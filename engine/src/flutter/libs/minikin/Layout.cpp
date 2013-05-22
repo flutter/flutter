@@ -18,7 +18,9 @@
 #include <vector>
 #include <fstream>
 #include <iostream>  // for debugging
+#include <stdio.h>  // ditto
 
+#include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
 
 using std::string;
@@ -45,9 +47,11 @@ void Bitmap::writePnm(std::ofstream &o) const {
     o.close();
 }
 
-void Bitmap::drawGlyph(const FT_Bitmap& bitmap, int x, int y) {
+void Bitmap::drawGlyph(const GlyphBitmap& bitmap, int x, int y) {
     int bmw = bitmap.width;
-    int bmh = bitmap.rows;
+    int bmh = bitmap.height;
+    x += bitmap.left;
+    y -= bitmap.top;
     int x0 = std::max(0, x);
     int x1 = std::min(width, x + bmw);
     int y0 = std::max(0, y);
@@ -74,19 +78,20 @@ void Layout::setFontCollection(const FontCollection *collection) {
 }
 
 hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
-    FT_Face ftFace = reinterpret_cast<FT_Face>(userData);
-    FT_ULong length = 0;
-    FT_Error error = FT_Load_Sfnt_Table(ftFace, tag, 0, NULL, &length);
-    if (error) {
+    MinikinFont* font = reinterpret_cast<MinikinFont *>(userData);
+    size_t length = 0;
+    bool ok = font->GetTable(tag, NULL, &length);
+    if (!ok) {
         return 0;
     }
     char *buffer = reinterpret_cast<char*>(malloc(length));
     if (!buffer) {
         return 0;
     }
-    error = FT_Load_Sfnt_Table(ftFace, tag, 0,
-        reinterpret_cast<FT_Byte*>(buffer), &length);
-    if (error) {
+    ok = font->GetTable(tag, reinterpret_cast<uint8_t*>(buffer), &length);
+    printf("referenceTable %c%c%c%c length=%d %d\n",
+        (tag >>24) & 0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, length, ok);
+    if (!ok) {
         free(buffer);
         return 0;
     }
@@ -96,23 +101,22 @@ hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
 
 static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoint_t unicode, hb_codepoint_t variationSelector, hb_codepoint_t* glyph, void* userData)
 {
-    FT_Face ftFace = reinterpret_cast<FT_Face>(fontData);
-    FT_UInt glyph_index = FT_Get_Char_Index(ftFace, unicode);
-    *glyph = glyph_index;
-    return !!*glyph;
-}
-
-static hb_position_t ft_pos_to_hb(FT_Pos pos) {
-    return pos << 2;
+    MinikinPaint* paint = reinterpret_cast<MinikinPaint *>(fontData);
+    MinikinFont* font = paint->font;
+    uint32_t glyph_id;
+    bool ok = font->GetGlyph(unicode, &glyph_id);
+    if (ok) {
+        *glyph = glyph_id;
+    }
+    return ok;
 }
 
 static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
 {
-    FT_Face ftFace = reinterpret_cast<FT_Face>(fontData);
-    hb_position_t advance = 0;
-
-    FT_Load_Glyph(ftFace, glyph, FT_LOAD_DEFAULT);
-    return ft_pos_to_hb(ftFace->glyph->advance.x);
+    MinikinPaint* paint = reinterpret_cast<MinikinPaint *>(fontData);
+    MinikinFont* font = paint->font;
+    float advance = font->GetHorizontalAdvance(glyph, *paint);
+    return 256 * advance + 0.5;
 }
 
 static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, hb_position_t* x, hb_position_t* y, void* userData)
@@ -135,10 +139,10 @@ hb_font_funcs_t* getHbFontFuncs() {
     return hbFontFuncs;
 }
 
-hb_font_t* create_hb_font(FT_Face ftFace) {
-    hb_face_t* face = hb_face_create_for_tables(referenceTable, ftFace, NULL);
+hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
+    hb_face_t* face = hb_face_create_for_tables(referenceTable, minikinFont, NULL);
     hb_font_t* font = hb_font_create(face);
-    hb_font_set_funcs(font, getHbFontFuncs(), ftFace, 0);
+    hb_font_set_funcs(font, getHbFontFuncs(), minikinPaint, 0);
     // TODO: manage ownership of face
     return font;
 }
@@ -164,19 +168,15 @@ void Layout::dump() const {
 // 1. Deal with multiple sizes in a layout
 // 2. We'll probably store FT_Face as primary and then use a cache
 // for the hb fonts
-int Layout::findFace(FT_Face face) {
+int Layout::findFace(MinikinFont* face, MinikinPaint* paint) {
     unsigned int ix;
     for (ix = 0; ix < mFaces.size(); ix++) {
         if (mFaces[ix] == face) {
             return ix;
         }
     }
-    double size = mProps.value(fontSize).getFloatValue();
-    FT_Error error = FT_Set_Pixel_Sizes(face, 0, size);
     mFaces.push_back(face);
-    hb_font_t *font = create_hb_font(face);
-    hb_font_set_ppem(font, size, size);
-    hb_font_set_scale(font, HBFloatToFixed(size), HBFloatToFixed(size));
+    hb_font_t *font = create_hb_font(face, paint);
     mHbFonts.push_back(font);
     return ix;
 }
@@ -190,7 +190,6 @@ static FontStyle styleFromCss(const CssProperties &props) {
     if (props.hasTag(fontStyle)) {
         italic = props.value(fontStyle).getIntValue() != 0;
     }
-    // TODO: italic property from CSS
     return FontStyle(weight, italic);
 }
 
@@ -202,6 +201,10 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     FontStyle style = styleFromCss(mProps);
     mCollection->itemize(buf, nchars, style, &items);
 
+    MinikinPaint paint;
+    double size = mProps.value(fontSize).getFloatValue();
+    paint.size = size;
+
     mGlyphs.clear();
     mFaces.clear();
     mHbFonts.clear();
@@ -209,12 +212,15 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
         FontCollection::Run &run = items[run_ix];
-        int font_ix = findFace(run.font);
+        int font_ix = findFace(run.font, &paint);
+        paint.font = mFaces[font_ix];
         hb_font_t *hbFont = mHbFonts[font_ix];
 #ifdef VERBOSE
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
 #endif
+        hb_font_set_ppem(hbFont, size, size);
+        hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
         hb_buffer_reset(buffer);
         hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
@@ -236,29 +242,41 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
             x += HBFixedToFloat(positions[i].x_advance);
         }
     }
+    mAdvance = x;
 }
 
 void Layout::draw(Bitmap* surface, int x0, int y0) const {
-    FT_Error error;
-    FT_Int32 load_flags = FT_LOAD_DEFAULT;
+    /*
+    TODO: redo as MinikinPaint settings
     if (mProps.hasTag(minikinHinting)) {
         int hintflags = mProps.value(minikinHinting).getIntValue();
         if (hintflags & 1) load_flags |= FT_LOAD_NO_HINTING;
         if (hintflags & 2) load_flags |= FT_LOAD_NO_AUTOHINT;
     }
+    */
     for (size_t i = 0; i < mGlyphs.size(); i++) {
         const LayoutGlyph& glyph = mGlyphs[i];
-        FT_Face face = mFaces[glyph.font_ix];
-        error = FT_Load_Glyph(face, glyph.glyph_id, load_flags);
-        error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
-        surface->drawGlyph(face->glyph->bitmap,
-            x0 + int(floor(glyph.x + 0.5)) + face->glyph->bitmap_left,
-            y0 + int(floor(glyph.y + 0.5)) - face->glyph->bitmap_top);
+        MinikinFont *mf = mFaces[glyph.font_ix];
+        MinikinFontFreeType *face = static_cast<MinikinFontFreeType *>(mf);
+        GlyphBitmap glyphBitmap;
+        MinikinPaint paint;
+        paint.size = mProps.value(fontSize).getFloatValue();
+        bool ok = face->Render(glyph.glyph_id, paint, &glyphBitmap);
+        printf("glyphBitmap.width=%d, glyphBitmap.height=%d (%d, %d) x=%f, y=%f, ok=%d\n",
+            glyphBitmap.width, glyphBitmap.height, glyphBitmap.left, glyphBitmap.top, glyph.x, glyph.y, ok);
+        if (ok) {
+            surface->drawGlyph(glyphBitmap,
+                x0 + int(floor(glyph.x + 0.5)), y0 + int(floor(glyph.y + 0.5)));
+        }
     }
 }
 
 void Layout::setProperties(string css) {
     mProps.parse(css);
+}
+
+float Layout::getAdvance() const {
+    return mAdvance;
 }
 
 }  // namespace android

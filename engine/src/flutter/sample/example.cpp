@@ -24,6 +24,7 @@
 #include <unicode/unistr.h>
 #include <unicode/utf16.h>
 
+#include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
 
 using std::vector;
@@ -55,15 +56,17 @@ FontCollection *makeFontCollection() {
         if (error != 0) {
             printf("error loading %s, %d\n", fn, error);
         }
-        family->addFont(face);
+        MinikinFont *font = new MinikinFontFreeType(face);
+        family->addFont(font);
     }
     typefaces.push_back(family);
 
-#if 0
+#if 1
     family = new FontFamily();
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
     error = FT_New_Face(library, fn, 0, &face);
-    family->addFont(face);
+    MinikinFont *font = new MinikinFontFreeType(face);
+    family->addFont(font);
     typefaces.push_back(family);
 #endif
 
@@ -81,11 +84,11 @@ int runMinikinTest() {
     Layout layout;
     layout.setFontCollection(collection);
     layout.setProperties("font-size: 32;");
-    const char *text = "hello world";
+    const char *text = "fine world \xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5\x87";
     icu::UnicodeString icuText = icu::UnicodeString::fromUTF8(text);
     layout.doLayout(icuText.getBuffer(), icuText.length());
     layout.dump();
-    Bitmap bitmap(200, 50);
+    Bitmap bitmap(250, 50);
     layout.draw(&bitmap, 10, 40);
     std::ofstream o;
     o.open("/data/local/tmp/foo.pgm", std::ios::out | std::ios::binary);

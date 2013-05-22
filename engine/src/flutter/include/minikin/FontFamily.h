@@ -42,21 +42,21 @@ private:
 class FontFamily {
 public:
     // Add font to family, extracting style information from the font
-    bool addFont(FT_Face typeface);
+    bool addFont(MinikinFont* typeface);
 
-    void addFont(FT_Face typeface, FontStyle style);
-    FT_Face getClosestMatch(FontStyle style) const;
+    void addFont(MinikinFont* typeface, FontStyle style);
+    MinikinFont* getClosestMatch(FontStyle style) const;
 
     // API's for enumerating the fonts in a family. These don't guarantee any particular order
     size_t getNumFonts() const;
-    FT_Face getFont(size_t index) const;
+    MinikinFont* getFont(size_t index) const;
     FontStyle getStyle(size_t index) const;
 private:
     class Font {
     public:
-        Font(FT_Face typeface, FontStyle style) :
+        Font(MinikinFont* typeface, FontStyle style) :
             typeface(typeface), style(style) { }
-        FT_Face typeface;
+        MinikinFont* typeface;
         FontStyle style;
     };
     std::vector<Font> mFonts;

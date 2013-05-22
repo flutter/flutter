@@ -19,12 +19,9 @@
 
 #include <vector>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_TRUETYPE_TABLES_H
-
-#include "SparseBitSet.h"
-#include "FontFamily.h"
+#include <minikin/MinikinFont.h>
+#include <minikin/SparseBitSet.h>
+#include <minikin/FontFamily.h>
 
 namespace android {
 
@@ -40,19 +37,19 @@ public:
         // Do copy constructor, assignment, destructor so it can be used in vectors
         Run() : font(NULL) { }
         Run(const Run& other): font(other.font), start(other.start), end(other.end) {
-            if (font) FT_Reference_Face(font);
+            if (font) font->Ref();
         }
         Run& operator=(const Run& other) {
-            if (other.font) FT_Reference_Face(other.font);
-            if (font) FT_Done_Face(font);
+            if (other.font) other.font->Ref();
+            if (font) font->Unref();
             font = other.font;
             start = other.start;
             end = other.end;
             return *this;
         }
-        ~Run() { if (font) FT_Done_Face(font); }
+        ~Run() { if (font) font->Unref(); }
 
-        FT_Face font;
+        MinikinFont* font;
         int start;
         int end;
     };

@@ -45,16 +45,15 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         FontInstance* instance = &mInstances.back();
         instance->mFamily = family;
         instance->mCoverage = new SparseBitSet;
-        FT_Face typeface = family->getClosestMatch(defaultStyle);
+        MinikinFont* typeface = family->getClosestMatch(defaultStyle);
 #ifdef VERBOSE_DEBUG
         printf("closest match = %x, family size = %d\n", typeface, family->getNumFonts());
 #endif
-        const uint32_t cmapTag = FT_MAKE_TAG('c', 'm', 'a', 'p');
-        FT_ULong cmapSize = 0;
-        FT_Error error = FT_Load_Sfnt_Table(typeface, cmapTag, 0, NULL, &cmapSize);
+        const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
+        size_t cmapSize = 0;
+        bool ok = typeface->GetTable(cmapTag, NULL, &cmapSize);
         UniquePtr<uint8_t[]> cmapData(new uint8_t[cmapSize]);
-        error = FT_Load_Sfnt_Table(typeface, cmapTag, 0,
-            cmapData.get(), &cmapSize);
+        ok = typeface->GetTable(cmapTag, cmapData.get(), &cmapSize);
         CmapCoverage::getCoverage(*instance->mCoverage, cmapData.get(), cmapSize);
 #ifdef VERBOSE_DEBUG
         printf("font coverage length=%d, first ch=%x\n", instance->mCoverage->length(),
@@ -138,7 +137,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 run->font = NULL;  // maybe we should do something different here
             } else {
                 run->font = family->getClosestMatch(style);
-                FT_Reference_Face(run->font);
+                run->font->Ref();
             }
             lastFamily = family;
             run->start = i;
