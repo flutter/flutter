@@ -17,15 +17,13 @@
 #ifndef MINIKIN_LAYOUT_H
 #define MINIKIN_LAYOUT_H
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <hb.h>
 
 #include <vector>
 
 #include <minikin/CssParse.h>
 #include <minikin/FontCollection.h>
+#include <minikin/MinikinFontFreeType.h>
 
 namespace android {
 
@@ -37,7 +35,7 @@ public:
     Bitmap(int width, int height);
     ~Bitmap();
     void writePnm(std::ofstream& o) const;
-    void drawGlyph(const FT_Bitmap& bitmap, int x, int y);
+    void drawGlyph(const GlyphBitmap& bitmap, int x, int y);
 private:
     int width;
     int height;
@@ -65,12 +63,14 @@ public:
     void draw(Bitmap*, int x0, int y0) const;
     void setProperties(const std::string css);
 
+    float getAdvance() const;
+
     // This must be called before any invocations.
 	// TODO: probably have a factory instead
     static void init();
 private:
     // Find a face in the mFaces vector, or create a new entry
-    int findFace(FT_Face face);
+    int findFace(MinikinFont* face, MinikinPaint* paint);
 
     CssProperties mProps;  // TODO: want spans
     std::vector<LayoutGlyph> mGlyphs;
@@ -80,8 +80,9 @@ private:
     // But for the time being, it should be ok to have just one
     // per layout.
     const FontCollection *mCollection;
-    std::vector<FT_Face> mFaces;
+    std::vector<MinikinFont *> mFaces;
     std::vector<hb_font_t *> mHbFonts;
+    float mAdvance;
 };
 
 }  // namespace android

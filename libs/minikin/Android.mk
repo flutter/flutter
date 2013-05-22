@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
     FontCollection.cpp \
     FontFamily.cpp \
     Layout.cpp \
+    MinikinFontFreeType.cpp \
     SparseBitSet.cpp
 
 LOCAL_MODULE := libminikin

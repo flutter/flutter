@@ -20,9 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <utils/UniquePtr.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_TRUETYPE_TABLES_H
+#include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
 #include <minikin/FontFamily.h>
 
@@ -30,14 +28,14 @@ using std::vector;
 
 namespace android {
 
-bool FontFamily::addFont(FT_Face typeface) {
-    const uint32_t os2Tag = FT_MAKE_TAG('O', 'S', '/', '2');
-    FT_ULong os2Size = 0;
-    FT_Error error = FT_Load_Sfnt_Table(typeface, os2Tag, 0, NULL, &os2Size);
-    if (error != 0) return false;
+bool FontFamily::addFont(MinikinFont* typeface) {
+    const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
+    size_t os2Size = 0;
+    bool ok = typeface->GetTable(os2Tag, NULL, &os2Size);
+    if (!ok) return false;
     UniquePtr<uint8_t[]> os2Data(new uint8_t[os2Size]);
-    error = FT_Load_Sfnt_Table(typeface, os2Tag, 0, os2Data.get(), &os2Size);
-    if (error != 0) return false;
+    ok = typeface->GetTable(os2Tag, os2Data.get(), &os2Size);
+    if (!ok) return false;
     int weight;
     bool italic;
     if (analyzeStyle(os2Data.get(), os2Size, &weight, &italic)) {
@@ -51,7 +49,7 @@ bool FontFamily::addFont(FT_Face typeface) {
     return false;
 }
 
-void FontFamily::addFont(FT_Face typeface, FontStyle style) {
+void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
     mFonts.push_back(Font(typeface, style));
     ALOGD("added font, mFonts.size() = %d", mFonts.size());
 }
@@ -66,7 +64,7 @@ int computeMatch(FontStyle style1, FontStyle style2) {
     return score;
 }
 
-FT_Face FontFamily::getClosestMatch(FontStyle style) const {
+MinikinFont* FontFamily::getClosestMatch(FontStyle style) const {
     const Font* bestFont = NULL;
     int bestMatch = 0;
     for (size_t i = 0; i < mFonts.size(); i++) {
@@ -84,7 +82,7 @@ size_t FontFamily::getNumFonts() const {
     return mFonts.size();
 }
 
-FT_Face FontFamily::getFont(size_t index) const {
+MinikinFont* FontFamily::getFont(size_t index) const {
     return mFonts[index].typeface;
 }
 
