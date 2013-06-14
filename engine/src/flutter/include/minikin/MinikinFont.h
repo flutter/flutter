@@ -38,8 +38,7 @@ public:
     void Ref() { mRefcount_++; }
     void Unref() { if (--mRefcount_ == 0) { delete this; } }
 
-    //MinikinFont();
-    virtual ~MinikinFont() = 0;
+    virtual ~MinikinFont() { };
 
     virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const = 0;
 
