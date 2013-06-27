@@ -33,9 +33,12 @@ LOCAL_SHARED_LIBRARIES += \
 	libcutils \
 	libstlport \
 	libharfbuzz_ng \
-	libicuuc
+	libicuuc \
+	libft2 \
+	libpng \
+	libz
 
-LOCAL_STATIC_LIBRARIES += libminikin libft2
+LOCAL_STATIC_LIBRARIES += libminikin
 
 LOCAL_MODULE:= minikin_example
 
