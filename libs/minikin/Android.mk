@@ -36,9 +36,9 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES := \
     libharfbuzz_ng \
+    libft2 \
+    libpng \
+    libz \
     libstlport
-
-LOCAL_STATIC_LIBARIES := \
-    libft2
 
 include $(BUILD_STATIC_LIBRARY)
