@@ -36,10 +36,40 @@ LOCAL_SHARED_LIBRARIES += \
 	libicuuc \
 	libft2 \
 	libpng \
-	libz
-
-LOCAL_STATIC_LIBRARIES += libminikin
+	libz \
+	libminikin
 
 LOCAL_MODULE:= minikin_example
+
+include $(BUILD_EXECUTABLE)
+
+
+include $(CLEAR_VARS)
+include external/stlport/libstlport.mk
+
+LOCAL_MODULE_TAG := tests
+
+LOCAL_C_INCLUDES += \
+	external/harfbuzz_ng/src \
+	external/freetype/include \
+	external/icu4c/common \
+	frameworks/minikin/include \
+	external/skia/src/core
+
+LOCAL_SRC_FILES:= example_skia.cpp \
+	MinikinSkia.cpp
+
+LOCAL_SHARED_LIBRARIES += \
+	libutils \
+	liblog \
+	libcutils \
+	libstlport \
+	libharfbuzz_ng \
+	libicuuc \
+	libskia \
+	libminikin \
+	libft2
+
+LOCAL_MODULE:= minikin_skia_example
 
 include $(BUILD_EXECUTABLE)

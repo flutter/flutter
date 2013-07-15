@@ -51,7 +51,6 @@ bool FontFamily::addFont(MinikinFont* typeface) {
 
 void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
     mFonts.push_back(Font(typeface, style));
-    ALOGD("added font, mFonts.size() = %d", mFonts.size());
 }
 
 // Compute a matching metric between two styles - 0 is an exact match

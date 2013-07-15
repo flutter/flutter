@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+#include <cutils/log.h>
+
 #include <string>
 #include <vector>
 #include <fstream>
 #include <iostream>  // for debugging
 #include <stdio.h>  // ditto
+
+#include <hb-icu.h>
+
+#include <utils/Mutex.h>
 
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
@@ -30,6 +37,8 @@ namespace android {
 
 // TODO: globals are not cool, move to a factory-ish object
 hb_buffer_t* buffer = 0;
+
+Mutex gLock;
 
 Bitmap::Bitmap(int width, int height) : width(width), height(height) {
     buf = new uint8_t[width * height]();
@@ -69,11 +78,23 @@ void Bitmap::drawGlyph(const GlyphBitmap& bitmap, int x, int y) {
     }
 }
 
+void MinikinRect::join(const MinikinRect& r) {
+    if (isEmpty()) {
+        set(r);
+    } else if (!r.isEmpty()) {
+        mLeft = std::min(mLeft, r.mLeft);
+        mTop = std::min(mTop, r.mTop);
+        mRight = std::max(mRight, r.mRight);
+        mBottom = std::max(mBottom, r.mBottom);
+    }
+}
+
+// TODO: the actual initialization is deferred, maybe make this explicit
 void Layout::init() {
-    buffer = hb_buffer_create();
 }
 
 void Layout::setFontCollection(const FontCollection *collection) {
+    ALOGD("setFontCollection(%p)", collection);
     mCollection = collection;
 }
 
@@ -193,8 +214,76 @@ static FontStyle styleFromCss(const CssProperties &props) {
     return FontStyle(weight, italic);
 }
 
+static hb_script_t codePointToScript(hb_codepoint_t codepoint) {
+    static hb_unicode_funcs_t *u = 0;
+    if (!u) {
+        u = hb_icu_get_unicode_funcs();
+    }
+    return hb_unicode_script(u, codepoint);
+}
+
+static hb_codepoint_t decodeUtf16(const uint16_t *chars, size_t len, ssize_t *iter) {
+    const uint16_t v = chars[(*iter)++];
+    // test whether v in (0xd800..0xdfff), lead or trail surrogate
+    if ((v & 0xf800) == 0xd800) {
+        // test whether v in (0xd800..0xdbff), lead surrogate
+        if (size_t(*iter) < len && (v & 0xfc00) == 0xd800) {
+            const uint16_t v2 = chars[(*iter)++];
+            // test whether v2 in (0xdc00..0xdfff), trail surrogate
+            if ((v2 & 0xfc00) == 0xdc00) {
+                // (0xd800 0xdc00) in utf-16 maps to 0x10000 in ucs-32
+                const hb_codepoint_t delta = (0xd800 << 10) + 0xdc00 - 0x10000;
+                return (((hb_codepoint_t)v) << 10) + v2 - delta;
+            }
+            (*iter) -= 2;
+            return ~0u;
+        } else {
+            (*iter)--;
+            return ~0u;
+        }
+    } else {
+        return v;
+    }
+}
+
+static hb_script_t getScriptRun(const uint16_t *chars, size_t len, ssize_t *iter) {
+    if (size_t(*iter) == len) {
+        return HB_SCRIPT_UNKNOWN;
+    }
+    uint32_t cp = decodeUtf16(chars, len, iter);
+    hb_script_t current_script = codePointToScript(cp);
+    for (;;) {
+        if (size_t(*iter) == len)
+            break;
+        const ssize_t prev_iter = *iter;
+        cp = decodeUtf16(chars, len, iter);
+        const hb_script_t script = codePointToScript(cp);
+        if (script != current_script) {
+            if (current_script == HB_SCRIPT_INHERITED ||
+                current_script == HB_SCRIPT_COMMON) {
+                current_script = script;
+            } else if (script == HB_SCRIPT_INHERITED ||
+                script == HB_SCRIPT_COMMON) {
+                continue;
+            } else {
+                *iter = prev_iter;
+                break;
+            }
+        }
+    }
+    if (current_script == HB_SCRIPT_INHERITED) {
+        current_script = HB_SCRIPT_COMMON;
+    }
+
+    return current_script;
+}
+
 // TODO: API should probably take context
 void Layout::doLayout(const uint16_t* buf, size_t nchars) {
+    AutoMutex _l(gLock);
+    if (buffer == 0) {
+        buffer = hb_buffer_create();
+    }
     FT_Error error;
 
     vector<FontCollection::Run> items;
@@ -208,6 +297,9 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     mGlyphs.clear();
     mFaces.clear();
     mHbFonts.clear();
+    mBounds.setEmpty();
+    mAdvances.clear();
+    mAdvances.resize(nchars, 0);
     float x = 0;
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
@@ -215,6 +307,10 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         int font_ix = findFace(run.font, &paint);
         paint.font = mFaces[font_ix];
         hb_font_t *hbFont = mHbFonts[font_ix];
+        if (paint.font == NULL) {
+            // TODO: should log what went wrong
+            continue;
+        }
 #ifdef VERBOSE
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
@@ -222,24 +318,38 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         hb_font_set_ppem(hbFont, size, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
-        hb_buffer_reset(buffer);
-        hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
-        hb_buffer_add_utf16(buffer, buf, nchars, run.start, run.end - run.start);
-        hb_shape(hbFont, buffer, NULL, 0);
-        unsigned int numGlyphs;
-        hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
-        hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
-        for (unsigned int i = 0; i < numGlyphs; i++) {
-#ifdef VERBOSE
-            std::cout << positions[i].x_advance << " " << positions[i].y_advance << " " << positions[i].x_offset << " " << positions[i].y_offset << std::endl;            std::cout << "DoLayout " << info[i].codepoint <<
-            ": " << HBFixedToFloat(positions[i].x_advance) << "; " << positions[i].x_offset << ", " << positions[i].y_offset << std::endl;
-#endif
-            hb_codepoint_t glyph_ix = info[i].codepoint;
-            float xoff = HBFixedToFloat(positions[i].x_offset);
-            float yoff = HBFixedToFloat(positions[i].y_offset);
-            LayoutGlyph glyph = {font_ix, glyph_ix, x + xoff, y + yoff};
-            mGlyphs.push_back(glyph);
-            x += HBFixedToFloat(positions[i].x_advance);
+        int srunend;
+        for (int srunstart = run.start; srunstart < run.end; srunstart = srunend) {
+            srunend = srunstart;
+            hb_script_t script = getScriptRun(buf, run.end, &srunend);
+
+            hb_buffer_reset(buffer);
+            hb_buffer_set_script(buffer, script);
+            hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+            hb_buffer_add_utf16(buffer, buf, nchars, srunstart, srunend - srunstart);
+            hb_shape(hbFont, buffer, NULL, 0);
+            unsigned int numGlyphs;
+            hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
+            hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
+            for (unsigned int i = 0; i < numGlyphs; i++) {
+    #ifdef VERBOSE
+                std::cout << positions[i].x_advance << " " << positions[i].y_advance << " " << positions[i].x_offset << " " << positions[i].y_offset << std::endl;            std::cout << "DoLayout " << info[i].codepoint <<
+                ": " << HBFixedToFloat(positions[i].x_advance) << "; " << positions[i].x_offset << ", " << positions[i].y_offset << std::endl;
+    #endif
+                hb_codepoint_t glyph_ix = info[i].codepoint;
+                float xoff = HBFixedToFloat(positions[i].x_offset);
+                float yoff = HBFixedToFloat(positions[i].y_offset);
+                LayoutGlyph glyph = {font_ix, glyph_ix, x + xoff, y + yoff};
+                mGlyphs.push_back(glyph);
+                float xAdvance = HBFixedToFloat(positions[i].x_advance);
+                MinikinRect glyphBounds;
+                paint.font->GetBounds(&glyphBounds, glyph_ix, paint);
+                glyphBounds.offset(x + xoff, y + yoff);
+                mBounds.join(glyphBounds);
+                size_t cluster = info[i].cluster;
+                mAdvances[cluster] += xAdvance;
+                x += xAdvance;
+            }
         }
     }
     mAdvance = x;
@@ -275,8 +385,40 @@ void Layout::setProperties(string css) {
     mProps.parse(css);
 }
 
+size_t Layout::nGlyphs() const {
+    return mGlyphs.size();
+}
+
+MinikinFont *Layout::getFont(int i) const {
+    const LayoutGlyph& glyph = mGlyphs[i];
+    return mFaces[glyph.font_ix];
+}
+
+unsigned int Layout::getGlyphId(int i) const {
+    const LayoutGlyph& glyph = mGlyphs[i];
+    return glyph.glyph_id;
+}
+
+float Layout::getX(int i) const {
+    const LayoutGlyph& glyph = mGlyphs[i];
+    return glyph.x;
+}
+
+float Layout::getY(int i) const {
+    const LayoutGlyph& glyph = mGlyphs[i];
+    return glyph.y;
+}
+
 float Layout::getAdvance() const {
     return mAdvance;
+}
+
+void Layout::getAdvances(float* advances) {
+    memcpy(advances, &mAdvances[0], mAdvances.size() * sizeof(float));
+}
+
+void Layout::getBounds(MinikinRect* bounds) {
+    bounds->set(mBounds);
 }
 
 }  // namespace android

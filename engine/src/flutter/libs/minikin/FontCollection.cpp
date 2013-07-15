@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#ifdef VERBOSE_DEBUG
-#include <stdio.h>  // for debugging - remove
-#endif
+// #define VERBOSE_DEBUG
+
+#define LOG_TAG "Minikin"
+#include <cutils/log.h>
 
 #include <minikin/CmapCoverage.h>
 #include <minikin/FontCollection.h>
@@ -35,7 +36,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
 #ifdef VERBOSE_DEBUG
-    printf("nTypefaces = %d\n", nTypefaces);
+    ALOGD("nTypefaces = %d\n", nTypefaces);
 #endif
     const FontStyle defaultStyle;
     for (size_t i = 0; i < nTypefaces; i++) {
@@ -47,7 +48,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         instance->mCoverage = new SparseBitSet;
         MinikinFont* typeface = family->getClosestMatch(defaultStyle);
 #ifdef VERBOSE_DEBUG
-        printf("closest match = %x, family size = %d\n", typeface, family->getNumFonts());
+        ALOGD("closest match = %p, family size = %d\n", typeface, family->getNumFonts());
 #endif
         const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
         size_t cmapSize = 0;
@@ -56,7 +57,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         ok = typeface->GetTable(cmapTag, cmapData.get(), &cmapSize);
         CmapCoverage::getCoverage(*instance->mCoverage, cmapData.get(), cmapSize);
 #ifdef VERBOSE_DEBUG
-        printf("font coverage length=%d, first ch=%x\n", instance->mCoverage->length(),
+        ALOGD("font coverage length=%d, first ch=%x\n", instance->mCoverage->length(),
                 instance->mCoverage->nextSetBit(0));
 #endif
         mMaxChar = max(mMaxChar, instance->mCoverage->length());
@@ -70,7 +71,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         mRanges.push_back(dummy);
         Range* range = &mRanges.back();
 #ifdef VERBOSE_DEBUG
-        printf("i=%d: range start = %d\n", i, offset);
+        ALOGD("i=%d: range start = %d\n", i, offset);
 #endif
         range->start = offset;
         for (size_t j = 0; j < nTypefaces; j++) {
@@ -80,7 +81,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
                 offset++;
                 uint32_t nextChar = instance->mCoverage->nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
-                printf("nextChar = %d (j = %d)\n", nextChar, j);
+                ALOGD("nextChar = %d (j = %d)\n", nextChar, j);
 #endif
                 lastChar[j] = nextChar;
             }
@@ -102,7 +103,7 @@ const FontFamily* FontCollection::getFamilyForChar(uint32_t ch) const {
     }
     const Range& range = mRanges[ch >> kLogCharsPerPage];
 #ifdef VERBOSE_DEBUG
-    printf("querying range %d:%d\n", range.start, range.end);
+    ALOGD("querying range %d:%d\n", range.start, range.end);
 #endif
     for (size_t i = range.start; i < range.end; i++) {
         const FontInstance* instance = mInstanceVec[i];

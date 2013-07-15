@@ -31,6 +31,29 @@ struct MinikinPaint {
     // todo: skew, stretch, hinting
 };
 
+struct MinikinRect {
+    float mLeft, mTop, mRight, mBottom;
+    bool isEmpty() const {
+        return mLeft == mRight || mTop == mBottom;
+    }
+    void set(const MinikinRect& r) {
+        mLeft = r.mLeft;
+        mTop = r.mTop;
+        mRight = r.mRight;
+        mBottom = r.mBottom;
+    }
+    void offset(float dx, float dy) {
+        mLeft += dx;
+        mTop += dy;
+        mRight += dx;
+        mBottom += dy;
+    }
+    void setEmpty() {
+        mLeft = mTop = mRight = mBottom = 0;
+    }
+    void join(const MinikinRect& r);
+};
+
 class MinikinFontFreeType;
 
 class MinikinFont {
@@ -38,11 +61,16 @@ public:
     void Ref() { mRefcount_++; }
     void Unref() { if (--mRefcount_ == 0) { delete this; } }
 
+    MinikinFont() : mRefcount_(1) { }
+
     virtual ~MinikinFont() { };
 
     virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const = 0;
 
     virtual float GetHorizontalAdvance(uint32_t glyph_id,
+        const MinikinPaint &paint) const = 0;
+
+    virtual void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
 
     // If buf is NULL, just update size
