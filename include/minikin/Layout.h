@@ -57,32 +57,50 @@ struct LayoutGlyph {
 
 class Layout {
 public:
+
     void dump() const;
-    void setFontCollection(const FontCollection *collection);
+    void setFontCollection(const FontCollection* collection);
     void doLayout(const uint16_t* buf, size_t nchars);
     void draw(Bitmap*, int x0, int y0) const;
     void setProperties(const std::string css);
 
-    float getAdvance() const;
-
     // This must be called before any invocations.
 	// TODO: probably have a factory instead
     static void init();
+
+    // public accessors
+    size_t nGlyphs() const;
+    // Does not bump reference; ownership is still layout
+    MinikinFont *getFont(int i) const;
+    unsigned int getGlyphId(int i) const;
+    float getX(int i) const;
+    float getY(int i) const;
+
+    float getAdvance() const;
+
+    // Get advances, copying into caller-provided buffer. The size of this
+    // buffer must match the length of the string (nchars arg to doLayout).
+    void getAdvances(float* advances);
+
+    void getBounds(MinikinRect* rect);
+
 private:
     // Find a face in the mFaces vector, or create a new entry
     int findFace(MinikinFont* face, MinikinPaint* paint);
 
     CssProperties mProps;  // TODO: want spans
     std::vector<LayoutGlyph> mGlyphs;
+    std::vector<float> mAdvances;
 
     // In future, this will be some kind of mapping from the
     // identifier used to represent font-family to a font collection.
     // But for the time being, it should be ok to have just one
     // per layout.
-    const FontCollection *mCollection;
+    const FontCollection* mCollection;
     std::vector<MinikinFont *> mFaces;
     std::vector<hb_font_t *> mHbFonts;
     float mAdvance;
+    MinikinRect mBounds;
 };
 
 }  // namespace android

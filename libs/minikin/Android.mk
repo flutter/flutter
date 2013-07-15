@@ -32,13 +32,15 @@ LOCAL_MODULE := libminikin
 LOCAL_C_INCLUDES += \
     external/harfbuzz_ng/src \
     external/freetype/include \
+    external/icu4c/common \
     frameworks/minikin/include
 
 LOCAL_SHARED_LIBRARIES := \
     libharfbuzz_ng \
     libft2 \
+    liblog \
     libpng \
     libz \
     libstlport
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
