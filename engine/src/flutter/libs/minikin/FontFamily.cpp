@@ -19,10 +19,10 @@
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <utils/UniquePtr.h>
 #include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
 #include <minikin/FontFamily.h>
+#include <UniquePtr.h>
 
 using std::vector;
 
