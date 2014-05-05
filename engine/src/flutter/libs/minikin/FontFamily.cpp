@@ -28,6 +28,12 @@ using std::vector;
 
 namespace android {
 
+FontFamily::~FontFamily() {
+    for (size_t i = 0; i < mFonts.size(); i++) {
+        mFonts[i].typeface->UnrefLocked();
+    }
+}
+
 bool FontFamily::addFont(MinikinFont* typeface) {
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
     size_t os2Size = 0;
@@ -50,6 +56,7 @@ bool FontFamily::addFont(MinikinFont* typeface) {
 }
 
 void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
+    typeface->RefLocked();
     mFonts.push_back(Font(typeface, style));
 }
 

@@ -17,6 +17,8 @@
 #ifndef MINIKIN_FONT_H
 #define MINIKIN_FONT_H
 
+#include <minikin/MinikinRefCounted.h>
+
 // An abstraction for platform fonts, allowing Minikin to be used with
 // multiple actual implementations of fonts.
 
@@ -56,15 +58,8 @@ struct MinikinRect {
 
 class MinikinFontFreeType;
 
-class MinikinFont {
+class MinikinFont : public MinikinRefCounted {
 public:
-    void Ref() { mRefcount_++; }
-    void Unref() { if (--mRefcount_ == 0) { delete this; } }
-
-    MinikinFont() : mRefcount_(1) { }
-
-    virtual ~MinikinFont() { };
-
     virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const = 0;
 
     virtual float GetHorizontalAdvance(uint32_t glyph_id,
@@ -82,14 +77,6 @@ public:
         return ((uint32_t)c1 << 24) | ((uint32_t)c2 << 16) |
             ((uint32_t)c3 << 8) | (uint32_t)c4;
     }
-
-    // This is used to implement a downcast without RTTI
-    virtual MinikinFontFreeType* GetFreeType() {
-        return NULL;
-    }
-
-private:
-    int mRefcount_;
 };
 
 }  // namespace android

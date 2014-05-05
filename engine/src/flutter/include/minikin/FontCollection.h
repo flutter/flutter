@@ -19,13 +19,14 @@
 
 #include <vector>
 
+#include <minikin/MinikinRefCounted.h>
 #include <minikin/MinikinFont.h>
 #include <minikin/SparseBitSet.h>
 #include <minikin/FontFamily.h>
 
 namespace android {
 
-class FontCollection {
+class FontCollection : public MinikinRefCounted {
 public:
     explicit FontCollection(const std::vector<FontFamily*>& typefaces);
 
@@ -37,17 +38,17 @@ public:
         // Do copy constructor, assignment, destructor so it can be used in vectors
         Run() : font(NULL) { }
         Run(const Run& other): font(other.font), start(other.start), end(other.end) {
-            if (font) font->Ref();
+            if (font) font->RefLocked();
         }
         Run& operator=(const Run& other) {
-            if (other.font) other.font->Ref();
-            if (font) font->Unref();
+            if (other.font) other.font->RefLocked();
+            if (font) font->UnrefLocked();
             font = other.font;
             start = other.start;
             end = other.end;
             return *this;
         }
-        ~Run() { if (font) font->Unref(); }
+        ~Run() { if (font) font->UnrefLocked(); }
 
         MinikinFont* font;
         int start;
