@@ -41,6 +41,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     const FontStyle defaultStyle;
     for (size_t i = 0; i < nTypefaces; i++) {
         FontFamily* family = typefaces[i];
+        family->RefLocked();
         FontInstance dummy;
         mInstances.push_back(dummy);  // emplace_back would be better
         FontInstance* instance = &mInstances.back();
@@ -62,7 +63,6 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
 #endif
         mMaxChar = max(mMaxChar, instance->mCoverage->length());
         lastChar.push_back(instance->mCoverage->nextSetBit(0));
-        // TODO: should probably ref typeface here, hmm
     }
     size_t nPages = mMaxChar >> kLogCharsPerPage;
     size_t offset = 0;
@@ -93,7 +93,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
 FontCollection::~FontCollection() {
     for (size_t i = 0; i < mInstances.size(); i++) {
         delete mInstances[i].mCoverage;
-        // probably unref the typeface here too
+        mInstances[i].mFamily->UnrefLocked();
     }
 }
 
@@ -138,7 +138,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 run->font = NULL;  // maybe we should do something different here
             } else {
                 run->font = family->getClosestMatch(style);
-                run->font->Ref();
+                run->font->RefLocked();
             }
             lastFamily = family;
             run->start = i;

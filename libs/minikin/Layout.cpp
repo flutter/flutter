@@ -25,8 +25,7 @@
 
 #include <hb-icu.h>
 
-#include <utils/Mutex.h>
-
+#include "MinikinInternal.h"
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
 
@@ -37,8 +36,6 @@ namespace android {
 
 // TODO: globals are not cool, move to a factory-ish object
 hb_buffer_t* buffer = 0;
-
-Mutex gLock;
 
 Bitmap::Bitmap(int width, int height) : width(width), height(height) {
     buf = new uint8_t[width * height]();
@@ -280,7 +277,7 @@ static hb_script_t getScriptRun(const uint16_t *chars, size_t len, ssize_t *iter
 
 // TODO: API should probably take context
 void Layout::doLayout(const uint16_t* buf, size_t nchars) {
-    AutoMutex _l(gLock);
+    AutoMutex _l(gMinikinLock);
     if (buffer == 0) {
         buffer = hb_buffer_create();
     }

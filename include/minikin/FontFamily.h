@@ -19,6 +19,8 @@
 
 #include <vector>
 
+#include <minikin/MinikinRefCounted.h>
+
 namespace android {
 
 // FontStyle represents all style information needed to select an actual font
@@ -39,8 +41,10 @@ private:
     uint32_t bits;
 };
 
-class FontFamily {
+class FontFamily : public MinikinRefCounted {
 public:
+    ~FontFamily();
+
     // Add font to family, extracting style information from the font
     bool addFont(MinikinFont* typeface);
 
