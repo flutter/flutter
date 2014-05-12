@@ -28,6 +28,7 @@ enum CssTag {
     fontWeight,
     fontStyle,
     minikinHinting,
+    minikinBidi,
 };
 
 const std::string cssTagNames[] = {
@@ -36,6 +37,7 @@ const std::string cssTagNames[] = {
     "font-weight",
     "font-style",
     "-minikin-hinting",
+    "-minikin-bidi",
 };
 
 class CssValue {

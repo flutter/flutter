@@ -19,10 +19,12 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <fstream>
 #include <iostream>  // for debugging
 #include <stdio.h>  // ditto
 
+#include <unicode/ubidi.h>
 #include <hb-icu.h>
 
 #include "MinikinInternal.h"
@@ -91,7 +93,6 @@ void Layout::init() {
 }
 
 void Layout::setFontCollection(const FontCollection *collection) {
-    ALOGD("setFontCollection(%p)", collection);
     mCollection = collection;
 }
 
@@ -290,6 +291,11 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     MinikinPaint paint;
     double size = mProps.value(fontSize).getFloatValue();
     paint.size = size;
+    int bidiFlags = mProps.hasTag(minikinBidi) ? mProps.value(minikinBidi).getIntValue() : 0;
+    bool isRtl = (bidiFlags & 1) != 0;  // TODO: do real bidi algo
+    if (isRtl) {
+        std::reverse(items.begin(), items.end());
+    }
 
     mGlyphs.clear();
     mFaces.clear();
@@ -315,6 +321,9 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         hb_font_set_ppem(hbFont, size, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
+        // TODO: if there are multiple scripts within a font in an RTL run,
+        // we need to reorder those runs. This is unlikely with our current
+        // font stack, but should be done for correctness.
         ssize_t srunend;
         for (ssize_t srunstart = run.start; srunstart < run.end; srunstart = srunend) {
             srunend = srunstart;
@@ -322,7 +331,7 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
 
             hb_buffer_reset(buffer);
             hb_buffer_set_script(buffer, script);
-            hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+            hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
             hb_buffer_add_utf16(buffer, buf, nchars, srunstart, srunend - srunstart);
             hb_shape(hbFont, buffer, NULL, 0);
             unsigned int numGlyphs;
