@@ -41,6 +41,7 @@ CssTag parseTag(const string str, size_t off, size_t len) {
         if (strEqC(str, off, len, "font-style")) return fontStyle;
     } else if (c == '-') {
         if (strEqC(str, off, len, "-minikin-hinting")) return minikinHinting;
+        if (strEqC(str, off, len, "-minikin-bidi")) return minikinBidi;
     }
     return unknown;
 }
