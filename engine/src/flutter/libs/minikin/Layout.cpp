@@ -315,8 +315,8 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         hb_font_set_ppem(hbFont, size, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
-        int srunend;
-        for (int srunstart = run.start; srunstart < run.end; srunstart = srunend) {
+        ssize_t srunend;
+        for (ssize_t srunstart = run.start; srunstart < run.end; srunstart = srunend) {
             srunend = srunstart;
             hb_script_t script = getScriptRun(buf, run.end, &srunend);
 
