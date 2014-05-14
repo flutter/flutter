@@ -53,6 +53,11 @@ float MinikinFontFreeType::GetHorizontalAdvance(uint32_t glyph_id,
     return advance * (1.0 / 65536);
 }
 
+void MinikinFontFreeType::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
+    const MinikinPaint& paint) const {
+    // TODO: NYI
+}
+
 bool MinikinFontFreeType::GetTable(uint32_t tag, uint8_t *buf, size_t *size) {
 	FT_ULong ftsize = *size;
 	FT_Error error = FT_Load_Sfnt_Table(mTypeface, tag, 0, buf, &ftsize);
