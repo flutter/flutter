@@ -92,8 +92,8 @@ void drawToSkia(SkCanvas *canvas, SkPaint *paint, Layout *layout, float x, float
         MinikinFontSkia *mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
         skFace = mfs->GetSkTypeface();
         glyphs[i] = layout->getGlyphId(i);
-        pos[i].fX = SkFloatToScalar(x + layout->getX(i));
-        pos[i].fY = SkFloatToScalar(y + layout->getY(i));
+        pos[i].fX = x + layout->getX(i);
+        pos[i].fY = y + layout->getY(i);
         if (i > 0 && skFace != lastFace) {
             paint->setTypeface(lastFace);
             canvas->drawPosText(glyphs + start, (i - start) << 1, pos + start, *paint);
