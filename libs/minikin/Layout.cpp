@@ -161,6 +161,7 @@ hb_font_funcs_t* getHbFontFuncs() {
 hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
     hb_face_t* face = hb_face_create_for_tables(referenceTable, minikinFont, NULL);
     hb_font_t* font = hb_font_create(face);
+    hb_face_destroy(face);
     hb_font_set_funcs(font, getHbFontFuncs(), minikinPaint, 0);
     // TODO: manage ownership of face
     return font;
@@ -174,6 +175,12 @@ static float HBFixedToFloat(hb_position_t v)
 static hb_position_t HBFloatToFixed(float v)
 {
     return scalbnf (v, +8);
+}
+
+Layout::~Layout() {
+    for (size_t ix = 0; ix < mHbFonts.size(); ix++) {
+        hb_font_destroy(mHbFonts[ix]);
+    }
 }
 
 void Layout::dump() const {
