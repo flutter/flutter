@@ -39,6 +39,21 @@ namespace android {
 // TODO: globals are not cool, move to a factory-ish object
 hb_buffer_t* buffer = 0;
 
+// TODO: these should move into the header file, but for now we don't want
+// to cause namespace collisions with TextLayout.h
+enum {
+    kBidi_LTR = 0,
+    kBidi_RTL = 1,
+    kBidi_Default_LTR = 2,
+    kBidi_Default_RTL = 3,
+    kBidi_Force_LTR = 4,
+    kBidi_Force_RTL = 5,
+
+    kBidi_Mask = 0x7
+};
+
+const int kDirection_Mask = 0x1;
+
 Bitmap::Bitmap(int width, int height) : width(width), height(height) {
     buf = new uint8_t[width * height]();
 }
@@ -291,18 +306,14 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     }
     FT_Error error;
 
-    vector<FontCollection::Run> items;
     FontStyle style = styleFromCss(mProps);
-    mCollection->itemize(buf, nchars, style, &items);
 
     MinikinPaint paint;
     double size = mProps.value(fontSize).getFloatValue();
     paint.size = size;
     int bidiFlags = mProps.hasTag(minikinBidi) ? mProps.value(minikinBidi).getIntValue() : 0;
-    bool isRtl = (bidiFlags & 1) != 0;  // TODO: do real bidi algo
-    if (isRtl) {
-        std::reverse(items.begin(), items.end());
-    }
+    bool isRtl = (bidiFlags & kDirection_Mask) != 0;
+    bool doSingleRun = true;
 
     mGlyphs.clear();
     mFaces.clear();
@@ -310,7 +321,65 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     mBounds.setEmpty();
     mAdvances.clear();
     mAdvances.resize(nchars, 0);
-    float x = 0;
+    mAdvance = 0;
+    if (!(bidiFlags == kBidi_Force_LTR || bidiFlags == kBidi_Force_RTL)) {
+        UBiDi* bidi = ubidi_open();
+        if (bidi) {
+            UErrorCode status = U_ZERO_ERROR;
+            UBiDiLevel bidiReq = bidiFlags;
+            if (bidiFlags == kBidi_Default_LTR) {
+                bidiReq = UBIDI_DEFAULT_LTR;
+            } else if (bidiFlags == kBidi_Default_RTL) {
+                bidiReq = UBIDI_DEFAULT_RTL;
+            }
+            ubidi_setPara(bidi, buf, nchars, bidiReq, NULL, &status);
+            if (U_SUCCESS(status)) {
+                int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask;
+                ssize_t rc = ubidi_countRuns(bidi, &status);
+                if (!U_SUCCESS(status) || rc < 1) {
+                    ALOGD("error counting bidi runs, status = %d", status);
+                }
+                if (!U_SUCCESS(status) || rc <= 1) {
+                    isRtl = (paraDir == kBidi_RTL);
+                } else {
+                    doSingleRun = false;
+                    // iterate through runs
+                    for (ssize_t i = 0; i < (ssize_t)rc; i++) {
+                        int32_t startRun = -1;
+                        int32_t lengthRun = -1;
+                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
+                        if (startRun == -1 || lengthRun == -1) {
+                            ALOGE("invalid visual run");
+                            // Note: this case will lose text; can it ever actually happen?
+                            break;
+                        }
+                        isRtl = (runDir == UBIDI_RTL);
+                        // TODO: min/max with context
+                        doLayoutRun(buf, startRun, lengthRun, nchars, isRtl, style, paint);
+                    }
+                }
+            } else {
+                ALOGE("error calling ubidi_setPara, status = %d", status);
+            }
+            ubidi_close(bidi);
+        } else {
+            ALOGE("error creating bidi object");
+        }
+    }
+    if (doSingleRun) {
+        doLayoutRun(buf, 0, nchars, nchars, isRtl, style, paint);
+    }
+}
+
+void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+    bool isRtl, FontStyle style, MinikinPaint& paint) {
+    vector<FontCollection::Run> items;
+    mCollection->itemize(buf + start, count, style, &items);
+    if (isRtl) {
+        std::reverse(items.begin(), items.end());
+    }
+
+    float x = mAdvance;
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
         FontCollection::Run &run = items[run_ix];
@@ -325,6 +394,7 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
 #endif
+        double size = paint.size;
         hb_font_set_ppem(hbFont, size, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
@@ -334,12 +404,12 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         ssize_t srunend;
         for (ssize_t srunstart = run.start; srunstart < run.end; srunstart = srunend) {
             srunend = srunstart;
-            hb_script_t script = getScriptRun(buf, run.end, &srunend);
+            hb_script_t script = getScriptRun(buf + start, run.end, &srunend);
 
             hb_buffer_reset(buffer);
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-            hb_buffer_add_utf16(buffer, buf, nchars, srunstart, srunend - srunstart);
+            hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
             hb_shape(hbFont, buffer, NULL, 0);
             unsigned int numGlyphs;
             hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
