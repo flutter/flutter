@@ -94,6 +94,10 @@ private:
     // Find a face in the mFaces vector, or create a new entry
     int findFace(MinikinFont* face, MinikinPaint* paint);
 
+    // Lay out a single bidi run
+    void doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, FontStyle style, MinikinPaint& paint);
+
     CssProperties mProps;  // TODO: want spans
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;
