@@ -56,6 +56,8 @@ public:
     MinikinFont* getFont(size_t index) const;
     FontStyle getStyle(size_t index) const;
 private:
+    void addFontLocked(MinikinFont* typeface, FontStyle style);
+
     class Font {
     public:
         Font(MinikinFont* typeface, FontStyle style) :
