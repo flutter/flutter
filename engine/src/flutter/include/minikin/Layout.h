@@ -55,8 +55,14 @@ struct LayoutGlyph {
     float y;
 };
 
+// Lifecycle and threading assumptions for Layout:
+// The object is assumed to be owned by a single thread; multiple threads
+// may not mutate it at the same time.
+// The lifetime of the FontCollection set through setFontCollection must
+// extend through the lifetime of the Layout object.
 class Layout {
 public:
+    ~Layout();
 
     void dump() const;
     void setFontCollection(const FontCollection* collection);

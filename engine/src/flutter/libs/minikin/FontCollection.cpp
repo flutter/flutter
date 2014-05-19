@@ -19,6 +19,7 @@
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
 
+#include "MinikinInternal.h"
 #include <minikin/CmapCoverage.h>
 #include <minikin/FontCollection.h>
 
@@ -33,6 +34,7 @@ static inline T max(T a, T b) {
 
 FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     mMaxChar(0) {
+    AutoMutex _l(gMinikinLock);
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
 #ifdef VERBOSE_DEBUG

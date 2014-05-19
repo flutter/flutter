@@ -19,6 +19,8 @@
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <stdint.h>
+
+#include "MinikinInternal.h"
 #include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
 #include <minikin/FontFamily.h>
@@ -35,6 +37,7 @@ FontFamily::~FontFamily() {
 }
 
 bool FontFamily::addFont(MinikinFont* typeface) {
+    AutoMutex _l(gMinikinLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
     size_t os2Size = 0;
     bool ok = typeface->GetTable(os2Tag, NULL, &os2Size);
@@ -47,7 +50,7 @@ bool FontFamily::addFont(MinikinFont* typeface) {
     if (analyzeStyle(os2Data.get(), os2Size, &weight, &italic)) {
         //ALOGD("analyzed weight = %d, italic = %s", weight, italic ? "true" : "false");
         FontStyle style(weight, italic);
-        addFont(typeface, style);
+        addFontLocked(typeface, style);
         return true;
     } else {
         ALOGD("failed to analyze style");
@@ -56,7 +59,11 @@ bool FontFamily::addFont(MinikinFont* typeface) {
 }
 
 void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
-    typeface->RefLocked();
+    AutoMutex _l(gMinikinLock);
+    addFontLocked(typeface, style);
+}
+
+void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {    typeface->RefLocked();
     mFonts.push_back(Font(typeface, style));
 }
 
