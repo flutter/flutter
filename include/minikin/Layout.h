@@ -55,6 +55,9 @@ struct LayoutGlyph {
     float y;
 };
 
+// Internal state used during layout operation
+class LayoutContext;
+
 // Lifecycle and threading assumptions for Layout:
 // The object is assumed to be owned by a single thread; multiple threads
 // may not mutate it at the same time.
@@ -62,13 +65,19 @@ struct LayoutGlyph {
 // extend through the lifetime of the Layout object.
 class Layout {
 public:
-    ~Layout();
-
     void dump() const;
     void setFontCollection(const FontCollection* collection);
+
+    // deprecated - missing functionality
     void doLayout(const uint16_t* buf, size_t nchars);
-    void draw(Bitmap*, int x0, int y0) const;
-    void setProperties(const std::string css);
+
+    void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        const std::string& css);
+
+    void draw(Bitmap*, int x0, int y0, float size) const;
+
+    // deprecated - pass as argument to doLayout instead
+    void setProperties(const std::string& css);
 
     // This must be called before any invocations.
 	// TODO: probably have a factory instead
@@ -92,23 +101,31 @@ public:
 
 private:
     // Find a face in the mFaces vector, or create a new entry
-    int findFace(MinikinFont* face, MinikinPaint* paint);
+    int findFace(MinikinFont* face, LayoutContext* ctx);
+
+    // Lay out a single bidi run
+    void doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx);
+
+    // Lay out a single word
+    void doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx, size_t bufStart);
 
     // Lay out a single bidi run
     void doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, FontStyle style, MinikinPaint& paint);
+        bool isRtl, LayoutContext* ctx);
 
-    CssProperties mProps;  // TODO: want spans
+    // Append another layout (for example, cached value) into this one
+    void appendLayout(Layout* src, size_t start);
+
+    // deprecated - remove when setProperties is removed
+    std::string mCssString;
+
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;
 
-    // In future, this will be some kind of mapping from the
-    // identifier used to represent font-family to a font collection.
-    // But for the time being, it should be ok to have just one
-    // per layout.
     const FontCollection* mCollection;
     std::vector<MinikinFont *> mFaces;
-    std::vector<hb_font_t *> mHbFonts;
     float mAdvance;
     MinikinRect mBounds;
 };
