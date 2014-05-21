@@ -24,6 +24,11 @@
 #include <iostream>  // for debugging
 #include <stdio.h>  // ditto
 
+#include <utils/JenkinsHash.h>
+#include <utils/LruCache.h>
+#include <utils/Singleton.h>
+#include <utils/String16.h>
+
 #include <unicode/ubidi.h>
 #include <hb-icu.h>
 
@@ -35,9 +40,6 @@ using std::string;
 using std::vector;
 
 namespace android {
-
-// TODO: globals are not cool, move to a factory-ish object
-hb_buffer_t* buffer = 0;
 
 // TODO: these should move into the header file, but for now we don't want
 // to cause namespace collisions with TextLayout.h
@@ -53,6 +55,114 @@ enum {
 };
 
 const int kDirection_Mask = 0x1;
+
+// Layout cache datatypes
+
+class LayoutCacheKey {
+public:
+    LayoutCacheKey(const FontCollection* collection, const MinikinPaint& paint, FontStyle style,
+            const uint16_t* chars, size_t start, size_t count, size_t nchars, bool dir)
+            : mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
+            mSize(paint.size), mIsRtl(dir) {
+        mText.setTo(chars, nchars);
+    }
+    bool operator==(const LayoutCacheKey &other) const;
+    hash_t hash() const;
+
+    // This is present to avoid having to copy the text more than once.
+    const uint16_t* textBuf() { return mText.string(); }
+private:
+    String16 mText;
+    size_t mStart;
+    size_t mCount;
+    uint32_t mId;  // for the font collection
+    FontStyle mStyle;
+    float mSize;
+    bool mIsRtl;
+    // Note: any fields added to MinikinPaint must also be reflected here.
+    // TODO: language matching (possibly integrate into style)
+};
+
+class LayoutCache : private OnEntryRemoved<LayoutCacheKey, Layout*> {
+public:
+    LayoutCache() : mCache(kMaxEntries) {
+        mCache.setOnEntryRemovedListener(this);
+    }
+
+    // callback for OnEntryRemoved
+    void operator()(LayoutCacheKey& key, Layout*& value) {
+        delete value;
+    }
+
+    LruCache<LayoutCacheKey, Layout*> mCache;
+private:
+    //static const size_t kMaxEntries = LruCache<LayoutCacheKey, Layout*>::kUnlimitedCapacity;
+
+    // TODO: eviction based on memory footprint; for now, we just use a constant
+    // number of strings
+    static const size_t kMaxEntries = 5000;
+};
+
+class HbFaceCache : private OnEntryRemoved<int32_t, hb_face_t*> {
+public:
+    HbFaceCache() : mCache(kMaxEntries) {
+        mCache.setOnEntryRemovedListener(this);
+    }
+
+    // callback for OnEntryRemoved
+    void operator()(int32_t& key, hb_face_t*& value) {
+        hb_face_destroy(value);
+    }
+
+    LruCache<int32_t, hb_face_t*> mCache;
+private:
+    static const size_t kMaxEntries = 100;
+};
+
+class LayoutEngine : public Singleton<LayoutEngine> {
+public:
+    LayoutEngine() {
+        hbBuffer = hb_buffer_create();
+    }
+
+    hb_buffer_t* hbBuffer;
+    LayoutCache layoutCache;
+    HbFaceCache hbFaceCache;
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(LayoutEngine);
+
+bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
+    return mId == other.mId &&
+            mStart == other.mStart &&
+            mCount == other.mCount &&
+            mStyle == other.mStyle &&
+            mSize == other.mSize &&
+            mIsRtl == other.mIsRtl &&
+            mText == other.mText;
+}
+
+hash_t LayoutCacheKey::hash() const {
+    uint32_t hash = JenkinsHashMix(0, mId);
+    hash = JenkinsHashMix(hash, mStart);
+    hash = JenkinsHashMix(hash, mCount);
+    hash = JenkinsHashMix(hash, hash_type(mStyle));
+    hash = JenkinsHashMix(hash, hash_type(mSize));
+    hash = JenkinsHashMix(hash, hash_type(mIsRtl));
+    hash = JenkinsHashMixShorts(hash, mText.string(), mText.size());
+    return JenkinsHashWhiten(hash);
+}
+
+struct LayoutContext {
+    MinikinPaint paint;
+    FontStyle style;
+    CssProperties props;
+    std::vector<hb_font_t*> hbFonts;  // parallel to mFaces
+};
+
+hash_t hash_type(const LayoutCacheKey& key) {
+    return key.hash();
+}
 
 Bitmap::Bitmap(int width, int height) : width(width), height(height) {
     buf = new uint8_t[width * height]();
@@ -107,18 +217,18 @@ void MinikinRect::join(const MinikinRect& r) {
 void Layout::init() {
 }
 
-void Layout::setFontCollection(const FontCollection *collection) {
+void Layout::setFontCollection(const FontCollection* collection) {
     mCollection = collection;
 }
 
 hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
-    MinikinFont* font = reinterpret_cast<MinikinFont *>(userData);
+    MinikinFont* font = reinterpret_cast<MinikinFont*>(userData);
     size_t length = 0;
     bool ok = font->GetTable(tag, NULL, &length);
     if (!ok) {
         return 0;
     }
-    char *buffer = reinterpret_cast<char*>(malloc(length));
+    char* buffer = reinterpret_cast<char*>(malloc(length));
     if (!buffer) {
         return 0;
     }
@@ -135,7 +245,7 @@ hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
 
 static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoint_t unicode, hb_codepoint_t variationSelector, hb_codepoint_t* glyph, void* userData)
 {
-    MinikinPaint* paint = reinterpret_cast<MinikinPaint *>(fontData);
+    MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
     MinikinFont* font = paint->font;
     uint32_t glyph_id;
     bool ok = font->GetGlyph(unicode, &glyph_id);
@@ -147,7 +257,7 @@ static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoin
 
 static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* hbFont, void* fontData, hb_codepoint_t glyph, void* userData)
 {
-    MinikinPaint* paint = reinterpret_cast<MinikinPaint *>(fontData);
+    MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
     MinikinFont* font = paint->font;
     float advance = font->GetHorizontalAdvance(glyph, *paint);
     return 256 * advance + 0.5;
@@ -173,12 +283,21 @@ hb_font_funcs_t* getHbFontFuncs() {
     return hbFontFuncs;
 }
 
-hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
-    hb_face_t* face = hb_face_create_for_tables(referenceTable, minikinFont, NULL);
+static hb_face_t* getHbFace(MinikinFont* minikinFont) {
+    HbFaceCache& cache = LayoutEngine::getInstance().hbFaceCache;
+    int32_t fontId = minikinFont->GetUniqueId();
+    hb_face_t* face = cache.mCache.get(fontId);
+    if (face == NULL) {
+        face = hb_face_create_for_tables(referenceTable, minikinFont, NULL);
+        cache.mCache.put(fontId, face);
+    }
+    return face;
+}
+
+static hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
+    hb_face_t* face = getHbFace(minikinFont);
     hb_font_t* font = hb_font_create(face);
-    hb_face_destroy(face);
     hb_font_set_funcs(font, getHbFontFuncs(), minikinPaint, 0);
-    // TODO: manage ownership of face
     return font;
 }
 
@@ -192,12 +311,6 @@ static hb_position_t HBFloatToFixed(float v)
     return scalbnf (v, +8);
 }
 
-Layout::~Layout() {
-    for (size_t ix = 0; ix < mHbFonts.size(); ix++) {
-        hb_font_destroy(mHbFonts[ix]);
-    }
-}
-
 void Layout::dump() const {
     for (size_t i = 0; i < mGlyphs.size(); i++) {
         const LayoutGlyph& glyph = mGlyphs[i];
@@ -205,11 +318,7 @@ void Layout::dump() const {
     }
 }
 
-// A couple of things probably need to change:
-// 1. Deal with multiple sizes in a layout
-// 2. We'll probably store FT_Face as primary and then use a cache
-// for the hb fonts
-int Layout::findFace(MinikinFont* face, MinikinPaint* paint) {
+int Layout::findFace(MinikinFont* face, LayoutContext* ctx) {
     unsigned int ix;
     for (ix = 0; ix < mFaces.size(); ix++) {
         if (mFaces[ix] == face) {
@@ -217,8 +326,12 @@ int Layout::findFace(MinikinFont* face, MinikinPaint* paint) {
         }
     }
     mFaces.push_back(face);
-    hb_font_t *font = create_hb_font(face, paint);
-    mHbFonts.push_back(font);
+    // Note: ctx == NULL means we're copying from the cache, no need to create
+    // corresponding hb_font object.
+    if (ctx != NULL) {
+        hb_font_t* font = create_hb_font(face, &ctx->paint);
+        ctx->hbFonts.push_back(font);
+    }
     return ix;
 }
 
@@ -235,14 +348,14 @@ static FontStyle styleFromCss(const CssProperties &props) {
 }
 
 static hb_script_t codePointToScript(hb_codepoint_t codepoint) {
-    static hb_unicode_funcs_t *u = 0;
+    static hb_unicode_funcs_t* u = 0;
     if (!u) {
         u = hb_icu_get_unicode_funcs();
     }
     return hb_unicode_script(u, codepoint);
 }
 
-static hb_codepoint_t decodeUtf16(const uint16_t *chars, size_t len, ssize_t *iter) {
+static hb_codepoint_t decodeUtf16(const uint16_t* chars, size_t len, ssize_t* iter) {
     const uint16_t v = chars[(*iter)++];
     // test whether v in (0xd800..0xdfff), lead or trail surrogate
     if ((v & 0xf800) == 0xd800) {
@@ -266,7 +379,7 @@ static hb_codepoint_t decodeUtf16(const uint16_t *chars, size_t len, ssize_t *it
     }
 }
 
-static hb_script_t getScriptRun(const uint16_t *chars, size_t len, ssize_t *iter) {
+static hb_script_t getScriptRun(const uint16_t* chars, size_t len, ssize_t* iter) {
     if (size_t(*iter) == len) {
         return HB_SCRIPT_UNKNOWN;
     }
@@ -298,29 +411,99 @@ static hb_script_t getScriptRun(const uint16_t *chars, size_t len, ssize_t *iter
     return current_script;
 }
 
-// TODO: API should probably take context
-void Layout::doLayout(const uint16_t* buf, size_t nchars) {
-    AutoMutex _l(gMinikinLock);
-    if (buffer == 0) {
-        buffer = hb_buffer_create();
+/**
+ * For the purpose of layout, a word break is a boundary with no
+ * kerning or complex script processing. This is necessarily a
+ * heuristic, but should be accurate most of the time.
+ */
+static bool isWordBreak(int c) {
+    if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
+        // spaces
+        return true;
     }
-    FT_Error error;
+    if ((c >= 0x3400 && c <= 0x9fff)) {
+        // CJK ideographs (and yijing hexagram symbols)
+        return true;
+    }
+    // Note: kana is not included, as sophisticated fonts may kern kana
+    return false;
+}
 
-    FontStyle style = styleFromCss(mProps);
+/**
+ * Return offset of previous word break. It is either < offset or == 0.
+ */
+static size_t getPrevWordBreak(const uint16_t* chars, size_t offset) {
+    if (offset == 0) return 0;
+    if (isWordBreak(chars[offset - 1])) {
+        return offset - 1;
+    }
+    for (size_t i = offset - 1; i > 0; i--) {
+        if (isWordBreak(chars[i - 1])) {
+            return i;
+        }
+    }
+    return 0;
+}
 
-    MinikinPaint paint;
-    double size = mProps.value(fontSize).getFloatValue();
-    paint.size = size;
-    int bidiFlags = mProps.hasTag(minikinBidi) ? mProps.value(minikinBidi).getIntValue() : 0;
+/**
+ * Return offset of next word break. It is either > offset or == len.
+ */
+static size_t getNextWordBreak(const uint16_t* chars, size_t offset, size_t len) {
+    if (offset >= len) return len;
+    if (isWordBreak(chars[offset])) {
+        return offset + 1;
+    }
+    for (size_t i = offset + 1; i < len; i++) {
+        if (isWordBreak(chars[i])) {
+            return i;
+        }
+    }
+    return len;
+}
+
+// deprecated API, to avoid breaking client
+void Layout::doLayout(const uint16_t* buf, size_t nchars) {
+    doLayout(buf, 0, nchars, nchars, mCssString);
+}
+
+// TODO: use some standard implementation
+template<typename T>
+static T mymin(const T& a, const T& b) {
+    return a < b ? a : b;
+}
+
+template<typename T>
+static T mymax(const T& a, const T& b) {
+    return a > b ? a : b;
+}
+
+static void clearHbFonts(LayoutContext* ctx) {
+    for (size_t i = 0; i < ctx->hbFonts.size(); i++) {
+        hb_font_destroy(ctx->hbFonts[i]);
+    }
+    ctx->hbFonts.clear();
+}
+
+// TODO: API should probably take context
+void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        const std::string& css) {
+    AutoMutex _l(gMinikinLock);
+    LayoutContext ctx;
+
+    ctx.props.parse(css);
+    ctx.style = styleFromCss(ctx.props);
+
+    double size = ctx.props.value(fontSize).getFloatValue();
+    ctx.paint.size = size;
+    int bidiFlags = ctx.props.hasTag(minikinBidi) ? ctx.props.value(minikinBidi).getIntValue() : 0;
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;
 
     mGlyphs.clear();
     mFaces.clear();
-    mHbFonts.clear();
     mBounds.setEmpty();
     mAdvances.clear();
-    mAdvances.resize(nchars, 0);
+    mAdvances.resize(count, 0);
     mAdvance = 0;
     if (!(bidiFlags == kBidi_Force_LTR || bidiFlags == kBidi_Force_RTL)) {
         UBiDi* bidi = ubidi_open();
@@ -332,12 +515,12 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
             } else if (bidiFlags == kBidi_Default_RTL) {
                 bidiReq = UBIDI_DEFAULT_RTL;
             }
-            ubidi_setPara(bidi, buf, nchars, bidiReq, NULL, &status);
+            ubidi_setPara(bidi, buf, bufSize, bidiReq, NULL, &status);
             if (U_SUCCESS(status)) {
                 int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask;
                 ssize_t rc = ubidi_countRuns(bidi, &status);
-                if (!U_SUCCESS(status) || rc < 1) {
-                    ALOGD("error counting bidi runs, status = %d", status);
+                if (!U_SUCCESS(status) || rc < 0) {
+                    ALOGW("error counting bidi runs, status = %d", status);
                 }
                 if (!U_SUCCESS(status) || rc <= 1) {
                     isRtl = (paraDir == kBidi_RTL);
@@ -350,12 +533,12 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
                         UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
                         if (startRun == -1 || lengthRun == -1) {
                             ALOGE("invalid visual run");
-                            // Note: this case will lose text; can it ever actually happen?
-                            break;
+                            // skip the invalid run
+                            continue;
                         }
                         isRtl = (runDir == UBIDI_RTL);
                         // TODO: min/max with context
-                        doLayoutRun(buf, startRun, lengthRun, nchars, isRtl, style, paint);
+                        doLayoutRunCached(buf, startRun, lengthRun, bufSize, isRtl, &ctx);
                     }
                 }
             } else {
@@ -367,14 +550,63 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
         }
     }
     if (doSingleRun) {
-        doLayoutRun(buf, 0, nchars, nchars, isRtl, style, paint);
+        doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx);
+    }
+    clearHbFonts(&ctx);
+}
+
+void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx) {
+    if (!isRtl) {
+        // left to right
+        size_t wordstart = start == bufSize ? start : getPrevWordBreak(buf, start + 1);
+        size_t wordend;
+        for (size_t iter = start; iter < start + count; iter = wordend) {
+            wordend = getNextWordBreak(buf, iter, bufSize);
+            size_t wordcount = mymin(start + count, wordend) - iter;
+            doLayoutWord(buf + wordstart, iter - wordstart, wordcount, wordend - wordstart,
+                    isRtl, ctx, iter);
+            wordstart = wordend;
+        }
+    } else {
+        // right to left
+        size_t wordstart;
+        size_t end = start + count;
+        size_t wordend = end == 0 ? 0 : getNextWordBreak(buf, end - 1, bufSize);
+        for (size_t iter = end; iter > start; iter = wordstart) {
+            wordstart = getPrevWordBreak(buf, iter);
+            size_t bufStart = mymax(start, wordstart);
+            doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
+                    wordend - wordstart, isRtl, ctx, bufStart);
+            wordend = wordstart;
+        }
     }
 }
 
+void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        bool isRtl, LayoutContext* ctx, size_t bufStart) {
+    LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
+    LayoutCacheKey key(mCollection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
+    Layout* value = cache.mCache.get(key);
+    if (value == NULL) {
+        value = new Layout();
+        value->setFontCollection(mCollection);
+        value->mAdvances.resize(count, 0);
+        clearHbFonts(ctx);
+        // Note: we do the layout from the copy stored in the key, in case a
+        // badly-behaved client is mutating the buffer in a separate thread.
+        value->doLayoutRun(key.textBuf(), start, count, bufSize, isRtl, ctx);
+    }
+    appendLayout(value, bufStart);
+    cache.mCache.put(key, value);
+
+}
+
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-    bool isRtl, FontStyle style, MinikinPaint& paint) {
+        bool isRtl, LayoutContext* ctx) {
+    hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
     vector<FontCollection::Run> items;
-    mCollection->itemize(buf + start, count, style, &items);
+    mCollection->itemize(buf + start, count, ctx->style, &items);
     if (isRtl) {
         std::reverse(items.begin(), items.end());
     }
@@ -383,10 +615,10 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
         FontCollection::Run &run = items[run_ix];
-        int font_ix = findFace(run.font, &paint);
-        paint.font = mFaces[font_ix];
-        hb_font_t *hbFont = mHbFonts[font_ix];
-        if (paint.font == NULL) {
+        int font_ix = findFace(run.font, ctx);
+        ctx->paint.font = mFaces[font_ix];
+        hb_font_t* hbFont = ctx->hbFonts[font_ix];
+        if (ctx->paint.font == NULL) {
             // TODO: should log what went wrong
             continue;
         }
@@ -394,7 +626,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
 #endif
-        double size = paint.size;
+        double size = ctx->paint.size;
         hb_font_set_ppem(hbFont, size, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
 
@@ -412,8 +644,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
             hb_shape(hbFont, buffer, NULL, 0);
             unsigned int numGlyphs;
-            hb_glyph_info_t *info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
-            hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
+            hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
+            hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer, NULL);
             for (unsigned int i = 0; i < numGlyphs; i++) {
     #ifdef VERBOSE
                 std::cout << positions[i].x_advance << " " << positions[i].y_advance << " " << positions[i].x_offset << " " << positions[i].y_offset << std::endl;            std::cout << "DoLayout " << info[i].codepoint <<
@@ -426,7 +658,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 mGlyphs.push_back(glyph);
                 float xAdvance = HBFixedToFloat(positions[i].x_advance);
                 MinikinRect glyphBounds;
-                paint.font->GetBounds(&glyphBounds, glyph_ix, paint);
+                ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
                 size_t cluster = info[i].cluster;
@@ -438,7 +670,33 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     mAdvance = x;
 }
 
-void Layout::draw(Bitmap* surface, int x0, int y0) const {
+void Layout::appendLayout(Layout* src, size_t start) {
+    // Note: size==1 is by far most common, should have specialized vector for this
+    std::vector<int> fontMap;
+    for (size_t i = 0; i < src->mFaces.size(); i++) {
+        int font_ix = findFace(src->mFaces[i], NULL);
+        fontMap.push_back(font_ix);
+    }
+    int x0 = mAdvance;
+    for (size_t i = 0; i < src->mGlyphs.size(); i++) {
+        LayoutGlyph& srcGlyph = src->mGlyphs[i];
+        int font_ix = fontMap[srcGlyph.font_ix];
+        unsigned int glyph_id = srcGlyph.glyph_id;
+        float x = x0 + srcGlyph.x;
+        float y = srcGlyph.y;
+        LayoutGlyph glyph = {font_ix, glyph_id, x, y};
+        mGlyphs.push_back(glyph);
+    }
+    for (size_t i = 0; i < src->mAdvances.size(); i++) {
+        mAdvances[i + start] = src->mAdvances[i];
+    }
+    MinikinRect srcBounds(src->mBounds);
+    srcBounds.offset(x0, 0);
+    mBounds.join(srcBounds);
+    mAdvance += src->mAdvance;
+}
+
+void Layout::draw(Bitmap* surface, int x0, int y0, float size) const {
     /*
     TODO: redo as MinikinPaint settings
     if (mProps.hasTag(minikinHinting)) {
@@ -449,11 +707,11 @@ void Layout::draw(Bitmap* surface, int x0, int y0) const {
     */
     for (size_t i = 0; i < mGlyphs.size(); i++) {
         const LayoutGlyph& glyph = mGlyphs[i];
-        MinikinFont *mf = mFaces[glyph.font_ix];
-        MinikinFontFreeType *face = static_cast<MinikinFontFreeType *>(mf);
+        MinikinFont* mf = mFaces[glyph.font_ix];
+        MinikinFontFreeType* face = static_cast<MinikinFontFreeType*>(mf);
         GlyphBitmap glyphBitmap;
         MinikinPaint paint;
-        paint.size = mProps.value(fontSize).getFloatValue();
+        paint.size = size;
         bool ok = face->Render(glyph.glyph_id, paint, &glyphBitmap);
         printf("glyphBitmap.width=%d, glyphBitmap.height=%d (%d, %d) x=%f, y=%f, ok=%d\n",
             glyphBitmap.width, glyphBitmap.height, glyphBitmap.left, glyphBitmap.top, glyph.x, glyph.y, ok);
@@ -464,15 +722,15 @@ void Layout::draw(Bitmap* surface, int x0, int y0) const {
     }
 }
 
-void Layout::setProperties(string css) {
-    mProps.parse(css);
+void Layout::setProperties(const string& css) {
+    mCssString = css;
 }
 
 size_t Layout::nGlyphs() const {
     return mGlyphs.size();
 }
 
-MinikinFont *Layout::getFont(int i) const {
+MinikinFont* Layout::getFont(int i) const {
     const LayoutGlyph& glyph = mGlyphs[i];
     return mFaces[glyph.font_ix];
 }

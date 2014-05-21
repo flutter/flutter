@@ -19,6 +19,8 @@
 
 #include <vector>
 
+#include <utils/TypeHelpers.h>
+
 #include <minikin/MinikinRefCounted.h>
 
 namespace android {
@@ -31,15 +33,21 @@ public:
     FontStyle(int weight = 4, bool italic = false) {
         bits = (weight & kWeightMask) | (italic ? kItalicMask : 0);
     }
-    int getWeight() { return bits & kWeightMask; }
-    bool getItalic() { return (bits & kItalicMask) != 0; }
-    bool operator==(const FontStyle other) { return bits == other.bits; }
+    int getWeight() const { return bits & kWeightMask; }
+    bool getItalic() const { return (bits & kItalicMask) != 0; }
+    bool operator==(const FontStyle other) const { return bits == other.bits; }
     // TODO: language, variant
+
+    hash_t hash() const { return bits; }
 private:
     static const int kWeightMask = 0xf;
     static const int kItalicMask = 16;
     uint32_t bits;
 };
+
+inline hash_t hash_type(const FontStyle &style) {
+    return style.hash();
+}
 
 class FontFamily : public MinikinRefCounted {
 public:

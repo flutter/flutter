@@ -32,9 +32,12 @@ static inline T max(T a, T b) {
     return a>b ? a : b;
 }
 
+uint32_t FontCollection::sNextId = 0;
+
 FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     mMaxChar(0) {
     AutoMutex _l(gMinikinLock);
+    mId = sNextId++;
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
 #ifdef VERBOSE_DEBUG
@@ -50,6 +53,12 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         instance->mFamily = family;
         instance->mCoverage = new SparseBitSet;
         MinikinFont* typeface = family->getClosestMatch(defaultStyle);
+        if (typeface == NULL) {
+            ALOGE("FontCollection: closest match was null");
+            // TODO: we shouldn't hit this, as there should be more robust
+            // checks upstream to prevent empty/invalid FontFamily objects
+            continue;
+        }
 #ifdef VERBOSE_DEBUG
         ALOGD("closest match = %p, family size = %d\n", typeface, family->getNumFonts());
 #endif
@@ -147,6 +156,10 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
         }
         run->end = i + nShorts;
     }
+}
+
+uint32_t FontCollection::getId() const {
+    return mId;
 }
 
 }  // namespace android
