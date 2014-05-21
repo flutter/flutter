@@ -54,9 +54,12 @@ public:
         int start;
         int end;
     };
+
     void itemize(const uint16_t *string, size_t string_length, FontStyle style,
             std::vector<Run>* result) const;
-    private:
+
+    uint32_t getId() const;
+private:
     static const int kLogCharsPerPage = 8;
     static const int kPageMask = (1 << kLogCharsPerPage) - 1;
 
@@ -69,6 +72,12 @@ public:
         size_t start;
         size_t end;
     };
+
+    // static for allocating unique id's
+    static uint32_t sNextId;
+
+    // unique id for this font collection (suitable for cache key)
+    uint32_t mId;
 
     // Highest UTF-32 code point that can be mapped
     uint32_t mMaxChar;

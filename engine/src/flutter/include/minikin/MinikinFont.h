@@ -27,6 +27,7 @@ namespace android {
 class MinikinFont;
 
 // Possibly move into own .h file?
+// Note: if you add a field here, also update LayoutCacheKey
 struct MinikinPaint {
     MinikinFont *font;
     float size;
