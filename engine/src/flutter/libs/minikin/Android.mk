@@ -44,6 +44,7 @@ LOCAL_SHARED_LIBRARIES := \
     libpng \
     libz \
     libstlport \
-    libicuuc
+    libicuuc \
+    libutils
 
 include $(BUILD_SHARED_LIBRARY)

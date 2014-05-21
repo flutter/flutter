@@ -89,7 +89,7 @@ int runMinikinTest() {
     layout.doLayout(icuText.getBuffer(), icuText.length());
     layout.dump();
     Bitmap bitmap(250, 50);
-    layout.draw(&bitmap, 10, 40);
+    layout.draw(&bitmap, 10, 40, 32);
     std::ofstream o;
     o.open("/data/local/tmp/foo.pgm", std::ios::out | std::ios::binary);
     bitmap.writePnm(o);
