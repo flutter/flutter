@@ -75,7 +75,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         mMaxChar = max(mMaxChar, instance->mCoverage->length());
         lastChar.push_back(instance->mCoverage->nextSetBit(0));
     }
-    size_t nPages = mMaxChar >> kLogCharsPerPage;
+    size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
     size_t offset = 0;
     for (size_t i = 0; i < nPages; i++) {
         Range dummy;
