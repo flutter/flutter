@@ -615,13 +615,13 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
         FontCollection::Run &run = items[run_ix];
+        if (run.font == NULL) {
+            ALOGE("no font for run starting u+%04x length %d", buf[run.start], run.end - run.start);
+            continue;
+        }
         int font_ix = findFace(run.font, ctx);
         ctx->paint.font = mFaces[font_ix];
         hb_font_t* hbFont = ctx->hbFonts[font_ix];
-        if (ctx->paint.font == NULL) {
-            // TODO: should log what went wrong
-            continue;
-        }
 #ifdef VERBOSE
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
