@@ -20,6 +20,7 @@
 #include <cstdio> // for sprintf - for debugging
 
 #include <minikin/CssParse.h>
+#include <minikin/FontFamily.h>
 
 using std::map;
 using std::pair;
@@ -27,27 +28,58 @@ using std::string;
 
 namespace android {
 
-bool strEqC(const string str, size_t off, size_t len, const char* str2) {
+static bool strEqC(const string str, size_t off, size_t len, const char* str2) {
     if (len != strlen(str2)) return false;
     return !memcmp(str.data() + off, str2, len);
 }
 
-CssTag parseTag(const string str, size_t off, size_t len) {
+static CssTag parseTag(const string str, size_t off, size_t len) {
     if (len == 0) return unknown;
     char c = str[off];
     if (c == 'f') {
         if (strEqC(str, off, len, "font-size")) return fontSize;
         if (strEqC(str, off, len, "font-weight")) return fontWeight;
         if (strEqC(str, off, len, "font-style")) return fontStyle;
+    } else if (c == 'l') {
+        if (strEqC(str, off, len, "lang")) return cssLang;
     } else if (c == '-') {
-        if (strEqC(str, off, len, "-minikin-hinting")) return minikinHinting;
         if (strEqC(str, off, len, "-minikin-bidi")) return minikinBidi;
+        if (strEqC(str, off, len, "-minikin-hinting")) return minikinHinting;
+        if (strEqC(str, off, len, "-minikin-variant")) return minikinVariant;
     }
     return unknown;
 }
 
-bool parseValue(const string str, size_t *off, size_t len, CssTag tag,
-        CssValue* v) {
+static bool parseStringValue(const string& str, size_t* off, size_t len, CssTag tag, CssValue* v) {
+    const char* data = str.data();
+    size_t beg = *off;
+    if (beg == len) return false;
+    char first = data[beg];
+    bool quoted = false;
+    if (first == '\'' || first == '\"') {
+        quoted = true;
+        beg++;
+    }
+    size_t end;
+    for (end = beg; end < len; end++) {
+        char c = data[end];
+        if (quoted && c == first) {
+            v->setStringValue(std::string(str, beg, end - beg));
+            *off = end + 1;
+            return true;
+        } else if (!quoted && (c == ';' || c == ' ')) {
+            break;
+        }  // TODO: deal with backslash escape, but only important for real strings
+    }
+    v->setStringValue(std::string(str, beg, end - beg));
+    *off = end;
+    return true;
+}
+
+static bool parseValue(const string& str, size_t* off, size_t len, CssTag tag, CssValue* v) {
+    if (tag == cssLang) {
+        return parseStringValue(str, off, len, tag, v);
+    }
     const char* data = str.data();
     char* endptr;
     double fv = strtod(data + *off, &endptr);
@@ -78,6 +110,12 @@ bool parseValue(const string str, size_t *off, size_t len, CssTag tag,
             } else {
                 return false;
             }
+        } else if (tag == minikinVariant) {
+            if (strEqC(str, *off, taglen, "compact")) {
+                fv = VARIANT_COMPACT;
+            } else if (strEqC(str, *off, taglen, "elegant")) {
+                fv = VARIANT_ELEGANT;
+            }
         } else {
             return false;
         }
@@ -91,10 +129,15 @@ string CssValue::toString(CssTag tag) const {
     if (mType == FLOAT) {
         if (tag == fontStyle) {
             return floatValue ? "italic" : "normal";
+        } else if (tag == minikinVariant) {
+            if (floatValue == VARIANT_COMPACT) return "compact";
+            if (floatValue == VARIANT_ELEGANT) return "elegant";
         }
         char buf[64];
         sprintf(buf, "%g", floatValue);
         return string(buf);
+    } else if (mType == STRING) {
+        return stringValue;  // should probably quote
     }
     return "";
 }
