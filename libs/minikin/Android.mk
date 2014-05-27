@@ -43,6 +43,7 @@ LOCAL_SHARED_LIBRARIES := \
     liblog \
     libpng \
     libz \
-    libstlport
+    libstlport \
+    libicuuc
 
 include $(BUILD_SHARED_LIBRARY)
