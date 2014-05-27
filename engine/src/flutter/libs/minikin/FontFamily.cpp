@@ -30,6 +30,47 @@ using std::vector;
 
 namespace android {
 
+// Parse bcp-47 language identifier into internal structure
+FontLanguage::FontLanguage(const char* buf, size_t size) {
+    uint32_t bits = 0;
+    size_t i;
+    for (i = 0; i < size && buf[i] != '-' && buf[i] != '_'; i++) {
+        uint16_t c = buf[i];
+        if (c == '-' || c == '_') break;
+    }
+    if (i == 2) {
+        bits = (uint8_t(buf[0]) << 8) | uint8_t(buf[1]);
+    }
+    size_t next;
+    for (i++; i < size; i = next + 1) {
+        for (next = i; next < size; next++) {
+            uint16_t c = buf[next];
+            if (c == '-' || c == '_') break;
+        }
+        if (next - i == 4 && buf[i] == 'H' && buf[i+1] == 'a' && buf[i+2] == 'n') {
+            if (buf[i+3] == 's') {
+                bits |= kHansFlag;
+            } else if (buf[i+3] == 't') {
+                bits |= kHantFlag;
+            }
+        }
+        // TODO: this might be a good place to infer script from country (zh_TW -> Hant),
+        // but perhaps it's up to the client to do that, before passing a string.
+    }
+    mBits = bits;
+}
+
+int FontLanguage::match(const FontLanguage other) const {
+    int result = 0;
+    if ((mBits & kBaseLangMask) == (other.mBits & kBaseLangMask)) {
+        result++;
+        if ((mBits & kScriptMask) != 0 && (mBits & kScriptMask) == (other.mBits & kScriptMask)) {
+            result++;
+        }
+    }
+    return result;
+}
+
 FontFamily::~FontFamily() {
     for (size_t i = 0; i < mFonts.size(); i++) {
         mFonts[i].typeface->UnrefLocked();

@@ -32,7 +32,8 @@ public:
 
     ~FontCollection();
 
-    const FontFamily* getFamilyForChar(uint32_t ch) const;
+    const FontFamily* getFamilyForChar(uint32_t ch, FontLanguage lang, int variant) const;
+
     class Run {
     public:
         // Do copy constructor, assignment, destructor so it can be used in vectors
