@@ -114,13 +114,8 @@ FontCollection::~FontCollection() {
 // 3. If a font matches just language, it gets a score of 2.
 // 4. Matching the "compact" or "elegant" variant adds one to the score.
 // 5. Highest score wins, with ties resolved to the first font.
-
-// Note that we may want to make the selection more dependent on
-// context, so for example a sequence of Devanagari, ZWJ, Devanagari
-// would get itemized as one run, even though by the rules the ZWJ
-// would go to the Latin font.
-const FontFamily* FontCollection::getFamilyForChar(uint32_t ch, FontLanguage lang,
-            int variant) const {
+const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t ch,
+            FontLanguage lang, int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
     }
@@ -128,7 +123,7 @@ const FontFamily* FontCollection::getFamilyForChar(uint32_t ch, FontLanguage lan
 #ifdef VERBOSE_DEBUG
     ALOGD("querying range %d:%d\n", range.start, range.end);
 #endif
-    FontFamily* bestFamily = NULL;
+    const FontInstance* bestInstance = NULL;
     int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
         const FontInstance* instance = mInstanceVec[i];
@@ -136,7 +131,7 @@ const FontFamily* FontCollection::getFamilyForChar(uint32_t ch, FontLanguage lan
             FontFamily* family = instance->mFamily;
             // First font family in collection always matches
             if (mInstances[0].mFamily == family) {
-                return family;
+                return instance;
             }
             int score = lang.match(family->lang()) * 2;
             if (variant != 0 && variant == family->variant()) {
@@ -144,18 +139,18 @@ const FontFamily* FontCollection::getFamilyForChar(uint32_t ch, FontLanguage lan
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestFamily = family;
+                bestInstance = instance;
             }
         }
     }
-    return bestFamily;
+    return bestInstance;
 }
 
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
     FontLanguage lang = style.getLanguage();
     int variant = style.getVariant();
-    const FontFamily* lastFamily = NULL;
+    const FontInstance* lastInstance = NULL;
     Run* run = NULL;
     int nShorts;
     for (size_t i = 0; i < string_size; i += nShorts) {
@@ -168,20 +163,23 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 nShorts = 2;
             }
         }
-        const FontFamily* family = getFamilyForChar(ch, lang, variant);
-        if (i == 0 || family != lastFamily) {
-            Run dummy;
-            result->push_back(dummy);
-            run = &result->back();
-            if (family == NULL) {
-                run->font = NULL;  // maybe we should do something different here
-            } else {
-                run->font = family->getClosestMatch(style);
-                // TODO: simplify refcounting (FontCollection lifetime dominates)
-                run->font->RefLocked();
+        // Continue using existing font as long as it has coverage.
+        if (lastInstance == NULL || !lastInstance->mCoverage->get(ch)) {
+            const FontInstance* instance = getInstanceForChar(ch, lang, variant);
+            if (i == 0 || instance != lastInstance) {
+                Run dummy;
+                result->push_back(dummy);
+                run = &result->back();
+                if (instance == NULL) {
+                    run->font = NULL;  // maybe we should do something different here
+                } else {
+                    run->font = instance->mFamily->getClosestMatch(style);
+                    // TODO: simplify refcounting (FontCollection lifetime dominates)
+                    run->font->RefLocked();
+                }
+                lastInstance = instance;
+                run->start = i;
             }
-            lastFamily = family;
-            run->start = i;
         }
         run->end = i + nShorts;
     }
