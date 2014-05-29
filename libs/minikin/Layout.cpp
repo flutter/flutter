@@ -344,7 +344,16 @@ static FontStyle styleFromCss(const CssProperties &props) {
     if (props.hasTag(fontStyle)) {
         italic = props.value(fontStyle).getIntValue() != 0;
     }
-    return FontStyle(weight, italic);
+    FontLanguage lang;
+    if (props.hasTag(cssLang)) {
+        string langStr = props.value(cssLang).getStringValue();
+        lang = FontLanguage(langStr.c_str(), langStr.size());
+    }
+    int variant = 0;
+    if (props.hasTag(minikinVariant)) {
+        variant = props.value(minikinVariant).getIntValue();
+    }
+    return FontStyle(lang, variant, weight, italic);
 }
 
 static hb_script_t codePointToScript(hb_codepoint_t codepoint) {
@@ -486,7 +495,7 @@ static void clearHbFonts(LayoutContext* ctx) {
 
 // TODO: API should probably take context
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        const std::string& css) {
+        const string& css) {
     AutoMutex _l(gMinikinLock);
     LayoutContext ctx;
 
@@ -599,7 +608,6 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
     }
     appendLayout(value, bufStart);
     cache.mCache.put(key, value);
-
 }
 
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -641,6 +649,10 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_buffer_reset(buffer);
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+            if (ctx->props.hasTag(cssLang)) {
+                string lang = ctx->props.value(cssLang).getStringValue();
+                hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
+            }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
             hb_shape(hbFont, buffer, NULL, 0);
             unsigned int numGlyphs;

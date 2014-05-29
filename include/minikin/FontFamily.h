@@ -25,6 +25,36 @@
 
 namespace android {
 
+class MinikinFont;
+
+// FontLanguage is a compact representation of a bcp-47 language tag. It
+// does not capture all possible information, only what directly affects
+// font rendering.
+class FontLanguage {
+    friend class FontStyle;
+public:
+    FontLanguage() : mBits(0) { }
+
+    // Parse from string
+    FontLanguage(const char* buf, size_t size);
+
+    bool operator==(const FontLanguage other) const { return mBits == other.mBits; }
+
+    // 0 = no match, 1 = language matches, 2 = language and script match
+    int match(const FontLanguage other) const;
+
+private:
+    explicit FontLanguage(uint32_t bits) : mBits(bits) { }
+
+    uint32_t bits() const { return mBits; }
+
+    static const uint32_t kBaseLangMask = 0xffff;
+    static const uint32_t kScriptMask = (1 << 18) - (1 << 16);
+    static const uint32_t kHansFlag = 1 << 16;
+    static const uint32_t kHantFlag = 1 << 17;
+    uint32_t mBits;
+};
+
 // FontStyle represents all style information needed to select an actual font
 // from a collection. The implementation is packed into a single 32-bit word
 // so it can be efficiently copied, embedded in other objects, etc.
@@ -33,16 +63,31 @@ public:
     FontStyle(int weight = 4, bool italic = false) {
         bits = (weight & kWeightMask) | (italic ? kItalicMask : 0);
     }
+    FontStyle(FontLanguage lang, int variant = 0, int weight = 4, bool italic = false) {
+        bits = (weight & kWeightMask) | (italic ? kItalicMask : 0)
+                | (variant << kVariantShift) | (lang.bits() << kLangShift);
+    }
     int getWeight() const { return bits & kWeightMask; }
     bool getItalic() const { return (bits & kItalicMask) != 0; }
+    int getVariant() const { return (bits >> kVariantShift) & kVariantMask; }
+    FontLanguage getLanguage() const { return FontLanguage(bits >> kLangShift); }
+
     bool operator==(const FontStyle other) const { return bits == other.bits; }
-    // TODO: language, variant
 
     hash_t hash() const { return bits; }
 private:
-    static const int kWeightMask = 0xf;
-    static const int kItalicMask = 16;
+    static const uint32_t kWeightMask = (1 << 4) - 1;
+    static const uint32_t kItalicMask = 1 << 4;
+    static const int kVariantShift = 5;
+    static const uint32_t kVariantMask = (1 << 2) - 1;
+    static const int kLangShift = 7;
     uint32_t bits;
+};
+
+enum FontVariant {
+    VARIANT_DEFAULT = 0,
+    VARIANT_COMPACT = 1,
+    VARIANT_ELEGANT = 2,
 };
 
 inline hash_t hash_type(const FontStyle &style) {
@@ -51,6 +96,11 @@ inline hash_t hash_type(const FontStyle &style) {
 
 class FontFamily : public MinikinRefCounted {
 public:
+    FontFamily() { }
+
+    FontFamily(FontLanguage lang, int variant) : mLang(lang), mVariant(variant) {
+    }
+
     ~FontFamily();
 
     // Add font to family, extracting style information from the font
@@ -58,6 +108,9 @@ public:
 
     void addFont(MinikinFont* typeface, FontStyle style);
     MinikinFont* getClosestMatch(FontStyle style) const;
+
+    FontLanguage lang() const { return mLang; }
+    int variant() const { return mVariant; }
 
     // API's for enumerating the fonts in a family. These don't guarantee any particular order
     size_t getNumFonts() const;
@@ -73,6 +126,8 @@ private:
         MinikinFont* typeface;
         FontStyle style;
     };
+    FontLanguage mLang;
+    int mVariant;
     std::vector<Font> mFonts;
 };
 
