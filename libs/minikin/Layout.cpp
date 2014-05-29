@@ -661,7 +661,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
-                size_t cluster = info[i].cluster;
+                size_t cluster = info[i].cluster - start;
                 mAdvances[cluster] += xAdvance;
                 x += xAdvance;
             }
