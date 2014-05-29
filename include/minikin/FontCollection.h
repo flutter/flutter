@@ -32,8 +32,6 @@ public:
 
     ~FontCollection();
 
-    const FontFamily* getFamilyForChar(uint32_t ch, FontLanguage lang, int variant) const;
-
     class Run {
     public:
         // Do copy constructor, assignment, destructor so it can be used in vectors
@@ -73,6 +71,8 @@ private:
         size_t start;
         size_t end;
     };
+
+    const FontInstance* getInstanceForChar(uint32_t ch, FontLanguage lang, int variant) const;
 
     // static for allocating unique id's
     static uint32_t sNextId;
