@@ -108,7 +108,19 @@ FontCollection::~FontCollection() {
     }
 }
 
-const FontFamily* FontCollection::getFamilyForChar(uint32_t ch) const {
+// Implement heuristic for choosing best-match font. Here are the rules:
+// 1. If first font in the collection has the character, it wins.
+// 2. If a font matches both language and script, it gets a score of 4.
+// 3. If a font matches just language, it gets a score of 2.
+// 4. Matching the "compact" or "elegant" variant adds one to the score.
+// 5. Highest score wins, with ties resolved to the first font.
+
+// Note that we may want to make the selection more dependent on
+// context, so for example a sequence of Devanagari, ZWJ, Devanagari
+// would get itemized as one run, even though by the rules the ZWJ
+// would go to the Latin font.
+const FontFamily* FontCollection::getFamilyForChar(uint32_t ch, FontLanguage lang,
+            int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
     }
@@ -116,17 +128,33 @@ const FontFamily* FontCollection::getFamilyForChar(uint32_t ch) const {
 #ifdef VERBOSE_DEBUG
     ALOGD("querying range %d:%d\n", range.start, range.end);
 #endif
+    FontFamily* bestFamily = NULL;
+    int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
         const FontInstance* instance = mInstanceVec[i];
         if (instance->mCoverage->get(ch)) {
-            return instance->mFamily;
+            FontFamily* family = instance->mFamily;
+            // First font family in collection always matches
+            if (mInstances[0].mFamily == family) {
+                return family;
+            }
+            int score = lang.match(family->lang()) * 2;
+            if (variant != 0 && variant == family->variant()) {
+                score++;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestFamily = family;
+            }
         }
     }
-    return NULL;
+    return bestFamily;
 }
 
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
+    FontLanguage lang = style.getLanguage();
+    int variant = style.getVariant();
     const FontFamily* lastFamily = NULL;
     Run* run = NULL;
     int nShorts;
@@ -140,7 +168,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 nShorts = 2;
             }
         }
-        const FontFamily* family = getFamilyForChar(ch);
+        const FontFamily* family = getFamilyForChar(ch, lang, variant);
         if (i == 0 || family != lastFamily) {
             Run dummy;
             result->push_back(dummy);
@@ -149,6 +177,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 run->font = NULL;  // maybe we should do something different here
             } else {
                 run->font = family->getClosestMatch(style);
+                // TODO: simplify refcounting (FontCollection lifetime dominates)
                 run->font->RefLocked();
             }
             lastFamily = family;

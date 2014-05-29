@@ -25,26 +25,31 @@ namespace android {
 enum CssTag {
     unknown,
     fontSize,
-    fontWeight,
     fontStyle,
-    minikinHinting,
+    fontWeight,
+    cssLang,
     minikinBidi,
+    minikinHinting,
+    minikinVariant,
 };
 
 const std::string cssTagNames[] = {
     "unknown",
     "font-size",
-    "font-weight",
     "font-style",
-    "-minikin-hinting",
+    "font-weight",
+    "lang",
     "-minikin-bidi",
+    "-minikin-hinting",
+    "-minikin-variant",
 };
 
 class CssValue {
 public:
     enum Type {
         UNKNOWN,
-        FLOAT
+        FLOAT,
+        STRING
     };
     enum Units {
         SCALAR,
@@ -58,14 +63,20 @@ public:
     Type getType() const { return mType; }
     double getFloatValue() const { return floatValue; }
     int getIntValue() const { return floatValue; }
+    std::string getStringValue() const { return stringValue; }
     std::string toString(CssTag tag) const;
     void setFloatValue(double v) {
         mType = FLOAT;
         floatValue = v;
     }
+    void setStringValue(const std::string& v) {
+        mType = STRING;
+        stringValue = v;
+    }
 private:
     Type mType;
     double floatValue;
+    std::string stringValue;
     Units mUnits;
 };
 
