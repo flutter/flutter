@@ -31,7 +31,9 @@ class MinikinFont;
 struct MinikinPaint {
     MinikinFont *font;
     float size;
-    // todo: skew, stretch, hinting
+    float scaleX;
+    float skewX;
+    int32_t paintFlags;
 };
 
 struct MinikinRect {

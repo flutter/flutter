@@ -63,7 +63,8 @@ public:
     LayoutCacheKey(const FontCollection* collection, const MinikinPaint& paint, FontStyle style,
             const uint16_t* chars, size_t start, size_t count, size_t nchars, bool dir)
             : mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
-            mSize(paint.size), mIsRtl(dir) {
+            mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
+            mPaintFlags(paint.paintFlags), mIsRtl(dir) {
         mText.setTo(chars, nchars);
     }
     bool operator==(const LayoutCacheKey &other) const;
@@ -78,6 +79,9 @@ private:
     uint32_t mId;  // for the font collection
     FontStyle mStyle;
     float mSize;
+    float mScaleX;
+    float mSkewX;
+    int mPaintFlags;
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
     // TODO: language matching (possibly integrate into style)
@@ -133,13 +137,16 @@ public:
 ANDROID_SINGLETON_STATIC_INSTANCE(LayoutEngine);
 
 bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
-    return mId == other.mId &&
-            mStart == other.mStart &&
-            mCount == other.mCount &&
-            mStyle == other.mStyle &&
-            mSize == other.mSize &&
-            mIsRtl == other.mIsRtl &&
-            mText == other.mText;
+    return mId == other.mId
+            && mStart == other.mStart
+            && mCount == other.mCount
+            && mStyle == other.mStyle
+            && mSize == other.mSize
+            && mScaleX == other.mScaleX
+            && mSkewX == other.mSkewX
+            && mPaintFlags == other.mPaintFlags
+            && mIsRtl == other.mIsRtl
+            && mText == other.mText;
 }
 
 hash_t LayoutCacheKey::hash() const {
@@ -148,6 +155,9 @@ hash_t LayoutCacheKey::hash() const {
     hash = JenkinsHashMix(hash, mCount);
     hash = JenkinsHashMix(hash, hash_type(mStyle));
     hash = JenkinsHashMix(hash, hash_type(mSize));
+    hash = JenkinsHashMix(hash, hash_type(mScaleX));
+    hash = JenkinsHashMix(hash, hash_type(mSkewX));
+    hash = JenkinsHashMix(hash, hash_type(mPaintFlags));
     hash = JenkinsHashMix(hash, hash_type(mIsRtl));
     hash = JenkinsHashMixShorts(hash, mText.string(), mText.size());
     return JenkinsHashWhiten(hash);
@@ -502,8 +512,13 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     ctx.props.parse(css);
     ctx.style = styleFromCss(ctx.props);
 
-    double size = ctx.props.value(fontSize).getFloatValue();
-    ctx.paint.size = size;
+    ctx.paint.size = ctx.props.value(fontSize).getFloatValue();
+    ctx.paint.scaleX = ctx.props.hasTag(fontScaleX)
+            ? ctx.props.value(fontScaleX).getFloatValue() : 1;
+    ctx.paint.skewX = ctx.props.hasTag(fontSkewX)
+            ? ctx.props.value(fontSkewX).getFloatValue() : 0;
+    ctx.paint.paintFlags = ctx.props.hasTag(paintFlags)
+            ?ctx.props.value(paintFlags).getIntValue() : 0;
     int bidiFlags = ctx.props.hasTag(minikinBidi) ? ctx.props.value(minikinBidi).getIntValue() : 0;
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;
@@ -635,8 +650,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             " [" << run.start << ":" << run.end << "]" << std::endl;
 #endif
         double size = ctx->paint.size;
-        hb_font_set_ppem(hbFont, size, size);
-        hb_font_set_scale(hbFont, HBFloatToFixed(size), HBFloatToFixed(size));
+        double scaleX = ctx->paint.scaleX;
+        hb_font_set_ppem(hbFont, size * scaleX, size);
+        hb_font_set_scale(hbFont, HBFloatToFixed(size * scaleX), HBFloatToFixed(size));
 
         // TODO: if there are multiple scripts within a font in an RTL run,
         // we need to reorder those runs. This is unlikely with our current
@@ -665,7 +681,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     #endif
                 hb_codepoint_t glyph_ix = info[i].codepoint;
                 float xoff = HBFixedToFloat(positions[i].x_offset);
-                float yoff = HBFixedToFloat(positions[i].y_offset);
+                float yoff = -HBFixedToFloat(positions[i].y_offset);
+                xoff += yoff * ctx->paint.skewX;
                 LayoutGlyph glyph = {font_ix, glyph_ix, x + xoff, y + yoff};
                 mGlyphs.push_back(glyph);
                 float xAdvance = HBFixedToFloat(positions[i].x_advance);
