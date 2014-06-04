@@ -105,7 +105,7 @@ private:
 
     // Lay out a single bidi run
     void doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx);
+        bool isRtl, LayoutContext* ctx, size_t dstStart);
 
     // Lay out a single word
     void doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,

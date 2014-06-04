@@ -485,17 +485,6 @@ void Layout::doLayout(const uint16_t* buf, size_t nchars) {
     doLayout(buf, 0, nchars, nchars, mCssString);
 }
 
-// TODO: use some standard implementation
-template<typename T>
-static T mymin(const T& a, const T& b) {
-    return a < b ? a : b;
-}
-
-template<typename T>
-static T mymax(const T& a, const T& b) {
-    return a > b ? a : b;
-}
-
 static void clearHbFonts(LayoutContext* ctx) {
     for (size_t i = 0; i < ctx->hbFonts.size(); i++) {
         hb_font_destroy(ctx->hbFonts[i]);
@@ -503,7 +492,6 @@ static void clearHbFonts(LayoutContext* ctx) {
     ctx->hbFonts.clear();
 }
 
-// TODO: API should probably take context
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         const string& css) {
     AutoMutex _l(gMinikinLock);
@@ -560,9 +548,14 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
                             // skip the invalid run
                             continue;
                         }
-                        isRtl = (runDir == UBIDI_RTL);
-                        // TODO: min/max with context
-                        doLayoutRunCached(buf, startRun, lengthRun, bufSize, isRtl, &ctx);
+                        int32_t endRun = std::min(startRun + lengthRun, int32_t(start + count));
+                        startRun = std::max(startRun, int32_t(start));
+                        lengthRun = endRun - startRun;
+                        if (lengthRun > 0) {
+                            isRtl = (runDir == UBIDI_RTL);
+                            doLayoutRunCached(buf, startRun, lengthRun, bufSize, isRtl, &ctx,
+                                start);
+                        }
                     }
                 }
             } else {
@@ -574,22 +567,22 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
         }
     }
     if (doSingleRun) {
-        doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx);
+        doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx, start);
     }
     clearHbFonts(&ctx);
 }
 
 void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx) {
+        bool isRtl, LayoutContext* ctx, size_t dstStart) {
     if (!isRtl) {
         // left to right
         size_t wordstart = start == bufSize ? start : getPrevWordBreak(buf, start + 1);
         size_t wordend;
         for (size_t iter = start; iter < start + count; iter = wordend) {
             wordend = getNextWordBreak(buf, iter, bufSize);
-            size_t wordcount = mymin(start + count, wordend) - iter;
+            size_t wordcount = std::min(start + count, wordend) - iter;
             doLayoutWord(buf + wordstart, iter - wordstart, wordcount, wordend - wordstart,
-                    isRtl, ctx, iter);
+                    isRtl, ctx, iter - dstStart);
             wordstart = wordend;
         }
     } else {
@@ -599,9 +592,9 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
         size_t wordend = end == 0 ? 0 : getNextWordBreak(buf, end - 1, bufSize);
         for (size_t iter = end; iter > start; iter = wordstart) {
             wordstart = getPrevWordBreak(buf, iter);
-            size_t bufStart = mymax(start, wordstart);
+            size_t bufStart = std::max(start, wordstart);
             doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
-                    wordend - wordstart, isRtl, ctx, bufStart);
+                    wordend - wordstart, isRtl, ctx, bufStart - dstStart);
             wordend = wordstart;
         }
     }
