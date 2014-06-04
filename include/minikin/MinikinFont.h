@@ -33,7 +33,7 @@ struct MinikinPaint {
     float size;
     float scaleX;
     float skewX;
-    int32_t paintFlags;
+    uint32_t paintFlags;
 };
 
 struct MinikinRect {

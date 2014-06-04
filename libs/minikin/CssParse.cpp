@@ -123,21 +123,21 @@ static bool parseValue(const string& str, size_t* off, size_t len, CssTag tag, C
             return false;
         }
     }
-    v->setFloatValue(fv);
+    v->setDoubleValue(fv);
     *off = endptr - data;
     return true;
 }
 
 string CssValue::toString(CssTag tag) const {
-    if (mType == FLOAT) {
+    if (mType == DOUBLE) {
         if (tag == fontStyle) {
-            return floatValue ? "italic" : "normal";
+            return doubleValue ? "italic" : "normal";
         } else if (tag == minikinVariant) {
-            if (floatValue == VARIANT_COMPACT) return "compact";
-            if (floatValue == VARIANT_ELEGANT) return "elegant";
+            if (doubleValue == VARIANT_COMPACT) return "compact";
+            if (doubleValue == VARIANT_ELEGANT) return "elegant";
         }
         char buf[64];
-        sprintf(buf, "%g", floatValue);
+        sprintf(buf, "%g", doubleValue);
         return string(buf);
     } else if (mType == STRING) {
         return stringValue;  // should probably quote
