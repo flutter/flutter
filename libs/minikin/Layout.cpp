@@ -81,7 +81,7 @@ private:
     float mSize;
     float mScaleX;
     float mSkewX;
-    int mPaintFlags;
+    int32_t mPaintFlags;
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
     // TODO: language matching (possibly integrate into style)
