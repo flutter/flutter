@@ -512,13 +512,13 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     ctx.props.parse(css);
     ctx.style = styleFromCss(ctx.props);
 
-    ctx.paint.size = ctx.props.value(fontSize).getFloatValue();
+    ctx.paint.size = ctx.props.value(fontSize).getDoubleValue();
     ctx.paint.scaleX = ctx.props.hasTag(fontScaleX)
-            ? ctx.props.value(fontScaleX).getFloatValue() : 1;
+            ? ctx.props.value(fontScaleX).getDoubleValue() : 1;
     ctx.paint.skewX = ctx.props.hasTag(fontSkewX)
-            ? ctx.props.value(fontSkewX).getFloatValue() : 0;
+            ? ctx.props.value(fontSkewX).getDoubleValue() : 0;
     ctx.paint.paintFlags = ctx.props.hasTag(paintFlags)
-            ?ctx.props.value(paintFlags).getIntValue() : 0;
+            ? ctx.props.value(paintFlags).getUintValue() : 0;
     int bidiFlags = ctx.props.hasTag(minikinBidi) ? ctx.props.value(minikinBidi).getIntValue() : 0;
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;

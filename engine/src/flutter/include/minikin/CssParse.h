@@ -54,7 +54,7 @@ class CssValue {
 public:
     enum Type {
         UNKNOWN,
-        FLOAT,
+        DOUBLE,
         STRING
     };
     enum Units {
@@ -65,15 +65,16 @@ public:
     };
     CssValue() : mType(UNKNOWN) { }
     explicit CssValue(double v) :
-        mType(FLOAT), floatValue(v), mUnits(SCALAR) { }
+        mType(DOUBLE), doubleValue(v), mUnits(SCALAR) { }
     Type getType() const { return mType; }
-    double getFloatValue() const { return floatValue; }
-    int32_t getIntValue() const { return floatValue; }
+    double getDoubleValue() const { return doubleValue; }
+    int32_t getIntValue() const { return doubleValue; }
+    uint32_t getUintValue() const { return doubleValue; }
     std::string getStringValue() const { return stringValue; }
     std::string toString(CssTag tag) const;
-    void setFloatValue(double v) {
-        mType = FLOAT;
-        floatValue = v;
+    void setDoubleValue(double v) {
+        mType = DOUBLE;
+        doubleValue = v;
     }
     void setStringValue(const std::string& v) {
         mType = STRING;
@@ -81,7 +82,7 @@ public:
     }
 private:
     Type mType;
-    double floatValue;
+    double doubleValue;
     std::string stringValue;
     Units mUnits;
 };
