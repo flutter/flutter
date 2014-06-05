@@ -37,7 +37,9 @@ static CssTag parseTag(const string str, size_t off, size_t len) {
     if (len == 0) return unknown;
     char c = str[off];
     if (c == 'f') {
+        if (strEqC(str, off, len, "font-scale-x")) return fontScaleX;
         if (strEqC(str, off, len, "font-size")) return fontSize;
+        if (strEqC(str, off, len, "font-skew-x")) return fontSkewX;
         if (strEqC(str, off, len, "font-weight")) return fontWeight;
         if (strEqC(str, off, len, "font-style")) return fontStyle;
     } else if (c == 'l') {
@@ -46,6 +48,7 @@ static CssTag parseTag(const string str, size_t off, size_t len) {
         if (strEqC(str, off, len, "-minikin-bidi")) return minikinBidi;
         if (strEqC(str, off, len, "-minikin-hinting")) return minikinHinting;
         if (strEqC(str, off, len, "-minikin-variant")) return minikinVariant;
+        if (strEqC(str, off, len, "-paint-flags")) return paintFlags;
     }
     return unknown;
 }
