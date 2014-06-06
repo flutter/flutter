@@ -185,6 +185,14 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
     }
 }
 
+MinikinFont* FontCollection::baseFont(FontStyle style) {
+    if (mInstances.empty()) {
+        return NULL;
+    }
+    return mInstances[0].mFamily->getClosestMatch(style);
+}
+
+
 uint32_t FontCollection::getId() const {
     return mId;
 }
