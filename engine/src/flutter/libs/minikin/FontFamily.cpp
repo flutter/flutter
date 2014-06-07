@@ -109,7 +109,7 @@ void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {    type
 }
 
 // Compute a matching metric between two styles - 0 is an exact match
-int computeMatch(FontStyle style1, FontStyle style2) {
+static int computeMatch(FontStyle style1, FontStyle style2) {
     if (style1 == style2) return 0;
     int score = abs(style1.getWeight() - style2.getWeight());
     if (style1.getItalic() != style2.getItalic()) {
@@ -118,7 +118,15 @@ int computeMatch(FontStyle style1, FontStyle style2) {
     return score;
 }
 
-MinikinFont* FontFamily::getClosestMatch(FontStyle style) const {
+static FontFakery computeFakery(FontStyle wanted, FontStyle actual) {
+    // If desired weight is 2 or more grades higher than actual
+    // (for example, medium 500 -> bold 700), then select fake bold.
+    bool isFakeBold = (wanted.getWeight() - actual.getWeight()) >= 2;
+    bool isFakeItalic = wanted.getItalic() && !actual.getItalic();
+    return FontFakery(isFakeBold, isFakeItalic);
+}
+
+FakedFont FontFamily::getClosestMatch(FontStyle style) const {
     const Font* bestFont = NULL;
     int bestMatch = 0;
     for (size_t i = 0; i < mFonts.size(); i++) {
@@ -129,7 +137,14 @@ MinikinFont* FontFamily::getClosestMatch(FontStyle style) const {
             bestMatch = match;
         }
     }
-    return bestFont == NULL ? NULL : bestFont->typeface;
+    FakedFont result;
+    if (bestFont == NULL) {
+        result.font = NULL;
+    } else {
+        result.font = bestFont->typeface;
+        result.fakery = computeFakery(style, bestFont->style);
+    }
+    return result;
 }
 
 size_t FontFamily::getNumFonts() const {

@@ -94,6 +94,25 @@ inline hash_t hash_type(const FontStyle &style) {
     return style.hash();
 }
 
+// attributes representing transforms (fake bold, fake italic) to match styles
+class FontFakery {
+public:
+    FontFakery() : mFakeBold(false), mFakeItalic(false) { }
+    FontFakery(bool fakeBold, bool fakeItalic) : mFakeBold(fakeBold), mFakeItalic(fakeItalic) { }
+    // TODO: want to support graded fake bolding
+    bool isFakeBold() { return mFakeBold; }
+    bool isFakeItalic() { return mFakeItalic; }
+private:
+    bool mFakeBold;
+    bool mFakeItalic;
+};
+
+struct FakedFont {
+    // ownership is the enclosing FontCollection
+    MinikinFont* font;
+    FontFakery fakery;
+};
+
 class FontFamily : public MinikinRefCounted {
 public:
     FontFamily() { }
@@ -107,7 +126,7 @@ public:
     bool addFont(MinikinFont* typeface);
 
     void addFont(MinikinFont* typeface, FontStyle style);
-    MinikinFont* getClosestMatch(FontStyle style) const;
+    FakedFont getClosestMatch(FontStyle style) const;
 
     FontLanguage lang() const { return mLang; }
     int variant() const { return mVariant; }
