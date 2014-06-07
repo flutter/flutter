@@ -328,10 +328,10 @@ void Layout::dump() const {
     }
 }
 
-int Layout::findFace(MinikinFont* face, LayoutContext* ctx) {
+int Layout::findFace(FakedFont face, LayoutContext* ctx) {
     unsigned int ix;
     for (ix = 0; ix < mFaces.size(); ix++) {
-        if (mFaces[ix] == face) {
+        if (mFaces[ix].font == face.font) {
             return ix;
         }
     }
@@ -339,7 +339,7 @@ int Layout::findFace(MinikinFont* face, LayoutContext* ctx) {
     // Note: ctx == NULL means we're copying from the cache, no need to create
     // corresponding hb_font object.
     if (ctx != NULL) {
-        hb_font_t* font = create_hb_font(face, &ctx->paint);
+        hb_font_t* font = create_hb_font(face.font, &ctx->paint);
         ctx->hbFonts.push_back(font);
     }
     return ix;
@@ -631,12 +631,13 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     float y = 0;
     for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
         FontCollection::Run &run = items[run_ix];
-        if (run.font == NULL) {
+        if (run.fakedFont.font == NULL) {
             ALOGE("no font for run starting u+%04x length %d", buf[run.start], run.end - run.start);
             continue;
         }
-        int font_ix = findFace(run.font, ctx);
-        ctx->paint.font = mFaces[font_ix];
+        int font_ix = findFace(run.fakedFont, ctx);
+        ctx->paint.font = mFaces[font_ix].font;
+        ctx->paint.fakery = mFaces[font_ix].fakery;
         hb_font_t* hbFont = ctx->hbFonts[font_ix];
 #ifdef VERBOSE
         std::cout << "Run " << run_ix << ", font " << font_ix <<
@@ -729,7 +730,7 @@ void Layout::draw(Bitmap* surface, int x0, int y0, float size) const {
     */
     for (size_t i = 0; i < mGlyphs.size(); i++) {
         const LayoutGlyph& glyph = mGlyphs[i];
-        MinikinFont* mf = mFaces[glyph.font_ix];
+        MinikinFont* mf = mFaces[glyph.font_ix].font;
         MinikinFontFreeType* face = static_cast<MinikinFontFreeType*>(mf);
         GlyphBitmap glyphBitmap;
         MinikinPaint paint;
@@ -754,7 +755,12 @@ size_t Layout::nGlyphs() const {
 
 MinikinFont* Layout::getFont(int i) const {
     const LayoutGlyph& glyph = mGlyphs[i];
-    return mFaces[glyph.font_ix];
+    return mFaces[glyph.font_ix].font;
+}
+
+FontFakery Layout::getFakery(int i) const {
+    const LayoutGlyph& glyph = mGlyphs[i];
+    return mFaces[glyph.font_ix].fakery;
 }
 
 unsigned int Layout::getGlyphId(int i) const {
