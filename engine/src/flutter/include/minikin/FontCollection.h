@@ -32,24 +32,8 @@ public:
 
     ~FontCollection();
 
-    class Run {
-    public:
-        // Do copy constructor, assignment, destructor so it can be used in vectors
-        Run() : font(NULL) { }
-        Run(const Run& other): font(other.font), start(other.start), end(other.end) {
-            if (font) font->RefLocked();
-        }
-        Run& operator=(const Run& other) {
-            if (other.font) other.font->RefLocked();
-            if (font) font->UnrefLocked();
-            font = other.font;
-            start = other.start;
-            end = other.end;
-            return *this;
-        }
-        ~Run() { if (font) font->UnrefLocked(); }
-
-        MinikinFont* font;
+    struct Run {
+        FakedFont fakedFont;
         int start;
         int end;
     };
@@ -59,6 +43,9 @@ public:
 
     // Get the base font for the given style, useful for font-wide metrics.
     MinikinFont* baseFont(FontStyle style);
+
+    // Get base font with fakery information (fake bold could affect metrics)
+    FakedFont baseFontFaked(FontStyle style);
 
     uint32_t getId() const;
 private:

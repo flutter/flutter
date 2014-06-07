@@ -18,6 +18,7 @@
 #define MINIKIN_FONT_H
 
 #include <minikin/MinikinRefCounted.h>
+#include <minikin/FontFamily.h>
 
 // An abstraction for platform fonts, allowing Minikin to be used with
 // multiple actual implementations of fonts.
@@ -34,6 +35,7 @@ struct MinikinPaint {
     float scaleX;
     float skewX;
     uint32_t paintFlags;
+    FontFakery fakery;
 };
 
 struct MinikinRect {
