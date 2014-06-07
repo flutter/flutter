@@ -87,6 +87,7 @@ public:
     size_t nGlyphs() const;
     // Does not bump reference; ownership is still layout
     MinikinFont *getFont(int i) const;
+    FontFakery getFakery(int i) const;
     unsigned int getGlyphId(int i) const;
     float getX(int i) const;
     float getY(int i) const;
@@ -101,7 +102,7 @@ public:
 
 private:
     // Find a face in the mFaces vector, or create a new entry
-    int findFace(MinikinFont* face, LayoutContext* ctx);
+    int findFace(FakedFont face, LayoutContext* ctx);
 
     // Lay out a single bidi run
     void doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -125,7 +126,7 @@ private:
     std::vector<float> mAdvances;
 
     const FontCollection* mCollection;
-    std::vector<MinikinFont *> mFaces;
+    std::vector<FakedFont> mFaces;
     float mAdvance;
     MinikinRect mBounds;
 };

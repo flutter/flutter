@@ -52,7 +52,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         FontInstance* instance = &mInstances.back();
         instance->mFamily = family;
         instance->mCoverage = new SparseBitSet;
-        MinikinFont* typeface = family->getClosestMatch(defaultStyle);
+        MinikinFont* typeface = family->getClosestMatch(defaultStyle).font;
         if (typeface == NULL) {
             ALOGE("FontCollection: closest match was null");
             // TODO: we shouldn't hit this, as there should be more robust
@@ -171,11 +171,9 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 result->push_back(dummy);
                 run = &result->back();
                 if (instance == NULL) {
-                    run->font = NULL;  // maybe we should do something different here
+                    run->fakedFont.font = NULL;
                 } else {
-                    run->font = instance->mFamily->getClosestMatch(style);
-                    // TODO: simplify refcounting (FontCollection lifetime dominates)
-                    run->font->RefLocked();
+                    run->fakedFont = instance->mFamily->getClosestMatch(style);
                 }
                 lastInstance = instance;
                 run->start = i;
@@ -186,12 +184,15 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
 }
 
 MinikinFont* FontCollection::baseFont(FontStyle style) {
+    return baseFontFaked(style).font;
+}
+
+FakedFont FontCollection::baseFontFaked(FontStyle style) {
     if (mInstances.empty()) {
-        return NULL;
+        return FakedFont();
     }
     return mInstances[0].mFamily->getClosestMatch(style);
 }
-
 
 uint32_t FontCollection::getId() const {
     return mId;
