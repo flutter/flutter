@@ -618,6 +618,12 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
     cache.mCache.put(key, value);
 }
 
+static void addFeatures(vector<hb_feature_t>* features) {
+    // hardcoded features, to be repaced with more flexible configuration
+    static hb_feature_t palt = { HB_TAG('p', 'a', 'l', 't'), 1, 0, ~0u };
+    features->push_back(palt);
+}
+
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         bool isRtl, LayoutContext* ctx) {
     hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
@@ -626,6 +632,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     if (isRtl) {
         std::reverse(items.begin(), items.end());
     }
+
+    vector<hb_feature_t> features;
+    addFeatures(&features);
 
     float x = mAdvance;
     float y = 0;
@@ -664,7 +673,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
-            hb_shape(hbFont, buffer, NULL, 0);
+            hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0], features.size());
             unsigned int numGlyphs;
             hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
             hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer, NULL);
