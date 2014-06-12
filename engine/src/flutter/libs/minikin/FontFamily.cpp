@@ -119,9 +119,11 @@ static int computeMatch(FontStyle style1, FontStyle style2) {
 }
 
 static FontFakery computeFakery(FontStyle wanted, FontStyle actual) {
-    // If desired weight is 2 or more grades higher than actual
-    // (for example, medium 500 -> bold 700), then select fake bold.
-    bool isFakeBold = (wanted.getWeight() - actual.getWeight()) >= 2;
+    // If desired weight is bold or darker, and 2 or more grades higher
+    // than actual (for example, medium 500 -> bold 700), then select
+    // fake bold.
+    int wantedWeight = wanted.getWeight();
+    bool isFakeBold = wantedWeight >= 7 && (wantedWeight - actual.getWeight()) >= 2;
     bool isFakeItalic = wanted.getItalic() && !actual.getItalic();
     return FontFakery(isFakeBold, isFakeItalic);
 }
