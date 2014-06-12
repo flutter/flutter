@@ -46,12 +46,6 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     const FontStyle defaultStyle;
     for (size_t i = 0; i < nTypefaces; i++) {
         FontFamily* family = typefaces[i];
-        family->RefLocked();
-        FontInstance dummy;
-        mInstances.push_back(dummy);  // emplace_back would be better
-        FontInstance* instance = &mInstances.back();
-        instance->mFamily = family;
-        instance->mCoverage = new SparseBitSet;
         MinikinFont* typeface = family->getClosestMatch(defaultStyle).font;
         if (typeface == NULL) {
             ALOGE("FontCollection: closest match was null");
@@ -59,6 +53,12 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
             // checks upstream to prevent empty/invalid FontFamily objects
             continue;
         }
+        family->RefLocked();
+        FontInstance dummy;
+        mInstances.push_back(dummy);  // emplace_back would be better
+        FontInstance* instance = &mInstances.back();
+        instance->mFamily = family;
+        instance->mCoverage = new SparseBitSet;
 #ifdef VERBOSE_DEBUG
         ALOGD("closest match = %p, family size = %d\n", typeface, family->getNumFonts());
 #endif
@@ -75,6 +75,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         mMaxChar = max(mMaxChar, instance->mCoverage->length());
         lastChar.push_back(instance->mCoverage->nextSetBit(0));
     }
+    nTypefaces = mInstances.size();
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
     size_t offset = 0;
     for (size_t i = 0; i < nPages; i++) {
