@@ -23,6 +23,7 @@ LOCAL_SRC_FILES := \
     CssParse.cpp \
     FontCollection.cpp \
     FontFamily.cpp \
+    GraphemeBreak.cpp \
     Layout.cpp \
     MinikinInternal.cpp \
     MinikinRefCounted.cpp \
