@@ -147,6 +147,20 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
     return bestInstance;
 }
 
+const uint32_t NBSP = 0xa0;
+const uint32_t ZWJ = 0x200c;
+const uint32_t ZWNJ = 0x200d;
+// Characters where we want to continue using existing font run instead of
+// recomputing the best match in the fallback list.
+static const uint32_t stickyWhitelist[] = { '!', ',', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ };
+
+static bool isStickyWhitelisted(uint32_t c) {
+    for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]); i++) {
+        if (stickyWhitelist[i] == c) return true;
+    }
+    return false;
+}
+
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
     FontLanguage lang = style.getLanguage();
@@ -164,8 +178,9 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 nShorts = 2;
             }
         }
-        // Continue using existing font as long as it has coverage.
-        if (lastInstance == NULL || !lastInstance->mCoverage->get(ch)) {
+        // Continue using existing font as long as it has coverage and is whitelisted
+        if (lastInstance == NULL
+                || !(isStickyWhitelisted(ch) && lastInstance->mCoverage->get(ch))) {
             const FontInstance* instance = getInstanceForChar(ch, lang, variant);
             if (i == 0 || instance != lastInstance) {
                 Run dummy;
