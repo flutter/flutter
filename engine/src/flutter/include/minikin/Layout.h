@@ -100,6 +100,9 @@ public:
 
     void getBounds(MinikinRect* rect);
 
+    // Purge all caches, useful in low memory conditions
+    static void purgeCaches();
+
 private:
     // Find a face in the mFaces vector, or create a new entry
     int findFace(FakedFont face, LayoutContext* ctx);

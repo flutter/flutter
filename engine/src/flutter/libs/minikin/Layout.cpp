@@ -799,4 +799,12 @@ void Layout::getBounds(MinikinRect* bounds) {
     bounds->set(mBounds);
 }
 
+void Layout::purgeCaches() {
+    AutoMutex _l(gMinikinLock);
+    LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
+    layoutCache.mCache.clear();
+    HbFaceCache& hbCache = LayoutEngine::getInstance().hbFaceCache;
+    hbCache.mCache.clear();
+}
+
 }  // namespace android
