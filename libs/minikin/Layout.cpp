@@ -621,7 +621,13 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
 static void addFeatures(vector<hb_feature_t>* features) {
     // hardcoded features, to be repaced with more flexible configuration
     static hb_feature_t palt = { HB_TAG('p', 'a', 'l', 't'), 1, 0, ~0u };
+
+    // Don't enable "palt" for now, pending implementation of more of the
+    // W3C Japanese layout recommendations. See:
+    // http://www.w3.org/TR/2012/NOTE-jlreq-20120403/
+#if 0
     features->push_back(palt);
+#endif
 }
 
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
