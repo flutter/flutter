@@ -125,11 +125,10 @@ int runMinikinTest() {
 
     SkAutoGraphics ag;
 
-    SkScalar width = 800;
-    SkScalar height = 600;
+    int width = 800;
+    int height = 600;
     SkBitmap bitmap;
-    bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
-    bitmap.allocPixels();
+    bitmap.allocN32Pixels(width, height);
     SkCanvas canvas(bitmap);
     SkPaint paint;
     paint.setARGB(255, 0, 0, 128);
