@@ -48,9 +48,6 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         FontFamily* family = typefaces[i];
         MinikinFont* typeface = family->getClosestMatch(defaultStyle).font;
         if (typeface == NULL) {
-            ALOGE("FontCollection: closest match was null");
-            // TODO: we shouldn't hit this, as there should be more robust
-            // checks upstream to prevent empty/invalid FontFamily objects
             continue;
         }
         family->RefLocked();
@@ -76,6 +73,8 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         lastChar.push_back(instance->mCoverage->nextSetBit(0));
     }
     nTypefaces = mInstances.size();
+    LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
+        "Font collection must have at least one valid typeface");
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
     size_t offset = 0;
     for (size_t i = 0; i < nPages; i++) {
@@ -143,6 +142,9 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
                 bestInstance = instance;
             }
         }
+    }
+    if (bestInstance == NULL) {
+        bestInstance = &mInstances[0];
     }
     return bestInstance;
 }
