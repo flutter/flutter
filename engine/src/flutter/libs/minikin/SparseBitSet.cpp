@@ -105,9 +105,9 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     }
 }
 
-// Note: this implementation depends on GCC builtin, and also assumes 32-bit elements.
 int SparseBitSet::CountLeadingZeros(element x) {
-    return __builtin_clz(x);
+    // Note: GCC / clang builtin
+    return sizeof(element) <= sizeof(int) ? __builtin_clz(x) : __builtin_clzl(x);
 }
 
 uint32_t SparseBitSet::nextSetBit(uint32_t fromIndex) const {
