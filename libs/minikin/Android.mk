@@ -35,7 +35,7 @@ LOCAL_MODULE := libminikin
 LOCAL_C_INCLUDES += \
     external/harfbuzz_ng/src \
     external/freetype/include \
-    external/icu4c/common \
+    external/icu/icu4c/source/common \
     frameworks/minikin/include
 
 LOCAL_SHARED_LIBRARIES := \
