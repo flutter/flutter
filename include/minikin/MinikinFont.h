@@ -34,6 +34,7 @@ struct MinikinPaint {
     float size;
     float scaleX;
     float skewX;
+    float letterSpacing;
     uint32_t paintFlags;
     FontFakery fakery;
 };

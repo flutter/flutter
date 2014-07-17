@@ -64,6 +64,7 @@ public:
             const uint16_t* chars, size_t start, size_t count, size_t nchars, bool dir)
             : mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
+            mLetterSpacing(paint.letterSpacing),
             mPaintFlags(paint.paintFlags), mIsRtl(dir) {
         mText.setTo(chars, nchars);
     }
@@ -81,6 +82,7 @@ private:
     float mSize;
     float mScaleX;
     float mSkewX;
+    float mLetterSpacing;
     int32_t mPaintFlags;
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
@@ -144,6 +146,7 @@ bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
             && mSize == other.mSize
             && mScaleX == other.mScaleX
             && mSkewX == other.mSkewX
+            && mLetterSpacing == other.mLetterSpacing
             && mPaintFlags == other.mPaintFlags
             && mIsRtl == other.mIsRtl
             && mText == other.mText;
@@ -157,6 +160,7 @@ hash_t LayoutCacheKey::hash() const {
     hash = JenkinsHashMix(hash, hash_type(mSize));
     hash = JenkinsHashMix(hash, hash_type(mScaleX));
     hash = JenkinsHashMix(hash, hash_type(mSkewX));
+    hash = JenkinsHashMix(hash, hash_type(mLetterSpacing));
     hash = JenkinsHashMix(hash, hash_type(mPaintFlags));
     hash = JenkinsHashMix(hash, hash_type(mIsRtl));
     hash = JenkinsHashMixShorts(hash, mText.string(), mText.size());
@@ -511,6 +515,8 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
             ? ctx.props.value(fontScaleX).getDoubleValue() : 1;
     ctx.paint.skewX = ctx.props.hasTag(fontSkewX)
             ? ctx.props.value(fontSkewX).getDoubleValue() : 0;
+    ctx.paint.letterSpacing = ctx.props.hasTag(letterSpacing)
+            ? ctx.props.value(letterSpacing).getDoubleValue() : 0;
     ctx.paint.paintFlags = ctx.props.hasTag(paintFlags)
             ? ctx.props.value(paintFlags).getUintValue() : 0;
     int bidiFlags = ctx.props.hasTag(minikinBidi) ? ctx.props.value(minikinBidi).getIntValue() : 0;
@@ -646,7 +652,24 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     }
 
     vector<hb_feature_t> features;
+    // Disable default-on non-required ligature features if letter-spacing
+    // See http://dev.w3.org/csswg/css-text-3/#letter-spacing-property
+    // "When the effective spacing between two characters is not zero (due to
+    // either justification or a non-zero value of letter-spacing), user agents
+    // should not apply optional ligatures."
+    if (fabs(ctx->paint.letterSpacing) > 0.03)
+    {
+        static const hb_feature_t no_liga = { HB_TAG('l', 'i', 'g', 'a'), 0, 0, ~0u };
+        static const hb_feature_t no_clig = { HB_TAG('c', 'l', 'i', 'g'), 0, 0, ~0u };
+        features.push_back(no_liga);
+        features.push_back(no_clig);
+    }
     addFeatures(&features);
+
+    double size = ctx->paint.size;
+    double scaleX = ctx->paint.scaleX;
+    double letterSpace = ctx->paint.letterSpacing * size * scaleX;
+    double letterSpaceHalf = letterSpace * .5;
 
     float x = mAdvance;
     float y = 0;
@@ -664,8 +687,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         std::cout << "Run " << run_ix << ", font " << font_ix <<
             " [" << run.start << ":" << run.end << "]" << std::endl;
 #endif
-        double size = ctx->paint.size;
-        double scaleX = ctx->paint.scaleX;
+
         hb_font_set_ppem(hbFont, size * scaleX, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size * scaleX), HBFloatToFixed(size));
 
@@ -689,11 +711,22 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             unsigned int numGlyphs;
             hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
             hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer, NULL);
+            if (numGlyphs)
+            {
+                mAdvances[info[0].cluster - start] += letterSpaceHalf;
+                x += letterSpaceHalf;
+            }
             for (unsigned int i = 0; i < numGlyphs; i++) {
     #ifdef VERBOSE
                 std::cout << positions[i].x_advance << " " << positions[i].y_advance << " " << positions[i].x_offset << " " << positions[i].y_offset << std::endl;            std::cout << "DoLayout " << info[i].codepoint <<
                 ": " << HBFixedToFloat(positions[i].x_advance) << "; " << positions[i].x_offset << ", " << positions[i].y_offset << std::endl;
     #endif
+                if (i > 0 && info[i - 1].cluster != info[i].cluster) {
+                    mAdvances[info[i - 1].cluster - start] += letterSpaceHalf;
+                    mAdvances[info[i].cluster - start] += letterSpaceHalf;
+                    x += letterSpaceHalf;
+                }
+
                 hb_codepoint_t glyph_ix = info[i].codepoint;
                 float xoff = HBFixedToFloat(positions[i].x_offset);
                 float yoff = -HBFixedToFloat(positions[i].y_offset);
@@ -705,9 +738,13 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
-                size_t cluster = info[i].cluster - start;
-                mAdvances[cluster] += xAdvance;
+                mAdvances[info[i].cluster - start] += xAdvance;
                 x += xAdvance;
+            }
+            if (numGlyphs)
+            {
+                mAdvances[info[numGlyphs - 1].cluster - start] += letterSpaceHalf;
+                x += letterSpaceHalf;
             }
         }
     }
