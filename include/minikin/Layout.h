@@ -68,19 +68,13 @@ public:
     void dump() const;
     void setFontCollection(const FontCollection* collection);
 
-    // deprecated - missing functionality
-    void doLayout(const uint16_t* buf, size_t nchars);
-
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         const std::string& css);
 
     void draw(Bitmap*, int x0, int y0, float size) const;
 
-    // deprecated - pass as argument to doLayout instead
-    void setProperties(const std::string& css);
-
     // This must be called before any invocations.
-	// TODO: probably have a factory instead
+    // TODO: probably have a factory instead
     static void init();
 
     // public accessors
@@ -121,9 +115,6 @@ private:
 
     // Append another layout (for example, cached value) into this one
     void appendLayout(Layout* src, size_t start);
-
-    // deprecated - remove when setProperties is removed
-    std::string mCssString;
 
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;

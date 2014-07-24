@@ -490,11 +490,6 @@ static size_t getNextWordBreak(const uint16_t* chars, size_t offset, size_t len)
     return len;
 }
 
-// deprecated API, to avoid breaking client
-void Layout::doLayout(const uint16_t* buf, size_t nchars) {
-    doLayout(buf, 0, nchars, nchars, mCssString);
-}
-
 static void clearHbFonts(LayoutContext* ctx) {
     for (size_t i = 0; i < ctx->hbFonts.size(); i++) {
         hb_font_destroy(ctx->hbFonts[i]);
@@ -801,10 +796,6 @@ void Layout::draw(Bitmap* surface, int x0, int y0, float size) const {
                 x0 + int(floor(glyph.x + 0.5)), y0 + int(floor(glyph.y + 0.5)));
         }
     }
-}
-
-void Layout::setProperties(const string& css) {
-    mCssString = css;
 }
 
 size_t Layout::nGlyphs() const {
