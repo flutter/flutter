@@ -397,11 +397,10 @@ static hb_codepoint_t decodeUtf16(const uint16_t* chars, size_t len, ssize_t* it
                 const hb_codepoint_t delta = (0xd800 << 10) + 0xdc00 - 0x10000;
                 return (((hb_codepoint_t)v) << 10) + v2 - delta;
             }
-            (*iter) -= 2;
-            return ~0u;
+            (*iter) -= 1;
+            return 0xFFFDu;
         } else {
-            (*iter)--;
-            return ~0u;
+            return 0xFFFDu;
         }
     } else {
         return v;
