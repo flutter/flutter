@@ -170,7 +170,6 @@ hash_t LayoutCacheKey::hash() const {
 struct LayoutContext {
     MinikinPaint paint;
     FontStyle style;
-    CssProperties props;
     std::vector<hb_font_t*> hbFonts;  // parallel to mFaces
 };
 
@@ -502,19 +501,21 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     AutoMutex _l(gMinikinLock);
     LayoutContext ctx;
 
-    ctx.props.parse(css);
-    ctx.style = styleFromCss(ctx.props);
+    CssProperties props;
+    props.parse(css);
 
-    ctx.paint.size = ctx.props.value(fontSize).getDoubleValue();
-    ctx.paint.scaleX = ctx.props.hasTag(fontScaleX)
-            ? ctx.props.value(fontScaleX).getDoubleValue() : 1;
-    ctx.paint.skewX = ctx.props.hasTag(fontSkewX)
-            ? ctx.props.value(fontSkewX).getDoubleValue() : 0;
-    ctx.paint.letterSpacing = ctx.props.hasTag(letterSpacing)
-            ? ctx.props.value(letterSpacing).getDoubleValue() : 0;
-    ctx.paint.paintFlags = ctx.props.hasTag(paintFlags)
-            ? ctx.props.value(paintFlags).getUintValue() : 0;
-    int bidiFlags = ctx.props.hasTag(minikinBidi) ? ctx.props.value(minikinBidi).getIntValue() : 0;
+    ctx.style = styleFromCss(props);
+
+    ctx.paint.size = props.value(fontSize).getDoubleValue();
+    ctx.paint.scaleX = props.hasTag(fontScaleX)
+            ? props.value(fontScaleX).getDoubleValue() : 1;
+    ctx.paint.skewX = props.hasTag(fontSkewX)
+            ? props.value(fontSkewX).getDoubleValue() : 0;
+    ctx.paint.letterSpacing = props.hasTag(letterSpacing)
+            ? props.value(letterSpacing).getDoubleValue() : 0;
+    ctx.paint.paintFlags = props.hasTag(paintFlags)
+            ? props.value(paintFlags).getUintValue() : 0;
+    int bidiFlags = props.hasTag(minikinBidi) ? props.value(minikinBidi).getIntValue() : 0;
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;
 
@@ -697,8 +698,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_buffer_reset(buffer);
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-            if (ctx->props.hasTag(cssLang)) {
-                string lang = ctx->props.value(cssLang).getStringValue();
+            FontLanguage language = ctx->style.getLanguage();
+            if (language) {
+                string lang = language.getString();
                 hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
