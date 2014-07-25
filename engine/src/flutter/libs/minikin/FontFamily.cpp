@@ -34,7 +34,7 @@ namespace android {
 FontLanguage::FontLanguage(const char* buf, size_t size) {
     uint32_t bits = 0;
     size_t i;
-    for (i = 0; i < size && buf[i] != '-' && buf[i] != '_'; i++) {
+    for (i = 0; i < size; i++) {
         uint16_t c = buf[i];
         if (c == '-' || c == '_') break;
     }
@@ -58,6 +58,28 @@ FontLanguage::FontLanguage(const char* buf, size_t size) {
         // but perhaps it's up to the client to do that, before passing a string.
     }
     mBits = bits;
+}
+
+std::string FontLanguage::getString() const {
+  char buf[16];
+  size_t i = 0;
+  if (mBits & kBaseLangMask) {
+    buf[i++] = (mBits >> 8) & 0xFFu;
+    buf[i++] = mBits & 0xFFu;
+  }
+  if (mBits & kScriptMask) {
+    if (!i)
+      buf[i++] = 'x';
+    buf[i++] = '-';
+    buf[i++] = 'H';
+    buf[i++] = 'a';
+    buf[i++] = 'n';
+    if (mBits & kHansFlag)
+      buf[i++] = 's';
+    else
+      buf[i++] = 't';
+  }
+  return std::string(buf, i);
 }
 
 int FontLanguage::match(const FontLanguage other) const {

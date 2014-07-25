@@ -18,6 +18,7 @@
 #define MINIKIN_FONT_FAMILY_H
 
 #include <vector>
+#include <string>
 
 #include <utils/TypeHelpers.h>
 
@@ -39,6 +40,9 @@ public:
     FontLanguage(const char* buf, size_t size);
 
     bool operator==(const FontLanguage other) const { return mBits == other.mBits; }
+    operator bool() const { return mBits != 0; }
+
+    std::string getString() const;
 
     // 0 = no match, 1 = language matches, 2 = language and script match
     int match(const FontLanguage other) const;
