@@ -30,6 +30,8 @@ class MinikinFont;
 // Possibly move into own .h file?
 // Note: if you add a field here, also update LayoutCacheKey
 struct MinikinPaint {
+    MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), paintFlags(0),
+            fakery() { }
     MinikinFont *font;
     float size;
     float scaleX;
