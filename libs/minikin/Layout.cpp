@@ -261,12 +261,6 @@ static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoin
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
     MinikinFont* font = paint->font;
     uint32_t glyph_id;
-    /* HarfBuzz replaces broken input codepoints with (unsigned int) -1.
-     * Skia expects valid Unicode.
-     * Replace invalid codepoints with U+FFFD REPLACEMENT CHARACTER.
-     */
-    if (unicode > 0x10FFFF)
-        unicode = 0xFFFD;
     bool ok = font->GetGlyph(unicode, &glyph_id);
     if (ok) {
         *glyph = glyph_id;
