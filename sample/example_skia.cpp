@@ -119,8 +119,12 @@ int runMinikinTest() {
     layout.setFontCollection(collection);
     const char *text = "fine world \xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5\x87";
     const char *style = "font-size: 32; font-weight: 700;";
+    int bidiFlags = 0;
+    FontStyle fontStyle(7);
+    MinikinPaint minikinPaint;
+    minikinPaint.size = 32;
     icu::UnicodeString icuText = icu::UnicodeString::fromUTF8(text);
-    layout.doLayout(icuText.getBuffer(), 0, icuText.length(), icuText.length(), style);
+    layout.doLayout(icuText.getBuffer(), 0, icuText.length(), icuText.length(), bidiFlags, fontStyle, minikinPaint);
     layout.dump();
 
     SkAutoGraphics ag;
