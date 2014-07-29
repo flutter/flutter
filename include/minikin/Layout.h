@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include <minikin/CssParse.h>
 #include <minikin/FontCollection.h>
 #include <minikin/MinikinFontFreeType.h>
 
@@ -67,10 +66,6 @@ class Layout {
 public:
     void dump() const;
     void setFontCollection(const FontCollection* collection);
-
-    // Deprecated.  Will be removed.
-    void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        const std::string& css);
 
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint);

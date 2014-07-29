@@ -20,7 +20,6 @@ include external/stlport/libstlport.mk
 LOCAL_SRC_FILES := \
     AnalyzeStyle.cpp \
     CmapCoverage.cpp \
-    CssParse.cpp \
     FontCollection.cpp \
     FontFamily.cpp \
     GraphemeBreak.cpp \
