@@ -354,27 +354,6 @@ int Layout::findFace(FakedFont face, LayoutContext* ctx) {
     return ix;
 }
 
-static FontStyle styleFromCss(const CssProperties &props) {
-    int weight = 4;
-    if (props.hasTag(fontWeight)) {
-        weight = props.value(fontWeight).getIntValue() / 100;
-    }
-    bool italic = false;
-    if (props.hasTag(fontStyle)) {
-        italic = props.value(fontStyle).getIntValue() != 0;
-    }
-    FontLanguage lang;
-    if (props.hasTag(cssLang)) {
-        string langStr = props.value(cssLang).getStringValue();
-        lang = FontLanguage(langStr.c_str(), langStr.size());
-    }
-    int variant = 0;
-    if (props.hasTag(minikinVariant)) {
-        variant = props.value(minikinVariant).getIntValue();
-    }
-    return FontStyle(lang, variant, weight, italic);
-}
-
 static hb_script_t codePointToScript(hb_codepoint_t codepoint) {
     static hb_unicode_funcs_t* u = 0;
     if (!u) {
@@ -493,30 +472,6 @@ static void clearHbFonts(LayoutContext* ctx) {
         hb_font_destroy(ctx->hbFonts[i]);
     }
     ctx->hbFonts.clear();
-}
-
-void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        const string& css) {
-
-    CssProperties props;
-    props.parse(css);
-
-    FontStyle style = styleFromCss(props);
-    MinikinPaint paint;
-
-    paint.size = props.value(fontSize).getDoubleValue();
-    paint.scaleX = props.hasTag(fontScaleX)
-            ? props.value(fontScaleX).getDoubleValue() : 1;
-    paint.skewX = props.hasTag(fontSkewX)
-            ? props.value(fontSkewX).getDoubleValue() : 0;
-    paint.letterSpacing = props.hasTag(letterSpacing)
-            ? props.value(letterSpacing).getDoubleValue() : 0;
-    paint.paintFlags = props.hasTag(paintFlags)
-            ? props.value(paintFlags).getUintValue() : 0;
-
-    int bidiFlags = props.hasTag(minikinBidi) ? props.value(minikinBidi).getIntValue() : 0;
-
-    doLayout(buf, start, count, bufSize, bidiFlags, style, paint);
 }
 
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
