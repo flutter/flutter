@@ -68,8 +68,12 @@ public:
     void dump() const;
     void setFontCollection(const FontCollection* collection);
 
+    // Deprecated.  Will be removed.
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         const std::string& css);
+
+    void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint);
 
     void draw(Bitmap*, int x0, int y0, float size) const;
 
