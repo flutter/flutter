@@ -497,24 +497,36 @@ static void clearHbFonts(LayoutContext* ctx) {
 
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         const string& css) {
-    AutoMutex _l(gMinikinLock);
-    LayoutContext ctx;
 
     CssProperties props;
     props.parse(css);
 
-    ctx.style = styleFromCss(props);
+    FontStyle style = styleFromCss(props);
+    MinikinPaint paint;
 
-    ctx.paint.size = props.value(fontSize).getDoubleValue();
-    ctx.paint.scaleX = props.hasTag(fontScaleX)
+    paint.size = props.value(fontSize).getDoubleValue();
+    paint.scaleX = props.hasTag(fontScaleX)
             ? props.value(fontScaleX).getDoubleValue() : 1;
-    ctx.paint.skewX = props.hasTag(fontSkewX)
+    paint.skewX = props.hasTag(fontSkewX)
             ? props.value(fontSkewX).getDoubleValue() : 0;
-    ctx.paint.letterSpacing = props.hasTag(letterSpacing)
+    paint.letterSpacing = props.hasTag(letterSpacing)
             ? props.value(letterSpacing).getDoubleValue() : 0;
-    ctx.paint.paintFlags = props.hasTag(paintFlags)
+    paint.paintFlags = props.hasTag(paintFlags)
             ? props.value(paintFlags).getUintValue() : 0;
+
     int bidiFlags = props.hasTag(minikinBidi) ? props.value(minikinBidi).getIntValue() : 0;
+
+    doLayout(buf, start, count, bufSize, bidiFlags, style, paint);
+}
+
+void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
+    AutoMutex _l(gMinikinLock);
+
+    LayoutContext ctx;
+    ctx.style = style;
+    ctx.paint = paint;
+
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;
 
