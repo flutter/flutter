@@ -578,7 +578,8 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
         bool isRtl, LayoutContext* ctx, size_t bufStart) {
     LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
     LayoutCacheKey key(mCollection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
-    Layout* value = cache.mCache.get(key);
+    bool skipCache = ctx->paint.skipCache();
+    Layout* value = skipCache ? NULL : cache.mCache.get(key);
     if (value == NULL) {
         value = new Layout();
         value->setFontCollection(mCollection);
@@ -589,19 +590,29 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
         value->doLayoutRun(key.textBuf(), start, count, bufSize, isRtl, ctx);
     }
     appendLayout(value, bufStart);
-    cache.mCache.put(key, value);
+    if (!skipCache)
+        cache.mCache.put(key, value);
 }
 
-static void addFeatures(vector<hb_feature_t>* features) {
-    // hardcoded features, to be repaced with more flexible configuration
-    static hb_feature_t palt = { HB_TAG('p', 'a', 'l', 't'), 1, 0, ~0u };
+static void addFeatures(const string &str, vector<hb_feature_t>* features) {
+    if (!str.size())
+        return;
 
-    // Don't enable "palt" for now, pending implementation of more of the
-    // W3C Japanese layout recommendations. See:
-    // http://www.w3.org/TR/2012/NOTE-jlreq-20120403/
-#if 0
-    features->push_back(palt);
-#endif
+    const char* start = str.c_str();
+    const char* end = start + str.size();
+
+    while (start < end) {
+        static hb_feature_t feature;
+        const char* p = strchr(start, ',');
+        if (!p)
+            p = end;
+        /* We do not allow setting features on ranges.  As such, reject any
+         * setting that has non-universal range. */
+        if (hb_feature_from_string (start, p - start, &feature)
+                && feature.start == 0 && feature.end == (unsigned int) -1)
+            features->push_back(feature);
+        start = p + 1;
+    }
 }
 
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -626,7 +637,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         features.push_back(no_liga);
         features.push_back(no_clig);
     }
-    addFeatures(&features);
+    addFeatures(ctx->paint.fontFeatureSettings, &features);
 
     double size = ctx->paint.size;
     double scaleX = ctx->paint.scaleX;
