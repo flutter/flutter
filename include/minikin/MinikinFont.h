@@ -17,6 +17,8 @@
 #ifndef MINIKIN_FONT_H
 #define MINIKIN_FONT_H
 
+#include <string>
+
 #include <minikin/MinikinRefCounted.h>
 #include <minikin/FontFamily.h>
 
@@ -28,10 +30,15 @@ namespace android {
 class MinikinFont;
 
 // Possibly move into own .h file?
-// Note: if you add a field here, also update LayoutCacheKey
+// Note: if you add a field here, either add it to LayoutCacheKey or to skipCache()
 struct MinikinPaint {
     MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), paintFlags(0),
-            fakery() { }
+            fakery(), fontFeatureSettings() { }
+
+    bool skipCache() const {
+      return !fontFeatureSettings.empty();
+    }
+
     MinikinFont *font;
     float size;
     float scaleX;
@@ -39,6 +46,7 @@ struct MinikinPaint {
     float letterSpacing;
     uint32_t paintFlags;
     FontFakery fakery;
+    std::string fontFeatureSettings;
 };
 
 struct MinikinRect {
