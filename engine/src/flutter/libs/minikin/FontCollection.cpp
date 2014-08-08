@@ -152,9 +152,11 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
 const uint32_t NBSP = 0xa0;
 const uint32_t ZWJ = 0x200c;
 const uint32_t ZWNJ = 0x200d;
+const uint32_t KEYCAP = 0x20e3;
+
 // Characters where we want to continue using existing font run instead of
 // recomputing the best match in the fallback list.
-static const uint32_t stickyWhitelist[] = { '!', ',', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ };
+static const uint32_t stickyWhitelist[] = { '!', ',', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ, KEYCAP };
 
 static bool isStickyWhitelisted(uint32_t c) {
     for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]); i++) {
@@ -185,6 +187,19 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 || !(isStickyWhitelisted(ch) && lastInstance->mCoverage->get(ch))) {
             const FontInstance* instance = getInstanceForChar(ch, lang, variant);
             if (i == 0 || instance != lastInstance) {
+                size_t start = i;
+                // Workaround for Emoji keycap until we implement per-cluster font
+                // selection: if keycap is found in a different font that also
+                // supports previous char, attach previous char to the new run.
+                // Only handles non-surrogate characters.
+                // Bug 7557244.
+                if (ch == KEYCAP && i && instance && instance->mCoverage->get(string[i - 1])) {
+                    run->end--;
+                    if (run->start == run->end) {
+                        result->pop_back();
+                    }
+                    start--;
+                }
                 Run dummy;
                 result->push_back(dummy);
                 run = &result->back();
@@ -194,7 +209,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                     run->fakedFont = instance->mFamily->getClosestMatch(style);
                 }
                 lastInstance = instance;
-                run->start = i;
+                run->start = start;
             }
         }
         run->end = i + nShorts;
