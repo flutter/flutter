@@ -97,6 +97,8 @@ public:
     static void purgeCaches();
 
 private:
+    friend class LayoutCacheKey;
+
     // Find a face in the mFaces vector, or create a new entry
     int findFace(FakedFont face, LayoutContext* ctx);
 
