@@ -56,6 +56,19 @@ enum {
 
 const int kDirection_Mask = 0x1;
 
+struct LayoutContext {
+    MinikinPaint paint;
+    FontStyle style;
+    std::vector<hb_font_t*> hbFonts;  // parallel to mFaces
+
+    void clearHbFonts() {
+        for (size_t i = 0; i < hbFonts.size(); i++) {
+            hb_font_destroy(hbFonts[i]);
+        }
+        hbFonts.clear();
+    }
+};
+
 // Layout cache datatypes
 
 class LayoutCacheKey {
@@ -65,16 +78,32 @@ public:
             : mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
             mLetterSpacing(paint.letterSpacing),
-            mPaintFlags(paint.paintFlags), mIsRtl(dir) {
-        mText.setTo(chars, nchars);
+            mPaintFlags(paint.paintFlags), mIsRtl(dir),
+            mChars(chars), mNchars(nchars) {
     }
     bool operator==(const LayoutCacheKey &other) const;
     hash_t hash() const;
 
-    // This is present to avoid having to copy the text more than once.
-    const uint16_t* textBuf() { return mText.string(); }
+    void copyText() {
+        uint16_t* charsCopy = new uint16_t[mNchars];
+        memcpy(charsCopy, mChars, mNchars * sizeof(uint16_t));
+        mChars = charsCopy;
+    }
+    void freeText() {
+        delete[] mChars;
+        mChars = NULL;
+    }
+
+    void doLayout(Layout* layout, LayoutContext* ctx, const FontCollection* collection) const {
+        layout->setFontCollection(collection);
+        layout->mAdvances.resize(mCount, 0);
+        ctx->clearHbFonts();
+        layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx);
+    }
+
 private:
-    String16 mText;
+    const uint16_t* mChars;
+    size_t mNchars;
     size_t mStart;
     size_t mCount;
     uint32_t mId;  // for the font collection
@@ -95,13 +124,30 @@ public:
         mCache.setOnEntryRemovedListener(this);
     }
 
+    void clear() {
+        mCache.clear();
+    }
+
+    Layout* get(LayoutCacheKey& key, LayoutContext* ctx, const FontCollection* collection) {
+        Layout* layout = mCache.get(key);
+        if (layout == NULL) {
+            key.copyText();
+            layout = new Layout();
+            key.doLayout(layout, ctx, collection);
+            mCache.put(key, layout);
+        }
+        return layout;
+    }
+
+private:
     // callback for OnEntryRemoved
     void operator()(LayoutCacheKey& key, Layout*& value) {
+        key.freeText();
         delete value;
     }
 
     LruCache<LayoutCacheKey, Layout*> mCache;
-private:
+
     //static const size_t kMaxEntries = LruCache<LayoutCacheKey, Layout*>::kUnlimitedCapacity;
 
     // TODO: eviction based on memory footprint; for now, we just use a constant
@@ -149,7 +195,8 @@ bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
             && mLetterSpacing == other.mLetterSpacing
             && mPaintFlags == other.mPaintFlags
             && mIsRtl == other.mIsRtl
-            && mText == other.mText;
+            && mNchars == other.mNchars
+            && !memcmp(mChars, other.mChars, mNchars * sizeof(uint16_t));
 }
 
 hash_t LayoutCacheKey::hash() const {
@@ -163,15 +210,9 @@ hash_t LayoutCacheKey::hash() const {
     hash = JenkinsHashMix(hash, hash_type(mLetterSpacing));
     hash = JenkinsHashMix(hash, hash_type(mPaintFlags));
     hash = JenkinsHashMix(hash, hash_type(mIsRtl));
-    hash = JenkinsHashMixShorts(hash, mText.string(), mText.size());
+    hash = JenkinsHashMixShorts(hash, mChars, mNchars);
     return JenkinsHashWhiten(hash);
 }
-
-struct LayoutContext {
-    MinikinPaint paint;
-    FontStyle style;
-    std::vector<hb_font_t*> hbFonts;  // parallel to mFaces
-};
 
 hash_t hash_type(const LayoutCacheKey& key) {
     return key.hash();
@@ -467,13 +508,6 @@ static size_t getNextWordBreak(const uint16_t* chars, size_t offset, size_t len)
     return len;
 }
 
-static void clearHbFonts(LayoutContext* ctx) {
-    for (size_t i = 0; i < ctx->hbFonts.size(); i++) {
-        hb_font_destroy(ctx->hbFonts[i]);
-    }
-    ctx->hbFonts.clear();
-}
-
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
     AutoMutex _l(gMinikinLock);
@@ -543,7 +577,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     if (doSingleRun) {
         doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx, start);
     }
-    clearHbFonts(&ctx);
+    ctx.clearHbFonts();
 }
 
 void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -579,19 +613,14 @@ void Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_
     LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
     LayoutCacheKey key(mCollection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
     bool skipCache = ctx->paint.skipCache();
-    Layout* value = skipCache ? NULL : cache.mCache.get(key);
-    if (value == NULL) {
-        value = new Layout();
-        value->setFontCollection(mCollection);
-        value->mAdvances.resize(count, 0);
-        clearHbFonts(ctx);
-        // Note: we do the layout from the copy stored in the key, in case a
-        // badly-behaved client is mutating the buffer in a separate thread.
-        value->doLayoutRun(key.textBuf(), start, count, bufSize, isRtl, ctx);
+    if (skipCache) {
+        Layout layout;
+        key.doLayout(&layout, ctx, mCollection);
+        appendLayout(&layout, bufStart);
+    } else {
+        Layout* layout = cache.get(key, ctx, mCollection);
+        appendLayout(layout, bufStart);
     }
-    appendLayout(value, bufStart);
-    if (!skipCache)
-        cache.mCache.put(key, value);
 }
 
 static void addFeatures(const string &str, vector<hb_feature_t>* features) {
@@ -821,7 +850,7 @@ void Layout::getBounds(MinikinRect* bounds) {
 void Layout::purgeCaches() {
     AutoMutex _l(gMinikinLock);
     LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
-    layoutCache.mCache.clear();
+    layoutCache.clear();
     HbFaceCache& hbCache = LayoutEngine::getInstance().hbFaceCache;
     hbCache.mCache.clear();
 }
