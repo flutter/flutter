@@ -760,11 +760,16 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
 }
 
 void Layout::appendLayout(Layout* src, size_t start) {
-    // Note: size==1 is by far most common, should have specialized vector for this
-    std::vector<int> fontMap;
+    int fontMapStack[16];
+    int* fontMap;
+    if (src->mFaces.size() < sizeof(fontMapStack) / sizeof(fontMapStack[0])) {
+        fontMap = fontMapStack;
+    } else {
+        fontMap = new int[src->mFaces.size()];
+    }
     for (size_t i = 0; i < src->mFaces.size(); i++) {
         int font_ix = findFace(src->mFaces[i], NULL);
-        fontMap.push_back(font_ix);
+        fontMap[i] = font_ix;
     }
     int x0 = mAdvance;
     for (size_t i = 0; i < src->mGlyphs.size(); i++) {
@@ -783,6 +788,10 @@ void Layout::appendLayout(Layout* src, size_t start) {
     srcBounds.offset(x0, 0);
     mBounds.join(srcBounds);
     mAdvance += src->mAdvance;
+
+    if (fontMap != fontMapStack) {
+        delete[] fontMap;
+    }
 }
 
 void Layout::draw(Bitmap* surface, int x0, int y0, float size) const {
