@@ -267,8 +267,16 @@ void MinikinRect::join(const MinikinRect& r) {
     }
 }
 
-// TODO: the actual initialization is deferred, maybe make this explicit
+// Deprecated. Remove when callers are removed.
 void Layout::init() {
+}
+
+void Layout::reset() {
+    mGlyphs.clear();
+    mFaces.clear();
+    mBounds.setEmpty();
+    mAdvances.clear();
+    mAdvance = 0;
 }
 
 void Layout::setFontCollection(const FontCollection* collection) {
@@ -513,12 +521,9 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
     bool isRtl = (bidiFlags & kDirection_Mask) != 0;
     bool doSingleRun = true;
 
-    mGlyphs.clear();
-    mFaces.clear();
-    mBounds.setEmpty();
-    mAdvances.clear();
+    reset();
     mAdvances.resize(count, 0);
-    mAdvance = 0;
+
     if (!(bidiFlags == kBidi_Force_LTR || bidiFlags == kBidi_Force_RTL)) {
         UBiDi* bidi = ubidi_open();
         if (bidi) {
