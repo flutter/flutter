@@ -64,6 +64,14 @@ class LayoutContext;
 // extend through the lifetime of the Layout object.
 class Layout {
 public:
+
+    Layout() : mGlyphs(), mAdvances(), mCollection(0), mFaces(), mAdvance(0), mBounds() {
+        mBounds.setEmpty();
+    }
+
+    // Clears layout, ready to be used again
+    void reset();
+
     void dump() const;
     void setFontCollection(const FontCollection* collection);
 
@@ -72,8 +80,7 @@ public:
 
     void draw(Bitmap*, int x0, int y0, float size) const;
 
-    // This must be called before any invocations.
-    // TODO: probably have a factory instead
+    // Deprecated. Nont needed. Remove when callers are removed.
     static void init();
 
     // public accessors
