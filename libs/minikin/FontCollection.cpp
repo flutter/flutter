@@ -19,6 +19,9 @@
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
 
+#include "unicode/unistr.h"
+#include "unicode/unorm2.h"
+
 #include "MinikinInternal.h"
 #include <minikin/CmapCoverage.h>
 #include <minikin/FontCollection.h>
@@ -143,7 +146,18 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
             }
         }
     }
-    if (bestInstance == NULL) {
+    if (bestInstance == NULL && !mInstanceVec.empty()) {
+        UErrorCode errorCode = U_ZERO_ERROR;
+        const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
+        if (U_SUCCESS(errorCode)) {
+            UChar decomposed[4];
+            int len = unorm2_getRawDecomposition(normalizer, ch, decomposed, 4, &errorCode);
+            if (U_SUCCESS(errorCode) && len > 0) {
+                int off = 0;
+                U16_NEXT_UNSAFE(decomposed, off, ch);
+                return getInstanceForChar(ch, lang, variant);
+            }
+        }
         bestInstance = &mInstances[0];
     }
     return bestInstance;
