@@ -670,7 +670,14 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     double size = ctx->paint.size;
     double scaleX = ctx->paint.scaleX;
     double letterSpace = ctx->paint.letterSpacing * size * scaleX;
-    double letterSpaceHalf = letterSpace * .5;
+    double letterSpaceHalfLeft;
+    if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
+        letterSpace = round(letterSpace);
+        letterSpaceHalfLeft = floor(letterSpace * 0.5);
+    } else {
+        letterSpaceHalfLeft = letterSpace * 0.5;
+    }
+    double letterSpaceHalfRight = letterSpace - letterSpaceHalfLeft;
 
     float x = mAdvance;
     float y = 0;
@@ -715,8 +722,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer, NULL);
             if (numGlyphs)
             {
-                mAdvances[info[0].cluster - start] += letterSpaceHalf;
-                x += letterSpaceHalf;
+                mAdvances[info[0].cluster - start] += letterSpaceHalfLeft;
+                x += letterSpaceHalfLeft;
             }
             for (unsigned int i = 0; i < numGlyphs; i++) {
     #ifdef VERBOSE
@@ -724,9 +731,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 ": " << HBFixedToFloat(positions[i].x_advance) << "; " << positions[i].x_offset << ", " << positions[i].y_offset << std::endl;
     #endif
                 if (i > 0 && info[i - 1].cluster != info[i].cluster) {
-                    mAdvances[info[i - 1].cluster - start] += letterSpaceHalf;
-                    mAdvances[info[i].cluster - start] += letterSpaceHalf;
-                    x += letterSpaceHalf;
+                    mAdvances[info[i - 1].cluster - start] += letterSpaceHalfRight;
+                    mAdvances[info[i].cluster - start] += letterSpaceHalfLeft;
+                    x += letterSpace;
                 }
 
                 hb_codepoint_t glyph_ix = info[i].codepoint;
@@ -736,6 +743,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 LayoutGlyph glyph = {font_ix, glyph_ix, x + xoff, y + yoff};
                 mGlyphs.push_back(glyph);
                 float xAdvance = HBFixedToFloat(positions[i].x_advance);
+                if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
+                    xAdvance = roundf(xAdvance);
+                }
                 MinikinRect glyphBounds;
                 ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
                 glyphBounds.offset(x + xoff, y + yoff);
@@ -745,8 +755,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             }
             if (numGlyphs)
             {
-                mAdvances[info[numGlyphs - 1].cluster - start] += letterSpaceHalf;
-                x += letterSpaceHalf;
+                mAdvances[info[numGlyphs - 1].cluster - start] += letterSpaceHalfRight;
+                x += letterSpaceHalfRight;
             }
         }
     }

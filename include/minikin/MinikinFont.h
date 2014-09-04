@@ -49,6 +49,12 @@ struct MinikinPaint {
     std::string fontFeatureSettings;
 };
 
+// Only a few flags affect layout, but those that do should have values
+// consistent with Android's paint flags.
+enum MinikinPaintFlags {
+    LinearTextFlag = 0x40,
+};
+
 struct MinikinRect {
     float mLeft, mTop, mRight, mBottom;
     bool isEmpty() const {
