@@ -71,8 +71,6 @@
             'ScriptPromiseProperty.h',
             'ScriptPromisePropertyBase.cpp',
             'ScriptPromisePropertyBase.h',
-            'ScriptRegexp.cpp',
-            'ScriptRegexp.h',
             'ScriptSourceCode.h',
             'ScriptState.cpp',
             'ScriptState.h',
