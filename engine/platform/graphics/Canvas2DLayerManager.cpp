@@ -43,7 +43,7 @@ Canvas2DLayerManager::Canvas2DLayerManager()
     : m_bytesAllocated(0)
     , m_maxBytesAllocated(DefaultMaxBytesAllocated)
     , m_targetBytesAllocated(DefaultTargetBytesAllocated)
-    , m_taskObserverActive(false)
+    , m_limitPendingFramesTimer(this, &Canvas2DLayerManager::limitPendingFramesTimerFired)
 {
 }
 
@@ -51,7 +51,6 @@ Canvas2DLayerManager::~Canvas2DLayerManager()
 {
     ASSERT(!m_bytesAllocated);
     ASSERT(!m_layerList.head());
-    ASSERT(!m_taskObserverActive);
 }
 
 void Canvas2DLayerManager::init(size_t maxBytesAllocated, size_t targetBytesAllocated)
@@ -59,10 +58,8 @@ void Canvas2DLayerManager::init(size_t maxBytesAllocated, size_t targetBytesAllo
     ASSERT(maxBytesAllocated >= targetBytesAllocated);
     m_maxBytesAllocated = maxBytesAllocated;
     m_targetBytesAllocated = targetBytesAllocated;
-    if (m_taskObserverActive) {
-        Platform::current()->currentThread()->removeTaskObserver(this);
-        m_taskObserverActive = false;
-    }
+    if (m_limitPendingFramesTimer.isActive())
+        m_limitPendingFramesTimer.stop();
 }
 
 Canvas2DLayerManager& Canvas2DLayerManager::get()
@@ -71,16 +68,8 @@ Canvas2DLayerManager& Canvas2DLayerManager::get()
     return manager;
 }
 
-void Canvas2DLayerManager::willProcessTask()
+void Canvas2DLayerManager::limitPendingFramesTimerFired(Timer<Canvas2DLayerManager>*)
 {
-}
-
-void Canvas2DLayerManager::didProcessTask()
-{
-    // Called after the script action for the current frame has been processed.
-    ASSERT(m_taskObserverActive);
-    Platform::current()->currentThread()->removeTaskObserver(this);
-    m_taskObserverActive = false;
     Canvas2DLayerBridge* layer = m_layerList.head();
     while (layer) {
         Canvas2DLayerBridge* currentLayer = layer;
@@ -100,11 +89,8 @@ void Canvas2DLayerManager::layerDidDraw(Canvas2DLayerBridge* layer)
         }
     }
 
-    if (!m_taskObserverActive) {
-        m_taskObserverActive = true;
-        // Schedule a call to didProcessTask() after completion of the current script task.
-        Platform::current()->currentThread()->addTaskObserver(this);
-    }
+    if (!m_limitPendingFramesTimer.isActive())
+        m_limitPendingFramesTimer.startOneShot(0, FROM_HERE);
 }
 
 void Canvas2DLayerManager::layerTransientResourceAllocationChanged(Canvas2DLayerBridge* layer, intptr_t deltaBytes)

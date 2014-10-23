@@ -25,14 +25,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef Canvas2DLayerManager_h
 #define Canvas2DLayerManager_h
 
+#include "platform/Timer.h"
 #include "platform/graphics/Canvas2DLayerBridge.h"
-#include "public/platform/WebThread.h"
 
 class Canvas2DLayerManagerTest;
 
 namespace blink {
 
-class PLATFORM_EXPORT Canvas2DLayerManager : public WebThread::TaskObserver {
+class PLATFORM_EXPORT Canvas2DLayerManager {
 public:
     static Canvas2DLayerManager& get();
 
@@ -49,13 +49,13 @@ private:
     // internal methods
     void freeMemoryIfNecessary();
     void addLayerToList(Canvas2DLayerBridge*);
-    virtual void willProcessTask() OVERRIDE;
-    virtual void didProcessTask() OVERRIDE;
+
+    void limitPendingFramesTimerFired(Timer<Canvas2DLayerManager>*);
 
     size_t m_bytesAllocated;
     size_t m_maxBytesAllocated;
     size_t m_targetBytesAllocated;
-    bool m_taskObserverActive;
+    Timer<Canvas2DLayerManager> m_limitPendingFramesTimer;
     DoublyLinkedList<Canvas2DLayerBridge> m_layerList;
 
     friend class ::Canvas2DLayerManagerTest; // for unit testing
