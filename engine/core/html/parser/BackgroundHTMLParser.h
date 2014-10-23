@@ -50,18 +50,8 @@ public:
 
     static base::WeakPtr<BackgroundHTMLParser> create(PassOwnPtr<Configuration>);
 
-    struct Checkpoint {
-        WeakPtr<HTMLDocumentParser> parser;
-        OwnPtr<HTMLToken> token;
-        OwnPtr<HTMLTokenizer> tokenizer;
-        String unparsedInput;
-    };
-
-    void appendRawBytesFromParserThread(const char* data, int dataLength);
-
     void appendRawBytesFromMainThread(PassOwnPtr<Vector<char> >);
     void flush();
-    void resumeFrom(PassOwnPtr<Checkpoint>);
     void finish();
     void stop();
 
@@ -79,7 +69,6 @@ private:
     SegmentedString m_input;
     OwnPtr<HTMLToken> m_token;
     OwnPtr<HTMLTokenizer> m_tokenizer;
-    HTMLParserOptions m_options;
     WeakPtr<HTMLDocumentParser> m_parser;
 
     OwnPtr<CompactHTMLTokenStream> m_pendingTokens;

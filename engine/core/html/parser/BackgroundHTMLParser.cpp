@@ -59,7 +59,6 @@ base::WeakPtr<BackgroundHTMLParser> BackgroundHTMLParser::create(PassOwnPtr<Back
 BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
     : m_token(adoptPtr(new HTMLToken))
     , m_tokenizer(HTMLTokenizer::create(config->options))
-    , m_options(config->options)
     , m_parser(config->parser)
     , m_pendingTokens(adoptPtr(new CompactHTMLTokenStream))
     , m_decoder(TextResourceDecoder::create())
@@ -69,11 +68,6 @@ BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
 
 BackgroundHTMLParser::~BackgroundHTMLParser()
 {
-}
-
-void BackgroundHTMLParser::appendRawBytesFromParserThread(const char* data, int dataLength)
-{
-    updateDocument(m_decoder->decode(data, dataLength));
 }
 
 void BackgroundHTMLParser::appendRawBytesFromMainThread(PassOwnPtr<Vector<char> > buffer)
@@ -172,7 +166,6 @@ void BackgroundHTMLParser::sendTokensToMainThread()
 #endif
 
     OwnPtr<HTMLDocumentParser::ParsedChunk> chunk = adoptPtr(new HTMLDocumentParser::ParsedChunk);
-    chunk->tokenizerState = m_tokenizer->state();
     chunk->tokens = m_pendingTokens.release();
     callOnMainThread(bind(&HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser, m_parser, chunk.release()));
 

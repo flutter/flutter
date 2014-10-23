@@ -82,7 +82,6 @@ public:
 
     struct ParsedChunk {
         OwnPtr<CompactHTMLTokenStream> tokens;
-        HTMLTokenizer::State tokenizerState;
     };
     void didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
 
