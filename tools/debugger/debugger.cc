@@ -70,6 +70,9 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
     window_manager_app_->InitFocus(
         new FocusRules(window_manager_app_.get(), content_));
+
+    if (!pending_url_.empty())
+      NavigateToURL(pending_url_);
   }
 
   virtual void OnViewManagerDisconnected(
@@ -98,7 +101,13 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
   // Overridden from Debugger
   virtual void NavigateToURL(const mojo::String& url) override {
-    content_->Embed(url);
+    // We can get Navigate commands before we've actually been
+    // embedded into the view and content_ created.
+    // Just save the last one.
+    if (content_)
+      content_->Embed(url);
+    else
+      pending_url_ = url;
   }
 
   scoped_ptr<mojo::WindowManagerApp> window_manager_app_;
@@ -106,6 +115,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   mojo::ViewManager* view_manager_;
   mojo::View* root_;
   mojo::View* content_;
+  std::string pending_url_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyDebugger);
 };
