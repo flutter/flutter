@@ -23,7 +23,6 @@
 #include "config.h"
 #include "core/html/HTMLImageElement.h"
 
-#include "bindings/core/v8/ScriptEventListener.h"
 #include "core/CSSPropertyNames.h"
 #include "core/HTMLNames.h"
 #include "core/MediaTypeNames.h"
