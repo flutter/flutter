@@ -100,8 +100,10 @@ An element consists of the following:
    2. Attribute name: A sequence of characters other than ```/```,
       ```=```, ```>```, U+0020, U+000A, U+000D (whitespace).
    3. Optionally:
-      1. ```=```
-      2. Attribute value: Either:
+      1. Zero or more U+0020, U+000A, U+000D (whitespace) characters.
+      2. ```=```
+      3. Zero or more U+0020, U+000A, U+000D (whitespace) characters.
+      4. Attribute value: Either:
          - ```'``` followed by attribute text other than ```'```
            followed by a terminating ```'```.
          - ```"``` followed by attribute text other than ```'```

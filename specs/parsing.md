@@ -131,22 +131,562 @@ If the current character is...
 * Anything else: Consume the character and stay in this state.
 
 
-### Data state ###
+### **Data** state ###
 
 If the current character is...
 
-* '```&```': Consume the character and switch to the **character
-  reference** state.
-
 * '```<```': Consume the character and switch to the **tag open** state.
+
+* '```&```': Consume the character and switch to the **character
+  reference** state, with the _return state_ set to the **data**
+  state, the _extra terminating character_ unset (or set to U+0000,
+  which has the same effect), and the _emitting operation_ being to
+  emit a character token for the given character.
 
 * Anything else: Emit the current input character as a character
   token. Consume the character. Stay in this state.
 
 
-TODO(ianh): Add the remaining tokenizer states.
+### **Script raw data** state ###
 
-TOOD(ianh): &lt;script>, &lt;style>
+TOOD(ianh): spec this
+
+
+### **Style raw data** state ###
+
+TOOD(ianh): spec this
+
+
+### **After tag** state ###
+
+Emit the tag token.
+
+If the tag token was a start tag token and the tag name was
+'```script```', then and switch to the **script raw data** state.
+
+If the tag token was a start tag token and the tag name was
+'```style```', then and switch to the **style raw data** state.
+
+Otherwise, switch to the **data** state.
+
+
+### **Tag open** state ###
+
+If the current character is...
+
+* '```!```': Consume the character and switch to the **comment start
+  1** state.
+
+* '```/```': Consume the character and switch to the **close tag
+  state** state.
+
+* '```>```': Emit character tokens for '```<>```'. Consume the current
+  character. Switch to the **data** state.
+
+* '```0```'..'```9```', '```a```'..'```z```', '```A```'..'```Z```',
+  '```-```', '```_```', '```.```': Create a start tag token, let its
+  tag name be the current character, consume the current character and
+  switch to the **tag name** state.
+
+* Anything else: Emit the character token for '```<```'. Switch to the
+  **data** state without consuming the current character.
+
+
+### **Close tag** state ###
+
+If the current character is...
+
+* '```>```': Emit character tokens for '```</>```'. Consume the current
+  character. Switch to the **data** state.
+
+* '```0```'..'```9```', '```a```'..'```z```', '```A```'..'```Z```',
+  '```-```', '```_```', '```.```': Create an end tag token, let its
+  tag name be the current character, consume the current character and
+  switch to the **tag name** state.
+
+* Anything else: Emit the character tokens for '```</```'. Switch to
+  the **data** state without consuming the current character.
+
+
+### **Tag name** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Switch to the
+  **before attribute name** state.
+
+* '```/```': Consume the current character. Switch to the **void tag**
+  state.
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* Anything else: Append the current character to the tag name, and
+  consume the current character. Stay in this state.
+
+
+### **Void tag** state ###
+
+If the current character is...
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* Anything else: Switch to the **before attribute name** state without
+  consuming the current character.
+
+
+### **Before attribute name** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Stay in this state.
+
+* '```/```': Consume the current character. Switch to the **void tag**
+  state.
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* Anything else: Create a new attribute in the tag token, and set its
+  name to the current character. Consume the current character. Switch
+  to the **attribute name** state.
+
+
+### **Attribute name** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Switch to the **after
+  attribute name** state.
+
+* '```/```': Consume the current character. Switch to the **void tag**
+  state.
+
+* '```=```': Consume the current character. Switch to the **before
+  attribute value** state.
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* Anything else: Append the current character to the most recently
+  added attribute's name, and consume the current character. Stay in
+  this state.
+
+
+### **After attribute name** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Stay in this state.
+
+* '```/```': Consume the current character. Switch to the **void tag**
+  state.
+
+* '```=```': Consume the current character. Switch to the **before
+  attribute value** state.
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* Anything else: Create a new attribute in the tag token, and set its
+  name to the current character. Consume the current character. Switch
+  to the **attribute name** state.
+
+
+### **Before attribute value** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Stay in this state.
+
+* '```>```': Consume the current character. Switch to the **after
+  tag** state.
+
+* '```'```': Consume the current character. Switch to the
+  **single-quoted attribute value** state.
+
+* '```"```': Consume the current character. Switch to the
+  **double-quoted attribute value** state.
+
+* Anything else: Set the value of the most recently added attribute to
+  the current character. Consume the current character. Switch to the
+  **unquoted attribute value** state.
+
+
+### **Single-quoted attribute value** state ###
+
+If the current character is...
+
+* '```'```': Consume the current character. Switch to the
+  **before attribute name** state.
+
+* '```&```': Consume the character and switch to the **character
+  reference** state, with the _return state_ set to the
+  **single-quoted attribute value** state, the _extra terminating
+  character_ set to '```'```', and the _emitting operation_ being to
+  append the given character to the value of the most recently added
+  attribute.
+
+* Anything else: Append the current character to the value of the most
+  recently added attribute. Consume the current character. Stay in
+  this state.
+
+
+### **Double-quoted attribute value** state ###
+
+If the current character is...
+
+* '```"```': Consume the current character. Switch to the
+  **before attribute name** state.
+
+* '```&```': Consume the character and switch to the **character
+  reference** state, with the _return state_ set to the
+  **double-quoted attribute value** state, the _extra terminating
+  character_ set to '```"```', and the _emitting operation_ being to
+  append the given character to the value of the most recently added
+  attribute.
+
+* Anything else: Append the current character to the value of the most
+  recently added attribute. Consume the current character. Stay in
+  this state.
+
+
+### **Unquoted attribute value** state ###
+
+If the current character is...
+
+* U+0020, U+000A: Consume the current character. Switch to the
+  **before attribute name** state.
+
+* '```>```': Consume the current character. Switch to the **data**
+  state. Switch to the **after tag** state.
+
+* '```&```': Consume the character and switch to the **character
+  reference** state, with the _return state_ set to the **unquoted
+  attribute value** state, the _extra terminating character_ unset (or
+  set to U+0000, which has the same effect), and the _emitting
+  operation_ being to append the given character to the value of the
+  most recently added attribute.
+
+* Anything else: Append the current character to the value of the most
+  recently added attribute. Consume the current character. Stay in
+  this state.
+
+
+### **Comment start 1** state ###
+
+If the current character is...
+
+* '```-```': Consume the character and switch to the **comment start
+  2** state.
+
+* '```>```': Emit character tokens for '```<!>```'. Consume the
+  current character. Switch to the **data** state.
+
+
+### **Comment start 2** state ###
+
+If the current character is...
+
+* '```-```': Consume the character and switch to the **comment**
+  state.
+
+* '```>```': Emit character tokens for '```<!->```'. Consume the
+  current character. Switch to the **data** state.
+
+
+### **Comment** state ###
+
+If the current character is...
+
+* '```-```': Consume the character and switch to the **comment end 1**
+  state.
+
+* Anything else: Consume the character and switch to the **comment**
+  state.
+
+
+### **Comment end 1** state ###
+
+If the current character is...
+
+* '```-```': Consume the character, switch to the **comment end 2**
+  state.
+
+* Anything else: Consume the character, and switch to the **comment**
+  state.
+
+
+### **Comment end 2** state ###
+
+If the current character is...
+
+* '```>```': Consume the character and switch to the **data** state.
+
+* '```-```': Consume the character, but stay in this state.
+
+* Anything else: Consume the character, and switch to the **comment**
+  state.
+
+
+### **Character reference** state ###
+
+Let _raw value_ be the string '```&```'.
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```#```': Consume the character, and switch to the **numeric
+  character reference** state.
+
+* '```l```': Consume the character and switch to the **named character
+  reference L** state.
+
+* '```a```': Consume the character and switch to the **named character
+  reference A** state.
+
+* '```g```': Consume the character and switch to the **named character
+  reference G** state.
+
+* '```q```': Consume the character and switch to the **named character
+  reference Q** state.
+
+* Any other character in the range '```0```'..'```9```',
+  '```a```'..'```f```', '```A```'..'```F```': Consume the character
+  and switch to the **bad named character reference** state.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the **data state** without
+  consuming the current character.
+
+
+### **Numeric character reference** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```x```', '```X```': Let _value_ be zero, consume the character,
+  and switch to the **hexadecimal numeric character reference** state.
+
+* '```0```'..'```9```': Let _value_ be the numeric value of the
+  current character interpreted as a decimal digit, consume the
+  character, and switch to the **decimal numeric character reference**
+  state.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the **data state** without
+  consuming the current character.
+
+
+### **Hexadecimal numeric character reference** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```0```'..'```9```', '```a```'..'```f```', '```A```'..'```F```':
+  Let _value_ be sixteen times _value_ plus the numeric value of the
+  current character interpreted as a hexadecimal digit.
+
+* '```;```': Consume the character. If _value_ is between 0x0001 and
+  0x10FFFF inclusive, but is not between 0xD800 and 0xDFFF inclusive,
+  run the _emitting operation_ with a unicode character having the
+  scalar value _value_; otherwise, run the _emitting operation_ with
+  the character U+FFFD. Then, in either case, switch to the _return
+  state_.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the **data state** without
+  consuming the current character.
+
+
+### **Decimal numeric character reference** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```0```'..'```9```': Let _value_ be ten times _value_ plus the
+  numeric value of the current character interpreted as a decimal
+  digit.
+
+* '```;```': Consume the character. If _value_ is between 0x0001 and
+  0x10FFFF inclusive, but is not between 0xD800 and 0xDFFF inclusive,
+  run the _emitting operation_ with a unicode character having the
+  scalar value _value_; otherwise, run the _emitting operation_ with
+  the character U+FFFD. Then, in either case, switch to the _return
+  state_.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the **data state** without
+  consuming the current character.
+
+
+### **Named character reference L** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```t```': Let _character_ be '```<```', consume the current
+  character, and switch to the **after named character reference**
+  state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference A** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```p```': Consume the current character and switch to the **named
+  character reference AP** state.
+
+* '```m```': Consume the current character and switch to the **named
+  character reference AM** state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference AM** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```p```': Let _character_ be '```&```', consume the current
+  character, and switch to the **after named character reference**
+  state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference AP** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```o```': Consume the current character and switch to the **named
+  character reference APO** state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference APO** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```s```': Let _character_ be '```'```', consume the current
+  character, and switch to the **after named character reference**
+  state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference G** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```t```': Let _character_ be '```>```', consume the current
+  character, and switch to the **after named character reference**
+  state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference Q** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```u```': Consume the current character and switch to the **named
+  character reference QU** state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference QU** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```o```': Consume the current character and switch to the **named
+  character reference QUO** state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **Named character reference QUO** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```t```': Let _character_ be '```"```', consume the current
+  character, and switch to the **after named character reference**
+  state.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the character.
+
+
+### **After named character reference** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```;```': Consume the character. Run the _emitting operation_ with
+  the character _character_. Switch to the _return state_.
+
+* The _extra terminating character_: Run the _emitting operation_ with
+  the character U+FFFD. Switch to the _return state_ without consuming
+  the current character.
+
+* Anything else: Switch to the _bad named character reference_ state
+  without consuming the current character.
+
+
+### **Bad named character reference** state ###
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '```;```': Consume the character. Run the _emitting operation_ with
+  the character U+FFFD. Switch to the _return state_.
+
+* The _extra terminating character_: Switch to the _return state_
+  without consuming the current character.
+
+* Any other character in the range '```0```'..'```9```',
+  '```a```'..'```f```', '```A```'..'```F```': Consume the character
+  and stay in this state.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the **data state** without
+  consuming the current character.
+
 
 Tree construction
 -----------------
