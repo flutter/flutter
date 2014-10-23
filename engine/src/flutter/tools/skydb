@@ -13,11 +13,18 @@ CONFIG_DIRECTORY = 'Debug'
 MOJO_SHELL_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
     os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'mojo_shell'))
 
+SUPPORTED_MIME_TYPES = [
+    'text/html',
+    'text/plain',
+]
+
 def main(args):
+    content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+        for mime_type in SUPPORTED_MIME_TYPES]
     shell_command = [
         MOJO_SHELL_PATH,
         '--v=1',
-        '--content-handlers=text/html,mojo://sky_viewer/',
+        '--content-handlers=%s' % ','.join(content_handlers),
         '--url-mappings=mojo:window_manager=mojo:sky_debugger',
         'mojo:window_manager',
     ]
