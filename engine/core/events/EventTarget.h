@@ -71,7 +71,6 @@ public:
 // This is the base class for all DOM event targets. To make your class an
 // EventTarget, follow these steps:
 // - Make your IDL interface inherit from EventTarget.
-//   Optionally add "attribute EventHandler onfoo;" attributes.
 // - Inherit from EventTargetWithInlineData (only in rare cases should you use
 //   EventTarget directly).
 // - Figure out if you now need to inherit from ActiveDOMObject as well.
@@ -80,8 +79,6 @@ public:
 //   WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(YourClassName). Make sure to include
 //   this header file in your .h file, or you will get very strange compiler
 //   errors.
-// - If you added an onfoo attribute, use DEFINE_ATTRIBUTE_EVENT_LISTENER(foo)
-//   in your class declaration.
 // - Call ScriptWrappable::init(this) in your constructor, unless you are already
 //   doing so.
 // - Override EventTarget::interfaceName() and executionContext(). The former
@@ -120,10 +117,6 @@ public:
     bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>, ExceptionState&); // DOM API
     virtual void uncaughtExceptionInEventHandler();
 
-    // Used for legacy "onEvent" attribute APIs.
-    bool setAttributeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>);
-    EventListener* getAttributeEventListener(const AtomicString& eventType);
-
     bool hasEventListeners() const;
     bool hasEventListeners(const AtomicString& eventType) const;
     bool hasCapturingEventListeners(const AtomicString& eventType);
@@ -155,8 +148,6 @@ private:
     void fireEventListeners(Event*, EventTargetData*, EventListenerVector&);
     void countLegacyEvents(const AtomicString& legacyTypeName, EventListenerVector*, EventListenerVector*);
 
-    bool clearAttributeEventListener(const AtomicString& eventType);
-
     friend class EventListenerIterator;
 };
 
@@ -167,52 +158,6 @@ protected:
 private:
     EventTargetData m_eventTargetData;
 };
-
-// FIXME: These macros should be split into separate DEFINE and DECLARE
-// macros to avoid causing so many header includes.
-#define DEFINE_ATTRIBUTE_EVENT_LISTENER(attribute) \
-    EventListener* on##attribute() { return getAttributeEventListener(EventTypeNames::attribute); } \
-    void setOn##attribute(PassRefPtr<EventListener> listener) { setAttributeEventListener(EventTypeNames::attribute, listener); } \
-
-#define DEFINE_STATIC_ATTRIBUTE_EVENT_LISTENER(attribute) \
-    static EventListener* on##attribute(EventTarget& eventTarget) { return eventTarget.getAttributeEventListener(EventTypeNames::attribute); } \
-    static void setOn##attribute(EventTarget& eventTarget, PassRefPtr<EventListener> listener) { eventTarget.setAttributeEventListener(EventTypeNames::attribute, listener); } \
-
-#define DEFINE_WINDOW_ATTRIBUTE_EVENT_LISTENER(attribute) \
-    EventListener* on##attribute() { return document().getWindowAttributeEventListener(EventTypeNames::attribute); } \
-    void setOn##attribute(PassRefPtr<EventListener> listener) { document().setWindowAttributeEventListener(EventTypeNames::attribute, listener); } \
-
-#define DEFINE_STATIC_WINDOW_ATTRIBUTE_EVENT_LISTENER(attribute) \
-    static EventListener* on##attribute(EventTarget& eventTarget) { \
-        if (Node* node = eventTarget.toNode()) \
-            return node->document().getWindowAttributeEventListener(EventTypeNames::attribute); \
-        ASSERT(eventTarget.toDOMWindow()); \
-        return eventTarget.getAttributeEventListener(EventTypeNames::attribute); \
-    } \
-    static void setOn##attribute(EventTarget& eventTarget, PassRefPtr<EventListener> listener) { \
-        if (Node* node = eventTarget.toNode()) \
-            node->document().setWindowAttributeEventListener(EventTypeNames::attribute, listener); \
-        else { \
-            ASSERT(eventTarget.toDOMWindow()); \
-            eventTarget.setAttributeEventListener(EventTypeNames::attribute, listener); \
-        } \
-    }
-
-#define DEFINE_MAPPED_ATTRIBUTE_EVENT_LISTENER(attribute, eventName) \
-    EventListener* on##attribute() { return getAttributeEventListener(EventTypeNames::eventName); } \
-    void setOn##attribute(PassRefPtr<EventListener> listener) { setAttributeEventListener(EventTypeNames::eventName, listener); } \
-
-#define DECLARE_FORWARDING_ATTRIBUTE_EVENT_LISTENER(recipient, attribute) \
-    EventListener* on##attribute(); \
-    void setOn##attribute(PassRefPtr<EventListener> listener);
-
-#define DEFINE_FORWARDING_ATTRIBUTE_EVENT_LISTENER(type, recipient, attribute) \
-    EventListener* type::on##attribute() { return recipient ? recipient->getAttributeEventListener(EventTypeNames::attribute) : 0; } \
-    void type::setOn##attribute(PassRefPtr<EventListener> listener) \
-    { \
-        if (recipient) \
-            recipient->setAttributeEventListener(EventTypeNames::attribute, listener); \
-    }
 
 inline bool EventTarget::hasEventListeners() const
 {

@@ -70,10 +70,6 @@ class FontFaceSet FINAL : public RefCountedSupplement<Document, FontFaceSet>, pu
 public:
     virtual ~FontFaceSet();
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(loading);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(loadingdone);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(loadingerror);
-
     bool check(const String& font, const String& text, ExceptionState&);
     ScriptPromise load(ScriptState*, const String& font, const String& text);
     ScriptPromise ready(ScriptState*);

@@ -36,18 +36,17 @@
 
 namespace blink {
 
-PassRefPtr<EventListener> V8EventListenerList::getEventListener(ScriptState* scriptState, v8::Local<v8::Value> value, bool isAttribute, ListenerLookupType lookup)
+PassRefPtr<EventListener> V8EventListenerList::getEventListener(ScriptState* scriptState, v8::Local<v8::Value> value, ListenerLookupType lookup)
 {
     ASSERT(!scriptState->contextIsEmpty());
     if (lookup == ListenerFindOnly) {
         // Used by EventTarget::removeEventListener, specifically
         // EventTargetV8Internal::removeEventListenerMethod
-        ASSERT(!isAttribute);
         return V8EventListenerList::findWrapper(value, scriptState);
     }
 
     if (toDOMWindow(scriptState->context()))
-        return V8EventListenerList::findOrCreateWrapper<V8EventListener>(value, isAttribute, scriptState);
+        return V8EventListenerList::findOrCreateWrapper<V8EventListener>(value, scriptState);
 
     ASSERT_NOT_REACHED();
     return nullptr;

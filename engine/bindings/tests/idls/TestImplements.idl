@@ -34,7 +34,6 @@
     readonly attribute DOMString implementsReadonlyStringAttribute;
     attribute DOMString implementsStringAttribute;
     attribute Node implementsNodeAttribute;
-    attribute EventHandler implementsEventHandlerAttribute;
 
     void implementsVoidMethod();
     [CallWith=ExecutionContext, RaisesException] TestInterfaceEmpty implementsComplexMethod(DOMString strArg, TestInterfaceEmpty testInterfaceEmptyArg);

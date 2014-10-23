@@ -150,8 +150,6 @@ interface TestObject {
     // Static attributes
     static attribute DOMString staticStringAttribute;
     static attribute long staticLongAttribute;
-    // Exceptional type
-    attribute EventHandler eventHandlerAttribute;
 
     // Extended attributes
     [CachedAttribute=isValueDirty] attribute any cachedAttributeAnyAttribute;

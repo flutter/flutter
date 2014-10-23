@@ -62,8 +62,6 @@ static void addReferencesForNodeWithEventListeners(v8::Isolate* isolate, Node* n
 
     EventListenerIterator iterator(node);
     while (EventListener* listener = iterator.nextListener()) {
-        if (listener->type() != EventListener::JSEventListenerType)
-            continue;
         V8AbstractEventListener* v8listener = static_cast<V8AbstractEventListener*>(listener);
         if (!v8listener->hasExistingListenerObject())
             continue;

@@ -372,9 +372,9 @@ def setter_expression(interface, attribute, context):
         if (interface.name in ['Window'] and
             attribute.name == 'onerror'):
             includes.add('bindings/core/v8/V8ErrorHandler.h')
-            arguments.append('V8EventListenerList::findOrCreateWrapper<V8ErrorHandler>(v8Value, true, ScriptState::current(info.GetIsolate()))')
+            arguments.append('V8EventListenerList::findOrCreateWrapper<V8ErrorHandler>(v8Value, ScriptState::current(info.GetIsolate()))')
         else:
-            arguments.append('V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), v8Value, true, ListenerFindOrCreate)')
+            arguments.append('V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), v8Value, ListenerFindOrCreate)')
     elif idl_type.is_interface_type:
         # FIXME: should be able to eliminate WTF::getPtr in most or all cases
         arguments.append('WTF::getPtr(cppValue)')

@@ -57,9 +57,6 @@ public:
     EventListenerVector* find(const AtomicString& eventType);
     Vector<AtomicString> eventTypes() const;
 
-    void removeFirstEventListenerCreatedFromMarkup(const AtomicString& eventType);
-    void copyEventListenersNotCreatedFromMarkupToTarget(EventTarget*);
-
 private:
     friend class EventListenerIterator;
 

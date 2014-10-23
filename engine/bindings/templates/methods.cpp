@@ -135,9 +135,9 @@ if (info.Length() > {{argument.index}} && {% if argument.is_nullable %}!isUndefi
 {# FIXME: remove EventListener special case #}
 {% if argument.idl_type == 'EventListener' %}
 {% if method.name == 'removeEventListener' or method.name == 'removeListener' %}
-{{argument.name}} = V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), info[{{argument.index}}], false, ListenerFindOnly);
+{{argument.name}} = V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), info[{{argument.index}}], ListenerFindOnly);
 {% else %}{# method.name == 'addEventListener' #}
-{{argument.name}} = V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), info[{{argument.index}}], false, ListenerFindOrCreate);
+{{argument.name}} = V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), info[{{argument.index}}], ListenerFindOrCreate);
 {% endif %}{# method.name #}
 {% else %}{# argument.idl_type == 'EventListener' #}
 {# Callback functions must be functions:

@@ -112,19 +112,6 @@
 
     [Replaceable] readonly attribute CSS CSS;
 
-    // Event handler attributes
-    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationend;
-    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationiteration;
-    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationstart;
-    [RuntimeEnabled=OrientationEvent] attribute EventHandler onorientationchange;
-    attribute EventHandler onsearch;
-    [RuntimeEnabled=Touch] attribute EventHandler ontouchcancel;
-    [RuntimeEnabled=Touch] attribute EventHandler ontouchend;
-    [RuntimeEnabled=Touch] attribute EventHandler ontouchmove;
-    [RuntimeEnabled=Touch] attribute EventHandler ontouchstart;
-    attribute EventHandler ontransitionend;
-    attribute EventHandler onwheel;
-
     // window.toString() requires special handling in V8
     [DoNotCheckSignature, DoNotCheckSecurity, Custom, NotEnumerable] stringifier;
 
@@ -133,5 +120,4 @@
 };
 
 Window implements WindowBase64;
-Window implements WindowEventHandlers;
 Window implements WindowTimers;

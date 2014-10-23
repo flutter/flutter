@@ -36,8 +36,4 @@ interface InputMethodContext : EventTarget {
     readonly attribute unsigned long compositionEndOffset;
 
     void confirmComposition();
-
-    attribute EventHandler oncandidatewindowshow;
-    attribute EventHandler oncandidatewindowupdate;
-    attribute EventHandler oncandidatewindowhide;
 };

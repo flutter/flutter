@@ -203,23 +203,6 @@ public:
 
     // DOM methods & attributes for Document
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(beforecopy);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(beforecut);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(beforepaste);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(copy);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(cut);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(paste);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(readystatechange);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(search);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(securitypolicyviolation);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(selectionchange);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(selectstart);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchcancel);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchend);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchmove);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchstart);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(wheel);
-
     bool shouldOverrideLegacyDescription(ViewportDescription::Type);
     void setViewportDescription(const ViewportDescription&);
     const ViewportDescription& viewportDescription() const { return m_viewportDescription; }
@@ -442,10 +425,6 @@ public:
 
     void clearDOMWindow() { m_domWindow = nullptr; }
     LocalDOMWindow* domWindow() const { return m_domWindow; }
-
-    // Helper functions for forwarding LocalDOMWindow event related tasks to the LocalDOMWindow if it exists.
-    void setWindowAttributeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>);
-    EventListener* getWindowAttributeEventListener(const AtomicString& eventType);
 
     static void registerEventFactory(PassOwnPtr<EventFactoryBase>);
     static PassRefPtrWillBeRawPtr<Event> createEvent(const String& eventType, ExceptionState&);

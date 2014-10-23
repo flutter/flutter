@@ -56,9 +56,7 @@ public:
 
     static const V8AbstractEventListener* cast(const EventListener* listener)
     {
-        return listener->type() == JSEventListenerType
-            ? static_cast<const V8AbstractEventListener*>(listener)
-            : 0;
+        return static_cast<const V8AbstractEventListener*>(listener);
     }
 
     static V8AbstractEventListener* cast(EventListener* listener)
@@ -71,8 +69,6 @@ public:
     virtual bool operator==(const EventListener& other) OVERRIDE { return this == &other; }
 
     virtual void handleEvent(ExecutionContext*, Event*) OVERRIDE;
-
-    virtual bool isLazy() const { return false; }
 
     // Returns the listener object, either a function or an object.
     v8::Local<v8::Object> getListenerObject(ExecutionContext* context)
@@ -108,7 +104,6 @@ public:
         m_listener.clear();
     }
 
-    virtual bool belongsToTheCurrentWorld() const OVERRIDE FINAL;
     v8::Isolate* isolate() const { return m_isolate; }
     virtual DOMWrapperWorld& world() const { return scriptState()->world(); }
     ScriptState* scriptState() const
@@ -119,8 +114,8 @@ public:
     void setScriptState(ScriptState* scriptState) { m_scriptState = scriptState; }
 
 protected:
-    V8AbstractEventListener(bool isAttribute, ScriptState*);
-    V8AbstractEventListener(bool isAttribute, v8::Isolate*);
+    V8AbstractEventListener(ScriptState*);
+    V8AbstractEventListener(v8::Isolate*);
 
     virtual void prepareListenerObject(ExecutionContext*) { }
 
@@ -132,9 +127,6 @@ protected:
     v8::Local<v8::Object> getReceiverObject(Event*);
 
 private:
-    // Implementation of EventListener function.
-    virtual bool virtualisAttribute() const OVERRIDE { return m_isAttribute; }
-
     virtual v8::Local<v8::Value> callListenerFunction(v8::Handle<v8::Value> jsevent, Event*) = 0;
 
     virtual bool shouldPreventDefault(v8::Local<v8::Value> returnValue);
@@ -142,13 +134,6 @@ private:
     static void setWeakCallback(const v8::WeakCallbackData<v8::Object, V8AbstractEventListener>&);
 
     ScopedPersistent<v8::Object> m_listener;
-
-    // Indicates if this is an HTML type listener.
-    bool m_isAttribute;
-
-    // For V8LazyEventListener, m_scriptState can be 0 until V8LazyEventListener is actually used.
-    // m_scriptState is set lazily because V8LazyEventListener doesn't know the associated frame
-    // until the listener is actually used.
     RefPtr<ScriptState> m_scriptState;
     v8::Isolate* m_isolate;
 };

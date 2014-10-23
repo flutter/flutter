@@ -46,5 +46,4 @@
     [RuntimeEnabled=WebAnimationsAPI] void reverse();
 
     void cancel();
-    [MeasureAs=AnimationPlayerFinishEvent] attribute EventHandler onfinish;
 };

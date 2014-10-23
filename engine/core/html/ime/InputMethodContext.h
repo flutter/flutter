@@ -71,10 +71,6 @@ public:
     virtual const AtomicString& interfaceName() const OVERRIDE;
     virtual ExecutionContext* executionContext() const OVERRIDE;
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(candidatewindowshow);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(candidatewindowupdate);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(candidatewindowhide);
-
     void dispatchCandidateWindowShowEvent();
     void dispatchCandidateWindowUpdateEvent();
     void dispatchCandidateWindowHideEvent();

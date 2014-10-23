@@ -38,8 +38,8 @@
 
 namespace blink {
 
-V8EventListener::V8EventListener(v8::Local<v8::Object> listener, bool isAttribute, ScriptState* scriptState)
-    : V8AbstractEventListener(isAttribute, scriptState)
+V8EventListener::V8EventListener(v8::Local<v8::Object> listener, ScriptState* scriptState)
+    : V8AbstractEventListener(scriptState)
 {
     setListenerObject(listener);
 }
@@ -56,7 +56,6 @@ v8::Local<v8::Function> V8EventListener::getListenerFunction(ExecutionContext*)
         return v8::Local<v8::Function>::Cast(listener);
 
     if (listener->IsObject()) {
-        ASSERT_WITH_MESSAGE(!isAttribute(), "EventHandler attributes should only accept JS Functions as input.");
         v8::Local<v8::Value> property = listener->Get(v8AtomicString(isolate(), "handleEvent"));
         // Check that no exceptions were thrown when getting the
         // handleEvent property and that the value is a function.

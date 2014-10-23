@@ -91,8 +91,6 @@ public:
     // remove this method.
     bool finishedInternal() const { return m_finished; }
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(finish);
-
     virtual const AtomicString& interfaceName() const OVERRIDE;
     virtual ExecutionContext* executionContext() const OVERRIDE;
     virtual bool hasPendingActivity() const OVERRIDE;

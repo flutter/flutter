@@ -2317,22 +2317,6 @@ void Document::didSplitTextNode(Text& oldNode)
     // FIXME: This should update markers for spelling and grammar checking.
 }
 
-void Document::setWindowAttributeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener)
-{
-    LocalDOMWindow* domWindow = this->domWindow();
-    if (!domWindow)
-        return;
-    domWindow->setAttributeEventListener(eventType, listener);
-}
-
-EventListener* Document::getWindowAttributeEventListener(const AtomicString& eventType)
-{
-    LocalDOMWindow* domWindow = this->domWindow();
-    if (!domWindow)
-        return 0;
-    return domWindow->getAttributeEventListener(eventType);
-}
-
 EventQueue* Document::eventQueue() const
 {
     if (!m_domWindow)

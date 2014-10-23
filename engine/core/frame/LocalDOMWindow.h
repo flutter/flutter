@@ -194,23 +194,10 @@ public:
 
     void dispatchLoadEvent();
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(animationend);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(animationiteration);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(animationstart);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(search);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(transitionend);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(wheel);
-
     // This is the interface orientation in degrees. Some examples are:
     //  0 is straight up; -90 is when the device is rotated 90 clockwise;
     //  90 is when rotated counter clockwise.
     int orientation() const;
-
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(orientationchange);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchstart);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchmove);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchend);
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(touchcancel);
 
     void willDetachDocumentFromFrame();
 

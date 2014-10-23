@@ -36,10 +36,6 @@ enum FontFaceSetLoadStatus { "loading", "loaded" };
     NoInterfaceObject,
 ] interface FontFaceSet : EventTarget {
 
-    attribute EventHandler onloading;
-    attribute EventHandler onloadingdone;
-    attribute EventHandler onloadingerror;
-
     [RaisesException] boolean check(DOMString font, optional DOMString text = null);
     [CallWith=ScriptState] Promise load(DOMString font, optional DOMString text = null);
     [MeasureAs=FontFaceSetReady, CallWith=ScriptState] Promise ready();

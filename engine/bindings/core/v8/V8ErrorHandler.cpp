@@ -42,8 +42,8 @@
 
 namespace blink {
 
-V8ErrorHandler::V8ErrorHandler(v8::Local<v8::Object> listener, bool isInline, ScriptState* scriptState)
-    : V8EventListener(listener, isInline, scriptState)
+V8ErrorHandler::V8ErrorHandler(v8::Local<v8::Object> listener, ScriptState* scriptState)
+    : V8EventListener(listener, scriptState)
 {
 }
 

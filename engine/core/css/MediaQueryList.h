@@ -53,8 +53,6 @@ public:
     String media() const;
     bool matches();
 
-    DEFINE_ATTRIBUTE_EVENT_LISTENER(change);
-
     // These two functions are provided for compatibility with JS code
     // written before the change listener became a DOM event.
     void addDeprecatedListener(PassRefPtr<EventListener>);

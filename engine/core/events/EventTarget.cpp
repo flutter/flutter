@@ -123,33 +123,6 @@ bool EventTarget::removeEventListener(const AtomicString& eventType, PassRefPtr<
     return true;
 }
 
-bool EventTarget::setAttributeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener)
-{
-    clearAttributeEventListener(eventType);
-    if (!listener)
-        return false;
-    return addEventListener(eventType, listener, false);
-}
-
-EventListener* EventTarget::getAttributeEventListener(const AtomicString& eventType)
-{
-    const EventListenerVector& entry = getEventListeners(eventType);
-    for (size_t i = 0; i < entry.size(); ++i) {
-        EventListener* listener = entry[i].listener.get();
-        if (listener->isAttribute() && listener->belongsToTheCurrentWorld())
-            return listener;
-    }
-    return 0;
-}
-
-bool EventTarget::clearAttributeEventListener(const AtomicString& eventType)
-{
-    EventListener* listener = getAttributeEventListener(eventType);
-    if (!listener)
-        return false;
-    return removeEventListener(eventType, listener, false);
-}
-
 bool EventTarget::dispatchEvent(PassRefPtrWillBeRawPtr<Event> event, ExceptionState& exceptionState)
 {
     if (!event) {

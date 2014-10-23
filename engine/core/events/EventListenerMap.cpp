@@ -169,53 +169,6 @@ EventListenerVector* EventListenerMap::find(const AtomicString& eventType)
     return 0;
 }
 
-static void removeFirstListenerCreatedFromMarkup(EventListenerVector* listenerVector)
-{
-    bool foundListener = false;
-
-    for (size_t i = 0; i < listenerVector->size(); ++i) {
-        if (!listenerVector->at(i).listener->wasCreatedFromMarkup())
-            continue;
-        foundListener = true;
-        listenerVector->remove(i);
-        break;
-    }
-
-    ASSERT_UNUSED(foundListener, foundListener);
-}
-
-void EventListenerMap::removeFirstEventListenerCreatedFromMarkup(const AtomicString& eventType)
-{
-    assertNoActiveIterators();
-
-    for (unsigned i = 0; i < m_entries.size(); ++i) {
-        if (m_entries[i].first == eventType) {
-            removeFirstListenerCreatedFromMarkup(m_entries[i].second.get());
-            if (m_entries[i].second->isEmpty())
-                m_entries.remove(i);
-            return;
-        }
-    }
-}
-
-static void copyListenersNotCreatedFromMarkupToTarget(const AtomicString& eventType, EventListenerVector* listenerVector, EventTarget* target)
-{
-    for (size_t i = 0; i < listenerVector->size(); ++i) {
-        // Event listeners created from markup have already been transfered to the shadow tree during cloning.
-        if ((*listenerVector)[i].listener->wasCreatedFromMarkup())
-            continue;
-        target->addEventListener(eventType, (*listenerVector)[i].listener, (*listenerVector)[i].useCapture);
-    }
-}
-
-void EventListenerMap::copyEventListenersNotCreatedFromMarkupToTarget(EventTarget* target)
-{
-    assertNoActiveIterators();
-
-    for (unsigned i = 0; i < m_entries.size(); ++i)
-        copyListenersNotCreatedFromMarkupToTarget(m_entries[i].first, m_entries[i].second.get(), target);
-}
-
 EventListenerIterator::EventListenerIterator()
     : m_map(0)
     , m_entryIndex(0)

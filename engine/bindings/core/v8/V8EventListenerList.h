@@ -53,20 +53,20 @@ public:
         if (!value->IsObject())
             return nullptr;
 
-        v8::Handle<v8::String> wrapperProperty = getHiddenProperty(false, scriptState->isolate());
+        v8::Handle<v8::String> wrapperProperty = getHiddenProperty(scriptState->isolate());
         return doFindWrapper(v8::Local<v8::Object>::Cast(value), wrapperProperty, scriptState);
     }
 
     template<typename WrapperType>
-    static PassRefPtr<V8EventListener> findOrCreateWrapper(v8::Local<v8::Value>, bool isAttribute, ScriptState*);
+    static PassRefPtr<V8EventListener> findOrCreateWrapper(v8::Local<v8::Value>, ScriptState*);
 
-    static void clearWrapper(v8::Handle<v8::Object> listenerObject, bool isAttribute, v8::Isolate* isolate)
+    static void clearWrapper(v8::Handle<v8::Object> listenerObject, v8::Isolate* isolate)
     {
-        v8::Handle<v8::String> wrapperProperty = getHiddenProperty(isAttribute, isolate);
+        v8::Handle<v8::String> wrapperProperty = getHiddenProperty(isolate);
         listenerObject->DeleteHiddenValue(wrapperProperty);
     }
 
-    static PassRefPtr<EventListener> getEventListener(ScriptState*, v8::Local<v8::Value>, bool isAttribute, ListenerLookupType);
+    static PassRefPtr<EventListener> getEventListener(ScriptState*, v8::Local<v8::Value>, ListenerLookupType);
 
 private:
     static V8EventListener* doFindWrapper(v8::Local<v8::Object> object, v8::Handle<v8::String> wrapperProperty, ScriptState* scriptState)
@@ -79,30 +79,28 @@ private:
         return static_cast<V8EventListener*>(v8::External::Cast(*listener)->Value());
     }
 
-    static inline v8::Handle<v8::String> getHiddenProperty(bool isAttribute, v8::Isolate* isolate)
+    static inline v8::Handle<v8::String> getHiddenProperty(v8::Isolate* isolate)
     {
-        return isAttribute ? v8AtomicString(isolate, "attributeListener") : v8AtomicString(isolate, "listener");
+        return v8AtomicString(isolate, "listener");
     }
 };
 
 template<typename WrapperType>
-PassRefPtr<V8EventListener> V8EventListenerList::findOrCreateWrapper(v8::Local<v8::Value> value, bool isAttribute, ScriptState* scriptState)
+PassRefPtr<V8EventListener> V8EventListenerList::findOrCreateWrapper(v8::Local<v8::Value> value, ScriptState* scriptState)
 {
     v8::Isolate* isolate = scriptState->isolate();
     ASSERT(isolate->InContext());
-    if (!value->IsObject()
-        // Non-callable attribute setter input is treated as null (no wrapper)
-        || (isAttribute && !value->IsFunction()))
+    if (!value->IsObject())
         return nullptr;
 
     v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
-    v8::Handle<v8::String> wrapperProperty = getHiddenProperty(isAttribute, isolate);
+    v8::Handle<v8::String> wrapperProperty = getHiddenProperty(isolate);
 
     V8EventListener* wrapper = doFindWrapper(object, wrapperProperty, scriptState);
     if (wrapper)
         return wrapper;
 
-    RefPtr<V8EventListener> wrapperPtr = WrapperType::create(object, isAttribute, scriptState);
+    RefPtr<V8EventListener> wrapperPtr = WrapperType::create(object, scriptState);
     if (wrapperPtr)
         object->SetHiddenValue(wrapperProperty, v8::External::New(isolate, wrapperPtr.get()));
 

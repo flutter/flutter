@@ -137,8 +137,7 @@ ReplacementFragment::ReplacementFragment(Document* document, DocumentFragment* f
     else
         shadowAncestorElement = editableRoot.get();
 
-    if (!editableRoot->getAttributeEventListener(EventTypeNames::webkitBeforeTextInserted)
-        && editableRoot->rendererIsRichlyEditable()) {
+    if (editableRoot->rendererIsRichlyEditable()) {
         removeInterchangeNodes(m_fragment.get());
         return;
     }

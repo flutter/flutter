@@ -42,9 +42,8 @@
 
 namespace blink {
 
-V8AbstractEventListener::V8AbstractEventListener(bool isAttribute, ScriptState* scriptState)
-    : EventListener(JSEventListenerType)
-    , m_isAttribute(isAttribute)
+V8AbstractEventListener::V8AbstractEventListener(ScriptState* scriptState)
+    : EventListener()
     , m_scriptState(scriptState)
     , m_isolate(scriptState->isolate())
 {
@@ -52,9 +51,8 @@ V8AbstractEventListener::V8AbstractEventListener(bool isAttribute, ScriptState* 
         InspectorCounters::incrementCounter(InspectorCounters::JSEventListenerCounter);
 }
 
-V8AbstractEventListener::V8AbstractEventListener(bool isAttribute, v8::Isolate* isolate)
-    : EventListener(JSEventListenerType)
-    , m_isAttribute(isAttribute)
+V8AbstractEventListener::V8AbstractEventListener(v8::Isolate* isolate)
+    : EventListener()
     , m_scriptState(nullptr)
     , m_isolate(isolate)
 {
@@ -66,7 +64,7 @@ V8AbstractEventListener::~V8AbstractEventListener()
 {
     if (!m_listener.isEmpty()) {
         v8::HandleScope scope(m_isolate);
-        V8EventListenerList::clearWrapper(m_listener.newLocal(isolate()), m_isAttribute, isolate());
+        V8EventListenerList::clearWrapper(m_listener.newLocal(isolate()), isolate());
     }
     if (isMainThread())
         InspectorCounters::decrementCounter(InspectorCounters::JSEventListenerCounter);
@@ -139,9 +137,6 @@ void V8AbstractEventListener::invokeEventHandler(Event* event, v8::Local<v8::Val
 
     if (returnValue.IsEmpty())
         return;
-
-    if (m_isAttribute && shouldPreventDefault(returnValue))
-        event->preventDefault();
 }
 
 bool V8AbstractEventListener::shouldPreventDefault(v8::Local<v8::Value> returnValue)
@@ -162,11 +157,6 @@ v8::Local<v8::Object> V8AbstractEventListener::getReceiverObject(Event* event)
     if (value.IsEmpty())
         return v8::Local<v8::Object>();
     return v8::Local<v8::Object>::New(isolate(), v8::Handle<v8::Object>::Cast(value));
-}
-
-bool V8AbstractEventListener::belongsToTheCurrentWorld() const
-{
-    return isolate()->InContext() && &world() == &DOMWrapperWorld::current(isolate());
 }
 
 void V8AbstractEventListener::setWeakCallback(const v8::WeakCallbackData<v8::Object, V8AbstractEventListener> &data)

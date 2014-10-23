@@ -44,13 +44,13 @@ class LocalFrame;
 // that can handle the event.
 class V8EventListener : public V8AbstractEventListener {
 public:
-    static PassRefPtr<V8EventListener> create(v8::Local<v8::Object> listener, bool isAttribute, ScriptState* scriptState)
+    static PassRefPtr<V8EventListener> create(v8::Local<v8::Object> listener, ScriptState* scriptState)
     {
-        return adoptRef(new V8EventListener(listener, isAttribute, scriptState));
+        return adoptRef(new V8EventListener(listener, scriptState));
     }
 
 protected:
-    V8EventListener(v8::Local<v8::Object> listener, bool isAttribute, ScriptState*);
+    V8EventListener(v8::Local<v8::Object> listener, ScriptState*);
 
     v8::Local<v8::Function> getListenerFunction(ExecutionContext*);
 

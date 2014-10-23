@@ -25,13 +25,4 @@
 ] interface MediaQueryList : EventTarget {
     readonly attribute DOMString media;
     readonly attribute boolean matches;
-
-    // Even though this interface is now an event target, these functions
-    // exist as aliases for addEventListener for backwards compatibility
-    // with older versions of this interface. See the note at
-    // http://dev.w3.org/csswg/cssom-view/#dom-mediaquerylist-removelistener
-    [ImplementedAs=addDeprecatedListener] void addListener([Default=Undefined] optional EventListener listener);
-    [ImplementedAs=removeDeprecatedListener]void removeListener([Default=Undefined] optional EventListener listener);
-
-    attribute EventHandler onchange;
 };
