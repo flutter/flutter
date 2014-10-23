@@ -17,7 +17,6 @@
 #include "net/base/net_errors.h"
 #include "sky/engine/public/platform/WebConvertableToTraceFormat.h"
 #include "sky/engine/public/platform/WebWaitableEvent.h"
-#include "sky/viewer/platform/webthread_impl.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
 
 namespace sky {
@@ -63,8 +62,7 @@ PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
       shared_timer_func_(NULL),
       shared_timer_fire_time_(0.0),
       shared_timer_fire_time_was_set_while_suspended_(false),
-      shared_timer_suspended_(0),
-      current_thread_slot_(&DestroyCurrentThread) {
+      shared_timer_suspended_(0) {
   app->ConnectToService("mojo://network_service/", &network_service_);
 
   mojo::CookieStorePtr cookie_store;
@@ -184,22 +182,6 @@ blink::WebURLError PlatformImpl::cancelledError(const blink::WebURL& url)
   return error;
 }
 
-blink::WebThread* PlatformImpl::currentThread() {
-  WebThreadImplForMessageLoop* thread =
-      static_cast<WebThreadImplForMessageLoop*>(current_thread_slot_.Get());
-  if (thread)
-    return (thread);
-
-  scoped_refptr<base::MessageLoopProxy> message_loop =
-      base::MessageLoopProxy::current();
-  if (!message_loop.get())
-    return NULL;
-
-  thread = new WebThreadImplForMessageLoop(message_loop.get());
-  current_thread_slot_.Set(thread);
-  return thread;
-}
-
 blink::WebWaitableEvent* PlatformImpl::createWaitableEvent() {
   return new WebWaitableEventImpl();
 }
@@ -303,13 +285,6 @@ void PlatformImpl::updateTraceEventDuration(
   memcpy(&traceEventHandle, &handle, sizeof(handle));
   TRACE_EVENT_API_UPDATE_TRACE_EVENT_DURATION(
       category_group_enabled, name, traceEventHandle);
-}
-
-// static
-void PlatformImpl::DestroyCurrentThread(void* thread) {
-  WebThreadImplForMessageLoop* impl =
-      static_cast<WebThreadImplForMessageLoop*>(thread);
-  delete impl;
 }
 
 }  // namespace sky

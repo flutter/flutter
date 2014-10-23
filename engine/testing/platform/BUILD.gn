@@ -12,8 +12,6 @@ static_library("platform") {
     "webmimeregistry_impl.h",
     "webthemeengine_impl.cc",
     "webthemeengine_impl.h",
-    "webthread_impl.cc",
-    "webthread_impl.h",
     "webunittestsupport_impl.cc",
     "webunittestsupport_impl.h",
   ]

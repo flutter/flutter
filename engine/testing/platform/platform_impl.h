@@ -38,7 +38,6 @@ class PlatformImpl : public blink::Platform {
   virtual blink::WebData parseDataURL(
       const blink::WebURL& url, blink::WebString& mime_type,
       blink::WebString& charset);
-  virtual blink::WebThread* currentThread();
   virtual blink::WebWaitableEvent* createWaitableEvent();
   virtual blink::WebWaitableEvent* waitMultipleEvents(
       const blink::WebVector<blink::WebWaitableEvent*>& events);
@@ -55,15 +54,12 @@ class PlatformImpl : public blink::Platform {
       shared_timer_func_();
   }
 
-  static void DestroyCurrentThread(void*);
-
   base::MessageLoop* main_loop_;
   base::OneShotTimer<PlatformImpl> shared_timer_;
   void (*shared_timer_func_)();
   double shared_timer_fire_time_;
   bool shared_timer_fire_time_was_set_while_suspended_;
   int shared_timer_suspended_;  // counter
-  base::ThreadLocalStorage::Slot current_thread_slot_;
   WebThemeEngineImpl theme_engine_;
   WebMimeRegistryImpl mime_registry_;
   WebUnitTestSupportImpl unit_test_support_;

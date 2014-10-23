@@ -14,7 +14,6 @@
 #include "net/base/mime_util.h"
 #include "net/base/net_errors.h"
 #include "sky/engine/public/platform/WebWaitableEvent.h"
-#include "sky/engine/testing/platform/webthread_impl.h"
 
 namespace sky {
 namespace {
@@ -43,8 +42,7 @@ PlatformImpl::PlatformImpl()
       shared_timer_func_(NULL),
       shared_timer_fire_time_(0.0),
       shared_timer_fire_time_was_set_while_suspended_(false),
-      shared_timer_suspended_(0),
-      current_thread_slot_(&DestroyCurrentThread) {
+      shared_timer_suspended_(0) {
 }
 
 PlatformImpl::~PlatformImpl() {
@@ -147,22 +145,6 @@ blink::WebData PlatformImpl::parseDataURL(
   return blink::WebData();
 }
 
-blink::WebThread* PlatformImpl::currentThread() {
-  WebThreadImplForMessageLoop* thread =
-      static_cast<WebThreadImplForMessageLoop*>(current_thread_slot_.Get());
-  if (thread)
-    return (thread);
-
-  scoped_refptr<base::MessageLoopProxy> message_loop =
-      base::MessageLoopProxy::current();
-  if (!message_loop.get())
-    return NULL;
-
-  thread = new WebThreadImplForMessageLoop(message_loop.get());
-  current_thread_slot_.Set(thread);
-  return thread;
-}
-
 blink::WebWaitableEvent* PlatformImpl::createWaitableEvent() {
   return new WebWaitableEventImpl();
 }
@@ -176,13 +158,6 @@ blink::WebWaitableEvent* PlatformImpl::waitMultipleEvents(
       vector_as_array(&events), events.size());
   DCHECK_LT(idx, web_events.size());
   return web_events[idx];
-}
-
-// static
-void PlatformImpl::DestroyCurrentThread(void* thread) {
-  WebThreadImplForMessageLoop* impl =
-      static_cast<WebThreadImplForMessageLoop*>(thread);
-  delete impl;
 }
 
 }  // namespace sky

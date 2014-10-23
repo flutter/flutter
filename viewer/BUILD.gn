@@ -28,8 +28,6 @@ shared_library("viewer") {
     "platform/webmimeregistry_impl.h",
     "platform/webthemeengine_impl.cc",
     "platform/webthemeengine_impl.h",
-    "platform/webthread_impl.cc",
-    "platform/webthread_impl.h",
     "platform/weburlloader_impl.cc",
     "platform/weburlloader_impl.h",
     "script/script_runner.cc",

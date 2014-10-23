@@ -66,7 +66,6 @@ class WebSandboxSupport;
 class WebScrollbarBehavior;
 struct WebFloatPoint;
 class WebThemeEngine;
-class WebThread;
 class WebURL;
 class WebURLLoader;
 class WebUnitTestSupport;
@@ -196,13 +195,6 @@ public:
     virtual WebString queryLocalizedString(WebLocalizedString::Name) { return WebString(); }
     virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter) { return WebString(); }
     virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter1, const WebString& parameter2) { return WebString(); }
-
-
-    // Threads -------------------------------------------------------
-
-    // Returns an interface to the current thread. This is owned by the
-    // embedder.
-    virtual WebThread* currentThread() { return 0; }
 
 
     // WaitableEvent -------------------------------------------------------

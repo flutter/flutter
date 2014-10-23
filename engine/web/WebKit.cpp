@@ -48,7 +48,6 @@
 #include "platform/graphics/ImageDecodingStore.h"
 #include "platform/graphics/media/MediaPlayer.h"
 #include "platform/heap/Heap.h"
-#include "platform/heap/glue/MessageLoopInterruptor.h"
 #include "public/platform/Platform.h"
 #include "web/WebMediaPlayerClientImpl.h"
 #include "wtf/Assertions.h"
