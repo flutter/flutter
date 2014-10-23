@@ -115,14 +115,11 @@ private:
         ~FragmentParsingContext();
 
         DocumentFragment* fragment() const { return m_fragment; }
-        Element* contextElement() const { ASSERT(m_fragment); return m_contextElementStackItem->element(); }
-        HTMLStackItem* contextElementStackItem() const { ASSERT(m_fragment); return m_contextElementStackItem.get(); }
 
         void trace(Visitor*);
 
     private:
         RawPtrWillBeMember<DocumentFragment> m_fragment;
-        RefPtrWillBeMember<HTMLStackItem> m_contextElementStackItem;
     };
 
 #if ENABLE(ASSERT)

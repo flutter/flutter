@@ -126,17 +126,10 @@ public:
     void insertTextNode(const String&, WhitespaceMode = WhitespaceUnknown);
 
     bool isEmpty() const { return !m_openElements.stackDepth(); }
-    HTMLElementStack::ElementRecord* currentElementRecord() const { return m_openElements.topRecord(); }
     Element* currentElement() const { return m_openElements.top(); }
     ContainerNode* currentNode() const { return m_openElements.topNode(); }
-    HTMLStackItem* currentStackItem() const { return m_openElements.topStackItem(); }
-    HTMLStackItem* oneBelowTop() const { return m_openElements.oneBelowTop(); }
     Document& ownerDocumentForCurrentNode();
     HTMLElementStack* openElements() const { return &m_openElements; }
-    bool currentIsRootNode() { return m_openElements.topNode() == m_openElements.rootNode(); }
-
-    Element* head() const { return m_head->element(); }
-    HTMLStackItem* headStackItem() const { return m_head.get(); }
 
     ParserContentPolicy parserContentPolicy() { return m_parserContentPolicy; }
 
@@ -159,7 +152,6 @@ private:
     // and a Document in all other cases.
     RawPtrWillBeMember<ContainerNode> m_attachmentRoot;
 
-    RefPtrWillBeMember<HTMLStackItem> m_head;
     mutable HTMLElementStack m_openElements;
 
     TaskQueue m_taskQueue;

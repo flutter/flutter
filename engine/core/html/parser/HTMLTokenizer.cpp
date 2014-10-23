@@ -30,6 +30,7 @@
 
 #include "core/HTMLNames.h"
 #include "core/HTMLTokenizerNames.h"
+#include "core/html/parser/AtomicHTMLToken.h"
 #include "core/html/parser/HTMLEntityParser.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/html/parser/HTMLTreeBuilder.h"

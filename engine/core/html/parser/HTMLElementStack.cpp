@@ -32,25 +32,15 @@
 
 namespace blink {
 
-HTMLElementStack::ElementRecord::ElementRecord(PassRefPtrWillBeRawPtr<HTMLStackItem> item, PassOwnPtrWillBeRawPtr<ElementRecord> next)
-    : m_item(item)
+HTMLElementStack::ElementRecord::ElementRecord(PassRefPtr<ContainerNode> node, PassOwnPtr<ElementRecord> next)
+    : m_node(node)
     , m_next(next)
 {
-    ASSERT(m_item);
+    ASSERT(m_node);
 }
 
-#if !ENABLE(OILPAN)
 HTMLElementStack::ElementRecord::~ElementRecord()
 {
-}
-#endif
-
-void HTMLElementStack::ElementRecord::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_item);
-    visitor->trace(m_next);
-#endif
 }
 
 HTMLElementStack::HTMLElementStack()
@@ -61,11 +51,6 @@ HTMLElementStack::HTMLElementStack()
 
 HTMLElementStack::~HTMLElementStack()
 {
-}
-
-bool HTMLElementStack::hasOnlyOneElement() const
-{
-    return !topRecord()->next();
 }
 
 void HTMLElementStack::popAll()
@@ -85,14 +70,6 @@ void HTMLElementStack::pop()
     popCommon();
 }
 
-void HTMLElementStack::popUntil(const AtomicString& tagName)
-{
-    while (!topStackItem()->hasLocalName(tagName)) {
-        // pop() will ASSERT if a <body>, <head> or <html> will be popped.
-        pop();
-    }
-}
-
 void HTMLElementStack::popUntil(Element* element)
 {
     while (top() != element)
@@ -105,41 +82,18 @@ void HTMLElementStack::popUntilPopped(Element* element)
     pop();
 }
 
-void HTMLElementStack::pushRootNode(PassRefPtrWillBeRawPtr<HTMLStackItem> rootItem)
+void HTMLElementStack::pushRootNode(PassRefPtr<ContainerNode> root)
 {
     ASSERT(!m_top);
     ASSERT(!m_rootNode);
-    m_rootNode = rootItem->node();
-    pushCommon(rootItem);
+    m_rootNode = root.get();
+    pushCommon(root);
 }
 
-void HTMLElementStack::push(PassRefPtrWillBeRawPtr<HTMLStackItem> item)
+void HTMLElementStack::push(PassRefPtr<ContainerNode> node)
 {
     ASSERT(m_rootNode);
-    pushCommon(item);
-}
-
-void HTMLElementStack::insertAbove(PassRefPtrWillBeRawPtr<HTMLStackItem> item, ElementRecord* recordBelow)
-{
-    ASSERT(item);
-    ASSERT(recordBelow);
-    ASSERT(m_top);
-    ASSERT(m_rootNode);
-    if (recordBelow == m_top) {
-        push(item);
-        return;
-    }
-
-    for (ElementRecord* recordAbove = m_top.get(); recordAbove; recordAbove = recordAbove->next()) {
-        if (recordAbove->next() != recordBelow)
-            continue;
-
-        m_stackDepth++;
-        recordAbove->setNext(adoptPtrWillBeNoop(new ElementRecord(item, recordAbove->releaseNext())));
-        recordAbove->next()->element()->beginParsingChildren();
-        return;
-    }
-    ASSERT_NOT_REACHED();
+    pushCommon(node);
 }
 
 HTMLElementStack::ElementRecord* HTMLElementStack::topRecord() const
@@ -148,90 +102,12 @@ HTMLElementStack::ElementRecord* HTMLElementStack::topRecord() const
     return m_top.get();
 }
 
-HTMLStackItem* HTMLElementStack::oneBelowTop() const
-{
-    // We should never call this if there are fewer than 2 elements on the stack.
-    ASSERT(m_top);
-    ASSERT(m_top->next());
-    if (m_top->next()->stackItem()->isElementNode())
-        return m_top->next()->stackItem().get();
-    return 0;
-}
-
-void HTMLElementStack::remove(Element* element)
-{
-    if (m_top->element() == element) {
-        pop();
-        return;
-    }
-    removeNonTopCommon(element);
-}
-
-HTMLElementStack::ElementRecord* HTMLElementStack::find(Element* element) const
-{
-    for (ElementRecord* pos = m_top.get(); pos; pos = pos->next()) {
-        if (pos->node() == element)
-            return pos;
-    }
-    return 0;
-}
-
-HTMLElementStack::ElementRecord* HTMLElementStack::topmost(const AtomicString& tagName) const
-{
-    for (ElementRecord* pos = m_top.get(); pos; pos = pos->next()) {
-        if (pos->stackItem()->hasLocalName(tagName))
-            return pos;
-    }
-    return 0;
-}
-
-bool HTMLElementStack::contains(Element* element) const
-{
-    return !!find(element);
-}
-
-bool HTMLElementStack::contains(const AtomicString& tagName) const
-{
-    return !!topmost(tagName);
-}
-
-template <bool isMarker(HTMLStackItem*)>
-bool inScopeCommon(HTMLElementStack::ElementRecord* top, const AtomicString& targetTag)
-{
-    for (HTMLElementStack::ElementRecord* pos = top; pos; pos = pos->next()) {
-        HTMLStackItem* item = pos->stackItem().get();
-        if (item->hasLocalName(targetTag))
-            return true;
-        if (isMarker(item))
-            return false;
-    }
-    ASSERT_NOT_REACHED(); // <html> is always on the stack and is a scope marker.
-    return false;
-}
-
-bool HTMLElementStack::inScope(Element* targetElement) const
-{
-    for (ElementRecord* pos = m_top.get(); pos; pos = pos->next()) {
-        HTMLStackItem* item = pos->stackItem().get();
-        if (item->node() == targetElement)
-            return true;
-    }
-    ASSERT_NOT_REACHED(); // <html> is always on the stack and is a scope marker.
-    return false;
-}
-
-ContainerNode* HTMLElementStack::rootNode() const
-{
-    ASSERT(m_rootNode);
-    return m_rootNode;
-}
-
-void HTMLElementStack::pushCommon(PassRefPtrWillBeRawPtr<HTMLStackItem> item)
+void HTMLElementStack::pushCommon(PassRefPtr<ContainerNode> node)
 {
     ASSERT(m_rootNode);
 
     m_stackDepth++;
-    m_top = adoptPtrWillBeNoop(new ElementRecord(item, m_top.release()));
+    m_top = adoptPtr(new ElementRecord(node, m_top.release()));
 }
 
 void HTMLElementStack::popCommon()
@@ -255,12 +131,6 @@ void HTMLElementStack::removeNonTopCommon(Element* element)
         }
     }
     ASSERT_NOT_REACHED();
-}
-
-void HTMLElementStack::trace(Visitor* visitor)
-{
-    visitor->trace(m_top);
-    visitor->trace(m_rootNode);
 }
 
 #ifndef NDEBUG

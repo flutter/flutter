@@ -971,7 +971,6 @@ sky_core_files = [
   "html/parser/HTMLScriptRunner.h",
   "html/parser/HTMLSrcsetParser.cpp",
   "html/parser/HTMLSrcsetParser.h",
-  "html/parser/HTMLStackItem.h",
   "html/parser/HTMLToken.h",
   "html/parser/HTMLTokenizer.cpp",
   "html/parser/HTMLTokenizer.h",

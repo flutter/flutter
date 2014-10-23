@@ -36,7 +36,6 @@
 #include "core/html/HTMLTemplateElement.h"
 #include "core/html/parser/AtomicHTMLToken.h"
 #include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/HTMLStackItem.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/loader/FrameLoaderClient.h"
 #include "platform/NotImplemented.h"
@@ -274,8 +273,6 @@ void HTMLConstructionSite::trace(Visitor* visitor)
 {
     visitor->trace(m_document);
     visitor->trace(m_attachmentRoot);
-    visitor->trace(m_head);
-    visitor->trace(m_openElements);
     visitor->trace(m_taskQueue);
     visitor->trace(m_pendingText);
 }
@@ -308,7 +305,7 @@ void HTMLConstructionSite::insertHTMLElement(AtomicHTMLToken* token)
 {
     RefPtrWillBeRawPtr<HTMLElement> element = createHTMLElement(token);
     attachLater(currentNode(), element);
-    m_openElements.push(HTMLStackItem::create(element.release(), token));
+    m_openElements.push(element.release());
 }
 
 void HTMLConstructionSite::insertSelfClosingHTMLElement(AtomicHTMLToken* token)
@@ -328,7 +325,7 @@ void HTMLConstructionSite::insertScriptElement(AtomicHTMLToken* token)
     setAttributes(element.get(), token, m_parserContentPolicy);
     if (scriptingContentIsAllowed(m_parserContentPolicy))
         attachLater(currentNode(), element);
-    m_openElements.push(HTMLStackItem::create(element.release(), token));
+    m_openElements.push(element.release());
 }
 
 void HTMLConstructionSite::insertTextNode(const String& string, WhitespaceMode whitespaceMode)

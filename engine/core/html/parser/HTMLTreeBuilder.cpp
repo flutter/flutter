@@ -35,7 +35,6 @@
 #include "core/html/parser/AtomicHTMLToken.h"
 #include "core/html/parser/HTMLDocumentParser.h"
 #include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/HTMLStackItem.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/html/parser/HTMLTokenizer.h"
 
@@ -58,7 +57,7 @@ HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* docum
     , m_scriptToProcessStartPosition(uninitializedPositionValue1())
     , m_options(options)
 {
-    m_tree.openElements()->pushRootNode(HTMLStackItem::create(document, HTMLStackItem::ItemForContextElement));
+    m_tree.openElements()->pushRootNode(document);
 }
 
 // FIXME: Member variables should be grouped into self-initializing structs to
@@ -83,7 +82,7 @@ HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, DocumentFragment* f
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-end.html#fragment-case
     // For efficiency, we skip step 4.2 ("Let root be a new html element with no attributes")
     // and instead use the DocumentFragment as a root node.
-    m_tree.openElements()->pushRootNode(HTMLStackItem::create(fragment, HTMLStackItem::ItemForDocumentFragmentNode));
+    m_tree.openElements()->pushRootNode(fragment);
 }
 
 HTMLTreeBuilder::~HTMLTreeBuilder()
@@ -119,7 +118,6 @@ HTMLTreeBuilder::FragmentParsingContext::FragmentParsingContext(DocumentFragment
     : m_fragment(fragment)
 {
     ASSERT(!fragment->hasChildren());
-    m_contextElementStackItem = HTMLStackItem::create(contextElement, HTMLStackItem::ItemForContextElement);
 }
 
 HTMLTreeBuilder::FragmentParsingContext::~FragmentParsingContext()
@@ -129,7 +127,6 @@ HTMLTreeBuilder::FragmentParsingContext::~FragmentParsingContext()
 void HTMLTreeBuilder::FragmentParsingContext::trace(Visitor* visitor)
 {
     visitor->trace(m_fragment);
-    visitor->trace(m_contextElementStackItem);
 }
 
 PassRefPtrWillBeRawPtr<Element> HTMLTreeBuilder::takeScriptToProcess(TextPosition& scriptStartPosition)
@@ -197,9 +194,9 @@ void HTMLTreeBuilder::processEndTag(AtomicHTMLToken* token)
     if (mode == HTMLMode) {
         HTMLElementStack::ElementRecord* record = m_tree.openElements()->topRecord();
         while (record->next()) {
-            RefPtrWillBeRawPtr<HTMLStackItem> item = record->stackItem();
-            if (item->hasLocalName(token->name())) {
-                m_tree.openElements()->popUntilPopped(item->element());
+            RefPtrWillBeRawPtr<Element> element = record->element();
+            if (element->hasLocalName(token->name())) {
+                m_tree.openElements()->popUntilPopped(element.get());
                 ASSERT(m_tree.openElements()->topNode());
                 return;
             }
@@ -211,7 +208,7 @@ void HTMLTreeBuilder::processEndTag(AtomicHTMLToken* token)
     ASSERT(mode == TextMode);
     if (token->name() == HTMLNames::scriptTag) {
         // Pause ourselves so that parsing stops until the script can be processed by the caller.
-        ASSERT(m_tree.currentStackItem()->hasLocalName(HTMLNames::scriptTag.localName()));
+        ASSERT(m_tree.currentElement()->hasLocalName(HTMLNames::scriptTag.localName()));
         if (scriptingContentIsAllowed(m_tree.parserContentPolicy()))
             m_scriptToProcess = m_tree.currentElement();
         m_tree.openElements()->pop();
