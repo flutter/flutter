@@ -31,7 +31,6 @@
 #include "core/css/resolver/StyleResolver.h"
 #include "core/dom/DocumentMarkerController.h"
 #include "core/editing/FrameSelection.h"
-#include "core/events/OverflowEvent.h"
 #include "core/fetch/ResourceFetcher.h"
 #include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/frame/FrameHost.h"
@@ -1474,19 +1473,6 @@ void FrameView::updateOverflowStatus(bool horizontalOverflow, bool verticalOverf
         m_overflowStatusDirty = false;
         return;
     }
-
-    bool horizontalOverflowChanged = (m_horizontalOverflow != horizontalOverflow);
-    bool verticalOverflowChanged = (m_verticalOverflow != verticalOverflow);
-
-    if (horizontalOverflowChanged || verticalOverflowChanged) {
-        m_horizontalOverflow = horizontalOverflow;
-        m_verticalOverflow = verticalOverflow;
-
-        RefPtrWillBeRawPtr<OverflowEvent> event = OverflowEvent::create(horizontalOverflowChanged, horizontalOverflow, verticalOverflowChanged, verticalOverflow);
-        event->setTarget(m_viewportRenderer->node());
-        m_frame->document()->enqueueAnimationFrameEvent(event.release());
-    }
-
 }
 
 IntRect FrameView::windowClipRect(IncludeScrollbarsInRect scrollbarInclusion) const

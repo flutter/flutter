@@ -30,7 +30,6 @@
 #include "core/dom/shadow/ShadowRoot.h"
 #include "core/editing/Editor.h"
 #include "core/editing/FrameSelection.h"
-#include "core/events/OverflowEvent.h"
 #include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
@@ -84,49 +83,6 @@ typedef WTF::HashMap<RenderBlock*, OwnPtr<ListHashSet<RenderInline*> > > Continu
 typedef WTF::HashSet<RenderBlock*> DelayedUpdateScrollInfoSet;
 static int gDelayUpdateScrollInfo = 0;
 static DelayedUpdateScrollInfoSet* gDelayedUpdateScrollInfoSet = 0;
-
-// This class helps dispatching the 'overflow' event on layout change. overflow can be set on RenderBoxes, yet the existing code
-// only works on RenderBlocks. If this changes, this class should be shared with other RenderBoxes.
-class OverflowEventDispatcher {
-    WTF_MAKE_NONCOPYABLE(OverflowEventDispatcher);
-public:
-    OverflowEventDispatcher(const RenderBlock* block)
-        : m_block(block)
-        , m_hadHorizontalLayoutOverflow(false)
-        , m_hadVerticalLayoutOverflow(false)
-    {
-        m_shouldDispatchEvent = !m_block->isAnonymous() && m_block->hasOverflowClip() && m_block->document().hasListenerType(Document::OVERFLOWCHANGED_LISTENER);
-        if (m_shouldDispatchEvent) {
-            m_hadHorizontalLayoutOverflow = m_block->hasHorizontalLayoutOverflow();
-            m_hadVerticalLayoutOverflow = m_block->hasVerticalLayoutOverflow();
-        }
-    }
-
-    ~OverflowEventDispatcher()
-    {
-        if (!m_shouldDispatchEvent)
-            return;
-
-        bool hasHorizontalLayoutOverflow = m_block->hasHorizontalLayoutOverflow();
-        bool hasVerticalLayoutOverflow = m_block->hasVerticalLayoutOverflow();
-
-        bool horizontalLayoutOverflowChanged = hasHorizontalLayoutOverflow != m_hadHorizontalLayoutOverflow;
-        bool verticalLayoutOverflowChanged = hasVerticalLayoutOverflow != m_hadVerticalLayoutOverflow;
-
-        if (!horizontalLayoutOverflowChanged && !verticalLayoutOverflowChanged)
-            return;
-
-        RefPtrWillBeRawPtr<OverflowEvent> event = OverflowEvent::create(horizontalLayoutOverflowChanged, hasHorizontalLayoutOverflow, verticalLayoutOverflowChanged, hasVerticalLayoutOverflow);
-        event->setTarget(m_block->node());
-        m_block->document().enqueueAnimationFrameEvent(event.release());
-    }
-
-private:
-    const RenderBlock* m_block;
-    bool m_shouldDispatchEvent;
-    bool m_hadHorizontalLayoutOverflow;
-    bool m_hadVerticalLayoutOverflow;
-};
 
 RenderBlock::RenderBlock(ContainerNode* node)
     : RenderBox(node)
@@ -1016,8 +972,6 @@ void RenderBlock::updateScrollInfoAfterLayout()
 
 void RenderBlock::layout()
 {
-    OverflowEventDispatcher dispatcher(this);
-
     // Table cells call layoutBlock directly, so don't add any logic here.  Put code into
     // layoutBlock().
     layoutBlock(false);

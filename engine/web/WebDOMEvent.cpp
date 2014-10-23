@@ -159,12 +159,6 @@ bool WebDOMEvent::isBeforeTextInsertedEvent() const
     return m_private->isBeforeTextInsertedEvent();
 }
 
-bool WebDOMEvent::isOverflowEvent() const
-{
-    ASSERT(m_private.get());
-    return m_private->hasInterface(EventNames::OverflowEvent);
-}
-
 bool WebDOMEvent::isPageTransitionEvent() const
 {
     ASSERT(m_private.get());
