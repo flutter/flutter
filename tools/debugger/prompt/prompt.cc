@@ -45,13 +45,17 @@ class Prompt : public mojo::ApplicationDelegate {
     app->ConnectToService("mojo:sky_viewer", &tracing_);
     if (app->args().size() > 1)
       url_ = app->args()[1];
+    else {
+      url_ = "https://raw.githubusercontent.com/domokit/mojo/master/sky/"
+          "examples/home.sky";
+    }
   }
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->ConnectToService(&debugger_);
-    if (!url_.empty())
-      Reload();
+    std::cout << "Loading " << url_ << std::endl;
+    Reload();
     ScheduleWaitForInput();
     return true;
   }

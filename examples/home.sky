@@ -1,7 +1,9 @@
 #!mojo mojo:sky
+<sky>
 <style>
  h1 { font-size: 2em; margin: 1em; }
  p { margin: 0.5em 1em; color: #bcd8f5; font-weight: 900; }
 </style>
 <h1>about:blank</h1>
 <p>Welcome to Sky!</p>
+</sky>
