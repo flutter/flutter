@@ -31,12 +31,4 @@
     readonly attribute unsigned long videoWidth;
     readonly attribute unsigned long videoHeight;
     [Reflect, URL] attribute DOMString poster;
-
-    // The number of frames that have been decoded and made available for
-    // playback.
-    [MeasureAs=PrefixedVideoDecodedFrameCount] readonly attribute unsigned long webkitDecodedFrameCount;
-
-    // The number of decoded frames that have been dropped by the player
-    // for performance reasons during playback.
-    [MeasureAs=PrefixedVideoDroppedFrameCount] readonly attribute unsigned long webkitDroppedFrameCount;
 };

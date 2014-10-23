@@ -37,8 +37,5 @@
     readonly attribute double           radiusX;
     readonly attribute double           radiusY;
     readonly attribute float            force;
-    [MeasureAs=PrefixedTouchRadiusX] readonly attribute double webkitRadiusX;
-    [MeasureAs=PrefixedTouchRadiusY] readonly attribute double webkitRadiusY;
-    [MeasureAs=PrefixedTouchRotationAngle] readonly attribute float webkitRotationAngle;
-    [MeasureAs=PrefixedTouchForce] readonly attribute float webkitForce;
+    readonly attribute float rotationAngle;
 };

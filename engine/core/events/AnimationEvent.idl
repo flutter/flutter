@@ -23,61 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/WebKitAnimationEvent.h"
+[
+    EventConstructor,
+] interface AnimationEvent : Event {
+    [InitializedByEventConstructor] readonly attribute DOMString animationName;
+    [InitializedByEventConstructor] readonly attribute double elapsedTime;
+};
 
-namespace blink {
-
-WebKitAnimationEventInit::WebKitAnimationEventInit()
-    : animationName()
-    , elapsedTime(0.0)
-{
-}
-
-WebKitAnimationEvent::WebKitAnimationEvent()
-    : m_elapsedTime(0.0)
-{
-    ScriptWrappable::init(this);
-}
-
-WebKitAnimationEvent::WebKitAnimationEvent(const AtomicString& type, const WebKitAnimationEventInit& initializer)
-    : Event(type, initializer)
-    , m_animationName(initializer.animationName)
-    , m_elapsedTime(initializer.elapsedTime)
-{
-    ScriptWrappable::init(this);
-}
-
-WebKitAnimationEvent::WebKitAnimationEvent(const AtomicString& type, const String& animationName, double elapsedTime)
-    : Event(type, true, true)
-    , m_animationName(animationName)
-    , m_elapsedTime(elapsedTime)
-{
-    ScriptWrappable::init(this);
-}
-
-WebKitAnimationEvent::~WebKitAnimationEvent()
-{
-}
-
-const String& WebKitAnimationEvent::animationName() const
-{
-    return m_animationName;
-}
-
-double WebKitAnimationEvent::elapsedTime() const
-{
-    return m_elapsedTime;
-}
-
-const AtomicString& WebKitAnimationEvent::interfaceName() const
-{
-    return EventNames::WebKitAnimationEvent;
-}
-
-void WebKitAnimationEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
-} // namespace blink

@@ -71,8 +71,6 @@
     ClientRectList getClientRects();
     ClientRect getBoundingClientRect();
 
-    // WebKit extensions
-
     // CompareResults
     const unsigned short NODE_BEFORE           = 0;
     const unsigned short NODE_AFTER            = 1;

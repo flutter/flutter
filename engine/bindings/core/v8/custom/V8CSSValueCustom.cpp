@@ -33,8 +33,8 @@
 
 #include "bindings/core/v8/V8CSSPrimitiveValue.h"
 #include "bindings/core/v8/V8CSSValueList.h"
-#include "bindings/core/v8/V8WebKitCSSFilterValue.h"
-#include "bindings/core/v8/V8WebKitCSSTransformValue.h"
+#include "bindings/core/v8/V8CSSFilterValue.h"
+#include "bindings/core/v8/V8CSSTransformValue.h"
 
 namespace blink {
 

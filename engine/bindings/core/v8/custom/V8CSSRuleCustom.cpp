@@ -31,6 +31,7 @@
 #include "config.h"
 #include "bindings/core/v8/V8CSSRule.h"
 
+#include "bindings/core/v8/V8CSSFilterRule.h"
 #include "bindings/core/v8/V8CSSFontFaceRule.h"
 #include "bindings/core/v8/V8CSSKeyframeRule.h"
 #include "bindings/core/v8/V8CSSKeyframesRule.h"
@@ -38,7 +39,6 @@
 #include "bindings/core/v8/V8CSSStyleRule.h"
 #include "bindings/core/v8/V8CSSSupportsRule.h"
 #include "bindings/core/v8/V8CSSViewportRule.h"
-#include "bindings/core/v8/V8WebKitCSSFilterRule.h"
 
 namespace blink {
 

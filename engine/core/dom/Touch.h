@@ -61,12 +61,9 @@ public:
     double pageX() const { return m_pagePos.x(); }
     double pageY() const { return m_pagePos.y(); }
     double radiusX() const { return m_radius.width(); }
-    double webkitRadiusX() const { return m_radius.width(); }
     double radiusY() const { return m_radius.height(); }
-    double webkitRadiusY() const { return m_radius.height(); }
-    float webkitRotationAngle() const { return m_rotationAngle; }
+    float rotationAngle() const { return m_rotationAngle; }
     float force() const { return m_force; }
-    float webkitForce() const { return m_force; }
 
     // Blink-internal methods
     const LayoutPoint& absoluteLocation() const { return m_absoluteLocation; }

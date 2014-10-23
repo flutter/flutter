@@ -27,9 +27,7 @@
  * SUCH DAMAGE.
  */
 
-[
-    ImplementedAs=CSSFilterRule
-] interface WebKitCSSFilterRule : CSSRule {
+interface CSSFilterRule : CSSRule {
     readonly attribute CSSStyleDeclaration style;
 
     // FIXME: We should expose the filter name once the CSSOM for the @filter rule is specified.

@@ -23,10 +23,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    EventConstructor,
-] interface WebKitAnimationEvent : Event {
-    [InitializedByEventConstructor] readonly attribute DOMString animationName;
-    [InitializedByEventConstructor] readonly attribute double elapsedTime;
-};
+#include "config.h"
+#include "core/events/AnimationEvent.h"
 
+namespace blink {
+
+AnimationEventInit::AnimationEventInit()
+    : animationName()
+    , elapsedTime(0.0)
+{
+}
+
+AnimationEvent::AnimationEvent()
+    : m_elapsedTime(0.0)
+{
+    ScriptWrappable::init(this);
+}
+
+AnimationEvent::AnimationEvent(const AtomicString& type, const AnimationEventInit& initializer)
+    : Event(type, initializer)
+    , m_animationName(initializer.animationName)
+    , m_elapsedTime(initializer.elapsedTime)
+{
+    ScriptWrappable::init(this);
+}
+
+AnimationEvent::AnimationEvent(const AtomicString& type, const String& animationName, double elapsedTime)
+    : Event(type, true, true)
+    , m_animationName(animationName)
+    , m_elapsedTime(elapsedTime)
+{
+    ScriptWrappable::init(this);
+}
+
+AnimationEvent::~AnimationEvent()
+{
+}
+
+const String& AnimationEvent::animationName() const
+{
+    return m_animationName;
+}
+
+double AnimationEvent::elapsedTime() const
+{
+    return m_elapsedTime;
+}
+
+const AtomicString& AnimationEvent::interfaceName() const
+{
+    return EventNames::AnimationEvent;
+}
+
+void AnimationEvent::trace(Visitor* visitor)
+{
+    Event::trace(visitor);
+}
+
+} // namespace blink

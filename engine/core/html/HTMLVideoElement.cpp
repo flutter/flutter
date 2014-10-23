@@ -203,22 +203,6 @@ void HTMLVideoElement::didMoveToNewDocument(Document& oldDocument)
     HTMLMediaElement::didMoveToNewDocument(oldDocument);
 }
 
-unsigned HTMLVideoElement::webkitDecodedFrameCount() const
-{
-    if (!webMediaPlayer())
-        return 0;
-
-    return webMediaPlayer()->decodedFrameCount();
-}
-
-unsigned HTMLVideoElement::webkitDroppedFrameCount() const
-{
-    if (!webMediaPlayer())
-        return 0;
-
-    return webMediaPlayer()->droppedFrameCount();
-}
-
 KURL HTMLVideoElement::posterImageURL() const
 {
     String url = stripLeadingAndTrailingHTMLSpaces(imageSourceURL());

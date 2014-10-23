@@ -82,11 +82,5 @@
     attribute boolean muted;
     [Reflect=muted] attribute boolean defaultMuted;
 
-    // WebKit extensions
-
-    // The number of bytes consumed by the media decoder.
-    [MeasureAs=PrefixedAudioDecodedByteCount] readonly attribute unsigned long webkitAudioDecodedByteCount;
-    [MeasureAs=PrefixedVideoDecodedByteCount] readonly attribute unsigned long webkitVideoDecodedByteCount;
-
     [Reflect, RuntimeEnabled=SubresourceIntegrity] attribute DOMString integrity;
 };

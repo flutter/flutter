@@ -32,8 +32,6 @@
     [InitializedByEventConstructor] readonly attribute EventTarget?     relatedTarget;
     [MeasureAs=MouseEventMovementX] readonly attribute long             movementX;
     [MeasureAs=MouseEventMovementY] readonly attribute long             movementY;
-    [MeasureAs=PrefixedMouseEventMovementX, ImplementedAs=movementX] readonly attribute long webkitMovementX;
-    [MeasureAs=PrefixedMouseEventMovementY, ImplementedAs=movementY] readonly attribute long webkitMovementY;
 
      void initMouseEvent([Default=Undefined] optional DOMString type,
                                        [Default=Undefined] optional boolean canBubble,

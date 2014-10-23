@@ -61,7 +61,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     [TreatNullAs=NullString] attribute DOMString globalCompositeOperation; // (default source-over)
 
     // image smoothing
-    [ImplementedAs=imageSmoothingEnabled, MeasureAs=PrefixedImageSmoothingEnabled] attribute boolean webkitImageSmoothingEnabled;
     [MeasureAs=UnprefixedImageSmoothingEnabled] attribute boolean imageSmoothingEnabled;
 
     // colors and styles (see also the CanvasDrawingStyles interface)

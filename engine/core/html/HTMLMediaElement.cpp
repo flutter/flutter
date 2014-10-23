@@ -2353,20 +2353,6 @@ blink::WebLayer* HTMLMediaElement::platformLayer() const
     return m_webLayer;
 }
 
-unsigned HTMLMediaElement::webkitAudioDecodedByteCount() const
-{
-    if (!webMediaPlayer())
-        return 0;
-    return webMediaPlayer()->audioDecodedByteCount();
-}
-
-unsigned HTMLMediaElement::webkitVideoDecodedByteCount() const
-{
-    if (!webMediaPlayer())
-        return 0;
-    return webMediaPlayer()->videoDecodedByteCount();
-}
-
 bool HTMLMediaElement::isURLAttribute(const Attribute& attribute) const
 {
     return attribute.name() == HTMLNames::srcAttr || HTMLElement::isURLAttribute(attribute);

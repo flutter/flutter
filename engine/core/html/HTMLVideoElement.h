@@ -55,10 +55,6 @@ public:
     unsigned videoWidth() const;
     unsigned videoHeight() const;
 
-    // Statistics
-    unsigned webkitDecodedFrameCount() const;
-    unsigned webkitDroppedFrameCount() const;
-
     // Used by canvas to gain raw pixel access
     void paintCurrentFrameInContext(GraphicsContext*, const IntRect&) const;
 

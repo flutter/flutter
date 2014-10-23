@@ -125,10 +125,6 @@ public:
     void play();
     void pause();
 
-    // statistics
-    unsigned webkitAudioDecodedByteCount() const;
-    unsigned webkitVideoDecodedByteCount() const;
-
     // media source extensions
     void closeMediaSource();
     void durationChanged(double duration, bool requestSeek);
