@@ -34,7 +34,6 @@
 #include "bindings/core/v8/V8Element.h"
 #include "bindings/core/v8/V8EventTarget.h"
 #include "bindings/core/v8/V8MediaKeyError.h"
-#include "bindings/core/v8/V8MessagePort.h"
 #include "bindings/core/v8/V8Path2D.h"
 #include "bindings/core/v8/V8VoidCallback.h"
 #include "bindings/core/v8/V8Window.h"
@@ -259,22 +258,6 @@ bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, RefP
     // exists on a prototype chain of v8Value.
     value = toDOMWindow(v8Value, dictionary.isolate());
     return true;
-}
-
-template <>
-bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, MessagePortArray& value)
-{
-    v8::Local<v8::Value> v8Value;
-    if (!dictionary.get(key, v8Value))
-        return false;
-
-    ASSERT(dictionary.isolate());
-    ASSERT(dictionary.isolate() == v8::Isolate::GetCurrent());
-    if (blink::isUndefinedOrNull(v8Value))
-        return true;
-    bool success = false;
-    value = toRefPtrWillBeMemberNativeArray<MessagePort, V8MessagePort>(v8Value, key, dictionary.isolate(), &success);
-    return success;
 }
 
 template <>
@@ -607,17 +590,5 @@ template bool DictionaryHelper::convert(const Dictionary&, Dictionary::Conversio
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<ArrayBufferView>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtrWillBeMember<MediaKeyError>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtrWillBeMember<EventTarget>& value);
-
-template <>
-bool DictionaryHelper::convert(const Dictionary& dictionary, Dictionary::ConversionContext& context, const String& key, MessagePortArray& value)
-{
-    Dictionary::ConversionContextScope scope(context);
-
-    v8::Local<v8::Value> v8Value;
-    if (!dictionary.get(key, v8Value))
-        return true;
-
-    return DictionaryHelper::get(dictionary, key, value);
-}
 
 } // namespace blink

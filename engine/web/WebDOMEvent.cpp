@@ -147,12 +147,6 @@ bool WebDOMEvent::isClipboardEvent() const
     return m_private->isClipboardEvent();
 }
 
-bool WebDOMEvent::isMessageEvent() const
-{
-    ASSERT(m_private.get());
-    return m_private->hasInterface(EventNames::MessageEvent);
-}
-
 bool WebDOMEvent::isWheelEvent() const
 {
     ASSERT(m_private.get());

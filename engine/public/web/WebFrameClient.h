@@ -33,7 +33,6 @@
 
 #include "../platform/WebColor.h"
 #include "WebAXObject.h"
-#include "WebDOMMessageEvent.h"
 #include "WebFrame.h"
 #include "WebIconURL.h"
 #include "WebNavigationPolicy.h"

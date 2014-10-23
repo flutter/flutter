@@ -34,7 +34,6 @@
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8ImageData.h"
-#include "bindings/core/v8/V8MessagePort.h"
 #include "bindings/core/v8/custom/V8ArrayBufferCustom.h"
 #include "bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
 #include "bindings/core/v8/custom/V8DataViewCustom.h"
@@ -48,7 +47,6 @@
 #include "bindings/core/v8/custom/V8Uint8ArrayCustom.h"
 #include "bindings/core/v8/custom/V8Uint8ClampedArrayCustom.h"
 #include "core/dom/ExceptionCode.h"
-#include "core/dom/MessagePort.h"
 #include "core/html/ImageData.h"
 #include "core/html/canvas/DataView.h"
 #include "platform/SharedBuffer.h"
@@ -183,7 +181,6 @@ enum SerializationTag {
     Int32Tag = 'I', // value:ZigZag-encoded int32 -> Integer
     Uint32Tag = 'U', // value:uint32_t -> Integer
     DateTag = 'D', // value:double -> Date (ref)
-    MessagePortTag = 'M', // index:int -> MessagePort. Fills the result with transferred MessagePort.
     NumberTag = 'N', // value:double -> Number
     ImageDataTag = '#', // width:uint32_t, height:uint32_t, pixelDataLength:uint32_t, data:byte[pixelDataLength] -> ImageData (ref)
     ObjectTag = '{', // numProperties:uint32_t -> pops the last object from the open stack;
@@ -437,12 +434,6 @@ public:
         doWriteUint32(static_cast<uint32_t>(flags));
     }
 
-    void writeTransferredMessagePort(uint32_t index)
-    {
-        append(MessagePortTag);
-        doWriteUint32(index);
-    }
-
     void writeTransferredArrayBuffer(uint32_t index)
     {
         append(ArrayBufferTransferTag);
@@ -616,15 +607,6 @@ private:
     unsigned m_position;
 };
 
-static v8::Handle<v8::Object> toV8Object(MessagePort* impl, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
-{
-    if (!impl)
-        return v8::Handle<v8::Object>();
-    v8::Handle<v8::Value> wrapper = toV8(impl, creationContext, isolate);
-    ASSERT(wrapper->IsObject());
-    return wrapper.As<v8::Object>();
-}
-
 static v8::Handle<v8::ArrayBuffer> toV8Object(ArrayBuffer* impl, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
 {
     if (!impl)
@@ -644,7 +626,7 @@ public:
         JSException
     };
 
-    Serializer(Writer& writer, MessagePortArray* messagePorts, ArrayBufferArray* arrayBuffers, v8::TryCatch& tryCatch, ScriptState* scriptState)
+    Serializer(Writer& writer, ArrayBufferArray* arrayBuffers, v8::TryCatch& tryCatch, ScriptState* scriptState)
         : m_scriptState(scriptState)
         , m_writer(writer)
         , m_tryCatch(tryCatch)
@@ -654,10 +636,6 @@ public:
     {
         ASSERT(!tryCatch.HasCaught());
         v8::Handle<v8::Object> creationContext = m_scriptState->context()->Global();
-        if (messagePorts) {
-            for (size_t i = 0; i < messagePorts->size(); i++)
-                m_transferredMessagePorts.set(toV8Object(messagePorts->at(i).get(), creationContext, isolate()), i);
-        }
         if (arrayBuffers) {
             for (size_t i = 0; i < arrayBuffers->size(); i++)  {
                 v8::Handle<v8::Object> v8ArrayBuffer = toV8Object(arrayBuffers->at(i).get(), creationContext, isolate());
@@ -1104,7 +1082,6 @@ private:
     String m_errorMessage;
     typedef V8ObjectMap<v8::Object, uint32_t> ObjectPool;
     ObjectPool m_objectPool;
-    ObjectPool m_transferredMessagePorts;
     ObjectPool m_transferredArrayBuffers;
     uint32_t m_nextObjectReference;
 };
@@ -1151,13 +1128,6 @@ Serializer::StateBase* Serializer::doSerialize(v8::Handle<v8::Value> value, Stat
         return writeAndGreyArrayBufferView(value.As<v8::Object>(), next);
     } else if (value->IsString()) {
         writeString(value);
-    } else if (V8MessagePort::hasInstance(value, isolate())) {
-        uint32_t messagePortIndex;
-        if (m_transferredMessagePorts.tryGet(value.As<v8::Object>(), &messagePortIndex)) {
-            m_writer.writeTransferredMessagePort(messagePortIndex);
-        } else {
-            return handleError(DataCloneError, "A MessagePort could not be cloned.", next);
-        }
     } else if (V8ArrayBuffer::hasInstance(value, isolate()) && m_transferredArrayBuffers.tryGet(value.As<v8::Object>(), &arrayBufferIndex)) {
         return writeTransferredArrayBuffer(value, arrayBufferIndex, next);
     } else {
@@ -1202,7 +1172,6 @@ public:
     virtual uint32_t objectReferenceCount() = 0;
     virtual void pushObjectReference(const v8::Handle<v8::Value>&) = 0;
     virtual bool tryGetObjectFromObjectReference(uint32_t reference, v8::Handle<v8::Value>*) = 0;
-    virtual bool tryGetTransferredMessagePort(uint32_t index, v8::Handle<v8::Value>*) = 0;
     virtual bool tryGetTransferredArrayBuffer(uint32_t index, v8::Handle<v8::Value>*) = 0;
     virtual bool newSparseArray(uint32_t length) = 0;
     virtual bool newDenseArray(uint32_t length) = 0;
@@ -1396,16 +1365,6 @@ public:
             if (!creator.newDenseArray(length))
                 return false;
             return true;
-        }
-        case MessagePortTag: {
-            if (!m_version)
-                return false;
-            uint32_t index;
-            if (!doReadUint32(&index))
-                return false;
-            if (!creator.tryGetTransferredMessagePort(index, value))
-                return false;
-            break;
         }
         case ArrayBufferTransferTag: {
             if (!m_version)
@@ -1763,9 +1722,8 @@ typedef Vector<WTF::ArrayBufferContents, 1> ArrayBufferContentsArray;
 
 class Deserializer FINAL : public CompositeCreator {
 public:
-    Deserializer(Reader& reader, MessagePortArray* messagePorts, ArrayBufferContentsArray* arrayBufferContents)
+    Deserializer(Reader& reader, ArrayBufferContentsArray* arrayBufferContents)
         : m_reader(reader)
-        , m_transferredMessagePorts(messagePorts)
         , m_arrayBufferContents(arrayBufferContents)
         , m_arrayBuffers(arrayBufferContents ? arrayBufferContents->size() : 0)
         , m_version(0)
@@ -1882,17 +1840,6 @@ public:
         m_objectPool.append(object);
     }
 
-    virtual bool tryGetTransferredMessagePort(uint32_t index, v8::Handle<v8::Value>* object) OVERRIDE
-    {
-        if (!m_transferredMessagePorts)
-            return false;
-        if (index >= m_transferredMessagePorts->size())
-            return false;
-        v8::Handle<v8::Object> creationContext = m_reader.scriptState()->context()->Global();
-        *object = toV8(m_transferredMessagePorts->at(index).get(), creationContext, m_reader.scriptState()->isolate());
-        return true;
-    }
-
     virtual bool tryGetTransferredArrayBuffer(uint32_t index, v8::Handle<v8::Value>* object) OVERRIDE
     {
         if (!m_arrayBufferContents)
@@ -1991,7 +1938,6 @@ private:
     Vector<v8::Local<v8::Value> > m_stack;
     Vector<v8::Handle<v8::Value> > m_objectPool;
     Vector<uint32_t> m_openCompositeReferenceStack;
-    RawPtrWillBeMember<MessagePortArray> m_transferredMessagePorts;
     ArrayBufferContentsArray* m_arrayBufferContents;
     Vector<v8::Handle<v8::Object> > m_arrayBuffers;
     uint32_t m_version;
@@ -1999,21 +1945,21 @@ private:
 
 } // namespace
 
-PassRefPtr<SerializedScriptValue> SerializedScriptValue::create(v8::Handle<v8::Value> value, MessagePortArray* messagePorts, ArrayBufferArray* arrayBuffers, ExceptionState& exceptionState, v8::Isolate* isolate)
+PassRefPtr<SerializedScriptValue> SerializedScriptValue::create(v8::Handle<v8::Value> value, ArrayBufferArray* arrayBuffers, ExceptionState& exceptionState, v8::Isolate* isolate)
 {
-    return adoptRef(new SerializedScriptValue(value, messagePorts, arrayBuffers, exceptionState, isolate));
+    return adoptRef(new SerializedScriptValue(value, arrayBuffers, exceptionState, isolate));
 }
 
 PassRefPtr<SerializedScriptValue> SerializedScriptValue::createAndSwallowExceptions(v8::Handle<v8::Value> value, v8::Isolate* isolate)
 {
     TrackExceptionState exceptionState;
-    return adoptRef(new SerializedScriptValue(value, 0, 0, exceptionState, isolate));
+    return adoptRef(new SerializedScriptValue(value, 0, exceptionState, isolate));
 }
 
 PassRefPtr<SerializedScriptValue> SerializedScriptValue::create(const ScriptValue& value, ExceptionState& exceptionState, v8::Isolate* isolate)
 {
     ASSERT(isolate->InContext());
-    return adoptRef(new SerializedScriptValue(value.v8Value(), 0, 0, exceptionState, isolate));
+    return adoptRef(new SerializedScriptValue(value.v8Value(), 0, exceptionState, isolate));
 }
 
 PassRefPtr<SerializedScriptValue> SerializedScriptValue::createFromWire(const String& data)
@@ -2137,7 +2083,7 @@ PassOwnPtr<SerializedScriptValue::ArrayBufferContentsArray> SerializedScriptValu
     return contents.release();
 }
 
-SerializedScriptValue::SerializedScriptValue(v8::Handle<v8::Value> value, MessagePortArray* messagePorts, ArrayBufferArray* arrayBuffers, ExceptionState& exceptionState, v8::Isolate* isolate)
+SerializedScriptValue::SerializedScriptValue(v8::Handle<v8::Value> value, ArrayBufferArray* arrayBuffers, ExceptionState& exceptionState, v8::Isolate* isolate)
     : m_externallyAllocatedMemory(0)
 {
     Writer writer;
@@ -2145,7 +2091,7 @@ SerializedScriptValue::SerializedScriptValue(v8::Handle<v8::Value> value, Messag
     String errorMessage;
     {
         v8::TryCatch tryCatch;
-        Serializer serializer(writer, messagePorts, arrayBuffers, tryCatch, ScriptState::current(isolate));
+        Serializer serializer(writer, arrayBuffers, tryCatch, ScriptState::current(isolate));
         status = serializer.serialize(value);
         if (status == Serializer::JSException) {
             // If there was a JS exception thrown, re-throw it.
@@ -2178,12 +2124,12 @@ SerializedScriptValue::SerializedScriptValue(const String& wireData)
     m_data = wireData.isolatedCopy();
 }
 
-v8::Handle<v8::Value> SerializedScriptValue::deserialize(MessagePortArray* messagePorts)
+v8::Handle<v8::Value> SerializedScriptValue::deserialize()
 {
-    return deserialize(v8::Isolate::GetCurrent(), messagePorts);
+    return deserialize(v8::Isolate::GetCurrent());
 }
 
-v8::Handle<v8::Value> SerializedScriptValue::deserialize(v8::Isolate* isolate, MessagePortArray* messagePorts)
+v8::Handle<v8::Value> SerializedScriptValue::deserialize(v8::Isolate* isolate)
 {
     if (!m_data.impl())
         return v8::Null(isolate);
@@ -2194,71 +2140,12 @@ v8::Handle<v8::Value> SerializedScriptValue::deserialize(v8::Isolate* isolate, M
     // information stored in m_data isn't even encoded in UTF-16. Instead,
     // unicode characters are encoded as UTF-8 with two code units per UChar.
     Reader reader(reinterpret_cast<const uint8_t*>(m_data.impl()->characters16()), 2 * m_data.length(), ScriptState::current(isolate));
-    Deserializer deserializer(reader, messagePorts, m_arrayBufferContentsArray.get());
+    Deserializer deserializer(reader, m_arrayBufferContentsArray.get());
 
     // deserialize() can run arbitrary script (e.g., setters), which could result in |this| being destroyed.
     // Holding a RefPtr ensures we are alive (along with our internal data) throughout the operation.
     RefPtr<SerializedScriptValue> protect(this);
     return deserializer.deserialize();
-}
-
-bool SerializedScriptValue::extractTransferables(v8::Local<v8::Value> value, int argumentIndex, MessagePortArray& ports, ArrayBufferArray& arrayBuffers, ExceptionState& exceptionState, v8::Isolate* isolate)
-{
-    if (isUndefinedOrNull(value)) {
-        ports.resize(0);
-        arrayBuffers.resize(0);
-        return true;
-    }
-
-    uint32_t length = 0;
-    if (value->IsArray()) {
-        v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(value);
-        length = array->Length();
-    } else if (toV8Sequence(value, length, isolate).IsEmpty()) {
-        exceptionState.throwTypeError(ExceptionMessages::notAnArrayTypeArgumentOrValue(argumentIndex + 1));
-        return false;
-    }
-
-    v8::Local<v8::Object> transferrables = v8::Local<v8::Object>::Cast(value);
-
-    // Validate the passed array of transferrables.
-    for (unsigned i = 0; i < length; ++i) {
-        v8::Local<v8::Value> transferrable = transferrables->Get(i);
-        // Validation of non-null objects, per HTML5 spec 10.3.3.
-        if (isUndefinedOrNull(transferrable)) {
-            exceptionState.throwDOMException(DataCloneError, "Value at index " + String::number(i) + " is an untransferable " + (transferrable->IsUndefined() ? "'undefined'" : "'null'") + " value.");
-            return false;
-        }
-        // Validation of Objects implementing an interface, per WebIDL spec 4.1.15.
-        if (V8MessagePort::hasInstance(transferrable, isolate)) {
-            RefPtrWillBeRawPtr<MessagePort> port = V8MessagePort::toNative(v8::Handle<v8::Object>::Cast(transferrable));
-            // Check for duplicate MessagePorts.
-            if (ports.contains(port)) {
-                exceptionState.throwDOMException(DataCloneError, "Message port at index " + String::number(i) + " is a duplicate of an earlier port.");
-                return false;
-            }
-            ports.append(port.release());
-        } else if (V8ArrayBuffer::hasInstance(transferrable, isolate)) {
-            RefPtr<ArrayBuffer> arrayBuffer = V8ArrayBuffer::toNative(v8::Handle<v8::Object>::Cast(transferrable));
-            if (arrayBuffers.contains(arrayBuffer)) {
-                exceptionState.throwDOMException(DataCloneError, "ArrayBuffer at index " + String::number(i) + " is a duplicate of an earlier ArrayBuffer.");
-                return false;
-            }
-            arrayBuffers.append(arrayBuffer.release());
-        } else {
-            exceptionState.throwDOMException(DataCloneError, "Value at index " + String::number(i) + " does not have a transferable type.");
-            return false;
-        }
-    }
-    return true;
-}
-
-void SerializedScriptValue::registerMemoryAllocatedWithCurrentScriptContext()
-{
-    if (m_externallyAllocatedMemory)
-        return;
-    m_externallyAllocatedMemory = static_cast<intptr_t>(m_data.length());
-    v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(m_externallyAllocatedMemory);
 }
 
 SerializedScriptValue::~SerializedScriptValue()

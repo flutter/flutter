@@ -39,7 +39,6 @@
             'ExceptionStatePlaceholder.cpp',
             'ExceptionStatePlaceholder.h',
             'Nullable.h',
-            'PostMessage.h',
             'RetainedDOMInfo.cpp',
             'RetainedDOMInfo.h',
             'RetainedObjectInfo.h',

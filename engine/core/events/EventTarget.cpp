@@ -76,11 +76,6 @@ LocalDOMWindow* EventTarget::toDOMWindow()
     return 0;
 }
 
-MessagePort* EventTarget::toMessagePort()
-{
-    return 0;
-}
-
 inline LocalDOMWindow* EventTarget::executingWindow()
 {
     if (ExecutionContext* context = executionContext())

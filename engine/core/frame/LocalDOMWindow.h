@@ -28,6 +28,7 @@
 #define LocalDOMWindow_h
 
 #include "bindings/core/v8/Dictionary.h"
+#include "bindings/core/v8/SerializedScriptValue.h"
 #include "core/events/EventTarget.h"
 #include "core/frame/DOMWindowBase64.h"
 #include "core/frame/FrameDestructionObserver.h"
@@ -64,7 +65,6 @@ class IDBFactory;
 class LocalFrame;
 class Location;
 class MediaQueryList;
-class MessageEvent;
 class Node;
 class Page;
 class RequestAnimationFrameCallback;
@@ -73,8 +73,6 @@ class Screen;
 class ScriptCallStack;
 class SerializedScriptValue;
 class StyleMedia;
-
-typedef WillBeHeapVector<RefPtrWillBeMember<MessagePort>, 1> MessagePortArray;
 
 enum PageshowEventPersistence {
     PageshowEventNotPersisted = 0,

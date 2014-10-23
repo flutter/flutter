@@ -175,7 +175,7 @@ if (!std::isnan({{argument.name}}NativeValue))
        IDL integer types have same internal C++ type (int or unsigned) #}
     {{argument.name}} = clampTo<{{argument.idl_type}}>({{argument.name}}NativeValue);
 {% elif argument.idl_type == 'SerializedScriptValue' %}
-{{argument.name}} = SerializedScriptValue::create(info[{{argument.index}}], 0, 0, exceptionState, info.GetIsolate());
+{{argument.name}} = SerializedScriptValue::create(info[{{argument.index}}], 0, exceptionState, info.GetIsolate());
 if (exceptionState.hadException()) {
     {{throw_from_exception_state(method)}};
     return;

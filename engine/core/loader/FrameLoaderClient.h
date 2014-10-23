@@ -52,7 +52,6 @@ namespace blink {
     class IntSize;
     class KURL;
     class LocalFrame;
-    class MessageEvent;
     class Page;
     class ResourceError;
     class ResourceHandle;

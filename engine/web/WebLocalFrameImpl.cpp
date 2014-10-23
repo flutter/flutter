@@ -81,7 +81,6 @@
 #include "bindings/core/v8/V8GCController.h"
 #include "bindings/core/v8/V8PerIsolateData.h"
 #include "core/dom/Document.h"
-#include "core/dom/MessagePort.h"
 #include "core/dom/Node.h"
 #include "core/dom/NodeTraversal.h"
 #include "core/dom/shadow/ShadowRoot.h"

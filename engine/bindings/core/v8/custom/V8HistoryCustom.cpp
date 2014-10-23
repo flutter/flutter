@@ -62,7 +62,7 @@ void V8History::stateAttributeGetterCustom(const v8::PropertyCallbackInfo<v8::Va
 void V8History::pushStateMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
     ExceptionState exceptionState(ExceptionState::ExecutionContext, "pushState", "History", info.Holder(), info.GetIsolate());
-    RefPtr<SerializedScriptValue> historyState = SerializedScriptValue::create(info[0], 0, 0, exceptionState, info.GetIsolate());
+    RefPtr<SerializedScriptValue> historyState = SerializedScriptValue::create(info[0], 0, exceptionState, info.GetIsolate());
     if (exceptionState.throwIfNeeded())
         return;
 

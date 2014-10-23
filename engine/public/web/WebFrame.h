@@ -36,7 +36,6 @@
 #include "WebNode.h"
 #include "WebURLLoaderOptions.h"
 #include "public/platform/WebCanvas.h"
-#include "public/platform/WebMessagePortChannel.h"
 #include "public/platform/WebPrivateOwnPtr.h"
 #include "public/platform/WebReferrerPolicy.h"
 #include "public/platform/WebURL.h"

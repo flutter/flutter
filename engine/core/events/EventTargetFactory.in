@@ -3,7 +3,6 @@ namespace="EventTarget"
 core/animation/AnimationPlayer
 core/css/FontFaceSet
 core/css/MediaQueryList
-core/dom/MessagePort
 core/dom/Node
 core/html/MediaController
 core/html/ime/InputMethodContext

@@ -60,7 +60,6 @@ class WebFlingAnimator;
 class WebGestureCurveTarget;
 class WebGestureCurve;
 class WebGraphicsContext3DProvider;
-class WebMessagePortChannel;
 class WebMimeRegistry;
 class WebPublicSuffixList;
 class WebSandboxSupport;
@@ -168,14 +167,6 @@ public:
     // Returns the maximum amount of memory a decoded image should be allowed.
     // See comments on ImageDecoder::m_maxDecodedBytes.
     virtual size_t maxDecodedImageBytes() { return noDecodedImageByteLimit; }
-
-
-    // Message Ports -------------------------------------------------------
-
-    // Creates a Message Port Channel pair. This can be called on any thread.
-    // The returned objects should only be used on the thread they were created on.
-    virtual void createMessageChannel(WebMessagePortChannel** channel1, WebMessagePortChannel** channel2) { *channel1 = 0; *channel2 = 0; }
-
 
     // Network -------------------------------------------------------------
 

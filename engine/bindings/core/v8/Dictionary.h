@@ -32,7 +32,6 @@
 #include "bindings/core/v8/ScriptValue.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8BindingMacros.h"
-#include "core/dom/MessagePort.h"
 #include "core/events/EventListener.h"
 #include "wtf/HashMap.h"
 #include "wtf/HashSet.h"

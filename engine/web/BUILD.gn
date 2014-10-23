@@ -72,7 +72,6 @@ component("web") {
     "WebDOMCustomEvent.cpp",
     "WebDOMError.cpp",
     "WebDOMEvent.cpp",
-    "WebDOMMessageEvent.cpp",
     "WebDOMMouseEvent.cpp",
     "WebDOMProgressEvent.cpp",
     "WebDOMResourceProgressEvent.cpp",

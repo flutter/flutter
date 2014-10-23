@@ -45,7 +45,6 @@
 #include "bindings/core/v8/V8HiddenValue.h"
 #include "bindings/core/v8/V8Node.h"
 #include "core/dom/ExceptionCode.h"
-#include "core/dom/MessagePort.h"
 #include "core/dom/Element.h"
 #include "core/dom/Node.h"
 #include "core/frame/DOMTimer.h"

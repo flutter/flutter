@@ -42,7 +42,6 @@ namespace blink {
 class LocalDOMWindow;
 class Event;
 class ExceptionState;
-class MessagePort;
 class Node;
 
 struct FiringEventIterator {
@@ -106,7 +105,6 @@ public:
 
     virtual Node* toNode();
     virtual LocalDOMWindow* toDOMWindow();
-    virtual MessagePort* toMessagePort();
 
     // FIXME: first 2 args to addEventListener and removeEventListener should
     // be required (per spec), but throwing TypeError breaks legacy content.

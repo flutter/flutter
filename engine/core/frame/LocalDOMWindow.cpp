@@ -50,7 +50,6 @@
 #include "core/events/DOMWindowEventQueue.h"
 #include "core/events/EventListener.h"
 #include "core/events/HashChangeEvent.h"
-#include "core/events/MessageEvent.h"
 #include "core/events/PageTransitionEvent.h"
 #include "core/events/PopStateEvent.h"
 #include "core/frame/Console.h"

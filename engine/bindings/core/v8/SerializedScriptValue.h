@@ -46,9 +46,7 @@ class ArrayBufferContents;
 namespace blink {
 
 class ExceptionState;
-class MessagePort;
 
-typedef WillBeHeapVector<RefPtrWillBeMember<MessagePort>, 1> MessagePortArray;
 typedef Vector<RefPtr<WTF::ArrayBuffer>, 1> ArrayBufferArray;
 
 class SerializedScriptValue FINAL : public ThreadSafeRefCounted<SerializedScriptValue> {
@@ -69,7 +67,7 @@ public:
     // be thrown using v8::ThrowException(), and sets |didThrow|. In this case
     // the caller must not invoke any V8 operations until control returns to
     // V8. When serialization is successful, |didThrow| is false.
-    static PassRefPtr<SerializedScriptValue> create(v8::Handle<v8::Value>, MessagePortArray*, ArrayBufferArray*, ExceptionState&, v8::Isolate*);
+    static PassRefPtr<SerializedScriptValue> create(v8::Handle<v8::Value>, ArrayBufferArray*, ExceptionState&, v8::Isolate*);
     static PassRefPtr<SerializedScriptValue> createFromWire(const String&);
     static PassRefPtr<SerializedScriptValue> createFromWireBytes(const Vector<uint8_t>&);
     static PassRefPtr<SerializedScriptValue> create(const String&);
@@ -87,20 +85,8 @@ public:
 
     // Deserializes the value (in the current context). Returns a null value in
     // case of failure.
-    v8::Handle<v8::Value> deserialize(MessagePortArray* = 0);
-    v8::Handle<v8::Value> deserialize(v8::Isolate*, MessagePortArray* = 0);
-
-    // Helper function which pulls the values out of a JS sequence and into a MessagePortArray.
-    // Also validates the elements per sections 4.1.13 and 4.1.15 of the WebIDL spec and section 8.3.3
-    // of the HTML5 spec and generates exceptions as appropriate.
-    // Returns true if the array was filled, or false if the passed value was not of an appropriate type.
-    static bool extractTransferables(v8::Local<v8::Value>, int, MessagePortArray&, ArrayBufferArray&, ExceptionState&, v8::Isolate*);
-
-    // Informs the V8 about external memory allocated and owned by this object. Large values should contribute
-    // to GC counters to eventually trigger a GC, otherwise flood of postMessage() can cause OOM.
-    // Ok to invoke multiple times (only adds memory once).
-    // The memory registration is revoked automatically in destructor.
-    void registerMemoryAllocatedWithCurrentScriptContext();
+    v8::Handle<v8::Value> deserialize();
+    v8::Handle<v8::Value> deserialize(v8::Isolate*);
 
 private:
     enum StringDataMode {
@@ -110,7 +96,7 @@ private:
     typedef Vector<WTF::ArrayBufferContents, 1> ArrayBufferContentsArray;
 
     SerializedScriptValue();
-    SerializedScriptValue(v8::Handle<v8::Value>, MessagePortArray*, ArrayBufferArray*, ExceptionState&, v8::Isolate*);
+    SerializedScriptValue(v8::Handle<v8::Value>, ArrayBufferArray*, ExceptionState&, v8::Isolate*);
     explicit SerializedScriptValue(const String& wireData);
 
     static PassOwnPtr<ArrayBufferContentsArray> transferArrayBuffers(ArrayBufferArray&, ExceptionState&, v8::Isolate*);

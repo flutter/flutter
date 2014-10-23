@@ -132,21 +132,6 @@
     [Custom, NotEnumerable] getter Window (DOMString name);
 };
 
-// http://www.whatwg.org/specs/web-apps/current-work/#transferable-objects
-//
-// Expressing the Transferable typedef in IDL depends on http://crbug.com/240176.
-// The postMessage() methods taking a Transferable array argument have custom
-// binding code that is able to handle the Transferables that we currently
-// recognize. To be able to declare a postMessage() signature that matches
-// the implementation, we provide a Transferable typedef but with an
-// incomplete type.
-//
-// FIXME: make this typedef accurate once enough of http://crbug.com/240176
-// is in place.
-// FIXME: consider putting this typedef in an .idl file containing spec-wide
-// utility type definitions.
-typedef MessagePort Transferable;
-
 Window implements WindowBase64;
 Window implements WindowEventHandlers;
 Window implements WindowTimers;

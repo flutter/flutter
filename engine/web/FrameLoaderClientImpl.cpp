@@ -34,7 +34,6 @@
 
 #include "bindings/core/v8/ScriptController.h"
 #include "core/dom/Document.h"
-#include "core/events/MessageEvent.h"
 #include "core/events/MouseEvent.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/Settings.h"

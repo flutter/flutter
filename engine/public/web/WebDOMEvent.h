@@ -83,7 +83,6 @@ public:
     BLINK_EXPORT bool isCompositionEvent() const;
     BLINK_EXPORT bool isDragEvent() const;
     BLINK_EXPORT bool isClipboardEvent() const;
-    BLINK_EXPORT bool isMessageEvent() const;
     BLINK_EXPORT bool isWheelEvent() const;
     BLINK_EXPORT bool isBeforeTextInsertedEvent() const;
     BLINK_EXPORT bool isOverflowEvent() const;
