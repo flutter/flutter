@@ -84,8 +84,8 @@ class DocumentView : public blink::WebViewClient,
 
   // ViewObserver methods:
   virtual void OnViewBoundsChanged(mojo::View* view,
-                                   const gfx::Rect& old_bounds,
-                                   const gfx::Rect& new_bounds) override;
+                                   const mojo::Rect& old_bounds,
+                                   const mojo::Rect& new_bounds) override;
   virtual void OnViewDestroyed(mojo::View* view) override;
   virtual void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 

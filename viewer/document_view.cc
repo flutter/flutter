@@ -10,6 +10,7 @@
 #include "base/single_thread_task_runner.h"
 #include "base/strings/string_util.h"
 #include "base/thread_task_runner_handle.h"
+#include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/system/data_pipe.h"
@@ -104,8 +105,9 @@ void DocumentView::OnEmbed(
 
   Load(response_.Pass());
 
-  web_view_->resize(root_->bounds().size());
-  web_layer_tree_view_impl_->setViewportSize(root_->bounds().size());
+  gfx::Size size = root_->bounds().To<gfx::Rect>().size();
+  web_view_->resize(size);
+  web_layer_tree_view_impl_->setViewportSize(size);
   web_layer_tree_view_impl_->set_view(root_);
   root_->AddObserver(this);
 }
@@ -179,11 +181,12 @@ void DocumentView::didCreateScriptContext(blink::WebLocalFrame* frame,
 }
 
 void DocumentView::OnViewBoundsChanged(mojo::View* view,
-                                       const gfx::Rect& old_bounds,
-                                       const gfx::Rect& new_bounds) {
+                                       const mojo::Rect& old_bounds,
+                                       const mojo::Rect& new_bounds) {
   DCHECK_EQ(view, root_);
-  web_view_->resize(new_bounds.size());
-  web_layer_tree_view_impl_->setViewportSize(new_bounds.size());
+  gfx::Size size = new_bounds.To<gfx::Rect>().size();
+  web_view_->resize(size);
+  web_layer_tree_view_impl_->setViewportSize(size);
 }
 
 void DocumentView::OnViewDestroyed(mojo::View* view) {

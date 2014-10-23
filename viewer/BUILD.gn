@@ -47,6 +47,7 @@ shared_library("viewer") {
     "//mojo/bindings/js",
     "//mojo/cc",
     "//mojo/common",
+    "//mojo/converters/geometry",
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
