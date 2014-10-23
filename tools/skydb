@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import argparse
 import os
 import subprocess
 import sys
@@ -32,7 +33,12 @@ def start_http_server_for_file(path):
     return 'http://localhost:%s/%s' % (HTTP_PORT, os.path.basename(path))
 
 
-def main(args):
+def main():
+    parser = argparse.ArgumentParser(description='Sky launcher/debugger')
+    parser.add_argument('--gdb', action='store_true')
+    parser.add_argument('url', nargs='?', type=str)
+    args = parser.parse_args()
+
     content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
         for mime_type in SUPPORTED_MIME_TYPES]
     shell_command = [
@@ -42,16 +48,19 @@ def main(args):
         '--url-mappings=mojo:window_manager=mojo:sky_debugger',
         'mojo:window_manager',
     ]
-    if args:
-        url = args[0]
-        parse_result = urlparse.urlparse(url)
-        if not parse_result.scheme:
+    if args.url:
+        url = args.url
+        if not urlparse.urlparse(url).scheme:
             url = start_http_server_for_file(url)
 
         prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
         shell_command.append(prompt_args)
+    if args.gdb:
+        shell_command = ['gdb', '--args'] + shell_command
+
+    print ' '.join(shell_command)
     subprocess.check_call(shell_command)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
