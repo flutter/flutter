@@ -1,0 +1,26 @@
+<body>
+<style>
+.editable {
+  -webkit-user-modify: read-write-plaintext-only;
+  border: 2px solid blue;
+}
+</style>
+<div class="editable"></div>
+<script>
+if (window.eventSender) {
+    var control = document.querySelector('.editable');
+    control.focus();
+    eventSender.keyDown('a');
+    eventSender.keyDown('b');
+    eventSender.keyDown('c');
+    eventSender.keyDown('d');
+    eventSender.keyDown('e');
+    eventSender.keyDown('leftArrow', 'rangeSelectionKey');
+    eventSender.keyDown('leftArrow', 'rangeSelectionKey');
+    eventSender.keyDown('leftArrow', 'rangeSelectionKey');
+    eventSender.keyDown('backspace');
+}
+if (window.testRunner)
+    testRunner.dumpAsText();
+</script>
+</body>

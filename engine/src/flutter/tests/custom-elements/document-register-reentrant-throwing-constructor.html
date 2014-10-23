@@ -1,0 +1,18 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.html" />
+<link rel="import" href="resources/document-register-fuzz.html" as="fuzzer" />
+<body>
+<div id="container"></div>
+Fuzzing document.registerElement() through getters. PASS unless crash.
+<script>
+fuzzer.setupObjectHooks({
+    prototypeGet: function() { throw "Error"; },
+    prototypeSet: function(value) { throw "Error"; },
+    constructorGet: function() { throw "Error"; },
+    constructorSet: function(value) { throw "Error"; }
+});
+
+fuzzer.exerciseDocumentRegister();
+</script>
+</body>
+</html>

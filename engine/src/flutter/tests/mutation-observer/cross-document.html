@@ -1,0 +1,49 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationObserver cross document moves', function() {
+    it('should handle basic observation', function(done) {
+        var mutations;
+        var div = document.createElement('div');
+        var observer = new MutationObserver(function(records) {
+            mutations = records;
+        });
+
+        observer.observe(div, {attributes: true});
+        var newDoc = document.implementation.createDocument('', '', null);
+        newDoc.appendChild(div);
+        div.id = 'foo';
+        setTimeout(function() {
+            assert.equal(mutations.length, 1);
+            assert.equal(mutations[0].type, 'attributes');
+            assert.equal(mutations[0].target, div);
+            assert.equal(mutations[0].attributeName, 'id');
+            observer.disconnect();
+            done();
+        }, 0);
+    });
+    it('should handle subtree observation', function(done) {
+        var mutations;
+        var div = document.createElement('div');
+        var subDiv = div.appendChild(document.createElement('div'));
+        var observer = new MutationObserver(function(records) {
+            mutations = records;
+        });
+
+        observer.observe(div, {attributes: true, subtree: true});
+        var newDoc = document.implementation.createDocument();
+        newDoc.appendChild(div);
+        subDiv.id = 'foo';
+        setTimeout(function() {
+            assert.equal(mutations.length, 1);
+            assert.equal(mutations[0].type, 'attributes');
+            assert.equal(mutations[0].target, subDiv);
+            assert.equal(mutations[0].attributeName, 'id');
+            observer.disconnect();
+            done();
+        }, 0);
+    });
+});
+</script>
+</html>

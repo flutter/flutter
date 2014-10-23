@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 Custom element constructors should run the createdCallback synchronously
+1 tests
+1 pass
+0 fail

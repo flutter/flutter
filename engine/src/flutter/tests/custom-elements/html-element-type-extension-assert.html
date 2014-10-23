@@ -1,0 +1,11 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.html" />
+<body>
+<section id="a" is="x-a"></section>
+Tests that type extension of a element whose DOM interface is HTMLElement does not assert
+<script>
+var u = document.querySelector('#a');
+var v = document.createElement('section', 'x-a');
+</script>
+</body>
+</html>

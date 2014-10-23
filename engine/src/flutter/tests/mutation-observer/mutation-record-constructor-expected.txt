@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 MutationRecord should be exposed on window but not constructable
+1 tests
+1 pass
+0 fail

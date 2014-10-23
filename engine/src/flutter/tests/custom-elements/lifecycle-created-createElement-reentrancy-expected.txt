@@ -1,0 +1,1 @@
+This test ensures that is visible in following script block.

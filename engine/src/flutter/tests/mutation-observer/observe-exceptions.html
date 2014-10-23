@@ -1,0 +1,54 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationObserver observe', function() {
+  it('should throw on invalid input', function() {
+    var div = document.createElement('div');
+    var observer = new MutationObserver(function(mutations) { });
+    assert.throw(function() {
+      observer.observe();
+    });
+    assert.throw(function() {
+      observer.observe(null);
+    });
+    assert.throw(function() {
+      observer.observe(undefined)
+    });
+    assert.throw(function() {
+      observer.observe(div);
+    });
+    assert.throw(function() {
+      observer.observe(div, null);
+    });
+    assert.throw(function() {
+      observer.observe(div, undefined);
+    });
+    assert.throw(function() {
+      observer.observe(null, {attributes: true});
+    });
+    assert.throw(function() {
+      observer.observe(undefined, {attributes: true});
+    });
+    assert.throw(function() {
+      observer.observe(div, {subtree: true});
+    });
+    assert.throw(function() {
+      observer.observe(div, {attributes: false, attributeOldValue: true});
+    });
+    assert.throw(function() {
+      observer.observe(div, {attributes: false, attributeFilter: ["id"]});
+    });
+    assert.throw(function() {
+      observer.observe(div, {attributes: false, attributeOldValue: false});
+    });
+    assert.throw(function() {
+      observer.observe(div, {characterData: false, characterDataOldValue: true});
+    });
+    assert.throw(function() {
+      observer.observe(div, {characterData: false, characterDataOldValue: false});
+    });
+  });
+});
+</script>
+</html>

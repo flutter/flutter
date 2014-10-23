@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 Transient registrations should be cleared even without delivery
+1 tests
+1 pass
+0 fail

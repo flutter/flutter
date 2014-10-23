@@ -1,0 +1,37 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+window.jsTestIsAsync = true;
+
+describe('MutationObservers', function() {
+    it ('must wait for the next loop when created during delivery', function(done) {
+        var order = [];
+        var div = document.createElement('div');
+
+        var observer3;
+        var observer1 = new MutationObserver(function(mutations) {
+            order.push(1);
+            if (!observer3) {
+                observer3 = new MutationObserver(function(mutations) {
+                    order.push(3);
+                });
+                observer3.observe(div, {attributes: true});
+                div.setAttribute('foo', 'baz');
+            }
+        });
+        var observer2 = new MutationObserver(function(mutations) {
+            order.push(2);
+        });
+
+        observer1.observe(div, {attributes: true});
+        observer2.observe(div, {attributes: true});
+        div.setAttribute('foo', 'bar');
+        setTimeout(function() {
+            assert.deepEqual(order, [1, 2, 1, 3]);
+            done();
+        }, 0);
+    });
+});
+</script>
+</html>

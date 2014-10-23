@@ -1,0 +1,22 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationRecord', function() {
+  it('should be exposed on window but not constructable', function() {
+    assert.ok(window.MutationRecord);
+    assert.equal(typeof MutationRecord, "function");
+    assert.throw(function() {
+        new MutationRecord
+    }, TypeError);
+
+    var div = document.createElement('div');
+    var observer = new MutationObserver(function(){});
+    observer.observe(div, {attributes: true});
+    div.id = 'foo';
+    var record = observer.takeRecords()[0];
+    assert.ok(record instanceof MutationRecord);
+  });
+});
+</script>
+</html>

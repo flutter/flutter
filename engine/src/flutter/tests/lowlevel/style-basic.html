@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<link rel="import" href="../resources/dump-as-text.html" />
+<style>
+    #id1 { order: 1; }
+    .class2 { order: 2; }
+    tag-name-3 { order: 3; }
+    .class4.class4 { order: 4; }
+    .class5#id5 { order: 5; }
+    tag-name-6.class6#id6 { order: 6; }
+</style>
+<body>
+    <div id="tests">
+        <div id="id1"></div>
+        <div class="class2"></div>
+        <tag-name-3></tag-name-3>
+        <div class="class4 class4"></div>
+        <div class="class5" id="id5"></div>
+        <tag-name-6 class="class6" id="id6"></tag-name-6>
+    </div>
+    <div id="log"></div>
+    <script>
+        var tests = document.getElementById("tests");
+        var log = document.getElementById("log");
+        var i = 1;
+        for (var element = tests.firstElementChild; element; element = element.nextElementSibling, ++i) {
+            var order = getComputedStyle(element).order;
+            var div = document.createElement("div");
+            var text = (order == i) ? "PASS" : "FAIL";
+            text += ": <"
+                + element.tagName
+                + " class="
+                + element.classList
+                + " id=" + element.id
+                + "> order was "
+                + order;
+            if (order != i)
+                text += " expected " + i;
+            div.textContent = text;
+            log.appendChild(div);
+        }
+    </script>
+</body>
+</html>

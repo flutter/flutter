@@ -1,0 +1,7 @@
+Running 3 tests
+ok 1 Non-relevant properties on mutation records should be null, except for NodeLists, which should be empty on characterData records
+ok 2 Non-relevant properties on mutation records should be null, except for NodeLists, which should be empty on childList records
+ok 3 Non-relevant properties on mutation records should be null, except for NodeLists, which should be empty on attribute records
+3 tests
+3 pass
+0 fail

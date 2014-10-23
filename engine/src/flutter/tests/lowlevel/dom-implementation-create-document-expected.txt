@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 DOMImplementation should let you create a document
+1 tests
+1 pass
+0 fail

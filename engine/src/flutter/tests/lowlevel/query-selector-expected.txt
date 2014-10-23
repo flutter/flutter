@@ -1,0 +1,9 @@
+Running 5 tests
+ok 1 querySelector should find elements by class name
+ok 2 querySelector should find elements by id
+ok 3 querySelector should find elements by tag name
+ok 4 querySelector should find an element by compound selector
+ok 5 querySelector should find all elements by compound selector
+5 tests
+5 pass
+0 fail

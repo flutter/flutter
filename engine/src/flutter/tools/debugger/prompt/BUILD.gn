@@ -1,0 +1,21 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+shared_library("prompt") {
+  output_name = "mojo_sky_debugger_prompt"
+
+  sources = [
+    "prompt.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/application",
+    "//mojo/public/c/system:for_shared_library",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/utility",
+    "//sky/tools/debugger:bindings",
+    "//sky/viewer:bindings",
+  ]
+}

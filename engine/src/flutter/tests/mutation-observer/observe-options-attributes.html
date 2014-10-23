@@ -1,0 +1,34 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationObserver.observe', function() {
+  it('should observe attributes', function() {
+    var observer = new MutationObserver(function() {});
+    var element = document.createElement('div');
+    element.setAttribute('data-test', '1');
+
+    observer.observe(element, {attributeOldValue: true});
+    element.setAttribute('data-test', '1');
+    var records = observer.takeRecords();
+    assert.equal(records.length, 1);
+    assert.equal(records[0].oldValue, 1);
+    observer.disconnect();
+
+    observer.observe(element, {attributeOldValue: false});
+    element.setAttribute('data-test', '1');
+    var records = observer.takeRecords();
+    assert.equal(records.length, 1);
+    assert.isNull(records[0].oldValue);
+    observer.disconnect();
+
+    observer.observe(element, {attributeFilter: ['data-test']});
+    element.setAttribute('data-test', '2');
+    var records = observer.takeRecords();
+    assert.equal(records.length, 1);
+    assert.isNull(records[0].oldValue);
+    observer.disconnect();
+  });
+});
+</script>
+</html>
