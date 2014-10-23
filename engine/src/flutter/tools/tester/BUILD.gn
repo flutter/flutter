@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 shared_library("tester") {
-  output_name = "mojo_sky_tester"
+  output_name = "sky_tester"
 
   sources = [
     "test_harness.cc",

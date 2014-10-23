@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 shared_library("prompt") {
-  output_name = "mojo_sky_debugger_prompt"
+  output_name = "sky_debugger_prompt"
 
   sources = [
     "prompt.cc",
