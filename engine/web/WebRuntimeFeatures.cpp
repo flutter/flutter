@@ -59,11 +59,6 @@ void WebRuntimeFeatures::enableDatabase(bool enable)
     RuntimeEnabledFeatures::setDatabaseEnabled(enable);
 }
 
-void WebRuntimeFeatures::enableDisplayList2dCanvas(bool enable)
-{
-    RuntimeEnabledFeatures::setDisplayList2dCanvasEnabled(enable);
-}
-
 void WebRuntimeFeatures::enableEncryptedMedia(bool enable)
 {
     RuntimeEnabledFeatures::setEncryptedMediaEnabled(enable);

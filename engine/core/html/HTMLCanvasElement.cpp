@@ -51,7 +51,6 @@
 #include "platform/graphics/Canvas2DImageBufferSurface.h"
 #include "platform/graphics/GraphicsContextStateSaver.h"
 #include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/RecordingImageBufferSurface.h"
 #include "platform/graphics/UnacceleratedImageBufferSurface.h"
 #include "platform/graphics/gpu/WebGLImageBufferSurface.h"
 #include "platform/transforms/AffineTransform.h"
@@ -459,12 +458,6 @@ PassOwnPtr<ImageBufferSurface> HTMLCanvasElement::createImageBufferSurface(const
     *msaaSampleCount = 0;
     if (is3D())
         return adoptPtr(new WebGLImageBufferSurface(size(), opacityMode));
-
-    if (RuntimeEnabledFeatures::displayList2dCanvasEnabled()) {
-        OwnPtr<ImageBufferSurface> surface = adoptPtr(new RecordingImageBufferSurface(size(), opacityMode));
-        if (surface->isValid())
-            return surface.release();
-    }
 
     if (shouldAccelerate(deviceSize)) {
         if (document().settings())
