@@ -5,6 +5,7 @@ include_rules = [
     "+gin/public",
     "+heap",
     "+modules",
+    "+mojo/common",
     "+painting",
     "+platform",
     "+public",

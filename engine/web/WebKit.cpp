@@ -31,6 +31,7 @@
 #include "config.h"
 #include "public/web/WebKit.h"
 
+#include "base/message_loop/message_loop.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8GCController.h"
 #include "bindings/core/v8/V8Initializer.h"
@@ -40,6 +41,7 @@
 #include "core/frame/Settings.h"
 #include "core/page/Page.h"
 #include "gin/public/v8_platform.h"
+#include "mojo/common/message_pump_mojo.h"
 #include "platform/LayoutTestSupport.h"
 #include "platform/Logging.h"
 #include "platform/RuntimeEnabledFeatures.h"
@@ -47,9 +49,7 @@
 #include "platform/graphics/media/MediaPlayer.h"
 #include "platform/heap/Heap.h"
 #include "platform/heap/glue/MessageLoopInterruptor.h"
-#include "platform/heap/glue/PendingGCRunner.h"
 #include "public/platform/Platform.h"
-#include "public/platform/WebThread.h"
 #include "web/WebMediaPlayerClientImpl.h"
 #include "wtf/Assertions.h"
 #include "wtf/CryptographicallyRandomNumber.h"
@@ -63,24 +63,60 @@ namespace blink {
 
 namespace {
 
-class EndOfTaskRunner : public WebThread::TaskObserver {
+void willProcessTask()
+{
+    AnimationClock::notifyTaskStart();
+}
+
+void didProcessTask()
+{
+    Microtask::performCheckpoint();
+    V8GCController::reportDOMMemoryUsageToV8(mainThreadIsolate());
+}
+
+class TaskObserver : public base::MessageLoop::TaskObserver {
 public:
-    virtual void willProcessTask() OVERRIDE
-    {
-        AnimationClock::notifyTaskStart();
-    }
-    virtual void didProcessTask() OVERRIDE
-    {
-        Microtask::performCheckpoint();
-        V8GCController::reportDOMMemoryUsageToV8(mainThreadIsolate());
-    }
+    void WillProcessTask(const base::PendingTask& pending_task) override { willProcessTask(); }
+    void DidProcessTask(const base::PendingTask& pending_task) override { didProcessTask(); }
 };
+
+class SignalObserver : public mojo::common::MessagePumpMojo::Observer {
+public:
+    void WillSignalHandler() override { willProcessTask(); }
+    void DidSignalHandler() override { didProcessTask(); }
+};
+
+static TaskObserver* s_taskObserver = 0;
+static SignalObserver* s_signalObserver = 0;
+
+void addMessageLoopObservers()
+{
+    ASSERT(!s_taskObserver);
+    s_taskObserver = new TaskObserver;
+
+    ASSERT(!s_signalObserver);
+    s_signalObserver = new SignalObserver;
+
+    base::MessageLoop::current()->AddTaskObserver(s_taskObserver);
+    mojo::common::MessagePumpMojo::current()->AddObserver(s_signalObserver);
+}
+
+void removeMessageLoopObservers()
+{
+    base::MessageLoop::current()->RemoveTaskObserver(s_taskObserver);
+    mojo::common::MessagePumpMojo::current()->RemoveObserver(s_signalObserver);
+
+    ASSERT(s_taskObserver);
+    delete s_taskObserver;
+    s_taskObserver = 0;
+
+    ASSERT(s_signalObserver);
+    delete s_signalObserver;
+    s_signalObserver = 0;
+}
 
 } // namespace
 
-static WebThread::TaskObserver* s_endOfTaskRunner = 0;
-static WebThread::TaskObserver* s_pendingGCRunner = 0;
-static ThreadState::Interruptor* s_messageLoopInterruptor = 0;
 static ThreadState::Interruptor* s_isolateInterruptor = 0;
 
 // Make sure we are not re-initialized in the same address space.
@@ -96,12 +132,7 @@ void initialize(Platform* platform)
     s_isolateInterruptor = new V8IsolateInterruptor(V8PerIsolateData::mainThreadIsolate());
     ThreadState::current()->addInterruptor(s_isolateInterruptor);
 
-    // currentThread will always be non-null in production, but can be null in Chromium unit tests.
-    if (WebThread* currentThread = platform->currentThread()) {
-        ASSERT(!s_endOfTaskRunner);
-        s_endOfTaskRunner = new EndOfTaskRunner;
-        currentThread->addTaskObserver(s_endOfTaskRunner);
-    }
+    addMessageLoopObservers();
 }
 
 v8::Isolate* mainThreadIsolate()
@@ -143,16 +174,6 @@ void initializeWithoutV8(Platform* platform)
     Heap::init();
 
     ThreadState::attachMainThread();
-    // currentThread will always be non-null in production, but can be null in Chromium unit tests.
-    if (WebThread* currentThread = platform->currentThread()) {
-        ASSERT(!s_pendingGCRunner);
-        s_pendingGCRunner = new PendingGCRunner;
-        currentThread->addTaskObserver(s_pendingGCRunner);
-
-        ASSERT(!s_messageLoopInterruptor);
-        s_messageLoopInterruptor = new MessageLoopInterruptor(currentThread);
-        ThreadState::current()->addInterruptor(s_messageLoopInterruptor);
-    }
 
     DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());
     initializer.init();
@@ -171,28 +192,10 @@ void initializeWithoutV8(Platform* platform)
 
 void shutdown()
 {
-    // currentThread will always be non-null in production, but can be null in Chromium unit tests.
-    if (Platform::current()->currentThread()) {
-        ASSERT(s_endOfTaskRunner);
-        Platform::current()->currentThread()->removeTaskObserver(s_endOfTaskRunner);
-        delete s_endOfTaskRunner;
-        s_endOfTaskRunner = 0;
-    }
+    removeMessageLoopObservers();
 
     ASSERT(s_isolateInterruptor);
     ThreadState::current()->removeInterruptor(s_isolateInterruptor);
-
-    // currentThread will always be non-null in production, but can be null in Chromium unit tests.
-    if (Platform::current()->currentThread()) {
-        ASSERT(s_pendingGCRunner);
-        delete s_pendingGCRunner;
-        s_pendingGCRunner = 0;
-
-        ASSERT(s_messageLoopInterruptor);
-        ThreadState::current()->removeInterruptor(s_messageLoopInterruptor);
-        delete s_messageLoopInterruptor;
-        s_messageLoopInterruptor = 0;
-    }
 
     // Detach the main thread before starting the shutdown sequence
     // so that the main thread won't get involved in a GC during the shutdown.
@@ -206,7 +209,6 @@ void shutdown()
 
 void shutdownWithoutV8()
 {
-    ASSERT(!s_endOfTaskRunner);
     CoreInitializer::shutdown();
     Heap::shutdown();
     WTF::shutdown();
