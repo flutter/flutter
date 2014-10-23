@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/ui.gni")
 import("//tools/grit/grit_rule.gni")
 
 group("sky") {
@@ -12,9 +13,15 @@ group("sky") {
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
-    "//sky/tools/debugger",
-    "//sky/tools/tester",
     "//sky/viewer",
-    "//third_party/mesa:osmesa",
   ]
+  if (use_aura) {
+    deps += [
+      "//sky/tools/debugger",
+      "//sky/tools/tester",
+    ]
+  }
+  if (!is_android) {
+    deps += [ "//third_party/mesa:osmesa" ]
+  }
 }
