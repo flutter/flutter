@@ -4,9 +4,8 @@ Hacking on Sky
 Building
 --------
 
-* Follow the setup & build instructions for [mojo](https://github.com/domokit/mojo), except...
-  * run ``gn & ninja`` in ``<src>/sky/`` and use the build target ``sky`` with ``ninja`` rather than ``root`` or ``mojo``
-
+* Follow the setup & build instructions for [mojo](https://github.com/domokit/mojo)
+* Build ``sky`` with ``ninja``, e.g. ``ninja C out/Debug sky``
 
 Running applications
 --------------------
