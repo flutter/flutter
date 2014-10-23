@@ -310,7 +310,10 @@ process_in_files("make_core_generated_html_element_factory") {
     "$sky_core_output_dir/V8HTMLElementWrapperFactory.cpp",
     "$sky_core_output_dir/V8HTMLElementWrapperFactory.h",
   ]
-  deps = [ ":libraries" ]
+  deps = [
+    ":libraries",
+    "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
+  ]
 }
 
 process_in_files("make_core_generated_html_element_type_helpers") {

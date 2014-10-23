@@ -5,7 +5,7 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 shared_library("viewer") {
-  output_name = "mojo_sky_viewer"
+  output_name = "sky_viewer"
 
   sources = [
     "content_handler_impl.cc",

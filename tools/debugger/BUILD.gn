@@ -14,8 +14,6 @@ group("debugger") {
 }
 
 shared_library("sky_debugger") {
-  output_name = "mojo_sky_debugger"
-
   sources = [
     "debugger.cc",
     "focus_rules.cc",
