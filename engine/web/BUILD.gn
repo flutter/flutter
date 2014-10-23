@@ -111,7 +111,6 @@ component("web") {
     "WebScriptController.cpp",
     "WebScrollbarThemePainter.cpp",
     "WebSecurityPolicy.cpp",
-    "WebSelector.cpp",
     "WebSerializedScriptValue.cpp",
     "WebSettingsImpl.cpp",
     "WebSettingsImpl.h",
