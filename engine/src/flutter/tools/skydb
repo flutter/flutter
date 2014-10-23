@@ -5,16 +5,27 @@
 
 import os
 import subprocess
+import sys
 
-build_directory = 'out'
-config_directory = 'Debug'
 
-mojo_shell = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
-    os.pardir, build_directory, config_directory, 'mojo_shell'))
+BUILD_DIRECTORY = 'out'
+CONFIG_DIRECTORY = 'Debug'
+MOJO_SHELL_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'mojo_shell'))
 
-subprocess.call([
-    mojo_shell,
-    '--content-handlers=text/html,mojo://sky_viewer/',
-    '--url-mappings=mojo:window_manager=mojo:sky_debugger',
-    'mojo:window_manager',
-])
+def main(args):
+    shell_command = [
+        MOJO_SHELL_PATH,
+        '--v=1',
+        '--content-handlers=text/html,mojo://sky_viewer/',
+        '--url-mappings=mojo:window_manager=mojo:sky_debugger',
+        'mojo:window_manager',
+    ]
+    if args:
+        prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % args[0]
+        shell_command.append(prompt_args)
+    subprocess.check_call(shell_command)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

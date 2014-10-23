@@ -43,12 +43,16 @@ class Prompt : public mojo::ApplicationDelegate {
   // Overridden from mojo::ApplicationDelegate:
   virtual void Initialize(mojo::ApplicationImpl* app) override {
     app->ConnectToService("mojo:sky_viewer", &tracing_);
-    ScheduleWaitForInput();
+    if (app->args().size() > 1)
+      url_ = app->args()[1];
   }
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->ConnectToService(&debugger_);
+    if (!url_.empty())
+      Reload();
+    ScheduleWaitForInput();
     return true;
   }
 
