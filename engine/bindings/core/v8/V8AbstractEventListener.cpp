@@ -37,7 +37,6 @@
 #include "bindings/core/v8/V8EventTarget.h"
 #include "bindings/core/v8/V8HiddenValue.h"
 #include "core/dom/Document.h"
-#include "core/events/BeforeUnloadEvent.h"
 #include "core/events/Event.h"
 #include "core/inspector/InspectorCounters.h"
 
@@ -140,11 +139,6 @@ void V8AbstractEventListener::invokeEventHandler(Event* event, v8::Local<v8::Val
 
     if (returnValue.IsEmpty())
         return;
-
-    if (m_isAttribute && !returnValue->IsNull() && !returnValue->IsUndefined() && event->isBeforeUnloadEvent()) {
-        TOSTRING_VOID(V8StringResource<>, stringReturnValue, returnValue);
-        toBeforeUnloadEvent(event)->setReturnValue(stringReturnValue);
-    }
 
     if (m_isAttribute && shouldPreventDefault(returnValue))
         event->preventDefault();

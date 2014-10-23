@@ -154,8 +154,6 @@ public:
     virtual bool isClipboardEvent() const;
     virtual bool isBeforeTextInsertedEvent() const;
 
-    virtual bool isBeforeUnloadEvent() const;
-
     bool propagationStopped() const { return m_propagationStopped || m_immediatePropagationStopped; }
     bool immediatePropagationStopped() const { return m_immediatePropagationStopped; }
 

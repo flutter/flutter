@@ -83,7 +83,6 @@
 #include "core/editing/FrameSelection.h"
 #include "core/editing/SpellChecker.h"
 #include "core/editing/markup.h"
-#include "core/events/BeforeUnloadEvent.h"
 #include "core/events/Event.h"
 #include "core/events/EventFactory.h"
 #include "core/events/EventListener.h"
@@ -1617,8 +1616,6 @@ void Document::dispatchUnloadEvents()
 
 Document::PageDismissalType Document::pageDismissalEventBeingDispatched() const
 {
-    if (m_loadEventProgress == BeforeUnloadEventInProgress)
-        return BeforeUnloadDismissal;
     if (m_loadEventProgress == PageHideInProgress)
         return PageHideDismissal;
     if (m_loadEventProgress == UnloadEventInProgress)

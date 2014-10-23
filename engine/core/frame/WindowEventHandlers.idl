@@ -36,7 +36,6 @@
 ] interface WindowEventHandlers {
     //attribute EventHandler onafterprint;
     //attribute EventHandler onbeforeprint;
-    attribute EventHandler onbeforeunload;
     attribute EventHandler onhashchange;
     attribute EventHandler onlanguagechange;
     attribute EventHandler onmessage;

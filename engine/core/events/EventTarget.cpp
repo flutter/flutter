@@ -289,10 +289,7 @@ void EventTarget::fireEventListeners(Event* event, EventTargetData* d, EventList
     // index |size|, so iterating up to (but not including) |size| naturally excludes
     // new event listeners.
 
-    if (event->type() == EventTypeNames::beforeunload) {
-        if (LocalDOMWindow* executingWindow = this->executingWindow())
-            UseCounter::count(executingWindow->document(), UseCounter::DocumentBeforeUnloadFired);
-    } else if (event->type() == EventTypeNames::unload) {
+    if (event->type() == EventTypeNames::unload) {
         if (LocalDOMWindow* executingWindow = this->executingWindow())
             UseCounter::count(executingWindow->document(), UseCounter::DocumentUnloadFired);
     } else if (event->type() == EventTypeNames::DOMFocusIn || event->type() == EventTypeNames::DOMFocusOut) {

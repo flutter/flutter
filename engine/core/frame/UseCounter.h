@@ -121,8 +121,6 @@ public:
         SVGAnimationElement = 90,
         KeyboardEventKeyLocation = 91,
         LineClamp = 96,
-        SubFrameBeforeUnloadRegistered = 97,
-        SubFrameBeforeUnloadFired = 98,
         TextReplaceWholeText = 100,
         ConsoleMarkTimeline = 102,
         CSSPseudoElementUserAgentCustomPseudo = 103,
@@ -185,8 +183,6 @@ public:
         InputTypePasswordMaxLength = 193,
         PrefixedPageVisibility = 196,
         CSSStyleSheetInsertRuleOptionalArg = 198, // Inconsistent with the specification and other browsers.
-        DocumentBeforeUnloadRegistered = 200,
-        DocumentBeforeUnloadFired = 201,
         DocumentUnloadRegistered = 202,
         DocumentUnloadFired = 203,
         SVGLocatableNearestViewportElement = 204,

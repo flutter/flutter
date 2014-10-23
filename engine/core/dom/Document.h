@@ -361,7 +361,6 @@ public:
 
     enum PageDismissalType {
         NoDismissal = 0,
-        BeforeUnloadDismissal = 1,
         PageHideDismissal = 2,
         UnloadDismissal = 3
     };
@@ -574,8 +573,6 @@ public:
         LoadEventTried,
         LoadEventInProgress,
         LoadEventCompleted,
-        BeforeUnloadEventInProgress,
-        BeforeUnloadEventCompleted,
         PageHideInProgress,
         UnloadEventInProgress,
         UnloadEventHandled

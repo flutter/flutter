@@ -188,11 +188,6 @@ bool Event::isBeforeTextInsertedEvent() const
     return false;
 }
 
-bool Event::isBeforeUnloadEvent() const
-{
-    return false;
-}
-
 void Event::setTarget(PassRefPtrWillBeRawPtr<EventTarget> target)
 {
     if (m_target == target)
