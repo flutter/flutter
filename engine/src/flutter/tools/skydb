@@ -6,6 +6,7 @@
 import os
 import subprocess
 import sys
+import urlparse
 
 
 BUILD_DIRECTORY = 'out'
@@ -18,6 +19,19 @@ SUPPORTED_MIME_TYPES = [
     'text/plain',
 ]
 
+def start_http_server_for_file(path):
+    HTTP_PORT = 9999
+    directory = os.path.dirname(os.path.abspath(path))
+    server_command = [
+        'python',
+        '-m',
+        'SimpleHTTPServer',
+        str(HTTP_PORT)
+    ]
+    subprocess.Popen(server_command, cwd=directory)
+    return 'http://localhost:%s/%s' % (HTTP_PORT, os.path.basename(path))
+
+
 def main(args):
     content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
         for mime_type in SUPPORTED_MIME_TYPES]
@@ -29,7 +43,12 @@ def main(args):
         'mojo:window_manager',
     ]
     if args:
-        prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % args[0]
+        url = args[0]
+        parse_result = urlparse.urlparse(url)
+        if not parse_result.scheme:
+            url = start_http_server_for_file(url)
+
+        prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
         shell_command.append(prompt_args)
     subprocess.check_call(shell_command)
 
