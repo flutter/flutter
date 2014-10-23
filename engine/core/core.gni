@@ -977,8 +977,6 @@ sky_core_files = [
   "html/parser/HTMLTokenizer.h",
   "html/parser/HTMLTreeBuilder.cpp",
   "html/parser/HTMLTreeBuilder.h",
-  "html/parser/HTMLTreeBuilderSimulator.cpp",
-  "html/parser/HTMLTreeBuilderSimulator.h",
   "html/parser/InputStreamPreprocessor.h",
   "html/parser/MarkupTokenizerInlines.h",
   "html/parser/NestingLevelIncrementer.h",

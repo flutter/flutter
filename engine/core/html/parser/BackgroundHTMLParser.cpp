@@ -27,6 +27,7 @@
 #include "core/html/parser/BackgroundHTMLParser.h"
 
 #include "core/html/parser/HTMLDocumentParser.h"
+#include "core/html/parser/HTMLParserIdioms.h"
 #include "core/html/parser/TextResourceDecoder.h"
 #include "wtf/MainThread.h"
 #include "wtf/text/TextPosition.h"
@@ -58,7 +59,6 @@ base::WeakPtr<BackgroundHTMLParser> BackgroundHTMLParser::create(PassOwnPtr<Back
 BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
     : m_token(adoptPtr(new HTMLToken))
     , m_tokenizer(HTMLTokenizer::create(config->options))
-    , m_treeBuilderSimulator(config->options)
     , m_options(config->options)
     , m_parser(config->parser)
     , m_pendingTokens(adoptPtr(new CompactHTMLTokenStream))
@@ -119,6 +119,28 @@ void BackgroundHTMLParser::markEndOfFile()
     m_input.close();
 }
 
+bool BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& token)
+{
+    if (token.type() == HTMLToken::StartTag) {
+        const String& tagName = token.data();
+        // FIXME: This is just a copy of Tokenizer::updateStateFor which uses threadSafeMatches.
+        if (threadSafeMatch(tagName, HTMLNames::scriptTag))
+            m_tokenizer->setState(HTMLTokenizer::ScriptDataState);
+        else if (threadSafeMatch(tagName, HTMLNames::styleTag))
+            m_tokenizer->setState(HTMLTokenizer::RAWTEXTState);
+    }
+
+    if (token.type() == HTMLToken::EndTag) {
+        const String& tagName = token.data();
+        if (threadSafeMatch(tagName, HTMLNames::scriptTag)) {
+            m_tokenizer->setState(HTMLTokenizer::DataState);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void BackgroundHTMLParser::pumpTokenizer()
 {
     while (true) {
@@ -135,7 +157,7 @@ void BackgroundHTMLParser::pumpTokenizer()
 
         m_token->clear();
 
-        if (!m_treeBuilderSimulator.simulate(m_pendingTokens->last(), m_tokenizer.get()) || m_pendingTokens->size() >= pendingTokenLimit)
+        if (!updateTokenizerState(m_pendingTokens->last()) || m_pendingTokens->size() >= pendingTokenLimit)
             sendTokensToMainThread();
     }
 }

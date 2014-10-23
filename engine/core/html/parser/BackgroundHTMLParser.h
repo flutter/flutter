@@ -29,7 +29,7 @@
 #include "base/memory/weak_ptr.h"
 #include "core/html/parser/CompactHTMLToken.h"
 #include "core/html/parser/HTMLParserOptions.h"
-#include "core/html/parser/HTMLTreeBuilderSimulator.h"
+#include "core/html/parser/HTMLTokenizer.h"
 #include "core/html/parser/TextResourceDecoder.h"
 #include "platform/text/SegmentedString.h"
 #include "wtf/PassOwnPtr.h"
@@ -74,11 +74,11 @@ private:
     void pumpTokenizer();
     void sendTokensToMainThread();
     void updateDocument(const String& decodedData);
+    bool updateTokenizerState(const CompactHTMLToken& token);
 
     SegmentedString m_input;
     OwnPtr<HTMLToken> m_token;
     OwnPtr<HTMLTokenizer> m_tokenizer;
-    HTMLTreeBuilderSimulator m_treeBuilderSimulator;
     HTMLParserOptions m_options;
     WeakPtr<HTMLDocumentParser> m_parser;
 

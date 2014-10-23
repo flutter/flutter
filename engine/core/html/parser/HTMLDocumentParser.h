@@ -37,7 +37,6 @@
 #include "core/html/parser/HTMLScriptRunner.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/html/parser/HTMLTokenizer.h"
-#include "core/html/parser/HTMLTreeBuilderSimulator.h"
 #include "core/html/parser/TextResourceDecoder.h"
 #include "platform/text/SegmentedString.h"
 #include "wtf/Deque.h"
