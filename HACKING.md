@@ -5,7 +5,7 @@ Building
 --------
 
 * Follow the setup & build instructions for [mojo](https://github.com/domokit/mojo)
-* Build ``sky`` with ``ninja``, e.g. ``ninja C out/Debug sky``
+* Build ``sky`` with ``ninja``, e.g. ``ninja -C out/Debug sky``
 
 Running applications
 --------------------
