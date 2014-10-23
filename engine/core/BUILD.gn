@@ -178,6 +178,7 @@ group("core_names") {
   deps = [
     ":make_core_generated_css_property_names",
     ":make_core_generated_event_names",
+    ":make_core_generated_event_target_factory",
     ":make_core_generated_event_target_names",
     ":make_core_generated_event_type_names",
     ":make_core_generated_fetch_initiator_type_names",
@@ -199,7 +200,6 @@ group("make_core_generated") {
     ":make_core_generated_css_value_keywords",
     ":make_core_generated_html_element_type_helpers",
     ":make_core_generated_event_factory",
-    ":make_core_generated_event_target_factory",
     ":make_core_generated_make_token_matcher",
     ":make_core_generated_make_parser",
     ":make_core_generated_make_token_matcher_for_viewport",
@@ -338,7 +338,10 @@ process_in_files("make_core_generated_event_factory") {
     "$sky_core_output_dir/EventHeaders.h",
     "$sky_core_output_dir/EventInterfaces.h",
   ]
-  deps = [ ":libraries" ]
+  deps = [
+    ":core_names",
+    ":libraries",
+  ]
 }
 
 process_in_files("make_core_generated_media_feature_names") {
