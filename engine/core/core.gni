@@ -944,8 +944,6 @@ sky_core_files = [
   "html/imports/LinkImport.cpp",
   "html/imports/LinkImport.h",
   "html/parser/AtomicHTMLToken.h",
-  "html/parser/BackgroundHTMLInputStream.cpp",
-  "html/parser/BackgroundHTMLInputStream.h",
   "html/parser/BackgroundHTMLParser.cpp",
   "html/parser/BackgroundHTMLParser.h",
   "html/parser/CompactHTMLToken.cpp",

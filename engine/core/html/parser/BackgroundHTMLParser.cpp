@@ -33,19 +33,6 @@
 
 namespace blink {
 
-// On a network with high latency and high bandwidth, using a device
-// with a fast CPU, we could end up speculatively tokenizing
-// the whole document, well ahead of when the main-thread actually needs it.
-// This is a waste of memory (and potentially time if the speculation fails).
-// So we limit our outstanding tokens arbitrarily to 10,000.
-// Our maximal memory spent speculating will be approximately:
-// (outstandingTokenLimit + pendingTokenLimit) * sizeof(CompactToken)
-// We use a separate low and high water mark to avoid constantly topping
-// off the main thread's token buffer.
-// At time of writing, this is (10000 + 1000) * 28 bytes = ~308kb of memory.
-// These numbers have not been tuned.
-static const size_t outstandingTokenLimit = 10000;
-
 // We limit our chucks to 1000 tokens, to make sure the main
 // thread is never waiting on the parser thread for tokens.
 // This was tuned in https://bugs.webkit.org/show_bug.cgi?id=110408.
@@ -96,8 +83,8 @@ void BackgroundHTMLParser::appendRawBytesFromMainThread(PassOwnPtr<Vector<char> 
 
 void BackgroundHTMLParser::appendDecodedBytes(const String& input)
 {
-    ASSERT(!m_input.current().isClosed());
-    m_input.append(input);
+    ASSERT(!m_input.isClosed());
+    m_input.append(SegmentedString(input));
     pumpTokenizer();
 }
 
@@ -114,14 +101,6 @@ void BackgroundHTMLParser::updateDocument(const String& decodedData)
     appendDecodedBytes(decodedData);
 }
 
-void BackgroundHTMLParser::startedChunkWithCheckpoint(HTMLInputCheckpoint inputCheckpoint)
-{
-    // Note, we should not have to worry about the index being invalid
-    // as messages from the main thread will be processed in FIFO order.
-    m_input.invalidateCheckpointsBefore(inputCheckpoint);
-    pumpTokenizer();
-}
-
 void BackgroundHTMLParser::finish()
 {
     markEndOfFile();
@@ -135,37 +114,29 @@ void BackgroundHTMLParser::stop()
 
 void BackgroundHTMLParser::markEndOfFile()
 {
-    ASSERT(!m_input.current().isClosed());
-    m_input.append(String(&kEndOfFileMarker, 1));
+    ASSERT(!m_input.isClosed());
+    m_input.append(SegmentedString(String(&kEndOfFileMarker, 1)));
     m_input.close();
 }
 
 void BackgroundHTMLParser::pumpTokenizer()
 {
-    // No need to start speculating until the main thread has almost caught up.
-    if (m_input.totalCheckpointTokenCount() > outstandingTokenLimit)
-        return;
-
     while (true) {
-        if (!m_tokenizer->nextToken(m_input.current(), *m_token)) {
+        if (!m_tokenizer->nextToken(m_input, *m_token)) {
             // We've reached the end of our current input.
             sendTokensToMainThread();
             break;
         }
 
         {
-            CompactHTMLToken token(m_token.get(), TextPosition(m_input.current().currentLine(), m_input.current().currentColumn()));
+            CompactHTMLToken token(m_token.get(), TextPosition(m_input.currentLine(), m_input.currentColumn()));
             m_pendingTokens->append(token);
         }
 
         m_token->clear();
 
-        if (!m_treeBuilderSimulator.simulate(m_pendingTokens->last(), m_tokenizer.get()) || m_pendingTokens->size() >= pendingTokenLimit) {
+        if (!m_treeBuilderSimulator.simulate(m_pendingTokens->last(), m_tokenizer.get()) || m_pendingTokens->size() >= pendingTokenLimit)
             sendTokensToMainThread();
-            // If we're far ahead of the main thread, yield for a bit to avoid consuming too much memory.
-            if (m_input.totalCheckpointTokenCount() > outstandingTokenLimit)
-                break;
-        }
     }
 }
 
@@ -180,7 +151,6 @@ void BackgroundHTMLParser::sendTokensToMainThread()
 
     OwnPtr<HTMLDocumentParser::ParsedChunk> chunk = adoptPtr(new HTMLDocumentParser::ParsedChunk);
     chunk->tokenizerState = m_tokenizer->state();
-    chunk->inputCheckpoint = m_input.createCheckpoint(m_pendingTokens->size());
     chunk->tokens = m_pendingTokens.release();
     callOnMainThread(bind(&HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser, m_parser, chunk.release()));
 

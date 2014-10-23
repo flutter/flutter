@@ -27,11 +27,11 @@
 #define BackgroundHTMLParser_h
 
 #include "base/memory/weak_ptr.h"
-#include "core/html/parser/BackgroundHTMLInputStream.h"
 #include "core/html/parser/CompactHTMLToken.h"
 #include "core/html/parser/HTMLParserOptions.h"
 #include "core/html/parser/HTMLTreeBuilderSimulator.h"
 #include "core/html/parser/TextResourceDecoder.h"
+#include "platform/text/SegmentedString.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/WeakPtr.h"
 
@@ -54,7 +54,6 @@ public:
         WeakPtr<HTMLDocumentParser> parser;
         OwnPtr<HTMLToken> token;
         OwnPtr<HTMLTokenizer> tokenizer;
-        HTMLInputCheckpoint inputCheckpoint;
         String unparsedInput;
     };
 
@@ -63,7 +62,6 @@ public:
     void appendRawBytesFromMainThread(PassOwnPtr<Vector<char> >);
     void flush();
     void resumeFrom(PassOwnPtr<Checkpoint>);
-    void startedChunkWithCheckpoint(HTMLInputCheckpoint);
     void finish();
     void stop();
 
@@ -77,7 +75,7 @@ private:
     void sendTokensToMainThread();
     void updateDocument(const String& decodedData);
 
-    BackgroundHTMLInputStream m_input;
+    SegmentedString m_input;
     OwnPtr<HTMLToken> m_token;
     OwnPtr<HTMLTokenizer> m_tokenizer;
     HTMLTreeBuilderSimulator m_treeBuilderSimulator;
