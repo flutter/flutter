@@ -93,7 +93,7 @@ component("web") {
     "WebInputEvent.cpp",
     "WebInputEventConversion.cpp",
     "WebInputEventConversion.h",
-    "WebKit.cpp",
+    "Sky.cpp",
     "WebLeakDetector.cpp",
     "WebLocalFrameImpl.cpp",
     "WebLocalFrameImpl.h",

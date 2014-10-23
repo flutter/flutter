@@ -11,7 +11,7 @@
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/services/public/interfaces/content_handler/content_handler.mojom.h"
-#include "sky/engine/public/web/WebKit.h"
+#include "sky/engine/public/web/Sky.h"
 #include "sky/viewer/content_handler_impl.h"
 #include "sky/viewer/document_view.h"
 #include "sky/viewer/platform/platform_impl.h"

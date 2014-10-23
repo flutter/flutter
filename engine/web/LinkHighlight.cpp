@@ -46,7 +46,7 @@
 #include "public/platform/WebFloatPoint.h"
 #include "public/platform/WebRect.h"
 #include "public/platform/WebSize.h"
-#include "public/web/WebKit.h"
+#include "public/web/Sky.h"
 #include "web/WebLocalFrameImpl.h"
 #include "web/WebSettingsImpl.h"
 #include "web/WebViewImpl.h"

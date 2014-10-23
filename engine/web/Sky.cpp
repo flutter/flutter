@@ -29,7 +29,7 @@
  */
 
 #include "config.h"
-#include "public/web/WebKit.h"
+#include "public/web/Sky.h"
 
 #include "base/message_loop/message_loop.h"
 #include "bindings/core/v8/V8Binding.h"
