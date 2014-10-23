@@ -74,11 +74,13 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
   virtual void OnViewManagerDisconnected(
       mojo::ViewManager* view_manager) override {
+    CHECK(false); // FIXME: This is dead code, why?
     view_manager_ = nullptr;
     root_ = nullptr;
   }
 
   virtual void OnViewDestroyed(mojo::View* view) override {
+    CHECK(false); // FIXME: This is dead code, why?
     view->RemoveObserver(this);
   }
 
