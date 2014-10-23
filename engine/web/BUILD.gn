@@ -62,7 +62,6 @@ component("web") {
     "SpellCheckerClientImpl.h",
     "ViewportAnchor.cpp",
     "ViewportAnchor.h",
-    "WebAXObject.cpp",
     "WebArrayBufferConverter.cpp",
     "WebArrayBufferView.cpp",
     "WebCache.cpp",

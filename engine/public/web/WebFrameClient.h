@@ -32,7 +32,6 @@
 #define WebFrameClient_h
 
 #include "../platform/WebColor.h"
-#include "WebAXObject.h"
 #include "WebFrame.h"
 #include "WebIconURL.h"
 #include "WebNavigationPolicy.h"
@@ -264,12 +263,6 @@ public:
 
     // Send initial drawing parameters to a child frame that is being rendered out of process.
     virtual void initializeChildFrame(const WebRect& frameRect, float scaleFactor) { }
-
-
-    // Accessibility -------------------------------------------------------
-
-    // Notifies embedder about an accessibility event.
-    virtual void postAccessibilityEvent(const WebAXObject&, WebAXEvent) { }
 
 protected:
     virtual ~WebFrameClient() { }

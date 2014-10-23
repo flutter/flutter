@@ -50,7 +50,6 @@ namespace blink {
 
 class Document;
 class DocumentType;
-class WebAXObject;
 class WebDocumentType;
 class WebElement;
 class WebString;

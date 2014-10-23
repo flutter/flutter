@@ -44,7 +44,6 @@
 #include "core/rendering/RenderObject.h"
 #include "core/rendering/RenderView.h"
 #include "public/platform/WebURL.h"
-#include "public/web/WebAXObject.h"
 #include "public/web/WebDOMEvent.h"
 #include "public/web/WebDocumentType.h"
 #include "public/web/WebElement.h"

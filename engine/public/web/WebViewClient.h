@@ -33,7 +33,6 @@
 
 #include "../platform/WebGraphicsContext3D.h"
 #include "../platform/WebString.h"
-#include "WebAXEnums.h"
 #include "WebContentDetectionResult.h"
 #include "WebDragOperation.h"
 #include "WebFrame.h"
@@ -45,7 +44,6 @@
 
 namespace blink {
 
-class WebAXObject;
 class WebCompositorOutputSurface;
 class WebElement;
 class WebGestureEvent;
@@ -114,13 +112,6 @@ public:
 
     // Returns comma separated list of accept languages.
     virtual WebString acceptLanguages() { return WebString(); }
-
-
-    // Accessibility -------------------------------------------------------
-
-    // Notifies embedder about an accessibility event.
-    virtual void postAccessibilityEvent(const WebAXObject&, WebAXEvent) { }
-
 
     // Developer tools -----------------------------------------------------
 

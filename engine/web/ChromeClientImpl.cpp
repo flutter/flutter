@@ -58,7 +58,6 @@
 #include "public/platform/WebRect.h"
 #include "public/platform/WebURLRequest.h"
 #include "public/web/Sky.h"
-#include "public/web/WebAXObject.h"
 #include "public/web/WebColorSuggestion.h"
 #include "public/web/WebConsoleMessage.h"
 #include "public/web/WebFrameClient.h"

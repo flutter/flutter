@@ -40,7 +40,6 @@
 
 namespace blink {
 
-class WebAXObject;
 class WebFrame;
 class WebFrameClient;
 class WebGraphicsContext3D;
