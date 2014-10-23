@@ -4,8 +4,6 @@
 
 import("//tools/grit/grit_rule.gni")
 
-if (!is_android) {
-
 group("blink") {
   deps = [
     ":sky_headers",
@@ -30,8 +28,6 @@ group("test_support") {
     "//sky/engine/web:test_support",
   ]
 }
-
-}  # !is_android
 
 config("sky_headers_config") {
   include_dirs = [ ".." ]

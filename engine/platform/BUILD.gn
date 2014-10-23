@@ -5,7 +5,6 @@
 import("//build/config/ui.gni")
 import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/config.gni")
-import("//third_party/yasm/yasm_assemble.gni")
 
 # Most targets in this file are private actions so use that as the default.
 visibility = [":*"]
@@ -754,16 +753,12 @@ component("platform") {
   }
 }
 
+if (cpu_arch == "x86" || cpu_arch == "x64") {
+
+import("//third_party/yasm/yasm_assemble.gni")
+
 yasm_assemble("heap_asm_stubs") {
-  if (cpu_arch == "x86" || cpu_arch == "x64") {
-    sources = [ "heap/asm/SaveRegisters_x86.asm" ]
-  } else if (cpu_arch == "arm") {
-    sources = [ "heap/asm/SaveRegisters_arm.S" ]
-  } else if (cpu_arch == "arm64") {
-    sources = [ "heap/asm/SaveRegisters_arm64.S" ]
-  } else if (cpu_arch == "mipsel") {
-    sources = [ "heap/asm/SaveRegisters_mips.S" ]
-  }
+  sources = [ "heap/asm/SaveRegisters_x86.asm" ]
 
   yasm_flags = []
   if (is_mac) {
@@ -779,9 +774,25 @@ yasm_assemble("heap_asm_stubs") {
     }
   } else if (cpu_arch == "x86") {
     yasm_flags += [ "-DIA32=1" ]
-  } else if (cpu_arch == "arm") {
-    yasm_flags += [ "-DARM=1" ]
   }
+}
+
+} else { # cpu_arch == "x86" || cpu_arch == "x64"
+
+source_set("heap_asm_stubs") {
+  if (cpu_arch == "arm") {
+    sources = [ "heap/asm/SaveRegisters_arm.S" ]
+  } else if (cpu_arch == "arm64") {
+    sources = [ "heap/asm/SaveRegisters_arm64.S" ]
+  } else if (cpu_arch == "mipsel") {
+    sources = [ "heap/asm/SaveRegisters_mips.S" ]
+  }
+
+  if (cpu_arch == "arm") {
+    defines = [ "ARM=1" ]
+  }
+}
+
 }
 
 test("platform_unittests") {
