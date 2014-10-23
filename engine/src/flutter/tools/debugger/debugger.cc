@@ -85,8 +85,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   }
 
   virtual void OnViewBoundsChanged(mojo::View* view,
-                                   const gfx::Rect& old_bounds,
-                                   const gfx::Rect& new_bounds) override {
+                                   const mojo::Rect& old_bounds,
+                                   const mojo::Rect& new_bounds) override {
     content_->SetBounds(new_bounds);
   }
 
