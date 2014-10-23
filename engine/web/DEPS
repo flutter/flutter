@@ -1,0 +1,16 @@
+include_rules = [
+    "+..",
+    "+bindings",
+    "+core",
+    "+gin/public",
+    "+heap",
+    "+modules",
+    "+painting",
+    "+platform",
+    "+public",
+    "+public/platform",
+    "+skia",
+    "+third_party/khronos",
+    "+third_party/skia",
+    "+web",
+]

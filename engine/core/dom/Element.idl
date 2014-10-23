@@ -1,0 +1,79 @@
+/*
+ * Copyright (C) 2006, 2007, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+[
+    SpecialWrapFor=HTMLElement,
+] interface Element : Node {
+    readonly attribute DOMString? tagName;
+
+    DOMString? getAttribute(DOMString name);
+    [RaisesException, CustomElementCallbacks] void setAttribute(DOMString name, DOMString value);
+    [CustomElementCallbacks] void removeAttribute(DOMString name);
+
+    [PerWorldBindings, ImplementedAs=attributesForBindings] readonly attribute NamedNodeMap     attributes;
+    [MeasureAs=HasAttributes] boolean hasAttributes();
+
+    boolean hasAttribute(DOMString name);
+
+    [PerWorldBindings] readonly attribute CSSStyleDeclaration style;
+
+    [Reflect] attribute DOMString id;
+    readonly attribute DOMString? localName;
+
+    [RaisesException] boolean matches(DOMString selectors);
+
+    readonly attribute long offsetLeft;
+    readonly attribute long offsetTop;
+    readonly attribute long offsetWidth;
+    readonly attribute long offsetHeight;
+    readonly attribute Element offsetParent;
+    readonly attribute long clientLeft;
+    readonly attribute long clientTop;
+    readonly attribute long clientWidth;
+    readonly attribute long clientHeight;
+
+    // FIXME: should be:
+    // attribute (Dictionary or double) scrollLeft;
+    // attribute (Dictionary or double) scrollTop;
+    // http://crbug.com/240176
+    [Custom=Setter] attribute long scrollLeft;
+    [Custom=Setter] attribute long scrollTop;
+    readonly attribute long scrollWidth;
+    readonly attribute long scrollHeight;
+
+    void focus();
+    void blur();
+    void scrollIntoView(optional boolean alignWithTop);
+
+    [MeasureAs=ElementScrollIntoViewIfNeeded] void scrollIntoViewIfNeeded(optional boolean centerIfNeeded);
+
+    [PerWorldBindings] readonly attribute DOMTokenList classList;
+
+    [RaisesException, MeasureAs=ElementCreateShadowRoot] ShadowRoot createShadowRoot();
+    [PerWorldBindings] readonly attribute ShadowRoot shadowRoot;
+    NodeList getDestinationInsertionPoints();
+
+    // CSSOM View Module API
+    ClientRectList getClientRects();
+    ClientRect getBoundingClientRect();
+};
+
+Element implements ParentNode;
+Element implements ChildNode;

@@ -1,0 +1,46 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef SettingsMacros_h
+#define SettingsMacros_h
+
+#define SETTINGS_GETTERS_AND_SETTERS \
+    {% for setting in settings %}
+    {{setting.type|to_passing_type}} {{setting.name}}() const { return m_{{setting.name}}; } \
+    void set{{setting.name|upper_first}}({{setting.type|to_passing_type}} {{setting.name}}); \
+    {% endfor %}
+// End of SETTINGS_GETTERS_AND_SETTERS.
+
+#define SETTINGS_MEMBER_VARIABLES \
+    {% for setting in settings if setting.type != 'bool' %}
+    {{setting.type}} m_{{setting.name}}; \
+    {% endfor %}
+    {% for setting in settings if setting.type == 'bool' %}
+    bool m_{{setting.name}} : 1; \
+    {% endfor %}
+// End of SETTINGS_MEMBER_VARIABLES.
+
+#define SETTINGS_INITIALIZER_LIST \
+    {% for setting in settings if setting.initial and setting.type != 'bool' %}
+    , m_{{setting.name}}({{setting.initial}}) \
+    {% endfor %}
+    {% for setting in settings if setting.initial and setting.type == 'bool' %}
+    , m_{{setting.name}}({{setting.initial}}) \
+    {% endfor %}
+// End of SETTINGS_INITIALIZER_LIST.
+
+#define SETTINGS_SETTER_BODIES \
+{% for setting in settings %}
+void Settings::set{{setting.name|upper_first}}({{setting.type|to_passing_type}} {{setting.name}}) \
+{ \
+    if (m_{{setting.name}} == {{setting.name}}) \
+        return; \
+    m_{{setting.name}} = {{setting.name}}; \
+    {% if setting.invalidate %}
+    invalidate(SettingsDelegate::{{setting.invalidate}}Change); \
+    {% endif  %}
+} \
+{% endfor %}
+// End of SETTINGS_SETTER_BODIES.
+
+#endif // SettingsMacros_h

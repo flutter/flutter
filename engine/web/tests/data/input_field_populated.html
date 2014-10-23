@@ -1,0 +1,8 @@
+<input id="sample" value='0123456789abcdefghijklmnopqrstuvwxyz'/>
+<div id="inputEvent">none</div>
+<script>
+document.getElementById('sample').addEventListener('input', function() {
+    document.getElementById('inputEvent').textContent = 'got';
+});
+</script>
+

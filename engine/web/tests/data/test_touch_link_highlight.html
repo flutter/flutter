@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+  <body>
+    <a href="http://www.test.com" style="position: absolute; left: 20px; top: 20px; width: 200px;">A link to highlight</a>
+    <div style="background-color: white; position: absolute; left: 20px; top: 40px; width: 200px; height: 30px; -webkit-transform:translateZ(0);">
+      <p id="innerDiv">Not a link to click.</p>
+    </div>
+    <div style="background-color: white; position: absolute; left: 20px; top: 100px; width: 200px; height: 100px; overflow-y: scroll; overflow-x : scroll;">
+        <a href="http://www.test.com">Another link to click</a><br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+        Some stuff.<br>
+    </div>
+    <!-- Don't highlight if no hand cursor. -->
+    <a href="http://www.test.com" style="position: absolute; left: 20px; top: 220px; width: 200px; cursor: crosshair;">A link to *not* highlight</a>
+    <div style="position: absolute; left: 20px; top: 260px; width: 200px;">
+        <input type="text"> <!-- This will have an I-beam cursor. -->
+    </div>
+    <a href="http://www.test.com" style="position: absolute; left: 20px; top: 300px; width: 400px;">One link to highlight</a>
+    <a href="http://www.test.com" style="position: absolute; left: 20px; top: 320px; width: 400px;">Another link to highlight simultaneously</a>
+<!-- The following is the text for the iframe tag below:
+<html>
+<body>
+<a href="http://www.test.com" position: absolute; left: 50px; top: 30px>
+This is going to be a very long link to force the scrollbars to activate on the iFrame that will contain this page.
+</a>
+</body>
+</html>
+-->
+<!--
+    <iframe style="scrolling: yes; width : 400px; height : 100px; position: absolute; left: 20px; top: 210px;"
+     src="data:text/html,%3Chtml%3E%0A%3Cbody%3E%0A%3Ca%20href%3D%22http%3A%2F%2Fwww.test.com%22%20position%3A%20absolute%3B%20left%3A%2050px%3B%20top%3A%2030px%3E%0AThis%20is%20going%20to%20be%20a%20very%20long%20link%20to%20force%20the%20scrollbars%20to%20activate%20on%20the%20iFrame%20that%20will%20contain%20this%20page.%0A%3C%2Fa%3E%0A%3C%2Fbody%3E%0A%3C%2Fhtml%3E"></iframe>
+-->
+  </body>
+</html>

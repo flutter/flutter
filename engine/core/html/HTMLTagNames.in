@@ -1,0 +1,18 @@
+namespace="HTML"
+fallbackInterfaceName="HTMLElement"
+
+a interfaceName=HTMLAnchorElement
+audio
+canvas
+content interfaceName=HTMLContentElement
+img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
+link constructorNeedsCreatedByParser
+meta
+picture interfaceName=HTMLPictureElement
+script
+shadow interfaceName=HTMLShadowElement
+source
+style constructorNeedsCreatedByParser
+template
+title
+video

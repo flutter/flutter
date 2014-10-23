@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<span id="header">[
+<span id="header_1">Header 1.</span>
+<span id="header_2">Header 2.</span>
+]</span>
+
+<span id="editable" contenteditable="true">[
+<span id="editable_1">Editable 1.</span>
+<span id="editable_2">Editable 2.</span>
+]</span>
+
+<span id="footer">[
+<span id="footer_1">Footer 1.</span>
+<span id="footer_2">Footer 2.</span>
+]</span>
+
+<script>
+function selectElement(id) {
+  var element = document.getElementById(id);
+  var range = document.createRange();
+  range.selectNode(document.getElementById(id));
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+}
+</script>
+</body>
+</html>
+

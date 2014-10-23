@@ -1,0 +1,89 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/bindings.gni")
+import("//sky/engine/build/scripts/scripts.gni")
+import("//sky/engine/core/core.gni")
+
+visibility = ["//sky/*"]
+
+# Main interface IDL files (excluding dependencies and testing)
+# are included as properties on global objects, and in aggregate bindings.
+main_interface_idl_files = core_idl_files
+
+main_interface_idl_files_list = "$target_gen_dir/main_interface_idl_files.tmp"
+write_file(main_interface_idl_files_list,
+           rebase_path(main_interface_idl_files, root_build_dir))
+
+generated_global_constructors_idl_files = [
+  "$sky_output_dir/WindowConstructors.idl",
+]
+generated_global_constructors_header_files = [
+  "$sky_output_dir/WindowConstructors.h",
+]
+
+# FIXME: Generate separate core_global_objects
+# http://crbug.com/358074
+# GYP version: generated.gyp:global_objects
+action("global_objects") {
+  script = "scripts/compute_global_objects.py"
+
+  inputs = [
+    "scripts/utilities.py",
+    # Only look in main IDL files (exclude dependencies and testing,
+    # which should not define global objects).
+    main_interface_idl_files_list,
+  ] + main_interface_idl_files
+
+  outputs = [
+    "$bindings_output_dir/GlobalObjects.pickle",
+  ]
+
+  args = [
+    "--idl-files-list",
+    rebase_path(main_interface_idl_files_list, root_build_dir),
+    "--write-file-only-if-changed=1",  # Always true for Ninja. FIXME: remove
+                                       # when everything switched to GN.
+    "--",
+    rebase_path("$bindings_output_dir/GlobalObjects.pickle", root_build_dir),
+  ]
+}
+
+# GYP version: generated.gyp:global_constructors_idls
+action("global_constructors_idls") {
+  script = "scripts/generate_global_constructors.py"
+
+  inputs = [
+    "scripts/generate_global_constructors.py",
+    "scripts/utilities.py",
+    "$bindings_output_dir/GlobalObjects.pickle",
+    # Only includes main IDL files (exclude dependencies and testing,
+    # which should not appear on global objects).
+    main_interface_idl_files_list,
+  ] + main_interface_idl_files
+
+  outputs = generated_global_constructors_idl_files +
+    generated_global_constructors_header_files
+
+  args = [
+    "--idl-files-list",
+    rebase_path(main_interface_idl_files_list, root_build_dir),
+    "--global-objects-file",
+    rebase_path("$bindings_output_dir/GlobalObjects.pickle", root_build_dir),
+    "--write-file-only-if-changed=1",  # Always true for Ninja.
+    "--",
+    "Window",
+    rebase_path("$sky_output_dir/WindowConstructors.idl", root_build_dir),
+  ]
+
+  deps = [ ":global_objects" ]
+}
+
+# GYP version: generated.gyp:generated_idls
+group("generated_idls") {
+  deps = [
+    ":global_constructors_idls",
+    "//sky/engine/core:generated_testing_idls",
+  ]
+}

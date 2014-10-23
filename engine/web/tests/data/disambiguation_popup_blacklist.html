@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <style>
+      div {
+        height: 100px;
+        margin: 0px;
+        text-align: center;
+        width: 100%;
+      }
+      div.tightlyPacked {
+        background-color: pink;
+        border: 1px solid black;
+      }
+      div.bugContainer {
+        background-color: cyan;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tightlyPacked" onclick="window.location='#first';">
+      <div>Leaf node #1</div>
+    </div>
+    <div class="tightlyPacked" onclick="window.location='#second';">
+      <div>Leaf node #2</div>
+    </div>
+    <div></div>
+    <div class="bugContainer" onclick="window.location='#third';">
+      <p class="title">
+        <a class="title" href="#fourth">Random link</a>
+      </p>
+      <p>
+        Breaking node
+      </p>
+    </div>
+  </body>
+</html>

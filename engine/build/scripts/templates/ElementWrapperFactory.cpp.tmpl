@@ -1,0 +1,92 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#include "config.h"
+#include "V8{{namespace}}ElementWrapperFactory.h"
+
+#include "{{namespace}}Names.h"
+#include "bindings/core/v8/CustomElementWrapper.h"
+{% for tag in tags|sort if tag.has_js_interface %}
+#include "bindings/core/v8/V8{{tag.interface}}.h"
+{% endfor %}
+{% for tag in tags|sort if tag.has_js_interface %}
+#include "core/{{namespace|lower}}/{{tag.js_interface}}.h"
+{% endfor %}
+#include "core/{{namespace|lower}}/{{fallback_js_interface}}.h"
+#include "core/dom/Document.h"
+#include "core/frame/Settings.h"
+#include "platform/RuntimeEnabledFeatures.h"
+#include "wtf/StdLibExtras.h"
+
+namespace blink {
+
+using namespace {{namespace}}Names;
+
+typedef v8::Handle<v8::Object> (*Create{{namespace}}ElementWrapperFunction)({{namespace}}Element*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
+
+static v8::Handle<v8::Object> create{{namespace}}ElementWrapper({{namespace}}Element*, v8::Handle<v8::Object>, v8::Isolate*)
+{
+    ASSERT_NOT_REACHED();
+    return v8::Handle<v8::Object>();
+}
+{% for js_interface, list in tags|sort|selectattr('has_js_interface')|groupby('js_interface') %}
+{% filter enable_conditional(list[0].Conditional) %}
+static v8::Handle<v8::Object> create{{js_interface}}Wrapper({{namespace}}Element* element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
+{
+    {% if list[0].runtimeEnabled %}
+    if (!RuntimeEnabledFeatures::{{list[0].runtimeEnabled}}Enabled())
+        return createV8{{namespace}}FallbackWrapper(to{{fallback_js_interface}}(element), creationContext, isolate);
+    {% endif %}
+    return wrap(static_cast<{{js_interface}}*>(element), creationContext, isolate);
+}
+{% endfilter %}
+{% endfor %}
+
+v8::Handle<v8::Object> createV8{{namespace}}Wrapper({{namespace}}Element* element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
+{
+    typedef HashMap<StringImpl*, Create{{namespace}}ElementWrapperFunction> FunctionMap;
+    DEFINE_STATIC_LOCAL(FunctionMap, map, ());
+    if (map.isEmpty()) {
+    {% for tag in tags|sort %}
+    {% filter enable_conditional(tag.Conditional) %}
+        map.set({{tag|symbol}}Tag.localName().impl(), create{{tag.js_interface}}Wrapper);
+    {% endfilter %}
+    {% endfor %}
+    }
+
+    Create{{namespace}}ElementWrapperFunction createWrapperFunction = map.get(element->localName().impl());
+    if (createWrapperFunction == create{{namespace}}ElementWrapper)
+        createWrapperFunction = createV8{{namespace}}DirectWrapper;
+    if (element->isCustomElement())
+        return CustomElementWrapper<{{namespace}}Element, V8{{namespace}}Element>::wrap(element, creationContext, isolate, createWrapperFunction);
+
+    if (createWrapperFunction)
+        return createWrapperFunction(element, creationContext, isolate);
+    {% if fallback_js_interface == namespace + 'Element' %}
+    return V8{{fallback_js_interface}}::createWrapper(element, creationContext, isolate);
+    {% else %}
+    return wrap(to{{fallback_js_interface}}(element), creationContext, isolate);
+    {% endif %}
+}
+
+const WrapperTypeInfo* findWrapperTypeFor{{namespace}}TagName(const AtomicString& name)
+{
+    typedef HashMap<StringImpl*, const WrapperTypeInfo*> NameTypeMap;
+    DEFINE_STATIC_LOCAL(NameTypeMap, map, ());
+    if (map.isEmpty()) {
+        // FIXME: This seems wrong. We should list every interface here, not
+        // just the ones that have specialized JavaScript interfaces.
+        {% for tag in tags|sort if tag.has_js_interface %}
+        {% filter enable_conditional(tag.Conditional) %}
+        map.set({{tag|symbol}}Tag.localName().impl(), &V8{{tag.js_interface}}::wrapperTypeInfo);
+        {% endfilter %}
+        {% endfor %}
+    }
+
+    if (const WrapperTypeInfo* result = map.get(name.impl()))
+        return result;
+
+    return &V8{{fallback_js_interface}}::wrapperTypeInfo;
+}
+
+}

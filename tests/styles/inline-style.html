@@ -1,0 +1,20 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<foo />
+<script>
+
+describe('Inline styles', function() {
+  it('should be settable using "style" attribute', function() {
+    var foo = document.querySelector('foo');
+    foo.setAttribute('style', 'color: red');
+
+
+    assert.equal(foo.getAttribute('style'), 'color: red');
+    assert.equal(foo.style.color, 'rgb(255, 0, 0)');
+    assert.equal(window.getComputedStyle(foo).color, 'rgb(255, 0, 0)');
+  });
+});
+
+</script>
+</html>

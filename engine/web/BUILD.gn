@@ -1,0 +1,199 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+import("//sky/engine/config.gni")
+
+visibility = ["//sky/*"]
+
+platform_web_unittest_files = [
+  "//sky/engine/platform/graphics/BitmapImageTest.cpp",
+  "//sky/engine/platform/graphics/DeferredImageDecoderTest.cpp",
+  "//sky/engine/platform/graphics/ImageDecodingStoreTest.cpp",
+  "//sky/engine/platform/graphics/ImageFrameGeneratorTest.cpp",
+  "//sky/engine/platform/graphics/OpaqueRectTrackingContentLayerDelegateTest.cpp",
+  "//sky/engine/platform/graphics/test/MockImageDecoder.h",
+  "//sky/engine/platform/graphics/test/MockWebGraphicsContext3D.h",
+  "//sky/engine/platform/image-decoders/gif/GIFImageDecoderTest.cpp",
+  "//sky/engine/platform/image-decoders/jpeg/JPEGImageDecoderTest.cpp",
+]
+
+component("web") {
+  output_name = "sky_web"
+
+  deps = [
+    "//sky/engine/core",
+    "//sky/engine/platform",
+  ]
+
+  configs += [
+    "//sky/engine:config",
+    "//sky/engine:inside_blink",
+    "//sky/engine:non_test_config",
+  ]
+
+  sources = [
+    "AssertMatchingEnums.cpp",
+    "ChromeClientImpl.cpp",
+    "ChromeClientImpl.h",
+    "CompositionUnderlineBuilder.h",
+    "CompositionUnderlineVectorBuilder.cpp",
+    "CompositionUnderlineVectorBuilder.h",
+    "ContextMenuClientImpl.cpp",
+    "ContextMenuClientImpl.h",
+    "EditorClientImpl.cpp",
+    "EditorClientImpl.h",
+    "FrameLoaderClientImpl.cpp",
+    "FrameLoaderClientImpl.h",
+    "GraphicsLayerFactoryChromium.cpp",
+    "GraphicsLayerFactoryChromium.h",
+    "LinkHighlight.cpp",
+    "LinkHighlight.h",
+    "PageOverlay.cpp",
+    "PageOverlay.h",
+    "PageOverlayList.cpp",
+    "PageOverlayList.h",
+    "PageWidgetDelegate.cpp",
+    "PageWidgetDelegate.h",
+    "ScrollbarGroup.cpp",
+    "ScrollbarGroup.h",
+    "SpellCheckerClientImpl.cpp",
+    "SpellCheckerClientImpl.h",
+    "ViewportAnchor.cpp",
+    "ViewportAnchor.h",
+    "WebAXObject.cpp",
+    "WebArrayBufferConverter.cpp",
+    "WebArrayBufferView.cpp",
+    "WebCache.cpp",
+    "WebCachedURLRequest.cpp",
+    "WebColorSuggestion.cpp",
+    "WebCustomElement.cpp",
+    "WebDOMCustomEvent.cpp",
+    "WebDOMError.cpp",
+    "WebDOMEvent.cpp",
+    "WebDOMMessageEvent.cpp",
+    "WebDOMMouseEvent.cpp",
+    "WebDOMProgressEvent.cpp",
+    "WebDOMResourceProgressEvent.cpp",
+    "WebDatabase.cpp",
+    "WebDocument.cpp",
+    "WebDocumentType.cpp",
+    "WebElement.cpp",
+    "WebEntities.cpp",
+    "WebEntities.h",
+    "WebFontDescription.cpp",
+    "WebFontImpl.cpp",
+    "WebFontImpl.h",
+    "WebFrame.cpp",
+    "WebGlyphCache.cpp",
+    "WebHeap.cpp",
+    "WebHitTestResult.cpp",
+    "WebImageCache.cpp",
+    "WebImageDecoder.cpp",
+    "WebInputEvent.cpp",
+    "WebInputEventConversion.cpp",
+    "WebInputEventConversion.h",
+    "WebKit.cpp",
+    "WebLeakDetector.cpp",
+    "WebLocalFrameImpl.cpp",
+    "WebLocalFrameImpl.h",
+    "WebMediaDevicesRequest.cpp",
+    "WebMediaPlayerClientImpl.cpp",
+    "WebMediaPlayerClientImpl.h",
+    "WebNode.cpp",
+    "WebPerformance.cpp",
+    "WebRange.cpp",
+    "WebRuntimeFeatures.cpp",
+    "WebScopedMicrotaskSuppression.cpp",
+    "WebScopedUserGesture.cpp",
+    "WebScopedWindowFocusAllowedIndicator.cpp",
+    "WebScriptBindings.cpp",
+    "WebScriptController.cpp",
+    "WebScrollbarThemePainter.cpp",
+    "WebSecurityPolicy.cpp",
+    "WebSelector.cpp",
+    "WebSerializedScriptValue.cpp",
+    "WebSettingsImpl.cpp",
+    "WebSettingsImpl.h",
+    "WebSurroundingText.cpp",
+    "WebTextCheckingCompletionImpl.cpp",
+    "WebTextCheckingCompletionImpl.h",
+    "WebTextCheckingResult.cpp",
+    "WebTextInputInfo.cpp",
+    "WebTextRun.cpp",
+    "WebUserGestureIndicator.cpp",
+    "WebUserGestureToken.cpp",
+    "WebViewImpl.cpp",
+    "WebViewImpl.h",
+    "linux/WebFontRendering.cpp",
+    "painting/ContinuousPainter.cpp",
+    "painting/ContinuousPainter.h",
+    "painting/PaintAggregator.cpp",
+    "painting/PaintAggregator.h",
+  ]
+
+  if (is_component_build) {
+    deps += [
+      "//base/test:test_support",
+      "//testing/gmock",
+      "//testing/gtest",
+      "//sky/engine/core:testing",
+    ]
+
+    configs -= [
+      "//sky/engine:non_test_config",
+    ]
+
+    sources += platform_web_unittest_files
+
+    sources += [ "WebTestingSupport.cpp" ]
+  }
+}
+
+source_set("test_support") {
+  if (!is_component_build) {
+    deps = [
+      "//skia",
+      "//sky/engine/core:testing",
+      "//sky/engine/wtf",
+    ]
+
+    sources = [ "WebTestingSupport.cpp" ]
+
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [
+      "//build/config/compiler:no_chromium_code",
+      "//sky/engine:config",
+    ]
+  }
+}
+
+test("sky_unittests") {
+  deps = [
+    "//base",
+    "//base/test:test_support",
+    "//base:i18n",
+    "//sky/engine/wtf:test_support",
+    "//sky/engine/testing/platform",
+    "//testing/gmock",
+    "//testing/gtest",
+    "//third_party/zlib",
+    "//url",
+    "//v8",
+    ":test_support",
+    ":web",
+  ]
+
+  sources = [ "tests/RunAllTests.cpp" ]
+
+  configs += [ "//sky/engine:config" ]
+
+  if (!is_component_build) {
+    deps += [ "//sky/engine/core" ]
+
+    configs += [ "//sky/engine:inside_blink" ]
+
+    sources += platform_web_unittest_files
+  }
+}

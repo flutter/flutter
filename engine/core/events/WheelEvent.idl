@@ -1,0 +1,40 @@
+/*
+ * Copyright (C) 2006, 2007, 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ * Copyright (C) 2013 Samsung Electronics. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+// Introduced in DOM Level 3:
+[
+    EventConstructor,
+] interface WheelEvent : MouseEvent {
+    // DeltaModeCode
+    const unsigned long              DOM_DELTA_PIXEL = 0x00;
+    const unsigned long              DOM_DELTA_LINE  = 0x01;
+    const unsigned long              DOM_DELTA_PAGE  = 0x02;
+
+    [InitializedByEventConstructor] readonly attribute double deltaX;
+    [InitializedByEventConstructor] readonly attribute double deltaY;
+    [InitializedByEventConstructor] readonly attribute double deltaZ;
+    [InitializedByEventConstructor] readonly attribute unsigned long deltaMode;
+
+    // Non-standard API.
+    [InitializedByEventConstructor, MeasureAs=WheelEventWheelDeltaX] readonly attribute long wheelDeltaX;
+    [InitializedByEventConstructor, MeasureAs=WheelEventWheelDeltaY] readonly attribute long wheelDeltaY;
+    [MeasureAs=WheelEventWheelDelta] readonly attribute long wheelDelta;
+};

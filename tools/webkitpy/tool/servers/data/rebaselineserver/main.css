@@ -1,0 +1,313 @@
+/*
+ * Copyright (c) 2010 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+body {
+  font-size: 12px;
+  font-family: Helvetica, Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+.loading {
+  opacity: 0.5;
+}
+
+div {
+  margin: 0;
+}
+
+a, .link {
+  color: #aaf;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link.selected {
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+#log,
+#queue {
+  padding: .25em 0 0 .25em;
+  position: absolute;
+  right: 0;
+  height: 200px;
+  overflow: auto;
+  background: #fff;
+  -webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .5);
+}
+
+#log {
+  top: 2em;
+  width: 500px;
+}
+
+#queue {
+  bottom: 3em;
+  width: 400px;
+}
+
+#queue-select {
+  display: block;
+  width: 390px;
+}
+
+#header,
+#footer {
+  padding: .5em 1em;
+  background: #333;
+  color: #fff;
+  -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+#header {
+  margin-bottom: 1em;
+}
+
+#header .divider,
+#footer .divider {
+  opacity: .3;
+  padding: 0 .5em;
+}
+
+#header label,
+#footer label {
+  padding-right: 1em;
+  color: #ccc;
+}
+
+#test-link {
+  margin-right: 1em;
+}
+
+#header label span,
+#footer label span {
+  color: #fff;
+  font-weight: bold;
+}
+
+#nav-buttons {
+  white-space: nowrap;
+}
+
+#nav-buttons button {
+  background: #fff;
+  border: 0;
+  border-radius: 10px;
+}
+
+#nav-buttons button:active {
+  -webkit-box-shadow: 0 0 5px #33f inset;
+  background: #aaa;
+}
+
+#nav-buttons button[disabled] {
+  opacity: .5;
+}
+
+#controls {
+  float: right;
+}
+
+.disabled-control {
+  color: #888;
+}
+
+#test-output {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin: 0 auto;
+  width: 100%;
+}
+
+#test-output td,
+#test-output th {
+  padding: 0;
+  vertical-align: top;
+}
+
+#image-outputs img,
+#image-outputs canvas,
+#image-outputs #diff-checksum {
+  width: 800px;
+  height: 600px;
+  border: solid 1px #ddd;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+#image-outputs img,
+#image-outputs canvas {
+  cursor: crosshair;
+}
+
+#image-outputs img.loading,
+#image-outputs canvas.loading {
+  opacity: .5;
+}
+
+#image-outputs #actual-image {
+  margin: 0 1em;
+}
+
+#test-output #labels th {
+  text-align: center;
+  color: #666;
+}
+
+#text-outputs .text-output {
+  height: 600px;
+  width: 800px;
+  overflow: auto;
+}
+
+#test-output h2 {
+  border-bottom: solid 1px #ccc;
+  font-weight: bold;
+  margin: 0;
+  background: #eee;
+}
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: 1em;
+}
+
+#state.needs_rebaseline {
+  color: yellow;
+}
+
+#state.rebaseline_failed {
+  color: red;
+}
+
+#state.rebaseline_succeeded {
+  color: green;
+}
+
+#state.in_queue {
+  color: gray;
+}
+
+#current-baselines {
+  font-weight: normal !important;
+}
+
+#current-baselines .platform {
+  font-weight: bold;
+}
+
+#current-baselines a {
+  color: #ddf;
+}
+
+#current-baselines .was-used-for-test {
+  color: #aaf;
+  font-weight: bold;
+}
+
+#action-buttons {
+  float: right;
+}
+
+#action-buttons .link {
+  margin-right: 1em;
+}
+
+#footer button {
+  padding: 1em;
+}
+
+#loupe {
+  -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, .5);
+  position: absolute;
+  width: 634px;
+  top: 50%;
+  left: 50%;
+  margin-left: -151px;
+  margin-top: -50px;
+  background: #fff;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+#loupe td {
+  padding: 0;
+  border: solid 1px #ccc;
+}
+
+#loupe label {
+  color: #999;
+  padding-right: 1em;
+}
+
+#loupe span {
+  color: #000;
+  font-weight: bold;
+}
+
+#loupe canvas {
+  cursor: crosshair;
+}
+
+#loupe #loupe-close {
+  float: right;
+}
+
+#loupe #loupe-info {
+  background: #eee;
+  padding: .3em .5em;
+}
+
+#loupe #loupe-colors td {
+  text-align: center;
+}
+
+#loupe .loupe-container {
+  position: relative;
+  width: 210px;
+  height: 210px;
+}
+
+#loupe .center-highlight {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  margin-left: -5px;
+  margin-top: -5px;
+  outline: solid 1px #999;
+}

@@ -1,0 +1,71 @@
+/*
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+typedef unsigned long GLenum;
+
+[
+    NoInterfaceObject,
+    DoNotCheckConstants,
+    WillBeGarbageCollected,
+] interface WebGLDrawBuffers {
+    const GLenum COLOR_ATTACHMENT0_WEBGL = 0x8CE0;
+    const GLenum COLOR_ATTACHMENT1_WEBGL = 0x8CE1;
+    const GLenum COLOR_ATTACHMENT2_WEBGL = 0x8CE2;
+    const GLenum COLOR_ATTACHMENT3_WEBGL = 0x8CE3;
+    const GLenum COLOR_ATTACHMENT4_WEBGL = 0x8CE4;
+    const GLenum COLOR_ATTACHMENT5_WEBGL = 0x8CE5;
+    const GLenum COLOR_ATTACHMENT6_WEBGL = 0x8CE6;
+    const GLenum COLOR_ATTACHMENT7_WEBGL = 0x8CE7;
+    const GLenum COLOR_ATTACHMENT8_WEBGL = 0x8CE8;
+    const GLenum COLOR_ATTACHMENT9_WEBGL = 0x8CE9;
+    const GLenum COLOR_ATTACHMENT10_WEBGL = 0x8CEA;
+    const GLenum COLOR_ATTACHMENT11_WEBGL = 0x8CEB;
+    const GLenum COLOR_ATTACHMENT12_WEBGL = 0x8CEC;
+    const GLenum COLOR_ATTACHMENT13_WEBGL = 0x8CED;
+    const GLenum COLOR_ATTACHMENT14_WEBGL = 0x8CEE;
+    const GLenum COLOR_ATTACHMENT15_WEBGL = 0x8CEF;
+
+    const GLenum DRAW_BUFFER0_WEBGL = 0x8825;
+    const GLenum DRAW_BUFFER1_WEBGL = 0x8826;
+    const GLenum DRAW_BUFFER2_WEBGL = 0x8827;
+    const GLenum DRAW_BUFFER3_WEBGL = 0x8828;
+    const GLenum DRAW_BUFFER4_WEBGL = 0x8829;
+    const GLenum DRAW_BUFFER5_WEBGL = 0x882A;
+    const GLenum DRAW_BUFFER6_WEBGL = 0x882B;
+    const GLenum DRAW_BUFFER7_WEBGL = 0x882C;
+    const GLenum DRAW_BUFFER8_WEBGL = 0x882D;
+    const GLenum DRAW_BUFFER9_WEBGL = 0x882E;
+    const GLenum DRAW_BUFFER10_WEBGL = 0x882F;
+    const GLenum DRAW_BUFFER11_WEBGL = 0x8830;
+    const GLenum DRAW_BUFFER12_WEBGL = 0x8831;
+    const GLenum DRAW_BUFFER13_WEBGL = 0x8832;
+    const GLenum DRAW_BUFFER14_WEBGL = 0x8833;
+    const GLenum DRAW_BUFFER15_WEBGL = 0x8834;
+
+    const GLenum MAX_COLOR_ATTACHMENTS_WEBGL = 0x8CDF;
+    const GLenum MAX_DRAW_BUFFERS_WEBGL = 0x8824;
+
+    void drawBuffersWEBGL(sequence<GLenum> buffers);
+};

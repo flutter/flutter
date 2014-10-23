@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+// Test for length > 0, overloaded constructor.
+// Need separate tests for constructors with length == 0 and length > 0,
+// and for overloaded vs. non-overloaded, if length > 0.
+// length == 0, non-overloaded just omits a block and is not worth another test.
+//
+// Also includes some [Default] arguments (instead of in
+// TestInterfaceConstructor.idl), otherwise overload resolution check string is
+// extremely long and triggers a lint warning (line length).
+[
+    // 2 constructors with same type length, to test overload resolution
+    Constructor(DOMString stringArg),
+    Constructor(Dictionary dictionaryArg),
+    Constructor(
+        TestInterfaceEmpty testInterfaceEmptyArg,
+        long longArg,
+        [Default=Undefined] optional DOMString defaultUndefinedOptionalStringArg,
+        optional DOMString defaultNullStringOptionalStringArg = null,
+        [Default=Undefined] optional Dictionary defaultUndefinedOptionalDictionaryArg,
+        optional DOMString optionalStringArg),
+] interface TestInterfaceConstructor2 {
+};

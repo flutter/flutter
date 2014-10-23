@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+function runtest() {
+    var iframe = document.getElementById("iframe");
+    iframe.src = "javascript:'A'";
+    iframe.scrollTop;
+    iframe.src = "javascript:''";
+}
+</script>
+</head>
+<body onload="runtest()">
+<iframe id="iframe" style="width:1px;height:1px;"></iframe>
+</body>
+</html>
+

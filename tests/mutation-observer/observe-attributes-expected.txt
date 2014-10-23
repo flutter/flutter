@@ -1,0 +1,19 @@
+Running 15 tests
+ok 1 MutationObserver.observe on attributes should handle basic aspects of attribute observation
+ok 2 MutationObserver.observe on attributes should not notify of attribute changes without asking
+ok 3 MutationObserver.observe on attributes re-observing the same node with the same observer has the effect of resetting the options
+ok 4 MutationObserver.observe on attributes multiple observers can be registered to a given node and both receive mutations
+ok 5 MutationObserver.observe on attributes should deliver mutations on modifications to node properties which delegate to attribute storage
+ok 6 MutationObserver.observe on attributes should handle basic oldValue delivery
+ok 7 MutationObserver.observe on attributes should deliver oldValue when needed
+ok 8 MutationObserver.observe on attributes should give attributeOldValue if any entries request it with multiple observers
+ok 9 MutationObserver.observe on attributes should handle setting an attribute via reflected IDL attribute
+ok 10 MutationObserver.observe on attributes should respect attributeFilter on HTML elements
+ok 11 MutationObserver.observe on attributes should respect different attributeFilters when observing multiple subtree nodes
+ok 12 MutationObserver.observe on attributes should create records for the style property
+ok 13 MutationObserver.observe on attributes should have oldValue for style property mutations
+ok 14 MutationObserver.observe on attributes should not create records for noop style property mutation
+ok 15 MutationObserver.observe on attributes should create records when mutating through the attribute collection
+15 tests
+15 pass
+0 fail

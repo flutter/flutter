@@ -1,0 +1,83 @@
+/*
+   Use a class to apply touch-action so that we can easily manually check
+   the tests for consistent behavior on IE10 as well.
+*/
+* /deep/ .ta-none {
+  -ms-touch-action: none;
+  touch-action: none;
+}
+.ta-auto {
+  -ms-touch-action: auto;
+  touch-action: auto;
+}
+.ta-panx {
+  -ms-touch-action: pan-x;
+  touch-action: pan-x;
+}
+.ta-pany {
+  -ms-touch-action: pan-y;
+  touch-action: pan-y;
+}
+.ta-panxy {
+  -ms-touch-action: pan-x pan-y;
+  touch-action: pan-x pan-y;
+}
+
+.ta-manipulation {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+/* Make it easy to visualize div boundaries */
+[expected-action] {
+  margin: 15px;
+  padding: 10px;
+  border: 1px solid blue;
+  max-width: 700px;
+}
+
+[expected-action=none]::before {
+  content: "NONE \2190 ";
+}
+[expected-action=auto]::before {
+  content: "AUTO \2190 ";
+}
+[expected-action=pan-x]::before {
+  content: "PAN-X \2190 ";
+}
+[expected-action=pan-y]::before {
+  content: "PAN-Y \2190 ";
+}
+[expected-action=pan-x-y]::before {
+  content: "PAN-X PAN-Y \2190 ";
+}
+[expected-action=manipulation]::before {
+  content: "MANIPULATION \2190 ";
+}
+
+body {
+  /* Leave gap for test to scroll down */
+  padding-top: 100px;
+  /* Ensure pages are scrollable for manual testing */
+  height: 2000px;
+  /* Use fixed line height so co-ordinates will be similar in test and browser */
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.scroll {
+  overflow: scroll;
+  height: 50px;
+}
+.spacer {
+  height: 500px;
+}
+
+.marker {
+  position: absolute;
+  opacity: 0.5;
+  /* Note, if changing size, be sure to change kMarkerSize in JS too */
+  width: 6px;
+  height: 6px;
+  background-color: red;
+}

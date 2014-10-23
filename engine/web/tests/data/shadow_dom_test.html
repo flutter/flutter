@@ -1,0 +1,21 @@
+<!doctype html>
+<!--
+ * Copyright (c) 2013 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+<head>
+  <script type="text/javascript">
+    window.addEventListener('load', function(e) {
+      // Give one of the elements a shadow root.
+      document.getElementById('shadowroot').createShadowRoot();
+    });
+  </script>
+</head>
+<body>
+  <webview id="noshadowroot"></webview>
+  <webview id="shadowroot"></webview>
+</body>
+</html>
+

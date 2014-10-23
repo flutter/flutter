@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+<input id='target' type='text' value='16-char header. ^^ 16-char footer.'></input>
+<script>
+    function selectCaret() {
+        var text = document.getElementById('target');
+        text.focus();
+        text.setSelectionRange(17, 17);
+    }
+    function selectRange() {
+        var text = document.getElementById('target');
+        text.focus();
+        text.setSelectionRange(16, 18);
+    }
+    window.onload = select;
+</script>
+</body>
+</html>
+

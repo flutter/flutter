@@ -1,0 +1,60 @@
+/*
+ * Copyright (C) 2008 Apple Inc.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+[
+    CheckSecurity=Frame,
+    WillBeGarbageCollected,
+] interface Location {
+    // |assign|, |replace|, and *writing* |href| do not require a security
+    // check, as they *change* the page, and thus these do not change any
+    // property of an *existing* document at a different origin.
+    // However, *reading* |href|, or accessing any component, is a security
+    // problem, since that allows tracking navigation.
+    [SetterCallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity=Setter, Unforgeable] attribute DOMString href;
+
+    [CallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity, Unforgeable] void assign(DOMString url);
+    [CallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity, Unforgeable] void replace(DOMString url);
+    [CallWith=ActiveWindow, Unforgeable] void reload();
+
+    // URI decomposition attributes
+    [SetterCallWith=(ActiveWindow,FirstWindow), RaisesException=Setter] attribute DOMString protocol;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString host;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString hostname;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString port;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString pathname;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString search;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString hash;
+
+    readonly attribute DOMString origin;
+
+    readonly attribute DOMStringList ancestorOrigins;
+
+    [NotEnumerable, Unforgeable, ImplementedAs=href] DOMString toString();
+    [NotEnumerable, Custom, Unforgeable] any valueOf();
+};
+

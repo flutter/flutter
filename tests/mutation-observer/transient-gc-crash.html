@@ -1,0 +1,22 @@
+<script src="../../../resources/js-test.js"></script>
+<script>
+window.jsTestIsAsync = true;
+description('Clearing transient observers after observation node is GCed should not cause a crash.');
+
+function callback(mutations) {
+    window.mutations = mutations;
+}
+var observer = new MutationObserver(callback);
+
+var div = document.createElement('div');
+var span = div.appendChild(document.createElement('span'));
+observer.observe(div, {attributes: true, subtree: true});
+div.removeChild(span);
+div = null;
+gc();
+span.setAttribute('foo', 'bar');
+setTimeout(function() {
+    shouldBe('mutations.length', '1');
+    finishJSTest();
+}, 0);
+</script>

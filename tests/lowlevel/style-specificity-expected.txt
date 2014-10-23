@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 Specificity should not exist
+1 tests
+1 pass
+0 fail

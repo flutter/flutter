@@ -1,0 +1,18 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Paths should be absolute so this file can be imported from anywhere.
+code_generator_template_files =
+  get_path_info(
+    [
+      "attributes.cpp",
+      "callback_interface.cpp",
+      "callback_interface.h",
+      "constants.cpp",
+      "interface_base.cpp",
+      "interface.cpp",
+      "interface.h",
+      "methods.cpp",
+    ],
+    "abspath")

@@ -1,0 +1,14 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    LegacyTreatAsPartialInterface, // used by [ImplementedAs]
+    ImplementedAs=TestImplements3Implementation, // Conflicts with default implements class name
+    NoInterfaceObject, // Always used on target of 'implements'
+] interface TestImplements3 {
+    attribute DOMString implements3StringAttribute;
+    static attribute DOMString implements3StaticStringAttribute;
+    void implements3VoidMethod();
+    static void implements3StaticVoidMethod();
+};

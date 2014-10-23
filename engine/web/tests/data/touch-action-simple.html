@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<link rel='stylesheet' type='text/css' href='touch-action-tests.css'>
+<script src='touch-action-tests.js'></script>
+
+<!-- 
+     Test a bunch of simple cases where touch-action: none results in a non-fast-scrollable region. 
+-->
+
+<div expected-action='auto'>Simple div with no explicit touch-action</div>
+<div class='ta-none' expected-action='none'>Simple div with touch-action: none</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <div expected-action='none'>
+    Touch-action: none is propagated to descendants
+  </div>
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <div class='ta-auto' expected-action='none'>
+    Explicitly setting touch-action: auto does nothing to prevent propagation of none
+  </div>
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <span expected-action='none' style='display:inline-block'>
+    touch-action should be inherited by inline-block elements
+  </span>
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <span expected-action='none' style='display:table-cell'>
+    touch-action should be inherited by table-cell elements
+  </span>
+</div>
+
+<div style='padding: 20px 0'>
+  <span class='ta-none' expected-action='auto'>Touch-action should be ignored on inline elements
+    <div expected-action='auto'>And not propagated to any block children</div>
+  </span>
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 100px'>
+  <span expected-action='none'>
+    touch-action should be inherited by inline elements.<br>Note this is different than IE (http://crbug.com/380203)
+  </span>
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 100px'>
+  <span>
+    <div expected-action='none'>touch-action should be inherited by any block descendants of inline elements</div>
+  </span>
+</div>
+
+<svg class='ta-none' expected-action='none' style="height: 50px" xmlns="http://www.w3.org/2000/svg">
+  touch-action should be inherited by svg root element
+</svg>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <svg expected-action='none' xmlns="http://www.w3.org/2000/svg" height="100%">
+  touch-action should be inherited by svg root element
+  </svg>
+</div>
+
+<div>
+  <img class='ta-none' expected-action='none' src='white-1x1.png'></img>
+  touch-action should be applicable to img element
+</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 100px'>
+  <img expected-action='none' src='white-1x1.png'></img>
+  touch-action should be inherited by img element
+</div>
+
+<table style='margin-left: 15px; margin-bottom: 50px'>
+  <tr class='ta-none'> <td expected-action='auto'>Test Cell</td> </tr>
+</table>
+
+<table style='margin-left: 15px'>
+  <colgroup>
+    <col class='ta-none'>
+  </colgroup>
+  <tr> <td expected-action='auto'>Test Cell</td> </tr>
+</table>

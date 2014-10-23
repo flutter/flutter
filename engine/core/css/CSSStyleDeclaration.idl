@@ -1,0 +1,46 @@
+/*
+ * Copyright (C) 2006, 2007, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+// Introduced in DOM Level 2:
+[
+    DependentLifetime,
+    WillBeGarbageCollected
+] interface CSSStyleDeclaration {
+    [RaisesException=Setter] attribute DOMString?       cssText;
+
+    DOMString?          getPropertyValue([Default=Undefined] optional DOMString propertyName);
+    [RaisesException] DOMString?          removeProperty([Default=Undefined] optional DOMString propertyName);
+    DOMString?          getPropertyPriority([Default=Undefined] optional DOMString propertyName);
+    [RaisesException] void setProperty([Default=Undefined] optional DOMString propertyName,
+                                       [Default=Undefined] optional DOMString? value,
+                                       optional DOMString? priority = null);
+
+    readonly attribute unsigned long    length;
+    getter DOMString          item([Default=Undefined] optional unsigned long index);
+    [Custom=(PropertyGetter,PropertyEnumerator,PropertyQuery)] getter (DOMString or float) (DOMString name);
+    [Custom] setter void (DOMString propertyName, DOMString? propertyValue);
+    readonly attribute CSSRule          parentRule;
+
+    // Deprecated as of 2003: http://lists.w3.org/Archives/Public/www-style/2003Oct/0347.html
+    // FIXME: This should be DeprecateAs=, but currently too many tests use
+    // this function and would need CONSOLE: message rebaselines!
+    [MeasureAs=CSSStyleDeclarationGetPropertyCSSValue] CSSValue           getPropertyCSSValue([Default=Undefined] optional DOMString propertyName);
+};
+

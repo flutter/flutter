@@ -1,0 +1,94 @@
+/*
+ * Copyright (C) 2007 Apple Inc.  All rights reserved.
+ * Copyright (C) 2009 Google Inc.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+// This is based on the W3C standard HTML Editing APIs
+// https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#selection
+//
+// FIXME: Fix discrepancies from the standard, especially
+// * unsigned types where should be unsigned
+// * Nullability
+// * RemoveRange(Range range) method
+// http://crbug.com/391673
+[
+    ImplementedAs=DOMSelection,
+    WillBeGarbageCollected,
+] interface Selection {
+    readonly attribute Node anchorNode;
+    readonly attribute long anchorOffset;
+    readonly attribute Node focusNode;
+    readonly attribute long focusOffset;
+
+    readonly attribute boolean isCollapsed;
+    [RaisesException, TypeChecking=Interface] void collapse(Node node, optional long offset = 0);
+    [RaisesException] void collapseToStart();
+    [RaisesException] void collapseToEnd();
+
+    // We mark offset as optional, defaulting to 0; this differs from spec.
+    // http://crbug.com/384966
+    [RaisesException, TypeChecking=Interface] void extend(Node node, optional long offset = 0);
+
+    [RaisesException] void selectAllChildren([Default=Undefined] optional Node node);
+    [CustomElementCallbacks] void deleteFromDocument();
+
+    readonly attribute long rangeCount;
+    [RaisesException] Range getRangeAt([Default=Undefined] optional long index);
+    void addRange([Default=Undefined] optional Range range);
+    void removeAllRanges();
+
+    [NotEnumerable] stringifier;
+
+    // Firefox extensions
+    // https://developer.mozilla.org/En/DOM/Selection
+    //
+    [MeasureAs=SelectionContainsNode] boolean containsNode([Default = Undefined] optional Node node, [Default = Undefined] optional boolean allowPartial);
+
+    // WebKit extensions
+    [MeasureAs=SelectionBaseNode] readonly attribute Node baseNode;
+    [MeasureAs=SelectionBaseOffset] readonly attribute long baseOffset;
+    [MeasureAs=SelectionExtentNode] readonly attribute Node extentNode;
+    [MeasureAs=SelectionExtentOffset] readonly attribute long extentOffset;
+
+    // WebKit's "type" accessor returns "None", "Range" and "Caret"
+    // IE's type accessor returns "none", "text" and "control"
+    [MeasureAs=SelectionType] readonly attribute DOMString type;
+
+    [MeasureAs=SelectionModify] void modify([Default=Undefined] optional DOMString alter,
+                                            [Default=Undefined] optional DOMString direction,
+                                            [Default=Undefined] optional DOMString granularity);
+    [MeasureAs=SelectionSetBaseAndExtent, RaisesException] void setBaseAndExtent([Default=Undefined] optional Node baseNode,
+                                                                                 [Default=Undefined] optional long baseOffset,
+                                                                                 [Default=Undefined] optional Node extentNode,
+                                                                                 [Default=Undefined] optional long extentOffset);
+    [ImplementedAs=collapse, MeasureAs=SelectionSetPosition, RaisesException, TypeChecking=Interface] void setPosition(Node node,
+                                                                                                                       optional long offset = 0);
+
+    // IE extensions
+    // http://msdn.microsoft.com/en-us/library/ms535869(VS.85).aspx
+    [MeasureAs=SelectionEmpty] void empty();
+};

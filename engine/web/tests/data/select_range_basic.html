@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html id='root'>
+<body>
+Some extra text.
+<span id='target'>Some test text for testing.</span>
+Some extra text.
+<script>
+    function select() {
+        var range = document.createRange();
+        range.selectNode(document.getElementById('target'));
+        window.getSelection().addRange(range);
+    }
+    window.onload = select;
+</script>
+</body>
+</html>
+

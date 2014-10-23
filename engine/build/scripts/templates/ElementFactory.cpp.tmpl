@@ -1,0 +1,93 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#include "config.h"
+#include "{{namespace}}ElementFactory.h"
+
+#include "{{namespace}}Names.h"
+{% for tag in tags|sort %}
+#include "core/{{namespace|lower}}/{{tag.interface}}.h"
+{% endfor %}
+{% if fallback_interface %}
+#include "core/{{namespace|lower}}/{{fallback_interface}}.h"
+{% endif %}
+#include "core/dom/custom/CustomElement.h"
+#include "core/dom/custom/CustomElementRegistrationContext.h"
+#include "core/dom/Document.h"
+#include "core/frame/Settings.h"
+#include "platform/RuntimeEnabledFeatures.h"
+#include "wtf/HashMap.h"
+
+namespace blink {
+
+using namespace {{namespace}}Names;
+
+typedef PassRefPtrWillBeRawPtr<{{namespace}}Element> (*ConstructorFunction)(
+    Document&,
+    bool createdByParser);
+
+typedef HashMap<AtomicString, ConstructorFunction> FunctionMap;
+
+static FunctionMap* g_constructors = 0;
+
+{% for tag in tags|sort if not tag.noConstructor %}
+{% filter enable_conditional(tag.Conditional) %}
+static PassRefPtrWillBeRawPtr<{{namespace}}Element> {{tag|symbol}}Constructor(
+    Document& document,
+    bool createdByParser)
+{
+    {% if tag.runtimeEnabled %}
+    if (!RuntimeEnabledFeatures::{{tag.runtimeEnabled}}Enabled())
+        return {{fallback_interface}}::create({{tag|symbol}}Tag, document);
+    {% endif %}
+    return {{tag.interface}}::create(
+        {%- if tag.multipleTagNames %}{{tag|symbol}}Tag, {% endif -%}
+        document
+        {%- if tag.constructorNeedsCreatedByParser %}, createdByParser{% endif -%}
+    );
+}
+{% endfilter %}
+{% endfor %}
+
+struct Create{{namespace}}FunctionMapData {
+  const QualifiedName& tag;
+  ConstructorFunction func;
+};
+
+static void create{{namespace}}FunctionMap()
+{
+    ASSERT(!g_constructors);
+    g_constructors = new FunctionMap;
+    // Empty array initializer lists are illegal [dcl.init.aggr] and will not
+    // compile in MSVC. If tags list is empty, add check to skip this.
+    static const Create{{namespace}}FunctionMapData data[] = {
+    {% for tag in tags|sort if not tag.noConstructor %}
+    {% filter enable_conditional(tag.Conditional) %}
+        { {{tag|symbol}}Tag, {{tag|symbol}}Constructor },
+    {% endfilter %}
+    {% endfor %}
+    };
+    for (size_t i = 0; i < WTF_ARRAY_LENGTH(data); i++)
+        g_constructors->set(data[i].tag.localName(), data[i].func);
+}
+
+PassRefPtrWillBeRawPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}}Element(
+    const AtomicString& localName,
+    Document& document,
+    bool createdByParser)
+{
+    if (!g_constructors)
+        create{{namespace}}FunctionMap();
+    if (ConstructorFunction function = g_constructors->get(localName))
+        return function(document, createdByParser);
+
+    if (document.registrationContext() && CustomElement::isValidName(localName)) {
+        RefPtrWillBeRawPtr<Element> element = document.registrationContext()->createCustomTagElement(document, QualifiedName(localName));
+        ASSERT_WITH_SECURITY_IMPLICATION(element->is{{namespace}}Element());
+        return static_pointer_cast<{{namespace}}Element>(element.release());
+    }
+
+    return {{fallback_interface}}::create(QualifiedName(localName), document);
+}
+
+} // namespace blink

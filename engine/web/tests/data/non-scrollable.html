@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <style type="text/css">
+      body {
+          overflow: hidden;
+      }
+      #a {
+          background-color: green;
+          width: 100px;
+          height: 1000px;
+      }
+    </style>
+    <script>
+      function allowScroll()
+      {
+        document.body.style.overflow = "auto";
+      }
+    </script>
+  </head>
+<body>
+This page is not scrollable until allowScroll() is called.
+<div id="a"></div>
+</body>
+</html>

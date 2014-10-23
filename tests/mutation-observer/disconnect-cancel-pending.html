@@ -1,0 +1,44 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationObserver.disconnect', function() {
+    it('should cancel pending delivery', function(done) {
+        var mutations;
+        var observer;
+        var div;
+
+        function start() {
+            mutations = null;
+            div = document.createElement('div');
+
+            observer = new MutationObserver(function(m) {
+                mutations = m;
+            });
+
+            observer.observe(div, { attributes: true });
+            div.setAttribute('foo', 'bar');
+            observer.disconnect();
+            setTimeout(next, 0);
+        }
+
+        function next() {
+            // Disconnecting should cancel any pending delivery...
+            assert.equal(mutations, null);
+            observer.observe(div, { attributes: true });
+            div.setAttribute('bar', 'baz');
+            setTimeout(finish, 0);
+        }
+
+        function finish() {
+            // ...and re-observing should not see any of the previously-generated records.
+            assert.equal(mutations.length, 1);
+            assert.equal(mutations[0].attributeName, "bar");
+            done();
+        }
+
+        start();
+    });
+});
+</script>
+</html>

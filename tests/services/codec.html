@@ -1,0 +1,9 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.html" />
+<link rel="import" href="/mojo/public/html/codec.html" as="codec" />
+<div id="result">FAIL</div>
+<script>
+document.getElementById("result").textContent =
+    codec.MessageBuilder ? "PASS" : "FAIL: codec.MessageBuilder is missing";
+</script>
+</html>

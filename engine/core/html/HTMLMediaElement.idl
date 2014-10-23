@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2007, 2010, 2011, 2012 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+[
+    ActiveDOMObject,
+    RuntimeEnabled=Media,
+    SpecialWrapFor=(HTMLAudioElement,HTMLVideoElement),
+    TypeChecking=Unrestricted,
+] interface HTMLMediaElement : HTMLElement {
+
+    // error state
+    readonly attribute MediaError? error;
+
+    // network state
+    [Reflect, URL] attribute DOMString src;
+    [URL] readonly attribute DOMString currentSrc;
+    [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] attribute DOMString crossOrigin;
+
+    const unsigned short NETWORK_EMPTY = 0;
+    const unsigned short NETWORK_IDLE = 1;
+    const unsigned short NETWORK_LOADING = 2;
+    const unsigned short NETWORK_NO_SOURCE = 3;
+    readonly attribute unsigned short networkState;
+    attribute DOMString preload;
+
+    readonly attribute TimeRanges buffered;
+    void load();
+    DOMString canPlayType(DOMString type, [Default=Undefined, TreatUndefinedAs=NullString] optional DOMString? keySystem);
+
+    // ready state
+    const unsigned short HAVE_NOTHING = 0;
+    const unsigned short HAVE_METADATA = 1;
+    const unsigned short HAVE_CURRENT_DATA = 2;
+    const unsigned short HAVE_FUTURE_DATA = 3;
+    const unsigned short HAVE_ENOUGH_DATA = 4;
+    readonly attribute unsigned short readyState;
+    readonly attribute boolean seeking;
+
+    // playback state
+    [RaisesException=Setter] attribute double currentTime;
+    readonly attribute unrestricted double duration;
+    readonly attribute boolean paused;
+    attribute double defaultPlaybackRate;
+    attribute double playbackRate;
+    readonly attribute TimeRanges played;
+    readonly attribute TimeRanges seekable;
+    readonly attribute boolean ended;
+    [Reflect] attribute boolean autoplay;
+    [Reflect] attribute boolean loop;
+    void play();
+    void pause();
+
+    // media controller
+    [RuntimeEnabled=MediaController, Reflect] attribute DOMString mediaGroup;
+    [RuntimeEnabled=MediaController, TypeChecking=Interface] attribute MediaController? controller;
+
+    // controls
+    [Reflect] attribute boolean controls;
+    [RaisesException=Setter] attribute double volume;
+    attribute boolean muted;
+    [Reflect=muted] attribute boolean defaultMuted;
+
+    // WebKit extensions
+
+    // The number of bytes consumed by the media decoder.
+    [MeasureAs=PrefixedAudioDecodedByteCount] readonly attribute unsigned long webkitAudioDecodedByteCount;
+    [MeasureAs=PrefixedVideoDecodedByteCount] readonly attribute unsigned long webkitVideoDecodedByteCount;
+
+    [Reflect, RuntimeEnabled=SubresourceIntegrity] attribute DOMString integrity;
+};

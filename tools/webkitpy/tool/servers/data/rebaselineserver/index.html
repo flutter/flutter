@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2010 Google Inc. All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
+
+     * Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the following disclaimer
+  in the documentation and/or other materials provided with the
+  distribution.
+     * Neither the name of Google Inc. nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<html>
+<head>
+  <title>Layout Test Rebaseline Server</title>
+  <link rel="stylesheet" href="/main.css" type="text/css">
+  <script src="/util.js"></script>
+  <script src="/loupe.js"></script>
+  <script src="/main.js"></script>
+  <script src="/queue.js"></script>
+</head>
+<body class="loading">
+
+<pre id="log" style="display: none"></pre>
+<div id="queue" style="display: none">
+  Queue:
+  <select id="queue-select" size="10"></select>
+  <button id="remove-queue-selection">Remove selection</button>
+  <button id="rebaseline-queue">Rebaseline queue</button>
+</div>
+
+<div id="header">
+  <div id="controls">
+    <!-- Add a dummy <select> node so that this lines up with the text on the left -->
+    <select style="visibility: hidden"></select>
+    <span id="toggle-sort" class="link">Sort tests by metric</span>
+    <span class="divider">|</span>
+    <span id="toggle-log" class="link">Log</span>
+    <span class="divider">|</span>
+    <a href="/quitquitquit">Exit</a>
+  </div>
+
+  <span id="selectors">
+    <label>
+      Failure type:
+      <select id="failure-type-selector"></select>
+    </label>
+
+    <label>
+      Directory:
+      <select id="directory-selector"></select>
+    </label>
+
+    <label>
+      Test:
+      <select id="test-selector"></select>
+    </label>
+  </span>
+
+  <a id="test-link" target="_blank">View test</a>
+
+  <span id="nav-buttons">
+    <button id="previous-test">&laquo;</button>
+    <span id="test-index"></span> of <span id="test-count"></span>
+    <button id="next-test">&raquo;</button>
+  </span>
+</div>
+
+<table id="test-output">
+  <thead id="labels">
+    <tr>
+      <th>Expected</th>
+      <th>Actual</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody id="image-outputs" style="display: none">
+    <tr>
+      <td colspan="3"><h2>Image</h2></td>
+    </tr>
+    <tr>
+      <td><img id="expected-image"></td>
+      <td><img id="actual-image"></td>
+      <td>
+        <canvas id="diff-canvas" width="800" height="600"></canvas>
+        <div id="diff-checksum" style="display: none">
+          <h3>Checksum mismatch</h3>
+          Expected: <span id="expected-checksum"></span><br>
+          Actual: <span id="actual-checksum"></span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tbody id="text-outputs" style="display: none">
+    <tr>
+      <td colspan="3"><h2>Text</h2></td>
+    </tr>
+    <tr>
+      <td><pre id="expected-text" class="text-output"></pre></td>
+      <td><pre id="actual-text" class="text-output"></pre></td>
+      <td><div id="diff-text-pretty" class="text-output"></div></td>
+    </tr>
+  </tbody>
+</table>
+
+<div id="footer">
+  <label>State: <span id="state"></span></label>
+  <label>Existing baselines: <span id="current-baselines"></span></label>
+  <label>
+    Baseline target:
+    <select id="baseline-target"></select>
+  </label>
+  <label>
+    Move current baselines to:
+    <select id="baseline-move-to">
+      <option value="none">Nowhere (replace)</option>
+    </select>
+  </label>
+
+  <!-- Add a dummy <button> node so that this lines up with the text on the right -->
+  <button style="visibility: hidden; padding-left: 0; padding-right: 0;"></button>
+
+  <div id="action-buttons">
+    <span id="toggle-queue" class="link">Queue</span>
+    <button id="add-to-rebaseline-queue">Add to rebaseline queue</button>
+  </div>
+</div>
+
+<table id="loupe" style="display: none">
+  <tr>
+    <td colspan="3" id="loupe-info">
+      <span id="loupe-close" class="link">Close</span>
+      <label>Coordinate: <span id="loupe-coordinate"></span></label>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="loupe-container">
+        <canvas id="expected-loupe" width="210" height="210"></canvas>
+        <div class="center-highlight"></div>
+      </div>
+    </td>
+    <td>
+      <div class="loupe-container">
+        <canvas id="actual-loupe" width="210" height="210"></canvas>
+        <div class="center-highlight"></div>
+      </div>
+    </td>
+    <td>
+      <div class="loupe-container">
+        <canvas id="diff-loupe" width="210" height="210"></canvas>
+        <div class="center-highlight"></div>
+      </div>
+    </td>
+  </tr>
+  <tr id="loupe-colors">
+    <td><label>Exp. color: <span id="expected-loupe-color"></span></label></td>
+    <td><label>Actual color: <span id="actual-loupe-color"></span></label></td>
+    <td><label>Diff color: <span id="diff-loupe-color"></span></label></td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,84 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+component("cc") {
+  output_name = "sky_viewer_cc"
+
+  deps = [
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//cc",
+    "//gpu",
+    "//skia",
+    "//sky/engine/public:blink",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+
+  defines = [ "SKY_VIEWER_CC_IMPLEMENTATION" ]
+
+  forward_dependent_configs_from = [ "//skia" ]
+
+  sources = [
+    "sky_viewer_cc_export.h",
+    "scrollbar_impl.cc",
+    "scrollbar_impl.h",
+    "web_animation_curve_common.cc",
+    "web_animation_curve_common.h",
+    "web_animation_impl.cc",
+    "web_animation_impl.h",
+    "web_compositor_support_impl.cc",
+    "web_compositor_support_impl.h",
+    "web_content_layer_impl.cc",
+    "web_content_layer_impl.h",
+    "web_external_bitmap_impl.cc",
+    "web_external_bitmap_impl.h",
+    "web_external_texture_layer_impl.cc",
+    "web_external_texture_layer_impl.h",
+    "web_filter_animation_curve_impl.cc",
+    "web_filter_animation_curve_impl.h",
+    "web_filter_operations_impl.cc",
+    "web_filter_operations_impl.h",
+    "web_float_animation_curve_impl.cc",
+    "web_float_animation_curve_impl.h",
+    "web_image_layer_impl.cc",
+    "web_image_layer_impl.h",
+    "web_layer_impl.cc",
+    "web_layer_impl.h",
+    "web_layer_impl_fixed_bounds.cc",
+    "web_layer_impl_fixed_bounds.h",
+    "web_nine_patch_layer_impl.cc",
+    "web_nine_patch_layer_impl.h",
+    "web_scroll_offset_animation_curve_impl.cc",
+    "web_scroll_offset_animation_curve_impl.h",
+    "web_scrollbar_layer_impl.cc",
+    "web_scrollbar_layer_impl.h",
+    "web_to_cc_animation_delegate_adapter.cc",
+    "web_to_cc_animation_delegate_adapter.h",
+    "web_transform_animation_curve_impl.cc",
+    "web_transform_animation_curve_impl.h",
+    "web_transform_operations_impl.cc",
+    "web_transform_operations_impl.h",
+  ]
+}
+
+test("sky_viewer_cc_unittests") {
+  deps = [
+    ":cc",
+    "//base/test:run_all_unittests",
+    "//base/third_party/dynamic_annotations",
+    "//skia",
+    "//testing/gtest",
+    "//ui/gfx/geometry",
+    "//ui/gfx:test_support",
+    "//cc",
+    "//cc:test_support",
+  ]
+
+  sources = [
+    "web_animation_unittest.cc",
+    "web_float_animation_curve_unittest.cc",
+    "web_layer_impl_fixed_bounds_unittest.cc",
+  ]
+}

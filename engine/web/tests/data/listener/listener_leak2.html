@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Event Listener Leak Test 2</title></head>
+<body onload="leak()">
+<script>
+if (typeof(gc) == "undefined") gc = function() {};
+
+var node = null;
+
+function EventListenerLeakTestObject2() {}
+
+function createListener(node) {
+  var foo = new EventListenerLeakTestObject2();
+  return function(evt) {
+    // This closure references |node| and an instance of leak object.
+    node.foo = foo;
+  };
+}
+
+function doLeak() {
+  if (!node) node = document.createElement('span');
+  for (var i = 0; i < 10000; i++) {
+    node.onclick = createListener(node);
+  }
+}
+
+function leak() {
+  doLeak();
+  gc();
+  gc();
+}
+</script>
+
+<p>This page leaks memory.</p>
+
+<!-- Allow leaking manually. -->
+<input type="button" value="Leak More" onclick="leak()">
+
+</body>
+</html>

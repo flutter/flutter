@@ -1,0 +1,78 @@
+/*
+ * (C) 1999-2003 Lars Knoll (knoll@kde.org)
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008 Apple Inc. All rights reserved.
+ * Copyright (C) 2013 Intel Corporation. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "config.h"
+#include "StylePropertyShorthand.h"
+#include "platform/RuntimeEnabledFeatures.h"
+
+#include "wtf/HashMap.h"
+#include "wtf/StdLibExtras.h"
+
+namespace blink {
+{% for property_id, property in properties.items() %}
+
+const StylePropertyShorthand& {{property.lower_camel_name}}Shorthand()
+{
+    static const CSSPropertyID {{property.lower_camel_name}}Properties[] = {
+        {% for longhand_id in property.longhand_property_ids %}
+        {{longhand_id}},
+        {% endfor %}
+    };
+    DEFINE_STATIC_LOCAL(StylePropertyShorthand, {{property.lower_camel_name}}Longhands, ({{property_id}}, {{property.lower_camel_name}}Properties, WTF_ARRAY_LENGTH({{property.lower_camel_name}}Properties)));
+    return {{property.lower_camel_name}}Longhands;
+}
+{% endfor %}
+
+// Returns an empty list if the property is not a shorthand
+const StylePropertyShorthand& shorthandForProperty(CSSPropertyID propertyID)
+{
+    DEFINE_STATIC_LOCAL(StylePropertyShorthand, emptyShorthand, ());
+    if (propertyID == CSSPropertyTextDecoration && !RuntimeEnabledFeatures::css3TextDecorationsEnabled())
+        return emptyShorthand;
+    switch (propertyID) {
+        {% for property_id, property in properties.items() if property.camel_case_name != "marker" %}
+        case {{property_id}}:
+            return {{property.lower_camel_name}}Shorthand();
+        {% endfor %}
+    default: {
+        return emptyShorthand;
+    }
+    }
+}
+
+void getMatchingShorthandsForLonghand(CSSPropertyID propertyID, Vector<StylePropertyShorthand, 4>* result)
+{
+    ASSERT(!result->size());
+    switch (propertyID) {
+    {% for longhand_id, shorthands in longhands_dictionary.items() %}
+    case {{longhand_id}}: {
+        {% for shorthand in shorthands %}
+        result->uncheckedAppend({{shorthand.lower_camel_name}}Shorthand());
+        {% endfor %}
+        break;
+    }
+    {% endfor %}
+    default:
+        break;
+    }
+}
+
+} // namespace blink

@@ -1,0 +1,11 @@
+include_rules = [
+  "+cc",
+  "+mojo/cc",
+  "+mojo/application",
+  "+mojo/services",
+  "+net/base",
+  "+skia",
+  "+sky/engine/public",
+  "+third_party/skia/include",
+  "+ui/native_theme",
+]

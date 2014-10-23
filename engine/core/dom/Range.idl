@@ -1,0 +1,85 @@
+/*
+ * Copyright (C) 2006 Apple Computer, Inc.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+// Introduced in DOM Level 2:
+[
+    Constructor,
+    ConstructorCallWith=Document,
+    WillBeGarbageCollected,
+] interface Range {
+
+    readonly attribute Node startContainer;
+    readonly attribute long startOffset;
+    readonly attribute Node endContainer;
+    readonly attribute long endOffset;
+    readonly attribute boolean collapsed;
+    readonly attribute Node commonAncestorContainer;
+
+    [RaisesException] void setStart(Node refNode, long offset);
+    [RaisesException] void setEnd(Node refNode, long offset);
+    [RaisesException] void setStartBefore(Node refNode);
+    [RaisesException] void setStartAfter(Node refNode);
+    [RaisesException] void setEndBefore(Node refNode);
+    [RaisesException] void setEndAfter(Node refNode);
+    void collapse(optional boolean toStart = false);
+    [RaisesException] void selectNode(Node refNode);
+    [RaisesException] void selectNodeContents(Node refNode);
+
+    // CompareHow
+    const unsigned short START_TO_START = 0;
+    const unsigned short START_TO_END   = 1;
+    const unsigned short END_TO_END     = 2;
+    const unsigned short END_TO_START   = 3;
+
+    [RaisesException, TypeChecking=Interface] short compareBoundaryPoints(CompareHow how, Range sourceRange);
+
+    [RaisesException, CustomElementCallbacks] void deleteContents();
+    [RaisesException, CustomElementCallbacks] DocumentFragment extractContents();
+    [RaisesException, CustomElementCallbacks] DocumentFragment cloneContents();
+    [RaisesException, CustomElementCallbacks] void insertNode(Node newNode);
+    [RaisesException, CustomElementCallbacks] void surroundContents(Node newParent);
+    Range cloneRange();
+
+    stringifier;
+
+    [DeprecateAs=RangeDetach] void detach();
+
+    [RaisesException] boolean isPointInRange(Node refNode, long offset);
+    [RaisesException, TypeChecking=Interface] short comparePoint(Node refNode, long offset);
+
+    [RaisesException] boolean intersectsNode(Node refNode);
+
+    // CSSOM View Module API extensions
+
+    ClientRectList getClientRects();
+    ClientRect getBoundingClientRect();
+
+    // WebKit extensions
+
+    // CompareResults
+    const unsigned short NODE_BEFORE           = 0;
+    const unsigned short NODE_AFTER            = 1;
+    const unsigned short NODE_BEFORE_AND_AFTER = 2;
+    const unsigned short NODE_INSIDE           = 3;
+
+    [RaisesException, MeasureAs=RangeCompareNode] short compareNode([Default=Undefined] optional Node refNode);
+
+    [RaisesException, MeasureAs=RangeExpand] void expand([Default=Undefined] optional DOMString unit);
+};

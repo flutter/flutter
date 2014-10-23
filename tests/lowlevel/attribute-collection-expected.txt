@@ -1,0 +1,9 @@
+Running 5 tests
+ok 1 Attribute collection should get by index
+ok 2 Attribute collection should get by name
+ok 3 Attribute collection should set by name
+ok 4 Attribute collection should be case sensitive
+ok 5 Attribute collection should live update
+5 tests
+5 pass
+0 fail

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html id='root'>
+<body>
+<div style='height:3000px'>
+    <span id="target">Some offscreen test text for testing.</span>
+</div>
+<script>
+    var range = document.createRange();
+    range.selectNode(document.getElementById('target'));
+    window.getSelection().addRange(range);
+    window.scrollBy(0,500);
+</script>
+</body>
+</html>
+

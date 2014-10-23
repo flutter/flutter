@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2006 Apple Computer, Inc.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+[
+    EventConstructor,
+] interface KeyboardEvent : UIEvent {
+    const unsigned long DOM_KEY_LOCATION_STANDARD = 0x00;
+    const unsigned long DOM_KEY_LOCATION_LEFT     = 0x01;
+    const unsigned long DOM_KEY_LOCATION_RIGHT    = 0x02;
+    const unsigned long DOM_KEY_LOCATION_NUMPAD   = 0x03;
+
+    [InitializedByEventConstructor] readonly attribute DOMString        keyIdentifier;
+    [InitializedByEventConstructor] readonly attribute unsigned long    location;
+    [ImplementedAs=location, DeprecateAs=KeyboardEventKeyLocation, InitializedByEventConstructor] readonly attribute unsigned long keyLocation; // Deprecated.
+    [InitializedByEventConstructor] readonly attribute boolean          ctrlKey;
+    [InitializedByEventConstructor] readonly attribute boolean          shiftKey;
+    [InitializedByEventConstructor] readonly attribute boolean          altKey;
+    [InitializedByEventConstructor] readonly attribute boolean          metaKey;
+    [InitializedByEventConstructor] readonly attribute boolean          repeat;
+
+    boolean getModifierState(DOMString keyArgument);
+
+    // FIXME: this does not match the version in the DOM spec.
+    void initKeyboardEvent([Default=Undefined] optional DOMString type,
+                           [Default=Undefined] optional boolean canBubble,
+                           [Default=Undefined] optional boolean cancelable,
+                           [Default=Undefined] optional Window view,
+                           [Default=Undefined] optional DOMString keyIdentifier,
+                           [Default=Undefined] optional unsigned long location,
+                           [Default=Undefined] optional boolean ctrlKey,
+                           [Default=Undefined] optional boolean altKey,
+                           [Default=Undefined] optional boolean shiftKey,
+                           [Default=Undefined] optional boolean metaKey);
+};
+

@@ -1,0 +1,4 @@
+include_rules = [
+    "+platform",
+    "+third_party/skia",
+]

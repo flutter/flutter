@@ -1,0 +1,7 @@
+include_rules = [
+    "+wtf",
+]
+
+skip_child_includes = [
+    "testing",
+]

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%;">
+<head>
+<title>Test</title>
+<style>
+::-webkit-scrollbar {
+    width: 1px;
+}
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+</head>
+<body>
+This test passes if it doesn't cause oscillating scale factor due to content size rounding errors and creating/destroying of custom scrollbars.
+An example of parameter that reproduce the crash is viewport size (800, 1057) with device scale factor 1.325
+</body>
+</html>

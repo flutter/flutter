@@ -1,0 +1,27 @@
+{% from 'macros.tmpl' import license %}
+{{license()}}
+
+#include "config.h"
+#include "core/events/{{namespace}}Factory.h"
+
+#include "{{namespace}}{{suffix}}Headers.h"
+#include "platform/RuntimeEnabledFeatures.h"
+
+namespace blink {
+
+PassRefPtrWillBeRawPtr<{{namespace}}> {{namespace}}{{suffix}}Factory::create(const String& type)
+{
+    {% for event in events %}
+    {% filter enable_conditional(event.Conditional) %}
+    {% if event|script_name|case_insensitive_matching %}
+    if (equalIgnoringCase(type, "{{event|script_name}}"){% if event.RuntimeEnabled %} && RuntimeEnabledFeatures::{{event.RuntimeEnabled|lower_first}}(){% endif %})
+    {% else %}
+    if (type == "{{event|script_name}}"{% if event.RuntimeEnabled %} && RuntimeEnabledFeatures::{{event.RuntimeEnabled|lower_first}}(){% endif %})
+    {% endif %}
+        return {{event|cpp_name}}::create();
+    {% endfilter %}
+    {% endfor %}
+    return nullptr;
+}
+
+} // namespace blink

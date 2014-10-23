@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+<textarea id='target' rows='2' cols='3'>
+  simple text that should be a bit longer than that
+</textarea>
+<script>
+    var textarea = document.getElementById('target');
+    textarea.focus();
+    textarea.setSelectionRange(0, textarea.value.length);
+</script>
+</body>
+</html>

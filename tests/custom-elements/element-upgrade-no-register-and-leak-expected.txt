@@ -1,0 +1,2 @@
+Tests unresolved element not leaking if never resolved.
+

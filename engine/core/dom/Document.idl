@@ -1,0 +1,101 @@
+/*
+ * Copyright (C) 2006, 2007, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2006, 2007 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+callback CustomElementConstructor = Element ();
+
+typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
+
+[
+    SpecialWrapFor=(HTMLDocument)
+] interface Document : Node {
+    readonly attribute DOMImplementation implementation;
+    readonly attribute Element documentElement;
+
+    [CustomElementCallbacks, PerWorldBindings, RaisesException] Element createElement(DOMString tagName);
+    DocumentFragment createDocumentFragment();
+    Text createTextNode(DOMString data);
+
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, optional boolean deep = false);
+
+    [PerWorldBindings] Element getElementById(DOMString elementId);
+
+    [RaisesException, CustomElementCallbacks, TypeChecking=Interface] Node adoptNode(Node node);
+
+    [RaisesException] Event createEvent(DOMString eventType);
+
+    readonly attribute DOMString? baseURI;
+
+    Range createRange();
+
+    [ImplementedAs=executingWindow] readonly attribute Window defaultView;
+
+    readonly attribute StyleSheetList styleSheets;
+
+    readonly attribute DOMString contentType;
+
+             [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;
+             [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString title;
+    readonly attribute DOMString referrer;
+    readonly attribute DOMString URL;
+
+    [PutForwards=href] readonly attribute Location location;
+
+    [TreatReturnedNullStringAs=Undefined] readonly attribute DOMString readyState;
+
+    Element            elementFromPoint([Default=Undefined] optional long x,
+                                        [Default=Undefined] optional long y);
+    [MeasureAs=DocumentCaretRangeFromPoint]
+    Range              caretRangeFromPoint([Default=Undefined] optional long x,
+                                           [Default=Undefined] optional long y);
+
+    // Mozilla extensions
+    Selection          getSelection();
+
+    [MeasureAs=DocumentGetCSSCanvasContext] RenderingContext getCSSCanvasContext(DOMString contextId, DOMString name, long width, long height);
+
+    // HTML 5
+    readonly attribute Element activeElement;
+    boolean hasFocus();
+
+    [RuntimeEnabled=Touch] Touch createTouch([Default=Undefined] optional Window window,
+                                             [Default=Undefined] optional EventTarget target,
+                                             [Default=Undefined] optional long identifier,
+                                             [Default=Undefined] optional double pageX,
+                                             [Default=Undefined] optional double pageY,
+                                             [Default=Undefined] optional double screenX,
+                                             [Default=Undefined] optional double screenY,
+                                             [Default=Undefined] optional double webkitRadiusX,
+                                             [Default=Undefined] optional double webkitRadiusY,
+                                             [Default=Undefined] optional float webkitRotationAngle,
+                                             [Default=Undefined] optional float webkitForce);
+    [RuntimeEnabled=Touch] TouchList createTouchList(Touch... touches);
+
+    [CallWith=ScriptState, CustomElementCallbacks, RaisesException, MeasureAs=DocumentRegisterElement] CustomElementConstructor registerElement(DOMString name, optional Dictionary options);
+    [CustomElementCallbacks, PerWorldBindings, RaisesException] Element createElement(DOMString localName, DOMString? typeExtension);
+
+    // Page visibility API.
+    readonly attribute DOMString visibilityState;
+    readonly attribute boolean hidden;
+
+    readonly attribute HTMLScriptElement currentScript;
+    attribute any exports;
+};
+
+Document implements ParentNode;

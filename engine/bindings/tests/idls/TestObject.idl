@@ -1,0 +1,536 @@
+/*
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+enum TestEnum {"", "EnumValue1", "EnumValue2", "EnumValue3"};
+
+callback VoidCallbackFunction = void ();
+callback AnyCallbackFunctionOptionalAnyArg = any (optional any optionalAnyArg);
+
+// No extended attributes on the interface; those go in TestInterface.idl
+interface TestObject {
+    // Constants
+    const unsigned short CONST_VALUE_0 = 0;
+    const unsigned short CONST_VALUE_1 = 1;
+    const unsigned short CONST_VALUE_2 = 2;
+    const unsigned short CONST_VALUE_4 = 4;
+    const unsigned short CONST_VALUE_8 = 8;
+    const short CONST_VALUE_9 = -1;
+    const DOMString CONST_VALUE_10 = "my constant string";
+    const unsigned short CONST_VALUE_11 = 0xffffffff;
+    const unsigned short CONST_VALUE_12 = 0x01;
+    const unsigned short CONST_VALUE_13 = 0X20;
+    const unsigned short CONST_VALUE_14 = 0x1abc;
+    const unsigned short CONST_VALUE_15 = 010;
+    const unsigned short CONST_VALUE_16 = -010;
+    const unsigned short CONST_VALUE_16 = -0x1A;
+    const unsigned short CONST_VALUE_17 = -0X1a;
+    const double CONST_VALUE_18 = 0.123;
+    const double CONST_VALUE_19 = 4e9;
+    const double CONST_VALUE_20 = 3.4e5;
+    const double CONST_VALUE_21 = -1.3;
+    const double CONST_VALUE_22 = -4e-9;
+    const double CONST_VALUE_23 = .123;
+    const double CONST_VALUE_24 = 5E+4;
+    const float CONST_VALUE_25 = 1;
+
+    // Extended attributes
+    [DeprecateAs=Constant] const short DEPRECATED_CONSTANT = 1;
+    [RuntimeEnabled=FeatureName] const short FEATURE_ENABLED_CONST = 1;
+    [Reflect=CONST_IMPL] const short CONST_JAVASCRIPT = 1;
+
+    stringifier attribute DOMString stringifierAttribute;
+
+    // Attributes
+    //
+    // Naming convention:
+    // [ExtAttr] attribute Type extAttrTypeNameAttribute;
+    // E.g.,
+    // [Foo] attribute DOMString? fooStringOrNullAttribute
+    //
+    // Type name reference:
+    // http://heycam.github.io/webidl/#dfn-type-name
+    //
+    // TestInterfaceEmpty is used as a stub interface type, for testing behavior
+    // that should not depend on particular type (beyond "interface or not").
+    // read only
+    readonly attribute DOMString readonlyStringAttribute;
+    readonly attribute TestInterfaceEmpty readonlyTestInterfaceEmptyAttribute;
+    readonly attribute long readonlyLongAttribute;
+    // Basic types
+    attribute Date dateAttribute;
+    attribute DOMString stringAttribute;
+    attribute ByteString byteStringAttribute;
+    attribute ScalarValueString scalarValueStringAttribute;
+    attribute DOMTimeStamp domTimeStampAttribute;
+    attribute boolean booleanAttribute;
+    attribute byte byteAttribute;
+    attribute double doubleAttribute;
+    attribute float floatAttribute;
+    attribute long longAttribute;
+    attribute long long longLongAttribute;
+    attribute octet octetAttribute;
+    attribute short shortAttribute;
+    attribute unrestricted double unrestrictedDoubleAttribute;
+    attribute unrestricted float unrestrictedFloatAttribute;
+    attribute unsigned long unsignedLongAttribute;
+    attribute unsigned long long unsignedLongLongAttribute;
+    attribute unsigned short unsignedShortAttribute;
+    // Interface type
+    attribute TestInterfaceEmpty testInterfaceEmptyAttribute;
+    // Self-reference
+    attribute TestObject testObjectAttribute;
+    // Callback function type
+    attribute VoidCallbackFunction voidCallbackFunctionAttribute;
+    attribute AnyCallbackFunctionOptionalAnyArg anyCallbackFunctionOptionalAnyArgAttribute;
+    // Names that begin with an acronym
+    attribute long cssAttribute;
+    attribute long imeAttribute;
+    attribute long svgAttribute;
+    attribute long xmlAttribute;
+    // Non-wrapper types
+    attribute SerializedScriptValue serializedScriptValueAttribute;
+    attribute any anyAttribute;
+    // Custom type conversions
+    attribute Promise promiseAttribute;
+    attribute Window windowAttribute;
+    // DOM Node types
+    attribute Document documentAttribute;
+    attribute DocumentFragment documentFragmentAttribute;
+    attribute DocumentType documentTypeAttribute;
+    attribute Element elementAttribute;
+    attribute Node nodeAttribute;
+    attribute ShadowRoot shadowRootAttribute;
+    // Typed arrays
+    attribute ArrayBuffer arrayBufferAttribute;
+    attribute Float32Array float32ArrayAttribute;
+    attribute Uint8Array uint8ArrayAttribute;
+    // Exceptions for is_keep_alive_for_gc
+    readonly attribute TestInterfaceEmpty self;
+    readonly attribute EventTarget readonlyEventTargetAttribute;
+    readonly attribute EventTarget? readonlyEventTargetOrNullAttribute;
+    readonly attribute Window readonlyWindowAttribute;
+    readonly attribute HTMLElement htmlElementAttribute;
+    // Arrays
+    attribute DOMString[] stringArrayAttribute;
+    attribute TestInterfaceEmpty[] testInterfaceEmptyArrayAttribute;
+    attribute float[] floatArrayAttribute;
+    // Nullable attributes
+    attribute DOMString? stringOrNullAttribute;
+    attribute long? longOrNullAttribute;
+    attribute TestInterface? testInterfaceOrNullAttribute;
+    // Enumerations
+    attribute TestEnum testEnumAttribute;
+    // Static attributes
+    static attribute DOMString staticStringAttribute;
+    static attribute long staticLongAttribute;
+    // Exceptional type
+    attribute EventHandler eventHandlerAttribute;
+
+    // Extended attributes
+    [CachedAttribute=isValueDirty] attribute any cachedAttributeAnyAttribute;
+    [CachedAttribute=isArrayDirty] attribute DOMString[] cachedArrayAttribute;
+    [CachedAttribute=isStringDirty] attribute DOMString? cachedStringOrNoneAttribute;
+    [CallWith=ExecutionContext] attribute any callWithExecutionContextAnyAttribute;
+    [CallWith=ScriptState] attribute any callWithScriptStateAnyAttribute;
+    [CallWith=(ExecutionContext,ScriptState)] attribute any callWithExecutionContextAndScriptStateAnyAttribute;
+    [CheckSecurity=Node] readonly attribute Document checkSecurityForNodeReadonlyDocumentAttribute; // All uses are read only
+    [Conditional=CONDITION] attribute long conditionalLongAttribute;
+    // Constructors: FIXME: replace suffix with [ConstructorAttribute]
+    attribute TestInterfaceEmptyConstructor testInterfaceEmptyConstructorAttribute;
+    [DeprecateAs=deprecatedTestInterfaceEmptyConstructorAttribute] attribute TestInterfaceEmptyConstructor testInterfaceEmptyConstructorAttribute;
+    [MeasureAs=FeatureName] attribute TestInterfaceEmptyConstructor measureAsFeatureNameTestInterfaceEmptyConstructorAttribute;
+    [Custom] attribute object customObjectAttribute;
+    [Custom=Getter] attribute long customGetterLongAttribute;
+    [Custom=Getter] readonly attribute object customGetterReadonlyObjectAttribute;
+    [Custom=Setter] attribute long customSetterLongAttribute;
+    [Conditional=CONDITION, Custom] attribute long customLongAttribute;
+    [CustomElementCallbacks] readonly attribute long customElementsCallbacksReadonlyLongAttribute;
+    [DeprecateAs=LongAttribute] attribute long deprecatedLongAttribute;
+    [EnforceRange] attribute long enforceRangeLongAttribute;
+    [ExposeJSAccessors] attribute long exposeJSAccessorsLongAttribute;
+    [ImplementedAs=implementedAsName] attribute long implementedAsLongAttribute;
+    [Custom, ImplementedAs=implementedAsNameWithCustom] attribute long customImplementedAsLongAttribute;
+    [Custom=Getter, ImplementedAs=implementedAsNameWithCustomGetter] attribute long customGetterImplementedAsLongAttribute;
+    [Custom=Setter, ImplementedAs=implementedAsNameWithCustomGetter] attribute long customSetterImplementedAsLongAttribute;
+    [MeasureAs=TestFeature] attribute long measureAsLongAttribute;
+    [NotEnumerable] attribute long notEnumerableLongAttribute;
+    [PerWorldBindings] readonly attribute TestInterfaceEmpty perWorldBindingsReadonlyTestInterfaceEmptyAttribute;
+    [PutForwards=href] readonly attribute TestNode location;
+    [PutForwards=hrefThrows] readonly attribute TestNode locationWithException;
+    [PutForwards=hrefCallWith] readonly attribute TestNode locationWithCallWith;
+    [PutForwards=hrefByteString] readonly attribute TestNode locationByteString;
+    [PerWorldBindings, PutForwards=href] readonly attribute TestNode locationWithPerWorldBindings;
+    [TypeChecking=Interface, PutForwards=href] readonly attribute TestNode locationTypeCheckingInterface;
+    [PutForwards=attr1] readonly attribute TestInterfaceGarbageCollected locationGarbageCollected;
+    [PutForwards=attr1] readonly attribute TestInterfaceWillBeGarbageCollected locationWillBeGarbageCollected;
+    [RaisesException] attribute long raisesExceptionLongAttribute;
+    [RaisesException=Getter] attribute long raisesExceptionGetterLongAttribute;
+    [RaisesException=Setter] attribute long setterRaisesExceptionLongAttribute;
+    [RaisesException] attribute TestInterfaceEmpty raisesExceptionTestInterfaceEmptyAttribute;
+    [CachedAttribute=isValueDirty, RaisesException] attribute any cachedAttributeRaisesExceptionGetterAnyAttribute;
+    [Reflect] attribute TestInterface reflectTestInterfaceAttribute;
+    [Reflect=reflectedNameAttribute] attribute TestInterface reflectReflectedNameAttributeTestAttribute;
+    // [Reflect] exceptional types: exceptional getters, exceptional setters,
+    // or range checking for unsigned
+    [Reflect] attribute boolean reflectBooleanAttribute;
+    [Reflect] attribute long reflectLongAttribute;
+    [Reflect] attribute unsigned short reflectUnsignedShortAttribute;
+    [Reflect] attribute unsigned long reflectUnsignedLongAttribute;
+    // [Reflect] exceptional names
+    [Reflect] attribute DOMString id;
+    [Reflect] attribute DOMString name;
+    [Reflect] attribute DOMString class;
+    [Reflect=id] attribute DOMString reflectedId;
+    [Reflect=name] attribute DOMString reflectedName;
+    [Reflect=class] attribute DOMString reflectedClass;
+    // Limited value attributes and enumerated attributes
+    [Reflect, ReflectOnly="unique"] attribute DOMString limitedToOnlyOneAttribute;
+    [Reflect, ReflectOnly=("Per","Paal","Espen")] attribute DOMString limitedToOnlyAttribute;
+    [Reflect=other, ReflectOnly=("Value1","Value2")] attribute DOMString limitedToOnlyOtherAttribute;
+    [Reflect, ReflectOnly=("rsa","dsa"), ReflectMissing="rsa"] attribute DOMString limitedWithMissingDefaultAttribute;
+    [Reflect, ReflectOnly=("ltr","rtl","auto"), ReflectMissing="auto", ReflectInvalid="ltr"] attribute DOMString limitedWithInvalidMissingDefaultAttribute;
+    [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] readonly attribute DOMString corsSettingAttribute;
+    [Reflect, ReflectOnly=("empty","missing","invalid","a-normal"), ReflectEmpty="empty", ReflectMissing="missing", ReflectInvalid="invalid"] readonly attribute DOMString limitedWithEmptyMissingInvalidAttribute;
+
+    [Replaceable] readonly attribute long replaceableReadonlyLongAttribute;
+    [Replaceable, PutForwards=href] readonly attribute TestNode locationReplaceable;
+    [RuntimeEnabled=FeatureName] attribute long runtimeEnabledLongAttribute;
+    [Conditional=CONDITION, RuntimeEnabled=FeatureName] attribute long conditionalRuntimeEnabledLongAttribute;
+    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString setterCallWithActiveWindowAndFirstWindowStringAttribute;
+    [SetterCallWith=ExecutionContext] attribute DOMString setterCallWithExecutionContextStringAttribute;
+    [TreatNullAs=EmptyString] attribute DOMString treatNullAsEmptyStringStringAttribute;
+    [TreatNullAs=NullString] attribute DOMString treatNullAsNullStringStringAttribute;
+    [TreatReturnedNullStringAs=Null] attribute DOMString treatReturnedNullStringAsNullStringAttribute;
+    [TreatReturnedNullStringAs=Undefined] attribute DOMString treatReturnedNullStringAsUndefinedStringAttribute;
+    [TreatReturnedNullStringAs=Undefined, CachedAttribute=isStringDirty] attribute DOMString cachedTreatReturnedNullStringAsUndefinedStringAttribute;
+    [TreatReturnedNullStringAs=Null] attribute ByteString treatReturnedNullStringAsNullByteStringAttribute;
+    [TreatReturnedNullStringAs=Undefined] attribute ByteString treatReturnedNullStringAsUndefinedByteStringAttribute;
+    [TreatReturnedNullStringAs=Null] attribute ScalarValueString treatReturnedNullStringAsNullScalarValueStringAttribute;
+    [TreatReturnedNullStringAs=Undefined] attribute ScalarValueString treatReturnedNullStringAsUndefinedScalarValueStringAttribute;
+    [TypeChecking=Interface] attribute float typeCheckingInterfaceFloatAttribute; // nop for non-interface types
+    [TypeChecking=Interface] attribute TestInterface typeCheckingInterfaceTestInterfaceAttribute;
+    [TypeChecking=Interface] attribute TestInterface? typeCheckingInterfaceTestInterfaceOrNullAttribute;
+    [Reflect, URL] attribute DOMString urlStringAttribute;
+    [Reflect=reflectUrlAttribute, URL] attribute DOMString urlStringAttribute;
+    [Unforgeable] attribute long unforgeableLongAttribute;
+
+
+    // Methods
+    //
+    // Naming convention:
+    // ReturnType returnTypeMethodTypeName1ArgTypeName2Arg(Type1 typeName1Arg, Type2 typeName2Arg);
+    // E.g.,
+    // void voidMethodStringArgLongArrayArg(DOMString stringArg, long[] longArrayArg);
+    void voidMethod();
+    static void staticVoidMethod();
+
+    // Types
+    // Basic types
+    Date dateMethod();
+    DOMString stringMethod();
+    ByteString byteStringMethod();
+    ScalarValueString scalarValueStringMethod();
+    DOMTimeStamp readonlyDOMTimeStampMethod();
+    boolean booleanMethod();
+    byte byteMethod();
+    double doubleMethod();
+    float floatMethod();
+    long longMethod();
+    long long longLongMethod();
+    octet octetMethod();
+    short shortMethod();
+    unsigned long unsignedLongMethod();
+    unsigned long long unsignedLongLongMethod();
+    unsigned short unsignedShortMethod();
+
+    void voidMethodDateArg(Date dateArg);
+    void voidMethodStringArg(DOMString stringArg);
+    void voidMethodByteStringArg(ByteString stringArg);
+    void voidMethodScalarValueStringArg(ScalarValueString scalarValueStringArg);
+    void voidMethodDOMTimeStampArg(DOMTimeStamp domTimeStampArg);
+    void voidMethodBooleanArg(boolean booleanArg);
+    void voidMethodByteArg(byte byteArg);
+    void voidMethodDoubleArg(double doubleArg);
+    void voidMethodFloatArg(float floatArg);
+    void voidMethodLongArg(long longArg);
+    void voidMethodLongLongArg(long long longLongArg);
+    void voidMethodOctetArg(octet octetArg);
+    void voidMethodShortArg(short shortArg);
+    void voidMethodUnsignedLongArg(unsigned long unsignedLongArg);
+    void voidMethodUnsignedLongLongArg(unsigned long long unsignedLongLongArg);
+    void voidMethodUnsignedShortArg(unsigned short unsignedShortArg);
+    // Interface types
+    TestInterfaceEmpty testInterfaceEmptyMethod();
+    void voidMethodTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg);
+    void voidMethodLongArgTestInterfaceEmptyArg(long longArg, TestInterfaceEmpty testInterfaceEmptyArg);
+    // Callback function type
+    VoidCallbackFunction voidCallbackFunctionMethod();
+    AnyCallbackFunctionOptionalAnyArg anyCallbackFunctionOptionalAnyArgMethod();
+    void voidMethodVoidCallbackFunctionArg(VoidCallbackFunction voidCallbackFunctionArg);
+    void voidMethodAnyCallbackFunctionOptionalAnyArg(AnyCallbackFunctionOptionalAnyArg anyCallbackFunctionOptionalAnyArgArg);
+    // Custom type conversions
+    CompareHow compareHowMethod();
+    any anyMethod();
+    void voidMethodCompareHowArg(CompareHow compareHowArg);
+    void voidMethodEventTargetArg(EventTarget eventTargetArg);
+    void voidMethodAnyArg(any anyArg);
+    // DOM node types
+    void voidMethodAttrArg(Attr attrArg);
+    void voidMethodDocumentArg(Document documentArg);
+    void voidMethodDocumentTypeArg(DocumentType documentTypeArg);
+    void voidMethodElementArg(Element elementArg);
+    void voidMethodNodeArg(Node nodeArg);
+    // Typed arrays
+    ArrayBuffer arrayBufferMethod();
+    ArrayBufferView arrayBufferViewMethod();
+    Float32Array float32ArrayMethod();
+    Int32Array int32ArrayMethod();
+    Uint8Array uint8ArrayMethod();
+    void voidMethodArrayBufferArg(ArrayBuffer arrayBufferArg);
+    void voidMethodArrayBufferOrNullArg(ArrayBuffer? arrayBufferArg);
+    void voidMethodArrayBufferViewArg(ArrayBufferView arrayBufferViewArg);
+    void voidMethodFloat32ArrayArg(Float32Array float32ArrayArg);
+    void voidMethodInt32ArrayArg(Int32Array int32ArrayArg);
+    void voidMethodUint8ArrayArg(Uint8Array uint8ArrayArg);
+    // Arrays
+    long[] longArrayMethod();
+    DOMString[] stringArrayMethod();
+    TestInterfaceEmpty[] testInterfaceEmptyArrayMethod();
+    void voidMethodArrayLongArg(long[] arrayLongArg);
+    void voidMethodArrayStringArg(DOMString[] arrayStringArg);
+    void voidMethodArrayTestInterfaceEmptyArg(TestInterfaceEmpty[] arrayTestInterfaceEmptyArg);
+    // Sequences
+    sequence<long> longSequenceMethod();
+    sequence<DOMString> stringSequenceMethod();
+    sequence<TestInterfaceEmpty> testInterfaceEmptySequenceMethod();
+    void voidMethodSequenceLongArg(sequence<long> longSequenceArg);
+    void voidMethodSequenceStringArg(sequence<DOMString> stringSequenceArg);
+    void voidMethodSequenceTestInterfaceEmptyArg(sequence<TestInterfaceEmpty> testInterfaceEmptySequenceArg);
+    // Nullable types
+    long? nullableLongMethod();
+    DOMString? nullableStringMethod();
+    TestInterface? nullableTestInterfaceMethod();
+    sequence<long>? nullableLongSequenceMethod();
+    // Union types
+    (TestInterfaceGarbageCollected or DOMString) testInterfaceGarbageCollectedOrDOMStringMethod();
+    (TestInterfaceWillBeGarbageCollected or TestDictionary) testInterfaceWillBeGarbageCollectedOrTestDictionaryMethod();
+    (sequence<long> or DOMString[] or unrestricted double) longSequenceOrDOMStringArrayOrUnrestrictedDoubleMethod();
+    // Currently only used on interface type arguments
+    void voidMethodTestInterfaceEmptyOrNullArg(TestInterfaceEmpty? nullableTestInterfaceEmptyArg);
+    // Callback interface types
+    void voidMethodTestCallbackInterfaceArg(TestCallbackInterface testCallbackInterfaceArg);
+    void voidMethodOptionalTestCallbackInterfaceArg(optional TestCallbackInterface optionalTestCallbackInterfaceArg);
+    void voidMethodTestCallbackInterfaceOrNullArg(TestCallbackInterface? testCallbackInterfaceArg);
+    // Enumerations
+    TestEnum testEnumMethod();
+    void voidMethodTestEnumArg(TestEnum testEnumTypeArg);
+    // Exceptional types
+    Dictionary dictionaryMethod();
+    Promise promiseMethod(long arg1, Dictionary arg2, DOMString arg3, DOMString... variadic);
+    Promise promiseMethodWithoutExceptionState(Dictionary arg1);
+    SerializedScriptValue serializedScriptValueMethod();
+    void voidMethodDictionaryArg(Dictionary dictionaryArg);
+    void voidMethodPromiseArg(Promise promiseArg);
+    void voidMethodSerializedScriptValueArg(SerializedScriptValue serializedScriptValueArg);
+    void voidMethodDictionarySequenceArg(sequence<Dictionary> dictionarySequenceArg);
+    Promise overloadedPromiseMethod(long arg);
+    Promise overloadedPromiseMethod(DOMString arg);
+
+    // Arguments
+    void voidMethodStringArgLongArg(DOMString stringArg, long longArg);
+    // Optional arguments
+    void voidMethodOptionalStringArg(optional DOMString optionalStringArg);
+    void voidMethodOptionalTestInterfaceEmptyArg(optional TestInterfaceEmpty optionalTestInterfaceEmptyArg);
+    void voidMethodOptionalLongArg(optional long optionalLongArg);
+    DOMString stringMethodOptionalLongArg(optional long optionalLongArg);
+    TestInterfaceEmpty testInterfaceEmptyMethodOptionalLongArg(optional long optionalLongArg);
+    long longMethodOptionalLongArg(optional long optionalLongArg);
+    void voidMethodLongArgOptionalLongArg(long longArg, optional long optionalLongArg);
+    void voidMethodLongArgOptionalLongArgOptionalLongArg(long longArg, optional long optionalLongArg1, optional long optionalLongArg2);
+    void voidMethodLongArgOptionalTestInterfaceEmptyArg(long longArg, optional TestInterfaceEmpty optionalTestInterfaceEmpty);
+    void voidMethodTestInterfaceEmptyArgOptionalLongArg(TestInterfaceEmpty optionalTestInterfaceEmpty, optional long longArg);
+    // Optional arguments: exceptional case
+    void voidMethodOptionalDictionaryArg(optional Dictionary optionalDictionaryArg);
+
+    // Optional arguments with defaults
+    void voidMethodDefaultByteStringArg(optional ByteString defaultByteStringArg = "foo");
+    void voidMethodDefaultStringArg(optional DOMString defaultStringArg = "foo");
+    void voidMethodDefaultIntegerArgs(optional long defaultLongArg = 10,
+                                      optional long long defaultLongLongArg = -10,
+                                      optional unsigned long defaultUnsignedArg = 0xFFFFFFFF);
+    void voidMethodDefaultDoubleArg(optional double defaultDoubleArg = 0.5);
+    void voidMethodDefaultTrueBooleanArg(optional boolean defaultBooleanArg = true);
+    void voidMethodDefaultFalseBooleanArg(optional boolean defaultBooleanArg = false);
+    void voidMethodDefaultNullableByteStringArg(optional ByteString? defaultStringArg = null);
+    void voidMethodDefaultNullableStringArg(optional DOMString? defaultStringArg = null);
+    void voidMethodDefaultNullableTestInterfaceArg(optional TestInterface? defaultTestInterfaceArg = null);
+
+    // Variadic operations
+    void voidMethodVariadicStringArg(DOMString... variadicStringArgs);
+    void voidMethodStringArgVariadicStringArg(DOMString stringArg, DOMString... variadicStringArgs);
+    void voidMethodVariadicTestInterfaceEmptyArg(TestInterfaceEmpty... variadicTestInterfaceEmptyArgs);
+    void voidMethodTestInterfaceEmptyArgVariadicTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg, TestInterfaceEmpty... variadicTestInterfaceEmptyArgs);
+    void voidMethodVariadicTestInterfaceGarbageCollectedArg(TestInterfaceGarbageCollected... variadicTestInterfaceGarbageCollectedArg);
+    void voidMethodVariadicTestInterfaceWillBeGarbageCollectedArg(TestInterfaceWillBeGarbageCollected... variadicTestInterfaceWillBeGarbageCollectedArg);
+
+    // Overloaded methods
+    void overloadedMethodA(long longArg);
+    void overloadedMethodA(long longArg1, long longArg2);
+    void overloadedMethodB(long longArg);
+    void overloadedMethodB(DOMString stringArg, optional long longArg);
+    void overloadedMethodC(long longArg);
+    void overloadedMethodC(TestInterfaceEmpty testInterfaceEmptyArg);
+    void overloadedMethodD(long longArg);
+    void overloadedMethodD(long[] longArrayArg);
+    void overloadedMethodE(long longArg);
+    void overloadedMethodE(TestInterfaceEmpty? testInterfaceEmptyOrNullArg);
+    void overloadedMethodF(optional DOMString stringArg);
+    void overloadedMethodF(double doubleArg);
+    void overloadedMethodG(long longArg);
+    void overloadedMethodG(optional TestInterfaceEmpty? testInterfaceEmptyOrNullArg = null);
+    void overloadedMethodH(TestInterface testInterfaceArg);
+    void overloadedMethodH(TestInterfaceEmpty testInterfaceEmptyArg);
+    void overloadedMethodI(DOMString stringArg);
+    void overloadedMethodI(double doubleArg);
+    void overloadedMethodJ(DOMString stringArg);
+    void overloadedMethodJ(TestDictionary testDictionaryArg);
+
+
+    [PerWorldBindings] void overloadedPerWorldBindingsMethod();
+    [PerWorldBindings] void overloadedPerWorldBindingsMethod(long longArg);
+
+    static void overloadedStaticMethod(long longArg);
+    static void overloadedStaticMethod(long longArg1, long longArg2);
+
+    // Extended attributes for arguments
+    // [Clamp]
+    void voidMethodClampUnsignedShortArg([Clamp] unsigned short clampUnsignedShortArg);
+    void voidMethodClampUnsignedLongArg([Clamp] unsigned long clampUnsignedLongArg);
+    // [Default]
+    void voidMethodDefaultUndefinedTestInterfaceEmptyArg([Default=Undefined] optional TestInterfaceEmpty defaultUndefinedTestInterfaceEmptyArg);
+    void voidMethodDefaultUndefinedLongArg([Default=Undefined] optional long defaultUndefinedLongArg);
+    void voidMethodDefaultUndefinedStringArg([Default=Undefined] optional DOMString defaultUndefinedStringArg);
+    // [EnforceRange]
+    void voidMethodEnforceRangeLongArg([EnforceRange] long enforceRangeLongArg);
+    // [TreatNullAs], [TreatUndefinedAs]
+    void voidMethodTreatNullAsEmptyStringStringArg([TreatNullAs=EmptyString] DOMString treatNullAsEmptyStringStringArg);
+    void voidMethodTreatNullAsNullStringStringArg([TreatNullAs=NullString] DOMString treatNullAsNullStringStringArg);
+    void voidMethodTreatNullAsNullStringTreatUndefinedAsNullStringStringArg([TreatNullAs=NullString, TreatUndefinedAs=NullString] DOMString treatNullAsNullStringStringArg);
+
+    // Extended attributes for methods
+    [CallWith=ExecutionContext] void callWithExecutionContextVoidMethod();
+    [CallWith=ScriptState] void callWithScriptStateVoidMethod();
+    [CallWith=ScriptState] long callWithScriptStateLongMethod();
+    [CallWith=(ScriptState,ExecutionContext)] void callWithScriptStateExecutionContextVoidMethod();
+    [CallWith=(ScriptState,ScriptArguments)] void callWithScriptStateScriptArgumentsVoidMethod();
+    [CallWith=(ScriptState,ScriptArguments)] void callWithScriptStateScriptArgumentsVoidMethodOptionalBooleanArg(optional boolean optionalBooleanArg);
+    [CallWith=ActiveWindow] void callWithActiveWindow();
+    [CallWith=(ActiveWindow,FirstWindow)] void callWithActiveWindowScriptWindow();
+    [CheckSecurity=Node] void checkSecurityForNodeVoidMethod();
+    [Conditional=CONDITION] void conditionalConditionVoidMethod();
+    [Conditional=CONDITION] static void conditionalConditionStaticVoidMethod();
+    [Custom] void customVoidMethod();
+    [Conditional=CONDITION, Custom] void conditionalConditionCustomVoidMethod();
+    [CustomElementCallbacks] void customElementCallbacksVoidMethod();
+    [DeprecateAs=voidMethod] void deprecatedVoidMethod();
+    [DoNotCheckSignature] void doNotCheckSignatureVoidMethod();
+    [ImplementedAs=implementedAsMethodName] void implementedAsVoidMethod();
+    [MeasureAs=TestFeature] void measureAsVoidMethod();
+    [DeprecateAs=TestFeatureA] void DeprecateAsOverloadedMethod();
+    [DeprecateAs=TestFeatureB] void DeprecateAsOverloadedMethod(long arg);
+    [DeprecateAs=TestFeature] void DeprecateAsSameValueOverloadedMethod();
+    [DeprecateAs=TestFeature] void DeprecateAsSameValueOverloadedMethod(long arg);
+    [MeasureAs=TestFeatureA] void measureAsOverloadedMethod();
+    [MeasureAs=TestFeatureB] void measureAsOverloadedMethod(long arg);
+    [MeasureAs=TestFeature] void measureAsSameValueOverloadedMethod();
+    [MeasureAs=TestFeature] void measureAsSameValueOverloadedMethod(long arg);
+    [DeprecateAs=TestFeatureA, MeasureAs=TestFeature] void deprecateAsMeasureAsSameValueOverloadedMethod();
+    [DeprecateAs=TestFeatureB, MeasureAs=TestFeature] void deprecateAsMeasureAsSameValueOverloadedMethod(long arg);
+    [DeprecateAs=TestFeature, MeasureAs=TestFeatureA] void deprecateAsSameValueMeasureAsOverloadedMethod();
+    [DeprecateAs=TestFeature, MeasureAs=TestFeatureB] void deprecateAsSameValueMeasureAsOverloadedMethod(long arg);
+    [DeprecateAs=TestFeatureA, MeasureAs=TestFeatureB] void deprecateAsSameValueMeasureAsSameValueOverloadedMethod();
+    [DeprecateAs=TestFeatureA, MeasureAs=TestFeatureB] void deprecateAsSameValueMeasureAsSameValueOverloadedMethod(long arg);
+    [NotEnumerable] void notEnumerableVoidMethod();
+    [PerWorldBindings] void perWorldBindingsVoidMethod();
+    [PerWorldBindings] void perWorldBindingsVoidMethodTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg);
+    [RaisesException] void raisesExceptionVoidMethod();
+    [RaisesException] DOMString raisesExceptionStringMethod();
+    [RaisesException] void raisesExceptionVoidMethodOptionalLongArg(optional long optionalLongArg);
+    [RaisesException] void raisesExceptionVoidMethodTestCallbackInterfaceArg(TestCallbackInterface testCallbackInterfaceArg);
+    [RaisesException] void raisesExceptionVoidMethodOptionalTestCallbackInterfaceArg(optional TestCallbackInterface optionalTestCallbackInterfaceArg);
+    [RaisesException] TestInterfaceEmpty raisesExceptionTestInterfaceEmptyVoidMethod();
+    [CallWith=ExecutionContext, RaisesException] void callWithExecutionContextRaisesExceptionVoidMethodLongArg(long longArg);
+    [RuntimeEnabled=FeatureName] void runtimeEnabledVoidMethod();
+    [PerWorldBindings, RuntimeEnabled=FeatureName] void perWorldBindingsRuntimeEnabledVoidMethod();
+    [RuntimeEnabled=FeatureName] void runtimeEnabledOverloadedVoidMethod(DOMString stringArg);
+    [RuntimeEnabled=FeatureName] void runtimeEnabledOverloadedVoidMethod(long longArg);
+    [RuntimeEnabled=FeatureName1] void partiallyRuntimeEnabledOverloadedVoidMethod(DOMString stringArg);
+    [RuntimeEnabled=FeatureName2] void partiallyRuntimeEnabledOverloadedVoidMethod(TestInterface testInterface);
+    void partiallyRuntimeEnabledOverloadedVoidMethod(long longArg);
+    [TreatReturnedNullStringAs=Null] DOMString treatReturnedNullStringAsNullStringMethod();
+    [TreatReturnedNullStringAs=Undefined] DOMString treatReturnedNullStringAsUndefinedStringMethod();
+    [TreatReturnedNullStringAs=Null] ByteString treatReturnedNullStringAsNullByteStringMethod();
+    [TreatReturnedNullStringAs=Undefined] ByteString treatReturnedNullStringAsUndefinedByteStringMethod();
+    [TreatReturnedNullStringAs=Null] ScalarValueString treatReturnedNullStringAsNullScalarValueStringMethod();
+    [TreatReturnedNullStringAs=Undefined] ScalarValueString treatReturnedNullStringAsUndefinedScalarValueStringMethod();
+    [TypeChecking=Interface] void typeCheckingInterfaceVoidMethodTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg);
+    [TypeChecking=Interface] void typeCheckingInterfaceVoidMethodTestInterfaceEmptyVariadicArg(TestInterfaceEmpty... testInterfaceEmptyArg);
+    [TypeChecking=Unrestricted] void typeCheckingUnrestrictedVoidMethodFloatArgDoubleArg(float floatArg, double doubleArg);
+    [Unforgeable] void unforgeableVoidMethod();
+    void voidMethodTestInterfaceGarbageCollectedSequenceArg(sequence<TestInterfaceGarbageCollected> testInterfaceGarbageCollectedSequenceArg);
+    void voidMethodTestInterfaceGarbageCollectedArrayArg(TestInterfaceGarbageCollected[] testInterfaceGarbageCollectedArrayArg);
+    void voidMethodTestInterfaceWillBeGarbageCollectedSequenceArg(sequence<TestInterfaceWillBeGarbageCollected> testInterfaceWillBeGarbageCollectedSequenceArg);
+    void voidMethodTestInterfaceWillBeGarbageCollectedArrayArg(TestInterfaceWillBeGarbageCollected[] testInterfaceWillBeGarbageCollectedArrayArg);
+
+    // Extended attributes on referenced interfaces
+    // (not self; self-reference tests at interface themselves)
+    attribute TestInterface testInterfaceAttribute; // [ImplementedAs]
+    attribute TestInterfaceGarbageCollected testInterfaceGarbageCollectedAttribute; // [GarbageCollected]
+    attribute TestInterfaceGarbageCollected? testInterfaceGarbageCollectedOrNullAttribute; // [GarbageCollected]
+    attribute TestInterfaceWillBeGarbageCollected testInterfaceWillBeGarbageCollectedAttribute; // [WillBeGarbageCollected]
+    attribute TestInterfaceWillBeGarbageCollected? testInterfaceWillBeGarbageCollectedOrNullAttribute; // [WillBeGarbageCollected]
+
+    // Private scripts
+    [ImplementedInPrivateScript] void voidMethodImplementedInPrivateScript();
+    [ImplementedInPrivateScript] short shortMethodImplementedInPrivateScript();
+    [ImplementedInPrivateScript] short shortMethodWithShortArgumentImplementedInPrivateScript(short value);
+    [ImplementedInPrivateScript] DOMString stringMethodWithStringArgumentImplementedInPrivateScript(DOMString value);
+    [ImplementedInPrivateScript] Node nodeMethodWithNodeArgumentImplementedInPrivateScript(Node value);
+    [ImplementedInPrivateScript] Node nodeMethodWithVariousArgumentsImplementedInPrivateScript(Document document, Node node, short value1, double value2, DOMString string);
+    [ImplementedInPrivateScript] readonly attribute short readonlyShortAttribute;
+    [ImplementedInPrivateScript] attribute short shortAttribute;
+    [ImplementedInPrivateScript] attribute DOMString stringAttribute;
+    [ImplementedInPrivateScript] attribute Node nodeAttribute;
+    [OnlyExposedToPrivateScript] short methodImplementedInCPPForPrivateScriptOnly(short value1, short value2);
+    [OnlyExposedToPrivateScript] attribute DOMString attributeImplementedInCPPForPrivateScriptOnly;
+    [ImplementedInPrivateScript, OnlyExposedToPrivateScript] short methodForPrivateScriptOnly(short value1, short value2);
+    [ImplementedInPrivateScript, OnlyExposedToPrivateScript] attribute DOMString attributeForPrivateScriptOnly;
+    [ImplementedInPrivateScript] attribute TestEnum enumForPrivateScript;
+};

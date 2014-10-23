@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<div>Test passes if it does not crash</div>
+<script src="../../../resources/gc.js"></script>
+<script>
+if (window.testRunner) {
+    testRunner.waitUntilDone();
+    testRunner.dumpAsText();
+}
+var observer = new MutationObserver(function() {console.log('Should not appear')});
+var div = document.createElement('div');
+observer.observe(div, {attributes: true});
+div.id = 'foo';
+div = null;
+observer = null;
+gc();
+setTimeout(function() { testRunner.notifyDone(); }, 0);
+</script>

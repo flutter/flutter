@@ -1,0 +1,29 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    RuntimeEnabled=WebAnimationsAPI,
+    ImplementedAs=AnimationNodeTiming,
+    WillBeGarbageCollected,
+] interface Timing {
+    attribute double delay;
+    attribute double endDelay;
+    attribute DOMString fill;
+    attribute double iterationStart;
+    attribute double iterations;
+
+    // FIXME: This uses a NamedPropertyGetter to implement the 'duration' attribute
+    // because duration has a union type (which is tricky to do with an attribute).
+    // Fix will be in a follow-up patch if there is a better solution.
+    [NotEnumerable, ImplementedAs=getDuration] getter (double or DOMString) (DOMString name);
+
+    // FIXME: If the user calls animation.specified.duration = "" (empty string) then duration
+    // gets set to 0 (This is correct behavior for IDL). Correct result is for duration to
+    // be set to 'auto'.
+    [TypeChecking=Interface, ImplementedAs=setDuration] setter double (DOMString name, double duration);
+
+    attribute double playbackRate;
+    attribute DOMString direction;
+    attribute DOMString easing;
+};

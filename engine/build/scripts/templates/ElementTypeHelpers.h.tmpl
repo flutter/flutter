@@ -1,0 +1,46 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef {{namespace}}ElementTypeHelpers_h
+#define {{namespace}}ElementTypeHelpers_h
+
+#include "core/dom/Element.h"
+#include "{{namespace}}Names.h"
+#include "platform/RuntimeEnabledFeatures.h"
+
+namespace blink {
+// Type checking.
+{% for tag in tags|sort if not tag.multipleTagNames and not tag.noTypeHelpers %}
+{% filter enable_conditional(tag.Conditional) %}
+class {{tag.interface}};
+void is{{tag.interface}}(const {{tag.interface}}&); // Catch unnecessary runtime check of type known at compile time.
+void is{{tag.interface}}(const {{tag.interface}}*); // Catch unnecessary runtime check of type known at compile time.
+
+inline bool is{{tag.interface}}(const {{namespace}}Element& element) {
+    {% if tag.runtimeEnabled %}
+    if (!RuntimeEnabledFeatures::{{tag.runtimeEnabled}}Enabled())
+        return false;
+    {% endif %}
+    return element.hasTagName({{namespace}}Names::{{tag|symbol}}Tag);
+}
+inline bool is{{tag.interface}}(const {{namespace}}Element* element) { return element && is{{tag.interface}}(*element); }
+template<typename T> inline bool is{{tag.interface}}(const PassRefPtr<T>& node) { return is{{tag.interface}}(node.get()); }
+template<typename T> inline bool is{{tag.interface}}(const RefPtr<T>& node) { return is{{tag.interface}}(node.get()); }
+inline bool is{{tag.interface}}(const Node& node) { return node.is{{namespace}}Element() && is{{tag.interface}}(to{{namespace}}Element(node)); }
+inline bool is{{tag.interface}}(const Node* node) { return node && is{{tag.interface}}(*node); }
+template <> inline bool isElementOfType<const {{tag.interface}}>(const Node& node) { return is{{tag.interface}}(node); }
+template <> inline bool isElementOfType<const {{tag.interface}}>(const {{namespace}}Element& element) { return is{{tag.interface}}(element); }
+{% endfilter %}
+
+{% endfor %}
+// Using macros because the types are forward-declared and we don't want to use reinterpret_cast in the
+// casting functions above. reinterpret_cast would be unsafe due to multiple inheritence.
+
+{% for tag in tags|sort if not tag.multipleTagNames and not tag.noTypeHelpers %}
+{% filter enable_conditional(tag.Conditional) %}
+#define to{{tag.interface}}(x) blink::toElement<blink::{{tag.interface}}>(x)
+{% endfilter %}
+{% endfor %}
+} // namespace blink
+
+#endif

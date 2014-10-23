@@ -1,0 +1,61 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+} else {
+  # TODO(brettw) remove this once && early-out is checked in.
+  is_android_webview_build = false
+}
+if (cpu_arch == "arm") {
+  import("//build/config/arm.gni")
+} else {
+  # TODO(brettw) remove this once && early-out is checked in.
+  arm_version = 0
+}
+
+declare_args() {
+  # Enables the Oilpan garbage-collection infrastructure.
+  sky_enable_oilpan = false
+
+  # Set to true to enable the clang plugin that checks the usage of the Blink
+  # garbage-collection infrastructure during compilation.
+  sky_gc_plugin = false
+  sky_gc_plugin_dump_graph = false
+
+  sky_asserts_always_on = false
+}
+
+# feature_defines_list ---------------------------------------------------------
+
+feature_defines_list = []
+
+if (is_debug) {
+  # TODO(GYP) this should also be set when release_valgrind_build is set,
+  # but we don't have that flag in the GN build yet.
+  feature_defines_list += [ "WTF_USE_DYNAMIC_ANNOTATIONS=1" ]
+}
+
+if (!is_mac) {
+  # Mac OS X has not implemented support for ENABLE(OPENTYPE_VERTICAL) yet.
+  feature_defines_list += [ "ENABLE_OPENTYPE_VERTICAL=1" ]
+}
+
+if (sky_enable_oilpan) {
+  feature_defines_list += [ "ENABLE_OILPAN=1" ]
+}
+if (sky_asserts_always_on) {
+  feature_defines_list += [ "ENABLE_ASSERT=1" ]
+}
+
+# feature_defines_string -------------------------------------------------------
+
+# Convert the list to a space-separated string for passing to scripts.
+# This would be the equivalent of passing '<(feature_defines)' in GYP.
+feature_defines_string = exec_script(
+    "build/gn_list_to_space_separated_string.py",
+    feature_defines_list,
+    "trim string")

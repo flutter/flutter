@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import os
+import subprocess
+
+build_directory = 'out'
+config_directory = 'Debug'
+
+mojo_shell = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir, build_directory, config_directory, 'mojo_shell'))
+
+subprocess.call([
+    mojo_shell,
+    '--content-handlers=text/html,mojo://sky_viewer/',
+    '--url-mappings=mojo:window_manager=mojo:sky_debugger',
+    'mojo:window_manager',
+])

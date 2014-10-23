@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .text {
+      font-family: courier;
+      font-size: 12px;
+      padding: 0px;
+      margin: 0px;
+      border: 0px;
+    }
+  </style>
+</head>
+<body>
+<textarea id='target' class="text" type='text' rows="3" cols="20">
+First Line
+Second Text Row
+</textarea>
+<script>
+    function selectCaret() {
+        var text = document.getElementById('target');
+        text.focus();
+        text.setSelectionRange(17, 17);
+    }
+    function selectRange() {
+        var text = document.getElementById('target');
+        text.focus();
+        text.setSelectionRange(1, 3);
+    }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PageSerializer Test - Image Button</title>
+</head>
+<body>
+  <h1>PageSerializer Test - Image Button</h1>
+  <form>
+    <table border="1">
+      <thead>
+        <tr><th>Type</th><th>Image Button</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Existing</td><td><input type="image" src="button.png"></td></tr>
+        <tr><td>Non-existing</td><td><input type="image" src="non-existing-button.png"></td></tr>
+        <tr><td>Empty src</td><td><input type="image" src=""></td></tr>
+        <tr><td>No src</td><td><input type="image"></td></tr>
+        <tr><td>Data URI</td><td><input type="image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAElBMVEVFR0J7f3N8mzuoqqedzTbT1dLaw9sTAAAAD0lEQVQI12NwgQOG4cYEANXmNSHGLZJkAAAAAElFTkSuQmCC"></td></tr>
+      </tbody>
+    </table>
+  </form>
+</body>
+</html>
+

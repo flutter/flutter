@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2006, 2008 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+[
+] interface CSSPrimitiveValue : CSSValue {
+
+    // UnitTypes
+    const unsigned short CSS_UNKNOWN    = 0;
+    const unsigned short CSS_NUMBER     = 1;
+    const unsigned short CSS_PERCENTAGE = 2;
+    const unsigned short CSS_EMS        = 3;
+    const unsigned short CSS_EXS        = 4;
+    const unsigned short CSS_PX         = 5;
+    const unsigned short CSS_CM         = 6;
+    const unsigned short CSS_MM         = 7;
+    const unsigned short CSS_IN         = 8;
+    const unsigned short CSS_PT         = 9;
+    const unsigned short CSS_PC         = 10;
+    const unsigned short CSS_DEG        = 11;
+    const unsigned short CSS_RAD        = 12;
+    const unsigned short CSS_GRAD       = 13;
+    const unsigned short CSS_MS         = 14;
+    const unsigned short CSS_S          = 15;
+    const unsigned short CSS_HZ         = 16;
+    const unsigned short CSS_KHZ        = 17;
+    const unsigned short CSS_DIMENSION  = 18;
+    const unsigned short CSS_STRING     = 19;
+    const unsigned short CSS_URI        = 20;
+    const unsigned short CSS_IDENT      = 21;
+    const unsigned short CSS_ATTR       = 22;
+    const unsigned short CSS_RECT       = 24;
+    const unsigned short CSS_RGBCOLOR   = 25;
+    const unsigned short CSS_VW         = 26;
+    const unsigned short CSS_VH         = 27;
+    const unsigned short CSS_VMIN       = 28;
+    const unsigned short CSS_VMAX       = 29;
+
+    readonly attribute unsigned short primitiveType;
+
+     [RaisesException] void setFloatValue([Default=Undefined] optional unsigned short unitType,
+                                      [Default=Undefined] optional float floatValue);
+    [RaisesException] float getFloatValue([Default=Undefined] optional unsigned short unitType);
+     [RaisesException] void setStringValue([Default=Undefined] optional unsigned short stringType,
+                                       [Default=Undefined] optional DOMString stringValue);
+    [RaisesException] DOMString getStringValue();
+    [RaisesException] Rect getRectValue();
+    [RaisesException] RGBColor getRGBColorValue();
+};
+

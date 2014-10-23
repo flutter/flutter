@@ -1,0 +1,9 @@
+include_rules = [
+    "+bindings",
+    "+core",
+    "+heap",
+    "+gin/public",
+    "+modules",
+    "+platform",
+    "+public/platform",
+]

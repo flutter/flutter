@@ -1,0 +1,590 @@
+<script>
+var isJsTest = true;
+
+var description, debug, successfullyParsed;
+
+var expectingError; // set by shouldHaveError()
+var expectedErrorMessage; // set by onerror when expectingError is true
+var unexpectedErrorMessage; // set by onerror when expectingError is not true
+
+(function() {
+    function body() {
+        var documentElement = document.documentElement;
+        for (var child = documentElement.firstChild; child; child = child.nextSibling) {
+            if (child.tagName == 'BODY')
+              return child;
+        }
+        return documentElement;
+    }
+
+    function getOrCreate(id, tagName) {
+        var element = document.getElementById(id);
+        if (element)
+            return element;
+
+        element = document.createElement(tagName);
+        element.id = id;
+        var refNode;
+        var parent = body();
+        if (id == "description")
+            refNode = getOrCreate("console", "div");
+        else
+            refNode = parent.firstChild;
+
+        parent.insertBefore(element, refNode);
+        return element;
+    }
+
+    description = function description(msg) {
+        var description = getOrCreate("description", "div");
+        description.textContent = msg;
+    };
+
+    debug = function debug(msg) {
+        var div = document.createElement("div");
+        getOrCreate("console", "div").appendChild(div);
+        div.textContent = msg;
+    };
+
+    if (!self.isOnErrorTest) {
+        self.onerror = function(message) {
+            if (self.expectingError) {
+                self.expectedErrorMessage = message;
+                self.expectingError = false;
+                return;
+            }
+            self.unexpectedErrorMessage = message;
+            if (self.jsTestIsAsync) {
+                self.testFailed("Unexpected error: " + message);
+                finishJSTest();
+            }
+        };
+    }
+})();
+
+function testPassed(msg)
+{
+    debug('PASS: ' + msg);
+}
+
+function testFailed(msg)
+{
+    debug('FAIL: ' + msg);
+}
+
+function areArraysEqual(a, b)
+{
+    try {
+        if (a.length !== b.length)
+            return false;
+        for (var i = 0; i < a.length; i++)
+            if (a[i] !== b[i])
+                return false;
+    } catch (ex) {
+        return false;
+    }
+    return true;
+}
+
+function isMinusZero(n)
+{
+    // the only way to tell 0 from -0 in JS is the fact that 1/-0 is
+    // -Infinity instead of Infinity
+    return n === 0 && 1/n < 0;
+}
+
+function isResultCorrect(actual, expected)
+{
+    if (expected === 0)
+        return actual === expected && (1/actual) === (1/expected);
+    if (actual === expected)
+        return true;
+    if (typeof(expected) == "number" && isNaN(expected))
+        return typeof(actual) == "number" && isNaN(actual);
+    if (expected && (Object.prototype.toString.call(expected) == Object.prototype.toString.call([])))
+        return areArraysEqual(actual, expected);
+    return false;
+}
+
+function stringify(v)
+{
+    if (v === 0 && 1/v < 0)
+        return "-0";
+    else return "" + v;
+}
+
+function evalAndLog(_a, _quiet)
+{
+  if (typeof _a != "string")
+    debug("WARN: tryAndLog() expects a string argument");
+
+  // Log first in case things go horribly wrong or this causes a sync event.
+  if (!_quiet)
+    debug(_a);
+
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+    testFailed(_a + " threw exception " + e);
+  }
+  return _av;
+}
+
+function shouldBe(_a, _b, quiet, opt_tolerance)
+{
+  if (typeof _a != "string" || typeof _b != "string")
+    debug("WARN: shouldBe() expects string arguments");
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+  var _bv = eval(_b);
+
+  if (_exception)
+    testFailed(_a + " should be " + _bv + ". Threw exception " + _exception);
+  else if (isResultCorrect(_av, _bv) || (typeof opt_tolerance == 'number' && typeof _av == 'number' && Math.abs(_av - _bv) <= opt_tolerance)) {
+    if (!quiet) {
+        testPassed(_a + " is " + _b);
+    }
+  } else if (typeof(_av) == typeof(_bv))
+    testFailed(_a + " should be " + _bv + ". Was " + stringify(_av) + ".");
+  else
+    testFailed(_a + " should be " + _bv + " (of type " + typeof _bv + "). Was " + _av + " (of type " + typeof _av + ").");
+}
+
+// Execute condition every 5 milliseconds until it succeed or failureTime is reached.
+// completionHandler is executed on success, failureHandler is executed on timeout.
+function _waitForCondition(condition, failureTime, completionHandler, failureHandler)
+{
+  if (condition()) {
+    completionHandler();
+  } else if (Date.now() > failureTime) {
+    failureHandler();
+  } else {
+    setTimeout(_waitForCondition, 5, condition, failureTime, completionHandler, failureHandler);
+  }
+}
+
+function shouldBecomeEqual(_a, _b, _completionHandler, _timeout)
+{
+  if (typeof _a != "string" || typeof _b != "string")
+    debug("WARN: shouldBecomeEqual() expects string arguments");
+
+  if (_timeout === undefined)
+    _timeout = 500;
+
+  var _bv;
+  var _condition = function() {
+    var _exception;
+    var _av;
+    try {
+      _av = eval(_a);
+    } catch (e) {
+        _exception = e;
+    }
+    _bv = eval(_b);
+    if (_exception)
+      testFailed(_a + " should become " + _bv + ". Threw exception " + _exception);
+    if (isResultCorrect(_av, _bv)) {
+      testPassed(_a + " became " + _b);
+      return true;
+    }
+    return false;
+  };
+  var _failureTime = Date.now() + _timeout;
+  var _failureHandler = function () {
+    testFailed(_a + " failed to change to " + _bv + " in " + (_timeout / 1000) + " seconds.");
+    _completionHandler();
+  };
+  _waitForCondition(_condition, _failureTime, _completionHandler, _failureHandler);
+}
+
+function shouldBecomeEqualToString(value, reference, completionHandler, timeout)
+{
+  if (typeof value !== "string" || typeof reference !== "string")
+    debug("WARN: shouldBecomeEqualToString() expects string arguments");
+  var unevaledString = JSON.stringify(reference);
+  shouldBecomeEqual(value, unevaledString, completionHandler, timeout);
+}
+
+function shouldBeType(_a, _type) {
+  var _exception;
+  var _av;
+  try {
+    _av = eval(_a);
+  } catch (e) {
+    _exception = e;
+  }
+
+  var _typev = eval(_type);
+  if (_av instanceof _typev) {
+    testPassed(_a + " is an instance of " + _type);
+  } else {
+    testFailed(_a + " is not an instance of " + _type);
+  }
+}
+
+// Variant of shouldBe()--confirms that result of eval(_to_eval) is within
+// numeric _tolerance of numeric _target.
+function shouldBeCloseTo(_to_eval, _target, _tolerance, _quiet)
+{
+  if (typeof _to_eval != "string") {
+    testFailed("shouldBeCloseTo() requires string argument _to_eval. was type " + typeof _to_eval);
+    return;
+  }
+  if (typeof _target != "number") {
+    testFailed("shouldBeCloseTo() requires numeric argument _target. was type " + typeof _target);
+    return;
+  }
+  if (typeof _tolerance != "number") {
+    testFailed("shouldBeCloseTo() requires numeric argument _tolerance. was type " + typeof _tolerance);
+    return;
+  }
+
+  var _result;
+  try {
+     _result = eval(_to_eval);
+  } catch (e) {
+    testFailed(_to_eval + " should be within " + _tolerance + " of "
+               + _target + ". Threw exception " + e);
+    return;
+  }
+
+  if (typeof(_result) != typeof(_target)) {
+    testFailed(_to_eval + " should be of type " + typeof _target
+               + " but was of type " + typeof _result);
+  } else if (Math.abs(_result - _target) <= _tolerance) {
+    if (!_quiet) {
+        testPassed(_to_eval + " is within " + _tolerance + " of " + _target);
+    }
+  } else {
+    testFailed(_to_eval + " should be within " + _tolerance + " of " + _target
+               + ". Was " + _result + ".");
+  }
+}
+
+function shouldNotBe(_a, _b, _quiet)
+{
+  if (typeof _a != "string" || typeof _b != "string")
+    debug("WARN: shouldNotBe() expects string arguments");
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+  var _bv = eval(_b);
+
+  if (_exception)
+    testFailed(_a + " should not be " + _bv + ". Threw exception " + _exception);
+  else if (!isResultCorrect(_av, _bv)) {
+    if (!_quiet) {
+        testPassed(_a + " is not " + _b);
+    }
+  } else
+    testFailed(_a + " should not be " + _bv + ".");
+}
+
+function shouldBecomeDifferent(_a, _b, _completionHandler, _timeout)
+{
+  if (typeof _a != "string" || typeof _b != "string")
+    debug("WARN: shouldBecomeDifferent() expects string arguments");
+  if (_timeout === undefined)
+    _timeout = 500;
+
+  var _bv;
+  var _condition = function() {
+    var _exception;
+    var _av;
+    try {
+      _av = eval(_a);
+    } catch (e) {
+      _exception = e;
+    }
+    _bv = eval(_b);
+    if (_exception)
+      testFailed(_a + " should became not equal to " + _bv + ". Threw exception " + _exception);
+    if (!isResultCorrect(_av, _bv)) {
+      testPassed(_a + " became different from " + _b);
+      return true;
+    }
+    return false;
+  };
+  var _failureTime = Date.now() + _timeout;
+  var _failureHandler = function () {
+    testFailed(_a + " did not become different from " + _bv + " in " + (_timeout / 1000) + " seconds.");
+    _completionHandler();
+  };
+  _waitForCondition(_condition, _failureTime, _completionHandler, _failureHandler);
+}
+
+function shouldBeTrue(a, quiet) { shouldBe(a, "true", quiet); }
+function shouldBeTrueQuiet(a) { shouldBe(a, "true", true); }
+function shouldBeFalse(a, quiet) { shouldBe(a, "false", quiet); }
+function shouldBeNaN(a, quiet) { shouldBe(a, "NaN", quiet); }
+function shouldBeNull(a, quiet) { shouldBe(a, "null", quiet); }
+function shouldBeZero(a, quiet) { shouldBe(a, "0", quiet); }
+
+function shouldBeEqualToString(a, b)
+{
+  if (typeof a !== "string" || typeof b !== "string")
+    debug("WARN: shouldBeEqualToString() expects string arguments");
+  var unevaledString = JSON.stringify(b);
+  shouldBe(a, unevaledString);
+}
+
+function shouldBeEqualToNumber(a, b)
+{
+  if (typeof a !== "string" || typeof b !== "number")
+    debug("WARN: shouldBeEqualToNumber() expects a string and a number arguments");
+  var unevaledString = JSON.stringify(b);
+  shouldBe(a, unevaledString);
+}
+
+function shouldBeEmptyString(a) { shouldBeEqualToString(a, ""); }
+
+function shouldEvaluateTo(actual, expected, opt_tolerance) {
+  // A general-purpose comparator.  'actual' should be a string to be
+  // evaluated, as for shouldBe(). 'expected' may be any type and will be
+  // used without being eval'ed.
+  if (expected == null) {
+    // Do this before the object test, since null is of type 'object'.
+    shouldBeNull(actual);
+  } else if (typeof expected == "undefined") {
+    shouldBeUndefined(actual);
+  } else if (typeof expected == "function") {
+    // All this fuss is to avoid the string-arg warning from shouldBe().
+    try {
+      var actualValue = eval(actual);
+    } catch (e) {
+      testFailed("Evaluating " + actual + ": Threw exception " + e);
+      return;
+    }
+    shouldBe("'" + actualValue.toString().replace(/\n/g, "") + "'",
+             "'" + expected.toString().replace(/\n/g, "") + "'");
+  } else if (typeof expected == "object") {
+    shouldBeTrue(actual + " == '" + expected + "'");
+  } else if (typeof expected == "string") {
+    shouldBe(actual, expected, undefined, opt_tolerance);
+  } else if (typeof expected == "boolean") {
+    shouldBe("typeof " + actual, "'boolean'");
+    if (expected)
+      shouldBeTrue(actual);
+    else
+      shouldBeFalse(actual);
+  } else if (typeof expected == "number") {
+    if (opt_tolerance)
+        shouldBeCloseTo(actual, expected, opt_tolerance);
+    else
+        shouldBe(actual, stringify(expected));
+  } else {
+    debug(expected + " is unknown type " + typeof expected);
+    shouldBeTrue(actual, "'"  +expected.toString() + "'");
+  }
+}
+
+function shouldBeNonZero(_a)
+{
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+
+  if (_exception)
+    testFailed(_a + " should be non-zero. Threw exception " + _exception);
+  else if (_av != 0)
+    testPassed(_a + " is non-zero.");
+  else
+    testFailed(_a + " should be non-zero. Was " + _av);
+}
+
+function shouldBeNonNull(_a)
+{
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+
+  if (_exception)
+    testFailed(_a + " should be non-null. Threw exception " + _exception);
+  else if (_av != null)
+    testPassed(_a + " is non-null.");
+  else
+    testFailed(_a + " should be non-null. Was " + _av);
+}
+
+function shouldBeUndefined(_a)
+{
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+      _exception = e;
+  }
+
+  if (_exception)
+    testFailed(_a + " should be undefined. Threw exception " + _exception);
+  else if (typeof _av == "undefined")
+    testPassed(_a + " is undefined.");
+  else
+    testFailed(_a + " should be undefined. Was " + _av);
+}
+
+function shouldBeDefined(_a)
+{
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+
+  if (_exception)
+    testFailed(_a + " should be defined. Threw exception " + _exception);
+  else if (_av !== undefined)
+    testPassed(_a + " is defined.");
+  else
+    testFailed(_a + " should be defined. Was " + _av);
+}
+
+function shouldBeGreaterThan(_a, _b) {
+    if (typeof _a != "string" || typeof _b != "string")
+        debug("WARN: shouldBeGreaterThan expects string arguments");
+
+    var _exception;
+    var _av;
+    try {
+        _av = eval(_a);
+    } catch (e) {
+        _exception = e;
+    }
+    var _bv = eval(_b);
+
+    if (_exception)
+        testFailed(_a + " should be > " + _b + ". Threw exception " + _exception);
+    else if (typeof _av == "undefined" || _av <= _bv)
+        testFailed(_a + " should be > " + _b + ". Was " + _av + " (of type " + typeof _av + ").");
+    else
+        testPassed(_a + " is > " + _b);
+}
+
+function shouldBeGreaterThanOrEqual(_a, _b) {
+    if (typeof _a != "string" || typeof _b != "string")
+        debug("WARN: shouldBeGreaterThanOrEqual expects string arguments");
+
+    var _exception;
+    var _av;
+    try {
+        _av = eval(_a);
+    } catch (e) {
+        _exception = e;
+    }
+    var _bv = eval(_b);
+
+    if (_exception)
+        testFailed(_a + " should be >= " + _b + ". Threw exception " + _exception);
+    else if (typeof _av == "undefined" || _av < _bv)
+        testFailed(_a + " should be >= " + _b + ". Was " + _av + " (of type " + typeof _av + ").");
+    else
+        testPassed(_a + " is >= " + _b);
+}
+
+function shouldNotThrow(_a) {
+    try {
+        eval(_a);
+        testPassed(_a + " did not throw exception.");
+    } catch (e) {
+        testFailed(_a + " should not throw exception. Threw exception " + e + ".");
+    }
+}
+
+function shouldThrow(_a, _e)
+{
+  var _exception;
+  var _av;
+  try {
+     _av = eval(_a);
+  } catch (e) {
+     _exception = e;
+  }
+
+  var _ev;
+  if (_e)
+      _ev = eval(_e);
+
+  if (_exception) {
+    if (typeof _e == "undefined" || _exception == _ev)
+      testPassed(_a + " threw exception " + _exception + ".");
+    else
+      testFailed(_a + " should throw " + (typeof _e == "undefined" ? "an exception" : _ev) + ". Threw exception " + _exception + ".");
+  } else if (typeof _av == "undefined")
+    testFailed(_a + " should throw " + (typeof _e == "undefined" ? "an exception" : _ev) + ". Was undefined.");
+  else
+    testFailed(_a + " should throw " + (typeof _e == "undefined" ? "an exception" : _ev) + ". Was " + _av + ".");
+}
+
+function expectError()
+{
+    if (expectingError) {
+        testFailed("shouldHaveError() called twice before an error occurred!");
+    }
+    expectingError = true;
+}
+
+function shouldHaveHadError(message)
+{
+    if (expectingError) {
+        testFailed("No error thrown between expectError() and shouldHaveHadError()");
+        return;
+    }
+
+    if (expectedErrorMessage) {
+        if (!message)
+            testPassed("Got expected error");
+        else if (expectedErrorMessage.indexOf(message) !== -1)
+            testPassed("Got expected error: '" + message + "'");
+        else
+            testFailed("Unexpected error '" + message + "'");
+        expectedErrorMessage = undefined;
+        return;
+    }
+
+    testFailed("expectError() not called before shouldHaveHadError()");
+}
+
+function isSuccessfullyParsed()
+{
+    // FIXME: Remove this and only report unexpected syntax errors.
+    successfullyParsed = !unexpectedErrorMessage;
+    shouldBeTrue("successfullyParsed");
+    debug('TEST COMPLETE');
+}
+
+var wasFinishJSTestCalled, jsTestIsAsync;
+
+function finishJSTest()
+{
+    wasFinishJSTestCalled = true;
+    isSuccessfullyParsed();
+    if (self.internals)
+        internals.notifyTestComplete(internals.contentAsText());
+}
+
+window.addEventListener('load', function() {
+    if (!self.jsTestIsAsync)
+        finishJSTest();
+});
+</script>

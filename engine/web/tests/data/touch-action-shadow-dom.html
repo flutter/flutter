@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<link rel='stylesheet' type='text/css' href='touch-action-tests.css'>
+<script src='touch-action-tests.js'></script>
+
+<!-- 
+     Test a bunch of cases involving shadow DOM.
+-->
+<div shadow-host></div>
+<div make-shadow-dom>
+  <div expected-action='auto'>
+    Default touch-action is still auto inside shadow DOM
+  </div>
+</div>
+
+<div shadow-host></div>
+<div make-shadow-dom>
+  <div class='ta-none' expected-action='none'>
+    touch-action: none still applies inside shadow DOM
+  </div>
+</div>
+
+<div class='ta-none' shadow-host></div>
+<div make-shadow-dom>
+  <div expected-action='none'>
+    touch-action: none applies across shadow DOM boundary
+  </div>
+</div>
+
+<div shadow-host>
+  <div expected-action='none'>
+    touch-action: none applies as part of projection
+  </div>
+</div>
+<div make-shadow-dom>
+  <div class='ta-none'>
+    <content></content>
+  </div>
+</div>
+

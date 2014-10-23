@@ -1,0 +1,59 @@
+/*
+ * Copyright (C) 2008 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+[
+    DoNotCheckConstants,
+    ImplementedAs=CSSTransformValue,
+] interface WebKitCSSTransformValue : CSSValueList {
+    // OperationTypes
+    const unsigned short CSS_TRANSLATE   = 1;
+    const unsigned short CSS_TRANSLATEX  = 2;
+    const unsigned short CSS_TRANSLATEY  = 3;
+    const unsigned short CSS_ROTATE      = 4;
+    const unsigned short CSS_SCALE       = 5;
+    const unsigned short CSS_SCALEX      = 6;
+    const unsigned short CSS_SCALEY      = 7;
+    const unsigned short CSS_SKEW        = 8;
+    const unsigned short CSS_SKEWX       = 9;
+    const unsigned short CSS_SKEWY       = 10;
+    const unsigned short CSS_MATRIX      = 11;
+    const unsigned short CSS_TRANSLATEZ  = 12;
+    const unsigned short CSS_TRANSLATE3D = 13;
+    const unsigned short CSS_ROTATEX     = 14;
+    const unsigned short CSS_ROTATEY     = 15;
+    const unsigned short CSS_ROTATEZ     = 16;
+    const unsigned short CSS_ROTATE3D    = 17;
+    const unsigned short CSS_SCALEZ      = 18;
+    const unsigned short CSS_SCALE3D     = 19;
+    const unsigned short CSS_PERSPECTIVE = 20;
+    const unsigned short CSS_MATRIX3D    = 21;
+
+    readonly attribute unsigned short operationType;
+    [ImplementedAs=item] getter CSSValue (unsigned long index);
+};
+

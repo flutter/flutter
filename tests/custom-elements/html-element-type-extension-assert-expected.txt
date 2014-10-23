@@ -1,0 +1,1 @@
+Tests that type extension of a element whose DOM interface is HTMLElement does not assert

@@ -1,0 +1,11 @@
+<body>
+<script>
+window.print();
+
+window.onload = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "print_with_xhr_inflight.html", true);
+    xhr.send();
+}
+</script>
+</body>

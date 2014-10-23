@@ -1,0 +1,15 @@
+<input id="field" />
+<div id="message"></div>
+<script>
+  var field = document.getElementById('field');
+
+  field.addEventListener('DOMFocusOut', function() {
+    document.getElementById('message').innerText += 'DOMFocusOut';
+
+    field.addEventListener('DOMFocusIn', function() {
+      document.getElementById('message').innerText += 'DOMFocusIn';
+    });
+  });
+
+  field.focus();
+</script>

@@ -1,0 +1,9 @@
+CONSOLE: LOG: url => http://127.0.0.1:8000/services/resources/pass.txt
+CONSOLE: LOG: status_line => HTTP/1.1 200 OK
+CONSOLE: LOG: mime_type => text/plain
+CONSOLE: LOG: read 31 bytes
+Running 1 tests
+ok 1 Mojo network_service should be able to fetch text files
+1 tests
+1 pass
+0 fail

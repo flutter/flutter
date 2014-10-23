@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<link rel='stylesheet' type='text/css' href='touch-action-tests.css'>
+<script src='touch-action-tests.js'></script>
+
+<!-- 
+     Test a bunch of cases involving overflow: scroll elements.
+-->
+<div class='scroll' style='height:75px'>
+  <div class='ta-none' expected-action="none">
+    touch-action: none still applies in scrollable area
+  </div>
+  <div class='spacer'></div>
+</div>
+
+<div class='ta-none scroll' style='height:75px'>
+  <div expected-action='none'>
+    Touch-action inherited by child in scrollable area
+  </div>
+  <div class='spacer'></div>
+</div>
+
+<div class='ta-none'>
+  <div class='scroll' expected-action='auto'>      
+    Touch-action: none is not propagated into overflow-scroll elements
+  </div>
+</div>

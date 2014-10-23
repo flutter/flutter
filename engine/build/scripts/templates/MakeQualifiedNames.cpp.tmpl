@@ -1,0 +1,67 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#include "config.h"
+
+#include "{{namespace}}Names.h"
+
+#include "wtf/StaticConstructors.h"
+
+namespace blink {
+namespace {{namespace}}Names {
+
+using namespace blink;
+
+{% if tags %}
+// Tags
+{% for tag in tags|sort %}
+DEFINE_GLOBAL({{namespace}}QualifiedName, {{tag|symbol}}Tag)
+{% endfor %}
+
+
+PassOwnPtr<const {{namespace}}QualifiedName*[]> get{{namespace}}Tags()
+{
+    OwnPtr<const {{namespace}}QualifiedName*[]> tags = adoptArrayPtr(new const {{namespace}}QualifiedName*[{{namespace}}TagsCount]);
+    {% for tag in tags|sort %}
+    tags[{{loop.index0}}] = reinterpret_cast<const {{namespace}}QualifiedName*>(&{{tag|symbol}}Tag);
+    {% endfor %}
+    return tags.release();
+}
+
+{% endif %}
+// Attributes
+{% for attr in attrs|sort %}
+DEFINE_GLOBAL(QualifiedName, {{attr|symbol}}Attr)
+{% endfor %}
+
+PassOwnPtr<const QualifiedName*[]> get{{namespace}}Attrs()
+{
+    OwnPtr<const QualifiedName*[]> attrs = adoptArrayPtr(new const QualifiedName*[{{namespace}}AttrsCount]);
+    {% for attr in attrs|sort %}
+    attrs[{{loop.index0}}] = reinterpret_cast<const blink::QualifiedName*>(&{{attr|symbol}}Attr);
+    {% endfor %}
+    return attrs.release();
+}
+
+void init()
+{
+    // Use placement new to initialize the globals.
+
+    // Namespace
+    {% for name, tag_list in (tags + attrs)|groupby('name')|sort %}
+    StringImpl* {{tag_list[0]|symbol}}Impl = StringImpl::createStatic("{{name}}", {{name|length}}, {{name|hash}});
+    {% endfor %}
+
+    // Tags
+    {% for tag in tags|sort %}
+    QualifiedName::createStatic((void*)&{{tag|symbol}}Tag, {{tag|symbol}}Impl);
+    {% endfor %}
+
+    // Attrs
+    {% for attr in attrs|sort %}
+    QualifiedName::createStatic((void*)&{{attr|symbol}}Attr, {{attr|symbol}}Impl);
+    {% endfor %}
+}
+
+} // {{namespace}}
+} // namespace blink

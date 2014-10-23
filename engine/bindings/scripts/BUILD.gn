@@ -1,0 +1,49 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/bindings.gni")
+import("//sky/engine/bindings/scripts/scripts.gni")
+import("//sky/engine/bindings/templates/templates.gni")
+
+visibility = ["//sky/*"]
+
+# This separate pre-caching step is required to use lex/parse table
+# caching in PLY, since PLY itself does not check if the cache is
+# valid, and thus may end up using a stale cache if this step hasn't
+# been run to update it.
+#
+# This action's dependencies *is* the cache validation.
+#
+# GYP version: scripts.gyp:cached_lex_yacc_tables
+action("cached_lex_yacc_tables") {
+  script = "blink_idl_parser.py"
+
+  inputs = idl_lexer_parser_files
+  outputs = [
+    "$bindings_scripts_output_dir/lextab.py",
+    "$bindings_scripts_output_dir/parsetab.pickle",
+  ]
+
+  args = [ rebase_path(bindings_scripts_output_dir, root_build_dir) ]
+}
+
+# A separate pre-caching step is *required* to use bytecode caching in
+# Jinja (which improves speed significantly), as the bytecode cache is
+# not concurrency-safe on write; details in code_generator_v8.py.
+#
+# GYP version: scripts.gyp:cached_jinja_templates
+action("cached_jinja_templates") {
+  script = "code_generator_v8.py"
+
+  inputs = jinja_module_files + [ "code_generator_v8.py" ] +
+    code_generator_template_files
+  # Dummy file to track dependency.
+  stamp_file = "$bindings_scripts_output_dir/cached_jinja_templates.stamp"
+  outputs = [ stamp_file ]
+
+  args = [
+    rebase_path(bindings_scripts_output_dir, root_build_dir),
+    rebase_path(stamp_file, root_build_dir),
+  ]
+}

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+  function createFrame() {
+    var generatedFrame = document.createElement('iframe');
+    generatedFrame.setAttribute("srcdoc", "<b>Foo</b>");
+    document.body.appendChild(generatedFrame);
+  }
+
+  window.onload = createFrame;
+</script>
+</head>
+<body>
+test
+</body>
+</html>

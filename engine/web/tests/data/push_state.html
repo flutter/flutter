@@ -1,0 +1,16 @@
+<body onload="sendXHR()">
+<script>
+// We need to test pushState after the load event has finished.
+// Do so on an XHR callback to ensure that it's after the load event,
+// but WebFrameTest has a pending task to wait for.
+function sendXHR() {
+   var xhr = new XMLHttpRequest();
+   xhr.onreadystatechange = function() {
+       if (xhr.readyState == 4)
+          history.pushState("test", "", "#1");
+   }
+   xhr.open("GET", "push_state.html", true);
+   xhr.send();
+}
+</script>
+</body>

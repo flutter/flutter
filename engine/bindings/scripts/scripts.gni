@@ -1,0 +1,236 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/core/v8/generated.gni")
+import("//sky/engine/bindings/core/core.gni")
+import("//sky/engine/bindings/core/idl.gni")
+
+bindings_scripts_dir = get_path_info(".", "abspath")
+bindings_scripts_output_dir = "$root_gen_dir/sky/bindings/scripts"
+
+# Replacing <(DEPTH) with "/" makes paths like "<(DEPTH)/foo" absolute.
+_gypi = exec_script(
+    "//build/gypi_to_gn.py",
+    [ rebase_path("scripts.gypi"),
+      "--replace=<(DEPTH)=/" ],
+    "scope",
+    [ "scripts.gypi" ])
+
+jinja_module_files = get_path_info(_gypi.jinja_module_files, "abspath")
+idl_lexer_parser_files = get_path_info(_gypi.idl_lexer_parser_files, "abspath")
+idl_compiler_files = get_path_info(_gypi.idl_compiler_files, "abspath")
+
+# Calls the compute_interfaces_info_individual script.
+#
+# Parameters:
+#   sources_static = list of IDL files to pass as inputs
+#   sources_generated = list of generated IDL files to pass as inputs
+#   component_dir = name if subdirectory (one word, no slashes) of component.
+#   output_file = pickle file to write
+#
+# FIXME: Note the static/generated split is for consistency with GYP. This
+# split is not necessary in the GN build and could be combined into a single
+# "sources".
+template("compute_interfaces_info_individual") {
+  action(target_name) {
+    script = "$bindings_scripts_dir/compute_interfaces_info_individual.py"
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+
+    # Save static list to temp file to avoid blowing out command-line length
+    # limit.
+    file_list = "$target_gen_dir/${target_name}_file_list.txt"
+    write_file(file_list, rebase_path(invoker.sources_static, root_build_dir))
+
+    inputs = [
+      "$bindings_scripts_dir/utilities.py",
+      file_list,
+    ] + invoker.sources_static + invoker.sources_generated
+
+    outputs = [
+      invoker.output_file
+    ]
+
+    args = [
+      "--component-dir", invoker.component_dir,
+      "--idl-files-list", rebase_path(file_list, root_build_dir),
+      "--interfaces-info-file",
+      rebase_path(invoker.output_file, root_build_dir),
+      "--write-file-only-if-changed=1",
+      "--",
+    ] + rebase_path(invoker.sources_generated, root_build_dir)
+
+    deps = [
+      # FIXME: should be {modules|core}_generated_idls
+      # http://crbug.com/358074
+      "//sky/engine/bindings:generated_idls",
+    ]
+  }
+}
+
+# Calls generate_event_interfaces
+#
+# Parameters:
+#   sources = A list of IDL files to process.
+#   output_file = The .in file to write, relative to the sky_gen_dir.
+#   suffix = (Optional) String to be passed to script via --suffix
+template("generate_event_interfaces") {
+  action(target_name) {
+    # Write the file list to a unique temp file to avoid blowing out the
+    # command line length limit.
+    idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
+    write_file(idl_files_list,
+               rebase_path(invoker.sources, root_build_dir))
+
+    inputs = [
+      "//sky/engine/bindings/scripts/utilities.py",
+      idl_files_list,
+    ] + invoker.sources
+
+    output_file = "$root_gen_dir/sky/" + invoker.output_file
+    outputs = [ output_file ]
+
+    script = "//sky/engine/bindings/scripts/generate_event_interfaces.py"
+    args = [
+      "--event-idl-files-list",
+      rebase_path(idl_files_list, root_build_dir),
+      "--event-interfaces-file",
+      rebase_path(output_file, root_build_dir),
+      "--write-file-only-if-changed=1",  # Always true for Ninja.
+    ]
+
+    if (defined(invoker.suffix)) {
+      args += [ "--suffix", invoker.suffix ]
+    }
+  }
+}
+
+# Runs the idl_compiler script over a list of sources.
+#
+# Parameters:
+#   sources = list of IDL files to compile
+#   output_dir = string containing the directory to put the output files.
+template("idl_compiler") {
+  output_dir = invoker.output_dir
+
+  action_foreach(target_name) {
+    # TODO(brettw) GYP adds a "-S before the script name to skip "import site" to
+    # speed up startup. Figure out if we need this and do something similar (not
+    # really expressible in GN now).
+    script = "//sky/engine/bindings/scripts/idl_compiler.py"
+
+    inputs =
+      idl_lexer_parser_files +  # to be explicit (covered by parsetab)
+      idl_compiler_files
+    inputs += [
+      "$bindings_scripts_output_dir/lextab.py",
+      "$bindings_scripts_output_dir/parsetab.pickle",
+      "$bindings_scripts_output_dir/cached_jinja_templates.stamp",
+      "$bindings_dir/IDLExtendedAttributes.txt",
+      # If the dependency structure or public interface info (e.g.,
+      # [ImplementedAs]) changes, we rebuild all files, since we're not
+      # computing dependencies file-by-file in the build.
+      # This data is generally stable.
+      "$bindings_core_output_dir/InterfacesInfoAll.pickle",
+    ]
+    # Further, if any dependency (partial interface or implemented
+    # interface) changes, rebuild everything, since every IDL potentially
+    # depends on them, because we're not computing dependencies
+    # file-by-file.
+    # FIXME: This is too conservative, and causes excess rebuilds:
+    # compute this file-by-file.  http://crbug.com/341748
+    # This should theoretically just be the IDL files passed in.
+    inputs += core_all_dependency_idl_files
+
+    sources = invoker.sources
+    outputs = [
+      "$output_dir/V8{{source_name_part}}.cpp",
+      "$output_dir/V8{{source_name_part}}.h",
+    ]
+
+    args = [
+      "--cache-dir",
+      rebase_path(bindings_scripts_output_dir, root_build_dir),
+      "--output-dir",
+      rebase_path(output_dir, root_build_dir),
+      "--interfaces-info",
+      rebase_path("$bindings_core_output_dir/InterfacesInfoAll.pickle",
+                  root_build_dir),
+      "--write-file-only-if-changed=1",  # Always true for Ninja.
+      "{{source}}",
+    ]
+
+    deps = [
+      "//sky/engine/bindings/core/v8:interfaces_info",
+      "//sky/engine/bindings/scripts:cached_lex_yacc_tables",
+      "//sky/engine/bindings/scripts:cached_jinja_templates",
+      "//sky/engine/core:generated_testing_idls",
+    ]
+  }
+}
+
+# Runs the idl_compiler to generate IDL dictionary impl files.
+#
+# Parameters:
+#   sources = a list of IDL files to process
+#   outputs = a list of files to write to
+template("idl_dictionary") {
+  output_dir = "$root_gen_dir/sky/"
+
+  action(target_name) {
+    script = "//sky/engine/bindings/scripts/idl_compiler.py"
+    idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
+    write_file(idl_files_list, rebase_path(invoker.sources, root_build_dir))
+
+    inputs = [ idl_files_list ] + invoker.sources
+    outputs = invoker.outputs
+
+    args = [
+      "--cache-dir",
+      rebase_path(bindings_scripts_output_dir, root_build_dir),
+      "--output-dir",
+      rebase_path(output_dir, root_build_dir),
+      "--interfaces-info",
+      rebase_path("$bindings_core_output_dir/InterfacesInfoAll.pickle",
+                  root_build_dir),
+      "--write-file-only-if-changed=1",
+      "--generate-dictionary-impl",
+      rebase_path(idl_files_list, root_build_dir),
+    ]
+
+    deps = [
+      "//sky/engine/bindings/core/v8:interfaces_info",
+      "//sky/engine/bindings/scripts:cached_lex_yacc_tables",
+      "//sky/engine/bindings/scripts:cached_jinja_templates",
+    ]
+  }
+}
+
+# Calls the aggregate_generated_bindings script.
+#
+# Parameters:
+#   sources = a list of source IDL files.
+#   component_dir = Name of directory for these files (one word, no slashes).
+#   outputs = a list of files to write to.
+template("aggregate_generated_bindings") {
+  action(target_name) {
+    script = "//sky/engine/bindings/scripts/aggregate_generated_bindings.py"
+
+    # Write lists of main IDL files to a file, so that the command lines don't
+    # exceed OS length limits.
+    idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
+    write_file(idl_files_list, rebase_path(invoker.sources, root_build_dir))
+
+    inputs = [ idl_files_list ] + invoker.sources
+    outputs = invoker.outputs
+
+    args = [
+      invoker.component_dir,
+      rebase_path(idl_files_list, root_build_dir),
+      "--",
+    ]
+    args += rebase_path(invoker.outputs, root_build_dir)
+  }
+}

@@ -1,0 +1,210 @@
+# Defines properties which are available on the Settings object.
+#
+# Please think carefully before adding a new Setting.  Some questions to
+# consider are:
+# - Should this be a RuntimeEnabledFeature instead? Settings are for things
+#   which we support either values of at runtime.  Features are set at renderer
+#   process startup and are never changed. Features also tend to be set to a
+#   value based on the platform or the stability of the code in question, where
+#   as settings both codepaths need to be stable.
+# - How will you ensure test coverage of all relevant values of your setting?
+# - Is the default value appropriate for other platforms or ports which may
+#   not be aware of your setting?
+# - Can your setting result in behavior differences observable to web
+#   developers?
+# - Should this setting ideally be removed in the future?  If so please file
+#   a bug and reference it in the comments for your setting.
+#
+# One reason to add a Setting is to manage the risk associated with adding a
+# new feature.  For example, we may choose to ship a new UI behavior or
+# performance optimization to ChromeOS users first (in order to gather feedback
+# and metrics on its use from the wild) before attempting to ship it to
+# Windows.
+#
+# FIXME: Add support for global settings.
+# FIXME: Add support for custom getters/setters.
+
+defaultTextEncodingName type=String
+
+# Sets the magnification value for validation message timer.  If the
+# magnification value is N, a validation message disappears automatically after
+# <message length> * N / 1000 seconds.  If N is equal to or less than 0, a
+# validation message doesn't disappears automaticaly.
+validationMessageTimerMagnification type=int, initial=50
+
+# Number of pixels below which 2D canvas is rendered in software
+# even if hardware acceleration is enabled.
+# Hardware acceleration is useful for large canvases where it can avoid the
+# pixel bandwidth between the CPU and GPU. But GPU acceleration comes at
+# a price - extra back-buffer and texture copy. Small canvases are also
+# widely used for stylized fonts. Anti-aliasing text in hardware at that
+# scale is generally slower. So below a certain size it is better to
+# draw canvas in software.
+minimumAccelerated2dCanvasSize type=int, initial=257*256
+
+minimumFontSize type=int, initial=0, invalidate=Style
+minimumLogicalFontSize type=int, initial=0, invalidate=Style
+defaultFontSize type=int, initial=0, invalidate=Style
+defaultFixedFontSize type=int, initial=0, invalidate=Style
+
+caretBrowsingEnabled initial=false
+localStorageEnabled initial=false
+allowUniversalAccessFromFileURLs initial=true
+allowFileAccessFromFileURLs initial=true
+javaScriptCanAccessClipboard initial=false
+shouldClearDocumentBackground initial=true
+
+textAreasAreResizable initial=false, invalidate=Style
+
+shrinksStandaloneImagesToFit initial=true
+
+deferredFiltersEnabled initial=true
+
+containerCullingEnabled initial=false
+
+# FIXME: This should really be disabled by default as it makes platforms that
+# don't support the feature download files they can't use by.
+# Leaving enabled for now to not change existing behavior.
+downloadableBinaryFontsEnabled initial=true
+
+treatIPAddressAsDomain initial=false
+
+preferCompositingToLCDTextEnabled initial=false, invalidate=AcceleratedCompositing
+
+# 3D canvas (WebGL) support.
+webGLEnabled initial=false
+
+webGLErrorsToConsoleEnabled initial=true
+accelerated2dCanvasEnabled initial=false
+antialiased2dCanvasEnabled initial=true
+accelerated2dCanvasMSAASampleCount type=int, initial=0
+
+asynchronousSpellCheckingEnabled initial=false
+
+hyperlinkAuditingEnabled initial=false
+allowDisplayOfInsecureContent initial=true
+allowRunningOfInsecureContent initial=true
+# FIXME: Remove this temporary flag. See crbug.com/366483 for the target
+# milestone.
+allowConnectingInsecureWebSocket initial=false
+mediaPlaybackRequiresUserGesture initial=false
+
+scrollAnimatorEnabled initial=true
+
+# Used in layout tests for gesture tap highlights. Makes the highlights square
+# (rather than rounded) to make it possible to reftest the results.
+mockGestureTapHighlightsEnabled initial=false
+
+shouldRespectImageOrientation initial=false
+
+# Limited use by features which behave differently depending on the input
+# devices available.  For example, the pointer and hover media queries.
+# Note that we need to be careful when basing behavior or UI on this -
+# just because a device is present doesn't mean the user cares about it
+# or uses it (i.e. Chromebook Pixel users generally don't want to give up
+# screen real estate just because they happen to have a touchscreen).
+deviceSupportsTouch initial=false
+deviceSupportsMouse initial=true
+
+# This value indicates the number of simultaneous multi-touch points supported
+# by the currently connected screen/digitizer that supports the most points.
+# From Pointer Events spec:
+#   http://www.w3.org/TR/pointerevents/#widl-Navigator-maxTouchPoints
+maxTouchPoints type=int, initial=0
+
+# Whether touch gestures should be "fuzzed" to nearest touch targets.
+# It's expected that this is enabled everywhere by default, but it may be
+# disabled for testing purposes as the algorithm is not yet perfect.
+# crbug.com/304895 tracks removal once we're satisfied with the algorithm.
+touchAdjustmentEnabled initial=true
+
+navigateOnDragDrop initial=true
+DOMPasteAllowed initial=false
+
+allowCustomScrollbarInMainFrame initial=true
+webSecurityEnabled initial=true
+
+# This setting adds a means to enable/disable touch initiated drag & drop. If
+# enabled, the user can initiate drag using long press.
+# crbug.com/304894 tracks removal once it's been enabled on all platforms.
+touchDragDropEnabled initial=false
+
+unifiedTextCheckerEnabled initial=defaultUnifiedTextCheckerEnabled
+
+# Some apps could have a default video poster if it is not set.
+defaultVideoPosterURL type=String
+
+smartInsertDeleteEnabled initial=defaultSmartInsertDeleteEnabled
+
+selectionIncludesAltImageText initial=false
+
+# Used by the android_webview to support a horizontal height auto-sizing
+# mode.
+forceZeroLayoutHeight initial=false, invalidate=ViewportDescription
+
+# Touch based text selection and editing on desktop.
+# crbug.com/304873 tracks removal once it's been enabled on all platforms.
+touchEditingEnabled initial=false
+
+# Settings for experimental desktop pinch-zoom support (with semantics
+# optimized for large screens).  Pinch-zoom generally is implemented mainly
+# outside of blink (in the compositor) and doesn't require any settings.
+# These settings are for an experimental modification to how pinch-zoom
+# behaves.  TODO(wjmaclean): link to design document.
+# crbug.com/304869 tracks removal.
+pinchVirtualViewportEnabled initial=false
+useSolidColorScrollbars initial=true
+pinchOverlayScrollbarThickness type=int, initial=0
+
+mainFrameClipsContent initial=true
+
+
+# Presumably used by tests?  Unclear.
+useWideViewport initial=true, invalidate=ViewportDescription
+loadWithOverviewMode initial=true, invalidate=ViewportDescription
+
+
+# Font scale factor for accessibility, applied as part of text autosizing.
+accessibilityFontScaleFactor type=double, initial=1.0
+
+
+# Only set by Layout Tests.
+mediaTypeOverride type=String, initial="screen", invalidate=MediaType
+
+# loadsImagesAutomatically only suppresses the network load of
+# the image URL. A cached image will still be rendered if requested.
+loadsImagesAutomatically initial=false, invalidate=ImageLoading
+imagesEnabled initial=true, invalidate=ImageLoading
+
+viewportEnabled initial=false, invalidate=ViewportDescription
+viewportMetaEnabled initial=false
+
+# Compensates for poor text legibility on mobile devices. This value is
+# multiplied by the font scale factor when performing text autosizing of
+# websites that do not set an explicit viewport description.
+deviceScaleAdjustment type=double, initial=1.0
+
+# This value indicates the maximum number of bytes a document is allowed
+# to transmit in Beacons (via navigator.sendBeacon()) -- Beacons are
+# intended to be smaller payloads transmitted as a page is unloading, not
+# a general (one-way) network transmission API.
+# The spec ( https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/Beacon/Overview.html )
+# does not proscribe an upper limit, but allows for it -- the underlying
+# API will return 'false' in that case.
+maxBeaconTransmission type=int, initial=65536
+
+# V8 supports different types of caching. Used by V8 bindings.
+v8CacheOptions type=V8CacheOptions, initial=V8CacheOptionsOff
+
+# These values are bit fields for the properties of available pointing devices
+# and may take on multiple values (e.g. laptop with touchpad and touchscreen
+# has pointerType coarse *and* fine).
+availablePointerTypes type=int, initial=PointerTypeNone, invalidate=MediaQuery
+availableHoverTypes type=int, initial=HoverTypeNone, invalidate=MediaQuery
+
+# These values specify properties of the user's primary pointing device only.
+primaryPointerType type=PointerType, initial=PointerTypeNone, invalidate=MediaQuery
+primaryHoverType type=HoverType, initial=HoverTypeNone, invalidate=MediaQuery
+
+accessibilityEnabled initial=false
+inlineTextBoxAccessibilityEnabled initial=false

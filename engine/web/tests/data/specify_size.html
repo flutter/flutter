@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<body style='margin:0px'>
+<img id='sizer'/>
+<script>
+// The desired size should be specified in the url in the search portion
+// like this ?widthDimension:heightDimension.
+var unitMatch = '([0-9]+[a-zA-Z]+)';
+var searchParser = new RegExp('\\?' + unitMatch + '(?:\\:' +  unitMatch + ')');
+var parsedParameters = searchParser.exec(window.location.search);
+
+// Set the sizes.
+var elementToSize = document.getElementById('sizer');
+var width = parsedParameters[1];
+elementToSize.style.width = width;
+var height = parsedParameters[2];
+elementToSize.style.height = height;
+</script>
+</body>
+</html>

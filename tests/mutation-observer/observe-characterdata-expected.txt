@@ -1,0 +1,10 @@
+Running 6 tests
+ok 1 MutationObserver on character data should handle basic aspects of characterData observation
+ok 2 MutationObserver on character data should only notify of characterData changes when requested
+ok 3 MutationObserver on character data should allow multiple observers can be registered to a given node and both receive mutations
+ok 4 MutationObserver on character data should provide oldValue is returned when requested
+ok 5 MutationObserver on character data should allow observing both with and without oldValue
+ok 6 MutationObserver on character data should provide oldValue if any observation requests it
+6 tests
+6 pass
+0 fail

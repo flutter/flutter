@@ -1,0 +1,37 @@
+<html>
+
+<script>
+  function onload() {
+    var frame = document.createElement("iframe");
+    var div = document.getElementById("myDiv1");
+    div.appendChild(frame);
+
+    frame.contentDocument.body.innerHTML +=
+      "Some text<br>An image <img src='blue_background.png'.><br><b>Some more text</b>"
+
+    frame = document.createElement("iframe");
+    div = document.getElementById("myDiv2");
+    div.appendChild(frame);
+
+    frame.contentDocument.body.innerHTML +=
+      "Some text<br>An image <img src='red_background.png'.><br><b>Some more text</b>"
+
+    frame = document.createElement("iframe");
+    div = document.getElementById("myDiv3");
+    div.appendChild(frame);
+
+    frame.contentDocument.body.innerHTML +=
+      "Some text<br>An image <img src='orange_background.png'.><br><b>Some more text</b>"
+
+  }
+  
+</script>
+
+<body onload="onload()">
+  This page creates empty iframes and adds content to them dynamically.<br><br>
+  <div id="myDiv1"></div>
+  <div id="myDiv2"></div>
+  <div id="myDiv3"></div>
+</body>
+
+</html>

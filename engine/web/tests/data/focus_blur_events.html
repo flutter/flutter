@@ -1,0 +1,18 @@
+<input id="field" />
+<div id="message"></div>
+<script>
+  var field = document.getElementById('field');
+
+  field.addEventListener('blur', function() {
+    document.getElementById('message').innerText += 'blur';
+
+    field.addEventListener('focus', function() {
+      document.getElementById('message').innerText += 'focus';
+    });
+
+    field.blur();
+    field.focus();
+  });
+
+  field.focus();
+</script>

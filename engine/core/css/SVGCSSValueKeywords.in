@@ -1,0 +1,283 @@
+//
+// SVG CSS value names
+//
+
+// CSS_PROP_*_COLOR
+//
+aliceblue
+antiquewhite
+// aqua
+aquamarine
+azure
+beige
+bisque
+// black
+blanchedalmond
+// blue
+blueviolet
+brown
+burlywood
+cadetblue
+chartreuse
+chocolate
+coral
+cornflowerblue
+cornsilk
+crimson
+cyan
+darkblue
+darkcyan
+darkgoldenrod
+darkgray
+darkgreen
+darkgrey
+darkkhaki
+darkmagenta
+darkolivegreen
+darkorange
+darkorchid
+darkred
+darksalmon
+darkseagreen
+darkslateblue
+darkslategray
+darkslategrey
+darkturquoise
+darkviolet
+deeppink
+deepskyblue
+dimgray
+dimgrey
+dodgerblue
+firebrick
+floralwhite
+forestgreen
+// fuchsia
+gainsboro
+ghostwhite
+gold
+goldenrod
+// gray
+// grey
+// green
+greenyellow
+honeydew
+hotpink
+indianred
+indigo
+ivory
+khaki
+lavender
+lavenderblush
+lawngreen
+lemonchiffon
+lightblue
+lightcoral
+lightcyan
+lightgoldenrodyellow
+lightgray
+lightgreen
+lightgrey
+lightpink
+lightsalmon
+lightseagreen
+lightskyblue
+lightslategray
+lightslategrey
+lightsteelblue
+lightyellow
+// lime
+limegreen
+linen
+magenta
+// maroon
+mediumaquamarine
+mediumblue
+mediumorchid
+mediumpurple
+mediumseagreen
+mediumslateblue
+mediumspringgreen
+mediumturquoise
+mediumvioletred
+midnightblue
+mintcream
+mistyrose
+moccasin
+navajowhite
+// navy
+oldlace
+// olive
+olivedrab
+// orange
+orangered
+orchid
+palegoldenrod
+palegreen
+paleturquoise
+palevioletred
+papayawhip
+peachpuff
+peru
+pink
+plum
+powderblue
+// purple
+rebeccapurple
+// red
+rosybrown
+royalblue
+saddlebrown
+salmon
+sandybrown
+seagreen
+seashell
+sienna
+// silver
+skyblue
+slateblue
+slategray
+slategrey
+snow
+springgreen
+steelblue
+tan
+// teal
+thistle
+tomato
+turquoise
+violet
+wheat
+// white
+whitesmoke
+// yellow
+yellowgreen
+
+// mask-type / mask-mode
+alpha
+luminance
+
+// CSS_PROP_CLIP_PATH
+// CSS_PROP_CLIP_RULE
+// nonzero and evenodd part of core CSS values now.
+
+// CSS_PROP_MASK
+// CSS_PROP_OPACITY
+// CSS_PROP_ENABLE_BACKGROUND
+accumulate
+new
+
+// CSS_PROP_FILTER
+// CSS_PROP_FLOOD_COLOR
+//currentColor
+
+// CSS_PROP_FLOOD_OPACITY
+// CSS_PROP_LIGHTING_COLOR
+//currentColor
+
+// CSS_PROP_STOP_COLOR
+// CSS_PROP_STOP_OPACITY
+// CSS_PROP_COLOR_INTERPOLATION
+//auto
+sRGB
+linearRGB
+
+// CSS_PROP_COLOR_INTERPOLATION_FILTERS
+//auto
+//sRGB
+//linearRGB
+
+// CSS_PROP_COLOR_PROFILE
+//sRGB
+
+// CSS_PROP_COLOR_RENDERING
+//auto
+//optimizeSpeed
+//optimizeQuality
+
+//// CSS_PROP_FILL
+//currentColor
+
+// CSS_PROP_FILL_OPACITY
+// CSS_PROP_FILL_RULE
+//nonzero
+//evenodd
+
+// CSS_PROP_IMAGE_RENDERING
+//auto
+//optimizeSpeed
+//optimizeQuality
+
+// CSS_PROP_MARKER
+// CSS_PROP_MARKER_END
+// CSS_PROP_MARKER_MID
+// CSS_PROP_MARKER_START
+// CSS_PROP_SHAPE_RENDERING
+//auto
+//optimizeSpeed
+crispEdges
+//geometricPrecision
+
+// CSS_PROP_STROKE
+// CSS_PROP_STROKE_DASHARRAY
+// CSS_PROP_STROKE_DASHOFFSET
+// CSS_PROP_STROKE_LINECAP
+butt
+// round
+// square
+
+// CSS_PROP_STROKE_LINEJOIN
+miter
+// round
+bevel
+
+// CSS_PROP_STROKE_MITERLIMIT
+// CSS_PROP_STROKE_OPACITY
+// CSS_PROP_STROKE_WIDTH
+
+// CSS_PROP_ALIGNMENT_BASELINE
+//auto
+// baseline
+before-edge
+after-edge
+//middle
+central
+text-before-edge
+text-after-edge
+ideographic
+hanging
+mathematical
+
+// CSS_PROP_BASELINE_SHIFT
+//baseline
+// sub
+// super
+
+// CSS_PROP_DOMINANT_BASELINE
+//auto
+use-script
+no-change
+reset-size
+
+// CSS_PROP_GLYPH_ORIENTATION_HORIZONTAL
+
+// CSS_PROP_GLYPH_ORIENTATION_VERTICAL
+// CSS_PROP_TEXT_ANCHOR
+// start
+// middle
+// end
+
+// CSS_PROP_BUFFERED_RENDERING
+// auto
+// static
+dynamic
+
+// CSS_PROP_VECTOR_EFFECT
+// none
+non-scaling-stroke
+
+// CSS_PROP_PAINT_ORDER
+// normal
+// fill
+// stroke
+// markers

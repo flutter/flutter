@@ -1,0 +1,2 @@
+This test ensures that the lifecycle callback of a parser-made element is visible in following script block.
+

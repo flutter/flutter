@@ -1,0 +1,26 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef {{namespace}}ElementFactory_h
+#define {{namespace}}ElementFactory_h
+
+#include "platform/heap/Handle.h"
+#include "wtf/Forward.h"
+#include "wtf/PassRefPtr.h"
+
+namespace blink {
+
+class Document;
+class {{namespace}}Element;
+
+class {{namespace}}ElementFactory {
+public:
+    static PassRefPtrWillBeRawPtr<{{namespace}}Element> create{{namespace}}Element(
+        const AtomicString& localName,
+        Document&,
+        bool createdByParser = true);
+};
+
+} // namespace blink
+
+#endif

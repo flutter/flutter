@@ -1,0 +1,247 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/config.gni")
+
+# All paths in this file should be absolute so targets in any directory can use
+# them without worrying about the current directory.
+_scripts_dir = "//sky/engine/build/scripts"
+
+scripts_for_in_files = [
+  # jinja2/__init__.py contains version string, so sufficient as
+  # dependency for whole jinja2 package
+  "//third_party/jinja2/__init__.py",
+  "//third_party/markupsafe/__init__.py",  # jinja2 dep
+  "$_scripts_dir/hasher.py",
+  "$_scripts_dir/in_file.py",
+  "$_scripts_dir/in_generator.py",
+  "$_scripts_dir/license.py",
+  "$_scripts_dir/name_macros.py",
+  "$_scripts_dir/name_utilities.py",
+  "$_scripts_dir/template_expander.py",
+  "$_scripts_dir/templates/macros.tmpl",
+]
+
+css_properties_files = scripts_for_in_files + [
+  "$_scripts_dir/css_properties.py",
+]
+
+make_event_factory_files = scripts_for_in_files + [
+  "$_scripts_dir/make_event_factory.py",
+  "$_scripts_dir/templates/EventFactory.cpp.tmpl",
+]
+
+make_names_files = scripts_for_in_files + [
+  "$_scripts_dir/make_names.py",
+  "$_scripts_dir/templates/MakeNames.cpp.tmpl",
+  "$_scripts_dir/templates/MakeNames.h.tmpl",
+]
+
+make_qualified_names_files = scripts_for_in_files + [
+  "$_scripts_dir/make_qualified_names.py",
+  "$_scripts_dir/templates/MakeQualifiedNames.cpp.tmpl",
+  "$_scripts_dir/templates/MakeQualifiedNames.h.tmpl",
+]
+
+make_element_factory_files = make_qualified_names_files + [
+  "$_scripts_dir/make_element_factory.py",
+  "$_scripts_dir/templates/ElementFactory.cpp.tmpl",
+  "$_scripts_dir/templates/ElementFactory.h.tmpl",
+  "$_scripts_dir/templates/ElementWrapperFactory.cpp.tmpl",
+  "$_scripts_dir/templates/ElementWrapperFactory.h.tmpl",
+]
+
+make_element_type_helpers_files = make_qualified_names_files + [
+  "$_scripts_dir/make_element_type_helpers.py",
+  "$_scripts_dir/templates/ElementTypeHelpers.h.tmpl",
+]
+
+# The executables are relative to the build directory. Don't rebase it because
+# on Posix we want to run the system one on the path.
+if (is_win) {
+  gperf_exe = rebase_path("//third_party/gperf/bin/gperf.exe", root_build_dir)
+  bison_exe = rebase_path("//third_party/bison/bin/bison.exe", root_build_dir)
+} else {
+  gperf_exe = "gperf"
+  bison_exe = "bison"
+}
+
+# Templates --------------------------------------------------------------------
+
+_sky_gen_dir = "$root_gen_dir/sky"
+
+# The GYP target make_core_generated has some deps and a bunch of actions on
+# it, which means that the deps will be resolved before the actions run. Here
+# we have separate targets for each action. Its not clear which actions depend
+# on these deps, so for GYP compatibility, all of the below actions should
+# depend on the following deps.
+make_core_generated_deps = [
+  "//sky/engine/core:generated_testing_idls",
+  "//sky/engine/core:core_event_interfaces",
+]
+
+# Template to run most of scripts that process "*.in" files.
+#   script: script to run.
+#   in_files: ".in" files to pass to the script
+#   other_inputs: (optional) other input files the script depends on
+#                 defaults to "scripts_for_in_files" (if specified, we assume
+#                 that the contents of "scripts_for_in_files" are included in
+#                 this list specified since this is how these lists are filled
+#                 from the GYP build.
+#   outputs: expected results. Note that the directory of the 0th item in this
+#            list will be taken to be the output path.
+#   other_args: (optional) other arguments to pass to the script.
+template("process_in_files") {
+  generator_target_name = target_name + "__generator"
+
+  action(generator_target_name) {
+    script = invoker.script
+
+    inputs = invoker.in_files
+    if (defined(invoker.other_inputs)) {
+      inputs += invoker.other_inputs
+    } else {
+      inputs += scripts_for_in_files
+    }
+    outputs = invoker.outputs
+
+    # Extract the directory to write files to.
+    output_dir = get_path_info(outputs[0], "dir")
+
+    args = rebase_path(invoker.in_files, root_build_dir) + [
+      "--output_dir", rebase_path(output_dir, root_build_dir),
+    ]
+    if (defined(invoker.other_args)) {
+      args += invoker.other_args
+    }
+
+    deps = make_core_generated_deps
+  }
+
+  source_set(target_name) {
+    sources = invoker.outputs
+
+    configs += [
+      "//build/config/compiler:wexit_time_destructors",
+      "//sky/engine:inside_blink",
+      "//sky/engine:config"
+    ]
+
+    deps = [
+      ":$generator_target_name",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
+
+# Template for scripts using css_properties.py. This is a special case of
+# process_in_files.
+#   outputs: expected results
+template("css_properties") {
+  process_in_files(target_name) {
+    script = invoker.script
+    in_files = ["css/CSSProperties.in"]
+    other_inputs = css_properties_files
+    if (defined(invoker.other_inputs)) {
+      other_inputs += invoker.other_inputs
+    }
+    other_args = [
+      "--gperf", gperf_exe,
+    ]
+    outputs = invoker.outputs
+
+    deps = [
+      "//sky/engine/wtf",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
+
+# Template to run the make_names script. This is a special case of
+# process_in_files.
+#   in_files: files to pass to the script
+#   outputs: expected results
+template("make_names") {
+  process_in_files(target_name) {
+    script = "//sky/engine/build/scripts/make_names.py"
+    in_files = invoker.in_files
+    other_inputs = make_names_files
+    outputs = invoker.outputs
+
+    deps = [
+      "//sky/engine/wtf",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
+
+# Template to run the make_qualified_names script. This is a special case of
+# process_in_files.
+#   in_files: list of ".in" files to process.
+#   outputs: list of output files
+template("make_qualified_names") {
+  process_in_files(target_name) {
+    script = "//sky/engine/build/scripts/make_qualified_names.py"
+    in_files = invoker.in_files
+    other_inputs = make_qualified_names_files
+    outputs = invoker.outputs
+
+    deps = [
+      "//sky/engine/wtf",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
+
+# Calls the make_event_factory script. This is a special case of
+# process_in_files.
+#   in_files: list of ".in" files to process.
+#   outputs: list of output files
+template("make_event_factory") {
+  process_in_files(target_name) {
+    script = "//sky/engine/build/scripts/make_event_factory.py"
+    in_files = invoker.in_files
+    other_inputs = make_event_factory_files
+    outputs = invoker.outputs
+
+    deps = [
+      "//sky/engine/wtf",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
+
+# Calls the make_token_matcher script.
+#   input_file: The "*-in.cpp" file
+#   output_file: The output file
+template("make_token_matcher") {
+  action(target_name) {
+    script = "//sky/engine/build/scripts/make_token_matcher.py"
+
+    inputs = scripts_for_in_files + [ invoker.input_file ]
+    outputs = [ invoker.output_file ]
+
+    args = [
+      rebase_path(invoker.input_file, root_build_dir),
+      rebase_path(invoker.output_file, root_build_dir),
+    ]
+
+    deps = make_core_generated_deps
+  }
+}
+

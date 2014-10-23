@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2006, 2009, 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+// FIXME: NamedConstructor does not support optional without Default. Fortunately using Undefined makes
+// us use 0 which happens to be the default width and height anyway.
+[
+    NamedConstructor=Image([Default=Undefined] optional long width, [Default=Undefined] optional long height),
+    ConstructorCallWith=Document
+] interface HTMLImageElement : HTMLElement {
+    [Reflect] attribute DOMString align;
+    [Reflect] attribute DOMString alt;
+    [Reflect, TreatNullAs=EmptyString] attribute DOMString border;
+    readonly attribute boolean complete;
+    [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] attribute DOMString crossOrigin;
+    attribute long height;
+    [Reflect] attribute long hspace;
+    [Reflect] attribute boolean isMap;
+    [Reflect, URL] attribute DOMString longDesc;
+    [Reflect, URL] attribute DOMString lowsrc;
+    readonly attribute long naturalHeight;
+    readonly attribute long naturalWidth;
+    [Reflect, URL] attribute DOMString src;
+    [Reflect] attribute DOMString srcset;
+    [Reflect, RuntimeEnabled=PictureSizes] attribute DOMString sizes;
+    [RuntimeEnabled=PictureSizes] readonly attribute DOMString currentSrc;
+    [Reflect] attribute DOMString useMap;
+    [Reflect] attribute long vspace;
+    attribute long width;
+
+    // Extensions
+    [MeasureAs=HTMLImageElementX] readonly attribute long x;
+    [MeasureAs=HTMLImageElementY] readonly attribute long y;
+
+    [Reflect, RuntimeEnabled=SubresourceIntegrity] attribute DOMString integrity;
+};

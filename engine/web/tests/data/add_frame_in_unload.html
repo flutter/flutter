@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<script>
+function handleUnload()
+{
+    var iframe = document.createElement('iframe');
+    iframe.src = 'about:blank';
+    document.body.appendChild(iframe);
+}
+</script>
+<body onunload="handleUnload()">
+</body>
+</html>

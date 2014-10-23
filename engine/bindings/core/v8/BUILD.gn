@@ -1,0 +1,56 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/core/idl.gni")
+
+import("//sky/engine/bindings/core/v8/generated.gni")
+import("//sky/engine/bindings/scripts/scripts.gni")
+import("//sky/engine/core/core.gni")
+
+visibility = ["//sky/engine/*"]
+
+# bindings_core_v8_generated in core/v8/generated.gyp
+group("bindings_core_v8_generated") {
+  deps = [
+    ":bindings_core_v8_generated_aggregate",
+    ":bindings_core_v8_generated_individual",
+  ]
+}
+
+aggregate_generated_bindings("bindings_core_v8_generated_aggregate") {
+  sources = core_idl_files
+  component_dir = "core"
+  outputs = bindings_core_generated_aggregate_files
+}
+
+idl_compiler("bindings_core_v8_generated_individual") {
+  sources = core_interface_idl_files
+  output_dir = bindings_core_v8_output_dir
+}
+
+action("interfaces_info") {
+  script = "$bindings_scripts_dir/compute_interfaces_info_overall.py"
+
+  inputs = [
+    "$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle",
+  ]
+  outputs = [
+    "$bindings_core_output_dir/InterfacesInfoAll.pickle",
+  ]
+
+  args = [
+    "--write-file-only-if-changed=1",
+    "--",
+    rebase_path(
+        "$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle",
+        root_build_dir),
+    rebase_path(
+        "$bindings_core_output_dir/InterfacesInfoAll.pickle",
+        root_build_dir),
+  ]
+
+  deps = [
+    "../:interfaces_info_individual_core",
+  ]
+}

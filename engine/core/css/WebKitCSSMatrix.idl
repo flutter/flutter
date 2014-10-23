@@ -1,0 +1,105 @@
+/*
+ * Copyright (C) 2008, 2010 Apple Inc. All Rights Reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+// Introduced in DOM Level ?:
+[
+    Constructor(optional DOMString cssValue = null),
+    ImplementedAs=CSSMatrix,
+    RaisesException=Constructor,
+    WillBeGarbageCollected
+] interface WebKitCSSMatrix {
+
+    // These attributes are simple aliases for certain elements of the 4x4 matrix
+    attribute double a; // alias for m11
+    attribute double b; // alias for m12
+    attribute double c; // alias for m21
+    attribute double d; // alias for m22
+    attribute double e; // alias for m41
+    attribute double f; // alias for m42
+
+    attribute double m11;
+    attribute double m12;
+    attribute double m13;
+    attribute double m14;
+    attribute double m21;
+    attribute double m22;
+    attribute double m23;
+    attribute double m24;
+    attribute double m31;
+    attribute double m32;
+    attribute double m33;
+    attribute double m34;
+    attribute double m41;
+    attribute double m42;
+    attribute double m43;
+    attribute double m44;
+
+    [RaisesException] void setMatrixValue([Default=Undefined] optional DOMString string);
+
+    // Multiply this matrix by secondMatrix, on the right (result = this * secondMatrix)
+    [Immutable] WebKitCSSMatrix multiply([Default=Undefined] optional WebKitCSSMatrix secondMatrix);
+
+    // Return the inverse of this matrix. Throw an exception if the matrix is not invertible
+    [Immutable, RaisesException] WebKitCSSMatrix inverse();
+
+    // Return this matrix translated by the passed values.
+    // Passing a NaN will use a value of 0. This allows the 3D form to used for 2D operations
+    [Immutable] WebKitCSSMatrix translate([Default=Undefined] optional double x,
+                                          [Default=Undefined] optional double y,
+                                          [Default=Undefined] optional double z);
+
+    // Returns this matrix scaled by the passed values.
+    // Passing scaleX or scaleZ as NaN uses a value of 1, but passing scaleY of NaN
+    // makes it the same as scaleX. This allows the 3D form to used for 2D operations
+    [Immutable] WebKitCSSMatrix scale([Default=Undefined] optional double scaleX,
+                                      [Default=Undefined] optional double scaleY,
+                                      [Default=Undefined] optional double scaleZ);
+
+    // Returns this matrix rotated by the passed values.
+    // If rotY and rotZ are NaN, rotate about Z (rotX=0, rotateY=0, rotateZ=rotX).
+    // Otherwise use a rotation value of 0 for any passed NaN.
+    [Immutable] WebKitCSSMatrix rotate([Default=Undefined] optional double rotX,
+                                       [Default=Undefined] optional double rotY,
+                                       [Default=Undefined] optional double rotZ);
+
+    // Returns this matrix rotated about the passed axis by the passed angle.
+    // Passing a NaN will use a value of 0. If the axis is (0,0,0) use a value
+    // of (0,0,1).
+    [Immutable] WebKitCSSMatrix rotateAxisAngle([Default=Undefined] optional double x,
+                                                [Default=Undefined] optional double y,
+                                                [Default=Undefined] optional double z,
+                                                [Default=Undefined] optional double angle);
+
+    // Returns this matrix skewed along the X axis by the passed values.
+    // Passing a NaN will use a value of 0.
+    [Immutable] WebKitCSSMatrix skewX([Default=Undefined] optional double angle);
+
+    // Returns this matrix skewed along the Y axis by the passed values.
+    // Passing a NaN will use a value of 0.
+    [Immutable] WebKitCSSMatrix skewY([Default=Undefined] optional double angle);
+
+    [NotEnumerable] stringifier;
+};
+

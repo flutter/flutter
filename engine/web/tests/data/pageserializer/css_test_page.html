@@ -1,0 +1,110 @@
+<html>
+
+<!-- This page is used to test that CSS resources are retrieved correctly by the
+     WebPageSerializer::generateSnapshot method
+-->
+
+<head>
+
+<link rel="stylesheet" type="text/css" href="link_styles.css" />
+
+<style>
+@import url('import_styles.css');
+
+@font-face {
+  font-family: Chunkfive;
+}
+
+#chunkfiveDiv {
+  font-family: Chunkfive, sans-serif;
+}
+</style>
+
+<style>
+#divBlue {
+  background-image:url('blue_background.png');
+}
+
+ul {
+  list-style-image: url('ul-dot.png');
+}
+
+ol {
+  list-style-image: url('ol-dot.png');
+}
+
+</style>
+
+<script>
+// Dynamically creates a CSS style.
+function onLoad() {
+  var styleText = "#divPurple {background-image:url('purple_background.png')}";
+  var div = document.getElementById('divPurple');
+  var styleNode= document.createElement('style');
+  styleNode.type= 'text/css';
+  styleNode.media= 'screen';
+  styleNode.appendChild(document.createTextNode(styleText));
+  div.appendChild(styleNode);
+}
+</script>
+</head>
+
+<body onload="onLoad()">
+
+<!-- Text using an imported font -->
+<div id='chunkfiveDiv'>This text uses the Chunkfive font.</div>
+
+<!-- Style is in linked file -->
+<div id='divRed'>
+This div has a red image as its background.
+</div>
+
+<!-- Style is in a file imported in the linked file -->
+<div id='divOrange'>
+This div has a orange image as its background.
+</div>
+
+<!-- Style is in an imported file -->
+<div id='divYellow'>
+This div has a yellow image as its background.
+</div>
+
+<!-- Style is defined in a style section in the header -->
+<div id='divBlue'>
+This div has a blue image as its background.
+</div>
+
+<!-- Style is inlined -->
+<div id='divGreen' style="background-image:url('green_background.png')">
+This div has a green image as its background.
+</div>
+
+<!-- Style id dynamically generated with JavaScript in the onload handler -->
+<div id='divPurple'>
+This div has a purple image as its background.
+</div>
+
+Unordered list:<br>
+<ul>
+  <li>Blue</li>
+  <li>Red</li>
+  <li>Yellow</li>
+  <li>Blue</li>
+  <li>Green</li>
+  <li>Red</li>
+</ul>
+<br>
+
+Ordered list:<br>
+<ol>
+  <li>Blue</li>
+  <li>Red</li>
+  <li>Yellow</li>
+  <li>Blue</li>
+  <li>Green</li>
+  <li>Red</li>
+</ol>
+
+</body>
+
+</html>

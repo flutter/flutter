@@ -1,0 +1,87 @@
+<!doctype html PUBLIC "-//W3C//DTD html 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    {# IE8 rounds line-height incorrectly, and adding this emulateIE7 line makes it right! #}
+    {# http://social.msdn.microsoft.com/Forums/en-US/iewebdevelopment/thread/7684445e-f080-4d8f-8529-132763348e21 #}
+    <meta http-equiv='X-UA-Compatible' content='IE=emulateIE7' />
+    <title>Coverage for {{cu.name|escape}}: {{nums.pc_covered_str}}%</title>
+    <link rel='stylesheet' href='style.css' type='text/css'>
+    <script type='text/javascript' src='jquery-1.4.3.min.js'></script>
+    <script type='text/javascript' src='jquery.hotkeys.js'></script>
+    <script type='text/javascript' src='jquery.isonscreen.js'></script>
+    <script type='text/javascript' src='coverage_html.js'></script>
+    <script type='text/javascript' charset='utf-8'>
+        jQuery(document).ready(coverage.pyfile_ready);
+    </script>
+</head>
+<body id='pyfile'>
+
+<div id='header'>
+    <div class='content'>
+        <h1>Coverage for <b>{{cu.name|escape}}</b> :
+            <span class='pc_cov'>{{nums.pc_covered_str}}%</span>
+        </h1>
+        <img id='keyboard_icon' src='keybd_closed.png'>
+        <h2 class='stats'>
+            {{nums.n_statements}} statements
+            <span class='{{c_run}} shortkey_r' onclick='coverage.toggle_lines(this, "run")'>{{nums.n_executed}} run</span>
+            <span class='{{c_mis}} shortkey_m' onclick='coverage.toggle_lines(this, "mis")'>{{nums.n_missing}} missing</span>
+            <span class='{{c_exc}} shortkey_x' onclick='coverage.toggle_lines(this, "exc")'>{{nums.n_excluded}} excluded</span>
+            {% if arcs %}
+                <span class='{{c_par}} shortkey_p' onclick='coverage.toggle_lines(this, "par")'>{{n_par}} partial</span>
+            {% endif %}
+        </h2>
+    </div>
+</div>
+
+<div class='help_panel'>
+    <img id='panel_icon' src='keybd_open.png'>
+    <p class='legend'>Hot-keys on this page</p>
+    <div>
+    <p class='keyhelp'>
+        <span class='key'>r</span>
+        <span class='key'>m</span>
+        <span class='key'>x</span>
+        <span class='key'>p</span> &nbsp; toggle line displays
+    </p>
+    <p class='keyhelp'>
+        <span class='key'>j</span>
+        <span class='key'>k</span> &nbsp; next/prev highlighted chunk
+    </p>
+    <p class='keyhelp'>
+        <span class='key'>0</span> &nbsp; (zero) top of page
+    </p>
+    <p class='keyhelp'>
+        <span class='key'>1</span> &nbsp; (one) first highlighted chunk
+    </p>
+    </div>
+</div>
+
+<div id='source'>
+    <table cellspacing='0' cellpadding='0'>
+        <tr>
+            <td class='linenos' valign='top'>
+                {% for line in lines %}
+                    <p id='n{{line.number}}' class='{{line.class}}'><a href='#n{{line.number}}'>{{line.number}}</a></p>
+                {% endfor %}
+            </td>
+            <td class='text' valign='top'>
+                {% for line in lines %}
+                    <p id='t{{line.number}}' class='{{line.class}}'>{% if line.annotate %}<span class='annotate' title='{{line.annotate_title}}'>{{line.annotate}}</span>{% endif %}{{line.html}}<span class='strut'>&nbsp;</span></p>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id='footer'>
+    <div class='content'>
+        <p>
+            <a class='nav' href='index.html'>&#xab; index</a> &nbsp; &nbsp; <a class='nav' href='{{__url__}}'>coverage.py v{{__version__}}</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

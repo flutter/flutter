@@ -1,0 +1,19 @@
+<body>
+<style>
+.editable {
+  -webkit-user-modify: read-write-plaintext-only;
+  border: 2px solid blue;
+}
+</style>
+<div class="editable"></div>
+<script>
+if (window.eventSender) {
+    var control = document.querySelector('.editable');
+    control.focus();
+    eventSender.keyDown('a');
+    eventSender.keyDown('b');
+}
+if (window.testRunner)
+    testRunner.dumpAsText();
+</script>
+</body>

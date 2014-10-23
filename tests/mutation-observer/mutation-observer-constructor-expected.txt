@@ -1,0 +1,6 @@
+Running 2 tests
+ok 1 MutationObserver should have methods
+ok 2 MutationObserver should throw with incorrect constructor args
+2 tests
+2 pass
+0 fail

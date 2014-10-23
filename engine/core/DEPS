@@ -1,0 +1,6 @@
+include_rules = [
+    "+bindings",
+    "+core",
+    "+platform",
+    "+public/platform",
+]

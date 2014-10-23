@@ -1,0 +1,13 @@
+include_rules = [
+    "+mozilla",
+    "+platform",
+    "+public/platform",
+    "+skia/ext",
+    "+third_party/khronos",
+    "+third_party/skia",
+    "+url",
+    "+heap",
+    "-bindings",
+    "-core",
+    "-modules",
+]

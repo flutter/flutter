@@ -1,0 +1,12 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    OverrideBuiltins,
+] interface TestSpecialOperations {
+    // [ImplementedAs], [TypeChecking=Interface], union return, nullability
+    // [OverrideBuiltins] affects named property operations
+    [ImplementedAs=getItem] getter (Node or NodeList) namedItem(DOMString name);
+    [TypeChecking=Interface] setter Node (DOMString name, Node? value);
+};

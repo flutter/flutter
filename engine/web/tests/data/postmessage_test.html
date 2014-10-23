@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>PostMessage Test</title>
+<script>
+var messagesReceived = 0;
+window.addEventListener("message", messageReceived, false);
+function messageReceived(event) {
+  messagesReceived++;
+  document.body.appendChild(document.createTextNode('Message ' + messagesReceived + '.'));
+}
+</script>
+</head>
+<body>
+Test page.
+</body>
+</html>

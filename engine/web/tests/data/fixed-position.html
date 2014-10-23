@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .fixed {
+      position: fixed;
+    }
+    .top {
+      top: 1px;
+    }
+    .bottom {
+      bottom: 1px;
+    }
+    .left {
+      left: 1px;
+    }
+    .right {
+      right: 1px;
+    }
+  </style>
+</head>
+
+<!-- Fixed position elements may skip compositing without a scrollable
+ancestor. To make sure this test covers the intended scenario, we force the
+body element to be tall, so that the FrameView is scrolling. -->
+<body style="height: 4000px">
+  <div id="div-tl" class="fixed top left">X</div>
+  <div id="div-tr" class="fixed top right">X</div>
+  <div id="div-bl" class="fixed bottom left">X</div>
+  <div id="div-br" class="fixed bottom right">X</div>
+  <span id="span-tl" class="fixed top left">X</span>
+  <span id="span-tr" class="fixed top right">X</span>
+  <span id="span-bl" class="fixed bottom left">X</span>
+  <span id="span-br" class="fixed bottom right">X</span>
+</body>
+</html>

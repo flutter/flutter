@@ -1,0 +1,10 @@
+<head>
+    <title>width=123 proceded by trash with special unicode folding</title>
+    <!-- 2x LATIN CAPITAL LETTER I WITH DOT ABOVE followed by =ignore,width=123
+         During parsing the content will be converted to lower case with proper
+         unicode folding (F = full) meaning that the U+0130's each will be
+         converted into two chars - lowercase i followed by U+0307 (COMBINING
+         DOT ABOVE). This test case checks that we iterate over the lowered
+         string length and ends up with 123 as width, instead of 1. -->
+    <meta name="viewport" content="&#x0130;&#x0130;=ignore,width=123">
+</head>

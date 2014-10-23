@@ -1,0 +1,152 @@
+/*
+ * Copyright (C) 2006, 2007, 2008, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+// HTML 5 draft spec:
+// http://www.w3.org/html/wg/drafts/html/master/browsers.html#window
+// FIXME: explain all uses of [DoNotCheckSecurity]
+[
+    CheckSecurity=Frame,
+    Custom=ToV8,
+    ImplementedAs=LocalDOMWindow,
+    PrimaryGlobal,
+    WillBeGarbageCollected,
+] interface Window : EventTarget {
+    readonly attribute Screen screen;
+    readonly attribute History history;
+    [DoNotCheckSecurity, Unforgeable, Replaceable, PutForwards=href] readonly attribute Location location;
+    [Custom, MeasureAs=WindowEvent, NotEnumerable] attribute Event event;
+
+    Selection getSelection();
+
+    [DoNotCheckSecurity, CallWith=ExecutionContext] void focus();
+
+    boolean find([Default=Undefined] optional DOMString string,
+                 [Default=Undefined] optional boolean caseSensitive,
+                 [Default=Undefined] optional boolean backwards,
+                 [Default=Undefined] optional boolean wrap,
+                 [Default=Undefined] optional boolean wholeWord,
+                 [Default=Undefined] optional boolean searchInFrames,
+                 [Default=Undefined] optional boolean showDialog);
+
+    [Replaceable] readonly attribute long outerHeight;
+    [Replaceable] readonly attribute long outerWidth;
+    [Replaceable] readonly attribute long innerHeight;
+    [Replaceable] readonly attribute long innerWidth;
+    [Replaceable] readonly attribute long screenX;
+    [Replaceable] readonly attribute long screenY;
+    [Replaceable] readonly attribute long screenLeft;
+    [Replaceable] readonly attribute long screenTop;
+    [Replaceable] readonly attribute long scrollX;
+    [Replaceable] readonly attribute long scrollY;
+    readonly attribute long pageXOffset;
+    readonly attribute long pageYOffset;
+
+    // Overloading can be replaced by optional if RuntimeEnabled is removed, by
+    // changing the third argument to *optional* Dictionary scrollOptions
+    void scrollBy(long x, long y);
+    [RuntimeEnabled=CSSOMSmoothScroll, RaisesException] void scrollBy(long x, long y, Dictionary scrollOptions);
+    void scrollTo(long x, long y);
+    [RuntimeEnabled=CSSOMSmoothScroll, RaisesException] void scrollTo(long x, long y, Dictionary scrollOptions);
+    void scroll(long x, long y);
+    [RuntimeEnabled=CSSOMSmoothScroll, RaisesException] void scroll(long x, long y, Dictionary scrollOptions);
+    void moveBy([Default=Undefined] optional float x, [Default=Undefined] optional float y); // FIXME: this should take longs not floats.
+    void moveTo([Default=Undefined] optional float x, [Default=Undefined] optional float y); // FIXME: this should take longs not floats.
+    void resizeBy([Default=Undefined] optional float x, [Default=Undefined] optional float y); // FIXME: this should take longs not floats.
+    void resizeTo([Default=Undefined] optional float width, [Default=Undefined] optional float height); // FIXME: this should take longs not floats.
+
+    // Self referential attributes
+    [Replaceable, DoNotCheckSecurity] readonly attribute Window self;
+    [DoNotCheckSecurity, Unforgeable] readonly attribute Window window;
+
+    // DOM Level 2 AbstractView Interface
+    readonly attribute Document document;
+
+    // CSSOM View Module
+    MediaQueryList matchMedia(DOMString query);
+
+    // styleMedia has been removed from the CSSOM View specification.
+    readonly attribute StyleMedia styleMedia;
+
+    // DOM Level 2 Style Interface
+    CSSStyleDeclaration getComputedStyle([Default=Undefined] optional Element element,
+                                         [TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? pseudoElement);
+
+    // WebKit extensions
+    [MeasureAs=GetMatchedCSSRules] CSSRuleList getMatchedCSSRules([Default=Undefined] optional Element element,
+                                                                  [TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? pseudoElement);
+
+    [Replaceable] readonly attribute double devicePixelRatio;
+
+    // This is the interface orientation in degrees. Some examples are:
+    //  0 is straight up; -90 is when the device is rotated 90 clockwise;
+    //  90 is when rotated counter clockwise.
+    [RuntimeEnabled=OrientationEvent, MeasureAs=WindowOrientation] readonly attribute long orientation;
+
+    [Replaceable] readonly attribute Console console;
+
+    [MeasureAs=UnprefixedRequestAnimationFrame] long requestAnimationFrame(RequestAnimationFrameCallback callback);
+    void cancelAnimationFrame(long id);
+
+    [Replaceable] readonly attribute CSS CSS;
+
+    // Event handler attributes
+    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationend;
+    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationiteration;
+    [RuntimeEnabled=CSSAnimationUnprefixed] attribute EventHandler onanimationstart;
+    [RuntimeEnabled=OrientationEvent] attribute EventHandler onorientationchange;
+    attribute EventHandler onsearch;
+    [RuntimeEnabled=Touch] attribute EventHandler ontouchcancel;
+    [RuntimeEnabled=Touch] attribute EventHandler ontouchend;
+    [RuntimeEnabled=Touch] attribute EventHandler ontouchmove;
+    [RuntimeEnabled=Touch] attribute EventHandler ontouchstart;
+    attribute EventHandler ontransitionend;
+    attribute EventHandler onwheel;
+
+    // window.toString() requires special handling in V8
+    [DoNotCheckSignature, DoNotCheckSecurity, Custom, NotEnumerable] stringifier;
+
+    // FIXME(sky): can't remove w/o also removing hacks in bindings generator.
+    [Custom, NotEnumerable] getter Window (DOMString name);
+};
+
+// http://www.whatwg.org/specs/web-apps/current-work/#transferable-objects
+//
+// Expressing the Transferable typedef in IDL depends on http://crbug.com/240176.
+// The postMessage() methods taking a Transferable array argument have custom
+// binding code that is able to handle the Transferables that we currently
+// recognize. To be able to declare a postMessage() signature that matches
+// the implementation, we provide a Transferable typedef but with an
+// incomplete type.
+//
+// FIXME: make this typedef accurate once enough of http://crbug.com/240176
+// is in place.
+// FIXME: consider putting this typedef in an .idl file containing spec-wide
+// utility type definitions.
+typedef MessagePort Transferable;
+
+Window implements WindowBase64;
+Window implements WindowEventHandlers;
+Window implements WindowTimers;

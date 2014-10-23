@@ -1,0 +1,8 @@
+namespace="HTMLTokenizer"
+
+-- Symbol=dashDash
+doctype
+[CDATA[ Symbol=cdata
+# The symbol "public" conflicts with the C++ keyword.
+public Symbol=publicString
+system

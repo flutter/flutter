@@ -1,0 +1,88 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+shared_library("viewer") {
+  output_name = "mojo_sky_viewer"
+
+  sources = [
+    "content_handler_impl.cc",
+    "content_handler_impl.h",
+    "converters/basic_types.cc",
+    "converters/basic_types.h",
+    "converters/input_event_types.cc",
+    "converters/input_event_types.h",
+    "converters/url_request_types.cc",
+    "converters/url_request_types.h",
+    "document_view.cc",
+    "document_view.h",
+    "internals.cc",
+    "internals.h",
+    "platform/platform_impl.cc",
+    "platform/platform_impl.h",
+    "platform/weblayertreeview_impl.cc",
+    "platform/weblayertreeview_impl.h",
+    "platform/webmimeregistry_impl.cc",
+    "platform/webmimeregistry_impl.h",
+    "platform/webthemeengine_impl.cc",
+    "platform/webthemeengine_impl.h",
+    "platform/webthread_impl.cc",
+    "platform/webthread_impl.h",
+    "platform/weburlloader_impl.cc",
+    "platform/weburlloader_impl.h",
+    "script/script_runner.cc",
+    "script/script_runner.h",
+    "services/tracing_impl.cc",
+    "services/tracing_impl.h",
+    "viewer.cc",
+  ]
+
+  include_dirs = [ ".." ]
+
+  deps = [
+    "//cc",
+    "//cc/surfaces",
+    "//gin",
+    "//mojo/application",
+    "//mojo/bindings/js",
+    "//mojo/cc",
+    "//mojo/common",
+    "//mojo/public/c/system:for_shared_library",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/utility",
+    "//mojo/services/public/cpp/view_manager",
+    "//mojo/services/public/interfaces/content_handler",
+    "//mojo/services/public/interfaces/gpu",
+    "//mojo/services/public/interfaces/navigation",
+    "//mojo/services/public/interfaces/network",
+    "//mojo/services/public/interfaces/surfaces",
+    "//net",
+    "//skia",
+    "//sky/engine/public:blink",
+    "//sky/viewer/cc",
+    "//third_party/icu",
+    "//ui/native_theme",
+    "//url",
+    ":bindings",
+    ":html_modules",
+  ]
+}
+
+mojom("bindings") {
+  sources = [
+    "test_observer.mojom",
+    "services/tracing.mojom",
+  ]
+}
+
+copy("html_modules") {
+  sources = [
+    "script/core.html",
+    "script/support.html",
+  ]
+  outputs = [
+    "$root_gen_dir/mojo/public/html/{{source_file_part}}",
+  ]
+}

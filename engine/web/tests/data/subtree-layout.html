@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<style>
+/* RenderObject::objectIsRelayoutBoundary() should be true */
+#relayoutBoundary {
+    overflow: hidden;
+    width: 100px;
+    height: 100px;
+}
+</style>
+<div id="relayoutBoundary">
+    <div id="layouter"></div>
+</div>
+<script>
+document.body.offsetTop;
+document.getElementById("layouter").style.position = "relative";
+document.body.offsetTop;
+</script>

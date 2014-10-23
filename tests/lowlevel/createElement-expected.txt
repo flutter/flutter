@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 createElementNS tests from mozilla, attached to webkit bug 16833 should behave like mozilla
+1 tests
+1 pass
+0 fail

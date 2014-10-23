@@ -1,0 +1,27 @@
+<html>
+<link rel="import" href="../resources/chai.html" />
+<link rel="import" href="../resources/mocha.html" />
+<script>
+describe('MutationObserver', function() {
+    it('should not invoke callbacks when appending a script', function() {
+        var mutationsDelivered = false;
+        function callback(mutations) {
+            mutationsDelivered = true;
+        }
+
+        var observer = new MutationObserver(callback);
+        var div = document.createElement('div');
+        observer.observe(div, {attributes: true});
+        div.setAttribute('foo', 'bar');
+        assert.notOk(mutationsDelivered);
+        var scriptDidRun = false;
+        var script = document.createElement('script');
+        script.textContent = 'scriptDidRun = true';
+        assert.notOk(scriptDidRun);
+        document.documentElement.appendChild(script);
+        assert.notOk(scriptDidRun);
+        assert.notOk(mutationsDelivered);
+    });
+});
+</script>
+</html>

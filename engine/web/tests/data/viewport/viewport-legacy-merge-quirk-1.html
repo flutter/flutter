@@ -1,0 +1,18 @@
+<head>
+    <title>Viewports Merge Quirk.</title>
+    <!--
+        Meta viewport tags still has priority over other legacy meta types,
+        but when having multiple meta viewport tags, unspecified content
+        attributes must not take over existing attribute values from previous
+        meta viewport tags.
+     -->
+    <meta name="HandheldFriendly" content="true">
+    <meta name="viewport" content="width=640">
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="viewport" content="user-scalable=0">
+    <!-- The previous 3 meta viewport tags must be equivalent to
+       <meta name="viewport" content="width=640,initial-scale=1.0,user-scalable=0">
+     -->
+    <meta name="MobileOptimized" content="176">
+</head>
+<body></body>

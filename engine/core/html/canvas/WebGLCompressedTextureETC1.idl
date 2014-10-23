@@ -1,0 +1,12 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    NoInterfaceObject,
+    DoNotCheckConstants,
+    WillBeGarbageCollected,
+] interface WebGLCompressedTextureETC1 {
+    /* Compressed Texture Formats */
+    const unsigned long COMPRESSED_RGB_ETC1_WEBGL = 0x8D64;
+};

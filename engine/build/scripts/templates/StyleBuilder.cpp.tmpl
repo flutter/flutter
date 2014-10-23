@@ -1,0 +1,50 @@
+{% from 'macros.tmpl' import license %}
+{{license()}}
+
+#include "config.h"
+#include "core/css/resolver/StyleBuilder.h"
+
+#include "StyleBuilderFunctions.h"
+#include "core/css/CSSProperty.h"
+#include "core/css/resolver/StyleResolverState.h"
+
+// FIXME: currently we're just generating a switch statement, but we should
+//   test other variations for performance once we have more properties here.
+
+namespace blink {
+
+void StyleBuilder::applyProperty(CSSPropertyID property, StyleResolverState& state, CSSValue* value, bool isInitial, bool isInherit) {
+    switch(property) {
+    {% for property_id, property in properties.items()
+        if property.should_declare_functions or property.use_handlers_for %}
+    {% set used_property = properties[property.use_handlers_for] or property %}
+    {% set used_property_id = used_property.property_id %}
+    case {{property_id}}:
+        if (isInitial)
+            StyleBuilderFunctions::applyInitial{{used_property_id}}(state);
+        else if (isInherit)
+            StyleBuilderFunctions::applyInherit{{used_property_id}}(state);
+        else
+            StyleBuilderFunctions::applyValue{{used_property_id}}(state, value);
+        return;
+
+    {% endfor %}
+    {% for property_id, property in properties.items() if property.direction_aware %}
+    case {{property_id}}:
+    {% endfor %}
+    {
+        CSSPropertyID resolvedProperty = CSSProperty::resolveDirectionAwareProperty(property, state.style()->direction(), state.style()->writingMode());
+        ASSERT(resolvedProperty != property);
+        applyProperty(resolvedProperty, state, value);
+        return;
+    }
+    {% for property_id, property in properties.items() if property.builder_skip %}
+    case {{property_id}}:
+    {% endfor %}
+        return;
+    default:
+        ASSERT_NOT_REACHED();
+    }
+}
+
+} // namespace blink

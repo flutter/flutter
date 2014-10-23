@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+This text won't be selected because it isn't editable.
+<span id='target' contenteditable="true">16-char header. This text is initially selected. 16-char footer.</span>
+This text won't be selected because it isn't editable.
+<script>
+    function select() {
+        var text = document.getElementById('target').firstChild;
+        var range = document.createRange();
+        range.setStart(text, 16);
+        range.setEnd(text, 48);
+        window.getSelection().addRange(range);
+    }
+    window.onload = select;
+</script>
+</body>
+</html>
+

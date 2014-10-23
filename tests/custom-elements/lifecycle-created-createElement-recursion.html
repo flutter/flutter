@@ -1,0 +1,10 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.html" />
+<body>
+<script>
+document.registerElement("x-foo", { prototype: Object.create(HTMLElement.prototype, { createdCallback: { value: function () { this.innerHTML = "<x-foo>Hello</x-foo>"; } } }) });
+document.createElement("x-foo");
+console.log("PASS unless crash");
+</script>
+</body>
+</html>

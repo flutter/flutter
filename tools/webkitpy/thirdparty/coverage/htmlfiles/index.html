@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <title>Coverage report</title>
+    <link rel='stylesheet' href='style.css' type='text/css'>
+    <script type='text/javascript' src='jquery-1.4.3.min.js'></script>
+    <script type='text/javascript' src='jquery.tablesorter.min.js'></script>
+    <script type='text/javascript' src='jquery.hotkeys.js'></script>
+    <script type='text/javascript' src='coverage_html.js'></script>
+    <script type='text/javascript' charset='utf-8'>
+        jQuery(document).ready(coverage.index_ready);
+    </script>
+</head>
+<body id='indexfile'>
+
+<div id='header'>
+    <div class='content'>
+        <h1>Coverage report:
+            <span class='pc_cov'>{{totals.pc_covered_str}}%</span>
+        </h1>
+        <img id='keyboard_icon' src='keybd_closed.png'>
+    </div>
+</div>
+
+<div class='help_panel'>
+    <img id='panel_icon' src='keybd_open.png'>
+    <p class='legend'>Hot-keys on this page</p>
+    <div>
+    <p class='keyhelp'>
+        <span class='key'>n</span>
+        <span class='key'>s</span>
+        <span class='key'>m</span>
+        <span class='key'>x</span>
+        {% if arcs %}
+        <span class='key'>b</span>
+        <span class='key'>p</span>
+        {% endif %}
+        <span class='key'>c</span> &nbsp; change column sorting
+    </p>
+    </div>
+</div>
+
+<div id='index'>
+    <table class='index'>
+        <thead>
+            {# The title='' attr doesn't work in Safari. #}
+            <tr class='tablehead' title='Click to sort'>
+                <th class='name left headerSortDown shortkey_n'>Module</th>
+                <th class='shortkey_s'>statements</th>
+                <th class='shortkey_m'>missing</th>
+                <th class='shortkey_x'>excluded</th>
+                {% if arcs %}
+                <th class='shortkey_b'>branches</th>
+                <th class='shortkey_p'>partial</th>
+                {% endif %}
+                <th class='right shortkey_c'>coverage</th>
+            </tr>
+        </thead>
+        {# HTML syntax requires thead, tfoot, tbody #}
+        <tfoot>
+            <tr class='total'>
+                <td class='name left'>Total</td>
+                <td>{{totals.n_statements}}</td>
+                <td>{{totals.n_missing}}</td>
+                <td>{{totals.n_excluded}}</td>
+                {% if arcs %}
+                <td>{{totals.n_branches}}</td>
+                <td>{{totals.n_missing_branches}}</td>
+                {% endif %}
+                <td class='right'>{{totals.pc_covered_str}}%</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            {% for file in files %}
+            <tr class='file'>
+                <td class='name left'><a href='{{file.html_filename}}'>{{file.name}}</a></td>
+                <td>{{file.nums.n_statements}}</td>
+                <td>{{file.nums.n_missing}}</td>
+                <td>{{file.nums.n_excluded}}</td>
+                {% if arcs %}
+                <td>{{file.nums.n_branches}}</td>
+                <td>{{file.nums.n_missing_branches}}</td>
+                {% endif %}
+                <td class='right'>{{file.nums.pc_covered_str}}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id='footer'>
+    <div class='content'>
+        <p>
+            <a class='nav' href='{{__url__}}'>coverage.py v{{__version__}}</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

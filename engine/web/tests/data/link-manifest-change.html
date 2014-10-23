@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- This file is meant to test how many times the WebFrameClient will be
+  notified of a change in the current manifest URL associated with the document. -->
+<html>
+  <head>
+    <link rel='manifest' href=''>
+    <link rel='manifest'>
+    <link rel='manifest foo'>
+    <link rel='manifest' crossorigin foo bar>
+    <!-- 4 times (= 4) -->
+  </head>
+  <body>
+    <link rel='manifest'>
+    <!-- 1 time (= 5) -->
+  </body>
+  <script>
+    function createLink(href, rel) {
+      var link = document.createElement('link');
+      link.href = href;
+      link.rel = rel;
+      return link;
+    }
+    var links = document.getElementsByTagName('link');
+    var link = document.createElement('link');
+
+    document.head.appendChild(createLink('foo.json', 'manifest'));
+    document.head.appendChild(createLink('foo.json', ''));
+    document.head.appendChild(createLink('foo.json', 'manifest'));
+    document.head.insertBefore(createLink('foo.json', 'manifest'), links[0]);
+    // 3 times (= 8)
+
+    links[0].crossOrigin = 'use-credentials';
+    links[0].media = '';
+    links[0].type = 'image/gif';
+    // 2 times (= 10)
+
+    links[0].href = 'bar.json';
+    links[0].rel = 'blah';
+    links[0].rel = 'manifest';
+    // 3 times (= 13)
+
+    document.head.removeChild(links[0]);
+    // 1 time (= 14)
+  </script>
+</html>

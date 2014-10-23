@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<link rel='stylesheet' type='text/css' href='touch-action-tests.css'>
+<script src='touch-action-tests.js'></script>
+
+<!-- 
+    Test a bunch of complex cases where touch-action: [pan-x ||pan-y]. 
+-->
+
+<div class='ta-panx' expected-action='pan-x'>Simple div with touch-action: pan-x</div>
+<div class='ta-pany' expected-action='pan-y'>Simple div with touch-action: pan-y</div>
+<div class='ta-panxy' expected-action='pan-x-y'>Simple div with touch-action: pan-x pan-y</div>
+<div class='ta-manipulation' expected-action='manipulation'>Simple div with touch-action: manipulation</div>
+
+<div class='ta-none' style='height: 0; margin-bottom: 50px'>
+  <div class='ta-panx' expected-action='none'>
+    Explicitly setting touch-action: pan-x does nothing to prevent propagation of none
+  </div>
+</div>
+
+<div class='ta-pany'>
+  <div class='ta-none' expected-action='none'>
+    Explicitly setting touch-action: none prevent propagation of pan-y
+  </div>
+</div>
+
+<div class='ta-panx'>
+  <div class='ta-pany' expected-action='none'>
+    Disjoint flags intersect to none
+  </div>
+</div>
+ 
+<div class='ta-panxy'>
+  <div class='ta-auto' expected-action='pan-x-y'>
+    Explicitly setting touch-action: auto does nothing to prevent propagation of 'pan-x pan-y'
+  </div>
+</div>
+
+<div class='ta-panx'>
+  <div class='ta-panxy' expected-action='pan-x'>
+    Explicitly setting touch-action: pan-x pan-y does nothing to prevent propagation of pan-x
+  </div>
+</div>
+
+<div class='ta-panx'>
+  <div class='ta-auto'>
+    <div class='ta-pany' expected-action='none'>
+      Disjoint flags intersect to none
+    </div>
+  </div>
+</div>
+
+<div class='ta-panx'>
+  <div class='scroll ta-pany' expected-action='pan-y'>      
+    Touch-action: pan-x is not propagated into overflow-scroll elements
+  </div>
+</div>
+
+ <div class='ta-panx'>
+  <div class='ta-manipulation' expected-action='pan-x'>
+    Explicitly setting touch-action: manipulation does nothing to prevent propagation of 'pan-x'
+  </div>
+ </div>
+
+ <div class='ta-manipulation'>
+  <div class='ta-auto' expected-action='manipulation'>
+    Explicitly setting touch-action: auto does nothing to prevent propagation of 'manipulation'
+  </div>
+</div>

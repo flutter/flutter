@@ -1,0 +1,28 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("platform") {
+  output_name = "sky_testing_platform"
+
+  sources = [
+    "platform_impl.cc",
+    "platform_impl.h",
+    "webmimeregistry_impl.cc",
+    "webmimeregistry_impl.h",
+    "webthemeengine_impl.cc",
+    "webthemeengine_impl.h",
+    "webthread_impl.cc",
+    "webthread_impl.h",
+    "webunittestsupport_impl.cc",
+    "webunittestsupport_impl.h",
+  ]
+
+  deps = [
+    "//base",
+    "//net",
+    "//sky/engine/public:blink",
+    "//ui/native_theme",
+    "//url",
+  ]
+}

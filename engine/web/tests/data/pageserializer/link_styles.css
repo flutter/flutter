@@ -1,0 +1,5 @@
+@import url('import_style_from_link.css');
+
+#divRed {
+  background-image: url('red_background.png');
+}

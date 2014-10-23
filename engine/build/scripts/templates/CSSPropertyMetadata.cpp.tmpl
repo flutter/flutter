@@ -1,0 +1,54 @@
+{% from 'macros.tmpl' import license %}
+{{license()}}
+
+#include "config.h"
+#include "core/css/CSSPropertyMetadata.h"
+
+#include "platform/RuntimeEnabledFeatures.h"
+#include "wtf/BitArray.h"
+
+namespace blink {
+{% for flag, function_name in switches %}
+
+bool CSSPropertyMetadata::{{function_name}}(CSSPropertyID property)
+{
+    switch(property) {
+    case CSSPropertyInvalid:
+        ASSERT_NOT_REACHED();
+        return false;
+    {% for property_id, property in properties.items() if property[flag] %}
+    case {{property_id}}:
+    {% endfor %}
+        return true;
+    default:
+        return false;
+    }
+}
+{% endfor %}
+
+bool CSSPropertyMetadata::isEnabledProperty(CSSPropertyID property)
+{
+    static BitArray<numCSSProperties>* enabledProperties = 0;
+    if (!enabledProperties) {
+        enabledProperties = new BitArray<numCSSProperties>(true); // All bits sets to 1.
+        {% for property_id, property in properties.items() if property.runtime_flag %}
+        if (!RuntimeEnabledFeatures::{{property.runtime_flag|lower_first}}Enabled())
+            enabledProperties->clear({{property_id}} - {{first_enum_value}});
+        {% endfor %}
+        {% for property_id, property in properties.items() if property.is_internal %}
+        enabledProperties->clear({{property_id}} - {{first_enum_value}});
+        {% endfor %}
+    }
+    return enabledProperties->get(property - {{first_enum_value}});
+}
+
+void CSSPropertyMetadata::filterEnabledCSSPropertiesIntoVector(const CSSPropertyID* properties, size_t propertyCount, Vector<CSSPropertyID>& outVector)
+{
+    for (unsigned i = 0; i < propertyCount; i++) {
+        CSSPropertyID property = properties[i];
+        if (isEnabledProperty(property))
+            outVector.append(property);
+    }
+}
+
+} // namespace blink

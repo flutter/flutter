@@ -1,0 +1,75 @@
+/*
+ * Copyright (C) 2006, 2007, 2009, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+// Introduced in DOM Level 2:
+[
+    WillBeGarbageCollected,
+    Custom=Wrap,
+    EventConstructor,
+] interface Event {
+
+    // DOM PhaseType
+    const unsigned short NONE                = 0;
+    const unsigned short CAPTURING_PHASE     = 1;
+    const unsigned short AT_TARGET           = 2;
+    const unsigned short BUBBLING_PHASE      = 3;
+
+    // Reverse-engineered from Netscape
+    const unsigned short MOUSEDOWN           = 1;
+    const unsigned short MOUSEUP             = 2;
+    const unsigned short MOUSEOVER           = 4;
+    const unsigned short MOUSEOUT            = 8;
+    const unsigned short MOUSEMOVE           = 16;
+    const unsigned short MOUSEDRAG           = 32;
+    const unsigned short CLICK               = 64;
+    const unsigned short DBLCLICK            = 128;
+    const unsigned short KEYDOWN             = 256;
+    const unsigned short KEYUP               = 512;
+    const unsigned short KEYPRESS            = 1024;
+    const unsigned short DRAGDROP            = 2048;
+    const unsigned short FOCUS               = 4096;
+    const unsigned short BLUR                = 8192;
+    const unsigned short SELECT              = 16384;
+    const unsigned short CHANGE              = 32768;
+
+    readonly attribute DOMString        type;
+    readonly attribute EventTarget      target;
+    readonly attribute EventTarget      currentTarget;
+    readonly attribute unsigned short   eventPhase;
+    [InitializedByEventConstructor] readonly attribute boolean bubbles;
+    [InitializedByEventConstructor] readonly attribute boolean cancelable;
+    readonly attribute DOMTimeStamp     timeStamp;
+
+    void               stopPropagation();
+    void               preventDefault();
+    void initEvent([Default=Undefined] optional DOMString eventTypeArg,
+                   [Default=Undefined] optional boolean canBubbleArg,
+                   [Default=Undefined] optional boolean cancelableArg);
+
+    // DOM Level 3 Additions.
+    readonly attribute boolean defaultPrevented;
+    void stopImmediatePropagation();
+
+    // IE Extensions
+    [MeasureAs=EventSrcElement] readonly attribute EventTarget srcElement;
+    [CallWith=ExecutionContext, ImplementedAs=legacyReturnValue, MeasureAs=EventReturnValue] attribute boolean returnValue;
+    [MeasureAs=EventCancelBubble] attribute boolean cancelBubble;
+    [MeasureAs=EventPath] readonly attribute NodeList path;
+};

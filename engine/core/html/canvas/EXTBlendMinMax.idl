@@ -1,0 +1,13 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    DoNotCheckConstants,
+    NoInterfaceObject,
+    TypeChecking=Interface,
+    WillBeGarbageCollected,
+] interface EXTBlendMinMax {
+    const unsigned long MIN_EXT              = 0x8007;
+    const unsigned long MAX_EXT              = 0x8008;
+};
