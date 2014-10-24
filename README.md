@@ -143,10 +143,13 @@ encode and decode messages sent over Mojo pipes.
 Specifications
 --------------
 
-TODO: Link to the specs.
+We're documenting Sky with a [set of technical specifications](specs) that
+define precisely the behavior of the engine.  Currently both the implementation
+and the specification are in flux, but hopefully they'll converge over time.
 
 Contributing
 ------------
 
-TODO: Link to HACKING.md, which contains the instructions for hacking on Sky.
-TODO: Link to mailing list and IRC channel.
+Instructions for building and testing Sky are contained in [HACKING.md]. For
+coordination, we use the ``#mojo`` IRC channel on
+[Freenode](https://freenode.net/).
