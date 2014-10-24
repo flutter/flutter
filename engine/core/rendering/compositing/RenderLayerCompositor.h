@@ -62,7 +62,7 @@ enum CompositingStateTransitionType {
 //
 // There is one RenderLayerCompositor per RenderView.
 
-class RenderLayerCompositor FINAL : public GraphicsLayerClient {
+class RenderLayerCompositor final : public GraphicsLayerClient {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit RenderLayerCompositor(RenderView&);
@@ -155,7 +155,7 @@ public:
     void resetTrackedPaintInvalidationRects();
     void setTracksPaintInvalidations(bool);
 
-    virtual String debugName(const GraphicsLayer*) OVERRIDE;
+    virtual String debugName(const GraphicsLayer*) override;
     DocumentLifecycle& lifecycle() const;
 
     void updatePotentialCompositingReasonsFromStyle(RenderLayer*);
@@ -177,10 +177,10 @@ private:
 #endif
 
     // GraphicsLayerClient implementation
-    virtual void notifyAnimationStarted(const GraphicsLayer*, double) OVERRIDE { }
-    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect&) OVERRIDE;
+    virtual void notifyAnimationStarted(const GraphicsLayer*, double) override { }
+    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect&) override;
 
-    virtual bool isTrackingPaintInvalidations() const OVERRIDE;
+    virtual bool isTrackingPaintInvalidations() const override;
 
     void updateWithoutAcceleratedCompositing(CompositingUpdateType);
     void updateIfNeeded();

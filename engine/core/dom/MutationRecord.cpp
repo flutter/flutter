@@ -53,7 +53,7 @@ public:
     {
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_target);
         visitor->trace(m_addedNodes);
@@ -64,12 +64,12 @@ public:
     }
 
 private:
-    virtual const AtomicString& type() OVERRIDE;
-    virtual Node* target() OVERRIDE { return m_target.get(); }
-    virtual StaticNodeList* addedNodes() OVERRIDE { return m_addedNodes.get(); }
-    virtual StaticNodeList* removedNodes() OVERRIDE { return m_removedNodes.get(); }
-    virtual Node* previousSibling() OVERRIDE { return m_previousSibling.get(); }
-    virtual Node* nextSibling() OVERRIDE { return m_nextSibling.get(); }
+    virtual const AtomicString& type() override;
+    virtual Node* target() override { return m_target.get(); }
+    virtual StaticNodeList* addedNodes() override { return m_addedNodes.get(); }
+    virtual StaticNodeList* removedNodes() override { return m_removedNodes.get(); }
+    virtual Node* previousSibling() override { return m_previousSibling.get(); }
+    virtual Node* nextSibling() override { return m_nextSibling.get(); }
 
     RefPtrWillBeMember<Node> m_target;
     RefPtrWillBeMember<StaticNodeList> m_addedNodes;
@@ -86,7 +86,7 @@ public:
     {
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_target);
         visitor->trace(m_addedNodes);
@@ -95,10 +95,10 @@ public:
     }
 
 private:
-    virtual Node* target() OVERRIDE { return m_target.get(); }
-    virtual String oldValue() OVERRIDE { return m_oldValue; }
-    virtual StaticNodeList* addedNodes() OVERRIDE { return lazilyInitializeEmptyNodeList(m_addedNodes); }
-    virtual StaticNodeList* removedNodes() OVERRIDE { return lazilyInitializeEmptyNodeList(m_removedNodes); }
+    virtual Node* target() override { return m_target.get(); }
+    virtual String oldValue() override { return m_oldValue; }
+    virtual StaticNodeList* addedNodes() override { return lazilyInitializeEmptyNodeList(m_addedNodes); }
+    virtual StaticNodeList* removedNodes() override { return lazilyInitializeEmptyNodeList(m_removedNodes); }
 
     static StaticNodeList* lazilyInitializeEmptyNodeList(RefPtrWillBeMember<StaticNodeList>& nodeList)
     {
@@ -122,8 +122,8 @@ public:
     }
 
 private:
-    virtual const AtomicString& type() OVERRIDE;
-    virtual const AtomicString& attributeName() OVERRIDE { return m_attributeName; }
+    virtual const AtomicString& type() override;
+    virtual const AtomicString& attributeName() override { return m_attributeName; }
 
     AtomicString m_attributeName;
 };
@@ -136,7 +136,7 @@ public:
     }
 
 private:
-    virtual const AtomicString& type() OVERRIDE;
+    virtual const AtomicString& type() override;
 };
 
 class MutationRecordWithNullOldValue : public MutationRecord {
@@ -146,22 +146,22 @@ public:
     {
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_record);
         MutationRecord::trace(visitor);
     }
 
 private:
-    virtual const AtomicString& type() OVERRIDE { return m_record->type(); }
-    virtual Node* target() OVERRIDE { return m_record->target(); }
-    virtual StaticNodeList* addedNodes() OVERRIDE { return m_record->addedNodes(); }
-    virtual StaticNodeList* removedNodes() OVERRIDE { return m_record->removedNodes(); }
-    virtual Node* previousSibling() OVERRIDE { return m_record->previousSibling(); }
-    virtual Node* nextSibling() OVERRIDE { return m_record->nextSibling(); }
-    virtual const AtomicString& attributeName() OVERRIDE { return m_record->attributeName(); }
+    virtual const AtomicString& type() override { return m_record->type(); }
+    virtual Node* target() override { return m_record->target(); }
+    virtual StaticNodeList* addedNodes() override { return m_record->addedNodes(); }
+    virtual StaticNodeList* removedNodes() override { return m_record->removedNodes(); }
+    virtual Node* previousSibling() override { return m_record->previousSibling(); }
+    virtual Node* nextSibling() override { return m_record->nextSibling(); }
+    virtual const AtomicString& attributeName() override { return m_record->attributeName(); }
 
-    virtual String oldValue() OVERRIDE { return String(); }
+    virtual String oldValue() override { return String(); }
 
     RefPtrWillBeMember<MutationRecord> m_record;
 };

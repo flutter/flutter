@@ -34,8 +34,8 @@ class TextResourceDecoder;
 
 class DecodedDataDocumentParser : public DocumentParser {
 public:
-    virtual void appendBytes(const char* bytes, size_t length) OVERRIDE;
-    virtual void flush() OVERRIDE;
+    virtual void appendBytes(const char* bytes, size_t length) override;
+    virtual void flush() override;
 
 protected:
     explicit DecodedDataDocumentParser(Document&);

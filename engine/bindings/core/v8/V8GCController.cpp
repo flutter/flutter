@@ -105,7 +105,7 @@ public:
         : m_isolate(isolate)
     { }
 
-    virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) OVERRIDE
+    virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) override
     {
         // A minor DOM GC can collect only Nodes.
         if (classId != WrapperTypeInfo::NodeClassId)
@@ -244,7 +244,7 @@ public:
     {
     }
 
-    virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) OVERRIDE
+    virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) override
     {
         if (classId != WrapperTypeInfo::NodeClassId && classId != WrapperTypeInfo::ObjectClassId)
             return;

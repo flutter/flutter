@@ -208,7 +208,7 @@ class HeapSupplement : public SupplementBase<T, true> { };
 template<typename T>
 class GC_PLUGIN_IGNORE("http://crbug.com/395036") HeapSupplementable : public SupplementableBase<T, true>, public GarbageCollectedMixin {
 public:
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(this->m_supplements);
         SupplementableBase<T, true>::trace(visitor);

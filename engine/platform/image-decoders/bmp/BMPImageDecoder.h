@@ -42,14 +42,14 @@ public:
     BMPImageDecoder(ImageSource::AlphaOption, ImageSource::GammaAndColorProfileOption, size_t maxDecodedBytes);
 
     // ImageDecoder
-    virtual String filenameExtension() const OVERRIDE { return "bmp"; }
-    virtual void setData(SharedBuffer*, bool allDataReceived) OVERRIDE;
-    virtual bool isSizeAvailable() OVERRIDE;
-    virtual ImageFrame* frameBufferAtIndex(size_t) OVERRIDE;
+    virtual String filenameExtension() const override { return "bmp"; }
+    virtual void setData(SharedBuffer*, bool allDataReceived) override;
+    virtual bool isSizeAvailable() override;
+    virtual ImageFrame* frameBufferAtIndex(size_t) override;
     // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // BMPImageReader!
-    virtual bool setFailed() OVERRIDE;
+    virtual bool setFailed() override;
 
 private:
     inline uint32_t readUint32(int offset) const

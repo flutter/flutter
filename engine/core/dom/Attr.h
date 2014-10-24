@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class Attr FINAL : public Node {
+class Attr final : public Node {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<Attr> create(Element&, const QualifiedName&);
@@ -45,21 +45,21 @@ public:
     void detachFromElement();
 
     // FIXME(sky): Remove this.
-    virtual const AtomicString& localName() const OVERRIDE { return m_name.localName(); }
+    virtual const AtomicString& localName() const override { return m_name.localName(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     Attr(Element&, const QualifiedName&);
 
     bool isElementNode() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
 
-    virtual String nodeName() const OVERRIDE { return name(); }
-    virtual NodeType nodeType() const OVERRIDE { return ATTRIBUTE_NODE; }
+    virtual String nodeName() const override { return name(); }
+    virtual NodeType nodeType() const override { return ATTRIBUTE_NODE; }
 
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) OVERRIDE { return nullptr; }
+    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override { return nullptr; }
 
-    virtual bool isAttributeNode() const OVERRIDE { return true; }
+    virtual bool isAttributeNode() const override { return true; }
 
     RawPtrWillBeMember<Element> m_element;
     QualifiedName m_name;

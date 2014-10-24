@@ -34,16 +34,16 @@
 
 namespace blink {
 
-class V8ArrayBufferDeallocationObserver FINAL: public WTF::ArrayBufferDeallocationObserver {
+class V8ArrayBufferDeallocationObserver final: public WTF::ArrayBufferDeallocationObserver {
 public:
-    virtual void arrayBufferDeallocated(unsigned sizeInBytes) OVERRIDE
+    virtual void arrayBufferDeallocated(unsigned sizeInBytes) override
     {
         v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-static_cast<int>(sizeInBytes));
     }
     static V8ArrayBufferDeallocationObserver* instanceTemplate();
 
 protected:
-    virtual void blinkAllocatedMemory(unsigned sizeInBytes) OVERRIDE
+    virtual void blinkAllocatedMemory(unsigned sizeInBytes) override
     {
         v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(static_cast<int>(sizeInBytes));
     }

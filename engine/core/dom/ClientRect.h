@@ -37,7 +37,7 @@ namespace blink {
 
 class IntRect;
 
-class ClientRect FINAL : public RefCountedWillBeGarbageCollected<ClientRect>, public ScriptWrappable {
+class ClientRect final : public RefCountedWillBeGarbageCollected<ClientRect>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<ClientRect> create()

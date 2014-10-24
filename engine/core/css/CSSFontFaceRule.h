@@ -31,7 +31,7 @@ class CSSStyleDeclaration;
 class StyleRuleFontFace;
 class StyleRuleCSSStyleDeclaration;
 
-class CSSFontFaceRule FINAL : public CSSRule {
+class CSSFontFaceRule final : public CSSRule {
 public:
     static PassRefPtrWillBeRawPtr<CSSFontFaceRule> create(StyleRuleFontFace* rule, CSSStyleSheet* sheet)
     {
@@ -40,15 +40,15 @@ public:
 
     virtual ~CSSFontFaceRule();
 
-    virtual CSSRule::Type type() const OVERRIDE { return FONT_FACE_RULE; }
-    virtual String cssText() const OVERRIDE;
-    virtual void reattach(StyleRuleBase*) OVERRIDE;
+    virtual CSSRule::Type type() const override { return FONT_FACE_RULE; }
+    virtual String cssText() const override;
+    virtual void reattach(StyleRuleBase*) override;
 
     CSSStyleDeclaration* style() const;
 
     StyleRuleFontFace* styleRule() const { return m_fontFaceRule.get(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CSSFontFaceRule(StyleRuleFontFace*, CSSStyleSheet* parent);

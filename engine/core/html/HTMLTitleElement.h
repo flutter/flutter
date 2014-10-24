@@ -26,7 +26,7 @@
 
 namespace blink {
 
-class HTMLTitleElement FINAL : public HTMLElement {
+class HTMLTitleElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLTitleElement);
@@ -37,9 +37,9 @@ public:
 private:
     explicit HTMLTitleElement(Document&);
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE;
-    virtual void childrenChanged(const ChildrenChange&) OVERRIDE;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void removedFrom(ContainerNode*) override;
+    virtual void childrenChanged(const ChildrenChange&) override;
 
     bool m_ignoreTitleUpdatesWhenChildrenChange;
 };

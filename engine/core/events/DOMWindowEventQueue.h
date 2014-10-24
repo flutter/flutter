@@ -46,16 +46,16 @@ class ExecutionContext;
 #define DOMWINDOWEVENTQUEUE_BASE_CLASSES public RefCounted<DOMWindowEventQueue>, public EventQueue
 #endif
 
-class DOMWindowEventQueue FINAL : DOMWINDOWEVENTQUEUE_BASE_CLASSES {
+class DOMWindowEventQueue final : DOMWINDOWEVENTQUEUE_BASE_CLASSES {
 public:
     static PassRefPtrWillBeRawPtr<DOMWindowEventQueue> create(ExecutionContext*);
     virtual ~DOMWindowEventQueue();
 
     // EventQueue
-    virtual void trace(Visitor*) OVERRIDE;
-    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) OVERRIDE;
-    virtual bool cancelEvent(Event*) OVERRIDE;
-    virtual void close() OVERRIDE;
+    virtual void trace(Visitor*) override;
+    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) override;
+    virtual bool cancelEvent(Event*) override;
+    virtual void close() override;
 
 private:
     explicit DOMWindowEventQueue(ExecutionContext*);

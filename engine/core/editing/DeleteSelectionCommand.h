@@ -32,7 +32,7 @@ namespace blink {
 
 class EditingStyle;
 
-class DeleteSelectionCommand FINAL : public CompositeEditCommand {
+class DeleteSelectionCommand final : public CompositeEditCommand {
 public:
     static PassRefPtrWillBeRawPtr<DeleteSelectionCommand> create(Document& document, bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool expandForSpecialElements = false, bool sanitizeMarkup = true)
     {
@@ -43,16 +43,16 @@ public:
         return adoptRefWillBeNoop(new DeleteSelectionCommand(selection, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     DeleteSelectionCommand(Document&, bool smartDelete, bool mergeBlocksAfterDelete, bool expandForSpecialElements, bool santizeMarkup);
     DeleteSelectionCommand(const VisibleSelection&, bool smartDelete, bool mergeBlocksAfterDelete, bool expandForSpecialElements, bool sanitizeMarkup);
 
-    virtual void doApply() OVERRIDE;
-    virtual EditAction editingAction() const OVERRIDE;
+    virtual void doApply() override;
+    virtual EditAction editingAction() const override;
 
-    virtual bool preservesTypingStyle() const OVERRIDE;
+    virtual bool preservesTypingStyle() const override;
 
     void initializeStartEnd(Position&, Position&);
     void setStartingSelectionOnSmartDelete(const Position&, const Position&);
@@ -64,8 +64,8 @@ private:
     void calculateTypingStyleAfterDelete();
     void clearTransientState();
     void makeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss();
-    virtual void removeNode(PassRefPtrWillBeRawPtr<Node>, ShouldAssumeContentIsAlwaysEditable = DoNotAssumeContentIsAlwaysEditable) OVERRIDE;
-    virtual void deleteTextFromNode(PassRefPtrWillBeRawPtr<Text>, unsigned, unsigned) OVERRIDE;
+    virtual void removeNode(PassRefPtrWillBeRawPtr<Node>, ShouldAssumeContentIsAlwaysEditable = DoNotAssumeContentIsAlwaysEditable) override;
+    virtual void deleteTextFromNode(PassRefPtrWillBeRawPtr<Text>, unsigned, unsigned) override;
     void removeRedundantBlocks();
 
     bool m_hasSelectionToDelete;

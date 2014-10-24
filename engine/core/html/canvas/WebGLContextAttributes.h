@@ -36,7 +36,7 @@ namespace blink {
 
 class Settings;
 
-class WebGLContextAttributes FINAL : public CanvasContextAttributes, public ScriptWrappable {
+class WebGLContextAttributes final : public CanvasContextAttributes, public ScriptWrappable {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(WebGLContextAttributes);
     DEFINE_WRAPPERTYPEINFO();
 public:

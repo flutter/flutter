@@ -35,18 +35,18 @@ public:
 
     bool requiresAcceleratedCompositing() const;
 
-    virtual bool needsPreferredWidthsRecalculation() const OVERRIDE FINAL;
+    virtual bool needsPreferredWidthsRecalculation() const override final;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) OVERRIDE;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
 
 protected:
-    virtual LayerType layerTypeRequired() const OVERRIDE;
+    virtual LayerType layerTypeRequired() const override;
 
 private:
-    virtual bool isRenderPart() const OVERRIDE FINAL { return true; }
-    virtual const char* renderName() const OVERRIDE { return "RenderPart"; }
+    virtual bool isRenderPart() const override final { return true; }
+    virtual const char* renderName() const override { return "RenderPart"; }
 
-    virtual CompositingReasons additionalCompositingReasons() const OVERRIDE;
+    virtual CompositingReasons additionalCompositingReasons() const override;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderPart, isRenderPart());

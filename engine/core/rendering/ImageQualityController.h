@@ -44,7 +44,7 @@ namespace blink {
 typedef HashMap<const void*, LayoutSize> LayerSizeMap;
 typedef HashMap<RenderObject*, LayerSizeMap> ObjectLayerSizeMap;
 
-class ImageQualityController FINAL {
+class ImageQualityController final {
     WTF_MAKE_NONCOPYABLE(ImageQualityController); WTF_MAKE_FAST_ALLOCATED;
 public:
     ~ImageQualityController();

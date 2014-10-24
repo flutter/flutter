@@ -17,18 +17,18 @@ public:
         return adoptRefWillBeNoop(new LegacyStyleInterpolation(InterpolableAnimatableValue::create(start), InterpolableAnimatableValue::create(end), id));
     }
 
-    virtual void apply(StyleResolverState& state) const OVERRIDE
+    virtual void apply(StyleResolverState& state) const override
     {
         AnimatedStyleBuilder::applyProperty(m_id, state, currentValue().get());
     }
 
-    virtual bool isLegacyStyleInterpolation() const OVERRIDE FINAL { return true; }
+    virtual bool isLegacyStyleInterpolation() const override final { return true; }
     PassRefPtrWillBeRawPtr<AnimatableValue> currentValue() const
     {
         return toInterpolableAnimatableValue(m_cachedValue.get())->value();
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         StyleInterpolation::trace(visitor);
     }

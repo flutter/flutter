@@ -61,8 +61,8 @@ public:
     AbstractView* view() const { return m_view.get(); }
     int detail() const { return m_detail; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual bool isUIEvent() const OVERRIDE FINAL;
+    virtual const AtomicString& interfaceName() const override;
+    virtual bool isUIEvent() const override final;
 
     virtual int keyCode() const;
     virtual int charCode() const;
@@ -75,7 +75,7 @@ public:
 
     virtual int which() const;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     UIEvent();

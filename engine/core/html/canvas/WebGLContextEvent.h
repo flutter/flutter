@@ -36,7 +36,7 @@ struct WebGLContextEventInit : public EventInit {
     String statusMessage;
 };
 
-class WebGLContextEvent FINAL : public Event {
+class WebGLContextEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 
 public:
@@ -56,9 +56,9 @@ public:
 
     const String& statusMessage() const { return m_statusMessage; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     WebGLContextEvent();

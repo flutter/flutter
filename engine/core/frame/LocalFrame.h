@@ -73,7 +73,7 @@ namespace blink {
 
         virtual ~LocalFrame();
 
-        virtual void detach() OVERRIDE;
+        virtual void detach() override;
 
         void addDestructionObserver(FrameDestructionObserver*);
         void removeDestructionObserver(FrameDestructionObserver*);
@@ -81,7 +81,7 @@ namespace blink {
         void willDetachFrameHost();
         void detachFromFrameHost();
 
-        virtual void setDOMWindow(PassRefPtrWillBeRawPtr<LocalDOMWindow>) OVERRIDE;
+        virtual void setDOMWindow(PassRefPtrWillBeRawPtr<LocalDOMWindow>) override;
         FrameView* view() const;
         Document* document() const;
 

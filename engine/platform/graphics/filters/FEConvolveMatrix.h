@@ -69,11 +69,11 @@ public:
     bool preserveAlpha() const;
     bool setPreserveAlpha(bool);
 
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
-    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) OVERRIDE FINAL;
+    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) override final;
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
 private:
 
@@ -88,7 +88,7 @@ private:
     FEConvolveMatrix(Filter*, const IntSize&, float, float,
             const IntPoint&, EdgeModeType, const FloatPoint&, bool, const Vector<float>&);
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
 
     template<bool preserveAlphaValues>
     ALWAYS_INLINE void fastSetInteriorPixels(PaintingData&, int clipRight, int clipBottom, int yStart, int yEnd);

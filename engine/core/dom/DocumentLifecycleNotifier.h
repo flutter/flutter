@@ -43,8 +43,8 @@ public:
     void notifyDocumentWasDisposed();
 #endif
 
-    virtual void addObserver(Observer*) OVERRIDE FINAL;
-    virtual void removeObserver(Observer*) OVERRIDE FINAL;
+    virtual void addObserver(Observer*) override final;
+    virtual void removeObserver(Observer*) override final;
 
 private:
     explicit DocumentLifecycleNotifier(Document*);

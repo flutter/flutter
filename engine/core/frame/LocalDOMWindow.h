@@ -81,7 +81,7 @@ enum PageshowEventPersistence {
 
 enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForwardList };
 
-class LocalDOMWindow FINAL : public RefCountedWillBeGarbageCollectedFinalized<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public WillBeHeapSupplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
+class LocalDOMWindow final : public RefCountedWillBeGarbageCollectedFinalized<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public WillBeHeapSupplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
     DEFINE_WRAPPERTYPEINFO();
     REFCOUNTED_EVENT_TARGET(LocalDOMWindow);
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LocalDOMWindow);
@@ -94,10 +94,10 @@ public:
 
     PassRefPtrWillBeRawPtr<Document> installNewDocument(const DocumentInit&);
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual ExecutionContext* executionContext() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual ExecutionContext* executionContext() const override;
 
-    virtual LocalDOMWindow* toDOMWindow() OVERRIDE;
+    virtual LocalDOMWindow* toDOMWindow() override;
 
     void registerProperty(DOMWindowProperty*);
     void unregisterProperty(DOMWindowProperty*);
@@ -185,9 +185,9 @@ public:
 
     // Events
     // EventTarget API
-    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) OVERRIDE;
-    virtual bool removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) OVERRIDE;
-    virtual void removeAllEventListeners() OVERRIDE;
+    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
+    virtual bool removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
+    virtual void removeAllEventListeners() override;
 
     using EventTarget::dispatchEvent;
     bool dispatchEvent(PassRefPtrWillBeRawPtr<Event> prpEvent, PassRefPtrWillBeRawPtr<EventTarget> prpTarget);
@@ -220,7 +220,7 @@ public:
 
     void acceptLanguagesChanged();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     DOMWindowLifecycleNotifier& lifecycleNotifier();
@@ -230,8 +230,8 @@ private:
 
     Page* page();
 
-    virtual void frameDestroyed() OVERRIDE;
-    virtual void willDetachFrameHost() OVERRIDE;
+    virtual void frameDestroyed() override;
+    virtual void willDetachFrameHost() override;
 
     void clearDocument();
     void resetDOMWindowProperties();

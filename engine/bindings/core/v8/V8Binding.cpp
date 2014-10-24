@@ -84,21 +84,21 @@ void setMinimumArityTypeError(ExceptionState& exceptionState, unsigned expected,
 }
 
 class ArrayBufferAllocator : public v8::ArrayBuffer::Allocator {
-    virtual void* Allocate(size_t size) OVERRIDE
+    virtual void* Allocate(size_t size) override
     {
         void* data;
         WTF::ArrayBufferContents::allocateMemory(size, WTF::ArrayBufferContents::ZeroInitialize, data);
         return data;
     }
 
-    virtual void* AllocateUninitialized(size_t size) OVERRIDE
+    virtual void* AllocateUninitialized(size_t size) override
     {
         void* data;
         WTF::ArrayBufferContents::allocateMemory(size, WTF::ArrayBufferContents::DontInitialize, data);
         return data;
     }
 
-    virtual void Free(void* data, size_t size) OVERRIDE
+    virtual void Free(void* data, size_t size) override
     {
         WTF::ArrayBufferContents::freeMemory(data, size);
     }

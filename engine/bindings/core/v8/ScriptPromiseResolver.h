@@ -77,9 +77,9 @@ public:
     ScriptState* scriptState() const { return m_scriptState.get(); }
 
     // ActiveDOMObject implementation.
-    virtual void suspend() OVERRIDE;
-    virtual void resume() OVERRIDE;
-    virtual void stop() OVERRIDE;
+    virtual void suspend() override;
+    virtual void resume() override;
+    virtual void stop() override;
 
     // Once this function is called this resolver stays alive while the
     // promise is pending and the associated ExecutionContext isn't stopped.

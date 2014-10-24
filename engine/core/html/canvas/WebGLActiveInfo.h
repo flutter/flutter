@@ -34,7 +34,7 @@
 
 namespace blink {
 
-class WebGLActiveInfo FINAL : public RefCountedWillBeGarbageCollectedFinalized<WebGLActiveInfo>, public ScriptWrappable {
+class WebGLActiveInfo final : public RefCountedWillBeGarbageCollectedFinalized<WebGLActiveInfo>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<WebGLActiveInfo> create(const String& name, GLenum type, GLint size)

@@ -61,7 +61,7 @@ class LocalFrame;
 // offset is set through the GraphicsLayer <-> CC sync mechanisms. Its contents is the page's
 // main FrameView, which corresponds to the outer viewport. The inner viewport is always contained
 // in the outer viewport and can pan within it.
-class PinchViewport FINAL : public GraphicsLayerClient, public ScrollableArea {
+class PinchViewport final : public GraphicsLayerClient, public ScrollableArea {
 public:
     explicit PinchViewport(FrameHost&);
     virtual ~PinchViewport();
@@ -112,32 +112,32 @@ public:
     void scrollIntoView(const FloatRect&);
 private:
     // ScrollableArea implementation
-    virtual bool isActive() const OVERRIDE { return false; }
-    virtual int scrollSize(ScrollbarOrientation) const OVERRIDE;
-    virtual bool isScrollCornerVisible() const OVERRIDE { return false; }
-    virtual IntRect scrollCornerRect() const OVERRIDE { return IntRect(); }
-    virtual IntPoint scrollPosition() const OVERRIDE { return flooredIntPoint(m_offset); }
-    virtual IntPoint minimumScrollPosition() const OVERRIDE;
-    virtual IntPoint maximumScrollPosition() const OVERRIDE;
-    virtual int visibleHeight() const OVERRIDE { return visibleRect().height(); };
-    virtual int visibleWidth() const OVERRIDE { return visibleRect().width(); };
-    virtual IntSize contentsSize() const OVERRIDE;
-    virtual bool scrollbarsCanBeActive() const OVERRIDE { return false; }
-    virtual IntRect scrollableAreaBoundingBox() const OVERRIDE;
-    virtual bool userInputScrollable(ScrollbarOrientation) const OVERRIDE { return true; }
-    virtual bool shouldPlaceVerticalScrollbarOnLeft() const OVERRIDE { return false; }
-    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) OVERRIDE;
-    virtual void invalidateScrollCornerRect(const IntRect&) OVERRIDE { }
-    virtual void setScrollOffset(const IntPoint&) OVERRIDE;
-    virtual GraphicsLayer* layerForContainer() const OVERRIDE;
-    virtual GraphicsLayer* layerForScrolling() const OVERRIDE;
-    virtual GraphicsLayer* layerForHorizontalScrollbar() const OVERRIDE;
-    virtual GraphicsLayer* layerForVerticalScrollbar() const OVERRIDE;
+    virtual bool isActive() const override { return false; }
+    virtual int scrollSize(ScrollbarOrientation) const override;
+    virtual bool isScrollCornerVisible() const override { return false; }
+    virtual IntRect scrollCornerRect() const override { return IntRect(); }
+    virtual IntPoint scrollPosition() const override { return flooredIntPoint(m_offset); }
+    virtual IntPoint minimumScrollPosition() const override;
+    virtual IntPoint maximumScrollPosition() const override;
+    virtual int visibleHeight() const override { return visibleRect().height(); };
+    virtual int visibleWidth() const override { return visibleRect().width(); };
+    virtual IntSize contentsSize() const override;
+    virtual bool scrollbarsCanBeActive() const override { return false; }
+    virtual IntRect scrollableAreaBoundingBox() const override;
+    virtual bool userInputScrollable(ScrollbarOrientation) const override { return true; }
+    virtual bool shouldPlaceVerticalScrollbarOnLeft() const override { return false; }
+    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
+    virtual void invalidateScrollCornerRect(const IntRect&) override { }
+    virtual void setScrollOffset(const IntPoint&) override;
+    virtual GraphicsLayer* layerForContainer() const override;
+    virtual GraphicsLayer* layerForScrolling() const override;
+    virtual GraphicsLayer* layerForHorizontalScrollbar() const override;
+    virtual GraphicsLayer* layerForVerticalScrollbar() const override;
 
     // GraphicsLayerClient implementation.
-    virtual void notifyAnimationStarted(const GraphicsLayer*, double monotonicTime) OVERRIDE;
-    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect& inClip) OVERRIDE;
-    virtual String debugName(const GraphicsLayer*) OVERRIDE;
+    virtual void notifyAnimationStarted(const GraphicsLayer*, double monotonicTime) override;
+    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect& inClip) override;
+    virtual String debugName(const GraphicsLayer*) override;
 
     void setupScrollbar(blink::WebScrollbar::Orientation);
     FloatPoint clampOffsetToBoundaries(const FloatPoint&);

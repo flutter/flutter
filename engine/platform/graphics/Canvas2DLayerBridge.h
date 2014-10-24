@@ -56,14 +56,14 @@ public:
     virtual ~Canvas2DLayerBridge();
 
     // WebExternalTextureLayerClient implementation.
-    virtual bool prepareMailbox(WebExternalTextureMailbox*, WebExternalBitmap*) OVERRIDE;
-    virtual void mailboxReleased(const WebExternalTextureMailbox&, bool lostResource) OVERRIDE;
+    virtual bool prepareMailbox(WebExternalTextureMailbox*, WebExternalBitmap*) override;
+    virtual void mailboxReleased(const WebExternalTextureMailbox&, bool lostResource) override;
 
     // SkDeferredCanvas::NotificationClient implementation
-    virtual void prepareForDraw() OVERRIDE;
-    virtual void storageAllocatedForRecordingChanged(size_t) OVERRIDE;
-    virtual void flushedDrawCommands() OVERRIDE;
-    virtual void skippedPendingDrawCommands() OVERRIDE;
+    virtual void prepareForDraw() override;
+    virtual void storageAllocatedForRecordingChanged(size_t) override;
+    virtual void flushedDrawCommands() override;
+    virtual void skippedPendingDrawCommands() override;
 
     // ImageBufferSurface implementation
     void finalizeFrame(const FloatRect &dirtyRect);

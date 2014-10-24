@@ -35,7 +35,7 @@ namespace blink {
 
 class ExceptionState;
 
-class CSSMatrix FINAL : public RefCountedWillBeGarbageCollected<CSSMatrix>, public ScriptWrappable {
+class CSSMatrix final : public RefCountedWillBeGarbageCollected<CSSMatrix>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<CSSMatrix> create(const TransformationMatrix& m)

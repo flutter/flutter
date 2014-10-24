@@ -96,7 +96,7 @@ WTF_ALLOW_INIT_WITH_MEM_FUNCTIONS(blink::AttributeChange);
 
 namespace blink {
 
-class StyledMarkupAccumulator FINAL : public MarkupAccumulator {
+class StyledMarkupAccumulator final : public MarkupAccumulator {
 public:
     enum RangeFullySelectsNode { DoesFullySelectNode, DoesNotFullySelectNode };
 
@@ -110,11 +110,11 @@ public:
 private:
     void appendStyleNodeOpenTag(StringBuilder&, StylePropertySet*, const Document&, bool isBlock = false);
     const String& styleNodeCloseTag(bool isBlock = false);
-    virtual void appendText(StringBuilder& out, Text&) OVERRIDE;
+    virtual void appendText(StringBuilder& out, Text&) override;
     String renderedText(Node&, const Range*);
     String stringValueForRange(const Node&, const Range*);
     void appendElement(StringBuilder& out, Element&, bool addDisplayInline, RangeFullySelectsNode);
-    virtual void appendElement(StringBuilder& out, Element& element, Namespaces*) OVERRIDE { appendElement(out, element, false, DoesFullySelectNode); }
+    virtual void appendElement(StringBuilder& out, Element& element, Namespaces*) override { appendElement(out, element, false, DoesFullySelectNode); }
 
     enum NodeTraversalMode { EmitString, DoNotEmitString };
     Node* traverseNodesForSerialization(Node* startNode, Node* pastEnd, NodeTraversalMode);

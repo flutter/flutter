@@ -105,7 +105,7 @@ public:
     void setProportion(int visibleSize, int totalSize);
     void setPressedPos(int p) { m_pressedPos = p; }
 
-    virtual void paint(GraphicsContext*, const IntRect& damageRect) OVERRIDE;
+    virtual void paint(GraphicsContext*, const IntRect& damageRect) override;
 
     bool isOverlayScrollbar() const;
     bool shouldParticipateInHitTesting();
@@ -131,11 +131,11 @@ public:
     bool suppressInvalidation() const { return m_suppressInvalidation; }
     void setSuppressInvalidation(bool s) { m_suppressInvalidation = s; }
 
-    virtual IntRect convertToContainingView(const IntRect&) const OVERRIDE;
-    virtual IntRect convertFromContainingView(const IntRect&) const OVERRIDE;
+    virtual IntRect convertToContainingView(const IntRect&) const override;
+    virtual IntRect convertFromContainingView(const IntRect&) const override;
 
-    virtual IntPoint convertToContainingView(const IntPoint&) const OVERRIDE;
-    virtual IntPoint convertFromContainingView(const IntPoint&) const OVERRIDE;
+    virtual IntPoint convertToContainingView(const IntPoint&) const override;
+    virtual IntPoint convertFromContainingView(const IntPoint&) const override;
 
     void moveThumb(int pos);
 
@@ -220,7 +220,7 @@ protected:
     bool m_isAlphaLocked;
 
 private:
-    virtual bool isScrollbar() const OVERRIDE { return true; }
+    virtual bool isScrollbar() const override { return true; }
 
     float scrollableAreaCurrentPos() const;
 };

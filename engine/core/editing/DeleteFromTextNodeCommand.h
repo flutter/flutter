@@ -32,20 +32,20 @@ namespace blink {
 
 class Text;
 
-class DeleteFromTextNodeCommand FINAL : public SimpleEditCommand {
+class DeleteFromTextNodeCommand final : public SimpleEditCommand {
 public:
     static PassRefPtrWillBeRawPtr<DeleteFromTextNodeCommand> create(PassRefPtrWillBeRawPtr<Text> node, unsigned offset, unsigned count)
     {
         return adoptRefWillBeNoop(new DeleteFromTextNodeCommand(node, offset, count));
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     DeleteFromTextNodeCommand(PassRefPtrWillBeRawPtr<Text>, unsigned offset, unsigned count);
 
-    virtual void doApply() OVERRIDE;
-    virtual void doUnapply() OVERRIDE;
+    virtual void doApply() override;
+    virtual void doUnapply() override;
 
     RefPtrWillBeMember<Text> m_node;
     unsigned m_offset;

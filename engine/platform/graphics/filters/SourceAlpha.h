@@ -32,12 +32,12 @@ public:
 
     static const AtomicString& effectName();
 
-    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) OVERRIDE;
+    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) override;
 
-    virtual FilterEffectType filterEffectType() const OVERRIDE { return FilterEffectTypeSourceInput; }
+    virtual FilterEffectType filterEffectType() const override { return FilterEffectTypeSourceInput; }
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
 private:
     SourceAlpha(Filter* filter)
@@ -45,7 +45,7 @@ private:
     {
     }
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
 };
 
 } // namespace blink

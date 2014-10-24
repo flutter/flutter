@@ -51,9 +51,9 @@ public:
         {
             m_lastDecodedSizeChangedDelta = delta;
         }
-        virtual void didDraw(const Image*) OVERRIDE { }
-        virtual bool shouldPauseAnimation(const Image*) OVERRIDE { return false; }
-        virtual void animationAdvanced(const Image*) OVERRIDE { }
+        virtual void didDraw(const Image*) override { }
+        virtual bool shouldPauseAnimation(const Image*) override { return false; }
+        virtual void animationAdvanced(const Image*) override { }
         virtual void changedInRect(const Image*, const IntRect&) { }
 
         int m_lastDecodedSizeChangedDelta;
@@ -107,7 +107,7 @@ public:
     }
 
 protected:
-    virtual void SetUp() OVERRIDE
+    virtual void SetUp() override
     {
         DeferredImageDecoder::setEnabled(false);
         m_image = BitmapImage::create(&m_imageObserver);

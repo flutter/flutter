@@ -65,26 +65,26 @@ private:
 
     // NOTE: We put the CanvasObserver in a member instead of inheriting from it
     // to avoid adding a vptr to CSSCanvasValue.
-    class CanvasObserverProxy FINAL : public NoBaseWillBeGarbageCollected<CanvasObserverProxy>, public CanvasObserver {
+    class CanvasObserverProxy final : public NoBaseWillBeGarbageCollected<CanvasObserverProxy>, public CanvasObserver {
         WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(CanvasObserverProxy);
     public:
         explicit CanvasObserverProxy(CSSCanvasValue* ownerValue) : m_ownerValue(ownerValue) { }
 
-        virtual void canvasChanged(HTMLCanvasElement* canvas, const FloatRect& changedRect) OVERRIDE
+        virtual void canvasChanged(HTMLCanvasElement* canvas, const FloatRect& changedRect) override
         {
             m_ownerValue->canvasChanged(canvas, changedRect);
         }
-        virtual void canvasResized(HTMLCanvasElement* canvas) OVERRIDE
+        virtual void canvasResized(HTMLCanvasElement* canvas) override
         {
             m_ownerValue->canvasResized(canvas);
         }
 #if !ENABLE(OILPAN)
-        virtual void canvasDestroyed(HTMLCanvasElement* canvas) OVERRIDE
+        virtual void canvasDestroyed(HTMLCanvasElement* canvas) override
         {
             m_ownerValue->canvasDestroyed(canvas);
         }
 #endif
-        virtual void trace(Visitor* visitor) OVERRIDE
+        virtual void trace(Visitor* visitor) override
         {
             visitor->trace(m_ownerValue);
             CanvasObserver::trace(visitor);

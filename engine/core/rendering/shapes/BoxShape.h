@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class BoxShape FINAL : public Shape {
+class BoxShape final : public Shape {
 public:
     BoxShape(const FloatRoundedRect& bounds)
         : Shape()
@@ -43,10 +43,10 @@ public:
     {
     }
 
-    virtual LayoutRect shapeMarginLogicalBoundingBox() const OVERRIDE;
-    virtual bool isEmpty() const OVERRIDE { return m_bounds.isEmpty(); }
-    virtual LineSegment getExcludedInterval(LayoutUnit logicalTop, LayoutUnit logicalHeight) const OVERRIDE;
-    virtual void buildDisplayPaths(DisplayPaths&) const OVERRIDE;
+    virtual LayoutRect shapeMarginLogicalBoundingBox() const override;
+    virtual bool isEmpty() const override { return m_bounds.isEmpty(); }
+    virtual LineSegment getExcludedInterval(LayoutUnit logicalTop, LayoutUnit logicalHeight) const override;
+    virtual void buildDisplayPaths(DisplayPaths&) const override;
 
 private:
     FloatRoundedRect shapeMarginBounds() const;

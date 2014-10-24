@@ -48,7 +48,7 @@ public:
     {
     }
 
-    virtual bool allocPixelRef(SkBitmap* dst, SkColorTable* ctable) OVERRIDE
+    virtual bool allocPixelRef(SkBitmap* dst, SkColorTable* ctable) override
     {
         const SkImageInfo& info = dst->info();
         if (kUnknown_SkColorType == info.colorType())

@@ -43,7 +43,7 @@ class InsertionPoint;
 class ShadowRootRareData;
 class StyleSheetList;
 
-class ShadowRoot FINAL : public DocumentFragment, public TreeScope, public DoublyLinkedListNode<ShadowRoot> {
+class ShadowRoot final : public DocumentFragment, public TreeScope, public DoublyLinkedListNode<ShadowRoot> {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ShadowRoot);
     friend class WTF::DoublyLinkedListNode<ShadowRoot>;
@@ -69,8 +69,8 @@ public:
     bool isOldest() const { return !olderShadowRoot(); }
     bool isOldestAuthorShadowRoot() const;
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void removedFrom(ContainerNode*) override;
 
     void registerScopedHTMLStyleChild();
     void unregisterScopedHTMLStyleChild();
@@ -110,17 +110,17 @@ public:
 
     StyleSheetList* styleSheets();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     ShadowRoot(Document&);
     virtual ~ShadowRoot();
 
 #if !ENABLE(OILPAN)
-    virtual void dispose() OVERRIDE;
+    virtual void dispose() override;
 #endif
 
-    virtual void childrenChanged(const ChildrenChange&) OVERRIDE;
+    virtual void childrenChanged(const ChildrenChange&) override;
 
     ShadowRootRareData* ensureShadowRootRareData();
 
@@ -129,7 +129,7 @@ private:
     void invalidateDescendantInsertionPoints();
 
     // ShadowRoots should never be cloned.
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool) OVERRIDE { return nullptr; }
+    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool) override { return nullptr; }
 
     // FIXME: This shouldn't happen. https://bugs.webkit.org/show_bug.cgi?id=88834
     bool isOrphan() const { return !host(); }

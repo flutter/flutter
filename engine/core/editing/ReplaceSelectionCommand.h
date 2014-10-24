@@ -34,7 +34,7 @@ namespace blink {
 class DocumentFragment;
 class ReplacementFragment;
 
-class ReplaceSelectionCommand FINAL : public CompositeEditCommand {
+class ReplaceSelectionCommand final : public CompositeEditCommand {
 public:
     enum CommandOption {
         SelectReplacement = 1 << 0,
@@ -51,13 +51,13 @@ public:
         return adoptRefWillBeNoop(new ReplaceSelectionCommand(document, fragment, options, action));
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     ReplaceSelectionCommand(Document&, PassRefPtrWillBeRawPtr<DocumentFragment>, CommandOptions, EditAction);
 
-    virtual void doApply() OVERRIDE;
-    virtual EditAction editingAction() const OVERRIDE;
+    virtual void doApply() override;
+    virtual EditAction editingAction() const override;
 
     class InsertedNodes {
         STACK_ALLOCATED();

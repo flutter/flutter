@@ -69,7 +69,7 @@ public:
     virtual void trace(Visitor*) { }
 };
 
-class HTMLCanvasElement FINAL : public HTMLElement, public DocumentVisibilityObserver, public CanvasImageSource, public ImageBufferClient {
+class HTMLCanvasElement final : public HTMLElement, public DocumentVisibilityObserver, public CanvasImageSource, public ImageBufferClient {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLCanvasElement);
 public:
@@ -136,30 +136,30 @@ public:
 
     bool shouldAccelerate(const IntSize&) const;
 
-    virtual const AtomicString imageSourceURL() const OVERRIDE;
+    virtual const AtomicString imageSourceURL() const override;
 
     // DocumentVisibilityObserver implementation
-    virtual void didChangeVisibilityState(PageVisibilityState) OVERRIDE;
+    virtual void didChangeVisibilityState(PageVisibilityState) override;
 
     // CanvasImageSource implementation
-    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const OVERRIDE;
-    virtual FloatSize sourceSize() const OVERRIDE;
+    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const override;
+    virtual FloatSize sourceSize() const override;
 
     // ImageBufferClient implementation
-    virtual void notifySurfaceInvalid() OVERRIDE;
-    virtual bool isDirty() OVERRIDE { return !m_dirtyRect.isEmpty(); }
-    virtual void didFinalizeFrame() OVERRIDE;
+    virtual void notifySurfaceInvalid() override;
+    virtual bool isDirty() override { return !m_dirtyRect.isEmpty(); }
+    virtual void didFinalizeFrame() override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
-    virtual void didMoveToNewDocument(Document& oldDocument) OVERRIDE;
+    virtual void didMoveToNewDocument(Document& oldDocument) override;
 
 private:
     explicit HTMLCanvasElement(Document&);
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
-    virtual RenderObject* createRenderer(RenderStyle*) OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
+    virtual RenderObject* createRenderer(RenderStyle*) override;
 
     void finalizeFrameMicrotask();
 

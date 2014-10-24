@@ -26,7 +26,7 @@
 
 namespace blink {
 
-class RenderCombineText FINAL : public RenderText {
+class RenderCombineText final : public RenderText {
 public:
     RenderCombineText(Node*, PassRefPtr<StringImpl>);
 
@@ -38,11 +38,11 @@ public:
     const Font& originalFont() const { return parent()->style()->font(); }
 
 private:
-    virtual bool isCombineText() const OVERRIDE { return true; }
-    virtual float width(unsigned from, unsigned length, const Font&, float xPosition, TextDirection, HashSet<const SimpleFontData*>* fallbackFonts = 0, GlyphOverflow* = 0) const OVERRIDE;
-    virtual const char* renderName() const OVERRIDE { return "RenderCombineText"; }
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) OVERRIDE;
-    virtual void setTextInternal(PassRefPtr<StringImpl>) OVERRIDE;
+    virtual bool isCombineText() const override { return true; }
+    virtual float width(unsigned from, unsigned length, const Font&, float xPosition, TextDirection, HashSet<const SimpleFontData*>* fallbackFonts = 0, GlyphOverflow* = 0) const override;
+    virtual const char* renderName() const override { return "RenderCombineText"; }
+    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
+    virtual void setTextInternal(PassRefPtr<StringImpl>) override;
 
     float m_combinedTextWidth;
     String m_renderingText;

@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class BeforeTextInsertedEvent FINAL : public Event {
+class BeforeTextInsertedEvent final : public Event {
 public:
     virtual ~BeforeTextInsertedEvent();
 
@@ -39,13 +39,13 @@ public:
         return adoptRefWillBeNoop(new BeforeTextInsertedEvent(text));
     }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual bool isBeforeTextInsertedEvent() const OVERRIDE { return true; }
+    virtual const AtomicString& interfaceName() const override;
+    virtual bool isBeforeTextInsertedEvent() const override { return true; }
 
     const String& text() const { return m_text; }
     void setText(const String& s) { m_text = s; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     explicit BeforeTextInsertedEvent(const String&);

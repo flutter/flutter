@@ -47,7 +47,7 @@ public:
     {
     }
 
-    virtual void run() OVERRIDE
+    virtual void run() override
     {
         m_closure.Run();
     }

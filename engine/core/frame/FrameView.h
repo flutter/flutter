@@ -330,8 +330,8 @@ private:
     void reset();
     void init();
 
-    virtual void frameRectsChanged() OVERRIDE;
-    virtual bool isFrameView() const OVERRIDE { return true; }
+    virtual void frameRectsChanged() override;
+    virtual bool isFrameView() const override { return true; }
 
     friend class RenderWidget;
 
@@ -359,10 +359,10 @@ private:
 
     // Override ScrollView methods to do point conversion via renderers, in order to
     // take transforms into account.
-    virtual IntRect convertToContainingView(const IntRect&) const OVERRIDE;
-    virtual IntRect convertFromContainingView(const IntRect&) const OVERRIDE;
-    virtual IntPoint convertToContainingView(const IntPoint&) const OVERRIDE;
-    virtual IntPoint convertFromContainingView(const IntPoint&) const OVERRIDE;
+    virtual IntRect convertToContainingView(const IntRect&) const override;
+    virtual IntRect convertFromContainingView(const IntRect&) const override;
+    virtual IntPoint convertToContainingView(const IntPoint&) const override;
+    virtual IntPoint convertFromContainingView(const IntPoint&) const override;
 
     void updateWidgetPositionsIfNeeded();
 

@@ -58,11 +58,11 @@ class FontsReadyPromiseResolver;
 class ExecutionContext;
 
 #if ENABLE(OILPAN)
-class FontFaceSet FINAL : public GarbageCollectedFinalized<FontFaceSet>, public HeapSupplement<Document>, public ActiveDOMObject, public EventTargetWithInlineData {
+class FontFaceSet final : public GarbageCollectedFinalized<FontFaceSet>, public HeapSupplement<Document>, public ActiveDOMObject, public EventTargetWithInlineData {
     USING_GARBAGE_COLLECTED_MIXIN(FontFaceSet);
     typedef HeapSupplement<Document> SupplementType;
 #else
-class FontFaceSet FINAL : public RefCountedSupplement<Document, FontFaceSet>, public ActiveDOMObject, public EventTargetWithInlineData {
+class FontFaceSet final : public RefCountedSupplement<Document, FontFaceSet>, public ActiveDOMObject, public EventTargetWithInlineData {
     DEFINE_EVENT_TARGET_REFCOUNTING(RefCounted<FontFaceSet>);
     typedef RefCountedSupplement<Document, FontFaceSet> SupplementType;
 #endif
@@ -84,8 +84,8 @@ public:
     unsigned long size() const;
     AtomicString status() const;
 
-    virtual ExecutionContext* executionContext() const OVERRIDE;
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual ExecutionContext* executionContext() const override;
+    virtual const AtomicString& interfaceName() const override;
 
     Document* document() const;
 
@@ -95,9 +95,9 @@ public:
     void loadError(FontFace*);
 
     // ActiveDOMObject
-    virtual void suspend() OVERRIDE;
-    virtual void resume() OVERRIDE;
-    virtual void stop() OVERRIDE;
+    virtual void suspend() override;
+    virtual void resume() override;
+    virtual void stop() override;
 
     static PassRefPtrWillBeRawPtr<FontFaceSet> from(Document&);
     static void didLayout(Document&);
@@ -105,7 +105,7 @@ public:
     void addFontFacesToFontFaceCache(FontFaceCache*, CSSFontSelector*);
 
 #if ENABLE(OILPAN)
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 #endif
 
 private:

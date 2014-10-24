@@ -39,7 +39,7 @@ class CSSStyleDeclaration;
 class StyleRuleFilter;
 class StyleRuleCSSStyleDeclaration;
 
-class CSSFilterRule FINAL : public CSSRule {
+class CSSFilterRule final : public CSSRule {
 public:
     static PassRefPtrWillBeRawPtr<CSSFilterRule> create(StyleRuleFilter* rule, CSSStyleSheet* sheet)
     {
@@ -48,13 +48,13 @@ public:
 
     virtual ~CSSFilterRule();
 
-    virtual CSSRule::Type type() const OVERRIDE { return WEBKIT_FILTER_RULE; }
-    virtual String cssText() const OVERRIDE;
-    virtual void reattach(StyleRuleBase*) OVERRIDE;
+    virtual CSSRule::Type type() const override { return WEBKIT_FILTER_RULE; }
+    virtual String cssText() const override;
+    virtual void reattach(StyleRuleBase*) override;
 
     CSSStyleDeclaration* style() const;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CSSFilterRule(StyleRuleFilter*, CSSStyleSheet* parent);

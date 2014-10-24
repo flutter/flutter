@@ -37,7 +37,7 @@ namespace blink {
 class WebGLRenderbuffer;
 class WebGLTexture;
 
-class WebGLFramebuffer FINAL : public WebGLContextObject, public ScriptWrappable {
+class WebGLFramebuffer final : public WebGLContextObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     class WebGLAttachment : public RefCountedWillBeGarbageCollectedFinalized<WebGLAttachment> {
@@ -102,12 +102,12 @@ public:
 
     GLenum getDrawBuffer(GLenum);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     explicit WebGLFramebuffer(WebGLRenderingContextBase*);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
 private:
     WebGLAttachment* getAttachment(GLenum) const;

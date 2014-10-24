@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class AnimatableLengthPoint3D FINAL : public AnimatableValue {
+class AnimatableLengthPoint3D final : public AnimatableValue {
 public:
     virtual ~AnimatableLengthPoint3D() { }
     static PassRefPtrWillBeRawPtr<AnimatableLengthPoint3D> create(PassRefPtrWillBeRawPtr<AnimatableValue> x, PassRefPtrWillBeRawPtr<AnimatableValue> y, PassRefPtrWillBeRawPtr<AnimatableValue> z)
@@ -46,10 +46,10 @@ public:
     const AnimatableValue* y() const { return m_y.get(); }
     const AnimatableValue* z() const { return m_z.get(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     AnimatableLengthPoint3D(PassRefPtrWillBeRawPtr<AnimatableValue> x, PassRefPtrWillBeRawPtr<AnimatableValue> y, PassRefPtrWillBeRawPtr<AnimatableValue> z)
@@ -58,8 +58,8 @@ private:
         , m_z(z)
     {
     }
-    virtual AnimatableType type() const OVERRIDE { return TypeLengthPoint3D; }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE;
+    virtual AnimatableType type() const override { return TypeLengthPoint3D; }
+    virtual bool equalTo(const AnimatableValue*) const override;
 
     RefPtrWillBeMember<AnimatableValue> m_x;
     RefPtrWillBeMember<AnimatableValue> m_y;

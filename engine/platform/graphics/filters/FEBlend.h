@@ -39,14 +39,14 @@ public:
                            unsigned colorArrayLength);
     void platformApplyNEON(unsigned char* srcPixelArrayA, unsigned char* srcPixelArrayB, unsigned char* dstPixelArray,
                            unsigned colorArrayLength);
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
 private:
     FEBlend(Filter*, WebBlendMode);
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
     bool applySoftwareNEON();
 
     WebBlendMode m_mode;

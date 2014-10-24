@@ -51,7 +51,7 @@ class HTMLDocument;
 class Node;
 class HTMLDocumentParser;
 
-class HTMLTreeBuilder FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLTreeBuilder> {
+class HTMLTreeBuilder final : public NoBaseWillBeGarbageCollectedFinalized<HTMLTreeBuilder> {
     WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors, const HTMLParserOptions& options)

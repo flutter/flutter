@@ -22,7 +22,7 @@ class DrawingBuffer;
 // WebGLContextObjects keep a RefPtr<> to an off-heap object that
 // safely handles the eventual release of the underlying
 // DrawingBuffer.
-class WebGLSharedWebGraphicsContext3D FINAL : public RefCounted<WebGLSharedWebGraphicsContext3D> {
+class WebGLSharedWebGraphicsContext3D final : public RefCounted<WebGLSharedWebGraphicsContext3D> {
 public:
     static PassRefPtr<WebGLSharedWebGraphicsContext3D> create(PassRefPtr<DrawingBuffer>);
 

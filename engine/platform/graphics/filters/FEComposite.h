@@ -58,22 +58,22 @@ public:
     float k4() const;
     bool setK4(float);
 
-    virtual void correctFilterResultIfNeeded() OVERRIDE;
+    virtual void correctFilterResultIfNeeded() override;
 
-    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) OVERRIDE;
+    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) override;
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
-    virtual PassRefPtr<SkImageFilter> createImageFilterWithoutValidation(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
+    virtual PassRefPtr<SkImageFilter> createImageFilterWithoutValidation(SkiaImageFilterBuilder*) override;
 
 protected:
-    virtual bool mayProduceInvalidPreMultipliedPixels() OVERRIDE { return m_type == FECOMPOSITE_OPERATOR_ARITHMETIC; }
+    virtual bool mayProduceInvalidPreMultipliedPixels() override { return m_type == FECOMPOSITE_OPERATOR_ARITHMETIC; }
 
 private:
     FEComposite(Filter*, const CompositeOperationType&, float, float, float, float);
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
     PassRefPtr<SkImageFilter> createImageFilterInternal(SkiaImageFilterBuilder*, bool requiresPMColorValidation);
 
     inline void platformArithmeticSoftware(Uint8ClampedArray* source, Uint8ClampedArray* destination,

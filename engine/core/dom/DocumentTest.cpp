@@ -43,10 +43,10 @@ namespace {
 
 class DocumentTest : public ::testing::Test {
 protected:
-    virtual void SetUp() OVERRIDE;
+    virtual void SetUp() override;
 
 #if ENABLE(OILPAN)
-    virtual void TearDown() OVERRIDE
+    virtual void TearDown() override
     {
         Heap::collectAllGarbage();
     }

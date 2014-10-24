@@ -44,7 +44,7 @@ namespace blink {
 
 // Encapsulates the state information we store for each pushed graphics state.
 // Only GraphicsContext can use this class.
-class PLATFORM_EXPORT GraphicsContextState FINAL {
+class PLATFORM_EXPORT GraphicsContextState final {
 public:
     static PassOwnPtr<GraphicsContextState> create()
     {

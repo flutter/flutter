@@ -101,7 +101,7 @@ public:
     {
     }
 
-    virtual void ConvertFromUTF16(const url::UTF16Char* input, int inputLength, url::CanonOutput* output) OVERRIDE
+    virtual void ConvertFromUTF16(const url::UTF16Char* input, int inputLength, url::CanonOutput* output) override
     {
         CString encoded = m_encoding->normalizeAndEncode(String(input, inputLength), WTF::URLEncodedEntitiesForUnencodables);
         output->Append(encoded.data(), static_cast<int>(encoded.length()));

@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class WebGLDebugRendererInfo FINAL : public WebGLExtension, public ScriptWrappable {
+class WebGLDebugRendererInfo final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum EnumType {
@@ -45,7 +45,7 @@ public:
     static const char* extensionName();
 
     virtual ~WebGLDebugRendererInfo();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit WebGLDebugRendererInfo(WebGLRenderingContextBase*);

@@ -20,7 +20,7 @@ class HTMLCanvasElement;
 class HTMLVideoElement;
 class ImageData;
 
-class ImageBitmap FINAL : public RefCountedWillBeGarbageCollectedFinalized<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
+class ImageBitmap final : public RefCountedWillBeGarbageCollectedFinalized<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ImageBitmap);
 public:
@@ -43,9 +43,9 @@ public:
     virtual ~ImageBitmap();
 
     // CanvasImageSource implementation
-    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const OVERRIDE;
-    virtual void adjustDrawRects(FloatRect* srcRect, FloatRect* dstRect) const OVERRIDE;
-    virtual FloatSize sourceSize() const OVERRIDE;
+    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const override;
+    virtual void adjustDrawRects(FloatRect* srcRect, FloatRect* dstRect) const override;
+    virtual FloatSize sourceSize() const override;
 
     virtual void trace(Visitor*);
 
@@ -58,8 +58,8 @@ private:
     ImageBitmap(Image*, const IntRect&);
 
     // ImageLoaderClient
-    virtual void notifyImageSourceChanged() OVERRIDE;
-    virtual bool requestsHighLiveResourceCachePriority() OVERRIDE { return true; }
+    virtual void notifyImageSourceChanged() override;
+    virtual bool requestsHighLiveResourceCachePriority() override { return true; }
 
     // ImageBitmaps constructed from HTMLImageElements hold a reference to the HTMLImageElement until
     // the image source changes.

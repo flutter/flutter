@@ -11,7 +11,7 @@
 
 namespace blink {
 
-class EXTBlendMinMax FINAL : public WebGLExtension, public ScriptWrappable {
+class EXTBlendMinMax final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<EXTBlendMinMax> create(WebGLRenderingContextBase*);
@@ -19,7 +19,7 @@ public:
     static const char* extensionName();
 
     virtual ~EXTBlendMinMax();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit EXTBlendMinMax(WebGLRenderingContextBase*);

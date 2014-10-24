@@ -93,7 +93,7 @@ public:
 };
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
-class StyleResolver FINAL : public NoBaseWillBeGarbageCollectedFinalized<StyleResolver> {
+class StyleResolver final : public NoBaseWillBeGarbageCollectedFinalized<StyleResolver> {
     WTF_MAKE_NONCOPYABLE(StyleResolver); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     explicit StyleResolver(Document&);

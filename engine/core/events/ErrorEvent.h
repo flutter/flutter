@@ -47,7 +47,7 @@ struct ErrorEventInit : public EventInit {
     unsigned colno;
 };
 
-class ErrorEvent FINAL : public Event {
+class ErrorEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<ErrorEvent> create()
@@ -77,13 +77,13 @@ public:
     // 'messageForConsole' is not exposed to JavaScript, and prefers 'm_unsanitizedMessage'.
     const String& messageForConsole() const { return !m_unsanitizedMessage.isEmpty() ? m_unsanitizedMessage : m_sanitizedMessage; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
     DOMWrapperWorld* world() const { return m_world.get(); }
 
     void setUnsanitizedMessage(const String&);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     ErrorEvent();

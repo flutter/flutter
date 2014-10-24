@@ -41,18 +41,18 @@ public:
     KURL href() const;
     void setHref(const AtomicString&);
 
-    virtual bool isLiveLink() const OVERRIDE FINAL;
+    virtual bool isLiveLink() const override final;
 
 private:
     explicit HTMLAnchorElement(Document&);
 
-    virtual bool supportsFocus() const OVERRIDE FINAL;
-    virtual void defaultEventHandler(Event*) OVERRIDE FINAL;
-    virtual bool willRespondToMouseClickEvents() OVERRIDE FINAL;
-    virtual bool isURLAttribute(const Attribute&) const OVERRIDE FINAL;
-    virtual bool hasLegalLinkAttribute(const QualifiedName&) const OVERRIDE FINAL;
-    virtual bool canStartSelection() const OVERRIDE FINAL;
-    virtual bool isInteractiveContent() const OVERRIDE FINAL;
+    virtual bool supportsFocus() const override final;
+    virtual void defaultEventHandler(Event*) override final;
+    virtual bool willRespondToMouseClickEvents() override final;
+    virtual bool isURLAttribute(const Attribute&) const override final;
+    virtual bool hasLegalLinkAttribute(const QualifiedName&) const override final;
+    virtual bool canStartSelection() const override final;
+    virtual bool isInteractiveContent() const override final;
 
     void handleClick(Event*);
 };

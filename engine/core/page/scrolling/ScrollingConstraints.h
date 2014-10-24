@@ -73,7 +73,7 @@ protected:
     AnchorEdges m_anchorEdges;
 };
 
-class FixedPositionViewportConstraints FINAL : public ViewportConstraints {
+class FixedPositionViewportConstraints final : public ViewportConstraints {
 public:
     FixedPositionViewportConstraints()
         : ViewportConstraints()
@@ -104,7 +104,7 @@ public:
     bool operator!=(const FixedPositionViewportConstraints& other) const { return !(*this == other); }
 
 private:
-    virtual ConstraintType constraintType() const OVERRIDE { return FixedPositionConstaint; }
+    virtual ConstraintType constraintType() const override { return FixedPositionConstaint; }
 
     FloatRect m_viewportRectAtLastLayout;
     FloatPoint m_layerPositionAtLastLayout;

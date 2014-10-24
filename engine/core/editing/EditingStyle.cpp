@@ -209,16 +209,16 @@ void HTMLElementEquivalent::addToStyle(Element*, EditingStyle* style) const
     style->setProperty(m_propertyID, m_primitiveValue->cssText());
 }
 
-class HTMLTextDecorationEquivalent FINAL : public HTMLElementEquivalent {
+class HTMLTextDecorationEquivalent final : public HTMLElementEquivalent {
 public:
     static PassOwnPtrWillBeRawPtr<HTMLElementEquivalent> create(CSSValueID primitiveValue, const HTMLQualifiedName& tagName)
     {
         return adoptPtrWillBeNoop(new HTMLTextDecorationEquivalent(primitiveValue, tagName));
     }
-    virtual bool propertyExistsInStyle(const StylePropertySet*) const OVERRIDE;
-    virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const OVERRIDE;
+    virtual bool propertyExistsInStyle(const StylePropertySet*) const override;
+    virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const override;
 
-    virtual void trace(Visitor* visitor) OVERRIDE { HTMLElementEquivalent::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { HTMLElementEquivalent::trace(visitor); }
 
 private:
     HTMLTextDecorationEquivalent(CSSValueID primitiveValue, const HTMLQualifiedName& tagName);
@@ -255,14 +255,14 @@ public:
         return adoptPtrWillBeNoop(new HTMLAttributeEquivalent(propertyID, attrName));
     }
 
-    virtual bool matches(const Element* element) const OVERRIDE { return HTMLElementEquivalent::matches(element) && element->hasAttribute(m_attrName); }
-    virtual bool hasAttribute() const OVERRIDE { return true; }
-    virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const OVERRIDE;
-    virtual void addToStyle(Element*, EditingStyle*) const OVERRIDE;
+    virtual bool matches(const Element* element) const override { return HTMLElementEquivalent::matches(element) && element->hasAttribute(m_attrName); }
+    virtual bool hasAttribute() const override { return true; }
+    virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const override;
+    virtual void addToStyle(Element*, EditingStyle*) const override;
     virtual PassRefPtrWillBeRawPtr<CSSValue> attributeValueAsCSSValue(Element*) const;
     inline const QualifiedName& attributeName() const { return m_attrName; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { HTMLElementEquivalent::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { HTMLElementEquivalent::trace(visitor); }
 
 protected:
     HTMLAttributeEquivalent(CSSPropertyID, const HTMLQualifiedName& tagName, const QualifiedName& attrName);

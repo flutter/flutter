@@ -36,16 +36,16 @@ struct GridCoordinate;
 struct GridSpan;
 class GridTrack;
 
-class RenderGrid FINAL : public RenderBlock {
+class RenderGrid final : public RenderBlock {
 public:
     RenderGrid(Element*);
     virtual ~RenderGrid();
 
-    virtual const char* renderName() const OVERRIDE;
+    virtual const char* renderName() const override;
 
-    virtual void layoutBlock(bool relayoutChildren) OVERRIDE;
+    virtual void layoutBlock(bool relayoutChildren) override;
 
-    virtual bool canCollapseAnonymousBlockChild() const OVERRIDE { return false; }
+    virtual bool canCollapseAnonymousBlockChild() const override { return false; }
 
     void dirtyGrid();
 
@@ -53,15 +53,15 @@ public:
     const Vector<LayoutUnit>& rowPositions() const { return m_rowPositions; }
 
 private:
-    virtual bool isRenderGrid() const OVERRIDE { return true; }
-    virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const OVERRIDE;
-    virtual void computePreferredLogicalWidths() OVERRIDE;
+    virtual bool isRenderGrid() const override { return true; }
+    virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override;
+    virtual void computePreferredLogicalWidths() override;
 
-    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) OVERRIDE;
+    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
     void addChildToIndexesMap(RenderBox*);
-    virtual void removeChild(RenderObject*) OVERRIDE;
+    virtual void removeChild(RenderObject*) override;
 
-    virtual void styleDidChange(StyleDifference, const RenderStyle*) OVERRIDE;
+    virtual void styleDidChange(StyleDifference, const RenderStyle*) override;
 
     bool explicitGridDidResize(const RenderStyle*) const;
     bool namedGridLinesDefinitionDidChange(const RenderStyle*) const;
@@ -119,7 +119,7 @@ private:
 
     LayoutUnit gridAreaBreadthForChild(const RenderBox* child, GridTrackSizingDirection, const Vector<GridTrack>&) const;
 
-    virtual void paintChildren(PaintInfo&, const LayoutPoint&) OVERRIDE;
+    virtual void paintChildren(PaintInfo&, const LayoutPoint&) override;
 
     bool gridIsDirty() const { return m_gridIsDirty; }
 

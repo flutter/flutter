@@ -32,20 +32,20 @@ namespace blink {
 
 class DocumentFragment;
 
-class MoveSelectionCommand FINAL : public CompositeEditCommand {
+class MoveSelectionCommand final : public CompositeEditCommand {
 public:
     static PassRefPtrWillBeRawPtr<MoveSelectionCommand> create(PassRefPtrWillBeRawPtr<DocumentFragment> fragment, const Position& position, bool smartInsert = false, bool smartDelete = false)
     {
         return adoptRefWillBeNoop(new MoveSelectionCommand(fragment, position, smartInsert, smartDelete));
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     MoveSelectionCommand(PassRefPtrWillBeRawPtr<DocumentFragment>, const Position&, bool smartInsert, bool smartDelete);
 
-    virtual void doApply() OVERRIDE;
-    virtual EditAction editingAction() const OVERRIDE;
+    virtual void doApply() override;
+    virtual EditAction editingAction() const override;
 
     RefPtrWillBeMember<DocumentFragment> m_fragment;
     Position m_position;

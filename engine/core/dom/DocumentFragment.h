@@ -35,17 +35,17 @@ public:
 
     void parseHTML(const String&, Element* contextElement);
 
-    virtual bool canContainRangeEndPoint() const OVERRIDE FINAL { return true; }
+    virtual bool canContainRangeEndPoint() const override final { return true; }
     virtual bool isTemplateContent() const { return false; }
 
 protected:
     DocumentFragment(Document*, ConstructionType = CreateContainer);
-    virtual String nodeName() const OVERRIDE FINAL;
+    virtual String nodeName() const override final;
 
 private:
-    virtual NodeType nodeType() const OVERRIDE FINAL;
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) OVERRIDE;
-    virtual bool childTypeAllowed(NodeType) const OVERRIDE;
+    virtual NodeType nodeType() const override final;
+    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override;
+    virtual bool childTypeAllowed(NodeType) const override;
 
     bool isDocumentFragment() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
 };

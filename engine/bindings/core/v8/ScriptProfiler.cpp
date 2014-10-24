@@ -139,11 +139,11 @@ void ScriptProfiler::clearHeapObjectIds()
 
 namespace {
 
-class ActivityControlAdapter FINAL : public v8::ActivityControl {
+class ActivityControlAdapter final : public v8::ActivityControl {
 public:
     ActivityControlAdapter(ScriptProfiler::HeapSnapshotProgress* progress)
         : m_progress(progress), m_firstReport(true) { }
-    virtual ControlOption ReportProgressValue(int done, int total) OVERRIDE
+    virtual ControlOption ReportProgressValue(int done, int total) override
     {
         ControlOption result = m_progress->isCanceled() ? kAbort : kContinue;
         if (m_firstReport) {
@@ -161,9 +161,9 @@ private:
     bool m_firstReport;
 };
 
-class GlobalObjectNameResolver FINAL : public v8::HeapProfiler::ObjectNameResolver {
+class GlobalObjectNameResolver final : public v8::HeapProfiler::ObjectNameResolver {
 public:
-    virtual const char* GetName(v8::Handle<v8::Object> object) OVERRIDE
+    virtual const char* GetName(v8::Handle<v8::Object> object) override
     {
         LocalDOMWindow* window = toDOMWindow(object, v8::Isolate::GetCurrent());
         if (!window)
@@ -189,15 +189,15 @@ namespace {
 class HeapStatsStream : public v8::OutputStream {
 public:
     HeapStatsStream(ScriptProfiler::OutputStream* stream) : m_stream(stream) { }
-    virtual void EndOfStream() OVERRIDE { }
+    virtual void EndOfStream() override { }
 
-    virtual WriteResult WriteAsciiChunk(char* data, int size) OVERRIDE
+    virtual WriteResult WriteAsciiChunk(char* data, int size) override
     {
         ASSERT(false);
         return kAbort;
     }
 
-    virtual WriteResult WriteHeapStatsChunk(v8::HeapStatsUpdate* updateData, int count) OVERRIDE
+    virtual WriteResult WriteHeapStatsChunk(v8::HeapStatsUpdate* updateData, int count) override
     {
         Vector<uint32_t> rawData(count * 3);
         for (int i = 0; i < count; ++i) {
@@ -274,7 +274,7 @@ void ScriptProfiler::visitNodeWrappers(WrappedNodeVisitor* visitor)
         {
         }
 
-        virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) OVERRIDE
+        virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) override
         {
             if (classId != WrapperTypeInfo::NodeClassId)
                 return;

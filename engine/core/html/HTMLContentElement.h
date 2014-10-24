@@ -36,13 +36,13 @@
 
 namespace blink {
 
-class HTMLContentElement FINAL : public InsertionPoint {
+class HTMLContentElement final : public InsertionPoint {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLContentElement);
     virtual ~HTMLContentElement();
 
-    virtual bool canAffectSelector() const OVERRIDE { return true; }
+    virtual bool canAffectSelector() const override { return true; }
 
     bool canSelectNode(const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth) const;
 
@@ -52,7 +52,7 @@ public:
 private:
     explicit HTMLContentElement(Document&);
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
 
     bool validateSelect() const;
     void parseSelect();

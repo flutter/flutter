@@ -193,7 +193,7 @@ public:
     using ExecutionContextClient::addConsoleMessage;
     using TreeScope::getElementById;
 
-    virtual bool canContainRangeEndPoint() const OVERRIDE { return true; }
+    virtual bool canContainRangeEndPoint() const override { return true; }
 
     SelectorQueryCache& selectorQueryCache();
 
@@ -317,8 +317,8 @@ public:
 
     ResourceFetcher* fetcher() { return m_fetcher.get(); }
 
-    virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
-    virtual void detach(const AttachContext& = AttachContext()) OVERRIDE;
+    virtual void attach(const AttachContext& = AttachContext()) override;
+    virtual void detach(const AttachContext& = AttachContext()) override;
     void prepareForDestruction();
 
     // If you have a Document, use renderView() instead which is faster.
@@ -541,7 +541,7 @@ public:
 
     const WTF::TextEncoding& encoding() const { return WTF::UTF8Encoding(); }
 
-    virtual void removeAllEventListeners() OVERRIDE FINAL;
+    virtual void removeAllEventListeners() override final;
 
     bool allowExecutingScripts(Node*);
 
@@ -561,7 +561,7 @@ public:
     bool loadEventFinished() const { return m_loadEventProgress >= LoadEventCompleted; }
     bool unloadStarted() const { return m_loadEventProgress >= PageHideInProgress; }
 
-    virtual bool isContextThread() const OVERRIDE FINAL;
+    virtual bool isContextThread() const override final;
 
     bool containsValidityStyleRules() const { return m_containsValidityStyleRules; }
     void setContainsValidityStyleRules() { m_containsValidityStyleRules = true; }
@@ -586,8 +586,8 @@ public:
     void cancelAnimationFrame(int id);
     void serviceScriptedAnimations(double monotonicAnimationStartTime);
 
-    virtual EventTarget* errorEventTarget() OVERRIDE FINAL;
-    virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtrWillBeRawPtr<ScriptCallStack>) OVERRIDE FINAL;
+    virtual EventTarget* errorEventTarget() override final;
+    virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtrWillBeRawPtr<ScriptCallStack>) override final;
 
     IntSize initialViewportSize() const;
 
@@ -633,9 +633,9 @@ public:
     Document& ensureTemplateDocument();
     Document* templateDocumentHost() { return m_templateDocumentHost; }
 
-    virtual void addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>) OVERRIDE FINAL;
+    virtual void addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>) override final;
 
-    virtual LocalDOMWindow* executingWindow() OVERRIDE FINAL;
+    virtual LocalDOMWindow* executingWindow() override final;
     LocalFrame* executingFrame();
 
     DocumentLifecycleNotifier& lifecycleNotifier();
@@ -661,17 +661,17 @@ public:
 
     void updateStyleInvalidationIfNeeded();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
 
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) OVERRIDE;
+    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:
     Document(const DocumentInit&, DocumentClassFlags = DefaultDocumentClass);
 
 #if !ENABLE(OILPAN)
-    virtual void dispose() OVERRIDE;
+    virtual void dispose() override;
 #endif
 
     PassRefPtrWillBeRawPtr<Document> cloneDocumentWithoutChildren();
@@ -686,7 +686,7 @@ private:
     bool isElementNode() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
 
     ScriptedAnimationController& ensureScriptedAnimationController();
-    virtual EventQueue* eventQueue() const OVERRIDE FINAL;
+    virtual EventQueue* eventQueue() const override final;
 
     // FIXME: Rename the StyleRecalc state to RenderTreeUpdate.
     bool hasPendingStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::VisualUpdatePending; }
@@ -707,26 +707,26 @@ private:
 
     void clearWeakMembers(Visitor*);
 
-    virtual bool isDocument() const OVERRIDE FINAL { return true; }
+    virtual bool isDocument() const override final { return true; }
 
-    virtual void childrenChanged(const ChildrenChange&) OVERRIDE;
+    virtual void childrenChanged(const ChildrenChange&) override;
 
-    virtual String nodeName() const OVERRIDE FINAL;
-    virtual NodeType nodeType() const OVERRIDE FINAL;
-    virtual bool childTypeAllowed(NodeType) const OVERRIDE FINAL;
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) OVERRIDE FINAL;
+    virtual String nodeName() const override final;
+    virtual NodeType nodeType() const override final;
+    virtual bool childTypeAllowed(NodeType) const override final;
+    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override final;
 
 #if !ENABLE(OILPAN)
-    virtual void refExecutionContext() OVERRIDE FINAL { ref(); }
-    virtual void derefExecutionContext() OVERRIDE FINAL { deref(); }
+    virtual void refExecutionContext() override final { ref(); }
+    virtual void derefExecutionContext() override final { deref(); }
 #endif
 
-    virtual const KURL& virtualURL() const OVERRIDE FINAL; // Same as url(), but needed for ExecutionContext to implement it without a performance loss for direct calls.
-    virtual KURL virtualCompleteURL(const String&) const OVERRIDE FINAL; // Same as completeURL() for the same reason as above.
+    virtual const KURL& virtualURL() const override final; // Same as url(), but needed for ExecutionContext to implement it without a performance loss for direct calls.
+    virtual KURL virtualCompleteURL(const String&) const override final; // Same as completeURL() for the same reason as above.
 
-    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) OVERRIDE FINAL;
+    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) override final;
 
-    virtual double timerAlignmentInterval() const OVERRIDE FINAL;
+    virtual double timerAlignmentInterval() const override final;
 
     void updateTitle(const String&);
     void updateBaseURL();

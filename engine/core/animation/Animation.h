@@ -45,7 +45,7 @@ class Element;
 class ExceptionState;
 class SampledEffect;
 
-class Animation FINAL : public AnimationNode {
+class Animation final : public AnimationNode {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum Priority { DefaultPriority, TransitionPriority };
@@ -61,7 +61,7 @@ public:
 
     virtual ~Animation();
 
-    virtual bool isAnimation() const OVERRIDE { return true; }
+    virtual bool isAnimation() const override { return true; }
 
     bool affects(CSSPropertyID) const;
     const AnimationEffect* effect() const { return m_effect.get(); }
@@ -87,11 +87,11 @@ public:
 protected:
     void applyEffects();
     void clearEffects();
-    virtual void updateChildrenAndEffects() const OVERRIDE;
-    virtual void attach(AnimationPlayer*) OVERRIDE;
-    virtual void detach() OVERRIDE;
-    virtual void specifiedTimingChanged() OVERRIDE;
-    virtual double calculateTimeToEffectChange(bool forwards, double inheritedTime, double timeToNextIteration) const OVERRIDE;
+    virtual void updateChildrenAndEffects() const override;
+    virtual void attach(AnimationPlayer*) override;
+    virtual void detach() override;
+    virtual void specifiedTimingChanged() override;
+    virtual double calculateTimeToEffectChange(bool forwards, double inheritedTime, double timeToNextIteration) const override;
 
 private:
     Animation(Element*, PassRefPtrWillBeRawPtr<AnimationEffect>, const Timing&, Priority, PassOwnPtrWillBeRawPtr<EventDelegate>);

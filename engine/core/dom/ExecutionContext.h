@@ -55,7 +55,7 @@ class ExecutionContext
     : public LifecycleContext<ExecutionContext>
     , public WillBeHeapSupplementable<ExecutionContext> {
 public:
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     // Delegating to ExecutionContextClient
     bool isDocument() const { return m_client && m_client->isDocument(); }

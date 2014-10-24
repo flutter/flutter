@@ -62,7 +62,7 @@ class HTMLMediaElement : public HTMLElement, public WillBeHeapSupplementable<HTM
 public:
     static blink::WebMimeRegistry::SupportsType supportsType(const ContentType&, const String& keySystem = String());
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     // Do not use player().
     // FIXME: Replace all uses with webMediaPlayer() and remove this API.
@@ -138,7 +138,7 @@ public:
     bool togglePlayStateWillPlay() const;
     void togglePlayState();
 
-    virtual KURL mediaPlayerPosterURL() OVERRIDE { return KURL(); }
+    virtual KURL mediaPlayerPosterURL() override { return KURL(); }
 
     // EventTarget function.
     // Both Node (via HTMLElement) and ActiveDOMObject define this method, which
@@ -157,8 +157,8 @@ public:
     bool isPlaying() const { return m_playing; }
 
     // ActiveDOMObject functions.
-    virtual bool hasPendingActivity() const OVERRIDE FINAL;
-    virtual void contextDestroyed() OVERRIDE FINAL;
+    virtual bool hasPendingActivity() const override final;
+    virtual void contextDestroyed() override final;
 
     enum InvalidURLAction { DoNothing, Complain };
     bool isSafeToLoadURL(const KURL&, InvalidURLAction);
@@ -189,12 +189,12 @@ protected:
     HTMLMediaElement(const QualifiedName&, Document&);
     virtual ~HTMLMediaElement();
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
-    virtual void finishParsingChildren() OVERRIDE FINAL;
-    virtual bool isURLAttribute(const Attribute&) const OVERRIDE;
-    virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
+    virtual void finishParsingChildren() override final;
+    virtual bool isURLAttribute(const Attribute&) const override;
+    virtual void attach(const AttachContext& = AttachContext()) override;
 
-    virtual void didMoveToNewDocument(Document& oldDocument) OVERRIDE;
+    virtual void didMoveToNewDocument(Document& oldDocument) override;
 
     enum DisplayMode { Unknown, Poster, PosterWaitingForVideo, Video };
     DisplayMode displayMode() const { return m_displayMode; }
@@ -203,36 +203,36 @@ protected:
 private:
     void createMediaPlayer();
 
-    virtual bool isMouseFocusable() const OVERRIDE FINAL;
-    virtual bool rendererIsNeeded(const RenderStyle&) OVERRIDE;
-    virtual RenderObject* createRenderer(RenderStyle*) OVERRIDE;
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE FINAL;
-    virtual void didNotifySubtreeInsertionsToDocument() OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE FINAL;
-    virtual void didRecalcStyle(StyleRecalcChange) OVERRIDE FINAL;
+    virtual bool isMouseFocusable() const override final;
+    virtual bool rendererIsNeeded(const RenderStyle&) override;
+    virtual RenderObject* createRenderer(RenderStyle*) override;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override final;
+    virtual void didNotifySubtreeInsertionsToDocument() override;
+    virtual void removedFrom(ContainerNode*) override final;
+    virtual void didRecalcStyle(StyleRecalcChange) override final;
 
-    virtual bool isInteractiveContent() const OVERRIDE FINAL;
-    virtual void defaultEventHandler(Event*) OVERRIDE FINAL;
+    virtual bool isInteractiveContent() const override final;
+    virtual void defaultEventHandler(Event*) override final;
 
     // ActiveDOMObject functions.
-    virtual void stop() OVERRIDE FINAL;
+    virtual void stop() override final;
 
     virtual void updateDisplayState() { }
 
     void setReadyState(ReadyState);
     void setNetworkState(blink::WebMediaPlayer::NetworkState);
 
-    virtual void mediaPlayerNetworkStateChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerReadyStateChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerTimeChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerDurationChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerPlaybackStateChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerRequestFullscreen() OVERRIDE FINAL;
-    virtual void mediaPlayerRequestSeek(double) OVERRIDE FINAL;
-    virtual void mediaPlayerRepaint() OVERRIDE FINAL;
-    virtual void mediaPlayerSizeChanged() OVERRIDE FINAL;
-    virtual void mediaPlayerSetWebLayer(blink::WebLayer*) OVERRIDE FINAL;
-    virtual void mediaPlayerMediaSourceOpened(blink::WebMediaSource*) OVERRIDE FINAL;
+    virtual void mediaPlayerNetworkStateChanged() override final;
+    virtual void mediaPlayerReadyStateChanged() override final;
+    virtual void mediaPlayerTimeChanged() override final;
+    virtual void mediaPlayerDurationChanged() override final;
+    virtual void mediaPlayerPlaybackStateChanged() override final;
+    virtual void mediaPlayerRequestFullscreen() override final;
+    virtual void mediaPlayerRequestSeek(double) override final;
+    virtual void mediaPlayerRepaint() override final;
+    virtual void mediaPlayerSizeChanged() override final;
+    virtual void mediaPlayerSetWebLayer(blink::WebLayer*) override final;
+    virtual void mediaPlayerMediaSourceOpened(blink::WebMediaSource*) override final;
 
     void loadTimerFired(Timer<HTMLMediaElement>*);
     void progressEventTimerFired(Timer<HTMLMediaElement>*);
@@ -303,7 +303,7 @@ private:
     void prepareMediaFragmentURI();
     void applyMediaFragmentURI();
 
-    virtual void* preDispatchEventHandler(Event*) OVERRIDE FINAL;
+    virtual void* preDispatchEventHandler(Event*) override final;
 
     void changeNetworkStateFromLoadingToIdle();
 

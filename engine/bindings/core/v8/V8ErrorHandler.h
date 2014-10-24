@@ -40,7 +40,7 @@ namespace blink {
 class ErrorEvent;
 class LocalFrame;
 
-class V8ErrorHandler FINAL : public V8EventListener {
+class V8ErrorHandler final : public V8EventListener {
 public:
     static PassRefPtr<V8ErrorHandler> create(v8::Local<v8::Object> listener, ScriptState* scriptState)
     {
@@ -52,8 +52,8 @@ public:
 private:
     V8ErrorHandler(v8::Local<v8::Object> listener, ScriptState*);
 
-    virtual v8::Local<v8::Value> callListenerFunction(v8::Handle<v8::Value> jsEvent, Event*) OVERRIDE;
-    virtual bool shouldPreventDefault(v8::Local<v8::Value> returnValue) OVERRIDE;
+    virtual v8::Local<v8::Value> callListenerFunction(v8::Handle<v8::Value> jsEvent, Event*) override;
+    virtual bool shouldPreventDefault(v8::Local<v8::Value> returnValue) override;
 };
 
 } // namespace blink

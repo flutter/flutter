@@ -23,9 +23,9 @@ public:
         return adoptRefWillBeNoop(new DeferredLegacyStyleInterpolation(start, end, id));
     }
 
-    virtual void apply(StyleResolverState&) const OVERRIDE;
+    virtual void apply(StyleResolverState&) const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     static bool interpolationRequiresStyleResolve(const CSSValue&);
     static bool interpolationRequiresStyleResolve(const CSSPrimitiveValue&);

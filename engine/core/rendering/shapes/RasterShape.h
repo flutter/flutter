@@ -77,7 +77,7 @@ private:
     int m_offset;
 };
 
-class RasterShape FINAL : public Shape {
+class RasterShape final : public Shape {
     WTF_MAKE_NONCOPYABLE(RasterShape);
 public:
     RasterShape(PassOwnPtr<RasterShapeIntervals> intervals, const IntSize& marginRectSize)
@@ -87,10 +87,10 @@ public:
         m_intervals->initializeBounds();
     }
 
-    virtual LayoutRect shapeMarginLogicalBoundingBox() const OVERRIDE { return static_cast<LayoutRect>(marginIntervals().bounds()); }
-    virtual bool isEmpty() const OVERRIDE { return m_intervals->isEmpty(); }
-    virtual LineSegment getExcludedInterval(LayoutUnit logicalTop, LayoutUnit logicalHeight) const OVERRIDE;
-    virtual void buildDisplayPaths(DisplayPaths& paths) const OVERRIDE
+    virtual LayoutRect shapeMarginLogicalBoundingBox() const override { return static_cast<LayoutRect>(marginIntervals().bounds()); }
+    virtual bool isEmpty() const override { return m_intervals->isEmpty(); }
+    virtual LineSegment getExcludedInterval(LayoutUnit logicalTop, LayoutUnit logicalHeight) const override;
+    virtual void buildDisplayPaths(DisplayPaths& paths) const override
     {
         m_intervals->buildBoundsPath(paths.shape);
         if (shapeMargin())

@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class ResourceLoaderSet FINAL : public NoBaseWillBeGarbageCollected<ResourceLoaderSet> {
+class ResourceLoaderSet final : public NoBaseWillBeGarbageCollected<ResourceLoaderSet> {
 public:
     typedef WillBeHeapHashSet<RefPtrWillBeMember<ResourceLoader> > SetType;
 

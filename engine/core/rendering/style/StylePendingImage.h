@@ -39,32 +39,32 @@ namespace blink {
 // style resolution, in order to avoid loading images that are not referenced by the final style.
 // They should never exist in a RenderStyle after it has been returned from the style selector.
 
-class StylePendingImage FINAL : public StyleImage {
+class StylePendingImage final : public StyleImage {
 public:
     static PassRefPtr<StylePendingImage> create(CSSValue* value) { return adoptRef(new StylePendingImage(value)); }
 
-    virtual WrappedImagePtr data() const OVERRIDE { return m_value; }
+    virtual WrappedImagePtr data() const override { return m_value; }
 
-    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const OVERRIDE { return m_value; }
+    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const override { return m_value; }
     CSSImageValue* cssImageValue() const { return m_value->isImageValue() ? toCSSImageValue(m_value) : 0; }
     CSSImageGeneratorValue* cssImageGeneratorValue() const { return m_value->isImageGeneratorValue() ? toCSSImageGeneratorValue(m_value) : 0; }
     CSSCursorImageValue* cssCursorImageValue() const { return m_value->isCursorImageValue() ? toCSSCursorImageValue(m_value) : 0; }
     CSSImageSetValue* cssImageSetValue() const { return m_value->isImageSetValue() ? toCSSImageSetValue(m_value) : 0; }
 
-    virtual LayoutSize imageSize(const RenderObject*, float /*multiplier*/) const OVERRIDE { return LayoutSize(); }
-    virtual bool imageHasRelativeWidth() const OVERRIDE { return false; }
-    virtual bool imageHasRelativeHeight() const OVERRIDE { return false; }
-    virtual void computeIntrinsicDimensions(const RenderObject*, Length& /* intrinsicWidth */ , Length& /* intrinsicHeight */, FloatSize& /* intrinsicRatio */) OVERRIDE { }
-    virtual bool usesImageContainerSize() const OVERRIDE { return false; }
-    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize&, float) OVERRIDE { }
-    virtual void addClient(RenderObject*) OVERRIDE { }
-    virtual void removeClient(RenderObject*) OVERRIDE { }
-    virtual PassRefPtr<Image> image(RenderObject*, const IntSize&) const OVERRIDE
+    virtual LayoutSize imageSize(const RenderObject*, float /*multiplier*/) const override { return LayoutSize(); }
+    virtual bool imageHasRelativeWidth() const override { return false; }
+    virtual bool imageHasRelativeHeight() const override { return false; }
+    virtual void computeIntrinsicDimensions(const RenderObject*, Length& /* intrinsicWidth */ , Length& /* intrinsicHeight */, FloatSize& /* intrinsicRatio */) override { }
+    virtual bool usesImageContainerSize() const override { return false; }
+    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize&, float) override { }
+    virtual void addClient(RenderObject*) override { }
+    virtual void removeClient(RenderObject*) override { }
+    virtual PassRefPtr<Image> image(RenderObject*, const IntSize&) const override
     {
         ASSERT_NOT_REACHED();
         return nullptr;
     }
-    virtual bool knownToBeOpaque(const RenderObject*) const OVERRIDE { return false; }
+    virtual bool knownToBeOpaque(const RenderObject*) const override { return false; }
 
 private:
     StylePendingImage(CSSValue* value)

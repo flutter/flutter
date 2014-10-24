@@ -37,7 +37,7 @@ class SerializedScriptValue;
 
 typedef EventInit PopStateEventInit;
 
-class PopStateEvent FINAL : public Event {
+class PopStateEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~PopStateEvent();
@@ -53,9 +53,9 @@ public:
     }
     History* history() const { return m_history.get(); }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     PopStateEvent();

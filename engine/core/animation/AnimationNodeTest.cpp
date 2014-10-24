@@ -39,7 +39,7 @@ namespace {
 
 class TestAnimationNodeEventDelegate : public AnimationNode::EventDelegate {
 public:
-    virtual void onEventCondition(const AnimationNode* animationNode) OVERRIDE
+    virtual void onEventCondition(const AnimationNode* animationNode) override
     {
         m_eventTriggered = true;
 
@@ -72,10 +72,10 @@ public:
         AnimationNode::updateInheritedTime(time, reason);
     }
 
-    virtual void updateChildrenAndEffects() const OVERRIDE { }
+    virtual void updateChildrenAndEffects() const override { }
     void willDetach() { }
     TestAnimationNodeEventDelegate* eventDelegate() { return m_eventDelegate.get(); }
-    virtual double calculateTimeToEffectChange(bool forwards, double localTime, double timeToNextIteration) const OVERRIDE
+    virtual double calculateTimeToEffectChange(bool forwards, double localTime, double timeToNextIteration) const override
     {
         m_localTime = localTime;
         m_timeToNextIteration = timeToNextIteration;
@@ -95,7 +95,7 @@ public:
         return result;
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_eventDelegate);
         AnimationNode::trace(visitor);

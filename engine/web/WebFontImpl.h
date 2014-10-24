@@ -42,20 +42,20 @@ class WebFontImpl FINAL : public WebFont {
 public:
     explicit WebFontImpl(const FontDescription&);
 
-    virtual WebFontDescription fontDescription() const OVERRIDE;
+    virtual WebFontDescription fontDescription() const override;
 
-    virtual int ascent() const OVERRIDE;
-    virtual int descent() const OVERRIDE;
-    virtual int height() const OVERRIDE;
-    virtual int lineSpacing() const OVERRIDE;
-    virtual float xHeight() const OVERRIDE;
+    virtual int ascent() const override;
+    virtual int descent() const override;
+    virtual int height() const override;
+    virtual int lineSpacing() const override;
+    virtual float xHeight() const override;
 
     virtual void drawText(WebCanvas*, const WebTextRun&, const WebFloatPoint& leftBaseline, WebColor,
-        const WebRect& clip, bool canvasIsOpaque, int from = 0, int to = -1) const OVERRIDE;
-    virtual int calculateWidth(const WebTextRun&) const OVERRIDE;
-    virtual int offsetForPosition(const WebTextRun&, float position) const OVERRIDE;
+        const WebRect& clip, bool canvasIsOpaque, int from = 0, int to = -1) const override;
+    virtual int calculateWidth(const WebTextRun&) const override;
+    virtual int offsetForPosition(const WebTextRun&, float position) const override;
     virtual WebFloatRect selectionRectForText(const WebTextRun&, const WebFloatPoint& leftBaseline,
-        int height, int from = 0, int to = -1) const OVERRIDE;
+        int height, int from = 0, int to = -1) const override;
 
 private:
     Font m_font;

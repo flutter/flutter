@@ -36,7 +36,7 @@ struct PageTransitionEventInit : public EventInit {
     bool persisted;
 };
 
-class PageTransitionEvent FINAL : public Event {
+class PageTransitionEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<PageTransitionEvent> create()
@@ -54,11 +54,11 @@ public:
 
     virtual ~PageTransitionEvent();
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
     bool persisted() const { return m_persisted; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     PageTransitionEvent();

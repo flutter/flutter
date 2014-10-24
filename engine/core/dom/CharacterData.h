@@ -70,11 +70,11 @@ protected:
     String m_data;
 
 private:
-    virtual String nodeValue() const OVERRIDE FINAL;
-    virtual void setNodeValue(const String&) OVERRIDE FINAL;
-    virtual bool isCharacterDataNode() const OVERRIDE FINAL { return true; }
-    virtual int maxCharacterOffset() const OVERRIDE FINAL;
-    virtual bool offsetInCharacters() const OVERRIDE FINAL;
+    virtual String nodeValue() const override final;
+    virtual void setNodeValue(const String&) override final;
+    virtual bool isCharacterDataNode() const override final { return true; }
+    virtual int maxCharacterOffset() const override final;
+    virtual bool offsetInCharacters() const override final;
     void setDataAndUpdate(const String&, unsigned offsetOfReplacedData, unsigned oldLength, unsigned newLength, RecalcStyleBehavior = DoNotRecalcStyle);
 
     bool isContainerNode() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.

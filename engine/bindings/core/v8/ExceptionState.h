@@ -126,23 +126,23 @@ private:
 };
 
 // Used if exceptions can/should not be directly thrown.
-class NonThrowableExceptionState FINAL : public ExceptionState {
+class NonThrowableExceptionState final : public ExceptionState {
 public:
     NonThrowableExceptionState(): ExceptionState(ExceptionState::UnknownContext, 0, 0, v8::Handle<v8::Object>(), v8::Isolate::GetCurrent()) { }
-    virtual void throwDOMException(const ExceptionCode&, const String& message) OVERRIDE;
-    virtual void throwTypeError(const String& message = String()) OVERRIDE;
-    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) OVERRIDE;
-    virtual void throwRangeError(const String& message) OVERRIDE;
+    virtual void throwDOMException(const ExceptionCode&, const String& message) override;
+    virtual void throwTypeError(const String& message = String()) override;
+    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) override;
+    virtual void throwRangeError(const String& message) override;
 };
 
 // Used if any exceptions thrown are ignorable.
-class TrackExceptionState FINAL : public ExceptionState {
+class TrackExceptionState final : public ExceptionState {
 public:
     TrackExceptionState(): ExceptionState(ExceptionState::UnknownContext, 0, 0, v8::Handle<v8::Object>(), v8::Isolate::GetCurrent()) { }
-    virtual void throwDOMException(const ExceptionCode&, const String& message) OVERRIDE;
-    virtual void throwTypeError(const String& message = String()) OVERRIDE;
-    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) OVERRIDE;
-    virtual void throwRangeError(const String& message) OVERRIDE;
+    virtual void throwDOMException(const ExceptionCode&, const String& message) override;
+    virtual void throwTypeError(const String& message = String()) override;
+    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) override;
+    virtual void throwRangeError(const String& message) override;
 };
 
 } // namespace blink

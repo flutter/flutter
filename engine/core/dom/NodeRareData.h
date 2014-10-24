@@ -31,7 +31,7 @@
 
 namespace blink {
 
-class NodeMutationObserverData FINAL : public NoBaseWillBeGarbageCollected<NodeMutationObserverData> {
+class NodeMutationObserverData final : public NoBaseWillBeGarbageCollected<NodeMutationObserverData> {
     WTF_MAKE_NONCOPYABLE(NodeMutationObserverData);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:

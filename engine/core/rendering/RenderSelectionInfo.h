@@ -64,7 +64,7 @@ protected:
 };
 
 // This struct is used when the selection changes to cache the old and new state of the selection for each RenderObject.
-class RenderSelectionInfo FINAL : public RenderSelectionInfoBase {
+class RenderSelectionInfo final : public RenderSelectionInfoBase {
 public:
     RenderSelectionInfo(RenderObject* o, bool clipToVisibleContent)
         : RenderSelectionInfoBase(o)
@@ -91,7 +91,7 @@ private:
 };
 
 // This struct is used when the selection changes to cache the old and new state of the selection for each RenderBlock.
-class RenderBlockSelectionInfo FINAL : public RenderSelectionInfoBase {
+class RenderBlockSelectionInfo final : public RenderSelectionInfoBase {
 public:
     RenderBlockSelectionInfo(RenderBlock* b)
         : RenderSelectionInfoBase(b)

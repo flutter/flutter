@@ -87,7 +87,7 @@ protected:
     explicit SimpleEditCommand(Document& document) : EditCommand(document) { }
 
 private:
-    virtual bool isSimpleEditCommand() const OVERRIDE FINAL { return true; }
+    virtual bool isSimpleEditCommand() const override final { return true; }
 };
 
 DEFINE_TYPE_CASTS(SimpleEditCommand, EditCommand, command, command->isSimpleEditCommand(), command.isSimpleEditCommand());

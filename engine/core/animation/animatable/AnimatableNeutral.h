@@ -35,15 +35,15 @@
 
 namespace blink {
 
-class AnimatableNeutral FINAL : public AnimatableValue {
+class AnimatableNeutral final : public AnimatableValue {
 public:
     virtual ~AnimatableNeutral() { }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { AnimatableValue::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
     static PassRefPtrWillBeRawPtr<AnimatableNeutral> create() { return adoptRefWillBeNoop(new AnimatableNeutral()); }
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const OVERRIDE
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
     {
         ASSERT_NOT_REACHED();
         return nullptr;
@@ -51,8 +51,8 @@ protected:
 
 private:
     friend class AnimatableValue;
-    virtual AnimatableType type() const OVERRIDE { return TypeNeutral; }
-    virtual bool equalTo(const AnimatableValue* value) const OVERRIDE
+    virtual AnimatableType type() const override { return TypeNeutral; }
+    virtual bool equalTo(const AnimatableValue* value) const override
     {
         ASSERT_NOT_REACHED();
         return true;

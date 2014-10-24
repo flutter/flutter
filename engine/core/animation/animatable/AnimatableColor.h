@@ -56,16 +56,16 @@ private:
 // property. Currently it is used for all properties, even those which do not
 // support a separate 'visited link' color (eg SVG properties). This is correct
 // but inefficient.
-class AnimatableColor FINAL : public AnimatableValue {
+class AnimatableColor final : public AnimatableValue {
 public:
     static PassRefPtrWillBeRawPtr<AnimatableColor> create(const AnimatableColorImpl&, const AnimatableColorImpl& visitedLinkColor);
     Color color() const { return m_color.toColor(); }
     Color visitedLinkColor() const { return m_visitedLinkColor.toColor(); }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { AnimatableValue::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     AnimatableColor(const AnimatableColorImpl& color, const AnimatableColorImpl& visitedLinkColor)
@@ -73,9 +73,9 @@ private:
         , m_visitedLinkColor(visitedLinkColor)
     {
     }
-    virtual AnimatableType type() const OVERRIDE { return TypeColor; }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE;
-    virtual double distanceTo(const AnimatableValue*) const OVERRIDE;
+    virtual AnimatableType type() const override { return TypeColor; }
+    virtual bool equalTo(const AnimatableValue*) const override;
+    virtual double distanceTo(const AnimatableValue*) const override;
     const AnimatableColorImpl m_color;
     const AnimatableColorImpl m_visitedLinkColor;
 };

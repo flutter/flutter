@@ -9,7 +9,7 @@
 
 namespace blink {
 
-class HTMLPictureElement FINAL : public HTMLElement {
+class HTMLPictureElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLPictureElement);
@@ -20,7 +20,7 @@ protected:
     explicit HTMLPictureElement(Document&);
 
 private:
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
 };
 
 } // namespace blink

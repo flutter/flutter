@@ -31,7 +31,7 @@
 
 namespace blink {
 
-class TemplateContentDocumentFragment FINAL : public DocumentFragment {
+class TemplateContentDocumentFragment final : public DocumentFragment {
 public:
     static PassRefPtrWillBeRawPtr<TemplateContentDocumentFragment> create(Document& document, Element* host)
     {
@@ -43,7 +43,7 @@ public:
     void clearHost() { m_host = nullptr; }
 #endif
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_host);
         DocumentFragment::trace(visitor);
@@ -56,7 +56,7 @@ private:
     {
     }
 
-    virtual bool isTemplateContent() const OVERRIDE { return true; }
+    virtual bool isTemplateContent() const override { return true; }
 
     RawPtrWillBeMember<Element> m_host;
 };

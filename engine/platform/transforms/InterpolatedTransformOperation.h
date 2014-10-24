@@ -50,16 +50,16 @@ public:
     }
 
 private:
-    virtual bool isIdentity() const OVERRIDE { return false; }
+    virtual bool isIdentity() const override { return false; }
 
-    virtual OperationType type() const OVERRIDE { return Interpolated; }
+    virtual OperationType type() const override { return Interpolated; }
 
-    virtual bool operator==(const TransformOperation&) const OVERRIDE;
-    virtual void apply(TransformationMatrix&, const FloatSize& borderBoxSize) const OVERRIDE;
+    virtual bool operator==(const TransformOperation&) const override;
+    virtual void apply(TransformationMatrix&, const FloatSize& borderBoxSize) const override;
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) OVERRIDE;
+    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
 
-    virtual bool dependsOnBoxSize() const OVERRIDE
+    virtual bool dependsOnBoxSize() const override
     {
         return from.dependsOnBoxSize() || to.dependsOnBoxSize();
     }

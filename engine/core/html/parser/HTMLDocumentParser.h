@@ -67,7 +67,7 @@ public:
         return adoptRefWillBeNoop(new HTMLDocumentParser(document, reportErrors));
     }
     virtual ~HTMLDocumentParser();
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();
@@ -84,8 +84,8 @@ public:
     };
     void didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
 
-    virtual void appendBytes(const char* bytes, size_t length) OVERRIDE;
-    virtual void flush() OVERRIDE FINAL;
+    virtual void appendBytes(const char* bytes, size_t length) override;
+    virtual void flush() override final;
 
     bool isWaitingForScripts() const;
     bool isExecutingScript() const;
@@ -94,9 +94,9 @@ public:
     UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
 protected:
-    virtual void insert(const SegmentedString&) OVERRIDE FINAL;
-    virtual void append(PassRefPtr<StringImpl>) OVERRIDE;
-    virtual void finish() OVERRIDE FINAL;
+    virtual void insert(const SegmentedString&) override final;
+    virtual void append(PassRefPtr<StringImpl>) override;
+    virtual void finish() override final;
 
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);
     HTMLDocumentParser(DocumentFragment*, Element* contextElement);
@@ -109,14 +109,14 @@ private:
         return adoptRefWillBeNoop(new HTMLDocumentParser(fragment, contextElement));
     }
 
-    virtual HTMLDocumentParser* asHTMLDocumentParser() OVERRIDE FINAL { return this; }
+    virtual HTMLDocumentParser* asHTMLDocumentParser() override final { return this; }
 
     // DocumentParser
-    virtual void detach() OVERRIDE FINAL;
-    virtual bool hasInsertionPoint() OVERRIDE FINAL;
-    virtual bool processingData() const OVERRIDE FINAL;
-    virtual void prepareToStopParsing() OVERRIDE FINAL;
-    virtual void stopParsing() OVERRIDE FINAL;
+    virtual void detach() override final;
+    virtual bool hasInsertionPoint() override final;
+    virtual bool processingData() const override final;
+    virtual void prepareToStopParsing() override final;
+    virtual void stopParsing() override final;
 
     void startBackgroundParser();
     void stopBackgroundParser();

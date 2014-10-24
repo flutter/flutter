@@ -36,24 +36,24 @@ public:
     explicit WebScrollbarImpl(Scrollbar*);
 
     // Implement WebScrollbar methods
-    virtual bool isOverlay() const OVERRIDE;
-    virtual int value() const OVERRIDE;
-    virtual WebPoint location() const OVERRIDE;
-    virtual WebSize size() const OVERRIDE;
-    virtual bool enabled() const OVERRIDE;
-    virtual int maximum() const OVERRIDE;
-    virtual int totalSize() const OVERRIDE;
-    virtual bool isScrollViewScrollbar() const OVERRIDE;
-    virtual bool isScrollableAreaActive() const OVERRIDE;
-    virtual void getTickmarks(WebVector<WebRect>& tickmarks) const OVERRIDE;
-    virtual ScrollbarPart pressedPart() const OVERRIDE;
-    virtual ScrollbarPart hoveredPart() const OVERRIDE;
-    virtual ScrollbarOverlayStyle scrollbarOverlayStyle() const OVERRIDE;
-    virtual bool isCustomScrollbar() const OVERRIDE;
-    virtual Orientation orientation() const OVERRIDE;
-    virtual bool isLeftSideVerticalScrollbar() const OVERRIDE;
-    virtual bool isAlphaLocked() const OVERRIDE;
-    virtual void setIsAlphaLocked(bool) OVERRIDE;
+    virtual bool isOverlay() const override;
+    virtual int value() const override;
+    virtual WebPoint location() const override;
+    virtual WebSize size() const override;
+    virtual bool enabled() const override;
+    virtual int maximum() const override;
+    virtual int totalSize() const override;
+    virtual bool isScrollViewScrollbar() const override;
+    virtual bool isScrollableAreaActive() const override;
+    virtual void getTickmarks(WebVector<WebRect>& tickmarks) const override;
+    virtual ScrollbarPart pressedPart() const override;
+    virtual ScrollbarPart hoveredPart() const override;
+    virtual ScrollbarOverlayStyle scrollbarOverlayStyle() const override;
+    virtual bool isCustomScrollbar() const override;
+    virtual Orientation orientation() const override;
+    virtual bool isLeftSideVerticalScrollbar() const override;
+    virtual bool isAlphaLocked() const override;
+    virtual void setIsAlphaLocked(bool) override;
 
 private:
     RefPtr<Scrollbar> m_scrollbar;

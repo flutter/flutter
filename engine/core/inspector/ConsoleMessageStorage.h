@@ -13,7 +13,7 @@ namespace blink {
 
 class LocalDOMWindow;
 
-class ConsoleMessageStorage FINAL : public NoBaseWillBeGarbageCollected<ConsoleMessageStorage> {
+class ConsoleMessageStorage final : public NoBaseWillBeGarbageCollected<ConsoleMessageStorage> {
     WTF_MAKE_NONCOPYABLE(ConsoleMessageStorage);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:

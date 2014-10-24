@@ -38,7 +38,7 @@
 
 namespace blink {
 
-class ScriptString FINAL {
+class ScriptString final {
 public:
     ScriptString();
     ScriptString(v8::Isolate*, v8::Handle<v8::String>);

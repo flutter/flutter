@@ -34,7 +34,7 @@ struct HashChangeEventInit : public EventInit {
     String newURL;
 };
 
-class HashChangeEvent FINAL : public Event {
+class HashChangeEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<HashChangeEvent> create()
@@ -66,9 +66,9 @@ public:
     const String& oldURL() const { return m_oldURL; }
     const String& newURL() const { return m_newURL; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE { return EventNames::HashChangeEvent; }
+    virtual const AtomicString& interfaceName() const override { return EventNames::HashChangeEvent; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { Event::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { Event::trace(visitor); }
 
 private:
     HashChangeEvent()

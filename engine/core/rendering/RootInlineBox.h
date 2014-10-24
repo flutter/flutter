@@ -37,16 +37,16 @@ class RootInlineBox : public InlineFlowBox {
 public:
     explicit RootInlineBox(RenderBlockFlow&);
 
-    virtual void destroy() OVERRIDE FINAL;
+    virtual void destroy() override final;
 
-    virtual bool isRootInlineBox() const OVERRIDE FINAL { return true; }
+    virtual bool isRootInlineBox() const override final { return true; }
 
     void detachEllipsisBox();
 
     RootInlineBox* nextRootBox() const { return static_cast<RootInlineBox*>(m_nextLineBox); }
     RootInlineBox* prevRootBox() const { return static_cast<RootInlineBox*>(m_prevLineBox); }
 
-    virtual void adjustPosition(float dx, float dy) OVERRIDE FINAL;
+    virtual void adjustPosition(float dx, float dy) override final;
 
     LayoutUnit lineTop() const { return m_lineTop; }
     LayoutUnit lineBottom() const { return m_lineBottom; }
@@ -79,7 +79,7 @@ public:
         m_selectionBottom = selectionBottom == LayoutUnit::min() ? bottom : selectionBottom;
     }
 
-    virtual RenderLineBoxList* rendererLineBoxes() const OVERRIDE FINAL;
+    virtual RenderLineBoxList* rendererLineBoxes() const override final;
 
     RenderObject* lineBreakObj() const { return m_lineBreakObj; }
     BidiStatus lineBreakBidiStatus() const;
@@ -97,25 +97,25 @@ public:
     // Return the truncatedWidth, the width of the truncated text + ellipsis.
     float placeEllipsis(const AtomicString& ellipsisStr, bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, InlineBox* markupBox = 0);
     // Return the position of the EllipsisBox or -1.
-    virtual float placeEllipsisBox(bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox) OVERRIDE FINAL;
+    virtual float placeEllipsisBox(bool ltr, float blockLeftEdge, float blockRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox) override final;
 
     using InlineBox::hasEllipsisBox;
     EllipsisBox* ellipsisBox() const;
 
     void paintEllipsisBox(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) const;
 
-    virtual void clearTruncation() OVERRIDE FINAL;
+    virtual void clearTruncation() override final;
 
-    virtual int baselinePosition(FontBaseline baselineType) const OVERRIDE FINAL;
-    virtual LayoutUnit lineHeight() const OVERRIDE FINAL;
+    virtual int baselinePosition(FontBaseline baselineType) const override final;
+    virtual LayoutUnit lineHeight() const override final;
 
-    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) OVERRIDE;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) OVERRIDE FINAL;
+    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) override;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) override final;
 
     using InlineBox::hasSelectedChildren;
     using InlineBox::setHasSelectedChildren;
 
-    virtual RenderObject::SelectionState selectionState() OVERRIDE FINAL;
+    virtual RenderObject::SelectionState selectionState() override final;
     InlineBox* firstSelectedBox();
     InlineBox* lastSelectedBox();
 
@@ -137,9 +137,9 @@ public:
 
     Vector<RenderBox*>* floatsPtr() { ASSERT(!isDirty()); return m_floats.get(); }
 
-    virtual void extractLineBoxFromRenderObject() OVERRIDE FINAL;
-    virtual void attachLineBoxToRenderObject() OVERRIDE FINAL;
-    virtual void removeLineBoxFromRenderObject() OVERRIDE FINAL;
+    virtual void extractLineBoxFromRenderObject() override final;
+    virtual void attachLineBoxToRenderObject() override final;
+    virtual void removeLineBoxFromRenderObject() override final;
 
     FontBaseline baselineType() const { return static_cast<FontBaseline>(m_baselineType); }
 
@@ -181,7 +181,7 @@ public:
     Node* getLogicalEndBoxWithNode(InlineBox*&) const;
 
 #ifndef NDEBUG
-    virtual const char* boxName() const OVERRIDE;
+    virtual const char* boxName() const override;
 #endif
 private:
     LayoutUnit beforeAnnotationsAdjustment() const;

@@ -22,7 +22,7 @@ public:
         StyleBuilder::applyProperty(m_id, state, toInterpolableBool(m_cachedValue.get())->value() ? m_endCSSValue.get() : m_startCSSValue.get());
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         StyleInterpolation::trace(visitor);
         visitor->trace(m_startCSSValue);

@@ -34,7 +34,7 @@
 
 namespace blink {
 
-class WebGLProgram FINAL : public WebGLSharedObject, public ScriptWrappable {
+class WebGLProgram final : public WebGLSharedObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~WebGLProgram();
@@ -60,15 +60,15 @@ public:
     bool attachShader(WebGLShader*);
     bool detachShader(WebGLShader*);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     explicit WebGLProgram(WebGLRenderingContextBase*);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
 private:
-    virtual bool isProgram() const OVERRIDE { return true; }
+    virtual bool isProgram() const override { return true; }
 
     void cacheActiveAttribLocations(blink::WebGraphicsContext3D*);
     void cacheInfoIfNeeded();

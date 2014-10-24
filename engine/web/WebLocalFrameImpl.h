@@ -60,80 +60,80 @@ class WebLocalFrameImpl FINAL
     , public RefCounted<WebLocalFrameImpl> {
 public:
     // WebFrame methods:
-    virtual bool isWebLocalFrame() const OVERRIDE;
-    virtual WebLocalFrame* toWebLocalFrame() OVERRIDE;
-    virtual void close() OVERRIDE;
-    virtual WebSize scrollOffset() const OVERRIDE;
-    virtual void setScrollOffset(const WebSize&) OVERRIDE;
-    virtual WebSize minimumScrollOffset() const OVERRIDE;
-    virtual WebSize maximumScrollOffset() const OVERRIDE;
-    virtual WebSize contentsSize() const OVERRIDE;
-    virtual bool hasVisibleContent() const OVERRIDE;
-    virtual WebRect visibleContentRect() const OVERRIDE;
-    virtual bool hasHorizontalScrollbar() const OVERRIDE;
-    virtual bool hasVerticalScrollbar() const OVERRIDE;
-    virtual WebView* view() const OVERRIDE;
-    virtual WebDocument document() const OVERRIDE;
-    virtual WebPerformance performance() const OVERRIDE;
-    virtual void executeScript(const WebScriptSource&) OVERRIDE;
+    virtual bool isWebLocalFrame() const override;
+    virtual WebLocalFrame* toWebLocalFrame() override;
+    virtual void close() override;
+    virtual WebSize scrollOffset() const override;
+    virtual void setScrollOffset(const WebSize&) override;
+    virtual WebSize minimumScrollOffset() const override;
+    virtual WebSize maximumScrollOffset() const override;
+    virtual WebSize contentsSize() const override;
+    virtual bool hasVisibleContent() const override;
+    virtual WebRect visibleContentRect() const override;
+    virtual bool hasHorizontalScrollbar() const override;
+    virtual bool hasVerticalScrollbar() const override;
+    virtual WebView* view() const override;
+    virtual WebDocument document() const override;
+    virtual WebPerformance performance() const override;
+    virtual void executeScript(const WebScriptSource&) override;
     virtual void executeScriptInIsolatedWorld(
         int worldID, const WebScriptSource* sources, unsigned numSources,
-        int extensionGroup) OVERRIDE;
-    virtual void setIsolatedWorldHumanReadableName(int worldID, const WebString&) OVERRIDE;
-    virtual void addMessageToConsole(const WebConsoleMessage&) OVERRIDE;
-    virtual void collectGarbage() OVERRIDE;
+        int extensionGroup) override;
+    virtual void setIsolatedWorldHumanReadableName(int worldID, const WebString&) override;
+    virtual void addMessageToConsole(const WebConsoleMessage&) override;
+    virtual void collectGarbage() override;
     virtual v8::Handle<v8::Value> executeScriptAndReturnValue(
-        const WebScriptSource&) OVERRIDE;
+        const WebScriptSource&) override;
     virtual void executeScriptInIsolatedWorld(
         int worldID, const WebScriptSource* sourcesIn, unsigned numSources,
-        int extensionGroup, WebVector<v8::Local<v8::Value> >* results) OVERRIDE;
+        int extensionGroup, WebVector<v8::Local<v8::Value> >* results) override;
     virtual v8::Handle<v8::Value> callFunctionEvenIfScriptDisabled(
         v8::Handle<v8::Function>,
         v8::Handle<v8::Value>,
         int argc,
-        v8::Handle<v8::Value> argv[]) OVERRIDE;
-    virtual v8::Local<v8::Context> mainWorldScriptContext() const OVERRIDE;
+        v8::Handle<v8::Value> argv[]) override;
+    virtual v8::Local<v8::Context> mainWorldScriptContext() const override;
     virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle);
-    virtual void setReferrerForRequest(WebURLRequest&, const WebURL& referrer) OVERRIDE;
-    virtual unsigned unloadListenerCount() const OVERRIDE;
-    virtual void replaceSelection(const WebString&) OVERRIDE;
-    virtual void insertText(const WebString&) OVERRIDE;
-    virtual void setMarkedText(const WebString&, unsigned location, unsigned length) OVERRIDE;
-    virtual void unmarkText() OVERRIDE;
-    virtual bool hasMarkedText() const OVERRIDE;
-    virtual WebRange markedRange() const OVERRIDE;
-    virtual bool firstRectForCharacterRange(unsigned location, unsigned length, WebRect&) const OVERRIDE;
-    virtual size_t characterIndexForPoint(const WebPoint&) const OVERRIDE;
-    virtual bool executeCommand(const WebString&, const WebNode& = WebNode()) OVERRIDE;
-    virtual bool executeCommand(const WebString&, const WebString& value, const WebNode& = WebNode()) OVERRIDE;
-    virtual bool isCommandEnabled(const WebString&) const OVERRIDE;
-    virtual void enableContinuousSpellChecking(bool) OVERRIDE;
-    virtual bool isContinuousSpellCheckingEnabled() const OVERRIDE;
-    virtual void requestTextChecking(const WebElement&) OVERRIDE;
-    virtual void replaceMisspelledRange(const WebString&) OVERRIDE;
-    virtual void removeSpellingMarkers() OVERRIDE;
-    virtual bool hasSelection() const OVERRIDE;
-    virtual WebRange selectionRange() const OVERRIDE;
-    virtual WebString selectionAsText() const OVERRIDE;
-    virtual WebString selectionAsMarkup() const OVERRIDE;
-    virtual bool selectWordAroundCaret() OVERRIDE;
-    virtual void selectRange(const WebPoint& base, const WebPoint& extent) OVERRIDE;
-    virtual void selectRange(const WebRange&) OVERRIDE;
-    virtual void moveRangeSelection(const WebPoint& base, const WebPoint& extent) OVERRIDE;
-    virtual void moveCaretSelection(const WebPoint&) OVERRIDE;
-    virtual bool setEditableSelectionOffsets(int start, int end) OVERRIDE;
-    virtual bool setCompositionFromExistingText(int compositionStart, int compositionEnd, const WebVector<WebCompositionUnderline>& underlines) OVERRIDE;
-    virtual void extendSelectionAndDelete(int before, int after) OVERRIDE;
-    virtual void setCaretVisible(bool) OVERRIDE;
+    virtual void setReferrerForRequest(WebURLRequest&, const WebURL& referrer) override;
+    virtual unsigned unloadListenerCount() const override;
+    virtual void replaceSelection(const WebString&) override;
+    virtual void insertText(const WebString&) override;
+    virtual void setMarkedText(const WebString&, unsigned location, unsigned length) override;
+    virtual void unmarkText() override;
+    virtual bool hasMarkedText() const override;
+    virtual WebRange markedRange() const override;
+    virtual bool firstRectForCharacterRange(unsigned location, unsigned length, WebRect&) const override;
+    virtual size_t characterIndexForPoint(const WebPoint&) const override;
+    virtual bool executeCommand(const WebString&, const WebNode& = WebNode()) override;
+    virtual bool executeCommand(const WebString&, const WebString& value, const WebNode& = WebNode()) override;
+    virtual bool isCommandEnabled(const WebString&) const override;
+    virtual void enableContinuousSpellChecking(bool) override;
+    virtual bool isContinuousSpellCheckingEnabled() const override;
+    virtual void requestTextChecking(const WebElement&) override;
+    virtual void replaceMisspelledRange(const WebString&) override;
+    virtual void removeSpellingMarkers() override;
+    virtual bool hasSelection() const override;
+    virtual WebRange selectionRange() const override;
+    virtual WebString selectionAsText() const override;
+    virtual WebString selectionAsMarkup() const override;
+    virtual bool selectWordAroundCaret() override;
+    virtual void selectRange(const WebPoint& base, const WebPoint& extent) override;
+    virtual void selectRange(const WebRange&) override;
+    virtual void moveRangeSelection(const WebPoint& base, const WebPoint& extent) override;
+    virtual void moveCaretSelection(const WebPoint&) override;
+    virtual bool setEditableSelectionOffsets(int start, int end) override;
+    virtual bool setCompositionFromExistingText(int compositionStart, int compositionEnd, const WebVector<WebCompositionUnderline>& underlines) override;
+    virtual void extendSelectionAndDelete(int before, int after) override;
+    virtual void setCaretVisible(bool) override;
 
-    virtual WebString contentAsText(size_t maxChars) const OVERRIDE;
-    virtual WebString contentAsMarkup() const OVERRIDE;
-    virtual WebString renderTreeAsText(RenderAsTextControls toShow = RenderAsTextNormal) const OVERRIDE;
-    virtual WebString markerTextForListItem(const WebElement&) const OVERRIDE;
-    virtual WebRect selectionBoundsRect() const OVERRIDE;
+    virtual WebString contentAsText(size_t maxChars) const override;
+    virtual WebString contentAsMarkup() const override;
+    virtual WebString renderTreeAsText(RenderAsTextControls toShow = RenderAsTextNormal) const override;
+    virtual WebString markerTextForListItem(const WebElement&) const override;
+    virtual WebRect selectionBoundsRect() const override;
 
-    virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const OVERRIDE;
-    virtual WebString layerTreeAsText(bool showDebugInfo = false) const OVERRIDE;
+    virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const override;
+    virtual WebString layerTreeAsText(bool showDebugInfo = false) const override;
 
     static WebLocalFrameImpl* create(WebFrameClient*);
     virtual ~WebLocalFrameImpl();
@@ -154,7 +154,7 @@ public:
     // Sets whether the WebLocalFrameImpl allows its document to be scrolled.
     // If the parameter is true, allow the document to be scrolled.
     // Otherwise, disallow scrolling.
-    virtual void setCanHaveScrollbars(bool) OVERRIDE;
+    virtual void setCanHaveScrollbars(bool) override;
 
     LocalFrame* frame() const { return m_frame.get(); }
     WebFrameClient* client() const { return m_client; }

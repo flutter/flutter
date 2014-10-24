@@ -74,7 +74,7 @@ enum UpdateReason {
 // MemoryCacheEntry class is used only in MemoryCache class, but we don't make
 // MemoryCacheEntry class an inner class of MemoryCache because of dependency
 // from MemoryCacheLRUList.
-class MemoryCacheEntry FINAL : public NoBaseWillBeGarbageCollectedFinalized<MemoryCacheEntry> {
+class MemoryCacheEntry final : public NoBaseWillBeGarbageCollectedFinalized<MemoryCacheEntry> {
 public:
     static PassOwnPtrWillBeRawPtr<MemoryCacheEntry> create(Resource* resource) { return adoptPtrWillBeNoop(new MemoryCacheEntry(resource)); }
     void trace(Visitor*);
@@ -108,7 +108,7 @@ private:
 // MemoryCacheLRUList is used only in MemoryCache class, but we don't make
 // MemoryCacheLRUList an inner struct of MemoryCache because we can't define
 // VectorTraits for inner structs.
-struct MemoryCacheLRUList FINAL {
+struct MemoryCacheLRUList final {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
     RawPtrWillBeMember<MemoryCacheEntry> m_head;
@@ -124,7 +124,7 @@ WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::MemoryCacheLRUList);
 
 namespace blink {
 
-class MemoryCache FINAL : public NoBaseWillBeGarbageCollectedFinalized<MemoryCache> {
+class MemoryCache final : public NoBaseWillBeGarbageCollectedFinalized<MemoryCache> {
     WTF_MAKE_NONCOPYABLE(MemoryCache); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     static PassOwnPtrWillBeRawPtr<MemoryCache> create();

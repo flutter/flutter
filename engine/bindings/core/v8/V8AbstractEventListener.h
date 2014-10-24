@@ -66,9 +66,9 @@ public:
 
     // Implementation of EventListener interface.
 
-    virtual bool operator==(const EventListener& other) OVERRIDE { return this == &other; }
+    virtual bool operator==(const EventListener& other) override { return this == &other; }
 
-    virtual void handleEvent(ExecutionContext*, Event*) OVERRIDE;
+    virtual void handleEvent(ExecutionContext*, Event*) override;
 
     // Returns the listener object, either a function or an object.
     v8::Local<v8::Object> getListenerObject(ExecutionContext* context)

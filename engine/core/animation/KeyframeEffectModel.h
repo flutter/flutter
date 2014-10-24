@@ -86,14 +86,14 @@ public:
     }
 
     // AnimationEffect implementation.
-    virtual PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const OVERRIDE;
+    virtual PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const override;
 
-    virtual bool isKeyframeEffectModel() const OVERRIDE { return true; }
+    virtual bool isKeyframeEffectModel() const override { return true; }
 
     virtual bool isAnimatableValueKeyframeEffectModel() const { return false; }
     virtual bool isStringKeyframeEffectModel() const { return false; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     // FIXME: This is a hack used to resolve CSSValues to AnimatableValues while we have a valid handle on an element.
     // This should be removed once StringKeyframes no longer uses InterpolableAnimatableValues.
@@ -128,7 +128,7 @@ protected:
 };
 
 template <class Keyframe>
-class KeyframeEffectModel FINAL : public KeyframeEffectModelBase {
+class KeyframeEffectModel final : public KeyframeEffectModelBase {
 public:
     typedef WillBeHeapVector<RefPtrWillBeMember<Keyframe> > KeyframeVector;
     static PassRefPtrWillBeRawPtr<KeyframeEffectModel<Keyframe> > create(const KeyframeVector& keyframes) { return adoptRefWillBeNoop(new KeyframeEffectModel(keyframes)); }

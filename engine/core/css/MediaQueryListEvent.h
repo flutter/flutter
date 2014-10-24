@@ -17,7 +17,7 @@ struct MediaQueryListEventInit : public EventInit {
     bool matches;
 };
 
-class MediaQueryListEvent FINAL : public Event {
+class MediaQueryListEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<MediaQueryListEvent> create()
@@ -43,9 +43,9 @@ public:
     String media() const { return m_mediaQueryList ? m_mediaQueryList->media() : m_media; }
     bool matches() const { return m_mediaQueryList ? m_mediaQueryList->matches() : m_matches; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE { return EventNames::MediaQueryListEvent; }
+    virtual const AtomicString& interfaceName() const override { return EventNames::MediaQueryListEvent; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         Event::trace(visitor);
         visitor->trace(m_mediaQueryList);

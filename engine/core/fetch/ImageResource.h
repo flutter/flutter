@@ -39,7 +39,7 @@ class Length;
 class MemoryCache;
 class RenderObject;
 
-class ImageResource FINAL : public Resource, public ImageObserver {
+class ImageResource final : public Resource, public ImageObserver {
     friend class MemoryCache;
 
 public:
@@ -51,7 +51,7 @@ public:
     ImageResource(const ResourceRequest&, blink::Image*);
     virtual ~ImageResource();
 
-    virtual void load(ResourceFetcher*, const ResourceLoaderOptions&) OVERRIDE;
+    virtual void load(ResourceFetcher*, const ResourceLoaderOptions&) override;
 
     blink::Image* image(); // Returns the nullImage() if the image is not available yet.
     blink::Image* imageForRenderer(const RenderObject*); // Returns the nullImage() if the image is not available yet.
@@ -79,33 +79,33 @@ public:
     LayoutSize imageSizeForRenderer(const RenderObject*, float multiplier, SizeType = NormalSize); // returns the size of the complete image.
     void computeIntrinsicDimensions(Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio);
 
-    virtual void didAddClient(ResourceClient*) OVERRIDE;
-    virtual void didRemoveClient(ResourceClient*) OVERRIDE;
+    virtual void didAddClient(ResourceClient*) override;
+    virtual void didRemoveClient(ResourceClient*) override;
 
-    virtual void allClientsRemoved() OVERRIDE;
+    virtual void allClientsRemoved() override;
 
-    virtual void appendData(const char*, int) OVERRIDE;
-    virtual void error(Resource::Status) OVERRIDE;
-    virtual void responseReceived(const ResourceResponse&) OVERRIDE;
-    virtual void finishOnePart() OVERRIDE;
+    virtual void appendData(const char*, int) override;
+    virtual void error(Resource::Status) override;
+    virtual void responseReceived(const ResourceResponse&) override;
+    virtual void finishOnePart() override;
 
     // For compatibility, images keep loading even if there are HTTP errors.
-    virtual bool shouldIgnoreHTTPStatusCodeErrors() const OVERRIDE { return true; }
+    virtual bool shouldIgnoreHTTPStatusCodeErrors() const override { return true; }
 
-    virtual bool isImage() const OVERRIDE { return true; }
-    virtual bool stillNeedsLoad() const OVERRIDE { return !errorOccurred() && status() == Unknown && !isLoading(); }
+    virtual bool isImage() const override { return true; }
+    virtual bool stillNeedsLoad() const override { return !errorOccurred() && status() == Unknown && !isLoading(); }
 
     // ImageObserver
-    virtual void decodedSizeChanged(const blink::Image*, int delta) OVERRIDE;
-    virtual void didDraw(const blink::Image*) OVERRIDE;
+    virtual void decodedSizeChanged(const blink::Image*, int delta) override;
+    virtual void didDraw(const blink::Image*) override;
 
-    virtual bool shouldPauseAnimation(const blink::Image*) OVERRIDE;
-    virtual void animationAdvanced(const blink::Image*) OVERRIDE;
-    virtual void changedInRect(const blink::Image*, const IntRect&) OVERRIDE;
+    virtual bool shouldPauseAnimation(const blink::Image*) override;
+    virtual void animationAdvanced(const blink::Image*) override;
+    virtual void changedInRect(const blink::Image*, const IntRect&) override;
 
 protected:
-    virtual bool isSafeToUnlock() const OVERRIDE;
-    virtual void destroyDecodedDataIfPossible() OVERRIDE;
+    virtual bool isSafeToUnlock() const override;
+    virtual void destroyDecodedDataIfPossible() override;
 
 private:
     void clear();
@@ -117,7 +117,7 @@ private:
     // If not null, changeRect is the changed part of the image.
     void notifyObservers(const IntRect* changeRect = 0);
 
-    virtual void switchClientsToRevalidatedResource() OVERRIDE;
+    virtual void switchClientsToRevalidatedResource() override;
 
     typedef pair<IntSize, float> SizeAndZoom;
     typedef HashMap<const ImageResourceClient*, SizeAndZoom> ContainerSizeRequests;

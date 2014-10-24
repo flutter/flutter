@@ -62,7 +62,7 @@ public:
         , m_contextDestroyedCalled(false)
     { }
 
-    virtual void contextDestroyed() OVERRIDE
+    virtual void contextDestroyed() override
     {
         LifecycleObserver<DummyContext>::contextDestroyed();
         m_contextDestroyedCalled = true;

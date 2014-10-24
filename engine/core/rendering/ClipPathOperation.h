@@ -63,7 +63,7 @@ protected:
     OperationType m_type;
 };
 
-class ShapeClipPathOperation FINAL : public ClipPathOperation {
+class ShapeClipPathOperation final : public ClipPathOperation {
 public:
     static PassRefPtr<ShapeClipPathOperation> create(PassRefPtr<BasicShape> shape)
     {
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    virtual bool operator==(const ClipPathOperation&) const OVERRIDE;
+    virtual bool operator==(const ClipPathOperation&) const override;
 
     ShapeClipPathOperation(PassRefPtr<BasicShape> shape)
         : ClipPathOperation(SHAPE)

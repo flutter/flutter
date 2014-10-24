@@ -65,7 +65,7 @@ typedef uint64_t LinkHash;
 
 float deviceScaleFactor(LocalFrame*);
 
-class Page FINAL : public NoBaseWillBeGarbageCollectedFinalized<Page>, public WillBeHeapSupplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
+class Page final : public NoBaseWillBeGarbageCollectedFinalized<Page>, public WillBeHeapSupplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Page);
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
@@ -179,7 +179,7 @@ private:
     void setNeedsLayoutInAllFrames();
 
     // SettingsDelegate overrides.
-    virtual void settingsChanged(SettingsDelegate::ChangeType) OVERRIDE;
+    virtual void settingsChanged(SettingsDelegate::ChangeType) override;
 
     PageAnimator m_animator;
     const OwnPtr<AutoscrollController> m_autoscrollController;

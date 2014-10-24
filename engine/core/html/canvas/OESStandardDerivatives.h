@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class OESStandardDerivatives FINAL : public WebGLExtension, public ScriptWrappable {
+class OESStandardDerivatives final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<OESStandardDerivatives> create(WebGLRenderingContextBase*);
@@ -40,7 +40,7 @@ public:
     static const char* extensionName();
 
     virtual ~OESStandardDerivatives();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit OESStandardDerivatives(WebGLRenderingContextBase*);

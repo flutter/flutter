@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class WebGLShader FINAL : public WebGLSharedObject, public ScriptWrappable {
+class WebGLShader final : public WebGLSharedObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~WebGLShader();
@@ -48,9 +48,9 @@ public:
 private:
     WebGLShader(WebGLRenderingContextBase*, GLenum);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
-    virtual bool isShader() const OVERRIDE { return true; }
+    virtual bool isShader() const override { return true; }
 
     GLenum m_type;
     String m_source;

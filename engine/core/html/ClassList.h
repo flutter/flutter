@@ -38,7 +38,7 @@ class Element;
 
 typedef int ExceptionCode;
 
-class ClassList FINAL : public DOMTokenList {
+class ClassList final : public DOMTokenList {
 public:
     static PassOwnPtrWillBeRawPtr<ClassList> create(Element* element)
     {
@@ -46,26 +46,26 @@ public:
     }
 
 #if !ENABLE(OILPAN)
-    virtual void ref() OVERRIDE;
-    virtual void deref() OVERRIDE;
+    virtual void ref() override;
+    virtual void deref() override;
 #endif
 
-    virtual unsigned length() const OVERRIDE;
-    virtual const AtomicString item(unsigned index) const OVERRIDE;
+    virtual unsigned length() const override;
+    virtual const AtomicString item(unsigned index) const override;
 
-    virtual Element* element() OVERRIDE { return m_element; }
+    virtual Element* element() override { return m_element; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     explicit ClassList(Element*);
 
-    virtual bool containsInternal(const AtomicString&) const OVERRIDE;
+    virtual bool containsInternal(const AtomicString&) const override;
 
     const SpaceSplitString& classNames() const;
 
-    virtual const AtomicString& value() const OVERRIDE { return m_element->getAttribute(HTMLNames::classAttr); }
-    virtual void setValue(const AtomicString& value) OVERRIDE { m_element->setAttribute(HTMLNames::classAttr, value); }
+    virtual const AtomicString& value() const override { return m_element->getAttribute(HTMLNames::classAttr); }
+    virtual void setValue(const AtomicString& value) override { m_element->setAttribute(HTMLNames::classAttr, value); }
 
     RawPtrWillBeMember<Element> m_element;
 };

@@ -11,7 +11,7 @@
 
 namespace blink {
 
-class CSSAnimationData FINAL : public CSSTimingData {
+class CSSAnimationData final : public CSSTimingData {
 public:
     static PassOwnPtrWillBeRawPtr<CSSAnimationData> create()
     {

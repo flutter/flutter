@@ -42,17 +42,17 @@ public:
     }
 
 private:
-    virtual bool isIdentity() const OVERRIDE FINAL { return true; }
-    virtual OperationType type() const OVERRIDE { return Identity; }
+    virtual bool isIdentity() const override final { return true; }
+    virtual OperationType type() const override { return Identity; }
 
-    virtual bool operator==(const TransformOperation& o) const OVERRIDE
+    virtual bool operator==(const TransformOperation& o) const override
     {
         return isSameType(o);
     }
 
-    virtual void apply(TransformationMatrix&, const FloatSize&) const OVERRIDE { }
+    virtual void apply(TransformationMatrix&, const FloatSize&) const override { }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation*, double, bool = false) OVERRIDE
+    virtual PassRefPtr<TransformOperation> blend(const TransformOperation*, double, bool = false) override
     {
         return this;
     }

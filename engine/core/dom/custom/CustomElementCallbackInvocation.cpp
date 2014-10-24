@@ -42,7 +42,7 @@ public:
     AttachedDetachedInvocation(PassRefPtr<CustomElementLifecycleCallbacks>, CustomElementLifecycleCallbacks::CallbackType which);
 
 private:
-    virtual void dispatch(Element*) OVERRIDE;
+    virtual void dispatch(Element*) override;
 
     CustomElementLifecycleCallbacks::CallbackType m_which;
 };
@@ -73,7 +73,7 @@ public:
     AttributeChangedInvocation(PassRefPtr<CustomElementLifecycleCallbacks>, const AtomicString& name, const AtomicString& oldValue, const AtomicString& newValue);
 
 private:
-    virtual void dispatch(Element*) OVERRIDE;
+    virtual void dispatch(Element*) override;
 
     AtomicString m_name;
     AtomicString m_oldValue;
@@ -101,8 +101,8 @@ public:
     }
 
 private:
-    virtual void dispatch(Element*) OVERRIDE;
-    virtual bool isCreated() const OVERRIDE { return true; }
+    virtual void dispatch(Element*) override;
+    virtual bool isCreated() const override { return true; }
 };
 
 void CreatedInvocation::dispatch(Element* element)

@@ -58,7 +58,7 @@ typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<MutationObserverRegistration> >
 typedef WillBeHeapVector<RefPtrWillBeMember<MutationObserver> > MutationObserverVector;
 typedef WillBeHeapVector<RefPtrWillBeMember<MutationRecord> > MutationRecordVector;
 
-class MutationObserver FINAL : public RefCountedWillBeGarbageCollectedFinalized<MutationObserver>, public ScriptWrappable {
+class MutationObserver final : public RefCountedWillBeGarbageCollectedFinalized<MutationObserver>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum MutationType {

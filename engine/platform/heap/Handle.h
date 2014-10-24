@@ -232,7 +232,7 @@ protected:
 };
 
 template<typename T>
-class WrapperPersistent FINAL : public WrapperPersistentNode {
+class WrapperPersistent final : public WrapperPersistentNode {
 public:
     WrapperPersistent() : WrapperPersistentNode(0) { }
     WrapperPersistent(std::nullptr_t) : WrapperPersistentNode(0) { }

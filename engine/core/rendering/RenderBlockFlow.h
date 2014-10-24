@@ -51,17 +51,17 @@ class RenderBlockFlow : public RenderBlock {
 public:
     explicit RenderBlockFlow(ContainerNode*);
     virtual ~RenderBlockFlow();
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     static RenderBlockFlow* createAnonymous(Document*);
 
-    virtual bool isRenderBlockFlow() const OVERRIDE FINAL { return true; }
+    virtual bool isRenderBlockFlow() const override final { return true; }
 
-    virtual void layoutBlock(bool relayoutChildren) OVERRIDE;
+    virtual void layoutBlock(bool relayoutChildren) override;
 
-    virtual void computeOverflow(LayoutUnit oldClientAfterEdge, bool recomputeFloats = false) OVERRIDE;
+    virtual void computeOverflow(LayoutUnit oldClientAfterEdge, bool recomputeFloats = false) override;
 
-    virtual void deleteLineBoxTree() OVERRIDE FINAL;
+    virtual void deleteLineBoxTree() override final;
 
     LayoutUnit availableLogicalWidthForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
     {
@@ -94,8 +94,8 @@ public:
     using RenderBlock::firstRootBox;
     using RenderBlock::lastRootBox;
 
-    virtual LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) OVERRIDE;
-    virtual LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) OVERRIDE;
+    virtual LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) override;
+    virtual LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) override;
 
     RootInlineBox* createAndAppendRootInlineBox();
 
@@ -107,7 +107,7 @@ public:
 
     void removeFloatingObjects();
 
-    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) OVERRIDE;
+    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
 
     void moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, bool fullRemoveInsert);
 
@@ -173,7 +173,7 @@ public:
     GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
         LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
 
-    virtual bool avoidsFloats() const OVERRIDE;
+    virtual bool avoidsFloats() const override;
 
 protected:
     void rebuildFloatsFromIntruding();
@@ -181,8 +181,8 @@ protected:
 
     void createFloatingObjects();
 
-    virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) OVERRIDE;
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) OVERRIDE;
+    virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
+    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
 
     void addOverflowFromFloats();
 
@@ -195,7 +195,7 @@ protected:
         return adjustLogicalLeftOffsetForLine(logicalLeftFloatOffsetForLine(logicalTop, fixedOffset, logicalHeight), applyTextIndent);
     }
 
-    virtual bool updateLogicalWidthAndColumnWidth() OVERRIDE;
+    virtual bool updateLogicalWidthAndColumnWidth() override;
 
     void setLogicalLeftForChild(RenderBox* child, LayoutUnit logicalLeft);
     void setLogicalTopForChild(RenderBox* child, LayoutUnit logicalTop);
@@ -247,12 +247,12 @@ private:
     LayoutUnit lowestFloatLogicalBottom(FloatingObject::Type = FloatingObject::FloatLeftRight) const;
     LayoutUnit nextFloatLogicalBottomBelow(LayoutUnit, ShapeOutsideFloatOffsetMode = ShapeOutsideFloatMarginBoxOffset) const;
 
-    virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) OVERRIDE FINAL;
+    virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
-    virtual void invalidatePaintForOverhangingFloats(bool paintAllDescendants) OVERRIDE FINAL;
-    virtual void invalidatePaintForOverflow() OVERRIDE FINAL;
-    virtual void paintFloats(PaintInfo&, const LayoutPoint&, bool preservePhase = false) OVERRIDE FINAL;
-    virtual void clipOutFloatingObjects(RenderBlock*, const PaintInfo*, const LayoutPoint&, const LayoutSize&) OVERRIDE;
+    virtual void invalidatePaintForOverhangingFloats(bool paintAllDescendants) override final;
+    virtual void invalidatePaintForOverflow() override final;
+    virtual void paintFloats(PaintInfo&, const LayoutPoint&, bool preservePhase = false) override final;
+    virtual void clipOutFloatingObjects(RenderBlock*, const PaintInfo*, const LayoutPoint&, const LayoutSize&) override;
     void clearFloats(EClear);
 
     LayoutUnit logicalRightFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const;
@@ -394,8 +394,8 @@ protected:
 
     virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 private:
-    virtual LayoutUnit collapsedMarginBefore() const OVERRIDE FINAL { return maxPositiveMarginBefore() - maxNegativeMarginBefore(); }
-    virtual LayoutUnit collapsedMarginAfter() const OVERRIDE FINAL { return maxPositiveMarginAfter() - maxNegativeMarginAfter(); }
+    virtual LayoutUnit collapsedMarginBefore() const override final { return maxPositiveMarginBefore() - maxNegativeMarginBefore(); }
+    virtual LayoutUnit collapsedMarginAfter() const override final { return maxPositiveMarginAfter() - maxNegativeMarginAfter(); }
 
     LayoutUnit collapseMargins(RenderBox* child, MarginInfo&, bool childIsSelfCollapsing);
     LayoutUnit clearFloatsIfNeeded(RenderBox* child, MarginInfo&, LayoutUnit oldTopPosMargin, LayoutUnit oldTopNegMargin, LayoutUnit yPos, bool childIsSelfCollapsing);
@@ -412,7 +412,7 @@ private:
     LayoutUnit m_paintInvalidationLogicalTop;
     LayoutUnit m_paintInvalidationLogicalBottom;
 
-    virtual bool isSelfCollapsingBlock() const OVERRIDE;
+    virtual bool isSelfCollapsingBlock() const override;
 
 protected:
     OwnPtrWillBeMember<RenderBlockFlowRareData> m_rareData;

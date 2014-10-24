@@ -30,19 +30,19 @@
 
 namespace blink {
 
-class SplitTextNodeContainingElementCommand FINAL : public CompositeEditCommand {
+class SplitTextNodeContainingElementCommand final : public CompositeEditCommand {
 public:
     static PassRefPtrWillBeRawPtr<SplitTextNodeContainingElementCommand> create(PassRefPtrWillBeRawPtr<Text> node, int offset)
     {
         return adoptRefWillBeNoop(new SplitTextNodeContainingElementCommand(node, offset));
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     SplitTextNodeContainingElementCommand(PassRefPtrWillBeRawPtr<Text>, int offset);
 
-    virtual void doApply() OVERRIDE;
+    virtual void doApply() override;
 
     RefPtrWillBeMember<Text> m_text;
     int m_offset;

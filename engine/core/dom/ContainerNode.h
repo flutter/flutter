@@ -77,13 +77,13 @@ public:
 
     void cloneChildNodes(ContainerNode* clone);
 
-    virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
-    virtual void detach(const AttachContext& = AttachContext()) OVERRIDE;
-    virtual LayoutRect boundingBox() const OVERRIDE FINAL;
-    virtual void setFocus(bool) OVERRIDE;
+    virtual void attach(const AttachContext& = AttachContext()) override;
+    virtual void detach(const AttachContext& = AttachContext()) override;
+    virtual LayoutRect boundingBox() const override final;
+    virtual void setFocus(bool) override;
     void focusStateChanged();
-    virtual void setActive(bool = true) OVERRIDE;
-    virtual void setHovered(bool = true) OVERRIDE;
+    virtual void setActive(bool = true) override;
+    virtual void setHovered(bool = true) override;
 
     // -----------------------------------------------------------------------------
     // Notification of document structure changes (see core/dom/Node.h for more notification methods)
@@ -129,7 +129,7 @@ public:
     // node that is of the type TEXT_NODE has changed its value.
     virtual void childrenChanged(const ChildrenChange&);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     ContainerNode(TreeScope*, ConstructionType = CreateContainer);

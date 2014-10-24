@@ -57,63 +57,63 @@ public:
     explicit ChromeClientImpl(WebViewImpl* webView);
     virtual ~ChromeClientImpl();
 
-    virtual void* webView() const OVERRIDE;
+    virtual void* webView() const override;
 
     // ChromeClient methods:
-    virtual void chromeDestroyed() OVERRIDE;
-    virtual void setWindowRect(const FloatRect&) OVERRIDE;
-    virtual FloatRect windowRect() OVERRIDE;
-    virtual FloatRect pageRect() OVERRIDE;
-    virtual void focus() OVERRIDE;
-    virtual bool canTakeFocus(FocusType) OVERRIDE;
-    virtual void takeFocus(FocusType) OVERRIDE;
-    virtual void focusedNodeChanged(Node*) OVERRIDE;
-    virtual void focusedFrameChanged(LocalFrame*) OVERRIDE;
-    virtual void show(NavigationPolicy) OVERRIDE;
-    virtual bool shouldReportDetailedMessageForSource(const WTF::String&) OVERRIDE;
+    virtual void chromeDestroyed() override;
+    virtual void setWindowRect(const FloatRect&) override;
+    virtual FloatRect windowRect() override;
+    virtual FloatRect pageRect() override;
+    virtual void focus() override;
+    virtual bool canTakeFocus(FocusType) override;
+    virtual void takeFocus(FocusType) override;
+    virtual void focusedNodeChanged(Node*) override;
+    virtual void focusedFrameChanged(LocalFrame*) override;
+    virtual void show(NavigationPolicy) override;
+    virtual bool shouldReportDetailedMessageForSource(const WTF::String&) override;
     virtual void addMessageToConsole(
         LocalFrame*, MessageSource, MessageLevel,
         const WTF::String& message, unsigned lineNumber,
-        const WTF::String& sourceID, const WTF::String& stackTrace) OVERRIDE;
-    virtual bool tabsToLinks() OVERRIDE;
-    virtual void invalidateContentsAndRootView(const IntRect&) OVERRIDE;
-    virtual void invalidateContentsForSlowScroll(const IntRect&) OVERRIDE;
-    virtual void scheduleAnimation() OVERRIDE;
-    virtual IntRect rootViewToScreen(const IntRect&) const OVERRIDE;
-    virtual WebScreenInfo screenInfo() const OVERRIDE;
-    virtual void layoutUpdated(LocalFrame*) const OVERRIDE;
+        const WTF::String& sourceID, const WTF::String& stackTrace) override;
+    virtual bool tabsToLinks() override;
+    virtual void invalidateContentsAndRootView(const IntRect&) override;
+    virtual void invalidateContentsForSlowScroll(const IntRect&) override;
+    virtual void scheduleAnimation() override;
+    virtual IntRect rootViewToScreen(const IntRect&) const override;
+    virtual WebScreenInfo screenInfo() const override;
+    virtual void layoutUpdated(LocalFrame*) const override;
     virtual void mouseDidMoveOverElement(
-        const HitTestResult&, unsigned modifierFlags) OVERRIDE;
-    virtual void setToolTip(const WTF::String& tooltipText, TextDirection) OVERRIDE;
-    virtual void dispatchViewportPropertiesDidChange(const ViewportDescription&) const OVERRIDE;
-    virtual bool paintCustomOverhangArea(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&) OVERRIDE;
-    virtual void setCursor(const Cursor&) OVERRIDE;
-    virtual void needTouchEvents(bool needTouchEvents) OVERRIDE;
-    virtual void setTouchAction(TouchAction) OVERRIDE;
+        const HitTestResult&, unsigned modifierFlags) override;
+    virtual void setToolTip(const WTF::String& tooltipText, TextDirection) override;
+    virtual void dispatchViewportPropertiesDidChange(const ViewportDescription&) const override;
+    virtual bool paintCustomOverhangArea(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&) override;
+    virtual void setCursor(const Cursor&) override;
+    virtual void needTouchEvents(bool needTouchEvents) override;
+    virtual void setTouchAction(TouchAction) override;
 
-    virtual GraphicsLayerFactory* graphicsLayerFactory() const OVERRIDE;
+    virtual GraphicsLayerFactory* graphicsLayerFactory() const override;
 
     // Pass 0 as the GraphicsLayer to detatch the root layer.
-    virtual void attachRootGraphicsLayer(GraphicsLayer*) OVERRIDE;
+    virtual void attachRootGraphicsLayer(GraphicsLayer*) override;
 
-    virtual void clearCompositedSelectionBounds() OVERRIDE;
+    virtual void clearCompositedSelectionBounds() override;
 
     // ChromeClient methods:
-    virtual String acceptLanguages() OVERRIDE;
+    virtual String acceptLanguages() override;
 
     // ChromeClientImpl:
     void setNewWindowNavigationPolicy(WebNavigationPolicy);
 
     // FIXME: Remove this method once we have input routing in the browser
     // process. See http://crbug.com/339659.
-    virtual void forwardInputEvent(Frame*, Event*) OVERRIDE;
+    virtual void forwardInputEvent(Frame*, Event*) override;
 
-    virtual void willSetInputMethodState() OVERRIDE;
-    virtual void didUpdateTextOfFocusedElementByNonUserInput() OVERRIDE;
-    virtual void showImeIfNeeded() OVERRIDE;
+    virtual void willSetInputMethodState() override;
+    virtual void didUpdateTextOfFocusedElementByNonUserInput() override;
+    virtual void showImeIfNeeded() override;
 
 private:
-    virtual bool isChromeClientImpl() const OVERRIDE { return true; }
+    virtual bool isChromeClientImpl() const override { return true; }
 
     WebNavigationPolicy getNavigationPolicy();
     void setCursor(const WebCursorInfo&);

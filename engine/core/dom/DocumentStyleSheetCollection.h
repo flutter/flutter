@@ -36,7 +36,7 @@ class DocumentStyleSheetCollector;
 class StyleEngine;
 class TreeScope;
 
-class DocumentStyleSheetCollection FINAL : public TreeScopeStyleSheetCollection {
+class DocumentStyleSheetCollection final : public TreeScopeStyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(DocumentStyleSheetCollection);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
@@ -48,7 +48,7 @@ public:
     void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);
     void collectStyleSheets(StyleEngine*, DocumentStyleSheetCollector&);
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         TreeScopeStyleSheetCollection::trace(visitor);
     }

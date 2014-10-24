@@ -34,7 +34,7 @@ namespace blink {
 
 class RenderObject;
 
-class RenderImageResourceStyleImage FINAL : public RenderImageResource {
+class RenderImageResourceStyleImage final : public RenderImageResource {
 public:
     virtual ~RenderImageResourceStyleImage();
 
@@ -42,22 +42,22 @@ public:
     {
         return adoptPtr(new RenderImageResourceStyleImage(styleImage));
     }
-    virtual void initialize(RenderObject*) OVERRIDE;
-    virtual void shutdown() OVERRIDE;
+    virtual void initialize(RenderObject*) override;
+    virtual void shutdown() override;
 
-    virtual bool hasImage() const OVERRIDE { return true; }
-    virtual PassRefPtr<Image> image(int width = 0, int height = 0) const OVERRIDE;
-    virtual bool errorOccurred() const OVERRIDE { return m_styleImage->errorOccurred(); }
+    virtual bool hasImage() const override { return true; }
+    virtual PassRefPtr<Image> image(int width = 0, int height = 0) const override;
+    virtual bool errorOccurred() const override { return m_styleImage->errorOccurred(); }
 
-    virtual void setContainerSizeForRenderer(const IntSize&) OVERRIDE;
-    virtual bool usesImageContainerSize() const OVERRIDE { return m_styleImage->usesImageContainerSize(); }
-    virtual bool imageHasRelativeWidth() const OVERRIDE { return m_styleImage->imageHasRelativeWidth(); }
-    virtual bool imageHasRelativeHeight() const OVERRIDE { return m_styleImage->imageHasRelativeHeight(); }
+    virtual void setContainerSizeForRenderer(const IntSize&) override;
+    virtual bool usesImageContainerSize() const override { return m_styleImage->usesImageContainerSize(); }
+    virtual bool imageHasRelativeWidth() const override { return m_styleImage->imageHasRelativeWidth(); }
+    virtual bool imageHasRelativeHeight() const override { return m_styleImage->imageHasRelativeHeight(); }
 
-    virtual LayoutSize imageSize(float multiplier) const OVERRIDE { return m_styleImage->imageSize(m_renderer, multiplier); }
-    virtual LayoutSize intrinsicSize(float multiplier) const OVERRIDE { return m_styleImage->imageSize(m_renderer, multiplier); }
+    virtual LayoutSize imageSize(float multiplier) const override { return m_styleImage->imageSize(m_renderer, multiplier); }
+    virtual LayoutSize intrinsicSize(float multiplier) const override { return m_styleImage->imageSize(m_renderer, multiplier); }
 
-    virtual WrappedImagePtr imagePtr() const OVERRIDE { return m_styleImage->data(); }
+    virtual WrappedImagePtr imagePtr() const override { return m_styleImage->data(); }
 
 private:
     RenderImageResourceStyleImage(StyleImage*);

@@ -62,13 +62,13 @@ protected:
     RefPtrWillBeMember<CSSPrimitiveValue> m_referenceBox;
 };
 
-class CSSBasicShapeCircle FINAL : public CSSBasicShape {
+class CSSBasicShapeCircle final : public CSSBasicShape {
 public:
     static PassRefPtrWillBeRawPtr<CSSBasicShapeCircle> create() { return adoptRefWillBeNoop(new CSSBasicShapeCircle); }
 
-    virtual Type type() const OVERRIDE { return CSSBasicShapeCircleType; }
-    virtual String cssText() const OVERRIDE;
-    virtual bool equals(const CSSBasicShape&) const OVERRIDE;
+    virtual Type type() const override { return CSSBasicShapeCircleType; }
+    virtual String cssText() const override;
+    virtual bool equals(const CSSBasicShape&) const override;
 
     CSSPrimitiveValue* centerX() const { return m_centerX.get(); }
     CSSPrimitiveValue* centerY() const { return m_centerY.get(); }
@@ -88,13 +88,13 @@ private:
     RefPtrWillBeMember<CSSPrimitiveValue> m_radius;
 };
 
-class CSSBasicShapeEllipse FINAL : public CSSBasicShape {
+class CSSBasicShapeEllipse final : public CSSBasicShape {
 public:
     static PassRefPtrWillBeRawPtr<CSSBasicShapeEllipse> create() { return adoptRefWillBeNoop(new CSSBasicShapeEllipse); }
 
-    virtual Type type() const OVERRIDE { return CSSBasicShapeEllipseType; }
-    virtual String cssText() const OVERRIDE;
-    virtual bool equals(const CSSBasicShape&) const OVERRIDE;
+    virtual Type type() const override { return CSSBasicShapeEllipseType; }
+    virtual String cssText() const override;
+    virtual bool equals(const CSSBasicShape&) const override;
 
     CSSPrimitiveValue* centerX() const { return m_centerX.get(); }
     CSSPrimitiveValue* centerY() const { return m_centerY.get(); }
@@ -117,7 +117,7 @@ private:
     RefPtrWillBeMember<CSSPrimitiveValue> m_radiusY;
 };
 
-class CSSBasicShapePolygon FINAL : public CSSBasicShape {
+class CSSBasicShapePolygon final : public CSSBasicShape {
 public:
     static PassRefPtrWillBeRawPtr<CSSBasicShapePolygon> create() { return adoptRefWillBeNoop(new CSSBasicShapePolygon); }
 
@@ -134,9 +134,9 @@ public:
     void setWindRule(WindRule w) { m_windRule = w; }
     WindRule windRule() const { return m_windRule; }
 
-    virtual Type type() const OVERRIDE { return CSSBasicShapePolygonType; }
-    virtual String cssText() const OVERRIDE;
-    virtual bool equals(const CSSBasicShape&) const OVERRIDE;
+    virtual Type type() const override { return CSSBasicShapePolygonType; }
+    virtual String cssText() const override;
+    virtual bool equals(const CSSBasicShape&) const override;
 
     virtual void trace(Visitor*);
 
@@ -198,9 +198,9 @@ public:
     void setBottomRightRadius(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> radius) { m_bottomRightRadius = radius; }
     void setBottomLeftRadius(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> radius) { m_bottomLeftRadius = radius; }
 
-    virtual Type type() const OVERRIDE { return CSSBasicShapeInsetType; }
-    virtual String cssText() const OVERRIDE;
-    virtual bool equals(const CSSBasicShape&) const OVERRIDE;
+    virtual Type type() const override { return CSSBasicShapeInsetType; }
+    virtual String cssText() const override;
+    virtual bool equals(const CSSBasicShape&) const override;
 
     virtual void trace(Visitor*);
 

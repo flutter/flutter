@@ -53,29 +53,29 @@ public:
     virtual ~WebMediaPlayerClientImpl();
 
     // WebMediaPlayerClient methods:
-    virtual void networkStateChanged() OVERRIDE;
-    virtual void readyStateChanged() OVERRIDE;
-    virtual void timeChanged() OVERRIDE;
-    virtual void repaint() OVERRIDE;
-    virtual void durationChanged() OVERRIDE;
-    virtual void sizeChanged() OVERRIDE;
-    virtual void playbackStateChanged() OVERRIDE;
+    virtual void networkStateChanged() override;
+    virtual void readyStateChanged() override;
+    virtual void timeChanged() override;
+    virtual void repaint() override;
+    virtual void durationChanged() override;
+    virtual void sizeChanged() override;
+    virtual void playbackStateChanged() override;
 
     // WebEncryptedMediaPlayerClient methods:
-    virtual void keyAdded(const WebString& keySystem, const WebString& sessionId) OVERRIDE;
-    virtual void keyError(const WebString& keySystem, const WebString& sessionId, MediaKeyErrorCode, unsigned short systemCode) OVERRIDE;
-    virtual void keyMessage(const WebString& keySystem, const WebString& sessionId, const unsigned char* message, unsigned messageLength, const WebURL& defaultURL) OVERRIDE;
-    virtual void keyNeeded(const WebString& contentType, const unsigned char* initData, unsigned initDataLength) OVERRIDE;
+    virtual void keyAdded(const WebString& keySystem, const WebString& sessionId) override;
+    virtual void keyError(const WebString& keySystem, const WebString& sessionId, MediaKeyErrorCode, unsigned short systemCode) override;
+    virtual void keyMessage(const WebString& keySystem, const WebString& sessionId, const unsigned char* message, unsigned messageLength, const WebURL& defaultURL) override;
+    virtual void keyNeeded(const WebString& contentType, const unsigned char* initData, unsigned initDataLength) override;
 
-    virtual void setWebLayer(WebLayer*) OVERRIDE;
-    virtual void mediaSourceOpened(WebMediaSource*) OVERRIDE;
-    virtual void requestFullscreen() OVERRIDE;
-    virtual void requestSeek(double) OVERRIDE;
+    virtual void setWebLayer(WebLayer*) override;
+    virtual void mediaSourceOpened(WebMediaSource*) override;
+    virtual void requestFullscreen() override;
+    virtual void requestSeek(double) override;
 
     // MediaPlayer methods:
-    virtual WebMediaPlayer* webMediaPlayer() const OVERRIDE;
-    virtual void load(WebMediaPlayer::LoadType, const WTF::String& url, WebMediaPlayer::CORSMode) OVERRIDE;
-    virtual void setPreload(MediaPlayer::Preload) OVERRIDE;
+    virtual WebMediaPlayer* webMediaPlayer() const override;
+    virtual void load(WebMediaPlayer::LoadType, const WTF::String& url, WebMediaPlayer::CORSMode) override;
+    virtual void setPreload(MediaPlayer::Preload) override;
 
 private:
     explicit WebMediaPlayerClientImpl(MediaPlayerClient*);

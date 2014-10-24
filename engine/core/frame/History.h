@@ -42,7 +42,7 @@ class KURL;
 class ExecutionContext;
 class ExceptionState;
 
-class History FINAL : public RefCountedWillBeGarbageCollectedFinalized<History>, public ScriptWrappable, public DOMWindowProperty {
+class History final : public RefCountedWillBeGarbageCollectedFinalized<History>, public ScriptWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<History> create(LocalFrame* frame)

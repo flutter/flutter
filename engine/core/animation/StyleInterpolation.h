@@ -22,11 +22,11 @@ public:
     // (3) a custom value that is inserted directly into the StyleResolverState.
     virtual void apply(StyleResolverState&) const = 0;
 
-    virtual bool isStyleInterpolation() const OVERRIDE FINAL { return true; }
+    virtual bool isStyleInterpolation() const override final { return true; }
 
     CSSPropertyID id() const { return m_id; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         Interpolation::trace(visitor);
     }

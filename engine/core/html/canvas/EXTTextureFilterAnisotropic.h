@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class EXTTextureFilterAnisotropic FINAL : public WebGLExtension, public ScriptWrappable {
+class EXTTextureFilterAnisotropic final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<EXTTextureFilterAnisotropic> create(WebGLRenderingContextBase*);
@@ -40,7 +40,7 @@ public:
     static const char* extensionName();
 
     virtual ~EXTTextureFilterAnisotropic();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit EXTTextureFilterAnisotropic(WebGLRenderingContextBase*);

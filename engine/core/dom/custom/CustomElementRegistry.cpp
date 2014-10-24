@@ -51,9 +51,9 @@ public:
 private:
 #if ENABLE(OILPAN)
     // In oilpan we don't have the disposed phase for context lifecycle observer.
-    virtual void documentWasDetached() OVERRIDE { m_wentAway = true; }
+    virtual void documentWasDetached() override { m_wentAway = true; }
 #else
-    virtual void documentWasDisposed() OVERRIDE { m_wentAway = true; }
+    virtual void documentWasDisposed() override { m_wentAway = true; }
 #endif
 
     bool m_wentAway;

@@ -45,7 +45,7 @@ class HTMLImportChild;
 //
 // A LinkResource subclasss used for @rel=import.
 //
-class LinkImport FINAL : public LinkResource, public HTMLImportChildClient {
+class LinkImport final : public LinkResource, public HTMLImportChildClient {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LinkImport);
 public:
@@ -56,19 +56,19 @@ public:
     virtual ~LinkImport();
 
     // LinkResource
-    virtual void process() OVERRIDE;
-    virtual Type type() const OVERRIDE { return Import; }
-    virtual bool hasLoaded() const OVERRIDE;
-    virtual void trace(Visitor*) OVERRIDE;
-    virtual void ownerInserted() OVERRIDE;
+    virtual void process() override;
+    virtual Type type() const override { return Import; }
+    virtual bool hasLoaded() const override;
+    virtual void trace(Visitor*) override;
+    virtual void ownerInserted() override;
 
     // HTMLImportChildClient
-    virtual void didFinish() OVERRIDE;
+    virtual void didFinish() override;
 #if !ENABLE(OILPAN)
-    virtual void importChildWasDestroyed(HTMLImportChild*) OVERRIDE;
+    virtual void importChildWasDestroyed(HTMLImportChild*) override;
 #endif
-    virtual bool isSync() const OVERRIDE;
-    virtual HTMLLinkElement* link() OVERRIDE;
+    virtual bool isSync() const override;
+    virtual HTMLLinkElement* link() override;
 
     Document* importedDocument() const;
 

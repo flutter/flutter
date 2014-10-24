@@ -41,16 +41,16 @@ public:
     static PassOwnPtr<WebScrollbarThemeGeometryNative> create(Scrollbar*);
 
     // WebScrollbarThemeGeometry overrides
-    virtual WebScrollbarThemeGeometryNative* clone() const OVERRIDE;
-    virtual int thumbPosition() OVERRIDE;
-    virtual int thumbLength() OVERRIDE;
-    virtual int trackPosition() OVERRIDE;
-    virtual int trackLength() OVERRIDE;
-    virtual WebRect trackRect() OVERRIDE;
-    virtual WebRect thumbRect() OVERRIDE;
-    virtual int minimumThumbLength() OVERRIDE;
-    virtual int scrollbarThickness() OVERRIDE;
-    virtual void splitTrack(const WebRect& track, WebRect& startTrack, WebRect& thumb, WebRect& endTrack) OVERRIDE;
+    virtual WebScrollbarThemeGeometryNative* clone() const override;
+    virtual int thumbPosition() override;
+    virtual int thumbLength() override;
+    virtual int trackPosition() override;
+    virtual int trackLength() override;
+    virtual WebRect trackRect() override;
+    virtual WebRect thumbRect() override;
+    virtual int minimumThumbLength() override;
+    virtual int scrollbarThickness() override;
+    virtual void splitTrack(const WebRect& track, WebRect& startTrack, WebRect& thumb, WebRect& endTrack) override;
 
 private:
     explicit WebScrollbarThemeGeometryNative(Scrollbar*);

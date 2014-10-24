@@ -911,12 +911,12 @@ public:
         reinterpret_cast<V8IsolateInterruptor*>(data)->onInterrupted();
     }
 
-    virtual void requestInterrupt() OVERRIDE
+    virtual void requestInterrupt() override
     {
         m_isolate->RequestInterrupt(&onInterruptCallback, this);
     }
 
-    virtual void clearInterrupt() OVERRIDE
+    virtual void clearInterrupt() override
     {
         m_isolate->ClearInterrupt();
     }
@@ -941,7 +941,7 @@ private:
 void GetDevToolsFunctionInfo(v8::Handle<v8::Function>, v8::Isolate*, int& scriptId, String& resourceName, int& lineNumber);
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> devToolsTraceEventData(ExecutionContext*, v8::Handle<v8::Function>, v8::Isolate*);
 
-class V8RethrowTryCatchScope FINAL {
+class V8RethrowTryCatchScope final {
 public:
     explicit V8RethrowTryCatchScope(v8::TryCatch& block) : m_block(block) { }
     ~V8RethrowTryCatchScope()

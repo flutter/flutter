@@ -46,11 +46,11 @@ public:
     float radiusY() const;
     bool setRadiusY(float);
 
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
-    virtual FloatRect mapRect(const FloatRect&, bool forward = true) OVERRIDE FINAL;
+    virtual FloatRect mapRect(const FloatRect&, bool forward = true) override final;
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
     struct PaintingData {
         Uint8ClampedArray* srcPixelArray;
@@ -73,7 +73,7 @@ public:
 private:
     FEMorphology(Filter*, MorphologyOperatorType, float radiusX, float radiusY);
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
 
     MorphologyOperatorType m_type;
     float m_radiusX;

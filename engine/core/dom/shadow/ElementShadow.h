@@ -38,7 +38,7 @@
 
 namespace blink {
 
-class ElementShadow FINAL : public NoBaseWillBeGarbageCollectedFinalized<ElementShadow> {
+class ElementShadow final : public NoBaseWillBeGarbageCollectedFinalized<ElementShadow> {
     WTF_MAKE_NONCOPYABLE(ElementShadow);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:

@@ -37,7 +37,7 @@ class MutableStylePropertySet;
 class StylePropertySet;
 class StyleRuleCSSStyleDeclaration;
 
-class StyleKeyframe FINAL : public RefCountedWillBeGarbageCollectedFinalized<StyleKeyframe> {
+class StyleKeyframe final : public RefCountedWillBeGarbageCollectedFinalized<StyleKeyframe> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     static PassRefPtrWillBeRawPtr<StyleKeyframe> create()
@@ -74,20 +74,20 @@ private:
     mutable OwnPtr<Vector<double> > m_keys;
 };
 
-class CSSKeyframeRule FINAL : public CSSRule {
+class CSSKeyframeRule final : public CSSRule {
 public:
     virtual ~CSSKeyframeRule();
 
-    virtual CSSRule::Type type() const OVERRIDE { return KEYFRAME_RULE; }
-    virtual String cssText() const OVERRIDE { return m_keyframe->cssText(); }
-    virtual void reattach(StyleRuleBase*) OVERRIDE;
+    virtual CSSRule::Type type() const override { return KEYFRAME_RULE; }
+    virtual String cssText() const override { return m_keyframe->cssText(); }
+    virtual void reattach(StyleRuleBase*) override;
 
     String keyText() const { return m_keyframe->keyText(); }
     void setKeyText(const String& s) { m_keyframe->setKeyText(s); }
 
     CSSStyleDeclaration* style() const;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CSSKeyframeRule(StyleKeyframe*, CSSKeyframesRule* parent);

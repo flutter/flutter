@@ -46,7 +46,7 @@ class Element;
 class ExecutionContext;
 class V8PerContextData;
 
-class V8CustomElementLifecycleCallbacks FINAL : public CustomElementLifecycleCallbacks, ContextLifecycleObserver {
+class V8CustomElementLifecycleCallbacks final : public CustomElementLifecycleCallbacks, ContextLifecycleObserver {
 public:
     static PassRefPtr<V8CustomElementLifecycleCallbacks> create(ScriptState*, v8::Handle<v8::Object> prototype, v8::Handle<v8::Function> created, v8::Handle<v8::Function> attached, v8::Handle<v8::Function> detached, v8::Handle<v8::Function> attributeChanged);
 
@@ -57,10 +57,10 @@ public:
 private:
     V8CustomElementLifecycleCallbacks(ScriptState*, v8::Handle<v8::Object> prototype, v8::Handle<v8::Function> created, v8::Handle<v8::Function> attached, v8::Handle<v8::Function> detached, v8::Handle<v8::Function> attributeChanged);
 
-    virtual void created(Element*) OVERRIDE;
-    virtual void attached(Element*) OVERRIDE;
-    virtual void detached(Element*) OVERRIDE;
-    virtual void attributeChanged(Element*, const AtomicString& name, const AtomicString& oldValue, const AtomicString& newValue) OVERRIDE;
+    virtual void created(Element*) override;
+    virtual void attached(Element*) override;
+    virtual void detached(Element*) override;
+    virtual void attributeChanged(Element*, const AtomicString& name, const AtomicString& oldValue, const AtomicString& newValue) override;
 
     void call(const ScopedPersistent<v8::Function>& weakCallback, Element*);
 

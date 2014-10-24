@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class HTMLShadowElement FINAL : public InsertionPoint {
+class HTMLShadowElement final : public InsertionPoint {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLShadowElement);

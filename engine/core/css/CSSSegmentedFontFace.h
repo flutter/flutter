@@ -44,7 +44,7 @@ class FontDescription;
 class FontFace;
 class SegmentedFontData;
 
-class CSSSegmentedFontFace FINAL : public RefCountedWillBeGarbageCollectedFinalized<CSSSegmentedFontFace> {
+class CSSSegmentedFontFace final : public RefCountedWillBeGarbageCollectedFinalized<CSSSegmentedFontFace> {
 public:
     static PassRefPtrWillBeRawPtr<CSSSegmentedFontFace> create(CSSFontSelector* selector, FontTraits traits)
     {

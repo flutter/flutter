@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class RenderedDocumentMarker FINAL : public DocumentMarker {
+class RenderedDocumentMarker final : public DocumentMarker {
 public:
     static PassOwnPtrWillBeRawPtr<RenderedDocumentMarker> create(const DocumentMarker& marker)
     {

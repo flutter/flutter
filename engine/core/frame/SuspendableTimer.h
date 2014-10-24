@@ -38,10 +38,10 @@ public:
     virtual ~SuspendableTimer();
 
     // ActiveDOMObject
-    virtual bool hasPendingActivity() const OVERRIDE FINAL;
-    virtual void stop() OVERRIDE;
-    virtual void suspend() OVERRIDE FINAL;
-    virtual void resume() OVERRIDE FINAL;
+    virtual bool hasPendingActivity() const override final;
+    virtual void stop() override;
+    virtual void suspend() override final;
+    virtual void resume() override final;
 
 private:
     virtual void fired() = 0;

@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class TypingCommand FINAL : public TextInsertionBaseCommand {
+class TypingCommand final : public TextInsertionBaseCommand {
 public:
     enum ETypingCommand {
         DeleteSelection,
@@ -95,12 +95,12 @@ private:
 
     static PassRefPtrWillBeRawPtr<TypingCommand> lastTypingCommandIfStillOpenForTyping(LocalFrame*);
 
-    virtual void doApply() OVERRIDE;
-    virtual EditAction editingAction() const OVERRIDE;
-    virtual bool isTypingCommand() const OVERRIDE;
-    virtual bool preservesTypingStyle() const OVERRIDE { return m_preservesTypingStyle; }
-    virtual void setShouldRetainAutocorrectionIndicator(bool retain) OVERRIDE { m_shouldRetainAutocorrectionIndicator = retain; }
-    virtual bool shouldStopCaretBlinking() const OVERRIDE { return true; }
+    virtual void doApply() override;
+    virtual EditAction editingAction() const override;
+    virtual bool isTypingCommand() const override;
+    virtual bool preservesTypingStyle() const override { return m_preservesTypingStyle; }
+    virtual void setShouldRetainAutocorrectionIndicator(bool retain) override { m_shouldRetainAutocorrectionIndicator = retain; }
+    virtual bool shouldStopCaretBlinking() const override { return true; }
     void setShouldPreventSpellChecking(bool prevent) { m_shouldPreventSpellChecking = prevent; }
 
     static void updateSelectionIfDifferentFromCurrentSelection(TypingCommand*, LocalFrame*);

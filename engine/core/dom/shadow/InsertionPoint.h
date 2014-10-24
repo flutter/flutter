@@ -55,8 +55,8 @@ public:
 
     virtual bool canAffectSelector() const { return false; }
 
-    virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
-    virtual void detach(const AttachContext& = AttachContext()) OVERRIDE;
+    virtual void attach(const AttachContext& = AttachContext()) override;
+    virtual void detach(const AttachContext& = AttachContext()) override;
 
     bool shouldUseFallbackElements() const;
 
@@ -67,15 +67,15 @@ public:
     Node* nextTo(const Node* node) const { return m_distribution.nextTo(node); }
     Node* previousTo(const Node* node) const { return m_distribution.previousTo(node); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     InsertionPoint(const QualifiedName&, Document&);
-    virtual bool rendererIsNeeded(const RenderStyle&) OVERRIDE;
-    virtual void childrenChanged(const ChildrenChange&) OVERRIDE;
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE;
-    virtual void willRecalcStyle(StyleRecalcChange) OVERRIDE;
+    virtual bool rendererIsNeeded(const RenderStyle&) override;
+    virtual void childrenChanged(const ChildrenChange&) override;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void removedFrom(ContainerNode*) override;
+    virtual void willRecalcStyle(StyleRecalcChange) override;
 
 private:
     bool isInsertionPoint() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.

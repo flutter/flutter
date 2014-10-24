@@ -54,7 +54,7 @@ public:
     inline PassRefPtr<Uint8ClampedArray> subarray(int start) const;
     inline PassRefPtr<Uint8ClampedArray> subarray(int start, int end) const;
 
-    virtual ViewType type() const OVERRIDE
+    virtual ViewType type() const override
     {
         return TypeUint8Clamped;
     }

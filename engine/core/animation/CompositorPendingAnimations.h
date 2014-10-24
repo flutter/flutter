@@ -43,7 +43,7 @@ namespace blink {
 // For CSS Animations, used to synchronize the start of main-thread animations
 // with compositor animations when both classes of CSS Animations are triggered
 // by the same recalc
-class CompositorPendingAnimations FINAL {
+class CompositorPendingAnimations final {
     DISALLOW_ALLOCATION();
 public:
 

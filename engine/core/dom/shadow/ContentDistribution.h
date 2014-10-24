@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class ContentDistribution FINAL {
+class ContentDistribution final {
     DISALLOW_ALLOCATION();
 public:
     ContentDistribution() { m_nodes.reserveInitialCapacity(32); }

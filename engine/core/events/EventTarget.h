@@ -153,8 +153,8 @@ private:
 
 class EventTargetWithInlineData : public EventTarget {
 protected:
-    virtual EventTargetData* eventTargetData() OVERRIDE FINAL { return &m_eventTargetData; }
-    virtual EventTargetData& ensureEventTargetData() OVERRIDE FINAL { return m_eventTargetData; }
+    virtual EventTargetData* eventTargetData() override final { return &m_eventTargetData; }
+    virtual EventTargetData& ensureEventTargetData() override final { return m_eventTargetData; }
 private:
     EventTargetData m_eventTargetData;
 };
@@ -199,8 +199,8 @@ public: \
     using baseClass::ref; \
     using baseClass::deref; \
 private: \
-    virtual void refEventTarget() OVERRIDE FINAL { ref(); } \
-    virtual void derefEventTarget() OVERRIDE FINAL { deref(); } \
+    virtual void refEventTarget() override final { ref(); } \
+    virtual void derefEventTarget() override final { deref(); } \
     typedef int thisIsHereToForceASemiColonAfterThisEventTargetMacro
 #define DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(baseClass) DEFINE_EVENT_TARGET_REFCOUNTING(baseClass)
 #endif

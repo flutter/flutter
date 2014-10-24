@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class OESTextureHalfFloat FINAL : public WebGLExtension, public ScriptWrappable {
+class OESTextureHalfFloat final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<OESTextureHalfFloat> create(WebGLRenderingContextBase*);
@@ -40,7 +40,7 @@ public:
     static const char* extensionName();
 
     virtual ~OESTextureHalfFloat();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit OESTextureHalfFloat(WebGLRenderingContextBase*);

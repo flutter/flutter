@@ -11,13 +11,13 @@ namespace blink {
 
 namespace {
 
-class NullEventQueue FINAL : public EventQueue {
+class NullEventQueue final : public EventQueue {
 public:
     NullEventQueue() { }
     virtual ~NullEventQueue() { }
-    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) OVERRIDE { return true; }
-    virtual bool cancelEvent(Event*) OVERRIDE { return true; }
-    virtual void close() OVERRIDE { }
+    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) override { return true; }
+    virtual bool cancelEvent(Event*) override { return true; }
+    virtual void close() override { }
 };
 
 } // namespace

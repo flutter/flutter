@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class ScriptHeapSnapshot FINAL : public RefCounted<ScriptHeapSnapshot> {
+class ScriptHeapSnapshot final : public RefCounted<ScriptHeapSnapshot> {
 public:
     class OutputStream {
     public:

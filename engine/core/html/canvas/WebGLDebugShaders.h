@@ -34,7 +34,7 @@ namespace blink {
 
 class WebGLShader;
 
-class WebGLDebugShaders FINAL : public WebGLExtension, public ScriptWrappable {
+class WebGLDebugShaders final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<WebGLDebugShaders> create(WebGLRenderingContextBase*);
@@ -42,7 +42,7 @@ public:
     static const char* extensionName();
 
     virtual ~WebGLDebugShaders();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
     String getTranslatedShaderSource(WebGLShader*);
 

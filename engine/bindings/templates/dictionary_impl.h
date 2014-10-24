@@ -13,7 +13,7 @@
 
 namespace blink {
 
-class {{cpp_class}} FINAL : public GarbageCollectedFinalized<{{cpp_class}}> {
+class {{cpp_class}} final : public GarbageCollectedFinalized<{{cpp_class}}> {
 public:
     static {{cpp_class}}* create()
     {

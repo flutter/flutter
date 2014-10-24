@@ -18,26 +18,26 @@ public:
     explicit RemoteFontFaceSource(FontResource*, PassRefPtrWillBeRawPtr<FontLoader>);
     virtual ~RemoteFontFaceSource();
 
-    virtual FontResource* resource() OVERRIDE { return m_font.get(); }
-    virtual bool isLoading() const OVERRIDE;
-    virtual bool isLoaded() const OVERRIDE;
-    virtual bool isValid() const OVERRIDE;
+    virtual FontResource* resource() override { return m_font.get(); }
+    virtual bool isLoading() const override;
+    virtual bool isLoaded() const override;
+    virtual bool isValid() const override;
 
-    void beginLoadIfNeeded() OVERRIDE;
+    void beginLoadIfNeeded() override;
     virtual bool ensureFontData();
 
-    virtual void didStartFontLoad(FontResource*) OVERRIDE;
-    virtual void fontLoaded(FontResource*) OVERRIDE;
-    virtual void fontLoadWaitLimitExceeded(FontResource*) OVERRIDE;
+    virtual void didStartFontLoad(FontResource*) override;
+    virtual void fontLoaded(FontResource*) override;
+    virtual void fontLoadWaitLimitExceeded(FontResource*) override;
 
     // For UMA reporting
-    virtual bool hadBlankText() OVERRIDE { return m_histograms.hadBlankText(); }
+    virtual bool hadBlankText() override { return m_histograms.hadBlankText(); }
     void paintRequested() { m_histograms.fallbackFontPainted(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
-    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) OVERRIDE;
+    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) override;
     PassRefPtr<SimpleFontData> createLoadingFallbackFontData(const FontDescription&);
     void pruneTable();
 

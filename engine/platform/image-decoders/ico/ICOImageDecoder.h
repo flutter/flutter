@@ -44,19 +44,19 @@ public:
     virtual ~ICOImageDecoder();
 
     // ImageDecoder
-    virtual String filenameExtension() const OVERRIDE { return "ico"; }
-    virtual void setData(SharedBuffer*, bool allDataReceived) OVERRIDE;
-    virtual bool isSizeAvailable() OVERRIDE;
-    virtual IntSize size() const OVERRIDE;
-    virtual IntSize frameSizeAtIndex(size_t) const OVERRIDE;
-    virtual bool setSize(unsigned width, unsigned height) OVERRIDE;
-    virtual size_t frameCount() OVERRIDE;
-    virtual ImageFrame* frameBufferAtIndex(size_t) OVERRIDE;
+    virtual String filenameExtension() const override { return "ico"; }
+    virtual void setData(SharedBuffer*, bool allDataReceived) override;
+    virtual bool isSizeAvailable() override;
+    virtual IntSize size() const override;
+    virtual IntSize frameSizeAtIndex(size_t) const override;
+    virtual bool setSize(unsigned width, unsigned height) override;
+    virtual size_t frameCount() override;
+    virtual ImageFrame* frameBufferAtIndex(size_t) override;
     // CAUTION: setFailed() deletes all readers and decoders.  Be careful to
     // avoid accessing deleted memory, especially when calling this from
     // inside BMPImageReader!
-    virtual bool setFailed() OVERRIDE;
-    virtual bool hotSpot(IntPoint&) const OVERRIDE;
+    virtual bool setFailed() override;
+    virtual bool hotSpot(IntPoint&) const override;
 
 private:
     enum ImageType {

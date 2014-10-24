@@ -131,7 +131,7 @@ private:
         virtual void cryptographicallyRandomValues(unsigned char* buffer, size_t length) { ASSERT_NOT_REACHED(); }
     private:
         WebCompositorSupportMock** m_compositor;
-        virtual WebCompositorSupport* compositorSupport() OVERRIDE { return *m_compositor; }
+        virtual WebCompositorSupport* compositorSupport() override { return *m_compositor; }
     };
 
     WebCompositorSupportMock* m_mockCompositor;

@@ -45,10 +45,10 @@ public:
     }
 
 private:
-    virtual bool isIdentity() const OVERRIDE { return !m_p; }
-    virtual OperationType type() const OVERRIDE { return Perspective; }
+    virtual bool isIdentity() const override { return !m_p; }
+    virtual OperationType type() const override { return Perspective; }
 
-    virtual bool operator==(const TransformOperation& o) const OVERRIDE
+    virtual bool operator==(const TransformOperation& o) const override
     {
         if (!isSameType(o))
             return false;
@@ -56,12 +56,12 @@ private:
         return m_p == p->m_p;
     }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const OVERRIDE
+    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
     {
         transform.applyPerspective(m_p);
     }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) OVERRIDE;
+    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
 
     PerspectiveTransformOperation(double p)
         : m_p(p)

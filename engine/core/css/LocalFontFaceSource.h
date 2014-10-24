@@ -14,10 +14,10 @@ class LocalFontFaceSource : public CSSFontFaceSource {
 public:
     LocalFontFaceSource(const String& fontName) : m_fontName(fontName) { }
     virtual bool isLocal() const { return true; }
-    virtual bool isLocalFontAvailable(const FontDescription&) OVERRIDE;
+    virtual bool isLocalFontAvailable(const FontDescription&) override;
 
 private:
-    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) OVERRIDE;
+    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) override;
 
     class LocalFontHistograms {
     public:

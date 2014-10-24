@@ -71,10 +71,10 @@ public:
     }
     virtual ~CompatibleImageBufferSurface() { }
 
-    virtual SkCanvas* canvas() const OVERRIDE { return m_surface ? m_surface->getCanvas() : 0; }
-    virtual bool isValid() const OVERRIDE { return m_surface; }
-    virtual bool isAccelerated() const OVERRIDE { return isValid() && m_surface->getCanvas()->getTopDevice()->accessRenderTarget(); }
-    virtual Platform3DObject getBackingTexture() const OVERRIDE
+    virtual SkCanvas* canvas() const override { return m_surface ? m_surface->getCanvas() : 0; }
+    virtual bool isValid() const override { return m_surface; }
+    virtual bool isAccelerated() const override { return isValid() && m_surface->getCanvas()->getTopDevice()->accessRenderTarget(); }
+    virtual Platform3DObject getBackingTexture() const override
     {
         ASSERT(isAccelerated());
         GrRenderTarget* renderTarget = m_surface->getCanvas()->getTopDevice()->accessRenderTarget();

@@ -42,7 +42,7 @@ class MediaQuerySet;
 // retrieve the current value of the given media query and to add/remove listeners that
 // will be called whenever the value of the query changes.
 
-class MediaQueryList FINAL : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryList>, public EventTargetWithInlineData, public ActiveDOMObject {
+class MediaQueryList final : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryList>, public EventTargetWithInlineData, public ActiveDOMObject {
     DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(RefCounted<MediaQueryList>);
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(MediaQueryList);
@@ -68,11 +68,11 @@ public:
     void trace(Visitor*);
 
     // From ActiveDOMObject
-    virtual bool hasPendingActivity() const OVERRIDE;
-    virtual void stop() OVERRIDE;
+    virtual bool hasPendingActivity() const override;
+    virtual void stop() override;
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual ExecutionContext* executionContext() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual ExecutionContext* executionContext() const override;
 
 private:
     MediaQueryList(ExecutionContext*, PassRefPtrWillBeRawPtr<MediaQueryMatcher>, PassRefPtrWillBeRawPtr<MediaQuerySet>);

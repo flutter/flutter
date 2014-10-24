@@ -41,7 +41,7 @@ class CSSSegmentedFontFace;
 class FontDescription;
 class StyleRuleFontFace;
 
-class FontFaceCache FINAL {
+class FontFaceCache final {
     DISALLOW_ALLOCATION();
 public:
     FontFaceCache();

@@ -47,7 +47,7 @@ class TestLayerPainterChromium : public GraphicsContextPainter {
 public:
     TestLayerPainterChromium(PaintCallback& callback) : m_callback(callback) { }
 
-    virtual void paint(GraphicsContext& context, const IntRect& contentRect) OVERRIDE
+    virtual void paint(GraphicsContext& context, const IntRect& contentRect) override
     {
         m_callback(context, contentRect);
     }
@@ -59,7 +59,7 @@ private:
 // Paint callback functions
 
 struct PaintFillOpaque : public PaintCallback {
-    virtual void operator()(GraphicsContext& context, const IntRect& contentRect) OVERRIDE
+    virtual void operator()(GraphicsContext& context, const IntRect& contentRect) override
     {
         Color opaque(255, 0, 0, 255);
         IntRect top(contentRect.x(), contentRect.y(), contentRect.width(), contentRect.height() / 2);

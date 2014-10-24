@@ -53,7 +53,7 @@ class HTMLImportsController;
 // HTMLImportLoader is owned by HTMLImportsController.
 //
 //
-class HTMLImportLoader FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>,
+class HTMLImportLoader final : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>,
                                public MojoFetcher::Client,
                                public DataPipeDrainer::Client {
 public:

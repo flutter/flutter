@@ -37,7 +37,7 @@ class MediaQuerySet;
 // whenever it is needed and to call the listeners if the corresponding query has changed.
 // The listeners must be called in the very same order in which they have been added.
 
-class MediaQueryMatcher FINAL : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryMatcher> {
+class MediaQueryMatcher final : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryMatcher> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(MediaQueryMatcher)
 public:
     static PassRefPtrWillBeRawPtr<MediaQueryMatcher> create(Document&);

@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class AnimatableFilterOperations FINAL : public AnimatableValue {
+class AnimatableFilterOperations final : public AnimatableValue {
 public:
     virtual ~AnimatableFilterOperations() { }
     static PassRefPtrWillBeRawPtr<AnimatableFilterOperations> create(const FilterOperations& operations)
@@ -45,19 +45,19 @@ public:
     }
     const FilterOperations& operations() const { return m_operations; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { AnimatableValue::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
-    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;
 
 private:
     AnimatableFilterOperations(const FilterOperations& operations)
         : m_operations(operations)
     {
     }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE;
-    virtual AnimatableType type() const OVERRIDE { return TypeFilterOperations; }
+    virtual bool equalTo(const AnimatableValue*) const override;
+    virtual AnimatableType type() const override { return TypeFilterOperations; }
 
     FilterOperations m_operations;
 };

@@ -27,7 +27,7 @@ public:
     WindRule fillRule;
 };
 
-class HitRegion FINAL : public RefCountedWillBeGarbageCollectedFinalized<HitRegion> {
+class HitRegion final : public RefCountedWillBeGarbageCollectedFinalized<HitRegion> {
 public:
     static PassRefPtrWillBeRawPtr<HitRegion> create(const HitRegionOptions& options)
     {
@@ -57,7 +57,7 @@ private:
     WindRule m_fillRule;
 };
 
-class HitRegionManager FINAL : public NoBaseWillBeGarbageCollected<HitRegionManager> {
+class HitRegionManager final : public NoBaseWillBeGarbageCollected<HitRegionManager> {
     WTF_MAKE_NONCOPYABLE(HitRegionManager);
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(HitRegionManager)
 public:

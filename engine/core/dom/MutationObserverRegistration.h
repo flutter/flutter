@@ -41,7 +41,7 @@ namespace blink {
 
 class QualifiedName;
 
-class MutationObserverRegistration FINAL : public NoBaseWillBeGarbageCollectedFinalized<MutationObserverRegistration> {
+class MutationObserverRegistration final : public NoBaseWillBeGarbageCollectedFinalized<MutationObserverRegistration> {
 public:
     static PassOwnPtrWillBeRawPtr<MutationObserverRegistration> create(MutationObserver&, Node*, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
     ~MutationObserverRegistration();

@@ -49,7 +49,7 @@ class HTMLLinkElement;
 // is done by HTMLImportLoader, which can be shared among multiple
 // HTMLImportChild of same link URL.
 //
-class HTMLImportChild FINAL : public HTMLImport {
+class HTMLImportChild final : public HTMLImport {
 public:
     HTMLImportChild(const KURL&, HTMLImportLoader*, SyncMode);
     virtual ~HTMLImportChild();
@@ -66,15 +66,15 @@ public:
 #endif
 
     // HTMLImport
-    virtual Document* document() const OVERRIDE;
-    virtual bool isDone() const OVERRIDE;
-    virtual HTMLImportLoader* loader() const OVERRIDE;
-    virtual void stateWillChange() OVERRIDE;
-    virtual void stateDidChange() OVERRIDE;
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual Document* document() const override;
+    virtual bool isDone() const override;
+    virtual HTMLImportLoader* loader() const override;
+    virtual void stateWillChange() override;
+    virtual void stateDidChange() override;
+    virtual void trace(Visitor*) override;
 
 #if !defined(NDEBUG)
-    virtual void showThis() OVERRIDE;
+    virtual void showThis() override;
 #endif
 
     void setClient(HTMLImportChildClient*);

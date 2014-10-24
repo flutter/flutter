@@ -39,17 +39,17 @@ namespace blink {
 class Node;
 
 // Implements v8::RetainedObjectInfo.
-class RetainedDOMInfo FINAL : public RetainedObjectInfo {
+class RetainedDOMInfo final : public RetainedObjectInfo {
 public:
     explicit RetainedDOMInfo(Node* root);
     virtual ~RetainedDOMInfo();
-    virtual void Dispose() OVERRIDE;
-    virtual bool IsEquivalent(v8::RetainedObjectInfo* other) OVERRIDE;
-    virtual intptr_t GetHash() OVERRIDE;
-    virtual const char* GetGroupLabel() OVERRIDE;
-    virtual const char* GetLabel() OVERRIDE;
-    virtual intptr_t GetElementCount() OVERRIDE;
-    virtual intptr_t GetEquivalenceClass() OVERRIDE;
+    virtual void Dispose() override;
+    virtual bool IsEquivalent(v8::RetainedObjectInfo* other) override;
+    virtual intptr_t GetHash() override;
+    virtual const char* GetGroupLabel() override;
+    virtual const char* GetLabel() override;
+    virtual intptr_t GetElementCount() override;
+    virtual intptr_t GetEquivalenceClass() override;
 
 private:
     // V8 guarantees to keep RetainedObjectInfos alive only during a GC or heap snapshotting round, when renderer

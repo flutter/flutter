@@ -38,7 +38,7 @@
 
 namespace blink {
 
-class ScriptProfile FINAL : public RefCountedWillBeGarbageCollectedFinalized<ScriptProfile> {
+class ScriptProfile final : public RefCountedWillBeGarbageCollectedFinalized<ScriptProfile> {
 public:
     static PassRefPtrWillBeRawPtr<ScriptProfile> create(v8::CpuProfile* profile, double idleTime)
     {

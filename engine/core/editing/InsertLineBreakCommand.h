@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class InsertLineBreakCommand FINAL : public CompositeEditCommand {
+class InsertLineBreakCommand final : public CompositeEditCommand {
 public:
     static PassRefPtrWillBeRawPtr<InsertLineBreakCommand> create(Document& document)
     {
@@ -40,9 +40,9 @@ public:
 private:
     explicit InsertLineBreakCommand(Document&);
 
-    virtual void doApply() OVERRIDE;
+    virtual void doApply() override;
 
-    virtual bool preservesTypingStyle() const OVERRIDE;
+    virtual bool preservesTypingStyle() const override;
 };
 
 } // namespace blink

@@ -83,7 +83,7 @@ class AtomicHTMLToken;
 class Document;
 class Element;
 
-class HTMLConstructionSite FINAL {
+class HTMLConstructionSite final {
     WTF_MAKE_NONCOPYABLE(HTMLConstructionSite);
     DISALLOW_ALLOCATION();
 public:

@@ -45,7 +45,7 @@ struct KeyboardEventInit : public UIEventInit {
     bool repeat;
 };
 
-class KeyboardEvent FINAL : public UIEventWithKeyState {
+class KeyboardEvent final : public UIEventWithKeyState {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum KeyLocationCode {
@@ -91,15 +91,15 @@ public:
 
     const PlatformKeyboardEvent* keyEvent() const { return m_keyEvent.get(); }
 
-    virtual int keyCode() const OVERRIDE; // key code for keydown and keyup, character for keypress
-    virtual int charCode() const OVERRIDE; // character code for keypress, 0 for keydown and keyup
+    virtual int keyCode() const override; // key code for keydown and keyup, character for keypress
+    virtual int charCode() const override; // character code for keypress, 0 for keydown and keyup
     bool repeat() const { return m_isAutoRepeat; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual bool isKeyboardEvent() const OVERRIDE;
-    virtual int which() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual bool isKeyboardEvent() const override;
+    virtual int which() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     KeyboardEvent();
@@ -120,7 +120,7 @@ public:
     static PassRefPtrWillBeRawPtr<KeyboardEventDispatchMediator> create(PassRefPtrWillBeRawPtr<KeyboardEvent>);
 private:
     explicit KeyboardEventDispatchMediator(PassRefPtrWillBeRawPtr<KeyboardEvent>);
-    virtual bool dispatchEvent(EventDispatcher*) const OVERRIDE;
+    virtual bool dispatchEvent(EventDispatcher*) const override;
 };
 
 DEFINE_EVENT_TYPE_CASTS(KeyboardEvent);

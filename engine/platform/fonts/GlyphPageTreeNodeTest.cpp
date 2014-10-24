@@ -16,7 +16,7 @@ public:
     static PassRefPtr<TestCustomFontData> create() { return adoptRef(new TestCustomFontData()); }
 private:
     TestCustomFontData() { }
-    virtual bool isLoadingFallback() const OVERRIDE { return true; }
+    virtual bool isLoadingFallback() const override { return true; }
 };
 
 class TestSimpleFontData : public SimpleFontData {
@@ -39,7 +39,7 @@ private:
     {
     }
 
-    bool fillGlyphPage(GlyphPage* pageToFill, unsigned offset, unsigned length, UChar* buffer, unsigned bufferLength) const OVERRIDE
+    bool fillGlyphPage(GlyphPage* pageToFill, unsigned offset, unsigned length, UChar* buffer, unsigned bufferLength) const override
     {
         const Glyph kGlyph = 1;
         String bufferString(buffer, bufferLength);

@@ -36,7 +36,7 @@ enum ViewportErrorCode {
     TargetDensityDpiUnsupported
 };
 
-class HTMLMetaElement FINAL : public HTMLElement {
+class HTMLMetaElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLMetaElement);
@@ -52,9 +52,9 @@ private:
     void processViewportKeyValuePair(const String& key, const String& value, void* data);
     void parseContentAttribute(const String& content, KeyValuePairCallback, void* data);
 
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void didNotifySubtreeInsertionsToDocument() OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void didNotifySubtreeInsertionsToDocument() override;
 
     float parsePositiveNumber(const String& key, const String& value, bool* ok = 0);
 

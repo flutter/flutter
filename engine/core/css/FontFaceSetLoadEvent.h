@@ -43,7 +43,7 @@ struct FontFaceSetLoadEventInit : public EventInit {
     FontFaceArray fontfaces;
 };
 
-class FontFaceSetLoadEvent FINAL : public Event {
+class FontFaceSetLoadEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<FontFaceSetLoadEvent> create()
@@ -65,9 +65,9 @@ public:
 
     FontFaceArray fontfaces() const { return m_fontfaces; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     FontFaceSetLoadEvent();

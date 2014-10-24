@@ -42,7 +42,7 @@ class TouchEvent;
 class TouchList;
 class TreeScope;
 
-class EventPath FINAL : public NoBaseWillBeGarbageCollected<EventPath> {
+class EventPath final : public NoBaseWillBeGarbageCollected<EventPath> {
 public:
     explicit EventPath(Event*);
     explicit EventPath(Node*);

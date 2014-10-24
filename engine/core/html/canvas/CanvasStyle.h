@@ -40,7 +40,7 @@ namespace blink {
     class GraphicsContext;
     class HTMLCanvasElement;
 
-    class CanvasStyle FINAL : public RefCountedWillBeGarbageCollected<CanvasStyle> {
+    class CanvasStyle final : public RefCountedWillBeGarbageCollected<CanvasStyle> {
     public:
         static PassRefPtrWillBeRawPtr<CanvasStyle> createFromRGBA(RGBA32 rgba) { return adoptRefWillBeNoop(new CanvasStyle(rgba)); }
         static PassRefPtrWillBeRawPtr<CanvasStyle> createFromString(const String& color);

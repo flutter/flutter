@@ -46,15 +46,15 @@ public:
     WebGLImageBufferSurface(const IntSize&, OpacityMode = NonOpaque);
     virtual ~WebGLImageBufferSurface();
 
-    virtual SkCanvas* canvas() const OVERRIDE { return 0; }
-    virtual const SkBitmap& bitmap() OVERRIDE { return m_bitmap; }
-    virtual bool isValid() const OVERRIDE { return m_bitmap.pixelRef(); }
-    virtual bool isAccelerated() const OVERRIDE { return true; }
-    virtual Platform3DObject getBackingTexture() const OVERRIDE;
-    virtual bool cachedBitmapEnabled() const OVERRIDE { return true; }
-    virtual const SkBitmap& cachedBitmap() const OVERRIDE { return m_cachedBitmap; }
-    virtual void invalidateCachedBitmap() OVERRIDE;
-    virtual void updateCachedBitmapIfNeeded() OVERRIDE;
+    virtual SkCanvas* canvas() const override { return 0; }
+    virtual const SkBitmap& bitmap() override { return m_bitmap; }
+    virtual bool isValid() const override { return m_bitmap.pixelRef(); }
+    virtual bool isAccelerated() const override { return true; }
+    virtual Platform3DObject getBackingTexture() const override;
+    virtual bool cachedBitmapEnabled() const override { return true; }
+    virtual const SkBitmap& cachedBitmap() const override { return m_cachedBitmap; }
+    virtual void invalidateCachedBitmap() override;
+    virtual void updateCachedBitmapIfNeeded() override;
 
 private:
     SkBitmap m_bitmap;

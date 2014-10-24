@@ -41,23 +41,23 @@ public:
     void ref() { ++m_refCount; }
     void deref();
 #endif
-    virtual bool isWidget() const OVERRIDE FINAL { return true; }
+    virtual bool isWidget() const override final { return true; }
     bool updateWidgetGeometry();
 
 protected:
     explicit RenderWidget(Element*);
 
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) OVERRIDE FINAL;
-    virtual void layout() OVERRIDE;
-    virtual void paint(PaintInfo&, const LayoutPoint&) OVERRIDE;
-    virtual CursorDirective getCursor(const LayoutPoint&, Cursor&) const OVERRIDE FINAL;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) OVERRIDE;
+    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override final;
+    virtual void layout() override;
+    virtual void paint(PaintInfo&, const LayoutPoint&) override;
+    virtual CursorDirective getCursor(const LayoutPoint&, Cursor&) const override final;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
 
     virtual void paintContents(PaintInfo&, const LayoutPoint&);
 
 private:
-    virtual void willBeDestroyed() OVERRIDE FINAL;
-    virtual void destroy() OVERRIDE FINAL;
+    virtual void willBeDestroyed() override final;
+    virtual void destroy() override final;
 
     bool setWidgetGeometry(const LayoutRect&);
 #if !ENABLE(OILPAN)

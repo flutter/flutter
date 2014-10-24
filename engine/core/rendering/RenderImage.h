@@ -34,7 +34,7 @@ class RenderImage : public RenderReplaced {
 public:
     RenderImage(Element*);
     virtual ~RenderImage();
-    virtual void destroy() OVERRIDE;
+    virtual void destroy() override;
 
     static RenderImage* createAnonymous(Document*);
 
@@ -59,40 +59,40 @@ public:
     inline void setImageDevicePixelRatio(float factor) { m_imageDevicePixelRatio = factor; }
     float imageDevicePixelRatio() const { return m_imageDevicePixelRatio; }
 
-    virtual void intrinsicSizeChanged() OVERRIDE
+    virtual void intrinsicSizeChanged() override
     {
         if (m_imageResource)
             imageChanged(m_imageResource->imagePtr());
     }
 
 protected:
-    virtual bool needsPreferredWidthsRecalculation() const OVERRIDE FINAL;
-    virtual void computeIntrinsicRatioInformation(FloatSize& intrinsicSize, double& intrinsicRatio) const OVERRIDE FINAL;
+    virtual bool needsPreferredWidthsRecalculation() const override final;
+    virtual void computeIntrinsicRatioInformation(FloatSize& intrinsicSize, double& intrinsicRatio) const override final;
 
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) OVERRIDE;
+    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) override;
 
     void paintIntoRect(GraphicsContext*, const LayoutRect&);
-    virtual void paint(PaintInfo&, const LayoutPoint&) OVERRIDE FINAL;
-    virtual void layout() OVERRIDE;
-    virtual bool updateImageLoadingPriorities() OVERRIDE FINAL;
+    virtual void paint(PaintInfo&, const LayoutPoint&) override final;
+    virtual void layout() override;
+    virtual bool updateImageLoadingPriorities() override final;
 
 private:
-    virtual const char* renderName() const OVERRIDE { return "RenderImage"; }
+    virtual const char* renderName() const override { return "RenderImage"; }
 
-    virtual bool isImage() const OVERRIDE { return true; }
-    virtual bool isRenderImage() const OVERRIDE FINAL { return true; }
+    virtual bool isImage() const override { return true; }
+    virtual bool isRenderImage() const override final { return true; }
 
-    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) OVERRIDE;
+    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
 
-    virtual bool foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect, unsigned maxDepthToTest) const OVERRIDE FINAL;
-    virtual bool computeBackgroundIsKnownToBeObscured() OVERRIDE FINAL;
+    virtual bool foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect, unsigned maxDepthToTest) const override final;
+    virtual bool computeBackgroundIsKnownToBeObscured() override final;
 
-    virtual LayoutUnit minimumReplacedHeight() const OVERRIDE;
+    virtual LayoutUnit minimumReplacedHeight() const override;
 
-    virtual void notifyFinished(Resource*) OVERRIDE FINAL;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) OVERRIDE FINAL;
+    virtual void notifyFinished(Resource*) override final;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
 
-    virtual bool boxShadowShouldBeAppliedToBackground(BackgroundBleedAvoidance, InlineFlowBox*) const OVERRIDE FINAL;
+    virtual bool boxShadowShouldBeAppliedToBackground(BackgroundBleedAvoidance, InlineFlowBox*) const override final;
 
     IntSize imageSizeForError(ImageResource*) const;
     void paintInvalidationOrMarkForLayout(bool imageSizeChanged, const IntRect* = 0);

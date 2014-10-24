@@ -44,7 +44,7 @@ class ResourceError;
 class ResourceResponse;
 class ResourceLoaderHost;
 
-class ResourceLoader FINAL : public RefCountedWillBeGarbageCollectedFinalized<ResourceLoader>, protected WebURLLoaderClient {
+class ResourceLoader final : public RefCountedWillBeGarbageCollectedFinalized<ResourceLoader>, protected WebURLLoaderClient {
 public:
     static PassRefPtrWillBeRawPtr<ResourceLoader> create(ResourceLoaderHost*, Resource*, const ResourceRequest&, const ResourceLoaderOptions&);
     virtual ~ResourceLoader();
@@ -63,13 +63,13 @@ public:
     void didChangePriority(ResourceLoadPriority, int intraPriorityValue);
 
     // WebURLLoaderClient
-    virtual void willSendRequest(blink::WebURLLoader*, blink::WebURLRequest&, const blink::WebURLResponse& redirectResponse) OVERRIDE;
-    virtual void didSendData(blink::WebURLLoader*, unsigned long long bytesSent, unsigned long long totalBytesToBeSent) OVERRIDE;
-    virtual void didReceiveResponse(blink::WebURLLoader*, const blink::WebURLResponse&) OVERRIDE;
-    virtual void didReceiveData(blink::WebURLLoader*, const char*, int, int encodedDataLength) OVERRIDE;
-    virtual void didFinishLoading(blink::WebURLLoader*, double finishTime, int64 encodedDataLength) OVERRIDE;
-    virtual void didFail(blink::WebURLLoader*, const blink::WebURLError&) OVERRIDE;
-    virtual void didDownloadData(blink::WebURLLoader*, int, int) OVERRIDE;
+    virtual void willSendRequest(blink::WebURLLoader*, blink::WebURLRequest&, const blink::WebURLResponse& redirectResponse) override;
+    virtual void didSendData(blink::WebURLLoader*, unsigned long long bytesSent, unsigned long long totalBytesToBeSent) override;
+    virtual void didReceiveResponse(blink::WebURLLoader*, const blink::WebURLResponse&) override;
+    virtual void didReceiveData(blink::WebURLLoader*, const char*, int, int encodedDataLength) override;
+    virtual void didFinishLoading(blink::WebURLLoader*, double finishTime, int64 encodedDataLength) override;
+    virtual void didFail(blink::WebURLLoader*, const blink::WebURLError&) override;
+    virtual void didDownloadData(blink::WebURLLoader*, int, int) override;
 
     const KURL& url() const { return m_request.url(); }
     bool isLoadedBy(ResourceLoaderHost*) const;

@@ -38,7 +38,7 @@ public:
     void beginArray();
     void beginDictionary();
 
-    virtual String asTraceFormat() const OVERRIDE;
+    virtual String asTraceFormat() const override;
 
 private:
     TracedValue();

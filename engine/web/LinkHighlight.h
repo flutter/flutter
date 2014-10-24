@@ -58,16 +58,16 @@ public:
 
     // WebContentLayerClient implementation.
     virtual void paintContents(WebCanvas*, const WebRect& clipRect, bool canPaintLCDText, WebFloatRect& opaque,
-        WebContentLayerClient::GraphicsContextStatus = GraphicsContextEnabled) OVERRIDE;
+        WebContentLayerClient::GraphicsContextStatus = GraphicsContextEnabled) override;
 
     // WebCompositorAnimationDelegate implementation.
-    virtual void notifyAnimationStarted(double monotonicTime, blink::WebCompositorAnimation::TargetProperty) OVERRIDE;
-    virtual void notifyAnimationFinished(double monotonicTime, blink::WebCompositorAnimation::TargetProperty) OVERRIDE;
+    virtual void notifyAnimationStarted(double monotonicTime, blink::WebCompositorAnimation::TargetProperty) override;
+    virtual void notifyAnimationFinished(double monotonicTime, blink::WebCompositorAnimation::TargetProperty) override;
 
     // LinkHighlightClient inplementation.
-    virtual void invalidate() OVERRIDE;
-    virtual WebLayer* layer() OVERRIDE;
-    virtual void clearCurrentGraphicsLayer() OVERRIDE;
+    virtual void invalidate() override;
+    virtual WebLayer* layer() override;
+    virtual void clearCurrentGraphicsLayer() override;
 
     GraphicsLayer* currentGraphicsLayerForTesting() const { return m_currentGraphicsLayer; }
 

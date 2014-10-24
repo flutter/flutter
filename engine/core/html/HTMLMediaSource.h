@@ -73,7 +73,7 @@ public:
 #endif
 
     // URLRegistrable
-    virtual URLRegistry& registry() const OVERRIDE { return *s_registry; }
+    virtual URLRegistry& registry() const override { return *s_registry; }
 
 private:
     static URLRegistry* s_registry;

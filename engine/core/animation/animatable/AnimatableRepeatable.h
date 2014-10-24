@@ -50,7 +50,7 @@ public:
 
     const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& values() const { return m_values; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     AnimatableRepeatable()
@@ -64,15 +64,15 @@ protected:
 
     static bool interpolateLists(const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& fromValues, const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& toValues, double fraction, WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& interpolatedValues);
 
-    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const OVERRIDE;
+    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;
 
     WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> > m_values;
 
 private:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
-    virtual AnimatableType type() const OVERRIDE { return TypeRepeatable; }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE FINAL;
+    virtual AnimatableType type() const override { return TypeRepeatable; }
+    virtual bool equalTo(const AnimatableValue*) const override final;
 };
 
 DEFINE_TYPE_CASTS(AnimatableRepeatable, AnimatableValue, value, (value->isRepeatable() || value->isStrokeDasharrayList()), (value.isRepeatable() || value.isStrokeDasharrayList()));

@@ -36,7 +36,7 @@ namespace blink {
 class CSSRule;
 class StyleRuleSupports;
 
-class CSSSupportsRule FINAL : public CSSGroupingRule {
+class CSSSupportsRule final : public CSSGroupingRule {
 public:
     static PassRefPtrWillBeRawPtr<CSSSupportsRule> create(StyleRuleSupports* rule, CSSStyleSheet* sheet)
     {
@@ -45,12 +45,12 @@ public:
 
     virtual ~CSSSupportsRule() { }
 
-    virtual CSSRule::Type type() const OVERRIDE { return SUPPORTS_RULE; }
-    virtual String cssText() const OVERRIDE;
+    virtual CSSRule::Type type() const override { return SUPPORTS_RULE; }
+    virtual String cssText() const override;
 
     String conditionText() const;
 
-    virtual void trace(Visitor* visitor) OVERRIDE { CSSGroupingRule::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { CSSGroupingRule::trace(visitor); }
 
 private:
     CSSSupportsRule(StyleRuleSupports*, CSSStyleSheet*);

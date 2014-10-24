@@ -44,7 +44,7 @@ struct WheelEventInit : public MouseEventInit {
     unsigned deltaMode;
 };
 
-class WheelEvent FINAL : public MouseEvent {
+class WheelEvent final : public MouseEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum { TickMultiplier = 120 };
@@ -84,11 +84,11 @@ public:
     float ticksX() const { return static_cast<float>(m_wheelDelta.x()) / TickMultiplier; }
     float ticksY() const { return static_cast<float>(m_wheelDelta.y()) / TickMultiplier; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual bool isMouseEvent() const OVERRIDE;
-    virtual bool isWheelEvent() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual bool isMouseEvent() const override;
+    virtual bool isWheelEvent() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     WheelEvent();
@@ -106,13 +106,13 @@ private:
 
 DEFINE_EVENT_TYPE_CASTS(WheelEvent);
 
-class WheelEventDispatchMediator FINAL : public EventDispatchMediator {
+class WheelEventDispatchMediator final : public EventDispatchMediator {
 public:
     static PassRefPtrWillBeRawPtr<WheelEventDispatchMediator> create(const PlatformWheelEvent&, PassRefPtrWillBeRawPtr<AbstractView>);
 private:
     WheelEventDispatchMediator(const PlatformWheelEvent&, PassRefPtrWillBeRawPtr<AbstractView>);
     WheelEvent* event() const;
-    virtual bool dispatchEvent(EventDispatcher*) const OVERRIDE;
+    virtual bool dispatchEvent(EventDispatcher*) const override;
 };
 
 } // namespace blink

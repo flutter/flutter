@@ -43,7 +43,7 @@ class RenderBlockFlow;
 class RenderBox;
 class FloatingObject;
 
-class ShapeOutsideDeltas FINAL {
+class ShapeOutsideDeltas final {
 public:
     ShapeOutsideDeltas()
         : m_lineOverlapsShape(false)
@@ -80,7 +80,7 @@ private:
     bool m_isValid : 1;
 };
 
-class ShapeOutsideInfo FINAL {
+class ShapeOutsideInfo final {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     void setReferenceBoxLogicalSize(LayoutSize);

@@ -36,8 +36,8 @@ public:
 
     bool hasTagName(const HTMLQualifiedName& name) const { return hasLocalName(name.localName()); }
 
-    virtual String title() const OVERRIDE FINAL;
-    virtual short tabIndex() const OVERRIDE;
+    virtual String title() const override final;
+    virtual short tabIndex() const override;
 
     String contentEditable() const;
     void setContentEditable(const String&, ExceptionState&);
@@ -50,18 +50,18 @@ public:
 
     void click();
 
-    virtual void accessKeyAction(bool sendMouseEvents) OVERRIDE;
+    virtual void accessKeyAction(bool sendMouseEvents) override;
 
     virtual bool isLabelable() const { return false; }
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/elements.html#interactive-content
     virtual bool isInteractiveContent() const;
 
-    virtual bool matchesReadOnlyPseudoClass() const OVERRIDE;
-    virtual bool matchesReadWritePseudoClass() const OVERRIDE;
+    virtual bool matchesReadOnlyPseudoClass() const override;
+    virtual bool matchesReadWritePseudoClass() const override;
 
     static const AtomicString& eventParameterName();
 
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) OVERRIDE;
+    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:
     HTMLElement(const QualifiedName& tagName, Document&, ConstructionType);

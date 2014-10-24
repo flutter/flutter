@@ -42,7 +42,7 @@ namespace blink {
 
 class PLATFORM_EXPORT FELighting : public FilterEffect {
 public:
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
 protected:
     static const int s_minimalRectDimension = 100 * 100; // Empirical data limit for parallel jobs
@@ -83,8 +83,8 @@ protected:
         int yEnd;
     };
 
-    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) OVERRIDE FINAL;
-    virtual bool affectsTransparentPixels() OVERRIDE { return true; }
+    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) override final;
+    virtual bool affectsTransparentPixels() override { return true; }
 
     static void platformApplyGenericWorker(PlatformApplyGenericParameters*);
 
@@ -115,7 +115,7 @@ protected:
     float m_kernelUnitLengthY;
 
 private:
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
 
     void getTransform(FloatPoint3D* scale, FloatSize* offset) const;
 };

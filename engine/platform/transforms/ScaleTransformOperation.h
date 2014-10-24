@@ -48,11 +48,11 @@ public:
     virtual bool canBlendWith(const TransformOperation& other) const;
 
 private:
-    virtual bool isIdentity() const OVERRIDE { return m_x == 1 &&  m_y == 1 &&  m_z == 1; }
+    virtual bool isIdentity() const override { return m_x == 1 &&  m_y == 1 &&  m_z == 1; }
 
-    virtual OperationType type() const OVERRIDE { return m_type; }
+    virtual OperationType type() const override { return m_type; }
 
-    virtual bool operator==(const TransformOperation& o) const OVERRIDE
+    virtual bool operator==(const TransformOperation& o) const override
     {
         if (!isSameType(o))
             return false;
@@ -60,12 +60,12 @@ private:
         return m_x == s->m_x && m_y == s->m_y && m_z == s->m_z;
     }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const OVERRIDE
+    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
     {
         transform.scale3d(m_x, m_y, m_z);
     }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) OVERRIDE;
+    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
 
     ScaleTransformOperation(double sx, double sy, double sz, OperationType type)
         : m_x(sx)

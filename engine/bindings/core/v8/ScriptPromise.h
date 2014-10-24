@@ -51,7 +51,7 @@ class ExceptionState;
 // So holding a ScriptPromise as a member variable in DOM object causes
 // memory leaks since it has a reference from C++ to V8.
 //
-class ScriptPromise FINAL {
+class ScriptPromise final {
 public:
     // Constructs an empty promise.
     ScriptPromise() { }
@@ -123,7 +123,7 @@ public:
 
     // This is a utility class intended to be used internally.
     // ScriptPromiseResolver is for general purpose.
-    class InternalResolver FINAL {
+    class InternalResolver final {
     public:
         explicit InternalResolver(ScriptState*);
         v8::Local<v8::Promise> v8Promise() const;

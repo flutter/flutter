@@ -85,13 +85,13 @@ public:
 
     bool fromTouch() const { return m_syntheticEventType == PlatformMouseEvent::FromTouch; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual bool isMouseEvent() const OVERRIDE;
-    virtual bool isDragEvent() const OVERRIDE FINAL;
-    virtual int which() const OVERRIDE FINAL;
+    virtual bool isMouseEvent() const override;
+    virtual bool isDragEvent() const override final;
+    virtual int which() const override final;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     MouseEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView>,
@@ -112,18 +112,18 @@ private:
     PlatformMouseEvent::SyntheticEventType m_syntheticEventType;
 };
 
-class SimulatedMouseEvent FINAL : public MouseEvent {
+class SimulatedMouseEvent final : public MouseEvent {
 public:
     static PassRefPtrWillBeRawPtr<SimulatedMouseEvent> create(const AtomicString& eventType, PassRefPtrWillBeRawPtr<AbstractView>, PassRefPtrWillBeRawPtr<Event> underlyingEvent);
     virtual ~SimulatedMouseEvent();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     SimulatedMouseEvent(const AtomicString& eventType, PassRefPtrWillBeRawPtr<AbstractView>, PassRefPtrWillBeRawPtr<Event> underlyingEvent);
 };
 
-class MouseEventDispatchMediator FINAL : public EventDispatchMediator {
+class MouseEventDispatchMediator final : public EventDispatchMediator {
 public:
     enum MouseEventType { SyntheticMouseEvent, NonSyntheticMouseEvent};
     static PassRefPtrWillBeRawPtr<MouseEventDispatchMediator> create(PassRefPtrWillBeRawPtr<MouseEvent>, MouseEventType = NonSyntheticMouseEvent);
@@ -132,7 +132,7 @@ private:
     explicit MouseEventDispatchMediator(PassRefPtrWillBeRawPtr<MouseEvent>, MouseEventType);
     MouseEvent* event() const;
 
-    virtual bool dispatchEvent(EventDispatcher*) const OVERRIDE;
+    virtual bool dispatchEvent(EventDispatcher*) const override;
     bool isSyntheticMouseEvent() const { return m_mouseEventType == SyntheticMouseEvent; }
     MouseEventType m_mouseEventType;
 };

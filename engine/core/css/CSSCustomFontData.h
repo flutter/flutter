@@ -26,7 +26,7 @@
 
 namespace blink {
 
-class CSSCustomFontData FINAL : public CustomFontData {
+class CSSCustomFontData final : public CustomFontData {
 public:
     enum FallbackVisibility { InvisibleFallback, VisibleFallback };
 
@@ -37,14 +37,14 @@ public:
 
     virtual ~CSSCustomFontData() { }
 
-    virtual bool shouldSkipDrawing() const OVERRIDE
+    virtual bool shouldSkipDrawing() const override
     {
         if (m_fontFaceSource)
             m_fontFaceSource->paintRequested();
         return m_fallbackVisibility == InvisibleFallback && m_isLoading;
     }
 
-    virtual void beginLoadIfNeeded() const OVERRIDE
+    virtual void beginLoadIfNeeded() const override
     {
         if (!m_isLoading && m_fontFaceSource) {
             m_isLoading = true;
@@ -52,9 +52,9 @@ public:
         }
     }
 
-    virtual bool isLoading() const OVERRIDE { return m_isLoading; }
-    virtual bool isLoadingFallback() const OVERRIDE { return true; }
-    virtual void clearFontFaceSource() OVERRIDE { m_fontFaceSource = 0; }
+    virtual bool isLoading() const override { return m_isLoading; }
+    virtual bool isLoadingFallback() const override { return true; }
+    virtual void clearFontFaceSource() override { m_fontFaceSource = 0; }
 
 private:
     CSSCustomFontData(RemoteFontFaceSource* source, FallbackVisibility visibility)

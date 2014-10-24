@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class WebMediaConstraintsPrivate FINAL : public RefCounted<WebMediaConstraintsPrivate> {
+class WebMediaConstraintsPrivate final : public RefCounted<WebMediaConstraintsPrivate> {
 public:
     static PassRefPtr<WebMediaConstraintsPrivate> create();
     static PassRefPtr<WebMediaConstraintsPrivate> create(const WebVector<WebMediaConstraint>& optional, const WebVector<WebMediaConstraint>& mandatory);

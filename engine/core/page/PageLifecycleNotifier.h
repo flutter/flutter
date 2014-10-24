@@ -36,15 +36,15 @@ namespace blink {
 class Page;
 class LocalFrame;
 
-class PageLifecycleNotifier FINAL : public LifecycleNotifier<Page> {
+class PageLifecycleNotifier final : public LifecycleNotifier<Page> {
 public:
     static PassOwnPtr<PageLifecycleNotifier> create(Page*);
 
     void notifyPageVisibilityChanged();
     void notifyDidCommitLoad(LocalFrame*);
 
-    virtual void addObserver(Observer*) OVERRIDE;
-    virtual void removeObserver(Observer*) OVERRIDE;
+    virtual void addObserver(Observer*) override;
+    virtual void removeObserver(Observer*) override;
 
 private:
     explicit PageLifecycleNotifier(Page*);

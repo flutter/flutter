@@ -38,15 +38,15 @@ namespace blink {
 
 class ExecutionContext;
 
-class V8MutationCallback FINAL : public MutationCallback, public ActiveDOMCallback {
+class V8MutationCallback final : public MutationCallback, public ActiveDOMCallback {
 public:
     static PassOwnPtr<V8MutationCallback> create(v8::Handle<v8::Function> callback, v8::Handle<v8::Object> owner, ScriptState* scriptState)
     {
         return adoptPtr(new V8MutationCallback(callback, owner, scriptState));
     }
 
-    virtual void call(const WillBeHeapVector<RefPtrWillBeMember<MutationRecord> >&, MutationObserver*) OVERRIDE;
-    virtual ExecutionContext* executionContext() const OVERRIDE { return ContextLifecycleObserver::executionContext(); }
+    virtual void call(const WillBeHeapVector<RefPtrWillBeMember<MutationRecord> >&, MutationObserver*) override;
+    virtual ExecutionContext* executionContext() const override { return ContextLifecycleObserver::executionContext(); }
 
 private:
     V8MutationCallback(v8::Handle<v8::Function>, v8::Handle<v8::Object>, ScriptState*);

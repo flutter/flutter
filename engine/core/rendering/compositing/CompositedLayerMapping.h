@@ -66,7 +66,7 @@ enum GraphicsLayerUpdateScope {
 //
 // Currently (Oct. 2013) there is one CompositedLayerMapping for each RenderLayer,
 // but this is likely to evolve soon.
-class CompositedLayerMapping FINAL : public GraphicsLayerClient {
+class CompositedLayerMapping final : public GraphicsLayerClient {
     WTF_MAKE_NONCOPYABLE(CompositedLayerMapping); WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit CompositedLayerMapping(RenderLayer&);
@@ -153,12 +153,12 @@ public:
     void updateShouldFlattenTransform();
 
     // GraphicsLayerClient interface
-    virtual void notifyAnimationStarted(const GraphicsLayer*, double monotonicTime) OVERRIDE;
-    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect& clip) OVERRIDE;
-    virtual bool isTrackingPaintInvalidations() const OVERRIDE;
+    virtual void notifyAnimationStarted(const GraphicsLayer*, double monotonicTime) override;
+    virtual void paintContents(const GraphicsLayer*, GraphicsContext&, GraphicsLayerPaintingPhase, const IntRect& clip) override;
+    virtual bool isTrackingPaintInvalidations() const override;
 
 #if ENABLE(ASSERT)
-    virtual void verifyNotPainting() OVERRIDE;
+    virtual void verifyNotPainting() override;
 #endif
 
     LayoutRect contentsBox() const;
@@ -193,7 +193,7 @@ public:
     void assertNeedsToUpdateGraphicsLayerBitsCleared() {  ASSERT(m_pendingUpdateScope == GraphicsLayerUpdateNone); }
 #endif
 
-    virtual String debugName(const GraphicsLayer*) OVERRIDE;
+    virtual String debugName(const GraphicsLayer*) override;
 
     LayoutSize contentOffsetInCompositingLayer() const;
 

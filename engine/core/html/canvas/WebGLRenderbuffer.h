@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class WebGLRenderbuffer FINAL : public WebGLSharedObject, public ScriptWrappable {
+class WebGLRenderbuffer final : public WebGLSharedObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~WebGLRenderbuffer();
@@ -61,15 +61,15 @@ public:
     WebGLRenderbuffer* emulatedStencilBuffer() const { return m_emulatedStencilBuffer.get(); }
     void deleteEmulatedStencilBuffer(blink::WebGraphicsContext3D* context3d);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     explicit WebGLRenderbuffer(WebGLRenderingContextBase*);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
 private:
-    virtual bool isRenderbuffer() const OVERRIDE { return true; }
+    virtual bool isRenderbuffer() const override { return true; }
 
     GLenum m_internalFormat;
     GLsizei m_width, m_height;

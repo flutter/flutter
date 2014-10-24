@@ -51,7 +51,7 @@ public:
 
     RenderText& renderer() const { return toRenderText(InlineBox::renderer()); }
 
-    virtual void destroy() OVERRIDE FINAL;
+    virtual void destroy() override final;
 
     InlineTextBox* prevTextBox() const { return m_prevTextBox; }
     InlineTextBox* nextTextBox() const { return m_nextTextBox; }
@@ -70,7 +70,7 @@ public:
 
     unsigned short truncation() { return m_truncation; }
 
-    virtual void markDirty() OVERRIDE FINAL;
+    virtual void markDirty() override final;
 
     using InlineBox::hasHyphen;
     using InlineBox::setHasHyphen;
@@ -79,8 +79,8 @@ public:
 
     static inline bool compareByStart(const InlineTextBox* first, const InlineTextBox* second) { return first->start() < second->start(); }
 
-    virtual int baselinePosition(FontBaseline) const OVERRIDE FINAL;
-    virtual LayoutUnit lineHeight() const OVERRIDE FINAL;
+    virtual int baselinePosition(FontBaseline) const override final;
+    virtual LayoutUnit lineHeight() const override final;
 
     bool getEmphasisMarkPosition(RenderStyle*, TextEmphasisPosition&) const;
 
@@ -90,8 +90,8 @@ public:
     LayoutUnit logicalBottomVisualOverflow() const { return logicalOverflowRect().maxY(); }
 
 #ifndef NDEBUG
-    virtual void showBox(int = 0) const OVERRIDE;
-    virtual const char* boxName() const OVERRIDE;
+    virtual void showBox(int = 0) const override;
+    virtual const char* boxName() const override;
 #endif
 
     enum RotationDirection { Counterclockwise, Clockwise };
@@ -107,30 +107,30 @@ private:
 
 public:
     TextRun constructTextRunForInspector(RenderStyle*, const Font&) const;
-    virtual FloatRect calculateBoundaries() const OVERRIDE { return FloatRect(x(), y(), width(), height()); }
+    virtual FloatRect calculateBoundaries() const override { return FloatRect(x(), y(), width(), height()); }
 
     virtual LayoutRect localSelectionRect(int startPos, int endPos);
     bool isSelected(int startPos, int endPos) const;
     void selectionStartEnd(int& sPos, int& ePos);
 
 protected:
-    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) OVERRIDE;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) OVERRIDE;
+    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) override;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) override;
 
 private:
-    virtual void deleteLine() OVERRIDE FINAL;
-    virtual void extractLine() OVERRIDE FINAL;
-    virtual void attachLine() OVERRIDE FINAL;
+    virtual void deleteLine() override final;
+    virtual void extractLine() override final;
+    virtual void attachLine() override final;
 
 public:
-    virtual RenderObject::SelectionState selectionState() OVERRIDE FINAL;
+    virtual RenderObject::SelectionState selectionState() override final;
 
 private:
-    virtual void clearTruncation() OVERRIDE FINAL { m_truncation = cNoTruncation; }
-    virtual float placeEllipsisBox(bool flowIsLTR, float visibleLeftEdge, float visibleRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox) OVERRIDE FINAL;
+    virtual void clearTruncation() override final { m_truncation = cNoTruncation; }
+    virtual float placeEllipsisBox(bool flowIsLTR, float visibleLeftEdge, float visibleRightEdge, float ellipsisWidth, float &truncatedWidth, bool& foundBox) override final;
 
 public:
-    virtual bool isLineBreak() const OVERRIDE FINAL;
+    virtual bool isLineBreak() const override final;
 
     void setExpansion(int newExpansion)
     {
@@ -140,11 +140,11 @@ public:
     }
 
 private:
-    virtual bool isInlineTextBox() const OVERRIDE FINAL { return true; }
+    virtual bool isInlineTextBox() const override final { return true; }
 
 public:
-    virtual int caretMinOffset() const OVERRIDE FINAL;
-    virtual int caretMaxOffset() const OVERRIDE FINAL;
+    virtual int caretMinOffset() const override final;
+    virtual int caretMaxOffset() const override final;
 
 private:
     float textPos() const; // returns the x position relative to the left start of the text line.

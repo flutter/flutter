@@ -33,7 +33,7 @@ namespace blink {
 
 class KURL;
 
-class MediaFragmentURIParser FINAL {
+class MediaFragmentURIParser final {
 public:
 
     MediaFragmentURIParser(const KURL&);

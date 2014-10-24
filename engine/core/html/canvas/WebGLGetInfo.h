@@ -48,7 +48,7 @@ namespace blink {
 // similar variants. For reference counted types, increments and
 // decrements the reference count of the target object.
 
-class WebGLGetInfo FINAL {
+class WebGLGetInfo final {
     STACK_ALLOCATED();
 public:
     enum Type {

@@ -42,7 +42,7 @@ namespace blink {
 // (and translate in the case of PNaCl) multiple binary files. It is not
 // constructable by web content at all, and so does not provide the usual
 // EventInit pattern for Event construction.
-class ResourceProgressEvent FINAL : public ProgressEvent {
+class ResourceProgressEvent final : public ProgressEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<ResourceProgressEvent> create()
@@ -56,9 +56,9 @@ public:
 
     const String& url() const;
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     ResourceProgressEvent();

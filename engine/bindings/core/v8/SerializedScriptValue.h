@@ -49,7 +49,7 @@ class ExceptionState;
 
 typedef Vector<RefPtr<WTF::ArrayBuffer>, 1> ArrayBufferArray;
 
-class SerializedScriptValue FINAL : public ThreadSafeRefCounted<SerializedScriptValue> {
+class SerializedScriptValue final : public ThreadSafeRefCounted<SerializedScriptValue> {
 public:
     // Increment this for each incompatible change to the wire format.
     // Version 2: Added StringUCharTag for UChar v8 strings.

@@ -43,9 +43,9 @@ public:
     virtual ~TestingDiscardableMemory();
 
     // WebDiscardableMemory:
-    virtual bool lock() OVERRIDE;
-    virtual void* data() OVERRIDE;
-    virtual void unlock() OVERRIDE;
+    virtual bool lock() override;
+    virtual void* data() override;
+    virtual void unlock() override;
 
 private:
     Vector<char> m_data;
@@ -65,9 +65,9 @@ public:
     virtual ~TestingPlatformSupport();
 
     // Platform:
-    virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) OVERRIDE;
-    virtual void cryptographicallyRandomValues(unsigned char* buffer, size_t length) OVERRIDE;
-    virtual const unsigned char* getTraceCategoryEnabledFlag(const char* categoryName) OVERRIDE;
+    virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) override;
+    virtual void cryptographicallyRandomValues(unsigned char* buffer, size_t length) override;
+    virtual const unsigned char* getTraceCategoryEnabledFlag(const char* categoryName) override;
 
 private:
     const Config m_config;

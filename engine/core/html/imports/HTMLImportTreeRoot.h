@@ -20,17 +20,17 @@ public:
     virtual ~HTMLImportTreeRoot();
 
     // HTMLImport
-    virtual Document* document() const OVERRIDE;
-    virtual bool isDone() const OVERRIDE;
-    virtual void stateWillChange() OVERRIDE;
-    virtual void stateDidChange() OVERRIDE;
+    virtual Document* document() const override;
+    virtual bool isDone() const override;
+    virtual void stateWillChange() override;
+    virtual void stateDidChange() override;
 
     void scheduleRecalcState();
 
     HTMLImportChild* add(PassOwnPtrWillBeRawPtr<HTMLImportChild>);
     HTMLImportChild* find(const KURL&) const;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     explicit HTMLImportTreeRoot(Document*);

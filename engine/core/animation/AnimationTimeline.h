@@ -114,7 +114,7 @@ private:
 
     OwnPtrWillBeMember<PlatformTiming> m_timing;
 
-    class AnimationTimelineTiming FINAL : public PlatformTiming {
+    class AnimationTimelineTiming final : public PlatformTiming {
     public:
         AnimationTimelineTiming(AnimationTimeline* timeline)
             : m_timeline(timeline)
@@ -123,13 +123,13 @@ private:
             ASSERT(m_timeline);
         }
 
-        virtual void wakeAfter(double duration) OVERRIDE;
-        virtual void cancelWake() OVERRIDE;
-        virtual void serviceOnNextFrame() OVERRIDE;
+        virtual void wakeAfter(double duration) override;
+        virtual void cancelWake() override;
+        virtual void serviceOnNextFrame() override;
 
         void timerFired(Timer<AnimationTimelineTiming>*) { m_timeline->wake(); }
 
-        virtual void trace(Visitor*) OVERRIDE;
+        virtual void trace(Visitor*) override;
 
     private:
         RawPtrWillBeMember<AnimationTimeline> m_timeline;

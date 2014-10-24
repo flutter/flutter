@@ -48,7 +48,7 @@ class Range;
 class TreeScope;
 class VisibleSelection;
 
-class DOMSelection FINAL : public RefCountedWillBeGarbageCollectedFinalized<DOMSelection>, public ScriptWrappable, public DOMWindowProperty {
+class DOMSelection final : public RefCountedWillBeGarbageCollectedFinalized<DOMSelection>, public ScriptWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<DOMSelection> create(const TreeScope* treeScope)

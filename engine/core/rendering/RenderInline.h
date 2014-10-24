@@ -33,7 +33,7 @@ namespace blink {
 class RenderInline : public RenderBoxModelObject {
 public:
     explicit RenderInline(Element*);
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     static RenderInline* createAnonymous(Document*);
 
@@ -44,23 +44,23 @@ public:
     void slowFirstChild() const WTF_DELETED_FUNCTION;
     void slowLastChild() const WTF_DELETED_FUNCTION;
 
-    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) OVERRIDE;
+    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
 
     Element* node() const { return toElement(RenderBoxModelObject::node()); }
 
-    virtual LayoutUnit marginLeft() const OVERRIDE FINAL;
-    virtual LayoutUnit marginRight() const OVERRIDE FINAL;
-    virtual LayoutUnit marginTop() const OVERRIDE FINAL;
-    virtual LayoutUnit marginBottom() const OVERRIDE FINAL;
-    virtual LayoutUnit marginBefore(const RenderStyle* otherStyle = 0) const OVERRIDE FINAL;
-    virtual LayoutUnit marginAfter(const RenderStyle* otherStyle = 0) const OVERRIDE FINAL;
-    virtual LayoutUnit marginStart(const RenderStyle* otherStyle = 0) const OVERRIDE FINAL;
-    virtual LayoutUnit marginEnd(const RenderStyle* otherStyle = 0) const OVERRIDE FINAL;
+    virtual LayoutUnit marginLeft() const override final;
+    virtual LayoutUnit marginRight() const override final;
+    virtual LayoutUnit marginTop() const override final;
+    virtual LayoutUnit marginBottom() const override final;
+    virtual LayoutUnit marginBefore(const RenderStyle* otherStyle = 0) const override final;
+    virtual LayoutUnit marginAfter(const RenderStyle* otherStyle = 0) const override final;
+    virtual LayoutUnit marginStart(const RenderStyle* otherStyle = 0) const override final;
+    virtual LayoutUnit marginEnd(const RenderStyle* otherStyle = 0) const override final;
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const OVERRIDE FINAL;
-    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const OVERRIDE;
+    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override final;
+    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const override;
 
-    virtual LayoutSize offsetFromContainer(const RenderObject*, const LayoutPoint&, bool* offsetDependsOnPoint = 0) const OVERRIDE FINAL;
+    virtual LayoutSize offsetFromContainer(const RenderObject*, const LayoutPoint&, bool* offsetDependsOnPoint = 0) const override final;
 
     IntRect linesBoundingBox() const;
     LayoutRect linesVisualOverflowBoundingBox() const;
@@ -78,41 +78,41 @@ public:
     InlineBox* firstLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? firstLineBox() : culledInlineFirstLineBox(); }
     InlineBox* lastLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? lastLineBox() : culledInlineLastLineBox(); }
 
-    virtual RenderBoxModelObject* virtualContinuation() const OVERRIDE FINAL { return continuation(); }
+    virtual RenderBoxModelObject* virtualContinuation() const override final { return continuation(); }
     RenderInline* inlineElementContinuation() const;
 
     LayoutSize offsetForInFlowPositionedInline(const RenderBox& child) const;
 
-    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const OVERRIDE FINAL;
+    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override final;
     void paintOutline(PaintInfo&, const LayoutPoint&);
 
     using RenderBoxModelObject::continuation;
-    virtual void setContinuation(RenderBoxModelObject*) OVERRIDE FINAL;
+    virtual void setContinuation(RenderBoxModelObject*) override final;
 
     bool alwaysCreateLineBoxes() const { return alwaysCreateLineBoxesForRenderInline(); }
     void setAlwaysCreateLineBoxes(bool alwaysCreateLineBoxes = true) { setAlwaysCreateLineBoxesForRenderInline(alwaysCreateLineBoxes); }
     void updateAlwaysCreateLineBoxes(bool fullLayout);
 
-    virtual LayoutRect localCaretRect(InlineBox*, int, LayoutUnit* extraWidthToEndOfLine) OVERRIDE FINAL;
+    virtual LayoutRect localCaretRect(InlineBox*, int, LayoutUnit* extraWidthToEndOfLine) override final;
 
     bool hitTestCulledInline(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
 
 protected:
-    virtual void willBeDestroyed() OVERRIDE;
+    virtual void willBeDestroyed() override;
 
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) OVERRIDE;
+    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
 
-    virtual void computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint& layerOffset) const OVERRIDE;
+    virtual void computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint& layerOffset) const override;
 
 private:
-    virtual RenderObjectChildList* virtualChildren() OVERRIDE FINAL { return children(); }
-    virtual const RenderObjectChildList* virtualChildren() const OVERRIDE FINAL { return children(); }
+    virtual RenderObjectChildList* virtualChildren() override final { return children(); }
+    virtual const RenderObjectChildList* virtualChildren() const override final { return children(); }
     const RenderObjectChildList* children() const { return &m_children; }
     RenderObjectChildList* children() { return &m_children; }
 
-    virtual const char* renderName() const OVERRIDE;
+    virtual const char* renderName() const override;
 
-    virtual bool isRenderInline() const OVERRIDE FINAL { return true; }
+    virtual bool isRenderInline() const override final { return true; }
 
     LayoutRect culledInlineVisualOverflowBoundingBox() const;
     InlineBox* culledInlineFirstLineBox() const;
@@ -124,35 +124,35 @@ private:
     void generateCulledLineBoxRects(GeneratorContext& yield, const RenderInline* container) const;
 
     void addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild);
-    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) OVERRIDE FINAL;
+    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) override final;
 
     void splitInlines(RenderBlock* fromBlock, RenderBlock* toBlock, RenderBlock* middleBlock,
                       RenderObject* beforeChild, RenderBoxModelObject* oldCont);
     void splitFlow(RenderObject* beforeChild, RenderBlock* newBlockBox,
                    RenderObject* newChild, RenderBoxModelObject* oldCont);
 
-    virtual void layout() OVERRIDE FINAL { ASSERT_NOT_REACHED(); } // Do nothing for layout()
+    virtual void layout() override final { ASSERT_NOT_REACHED(); } // Do nothing for layout()
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) OVERRIDE FINAL;
+    virtual void paint(PaintInfo&, const LayoutPoint&) override final;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) OVERRIDE FINAL;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
 
-    virtual LayerType layerTypeRequired() const OVERRIDE { return isRelPositioned() || createsGroup() || hasClipPath() || style()->shouldCompositeForCurrentAnimations() ? NormalLayer : NoLayer; }
+    virtual LayerType layerTypeRequired() const override { return isRelPositioned() || createsGroup() || hasClipPath() || style()->shouldCompositeForCurrentAnimations() ? NormalLayer : NoLayer; }
 
-    virtual LayoutUnit offsetLeft() const OVERRIDE FINAL;
-    virtual LayoutUnit offsetTop() const OVERRIDE FINAL;
-    virtual LayoutUnit offsetWidth() const OVERRIDE FINAL { return linesBoundingBox().width(); }
-    virtual LayoutUnit offsetHeight() const OVERRIDE FINAL { return linesBoundingBox().height(); }
+    virtual LayoutUnit offsetLeft() const override final;
+    virtual LayoutUnit offsetTop() const override final;
+    virtual LayoutUnit offsetWidth() const override final { return linesBoundingBox().width(); }
+    virtual LayoutUnit offsetHeight() const override final { return linesBoundingBox().height(); }
 
-    virtual LayoutRect clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const OVERRIDE;
-    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const OVERRIDE FINAL;
-    virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const OVERRIDE FINAL;
+    virtual LayoutRect clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const override;
+    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const override final;
+    virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override final;
 
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, bool* wasFixed = 0, const PaintInvalidationState* = 0) const OVERRIDE;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, bool* wasFixed = 0, const PaintInvalidationState* = 0) const override;
 
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) OVERRIDE FINAL;
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
 
-    virtual IntRect borderBoundingBox() const OVERRIDE FINAL
+    virtual IntRect borderBoundingBox() const override final
     {
         IntRect boundingBox = linesBoundingBox();
         return IntRect(0, 0, boundingBox.width(), boundingBox.height());
@@ -160,18 +160,18 @@ private:
 
     virtual InlineFlowBox* createInlineFlowBox(); // Subclassed by SVG and Ruby
 
-    virtual void dirtyLinesFromChangedChild(RenderObject* child) OVERRIDE FINAL { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
+    virtual void dirtyLinesFromChangedChild(RenderObject* child) override final { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
 
-    virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const OVERRIDE FINAL;
-    virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const OVERRIDE FINAL;
+    virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override final;
+    virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override final;
 
-    virtual void childBecameNonInline(RenderObject* child) OVERRIDE FINAL;
+    virtual void childBecameNonInline(RenderObject* child) override final;
 
-    virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) OVERRIDE FINAL;
+    virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override final;
 
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) OVERRIDE FINAL;
+    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) override final;
 
-    virtual void updateFromStyle() OVERRIDE FINAL;
+    virtual void updateFromStyle() override final;
 
     RenderInline* clone() const;
 

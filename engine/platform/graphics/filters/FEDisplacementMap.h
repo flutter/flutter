@@ -50,21 +50,21 @@ public:
     float scale() const;
     bool setScale(float);
 
-    virtual void setResultColorSpace(ColorSpace) OVERRIDE;
-    virtual void transformResultColorSpace(FilterEffect*, const int) OVERRIDE;
+    virtual void setResultColorSpace(ColorSpace) override;
+    virtual void transformResultColorSpace(FilterEffect*, const int) override;
 
-    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) OVERRIDE FINAL;
+    virtual FloatRect mapPaintRect(const FloatRect&, bool forward = true) override final;
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
-    FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) OVERRIDE;
+    FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) override;
 
 private:
     FEDisplacementMap(Filter*, ChannelSelectorType xChannelSelector, ChannelSelectorType yChannelSelector, float);
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
 
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
     ChannelSelectorType m_xChannelSelector;
     ChannelSelectorType m_yChannelSelector;

@@ -47,7 +47,7 @@ class CustomElementConstructorBuilder;
 class Document;
 class ExceptionState;
 
-class CustomElementRegistry FINAL {
+class CustomElementRegistry final {
     WTF_MAKE_NONCOPYABLE(CustomElementRegistry);
 protected:
     friend class CustomElementRegistrationContext;

@@ -42,7 +42,7 @@ namespace blink {
 
 class Element;
 
-class CustomElementUpgradeCandidateMap FINAL : public CustomElementObserver {
+class CustomElementUpgradeCandidateMap final : public CustomElementObserver {
     WTF_MAKE_NONCOPYABLE(CustomElementUpgradeCandidateMap);
 public:
     static PassOwnPtrWillBeRawPtr<CustomElementUpgradeCandidateMap> create();
@@ -55,14 +55,14 @@ public:
     void add(const CustomElementDescriptor&, Element*);
     PassOwnPtrWillBeRawPtr<ElementSet> takeUpgradeCandidatesFor(const CustomElementDescriptor&);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CustomElementUpgradeCandidateMap() { }
 
-    virtual void elementWasDestroyed(Element*) OVERRIDE;
+    virtual void elementWasDestroyed(Element*) override;
 
-    virtual void elementDidFinishParsingChildren(Element*) OVERRIDE;
+    virtual void elementDidFinishParsingChildren(Element*) override;
     void moveToEnd(Element*);
 
     typedef WillBeHeapHashMap<RawPtrWillBeWeakMember<Element>, CustomElementDescriptor> UpgradeCandidateMap;

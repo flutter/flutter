@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class MockImageResourceClient FINAL : public blink::ImageResourceClient {
+class MockImageResourceClient final : public blink::ImageResourceClient {
 public:
     MockImageResourceClient()
         : m_imageChangedCount(0)
@@ -46,12 +46,12 @@ public:
     }
 
     virtual ~MockImageResourceClient() { }
-    virtual void imageChanged(ImageResource*, const IntRect*) OVERRIDE
+    virtual void imageChanged(ImageResource*, const IntRect*) override
     {
         m_imageChangedCount++;
     }
 
-    virtual void notifyFinished(Resource*) OVERRIDE
+    virtual void notifyFinished(Resource*) override
     {
         ASSERT_FALSE(m_notifyFinishedCalled);
         m_notifyFinishedCalled = true;

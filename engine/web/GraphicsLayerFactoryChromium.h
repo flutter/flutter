@@ -37,7 +37,7 @@ public:
 
     virtual ~GraphicsLayerFactoryChromium();
 
-    virtual PassOwnPtr<GraphicsLayer> createGraphicsLayer(GraphicsLayerClient*) OVERRIDE;
+    virtual PassOwnPtr<GraphicsLayer> createGraphicsLayer(GraphicsLayerClient*) override;
 
 private:
     // The owner of this GraphicsLayerFactoryChromium.

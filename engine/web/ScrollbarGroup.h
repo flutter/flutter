@@ -43,30 +43,30 @@ public:
     void setFrameRect(const IntRect&);
 
     // ScrollableArea methods
-    virtual int scrollSize(ScrollbarOrientation) const OVERRIDE;
-    virtual void setScrollOffset(const IntPoint&) OVERRIDE;
-    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) OVERRIDE;
-    virtual void invalidateScrollCornerRect(const IntRect&) OVERRIDE;
-    virtual bool isActive() const OVERRIDE;
-    virtual IntRect scrollCornerRect() const OVERRIDE { return IntRect(); }
-    virtual bool isScrollCornerVisible() const OVERRIDE;
-    virtual void getTickmarks(Vector<IntRect>&) const OVERRIDE;
-    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar*, const IntPoint& parentPoint) const OVERRIDE;
-    virtual Scrollbar* horizontalScrollbar() const OVERRIDE;
-    virtual Scrollbar* verticalScrollbar() const OVERRIDE;
-    virtual IntPoint scrollPosition() const OVERRIDE;
-    virtual IntPoint minimumScrollPosition() const OVERRIDE;
-    virtual IntPoint maximumScrollPosition() const OVERRIDE;
-    virtual int visibleHeight() const OVERRIDE;
-    virtual int visibleWidth() const OVERRIDE;
-    virtual IntSize contentsSize() const OVERRIDE;
-    virtual IntSize overhangAmount() const OVERRIDE;
-    virtual IntPoint lastKnownMousePosition() const OVERRIDE;
-    virtual bool scrollbarsCanBeActive() const OVERRIDE;
-    virtual IntRect scrollableAreaBoundingBox() const OVERRIDE;
-    virtual bool userInputScrollable(ScrollbarOrientation) const OVERRIDE;
-    virtual bool shouldPlaceVerticalScrollbarOnLeft() const OVERRIDE;
-    virtual int pageStep(ScrollbarOrientation) const OVERRIDE;
+    virtual int scrollSize(ScrollbarOrientation) const override;
+    virtual void setScrollOffset(const IntPoint&) override;
+    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
+    virtual void invalidateScrollCornerRect(const IntRect&) override;
+    virtual bool isActive() const override;
+    virtual IntRect scrollCornerRect() const override { return IntRect(); }
+    virtual bool isScrollCornerVisible() const override;
+    virtual void getTickmarks(Vector<IntRect>&) const override;
+    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar*, const IntPoint& parentPoint) const override;
+    virtual Scrollbar* horizontalScrollbar() const override;
+    virtual Scrollbar* verticalScrollbar() const override;
+    virtual IntPoint scrollPosition() const override;
+    virtual IntPoint minimumScrollPosition() const override;
+    virtual IntPoint maximumScrollPosition() const override;
+    virtual int visibleHeight() const override;
+    virtual int visibleWidth() const override;
+    virtual IntSize contentsSize() const override;
+    virtual IntSize overhangAmount() const override;
+    virtual IntPoint lastKnownMousePosition() const override;
+    virtual bool scrollbarsCanBeActive() const override;
+    virtual IntRect scrollableAreaBoundingBox() const override;
+    virtual bool userInputScrollable(ScrollbarOrientation) const override;
+    virtual bool shouldPlaceVerticalScrollbarOnLeft() const override;
+    virtual int pageStep(ScrollbarOrientation) const override;
 
 private:
     IntPoint m_lastMousePosition;

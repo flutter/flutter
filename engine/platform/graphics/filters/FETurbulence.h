@@ -60,7 +60,7 @@ public:
 
     static void fillRegionWorker(void*);
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
 
 private:
     static const int s_blockSize = 256;
@@ -115,8 +115,8 @@ private:
 
     FETurbulence(Filter*, TurbulenceType, float, float, int, float, bool);
 
-    virtual void applySoftware() OVERRIDE;
-    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual void applySoftware() override;
+    virtual PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
     SkShader* createShader();
 
     inline void initPaint(PaintingData&);

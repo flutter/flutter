@@ -47,8 +47,8 @@ public:
 
     const ActiveDOMObjectSet& activeDOMObjects() const { return m_activeDOMObjects; }
 
-    virtual void addObserver(Observer*) OVERRIDE;
-    virtual void removeObserver(Observer*) OVERRIDE;
+    virtual void addObserver(Observer*) override;
+    virtual void removeObserver(Observer*) override;
 
     void notifyResumingActiveDOMObjects();
     void notifySuspendingActiveDOMObjects();

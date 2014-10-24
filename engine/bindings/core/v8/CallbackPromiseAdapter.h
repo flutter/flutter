@@ -76,7 +76,7 @@ namespace blink {
 // example that ownership of the WebCallbacks instance is being passed
 // in and it is up to the callee to free the WebCallbacks instace.
 template<typename S, typename T>
-class CallbackPromiseAdapter FINAL : public blink::WebCallbacks<typename S::WebType, typename T::WebType> {
+class CallbackPromiseAdapter final : public blink::WebCallbacks<typename S::WebType, typename T::WebType> {
 public:
     explicit CallbackPromiseAdapter(PassRefPtr<ScriptPromiseResolver> resolver)
         : m_resolver(resolver)
@@ -85,7 +85,7 @@ public:
     }
     virtual ~CallbackPromiseAdapter() { }
 
-    virtual void onSuccess(typename S::WebType* result) OVERRIDE
+    virtual void onSuccess(typename S::WebType* result) override
     {
         if (!m_resolver->executionContext() || m_resolver->executionContext()->activeDOMObjectsAreStopped()) {
             S::dispose(result);
@@ -94,7 +94,7 @@ public:
         m_resolver->resolve(S::take(m_resolver.get(), result));
     }
 
-    virtual void onError(typename T::WebType* error) OVERRIDE
+    virtual void onError(typename T::WebType* error) override
     {
         if (!m_resolver->executionContext() || m_resolver->executionContext()->activeDOMObjectsAreStopped()) {
             T::dispose(error);
@@ -109,7 +109,7 @@ private:
 };
 
 template<typename T>
-class CallbackPromiseAdapter<void, T> FINAL : public blink::WebCallbacks<void, typename T::WebType> {
+class CallbackPromiseAdapter<void, T> final : public blink::WebCallbacks<void, typename T::WebType> {
 public:
     explicit CallbackPromiseAdapter(PassRefPtr<ScriptPromiseResolver> resolver)
         : m_resolver(resolver)
@@ -118,7 +118,7 @@ public:
     }
     virtual ~CallbackPromiseAdapter() { }
 
-    virtual void onSuccess() OVERRIDE
+    virtual void onSuccess() override
     {
         if (!m_resolver->executionContext() || m_resolver->executionContext()->activeDOMObjectsAreStopped()) {
             return;
@@ -126,7 +126,7 @@ public:
         m_resolver->resolve(V8UndefinedType());
     }
 
-    virtual void onError(typename T::WebType* error) OVERRIDE
+    virtual void onError(typename T::WebType* error) override
     {
         if (!m_resolver->executionContext() || m_resolver->executionContext()->activeDOMObjectsAreStopped()) {
             T::dispose(error);

@@ -44,8 +44,8 @@ public:
     UnacceleratedImageBufferSurface(const IntSize&, OpacityMode = NonOpaque);
     virtual ~UnacceleratedImageBufferSurface();
 
-    virtual SkCanvas* canvas() const OVERRIDE;
-    virtual bool isValid() const OVERRIDE;
+    virtual SkCanvas* canvas() const override;
+    virtual bool isValid() const override;
 
 private:
     RefPtr<SkSurface> m_surface;

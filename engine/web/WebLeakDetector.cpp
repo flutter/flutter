@@ -67,7 +67,7 @@ public:
 
     virtual ~WebLeakDetectorImpl() { }
 
-    virtual void collectGarbageAndGetDOMCounts(WebLocalFrame*) OVERRIDE;
+    virtual void collectGarbageAndGetDOMCounts(WebLocalFrame*) override;
 
 private:
     void delayedGCAndReport(Timer<WebLeakDetectorImpl>*);

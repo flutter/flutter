@@ -43,7 +43,7 @@ class Node;
 class SpellCheckRequester;
 class TextCheckerClient;
 
-class SpellCheckRequest FINAL : public TextCheckingRequest {
+class SpellCheckRequest final : public TextCheckingRequest {
 public:
     static PassRefPtr<SpellCheckRequest> create(TextCheckingTypeMask, TextCheckingProcessType, PassRefPtrWillBeRawPtr<Range> checkingRange, PassRefPtrWillBeRawPtr<Range> paragraphRange, int requestNumber = 0);
     virtual ~SpellCheckRequest();
@@ -55,9 +55,9 @@ public:
     void setCheckerAndSequence(SpellCheckRequester*, int sequence);
     void requesterDestroyed();
 
-    virtual const TextCheckingRequestData& data() const OVERRIDE;
-    virtual void didSucceed(const Vector<TextCheckingResult>&) OVERRIDE;
-    virtual void didCancel() OVERRIDE;
+    virtual const TextCheckingRequestData& data() const override;
+    virtual void didSucceed(const Vector<TextCheckingResult>&) override;
+    virtual void didCancel() override;
 
     int requestNumber() const { return m_requestNumber; }
 

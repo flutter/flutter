@@ -38,7 +38,7 @@ struct CompositionEventInit : UIEventInit {
     String data;
 };
 
-class CompositionEvent FINAL : public UIEvent {
+class CompositionEvent final : public UIEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<CompositionEvent> create()
@@ -65,9 +65,9 @@ public:
     int activeSegmentEnd() const { return m_activeSegmentEnd; }
     const Vector<unsigned>& getSegments() const { return m_segments; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CompositionEvent();

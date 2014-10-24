@@ -32,7 +32,7 @@ namespace blink {
 
 class HTMLVideoElement;
 
-class RenderVideo FINAL : public RenderMedia {
+class RenderVideo final : public RenderMedia {
 public:
     RenderVideo(HTMLVideoElement*);
     virtual ~RenderVideo();
@@ -46,28 +46,28 @@ public:
     bool shouldDisplayVideo() const;
 
 private:
-    virtual void updateFromElement() OVERRIDE;
+    virtual void updateFromElement() override;
     inline HTMLVideoElement* videoElement() const;
 
-    virtual void intrinsicSizeChanged() OVERRIDE;
+    virtual void intrinsicSizeChanged() override;
     LayoutSize calculateIntrinsicSize();
     void updateIntrinsicSize();
 
-    virtual void imageChanged(WrappedImagePtr, const IntRect*) OVERRIDE;
+    virtual void imageChanged(WrappedImagePtr, const IntRect*) override;
 
-    virtual const char* renderName() const OVERRIDE { return "RenderVideo"; }
+    virtual const char* renderName() const override { return "RenderVideo"; }
 
-    virtual bool isVideo() const OVERRIDE { return true; }
+    virtual bool isVideo() const override { return true; }
 
-    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) OVERRIDE;
+    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
 
-    virtual void layout() OVERRIDE;
+    virtual void layout() override;
 
-    virtual LayoutUnit computeReplacedLogicalWidth(ShouldComputePreferred  = ComputeActual) const OVERRIDE;
-    virtual LayoutUnit computeReplacedLogicalHeight() const OVERRIDE;
-    virtual LayoutUnit minimumReplacedHeight() const OVERRIDE;
+    virtual LayoutUnit computeReplacedLogicalWidth(ShouldComputePreferred  = ComputeActual) const override;
+    virtual LayoutUnit computeReplacedLogicalHeight() const override;
+    virtual LayoutUnit minimumReplacedHeight() const override;
 
-    virtual CompositingReasons additionalCompositingReasons() const OVERRIDE;
+    virtual CompositingReasons additionalCompositingReasons() const override;
 
     void updatePlayer();
 

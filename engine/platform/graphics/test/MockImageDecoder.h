@@ -61,12 +61,12 @@ public:
         m_client->decoderBeingDestroyed();
     }
 
-    virtual IntSize decodedSize() const OVERRIDE
+    virtual IntSize decodedSize() const override
     {
         return m_client->decodedSize().isEmpty() ? size() : m_client->decodedSize();
     }
 
-    virtual bool setSize(unsigned width, unsigned height) OVERRIDE
+    virtual bool setSize(unsigned width, unsigned height) override
     {
         ImageDecoder::setSize(width, height);
         m_frameBufferCache.resize(1);
@@ -74,22 +74,22 @@ public:
         return true;
     }
 
-    virtual String filenameExtension() const OVERRIDE
+    virtual String filenameExtension() const override
     {
         return "mock";
     }
 
-    virtual size_t frameCount() OVERRIDE
+    virtual size_t frameCount() override
     {
         return m_client->frameCount();
     }
 
-    virtual int repetitionCount() const OVERRIDE
+    virtual int repetitionCount() const override
     {
         return m_client->repetitionCount();
     }
 
-    virtual ImageFrame* frameBufferAtIndex(size_t) OVERRIDE
+    virtual ImageFrame* frameBufferAtIndex(size_t) override
     {
         m_client->frameBufferRequested();
 
@@ -97,12 +97,12 @@ public:
         return &m_frameBufferCache[0];
     }
 
-    virtual bool frameIsCompleteAtIndex(size_t) const OVERRIDE
+    virtual bool frameIsCompleteAtIndex(size_t) const override
     {
         return m_client->status() == ImageFrame::FrameComplete;
     }
 
-    virtual float frameDurationAtIndex(size_t) const OVERRIDE
+    virtual float frameDurationAtIndex(size_t) const override
     {
         return m_client->frameDuration();
     }
@@ -125,7 +125,7 @@ public:
         return adoptPtr(new MockImageDecoderFactory(client, decodedSize));
     }
 
-    virtual PassOwnPtr<ImageDecoder> create() OVERRIDE
+    virtual PassOwnPtr<ImageDecoder> create() override
     {
         OwnPtr<MockImageDecoder> decoder = MockImageDecoder::create(m_client);
         decoder->setSize(m_decodedSize.width(), m_decodedSize.height());

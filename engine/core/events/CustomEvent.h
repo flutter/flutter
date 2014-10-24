@@ -35,7 +35,7 @@ class SerializedScriptValue;
 
 typedef EventInit CustomEventInit;
 
-class CustomEvent FINAL : public Event {
+class CustomEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~CustomEvent();
@@ -52,7 +52,7 @@ public:
 
     void initCustomEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<SerializedScriptValue>);
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
     SerializedScriptValue* serializedDetail() { return m_serializedDetail.get(); }
 
@@ -62,7 +62,7 @@ public:
         m_serializedDetail = detail;
     }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CustomEvent();

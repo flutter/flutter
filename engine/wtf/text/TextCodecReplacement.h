@@ -18,7 +18,7 @@ public:
     static void registerCodecs(TextCodecRegistrar);
 
 private:
-    virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) OVERRIDE;
+    virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) override;
 
     bool m_sentEOF;
 };

@@ -149,7 +149,7 @@ private:
 
 };
 
-class BasicShapeCircle FINAL : public BasicShape {
+class BasicShapeCircle final : public BasicShape {
 public:
     static PassRefPtr<BasicShapeCircle> create() { return adoptRef(new BasicShapeCircle); }
 
@@ -162,11 +162,11 @@ public:
     void setCenterY(BasicShapeCenterCoordinate centerY) { m_centerY = centerY; }
     void setRadius(BasicShapeRadius radius) { m_radius = radius; }
 
-    virtual void path(Path&, const FloatRect&) OVERRIDE;
-    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const OVERRIDE;
-    virtual bool operator==(const BasicShape&) const OVERRIDE;
+    virtual void path(Path&, const FloatRect&) override;
+    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const override;
+    virtual bool operator==(const BasicShape&) const override;
 
-    virtual Type type() const OVERRIDE { return BasicShapeCircleType; }
+    virtual Type type() const override { return BasicShapeCircleType; }
 private:
     BasicShapeCircle() { }
 
@@ -177,7 +177,7 @@ private:
 
 DEFINE_BASICSHAPE_TYPE_CASTS(BasicShapeCircle);
 
-class BasicShapeEllipse FINAL : public BasicShape {
+class BasicShapeEllipse final : public BasicShape {
 public:
     static PassRefPtr<BasicShapeEllipse> create() { return adoptRef(new BasicShapeEllipse); }
 
@@ -192,11 +192,11 @@ public:
     void setRadiusX(BasicShapeRadius radiusX) { m_radiusX = radiusX; }
     void setRadiusY(BasicShapeRadius radiusY) { m_radiusY = radiusY; }
 
-    virtual void path(Path&, const FloatRect&) OVERRIDE;
-    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const OVERRIDE;
-    virtual bool operator==(const BasicShape&) const OVERRIDE;
+    virtual void path(Path&, const FloatRect&) override;
+    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const override;
+    virtual bool operator==(const BasicShape&) const override;
 
-    virtual Type type() const OVERRIDE { return BasicShapeEllipseType; }
+    virtual Type type() const override { return BasicShapeEllipseType; }
 private:
     BasicShapeEllipse() { }
 
@@ -208,7 +208,7 @@ private:
 
 DEFINE_BASICSHAPE_TYPE_CASTS(BasicShapeEllipse);
 
-class BasicShapePolygon FINAL : public BasicShape {
+class BasicShapePolygon final : public BasicShape {
 public:
     static PassRefPtr<BasicShapePolygon> create() { return adoptRef(new BasicShapePolygon); }
 
@@ -219,13 +219,13 @@ public:
     void setWindRule(WindRule windRule) { m_windRule = windRule; }
     void appendPoint(const Length& x, const Length& y) { m_values.append(x); m_values.append(y); }
 
-    virtual void path(Path&, const FloatRect&) OVERRIDE;
-    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const OVERRIDE;
-    virtual bool operator==(const BasicShape&) const OVERRIDE;
+    virtual void path(Path&, const FloatRect&) override;
+    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const override;
+    virtual bool operator==(const BasicShape&) const override;
 
-    virtual WindRule windRule() const OVERRIDE { return m_windRule; }
+    virtual WindRule windRule() const override { return m_windRule; }
 
-    virtual Type type() const OVERRIDE { return BasicShapePolygonType; }
+    virtual Type type() const override { return BasicShapePolygonType; }
 private:
     BasicShapePolygon()
         : m_windRule(RULE_NONZERO)
@@ -261,11 +261,11 @@ public:
     void setBottomRightRadius(const LengthSize& radius) { m_bottomRightRadius = radius; }
     void setBottomLeftRadius(const LengthSize& radius) { m_bottomLeftRadius = radius; }
 
-    virtual void path(Path&, const FloatRect&) OVERRIDE;
-    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const OVERRIDE;
-    virtual bool operator==(const BasicShape&) const OVERRIDE;
+    virtual void path(Path&, const FloatRect&) override;
+    virtual PassRefPtr<BasicShape> blend(const BasicShape*, double) const override;
+    virtual bool operator==(const BasicShape&) const override;
 
-    virtual Type type() const OVERRIDE { return BasicShapeInsetType; }
+    virtual Type type() const override { return BasicShapeInsetType; }
 private:
     BasicShapeInset() { }
 

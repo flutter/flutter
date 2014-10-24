@@ -50,11 +50,11 @@ public:
     }
 
 private:
-    virtual bool isIdentity() const OVERRIDE { return m_a == 1 && !m_b && !m_c && m_d == 1 && !m_e && !m_f; }
+    virtual bool isIdentity() const override { return m_a == 1 && !m_b && !m_c && m_d == 1 && !m_e && !m_f; }
 
-    virtual OperationType type() const OVERRIDE { return Matrix; }
+    virtual OperationType type() const override { return Matrix; }
 
-    virtual bool operator==(const TransformOperation& o) const OVERRIDE
+    virtual bool operator==(const TransformOperation& o) const override
     {
         if (!isSameType(o))
             return false;
@@ -63,13 +63,13 @@ private:
         return m_a == m->m_a && m_b == m->m_b && m_c == m->m_c && m_d == m->m_d && m_e == m->m_e && m_f == m->m_f;
     }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const OVERRIDE
+    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
     {
         TransformationMatrix matrix(m_a, m_b, m_c, m_d, m_e, m_f);
         transform.multiply(matrix);
     }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) OVERRIDE;
+    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
 
     MatrixTransformOperation(double a, double b, double c, double d, double e, double f)
         : m_a(a)

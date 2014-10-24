@@ -41,7 +41,7 @@ class Element;
 class Node;
 
 template <typename NodeType>
-class StaticNodeTypeList FINAL : public NodeList {
+class StaticNodeTypeList final : public NodeList {
 public:
     static PassRefPtrWillBeRawPtr<StaticNodeTypeList> adopt(WillBeHeapVector<RefPtrWillBeMember<NodeType> >& nodes);
 
@@ -52,10 +52,10 @@ public:
 
     virtual ~StaticNodeTypeList();
 
-    virtual unsigned length() const OVERRIDE;
-    virtual NodeType* item(unsigned index) const OVERRIDE;
+    virtual unsigned length() const override;
+    virtual NodeType* item(unsigned index) const override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     ptrdiff_t AllocationSize()

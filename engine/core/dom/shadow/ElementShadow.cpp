@@ -39,7 +39,7 @@
 
 namespace blink {
 
-class DistributionPool FINAL {
+class DistributionPool final {
     STACK_ALLOCATED();
 public:
     explicit DistributionPool(const ContainerNode&);

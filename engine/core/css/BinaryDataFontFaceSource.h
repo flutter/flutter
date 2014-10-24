@@ -13,14 +13,14 @@ namespace blink {
 class FontCustomPlatformData;
 class SharedBuffer;
 
-class BinaryDataFontFaceSource FINAL : public CSSFontFaceSource {
+class BinaryDataFontFaceSource final : public CSSFontFaceSource {
 public:
     explicit BinaryDataFontFaceSource(SharedBuffer*);
     virtual ~BinaryDataFontFaceSource();
-    virtual bool isValid() const OVERRIDE;
+    virtual bool isValid() const override;
 
 private:
-    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) OVERRIDE;
+    virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) override;
 
     OwnPtr<FontCustomPlatformData> m_customPlatformData;
 };

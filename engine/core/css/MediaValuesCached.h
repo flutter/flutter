@@ -9,7 +9,7 @@
 
 namespace blink {
 
-class MediaValuesCached FINAL : public MediaValues {
+class MediaValuesCached final : public MediaValues {
 public:
     struct MediaValuesCachedData {
         // Members variables must be thread safe, since they're copied to the parser thread
@@ -52,27 +52,27 @@ public:
     static PassRefPtr<MediaValues> create(Document&);
     static PassRefPtr<MediaValues> create(LocalFrame*);
     static PassRefPtr<MediaValues> create(MediaValuesCachedData&);
-    virtual PassRefPtr<MediaValues> copy() const OVERRIDE;
-    virtual bool isSafeToSendToAnotherThread() const OVERRIDE;
-    virtual bool computeLength(double value, CSSPrimitiveValue::UnitType, int& result) const OVERRIDE;
-    virtual bool computeLength(double value, CSSPrimitiveValue::UnitType, double& result) const OVERRIDE;
+    virtual PassRefPtr<MediaValues> copy() const override;
+    virtual bool isSafeToSendToAnotherThread() const override;
+    virtual bool computeLength(double value, CSSPrimitiveValue::UnitType, int& result) const override;
+    virtual bool computeLength(double value, CSSPrimitiveValue::UnitType, double& result) const override;
 
-    virtual int viewportWidth() const OVERRIDE;
-    virtual int viewportHeight() const OVERRIDE;
-    virtual int deviceWidth() const OVERRIDE;
-    virtual int deviceHeight() const OVERRIDE;
-    virtual float devicePixelRatio() const OVERRIDE;
-    virtual int colorBitsPerComponent() const OVERRIDE;
-    virtual int monochromeBitsPerComponent() const OVERRIDE;
-    virtual PointerType primaryPointerType() const OVERRIDE;
-    virtual int availablePointerTypes() const OVERRIDE;
-    virtual HoverType primaryHoverType() const OVERRIDE;
-    virtual int availableHoverTypes() const OVERRIDE;
-    virtual bool threeDEnabled() const OVERRIDE;
-    virtual bool strictMode() const OVERRIDE;
-    virtual Document* document() const OVERRIDE;
-    virtual bool hasValues() const OVERRIDE;
-    virtual const String mediaType() const OVERRIDE;
+    virtual int viewportWidth() const override;
+    virtual int viewportHeight() const override;
+    virtual int deviceWidth() const override;
+    virtual int deviceHeight() const override;
+    virtual float devicePixelRatio() const override;
+    virtual int colorBitsPerComponent() const override;
+    virtual int monochromeBitsPerComponent() const override;
+    virtual PointerType primaryPointerType() const override;
+    virtual int availablePointerTypes() const override;
+    virtual HoverType primaryHoverType() const override;
+    virtual int availableHoverTypes() const override;
+    virtual bool threeDEnabled() const override;
+    virtual bool strictMode() const override;
+    virtual Document* document() const override;
+    virtual bool hasValues() const override;
+    virtual const String mediaType() const override;
 
 protected:
     MediaValuesCached();

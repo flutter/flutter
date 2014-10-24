@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class MediaKeyError FINAL : public RefCountedWillBeGarbageCollectedFinalized<MediaKeyError>, public ScriptWrappable {
+class MediaKeyError final : public RefCountedWillBeGarbageCollectedFinalized<MediaKeyError>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum {

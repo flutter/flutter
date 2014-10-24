@@ -42,26 +42,26 @@ class ExceptionState;
 
 typedef int ExceptionCode;
 
-class IgnorableExceptionState FINAL : public ExceptionState {
+class IgnorableExceptionState final : public ExceptionState {
 public:
     IgnorableExceptionState(): ExceptionState(ExceptionState::UnknownContext, 0, 0, v8::Handle<v8::Object>(), 0) { }
     ExceptionState& returnThis() { return *this; }
-    virtual void throwDOMException(const ExceptionCode&, const String& message = String()) OVERRIDE { }
-    virtual void throwTypeError(const String& message = String()) OVERRIDE { }
-    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) OVERRIDE { }
+    virtual void throwDOMException(const ExceptionCode&, const String& message = String()) override { }
+    virtual void throwTypeError(const String& message = String()) override { }
+    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) override { }
 };
 
 #define IGNORE_EXCEPTION (::blink::IgnorableExceptionState().returnThis())
 
 #if ENABLE(ASSERT)
 
-class NoExceptionStateAssertionChecker FINAL : public ExceptionState {
+class NoExceptionStateAssertionChecker final : public ExceptionState {
 public:
     NoExceptionStateAssertionChecker(const char* file, int line);
     ExceptionState& returnThis() { return *this; }
-    virtual void throwDOMException(const ExceptionCode&, const String& message = String()) OVERRIDE;
-    virtual void throwTypeError(const String& message = String()) OVERRIDE;
-    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) OVERRIDE;
+    virtual void throwDOMException(const ExceptionCode&, const String& message = String()) override;
+    virtual void throwTypeError(const String& message = String()) override;
+    virtual void throwSecurityError(const String& sanitizedMessage, const String& unsanitizedMessage = String()) override;
 
 private:
     const char* m_file;

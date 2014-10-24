@@ -34,7 +34,7 @@ namespace blink {
 
 class WebGLRenderingContextBase;
 
-class WebGLLoseContext FINAL : public WebGLExtension, public ScriptWrappable {
+class WebGLLoseContext final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<WebGLLoseContext> create(WebGLRenderingContextBase*);
@@ -42,8 +42,8 @@ public:
     static const char* extensionName();
 
     virtual ~WebGLLoseContext();
-    virtual WebGLExtensionName name() const OVERRIDE;
-    virtual void lose(bool) OVERRIDE;
+    virtual WebGLExtensionName name() const override;
+    virtual void lose(bool) override;
 
     void loseContext();
     void restoreContext();

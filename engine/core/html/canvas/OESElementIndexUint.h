@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class OESElementIndexUint FINAL : public WebGLExtension, public ScriptWrappable {
+class OESElementIndexUint final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<OESElementIndexUint> create(WebGLRenderingContextBase*);
@@ -40,7 +40,7 @@ public:
     static const char* extensionName();
 
     virtual ~OESElementIndexUint();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit OESElementIndexUint(WebGLRenderingContextBase*);

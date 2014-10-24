@@ -42,7 +42,7 @@ namespace blink {
 
 class JSONValue;
 
-class ScriptValue FINAL {
+class ScriptValue final {
 public:
     ScriptValue() { }
 

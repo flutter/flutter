@@ -3193,7 +3193,7 @@ void RenderBox::computePositionedLogicalWidthReplaced(LogicalExtentComputedValue
      * 1. The used value of 'width' is determined as for inline replaced
      *    elements.
     \*-----------------------------------------------------------------------*/
-    // NOTE: This value of width is FINAL in that the min/max width calculations
+    // NOTE: This value of width is final in that the min/max width calculations
     // are dealt with in computeReplacedWidth().  This means that the steps to produce
     // correct max/min in the non-replaced version, are not necessary.
     computedValues.m_extent = computeReplacedLogicalWidth() + borderAndPaddingLogicalWidth();
@@ -3357,7 +3357,7 @@ void RenderBox::computePositionedLogicalHeightReplaced(LogicalExtentComputedValu
      * 1. The used value of 'height' is determined as for inline replaced
      *    elements.
     \*-----------------------------------------------------------------------*/
-    // NOTE: This value of height is FINAL in that the min/max height calculations
+    // NOTE: This value of height is final in that the min/max height calculations
     // are dealt with in computeReplacedHeight().  This means that the steps to produce
     // correct max/min in the non-replaced version, are not necessary.
     computedValues.m_extent = computeReplacedLogicalHeight() + borderAndPaddingLogicalHeight();

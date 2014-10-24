@@ -38,7 +38,7 @@
 
 namespace blink {
 
-class CustomElementDefinition FINAL : public RefCounted<CustomElementDefinition> {
+class CustomElementDefinition final : public RefCounted<CustomElementDefinition> {
 public:
     static PassRefPtr<CustomElementDefinition> create(const CustomElementDescriptor&, PassRefPtr<CustomElementLifecycleCallbacks>);
 

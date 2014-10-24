@@ -63,7 +63,7 @@ public:
     WeakPtr<CustomElementMicrotaskImportStep> weakPtr() { return m_weakFactory.createWeakPtr(); }
 #endif
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     explicit CustomElementMicrotaskImportStep(HTMLImportChild*);
@@ -72,10 +72,10 @@ private:
     bool shouldWaitForImport() const;
 
     // CustomElementMicrotaskStep
-    virtual Result process() OVERRIDE FINAL;
+    virtual Result process() override final;
 
 #if !defined(NDEBUG)
-    virtual void show(unsigned indent) OVERRIDE;
+    virtual void show(unsigned indent) override;
 #endif
     WeakPtrWillBeWeakMember<HTMLImportChild> m_import;
 #if !ENABLE(OILPAN)

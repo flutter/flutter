@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class TouchEvent FINAL : public UIEventWithKeyState {
+class TouchEvent final : public UIEventWithKeyState {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~TouchEvent();
@@ -65,13 +65,13 @@ public:
     void setTargetTouches(PassRefPtrWillBeRawPtr<TouchList> targetTouches) { m_targetTouches = targetTouches; }
     void setChangedTouches(PassRefPtrWillBeRawPtr<TouchList> changedTouches) { m_changedTouches = changedTouches; }
 
-    virtual bool isTouchEvent() const OVERRIDE;
+    virtual bool isTouchEvent() const override;
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
-    virtual void preventDefault() OVERRIDE;
+    virtual void preventDefault() override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     TouchEvent();
@@ -85,14 +85,14 @@ private:
     RefPtrWillBeMember<TouchList> m_changedTouches;
 };
 
-class TouchEventDispatchMediator FINAL : public EventDispatchMediator {
+class TouchEventDispatchMediator final : public EventDispatchMediator {
 public:
     static PassRefPtrWillBeRawPtr<TouchEventDispatchMediator> create(PassRefPtrWillBeRawPtr<TouchEvent>);
 
 private:
     explicit TouchEventDispatchMediator(PassRefPtrWillBeRawPtr<TouchEvent>);
     TouchEvent* event() const;
-    virtual bool dispatchEvent(EventDispatcher*) const OVERRIDE;
+    virtual bool dispatchEvent(EventDispatcher*) const override;
 };
 
 DEFINE_EVENT_TYPE_CASTS(TouchEvent);

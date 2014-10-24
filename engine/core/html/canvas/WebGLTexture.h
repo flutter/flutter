@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class WebGLTexture FINAL : public WebGLSharedObject, public ScriptWrappable {
+class WebGLTexture final : public WebGLSharedObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum TextureExtensionFlag {
@@ -79,7 +79,7 @@ public:
 protected:
     explicit WebGLTexture(WebGLRenderingContextBase*);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
 private:
     class LevelInfo {
@@ -109,7 +109,7 @@ private:
         GLenum type;
     };
 
-    virtual bool isTexture() const OVERRIDE { return true; }
+    virtual bool isTexture() const override { return true; }
 
     void update();
 

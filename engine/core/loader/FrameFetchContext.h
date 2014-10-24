@@ -45,22 +45,22 @@ class ResourceLoader;
 class ResourceResponse;
 class ResourceRequest;
 
-class FrameFetchContext FINAL : public FetchContext {
+class FrameFetchContext final : public FetchContext {
 public:
     static PassOwnPtr<FrameFetchContext> create(LocalFrame* frame) { return adoptPtr(new FrameFetchContext(frame)); }
 
-    virtual void reportLocalLoadFailed(const KURL&) OVERRIDE;
-    virtual void addAdditionalRequestHeaders(Document*, ResourceRequest&, FetchResourceType) OVERRIDE;
-    virtual CachePolicy cachePolicy(Document*) const OVERRIDE;
+    virtual void reportLocalLoadFailed(const KURL&) override;
+    virtual void addAdditionalRequestHeaders(Document*, ResourceRequest&, FetchResourceType) override;
+    virtual CachePolicy cachePolicy(Document*) const override;
     virtual void dispatchDidChangeResourcePriority(unsigned long identifier, ResourceLoadPriority, int intraPriorityValue);
-    virtual void dispatchWillSendRequest(Document*, unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse, const FetchInitiatorInfo& = FetchInitiatorInfo()) OVERRIDE;
-    virtual void dispatchDidLoadResourceFromMemoryCache(const ResourceRequest&, const ResourceResponse&) OVERRIDE;
-    virtual void dispatchDidReceiveResponse(Document*, unsigned long identifier, const ResourceResponse&, ResourceLoader* = 0) OVERRIDE;
-    virtual void dispatchDidReceiveData(Document*, unsigned long identifier, const char* data, int dataLength, int encodedDataLength) OVERRIDE;
-    virtual void dispatchDidDownloadData(Document*, unsigned long identifier, int dataLength, int encodedDataLength)  OVERRIDE;
-    virtual void dispatchDidFinishLoading(Document*, unsigned long identifier, double finishTime, int64_t encodedDataLength) OVERRIDE;
-    virtual void dispatchDidFail(Document*, unsigned long identifier, const ResourceError&) OVERRIDE;
-    virtual void sendRemainingDelegateMessages(Document*, unsigned long identifier, const ResourceResponse&, int dataLength) OVERRIDE;
+    virtual void dispatchWillSendRequest(Document*, unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse, const FetchInitiatorInfo& = FetchInitiatorInfo()) override;
+    virtual void dispatchDidLoadResourceFromMemoryCache(const ResourceRequest&, const ResourceResponse&) override;
+    virtual void dispatchDidReceiveResponse(Document*, unsigned long identifier, const ResourceResponse&, ResourceLoader* = 0) override;
+    virtual void dispatchDidReceiveData(Document*, unsigned long identifier, const char* data, int dataLength, int encodedDataLength) override;
+    virtual void dispatchDidDownloadData(Document*, unsigned long identifier, int dataLength, int encodedDataLength)  override;
+    virtual void dispatchDidFinishLoading(Document*, unsigned long identifier, double finishTime, int64_t encodedDataLength) override;
+    virtual void dispatchDidFail(Document*, unsigned long identifier, const ResourceError&) override;
+    virtual void sendRemainingDelegateMessages(Document*, unsigned long identifier, const ResourceResponse&, int dataLength) override;
 
 private:
     explicit FrameFetchContext(LocalFrame*);

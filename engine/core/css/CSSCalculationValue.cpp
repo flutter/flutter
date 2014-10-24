@@ -181,7 +181,7 @@ double CSSCalcValue::computeLengthPx(const CSSToLengthConversionData& conversion
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CSSCalcExpressionNode)
 
-class CSSCalcPrimitiveValue FINAL : public CSSCalcExpressionNode {
+class CSSCalcPrimitiveValue final : public CSSCalcExpressionNode {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
 
@@ -197,17 +197,17 @@ public:
         return adoptRefWillBeNoop(new CSSCalcPrimitiveValue(CSSPrimitiveValue::create(value, type).get(), isInteger));
     }
 
-    virtual bool isZero() const OVERRIDE
+    virtual bool isZero() const override
     {
         return !m_value->getDoubleValue();
     }
 
-    virtual String customCSSText() const OVERRIDE
+    virtual String customCSSText() const override
     {
         return m_value->cssText();
     }
 
-    virtual void accumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PixelsAndPercent& value, float multiplier) const OVERRIDE
+    virtual void accumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PixelsAndPercent& value, float multiplier) const override
     {
         switch (m_category) {
         case CalcLength:
@@ -222,7 +222,7 @@ public:
         }
     }
 
-    virtual double doubleValue() const OVERRIDE
+    virtual double doubleValue() const override
     {
         if (hasDoubleValue(primitiveType()))
             return m_value->getDoubleValue();
@@ -230,7 +230,7 @@ public:
         return 0;
     }
 
-    virtual double computeLengthPx(const CSSToLengthConversionData& conversionData) const OVERRIDE
+    virtual double computeLengthPx(const CSSToLengthConversionData& conversionData) const override
     {
         switch (m_category) {
         case CalcLength:
@@ -257,7 +257,7 @@ public:
         m_value->accumulateLengthArray(lengthArray, multiplier);
     }
 
-    virtual bool equals(const CSSCalcExpressionNode& other) const OVERRIDE
+    virtual bool equals(const CSSCalcExpressionNode& other) const override
     {
         if (type() != other.type())
             return false;
@@ -265,8 +265,8 @@ public:
         return compareCSSValuePtr(m_value, static_cast<const CSSCalcPrimitiveValue&>(other).m_value);
     }
 
-    virtual Type type() const OVERRIDE { return CssCalcPrimitiveValue; }
-    virtual CSSPrimitiveValue::UnitType primitiveType() const OVERRIDE
+    virtual Type type() const override { return CssCalcPrimitiveValue; }
+    virtual CSSPrimitiveValue::UnitType primitiveType() const override
     {
         return m_value->primitiveType();
     }
@@ -334,7 +334,7 @@ static bool isIntegerResult(const CSSCalcExpressionNode* leftSide, const CSSCalc
     return op != CalcDivide && leftSide->isInteger() && rightSide->isInteger();
 }
 
-class CSSCalcBinaryOperation FINAL : public CSSCalcExpressionNode {
+class CSSCalcBinaryOperation final : public CSSCalcExpressionNode {
 public:
     static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> create(PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> leftSide, PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> rightSide, CalcOperator op)
     {
@@ -403,12 +403,12 @@ public:
         return create(leftSide, rightSide, op);
     }
 
-    virtual bool isZero() const OVERRIDE
+    virtual bool isZero() const override
     {
         return !doubleValue();
     }
 
-    virtual void accumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PixelsAndPercent& value, float multiplier) const OVERRIDE
+    virtual void accumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PixelsAndPercent& value, float multiplier) const override
     {
         switch (m_operator) {
         case CalcAdd:
@@ -435,12 +435,12 @@ public:
         }
     }
 
-    virtual double doubleValue() const OVERRIDE
+    virtual double doubleValue() const override
     {
         return evaluate(m_leftSide->doubleValue(), m_rightSide->doubleValue());
     }
 
-    virtual double computeLengthPx(const CSSToLengthConversionData& conversionData) const OVERRIDE
+    virtual double computeLengthPx(const CSSToLengthConversionData& conversionData) const override
     {
         const double leftValue = m_leftSide->computeLengthPx(conversionData);
         const double rightValue = m_rightSide->computeLengthPx(conversionData);
@@ -488,12 +488,12 @@ public:
         return result.toString();
     }
 
-    virtual String customCSSText() const OVERRIDE
+    virtual String customCSSText() const override
     {
         return buildCSSText(m_leftSide->customCSSText(), m_rightSide->customCSSText(), m_operator);
     }
 
-    virtual bool equals(const CSSCalcExpressionNode& exp) const OVERRIDE
+    virtual bool equals(const CSSCalcExpressionNode& exp) const override
     {
         if (type() != exp.type())
             return false;
@@ -504,9 +504,9 @@ public:
             && m_operator == other.m_operator;
     }
 
-    virtual Type type() const OVERRIDE { return CssCalcBinaryOperation; }
+    virtual Type type() const override { return CssCalcBinaryOperation; }
 
-    virtual CSSPrimitiveValue::UnitType primitiveType() const OVERRIDE
+    virtual CSSPrimitiveValue::UnitType primitiveType() const override
     {
         switch (m_category) {
         case CalcNumber:

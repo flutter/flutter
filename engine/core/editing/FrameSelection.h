@@ -56,7 +56,7 @@ enum RevealExtentOption {
     DoNotRevealExtent
 };
 
-class FrameSelection FINAL : public NoBaseWillBeGarbageCollectedFinalized<FrameSelection>, public VisibleSelection::ChangeObserver, private CaretBase {
+class FrameSelection final : public NoBaseWillBeGarbageCollectedFinalized<FrameSelection>, public VisibleSelection::ChangeObserver, private CaretBase {
     WTF_MAKE_NONCOPYABLE(FrameSelection);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(FrameSelection);
@@ -210,9 +210,9 @@ public:
     void setShouldShowBlockCursor(bool);
 
     // VisibleSelection::ChangeObserver interface.
-    virtual void didChangeVisibleSelection() OVERRIDE;
+    virtual void didChangeVisibleSelection() override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     explicit FrameSelection(LocalFrame*);

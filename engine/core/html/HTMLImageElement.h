@@ -35,7 +35,7 @@ namespace blink {
 class ImageCandidate;
 class MediaQueryList;
 
-class HTMLImageElement FINAL : public HTMLElement, public CanvasImageSource {
+class HTMLImageElement final : public HTMLElement, public CanvasImageSource {
     DEFINE_WRAPPERTYPEINFO();
 public:
     class ViewportChangeListener;
@@ -45,7 +45,7 @@ public:
     static PassRefPtrWillBeRawPtr<HTMLImageElement> createForJSConstructor(Document&, int width, int height);
 
     virtual ~HTMLImageElement();
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     int width(bool ignorePendingStylesheets = false);
     int height(bool ignorePendingStylesheets = false);
@@ -77,42 +77,42 @@ public:
 
     bool hasPendingActivity() const { return imageLoader().hasPendingActivity(); }
 
-    virtual bool canContainRangeEndPoint() const OVERRIDE { return false; }
+    virtual bool canContainRangeEndPoint() const override { return false; }
 
     void addClient(ImageLoaderClient* client) { imageLoader().addClient(client); }
     void removeClient(ImageLoaderClient* client) { imageLoader().removeClient(client); }
 
-    virtual const AtomicString imageSourceURL() const OVERRIDE;
+    virtual const AtomicString imageSourceURL() const override;
 
     // CanvasImageSourceImplementations
     virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const;
-    virtual FloatSize sourceSize() const OVERRIDE;
-    virtual FloatSize defaultDestinationSize() const OVERRIDE;
-    virtual const KURL& sourceURL() const OVERRIDE;
+    virtual FloatSize sourceSize() const override;
+    virtual FloatSize defaultDestinationSize() const override;
+    virtual const KURL& sourceURL() const override;
 
     // public so that HTMLPictureElement can call this as well.
     void selectSourceURL(ImageLoader::UpdateFromElementBehavior);
 protected:
     explicit HTMLImageElement(Document&, bool createdByParser = false);
 
-    virtual void didMoveToNewDocument(Document& oldDocument) OVERRIDE;
+    virtual void didMoveToNewDocument(Document& oldDocument) override;
 
 private:
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
 
-    virtual void attach(const AttachContext& = AttachContext()) OVERRIDE;
-    virtual RenderObject* createRenderer(RenderStyle*) OVERRIDE;
+    virtual void attach(const AttachContext& = AttachContext()) override;
+    virtual RenderObject* createRenderer(RenderStyle*) override;
 
-    virtual bool canStartSelection() const OVERRIDE;
+    virtual bool canStartSelection() const override;
 
-    virtual bool isURLAttribute(const Attribute&) const OVERRIDE;
-    virtual bool hasLegalLinkAttribute(const QualifiedName&) const OVERRIDE;
-    virtual const QualifiedName& subResourceAttributeName() const OVERRIDE;
+    virtual bool isURLAttribute(const Attribute&) const override;
+    virtual bool hasLegalLinkAttribute(const QualifiedName&) const override;
+    virtual const QualifiedName& subResourceAttributeName() const override;
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE;
-    virtual bool isInteractiveContent() const OVERRIDE;
-    virtual Image* imageContents() OVERRIDE;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void removedFrom(ContainerNode*) override;
+    virtual bool isInteractiveContent() const override;
+    virtual Image* imageContents() override;
 
     ImageCandidate findBestFitImageFromPictureParent();
     void setBestFitURLAndDPRFromImageCandidate(const ImageCandidate&);

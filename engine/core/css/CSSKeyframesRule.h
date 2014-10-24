@@ -37,7 +37,7 @@ class CSSRuleList;
 class StyleKeyframe;
 class CSSKeyframeRule;
 
-class StyleRuleKeyframes FINAL : public StyleRuleBase {
+class StyleRuleKeyframes final : public StyleRuleBase {
 public:
     static PassRefPtrWillBeRawPtr<StyleRuleKeyframes> create() { return adoptRefWillBeNoop(new StyleRuleKeyframes()); }
 
@@ -72,7 +72,7 @@ private:
 
 DEFINE_STYLE_RULE_TYPE_CASTS(Keyframes);
 
-class CSSKeyframesRule FINAL : public CSSRule {
+class CSSKeyframesRule final : public CSSRule {
 public:
     static PassRefPtrWillBeRawPtr<CSSKeyframesRule> create(StyleRuleKeyframes* rule, CSSStyleSheet* sheet)
     {
@@ -81,9 +81,9 @@ public:
 
     virtual ~CSSKeyframesRule();
 
-    virtual CSSRule::Type type() const OVERRIDE { return KEYFRAMES_RULE; }
-    virtual String cssText() const OVERRIDE;
-    virtual void reattach(StyleRuleBase*) OVERRIDE;
+    virtual CSSRule::Type type() const override { return KEYFRAMES_RULE; }
+    virtual String cssText() const override;
+    virtual void reattach(StyleRuleBase*) override;
 
     String name() const { return m_keyframesRule->name(); }
     void setName(const String&);
@@ -101,7 +101,7 @@ public:
     bool isVendorPrefixed() const { return m_isPrefixed; }
     void setVendorPrefixed(bool isPrefixed) { m_isPrefixed = isPrefixed; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CSSKeyframesRule(StyleRuleKeyframes*, CSSStyleSheet* parent);

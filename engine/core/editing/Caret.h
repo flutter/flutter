@@ -76,7 +76,7 @@ private:
     CaretVisibility m_caretVisibility;
 };
 
-class DragCaretController FINAL : public NoBaseWillBeGarbageCollected<DragCaretController>, private CaretBase {
+class DragCaretController final : public NoBaseWillBeGarbageCollected<DragCaretController>, private CaretBase {
     WTF_MAKE_NONCOPYABLE(DragCaretController);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:

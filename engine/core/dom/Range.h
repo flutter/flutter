@@ -47,7 +47,7 @@ class Node;
 class NodeWithIndex;
 class Text;
 
-class Range FINAL : public RefCountedWillBeGarbageCollectedFinalized<Range>, public ScriptWrappable {
+class Range final : public RefCountedWillBeGarbageCollectedFinalized<Range>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<Range> create(Document&);

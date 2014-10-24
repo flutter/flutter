@@ -107,7 +107,7 @@ private:
 #endif
 };
 
-class WebCoreStringResource16 FINAL : public WebCoreStringResourceBase, public v8::String::ExternalStringResource {
+class WebCoreStringResource16 final : public WebCoreStringResourceBase, public v8::String::ExternalStringResource {
 public:
     explicit WebCoreStringResource16(const String& string)
         : WebCoreStringResourceBase(string)
@@ -121,14 +121,14 @@ public:
         ASSERT(!string.is8Bit());
     }
 
-    virtual size_t length() const OVERRIDE { return m_plainString.impl()->length(); }
-    virtual const uint16_t* data() const OVERRIDE
+    virtual size_t length() const override { return m_plainString.impl()->length(); }
+    virtual const uint16_t* data() const override
     {
         return reinterpret_cast<const uint16_t*>(m_plainString.impl()->characters16());
     }
 };
 
-class WebCoreStringResource8 FINAL : public WebCoreStringResourceBase, public v8::String::ExternalOneByteStringResource {
+class WebCoreStringResource8 final : public WebCoreStringResourceBase, public v8::String::ExternalOneByteStringResource {
 public:
     explicit WebCoreStringResource8(const String& string)
         : WebCoreStringResourceBase(string)
@@ -142,8 +142,8 @@ public:
         ASSERT(string.is8Bit());
     }
 
-    virtual size_t length() const OVERRIDE { return m_plainString.impl()->length(); }
-    virtual const char* data() const OVERRIDE
+    virtual size_t length() const override { return m_plainString.impl()->length(); }
+    virtual const char* data() const override
     {
         return reinterpret_cast<const char*>(m_plainString.impl()->characters8());
     }

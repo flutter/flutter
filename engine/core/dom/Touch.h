@@ -40,7 +40,7 @@ namespace blink {
 
 class LocalFrame;
 
-class Touch FINAL : public RefCountedWillBeGarbageCollected<Touch>, public ScriptWrappable {
+class Touch final : public RefCountedWillBeGarbageCollected<Touch>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<Touch> create(LocalFrame* frame, EventTarget* target,

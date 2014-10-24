@@ -40,7 +40,7 @@ class ExceptionState;
 class ExecutionContext;
 class URLRegistrable;
 
-class DOMURL FINAL : public RefCountedWillBeGarbageCollectedFinalized<DOMURL>, public ScriptWrappable, public DOMURLUtils {
+class DOMURL final : public RefCountedWillBeGarbageCollectedFinalized<DOMURL>, public ScriptWrappable, public DOMURLUtils {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<DOMURL> create(const String& url, ExceptionState& exceptionState)
@@ -59,11 +59,11 @@ public:
 
     static void revokeObjectUUID(ExecutionContext*, const String&);
 
-    virtual KURL url() const OVERRIDE { return m_url; }
-    virtual void setURL(const KURL& url) OVERRIDE { m_url = url; }
+    virtual KURL url() const override { return m_url; }
+    virtual void setURL(const KURL& url) override { m_url = url; }
 
-    virtual String input() const OVERRIDE { return m_input; }
-    virtual void setInput(const String&) OVERRIDE;
+    virtual String input() const override { return m_input; }
+    virtual void setInput(const String&) override;
 
     void trace(Visitor*) { }
 

@@ -52,7 +52,7 @@ class StyleRuleFontFace;
 class StyleSheet;
 class StyleSheetContents;
 
-class StyleEngine FINAL : public CSSFontSelectorClient  {
+class StyleEngine final : public CSSFontSelectorClient  {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
 
@@ -141,11 +141,11 @@ public:
     bool hasOnlyScopedResolverForDocument() const { return m_scopedStyleResolvers.size() == 1; }
     void collectScopedStyleFeaturesTo(RuleFeatureSet&) const;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     // CSSFontSelectorClient implementation.
-    virtual void fontsNeedUpdate(CSSFontSelector*) OVERRIDE;
+    virtual void fontsNeedUpdate(CSSFontSelector*) override;
 
 private:
     StyleEngine(Document&);

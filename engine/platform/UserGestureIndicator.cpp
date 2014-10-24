@@ -45,7 +45,7 @@ public:
     static PassRefPtr<UserGestureToken> create() { return adoptRef(new GestureToken); }
 
     virtual ~GestureToken() { }
-    virtual bool hasGestures() const OVERRIDE
+    virtual bool hasGestures() const override
     {
         // Do not enforce timeouts for gestures which spawned javascript prompts.
         if (m_consumableGestures < 1 || (WTF::currentTime() - m_timestamp > (m_outOfProcess ? userGestureOutOfProcessTimeout : userGestureTimeout) && !m_javascriptPrompt))
@@ -72,7 +72,7 @@ public:
         return true;
     }
 
-    virtual void setOutOfProcess() OVERRIDE
+    virtual void setOutOfProcess() override
     {
         if (WTF::currentTime() - m_timestamp > userGestureTimeout)
             return;
@@ -80,7 +80,7 @@ public:
             m_outOfProcess = true;
     }
 
-    virtual void setJavascriptPrompt() OVERRIDE
+    virtual void setJavascriptPrompt() override
     {
         if (WTF::currentTime() - m_timestamp > userGestureTimeout)
             return;

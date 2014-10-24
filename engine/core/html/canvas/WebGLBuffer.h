@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class WebGLBuffer FINAL : public WebGLSharedObject, public ScriptWrappable {
+class WebGLBuffer final : public WebGLSharedObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~WebGLBuffer();
@@ -48,10 +48,10 @@ public:
 protected:
     explicit WebGLBuffer(WebGLRenderingContextBase*);
 
-    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) OVERRIDE;
+    virtual void deleteObjectImpl(blink::WebGraphicsContext3D*, Platform3DObject) override;
 
 private:
-    virtual bool isBuffer() const OVERRIDE { return true; }
+    virtual bool isBuffer() const override { return true; }
 
     GLenum m_target;
 };

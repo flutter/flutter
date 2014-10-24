@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class WebMediaDeviceInfoPrivate FINAL : public RefCounted<WebMediaDeviceInfoPrivate> {
+class WebMediaDeviceInfoPrivate final : public RefCounted<WebMediaDeviceInfoPrivate> {
 public:
     static PassRefPtr<WebMediaDeviceInfoPrivate> create(const WebString& deviceId, WebMediaDeviceInfo::MediaDeviceKind, const WebString& label, const WebString& groupId);
 

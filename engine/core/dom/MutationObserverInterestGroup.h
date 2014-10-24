@@ -41,7 +41,7 @@
 
 namespace blink {
 
-class MutationObserverInterestGroup FINAL : public NoBaseWillBeGarbageCollectedFinalized<MutationObserverInterestGroup> {
+class MutationObserverInterestGroup final : public NoBaseWillBeGarbageCollectedFinalized<MutationObserverInterestGroup> {
 public:
     static PassOwnPtrWillBeRawPtr<MutationObserverInterestGroup> createForChildListMutation(Node& target)
     {

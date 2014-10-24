@@ -36,7 +36,7 @@ namespace blink {
 
 class Node;
 
-class DocumentOrderedList FINAL {
+class DocumentOrderedList final {
     WTF_MAKE_NONCOPYABLE(DocumentOrderedList);
     DISALLOW_ALLOCATION();
 public:

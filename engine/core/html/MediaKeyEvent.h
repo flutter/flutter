@@ -43,7 +43,7 @@ struct MediaKeyEventInit : public EventInit {
     unsigned short systemCode;
 };
 
-class MediaKeyEvent FINAL : public Event {
+class MediaKeyEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~MediaKeyEvent();
@@ -58,7 +58,7 @@ public:
         return adoptRefWillBeNoop(new MediaKeyEvent(type, initializer));
     }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
     String keySystem() const { return m_keySystem; }
     String sessionId() const { return m_sessionId; }
@@ -68,7 +68,7 @@ public:
     MediaKeyError* errorCode() const { return m_errorCode.get(); }
     unsigned short systemCode() const { return m_systemCode; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     MediaKeyEvent();

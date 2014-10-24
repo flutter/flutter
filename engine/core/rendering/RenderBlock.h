@@ -53,8 +53,8 @@ enum ContainingBlockState { NewContainingBlock, SameContainingBlock };
 
 class RenderBlock : public RenderBox {
 public:
-    virtual void destroy() OVERRIDE;
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void destroy() override;
+    virtual void trace(Visitor*) override;
     friend class LineLayoutState;
 
 protected:
@@ -75,8 +75,8 @@ public:
     bool beingDestroyed() const { return m_beingDestroyed; }
 
     // These two functions are overridden for inline-block.
-    virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const OVERRIDE FINAL;
-    virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const OVERRIDE;
+    virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override final;
+    virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
 
     LayoutUnit minLineHeightForReplacedRenderer(bool isFirstLine, LayoutUnit replacedHeight) const;
 
@@ -93,8 +93,8 @@ public:
     // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
     virtual void deleteLineBoxTree();
 
-    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) OVERRIDE;
-    virtual void removeChild(RenderObject*) OVERRIDE;
+    virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
+    virtual void removeChild(RenderObject*) override;
 
     virtual void layoutBlock(bool relayoutChildren);
 
@@ -139,15 +139,15 @@ public:
 
     LayoutUnit textIndentOffset() const;
 
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) OVERRIDE;
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
 
     // Block flows subclass availableWidth to handle multi column layout (shrinking the width available to children when laying out.)
-    virtual LayoutUnit availableLogicalWidth() const OVERRIDE FINAL;
+    virtual LayoutUnit availableLogicalWidth() const override final;
 
     LayoutUnit blockDirectionOffset(const LayoutSize& offsetFromBlock) const;
     LayoutUnit inlineDirectionOffset(const LayoutSize& offsetFromBlock) const;
 
-    virtual bool shouldPaintSelectionGaps() const OVERRIDE FINAL;
+    virtual bool shouldPaintSelectionGaps() const override final;
     GapRects selectionGapRectsForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer);
     LayoutRect logicalLeftSelectionGap(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
                                        RenderObject* selObj, LayoutUnit logicalLeft, LayoutUnit logicalTop, LayoutUnit logicalHeight, const PaintInfo*);
@@ -156,7 +156,7 @@ public:
     void getSelectionGapInfo(SelectionState, bool& leftGap, bool& rightGap);
     RenderBlock* blockBeforeWithinSelectionRoot(LayoutSize& offset) const;
 
-    virtual void setSelectionState(SelectionState) OVERRIDE;
+    virtual void setSelectionState(SelectionState) override;
 
     LayoutRect logicalRectToPhysicalRect(const LayoutPoint& physicalPosition, const LayoutRect& logicalRect);
 
@@ -169,7 +169,7 @@ public:
     void addContinuationWithOutline(RenderInline*);
     bool paintsContinuationOutline(RenderInline*);
 
-    virtual RenderBoxModelObject* virtualContinuation() const OVERRIDE FINAL { return continuation(); }
+    virtual RenderBoxModelObject* virtualContinuation() const override final { return continuation(); }
     bool isAnonymousBlockContinuation() const { return continuation() && isAnonymousBlock(); }
     RenderInline* inlineElementContinuation() const;
     RenderBlock* blockElementContinuation() const;
@@ -180,7 +180,7 @@ public:
     static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = BLOCK);
     RenderBlock* createAnonymousBlock(EDisplay display = BLOCK) const { return createAnonymousWithParentRendererAndDisplay(this, display); }
 
-    virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const OVERRIDE;
+    virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const override;
 
     // Accessors for logical width/height and margins in the containing block's block-flow direction.
     LayoutUnit logicalWidthForChild(const RenderBox* child) const { return isHorizontalWritingMode() ? child->width() : child->height(); }
@@ -198,7 +198,7 @@ public:
     LayoutUnit collapsedMarginBeforeForChild(const RenderBox* child) const;
     LayoutUnit collapsedMarginAfterForChild(const RenderBox* child) const;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) OVERRIDE;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
 
     virtual void scrollbarsChanged(bool /*horizontalScrollbarChanged*/, bool /*verticalScrollbarChanged*/) { }
 
@@ -224,12 +224,12 @@ public:
     bool recalcOverflowAfterStyleChange();
 
 protected:
-    virtual void willBeDestroyed() OVERRIDE;
+    virtual void willBeDestroyed() override;
 
     void dirtyForLayoutFromPercentageHeightDescendants(SubtreeLayoutScope&);
 
-    virtual void layout() OVERRIDE;
-    virtual bool updateImageLoadingPriorities() OVERRIDE FINAL;
+    virtual void layout() override;
+    virtual bool updateImageLoadingPriorities() override final;
 
     enum PositionedLayoutBehavior {
         DefaultLayout,
@@ -244,22 +244,22 @@ protected:
 
     int beforeMarginInLineDirection(LineDirectionMode) const;
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) OVERRIDE;
-    virtual void paintObject(PaintInfo&, const LayoutPoint&) OVERRIDE;
+    virtual void paint(PaintInfo&, const LayoutPoint&) override;
+    virtual void paintObject(PaintInfo&, const LayoutPoint&) override;
     virtual void paintChildren(PaintInfo&, const LayoutPoint&);
     void paintChild(RenderBox*, PaintInfo&, const LayoutPoint&);
     void paintChildAsInlineBlock(RenderBox*, PaintInfo&, const LayoutPoint&);
 
     virtual void adjustInlineDirectionLineBounds(unsigned /* expansionOpportunityCount */, float& /* logicalLeft */, float& /* logicalWidth */) const { }
 
-    virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const OVERRIDE;
-    virtual void computePreferredLogicalWidths() OVERRIDE;
+    virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override;
+    virtual void computePreferredLogicalWidths() override;
 
-    virtual int firstLineBoxBaseline() const OVERRIDE;
-    virtual int inlineBlockBaseline(LineDirectionMode) const OVERRIDE;
+    virtual int firstLineBoxBaseline() const override;
+    virtual int inlineBlockBaseline(LineDirectionMode) const override;
     int lastLineBoxBaseline(LineDirectionMode) const;
 
-    virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) OVERRIDE;
+    virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
 
     // Delay update scrollbar until finishDelayUpdateScrollInfo() will be
     // called. This function is used when a flexbox is laying out its
@@ -271,8 +271,8 @@ protected:
 
     void updateScrollInfoAfterLayout();
 
-    virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) OVERRIDE;
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) OVERRIDE;
+    virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
+    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
 
     virtual bool hasLineIfEmpty() const;
 
@@ -286,37 +286,37 @@ protected:
     void addOverflowFromPositionedObjects();
     void addOverflowFromBlockChildren();
 
-    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const OVERRIDE;
+    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override;
 
-    virtual void computeSelfHitTestRects(Vector<LayoutRect>&, const LayoutPoint& layerOffset) const OVERRIDE;
+    virtual void computeSelfHitTestRects(Vector<LayoutRect>&, const LayoutPoint& layerOffset) const override;
 
     void updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox*);
 
-    virtual bool isInlineBlock() const OVERRIDE FINAL { return isInline() && isReplaced(); }
+    virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }
 
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) OVERRIDE;
+    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
 
 private:
-    virtual RenderObjectChildList* virtualChildren() OVERRIDE FINAL { return children(); }
-    virtual const RenderObjectChildList* virtualChildren() const OVERRIDE FINAL { return children(); }
+    virtual RenderObjectChildList* virtualChildren() override final { return children(); }
+    virtual const RenderObjectChildList* virtualChildren() const override final { return children(); }
 
-    virtual const char* renderName() const OVERRIDE;
+    virtual const char* renderName() const override;
 
-    virtual bool isRenderBlock() const OVERRIDE FINAL { return true; }
+    virtual bool isRenderBlock() const override final { return true; }
 
     void makeChildrenNonInline(RenderObject* insertionPoint = 0);
     virtual void removeLeftoverAnonymousBlock(RenderBlock* child);
 
     static void collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* child);
 
-    virtual void dirtyLinesFromChangedChild(RenderObject* child) OVERRIDE FINAL { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
+    virtual void dirtyLinesFromChangedChild(RenderObject* child) override final { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
 
     void addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild);
-    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild) OVERRIDE;
+    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild) override;
 
     void addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild = 0);
 
-    virtual bool isSelfCollapsingBlock() const OVERRIDE;
+    virtual bool isSelfCollapsingBlock() const override;
 
     void insertIntoTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
@@ -331,7 +331,7 @@ private:
 
     bool hasCaret() const;
 
-    virtual bool avoidsFloats() const OVERRIDE { return true; }
+    virtual bool avoidsFloats() const override { return true; }
 
     bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
     // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
@@ -343,14 +343,14 @@ private:
 
     // Obtains the nearest enclosing block (including this block) that contributes a first-line style to our inline
     // children.
-    virtual RenderBlock* firstLineBlock() const OVERRIDE;
+    virtual RenderBlock* firstLineBlock() const override;
 
-    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const OVERRIDE FINAL;
+    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const override final;
 
-    virtual RenderObject* hoverAncestor() const OVERRIDE FINAL;
-    virtual void childBecameNonInline(RenderObject* child) OVERRIDE FINAL;
+    virtual RenderObject* hoverAncestor() const override final;
+    virtual void childBecameNonInline(RenderObject* child) override final;
 
-    virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool /*clipToVisibleContent*/) OVERRIDE FINAL
+    virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool /*clipToVisibleContent*/) override final
     {
         return selectionGapRectsForPaintInvalidation(paintInvalidationContainer);
     }
@@ -367,12 +367,12 @@ private:
     // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
     virtual void clipOutFloatingObjects(RenderBlock*, const PaintInfo*, const LayoutPoint&, const LayoutSize&) { };
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const OVERRIDE;
-    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const OVERRIDE;
+    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
+    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const override;
 
     void paintContinuationOutlines(PaintInfo&, const LayoutPoint&);
 
-    virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) OVERRIDE FINAL;
+    virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override final;
 
     void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
 

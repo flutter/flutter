@@ -42,7 +42,7 @@ class LocalFrame;
 class HTMLImportsController;
 class Settings;
 
-class DocumentInit FINAL {
+class DocumentInit final {
     STACK_ALLOCATED();
 public:
     explicit DocumentInit(const KURL& = KURL(), LocalFrame* = 0, WeakPtrWillBeRawPtr<Document> = nullptr, HTMLImportsController* = 0);

@@ -32,7 +32,7 @@
 
 namespace blink {
 
-class EXTFragDepth FINAL : public WebGLExtension, public ScriptWrappable {
+class EXTFragDepth final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<EXTFragDepth> create(WebGLRenderingContextBase*);
@@ -40,7 +40,7 @@ public:
     static const char* extensionName();
 
     virtual ~EXTFragDepth();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
 private:
     explicit EXTFragDepth(WebGLRenderingContextBase*);

@@ -48,9 +48,9 @@ private:
     TextCodecICU(const TextEncoding&);
     static PassOwnPtr<TextCodec> create(const TextEncoding&, const void*);
 
-    virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) OVERRIDE;
-    virtual CString encode(const UChar*, size_t length, UnencodableHandling) OVERRIDE;
-    virtual CString encode(const LChar*, size_t length, UnencodableHandling) OVERRIDE;
+    virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) override;
+    virtual CString encode(const UChar*, size_t length, UnencodableHandling) override;
+    virtual CString encode(const LChar*, size_t length, UnencodableHandling) override;
 
     template<typename CharType>
     CString encodeCommon(const CharType*, size_t length, UnencodableHandling);

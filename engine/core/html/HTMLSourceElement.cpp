@@ -45,17 +45,17 @@ static SourceEventSender& sourceErrorEventSender()
     return sharedErrorEventSender;
 }
 
-class HTMLSourceElement::Listener FINAL : public MediaQueryListListener {
+class HTMLSourceElement::Listener final : public MediaQueryListListener {
 public:
     explicit Listener(HTMLSourceElement* element) : m_element(element) { }
-    virtual void notifyMediaQueryChanged() OVERRIDE
+    virtual void notifyMediaQueryChanged() override
     {
         if (m_element)
             m_element->notifyMediaQueryChanged();
     }
 
     void clearElement() { m_element = nullptr; }
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_element);
         MediaQueryListListener::trace(visitor);

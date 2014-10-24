@@ -45,7 +45,7 @@ class ExecutionContext;
 class InputMethodController;
 class Node;
 
-class InputMethodContext FINAL : public NoBaseWillBeGarbageCollectedFinalized<InputMethodContext>, public EventTargetWithInlineData {
+class InputMethodContext final : public NoBaseWillBeGarbageCollectedFinalized<InputMethodContext>, public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(InputMethodContext);
 public:
@@ -68,14 +68,14 @@ public:
     int selectionEnd() const;
     const Vector<unsigned>& segments();
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual ExecutionContext* executionContext() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual ExecutionContext* executionContext() const override;
 
     void dispatchCandidateWindowShowEvent();
     void dispatchCandidateWindowUpdateEvent();
     void dispatchCandidateWindowHideEvent();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     InputMethodContext(HTMLElement*);
@@ -84,8 +84,8 @@ private:
     InputMethodController& inputMethodController() const;
 
 #if !ENABLE(OILPAN)
-    virtual void refEventTarget() OVERRIDE { ref(); }
-    virtual void derefEventTarget() OVERRIDE { deref(); }
+    virtual void refEventTarget() override { ref(); }
+    virtual void derefEventTarget() override { deref(); }
 #endif
 
     RawPtrWillBeMember<HTMLElement> m_element;

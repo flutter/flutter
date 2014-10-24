@@ -30,25 +30,25 @@ namespace blink {
 class RawResourceCallback;
 class RawResourceClient;
 
-class RawResource FINAL : public Resource {
+class RawResource final : public Resource {
 public:
     typedef RawResourceClient ClientType;
 
     RawResource(const ResourceRequest&, Type);
 
-    virtual bool canReuse(const ResourceRequest&) const OVERRIDE;
+    virtual bool canReuse(const ResourceRequest&) const override;
 
 private:
-    virtual void didAddClient(ResourceClient*) OVERRIDE;
-    virtual void appendData(const char*, int) OVERRIDE;
+    virtual void didAddClient(ResourceClient*) override;
+    virtual void appendData(const char*, int) override;
 
-    virtual bool shouldIgnoreHTTPStatusCodeErrors() const OVERRIDE { return true; }
+    virtual bool shouldIgnoreHTTPStatusCodeErrors() const override { return true; }
 
-    virtual void willSendRequest(ResourceRequest&, const ResourceResponse&) OVERRIDE;
-    virtual void updateRequest(const ResourceRequest&) OVERRIDE;
-    virtual void responseReceived(const ResourceResponse&) OVERRIDE;
-    virtual void didSendData(unsigned long long bytesSent, unsigned long long totalBytesToBeSent) OVERRIDE;
-    virtual void didDownloadData(int) OVERRIDE;
+    virtual void willSendRequest(ResourceRequest&, const ResourceResponse&) override;
+    virtual void updateRequest(const ResourceRequest&) override;
+    virtual void responseReceived(const ResourceResponse&) override;
+    virtual void didSendData(unsigned long long bytesSent, unsigned long long totalBytesToBeSent) override;
+    virtual void didDownloadData(int) override;
 };
 
 #if ENABLE(SECURITY_ASSERT)
@@ -68,7 +68,7 @@ class RawResourceClient : public ResourceClient {
 public:
     virtual ~RawResourceClient() { }
     static ResourceClientType expectedType() { return RawResourceType; }
-    virtual ResourceClientType resourceClientType() const OVERRIDE FINAL { return expectedType(); }
+    virtual ResourceClientType resourceClientType() const override final { return expectedType(); }
 
     virtual void dataSent(Resource*, unsigned long long /* bytesSent */, unsigned long long /* totalBytesToBeSent */) { }
     virtual void responseReceived(Resource*, const ResourceResponse&) { }

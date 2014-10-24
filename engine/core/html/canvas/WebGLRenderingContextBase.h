@@ -356,12 +356,12 @@ public:
     unsigned maxVertexAttribs() const { return m_maxVertexAttribs; }
 
     // ActiveDOMObject notifications
-    virtual bool hasPendingActivity() const OVERRIDE;
-    virtual void stop() OVERRIDE;
+    virtual bool hasPendingActivity() const override;
+    virtual void stop() override;
 
     void setSavingImage(bool isSaving) { m_savingImage = isSaving; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     class TextureUnitState {
         ALLOW_ONLY_INLINE_ALLOCATION();
@@ -397,11 +397,11 @@ protected:
 #endif
 
     // CanvasRenderingContext implementation.
-    virtual bool is3d() const OVERRIDE { return true; }
-    virtual bool isAccelerated() const OVERRIDE { return true; }
-    virtual void setIsHidden(bool) OVERRIDE;
-    virtual void paintRenderingResultsToCanvas() OVERRIDE;
-    virtual blink::WebLayer* platformLayer() const OVERRIDE;
+    virtual bool is3d() const override { return true; }
+    virtual bool isAccelerated() const override { return true; }
+    virtual void setIsHidden(bool) override;
+    virtual void paintRenderingResultsToCanvas() override;
+    virtual blink::WebLayer* platformLayer() const override;
 
     void addSharedObject(WebGLSharedObject*);
     void addContextObject(WebGLContextObject*);
@@ -615,7 +615,7 @@ protected:
     };
 
     template <typename T>
-    class TypedExtensionTracker FINAL : public ExtensionTracker {
+    class TypedExtensionTracker final : public ExtensionTracker {
     public:
         static PassOwnPtrWillBeRawPtr<TypedExtensionTracker<T> > create(RefPtrWillBeMember<T>& extensionField, ExtensionFlags flags, const char* const* prefixes)
         {
@@ -632,7 +632,7 @@ protected:
         }
 #endif
 
-        virtual PassRefPtrWillBeRawPtr<WebGLExtension> getExtension(WebGLRenderingContextBase* context) OVERRIDE
+        virtual PassRefPtrWillBeRawPtr<WebGLExtension> getExtension(WebGLRenderingContextBase* context) override
         {
             if (!m_extension) {
                 m_extension = T::create(context);
@@ -642,17 +642,17 @@ protected:
             return m_extension;
         }
 
-        virtual bool supported(WebGLRenderingContextBase* context) const OVERRIDE
+        virtual bool supported(WebGLRenderingContextBase* context) const override
         {
             return T::supported(context);
         }
 
-        virtual const char* extensionName() const OVERRIDE
+        virtual const char* extensionName() const override
         {
             return T::extensionName();
         }
 
-        virtual void loseExtension() OVERRIDE
+        virtual void loseExtension() override
         {
             if (m_extension) {
                 m_extension->lose(false);
@@ -661,7 +661,7 @@ protected:
             }
         }
 
-        virtual void trace(Visitor* visitor) OVERRIDE
+        virtual void trace(Visitor* visitor) override
         {
             visitor->trace(m_extension);
             ExtensionTracker::trace(visitor);
@@ -935,7 +935,7 @@ protected:
     void restoreCurrentFramebuffer();
     void restoreCurrentTexture2D();
 
-    virtual void multisamplingChanged(bool) OVERRIDE;
+    virtual void multisamplingChanged(bool) override;
 
     void findNewMaxNonDefaultTextureUnit();
 

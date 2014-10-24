@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class AnimatableLengthSize FINAL : public AnimatableValue {
+class AnimatableLengthSize final : public AnimatableValue {
 public:
     virtual ~AnimatableLengthSize() { }
     static PassRefPtrWillBeRawPtr<AnimatableLengthSize> create(PassRefPtrWillBeRawPtr<AnimatableValue> width, PassRefPtrWillBeRawPtr<AnimatableValue> height)
@@ -45,10 +45,10 @@ public:
     const AnimatableValue* width() const { return m_width.get(); }
     const AnimatableValue* height() const { return m_height.get(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     AnimatableLengthSize(PassRefPtrWillBeRawPtr<AnimatableValue> width, PassRefPtrWillBeRawPtr<AnimatableValue> height)
@@ -56,8 +56,8 @@ private:
         , m_height(height)
     {
     }
-    virtual AnimatableType type() const OVERRIDE { return TypeLengthSize; }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE;
+    virtual AnimatableType type() const override { return TypeLengthSize; }
+    virtual bool equalTo(const AnimatableValue*) const override;
 
     RefPtrWillBeMember<AnimatableValue> m_width;
     RefPtrWillBeMember<AnimatableValue> m_height;

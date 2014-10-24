@@ -40,7 +40,7 @@ namespace blink {
 
 class ExceptionState;
 
-class ImageData FINAL : public RefCountedWillBeGarbageCollectedFinalized<ImageData>, public ScriptWrappable {
+class ImageData final : public RefCountedWillBeGarbageCollectedFinalized<ImageData>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<ImageData> create(const IntSize&);
@@ -55,7 +55,7 @@ public:
 
     void trace(Visitor*) { }
 
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) OVERRIDE;
+    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 private:
     explicit ImageData(const IntSize&);

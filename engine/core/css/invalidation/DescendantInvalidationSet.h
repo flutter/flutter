@@ -45,7 +45,7 @@ class Element;
 
 // Tracks data to determine which elements of a DOM subtree need to have style
 // recalculated.
-class DescendantInvalidationSet FINAL : public RefCountedWillBeGarbageCollected<DescendantInvalidationSet> {
+class DescendantInvalidationSet final : public RefCountedWillBeGarbageCollected<DescendantInvalidationSet> {
 public:
     static PassRefPtrWillBeRawPtr<DescendantInvalidationSet> create()
     {

@@ -50,7 +50,7 @@ class InlineBox;
 class Node;
 class Range;
 
-class VisiblePosition FINAL {
+class VisiblePosition final {
     DISALLOW_ALLOCATION();
 public:
     // NOTE: UPSTREAM affinity will be used only if pos is at end of a wrapped line,

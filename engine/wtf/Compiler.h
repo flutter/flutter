@@ -206,13 +206,13 @@
 #define ALLOW_UNUSED
 #endif
 
-/* OVERRIDE and FINAL */
+/* override and FINAL */
 
 #if COMPILER_SUPPORTS(CXX_OVERRIDE_CONTROL)
-#define OVERRIDE override
+#define override override
 #define FINAL final
 #else
-#define OVERRIDE
+#define override
 #define FINAL
 #endif
 

@@ -49,7 +49,7 @@ namespace blink {
 static const int defaultFontSize = 10;
 static const char defaultFontFamily[] = "sans-serif";
 
-class LoadFontPromiseResolver FINAL : public FontFace::LoadFontCallback {
+class LoadFontPromiseResolver final : public FontFace::LoadFontCallback {
 public:
     static PassRefPtrWillBeRawPtr<LoadFontPromiseResolver> create(FontFaceArray faces, ScriptState* scriptState)
     {
@@ -59,10 +59,10 @@ public:
     void loadFonts(ExecutionContext*);
     ScriptPromise promise() { return m_resolver->promise(); }
 
-    virtual void notifyLoaded(FontFace*) OVERRIDE;
-    virtual void notifyError(FontFace*) OVERRIDE;
+    virtual void notifyLoaded(FontFace*) override;
+    virtual void notifyError(FontFace*) override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     LoadFontPromiseResolver(FontFaceArray faces, ScriptState* scriptState)

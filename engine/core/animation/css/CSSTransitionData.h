@@ -11,7 +11,7 @@
 
 namespace blink {
 
-class CSSTransitionData FINAL : public CSSTimingData {
+class CSSTransitionData final : public CSSTimingData {
 public:
     enum TransitionPropertyType {
         TransitionNone,

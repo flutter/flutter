@@ -45,7 +45,7 @@ public:
 
 private:
     CustomElementAsyncImportMicrotaskQueue() { }
-    virtual void doDispatch() OVERRIDE;
+    virtual void doDispatch() override;
 };
 
 }

@@ -49,7 +49,7 @@ enum RegionTrackingMode {
 
 // This class is an encapsulation of functionality for GraphicsContext, and its methods are mirrored
 // there for the outside world. It tracks paints and computes what area will be opaque.
-class PLATFORM_EXPORT RegionTracker FINAL {
+class PLATFORM_EXPORT RegionTracker final {
 public:
     RegionTracker();
 

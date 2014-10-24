@@ -32,21 +32,21 @@ namespace blink {
 
 class HTMLCanvasElement;
 
-class RenderHTMLCanvas FINAL : public RenderReplaced {
+class RenderHTMLCanvas final : public RenderReplaced {
 public:
     explicit RenderHTMLCanvas(HTMLCanvasElement*);
 
-    virtual bool isCanvas() const OVERRIDE { return true; }
-    virtual LayerType layerTypeRequired() const OVERRIDE;
+    virtual bool isCanvas() const override { return true; }
+    virtual LayerType layerTypeRequired() const override;
 
     void canvasSizeChanged();
 
 private:
-    virtual const char* renderName() const OVERRIDE { return "RenderHTMLCanvas"; }
-    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) OVERRIDE;
-    virtual void intrinsicSizeChanged() OVERRIDE { canvasSizeChanged(); }
+    virtual const char* renderName() const override { return "RenderHTMLCanvas"; }
+    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
+    virtual void intrinsicSizeChanged() override { canvasSizeChanged(); }
 
-    virtual CompositingReasons additionalCompositingReasons() const OVERRIDE;
+    virtual CompositingReasons additionalCompositingReasons() const override;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderHTMLCanvas, isCanvas());

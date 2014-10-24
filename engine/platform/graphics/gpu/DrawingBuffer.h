@@ -151,8 +151,8 @@ public:
     WebGraphicsContext3D::Attributes getActualAttributes() const { return m_actualAttributes; }
 
     // WebExternalTextureLayerClient implementation.
-    virtual bool prepareMailbox(WebExternalTextureMailbox*, WebExternalBitmap*) OVERRIDE;
-    virtual void mailboxReleased(const WebExternalTextureMailbox&, bool lostResource = false) OVERRIDE;
+    virtual bool prepareMailbox(WebExternalTextureMailbox*, WebExternalBitmap*) override;
+    virtual void mailboxReleased(const WebExternalTextureMailbox&, bool lostResource = false) override;
 
     // Destroys the TEXTURE_2D binding for the owned context
     bool copyToPlatformTexture(WebGraphicsContext3D*, Platform3DObject texture, GLenum internalFormat,

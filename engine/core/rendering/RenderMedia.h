@@ -36,7 +36,7 @@ class RenderMedia : public RenderImage {
 public:
     explicit RenderMedia(HTMLMediaElement*);
     virtual ~RenderMedia();
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
     RenderObject* firstChild() const { ASSERT(children() == virtualChildren()); return children()->firstChild(); }
     RenderObject* lastChild() const { ASSERT(children() == virtualChildren()); return children()->lastChild(); }
@@ -51,20 +51,20 @@ public:
     HTMLMediaElement* mediaElement() const;
 
 private:
-    virtual RenderObjectChildList* virtualChildren() OVERRIDE FINAL { return children(); }
-    virtual const RenderObjectChildList* virtualChildren() const OVERRIDE FINAL { return children(); }
+    virtual RenderObjectChildList* virtualChildren() override final { return children(); }
+    virtual const RenderObjectChildList* virtualChildren() const override final { return children(); }
 
-    virtual LayerType layerTypeRequired() const OVERRIDE { return NormalLayer; }
+    virtual LayerType layerTypeRequired() const override { return NormalLayer; }
 
     // FIXME: RenderMedia::layout makes assumptions about what children are allowed
     // so we can't support generated content.
-    virtual bool canHaveGeneratedChildren() const OVERRIDE FINAL { return false; }
-    virtual bool canHaveChildren() const OVERRIDE FINAL { return true; }
+    virtual bool canHaveGeneratedChildren() const override final { return false; }
+    virtual bool canHaveChildren() const override final { return true; }
 
-    virtual const char* renderName() const OVERRIDE { return "RenderMedia"; }
-    virtual bool isMedia() const OVERRIDE FINAL { return true; }
-    virtual bool isImage() const OVERRIDE FINAL { return false; }
-    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) OVERRIDE;
+    virtual const char* renderName() const override { return "RenderMedia"; }
+    virtual bool isMedia() const override final { return true; }
+    virtual bool isImage() const override final { return false; }
+    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
 
     RenderObjectChildList m_children;
 };

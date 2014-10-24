@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class AnimatableDouble FINAL : public AnimatableValue {
+class AnimatableDouble final : public AnimatableValue {
 public:
     virtual ~AnimatableDouble() { }
 
@@ -51,11 +51,11 @@ public:
 
     double toDouble() const { return m_number; }
 
-    virtual void trace(Visitor* visitor) OVERRIDE { AnimatableValue::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const OVERRIDE;
-    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const OVERRIDE;
+    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;
 
 private:
     AnimatableDouble(double number, Constraint constraint)
@@ -63,9 +63,9 @@ private:
         , m_constraint(constraint)
     {
     }
-    virtual AnimatableType type() const OVERRIDE { return TypeDouble; }
-    virtual bool equalTo(const AnimatableValue*) const OVERRIDE;
-    virtual double distanceTo(const AnimatableValue*) const OVERRIDE;
+    virtual AnimatableType type() const override { return TypeDouble; }
+    virtual bool equalTo(const AnimatableValue*) const override;
+    virtual double distanceTo(const AnimatableValue*) const override;
 
     double m_number;
     Constraint m_constraint;

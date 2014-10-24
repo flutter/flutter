@@ -69,7 +69,7 @@ private:
     Type m_type;
 };
 
-class PLATFORM_EXPORT LinearTimingFunction FINAL : public TimingFunction {
+class PLATFORM_EXPORT LinearTimingFunction final : public TimingFunction {
 public:
     static LinearTimingFunction* shared()
     {
@@ -79,11 +79,11 @@ public:
 
     virtual ~LinearTimingFunction() { }
 
-    virtual String toString() const OVERRIDE;
+    virtual String toString() const override;
 
-    virtual double evaluate(double fraction, double) const OVERRIDE;
+    virtual double evaluate(double fraction, double) const override;
 
-    virtual void range(double* minValue, double* maxValue) const OVERRIDE;
+    virtual void range(double* minValue, double* maxValue) const override;
 private:
     LinearTimingFunction()
         : TimingFunction(LinearFunction)
@@ -91,7 +91,7 @@ private:
     }
 };
 
-class PLATFORM_EXPORT CubicBezierTimingFunction FINAL : public TimingFunction {
+class PLATFORM_EXPORT CubicBezierTimingFunction final : public TimingFunction {
 public:
     enum SubType {
         Ease,
@@ -137,10 +137,10 @@ public:
 
     virtual ~CubicBezierTimingFunction() { }
 
-    virtual String toString() const OVERRIDE;
+    virtual String toString() const override;
 
-    virtual double evaluate(double fraction, double accuracy) const OVERRIDE;
-    virtual void range(double* minValue, double* maxValue) const OVERRIDE;
+    virtual double evaluate(double fraction, double accuracy) const override;
+    virtual void range(double* minValue, double* maxValue) const override;
 
     double x1() const { return m_x1; }
     double y1() const { return m_y1; }
@@ -168,7 +168,7 @@ private:
     mutable OwnPtr<UnitBezier> m_bezier;
 };
 
-class PLATFORM_EXPORT StepsTimingFunction FINAL : public TimingFunction {
+class PLATFORM_EXPORT StepsTimingFunction final : public TimingFunction {
 public:
     enum SubType {
         Start,
@@ -215,11 +215,11 @@ public:
 
     virtual ~StepsTimingFunction() { }
 
-    virtual String toString() const OVERRIDE;
+    virtual String toString() const override;
 
-    virtual double evaluate(double fraction, double) const OVERRIDE;
+    virtual double evaluate(double fraction, double) const override;
 
-    virtual void range(double* minValue, double* maxValue) const OVERRIDE;
+    virtual void range(double* minValue, double* maxValue) const override;
     int numberOfSteps() const { return m_steps; }
     StepAtPosition stepAtPosition() const { return m_stepAtPosition; }
 

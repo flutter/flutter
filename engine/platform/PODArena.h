@@ -42,7 +42,7 @@ namespace blink {
 // the objects allocated in this arena are called, but _not_ their
 // destructors.
 
-class PODArena FINAL : public RefCounted<PODArena> {
+class PODArena final : public RefCounted<PODArena> {
 public:
     // The arena is configured with an allocator, which is responsible
     // for allocating and freeing chunks of memory at a time.
@@ -64,8 +64,8 @@ public:
             return adoptRef(new FastMallocAllocator);
         }
 
-        virtual void* allocate(size_t size) OVERRIDE { return fastMalloc(size); }
-        virtual void free(void* ptr) OVERRIDE { fastFree(ptr); }
+        virtual void* allocate(size_t size) override { return fastMalloc(size); }
+        virtual void free(void* ptr) override { fastFree(ptr); }
 
     protected:
         FastMallocAllocator() { }
@@ -146,7 +146,7 @@ protected:
     }
 
     // Manages a chunk of memory and individual allocations out of it.
-    class Chunk FINAL {
+    class Chunk final {
         WTF_MAKE_NONCOPYABLE(Chunk);
     public:
         // Allocates a block of memory of the given size from the passed

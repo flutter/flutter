@@ -49,27 +49,27 @@ public:
     static PassOwnPtr<LocaleICU> create(const char* localeString);
     virtual ~LocaleICU();
 
-    virtual const Vector<String>& weekDayShortLabels() OVERRIDE;
-    virtual unsigned firstDayOfWeek() OVERRIDE;
-    virtual bool isRTL() OVERRIDE;
-    virtual String dateFormat() OVERRIDE;
-    virtual String monthFormat() OVERRIDE;
-    virtual String shortMonthFormat() OVERRIDE;
-    virtual String timeFormat() OVERRIDE;
-    virtual String shortTimeFormat() OVERRIDE;
-    virtual String dateTimeFormatWithSeconds() OVERRIDE;
-    virtual String dateTimeFormatWithoutSeconds() OVERRIDE;
-    virtual const Vector<String>& monthLabels() OVERRIDE;
-    virtual const Vector<String>& shortMonthLabels() OVERRIDE;
-    virtual const Vector<String>& standAloneMonthLabels() OVERRIDE;
-    virtual const Vector<String>& shortStandAloneMonthLabels() OVERRIDE;
-    virtual const Vector<String>& timeAMPMLabels() OVERRIDE;
+    virtual const Vector<String>& weekDayShortLabels() override;
+    virtual unsigned firstDayOfWeek() override;
+    virtual bool isRTL() override;
+    virtual String dateFormat() override;
+    virtual String monthFormat() override;
+    virtual String shortMonthFormat() override;
+    virtual String timeFormat() override;
+    virtual String shortTimeFormat() override;
+    virtual String dateTimeFormatWithSeconds() override;
+    virtual String dateTimeFormatWithoutSeconds() override;
+    virtual const Vector<String>& monthLabels() override;
+    virtual const Vector<String>& shortMonthLabels() override;
+    virtual const Vector<String>& standAloneMonthLabels() override;
+    virtual const Vector<String>& shortStandAloneMonthLabels() override;
+    virtual const Vector<String>& timeAMPMLabels() override;
 
 private:
     explicit LocaleICU(const char*);
     String decimalSymbol(UNumberFormatSymbol);
     String decimalTextAttribute(UNumberFormatTextAttribute);
-    virtual void initializeLocaleData() OVERRIDE;
+    virtual void initializeLocaleData() override;
 
     bool detectSignAndGetDigitRange(const String& input, bool& isNegative, unsigned& startIndex, unsigned& endIndex);
     unsigned matchedDecimalSymbolIndex(const String& input, unsigned& position);

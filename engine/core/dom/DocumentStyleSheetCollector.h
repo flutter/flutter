@@ -63,14 +63,14 @@ private:
     WillBeHeapHashSet<RawPtrWillBeMember<Document> >& m_visitedDocuments;
 };
 
-class ActiveDocumentStyleSheetCollector FINAL : public DocumentStyleSheetCollector {
+class ActiveDocumentStyleSheetCollector final : public DocumentStyleSheetCollector {
 public:
     ActiveDocumentStyleSheetCollector(StyleSheetCollection&);
 private:
     WillBeHeapHashSet<RawPtrWillBeMember<Document> > m_visitedDocuments;
 };
 
-class ImportedDocumentStyleSheetCollector FINAL : public DocumentStyleSheetCollector {
+class ImportedDocumentStyleSheetCollector final : public DocumentStyleSheetCollector {
 public:
     ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector&, WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >&);
 };

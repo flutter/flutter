@@ -34,7 +34,7 @@ class ImageResourceClient : public ResourceClient {
 public:
     virtual ~ImageResourceClient() { }
     static ResourceClientType expectedType() { return ImageType; }
-    virtual ResourceClientType resourceClientType() const OVERRIDE FINAL { return expectedType(); }
+    virtual ResourceClientType resourceClientType() const override final { return expectedType(); }
 
     // Called whenever a frame of an image changes, either because we got more data from the network or
     // because we are animating. If not null, the IntRect is the changed rect of the image.

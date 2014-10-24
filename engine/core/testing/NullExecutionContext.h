@@ -13,12 +13,12 @@
 
 namespace blink {
 
-class NullExecutionContext FINAL : public RefCountedWillBeGarbageCollectedFinalized<NullExecutionContext>, public ExecutionContext {
+class NullExecutionContext final : public RefCountedWillBeGarbageCollectedFinalized<NullExecutionContext>, public ExecutionContext {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(NullExecutionContext);
 public:
     NullExecutionContext();
 
-    virtual EventQueue* eventQueue() const OVERRIDE { return m_queue.get(); }
+    virtual EventQueue* eventQueue() const override { return m_queue.get(); }
 
     void trace(Visitor* visitor)
     {
@@ -26,19 +26,19 @@ public:
         ExecutionContext::trace(visitor);
     }
 
-    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) OVERRIDE { }
+    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) override { }
 
 #if !ENABLE(OILPAN)
     using RefCounted<NullExecutionContext>::ref;
     using RefCounted<NullExecutionContext>::deref;
 
-    virtual void refExecutionContext() OVERRIDE { ref(); }
-    virtual void derefExecutionContext() OVERRIDE { deref(); }
+    virtual void refExecutionContext() override { ref(); }
+    virtual void derefExecutionContext() override { deref(); }
 #endif
 
 protected:
-    virtual const KURL& virtualURL() const OVERRIDE { return m_dummyURL; }
-    virtual KURL virtualCompleteURL(const String&) const OVERRIDE { return m_dummyURL; }
+    virtual const KURL& virtualURL() const override { return m_dummyURL; }
+    virtual KURL virtualCompleteURL(const String&) const override { return m_dummyURL; }
 
 private:
     OwnPtrWillBeMember<EventQueue> m_queue;

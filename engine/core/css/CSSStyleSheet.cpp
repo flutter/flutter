@@ -38,14 +38,14 @@
 
 namespace blink {
 
-class StyleSheetCSSRuleList FINAL : public CSSRuleList {
+class StyleSheetCSSRuleList final : public CSSRuleList {
 public:
     static PassOwnPtrWillBeRawPtr<StyleSheetCSSRuleList> create(CSSStyleSheet* sheet)
     {
         return adoptPtrWillBeNoop(new StyleSheetCSSRuleList(sheet));
     }
 
-    virtual void trace(Visitor* visitor) OVERRIDE
+    virtual void trace(Visitor* visitor) override
     {
         visitor->trace(m_styleSheet);
         CSSRuleList::trace(visitor);
@@ -55,14 +55,14 @@ private:
     StyleSheetCSSRuleList(CSSStyleSheet* sheet) : m_styleSheet(sheet) { }
 
 #if !ENABLE(OILPAN)
-    virtual void ref() OVERRIDE { m_styleSheet->ref(); }
-    virtual void deref() OVERRIDE { m_styleSheet->deref(); }
+    virtual void ref() override { m_styleSheet->ref(); }
+    virtual void deref() override { m_styleSheet->deref(); }
 #endif
 
-    virtual unsigned length() const OVERRIDE { return m_styleSheet->length(); }
-    virtual CSSRule* item(unsigned index) const OVERRIDE { return m_styleSheet->item(index); }
+    virtual unsigned length() const override { return m_styleSheet->length(); }
+    virtual CSSRule* item(unsigned index) const override { return m_styleSheet->item(index); }
 
-    virtual CSSStyleSheet* styleSheet() const OVERRIDE { return m_styleSheet; }
+    virtual CSSStyleSheet* styleSheet() const override { return m_styleSheet; }
 
     RawPtrWillBeMember<CSSStyleSheet> m_styleSheet;
 };

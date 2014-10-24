@@ -61,7 +61,7 @@ class ResourceLoaderSet;
 // RefPtr<ResourceFetcher> for their lifetime (and will create one if they
 // are initialized without a LocalFrame), so a Document can keep a ResourceFetcher
 // alive past detach if scripts still reference the Document.
-class ResourceFetcher FINAL : public RefCountedWillBeGarbageCollectedFinalized<ResourceFetcher>, public ResourceLoaderHost {
+class ResourceFetcher final : public RefCountedWillBeGarbageCollectedFinalized<ResourceFetcher>, public ResourceLoaderHost {
     WTF_MAKE_NONCOPYABLE(ResourceFetcher); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ResourceFetcher);
 friend class ImageLoader;
@@ -115,25 +115,25 @@ public:
     bool isFetching() const;
 
     // ResourceLoaderHost
-    virtual void incrementRequestCount(const Resource*) OVERRIDE;
-    virtual void decrementRequestCount(const Resource*) OVERRIDE;
-    virtual void didLoadResource(Resource*) OVERRIDE;
-    virtual void didFinishLoading(const Resource*, double finishTime, int64_t encodedDataLength) OVERRIDE;
-    virtual void didChangeLoadingPriority(const Resource*, ResourceLoadPriority, int intraPriorityValue) OVERRIDE;
-    virtual void didFailLoading(const Resource*, const ResourceError&) OVERRIDE;
-    virtual void willSendRequest(unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse, const FetchInitiatorInfo&) OVERRIDE;
-    virtual void didReceiveResponse(const Resource*, const ResourceResponse&) OVERRIDE;
-    virtual void didReceiveData(const Resource*, const char* data, int dataLength, int encodedDataLength) OVERRIDE;
-    virtual void didDownloadData(const Resource*, int dataLength, int encodedDataLength) OVERRIDE;
-    virtual void subresourceLoaderFinishedLoadingOnePart(ResourceLoader*) OVERRIDE;
-    virtual void didInitializeResourceLoader(ResourceLoader*) OVERRIDE;
-    virtual void willTerminateResourceLoader(ResourceLoader*) OVERRIDE;
-    virtual void willStartLoadingResource(Resource*, ResourceRequest&) OVERRIDE;
-    virtual bool isLoadedBy(ResourceLoaderHost*) const OVERRIDE;
+    virtual void incrementRequestCount(const Resource*) override;
+    virtual void decrementRequestCount(const Resource*) override;
+    virtual void didLoadResource(Resource*) override;
+    virtual void didFinishLoading(const Resource*, double finishTime, int64_t encodedDataLength) override;
+    virtual void didChangeLoadingPriority(const Resource*, ResourceLoadPriority, int intraPriorityValue) override;
+    virtual void didFailLoading(const Resource*, const ResourceError&) override;
+    virtual void willSendRequest(unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse, const FetchInitiatorInfo&) override;
+    virtual void didReceiveResponse(const Resource*, const ResourceResponse&) override;
+    virtual void didReceiveData(const Resource*, const char* data, int dataLength, int encodedDataLength) override;
+    virtual void didDownloadData(const Resource*, int dataLength, int encodedDataLength) override;
+    virtual void subresourceLoaderFinishedLoadingOnePart(ResourceLoader*) override;
+    virtual void didInitializeResourceLoader(ResourceLoader*) override;
+    virtual void willTerminateResourceLoader(ResourceLoader*) override;
+    virtual void willStartLoadingResource(Resource*, ResourceRequest&) override;
+    virtual bool isLoadedBy(ResourceLoaderHost*) const override;
 
 #if !ENABLE(OILPAN)
-    virtual void refResourceLoaderHost() OVERRIDE;
-    virtual void derefResourceLoaderHost() OVERRIDE;
+    virtual void refResourceLoaderHost() override;
+    virtual void derefResourceLoaderHost() override;
 #endif
 
     enum ResourceLoadStartType {

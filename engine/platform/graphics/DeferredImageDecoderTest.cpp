@@ -68,7 +68,7 @@ struct Rasterizer {
 
 class DeferredImageDecoderTest : public ::testing::Test, public MockImageDecoderClient {
 public:
-    virtual void SetUp() OVERRIDE
+    virtual void SetUp() override
     {
         ImageDecodingStore::instance()->setCacheLimitInBytes(1024 * 1024);
         DeferredImageDecoder::setEnabled(true);
@@ -87,42 +87,42 @@ public:
         m_decodedSize = m_actualDecoder->size();
     }
 
-    virtual void TearDown() OVERRIDE
+    virtual void TearDown() override
     {
         ImageDecodingStore::instance()->clear();
     }
 
-    virtual void decoderBeingDestroyed() OVERRIDE
+    virtual void decoderBeingDestroyed() override
     {
         m_actualDecoder = 0;
     }
 
-    virtual void frameBufferRequested() OVERRIDE
+    virtual void frameBufferRequested() override
     {
         ++m_frameBufferRequestCount;
     }
 
-    virtual size_t frameCount() OVERRIDE
+    virtual size_t frameCount() override
     {
         return m_frameCount;
     }
 
-    virtual int repetitionCount() const OVERRIDE
+    virtual int repetitionCount() const override
     {
         return m_repetitionCount;
     }
 
-    virtual ImageFrame::Status status() OVERRIDE
+    virtual ImageFrame::Status status() override
     {
         return m_status;
     }
 
-    virtual float frameDuration() const OVERRIDE
+    virtual float frameDuration() const override
     {
         return m_frameDuration;
     }
 
-    virtual IntSize decodedSize() const OVERRIDE
+    virtual IntSize decodedSize() const override
     {
         return m_decodedSize;
     }

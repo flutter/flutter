@@ -43,7 +43,7 @@ enum StyleSheetUpdateType {
     EntireStyleSheetUpdate
 };
 
-class CSSStyleSheet FINAL : public StyleSheet {
+class CSSStyleSheet final : public StyleSheet {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<CSSStyleSheet> create(PassRefPtrWillBeRawPtr<StyleSheetContents>);
@@ -52,8 +52,8 @@ public:
 
     virtual ~CSSStyleSheet();
 
-    virtual Node* ownerNode() const OVERRIDE { return m_ownerNode; }
-    virtual MediaList* media() const OVERRIDE;
+    virtual Node* ownerNode() const override { return m_ownerNode; }
+    virtual MediaList* media() const override;
 
     PassRefPtrWillBeRawPtr<CSSRuleList> cssRules();
     unsigned insertRule(const String& rule, unsigned index, ExceptionState&);
@@ -70,9 +70,9 @@ public:
     unsigned length() const;
     CSSRule* item(unsigned index);
 
-    virtual void clearOwnerNode() OVERRIDE;
+    virtual void clearOwnerNode() override;
 
-    virtual KURL baseURL() const OVERRIDE;
+    virtual KURL baseURL() const override;
 
     Document* ownerDocument() const;
     MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
@@ -101,14 +101,14 @@ public:
     bool isInline() const { return m_isInlineStylesheet; }
     TextPosition startPositionInSource() const { return m_startPosition; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     CSSStyleSheet(PassRefPtrWillBeRawPtr<StyleSheetContents>);
     CSSStyleSheet(PassRefPtrWillBeRawPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);
 
-    virtual bool isCSSStyleSheet() const OVERRIDE { return true; }
-    virtual String type() const OVERRIDE { return "text/css"; }
+    virtual bool isCSSStyleSheet() const override { return true; }
+    virtual String type() const override { return "text/css"; }
 
     void reattachChildRuleCSSOMWrappers();
 

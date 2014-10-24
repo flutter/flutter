@@ -119,7 +119,7 @@ private:
 // the parser during page load for elements that have identical attributes. This
 // is a memory optimization since it's very common for many elements to have
 // duplicate sets of attributes (ex. the same classes).
-class ShareableElementData FINAL : public ElementData {
+class ShareableElementData final : public ElementData {
 public:
     static PassRefPtrWillBeRawPtr<ShareableElementData> createWithAttributes(const Vector<Attribute>&);
 
@@ -156,7 +156,7 @@ DEFINE_ELEMENT_DATA_TYPE_CASTS(ShareableElementData, !data->isUnique(), !data.is
 // attributes. For example populating the m_inlineStyle from the style attribute
 // doesn't require a UniqueElementData as all elements with the same style
 // attribute will have the same inline style.
-class UniqueElementData FINAL : public ElementData {
+class UniqueElementData final : public ElementData {
 public:
     static PassRefPtrWillBeRawPtr<UniqueElementData> create();
     PassRefPtrWillBeRawPtr<ShareableElementData> makeShareableCopy() const;

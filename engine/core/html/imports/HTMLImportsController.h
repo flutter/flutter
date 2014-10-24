@@ -51,7 +51,7 @@ class HTMLImportChildClient;
 class HTMLImportLoader;
 class HTMLImportTreeRoot;
 
-class HTMLImportsController FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportsController>, public DocumentSupplement {
+class HTMLImportsController final : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportsController>, public DocumentSupplement {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLImportsController);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:

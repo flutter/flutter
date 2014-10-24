@@ -44,7 +44,7 @@ namespace blink {
 class Color;
 class FloatSize;
 
-class PLATFORM_EXPORT DrawLooperBuilder FINAL {
+class PLATFORM_EXPORT DrawLooperBuilder final {
     // Implementing the copy constructor properly would require writing code to
     // copy the underlying SkLayerDrawLooper::Builder.
     WTF_MAKE_NONCOPYABLE(DrawLooperBuilder);

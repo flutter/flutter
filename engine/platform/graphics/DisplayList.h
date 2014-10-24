@@ -45,7 +45,7 @@ namespace blink {
 
 class IntSize;
 
-class PLATFORM_EXPORT DisplayList FINAL : public WTF::RefCounted<DisplayList> {
+class PLATFORM_EXPORT DisplayList final : public WTF::RefCounted<DisplayList> {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(DisplayList);
 public:

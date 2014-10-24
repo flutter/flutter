@@ -130,7 +130,7 @@ public:
     Glyph zeroGlyph() const { return m_zeroGlyph; }
     void setZeroGlyph(Glyph zeroGlyph) { m_zeroGlyph = zeroGlyph; }
 
-    virtual const SimpleFontData* fontDataForCharacter(UChar32) const OVERRIDE;
+    virtual const SimpleFontData* fontDataForCharacter(UChar32) const override;
 
     Glyph glyphForCharacter(UChar32) const;
 
@@ -138,17 +138,17 @@ public:
     Pitch pitch() const { return m_treatAsFixedPitch ? FixedPitch : VariablePitch; }
 
     bool isSVGFont() const { return m_customFontData && m_customFontData->isSVGFont(); }
-    virtual bool isCustomFont() const OVERRIDE { return m_customFontData; }
-    virtual bool isLoading() const OVERRIDE { return m_customFontData ? m_customFontData->isLoading() : false; }
-    virtual bool isLoadingFallback() const OVERRIDE { return m_customFontData ? m_customFontData->isLoadingFallback() : false; }
-    virtual bool isSegmented() const OVERRIDE;
-    virtual bool shouldSkipDrawing() const OVERRIDE { return m_customFontData && m_customFontData->shouldSkipDrawing(); }
+    virtual bool isCustomFont() const override { return m_customFontData; }
+    virtual bool isLoading() const override { return m_customFontData ? m_customFontData->isLoading() : false; }
+    virtual bool isLoadingFallback() const override { return m_customFontData ? m_customFontData->isLoadingFallback() : false; }
+    virtual bool isSegmented() const override;
+    virtual bool shouldSkipDrawing() const override { return m_customFontData && m_customFontData->shouldSkipDrawing(); }
 
     const GlyphData& missingGlyphData() const { return m_missingGlyphData; }
     void setMissingGlyphData(const GlyphData& glyphData) { m_missingGlyphData = glyphData; }
 
 #ifndef NDEBUG
-    virtual String description() const OVERRIDE;
+    virtual String description() const override;
 #endif
 
 #if OS(MACOSX)

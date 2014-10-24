@@ -41,7 +41,7 @@ class LinkImport;
 template<typename T> class EventSender;
 typedef EventSender<HTMLLinkElement> LinkEventSender;
 
-class HTMLLinkElement FINAL : public HTMLElement {
+class HTMLLinkElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<HTMLLinkElement> create(Document&, bool createdByParser);
@@ -82,10 +82,10 @@ public:
     // visible for testing purpose.
     static void parseSizesAttribute(const AtomicString& value, Vector<IntSize>& iconSizes);
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
-    virtual void parseAttribute(const QualifiedName&, const AtomicString&) OVERRIDE;
+    virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
 
     LinkImport* linkImport() const;
     LinkResource* linkResourceToProcess();
@@ -94,12 +94,12 @@ private:
     static void processCallback(Node*);
 
     // From Node and subclassses
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) OVERRIDE;
-    virtual void removedFrom(ContainerNode*) OVERRIDE;
-    virtual bool isURLAttribute(const Attribute&) const OVERRIDE;
-    virtual bool hasLegalLinkAttribute(const QualifiedName&) const OVERRIDE;
-    virtual const QualifiedName& subResourceAttributeName() const OVERRIDE;
-    virtual void finishParsingChildren() OVERRIDE;
+    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void removedFrom(ContainerNode*) override;
+    virtual bool isURLAttribute(const Attribute&) const override;
+    virtual bool hasLegalLinkAttribute(const QualifiedName&) const override;
+    virtual const QualifiedName& subResourceAttributeName() const override;
+    virtual void finishParsingChildren() override;
 
 private:
     HTMLLinkElement(Document&, bool createdByParser);

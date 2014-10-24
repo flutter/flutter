@@ -34,12 +34,12 @@ public:
 
     static const AtomicString& effectName();
 
-    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) OVERRIDE;
+    virtual FloatRect determineAbsolutePaintRect(const FloatRect& requestedRect) override;
 
-    virtual FilterEffectType filterEffectType() const OVERRIDE { return FilterEffectTypeSourceInput; }
+    virtual FilterEffectType filterEffectType() const override { return FilterEffectTypeSourceInput; }
 
-    virtual TextStream& externalRepresentation(TextStream&, int indention) const OVERRIDE;
-    PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) OVERRIDE;
+    virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
+    PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
     void setDisplayList(PassRefPtr<DisplayList>);
 
@@ -51,7 +51,7 @@ private:
         setOperatingColorSpace(ColorSpaceDeviceRGB);
     }
 
-    virtual void applySoftware() OVERRIDE;
+    virtual void applySoftware() override;
     RefPtr<DisplayList> m_displayList;
 };
 

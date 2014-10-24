@@ -50,40 +50,40 @@ public:
 
     // FrameLoaderClient ----------------------------------------------
 
-    virtual void documentElementAvailable() OVERRIDE;
+    virtual void documentElementAvailable() override;
 
-    virtual void didCreateScriptContext(v8::Handle<v8::Context>, int extensionGroup, int worldId) OVERRIDE;
-    virtual void willReleaseScriptContext(v8::Handle<v8::Context>, int worldId) OVERRIDE;
+    virtual void didCreateScriptContext(v8::Handle<v8::Context>, int extensionGroup, int worldId) override;
+    virtual void willReleaseScriptContext(v8::Handle<v8::Context>, int worldId) override;
 
-    virtual void detachedFromParent() OVERRIDE;
-    virtual void dispatchWillSendRequest(Document*, unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse) OVERRIDE;
-    virtual void dispatchDidReceiveResponse(Document*, unsigned long identifier, const ResourceResponse&) OVERRIDE;
-    virtual void dispatchDidChangeResourcePriority(unsigned long identifier, ResourceLoadPriority, int intraPriorityValue) OVERRIDE;
-    virtual void dispatchDidFinishLoading(Document*, unsigned long identifier) OVERRIDE;
-    virtual void dispatchDidLoadResourceFromMemoryCache(const ResourceRequest&, const ResourceResponse&) OVERRIDE;
-    virtual void dispatchDidHandleOnloadEvents() OVERRIDE;
-    virtual void dispatchWillClose() OVERRIDE;
-    virtual void dispatchDidReceiveTitle(const String&) OVERRIDE;
-    virtual void dispatchDidFailLoad(const ResourceError&) OVERRIDE;
+    virtual void detachedFromParent() override;
+    virtual void dispatchWillSendRequest(Document*, unsigned long identifier, ResourceRequest&, const ResourceResponse& redirectResponse) override;
+    virtual void dispatchDidReceiveResponse(Document*, unsigned long identifier, const ResourceResponse&) override;
+    virtual void dispatchDidChangeResourcePriority(unsigned long identifier, ResourceLoadPriority, int intraPriorityValue) override;
+    virtual void dispatchDidFinishLoading(Document*, unsigned long identifier) override;
+    virtual void dispatchDidLoadResourceFromMemoryCache(const ResourceRequest&, const ResourceResponse&) override;
+    virtual void dispatchDidHandleOnloadEvents() override;
+    virtual void dispatchWillClose() override;
+    virtual void dispatchDidReceiveTitle(const String&) override;
+    virtual void dispatchDidFailLoad(const ResourceError&) override;
 
-    virtual NavigationPolicy decidePolicyForNavigation(const ResourceRequest&, Document*, NavigationPolicy, bool isTransitionNavigation) OVERRIDE;
-    virtual void dispatchAddNavigationTransitionData(const String& allowedDestinationOrigin, const String& selector, const String& markup) OVERRIDE;
-    virtual void dispatchWillRequestResource(FetchRequest*) OVERRIDE;
-    virtual void didStartLoading(LoadStartType) OVERRIDE;
-    virtual void didStopLoading() OVERRIDE;
-    virtual void progressEstimateChanged(double progressEstimate) OVERRIDE;
-    virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) OVERRIDE;
-    virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) OVERRIDE;
-    virtual void transitionToCommittedForNewPage() OVERRIDE;
-    virtual void didChangeScrollOffset() OVERRIDE;
-    virtual void didRemoveAllPendingStylesheet() OVERRIDE;
+    virtual NavigationPolicy decidePolicyForNavigation(const ResourceRequest&, Document*, NavigationPolicy, bool isTransitionNavigation) override;
+    virtual void dispatchAddNavigationTransitionData(const String& allowedDestinationOrigin, const String& selector, const String& markup) override;
+    virtual void dispatchWillRequestResource(FetchRequest*) override;
+    virtual void didStartLoading(LoadStartType) override;
+    virtual void didStopLoading() override;
+    virtual void progressEstimateChanged(double progressEstimate) override;
+    virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) override;
+    virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) override;
+    virtual void transitionToCommittedForNewPage() override;
+    virtual void didChangeScrollOffset() override;
+    virtual void didRemoveAllPendingStylesheet() override;
 
-    virtual void didLoseWebGLContext(int arbRobustnessContextLostReason) OVERRIDE;
+    virtual void didLoseWebGLContext(int arbRobustnessContextLostReason) override;
 
-    virtual void dispatchDidChangeManifest() OVERRIDE;
+    virtual void dispatchDidChangeManifest() override;
 
 private:
-    virtual bool isFrameLoaderClientImpl() const OVERRIDE { return true; }
+    virtual bool isFrameLoaderClientImpl() const override { return true; }
 
     // The WebFrame that owns this object and manages its lifetime. Therefore,
     // the web frame object is guaranteed to exist.

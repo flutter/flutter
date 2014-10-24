@@ -41,7 +41,7 @@ namespace blink {
 class AnimationTimeline;
 class ExceptionState;
 
-class AnimationPlayer FINAL : public RefCountedWillBeGarbageCollectedFinalized<AnimationPlayer>
+class AnimationPlayer final : public RefCountedWillBeGarbageCollectedFinalized<AnimationPlayer>
     , public ActiveDOMObject
     , public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
@@ -91,11 +91,11 @@ public:
     // remove this method.
     bool finishedInternal() const { return m_finished; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
-    virtual ExecutionContext* executionContext() const OVERRIDE;
-    virtual bool hasPendingActivity() const OVERRIDE;
-    virtual void stop() OVERRIDE;
-    virtual bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>) OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
+    virtual ExecutionContext* executionContext() const override;
+    virtual bool hasPendingActivity() const override;
+    virtual void stop() override;
+    virtual bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>) override;
 
     double playbackRate() const { return m_playbackRate; }
     void setPlaybackRate(double);
@@ -150,9 +150,9 @@ public:
     bool canFree() const;
 #endif
 
-    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) OVERRIDE;
+    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     AnimationPlayer(ExecutionContext*, AnimationTimeline&, AnimationNode*);

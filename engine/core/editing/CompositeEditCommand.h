@@ -38,14 +38,14 @@ class Element;
 class HTMLElement;
 class Text;
 
-class EditCommandComposition FINAL : public UndoStep {
+class EditCommandComposition final : public UndoStep {
 public:
     static PassRefPtrWillBeRawPtr<EditCommandComposition> create(Document*, const VisibleSelection&, const VisibleSelection&, EditAction);
 
-    virtual bool belongsTo(const LocalFrame&) const OVERRIDE;
-    virtual void unapply() OVERRIDE;
-    virtual void reapply() OVERRIDE;
-    virtual EditAction editingAction() const OVERRIDE { return m_editAction; }
+    virtual bool belongsTo(const LocalFrame&) const override;
+    virtual void unapply() override;
+    virtual void reapply() override;
+    virtual EditAction editingAction() const override { return m_editAction; }
     void append(SimpleEditCommand*);
 
     const VisibleSelection& startingSelection() const { return m_startingSelection; }
@@ -55,7 +55,7 @@ public:
     Element* startingRootEditableElement() const { return m_startingRootEditableElement.get(); }
     Element* endingRootEditableElement() const { return m_endingRootEditableElement.get(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     EditCommandComposition(Document*, const VisibleSelection& startingSelection, const VisibleSelection& endingSelection, EditAction);
@@ -83,7 +83,7 @@ public:
     virtual void setShouldRetainAutocorrectionIndicator(bool);
     virtual bool shouldStopCaretBlinking() const { return false; }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     explicit CompositeEditCommand(Document&);
@@ -156,7 +156,7 @@ protected:
     WillBeHeapVector<RefPtrWillBeMember<EditCommand> > m_commands;
 
 private:
-    virtual bool isCompositeEditCommand() const OVERRIDE FINAL { return true; }
+    virtual bool isCompositeEditCommand() const override final { return true; }
 
     RefPtrWillBeMember<EditCommandComposition> m_composition;
 };

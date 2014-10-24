@@ -35,7 +35,7 @@ namespace blink {
 class WebGLRenderingContextBase;
 class WebGLVertexArrayObjectOES;
 
-class OESVertexArrayObject FINAL : public WebGLExtension, public ScriptWrappable {
+class OESVertexArrayObject final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<OESVertexArrayObject> create(WebGLRenderingContextBase*);
@@ -43,7 +43,7 @@ public:
     static const char* extensionName();
 
     virtual ~OESVertexArrayObject();
-    virtual WebGLExtensionName name() const OVERRIDE;
+    virtual WebGLExtensionName name() const override;
 
     PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> createVertexArrayOES();
     void deleteVertexArrayOES(WebGLVertexArrayObjectOES*);

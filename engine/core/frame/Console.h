@@ -43,7 +43,7 @@ class MemoryInfo;
 class Page;
 class ScriptArguments;
 
-class Console FINAL : public ConsoleBase, public DOMWindowProperty {
+class Console final : public ConsoleBase, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<Console> create(LocalFrame* frame)
@@ -54,11 +54,11 @@ public:
 
     PassRefPtrWillBeRawPtr<MemoryInfo> memory() const;
 
-    virtual void trace(Visitor* visitor) OVERRIDE { ConsoleBase::trace(visitor); }
+    virtual void trace(Visitor* visitor) override { ConsoleBase::trace(visitor); }
 
 protected:
-    virtual ExecutionContext* context() OVERRIDE;
-    virtual void reportMessageToConsole(PassRefPtrWillBeRawPtr<ConsoleMessage>) OVERRIDE;
+    virtual ExecutionContext* context() override;
+    virtual void reportMessageToConsole(PassRefPtrWillBeRawPtr<ConsoleMessage>) override;
 
 private:
     explicit Console(LocalFrame*);

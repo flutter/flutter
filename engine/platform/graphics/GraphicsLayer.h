@@ -87,7 +87,7 @@ public:
     GraphicsLayerClient* client() const { return m_client; }
 
     // WebLayerClient implementation.
-    virtual WebGraphicsLayerDebugInfo* takeDebugInfoFor(WebLayer*) OVERRIDE;
+    virtual WebGraphicsLayerDebugInfo* takeDebugInfoFor(WebLayer*) override;
 
     GraphicsLayerDebugInfo& debugInfo();
 
@@ -225,14 +225,14 @@ public:
     static void unregisterContentsLayer(WebLayer*);
 
     // GraphicsContextPainter implementation.
-    virtual void paint(GraphicsContext&, const IntRect& clip) OVERRIDE;
+    virtual void paint(GraphicsContext&, const IntRect& clip) override;
 
     // WebCompositorAnimationDelegate implementation.
-    virtual void notifyAnimationStarted(double monotonicTime, WebCompositorAnimation::TargetProperty) OVERRIDE;
-    virtual void notifyAnimationFinished(double monotonicTime, WebCompositorAnimation::TargetProperty) OVERRIDE;
+    virtual void notifyAnimationStarted(double monotonicTime, WebCompositorAnimation::TargetProperty) override;
+    virtual void notifyAnimationFinished(double monotonicTime, WebCompositorAnimation::TargetProperty) override;
 
     // WebLayerScrollClient implementation.
-    virtual void didScroll() OVERRIDE;
+    virtual void didScroll() override;
 
 protected:
     String debugName(WebLayer*) const;

@@ -45,24 +45,24 @@ public:
 
     WebGLRenderingContextBase* context() const { return m_context; }
 
-    virtual bool validate(const WebGLContextGroup*, const WebGLRenderingContextBase* context) const OVERRIDE FINAL
+    virtual bool validate(const WebGLContextGroup*, const WebGLRenderingContextBase* context) const override final
     {
         return context == m_context;
     }
 
     void detachContext();
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 protected:
     explicit WebGLContextObject(WebGLRenderingContextBase*);
 
-    virtual bool hasGroupOrContext() const OVERRIDE FINAL
+    virtual bool hasGroupOrContext() const override final
     {
         return m_context;
     }
 
-    virtual blink::WebGraphicsContext3D* getAWebGraphicsContext3D() const OVERRIDE FINAL;
+    virtual blink::WebGraphicsContext3D* getAWebGraphicsContext3D() const override final;
 
 private:
     RawPtrWillBeMember<WebGLRenderingContextBase> m_context;

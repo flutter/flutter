@@ -34,7 +34,7 @@ namespace blink {
 
 class DocumentFragment;
 
-class TextEvent FINAL : public UIEvent {
+class TextEvent final : public UIEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtrWillBeRawPtr<TextEvent> create();
@@ -49,7 +49,7 @@ public:
 
     String data() const { return m_data; }
 
-    virtual const AtomicString& interfaceName() const OVERRIDE;
+    virtual const AtomicString& interfaceName() const override;
 
     bool isLineBreak() const { return m_inputType == TextEventInputLineBreak; }
     bool isComposition() const { return m_inputType == TextEventInputComposition; }
@@ -60,7 +60,7 @@ public:
     bool shouldMatchStyle() const { return m_shouldMatchStyle; }
     DocumentFragment* pastingFragment() const { return m_pastingFragment.get(); }
 
-    virtual void trace(Visitor*) OVERRIDE;
+    virtual void trace(Visitor*) override;
 
 private:
     TextEvent();
