@@ -12,13 +12,14 @@ rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
 
 source_set("libraries") {
   deps = [
+    "//base:base",
     "//gin",
     "//gpu/command_buffer/client:gles2_c_lib",
-    "//mojo/common",
     "//mojo/application",
+    "//mojo/common",
+    "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
-    "//mojo/public/c/system:for_shared_library",
     "//skia",
     "//sky/engine/wtf",
     "//third_party/angle:translator",
@@ -110,9 +111,6 @@ source_set("core_generated") {
 
     # Additional .cpp files from the make_core_generated rules.
     "$sky_core_output_dir/CSSGrammar.cpp",
-
-    # Generated from make_css_property_metadata.py
-    "$sky_core_output_dir/CSSPropertyMetadata.cpp",
   ]
 
   configs += [
@@ -191,20 +189,21 @@ group("core_names") {
 group("make_core_generated") {
   deps = [
     ":core_names",
+    ":make_core_generated_bison",
+    ":make_core_generated_css_property_metadata",
+    ":make_core_generated_css_value_keywords",
+    ":make_core_generated_event_factory",
+    ":make_core_generated_html_element_lookup_trie",
+    ":make_core_generated_html_element_type_helpers",
     ":make_core_generated_html_entity_table",
+    ":make_core_generated_make_parser",
+    ":make_core_generated_make_token_matcher",
+    ":make_core_generated_make_token_matcher_for_viewport",
     ":make_core_generated_media_feature_names",
     ":make_core_generated_media_features",
     ":make_core_generated_media_query_tokenizer_codepoints",
-    ":make_core_generated_style_property_shorthand",
     ":make_core_generated_style_builder",
-    ":make_core_generated_css_value_keywords",
-    ":make_core_generated_html_element_type_helpers",
-    ":make_core_generated_event_factory",
-    ":make_core_generated_make_token_matcher",
-    ":make_core_generated_make_parser",
-    ":make_core_generated_make_token_matcher_for_viewport",
-    ":make_core_generated_html_element_lookup_trie",
-    ":make_core_generated_bison",
+    ":make_core_generated_style_property_shorthand",
   ]
 }
 

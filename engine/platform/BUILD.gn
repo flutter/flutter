@@ -212,7 +212,6 @@ component("platform") {
     "clipboard/ClipboardUtilities.cpp",
     "clipboard/ClipboardUtilities.h",
     "clipboard/ClipboardUtilitiesPosix.cpp",
-    "clipboard/ClipboardUtilitiesWin.cpp",
     "exported/Platform.cpp",
     "exported/WebActiveGestureAnimation.cpp",
     "exported/WebActiveGestureAnimation.h",
@@ -306,8 +305,6 @@ component("platform") {
     "fonts/opentype/OpenTypeSanitizer.cpp",
     "fonts/opentype/OpenTypeSanitizer.h",
     "fonts/opentype/OpenTypeTypes.h",
-    "fonts/opentype/OpenTypeUtilities.cpp",
-    "fonts/opentype/OpenTypeUtilities.h",
     "fonts/opentype/OpenTypeVerticalData.cpp",
     "fonts/opentype/OpenTypeVerticalData.h",
     "fonts/skia/FontCacheSkia.cpp",
@@ -582,8 +579,6 @@ component("platform") {
     "text/LocaleICU.h",
     "text/LocaleToScriptMapping.cpp",
     "text/LocaleToScriptMapping.h",
-    "text/LocaleWin.cpp",
-    "text/LocaleWin.h",
     "text/NonCJKGlyphOrientation.h",
     "text/ParserUtilities.h",
     "text/PlatformLocale.cpp",
@@ -714,26 +709,6 @@ component("platform") {
     "fonts/FontPlatformData.cpp",
     "fonts/harfbuzz/HarfBuzzFaceCoreText.cpp",
   ]
-
-  if (is_win) {
-    sources -= [
-      # Uses LocaleWin instead.
-      "text/LocaleICU.cpp",
-      "text/LocaleICU.h",
-    ]
-    cflags = [
-      "/wd4267",  # Conversion from 'size_t' to 'type', possible loss of data.
-      "/wd4334",  # Result of 32-bit shift implicitly converted to 64 bits.
-      "/wd4724",  # Modulo by 0.
-    ]
-  } else {
-    sources -= [
-      "clipboard/ClipboardUtilitiesWin.cpp",
-      "fonts/opentype/OpenTypeUtilities.cpp",
-      "fonts/opentype/OpenTypeUtilities.h",
-      "text/LocaleWin.cpp",
-    ]
-  }
 
   if (is_android) {
     # Add in some Linux files also shared with Android.

@@ -20,4 +20,4 @@ public:
 
 } // namespace blink
 
-#endif // CSSPropertyMetadata
+#endif // CSSPropertyMetadata_h

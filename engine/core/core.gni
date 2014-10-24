@@ -989,6 +989,8 @@ sky_core_files = [
   "inspector/IdentifiersFactory.h",
   "inspector/InspectorTraceEvents.cpp",
   "inspector/InspectorTraceEvents.h",
+  "inspector/ScriptProfile.cpp",
+  "inspector/ScriptProfile.h",
   "inspector/ScriptArguments.cpp",
   "inspector/ScriptArguments.h",
   "inspector/ScriptAsyncCallStack.cpp",

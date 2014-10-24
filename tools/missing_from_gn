@@ -23,11 +23,9 @@ def stripped_lines_from_command(cmd, cwd=None):
 def gn_desc(*args):
     # GN doesn't understand absolute paths yet, so use a relative BUILD_DIR
     # and pass ROOT_DIR as the CWD.
-    cmd = [
-        'gn', 'desc',
-        # Hard-coding Debug for now:
-        os.path.join('out', 'Debug'),
-    ] + list(args)
+    # Hard-coding Debug for now:
+    BUILD_DIR = '//out/Debug' # // means repository root-relative.
+    cmd = ['gn', 'desc', BUILD_DIR] + list(args)
     return stripped_lines_from_command(cmd, cwd=ROOT_DIR)
 
 
@@ -40,7 +38,9 @@ def used_files(target):
     logging.info(target)
     sources = map(lambda s: s[2:], gn_desc(target, 'sources'))
     inputs = map(lambda s: s[2:], gn_desc(target, 'inputs'))
-    return sources + inputs
+    public = map(lambda s: s[2:], gn_desc(target, 'public'))
+    script = map(lambda s: s[2:], gn_desc(target, 'script'))
+    return sources + inputs + public + script
 
 
 def find_on_disk(path):
