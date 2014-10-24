@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import subprocess
+import os
+import argparse
+import logging
+
+ROOT_DIR = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir))
+
+def dependencies():
+    args = [
+        'gn',
+        'desc',
+        os.path.join('out', 'Debug'),
+        '//sky/engine/public:blink',
+        'deps', '--all'
+    ]
+    targets = subprocess.check_output(args).splitlines()
+    return map(str.strip, targets)
+
+
+def sources(target):
+    print target
+    args = [
+        'gn',
+        'desc',
+        os.path.join('out', 'Debug'),
+        target,
+        'sources'
+    ]
+    sources = subprocess.check_output(args).splitlines()
+    return map(lambda s: s[2:], map(str.strip, sources))
+
+
+def find_on_disk(path):
+    # FIXME: Use os.walk and do fancier ignoring.
+    find_output = subprocess.check_output(['find', path, '-type', 'f'])
+    return map(str.strip, find_output.splitlines())
+
+
+def main():
+    logging.basicConfig()
+
+    os.chdir(ROOT_DIR)
+    if os.path.exists('in_gn.txt'):
+        logging.info('Using cached GN list: %s' % os.path.abspath('in_gn.txt'))
+        in_gn = set(map(str.strip, open('in_gn.txt').readlines()))
+    else:
+        logging.info('No gn cache found, rebuilding: %s' % os.abspath('in_gn.txt'))
+        targets = filter(lambda s: '//sky' in s, dependencies())
+        in_gn = set(sum(map(sources, targets), []))
+        open('in_gn.txt', 'w+').write('\n'.join(in_gn))
+
+    on_disk = set(find_on_disk('sky/engine'))
+    # Ignore web/tests and bindings/tests
+    on_disk = set(filter(lambda p: '/tests/' not in p, on_disk))
+
+    missing_from_gn = sorted(on_disk - in_gn)
+
+    IGNORED_EXTENSIONS = [
+        '.py', # Probably some to remove, probably some to teach gn about.
+        # Python files not being known to gn can cause flaky builds too!
+        '.pyc',
+        '.gypi',
+        '.gn',
+        '.gni',
+        '.h', # Ignore headers for the moment.
+    ]
+    for ext in IGNORED_EXTENSIONS:
+        missing_from_gn = filter(lambda p: not p.endswith(ext), missing_from_gn)
+
+    # All upper-case files like README, DEPS, etc. are fine.
+    missing_from_gn = filter(lambda p: not os.path.basename(p).isupper(),
+        missing_from_gn)
+
+    print '\n'.join(missing_from_gn)
+
+
+if __name__ == '__main__':
+    main()
