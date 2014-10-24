@@ -22,5 +22,6 @@ static_library("platform") {
     "//sky/engine/public:blink",
     "//ui/native_theme",
     "//url",
+    "//skia",
   ]
 }

@@ -40,6 +40,7 @@ shared_library("viewer") {
   include_dirs = [ ".." ]
 
   deps = [
+    "//base:i18n",
     "//cc",
     "//cc/surfaces",
     "//gin",
@@ -48,12 +49,16 @@ shared_library("viewer") {
     "//mojo/cc",
     "//mojo/common",
     "//mojo/converters/geometry",
+    "//mojo/converters/surfaces",
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
     "//mojo/services/public/cpp/view_manager",
     "//mojo/services/public/interfaces/content_handler",
     "//mojo/services/public/interfaces/gpu",
+    "//mojo/services/public/interfaces/input_events",
     "//mojo/services/public/interfaces/navigation",
     "//mojo/services/public/interfaces/network",
     "//mojo/services/public/interfaces/surfaces",

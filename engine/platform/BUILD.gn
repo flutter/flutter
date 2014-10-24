@@ -11,30 +11,6 @@ visibility = [":*"]
 
 sky_platform_output_dir = "$root_gen_dir/sky/platform"
 
-component("sky_common") {
-  visibility += ["//sky/*"]
-  sources = [
-    "exported/WebCString.cpp",
-    "exported/WebString.cpp",
-    "exported/WebCommon.cpp",
-  ]
-
-  defines = [
-    "BLINK_COMMON_IMPLEMENTATION=1",
-    "INSIDE_BLINK",
-  ]
-
-  configs += [
-    "//build/config/compiler:wexit_time_destructors",
-    "//sky/engine:config",
-    "//sky/engine:non_test_config",
-  ]
-
-  deps = [
-    "//sky/engine/wtf",
-  ]
-}
-
 action("font_family_names") {
   script = "../build/scripts/make_names.py"
 
@@ -96,7 +72,6 @@ action("color_data") {
 group("make_platform_generated") {
   visibility += [":*"]
   deps = [
-    ":sky_common",
     ":color_data",
     ":font_family_names",
     ":runtime_enabled_features",
@@ -216,6 +191,8 @@ component("platform") {
     "exported/WebActiveGestureAnimation.cpp",
     "exported/WebActiveGestureAnimation.h",
     "exported/WebArrayBuffer.cpp",
+    "exported/WebCString.cpp",
+    "exported/WebCommon.cpp",
     "exported/WebConvertableToTraceFormat.cpp",
     "exported/WebCursorInfo.cpp",
     "exported/WebData.cpp",
@@ -229,6 +206,7 @@ component("platform") {
     "exported/WebScrollbarImpl.h",
     "exported/WebScrollbarThemeGeometryNative.cpp",
     "exported/WebScrollbarThemeGeometryNative.h",
+    "exported/WebString.cpp",
     "exported/WebTransformKeyframe.cpp",
     "exported/WebURL.cpp",
     "exported/WebURLError.cpp",
@@ -671,21 +649,24 @@ component("platform") {
   deps = [
     ":heap_asm_stubs",
     ":make_platform_generated",
+    "//base:base",
     "//gpu/command_buffer/client:gles2_c_lib",
+    "//mojo/application",
+    "//mojo/common:common",
+    "//mojo/public/c/system:for_shared_library",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
     "//skia",
-    "//third_party:jpeg",
+    "//sky/engine/platform/heap",
+    "//sky/engine/wtf",
     "//third_party/harfbuzz-ng",
     "//third_party/iccjpeg",
     "//third_party/icu",
     "//third_party/libpng",
     "//third_party/ots",
     "//third_party/qcms",
-    "//mojo/application",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/utility",
-    "//mojo/public/c/system:for_shared_library",
-    "//sky/engine/wtf",
-    "//sky/engine/platform/heap",
+    "//third_party:jpeg",
     "//url",
     "//v8",
   ]
@@ -809,7 +790,6 @@ test("platform_unittests") {
     "graphics/filters/FilterOperationsTest.cpp",
     "graphics/filters/ImageFilterBuilderTest.cpp",
     "graphics/gpu/DrawingBufferTest.cpp",
-    "graphics/test/MockDiscardablePixelRef.h",
     "image-decoders/ImageDecoderTest.cpp",
     "mac/ScrollElasticityControllerTest.mm",
     "network/HTTPParsersTest.cpp",
@@ -831,7 +811,6 @@ test("platform_unittests") {
   ]
 
   deps = [
-    ":sky_common",
     ":platform",
     "//base",
     "//base/allocator",
@@ -873,7 +852,5 @@ if (cpu_arch == "arm") {
     #        'cflags!': ['-mthumb'],
     #      }],
     #    ],
-
-    deps = [ ":sky_common" ]
   }
 }

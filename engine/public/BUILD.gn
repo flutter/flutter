@@ -7,19 +7,8 @@ import("//tools/grit/grit_rule.gni")
 group("blink") {
   deps = [
     ":sky_headers",
-    ":sky_minimal",
     "//sky/engine/web",
     "//sky/engine/platform",
-  ]
-}
-
-# This target provides a minimal set of Blink APIs such as WebString to use in
-# places that cannot link against the full Blink library.  FIXME: We really
-# shouldn't have this at all and should instead remove all uses of Blink's API
-# types from places that can't link against Blink. crbug.com/248653
-group("sky_minimal") {
-  deps = [
-    "//sky/engine/platform:sky_common",
   ]
 }
 

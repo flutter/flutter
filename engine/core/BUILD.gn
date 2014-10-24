@@ -11,7 +11,7 @@ visibility = ["//sky/engine/*"]
 rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
 
 source_set("libraries") {
-  deps = [
+  public_deps = [
     "//base:base",
     "//gin",
     "//gpu/command_buffer/client:gles2_c_lib",
@@ -20,6 +20,7 @@ source_set("libraries") {
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
+    "//mojo/public/cpp/system",
     "//skia",
     "//sky/engine/wtf",
     "//third_party/angle:translator",
@@ -31,8 +32,6 @@ source_set("libraries") {
     "//url",
     "//v8",
   ]
-
-  forward_dependent_configs_from = deps
 }
 
 source_set("prerequisites") {
