@@ -138,7 +138,7 @@ If the current character is...
 * Anything else: Consume the character and stay in this state.
 
 
-### **Data** state ###
+#### **Data** state ####
 
 If the current character is...
 
@@ -154,7 +154,7 @@ If the current character is...
   token. Consume the character. Stay in this state.
 
 
-### **Script raw data** state ###
+#### **Script raw data** state ####
 
 If the current character is...
 
@@ -165,7 +165,7 @@ If the current character is...
   token. Consume the character. Stay in this state.
 
 
-### **Script raw data: close 1** state ###
+#### **Script raw data: close 1** state ####
 
 If the current character is...
 
@@ -176,7 +176,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 2** state ###
+#### **Script raw data: close 2** state ####
 
 If the current character is...
 
@@ -187,7 +187,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 3** state ###
+#### **Script raw data: close 3** state ####
 
 If the current character is...
 
@@ -198,7 +198,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 4** state ###
+#### **Script raw data: close 4** state ####
 
 If the current character is...
 
@@ -209,7 +209,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 5** state ###
+#### **Script raw data: close 5** state ####
 
 If the current character is...
 
@@ -220,7 +220,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 6** state ###
+#### **Script raw data: close 6** state ####
 
 If the current character is...
 
@@ -231,7 +231,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 7** state ###
+#### **Script raw data: close 7** state ####
 
 If the current character is...
 
@@ -242,7 +242,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Script raw data: close 8** state ###
+#### **Script raw data: close 8** state ####
 
 If the current character is...
 
@@ -254,7 +254,7 @@ If the current character is...
   character. Switch to the **script raw data** state.
 
 
-### **Style raw data** state ###
+#### **Style raw data** state ####
 
 If the current character is...
 
@@ -265,7 +265,7 @@ If the current character is...
   token. Consume the character. Stay in this state.
 
 
-### **Style raw data: close 1** state ###
+#### **Style raw data: close 1** state ####
 
 If the current character is...
 
@@ -276,7 +276,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 2** state ###
+#### **Style raw data: close 2** state ####
 
 If the current character is...
 
@@ -287,7 +287,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 3** state ###
+#### **Style raw data: close 3** state ####
 
 If the current character is...
 
@@ -298,7 +298,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 4** state ###
+#### **Style raw data: close 4** state ####
 
 If the current character is...
 
@@ -309,7 +309,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 5** state ###
+#### **Style raw data: close 5** state ####
 
 If the current character is...
 
@@ -320,7 +320,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 6** state ###
+#### **Style raw data: close 6** state ####
 
 If the current character is...
 
@@ -331,7 +331,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Style raw data: close 7** state ###
+#### **Style raw data: close 7** state ####
 
 If the current character is...
 
@@ -343,7 +343,7 @@ If the current character is...
   character. Switch to the **style raw data** state.
 
 
-### **Tag open** state ###
+#### **Tag open** state ####
 
 If the current character is...
 
@@ -365,7 +365,7 @@ If the current character is...
   **data** state without consuming the current character.
 
 
-### **Close tag** state ###
+#### **Close tag** state ####
 
 If the current character is...
 
@@ -381,7 +381,7 @@ If the current character is...
   the **data** state without consuming the current character.
 
 
-### **Tag name** state ###
+#### **Tag name** state ####
 
 If the current character is...
 
@@ -398,7 +398,7 @@ If the current character is...
   consume the current character. Stay in this state.
 
 
-### **Void tag** state ###
+#### **Void tag** state ####
 
 If the current character is...
 
@@ -409,7 +409,7 @@ If the current character is...
   consuming the current character.
 
 
-### **Before attribute name** state ###
+#### **Before attribute name** state ####
 
 If the current character is...
 
@@ -426,7 +426,7 @@ If the current character is...
   to the **attribute name** state.
 
 
-### **Attribute name** state ###
+#### **Attribute name** state ####
 
 If the current character is...
 
@@ -447,7 +447,7 @@ If the current character is...
   this state.
 
 
-### **After attribute name** state ###
+#### **After attribute name** state ####
 
 If the current character is...
 
@@ -467,7 +467,7 @@ If the current character is...
   to the **attribute name** state.
 
 
-### **Before attribute value** state ###
+#### **Before attribute value** state ####
 
 If the current character is...
 
@@ -487,7 +487,7 @@ If the current character is...
   **unquoted attribute value** state.
 
 
-### **Single-quoted attribute value** state ###
+#### **Single-quoted attribute value** state ####
 
 If the current character is...
 
@@ -506,7 +506,7 @@ If the current character is...
   this state.
 
 
-### **Double-quoted attribute value** state ###
+#### **Double-quoted attribute value** state ####
 
 If the current character is...
 
@@ -525,7 +525,7 @@ If the current character is...
   this state.
 
 
-### **Unquoted attribute value** state ###
+#### **Unquoted attribute value** state ####
 
 If the current character is...
 
@@ -547,7 +547,7 @@ If the current character is...
   this state.
 
 
-### **After tag** state ###
+#### **After tag** state ####
 
 Emit the tag token.
 
@@ -560,7 +560,7 @@ If the tag token was a start tag token and the tag name was
 Otherwise, switch to the **data** state.
 
 
-### **After void tag** state ###
+#### **After void tag** state ####
 
 Emit the tag token.
 
@@ -570,7 +570,7 @@ same tag name.
 Switch to the **data** state.
 
 
-### **Comment start 1** state ###
+#### **Comment start 1** state ####
 
 If the current character is...
 
@@ -581,7 +581,7 @@ If the current character is...
   current character. Switch to the **data** state.
 
 
-### **Comment start 2** state ###
+#### **Comment start 2** state ####
 
 If the current character is...
 
@@ -592,7 +592,7 @@ If the current character is...
   current character. Switch to the **data** state.
 
 
-### **Comment** state ###
+#### **Comment** state ####
 
 If the current character is...
 
@@ -603,7 +603,7 @@ If the current character is...
   state.
 
 
-### **Comment end 1** state ###
+#### **Comment end 1** state ####
 
 If the current character is...
 
@@ -614,7 +614,7 @@ If the current character is...
   state.
 
 
-### **Comment end 2** state ###
+#### **Comment end 2** state ####
 
 If the current character is...
 
@@ -626,7 +626,7 @@ If the current character is...
   state.
 
 
-### **Character reference** state ###
+#### **Character reference** state ####
 
 Let _raw value_ be the string '``&``'.
 
@@ -658,7 +658,7 @@ If the current character is...
   consuming the current character.
 
 
-### **Numeric character reference** state ###
+#### **Numeric character reference** state ####
 
 Append the current character to _raw value_.
 
@@ -677,7 +677,7 @@ If the current character is...
   consuming the current character.
 
 
-### **Hexadecimal numeric character reference** state ###
+#### **Hexadecimal numeric character reference** state ####
 
 Append the current character to _raw value_.
 
@@ -699,7 +699,7 @@ If the current character is...
   consuming the current character.
 
 
-### **Decimal numeric character reference** state ###
+#### **Decimal numeric character reference** state ####
 
 Append the current character to _raw value_.
 
@@ -721,7 +721,7 @@ If the current character is...
   consuming the current character.
 
 
-### **Named character reference L** state ###
+#### **Named character reference L** state ####
 
 Append the current character to _raw value_.
 
@@ -735,7 +735,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference A** state ###
+#### **Named character reference A** state ####
 
 Append the current character to _raw value_.
 
@@ -751,7 +751,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference AM** state ###
+#### **Named character reference AM** state ####
 
 Append the current character to _raw value_.
 
@@ -765,7 +765,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference AP** state ###
+#### **Named character reference AP** state ####
 
 Append the current character to _raw value_.
 
@@ -778,7 +778,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference APO** state ###
+#### **Named character reference APO** state ####
 
 Append the current character to _raw value_.
 
@@ -792,7 +792,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference G** state ###
+#### **Named character reference G** state ####
 
 Append the current character to _raw value_.
 
@@ -806,7 +806,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference Q** state ###
+#### **Named character reference Q** state ####
 
 Append the current character to _raw value_.
 
@@ -819,7 +819,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference QU** state ###
+#### **Named character reference QU** state ####
 
 Append the current character to _raw value_.
 
@@ -832,7 +832,7 @@ If the current character is...
   without consuming the character.
 
 
-### **Named character reference QUO** state ###
+#### **Named character reference QUO** state ####
 
 Append the current character to _raw value_.
 
@@ -846,7 +846,7 @@ If the current character is...
   without consuming the character.
 
 
-### **After named character reference** state ###
+#### **After named character reference** state ####
 
 Append the current character to _raw value_.
 
@@ -863,7 +863,7 @@ If the current character is...
   without consuming the current character.
 
 
-### **Bad named character reference** state ###
+#### **Bad named character reference** state ####
 
 Append the current character to _raw value_.
 
