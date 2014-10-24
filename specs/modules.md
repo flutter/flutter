@@ -30,7 +30,7 @@ Module API
 Within a script in a module, the ```module``` identifier is bound to
 the ```Module``` object that represents the module:
 
-```
+```javascript
 interface Module : EventTarget {
   constructor (Application application, Document document); // O(1)
   attribute any exports; // O(1) // defaults to the module's document

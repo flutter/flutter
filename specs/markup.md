@@ -204,11 +204,10 @@ Sky Markup: Global Attributes
 
 The following attributes are available on all elements:
 
-id="" (any value)
-class="" (any value, space-separated)
-style="" (declaration part of a Sky style rule)
-lang="" (language code)
-dir="" (ltr or rtl only)
-
-contenteditable="" (subject to future developments)
-tabindex="" (subject to future developments)
+* ``id=""`` (any value)
+* ``class=""`` (any value, space-separated)
+* ``style=""`` (declaration part of a Sky style rule)
+* ``lang=""`` (language code)
+* ``dir=""`` (ltr or rtl only)
+* ``contenteditable=""`` (subject to future developments)
+* ``tabindex=""`` (subject to future developments)

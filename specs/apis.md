@@ -4,7 +4,7 @@ APIS
 The Sky core API
 ----------------
 
-```
+```javascript
 module 'sky:core' {
 
   // EVENTS
@@ -218,7 +218,7 @@ implementations of the APIs to JavaScript.
 Sky IDL works more or less the same as Web IDL but the syntax is a bit
 different.
 
-```
+```javascript
 module 'sky:modulename' {
 
   // this is a comment
@@ -267,18 +267,18 @@ module 'sky:modulename' {
 
 The following types are available:
 
-* ```Integer``` - WebIDL ```long long```
-* ```Float``` - WebIDL ```double```
-* ```String``` - WebIDL ```USVString```
-* ```Boolean``` - WebIDL ```boolean```
-# ```Object``` - WebIDL ```object```
-* ```InterfaceName``` - an instance of the interface InterfaceName
-* ```Promise<Type>``` - WebIDL ```Promise<T>```
-* ```Array<Type>``` - WebIDL ```sequence<T>```
-* ```Dictionary``` - unordered set of name-value String-String pairs with no duplicate names
-* ```Type?``` - union of Type and the singleton type with value "null" (WebIDL nullable)
-* ```(Type1 or Type2)``` - union of Type1 and Type2 (WebIDL union)
-* ```any``` - union of all types (WebIDL ```any```)
+* ``Integer`` - WebIDL ``long long``
+* ``Float`` - WebIDL ``double``
+* ``String`` - WebIDL ``USVString``
+* ``Boolean`` - WebIDL ``boolean``
+# ``Object`` - WebIDL ``object``
+* ``InterfaceName`` - an instance of the interface InterfaceName
+* ``Promise<Type>`` - WebIDL ``Promise<T>``
+* ``Array<Type>`` - WebIDL ``sequence<T>``
+* ``Dictionary`` - unordered set of name-value String-String pairs with no duplicate names
+* ``Type?`` - union of Type and the singleton type with value "null" (WebIDL nullable)
+* ``(Type1 or Type2)`` - union of Type1 and Type2 (WebIDL union)
+* ``any`` - union of all types (WebIDL ``any``)
 
 Methods that return nothing (undefined, in JS) use the keyword "void"
 instead of a type.
@@ -301,7 +301,7 @@ TODO(ianh): Define in detail how this actually works
 
 Notes
 -----
-```
+```javascript
 global object = {} // with Math, RegExp, etc
 
 magical imports:
