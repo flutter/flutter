@@ -270,6 +270,8 @@ css_properties("make_core_generated_css_property_metadata") {
   outputs = [
     "$sky_core_output_dir/CSSPropertyMetadata.cpp",
   ]
+
+  deps = [ ":core_names" ]
 }
 
 process_in_files("make_core_generated_css_value_keywords") {
