@@ -1481,7 +1481,7 @@ void Document::cancelParsing()
     checkCompleted();
 }
 
-PassRefPtrWillBeRawPtr<DocumentParser> Document::startParsing()
+void Document::startParsing()
 {
     ASSERT(!m_parser);
     ASSERT(!m_isParsing);
@@ -1491,7 +1491,6 @@ PassRefPtrWillBeRawPtr<DocumentParser> Document::startParsing()
     m_parser = createParser();
     setParsing(true);
     setReadyState(Loading);
-    return m_parser;
 }
 
 Element* Document::viewportDefiningElement(RenderStyle* rootStyle) const

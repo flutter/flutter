@@ -35,16 +35,7 @@ namespace blink {
 
 HTMLParserOptions::HTMLParserOptions(Document* document)
 {
-    // We force the main-thread parser for two cases:
-    // - about:blank and javascript (which uses about:blank) for compatibility
-    //   with historical synchronous loading/parsing behavior.
-    // - instances where the Document has no Frame (this happens sometimes for
-    //   HTML imports, and possibly other cases).
-    // FIXME: We want to use the threaded parser for XHRs (where there is no
-    // frame) so the second case should go away eventually.
-    // FIXME: Gecko does not load javascript: urls synchronously, why do we?
-    // See tests/loader/iframe-sync-loads.html
-    useThreading = document && document->frame() && !document->url().isAboutBlankURL();
+    useThreading = document && !document->url().isAboutBlankURL();
 }
 
 }

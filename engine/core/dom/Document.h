@@ -328,7 +328,8 @@ public:
 
     DocumentLoadTiming* timing() const;
 
-    PassRefPtrWillBeRawPtr<DocumentParser> startParsing();
+    void startParsing();
+    void cancelParsing();
 
     // close() is the DOM API document.close()
     void close(ExceptionState& = ASSERT_NO_EXCEPTION);
@@ -348,8 +349,6 @@ public:
         UnloadDismissal = 3
     };
     PageDismissalType pageDismissalEventBeingDispatched() const;
-
-    void cancelParsing();
 
     const KURL& url() const { return m_url; }
     void setURL(const KURL&);

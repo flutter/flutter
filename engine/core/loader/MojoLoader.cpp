@@ -5,7 +5,6 @@
 #include "config.h"
 #include "core/loader/MojoLoader.h"
 
-#include "base/bind.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentInit.h"
 #include "core/frame/LocalDOMWindow.h"
@@ -43,18 +42,7 @@ void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStre
     // response headers and set them on Document::contentLanguage.
 
     document->startParsing();
-
-    m_drainJob = adoptPtr(new DataPipeDrainer(this, responseStream.Pass()));
-}
-
-void MojoLoader::OnDataAvailable(const void* data, size_t numberOfBytes)
-{
-    m_frame.document()->parser()->appendBytes(static_cast<const char*>(data), numberOfBytes);
-}
-
-void MojoLoader::OnDataComplete()
-{
-    m_frame.document()->parser()->finish();
+    document->parser()->parse(responseStream.Pass());
 }
 
 }

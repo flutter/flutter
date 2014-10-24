@@ -33,41 +33,11 @@ namespace blink {
 
 DecodedDataDocumentParser::DecodedDataDocumentParser(Document& document)
     : DocumentParser(&document)
-    , m_decoder(TextResourceDecoder::create())
 {
 }
 
 DecodedDataDocumentParser::~DecodedDataDocumentParser()
 {
-}
-
-void DecodedDataDocumentParser::appendBytes(const char* data, size_t length)
-{
-    if (!length)
-        return;
-
-    // This should be checking isStopped(), but XMLDocumentParser prematurely
-    // stops parsing when handling an XSLT processing instruction and still
-    // needs to receive decoded bytes.
-    if (isDetached())
-        return;
-
-    String decodedData = m_decoder->decode(data, length);
-    if (!decodedData.isEmpty())
-        append(decodedData.releaseImpl());
-}
-
-void DecodedDataDocumentParser::flush()
-{
-    // This should be checking isStopped(), but XMLDocumentParser prematurely
-    // stops parsing when handling an XSLT processing instruction and still
-    // needs to receive decoded bytes.
-    if (isDetached())
-        return;
-
-    String decodedData = m_decoder->flush();
-    if (!decodedData.isEmpty())
-        append(decodedData.releaseImpl());
 }
 
 };

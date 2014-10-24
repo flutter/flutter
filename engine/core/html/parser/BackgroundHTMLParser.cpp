@@ -62,6 +62,7 @@ BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
     , m_parser(config->parser)
     , m_pendingTokens(adoptPtr(new CompactHTMLTokenStream))
     , m_decoder(TextResourceDecoder::create())
+    , m_source(config->source.Pass())
     , m_weakFactory(this)
 {
 }
@@ -70,40 +71,35 @@ BackgroundHTMLParser::~BackgroundHTMLParser()
 {
 }
 
-void BackgroundHTMLParser::appendRawBytesFromMainThread(PassOwnPtr<Vector<char> > buffer)
+void BackgroundHTMLParser::start()
 {
-    updateDocument(m_decoder->decode(buffer->data(), buffer->size()));
-}
-
-void BackgroundHTMLParser::appendDecodedBytes(const String& input)
-{
-    ASSERT(!m_input.isClosed());
-    m_input.append(SegmentedString(input));
-    pumpTokenizer();
-}
-
-void BackgroundHTMLParser::flush()
-{
-    updateDocument(m_decoder->flush());
-}
-
-void BackgroundHTMLParser::updateDocument(const String& decodedData)
-{
-    if (decodedData.isEmpty())
-        return;
-
-    appendDecodedBytes(decodedData);
-}
-
-void BackgroundHTMLParser::finish()
-{
-    markEndOfFile();
-    pumpTokenizer();
+    m_drainer = adoptPtr(new DataPipeDrainer(this, m_source.Pass()));
 }
 
 void BackgroundHTMLParser::stop()
 {
     delete this;
+}
+
+void BackgroundHTMLParser::OnDataAvailable(const void* data, size_t numberOfBytes)
+{
+    ASSERT(!m_input.isClosed());
+    String input = m_decoder->decode(static_cast<const char*>(data), numberOfBytes);
+    m_input.append(SegmentedString(input));
+    pumpTokenizer();
+}
+
+void BackgroundHTMLParser::OnDataComplete()
+{
+    ASSERT(!m_input.isClosed());
+    finish();
+}
+
+void BackgroundHTMLParser::finish()
+{
+    m_input.append(SegmentedString(m_decoder->flush()));
+    markEndOfFile();
+    pumpTokenizer();
 }
 
 void BackgroundHTMLParser::markEndOfFile()

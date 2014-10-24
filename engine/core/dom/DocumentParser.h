@@ -24,6 +24,7 @@
 #ifndef DocumentParser_h
 #define DocumentParser_h
 
+#include "mojo/public/cpp/system/core.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
 #include "wtf/RefCounted.h"
@@ -42,22 +43,7 @@ public:
 
     virtual HTMLDocumentParser* asHTMLDocumentParser() { return 0; }
 
-    // http://www.whatwg.org/specs/web-apps/current-work/#insertion-point
-    virtual bool hasInsertionPoint() { return true; }
-
-    // insert is used by document.write.
-    virtual void insert(const SegmentedString&) = 0;
-
-    // The below functions are used by DocumentWriter (the loader).
-    virtual void appendBytes(const char* bytes, size_t length) = 0;
-
-    // FIXME: append() should be private, but DocumentWriter::replaceDocumentWhileExecutingJavaScriptURL uses it for now.
-    // FIXME: This really should take a PassOwnPtr to signify that it expects to take
-    // ownership of the buffer. The parser expects the PassRefPtr to hold the only ref of the StringImpl.
-    virtual void append(PassRefPtr<StringImpl>) = 0;
-
-    virtual void finish() = 0;
-
+    virtual void parse(mojo::ScopedDataPipeConsumerHandle) = 0;
     virtual bool processingData() const { return false; }
 
     // document() will return 0 after detach() is called.
@@ -88,8 +74,6 @@ public:
 
 protected:
     explicit DocumentParser(Document*);
-
-    virtual void flush() = 0;
 
 private:
     enum ParserState {

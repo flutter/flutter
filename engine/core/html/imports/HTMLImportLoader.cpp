@@ -32,13 +32,12 @@
 #include "core/html/imports/HTMLImportLoader.h"
 
 #include "core/dom/Document.h"
+#include "core/dom/DocumentParser.h"
 #include "core/dom/StyleEngine.h"
 #include "core/dom/custom/CustomElementSyncMicrotaskQueue.h"
 #include "core/html/HTMLDocument.h"
 #include "core/html/imports/HTMLImportChild.h"
 #include "core/html/imports/HTMLImportsController.h"
-#include "core/loader/DocumentWriter.h"
-
 
 namespace blink {
 
@@ -71,7 +70,6 @@ void HTMLImportLoader::clear()
         m_document.clear();
     }
     m_fetcher.clear();
-    m_drainer.clear();
 }
 #endif
 
@@ -86,20 +84,7 @@ void HTMLImportLoader::OnReceivedResponse(mojo::URLResponsePtr response)
         setState(StateError);
         return;
     }
-    mojo::ScopedDataPipeConsumerHandle body = response->body.Pass();
     setState(startWritingAndParsing(response.Pass()));
-    m_drainer = adoptPtr(new DataPipeDrainer(this, body.Pass()));
-}
-
-void HTMLImportLoader::OnDataAvailable(const void* data, size_t length)
-{
-    RefPtrWillBeRawPtr<DocumentWriter> protectingWriter(m_writer.get());
-    m_writer->addData(static_cast<const char*>(data), length);
-}
-
-void HTMLImportLoader::OnDataComplete()
-{
-    setState(finishWriting());
 }
 
 HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLResponsePtr response)
@@ -109,8 +94,8 @@ HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLRespon
     DocumentInit init = DocumentInit(url, 0, m_controller->master()->contextDocument(), m_controller)
         .withRegistrationContext(m_controller->master()->registrationContext());
     m_document = HTMLDocument::create(init);
-    m_writer = DocumentWriter::create(m_document.get());
-
+    m_document->startParsing();
+    m_document->parser()->parse(response->body.Pass());
     return StateLoading;
 }
 
@@ -136,10 +121,8 @@ void HTMLImportLoader::setState(State state)
 
     m_state = state;
 
-    if (m_state == StateParsed || m_state == StateError || m_state == StateWritten) {
-        if (RefPtrWillBeRawPtr<DocumentWriter> writer = m_writer.release())
-            writer->end();
-    }
+    if (m_state == StateParsed || m_state == StateError || m_state == StateWritten)
+        m_document->cancelParsing();
 
     // Since DocumentWriter::end() can let setState() reenter, we shouldn't refer to m_state here.
     if (state == StateLoaded || state == StateError)
@@ -209,7 +192,6 @@ void HTMLImportLoader::trace(Visitor* visitor)
     visitor->trace(m_imports);
 #endif
     visitor->trace(m_document);
-    visitor->trace(m_writer);
     visitor->trace(m_microtaskQueue);
 }
 

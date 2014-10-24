@@ -212,13 +212,6 @@ void HTMLTreeBuilder::processEndTag(AtomicHTMLToken* token)
         m_scriptToProcess = m_tree.currentElement();
         m_tree.openElements()->pop();
         setInsertionMode(m_originalInsertionMode);
-
-        if (m_parser->tokenizer()) {
-            // We must set the tokenizer's state to
-            // DataState explicitly if the tokenizer didn't have a chance to.
-            ASSERT(m_parser->tokenizer()->state() == HTMLTokenizer::DataState || m_options.useThreading);
-            m_parser->tokenizer()->setState(HTMLTokenizer::DataState);
-        }
         return;
     }
     m_tree.openElements()->pop();
@@ -241,8 +234,6 @@ void HTMLTreeBuilder::processGenericRawTextStartTag(AtomicHTMLToken* token)
 {
     ASSERT(token->type() == HTMLToken::StartTag);
     m_tree.insertHTMLElement(token);
-    if (m_parser->tokenizer())
-        m_parser->tokenizer()->setState(HTMLTokenizer::RAWTEXTState);
     m_originalInsertionMode = m_insertionMode;
     setInsertionMode(TextMode);
 }
@@ -251,8 +242,6 @@ void HTMLTreeBuilder::processScriptStartTag(AtomicHTMLToken* token)
 {
     ASSERT(token->type() == HTMLToken::StartTag);
     m_tree.insertScriptElement(token);
-    if (m_parser->tokenizer())
-        m_parser->tokenizer()->setState(HTMLTokenizer::ScriptDataState);
     m_originalInsertionMode = m_insertionMode;
     TextPosition position = m_parser->textPosition();
     m_scriptToProcessStartPosition = position;

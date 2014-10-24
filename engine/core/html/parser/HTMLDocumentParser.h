@@ -66,12 +66,13 @@ public:
         return adoptRefWillBeNoop(new HTMLDocumentParser(document, reportErrors));
     }
     virtual ~HTMLDocumentParser();
+
+    void parse(mojo::ScopedDataPipeConsumerHandle) override;
+
     virtual void trace(Visitor*) override;
 
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();
-
-    HTMLTokenizer* tokenizer() const { return m_tokenizer.get(); }
 
     TextPosition textPosition() const;
     OrdinalNumber lineNumber() const;
@@ -81,33 +82,26 @@ public:
     };
     void didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
 
-    virtual void appendBytes(const char* bytes, size_t length) override;
-    virtual void flush() override final;
-
     bool isWaitingForScripts() const;
     bool isExecutingScript() const;
     void executeScriptsWaitingForResources();
 
     UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
-protected:
-    virtual void insert(const SegmentedString&) override final;
-    virtual void append(PassRefPtr<StringImpl>) override;
-    virtual void finish() override final;
-
+private:
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);
 
     HTMLTreeBuilder* treeBuilder() const { return m_treeBuilder.get(); }
 
-private:
     virtual HTMLDocumentParser* asHTMLDocumentParser() override final { return this; }
 
     // DocumentParser
     virtual void detach() override final;
-    virtual bool hasInsertionPoint() override final;
     virtual bool processingData() const override final;
     virtual void prepareToStopParsing() override final;
     virtual void stopParsing() override final;
+
+    bool hasInsertionPoint();
 
     void startBackgroundParser();
     void stopBackgroundParser();
@@ -117,13 +111,6 @@ private:
 
     Document* contextForParsingSession();
 
-    enum SynchronousMode {
-        AllowYield,
-        ForceSynchronous,
-    };
-    bool canTakeNextToken(SynchronousMode, PumpSession&);
-    void pumpTokenizer(SynchronousMode);
-    void pumpTokenizerIfPossible(SynchronousMode);
     void constructTreeFromHTMLToken(HTMLToken&);
     void constructTreeFromCompactHTMLToken(const CompactHTMLToken&);
 
@@ -141,21 +128,14 @@ private:
     bool inPumpSession() const { return m_pumpSessionNestingLevel > 0; }
     bool shouldDelayEnd() const { return inPumpSession() || isWaitingForScripts() || isScheduledForResume() || isExecutingScript(); }
 
-    HTMLToken& token() { return *m_token; }
-
     HTMLParserOptions m_options;
-    HTMLInputStream m_input;
 
-    OwnPtr<HTMLToken> m_token;
-    OwnPtr<HTMLTokenizer> m_tokenizer;
     OwnPtrWillBeMember<HTMLTreeBuilder> m_treeBuilder;
     OwnPtr<HTMLParserScheduler> m_parserScheduler;
     TextPosition m_textPosition;
 
     HTMLScriptRunner m_scriptRunner;
 
-    // FIXME: m_lastChunkBeforeScript, m_tokenizer, m_token, and m_input should be combined into a single state object
-    // so they can be set and cleared together and passed between threads together.
     OwnPtr<ParsedChunk> m_lastChunkBeforeScript;
     Deque<OwnPtr<ParsedChunk> > m_speculations;
     WeakPtrFactory<HTMLDocumentParser> m_weakFactory;

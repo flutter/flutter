@@ -3,4 +3,6 @@ include_rules = [
     "+core",
     "+platform",
     "+public/platform",
+    "+mojo/public",
+    "+mojo/services/public",
 ]

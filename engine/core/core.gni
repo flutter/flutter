@@ -1000,7 +1000,6 @@ sky_core_files = [
   "inspector/ScriptCallStack.cpp",
   "inspector/ScriptCallStack.h",
   "loader/DocumentLoadTiming.cpp",
-  "loader/DocumentWriter.cpp",
   "loader/EmptyClients.cpp",
   "loader/EmptyClients.h",
   "loader/FrameFetchContext.cpp",

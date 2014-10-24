@@ -31,6 +31,8 @@
 #include "core/html/parser/HTMLParserOptions.h"
 #include "core/html/parser/HTMLTokenizer.h"
 #include "core/html/parser/TextResourceDecoder.h"
+#include "mojo/public/cpp/system/core.h"
+#include "platform/fetcher/DataPipeDrainer.h"
 #include "platform/text/SegmentedString.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/WeakPtr.h"
@@ -40,30 +42,31 @@ namespace blink {
 class HTMLDocumentParser;
 class SharedBuffer;
 
-class BackgroundHTMLParser {
+class BackgroundHTMLParser : public DataPipeDrainer::Client {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     struct Configuration {
         HTMLParserOptions options;
+        mojo::ScopedDataPipeConsumerHandle source;
         WeakPtr<HTMLDocumentParser> parser;
     };
 
     static base::WeakPtr<BackgroundHTMLParser> create(PassOwnPtr<Configuration>);
 
-    void appendRawBytesFromMainThread(PassOwnPtr<Vector<char> >);
-    void flush();
-    void finish();
+    void start();
     void stop();
 
 private:
     explicit BackgroundHTMLParser(PassOwnPtr<Configuration>);
     ~BackgroundHTMLParser();
 
-    void appendDecodedBytes(const String&);
+    void OnDataAvailable(const void* data, size_t numberOfBytes) override;
+    void OnDataComplete() override;
+
+    void finish();
     void markEndOfFile();
     void pumpTokenizer();
     void sendTokensToMainThread();
-    void updateDocument(const String& decodedData);
     bool updateTokenizerState(const CompactHTMLToken& token);
 
     SegmentedString m_input;
@@ -73,6 +76,9 @@ private:
 
     OwnPtr<CompactHTMLTokenStream> m_pendingTokens;
     OwnPtr<TextResourceDecoder> m_decoder;
+
+    mojo::ScopedDataPipeConsumerHandle m_source;
+    OwnPtr<DataPipeDrainer> m_drainer;
 
     base::WeakPtrFactory<BackgroundHTMLParser> m_weakFactory;
 };

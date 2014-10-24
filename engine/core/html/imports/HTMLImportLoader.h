@@ -42,20 +42,11 @@ namespace blink {
 
 class CustomElementSyncMicrotaskQueue;
 class Document;
-class DocumentWriter;
 class HTMLImportChild;
 class HTMLImportsController;
 
-
-//
-// Owning imported Document lifetime. It also implements ResourceClient through ResourceOwner
-// to feed fetched bytes to the DocumentWriter of the imported document.
-// HTMLImportLoader is owned by HTMLImportsController.
-//
-//
 class HTMLImportLoader final : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>,
-                               public MojoFetcher::Client,
-                               public DataPipeDrainer::Client {
+                               public MojoFetcher::Client {
 public:
     enum State {
         StateLoading,
@@ -108,10 +99,6 @@ private:
     // MojoFetcher::Client
     void OnReceivedResponse(mojo::URLResponsePtr) override;
 
-    // DataPipeDrainer::Client
-    void OnDataAvailable(const void* data, size_t num_bytes) override;
-    void OnDataComplete() override;
-
     State startWritingAndParsing(mojo::URLResponsePtr);
     State finishWriting();
     State finishParsing();
@@ -127,11 +114,9 @@ private:
     WillBeHeapVector<RawPtrWillBeMember<HTMLImportChild> > m_imports;
     State m_state;
     RefPtrWillBeMember<Document> m_document;
-    RefPtrWillBeMember<DocumentWriter> m_writer;
     RefPtrWillBeMember<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
 
     OwnPtr<MojoFetcher> m_fetcher;
-    OwnPtr<DataPipeDrainer> m_drainer;
 };
 
 } // namespace blink

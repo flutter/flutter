@@ -33,19 +33,9 @@ namespace blink {
 class TextResourceDecoder;
 
 class DecodedDataDocumentParser : public DocumentParser {
-public:
-    virtual void appendBytes(const char* bytes, size_t length) override;
-    virtual void flush() override;
-
 protected:
     explicit DecodedDataDocumentParser(Document&);
     virtual ~DecodedDataDocumentParser();
-
-private:
-    // append is used by DocumentWriter::replaceDocumentWhileExecutingJavaScriptURL.
-    virtual void append(PassRefPtr<StringImpl>) = 0;
-
-    OwnPtr<TextResourceDecoder> m_decoder;
 };
 
 }
