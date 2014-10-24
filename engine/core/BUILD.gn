@@ -93,9 +93,6 @@ source_set("core_generated") {
   sources += bindings_core_generated_aggregate_files
 
   sources += [
-    "$sky_core_output_dir/HTMLElementLookupTrie.cpp",
-    "$sky_core_output_dir/HTMLElementLookupTrie.h",
-
     # Generated from HTMLEntityNames.in
     "$sky_core_output_dir/HTMLEntityTable.cpp",
 
@@ -483,12 +480,12 @@ action("make_core_generated_media_query_tokenizer_codepoints") {
   deps = make_core_generated_deps
 }
 
-action("make_core_generated_html_element_lookup_trie") {
+process_in_files("make_core_generated_html_element_lookup_trie") {
   script = "../build/scripts/make_element_lookup_trie.py"
-
-  input_file = "html/HTMLTagNames.in"
-  inputs = scripts_for_in_files + [
-    input_file,
+  in_files = [
+    "html/HTMLTagNames.in",
+  ]
+  other_inputs = [
     "../build/scripts/templates/ElementLookupTrie.cpp.tmpl",
     "../build/scripts/templates/ElementLookupTrie.h.tmpl",
   ]
@@ -496,13 +493,10 @@ action("make_core_generated_html_element_lookup_trie") {
     "$sky_core_output_dir/HTMLElementLookupTrie.cpp",
     "$sky_core_output_dir/HTMLElementLookupTrie.h",
   ]
-
-  args = [
-    rebase_path(input_file, root_build_dir),
-    "--output_dir", rel_sky_core_gen_dir,
+  deps = [
+    ":core_names",
+    ":libraries",
   ]
-
-  deps = make_core_generated_deps
 }
 
 action_foreach("make_core_generated_bison") {
