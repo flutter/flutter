@@ -4,7 +4,7 @@ Sky Markup: Syntax
 A Sky file must consist of the following components:
 
  1. If the file is intended to be a top-level Sky application, the
-    string "```#!mojo mojo:sky```" followed by a U+0020, U+000A or
+    string "``#!mojo mojo:sky``" followed by a U+0020, U+000A or
     U+000D character.
 
     If the file is intended to be a module, then the string "SKY", a
@@ -23,34 +23,34 @@ A Sky file must consist of the following components:
 
 Sky files must be encoded using UTF-8.
 
-A file that doesn't begin with the "```#!mojo mojo:sky```" signature
+A file that doesn't begin with the "``#!mojo mojo:sky``" signature
 isn't a Sky application file. For example:
 
     #!mojo https://example.com/runtimes/sky.asmjs
     Hello World
 
-...is not a Sky file, even if ```https://example.com/runtimes/sky.asmjs```
+...is not a Sky file, even if ``https://example.com/runtimes/sky.asmjs``
 is an implementation of the Sky runtime: it's just a file intended
 specifically for that runtime.
 
-The ```mojo:sky``` URL represents the generic Sky runtime provided by
+The ``mojo:sky`` URL represents the generic Sky runtime provided by
 your Mojo runtime vendor.
 
 
 Comments
 --------
 
-Comments start with the sequence "```<!--```" and end with the
-sequence "```-->```", where the start and end hyphens don't overlap.
+Comments start with the sequence "``<!--``" and end with the
+sequence "``-->``", where the start and end hyphens don't overlap.
 In between these characters, any sequence of characters is allowed
-except "```-->```", which terminates the comment. Comments cannot,
+except "``-->``", which terminates the comment. Comments cannot,
 therefore, be nested.
 
 
 Text
 ----
 
-Any sequence of Unicode characters other than ```<```, ```&```, and
+Any sequence of Unicode characters other than ``<``, ``&``, and
 U+0000.
 
 
@@ -61,19 +61,19 @@ There are three kinds of escapes:
 
 ### Hex
 
-They begin with the sequence ```&#x``` or ```&#X```, followed by a
+They begin with the sequence ``&#x`` or ``&#X``, followed by a
 sequence of hex characters (lowercase or uppercase), followed by a
 semicolon. The number 0 is not allowed.
 
 ### Decimal
 
-They begin with the sequence ```&#``` or ```&#```, followed by a
+They begin with the sequence ``&#`` or ``&#``, followed by a
 sequence of decimal characters, followed by a semicolon. The number 0
 is not allowed.
 
 ### Named
 
-They begin with the sequence ```&```, followed by any characters,
+They begin with the sequence ``&``, followed by any characters,
 followed by a semicolon.
 
 The following names work:
@@ -92,50 +92,50 @@ Elements
 
 An element consists of the following:
 
-1. ```<```
-2. Tag name: A sequence of characters other than ```/```, ```>```,
+1. ``<``
+2. Tag name: A sequence of characters other than ``/``, ``>``,
    U+0020, U+000A, U+000D (whitespace).
 3. Zero or more of the following:
    1. One or more U+0020, U+000A, U+000D (whitespace).
-   2. Attribute name: A sequence of characters other than ```/```,
-      ```=```, ```>```, U+0020, U+000A, U+000D (whitespace).
+   2. Attribute name: A sequence of characters other than ``/``,
+      ``=``, ``>``, U+0020, U+000A, U+000D (whitespace).
    3. Optionally:
       1. Zero or more U+0020, U+000A, U+000D (whitespace) characters.
-      2. ```=```
+      2. ``=``
       3. Zero or more U+0020, U+000A, U+000D (whitespace) characters.
       4. Attribute value: Either:
-         - ```'``` followed by attribute text other than ```'```
-           followed by a terminating ```'```.
-         - ```"``` followed by attribute text other than ```'```
-           followed by a terminating ```"```.
-         - attribute text other than ```/```, ```>```,
+         - ``'`` followed by attribute text other than ``'``
+           followed by a terminating ``'``.
+         - ``"`` followed by attribute text other than ``'``
+           followed by a terminating ``"``.
+         - attribute text other than ``/``, ``>``,
            U+0020, U+000A, U+000D (whitespace).
          "Attribute text" is escapes or any unicode characters other
          than U+0000.
 4. Either:
    - For a void element:
-     1. ```/```, indicating an empty element.
-     2. ```>```
+     1. ``/``, indicating an empty element.
+     2. ``>``
    - For a non-void element:
-     2. ```>```
+     2. ``>``
      3. The element's contents:
-        - If the element's tag name is ```script```, then any sequence of
+        - If the element's tag name is ``script``, then any sequence of
           characters other than U+0000, but there must not be the
-          substring ```</script```. The sequence must be valid sky script.
-        - If the element's tag name is ```style```, then any sequence of
+          substring ``</script``. The sequence must be valid sky script.
+        - If the element's tag name is ``style``, then any sequence of
           characters other than U+0000, but there must not be the
-          substring ```</style```. The sequence must be valid sky style.
+          substring ``</style``. The sequence must be valid sky style.
         - Otherwise, zero or more of the following, in any order:
           - comments
           - text
           - escapes
           - elements
      4. Finally, the end tag, which may be omitted if the element's tag
-        name is not ```template```, consisting of:
-        1. ```<```
-        2. ```/```
+        name is not ``template``, consisting of:
+        1. ``<``
+        2. ``/``
         3. Same sequence of characters as "tag name" above.
-        4. ```>```
+        4. ``>``
 
 
 Sky Markup: Elements
@@ -144,55 +144,55 @@ Sky Markup: Elements
 The Sky language consists of very few elements, since it is expected
 that everything of note would be provided by frameworks.
 
-```<import src="foo.sky">```
+``<import src="foo.sky">``
  - Downloads and imports foo.sky in the background.
 
-```<import src="foo.sky" as="foo">```
+``<import src="foo.sky" as="foo">``
  - Downloads and imports foo.sky in the background, using "foo" as its
-   local name (see ```<script>```).
+   local name (see ``<script>``).
 
-```<template>```
+``<template>``
  - The contents of the element aren't placed in the Element itself.
    They are instead placed into a DocumentFragment that you can obtain
    from the element's "content" attribute.
 
-```<script>```
+``<script>``
  - Blocks until all previous imports have been loaded, then runs the
    script, with either 'module' or 'application' as the first
    argument, the exports of any imports that have "as" attributes at
    this time passed in as subsequent arguments, and with "this" set to
    null.
 
-```<style>```
+``<style>``
  - Adds the contents to the document's styles.
 
-```<content>```
-```<content select="...">```
+``<content>``
+``<content select="...">``
  - In a shadow tree, acts as an insertion point for distributed nodes.
    The select="" attribute gives the selector to use to pick the nodes
    to place in this insertion point; it defaults to everything.
 
-```<shadow>```
+``<shadow>``
  - In a shadow tree, acts as an insertion point for older shadow trees.
 
-```<img src="foo.bin">```
+``<img src="foo.bin">``
  - Sky fetches the bits for foo.bin, looks for a decoder for those
    bits, and renders the bits that the decoder returns.
 
-```<iframe src="foo.bin">```
+``<iframe src="foo.bin">``
  - Sky tells mojo to open an application for foo.bin, and hands that
    application a view so that the application can render appropriately.
 
-```<t>```
- - Within a ```<t>``` section, whitespace is not trimmed from the start and
+``<t>``
+ - Within a ``<t>`` section, whitespace is not trimmed from the start and
    end of text nodes by the parser.
    TOOD(ianh): figure out if the authoring aesthetics of this are ok
 
-```<a href="foo.bin">```
+``<a href="foo.bin">``
  - A widget that, when invoked, causes mojo to open a new application
    for "foo.bin".
 
-```<title>```
+``<title>``
  - Sets the contents as the document's title (as provided by Sky to
    the view manager). (Actually just ensures that any time the element
    is mutated, theTitleElement.ownerScope.ownerDocument.title is set
