@@ -151,8 +151,7 @@ void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
     // The mainFrame view doesn't get included in the FrameTree below, so we
     // update its size separately.
     if (WebLayer* scrollingWebLayer = frameView ? toWebLayer(frameView->layerForScrolling()) : 0) {
-        scrollingWebLayer->setBounds(frameView->contentsSize());
-        scrollingWebLayer->setScrollClipLayer(toWebLayer(frameView->layerForContainer()));
+        scrollingWebLayer->setBounds(frameView->size());
     }
 }
 
@@ -757,7 +756,8 @@ void ScrollingCoordinator::frameViewFixedObjectsDidChange(FrameView* frameView)
 
 bool ScrollingCoordinator::isForMainFrame(ScrollableArea* scrollableArea) const
 {
-    return scrollableArea == m_page->mainFrame()->view();
+    // FIXME(sky): Remove
+    return false;
 }
 
 void ScrollingCoordinator::frameViewRootLayerDidChange(FrameView* frameView)
@@ -858,13 +858,7 @@ String ScrollingCoordinator::mainThreadScrollingReasonsAsText() const
 
 bool ScrollingCoordinator::frameViewIsDirty() const
 {
-    FrameView* frameView = m_page->mainFrame()->view();
-    bool frameIsScrollable = frameView && frameView->isScrollable();
-    if (frameIsScrollable != m_wasFrameScrollable)
-        return true;
-
-    if (WebLayer* scrollLayer = frameView ? toWebLayer(frameView->layerForScrolling()) : 0)
-        return blink::WebSize(frameView->contentsSize()) != scrollLayer->bounds();
+    // FIXME(sky): Remove
     return false;
 }
 

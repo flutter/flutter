@@ -85,15 +85,6 @@ bool RenderPart::nodeAtPoint(const HitTestRequest& request, HitTestResult& resul
 
         if (isInsideChildFrame)
             return true;
-
-        if (request.allowsFrameScrollbars()) {
-            // ScrollView scrollbars are not the same as RenderLayer scrollbars tested by RenderLayer::hitTestOverflowControls,
-            // so we need to test ScrollView scrollbars separately here.
-            // FIXME: Consider if this test could be done unconditionally.
-            Scrollbar* frameScrollbar = childFrameView->scrollbarAtPoint(newHitTestLocation.roundedPoint());
-            if (frameScrollbar)
-                result.setScrollbar(frameScrollbar);
-        }
     }
 
     return RenderWidget::nodeAtPoint(request, result, locationInContainer, accumulatedOffset, action);

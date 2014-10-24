@@ -260,27 +260,29 @@ void WebLocalFrameImpl::setScrollOffset(const WebSize& offset)
 
 WebSize WebLocalFrameImpl::contentsSize() const
 {
-    return frame()->view()->contentsSize();
+    return frame()->view()->size();
 }
 
 bool WebLocalFrameImpl::hasVisibleContent() const
 {
-    return frame()->view()->visibleWidth() > 0 && frame()->view()->visibleHeight() > 0;
+    return frame()->view()->width() > 0 && frame()->view()->height() > 0;
 }
 
 WebRect WebLocalFrameImpl::visibleContentRect() const
 {
-    return frame()->view()->visibleContentRect();
+    return frame()->view()->frameRect();
 }
 
 bool WebLocalFrameImpl::hasHorizontalScrollbar() const
 {
-    return frame() && frame()->view() && frame()->view()->horizontalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool WebLocalFrameImpl::hasVerticalScrollbar() const
 {
-    return frame() && frame()->view() && frame()->view()->verticalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 WebView* WebLocalFrameImpl::view() const
@@ -833,22 +835,11 @@ void WebLocalFrameImpl::setInputEventsTransformForEmulation(const IntSize& offse
         frame()->view()->setInputEventsTransformForEmulation(m_inputEventsOffsetForEmulation, m_inputEventsScaleFactorForEmulation);
 }
 
-void WebLocalFrameImpl::invalidateScrollbar() const
-{
-    ASSERT(frame() && frame()->view());
-    FrameView* view = frame()->view();
-    // Invalidate the vertical scroll bar region for the view.
-    Scrollbar* scrollbar = view->verticalScrollbar();
-    if (scrollbar)
-        scrollbar->invalidate();
-}
-
 void WebLocalFrameImpl::invalidateAll() const
 {
     ASSERT(frame() && frame()->view());
     FrameView* view = frame()->view();
     view->invalidateRect(view->frameRect());
-    invalidateScrollbar();
 }
 
 } // namespace blink

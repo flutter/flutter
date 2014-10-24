@@ -831,7 +831,7 @@ bool ContainerNode::getUpperLeftCorner(FloatPoint& point) const
     // If the target doesn't have any children or siblings that could be used to calculate the scroll position, we must be
     // at the end of the document. Scroll to the bottom. FIXME: who said anything about scrolling?
     if (!o && document().view()) {
-        point = FloatPoint(0, document().view()->contentsHeight());
+        point = FloatPoint(0, document().view()->height());
         return true;
     }
     return false;

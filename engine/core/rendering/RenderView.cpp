@@ -249,7 +249,7 @@ void RenderView::computeSelfHitTestRects(Vector<LayoutRect>& rects, const Layout
     // Record the entire size of the contents of the frame. Note that we don't just
     // use the viewport size (containing block) here because we want to ensure this includes
     // all children (so we can avoid walking them explicitly).
-    rects.append(LayoutRect(LayoutPoint::zero(), frameView()->contentsSize()));
+    rects.append(LayoutRect(LayoutPoint::zero(), frameView()->size()));
 }
 
 void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
@@ -378,10 +378,6 @@ void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject*
 
     if (viewportConstraint == IsFixedPosition && m_frameView) {
         rect.move(m_frameView->scrollOffsetForFixedPosition());
-        // If we have a pending scroll, invalidate the previous scroll position.
-        if (!m_frameView->pendingScrollDelta().isZero()) {
-            rect.move(-m_frameView->pendingScrollDelta());
-        }
     }
 
     // Apply our transform if we have one (because of full page zooming).

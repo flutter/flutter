@@ -40,7 +40,6 @@ class IntRect;
 class PlatformGestureEvent;
 class PlatformMouseEvent;
 class ScrollableArea;
-class ScrollView;
 
 class PLATFORM_EXPORT Scrollbar : public Widget {
 
@@ -60,8 +59,6 @@ public:
     Widget* root() const { return Widget::root(); }
 
     void removeFromParent();
-    ScrollView* parentScrollView() const;
-    ScrollView* rootScrollView() const;
 
     void setFrameRect(const IntRect& r) { Widget::setFrameRect(r); }
     IntRect frameRect() const { return Widget::frameRect(); }

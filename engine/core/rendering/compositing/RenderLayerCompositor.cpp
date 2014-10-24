@@ -407,18 +407,10 @@ void RenderLayerCompositor::frameViewDidScroll()
     if (!m_scrollLayer)
         return;
 
-    bool scrollingCoordinatorHandlesOffset = false;
-    if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator()) {
-        scrollingCoordinatorHandlesOffset = scrollingCoordinator->scrollableAreaScrollLayerDidChange(frameView);
-    }
-
     // Scroll position = scroll minimum + scroll offset. Adjust the layer's
     // position to handle whatever the scroll coordinator isn't handling.
     // The minimum scroll position is non-zero for RTL pages with overflow.
-    if (scrollingCoordinatorHandlesOffset)
-        m_scrollLayer->setPosition(-frameView->minimumScrollPosition());
-    else
-        m_scrollLayer->setPosition(-scrollPosition);
+    m_scrollLayer->setPosition(-scrollPosition);
 
 
     Platform::current()->histogramEnumeration("Renderer.AcceleratedFixedRootBackground",
@@ -639,35 +631,9 @@ bool RenderLayerCompositor::needsContentsCompositingLayer(const RenderLayer* lay
     return layer->stackingNode()->hasNegativeZOrderList();
 }
 
-static void paintScrollbar(Scrollbar* scrollbar, GraphicsContext& context, const IntRect& clip)
-{
-    if (!scrollbar)
-        return;
-
-    context.save();
-    const IntRect& scrollbarRect = scrollbar->frameRect();
-    context.translate(-scrollbarRect.x(), -scrollbarRect.y());
-    IntRect transformedClip = clip;
-    transformedClip.moveBy(scrollbarRect.location());
-    scrollbar->paint(&context, transformedClip);
-    context.restore();
-}
-
 void RenderLayerCompositor::paintContents(const GraphicsLayer* graphicsLayer, GraphicsContext& context, GraphicsLayerPaintingPhase, const IntRect& clip)
 {
-    if (graphicsLayer == layerForHorizontalScrollbar())
-        paintScrollbar(m_renderView.frameView()->horizontalScrollbar(), context, clip);
-    else if (graphicsLayer == layerForVerticalScrollbar())
-        paintScrollbar(m_renderView.frameView()->verticalScrollbar(), context, clip);
-    else if (graphicsLayer == layerForScrollCorner()) {
-        const IntRect& scrollCorner = m_renderView.frameView()->scrollCornerRect();
-        context.save();
-        context.translate(-scrollCorner.x(), -scrollCorner.y());
-        IntRect transformedClip = clip;
-        transformedClip.moveBy(scrollCorner.location());
-        m_renderView.frameView()->paintScrollCorner(&context, transformedClip);
-        context.restore();
-    }
+    // FIXME(sky): Remove.
 }
 
 bool RenderLayerCompositor::supportsFixedRootBackgroundCompositing() const
@@ -732,33 +698,22 @@ bool RenderLayerCompositor::isTrackingPaintInvalidations() const
     return m_isTrackingPaintInvalidations;
 }
 
-static bool shouldCompositeOverflowControls(FrameView* view)
-{
-    if (Page* page = view->frame().page()) {
-        if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-            if (scrollingCoordinator->coordinatesScrollingForFrameView(view))
-                return true;
-    }
-
-    return true;
-}
-
 bool RenderLayerCompositor::requiresHorizontalScrollbarLayer() const
 {
-    FrameView* view = m_renderView.frameView();
-    return shouldCompositeOverflowControls(view) && view->horizontalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayerCompositor::requiresVerticalScrollbarLayer() const
 {
-    FrameView* view = m_renderView.frameView();
-    return shouldCompositeOverflowControls(view) && view->verticalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayerCompositor::requiresScrollCornerLayer() const
 {
-    FrameView* view = m_renderView.frameView();
-    return shouldCompositeOverflowControls(view) && view->isScrollCornerVisible();
+    // FIXME(sky): Remove
+    return false;
 }
 
 void RenderLayerCompositor::updateOverflowControlsLayers()
@@ -772,16 +727,10 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
 
         if (m_layerForHorizontalScrollbar->parent() != controlsParent) {
             controlsParent->addChild(m_layerForHorizontalScrollbar.get());
-
-            if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), HorizontalScrollbar);
         }
     } else if (m_layerForHorizontalScrollbar) {
         m_layerForHorizontalScrollbar->removeFromParent();
         m_layerForHorizontalScrollbar = nullptr;
-
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), HorizontalScrollbar);
     }
 
     if (requiresVerticalScrollbarLayer()) {
@@ -791,16 +740,10 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
 
         if (m_layerForVerticalScrollbar->parent() != controlsParent) {
             controlsParent->addChild(m_layerForVerticalScrollbar.get());
-
-            if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-                scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), VerticalScrollbar);
         }
     } else if (m_layerForVerticalScrollbar) {
         m_layerForVerticalScrollbar->removeFromParent();
         m_layerForVerticalScrollbar = nullptr;
-
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), VerticalScrollbar);
     }
 
     if (requiresScrollCornerLayer()) {
@@ -812,8 +755,6 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
         m_layerForScrollCorner->removeFromParent();
         m_layerForScrollCorner = nullptr;
     }
-
-    m_renderView.frameView()->positionScrollbarLayers();
 }
 
 void RenderLayerCompositor::ensureRootLayer()
@@ -878,24 +819,15 @@ void RenderLayerCompositor::destroyRootLayer()
     if (m_layerForHorizontalScrollbar) {
         m_layerForHorizontalScrollbar->removeFromParent();
         m_layerForHorizontalScrollbar = nullptr;
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), HorizontalScrollbar);
-        if (Scrollbar* horizontalScrollbar = m_renderView.frameView()->verticalScrollbar())
-            m_renderView.frameView()->invalidateScrollbar(horizontalScrollbar, IntRect(IntPoint(0, 0), horizontalScrollbar->frameRect().size()));
     }
 
     if (m_layerForVerticalScrollbar) {
         m_layerForVerticalScrollbar->removeFromParent();
         m_layerForVerticalScrollbar = nullptr;
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_renderView.frameView(), VerticalScrollbar);
-        if (Scrollbar* verticalScrollbar = m_renderView.frameView()->verticalScrollbar())
-            m_renderView.frameView()->invalidateScrollbar(verticalScrollbar, IntRect(IntPoint(0, 0), verticalScrollbar->frameRect().size()));
     }
 
     if (m_layerForScrollCorner) {
         m_layerForScrollCorner = nullptr;
-        m_renderView.frameView()->invalidateScrollCorner(m_renderView.frameView()->scrollCornerRect());
     }
 
     if (m_overflowControlsHostLayer) {

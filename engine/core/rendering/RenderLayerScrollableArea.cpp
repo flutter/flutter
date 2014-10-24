@@ -104,12 +104,6 @@ RenderLayerScrollableArea::~RenderLayerScrollableArea()
             frame->eventHandler().resizeScrollableAreaDestroyed();
     }
 
-    if (LocalFrame* frame = box().frame()) {
-        if (FrameView* frameView = frame->view()) {
-            frameView->removeScrollableArea(this);
-        }
-    }
-
     if (box().frame() && box().frame()->page()) {
         if (ScrollingCoordinator* scrollingCoordinator = box().frame()->page()->scrollingCoordinator())
             scrollingCoordinator->willDestroyScrollableArea(this);

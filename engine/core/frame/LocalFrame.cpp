@@ -219,9 +219,6 @@ void LocalFrame::willDetachFrameHost()
     // so page() could be null.
     if (page() && page()->focusController().focusedFrame() == this)
         page()->focusController().setFocusedFrame(nullptr);
-
-    if (page() && page()->scrollingCoordinator() && m_view)
-        page()->scrollingCoordinator()->willDestroyScrollableArea(m_view.get());
 }
 
 void LocalFrame::detachFromFrameHost()
@@ -320,8 +317,6 @@ void LocalFrame::createView(const IntSize& viewportSize, const Color& background
 
     // The layout size is set by WebViewImpl to support @viewport
     frameView->setLayoutSizeFixedToFrameSize(false);
-
-    frameView->setScrollbarModes(horizontalScrollbarMode, verticalScrollbarMode, horizontalLock, verticalLock);
 
     setView(frameView);
 

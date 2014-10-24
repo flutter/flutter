@@ -1,7 +1,9 @@
-layer at (0,0) size 800x1500
+layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-layer at (0,0) size 800x1500
-  RenderBlock {html} at (0,0) size 800x1500 [bgcolor=#FFC0CB]
+layer at (0,0) size 800x400
+  RenderBlock {sky} at (0,0) size 800x400
+layer at (0,0) size 800x400 scrollHeight 1500
+  RenderBlock {scroller} at (0,0) size 800x400
     RenderBlock {div} at (0,0) size 800x100
       RenderText {#text} at (0,0) size 10x19
         text run at (0,0) width 10: "a"

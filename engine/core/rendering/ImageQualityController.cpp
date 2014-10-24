@@ -92,6 +92,7 @@ ImageQualityController::~ImageQualityController()
     ASSERT(!gImageQualityController || gImageQualityController->isEmpty());
 }
 
+// FIXME(sky): m_liveResizeOptimizationIsActive is never set to true.
 ImageQualityController::ImageQualityController()
     : m_timer(this, &ImageQualityController::highQualityRepaintTimerFired)
     , m_animatedResizeIsActive(false)
@@ -135,13 +136,6 @@ void ImageQualityController::highQualityRepaintTimerFired(Timer<ImageQualityCont
     m_animatedResizeIsActive = false;
 
     for (ObjectLayerSizeMap::iterator it = m_objectLayerSizeMap.begin(); it != m_objectLayerSizeMap.end(); ++it) {
-        if (LocalFrame* frame = it->key->document().frame()) {
-            // If this renderer's containing FrameView is in live resize, punt the timer and hold back for now.
-            if (frame->view() && frame->view()->inLiveResize()) {
-                restartTimer();
-                return;
-            }
-        }
         it->key->setShouldDoFullPaintInvalidation(true);
     }
 
@@ -185,19 +179,10 @@ bool ImageQualityController::shouldPaintAtLowQuality(GraphicsContext* context, R
     LayoutSize scaledLayoutSize = currentTransform.mapSize(roundedIntSize(layoutSize));
 
     // If the containing FrameView is being resized, paint at low quality until resizing is finished.
-    if (LocalFrame* frame = object->document().frame()) {
-        bool frameViewIsCurrentlyInLiveResize = frame->view() && frame->view()->inLiveResize();
-        if (frameViewIsCurrentlyInLiveResize) {
-            set(object, innerMap, layer, scaledLayoutSize);
-            restartTimer();
-            m_liveResizeOptimizationIsActive = true;
-            return true;
-        }
-        if (m_liveResizeOptimizationIsActive) {
-            // Live resize has ended, paint in HQ and remove this object from the list.
-            removeLayer(object, innerMap, layer);
-            return false;
-        }
+    if (m_liveResizeOptimizationIsActive) {
+        // Live resize has ended, paint in HQ and remove this object from the list.
+        removeLayer(object, innerMap, layer);
+        return false;
     }
 
     // See crbug.com/382491. This test is insufficient to ensure that there is no scale

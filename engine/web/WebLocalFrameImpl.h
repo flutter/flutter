@@ -164,9 +164,6 @@ public:
 
     static void selectWordAroundPosition(LocalFrame*, VisiblePosition);
 
-    // Invalidates vertical scrollbar only.
-    void invalidateScrollbar() const;
-
     // Invalidates both content area and the scrollbar.
     void invalidateAll() const;
 

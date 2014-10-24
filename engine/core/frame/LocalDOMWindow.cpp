@@ -241,15 +241,6 @@ PassRefPtrWillBeRawPtr<Document> LocalDOMWindow::installNewDocument(const Docume
 
     m_frame->script().updateDocument();
     m_document->updateViewportDescription();
-
-    if (m_frame->page() && m_frame->view()) {
-        if (ScrollingCoordinator* scrollingCoordinator = m_frame->page()->scrollingCoordinator()) {
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_frame->view(), HorizontalScrollbar);
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_frame->view(), VerticalScrollbar);
-            scrollingCoordinator->scrollableAreaScrollLayerDidChange(m_frame->view());
-        }
-    }
-
     return m_document;
 }
 
@@ -678,14 +669,7 @@ static bool scrollBehaviorFromScrollOptions(const Dictionary& scrollOptions, Scr
 
 void LocalDOMWindow::scrollBy(int x, int y, ScrollBehavior scrollBehavior) const
 {
-    document()->updateLayoutIgnorePendingStylesheets();
-
-    FrameView* view = m_frame->view();
-    if (!view)
-        return;
-
-    IntSize scaledOffset(x * m_frame->pageZoomFactor(), y * m_frame->pageZoomFactor());
-    view->scrollBy(scaledOffset, scrollBehavior);
+    // FIXME(sky): Remove
 }
 
 void LocalDOMWindow::scrollBy(int x, int y, const Dictionary& scrollOptions, ExceptionState &exceptionState) const

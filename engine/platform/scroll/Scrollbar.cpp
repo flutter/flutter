@@ -30,10 +30,10 @@
 #include "platform/graphics/GraphicsContext.h"
 #include "platform/PlatformGestureEvent.h"
 #include "platform/PlatformMouseEvent.h"
+#include "platform/FrameWidget.h"
 #include "platform/scroll/ScrollableArea.h"
 #include "platform/scroll/ScrollAnimator.h"
 #include "platform/scroll/Scrollbar.h"
-#include "platform/scroll/ScrollView.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebPoint.h"
 #include "public/platform/WebRect.h"
@@ -91,17 +91,7 @@ Scrollbar::~Scrollbar()
 void Scrollbar::removeFromParent()
 {
     if (parent())
-        toScrollView(parent())->removeChild(this);
-}
-
-ScrollView* Scrollbar::parentScrollView() const
-{
-    return toScrollView(parent());
-}
-
-ScrollView* Scrollbar::rootScrollView() const
-{
-    return toScrollView(root());
+        toFrameWidget(parent())->removeChild(this);
 }
 
 ScrollbarOverlayStyle Scrollbar::scrollbarOverlayStyle() const
@@ -122,7 +112,8 @@ bool Scrollbar::isScrollableAreaActive() const
 
 bool Scrollbar::isScrollViewScrollbar() const
 {
-    return parent() && parent()->isFrameView() && toScrollView(parent())->isScrollViewScrollbar(this);
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool Scrollbar::isLeftSideVerticalScrollbar() const

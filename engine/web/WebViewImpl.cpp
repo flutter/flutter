@@ -934,8 +934,7 @@ void WebViewImpl::close()
 
 void WebViewImpl::willStartLiveResize()
 {
-    if (mainFrameImpl() && mainFrameImpl()->frameView())
-        mainFrameImpl()->frameView()->willStartLiveResize();
+    // FIXME(sky): Remove
 }
 
 WebSize WebViewImpl::size()
@@ -987,8 +986,7 @@ void WebViewImpl::resize(const WebSize& newSize)
 
 void WebViewImpl::willEndLiveResize()
 {
-    if (mainFrameImpl() && mainFrameImpl()->frameView())
-        mainFrameImpl()->frameView()->willEndLiveResize();
+    // FIXME(sky): Remove
 }
 
 void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
@@ -1108,12 +1106,14 @@ void WebViewImpl::clearCompositedSelectionBounds()
 
 bool WebViewImpl::hasHorizontalScrollbar()
 {
-    return mainFrameImpl()->frameView()->horizontalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool WebViewImpl::hasVerticalScrollbar()
 {
-    return mainFrameImpl()->frameView()->verticalScrollbar();
+    // FIXME(sky): Remove
+    return false;
 }
 
 const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
@@ -1942,14 +1942,7 @@ WebSize WebViewImpl::contentsPreferredMinimumSize()
 
 void WebViewImpl::resetScrollAndScaleState()
 {
-    // TODO: This is done by the pinchViewport().reset() call below and can be removed when
-    // the new pinch path is the only one.
-    updateMainFrameScrollPosition(IntPoint(), true);
-    page()->frameHost().pinchViewport().reset();
-
-    // Clobber saved scales and scroll offsets.
-    if (FrameView* view = page()->mainFrame()->document()->view())
-        view->cacheCurrentScrollPosition();
+    // FIXME(sky): Remove
 }
 
 void WebViewImpl::setFixedLayoutSize(const WebSize& layoutSize)
@@ -2452,23 +2445,11 @@ void WebViewImpl::setIsAcceleratedCompositingActive(bool active)
         m_layerTreeView->setShowScrollBottleneckRects(m_showScrollBottleneckRects);
         m_layerTreeView->heuristicsForGpuRasterizationUpdated(m_matchesHeuristicsForGpuRasterization);
     }
-    if (page())
-        page()->mainFrame()->view()->setClipsRepaints(!m_isAcceleratedCompositingActive);
 }
 
 void WebViewImpl::updateMainFrameScrollPosition(const IntPoint& scrollPosition, bool programmaticScroll)
 {
-    FrameView* frameView = page()->mainFrame()->view();
-    if (!frameView)
-        return;
-
-    if (frameView->scrollPosition() == scrollPosition)
-        return;
-
-    bool oldProgrammaticScroll = frameView->inProgrammaticScroll();
-    frameView->setInProgrammaticScroll(programmaticScroll);
-    frameView->notifyScrollPositionChanged(scrollPosition);
-    frameView->setInProgrammaticScroll(oldProgrammaticScroll);
+    // FIXME(sky): Remove
 }
 
 void WebViewImpl::applyScrollAndScale(const WebSize& scrollDelta, float pageScaleDelta)

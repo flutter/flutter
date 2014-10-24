@@ -45,7 +45,6 @@
 #include "core/rendering/RenderObject.h"
 #include "platform/KeyboardCodes.h"
 #include "platform/Widget.h"
-#include "platform/scroll/ScrollView.h"
 
 namespace blink {
 
@@ -56,7 +55,7 @@ static float widgetInputEventsScaleFactor(const Widget* widget)
     if (!widget)
         return 1;
 
-    ScrollView* rootView =  toScrollView(widget->root());
+    FrameView* rootView = toFrameView(widget->root());
     if (!rootView)
         return 1;
 
@@ -67,7 +66,7 @@ static IntSize widgetInputEventsOffset(const Widget* widget)
 {
     if (!widget)
         return IntSize();
-    ScrollView* rootView =  toScrollView(widget->root());
+    FrameView* rootView = toFrameView(widget->root());
     if (!rootView)
         return IntSize();
 
@@ -489,7 +488,7 @@ static void updateWebMouseEventFromCoreMouseEvent(const MouseRelatedEvent& event
     webEvent.timeStampSeconds = event.timeStamp() / millisPerSecond;
     webEvent.modifiers = getWebInputModifiers(event);
 
-    ScrollView* view =  toScrollView(widget.parent());
+    FrameView* view = toFrameView(widget.parent());
     IntPoint windowPoint = IntPoint(event.absoluteLocation().x(), event.absoluteLocation().y());
     if (view)
         windowPoint = view->contentsToWindow(windowPoint);
@@ -577,7 +576,7 @@ WebMouseEventBuilder::WebMouseEventBuilder(const Widget* widget, const RenderObj
     modifiers = getWebInputModifiers(event);
 
     // The mouse event co-ordinates should be generated from the co-ordinates of the touch point.
-    ScrollView* view =  toScrollView(widget->parent());
+    FrameView* view = toFrameView(widget->parent());
     IntPoint windowPoint = roundedIntPoint(touch->absoluteLocation());
     if (view)
         windowPoint = view->contentsToWindow(windowPoint);

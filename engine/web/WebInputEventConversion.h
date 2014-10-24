@@ -44,7 +44,6 @@ class GestureEvent;
 class KeyboardEvent;
 class MouseEvent;
 class RenderObject;
-class ScrollView;
 class TouchEvent;
 class WebMouseEvent;
 class WebMouseWheelEvent;
