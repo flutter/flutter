@@ -11,49 +11,53 @@ import logging
 ROOT_DIR = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
     os.pardir))
 
-def dependencies():
-    args = [
-        'gn',
-        'desc',
-        os.path.join('out', 'Debug'),
-        '//sky/engine/public:blink',
-        'deps', '--all'
-    ]
-    targets = subprocess.check_output(args).splitlines()
-    return map(str.strip, targets)
+# Where to cache GN results (they're expensive to compute).
+GN_CACHE_PATH = os.path.abspath(os.path.join(ROOT_DIR, 'in_gn.txt'))
 
 
-def sources(target):
-    print target
-    args = [
-        'gn',
-        'desc',
+def stripped_lines_from_command(cmd, cwd=None):
+    lines = subprocess.check_output(cmd, cwd=cwd).splitlines()
+    return map(str.strip, lines)
+
+
+def gn_desc(*args):
+    # GN doesn't understand absolute paths yet, so use a relative BUILD_DIR
+    # and pass ROOT_DIR as the CWD.
+    cmd = [
+        'gn', 'desc',
+        # Hard-coding Debug for now:
         os.path.join('out', 'Debug'),
-        target,
-        'sources'
-    ]
-    sources = subprocess.check_output(args).splitlines()
-    return map(lambda s: s[2:], map(str.strip, sources))
+    ] + list(args)
+    return stripped_lines_from_command(cmd, cwd=ROOT_DIR)
+
+
+def targets_under(target):
+    targets = gn_desc(target, 'deps', '--all')
+    return filter(lambda s: s.startswith(target), targets)
+
+
+def used_files(target):
+    logging.info(target)
+    sources = map(lambda s: s[2:], gn_desc(target, 'sources'))
+    inputs = map(lambda s: s[2:], gn_desc(target, 'inputs'))
+    return sources + inputs
 
 
 def find_on_disk(path):
     # FIXME: Use os.walk and do fancier ignoring.
-    find_output = subprocess.check_output(['find', path, '-type', 'f'])
-    return map(str.strip, find_output.splitlines())
+    return stripped_lines_from_command(['find', path, '-type', 'f'])
 
 
 def main():
-    logging.basicConfig()
+    logging.basicConfig(level=logging.INFO)
 
-    os.chdir(ROOT_DIR)
-    if os.path.exists('in_gn.txt'):
-        logging.info('Using cached GN list: %s' % os.path.abspath('in_gn.txt'))
-        in_gn = set(map(str.strip, open('in_gn.txt').readlines()))
+    if os.path.exists(GN_CACHE_PATH):
+        logging.info('Using cached GN list: %s' % GN_CACHE_PATH)
+        in_gn = set(map(str.strip, open(GN_CACHE_PATH).readlines()))
     else:
-        logging.info('No gn cache found, rebuilding: %s' % os.abspath('in_gn.txt'))
-        targets = filter(lambda s: '//sky' in s, dependencies())
-        in_gn = set(sum(map(sources, targets), []))
-        open('in_gn.txt', 'w+').write('\n'.join(in_gn))
+        logging.info('No gn cache found, rebuilding: %s' % GN_CACHE_PATH)
+        in_gn = set(sum(map(used_files, targets_under('//sky')), []))
+        open(GN_CACHE_PATH, 'w+').write('\n'.join(in_gn))
 
     on_disk = set(find_on_disk('sky/engine'))
     # Ignore web/tests and bindings/tests
