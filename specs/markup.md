@@ -144,55 +144,55 @@ Sky Markup: Elements
 The Sky language consists of very few elements, since it is expected
 that everything of note would be provided by frameworks.
 
-<import src="foo.sky">
+```<import src="foo.sky">```
  - Downloads and imports foo.sky in the background.
 
-<import src="foo.sky" as="foo">
+```<import src="foo.sky" as="foo">```
  - Downloads and imports foo.sky in the background, using "foo" as its
-   local name (see <script>).
+   local name (see ```<script>```).
 
-<template>
+```<template>```
  - The contents of the element aren't placed in the Element itself.
    They are instead placed into a DocumentFragment that you can obtain
    from the element's "content" attribute.
 
-<script>
+```<script>```
  - Blocks until all previous imports have been loaded, then runs the
    script, with either 'module' or 'application' as the first
    argument, the exports of any imports that have "as" attributes at
    this time passed in as subsequent arguments, and with "this" set to
    null.
 
-<style>
+```<style>```
  - Adds the contents to the document's styles.
 
-<content>
-<content select="...">
+```<content>```
+```<content select="...">```
  - In a shadow tree, acts as an insertion point for distributed nodes.
    The select="" attribute gives the selector to use to pick the nodes
    to place in this insertion point; it defaults to everything.
 
-<shadow>
+```<shadow>```
  - In a shadow tree, acts as an insertion point for older shadow trees.
 
-<img src="foo.bin">
+```<img src="foo.bin">```
  - Sky fetches the bits for foo.bin, looks for a decoder for those
    bits, and renders the bits that the decoder returns.
 
-<iframe src="foo.bin">
+```<iframe src="foo.bin">```
  - Sky tells mojo to open an application for foo.bin, and hands that
    application a view so that the application can render appropriately.
 
-<t>
- - Within a <t> section, whitespace is not trimmed from the start and
+```<t>```
+ - Within a ```<t>``` section, whitespace is not trimmed from the start and
    end of text nodes by the parser.
    TOOD(ianh): figure out if the authoring aesthetics of this are ok
 
-<a href="foo.bin">
+```<a href="foo.bin">```
  - A widget that, when invoked, causes mojo to open a new application
    for "foo.bin".
 
-<title>
+```<title>```
  - Sets the contents as the document's title (as provided by Sky to
    the view manager). (Actually just ensures that any time the element
    is mutated, theTitleElement.ownerScope.ownerDocument.title is set
