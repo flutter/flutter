@@ -21,7 +21,6 @@ using namespace mojo;
 
 MojoLoader::MojoLoader(LocalFrame& frame)
     : m_frame(frame)
-    , m_weakFactory(this)
 {
 }
 
@@ -44,39 +43,18 @@ void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStre
     // response headers and set them on Document::contentLanguage.
 
     document->startParsing();
-    m_responseStream = responseStream.Pass();
-    readMore();
+
+    m_drainJob = adoptPtr(new DataPipeDrainer(this, responseStream.Pass()));
 }
 
-void MojoLoader::readMore()
+void MojoLoader::OnDataAvailable(const void* data, size_t numberOfBytes)
 {
-    const void* buf = nullptr;
-    uint32_t buf_size = 0;
-    MojoResult rv = BeginReadDataRaw(m_responseStream.get(),
-        &buf, &buf_size, MOJO_READ_DATA_FLAG_NONE);
-    if (rv == MOJO_RESULT_OK) {
-        m_frame.document()->parser()->appendBytes(static_cast<const char*>(buf), buf_size);
-        EndReadDataRaw(m_responseStream.get(), buf_size);
-        waitToReadMore();
-    } else if (rv == MOJO_RESULT_SHOULD_WAIT) {
-        waitToReadMore();
-    } else if (rv == MOJO_RESULT_FAILED_PRECONDITION) {
-        m_frame.document()->parser()->finish();
-    } else {
-        ASSERT_NOT_REACHED();
-    }
+    m_frame.document()->parser()->appendBytes(static_cast<const char*>(data), numberOfBytes);
 }
 
-void MojoLoader::waitToReadMore()
+void MojoLoader::OnDataComplete()
 {
-    m_handleWatcher.Start(m_responseStream.get(),
-        MOJO_HANDLE_SIGNAL_READABLE, MOJO_DEADLINE_INDEFINITE,
-        base::Bind(&MojoLoader::moreDataReady,m_weakFactory.GetWeakPtr()));
-}
-
-void MojoLoader::moreDataReady(MojoResult result)
-{
-    readMore();
+    m_frame.document()->parser()->finish();
 }
 
 }

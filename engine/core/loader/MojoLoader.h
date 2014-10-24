@@ -8,13 +8,14 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/common/handle_watcher.h"
 #include "mojo/public/cpp/system/data_pipe.h"
+#include "platform/fetcher/DataPipeDrainer.h"
 #include "platform/weborigin/KURL.h"
 
 namespace blink {
 
 class LocalFrame;
 
-class MojoLoader {
+class MojoLoader : public DataPipeDrainer::Client {
 public:
     explicit MojoLoader(LocalFrame&);
 
@@ -23,14 +24,11 @@ public:
 private:
     LocalFrame& m_frame;
 
-    // FIXME: These belong on a helper object for async reading from mojo pipes.
-    void readMore();
-    void waitToReadMore();
-    void moreDataReady(MojoResult);
+    // From DataPipeDrainer::Client
+    void OnDataAvailable(const void* data, size_t numberOfBytes) override;
+    void OnDataComplete() override;
 
-    mojo::common::HandleWatcher m_handleWatcher;
-    mojo::ScopedDataPipeConsumerHandle m_responseStream;
-    base::WeakPtrFactory<MojoLoader> m_weakFactory;
+    OwnPtr<DataPipeDrainer> m_drainJob;
 };
 
 }

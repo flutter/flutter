@@ -3,6 +3,8 @@ include_rules = [
     "+platform",
     "+public/platform",
     "+skia/ext",
+    "+mojo/public",
+    "+mojo/common",
     "+third_party/khronos",
     "+third_party/skia",
     "+url",
