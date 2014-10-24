@@ -168,11 +168,6 @@ bool Event::isWheelEvent() const
     return false;
 }
 
-bool Event::isRelatedEvent() const
-{
-    return false;
-}
-
 bool Event::isDragEvent() const
 {
     return false;

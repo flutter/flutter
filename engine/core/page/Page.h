@@ -43,8 +43,6 @@ class AutoscrollController;
 class Chrome;
 class ChromeClient;
 class ClientRectList;
-class ContextMenuClient;
-class ContextMenuController;
 class Document;
 class DragCaretController;
 class EditorClient;
@@ -82,7 +80,6 @@ public:
         ~PageClients();
 
         ChromeClient* chromeClient;
-        ContextMenuClient* contextMenuClient;
         EditorClient* editorClient;
         SpellCheckerClient* spellCheckerClient;
     };
@@ -122,7 +119,6 @@ public:
     AutoscrollController& autoscrollController() const { return *m_autoscrollController; }
     DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
-    ContextMenuController& contextMenuController() const { return *m_contextMenuController; }
 
     ScrollingCoordinator* scrollingCoordinator();
 
@@ -190,7 +186,6 @@ private:
     const OwnPtr<Chrome> m_chrome;
     const OwnPtrWillBeMember<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
-    const OwnPtrWillBeMember<ContextMenuController> m_contextMenuController;
     OwnPtr<ScrollingCoordinator> m_scrollingCoordinator;
     const OwnPtrWillBeMember<UndoStack> m_undoStack;
 

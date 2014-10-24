@@ -56,7 +56,6 @@ DummyPageHolder::DummyPageHolder(
         fillWithEmptyClients(m_pageClients);
     } else {
         m_pageClients.chromeClient = pageClients->chromeClient;
-        m_pageClients.contextMenuClient = pageClients->contextMenuClient;
         m_pageClients.editorClient = pageClients->editorClient;
         m_pageClients.spellCheckerClient = pageClients->spellCheckerClient;
     }

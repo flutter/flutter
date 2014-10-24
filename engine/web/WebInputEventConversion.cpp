@@ -514,8 +514,6 @@ WebMouseEventBuilder::WebMouseEventBuilder(const Widget* widget, const RenderObj
         type = WebInputEvent::MouseDown;
     else if (event.type() == EventTypeNames::mouseup)
         type = WebInputEvent::MouseUp;
-    else if (event.type() == EventTypeNames::contextmenu)
-        type = WebInputEvent::ContextMenu;
     else
         return; // Skip all other mouse events.
 

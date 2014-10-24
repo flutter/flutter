@@ -56,8 +56,6 @@
 #include "core/loader/FrameLoader.h"
 #include "core/loader/UniqueIdentifier.h"
 #include "core/page/Chrome.h"
-#include "core/page/ContextMenuController.h"
-#include "core/page/ContextMenuProvider.h"
 #include "core/page/EventHandler.h"
 #include "core/page/EventWithHitTestResults.h"
 #include "core/page/FocusController.h"
@@ -66,8 +64,6 @@
 #include "core/rendering/RenderView.h"
 #include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "platform/ContextMenu.h"
-#include "platform/ContextMenuItem.h"
 #include "platform/Cursor.h"
 #include "platform/KeyboardCodes.h"
 #include "platform/Logging.h"
@@ -156,14 +152,12 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     : m_client(client)
     , m_spellCheckClient(0)
     , m_chromeClientImpl(this)
-    , m_contextMenuClientImpl(this)
     , m_editorClientImpl(this)
     , m_spellCheckerClientImpl(this)
     , m_fixedLayoutSizeLock(false)
     , m_zoomLevel(0)
     , m_minimumZoomLevel(zoomFactorToZoomLevel(minTextSizeMultiplier))
     , m_maximumZoomLevel(zoomFactorToZoomLevel(maxTextSizeMultiplier))
-    , m_contextMenuAllowed(false)
     , m_doingDragAndDrop(false)
     , m_ignoreInputEvents(false)
     , m_compositorDeviceScaleFactorOverride(0)
@@ -198,7 +192,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
 {
     Page::PageClients pageClients;
     pageClients.chromeClient = &m_chromeClientImpl;
-    pageClients.contextMenuClient = &m_contextMenuClientImpl;
     pageClients.editorClient = &m_editorClientImpl;
     pageClients.spellCheckerClient = &m_spellCheckerClientImpl;
 
@@ -247,55 +240,11 @@ void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& ev
 
     if (event.button == WebMouseEvent::ButtonLeft && m_mouseCaptureNode)
         m_mouseCaptureGestureToken = mainFrame.eventHandler().takeLastMouseDownGestureToken();
-
-    // Dispatch the contextmenu event regardless of if the click was swallowed.
-#if OS(MACOSX)
-    if (event.button == WebMouseEvent::ButtonRight
-        || (event.button == WebMouseEvent::ButtonLeft
-            && event.modifiers & WebMouseEvent::ControlKey))
-        mouseContextMenu(event);
-#else
-    if (event.button == WebMouseEvent::ButtonRight)
-        mouseContextMenu(event);
-#endif
-}
-
-void WebViewImpl::mouseContextMenu(const WebMouseEvent& event)
-{
-    if (!mainFrameImpl() || !mainFrameImpl()->frameView())
-        return;
-
-    m_page->contextMenuController().clearContextMenu();
-
-    PlatformMouseEventBuilder pme(mainFrameImpl()->frameView(), event);
-
-    // Find the right target frame. See issue 1186900.
-    HitTestResult result = hitTestResultForWindowPos(pme.position());
-    LocalFrame* targetFrame;
-    if (result.innerNonSharedNode())
-        targetFrame = result.innerNonSharedNode()->document().frame();
-    else
-        targetFrame = m_page->focusController().focusedOrMainFrame();
-
-    LocalFrame* targetLocalFrame = targetFrame;
-
-    m_contextMenuAllowed = true;
-    targetLocalFrame->eventHandler().sendContextMenuEvent(pme);
-    m_contextMenuAllowed = false;
-    // Actually showing the context menu is handled by the ContextMenuClient
-    // implementation...
 }
 
 void WebViewImpl::handleMouseUp(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
     PageWidgetEventHandler::handleMouseUp(mainFrame, event);
-
-#if OS(WIN)
-    // Dispatch the contextmenu event regardless of if the click was swallowed.
-    // On Mac/Linux, we handle it on mouse down, not up.
-    if (event.button == WebMouseEvent::ButtonRight)
-        mouseContextMenu(event);
-#endif
 }
 
 bool WebViewImpl::handleMouseWheel(LocalFrame& mainFrame, const WebMouseWheelEvent& event)
@@ -437,11 +386,7 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
             break;
 
         m_client->cancelScheduledContentIntents();
-        m_page->contextMenuController().clearContextMenu();
-        m_contextMenuAllowed = true;
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
-        m_contextMenuAllowed = false;
-
         break;
     }
     case WebInputEvent::GestureShowPress: {
@@ -598,22 +543,6 @@ bool WebViewImpl::handleKeyEvent(const WebKeyboardEvent& event)
         }
         return true;
     }
-
-#if !OS(MACOSX)
-    const WebInputEvent::Type contextMenuTriggeringEventType =
-#if OS(WIN)
-        WebInputEvent::KeyUp;
-#else
-        WebInputEvent::RawKeyDown;
-#endif
-
-    bool isUnmodifiedMenuKey = !(event.modifiers & WebInputEvent::InputModifiers) && event.windowsKeyCode == VKEY_APPS;
-    bool isShiftF10 = event.modifiers == WebInputEvent::ShiftKey && event.windowsKeyCode == VKEY_F10;
-    if ((isUnmodifiedMenuKey || isShiftF10) && event.type == contextMenuTriggeringEventType) {
-        sendContextMenuEvent(event);
-        return true;
-    }
-#endif // !OS(MACOSX)
 
     return keyEventDefault(event);
 }
@@ -860,34 +789,6 @@ bool WebViewImpl::hasTouchEventHandlersAt(const WebPoint& point)
 {
     // FIXME: Implement this. Note that the point must be divided by pageScaleFactor.
     return true;
-}
-
-#if !OS(MACOSX)
-// Mac has no way to open a context menu based on a keyboard event.
-bool WebViewImpl::sendContextMenuEvent(const WebKeyboardEvent& event)
-{
-    // The contextMenuController() holds onto the last context menu that was
-    // popped up on the page until a new one is created. We need to clear
-    // this menu before propagating the event through the DOM so that we can
-    // detect if we create a new menu for this event, since we won't create
-    // a new menu if the DOM swallows the event and the defaultEventHandler does
-    // not run.
-    page()->contextMenuController().clearContextMenu();
-
-    m_contextMenuAllowed = true;
-    LocalFrame* focusedFrame = page()->focusController().focusedOrMainFrame();
-    bool handled = focusedFrame->eventHandler().sendContextMenuEventForKey();
-    m_contextMenuAllowed = false;
-    return handled;
-}
-#endif
-
-void WebViewImpl::showContextMenuAtPoint(float x, float y, PassRefPtr<ContextMenuProvider> menuProvider)
-{
-    m_contextMenuAllowed = true;
-    page()->contextMenuController().clearContextMenu();
-    page()->contextMenuController().showContextMenuAtPoint(page()->mainFrame(), x, y, menuProvider);
-    m_contextMenuAllowed = false;
 }
 
 bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)
@@ -1232,8 +1133,6 @@ static String inputTypeToName(WebInputEvent::Type type)
         return EventTypeNames::mouseenter;
     case WebInputEvent::MouseLeave:
         return EventTypeNames::mouseleave;
-    case WebInputEvent::ContextMenu:
-        return EventTypeNames::contextmenu;
     case WebInputEvent::MouseWheel:
         return EventTypeNames::mousewheel;
     case WebInputEvent::KeyDown:
@@ -2217,31 +2116,6 @@ void WebViewImpl::setRootLayerTransform(const WebSize& rootLayerOffset, float ro
     if (mainFrameImpl())
         mainFrameImpl()->setInputEventsTransformForEmulation(m_rootLayerOffset, m_rootLayerScale);
     updateRootLayerTransform();
-}
-
-void WebViewImpl::performCustomContextMenuAction(unsigned action)
-{
-    if (!m_page)
-        return;
-    ContextMenu* menu = m_page->contextMenuController().contextMenu();
-    if (!menu)
-        return;
-    const ContextMenuItem* item = menu->itemWithAction(static_cast<ContextMenuAction>(ContextMenuItemBaseCustomTag + action));
-    if (item)
-        m_page->contextMenuController().contextMenuItemSelected(item);
-    m_page->contextMenuController().clearContextMenu();
-}
-
-void WebViewImpl::showContextMenu()
-{
-    if (!page())
-        return;
-
-    page()->contextMenuController().clearContextMenu();
-    m_contextMenuAllowed = true;
-    if (LocalFrame* focusedFrame = page()->focusController().focusedOrMainFrame())
-        focusedFrame->eventHandler().sendContextMenuEventForKey();
-    m_contextMenuAllowed = false;
 }
 
 void WebViewImpl::extractSmartClipData(WebRect rect, WebString& clipText, WebString& clipHtml, WebRect& clipRect)

@@ -94,8 +94,7 @@ public:
         MouseMove,
         MouseEnter,
         MouseLeave,
-        ContextMenu,
-        MouseTypeLast = ContextMenu,
+        MouseTypeLast = MouseLeave,
 
         // WebMouseWheelEvent
         MouseWheel,

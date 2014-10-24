@@ -32,7 +32,6 @@
 #define WebViewImpl_h
 
 #include "core/html/ime/InputMethodContext.h"
-#include "core/page/ContextMenuProvider.h"
 #include "platform/geometry/IntPoint.h"
 #include "platform/geometry/IntRect.h"
 #include "platform/graphics/GraphicsLayer.h"
@@ -46,7 +45,6 @@
 #include "public/web/WebNavigationPolicy.h"
 #include "public/web/WebView.h"
 #include "web/ChromeClientImpl.h"
-#include "web/ContextMenuClientImpl.h"
 #include "web/EditorClientImpl.h"
 #include "web/PageOverlayList.h"
 #include "web/PageWidgetDelegate.h"
@@ -177,8 +175,6 @@ public:
                                     unsigned activeForegroundColor,
                                     unsigned inactiveBackgroundColor,
                                     unsigned inactiveForegroundColor) OVERRIDE;
-    virtual void performCustomContextMenuAction(unsigned action) OVERRIDE;
-    virtual void showContextMenu() OVERRIDE;
     virtual void extractSmartClipData(WebRect, WebString&, WebString&, WebRect&) OVERRIDE;
     virtual void addPageOverlay(WebPageOverlay*, int /* zOrder */) OVERRIDE;
     virtual void removePageOverlay(WebPageOverlay*) OVERRIDE;
@@ -246,7 +242,6 @@ public:
     WebLocalFrameImpl* localFrameRootTemporary() const;
 
     // Event related methods:
-    void mouseContextMenu(const WebMouseEvent&);
     void mouseDoubleClick(const WebMouseEvent&);
 
     bool detectContentOnTouch(const WebPoint&);
@@ -255,16 +250,6 @@ public:
 
     // WebGestureCurveTarget implementation for fling.
     virtual bool scrollBy(const WebFloatSize& delta, const WebFloatSize& velocity) OVERRIDE;
-
-    // Handles context menu events orignated via the the keyboard. These
-    // include the VK_APPS virtual key and the Shift+F10 combine. Code is
-    // based on the Webkit function bool WebView::handleContextMenuEvent(WPARAM
-    // wParam, LPARAM lParam) in webkit\webkit\win\WebView.cpp. The only
-    // significant change in this function is the code to convert from a
-    // Keyboard event to the Right Mouse button down event.
-    bool sendContextMenuEvent(const WebKeyboardEvent&);
-
-    void showContextMenuAtPoint(float x, float y, PassRefPtr<ContextMenuProvider>);
 
     // Notifies the WebView that a load has been committed. isNewNavigation
     // will be true if a new session history item should be created for that
@@ -280,11 +265,6 @@ public:
     void layoutUpdated(WebLocalFrameImpl*);
 
     void didRemoveAllPendingStylesheet(WebLocalFrameImpl*);
-
-    bool contextMenuAllowed() const
-    {
-        return m_contextMenuAllowed;
-    }
 
     void updateMainFrameLayoutSize();
     void updatePageDefinedViewportConstraints(const ViewportDescription&);
@@ -417,7 +397,6 @@ private:
     WebSpellCheckClient* m_spellCheckClient;
 
     ChromeClientImpl m_chromeClientImpl;
-    ContextMenuClientImpl m_contextMenuClientImpl;
     EditorClientImpl m_editorClientImpl;
     SpellCheckerClientImpl m_spellCheckerClientImpl;
 
@@ -447,8 +426,6 @@ private:
     double m_minimumZoomLevel;
 
     double m_maximumZoomLevel;
-
-    bool m_contextMenuAllowed;
 
     bool m_doingDragAndDrop;
 

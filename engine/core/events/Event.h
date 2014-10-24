@@ -145,7 +145,6 @@ public:
     virtual bool isTouchEvent() const;
     virtual bool isGestureEvent() const;
     virtual bool isWheelEvent() const;
-    virtual bool isRelatedEvent() const;
 
     // Drag events are a subset of mouse events.
     virtual bool isDragEvent() const;

@@ -149,13 +149,8 @@ public:
     bool isScrollbarHandlingGestures() const;
 
     bool bestClickableNodeForHitTestResult(const HitTestResult&, IntPoint& targetPoint, Node*& targetNode);
-    bool bestContextMenuNodeForHitTestResult(const HitTestResult&, IntPoint& targetPoint, Node*& targetNode);
     // FIXME: This doesn't appear to be used outside tests anymore, what path are we using now and is it tested?
     bool bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, const IntSize& touchRadius, IntRect& targetArea, Node*& targetNode);
-
-    bool sendContextMenuEvent(const PlatformMouseEvent&);
-    bool sendContextMenuEventForKey();
-    bool sendContextMenuEventForGesture(const GestureEventWithHitTestResults&);
 
     void setMouseDownMayStartAutoscroll() { m_mouseDownMayStartAutoscroll = true; }
 
@@ -350,8 +345,6 @@ private:
 
     double m_maxMouseMovedDuration;
     bool m_didStartDrag;
-
-    bool m_longTapShouldInvokeContextMenu;
 
     Timer<EventHandler> m_activeIntervalTimer;
     double m_lastShowPressTimestamp;

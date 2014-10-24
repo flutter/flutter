@@ -266,14 +266,6 @@ public:
     // to implement device metrics emulation.
     virtual void setRootLayerTransform(const WebSize& offset, float scale) = 0;
 
-    // Context menu --------------------------------------------------------
-
-    virtual void performCustomContextMenuAction(unsigned action) = 0;
-
-    // Shows a context menu for the currently focused element.
-    virtual void showContextMenu() = 0;
-
-
     // SmartClip support ---------------------------------------------------
     virtual void extractSmartClipData(WebRect initRect, WebString& text, WebString& html, WebRect& resultRect) = 0;
 

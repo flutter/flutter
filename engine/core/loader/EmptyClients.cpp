@@ -38,9 +38,6 @@ void fillWithEmptyClients(Page::PageClients& pageClients)
     static ChromeClient* dummyChromeClient = adoptPtr(new EmptyChromeClient).leakPtr();
     pageClients.chromeClient = dummyChromeClient;
 
-    static ContextMenuClient* dummyContextMenuClient = adoptPtr(new EmptyContextMenuClient).leakPtr();
-    pageClients.contextMenuClient = dummyContextMenuClient;
-
     static EditorClient* dummyEditorClient = adoptPtr(new EmptyEditorClient).leakPtr();
     pageClients.editorClient = dummyEditorClient;
 

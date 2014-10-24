@@ -32,7 +32,6 @@
 #include "core/editing/UndoStep.h"
 #include "core/loader/FrameLoaderClient.h"
 #include "core/page/ChromeClient.h"
-#include "core/page/ContextMenuClient.h"
 #include "core/page/EditorClient.h"
 #include "core/page/FocusType.h"
 #include "core/page/Page.h"
@@ -187,15 +186,6 @@ public:
     virtual bool canPaste(LocalFrame*, bool defaultValue) const OVERRIDE { return defaultValue; }
 
     virtual bool handleKeyboardEvent() OVERRIDE { return false; }
-};
-
-class EmptyContextMenuClient FINAL : public ContextMenuClient {
-    WTF_MAKE_NONCOPYABLE(EmptyContextMenuClient); WTF_MAKE_FAST_ALLOCATED;
-public:
-    EmptyContextMenuClient() { }
-    virtual ~EmptyContextMenuClient() {  }
-    virtual void showContextMenu(const ContextMenu*) OVERRIDE { }
-    virtual void clearContextMenu() OVERRIDE { }
 };
 
 void fillWithEmptyClients(Page::PageClients&);

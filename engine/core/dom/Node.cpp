@@ -72,7 +72,6 @@
 #include "core/frame/Settings.h"
 #include "core/html/HTMLAnchorElement.h"
 #include "core/html/HTMLStyleElement.h"
-#include "core/page/ContextMenuController.h"
 #include "core/page/EventHandler.h"
 #include "core/page/Page.h"
 #include "core/rendering/RenderBox.h"
@@ -1823,9 +1822,6 @@ void Node::defaultEventHandler(Event* event)
         int detail = event->isUIEvent() ? static_cast<UIEvent*>(event)->detail() : 0;
         if (dispatchDOMActivateEvent(detail, event))
             event->setDefaultHandled();
-    } else if (eventType == EventTypeNames::contextmenu) {
-        if (Page* page = document().page())
-            page->contextMenuController().handleContextMenuEvent(event);
     } else if (eventType == EventTypeNames::textInput) {
         if (event->hasInterface(EventNames::TextEvent)) {
             if (LocalFrame* frame = document().frame())

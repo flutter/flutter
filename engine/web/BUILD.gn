@@ -40,8 +40,6 @@ component("web") {
     "CompositionUnderlineBuilder.h",
     "CompositionUnderlineVectorBuilder.cpp",
     "CompositionUnderlineVectorBuilder.h",
-    "ContextMenuClientImpl.cpp",
-    "ContextMenuClientImpl.h",
     "EditorClientImpl.cpp",
     "EditorClientImpl.h",
     "FrameLoaderClientImpl.cpp",

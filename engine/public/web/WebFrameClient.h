@@ -56,7 +56,6 @@ class WebURLLoader;
 class WebURLResponse;
 struct WebColorSuggestion;
 struct WebConsoleMessage;
-struct WebContextMenuData;
 struct WebRect;
 struct WebSize;
 struct WebURLError;
@@ -173,18 +172,6 @@ public:
     // These methods allow the client to intercept and overrule editing
     // operations.
     virtual void didChangeSelection(bool isSelectionEmpty) { }
-
-
-    // UI ------------------------------------------------------------------
-
-    // Shows a context menu with commands relevant to a specific element on
-    // the given frame. Additional context data is supplied.
-    virtual void showContextMenu(const WebContextMenuData&) { }
-
-    // Called when the data attached to the currently displayed context menu is
-    // invalidated. The context menu may be closed if possible.
-    virtual void clearContextMenu() { }
-
 
     // Low-level resource notifications ------------------------------------
 

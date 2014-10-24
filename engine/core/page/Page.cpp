@@ -37,7 +37,6 @@
 #include "core/page/AutoscrollController.h"
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
-#include "core/page/ContextMenuController.h"
 #include "core/page/FocusController.h"
 #include "core/page/PageLifecycleNotifier.h"
 #include "core/page/scrolling/ScrollingCoordinator.h"
@@ -99,7 +98,6 @@ Page::Page(PageClients& pageClients)
     , m_chrome(Chrome::create(this, pageClients.chromeClient))
     , m_dragCaretController(DragCaretController::create())
     , m_focusController(FocusController::create(this))
-    , m_contextMenuController(ContextMenuController::create(this, pageClients.contextMenuClient))
     , m_undoStack(UndoStack::create())
     , m_mainFrame(0)
     , m_editorClient(pageClients.editorClient)
@@ -185,7 +183,6 @@ void Page::setMainFrame(LocalFrame* mainFrame)
 void Page::documentDetached(Document* document)
 {
     m_multisamplingChangedObservers.clear();
-    m_contextMenuController->documentDetached(document);
 }
 
 bool Page::openedByDOM() const
@@ -375,7 +372,6 @@ void Page::trace(Visitor* visitor)
 {
 #if ENABLE(OILPAN)
     visitor->trace(m_dragCaretController);
-    visitor->trace(m_contextMenuController);
     visitor->trace(m_undoStack);
     visitor->trace(m_multisamplingChangedObservers);
     visitor->trace(m_frameHost);
@@ -408,7 +404,6 @@ void Page::willBeDestroyed()
 
 Page::PageClients::PageClients()
     : chromeClient(0)
-    , contextMenuClient(0)
     , editorClient(0)
     , spellCheckerClient(0)
 {
