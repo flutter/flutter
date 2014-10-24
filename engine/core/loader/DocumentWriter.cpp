@@ -30,7 +30,7 @@
 #include "core/loader/DocumentWriter.h"
 
 #include "core/dom/Document.h"
-#include "core/dom/ScriptableDocumentParser.h"
+#include "core/dom/DocumentParser.h"
 #include "core/frame/LocalFrame.h"
 
 namespace blink {

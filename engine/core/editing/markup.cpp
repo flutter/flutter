@@ -529,10 +529,10 @@ String createMarkup(const Range* range, WillBeHeapVector<RawPtrWillBeMember<Node
     return createMarkupInternal(document, range, updatedRange, nodes, shouldAnnotate, convertBlocksToInlines, shouldResolveURLs, constrainingAncestor);
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentFromMarkup(Document& document, const String& markup, ParserContentPolicy parserContentPolicy)
+PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentFromMarkup(Document& document, const String& markup)
 {
     RefPtrWillBeRawPtr<DocumentFragment> fragment = DocumentFragment::create(document);
-    fragment->parseHTML(markup, nullptr, parserContentPolicy);
+    fragment->parseHTML(markup, nullptr);
     return fragment.release();
 }
 
@@ -545,12 +545,12 @@ String createMarkup(const Node* node, EChildrenOnly childrenOnly, WillBeHeapVect
     return accumulator.serializeNodes(const_cast<Node&>(*node), childrenOnly, tagNamesToSkip);
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentForInnerOuterHTML(const String& markup, Element* contextElement, ParserContentPolicy parserContentPolicy, const char* method, ExceptionState& exceptionState)
+PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentForInnerOuterHTML(const String& markup, Element* contextElement, const char* method, ExceptionState& exceptionState)
 {
     ASSERT(contextElement);
     Document& document = isHTMLTemplateElement(*contextElement) ? contextElement->document().ensureTemplateDocument() : contextElement->document();
     RefPtrWillBeRawPtr<DocumentFragment> fragment = DocumentFragment::create(document);
-    fragment->parseHTML(markup, contextElement, parserContentPolicy);
+    fragment->parseHTML(markup, contextElement);
     return fragment;
 }
 

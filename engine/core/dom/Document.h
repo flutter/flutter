@@ -90,6 +90,7 @@ class Frame;
 class FrameHost;
 class FrameView;
 class HTMLCanvasElement;
+class HTMLDocumentParser;
 class HTMLElement;
 class HTMLImport;
 class HTMLImportLoader;
@@ -112,7 +113,6 @@ class RenderView;
 class RequestAnimationFrameCallback;
 class ResourceFetcher;
 class ScriptRunner;
-class ScriptableDocumentParser;
 class ScriptedAnimationController;
 class SegmentedString;
 class SelectorQueryCache;
@@ -367,7 +367,7 @@ public:
 
     virtual PassRefPtrWillBeRawPtr<DocumentParser> createParser();
     DocumentParser* parser() const { return m_parser.get(); }
-    ScriptableDocumentParser* scriptableDocumentParser() const;
+    HTMLDocumentParser* scriptableDocumentParser() const;
 
     enum ReadyState {
         Loading,

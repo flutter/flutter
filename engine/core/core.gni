@@ -445,8 +445,6 @@ sky_core_files = [
   "dom/RenderTreeBuilder.cpp",
   "dom/RenderTreeBuilder.h",
   "dom/RequestAnimationFrameCallback.h",
-  "dom/ScriptableDocumentParser.cpp",
-  "dom/ScriptableDocumentParser.h",
   "dom/ScriptedAnimationController.cpp",
   "dom/ScriptedAnimationController.h",
   "dom/SelectorQuery.cpp",

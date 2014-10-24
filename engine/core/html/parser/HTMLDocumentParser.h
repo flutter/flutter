@@ -27,8 +27,7 @@
 #define HTMLDocumentParser_h
 
 #include "base/memory/weak_ptr.h"
-#include "core/dom/ParserContentPolicy.h"
-#include "core/dom/ScriptableDocumentParser.h"
+#include "core/dom/DecodedDataDocumentParser.h"
 #include "core/fetch/ResourceClient.h"
 #include "core/frame/UseCounter.h"
 #include "core/html/parser/CompactHTMLToken.h"
@@ -59,7 +58,7 @@ class ScriptSourceCode;
 
 class PumpSession;
 
-class HTMLDocumentParser :  public ScriptableDocumentParser {
+class HTMLDocumentParser :  public DecodedDataDocumentParser {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLDocumentParser);
 public:
@@ -73,12 +72,12 @@ public:
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();
 
-    static void parseDocumentFragment(const String&, DocumentFragment*, Element* contextElement, ParserContentPolicy = AllowScriptingContent);
+    static void parseDocumentFragment(const String&, DocumentFragment*, Element* contextElement);
 
     HTMLTokenizer* tokenizer() const { return m_tokenizer.get(); }
 
-    virtual TextPosition textPosition() const OVERRIDE FINAL;
-    virtual OrdinalNumber lineNumber() const OVERRIDE FINAL;
+    TextPosition textPosition() const;
+    OrdinalNumber lineNumber() const;
 
     struct ParsedChunk {
         OwnPtr<CompactHTMLTokenStream> tokens;
@@ -88,6 +87,10 @@ public:
     virtual void appendBytes(const char* bytes, size_t length) OVERRIDE;
     virtual void flush() OVERRIDE FINAL;
 
+    bool isWaitingForScripts() const;
+    bool isExecutingScript() const;
+    void executeScriptsWaitingForResources();
+
     UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
 protected:
@@ -96,15 +99,17 @@ protected:
     virtual void finish() OVERRIDE FINAL;
 
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);
-    HTMLDocumentParser(DocumentFragment*, Element* contextElement, ParserContentPolicy);
+    HTMLDocumentParser(DocumentFragment*, Element* contextElement);
 
     HTMLTreeBuilder* treeBuilder() const { return m_treeBuilder.get(); }
 
 private:
-    static PassRefPtrWillBeRawPtr<HTMLDocumentParser> create(DocumentFragment* fragment, Element* contextElement, ParserContentPolicy parserContentPolicy)
+    static PassRefPtrWillBeRawPtr<HTMLDocumentParser> create(DocumentFragment* fragment, Element* contextElement)
     {
-        return adoptRefWillBeNoop(new HTMLDocumentParser(fragment, contextElement, parserContentPolicy));
+        return adoptRefWillBeNoop(new HTMLDocumentParser(fragment, contextElement));
     }
+
+    virtual HTMLDocumentParser* asHTMLDocumentParser() OVERRIDE FINAL { return this; }
 
     // DocumentParser
     virtual void detach() OVERRIDE FINAL;
@@ -112,9 +117,6 @@ private:
     virtual bool processingData() const OVERRIDE FINAL;
     virtual void prepareToStopParsing() OVERRIDE FINAL;
     virtual void stopParsing() OVERRIDE FINAL;
-    virtual bool isWaitingForScripts() const OVERRIDE FINAL;
-    virtual bool isExecutingScript() const OVERRIDE FINAL;
-    virtual void executeScriptsWaitingForResources() OVERRIDE FINAL;
 
     void startBackgroundParser();
     void stopBackgroundParser();

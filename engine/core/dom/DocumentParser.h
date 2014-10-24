@@ -32,7 +32,7 @@ namespace blink {
 
 class Document;
 class SegmentedString;
-class ScriptableDocumentParser;
+class HTMLDocumentParser;
 class TextResourceDecoder;
 
 class DocumentParser : public RefCountedWillBeGarbageCollectedFinalized<DocumentParser> {
@@ -40,7 +40,7 @@ public:
     virtual ~DocumentParser();
     virtual void trace(Visitor*);
 
-    virtual ScriptableDocumentParser* asScriptableDocumentParser() { return 0; }
+    virtual HTMLDocumentParser* asHTMLDocumentParser() { return 0; }
 
     // http://www.whatwg.org/specs/web-apps/current-work/#insertion-point
     virtual bool hasInsertionPoint() { return true; }

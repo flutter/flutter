@@ -25,7 +25,6 @@
 #define DocumentFragment_h
 
 #include "core/dom/ContainerNode.h"
-#include "core/dom/ParserContentPolicy.h"
 
 namespace blink {
 
@@ -34,7 +33,7 @@ class DocumentFragment : public ContainerNode {
 public:
     static PassRefPtrWillBeRawPtr<DocumentFragment> create(Document&);
 
-    void parseHTML(const String&, Element* contextElement, ParserContentPolicy = AllowScriptingContent);
+    void parseHTML(const String&, Element* contextElement);
 
     virtual bool canContainRangeEndPoint() const OVERRIDE FINAL { return true; }
     virtual bool isTemplateContent() const { return false; }

@@ -47,7 +47,6 @@
 #include "bindings/core/v8/WindowProxy.h"
 #include "core/dom/Document.h"
 #include "core/dom/Node.h"
-#include "core/dom/ScriptableDocumentParser.h"
 #include "core/events/Event.h"
 #include "core/events/EventListener.h"
 #include "core/frame/LocalDOMWindow.h"
@@ -57,6 +56,7 @@
 #include "core/html/HTMLLinkElement.h"
 #include "core/html/imports/HTMLImportChild.h"
 #include "core/html/imports/HTMLImportLoader.h"
+#include "core/html/parser/HTMLDocumentParser.h"
 #include "core/inspector/InspectorTraceEvents.h"
 #include "core/inspector/ScriptCallStack.h"
 #include "core/loader/FrameLoaderClient.h"
@@ -190,7 +190,7 @@ WindowProxy* ScriptController::windowProxy(DOMWrapperWorld& world)
 
 TextPosition ScriptController::eventHandlerPosition() const
 {
-    ScriptableDocumentParser* parser = m_frame->document()->scriptableDocumentParser();
+    HTMLDocumentParser* parser = m_frame->document()->scriptableDocumentParser();
     if (parser)
         return parser->textPosition();
     return TextPosition::minimumPosition();

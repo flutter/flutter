@@ -63,11 +63,11 @@ static HTMLTokenizer::State tokenizerStateForContextElement(Element* contextElem
 }
 
 HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
-    : ScriptableDocumentParser(document)
+    : DecodedDataDocumentParser(document)
     , m_options(&document)
     , m_token(m_options.useThreading ? nullptr : adoptPtr(new HTMLToken))
     , m_tokenizer(m_options.useThreading ? nullptr : HTMLTokenizer::create(m_options))
-    , m_treeBuilder(HTMLTreeBuilder::create(this, &document, parserContentPolicy(), reportErrors, m_options))
+    , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors, m_options))
     , m_parserScheduler(HTMLParserScheduler::create(this))
     , m_weakFactory(this)
     , m_isFragment(false)
@@ -80,12 +80,12 @@ HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors
 
 // FIXME: Member variables should be grouped into self-initializing structs to
 // minimize code duplication between these constructors.
-HTMLDocumentParser::HTMLDocumentParser(DocumentFragment* fragment, Element* contextElement, ParserContentPolicy parserContentPolicy)
-    : ScriptableDocumentParser(fragment->document(), parserContentPolicy)
+HTMLDocumentParser::HTMLDocumentParser(DocumentFragment* fragment, Element* contextElement)
+    : DecodedDataDocumentParser(fragment->document())
     , m_options(&fragment->document())
     , m_token(adoptPtr(new HTMLToken))
     , m_tokenizer(HTMLTokenizer::create(m_options))
-    , m_treeBuilder(HTMLTreeBuilder::create(this, fragment, contextElement, this->parserContentPolicy(), m_options))
+    , m_treeBuilder(HTMLTreeBuilder::create(this, fragment, contextElement, m_options))
     , m_weakFactory(this)
     , m_isFragment(true)
     , m_endWasDelayed(false)
@@ -117,7 +117,7 @@ HTMLDocumentParser::~HTMLDocumentParser()
 void HTMLDocumentParser::trace(Visitor* visitor)
 {
     visitor->trace(m_treeBuilder);
-    ScriptableDocumentParser::trace(visitor);
+    DecodedDataDocumentParser::trace(visitor);
 }
 
 void HTMLDocumentParser::detach()
@@ -228,7 +228,6 @@ void HTMLDocumentParser::resumeParsingAfterYield()
 
 void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
 {
-    ASSERT(scriptingContentIsAllowed(parserContentPolicy()));
     if (m_isFragment)
         return;
     TextPosition scriptStartPosition = TextPosition::belowRangePosition();
@@ -703,9 +702,9 @@ void HTMLDocumentParser::executeScriptsWaitingForResources()
         resumeParsingAfterScriptExecution();
 }
 
-void HTMLDocumentParser::parseDocumentFragment(const String& source, DocumentFragment* fragment, Element* contextElement, ParserContentPolicy parserContentPolicy)
+void HTMLDocumentParser::parseDocumentFragment(const String& source, DocumentFragment* fragment, Element* contextElement)
 {
-    RefPtrWillBeRawPtr<HTMLDocumentParser> parser = HTMLDocumentParser::create(fragment, contextElement, parserContentPolicy);
+    RefPtrWillBeRawPtr<HTMLDocumentParser> parser = HTMLDocumentParser::create(fragment, contextElement);
     parser->insert(source); // Use insert() so that the parser will not yield.
     parser->finish();
     ASSERT(!parser->processingData()); // Make sure we're done. <rdar://problem/3963151>

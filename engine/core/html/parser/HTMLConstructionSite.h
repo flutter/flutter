@@ -28,7 +28,6 @@
 #define HTMLConstructionSite_h
 
 #include "core/dom/Document.h"
-#include "core/dom/ParserContentPolicy.h"
 #include "core/html/parser/HTMLElementStack.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/PassRefPtr.h"
@@ -88,8 +87,8 @@ class HTMLConstructionSite FINAL {
     WTF_MAKE_NONCOPYABLE(HTMLConstructionSite);
     DISALLOW_ALLOCATION();
 public:
-    HTMLConstructionSite(Document*, ParserContentPolicy);
-    HTMLConstructionSite(DocumentFragment*, ParserContentPolicy);
+    explicit HTMLConstructionSite(Document*);
+    explicit HTMLConstructionSite(DocumentFragment*);
     ~HTMLConstructionSite();
     void trace(Visitor*);
 
@@ -130,8 +129,6 @@ public:
     ContainerNode* currentNode() const { return m_openElements.topNode(); }
     Document& ownerDocumentForCurrentNode();
     HTMLElementStack* openElements() const { return &m_openElements; }
-
-    ParserContentPolicy parserContentPolicy() { return m_parserContentPolicy; }
 
 private:
     // In the common case, this queue will have only one task because most
@@ -206,8 +203,6 @@ private:
     };
 
     PendingText m_pendingText;
-
-    ParserContentPolicy m_parserContentPolicy;
 };
 
 } // namespace blink

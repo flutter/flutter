@@ -45,12 +45,12 @@ static TextPosition uninitializedPositionValue1()
     return TextPosition(OrdinalNumber::fromOneBasedInt(-1), OrdinalNumber::first());
 }
 
-HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* document, ParserContentPolicy parserContentPolicy, bool, const HTMLParserOptions& options)
+HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* document, bool, const HTMLParserOptions& options)
     :
 #if ENABLE(ASSERT)
       m_isAttached(true),
 #endif
-      m_tree(document, parserContentPolicy)
+      m_tree(document)
     , m_insertionMode(HTMLMode)
     , m_originalInsertionMode(HTMLMode)
     , m_parser(parser)
@@ -62,13 +62,13 @@ HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* docum
 
 // FIXME: Member variables should be grouped into self-initializing structs to
 // minimize code duplication between these constructors.
-HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, ParserContentPolicy parserContentPolicy, const HTMLParserOptions& options)
+HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, const HTMLParserOptions& options)
     :
 #if ENABLE(ASSERT)
      m_isAttached(true),
 #endif
      m_fragmentContext(fragment, contextElement)
-    , m_tree(fragment, parserContentPolicy)
+    , m_tree(fragment)
     , m_insertionMode(HTMLMode)
     , m_originalInsertionMode(HTMLMode)
     , m_parser(parser)
@@ -209,8 +209,7 @@ void HTMLTreeBuilder::processEndTag(AtomicHTMLToken* token)
     if (token->name() == HTMLNames::scriptTag) {
         // Pause ourselves so that parsing stops until the script can be processed by the caller.
         ASSERT(m_tree.currentElement()->hasLocalName(HTMLNames::scriptTag.localName()));
-        if (scriptingContentIsAllowed(m_tree.parserContentPolicy()))
-            m_scriptToProcess = m_tree.currentElement();
+        m_scriptToProcess = m_tree.currentElement();
         m_tree.openElements()->pop();
         setInsertionMode(m_originalInsertionMode);
 

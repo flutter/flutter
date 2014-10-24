@@ -52,7 +52,6 @@
 #include "core/dom/NamedNodeMap.h"
 #include "core/dom/NodeRenderStyle.h"
 #include "core/dom/RenderTreeBuilder.h"
-#include "core/dom/ScriptableDocumentParser.h"
 #include "core/dom/SelectorQuery.h"
 #include "core/dom/StyleEngine.h"
 #include "core/dom/Text.h"
@@ -75,6 +74,7 @@
 #include "core/html/HTMLDocument.h"
 #include "core/html/HTMLElement.h"
 #include "core/html/HTMLTemplateElement.h"
+#include "core/html/parser/HTMLDocumentParser.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
@@ -1553,7 +1553,7 @@ String Element::outerHTML() const
 
 void Element::setInnerHTML(const String& html, ExceptionState& exceptionState)
 {
-    if (RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, this, AllowScriptingContent, "innerHTML", exceptionState)) {
+    if (RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, this, "innerHTML", exceptionState)) {
         ContainerNode* container = this;
         if (isHTMLTemplateElement(*this))
             container = toHTMLTemplateElement(this)->content();
@@ -1577,7 +1577,7 @@ void Element::setOuterHTML(const String& html, ExceptionState& exceptionState)
     RefPtrWillBeRawPtr<Node> prev = previousSibling();
     RefPtrWillBeRawPtr<Node> next = nextSibling();
 
-    RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, parent.get(), AllowScriptingContent, "outerHTML", exceptionState);
+    RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, parent.get(), "outerHTML", exceptionState);
     if (exceptionState.hadException())
         return;
 

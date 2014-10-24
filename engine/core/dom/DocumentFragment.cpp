@@ -68,9 +68,9 @@ PassRefPtrWillBeRawPtr<Node> DocumentFragment::cloneNode(bool deep)
     return clone.release();
 }
 
-void DocumentFragment::parseHTML(const String& source, Element* contextElement, ParserContentPolicy parserContentPolicy)
+void DocumentFragment::parseHTML(const String& source, Element* contextElement)
 {
-    HTMLDocumentParser::parseDocumentFragment(source, this, contextElement, parserContentPolicy);
+    HTMLDocumentParser::parseDocumentFragment(source, this, contextElement);
 }
 
 } // namespace blink

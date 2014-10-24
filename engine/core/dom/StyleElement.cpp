@@ -27,10 +27,10 @@
 #include "core/css/StyleSheetContents.h"
 #include "core/dom/Document.h"
 #include "core/dom/Element.h"
-#include "core/dom/ScriptableDocumentParser.h"
 #include "core/dom/StyleEngine.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/HTMLStyleElement.h"
+#include "core/html/parser/HTMLDocumentParser.h"
 #include "platform/TraceEvent.h"
 #include "wtf/text/StringBuilder.h"
 

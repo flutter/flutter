@@ -26,7 +26,6 @@
 #ifndef markup_h
 #define markup_h
 
-#include "core/dom/ParserContentPolicy.h"
 #include "core/editing/HTMLInterchange.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
@@ -47,8 +46,8 @@ class Range;
 enum EChildrenOnly { IncludeNode, ChildrenOnly };
 enum EAbsoluteURLs { DoNotResolveURLs, ResolveAllURLs, ResolveNonLocalURLs };
 
-PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentFromMarkup(Document&, const String& markup, ParserContentPolicy = AllowScriptingContent);
-PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentForInnerOuterHTML(const String&, Element*, ParserContentPolicy, const char* method, ExceptionState&);
+PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentFromMarkup(Document&, const String& markup);
+PassRefPtrWillBeRawPtr<DocumentFragment> createFragmentForInnerOuterHTML(const String&, Element*, const char* method, ExceptionState&);
 
 // These methods are used by HTMLElement & ShadowRoot to replace the
 // children with respected fragment/text.

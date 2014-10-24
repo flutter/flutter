@@ -54,13 +54,13 @@ class HTMLDocumentParser;
 class HTMLTreeBuilder FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLTreeBuilder> {
     WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, ParserContentPolicy parserContentPolicy, bool reportErrors, const HTMLParserOptions& options)
+    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors, const HTMLParserOptions& options)
     {
-        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, document, parserContentPolicy, reportErrors, options));
+        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, document, reportErrors, options));
     }
-    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, ParserContentPolicy parserContentPolicy, const HTMLParserOptions& options)
+    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, const HTMLParserOptions& options)
     {
-        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, fragment, contextElement, parserContentPolicy, options));
+        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, fragment, contextElement, options));
     }
     ~HTMLTreeBuilder();
     void trace(Visitor*);
@@ -92,8 +92,8 @@ private:
         TextMode,
     };
 
-    HTMLTreeBuilder(HTMLDocumentParser*, HTMLDocument*, ParserContentPolicy, bool reportErrors, const HTMLParserOptions&);
-    HTMLTreeBuilder(HTMLDocumentParser*, DocumentFragment*, Element* contextElement, ParserContentPolicy, const HTMLParserOptions&);
+    HTMLTreeBuilder(HTMLDocumentParser*, HTMLDocument*, bool reportErrors, const HTMLParserOptions&);
+    HTMLTreeBuilder(HTMLDocumentParser*, DocumentFragment*, Element* contextElement, const HTMLParserOptions&);
 
     void processStartTag(AtomicHTMLToken*);
     void processEndTag(AtomicHTMLToken*);

@@ -46,10 +46,9 @@ namespace blink {
 
 static const unsigned maximumHTMLParserDOMTreeDepth = 512;
 
-static inline void setAttributes(Element* element, AtomicHTMLToken* token, ParserContentPolicy parserContentPolicy)
+static inline void setAttributes(Element* element, AtomicHTMLToken* token)
 {
-    if (!scriptingContentIsAllowed(parserContentPolicy))
-        element->stripScriptingAttributes(token->attributes());
+    element->stripScriptingAttributes(token->attributes());
     element->parserSetAttributes(token->attributes());
 }
 
@@ -211,8 +210,6 @@ void HTMLConstructionSite::queueTask(const HTMLConstructionSiteTask& task)
 
 void HTMLConstructionSite::attachLater(ContainerNode* parent, PassRefPtrWillBeRawPtr<Node> prpChild, bool selfClosing)
 {
-    ASSERT(scriptingContentIsAllowed(m_parserContentPolicy) || !prpChild.get()->isElementNode());
-
     HTMLConstructionSiteTask task(HTMLConstructionSiteTask::Insert);
     task.parent = parent;
     task.child = prpChild;
@@ -245,17 +242,15 @@ void HTMLConstructionSite::executeQueuedTasks()
     // We might be detached now.
 }
 
-HTMLConstructionSite::HTMLConstructionSite(Document* document, ParserContentPolicy parserContentPolicy)
+HTMLConstructionSite::HTMLConstructionSite(Document* document)
     : m_document(document)
     , m_attachmentRoot(document)
-    , m_parserContentPolicy(parserContentPolicy)
 {
 }
 
-HTMLConstructionSite::HTMLConstructionSite(DocumentFragment* fragment, ParserContentPolicy parserContentPolicy)
+HTMLConstructionSite::HTMLConstructionSite(DocumentFragment* fragment)
     : m_document(&fragment->document())
     , m_attachmentRoot(fragment)
-    , m_parserContentPolicy(parserContentPolicy)
 {
 }
 
@@ -322,9 +317,8 @@ void HTMLConstructionSite::insertSelfClosingHTMLElement(AtomicHTMLToken* token)
 void HTMLConstructionSite::insertScriptElement(AtomicHTMLToken* token)
 {
     RefPtrWillBeRawPtr<HTMLScriptElement> element = HTMLScriptElement::create(ownerDocumentForCurrentNode());
-    setAttributes(element.get(), token, m_parserContentPolicy);
-    if (scriptingContentIsAllowed(m_parserContentPolicy))
-        attachLater(currentNode(), element);
+    setAttributes(element.get(), token);
+    attachLater(currentNode(), element);
     m_openElements.push(element.release());
 }
 
@@ -349,7 +343,7 @@ PassRefPtrWillBeRawPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLTo
 {
     QualifiedName tagName(token->name());
     RefPtrWillBeRawPtr<Element> element = ownerDocumentForCurrentNode().createElement(tagName, true);
-    setAttributes(element.get(), token, m_parserContentPolicy);
+    setAttributes(element.get(), token);
     return element.release();
 }
 
@@ -364,7 +358,7 @@ PassRefPtrWillBeRawPtr<HTMLElement> HTMLConstructionSite::createHTMLElement(Atom
 {
     Document& document = ownerDocumentForCurrentNode();
     RefPtrWillBeRawPtr<HTMLElement> element = HTMLElementFactory::createHTMLElement(token->name(), document, true);
-    setAttributes(element.get(), token, m_parserContentPolicy);
+    setAttributes(element.get(), token);
     return element.release();
 }
 

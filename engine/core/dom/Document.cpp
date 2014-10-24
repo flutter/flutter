@@ -1449,9 +1449,9 @@ PassRefPtrWillBeRawPtr<DocumentParser> Document::createParser()
     return HTMLDocumentParser::create(toHTMLDocument(*this), false);
 }
 
-ScriptableDocumentParser* Document::scriptableDocumentParser() const
+HTMLDocumentParser* Document::scriptableDocumentParser() const
 {
-    return parser() ? parser()->asScriptableDocumentParser() : 0;
+    return parser() ? parser()->asHTMLDocumentParser() : 0;
 }
 
 void Document::detachParser()
@@ -1743,7 +1743,7 @@ void Document::executeScriptsWaitingForResourcesTimerFired(Timer<Document>*)
 {
     if (!isRenderingReady())
         return;
-    if (ScriptableDocumentParser* parser = scriptableDocumentParser())
+    if (HTMLDocumentParser* parser = scriptableDocumentParser())
         parser->executeScriptsWaitingForResources();
 }
 
@@ -2767,7 +2767,7 @@ void Document::addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> consoleMessage)
     if (!consoleMessage->scriptState() && consoleMessage->url().isNull() && !consoleMessage->lineNumber()) {
         consoleMessage->setURL(url().string());
         if (parsing() && scriptableDocumentParser()) {
-            ScriptableDocumentParser* parser = scriptableDocumentParser();
+            HTMLDocumentParser* parser = scriptableDocumentParser();
             if (!parser->isWaitingForScripts() && !parser->isExecutingScript())
                 consoleMessage->setLineNumber(parser->lineNumber().oneBasedInt());
         }
