@@ -149,25 +149,191 @@ If the current character is...
 
 ### **Script raw data** state ###
 
-TOOD(ianh): spec this
+If the current character is...
+
+* '```<```': Consume the character and switch to the **script raw
+  data: close 1** state.
+
+* Anything else: Emit the current input character as a character
+  token. Consume the character. Stay in this state.
+
+
+### **Script raw data: close 1** state ###
+
+If the current character is...
+
+* '```/```': Consume the character and switch to the **script raw
+  data: close 2** state.
+
+* Anything else: Emit '```<```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 2** state ###
+
+If the current character is...
+
+* '```s```': Consume the character and switch to the **script raw
+  data: close 3** state.
+
+* Anything else: Emit '```</```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 3** state ###
+
+If the current character is...
+
+* '```c```': Consume the character and switch to the **script raw
+  data: close 4** state.
+
+* Anything else: Emit '```</s```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 4** state ###
+
+If the current character is...
+
+* '```r```': Consume the character and switch to the **script raw
+  data: close 5** state.
+
+* Anything else: Emit '```</sc```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 5** state ###
+
+If the current character is...
+
+* '```i```': Consume the character and switch to the **script raw
+  data: close 6** state.
+
+* Anything else: Emit '```</scr```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 6** state ###
+
+If the current character is...
+
+* '```p```': Consume the character and switch to the **script raw
+  data: close 7** state.
+
+* Anything else: Emit '```</scri```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 7** state ###
+
+If the current character is...
+
+* '```t```': Consume the character and switch to the **script raw
+  data: close 8** state.
+
+* Anything else: Emit '```</scrip```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
+
+
+### **Script raw data: close 8** state ###
+
+If the current character is...
+
+* U+0020, U+000A, '```/```', '```>```': Create an end tag token, and
+  let its tag name be the string '```script```'. Switch to the
+  **before attribute name** state without consuming the character.
+
+* Anything else: Emit '```</script```' character tokens. Consume the
+  character. Switch to the **script raw data** state.
 
 
 ### **Style raw data** state ###
 
-TOOD(ianh): spec this
+If the current character is...
+
+* '```<```': Consume the character and switch to the **style raw
+  data: close 1** state.
+
+* Anything else: Emit the current input character as a character
+  token. Consume the character. Stay in this state.
 
 
-### **After tag** state ###
+### **Style raw data: close 1** state ###
 
-Emit the tag token.
+If the current character is...
 
-If the tag token was a start tag token and the tag name was
-'```script```', then and switch to the **script raw data** state.
+* '```/```': Consume the character and switch to the **style raw
+  data: close 2** state.
 
-If the tag token was a start tag token and the tag name was
-'```style```', then and switch to the **style raw data** state.
+* Anything else: Emit '```<```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
 
-Otherwise, switch to the **data** state.
+
+### **Style raw data: close 2** state ###
+
+If the current character is...
+
+* '```s```': Consume the character and switch to the **style raw
+  data: close 3** state.
+
+* Anything else: Emit '```</```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
+
+
+### **Style raw data: close 3** state ###
+
+If the current character is...
+
+* '```t```': Consume the character and switch to the **style raw
+  data: close 4** state.
+
+* Anything else: Emit '```</s```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
+
+
+### **Style raw data: close 4** state ###
+
+If the current character is...
+
+* '```y```': Consume the character and switch to the **style raw
+  data: close 5** state.
+
+* Anything else: Emit '```</st```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
+
+
+### **Style raw data: close 5** state ###
+
+If the current character is...
+
+* '```l```': Consume the character and switch to the **style raw
+  data: close 6** state.
+
+* Anything else: Emit '```</sty```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
+
+
+### **Style raw data: close 6** state ###
+
+If the current character is...
+
+* '```e```': Consume the character and switch to the **style raw
+  data: close 7** state.
+
+* Anything else: Emit '```</styl```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
+
+
+### **Style raw data: close 7** state ###
+
+If the current character is...
+
+* U+0020, U+000A, '```/```', '```>```': Create an end tag token, and
+  let its tag name be the string '```style```'. Switch to the
+  **before attribute name** state without consuming the character.
+
+* Anything else: Emit '```</style```' character tokens. Consume the
+  character. Switch to the **style raw data** state.
 
 
 ### **Tag open** state ###
@@ -372,6 +538,19 @@ If the current character is...
 * Anything else: Append the current character to the value of the most
   recently added attribute. Consume the current character. Stay in
   this state.
+
+
+### **After tag** state ###
+
+Emit the tag token.
+
+If the tag token was a start tag token and the tag name was
+'```script```', then and switch to the **script raw data** state.
+
+If the tag token was a start tag token and the tag name was
+'```style```', then and switch to the **style raw data** state.
+
+Otherwise, switch to the **data** state.
 
 
 ### **Comment start 1** state ###
