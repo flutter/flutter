@@ -17,7 +17,7 @@ theme layer that gives each widget a concrete visual and interactive design.
 Elements
 --------
 
-The Sky engine contains a handful of primitive elements and the tools with which
+The Sky engine contains [a handful of primitive elements](specs/markup.md) and the tools with which
 to create custom elements.  The following elements are built into the engine:
 
  - ``script``: Executes script
@@ -27,9 +27,10 @@ to create custom elements.  The following elements are built into the engine:
  - ``template``: Captures descendants for use as a template
  - ``content``: Visually projects descendents of the shadow host
  - ``shadow``: Visually projects older shadow roots of the shadow host
- - ``image``: Displays an image
+ - ``img``: Displays an image
  - ``a``: Links to another Mojo application
  - ``title``: Briefly describes the current application state to the user
+ - ``t``: Preserve whitespace (by default, whitespace nodes are dropped)
 
 ### Additional Elements ###
 
@@ -64,10 +65,19 @@ For example, the ``AnnualReport`` constructor uses the ``BalanceSheet`` class
 exported by that module.
 
 ```html
-<import href=”/sky/framework” />
-<import href=”/another/module.sky” as=”foo” />
+SKY MODULE
+<import src=”/sky/framework” />
+<import src=”/another/module.sky” as=”foo” />
 <sky-element name=”my-element”>
-  [ ... custom element definition ... ]
+class extends SkyElement {
+  constructor () {
+    this.addEventListener('click', (event) => this.updateTime());
+    this.createShadowTree().appendChild('Click to show the time');
+  }
+  updateTime() {
+    this.shadowTree.firstChild.replaceWith(new Date());
+  }
+}
 </sky-element>
 <script>
 class AnnualReport {
@@ -114,9 +124,10 @@ As an example, the following is a sketch of a module that wraps Mojo's
 ``network_service`` in a simpler functional interface:
 
 ```html
-<import href=”mojo://shell” as=”shell” />
-<import href="/mojo/network/network_service.mojom.sky" as="net" />
-<import href="/mojo/network/url_loader.mojom.sky" as="loader" />
+SKY MODULE
+<import src=”mojo://shell” as=”shell” />
+<import src="/mojo/network/network_service.mojom.sky" as="net" />
+<import src="/mojo/network/url_loader.mojom.sky" as="loader" />
 <script>
 module.exports = function fetch(url) {
   return new Promise(function(resolve, reject) {
@@ -150,6 +161,6 @@ and the specification are in flux, but hopefully they'll converge over time.
 Contributing
 ------------
 
-Instructions for building and testing Sky are contained in [HACKING.md]. For
+Instructions for building and testing Sky are contained in [HACKING.md](HACKING.md). For
 coordination, we use the ``#mojo`` IRC channel on
 [Freenode](https://freenode.net/).
