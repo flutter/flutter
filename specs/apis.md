@@ -173,14 +173,14 @@ module 'sky:core' {
 
   // MODULES
 
-  interface Module {
+  interface Module : EventTarget {
     constructor (Application application, Document document); // O(1)
     attribute any exports; // O(1) // defaults to the module's document
     readonly attribute Document document; // O(1) // the module's document
     readonly attribute Application application; // O(1)
   }
 
-  interface Application {
+  interface Application : EventTarget {
     constructor (Document document); // O(1)
     attribute String title; // O(1)
     readonly attribute Document document; // O(1) // the application's document

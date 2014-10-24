@@ -162,7 +162,6 @@ that everything of note would be provided by frameworks.
    argument, the exports of any imports that have "as" attributes at
    this time passed in as subsequent arguments, and with "this" set to
    null.
-   TODO(ianh): could be something other than null?
 
 <style>
  - Adds the contents to the document's styles.

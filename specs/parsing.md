@@ -1,21 +1,28 @@
 Parsing
 =======
 
-Parsing in Sky is a strict pipeline consisting of four stages:
+Parsing in Sky is a strict pipeline consisting of five stages:
 
 - decoding, which converts incoming bytes into Unicode characters
-  using UTF-8
+  using UTF-8.
 
-- normalising, which converts certain sequences of characters
+- normalising, which manipulates the sequence of characters.
 
-- tokenising, which converts these characters into tokens
+- tokenising, which converts these characters into three kinds of
+  tokens: character tokens, start tag tokens, and end tag tokens.
+  Character tokens have a single character value. Tag tokens have a
+  tag name, and a list of name/value pairs known as attributes.
 
-- tree construction, which converts these tokens into a tree of nodes
+- token cleanup, which converts sequences of character tokens into
+  string tokens, and removes duplicate attributes in tag tokens.
+
+- tree construction, which converts these tokens into a tree of nodes.
 
 Later stages cannot affect earlier stages.
 
 When a sequence of bytes is to be parsed, there is always a defined
-_parsing context_, which is either "application" or "module".
+_parsing context_, which is either an Application object or a Module
+object.
 
 
 Decoding stage
@@ -54,7 +61,7 @@ Initially, the state machine must begin in the **signature** state.
 Each character in turn must be processed according to the rules of the
 state at the time the character is processed. A character is processed
 once it has been _consumed_. This produces a stream of tokens; the
-tokens must be passed to the tree construction stage.
+tokens must be passed to the token cleanup stage.
 
 When the last character is consumed, the tokeniser ends.
 
@@ -85,12 +92,12 @@ When the user agent is to _expect a string_, it must run these steps:
 
 If the current character is...
 
-* '```#```': If the _parsing context_ is not "application", switch to
+* '```#```': If the _parsing context_ is not an Application, switch to
   the _failed signature_ state. Otherwise, expect the string
   "```#!mojo mojo:sky```", with _after signature_ as the _success_
   state and _failed signature_ as the _failure_ state.
 
-* '```S```': If the _parsing context_ is not "module", switch to the
+* '```S```': If the _parsing context_ is not a Module, switch to the
   _failed signature_ state. Otherwise, expect the string
   "```SKY MODULE```", with _after signature_ as the _success_ state,
   and _failed signature_ as the _failure_ state.
@@ -395,7 +402,7 @@ If the current character is...
 
 If the current character is...
 
-* '```>```': Consume the current character. Switch to the **after
+* '```>```': Consume the current character. Switch to the **after void
   tag** state.
 
 * Anything else: Switch to the **before attribute name** state without
@@ -551,6 +558,16 @@ If the tag token was a start tag token and the tag name was
 '```style```', then and switch to the **style raw data** state.
 
 Otherwise, switch to the **data** state.
+
+
+### **After void tag** state ###
+
+Emit the tag token.
+
+If the tag token is a start tag token, emit an end tag token with the
+same tag name.
+
+Switch to the **data** state.
 
 
 ### **Comment start 1** state ###
@@ -867,33 +884,56 @@ If the current character is...
   consuming the current character.
 
 
-Tree construction
------------------
+Token cleanup stage
+-------------------
 
-To construct a node tree from a _sequence of tokens_ and a document _document_:
+Replace each sequence of character tokens with a single string token
+whose value is the concatenation of all the characters in the
+character tokens.
+
+For each start tag token, remove all but the first name/value pair for
+each name (i.e. remove duplicate attributes, keeping only the first
+one).
+
+For each end tag token, remove the attributes entirely.
+
+If the token is a start tag token, notify the JavaScript token stream
+callback of the token.
+
+Then, pass the tokens to the tree construction stage.
+
+
+Tree construction stage
+-----------------------
+
+To construct a node tree from a _sequence of tokens_ and a document
+_document_:
 
 1. Initialize the _stack of open nodes_ to be _document_.
-2. Consider each token _token_ in the _sequence of tokens_ in turn.
-   - If _token_ is a text token,
-     1. Create a text node _node_ with character data _token.data_.
-     2. Append _node_ to the top node in the _stack of open nodes_.
+2. Consider each token _token_ in the _sequence of tokens_ in turn, as
+   follows. If a token is to be skipped, then jump straight to the
+   next token, without doing any more work with the skipped token.
+   - If _token_ is a string token,
+     1. If the value of the token contains only U+0020 and U+000A
+        characters, and there is no ```t``` element on the _stack of
+        open nodes_, then skip the token.
+     2. Create a text node _node_ whose character data is the value of
+        the token.
+     3. Append _node_ to the top node in the _stack of open nodes_.
    - If _token_ is a start tag token,
-     1. Create an element _node_ with tag name _token.tagName_ and attributes
-        _token.attributes_.
+     1. Create an element _node_ with tag name and attributes given by
+        the token.
      2. Append _node_ to the top node in the _stack of open nodes_.
-     3. If the _token.selfClosing_ flag is not set, push _node_ onto the
-        _stack of open elements_.
-     4. If _token.tagName_ is _script_, TODO: Execute the script.
-   - If _token_ is an end tag token,
-     1. If the _stack of open nodes_ contains a node whose _tagName_ is
-        _token.tagName_,
-        - Pop nodes from the _stack of open nodes_ until a node with
-          a _tagName_ equal to _token.tagName_ has been popped.
-     2. Otherwise, ignore _token_.
-   - If _token_ is a comment token,
-     1. Ignore _token_.
-   - If _token_ is an EOF token,
-     1. Pop all the nodes from the _stack of open nodes_.
-     2. Signal _document_ that parsing is complete.
-
-TODO(ianh): &lt;template>, &lt;t>
+   - If _token_ is an end tag token:
+     1. Let _node_ be the topmost node in the _stack of open nodes_
+        whose tag name is the same as the token's tag name, if any. If
+        there isn't one, skip this token.
+     2. If there's a ```template``` element in the _stack of open
+        nodes_ above _node_, then skip this token.
+     3. Pop nodes from the _stack of open nodes_ until _node_ has been
+        popped.
+     4. If _node_'s tag name is ```script```, then yield until there
+        are no pending import loads, then execute the script given by
+        the element's contents.
+3. Yield until there are no pending import loads.
+3. Fire a ```load``` event at the _parsing context_ object.
