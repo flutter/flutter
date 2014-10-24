@@ -16,9 +16,8 @@
 
 // Determine coverage of font given its raw "cmap" OpenType table
 
-#ifdef PRINTF_DEBUG
-#include <stdio.h>
-#endif
+#define LOG_TAG "Minikin"
+#include <cutils/log.h>
 
 #include <vector>
 using std::vector;
@@ -38,8 +37,8 @@ static uint32_t readU32(const uint8_t* data, size_t offset) {
 }
 
 static void addRange(vector<uint32_t> &coverage, uint32_t start, uint32_t end) {
-#ifdef PRINTF_DEBUG
-    printf("adding range %d-%d\n", start, end);
+#ifdef VERBOSE_DEBUG
+    ALOGD("adding range %d-%d\n", start, end);
 #endif
     if (coverage.empty() || coverage.back() < start) {
         coverage.push_back(start);
@@ -82,7 +81,8 @@ static bool getCoverageFormat4(vector<uint32_t>& coverage, const uint8_t* data, 
                 uint32_t actualRangeOffset = kHeaderSize + 6 * segCount + rangeOffset +
                     (i + j - start) * 2;
                 if (actualRangeOffset + 2 > size) {
-                    return false;
+                    // invalid rangeOffset is considered a "warning" by OpenType Sanitizer
+                    continue;
                 }
                 int glyphId = readU16(data, actualRangeOffset);
                 if (glyphId != 0) {
@@ -146,8 +146,8 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
             bestTable = i;
         }
     }
-#ifdef PRINTF_DEBUG
-    printf("best table = %d\n", bestTable);
+#ifdef VERBOSE_DEBUG
+    ALOGD("best table = %d\n", bestTable);
 #endif
     if (bestTable < 0) {
         return false;
@@ -168,10 +168,11 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
     if (success) {
         coverage.initFromRanges(&coverageVec.front(), coverageVec.size() >> 1);
     }
-#ifdef PRINTF_DEBUG
-    for (int i = 0; i < coverageVec.size(); i += 2) {
-        printf("%x:%x\n", coverageVec[i], coverageVec[i + 1]);
+#ifdef VERBOSE_DEBUG
+    for (size_t i = 0; i < coverageVec.size(); i += 2) {
+        ALOGD("%x:%x\n", coverageVec[i], coverageVec[i + 1]);
     }
+    ALOGD("success = %d", success);
 #endif
     return success;
 }
