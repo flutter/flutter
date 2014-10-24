@@ -14,7 +14,7 @@ SKY MODULE - radio button and radio button group
  module.exports.RadioElement = sky.registerElement('radio', class extends Element {
    constructor () {
      this.addEventListener('click', (event) => this.checked = true);
-     this.createShadowTree().appendChild(module.document.findId('radio-shadow').cloneNode(true));
+     this.createShadowTree().appendChild(module.document.findId('radio-shadow').content.cloneNode(true));
    }
    get checked () {
      return this.hasAttribute('checked');
