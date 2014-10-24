@@ -1541,55 +1541,6 @@ void Element::dispatchFocusOutEvent(const AtomicString& eventType, Element* newF
     dispatchScopedEventDispatchMediator(FocusOutEventDispatchMediator::create(FocusEvent::create(eventType, true, false, document().domWindow(), 0, newFocusedElement)));
 }
 
-String Element::innerHTML() const
-{
-    return createMarkup(this, ChildrenOnly);
-}
-
-String Element::outerHTML() const
-{
-    return createMarkup(this);
-}
-
-void Element::setInnerHTML(const String& html, ExceptionState& exceptionState)
-{
-    if (RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, this, "innerHTML", exceptionState)) {
-        ContainerNode* container = this;
-        if (isHTMLTemplateElement(*this))
-            container = toHTMLTemplateElement(this)->content();
-        replaceChildrenWithFragment(container, fragment.release(), exceptionState);
-    }
-}
-
-void Element::setOuterHTML(const String& html, ExceptionState& exceptionState)
-{
-    Node* p = parentNode();
-    if (!p) {
-        exceptionState.throwDOMException(NoModificationAllowedError, "This element has no parent node.");
-        return;
-    }
-    if (!p->isElementNode()) {
-        exceptionState.throwDOMException(NoModificationAllowedError, "This element's parent is of type '" + p->nodeName() + "', which is not an element node.");
-        return;
-    }
-
-    RefPtrWillBeRawPtr<Element> parent = toElement(p);
-    RefPtrWillBeRawPtr<Node> prev = previousSibling();
-    RefPtrWillBeRawPtr<Node> next = nextSibling();
-
-    RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(html, parent.get(), "outerHTML", exceptionState);
-    if (exceptionState.hadException())
-        return;
-
-    parent->replaceChild(fragment.release(), this, exceptionState);
-    RefPtrWillBeRawPtr<Node> node = next ? next->previousSibling() : 0;
-    if (!exceptionState.hadException() && node && node->isTextNode())
-        mergeWithNextTextNode(toText(node.get()), exceptionState);
-
-    if (!exceptionState.hadException() && prev && prev->isTextNode())
-        mergeWithNextTextNode(toText(prev.get()), exceptionState);
-}
-
 String Element::innerText()
 {
     // We need to update layout, since plainText uses line boxes in the render tree.

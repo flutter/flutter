@@ -48,7 +48,6 @@ namespace blink {
 class BackgroundHTMLParser;
 class CompactHTMLToken;
 class Document;
-class DocumentFragment;
 class Element;
 class HTMLDocument;
 class HTMLParserScheduler;
@@ -71,8 +70,6 @@ public:
 
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();
-
-    static void parseDocumentFragment(const String&, DocumentFragment*, Element* contextElement);
 
     HTMLTokenizer* tokenizer() const { return m_tokenizer.get(); }
 
@@ -99,16 +96,10 @@ protected:
     virtual void finish() override final;
 
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);
-    HTMLDocumentParser(DocumentFragment*, Element* contextElement);
 
     HTMLTreeBuilder* treeBuilder() const { return m_treeBuilder.get(); }
 
 private:
-    static PassRefPtrWillBeRawPtr<HTMLDocumentParser> create(DocumentFragment* fragment, Element* contextElement)
-    {
-        return adoptRefWillBeNoop(new HTMLDocumentParser(fragment, contextElement));
-    }
-
     virtual HTMLDocumentParser* asHTMLDocumentParser() override final { return this; }
 
     // DocumentParser

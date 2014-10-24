@@ -33,8 +33,6 @@ class DocumentFragment : public ContainerNode {
 public:
     static PassRefPtrWillBeRawPtr<DocumentFragment> create(Document&);
 
-    void parseHTML(const String&, Element* contextElement);
-
     virtual bool canContainRangeEndPoint() const override final { return true; }
     virtual bool isTemplateContent() const { return false; }
 

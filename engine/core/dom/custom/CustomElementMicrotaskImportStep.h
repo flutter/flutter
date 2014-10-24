@@ -74,9 +74,6 @@ private:
     // CustomElementMicrotaskStep
     virtual Result process() override final;
 
-#if !defined(NDEBUG)
-    virtual void show(unsigned indent) override;
-#endif
     WeakPtrWillBeWeakMember<HTMLImportChild> m_import;
 #if !ENABLE(OILPAN)
     WeakPtrFactory<CustomElementMicrotaskImportStep> m_weakFactory;

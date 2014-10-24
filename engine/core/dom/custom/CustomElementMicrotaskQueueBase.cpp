@@ -22,16 +22,4 @@ void CustomElementMicrotaskQueueBase::trace(Visitor* visitor)
     visitor->trace(m_queue);
 }
 
-#if !defined(NDEBUG)
-void CustomElementMicrotaskQueueBase::show(unsigned indent)
-{
-    for (unsigned q = 0; q < m_queue.size(); ++q) {
-        if (m_queue[q])
-            m_queue[q]->show(indent);
-        else
-            fprintf(stderr, "%*snull\n", indent, "");
-    }
-}
-#endif
-
 } // namespace blink

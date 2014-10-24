@@ -102,9 +102,6 @@ public:
 
     ShadowRoot* olderShadowRoot() const { return next(); }
 
-    String innerHTML() const;
-    void setInnerHTML(const String&, ExceptionState&);
-
     PassRefPtrWillBeRawPtr<Node> cloneNode(bool, ExceptionState&);
     PassRefPtrWillBeRawPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
 

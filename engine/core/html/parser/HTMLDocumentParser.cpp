@@ -29,7 +29,6 @@
 #include "base/bind.h"
 #include "core/HTMLNames.h"
 #include "core/css/MediaValuesCached.h"
-#include "core/dom/DocumentFragment.h"
 #include "core/dom/Element.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/HTMLDocument.h"
@@ -46,22 +45,6 @@
 
 namespace blink {
 
-// This is a direct transcription of step 4 from:
-// http://www.whatwg.org/specs/web-apps/current-work/multipage/the-end.html#fragment-case
-static HTMLTokenizer::State tokenizerStateForContextElement(Element* contextElement, bool reportErrors, const HTMLParserOptions& options)
-{
-    if (!contextElement)
-        return HTMLTokenizer::DataState;
-
-    const QualifiedName& contextTag = contextElement->tagQName();
-
-    if (contextTag == HTMLNames::styleTag)
-        return HTMLTokenizer::RAWTEXTState;
-    if (contextTag == HTMLNames::scriptTag)
-        return HTMLTokenizer::ScriptDataState;
-    return HTMLTokenizer::DataState;
-}
-
 HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
     : DecodedDataDocumentParser(document)
     , m_options(&document)
@@ -76,25 +59,6 @@ HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors
     , m_pumpSessionNestingLevel(0)
 {
     ASSERT(shouldUseThreading() || (m_token && m_tokenizer));
-}
-
-// FIXME: Member variables should be grouped into self-initializing structs to
-// minimize code duplication between these constructors.
-HTMLDocumentParser::HTMLDocumentParser(DocumentFragment* fragment, Element* contextElement)
-    : DecodedDataDocumentParser(fragment->document())
-    , m_options(&fragment->document())
-    , m_token(adoptPtr(new HTMLToken))
-    , m_tokenizer(HTMLTokenizer::create(m_options))
-    , m_treeBuilder(HTMLTreeBuilder::create(this, fragment, contextElement, m_options))
-    , m_weakFactory(this)
-    , m_isFragment(true)
-    , m_endWasDelayed(false)
-    , m_haveBackgroundParser(false)
-    , m_pumpSessionNestingLevel(0)
-{
-    ASSERT(!shouldUseThreading());
-    bool reportErrors = false; // For now document fragment parsing never reports errors.
-    m_tokenizer->setState(tokenizerStateForContextElement(contextElement, reportErrors, m_options));
 }
 
 HTMLDocumentParser::~HTMLDocumentParser()
@@ -700,15 +664,6 @@ void HTMLDocumentParser::executeScriptsWaitingForResources()
     m_scriptRunner.executePendingScripts();
     if (!isWaitingForScripts())
         resumeParsingAfterScriptExecution();
-}
-
-void HTMLDocumentParser::parseDocumentFragment(const String& source, DocumentFragment* fragment, Element* contextElement)
-{
-    RefPtrWillBeRawPtr<HTMLDocumentParser> parser = HTMLDocumentParser::create(fragment, contextElement);
-    parser->insert(source); // Use insert() so that the parser will not yield.
-    parser->finish();
-    ASSERT(!parser->processingData()); // Make sure we're done. <rdar://problem/3963151>
-    parser->detach(); // Allows ~DocumentParser to assert it was detached before destruction.
 }
 
 void HTMLDocumentParser::appendBytes(const char* data, size_t length)

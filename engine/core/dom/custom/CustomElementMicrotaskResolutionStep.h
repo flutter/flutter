@@ -57,10 +57,6 @@ private:
 
     virtual Result process() override;
 
-#if !defined(NDEBUG)
-    virtual void show(unsigned indent) override;
-#endif
-
     RefPtrWillBeMember<CustomElementRegistrationContext> m_context;
     RefPtrWillBeMember<Element> m_element;
     CustomElementDescriptor m_descriptor;

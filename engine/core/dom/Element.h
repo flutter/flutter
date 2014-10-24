@@ -308,10 +308,6 @@ public:
 
     String innerText();
     String outerText();
-    String innerHTML() const;
-    String outerHTML() const;
-    void setInnerHTML(const String&, ExceptionState&);
-    void setOuterHTML(const String&, ExceptionState&);
 
     String textFromChildren();
 

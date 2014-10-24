@@ -167,14 +167,3 @@ v8::Handle<v8::Object> HTMLElement::wrap(v8::Handle<v8::Object> creationContext,
 }
 
 } // namespace blink
-
-#ifndef NDEBUG
-
-// For use in the debugger
-void dumpInnerHTML(blink::HTMLElement*);
-
-void dumpInnerHTML(blink::HTMLElement* element)
-{
-    printf("%s\n", element->innerHTML().ascii().data());
-}
-#endif

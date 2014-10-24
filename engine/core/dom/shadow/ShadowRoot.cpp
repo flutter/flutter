@@ -103,22 +103,6 @@ PassRefPtrWillBeRawPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& excepti
     return nullptr;
 }
 
-String ShadowRoot::innerHTML() const
-{
-    return createMarkup(this, ChildrenOnly);
-}
-
-void ShadowRoot::setInnerHTML(const String& markup, ExceptionState& exceptionState)
-{
-    if (isOrphan()) {
-        exceptionState.throwDOMException(InvalidAccessError, "The ShadowRoot does not have a host.");
-        return;
-    }
-
-    if (RefPtrWillBeRawPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(markup, host(), "innerHTML", exceptionState))
-        replaceChildrenWithFragment(this, fragment.release(), exceptionState);
-}
-
 void ShadowRoot::recalcStyle(StyleRecalcChange change)
 {
     // ShadowRoot doesn't support custom callbacks.

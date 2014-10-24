@@ -26,10 +26,6 @@ public:
 
     void trace(Visitor*);
 
-#if !defined(NDEBUG)
-    void show(unsigned indent);
-#endif
-
 protected:
     CustomElementMicrotaskQueueBase() : m_inDispatch(false) { }
     virtual void doDispatch() = 0;

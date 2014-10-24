@@ -28,8 +28,6 @@ interface ShadowRoot : DocumentFragment {
     readonly attribute Element activeElement;
     readonly attribute ShadowRoot olderShadowRoot;
 
-    [TreatNullAs=NullString, CustomElementCallbacks, RaisesException=Setter] attribute DOMString innerHTML;
-
     [RaisesException] Node cloneNode([Default=Undefined] optional boolean deep);
     Selection getSelection();
     Element getElementById([Default=Undefined] optional DOMString elementId);

@@ -27,10 +27,6 @@ public:
 
     void trace(Visitor*);
 
-#if !defined(NDEBUG)
-    void show(unsigned indent);
-#endif
-
 private:
     CustomElementMicrotaskRunQueue();
 

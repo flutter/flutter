@@ -65,12 +65,4 @@ void CustomElementMicrotaskResolutionStep::trace(Visitor* visitor)
     CustomElementMicrotaskStep::trace(visitor);
 }
 
-#if !defined(NDEBUG)
-void CustomElementMicrotaskResolutionStep::show(unsigned indent)
-{
-    fprintf(stderr, "%*sResolution: ", indent, "");
-    m_element->outerHTML().show();
-}
-#endif
-
 } // namespace blink

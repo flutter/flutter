@@ -66,14 +66,4 @@ bool CustomElementMicrotaskRunQueue::isEmpty() const
     return m_syncQueue->isEmpty() && m_asyncQueue->isEmpty();
 }
 
-#if !defined(NDEBUG)
-void CustomElementMicrotaskRunQueue::show(unsigned indent)
-{
-    fprintf(stderr, "Sync:\n");
-    m_syncQueue->show(indent);
-    fprintf(stderr, "Async:\n");
-    m_asyncQueue->show(indent);
-}
-#endif
-
 } // namespace blink

@@ -94,12 +94,4 @@ void CustomElementMicrotaskImportStep::trace(Visitor* visitor)
     CustomElementMicrotaskStep::trace(visitor);
 }
 
-#if !defined(NDEBUG)
-void CustomElementMicrotaskImportStep::show(unsigned indent)
-{
-    fprintf(stderr, "%*sImport(wait=%d sync=%d, url=%s)\n", indent, "", shouldWaitForImport(), m_import && m_import->isSync(), m_import ? m_import->url().string().utf8().data() : "null");
-    m_queue->show(indent + 1);
-}
-#endif
-
 } // namespace blink
