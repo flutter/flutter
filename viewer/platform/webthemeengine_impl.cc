@@ -16,6 +16,7 @@ using blink::WebThemeEngine;
 
 namespace sky {
 
+#if !defined(OS_ANDROID)
 static ui::NativeTheme::Part NativeThemePart(
     WebThemeEngine::Part part) {
   switch (part) {
@@ -75,6 +76,7 @@ static ui::NativeTheme::State NativeThemeState(
       return ui::NativeTheme::kDisabled;
   }
 }
+#endif
 
 static void GetNativeThemeExtraParams(
     WebThemeEngine::Part part,
@@ -161,10 +163,14 @@ static void GetNativeThemeExtraParams(
 }
 
 blink::WebSize WebThemeEngineImpl::getSize(WebThemeEngine::Part part) {
+#if defined(OS_ANDROID)
+  return blink::WebSize();
+#else
   ui::NativeTheme::ExtraParams extra;
   return ui::NativeTheme::instance()->GetPartSize(NativeThemePart(part),
                                                    ui::NativeTheme::kNormal,
                                                    extra);
+#endif
 }
 
 void WebThemeEngineImpl::paint(
@@ -176,12 +182,14 @@ void WebThemeEngineImpl::paint(
   ui::NativeTheme::ExtraParams native_theme_extra_params;
   GetNativeThemeExtraParams(
       part, state, extra_params, &native_theme_extra_params);
+#if !defined(OS_ANDROID)
   ui::NativeTheme::instance()->Paint(
       canvas,
       NativeThemePart(part),
       NativeThemeState(state),
       gfx::Rect(rect),
       native_theme_extra_params);
+#endif
 }
 
 void WebThemeEngineImpl::paintStateTransition(blink::WebCanvas* canvas,
@@ -190,6 +198,7 @@ void WebThemeEngineImpl::paintStateTransition(blink::WebCanvas* canvas,
                                               WebThemeEngine::State endState,
                                               double progress,
                                               const blink::WebRect& rect) {
+#if !defined(OS_ANDROID)
   ui::NativeTheme::instance()->PaintStateTransition(
       canvas,
       NativeThemePart(part),
@@ -197,6 +206,7 @@ void WebThemeEngineImpl::paintStateTransition(blink::WebCanvas* canvas,
       NativeThemeState(endState),
       progress,
       gfx::Rect(rect));
+#endif
 }
 
 }  // namespace sky

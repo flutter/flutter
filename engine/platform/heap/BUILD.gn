@@ -16,15 +16,6 @@ source_set("heap") {
     "Visitor.cpp",
     "Visitor.h",
   ]
-  if (cpu_arch == "x86" || cpu_arch == "x64") {
-    sources += [ "asm/SaveRegisters_x86.asm" ]
-  } else if (cpu_arch == "arm") {
-    sources += [ "asm/SaveRegisters_arm.S" ]
-  } else if (cpu_arch == "arm64") {
-    sources += [ "asm/SaveRegisters_arm64.S" ]
-  } else if (cpu_arch == "mipsel") {
-    sources += [ "asm/SaveRegisters_mips.S" ]
-  }
 
   configs += [ "//sky/engine:config" ]
 

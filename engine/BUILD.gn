@@ -6,6 +6,9 @@ import("config.gni")
 if (is_clang) {
   import("//build/config/clang/clang.gni")
 }
+if (is_posix) {
+  import("//build/config/gcc/gcc_version.gni")
+}
 
 visibility = ["//sky/*"]
 
@@ -62,6 +65,10 @@ config("config") {
     # Due to a bug in gcc arm, we get warnings about uninitialized
     # timesNewRoman.unstatic.3258 and colorTransparent.unstatic.4879.
     cflags += [ "-Wno-uninitialized" ]
+  }
+
+  if (is_posix && gcc_version >= 49) {
+    cflags += [ "-Wno-unused-but-set-variable" ]
   }
 
   if (is_clang) {

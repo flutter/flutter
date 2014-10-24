@@ -36,7 +36,7 @@
 namespace blink {
 
 struct SameSizeAsElementRareData : NodeRareData {
-    short indices[2];
+    short index;
     LayoutSize sizeForResizing;
     IntSize scrollOffset;
     void* pointers[9];
