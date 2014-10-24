@@ -179,6 +179,9 @@ public:
     CString latin1() const;
     CString utf8(UTF8ConversionMode = LenientUTF8Conversion) const;
 
+    // We should replace CString with std::string.
+    std::string toUTF8() const;
+
     UChar operator[](unsigned index) const
     {
         if (!m_impl || index >= m_impl->length())
@@ -400,6 +403,7 @@ public:
     static String fromUTF8(const char* s, size_t length) { return fromUTF8(reinterpret_cast<const LChar*>(s), length); };
     static String fromUTF8(const char* s) { return fromUTF8(reinterpret_cast<const LChar*>(s)); };
     static String fromUTF8(const CString&);
+    static String fromUTF8(const std::string& s) { return fromUTF8(s.data(), s.size()); }
 
     // Tries to convert the passed in string to UTF-8, but will fall back to Latin-1 if the string is not valid UTF-8.
     static String fromUTF8WithLatin1Fallback(const LChar*, size_t);

@@ -41,6 +41,7 @@ class PlatformImpl : public blink::Platform {
   virtual void callOnMainThread(void (*func)(void*), void* context);
   virtual bool isThreadedCompositingEnabled();
   virtual blink::WebCompositorSupport* compositorSupport();
+  virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
   virtual blink::WebData parseDataURL(
       const blink::WebURL& url, blink::WebString& mime_type,

@@ -153,6 +153,10 @@ blink::WebScrollbarBehavior* PlatformImpl::scrollbarBehavior() {
   return &scrollbar_behavior_;
 }
 
+mojo::NetworkService* PlatformImpl::networkService() {
+  return network_service_.get();
+}
+
 blink::WebURLLoader* PlatformImpl::createURLLoader() {
   return new WebURLLoaderImpl(network_service_.get());
 }

@@ -871,6 +871,11 @@ CString String::utf8(UTF8ConversionMode mode) const
     return CString(bufferVector.data(), buffer - bufferVector.data());
 }
 
+std::string String::toUTF8() const
+{
+    return utf8().toStdString();
+}
+
 String String::make8BitFrom16BitSource(const UChar* source, size_t length)
 {
     if (!length)

@@ -29,6 +29,7 @@
 #include "wtf/RefCounted.h"
 #include "wtf/RefPtr.h"
 #include "wtf/WTFExport.h"
+#include <string>
 
 namespace WTF {
 
@@ -63,6 +64,11 @@ public:
     CString(const char*, size_t length);
     CString(CStringBuffer* buffer) : m_buffer(buffer) { }
     static CString newUninitialized(size_t length, char*& characterBuffer);
+
+    std::string toStdString() const
+    {
+        return std::string(data(), length());
+    }
 
     const char* data() const
     {

@@ -47,6 +47,10 @@
 
 class GrContext;
 
+namespace mojo {
+class NetworkService;
+}
+
 namespace blink {
 
 class WebBlobRegistry;
@@ -168,6 +172,8 @@ public:
     virtual size_t maxDecodedImageBytes() { return noDecodedImageByteLimit; }
 
     // Network -------------------------------------------------------------
+
+    virtual mojo::NetworkService* networkService() { return 0; }
 
     // Returns a new WebURLLoader instance.
     virtual WebURLLoader* createURLLoader() { return 0; }

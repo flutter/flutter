@@ -31,8 +31,8 @@
 #ifndef HTMLImportLoader_h
 #define HTMLImportLoader_h
 
-#include "core/fetch/RawResource.h"
-#include "core/fetch/ResourceOwner.h"
+#include "platform/fetcher/DataPipeDrainer.h"
+#include "platform/fetcher/MojoFetcher.h"
 #include "platform/heap/Handle.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/PassOwnPtr.h"
@@ -53,7 +53,9 @@ class HTMLImportsController;
 // HTMLImportLoader is owned by HTMLImportsController.
 //
 //
-class HTMLImportLoader FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>, public ResourceOwner<RawResource> {
+class HTMLImportLoader FINAL : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>,
+                               public MojoFetcher::Client,
+                               public DataPipeDrainer::Client {
 public:
     enum State {
         StateLoading,
@@ -86,7 +88,7 @@ public:
 #if !ENABLE(OILPAN)
     void importDestroyed();
 #endif
-    void startLoading(const ResourcePtr<RawResource>&);
+    void startLoading(const KURL&);
 
     // Tells the loader that the parser is done with this import.
     // Called by Document::finishedParsing, after DOMContentLoaded was dispatched.
@@ -103,12 +105,14 @@ public:
 private:
     HTMLImportLoader(HTMLImportsController*);
 
-    // RawResourceClient
-    virtual void responseReceived(Resource*, const ResourceResponse&) OVERRIDE;
-    virtual void dataReceived(Resource*, const char* data, int length) OVERRIDE;
-    virtual void notifyFinished(Resource*) OVERRIDE;
+    // MojoFetcher::Client
+    void OnReceivedResponse(mojo::URLResponsePtr) override;
 
-    State startWritingAndParsing(const ResourceResponse&);
+    // DataPipeDrainer::Client
+    void OnDataAvailable(const void* data, size_t num_bytes) override;
+    void OnDataComplete() override;
+
+    State startWritingAndParsing(mojo::URLResponsePtr);
     State finishWriting();
     State finishParsing();
     State finishLoading();
@@ -125,6 +129,9 @@ private:
     RefPtrWillBeMember<Document> m_document;
     RefPtrWillBeMember<DocumentWriter> m_writer;
     RefPtrWillBeMember<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
+
+    OwnPtr<MojoFetcher> m_fetcher;
+    OwnPtr<DataPipeDrainer> m_drainer;
 };
 
 } // namespace blink

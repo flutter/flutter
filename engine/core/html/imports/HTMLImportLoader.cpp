@@ -70,47 +70,43 @@ void HTMLImportLoader::clear()
         m_document->cancelParsing();
         m_document.clear();
     }
+    m_fetcher.clear();
+    m_drainer.clear();
 }
 #endif
 
-void HTMLImportLoader::startLoading(const ResourcePtr<RawResource>& resource)
+void HTMLImportLoader::startLoading(const KURL& url)
 {
-    setResource(resource);
+    m_fetcher = adoptPtr(new MojoFetcher(this, url));
 }
 
-void HTMLImportLoader::responseReceived(Resource* resource, const ResourceResponse& response)
+void HTMLImportLoader::OnReceivedResponse(mojo::URLResponsePtr response)
 {
-    // Resource may already have been loaded with the import loader
-    // being added as a client later & now being notified. Fail early.
-    if (resource->loadFailedOrCanceled() || response.httpStatusCode() >= 400) {
+    if (response->error || response->status_code >= 400) {
         setState(StateError);
         return;
     }
-    setState(startWritingAndParsing(response));
+    mojo::ScopedDataPipeConsumerHandle body = response->body.Pass();
+    setState(startWritingAndParsing(response.Pass()));
+    m_drainer = adoptPtr(new DataPipeDrainer(this, body.Pass()));
 }
 
-void HTMLImportLoader::dataReceived(Resource*, const char* data, int length)
+void HTMLImportLoader::OnDataAvailable(const void* data, size_t length)
 {
     RefPtrWillBeRawPtr<DocumentWriter> protectingWriter(m_writer.get());
-    m_writer->addData(data, length);
+    m_writer->addData(static_cast<const char*>(data), length);
 }
 
-void HTMLImportLoader::notifyFinished(Resource* resource)
+void HTMLImportLoader::OnDataComplete()
 {
-    // The writer instance indicates that a part of the document can be already loaded.
-    // We don't take such a case as an error because the partially-loaded document has been visible from script at this point.
-    if (resource->loadFailedOrCanceled() && !m_writer) {
-        setState(StateError);
-        return;
-    }
-
     setState(finishWriting());
 }
 
-HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(const ResourceResponse& response)
+HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLResponsePtr response)
 {
     ASSERT(!m_imports.isEmpty());
-    DocumentInit init = DocumentInit(response.url(), 0, m_controller->master()->contextDocument(), m_controller)
+    KURL url(ParsedURLString, String::fromUTF8(response->url));
+    DocumentInit init = DocumentInit(url, 0, m_controller->master()->contextDocument(), m_controller)
         .withRegistrationContext(m_controller->master()->registrationContext());
     m_document = HTMLDocument::create(init);
     m_writer = DocumentWriter::create(m_document.get());
@@ -166,8 +162,6 @@ void HTMLImportLoader::didFinishLoading()
 {
     for (size_t i = 0; i < m_imports.size(); ++i)
         m_imports[i]->didFinishLoading();
-
-    clearResource();
 
     ASSERT(!m_document || !m_document->parsing());
 }
