@@ -72,10 +72,6 @@
     void play();
     void pause();
 
-    // media controller
-    [RuntimeEnabled=MediaController, Reflect] attribute DOMString mediaGroup;
-    [RuntimeEnabled=MediaController, TypeChecking=Interface] attribute MediaController? controller;
-
     // controls
     [Reflect] attribute boolean controls;
     [RaisesException=Setter] attribute double volume;

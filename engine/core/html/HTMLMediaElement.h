@@ -46,7 +46,6 @@ class Event;
 class ExceptionState;
 class HTMLSourceElement;
 class KURL;
-class MediaController;
 class MediaError;
 class HTMLMediaSource;
 class TimeRanges;
@@ -164,9 +163,6 @@ public:
     enum InvalidURLAction { DoNothing, Complain };
     bool isSafeToLoadURL(const KURL&, InvalidURLAction);
 
-    MediaController* controller() const;
-    void setController(PassRefPtrWillBeRawPtr<MediaController>); // Resets the MediaGroup and sets the MediaController.
-
     void scheduleEvent(PassRefPtrWillBeRawPtr<Event>);
 
     // Returns the "effective media volume" value as specified in the HTML5 spec.
@@ -203,8 +199,6 @@ protected:
     enum DisplayMode { Unknown, Poster, PosterWaitingForVideo, Video };
     DisplayMode displayMode() const { return m_displayMode; }
     virtual void setDisplayMode(DisplayMode mode) { m_displayMode = mode; }
-
-    void setControllerInternal(PassRefPtrWillBeRawPtr<MediaController>);
 
 private:
     void createMediaPlayer();
@@ -315,9 +309,7 @@ private:
 
     const AtomicString& mediaGroup() const;
     void setMediaGroup(const AtomicString&);
-    void updateMediaController();
     bool isBlocked() const;
-    bool isBlockedOnMediaController() const;
     bool isAutoplaying() const { return m_autoplaying; }
 
     blink::WebMediaPlayer::CORSMode corsMode() const;
@@ -429,9 +421,6 @@ private:
     bool m_isFinalizing : 1;
     bool m_closeMediaSourceWhenFinalizing : 1;
 #endif
-
-    friend class MediaController;
-    RefPtrWillBeMember<MediaController> m_mediaController;
 
     static URLRegistry* s_mediaStreamRegistry;
 };
