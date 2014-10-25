@@ -27,7 +27,6 @@
 #ifndef HTMLTokenizer_h
 #define HTMLTokenizer_h
 
-#include "core/html/parser/HTMLParserOptions.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/html/parser/InputStreamPreprocessor.h"
 #include "platform/text/SegmentedString.h"
@@ -38,7 +37,7 @@ class HTMLTokenizer {
     WTF_MAKE_NONCOPYABLE(HTMLTokenizer);
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassOwnPtr<HTMLTokenizer> create(const HTMLParserOptions& options) { return adoptPtr(new HTMLTokenizer(options)); }
+    static PassOwnPtr<HTMLTokenizer> create() { return adoptPtr(new HTMLTokenizer()); }
     ~HTMLTokenizer();
 
     void reset();
@@ -96,25 +95,6 @@ public:
         CommentEndBangState,
     };
 
-    struct Checkpoint {
-        HTMLParserOptions options;
-        State state;
-        UChar additionalAllowedCharacter;
-        bool skipNextNewLine;
-
-        Checkpoint()
-            : options(0)
-            , state()
-            , additionalAllowedCharacter('\0')
-            , skipNextNewLine(false)
-        {
-        }
-    };
-
-    bool canCreateCheckpoint() const;
-    void createCheckpoint(Checkpoint&) const;
-    void restoreFromCheckpoint(const Checkpoint&);
-
     // This function returns true if it emits a token. Otherwise, callers
     // must provide the same (in progress) token on the next call (unless
     // they call reset() first).
@@ -153,7 +133,7 @@ public:
     void setState(State state) { m_state = state; }
 
 private:
-    explicit HTMLTokenizer(const HTMLParserOptions&);
+    HTMLTokenizer();
 
     inline bool processEntity(SegmentedString&);
 
@@ -239,8 +219,6 @@ private:
     // token (e.g., when lexing script). We buffer the name of the end tag
     // token here so we remember it next time we re-enter the tokenizer.
     Vector<LChar, 32> m_bufferedEndTagName;
-
-    HTMLParserOptions m_options;
 };
 
 }

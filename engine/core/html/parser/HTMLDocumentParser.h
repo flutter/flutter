@@ -32,7 +32,6 @@
 #include "core/frame/UseCounter.h"
 #include "core/html/parser/CompactHTMLToken.h"
 #include "core/html/parser/HTMLInputStream.h"
-#include "core/html/parser/HTMLParserOptions.h"
 #include "core/html/parser/HTMLScriptRunner.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/html/parser/HTMLTokenizer.h"
@@ -118,14 +117,10 @@ private:
     void endIfDelayed();
     void end();
 
-    bool shouldUseThreading() const { return m_options.useThreading; }
-
     bool isParsingFragment() const;
     bool isScheduledForResume() const;
     bool inPumpSession() const { return m_pumpSessionNestingLevel > 0; }
     bool shouldDelayEnd() const { return inPumpSession() || isWaitingForScripts() || isScheduledForResume() || isExecutingScript(); }
-
-    HTMLParserOptions m_options;
 
     OwnPtrWillBeMember<HTMLTreeBuilder> m_treeBuilder;
     OwnPtr<HTMLParserScheduler> m_parserScheduler;

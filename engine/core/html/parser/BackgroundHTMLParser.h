@@ -28,7 +28,6 @@
 
 #include "base/memory/weak_ptr.h"
 #include "core/html/parser/CompactHTMLToken.h"
-#include "core/html/parser/HTMLParserOptions.h"
 #include "core/html/parser/HTMLTokenizer.h"
 #include "core/html/parser/TextResourceDecoder.h"
 #include "mojo/public/cpp/system/core.h"
@@ -46,7 +45,6 @@ class BackgroundHTMLParser : public DataPipeDrainer::Client {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     struct Configuration {
-        HTMLParserOptions options;
         mojo::ScopedDataPipeConsumerHandle source;
         WeakPtr<HTMLDocumentParser> parser;
     };

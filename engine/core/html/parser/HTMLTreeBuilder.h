@@ -29,7 +29,6 @@
 
 #include "core/html/parser/HTMLConstructionSite.h"
 #include "core/html/parser/HTMLElementStack.h"
-#include "core/html/parser/HTMLParserOptions.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/PassOwnPtr.h"
@@ -54,16 +53,11 @@ class HTMLDocumentParser;
 class HTMLTreeBuilder final : public NoBaseWillBeGarbageCollectedFinalized<HTMLTreeBuilder> {
     WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors, const HTMLParserOptions& options)
+    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors)
     {
-        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, document, reportErrors, options));
-    }
-    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, const HTMLParserOptions& options)
-    {
-        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, fragment, contextElement, options));
+        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, document, reportErrors));
     }
     ~HTMLTreeBuilder();
-    void trace(Visitor*);
 
     const HTMLElementStack* openElements() const { return m_tree.openElements(); }
 
@@ -92,8 +86,7 @@ private:
         TextMode,
     };
 
-    HTMLTreeBuilder(HTMLDocumentParser*, HTMLDocument*, bool reportErrors, const HTMLParserOptions&);
-    HTMLTreeBuilder(HTMLDocumentParser*, DocumentFragment*, Element* contextElement, const HTMLParserOptions&);
+    HTMLTreeBuilder(HTMLDocumentParser*, HTMLDocument*, bool reportErrors);
 
     void processStartTag(AtomicHTMLToken*);
     void processEndTag(AtomicHTMLToken*);
@@ -140,8 +133,6 @@ private:
 
     RefPtrWillBeMember<Element> m_scriptToProcess; // <script> tag which needs processing before resuming the parser.
     TextPosition m_scriptToProcessStartPosition; // Starting line number of the script tag needing processing.
-
-    HTMLParserOptions m_options;
 };
 
 }

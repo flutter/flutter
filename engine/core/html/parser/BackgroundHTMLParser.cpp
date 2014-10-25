@@ -58,7 +58,7 @@ base::WeakPtr<BackgroundHTMLParser> BackgroundHTMLParser::create(PassOwnPtr<Back
 
 BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
     : m_token(adoptPtr(new HTMLToken))
-    , m_tokenizer(HTMLTokenizer::create(config->options))
+    , m_tokenizer(HTMLTokenizer::create())
     , m_parser(config->parser)
     , m_pendingTokens(adoptPtr(new CompactHTMLTokenStream))
     , m_decoder(TextResourceDecoder::create())

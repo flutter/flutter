@@ -45,7 +45,7 @@ static TextPosition uninitializedPositionValue1()
     return TextPosition(OrdinalNumber::fromOneBasedInt(-1), OrdinalNumber::first());
 }
 
-HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* document, bool, const HTMLParserOptions& options)
+HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* document, bool)
     :
 #if ENABLE(ASSERT)
       m_isAttached(true),
@@ -55,46 +55,12 @@ HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* docum
     , m_originalInsertionMode(HTMLMode)
     , m_parser(parser)
     , m_scriptToProcessStartPosition(uninitializedPositionValue1())
-    , m_options(options)
 {
     m_tree.openElements()->pushRootNode(document);
 }
 
-// FIXME: Member variables should be grouped into self-initializing structs to
-// minimize code duplication between these constructors.
-HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, DocumentFragment* fragment, Element* contextElement, const HTMLParserOptions& options)
-    :
-#if ENABLE(ASSERT)
-     m_isAttached(true),
-#endif
-     m_fragmentContext(fragment, contextElement)
-    , m_tree(fragment)
-    , m_insertionMode(HTMLMode)
-    , m_originalInsertionMode(HTMLMode)
-    , m_parser(parser)
-    , m_scriptToProcessStartPosition(uninitializedPositionValue1())
-    , m_options(options)
-{
-    ASSERT(isMainThread());
-    ASSERT(contextElement);
-
-    // Steps 4.2-4.6 of the HTML5 Fragment Case parsing algorithm:
-    // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-end.html#fragment-case
-    // For efficiency, we skip step 4.2 ("Let root be a new html element with no attributes")
-    // and instead use the DocumentFragment as a root node.
-    m_tree.openElements()->pushRootNode(fragment);
-}
-
 HTMLTreeBuilder::~HTMLTreeBuilder()
 {
-}
-
-void HTMLTreeBuilder::trace(Visitor* visitor)
-{
-    visitor->trace(m_fragmentContext);
-    visitor->trace(m_tree);
-    visitor->trace(m_parser);
-    visitor->trace(m_scriptToProcess);
 }
 
 void HTMLTreeBuilder::detach()

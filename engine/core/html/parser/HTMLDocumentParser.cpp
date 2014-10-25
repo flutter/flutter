@@ -48,7 +48,7 @@ namespace blink {
 HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
     : DocumentParser(&document)
     , m_options(&document)
-    , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors, m_options))
+    , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors))
     , m_parserScheduler(HTMLParserScheduler::create(this))
     , m_weakFactory(this)
     , m_isFragment(false)
@@ -56,7 +56,6 @@ HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors
     , m_haveBackgroundParser(false)
     , m_pumpSessionNestingLevel(0)
 {
-    ASSERT(shouldUseThreading());
 }
 
 HTMLDocumentParser::~HTMLDocumentParser()
@@ -79,12 +78,10 @@ HTMLDocumentParser::~HTMLDocumentParser()
 void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source)
 {
     ASSERT(!isStopped());
-    ASSERT(shouldUseThreading());
     ASSERT(!m_haveBackgroundParser);
     m_haveBackgroundParser = true;
 
     OwnPtr<BackgroundHTMLParser::Configuration> config = adoptPtr(new BackgroundHTMLParser::Configuration);
-    config->options = m_options;
     config->source = source.Pass();
     config->parser = m_weakFactory.createWeakPtr();
 
@@ -225,7 +222,6 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
     // ASSERT that this object is both attached to the Document and protected.
     ASSERT(refCount() >= 2);
 #endif
-    ASSERT(shouldUseThreading());
     ASSERT(!m_lastChunkBeforeScript);
 
     ActiveParserSession session(contextForParsingSession());
@@ -350,7 +346,6 @@ void HTMLDocumentParser::startBackgroundParser()
 
 void HTMLDocumentParser::stopBackgroundParser()
 {
-    ASSERT(shouldUseThreading());
     ASSERT(m_haveBackgroundParser);
     m_haveBackgroundParser = false;
 

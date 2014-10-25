@@ -101,9 +101,8 @@ static inline bool isEndTagBufferingState(HTMLTokenizer::State state)
 #define HTML_ADVANCE_TO(stateName) ADVANCE_TO(HTMLTokenizer, stateName)
 #define HTML_SWITCH_TO(stateName) SWITCH_TO(HTMLTokenizer, stateName)
 
-HTMLTokenizer::HTMLTokenizer(const HTMLParserOptions& options)
+HTMLTokenizer::HTMLTokenizer()
     : m_inputStreamPreprocessor(this)
-    , m_options(options)
 {
     reset();
 }
@@ -117,35 +116,6 @@ void HTMLTokenizer::reset()
     m_state = HTMLTokenizer::DataState;
     m_token = 0;
     m_additionalAllowedCharacter = '\0';
-}
-
-bool HTMLTokenizer::canCreateCheckpoint() const
-{
-    if (!m_appropriateEndTagName.isEmpty())
-        return false;
-    if (!m_temporaryBuffer.isEmpty())
-        return false;
-    if (!m_bufferedEndTagName.isEmpty())
-        return false;
-    return true;
-}
-
-void HTMLTokenizer::createCheckpoint(Checkpoint& result) const
-{
-    ASSERT(canCreateCheckpoint());
-    result.options = m_options;
-    result.state = m_state;
-    result.additionalAllowedCharacter = m_additionalAllowedCharacter;
-    result.skipNextNewLine = m_inputStreamPreprocessor.skipNextNewLine();
-}
-
-void HTMLTokenizer::restoreFromCheckpoint(const Checkpoint& checkpoint)
-{
-    m_token = 0;
-    m_options = checkpoint.options;
-    m_state = checkpoint.state;
-    m_additionalAllowedCharacter = checkpoint.additionalAllowedCharacter;
-    m_inputStreamPreprocessor.reset(checkpoint.skipNextNewLine);
 }
 
 inline bool HTMLTokenizer::processEntity(SegmentedString& source)
