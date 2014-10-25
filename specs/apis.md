@@ -53,7 +53,7 @@ module 'sky:core' {
     readonly attribute ChildNode? previousSibling; // O(1)
     readonly attribute ChildNode? nextSibling; // O(1)
     
-    // the following all throw is parentNode is null
+    // the following all throw if parentNode is null
     void insertBefore(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
     void insertAfter(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
     void replaceWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
