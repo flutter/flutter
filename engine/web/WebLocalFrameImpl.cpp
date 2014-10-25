@@ -816,11 +816,6 @@ void WebLocalFrameImpl::didFail(const ResourceError& error)
     client()->didFailLoad(this, error);
 }
 
-void WebLocalFrameImpl::setCanHaveScrollbars(bool canHaveScrollbars)
-{
-    frame()->view()->setCanHaveScrollbars(canHaveScrollbars);
-}
-
 void WebLocalFrameImpl::setInputEventsTransformForEmulation(const IntSize& offset, float contentScaleFactor)
 {
     m_inputEventsOffsetForEmulation = offset;

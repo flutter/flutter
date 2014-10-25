@@ -75,10 +75,6 @@ public:
 
     RenderView* renderView() const;
 
-    // FIXME(sky): Remove.
-    void setCanHaveScrollbars(bool);
-
-    void setContentsSize(const IntSize&);
     IntPoint clampOffsetAtScale(const IntPoint& offset, float scale) const;
 
     void layout(bool allowSubtree = true);
@@ -132,8 +128,6 @@ public:
     void setBaseBackgroundColor(const Color&);
     void updateBackgroundRecursively(const Color&, bool);
 
-    void adjustViewSize();
-
     IntRect windowClipRect(IncludeScrollbarsInRect = ExcludeScrollbars) const;
 
     float visibleContentScaleFactor() const { return m_visibleContentScaleFactor; }
@@ -142,11 +136,6 @@ public:
     float inputEventsScaleFactor() const;
     IntSize inputEventsOffsetForEmulation() const;
     void setInputEventsTransformForEmulation(const IntSize&, float);
-
-    // FIXME(sky): Remove
-    void setScrollPosition(const IntPoint&, ScrollBehavior = ScrollBehaviorInstant);
-    bool isRubberBandInProgress() const;
-    void setScrollPositionNonProgrammatically(const IntPoint&);
 
     // This is different than visibleContentRect() in that it ignores negative (or overly positive)
     // offsets from rubber-banding, and it takes zooming into account.

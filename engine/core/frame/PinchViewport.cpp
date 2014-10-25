@@ -130,22 +130,7 @@ FloatRect PinchViewport::visibleRectInDocument() const
 
 void PinchViewport::scrollIntoView(const FloatRect& rect)
 {
-    if (!mainFrame() || !mainFrame()->view())
-        return;
-
-    FrameView* view = mainFrame()->view();
-
-    float centeringOffsetX = (visibleRect().width() - rect.width()) / 2;
-    float centeringOffsetY = (visibleRect().height() - rect.height()) / 2;
-
-    FloatPoint targetOffset(
-        rect.x() - centeringOffsetX - visibleRect().x(),
-        rect.y() - centeringOffsetY - visibleRect().y());
-
-    view->setScrollPosition(flooredIntPoint(targetOffset));
-
-    FloatPoint remainder = FloatPoint(targetOffset - view->scrollPosition());
-    move(remainder);
+    // FIXME(sky): Delete this whole file.
 }
 
 void PinchViewport::setLocation(const FloatPoint& newLocation)

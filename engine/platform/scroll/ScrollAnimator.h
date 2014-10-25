@@ -99,8 +99,6 @@ public:
 
     virtual void notifyContentAreaScrolled(const FloatSize&) { }
 
-    virtual bool isRubberBandInProgress() const { return false; }
-
 protected:
     explicit ScrollAnimator(ScrollableArea*);
 

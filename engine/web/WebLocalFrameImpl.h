@@ -150,11 +150,6 @@ public:
 
     void didFail(const ResourceError&);
 
-    // Sets whether the WebLocalFrameImpl allows its document to be scrolled.
-    // If the parameter is true, allow the document to be scrolled.
-    // Otherwise, disallow scrolling.
-    virtual void setCanHaveScrollbars(bool) override;
-
     LocalFrame* frame() const { return m_frame.get(); }
     WebFrameClient* client() const { return m_client; }
     void setClient(WebFrameClient* client) { m_client = client; }

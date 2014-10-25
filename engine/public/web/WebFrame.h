@@ -104,9 +104,6 @@ public:
     // NOTE: These routines do not force page layout so their results may
     // not be accurate if the page layout is out-of-date.
 
-    // If set to false, do not draw scrollbars on this frame's view.
-    virtual void setCanHaveScrollbars(bool) = 0;
-
     // The scroll offset from the top-left corner of the frame in pixels.
     virtual WebSize scrollOffset() const = 0;
 

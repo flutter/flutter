@@ -223,16 +223,6 @@ RenderView* FrameView::renderView() const
     return frame().contentRenderer();
 }
 
-void FrameView::setCanHaveScrollbars(bool canHaveScrollbars)
-{
-    // FIXME(sky): Remove
-}
-
-void FrameView::setContentsSize(const IntSize&)
-{
-    // FIXME(sky): Remove
-}
-
 IntPoint FrameView::clampOffsetAtScale(const IntPoint& offset, float scale) const
 {
     FloatSize scaledSize = unscaledVisibleContentSize();
@@ -245,19 +235,6 @@ IntPoint FrameView::clampOffsetAtScale(const IntPoint& offset, float scale) cons
     clampedOffset = clampedOffset.expandedTo(-scrollOrigin());
 
     return clampedOffset;
-}
-
-void FrameView::adjustViewSize()
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return;
-
-    ASSERT(m_frame->view() == this);
-
-    const IntRect rect = renderView->documentRect();
-    const IntSize& size = rect.size();
-    setContentsSize(size);
 }
 
 void FrameView::applyOverflowToViewportAndSetRenderer(RenderObject* o, ScrollbarMode& hMode, ScrollbarMode& vMode)
@@ -340,15 +317,6 @@ void FrameView::recalcOverflowAfterStyleChange()
         return;
 
     renderView->recalcOverflowAfterStyleChange();
-
-    IntRect documentRect = renderView->documentRect();
-    if (size() == documentRect.size())
-        return;
-
-    if (needsLayout())
-        return;
-
-    adjustViewSize();
 }
 
 bool FrameView::usesCompositedScrolling() const
@@ -584,9 +552,6 @@ void FrameView::layout(bool allowSubtree)
         if (RenderObject* container = rootForThisLayout->container())
             container->setMayNeedPaintInvalidation(true);
     } // Reset m_layoutSchedulingEnabled to its previous value.
-
-    if (!inSubtreeLayout)
-        adjustViewSize();
 
     layer->updateLayerPositionsAfterLayout();
 
@@ -947,22 +912,10 @@ void FrameView::scrollElementToRect(Element* element, const IntRect& rect)
         bounds.x() - centeringOffsetX - targetRect.x(),
         bounds.y() - centeringOffsetY - targetRect.y());
 
-    setScrollPosition(targetOffset);
-
     if (pinchVirtualViewportEnabled) {
         IntPoint remainder = IntPoint(targetOffset - scrollPosition());
         m_frame->page()->frameHost().pinchViewport().move(remainder);
     }
-}
-
-void FrameView::setScrollPosition(const IntPoint& scrollPoint, ScrollBehavior scrollBehavior)
-{
-    // FIXME(sky): Remove
-}
-
-void FrameView::setScrollPositionNonProgrammatically(const IntPoint&)
-{
-    // FIXME(sky): Remove
 }
 
 // FIXME(sky): remove
@@ -1063,12 +1016,6 @@ void FrameView::updateCompositedSelectionBoundsIfNeeded()
     }
 
     // TODO(jdduke): Compute and route selection bounds through ChromeClient.
-}
-
-bool FrameView::isRubberBandInProgress() const
-{
-    // FIXME(sky): Remove
-    return false;
 }
 
 HostWindow* FrameView::hostWindow() const
