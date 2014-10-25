@@ -277,7 +277,6 @@ public:
     // FIXME(sky): Remove
     void invalidateScrollbarRect(Scrollbar*, const IntRect&);
     void getTickmarks(Vector<IntRect>&) const;
-    void scrollTo(const IntSize&);
     IntRect scrollableAreaBoundingBox() const;
     bool scrollAnimatorEnabled() const;
     bool usesCompositedScrolling() const;
@@ -301,12 +300,6 @@ public:
     IntPoint maximumScrollPosition() const { return IntPoint(); }
     IntPoint scrollPosition() const { return IntPoint(); }
     bool scheduleAnimation();
-    int scrollX() const { return 0; }
-    int scrollY() const { return 0; }
-    void scrollBy(const IntSize& s, ScrollBehavior behavior = ScrollBehaviorInstant) {}
-    void setScrollOffset(const IntPoint&) {}
-    // Scrollbar* horizontalScrollbar() const { return 0; }
-    // Scrollbar* verticalScrollbar() const { return 0; }
     IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
     IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }
     IntPoint clampScrollPosition(const IntPoint& scrollPosition) const { return scrollPosition; }

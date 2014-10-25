@@ -252,6 +252,7 @@ bool WebViewImpl::handleMouseWheel(LocalFrame& mainFrame, const WebMouseWheelEve
     return PageWidgetEventHandler::handleMouseWheel(mainFrame, event);
 }
 
+// FIXME(sky): This appears to be unused.
 bool WebViewImpl::scrollBy(const WebFloatSize& delta, const WebFloatSize& velocity)
 {
     if (m_flingSourceDevice == WebGestureDeviceTouchpad) {

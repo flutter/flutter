@@ -74,7 +74,7 @@
 #include "core/page/EventHandler.h"
 #include "core/page/Page.h"
 #include "core/page/WindowFocusAllowedIndicator.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
+#include "core/rendering/style/RenderStyle.h"
 #include "platform/EventDispatchForbiddenScope.h"
 #include "platform/PlatformScreen.h"
 #include "platform/RuntimeEnabledFeatures.h"
@@ -573,34 +573,6 @@ int LocalDOMWindow::screenY() const
     return static_cast<int>(host->chrome().windowRect().y());
 }
 
-int LocalDOMWindow::scrollX() const
-{
-    if (!m_frame)
-        return 0;
-
-    FrameView* view = m_frame->view();
-    if (!view)
-        return 0;
-
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
-
-    return adjustForAbsoluteZoom(view->scrollX(), m_frame->pageZoomFactor());
-}
-
-int LocalDOMWindow::scrollY() const
-{
-    if (!m_frame)
-        return 0;
-
-    FrameView* view = m_frame->view();
-    if (!view)
-        return 0;
-
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
-
-    return adjustForAbsoluteZoom(view->scrollY(), m_frame->pageZoomFactor());
-}
-
 LocalDOMWindow* LocalDOMWindow::window() const
 {
     if (!m_frame)
@@ -650,54 +622,6 @@ double LocalDOMWindow::devicePixelRatio() const
         return 0.0;
 
     return m_frame->devicePixelRatio();
-}
-
-static bool scrollBehaviorFromScrollOptions(const Dictionary& scrollOptions, ScrollBehavior& scrollBehavior, ExceptionState& exceptionState)
-{
-    String scrollBehaviorString;
-    if (!DictionaryHelper::get(scrollOptions, "behavior", scrollBehaviorString)) {
-        scrollBehavior = ScrollBehaviorAuto;
-        return true;
-    }
-
-    if (ScrollableArea::scrollBehaviorFromString(scrollBehaviorString, scrollBehavior))
-        return true;
-
-    exceptionState.throwTypeError("The ScrollBehavior provided is invalid.");
-    return false;
-}
-
-void LocalDOMWindow::scrollBy(int x, int y, ScrollBehavior scrollBehavior) const
-{
-    // FIXME(sky): Remove
-}
-
-void LocalDOMWindow::scrollBy(int x, int y, const Dictionary& scrollOptions, ExceptionState &exceptionState) const
-{
-    ScrollBehavior scrollBehavior = ScrollBehaviorAuto;
-    if (!scrollBehaviorFromScrollOptions(scrollOptions, scrollBehavior, exceptionState))
-        return;
-    scrollBy(x, y, scrollBehavior);
-}
-
-void LocalDOMWindow::scrollTo(int x, int y, ScrollBehavior scrollBehavior) const
-{
-    document()->updateLayoutIgnorePendingStylesheets();
-
-    RefPtr<FrameView> view = m_frame->view();
-    if (!view)
-        return;
-
-    IntPoint layoutPos(x * m_frame->pageZoomFactor(), y * m_frame->pageZoomFactor());
-    view->setScrollPosition(layoutPos, scrollBehavior);
-}
-
-void LocalDOMWindow::scrollTo(int x, int y, const Dictionary& scrollOptions, ExceptionState& exceptionState) const
-{
-    ScrollBehavior scrollBehavior = ScrollBehaviorAuto;
-    if (!scrollBehaviorFromScrollOptions(scrollOptions, scrollBehavior, exceptionState))
-        return;
-    scrollTo(x, y, scrollBehavior);
 }
 
 void LocalDOMWindow::moveBy(float x, float y) const

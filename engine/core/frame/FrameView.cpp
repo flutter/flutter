@@ -1385,11 +1385,6 @@ bool FrameView::isActive() const
     return page && page->focusController().isActive();
 }
 
-void FrameView::scrollTo(const IntSize& newOffset)
-{
-    // FIXME(sky): remove
-}
-
 void FrameView::invalidateScrollbarRect(Scrollbar*, const IntRect&)
 {
     // FIXME(sky): remove
@@ -1713,12 +1708,7 @@ IntPoint FrameView::convertFromRenderer(const RenderObject& renderer, const IntP
 
 IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoint& viewPoint) const
 {
-    IntPoint point = viewPoint;
-
-    // Convert from FrameView coords into page ("absolute") coordinates.
-    point += IntSize(scrollX(), scrollY());
-
-    return roundedIntPoint(renderer.absoluteToLocal(point, UseTransforms));
+    return roundedIntPoint(renderer.absoluteToLocal(viewPoint, UseTransforms));
 }
 
 IntRect FrameView::convertToContainingView(const IntRect& localRect) const

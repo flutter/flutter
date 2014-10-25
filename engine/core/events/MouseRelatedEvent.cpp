@@ -38,20 +38,6 @@ MouseRelatedEvent::MouseRelatedEvent()
 {
 }
 
-static LayoutSize contentsScrollOffset(AbstractView* abstractView)
-{
-    if (!abstractView)
-        return LayoutSize();
-    LocalFrame* frame = abstractView->frame();
-    if (!frame)
-        return LayoutSize();
-    FrameView* frameView = frame->view();
-    if (!frameView)
-        return LayoutSize();
-    float scaleFactor = frame->pageZoomFactor();
-    return LayoutSize(frameView->scrollX() / scaleFactor, frameView->scrollY() / scaleFactor);
-}
-
 MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> abstractView,
                                      int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
                                      const IntPoint& movementDelta,
@@ -99,7 +85,8 @@ void MouseRelatedEvent::initCoordinates(const LayoutPoint& clientLocation)
     // Set up initial values for coordinates.
     // Correct values are computed lazily, see computeRelativePosition.
     m_clientLocation = clientLocation;
-    m_pageLocation = clientLocation + contentsScrollOffset(view());
+    // FIXME(sky): We don't need this anymore?
+    m_pageLocation = clientLocation;
 
     m_layerLocation = m_pageLocation;
     m_offsetLocation = m_pageLocation;

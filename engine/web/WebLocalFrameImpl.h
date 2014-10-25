@@ -64,7 +64,6 @@ public:
     virtual WebLocalFrame* toWebLocalFrame() override;
     virtual void close() override;
     virtual WebSize scrollOffset() const override;
-    virtual void setScrollOffset(const WebSize&) override;
     virtual WebSize minimumScrollOffset() const override;
     virtual WebSize maximumScrollOffset() const override;
     virtual WebSize contentsSize() const override;

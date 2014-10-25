@@ -461,14 +461,6 @@ int Element::scrollLeft()
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
             return adjustDoubleForAbsoluteZoom(rend->scrollLeft(), *rend);
-        return 0;
-    }
-
-    if (RuntimeEnabledFeatures::scrollTopLeftInteropEnabled()) {
-        if (FrameView* view = document().view()) {
-            if (RenderView* renderView = document().renderView())
-                return adjustDoubleForAbsoluteZoom(view->scrollX(), *renderView);
-        }
     }
 
     return 0;
@@ -481,14 +473,6 @@ int Element::scrollTop()
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
             return adjustLayoutUnitForAbsoluteZoom(rend->scrollTop(), *rend);
-        return 0;
-    }
-
-    if (RuntimeEnabledFeatures::scrollTopLeftInteropEnabled()) {
-        if (FrameView* view = document().view()) {
-            if (RenderView* renderView = document().renderView())
-                return adjustDoubleForAbsoluteZoom(view->scrollY(), *renderView);
-        }
     }
 
     return 0;
@@ -501,18 +485,6 @@ void Element::setScrollLeft(int newLeft)
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
             rend->setScrollLeft(LayoutUnit::fromFloatRound(newLeft * rend->style()->effectiveZoom()));
-        return;
-    }
-
-    if (RuntimeEnabledFeatures::scrollTopLeftInteropEnabled()) {
-        LocalFrame* frame = document().frame();
-        if (!frame)
-            return;
-        FrameView* view = frame->view();
-        if (!view)
-            return;
-
-        view->setScrollPosition(IntPoint(roundf(newLeft * frame->pageZoomFactor()), view->scrollY()));
     }
 }
 
@@ -544,18 +516,6 @@ void Element::setScrollTop(int newTop)
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
             rend->setScrollTop(LayoutUnit::fromFloatRound(newTop * rend->style()->effectiveZoom()));
-        return;
-    }
-
-    if (RuntimeEnabledFeatures::scrollTopLeftInteropEnabled()) {
-        LocalFrame* frame = document().frame();
-        if (!frame)
-            return;
-        FrameView* view = frame->view();
-        if (!view)
-            return;
-
-        view->setScrollPosition(IntPoint(view->scrollX(), roundf(newTop * frame->pageZoomFactor())));
     }
 }
 

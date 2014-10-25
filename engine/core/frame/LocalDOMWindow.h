@@ -35,7 +35,6 @@
 #include "platform/LifecycleContext.h"
 #include "platform/Supplementable.h"
 #include "platform/heap/Handle.h"
-#include "platform/scroll/ScrollableArea.h"
 
 #include "wtf/Forward.h"
 
@@ -133,10 +132,6 @@ public:
     int screenY() const;
     int screenLeft() const { return screenX(); }
     int screenTop() const { return screenY(); }
-    int scrollX() const;
-    int scrollY() const;
-    int pageXOffset() const { return scrollX(); }
-    int pageYOffset() const { return scrollY(); }
 
     // FIXME(sky): keeping self for now since js-test.html uses it.
     LocalDOMWindow* window() const;
@@ -163,13 +158,6 @@ public:
     FrameConsole* frameConsole() const;
 
     void printErrorMessage(const String&);
-
-    void scrollBy(int x, int y, ScrollBehavior = ScrollBehaviorAuto) const;
-    void scrollBy(int x, int y, const Dictionary& scrollOptions, ExceptionState&) const;
-    void scrollTo(int x, int y, ScrollBehavior = ScrollBehaviorAuto) const;
-    void scrollTo(int x, int y, const Dictionary& scrollOptions, ExceptionState&) const;
-    void scroll(int x, int y) const { scrollTo(x, y); }
-    void scroll(int x, int y, const Dictionary& scrollOptions, ExceptionState& exceptionState) const { scrollTo(x, y, scrollOptions, exceptionState); }
 
     void moveBy(float x, float y) const;
     void moveTo(float x, float y) const;

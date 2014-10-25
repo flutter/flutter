@@ -209,7 +209,7 @@ HitTestResult hitTestInDocument(const Document* document, int x, int y)
         return HitTestResult();
 
     float scaleFactor = frame->pageZoomFactor();
-    IntPoint point = roundedIntPoint(FloatPoint(x * scaleFactor  + frameView->scrollX(), y * scaleFactor + frameView->scrollY()));
+    IntPoint point = roundedIntPoint(FloatPoint(x * scaleFactor, y * scaleFactor));
 
     if (!frameView->visibleContentRect().contains(point))
         return HitTestResult();

@@ -668,13 +668,6 @@ void RenderBox::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping c
             if (frame && frame->page())
                 frame->page()->autoscrollController().updateAutoscrollRenderer();
         }
-    } else if (view()->frameView()) {
-        // If we are here, we were called on a renderer that can be programmatically scrolled, but doesn't
-        // have an overflow clip. Which means that it is a document node that can be scrolled.
-        view()->frameView()->scrollBy(delta);
-
-        // FIXME: If we didn't scroll the whole way, do we want to try looking at the frames ownerElement?
-        // https://bugs.webkit.org/show_bug.cgi?id=28237
     }
 }
 
