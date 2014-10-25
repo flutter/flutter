@@ -46,7 +46,7 @@
 namespace blink {
 
 HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
-    : DecodedDataDocumentParser(document)
+    : DocumentParser(&document)
     , m_options(&document)
     , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors, m_options))
     , m_parserScheduler(HTMLParserScheduler::create(this))
@@ -74,12 +74,6 @@ HTMLDocumentParser::~HTMLDocumentParser()
     // but there are cases where that's not true currently. For example,
     // we we're told to stop parsing before we've consumed all the input.
 #endif
-}
-
-void HTMLDocumentParser::trace(Visitor* visitor)
-{
-    visitor->trace(m_treeBuilder);
-    DecodedDataDocumentParser::trace(visitor);
 }
 
 void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source)

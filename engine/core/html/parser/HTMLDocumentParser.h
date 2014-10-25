@@ -27,7 +27,7 @@
 #define HTMLDocumentParser_h
 
 #include "base/memory/weak_ptr.h"
-#include "core/dom/DecodedDataDocumentParser.h"
+#include "core/dom/DocumentParser.h"
 #include "core/fetch/ResourceClient.h"
 #include "core/frame/UseCounter.h"
 #include "core/html/parser/CompactHTMLToken.h"
@@ -57,9 +57,8 @@ class ScriptSourceCode;
 
 class PumpSession;
 
-class HTMLDocumentParser :  public DecodedDataDocumentParser {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLDocumentParser);
+class HTMLDocumentParser :  public DocumentParser {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassRefPtrWillBeRawPtr<HTMLDocumentParser> create(HTMLDocument& document, bool reportErrors)
     {
@@ -68,8 +67,6 @@ public:
     virtual ~HTMLDocumentParser();
 
     void parse(mojo::ScopedDataPipeConsumerHandle) override;
-
-    virtual void trace(Visitor*) override;
 
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();

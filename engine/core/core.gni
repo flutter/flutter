@@ -380,8 +380,6 @@ sky_core_files = [
   "dom/DOMURLUtils.h",
   "dom/DOMURLUtilsReadOnly.cpp",
   "dom/DOMURLUtilsReadOnly.h",
-  "dom/DecodedDataDocumentParser.cpp",
-  "dom/DecodedDataDocumentParser.h",
   "dom/Document.cpp",
   "dom/DocumentFragment.cpp",
   "dom/DocumentInit.cpp",
