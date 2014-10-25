@@ -52,7 +52,7 @@ public:
 private:
     Attr(Element&, const QualifiedName&);
 
-    bool isElementNode() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isElementNode() const = delete; // This will catch anyone doing an unnecessary check.
 
     virtual String nodeName() const override { return name(); }
     virtual NodeType nodeType() const override { return ATTRIBUTE_NODE; }

@@ -1401,7 +1401,6 @@ T* adoptRefCountedGarbageCollected(T* ptr)
 // need to have a trace method. That trace method will be called
 // automatically by the Heap collections.
 //
-#if COMPILER_SUPPORTS(CXX_DELETED_FUNCTIONS)
 #define DISALLOW_ALLOCATION()                                   \
     private:                                                    \
         void* operator new(size_t) = delete;                    \
@@ -1418,28 +1417,6 @@ T* adoptRefCountedGarbageCollected(T* ptr)
 #define STATIC_ONLY(Type) \
     private:              \
         Type() = delete;
-
-#else
-
-#define DISALLOW_ALLOCATION()                          \
-    private:                                           \
-        void* operator new(size_t);                    \
-        void* operator new(size_t, NotNullTag, void*); \
-        void* operator new(size_t, void*)
-
-#define ALLOW_ONLY_INLINE_ALLOCATION()                                              \
-    public:                                                                         \
-        void* operator new(size_t, NotNullTag, void* location) { return location; } \
-        void* operator new(size_t, void* location) { return location; }             \
-    private:                                                                        \
-        void* operator new(size_t);
-
-#define STATIC_ONLY(Type)  \
-    private:               \
-        Type();
-
-#endif
-
 
 // These macros insert annotations that the Blink GC plugin for clang uses for
 // verification. STACK_ALLOCATED is used to declare that objects of this type

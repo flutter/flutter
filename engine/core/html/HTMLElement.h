@@ -67,8 +67,8 @@ protected:
     HTMLElement(const QualifiedName& tagName, Document&, ConstructionType);
 
 private:
-    bool isHTMLElement() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
-    bool isStyledElement() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isHTMLElement() const = delete; // This will catch anyone doing an unnecessary check.
+    bool isStyledElement() const = delete; // This will catch anyone doing an unnecessary check.
 };
 
 DEFINE_ELEMENT_TYPE_CASTS(HTMLElement, isHTMLElement());

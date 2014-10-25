@@ -169,7 +169,7 @@ private:
     float widthFromCache(const Font&, int start, int len, float xPos, TextDirection, HashSet<const SimpleFontData*>* fallbackFonts, GlyphOverflow*) const;
     bool isAllASCII() const { return m_isAllASCII; }
 
-    bool isText() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isText() const = delete; // This will catch anyone doing an unnecessary check.
 
     // We put the bitfield first to minimize padding on 64-bit.
     bool m_hasBreakableChar : 1; // Whether or not we can be broken into multiple lines.

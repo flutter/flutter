@@ -71,7 +71,7 @@ private:
     virtual String nodeName() const override;
     virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override final;
 
-    bool isTextNode() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isTextNode() const = delete; // This will catch anyone doing an unnecessary check.
 
     bool needsWhitespaceRenderer();
 

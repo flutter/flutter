@@ -718,7 +718,7 @@ private:
 
     virtual InvalidationReason invalidatePaintIfNeeded(const PaintInvalidationState&, const RenderLayerModelObject& newPaintInvalidationContainer) override final;
 
-    bool isBox() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isBox() const = delete; // This will catch anyone doing an unnecessary check.
 
     // The width/height of the contents + borders + padding.  The x/y location is relative to our container (which is not always our parent).
     LayoutRect m_frameRect;

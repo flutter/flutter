@@ -23,16 +23,9 @@
 
 #include "wtf/Compiler.h"
 
-#if COMPILER_SUPPORTS(CXX_DELETED_FUNCTIONS)
-    #define WTF_MAKE_NONCOPYABLE(ClassName) \
-        private: \
-            ClassName(const ClassName&) = delete; \
-            ClassName& operator=(const ClassName&) = delete;
-#else
-    #define WTF_MAKE_NONCOPYABLE(ClassName) \
-        private: \
-            ClassName(const ClassName&); \
-            ClassName& operator=(const ClassName&)
-#endif
+#define WTF_MAKE_NONCOPYABLE(ClassName) \
+    private: \
+        ClassName(const ClassName&) = delete; \
+        ClassName& operator=(const ClassName&) = delete;
 
 #endif // WTF_Noncopyable_h

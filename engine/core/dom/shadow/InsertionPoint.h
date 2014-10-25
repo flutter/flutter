@@ -78,7 +78,7 @@ protected:
     virtual void willRecalcStyle(StyleRecalcChange) override;
 
 private:
-    bool isInsertionPoint() const WTF_DELETED_FUNCTION; // This will catch anyone doing an unnecessary check.
+    bool isInsertionPoint() const = delete; // This will catch anyone doing an unnecessary check.
 
     ContentDistribution m_distribution;
     bool m_registeredWithShadowRoot;

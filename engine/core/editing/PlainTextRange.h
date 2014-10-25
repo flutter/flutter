@@ -54,7 +54,7 @@ public:
     static PlainTextRange create(const ContainerNode& scope, const Range&);
 
 private:
-    PlainTextRange& operator=(const PlainTextRange&)  WTF_DELETED_FUNCTION;
+    PlainTextRange& operator=(const PlainTextRange&)  = delete;
 
     enum GetRangeFor { ForGeneric, ForSelection };
     PassRefPtrWillBeRawPtr<Range> createRangeFor(const ContainerNode& scope, GetRangeFor) const;
