@@ -47,7 +47,6 @@ namespace blink {
 
 HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
     : DocumentParser(&document)
-    , m_options(&document)
     , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors))
     , m_parserScheduler(HTMLParserScheduler::create(this))
     , m_weakFactory(this)
