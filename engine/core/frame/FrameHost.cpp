@@ -45,7 +45,6 @@ PassOwnPtrWillBeRawPtr<FrameHost> FrameHost::create(Page& page)
 
 FrameHost::FrameHost(Page& page)
     : m_page(&page)
-    , m_pinchViewport(adoptPtr(new PinchViewport(*this)))
     , m_eventHandlerRegistry(adoptPtrWillBeNoop(new EventHandlerRegistry(*this)))
 {
 }
@@ -73,11 +72,6 @@ UseCounter& FrameHost::useCounter() const
 float FrameHost::deviceScaleFactor() const
 {
     return m_page->deviceScaleFactor();
-}
-
-PinchViewport& FrameHost::pinchViewport() const
-{
-    return *m_pinchViewport;
 }
 
 EventHandlerRegistry& FrameHost::eventHandlerRegistry() const

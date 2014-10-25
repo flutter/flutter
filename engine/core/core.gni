@@ -741,8 +741,6 @@ sky_core_files = [
   "frame/LocalFrame.h",
   "frame/Location.cpp",
   "frame/Location.h",
-  "frame/PinchViewport.cpp",
-  "frame/PinchViewport.h",
   "frame/PlatformEventController.cpp",
   "frame/PlatformEventController.h",
   "frame/PlatformEventDispatcher.cpp",

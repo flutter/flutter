@@ -76,7 +76,6 @@ public:
     virtual WebSize size() override;
     virtual void willStartLiveResize() override;
     virtual void resize(const WebSize&) override;
-    virtual void resizePinchViewport(const WebSize&) override;
     virtual void willEndLiveResize() override;
 
     virtual void beginFrame(const WebBeginFrameArgs&) override;
@@ -150,8 +149,6 @@ public:
     virtual float setTextZoomFactor(float) override;
     virtual bool zoomToMultipleTargetsRect(const WebRect&) override;
     virtual void setMainFrameScrollOffset(const WebPoint&) override;
-    virtual void setPinchViewportOffset(const WebFloatPoint&) override;
-    virtual WebFloatPoint pinchViewportOffset() const override;
     virtual void resetScrollAndScaleState() override;
     virtual WebSize contentsPreferredMinimumSize() override;
 
@@ -326,8 +323,6 @@ public:
 
     // Exposed for tests.
     WebVector<WebCompositionUnderline> compositionUnderlines() const;
-
-    bool pinchVirtualViewportEnabled() const;
 
     bool matchesHeuristicsForGpuRasterizationForTesting() const { return m_matchesHeuristicsForGpuRasterization; }
 

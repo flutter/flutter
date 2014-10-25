@@ -667,14 +667,8 @@ void WebLocalFrameImpl::setCaretVisible(bool visible)
 
 VisiblePosition WebLocalFrameImpl::visiblePositionForWindowPoint(const WebPoint& point)
 {
-    // FIXME(bokan): crbug.com/371902 - These scale/pinch transforms shouldn't
-    // be ad hoc and explicit.
-    PinchViewport& pinchViewport = frame()->page()->frameHost().pinchViewport();
-    FloatPoint unscaledPoint(point);
-    unscaledPoint.moveBy(pinchViewport.visibleRect().location());
-
     HitTestRequest request = HitTestRequest::Move | HitTestRequest::ReadOnly | HitTestRequest::Active | HitTestRequest::IgnoreClipping;
-    HitTestResult result(frame()->view()->windowToContents(roundedIntPoint(unscaledPoint)));
+    HitTestResult result(frame()->view()->windowToContents(roundedIntPoint(FloatPoint(point))));
     frame()->document()->renderView()->layer()->hitTest(request, result);
 
     if (Node* node = result.targetNode())

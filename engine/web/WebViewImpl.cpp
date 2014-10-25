@@ -49,7 +49,6 @@
 #include "core/frame/FrameHost.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
-#include "core/frame/PinchViewport.h"
 #include "core/frame/Settings.h"
 #include "core/html/HTMLMediaElement.h"
 #include "core/html/ime/InputMethodContext.h"
@@ -943,14 +942,6 @@ WebSize WebViewImpl::size()
     return m_size;
 }
 
-void WebViewImpl::resizePinchViewport(const WebSize& newSize)
-{
-    if (!pinchVirtualViewportEnabled())
-        return;
-
-    page()->frameHost().pinchViewport().setSize(newSize);
-}
-
 WebLocalFrameImpl* WebViewImpl::localFrameRootTemporary() const
 {
     // FIXME(sky): remove
@@ -964,11 +955,8 @@ void WebViewImpl::performResize()
 
     // If the virtual viewport pinch mode is enabled, the main frame will be resized
     // after layout so it can be sized to the contentsSize.
-    if (!pinchVirtualViewportEnabled() && localFrameRootTemporary()->frameView())
+    if (localFrameRootTemporary()->frameView())
         localFrameRootTemporary()->frameView()->resize(m_size);
-
-    if (pinchVirtualViewportEnabled())
-        page()->frameHost().pinchViewport().setSize(m_size);
 }
 
 void WebViewImpl::resize(const WebSize& newSize)
@@ -1498,16 +1486,6 @@ bool WebViewImpl::selectionBounds(WebRect& anchor, WebRect& focus) const
     IntRect scaledAnchor(localFrame->view()->contentsToWindow(anchor));
     IntRect scaledFocus(localFrame->view()->contentsToWindow(focus));
 
-    if (pinchVirtualViewportEnabled()) {
-        // FIXME(http://crbug.com/371902) - We shouldn't have to do this
-        // manually, the contentsToWindow methods above should be fixed to do
-        // this.
-        IntPoint pinchViewportOffset =
-            roundedIntPoint(page()->frameHost().pinchViewport().visibleRect().location());
-        scaledAnchor.moveBy(-pinchViewportOffset);
-        scaledFocus.moveBy(-pinchViewportOffset);
-    }
-
     anchor = scaledAnchor;
     focus = scaledFocus;
 
@@ -1751,11 +1729,6 @@ void WebViewImpl::scrollFocusedNodeIntoRect(const WebRect& rect)
     if (!frame || !frame->view() || !element)
         return;
 
-    if (!m_webSettings->autoZoomFocusedNodeToLegibleScale()) {
-        frame->view()->scrollElementToRect(element, IntRect(rect.x, rect.y, rect.width, rect.height));
-        return;
-    }
-
     float scale;
     IntPoint scroll;
     bool needAnimation;
@@ -1831,32 +1804,6 @@ IntPoint WebViewImpl::clampOffsetAtScale(const IntPoint& offset, float scale)
         return offset;
 
     return view->clampOffsetAtScale(offset, scale);
-}
-
-bool WebViewImpl::pinchVirtualViewportEnabled() const
-{
-    ASSERT(page());
-    return page()->settings().pinchVirtualViewportEnabled();
-}
-
-void WebViewImpl::setPinchViewportOffset(const WebFloatPoint& offset)
-{
-    ASSERT(page());
-
-    if (!pinchVirtualViewportEnabled())
-        return;
-
-    page()->frameHost().pinchViewport().setLocation(offset);
-}
-
-WebFloatPoint WebViewImpl::pinchViewportOffset() const
-{
-    ASSERT(page());
-
-    if (!pinchVirtualViewportEnabled())
-        return WebFloatPoint();
-
-    return page()->frameHost().pinchViewport().visibleRect().location();
 }
 
 void WebViewImpl::setMainFrameScrollOffset(const WebPoint& origin)
@@ -2251,11 +2198,6 @@ void WebViewImpl::setOverlayLayer(GraphicsLayer* layer)
     if (!m_rootGraphicsLayer)
         return;
 
-    if (pinchVirtualViewportEnabled()) {
-        m_page->mainFrame()->view()->renderView()->compositor()->setOverlayLayer(layer);
-        return;
-    }
-
     // FIXME(bokan): This path goes away after virtual viewport pinch is enabled everywhere.
     if (!m_rootTransformLayer)
         m_rootTransformLayer = m_page->mainFrame()->view()->renderView()->compositor()->ensureRootTransformLayer();
@@ -2305,23 +2247,9 @@ void WebViewImpl::setRootGraphicsLayer(GraphicsLayer* layer)
 {
     suppressInvalidations(true);
 
-    if (pinchVirtualViewportEnabled()) {
-        PinchViewport& pinchViewport = page()->frameHost().pinchViewport();
-        pinchViewport.attachToLayerTree(layer, graphicsLayerFactory());
-        if (layer) {
-            m_rootGraphicsLayer = pinchViewport.rootGraphicsLayer();
-            m_rootLayer = pinchViewport.rootGraphicsLayer()->platformLayer();
-            m_rootTransformLayer = pinchViewport.rootGraphicsLayer();
-        } else {
-            m_rootGraphicsLayer = 0;
-            m_rootLayer = 0;
-            m_rootTransformLayer = 0;
-        }
-    } else {
-        m_rootGraphicsLayer = layer;
-        m_rootLayer = layer ? layer->platformLayer() : 0;
-        m_rootTransformLayer = 0;
-    }
+    m_rootGraphicsLayer = layer;
+    m_rootLayer = layer ? layer->platformLayer() : 0;
+    m_rootTransformLayer = 0;
 
     setIsAcceleratedCompositingActive(layer != 0);
 
@@ -2332,20 +2260,13 @@ void WebViewImpl::setRootGraphicsLayer(GraphicsLayer* layer)
             m_layerTreeView->setRootLayer(*m_rootLayer);
             // We register viewport layers here since there may not be a layer
             // tree view prior to this point.
-            if (pinchVirtualViewportEnabled()) {
-                page()->frameHost().pinchViewport().registerLayersWithTreeView(m_layerTreeView);
-            } else {
-                GraphicsLayer* rootScrollLayer = compositor()->scrollLayer();
-                ASSERT(rootScrollLayer);
-                WebLayer* pageScaleLayer = rootScrollLayer->parent() ? rootScrollLayer->parent()->platformLayer() : 0;
-                m_layerTreeView->registerViewportLayers(pageScaleLayer, rootScrollLayer->platformLayer(), 0);
-            }
+            GraphicsLayer* rootScrollLayer = compositor()->scrollLayer();
+            ASSERT(rootScrollLayer);
+            WebLayer* pageScaleLayer = rootScrollLayer->parent() ? rootScrollLayer->parent()->platformLayer() : 0;
+            m_layerTreeView->registerViewportLayers(pageScaleLayer, rootScrollLayer->platformLayer(), 0);
         } else {
             m_layerTreeView->clearRootLayer();
-            if (pinchVirtualViewportEnabled())
-                page()->frameHost().pinchViewport().clearLayersForTreeView(m_layerTreeView);
-            else
-                m_layerTreeView->clearViewportLayers();
+            m_layerTreeView->clearViewportLayers();
         }
     }
 

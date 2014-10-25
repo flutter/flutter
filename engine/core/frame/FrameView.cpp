@@ -207,10 +207,6 @@ void FrameView::setFrameRect(const IntRect& newRect)
     }
 
     viewportConstrainedVisibleContentSizeChanged(newRect.width() != oldRect.width(), newRect.height() != oldRect.height());
-
-    if (oldRect.size() != newRect.size()
-        && m_frame->settings()->pinchVirtualViewportEnabled())
-        page()->frameHost().pinchViewport().mainFrameDidChangeSize();
 }
 
 Page* FrameView::page() const
@@ -759,36 +755,7 @@ LayoutRect FrameView::viewportConstrainedVisibleContentRect() const
 
 void FrameView::viewportConstrainedVisibleContentSizeChanged(bool widthChanged, bool heightChanged)
 {
-    if (!hasViewportConstrainedObjects())
-        return;
-
-    // If viewport is not enabled, frameRect change will cause layout size change and then layout.
-    // Otherwise, viewport constrained objects need their layout flags set separately to ensure
-    // they are positioned correctly. In the virtual-viewport pinch mode frame rect changes wont
-    // necessarily cause a layout size change so only take this early-out if we're in old-style
-    // pinch.
-    if (m_frame->settings()
-        && !m_frame->settings()->viewportEnabled()
-        && !m_frame->settings()->pinchVirtualViewportEnabled())
-        return;
-
-    ViewportConstrainedObjectSet::const_iterator end = m_viewportConstrainedObjects->end();
-    for (ViewportConstrainedObjectSet::const_iterator it = m_viewportConstrainedObjects->begin(); it != end; ++it) {
-        RenderObject* renderer = *it;
-        RenderStyle* style = renderer->style();
-        if (widthChanged) {
-            if (style->width().isFixed() && (style->left().isAuto() || style->right().isAuto()))
-                renderer->setNeedsPositionedMovementLayout();
-            else
-                renderer->setNeedsLayoutAndFullPaintInvalidation();
-        }
-        if (heightChanged) {
-            if (style->height().isFixed() && (style->top().isAuto() || style->bottom().isAuto()))
-                renderer->setNeedsPositionedMovementLayout();
-            else
-                renderer->setNeedsLayoutAndFullPaintInvalidation();
-        }
-    }
+    // FIXME(sky): Remove
 }
 
 IntSize FrameView::scrollOffsetForFixedPosition() const
@@ -884,38 +851,6 @@ void FrameView::scrollContentsSlowPath(const IntRect& updateRect)
 void FrameView::restoreScrollbar()
 {
     // FIXME(sky): Remove
-}
-
-void FrameView::scrollElementToRect(Element* element, const IntRect& rect)
-{
-    // FIXME(http://crbug.com/371896) - This method shouldn't be manually doing
-    // coordinate transformations to the PinchViewport.
-    IntRect targetRect(rect);
-
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
-
-    bool pinchVirtualViewportEnabled = m_frame->settings()->pinchVirtualViewportEnabled();
-
-    if (pinchVirtualViewportEnabled) {
-        PinchViewport& pinchViewport = m_frame->page()->frameHost().pinchViewport();
-
-        IntSize pinchViewportSize = expandedIntSize(pinchViewport.visibleRect().size());
-        targetRect.moveBy(ceiledIntPoint(pinchViewport.visibleRect().location()));
-        targetRect.setSize(pinchViewportSize.shrunkTo(targetRect.size()));
-    }
-
-    LayoutRect bounds = element->boundingBox();
-    int centeringOffsetX = (targetRect.width() - bounds.width()) / 2;
-    int centeringOffsetY = (targetRect.height() - bounds.height()) / 2;
-
-    IntPoint targetOffset(
-        bounds.x() - centeringOffsetX - targetRect.x(),
-        bounds.y() - centeringOffsetY - targetRect.y());
-
-    if (pinchVirtualViewportEnabled) {
-        IntPoint remainder = IntPoint(targetOffset - scrollPosition());
-        m_frame->page()->frameHost().pinchViewport().move(remainder);
-    }
 }
 
 // FIXME(sky): remove
@@ -1365,9 +1300,7 @@ IntSize FrameView::inputEventsOffsetForEmulation() const
 
 float FrameView::inputEventsScaleFactor() const
 {
-    float pageScale = m_frame->settings()->pinchVirtualViewportEnabled()
-        ? m_frame->page()->frameHost().pinchViewport().scale()
-        : visibleContentScaleFactor();
+    float pageScale = visibleContentScaleFactor();
     return pageScale * m_inputEventsScaleFactorForEmulation;
 }
 

@@ -188,7 +188,6 @@ public:
 
     void forceLayout(bool allowSubtree = false);
 
-    void scrollElementToRect(Element*, const IntRect&);
     void scrollContentsIfNeededRecursive();
 
     // Methods to convert points and rects between the coordinate space of the renderer, and this view.

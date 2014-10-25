@@ -146,15 +146,7 @@ forceZeroLayoutHeight initial=false, invalidate=ViewportDescription
 # crbug.com/304873 tracks removal once it's been enabled on all platforms.
 touchEditingEnabled initial=false
 
-# Settings for experimental desktop pinch-zoom support (with semantics
-# optimized for large screens).  Pinch-zoom generally is implemented mainly
-# outside of blink (in the compositor) and doesn't require any settings.
-# These settings are for an experimental modification to how pinch-zoom
-# behaves.  TODO(wjmaclean): link to design document.
-# crbug.com/304869 tracks removal.
-pinchVirtualViewportEnabled initial=false
 useSolidColorScrollbars initial=true
-pinchOverlayScrollbarThickness type=int, initial=0
 
 mainFrameClipsContent initial=true
 

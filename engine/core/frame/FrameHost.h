@@ -31,7 +31,6 @@
 #ifndef FrameHost_h
 #define FrameHost_h
 
-#include "core/frame/PinchViewport.h"
 #include "platform/heap/Handle.h"
 #include "wtf/FastAllocBase.h"
 #include "wtf/Noncopyable.h"
@@ -43,7 +42,6 @@ namespace blink {
 class Chrome;
 class EventHandlerRegistry;
 class Page;
-class PinchViewport;
 class Settings;
 class UseCounter;
 class Visitor;
@@ -74,7 +72,6 @@ public:
     // This value does not account for Page zoom, use LocalFrame::devicePixelRatio instead.
     float deviceScaleFactor() const;
 
-    PinchViewport& pinchViewport() const;
     EventHandlerRegistry& eventHandlerRegistry() const;
 
     void trace(Visitor*);
@@ -83,7 +80,6 @@ private:
     explicit FrameHost(Page&);
 
     RawPtrWillBeMember<Page> m_page;
-    const OwnPtr<PinchViewport> m_pinchViewport;
     const OwnPtrWillBeMember<EventHandlerRegistry> m_eventHandlerRegistry;
 };
 

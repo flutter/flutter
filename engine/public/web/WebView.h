@@ -196,15 +196,6 @@ public:
     // virtual viewport pinch.
     virtual void setMainFrameScrollOffset(const WebPoint& origin) = 0;
 
-    // Sets the offset of the pinch-to-zoom viewport within the main frame, in
-    // partial CSS pixels. The offset will be clamped so the pinch viewport
-    // stays within the frame's bounds.
-    virtual void setPinchViewportOffset(const WebFloatPoint&) = 0;
-
-    // Gets the pinch viewport's current offset within the page's main frame,
-    // in partial CSS pixels.
-    virtual WebFloatPoint pinchViewportOffset() const = 0;
-
     // Reset any saved values for the scroll and scale state.
     virtual void resetScrollAndScaleState() = 0;
 
