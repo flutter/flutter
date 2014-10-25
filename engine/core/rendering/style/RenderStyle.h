@@ -355,7 +355,7 @@ public:
 
     bool hasBackground() const
     {
-        Color color = visitedDependentColor(CSSPropertyBackgroundColor);
+        Color color = colorIncludingFallback(CSSPropertyBackgroundColor);
         if (color.alpha())
             return true;
         return hasBackgroundImage();
@@ -1350,9 +1350,8 @@ public:
     bool lastChildState() const { return noninherited_flags.lastChildState; }
     void setLastChildState() { setUnique(); noninherited_flags.lastChildState = true; }
 
-    StyleColor visitedDependentDecorationStyleColor() const;
-    Color visitedDependentDecorationColor() const;
-    Color visitedDependentColor(int colorProperty) const;
+    StyleColor decorationStyleColor() const;
+    Color decorationColor() const;
 
     void setHasExplicitlyInheritedProperties() { noninherited_flags.explicitInheritance = true; }
     bool hasExplicitlyInheritedProperties() const { return noninherited_flags.explicitInheritance; }
@@ -1538,19 +1537,10 @@ public:
     static const FilterOperations& initialFilter() { DEFINE_STATIC_LOCAL(FilterOperations, ops, ()); return ops; }
     static WebBlendMode initialBlendMode() { return WebBlendModeNormal; }
     static EIsolation initialIsolation() { return IsolationAuto; }
-private:
-    void setVisitedLinkColor(const Color&);
-    void setVisitedLinkBackgroundColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBackgroundColor, v); }
-    void setVisitedLinkBorderLeftColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBorderLeftColor, v); }
-    void setVisitedLinkBorderRightColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBorderRightColor, v); }
-    void setVisitedLinkBorderBottomColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBorderBottomColor, v); }
-    void setVisitedLinkBorderTopColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBorderTopColor, v); }
-    void setVisitedLinkOutlineColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkOutlineColor, v); }
-    void setVisitedLinkTextDecorationColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkTextDecorationColor, v); }
-    void setVisitedLinkTextEmphasisColor(const StyleColor& v) { SET_VAR_WITH_SETTER(rareInheritedData, visitedLinkTextEmphasisColor, setVisitedLinkTextEmphasisColor, v); }
-    void setVisitedLinkTextFillColor(const StyleColor& v) { SET_VAR_WITH_SETTER(rareInheritedData, visitedLinkTextFillColor, setVisitedLinkTextFillColor, v); }
-    void setVisitedLinkTextStrokeColor(const StyleColor& v) { SET_VAR_WITH_SETTER(rareInheritedData, visitedLinkTextStrokeColor, setVisitedLinkTextStrokeColor, v); }
 
+    Color colorIncludingFallback(int colorProperty) const;
+
+private:
     void inheritUnicodeBidiFrom(const RenderStyle* parent) { noninherited_flags.unicodeBidi = parent->noninherited_flags.unicodeBidi; }
     void getShadowExtent(const ShadowList*, LayoutUnit& top, LayoutUnit& right, LayoutUnit& bottom, LayoutUnit& left) const;
     LayoutBoxExtent getShadowInsetExtent(const ShadowList*) const;
@@ -1585,7 +1575,7 @@ private:
         return display == INLINE || isDisplayReplacedType(display);
     }
 
-    // Color accessors are all private to make sure callers use visitedDependentColor instead to access them.
+    // Color accessors are all private to make sure callers use colorIncludingFallback instead to access them.
     StyleColor borderLeftColor() const { return surround->border.left().color(); }
     StyleColor borderRightColor() const { return surround->border.right().color(); }
     StyleColor borderTopColor() const { return surround->border.top().color(); }
@@ -1596,20 +1586,8 @@ private:
     StyleColor textEmphasisColor() const { return rareInheritedData->textEmphasisColor(); }
     StyleColor textFillColor() const { return rareInheritedData->textFillColor(); }
     StyleColor textStrokeColor() const { return rareInheritedData->textStrokeColor(); }
-    Color visitedLinkColor() const;
-    StyleColor visitedLinkBackgroundColor() const { return rareNonInheritedData->m_visitedLinkBackgroundColor; }
-    StyleColor visitedLinkBorderLeftColor() const { return rareNonInheritedData->m_visitedLinkBorderLeftColor; }
-    StyleColor visitedLinkBorderRightColor() const { return rareNonInheritedData->m_visitedLinkBorderRightColor; }
-    StyleColor visitedLinkBorderBottomColor() const { return rareNonInheritedData->m_visitedLinkBorderBottomColor; }
-    StyleColor visitedLinkBorderTopColor() const { return rareNonInheritedData->m_visitedLinkBorderTopColor; }
-    StyleColor visitedLinkOutlineColor() const { return rareNonInheritedData->m_visitedLinkOutlineColor; }
-    StyleColor textDecorationColor() const { return rareNonInheritedData->m_textDecorationColor; }
-    StyleColor visitedLinkTextDecorationColor() const { return rareNonInheritedData->m_visitedLinkTextDecorationColor; }
-    StyleColor visitedLinkTextEmphasisColor() const { return rareInheritedData->visitedLinkTextEmphasisColor(); }
-    StyleColor visitedLinkTextFillColor() const { return rareInheritedData->visitedLinkTextFillColor(); }
-    StyleColor visitedLinkTextStrokeColor() const { return rareInheritedData->visitedLinkTextStrokeColor(); }
 
-    Color colorIncludingFallback(int colorProperty, bool visitedLink) const;
+    StyleColor textDecorationColor() const { return rareNonInheritedData->m_textDecorationColor; }
 
     void appendContent(PassOwnPtr<ContentData>);
     void addAppliedTextDecoration(const AppliedTextDecoration&);

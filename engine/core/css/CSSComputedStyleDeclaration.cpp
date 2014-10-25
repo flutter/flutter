@@ -1471,7 +1471,7 @@ PassRefPtrWillBeRawPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValu
             break;
 
         case CSSPropertyBackgroundColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyBackgroundColor).rgb()) : currentColorOrValidColor(*style, style->backgroundColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBackgroundColor).rgb()) : currentColorOrValidColor(*style, style->backgroundColor());
         case CSSPropertyBackgroundImage:
         case CSSPropertyWebkitMaskImage: {
             RefPtrWillBeRawPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
@@ -1579,13 +1579,13 @@ PassRefPtrWillBeRawPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValu
                 return style->borderImageSource()->cssValue();
             return cssValuePool().createIdentifierValue(CSSValueNone);
         case CSSPropertyBorderTopColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyBorderTopColor).rgb()) : currentColorOrValidColor(*style, style->borderTopColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBorderTopColor).rgb()) : currentColorOrValidColor(*style, style->borderTopColor());
         case CSSPropertyBorderRightColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyBorderRightColor).rgb()) : currentColorOrValidColor(*style, style->borderRightColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBorderRightColor).rgb()) : currentColorOrValidColor(*style, style->borderRightColor());
         case CSSPropertyBorderBottomColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyBorderBottomColor).rgb()) : currentColorOrValidColor(*style, style->borderBottomColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBorderBottomColor).rgb()) : currentColorOrValidColor(*style, style->borderBottomColor());
         case CSSPropertyBorderLeftColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyBorderLeftColor).rgb()) : currentColorOrValidColor(*style, style->borderLeftColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBorderLeftColor).rgb()) : currentColorOrValidColor(*style, style->borderLeftColor());
         case CSSPropertyBorderTopStyle:
             return cssValuePool().createValue(style->borderTopStyle());
         case CSSPropertyBorderRightStyle:
@@ -1616,7 +1616,7 @@ PassRefPtrWillBeRawPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValu
         case CSSPropertyClear:
             return cssValuePool().createValue(style->clear());
         case CSSPropertyColor:
-            return cssValuePool().createColorValue(m_allowVisitedStyle ? style->visitedDependentColor(CSSPropertyColor).rgb() : style->color().rgb());
+            return cssValuePool().createColorValue(m_allowVisitedStyle ? style->colorIncludingFallback(CSSPropertyColor).rgb() : style->color().rgb());
         case CSSPropertyWebkitPrintColorAdjust:
             return cssValuePool().createValue(style->printColorAdjust());
         case CSSPropertyTabSize:
@@ -1915,7 +1915,7 @@ PassRefPtrWillBeRawPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValu
                 return cssValuePool().createIdentifierValue(CSSValueAuto);
             return cssValuePool().createValue(style->orphans(), CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyOutlineColor:
-            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->visitedDependentColor(CSSPropertyOutlineColor).rgb()) : currentColorOrValidColor(*style, style->outlineColor());
+            return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyOutlineColor).rgb()) : currentColorOrValidColor(*style, style->outlineColor());
         case CSSPropertyOutlineOffset:
             return zoomAdjustedPixelValue(style->outlineOffset(), *style);
         case CSSPropertyOutlineStyle:

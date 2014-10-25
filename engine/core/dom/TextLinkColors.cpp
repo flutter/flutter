@@ -38,7 +38,6 @@ TextLinkColors::TextLinkColors()
     : m_textColor(Color::black)
 {
     resetLinkColor();
-    resetVisitedLinkColor();
     resetActiveLinkColor();
 }
 
@@ -47,17 +46,12 @@ void TextLinkColors::resetLinkColor()
     m_linkColor = Color(0, 0, 238);
 }
 
-void TextLinkColors::resetVisitedLinkColor()
-{
-    m_visitedLinkColor = Color(85, 26, 139);
-}
-
 void TextLinkColors::resetActiveLinkColor()
 {
     m_activeLinkColor = Color(255, 0, 0);
 }
 
-Color TextLinkColors::colorFromPrimitiveValue(const CSSPrimitiveValue* value, Color currentColor, bool forVisitedLink) const
+Color TextLinkColors::colorFromPrimitiveValue(const CSSPrimitiveValue* value, Color currentColor) const
 {
     if (value->isRGBColor())
         return Color(value->getRGBA32Value());

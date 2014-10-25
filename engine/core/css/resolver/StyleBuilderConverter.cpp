@@ -56,10 +56,10 @@ static GridLength convertGridTrackBreadth(const StyleResolverState& state, CSSPr
 
 } // namespace
 
-Color StyleBuilderConverter::convertColor(StyleResolverState& state, CSSValue* value, bool forVisitedLink)
+Color StyleBuilderConverter::convertColor(StyleResolverState& state, CSSValue* value)
 {
     CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-    return state.document().textLinkColors().colorFromPrimitiveValue(primitiveValue, state.style()->color(), forVisitedLink);
+    return state.document().textLinkColors().colorFromPrimitiveValue(primitiveValue, state.style()->color());
 }
 
 AtomicString StyleBuilderConverter::convertFragmentIdentifier(StyleResolverState& state, CSSValue* value)

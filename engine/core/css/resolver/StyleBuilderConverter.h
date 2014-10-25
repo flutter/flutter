@@ -43,7 +43,7 @@ namespace blink {
 class StyleBuilderConverter {
 public:
     static AtomicString convertFragmentIdentifier(StyleResolverState&, CSSValue*);
-    static Color convertColor(StyleResolverState&, CSSValue*, bool forVisitedLink = false);
+    static Color convertColor(StyleResolverState&, CSSValue*);
     template <typename T> static T convertComputedLength(StyleResolverState&, CSSValue*);
     static LengthBox convertClip(StyleResolverState&, CSSValue*);
     template <typename T> static T convertFlags(StyleResolverState&, CSSValue*);

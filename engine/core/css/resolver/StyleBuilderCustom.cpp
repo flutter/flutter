@@ -75,30 +75,6 @@
 
 namespace blink {
 
-namespace {
-
-static inline bool isValidVisitedLinkProperty(CSSPropertyID id)
-{
-    switch (id) {
-    case CSSPropertyBackgroundColor:
-    case CSSPropertyBorderLeftColor:
-    case CSSPropertyBorderRightColor:
-    case CSSPropertyBorderTopColor:
-    case CSSPropertyBorderBottomColor:
-    case CSSPropertyColor:
-    case CSSPropertyOutlineColor:
-    case CSSPropertyTextDecorationColor:
-    case CSSPropertyWebkitTextEmphasisColor:
-    case CSSPropertyWebkitTextFillColor:
-    case CSSPropertyWebkitTextStrokeColor:
-        return true;
-    default:
-        return false;
-    }
-}
-
-} // namespace
-
 void StyleBuilder::applyProperty(CSSPropertyID id, StyleResolverState& state, CSSValue* value)
 {
     ASSERT_WITH_MESSAGE(!isExpandedShorthand(id), "Shorthand property id = %d wasn't expanded at parsing time", id);
@@ -108,11 +84,6 @@ void StyleBuilder::applyProperty(CSSPropertyID id, StyleResolverState& state, CS
 
     ASSERT(!isInherit || !isInitial); // isInherit -> !isInitial && isInitial -> !isInherit
     ASSERT(!isInherit || (state.parentNode() && state.parentStyle())); // isInherit -> (state.parentNode() && state.parentStyle())
-
-    if (!state.applyPropertyToRegularStyle() && (!state.applyPropertyToVisitedLinkStyle() || !isValidVisitedLinkProperty(id))) {
-        // Limit the properties that can be applied to only the ones honored by :visited.
-        return;
-    }
 
     CSSPrimitiveValue* primitiveValue = value->isPrimitiveValue() ? toCSSPrimitiveValue(value) : 0;
     if (primitiveValue && primitiveValue->getValueID() == CSSValueCurrentcolor)
@@ -127,19 +98,13 @@ void StyleBuilder::applyProperty(CSSPropertyID id, StyleResolverState& state, CS
 void StyleBuilderFunctions::applyInitialCSSPropertyColor(StyleResolverState& state)
 {
     Color color = RenderStyle::initialColor();
-    if (state.applyPropertyToRegularStyle())
-        state.style()->setColor(color);
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->setVisitedLinkColor(color);
+    state.style()->setColor(color);
 }
 
 void StyleBuilderFunctions::applyInheritCSSPropertyColor(StyleResolverState& state)
 {
     Color color = state.parentStyle()->color();
-    if (state.applyPropertyToRegularStyle())
-        state.style()->setColor(color);
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->setVisitedLinkColor(color);
+    state.style()->setColor(color);
 }
 
 void StyleBuilderFunctions::applyValueCSSPropertyColor(StyleResolverState& state, CSSValue* value)
@@ -151,10 +116,7 @@ void StyleBuilderFunctions::applyValueCSSPropertyColor(StyleResolverState& state
         return;
     }
 
-    if (state.applyPropertyToRegularStyle())
-        state.style()->setColor(StyleBuilderConverter::convertColor(state, value));
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->setVisitedLinkColor(StyleBuilderConverter::convertColor(state, value, true));
+    state.style()->setColor(StyleBuilderConverter::convertColor(state, value));
 }
 
 void StyleBuilderFunctions::applyInitialCSSPropertyJustifyItems(StyleResolverState& state)

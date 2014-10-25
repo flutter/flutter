@@ -679,12 +679,12 @@ public:
 
     inline Color resolveColor(const RenderStyle* styleToUse, int colorProperty) const
     {
-        return styleToUse->visitedDependentColor(colorProperty);
+        return styleToUse->colorIncludingFallback(colorProperty);
     }
 
     inline Color resolveColor(int colorProperty) const
     {
-        return style()->visitedDependentColor(colorProperty);
+        return style()->colorIncludingFallback(colorProperty);
     }
 
     virtual CursorDirective getCursor(const LayoutPoint&, Cursor&) const;

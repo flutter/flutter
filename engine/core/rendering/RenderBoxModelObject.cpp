@@ -2327,7 +2327,7 @@ void RenderBoxModelObject::paintBoxShadow(const PaintInfo& info, const LayoutRec
 
     bool hasBorderRadius = s->hasBorderRadius();
     bool isHorizontal = s->isHorizontalWritingMode();
-    bool hasOpaqueBackground = s->visitedDependentColor(CSSPropertyBackgroundColor).alpha() == 255;
+    bool hasOpaqueBackground = s->colorIncludingFallback(CSSPropertyBackgroundColor).alpha() == 255;
 
     GraphicsContextStateSaver stateSaver(*context, false);
 

@@ -46,13 +46,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_shapeImageThreshold(RenderStyle::initialShapeImageThreshold())
     , m_clipPath(RenderStyle::initialClipPath())
     , m_textDecorationColor(StyleColor::currentColor())
-    , m_visitedLinkTextDecorationColor(StyleColor::currentColor())
-    , m_visitedLinkBackgroundColor(RenderStyle::initialBackgroundColor())
-    , m_visitedLinkOutlineColor(StyleColor::currentColor())
-    , m_visitedLinkBorderLeftColor(StyleColor::currentColor())
-    , m_visitedLinkBorderRightColor(StyleColor::currentColor())
-    , m_visitedLinkBorderTopColor(StyleColor::currentColor())
-    , m_visitedLinkBorderBottomColor(StyleColor::currentColor())
     , m_order(RenderStyle::initialOrder())
     , m_objectPosition(RenderStyle::initialObjectPosition())
     , m_pageSizeType(PAGE_SIZE_AUTO)
@@ -124,13 +117,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_shapeImageThreshold(o.m_shapeImageThreshold)
     , m_clipPath(o.m_clipPath)
     , m_textDecorationColor(o.m_textDecorationColor)
-    , m_visitedLinkTextDecorationColor(o.m_visitedLinkTextDecorationColor)
-    , m_visitedLinkBackgroundColor(o.m_visitedLinkBackgroundColor)
-    , m_visitedLinkOutlineColor(o.m_visitedLinkOutlineColor)
-    , m_visitedLinkBorderLeftColor(o.m_visitedLinkBorderLeftColor)
-    , m_visitedLinkBorderRightColor(o.m_visitedLinkBorderRightColor)
-    , m_visitedLinkBorderTopColor(o.m_visitedLinkBorderTopColor)
-    , m_visitedLinkBorderBottomColor(o.m_visitedLinkBorderBottomColor)
     , m_order(o.m_order)
     , m_objectPosition(o.m_objectPosition)
     , m_pageSizeType(o.m_pageSizeType)
@@ -205,13 +191,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_shapeImageThreshold == o.m_shapeImageThreshold
         && m_clipPath == o.m_clipPath
         && m_textDecorationColor == o.m_textDecorationColor
-        && m_visitedLinkTextDecorationColor == o.m_visitedLinkTextDecorationColor
-        && m_visitedLinkBackgroundColor == o.m_visitedLinkBackgroundColor
-        && m_visitedLinkOutlineColor == o.m_visitedLinkOutlineColor
-        && m_visitedLinkBorderLeftColor == o.m_visitedLinkBorderLeftColor
-        && m_visitedLinkBorderRightColor == o.m_visitedLinkBorderRightColor
-        && m_visitedLinkBorderTopColor == o.m_visitedLinkBorderTopColor
-        && m_visitedLinkBorderBottomColor == o.m_visitedLinkBorderBottomColor
         && m_order == o.m_order
         && m_objectPosition == o.m_objectPosition
         && m_pageSizeType == o.m_pageSizeType

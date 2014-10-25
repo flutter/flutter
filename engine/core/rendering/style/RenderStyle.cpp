@@ -773,9 +773,7 @@ void RenderStyle::setListStyleImage(PassRefPtr<StyleImage> v)
 }
 
 Color RenderStyle::color() const { return inherited->color; }
-Color RenderStyle::visitedLinkColor() const { return inherited->visitedLinkColor; }
 void RenderStyle::setColor(const Color& v) { SET_VAR(inherited, color, v); }
-void RenderStyle::setVisitedLinkColor(const Color& v) { SET_VAR(inherited, visitedLinkColor, v); }
 
 short RenderStyle::horizontalBorderSpacing() const { return inherited->horizontal_border_spacing; }
 short RenderStyle::verticalBorderSpacing() const { return inherited->vertical_border_spacing; }
@@ -1065,7 +1063,7 @@ void RenderStyle::applyTextDecorations()
         return;
 
     TextDecorationStyle style = textDecorationStyle();
-    StyleColor styleColor = visitedDependentDecorationStyleColor();
+    StyleColor styleColor = decorationStyleColor();
 
     int decorations = textDecoration();
 
@@ -1179,69 +1177,66 @@ void RenderStyle::getShadowVerticalExtent(const ShadowList* shadowList, LayoutUn
     }
 }
 
-StyleColor RenderStyle::visitedDependentDecorationStyleColor() const
+StyleColor RenderStyle::decorationStyleColor() const
 {
-    bool isVisited = false;
-
-    StyleColor styleColor = isVisited ? visitedLinkTextDecorationColor() : textDecorationColor();
+    StyleColor styleColor = textDecorationColor();
 
     if (!styleColor.isCurrentColor())
         return styleColor;
 
     if (textStrokeWidth()) {
         // Prefer stroke color if possible, but not if it's fully transparent.
-        StyleColor textStrokeStyleColor = isVisited ? visitedLinkTextStrokeColor() : textStrokeColor();
+        StyleColor textStrokeStyleColor = textStrokeColor();
         if (!textStrokeStyleColor.isCurrentColor() && textStrokeStyleColor.color().alpha())
             return textStrokeStyleColor;
     }
 
-    return isVisited ? visitedLinkTextFillColor() : textFillColor();
+    return textFillColor();
 }
 
-Color RenderStyle::visitedDependentDecorationColor() const
+Color RenderStyle::decorationColor() const
 {
-    bool isVisited = false;
-    return visitedDependentDecorationStyleColor().resolve(isVisited ? visitedLinkColor() : color());
+    return decorationStyleColor().resolve(color());
 }
 
-Color RenderStyle::colorIncludingFallback(int colorProperty, bool visitedLink) const
+Color RenderStyle::colorIncludingFallback(int colorProperty) const
 {
     StyleColor result(StyleColor::currentColor());
     EBorderStyle borderStyle = BNONE;
     switch (colorProperty) {
     case CSSPropertyBackgroundColor:
-        result = visitedLink ? visitedLinkBackgroundColor() : backgroundColor();
+        result = backgroundColor();
         break;
     case CSSPropertyBorderLeftColor:
-        result = visitedLink ? visitedLinkBorderLeftColor() : borderLeftColor();
+        result = borderLeftColor();
         borderStyle = borderLeftStyle();
         break;
     case CSSPropertyBorderRightColor:
-        result = visitedLink ? visitedLinkBorderRightColor() : borderRightColor();
+        result = borderRightColor();
         borderStyle = borderRightStyle();
         break;
     case CSSPropertyBorderTopColor:
-        result = visitedLink ? visitedLinkBorderTopColor() : borderTopColor();
+        result = borderTopColor();
         borderStyle = borderTopStyle();
         break;
     case CSSPropertyBorderBottomColor:
-        result = visitedLink ? visitedLinkBorderBottomColor() : borderBottomColor();
+        result = borderBottomColor();
         borderStyle = borderBottomStyle();
         break;
     case CSSPropertyColor:
-        result = visitedLink ? visitedLinkColor() : color();
+        result = color();
         break;
     case CSSPropertyOutlineColor:
-        result = visitedLink ? visitedLinkOutlineColor() : outlineColor();
+        result = outlineColor();
         break;
     case CSSPropertyWebkitTextEmphasisColor:
-        result = visitedLink ? visitedLinkTextEmphasisColor() : textEmphasisColor();
+        result = textEmphasisColor();
         break;
     case CSSPropertyWebkitTextFillColor:
-        result = visitedLink ? visitedLinkTextFillColor() : textFillColor();
+        result = textFillColor();
         break;
     case CSSPropertyWebkitTextStrokeColor:
-        result = visitedLink ? visitedLinkTextStrokeColor() : textStrokeColor();
+        result = textStrokeColor();
         break;
     case CSSPropertyWebkitTapHighlightColor:
         result = tapHighlightColor();
@@ -1256,15 +1251,9 @@ Color RenderStyle::colorIncludingFallback(int colorProperty, bool visitedLink) c
 
     // FIXME: Treating styled borders with initial color differently causes problems
     // See crbug.com/316559, crbug.com/276231
-    if (!visitedLink && (borderStyle == INSET || borderStyle == OUTSET || borderStyle == RIDGE || borderStyle == GROOVE))
+    if ((borderStyle == INSET || borderStyle == OUTSET || borderStyle == RIDGE || borderStyle == GROOVE))
         return Color(238, 238, 238);
-    return visitedLink ? visitedLinkColor() : color();
-}
-
-Color RenderStyle::visitedDependentColor(int colorProperty) const
-{
-    // FIXME(sky): Remove visited colors.
-    return colorIncludingFallback(colorProperty, false);
+    return color();
 }
 
 const BorderValue& RenderStyle::borderBefore() const

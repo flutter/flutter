@@ -125,13 +125,6 @@ public:
     RefPtr<ClipPathOperation> m_clipPath;
 
     StyleColor m_textDecorationColor;
-    StyleColor m_visitedLinkTextDecorationColor;
-    StyleColor m_visitedLinkBackgroundColor;
-    StyleColor m_visitedLinkOutlineColor;
-    StyleColor m_visitedLinkBorderLeftColor;
-    StyleColor m_visitedLinkBorderRightColor;
-    StyleColor m_visitedLinkBorderTopColor;
-    StyleColor m_visitedLinkBorderBottomColor;
 
     int m_order;
 

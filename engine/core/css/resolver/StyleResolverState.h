@@ -74,16 +74,6 @@ public:
     const RenderStyle* parentStyle() const { return m_parentStyle.get(); }
     RenderStyle* parentStyle() { return m_parentStyle.get(); }
 
-    // FIXME: These are effectively side-channel "out parameters" for the various
-    // map functions. When we map from CSS to style objects we use this state object
-    // to track various meta-data about that mapping (e.g. if it's cache-able).
-    // We need to move this data off of StyleResolverState and closer to the
-    // objects it applies to. Possibly separating (immutable) inputs from (mutable) outputs.
-    void setApplyPropertyToRegularStyle(bool isApply) { m_applyPropertyToRegularStyle = isApply; }
-    void setApplyPropertyToVisitedLinkStyle(bool isApply) { m_applyPropertyToVisitedLinkStyle = isApply; }
-    bool applyPropertyToRegularStyle() const { return m_applyPropertyToRegularStyle; }
-    bool applyPropertyToVisitedLinkStyle() const { return m_applyPropertyToVisitedLinkStyle; }
-
     // Holds all attribute names found while applying "content" properties that contain an "attr()" value.
     Vector<AtomicString>& contentAttrValues() { return m_contentAttrValues; }
 
@@ -128,9 +118,6 @@ private:
     RefPtr<RenderStyle> m_parentStyle;
 
     OwnPtrWillBeMember<CSSAnimationUpdate> m_animationUpdate;
-
-    bool m_applyPropertyToRegularStyle;
-    bool m_applyPropertyToVisitedLinkStyle;
 
     RawPtrWillBeMember<CSSValue> m_lineHeightValue;
 

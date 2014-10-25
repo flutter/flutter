@@ -272,33 +272,22 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 
 {% macro apply_color(property_id, initial_color='StyleColor::currentColor') %}
 {% set property = properties[property_id] %}
-{% set visited_link_setter = 'setVisitedLink' + property.name_for_methods %}
 {{declare_initial_function(property_id)}}
 {
     StyleColor color = {{initial_color}}();
-    if (state.applyPropertyToRegularStyle())
-        {{set_value(property)}}(color);
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->{{visited_link_setter}}(color);
+    {{set_value(property)}}(color);
 }
 
 {{declare_inherit_function(property_id)}}
 {
-    // Visited link style can never explicitly inherit from parent visited link style so no separate getters are needed.
     StyleColor color = state.parentStyle()->{{property.getter}}();
     Color resolvedColor = color.resolve(state.parentStyle()->color());
-    if (state.applyPropertyToRegularStyle())
-        {{set_value(property)}}(resolvedColor);
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->{{visited_link_setter}}(resolvedColor);
+    {{set_value(property)}}(resolvedColor);
 }
 
 {{declare_value_function(property_id)}}
 {
-    if (state.applyPropertyToRegularStyle())
-        {{set_value(property)}}(StyleBuilderConverter::convertColor(state, value));
-    if (state.applyPropertyToVisitedLinkStyle())
-        state.style()->{{visited_link_setter}}(StyleBuilderConverter::convertColor(state, value, true));
+    {{set_value(property)}}(StyleBuilderConverter::convertColor(state, value));
 }
 {% endmacro %}
 {{apply_color('CSSPropertyBackgroundColor', initial_color='RenderStyle::initialBackgroundColor') }}

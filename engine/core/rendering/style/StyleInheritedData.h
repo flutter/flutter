@@ -55,7 +55,6 @@ public:
 
     Font font;
     Color color;
-    Color visitedLinkColor;
 
 private:
     StyleInheritedData();

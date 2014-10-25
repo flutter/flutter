@@ -67,25 +67,15 @@ public:
     StyleColor textStrokeColor() const { return m_textStrokeColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textStrokeColor); }
     StyleColor textFillColor() const { return m_textFillColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textFillColor); }
     StyleColor textEmphasisColor() const { return m_textEmphasisColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textEmphasisColor); }
-    StyleColor visitedLinkTextStrokeColor() const { return m_visitedLinkTextStrokeColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_visitedLinkTextStrokeColor); }
-    StyleColor visitedLinkTextFillColor() const { return m_visitedLinkTextFillColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_visitedLinkTextFillColor); }
-    StyleColor visitedLinkTextEmphasisColor() const { return m_visitedLinkTextEmphasisColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_visitedLinkTextEmphasisColor); }
 
     void setTextStrokeColor(const StyleColor& color) { m_textStrokeColor = color.resolve(Color()); m_textStrokeColorIsCurrentColor = color.isCurrentColor(); }
     void setTextFillColor(const StyleColor& color) { m_textFillColor = color.resolve(Color()); m_textFillColorIsCurrentColor = color.isCurrentColor(); }
     void setTextEmphasisColor(const StyleColor& color) { m_textEmphasisColor = color.resolve(Color()); m_textEmphasisColorIsCurrentColor = color.isCurrentColor(); }
-    void setVisitedLinkTextStrokeColor(const StyleColor& color) { m_visitedLinkTextStrokeColor = color.resolve(Color()); m_visitedLinkTextStrokeColorIsCurrentColor = color.isCurrentColor(); }
-    void setVisitedLinkTextFillColor(const StyleColor& color) { m_visitedLinkTextFillColor = color.resolve(Color()); m_visitedLinkTextFillColorIsCurrentColor = color.isCurrentColor(); }
-    void setVisitedLinkTextEmphasisColor(const StyleColor& color) { m_visitedLinkTextEmphasisColor = color.resolve(Color()); m_visitedLinkTextEmphasisColorIsCurrentColor = color.isCurrentColor(); }
 
     Color m_textStrokeColor;
     float textStrokeWidth;
     Color m_textFillColor;
     Color m_textEmphasisColor;
-
-    Color m_visitedLinkTextStrokeColor;
-    Color m_visitedLinkTextFillColor;
-    Color m_visitedLinkTextEmphasisColor;
 
     RefPtr<ShadowList> textShadow; // Our text shadow information for shadowed text drawing.
     AtomicString highlight; // Apple-specific extension for custom highlight rendering.
@@ -103,9 +93,6 @@ public:
     unsigned m_textStrokeColorIsCurrentColor : 1;
     unsigned m_textFillColorIsCurrentColor : 1;
     unsigned m_textEmphasisColorIsCurrentColor : 1;
-    unsigned m_visitedLinkTextStrokeColorIsCurrentColor : 1;
-    unsigned m_visitedLinkTextFillColorIsCurrentColor : 1;
-    unsigned m_visitedLinkTextEmphasisColorIsCurrentColor : 1;
 
     unsigned userModify : 2; // EUserModify (editing)
     unsigned wordBreak : 2; // EWordBreak

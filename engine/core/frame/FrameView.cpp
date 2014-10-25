@@ -1487,7 +1487,7 @@ Color FrameView::documentBackgroundColor() const
     // otherwise poses problems when the aggregate is not
     // fully opaque.
     if (htmlElement && htmlElement->renderer())
-        result = result.blend(htmlElement->renderer()->style()->visitedDependentColor(CSSPropertyBackgroundColor));
+        result = result.blend(htmlElement->renderer()->style()->colorIncludingFallback(CSSPropertyBackgroundColor));
 
     return result;
 }

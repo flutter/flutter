@@ -60,8 +60,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
 {
     switch (prop) {
     case CSSPropertyBackgroundColor:
-        return a.backgroundColor().resolve(a.color()) == b.backgroundColor().resolve(b.color())
-            && a.visitedLinkBackgroundColor().resolve(a.color()) == b.visitedLinkBackgroundColor().resolve(b.color());
+        return a.backgroundColor().resolve(a.color()) == b.backgroundColor().resolve(b.color());
     case CSSPropertyBackgroundImage:
         return fillLayersEqual<CSSPropertyBackgroundImage>(a.backgroundLayers(), b.backgroundLayers());
     case CSSPropertyBackgroundPositionX:
@@ -71,8 +70,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyBackgroundSize:
         return fillLayersEqual<CSSPropertyBackgroundSize>(a.backgroundLayers(), b.backgroundLayers());
     case CSSPropertyBorderBottomColor:
-        return a.borderBottomColor().resolve(a.color()) == b.borderBottomColor().resolve(b.color())
-            && a.visitedLinkBorderBottomColor().resolve(a.color()) == b.visitedLinkBorderBottomColor().resolve(b.color());
+        return a.borderBottomColor().resolve(a.color()) == b.borderBottomColor().resolve(b.color());
     case CSSPropertyBorderBottomLeftRadius:
         return a.borderBottomLeftRadius() == b.borderBottomLeftRadius();
     case CSSPropertyBorderBottomRightRadius:
@@ -88,18 +86,15 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyBorderImageWidth:
         return a.borderImageWidth() == b.borderImageWidth();
     case CSSPropertyBorderLeftColor:
-        return a.borderLeftColor().resolve(a.color()) == b.borderLeftColor().resolve(b.color())
-            && a.visitedLinkBorderLeftColor().resolve(a.color()) == b.visitedLinkBorderLeftColor().resolve(b.color());
+        return a.borderLeftColor().resolve(a.color()) == b.borderLeftColor().resolve(b.color());
     case CSSPropertyBorderLeftWidth:
         return a.borderLeftWidth() == b.borderLeftWidth();
     case CSSPropertyBorderRightColor:
-        return a.borderRightColor().resolve(a.color()) == b.borderRightColor().resolve(b.color())
-            && a.visitedLinkBorderRightColor().resolve(a.color()) == b.visitedLinkBorderRightColor().resolve(b.color());
+        return a.borderRightColor().resolve(a.color()) == b.borderRightColor().resolve(b.color());
     case CSSPropertyBorderRightWidth:
         return a.borderRightWidth() == b.borderRightWidth();
     case CSSPropertyBorderTopColor:
-        return a.borderTopColor().resolve(a.color()) == b.borderTopColor().resolve(b.color())
-            && a.visitedLinkBorderTopColor().resolve(a.color()) == b.visitedLinkBorderTopColor().resolve(b.color());
+        return a.borderTopColor().resolve(a.color()) == b.borderTopColor().resolve(b.color());
     case CSSPropertyBorderTopLeftRadius:
         return a.borderTopLeftRadius() == b.borderTopLeftRadius();
     case CSSPropertyBorderTopRightRadius:
@@ -113,7 +108,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyClip:
         return a.clip() == b.clip();
     case CSSPropertyColor:
-        return a.color() == b.color() && a.visitedLinkColor() == b.visitedLinkColor();
+        return a.color() == b.color();
     case CSSPropertyFlexBasis:
         return a.flexBasis() == b.flexBasis();
     case CSSPropertyFlexGrow:
@@ -163,8 +158,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyOrphans:
         return a.orphans() == b.orphans();
     case CSSPropertyOutlineColor:
-        return a.outlineColor().resolve(a.color()) == b.outlineColor().resolve(b.color())
-            && a.visitedLinkOutlineColor().resolve(a.color()) == b.visitedLinkOutlineColor().resolve(b.color());
+        return a.outlineColor().resolve(a.color()) == b.outlineColor().resolve(b.color());
     case CSSPropertyOutlineOffset:
         return a.outlineOffset() == b.outlineOffset();
     case CSSPropertyOutlineWidth:
@@ -186,8 +180,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyShapeOutside:
         return dataEquivalent(a.shapeOutside(), b.shapeOutside());
     case CSSPropertyTextDecorationColor:
-        return a.textDecorationColor().resolve(a.color()) == b.textDecorationColor().resolve(b.color())
-            && a.visitedLinkTextDecorationColor().resolve(a.color()) == b.visitedLinkTextDecorationColor().resolve(b.color());
+        return a.textDecorationColor().resolve(a.color()) == b.textDecorationColor().resolve(b.color());
     case CSSPropertyTextIndent:
         return a.textIndent() == b.textIndent();
     case CSSPropertyTextShadow:
@@ -230,8 +223,7 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
     case CSSPropertyPerspectiveOrigin:
         return a.perspectiveOriginX() == b.perspectiveOriginX() && a.perspectiveOriginY() == b.perspectiveOriginY();
     case CSSPropertyWebkitTextStrokeColor:
-        return a.textStrokeColor().resolve(a.color()) == b.textStrokeColor().resolve(b.color())
-            && a.visitedLinkTextStrokeColor().resolve(a.color()) == b.visitedLinkTextStrokeColor().resolve(b.color());
+        return a.textStrokeColor().resolve(a.color()) == b.textStrokeColor().resolve(b.color());
     case CSSPropertyTransform:
         return a.transform() == b.transform();
     case CSSPropertyTransformOrigin:

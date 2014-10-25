@@ -251,7 +251,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
     switch (property) {
     case CSSPropertyBackgroundColor:
         style->setBackgroundColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkBackgroundColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyBackgroundImage:
         setOnFillLayers<CSSPropertyBackgroundImage>(style->accessBackgroundLayers(), value, state);
@@ -267,7 +266,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyBorderBottomColor:
         style->setBorderBottomColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkBorderBottomColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyBorderBottomLeftRadius:
         style->setBorderBottomLeftRadius(animatableValueToLengthSize(value, state, ValueRangeNonNegative));
@@ -292,21 +290,18 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyBorderLeftColor:
         style->setBorderLeftColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkBorderLeftColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyBorderLeftWidth:
         style->setBorderLeftWidth(animatableValueRoundClampTo<unsigned>(value));
         return;
     case CSSPropertyBorderRightColor:
         style->setBorderRightColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkBorderRightColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyBorderRightWidth:
         style->setBorderRightWidth(animatableValueRoundClampTo<unsigned>(value));
         return;
     case CSSPropertyBorderTopColor:
         style->setBorderTopColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkBorderTopColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyBorderTopLeftRadius:
         style->setBorderTopLeftRadius(animatableValueToLengthSize(value, state, ValueRangeNonNegative));
@@ -329,7 +324,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyColor:
         style->setColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyFlexGrow:
         style->setFlexGrow(clampTo<float>(toAnimatableDouble(value)->toDouble(), 0));
@@ -403,7 +397,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyOutlineColor:
         style->setOutlineColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkOutlineColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyOutlineOffset:
         style->setOutlineOffset(animatableValueRoundClampTo<int>(value));
@@ -428,7 +421,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyTextDecorationColor:
         style->setTextDecorationColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkTextDecorationColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyTextIndent:
         style->setTextIndent(animatableValueToLength(value, state));
@@ -499,7 +491,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         return;
     case CSSPropertyWebkitTextStrokeColor:
         style->setTextStrokeColor(toAnimatableColor(value)->color());
-        style->setVisitedLinkTextStrokeColor(toAnimatableColor(value)->visitedLinkColor());
         return;
     case CSSPropertyTransform: {
         const TransformOperations& operations = toAnimatableTransform(value)->transformOperations();

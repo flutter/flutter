@@ -209,9 +209,8 @@ inline static PassRefPtrWillBeRawPtr<AnimatableValue> createFromFillLayers(const
 
 PassRefPtrWillBeRawPtr<AnimatableValue> CSSAnimatableValueFactory::createFromColor(CSSPropertyID property, const RenderStyle& style)
 {
-    Color color = style.colorIncludingFallback(property, false);
-    Color visitedLinkColor = style.colorIncludingFallback(property, true);
-    return AnimatableColor::create(color, visitedLinkColor);
+    Color color = style.colorIncludingFallback(property);
+    return AnimatableColor::create(color);
 }
 
 inline static PassRefPtrWillBeRawPtr<AnimatableValue> createFromShapeValue(ShapeValue* value)
@@ -387,7 +386,7 @@ PassRefPtrWillBeRawPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPro
     case CSSPropertyRight:
         return createFromLength(style.right(), style);
     case CSSPropertyTextDecorationColor:
-        return AnimatableColor::create(style.textDecorationColor().resolve(style.color()), style.visitedLinkTextDecorationColor().resolve(style.visitedLinkColor()));
+        return AnimatableColor::create(style.textDecorationColor().resolve(style.color()));
     case CSSPropertyTextIndent:
         return createFromLength(style.textIndent(), style);
     case CSSPropertyTextShadow:

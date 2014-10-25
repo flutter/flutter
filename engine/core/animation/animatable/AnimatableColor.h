@@ -58,9 +58,8 @@ private:
 // but inefficient.
 class AnimatableColor final : public AnimatableValue {
 public:
-    static PassRefPtrWillBeRawPtr<AnimatableColor> create(const AnimatableColorImpl&, const AnimatableColorImpl& visitedLinkColor);
+    static PassRefPtrWillBeRawPtr<AnimatableColor> create(const AnimatableColorImpl&);
     Color color() const { return m_color.toColor(); }
-    Color visitedLinkColor() const { return m_visitedLinkColor.toColor(); }
 
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
@@ -68,16 +67,14 @@ protected:
     virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
-    AnimatableColor(const AnimatableColorImpl& color, const AnimatableColorImpl& visitedLinkColor)
+    AnimatableColor(const AnimatableColorImpl& color)
         : m_color(color)
-        , m_visitedLinkColor(visitedLinkColor)
     {
     }
     virtual AnimatableType type() const override { return TypeColor; }
     virtual bool equalTo(const AnimatableValue*) const override;
     virtual double distanceTo(const AnimatableValue*) const override;
     const AnimatableColorImpl m_color;
-    const AnimatableColorImpl m_visitedLinkColor;
 };
 
 DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableColor, isColor());

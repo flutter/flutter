@@ -31,7 +31,6 @@ StyleInheritedData::StyleInheritedData()
     , vertical_border_spacing(RenderStyle::initialVerticalBorderSpacing())
     , line_height(RenderStyle::initialLineHeight())
     , color(RenderStyle::initialColor())
-    , visitedLinkColor(RenderStyle::initialColor())
 {
 }
 
@@ -46,7 +45,6 @@ StyleInheritedData::StyleInheritedData(const StyleInheritedData& o)
     , line_height(o.line_height)
     , font(o.font)
     , color(o.color)
-    , visitedLinkColor(o.visitedLinkColor)
 {
 }
 
@@ -55,7 +53,6 @@ bool StyleInheritedData::operator==(const StyleInheritedData& o) const
     return line_height == o.line_height
         && font == o.font
         && color == o.color
-        && visitedLinkColor == o.visitedLinkColor
         && horizontal_border_spacing == o.horizontal_border_spacing
         && vertical_border_spacing == o.vertical_border_spacing;
 }

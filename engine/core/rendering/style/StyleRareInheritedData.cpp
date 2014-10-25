@@ -37,7 +37,7 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     void* styleImage;
     Color firstColor;
     float firstFloat;
-    Color colors[5];
+    Color colors[2];
     void* ownPtrs[1];
     AtomicString atomicStrings[4];
     void* refPtrs[3];
@@ -65,9 +65,6 @@ StyleRareInheritedData::StyleRareInheritedData()
     , m_textStrokeColorIsCurrentColor(true)
     , m_textFillColorIsCurrentColor(true)
     , m_textEmphasisColorIsCurrentColor(true)
-    , m_visitedLinkTextStrokeColorIsCurrentColor(true)
-    , m_visitedLinkTextFillColorIsCurrentColor(true)
-    , m_visitedLinkTextEmphasisColorIsCurrentColor(true)
     , userModify(READ_ONLY)
     , wordBreak(RenderStyle::initialWordBreak())
     , overflowWrap(RenderStyle::initialOverflowWrap())
@@ -104,9 +101,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , textStrokeWidth(o.textStrokeWidth)
     , m_textFillColor(o.m_textFillColor)
     , m_textEmphasisColor(o.m_textEmphasisColor)
-    , m_visitedLinkTextStrokeColor(o.m_visitedLinkTextStrokeColor)
-    , m_visitedLinkTextFillColor(o.m_visitedLinkTextFillColor)
-    , m_visitedLinkTextEmphasisColor(o.m_visitedLinkTextEmphasisColor)
     , textShadow(o.textShadow)
     , highlight(o.highlight)
     , cursorData(o.cursorData)
@@ -119,9 +113,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , m_textStrokeColorIsCurrentColor(o.m_textStrokeColorIsCurrentColor)
     , m_textFillColorIsCurrentColor(o.m_textFillColorIsCurrentColor)
     , m_textEmphasisColorIsCurrentColor(o.m_textEmphasisColorIsCurrentColor)
-    , m_visitedLinkTextStrokeColorIsCurrentColor(o.m_visitedLinkTextStrokeColorIsCurrentColor)
-    , m_visitedLinkTextFillColorIsCurrentColor(o.m_visitedLinkTextFillColorIsCurrentColor)
-    , m_visitedLinkTextEmphasisColorIsCurrentColor(o.m_visitedLinkTextEmphasisColorIsCurrentColor)
     , userModify(o.userModify)
     , wordBreak(o.wordBreak)
     , overflowWrap(o.overflowWrap)
@@ -165,9 +156,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && textStrokeWidth == o.textStrokeWidth
         && m_textFillColor == o.m_textFillColor
         && m_textEmphasisColor == o.m_textEmphasisColor
-        && m_visitedLinkTextStrokeColor == o.m_visitedLinkTextStrokeColor
-        && m_visitedLinkTextFillColor == o.m_visitedLinkTextFillColor
-        && m_visitedLinkTextEmphasisColor == o.m_visitedLinkTextEmphasisColor
         && tapHighlightColor == o.tapHighlightColor
         && shadowDataEquivalent(o)
         && highlight == o.highlight
@@ -181,9 +169,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && m_textStrokeColorIsCurrentColor == o.m_textStrokeColorIsCurrentColor
         && m_textFillColorIsCurrentColor == o.m_textFillColorIsCurrentColor
         && m_textEmphasisColorIsCurrentColor == o.m_textEmphasisColorIsCurrentColor
-        && m_visitedLinkTextStrokeColorIsCurrentColor == o.m_visitedLinkTextStrokeColorIsCurrentColor
-        && m_visitedLinkTextFillColorIsCurrentColor == o.m_visitedLinkTextFillColorIsCurrentColor
-        && m_visitedLinkTextEmphasisColorIsCurrentColor == o.m_visitedLinkTextEmphasisColorIsCurrentColor
         && userModify == o.userModify
         && wordBreak == o.wordBreak
         && overflowWrap == o.overflowWrap

@@ -35,8 +35,6 @@ StyleResolverState::StyleResolverState(Document& document, Element* element, Ren
     , m_style(nullptr)
     , m_cssToLengthConversionData(0, rootElementStyle(), document.renderView())
     , m_parentStyle(parentStyle)
-    , m_applyPropertyToRegularStyle(true)
-    , m_applyPropertyToVisitedLinkStyle(false)
     , m_lineHeightValue(nullptr)
     , m_styleMap(*this, m_elementStyleResources)
 {

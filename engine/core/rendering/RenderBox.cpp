@@ -4215,7 +4215,7 @@ LayoutSize RenderBox::computePreviousBorderBoxSize(const LayoutSize& previousBou
 
 RenderBox::BoxDecorationData::BoxDecorationData(const RenderStyle& style)
 {
-    backgroundColor = style.visitedDependentColor(CSSPropertyBackgroundColor);
+    backgroundColor = style.colorIncludingFallback(CSSPropertyBackgroundColor);
     hasBackground = backgroundColor.alpha() || style.hasBackgroundImage();
     ASSERT(hasBackground == style.hasBackground());
     hasBorder = style.hasBorder();
