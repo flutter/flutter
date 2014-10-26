@@ -44,7 +44,6 @@ WebSettingsImpl::WebSettingsImpl(Settings* settings)
     , m_showFPSCounter(false)
     , m_showPaintRects(false)
     , m_renderVSyncNotificationEnabled(false)
-    , m_autoZoomFocusedNodeToLegibleScale(false)
     , m_deferredImageDecodingEnabled(false)
     , m_doubleTapToZoomEnabled(false)
     , m_supportDeprecatedTargetDensityDPI(false)
@@ -116,16 +115,6 @@ void WebSettingsImpl::setDefaultVideoPosterURL(const WebString& url)
     m_settings->setDefaultVideoPosterURL(url);
 }
 
-void WebSettingsImpl::setMinimumFontSize(int size)
-{
-    m_settings->setMinimumFontSize(size);
-}
-
-void WebSettingsImpl::setMinimumLogicalFontSize(int size)
-{
-    m_settings->setMinimumLogicalFontSize(size);
-}
-
 void WebSettingsImpl::setDeviceSupportsTouch(bool deviceSupportsTouch)
 {
     m_settings->setDeviceSupportsTouch(deviceSupportsTouch);
@@ -146,38 +135,9 @@ void WebSettingsImpl::setDeviceSupportsMouse(bool deviceSupportsMouse)
     m_settings->setDeviceSupportsMouse(deviceSupportsMouse);
 }
 
-void WebSettingsImpl::setAutoZoomFocusedNodeToLegibleScale(bool autoZoomFocusedNodeToLegibleScale)
-{
-    m_autoZoomFocusedNodeToLegibleScale = autoZoomFocusedNodeToLegibleScale;
-}
-
-void WebSettingsImpl::setAccessibilityFontScaleFactor(float fontScaleFactor)
-{
-    m_settings->setAccessibilityFontScaleFactor(fontScaleFactor);
-}
-
-void WebSettingsImpl::setAccessibilityEnabled(bool enabled)
-{
-    m_settings->setAccessibilityEnabled(enabled);
-}
-
-void WebSettingsImpl::setInlineTextBoxAccessibilityEnabled(bool enabled)
-{
-    m_settings->setInlineTextBoxAccessibilityEnabled(enabled);
-}
-
-void WebSettingsImpl::setDeviceScaleAdjustment(float deviceScaleAdjustment)
-{
-}
-
 void WebSettingsImpl::setDefaultTextEncodingName(const WebString& encoding)
 {
     m_settings->setDefaultTextEncodingName((String)encoding);
-}
-
-void WebSettingsImpl::setWebSecurityEnabled(bool enabled)
-{
-    m_settings->setWebSecurityEnabled(enabled);
 }
 
 void WebSettingsImpl::setSupportDeprecatedTargetDensityDPI(bool supportDeprecatedTargetDensityDPI)
@@ -225,11 +185,6 @@ void WebSettingsImpl::setDOMPasteAllowed(bool enabled)
     m_settings->setDOMPasteAllowed(enabled);
 }
 
-void WebSettingsImpl::setShrinksStandaloneImagesToFit(bool shrinkImages)
-{
-    m_settings->setShrinksStandaloneImagesToFit(shrinkImages);
-}
-
 void WebSettingsImpl::setShrinksViewportContentToFit(bool shrinkViewportContent)
 {
     m_shrinksViewportContentToFit = shrinkViewportContent;
@@ -260,11 +215,6 @@ void WebSettingsImpl::setJavaScriptCanAccessClipboard(bool enabled)
     m_settings->setJavaScriptCanAccessClipboard(enabled);
 }
 
-void WebSettingsImpl::setLocalStorageEnabled(bool enabled)
-{
-    m_settings->setLocalStorageEnabled(enabled);
-}
-
 void WebSettingsImpl::setMainFrameClipsContent(bool enabled)
 {
     m_settings->setMainFrameClipsContent(enabled);
@@ -273,21 +223,6 @@ void WebSettingsImpl::setMainFrameClipsContent(bool enabled)
 void WebSettingsImpl::setMaxTouchPoints(int maxTouchPoints)
 {
     m_settings->setMaxTouchPoints(maxTouchPoints);
-}
-
-void WebSettingsImpl::setAllowUniversalAccessFromFileURLs(bool allow)
-{
-    m_settings->setAllowUniversalAccessFromFileURLs(allow);
-}
-
-void WebSettingsImpl::setAllowFileAccessFromFileURLs(bool allow)
-{
-    m_settings->setAllowFileAccessFromFileURLs(allow);
-}
-
-void WebSettingsImpl::setTouchDragDropEnabled(bool enabled)
-{
-    m_settings->setTouchDragDropEnabled(enabled);
 }
 
 void WebSettingsImpl::setTouchEditingEnabled(bool enabled)
@@ -370,11 +305,6 @@ void WebSettingsImpl::setMinimumAccelerated2dCanvasSize(int numPixels)
     m_settings->setMinimumAccelerated2dCanvasSize(numPixels);
 }
 
-void WebSettingsImpl::setHyperlinkAuditingEnabled(bool enabled)
-{
-    m_settings->setHyperlinkAuditingEnabled(enabled);
-}
-
 void WebSettingsImpl::setAsynchronousSpellCheckingEnabled(bool enabled)
 {
     m_settings->setAsynchronousSpellCheckingEnabled(enabled);
@@ -383,31 +313,6 @@ void WebSettingsImpl::setAsynchronousSpellCheckingEnabled(bool enabled)
 void WebSettingsImpl::setUnifiedTextCheckerEnabled(bool enabled)
 {
     m_settings->setUnifiedTextCheckerEnabled(enabled);
-}
-
-void WebSettingsImpl::setCaretBrowsingEnabled(bool enabled)
-{
-    m_settings->setCaretBrowsingEnabled(enabled);
-}
-
-void WebSettingsImpl::setValidationMessageTimerMagnification(int newValue)
-{
-    m_settings->setValidationMessageTimerMagnification(newValue);
-}
-
-void WebSettingsImpl::setAllowDisplayOfInsecureContent(bool enabled)
-{
-    m_settings->setAllowDisplayOfInsecureContent(enabled);
-}
-
-void WebSettingsImpl::setAllowRunningOfInsecureContent(bool enabled)
-{
-    m_settings->setAllowRunningOfInsecureContent(enabled);
-}
-
-void WebSettingsImpl::setAllowConnectingInsecureWebSocket(bool enabled)
-{
-    m_settings->setAllowConnectingInsecureWebSocket(enabled);
 }
 
 void WebSettingsImpl::setPerTilePaintingEnabled(bool enabled)
@@ -492,16 +397,6 @@ void WebSettingsImpl::setViewportEnabled(bool enabled)
 void WebSettingsImpl::setViewportMetaEnabled(bool enabled)
 {
     m_settings->setViewportMetaEnabled(enabled);
-}
-
-void WebSettingsImpl::setNavigateOnDragDrop(bool enabled)
-{
-    m_settings->setNavigateOnDragDrop(enabled);
-}
-
-void WebSettingsImpl::setAllowCustomScrollbarInMainFrame(bool enabled)
-{
-    m_settings->setAllowCustomScrollbarInMainFrame(enabled);
 }
 
 void WebSettingsImpl::setSelectionIncludesAltImageText(bool enabled)

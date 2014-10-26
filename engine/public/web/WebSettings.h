@@ -92,28 +92,9 @@ public:
     // contents at an insecure URL. Otherwise, disallows it. The
     // FrameLoaderClient set to the frame may override the value set by this
     // method.
-    virtual void setAccessibilityEnabled(bool) = 0;
-    virtual void setAllowDisplayOfInsecureContent(bool) = 0;
-    virtual void setAllowFileAccessFromFileURLs(bool) = 0;
-    virtual void setAllowCustomScrollbarInMainFrame(bool) = 0;
-    // If set to true, allows frames with an https origin to run active
-    // contents at an insecure URL. This includes WebSockets. Otherwise,
-    // disallows it. The FrameLoaderClient set to the frame may override the
-    // value set by this method.
-    virtual void setAllowRunningOfInsecureContent(bool) = 0;
-    // If set to true, allows frames with an https origin to connect WebSockets
-    // with an insecure URL (ws://). Otherwise, disallows it. Only when this is
-    // set to true, this value overrides the value set by
-    // setAllowRunningOfInsecureContent() for WebSockets. The FrameLoaderClient
-    // set to the frame may override the value set by this method.
-    virtual void setAllowConnectingInsecureWebSocket(bool) = 0;
-    virtual void setAllowUniversalAccessFromFileURLs(bool) = 0;
     virtual void setAntialiased2dCanvasEnabled(bool) = 0;
     virtual void setAsynchronousSpellCheckingEnabled(bool) = 0;
-    virtual void setAutoZoomFocusedNodeToLegibleScale(bool) = 0;
-    virtual void setCaretBrowsingEnabled(bool) = 0;
     virtual void setContainerCullingEnabled(bool) = 0;
-    virtual void setNavigateOnDragDrop(bool) = 0;
     virtual void setCursiveFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
     virtual void setDOMPasteAllowed(bool) = 0;
     virtual void setDefaultFixedFontSize(int) = 0;
@@ -123,7 +104,6 @@ public:
     void setDeferred2dCanvasEnabled(bool) { } // temporary stub
     virtual void setDeferredFiltersEnabled(bool) = 0;
     virtual void setDeferredImageDecodingEnabled(bool) = 0;
-    virtual void setDeviceScaleAdjustment(float) = 0;
     virtual void setDeviceSupportsMouse(bool) = 0;
     virtual void setDeviceSupportsTouch(bool) = 0;
     virtual void setDoubleTapToZoomEnabled(bool) = 0;
@@ -134,21 +114,16 @@ public:
     virtual void setFantasyFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
     virtual void setFixedFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
     virtual void setForceZeroLayoutHeight(bool) = 0;
-    virtual void setHyperlinkAuditingEnabled(bool) = 0;
     virtual void setImagesEnabled(bool) = 0;
-    virtual void setInlineTextBoxAccessibilityEnabled(bool) = 0;
     virtual void setJavaScriptCanAccessClipboard(bool) = 0;
     virtual void setLoadsImagesAutomatically(bool) = 0;
     virtual void setLoadWithOverviewMode(bool) = 0;
-    virtual void setLocalStorageEnabled(bool) = 0;
     virtual void setMainFrameClipsContent(bool) = 0;
     virtual void setMainFrameResizesAreOrientationChanges(bool) = 0;
     virtual void setMaxTouchPoints(int) = 0;
     virtual void setMediaControlsOverlayPlayButtonEnabled(bool) = 0;
     virtual void setMediaPlaybackRequiresUserGesture(bool) = 0;
     virtual void setMinimumAccelerated2dCanvasSize(int) = 0;
-    virtual void setMinimumFontSize(int) = 0;
-    virtual void setMinimumLogicalFontSize(int) = 0;
     virtual void setOpenGLMultisamplingEnabled(bool) = 0;
     virtual void setPerTilePaintingEnabled(bool) = 0;
     virtual void setPictographFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
@@ -164,24 +139,19 @@ public:
     virtual void setShouldRespectImageOrientation(bool) = 0;
     virtual void setShowFPSCounter(bool) = 0;
     virtual void setShowPaintRects(bool) = 0;
-    virtual void setShrinksStandaloneImagesToFit(bool) = 0;
     virtual void setShrinksViewportContentToFit(bool) = 0;
     virtual void setSmartInsertDeleteEnabled(bool) = 0;
     virtual void setStandardFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
     virtual void setSupportDeprecatedTargetDensityDPI(bool) = 0;
     virtual void setTextAreasAreResizable(bool) = 0;
-    virtual void setAccessibilityFontScaleFactor(float) = 0;
-    virtual void setTouchDragDropEnabled(bool) = 0;
     virtual void setTouchEditingEnabled(bool) = 0;
     virtual void setUnifiedTextCheckerEnabled(bool) = 0;
     virtual void setUseSolidColorScrollbars(bool) = 0;
     virtual void setUseWideViewport(bool) = 0;
     virtual void setV8CacheOptions(V8CacheOptions) = 0;
-    virtual void setValidationMessageTimerMagnification(int) = 0;
     virtual void setViewportEnabled(bool) = 0;
     virtual void setViewportMetaEnabled(bool) = 0;
     virtual void setWebGLErrorsToConsoleEnabled(bool) = 0;
-    virtual void setWebSecurityEnabled(bool) = 0;
 
 protected:
     ~WebSettings() { }

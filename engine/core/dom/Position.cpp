@@ -816,9 +816,7 @@ bool Position::isCandidate() const
             return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(deprecatedNode()) && atEditingBoundary();
         }
     } else {
-        LocalFrame* frame = m_anchorNode->document().frame();
-        bool caretBrowsing = frame->settings() && frame->settings()->caretBrowsingEnabled();
-        return (caretBrowsing || m_anchorNode->hasEditableStyle()) && !Position::nodeIsUserSelectNone(deprecatedNode()) && atEditingBoundary();
+        return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(deprecatedNode()) && atEditingBoundary();
     }
 
     return false;

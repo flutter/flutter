@@ -58,8 +58,8 @@ float FontSize::getComputedSizeFromSpecifiedSize(const Document* document, float
     if (!settings)
         return 1.0f;
 
-    int minSize = settings->minimumFontSize();
-    int minLogicalSize = settings->minimumLogicalFontSize();
+    int minSize = 0;
+    int minLogicalSize = 0;
     float zoomedSize = specifiedSize * zoomFactor;
 
     // Apply the hard minimum first. We only apply the hard minimum if after zooming we're still too small.
@@ -126,7 +126,7 @@ float FontSize::fontSizeForKeyword(const Document* document, CSSValueID keyword,
     }
 
     // Value is outside the range of the table. Apply the scale factor instead.
-    float minLogicalSize = std::max(settings->minimumLogicalFontSize(), 1);
+    float minLogicalSize = 1;
     return std::max(fontSizeFactors[keyword - CSSValueXxSmall] * mediumSize, minLogicalSize);
 }
 

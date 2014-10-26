@@ -102,11 +102,6 @@ void WebRuntimeFeatures::enableFileSystem(bool enable)
     RuntimeEnabledFeatures::setFileSystemEnabled(enable);
 }
 
-void WebRuntimeFeatures::enableLocalStorage(bool enable)
-{
-    RuntimeEnabledFeatures::setLocalStorageEnabled(enable);
-}
-
 void WebRuntimeFeatures::enableMediaPlayer(bool enable)
 {
     RuntimeEnabledFeatures::setMediaEnabled(enable);

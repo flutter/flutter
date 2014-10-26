@@ -327,7 +327,6 @@ public:
     bool matchesHeuristicsForGpuRasterizationForTesting() const { return m_matchesHeuristicsForGpuRasterization; }
 
 private:
-    float legibleScale() const;
     void resumeTreeViewCommits();
     IntSize contentsSize() const;
 

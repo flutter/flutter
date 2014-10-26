@@ -54,7 +54,6 @@ protected:
     bool updateCaretRect(Document*, const PositionWithAffinity& caretPosition);
     bool updateCaretRect(Document*, const VisiblePosition& caretPosition);
     IntRect absoluteBoundsForLocalRect(Node*, const LayoutRect&) const;
-    bool shouldRepaintCaret(const RenderView*, bool isContentEditable) const;
     void paintCaret(Node*, GraphicsContext*, const LayoutPoint&, const LayoutRect& clipRect) const;
 
     const LayoutRect& localCaretRectWithoutUpdate() const { return m_caretLocalRect; }

@@ -26,12 +26,6 @@
 
 defaultTextEncodingName type=String
 
-# Sets the magnification value for validation message timer.  If the
-# magnification value is N, a validation message disappears automatically after
-# <message length> * N / 1000 seconds.  If N is equal to or less than 0, a
-# validation message doesn't disappears automaticaly.
-validationMessageTimerMagnification type=int, initial=50
-
 # Number of pixels below which 2D canvas is rendered in software
 # even if hardware acceleration is enabled.
 # Hardware acceleration is useful for large canvases where it can avoid the
@@ -42,21 +36,13 @@ validationMessageTimerMagnification type=int, initial=50
 # draw canvas in software.
 minimumAccelerated2dCanvasSize type=int, initial=257*256
 
-minimumFontSize type=int, initial=0, invalidate=Style
-minimumLogicalFontSize type=int, initial=0, invalidate=Style
 defaultFontSize type=int, initial=0, invalidate=Style
 defaultFixedFontSize type=int, initial=0, invalidate=Style
 
-caretBrowsingEnabled initial=false
-localStorageEnabled initial=false
-allowUniversalAccessFromFileURLs initial=true
-allowFileAccessFromFileURLs initial=true
 javaScriptCanAccessClipboard initial=false
 shouldClearDocumentBackground initial=true
 
 textAreasAreResizable initial=false, invalidate=Style
-
-shrinksStandaloneImagesToFit initial=true
 
 deferredFiltersEnabled initial=true
 
@@ -66,8 +52,6 @@ containerCullingEnabled initial=false
 # don't support the feature download files they can't use by.
 # Leaving enabled for now to not change existing behavior.
 downloadableBinaryFontsEnabled initial=true
-
-treatIPAddressAsDomain initial=false
 
 preferCompositingToLCDTextEnabled initial=false, invalidate=AcceleratedCompositing
 
@@ -81,12 +65,6 @@ accelerated2dCanvasMSAASampleCount type=int, initial=0
 
 asynchronousSpellCheckingEnabled initial=false
 
-hyperlinkAuditingEnabled initial=false
-allowDisplayOfInsecureContent initial=true
-allowRunningOfInsecureContent initial=true
-# FIXME: Remove this temporary flag. See crbug.com/366483 for the target
-# milestone.
-allowConnectingInsecureWebSocket initial=false
 mediaPlaybackRequiresUserGesture initial=false
 
 scrollAnimatorEnabled initial=true
@@ -118,16 +96,7 @@ maxTouchPoints type=int, initial=0
 # crbug.com/304895 tracks removal once we're satisfied with the algorithm.
 touchAdjustmentEnabled initial=true
 
-navigateOnDragDrop initial=true
 DOMPasteAllowed initial=false
-
-allowCustomScrollbarInMainFrame initial=true
-webSecurityEnabled initial=true
-
-# This setting adds a means to enable/disable touch initiated drag & drop. If
-# enabled, the user can initiate drag using long press.
-# crbug.com/304894 tracks removal once it's been enabled on all platforms.
-touchDragDropEnabled initial=false
 
 unifiedTextCheckerEnabled initial=defaultUnifiedTextCheckerEnabled
 
@@ -150,15 +119,9 @@ useSolidColorScrollbars initial=true
 
 mainFrameClipsContent initial=true
 
-
 # Presumably used by tests?  Unclear.
 useWideViewport initial=true, invalidate=ViewportDescription
 loadWithOverviewMode initial=true, invalidate=ViewportDescription
-
-
-# Font scale factor for accessibility, applied as part of text autosizing.
-accessibilityFontScaleFactor type=double, initial=1.0
-
 
 # Only set by Layout Tests.
 mediaTypeOverride type=String, initial="screen", invalidate=MediaType
@@ -170,20 +133,6 @@ imagesEnabled initial=true, invalidate=ImageLoading
 
 viewportEnabled initial=false, invalidate=ViewportDescription
 viewportMetaEnabled initial=false
-
-# Compensates for poor text legibility on mobile devices. This value is
-# multiplied by the font scale factor when performing text autosizing of
-# websites that do not set an explicit viewport description.
-deviceScaleAdjustment type=double, initial=1.0
-
-# This value indicates the maximum number of bytes a document is allowed
-# to transmit in Beacons (via navigator.sendBeacon()) -- Beacons are
-# intended to be smaller payloads transmitted as a page is unloading, not
-# a general (one-way) network transmission API.
-# The spec ( https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/Beacon/Overview.html )
-# does not proscribe an upper limit, but allows for it -- the underlying
-# API will return 'false' in that case.
-maxBeaconTransmission type=int, initial=65536
 
 # V8 supports different types of caching. Used by V8 bindings.
 v8CacheOptions type=V8CacheOptions, initial=V8CacheOptionsOff
@@ -197,6 +146,3 @@ availableHoverTypes type=int, initial=HoverTypeNone, invalidate=MediaQuery
 # These values specify properties of the user's primary pointing device only.
 primaryPointerType type=PointerType, initial=PointerTypeNone, invalidate=MediaQuery
 primaryHoverType type=HoverType, initial=HoverTypeNone, invalidate=MediaQuery
-
-accessibilityEnabled initial=false
-inlineTextBoxAccessibilityEnabled initial=false

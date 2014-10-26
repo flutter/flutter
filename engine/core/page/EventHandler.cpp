@@ -695,8 +695,7 @@ bool EventHandler::handleMouseReleaseEvent(const MouseEventWithHitTestResults& e
             && event.event().button() != RightButton) {
         VisibleSelection newSelection;
         Node* node = event.targetNode();
-        bool caretBrowsing = m_frame->settings() && m_frame->settings()->caretBrowsingEnabled();
-        if (node && node->renderer() && (caretBrowsing || node->hasEditableStyle())) {
+        if (node && node->renderer() && node->hasEditableStyle()) {
             VisiblePosition pos = VisiblePosition(node->renderer()->positionForPoint(event.localPoint()));
             newSelection = VisibleSelection(pos);
         }

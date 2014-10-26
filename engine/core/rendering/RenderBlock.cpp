@@ -1413,40 +1413,31 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
     }
 }
 
-static inline bool caretBrowsingEnabled(const Frame* frame)
+static inline bool hasCursorCaret(const FrameSelection& selection, const RenderBlock* block)
 {
-    Settings* settings = frame->settings();
-    return settings && settings->caretBrowsingEnabled();
+    return selection.caretRenderer() == block && selection.hasEditableStyle();
 }
 
-static inline bool hasCursorCaret(const FrameSelection& selection, const RenderBlock* block, bool caretBrowsing)
+static inline bool hasDragCaret(const DragCaretController& dragCaretController, const RenderBlock* block)
 {
-    return selection.caretRenderer() == block && (selection.hasEditableStyle() || caretBrowsing);
-}
-
-static inline bool hasDragCaret(const DragCaretController& dragCaretController, const RenderBlock* block, bool caretBrowsing)
-{
-    return dragCaretController.caretRenderer() == block && (dragCaretController.isContentEditable() || caretBrowsing);
+    return dragCaretController.caretRenderer() == block && dragCaretController.isContentEditable();
 }
 
 bool RenderBlock::hasCaret() const
 {
-    bool caretBrowsing = caretBrowsingEnabled(frame());
-    return hasCursorCaret(frame()->selection(), this, caretBrowsing)
-        || hasDragCaret(frame()->page()->dragCaretController(), this, caretBrowsing);
+    return hasCursorCaret(frame()->selection(), this)
+        || hasDragCaret(frame()->page()->dragCaretController(), this);
 }
 
 void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    bool caretBrowsing = caretBrowsingEnabled(frame());
-
     FrameSelection& selection = frame()->selection();
-    if (hasCursorCaret(selection, this, caretBrowsing)) {
+    if (hasCursorCaret(selection, this)) {
         selection.paintCaret(paintInfo.context, paintOffset, paintInfo.rect);
     }
 
     DragCaretController& dragCaretController = frame()->page()->dragCaretController();
-    if (hasDragCaret(dragCaretController, this, caretBrowsing)) {
+    if (hasDragCaret(dragCaretController, this)) {
         dragCaretController.paintDragCaret(frame(), paintInfo.context, paintOffset, paintInfo.rect);
     }
 }

@@ -646,18 +646,6 @@ WebRect WebViewImpl::widenRectWithinPageBounds(const WebRect& source, int target
     return WebRect(newX, source.y, newWidth, source.height);
 }
 
-float WebViewImpl::legibleScale() const
-{
-    // Pages should be as legible as on desktop when at dpi scale, so no
-    // need to zoom in further when automatically determining zoom level
-    // (after double tap, find in page, etc), though the user should still
-    // be allowed to manually pinch zoom in further if they desire.
-    float legibleScale = 1;
-    if (page())
-        legibleScale *= page()->settings().accessibilityFontScaleFactor();
-    return legibleScale;
-}
-
 void WebViewImpl::computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, const WebRect& blockRect, float padding, float defaultScaleWhenAlreadyLegible, float& scale, WebPoint& scroll)
 {
     //FIXME(sky)

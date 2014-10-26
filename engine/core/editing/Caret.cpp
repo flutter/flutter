@@ -210,17 +210,6 @@ void CaretBase::invalidateLocalCaretRect(Node* node, const LayoutRect& rect)
     caretPainter->invalidatePaintRectangle(inflatedRect);
 }
 
-bool CaretBase::shouldRepaintCaret(const RenderView* view, bool isContentEditable) const
-{
-    ASSERT(view);
-    bool caretBrowsing = false;
-    if (FrameView* frameView = view->frameView()) {
-        LocalFrame& frame = frameView->frame(); // The frame where the selection started
-        caretBrowsing = frame.settings() && frame.settings()->caretBrowsingEnabled();
-    }
-    return (caretBrowsing || isContentEditable);
-}
-
 void CaretBase::invalidateCaretRect(Node* node, bool caretRectChanged)
 {
     // EDIT FIXME: This is an unfortunate hack.
@@ -239,10 +228,8 @@ void CaretBase::invalidateCaretRect(Node* node, bool caretRectChanged)
     if (caretRectChanged)
         return;
 
-    if (RenderView* view = node->document().renderView()) {
-        if (shouldRepaintCaret(view, node->isContentEditable(Node::UserSelectAllIsAlwaysNonEditable)))
-            invalidateLocalCaretRect(node, localCaretRectWithoutUpdate());
-    }
+    if (node->isContentEditable(Node::UserSelectAllIsAlwaysNonEditable))
+        invalidateLocalCaretRect(node, localCaretRectWithoutUpdate());
 }
 
 void CaretBase::paintCaret(Node* node, GraphicsContext* context, const LayoutPoint& paintOffset, const LayoutRect& clipRect) const

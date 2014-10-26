@@ -1236,10 +1236,9 @@ void FrameSelection::invalidateCaretRect()
     if (!m_caretBlinkTimer.isActive() && newNode == m_previousCaretNode && newRect == m_previousCaretRect)
         return;
 
-    RenderView* view = m_frame->document()->renderView();
-    if (m_previousCaretNode && shouldRepaintCaret(view, m_previousCaretNode->isContentEditable()))
+    if (m_previousCaretNode && m_previousCaretNode->isContentEditable())
         invalidateLocalCaretRect(m_previousCaretNode.get(), m_previousCaretRect);
-    if (newNode && shouldRepaintCaret(view, newNode->isContentEditable()))
+    if (newNode && newNode->isContentEditable())
         invalidateLocalCaretRect(newNode, newRect);
 
     m_previousCaretNode = newNode;
@@ -1512,9 +1511,6 @@ bool FrameSelection::shouldBlinkCaret() const
     if (!caretIsVisible() || !isCaret())
         return false;
 
-    if (m_frame->settings() && m_frame->settings()->caretBrowsingEnabled())
-        return false;
-
     Element* root = rootEditableElement();
     if (!root)
         return false;
@@ -1558,14 +1554,6 @@ void FrameSelection::setFocusedNodeIfNeeded()
     if (isNone() || !isFocused())
         return;
 
-    bool caretBrowsing = m_frame->settings() && m_frame->settings()->caretBrowsingEnabled();
-    if (caretBrowsing) {
-        if (Element* anchor = enclosingAnchorElement(base())) {
-            m_frame->page()->focusController().setFocusedElement(anchor, m_frame);
-            return;
-        }
-    }
-
     if (Element* target = rootEditableElement()) {
         // Walk up the DOM tree to search for a node to focus.
         while (target) {
@@ -1580,9 +1568,6 @@ void FrameSelection::setFocusedNodeIfNeeded()
         }
         m_frame->document()->setFocusedElement(nullptr);
     }
-
-    if (caretBrowsing)
-        m_frame->page()->focusController().setFocusedElement(0, m_frame);
 }
 
 static String extractSelectedText(const FrameSelection& selection, TextIteratorBehavior behavior)

@@ -334,11 +334,6 @@ bool FocusController::advanceFocusInDocumentOrder(FocusType type, bool initialFo
     Document* document = frame->document();
 
     Node* currentNode = document->focusedElement();
-    // FIXME: Not quite correct when it comes to focus transitions leaving/entering the WebView itself
-    bool caretBrowsing = frame->settings() && frame->settings()->caretBrowsingEnabled();
-
-    if (caretBrowsing && !currentNode)
-        currentNode = frame->selection().start().deprecatedNode();
 
     document->updateLayoutIgnorePendingStylesheets();
 
@@ -384,12 +379,6 @@ bool FocusController::advanceFocusInDocumentOrder(FocusType type, bool initialFo
     }
 
     setFocusedFrame(newDocument.frame());
-
-    if (caretBrowsing) {
-        Position position = firstPositionInOrBeforeNode(element);
-        VisibleSelection newSelection(position, position, DOWNSTREAM);
-        frame->selection().setSelection(newSelection);
-    }
 
     element->focus(false, type);
     return true;
