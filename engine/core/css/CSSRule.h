@@ -46,7 +46,6 @@ public:
         KEYFRAMES_RULE = 7,
         KEYFRAME_RULE,
         SUPPORTS_RULE = 12,
-        VIEWPORT_RULE = 15,
         WEBKIT_FILTER_RULE = 17
     };
 

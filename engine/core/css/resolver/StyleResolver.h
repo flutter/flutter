@@ -63,7 +63,6 @@ class StylePropertySet;
 class StyleResolverStats;
 class StyleRule;
 class StyleRuleKeyframes;
-class ViewportStyleResolver;
 
 class MatchResult;
 
@@ -145,8 +144,6 @@ public:
 
     // |properties| is an array with |count| elements.
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);
-
-    ViewportStyleResolver* viewportStyleResolver() { return m_viewportStyleResolver.get(); }
 
     void addMediaQueryResults(const MediaQueryResultList&);
     MediaQueryResultList* viewportDependentMediaQueryResults() { return &m_viewportDependentMediaQueryResults; }
@@ -236,8 +233,6 @@ private:
     template <StyleResolver::StyleApplicationPass pass>
     void applyAllProperty(StyleResolverState&, CSSValue*);
 
-    void collectViewportRules();
-
     // FIXME: This likely belongs on RuleSet.
     typedef WillBeHeapHashMap<StringImpl*, RefPtrWillBeMember<StyleRuleKeyframes> > KeyframesRuleMap;
     KeyframesRuleMap m_keyframesRuleMap;
@@ -250,8 +245,6 @@ private:
     MediaQueryResultList m_viewportDependentMediaQueryResults;
 
     RawPtrWillBeMember<Document> m_document;
-
-    OwnPtrWillBeMember<ViewportStyleResolver> m_viewportStyleResolver;
 
     WillBeHeapListHashSet<RawPtrWillBeMember<CSSStyleSheet>, 16> m_pendingStyleSheets;
 

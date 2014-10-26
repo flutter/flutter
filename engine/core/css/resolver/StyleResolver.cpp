@@ -62,7 +62,6 @@
 #include "core/css/resolver/StyleAdjuster.h"
 #include "core/css/resolver/StyleResolverState.h"
 #include "core/css/resolver/StyleResolverStats.h"
-#include "core/css/resolver/ViewportStyleResolver.h"
 #include "core/dom/NodeRenderStyle.h"
 #include "core/dom/StyleEngine.h"
 #include "core/dom/Text.h"
@@ -102,7 +101,6 @@ static void addFontFaceRule(Document* document, CSSFontSelector* cssFontSelector
 
 StyleResolver::StyleResolver(Document& document)
     : m_document(document)
-    , m_viewportStyleResolver(ViewportStyleResolver::create(&document))
     , m_needCollectFeatures(false)
     , m_printMediaType(false)
     , m_styleResourceLoader(document.fetcher())
@@ -171,8 +169,6 @@ void StyleResolver::finishAppendAuthorStyleSheets()
 
     if (document().renderView() && document().renderView()->style())
         document().renderView()->style()->font().update(document().styleEngine()->fontSelector());
-
-    collectViewportRules();
 }
 
 void StyleResolver::resetRuleFeatures()
@@ -572,18 +568,6 @@ PassRefPtrWillBeRawPtr<AnimatableValue> StyleResolver::createAnimatableValueSnap
     return CSSAnimatableValueFactory::create(property, *state.style());
 }
 
-void StyleResolver::collectViewportRules()
-{
-    CSSDefaultStyleSheets& defaultStyleSheets = CSSDefaultStyleSheets::instance();
-    viewportStyleResolver()->collectViewportRules(defaultStyleSheets.defaultStyle(), ViewportStyleResolver::UserAgentOrigin);
-    viewportStyleResolver()->collectViewportRules(defaultStyleSheets.defaultViewportStyle(), ViewportStyleResolver::UserAgentOrigin);
-
-    if (ScopedStyleResolver* scopedResolver = document().scopedStyleResolver())
-        scopedResolver->collectViewportRulesTo(this);
-
-    viewportStyleResolver()->resolve();
-}
-
 PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
 {
     StyleResolverState state(document(), 0);
@@ -872,7 +856,6 @@ void StyleResolver::invalidateMatchedPropertiesCache()
 
 void StyleResolver::notifyResizeForViewportUnits()
 {
-    collectViewportRules();
     m_matchedPropertiesCache.clearViewportDependent();
 }
 
@@ -1028,7 +1011,6 @@ void StyleResolver::trace(Visitor* visitor)
     visitor->trace(m_keyframesRuleMap);
     visitor->trace(m_matchedPropertiesCache);
     visitor->trace(m_viewportDependentMediaQueryResults);
-    visitor->trace(m_viewportStyleResolver);
     visitor->trace(m_features);
     visitor->trace(m_attributeRuleSet);
     visitor->trace(m_styleSharingLists);

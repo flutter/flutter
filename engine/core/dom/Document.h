@@ -41,7 +41,6 @@
 #include "core/dom/TextLinkColors.h"
 #include "core/dom/TreeScope.h"
 #include "core/dom/UserActionElementSet.h"
-#include "core/dom/ViewportDescription.h"
 #include "core/dom/custom/CustomElement.h"
 #include "core/fetch/ResourceClient.h"
 #include "core/loader/DocumentLoadTiming.h"
@@ -203,9 +202,6 @@ public:
 
     // DOM methods & attributes for Document
 
-    bool shouldOverrideLegacyDescription(ViewportDescription::Type);
-    void setViewportDescription(const ViewportDescription&);
-    const ViewportDescription& viewportDescription() const { return m_viewportDescription; }
     Length viewportDefaultMinWidth() const { return m_viewportDefaultMinWidth; }
 
     void setReferrerPolicy(ReferrerPolicy);
@@ -467,7 +463,6 @@ public:
      * @param inDocumentHeadElement Is the element in the document's <head> element?
      */
     void processHttpEquiv(const AtomicString& equiv, const AtomicString& content, bool inDocumentHeadElement);
-    void updateViewportDescription();
     void processReferrerPolicy(const String& policy);
 
     String title() const { return m_title; }
@@ -848,8 +843,6 @@ private:
     int m_loadEventDelayCount;
     Timer<Document> m_loadEventDelayTimer;
 
-    ViewportDescription m_viewportDescription;
-    ViewportDescription m_legacyViewportDescription;
     Length m_viewportDefaultMinWidth;
 
     bool m_didSetReferrerPolicy;
@@ -891,14 +884,6 @@ private:
     int m_styleRecalcElementCounter;
     mutable DocumentLoadTiming m_documentLoadTiming;
 };
-
-inline bool Document::shouldOverrideLegacyDescription(ViewportDescription::Type origin)
-{
-    // The different (legacy) meta tags have different priorities based on the type
-    // regardless of which order they appear in the DOM. The priority is given by the
-    // ViewportDescription::Type enum.
-    return origin >= m_legacyViewportDescription.type;
-}
 
 inline void Document::scheduleRenderTreeUpdateIfNeeded()
 {

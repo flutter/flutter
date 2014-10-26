@@ -21,7 +21,6 @@
 #ifndef Page_h
 #define Page_h
 
-#include "core/dom/ViewportDescription.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/SettingsDelegate.h"
 #include "core/frame/UseCounter.h"
@@ -99,8 +98,6 @@ public:
 
     void setNeedsRecalcStyleInAllFrames();
     void updateAcceleratedCompositingSettings();
-
-    ViewportDescription viewportDescription() const;
 
     EditorClient& editorClient() const { return *m_editorClient; }
     SpellCheckerClient& spellCheckerClient() const { return *m_spellCheckerClient; }

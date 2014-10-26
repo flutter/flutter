@@ -34,7 +34,6 @@
     const unsigned short KEYFRAMES_RULE = 7;
     const unsigned short KEYFRAME_RULE = 8;
     const unsigned short SUPPORTS_RULE = 12;
-    [RuntimeEnabled=CSSViewport] const unsigned short VIEWPORT_RULE = 15;
     const unsigned short WEBKIT_FILTER_RULE = 17;
 
     readonly attribute unsigned short   type;

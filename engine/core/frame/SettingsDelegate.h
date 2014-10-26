@@ -50,7 +50,6 @@ public:
     // functions to make generating Settings.in slightly easier.
     enum ChangeType {
         StyleChange,
-        ViewportDescriptionChange,
         MediaTypeChange,
         MultisamplingChange,
         ImageLoadingChange,

@@ -264,7 +264,6 @@ public:
     void didRemoveAllPendingStylesheet(WebLocalFrameImpl*);
 
     void updateMainFrameLayoutSize();
-    void updatePageDefinedViewportConstraints(const ViewportDescription&);
 
     // Returns the input event we're currently processing. This is used in some
     // cases where the WebCore DOM event doesn't have the information we need.

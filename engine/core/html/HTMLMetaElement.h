@@ -23,18 +23,9 @@
 #ifndef HTMLMetaElement_h
 #define HTMLMetaElement_h
 
-#include "core/dom/ViewportDescription.h"
 #include "core/html/HTMLElement.h"
 
 namespace blink {
-
-enum ViewportErrorCode {
-    UnrecognizedViewportArgumentKeyError,
-    UnrecognizedViewportArgumentValueError,
-    TruncatedViewportArgumentValueError,
-    MaximumScaleTooLargeError,
-    TargetDensityDpiUnsupported
-};
 
 class HTMLMetaElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
@@ -48,25 +39,11 @@ public:
 private:
     explicit HTMLMetaElement(Document&);
 
-    typedef void (HTMLMetaElement::*KeyValuePairCallback)(const String& key, const String& value, void* data);
-    void processViewportKeyValuePair(const String& key, const String& value, void* data);
-    void parseContentAttribute(const String& content, KeyValuePairCallback, void* data);
-
     virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
     virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
     virtual void didNotifySubtreeInsertionsToDocument() override;
 
-    float parsePositiveNumber(const String& key, const String& value, bool* ok = 0);
-
-    Length parseViewportValueAsLength(const String& key, const String& value);
-    float parseViewportValueAsZoom(const String& key, const String& value, bool& computedValueMatchesParsedValue);
-    bool parseViewportValueAsUserZoom(const String& key, const String& value, bool& computedValueMatchesParsedValue);
-    float parseViewportValueAsDPI(const String& key, const String& value);
-
-    void reportViewportWarning(ViewportErrorCode, const String& replacement1, const String& replacement2);
-
     void process();
-    void processViewportContentAttribute(const String& content, ViewportDescription::Type origin);
 };
 
 } // namespace blink

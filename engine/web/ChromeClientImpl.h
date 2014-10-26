@@ -85,7 +85,6 @@ public:
     virtual void mouseDidMoveOverElement(
         const HitTestResult&, unsigned modifierFlags) override;
     virtual void setToolTip(const WTF::String& tooltipText, TextDirection) override;
-    virtual void dispatchViewportPropertiesDidChange(const ViewportDescription&) const override;
     virtual bool paintCustomOverhangArea(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&) override;
     virtual void setCursor(const Cursor&) override;
     virtual void needTouchEvents(bool needTouchEvents) override;

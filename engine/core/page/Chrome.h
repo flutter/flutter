@@ -43,7 +43,6 @@ class Node;
 class Page;
 
 struct DateTimeChooserParameters;
-struct ViewportDescription;
 
 class Chrome final : public HostWindow {
 public:
@@ -80,8 +79,6 @@ public:
     void mouseDidMoveOverElement(const HitTestResult&, unsigned modifierFlags);
 
     void setToolTip(const HitTestResult&);
-
-    void dispatchViewportPropertiesDidChange(const ViewportDescription&) const;
 
     void willBeDestroyed();
 

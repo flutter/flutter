@@ -899,10 +899,7 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
     m_id = propertyID;
     m_important = important;
 
-    {
-        StyleDeclarationScope scope(this, declaration);
-        cssyyparse(this);
-    }
+    cssyyparse(this);
 
     m_rule = nullptr;
     m_id = CSSPropertyInvalid;
@@ -1020,10 +1017,7 @@ bool BisonCSSParser::parseDeclaration(MutableStylePropertySet* declaration, cons
         m_observer->startRuleBody(0);
     }
 
-    {
-        StyleDeclarationScope scope(this, declaration);
-        cssyyparse(this);
-    }
+    cssyyparse(this);
 
     m_rule = nullptr;
 
@@ -1879,25 +1873,6 @@ void BisonCSSParser::startEndUnknownRule()
 {
     if (m_observer)
         m_observer->startEndUnknownRule();
-}
-
-StyleRuleBase* BisonCSSParser::createViewportRule()
-{
-    // Allow @viewport rules from UA stylesheets even if the feature is disabled.
-    if (!RuntimeEnabledFeatures::cssViewportEnabled() && !isUASheetBehavior(m_context.mode()))
-        return 0;
-
-    m_allowImportRules = m_allowNamespaceDeclarations = false;
-
-    RefPtrWillBeRawPtr<StyleRuleViewport> rule = StyleRuleViewport::create();
-
-    rule->setProperties(createStylePropertySet());
-    clearProperties();
-
-    StyleRuleViewport* result = rule.get();
-    m_parsedRules.append(rule.release());
-
-    return result;
 }
 
 }

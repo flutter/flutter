@@ -177,7 +177,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token SUPPORTS_SYM
 %token FONT_FACE_SYM
 %token CHARSET_SYM
-%token VIEWPORT_RULE_SYM
 %token INTERNAL_DECLS_SYM
 %token INTERNAL_MEDIALIST_SYM
 %token INTERNAL_RULE_SYM
@@ -252,7 +251,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %type <rule> block_rule
 %type <rule> block_valid_rule
 %type <rule> supports
-%type <rule> viewport
 %type <boolean> keyframes_rule_start
 
 %type <string> ident_or_string
@@ -453,7 +451,6 @@ valid_rule:
   | font_face
   | keyframes
   | supports
-  | viewport
   ;
 
 before_rule:
@@ -498,7 +495,6 @@ block_valid_rule:
   | media
   | keyframes
   | supports
-  | viewport
   ;
 
 block_rule:
@@ -831,21 +827,6 @@ font_face:
         $$ = parser->createFontFaceRule();
     }
     ;
-
-before_viewport_rule:
-    /* empty */ {
-        parser->markViewportRuleBodyStart();
-        parser->startRuleHeader(CSSRuleSourceData::VIEWPORT_RULE);
-    }
-    ;
-
-viewport:
-    before_viewport_rule VIEWPORT_RULE_SYM at_rule_header_end_maybe_space
-    '{' at_rule_body_start maybe_space_before_declaration declaration_list closing_brace {
-        $$ = parser->createViewportRule();
-        parser->markViewportRuleBodyEnd();
-    }
-;
 
 maybe_unary_operator:
     unary_operator
@@ -1443,9 +1424,6 @@ regular_invalid_at_rule_header:
   | before_supports_rule SUPPORTS_SYM error error_location rule_error_recovery {
         parser->reportError($4, InvalidSupportsConditionCSSError);
         parser->popSupportsRuleData();
-    }
-  | before_viewport_rule VIEWPORT_RULE_SYM at_rule_header_recovery {
-        parser->markViewportRuleBodyEnd();
     }
   | error_location invalid_at at_rule_header_recovery {
         parser->resumeErrorLogging();

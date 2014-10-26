@@ -165,12 +165,6 @@ void RuleSet::addRule(StyleRule* rule, unsigned selectorIndex, AddRuleFlags addR
     }
 }
 
-void RuleSet::addViewportRule(StyleRuleViewport* rule)
-{
-    ensurePendingRules(); // So that m_viewportRules.shrinkToFit() gets called.
-    m_viewportRules.append(rule);
-}
-
 void RuleSet::addFontFaceRule(StyleRuleFontFace* rule)
 {
     ensurePendingRules(); // So that m_fontFaceRules.shrinkToFit() gets called.
@@ -202,8 +196,6 @@ void RuleSet::addChildRules(const WillBeHeapVector<RefPtrWillBeMember<StyleRuleB
             addFontFaceRule(toStyleRuleFontFace(rule));
         } else if (rule->isKeyframesRule()) {
             addKeyframesRule(toStyleRuleKeyframes(rule));
-        } else if (rule->isViewportRule()) {
-            addViewportRule(toStyleRuleViewport(rule));
         } else if (rule->isSupportsRule() && toStyleRuleSupports(rule)->conditionIsSupported()) {
             addChildRules(toStyleRuleSupports(rule)->childRules(), medium, addRuleFlags);
         }
@@ -251,7 +243,6 @@ void RuleSet::compactRules()
     compactPendingRules(pendingRules->tagRules, m_tagRules);
     compactPendingRules(pendingRules->shadowPseudoElementRules, m_shadowPseudoElementRules);
     m_universalRules.shrinkToFit();
-    m_viewportRules.shrinkToFit();
     m_fontFaceRules.shrinkToFit();
     m_keyframesRules.shrinkToFit();
 }
@@ -280,7 +271,6 @@ void RuleSet::trace(Visitor* visitor)
     visitor->trace(m_shadowPseudoElementRules);
     visitor->trace(m_universalRules);
     visitor->trace(m_features);
-    visitor->trace(m_viewportRules);
     visitor->trace(m_fontFaceRules);
     visitor->trace(m_keyframesRules);
     visitor->trace(m_viewportDependentMediaQueryResults);

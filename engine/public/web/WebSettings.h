@@ -82,7 +82,6 @@ public:
     virtual int availableHoverTypes() const = 0;
     virtual HoverType primaryHoverType() const = 0;
     virtual bool shrinksViewportContentToFit() const = 0;
-    virtual bool viewportEnabled() const = 0;
     virtual void setAccelerated2dCanvasEnabled(bool) = 0;
     virtual void setAccelerated2dCanvasMSAASampleCount(int) = 0;
     virtual void setPreferCompositingToLCDTextEnabled(bool) = 0;
@@ -149,8 +148,6 @@ public:
     virtual void setUseSolidColorScrollbars(bool) = 0;
     virtual void setUseWideViewport(bool) = 0;
     virtual void setV8CacheOptions(V8CacheOptions) = 0;
-    virtual void setViewportEnabled(bool) = 0;
-    virtual void setViewportMetaEnabled(bool) = 0;
     virtual void setWebGLErrorsToConsoleEnabled(bool) = 0;
 
 protected:

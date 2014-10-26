@@ -240,7 +240,6 @@ PassRefPtrWillBeRawPtr<Document> LocalDOMWindow::installNewDocument(const Docume
     m_document->attach();
 
     m_frame->script().updateDocument();
-    m_document->updateViewportDescription();
     return m_document;
 }
 

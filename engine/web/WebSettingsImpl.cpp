@@ -355,11 +355,6 @@ WebSettings::HoverType WebSettingsImpl::primaryHoverType() const
     return static_cast<HoverType>(m_settings->primaryHoverType());
 }
 
-bool WebSettingsImpl::viewportEnabled() const
-{
-    return m_settings->viewportEnabled();
-}
-
 bool WebSettingsImpl::mockGestureTapHighlightsEnabled() const
 {
     return m_settings->mockGestureTapHighlightsEnabled();
@@ -387,16 +382,6 @@ void WebSettingsImpl::setMediaControlsOverlayPlayButtonEnabled(bool enabled)
 void WebSettingsImpl::setMediaPlaybackRequiresUserGesture(bool required)
 {
     m_settings->setMediaPlaybackRequiresUserGesture(required);
-}
-
-void WebSettingsImpl::setViewportEnabled(bool enabled)
-{
-    m_settings->setViewportEnabled(enabled);
-}
-
-void WebSettingsImpl::setViewportMetaEnabled(bool enabled)
-{
-    m_settings->setViewportMetaEnabled(enabled);
 }
 
 void WebSettingsImpl::setSelectionIncludesAltImageText(bool enabled)

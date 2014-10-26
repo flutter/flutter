@@ -32,7 +32,6 @@
 #include "core/css/StyleRule.h"
 #include "core/css/StyleSheetContents.h"
 #include "core/css/resolver/StyleResolver.h" // For MatchRequest.
-#include "core/css/resolver/ViewportStyleResolver.h"
 #include "core/dom/Document.h"
 #include "core/dom/shadow/ElementShadow.h"
 #include "core/dom/shadow/ShadowRoot.h"
@@ -131,14 +130,6 @@ void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& colle
         MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), includeEmptyRules, &m_scope->rootNode(), m_authorStyleSheets[i], applyAuthorStyles, i);
         collector.collectMatchingRules(matchRequest, ruleRange, static_cast<SelectorChecker::ContextFlags>(contextFlags), cascadeScope, cascadeOrder);
     }
-}
-
-void ScopedStyleResolver::collectViewportRulesTo(StyleResolver* resolver) const
-{
-    if (!m_scope->rootNode().isDocumentNode())
-        return;
-    for (size_t i = 0; i < m_authorStyleSheets.size(); ++i)
-        resolver->viewportStyleResolver()->collectViewportRules(&m_authorStyleSheets[i]->contents()->ruleSet(), ViewportStyleResolver::AuthorOrigin);
 }
 
 void ScopedStyleResolver::trace(Visitor* visitor)

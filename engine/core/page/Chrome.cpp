@@ -129,11 +129,6 @@ void Chrome::setToolTip(const HitTestResult& result)
     m_client->setToolTip(toolTip, toolTipDirection);
 }
 
-void Chrome::dispatchViewportPropertiesDidChange(const ViewportDescription& description) const
-{
-    m_client->dispatchViewportPropertiesDidChange(description);
-}
-
 void Chrome::setCursor(const Cursor& cursor)
 {
     m_client->setCursor(cursor);

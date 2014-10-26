@@ -28,7 +28,6 @@
 #include "core/css/CSSMediaRule.h"
 #include "core/css/CSSStyleRule.h"
 #include "core/css/CSSSupportsRule.h"
-#include "core/css/CSSViewportRule.h"
 #include "core/css/StylePropertySet.h"
 
 namespace blink {
@@ -67,9 +66,6 @@ void StyleRuleBase::trace(Visitor* visitor)
     case Keyframes:
         toStyleRuleKeyframes(this)->traceAfterDispatch(visitor);
         return;
-    case Viewport:
-        toStyleRuleViewport(this)->traceAfterDispatch(visitor);
-        return;
     case Filter:
         toStyleRuleFilter(this)->traceAfterDispatch(visitor);
         return;
@@ -98,9 +94,6 @@ void StyleRuleBase::finalizeGarbageCollectedObject()
         return;
     case Keyframes:
         toStyleRuleKeyframes(this)->~StyleRuleKeyframes();
-        return;
-    case Viewport:
-        toStyleRuleViewport(this)->~StyleRuleViewport();
         return;
     case Filter:
         toStyleRuleFilter(this)->~StyleRuleFilter();
@@ -131,9 +124,6 @@ void StyleRuleBase::destroy()
     case Keyframes:
         delete toStyleRuleKeyframes(this);
         return;
-    case Viewport:
-        delete toStyleRuleViewport(this);
-        return;
     case Filter:
         delete toStyleRuleFilter(this);
         return;
@@ -158,8 +148,6 @@ PassRefPtrWillBeRawPtr<StyleRuleBase> StyleRuleBase::copy() const
         return toStyleRuleSupports(this)->copy();
     case Keyframes:
         return toStyleRuleKeyframes(this)->copy();
-    case Viewport:
-        return toStyleRuleViewport(this)->copy();
     case Filter:
         return toStyleRuleFilter(this)->copy();
     case Unknown:
@@ -190,9 +178,6 @@ PassRefPtrWillBeRawPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet*
         break;
     case Keyframes:
         rule = CSSKeyframesRule::create(toStyleRuleKeyframes(self), parentSheet);
-        break;
-    case Viewport:
-        rule = CSSViewportRule::create(toStyleRuleViewport(self), parentSheet);
         break;
     case Filter:
         rule = CSSFilterRule::create(toStyleRuleFilter(self), parentSheet);
@@ -340,39 +325,6 @@ StyleRuleSupports::StyleRuleSupports(const StyleRuleSupports& o)
     , m_conditionText(o.m_conditionText)
     , m_conditionIsSupported(o.m_conditionIsSupported)
 {
-}
-
-StyleRuleViewport::StyleRuleViewport()
-    : StyleRuleBase(Viewport)
-{
-}
-
-StyleRuleViewport::StyleRuleViewport(const StyleRuleViewport& o)
-    : StyleRuleBase(o)
-    , m_properties(o.m_properties->mutableCopy())
-{
-}
-
-StyleRuleViewport::~StyleRuleViewport()
-{
-}
-
-MutableStylePropertySet& StyleRuleViewport::mutableProperties()
-{
-    if (!m_properties->isMutable())
-        m_properties = m_properties->mutableCopy();
-    return *toMutableStylePropertySet(m_properties);
-}
-
-void StyleRuleViewport::setProperties(PassRefPtrWillBeRawPtr<StylePropertySet> properties)
-{
-    m_properties = properties;
-}
-
-void StyleRuleViewport::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_properties);
-    StyleRuleBase::traceAfterDispatch(visitor);
 }
 
 StyleRuleFilter::StyleRuleFilter(const String& filterName)

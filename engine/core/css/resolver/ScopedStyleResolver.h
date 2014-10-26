@@ -64,7 +64,6 @@ public:
     void addRulesFromSheet(CSSStyleSheet*, const MediaQueryEvaluator&, StyleResolver*);
     void collectFeaturesTo(RuleFeatureSet&, HashSet<const StyleSheetContents*>& visitedSharedStyleSheetContents) const;
     void resetAuthorStyle();
-    void collectViewportRulesTo(StyleResolver*) const;
 
     void trace(Visitor*);
 

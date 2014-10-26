@@ -56,7 +56,6 @@ class Widget;
 
 struct DateTimeChooserParameters;
 struct GraphicsDeviceAdapter;
-struct ViewportDescription;
 
 class ChromeClient {
 public:
@@ -93,8 +92,6 @@ public:
     virtual void setCursor(const Cursor&) = 0;
     virtual void scheduleAnimation() = 0;
     // End methods used by HostWindow.
-
-    virtual void dispatchViewportPropertiesDidChange(const ViewportDescription&) const { }
 
     virtual void layoutUpdated(LocalFrame*) const { }
 

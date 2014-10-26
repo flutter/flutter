@@ -134,11 +134,6 @@ void Page::makeOrdinary()
     ordinaryPages().add(this);
 }
 
-ViewportDescription Page::viewportDescription() const
-{
-    return mainFrame() && mainFrame()->document() ? mainFrame()->document()->viewportDescription() : ViewportDescription();
-}
-
 ScrollingCoordinator* Page::scrollingCoordinator()
 {
     if (!m_scrollingCoordinator)
@@ -299,10 +294,6 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
     switch (changeType) {
     case SettingsDelegate::StyleChange:
         setNeedsRecalcStyleInAllFrames();
-        break;
-    case SettingsDelegate::ViewportDescriptionChange:
-        if (mainFrame() && mainFrame()->document())
-            mainFrame()->document()->updateViewportDescription();
         break;
     case SettingsDelegate::MediaTypeChange:
         if (mainFrame()) {

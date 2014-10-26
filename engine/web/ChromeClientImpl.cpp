@@ -327,11 +327,6 @@ void ChromeClientImpl::setToolTip(const String& tooltipText, TextDirection dir)
         m_webView->client()->setToolTipText(tooltipText, toWebTextDirection(dir));
 }
 
-void ChromeClientImpl::dispatchViewportPropertiesDidChange(const ViewportDescription& description) const
-{
-    m_webView->updatePageDefinedViewportConstraints(description);
-}
-
 void ChromeClientImpl::setCursor(const Cursor& cursor)
 {
     setCursor(WebCursorInfo(cursor));

@@ -48,7 +48,6 @@ public:
     virtual PointerType primaryPointerType() const override;
     virtual int availableHoverTypes() const override;
     virtual HoverType primaryHoverType() const override;
-    virtual bool viewportEnabled() const override;
     virtual void setAccelerated2dCanvasEnabled(bool) override;
     virtual void setAccelerated2dCanvasMSAASampleCount(int) override;
     virtual void setPreferCompositingToLCDTextEnabled(bool) override;
@@ -112,8 +111,6 @@ public:
     virtual void setUseSolidColorScrollbars(bool) override;
     virtual void setUseWideViewport(bool) override;
     virtual void setV8CacheOptions(V8CacheOptions) override;
-    virtual void setViewportEnabled(bool) override;
-    virtual void setViewportMetaEnabled(bool) override;
     virtual void setWebGLErrorsToConsoleEnabled(bool) override;
 
     bool showFPSCounter() const { return m_showFPSCounter; }

@@ -109,7 +109,7 @@ selectionIncludesAltImageText initial=false
 
 # Used by the android_webview to support a horizontal height auto-sizing
 # mode.
-forceZeroLayoutHeight initial=false, invalidate=ViewportDescription
+forceZeroLayoutHeight initial=false
 
 # Touch based text selection and editing on desktop.
 # crbug.com/304873 tracks removal once it's been enabled on all platforms.
@@ -120,8 +120,8 @@ useSolidColorScrollbars initial=true
 mainFrameClipsContent initial=true
 
 # Presumably used by tests?  Unclear.
-useWideViewport initial=true, invalidate=ViewportDescription
-loadWithOverviewMode initial=true, invalidate=ViewportDescription
+useWideViewport initial=true
+loadWithOverviewMode initial=true
 
 # Only set by Layout Tests.
 mediaTypeOverride type=String, initial="screen", invalidate=MediaType
@@ -130,9 +130,6 @@ mediaTypeOverride type=String, initial="screen", invalidate=MediaType
 # the image URL. A cached image will still be rendered if requested.
 loadsImagesAutomatically initial=false, invalidate=ImageLoading
 imagesEnabled initial=true, invalidate=ImageLoading
-
-viewportEnabled initial=false, invalidate=ViewportDescription
-viewportMetaEnabled initial=false
 
 # V8 supports different types of caching. Used by V8 bindings.
 v8CacheOptions type=V8CacheOptions, initial=V8CacheOptionsOff

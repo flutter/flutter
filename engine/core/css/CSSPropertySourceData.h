@@ -96,7 +96,6 @@ struct CSSRuleSourceData : public RefCountedWillBeGarbageCollected<CSSRuleSource
         MEDIA_RULE = 3,
         FONT_FACE_RULE = 4,
         KEYFRAMES_RULE = 6,
-        VIEWPORT_RULE = 7,
         SUPPORTS_RULE = 8,
         FILTER_RULE = 9
     };

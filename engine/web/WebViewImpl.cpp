@@ -938,7 +938,6 @@ WebLocalFrameImpl* WebViewImpl::localFrameRootTemporary() const
 
 void WebViewImpl::performResize()
 {
-    updatePageDefinedViewportConstraints(localFrameRootTemporary()->frame()->document()->viewportDescription());
     updateMainFrameLayoutSize();
 
     // If the virtual viewport pinch mode is enabled, the main frame will be resized
@@ -1816,26 +1815,6 @@ void WebViewImpl::setDeviceScaleFactor(float scaleFactor)
 
     if (m_layerTreeView)
         updateLayerTreeDeviceScaleFactor();
-}
-
-void WebViewImpl::updatePageDefinedViewportConstraints(const ViewportDescription& description)
-{
-    if (!settings()->viewportEnabled() || !page() || (!m_size.width && !m_size.height))
-        return;
-
-    Document* document = page()->mainFrame()->document();
-
-    m_matchesHeuristicsForGpuRasterization = description.maxWidth == Length(DeviceWidth)
-        && description.minZoom == 1.0
-        && description.minZoomIsExplicit;
-    if (m_layerTreeView)
-        m_layerTreeView->heuristicsForGpuRasterizationUpdated(m_matchesHeuristicsForGpuRasterization);
-
-    Length defaultMinWidth = document->viewportDefaultMinWidth();
-    if (defaultMinWidth.isAuto())
-        defaultMinWidth = Length(ExtendToZoom);
-
-    updateMainFrameLayoutSize();
 }
 
 void WebViewImpl::updateMainFrameLayoutSize()

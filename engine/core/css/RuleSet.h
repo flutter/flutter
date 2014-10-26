@@ -96,7 +96,6 @@ public:
     const WillBeHeapTerminatedArray<RuleData>* tagRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_tagRules.get(key); }
     const WillBeHeapTerminatedArray<RuleData>* shadowPseudoElementRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_shadowPseudoElementRules.get(key); }
     const WillBeHeapVector<RuleData>* universalRules() const { ASSERT(!m_pendingRules); return &m_universalRules; }
-    const WillBeHeapVector<RawPtrWillBeMember<StyleRuleViewport> >& viewportRules() const { ASSERT(!m_pendingRules); return m_viewportRules; }
     const WillBeHeapVector<RawPtrWillBeMember<StyleRuleFontFace> >& fontFaceRules() const { return m_fontFaceRules; }
     const WillBeHeapVector<RawPtrWillBeMember<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
     const MediaQueryResultList& viewportDependentMediaQueryResults() const { return m_viewportDependentMediaQueryResults; }
@@ -126,7 +125,6 @@ private:
     }
 
     void addToRuleSet(const AtomicString& key, PendingRuleMap&, const RuleData&);
-    void addViewportRule(StyleRuleViewport*);
     void addFontFaceRule(StyleRuleFontFace*);
     void addKeyframesRule(StyleRuleKeyframes*);
 
@@ -164,7 +162,6 @@ private:
     CompactRuleMap m_shadowPseudoElementRules;
     WillBeHeapVector<RuleData> m_universalRules;
     RuleFeatureSet m_features;
-    WillBeHeapVector<RawPtrWillBeMember<StyleRuleViewport> > m_viewportRules;
     WillBeHeapVector<RawPtrWillBeMember<StyleRuleFontFace> > m_fontFaceRules;
     WillBeHeapVector<RawPtrWillBeMember<StyleRuleKeyframes> > m_keyframesRules;
 

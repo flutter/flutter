@@ -213,38 +213,9 @@ public:
 
     void tokenToLowerCase(CSSParserString& token);
 
-    void markViewportRuleBodyStart() { m_inViewport = true; }
-    void markViewportRuleBodyEnd() { m_inViewport = false; }
-    StyleRuleBase* createViewportRule();
-
     CSSParserLocation currentLocation() { return m_tokenizer.currentLocation(); }
 
 private:
-    class StyleDeclarationScope {
-        STACK_ALLOCATED();
-        WTF_MAKE_NONCOPYABLE(StyleDeclarationScope);
-    public:
-        StyleDeclarationScope(BisonCSSParser* parser, const StylePropertySet* declaration)
-            : m_parser(parser)
-            , m_mode(declaration->cssParserMode())
-        {
-            if (isCSSViewportParsingEnabledForMode(m_mode)) {
-                ASSERT(!m_parser->inViewport());
-                m_parser->markViewportRuleBodyStart();
-            }
-        }
-
-        ~StyleDeclarationScope()
-        {
-            if (isCSSViewportParsingEnabledForMode(m_mode))
-                m_parser->markViewportRuleBodyEnd();
-        }
-
-    private:
-        BisonCSSParser* m_parser;
-        CSSParserMode m_mode;
-    };
-
     inline void ensureLineEndings();
 
     void setStyleSheet(StyleSheetContents* styleSheet) { m_styleSheet = styleSheet; }

@@ -46,7 +46,6 @@ public:
         Keyframes = 5,
         Keyframe, // Not used. These are internally non-rule StyleKeyframe objects.
         Supports = 12,
-        Viewport = 15,
         Filter = 17
     };
 
@@ -57,7 +56,6 @@ public:
     bool isMediaRule() const { return type() == Media; }
     bool isStyleRule() const { return type() == Style; }
     bool isSupportsRule() const { return type() == Supports; }
-    bool isViewportRule() const { return type() == Viewport; }
     bool isFilterRule() const { return type() == Filter; }
 
     PassRefPtrWillBeRawPtr<StyleRuleBase> copy() const;
@@ -201,28 +199,6 @@ private:
     bool m_conditionIsSupported;
 };
 
-class StyleRuleViewport : public StyleRuleBase {
-public:
-    static PassRefPtrWillBeRawPtr<StyleRuleViewport> create() { return adoptRefWillBeNoop(new StyleRuleViewport); }
-
-    ~StyleRuleViewport();
-
-    const StylePropertySet& properties() const { return *m_properties; }
-    MutableStylePropertySet& mutableProperties();
-
-    void setProperties(PassRefPtrWillBeRawPtr<StylePropertySet>);
-
-    PassRefPtrWillBeRawPtr<StyleRuleViewport> copy() const { return adoptRefWillBeNoop(new StyleRuleViewport(*this)); }
-
-    void traceAfterDispatch(Visitor*);
-
-private:
-    StyleRuleViewport();
-    StyleRuleViewport(const StyleRuleViewport&);
-
-    RefPtrWillBeMember<StylePropertySet> m_properties; // Cannot be null
-};
-
 class StyleRuleFilter : public StyleRuleBase {
 public:
     static PassRefPtrWillBeRawPtr<StyleRuleFilter> create(const String& filterName) { return adoptRefWillBeNoop(new StyleRuleFilter(filterName)); }
@@ -255,7 +231,6 @@ DEFINE_TYPE_CASTS(StyleRule, StyleRuleBase, rule, rule->isStyleRule(), rule.isSt
 DEFINE_STYLE_RULE_TYPE_CASTS(FontFace);
 DEFINE_STYLE_RULE_TYPE_CASTS(Media);
 DEFINE_STYLE_RULE_TYPE_CASTS(Supports);
-DEFINE_STYLE_RULE_TYPE_CASTS(Viewport);
 DEFINE_STYLE_RULE_TYPE_CASTS(Filter);
 
 } // namespace blink

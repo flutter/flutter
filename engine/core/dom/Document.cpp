@@ -1774,42 +1774,6 @@ void Document::maybeHandleHttpRefresh(const String& content, HttpRefreshType htt
     // FIXME(sky): remove
 }
 
-void Document::setViewportDescription(const ViewportDescription& viewportDescription)
-{
-    // The UA-defined min-width is used by the processing of legacy meta tags.
-    if (!viewportDescription.isSpecifiedByAuthor())
-        m_viewportDefaultMinWidth = viewportDescription.minWidth;
-
-    if (viewportDescription.isLegacyViewportType()) {
-        if (settings() && !settings()->viewportMetaEnabled())
-            return;
-
-        m_legacyViewportDescription = viewportDescription;
-
-        // When no author style for @viewport is present, and a meta tag for defining
-        // the viewport is, apply the meta tag viewport instead of the UA styles.
-        if (m_viewportDescription.type == ViewportDescription::AuthorStyleSheet)
-            return;
-        m_viewportDescription = viewportDescription;
-    } else {
-        // If the legacy viewport tag has higher priority than the cascaded @viewport
-        // descriptors, use the values from the legacy tag.
-        if (!shouldOverrideLegacyDescription(viewportDescription.type))
-            m_viewportDescription = m_legacyViewportDescription;
-        else
-            m_viewportDescription = viewportDescription;
-    }
-
-    updateViewportDescription();
-}
-
-void Document::updateViewportDescription()
-{
-    if (frame()) {
-        frameHost()->chrome().dispatchViewportPropertiesDidChange(m_viewportDescription);
-    }
-}
-
 void Document::processReferrerPolicy(const String& policy)
 {
     ASSERT(!policy.isNull());

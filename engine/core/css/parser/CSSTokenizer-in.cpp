@@ -916,9 +916,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
             m_parsingMode = SupportsMode;
             m_token = SUPPORTS_SYM;
         }
-        CASE("viewport") {
-            m_token = VIEWPORT_RULE_SYM;
-        }
         CASE("-internal-rule") {
             if (LIKELY(!hasEscape && m_internal))
                 m_token = INTERNAL_RULE_SYM;

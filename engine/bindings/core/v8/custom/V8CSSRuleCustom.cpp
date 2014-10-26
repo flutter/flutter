@@ -38,7 +38,6 @@
 #include "bindings/core/v8/V8CSSMediaRule.h"
 #include "bindings/core/v8/V8CSSStyleRule.h"
 #include "bindings/core/v8/V8CSSSupportsRule.h"
-#include "bindings/core/v8/V8CSSViewportRule.h"
 
 namespace blink {
 
@@ -63,8 +62,6 @@ v8::Handle<v8::Object> wrap(CSSRule* impl, v8::Handle<v8::Object> creationContex
         return wrap(toCSSKeyframesRule(impl), creationContext, isolate);
     case CSSRule::SUPPORTS_RULE:
         return wrap(toCSSSupportsRule(impl), creationContext, isolate);
-    case CSSRule::VIEWPORT_RULE:
-        return wrap(toCSSViewportRule(impl), creationContext, isolate);
     case CSSRule::WEBKIT_FILTER_RULE:
         return wrap(toCSSFilterRule(impl), creationContext, isolate);
     }
