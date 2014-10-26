@@ -93,10 +93,10 @@ class DiffParserTest(unittest.TestCase):
             ]
 
         svn_diff_lines = [
-            "Index: Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
+            "Index: tools/webkitpy/common/checkout/diff_parser.py\n",
             "===================================================================\n",
-            "--- Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
-            "+++ Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
+            "--- tools/webkitpy/common/checkout/diff_parser.py\n",
+            "+++ tools/webkitpy/common/checkout/diff_parser.py\n",
             "@@ -59,6 +59,7 @@ def git_diff_to_svn_diff(line):\n",
             ]
         self.assertEqual(diff_parser.get_diff_converter(svn_diff_lines), diff_parser.svn_diff_to_svn_diff)
@@ -104,10 +104,10 @@ class DiffParserTest(unittest.TestCase):
         self.assertEqual(diff_parser.get_diff_converter(revision_lines + svn_diff_lines), diff_parser.svn_diff_to_svn_diff)
 
         git_diff_lines = [
-            "diff --git a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
+            "diff --git a/tools/webkitpy/common/checkout/diff_parser.py b/tools/webkitpy/common/checkout/diff_parser.py\n",
             "index 3c5b45b..0197ead 100644\n",
-            "--- a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
-            "+++ b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py\n",
+            "--- a/tools/webkitpy/common/checkout/diff_parser.py\n",
+            "+++ b/tools/webkitpy/common/checkout/diff_parser.py\n",
             "@@ -59,6 +59,7 @@ def git_diff_to_svn_diff(line):\n",
             ]
         self.assertEqual(diff_parser.get_diff_converter(git_diff_lines), diff_parser.git_diff_to_svn_diff)
@@ -131,10 +131,10 @@ class DiffParserTest(unittest.TestCase):
 
     def test_git_diff_to_svn_diff(self):
         output = """\
-Index: Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+Index: tools/webkitpy/common/checkout/diff_parser.py
 ===================================================================
---- Tools/Scripts/webkitpy/common/checkout/diff_parser.py
-+++ Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+--- tools/webkitpy/common/checkout/diff_parser.py
++++ tools/webkitpy/common/checkout/diff_parser.py
 @@ -59,6 +59,7 @@ def git_diff_to_svn_diff(line):
  A
  B
@@ -145,10 +145,10 @@ Index: Tools/Scripts/webkitpy/common/checkout/diff_parser.py
 """
 
         inputfmt = StringIO.StringIO("""\
-diff --git a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+diff --git a/tools/webkitpy/common/checkout/diff_parser.py b/tools/webkitpy/common/checkout/diff_parser.py
 index 2ed552c4555db72df16b212547f2c125ae301a04..72870482000c0dba64ce4300ed782c03ee79b74f 100644
---- a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
-+++ b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+--- a/tools/webkitpy/common/checkout/diff_parser.py
++++ b/tools/webkitpy/common/checkout/diff_parser.py
 @@ -59,6 +59,7 @@ def git_diff_to_svn_diff(line):
  A
  B
@@ -158,10 +158,10 @@ index 2ed552c4555db72df16b212547f2c125ae301a04..72870482000c0dba64ce4300ed782c03
  F
 """)
         shortfmt = StringIO.StringIO("""\
-diff --git a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+diff --git a/tools/webkitpy/common/checkout/diff_parser.py b/tools/webkitpy/common/checkout/diff_parser.py
 index b48b162..f300960 100644
---- a/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
-+++ b/Tools/Scripts/webkitpy/common/checkout/diff_parser.py
+--- a/tools/webkitpy/common/checkout/diff_parser.py
++++ b/tools/webkitpy/common/checkout/diff_parser.py
 @@ -59,6 +59,7 @@ def git_diff_to_svn_diff(line):
  A
  B

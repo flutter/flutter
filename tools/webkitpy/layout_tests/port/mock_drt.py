@@ -44,7 +44,7 @@ import sys
 import types
 
 # Since we execute this script directly as part of the unit tests, we need to ensure
-# that Tools/Scripts is in sys.path for the next imports to work correctly.
+# that tools is in sys.path for the next imports to work correctly.
 script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 if script_dir not in sys.path:
     sys.path.append(script_dir)

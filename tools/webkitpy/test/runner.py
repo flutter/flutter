@@ -73,7 +73,7 @@ class _Worker(object):
         self._loader = loader
 
         # FIXME: coverage needs to be in sys.path for its internal imports to work.
-        thirdparty_path = webkit_finder.path_from_webkit_base('Tools', 'Scripts', 'webkitpy', 'thirdparty')
+        thirdparty_path = webkit_finder.path_from_webkit_base('tools', 'webkitpy', 'thirdparty')
         if not thirdparty_path in sys.path:
             sys.path.append(thirdparty_path)
 

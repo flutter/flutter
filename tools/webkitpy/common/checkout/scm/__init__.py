@@ -4,4 +4,3 @@
 from .detection import SCMDetector
 from .git import Git, AmbiguousCommitError
 from .scm import SCM
-from .svn import SVN

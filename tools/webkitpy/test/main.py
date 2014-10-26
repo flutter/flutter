@@ -51,24 +51,11 @@ def main():
     filesystem = FileSystem()
     wkf = WebKitFinder(filesystem)
     tester = Tester(filesystem, wkf)
-    tester.add_tree(wkf.path_from_webkit_base('Tools', 'Scripts'), 'webkitpy')
+    tester.add_tree(wkf.path_from_webkit_base('tools'), 'webkitpy')
 
     tester.skip(('webkitpy.common.checkout.scm.scm_unittest',), 'are really, really, slow', 31818)
     if sys.platform == 'win32':
         tester.skip(('webkitpy.common.checkout', 'webkitpy.common.config', 'webkitpy.tool', 'webkitpy.w3c', 'webkitpy.layout_tests.layout_package.bot_test_expectations'), 'fail horribly on win32', 54526)
-
-    # This only needs to run on Unix, so don't worry about win32 for now.
-    appengine_sdk_path = '/usr/local/google_appengine'
-    if os.path.exists(appengine_sdk_path):
-        if not appengine_sdk_path in sys.path:
-            sys.path.append(appengine_sdk_path)
-        import dev_appserver
-        from google.appengine.dist import use_library
-        use_library('django', '1.2')
-        dev_appserver.fix_sys_path()
-        tester.add_tree(wkf.path_from_webkit_base('Tools', 'TestResultServer'))
-    else:
-        _log.info('Skipping TestResultServer tests; the Google AppEngine Python SDK is not installed.')
 
     return not tester.run()
 
@@ -118,7 +105,7 @@ class Tester(object):
         sys.path = self.finder.additional_paths(sys.path) + sys.path
 
         # FIXME: coverage needs to be in sys.path for its internal imports to work.
-        thirdparty_path = self.webkit_finder.path_from_webkit_base('Tools', 'Scripts', 'webkitpy', 'thirdparty')
+        thirdparty_path = self.webkit_finder.path_from_webkit_base('tools', 'webkitpy', 'thirdparty')
         if not thirdparty_path in sys.path:
             sys.path.append(thirdparty_path)
 

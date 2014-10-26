@@ -46,10 +46,10 @@ class GetLoggerTest(unittest.TestCase):
         root_dir = "/"
         os.chdir(root_dir)
 
-        logger = logutils.get_logger("/Tools/Scripts/test-webkitpy")
+        logger = logutils.get_logger("/tools/test-webkitpy")
         self.assertEqual(logger.name, "test-webkitpy")
 
-        logger = logutils.get_logger("/Tools/Scripts/test-webkitpy.py")
+        logger = logutils.get_logger("/tools/test-webkitpy.py")
         self.assertEqual(logger.name, "test-webkitpy")
 
         os.chdir(working_directory)

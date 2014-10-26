@@ -1246,7 +1246,7 @@ class TestRebaselineOMatic(_BaseTestCase):
         self.assertEqual(out, '')
         self.assertEqual(self.tool.executive.calls, [
             ['git', 'pull'],
-            ['/mock-checkout/third_party/WebKit/Tools/Scripts/webkit-patch', 'auto-rebaseline'],
+            ['/mock-checkout/third_party/WebKit/tools/webkit-patch', 'auto-rebaseline'],
         ])
         self.assertEqual(self._logs, ['MOCK STDOUT'])
 
@@ -1262,6 +1262,6 @@ class TestRebaselineOMatic(_BaseTestCase):
         self.assertEqual(out, 'MOCK STDOUT\n')
         self.assertEqual(self.tool.executive.calls, [
             ['git', 'pull'],
-            ['/mock-checkout/third_party/WebKit/Tools/Scripts/webkit-patch', 'auto-rebaseline', '--verbose'],
+            ['/mock-checkout/third_party/WebKit/tools/webkit-patch', 'auto-rebaseline', '--verbose'],
         ])
         self.assertEqual(self._logs, ['MOCK STDOUT'])

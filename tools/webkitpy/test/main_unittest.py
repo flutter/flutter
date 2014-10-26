@@ -79,7 +79,7 @@ class TesterTest(unittest.TestCase):
 
     def test_coverage_works(self):
         # This is awkward; by design, running test-webkitpy -c will
-        # create a .coverage file in Tools/Scripts, so we need to be
+        # create a .coverage file in tools, so we need to be
         # careful not to clobber an existing one, and to clean up.
         # FIXME: This design needs to change since it means we can't actually
         # run this method itself under coverage properly.
