@@ -113,22 +113,11 @@ bool BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& token)
 {
     if (token.type() == HTMLToken::StartTag) {
         const String& tagName = token.data();
-        // FIXME: This is just a copy of Tokenizer::updateStateFor which uses threadSafeMatches.
-        if (threadSafeMatch(tagName, HTMLNames::scriptTag))
-            m_tokenizer->setState(HTMLTokenizer::ScriptDataState);
-        else if (threadSafeMatch(tagName, HTMLNames::styleTag))
+        if (threadSafeMatch(tagName, HTMLNames::scriptTag) || threadSafeMatch(tagName, HTMLNames::styleTag))
             m_tokenizer->setState(HTMLTokenizer::RAWTEXTState);
     }
 
-    if (token.type() == HTMLToken::EndTag) {
-        const String& tagName = token.data();
-        if (threadSafeMatch(tagName, HTMLNames::scriptTag)) {
-            m_tokenizer->setState(HTMLTokenizer::DataState);
-            return false;
-        }
-    }
-
-    return true;
+    return token.type() != HTMLToken::EndTag || !threadSafeMatch(token.data(), HTMLNames::scriptTag);
 }
 
 void BackgroundHTMLParser::pumpTokenizer()
