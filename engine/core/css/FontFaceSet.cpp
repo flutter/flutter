@@ -62,8 +62,6 @@ public:
     virtual void notifyLoaded(FontFace*) override;
     virtual void notifyError(FontFace*) override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     LoadFontPromiseResolver(FontFaceArray faces, ScriptState* scriptState)
         : m_numLoading(faces.size())
@@ -106,12 +104,6 @@ void LoadFontPromiseResolver::notifyError(FontFace* fontFace)
         m_errorOccured = true;
         m_resolver->reject(fontFace->error());
     }
-}
-
-void LoadFontPromiseResolver::trace(Visitor* visitor)
-{
-    visitor->trace(m_fontFaces);
-    LoadFontCallback::trace(visitor);
 }
 
 class FontsReadyPromiseResolver {
@@ -587,17 +579,5 @@ void FontFaceSet::didLayout(Document& document)
     if (FontFaceSet* fonts = static_cast<FontFaceSet*>(SupplementType::from(document, supplementName())))
         fonts->didLayout();
 }
-
-#if ENABLE(OILPAN)
-void FontFaceSet::trace(Visitor* visitor)
-{
-    visitor->trace(m_loadingFonts);
-    visitor->trace(m_loadedFonts);
-    visitor->trace(m_failedFonts);
-    visitor->trace(m_nonCSSConnectedFaces);
-    DocumentSupplement::trace(visitor);
-    EventTargetWithInlineData::trace(visitor);
-}
-#endif
 
 } // namespace blink

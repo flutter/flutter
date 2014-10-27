@@ -607,39 +607,6 @@ struct NativeValueTraits<ScriptValue> {
 
 v8::Handle<v8::Value> toV8Sequence(v8::Handle<v8::Value>, uint32_t& length, v8::Isolate*);
 
-template <class T, class V8T>
-HeapVector<Member<T> > toMemberNativeArray(v8::Handle<v8::Value> value, int argumentIndex, v8::Isolate* isolate, bool* success = 0)
-{
-    if (success)
-        *success = true;
-
-    v8::Local<v8::Value> v8Value(v8::Local<v8::Value>::New(isolate, value));
-    uint32_t length = 0;
-    if (value->IsArray()) {
-        length = v8::Local<v8::Array>::Cast(v8Value)->Length();
-    } else if (toV8Sequence(value, length, isolate).IsEmpty()) {
-        V8ThrowException::throwTypeError(ExceptionMessages::notAnArrayTypeArgumentOrValue(argumentIndex), isolate);
-        return HeapVector<Member<T> >();
-    }
-
-    HeapVector<Member<T> > result;
-    result.reserveInitialCapacity(length);
-    v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(v8Value);
-    for (uint32_t i = 0; i < length; ++i) {
-        v8::Handle<v8::Value> element = object->Get(i);
-        if (V8T::hasInstance(element, isolate)) {
-            v8::Handle<v8::Object> elementObject = v8::Handle<v8::Object>::Cast(element);
-            result.uncheckedAppend(V8T::toNative(elementObject));
-        } else {
-            if (success)
-                *success = false;
-            V8ThrowException::throwTypeError("Invalid Array element type", isolate);
-            return HeapVector<Member<T> >();
-        }
-    }
-    return result;
-}
-
 // Converts a JavaScript value to an array as per the Web IDL specification:
 // http://www.w3.org/TR/2012/CR-WebIDL-20120419/#es-array
 template <class T>

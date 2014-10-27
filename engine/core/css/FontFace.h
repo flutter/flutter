@@ -94,8 +94,6 @@ public:
     FontTraits traits() const;
     CSSFontFace* cssFontFace() { return m_cssFontFace.get(); }
 
-    void trace(Visitor*);
-
     bool hadBlankText() const;
 
     class LoadFontCallback : public RefCounted<LoadFontCallback> {
@@ -103,7 +101,6 @@ public:
         virtual ~LoadFontCallback() { }
         virtual void notifyLoaded(FontFace*) = 0;
         virtual void notifyError(FontFace*) = 0;
-        virtual void trace(Visitor*) { }
     };
     void loadWithCallback(PassRefPtr<LoadFontCallback>, ExecutionContext*);
 

@@ -68,8 +68,6 @@ public:
     // This method keeps the holder object and the property name.
     void reset();
 
-    virtual void trace(Visitor*) override;
-
 private:
     virtual v8::Handle<v8::Object> holder(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
     virtual v8::Handle<v8::Value> resolvedValue(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
@@ -143,15 +141,6 @@ void ScriptPromiseProperty<HolderType, ResolvedType, RejectedType>::reset()
     resetBase();
     m_resolved = ResolvedType();
     m_rejected = RejectedType();
-}
-
-template<typename HolderType, typename ResolvedType, typename RejectedType>
-void ScriptPromiseProperty<HolderType, ResolvedType, RejectedType>::trace(Visitor* visitor)
-{
-    TraceIfNeeded<HolderType>::trace(visitor, &m_holder);
-    TraceIfNeeded<ResolvedType>::trace(visitor, &m_resolved);
-    TraceIfNeeded<RejectedType>::trace(visitor, &m_rejected);
-    ScriptPromisePropertyBase::trace(visitor);
 }
 
 } // namespace blink

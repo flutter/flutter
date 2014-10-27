@@ -549,21 +549,6 @@ void FontFace::initCSSFontFace(const unsigned char* data, unsigned size)
     m_cssFontFace->addSource(source.release());
 }
 
-void FontFace::trace(Visitor* visitor)
-{
-    visitor->trace(m_src);
-    visitor->trace(m_style);
-    visitor->trace(m_weight);
-    visitor->trace(m_stretch);
-    visitor->trace(m_unicodeRange);
-    visitor->trace(m_variant);
-    visitor->trace(m_featureSettings);
-    visitor->trace(m_error);
-    visitor->trace(m_loadedProperty);
-    visitor->trace(m_cssFontFace);
-    visitor->trace(m_callbacks);
-}
-
 bool FontFace::hadBlankText() const
 {
     return m_cssFontFace->hadBlankText();

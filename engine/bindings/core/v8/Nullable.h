@@ -51,11 +51,6 @@ public:
         return (m_isNull && other.m_isNull) || (!m_isNull && !other.m_isNull && m_value == other.m_value);
     }
 
-    void trace(Visitor* visitor)
-    {
-        TraceIfNeeded<T>::trace(visitor, &m_value);
-    }
-
 private:
     T m_value;
     bool m_isNull;

@@ -31,34 +31,6 @@
 #include "config.h"
 #include "platform/heap/Visitor.h"
 
-#include "platform/heap/Handle.h"
-#include "platform/heap/Heap.h"
-
 namespace blink {
-
-#if ENABLE(ASSERT)
-void Visitor::checkGCInfo(const void* payload, const GCInfo* gcInfo)
-{
-    FinalizedHeapObjectHeader::fromPayload(payload)->checkHeader();
-#if !defined(COMPONENT_BUILD)
-    // On component builds we cannot compare the gcInfos as they are statically
-    // defined in each of the components and hence will not match.
-    BaseHeapPage* page = pageHeaderFromObject(payload);
-    ASSERT(page->orphaned() || FinalizedHeapObjectHeader::fromPayload(payload)->gcInfo() == gcInfo);
-#endif
-}
-
-#define DEFINE_VISITOR_CHECK_MARKER(Type)                                \
-    void Visitor::checkGCInfo(const Type* payload, const GCInfo* gcInfo) \
-    {                                                                    \
-        HeapObjectHeader::fromPayload(payload)->checkHeader();           \
-        Type* object = const_cast<Type*>(payload);                       \
-        BaseHeapPage* page = pageHeaderFromObject(object);               \
-        ASSERT(page->orphaned() || page->gcInfo() == gcInfo);            \
-    }
-
-FOR_EACH_TYPED_HEAP(DEFINE_VISITOR_CHECK_MARKER)
-#undef DEFINE_VISITOR_CHECK_MARKER
-#endif
 
 }

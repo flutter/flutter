@@ -39,8 +39,6 @@ public:
 
     ScriptPromise promise(DOMWrapperWorld&);
 
-    virtual void trace(Visitor*) { }
-
 protected:
     ScriptPromisePropertyBase(ExecutionContext*, Name);
 

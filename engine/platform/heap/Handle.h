@@ -577,7 +577,6 @@ protected:
 
     T* m_raw;
 
-    template<bool x, WTF::WeakHandlingFlag y, WTF::ShouldWeakPointersBeMarkedStrongly z, typename U, typename V> friend struct CollectionBackingTraceTrait;
     friend class Visitor;
 };
 
@@ -610,32 +609,9 @@ public:
     }
 };
 
-template<typename T, bool needsTracing>
-struct TraceIfEnabled;
-
-template<typename T>
-struct TraceIfEnabled<T, false>  {
-    static void trace(Visitor*, T*) { }
-};
-
-template<typename T>
-struct TraceIfEnabled<T, true> {
-    static void trace(Visitor* visitor, T* t)
-    {
-        visitor->trace(*t);
-    }
-};
-
 template <typename T> struct RemoveHeapPointerWrapperTypes {
     typedef typename WTF::RemoveTemplate<typename WTF::RemoveTemplate<typename WTF::RemoveTemplate<T, Member>::Type, WeakMember>::Type, RawPtr>::Type Type;
 };
-
-// FIXME: Oilpan: TraceIfNeeded should be implemented ala:
-// NeedsTracing<T>::value || IsWeakMember<T>::value. It should not need to test
-// raw pointer types. To remove these tests, we may need support for
-// instantiating a template with a RawPtrOrMember'ish template.
-template<typename T>
-struct TraceIfNeeded : public TraceIfEnabled<T, false> { };
 
 // This trace trait for std::pair will null weak members if their referent is
 // collected. If you have a collection that contain weakness it does not remove
@@ -643,12 +619,8 @@ struct TraceIfNeeded : public TraceIfEnabled<T, false> { };
 template<typename T, typename U>
 class TraceTrait<std::pair<T, U> > {
 public:
-    static const bool firstNeedsTracing = WTF::NeedsTracing<T>::value || WTF::IsWeak<T>::value;
-    static const bool secondNeedsTracing = WTF::NeedsTracing<U>::value || WTF::IsWeak<U>::value;
     static void trace(Visitor* visitor, std::pair<T, U>* pair)
     {
-        TraceIfEnabled<T, firstNeedsTracing>::trace(visitor, &pair->first);
-        TraceIfEnabled<U, secondNeedsTracing>::trace(visitor, &pair->second);
     }
 };
 
@@ -727,125 +699,6 @@ template<typename T, typename U> inline bool operator!=(const Persistent<T>& a, 
 template<typename T, typename U> inline bool operator==(const Persistent<T>& a, const Persistent<U>& b) { return a.get() == b.get(); }
 template<typename T, typename U> inline bool operator!=(const Persistent<T>& a, const Persistent<U>& b) { return a.get() != b.get(); }
 
-// CPP-defined type names for the transition period where we want to
-// support both reference counting and garbage collection based on a
-// compile-time flag.
-//
-// C++11 template aliases were initially used (with clang only, not
-// with GCC nor MSVC.) However, supporting both CPP defines and
-// template aliases is problematic from outside a WebCore namespace
-// when Oilpan is disabled: e.g.,
-// blink::RefCountedWillBeGarbageCollected as a template alias would
-// uniquely resolve from within any namespace, but if it is backed by
-// a CPP #define, it would expand to blink::RefCounted, and not the
-// required WTF::RefCounted.
-//
-// Having the CPP expansion instead be fully namespace qualified, and the
-// transition type be unqualified, would dually not work for template
-// aliases. So, slightly unfortunately, fall back/down to the lowest
-// commmon denominator of using CPP macros only.
-#if ENABLE(OILPAN)
-#define PassRefPtrWillBeRawPtr WTF::RawPtr
-#define RefCountedWillBeGarbageCollected blink::GarbageCollected
-#define RefCountedWillBeGarbageCollectedFinalized blink::GarbageCollectedFinalized
-#define RefCountedWillBeRefCountedGarbageCollected blink::RefCountedGarbageCollected
-#define RefCountedGarbageCollectedWillBeGarbageCollectedFinalized blink::GarbageCollectedFinalized
-#define ThreadSafeRefCountedWillBeGarbageCollected blink::GarbageCollected
-#define ThreadSafeRefCountedWillBeGarbageCollectedFinalized blink::GarbageCollectedFinalized
-#define ThreadSafeRefCountedWillBeThreadSafeRefCountedGarbageCollected blink::ThreadSafeRefCountedGarbageCollected
-#define PersistentWillBeMember blink::Member
-#define RefPtrWillBePersistent blink::Persistent
-#define RefPtrWillBeRawPtr WTF::RawPtr
-#define RefPtrWillBeMember blink::Member
-#define RefPtrWillBeWeakMember blink::WeakMember
-#define RefPtrWillBeCrossThreadPersistent blink::CrossThreadPersistent
-#define RawPtrWillBeMember blink::Member
-#define RawPtrWillBePersistent blink::Persistent
-#define RawPtrWillBeWeakMember blink::WeakMember
-#define OwnPtrWillBeMember blink::Member
-#define OwnPtrWillBePersistent blink::Persistent
-#define OwnPtrWillBeRawPtr WTF::RawPtr
-#define PassOwnPtrWillBeRawPtr WTF::RawPtr
-#define WeakPtrWillBeMember blink::Member
-#define WeakPtrWillBeRawPtr WTF::RawPtr
-#define WeakPtrWillBeMember blink::Member
-#define WeakPtrWillBeWeakMember blink::WeakMember
-#define NoBaseWillBeGarbageCollected blink::GarbageCollected
-#define NoBaseWillBeGarbageCollectedFinalized blink::GarbageCollectedFinalized
-#define NoBaseWillBeRefCountedGarbageCollected blink::RefCountedGarbageCollected
-#define WillBeHeapHashMap blink::HeapHashMap
-#define WillBePersistentHeapHashMap blink::PersistentHeapHashMap
-#define WillBeHeapHashSet blink::HeapHashSet
-#define WillBePersistentHeapHashSet blink::PersistentHeapHashSet
-#define WillBeHeapLinkedHashSet blink::HeapLinkedHashSet
-#define WillBePersistentHeapLinkedHashSet blink::PersistentHeapLinkedHashSet
-#define WillBeHeapListHashSet blink::HeapListHashSet
-#define WillBePersistentHeapListHashSet blink::PersistentHeapListHashSet
-#define WillBeHeapVector blink::HeapVector
-#define WillBePersistentHeapVector blink::PersistentHeapVector
-#define WillBeHeapDeque blink::HeapDeque
-#define WillBePersistentHeapDeque blink::PersistentHeapDeque
-#define WillBeHeapHashCountedSet blink::HeapHashCountedSet
-#define WillBePersistentHeapHashCountedSet blink::PersistentHeapHashCountedSet
-#define WillBeGarbageCollectedMixin blink::GarbageCollectedMixin
-#define WillBeHeapSupplement blink::HeapSupplement
-#define WillBeHeapSupplementable blink::HeapSupplementable
-#define WillBePersistentHeapSupplementable blink::PersistentHeapSupplementable
-#define WillBeHeapTerminatedArray blink::HeapTerminatedArray
-#define WillBeHeapTerminatedArrayBuilder blink::HeapTerminatedArrayBuilder
-#define WillBeHeapLinkedStack blink::HeapLinkedStack
-#define PersistentHeapHashSetWillBeHeapHashSet blink::HeapHashSet
-#define PersistentHeapDequeWillBeHeapDeque blink::HeapDeque
-#define PersistentHeapVectorWillBeHeapVector blink::HeapVector
-
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeNoop(T* ptr)
-{
-    static const bool notRefCountedGarbageCollected = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    static const bool notRefCounted = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCounted>::value;
-    COMPILE_ASSERT(notRefCountedGarbageCollected, useAdoptRefCountedWillBeRefCountedGarbageCollected);
-    COMPILE_ASSERT(notRefCounted, youMustAdopt);
-    return PassRefPtrWillBeRawPtr<T>(ptr);
-}
-
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeRefCountedGarbageCollected(T* ptr)
-{
-    static const bool isRefCountedGarbageCollected = WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    COMPILE_ASSERT(isRefCountedGarbageCollected, useAdoptRefWillBeNoop);
-    return PassRefPtrWillBeRawPtr<T>(adoptRefCountedGarbageCollected(ptr));
-}
-
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeThreadSafeRefCountedGarbageCollected(T* ptr)
-{
-    static const bool isThreadSafeRefCountedGarbageCollected = WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, ThreadSafeRefCountedGarbageCollected>::value;
-    COMPILE_ASSERT(isThreadSafeRefCountedGarbageCollected, useAdoptRefWillBeNoop);
-    return PassRefPtrWillBeRawPtr<T>(adoptRefCountedGarbageCollected(ptr));
-}
-
-template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeNoop(T* ptr)
-{
-    static const bool notRefCountedGarbageCollected = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    static const bool notRefCounted = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCounted>::value;
-    COMPILE_ASSERT(notRefCountedGarbageCollected, useAdoptRefCountedWillBeRefCountedGarbageCollected);
-    COMPILE_ASSERT(notRefCounted, youMustAdopt);
-    return PassOwnPtrWillBeRawPtr<T>(ptr);
-}
-
-template<typename T> T* adoptPtrWillBeRefCountedGarbageCollected(T* ptr)
-{
-    static const bool isRefCountedGarbageCollected = WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    COMPILE_ASSERT(isRefCountedGarbageCollected, useAdoptRefWillBeNoop);
-    return adoptRefCountedGarbageCollected(ptr);
-}
-
-#define WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED // do nothing when oilpan is enabled.
-#define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) // do nothing
-#define DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(type) // do nothing
-#define DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) // do nothing
-
-#define DEFINE_STATIC_REF_WILL_BE_PERSISTENT(type, name, arguments) \
-    static type* name = (new Persistent<type>(arguments))->get();
-
-#else // !ENABLE(OILPAN)
 
 template<typename T>
 class DummyBase {
@@ -853,66 +706,6 @@ public:
     DummyBase() { }
     ~DummyBase() { }
 };
-
-#define PassRefPtrWillBeRawPtr WTF::PassRefPtr
-#define RefCountedWillBeGarbageCollected WTF::RefCounted
-#define RefCountedWillBeGarbageCollectedFinalized WTF::RefCounted
-#define RefCountedWillBeRefCountedGarbageCollected WTF::RefCounted
-#define RefCountedGarbageCollectedWillBeGarbageCollectedFinalized blink::RefCountedGarbageCollected
-#define ThreadSafeRefCountedWillBeGarbageCollected WTF::ThreadSafeRefCounted
-#define ThreadSafeRefCountedWillBeGarbageCollectedFinalized WTF::ThreadSafeRefCounted
-#define ThreadSafeRefCountedWillBeThreadSafeRefCountedGarbageCollected WTF::ThreadSafeRefCounted
-#define PersistentWillBeMember blink::Persistent
-#define RefPtrWillBePersistent WTF::RefPtr
-#define RefPtrWillBeRawPtr WTF::RefPtr
-#define RefPtrWillBeMember WTF::RefPtr
-#define RefPtrWillBeWeakMember WTF::RefPtr
-#define RefPtrWillBeCrossThreadPersistent WTF::RefPtr
-#define RawPtrWillBeMember WTF::RawPtr
-#define RawPtrWillBePersistent WTF::RawPtr
-#define RawPtrWillBeWeakMember WTF::RawPtr
-#define OwnPtrWillBeMember WTF::OwnPtr
-#define OwnPtrWillBePersistent WTF::OwnPtr
-#define OwnPtrWillBeRawPtr WTF::OwnPtr
-#define PassOwnPtrWillBeRawPtr WTF::PassOwnPtr
-#define WeakPtrWillBeMember WTF::WeakPtr
-#define WeakPtrWillBeRawPtr WTF::WeakPtr
-#define WeakPtrWillBeMember WTF::WeakPtr
-#define WeakPtrWillBeWeakMember WTF::WeakPtr
-#define NoBaseWillBeGarbageCollected blink::DummyBase
-#define NoBaseWillBeGarbageCollectedFinalized blink::DummyBase
-#define NoBaseWillBeRefCountedGarbageCollected blink::DummyBase
-#define WillBeHeapHashMap WTF::HashMap
-#define WillBePersistentHeapHashMap WTF::HashMap
-#define WillBeHeapHashSet WTF::HashSet
-#define WillBePersistentHeapHashSet WTF::HashSet
-#define WillBeHeapLinkedHashSet WTF::LinkedHashSet
-#define WillBePersistentLinkedHeapHashSet WTF::LinkedHashSet
-#define WillBeHeapListHashSet WTF::ListHashSet
-#define WillBePersistentListHeapHashSet WTF::ListHashSet
-#define WillBeHeapVector WTF::Vector
-#define WillBePersistentHeapVector WTF::Vector
-#define WillBeHeapDeque WTF::Deque
-#define WillBePersistentHeapDeque WTF::Deque
-#define WillBeHeapHashCountedSet WTF::HashCountedSet
-#define WillBePersistentHeapHashCountedSet WTF::HashCountedSet
-#define WillBeGarbageCollectedMixin blink::DummyBase<void>
-#define WillBeHeapSupplement blink::Supplement
-#define WillBeHeapSupplementable blink::Supplementable
-#define WillBePersistentHeapSupplementable blink::Supplementable
-#define WillBeHeapTerminatedArray WTF::TerminatedArray
-#define WillBeHeapTerminatedArrayBuilder WTF::TerminatedArrayBuilder
-#define WillBeHeapLinkedStack WTF::LinkedStack
-#define PersistentHeapHashSetWillBeHeapHashSet blink::PersistentHeapHashSet
-#define PersistentHeapDequeWillBeHeapDeque blink::PersistentHeapDeque
-#define PersistentHeapVectorWillBeHeapVector blink::PersistentHeapVector
-
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeNoop(T* ptr) { return adoptRef(ptr); }
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeRefCountedGarbageCollected(T* ptr) { return adoptRef(ptr); }
-template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeThreadSafeRefCountedGarbageCollected(T* ptr) { return adoptRef(ptr); }
-template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeNoop(T* ptr) { return adoptPtr(ptr); }
-template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeRefCountedGarbageCollected(T* ptr) { return adoptPtr(ptr); }
-
 
 #define WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED WTF_MAKE_FAST_ALLOCATED
 #define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) \
@@ -929,8 +722,6 @@ template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeRefCountedGarbageCo
 
 #define DEFINE_STATIC_REF_WILL_BE_PERSISTENT(type, name, arguments) \
     DEFINE_STATIC_REF(type, name, arguments)
-
-#endif // ENABLE(OILPAN)
 
 } // namespace blink
 
@@ -1026,11 +817,6 @@ template<typename T> struct HashTraits<blink::WeakMember<T> > : SimpleClassHashT
     static PassOutType passOut(const blink::WeakMember<T>& value) { return value; }
     static bool traceInCollection(blink::Visitor* visitor, blink::WeakMember<T>& weakMember, ShouldWeakPointersBeMarkedStrongly strongify)
     {
-        if (strongify == WeakPointersActStrong) {
-            visitor->trace(reinterpret_cast<blink::Member<T>&>(weakMember)); // Strongified visit.
-            return false;
-        }
-        return !visitor->isAlive(weakMember);
     }
 };
 

@@ -169,20 +169,11 @@ public:
     // dispatches to the trace method of the class T.
     static void trace(Visitor* visitor, void* self)
     {
-        static_cast<T*>(self)->trace(visitor);
     }
 
     static void mark(Visitor* visitor, const T* t)
     {
-        DefaultTraceTrait<T>::mark(visitor, t);
     }
-
-#if ENABLE(ASSERT)
-    static void checkGCInfo(Visitor* visitor, const T* t)
-    {
-        DefaultTraceTrait<T>::checkGCInfo(visitor, t);
-    }
-#endif
 };
 
 template<typename T> class TraceTrait<const T> : public TraceTrait<T> { };
@@ -216,7 +207,6 @@ public:
     template<typename T>
     static void verifyGarbageCollectedIfMember(Member<T>* t)
     {
-        t->verifyTypeIsGarbageCollected();
     }
 
     // One-argument templated mark method. This uses the static type of
@@ -226,21 +216,12 @@ public:
     template<typename T>
     void mark(T* t)
     {
-        if (!t)
-            return;
-#if ENABLE(ASSERT)
-        TraceTrait<T>::checkGCInfo(this, t);
-#endif
-        TraceTrait<T>::mark(this, t);
-
-        reinterpret_cast<const Member<T>*>(0)->verifyTypeIsGarbageCollected();
     }
 
     // Member version of the one-argument templated trace method.
     template<typename T>
     void trace(const Member<T>& t)
     {
-        mark(t.get());
     }
 
     // Fallback method used only when we need to trace raw pointers of T.
@@ -248,13 +229,11 @@ public:
     template<typename T>
     void trace(const T* t)
     {
-        mark(const_cast<T*>(t));
     }
 
     template<typename T>
     void trace(T* t)
     {
-        mark(t);
     }
 
     // WeakMember version of the templated trace method. It doesn't keep
@@ -266,16 +245,11 @@ public:
     template<typename T>
     void trace(const WeakMember<T>& t)
     {
-        // Check that we actually know the definition of T when tracing.
-        COMPILE_ASSERT(sizeof(T), WeNeedToKnowTheDefinitionOfTheTypeWeAreTracing);
-        registerWeakCell(const_cast<WeakMember<T>&>(t).cell());
-        reinterpret_cast<const Member<T>*>(0)->verifyTypeIsGarbageCollected();
     }
 
     template<typename T>
     void traceInCollection(T& t, WTF::ShouldWeakPointersBeMarkedStrongly strongify)
     {
-        HashTraits<T>::traceInCollection(this, t, strongify);
     }
 
     // Fallback trace method for part objects to allow individual trace methods
@@ -289,25 +263,17 @@ public:
     template<typename T>
     void trace(const T& t)
     {
-        if (WTF::IsPolymorphic<T>::value) {
-            intptr_t vtable = *reinterpret_cast<const intptr_t*>(&t);
-            if (!vtable)
-                return;
-        }
-        const_cast<T&>(t).trace(this);
     }
 
     // The following trace methods are for off-heap collections.
     template<typename T, size_t inlineCapacity>
     void trace(const Vector<T, inlineCapacity>& vector)
     {
-        OffHeapCollectionTraceTrait<Vector<T, inlineCapacity, WTF::DefaultAllocator> >::trace(this, vector);
     }
 
     template<typename T, size_t N>
     void trace(const Deque<T, N>& deque)
     {
-        OffHeapCollectionTraceTrait<Deque<T, N> >::trace(this, deque);
     }
 
 #if !ENABLE(OILPAN)
@@ -417,13 +383,8 @@ public:
         return isAlive(ptr.get());
     }
 
-#if ENABLE(ASSERT)
-    void checkGCInfo(const void*, const GCInfo*);
-#endif
-
     // Macro to declare methods needed for each typed heap.
 #define DECLARE_VISITOR_METHODS(Type)                                  \
-    DEBUG_ONLY(void checkGCInfo(const Type*, const GCInfo*);)          \
     virtual void mark(const Type*, TraceCallback) = 0;                 \
     virtual bool isMarked(const Type*) = 0;
 
@@ -464,10 +425,6 @@ struct OffHeapCollectionTraceTrait<WTF::Vector<T, N, WTF::DefaultAllocator> > {
 
     static void trace(Visitor* visitor, const Vector& vector)
     {
-        if (vector.isEmpty())
-            return;
-        for (typename Vector::const_iterator it = vector.begin(), end = vector.end(); it != end; ++it)
-            TraceTrait<T>::trace(visitor, const_cast<T*>(it));
     }
 };
 
@@ -477,10 +434,6 @@ struct OffHeapCollectionTraceTrait<WTF::Deque<T, N> > {
 
     static void trace(Visitor* visitor, const Deque& deque)
     {
-        if (deque.isEmpty())
-            return;
-        for (typename Deque::const_iterator it = deque.begin(), end = deque.end(); it != end; ++it)
-            TraceTrait<T>::trace(visitor, const_cast<T*>(&(*it)));
     }
 };
 
@@ -498,19 +451,7 @@ class DefaultTraceTrait<T, false> {
 public:
     static void mark(Visitor* visitor, const T* t)
     {
-        // Default mark method of the trait just calls the two-argument mark
-        // method on the visitor. The second argument is the static trace method
-        // of the trait, which by default calls the instance method
-        // trace(Visitor*) on the object.
-        visitor->mark(const_cast<T*>(t), &TraceTrait<T>::trace);
     }
-
-#if ENABLE(ASSERT)
-    static void checkGCInfo(Visitor* visitor, const T* t)
-    {
-        visitor->checkGCInfo(const_cast<T*>(t), GCInfoTrait<T>::get());
-    }
-#endif
 };
 
 template<typename T>
@@ -531,10 +472,6 @@ public:
         }
         self->adjustAndMark(visitor);
     }
-
-#if ENABLE(ASSERT)
-    static void checkGCInfo(Visitor*, const T*) { }
-#endif
 };
 
 template<typename T, bool = NeedsAdjustAndMark<T>::value> class DefaultObjectAliveTrait;
