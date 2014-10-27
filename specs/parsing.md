@@ -146,9 +146,8 @@ If the current character is...
 
 * '``&``': Consume the character and switch to the **character
   reference** state, with the _return state_ set to the **data**
-  state, the _extra terminating character_ unset (or set to U+0000,
-  which has the same effect), and the _emitting operation_ being to
-  emit a character token for the given character.
+  state, and the _emitting operation_ being to emit a character token
+  for the given character.
 
 * Anything else: Emit the current input character as a character
   token. Consume the character. Stay in this state.
@@ -496,10 +495,9 @@ If the current character is...
 
 * '``&``': Consume the character and switch to the **character
   reference** state, with the _return state_ set to the
-  **single-quoted attribute value** state, the _extra terminating
-  character_ set to '``'``', and the _emitting operation_ being to
-  append the given character to the value of the most recently added
-  attribute.
+  **single-quoted attribute value** state and the _emitting operation_
+  being to append the given character to the value of the most
+  recently added attribute.
 
 * Anything else: Append the current character to the value of the most
   recently added attribute. Consume the current character. Stay in
@@ -515,10 +513,9 @@ If the current character is...
 
 * '``&``': Consume the character and switch to the **character
   reference** state, with the _return state_ set to the
-  **double-quoted attribute value** state, the _extra terminating
-  character_ set to '``"``', and the _emitting operation_ being to
-  append the given character to the value of the most recently added
-  attribute.
+  **double-quoted attribute value** state and the _emitting operation_
+  being to append the given character to the value of the most
+  recently added attribute.
 
 * Anything else: Append the current character to the value of the most
   recently added attribute. Consume the current character. Stay in
@@ -537,10 +534,9 @@ If the current character is...
 
 * '``&``': Consume the character and switch to the **character
   reference** state, with the _return state_ set to the **unquoted
-  attribute value** state, the _extra terminating character_ unset (or
-  set to U+0000, which has the same effect), and the _emitting
-  operation_ being to append the given character to the value of the
-  most recently added attribute.
+  attribute value** state which has the same effect), and the
+  _emitting operation_ being to append the given character to the
+  value of the most recently added attribute.
 
 * Anything else: Append the current character to the value of the most
   recently added attribute. Consume the current character. Stay in
@@ -637,21 +633,9 @@ If the current character is...
 * '``#``': Consume the character, and switch to the **numeric
   character reference** state.
 
-* '``l``': Consume the character and switch to the **named character
-  reference L** state.
-
-* '``a``': Consume the character and switch to the **named character
-  reference A** state.
-
-* '``g``': Consume the character and switch to the **named character
-  reference G** state.
-
-* '``q``': Consume the character and switch to the **named character
-  reference Q** state.
-
-* Any other character in the range '``0``'..'``9``',
-  '``a``'..'``f``', '``A``'..'``F``': Consume the character
-  and switch to the **bad named character reference** state.
+* '``0``'..'``9``', '``a``'..'``f``', '``A``'..'``F``': switch to the
+  **named character reference** state without consuming the current
+  character.
 
 * Anything else: Run the _emitting operation_ for all but the last
   character in _raw value_, and switch to the **data state** without
@@ -727,157 +711,28 @@ Append the current character to _raw value_.
 
 If the current character is...
 
-* '``t``': Let _character_ be '``<``', consume the current
-  character, and switch to the **after named character reference**
-  state.
+* '``;``': Consume the character.
+  If the _raw value_ is...
 
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
+  - '``&amp;``: Emit Run the _emitting operation_ for the character
+    '``&``'.
 
+  - '``&apos;``: Emit Run the _emitting operation_ for the character
+    '``'``'.
 
-#### **Named character reference A** state ####
+  - '``&gt;``: Emit Run the _emitting operation_ for the character
+    '``>``'.
 
-Append the current character to _raw value_.
+  - '``&lt;``: Emit Run the _emitting operation_ for the character
+    '``<``'.
 
-If the current character is...
+  - '``&quot;``: Emit Run the _emitting operation_ for the character
+    '``"``'.
 
-* '``p``': Consume the current character and switch to the **named
-  character reference AP** state.
+  Then, switch to the _return state_.
 
-* '``m``': Consume the current character and switch to the **named
-  character reference AM** state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference AM** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``p``': Let _character_ be '``&``', consume the current
-  character, and switch to the **after named character reference**
-  state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference AP** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``o``': Consume the current character and switch to the **named
-  character reference APO** state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference APO** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``s``': Let _character_ be '``'``', consume the current
-  character, and switch to the **after named character reference**
-  state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference G** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``t``': Let _character_ be '``>``', consume the current
-  character, and switch to the **after named character reference**
-  state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference Q** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``u``': Consume the current character and switch to the **named
-  character reference QU** state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference QU** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``o``': Consume the current character and switch to the **named
-  character reference QUO** state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **Named character reference QUO** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``t``': Let _character_ be '``"``', consume the current
-  character, and switch to the **after named character reference**
-  state.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the character.
-
-
-#### **After named character reference** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``;``': Consume the character. Run the _emitting operation_ with
-  the character _character_. Switch to the _return state_.
-
-* The _extra terminating character_: Run the _emitting operation_ with
-  the character U+FFFD. Switch to the _return state_ without consuming
-  the current character.
-
-* Anything else: Switch to the _bad named character reference_ state
-  without consuming the current character.
-
-
-#### **Bad named character reference** state ####
-
-Append the current character to _raw value_.
-
-If the current character is...
-
-* '``;``': Consume the character. Run the _emitting operation_ with
-  the character U+FFFD. Switch to the _return state_.
-
-* The _extra terminating character_: Switch to the _return state_
-  without consuming the current character.
-
-* Any other character in the range '``0``'..'``9``',
-  '``a``'..'``f``', '``A``'..'``F``': Consume the character
-  and stay in this state.
+* '``0``'..'``9``', '``a``'..'``z``', '``A``'..'``Z``': Consume the
+  character and stay in this state.
 
 * Anything else: Run the _emitting operation_ for all but the last
   character in _raw value_, and switch to the **data state** without
