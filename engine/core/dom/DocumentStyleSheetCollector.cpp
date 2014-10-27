@@ -33,7 +33,7 @@
 
 namespace blink {
 
-DocumentStyleSheetCollector::DocumentStyleSheetCollector(WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& sheetsForList, WillBeHeapVector<RefPtrWillBeMember<CSSStyleSheet> >& activeList, WillBeHeapHashSet<RawPtrWillBeMember<Document> >& visitedDocuments)
+DocumentStyleSheetCollector::DocumentStyleSheetCollector(Vector<RefPtr<StyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >& visitedDocuments)
     : m_styleSheetsForStyleSheetList(sheetsForList)
     , m_activeAuthorStyleSheets(activeList)
     , m_visitedDocuments(visitedDocuments)
@@ -44,7 +44,7 @@ DocumentStyleSheetCollector::~DocumentStyleSheetCollector()
 {
 }
 
-void DocumentStyleSheetCollector::appendActiveStyleSheets(const WillBeHeapVector<RefPtrWillBeMember<CSSStyleSheet> >& sheets)
+void DocumentStyleSheetCollector::appendActiveStyleSheets(const Vector<RefPtr<CSSStyleSheet> >& sheets)
 {
     m_activeAuthorStyleSheets.appendVector(sheets);
 }
@@ -64,7 +64,7 @@ ActiveDocumentStyleSheetCollector::ActiveDocumentStyleSheetCollector(StyleSheetC
 {
 }
 
-ImportedDocumentStyleSheetCollector::ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector& collector, WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& sheetForList)
+ImportedDocumentStyleSheetCollector::ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector& collector, Vector<RefPtr<StyleSheet> >& sheetForList)
     : DocumentStyleSheetCollector(sheetForList, collector.m_activeAuthorStyleSheets, collector.m_visitedDocuments)
 {
 }

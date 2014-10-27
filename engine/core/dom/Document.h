@@ -148,7 +148,7 @@ typedef unsigned char DocumentClassFlags;
 
 class Document;
 
-class DocumentVisibilityObserver : public WillBeGarbageCollectedMixin {
+class DocumentVisibilityObserver : public DummyBase<void> {
 public:
     DocumentVisibilityObserver(Document&);
     virtual ~DocumentVisibilityObserver();
@@ -167,7 +167,7 @@ private:
     void registerObserver(Document&);
     void unregisterObserver();
 
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
 };
 
 class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
@@ -175,9 +175,9 @@ class Document : public ContainerNode, public TreeScope, public ExecutionContext
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Document);
 public:
-    static PassRefPtrWillBeRawPtr<Document> create(const DocumentInit& initializer = DocumentInit())
+    static PassRefPtr<Document> create(const DocumentInit& initializer = DocumentInit())
     {
-        return adoptRefWillBeNoop(new Document(initializer));
+        return adoptRef(new Document(initializer));
     }
     virtual ~Document();
 
@@ -218,14 +218,14 @@ public:
 
     Location* location() const;
 
-    PassRefPtrWillBeRawPtr<Element> createElement(const AtomicString& name, ExceptionState&);
-    PassRefPtrWillBeRawPtr<DocumentFragment> createDocumentFragment();
-    PassRefPtrWillBeRawPtr<Text> createTextNode(const String& data);
-    PassRefPtrWillBeRawPtr<Node> importNode(Node* importedNode, bool deep, ExceptionState&);
-    PassRefPtrWillBeRawPtr<Element> createElement(const QualifiedName&, bool createdByParser);
+    PassRefPtr<Element> createElement(const AtomicString& name, ExceptionState&);
+    PassRefPtr<DocumentFragment> createDocumentFragment();
+    PassRefPtr<Text> createTextNode(const String& data);
+    PassRefPtr<Node> importNode(Node* importedNode, bool deep, ExceptionState&);
+    PassRefPtr<Element> createElement(const QualifiedName&, bool createdByParser);
 
     Element* elementFromPoint(int x, int y) const;
-    PassRefPtrWillBeRawPtr<Range> caretRangeFromPoint(int x, int y);
+    PassRefPtr<Range> caretRangeFromPoint(int x, int y);
 
     String readyState() const;
 
@@ -246,7 +246,7 @@ public:
     bool hidden() const;
     void didChangeVisibilityState();
 
-    PassRefPtrWillBeRawPtr<Node> adoptNode(PassRefPtrWillBeRawPtr<Node> source, ExceptionState&);
+    PassRefPtr<Node> adoptNode(PassRefPtr<Node> source, ExceptionState&);
 
     bool isHTMLDocument() const { return m_documentClasses & HTMLDocumentClass; }
 
@@ -291,10 +291,10 @@ public:
 
     float devicePixelRatio() const;
 
-    PassRefPtrWillBeRawPtr<Range> createRange();
+    PassRefPtr<Range> createRange();
 
     // Special support for editing
-    PassRefPtrWillBeRawPtr<Text> createEditingTextNode(const String&);
+    PassRefPtr<Text> createEditingTextNode(const String&);
 
     void setupFontBuilder(RenderStyle* documentStyle);
 
@@ -360,7 +360,7 @@ public:
 
     CSSStyleSheet& elementSheet();
 
-    virtual PassRefPtrWillBeRawPtr<DocumentParser> createParser();
+    virtual PassRefPtr<DocumentParser> createParser();
     DocumentParser* parser() const { return m_parser.get(); }
     HTMLDocumentParser* scriptableDocumentParser() const;
 
@@ -382,7 +382,7 @@ public:
 
     MouseEventWithHitTestResults prepareMouseEvent(const HitTestRequest&, const LayoutPoint&, const PlatformMouseEvent&);
 
-    bool setFocusedElement(PassRefPtrWillBeRawPtr<Element>, FocusType = FocusTypeNone);
+    bool setFocusedElement(PassRefPtr<Element>, FocusType = FocusTypeNone);
     Element* focusedElement() const { return m_focusedElement.get(); }
     UserActionElementSet& userActionElements()  { return m_userActionElements; }
     const UserActionElementSet& userActionElements() const { return m_userActionElements; }
@@ -390,7 +390,7 @@ public:
     void setAutofocusElement(Element*);
     Element* autofocusElement() const { return m_autofocusElement.get(); }
 
-    void setActiveHoverElement(PassRefPtrWillBeRawPtr<Element>);
+    void setActiveHoverElement(PassRefPtr<Element>);
     Element* activeHoverElement() const { return m_activeHoverElement.get(); }
 
     void removeFocusedElementOfSubtree(Node*, bool amongChildrenOnly = false);
@@ -422,7 +422,7 @@ public:
     LocalDOMWindow* domWindow() const { return m_domWindow; }
 
     static void registerEventFactory(PassOwnPtr<EventFactoryBase>);
-    static PassRefPtrWillBeRawPtr<Event> createEvent(const String& eventType, ExceptionState&);
+    static PassRefPtr<Event> createEvent(const String& eventType, ExceptionState&);
 
     // keep track of what types of event listeners are registered, so we don't
     // dispatch events unnecessarily
@@ -513,10 +513,10 @@ public:
     KURL openSearchDescriptionURL();
 
     Document& topDocument() const;
-    WeakPtrWillBeRawPtr<Document> contextDocument();
+    WeakPtr<Document> contextDocument();
 
     HTMLScriptElement* currentScript() const { return !m_currentScriptStack.isEmpty() ? m_currentScriptStack.last().get() : 0; }
-    void pushCurrentScript(PassRefPtrWillBeRawPtr<HTMLScriptElement>);
+    void pushCurrentScript(PassRefPtr<HTMLScriptElement>);
     void popCurrentScript();
 
     enum PendingSheetLayout { NoLayoutWithPendingSheets, DidLayoutWithPendingSheets, IgnoreLayoutWithPendingSheets };
@@ -528,7 +528,7 @@ public:
     void setHasNodesWithPlaceholderStyle() { m_hasNodesWithPlaceholderStyle = true; }
 
     // Extension for manipulating canvas drawing contexts for use in CSS
-    void getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtrWillBeRawPtr<CanvasRenderingContext2D>&, RefPtrWillBeRawPtr<WebGLRenderingContext>&);
+    void getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtr<CanvasRenderingContext2D>&, RefPtr<WebGLRenderingContext>&);
     HTMLCanvasElement& getCSSCanvasElement(const String& name);
 
     void finishedParsing();
@@ -562,10 +562,10 @@ public:
 
     void enqueueResizeEvent();
     void enqueueScrollEventForNode(Node*);
-    void enqueueAnimationFrameEvent(PassRefPtrWillBeRawPtr<Event>);
+    void enqueueAnimationFrameEvent(PassRefPtr<Event>);
     // Only one event for a target/event type combination will be dispatched per frame.
-    void enqueueUniqueAnimationFrameEvent(PassRefPtrWillBeRawPtr<Event>);
-    void enqueueMediaQueryChangeListeners(WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> >&);
+    void enqueueUniqueAnimationFrameEvent(PassRefPtr<Event>);
+    void enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >&);
 
     // Used to allow element that loads data without going through a FrameLoader to delay the 'load' event.
     void incrementLoadEventDelayCount() { ++m_loadEventDelayCount; }
@@ -573,19 +573,19 @@ public:
     void checkLoadEventSoon();
     bool isDelayingLoadEvent();
 
-    PassRefPtrWillBeRawPtr<Touch> createTouch(LocalDOMWindow*, EventTarget*, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const;
-    PassRefPtrWillBeRawPtr<TouchList> createTouchList(WillBeHeapVector<RefPtrWillBeMember<Touch> >&) const;
+    PassRefPtr<Touch> createTouch(LocalDOMWindow*, EventTarget*, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const;
+    PassRefPtr<TouchList> createTouchList(Vector<RefPtr<Touch> >&) const;
 
-    int requestAnimationFrame(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback>);
+    int requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelAnimationFrame(int id);
     void serviceScriptedAnimations(double monotonicAnimationStartTime);
 
     virtual EventTarget* errorEventTarget() override final;
-    virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtrWillBeRawPtr<ScriptCallStack>) override final;
+    virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtr<ScriptCallStack>) override final;
 
     IntSize initialViewportSize() const;
 
-    PassRefPtrWillBeRawPtr<Element> createElement(const AtomicString& localName, const AtomicString& typeExtension, ExceptionState&);
+    PassRefPtr<Element> createElement(const AtomicString& localName, const AtomicString& typeExtension, ExceptionState&);
     ScriptValue registerElement(ScriptState*, const AtomicString& name, ExceptionState&);
     ScriptValue registerElement(ScriptState*, const AtomicString& name, const Dictionary& options, ExceptionState&, CustomElement::NameSet validNames = CustomElement::StandardNames);
     CustomElementRegistrationContext* registrationContext() { return m_registrationContext.get(); }
@@ -627,7 +627,7 @@ public:
     Document& ensureTemplateDocument();
     Document* templateDocumentHost() { return m_templateDocumentHost; }
 
-    virtual void addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>) override final;
+    virtual void addMessage(PassRefPtr<ConsoleMessage>) override final;
 
     virtual LocalDOMWindow* executingWindow() override final;
     LocalFrame* executingFrame();
@@ -668,9 +668,9 @@ protected:
     virtual void dispose() override;
 #endif
 
-    PassRefPtrWillBeRawPtr<Document> cloneDocumentWithoutChildren();
+    PassRefPtr<Document> cloneDocumentWithoutChildren();
 
-    bool importContainerNodeChildren(ContainerNode* oldContainerNode, PassRefPtrWillBeRawPtr<ContainerNode> newContainerNode, ExceptionState&);
+    bool importContainerNodeChildren(ContainerNode* oldContainerNode, PassRefPtr<ContainerNode> newContainerNode, ExceptionState&);
 
 private:
     friend class Node;
@@ -708,7 +708,7 @@ private:
     virtual String nodeName() const override final;
     virtual NodeType nodeType() const override final;
     virtual bool childTypeAllowed(NodeType) const override final;
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override final;
+    virtual PassRefPtr<Node> cloneNode(bool deep = true) override final;
 
 #if !ENABLE(OILPAN)
     virtual void refExecutionContext() override final { ref(); }
@@ -744,7 +744,7 @@ private:
 
     void processHttpEquivRefresh(const AtomicString& content);
 
-    void setHoverNode(PassRefPtrWillBeRawPtr<Node>);
+    void setHoverNode(PassRefPtr<Node>);
     Node* hoverNode() const { return m_hoverNode.get(); }
 
     typedef HashSet<OwnPtr<EventFactoryBase> > EventFactorySet;
@@ -761,14 +761,14 @@ private:
     PendingSheetLayout m_pendingSheetLayout;
 
     LocalFrame* m_frame;
-    RawPtrWillBeMember<LocalDOMWindow> m_domWindow;
+    RawPtr<LocalDOMWindow> m_domWindow;
     // FIXME: oilpan: when we get rid of the transition types change the
     // HTMLImportsController to not be a DocumentSupplement since it is
     // redundant with oilpan.
-    RawPtrWillBeMember<HTMLImportsController> m_importsController;
+    RawPtr<HTMLImportsController> m_importsController;
 
-    RefPtrWillBeMember<ResourceFetcher> m_fetcher;
-    RefPtrWillBeMember<DocumentParser> m_parser;
+    RefPtr<ResourceFetcher> m_fetcher;
+    RefPtr<DocumentParser> m_parser;
     unsigned m_activeParserCount;
 
     // Document URLs.
@@ -778,31 +778,31 @@ private:
     // Mime-type of the document in case it was cloned or created by XHR.
     AtomicString m_mimeType;
 
-    OwnPtrWillBeMember<DOMImplementation> m_implementation;
+    OwnPtr<DOMImplementation> m_implementation;
 
-    RefPtrWillBeMember<CSSStyleSheet> m_elemSheet;
+    RefPtr<CSSStyleSheet> m_elemSheet;
 
     Timer<Document> m_executeScriptsWaitingForResourcesTimer;
 
     bool m_hasAutofocused;
     Timer<Document> m_clearFocusedElementTimer;
     Timer<Document> m_focusAutofocusElementTimer;
-    RefPtrWillBeMember<Element> m_autofocusElement;
-    RefPtrWillBeMember<Element> m_focusedElement;
-    RefPtrWillBeMember<Node> m_hoverNode;
-    RefPtrWillBeMember<Element> m_activeHoverElement;
-    RefPtrWillBeMember<Element> m_documentElement;
+    RefPtr<Element> m_autofocusElement;
+    RefPtr<Element> m_focusedElement;
+    RefPtr<Node> m_hoverNode;
+    RefPtr<Element> m_activeHoverElement;
+    RefPtr<Element> m_documentElement;
     UserActionElementSet m_userActionElements;
 
-    typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<Range> > AttachedRangeSet;
+    typedef HashSet<RawPtr<Range> > AttachedRangeSet;
     AttachedRangeSet m_ranges;
 
     unsigned short m_listenerTypes;
 
     MutationObserverOptions m_mutationObserverTypes;
 
-    OwnPtrWillBeMember<StyleEngine> m_styleEngine;
-    RefPtrWillBeMember<StyleSheetList> m_styleSheetList;
+    OwnPtr<StyleEngine> m_styleEngine;
+    RefPtr<StyleSheetList> m_styleSheetList;
 
     TextLinkColors m_textLinkColors;
 
@@ -815,19 +815,19 @@ private:
 
     String m_title;
     String m_rawTitle;
-    RefPtrWillBeMember<Element> m_titleElement;
+    RefPtr<Element> m_titleElement;
 
-    OwnPtrWillBeMember<DocumentMarkerController> m_markers;
+    OwnPtr<DocumentMarkerController> m_markers;
 
     LoadEventProgress m_loadEventProgress;
 
     double m_startTime;
 
-    WillBeHeapVector<RefPtrWillBeMember<HTMLScriptElement> > m_currentScriptStack;
+    Vector<RefPtr<HTMLScriptElement> > m_currentScriptStack;
 
     AtomicString m_contentLanguage;
 
-    WillBeHeapHashMap<String, RefPtrWillBeMember<HTMLCanvasElement> > m_cssCanvasElements;
+    HashMap<String, RefPtr<HTMLCanvasElement> > m_cssCanvasElements;
 
     OwnPtr<SelectorQueryCache> m_selectorQueryCache;
 
@@ -838,7 +838,7 @@ private:
 #if !ENABLE(OILPAN)
     WeakPtrFactory<Document> m_weakFactory;
 #endif
-    WeakPtrWillBeWeakMember<Document> m_contextDocument;
+    WeakPtr<Document> m_contextDocument;
 
     int m_loadEventDelayCount;
     Timer<Document> m_loadEventDelayTimer;
@@ -851,34 +851,34 @@ private:
     bool m_directionSetOnDocumentElement;
     bool m_writingModeSetOnDocumentElement;
 
-    RefPtrWillBeMember<MediaQueryMatcher> m_mediaQueryMatcher;
+    RefPtr<MediaQueryMatcher> m_mediaQueryMatcher;
 
-    RefPtrWillBeMember<ScriptedAnimationController> m_scriptedAnimationController;
+    RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
-    RefPtrWillBeMember<CustomElementRegistrationContext> m_registrationContext;
-    RefPtrWillBeMember<CustomElementMicrotaskRunQueue> m_customElementMicrotaskRunQueue;
+    RefPtr<CustomElementRegistrationContext> m_registrationContext;
+    RefPtr<CustomElementMicrotaskRunQueue> m_customElementMicrotaskRunQueue;
 
     void elementDataCacheClearTimerFired(Timer<Document>*);
     Timer<Document> m_elementDataCacheClearTimer;
 
-    OwnPtrWillBeMember<ElementDataCache> m_elementDataCache;
+    OwnPtr<ElementDataCache> m_elementDataCache;
 
     typedef HashMap<AtomicString, OwnPtr<Locale> > LocaleIdentifierToLocaleMap;
     LocaleIdentifierToLocaleMap m_localeCache;
 
     AnimationClock m_animationClock;
-    RefPtrWillBeMember<AnimationTimeline> m_timeline;
+    RefPtr<AnimationTimeline> m_timeline;
     CompositorPendingAnimations m_compositorPendingAnimations;
 
-    RefPtrWillBeMember<Document> m_templateDocument;
+    RefPtr<Document> m_templateDocument;
     // With Oilpan the templateDocument and the templateDocumentHost
     // live and die together. Without Oilpan, the templateDocumentHost
     // is a manually managed backpointer from m_templateDocument.
-    RawPtrWillBeMember<Document> m_templateDocumentHost;
+    RawPtr<Document> m_templateDocumentHost;
 
     bool m_hasViewportUnits;
 
-    typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<DocumentVisibilityObserver> > DocumentVisibilityObserverSet;
+    typedef HashSet<RawPtr<DocumentVisibilityObserver> > DocumentVisibilityObserverSet;
     DocumentVisibilityObserverSet m_visibilityObservers;
 
     int m_styleRecalcElementCounter;

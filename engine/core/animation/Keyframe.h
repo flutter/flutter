@@ -17,7 +17,7 @@ typedef HashSet<CSSPropertyID> PropertySet;
 class Element;
 
 // FIXME: Make Keyframe immutable
-class Keyframe : public RefCountedWillBeGarbageCollectedFinalized<Keyframe> {
+class Keyframe : public RefCounted<Keyframe> {
 public:
     virtual ~Keyframe() { }
 
@@ -30,17 +30,17 @@ public:
     void setEasing(PassRefPtr<TimingFunction> easing) { m_easing = easing; }
     TimingFunction& easing() const { return *m_easing; }
 
-    static bool compareOffsets(const RefPtrWillBeMember<Keyframe>& a, const RefPtrWillBeMember<Keyframe>& b)
+    static bool compareOffsets(const RefPtr<Keyframe>& a, const RefPtr<Keyframe>& b)
     {
         return a->offset() < b->offset();
     }
 
     virtual PropertySet properties() const = 0;
 
-    virtual PassRefPtrWillBeRawPtr<Keyframe> clone() const = 0;
-    PassRefPtrWillBeRawPtr<Keyframe> cloneWithOffset(double offset) const
+    virtual PassRefPtr<Keyframe> clone() const = 0;
+    PassRefPtr<Keyframe> cloneWithOffset(double offset) const
     {
-        RefPtrWillBeRawPtr<Keyframe> theClone = clone();
+        RefPtr<Keyframe> theClone = clone();
         theClone->setOffset(offset);
         return theClone.release();
     }
@@ -50,21 +50,21 @@ public:
 
     virtual void trace(Visitor*) { }
 
-    class PropertySpecificKeyframe : public NoBaseWillBeGarbageCollectedFinalized<PropertySpecificKeyframe> {
+    class PropertySpecificKeyframe : public DummyBase<PropertySpecificKeyframe> {
     public:
         virtual ~PropertySpecificKeyframe() { }
         double offset() const { return m_offset; }
         TimingFunction& easing() const { return *m_easing; }
         AnimationEffect::CompositeOperation composite() const { return m_composite; }
-        virtual PassOwnPtrWillBeRawPtr<PropertySpecificKeyframe> cloneWithOffset(double offset) const = 0;
+        virtual PassOwnPtr<PropertySpecificKeyframe> cloneWithOffset(double offset) const = 0;
 
-        virtual const PassRefPtrWillBeRawPtr<AnimatableValue> getAnimatableValue() const = 0;
+        virtual const PassRefPtr<AnimatableValue> getAnimatableValue() const = 0;
 
         virtual bool isAnimatableValuePropertySpecificKeyframe() const { return false; }
         virtual bool isStringPropertySpecificKeyframe() const { return false; }
 
-        virtual PassOwnPtrWillBeRawPtr<PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const = 0;
-        virtual PassRefPtrWillBeRawPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const = 0;
+        virtual PassOwnPtr<PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const = 0;
+        virtual PassRefPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const = 0;
 
         virtual void trace(Visitor*) { }
 
@@ -76,7 +76,7 @@ public:
         AnimationEffect::CompositeOperation m_composite;
     };
 
-    virtual PassOwnPtrWillBeRawPtr<PropertySpecificKeyframe> createPropertySpecificKeyframe(CSSPropertyID) const = 0;
+    virtual PassOwnPtr<PropertySpecificKeyframe> createPropertySpecificKeyframe(CSSPropertyID) const = 0;
 
 protected:
     Keyframe()

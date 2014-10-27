@@ -42,7 +42,7 @@ TouchEvent::TouchEvent()
 
 TouchEvent::TouchEvent(TouchList* touches, TouchList* targetTouches,
         TouchList* changedTouches, const AtomicString& type,
-        PassRefPtrWillBeRawPtr<AbstractView> view,
+        PassRefPtr<AbstractView> view,
         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, bool cancelable)
     : UIEventWithKeyState(type, true, cancelable, view, 0,
                         ctrlKey, altKey, shiftKey, metaKey)
@@ -59,7 +59,7 @@ TouchEvent::~TouchEvent()
 
 void TouchEvent::initTouchEvent(TouchList* touches, TouchList* targetTouches,
         TouchList* changedTouches, const AtomicString& type,
-        PassRefPtrWillBeRawPtr<AbstractView> view,
+        PassRefPtr<AbstractView> view,
         int, int, int, int,
         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey)
 {
@@ -111,12 +111,12 @@ void TouchEvent::trace(Visitor* visitor)
     UIEventWithKeyState::trace(visitor);
 }
 
-PassRefPtrWillBeRawPtr<TouchEventDispatchMediator> TouchEventDispatchMediator::create(PassRefPtrWillBeRawPtr<TouchEvent> touchEvent)
+PassRefPtr<TouchEventDispatchMediator> TouchEventDispatchMediator::create(PassRefPtr<TouchEvent> touchEvent)
 {
-    return adoptRefWillBeNoop(new TouchEventDispatchMediator(touchEvent));
+    return adoptRef(new TouchEventDispatchMediator(touchEvent));
 }
 
-TouchEventDispatchMediator::TouchEventDispatchMediator(PassRefPtrWillBeRawPtr<TouchEvent> touchEvent)
+TouchEventDispatchMediator::TouchEventDispatchMediator(PassRefPtr<TouchEvent> touchEvent)
     : EventDispatchMediator(touchEvent)
 {
 }

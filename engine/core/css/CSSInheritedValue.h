@@ -28,9 +28,9 @@ namespace blink {
 
 class CSSInheritedValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSInheritedValue> create()
+    static PassRefPtr<CSSInheritedValue> create()
     {
-        return adoptRefWillBeNoop(new CSSInheritedValue);
+        return adoptRef(new CSSInheritedValue);
     }
 
     String customCSSText() const;

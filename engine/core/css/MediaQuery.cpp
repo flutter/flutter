@@ -70,23 +70,23 @@ String MediaQuery::serialize() const
     return result.toString();
 }
 
-static bool expressionCompare(const OwnPtrWillBeMember<MediaQueryExp>& a, const OwnPtrWillBeMember<MediaQueryExp>& b)
+static bool expressionCompare(const OwnPtr<MediaQueryExp>& a, const OwnPtr<MediaQueryExp>& b)
 {
     return codePointCompare(a->serialize(), b->serialize()) < 0;
 }
 
-PassOwnPtrWillBeRawPtr<MediaQuery> MediaQuery::createNotAll()
+PassOwnPtr<MediaQuery> MediaQuery::createNotAll()
 {
-    return adoptPtrWillBeNoop(new MediaQuery(MediaQuery::Not, MediaTypeNames::all, nullptr));
+    return adoptPtr(new MediaQuery(MediaQuery::Not, MediaTypeNames::all, nullptr));
 }
 
-MediaQuery::MediaQuery(Restrictor r, const String& mediaType, PassOwnPtrWillBeRawPtr<ExpressionHeapVector> expressions)
+MediaQuery::MediaQuery(Restrictor r, const String& mediaType, PassOwnPtr<ExpressionHeapVector> expressions)
     : m_restrictor(r)
     , m_mediaType(attemptStaticStringCreation(mediaType.lower()))
     , m_expressions(expressions)
 {
     if (!m_expressions) {
-        m_expressions = adoptPtrWillBeNoop(new ExpressionHeapVector);
+        m_expressions = adoptPtr(new ExpressionHeapVector);
         return;
     }
 
@@ -107,7 +107,7 @@ MediaQuery::MediaQuery(Restrictor r, const String& mediaType, PassOwnPtrWillBeRa
 MediaQuery::MediaQuery(const MediaQuery& o)
     : m_restrictor(o.m_restrictor)
     , m_mediaType(o.m_mediaType)
-    , m_expressions(adoptPtrWillBeNoop(new ExpressionHeapVector(o.m_expressions->size())))
+    , m_expressions(adoptPtr(new ExpressionHeapVector(o.m_expressions->size())))
     , m_serializationCache(o.m_serializationCache)
 {
     for (unsigned i = 0; i < m_expressions->size(); ++i)

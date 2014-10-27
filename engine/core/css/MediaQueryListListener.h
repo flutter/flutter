@@ -29,7 +29,7 @@ namespace blink {
 class MediaQueryList;
 
 // See http://dev.w3.org/csswg/cssom-view/#the-mediaquerylist-interface
-class MediaQueryListListener : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryListListener> {
+class MediaQueryListListener : public RefCounted<MediaQueryListListener> {
 public:
     virtual ~MediaQueryListListener();
 

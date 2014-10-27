@@ -13,18 +13,18 @@
 
 namespace blink {
 
-class SampledEffect : public NoBaseWillBeGarbageCollected<SampledEffect> {
+class SampledEffect : public DummyBase<SampledEffect> {
 public:
-    static PassOwnPtrWillBeRawPtr<SampledEffect> create(Animation* animation, PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > interpolations)
+    static PassOwnPtr<SampledEffect> create(Animation* animation, PassOwnPtr<Vector<RefPtr<Interpolation> > > interpolations)
     {
-        return adoptPtrWillBeNoop(new SampledEffect(animation, interpolations));
+        return adoptPtr(new SampledEffect(animation, interpolations));
     }
 
     bool canChange() const;
     void clear();
 
-    const WillBeHeapVector<RefPtrWillBeMember<Interpolation> >& interpolations() const { return *m_interpolations; }
-    void setInterpolations(PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > interpolations) { m_interpolations = interpolations; }
+    const Vector<RefPtr<Interpolation> >& interpolations() const { return *m_interpolations; }
+    void setInterpolations(PassOwnPtr<Vector<RefPtr<Interpolation> > > interpolations) { m_interpolations = interpolations; }
 
     Animation* animation() const { return m_animation; }
     unsigned sequenceNumber() const { return m_sequenceNumber; }
@@ -35,13 +35,13 @@ public:
     void trace(Visitor*);
 
 private:
-    SampledEffect(Animation*, PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > >);
+    SampledEffect(Animation*, PassOwnPtr<Vector<RefPtr<Interpolation> > >);
 
-    RawPtrWillBeWeakMember<Animation> m_animation;
+    RawPtr<Animation> m_animation;
 #if !ENABLE(OILPAN)
     RefPtr<AnimationPlayer> m_player;
 #endif
-    OwnPtrWillBeMember<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > m_interpolations;
+    OwnPtr<Vector<RefPtr<Interpolation> > > m_interpolations;
     const unsigned m_sequenceNumber;
     Animation::Priority m_priority;
 };

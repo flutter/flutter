@@ -74,9 +74,9 @@ enum UpdateReason {
 // MemoryCacheEntry class is used only in MemoryCache class, but we don't make
 // MemoryCacheEntry class an inner class of MemoryCache because of dependency
 // from MemoryCacheLRUList.
-class MemoryCacheEntry final : public NoBaseWillBeGarbageCollectedFinalized<MemoryCacheEntry> {
+class MemoryCacheEntry final : public DummyBase<MemoryCacheEntry> {
 public:
-    static PassOwnPtrWillBeRawPtr<MemoryCacheEntry> create(Resource* resource) { return adoptPtrWillBeNoop(new MemoryCacheEntry(resource)); }
+    static PassOwnPtr<MemoryCacheEntry> create(Resource* resource) { return adoptPtr(new MemoryCacheEntry(resource)); }
     void trace(Visitor*);
 
     ResourcePtr<Resource> m_resource;
@@ -85,10 +85,10 @@ public:
     MemoryCacheLiveResourcePriority m_liveResourcePriority;
     double m_lastDecodedAccessTime; // Used as a thrash guard
 
-    RawPtrWillBeMember<MemoryCacheEntry> m_previousInLiveResourcesList;
-    RawPtrWillBeMember<MemoryCacheEntry> m_nextInLiveResourcesList;
-    RawPtrWillBeMember<MemoryCacheEntry> m_previousInAllResourcesList;
-    RawPtrWillBeMember<MemoryCacheEntry> m_nextInAllResourcesList;
+    RawPtr<MemoryCacheEntry> m_previousInLiveResourcesList;
+    RawPtr<MemoryCacheEntry> m_nextInLiveResourcesList;
+    RawPtr<MemoryCacheEntry> m_previousInAllResourcesList;
+    RawPtr<MemoryCacheEntry> m_nextInAllResourcesList;
 
 private:
     explicit MemoryCacheEntry(Resource* resource)
@@ -111,8 +111,8 @@ private:
 struct MemoryCacheLRUList final {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    RawPtrWillBeMember<MemoryCacheEntry> m_head;
-    RawPtrWillBeMember<MemoryCacheEntry> m_tail;
+    RawPtr<MemoryCacheEntry> m_head;
+    RawPtr<MemoryCacheEntry> m_tail;
 
     MemoryCacheLRUList() : m_head(nullptr), m_tail(nullptr) { }
     void trace(Visitor*);
@@ -124,10 +124,10 @@ WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::MemoryCacheLRUList);
 
 namespace blink {
 
-class MemoryCache final : public NoBaseWillBeGarbageCollectedFinalized<MemoryCache> {
+class MemoryCache final : public DummyBase<MemoryCache> {
     WTF_MAKE_NONCOPYABLE(MemoryCache); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<MemoryCache> create();
+    static PassOwnPtr<MemoryCache> create();
     ~MemoryCache();
     void trace(Visitor*);
 
@@ -266,7 +266,7 @@ private:
     // Size-adjusted and popularity-aware LRU list collection for cache objects. This collection can hold
     // more resources than the cached resource map, since it can also hold "stale" multiple versions of objects that are
     // waiting to die when the clients referencing them go away.
-    WillBeHeapVector<MemoryCacheLRUList, 32> m_allResources;
+    Vector<MemoryCacheLRUList, 32> m_allResources;
 
     // Lists just for live resources with decoded data. Access to this list is based off of painting the resource.
     // The lists are ordered by decode priority, with higher indices having higher priorities.
@@ -274,7 +274,7 @@ private:
 
     // A URL-based map of all resources that are in the cache (including the freshest version of objects that are currently being
     // referenced by a Web page).
-    typedef WillBeHeapHashMap<String, OwnPtrWillBeMember<MemoryCacheEntry> > ResourceMap;
+    typedef HashMap<String, OwnPtr<MemoryCacheEntry> > ResourceMap;
     ResourceMap m_resources;
 
 #if ENABLE(OILPAN)
@@ -297,7 +297,7 @@ MemoryCache* memoryCache();
 
 // Sets the global cache, used to swap in a test instance. Returns the old
 // MemoryCache object.
-PassOwnPtrWillBeRawPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtrWillBeRawPtr<MemoryCache>);
+PassOwnPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtr<MemoryCache>);
 
 }
 

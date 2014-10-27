@@ -64,8 +64,8 @@ void PrintTo(const AnimatableRepeatable& animValue, ::std::ostream* os)
 {
     *os << "AnimatableRepeatable(";
 
-    const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> > v = animValue.values();
-    for (WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >::const_iterator it = v.begin(); it != v.end(); ++it) {
+    const Vector<RefPtr<AnimatableValue> > v = animValue.values();
+    for (Vector<RefPtr<AnimatableValue> >::const_iterator it = v.begin(); it != v.end(); ++it) {
         PrintTo(*(it->get()), os);
         if (it+1 != v.end())
             *os << ", ";

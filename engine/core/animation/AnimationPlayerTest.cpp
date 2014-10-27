@@ -67,7 +67,7 @@ protected:
         simulateFrame(0);
     }
 
-    PassRefPtrWillBeRawPtr<Animation> makeAnimation(double duration = 30, double playbackRate = 1)
+    PassRefPtr<Animation> makeAnimation(double duration = 30, double playbackRate = 1)
     {
         Timing timing;
         timing.iterationDuration = duration;
@@ -83,9 +83,9 @@ protected:
         return player->update(TimingUpdateForAnimationFrame);
     }
 
-    RefPtrWillBePersistent<Document> document;
-    RefPtrWillBePersistent<AnimationTimeline> timeline;
-    RefPtrWillBePersistent<AnimationPlayer> player;
+    RefPtr<Document> document;
+    RefPtr<AnimationTimeline> timeline;
+    RefPtr<AnimationPlayer> player;
     TrackExceptionState exceptionState;
 };
 
@@ -636,8 +636,8 @@ TEST_F(AnimationAnimationPlayerTest, SetSource)
 {
     player = timeline->createAnimationPlayer(0);
     player->setStartTime(0);
-    RefPtrWillBeRawPtr<AnimationNode> source1 = makeAnimation();
-    RefPtrWillBeRawPtr<AnimationNode> source2 = makeAnimation();
+    RefPtr<AnimationNode> source1 = makeAnimation();
+    RefPtr<AnimationNode> source2 = makeAnimation();
     player->setSource(source1.get());
     EXPECT_EQ(source1, player->source());
     EXPECT_EQ(0, player->currentTimeInternal());
@@ -695,7 +695,7 @@ TEST_F(AnimationAnimationPlayerTest, AnimationPlayersReturnTimeToNextEffect)
     timing.startDelay = 1;
     timing.iterationDuration = 1;
     timing.endDelay = 1;
-    RefPtrWillBeRawPtr<Animation> animation = Animation::create(0, nullptr, timing);
+    RefPtr<Animation> animation = Animation::create(0, nullptr, timing);
     player = timeline->createAnimationPlayer(animation.get());
     player->setStartTime(0);
 
@@ -773,11 +773,11 @@ TEST_F(AnimationAnimationPlayerTest, TimeToNextEffectWhenCancelledBeforeStartRev
 
 TEST_F(AnimationAnimationPlayerTest, AttachedAnimationPlayers)
 {
-    RefPtrWillBePersistent<Element> element = document->createElement("foo", ASSERT_NO_EXCEPTION);
+    RefPtr<Element> element = document->createElement("foo", ASSERT_NO_EXCEPTION);
 
     Timing timing;
-    RefPtrWillBeRawPtr<Animation> animation = Animation::create(element.get(), nullptr, timing);
-    RefPtrWillBeRawPtr<AnimationPlayer> player = timeline->createAnimationPlayer(animation.get());
+    RefPtr<Animation> animation = Animation::create(element.get(), nullptr, timing);
+    RefPtr<AnimationPlayer> player = timeline->createAnimationPlayer(animation.get());
     simulateFrame(0);
     timeline->serviceAnimations(TimingUpdateForAnimationFrame);
     EXPECT_EQ(1U, element->activeAnimations()->players().find(player.get())->value);
@@ -788,8 +788,8 @@ TEST_F(AnimationAnimationPlayerTest, AttachedAnimationPlayers)
 
 TEST_F(AnimationAnimationPlayerTest, HasLowerPriority)
 {
-    RefPtrWillBeRawPtr<AnimationPlayer> player1 = timeline->createAnimationPlayer(0);
-    RefPtrWillBeRawPtr<AnimationPlayer> player2 = timeline->createAnimationPlayer(0);
+    RefPtr<AnimationPlayer> player1 = timeline->createAnimationPlayer(0);
+    RefPtr<AnimationPlayer> player2 = timeline->createAnimationPlayer(0);
     EXPECT_TRUE(AnimationPlayer::hasLowerPriority(player1.get(), player2.get()));
 }
 

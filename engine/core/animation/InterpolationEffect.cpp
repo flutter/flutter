@@ -7,15 +7,15 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > InterpolationEffect::getActiveInterpolations(double fraction, double iterationDuration) const
+PassOwnPtr<Vector<RefPtr<Interpolation> > > InterpolationEffect::getActiveInterpolations(double fraction, double iterationDuration) const
 {
 
-    WillBeHeapVector<RefPtrWillBeMember<Interpolation> >* result = new WillBeHeapVector<RefPtrWillBeMember<Interpolation> >();
+    Vector<RefPtr<Interpolation> >* result = new Vector<RefPtr<Interpolation> >();
 
     for (size_t i = 0; i < m_interpolations.size(); ++i) {
         const InterpolationRecord* record = m_interpolations[i].get();
         if (fraction >= record->m_applyFrom && fraction < record->m_applyTo) {
-            RefPtrWillBeRawPtr<Interpolation> interpolation = record->m_interpolation;
+            RefPtr<Interpolation> interpolation = record->m_interpolation;
             double localFraction = (fraction - record->m_start) / (record->m_end - record->m_start);
             if (record->m_easing)
                 localFraction = record->m_easing->evaluate(localFraction, accuracyForDuration(iterationDuration));
@@ -24,7 +24,7 @@ PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > In
         }
     }
 
-    return adoptPtrWillBeNoop(result);
+    return adoptPtr(result);
 }
 
 void InterpolationEffect::InterpolationRecord::trace(Visitor* visitor)

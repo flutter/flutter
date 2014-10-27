@@ -136,9 +136,9 @@ inline HTMLLinkElement::HTMLLinkElement(Document& document, bool createdByParser
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<HTMLLinkElement> HTMLLinkElement::create(Document& document, bool createdByParser)
+PassRefPtr<HTMLLinkElement> HTMLLinkElement::create(Document& document, bool createdByParser)
 {
-    return adoptRefWillBeNoop(new HTMLLinkElement(document, createdByParser));
+    return adoptRef(new HTMLLinkElement(document, createdByParser));
 }
 
 HTMLLinkElement::~HTMLLinkElement()
@@ -237,7 +237,7 @@ void HTMLLinkElement::removedFrom(ContainerNode* insertionPoint)
         return;
     document().styleEngine()->removeStyleSheetCandidateNode(this);
 
-    RefPtrWillBeRawPtr<StyleSheet> removedSheet = sheet();
+    RefPtr<StyleSheet> removedSheet = sheet();
 
     if (m_link)
         m_link->ownerRemoved();

@@ -104,8 +104,8 @@ bool RenderWidget::setWidgetGeometry(const LayoutRect& frame)
     if (widget->frameRect() == newFrame)
         return false;
 
-    RefPtrWillBeRawPtr<RenderWidget> protector(this);
-    RefPtrWillBeRawPtr<Node> protectedNode(node());
+    RefPtr<RenderWidget> protector(this);
+    RefPtr<Node> protectedNode(node());
     widget->setFrameRect(newFrame);
     return widget->frameRect().size() != newFrame.size();
 }

@@ -41,15 +41,15 @@ class Node;
 class StyleRuleBase;
 class StyleRuleFontFace;
 
-class StyleSheetContents : public RefCountedWillBeGarbageCollectedFinalized<StyleSheetContents> {
+class StyleSheetContents : public RefCounted<StyleSheetContents> {
 public:
-    static PassRefPtrWillBeRawPtr<StyleSheetContents> create(const CSSParserContext& context)
+    static PassRefPtr<StyleSheetContents> create(const CSSParserContext& context)
     {
-        return adoptRefWillBeNoop(new StyleSheetContents(String(), context));
+        return adoptRef(new StyleSheetContents(String(), context));
     }
-    static PassRefPtrWillBeRawPtr<StyleSheetContents> create(const String& originalURL, const CSSParserContext& context)
+    static PassRefPtr<StyleSheetContents> create(const String& originalURL, const CSSParserContext& context)
     {
-        return adoptRefWillBeNoop(new StyleSheetContents(originalURL, context));
+        return adoptRef(new StyleSheetContents(originalURL, context));
     }
 
     ~StyleSheetContents();
@@ -74,15 +74,15 @@ public:
 
     void setHasFontFaceRule(bool b) { m_hasFontFaceRule = b; }
     bool hasFontFaceRule() const { return m_hasFontFaceRule; }
-    void findFontFaceRules(WillBeHeapVector<RawPtrWillBeMember<const StyleRuleFontFace> >& fontFaceRules);
+    void findFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules);
 
-    void parserAppendRule(PassRefPtrWillBeRawPtr<StyleRuleBase>);
+    void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
 
     void clearRules();
 
     // Rules other than @charset and @import.
-    const WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& childRules() const { return m_childRules; }
+    const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
 
     // Note that href is the URL that started the redirect chain that led to
     // this style sheet. This property probably isn't useful for much except
@@ -97,12 +97,12 @@ public:
 
     unsigned estimatedSizeInBytes() const;
 
-    bool wrapperInsertRule(PassRefPtrWillBeRawPtr<StyleRuleBase>, unsigned index);
+    bool wrapperInsertRule(PassRefPtr<StyleRuleBase>, unsigned index);
     void wrapperDeleteRule(unsigned index);
 
-    PassRefPtrWillBeRawPtr<StyleSheetContents> copy() const
+    PassRefPtr<StyleSheetContents> copy() const
     {
-        return adoptRefWillBeNoop(new StyleSheetContents(*this));
+        return adoptRef(new StyleSheetContents(*this));
     }
 
     void registerClient(CSSStyleSheet*);
@@ -140,7 +140,7 @@ private:
 
     String m_originalURL;
 
-    WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> > m_childRules;
+    Vector<RefPtr<StyleRuleBase> > m_childRules;
     typedef HashMap<AtomicString, AtomicString> PrefixNamespaceURIMap;
     PrefixNamespaceURIMap m_namespaces;
 
@@ -155,11 +155,11 @@ private:
 
     CSSParserContext m_parserContext;
 
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> > m_loadingClients;
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> > m_completedClients;
-    typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> >::iterator ClientsIterator;
+    HashSet<RawPtr<CSSStyleSheet> > m_loadingClients;
+    HashSet<RawPtr<CSSStyleSheet> > m_completedClients;
+    typedef HashSet<RawPtr<CSSStyleSheet> >::iterator ClientsIterator;
 
-    OwnPtrWillBeMember<RuleSet> m_ruleSet;
+    OwnPtr<RuleSet> m_ruleSet;
 };
 
 } // namespace

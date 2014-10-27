@@ -54,7 +54,7 @@ using namespace blink;
 
 namespace {
 
-void testAccumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> expression, float expectedPixels, float expectedPercent)
+void testAccumulatePixelsAndPercent(const CSSToLengthConversionData& conversionData, PassRefPtr<CSSCalcExpressionNode> expression, float expectedPixels, float expectedPercent)
 {
     PixelsAndPercent value(0, 0);
     expression->accumulatePixelsAndPercent(conversionData, value);
@@ -72,7 +72,7 @@ void initLengthArray(CSSLengthArray& lengthArray)
 CSSLengthArray& setLengthArray(CSSLengthArray& lengthArray, String text)
 {
     initLengthArray(lengthArray);
-    RefPtrWillBeRawPtr<MutableStylePropertySet> propertySet = MutableStylePropertySet::create();
+    RefPtr<MutableStylePropertySet> propertySet = MutableStylePropertySet::create();
     propertySet->setProperty(CSSPropertyLeft, text);
     toCSSPrimitiveValue(propertySet->getPropertyCSSValue(CSSPropertyLeft).get())->accumulateLengthArray(lengthArray);
     return lengthArray;

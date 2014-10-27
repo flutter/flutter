@@ -57,9 +57,9 @@ inline bool keyMatchesLabelForAttribute(const AtomicString& key, const Element& 
     return false;
 }
 
-PassOwnPtrWillBeRawPtr<DocumentOrderedMap> DocumentOrderedMap::create()
+PassOwnPtr<DocumentOrderedMap> DocumentOrderedMap::create()
 {
-    return adoptPtrWillBeNoop(new DocumentOrderedMap());
+    return adoptPtr(new DocumentOrderedMap());
 }
 
 void DocumentOrderedMap::add(const AtomicString& key, Element* element)
@@ -67,11 +67,11 @@ void DocumentOrderedMap::add(const AtomicString& key, Element* element)
     ASSERT(key);
     ASSERT(element);
 
-    Map::AddResult addResult = m_map.add(key, adoptPtrWillBeNoop(new MapEntry(element)));
+    Map::AddResult addResult = m_map.add(key, adoptPtr(new MapEntry(element)));
     if (addResult.isNewEntry)
         return;
 
-    OwnPtrWillBeMember<MapEntry>& entry = addResult.storedValue->value;
+    OwnPtr<MapEntry>& entry = addResult.storedValue->value;
     ASSERT(entry->count);
     entry->element = nullptr;
     entry->count++;
@@ -87,7 +87,7 @@ void DocumentOrderedMap::remove(const AtomicString& key, Element* element)
     if (it == m_map.end())
         return;
 
-    OwnPtrWillBeMember<MapEntry>& entry = it->value;
+    OwnPtr<MapEntry>& entry = it->value;
     ASSERT(entry->count);
     if (entry->count == 1) {
         ASSERT(!entry->element || entry->element == element);
@@ -132,17 +132,17 @@ Element* DocumentOrderedMap::getElementById(const AtomicString& key, const TreeS
     return get<keyMatchesId>(key, scope);
 }
 
-const WillBeHeapVector<RawPtrWillBeMember<Element> >& DocumentOrderedMap::getAllElementsById(const AtomicString& key, const TreeScope* scope) const
+const Vector<RawPtr<Element> >& DocumentOrderedMap::getAllElementsById(const AtomicString& key, const TreeScope* scope) const
 {
     ASSERT(key);
     ASSERT(scope);
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<WillBeHeapVector<RawPtrWillBeMember<Element> > >, emptyVector, (adoptPtrWillBeNoop(new WillBeHeapVector<RawPtrWillBeMember<Element> >())));
+    DEFINE_STATIC_LOCAL(OwnPtr<Vector<RawPtr<Element> > >, emptyVector, (adoptPtr(new Vector<RawPtr<Element> >())));
 
     Map::iterator it = m_map.find(key);
     if (it == m_map.end())
         return *emptyVector;
 
-    OwnPtrWillBeMember<MapEntry>& entry = it->value;
+    OwnPtr<MapEntry>& entry = it->value;
     ASSERT(entry->count);
 
     if (entry->orderedList.isEmpty()) {

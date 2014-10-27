@@ -31,7 +31,7 @@ namespace blink {
 class DocumentFragment : public ContainerNode {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DocumentFragment> create(Document&);
+    static PassRefPtr<DocumentFragment> create(Document&);
 
     virtual bool canContainRangeEndPoint() const override final { return true; }
     virtual bool isTemplateContent() const { return false; }
@@ -42,7 +42,7 @@ protected:
 
 private:
     virtual NodeType nodeType() const override final;
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override;
+    virtual PassRefPtr<Node> cloneNode(bool deep = true) override;
     virtual bool childTypeAllowed(NodeType) const override;
 
     bool isDocumentFragment() const = delete; // This will catch anyone doing an unnecessary check.

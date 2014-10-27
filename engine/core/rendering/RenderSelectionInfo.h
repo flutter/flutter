@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class RenderSelectionInfoBase : public NoBaseWillBeGarbageCollected<RenderSelectionInfoBase> {
+class RenderSelectionInfoBase : public DummyBase<RenderSelectionInfoBase> {
     WTF_MAKE_NONCOPYABLE(RenderSelectionInfoBase); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     RenderSelectionInfoBase()
@@ -58,8 +58,8 @@ public:
     RenderObject::SelectionState state() const { return m_state; }
 
 protected:
-    RawPtrWillBeMember<RenderObject> m_object;
-    RawPtrWillBeMember<const RenderLayerModelObject> m_paintInvalidationContainer;
+    RawPtr<RenderObject> m_object;
+    RawPtr<const RenderLayerModelObject> m_paintInvalidationContainer;
     RenderObject::SelectionState m_state;
 };
 

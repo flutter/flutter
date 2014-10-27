@@ -43,12 +43,12 @@ MouseEventInit::MouseEventInit()
 {
 }
 
-PassRefPtrWillBeRawPtr<MouseEvent> MouseEvent::create(const AtomicString& type, const MouseEventInit& initializer)
+PassRefPtr<MouseEvent> MouseEvent::create(const AtomicString& type, const MouseEventInit& initializer)
 {
-    return adoptRefWillBeNoop(new MouseEvent(type, initializer));
+    return adoptRef(new MouseEvent(type, initializer));
 }
 
-PassRefPtrWillBeRawPtr<MouseEvent> MouseEvent::create(const AtomicString& eventType, PassRefPtrWillBeRawPtr<AbstractView> view, const PlatformMouseEvent& event, int detail, PassRefPtrWillBeRawPtr<Node> relatedTarget)
+PassRefPtr<MouseEvent> MouseEvent::create(const AtomicString& eventType, PassRefPtr<AbstractView> view, const PlatformMouseEvent& event, int detail, PassRefPtr<Node> relatedTarget)
 {
     ASSERT(event.type() == PlatformEvent::MouseMoved || event.button() != NoButton);
 
@@ -64,13 +64,13 @@ PassRefPtrWillBeRawPtr<MouseEvent> MouseEvent::create(const AtomicString& eventT
         relatedTarget, false, event.syntheticEventType());
 }
 
-PassRefPtrWillBeRawPtr<MouseEvent> MouseEvent::create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view,
+PassRefPtr<MouseEvent> MouseEvent::create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view,
     int detail, int screenX, int screenY, int pageX, int pageY,
     int movementX, int movementY,
     bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, unsigned short button,
-    PassRefPtrWillBeRawPtr<EventTarget> relatedTarget, bool isSimulated, PlatformMouseEvent::SyntheticEventType syntheticEventType)
+    PassRefPtr<EventTarget> relatedTarget, bool isSimulated, PlatformMouseEvent::SyntheticEventType syntheticEventType)
 {
-    return adoptRefWillBeNoop(new MouseEvent(type, canBubble, cancelable, view,
+    return adoptRef(new MouseEvent(type, canBubble, cancelable, view,
         detail, screenX, screenY, pageX, pageY,
         movementX, movementY,
         ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget, isSimulated, syntheticEventType));
@@ -83,11 +83,11 @@ MouseEvent::MouseEvent()
     ScriptWrappable::init(this);
 }
 
-MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view,
+MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view,
     int detail, int screenX, int screenY, int pageX, int pageY,
     int movementX, int movementY,
     bool ctrlKey, bool altKey, bool shiftKey, bool metaKey,
-    unsigned short button, PassRefPtrWillBeRawPtr<EventTarget> relatedTarget,
+    unsigned short button, PassRefPtr<EventTarget> relatedTarget,
     bool isSimulated, PlatformMouseEvent::SyntheticEventType syntheticEventType)
     : MouseRelatedEvent(eventType, canBubble, cancelable, view, detail, IntPoint(screenX, screenY),
                         IntPoint(pageX, pageY),
@@ -118,10 +118,10 @@ MouseEvent::~MouseEvent()
 {
 }
 
-void MouseEvent::initMouseEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view,
+void MouseEvent::initMouseEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view,
                                 int detail, int screenX, int screenY, int clientX, int clientY,
                                 bool ctrlKey, bool altKey, bool shiftKey, bool metaKey,
-                                unsigned short button, PassRefPtrWillBeRawPtr<EventTarget> relatedTarget)
+                                unsigned short button, PassRefPtr<EventTarget> relatedTarget)
 {
     if (dispatched())
         return;
@@ -193,16 +193,16 @@ void MouseEvent::trace(Visitor* visitor)
     MouseRelatedEvent::trace(visitor);
 }
 
-PassRefPtrWillBeRawPtr<SimulatedMouseEvent> SimulatedMouseEvent::create(const AtomicString& eventType, PassRefPtrWillBeRawPtr<AbstractView> view, PassRefPtrWillBeRawPtr<Event> underlyingEvent)
+PassRefPtr<SimulatedMouseEvent> SimulatedMouseEvent::create(const AtomicString& eventType, PassRefPtr<AbstractView> view, PassRefPtr<Event> underlyingEvent)
 {
-    return adoptRefWillBeNoop(new SimulatedMouseEvent(eventType, view, underlyingEvent));
+    return adoptRef(new SimulatedMouseEvent(eventType, view, underlyingEvent));
 }
 
 SimulatedMouseEvent::~SimulatedMouseEvent()
 {
 }
 
-SimulatedMouseEvent::SimulatedMouseEvent(const AtomicString& eventType, PassRefPtrWillBeRawPtr<AbstractView> view, PassRefPtrWillBeRawPtr<Event> underlyingEvent)
+SimulatedMouseEvent::SimulatedMouseEvent(const AtomicString& eventType, PassRefPtr<AbstractView> view, PassRefPtr<Event> underlyingEvent)
     : MouseEvent(eventType, true, true, view, 0, 0, 0, 0, 0, 0, 0, false, false, false, false, 0,
         nullptr, true, PlatformMouseEvent::RealOrIndistinguishable)
 {
@@ -226,12 +226,12 @@ void SimulatedMouseEvent::trace(Visitor* visitor)
     MouseEvent::trace(visitor);
 }
 
-PassRefPtrWillBeRawPtr<MouseEventDispatchMediator> MouseEventDispatchMediator::create(PassRefPtrWillBeRawPtr<MouseEvent> mouseEvent, MouseEventType mouseEventType)
+PassRefPtr<MouseEventDispatchMediator> MouseEventDispatchMediator::create(PassRefPtr<MouseEvent> mouseEvent, MouseEventType mouseEventType)
 {
-    return adoptRefWillBeNoop(new MouseEventDispatchMediator(mouseEvent, mouseEventType));
+    return adoptRef(new MouseEventDispatchMediator(mouseEvent, mouseEventType));
 }
 
-MouseEventDispatchMediator::MouseEventDispatchMediator(PassRefPtrWillBeRawPtr<MouseEvent> mouseEvent, MouseEventType mouseEventType)
+MouseEventDispatchMediator::MouseEventDispatchMediator(PassRefPtr<MouseEvent> mouseEvent, MouseEventType mouseEventType)
     : EventDispatchMediator(mouseEvent), m_mouseEventType(mouseEventType)
 {
 }
@@ -268,7 +268,7 @@ bool MouseEventDispatchMediator::dispatchEvent(EventDispatcher* dispatcher) cons
     // Special case: If it's a double click event, we also send the dblclick event. This is not part
     // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
     // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
-    RefPtrWillBeRawPtr<MouseEvent> doubleClickEvent = MouseEvent::create();
+    RefPtr<MouseEvent> doubleClickEvent = MouseEvent::create();
     doubleClickEvent->initMouseEvent(EventTypeNames::dblclick, event()->bubbles(), event()->cancelable(), event()->view(),
                                      event()->detail(), event()->screenX(), event()->screenY(), event()->clientX(), event()->clientY(),
                                      event()->ctrlKey(), event()->altKey(), event()->shiftKey(), event()->metaKey(),

@@ -31,9 +31,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> WebGLVertexArrayObjectOES::create(WebGLRenderingContextBase* ctx, VaoType type)
+PassRefPtr<WebGLVertexArrayObjectOES> WebGLVertexArrayObjectOES::create(WebGLRenderingContextBase* ctx, VaoType type)
 {
-    return adoptRefWillBeNoop(new WebGLVertexArrayObjectOES(ctx, type));
+    return adoptRef(new WebGLVertexArrayObjectOES(ctx, type));
 }
 
 WebGLVertexArrayObjectOES::WebGLVertexArrayObjectOES(WebGLRenderingContextBase* ctx, VaoType type)
@@ -109,7 +109,7 @@ void WebGLVertexArrayObjectOES::deleteObjectImpl(blink::WebGraphicsContext3D* co
 #endif
 }
 
-void WebGLVertexArrayObjectOES::setElementArrayBuffer(PassRefPtrWillBeRawPtr<WebGLBuffer> buffer)
+void WebGLVertexArrayObjectOES::setElementArrayBuffer(PassRefPtr<WebGLBuffer> buffer)
 {
     if (buffer)
         buffer->onAttached();
@@ -119,7 +119,7 @@ void WebGLVertexArrayObjectOES::setElementArrayBuffer(PassRefPtrWillBeRawPtr<Web
 }
 
 void WebGLVertexArrayObjectOES::setVertexAttribState(
-    GLuint index, GLsizei bytesPerElement, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset, PassRefPtrWillBeRawPtr<WebGLBuffer> buffer)
+    GLuint index, GLsizei bytesPerElement, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset, PassRefPtr<WebGLBuffer> buffer)
 {
     GLsizei validatedStride = stride ? stride : bytesPerElement;
 
@@ -140,7 +140,7 @@ void WebGLVertexArrayObjectOES::setVertexAttribState(
     state.offset = offset;
 }
 
-void WebGLVertexArrayObjectOES::unbindBuffer(PassRefPtrWillBeRawPtr<WebGLBuffer> buffer)
+void WebGLVertexArrayObjectOES::unbindBuffer(PassRefPtr<WebGLBuffer> buffer)
 {
     if (m_boundElementArrayBuffer == buffer) {
         m_boundElementArrayBuffer->onDetached(context()->webContext());

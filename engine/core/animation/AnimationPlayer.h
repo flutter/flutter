@@ -41,7 +41,7 @@ namespace blink {
 class AnimationTimeline;
 class ExceptionState;
 
-class AnimationPlayer final : public RefCountedWillBeGarbageCollectedFinalized<AnimationPlayer>
+class AnimationPlayer final : public RefCounted<AnimationPlayer>
     , public ActiveDOMObject
     , public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
@@ -57,7 +57,7 @@ public:
     };
 
     ~AnimationPlayer();
-    static PassRefPtrWillBeRawPtr<AnimationPlayer> create(ExecutionContext*, AnimationTimeline&, AnimationNode*);
+    static PassRefPtr<AnimationPlayer> create(ExecutionContext*, AnimationTimeline&, AnimationNode*);
 
     // Returns whether the player is finished.
     bool update(TimingUpdateReason);
@@ -95,7 +95,7 @@ public:
     virtual ExecutionContext* executionContext() const override;
     virtual bool hasPendingActivity() const override;
     virtual void stop() override;
-    virtual bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>) override;
+    virtual bool dispatchEvent(PassRefPtr<Event>) override;
 
     double playbackRate() const { return m_playbackRate; }
     void setPlaybackRate(double);
@@ -168,8 +168,8 @@ private:
 
     unsigned m_sequenceNumber;
 
-    RefPtrWillBeMember<AnimationNode> m_content;
-    RawPtrWillBeMember<AnimationTimeline> m_timeline;
+    RefPtr<AnimationNode> m_content;
+    RawPtr<AnimationTimeline> m_timeline;
     // Reflects all pausing, including via pauseForTesting().
     bool m_paused;
     bool m_held;
@@ -183,7 +183,7 @@ private:
     // Holds a 'finished' event queued for asynchronous dispatch via the
     // ScriptedAnimationController. This object remains active until the
     // event is actually dispatched.
-    RefPtrWillBeMember<Event> m_pendingFinishedEvent;
+    RefPtr<Event> m_pendingFinishedEvent;
 
     enum CompositorAction {
         None,

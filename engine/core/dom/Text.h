@@ -35,20 +35,20 @@ class Text : public CharacterData {
 public:
     static const unsigned defaultLengthLimit = 1 << 16;
 
-    static PassRefPtrWillBeRawPtr<Text> create(Document&, const String&);
-    static PassRefPtrWillBeRawPtr<Text> createEditingText(Document&, const String&);
+    static PassRefPtr<Text> create(Document&, const String&);
+    static PassRefPtr<Text> createEditingText(Document&, const String&);
 
     RenderText* renderer() const;
 
     // mergeNextSiblingNodesIfPossible() merges next sibling nodes if possible
     // then returns a node not merged.
-    PassRefPtrWillBeRawPtr<Node> mergeNextSiblingNodesIfPossible();
-    PassRefPtrWillBeRawPtr<Text> splitText(unsigned offset, ExceptionState&);
+    PassRefPtr<Node> mergeNextSiblingNodesIfPossible();
+    PassRefPtr<Text> splitText(unsigned offset, ExceptionState&);
 
     // DOM Level 3: http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-1312295772
 
     String wholeText() const;
-    PassRefPtrWillBeRawPtr<Text> replaceWholeText(const String&);
+    PassRefPtr<Text> replaceWholeText(const String&);
 
     void recalcTextStyle(StyleRecalcChange, Text* nextTextSibling);
     bool textRendererIsNeeded(const RenderStyle&, const RenderObject& parent);
@@ -69,13 +69,13 @@ protected:
 
 private:
     virtual String nodeName() const override;
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override final;
+    virtual PassRefPtr<Node> cloneNode(bool deep = true) override final;
 
     bool isTextNode() const = delete; // This will catch anyone doing an unnecessary check.
 
     bool needsWhitespaceRenderer();
 
-    virtual PassRefPtrWillBeRawPtr<Text> cloneWithData(const String&);
+    virtual PassRefPtr<Text> cloneWithData(const String&);
 
 #ifndef NDEBUG
     virtual void formatForDebugger(char* buffer, unsigned length) const override;

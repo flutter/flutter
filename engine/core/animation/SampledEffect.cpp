@@ -9,7 +9,7 @@
 
 namespace blink {
 
-SampledEffect::SampledEffect(Animation* animation, PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > interpolations)
+SampledEffect::SampledEffect(Animation* animation, PassOwnPtr<Vector<RefPtr<Interpolation> > > interpolations)
     : m_animation(animation)
 #if !ENABLE(OILPAN)
     , m_player(animation->player())

@@ -15,7 +15,7 @@ class FontLoader;
 
 class RemoteFontFaceSource : public CSSFontFaceSource, public FontResourceClient {
 public:
-    explicit RemoteFontFaceSource(FontResource*, PassRefPtrWillBeRawPtr<FontLoader>);
+    explicit RemoteFontFaceSource(FontResource*, PassRefPtr<FontLoader>);
     virtual ~RemoteFontFaceSource();
 
     virtual FontResource* resource() override { return m_font.get(); }
@@ -57,7 +57,7 @@ private:
     };
 
     ResourcePtr<FontResource> m_font;
-    RefPtrWillBeMember<FontLoader> m_fontLoader;
+    RefPtr<FontLoader> m_fontLoader;
     FontLoadHistograms m_histograms;
 };
 

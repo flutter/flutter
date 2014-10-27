@@ -64,8 +64,8 @@ public:
         }
 
         const CSSSelector* selector;
-        RawPtrWillBeMember<Element> element;
-        RawPtrWillBeMember<const ContainerNode> scope;
+        RawPtr<Element> element;
+        RawPtr<const ContainerNode> scope;
         RenderStyle* elementStyle;
         ContextFlags contextFlags;
     };

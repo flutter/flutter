@@ -82,9 +82,9 @@ RuleData::RuleData(StyleRule* rule, unsigned selectorIndex, unsigned position, A
 
 void RuleSet::addToRuleSet(const AtomicString& key, PendingRuleMap& map, const RuleData& ruleData)
 {
-    OwnPtrWillBeMember<WillBeHeapLinkedStack<RuleData> >& rules = map.add(key, nullptr).storedValue->value;
+    OwnPtr<LinkedStack<RuleData> >& rules = map.add(key, nullptr).storedValue->value;
     if (!rules)
-        rules = adoptPtrWillBeNoop(new WillBeHeapLinkedStack<RuleData>);
+        rules = adoptPtr(new LinkedStack<RuleData>);
     rules->push(ruleData);
 }
 
@@ -176,7 +176,7 @@ void RuleSet::addKeyframesRule(StyleRuleKeyframes* rule)
     m_keyframesRules.append(rule);
 }
 
-void RuleSet::addChildRules(const WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& rules, const MediaQueryEvaluator& medium, AddRuleFlags addRuleFlags)
+void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, const MediaQueryEvaluator& medium, AddRuleFlags addRuleFlags)
 {
     for (unsigned i = 0; i < rules.size(); ++i) {
         StyleRuleBase* rule = rules[i].get();
@@ -219,10 +219,10 @@ void RuleSet::compactPendingRules(PendingRuleMap& pendingMap, CompactRuleMap& co
 {
     PendingRuleMap::iterator end = pendingMap.end();
     for (PendingRuleMap::iterator it = pendingMap.begin(); it != end; ++it) {
-        OwnPtrWillBeRawPtr<WillBeHeapLinkedStack<RuleData> > pendingRules = it->value.release();
+        OwnPtr<LinkedStack<RuleData> > pendingRules = it->value.release();
         CompactRuleMap::ValueType* compactRules = compactMap.add(it->key, nullptr).storedValue;
 
-        WillBeHeapTerminatedArrayBuilder<RuleData> builder(compactRules->value.release());
+        TerminatedArrayBuilder<RuleData> builder(compactRules->value.release());
         builder.grow(pendingRules->size());
         while (!pendingRules->isEmpty()) {
             builder.append(pendingRules->peek());
@@ -236,7 +236,7 @@ void RuleSet::compactPendingRules(PendingRuleMap& pendingMap, CompactRuleMap& co
 void RuleSet::compactRules()
 {
     ASSERT(m_pendingRules);
-    OwnPtrWillBeRawPtr<PendingRuleMaps> pendingRules = m_pendingRules.release();
+    OwnPtr<PendingRuleMaps> pendingRules = m_pendingRules.release();
     compactPendingRules(pendingRules->idRules, m_idRules);
     compactPendingRules(pendingRules->classRules, m_classRules);
     compactPendingRules(pendingRules->tagRules, m_tagRules);
@@ -283,7 +283,7 @@ void RuleSet::trace(Visitor* visitor)
 #ifndef NDEBUG
 void RuleSet::show()
 {
-    for (WillBeHeapVector<RuleData>::const_iterator it = m_allRules.begin(); it != m_allRules.end(); ++it)
+    for (Vector<RuleData>::const_iterator it = m_allRules.begin(); it != m_allRules.end(); ++it)
         it->selector().show();
 }
 #endif

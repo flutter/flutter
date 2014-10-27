@@ -58,10 +58,10 @@ class UndoStack;
 enum EditorCommandSource { CommandFromMenuOrKeyBinding, CommandFromDOM, CommandFromDOMWithUserInterface };
 enum EditorParagraphSeparator { EditorParagraphSeparatorIsDiv, EditorParagraphSeparatorIsP };
 
-class Editor final : public NoBaseWillBeGarbageCollectedFinalized<Editor> {
+class Editor final : public DummyBase<Editor> {
     WTF_MAKE_NONCOPYABLE(Editor);
 public:
-    static PassOwnPtrWillBeRawPtr<Editor> create(LocalFrame&);
+    static PassOwnPtr<Editor> create(LocalFrame&);
     ~Editor();
 
     EditorClient& client() const;
@@ -110,9 +110,9 @@ public:
     bool deleteWithDirection(SelectionDirection, TextGranularity, bool isTypingAction);
     void deleteSelectionWithSmartDelete(bool smartDelete);
 
-    void appliedEditing(PassRefPtrWillBeRawPtr<CompositeEditCommand>);
-    void unappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition>);
-    void reappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition>);
+    void appliedEditing(PassRefPtr<CompositeEditCommand>);
+    void unappliedEditing(PassRefPtr<EditCommandComposition>);
+    void reappliedEditing(PassRefPtr<EditCommandComposition>);
 
     void setShouldStyleWithCSS(bool flag) { m_shouldStyleWithCSS = flag; }
     bool shouldStyleWithCSS() const { return m_shouldStyleWithCSS; }
@@ -175,9 +175,9 @@ public:
 
     EditingBehavior behavior() const;
 
-    PassRefPtrWillBeRawPtr<Range> selectedRange();
+    PassRefPtr<Range> selectedRange();
 
-    void pasteAsFragment(PassRefPtrWillBeRawPtr<DocumentFragment>, bool smartReplace, bool matchStyle);
+    void pasteAsFragment(PassRefPtr<DocumentFragment>, bool smartReplace, bool matchStyle);
     void pasteAsPlainText(const String&, bool smartReplace);
 
     Element* findEventTargetFrom(const VisibleSelection&) const;
@@ -186,7 +186,7 @@ public:
     // FIXME: Switch callers over to the FindOptions version and retire this one.
     bool findString(const String&, bool forward, bool caseFlag, bool wrapFlag, bool startInSelection);
 
-    PassRefPtrWillBeRawPtr<Range> findStringAndScrollToVisible(const String&, Range*, FindOptions);
+    PassRefPtr<Range> findStringAndScrollToVisible(const String&, Range*, FindOptions);
 
     const VisibleSelection& mark() const; // Mark, to be used as emacs uses it.
     void setMark(const VisibleSelection&);
@@ -200,7 +200,7 @@ public:
     bool markedTextMatchesAreHighlighted() const;
     void setMarkedTextMatchesAreHighlighted(bool);
 
-    void replaceSelectionWithFragment(PassRefPtrWillBeRawPtr<DocumentFragment>, bool selectReplacement, bool smartReplace, bool matchStyle);
+    void replaceSelectionWithFragment(PassRefPtr<DocumentFragment>, bool selectReplacement, bool smartReplace, bool matchStyle);
     void replaceSelectionWithText(const String&, bool selectReplacement, bool smartReplace);
 
     EditorParagraphSeparator defaultParagraphSeparator() const { return m_defaultParagraphSeparator; }
@@ -220,7 +220,7 @@ public:
 
 private:
     LocalFrame& m_frame;
-    RefPtrWillBeMember<CompositeEditCommand> m_lastEditCommand;
+    RefPtr<CompositeEditCommand> m_lastEditCommand;
     int m_preventRevealSelection;
     bool m_shouldStyleWithCSS;
     VisibleSelection m_mark;
@@ -243,7 +243,7 @@ private:
 
     Element* findEventTargetFromSelection() const;
 
-    PassRefPtrWillBeRawPtr<Range> rangeOfString(const String&, Range*, FindOptions);
+    PassRefPtr<Range> rangeOfString(const String&, Range*, FindOptions);
 
     SpellChecker& spellChecker() const;
 

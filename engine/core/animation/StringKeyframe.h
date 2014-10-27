@@ -14,9 +14,9 @@ class StyleSheetContents;
 
 class StringKeyframe : public Keyframe {
 public:
-    static PassRefPtrWillBeRawPtr<StringKeyframe> create()
+    static PassRefPtr<StringKeyframe> create()
     {
-        return adoptRefWillBeNoop(new StringKeyframe);
+        return adoptRef(new StringKeyframe);
     }
     void setPropertyValue(CSSPropertyID, const String& value, StyleSheetContents*);
     void clearPropertyValue(CSSPropertyID property) { m_propertySet->removeProperty(property); }
@@ -35,23 +35,23 @@ public:
         PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, CSSValue*, AnimationEffect::CompositeOperation);
 
         CSSValue* value() const { return m_value.get(); }
-        virtual const PassRefPtrWillBeRawPtr<AnimatableValue> getAnimatableValue() const override final {
+        virtual const PassRefPtr<AnimatableValue> getAnimatableValue() const override final {
             return m_animatableValueCache.get();
         }
 
-        virtual PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const override final;
-        virtual PassRefPtrWillBeRawPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const override final;
+        virtual PassOwnPtr<Keyframe::PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const override final;
+        virtual PassRefPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const override final;
 
         virtual void trace(Visitor*) override;
 
     private:
         PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, CSSValue*);
 
-        virtual PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> cloneWithOffset(double offset) const;
+        virtual PassOwnPtr<Keyframe::PropertySpecificKeyframe> cloneWithOffset(double offset) const;
         virtual bool isStringPropertySpecificKeyframe() const override { return true; }
 
-        RefPtrWillBeMember<CSSValue> m_value;
-        mutable RefPtrWillBeMember<AnimatableValue> m_animatableValueCache;
+        RefPtr<CSSValue> m_value;
+        mutable RefPtr<AnimatableValue> m_animatableValueCache;
     };
 
 private:
@@ -61,12 +61,12 @@ private:
 
     StringKeyframe(const StringKeyframe& copyFrom);
 
-    virtual PassRefPtrWillBeRawPtr<Keyframe> clone() const override;
-    virtual PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> createPropertySpecificKeyframe(CSSPropertyID) const override;
+    virtual PassRefPtr<Keyframe> clone() const override;
+    virtual PassOwnPtr<Keyframe::PropertySpecificKeyframe> createPropertySpecificKeyframe(CSSPropertyID) const override;
 
     virtual bool isStringKeyframe() const override { return true; }
 
-    RefPtrWillBeMember<MutableStylePropertySet> m_propertySet;
+    RefPtr<MutableStylePropertySet> m_propertySet;
 };
 
 typedef StringKeyframe::PropertySpecificKeyframe StringPropertySpecificKeyframe;

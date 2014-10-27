@@ -67,9 +67,9 @@ ResourceLoader::RequestCountTracker::RequestCountTracker(const RequestCountTrack
     m_host->incrementRequestCount(m_resource);
 }
 
-PassRefPtrWillBeRawPtr<ResourceLoader> ResourceLoader::create(ResourceLoaderHost* host, Resource* resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
+PassRefPtr<ResourceLoader> ResourceLoader::create(ResourceLoaderHost* host, Resource* resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
 {
-    RefPtrWillBeRawPtr<ResourceLoader> loader(adoptRefWillBeNoop(new ResourceLoader(host, resource, options)));
+    RefPtr<ResourceLoader> loader(adoptRef(new ResourceLoader(host, resource, options)));
     loader->init(request);
     return loader.release();
 }
@@ -115,7 +115,7 @@ void ResourceLoader::releaseResources()
     // deallocated and release the last reference to this object.
     // We need to retain to avoid accessing the object after it
     // has been deallocated and also to avoid reentering this method.
-    RefPtrWillBeRawPtr<ResourceLoader> protector(this);
+    RefPtr<ResourceLoader> protector(this);
 
     m_host.clear();
     m_state = Terminated;
@@ -161,7 +161,7 @@ void ResourceLoader::start()
 void ResourceLoader::didDownloadData(blink::WebURLLoader*, int length, int encodedDataLength)
 {
     ASSERT(m_state != Terminated);
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
     RELEASE_ASSERT(m_connectionState == ConnectionStateReceivedResponse);
     m_host->didDownloadData(m_resource, length, encodedDataLength);
     if (m_state == Terminated)
@@ -217,7 +217,7 @@ void ResourceLoader::cancel(const ResourceError& error)
 
     // This function calls out to clients at several points that might do
     // something that causes the last reference to this object to go away.
-    RefPtrWillBeRawPtr<ResourceLoader> protector(this);
+    RefPtr<ResourceLoader> protector(this);
 
     WTF_LOG(ResourceLoading, "Cancelled load of '%s'.\n", m_resource->url().string().latin1().data());
     if (m_state == Initialized)
@@ -244,7 +244,7 @@ void ResourceLoader::cancel(const ResourceError& error)
 void ResourceLoader::willSendRequest(blink::WebURLLoader*, blink::WebURLRequest& passedRequest, const blink::WebURLResponse& passedRedirectResponse)
 {
     ASSERT(m_state != Terminated);
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
 
     ResourceRequest& request(applyOptions(passedRequest.toMutableResourceRequest()));
 
@@ -272,7 +272,7 @@ void ResourceLoader::willSendRequest(blink::WebURLLoader*, blink::WebURLRequest&
 void ResourceLoader::didSendData(blink::WebURLLoader*, unsigned long long bytesSent, unsigned long long totalBytesToBeSent)
 {
     ASSERT(m_state == Initialized);
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
     m_resource->didSendData(bytesSent, totalBytesToBeSent);
 }
 
@@ -291,7 +291,7 @@ void ResourceLoader::didReceiveResponse(blink::WebURLLoader*, const blink::WebUR
 
     // Reference the object in this method since the additional processing can do
     // anything including removing the last reference to this object.
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
     m_resource->responseReceived(resourceResponse);
     if (m_state == Terminated)
         return;
@@ -345,7 +345,7 @@ void ResourceLoader::didReceiveData(blink::WebURLLoader*, const char* data, int 
 
     // Reference the object in this method since the additional processing can do
     // anything including removing the last reference to this object.
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
 
     // FIXME: If we get a resource with more than 2B bytes, this code won't do the right thing.
     // However, with today's computers and networking speeds, this won't happen in practice.
@@ -365,7 +365,7 @@ void ResourceLoader::didFinishLoading(blink::WebURLLoader*, double finishTime, i
     ASSERT(m_state != Terminated);
     WTF_LOG(ResourceLoading, "Received '%s'.", m_resource->url().string().latin1().data());
 
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoader> protect(this);
     ResourcePtr<Resource> protectResource(m_resource);
     m_state = Finishing;
     didFinishLoadingOnePart(finishTime, encodedDataLength);
@@ -386,8 +386,8 @@ void ResourceLoader::didFail(blink::WebURLLoader*, const blink::WebURLError& err
     ASSERT(m_state != Terminated);
     WTF_LOG(ResourceLoading, "Failed to load '%s'.\n", m_resource->url().string().latin1().data());
 
-    RefPtrWillBeRawPtr<ResourceLoader> protect(this);
-    RefPtrWillBeRawPtr<ResourceLoaderHost> protectHost(m_host.get());
+    RefPtr<ResourceLoader> protect(this);
+    RefPtr<ResourceLoaderHost> protectHost(m_host.get());
     ResourcePtr<Resource> protectResource(m_resource);
     m_state = Finishing;
     m_resource->setResourceError(error);

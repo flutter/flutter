@@ -61,11 +61,11 @@ public:
     IntPoint computeOrigin(const IntSize& currentViewSize) const;
 
 private:
-    RawPtrWillBeMember<EventHandler> m_eventHandler;
+    RawPtr<EventHandler> m_eventHandler;
 
     IntRect m_viewRect;
 
-    RefPtrWillBeMember<Node> m_anchorNode;
+    RefPtr<Node> m_anchorNode;
     LayoutRect m_anchorNodeBounds;
 
     FloatSize m_anchorInViewCoords;

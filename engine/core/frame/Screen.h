@@ -41,13 +41,13 @@ namespace blink {
 
 class LocalFrame;
 
-class Screen final : public RefCountedWillBeGarbageCollectedFinalized<Screen>, public ScriptWrappable, public DOMWindowProperty, public WillBeHeapSupplementable<Screen> {
+class Screen final : public RefCounted<Screen>, public ScriptWrappable, public DOMWindowProperty, public Supplementable<Screen> {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Screen);
 public:
-    static PassRefPtrWillBeRawPtr<Screen> create(LocalFrame* frame)
+    static PassRefPtr<Screen> create(LocalFrame* frame)
     {
-        return adoptRefWillBeNoop(new Screen(frame));
+        return adoptRef(new Screen(frame));
     }
 
     unsigned height() const;

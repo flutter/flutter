@@ -28,9 +28,9 @@ ConsoleMessageStorage::ConsoleMessageStorage(LocalFrame* frame)
 {
 }
 
-void ConsoleMessageStorage::reportMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> prpMessage)
+void ConsoleMessageStorage::reportMessage(PassRefPtr<ConsoleMessage> prpMessage)
 {
-    RefPtrWillBeRawPtr<ConsoleMessage> message = prpMessage;
+    RefPtr<ConsoleMessage> message = prpMessage;
     message->collectCallStack();
 
     if (message->type() == ClearMessageType)

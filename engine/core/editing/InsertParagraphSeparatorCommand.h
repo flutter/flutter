@@ -34,9 +34,9 @@ class EditingStyle;
 
 class InsertParagraphSeparatorCommand final : public CompositeEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<InsertParagraphSeparatorCommand> create(Document& document, bool useDefaultParagraphElement = false, bool pasteBlockquoteIntoUnquotedArea = false)
+    static PassRefPtr<InsertParagraphSeparatorCommand> create(Document& document, bool useDefaultParagraphElement = false, bool pasteBlockquoteIntoUnquotedArea = false)
     {
-        return adoptRefWillBeNoop(new InsertParagraphSeparatorCommand(document, useDefaultParagraphElement, pasteBlockquoteIntoUnquotedArea));
+        return adoptRef(new InsertParagraphSeparatorCommand(document, useDefaultParagraphElement, pasteBlockquoteIntoUnquotedArea));
     }
 
     virtual void trace(Visitor*) override;
@@ -47,14 +47,14 @@ private:
     virtual void doApply() override;
 
     void calculateStyleBeforeInsertion(const Position&);
-    void getAncestorsInsideBlock(const Node* insertionNode, Element* outerBlock, WillBeHeapVector<RefPtrWillBeMember<Element> >& ancestors);
-    PassRefPtrWillBeRawPtr<Element> cloneHierarchyUnderNewBlock(const WillBeHeapVector<RefPtrWillBeMember<Element> >& ancestors, PassRefPtrWillBeRawPtr<Element> blockToInsert);
+    void getAncestorsInsideBlock(const Node* insertionNode, Element* outerBlock, Vector<RefPtr<Element> >& ancestors);
+    PassRefPtr<Element> cloneHierarchyUnderNewBlock(const Vector<RefPtr<Element> >& ancestors, PassRefPtr<Element> blockToInsert);
 
     bool shouldUseDefaultParagraphElement(Element*) const;
 
     virtual bool preservesTypingStyle() const override;
 
-    RefPtrWillBeMember<EditingStyle> m_style;
+    RefPtr<EditingStyle> m_style;
 
     bool m_mustUseDefaultParagraphElement;
 };

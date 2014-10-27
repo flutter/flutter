@@ -16,7 +16,7 @@ class WebGLTexture;
 class WebGLCompressedTextureETC1 final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<WebGLCompressedTextureETC1> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLCompressedTextureETC1> create(WebGLRenderingContextBase*);
     static bool supported(WebGLRenderingContextBase*);
     static const char* extensionName();
 

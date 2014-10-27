@@ -47,7 +47,7 @@ StyleFetchedImageSet::~StyleFetchedImageSet()
     m_bestFitImage->removeClient(this);
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> StyleFetchedImageSet::cssValue() const
+PassRefPtr<CSSValue> StyleFetchedImageSet::cssValue() const
 {
     return m_imageSetValue;
 }

@@ -38,22 +38,22 @@ class TouchEvent final : public UIEventWithKeyState {
 public:
     virtual ~TouchEvent();
 
-    static PassRefPtrWillBeRawPtr<TouchEvent> create()
+    static PassRefPtr<TouchEvent> create()
     {
-        return adoptRefWillBeNoop(new TouchEvent);
+        return adoptRef(new TouchEvent);
     }
-    static PassRefPtrWillBeRawPtr<TouchEvent> create(TouchList* touches,
+    static PassRefPtr<TouchEvent> create(TouchList* touches,
         TouchList* targetTouches, TouchList* changedTouches,
-        const AtomicString& type, PassRefPtrWillBeRawPtr<AbstractView> view,
+        const AtomicString& type, PassRefPtr<AbstractView> view,
         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, bool cancelable)
     {
-        return adoptRefWillBeNoop(new TouchEvent(touches, targetTouches, changedTouches, type, view,
+        return adoptRef(new TouchEvent(touches, targetTouches, changedTouches, type, view,
             ctrlKey, altKey, shiftKey, metaKey, cancelable));
     }
 
     void initTouchEvent(TouchList* touches, TouchList* targetTouches,
         TouchList* changedTouches, const AtomicString& type,
-        PassRefPtrWillBeRawPtr<AbstractView>,
+        PassRefPtr<AbstractView>,
         int, int, int, int, // unused useless members of web exposed API
         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey);
 
@@ -61,9 +61,9 @@ public:
     TouchList* targetTouches() const { return m_targetTouches.get(); }
     TouchList* changedTouches() const { return m_changedTouches.get(); }
 
-    void setTouches(PassRefPtrWillBeRawPtr<TouchList> touches) { m_touches = touches; }
-    void setTargetTouches(PassRefPtrWillBeRawPtr<TouchList> targetTouches) { m_targetTouches = targetTouches; }
-    void setChangedTouches(PassRefPtrWillBeRawPtr<TouchList> changedTouches) { m_changedTouches = changedTouches; }
+    void setTouches(PassRefPtr<TouchList> touches) { m_touches = touches; }
+    void setTargetTouches(PassRefPtr<TouchList> targetTouches) { m_targetTouches = targetTouches; }
+    void setChangedTouches(PassRefPtr<TouchList> changedTouches) { m_changedTouches = changedTouches; }
 
     virtual bool isTouchEvent() const override;
 
@@ -77,20 +77,20 @@ private:
     TouchEvent();
     TouchEvent(TouchList* touches, TouchList* targetTouches,
             TouchList* changedTouches, const AtomicString& type,
-            PassRefPtrWillBeRawPtr<AbstractView>,
+            PassRefPtr<AbstractView>,
             bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, bool cancelable);
 
-    RefPtrWillBeMember<TouchList> m_touches;
-    RefPtrWillBeMember<TouchList> m_targetTouches;
-    RefPtrWillBeMember<TouchList> m_changedTouches;
+    RefPtr<TouchList> m_touches;
+    RefPtr<TouchList> m_targetTouches;
+    RefPtr<TouchList> m_changedTouches;
 };
 
 class TouchEventDispatchMediator final : public EventDispatchMediator {
 public:
-    static PassRefPtrWillBeRawPtr<TouchEventDispatchMediator> create(PassRefPtrWillBeRawPtr<TouchEvent>);
+    static PassRefPtr<TouchEventDispatchMediator> create(PassRefPtr<TouchEvent>);
 
 private:
-    explicit TouchEventDispatchMediator(PassRefPtrWillBeRawPtr<TouchEvent>);
+    explicit TouchEventDispatchMediator(PassRefPtr<TouchEvent>);
     TouchEvent* event() const;
     virtual bool dispatchEvent(EventDispatcher*) const override;
 };

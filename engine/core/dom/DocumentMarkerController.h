@@ -51,7 +51,7 @@ private:
     Vector<String> m_words;
 };
 
-class DocumentMarkerController final : public NoBaseWillBeGarbageCollected<DocumentMarkerController> {
+class DocumentMarkerController final : public DummyBase<DocumentMarkerController> {
     WTF_MAKE_NONCOPYABLE(DocumentMarkerController); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(DocumentMarkerController);
 public:
@@ -99,9 +99,9 @@ public:
 private:
     void addMarker(Node*, const DocumentMarker&);
 
-    typedef WillBeHeapVector<OwnPtrWillBeMember<RenderedDocumentMarker> > MarkerList;
-    typedef WillBeHeapVector<OwnPtrWillBeMember<MarkerList>, DocumentMarker::MarkerTypeIndexesCount> MarkerLists;
-    typedef WillBeHeapHashMap<RawPtrWillBeWeakMember<const Node>, OwnPtrWillBeMember<MarkerLists> > MarkerMap;
+    typedef Vector<OwnPtr<RenderedDocumentMarker> > MarkerList;
+    typedef Vector<OwnPtr<MarkerList>, DocumentMarker::MarkerTypeIndexesCount> MarkerLists;
+    typedef HashMap<RawPtr<const Node>, OwnPtr<MarkerLists> > MarkerMap;
     void mergeOverlapping(MarkerList*, DocumentMarker&);
     bool possiblyHasMarkers(DocumentMarker::MarkerTypes);
     void removeMarkersFromList(MarkerMap::iterator, DocumentMarker::MarkerTypes);

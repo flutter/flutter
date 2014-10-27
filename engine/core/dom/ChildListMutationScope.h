@@ -49,13 +49,13 @@ class MutationObserverInterestGroup;
 // active ChildListMutationScopes for that Node. Once the last ChildListMutationScope
 // is destructed the accumulator enqueues a mutation record for the recorded
 // mutations and the accumulator can be garbage collected.
-class ChildListMutationAccumulator final : public RefCountedWillBeGarbageCollected<ChildListMutationAccumulator> {
+class ChildListMutationAccumulator final : public RefCounted<ChildListMutationAccumulator> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ChildListMutationAccumulator);
 public:
-    static PassRefPtrWillBeRawPtr<ChildListMutationAccumulator> getOrCreate(Node&);
+    static PassRefPtr<ChildListMutationAccumulator> getOrCreate(Node&);
 
-    void childAdded(PassRefPtrWillBeRawPtr<Node>);
-    void willRemoveChild(PassRefPtrWillBeRawPtr<Node>);
+    void childAdded(PassRefPtr<Node>);
+    void willRemoveChild(PassRefPtr<Node>);
 
     bool hasObservers() const { return m_observers; }
 
@@ -67,22 +67,22 @@ public:
     void trace(Visitor*);
 
 private:
-    ChildListMutationAccumulator(PassRefPtrWillBeRawPtr<Node>, PassOwnPtrWillBeRawPtr<MutationObserverInterestGroup>);
+    ChildListMutationAccumulator(PassRefPtr<Node>, PassOwnPtr<MutationObserverInterestGroup>);
 
     void enqueueMutationRecord();
     bool isEmpty();
     bool isAddedNodeInOrder(Node*);
     bool isRemovedNodeInOrder(Node*);
 
-    RefPtrWillBeMember<Node> m_target;
+    RefPtr<Node> m_target;
 
-    WillBeHeapVector<RefPtrWillBeMember<Node> > m_removedNodes;
-    WillBeHeapVector<RefPtrWillBeMember<Node> > m_addedNodes;
-    RefPtrWillBeMember<Node> m_previousSibling;
-    RefPtrWillBeMember<Node> m_nextSibling;
-    RawPtrWillBeMember<Node> m_lastAdded;
+    Vector<RefPtr<Node> > m_removedNodes;
+    Vector<RefPtr<Node> > m_addedNodes;
+    RefPtr<Node> m_previousSibling;
+    RefPtr<Node> m_nextSibling;
+    RawPtr<Node> m_lastAdded;
 
-    OwnPtrWillBeMember<MutationObserverInterestGroup> m_observers;
+    OwnPtr<MutationObserverInterestGroup> m_observers;
 
     unsigned m_mutationScopes;
 };
@@ -122,7 +122,7 @@ public:
     }
 
 private:
-    RefPtrWillBeMember<ChildListMutationAccumulator> m_accumulator;
+    RefPtr<ChildListMutationAccumulator> m_accumulator;
 };
 
 } // namespace blink

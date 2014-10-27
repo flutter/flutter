@@ -11,9 +11,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<AnimationNodeTiming> AnimationNodeTiming::create(AnimationNode* parent)
+PassRefPtr<AnimationNodeTiming> AnimationNodeTiming::create(AnimationNode* parent)
 {
-    return adoptRefWillBeNoop(new AnimationNodeTiming(parent));
+    return adoptRef(new AnimationNodeTiming(parent));
 }
 
 AnimationNodeTiming::AnimationNodeTiming(AnimationNode* parent)

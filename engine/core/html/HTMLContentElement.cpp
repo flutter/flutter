@@ -108,7 +108,7 @@ bool HTMLContentElement::validateSelect() const
     return true;
 }
 
-static inline bool checkOneSelector(const CSSSelector& selector, const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth)
+static inline bool checkOneSelector(const CSSSelector& selector, const Vector<RawPtr<Node>, 32>& siblings, int nth)
 {
     Element* element = toElement(siblings[nth]);
     SelectorChecker selectorChecker(element->document(), SelectorChecker::CollectingCSSRules);
@@ -116,7 +116,7 @@ static inline bool checkOneSelector(const CSSSelector& selector, const WillBeHea
     return selectorChecker.match(context);
 }
 
-bool HTMLContentElement::matchSelector(const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth) const
+bool HTMLContentElement::matchSelector(const Vector<RawPtr<Node>, 32>& siblings, int nth) const
 {
     for (const CSSSelector* selector = selectorList().first(); selector; selector = CSSSelectorList::next(*selector)) {
         if (checkOneSelector(*selector, siblings, nth))

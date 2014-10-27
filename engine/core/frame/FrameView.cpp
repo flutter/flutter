@@ -654,7 +654,7 @@ void FrameView::removeWidget(RenderWidget* object)
 
 void FrameView::updateWidgetPositions()
 {
-    WillBeHeapVector<RefPtrWillBeMember<RenderWidget> > widgets;
+    Vector<RefPtr<RenderWidget> > widgets;
     copyToVector(m_widgets, widgets);
 
     // Script or plugins could detach the frame so abort processing if that happens.

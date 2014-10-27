@@ -34,9 +34,9 @@ namespace blink {
 
 class CSSCubicBezierTimingFunctionValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSCubicBezierTimingFunctionValue> create(double x1, double y1, double x2, double y2)
+    static PassRefPtr<CSSCubicBezierTimingFunctionValue> create(double x1, double y1, double x2, double y2)
     {
-        return adoptRefWillBeNoop(new CSSCubicBezierTimingFunctionValue(x1, y1, x2, y2));
+        return adoptRef(new CSSCubicBezierTimingFunctionValue(x1, y1, x2, y2));
     }
 
     String customCSSText() const;
@@ -70,9 +70,9 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSCubicBezierTimingFunctionValue, isCubicBezierTimi
 
 class CSSStepsTimingFunctionValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSStepsTimingFunctionValue> create(int steps, StepsTimingFunction::StepAtPosition stepAtPosition)
+    static PassRefPtr<CSSStepsTimingFunctionValue> create(int steps, StepsTimingFunction::StepAtPosition stepAtPosition)
     {
-        return adoptRefWillBeNoop(new CSSStepsTimingFunctionValue(steps, stepAtPosition));
+        return adoptRef(new CSSStepsTimingFunctionValue(steps, stepAtPosition));
     }
 
     int numberOfSteps() const { return m_steps; }

@@ -65,7 +65,7 @@ protected:
     virtual blink::WebGraphicsContext3D* getAWebGraphicsContext3D() const override final;
 
 private:
-    RawPtrWillBeMember<WebGLRenderingContextBase> m_context;
+    RawPtr<WebGLRenderingContextBase> m_context;
 #if ENABLE(OILPAN)
     RefPtr<WebGLSharedWebGraphicsContext3D> m_sharedWebGraphicsContext3D;
 #endif

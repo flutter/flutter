@@ -44,9 +44,9 @@ class CSSAnimations;
 class RenderObject;
 class Element;
 
-typedef WillBeHeapHashCountedSet<RawPtrWillBeWeakMember<AnimationPlayer> > AnimationPlayerCountedSet;
+typedef HashCountedSet<RawPtr<AnimationPlayer> > AnimationPlayerCountedSet;
 
-class ActiveAnimations : public NoBaseWillBeGarbageCollectedFinalized<ActiveAnimations> {
+class ActiveAnimations : public DummyBase<ActiveAnimations> {
     WTF_MAKE_NONCOPYABLE(ActiveAnimations);
 public:
     ActiveAnimations()

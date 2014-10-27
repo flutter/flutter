@@ -37,10 +37,10 @@
 
 namespace blink {
 
-class ExecutionContext::PendingException : public NoBaseWillBeGarbageCollectedFinalized<ExecutionContext::PendingException> {
+class ExecutionContext::PendingException : public DummyBase<ExecutionContext::PendingException> {
     WTF_MAKE_NONCOPYABLE(PendingException);
 public:
-    PendingException(const String& errorMessage, int lineNumber, int columnNumber, int scriptId, const String& sourceURL, PassRefPtrWillBeRawPtr<ScriptCallStack> callStack)
+    PendingException(const String& errorMessage, int lineNumber, int columnNumber, int scriptId, const String& sourceURL, PassRefPtr<ScriptCallStack> callStack)
         : m_errorMessage(errorMessage)
         , m_lineNumber(lineNumber)
         , m_columnNumber(columnNumber)
@@ -58,7 +58,7 @@ public:
     int m_columnNumber;
     int m_scriptId;
     String m_sourceURL;
-    RefPtrWillBeMember<ScriptCallStack> m_callStack;
+    RefPtr<ScriptCallStack> m_callStack;
 };
 
 ExecutionContext::ExecutionContext()
@@ -103,13 +103,13 @@ bool ExecutionContext::shouldSanitizeScriptError(const String& sourceURL)
     return false;
 }
 
-void ExecutionContext::reportException(PassRefPtrWillBeRawPtr<ErrorEvent> event, int scriptId, PassRefPtrWillBeRawPtr<ScriptCallStack> callStack)
+void ExecutionContext::reportException(PassRefPtr<ErrorEvent> event, int scriptId, PassRefPtr<ScriptCallStack> callStack)
 {
-    RefPtrWillBeRawPtr<ErrorEvent> errorEvent = event;
+    RefPtr<ErrorEvent> errorEvent = event;
     if (m_inDispatchErrorEvent) {
         if (!m_pendingExceptions)
-            m_pendingExceptions = adoptPtrWillBeNoop(new WillBeHeapVector<OwnPtrWillBeMember<PendingException> >());
-        m_pendingExceptions->append(adoptPtrWillBeNoop(new PendingException(errorEvent->messageForConsole(), errorEvent->lineno(), errorEvent->colno(), scriptId, errorEvent->filename(), callStack)));
+            m_pendingExceptions = adoptPtr(new Vector<OwnPtr<PendingException> >());
+        m_pendingExceptions->append(adoptPtr(new PendingException(errorEvent->messageForConsole(), errorEvent->lineno(), errorEvent->colno(), scriptId, errorEvent->filename(), callStack)));
         return;
     }
 
@@ -128,14 +128,14 @@ void ExecutionContext::reportException(PassRefPtrWillBeRawPtr<ErrorEvent> event,
     m_pendingExceptions.clear();
 }
 
-void ExecutionContext::addConsoleMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> consoleMessage)
+void ExecutionContext::addConsoleMessage(PassRefPtr<ConsoleMessage> consoleMessage)
 {
     if (!m_client)
         return;
     m_client->addMessage(consoleMessage);
 }
 
-bool ExecutionContext::dispatchErrorEvent(PassRefPtrWillBeRawPtr<ErrorEvent> event)
+bool ExecutionContext::dispatchErrorEvent(PassRefPtr<ErrorEvent> event)
 {
     if (!m_client)
         return false;
@@ -143,7 +143,7 @@ bool ExecutionContext::dispatchErrorEvent(PassRefPtrWillBeRawPtr<ErrorEvent> eve
     if (!target)
         return false;
 
-    RefPtrWillBeRawPtr<ErrorEvent> errorEvent = event;
+    RefPtr<ErrorEvent> errorEvent = event;
     if (shouldSanitizeScriptError(errorEvent->filename()))
         errorEvent = ErrorEvent::createSanitizedError(errorEvent->world());
 
@@ -253,7 +253,7 @@ void ExecutionContext::trace(Visitor* visitor)
 #if ENABLE(OILPAN)
     visitor->trace(m_pendingExceptions);
 #endif
-    WillBeHeapSupplementable<ExecutionContext>::trace(visitor);
+    Supplementable<ExecutionContext>::trace(visitor);
     LifecycleContext<ExecutionContext>::trace(visitor);
 }
 

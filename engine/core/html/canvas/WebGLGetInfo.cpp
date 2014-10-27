@@ -99,7 +99,7 @@ WebGLGetInfo::WebGLGetInfo(unsigned value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLBuffer> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLBuffer> value)
     : m_type(kTypeWebGLBuffer)
     , m_bool(false)
     , m_float(0)
@@ -119,7 +119,7 @@ WebGLGetInfo::WebGLGetInfo(PassRefPtr<Float32Array> value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLFramebuffer> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLFramebuffer> value)
     : m_type(kTypeWebGLFramebuffer)
     , m_bool(false)
     , m_float(0)
@@ -139,7 +139,7 @@ WebGLGetInfo::WebGLGetInfo(PassRefPtr<Int32Array> value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLProgram> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLProgram> value)
     : m_type(kTypeWebGLProgram)
     , m_bool(false)
     , m_float(0)
@@ -149,7 +149,7 @@ WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLProgram> value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLRenderbuffer> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLRenderbuffer> value)
     : m_type(kTypeWebGLRenderbuffer)
     , m_bool(false)
     , m_float(0)
@@ -159,7 +159,7 @@ WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLRenderbuffer> value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLTexture> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLTexture> value)
     : m_type(kTypeWebGLTexture)
     , m_bool(false)
     , m_float(0)
@@ -189,7 +189,7 @@ WebGLGetInfo::WebGLGetInfo(PassRefPtr<Uint32Array> value)
 {
 }
 
-WebGLGetInfo::WebGLGetInfo(PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> value)
+WebGLGetInfo::WebGLGetInfo(PassRefPtr<WebGLVertexArrayObjectOES> value)
     : m_type(kTypeWebGLVertexArrayObjectOES)
     , m_bool(false)
     , m_float(0)
@@ -240,7 +240,7 @@ unsigned WebGLGetInfo::getUnsignedInt() const
     return m_unsignedInt;
 }
 
-PassRefPtrWillBeRawPtr<WebGLBuffer> WebGLGetInfo::getWebGLBuffer() const
+PassRefPtr<WebGLBuffer> WebGLGetInfo::getWebGLBuffer() const
 {
     ASSERT(getType() == kTypeWebGLBuffer);
     return m_webglBuffer;
@@ -252,7 +252,7 @@ PassRefPtr<Float32Array> WebGLGetInfo::getWebGLFloatArray() const
     return m_webglFloatArray;
 }
 
-PassRefPtrWillBeRawPtr<WebGLFramebuffer> WebGLGetInfo::getWebGLFramebuffer() const
+PassRefPtr<WebGLFramebuffer> WebGLGetInfo::getWebGLFramebuffer() const
 {
     ASSERT(getType() == kTypeWebGLFramebuffer);
     return m_webglFramebuffer;
@@ -264,19 +264,19 @@ PassRefPtr<Int32Array> WebGLGetInfo::getWebGLIntArray() const
     return m_webglIntArray;
 }
 
-PassRefPtrWillBeRawPtr<WebGLProgram> WebGLGetInfo::getWebGLProgram() const
+PassRefPtr<WebGLProgram> WebGLGetInfo::getWebGLProgram() const
 {
     ASSERT(getType() == kTypeWebGLProgram);
     return m_webglProgram;
 }
 
-PassRefPtrWillBeRawPtr<WebGLRenderbuffer> WebGLGetInfo::getWebGLRenderbuffer() const
+PassRefPtr<WebGLRenderbuffer> WebGLGetInfo::getWebGLRenderbuffer() const
 {
     ASSERT(getType() == kTypeWebGLRenderbuffer);
     return m_webglRenderbuffer;
 }
 
-PassRefPtrWillBeRawPtr<WebGLTexture> WebGLGetInfo::getWebGLTexture() const
+PassRefPtr<WebGLTexture> WebGLGetInfo::getWebGLTexture() const
 {
     ASSERT(getType() == kTypeWebGLTexture);
     return m_webglTexture;
@@ -294,7 +294,7 @@ PassRefPtr<Uint32Array> WebGLGetInfo::getWebGLUnsignedIntArray() const
     return m_webglUnsignedIntArray;
 }
 
-PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> WebGLGetInfo::getWebGLVertexArrayObjectOES() const
+PassRefPtr<WebGLVertexArrayObjectOES> WebGLGetInfo::getWebGLVertexArrayObjectOES() const
 {
     ASSERT(getType() == kTypeWebGLVertexArrayObjectOES);
     return m_webglVertexArrayObject;

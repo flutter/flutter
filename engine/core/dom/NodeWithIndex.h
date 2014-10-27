@@ -56,7 +56,7 @@ public:
 private:
     bool hasIndex() const { return m_index >= 0; }
 
-    RawPtrWillBeMember<Node> m_node;
+    RawPtr<Node> m_node;
     mutable int m_index;
 };
 

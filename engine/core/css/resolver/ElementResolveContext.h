@@ -46,8 +46,8 @@ public:
     bool distributedToInsertionPoint() const { return m_distributedToInsertionPoint; }
 
 private:
-    RawPtrWillBeMember<Element> m_element;
-    RawPtrWillBeMember<ContainerNode> m_parentNode;
+    RawPtr<Element> m_element;
+    RawPtr<ContainerNode> m_parentNode;
     RenderStyle* m_rootElementStyle;
     bool m_distributedToInsertionPoint;
 };

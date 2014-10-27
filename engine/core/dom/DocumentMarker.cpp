@@ -39,7 +39,7 @@ DocumentMarkerDetails::~DocumentMarkerDetails()
 
 class DocumentMarkerDescription final : public DocumentMarkerDetails {
 public:
-    static PassRefPtrWillBeRawPtr<DocumentMarkerDescription> create(const String&);
+    static PassRefPtr<DocumentMarkerDescription> create(const String&);
 
     const String& description() const { return m_description; }
     virtual bool isDescription() const override { return true; }
@@ -53,9 +53,9 @@ private:
     String m_description;
 };
 
-PassRefPtrWillBeRawPtr<DocumentMarkerDescription> DocumentMarkerDescription::create(const String& description)
+PassRefPtr<DocumentMarkerDescription> DocumentMarkerDescription::create(const String& description)
 {
-    return adoptRefWillBeNoop(new DocumentMarkerDescription(description));
+    return adoptRef(new DocumentMarkerDescription(description));
 }
 
 inline DocumentMarkerDescription* toDocumentMarkerDescription(DocumentMarkerDetails* details)
@@ -68,7 +68,7 @@ inline DocumentMarkerDescription* toDocumentMarkerDescription(DocumentMarkerDeta
 
 class DocumentMarkerTextMatch final : public DocumentMarkerDetails {
 public:
-    static PassRefPtrWillBeRawPtr<DocumentMarkerTextMatch> instanceFor(bool);
+    static PassRefPtr<DocumentMarkerTextMatch> instanceFor(bool);
 
     bool activeMatch() const { return m_match; }
     virtual bool isTextMatch() const override { return true; }
@@ -82,10 +82,10 @@ private:
     bool m_match;
 };
 
-PassRefPtrWillBeRawPtr<DocumentMarkerTextMatch> DocumentMarkerTextMatch::instanceFor(bool match)
+PassRefPtr<DocumentMarkerTextMatch> DocumentMarkerTextMatch::instanceFor(bool match)
 {
-    DEFINE_STATIC_REF_WILL_BE_PERSISTENT(DocumentMarkerTextMatch, trueInstance, (adoptRefWillBeNoop(new DocumentMarkerTextMatch(true))));
-    DEFINE_STATIC_REF_WILL_BE_PERSISTENT(DocumentMarkerTextMatch, falseInstance, (adoptRefWillBeNoop(new DocumentMarkerTextMatch(false))));
+    DEFINE_STATIC_REF_WILL_BE_PERSISTENT(DocumentMarkerTextMatch, trueInstance, (adoptRef(new DocumentMarkerTextMatch(true))));
+    DEFINE_STATIC_REF_WILL_BE_PERSISTENT(DocumentMarkerTextMatch, falseInstance, (adoptRef(new DocumentMarkerTextMatch(false))));
     return match ? trueInstance : falseInstance;
 }
 
@@ -140,7 +140,7 @@ DocumentMarker::DocumentMarker(unsigned startOffset, unsigned endOffset, bool ac
 {
 }
 
-DocumentMarker::DocumentMarker(MarkerType type, unsigned startOffset, unsigned endOffset, PassRefPtrWillBeRawPtr<DocumentMarkerDetails> details)
+DocumentMarker::DocumentMarker(MarkerType type, unsigned startOffset, unsigned endOffset, PassRefPtr<DocumentMarkerDetails> details)
     : m_type(type)
     , m_startOffset(startOffset)
     , m_endOffset(endOffset)

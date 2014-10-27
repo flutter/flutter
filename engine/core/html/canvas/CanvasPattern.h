@@ -37,14 +37,14 @@ namespace blink {
 class ExceptionState;
 class Image;
 
-class CanvasPattern final : public RefCountedWillBeGarbageCollectedFinalized<CanvasPattern>, public ScriptWrappable {
+class CanvasPattern final : public RefCounted<CanvasPattern>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static Pattern::RepeatMode parseRepetitionType(const String&, ExceptionState&);
 
-    static PassRefPtrWillBeRawPtr<CanvasPattern> create(PassRefPtr<Image> image, Pattern::RepeatMode repeat)
+    static PassRefPtr<CanvasPattern> create(PassRefPtr<Image> image, Pattern::RepeatMode repeat)
     {
-        return adoptRefWillBeNoop(new CanvasPattern(image, repeat));
+        return adoptRef(new CanvasPattern(image, repeat));
     }
 
     Pattern* pattern() const { return m_pattern.get(); }

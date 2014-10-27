@@ -65,7 +65,7 @@ private:
     RefPtr<FilterEffectRenderer> m_renderer;
 
     static RenderLayerFilterInfoMap* s_filterMap;
-    WillBePersistentHeapVector<RefPtrWillBeMember<Element> > m_internalSVGReferences;
+    Vector<RefPtr<Element> > m_internalSVGReferences;
 };
 
 } // namespace blink

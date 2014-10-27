@@ -27,7 +27,7 @@ public:
 
 private:
     IncrementLoadEventDelayCount(Document&);
-    RefPtrWillBePersistent<Document> m_document;
+    RefPtr<Document> m_document;
 };
 }
 

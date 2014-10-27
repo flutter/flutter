@@ -36,7 +36,7 @@ class SegmentedString;
 class HTMLDocumentParser;
 class TextResourceDecoder;
 
-class DocumentParser : public RefCountedWillBeGarbageCollectedFinalized<DocumentParser> {
+class DocumentParser : public RefCounted<DocumentParser> {
 public:
     virtual ~DocumentParser();
     virtual void trace(Visitor*);
@@ -86,7 +86,7 @@ private:
 
     // Every DocumentParser needs a pointer back to the document.
     // m_document will be 0 after the parser is stopped.
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
 };
 
 } // namespace blink

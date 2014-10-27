@@ -46,7 +46,7 @@ private:
 
     friend v8::Handle<v8::Object> createV8HTMLWrapper(HTMLElement*, v8::Handle<v8::Object>, v8::Isolate*);
 
-    static v8::Handle<v8::Object> wrap(PassRefPtrWillBeRawPtr<ElementType>, v8::Handle<v8::Object> creationContext, v8::Isolate*, v8::Handle<v8::Object> (*createSpecificWrapper)(ElementType* element, v8::Handle<v8::Object> creationContext, v8::Isolate*));
+    static v8::Handle<v8::Object> wrap(PassRefPtr<ElementType>, v8::Handle<v8::Object> creationContext, v8::Isolate*, v8::Handle<v8::Object> (*createSpecificWrapper)(ElementType* element, v8::Handle<v8::Object> creationContext, v8::Isolate*));
 };
 
 } // namespace blink

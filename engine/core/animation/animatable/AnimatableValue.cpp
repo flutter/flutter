@@ -49,7 +49,7 @@ const AnimatableValue* AnimatableValue::neutralValue()
     return neutralSentinelValue;
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableValue::interpolate(const AnimatableValue* left, const AnimatableValue* right, double fraction)
+PassRefPtr<AnimatableValue> AnimatableValue::interpolate(const AnimatableValue* left, const AnimatableValue* right, double fraction)
 {
     ASSERT(left);
     ASSERT(right);

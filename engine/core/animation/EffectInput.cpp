@@ -44,7 +44,7 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<AnimationEffect> EffectInput::convert(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
+PassRefPtr<AnimationEffect> EffectInput::convert(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
 {
     // FIXME: Remove the dependency on element.
     if (!element)
@@ -55,7 +55,7 @@ PassRefPtrWillBeRawPtr<AnimationEffect> EffectInput::convert(Element* element, c
     double lastOffset = 0;
 
     for (size_t i = 0; i < keyframeDictionaryVector.size(); ++i) {
-        RefPtrWillBeRawPtr<StringKeyframe> keyframe = StringKeyframe::create();
+        RefPtr<StringKeyframe> keyframe = StringKeyframe::create();
 
         ScriptValue scriptValue;
         bool frameHasOffset = DictionaryHelper::get(keyframeDictionaryVector[i], "offset", scriptValue) && !scriptValue.isNull();
@@ -92,7 +92,7 @@ PassRefPtrWillBeRawPtr<AnimationEffect> EffectInput::convert(Element* element, c
 
         String timingFunctionString;
         if (DictionaryHelper::get(keyframeDictionaryVector[i], "easing", timingFunctionString)) {
-            if (RefPtrWillBeRawPtr<CSSValue> timingFunctionValue = BisonCSSParser::parseAnimationTimingFunctionValue(timingFunctionString))
+            if (RefPtr<CSSValue> timingFunctionValue = BisonCSSParser::parseAnimationTimingFunctionValue(timingFunctionString))
                 keyframe->setEasing(CSSToStyleMap::mapAnimationTimingFunction(timingFunctionValue.get(), true));
         }
 
@@ -109,7 +109,7 @@ PassRefPtrWillBeRawPtr<AnimationEffect> EffectInput::convert(Element* element, c
         }
     }
 
-    RefPtrWillBeRawPtr<StringKeyframeEffectModel> keyframeEffectModel = StringKeyframeEffectModel::create(keyframes);
+    RefPtr<StringKeyframeEffectModel> keyframeEffectModel = StringKeyframeEffectModel::create(keyframes);
     if (!keyframeEffectModel->isReplaceOnly()) {
         exceptionState.throwDOMException(NotSupportedError, "Partial keyframes are not supported.");
         return nullptr;

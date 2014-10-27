@@ -41,7 +41,7 @@ namespace {
 
     class WebGLRenderbufferAttachment final : public WebGLFramebuffer::WebGLAttachment {
     public:
-        static PassRefPtrWillBeRawPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLRenderbuffer*);
+        static PassRefPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLRenderbuffer*);
 
         virtual void trace(Visitor*) override;
 
@@ -60,12 +60,12 @@ namespace {
         virtual void attach(blink::WebGraphicsContext3D*, GLenum attachment) override;
         virtual void unattach(blink::WebGraphicsContext3D*, GLenum attachment) override;
 
-        RefPtrWillBeMember<WebGLRenderbuffer> m_renderbuffer;
+        RefPtr<WebGLRenderbuffer> m_renderbuffer;
     };
 
-    PassRefPtrWillBeRawPtr<WebGLFramebuffer::WebGLAttachment> WebGLRenderbufferAttachment::create(WebGLRenderbuffer* renderbuffer)
+    PassRefPtr<WebGLFramebuffer::WebGLAttachment> WebGLRenderbufferAttachment::create(WebGLRenderbuffer* renderbuffer)
     {
-        return adoptRefWillBeNoop(new WebGLRenderbufferAttachment(renderbuffer));
+        return adoptRef(new WebGLRenderbufferAttachment(renderbuffer));
     }
 
     void WebGLRenderbufferAttachment::trace(Visitor* visitor)
@@ -149,7 +149,7 @@ namespace {
 
     class WebGLTextureAttachment final : public WebGLFramebuffer::WebGLAttachment {
     public:
-        static PassRefPtrWillBeRawPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLTexture*, GLenum target, GLint level);
+        static PassRefPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLTexture*, GLenum target, GLint level);
 
         virtual void trace(Visitor*) override;
 
@@ -168,14 +168,14 @@ namespace {
         virtual void attach(blink::WebGraphicsContext3D*, GLenum attachment) override;
         virtual void unattach(blink::WebGraphicsContext3D*, GLenum attachment) override;
 
-        RefPtrWillBeMember<WebGLTexture> m_texture;
+        RefPtr<WebGLTexture> m_texture;
         GLenum m_target;
         GLint m_level;
     };
 
-    PassRefPtrWillBeRawPtr<WebGLFramebuffer::WebGLAttachment> WebGLTextureAttachment::create(WebGLTexture* texture, GLenum target, GLint level)
+    PassRefPtr<WebGLFramebuffer::WebGLAttachment> WebGLTextureAttachment::create(WebGLTexture* texture, GLenum target, GLint level)
     {
-        return adoptRefWillBeNoop(new WebGLTextureAttachment(texture, target, level));
+        return adoptRef(new WebGLTextureAttachment(texture, target, level));
     }
 
     void WebGLTextureAttachment::trace(Visitor* visitor)
@@ -269,9 +269,9 @@ WebGLFramebuffer::WebGLAttachment::~WebGLAttachment()
 {
 }
 
-PassRefPtrWillBeRawPtr<WebGLFramebuffer> WebGLFramebuffer::create(WebGLRenderingContextBase* ctx)
+PassRefPtr<WebGLFramebuffer> WebGLFramebuffer::create(WebGLRenderingContextBase* ctx)
 {
-    return adoptRefWillBeNoop(new WebGLFramebuffer(ctx));
+    return adoptRef(new WebGLFramebuffer(ctx));
 }
 
 WebGLFramebuffer::WebGLFramebuffer(WebGLRenderingContextBase* ctx)

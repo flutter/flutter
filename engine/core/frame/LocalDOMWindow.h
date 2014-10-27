@@ -80,18 +80,18 @@ enum PageshowEventPersistence {
 
 enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForwardList };
 
-class LocalDOMWindow final : public RefCountedWillBeGarbageCollectedFinalized<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public WillBeHeapSupplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
+class LocalDOMWindow final : public RefCounted<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
     DEFINE_WRAPPERTYPEINFO();
     REFCOUNTED_EVENT_TARGET(LocalDOMWindow);
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LocalDOMWindow);
 public:
-    static PassRefPtrWillBeRawPtr<LocalDOMWindow> create(LocalFrame& frame)
+    static PassRefPtr<LocalDOMWindow> create(LocalFrame& frame)
     {
-        return adoptRefWillBeNoop(new LocalDOMWindow(frame));
+        return adoptRef(new LocalDOMWindow(frame));
     }
     virtual ~LocalDOMWindow();
 
-    PassRefPtrWillBeRawPtr<Document> installNewDocument(const DocumentInit&);
+    PassRefPtr<Document> installNewDocument(const DocumentInit&);
 
     virtual const AtomicString& interfaceName() const override;
     virtual ExecutionContext* executionContext() const override;
@@ -103,7 +103,7 @@ public:
 
     void reset();
 
-    PassRefPtrWillBeRawPtr<MediaQueryList> matchMedia(const String&);
+    PassRefPtr<MediaQueryList> matchMedia(const String&);
 
     unsigned pendingUnloadEventListeners() const;
 
@@ -147,11 +147,11 @@ public:
 
     // DOM Level 2 Style Interface
 
-    PassRefPtrWillBeRawPtr<CSSStyleDeclaration> getComputedStyle(Element*, const String& pseudoElt) const;
+    PassRefPtr<CSSStyleDeclaration> getComputedStyle(Element*, const String& pseudoElt) const;
 
     // WebKit extensions
 
-    PassRefPtrWillBeRawPtr<CSSRuleList> getMatchedCSSRules(Element*, const String& pseudoElt) const;
+    PassRefPtr<CSSRuleList> getMatchedCSSRules(Element*, const String& pseudoElt) const;
     double devicePixelRatio() const;
 
     Console& console() const;
@@ -166,7 +166,7 @@ public:
     void resizeTo(float width, float height) const;
 
     // WebKit animation extensions
-    int requestAnimationFrame(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback>);
+    int requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelAnimationFrame(int id);
 
     DOMWindowCSS& css() const;
@@ -178,7 +178,7 @@ public:
     virtual void removeAllEventListeners() override;
 
     using EventTarget::dispatchEvent;
-    bool dispatchEvent(PassRefPtrWillBeRawPtr<Event> prpEvent, PassRefPtrWillBeRawPtr<EventTarget> prpTarget);
+    bool dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget);
 
     void dispatchLoadEvent();
 
@@ -194,8 +194,8 @@ public:
     PassOwnPtr<LifecycleNotifier<LocalDOMWindow> > createLifecycleNotifier();
 
     EventQueue* eventQueue() const;
-    void enqueueWindowEvent(PassRefPtrWillBeRawPtr<Event>);
-    void enqueueDocumentEvent(PassRefPtrWillBeRawPtr<Event>);
+    void enqueueWindowEvent(PassRefPtr<Event>);
+    void enqueueDocumentEvent(PassRefPtr<Event>);
     void enqueuePageshowEvent(PageshowEventPersistence);
     void enqueueHashchangeEvent(const String& oldURL, const String& newURL);
     void enqueuePopstateEvent(PassRefPtr<SerializedScriptValue>);
@@ -237,7 +237,7 @@ private:
 
     void removeAllEventListenersInternal(BroadcastListenerRemoval);
 
-    RefPtrWillBeMember<Document> m_document;
+    RefPtr<Document> m_document;
 
 #if ENABLE(ASSERT)
     bool m_hasBeenReset;
@@ -245,15 +245,15 @@ private:
 
     HashSet<DOMWindowProperty*> m_properties;
 
-    mutable RefPtrWillBeMember<Screen> m_screen;
-    mutable RefPtrWillBeMember<History> m_history;
-    mutable RefPtrWillBeMember<Console> m_console;
-    mutable RefPtrWillBeMember<Location> m_location;
-    mutable RefPtrWillBeMember<StyleMedia> m_media;
+    mutable RefPtr<Screen> m_screen;
+    mutable RefPtr<History> m_history;
+    mutable RefPtr<Console> m_console;
+    mutable RefPtr<Location> m_location;
+    mutable RefPtr<StyleMedia> m_media;
 
-    mutable RefPtrWillBeMember<DOMWindowCSS> m_css;
+    mutable RefPtr<DOMWindowCSS> m_css;
 
-    RefPtrWillBeMember<DOMWindowEventQueue> m_eventQueue;
+    RefPtr<DOMWindowEventQueue> m_eventQueue;
     RefPtr<SerializedScriptValue> m_pendingStateObject;
 };
 

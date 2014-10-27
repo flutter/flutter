@@ -31,9 +31,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLBuffer> WebGLBuffer::create(WebGLRenderingContextBase* ctx)
+PassRefPtr<WebGLBuffer> WebGLBuffer::create(WebGLRenderingContextBase* ctx)
 {
-    return adoptRefWillBeNoop(new WebGLBuffer(ctx));
+    return adoptRef(new WebGLBuffer(ctx));
 }
 
 WebGLBuffer::WebGLBuffer(WebGLRenderingContextBase* ctx)

@@ -250,10 +250,10 @@ static bool acceptsEditingFocus(const Element& element)
 }
 
 #ifndef NDEBUG
-typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<Document> > WeakDocumentSet;
+typedef HashSet<RawPtr<Document> > WeakDocumentSet;
 static WeakDocumentSet& liveDocumentSet()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<WeakDocumentSet>, set, (adoptPtrWillBeNoop(new WeakDocumentSet())));
+    DEFINE_STATIC_LOCAL(OwnPtr<WeakDocumentSet>, set, (adoptPtr(new WeakDocumentSet())));
     return *set;
 }
 #endif
@@ -317,7 +317,7 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_readyState(Complete)
     , m_isParsing(false)
     , m_containsValidityStyleRules(false)
-    , m_markers(adoptPtrWillBeNoop(new DocumentMarkerController))
+    , m_markers(adoptPtr(new DocumentMarkerController))
     , m_loadEventProgress(LoadEventNotRun)
     , m_startTime(currentTime())
     , m_documentClasses(documentClasses)
@@ -513,7 +513,7 @@ void Document::childrenChanged(const ChildrenChange& change)
     m_documentElement = ElementTraversal::firstWithin(*this);
 }
 
-PassRefPtrWillBeRawPtr<Element> Document::createElement(const AtomicString& name, ExceptionState& exceptionState)
+PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionState& exceptionState)
 {
     if (!isValidName(name)) {
         exceptionState.throwDOMException(InvalidCharacterError, "The tag name provided ('" + name + "') is not a valid name.");
@@ -525,14 +525,14 @@ PassRefPtrWillBeRawPtr<Element> Document::createElement(const AtomicString& name
     return Element::create(QualifiedName(name), this);
 }
 
-PassRefPtrWillBeRawPtr<Element> Document::createElement(const AtomicString& localName, const AtomicString& typeExtension, ExceptionState& exceptionState)
+PassRefPtr<Element> Document::createElement(const AtomicString& localName, const AtomicString& typeExtension, ExceptionState& exceptionState)
 {
     if (!isValidName(localName)) {
         exceptionState.throwDOMException(InvalidCharacterError, "The tag name provided ('" + localName + "') is not a valid name.");
         return nullptr;
     }
 
-    RefPtrWillBeRawPtr<Element> element;
+    RefPtr<Element> element;
 
     if (CustomElement::isValidName(localName) && registrationContext()) {
         element = registrationContext()->createCustomTagElement(*this, QualifiedName(localName));
@@ -618,25 +618,25 @@ LocalFrame* Document::executingFrame()
     return window->frame();
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> Document::createDocumentFragment()
+PassRefPtr<DocumentFragment> Document::createDocumentFragment()
 {
     return DocumentFragment::create(*this);
 }
 
-PassRefPtrWillBeRawPtr<Text> Document::createTextNode(const String& data)
+PassRefPtr<Text> Document::createTextNode(const String& data)
 {
     return Text::create(*this, data);
 }
 
-PassRefPtrWillBeRawPtr<Text> Document::createEditingTextNode(const String& text)
+PassRefPtr<Text> Document::createEditingTextNode(const String& text)
 {
     return Text::createEditingText(*this, text);
 }
 
-bool Document::importContainerNodeChildren(ContainerNode* oldContainerNode, PassRefPtrWillBeRawPtr<ContainerNode> newContainerNode, ExceptionState& exceptionState)
+bool Document::importContainerNodeChildren(ContainerNode* oldContainerNode, PassRefPtr<ContainerNode> newContainerNode, ExceptionState& exceptionState)
 {
     for (Node* oldChild = oldContainerNode->firstChild(); oldChild; oldChild = oldChild->nextSibling()) {
-        RefPtrWillBeRawPtr<Node> newChild = importNode(oldChild, true, exceptionState);
+        RefPtr<Node> newChild = importNode(oldChild, true, exceptionState);
         if (exceptionState.hadException())
             return false;
         newContainerNode->appendChild(newChild.release(), exceptionState);
@@ -647,14 +647,14 @@ bool Document::importContainerNodeChildren(ContainerNode* oldContainerNode, Pass
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionState& exceptionState)
+PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionState& exceptionState)
 {
     switch (importedNode->nodeType()) {
     case TEXT_NODE:
         return createTextNode(importedNode->nodeValue());
     case ELEMENT_NODE: {
         Element* oldElement = toElement(importedNode);
-        RefPtrWillBeRawPtr<Element> newElement = createElement(oldElement->tagQName(), false);
+        RefPtr<Element> newElement = createElement(oldElement->tagQName(), false);
 
         newElement->cloneDataFromElement(*oldElement);
 
@@ -679,7 +679,7 @@ PassRefPtrWillBeRawPtr<Node> Document::importNode(Node* importedNode, bool deep,
             return nullptr;
         }
         DocumentFragment* oldFragment = toDocumentFragment(importedNode);
-        RefPtrWillBeRawPtr<DocumentFragment> newFragment = createDocumentFragment();
+        RefPtr<DocumentFragment> newFragment = createDocumentFragment();
         if (deep && !importContainerNodeChildren(oldFragment, newFragment, exceptionState))
             return nullptr;
 
@@ -694,7 +694,7 @@ PassRefPtrWillBeRawPtr<Node> Document::importNode(Node* importedNode, bool deep,
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Node> Document::adoptNode(PassRefPtrWillBeRawPtr<Node> source, ExceptionState& exceptionState)
+PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& exceptionState)
 {
     EventQueueScope scope;
 
@@ -726,7 +726,7 @@ PassRefPtrWillBeRawPtr<Node> Document::adoptNode(PassRefPtrWillBeRawPtr<Node> so
 }
 
 // FIXME: This should really be in a possible ElementFactory class
-PassRefPtrWillBeRawPtr<Element> Document::createElement(const QualifiedName& qName, bool createdByParser)
+PassRefPtr<Element> Document::createElement(const QualifiedName& qName, bool createdByParser)
 {
     // FIXME(sky): This should only take a local name.
     return HTMLElementFactory::createHTMLElement(qName.localName(), *this, createdByParser);
@@ -800,7 +800,7 @@ Element* Document::elementFromPoint(int x, int y) const
     return TreeScope::elementFromPoint(x, y);
 }
 
-PassRefPtrWillBeRawPtr<Range> Document::caretRangeFromPoint(int x, int y)
+PassRefPtr<Range> Document::caretRangeFromPoint(int x, int y)
 {
     if (!renderView())
         return nullptr;
@@ -1024,7 +1024,7 @@ Settings* Document::settings() const
     return m_frame ? m_frame->settings() : 0;
 }
 
-PassRefPtrWillBeRawPtr<Range> Document::createRange()
+PassRefPtr<Range> Document::createRange()
 {
     return Range::create(*this);
 }
@@ -1135,7 +1135,7 @@ void Document::setupFontBuilder(RenderStyle* documentStyle)
 {
     FontBuilder fontBuilder;
     fontBuilder.initForStyleResolve(*this, documentStyle);
-    RefPtrWillBeRawPtr<CSSFontSelector> selector = m_styleEngine->fontSelector();
+    RefPtr<CSSFontSelector> selector = m_styleEngine->fontSelector();
     fontBuilder.createFontForDocument(selector, documentStyle);
 }
 
@@ -1443,7 +1443,7 @@ void Document::removeAllEventListeners()
         domWindow->removeAllEventListeners();
 }
 
-PassRefPtrWillBeRawPtr<DocumentParser> Document::createParser()
+PassRefPtr<DocumentParser> Document::createParser()
 {
     // FIXME(sky): Should we pass true for report errors like the inspector did?
     return HTMLDocumentParser::create(toHTMLDocument(*this), false);
@@ -1527,7 +1527,7 @@ void Document::implicitClose()
 
     // The call to dispatchWindowLoadEvent can detach the LocalDOMWindow and cause it (and its
     // attached Document) to be destroyed.
-    RefPtrWillBeRawPtr<LocalDOMWindow> protectedWindow(this->domWindow());
+    RefPtr<LocalDOMWindow> protectedWindow(this->domWindow());
 
     m_loadEventProgress = LoadEventInProgress;
 
@@ -1588,7 +1588,7 @@ void Document::checkCompleted()
 
 void Document::dispatchUnloadEvents()
 {
-    RefPtrWillBeRawPtr<Document> protect(this);
+    RefPtr<Document> protect(this);
     if (m_parser)
         m_parser->stopParsing();
 
@@ -1601,7 +1601,7 @@ void Document::dispatchUnloadEvents()
                 return;
 
             m_loadEventProgress = UnloadEventInProgress;
-            RefPtrWillBeRawPtr<Event> unloadEvent(Event::create(EventTypeNames::unload));
+            RefPtr<Event> unloadEvent(Event::create(EventTypeNames::unload));
             m_frame->domWindow()->dispatchEvent(unloadEvent, this);
         }
         m_loadEventProgress = UnloadEventHandled;
@@ -1674,9 +1674,9 @@ EventTarget* Document::errorEventTarget()
     return domWindow();
 }
 
-void Document::logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtrWillBeRawPtr<ScriptCallStack> callStack)
+void Document::logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtr<ScriptCallStack> callStack)
 {
-    RefPtrWillBeRawPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, errorMessage, sourceURL, lineNumber);
+    RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, errorMessage, sourceURL, lineNumber);
     consoleMessage->setScriptId(scriptId);
     consoleMessage->setCallStack(callStack);
     addMessage(consoleMessage.release());
@@ -1907,15 +1907,15 @@ bool Document::canReplaceChild(const Node& newChild, const Node& oldChild) const
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Node> Document::cloneNode(bool deep)
+PassRefPtr<Node> Document::cloneNode(bool deep)
 {
-    RefPtrWillBeRawPtr<Document> clone = cloneDocumentWithoutChildren();
+    RefPtr<Document> clone = cloneDocumentWithoutChildren();
     if (deep)
         cloneChildNodes(clone.get());
     return clone.release();
 }
 
-PassRefPtrWillBeRawPtr<Document> Document::cloneDocumentWithoutChildren()
+PassRefPtr<Document> Document::cloneDocumentWithoutChildren()
 {
     return create(DocumentInit(url()).withRegistrationContext(registrationContext()));
 }
@@ -1976,12 +1976,12 @@ void Document::styleResolverMayHaveChanged()
     styleResolverChanged(hasNodesWithPlaceholderStyle() ? FullStyleUpdate : AnalyzedStyleUpdate);
 }
 
-void Document::setHoverNode(PassRefPtrWillBeRawPtr<Node> newHoverNode)
+void Document::setHoverNode(PassRefPtr<Node> newHoverNode)
 {
     m_hoverNode = newHoverNode;
 }
 
-void Document::setActiveHoverElement(PassRefPtrWillBeRawPtr<Element> newActiveElement)
+void Document::setActiveHoverElement(PassRefPtr<Element> newActiveElement)
 {
     if (!newActiveElement) {
         m_activeHoverElement.clear();
@@ -2041,11 +2041,11 @@ void Document::activeChainNodeDetached(Node* node)
     m_activeHoverElement = activeNode && activeNode->isElementNode() ? toElement(activeNode) : 0;
 }
 
-bool Document::setFocusedElement(PassRefPtrWillBeRawPtr<Element> prpNewFocusedElement, FocusType type)
+bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, FocusType type)
 {
     m_clearFocusedElementTimer.stop();
 
-    RefPtrWillBeRawPtr<Element> newFocusedElement = prpNewFocusedElement;
+    RefPtr<Element> newFocusedElement = prpNewFocusedElement;
 
     // Make sure newFocusedNode is actually in this document
     if (newFocusedElement && (newFocusedElement->document() != this))
@@ -2055,7 +2055,7 @@ bool Document::setFocusedElement(PassRefPtrWillBeRawPtr<Element> prpNewFocusedEl
         return true;
 
     bool focusChangeBlocked = false;
-    RefPtrWillBeRawPtr<Element> oldFocusedElement = m_focusedElement;
+    RefPtr<Element> oldFocusedElement = m_focusedElement;
     m_focusedElement = nullptr;
 
     // Remove focus from the existing focus node (if any)
@@ -2287,12 +2287,12 @@ EventQueue* Document::eventQueue() const
     return m_domWindow->eventQueue();
 }
 
-void Document::enqueueAnimationFrameEvent(PassRefPtrWillBeRawPtr<Event> event)
+void Document::enqueueAnimationFrameEvent(PassRefPtr<Event> event)
 {
     ensureScriptedAnimationController().enqueueEvent(event);
 }
 
-void Document::enqueueUniqueAnimationFrameEvent(PassRefPtrWillBeRawPtr<Event> event)
+void Document::enqueueUniqueAnimationFrameEvent(PassRefPtr<Event> event)
 {
     ensureScriptedAnimationController().enqueuePerFrameEvent(event);
 }
@@ -2300,19 +2300,19 @@ void Document::enqueueUniqueAnimationFrameEvent(PassRefPtrWillBeRawPtr<Event> ev
 void Document::enqueueScrollEventForNode(Node* target)
 {
     // Per the W3C CSSOM View Module only scroll events fired at the document should bubble.
-    RefPtrWillBeRawPtr<Event> scrollEvent = target->isDocumentNode() ? Event::createBubble(EventTypeNames::scroll) : Event::create(EventTypeNames::scroll);
+    RefPtr<Event> scrollEvent = target->isDocumentNode() ? Event::createBubble(EventTypeNames::scroll) : Event::create(EventTypeNames::scroll);
     scrollEvent->setTarget(target);
     ensureScriptedAnimationController().enqueuePerFrameEvent(scrollEvent.release());
 }
 
 void Document::enqueueResizeEvent()
 {
-    RefPtrWillBeRawPtr<Event> event = Event::create(EventTypeNames::resize);
+    RefPtr<Event> event = Event::create(EventTypeNames::resize);
     event->setTarget(domWindow());
     ensureScriptedAnimationController().enqueuePerFrameEvent(event.release());
 }
 
-void Document::enqueueMediaQueryChangeListeners(WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> >& listeners)
+void Document::enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >& listeners)
 {
     ensureScriptedAnimationController().enqueueMediaQueryChangeListeners(listeners);
 }
@@ -2329,9 +2329,9 @@ void Document::registerEventFactory(PassOwnPtr<EventFactoryBase> eventFactory)
     eventFactories().add(eventFactory);
 }
 
-PassRefPtrWillBeRawPtr<Event> Document::createEvent(const String& eventType, ExceptionState& exceptionState)
+PassRefPtr<Event> Document::createEvent(const String& eventType, ExceptionState& exceptionState)
 {
-    RefPtrWillBeRawPtr<Event> event = nullptr;
+    RefPtr<Event> event = nullptr;
     for (EventFactorySet::const_iterator it = eventFactories().begin(); it != eventFactories().end(); ++it) {
         event = (*it)->create(eventType);
         if (event)
@@ -2588,7 +2588,7 @@ KURL Document::openSearchDescriptionURL()
     return KURL();
 }
 
-void Document::pushCurrentScript(PassRefPtrWillBeRawPtr<HTMLScriptElement> newCurrentScript)
+void Document::pushCurrentScript(PassRefPtr<HTMLScriptElement> newCurrentScript)
 {
     ASSERT(newCurrentScript);
     m_currentScriptStack.append(newCurrentScript);
@@ -2607,7 +2607,7 @@ Document& Document::topDocument() const
     return *doc;
 }
 
-WeakPtrWillBeRawPtr<Document> Document::contextDocument()
+WeakPtr<Document> Document::contextDocument()
 {
     if (m_contextDocument)
         return m_contextDocument;
@@ -2618,7 +2618,7 @@ WeakPtrWillBeRawPtr<Document> Document::contextDocument()
         return m_weakFactory.createWeakPtr();
 #endif
     }
-    return WeakPtrWillBeRawPtr<Document>(nullptr);
+    return WeakPtr<Document>(nullptr);
 }
 
 void Document::finishedParsing()
@@ -2631,7 +2631,7 @@ void Document::finishedParsing()
     // The loader's finishedParsing() method may invoke script that causes this object to
     // be dereferenced (when this document is in an iframe and the onload causes the iframe's src to change).
     // Keep it alive until we are done.
-    RefPtrWillBeRawPtr<Document> protect(this);
+    RefPtr<Document> protect(this);
 
     if (RefPtr<LocalFrame> f = frame()) {
         checkCompleted();
@@ -2693,7 +2693,7 @@ void Document::detachRange(Range* range)
     m_ranges.remove(range);
 }
 
-void Document::getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtrWillBeRawPtr<CanvasRenderingContext2D>& context2d, RefPtrWillBeRawPtr<WebGLRenderingContext>& context3d)
+void Document::getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtr<CanvasRenderingContext2D>& context2d, RefPtr<WebGLRenderingContext>& context3d)
 {
     HTMLCanvasElement& element = getCSSCanvasElement(name);
     element.setSize(IntSize(width, height));
@@ -2710,7 +2710,7 @@ void Document::getCSSCanvasContext(const String& type, const String& name, int w
 
 HTMLCanvasElement& Document::getCSSCanvasElement(const String& name)
 {
-    RefPtrWillBeMember<HTMLCanvasElement>& element = m_cssCanvasElements.add(name, nullptr).storedValue->value;
+    RefPtr<HTMLCanvasElement>& element = m_cssCanvasElements.add(name, nullptr).storedValue->value;
     if (!element) {
         element = HTMLCanvasElement::create(*this);
         element->setAccelerationDisabled(true);
@@ -2722,7 +2722,7 @@ void Document::reportBlockedScriptExecutionToInspector(const String& directiveTe
 {
 }
 
-void Document::addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> consoleMessage)
+void Document::addMessage(PassRefPtr<ConsoleMessage> consoleMessage)
 {
     if (!m_frame)
         return;
@@ -2775,7 +2775,7 @@ ScriptedAnimationController& Document::ensureScriptedAnimationController()
     return *m_scriptedAnimationController;
 }
 
-int Document::requestAnimationFrame(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback> callback)
+int Document::requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback> callback)
 {
     return ensureScriptedAnimationController().registerCallback(callback);
 }
@@ -2796,7 +2796,7 @@ void Document::serviceScriptedAnimations(double monotonicAnimationStartTime)
     m_scriptedAnimationController->serviceScriptedAnimations(monotonicAnimationStartTime);
 }
 
-PassRefPtrWillBeRawPtr<Touch> Document::createTouch(LocalDOMWindow* window, EventTarget* target, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const
+PassRefPtr<Touch> Document::createTouch(LocalDOMWindow* window, EventTarget* target, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const
 {
     // Match behavior from when these types were integers, and avoid surprises from someone explicitly
     // passing Infinity/NaN.
@@ -2825,7 +2825,7 @@ PassRefPtrWillBeRawPtr<Touch> Document::createTouch(LocalDOMWindow* window, Even
     return Touch::create(frame, target, identifier, FloatPoint(screenX, screenY), FloatPoint(pageX, pageY), FloatSize(radiusX, radiusY), rotationAngle, force);
 }
 
-PassRefPtrWillBeRawPtr<TouchList> Document::createTouchList(WillBeHeapVector<RefPtrWillBeMember<Touch> >& touches) const
+PassRefPtr<TouchList> Document::createTouchList(Vector<RefPtr<Touch> >& touches) const
 {
     return TouchList::adopt(touches);
 }
@@ -2939,7 +2939,7 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
     // at the time the mouse went down.
     bool mustBeInActiveChain = request.active() && request.move();
 
-    RefPtrWillBeRawPtr<Node> oldHoverNode = hoverNode();
+    RefPtr<Node> oldHoverNode = hoverNode();
 
     // Check to see if the hovered node has changed.
     // If it hasn't, we do not need to do anything.
@@ -2956,10 +2956,10 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
 
     // Locate the common ancestor render object for the two renderers.
     RenderObject* ancestor = nearestCommonHoverAncestor(oldHoverObj, newHoverObj);
-    RefPtrWillBeRawPtr<Node> ancestorNode(ancestor ? ancestor->node() : 0);
+    RefPtr<Node> ancestorNode(ancestor ? ancestor->node() : 0);
 
-    WillBeHeapVector<RefPtrWillBeMember<Node>, 32> nodesToRemoveFromChain;
-    WillBeHeapVector<RefPtrWillBeMember<Node>, 32> nodesToAddToChain;
+    Vector<RefPtr<Node>, 32> nodesToRemoveFromChain;
+    Vector<RefPtr<Node>, 32> nodesToAddToChain;
 
     if (oldHoverObj != newHoverObj) {
         // If the old hovered node is not nil but it's renderer is, it was probably detached as part of the :hover style
@@ -3103,7 +3103,7 @@ void Document::modifiedStyleSheet(StyleSheet* sheet, StyleResolverUpdateMode upd
 
 void Document::focusAutofocusElementTimerFired(Timer<Document>*)
 {
-    if (RefPtrWillBeRawPtr<Element> element = autofocusElement()) {
+    if (RefPtr<Element> element = autofocusElement()) {
         setAutofocusElement(nullptr);
         element->focus();
     }

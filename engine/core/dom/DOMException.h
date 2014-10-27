@@ -39,10 +39,10 @@ namespace blink {
 
 typedef int ExceptionCode;
 
-class DOMException final : public RefCountedWillBeGarbageCollectedFinalized<DOMException>, public ScriptWrappable {
+class DOMException final : public RefCounted<DOMException>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DOMException> create(ExceptionCode, const String& sanitizedMessage = String(), const String& unsanitizedMessage = String());
+    static PassRefPtr<DOMException> create(ExceptionCode, const String& sanitizedMessage = String(), const String& unsanitizedMessage = String());
 
     unsigned short code() const { return m_code; }
     String name() const { return m_name; }

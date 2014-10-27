@@ -41,17 +41,17 @@ struct TransitionEventInit : public EventInit {
 class TransitionEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<TransitionEvent> create()
+    static PassRefPtr<TransitionEvent> create()
     {
-        return adoptRefWillBeNoop(new TransitionEvent);
+        return adoptRef(new TransitionEvent);
     }
-    static PassRefPtrWillBeRawPtr<TransitionEvent> create(const AtomicString& type, const String& propertyName, double elapsedTime)
+    static PassRefPtr<TransitionEvent> create(const AtomicString& type, const String& propertyName, double elapsedTime)
     {
-        return adoptRefWillBeNoop(new TransitionEvent(type, propertyName, elapsedTime));
+        return adoptRef(new TransitionEvent(type, propertyName, elapsedTime));
     }
-    static PassRefPtrWillBeRawPtr<TransitionEvent> create(const AtomicString& type, const TransitionEventInit& initializer)
+    static PassRefPtr<TransitionEvent> create(const AtomicString& type, const TransitionEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new TransitionEvent(type, initializer));
+        return adoptRef(new TransitionEvent(type, initializer));
     }
 
     virtual ~TransitionEvent();

@@ -58,7 +58,7 @@ public:
 
 private:
     explicit FocusNavigationScope(TreeScope*);
-    RawPtrWillBeMember<TreeScope> m_rootTreeScope;
+    RawPtr<TreeScope> m_rootTreeScope;
 };
 
 class FocusController {

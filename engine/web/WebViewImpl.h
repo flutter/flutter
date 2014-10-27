@@ -291,7 +291,7 @@ public:
     void computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, const WebRect& blockRect, float padding, float defaultScaleWhenAlreadyLegible, float& scale, WebPoint& scroll);
     Node* bestTapNode(const PlatformGestureEvent& tapEvent);
     void enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent);
-    void enableTapHighlights(WillBeHeapVector<RawPtrWillBeMember<Node> >&);
+    void enableTapHighlights(Vector<RawPtr<Node> >&);
     void computeScaleAndScrollForFocusedNode(Node* focusedNode, float& scale, IntPoint& scroll, bool& needAnimation);
 
     void animateDoubleTapZoom(const IntPoint&);
@@ -396,7 +396,7 @@ private:
     WebSize m_size;
     bool m_fixedLayoutSizeLock;
 
-    OwnPtrWillBePersistent<Page> m_page;
+    OwnPtr<Page> m_page;
 
     // An object that can be used to manipulate m_page->settings() without linking
     // against WebCore. This is lazily allocated the first time GetWebSettings()
@@ -454,7 +454,7 @@ private:
     bool m_tabsToLinks;
 
     // If set, the (plugin) node which has mouse capture.
-    RefPtrWillBePersistent<Node> m_mouseCaptureNode;
+    RefPtr<Node> m_mouseCaptureNode;
     RefPtr<UserGestureToken> m_mouseCaptureGestureToken;
 
     IntRect m_rootLayerScrollDamage;

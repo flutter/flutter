@@ -160,9 +160,9 @@ Element* TreeScope::getElementById(const AtomicString& elementId) const
     return m_elementsById->getElementById(elementId, this);
 }
 
-const WillBeHeapVector<RawPtrWillBeMember<Element> >& TreeScope::getAllElementsById(const AtomicString& elementId) const
+const Vector<RawPtr<Element> >& TreeScope::getAllElementsById(const AtomicString& elementId) const
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<WillBeHeapVector<RawPtrWillBeMember<Element> > >, emptyVector, (adoptPtrWillBeNoop(new WillBeHeapVector<RawPtrWillBeMember<Element> >())));
+    DEFINE_STATIC_LOCAL(OwnPtr<Vector<RawPtr<Element> > >, emptyVector, (adoptPtr(new Vector<RawPtr<Element> >())));
     if (elementId.isEmpty())
         return *emptyVector;
     if (!m_elementsById)

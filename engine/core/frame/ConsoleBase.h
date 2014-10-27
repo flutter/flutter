@@ -46,21 +46,21 @@ namespace blink {
 class ConsoleMessage;
 class ScriptArguments;
 
-class ConsoleBase : public RefCountedWillBeGarbageCollectedFinalized<ConsoleBase>, public ScriptWrappable {
+class ConsoleBase : public RefCounted<ConsoleBase>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    void debug(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void error(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void info(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void log(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void clear(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void warn(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void dir(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void dirxml(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void table(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void trace(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void assertCondition(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>, bool condition);
-    void count(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
+    void debug(ScriptState*, PassRefPtr<ScriptArguments>);
+    void error(ScriptState*, PassRefPtr<ScriptArguments>);
+    void info(ScriptState*, PassRefPtr<ScriptArguments>);
+    void log(ScriptState*, PassRefPtr<ScriptArguments>);
+    void clear(ScriptState*, PassRefPtr<ScriptArguments>);
+    void warn(ScriptState*, PassRefPtr<ScriptArguments>);
+    void dir(ScriptState*, PassRefPtr<ScriptArguments>);
+    void dirxml(ScriptState*, PassRefPtr<ScriptArguments>);
+    void table(ScriptState*, PassRefPtr<ScriptArguments>);
+    void trace(ScriptState*, PassRefPtr<ScriptArguments>);
+    void assertCondition(ScriptState*, PassRefPtr<ScriptArguments>, bool condition);
+    void count(ScriptState*, PassRefPtr<ScriptArguments>);
     void markTimeline(const String&);
     void profile(const String&);
     void profileEnd(const String&);
@@ -69,8 +69,8 @@ public:
     void timeStamp(const String&);
     void timeline(ScriptState*, const String&);
     void timelineEnd(ScriptState*, const String&);
-    void group(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
-    void groupCollapsed(ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>);
+    void group(ScriptState*, PassRefPtr<ScriptArguments>);
+    void groupCollapsed(ScriptState*, PassRefPtr<ScriptArguments>);
     void groupEnd();
 
     virtual void trace(Visitor*) { }
@@ -79,10 +79,10 @@ public:
 
 protected:
     virtual ExecutionContext* context() = 0;
-    virtual void reportMessageToConsole(PassRefPtrWillBeRawPtr<ConsoleMessage>) = 0;
+    virtual void reportMessageToConsole(PassRefPtr<ConsoleMessage>) = 0;
 
 private:
-    void internalAddMessage(MessageType, MessageLevel, ScriptState*, PassRefPtrWillBeRawPtr<ScriptArguments>, bool acceptNoArguments = false, bool printTrace = false);
+    void internalAddMessage(MessageType, MessageLevel, ScriptState*, PassRefPtr<ScriptArguments>, bool acceptNoArguments = false, bool printTrace = false);
 
     HashCountedSet<String> m_counts;
     HashMap<String, double> m_times;

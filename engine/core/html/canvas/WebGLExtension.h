@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class WebGLExtension : public RefCountedWillBeGarbageCollectedFinalized<WebGLExtension> {
+class WebGLExtension : public RefCounted<WebGLExtension> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     WebGLRenderingContextBase* context() { return m_context; }
@@ -59,7 +59,7 @@ public:
 protected:
     explicit WebGLExtension(WebGLRenderingContextBase*);
 
-    RawPtrWillBeWeakMember<WebGLRenderingContextBase> m_context;
+    RawPtr<WebGLRenderingContextBase> m_context;
 };
 
 } // namespace blink

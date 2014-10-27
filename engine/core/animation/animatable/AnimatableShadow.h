@@ -39,16 +39,16 @@ namespace blink {
 class AnimatableShadow final : public AnimatableValue {
 public:
     virtual ~AnimatableShadow() { }
-    static PassRefPtrWillBeRawPtr<AnimatableShadow> create(PassRefPtr<ShadowList> shadowList)
+    static PassRefPtr<AnimatableShadow> create(PassRefPtr<ShadowList> shadowList)
     {
-        return adoptRefWillBeNoop(new AnimatableShadow(shadowList));
+        return adoptRef(new AnimatableShadow(shadowList));
     }
     ShadowList* shadowList() const { return m_shadowList.get(); }
 
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     explicit AnimatableShadow(PassRefPtr<ShadowList> shadowList)

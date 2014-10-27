@@ -42,12 +42,12 @@ class NodeEventContext {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(NodeEventContext);
 public:
     // FIXME: Use ContainerNode instead of Node.
-    NodeEventContext(PassRefPtrWillBeRawPtr<Node>, PassRefPtrWillBeRawPtr<EventTarget> currentTarget);
+    NodeEventContext(PassRefPtr<Node>, PassRefPtr<EventTarget> currentTarget);
     void trace(Visitor*);
 
     Node* node() const { return m_node.get(); }
 
-    void setTreeScopeEventContext(PassRefPtrWillBeRawPtr<TreeScopeEventContext> prpTreeScopeEventContext) { m_treeScopeEventContext = prpTreeScopeEventContext; }
+    void setTreeScopeEventContext(PassRefPtr<TreeScopeEventContext> prpTreeScopeEventContext) { m_treeScopeEventContext = prpTreeScopeEventContext; }
     TreeScopeEventContext& treeScopeEventContext() { ASSERT(m_treeScopeEventContext); return *m_treeScopeEventContext; }
 
     EventTarget* target() const { return m_treeScopeEventContext->target(); }
@@ -58,9 +58,9 @@ public:
     void handleLocalEvents(Event*) const;
 
 private:
-    RefPtrWillBeMember<Node> m_node;
-    RefPtrWillBeMember<EventTarget> m_currentTarget;
-    RefPtrWillBeMember<TreeScopeEventContext> m_treeScopeEventContext;
+    RefPtr<Node> m_node;
+    RefPtr<EventTarget> m_currentTarget;
+    RefPtr<TreeScopeEventContext> m_treeScopeEventContext;
 };
 
 } // namespace blink

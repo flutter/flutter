@@ -33,7 +33,7 @@ template<typename NodeType> class TreeShared;
 template<typename NodeType> void adopted(TreeShared<NodeType>*);
 #endif
 
-template<typename NodeType> class TreeShared : public NoBaseWillBeGarbageCollectedFinalized<NodeType> {
+template<typename NodeType> class TreeShared : public DummyBase<NodeType> {
     WTF_MAKE_NONCOPYABLE(TreeShared);
 protected:
     TreeShared()

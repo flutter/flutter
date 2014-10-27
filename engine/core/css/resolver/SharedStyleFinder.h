@@ -71,7 +71,7 @@ private:
 
     bool m_elementAffectedByClassRules;
     const RuleFeatureSet& m_features;
-    RawPtrWillBeMember<RuleSet> m_attributeRuleSet;
+    RawPtr<RuleSet> m_attributeRuleSet;
     StyleResolver& m_styleResolver;
     const ElementResolveContext& m_context;
 };

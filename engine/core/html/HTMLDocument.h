@@ -31,9 +31,9 @@ namespace blink {
 class HTMLDocument : public Document {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<HTMLDocument> create(const DocumentInit& initializer = DocumentInit())
+    static PassRefPtr<HTMLDocument> create(const DocumentInit& initializer = DocumentInit())
     {
-        return adoptRefWillBeNoop(new HTMLDocument(initializer));
+        return adoptRef(new HTMLDocument(initializer));
     }
     virtual ~HTMLDocument();
 

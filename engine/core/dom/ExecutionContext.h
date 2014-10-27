@@ -53,7 +53,7 @@ class ScriptCallStack;
 
 class ExecutionContext
     : public LifecycleContext<ExecutionContext>
-    , public WillBeHeapSupplementable<ExecutionContext> {
+    , public Supplementable<ExecutionContext> {
 public:
     virtual void trace(Visitor*) override;
 
@@ -70,9 +70,9 @@ public:
     KURL contextCompleteURL(const String& url) const { return virtualCompleteURL(url); }
 
     bool shouldSanitizeScriptError(const String& sourceURL);
-    void reportException(PassRefPtrWillBeRawPtr<ErrorEvent>, int scriptId, PassRefPtrWillBeRawPtr<ScriptCallStack>);
+    void reportException(PassRefPtr<ErrorEvent>, int scriptId, PassRefPtr<ScriptCallStack>);
 
-    void addConsoleMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>);
+    void addConsoleMessage(PassRefPtr<ConsoleMessage>);
 
     PublicURLManager& publicURLManager();
 
@@ -116,7 +116,7 @@ protected:
 private:
     friend class DOMTimer; // For installNewTimeout() and removeTimeoutByID() below.
 
-    bool dispatchErrorEvent(PassRefPtrWillBeRawPtr<ErrorEvent>);
+    bool dispatchErrorEvent(PassRefPtr<ErrorEvent>);
 
 #if !ENABLE(OILPAN)
     virtual void refExecutionContext() = 0;
@@ -136,7 +136,7 @@ private:
 
     bool m_inDispatchErrorEvent;
     class PendingException;
-    OwnPtrWillBeMember<WillBeHeapVector<OwnPtrWillBeMember<PendingException> > > m_pendingExceptions;
+    OwnPtr<Vector<OwnPtr<PendingException> > > m_pendingExceptions;
 
     bool m_activeDOMObjectsAreSuspended;
     bool m_activeDOMObjectsAreStopped;

@@ -36,9 +36,9 @@ void HitRegion::trace(Visitor* visitor)
     visitor->trace(m_control);
 }
 
-void HitRegionManager::addHitRegion(PassRefPtrWillBeRawPtr<HitRegion> passHitRegion)
+void HitRegionManager::addHitRegion(PassRefPtr<HitRegion> passHitRegion)
 {
-    RefPtrWillBeRawPtr<HitRegion> hitRegion = passHitRegion;
+    RefPtr<HitRegion> hitRegion = passHitRegion;
 
     m_hitRegionList.add(hitRegion);
 
@@ -84,7 +84,7 @@ void HitRegionManager::removeHitRegionsInRect(const FloatRect& rect, const Affin
     HitRegionList toBeRemoved;
 
     for (HitRegionIterator it = m_hitRegionList.rbegin(); it != itEnd; ++it) {
-        RefPtrWillBeRawPtr<HitRegion> hitRegion = *it;
+        RefPtr<HitRegion> hitRegion = *it;
         hitRegion->removePixels(clearArea);
         if (hitRegion->path().isEmpty())
             toBeRemoved.add(hitRegion);
@@ -120,7 +120,7 @@ HitRegion* HitRegionManager::getHitRegionAtPoint(const LayoutPoint& point) const
     HitRegionIterator itEnd = m_hitRegionList.rend();
 
     for (HitRegionIterator it = m_hitRegionList.rbegin(); it != itEnd; ++it) {
-        RefPtrWillBeRawPtr<HitRegion> hitRegion = *it;
+        RefPtr<HitRegion> hitRegion = *it;
         if (hitRegion->contains(point))
             return hitRegion.get();
     }

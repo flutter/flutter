@@ -46,10 +46,10 @@ public:
         ruleSet->compactRulesIfNeeded();
     }
 
-    RawPtrWillBeMember<const RuleSet> ruleSet;
+    RawPtr<const RuleSet> ruleSet;
     const bool includeEmptyRules;
-    RawPtrWillBeMember<const ContainerNode> scope;
-    RawPtrWillBeMember<const CSSStyleSheet> styleSheet;
+    RawPtr<const ContainerNode> scope;
+    RawPtr<const CSSStyleSheet> styleSheet;
     const bool elementApplyAuthorStyles;
     const unsigned styleSheetIndex;
 };

@@ -14,7 +14,7 @@ namespace blink {
 
 namespace {
 
-    PassRefPtrWillBeRawPtr<AnimatableLength> create(const Length& length, double zoom = 1)
+    PassRefPtr<AnimatableLength> create(const Length& length, double zoom = 1)
     {
         return AnimatableLength::create(length, zoom);
     }

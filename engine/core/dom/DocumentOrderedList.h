@@ -49,7 +49,7 @@ public:
     void clear() { m_nodes.clear(); }
     size_t size() const { return m_nodes.size(); }
 
-    typedef WillBeHeapListHashSet<RawPtrWillBeMember<Node>, 32>::iterator iterator;
+    typedef ListHashSet<RawPtr<Node>, 32>::iterator iterator;
 
     iterator begin() { return m_nodes.begin(); }
     iterator end() { return m_nodes.end(); }
@@ -57,7 +57,7 @@ public:
     void trace(Visitor*);
 
 private:
-    WillBeHeapListHashSet<RawPtrWillBeMember<Node>, 32> m_nodes;
+    ListHashSet<RawPtr<Node>, 32> m_nodes;
 };
 
 }

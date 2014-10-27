@@ -31,16 +31,16 @@
 
 namespace blink {
 
-class NodeMutationObserverData final : public NoBaseWillBeGarbageCollected<NodeMutationObserverData> {
+class NodeMutationObserverData final : public DummyBase<NodeMutationObserverData> {
     WTF_MAKE_NONCOPYABLE(NodeMutationObserverData);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> > registry;
-    WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> > transientRegistry;
+    Vector<OwnPtr<MutationObserverRegistration> > registry;
+    HashSet<RawPtr<MutationObserverRegistration> > transientRegistry;
 
-    static PassOwnPtrWillBeRawPtr<NodeMutationObserverData> create()
+    static PassOwnPtr<NodeMutationObserverData> create()
     {
-        return adoptPtrWillBeNoop(new NodeMutationObserverData);
+        return adoptPtr(new NodeMutationObserverData);
     }
 
     void trace(Visitor* visitor)
@@ -55,7 +55,7 @@ private:
     NodeMutationObserverData() { }
 };
 
-class NodeRareData : public NoBaseWillBeGarbageCollectedFinalized<NodeRareData>, public NodeRareDataBase {
+class NodeRareData : public DummyBase<NodeRareData>, public NodeRareDataBase {
     WTF_MAKE_NONCOPYABLE(NodeRareData);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
@@ -89,7 +89,7 @@ protected:
     { }
 
 private:
-    OwnPtrWillBeMember<NodeMutationObserverData> m_mutationObserverData;
+    OwnPtr<NodeMutationObserverData> m_mutationObserverData;
 
     unsigned m_elementFlags : NumberOfElementFlags;
 protected:

@@ -43,7 +43,7 @@ class Canvas2DContextAttributes : public CanvasContextAttributes, public ScriptW
     DEFINE_WRAPPERTYPEINFO();
 public:
     // Create a new attributes object
-    static PassRefPtrWillBeRawPtr<Canvas2DContextAttributes> create();
+    static PassRefPtr<Canvas2DContextAttributes> create();
 
     // Whether or not the drawing buffer has an alpha channel; default=true
     bool alpha() const;

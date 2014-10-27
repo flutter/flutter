@@ -55,10 +55,10 @@ class Visitor;
 // browser-level concept and Blink core/ only knows about its LocalFrame (and FrameHost).
 // Separating Page from the rest of core/ through this indirection
 // allows us to slowly refactor Page without breaking the rest of core.
-class FrameHost final : public NoBaseWillBeGarbageCollectedFinalized<FrameHost> {
+class FrameHost final : public DummyBase<FrameHost> {
     WTF_MAKE_NONCOPYABLE(FrameHost); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<FrameHost> create(Page&);
+    static PassOwnPtr<FrameHost> create(Page&);
     ~FrameHost();
 
     // Careful: This function will eventually be removed.
@@ -79,8 +79,8 @@ public:
 private:
     explicit FrameHost(Page&);
 
-    RawPtrWillBeMember<Page> m_page;
-    const OwnPtrWillBeMember<EventHandlerRegistry> m_eventHandlerRegistry;
+    RawPtr<Page> m_page;
+    const OwnPtr<EventHandlerRegistry> m_eventHandlerRegistry;
 };
 
 }

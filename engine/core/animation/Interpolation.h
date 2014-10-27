@@ -10,12 +10,12 @@
 
 namespace blink {
 
-class Interpolation : public RefCountedWillBeGarbageCollected<Interpolation> {
+class Interpolation : public RefCounted<Interpolation> {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(Interpolation);
 public:
-    static PassRefPtrWillBeRawPtr<Interpolation> create(PassOwnPtrWillBeRawPtr<InterpolableValue> start, PassOwnPtrWillBeRawPtr<InterpolableValue> end)
+    static PassRefPtr<Interpolation> create(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end)
     {
-        return adoptRefWillBeNoop(new Interpolation(start, end));
+        return adoptRef(new Interpolation(start, end));
     }
 
     void interpolate(int iteration, double fraction) const;
@@ -26,14 +26,14 @@ public:
     virtual void trace(Visitor*);
 
 protected:
-    const OwnPtrWillBeMember<InterpolableValue> m_start;
-    const OwnPtrWillBeMember<InterpolableValue> m_end;
+    const OwnPtr<InterpolableValue> m_start;
+    const OwnPtr<InterpolableValue> m_end;
 
     mutable double m_cachedFraction;
     mutable int m_cachedIteration;
-    mutable OwnPtrWillBeMember<InterpolableValue> m_cachedValue;
+    mutable OwnPtr<InterpolableValue> m_cachedValue;
 
-    Interpolation(PassOwnPtrWillBeRawPtr<InterpolableValue> start, PassOwnPtrWillBeRawPtr<InterpolableValue> end);
+    Interpolation(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end);
 
 private:
     InterpolableValue* getCachedValueForTesting() const { return m_cachedValue.get(); }

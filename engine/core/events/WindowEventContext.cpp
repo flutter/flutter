@@ -35,7 +35,7 @@
 
 namespace blink {
 
-WindowEventContext::WindowEventContext(Event* event, PassRefPtrWillBeRawPtr<Node> node, const NodeEventContext* topNodeEventContext)
+WindowEventContext::WindowEventContext(Event* event, PassRefPtr<Node> node, const NodeEventContext* topNodeEventContext)
 {
     // We don't dispatch load events to the window. This quirk was originally
     // added because Mozilla doesn't propagate load events to the window object.

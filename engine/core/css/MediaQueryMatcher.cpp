@@ -33,9 +33,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<MediaQueryMatcher> MediaQueryMatcher::create(Document& document)
+PassRefPtr<MediaQueryMatcher> MediaQueryMatcher::create(Document& document)
 {
-    return adoptRefWillBeNoop(new MediaQueryMatcher(document));
+    return adoptRef(new MediaQueryMatcher(document));
 }
 
 MediaQueryMatcher::MediaQueryMatcher(Document& document)
@@ -77,12 +77,12 @@ bool MediaQueryMatcher::evaluate(const MediaQuerySet* media)
     return false;
 }
 
-PassRefPtrWillBeRawPtr<MediaQueryList> MediaQueryMatcher::matchMedia(const String& query)
+PassRefPtr<MediaQueryList> MediaQueryMatcher::matchMedia(const String& query)
 {
     if (!m_document)
         return nullptr;
 
-    RefPtrWillBeRawPtr<MediaQuerySet> media = MediaQuerySet::create(query);
+    RefPtr<MediaQuerySet> media = MediaQuerySet::create(query);
     // Add warning message to inspector whenever dpi/dpcm values are used for "screen" media.
     reportMediaQueryWarningIfNeeded(m_document, media.get());
     return MediaQueryList::create(m_document, this, media);
@@ -121,10 +121,10 @@ void MediaQueryMatcher::mediaFeaturesChanged()
     if (!m_document)
         return;
 
-    WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> > listenersToNotify;
+    Vector<RefPtr<MediaQueryListListener> > listenersToNotify;
     for (MediaQueryListSet::iterator it = m_mediaLists.begin(); it != m_mediaLists.end(); ++it) {
         if ((*it)->mediaFeaturesChanged(&listenersToNotify)) {
-            RefPtrWillBeRawPtr<Event> event(MediaQueryListEvent::create(*it));
+            RefPtr<Event> event(MediaQueryListEvent::create(*it));
             event->setTarget(*it);
             m_document->enqueueUniqueAnimationFrameEvent(event);
         }
@@ -137,7 +137,7 @@ void MediaQueryMatcher::viewportChanged()
     if (!m_document)
         return;
 
-    WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> > listenersToNotify;
+    Vector<RefPtr<MediaQueryListListener> > listenersToNotify;
     for (ViewportListenerSet::iterator it = m_viewportListeners.begin(); it != m_viewportListeners.end(); ++it)
         listenersToNotify.append(*it);
 

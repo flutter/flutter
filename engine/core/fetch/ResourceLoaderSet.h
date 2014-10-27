@@ -36,17 +36,17 @@
 
 namespace blink {
 
-class ResourceLoaderSet final : public NoBaseWillBeGarbageCollected<ResourceLoaderSet> {
+class ResourceLoaderSet final : public DummyBase<ResourceLoaderSet> {
 public:
-    typedef WillBeHeapHashSet<RefPtrWillBeMember<ResourceLoader> > SetType;
+    typedef HashSet<RefPtr<ResourceLoader> > SetType;
 
-    static PassOwnPtrWillBeRawPtr<ResourceLoaderSet> create();
+    static PassOwnPtr<ResourceLoaderSet> create();
     void trace(Visitor*);
 
-    void add(const RefPtrWillBeRawPtr<ResourceLoader>& loader) { m_set.add(loader); }
-    void remove(const RefPtrWillBeRawPtr<ResourceLoader>& loader) { m_set.remove(loader); }
+    void add(const RefPtr<ResourceLoader>& loader) { m_set.add(loader); }
+    void remove(const RefPtr<ResourceLoader>& loader) { m_set.remove(loader); }
     bool isEmpty() const { return m_set.isEmpty(); }
-    bool contains(const RefPtrWillBeRawPtr<ResourceLoader>& loader) const { return m_set.contains(loader); }
+    bool contains(const RefPtr<ResourceLoader>& loader) const { return m_set.contains(loader); }
     void cancelAll();
 
 private:

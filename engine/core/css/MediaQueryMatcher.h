@@ -37,10 +37,10 @@ class MediaQuerySet;
 // whenever it is needed and to call the listeners if the corresponding query has changed.
 // The listeners must be called in the very same order in which they have been added.
 
-class MediaQueryMatcher final : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryMatcher> {
+class MediaQueryMatcher final : public RefCounted<MediaQueryMatcher> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(MediaQueryMatcher)
 public:
-    static PassRefPtrWillBeRawPtr<MediaQueryMatcher> create(Document&);
+    static PassRefPtr<MediaQueryMatcher> create(Document&);
     void documentDetached();
 
     void addMediaQueryList(MediaQueryList*);
@@ -49,7 +49,7 @@ public:
     void addViewportListener(MediaQueryListListener*);
     void removeViewportListener(MediaQueryListListener*);
 
-    PassRefPtrWillBeRawPtr<MediaQueryList> matchMedia(const String&);
+    PassRefPtr<MediaQueryList> matchMedia(const String&);
 
     void mediaFeaturesChanged();
     void viewportChanged();
@@ -62,13 +62,13 @@ private:
 
     PassOwnPtr<MediaQueryEvaluator> createEvaluator() const;
 
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
     OwnPtr<MediaQueryEvaluator> m_evaluator;
 
-    typedef WillBeHeapLinkedHashSet<RawPtrWillBeWeakMember<MediaQueryList> > MediaQueryListSet;
+    typedef LinkedHashSet<RawPtr<MediaQueryList> > MediaQueryListSet;
     MediaQueryListSet m_mediaLists;
 
-    typedef WillBeHeapLinkedHashSet<RawPtrWillBeWeakMember<MediaQueryListListener> > ViewportListenerSet;
+    typedef LinkedHashSet<RawPtr<MediaQueryListListener> > ViewportListenerSet;
     ViewportListenerSet m_viewportListeners;
 };
 

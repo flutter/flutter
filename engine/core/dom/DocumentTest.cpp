@@ -58,13 +58,13 @@ void DocumentTest::SetUp()
 }
 
 class MockDocumentVisibilityObserver
-    : public NoBaseWillBeGarbageCollectedFinalized<MockDocumentVisibilityObserver>
+    : public DummyBase<MockDocumentVisibilityObserver>
     , public DocumentVisibilityObserver {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(MockDocumentVisibilityObserver);
 public:
-    static PassOwnPtrWillBeRawPtr<MockDocumentVisibilityObserver> create(Document& document)
+    static PassOwnPtr<MockDocumentVisibilityObserver> create(Document& document)
     {
-        return adoptPtrWillBeNoop(new MockDocumentVisibilityObserver(document));
+        return adoptPtr(new MockDocumentVisibilityObserver(document));
     }
 
     virtual void trace(Visitor*) { }
@@ -78,10 +78,10 @@ private:
 TEST_F(DocumentTest, VisibilityOberver)
 {
     page().setVisibilityState(PageVisibilityStateVisible, true); // initial state
-    OwnPtrWillBeRawPtr<MockDocumentVisibilityObserver> observer1 = MockDocumentVisibilityObserver::create(document());
+    OwnPtr<MockDocumentVisibilityObserver> observer1 = MockDocumentVisibilityObserver::create(document());
 
     {
-        OwnPtrWillBeRawPtr<MockDocumentVisibilityObserver> observer2 = MockDocumentVisibilityObserver::create(document());
+        OwnPtr<MockDocumentVisibilityObserver> observer2 = MockDocumentVisibilityObserver::create(document());
         EXPECT_CALL(*observer1, didChangeVisibilityState(PageVisibilityStateHidden)).Times(0);
         EXPECT_CALL(*observer1, didChangeVisibilityState(PageVisibilityStateVisible)).Times(0);
         EXPECT_CALL(*observer2, didChangeVisibilityState(PageVisibilityStateHidden)).Times(0);

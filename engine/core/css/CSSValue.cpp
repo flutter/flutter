@@ -55,7 +55,7 @@
 
 namespace blink {
 
-struct SameSizeAsCSSValue : public RefCountedWillBeGarbageCollectedFinalized<SameSizeAsCSSValue>
+struct SameSizeAsCSSValue : public RefCounted<SameSizeAsCSSValue>
 // VC++ 2013 doesn't support EBCO (Empty Base Class Optimization), and having
 // multiple empty base classes makes the size of CSSValue bloat (Note that both
 // of GarbageCollectedFinalized and ScriptWrappableBase are empty classes).
@@ -78,9 +78,9 @@ COMPILE_ASSERT(sizeof(CSSValue) <= sizeof(SameSizeAsCSSValue), CSS_value_should_
 
 class TextCloneCSSValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<TextCloneCSSValue> create(ClassType classType, const String& text)
+    static PassRefPtr<TextCloneCSSValue> create(ClassType classType, const String& text)
     {
-        return adoptRefWillBeNoop(new TextCloneCSSValue(classType, text));
+        return adoptRef(new TextCloneCSSValue(classType, text));
     }
 
     String cssText() const { return m_cssText; }
@@ -570,7 +570,7 @@ void CSSValue::trace(Visitor* visitor)
     ASSERT_NOT_REACHED();
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> CSSValue::cloneForCSSOM() const
+PassRefPtr<CSSValue> CSSValue::cloneForCSSOM() const
 {
     switch (classType()) {
     case PrimitiveClass:

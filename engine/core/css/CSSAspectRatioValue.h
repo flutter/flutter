@@ -35,9 +35,9 @@ namespace blink {
 
 class CSSAspectRatioValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSAspectRatioValue> create(float numeratorValue, float denominatorValue)
+    static PassRefPtr<CSSAspectRatioValue> create(float numeratorValue, float denominatorValue)
     {
-        return adoptRefWillBeNoop(new CSSAspectRatioValue(numeratorValue, denominatorValue));
+        return adoptRef(new CSSAspectRatioValue(numeratorValue, denominatorValue));
     }
 
     String customCSSText() const;

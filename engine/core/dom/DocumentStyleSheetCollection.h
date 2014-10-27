@@ -40,9 +40,9 @@ class DocumentStyleSheetCollection final : public TreeScopeStyleSheetCollection 
     WTF_MAKE_NONCOPYABLE(DocumentStyleSheetCollection);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<DocumentStyleSheetCollection> create(TreeScope& treeScope)
+    static PassOwnPtr<DocumentStyleSheetCollection> create(TreeScope& treeScope)
     {
-        return adoptPtrWillBeNoop(new DocumentStyleSheetCollection(treeScope));
+        return adoptPtr(new DocumentStyleSheetCollection(treeScope));
     }
 
     void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);

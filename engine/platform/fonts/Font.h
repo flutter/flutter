@@ -97,7 +97,7 @@ public:
 
     const FontDescription& fontDescription() const { return m_fontDescription; }
 
-    void update(PassRefPtrWillBeRawPtr<FontSelector>) const;
+    void update(PassRefPtr<FontSelector>) const;
 
     enum CustomFontNotReadyAction { DoNotPaintIfFontNotReady, UseFallbackIfFontNotReady };
     void drawText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&, CustomFontNotReadyAction = DoNotPaintIfFontNotReady) const;

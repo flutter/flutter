@@ -35,14 +35,14 @@
 
 namespace blink {
 
-void CustomElementAsyncImportMicrotaskQueue::enqueue(PassOwnPtrWillBeRawPtr<CustomElementMicrotaskStep> step)
+void CustomElementAsyncImportMicrotaskQueue::enqueue(PassOwnPtr<CustomElementMicrotaskStep> step)
 {
     m_queue.append(step);
 }
 
 void CustomElementAsyncImportMicrotaskQueue::doDispatch()
 {
-    WillBeHeapVector<OwnPtrWillBeMember<CustomElementMicrotaskStep> > remaining;
+    Vector<OwnPtr<CustomElementMicrotaskStep> > remaining;
 
     for (unsigned i = 0; i < m_queue.size(); ++i) {
         if (CustomElementMicrotaskStep::Processing == m_queue[i]->process())

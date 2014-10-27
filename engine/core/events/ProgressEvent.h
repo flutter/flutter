@@ -41,17 +41,17 @@ struct ProgressEventInit : public EventInit {
 class ProgressEvent : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ProgressEvent> create()
+    static PassRefPtr<ProgressEvent> create()
     {
-        return adoptRefWillBeNoop(new ProgressEvent);
+        return adoptRef(new ProgressEvent);
     }
-    static PassRefPtrWillBeRawPtr<ProgressEvent> create(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total)
+    static PassRefPtr<ProgressEvent> create(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total)
     {
-        return adoptRefWillBeNoop(new ProgressEvent(type, lengthComputable, loaded, total));
+        return adoptRef(new ProgressEvent(type, lengthComputable, loaded, total));
     }
-    static PassRefPtrWillBeRawPtr<ProgressEvent> create(const AtomicString& type, const ProgressEventInit& initializer)
+    static PassRefPtr<ProgressEvent> create(const AtomicString& type, const ProgressEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new ProgressEvent(type, initializer));
+        return adoptRef(new ProgressEvent(type, initializer));
     }
 
     bool lengthComputable() const { return m_lengthComputable; }

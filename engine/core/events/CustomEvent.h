@@ -40,14 +40,14 @@ class CustomEvent final : public Event {
 public:
     virtual ~CustomEvent();
 
-    static PassRefPtrWillBeRawPtr<CustomEvent> create()
+    static PassRefPtr<CustomEvent> create()
     {
-        return adoptRefWillBeNoop(new CustomEvent);
+        return adoptRef(new CustomEvent);
     }
 
-    static PassRefPtrWillBeRawPtr<CustomEvent> create(const AtomicString& type, const CustomEventInit& initializer)
+    static PassRefPtr<CustomEvent> create(const AtomicString& type, const CustomEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new CustomEvent(type, initializer));
+        return adoptRef(new CustomEvent(type, initializer));
     }
 
     void initCustomEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<SerializedScriptValue>);

@@ -40,7 +40,7 @@ namespace blink {
 
 struct SameSizeAsNodeRareData {
     void* m_pointer[1];
-    OwnPtrWillBeMember<NodeMutationObserverData> m_mutationObserverData;
+    OwnPtr<NodeMutationObserverData> m_mutationObserverData;
     unsigned m_bitfields;
 };
 

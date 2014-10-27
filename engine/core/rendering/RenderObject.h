@@ -143,7 +143,7 @@ const int showTreeCharacterOffset = 39;
 #endif
 
 // Base class for all rendering tree objects.
-class RenderObject : public NoBaseWillBeGarbageCollectedFinalized<RenderObject>, public ImageResourceClient {
+class RenderObject : public DummyBase<RenderObject>, public ImageResourceClient {
     friend class RenderBlock;
     friend class RenderBlockFlow;
     friend class RenderLayerScrollableArea; // For setParent.
@@ -1015,11 +1015,11 @@ private:
 
     RefPtr<RenderStyle> m_style;
 
-    RawPtrWillBeMember<Node> m_node;
+    RawPtr<Node> m_node;
 
-    RawPtrWillBeMember<RenderObject> m_parent;
-    RawPtrWillBeMember<RenderObject> m_previous;
-    RawPtrWillBeMember<RenderObject> m_next;
+    RawPtr<RenderObject> m_parent;
+    RawPtr<RenderObject> m_previous;
+    RawPtr<RenderObject> m_next;
 
 #if ENABLE(ASSERT)
     unsigned m_setNeedsLayoutForbidden : 1;

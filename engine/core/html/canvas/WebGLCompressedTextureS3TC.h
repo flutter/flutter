@@ -37,7 +37,7 @@ class WebGLTexture;
 class WebGLCompressedTextureS3TC final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<WebGLCompressedTextureS3TC> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLCompressedTextureS3TC> create(WebGLRenderingContextBase*);
     static bool supported(WebGLRenderingContextBase*);
     static const char* extensionName();
 

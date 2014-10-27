@@ -47,9 +47,9 @@ class StyleRuleFontFace;
 
 class CSSFontSelector final : public FontSelector {
 public:
-    static PassRefPtrWillBeRawPtr<CSSFontSelector> create(Document* document)
+    static PassRefPtr<CSSFontSelector> create(Document* document)
     {
-        return adoptRefWillBeNoop(new CSSFontSelector(document));
+        return adoptRef(new CSSFontSelector(document));
     }
     virtual ~CSSFontSelector();
 
@@ -90,12 +90,12 @@ private:
     // FIXME: Oilpan: Ideally this should just be a traced Member but that will
     // currently leak because RenderStyle and its data are not on the heap.
     // See crbug.com/383860 for details.
-    RawPtrWillBeWeakMember<Document> m_document;
+    RawPtr<Document> m_document;
     // FIXME: Move to Document or StyleEngine.
     FontFaceCache m_fontFaceCache;
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSFontSelectorClient> > m_clients;
+    HashSet<RawPtr<CSSFontSelectorClient> > m_clients;
 
-    RefPtrWillBeMember<FontLoader> m_fontLoader;
+    RefPtr<FontLoader> m_fontLoader;
     GenericFontFamilySettings m_genericFontFamilySettings;
 };
 

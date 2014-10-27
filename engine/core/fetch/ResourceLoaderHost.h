@@ -45,7 +45,7 @@ class ResourceResponse;
 
 struct FetchInitiatorInfo;
 
-class ResourceLoaderHost : public WillBeGarbageCollectedMixin {
+class ResourceLoaderHost : public DummyBase<void> {
 public:
     virtual void incrementRequestCount(const Resource*) = 0;
     virtual void decrementRequestCount(const Resource*) = 0;

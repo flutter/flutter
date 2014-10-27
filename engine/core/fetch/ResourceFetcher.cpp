@@ -650,7 +650,7 @@ void ResourceFetcher::reloadImagesIfNotDeferred()
 
 void ResourceFetcher::didLoadResource(Resource* resource)
 {
-    RefPtrWillBeRawPtr<Document> protectDocument(m_document);
+    RefPtr<Document> protectDocument(m_document);
     if (m_document)
         m_document->checkCompleted();
     scheduleDocumentResourcesGC();

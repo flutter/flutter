@@ -42,14 +42,14 @@ class ContentDistribution final {
 public:
     ContentDistribution() { m_nodes.reserveInitialCapacity(32); }
 
-    PassRefPtrWillBeRawPtr<Node> first() const { return m_nodes.first(); }
-    PassRefPtrWillBeRawPtr<Node> last() const { return m_nodes.last(); }
-    PassRefPtrWillBeRawPtr<Node> at(size_t index) const { return m_nodes.at(index); }
+    PassRefPtr<Node> first() const { return m_nodes.first(); }
+    PassRefPtr<Node> last() const { return m_nodes.last(); }
+    PassRefPtr<Node> at(size_t index) const { return m_nodes.at(index); }
 
     size_t size() const { return m_nodes.size(); }
     bool isEmpty() const { return m_nodes.isEmpty(); }
 
-    void append(PassRefPtrWillBeRawPtr<Node>);
+    void append(PassRefPtr<Node>);
     void clear() { m_nodes.clear(); m_indices.clear(); }
     void shrinkToFit() { m_nodes.shrinkToFit(); }
 
@@ -60,13 +60,13 @@ public:
 
     void swap(ContentDistribution& other);
 
-    const WillBeHeapVector<RefPtrWillBeMember<Node> >& nodes() const { return m_nodes; }
+    const Vector<RefPtr<Node> >& nodes() const { return m_nodes; }
 
     void trace(Visitor*);
 
 private:
-    WillBeHeapVector<RefPtrWillBeMember<Node> > m_nodes;
-    WillBeHeapHashMap<RawPtrWillBeMember<const Node>, size_t> m_indices;
+    Vector<RefPtr<Node> > m_nodes;
+    HashMap<RawPtr<const Node>, size_t> m_indices;
 };
 
 }

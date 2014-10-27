@@ -94,7 +94,7 @@ bool SharedStyleFinder::sharingCandidateCanShareHostStyles(Element& candidate) c
 
 bool SharedStyleFinder::sharingCandidateDistributedToSameInsertionPoint(Element& candidate) const
 {
-    WillBeHeapVector<RawPtrWillBeMember<InsertionPoint>, 8> insertionPoints, candidateInsertionPoints;
+    Vector<RawPtr<InsertionPoint>, 8> insertionPoints, candidateInsertionPoints;
     collectDestinationInsertionPoints(element(), insertionPoints);
     collectDestinationInsertionPoints(candidate, candidateInsertionPoints);
     if (insertionPoints.size() != candidateInsertionPoints.size())

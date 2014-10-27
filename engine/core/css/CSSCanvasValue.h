@@ -35,9 +35,9 @@ class Document;
 
 class CSSCanvasValue : public CSSImageGeneratorValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSCanvasValue> create(const String& name)
+    static PassRefPtr<CSSCanvasValue> create(const String& name)
     {
-        return adoptRefWillBeNoop(new CSSCanvasValue(name));
+        return adoptRef(new CSSCanvasValue(name));
     }
     ~CSSCanvasValue();
 
@@ -57,7 +57,7 @@ public:
 private:
     explicit CSSCanvasValue(const String& name)
         : CSSImageGeneratorValue(CanvasClass)
-        , m_canvasObserver(adoptPtrWillBeNoop(new CanvasObserverProxy(this)))
+        , m_canvasObserver(adoptPtr(new CanvasObserverProxy(this)))
         , m_name(name)
         , m_element(nullptr)
     {
@@ -65,7 +65,7 @@ private:
 
     // NOTE: We put the CanvasObserver in a member instead of inheriting from it
     // to avoid adding a vptr to CSSCanvasValue.
-    class CanvasObserverProxy final : public NoBaseWillBeGarbageCollected<CanvasObserverProxy>, public CanvasObserver {
+    class CanvasObserverProxy final : public DummyBase<CanvasObserverProxy>, public CanvasObserver {
         WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(CanvasObserverProxy);
     public:
         explicit CanvasObserverProxy(CSSCanvasValue* ownerValue) : m_ownerValue(ownerValue) { }
@@ -91,7 +91,7 @@ private:
         }
 
     private:
-        RawPtrWillBeMember<CSSCanvasValue> m_ownerValue;
+        RawPtr<CSSCanvasValue> m_ownerValue;
     };
 
     void canvasChanged(HTMLCanvasElement*, const FloatRect& changedRect);
@@ -103,12 +103,12 @@ private:
 
     HTMLCanvasElement* element(Document*);
 
-    OwnPtrWillBeMember<CanvasObserverProxy> m_canvasObserver;
+    OwnPtr<CanvasObserverProxy> m_canvasObserver;
 
     // The name of the canvas.
     String m_name;
     // The document supplies the element and owns it.
-    RawPtrWillBeWeakMember<HTMLCanvasElement> m_element;
+    RawPtr<HTMLCanvasElement> m_element;
 };
 
 DEFINE_CSS_VALUE_TYPE_CASTS(CSSCanvasValue, isCanvasValue());

@@ -39,7 +39,7 @@ namespace blink {
 class AnimatableTransform final : public AnimatableValue {
 public:
     virtual ~AnimatableTransform() { }
-    static PassRefPtrWillBeRawPtr<AnimatableTransform> create(const TransformOperations&);
+    static PassRefPtr<AnimatableTransform> create(const TransformOperations&);
     const TransformOperations& transformOperations() const
     {
         return m_transform;
@@ -48,7 +48,7 @@ public:
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     explicit AnimatableTransform(const TransformOperations& transform)

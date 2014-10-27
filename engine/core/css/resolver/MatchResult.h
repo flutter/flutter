@@ -57,7 +57,7 @@ public:
 
     void trace(Visitor*);
 
-    RefPtrWillBeMember<StylePropertySet> properties;
+    RefPtr<StylePropertySet> properties;
 };
 
 } // namespace blink
@@ -70,7 +70,7 @@ class MatchResult {
     STACK_ALLOCATED();
 public:
     MatchResult() : isCacheable(true) { }
-    WillBeHeapVector<MatchedProperties, 64> matchedProperties;
+    Vector<MatchedProperties, 64> matchedProperties;
     MatchRanges ranges;
     bool isCacheable;
 

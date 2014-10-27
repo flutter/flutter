@@ -44,7 +44,7 @@ class Node;
 // A class which inherits both Node and TreeScope must call clearRareData() in its destructor
 // so that the Node destructor no longer does problematic NodeList cache manipulation in
 // the destructor.
-class TreeScope : public WillBeGarbageCollectedMixin {
+class TreeScope : public DummyBase<void> {
 public:
     TreeScope* parentTreeScope() const { return m_parentTreeScope; }
 
@@ -53,7 +53,7 @@ public:
 
     Element* adjustedFocusedElement() const;
     Element* getElementById(const AtomicString&) const;
-    const WillBeHeapVector<RawPtrWillBeMember<Element> >& getAllElementsById(const AtomicString&) const;
+    const Vector<RawPtr<Element> >& getAllElementsById(const AtomicString&) const;
     bool hasElementWithId(const AtomicString& id) const;
     bool containsMultipleElementsWithId(const AtomicString& id) const;
     void addElementById(const AtomicString& elementId, Element*);
@@ -157,21 +157,21 @@ private:
 
     bool rootNodeHasTreeSharedParent() const;
 
-    RawPtrWillBeMember<ContainerNode> m_rootNode;
-    RawPtrWillBeMember<Document> m_document;
-    RawPtrWillBeMember<TreeScope> m_parentTreeScope;
+    RawPtr<ContainerNode> m_rootNode;
+    RawPtr<Document> m_document;
+    RawPtr<TreeScope> m_parentTreeScope;
 
 #if !ENABLE(OILPAN)
     int m_guardRefCount;
 #endif
 
-    OwnPtrWillBeMember<DocumentOrderedMap> m_elementsById;
-    OwnPtrWillBeMember<DocumentOrderedMap> m_imageMapsByName;
-    OwnPtrWillBeMember<DocumentOrderedMap> m_labelsByForAttribute;
+    OwnPtr<DocumentOrderedMap> m_elementsById;
+    OwnPtr<DocumentOrderedMap> m_imageMapsByName;
+    OwnPtr<DocumentOrderedMap> m_labelsByForAttribute;
 
-    OwnPtrWillBeMember<ScopedStyleResolver> m_scopedStyleResolver;
+    OwnPtr<ScopedStyleResolver> m_scopedStyleResolver;
 
-    mutable RefPtrWillBeMember<DOMSelection> m_selection;
+    mutable RefPtr<DOMSelection> m_selection;
 };
 
 inline bool TreeScope::hasElementWithId(const AtomicString& id) const

@@ -89,7 +89,7 @@ public:
 //
 // Optionally, add a FooEvent.idl class, but that's outside the scope of this
 // comment (and much more straightforward).
-class EventTarget : public WillBeGarbageCollectedMixin, public ScriptWrappable {
+class EventTarget : public DummyBase<void>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
 #if !ENABLE(OILPAN)
@@ -113,8 +113,8 @@ public:
     bool removeEventListener(const AtomicString& eventType) { return false; }
     virtual bool removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false);
     virtual void removeAllEventListeners();
-    virtual bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>);
-    bool dispatchEvent(PassRefPtrWillBeRawPtr<Event>, ExceptionState&); // DOM API
+    virtual bool dispatchEvent(PassRefPtr<Event>);
+    bool dispatchEvent(PassRefPtr<Event>, ExceptionState&); // DOM API
     virtual void uncaughtExceptionInEventHandler();
 
     bool hasEventListeners() const;

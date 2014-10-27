@@ -44,7 +44,7 @@ namespace {
 
 class ChildListRecord : public MutationRecord {
 public:
-    ChildListRecord(PassRefPtrWillBeRawPtr<Node> target, PassRefPtrWillBeRawPtr<StaticNodeList> added, PassRefPtrWillBeRawPtr<StaticNodeList> removed, PassRefPtrWillBeRawPtr<Node> previousSibling, PassRefPtrWillBeRawPtr<Node> nextSibling)
+    ChildListRecord(PassRefPtr<Node> target, PassRefPtr<StaticNodeList> added, PassRefPtr<StaticNodeList> removed, PassRefPtr<Node> previousSibling, PassRefPtr<Node> nextSibling)
         : m_target(target)
         , m_addedNodes(added)
         , m_removedNodes(removed)
@@ -71,16 +71,16 @@ private:
     virtual Node* previousSibling() override { return m_previousSibling.get(); }
     virtual Node* nextSibling() override { return m_nextSibling.get(); }
 
-    RefPtrWillBeMember<Node> m_target;
-    RefPtrWillBeMember<StaticNodeList> m_addedNodes;
-    RefPtrWillBeMember<StaticNodeList> m_removedNodes;
-    RefPtrWillBeMember<Node> m_previousSibling;
-    RefPtrWillBeMember<Node> m_nextSibling;
+    RefPtr<Node> m_target;
+    RefPtr<StaticNodeList> m_addedNodes;
+    RefPtr<StaticNodeList> m_removedNodes;
+    RefPtr<Node> m_previousSibling;
+    RefPtr<Node> m_nextSibling;
 };
 
 class RecordWithEmptyNodeLists : public MutationRecord {
 public:
-    RecordWithEmptyNodeLists(PassRefPtrWillBeRawPtr<Node> target, const String& oldValue)
+    RecordWithEmptyNodeLists(PassRefPtr<Node> target, const String& oldValue)
         : m_target(target)
         , m_oldValue(oldValue)
     {
@@ -100,22 +100,22 @@ private:
     virtual StaticNodeList* addedNodes() override { return lazilyInitializeEmptyNodeList(m_addedNodes); }
     virtual StaticNodeList* removedNodes() override { return lazilyInitializeEmptyNodeList(m_removedNodes); }
 
-    static StaticNodeList* lazilyInitializeEmptyNodeList(RefPtrWillBeMember<StaticNodeList>& nodeList)
+    static StaticNodeList* lazilyInitializeEmptyNodeList(RefPtr<StaticNodeList>& nodeList)
     {
         if (!nodeList)
             nodeList = StaticNodeList::createEmpty();
         return nodeList.get();
     }
 
-    RefPtrWillBeMember<Node> m_target;
+    RefPtr<Node> m_target;
     String m_oldValue;
-    RefPtrWillBeMember<StaticNodeList> m_addedNodes;
-    RefPtrWillBeMember<StaticNodeList> m_removedNodes;
+    RefPtr<StaticNodeList> m_addedNodes;
+    RefPtr<StaticNodeList> m_removedNodes;
 };
 
 class AttributesRecord : public RecordWithEmptyNodeLists {
 public:
-    AttributesRecord(PassRefPtrWillBeRawPtr<Node> target, const QualifiedName& name, const AtomicString& oldValue)
+    AttributesRecord(PassRefPtr<Node> target, const QualifiedName& name, const AtomicString& oldValue)
         : RecordWithEmptyNodeLists(target, oldValue)
         , m_attributeName(name.localName())
     {
@@ -130,7 +130,7 @@ private:
 
 class CharacterDataRecord : public RecordWithEmptyNodeLists {
 public:
-    CharacterDataRecord(PassRefPtrWillBeRawPtr<Node> target, const String& oldValue)
+    CharacterDataRecord(PassRefPtr<Node> target, const String& oldValue)
         : RecordWithEmptyNodeLists(target, oldValue)
     {
     }
@@ -141,7 +141,7 @@ private:
 
 class MutationRecordWithNullOldValue : public MutationRecord {
 public:
-    MutationRecordWithNullOldValue(PassRefPtrWillBeRawPtr<MutationRecord> record)
+    MutationRecordWithNullOldValue(PassRefPtr<MutationRecord> record)
         : m_record(record)
     {
     }
@@ -163,7 +163,7 @@ private:
 
     virtual String oldValue() override { return String(); }
 
-    RefPtrWillBeMember<MutationRecord> m_record;
+    RefPtr<MutationRecord> m_record;
 };
 
 const AtomicString& ChildListRecord::type()
@@ -186,24 +186,24 @@ const AtomicString& CharacterDataRecord::type()
 
 } // namespace
 
-PassRefPtrWillBeRawPtr<MutationRecord> MutationRecord::createChildList(PassRefPtrWillBeRawPtr<Node> target, PassRefPtrWillBeRawPtr<StaticNodeList> added, PassRefPtrWillBeRawPtr<StaticNodeList> removed, PassRefPtrWillBeRawPtr<Node> previousSibling, PassRefPtrWillBeRawPtr<Node> nextSibling)
+PassRefPtr<MutationRecord> MutationRecord::createChildList(PassRefPtr<Node> target, PassRefPtr<StaticNodeList> added, PassRefPtr<StaticNodeList> removed, PassRefPtr<Node> previousSibling, PassRefPtr<Node> nextSibling)
 {
-    return adoptRefWillBeNoop(new ChildListRecord(target, added, removed, previousSibling, nextSibling));
+    return adoptRef(new ChildListRecord(target, added, removed, previousSibling, nextSibling));
 }
 
-PassRefPtrWillBeRawPtr<MutationRecord> MutationRecord::createAttributes(PassRefPtrWillBeRawPtr<Node> target, const QualifiedName& name, const AtomicString& oldValue)
+PassRefPtr<MutationRecord> MutationRecord::createAttributes(PassRefPtr<Node> target, const QualifiedName& name, const AtomicString& oldValue)
 {
-    return adoptRefWillBeNoop(new AttributesRecord(target, name, oldValue));
+    return adoptRef(new AttributesRecord(target, name, oldValue));
 }
 
-PassRefPtrWillBeRawPtr<MutationRecord> MutationRecord::createCharacterData(PassRefPtrWillBeRawPtr<Node> target, const String& oldValue)
+PassRefPtr<MutationRecord> MutationRecord::createCharacterData(PassRefPtr<Node> target, const String& oldValue)
 {
-    return adoptRefWillBeNoop(new CharacterDataRecord(target, oldValue));
+    return adoptRef(new CharacterDataRecord(target, oldValue));
 }
 
-PassRefPtrWillBeRawPtr<MutationRecord> MutationRecord::createWithNullOldValue(PassRefPtrWillBeRawPtr<MutationRecord> record)
+PassRefPtr<MutationRecord> MutationRecord::createWithNullOldValue(PassRefPtr<MutationRecord> record)
 {
-    return adoptRefWillBeNoop(new MutationRecordWithNullOldValue(record));
+    return adoptRef(new MutationRecordWithNullOldValue(record));
 }
 
 MutationRecord::~MutationRecord()

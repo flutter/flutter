@@ -41,9 +41,9 @@ class StyleRuleCSSStyleDeclaration;
 
 class CSSFilterRule final : public CSSRule {
 public:
-    static PassRefPtrWillBeRawPtr<CSSFilterRule> create(StyleRuleFilter* rule, CSSStyleSheet* sheet)
+    static PassRefPtr<CSSFilterRule> create(StyleRuleFilter* rule, CSSStyleSheet* sheet)
     {
-        return adoptRefWillBeNoop(new CSSFilterRule(rule, sheet));
+        return adoptRef(new CSSFilterRule(rule, sheet));
     }
 
     virtual ~CSSFilterRule();
@@ -59,8 +59,8 @@ public:
 private:
     CSSFilterRule(StyleRuleFilter*, CSSStyleSheet* parent);
 
-    RefPtrWillBeMember<StyleRuleFilter> m_filterRule;
-    mutable RefPtrWillBeMember<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
+    RefPtr<StyleRuleFilter> m_filterRule;
+    mutable RefPtr<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
 };
 
 DEFINE_CSS_RULE_TYPE_CASTS(CSSFilterRule, WEBKIT_FILTER_RULE);

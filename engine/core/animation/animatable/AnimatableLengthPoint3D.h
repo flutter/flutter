@@ -38,9 +38,9 @@ namespace blink {
 class AnimatableLengthPoint3D final : public AnimatableValue {
 public:
     virtual ~AnimatableLengthPoint3D() { }
-    static PassRefPtrWillBeRawPtr<AnimatableLengthPoint3D> create(PassRefPtrWillBeRawPtr<AnimatableValue> x, PassRefPtrWillBeRawPtr<AnimatableValue> y, PassRefPtrWillBeRawPtr<AnimatableValue> z)
+    static PassRefPtr<AnimatableLengthPoint3D> create(PassRefPtr<AnimatableValue> x, PassRefPtr<AnimatableValue> y, PassRefPtr<AnimatableValue> z)
     {
-        return adoptRefWillBeNoop(new AnimatableLengthPoint3D(x, y, z));
+        return adoptRef(new AnimatableLengthPoint3D(x, y, z));
     }
     const AnimatableValue* x() const { return m_x.get(); }
     const AnimatableValue* y() const { return m_y.get(); }
@@ -49,10 +49,10 @@ public:
     virtual void trace(Visitor*) override;
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
-    AnimatableLengthPoint3D(PassRefPtrWillBeRawPtr<AnimatableValue> x, PassRefPtrWillBeRawPtr<AnimatableValue> y, PassRefPtrWillBeRawPtr<AnimatableValue> z)
+    AnimatableLengthPoint3D(PassRefPtr<AnimatableValue> x, PassRefPtr<AnimatableValue> y, PassRefPtr<AnimatableValue> z)
         : m_x(x)
         , m_y(y)
         , m_z(z)
@@ -61,9 +61,9 @@ private:
     virtual AnimatableType type() const override { return TypeLengthPoint3D; }
     virtual bool equalTo(const AnimatableValue*) const override;
 
-    RefPtrWillBeMember<AnimatableValue> m_x;
-    RefPtrWillBeMember<AnimatableValue> m_y;
-    RefPtrWillBeMember<AnimatableValue> m_z;
+    RefPtr<AnimatableValue> m_x;
+    RefPtr<AnimatableValue> m_y;
+    RefPtr<AnimatableValue> m_z;
 };
 
 DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableLengthPoint3D, isLengthPoint3D());

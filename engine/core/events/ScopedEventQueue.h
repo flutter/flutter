@@ -46,7 +46,7 @@ class ScopedEventQueue {
 public:
     ~ScopedEventQueue();
 
-    void enqueueEventDispatchMediator(PassRefPtrWillBeRawPtr<EventDispatchMediator>);
+    void enqueueEventDispatchMediator(PassRefPtr<EventDispatchMediator>);
     void dispatchAllEvents();
     static ScopedEventQueue* instance();
 
@@ -56,9 +56,9 @@ public:
 private:
     ScopedEventQueue();
     static void initialize();
-    void dispatchEvent(PassRefPtrWillBeRawPtr<EventDispatchMediator>) const;
+    void dispatchEvent(PassRefPtr<EventDispatchMediator>) const;
 
-    WillBePersistentHeapVector<RefPtrWillBeMember<EventDispatchMediator> > m_queuedEventDispatchMediators;
+    Vector<RefPtr<EventDispatchMediator> > m_queuedEventDispatchMediators;
     unsigned m_scopingLevel;
 
     static ScopedEventQueue* s_instance;

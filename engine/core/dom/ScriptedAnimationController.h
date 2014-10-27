@@ -41,11 +41,11 @@ class EventTarget;
 class MediaQueryListListener;
 class RequestAnimationFrameCallback;
 
-class ScriptedAnimationController : public RefCountedWillBeGarbageCollectedFinalized<ScriptedAnimationController> {
+class ScriptedAnimationController : public RefCounted<ScriptedAnimationController> {
 public:
-    static PassRefPtrWillBeRawPtr<ScriptedAnimationController> create(Document* document)
+    static PassRefPtr<ScriptedAnimationController> create(Document* document)
     {
-        return adoptRefWillBeNoop(new ScriptedAnimationController(document));
+        return adoptRef(new ScriptedAnimationController(document));
     }
     ~ScriptedAnimationController();
     void trace(Visitor*);
@@ -53,13 +53,13 @@ public:
 
     typedef int CallbackId;
 
-    int registerCallback(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback>);
+    int registerCallback(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelCallback(CallbackId);
     void serviceScriptedAnimations(double monotonicTimeNow);
 
-    void enqueueEvent(PassRefPtrWillBeRawPtr<Event>);
-    void enqueuePerFrameEvent(PassRefPtrWillBeRawPtr<Event>);
-    void enqueueMediaQueryChangeListeners(WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> >&);
+    void enqueueEvent(PassRefPtr<Event>);
+    void enqueuePerFrameEvent(PassRefPtr<Event>);
+    void enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >&);
 
     void suspend();
     void resume();
@@ -73,16 +73,16 @@ private:
     void executeCallbacks(double monotonicTimeNow);
     void callMediaQueryListListeners();
 
-    typedef WillBeHeapVector<OwnPtrWillBeMember<RequestAnimationFrameCallback> > CallbackList;
+    typedef Vector<OwnPtr<RequestAnimationFrameCallback> > CallbackList;
     CallbackList m_callbacks;
     CallbackList m_callbacksToInvoke; // only non-empty while inside executeCallbacks
 
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
     CallbackId m_nextCallbackId;
     int m_suspendCount;
-    WillBeHeapVector<RefPtrWillBeMember<Event> > m_eventQueue;
-    WillBeHeapListHashSet<std::pair<RawPtrWillBeMember<const EventTarget>, const StringImpl*> > m_perFrameEvents;
-    typedef WillBeHeapListHashSet<RefPtrWillBeMember<MediaQueryListListener> > MediaQueryListListeners;
+    Vector<RefPtr<Event> > m_eventQueue;
+    ListHashSet<std::pair<RawPtr<const EventTarget>, const StringImpl*> > m_perFrameEvents;
+    typedef ListHashSet<RefPtr<MediaQueryListListener> > MediaQueryListListeners;
     MediaQueryListListeners m_mediaQueryListListeners;
 };
 

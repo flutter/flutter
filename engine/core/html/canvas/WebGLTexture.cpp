@@ -31,9 +31,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLTexture> WebGLTexture::create(WebGLRenderingContextBase* ctx)
+PassRefPtr<WebGLTexture> WebGLTexture::create(WebGLRenderingContextBase* ctx)
 {
-    return adoptRefWillBeNoop(new WebGLTexture(ctx));
+    return adoptRef(new WebGLTexture(ctx));
 }
 
 WebGLTexture::WebGLTexture(WebGLRenderingContextBase* ctx)

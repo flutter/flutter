@@ -68,7 +68,7 @@ enum CalculationCategory {
     CalcOther
 };
 
-class CSSCalcExpressionNode : public RefCountedWillBeGarbageCollected<CSSCalcExpressionNode> {
+class CSSCalcExpressionNode : public RefCounted<CSSCalcExpressionNode> {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(CSSCalcExpressionNode);
 public:
     enum Type {
@@ -105,12 +105,12 @@ protected:
 
 class CSSCalcValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSCalcValue> create(CSSParserString name, CSSParserValueList*, ValueRange);
-    static PassRefPtrWillBeRawPtr<CSSCalcValue> create(PassRefPtrWillBeRawPtr<CSSCalcExpressionNode>, ValueRange = ValueRangeAll);
+    static PassRefPtr<CSSCalcValue> create(CSSParserString name, CSSParserValueList*, ValueRange);
+    static PassRefPtr<CSSCalcValue> create(PassRefPtr<CSSCalcExpressionNode>, ValueRange = ValueRangeAll);
 
-    static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> createExpressionNode(PassRefPtrWillBeRawPtr<CSSPrimitiveValue>, bool isInteger = false);
-    static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> createExpressionNode(PassRefPtrWillBeRawPtr<CSSCalcExpressionNode>, PassRefPtrWillBeRawPtr<CSSCalcExpressionNode>, CalcOperator);
-    static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> createExpressionNode(double pixels, double percent);
+    static PassRefPtr<CSSCalcExpressionNode> createExpressionNode(PassRefPtr<CSSPrimitiveValue>, bool isInteger = false);
+    static PassRefPtr<CSSCalcExpressionNode> createExpressionNode(PassRefPtr<CSSCalcExpressionNode>, PassRefPtr<CSSCalcExpressionNode>, CalcOperator);
+    static PassRefPtr<CSSCalcExpressionNode> createExpressionNode(double pixels, double percent);
 
     PassRefPtr<CalculationValue> toCalcValue(const CSSToLengthConversionData& conversionData) const
     {
@@ -133,7 +133,7 @@ public:
     void traceAfterDispatch(Visitor*);
 
 private:
-    CSSCalcValue(PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> expression, ValueRange range)
+    CSSCalcValue(PassRefPtr<CSSCalcExpressionNode> expression, ValueRange range)
         : CSSValue(CalculationClass)
         , m_expression(expression)
         , m_nonNegative(range == ValueRangeNonNegative)
@@ -142,7 +142,7 @@ private:
 
     double clampToPermittedRange(double) const;
 
-    const RefPtrWillBeMember<CSSCalcExpressionNode> m_expression;
+    const RefPtr<CSSCalcExpressionNode> m_expression;
     const bool m_nonNegative;
 };
 

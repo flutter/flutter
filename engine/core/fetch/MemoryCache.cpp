@@ -38,7 +38,7 @@
 
 namespace blink {
 
-static OwnPtrWillBePersistent<MemoryCache>* gMemoryCache;
+static OwnPtr<MemoryCache>* gMemoryCache;
 
 static const unsigned cDefaultCacheCapacity = 8192 * 1024;
 static const unsigned cDeferredPruneDeadCapacityFactor = 2;
@@ -50,11 +50,11 @@ MemoryCache* memoryCache()
 {
     ASSERT(WTF::isMainThread());
     if (!gMemoryCache)
-        gMemoryCache = new OwnPtrWillBePersistent<MemoryCache>(MemoryCache::create());
+        gMemoryCache = new OwnPtr<MemoryCache>(MemoryCache::create());
     return gMemoryCache->get();
 }
 
-PassOwnPtrWillBeRawPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtrWillBeRawPtr<MemoryCache> cache)
+PassOwnPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtr<MemoryCache> cache)
 {
 #if ENABLE(OILPAN)
     // Move m_liveResources content to keep Resource objects alive.
@@ -68,7 +68,7 @@ PassOwnPtrWillBeRawPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtrWillB
     // Make sure we have non-empty gMemoryCache.
     memoryCache();
 #endif
-    OwnPtrWillBeRawPtr<MemoryCache> oldCache = gMemoryCache->release();
+    OwnPtr<MemoryCache> oldCache = gMemoryCache->release();
     *gMemoryCache = cache;
     return oldCache.release();
 }
@@ -108,9 +108,9 @@ inline MemoryCache::MemoryCache()
     m_pruneTimeStamp = m_pruneFrameTimeStamp = FrameView::currentFrameTimeStamp();
 }
 
-PassOwnPtrWillBeRawPtr<MemoryCache> MemoryCache::create()
+PassOwnPtr<MemoryCache> MemoryCache::create()
 {
-    return adoptPtrWillBeNoop(new MemoryCache());
+    return adoptPtr(new MemoryCache());
 }
 
 MemoryCache::~MemoryCache()

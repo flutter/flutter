@@ -194,7 +194,7 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     pageClients.editorClient = &m_editorClientImpl;
     pageClients.spellCheckerClient = &m_spellCheckerClientImpl;
 
-    m_page = adoptPtrWillBeNoop(new Page(pageClients));
+    m_page = adoptPtr(new Page(pageClients));
     m_page->makeOrdinary();
 
     setDeviceScaleFactor(m_client->screenInfo().deviceScaleFactor);
@@ -362,7 +362,7 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
             WebGestureEvent scaledEvent = event;
             IntRect boundingBox(scaledEvent.x - scaledEvent.data.tap.width / 2, scaledEvent.y - scaledEvent.data.tap.height / 2, scaledEvent.data.tap.width, scaledEvent.data.tap.height);
             Vector<IntRect> goodTargets;
-            WillBeHeapVector<RawPtrWillBeMember<Node> > highlightNodes;
+            Vector<RawPtr<Node> > highlightNodes;
             findGoodTouchTargets(boundingBox, mainFrameImpl()->frame(), goodTargets, highlightNodes);
             // FIXME: replace touch adjustment code when numberOfGoodTargets == 1?
             // Single candidate case is currently handled by: https://bugs.webkit.org/show_bug.cgi?id=85101
@@ -718,13 +718,13 @@ void WebViewImpl::enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent
 {
     Node* touchNode = bestTapNode(tapEvent);
 
-    WillBeHeapVector<RawPtrWillBeMember<Node> > highlightNodes;
+    Vector<RawPtr<Node> > highlightNodes;
     highlightNodes.append(touchNode);
 
     enableTapHighlights(highlightNodes);
 }
 
-void WebViewImpl::enableTapHighlights(WillBeHeapVector<RawPtrWillBeMember<Node> >& highlightNodes)
+void WebViewImpl::enableTapHighlights(Vector<RawPtr<Node> >& highlightNodes)
 {
     if (highlightNodes.isEmpty())
         return;
@@ -1159,7 +1159,7 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     if (m_mouseCaptureNode && WebInputEvent::isMouseEventType(inputEvent.type)) {
         TRACE_EVENT1("input", "captured mouse event", "type", inputEvent.type);
         // Save m_mouseCaptureNode since mouseCaptureLost() will clear it.
-        RefPtrWillBeRawPtr<Node> node = m_mouseCaptureNode;
+        RefPtr<Node> node = m_mouseCaptureNode;
 
         // Not all platforms call mouseCaptureLost() directly.
         if (inputEvent.type == WebInputEvent::MouseUp)
@@ -1270,7 +1270,7 @@ bool WebViewImpl::setComposition(
     // editable because JavaScript may delete a parent node of the composition
     // node. In this case, WebKit crashes while deleting texts from the parent
     // node, which doesn't exist any longer.
-    RefPtrWillBeRawPtr<Range> range = inputMethodController.compositionRange();
+    RefPtr<Range> range = inputMethodController.compositionRange();
     if (range) {
         Node* node = range->startContainer();
         if (!node || !node->isContentEditable())
@@ -1331,7 +1331,7 @@ bool WebViewImpl::compositionRange(size_t* location, size_t* length)
     if (!focused || !m_imeAcceptEvents)
         return false;
 
-    RefPtrWillBeRawPtr<Range> range = focused->inputMethodController().compositionRange();
+    RefPtr<Range> range = focused->inputMethodController().compositionRange();
     if (!range)
         return false;
 
@@ -1375,7 +1375,7 @@ WebTextInputInfo WebViewImpl::textInputInfo()
     if (info.value.isEmpty())
         return info;
 
-    if (RefPtrWillBeRawPtr<Range> range = selection.selection().firstRange()) {
+    if (RefPtr<Range> range = selection.selection().firstRange()) {
         PlainTextRange plainTextRange(PlainTextRange::create(*element, *range.get()));
         if (plainTextRange.isNotNull()) {
             info.selectionStart = plainTextRange.start();
@@ -1383,7 +1383,7 @@ WebTextInputInfo WebViewImpl::textInputInfo()
         }
     }
 
-    if (RefPtrWillBeRawPtr<Range> range = focused->inputMethodController().compositionRange()) {
+    if (RefPtr<Range> range = focused->inputMethodController().compositionRange()) {
         PlainTextRange plainTextRange(PlainTextRange::create(*element, *range.get()));
         if (plainTextRange.isNotNull()) {
             info.compositionStart = plainTextRange.start();
@@ -1451,11 +1451,11 @@ bool WebViewImpl::selectionBounds(WebRect& anchor, WebRect& focus) const
     if (selection.isCaret()) {
         anchor = focus = selection.absoluteCaretBounds();
     } else {
-        RefPtrWillBeRawPtr<Range> selectedRange = selection.toNormalizedRange();
+        RefPtr<Range> selectedRange = selection.toNormalizedRange();
         if (!selectedRange)
             return false;
 
-        RefPtrWillBeRawPtr<Range> range(Range::create(selectedRange->startContainer()->document(),
+        RefPtr<Range> range(Range::create(selectedRange->startContainer()->document(),
             selectedRange->startContainer(),
             selectedRange->startOffset(),
             selectedRange->startContainer(),
@@ -1689,11 +1689,11 @@ void WebViewImpl::clearFocusedElement()
     if (!localFrame)
         return;
 
-    RefPtrWillBeRawPtr<Document> document = localFrame->document();
+    RefPtr<Document> document = localFrame->document();
     if (!document)
         return;
 
-    RefPtrWillBeRawPtr<Element> oldFocusedElement = document->focusedElement();
+    RefPtr<Element> oldFocusedElement = document->focusedElement();
 
     // Clear the focused node.
     document->setFocusedElement(nullptr);
@@ -1885,11 +1885,11 @@ void WebViewImpl::performMediaPlayerAction(const WebMediaPlayerAction& action,
                                            const WebPoint& location)
 {
     HitTestResult result = hitTestResultForWindowPos(location);
-    RefPtrWillBeRawPtr<Node> node = result.innerNonSharedNode();
+    RefPtr<Node> node = result.innerNonSharedNode();
     if (!isHTMLVideoElement(*node) && !isHTMLAudioElement(*node))
         return;
 
-    RefPtrWillBeRawPtr<HTMLMediaElement> mediaElement = static_pointer_cast<HTMLMediaElement>(node);
+    RefPtr<HTMLMediaElement> mediaElement = static_pointer_cast<HTMLMediaElement>(node);
     switch (action.type) {
     case WebMediaPlayerAction::Play:
         if (action.enable)

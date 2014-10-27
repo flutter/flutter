@@ -207,48 +207,48 @@ public:
     bool isValueID() const { return m_primitiveUnitType == CSS_VALUE_ID; }
     bool colorIsDerivedFromElement() const;
 
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> createIdentifier(CSSValueID valueID)
+    static PassRefPtr<CSSPrimitiveValue> createIdentifier(CSSValueID valueID)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(valueID));
+        return adoptRef(new CSSPrimitiveValue(valueID));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> createIdentifier(CSSPropertyID propertyID)
+    static PassRefPtr<CSSPrimitiveValue> createIdentifier(CSSPropertyID propertyID)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(propertyID));
+        return adoptRef(new CSSPrimitiveValue(propertyID));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> createColor(unsigned rgbValue)
+    static PassRefPtr<CSSPrimitiveValue> createColor(unsigned rgbValue)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(rgbValue, CSS_RGBCOLOR));
+        return adoptRef(new CSSPrimitiveValue(rgbValue, CSS_RGBCOLOR));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> create(double value, UnitType type)
+    static PassRefPtr<CSSPrimitiveValue> create(double value, UnitType type)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(value, type));
+        return adoptRef(new CSSPrimitiveValue(value, type));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> create(const String& value, UnitType type)
+    static PassRefPtr<CSSPrimitiveValue> create(const String& value, UnitType type)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(value, type));
+        return adoptRef(new CSSPrimitiveValue(value, type));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> create(const Length& value, float zoom)
+    static PassRefPtr<CSSPrimitiveValue> create(const Length& value, float zoom)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(value, zoom));
+        return adoptRef(new CSSPrimitiveValue(value, zoom));
     }
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> create(const LengthSize& value, const RenderStyle& style)
+    static PassRefPtr<CSSPrimitiveValue> create(const LengthSize& value, const RenderStyle& style)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(value, style));
+        return adoptRef(new CSSPrimitiveValue(value, style));
     }
-    template<typename T> static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> create(T value)
+    template<typename T> static PassRefPtr<CSSPrimitiveValue> create(T value)
     {
-        return adoptRefWillBeNoop(new CSSPrimitiveValue(value));
+        return adoptRef(new CSSPrimitiveValue(value));
     }
 
     // This value is used to handle quirky margins in reflow roots (body, td, and th) like WinIE.
     // The basic idea is that a stylesheet can use the value __qem (for quirky em) instead of em.
     // When the quirky value is used, if you're in quirks mode, the margin will collapse away
     // inside a table cell.
-    static PassRefPtrWillBeRawPtr<CSSPrimitiveValue> createAllowingMarginQuirk(double value, UnitType type)
+    static PassRefPtr<CSSPrimitiveValue> createAllowingMarginQuirk(double value, UnitType type)
     {
         CSSPrimitiveValue* quirkValue = new CSSPrimitiveValue(value, type);
         quirkValue->m_isQuirkValue = true;
-        return adoptRefWillBeNoop(quirkValue);
+        return adoptRef(quirkValue);
     }
 
     ~CSSPrimitiveValue();
@@ -302,7 +302,7 @@ public:
     Quad* getQuadValue(ExceptionState&) const;
     Quad* getQuadValue() const { return m_primitiveUnitType != CSS_QUAD ? 0 : m_value.quad; }
 
-    PassRefPtrWillBeRawPtr<RGBColor> getRGBColorValue(ExceptionState&) const;
+    PassRefPtr<RGBColor> getRGBColorValue(ExceptionState&) const;
     RGBA32 getRGBA32Value() const { return m_primitiveUnitType != CSS_RGBCOLOR ? 0 : m_value.rgbcolor; }
 
     Pair* getPairValue(ExceptionState&) const;
@@ -322,7 +322,7 @@ public:
 
     bool isQuirkValue() { return m_isQuirkValue; }
 
-    PassRefPtrWillBeRawPtr<CSSPrimitiveValue> cloneForCSSOM() const;
+    PassRefPtr<CSSPrimitiveValue> cloneForCSSOM() const;
     void setCSSOMSafe() { m_isCSSOMSafe = true; }
 
     bool equals(const CSSPrimitiveValue&) const;
@@ -351,10 +351,10 @@ private:
     template<typename T> CSSPrimitiveValue(T* val)
         : CSSValue(PrimitiveClass)
     {
-        init(PassRefPtrWillBeRawPtr<T>(val));
+        init(PassRefPtr<T>(val));
     }
 
-    template<typename T> CSSPrimitiveValue(PassRefPtrWillBeRawPtr<T> val)
+    template<typename T> CSSPrimitiveValue(PassRefPtr<T> val)
         : CSSValue(PrimitiveClass)
     {
         init(val);
@@ -366,11 +366,11 @@ private:
 
     void init(const Length&);
     void init(const LengthSize&, const RenderStyle&);
-    void init(PassRefPtrWillBeRawPtr<Rect>);
-    void init(PassRefPtrWillBeRawPtr<Pair>);
-    void init(PassRefPtrWillBeRawPtr<Quad>);
-    void init(PassRefPtrWillBeRawPtr<CSSBasicShape>);
-    void init(PassRefPtrWillBeRawPtr<CSSCalcValue>);
+    void init(PassRefPtr<Rect>);
+    void init(PassRefPtr<Pair>);
+    void init(PassRefPtr<Quad>);
+    void init(PassRefPtr<CSSBasicShape>);
+    void init(PassRefPtr<CSSCalcValue>);
     bool getDoubleValueInternal(UnitType targetUnitType, double* result) const;
 
     double computeLengthDouble(const CSSToLengthConversionData&);

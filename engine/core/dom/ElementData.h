@@ -46,7 +46,7 @@ class UniqueElementData;
 
 // ElementData represents very common, but not necessarily unique to an element,
 // data such as attributes, inline style, and parsed class names and ids.
-class ElementData : public RefCountedWillBeGarbageCollectedFinalized<ElementData> {
+class ElementData : public RefCounted<ElementData> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
 #if ENABLE(OILPAN)
@@ -90,7 +90,7 @@ protected:
     unsigned m_arraySize : 28;
     mutable unsigned m_styleAttributeIsDirty : 1;
 
-    mutable RefPtrWillBeMember<StylePropertySet> m_inlineStyle;
+    mutable RefPtr<StylePropertySet> m_inlineStyle;
     mutable SpaceSplitString m_classNames;
     mutable AtomicString m_idForStyleResolution;
 
@@ -103,7 +103,7 @@ private:
     void destroy();
 #endif
 
-    PassRefPtrWillBeRawPtr<UniqueElementData> makeUniqueCopy() const;
+    PassRefPtr<UniqueElementData> makeUniqueCopy() const;
 };
 
 #define DEFINE_ELEMENT_DATA_TYPE_CASTS(thisType,  pointerPredicate, referencePredicate) \
@@ -121,7 +121,7 @@ private:
 // duplicate sets of attributes (ex. the same classes).
 class ShareableElementData final : public ElementData {
 public:
-    static PassRefPtrWillBeRawPtr<ShareableElementData> createWithAttributes(const Vector<Attribute>&);
+    static PassRefPtr<ShareableElementData> createWithAttributes(const Vector<Attribute>&);
 
     explicit ShareableElementData(const Vector<Attribute>&);
     explicit ShareableElementData(const UniqueElementData&);
@@ -158,8 +158,8 @@ DEFINE_ELEMENT_DATA_TYPE_CASTS(ShareableElementData, !data->isUnique(), !data.is
 // attribute will have the same inline style.
 class UniqueElementData final : public ElementData {
 public:
-    static PassRefPtrWillBeRawPtr<UniqueElementData> create();
-    PassRefPtrWillBeRawPtr<ShareableElementData> makeShareableCopy() const;
+    static PassRefPtr<UniqueElementData> create();
+    PassRefPtr<ShareableElementData> makeShareableCopy() const;
 
     MutableAttributeCollection attributes();
     AttributeCollection attributes() const;

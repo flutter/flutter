@@ -73,8 +73,8 @@ public:
     BLINK_EXPORT static WebRange fromDocumentRange(WebLocalFrame*, int start, int length);
 
 #if BLINK_IMPLEMENTATION
-    WebRange(const PassRefPtrWillBeRawPtr<Range>&);
-    operator PassRefPtrWillBeRawPtr<Range>() const;
+    WebRange(const PassRefPtr<Range>&);
+    operator PassRefPtr<Range>() const;
 #endif
 
 private:

@@ -31,7 +31,7 @@ namespace blink {
 
 class Node;
 
-class NodeList : public RefCountedWillBeGarbageCollectedFinalized<NodeList>, public ScriptWrappable {
+class NodeList : public RefCounted<NodeList>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~NodeList() { }

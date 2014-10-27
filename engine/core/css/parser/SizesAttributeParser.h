@@ -25,10 +25,10 @@ private:
     bool parseMediaConditionAndLength(MediaQueryTokenIterator startToken, MediaQueryTokenIterator endToken);
     unsigned effectiveSize();
     bool calculateLengthInPixels(MediaQueryTokenIterator startToken, MediaQueryTokenIterator endToken, unsigned& result);
-    bool mediaConditionMatches(PassRefPtrWillBeRawPtr<MediaQuerySet> mediaCondition);
+    bool mediaConditionMatches(PassRefPtr<MediaQuerySet> mediaCondition);
     unsigned effectiveSizeDefaultValue();
 
-    RefPtrWillBeMember<MediaQuerySet> m_mediaCondition;
+    RefPtr<MediaQuerySet> m_mediaCondition;
     RefPtr<MediaValues> m_mediaValues;
     unsigned m_length;
     bool m_lengthWasSet;

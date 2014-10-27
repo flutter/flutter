@@ -34,9 +34,9 @@ namespace blink {
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(WebGLContextAttributes);
 
-PassRefPtrWillBeRawPtr<WebGLContextAttributes> WebGLContextAttributes::create()
+PassRefPtr<WebGLContextAttributes> WebGLContextAttributes::create()
 {
-    return adoptRefWillBeNoop(new WebGLContextAttributes());
+    return adoptRef(new WebGLContextAttributes());
 }
 
 WebGLContextAttributes::WebGLContextAttributes()
@@ -65,9 +65,9 @@ WebGLContextAttributes::WebGLContextAttributes(const WebGLContextAttributes& att
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<WebGLContextAttributes> WebGLContextAttributes::clone() const
+PassRefPtr<WebGLContextAttributes> WebGLContextAttributes::clone() const
 {
-    return adoptRefWillBeNoop(new WebGLContextAttributes(*this));
+    return adoptRef(new WebGLContextAttributes(*this));
 }
 
 bool WebGLContextAttributes::alpha() const

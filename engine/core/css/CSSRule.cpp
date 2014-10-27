@@ -41,7 +41,7 @@ namespace blink {
 // (assumed name) which derives ScriptWrappable and CSSRule (new one) which
 // doesn't derive ScriptWrappable or ScriptWrappableBase. Then, we can safely
 // remove ScriptWrappableBase from the base class list.
-struct SameSizeAsCSSRule : public RefCountedWillBeGarbageCollectedFinalized<SameSizeAsCSSRule>, public ScriptWrappableBase {
+struct SameSizeAsCSSRule : public RefCounted<SameSizeAsCSSRule>, public ScriptWrappableBase {
     virtual ~SameSizeAsCSSRule();
     unsigned char bitfields;
     void* pointerUnion;

@@ -119,7 +119,7 @@ bool StyleSheetContents::isCacheable() const
     return true;
 }
 
-void StyleSheetContents::parserAppendRule(PassRefPtrWillBeRawPtr<StyleRuleBase> rule)
+void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
 {
     // Add warning message to inspector if dpi/dpcm values are used for screen media.
     if (rule->isMediaRule()) {
@@ -151,7 +151,7 @@ void StyleSheetContents::clearRules()
     m_childRules.clear();
 }
 
-bool StyleSheetContents::wrapperInsertRule(PassRefPtrWillBeRawPtr<StyleRuleBase> rule, unsigned index)
+bool StyleSheetContents::wrapperInsertRule(PassRefPtr<StyleRuleBase> rule, unsigned index)
 {
     ASSERT(m_isMutable);
     ASSERT_WITH_SECURITY_IMPLICATION(index <= ruleCount());
@@ -214,7 +214,7 @@ KURL StyleSheetContents::completeURL(const String& url) const
     return m_parserContext.completeURL(url);
 }
 
-static bool childRulesHaveFailedOrCanceledSubresources(const WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& rules)
+static bool childRulesHaveFailedOrCanceledSubresources(const Vector<RefPtr<StyleRuleBase> >& rules)
 {
     for (unsigned i = 0; i < rules.size(); ++i) {
         const StyleRuleBase* rule = rules[i].get();
@@ -320,9 +320,9 @@ RuleSet& StyleSheetContents::ensureRuleSet(const MediaQueryEvaluator& medium, Ad
     return *m_ruleSet.get();
 }
 
-static void clearResolvers(WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> >& clients)
+static void clearResolvers(HashSet<RawPtr<CSSStyleSheet> >& clients)
 {
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
+    for (HashSet<RawPtr<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
         if (Document* document = (*it)->ownerDocument())
             document->styleEngine()->clearResolver();
     }
@@ -343,11 +343,11 @@ void StyleSheetContents::clearRuleSet()
     m_ruleSet.clear();
 }
 
-static void removeFontFaceRules(WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> >& clients, const StyleRuleFontFace* fontFaceRule)
+static void removeFontFaceRules(HashSet<RawPtr<CSSStyleSheet> >& clients, const StyleRuleFontFace* fontFaceRule)
 {
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
+    for (HashSet<RawPtr<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
         if (Node* ownerNode = (*it)->ownerNode())
-            ownerNode->document().styleEngine()->removeFontFaceRules(WillBeHeapVector<RawPtrWillBeMember<const StyleRuleFontFace> >(1, fontFaceRule));
+            ownerNode->document().styleEngine()->removeFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >(1, fontFaceRule));
     }
 }
 
@@ -357,7 +357,7 @@ void StyleSheetContents::notifyRemoveFontFaceRule(const StyleRuleFontFace* fontF
     removeFontFaceRules(m_completedClients, fontFaceRule);
 }
 
-static void findFontFaceRulesFromRules(const WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& rules, WillBeHeapVector<RawPtrWillBeMember<const StyleRuleFontFace> >& fontFaceRules)
+static void findFontFaceRulesFromRules(const Vector<RefPtr<StyleRuleBase> >& rules, Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
 {
     for (unsigned i = 0; i < rules.size(); ++i) {
         StyleRuleBase* rule = rules[i].get();
@@ -373,7 +373,7 @@ static void findFontFaceRulesFromRules(const WillBeHeapVector<RefPtrWillBeMember
     }
 }
 
-void StyleSheetContents::findFontFaceRules(WillBeHeapVector<RawPtrWillBeMember<const StyleRuleFontFace> >& fontFaceRules)
+void StyleSheetContents::findFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
 {
     findFontFaceRulesFromRules(childRules(), fontFaceRules);
 }

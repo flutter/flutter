@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class DOMWindowEventQueueTimer : public NoBaseWillBeGarbageCollectedFinalized<DOMWindowEventQueueTimer>, public SuspendableTimer {
+class DOMWindowEventQueueTimer : public DummyBase<DOMWindowEventQueueTimer>, public SuspendableTimer {
     WTF_MAKE_NONCOPYABLE(DOMWindowEventQueueTimer);
 public:
     DOMWindowEventQueueTimer(DOMWindowEventQueue* eventQueue, ExecutionContext* context)
@@ -44,16 +44,16 @@ public:
 private:
     virtual void fired() { m_eventQueue->pendingEventTimerFired(); }
 
-    RawPtrWillBeMember<DOMWindowEventQueue> m_eventQueue;
+    RawPtr<DOMWindowEventQueue> m_eventQueue;
 };
 
-PassRefPtrWillBeRawPtr<DOMWindowEventQueue> DOMWindowEventQueue::create(ExecutionContext* context)
+PassRefPtr<DOMWindowEventQueue> DOMWindowEventQueue::create(ExecutionContext* context)
 {
-    return adoptRefWillBeNoop(new DOMWindowEventQueue(context));
+    return adoptRef(new DOMWindowEventQueue(context));
 }
 
 DOMWindowEventQueue::DOMWindowEventQueue(ExecutionContext* context)
-    : m_pendingEventTimer(adoptPtrWillBeNoop(new DOMWindowEventQueueTimer(this, context)))
+    : m_pendingEventTimer(adoptPtr(new DOMWindowEventQueueTimer(this, context)))
     , m_isClosed(false)
 {
     m_pendingEventTimer->suspendIfNeeded();
@@ -72,7 +72,7 @@ void DOMWindowEventQueue::trace(Visitor* visitor)
     EventQueue::trace(visitor);
 }
 
-bool DOMWindowEventQueue::enqueueEvent(PassRefPtrWillBeRawPtr<Event> event)
+bool DOMWindowEventQueue::enqueueEvent(PassRefPtr<Event> event)
 {
     if (m_isClosed)
         return false;
@@ -90,7 +90,7 @@ bool DOMWindowEventQueue::enqueueEvent(PassRefPtrWillBeRawPtr<Event> event)
 
 bool DOMWindowEventQueue::cancelEvent(Event* event)
 {
-    WillBeHeapListHashSet<RefPtrWillBeMember<Event>, 16>::iterator it = m_queuedEvents.find(event);
+    ListHashSet<RefPtr<Event>, 16>::iterator it = m_queuedEvents.find(event);
     bool found = it != m_queuedEvents.end();
     if (found) {
         m_queuedEvents.remove(it);
@@ -117,11 +117,11 @@ void DOMWindowEventQueue::pendingEventTimerFired()
     bool wasAdded = m_queuedEvents.add(nullptr).isNewEntry;
     ASSERT_UNUSED(wasAdded, wasAdded); // It should not have already been in the list.
 
-    RefPtrWillBeRawPtr<DOMWindowEventQueue> protector(this);
+    RefPtr<DOMWindowEventQueue> protector(this);
 
     while (!m_queuedEvents.isEmpty()) {
-        WillBeHeapListHashSet<RefPtrWillBeMember<Event>, 16>::iterator iter = m_queuedEvents.begin();
-        RefPtrWillBeRawPtr<Event> event = *iter;
+        ListHashSet<RefPtr<Event>, 16>::iterator iter = m_queuedEvents.begin();
+        RefPtr<Event> event = *iter;
         m_queuedEvents.remove(iter);
         if (!event)
             break;
@@ -129,7 +129,7 @@ void DOMWindowEventQueue::pendingEventTimerFired()
     }
 }
 
-void DOMWindowEventQueue::dispatchEvent(PassRefPtrWillBeRawPtr<Event> event)
+void DOMWindowEventQueue::dispatchEvent(PassRefPtr<Event> event)
 {
     EventTarget* eventTarget = event->target();
     if (eventTarget->toDOMWindow())

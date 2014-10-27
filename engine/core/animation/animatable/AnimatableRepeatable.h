@@ -43,12 +43,12 @@ public:
     virtual ~AnimatableRepeatable() { }
 
     // This will consume the vector passed into it.
-    static PassRefPtrWillBeRawPtr<AnimatableRepeatable> create(WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& values)
+    static PassRefPtr<AnimatableRepeatable> create(Vector<RefPtr<AnimatableValue> >& values)
     {
-        return adoptRefWillBeNoop(new AnimatableRepeatable(values));
+        return adoptRef(new AnimatableRepeatable(values));
     }
 
-    const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& values() const { return m_values; }
+    const Vector<RefPtr<AnimatableValue> >& values() const { return m_values; }
 
     virtual void trace(Visitor*) override;
 
@@ -56,20 +56,20 @@ protected:
     AnimatableRepeatable()
     {
     }
-    AnimatableRepeatable(WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& values)
+    AnimatableRepeatable(Vector<RefPtr<AnimatableValue> >& values)
     {
         ASSERT(!values.isEmpty());
         m_values.swap(values);
     }
 
-    static bool interpolateLists(const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& fromValues, const WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& toValues, double fraction, WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> >& interpolatedValues);
+    static bool interpolateLists(const Vector<RefPtr<AnimatableValue> >& fromValues, const Vector<RefPtr<AnimatableValue> >& toValues, double fraction, Vector<RefPtr<AnimatableValue> >& interpolatedValues);
 
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;
 
-    WillBeHeapVector<RefPtrWillBeMember<AnimatableValue> > m_values;
+    Vector<RefPtr<AnimatableValue> > m_values;
 
 private:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
     virtual AnimatableType type() const override { return TypeRepeatable; }
     virtual bool equalTo(const AnimatableValue*) const override final;

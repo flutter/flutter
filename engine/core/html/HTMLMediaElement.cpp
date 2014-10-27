@@ -98,11 +98,11 @@ static const char* boolString(bool val)
 #define LOG_CACHED_TIME_WARNINGS 0
 #endif
 
-typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<HTMLMediaElement> > WeakMediaElementSet;
-typedef WillBeHeapHashMap<RawPtrWillBeWeakMember<Document>, WeakMediaElementSet> DocumentElementSetMap;
+typedef HashSet<RawPtr<HTMLMediaElement> > WeakMediaElementSet;
+typedef HashMap<RawPtr<Document>, WeakMediaElementSet> DocumentElementSetMap;
 static DocumentElementSetMap& documentToElementSetMap()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<DocumentElementSetMap>, map, (adoptPtrWillBeNoop(new DocumentElementSetMap())));
+    DEFINE_STATIC_LOCAL(OwnPtr<DocumentElementSetMap>, map, (adoptPtr(new DocumentElementSetMap())));
     return *map;
 }
 
@@ -474,7 +474,7 @@ void HTMLMediaElement::scheduleEvent(const AtomicString& eventName)
     scheduleEvent(Event::createCancelable(eventName));
 }
 
-void HTMLMediaElement::scheduleEvent(PassRefPtrWillBeRawPtr<Event> event)
+void HTMLMediaElement::scheduleEvent(PassRefPtr<Event> event)
 {
 #if LOG_MEDIA_EVENTS
     WTF_LOG(Media, "HTMLMediaElement::scheduleEvent - scheduling '%s'", event->type().ascii().data());
@@ -494,7 +494,7 @@ void HTMLMediaElement::loadTimerFired(Timer<HTMLMediaElement>*)
     m_pendingActionFlags = 0;
 }
 
-PassRefPtrWillBeRawPtr<MediaError> HTMLMediaElement::error() const
+PassRefPtr<MediaError> HTMLMediaElement::error() const
 {
     return m_error;
 }
@@ -978,7 +978,7 @@ void HTMLMediaElement::noneSupported()
         renderer()->updateFromElement();
 }
 
-void HTMLMediaElement::mediaEngineError(PassRefPtrWillBeRawPtr<MediaError> err)
+void HTMLMediaElement::mediaEngineError(PassRefPtr<MediaError> err)
 {
     ASSERT(m_readyState >= HAVE_METADATA);
     WTF_LOG(Media, "HTMLMediaElement::mediaEngineError(%d)", static_cast<int>(err->code()));
@@ -1311,7 +1311,7 @@ void HTMLMediaElement::seek(double time, ExceptionState& exceptionState)
     // seekable attribute, then let it be the position in one of the ranges given in the seekable attribute
     // that is the nearest to the new playback position. ... If there are no ranges given in the seekable
     // attribute then set the seeking IDL attribute to false and abort these steps.
-    RefPtrWillBeRawPtr<TimeRanges> seekableRanges = seekable();
+    RefPtr<TimeRanges> seekableRanges = seekable();
 
     // Short circuit seeking to the current time by just firing the events if no seek is required.
     // Don't skip calling the media engine if we are in poster mode because a seek should always
@@ -1739,8 +1739,8 @@ bool HTMLMediaElement::havePotentialSourceChild()
 {
     // Stash the current <source> node and next nodes so we can restore them after checking
     // to see there is another potential.
-    RefPtrWillBeRawPtr<HTMLSourceElement> currentSourceNode = m_currentSourceNode;
-    RefPtrWillBeRawPtr<Node> nextNode = m_nextChildNodeToConsider;
+    RefPtr<HTMLSourceElement> currentSourceNode = m_currentSourceNode;
+    RefPtr<Node> nextNode = m_nextChildNodeToConsider;
 
     KURL nextURL = selectNextSourceChild(0, 0, DoNothing);
 
@@ -2041,7 +2041,7 @@ void HTMLMediaElement::mediaPlayerSizeChanged()
         renderer()->updateFromElement();
 }
 
-PassRefPtrWillBeRawPtr<TimeRanges> HTMLMediaElement::buffered() const
+PassRefPtr<TimeRanges> HTMLMediaElement::buffered() const
 {
     if (m_mediaSource)
         return m_mediaSource->buffered();
@@ -2052,7 +2052,7 @@ PassRefPtrWillBeRawPtr<TimeRanges> HTMLMediaElement::buffered() const
     return TimeRanges::create(webMediaPlayer()->buffered());
 }
 
-PassRefPtrWillBeRawPtr<TimeRanges> HTMLMediaElement::played()
+PassRefPtr<TimeRanges> HTMLMediaElement::played()
 {
     if (m_playing) {
         double time = currentTime();
@@ -2066,7 +2066,7 @@ PassRefPtrWillBeRawPtr<TimeRanges> HTMLMediaElement::played()
     return m_playedTimeRanges->copy();
 }
 
-PassRefPtrWillBeRawPtr<TimeRanges> HTMLMediaElement::seekable() const
+PassRefPtr<TimeRanges> HTMLMediaElement::seekable() const
 {
     if (webMediaPlayer()) {
         double maxTimeSeekable = webMediaPlayer()->maxTimeSeekable();
@@ -2119,7 +2119,7 @@ bool HTMLMediaElement::endedPlayback() const
 bool HTMLMediaElement::stoppedDueToErrors() const
 {
     if (m_readyState >= HAVE_METADATA && m_error) {
-        RefPtrWillBeRawPtr<TimeRanges> seekableRanges = seekable();
+        RefPtr<TimeRanges> seekableRanges = seekable();
         if (!seekableRanges->contain(currentTime()))
             return true;
     }
@@ -2432,7 +2432,7 @@ void HTMLMediaElement::trace(Visitor* visitor)
     visitor->trace(m_currentSourceNode);
     visitor->trace(m_nextChildNodeToConsider);
     visitor->trace(m_mediaSource);
-    WillBeHeapSupplementable<HTMLMediaElement>::trace(visitor);
+    Supplementable<HTMLMediaElement>::trace(visitor);
     HTMLElement::trace(visitor);
 }
 

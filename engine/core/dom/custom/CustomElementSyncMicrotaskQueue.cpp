@@ -7,7 +7,7 @@
 
 namespace blink {
 
-void CustomElementSyncMicrotaskQueue::enqueue(PassOwnPtrWillBeRawPtr<CustomElementMicrotaskStep> step)
+void CustomElementSyncMicrotaskQueue::enqueue(PassOwnPtr<CustomElementMicrotaskStep> step)
 {
     m_queue.append(step);
 }

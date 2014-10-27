@@ -28,7 +28,7 @@ void PageAnimator::serviceScriptedAnimations(double monotonicAnimationStartTime)
     m_animationFramePending = false;
     TemporaryChange<bool> servicing(m_servicingAnimations, true);
 
-    WillBeHeapVector<RefPtrWillBeMember<Document> > documents;
+    Vector<RefPtr<Document> > documents;
     documents.append(m_page->mainFrame()->document());
 
     WTF_LOG(ScriptedAnimationController, "PageAnimator::serviceScriptedAnimations: #documents = %d",

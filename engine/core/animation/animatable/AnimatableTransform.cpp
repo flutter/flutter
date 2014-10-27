@@ -33,12 +33,12 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<AnimatableTransform> AnimatableTransform::create(const TransformOperations& transform)
+PassRefPtr<AnimatableTransform> AnimatableTransform::create(const TransformOperations& transform)
 {
-    return adoptRefWillBeNoop(new AnimatableTransform(transform));
+    return adoptRef(new AnimatableTransform(transform));
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableTransform::interpolateTo(const AnimatableValue* value, double fraction) const
+PassRefPtr<AnimatableValue> AnimatableTransform::interpolateTo(const AnimatableValue* value, double fraction) const
 {
     const AnimatableTransform* transform = toAnimatableTransform(value);
     return AnimatableTransform::create(transform->m_transform.blend(m_transform, fraction));

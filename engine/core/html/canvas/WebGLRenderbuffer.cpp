@@ -31,9 +31,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLRenderbuffer> WebGLRenderbuffer::create(WebGLRenderingContextBase* ctx)
+PassRefPtr<WebGLRenderbuffer> WebGLRenderbuffer::create(WebGLRenderingContextBase* ctx)
 {
-    return adoptRefWillBeNoop(new WebGLRenderbuffer(ctx));
+    return adoptRef(new WebGLRenderbuffer(ctx));
 }
 
 WebGLRenderbuffer::~WebGLRenderbuffer()

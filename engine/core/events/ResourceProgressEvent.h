@@ -45,13 +45,13 @@ namespace blink {
 class ResourceProgressEvent final : public ProgressEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ResourceProgressEvent> create()
+    static PassRefPtr<ResourceProgressEvent> create()
     {
-        return adoptRefWillBeNoop(new ResourceProgressEvent);
+        return adoptRef(new ResourceProgressEvent);
     }
-    static PassRefPtrWillBeRawPtr<ResourceProgressEvent> create(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total, const String& url)
+    static PassRefPtr<ResourceProgressEvent> create(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total, const String& url)
     {
-        return adoptRefWillBeNoop(new ResourceProgressEvent(type, lengthComputable, loaded, total, url));
+        return adoptRef(new ResourceProgressEvent(type, lengthComputable, loaded, total, url));
     }
 
     const String& url() const;

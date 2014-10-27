@@ -33,7 +33,7 @@ namespace blink {
 class CSSRule;
 class CSSStyleSheet;
 
-class CSSRuleList : public NoBaseWillBeGarbageCollectedFinalized<CSSRuleList>, public ScriptWrappable {
+class CSSRuleList : public DummyBase<CSSRuleList>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WTF_MAKE_NONCOPYABLE(CSSRuleList);
@@ -58,9 +58,9 @@ protected:
 
 class StaticCSSRuleList final : public CSSRuleList {
 public:
-    static PassRefPtrWillBeRawPtr<StaticCSSRuleList> create()
+    static PassRefPtr<StaticCSSRuleList> create()
     {
-        return adoptRefWillBeNoop(new StaticCSSRuleList());
+        return adoptRef(new StaticCSSRuleList());
     }
 
 #if !ENABLE(OILPAN)
@@ -68,7 +68,7 @@ public:
     virtual void deref() override;
 #endif
 
-    WillBeHeapVector<RefPtrWillBeMember<CSSRule> >& rules() { return m_rules; }
+    Vector<RefPtr<CSSRule> >& rules() { return m_rules; }
 
     virtual CSSStyleSheet* styleSheet() const override { return 0; }
 
@@ -81,7 +81,7 @@ private:
     virtual unsigned length() const override { return m_rules.size(); }
     virtual CSSRule* item(unsigned index) const override { return index < m_rules.size() ? m_rules[index].get() : 0; }
 
-    WillBeHeapVector<RefPtrWillBeMember<CSSRule> > m_rules;
+    Vector<RefPtr<CSSRule> > m_rules;
 #if !ENABLE(OILPAN)
     unsigned m_refCount;
 #endif
@@ -90,9 +90,9 @@ private:
 template <class Rule>
 class LiveCSSRuleList final : public CSSRuleList {
 public:
-    static PassOwnPtrWillBeRawPtr<LiveCSSRuleList> create(Rule* rule)
+    static PassOwnPtr<LiveCSSRuleList> create(Rule* rule)
     {
-        return adoptPtrWillBeNoop(new LiveCSSRuleList(rule));
+        return adoptPtr(new LiveCSSRuleList(rule));
     }
 
 #if !ENABLE(OILPAN)
@@ -113,7 +113,7 @@ private:
     virtual CSSRule* item(unsigned index) const override { return m_rule->item(index); }
     virtual CSSStyleSheet* styleSheet() const override { return m_rule->parentStyleSheet(); }
 
-    RawPtrWillBeMember<Rule> m_rule;
+    RawPtr<Rule> m_rule;
 };
 
 } // namespace blink

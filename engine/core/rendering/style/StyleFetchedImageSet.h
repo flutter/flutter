@@ -47,7 +47,7 @@ public:
     }
     virtual ~StyleFetchedImageSet();
 
-    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const override;
+    virtual PassRefPtr<CSSValue> cssValue() const override;
 
     // FIXME: This is used by StyleImage for equals comparison, but this implementation
     // only looks at the image from the set that we have loaded. I'm not sure if that is
@@ -78,7 +78,7 @@ private:
     ResourcePtr<ImageResource> m_bestFitImage;
     float m_imageScaleFactor;
 
-    // FIXME: oilpan: Change to RawPtrWillBeMember when moving this class onto oilpan heap.
+    // FIXME: oilpan: Change to RawPtr when moving this class onto oilpan heap.
     // Also add "if !ENABLE(OILPAN)" around clearImageSetValue above as well as around its
     // caller since it should not be needed once both of the objects are on the heap and
     // oilpan is enabled.

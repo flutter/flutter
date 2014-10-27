@@ -61,7 +61,7 @@ v8::Handle<v8::Object> createUpgradeCandidateWrapper(ElementType* element, v8::H
 }
 
 template<typename ElementType, typename WrapperType>
-v8::Handle<v8::Object> CustomElementWrapper<ElementType, WrapperType>::wrap(PassRefPtrWillBeRawPtr<ElementType> element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate, v8::Handle<v8::Object> (*createSpecificWrapper)(ElementType* element, v8::Handle<v8::Object> creationContext, v8::Isolate*))
+v8::Handle<v8::Object> CustomElementWrapper<ElementType, WrapperType>::wrap(PassRefPtr<ElementType> element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate, v8::Handle<v8::Object> (*createSpecificWrapper)(ElementType* element, v8::Handle<v8::Object> creationContext, v8::Isolate*))
 {
     ASSERT(DOMDataStore::getWrapper<V8Element>(element.get(), isolate).IsEmpty());
 

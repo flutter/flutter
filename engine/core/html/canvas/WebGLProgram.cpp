@@ -32,9 +32,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLProgram> WebGLProgram::create(WebGLRenderingContextBase* ctx)
+PassRefPtr<WebGLProgram> WebGLProgram::create(WebGLRenderingContextBase* ctx)
 {
-    return adoptRefWillBeNoop(new WebGLProgram(ctx));
+    return adoptRef(new WebGLProgram(ctx));
 }
 
 WebGLProgram::WebGLProgram(WebGLRenderingContextBase* ctx)

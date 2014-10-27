@@ -45,9 +45,9 @@ WebGLExtensionName OESStandardDerivatives::name() const
     return OESStandardDerivativesName;
 }
 
-PassRefPtrWillBeRawPtr<OESStandardDerivatives> OESStandardDerivatives::create(WebGLRenderingContextBase* context)
+PassRefPtr<OESStandardDerivatives> OESStandardDerivatives::create(WebGLRenderingContextBase* context)
 {
-    return adoptRefWillBeNoop(new OESStandardDerivatives(context));
+    return adoptRef(new OESStandardDerivatives(context));
 }
 
 bool OESStandardDerivatives::supported(WebGLRenderingContextBase* context)

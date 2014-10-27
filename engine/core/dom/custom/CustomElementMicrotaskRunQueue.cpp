@@ -25,7 +25,7 @@ CustomElementMicrotaskRunQueue::CustomElementMicrotaskRunQueue()
 {
 }
 
-void CustomElementMicrotaskRunQueue::enqueue(HTMLImportLoader* parentLoader, PassOwnPtrWillBeRawPtr<CustomElementMicrotaskStep> step, bool importIsSync)
+void CustomElementMicrotaskRunQueue::enqueue(HTMLImportLoader* parentLoader, PassOwnPtr<CustomElementMicrotaskStep> step, bool importIsSync)
 {
     if (importIsSync) {
         if (parentLoader)

@@ -33,12 +33,12 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<CustomElementCallbackQueue> CustomElementCallbackQueue::create(PassRefPtrWillBeRawPtr<Element> element)
+PassOwnPtr<CustomElementCallbackQueue> CustomElementCallbackQueue::create(PassRefPtr<Element> element)
 {
-    return adoptPtrWillBeNoop(new CustomElementCallbackQueue(element));
+    return adoptPtr(new CustomElementCallbackQueue(element));
 }
 
-CustomElementCallbackQueue::CustomElementCallbackQueue(PassRefPtrWillBeRawPtr<Element> element)
+CustomElementCallbackQueue::CustomElementCallbackQueue(PassRefPtr<Element> element)
     : m_element(element)
     , m_owner(-1)
     , m_index(0)

@@ -13,16 +13,16 @@ namespace blink {
 
 class LocalDOMWindow;
 
-class ConsoleMessageStorage final : public NoBaseWillBeGarbageCollected<ConsoleMessageStorage> {
+class ConsoleMessageStorage final : public DummyBase<ConsoleMessageStorage> {
     WTF_MAKE_NONCOPYABLE(ConsoleMessageStorage);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<ConsoleMessageStorage> createForFrame(LocalFrame* frame)
+    static PassOwnPtr<ConsoleMessageStorage> createForFrame(LocalFrame* frame)
     {
-        return adoptPtrWillBeNoop(new ConsoleMessageStorage(frame));
+        return adoptPtr(new ConsoleMessageStorage(frame));
     }
 
-    void reportMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>);
+    void reportMessage(PassRefPtr<ConsoleMessage>);
     void clear();
 
     Vector<unsigned> argumentCounts() const;
@@ -43,8 +43,8 @@ private:
     ExecutionContext* executionContext() const;
 
     int m_expiredCount;
-    WillBeHeapDeque<RefPtrWillBeMember<ConsoleMessage> > m_messages;
-    RawPtrWillBeMember<ExecutionContext> m_context;
+    Deque<RefPtr<ConsoleMessage> > m_messages;
+    RawPtr<ExecutionContext> m_context;
     LocalFrame* m_frame;
 };
 

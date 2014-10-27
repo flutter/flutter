@@ -85,7 +85,7 @@ enum ElementFlags {
 class Element : public ContainerNode {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Element> create(const QualifiedName&, Document*);
+    static PassRefPtr<Element> create(const QualifiedName&, Document*);
     virtual ~Element();
 
     bool hasAttribute(const QualifiedName&) const;
@@ -160,8 +160,8 @@ public:
 
     IntRect boundsInRootViewSpace();
 
-    PassRefPtrWillBeRawPtr<ClientRectList> getClientRects();
-    PassRefPtrWillBeRawPtr<ClientRect> getBoundingClientRect();
+    PassRefPtr<ClientRectList> getClientRects();
+    PassRefPtr<ClientRect> getBoundingClientRect();
 
     // Returns the absolute bounding box translated into screen coordinates:
     IntRect screenRect() const;
@@ -170,12 +170,12 @@ public:
 
     void removeAttribute(const AtomicString& name);
 
-    PassRefPtrWillBeRawPtr<Attr> getAttributeNode(const AtomicString& name);
+    PassRefPtr<Attr> getAttributeNode(const AtomicString& name);
 
-    PassRefPtrWillBeRawPtr<Attr> attrIfExists(const QualifiedName&);
-    PassRefPtrWillBeRawPtr<Attr> ensureAttr(const QualifiedName&);
+    PassRefPtr<Attr> attrIfExists(const QualifiedName&);
+    PassRefPtr<Attr> ensureAttr(const QualifiedName&);
 
-    WillBeHeapVector<RefPtrWillBeMember<Attr> >* attrNodeList();
+    Vector<RefPtr<Attr> >* attrNodeList();
 
     CSSStyleDeclaration* style();
 
@@ -192,8 +192,8 @@ public:
 
     virtual String nodeName() const override;
 
-    PassRefPtrWillBeRawPtr<Element> cloneElementWithChildren();
-    PassRefPtrWillBeRawPtr<Element> cloneElementWithoutChildren();
+    PassRefPtr<Element> cloneElementWithChildren();
+    PassRefPtr<Element> cloneElementWithoutChildren();
 
     void normalizeAttributes();
 
@@ -258,7 +258,7 @@ public:
 
     ElementShadow* shadow() const;
     ElementShadow& ensureShadow();
-    PassRefPtrWillBeRawPtr<ShadowRoot> createShadowRoot(ExceptionState&);
+    PassRefPtr<ShadowRoot> createShadowRoot(ExceptionState&);
     ShadowRoot* shadowRoot() const;
     ShadowRoot* youngestShadowRoot() const;
 
@@ -463,8 +463,8 @@ private:
 
     // cloneNode is private so that non-virtual cloneElementWithChildren and cloneElementWithoutChildren
     // are used instead.
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep) override;
-    virtual PassRefPtrWillBeRawPtr<Element> cloneElementWithoutAttributesAndChildren();
+    virtual PassRefPtr<Node> cloneNode(bool deep) override;
+    virtual PassRefPtr<Element> cloneElementWithoutAttributesAndChildren();
 
     QualifiedName m_tagName;
 
@@ -477,11 +477,11 @@ private:
     ElementRareData* elementRareData() const;
     ElementRareData& ensureElementRareData();
 
-    WillBeHeapVector<RefPtrWillBeMember<Attr> >& ensureAttrNodeList();
+    Vector<RefPtr<Attr> >& ensureAttrNodeList();
     void removeAttrNodeList();
     void detachAllAttrNodesFromElement();
 
-    RefPtrWillBeMember<ElementData> m_elementData;
+    RefPtr<ElementData> m_elementData;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());
@@ -685,11 +685,11 @@ inline bool isAtShadowBoundary(const Element* element)
     DEFINE_NODE_TYPE_CASTS_WITH_FUNCTION(thisType)
 
 #define DECLARE_ELEMENT_FACTORY_WITH_TAGNAME(T) \
-    static PassRefPtrWillBeRawPtr<T> create(const QualifiedName&, Document&)
+    static PassRefPtr<T> create(const QualifiedName&, Document&)
 #define DEFINE_ELEMENT_FACTORY_WITH_TAGNAME(T) \
-    PassRefPtrWillBeRawPtr<T> T::create(const QualifiedName& tagName, Document& document) \
+    PassRefPtr<T> T::create(const QualifiedName& tagName, Document& document) \
     { \
-        return adoptRefWillBeNoop(new T(tagName, document)); \
+        return adoptRef(new T(tagName, document)); \
     }
 
 } // namespace

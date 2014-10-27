@@ -12,7 +12,7 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<MediaQuerySet> MediaQueryParser::parseMediaQuerySet(const String& queryString)
+PassRefPtr<MediaQuerySet> MediaQueryParser::parseMediaQuerySet(const String& queryString)
 {
     // FIXME: Replace the MediaQueryTokenizer with a generic CSSTokenizer, once there is one,
     // or better yet, replace the MediaQueryParser with a generic thread-safe CSS parser.
@@ -21,7 +21,7 @@ PassRefPtrWillBeRawPtr<MediaQuerySet> MediaQueryParser::parseMediaQuerySet(const
     return MediaQueryParser(MediaQuerySetParser).parseImpl(tokens.begin(), tokens.end());
 }
 
-PassRefPtrWillBeRawPtr<MediaQuerySet> MediaQueryParser::parseMediaCondition(MediaQueryTokenIterator token, MediaQueryTokenIterator endToken)
+PassRefPtr<MediaQuerySet> MediaQueryParser::parseMediaCondition(MediaQueryTokenIterator token, MediaQueryTokenIterator endToken)
 {
     return MediaQueryParser(MediaConditionParser).parseImpl(token, endToken);
 }
@@ -188,7 +188,7 @@ void MediaQueryParser::processToken(const MediaQueryToken& token)
 }
 
 // The state machine loop
-PassRefPtrWillBeRawPtr<MediaQuerySet> MediaQueryParser::parseImpl(MediaQueryTokenIterator token, MediaQueryTokenIterator endToken)
+PassRefPtr<MediaQuerySet> MediaQueryParser::parseImpl(MediaQueryTokenIterator token, MediaQueryTokenIterator endToken)
 {
     for (; token != endToken; ++token)
         processToken(*token);
@@ -204,7 +204,7 @@ PassRefPtrWillBeRawPtr<MediaQuerySet> MediaQueryParser::parseImpl(MediaQueryToke
 MediaQueryData::MediaQueryData()
     : m_restrictor(MediaQuery::None)
     , m_mediaType(MediaTypeNames::all)
-    , m_expressions(adoptPtrWillBeNoop(new ExpressionHeapVector))
+    , m_expressions(adoptPtr(new ExpressionHeapVector))
     , m_mediaTypeSet(false)
 {
 }
@@ -216,19 +216,19 @@ void MediaQueryData::clear()
     m_mediaTypeSet = false;
     m_mediaFeature = String();
     m_valueList.destroyAndClear();
-    m_expressions = adoptPtrWillBeNoop(new ExpressionHeapVector);
+    m_expressions = adoptPtr(new ExpressionHeapVector);
 }
 
-PassOwnPtrWillBeRawPtr<MediaQuery> MediaQueryData::takeMediaQuery()
+PassOwnPtr<MediaQuery> MediaQueryData::takeMediaQuery()
 {
-    OwnPtrWillBeRawPtr<MediaQuery> mediaQuery = adoptPtrWillBeNoop(new MediaQuery(m_restrictor, m_mediaType, m_expressions.release()));
+    OwnPtr<MediaQuery> mediaQuery = adoptPtr(new MediaQuery(m_restrictor, m_mediaType, m_expressions.release()));
     clear();
     return mediaQuery.release();
 }
 
 bool MediaQueryData::addExpression()
 {
-    OwnPtrWillBeRawPtr<MediaQueryExp> expression = MediaQueryExp::createIfValid(m_mediaFeature, &m_valueList);
+    OwnPtr<MediaQueryExp> expression = MediaQueryExp::createIfValid(m_mediaFeature, &m_valueList);
     bool isValid = !!expression;
     m_expressions->append(expression.release());
     m_valueList.destroyAndClear();

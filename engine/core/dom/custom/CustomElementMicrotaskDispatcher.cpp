@@ -27,7 +27,7 @@ DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskDispatcher)
 
 CustomElementMicrotaskDispatcher& CustomElementMicrotaskDispatcher::instance()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<CustomElementMicrotaskDispatcher>, instance, (adoptPtrWillBeNoop(new CustomElementMicrotaskDispatcher())));
+    DEFINE_STATIC_LOCAL(OwnPtr<CustomElementMicrotaskDispatcher>, instance, (adoptPtr(new CustomElementMicrotaskDispatcher())));
     return *instance;
 }
 
@@ -72,7 +72,7 @@ void CustomElementMicrotaskDispatcher::doDispatch()
     m_phase = Resolving;
 
     m_phase = DispatchingCallbacks;
-    for (WillBeHeapVector<RawPtrWillBeMember<CustomElementCallbackQueue> >::iterator it = m_elements.begin(); it != m_elements.end(); ++it) {
+    for (Vector<RawPtr<CustomElementCallbackQueue> >::iterator it = m_elements.begin(); it != m_elements.end(); ++it) {
         // Created callback may enqueue an attached callback.
         CustomElementProcessingStack::CallbackDeliveryScope scope;
         (*it)->processInElementQueue(kMicrotaskQueueId);

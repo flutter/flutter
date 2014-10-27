@@ -110,10 +110,10 @@ void Node::operator delete(void* ptr)
 #endif
 
 #if DUMP_NODE_STATISTICS
-typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<Node> > WeakNodeSet;
+typedef HashSet<RawPtr<Node> > WeakNodeSet;
 static WeakNodeSet& liveNodeSet()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<WeakNodeSet>, set, (adoptPtrWillBeNoop(new WeakNodeSet())));
+    DEFINE_STATIC_LOCAL(OwnPtr<WeakNodeSet>, set, (adoptPtr(new WeakNodeSet())));
     return *set;
 }
 #endif
@@ -361,7 +361,7 @@ void Node::setNodeValue(const String&)
     // By default, setting nodeValue has no effect.
 }
 
-PassRefPtrWillBeRawPtr<Node> Node::insertBefore(PassRefPtrWillBeRawPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
+PassRefPtr<Node> Node::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
 {
     if (isContainerNode())
         return toContainerNode(this)->insertBefore(newChild, refChild, exceptionState);
@@ -370,7 +370,7 @@ PassRefPtrWillBeRawPtr<Node> Node::insertBefore(PassRefPtrWillBeRawPtr<Node> new
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Node> Node::replaceChild(PassRefPtrWillBeRawPtr<Node> newChild, PassRefPtrWillBeRawPtr<Node> oldChild, ExceptionState& exceptionState)
+PassRefPtr<Node> Node::replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
     if (isContainerNode())
         return toContainerNode(this)->replaceChild(newChild, oldChild, exceptionState);
@@ -379,7 +379,7 @@ PassRefPtrWillBeRawPtr<Node> Node::replaceChild(PassRefPtrWillBeRawPtr<Node> new
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Node> Node::removeChild(PassRefPtrWillBeRawPtr<Node> oldChild, ExceptionState& exceptionState)
+PassRefPtr<Node> Node::removeChild(PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
     if (isContainerNode())
         return toContainerNode(this)->removeChild(oldChild, exceptionState);
@@ -388,7 +388,7 @@ PassRefPtrWillBeRawPtr<Node> Node::removeChild(PassRefPtrWillBeRawPtr<Node> oldC
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Node> Node::appendChild(PassRefPtrWillBeRawPtr<Node> newChild, ExceptionState& exceptionState)
+PassRefPtr<Node> Node::appendChild(PassRefPtr<Node> newChild, ExceptionState& exceptionState)
 {
     if (isContainerNode())
         return toContainerNode(this)->appendChild(newChild, exceptionState);
@@ -408,7 +408,7 @@ void Node::normalize()
     // Go through the subtree beneath us, normalizing all nodes. This means that
     // any two adjacent text nodes are merged and any empty text nodes are removed.
 
-    RefPtrWillBeRawPtr<Node> node = this;
+    RefPtr<Node> node = this;
     while (Node* firstChild = node->firstChild())
         node = firstChild;
     while (node) {
@@ -575,7 +575,7 @@ namespace {
 
 void addJsStack(TracedValue* stackFrames)
 {
-    RefPtrWillBeRawPtr<ScriptCallStack> stack = createScriptCallStack(10);
+    RefPtr<ScriptCallStack> stack = createScriptCallStack(10);
     if (!stack)
         return;
     for (size_t i = 0; i < stack->size(); i++)
@@ -1121,7 +1121,7 @@ void Node::setTextContent(const String& text)
         case ATTRIBUTE_NODE:
         case DOCUMENT_FRAGMENT_NODE: {
             // FIXME: Merge this logic into replaceChildrenWithText.
-            RefPtrWillBeRawPtr<ContainerNode> container = toContainerNode(this);
+            RefPtr<ContainerNode> container = toContainerNode(this);
 
             // Note: This is an intentional optimization.
             // See crbug.com/352836 also.
@@ -1509,14 +1509,14 @@ void Node::didMoveToNewDocument(Document& oldDocument)
     else if (oldDocument.frameHost() != document().frameHost())
         EventHandlerRegistry::didMoveBetweenFrameHosts(*this, oldDocument.frameHost(), document().frameHost());
 
-    if (WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >* registry = mutationObserverRegistry()) {
+    if (Vector<OwnPtr<MutationObserverRegistration> >* registry = mutationObserverRegistry()) {
         for (size_t i = 0; i < registry->size(); ++i) {
             document().addMutationObserverTypes(registry->at(i)->mutationTypes());
         }
     }
 
-    if (WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >* transientRegistry = transientMutationObserverRegistry()) {
-        for (WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >::iterator iter = transientRegistry->begin(); iter != transientRegistry->end(); ++iter) {
+    if (HashSet<RawPtr<MutationObserverRegistration> >* transientRegistry = transientMutationObserverRegistry()) {
+        for (HashSet<RawPtr<MutationObserverRegistration> >::iterator iter = transientRegistry->begin(); iter != transientRegistry->end(); ++iter) {
             document().addMutationObserverTypes((*iter)->mutationTypes());
         }
     }
@@ -1575,11 +1575,11 @@ void Node::removeAllEventListenersRecursively()
     }
 }
 
-typedef WillBeHeapHashMap<RawPtrWillBeWeakMember<Node>, OwnPtr<EventTargetData> > EventTargetDataMap;
+typedef HashMap<RawPtr<Node>, OwnPtr<EventTargetData> > EventTargetDataMap;
 
 static EventTargetDataMap& eventTargetDataMap()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<EventTargetDataMap>, map, (adoptPtrWillBeNoop(new EventTargetDataMap())));
+    DEFINE_STATIC_LOCAL(OwnPtr<EventTargetDataMap>, map, (adoptPtr(new EventTargetDataMap())));
     return *map;
 }
 
@@ -1605,7 +1605,7 @@ void Node::clearEventTargetData()
 }
 #endif
 
-WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >* Node::mutationObserverRegistry()
+Vector<OwnPtr<MutationObserverRegistration> >* Node::mutationObserverRegistry()
 {
     if (!hasRareData())
         return 0;
@@ -1615,7 +1615,7 @@ WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >* Node::mutat
     return &data->registry;
 }
 
-WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >* Node::transientMutationObserverRegistry()
+HashSet<RawPtr<MutationObserverRegistration> >* Node::transientMutationObserverRegistry()
 {
     if (!hasRareData())
         return 0;
@@ -1626,7 +1626,7 @@ WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >* Node::tran
 }
 
 template<typename Registry>
-static inline void collectMatchingObserversForMutation(WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>& observers, Registry* registry, Node& target, MutationObserver::MutationType type, const QualifiedName* attributeName)
+static inline void collectMatchingObserversForMutation(HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>& observers, Registry* registry, Node& target, MutationObserver::MutationType type, const QualifiedName* attributeName)
 {
     if (!registry)
         return;
@@ -1634,14 +1634,14 @@ static inline void collectMatchingObserversForMutation(WillBeHeapHashMap<RawPtrW
         const MutationObserverRegistration& registration = **iter;
         if (registration.shouldReceiveMutationFrom(target, type, attributeName)) {
             MutationRecordDeliveryOptions deliveryOptions = registration.deliveryOptions();
-            WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>::AddResult result = observers.add(&registration.observer(), deliveryOptions);
+            HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>::AddResult result = observers.add(&registration.observer(), deliveryOptions);
             if (!result.isNewEntry)
                 result.storedValue->value |= deliveryOptions;
         }
     }
 }
 
-void Node::getRegisteredMutationObserversOfType(WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>& observers, MutationObserver::MutationType type, const QualifiedName* attributeName)
+void Node::getRegisteredMutationObserversOfType(HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>& observers, MutationObserver::MutationType type, const QualifiedName* attributeName)
 {
     ASSERT((type == MutationObserver::Attributes && attributeName) || !attributeName);
     collectMatchingObserversForMutation(observers, mutationObserverRegistry(), *this, type, attributeName);
@@ -1655,7 +1655,7 @@ void Node::getRegisteredMutationObserversOfType(WillBeHeapHashMap<RawPtrWillBeMe
 void Node::registerMutationObserver(MutationObserver& observer, MutationObserverOptions options, const HashSet<AtomicString>& attributeFilter)
 {
     MutationObserverRegistration* registration = 0;
-    WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >& registry = ensureRareData().ensureMutationObserverData().registry;
+    Vector<OwnPtr<MutationObserverRegistration> >& registry = ensureRareData().ensureMutationObserverData().registry;
     for (size_t i = 0; i < registry.size(); ++i) {
         if (&registry[i]->observer() == &observer) {
             registration = registry[i].get();
@@ -1673,7 +1673,7 @@ void Node::registerMutationObserver(MutationObserver& observer, MutationObserver
 
 void Node::unregisterMutationObserver(MutationObserverRegistration* registration)
 {
-    WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >* registry = mutationObserverRegistry();
+    Vector<OwnPtr<MutationObserverRegistration> >* registry = mutationObserverRegistry();
     ASSERT(registry);
     if (!registry)
         return;
@@ -1686,7 +1686,7 @@ void Node::unregisterMutationObserver(MutationObserverRegistration* registration
     // Deleting the registration may cause this node to be derefed, so we must make sure the Vector operation completes
     // before that, in case |this| is destroyed (see MutationObserverRegistration::m_registrationNodeKeepAlive).
     // FIXME: Simplify the registration/transient registration logic to make this understandable by humans.
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
 #if ENABLE(OILPAN)
     // The explicit dispose() is needed to have the registration
     // object unregister itself promptly.
@@ -1702,7 +1702,7 @@ void Node::registerTransientMutationObserver(MutationObserverRegistration* regis
 
 void Node::unregisterTransientMutationObserver(MutationObserverRegistration* registration)
 {
-    WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >* transientRegistry = transientMutationObserverRegistry();
+    HashSet<RawPtr<MutationObserverRegistration> >* transientRegistry = transientMutationObserverRegistry();
     ASSERT(transientRegistry);
     if (!transientRegistry)
         return;
@@ -1717,14 +1717,14 @@ void Node::notifyMutationObserversNodeWillDetach()
         return;
 
     for (Node* node = parentNode(); node; node = node->parentNode()) {
-        if (WillBeHeapVector<OwnPtrWillBeMember<MutationObserverRegistration> >* registry = node->mutationObserverRegistry()) {
+        if (Vector<OwnPtr<MutationObserverRegistration> >* registry = node->mutationObserverRegistry()) {
             const size_t size = registry->size();
             for (size_t i = 0; i < size; ++i)
                 registry->at(i)->observedSubtreeNodeWillDetach(*this);
         }
 
-        if (WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >* transientRegistry = node->transientMutationObserverRegistry()) {
-            for (WillBeHeapHashSet<RawPtrWillBeMember<MutationObserverRegistration> >::iterator iter = transientRegistry->begin(); iter != transientRegistry->end(); ++iter)
+        if (HashSet<RawPtr<MutationObserverRegistration> >* transientRegistry = node->transientMutationObserverRegistry()) {
+            for (HashSet<RawPtr<MutationObserverRegistration> >::iterator iter = transientRegistry->begin(); iter != transientRegistry->end(); ++iter)
                 (*iter)->observedSubtreeNodeWillDetach(*this);
         }
     }
@@ -1741,17 +1741,17 @@ void Node::handleLocalEvents(Event* event)
     fireEventListeners(event);
 }
 
-void Node::dispatchScopedEvent(PassRefPtrWillBeRawPtr<Event> event)
+void Node::dispatchScopedEvent(PassRefPtr<Event> event)
 {
     dispatchScopedEventDispatchMediator(EventDispatchMediator::create(event));
 }
 
-void Node::dispatchScopedEventDispatchMediator(PassRefPtrWillBeRawPtr<EventDispatchMediator> eventDispatchMediator)
+void Node::dispatchScopedEventDispatchMediator(PassRefPtr<EventDispatchMediator> eventDispatchMediator)
 {
     EventDispatcher::dispatchScopedEvent(this, eventDispatchMediator);
 }
 
-bool Node::dispatchEvent(PassRefPtrWillBeRawPtr<Event> event)
+bool Node::dispatchEvent(PassRefPtr<Event> event)
 {
     if (event->isMouseEvent())
         return EventDispatcher::dispatchEvent(this, MouseEventDispatchMediator::create(static_pointer_cast<MouseEvent>(event), MouseEventDispatchMediator::SyntheticMouseEvent));
@@ -1760,10 +1760,10 @@ bool Node::dispatchEvent(PassRefPtrWillBeRawPtr<Event> event)
     return EventDispatcher::dispatchEvent(this, EventDispatchMediator::create(event));
 }
 
-bool Node::dispatchDOMActivateEvent(int detail, PassRefPtrWillBeRawPtr<Event> underlyingEvent)
+bool Node::dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent)
 {
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    RefPtrWillBeRawPtr<UIEvent> event = UIEvent::create(EventTypeNames::DOMActivate, true, true, document().domWindow(), detail);
+    RefPtr<UIEvent> event = UIEvent::create(EventTypeNames::DOMActivate, true, true, document().domWindow(), detail);
     event->setUnderlyingEvent(underlyingEvent);
     dispatchScopedEvent(event);
     return event->defaultHandled();
@@ -1782,13 +1782,13 @@ bool Node::dispatchMouseEvent(const PlatformMouseEvent& event, const AtomicStrin
 
 bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
 {
-    RefPtrWillBeRawPtr<GestureEvent> gestureEvent = GestureEvent::create(document().domWindow(), event);
+    RefPtr<GestureEvent> gestureEvent = GestureEvent::create(document().domWindow(), event);
     if (!gestureEvent.get())
         return false;
     return EventDispatcher::dispatchEvent(this, GestureEventDispatchMediator::create(gestureEvent));
 }
 
-bool Node::dispatchTouchEvent(PassRefPtrWillBeRawPtr<TouchEvent> event)
+bool Node::dispatchTouchEvent(PassRefPtr<TouchEvent> event)
 {
     return EventDispatcher::dispatchEvent(this, TouchEventDispatchMediator::create(event));
 }
@@ -1917,13 +1917,13 @@ void Node::removedLastRef()
 }
 #endif
 
-PassRefPtrWillBeRawPtr<StaticNodeList> Node::getDestinationInsertionPoints()
+PassRefPtr<StaticNodeList> Node::getDestinationInsertionPoints()
 {
     document().updateDistributionForNodeIfNeeded(this);
-    WillBeHeapVector<RawPtrWillBeMember<InsertionPoint>, 8> insertionPoints;
+    Vector<RawPtr<InsertionPoint>, 8> insertionPoints;
     collectDestinationInsertionPoints(*this, insertionPoints);
     // FIXME(sky): Is there an easier way to get this into a Vector<Node>?
-    WillBeHeapVector<RefPtrWillBeMember<Node> > nodes(insertionPoints.size());
+    Vector<RefPtr<Node> > nodes(insertionPoints.size());
     copyToVector(insertionPoints, nodes);
     return StaticNodeList::adopt(nodes);
 }

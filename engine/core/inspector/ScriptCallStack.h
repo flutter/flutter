@@ -41,18 +41,18 @@ namespace blink {
 
 class ScriptAsyncCallStack;
 
-class ScriptCallStack final : public RefCountedWillBeGarbageCollectedFinalized<ScriptCallStack> {
+class ScriptCallStack final : public RefCounted<ScriptCallStack> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ScriptCallStack);
 public:
     static const size_t maxCallStackSizeToCapture = 200;
 
-    static PassRefPtrWillBeRawPtr<ScriptCallStack> create(Vector<ScriptCallFrame>&);
+    static PassRefPtr<ScriptCallStack> create(Vector<ScriptCallFrame>&);
 
     const ScriptCallFrame &at(size_t) const;
     size_t size() const;
 
-    PassRefPtrWillBeRawPtr<ScriptAsyncCallStack> asyncCallStack() const;
-    void setAsyncCallStack(PassRefPtrWillBeRawPtr<ScriptAsyncCallStack>);
+    PassRefPtr<ScriptAsyncCallStack> asyncCallStack() const;
+    void setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack>);
 
     void trace(Visitor*);
 
@@ -60,7 +60,7 @@ private:
     explicit ScriptCallStack(Vector<ScriptCallFrame>&);
 
     Vector<ScriptCallFrame> m_frames;
-    RefPtrWillBeMember<ScriptAsyncCallStack> m_asyncCallStack;
+    RefPtr<ScriptAsyncCallStack> m_asyncCallStack;
 };
 
 } // namespace blink

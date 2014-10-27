@@ -128,7 +128,7 @@ bool MediaQueryEvaluator::eval(const MediaQuery* query, MediaQueryResultList* vi
     for (; i < expressions.size(); ++i) {
         bool exprResult = eval(expressions.at(i).get());
         if (viewportDependentMediaQueryResults && expressions.at(i)->isViewportDependent())
-            viewportDependentMediaQueryResults->append(adoptRefWillBeNoop(new MediaQueryResult(*expressions.at(i), exprResult)));
+            viewportDependentMediaQueryResults->append(adoptRef(new MediaQueryResult(*expressions.at(i), exprResult)));
         if (!exprResult)
             break;
     }
@@ -142,7 +142,7 @@ bool MediaQueryEvaluator::eval(const MediaQuerySet* querySet, MediaQueryResultLi
     if (!querySet)
         return true;
 
-    const WillBeHeapVector<OwnPtrWillBeMember<MediaQuery> >& queries = querySet->queryVector();
+    const Vector<OwnPtr<MediaQuery> >& queries = querySet->queryVector();
     if (!queries.size())
         return true; // Empty query list evaluates to true.
 

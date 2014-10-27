@@ -46,7 +46,7 @@ bool AnimatableClipPathOperation::usesDefaultInterpolationWith(const AnimatableV
     return !fromShape->canBlend(toShape);
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableClipPathOperation::interpolateTo(const AnimatableValue* value, double fraction) const
+PassRefPtr<AnimatableValue> AnimatableClipPathOperation::interpolateTo(const AnimatableValue* value, double fraction) const
 {
     if (usesDefaultInterpolationWith(value))
         return defaultInterpolateTo(this, value, fraction);

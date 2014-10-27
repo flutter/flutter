@@ -213,18 +213,18 @@ WebElement WebNode::shadowHost() const
     return WebElement(coreNode->shadowHost());
 }
 
-WebNode::WebNode(const PassRefPtrWillBeRawPtr<Node>& node)
+WebNode::WebNode(const PassRefPtr<Node>& node)
     : m_private(node)
 {
 }
 
-WebNode& WebNode::operator=(const PassRefPtrWillBeRawPtr<Node>& node)
+WebNode& WebNode::operator=(const PassRefPtr<Node>& node)
 {
     m_private = node;
     return *this;
 }
 
-WebNode::operator PassRefPtrWillBeRawPtr<Node>() const
+WebNode::operator PassRefPtr<Node>() const
 {
     return m_private.get();
 }

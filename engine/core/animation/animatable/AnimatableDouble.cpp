@@ -42,7 +42,7 @@ bool AnimatableDouble::usesDefaultInterpolationWith(const AnimatableValue* value
     return (m_constraint == InterpolationIsNonContinuousWithZero) && (!m_number || !other->m_number);
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableDouble::interpolateTo(const AnimatableValue* value, double fraction) const
+PassRefPtr<AnimatableValue> AnimatableDouble::interpolateTo(const AnimatableValue* value, double fraction) const
 {
     const AnimatableDouble* other = toAnimatableDouble(value);
     ASSERT(m_constraint == other->m_constraint);

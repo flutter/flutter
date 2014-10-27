@@ -39,14 +39,14 @@ class CSSKeyframeRule;
 
 class StyleRuleKeyframes final : public StyleRuleBase {
 public:
-    static PassRefPtrWillBeRawPtr<StyleRuleKeyframes> create() { return adoptRefWillBeNoop(new StyleRuleKeyframes()); }
+    static PassRefPtr<StyleRuleKeyframes> create() { return adoptRef(new StyleRuleKeyframes()); }
 
     ~StyleRuleKeyframes();
 
-    const WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> >& keyframes() const { return m_keyframes; }
+    const Vector<RefPtr<StyleKeyframe> >& keyframes() const { return m_keyframes; }
 
-    void parserAppendKeyframe(PassRefPtrWillBeRawPtr<StyleKeyframe>);
-    void wrapperAppendKeyframe(PassRefPtrWillBeRawPtr<StyleKeyframe>);
+    void parserAppendKeyframe(PassRefPtr<StyleKeyframe>);
+    void wrapperAppendKeyframe(PassRefPtr<StyleKeyframe>);
     void wrapperRemoveKeyframe(unsigned);
 
     String name() const { return m_name; }
@@ -57,7 +57,7 @@ public:
 
     int findKeyframeIndex(const String& key) const;
 
-    PassRefPtrWillBeRawPtr<StyleRuleKeyframes> copy() const { return adoptRefWillBeNoop(new StyleRuleKeyframes(*this)); }
+    PassRefPtr<StyleRuleKeyframes> copy() const { return adoptRef(new StyleRuleKeyframes(*this)); }
 
     void traceAfterDispatch(Visitor*);
 
@@ -65,7 +65,7 @@ private:
     StyleRuleKeyframes();
     explicit StyleRuleKeyframes(const StyleRuleKeyframes&);
 
-    WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> > m_keyframes;
+    Vector<RefPtr<StyleKeyframe> > m_keyframes;
     AtomicString m_name;
     bool m_isPrefixed;
 };
@@ -74,9 +74,9 @@ DEFINE_STYLE_RULE_TYPE_CASTS(Keyframes);
 
 class CSSKeyframesRule final : public CSSRule {
 public:
-    static PassRefPtrWillBeRawPtr<CSSKeyframesRule> create(StyleRuleKeyframes* rule, CSSStyleSheet* sheet)
+    static PassRefPtr<CSSKeyframesRule> create(StyleRuleKeyframes* rule, CSSStyleSheet* sheet)
     {
-        return adoptRefWillBeNoop(new CSSKeyframesRule(rule, sheet));
+        return adoptRef(new CSSKeyframesRule(rule, sheet));
     }
 
     virtual ~CSSKeyframesRule();
@@ -106,9 +106,9 @@ public:
 private:
     CSSKeyframesRule(StyleRuleKeyframes*, CSSStyleSheet* parent);
 
-    RefPtrWillBeMember<StyleRuleKeyframes> m_keyframesRule;
-    mutable WillBeHeapVector<RefPtrWillBeMember<CSSKeyframeRule> > m_childRuleCSSOMWrappers;
-    mutable OwnPtrWillBeMember<CSSRuleList> m_ruleListCSSOMWrapper;
+    RefPtr<StyleRuleKeyframes> m_keyframesRule;
+    mutable Vector<RefPtr<CSSKeyframeRule> > m_childRuleCSSOMWrappers;
+    mutable OwnPtr<CSSRuleList> m_ruleListCSSOMWrapper;
     bool m_isPrefixed;
 };
 

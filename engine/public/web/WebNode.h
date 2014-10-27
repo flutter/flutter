@@ -133,9 +133,9 @@ public:
     }
 
 #if BLINK_IMPLEMENTATION
-    WebNode(const PassRefPtrWillBeRawPtr<Node>&);
-    WebNode& operator=(const PassRefPtrWillBeRawPtr<Node>&);
-    operator PassRefPtrWillBeRawPtr<Node>() const;
+    WebNode(const PassRefPtr<Node>&);
+    WebNode& operator=(const PassRefPtr<Node>&);
+    operator PassRefPtr<Node>() const;
 #endif
 
 #if BLINK_IMPLEMENTATION

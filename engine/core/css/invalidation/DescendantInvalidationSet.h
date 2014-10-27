@@ -45,11 +45,11 @@ class Element;
 
 // Tracks data to determine which elements of a DOM subtree need to have style
 // recalculated.
-class DescendantInvalidationSet final : public RefCountedWillBeGarbageCollected<DescendantInvalidationSet> {
+class DescendantInvalidationSet final : public RefCounted<DescendantInvalidationSet> {
 public:
-    static PassRefPtrWillBeRawPtr<DescendantInvalidationSet> create()
+    static PassRefPtr<DescendantInvalidationSet> create()
     {
-        return adoptRefWillBeNoop(new DescendantInvalidationSet);
+        return adoptRef(new DescendantInvalidationSet);
     }
 
     bool invalidatesElement(Element&) const;
@@ -81,16 +81,16 @@ public:
 private:
     DescendantInvalidationSet();
 
-    WillBeHeapHashSet<AtomicString>& ensureClassSet();
-    WillBeHeapHashSet<AtomicString>& ensureIdSet();
-    WillBeHeapHashSet<AtomicString>& ensureTagNameSet();
-    WillBeHeapHashSet<AtomicString>& ensureAttributeSet();
+    HashSet<AtomicString>& ensureClassSet();
+    HashSet<AtomicString>& ensureIdSet();
+    HashSet<AtomicString>& ensureTagNameSet();
+    HashSet<AtomicString>& ensureAttributeSet();
 
     // FIXME: optimize this if it becomes a memory issue.
-    OwnPtrWillBeMember<WillBeHeapHashSet<AtomicString> > m_classes;
-    OwnPtrWillBeMember<WillBeHeapHashSet<AtomicString> > m_ids;
-    OwnPtrWillBeMember<WillBeHeapHashSet<AtomicString> > m_tagNames;
-    OwnPtrWillBeMember<WillBeHeapHashSet<AtomicString> > m_attributes;
+    OwnPtr<HashSet<AtomicString> > m_classes;
+    OwnPtr<HashSet<AtomicString> > m_ids;
+    OwnPtr<HashSet<AtomicString> > m_tagNames;
+    OwnPtr<HashSet<AtomicString> > m_attributes;
 
     // If true, all descendants might be invalidated, so a full subtree recalc is required.
     unsigned m_allDescendantsMightBeInvalid : 1;

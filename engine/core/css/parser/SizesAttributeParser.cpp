@@ -88,7 +88,7 @@ static void reverseSkipUntilComponentStart(MediaQueryTokenIterator& token, Media
     }
 }
 
-bool SizesAttributeParser::mediaConditionMatches(PassRefPtrWillBeRawPtr<MediaQuerySet> mediaCondition)
+bool SizesAttributeParser::mediaConditionMatches(PassRefPtr<MediaQuerySet> mediaCondition)
 {
     // A Media Condition cannot have a media type other then screen.
     MediaQueryEvaluator mediaQueryEvaluator(*m_mediaValues);
@@ -107,7 +107,7 @@ bool SizesAttributeParser::parseMediaConditionAndLength(MediaQueryTokenIterator 
     unsigned length;
     if (!calculateLengthInPixels(lengthTokenStart, lengthTokenEnd, length))
         return false;
-    RefPtrWillBeRawPtr<MediaQuerySet> mediaCondition = MediaQueryParser::parseMediaCondition(startToken, endToken);
+    RefPtr<MediaQuerySet> mediaCondition = MediaQueryParser::parseMediaCondition(startToken, endToken);
     if (mediaCondition && mediaConditionMatches(mediaCondition)) {
         m_length = length;
         m_lengthWasSet = true;

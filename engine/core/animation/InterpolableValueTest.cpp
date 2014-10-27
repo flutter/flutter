@@ -20,21 +20,21 @@ protected:
 
     double interpolateNumbers(double a, double b, double progress)
     {
-        RefPtrWillBeRawPtr<Interpolation> i = Interpolation::create(InterpolableNumber::create(a), InterpolableNumber::create(b));
+        RefPtr<Interpolation> i = Interpolation::create(InterpolableNumber::create(a), InterpolableNumber::create(b));
         i->interpolate(0, progress);
         return toInterpolableNumber(interpolationValue(*i.get()))->value();
     }
 
     bool interpolateBools(bool a, bool b, double progress)
     {
-        RefPtrWillBeRawPtr<Interpolation> i = Interpolation::create(InterpolableBool::create(a), InterpolableBool::create(b));
+        RefPtr<Interpolation> i = Interpolation::create(InterpolableBool::create(a), InterpolableBool::create(b));
         i->interpolate(0, progress);
         return toInterpolableBool(interpolationValue(*i.get()))->value();
     }
 
-    PassRefPtrWillBeRawPtr<Interpolation> interpolateLists(PassOwnPtrWillBeRawPtr<InterpolableList> listA, PassOwnPtrWillBeRawPtr<InterpolableList> listB, double progress)
+    PassRefPtr<Interpolation> interpolateLists(PassOwnPtr<InterpolableList> listA, PassOwnPtr<InterpolableList> listB, double progress)
     {
-        RefPtrWillBeRawPtr<Interpolation> i = Interpolation::create(listA, listB);
+        RefPtr<Interpolation> i = Interpolation::create(listA, listB);
         i->interpolate(0, progress);
         return i;
     }
@@ -62,17 +62,17 @@ TEST_F(AnimationInterpolableValueTest, InterpolateBools)
 
 TEST_F(AnimationInterpolableValueTest, SimpleList)
 {
-    OwnPtrWillBeRawPtr<InterpolableList> listA = InterpolableList::create(3);
+    OwnPtr<InterpolableList> listA = InterpolableList::create(3);
     listA->set(0, InterpolableNumber::create(0));
     listA->set(1, InterpolableNumber::create(42));
     listA->set(2, InterpolableNumber::create(20.5));
 
-    OwnPtrWillBeRawPtr<InterpolableList> listB = InterpolableList::create(3);
+    OwnPtr<InterpolableList> listB = InterpolableList::create(3);
     listB->set(0, InterpolableNumber::create(100));
     listB->set(1, InterpolableNumber::create(-200));
     listB->set(2, InterpolableNumber::create(300));
 
-    RefPtrWillBeRawPtr<Interpolation> i = interpolateLists(listA.release(), listB.release(), 0.3);
+    RefPtr<Interpolation> i = interpolateLists(listA.release(), listB.release(), 0.3);
     InterpolableList* outList = toInterpolableList(interpolationValue(*i.get()));
     EXPECT_FLOAT_EQ(30, toInterpolableNumber(outList->get(0))->value());
     EXPECT_FLOAT_EQ(-30.6f, toInterpolableNumber(outList->get(1))->value());
@@ -81,21 +81,21 @@ TEST_F(AnimationInterpolableValueTest, SimpleList)
 
 TEST_F(AnimationInterpolableValueTest, NestedList)
 {
-    OwnPtrWillBeRawPtr<InterpolableList> listA = InterpolableList::create(3);
+    OwnPtr<InterpolableList> listA = InterpolableList::create(3);
     listA->set(0, InterpolableNumber::create(0));
-    OwnPtrWillBeRawPtr<InterpolableList> subListA = InterpolableList::create(1);
+    OwnPtr<InterpolableList> subListA = InterpolableList::create(1);
     subListA->set(0, InterpolableNumber::create(100));
     listA->set(1, subListA.release());
     listA->set(2, InterpolableBool::create(false));
 
-    OwnPtrWillBeRawPtr<InterpolableList> listB = InterpolableList::create(3);
+    OwnPtr<InterpolableList> listB = InterpolableList::create(3);
     listB->set(0, InterpolableNumber::create(100));
-    OwnPtrWillBeRawPtr<InterpolableList> subListB = InterpolableList::create(1);
+    OwnPtr<InterpolableList> subListB = InterpolableList::create(1);
     subListB->set(0, InterpolableNumber::create(50));
     listB->set(1, subListB.release());
     listB->set(2, InterpolableBool::create(true));
 
-    RefPtrWillBeRawPtr<Interpolation> i = interpolateLists(listA.release(), listB.release(), 0.5);
+    RefPtr<Interpolation> i = interpolateLists(listA.release(), listB.release(), 0.5);
     InterpolableList* outList = toInterpolableList(interpolationValue(*i.get()));
     EXPECT_FLOAT_EQ(50, toInterpolableNumber(outList->get(0))->value());
     EXPECT_FLOAT_EQ(75, toInterpolableNumber(toInterpolableList(outList->get(1))->get(0))->value());

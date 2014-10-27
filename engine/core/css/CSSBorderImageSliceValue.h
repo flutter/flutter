@@ -36,9 +36,9 @@ class Rect;
 
 class CSSBorderImageSliceValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSBorderImageSliceValue> create(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> slices, bool fill)
+    static PassRefPtr<CSSBorderImageSliceValue> create(PassRefPtr<CSSPrimitiveValue> slices, bool fill)
     {
-        return adoptRefWillBeNoop(new CSSBorderImageSliceValue(slices, fill));
+        return adoptRef(new CSSBorderImageSliceValue(slices, fill));
     }
 
     String customCSSText() const;
@@ -51,11 +51,11 @@ public:
 
     // These four values are used to make "cuts" in the border image. They can be numbers
     // or percentages.
-    RefPtrWillBeMember<CSSPrimitiveValue> m_slices;
+    RefPtr<CSSPrimitiveValue> m_slices;
     bool m_fill;
 
 private:
-    CSSBorderImageSliceValue(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> slices, bool fill);
+    CSSBorderImageSliceValue(PassRefPtr<CSSPrimitiveValue> slices, bool fill);
 };
 
 DEFINE_CSS_VALUE_TYPE_CASTS(CSSBorderImageSliceValue, isBorderImageSliceValue());

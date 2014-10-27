@@ -30,39 +30,39 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<RGBColor> RGBColor::create(unsigned rgbColor)
+PassRefPtr<RGBColor> RGBColor::create(unsigned rgbColor)
 {
-    return adoptRefWillBeNoop(new RGBColor(rgbColor));
+    return adoptRef(new RGBColor(rgbColor));
 }
 
-PassRefPtrWillBeRawPtr<CSSPrimitiveValue> RGBColor::red()
+PassRefPtr<CSSPrimitiveValue> RGBColor::red()
 {
     unsigned value = (m_rgbColor >> 16) & 0xFF;
-    RefPtrWillBeRawPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
+    RefPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
     result->setCSSOMSafe();
     return result.release();
 }
 
-PassRefPtrWillBeRawPtr<CSSPrimitiveValue> RGBColor::green()
+PassRefPtr<CSSPrimitiveValue> RGBColor::green()
 {
     unsigned value = (m_rgbColor >> 8) & 0xFF;
-    RefPtrWillBeRawPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
+    RefPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
     result->setCSSOMSafe();
     return result.release();
 }
 
-PassRefPtrWillBeRawPtr<CSSPrimitiveValue> RGBColor::blue()
+PassRefPtr<CSSPrimitiveValue> RGBColor::blue()
 {
     unsigned value = m_rgbColor & 0xFF;
-    RefPtrWillBeRawPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
+    RefPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
     result->setCSSOMSafe();
     return result.release();
 }
 
-PassRefPtrWillBeRawPtr<CSSPrimitiveValue> RGBColor::alpha()
+PassRefPtr<CSSPrimitiveValue> RGBColor::alpha()
 {
     float value = static_cast<float>((m_rgbColor >> 24) & 0xFF) / 0xFF;
-    RefPtrWillBeRawPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
+    RefPtr<CSSPrimitiveValue> result = CSSPrimitiveValue::create(value, CSSPrimitiveValue::CSS_NUMBER);
     result->setCSSOMSafe();
     return result.release();
 }

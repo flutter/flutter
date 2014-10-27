@@ -37,13 +37,13 @@ class RenderObject;
 
 class CSSImageValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSImageValue> create(const KURL& url, StyleImage* image = 0)
+    static PassRefPtr<CSSImageValue> create(const KURL& url, StyleImage* image = 0)
     {
-        return adoptRefWillBeNoop(new CSSImageValue(url, url, image));
+        return adoptRef(new CSSImageValue(url, url, image));
     }
-    static PassRefPtrWillBeRawPtr<CSSImageValue> create(const String& rawValue, const KURL& url, StyleImage* image = 0)
+    static PassRefPtr<CSSImageValue> create(const String& rawValue, const KURL& url, StyleImage* image = 0)
     {
-        return adoptRefWillBeNoop(new CSSImageValue(rawValue, url, image));
+        return adoptRef(new CSSImageValue(rawValue, url, image));
     }
     ~CSSImageValue();
 
@@ -61,7 +61,7 @@ public:
 
     String customCSSText() const;
 
-    PassRefPtrWillBeRawPtr<CSSValue> cloneForCSSOM() const;
+    PassRefPtr<CSSValue> cloneForCSSOM() const;
 
     bool hasFailedOrCanceledSubresources() const;
 

@@ -37,10 +37,10 @@ namespace blink {
 class Event;
 class TouchList;
 
-class TouchEventContext : public RefCountedWillBeGarbageCollected<TouchEventContext> {
+class TouchEventContext : public RefCounted<TouchEventContext> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(TouchEventContext);
 public:
-    static PassRefPtrWillBeRawPtr<TouchEventContext> create();
+    static PassRefPtr<TouchEventContext> create();
     void handleLocalEvents(Event*) const;
     TouchList& touches() { return *m_touches; }
     TouchList& targetTouches() { return *m_targetTouches; }
@@ -51,9 +51,9 @@ public:
 private:
     TouchEventContext();
 
-    RefPtrWillBeMember<TouchList> m_touches;
-    RefPtrWillBeMember<TouchList> m_targetTouches;
-    RefPtrWillBeMember<TouchList> m_changedTouches;
+    RefPtr<TouchList> m_touches;
+    RefPtr<TouchList> m_targetTouches;
+    RefPtr<TouchList> m_changedTouches;
 };
 
 }

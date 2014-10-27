@@ -61,14 +61,14 @@ class ResourceLoaderSet;
 // RefPtr<ResourceFetcher> for their lifetime (and will create one if they
 // are initialized without a LocalFrame), so a Document can keep a ResourceFetcher
 // alive past detach if scripts still reference the Document.
-class ResourceFetcher final : public RefCountedWillBeGarbageCollectedFinalized<ResourceFetcher>, public ResourceLoaderHost {
+class ResourceFetcher final : public RefCounted<ResourceFetcher>, public ResourceLoaderHost {
     WTF_MAKE_NONCOPYABLE(ResourceFetcher); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ResourceFetcher);
 friend class ImageLoader;
 friend class ResourceCacheValidationSuppressor;
 
 public:
-    static PassRefPtrWillBeRawPtr<ResourceFetcher> create(Document* document) { return adoptRefWillBeNoop(new ResourceFetcher(document)); }
+    static PassRefPtr<ResourceFetcher> create(Document* document) { return adoptRef(new ResourceFetcher(document)); }
     virtual ~ResourceFetcher();
 
 #if !ENABLE(OILPAN)
@@ -183,8 +183,8 @@ private:
 
     Timer<ResourceFetcher> m_garbageCollectDocumentResourcesTimer;
 
-    OwnPtrWillBeMember<ResourceLoaderSet> m_loaders;
-    OwnPtrWillBeMember<ResourceLoaderSet> m_multipartLoaders;
+    OwnPtr<ResourceLoaderSet> m_loaders;
+    OwnPtr<ResourceLoaderSet> m_multipartLoaders;
 
     // Used in hit rate histograms.
     class DeadResourceStatsRecorder {

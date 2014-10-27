@@ -113,7 +113,7 @@ String Location::origin() const
     return DOMURLUtilsReadOnly::origin(url());
 }
 
-PassRefPtrWillBeRawPtr<DOMStringList> Location::ancestorOrigins() const
+PassRefPtr<DOMStringList> Location::ancestorOrigins() const
 {
     // FIXME(sky): remove
     return DOMStringList::create();

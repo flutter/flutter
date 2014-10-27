@@ -47,10 +47,10 @@ class Document;
 class AnimationNode;
 
 // AnimationTimeline is constructed and owned by Document, and tied to its lifecycle.
-class AnimationTimeline : public RefCountedWillBeGarbageCollectedFinalized<AnimationTimeline>, public ScriptWrappable {
+class AnimationTimeline : public RefCounted<AnimationTimeline>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    class PlatformTiming : public NoBaseWillBeGarbageCollectedFinalized<PlatformTiming> {
+    class PlatformTiming : public DummyBase<PlatformTiming> {
 
     public:
         // Calls AnimationTimeline's wake() method after duration seconds.
@@ -61,7 +61,7 @@ public:
         virtual void trace(Visitor*) { }
     };
 
-    static PassRefPtrWillBeRawPtr<AnimationTimeline> create(Document*, PassOwnPtrWillBeRawPtr<PlatformTiming> = nullptr);
+    static PassRefPtr<AnimationTimeline> create(Document*, PassOwnPtr<PlatformTiming> = nullptr);
     ~AnimationTimeline();
 
     void serviceAnimations(TimingUpdateReason);
@@ -69,7 +69,7 @@ public:
     // Creates a player attached to this timeline, but without a start time.
     AnimationPlayer* createAnimationPlayer(AnimationNode*);
     AnimationPlayer* play(AnimationNode*);
-    WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer> > getAnimationPlayers();
+    Vector<RefPtr<AnimationPlayer> > getAnimationPlayers();
 
 #if !ENABLE(OILPAN)
     void playerDestroyed(AnimationPlayer* player)
@@ -100,19 +100,19 @@ public:
     void trace(Visitor*);
 
 protected:
-    AnimationTimeline(Document*, PassOwnPtrWillBeRawPtr<PlatformTiming>);
+    AnimationTimeline(Document*, PassOwnPtr<PlatformTiming>);
 
 private:
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
     // AnimationPlayers which will be updated on the next frame
     // i.e. current, in effect, or had timing changed
-    WillBeHeapHashSet<RefPtrWillBeMember<AnimationPlayer> > m_playersNeedingUpdate;
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<AnimationPlayer> > m_players;
+    HashSet<RefPtr<AnimationPlayer> > m_playersNeedingUpdate;
+    HashSet<RawPtr<AnimationPlayer> > m_players;
 
     friend class SMILTimeContainer;
     static const double s_minimumDelay;
 
-    OwnPtrWillBeMember<PlatformTiming> m_timing;
+    OwnPtr<PlatformTiming> m_timing;
 
     class AnimationTimelineTiming final : public PlatformTiming {
     public:
@@ -132,7 +132,7 @@ private:
         virtual void trace(Visitor*) override;
 
     private:
-        RawPtrWillBeMember<AnimationTimeline> m_timeline;
+        RawPtr<AnimationTimeline> m_timeline;
         Timer<AnimationTimelineTiming> m_timer;
     };
 

@@ -75,7 +75,7 @@ static Node* previousRenderedEditable(Node* node)
     return 0;
 }
 
-Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, LegacyEditingOffset offset)
+Position::Position(PassRefPtr<Node> anchorNode, LegacyEditingOffset offset)
     : m_anchorNode(anchorNode)
     , m_offset(offset.value())
     , m_anchorType(anchorTypeForLegacyEditingPosition(m_anchorNode.get(), m_offset))
@@ -83,7 +83,7 @@ Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, LegacyEditingOffset 
 {
 }
 
-Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, AnchorType anchorType)
+Position::Position(PassRefPtr<Node> anchorNode, AnchorType anchorType)
     : m_anchorNode(anchorNode)
     , m_offset(0)
     , m_anchorType(anchorType)
@@ -94,7 +94,7 @@ Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, AnchorType anchorTyp
         && (m_anchorNode->isTextNode() || editingIgnoresContent(m_anchorNode.get()))));
 }
 
-Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, int offset, AnchorType anchorType)
+Position::Position(PassRefPtr<Node> anchorNode, int offset, AnchorType anchorType)
     : m_anchorNode(anchorNode)
     , m_offset(offset)
     , m_anchorType(anchorType)
@@ -103,7 +103,7 @@ Position::Position(PassRefPtrWillBeRawPtr<Node> anchorNode, int offset, AnchorTy
     ASSERT(anchorType == PositionIsOffsetInAnchor);
 }
 
-Position::Position(PassRefPtrWillBeRawPtr<Text> textNode, unsigned offset)
+Position::Position(PassRefPtr<Text> textNode, unsigned offset)
     : m_anchorNode(textNode)
     , m_offset(static_cast<int>(offset))
     , m_anchorType(PositionIsOffsetInAnchor)
@@ -112,7 +112,7 @@ Position::Position(PassRefPtrWillBeRawPtr<Text> textNode, unsigned offset)
     ASSERT(m_anchorNode);
 }
 
-void Position::moveToPosition(PassRefPtrWillBeRawPtr<Node> node, int offset)
+void Position::moveToPosition(PassRefPtr<Node> node, int offset)
 {
     ASSERT(!editingIgnoresContent(node.get()));
     ASSERT(anchorType() == PositionIsOffsetInAnchor || m_isLegacyEditingPosition);
@@ -275,7 +275,7 @@ Element* Position::element() const
     return node->parentElement();
 }
 
-PassRefPtrWillBeRawPtr<CSSComputedStyleDeclaration> Position::computedStyle() const
+PassRefPtr<CSSComputedStyleDeclaration> Position::computedStyle() const
 {
     Element* elem = element();
     if (!elem)

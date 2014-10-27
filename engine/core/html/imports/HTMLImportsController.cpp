@@ -50,7 +50,7 @@ const char* HTMLImportsController::supplementName()
 
 void HTMLImportsController::provideTo(Document& master)
 {
-    OwnPtrWillBeRawPtr<HTMLImportsController> controller = adoptPtrWillBeNoop(new HTMLImportsController(master));
+    OwnPtr<HTMLImportsController> controller = adoptPtr(new HTMLImportsController(master));
     master.setImportsController(controller.get());
     DocumentSupplement::provideTo(master, supplementName(), controller.release());
 }
@@ -94,7 +94,7 @@ HTMLImportChild* HTMLImportsController::createChild(const KURL& url, HTMLImportL
     if (mode == HTMLImport::Async)
         UseCounter::count(root()->document(), UseCounter::HTMLImportsAsyncAttribute);
 
-    OwnPtrWillBeRawPtr<HTMLImportChild> child = adoptPtrWillBeNoop(new HTMLImportChild(url, loader, mode));
+    OwnPtr<HTMLImportChild> child = adoptPtr(new HTMLImportChild(url, loader, mode));
     child->setClient(client);
     parent->appendImport(child.get());
     loader->addImport(child.get());

@@ -183,7 +183,7 @@ bool Event::isBeforeTextInsertedEvent() const
     return false;
 }
 
-void Event::setTarget(PassRefPtrWillBeRawPtr<EventTarget> target)
+void Event::setTarget(PassRefPtr<EventTarget> target)
 {
     if (m_target == target)
         return;
@@ -197,7 +197,7 @@ void Event::receivedTarget()
 {
 }
 
-void Event::setUnderlyingEvent(PassRefPtrWillBeRawPtr<Event> ue)
+void Event::setUnderlyingEvent(PassRefPtr<Event> ue)
 {
     // Prohibit creation of a cycle -- just do nothing in that case.
     for (Event* e = ue.get(); e; e = e->underlyingEvent())
@@ -209,11 +209,11 @@ void Event::setUnderlyingEvent(PassRefPtrWillBeRawPtr<Event> ue)
 EventPath& Event::ensureEventPath()
 {
     if (!m_eventPath)
-        m_eventPath = adoptPtrWillBeNoop(new EventPath(this));
+        m_eventPath = adoptPtr(new EventPath(this));
     return *m_eventPath;
 }
 
-PassRefPtrWillBeRawPtr<StaticNodeList> Event::path() const
+PassRefPtr<StaticNodeList> Event::path() const
 {
     if (!m_currentTarget) {
         ASSERT(m_eventPhase == Event::NONE);

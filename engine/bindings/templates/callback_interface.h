@@ -16,9 +16,9 @@ namespace blink {
 
 class {{v8_class}} final : public {{cpp_class}}, public ActiveDOMCallback {
 public:
-    static PassOwnPtrWillBeRawPtr<{{v8_class}}> create(v8::Handle<v8::Function> callback, ScriptState* scriptState)
+    static PassOwnPtr<{{v8_class}}> create(v8::Handle<v8::Function> callback, ScriptState* scriptState)
     {
-        return adoptPtrWillBeNoop(new {{v8_class}}(callback, scriptState));
+        return adoptPtr(new {{v8_class}}(callback, scriptState));
     }
 
     virtual ~{{v8_class}}();

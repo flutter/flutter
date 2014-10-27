@@ -39,17 +39,17 @@ struct PageTransitionEventInit : public EventInit {
 class PageTransitionEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<PageTransitionEvent> create()
+    static PassRefPtr<PageTransitionEvent> create()
     {
-        return adoptRefWillBeNoop(new PageTransitionEvent);
+        return adoptRef(new PageTransitionEvent);
     }
-    static PassRefPtrWillBeRawPtr<PageTransitionEvent> create(const AtomicString& type, bool persisted)
+    static PassRefPtr<PageTransitionEvent> create(const AtomicString& type, bool persisted)
     {
-        return adoptRefWillBeNoop(new PageTransitionEvent(type, persisted));
+        return adoptRef(new PageTransitionEvent(type, persisted));
     }
-    static PassRefPtrWillBeRawPtr<PageTransitionEvent> create(const AtomicString& type, const PageTransitionEventInit& initializer)
+    static PassRefPtr<PageTransitionEvent> create(const AtomicString& type, const PageTransitionEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new PageTransitionEvent(type, initializer));
+        return adoptRef(new PageTransitionEvent(type, initializer));
     }
 
     virtual ~PageTransitionEvent();

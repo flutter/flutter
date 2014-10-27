@@ -40,7 +40,7 @@ class WebGLTexture;
 class WebGLFramebuffer final : public WebGLContextObject, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    class WebGLAttachment : public RefCountedWillBeGarbageCollectedFinalized<WebGLAttachment> {
+    class WebGLAttachment : public RefCounted<WebGLAttachment> {
     public:
         virtual ~WebGLAttachment();
 
@@ -67,7 +67,7 @@ public:
 
     virtual ~WebGLFramebuffer();
 
-    static PassRefPtrWillBeRawPtr<WebGLFramebuffer> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLFramebuffer> create(WebGLRenderingContextBase*);
 
     void setAttachmentForBoundFramebuffer(GLenum attachment, GLenum texTarget, WebGLTexture*, GLint level);
     void setAttachmentForBoundFramebuffer(GLenum attachment, WebGLRenderbuffer*);
@@ -122,7 +122,7 @@ private:
     // Check if a new drawBuffers call should be issued. This is called when we add or remove an attachment.
     void drawBuffersIfNecessary(bool force);
 
-    typedef WillBeHeapHashMap<GLenum, RefPtrWillBeMember<WebGLAttachment> > AttachmentMap;
+    typedef HashMap<GLenum, RefPtr<WebGLAttachment> > AttachmentMap;
 
     AttachmentMap m_attachments;
 

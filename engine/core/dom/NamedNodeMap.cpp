@@ -52,12 +52,12 @@ void NamedNodeMap::deref()
 }
 #endif
 
-PassRefPtrWillBeRawPtr<Attr> NamedNodeMap::getNamedItem(const AtomicString& name) const
+PassRefPtr<Attr> NamedNodeMap::getNamedItem(const AtomicString& name) const
 {
     return m_element->getAttributeNode(name);
 }
 
-PassRefPtrWillBeRawPtr<Attr> NamedNodeMap::item(unsigned index) const
+PassRefPtr<Attr> NamedNodeMap::item(unsigned index) const
 {
     AttributeCollection attributes = m_element->attributes();
     if (index >= attributes.size())

@@ -50,7 +50,7 @@ class LinkImport final : public LinkResource, public HTMLImportChildClient {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LinkImport);
 public:
 
-    static PassOwnPtrWillBeRawPtr<LinkImport> create(HTMLLinkElement* owner);
+    static PassOwnPtr<LinkImport> create(HTMLLinkElement* owner);
 
     explicit LinkImport(HTMLLinkElement* owner);
     virtual ~LinkImport();
@@ -73,7 +73,7 @@ public:
     Document* importedDocument() const;
 
 private:
-    RawPtrWillBeMember<HTMLImportChild> m_child;
+    RawPtr<HTMLImportChild> m_child;
 };
 
 } // namespace blink

@@ -40,9 +40,9 @@ typedef int ExceptionCode;
 
 class ClassList final : public DOMTokenList {
 public:
-    static PassOwnPtrWillBeRawPtr<ClassList> create(Element* element)
+    static PassOwnPtr<ClassList> create(Element* element)
     {
-        return adoptPtrWillBeNoop(new ClassList(element));
+        return adoptPtr(new ClassList(element));
     }
 
 #if !ENABLE(OILPAN)
@@ -67,7 +67,7 @@ private:
     virtual const AtomicString& value() const override { return m_element->getAttribute(HTMLNames::classAttr); }
     virtual void setValue(const AtomicString& value) override { m_element->setAttribute(HTMLNames::classAttr, value); }
 
-    RawPtrWillBeMember<Element> m_element;
+    RawPtr<Element> m_element;
 };
 
 } // namespace blink

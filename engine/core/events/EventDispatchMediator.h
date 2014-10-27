@@ -42,21 +42,21 @@ class Event;
 class EventDispatcher;
 class Node;
 
-class EventDispatchMediator : public RefCountedWillBeGarbageCollectedFinalized<EventDispatchMediator> {
+class EventDispatchMediator : public RefCounted<EventDispatchMediator> {
 public:
-    static PassRefPtrWillBeRawPtr<EventDispatchMediator> create(PassRefPtrWillBeRawPtr<Event>);
+    static PassRefPtr<EventDispatchMediator> create(PassRefPtr<Event>);
     virtual ~EventDispatchMediator() { };
     virtual void trace(Visitor*);
     virtual bool dispatchEvent(EventDispatcher*) const;
     Event* event() const { return m_event.get(); };
 
 protected:
-    explicit EventDispatchMediator(PassRefPtrWillBeRawPtr<Event>);
+    explicit EventDispatchMediator(PassRefPtr<Event>);
     EventDispatchMediator() { };
-    void setEvent(PassRefPtrWillBeRawPtr<Event> event) { m_event = event; };
+    void setEvent(PassRefPtr<Event> event) { m_event = event; };
 
 private:
-    RefPtrWillBeMember<Event> m_event;
+    RefPtr<Event> m_event;
 };
 
 } // namespace blink

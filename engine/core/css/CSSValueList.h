@@ -29,17 +29,17 @@ namespace blink {
 
 class CSSValueList : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSValueList> createCommaSeparated()
+    static PassRefPtr<CSSValueList> createCommaSeparated()
     {
-        return adoptRefWillBeNoop(new CSSValueList(CommaSeparator));
+        return adoptRef(new CSSValueList(CommaSeparator));
     }
-    static PassRefPtrWillBeRawPtr<CSSValueList> createSpaceSeparated()
+    static PassRefPtr<CSSValueList> createSpaceSeparated()
     {
-        return adoptRefWillBeNoop(new CSSValueList(SpaceSeparator));
+        return adoptRef(new CSSValueList(SpaceSeparator));
     }
-    static PassRefPtrWillBeRawPtr<CSSValueList> createSlashSeparated()
+    static PassRefPtr<CSSValueList> createSlashSeparated()
     {
-        return adoptRefWillBeNoop(new CSSValueList(SlashSeparator));
+        return adoptRef(new CSSValueList(SlashSeparator));
     }
 
     size_t length() const { return m_values.size(); }
@@ -47,11 +47,11 @@ public:
     const CSSValue* item(size_t index) const { return m_values[index].get(); }
     CSSValue* itemWithBoundsCheck(size_t index) { return index < m_values.size() ? m_values[index].get() : 0; }
 
-    void append(PassRefPtrWillBeRawPtr<CSSValue> value) { m_values.append(value); }
-    void prepend(PassRefPtrWillBeRawPtr<CSSValue> value) { m_values.prepend(value); }
+    void append(PassRefPtr<CSSValue> value) { m_values.append(value); }
+    void prepend(PassRefPtr<CSSValue> value) { m_values.prepend(value); }
     bool removeAll(CSSValue*);
     bool hasValue(CSSValue*) const;
-    PassRefPtrWillBeRawPtr<CSSValueList> copy();
+    PassRefPtr<CSSValueList> copy();
 
     String customCSSText(CSSTextFormattingFlags = QuoteCSSStringIfNeeded) const;
     bool equals(const CSSValueList&) const;
@@ -59,7 +59,7 @@ public:
 
     bool hasFailedOrCanceledSubresources() const;
 
-    PassRefPtrWillBeRawPtr<CSSValueList> cloneForCSSOM() const;
+    PassRefPtr<CSSValueList> cloneForCSSOM() const;
 
     void traceAfterDispatch(Visitor*);
 
@@ -70,7 +70,7 @@ protected:
 private:
     explicit CSSValueList(ValueListSeparator);
 
-    WillBeHeapVector<RefPtrWillBeMember<CSSValue>, 4> m_values;
+    Vector<RefPtr<CSSValue>, 4> m_values;
 };
 
 DEFINE_CSS_VALUE_TYPE_CASTS(CSSValueList, isValueList());
@@ -86,7 +86,7 @@ public:
     CSSValue* second() const { return item(1); }
     size_t length() const { return m_list ? m_list->length() : 0; }
 private:
-    RawPtrWillBeMember<CSSValueList> m_list;
+    RawPtr<CSSValueList> m_list;
 };
 
 // Wrapper that can be used to iterate over any CSSValue. Non-list values and 0 behave as zero-length lists.

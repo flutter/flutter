@@ -37,12 +37,12 @@ class MutableStylePropertySet;
 class StylePropertySet;
 class StyleRuleCSSStyleDeclaration;
 
-class StyleKeyframe final : public RefCountedWillBeGarbageCollectedFinalized<StyleKeyframe> {
+class StyleKeyframe final : public RefCounted<StyleKeyframe> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassRefPtrWillBeRawPtr<StyleKeyframe> create()
+    static PassRefPtr<StyleKeyframe> create()
     {
-        return adoptRefWillBeNoop(new StyleKeyframe());
+        return adoptRef(new StyleKeyframe());
     }
     ~StyleKeyframe();
 
@@ -57,7 +57,7 @@ public:
 
     const StylePropertySet& properties() const { return *m_properties; }
     MutableStylePropertySet& mutableProperties();
-    void setProperties(PassRefPtrWillBeRawPtr<StylePropertySet>);
+    void setProperties(PassRefPtr<StylePropertySet>);
 
     String cssText() const;
 
@@ -68,7 +68,7 @@ public:
 private:
     StyleKeyframe();
 
-    RefPtrWillBeMember<StylePropertySet> m_properties;
+    RefPtr<StylePropertySet> m_properties;
     // These are both calculated lazily. Either one can be set, which invalidates the other.
     mutable String m_keyText;
     mutable OwnPtr<Vector<double> > m_keys;
@@ -92,8 +92,8 @@ public:
 private:
     CSSKeyframeRule(StyleKeyframe*, CSSKeyframesRule* parent);
 
-    RefPtrWillBeMember<StyleKeyframe> m_keyframe;
-    mutable RefPtrWillBeMember<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
+    RefPtr<StyleKeyframe> m_keyframe;
+    mutable RefPtr<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
 
     friend class CSSKeyframesRule;
 };

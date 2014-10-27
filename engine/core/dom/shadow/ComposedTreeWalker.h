@@ -109,7 +109,7 @@ private:
 
     Node* traverseParentOrHost(const Node*) const;
 
-    RawPtrWillBeMember<const Node> m_node;
+    RawPtr<const Node> m_node;
 };
 
 inline ComposedTreeWalker::ComposedTreeWalker(const Node* node, StartPolicy startPolicy)

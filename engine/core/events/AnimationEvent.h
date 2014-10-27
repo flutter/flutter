@@ -43,17 +43,17 @@ struct AnimationEventInit : public EventInit {
 class AnimationEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<AnimationEvent> create()
+    static PassRefPtr<AnimationEvent> create()
     {
-        return adoptRefWillBeNoop(new AnimationEvent);
+        return adoptRef(new AnimationEvent);
     }
-    static PassRefPtrWillBeRawPtr<AnimationEvent> create(const AtomicString& type, const String& animationName, double elapsedTime)
+    static PassRefPtr<AnimationEvent> create(const AtomicString& type, const String& animationName, double elapsedTime)
     {
-        return adoptRefWillBeNoop(new AnimationEvent(type, animationName, elapsedTime));
+        return adoptRef(new AnimationEvent(type, animationName, elapsedTime));
     }
-    static PassRefPtrWillBeRawPtr<AnimationEvent> create(const AtomicString& type, const AnimationEventInit& initializer)
+    static PassRefPtr<AnimationEvent> create(const AtomicString& type, const AnimationEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new AnimationEvent(type, initializer));
+        return adoptRef(new AnimationEvent(type, initializer));
     }
 
     virtual ~AnimationEvent();

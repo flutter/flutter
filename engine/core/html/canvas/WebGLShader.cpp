@@ -31,9 +31,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<WebGLShader> WebGLShader::create(WebGLRenderingContextBase* ctx, GLenum type)
+PassRefPtr<WebGLShader> WebGLShader::create(WebGLRenderingContextBase* ctx, GLenum type)
 {
-    return adoptRefWillBeNoop(new WebGLShader(ctx, type));
+    return adoptRef(new WebGLShader(ctx, type));
 }
 
 WebGLShader::WebGLShader(WebGLRenderingContextBase* ctx, GLenum type)

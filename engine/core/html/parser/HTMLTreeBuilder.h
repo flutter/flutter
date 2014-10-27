@@ -50,12 +50,12 @@ class HTMLDocument;
 class Node;
 class HTMLDocumentParser;
 
-class HTMLTreeBuilder final : public NoBaseWillBeGarbageCollectedFinalized<HTMLTreeBuilder> {
+class HTMLTreeBuilder final : public DummyBase<HTMLTreeBuilder> {
     WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors)
+    static PassOwnPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors)
     {
-        return adoptPtrWillBeNoop(new HTMLTreeBuilder(parser, document, reportErrors));
+        return adoptPtr(new HTMLTreeBuilder(parser, document, reportErrors));
     }
     ~HTMLTreeBuilder();
 
@@ -69,7 +69,7 @@ public:
 
     bool hasParserBlockingScript() const { return !!m_scriptToProcess; }
     // Must be called to take the parser-blocking script before calling the parser again.
-    PassRefPtrWillBeRawPtr<Element> takeScriptToProcess(TextPosition& scriptStartPosition);
+    PassRefPtr<Element> takeScriptToProcess(TextPosition& scriptStartPosition);
 
     // Done, close any open tags, etc.
     void finished();
@@ -112,7 +112,7 @@ private:
         void trace(Visitor*);
 
     private:
-        RawPtrWillBeMember<DocumentFragment> m_fragment;
+        RawPtr<DocumentFragment> m_fragment;
     };
 
 #if ENABLE(ASSERT)
@@ -129,9 +129,9 @@ private:
 
     // We access parser because HTML5 spec requires that we be able to change the state of the tokenizer
     // from within parser actions. We also need it to track the current position.
-    RawPtrWillBeMember<HTMLDocumentParser> m_parser;
+    RawPtr<HTMLDocumentParser> m_parser;
 
-    RefPtrWillBeMember<Element> m_scriptToProcess; // <script> tag which needs processing before resuming the parser.
+    RefPtr<Element> m_scriptToProcess; // <script> tag which needs processing before resuming the parser.
     TextPosition m_scriptToProcessStartPosition; // Starting line number of the script tag needing processing.
 };
 

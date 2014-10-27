@@ -56,14 +56,14 @@ enum RevealExtentOption {
     DoNotRevealExtent
 };
 
-class FrameSelection final : public NoBaseWillBeGarbageCollectedFinalized<FrameSelection>, public VisibleSelection::ChangeObserver, private CaretBase {
+class FrameSelection final : public DummyBase<FrameSelection>, public VisibleSelection::ChangeObserver, private CaretBase {
     WTF_MAKE_NONCOPYABLE(FrameSelection);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(FrameSelection);
 public:
-    static PassOwnPtrWillBeRawPtr<FrameSelection> create(LocalFrame* frame = 0)
+    static PassOwnPtr<FrameSelection> create(LocalFrame* frame = 0)
     {
-        return adoptPtrWillBeNoop(new FrameSelection(frame));
+        return adoptPtr(new FrameSelection(frame));
     }
     virtual ~FrameSelection();
 
@@ -157,9 +157,9 @@ public:
 
     // If this FrameSelection has a logical range which is still valid, this function return its clone. Otherwise,
     // the return value from underlying VisibleSelection's firstRange() is returned.
-    PassRefPtrWillBeRawPtr<Range> firstRange() const;
+    PassRefPtr<Range> firstRange() const;
 
-    PassRefPtrWillBeRawPtr<Range> toNormalizedRange() const { return m_selection.toNormalizedRange(); }
+    PassRefPtr<Range> toNormalizedRange() const { return m_selection.toNormalizedRange(); }
 
     void nodeWillBeRemoved(Node&);
     void didUpdateCharacterData(CharacterData*, unsigned offset, unsigned oldLength, unsigned newLength);
@@ -196,7 +196,7 @@ public:
     void notifyRendererOfSelectionChange(EUserTriggered);
 
     EditingStyle* typingStyle() const;
-    void setTypingStyle(PassRefPtrWillBeRawPtr<EditingStyle>);
+    void setTypingStyle(PassRefPtr<EditingStyle>);
     void clearTypingStyle();
 
     String selectedText() const;
@@ -270,12 +270,12 @@ private:
     // The range specified by the user, which may not be visually canonicalized (hence "logical").
     // This will be invalidated if the underlying VisibleSelection changes. If that happens, this variable will
     // become null, in which case logical positions == visible positions.
-    RefPtrWillBeMember<Range> m_logicalRange;
+    RefPtr<Range> m_logicalRange;
 
-    RefPtrWillBeMember<Node> m_previousCaretNode; // The last node which painted the caret. Retained for clearing the old caret when it moves.
+    RefPtr<Node> m_previousCaretNode; // The last node which painted the caret. Retained for clearing the old caret when it moves.
     LayoutRect m_previousCaretRect;
 
-    RefPtrWillBeMember<EditingStyle> m_typingStyle;
+    RefPtr<EditingStyle> m_typingStyle;
 
     Timer<FrameSelection> m_caretBlinkTimer;
 
@@ -296,7 +296,7 @@ inline void FrameSelection::clearTypingStyle()
     m_typingStyle.clear();
 }
 
-inline void FrameSelection::setTypingStyle(PassRefPtrWillBeRawPtr<EditingStyle> style)
+inline void FrameSelection::setTypingStyle(PassRefPtr<EditingStyle> style)
 {
     m_typingStyle = style;
 }

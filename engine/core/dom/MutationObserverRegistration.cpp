@@ -37,9 +37,9 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<MutationObserverRegistration> MutationObserverRegistration::create(MutationObserver& observer, Node* registrationNode, MutationObserverOptions options, const HashSet<AtomicString>& attributeFilter)
+PassOwnPtr<MutationObserverRegistration> MutationObserverRegistration::create(MutationObserver& observer, Node* registrationNode, MutationObserverOptions options, const HashSet<AtomicString>& attributeFilter)
 {
-    return adoptPtrWillBeNoop(new MutationObserverRegistration(observer, registrationNode, options, attributeFilter));
+    return adoptPtr(new MutationObserverRegistration(observer, registrationNode, options, attributeFilter));
 }
 
 MutationObserverRegistration::MutationObserverRegistration(MutationObserver& observer, Node* registrationNode, MutationObserverOptions options, const HashSet<AtomicString>& attributeFilter)
@@ -81,11 +81,11 @@ void MutationObserverRegistration::observedSubtreeNodeWillDetach(Node& node)
     m_observer->setHasTransientRegistration();
 
     if (!m_transientRegistrationNodes) {
-        m_transientRegistrationNodes = adoptPtrWillBeNoop(new NodeHashSet);
+        m_transientRegistrationNodes = adoptPtr(new NodeHashSet);
 
         ASSERT(m_registrationNode);
         ASSERT(!m_registrationNodeKeepAlive);
-        m_registrationNodeKeepAlive = PassRefPtrWillBeRawPtr<Node>(m_registrationNode.get()); // Balanced in clearTransientRegistrations.
+        m_registrationNodeKeepAlive = PassRefPtr<Node>(m_registrationNode.get()); // Balanced in clearTransientRegistrations.
     }
     m_transientRegistrationNodes->add(&node);
 }
@@ -128,7 +128,7 @@ bool MutationObserverRegistration::shouldReceiveMutationFrom(Node& node, Mutatio
     return m_attributeFilter.contains(attributeName->localName());
 }
 
-void MutationObserverRegistration::addRegistrationNodesToSet(WillBeHeapHashSet<RawPtrWillBeMember<Node> >& nodes) const
+void MutationObserverRegistration::addRegistrationNodesToSet(HashSet<RawPtr<Node> >& nodes) const
 {
     ASSERT(m_registrationNode);
     nodes.add(m_registrationNode.get());

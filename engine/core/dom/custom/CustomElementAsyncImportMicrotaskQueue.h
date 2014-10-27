@@ -39,9 +39,9 @@ class CustomElementMicrotaskImportStep;
 
 class CustomElementAsyncImportMicrotaskQueue : public CustomElementMicrotaskQueueBase {
 public:
-    static PassRefPtrWillBeRawPtr<CustomElementAsyncImportMicrotaskQueue> create() { return adoptRefWillBeNoop(new CustomElementAsyncImportMicrotaskQueue()); }
+    static PassRefPtr<CustomElementAsyncImportMicrotaskQueue> create() { return adoptRef(new CustomElementAsyncImportMicrotaskQueue()); }
 
-    void enqueue(PassOwnPtrWillBeRawPtr<CustomElementMicrotaskStep>);
+    void enqueue(PassOwnPtr<CustomElementMicrotaskStep>);
 
 private:
     CustomElementAsyncImportMicrotaskQueue() { }

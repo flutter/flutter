@@ -76,10 +76,10 @@ struct MediaQueryExpValue {
     }
 };
 
-class MediaQueryExp  : public NoBaseWillBeGarbageCollectedFinalized<MediaQueryExp> {
+class MediaQueryExp  : public DummyBase<MediaQueryExp> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<MediaQueryExp> createIfValid(const String& mediaFeature, CSSParserValueList*);
+    static PassOwnPtr<MediaQueryExp> createIfValid(const String& mediaFeature, CSSParserValueList*);
     ~MediaQueryExp();
 
     const String& mediaFeature() const { return m_mediaFeature; }
@@ -92,7 +92,7 @@ public:
 
     String serialize() const;
 
-    PassOwnPtrWillBeRawPtr<MediaQueryExp> copy() const { return adoptPtrWillBeNoop(new MediaQueryExp(*this)); }
+    PassOwnPtr<MediaQueryExp> copy() const { return adoptPtr(new MediaQueryExp(*this)); }
 
     MediaQueryExp(const MediaQueryExp& other);
 

@@ -94,12 +94,12 @@ public:
     bool expandUsingGranularity(TextGranularity granularity);
 
     // We don't yet support multi-range selections, so we only ever have one range to return.
-    PassRefPtrWillBeRawPtr<Range> firstRange() const;
+    PassRefPtr<Range> firstRange() const;
 
     // FIXME: Most callers probably don't want this function, but are using it
     // for historical reasons.  toNormalizedRange contracts the range around
     // text, and moves the caret upstream before returning the range.
-    PassRefPtrWillBeRawPtr<Range> toNormalizedRange() const;
+    PassRefPtr<Range> toNormalizedRange() const;
 
     Element* rootEditableElement() const;
     bool isContentEditable() const;
@@ -117,7 +117,7 @@ public:
     // or end is moved to a different position.
     //
     // Objects implementing |ChangeObserver| interface must outlive the VisibleSelection object.
-    class ChangeObserver : public WillBeGarbageCollectedMixin {
+    class ChangeObserver : public DummyBase<void> {
         WTF_MAKE_NONCOPYABLE(ChangeObserver);
     public:
         ChangeObserver();
@@ -164,7 +164,7 @@ private:
 
     // Oilpan: this reference has a lifetime that is at least as long
     // as this object.
-    RawPtrWillBeMember<ChangeObserver> m_changeObserver;
+    RawPtr<ChangeObserver> m_changeObserver;
 
     // these are cached, can be recalculated by validate()
     SelectionType m_selectionType; // None, Caret, Range

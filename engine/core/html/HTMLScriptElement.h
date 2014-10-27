@@ -12,7 +12,7 @@ namespace blink {
 class HTMLScriptElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<HTMLScriptElement> create(Document&);
+    static PassRefPtr<HTMLScriptElement> create(Document&);
 
 private:
     explicit HTMLScriptElement(Document&);

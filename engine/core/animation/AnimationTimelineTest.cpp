@@ -92,7 +92,7 @@ protected:
         document->animationClock().resetTimeForTesting();
         element = Element::create(nullName, document.get());
         platformTiming = new MockPlatformTiming;
-        timeline = AnimationTimeline::create(document.get(), adoptPtrWillBeNoop(platformTiming));
+        timeline = AnimationTimeline::create(document.get(), adoptPtr(platformTiming));
         ASSERT_EQ(0, timeline->currentTimeInternal());
     }
 
@@ -110,9 +110,9 @@ protected:
         timeline->serviceAnimations(TimingUpdateForAnimationFrame);
     }
 
-    RefPtrWillBePersistent<Document> document;
-    RefPtrWillBePersistent<Element> element;
-    RefPtrWillBePersistent<AnimationTimeline> timeline;
+    RefPtr<Document> document;
+    RefPtr<Element> element;
+    RefPtr<AnimationTimeline> timeline;
     Timing timing;
     MockPlatformTiming* platformTiming;
 
@@ -134,8 +134,8 @@ TEST_F(AnimationAnimationTimelineTest, HasStarted)
 
 TEST_F(AnimationAnimationTimelineTest, EmptyKeyframeAnimation)
 {
-    RefPtrWillBeRawPtr<AnimatableValueKeyframeEffectModel> effect = AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector());
-    RefPtrWillBeRawPtr<Animation> anim = Animation::create(element.get(), effect, timing);
+    RefPtr<AnimatableValueKeyframeEffectModel> effect = AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector());
+    RefPtr<Animation> anim = Animation::create(element.get(), effect, timing);
 
     timeline->play(anim.get());
 
@@ -151,9 +151,9 @@ TEST_F(AnimationAnimationTimelineTest, EmptyKeyframeAnimation)
 
 TEST_F(AnimationAnimationTimelineTest, EmptyForwardsKeyframeAnimation)
 {
-    RefPtrWillBeRawPtr<AnimatableValueKeyframeEffectModel> effect = AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector());
+    RefPtr<AnimatableValueKeyframeEffectModel> effect = AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector());
     timing.fillMode = Timing::FillModeForwards;
-    RefPtrWillBeRawPtr<Animation> anim = Animation::create(element.get(), effect, timing);
+    RefPtr<Animation> anim = Animation::create(element.get(), effect, timing);
 
     timeline->play(anim.get());
 
@@ -187,8 +187,8 @@ TEST_F(AnimationAnimationTimelineTest, PauseForTesting)
 {
     float seekTime = 1;
     timing.fillMode = Timing::FillModeForwards;
-    RefPtrWillBeRawPtr<Animation> anim1 = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
-    RefPtrWillBeRawPtr<Animation> anim2  = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
+    RefPtr<Animation> anim1 = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
+    RefPtr<Animation> anim2  = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
     AnimationPlayer* player1 = timeline->play(anim1.get());
     AnimationPlayer* player2 = timeline->play(anim2.get());
     timeline->pauseAnimationsForTesting(seekTime);
@@ -202,7 +202,7 @@ TEST_F(AnimationAnimationTimelineTest, DelayBeforeAnimationStart)
     timing.iterationDuration = 2;
     timing.startDelay = 5;
 
-    RefPtrWillBeRawPtr<Animation> anim = Animation::create(element.get(), nullptr, timing);
+    RefPtr<Animation> anim = Animation::create(element.get(), nullptr, timing);
 
     timeline->play(anim.get());
 
@@ -229,14 +229,14 @@ TEST_F(AnimationAnimationTimelineTest, PlayAfterDocumentDeref)
     element = nullptr;
     document = nullptr;
 
-    RefPtrWillBeRawPtr<Animation> anim = Animation::create(0, nullptr, timing);
+    RefPtr<Animation> anim = Animation::create(0, nullptr, timing);
     // Test passes if this does not crash.
     timeline->play(anim.get());
 }
 
 TEST_F(AnimationAnimationTimelineTest, UseAnimationPlayerAfterTimelineDeref)
 {
-    RefPtrWillBeRawPtr<AnimationPlayer> player = timeline->createAnimationPlayer(0);
+    RefPtr<AnimationPlayer> player = timeline->createAnimationPlayer(0);
     timeline.clear();
     // Test passes if this does not crash.
     player->setStartTime(0);

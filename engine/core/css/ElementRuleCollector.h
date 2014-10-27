@@ -75,7 +75,7 @@ private:
     const RuleData* m_ruleData;
     CascadeScope m_cascadeScope;
     uint64_t m_position;
-    RawPtrWillBeMember<const CSSStyleSheet> m_parentStyleSheet;
+    RawPtr<const CSSStyleSheet> m_parentStyleSheet;
 };
 
 } // namespace blink
@@ -85,9 +85,9 @@ WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::MatchedRule);
 namespace blink {
 
 // FIXME: oilpan: when transition types are gone this class can be replaced with HeapVector.
-class StyleRuleList final : public RefCountedWillBeGarbageCollected<StyleRuleList> {
+class StyleRuleList final : public RefCounted<StyleRuleList> {
 public:
-    static PassRefPtrWillBeRawPtr<StyleRuleList> create() { return adoptRefWillBeNoop(new StyleRuleList()); }
+    static PassRefPtr<StyleRuleList> create() { return adoptRef(new StyleRuleList()); }
 
     void trace(Visitor* visitor)
     {
@@ -96,7 +96,7 @@ public:
 #endif
     }
 
-    WillBeHeapVector<RawPtrWillBeMember<StyleRule> > m_list;
+    Vector<RawPtr<StyleRule> > m_list;
 };
 
 // ElementRuleCollector is designed to be used as a stack object.
@@ -116,8 +116,8 @@ public:
     bool hasAnyMatchingRules(RuleSet*);
 
     MatchResult& matchedResult();
-    PassRefPtrWillBeRawPtr<StyleRuleList> matchedStyleRuleList();
-    PassRefPtrWillBeRawPtr<CSSRuleList> matchedCSSRuleList();
+    PassRefPtr<StyleRuleList> matchedStyleRuleList();
+    PassRefPtr<CSSRuleList> matchedCSSRuleList();
 
     void collectMatchingRules(const MatchRequest&, RuleRange&, SelectorChecker::ContextFlags = SelectorChecker::DefaultBehavior, CascadeScope = ignoreCascadeScope, CascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
@@ -157,11 +157,11 @@ private:
     SelectorChecker::Mode m_mode;
     bool m_matchingUARules;
 
-    OwnPtrWillBeMember<WillBeHeapVector<MatchedRule, 32> > m_matchedRules;
+    OwnPtr<Vector<MatchedRule, 32> > m_matchedRules;
 
     // Output.
-    RefPtrWillBeMember<StaticCSSRuleList> m_cssRuleList;
-    RefPtrWillBeMember<StyleRuleList> m_styleRuleList;
+    RefPtr<StaticCSSRuleList> m_cssRuleList;
+    RefPtr<StyleRuleList> m_styleRuleList;
     MatchResult m_result;
 };
 

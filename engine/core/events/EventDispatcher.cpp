@@ -41,7 +41,7 @@
 
 namespace blink {
 
-bool EventDispatcher::dispatchEvent(Node* node, PassRefPtrWillBeRawPtr<EventDispatchMediator> mediator)
+bool EventDispatcher::dispatchEvent(Node* node, PassRefPtr<EventDispatchMediator> mediator)
 {
     TRACE_EVENT0("blink", "EventDispatcher::dispatchEvent");
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
@@ -51,7 +51,7 @@ bool EventDispatcher::dispatchEvent(Node* node, PassRefPtrWillBeRawPtr<EventDisp
     return mediator->dispatchEvent(&dispatcher);
 }
 
-EventDispatcher::EventDispatcher(Node* node, PassRefPtrWillBeRawPtr<Event> event)
+EventDispatcher::EventDispatcher(Node* node, PassRefPtr<Event> event)
     : m_node(node)
     , m_event(event)
 #if ENABLE(ASSERT)
@@ -65,7 +65,7 @@ EventDispatcher::EventDispatcher(Node* node, PassRefPtrWillBeRawPtr<Event> event
     m_event->ensureEventPath().resetWith(m_node.get());
 }
 
-void EventDispatcher::dispatchScopedEvent(Node* node, PassRefPtrWillBeRawPtr<EventDispatchMediator> mediator)
+void EventDispatcher::dispatchScopedEvent(Node* node, PassRefPtr<EventDispatchMediator> mediator)
 {
     // We need to set the target here because it can go away by the time we actually fire the event.
     mediator->event()->setTarget(EventPath::eventTargetRespectingTargetRules(node));
@@ -77,7 +77,7 @@ void EventDispatcher::dispatchSimulatedClick(Node* node, Event* underlyingEvent,
     // This persistent vector doesn't cause leaks, because added Nodes are removed
     // before dispatchSimulatedClick() returns. This vector is here just to prevent
     // the code from running into an infinite recursion of dispatchSimulatedClick().
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<WillBeHeapHashSet<RawPtrWillBeMember<Node> > >, nodesDispatchingSimulatedClicks, (adoptPtrWillBeNoop(new WillBeHeapHashSet<RawPtrWillBeMember<Node> >())));
+    DEFINE_STATIC_LOCAL(OwnPtr<HashSet<RawPtr<Node> > >, nodesDispatchingSimulatedClicks, (adoptPtr(new HashSet<RawPtr<Node> >())));
 
     if (isDisabledFormControl(node))
         return;

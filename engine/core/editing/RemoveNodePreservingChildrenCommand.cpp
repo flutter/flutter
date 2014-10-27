@@ -31,7 +31,7 @@
 
 namespace blink {
 
-RemoveNodePreservingChildrenCommand::RemoveNodePreservingChildrenCommand(PassRefPtrWillBeRawPtr<Node> node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable)
+RemoveNodePreservingChildrenCommand::RemoveNodePreservingChildrenCommand(PassRefPtr<Node> node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable)
     : CompositeEditCommand(node->document())
     , m_node(node)
     , m_shouldAssumeContentIsAlwaysEditable(shouldAssumeContentIsAlwaysEditable)
@@ -47,7 +47,7 @@ void RemoveNodePreservingChildrenCommand::doApply()
 
         size_t size = children.size();
         for (size_t i = 0; i < size; ++i) {
-            RefPtrWillBeRawPtr<Node> child = children[i].release();
+            RefPtr<Node> child = children[i].release();
             removeNode(child, m_shouldAssumeContentIsAlwaysEditable);
             insertNodeBefore(child.release(), m_node, m_shouldAssumeContentIsAlwaysEditable);
         }

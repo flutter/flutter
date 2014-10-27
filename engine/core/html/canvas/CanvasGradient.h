@@ -38,16 +38,16 @@ namespace blink {
 
 class ExceptionState;
 
-class CanvasGradient final : public RefCountedWillBeGarbageCollectedFinalized<CanvasGradient>, public ScriptWrappable {
+class CanvasGradient final : public RefCounted<CanvasGradient>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<CanvasGradient> create(const FloatPoint& p0, const FloatPoint& p1)
+    static PassRefPtr<CanvasGradient> create(const FloatPoint& p0, const FloatPoint& p1)
     {
-        return adoptRefWillBeNoop(new CanvasGradient(p0, p1));
+        return adoptRef(new CanvasGradient(p0, p1));
     }
-    static PassRefPtrWillBeRawPtr<CanvasGradient> create(const FloatPoint& p0, float r0, const FloatPoint& p1, float r1)
+    static PassRefPtr<CanvasGradient> create(const FloatPoint& p0, float r0, const FloatPoint& p1, float r1)
     {
-        return adoptRefWillBeNoop(new CanvasGradient(p0, r0, p1, r1));
+        return adoptRef(new CanvasGradient(p0, r0, p1, r1));
     }
 
     Gradient* gradient() const { return m_gradient.get(); }

@@ -77,7 +77,7 @@ private:
     void clearFlags(Element*, unsigned);
     bool hasFlags(const Element*, unsigned flags) const;
 
-    typedef WillBeHeapHashMap<RefPtrWillBeMember<Element>, unsigned> ElementFlagMap;
+    typedef HashMap<RefPtr<Element>, unsigned> ElementFlagMap;
     ElementFlagMap m_elements;
 };
 

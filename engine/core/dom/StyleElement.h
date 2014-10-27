@@ -31,7 +31,7 @@ class Document;
 class Element;
 class TreeScope;
 
-class StyleElement : public WillBeGarbageCollectedMixin {
+class StyleElement : public DummyBase<void> {
 public:
     StyleElement(Document*, bool createdByParser);
     virtual ~StyleElement();
@@ -50,7 +50,7 @@ protected:
     void childrenChanged(Element*);
     void finishParsingChildren(Element*);
 
-    RefPtrWillBeMember<CSSStyleSheet> m_sheet;
+    RefPtr<CSSStyleSheet> m_sheet;
 
 private:
     void createSheet(Element*, const String& text = String());

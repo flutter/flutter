@@ -51,7 +51,7 @@ class SharedBuffer;
 // A resource that is held in the cache. Classes who want to use this object should derive
 // from ResourceClient, to get the function calls in case the requested data has arrived.
 // This class also does the actual communication with the loader to obtain the resource from the network.
-class Resource : public NoBaseWillBeGarbageCollectedFinalized<Resource> {
+class Resource : public DummyBase<Resource> {
     WTF_MAKE_NONCOPYABLE(Resource); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     friend class InspectorResource;
 
@@ -291,7 +291,7 @@ protected:
 
     ResourceRequest m_resourceRequest;
     AtomicString m_accept;
-    RefPtrWillBeMember<ResourceLoader> m_loader;
+    RefPtr<ResourceLoader> m_loader;
     ResourceLoaderOptions m_options;
 
     ResourceResponse m_response;
@@ -349,10 +349,10 @@ private:
     // using HTTP If-Modified-Since/If-None-Match headers. If the response is 304 all clients of this resource are moved
     // to to be clients of m_resourceToRevalidate and the resource is deleted. If not, the field is zeroed and this
     // resources becomes normal resource load.
-    RawPtrWillBeMember<Resource> m_resourceToRevalidate;
+    RawPtr<Resource> m_resourceToRevalidate;
 
     // If this field is non-null, the resource has a proxy for checking whether it is still up to date (see m_resourceToRevalidate).
-    RawPtrWillBeMember<Resource> m_proxyResource;
+    RawPtr<Resource> m_proxyResource;
 
     // These handles will need to be updated to point to the m_resourceToRevalidate in case we get 304 response.
     HashSet<ResourcePtrBase*> m_handlesToRevalidate;

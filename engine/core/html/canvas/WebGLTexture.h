@@ -43,7 +43,7 @@ public:
     };
     virtual ~WebGLTexture();
 
-    static PassRefPtrWillBeRawPtr<WebGLTexture> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLTexture> create(WebGLRenderingContextBase*);
 
     void setTarget(GLenum target, GLint maxLevel);
     void setParameteri(GLenum pname, GLint param);

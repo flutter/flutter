@@ -49,11 +49,11 @@ class AnimationStack {
 public:
     AnimationStack();
 
-    void add(PassOwnPtrWillBeRawPtr<SampledEffect> effect) { m_effects.append(effect); }
+    void add(PassOwnPtr<SampledEffect> effect) { m_effects.append(effect); }
     bool isEmpty() const { return m_effects.isEmpty(); }
     bool affects(CSSPropertyID) const;
     bool hasActiveAnimationsOnCompositor(CSSPropertyID) const;
-    static WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<Interpolation> > activeInterpolations(AnimationStack*, const WillBeHeapVector<RawPtrWillBeMember<InertAnimation> >* newAnimations, const WillBeHeapHashSet<RawPtrWillBeMember<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority, double timelineCurrentTime);
+    static HashMap<CSSPropertyID, RefPtr<Interpolation> > activeInterpolations(AnimationStack*, const Vector<RawPtr<InertAnimation> >* newAnimations, const HashSet<RawPtr<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority, double timelineCurrentTime);
 
     bool getAnimatedBoundingBox(FloatBox&, CSSPropertyID) const;
     void trace(Visitor*);
@@ -61,7 +61,7 @@ public:
 private:
     void simplifyEffects();
     // Effects sorted by priority. Lower priority at the start of the list.
-    WillBeHeapVector<OwnPtrWillBeMember<SampledEffect> > m_effects;
+    Vector<OwnPtr<SampledEffect> > m_effects;
 
     friend class AnimationAnimationStackTest;
 };

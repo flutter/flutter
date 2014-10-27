@@ -33,9 +33,9 @@ class StyleRule;
 
 class CSSStyleRule final : public CSSRule {
 public:
-    static PassRefPtrWillBeRawPtr<CSSStyleRule> create(StyleRule* rule, CSSStyleSheet* sheet)
+    static PassRefPtr<CSSStyleRule> create(StyleRule* rule, CSSStyleSheet* sheet)
     {
-        return adoptRefWillBeNoop(new CSSStyleRule(rule, sheet));
+        return adoptRef(new CSSStyleRule(rule, sheet));
     }
 
     virtual ~CSSStyleRule();
@@ -59,8 +59,8 @@ private:
 
     String generateSelectorText() const;
 
-    RefPtrWillBeMember<StyleRule> m_styleRule;
-    mutable RefPtrWillBeMember<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
+    RefPtr<StyleRule> m_styleRule;
+    mutable RefPtr<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
 };
 
 DEFINE_CSS_RULE_TYPE_CASTS(CSSStyleRule, STYLE_RULE);

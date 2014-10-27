@@ -453,14 +453,14 @@ static VisiblePosition previousBoundary(const VisiblePosition& c, BoundarySearch
     Document& d = boundary->document();
     Position start = createLegacyEditingPosition(boundary, 0).parentAnchoredEquivalent();
     Position end = pos.parentAnchoredEquivalent();
-    RefPtrWillBeRawPtr<Range> searchRange = Range::create(d);
+    RefPtr<Range> searchRange = Range::create(d);
 
     Vector<UChar, 1024> string;
     unsigned suffixLength = 0;
 
     TrackExceptionState exceptionState;
     if (requiresContextForWordBoundary(c.characterBefore())) {
-        RefPtrWillBeRawPtr<Range> forwardsScanRange(d.createRange());
+        RefPtr<Range> forwardsScanRange(d.createRange());
         forwardsScanRange->setEndAfter(boundary, exceptionState);
         forwardsScanRange->setStart(end.deprecatedNode(), end.deprecatedEditingOffset(), exceptionState);
         TextIterator forwardsIterator(forwardsScanRange.get());
@@ -523,14 +523,14 @@ static VisiblePosition nextBoundary(const VisiblePosition& c, BoundarySearchFunc
         return VisiblePosition();
 
     Document& d = boundary->document();
-    RefPtrWillBeRawPtr<Range> searchRange(d.createRange());
+    RefPtr<Range> searchRange(d.createRange());
     Position start(pos.parentAnchoredEquivalent());
 
     Vector<UChar, 1024> string;
     unsigned prefixLength = 0;
 
     if (requiresContextForWordBoundary(c.characterAfter())) {
-        RefPtrWillBeRawPtr<Range> backwardsScanRange(d.createRange());
+        RefPtr<Range> backwardsScanRange(d.createRange());
         backwardsScanRange->setEnd(start.deprecatedNode(), start.deprecatedEditingOffset(), IGNORE_EXCEPTION);
         SimplifiedBackwardsTextIterator backwardsIterator(backwardsScanRange.get());
         while (!backwardsIterator.atEnd()) {
@@ -574,7 +574,7 @@ static VisiblePosition nextBoundary(const VisiblePosition& c, BoundarySearchFunc
         // Use the character iterator to translate the next value into a DOM position.
         CharacterIterator charIt(searchRange.get(), TextIteratorEmitsCharactersBetweenAllVisiblePositions);
         charIt.advance(next - prefixLength - 1);
-        RefPtrWillBeRawPtr<Range> characterRange = charIt.range();
+        RefPtr<Range> characterRange = charIt.range();
         pos = characterRange->endPosition();
 
         if (charIt.characterAt(0) == '\n') {

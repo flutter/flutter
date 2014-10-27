@@ -22,7 +22,7 @@ namespace blink {
 
 using namespace {{namespace}}Names;
 
-typedef PassRefPtrWillBeRawPtr<{{namespace}}Element> (*ConstructorFunction)(
+typedef PassRefPtr<{{namespace}}Element> (*ConstructorFunction)(
     Document&,
     bool createdByParser);
 
@@ -32,7 +32,7 @@ static FunctionMap* g_constructors = 0;
 
 {% for tag in tags|sort if not tag.noConstructor %}
 {% filter enable_conditional(tag.Conditional) %}
-static PassRefPtrWillBeRawPtr<{{namespace}}Element> {{tag|symbol}}Constructor(
+static PassRefPtr<{{namespace}}Element> {{tag|symbol}}Constructor(
     Document& document,
     bool createdByParser)
 {
@@ -71,7 +71,7 @@ static void create{{namespace}}FunctionMap()
         g_constructors->set(data[i].tag.localName(), data[i].func);
 }
 
-PassRefPtrWillBeRawPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}}Element(
+PassRefPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}}Element(
     const AtomicString& localName,
     Document& document,
     bool createdByParser)
@@ -82,7 +82,7 @@ PassRefPtrWillBeRawPtr<{{namespace}}Element> {{namespace}}ElementFactory::create
         return function(document, createdByParser);
 
     if (document.registrationContext() && CustomElement::isValidName(localName)) {
-        RefPtrWillBeRawPtr<Element> element = document.registrationContext()->createCustomTagElement(document, QualifiedName(localName));
+        RefPtr<Element> element = document.registrationContext()->createCustomTagElement(document, QualifiedName(localName));
         ASSERT_WITH_SECURITY_IMPLICATION(element->is{{namespace}}Element());
         return static_pointer_cast<{{namespace}}Element>(element.release());
     }

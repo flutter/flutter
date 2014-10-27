@@ -41,16 +41,16 @@ class AnimatableUnknown final : public AnimatableValue {
 public:
     virtual ~AnimatableUnknown() { }
 
-    static PassRefPtrWillBeRawPtr<AnimatableUnknown> create(PassRefPtrWillBeRawPtr<CSSValue> value)
+    static PassRefPtr<AnimatableUnknown> create(PassRefPtr<CSSValue> value)
     {
-        return adoptRefWillBeNoop(new AnimatableUnknown(value));
+        return adoptRef(new AnimatableUnknown(value));
     }
-    static PassRefPtrWillBeRawPtr<AnimatableUnknown> create(CSSValueID value)
+    static PassRefPtr<AnimatableUnknown> create(CSSValueID value)
     {
-        return adoptRefWillBeNoop(new AnimatableUnknown(cssValuePool().createIdentifierValue(value)));
+        return adoptRef(new AnimatableUnknown(cssValuePool().createIdentifierValue(value)));
     }
 
-    PassRefPtrWillBeRawPtr<CSSValue> toCSSValue() const { return m_value; }
+    PassRefPtr<CSSValue> toCSSValue() const { return m_value; }
     CSSValueID toCSSValueID() const { return toCSSPrimitiveValue(m_value.get())->getValueID(); }
 
     virtual void trace(Visitor* visitor) override
@@ -60,7 +60,7 @@ public:
     }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
     {
         return defaultInterpolateTo(this, value, fraction);
     }
@@ -68,7 +68,7 @@ protected:
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override { return true; }
 
 private:
-    explicit AnimatableUnknown(PassRefPtrWillBeRawPtr<CSSValue> value)
+    explicit AnimatableUnknown(PassRefPtr<CSSValue> value)
         : m_value(value)
     {
         ASSERT(m_value);
@@ -76,7 +76,7 @@ private:
     virtual AnimatableType type() const override { return TypeUnknown; }
     virtual bool equalTo(const AnimatableValue*) const override;
 
-    const RefPtrWillBeMember<CSSValue> m_value;
+    const RefPtr<CSSValue> m_value;
 };
 
 DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableUnknown, isUnknown());

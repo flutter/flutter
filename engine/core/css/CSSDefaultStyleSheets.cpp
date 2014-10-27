@@ -38,7 +38,7 @@ namespace blink {
 
 CSSDefaultStyleSheets& CSSDefaultStyleSheets::instance()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<CSSDefaultStyleSheets>, cssDefaultStyleSheets, (adoptPtrWillBeNoop(new CSSDefaultStyleSheets())));
+    DEFINE_STATIC_LOCAL(OwnPtr<CSSDefaultStyleSheets>, cssDefaultStyleSheets, (adoptPtr(new CSSDefaultStyleSheets())));
     return *cssDefaultStyleSheets;
 }
 
@@ -48,9 +48,9 @@ static const MediaQueryEvaluator& screenEval()
     return staticScreenEval;
 }
 
-static PassRefPtrWillBeRawPtr<StyleSheetContents> parseUASheet(const String& str)
+static PassRefPtr<StyleSheetContents> parseUASheet(const String& str)
 {
-    RefPtrWillBeRawPtr<StyleSheetContents> sheet = StyleSheetContents::create(CSSParserContext(0));
+    RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(CSSParserContext(0));
     sheet->parseString(str);
     // User Agent stylesheets are parsed once for the lifetime of the renderer
     // and are intentionally leaked.

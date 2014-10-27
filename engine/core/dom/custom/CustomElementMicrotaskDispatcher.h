@@ -18,7 +18,7 @@ class CustomElementMicrotaskStep;
 class Document;
 class HTMLImportLoader;
 
-class CustomElementMicrotaskDispatcher final : public NoBaseWillBeGarbageCollected<CustomElementMicrotaskDispatcher> {
+class CustomElementMicrotaskDispatcher final : public DummyBase<CustomElementMicrotaskDispatcher> {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskDispatcher);
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskDispatcher);
 public:
@@ -46,7 +46,7 @@ private:
         DispatchingCallbacks
     } m_phase;
 
-    WillBeHeapVector<RawPtrWillBeMember<CustomElementCallbackQueue> > m_elements;
+    Vector<RawPtr<CustomElementCallbackQueue> > m_elements;
 };
 
 }

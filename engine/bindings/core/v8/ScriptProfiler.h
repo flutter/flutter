@@ -69,7 +69,7 @@ public:
     static void clearHeapObjectIds();
     static void setSamplingInterval(int intervalUs);
     static void start(const String& title);
-    static PassRefPtrWillBeRawPtr<ScriptProfile> stop(const String& title);
+    static PassRefPtr<ScriptProfile> stop(const String& title);
     static PassRefPtr<ScriptHeapSnapshot> takeHeapSnapshot(const String& title, HeapSnapshotProgress*);
     static void startTrackingHeapObjects(bool trackAllocations);
     static void stopTrackingHeapObjects();

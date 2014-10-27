@@ -41,7 +41,7 @@ class HTMLCanvasElement;
 class KURL;
 class WebGLObject;
 
-class CanvasRenderingContext : public NoBaseWillBeGarbageCollectedFinalized<CanvasRenderingContext> {
+class CanvasRenderingContext : public DummyBase<CanvasRenderingContext> {
     WTF_MAKE_NONCOPYABLE(CanvasRenderingContext);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
@@ -70,7 +70,7 @@ protected:
     CanvasRenderingContext(HTMLCanvasElement*);
 
 private:
-    RawPtrWillBeMember<HTMLCanvasElement> m_canvas;
+    RawPtr<HTMLCanvasElement> m_canvas;
     HashSet<String> m_cleanURLs;
     HashSet<String> m_dirtyURLs;
 };

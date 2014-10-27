@@ -39,27 +39,27 @@ class ExceptionState;
 class MediaList;
 class MediaQuery;
 
-class MediaQuerySet : public RefCountedWillBeGarbageCollected<MediaQuerySet> {
+class MediaQuerySet : public RefCounted<MediaQuerySet> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(MediaQuerySet);
 public:
-    static PassRefPtrWillBeRawPtr<MediaQuerySet> create()
+    static PassRefPtr<MediaQuerySet> create()
     {
-        return adoptRefWillBeNoop(new MediaQuerySet());
+        return adoptRef(new MediaQuerySet());
     }
-    static PassRefPtrWillBeRawPtr<MediaQuerySet> create(const String& mediaString);
-    static PassRefPtrWillBeRawPtr<MediaQuerySet> createOffMainThread(const String& mediaString);
+    static PassRefPtr<MediaQuerySet> create(const String& mediaString);
+    static PassRefPtr<MediaQuerySet> createOffMainThread(const String& mediaString);
 
     bool set(const String&);
     bool add(const String&);
     bool remove(const String&);
 
-    void addMediaQuery(PassOwnPtrWillBeRawPtr<MediaQuery>);
+    void addMediaQuery(PassOwnPtr<MediaQuery>);
 
-    const WillBeHeapVector<OwnPtrWillBeMember<MediaQuery> >& queryVector() const { return m_queries; }
+    const Vector<OwnPtr<MediaQuery> >& queryVector() const { return m_queries; }
 
     String mediaText() const;
 
-    PassRefPtrWillBeRawPtr<MediaQuerySet> copy() const { return adoptRefWillBeNoop(new MediaQuerySet(*this)); }
+    PassRefPtr<MediaQuerySet> copy() const { return adoptRef(new MediaQuerySet(*this)); }
 
     void trace(Visitor*);
 
@@ -67,19 +67,19 @@ private:
     MediaQuerySet();
     MediaQuerySet(const MediaQuerySet&);
 
-    WillBeHeapVector<OwnPtrWillBeMember<MediaQuery> > m_queries;
+    Vector<OwnPtr<MediaQuery> > m_queries;
 };
 
-class MediaList : public RefCountedWillBeGarbageCollectedFinalized<MediaList>, public ScriptWrappable {
+class MediaList : public RefCounted<MediaList>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
+    static PassRefPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
     {
-        return adoptRefWillBeNoop(new MediaList(mediaQueries, parentSheet));
+        return adoptRef(new MediaList(mediaQueries, parentSheet));
     }
-    static PassRefPtrWillBeRawPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSRule* parentRule)
+    static PassRefPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSRule* parentRule)
     {
-        return adoptRefWillBeNoop(new MediaList(mediaQueries, parentRule));
+        return adoptRef(new MediaList(mediaQueries, parentRule));
     }
 
     ~MediaList();
@@ -111,11 +111,11 @@ private:
     MediaList(MediaQuerySet*, CSSStyleSheet* parentSheet);
     MediaList(MediaQuerySet*, CSSRule* parentRule);
 
-    RefPtrWillBeMember<MediaQuerySet> m_mediaQueries;
+    RefPtr<MediaQuerySet> m_mediaQueries;
     // Cleared in ~CSSStyleSheet destructor when oilpan is not enabled.
-    RawPtrWillBeMember<CSSStyleSheet> m_parentStyleSheet;
+    RawPtr<CSSStyleSheet> m_parentStyleSheet;
     // Cleared in the ~CSSMediaRule destructors when oilpan is not enabled.
-    RawPtrWillBeMember<CSSRule> m_parentRule;
+    RawPtr<CSSRule> m_parentRule;
 };
 
 // Adds message to inspector console whenever dpi or dpcm values are used for "screen" media.

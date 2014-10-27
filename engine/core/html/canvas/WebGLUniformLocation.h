@@ -34,10 +34,10 @@
 
 namespace blink {
 
-class WebGLUniformLocation final : public RefCountedWillBeGarbageCollected<WebGLUniformLocation>, public ScriptWrappable {
+class WebGLUniformLocation final : public RefCounted<WebGLUniformLocation>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<WebGLUniformLocation> create(WebGLProgram*, GLint location);
+    static PassRefPtr<WebGLUniformLocation> create(WebGLProgram*, GLint location);
 
     WebGLProgram* program() const;
 
@@ -49,7 +49,7 @@ protected:
     WebGLUniformLocation(WebGLProgram*, GLint location);
 
 private:
-    RefPtrWillBeMember<WebGLProgram> m_program;
+    RefPtr<WebGLProgram> m_program;
     GLint m_location;
     unsigned m_linkCount;
 };

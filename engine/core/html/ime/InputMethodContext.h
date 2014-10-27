@@ -45,11 +45,11 @@ class ExecutionContext;
 class InputMethodController;
 class Node;
 
-class InputMethodContext final : public NoBaseWillBeGarbageCollectedFinalized<InputMethodContext>, public EventTargetWithInlineData {
+class InputMethodContext final : public DummyBase<InputMethodContext>, public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(InputMethodContext);
 public:
-    static PassOwnPtrWillBeRawPtr<InputMethodContext> create(HTMLElement*);
+    static PassOwnPtr<InputMethodContext> create(HTMLElement*);
     virtual ~InputMethodContext();
 
 #if !ENABLE(OILPAN)
@@ -88,7 +88,7 @@ private:
     virtual void derefEventTarget() override { deref(); }
 #endif
 
-    RawPtrWillBeMember<HTMLElement> m_element;
+    RawPtr<HTMLElement> m_element;
     Vector<unsigned> m_segments;
 };
 

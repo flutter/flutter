@@ -32,9 +32,9 @@ class StyleRuleMedia;
 
 class CSSMediaRule final : public CSSGroupingRule {
 public:
-    static PassRefPtrWillBeRawPtr<CSSMediaRule> create(StyleRuleMedia* rule, CSSStyleSheet* sheet)
+    static PassRefPtr<CSSMediaRule> create(StyleRuleMedia* rule, CSSStyleSheet* sheet)
     {
-        return adoptRefWillBeNoop(new CSSMediaRule(rule, sheet));
+        return adoptRef(new CSSMediaRule(rule, sheet));
     }
 
     virtual ~CSSMediaRule();
@@ -52,7 +52,7 @@ private:
 
     MediaQuerySet* mediaQueries() const;
 
-    mutable RefPtrWillBeMember<MediaList> m_mediaCSSOMWrapper;
+    mutable RefPtr<MediaList> m_mediaCSSOMWrapper;
 };
 
 DEFINE_CSS_RULE_TYPE_CASTS(CSSMediaRule, MEDIA_RULE);

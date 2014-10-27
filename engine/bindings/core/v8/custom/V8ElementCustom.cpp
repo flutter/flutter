@@ -96,7 +96,7 @@ void animate2Method(const v8::FunctionCallbackInfo<v8::Value>& info)
     ExceptionState exceptionState(ExceptionState::ExecutionContext, "animate", "Element", info.Holder(), info.GetIsolate());
     Element* impl = V8Element::toNative(info.Holder());
     TONATIVE_VOID(Vector<Dictionary>, keyframes, toNativeArray<Dictionary>(info[0], 1, info.GetIsolate()));
-    RefPtrWillBeRawPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, exceptionState);
+    RefPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, exceptionState);
     if (exceptionState.throwIfNeeded())
         return;
     v8SetReturnValueFast(info, WTF::getPtr(result.release()), impl);
@@ -131,7 +131,7 @@ void animate5Method(const v8::FunctionCallbackInfo<v8::Value>& info)
     Element* impl = V8Element::toNative(info.Holder());
     TONATIVE_VOID(Vector<Dictionary>, keyframes, toNativeArray<Dictionary>(info[0], 1, info.GetIsolate()));
     TONATIVE_VOID(double, duration, static_cast<double>(info[1]->NumberValue()));
-    RefPtrWillBeRawPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, duration, exceptionState);
+    RefPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, duration, exceptionState);
     if (exceptionState.throwIfNeeded())
         return;
     v8SetReturnValueFast(info, WTF::getPtr(result.release()), impl);
@@ -149,7 +149,7 @@ void animate6Method(const v8::FunctionCallbackInfo<v8::Value>& info)
         exceptionState.throwIfNeeded();
         return;
     }
-    RefPtrWillBeRawPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, timingInput, exceptionState);
+    RefPtr<AnimationPlayer> result = ElementAnimation::animate(*impl, keyframes, timingInput, exceptionState);
     if (exceptionState.throwIfNeeded())
         return;
     v8SetReturnValueFast(info, WTF::getPtr(result.release()), impl);

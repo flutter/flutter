@@ -42,7 +42,7 @@ StyleFetchedImage::~StyleFetchedImage()
     m_image->removeClient(this);
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> StyleFetchedImage::cssValue() const
+PassRefPtr<CSSValue> StyleFetchedImage::cssValue() const
 {
     return CSSImageValue::create(m_image->url(), const_cast<StyleFetchedImage*>(this));
 }

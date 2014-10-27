@@ -35,7 +35,7 @@ class DocumentMarkerDetails;
 // It optionally includes a description that could be displayed in the user interface.
 // It also optionally includes a flag specifying whether the match is active, which is ignored
 // for all types other than type TextMatch.
-class DocumentMarker : public NoBaseWillBeGarbageCollected<DocumentMarker> {
+class DocumentMarker : public DummyBase<DocumentMarker> {
 public:
     enum MarkerTypeIndex {
         SpellingMarkerIndex = 0,
@@ -97,7 +97,7 @@ public:
     DocumentMarker(MarkerType, unsigned startOffset, unsigned endOffset, const String& description);
     DocumentMarker(MarkerType, unsigned startOffset, unsigned endOffset, const String& description, uint32_t hash);
     DocumentMarker(unsigned startOffset, unsigned endOffset, bool activeMatch);
-    DocumentMarker(MarkerType, unsigned startOffset, unsigned endOffset, PassRefPtrWillBeRawPtr<DocumentMarkerDetails>);
+    DocumentMarker(MarkerType, unsigned startOffset, unsigned endOffset, PassRefPtr<DocumentMarkerDetails>);
     DocumentMarker(const DocumentMarker&);
 
     MarkerType type() const { return m_type; }
@@ -134,18 +134,18 @@ private:
     MarkerType m_type;
     unsigned m_startOffset;
     unsigned m_endOffset;
-    RefPtrWillBeMember<DocumentMarkerDetails> m_details;
+    RefPtr<DocumentMarkerDetails> m_details;
     uint32_t m_hash;
 };
 
-typedef WillBeHeapVector<RawPtrWillBeMember<DocumentMarker> > DocumentMarkerVector;
+typedef Vector<RawPtr<DocumentMarker> > DocumentMarkerVector;
 
 inline DocumentMarkerDetails* DocumentMarker::details() const
 {
     return m_details.get();
 }
 
-class DocumentMarkerDetails : public RefCountedWillBeGarbageCollectedFinalized<DocumentMarkerDetails>
+class DocumentMarkerDetails : public RefCounted<DocumentMarkerDetails>
 {
 public:
     DocumentMarkerDetails() { }

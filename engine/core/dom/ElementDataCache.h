@@ -40,19 +40,19 @@ namespace blink {
 class Attribute;
 class ShareableElementData;
 
-class ElementDataCache final : public NoBaseWillBeGarbageCollected<ElementDataCache>  {
+class ElementDataCache final : public DummyBase<ElementDataCache>  {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ElementDataCache)
 public:
-    static PassOwnPtrWillBeRawPtr<ElementDataCache> create() { return adoptPtrWillBeNoop(new ElementDataCache); }
+    static PassOwnPtr<ElementDataCache> create() { return adoptPtr(new ElementDataCache); }
 
-    PassRefPtrWillBeRawPtr<ShareableElementData> cachedShareableElementDataWithAttributes(const Vector<Attribute>&);
+    PassRefPtr<ShareableElementData> cachedShareableElementDataWithAttributes(const Vector<Attribute>&);
 
     void trace(Visitor*);
 
 private:
     ElementDataCache();
 
-    typedef WillBeHeapHashMap<unsigned, RefPtrWillBeMember<ShareableElementData>, AlreadyHashed> ShareableElementDataCache;
+    typedef HashMap<unsigned, RefPtr<ShareableElementData>, AlreadyHashed> ShareableElementDataCache;
     ShareableElementDataCache m_shareableElementDataCache;
 };
 

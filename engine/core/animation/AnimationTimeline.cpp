@@ -42,7 +42,7 @@ namespace blink {
 
 namespace {
 
-bool compareAnimationPlayers(const RefPtrWillBeMember<blink::AnimationPlayer>& left, const RefPtrWillBeMember<blink::AnimationPlayer>& right)
+bool compareAnimationPlayers(const RefPtr<blink::AnimationPlayer>& left, const RefPtr<blink::AnimationPlayer>& right)
 {
     return AnimationPlayer::hasLowerPriority(left.get(), right.get());
 }
@@ -54,17 +54,17 @@ bool compareAnimationPlayers(const RefPtrWillBeMember<blink::AnimationPlayer>& l
 const double AnimationTimeline::s_minimumDelay = 0.04;
 
 
-PassRefPtrWillBeRawPtr<AnimationTimeline> AnimationTimeline::create(Document* document, PassOwnPtrWillBeRawPtr<PlatformTiming> timing)
+PassRefPtr<AnimationTimeline> AnimationTimeline::create(Document* document, PassOwnPtr<PlatformTiming> timing)
 {
-    return adoptRefWillBeNoop(new AnimationTimeline(document, timing));
+    return adoptRef(new AnimationTimeline(document, timing));
 }
 
-AnimationTimeline::AnimationTimeline(Document* document, PassOwnPtrWillBeRawPtr<PlatformTiming> timing)
+AnimationTimeline::AnimationTimeline(Document* document, PassOwnPtr<PlatformTiming> timing)
     : m_document(document)
 {
     ScriptWrappable::init(this);
     if (!timing)
-        m_timing = adoptPtrWillBeNoop(new AnimationTimelineTiming(this));
+        m_timing = adoptPtr(new AnimationTimelineTiming(this));
     else
         m_timing = timing;
 
@@ -74,14 +74,14 @@ AnimationTimeline::AnimationTimeline(Document* document, PassOwnPtrWillBeRawPtr<
 AnimationTimeline::~AnimationTimeline()
 {
 #if !ENABLE(OILPAN)
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<AnimationPlayer> >::iterator it = m_players.begin(); it != m_players.end(); ++it)
+    for (HashSet<RawPtr<AnimationPlayer> >::iterator it = m_players.begin(); it != m_players.end(); ++it)
         (*it)->timelineDestroyed();
 #endif
 }
 
 AnimationPlayer* AnimationTimeline::createAnimationPlayer(AnimationNode* child)
 {
-    RefPtrWillBeRawPtr<AnimationPlayer> player = AnimationPlayer::create(m_document->contextDocument().get(), *this, child);
+    RefPtr<AnimationPlayer> player = AnimationPlayer::create(m_document->contextDocument().get(), *this, child);
     AnimationPlayer* result = player.get();
     m_players.add(result);
     setOutdatedAnimationPlayer(result);
@@ -96,10 +96,10 @@ AnimationPlayer* AnimationTimeline::play(AnimationNode* child)
     return player;
 }
 
-WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer> > AnimationTimeline::getAnimationPlayers()
+Vector<RefPtr<AnimationPlayer> > AnimationTimeline::getAnimationPlayers()
 {
-    WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer> > animationPlayers;
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<AnimationPlayer> >::iterator it = m_players.begin(); it != m_players.end(); ++it) {
+    Vector<RefPtr<AnimationPlayer> > animationPlayers;
+    for (HashSet<RawPtr<AnimationPlayer> >::iterator it = m_players.begin(); it != m_players.end(); ++it) {
         if ((*it)->source() && (*it)->source()->isCurrent()) {
             animationPlayers.append(*it);
         }
@@ -121,9 +121,9 @@ void AnimationTimeline::serviceAnimations(TimingUpdateReason reason)
 
     double timeToNextEffect = std::numeric_limits<double>::infinity();
 
-    WillBeHeapVector<RawPtrWillBeMember<AnimationPlayer> > players;
+    Vector<RawPtr<AnimationPlayer> > players;
     players.reserveInitialCapacity(m_playersNeedingUpdate.size());
-    for (WillBeHeapHashSet<RefPtrWillBeMember<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it)
+    for (HashSet<RefPtr<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it)
         players.append(it->get());
 
     std::sort(players.begin(), players.end(), AnimationPlayer::hasLowerPriority);
@@ -201,14 +201,14 @@ double AnimationTimeline::effectiveTime()
 
 void AnimationTimeline::pauseAnimationsForTesting(double pauseTime)
 {
-    for (WillBeHeapHashSet<RefPtrWillBeMember<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it)
+    for (HashSet<RefPtr<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it)
         (*it)->pauseForTesting(pauseTime);
     serviceAnimations(TimingUpdateOnDemand);
 }
 
 bool AnimationTimeline::hasOutdatedAnimationPlayer() const
 {
-    for (WillBeHeapHashSet<RefPtrWillBeMember<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it) {
+    for (HashSet<RefPtr<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it) {
         if ((*it)->outdated())
             return true;
     }

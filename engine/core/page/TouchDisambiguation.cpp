@@ -84,7 +84,7 @@ struct TouchTargetData {
     float score;
 };
 
-void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector<IntRect>& goodTargets, WillBeHeapVector<RawPtrWillBeMember<Node> >& highlightNodes)
+void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector<IntRect>& goodTargets, Vector<RawPtr<Node> >& highlightNodes)
 {
     goodTargets.clear();
 
@@ -94,13 +94,13 @@ void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector
     IntPoint contentsPoint = mainFrame->view()->windowToContents(touchPoint);
 
     HitTestResult result = mainFrame->eventHandler().hitTestResultAtPoint(contentsPoint, HitTestRequest::ReadOnly | HitTestRequest::Active, IntSize(touchPointPadding, touchPointPadding));
-    const WillBeHeapListHashSet<RefPtrWillBeMember<Node> >& hitResults = result.rectBasedTestResult();
+    const ListHashSet<RefPtr<Node> >& hitResults = result.rectBasedTestResult();
 
     // Blacklist nodes that are container of disambiguated nodes.
     // It is not uncommon to have a clickable <div> that contains other clickable objects.
     // This heuristic avoids excessive disambiguation in that case.
-    WillBeHeapHashSet<RawPtrWillBeMember<Node> > blackList;
-    for (WillBeHeapListHashSet<RefPtrWillBeMember<Node> >::const_iterator it = hitResults.begin(); it != hitResults.end(); ++it) {
+    HashSet<RawPtr<Node> > blackList;
+    for (ListHashSet<RefPtr<Node> >::const_iterator it = hitResults.begin(); it != hitResults.end(); ++it) {
         // Ignore any Nodes that can't be clicked on.
         RenderObject* renderer = it->get()->renderer();
         if (!renderer || !it->get()->willRespondToMouseClickEvents())
@@ -116,9 +116,9 @@ void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector
         }
     }
 
-    WillBeHeapHashMap<RawPtrWillBeMember<Node>, TouchTargetData> touchTargets;
+    HashMap<RawPtr<Node>, TouchTargetData> touchTargets;
     float bestScore = 0;
-    for (WillBeHeapListHashSet<RefPtrWillBeMember<Node> >::const_iterator it = hitResults.begin(); it != hitResults.end(); ++it) {
+    for (ListHashSet<RefPtr<Node> >::const_iterator it = hitResults.begin(); it != hitResults.end(); ++it) {
         for (Node* node = it->get(); node; node = node->parentNode()) {
             if (blackList.contains(node))
                 continue;
@@ -134,7 +134,7 @@ void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector
         }
     }
 
-    for (WillBeHeapHashMap<RawPtrWillBeMember<Node>, TouchTargetData>::iterator it = touchTargets.begin(); it != touchTargets.end(); ++it) {
+    for (HashMap<RawPtr<Node>, TouchTargetData>::iterator it = touchTargets.begin(); it != touchTargets.end(); ++it) {
         // Currently the scoring function uses the overlap area with the fat point as the score.
         // We ignore the candidates that has less than 1/2 overlap (we consider not really ambiguous enough) than the best candidate to avoid excessive popups.
         if (it->value.score < bestScore * 0.5)

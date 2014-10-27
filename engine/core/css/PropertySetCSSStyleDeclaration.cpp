@@ -98,8 +98,8 @@ private:
     static AbstractPropertySetCSSStyleDeclaration* s_currentDecl;
     static bool s_shouldDeliver;
 
-    OwnPtrWillBeMember<MutationObserverInterestGroup> m_mutationRecipients;
-    RefPtrWillBeMember<MutationRecord> m_mutation;
+    OwnPtr<MutationObserverInterestGroup> m_mutationRecipients;
+    RefPtr<MutationRecord> m_mutation;
 };
 
 unsigned StyleAttributeMutationScope::s_scopeCount = 0;
@@ -156,7 +156,7 @@ void AbstractPropertySetCSSStyleDeclaration::setCSSText(const String& text, Exce
     mutationScope.enqueueMutationRecord();
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> AbstractPropertySetCSSStyleDeclaration::getPropertyCSSValue(const String& propertyName)
+PassRefPtr<CSSValue> AbstractPropertySetCSSStyleDeclaration::getPropertyCSSValue(const String& propertyName)
 {
     CSSPropertyID propertyID = cssPropertyID(propertyName);
     if (!propertyID)
@@ -231,7 +231,7 @@ String AbstractPropertySetCSSStyleDeclaration::removeProperty(const String& prop
     return result;
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> AbstractPropertySetCSSStyleDeclaration::getPropertyCSSValueInternal(CSSPropertyID propertyID)
+PassRefPtr<CSSValue> AbstractPropertySetCSSStyleDeclaration::getPropertyCSSValueInternal(CSSPropertyID propertyID)
 {
     return propertySet().getPropertyCSSValue(propertyID);
 }
@@ -262,9 +262,9 @@ CSSValue* AbstractPropertySetCSSStyleDeclaration::cloneAndCacheForCSSOM(CSSValue
     // The map is here to maintain the object identity of the CSSValues over multiple invocations.
     // FIXME: It is likely that the identity is not important for web compatibility and this code should be removed.
     if (!m_cssomCSSValueClones)
-        m_cssomCSSValueClones = adoptPtrWillBeNoop(new WillBeHeapHashMap<RawPtrWillBeMember<CSSValue>, RefPtrWillBeMember<CSSValue> >);
+        m_cssomCSSValueClones = adoptPtr(new HashMap<RawPtr<CSSValue>, RefPtr<CSSValue> >);
 
-    RefPtrWillBeMember<CSSValue>& clonedValue = m_cssomCSSValueClones->add(internalValue, RefPtrWillBeMember<CSSValue>()).storedValue->value;
+    RefPtr<CSSValue>& clonedValue = m_cssomCSSValueClones->add(internalValue, RefPtr<CSSValue>()).storedValue->value;
     if (!clonedValue)
         clonedValue = internalValue->cloneForCSSOM();
     return clonedValue.get();
@@ -276,7 +276,7 @@ StyleSheetContents* AbstractPropertySetCSSStyleDeclaration::contextStyleSheet() 
     return cssStyleSheet ? cssStyleSheet->contents() : 0;
 }
 
-PassRefPtrWillBeRawPtr<MutableStylePropertySet> AbstractPropertySetCSSStyleDeclaration::copyProperties() const
+PassRefPtr<MutableStylePropertySet> AbstractPropertySetCSSStyleDeclaration::copyProperties() const
 {
     return propertySet().mutableCopy();
 }

@@ -31,7 +31,7 @@ class Element;
 class RuleSet;
 class StyleSheetContents;
 
-class CSSDefaultStyleSheets : public NoBaseWillBeGarbageCollected<CSSDefaultStyleSheets> {
+class CSSDefaultStyleSheets : public DummyBase<CSSDefaultStyleSheets> {
 public:
     static CSSDefaultStyleSheets& instance();
 
@@ -48,11 +48,11 @@ public:
 private:
     CSSDefaultStyleSheets();
 
-    OwnPtrWillBeMember<RuleSet> m_defaultStyle;
-    OwnPtrWillBeMember<RuleSet> m_defaultViewportStyle;
+    OwnPtr<RuleSet> m_defaultStyle;
+    OwnPtr<RuleSet> m_defaultViewportStyle;
 
-    RefPtrWillBeMember<StyleSheetContents> m_defaultStyleSheet;
-    RefPtrWillBeMember<StyleSheetContents> m_viewportStyleSheet;
+    RefPtr<StyleSheetContents> m_defaultStyleSheet;
+    RefPtr<StyleSheetContents> m_viewportStyleSheet;
 };
 
 } // namespace blink

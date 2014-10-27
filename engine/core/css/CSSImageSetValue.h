@@ -39,9 +39,9 @@ class StyleImage;
 class CSSImageSetValue : public CSSValueList {
 public:
 
-    static PassRefPtrWillBeRawPtr<CSSImageSetValue> create()
+    static PassRefPtr<CSSImageSetValue> create()
     {
-        return adoptRefWillBeNoop(new CSSImageSetValue());
+        return adoptRef(new CSSImageSetValue());
     }
     ~CSSImageSetValue();
 
@@ -63,7 +63,7 @@ public:
 
     bool hasFailedOrCanceledSubresources() const;
 
-    PassRefPtrWillBeRawPtr<CSSImageSetValue> cloneForCSSOM() const;
+    PassRefPtr<CSSImageSetValue> cloneForCSSOM() const;
 
     void traceAfterDispatch(Visitor* visitor) { CSSValueList::traceAfterDispatch(visitor); }
 

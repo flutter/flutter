@@ -45,14 +45,14 @@ struct SameSizeAsElementRareData : NodeRareData {
 CSSStyleDeclaration& ElementRareData::ensureInlineCSSStyleDeclaration(Element* ownerElement)
 {
     if (!m_cssomWrapper)
-        m_cssomWrapper = adoptPtrWillBeNoop(new InlineCSSStyleDeclaration(ownerElement));
+        m_cssomWrapper = adoptPtr(new InlineCSSStyleDeclaration(ownerElement));
     return *m_cssomWrapper;
 }
 
-WillBeHeapVector<RefPtrWillBeMember<Attr> >& ElementRareData::ensureAttrNodeList()
+Vector<RefPtr<Attr> >& ElementRareData::ensureAttrNodeList()
 {
     if (!m_attrNodeList)
-        m_attrNodeList = adoptPtrWillBeNoop(new WillBeHeapVector<RefPtrWillBeMember<Attr> >());
+        m_attrNodeList = adoptPtr(new Vector<RefPtr<Attr> >());
     return *m_attrNodeList;
 }
 

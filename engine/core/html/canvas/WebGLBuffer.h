@@ -38,7 +38,7 @@ class WebGLBuffer final : public WebGLSharedObject, public ScriptWrappable {
 public:
     virtual ~WebGLBuffer();
 
-    static PassRefPtrWillBeRawPtr<WebGLBuffer> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLBuffer> create(WebGLRenderingContextBase*);
 
     GLenum getTarget() const { return m_target; }
     void setTarget(GLenum);

@@ -39,10 +39,10 @@
 
 namespace blink {
 
-class WebHitTestResultPrivate : public RefCountedWillBeGarbageCollectedFinalized<WebHitTestResultPrivate> {
+class WebHitTestResultPrivate : public RefCounted<WebHitTestResultPrivate> {
 public:
-    static PassRefPtrWillBeRawPtr<WebHitTestResultPrivate> create(const HitTestResult&);
-    static PassRefPtrWillBeRawPtr<WebHitTestResultPrivate> create(const WebHitTestResultPrivate&);
+    static PassRefPtr<WebHitTestResultPrivate> create(const HitTestResult&);
+    static PassRefPtr<WebHitTestResultPrivate> create(const WebHitTestResultPrivate&);
     void trace(Visitor* visitor) { visitor->trace(m_result); }
     const HitTestResult& result() const { return m_result; }
 
@@ -63,14 +63,14 @@ inline WebHitTestResultPrivate::WebHitTestResultPrivate(const WebHitTestResultPr
 {
 }
 
-PassRefPtrWillBeRawPtr<WebHitTestResultPrivate> WebHitTestResultPrivate::create(const HitTestResult& result)
+PassRefPtr<WebHitTestResultPrivate> WebHitTestResultPrivate::create(const HitTestResult& result)
 {
-    return adoptRefWillBeNoop(new WebHitTestResultPrivate(result));
+    return adoptRef(new WebHitTestResultPrivate(result));
 }
 
-PassRefPtrWillBeRawPtr<WebHitTestResultPrivate> WebHitTestResultPrivate::create(const WebHitTestResultPrivate& result)
+PassRefPtr<WebHitTestResultPrivate> WebHitTestResultPrivate::create(const WebHitTestResultPrivate& result)
 {
-    return adoptRefWillBeNoop(new WebHitTestResultPrivate(result));
+    return adoptRef(new WebHitTestResultPrivate(result));
 }
 
 WebNode WebHitTestResult::node() const

@@ -43,9 +43,9 @@ class Document;
 class CSSCrossfadeValue : public CSSImageGeneratorValue {
     friend class CrossfadeSubimageObserverProxy;
 public:
-    static PassRefPtrWillBeRawPtr<CSSCrossfadeValue> create(PassRefPtrWillBeRawPtr<CSSValue> fromValue, PassRefPtrWillBeRawPtr<CSSValue> toValue)
+    static PassRefPtr<CSSCrossfadeValue> create(PassRefPtr<CSSValue> fromValue, PassRefPtr<CSSValue> toValue)
     {
-        return adoptRefWillBeNoop(new CSSCrossfadeValue(fromValue, toValue));
+        return adoptRef(new CSSCrossfadeValue(fromValue, toValue));
     }
 
     ~CSSCrossfadeValue();
@@ -61,7 +61,7 @@ public:
 
     void loadSubimages(ResourceFetcher*);
 
-    void setPercentage(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> percentageValue) { m_percentageValue = percentageValue; }
+    void setPercentage(PassRefPtr<CSSPrimitiveValue> percentageValue) { m_percentageValue = percentageValue; }
 
     bool hasFailedOrCanceledSubresources() const;
 
@@ -70,7 +70,7 @@ public:
     void traceAfterDispatch(Visitor*);
 
 private:
-    CSSCrossfadeValue(PassRefPtrWillBeRawPtr<CSSValue> fromValue, PassRefPtrWillBeRawPtr<CSSValue> toValue)
+    CSSCrossfadeValue(PassRefPtr<CSSValue> fromValue, PassRefPtr<CSSValue> toValue)
         : CSSImageGeneratorValue(CrossfadeClass)
         , m_fromValue(fromValue)
         , m_toValue(toValue)
@@ -94,9 +94,9 @@ private:
 
     void crossfadeChanged(const IntRect&);
 
-    RefPtrWillBeMember<CSSValue> m_fromValue;
-    RefPtrWillBeMember<CSSValue> m_toValue;
-    RefPtrWillBeMember<CSSPrimitiveValue> m_percentageValue;
+    RefPtr<CSSValue> m_fromValue;
+    RefPtr<CSSValue> m_toValue;
+    RefPtr<CSSPrimitiveValue> m_percentageValue;
 
     ResourcePtr<ImageResource> m_cachedFromImage;
     ResourcePtr<ImageResource> m_cachedToImage;

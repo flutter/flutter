@@ -82,7 +82,7 @@ typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults
 enum AppendTrailingWhitespace { ShouldAppendTrailingWhitespace, DontAppendTrailingWhitespace };
 enum CheckDragHysteresis { ShouldCheckDragHysteresis, DontCheckDragHysteresis };
 
-class EventHandler : public NoBaseWillBeGarbageCollectedFinalized<EventHandler> {
+class EventHandler : public DummyBase<EventHandler> {
     WTF_MAKE_NONCOPYABLE(EventHandler);
 public:
     explicit EventHandler(LocalFrame*);
@@ -108,7 +108,7 @@ public:
     bool mousePressed() const { return m_mousePressed; }
     void setMousePressed(bool pressed) { m_mousePressed = pressed; }
 
-    void setCapturingMouseEventsNode(PassRefPtrWillBeRawPtr<Node>); // A caller is responsible for resetting capturing node to 0.
+    void setCapturingMouseEventsNode(PassRefPtr<Node>); // A caller is responsible for resetting capturing node to 0.
 
     void scheduleHoverStateUpdate();
     void scheduleCursorUpdate();
@@ -280,7 +280,7 @@ private:
 
     bool m_mousePressed;
     bool m_capturesDragging;
-    RefPtrWillBeMember<Node> m_mousePressNode;
+    RefPtr<Node> m_mousePressNode;
 
     bool m_mouseDownMayStartSelect;
     bool m_mouseDownMayStartDrag;
@@ -299,18 +299,18 @@ private:
 
     RenderLayerScrollableArea* m_resizeScrollableArea;
 
-    RefPtrWillBeMember<Node> m_capturingMouseEventsNode;
+    RefPtr<Node> m_capturingMouseEventsNode;
     bool m_eventHandlerWillResetCapturingMouseEventsNode;
 
-    RefPtrWillBeMember<Node> m_nodeUnderMouse;
-    RefPtrWillBeMember<Node> m_lastNodeUnderMouse;
+    RefPtr<Node> m_nodeUnderMouse;
+    RefPtr<Node> m_lastNodeUnderMouse;
     RefPtr<Scrollbar> m_lastScrollbarUnderMouse;
     Cursor m_currentMouseCursor;
 
     int m_clickCount;
-    RefPtrWillBeMember<Node> m_clickNode;
+    RefPtr<Node> m_clickNode;
 
-    RefPtrWillBeMember<Node> m_dragTarget;
+    RefPtr<Node> m_dragTarget;
     bool m_shouldOnlyFireDragOverEvent;
 
     LayoutSize m_offsetFromResizeCorner; // In the coords of m_resizeScrollableArea.
@@ -323,24 +323,24 @@ private:
     PlatformMouseEvent m_mouseDown;
     RefPtr<UserGestureToken> m_lastMouseDownUserGestureToken;
 
-    RefPtrWillBeMember<Node> m_latchedWheelEventNode;
+    RefPtr<Node> m_latchedWheelEventNode;
     bool m_widgetIsLatched;
 
-    RefPtrWillBeMember<Node> m_previousWheelScrolledNode;
+    RefPtr<Node> m_previousWheelScrolledNode;
 
     // The target of each active touch point indexed by the touch ID.
-    typedef WillBeHeapHashMap<unsigned, RefPtrWillBeMember<EventTarget>, DefaultHash<unsigned>::Hash, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > TouchTargetMap;
+    typedef HashMap<unsigned, RefPtr<EventTarget>, DefaultHash<unsigned>::Hash, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > TouchTargetMap;
     TouchTargetMap m_targetForTouchID;
 
     // If set, the document of the active touch sequence. Unset if no touch sequence active.
-    RefPtrWillBeMember<Document> m_touchSequenceDocument;
+    RefPtr<Document> m_touchSequenceDocument;
     RefPtr<UserGestureToken> m_touchSequenceUserGestureToken;
 
     bool m_touchPressed;
 
-    RefPtrWillBeMember<Node> m_scrollGestureHandlingNode;
+    RefPtr<Node> m_scrollGestureHandlingNode;
     bool m_lastGestureScrollOverWidget;
-    RefPtrWillBeMember<Node> m_previousGestureScrolledNode;
+    RefPtr<Node> m_previousGestureScrolledNode;
     RefPtr<Scrollbar> m_scrollbarHandlingScrollGesture;
 
     double m_maxMouseMovedDuration;
@@ -348,7 +348,7 @@ private:
 
     Timer<EventHandler> m_activeIntervalTimer;
     double m_lastShowPressTimestamp;
-    RefPtrWillBeMember<Element> m_lastDeferredTapElement;
+    RefPtr<Element> m_lastDeferredTapElement;
 };
 
 } // namespace blink

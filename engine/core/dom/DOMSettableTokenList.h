@@ -44,9 +44,9 @@ class DOMSettableTokenList final
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassRefPtrWillBeRawPtr<DOMSettableTokenList> create()
+    static PassRefPtr<DOMSettableTokenList> create()
     {
-        return adoptRefWillBeNoop(new DOMSettableTokenList());
+        return adoptRef(new DOMSettableTokenList());
     }
     virtual ~DOMSettableTokenList();
 

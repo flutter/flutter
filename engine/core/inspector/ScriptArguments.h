@@ -41,10 +41,10 @@ namespace blink {
 
 class ScriptValue;
 
-class ScriptArguments : public RefCountedWillBeGarbageCollectedFinalized<ScriptArguments> {
+class ScriptArguments : public RefCounted<ScriptArguments> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ScriptArguments);
 public:
-    static PassRefPtrWillBeRawPtr<ScriptArguments> create(ScriptState*, Vector<ScriptValue>& arguments);
+    static PassRefPtr<ScriptArguments> create(ScriptState*, Vector<ScriptValue>& arguments);
 
     const ScriptValue& argumentAt(size_t) const;
     size_t argumentCount() const { return m_arguments.size(); }

@@ -54,8 +54,8 @@ private:
 
     AtomicString m_eventType;
     Timer<EventSender<T> > m_timer;
-    WillBePersistentHeapVector<RawPtrWillBeMember<T> > m_dispatchSoonList;
-    WillBePersistentHeapVector<RawPtrWillBeMember<T> > m_dispatchingList;
+    Vector<RawPtr<T> > m_dispatchSoonList;
+    Vector<RawPtr<T> > m_dispatchingList;
 };
 
 template<typename T> EventSender<T>::EventSender(const AtomicString& eventType)

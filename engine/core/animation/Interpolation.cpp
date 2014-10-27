@@ -34,7 +34,7 @@ bool typesMatch(const InterpolableValue* start, const InterpolableValue* end)
 
 }
 
-Interpolation::Interpolation(PassOwnPtrWillBeRawPtr<InterpolableValue> start, PassOwnPtrWillBeRawPtr<InterpolableValue> end)
+Interpolation::Interpolation(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end)
     : m_start(start)
     , m_end(end)
     , m_cachedFraction(0)

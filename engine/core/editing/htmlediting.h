@@ -180,7 +180,7 @@ bool lineBreakExistsAtVisiblePosition(const VisiblePosition&);
 
 int comparePositions(const VisiblePosition&, const VisiblePosition&);
 
-int indexForVisiblePosition(const VisiblePosition&, RefPtrWillBeRawPtr<ContainerNode>& scope);
+int indexForVisiblePosition(const VisiblePosition&, RefPtr<ContainerNode>& scope);
 VisiblePosition visiblePositionForIndex(int index, ContainerNode* scope);
 
 // -------------------------------------------------------------------------
@@ -189,7 +189,7 @@ VisiblePosition visiblePositionForIndex(int index, ContainerNode* scope);
 
 // Functions returning Range
 
-PassRefPtrWillBeRawPtr<Range> createRange(Document&, const VisiblePosition& start, const VisiblePosition& end, ExceptionState&);
+PassRefPtr<Range> createRange(Document&, const VisiblePosition& start, const VisiblePosition& end, ExceptionState&);
 
 // -------------------------------------------------------------------------
 // HTMLElement
@@ -197,9 +197,9 @@ PassRefPtrWillBeRawPtr<Range> createRange(Document&, const VisiblePosition& star
 
 // Functions returning HTMLElement
 
-PassRefPtrWillBeRawPtr<HTMLElement> createDefaultParagraphElement(Document&);
-PassRefPtrWillBeRawPtr<HTMLElement> createHTMLElement(Document&, const QualifiedName&);
-PassRefPtrWillBeRawPtr<HTMLElement> createHTMLElement(Document&, const AtomicString&);
+PassRefPtr<HTMLElement> createDefaultParagraphElement(Document&);
+PassRefPtr<HTMLElement> createHTMLElement(Document&, const QualifiedName&);
+PassRefPtr<HTMLElement> createHTMLElement(Document&, const AtomicString&);
 
 // -------------------------------------------------------------------------
 // Element

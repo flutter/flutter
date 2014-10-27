@@ -15,7 +15,7 @@ class HTMLImportChild;
 
 class HTMLImportTreeRoot : public HTMLImport {
 public:
-    static PassOwnPtrWillBeRawPtr<HTMLImportTreeRoot> create(Document*);
+    static PassOwnPtr<HTMLImportTreeRoot> create(Document*);
 
     virtual ~HTMLImportTreeRoot();
 
@@ -27,7 +27,7 @@ public:
 
     void scheduleRecalcState();
 
-    HTMLImportChild* add(PassOwnPtrWillBeRawPtr<HTMLImportChild>);
+    HTMLImportChild* add(PassOwnPtr<HTMLImportChild>);
     HTMLImportChild* find(const KURL&) const;
 
     virtual void trace(Visitor*) override;
@@ -37,11 +37,11 @@ private:
 
     void recalcTimerFired(Timer<HTMLImportTreeRoot>*);
 
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
     Timer<HTMLImportTreeRoot> m_recalcTimer;
 
     // List of import which has been loaded or being loaded.
-    typedef WillBeHeapVector<OwnPtrWillBeMember<HTMLImportChild> > ImportList;
+    typedef Vector<OwnPtr<HTMLImportChild> > ImportList;
     ImportList m_imports;
 };
 

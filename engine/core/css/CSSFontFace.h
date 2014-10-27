@@ -43,7 +43,7 @@ class RemoteFontFaceSource;
 class SimpleFontData;
 class StyleRuleFontFace;
 
-class CSSFontFace final : public NoBaseWillBeGarbageCollectedFinalized<CSSFontFace> {
+class CSSFontFace final : public DummyBase<CSSFontFace> {
 public:
     struct UnicodeRange;
     class UnicodeRangeSet;
@@ -65,7 +65,7 @@ public:
 
     bool isValid() const { return !m_sources.isEmpty(); }
 
-    void addSource(PassOwnPtrWillBeRawPtr<CSSFontFaceSource>);
+    void addSource(PassOwnPtr<CSSFontFaceSource>);
 
     void didBeginLoad();
     void fontLoaded(RemoteFontFaceSource*);
@@ -116,9 +116,9 @@ private:
     void setLoadStatus(FontFace::LoadStatus);
 
     UnicodeRangeSet m_ranges;
-    RawPtrWillBeMember<CSSSegmentedFontFace> m_segmentedFontFace;
-    WillBeHeapDeque<OwnPtrWillBeMember<CSSFontFaceSource> > m_sources;
-    RawPtrWillBeMember<FontFace> m_fontFace;
+    RawPtr<CSSSegmentedFontFace> m_segmentedFontFace;
+    Deque<OwnPtr<CSSFontFaceSource> > m_sources;
+    RawPtr<FontFace> m_fontFace;
 };
 
 }

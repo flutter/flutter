@@ -94,7 +94,7 @@ class KURL;
 
 // The superclass of HTMLImportTreeRoot and HTMLImportChild
 // This represents the import tree data structure.
-class HTMLImport : public NoBaseWillBeGarbageCollectedFinalized<HTMLImport>, public TreeNode<HTMLImport> {
+class HTMLImport : public DummyBase<HTMLImport>, public TreeNode<HTMLImport> {
 public:
     enum SyncMode {
         Sync  = 0,

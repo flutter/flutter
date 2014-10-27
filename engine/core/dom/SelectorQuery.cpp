@@ -52,9 +52,9 @@ bool SelectorQuery::matches(Element& element) const
     return selectorMatches(element, element);
 }
 
-PassRefPtrWillBeRawPtr<StaticElementList> SelectorQuery::queryAll(ContainerNode& rootNode) const
+PassRefPtr<StaticElementList> SelectorQuery::queryAll(ContainerNode& rootNode) const
 {
-    WillBeHeapVector<RefPtrWillBeMember<Element> > result;
+    Vector<RefPtr<Element> > result;
     for (Element* element = ElementTraversal::firstWithin(rootNode); element; element = ElementTraversal::next(*element, &rootNode)) {
         if (selectorMatches(rootNode, *element))
             result.append(element);
@@ -62,7 +62,7 @@ PassRefPtrWillBeRawPtr<StaticElementList> SelectorQuery::queryAll(ContainerNode&
     return StaticElementList::adopt(result);
 }
 
-PassRefPtrWillBeRawPtr<Element> SelectorQuery::queryFirst(ContainerNode& rootNode) const
+PassRefPtr<Element> SelectorQuery::queryFirst(ContainerNode& rootNode) const
 {
     for (Element* element = ElementTraversal::firstWithin(rootNode); element; element = ElementTraversal::next(*element, &rootNode)) {
         if (selectorMatches(rootNode, *element))

@@ -44,24 +44,24 @@ typedef StaticNodeTypeList<Node> StaticNodeList;
 class TouchEventContext;
 class TreeScope;
 
-class TreeScopeEventContext final : public RefCountedWillBeGarbageCollected<TreeScopeEventContext> {
+class TreeScopeEventContext final : public RefCounted<TreeScopeEventContext> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(TreeScopeEventContext);
 public:
-    static PassRefPtrWillBeRawPtr<TreeScopeEventContext> create(TreeScope&);
+    static PassRefPtr<TreeScopeEventContext> create(TreeScope&);
     void trace(Visitor*);
 
     TreeScope& treeScope() const { return *m_treeScope; }
 
     EventTarget* target() const { return m_target.get(); }
-    void setTarget(PassRefPtrWillBeRawPtr<EventTarget>);
+    void setTarget(PassRefPtr<EventTarget>);
 
     EventTarget* relatedTarget() const { return m_relatedTarget.get(); }
-    void setRelatedTarget(PassRefPtrWillBeRawPtr<EventTarget>);
+    void setRelatedTarget(PassRefPtr<EventTarget>);
 
     TouchEventContext* touchEventContext() const { return m_touchEventContext.get(); }
     TouchEventContext* ensureTouchEventContext();
 
-    PassRefPtrWillBeRawPtr<StaticNodeList> ensureEventPath(EventPath&);
+    PassRefPtr<StaticNodeList> ensureEventPath(EventPath&);
 
     bool isInclusiveAncestorOf(const TreeScopeEventContext&);
     void addChild(TreeScopeEventContext& child) { m_children.append(&child); }
@@ -77,13 +77,13 @@ private:
     bool isUnreachableNode(EventTarget&);
 #endif
 
-    RawPtrWillBeMember<TreeScope> m_treeScope;
-    RefPtrWillBeMember<EventTarget> m_target;
-    RefPtrWillBeMember<EventTarget> m_relatedTarget;
-    RefPtrWillBeMember<StaticNodeList> m_eventPath;
-    RefPtrWillBeMember<TouchEventContext> m_touchEventContext;
+    RawPtr<TreeScope> m_treeScope;
+    RefPtr<EventTarget> m_target;
+    RefPtr<EventTarget> m_relatedTarget;
+    RefPtr<StaticNodeList> m_eventPath;
+    RefPtr<TouchEventContext> m_touchEventContext;
 
-    WillBeHeapVector<RawPtrWillBeMember<TreeScopeEventContext> > m_children;
+    Vector<RawPtr<TreeScopeEventContext> > m_children;
     int m_preOrder;
     int m_postOrder;
 };
@@ -96,14 +96,14 @@ inline bool TreeScopeEventContext::isUnreachableNode(EventTarget& target)
 }
 #endif
 
-inline void TreeScopeEventContext::setTarget(PassRefPtrWillBeRawPtr<EventTarget> target)
+inline void TreeScopeEventContext::setTarget(PassRefPtr<EventTarget> target)
 {
     ASSERT(target);
     ASSERT(!isUnreachableNode(*target));
     m_target = target;
 }
 
-inline void TreeScopeEventContext::setRelatedTarget(PassRefPtrWillBeRawPtr<EventTarget> relatedTarget)
+inline void TreeScopeEventContext::setRelatedTarget(PassRefPtr<EventTarget> relatedTarget)
 {
     ASSERT(relatedTarget);
     ASSERT(!isUnreachableNode(*relatedTarget));

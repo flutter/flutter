@@ -50,7 +50,7 @@ public:
 
 private:
     void detachNonDistributedNodes();
-    WillBeHeapVector<RawPtrWillBeMember<Node>, 32> m_nodes;
+    Vector<RawPtr<Node>, 32> m_nodes;
     Vector<bool, 32> m_distributed;
 };
 
@@ -124,9 +124,9 @@ inline void DistributionPool::detachNonDistributedNodes()
     }
 }
 
-PassOwnPtrWillBeRawPtr<ElementShadow> ElementShadow::create()
+PassOwnPtr<ElementShadow> ElementShadow::create()
 {
-    return adoptPtrWillBeNoop(new ElementShadow());
+    return adoptPtr(new ElementShadow());
 }
 
 ElementShadow::ElementShadow()
@@ -150,7 +150,7 @@ ShadowRoot& ElementShadow::addShadowRoot(Element& shadowHost)
     for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot())
         root->lazyReattachIfAttached();
 
-    RefPtrWillBeRawPtr<ShadowRoot> shadowRoot = ShadowRoot::create(shadowHost.document());
+    RefPtr<ShadowRoot> shadowRoot = ShadowRoot::create(shadowHost.document());
     shadowRoot->setParentOrShadowHostNode(&shadowHost);
     shadowRoot->setParentTreeScope(shadowHost.treeScope());
     m_shadowRoots.push(shadowRoot.get());
@@ -168,7 +168,7 @@ void ElementShadow::removeDetachedShadowRoots()
     Element* shadowHost = host();
     ASSERT(shadowHost);
 
-    while (RefPtrWillBeRawPtr<ShadowRoot> oldRoot = m_shadowRoots.head()) {
+    while (RefPtr<ShadowRoot> oldRoot = m_shadowRoots.head()) {
         shadowHost->document().removeFocusedElementOfSubtree(oldRoot.get());
         m_shadowRoots.removeHead();
         oldRoot->setParentOrShadowHostNode(0);
@@ -250,12 +250,12 @@ const DestinationInsertionPoints* ElementShadow::destinationInsertionPointsFor(c
 void ElementShadow::distribute()
 {
     host()->setNeedsStyleRecalc(SubtreeStyleChange);
-    WillBeHeapVector<RawPtrWillBeMember<HTMLShadowElement>, 32> shadowInsertionPoints;
+    Vector<RawPtr<HTMLShadowElement>, 32> shadowInsertionPoints;
     DistributionPool pool(*host());
 
     for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
         HTMLShadowElement* shadowInsertionPoint = 0;
-        const WillBeHeapVector<RefPtrWillBeMember<InsertionPoint> >& insertionPoints = root->descendantInsertionPoints();
+        const Vector<RefPtr<InsertionPoint> >& insertionPoints = root->descendantInsertionPoints();
         for (size_t i = 0; i < insertionPoints.size(); ++i) {
             InsertionPoint* point = insertionPoints[i].get();
             if (!point->isActive())

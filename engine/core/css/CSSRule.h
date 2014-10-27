@@ -34,7 +34,7 @@ class CSSParserContext;
 class CSSStyleSheet;
 class StyleRuleBase;
 
-class CSSRule : public RefCountedWillBeGarbageCollectedFinalized<CSSRule>, public ScriptWrappableBase {
+class CSSRule : public RefCounted<CSSRule>, public ScriptWrappableBase {
 public:
     virtual ~CSSRule() { }
 

@@ -41,9 +41,9 @@ class RenderStyle;
 
 class CSSAnimatableValueFactory {
 public:
-    static PassRefPtrWillBeRawPtr<AnimatableValue> create(CSSPropertyID, const RenderStyle&);
+    static PassRefPtr<AnimatableValue> create(CSSPropertyID, const RenderStyle&);
 private:
-    static PassRefPtrWillBeRawPtr<AnimatableValue> createFromColor(CSSPropertyID, const RenderStyle&);
+    static PassRefPtr<AnimatableValue> createFromColor(CSSPropertyID, const RenderStyle&);
 };
 
 } // namespace blink

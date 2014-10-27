@@ -87,7 +87,7 @@ private:
     OwnPtr<WebLayer> m_clipLayer;
     Path m_path;
 
-    RefPtrWillBePersistent<Node> m_node;
+    RefPtr<Node> m_node;
     WebViewImpl* m_owningWebViewImpl;
     GraphicsLayer* m_currentGraphicsLayer;
 

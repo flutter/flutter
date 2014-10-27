@@ -34,7 +34,7 @@
 
 namespace blink {
 
-SplitElementCommand::SplitElementCommand(PassRefPtrWillBeRawPtr<Element> element, PassRefPtrWillBeRawPtr<Node> atChild)
+SplitElementCommand::SplitElementCommand(PassRefPtr<Element> element, PassRefPtr<Node> atChild)
     : SimpleEditCommand(element->document())
     , m_element2(element)
     , m_atChild(atChild)
@@ -49,7 +49,7 @@ void SplitElementCommand::executeApply()
     if (m_atChild->parentNode() != m_element2)
         return;
 
-    WillBeHeapVector<RefPtrWillBeMember<Node> > children;
+    Vector<RefPtr<Node> > children;
     for (Node* node = m_element2->firstChild(); node != m_atChild; node = node->nextSibling())
         children.append(node);
 
@@ -85,7 +85,7 @@ void SplitElementCommand::doUnapply()
     NodeVector children;
     getChildNodes(*m_element1, children);
 
-    RefPtrWillBeRawPtr<Node> refChild = m_element2->firstChild();
+    RefPtr<Node> refChild = m_element2->firstChild();
 
     size_t size = children.size();
     for (size_t i = 0; i < size; ++i)

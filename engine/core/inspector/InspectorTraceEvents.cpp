@@ -32,7 +32,7 @@ namespace {
 
 class JSCallStack : public TraceEvent::ConvertableToTraceFormat  {
 public:
-    explicit JSCallStack(PassRefPtrWillBeRawPtr<ScriptCallStack> callstack)
+    explicit JSCallStack(PassRefPtr<ScriptCallStack> callstack)
     {
         ASSERT(m_serialized.isSafeToSendToAnotherThread());
     }

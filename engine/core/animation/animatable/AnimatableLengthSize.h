@@ -38,9 +38,9 @@ namespace blink {
 class AnimatableLengthSize final : public AnimatableValue {
 public:
     virtual ~AnimatableLengthSize() { }
-    static PassRefPtrWillBeRawPtr<AnimatableLengthSize> create(PassRefPtrWillBeRawPtr<AnimatableValue> width, PassRefPtrWillBeRawPtr<AnimatableValue> height)
+    static PassRefPtr<AnimatableLengthSize> create(PassRefPtr<AnimatableValue> width, PassRefPtr<AnimatableValue> height)
     {
-        return adoptRefWillBeNoop(new AnimatableLengthSize(width, height));
+        return adoptRef(new AnimatableLengthSize(width, height));
     }
     const AnimatableValue* width() const { return m_width.get(); }
     const AnimatableValue* height() const { return m_height.get(); }
@@ -48,10 +48,10 @@ public:
     virtual void trace(Visitor*) override;
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
-    AnimatableLengthSize(PassRefPtrWillBeRawPtr<AnimatableValue> width, PassRefPtrWillBeRawPtr<AnimatableValue> height)
+    AnimatableLengthSize(PassRefPtr<AnimatableValue> width, PassRefPtr<AnimatableValue> height)
         : m_width(width)
         , m_height(height)
     {
@@ -59,8 +59,8 @@ private:
     virtual AnimatableType type() const override { return TypeLengthSize; }
     virtual bool equalTo(const AnimatableValue*) const override;
 
-    RefPtrWillBeMember<AnimatableValue> m_width;
-    RefPtrWillBeMember<AnimatableValue> m_height;
+    RefPtr<AnimatableValue> m_width;
+    RefPtr<AnimatableValue> m_height;
 };
 
 DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableLengthSize, isLengthSize());

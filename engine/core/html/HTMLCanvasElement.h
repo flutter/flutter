@@ -57,7 +57,7 @@ class ImageBuffer;
 class ImageBufferSurface;
 class IntSize;
 
-class CanvasObserver : public WillBeGarbageCollectedMixin {
+class CanvasObserver : public DummyBase<void> {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(CanvasObserver);
 public:
     virtual void canvasChanged(HTMLCanvasElement*, const FloatRect& changedRect) = 0;
@@ -122,7 +122,7 @@ public:
     ImageBuffer* buffer() const;
     Image* copiedImage() const;
     void clearCopiedImage();
-    PassRefPtrWillBeRawPtr<ImageData> getImageData() const;
+    PassRefPtr<ImageData> getImageData() const;
     void makePresentationCopy();
     void clearPresentationCopy();
 
@@ -180,11 +180,11 @@ private:
 
     String toDataURLInternal(const String& mimeType, const double* quality, bool isSaving = false) const;
 
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CanvasObserver> > m_observers;
+    HashSet<RawPtr<CanvasObserver> > m_observers;
 
     IntSize m_size;
 
-    OwnPtrWillBeMember<CanvasRenderingContext> m_context;
+    OwnPtr<CanvasRenderingContext> m_context;
 
     bool m_ignoreReset;
     bool m_accelerationDisabled;

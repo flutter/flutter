@@ -75,19 +75,19 @@ public:
     private:
         explicit LegacyEditingOffset(int offset) : m_offset(offset) { }
 
-        friend Position createLegacyEditingPosition(PassRefPtrWillBeRawPtr<Node>, int offset);
+        friend Position createLegacyEditingPosition(PassRefPtr<Node>, int offset);
 
         int m_offset;
     };
-    Position(PassRefPtrWillBeRawPtr<Node> anchorNode, LegacyEditingOffset);
+    Position(PassRefPtr<Node> anchorNode, LegacyEditingOffset);
 
     // For creating before/after positions:
-    Position(PassRefPtrWillBeRawPtr<Node> anchorNode, AnchorType);
-    Position(PassRefPtrWillBeRawPtr<Text> textNode, unsigned offset);
+    Position(PassRefPtr<Node> anchorNode, AnchorType);
+    Position(PassRefPtr<Text> textNode, unsigned offset);
 
     // For creating offset positions:
     // FIXME: This constructor should eventually go away. See bug 63040.
-    Position(PassRefPtrWillBeRawPtr<Node> anchorNode, int offset, AnchorType);
+    Position(PassRefPtr<Node> anchorNode, int offset, AnchorType);
 
     AnchorType anchorType() const { return static_cast<AnchorType>(m_anchorType); }
 
@@ -137,7 +137,7 @@ public:
 
     // These should only be used for PositionIsOffsetInAnchor positions, unless
     // the position is a legacy editing position.
-    void moveToPosition(PassRefPtrWillBeRawPtr<Node> anchorNode, int offset);
+    void moveToPosition(PassRefPtr<Node> anchorNode, int offset);
     void moveToOffset(int offset);
 
     bool isNull() const { return !m_anchorNode; }
@@ -145,7 +145,7 @@ public:
     bool isOrphan() const { return m_anchorNode && !m_anchorNode->inDocument(); }
 
     Element* element() const;
-    PassRefPtrWillBeRawPtr<CSSComputedStyleDeclaration> computedStyle() const;
+    PassRefPtr<CSSComputedStyleDeclaration> computedStyle() const;
 
     // Move up or down the DOM by one position.
     // Offsets are computed using render text for nodes that have renderers - but note that even when
@@ -207,7 +207,7 @@ private:
 
     static AnchorType anchorTypeForLegacyEditingPosition(Node* anchorNode, int offset);
 
-    RefPtrWillBeMember<Node> m_anchorNode;
+    RefPtr<Node> m_anchorNode;
     // m_offset can be the offset inside m_anchorNode, or if editingIgnoresContent(m_anchorNode)
     // returns true, then other places in editing will treat m_offset == 0 as "before the anchor"
     // and m_offset > 0 as "after the anchor node".  See parentAnchoredEquivalent for more info.
@@ -216,7 +216,7 @@ private:
     bool m_isLegacyEditingPosition : 1;
 };
 
-inline Position createLegacyEditingPosition(PassRefPtrWillBeRawPtr<Node> node, int offset)
+inline Position createLegacyEditingPosition(PassRefPtr<Node> node, int offset)
 {
     return Position(node, Position::LegacyEditingOffset(offset));
 }

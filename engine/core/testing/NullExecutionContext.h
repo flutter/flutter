@@ -13,7 +13,7 @@
 
 namespace blink {
 
-class NullExecutionContext final : public RefCountedWillBeGarbageCollectedFinalized<NullExecutionContext>, public ExecutionContext {
+class NullExecutionContext final : public RefCounted<NullExecutionContext>, public ExecutionContext {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(NullExecutionContext);
 public:
     NullExecutionContext();
@@ -41,7 +41,7 @@ protected:
     virtual KURL virtualCompleteURL(const String&) const override { return m_dummyURL; }
 
 private:
-    OwnPtrWillBeMember<EventQueue> m_queue;
+    OwnPtr<EventQueue> m_queue;
 
     KURL m_dummyURL;
 };

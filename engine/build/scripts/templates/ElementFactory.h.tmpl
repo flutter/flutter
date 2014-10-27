@@ -15,7 +15,7 @@ class {{namespace}}Element;
 
 class {{namespace}}ElementFactory {
 public:
-    static PassRefPtrWillBeRawPtr<{{namespace}}Element> create{{namespace}}Element(
+    static PassRefPtr<{{namespace}}Element> create{{namespace}}Element(
         const AtomicString& localName,
         Document&,
         bool createdByParser = true);

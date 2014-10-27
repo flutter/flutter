@@ -74,22 +74,22 @@ public:
     SourceRange range;
 };
 
-struct CSSStyleSourceData : public RefCountedWillBeGarbageCollected<CSSStyleSourceData> {
-    static PassRefPtrWillBeRawPtr<CSSStyleSourceData> create()
+struct CSSStyleSourceData : public RefCounted<CSSStyleSourceData> {
+    static PassRefPtr<CSSStyleSourceData> create()
     {
-        return adoptRefWillBeNoop(new CSSStyleSourceData());
+        return adoptRef(new CSSStyleSourceData());
     }
 
     void trace(Visitor* visitor) { visitor->trace(propertyData); }
 
-    WillBeHeapVector<CSSPropertySourceData> propertyData;
+    Vector<CSSPropertySourceData> propertyData;
 };
 
 struct CSSRuleSourceData;
-typedef WillBeHeapVector<RefPtrWillBeMember<CSSRuleSourceData> > RuleSourceDataList;
-typedef WillBeHeapVector<SourceRange> SelectorRangeList;
+typedef Vector<RefPtr<CSSRuleSourceData> > RuleSourceDataList;
+typedef Vector<SourceRange> SelectorRangeList;
 
-struct CSSRuleSourceData : public RefCountedWillBeGarbageCollected<CSSRuleSourceData> {
+struct CSSRuleSourceData : public RefCounted<CSSRuleSourceData> {
     enum Type {
         UNKNOWN_RULE = 0,
         STYLE_RULE = 1,
@@ -100,14 +100,14 @@ struct CSSRuleSourceData : public RefCountedWillBeGarbageCollected<CSSRuleSource
         FILTER_RULE = 9
     };
 
-    static PassRefPtrWillBeRawPtr<CSSRuleSourceData> create(Type type)
+    static PassRefPtr<CSSRuleSourceData> create(Type type)
     {
-        return adoptRefWillBeNoop(new CSSRuleSourceData(type));
+        return adoptRef(new CSSRuleSourceData(type));
     }
 
-    static PassRefPtrWillBeRawPtr<CSSRuleSourceData> createUnknown()
+    static PassRefPtr<CSSRuleSourceData> createUnknown()
     {
-        return adoptRefWillBeNoop(new CSSRuleSourceData(UNKNOWN_RULE));
+        return adoptRef(new CSSRuleSourceData(UNKNOWN_RULE));
     }
 
     CSSRuleSourceData(Type type)
@@ -131,7 +131,7 @@ struct CSSRuleSourceData : public RefCountedWillBeGarbageCollected<CSSRuleSource
     SelectorRangeList selectorRanges;
 
     // Only for CSSStyleRules, CSSFontFaceRules.
-    RefPtrWillBeMember<CSSStyleSourceData> styleSourceData;
+    RefPtr<CSSStyleSourceData> styleSourceData;
 
     // Only for CSSMediaRules.
     RuleSourceDataList childRules;

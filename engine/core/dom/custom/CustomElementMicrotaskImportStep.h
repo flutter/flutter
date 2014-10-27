@@ -53,7 +53,7 @@ class HTMLImportChild;
 class CustomElementMicrotaskImportStep : public CustomElementMicrotaskStep {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskImportStep);
 public:
-    static PassOwnPtrWillBeRawPtr<CustomElementMicrotaskImportStep> create(HTMLImportChild*);
+    static PassOwnPtr<CustomElementMicrotaskImportStep> create(HTMLImportChild*);
     virtual ~CustomElementMicrotaskImportStep();
 
     // API for HTML Imports
@@ -74,11 +74,11 @@ private:
     // CustomElementMicrotaskStep
     virtual Result process() override final;
 
-    WeakPtrWillBeWeakMember<HTMLImportChild> m_import;
+    WeakPtr<HTMLImportChild> m_import;
 #if !ENABLE(OILPAN)
     WeakPtrFactory<CustomElementMicrotaskImportStep> m_weakFactory;
 #endif
-    RefPtrWillBeMember<CustomElementSyncMicrotaskQueue> m_queue;
+    RefPtr<CustomElementSyncMicrotaskQueue> m_queue;
 };
 
 }

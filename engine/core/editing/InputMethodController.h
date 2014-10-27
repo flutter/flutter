@@ -66,7 +66,7 @@ public:
     // Deletes the existing composition text.
     void cancelComposition();
     void cancelCompositionIfSelectionIsInvalid();
-    PassRefPtrWillBeRawPtr<Range> compositionRange() const;
+    PassRefPtr<Range> compositionRange() const;
 
     // getting international text input composition state (for use by InlineTextBox)
     Text* compositionNode() const { return m_compositionNode.get(); }
@@ -95,7 +95,7 @@ private:
     friend class SelectionOffsetsScope;
 
     LocalFrame& m_frame;
-    RefPtrWillBePersistent<Text> m_compositionNode;
+    RefPtr<Text> m_compositionNode;
     // We don't use PlainTextRange which is immutable, for composition range.
     unsigned m_compositionStart;
     unsigned m_compositionEnd;

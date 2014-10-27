@@ -63,22 +63,22 @@ class ImageBitmap;
 class ImageData;
 class TextMetrics;
 
-typedef WillBeHeapHashMap<String, RefPtrWillBeMember<MutableStylePropertySet> > MutableStylePropertyMap;
+typedef HashMap<String, RefPtr<MutableStylePropertySet> > MutableStylePropertyMap;
 
 class CanvasRenderingContext2D final: public CanvasRenderingContext, public ScriptWrappable, public CanvasPathMethods {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassOwnPtrWillBeRawPtr<CanvasRenderingContext2D> create(HTMLCanvasElement* canvas, const Canvas2DContextAttributes* attrs)
+    static PassOwnPtr<CanvasRenderingContext2D> create(HTMLCanvasElement* canvas, const Canvas2DContextAttributes* attrs)
     {
-        return adoptPtrWillBeNoop(new CanvasRenderingContext2D(canvas, attrs));
+        return adoptPtr(new CanvasRenderingContext2D(canvas, attrs));
     }
     virtual ~CanvasRenderingContext2D();
 
     CanvasStyle* strokeStyle() const;
-    void setStrokeStyle(PassRefPtrWillBeRawPtr<CanvasStyle>);
+    void setStrokeStyle(PassRefPtr<CanvasStyle>);
 
     CanvasStyle* fillStyle() const;
-    void setFillStyle(PassRefPtrWillBeRawPtr<CanvasStyle>);
+    void setFillStyle(PassRefPtr<CanvasStyle>);
 
     float lineWidth() const;
     void setLineWidth(float);
@@ -184,13 +184,13 @@ public:
 
     void setCompositeOperation(const String&);
 
-    PassRefPtrWillBeRawPtr<CanvasGradient> createLinearGradient(float x0, float y0, float x1, float y1);
-    PassRefPtrWillBeRawPtr<CanvasGradient> createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1, ExceptionState&);
-    PassRefPtrWillBeRawPtr<CanvasPattern> createPattern(CanvasImageSource*, const String& repetitionType, ExceptionState&);
+    PassRefPtr<CanvasGradient> createLinearGradient(float x0, float y0, float x1, float y1);
+    PassRefPtr<CanvasGradient> createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1, ExceptionState&);
+    PassRefPtr<CanvasPattern> createPattern(CanvasImageSource*, const String& repetitionType, ExceptionState&);
 
-    PassRefPtrWillBeRawPtr<ImageData> createImageData(PassRefPtrWillBeRawPtr<ImageData>) const;
-    PassRefPtrWillBeRawPtr<ImageData> createImageData(float width, float height, ExceptionState&) const;
-    PassRefPtrWillBeRawPtr<ImageData> getImageData(float sx, float sy, float sw, float sh, ExceptionState&) const;
+    PassRefPtr<ImageData> createImageData(PassRefPtr<ImageData>) const;
+    PassRefPtr<ImageData> createImageData(float width, float height, ExceptionState&) const;
+    PassRefPtr<ImageData> getImageData(float sx, float sy, float sw, float sh, ExceptionState&) const;
     void putImageData(ImageData*, float dx, float dy);
     void putImageData(ImageData*, float dx, float dy, float dirtyX, float dirtyY, float dirtyWidth, float dirtyHeight);
 
@@ -212,7 +212,7 @@ public:
     void fillText(const String& text, float x, float y, float maxWidth);
     void strokeText(const String& text, float x, float y);
     void strokeText(const String& text, float x, float y, float maxWidth);
-    PassRefPtrWillBeRawPtr<TextMetrics> measureText(const String& text);
+    PassRefPtr<TextMetrics> measureText(const String& text);
 
     LineCap getLineCap() const { return state().m_lineCap; }
     LineJoin getLineJoin() const { return state().m_lineJoin; }
@@ -220,7 +220,7 @@ public:
     bool imageSmoothingEnabled() const;
     void setImageSmoothingEnabled(bool);
 
-    PassRefPtrWillBeRawPtr<Canvas2DContextAttributes> getContextAttributes() const;
+    PassRefPtr<Canvas2DContextAttributes> getContextAttributes() const;
 
     void drawFocusIfNeeded(Element*);
     void drawFocusIfNeeded(Path2D*, Element*);
@@ -261,8 +261,8 @@ private:
 
         String m_unparsedStrokeColor;
         String m_unparsedFillColor;
-        RefPtrWillBeMember<CanvasStyle> m_strokeStyle;
-        RefPtrWillBeMember<CanvasStyle> m_fillStyle;
+        RefPtr<CanvasStyle> m_strokeStyle;
+        RefPtr<CanvasStyle> m_fillStyle;
         float m_lineWidth;
         LineCap m_lineCap;
         LineJoin m_lineJoin;
@@ -362,8 +362,8 @@ private:
     virtual blink::WebLayer* platformLayer() const override;
     TextDirection toTextDirection(Direction, RenderStyle** computedStyle = nullptr) const;
 
-    WillBeHeapVector<OwnPtrWillBeMember<State> > m_stateStack;
-    OwnPtrWillBeMember<HitRegionManager> m_hitRegionManager;
+    Vector<OwnPtr<State> > m_stateStack;
+    OwnPtr<HitRegionManager> m_hitRegionManager;
     bool m_hasAlpha;
     bool m_isContextLost;
     bool m_contextRestorable;

@@ -44,7 +44,7 @@ public:
 
     virtual bool canAffectSelector() const override { return true; }
 
-    bool canSelectNode(const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth) const;
+    bool canSelectNode(const Vector<RawPtr<Node>, 32>& siblings, int nth) const;
 
     const CSSSelectorList& selectorList() const;
     bool isSelectValid() const;
@@ -57,7 +57,7 @@ private:
     bool validateSelect() const;
     void parseSelect();
 
-    bool matchSelector(const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth) const;
+    bool matchSelector(const Vector<RawPtr<Node>, 32>& siblings, int nth) const;
 
     bool m_shouldParseSelect;
     bool m_isValidSelector;
@@ -79,7 +79,7 @@ inline bool HTMLContentElement::isSelectValid() const
     return m_isValidSelector;
 }
 
-inline bool HTMLContentElement::canSelectNode(const WillBeHeapVector<RawPtrWillBeMember<Node>, 32>& siblings, int nth) const
+inline bool HTMLContentElement::canSelectNode(const Vector<RawPtr<Node>, 32>& siblings, int nth) const
 {
     if (m_select.isNull() || m_select.isEmpty())
         return true;

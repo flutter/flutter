@@ -40,9 +40,9 @@ typedef unsigned LineBoxContain;
 // Used for text-CSSLineBoxContain and box-CSSLineBoxContain
 class CSSLineBoxContainValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSLineBoxContainValue> create(LineBoxContain value)
+    static PassRefPtr<CSSLineBoxContainValue> create(LineBoxContain value)
     {
-        return adoptRefWillBeNoop(new CSSLineBoxContainValue(value));
+        return adoptRef(new CSSLineBoxContainValue(value));
     }
 
     String customCSSText() const;

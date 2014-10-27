@@ -97,7 +97,7 @@ CanvasRenderingContext2D::CanvasRenderingContext2D(HTMLCanvasElement* canvas, co
     , m_dispatchContextRestoredEventTimer(this, &CanvasRenderingContext2D::dispatchContextRestoredEvent)
     , m_tryRestoreContextEventTimer(this, &CanvasRenderingContext2D::tryRestoreContextEvent)
 {
-    m_stateStack.append(adoptPtrWillBeNoop(new State()));
+    m_stateStack.append(adoptPtr(new State()));
     ScriptWrappable::init(this);
 }
 
@@ -177,7 +177,7 @@ void CanvasRenderingContext2D::trace(Visitor* visitor)
 void CanvasRenderingContext2D::dispatchContextLostEvent(Timer<CanvasRenderingContext2D>*)
 {
     if (contextLostRestoredEventsEnabled()) {
-        RefPtrWillBeRawPtr<Event> event = Event::createCancelable(EventTypeNames::contextlost);
+        RefPtr<Event> event = Event::createCancelable(EventTypeNames::contextlost);
         canvas()->dispatchEvent(event);
         if (event->defaultPrevented()) {
             m_contextRestorable = false;
@@ -222,7 +222,7 @@ void CanvasRenderingContext2D::dispatchContextRestoredEvent(Timer<CanvasRenderin
     reset();
     m_isContextLost = false;
     if (contextLostRestoredEventsEnabled()) {
-        RefPtrWillBeRawPtr<Event> event(Event::create(EventTypeNames::contextrestored));
+        RefPtr<Event> event(Event::create(EventTypeNames::contextrestored));
         canvas()->dispatchEvent(event);
     }
 }
@@ -232,7 +232,7 @@ void CanvasRenderingContext2D::reset()
     validateStateStack();
     unwindStateStack();
     m_stateStack.resize(1);
-    m_stateStack.first() = adoptPtrWillBeNoop(new State());
+    m_stateStack.first() = adoptPtr(new State());
     m_path.clear();
     validateStateStack();
 }
@@ -372,7 +372,7 @@ void CanvasRenderingContext2D::realizeSaves(GraphicsContext* context)
         // Reduce the current state's unrealized count by one now,
         // to reflect the fact we are saving one state.
         m_stateStack.last()->m_unrealizedSaveCount--;
-        m_stateStack.append(adoptPtrWillBeNoop(new State(state())));
+        m_stateStack.append(adoptPtr(new State(state())));
         // Set the new state's unrealized count to 0, because it has no outstanding saves.
         // We need to do this explicitly because the copy constructor and operator= used
         // by the Vector operations copy the unrealized count from the previous state (in
@@ -411,9 +411,9 @@ CanvasStyle* CanvasRenderingContext2D::strokeStyle() const
     return state().m_strokeStyle.get();
 }
 
-void CanvasRenderingContext2D::setStrokeStyle(PassRefPtrWillBeRawPtr<CanvasStyle> prpStyle)
+void CanvasRenderingContext2D::setStrokeStyle(PassRefPtr<CanvasStyle> prpStyle)
 {
-    RefPtrWillBeRawPtr<CanvasStyle> style = prpStyle;
+    RefPtr<CanvasStyle> style = prpStyle;
 
     if (!style)
         return;
@@ -442,9 +442,9 @@ CanvasStyle* CanvasRenderingContext2D::fillStyle() const
     return state().m_fillStyle.get();
 }
 
-void CanvasRenderingContext2D::setFillStyle(PassRefPtrWillBeRawPtr<CanvasStyle> prpStyle)
+void CanvasRenderingContext2D::setFillStyle(PassRefPtr<CanvasStyle> prpStyle)
 {
-    RefPtrWillBeRawPtr<CanvasStyle> style = prpStyle;
+    RefPtr<CanvasStyle> style = prpStyle;
 
     if (!style)
         return;
@@ -1658,24 +1658,24 @@ template<class T> void CanvasRenderingContext2D::fullCanvasCompositedStroke(cons
     c->endLayer();
 }
 
-PassRefPtrWillBeRawPtr<CanvasGradient> CanvasRenderingContext2D::createLinearGradient(float x0, float y0, float x1, float y1)
+PassRefPtr<CanvasGradient> CanvasRenderingContext2D::createLinearGradient(float x0, float y0, float x1, float y1)
 {
-    RefPtrWillBeRawPtr<CanvasGradient> gradient = CanvasGradient::create(FloatPoint(x0, y0), FloatPoint(x1, y1));
+    RefPtr<CanvasGradient> gradient = CanvasGradient::create(FloatPoint(x0, y0), FloatPoint(x1, y1));
     return gradient.release();
 }
 
-PassRefPtrWillBeRawPtr<CanvasGradient> CanvasRenderingContext2D::createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1, ExceptionState& exceptionState)
+PassRefPtr<CanvasGradient> CanvasRenderingContext2D::createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1, ExceptionState& exceptionState)
 {
     if (r0 < 0 || r1 < 0) {
         exceptionState.throwDOMException(IndexSizeError, String::format("The %s provided is less than 0.", r0 < 0 ? "r0" : "r1"));
         return nullptr;
     }
 
-    RefPtrWillBeRawPtr<CanvasGradient> gradient = CanvasGradient::create(FloatPoint(x0, y0), r0, FloatPoint(x1, y1), r1);
+    RefPtr<CanvasGradient> gradient = CanvasGradient::create(FloatPoint(x0, y0), r0, FloatPoint(x1, y1), r1);
     return gradient.release();
 }
 
-PassRefPtrWillBeRawPtr<CanvasPattern> CanvasRenderingContext2D::createPattern(CanvasImageSource* imageSource,
+PassRefPtr<CanvasPattern> CanvasRenderingContext2D::createPattern(CanvasImageSource* imageSource,
     const String& repetitionType, ExceptionState& exceptionState)
 {
     Pattern::RepeatMode repeatMode = CanvasPattern::parseRepetitionType(repetitionType, exceptionState);
@@ -1753,9 +1753,9 @@ GraphicsContext* CanvasRenderingContext2D::drawingContext() const
     return canvas()->drawingContext();
 }
 
-static PassRefPtrWillBeRawPtr<ImageData> createEmptyImageData(const IntSize& size)
+static PassRefPtr<ImageData> createEmptyImageData(const IntSize& size)
 {
-    if (RefPtrWillBeRawPtr<ImageData> data = ImageData::create(size)) {
+    if (RefPtr<ImageData> data = ImageData::create(size)) {
         data->data()->zeroFill();
         return data.release();
     }
@@ -1763,12 +1763,12 @@ static PassRefPtrWillBeRawPtr<ImageData> createEmptyImageData(const IntSize& siz
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<ImageData> CanvasRenderingContext2D::createImageData(PassRefPtrWillBeRawPtr<ImageData> imageData) const
+PassRefPtr<ImageData> CanvasRenderingContext2D::createImageData(PassRefPtr<ImageData> imageData) const
 {
     return createEmptyImageData(imageData->size());
 }
 
-PassRefPtrWillBeRawPtr<ImageData> CanvasRenderingContext2D::createImageData(float sw, float sh, ExceptionState& exceptionState) const
+PassRefPtr<ImageData> CanvasRenderingContext2D::createImageData(float sw, float sh, ExceptionState& exceptionState) const
 {
     if (!sw || !sh) {
         exceptionState.throwDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
@@ -1788,7 +1788,7 @@ PassRefPtrWillBeRawPtr<ImageData> CanvasRenderingContext2D::createImageData(floa
     return createEmptyImageData(size);
 }
 
-PassRefPtrWillBeRawPtr<ImageData> CanvasRenderingContext2D::getImageData(float sx, float sy, float sw, float sh, ExceptionState& exceptionState) const
+PassRefPtr<ImageData> CanvasRenderingContext2D::getImageData(float sx, float sy, float sw, float sh, ExceptionState& exceptionState) const
 {
     if (!sw || !sh)
         exceptionState.throwDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
@@ -1906,7 +1906,7 @@ void CanvasRenderingContext2D::setFont(const String& newFont)
         return;
 
     MutableStylePropertyMap::iterator i = m_fetchedFonts.find(newFont);
-    RefPtrWillBeRawPtr<MutableStylePropertySet> parsedStyle = i != m_fetchedFonts.end() ? i->value : nullptr;
+    RefPtr<MutableStylePropertySet> parsedStyle = i != m_fetchedFonts.end() ? i->value : nullptr;
 
     if (!parsedStyle) {
         parsedStyle = MutableStylePropertySet::create();
@@ -2094,9 +2094,9 @@ static String normalizeSpaces(const String& text)
     return String(charVector);
 }
 
-PassRefPtrWillBeRawPtr<TextMetrics> CanvasRenderingContext2D::measureText(const String& text)
+PassRefPtr<TextMetrics> CanvasRenderingContext2D::measureText(const String& text)
 {
-    RefPtrWillBeRawPtr<TextMetrics> metrics = TextMetrics::create();
+    RefPtr<TextMetrics> metrics = TextMetrics::create();
 
     // The style resolution required for rendering text is not available in frame-less documents.
     if (!canvas()->document().frame())
@@ -2325,9 +2325,9 @@ void CanvasRenderingContext2D::setImageSmoothingEnabled(bool enabled)
         c->setImageInterpolationQuality(enabled ? CanvasDefaultInterpolationQuality : InterpolationNone);
 }
 
-PassRefPtrWillBeRawPtr<Canvas2DContextAttributes> CanvasRenderingContext2D::getContextAttributes() const
+PassRefPtr<Canvas2DContextAttributes> CanvasRenderingContext2D::getContextAttributes() const
 {
-    RefPtrWillBeRawPtr<Canvas2DContextAttributes> attributes = Canvas2DContextAttributes::create();
+    RefPtr<Canvas2DContextAttributes> attributes = Canvas2DContextAttributes::create();
     attributes->setAlpha(m_hasAlpha);
     return attributes.release();
 }
@@ -2412,7 +2412,7 @@ void CanvasRenderingContext2D::addHitRegion(const Dictionary& options, Exception
         return;
     }
 
-    RefPtrWillBeMember<Path2D> path2d;
+    RefPtr<Path2D> path2d;
     options.getWithUndefinedOrNullCheck("path", path2d);
     Path hitRegionPath = path2d ? path2d->path() : m_path;
 
@@ -2456,7 +2456,7 @@ void CanvasRenderingContext2D::addHitRegionInternal(const HitRegionOptions& opti
     m_hitRegionManager->removeHitRegionById(options.id);
     m_hitRegionManager->removeHitRegionByControl(options.control.get());
 
-    RefPtrWillBeRawPtr<HitRegion> hitRegion = HitRegion::create(options);
+    RefPtr<HitRegion> hitRegion = HitRegion::create(options);
     hitRegion->updateAccessibility(canvas());
     m_hitRegionManager->addHitRegion(hitRegion.release());
 }

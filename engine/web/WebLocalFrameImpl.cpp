@@ -174,7 +174,7 @@ static void frameContentAsPlainText(size_t maxChars, LocalFrame* frame, StringBu
         return;
 
     // Select the document body.
-    RefPtrWillBeRawPtr<Range> range(document->createRange());
+    RefPtr<Range> range(document->createRange());
     TrackExceptionState exceptionState;
     range->selectNodeContents(document->documentElement(), exceptionState);
 
@@ -469,7 +469,7 @@ bool WebLocalFrameImpl::firstRectForCharacterRange(unsigned location, unsigned l
 
     Element* editable = frame()->selection().rootEditableElementOrDocumentElement();
     ASSERT(editable);
-    RefPtrWillBeRawPtr<Range> range = PlainTextRange(location, location + length).createRange(*editable);
+    RefPtr<Range> range = PlainTextRange(location, location + length).createRange(*editable);
     if (!range)
         return false;
     IntRect intRect = frame()->editor().firstRectForRange(range.get());
@@ -485,7 +485,7 @@ size_t WebLocalFrameImpl::characterIndexForPoint(const WebPoint& webPoint) const
 
     IntPoint point = frame()->view()->windowToContents(webPoint);
     HitTestResult result = frame()->eventHandler().hitTestResultAtPoint(point, HitTestRequest::ReadOnly | HitTestRequest::Active);
-    RefPtrWillBeRawPtr<Range> range = frame()->rangeForPoint(result.roundedPointInInnerNodeFrame());
+    RefPtr<Range> range = frame()->rangeForPoint(result.roundedPointInInnerNodeFrame());
     if (!range)
         return kNotFound;
     Element* editable = frame()->selection().rootEditableElementOrDocumentElement();
@@ -569,7 +569,7 @@ WebRange WebLocalFrameImpl::selectionRange() const
 
 WebString WebLocalFrameImpl::selectionAsText() const
 {
-    RefPtrWillBeRawPtr<Range> range = frame()->selection().toNormalizedRange();
+    RefPtr<Range> range = frame()->selection().toNormalizedRange();
     if (!range)
         return WebString();
 
@@ -580,7 +580,7 @@ WebString WebLocalFrameImpl::selectionAsText() const
 
 WebString WebLocalFrameImpl::selectionAsMarkup() const
 {
-    RefPtrWillBeRawPtr<Range> range = frame()->selection().toNormalizedRange();
+    RefPtr<Range> range = frame()->selection().toNormalizedRange();
     if (!range)
         return WebString();
 
@@ -612,7 +612,7 @@ void WebLocalFrameImpl::selectRange(const WebPoint& base, const WebPoint& extent
 
 void WebLocalFrameImpl::selectRange(const WebRange& webRange)
 {
-    if (RefPtrWillBeRawPtr<Range> range = static_cast<PassRefPtrWillBeRawPtr<Range> >(webRange))
+    if (RefPtr<Range> range = static_cast<PassRefPtr<Range> >(webRange))
         frame()->selection().setSelectedRange(range.get(), VP_DEFAULT_AFFINITY, FrameSelection::NonDirectional, NotUserTriggered);
 }
 

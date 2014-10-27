@@ -53,9 +53,9 @@ void V8HTMLCanvasElement::getContextMethodCustom(const v8::FunctionCallbackInfo<
     HTMLCanvasElement* impl = V8HTMLCanvasElement::toNative(holder);
     TOSTRING_VOID(V8StringResource<>, contextIdResource, info[0]);
     String contextId = contextIdResource;
-    RefPtrWillBeRawPtr<CanvasContextAttributes> attributes = nullptr;
+    RefPtr<CanvasContextAttributes> attributes = nullptr;
     if (contextId == "webgl" || contextId == "experimental-webgl") {
-        RefPtrWillBeRawPtr<WebGLContextAttributes> webGLAttributes = WebGLContextAttributes::create();
+        RefPtr<WebGLContextAttributes> webGLAttributes = WebGLContextAttributes::create();
         if (info.Length() > 1 && info[1]->IsObject()) {
             v8::Handle<v8::Object> jsAttributes = info[1]->ToObject();
             v8::Handle<v8::String> alpha = v8AtomicString(isolate, "alpha");
@@ -82,7 +82,7 @@ void V8HTMLCanvasElement::getContextMethodCustom(const v8::FunctionCallbackInfo<
         }
         attributes = webGLAttributes;
     } else {
-        RefPtrWillBeRawPtr<Canvas2DContextAttributes> canvas2DAttributes = Canvas2DContextAttributes::create();
+        RefPtr<Canvas2DContextAttributes> canvas2DAttributes = Canvas2DContextAttributes::create();
         if (info.Length() > 1 && info[1]->IsObject()) {
             v8::Handle<v8::Object> jsAttributes = info[1]->ToObject();
             v8::Handle<v8::String> alpha = v8AtomicString(isolate, "alpha");

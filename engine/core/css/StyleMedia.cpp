@@ -60,7 +60,7 @@ bool StyleMedia::matchMedium(const String& query) const
     if (!documentElement)
         return false;
 
-    RefPtrWillBeRawPtr<MediaQuerySet> media = MediaQuerySet::create();
+    RefPtr<MediaQuerySet> media = MediaQuerySet::create();
     if (!media->set(query))
         return false;
 

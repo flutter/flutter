@@ -72,9 +72,9 @@ FrameConsole::FrameConsole(LocalFrame& frame)
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(FrameConsole);
 
-void FrameConsole::addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> prpConsoleMessage)
+void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
 {
-    RefPtrWillBeRawPtr<ConsoleMessage> consoleMessage = prpConsoleMessage;
+    RefPtr<ConsoleMessage> consoleMessage = prpConsoleMessage;
     if (muteCount && consoleMessage->source() != ConsoleAPIMessageSource)
         return;
 
@@ -99,7 +99,7 @@ void FrameConsole::addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage> prpConsoleM
     if (consoleMessage->source() == CSSMessageSource || consoleMessage->source() == NetworkMessageSource)
         return;
 
-    RefPtrWillBeRawPtr<ScriptCallStack> reportedCallStack = nullptr;
+    RefPtr<ScriptCallStack> reportedCallStack = nullptr;
     if (consoleMessage->source() != ConsoleAPIMessageSource) {
         if (consoleMessage->callStack() && m_frame.chromeClient().shouldReportDetailedMessageForSource(messageURL))
             reportedCallStack = consoleMessage->callStack();
@@ -127,12 +127,12 @@ void FrameConsole::reportResourceResponseReceived(Document* document, unsigned l
     if (response.httpStatusCode() < 400)
         return;
     String message = "Failed to load resource: the server responded with a status of " + String::number(response.httpStatusCode()) + " (" + response.httpStatusText() + ')';
-    RefPtrWillBeRawPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(NetworkMessageSource, ErrorMessageLevel, message, response.url().string());
+    RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(NetworkMessageSource, ErrorMessageLevel, message, response.url().string());
     consoleMessage->setRequestIdentifier(requestIdentifier);
     addMessage(consoleMessage.release());
 }
 
-String FrameConsole::formatStackTraceString(const String& originalMessage, PassRefPtrWillBeRawPtr<ScriptCallStack> callStack)
+String FrameConsole::formatStackTraceString(const String& originalMessage, PassRefPtr<ScriptCallStack> callStack)
 {
     StringBuilder stackTrace;
     for (size_t i = 0; i < callStack->size(); ++i) {

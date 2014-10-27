@@ -67,7 +67,7 @@ Length AnimatableLength::length(float zoom, ValueRange range) const
     return Length(CalculationValue::create(PixelsAndPercent(m_pixels * zoom, m_percent), range));
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableLength::interpolateTo(const AnimatableValue* value, double fraction) const
+PassRefPtr<AnimatableValue> AnimatableLength::interpolateTo(const AnimatableValue* value, double fraction) const
 {
     const AnimatableLength* length = toAnimatableLength(value);
     return create(blend(m_pixels, length->m_pixels, fraction), blend(m_percent, length->m_percent, fraction),

@@ -43,15 +43,15 @@ namespace blink {
 // accumulator for a given node even if there are multiple ChildListMutationScopes
 // on the stack. The map is always empty when there are no ChildListMutationScopes
 // on the stack.
-typedef WillBeHeapHashMap<RawPtrWillBeMember<Node>, RawPtrWillBeMember<ChildListMutationAccumulator> > AccumulatorMap;
+typedef HashMap<RawPtr<Node>, RawPtr<ChildListMutationAccumulator> > AccumulatorMap;
 
 static AccumulatorMap& accumulatorMap()
 {
-    DEFINE_STATIC_LOCAL(OwnPtrWillBePersistent<AccumulatorMap>, map, (adoptPtrWillBeNoop(new AccumulatorMap())));
+    DEFINE_STATIC_LOCAL(OwnPtr<AccumulatorMap>, map, (adoptPtr(new AccumulatorMap())));
     return *map;
 }
 
-ChildListMutationAccumulator::ChildListMutationAccumulator(PassRefPtrWillBeRawPtr<Node> target, PassOwnPtrWillBeRawPtr<MutationObserverInterestGroup> observers)
+ChildListMutationAccumulator::ChildListMutationAccumulator(PassRefPtr<Node> target, PassOwnPtr<MutationObserverInterestGroup> observers)
     : m_target(target)
     , m_lastAdded(nullptr)
     , m_observers(observers)
@@ -71,14 +71,14 @@ void ChildListMutationAccumulator::leaveMutationScope()
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ChildListMutationAccumulator);
 
-PassRefPtrWillBeRawPtr<ChildListMutationAccumulator> ChildListMutationAccumulator::getOrCreate(Node& target)
+PassRefPtr<ChildListMutationAccumulator> ChildListMutationAccumulator::getOrCreate(Node& target)
 {
     AccumulatorMap::AddResult result = accumulatorMap().add(&target, nullptr);
-    RefPtrWillBeRawPtr<ChildListMutationAccumulator> accumulator;
+    RefPtr<ChildListMutationAccumulator> accumulator;
     if (!result.isNewEntry)
         accumulator = result.storedValue->value;
     else {
-        accumulator = adoptRefWillBeNoop(new ChildListMutationAccumulator(PassRefPtrWillBeRawPtr<Node>(target), MutationObserverInterestGroup::createForChildListMutation(target)));
+        accumulator = adoptRef(new ChildListMutationAccumulator(PassRefPtr<Node>(target), MutationObserverInterestGroup::createForChildListMutation(target)));
         result.storedValue->value = accumulator.get();
     }
     return accumulator.release();
@@ -89,11 +89,11 @@ inline bool ChildListMutationAccumulator::isAddedNodeInOrder(Node* child)
     return isEmpty() || (m_lastAdded == child->previousSibling() && m_nextSibling == child->nextSibling());
 }
 
-void ChildListMutationAccumulator::childAdded(PassRefPtrWillBeRawPtr<Node> prpChild)
+void ChildListMutationAccumulator::childAdded(PassRefPtr<Node> prpChild)
 {
     ASSERT(hasObservers());
 
-    RefPtrWillBeRawPtr<Node> child = prpChild;
+    RefPtr<Node> child = prpChild;
 
     if (!isAddedNodeInOrder(child.get()))
         enqueueMutationRecord();
@@ -112,11 +112,11 @@ inline bool ChildListMutationAccumulator::isRemovedNodeInOrder(Node* child)
     return isEmpty() || m_nextSibling == child;
 }
 
-void ChildListMutationAccumulator::willRemoveChild(PassRefPtrWillBeRawPtr<Node> prpChild)
+void ChildListMutationAccumulator::willRemoveChild(PassRefPtr<Node> prpChild)
 {
     ASSERT(hasObservers());
 
-    RefPtrWillBeRawPtr<Node> child = prpChild;
+    RefPtr<Node> child = prpChild;
 
     if (!m_addedNodes.isEmpty() || !isRemovedNodeInOrder(child.get()))
         enqueueMutationRecord();
@@ -136,9 +136,9 @@ void ChildListMutationAccumulator::enqueueMutationRecord()
     ASSERT(hasObservers());
     ASSERT(!isEmpty());
 
-    RefPtrWillBeRawPtr<StaticNodeList> addedNodes = StaticNodeList::adopt(m_addedNodes);
-    RefPtrWillBeRawPtr<StaticNodeList> removedNodes = StaticNodeList::adopt(m_removedNodes);
-    RefPtrWillBeRawPtr<MutationRecord> record = MutationRecord::createChildList(m_target, addedNodes.release(), removedNodes.release(), m_previousSibling.release(), m_nextSibling.release());
+    RefPtr<StaticNodeList> addedNodes = StaticNodeList::adopt(m_addedNodes);
+    RefPtr<StaticNodeList> removedNodes = StaticNodeList::adopt(m_removedNodes);
+    RefPtr<MutationRecord> record = MutationRecord::createChildList(m_target, addedNodes.release(), removedNodes.release(), m_previousSibling.release(), m_nextSibling.release());
     m_observers->enqueueMutationRecord(record.release());
     m_lastAdded = nullptr;
     ASSERT(isEmpty());

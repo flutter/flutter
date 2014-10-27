@@ -36,7 +36,7 @@
 
 namespace blink {
 
-DocumentInit::DocumentInit(const KURL& url, LocalFrame* frame, WeakPtrWillBeRawPtr<Document> contextDocument, HTMLImportsController* importsController)
+DocumentInit::DocumentInit(const KURL& url, LocalFrame* frame, WeakPtr<Document> contextDocument, HTMLImportsController* importsController)
     : m_url(url)
     , m_frame(frame)
     , m_contextDocument(contextDocument)
@@ -93,7 +93,7 @@ DocumentInit& DocumentInit::withNewRegistrationContext()
     return *this;
 }
 
-PassRefPtrWillBeRawPtr<CustomElementRegistrationContext> DocumentInit::registrationContext(Document* document) const
+PassRefPtr<CustomElementRegistrationContext> DocumentInit::registrationContext(Document* document) const
 {
     if (m_createNewRegistrationContext)
         return CustomElementRegistrationContext::create();
@@ -101,12 +101,12 @@ PassRefPtrWillBeRawPtr<CustomElementRegistrationContext> DocumentInit::registrat
     return m_registrationContext.get();
 }
 
-WeakPtrWillBeRawPtr<Document> DocumentInit::contextDocument() const
+WeakPtr<Document> DocumentInit::contextDocument() const
 {
     return m_contextDocument;
 }
 
-DocumentInit DocumentInit::fromContext(WeakPtrWillBeRawPtr<Document> contextDocument, const KURL& url)
+DocumentInit DocumentInit::fromContext(WeakPtr<Document> contextDocument, const KURL& url)
 {
     return DocumentInit(url, 0, contextDocument, 0);
 }

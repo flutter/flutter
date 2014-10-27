@@ -44,9 +44,9 @@ class ResourceError;
 class ResourceResponse;
 class ResourceLoaderHost;
 
-class ResourceLoader final : public RefCountedWillBeGarbageCollectedFinalized<ResourceLoader>, protected WebURLLoaderClient {
+class ResourceLoader final : public RefCounted<ResourceLoader>, protected WebURLLoaderClient {
 public:
-    static PassRefPtrWillBeRawPtr<ResourceLoader> create(ResourceLoaderHost*, Resource*, const ResourceRequest&, const ResourceLoaderOptions&);
+    static PassRefPtr<ResourceLoader> create(ResourceLoaderHost*, Resource*, const ResourceRequest&, const ResourceLoaderOptions&);
     virtual ~ResourceLoader();
     void trace(Visitor*);
 
@@ -97,7 +97,7 @@ private:
     ResourceRequest& applyOptions(ResourceRequest&) const;
 
     OwnPtr<blink::WebURLLoader> m_loader;
-    RefPtrWillBeMember<ResourceLoaderHost> m_host;
+    RefPtr<ResourceLoaderHost> m_host;
 
     ResourceRequest m_request;
 
@@ -121,7 +121,7 @@ private:
         ConnectionStateFailed,
     };
 
-    RawPtrWillBeMember<Resource> m_resource;
+    RawPtr<Resource> m_resource;
     ResourceLoaderState m_state;
 
     // Used for sanity checking to make sure we don't experience illegal state

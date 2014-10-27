@@ -38,7 +38,7 @@ StyleSheetList::~StyleSheetList()
 {
 }
 
-inline const WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& StyleSheetList::styleSheets()
+inline const Vector<RefPtr<StyleSheet> >& StyleSheetList::styleSheets()
 {
 #if !ENABLE(OILPAN)
     if (!m_treeScope)
@@ -62,7 +62,7 @@ unsigned StyleSheetList::length()
 
 StyleSheet* StyleSheetList::item(unsigned index)
 {
-    const WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& sheets = styleSheets();
+    const Vector<RefPtr<StyleSheet> >& sheets = styleSheets();
     return index < sheets.size() ? sheets[index].get() : 0;
 }
 

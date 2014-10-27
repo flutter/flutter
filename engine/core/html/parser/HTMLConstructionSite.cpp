@@ -208,7 +208,7 @@ void HTMLConstructionSite::queueTask(const HTMLConstructionSiteTask& task)
     m_taskQueue.append(task);
 }
 
-void HTMLConstructionSite::attachLater(ContainerNode* parent, PassRefPtrWillBeRawPtr<Node> prpChild, bool selfClosing)
+void HTMLConstructionSite::attachLater(ContainerNode* parent, PassRefPtr<Node> prpChild, bool selfClosing)
 {
     HTMLConstructionSiteTask task(HTMLConstructionSiteTask::Insert);
     task.parent = parent;
@@ -298,7 +298,7 @@ void HTMLConstructionSite::finishedParsing()
 
 void HTMLConstructionSite::insertHTMLElement(AtomicHTMLToken* token)
 {
-    RefPtrWillBeRawPtr<HTMLElement> element = createHTMLElement(token);
+    RefPtr<HTMLElement> element = createHTMLElement(token);
     attachLater(currentNode(), element);
     m_openElements.push(element.release());
 }
@@ -316,7 +316,7 @@ void HTMLConstructionSite::insertSelfClosingHTMLElement(AtomicHTMLToken* token)
 
 void HTMLConstructionSite::insertScriptElement(AtomicHTMLToken* token)
 {
-    RefPtrWillBeRawPtr<HTMLScriptElement> element = HTMLScriptElement::create(ownerDocumentForCurrentNode());
+    RefPtr<HTMLScriptElement> element = HTMLScriptElement::create(ownerDocumentForCurrentNode());
     setAttributes(element.get(), token);
     attachLater(currentNode(), element);
     m_openElements.push(element.release());
@@ -339,10 +339,10 @@ void HTMLConstructionSite::insertTextNode(const String& string, WhitespaceMode w
     m_pendingText.append(dummyTask.parent, dummyTask.nextChild, string, whitespaceMode);
 }
 
-PassRefPtrWillBeRawPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token, const AtomicString& namespaceURI)
+PassRefPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token, const AtomicString& namespaceURI)
 {
     QualifiedName tagName(token->name());
-    RefPtrWillBeRawPtr<Element> element = ownerDocumentForCurrentNode().createElement(tagName, true);
+    RefPtr<Element> element = ownerDocumentForCurrentNode().createElement(tagName, true);
     setAttributes(element.get(), token);
     return element.release();
 }
@@ -354,10 +354,10 @@ inline Document& HTMLConstructionSite::ownerDocumentForCurrentNode()
     return currentNode()->document();
 }
 
-PassRefPtrWillBeRawPtr<HTMLElement> HTMLConstructionSite::createHTMLElement(AtomicHTMLToken* token)
+PassRefPtr<HTMLElement> HTMLConstructionSite::createHTMLElement(AtomicHTMLToken* token)
 {
     Document& document = ownerDocumentForCurrentNode();
-    RefPtrWillBeRawPtr<HTMLElement> element = HTMLElementFactory::createHTMLElement(token->name(), document, true);
+    RefPtr<HTMLElement> element = HTMLElementFactory::createHTMLElement(token->name(), document, true);
     setAttributes(element.get(), token);
     return element.release();
 }

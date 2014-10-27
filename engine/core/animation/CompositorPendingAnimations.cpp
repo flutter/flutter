@@ -60,7 +60,7 @@ bool CompositorPendingAnimations::update(bool startOnCompositor)
     Vector<AnimationPlayer*> waitingForStartTime;
     bool startedSynchronizedOnCompositor = false;
 
-    WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer> > players;
+    Vector<RefPtr<AnimationPlayer> > players;
     players.swap(m_pending);
 
     for (size_t i = 0; i < players.size(); ++i) {

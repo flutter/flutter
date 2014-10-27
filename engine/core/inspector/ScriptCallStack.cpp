@@ -37,9 +37,9 @@ namespace blink {
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ScriptCallStack);
 
-PassRefPtrWillBeRawPtr<ScriptCallStack> ScriptCallStack::create(Vector<ScriptCallFrame>& frames)
+PassRefPtr<ScriptCallStack> ScriptCallStack::create(Vector<ScriptCallFrame>& frames)
 {
-    return adoptRefWillBeNoop(new ScriptCallStack(frames));
+    return adoptRef(new ScriptCallStack(frames));
 }
 
 ScriptCallStack::ScriptCallStack(Vector<ScriptCallFrame>& frames)
@@ -58,12 +58,12 @@ size_t ScriptCallStack::size() const
     return m_frames.size();
 }
 
-PassRefPtrWillBeRawPtr<ScriptAsyncCallStack> ScriptCallStack::asyncCallStack() const
+PassRefPtr<ScriptAsyncCallStack> ScriptCallStack::asyncCallStack() const
 {
     return m_asyncCallStack;
 }
 
-void ScriptCallStack::setAsyncCallStack(PassRefPtrWillBeRawPtr<ScriptAsyncCallStack> asyncCallStack)
+void ScriptCallStack::setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack> asyncCallStack)
 {
     m_asyncCallStack = asyncCallStack;
 }

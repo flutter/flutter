@@ -38,10 +38,10 @@
 
 namespace blink {
 
-class DOMWindowCSS : public RefCountedWillBeGarbageCollected<DOMWindowCSS>, public ScriptWrappable {
+class DOMWindowCSS : public RefCounted<DOMWindowCSS>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DOMWindowCSS> create();
+    static PassRefPtr<DOMWindowCSS> create();
 
     bool supports(const String& property, const String& value) const;
     bool supports(const String& conditionText) const;

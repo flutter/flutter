@@ -321,7 +321,7 @@ public:
     MarginValues marginValuesForChild(RenderBox* child) const;
 
     // Allocated only when some of these fields have non-default values
-    struct RenderBlockFlowRareData : public NoBaseWillBeGarbageCollected<RenderBlockFlowRareData> {
+    struct RenderBlockFlowRareData : public DummyBase<RenderBlockFlowRareData> {
         WTF_MAKE_NONCOPYABLE(RenderBlockFlowRareData); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     public:
         RenderBlockFlowRareData(const RenderBlockFlow* block)
@@ -415,7 +415,7 @@ private:
     virtual bool isSelfCollapsingBlock() const override;
 
 protected:
-    OwnPtrWillBeMember<RenderBlockFlowRareData> m_rareData;
+    OwnPtr<RenderBlockFlowRareData> m_rareData;
     OwnPtr<FloatingObjects> m_floatingObjects;
 
     friend class BreakingContext; // FIXME: It uses insertFloatingObject and positionNewFloatOnLine, if we move those out from the private scope/add a helper to LineBreaker, we can remove this friend

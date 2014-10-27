@@ -117,7 +117,7 @@ public:
     static ScriptPromise reject(ScriptState*, const ScriptValue&);
     static ScriptPromise reject(ScriptState*, v8::Handle<v8::Value>);
 
-    static ScriptPromise rejectWithDOMException(ScriptState*, PassRefPtrWillBeRawPtr<DOMException>);
+    static ScriptPromise rejectWithDOMException(ScriptState*, PassRefPtr<DOMException>);
 
     static v8::Local<v8::Promise> rejectRaw(v8::Isolate*, v8::Handle<v8::Value>);
 

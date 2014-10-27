@@ -19,7 +19,7 @@ public:
     StyleInvalidator();
     ~StyleInvalidator();
     void invalidate(Document&);
-    void scheduleInvalidation(PassRefPtrWillBeRawPtr<DescendantInvalidationSet>, Element&);
+    void scheduleInvalidation(PassRefPtr<DescendantInvalidationSet>, Element&);
 
     // Clears all style invalidation state for the passed node.
     void clearInvalidation(Node&);
@@ -81,8 +81,8 @@ private:
         RecursionData* m_data;
     };
 
-    typedef WillBeHeapVector<RefPtrWillBeMember<DescendantInvalidationSet> > InvalidationList;
-    typedef WillBeHeapHashMap<RawPtrWillBeMember<Element>, OwnPtrWillBeMember<InvalidationList> > PendingInvalidationMap;
+    typedef Vector<RefPtr<DescendantInvalidationSet> > InvalidationList;
+    typedef HashMap<RawPtr<Element>, OwnPtr<InvalidationList> > PendingInvalidationMap;
 
     InvalidationList& ensurePendingInvalidationList(Element&);
 

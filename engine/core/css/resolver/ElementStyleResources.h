@@ -40,7 +40,7 @@ class FilterOperation;
 class StyleImage;
 class TextLinkColors;
 
-typedef WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<CSSValue> > PendingImagePropertyMap;
+typedef HashMap<CSSPropertyID, RefPtr<CSSValue> > PendingImagePropertyMap;
 
 // Holds information about resources, requested by stylesheets.
 // Lifetime: per-element style resolve.

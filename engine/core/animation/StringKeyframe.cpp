@@ -39,13 +39,13 @@ PropertySet StringKeyframe::properties() const
     return properties;
 }
 
-PassRefPtrWillBeRawPtr<Keyframe> StringKeyframe::clone() const
+PassRefPtr<Keyframe> StringKeyframe::clone() const
 {
-    return adoptRefWillBeNoop(new StringKeyframe(*this));
+    return adoptRef(new StringKeyframe(*this));
 }
-PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::createPropertySpecificKeyframe(CSSPropertyID property) const
+PassOwnPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::createPropertySpecificKeyframe(CSSPropertyID property) const
 {
-    return adoptPtrWillBeNoop(new PropertySpecificKeyframe(offset(), &easing(), propertyValue(property), composite()));
+    return adoptPtr(new PropertySpecificKeyframe(offset(), &easing(), propertyValue(property), composite()));
 }
 
 void StringKeyframe::trace(Visitor* visitor)
@@ -66,7 +66,7 @@ StringKeyframe::PropertySpecificKeyframe::PropertySpecificKeyframe(double offset
     ASSERT(!isNull(m_offset));
 }
 
-PassRefPtrWillBeRawPtr<Interpolation> StringKeyframe::PropertySpecificKeyframe::createInterpolation(CSSPropertyID property, Keyframe::PropertySpecificKeyframe* end, Element* element) const
+PassRefPtr<Interpolation> StringKeyframe::PropertySpecificKeyframe::createInterpolation(CSSPropertyID property, Keyframe::PropertySpecificKeyframe* end, Element* element) const
 {
     CSSValue* fromCSSValue = m_value.get();
     CSSValue* toCSSValue = toStringPropertySpecificKeyframe(end)->value();
@@ -125,22 +125,22 @@ PassRefPtrWillBeRawPtr<Interpolation> StringKeyframe::PropertySpecificKeyframe::
     if (!m_animatableValueCache)
         m_animatableValueCache = StyleResolver::createAnimatableValueSnapshot(*element, property, *fromCSSValue);
 
-    RefPtrWillBeRawPtr<AnimatableValue> to = StyleResolver::createAnimatableValueSnapshot(*element, property, *toCSSValue);
+    RefPtr<AnimatableValue> to = StyleResolver::createAnimatableValueSnapshot(*element, property, *toCSSValue);
     toStringPropertySpecificKeyframe(end)->m_animatableValueCache = to;
 
     return LegacyStyleInterpolation::create(m_animatableValueCache.get(), to.release(), property);
 }
 
-PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::PropertySpecificKeyframe::neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const
+PassOwnPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::PropertySpecificKeyframe::neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const
 {
-    return adoptPtrWillBeNoop(new PropertySpecificKeyframe(offset, easing, 0, AnimationEffect::CompositeAdd));
+    return adoptPtr(new PropertySpecificKeyframe(offset, easing, 0, AnimationEffect::CompositeAdd));
 }
 
-PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::PropertySpecificKeyframe::cloneWithOffset(double offset) const
+PassOwnPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::PropertySpecificKeyframe::cloneWithOffset(double offset) const
 {
     Keyframe::PropertySpecificKeyframe* theClone = new PropertySpecificKeyframe(offset, m_easing, m_value.get());
     toStringPropertySpecificKeyframe(theClone)->m_animatableValueCache = m_animatableValueCache;
-    return adoptPtrWillBeNoop(theClone);
+    return adoptPtr(theClone);
 }
 
 void StringKeyframe::PropertySpecificKeyframe::trace(Visitor* visitor)

@@ -67,8 +67,8 @@ private:
     bool shouldCreateRenderer() const;
     RenderStyle& style() const;
 
-    RawPtrWillBeMember<Node> m_node;
-    RawPtrWillBeMember<ContainerNode> m_renderingParent;
+    RawPtr<Node> m_node;
+    RawPtr<ContainerNode> m_renderingParent;
     NodeRenderingTraversal::ParentDetails m_parentDetails;
     mutable RefPtr<RenderStyle> m_style;
 };

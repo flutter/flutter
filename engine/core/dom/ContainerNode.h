@@ -40,7 +40,7 @@ typedef StaticNodeTypeList<Element> StaticElementList;
 // for a Node Vector that is used to store child Nodes of a given Node.
 // FIXME: Optimize the value.
 const int initialNodeVectorSize = 11;
-typedef WillBeHeapVector<RefPtrWillBeMember<Node>, initialNodeVectorSize> NodeVector;
+typedef Vector<RefPtr<Node>, initialNodeVectorSize> NodeVector;
 
 class ContainerNode : public Node {
 public:
@@ -56,21 +56,21 @@ public:
 
     unsigned countChildren() const;
 
-    PassRefPtrWillBeRawPtr<Element> querySelector(const AtomicString& selectors, ExceptionState&);
-    PassRefPtrWillBeRawPtr<StaticElementList> querySelectorAll(const AtomicString& selectors, ExceptionState&);
+    PassRefPtr<Element> querySelector(const AtomicString& selectors, ExceptionState&);
+    PassRefPtr<StaticElementList> querySelectorAll(const AtomicString& selectors, ExceptionState&);
 
-    PassRefPtrWillBeRawPtr<Node> insertBefore(PassRefPtrWillBeRawPtr<Node> newChild, Node* refChild, ExceptionState& = ASSERT_NO_EXCEPTION);
-    PassRefPtrWillBeRawPtr<Node> replaceChild(PassRefPtrWillBeRawPtr<Node> newChild, PassRefPtrWillBeRawPtr<Node> oldChild, ExceptionState& = ASSERT_NO_EXCEPTION);
-    PassRefPtrWillBeRawPtr<Node> removeChild(PassRefPtrWillBeRawPtr<Node> child, ExceptionState& = ASSERT_NO_EXCEPTION);
-    PassRefPtrWillBeRawPtr<Node> appendChild(PassRefPtrWillBeRawPtr<Node> newChild, ExceptionState& = ASSERT_NO_EXCEPTION);
+    PassRefPtr<Node> insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& = ASSERT_NO_EXCEPTION);
+    PassRefPtr<Node> replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& = ASSERT_NO_EXCEPTION);
+    PassRefPtr<Node> removeChild(PassRefPtr<Node> child, ExceptionState& = ASSERT_NO_EXCEPTION);
+    PassRefPtr<Node> appendChild(PassRefPtr<Node> newChild, ExceptionState& = ASSERT_NO_EXCEPTION);
 
     Element* getElementById(const AtomicString& id) const;
 
     // These methods are only used during parsing.
     // They don't send DOM mutation events or handle reparenting.
-    void parserAppendChild(PassRefPtrWillBeRawPtr<Node>);
+    void parserAppendChild(PassRefPtr<Node>);
     void parserRemoveChild(Node&);
-    void parserInsertBefore(PassRefPtrWillBeRawPtr<Node> newChild, Node& refChild);
+    void parserInsertBefore(PassRefPtr<Node> newChild, Node& refChild);
     void parserTakeAllChildrenFrom(ContainerNode&);
 
     void removeChildren();
@@ -120,8 +120,8 @@ public:
         bool isChildElementChange() const { return type == ElementInserted || type == ElementRemoved; }
 
         ChildrenChangeType type;
-        RawPtrWillBeMember<Node> siblingBeforeChange;
-        RawPtrWillBeMember<Node> siblingAfterChange;
+        RawPtr<Node> siblingBeforeChange;
+        RawPtr<Node> siblingAfterChange;
         ChildrenChangeSource byParser;
     };
 
@@ -169,8 +169,8 @@ private:
     bool getUpperLeftCorner(FloatPoint&) const;
     bool getLowerRightCorner(FloatPoint&) const;
 
-    RawPtrWillBeMember<Node> m_firstChild;
-    RawPtrWillBeMember<Node> m_lastChild;
+    RawPtr<Node> m_firstChild;
+    RawPtr<Node> m_lastChild;
 };
 
 #if ENABLE(ASSERT)

@@ -82,9 +82,9 @@ CSSTransformValue::CSSTransformValue(const CSSTransformValue& cloneFrom)
 {
 }
 
-PassRefPtrWillBeRawPtr<CSSTransformValue> CSSTransformValue::cloneForCSSOM() const
+PassRefPtr<CSSTransformValue> CSSTransformValue::cloneForCSSOM() const
 {
-    return adoptRefWillBeNoop(new CSSTransformValue(*this));
+    return adoptRef(new CSSTransformValue(*this));
 }
 
 }

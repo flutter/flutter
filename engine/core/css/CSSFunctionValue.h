@@ -34,9 +34,9 @@ class CSSValueList;
 
 class CSSFunctionValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSFunctionValue> create(String name, PassRefPtrWillBeRawPtr<CSSValueList> args)
+    static PassRefPtr<CSSFunctionValue> create(String name, PassRefPtr<CSSValueList> args)
     {
-        return adoptRefWillBeNoop(new CSSFunctionValue(name, args));
+        return adoptRef(new CSSFunctionValue(name, args));
     }
 
     String customCSSText() const;
@@ -48,10 +48,10 @@ public:
     void traceAfterDispatch(Visitor*);
 
 private:
-    CSSFunctionValue(String, PassRefPtrWillBeRawPtr<CSSValueList>);
+    CSSFunctionValue(String, PassRefPtr<CSSValueList>);
 
     String m_name;
-    RefPtrWillBeMember<CSSValueList> m_args;
+    RefPtr<CSSValueList> m_args;
 };
 
 DEFINE_CSS_VALUE_TYPE_CASTS(CSSFunctionValue, isFunctionValue());

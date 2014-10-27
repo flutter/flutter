@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class MediaKeyError final : public RefCountedWillBeGarbageCollectedFinalized<MediaKeyError>, public ScriptWrappable {
+class MediaKeyError final : public RefCounted<MediaKeyError>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum {
@@ -46,9 +46,9 @@ public:
     };
     typedef unsigned short Code;
 
-    static PassRefPtrWillBeRawPtr<MediaKeyError> create(Code code, unsigned long systemCode = 0)
+    static PassRefPtr<MediaKeyError> create(Code code, unsigned long systemCode = 0)
     {
-        return adoptRefWillBeNoop(new MediaKeyError(code, systemCode));
+        return adoptRef(new MediaKeyError(code, systemCode));
     }
 
     Code code() const { return m_code; }

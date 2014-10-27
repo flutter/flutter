@@ -39,9 +39,9 @@ namespace blink {
 
 class CSSGridTemplateAreasValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSGridTemplateAreasValue> create(const NamedGridAreaMap& gridAreaMap, size_t rowCount, size_t columnCount)
+    static PassRefPtr<CSSGridTemplateAreasValue> create(const NamedGridAreaMap& gridAreaMap, size_t rowCount, size_t columnCount)
     {
-        return adoptRefWillBeNoop(new CSSGridTemplateAreasValue(gridAreaMap, rowCount, columnCount));
+        return adoptRef(new CSSGridTemplateAreasValue(gridAreaMap, rowCount, columnCount));
     }
     ~CSSGridTemplateAreasValue() { }
 

@@ -45,7 +45,7 @@ class Document;
 class HTMLImportChild;
 class HTMLImportsController;
 
-class HTMLImportLoader final : public NoBaseWillBeGarbageCollectedFinalized<HTMLImportLoader>,
+class HTMLImportLoader final : public DummyBase<HTMLImportLoader>,
                                public MojoFetcher::Client {
 public:
     enum State {
@@ -56,9 +56,9 @@ public:
         StateError
     };
 
-    static PassOwnPtrWillBeRawPtr<HTMLImportLoader> create(HTMLImportsController* controller)
+    static PassOwnPtr<HTMLImportLoader> create(HTMLImportsController* controller)
     {
-        return adoptPtrWillBeNoop(new HTMLImportLoader(controller));
+        return adoptPtr(new HTMLImportLoader(controller));
     }
 
     virtual ~HTMLImportLoader();
@@ -89,7 +89,7 @@ public:
     // Called by Document::didRemoveAllPendingStylesheet.
     void didRemoveAllPendingStylesheet();
 
-    PassRefPtrWillBeRawPtr<CustomElementSyncMicrotaskQueue> microtaskQueue() const;
+    PassRefPtr<CustomElementSyncMicrotaskQueue> microtaskQueue() const;
 
     virtual void trace(Visitor*);
 
@@ -110,11 +110,11 @@ private:
     void clear();
 #endif
 
-    RawPtrWillBeMember<HTMLImportsController> m_controller;
-    WillBeHeapVector<RawPtrWillBeMember<HTMLImportChild> > m_imports;
+    RawPtr<HTMLImportsController> m_controller;
+    Vector<RawPtr<HTMLImportChild> > m_imports;
     State m_state;
-    RefPtrWillBeMember<Document> m_document;
-    RefPtrWillBeMember<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
+    RefPtr<Document> m_document;
+    RefPtr<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
 
     OwnPtr<MojoFetcher> m_fetcher;
 };

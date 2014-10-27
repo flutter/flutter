@@ -36,10 +36,10 @@ namespace blink {
 class RenderStyle;
 class StyleResolverState;
 
-class CachedMatchedProperties final : public NoBaseWillBeGarbageCollectedFinalized<CachedMatchedProperties> {
+class CachedMatchedProperties final : public DummyBase<CachedMatchedProperties> {
 
 public:
-    WillBeHeapVector<MatchedProperties> matchedProperties;
+    Vector<MatchedProperties> matchedProperties;
     MatchRanges ranges;
     RefPtr<RenderStyle> renderStyle;
     RefPtr<RenderStyle> parentRenderStyle;

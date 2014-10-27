@@ -22,7 +22,7 @@ class MediaQueryData {
 private:
     MediaQuery::Restrictor m_restrictor;
     String m_mediaType;
-    OwnPtrWillBeMember<ExpressionHeapVector> m_expressions;
+    OwnPtr<ExpressionHeapVector> m_expressions;
     String m_mediaFeature;
     CSSParserValueList m_valueList;
     bool m_mediaTypeSet;
@@ -33,7 +33,7 @@ public:
     bool addExpression();
     void addParserValue(MediaQueryTokenType, const MediaQueryToken&);
     void setMediaType(const String&);
-    PassOwnPtrWillBeRawPtr<MediaQuery> takeMediaQuery();
+    PassOwnPtr<MediaQuery> takeMediaQuery();
 
     inline bool currentMediaQueryChanged() const
     {
@@ -48,8 +48,8 @@ public:
 class MediaQueryParser {
     STACK_ALLOCATED();
 public:
-    static PassRefPtrWillBeRawPtr<MediaQuerySet> parseMediaQuerySet(const String&);
-    static PassRefPtrWillBeRawPtr<MediaQuerySet> parseMediaCondition(MediaQueryTokenIterator, MediaQueryTokenIterator endToken);
+    static PassRefPtr<MediaQuerySet> parseMediaQuerySet(const String&);
+    static PassRefPtr<MediaQuerySet> parseMediaCondition(MediaQueryTokenIterator, MediaQueryTokenIterator endToken);
 
 private:
     enum ParserType {
@@ -60,7 +60,7 @@ private:
     MediaQueryParser(ParserType);
     virtual ~MediaQueryParser();
 
-    PassRefPtrWillBeRawPtr<MediaQuerySet> parseImpl(MediaQueryTokenIterator, MediaQueryTokenIterator endToken);
+    PassRefPtr<MediaQuerySet> parseImpl(MediaQueryTokenIterator, MediaQueryTokenIterator endToken);
 
     void processToken(const MediaQueryToken&);
 
@@ -84,7 +84,7 @@ private:
     State m_state;
     ParserType m_parserType;
     MediaQueryData m_mediaQueryData;
-    RefPtrWillBeMember<MediaQuerySet> m_querySet;
+    RefPtr<MediaQuerySet> m_querySet;
     MediaQueryBlockWatcher m_blockWatcher;
 
     const static State ReadRestrictor;

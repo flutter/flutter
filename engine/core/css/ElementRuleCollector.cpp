@@ -61,13 +61,13 @@ MatchResult& ElementRuleCollector::matchedResult()
     return m_result;
 }
 
-PassRefPtrWillBeRawPtr<StyleRuleList> ElementRuleCollector::matchedStyleRuleList()
+PassRefPtr<StyleRuleList> ElementRuleCollector::matchedStyleRuleList()
 {
     ASSERT(m_mode == SelectorChecker::CollectingStyleRules);
     return m_styleRuleList.release();
 }
 
-PassRefPtrWillBeRawPtr<CSSRuleList> ElementRuleCollector::matchedCSSRuleList()
+PassRefPtr<CSSRuleList> ElementRuleCollector::matchedCSSRuleList()
 {
     ASSERT(m_mode == SelectorChecker::CollectingCSSRules);
     return m_cssRuleList.release();
@@ -76,7 +76,7 @@ PassRefPtrWillBeRawPtr<CSSRuleList> ElementRuleCollector::matchedCSSRuleList()
 inline void ElementRuleCollector::addMatchedRule(const RuleData* rule, CascadeScope cascadeScope, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
 {
     if (!m_matchedRules)
-        m_matchedRules = adoptPtrWillBeNoop(new WillBeHeapVector<MatchedRule, 32>);
+        m_matchedRules = adoptPtr(new Vector<MatchedRule, 32>);
     m_matchedRules->append(MatchedRule(rule, cascadeScope, cascadeOrder, styleSheetIndex, parentStyleSheet));
 }
 
@@ -199,7 +199,7 @@ void ElementRuleCollector::appendCSSOMWrapperForRule(CSSStyleSheet* parentStyleS
     // |parentStyleSheet| is 0 if and only if the |rule| is coming from User Agent. In this case,
     // it is safe to create CSSOM wrappers without parentStyleSheets as they will be used only
     // by inspector which will not try to edit them.
-    RefPtrWillBeRawPtr<CSSRule> cssRule = nullptr;
+    RefPtr<CSSRule> cssRule = nullptr;
     if (parentStyleSheet)
         cssRule = findStyleRule(parentStyleSheet, rule);
     else
@@ -215,7 +215,7 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
 
     sortMatchedRules();
 
-    WillBeHeapVector<MatchedRule, 32>& matchedRules = *m_matchedRules;
+    Vector<MatchedRule, 32>& matchedRules = *m_matchedRules;
     if (m_mode == SelectorChecker::CollectingStyleRules) {
         for (unsigned i = 0; i < matchedRules.size(); ++i)
             ensureStyleRuleList()->m_list.append(matchedRules[i].ruleData()->rule());

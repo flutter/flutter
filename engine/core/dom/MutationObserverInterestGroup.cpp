@@ -36,18 +36,18 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<MutationObserverInterestGroup> MutationObserverInterestGroup::createIfNeeded(Node& target, MutationObserver::MutationType type, MutationRecordDeliveryOptions oldValueFlag, const QualifiedName* attributeName)
+PassOwnPtr<MutationObserverInterestGroup> MutationObserverInterestGroup::createIfNeeded(Node& target, MutationObserver::MutationType type, MutationRecordDeliveryOptions oldValueFlag, const QualifiedName* attributeName)
 {
     ASSERT((type == MutationObserver::Attributes && attributeName) || !attributeName);
-    WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions> observers;
+    HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions> observers;
     target.getRegisteredMutationObserversOfType(observers, type, attributeName);
     if (observers.isEmpty())
         return nullptr;
 
-    return adoptPtrWillBeNoop(new MutationObserverInterestGroup(observers, oldValueFlag));
+    return adoptPtr(new MutationObserverInterestGroup(observers, oldValueFlag));
 }
 
-MutationObserverInterestGroup::MutationObserverInterestGroup(WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>& observers, MutationRecordDeliveryOptions oldValueFlag)
+MutationObserverInterestGroup::MutationObserverInterestGroup(HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>& observers, MutationRecordDeliveryOptions oldValueFlag)
     : m_oldValueFlag(oldValueFlag)
 {
     ASSERT(!observers.isEmpty());
@@ -56,18 +56,18 @@ MutationObserverInterestGroup::MutationObserverInterestGroup(WillBeHeapHashMap<R
 
 bool MutationObserverInterestGroup::isOldValueRequested()
 {
-    for (WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>::iterator iter = m_observers.begin(); iter != m_observers.end(); ++iter) {
+    for (HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>::iterator iter = m_observers.begin(); iter != m_observers.end(); ++iter) {
         if (hasOldValue(iter->value))
             return true;
     }
     return false;
 }
 
-void MutationObserverInterestGroup::enqueueMutationRecord(PassRefPtrWillBeRawPtr<MutationRecord> prpMutation)
+void MutationObserverInterestGroup::enqueueMutationRecord(PassRefPtr<MutationRecord> prpMutation)
 {
-    RefPtrWillBeRawPtr<MutationRecord> mutation = prpMutation;
-    RefPtrWillBeRawPtr<MutationRecord> mutationWithNullOldValue = nullptr;
-    for (WillBeHeapHashMap<RawPtrWillBeMember<MutationObserver>, MutationRecordDeliveryOptions>::iterator iter = m_observers.begin(); iter != m_observers.end(); ++iter) {
+    RefPtr<MutationRecord> mutation = prpMutation;
+    RefPtr<MutationRecord> mutationWithNullOldValue = nullptr;
+    for (HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>::iterator iter = m_observers.begin(); iter != m_observers.end(); ++iter) {
         MutationObserver* observer = iter->key;
         if (hasOldValue(iter->value)) {
             observer->enqueueMutationRecord(mutation);

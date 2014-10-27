@@ -76,12 +76,12 @@ void ConsoleMessage::setLineNumber(unsigned lineNumber)
     m_lineNumber = lineNumber;
 }
 
-PassRefPtrWillBeRawPtr<ScriptCallStack> ConsoleMessage::callStack() const
+PassRefPtr<ScriptCallStack> ConsoleMessage::callStack() const
 {
     return m_callStack;
 }
 
-void ConsoleMessage::setCallStack(PassRefPtrWillBeRawPtr<ScriptCallStack> callStack)
+void ConsoleMessage::setCallStack(PassRefPtr<ScriptCallStack> callStack)
 {
     m_callStack = callStack;
 }
@@ -104,12 +104,12 @@ void ConsoleMessage::setScriptState(ScriptState* scriptState)
         m_scriptState.clear();
 }
 
-PassRefPtrWillBeRawPtr<ScriptArguments> ConsoleMessage::scriptArguments() const
+PassRefPtr<ScriptArguments> ConsoleMessage::scriptArguments() const
 {
     return m_scriptArguments;
 }
 
-void ConsoleMessage::setScriptArguments(PassRefPtrWillBeRawPtr<ScriptArguments> scriptArguments)
+void ConsoleMessage::setScriptArguments(PassRefPtr<ScriptArguments> scriptArguments)
 {
     m_scriptArguments = scriptArguments;
 }

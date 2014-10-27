@@ -46,19 +46,19 @@ class ScriptArguments;
 class Console final : public ConsoleBase, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Console> create(LocalFrame* frame)
+    static PassRefPtr<Console> create(LocalFrame* frame)
     {
-        return adoptRefWillBeNoop(new Console(frame));
+        return adoptRef(new Console(frame));
     }
     virtual ~Console();
 
-    PassRefPtrWillBeRawPtr<MemoryInfo> memory() const;
+    PassRefPtr<MemoryInfo> memory() const;
 
     virtual void trace(Visitor* visitor) override { ConsoleBase::trace(visitor); }
 
 protected:
     virtual ExecutionContext* context() override;
-    virtual void reportMessageToConsole(PassRefPtrWillBeRawPtr<ConsoleMessage>) override;
+    virtual void reportMessageToConsole(PassRefPtr<ConsoleMessage>) override;
 
 private:
     explicit Console(LocalFrame*);

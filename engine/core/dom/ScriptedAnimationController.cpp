@@ -81,7 +81,7 @@ void ScriptedAnimationController::resume()
     scheduleAnimationIfNeeded();
 }
 
-ScriptedAnimationController::CallbackId ScriptedAnimationController::registerCallback(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback> callback)
+ScriptedAnimationController::CallbackId ScriptedAnimationController::registerCallback(PassOwnPtr<RequestAnimationFrameCallback> callback)
 {
     ScriptedAnimationController::CallbackId id = ++m_nextCallbackId;
     WTF_LOG(ScriptedAnimationController, "registerCallback: id = %d", id);
@@ -120,7 +120,7 @@ void ScriptedAnimationController::cancelCallback(CallbackId id)
 
 void ScriptedAnimationController::dispatchEvents()
 {
-    WillBeHeapVector<RefPtrWillBeMember<Event> > events;
+    Vector<RefPtr<Event> > events;
     events.swap(m_eventQueue);
     m_perFrameEvents.clear();
 
@@ -189,7 +189,7 @@ void ScriptedAnimationController::serviceScriptedAnimations(double monotonicTime
     if (m_suspendCount)
         return;
 
-    RefPtrWillBeRawPtr<ScriptedAnimationController> protect(this);
+    RefPtr<ScriptedAnimationController> protect(this);
 
     callMediaQueryListListeners();
     dispatchEvents();
@@ -198,21 +198,21 @@ void ScriptedAnimationController::serviceScriptedAnimations(double monotonicTime
     scheduleAnimationIfNeeded();
 }
 
-void ScriptedAnimationController::enqueueEvent(PassRefPtrWillBeRawPtr<Event> event)
+void ScriptedAnimationController::enqueueEvent(PassRefPtr<Event> event)
 {
     WTF_LOG(ScriptedAnimationController, "enqueueEvent");
     m_eventQueue.append(event);
     scheduleAnimationIfNeeded();
 }
 
-void ScriptedAnimationController::enqueuePerFrameEvent(PassRefPtrWillBeRawPtr<Event> event)
+void ScriptedAnimationController::enqueuePerFrameEvent(PassRefPtr<Event> event)
 {
     if (!m_perFrameEvents.add(eventTargetKey(event.get())).isNewEntry)
         return;
     enqueueEvent(event);
 }
 
-void ScriptedAnimationController::enqueueMediaQueryChangeListeners(WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> >& listeners)
+void ScriptedAnimationController::enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >& listeners)
 {
     WTF_LOG(ScriptedAnimationController, "enqueueMediaQueryChangeListeners");
     for (size_t i = 0; i < listeners.size(); ++i) {

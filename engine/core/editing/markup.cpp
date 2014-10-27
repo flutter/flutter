@@ -69,7 +69,7 @@ public:
     {
     }
 
-    AttributeChange(PassRefPtrWillBeRawPtr<Element> element, const QualifiedName& name, const String& value)
+    AttributeChange(PassRefPtr<Element> element, const QualifiedName& name, const String& value)
         : m_element(element), m_name(name), m_value(value)
     {
     }
@@ -85,7 +85,7 @@ public:
     }
 
 private:
-    RefPtrWillBeMember<Element> m_element;
+    RefPtr<Element> m_element;
     QualifiedName m_name;
     String m_value;
 };
@@ -100,7 +100,7 @@ class StyledMarkupAccumulator final : public MarkupAccumulator {
 public:
     enum RangeFullySelectsNode { DoesFullySelectNode, DoesNotFullySelectNode };
 
-    StyledMarkupAccumulator(WillBeHeapVector<RawPtrWillBeMember<Node> >* nodes, EAbsoluteURLs, EAnnotateForInterchange, RawPtr<const Range>, Node* highestNodeToBeSerialized = 0);
+    StyledMarkupAccumulator(Vector<RawPtr<Node> >* nodes, EAbsoluteURLs, EAnnotateForInterchange, RawPtr<const Range>, Node* highestNodeToBeSerialized = 0);
     Node* serializeNodes(Node* startNode, Node* pastEnd);
     void appendString(const String& s) { return MarkupAccumulator::appendString(s); }
     void wrapWithNode(ContainerNode&, bool convertBlocksToInlines = false, RangeFullySelectsNode = DoesFullySelectNode);
@@ -128,11 +128,11 @@ private:
 
     Vector<String> m_reversedPrecedingMarkup;
     const EAnnotateForInterchange m_shouldAnnotate;
-    RawPtrWillBeMember<Node> m_highestNodeToBeSerialized;
-    RefPtrWillBeMember<EditingStyle> m_wrappingStyle;
+    RawPtr<Node> m_highestNodeToBeSerialized;
+    RefPtr<EditingStyle> m_wrappingStyle;
 };
 
-inline StyledMarkupAccumulator::StyledMarkupAccumulator(WillBeHeapVector<RawPtrWillBeMember<Node> >* nodes, EAbsoluteURLs shouldResolveURLs, EAnnotateForInterchange shouldAnnotate, RawPtr<const Range> range, Node* highestNodeToBeSerialized)
+inline StyledMarkupAccumulator::StyledMarkupAccumulator(Vector<RawPtr<Node> >* nodes, EAbsoluteURLs shouldResolveURLs, EAnnotateForInterchange shouldAnnotate, RawPtr<const Range> range, Node* highestNodeToBeSerialized)
     : MarkupAccumulator(nodes, shouldResolveURLs, range)
     , m_shouldAnnotate(shouldAnnotate)
     , m_highestNodeToBeSerialized(highestNodeToBeSerialized)
@@ -248,7 +248,7 @@ void StyledMarkupAccumulator::appendElement(StringBuilder& out, Element& element
     }
 
     if (shouldOverrideStyleAttr) {
-        RefPtrWillBeRawPtr<EditingStyle> newInlineStyle = nullptr;
+        RefPtr<EditingStyle> newInlineStyle = nullptr;
 
         if (shouldApplyWrappingStyle(element)) {
             newInlineStyle = m_wrappingStyle->copy();
@@ -308,7 +308,7 @@ Node* StyledMarkupAccumulator::serializeNodes(Node* startNode, Node* pastEnd)
 Node* StyledMarkupAccumulator::traverseNodesForSerialization(Node* startNode, Node* pastEnd, NodeTraversalMode traversalMode)
 {
     const bool shouldEmit = traversalMode == EmitString;
-    WillBeHeapVector<RawPtrWillBeMember<ContainerNode> > ancestorsToClose;
+    Vector<RawPtr<ContainerNode> > ancestorsToClose;
     Node* next;
     Node* lastClosed = 0;
     for (Node* n = startNode; n != pastEnd; n = next) {
@@ -389,7 +389,7 @@ static bool propertyMissingOrEqualToNone(StylePropertySet* style, CSSPropertyID 
 {
     if (!style)
         return false;
-    RefPtrWillBeRawPtr<CSSValue> value = style->getPropertyCSSValue(propertyID);
+    RefPtr<CSSValue> value = style->getPropertyCSSValue(propertyID);
     if (!value)
         return true;
     if (!value->isPrimitiveValue())
@@ -402,9 +402,9 @@ static bool needInterchangeNewlineAfter(const VisiblePosition& v)
     return isEndOfParagraph(v) && isStartOfParagraph(v.next());
 }
 
-static PassRefPtrWillBeRawPtr<EditingStyle> styleFromMatchedRulesAndInlineDecl(const HTMLElement* element)
+static PassRefPtr<EditingStyle> styleFromMatchedRulesAndInlineDecl(const HTMLElement* element)
 {
-    RefPtrWillBeRawPtr<EditingStyle> style = EditingStyle::create(element->inlineStyle());
+    RefPtr<EditingStyle> style = EditingStyle::create(element->inlineStyle());
     // FIXME: Having to const_cast here is ugly, but it is quite a bit of work to untangle
     // the non-const-ness of styleFromMatchedRulesForElement.
     style->mergeStyleFromRules(const_cast<HTMLElement*>(element));
@@ -436,7 +436,7 @@ static HTMLElement* highestAncestorToWrapMarkup(const Range* range, EAnnotateFor
 
 // FIXME: Shouldn't we omit style info when annotate == DoNotAnnotateForInterchange?
 // FIXME: At least, annotation and style info should probably not be included in range.markupString()
-static String createMarkupInternal(Document& document, const Range* range, const Range* updatedRange, WillBeHeapVector<RawPtrWillBeMember<Node> >* nodes,
+static String createMarkupInternal(Document& document, const Range* range, const Range* updatedRange, Vector<RawPtr<Node> >* nodes,
     EAnnotateForInterchange shouldAnnotate, bool convertBlocksToInlines, EAbsoluteURLs shouldResolveURLs, Node* constrainingAncestor)
 {
     ASSERT(range);
@@ -480,7 +480,7 @@ static String createMarkupInternal(Document& document, const Range* range, const
         // Also include all of the ancestors of lastClosed up to this special ancestor.
         for (ContainerNode* ancestor = lastClosed->parentNode(); ancestor; ancestor = ancestor->parentNode()) {
             if (ancestor == fullySelectedRoot && !convertBlocksToInlines) {
-                RefPtrWillBeRawPtr<EditingStyle> fullySelectedRootStyle = styleFromMatchedRulesAndInlineDecl(fullySelectedRoot);
+                RefPtr<EditingStyle> fullySelectedRootStyle = styleFromMatchedRulesAndInlineDecl(fullySelectedRoot);
 
                 // Bring the background attribute over, but not as an attribute because a background attribute on a div
                 // appears to have no effect.
@@ -518,7 +518,7 @@ static String createMarkupInternal(Document& document, const Range* range, const
     return accumulator.takeResults();
 }
 
-String createMarkup(const Range* range, WillBeHeapVector<RawPtrWillBeMember<Node> >* nodes, EAnnotateForInterchange shouldAnnotate, bool convertBlocksToInlines, EAbsoluteURLs shouldResolveURLs, Node* constrainingAncestor)
+String createMarkup(const Range* range, Vector<RawPtr<Node> >* nodes, EAnnotateForInterchange shouldAnnotate, bool convertBlocksToInlines, EAbsoluteURLs shouldResolveURLs, Node* constrainingAncestor)
 {
     if (!range)
         return emptyString();
@@ -529,7 +529,7 @@ String createMarkup(const Range* range, WillBeHeapVector<RawPtrWillBeMember<Node
     return createMarkupInternal(document, range, updatedRange, nodes, shouldAnnotate, convertBlocksToInlines, shouldResolveURLs, constrainingAncestor);
 }
 
-String createMarkup(const Node* node, EChildrenOnly childrenOnly, WillBeHeapVector<RawPtrWillBeMember<Node> >* nodes, EAbsoluteURLs shouldResolveURLs, Vector<QualifiedName>* tagNamesToSkip)
+String createMarkup(const Node* node, EChildrenOnly childrenOnly, Vector<RawPtr<Node> >* nodes, EAbsoluteURLs shouldResolveURLs, Vector<QualifiedName>* tagNamesToSkip)
 {
     if (!node)
         return "";
@@ -538,10 +538,10 @@ String createMarkup(const Node* node, EChildrenOnly childrenOnly, WillBeHeapVect
     return accumulator.serializeNodes(const_cast<Node&>(*node), childrenOnly, tagNamesToSkip);
 }
 
-void replaceChildrenWithFragment(ContainerNode* container, PassRefPtrWillBeRawPtr<DocumentFragment> fragment, ExceptionState& exceptionState)
+void replaceChildrenWithFragment(ContainerNode* container, PassRefPtr<DocumentFragment> fragment, ExceptionState& exceptionState)
 {
     ASSERT(container);
-    RefPtrWillBeRawPtr<ContainerNode> containerNode(container);
+    RefPtr<ContainerNode> containerNode(container);
 
     ChildListMutationScope mutation(*containerNode);
 
@@ -573,7 +573,7 @@ void mergeWithNextTextNode(Text* textNode, ExceptionState& exceptionState)
     if (!next || !next->isTextNode())
         return;
 
-    RefPtrWillBeRawPtr<Text> textNext = toText(next);
+    RefPtr<Text> textNext = toText(next);
     textNode->appendData(textNext->data());
     if (textNext->parentNode()) // Might have been removed by mutation event.
         textNext->remove(exceptionState);

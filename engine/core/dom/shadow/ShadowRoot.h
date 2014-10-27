@@ -49,9 +49,9 @@ class ShadowRoot final : public DocumentFragment, public TreeScope, public Doubl
     friend class WTF::DoublyLinkedListNode<ShadowRoot>;
 public:
 
-    static PassRefPtrWillBeRawPtr<ShadowRoot> create(Document& document)
+    static PassRefPtr<ShadowRoot> create(Document& document)
     {
-        return adoptRefWillBeNoop(new ShadowRoot(document));
+        return adoptRef(new ShadowRoot(document));
     }
 
     void recalcStyle(StyleRecalcChange);
@@ -87,11 +87,11 @@ public:
     unsigned numberOfStyles() const { return m_numberOfStyles; }
 
     HTMLShadowElement* shadowInsertionPointOfYoungerShadowRoot() const;
-    void setShadowInsertionPointOfYoungerShadowRoot(PassRefPtrWillBeRawPtr<HTMLShadowElement>);
+    void setShadowInsertionPointOfYoungerShadowRoot(PassRefPtr<HTMLShadowElement>);
 
     void didAddInsertionPoint(InsertionPoint*);
     void didRemoveInsertionPoint(InsertionPoint*);
-    const WillBeHeapVector<RefPtrWillBeMember<InsertionPoint> >& descendantInsertionPoints();
+    const Vector<RefPtr<InsertionPoint> >& descendantInsertionPoints();
 
     // Make protected methods from base class public here.
     using TreeScope::setDocument;
@@ -102,8 +102,8 @@ public:
 
     ShadowRoot* olderShadowRoot() const { return next(); }
 
-    PassRefPtrWillBeRawPtr<Node> cloneNode(bool, ExceptionState&);
-    PassRefPtrWillBeRawPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
+    PassRefPtr<Node> cloneNode(bool, ExceptionState&);
+    PassRefPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
 
     StyleSheetList* styleSheets();
 
@@ -126,14 +126,14 @@ private:
     void invalidateDescendantInsertionPoints();
 
     // ShadowRoots should never be cloned.
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool) override { return nullptr; }
+    virtual PassRefPtr<Node> cloneNode(bool) override { return nullptr; }
 
     // FIXME: This shouldn't happen. https://bugs.webkit.org/show_bug.cgi?id=88834
     bool isOrphan() const { return !host(); }
 
-    RawPtrWillBeMember<ShadowRoot> m_prev;
-    RawPtrWillBeMember<ShadowRoot> m_next;
-    OwnPtrWillBeMember<ShadowRootRareData> m_shadowRootRareData;
+    RawPtr<ShadowRoot> m_prev;
+    RawPtr<ShadowRoot> m_next;
+    OwnPtr<ShadowRootRareData> m_shadowRootRareData;
     unsigned m_numberOfStyles : 27;
     unsigned m_registeredWithParentShadowRoot : 1;
     unsigned m_descendantInsertionPointsIsValid : 1;

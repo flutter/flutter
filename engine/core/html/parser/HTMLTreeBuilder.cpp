@@ -95,7 +95,7 @@ void HTMLTreeBuilder::FragmentParsingContext::trace(Visitor* visitor)
     visitor->trace(m_fragment);
 }
 
-PassRefPtrWillBeRawPtr<Element> HTMLTreeBuilder::takeScriptToProcess(TextPosition& scriptStartPosition)
+PassRefPtr<Element> HTMLTreeBuilder::takeScriptToProcess(TextPosition& scriptStartPosition)
 {
     ASSERT(m_scriptToProcess);
     ASSERT(!m_tree.hasPendingTasks());
@@ -160,7 +160,7 @@ void HTMLTreeBuilder::processEndTag(AtomicHTMLToken* token)
     if (mode == HTMLMode) {
         HTMLElementStack::ElementRecord* record = m_tree.openElements()->topRecord();
         while (record->next()) {
-            RefPtrWillBeRawPtr<Element> element = record->element();
+            RefPtr<Element> element = record->element();
             if (element->hasLocalName(token->name())) {
                 m_tree.openElements()->popUntilPopped(element.get());
                 ASSERT(m_tree.openElements()->topNode());

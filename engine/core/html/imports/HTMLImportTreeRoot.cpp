@@ -12,9 +12,9 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<HTMLImportTreeRoot> HTMLImportTreeRoot::create(Document* document)
+PassOwnPtr<HTMLImportTreeRoot> HTMLImportTreeRoot::create(Document* document)
 {
-    return adoptPtrWillBeNoop(new HTMLImportTreeRoot(document));
+    return adoptPtr(new HTMLImportTreeRoot(document));
 }
 
 HTMLImportTreeRoot::HTMLImportTreeRoot(Document* document)
@@ -72,7 +72,7 @@ void HTMLImportTreeRoot::scheduleRecalcState()
     m_recalcTimer.startOneShot(0, FROM_HERE);
 }
 
-HTMLImportChild* HTMLImportTreeRoot::add(PassOwnPtrWillBeRawPtr<HTMLImportChild> child)
+HTMLImportChild* HTMLImportTreeRoot::add(PassOwnPtr<HTMLImportChild> child)
 {
     m_imports.append(child);
     return m_imports.last().get();

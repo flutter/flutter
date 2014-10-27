@@ -40,7 +40,7 @@ namespace blink {
 
 class HTMLLinkElement;
 
-class LinkResource : public NoBaseWillBeGarbageCollectedFinalized<LinkResource>  {
+class LinkResource : public DummyBase<LinkResource>  {
     WTF_MAKE_NONCOPYABLE(LinkResource); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     enum Type {
@@ -64,7 +64,7 @@ public:
     virtual void trace(Visitor*);
 
 protected:
-    RawPtrWillBeMember<HTMLLinkElement> m_owner;
+    RawPtr<HTMLLinkElement> m_owner;
 };
 
 class LinkRequestBuilder {
@@ -78,7 +78,7 @@ public:
     FetchRequest build(bool blocking) const;
 
 private:
-    RawPtrWillBeMember<HTMLLinkElement> m_owner;
+    RawPtr<HTMLLinkElement> m_owner;
     KURL m_url;
     AtomicString m_charset;
 };

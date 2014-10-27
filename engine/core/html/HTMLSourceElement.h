@@ -66,8 +66,8 @@ private:
 
     void notifyMediaQueryChanged();
 
-    RefPtrWillBeMember<MediaQueryList> m_mediaQueryList;
-    RefPtrWillBeMember<Listener> m_listener;
+    RefPtr<MediaQueryList> m_mediaQueryList;
+    RefPtr<Listener> m_listener;
 };
 
 } // namespace blink

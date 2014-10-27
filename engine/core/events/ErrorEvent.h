@@ -50,21 +50,21 @@ struct ErrorEventInit : public EventInit {
 class ErrorEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ErrorEvent> create()
+    static PassRefPtr<ErrorEvent> create()
     {
-        return adoptRefWillBeNoop(new ErrorEvent);
+        return adoptRef(new ErrorEvent);
     }
-    static PassRefPtrWillBeRawPtr<ErrorEvent> create(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld* world)
+    static PassRefPtr<ErrorEvent> create(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld* world)
     {
-        return adoptRefWillBeNoop(new ErrorEvent(message, fileName, lineNumber, columnNumber, world));
+        return adoptRef(new ErrorEvent(message, fileName, lineNumber, columnNumber, world));
     }
-    static PassRefPtrWillBeRawPtr<ErrorEvent> create(const AtomicString& type, const ErrorEventInit& initializer)
+    static PassRefPtr<ErrorEvent> create(const AtomicString& type, const ErrorEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new ErrorEvent(type, initializer));
+        return adoptRef(new ErrorEvent(type, initializer));
     }
-    static PassRefPtrWillBeRawPtr<ErrorEvent> createSanitizedError(DOMWrapperWorld* world)
+    static PassRefPtr<ErrorEvent> createSanitizedError(DOMWrapperWorld* world)
     {
-        return adoptRefWillBeNoop(new ErrorEvent("Script error.", String(), 0, 0, world));
+        return adoptRef(new ErrorEvent("Script error.", String(), 0, 0, world));
     }
     virtual ~ErrorEvent();
 

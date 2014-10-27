@@ -55,7 +55,7 @@ class URLRegistry;
 // But it can't be until the Chromium WebMediaPlayerClientImpl class is fixed so it
 // no longer depends on typecasting a MediaPlayerClient to an HTMLMediaElement.
 
-class HTMLMediaElement : public HTMLElement, public WillBeHeapSupplementable<HTMLMediaElement>, public MediaPlayerClient, public ActiveDOMObject
+class HTMLMediaElement : public HTMLElement, public Supplementable<HTMLMediaElement>, public MediaPlayerClient, public ActiveDOMObject
 {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLMediaElement);
@@ -84,7 +84,7 @@ public:
     bool isActive() const { return m_active; }
 
     // error state
-    PassRefPtrWillBeRawPtr<MediaError> error() const;
+    PassRefPtr<MediaError> error() const;
 
     // network state
     void setSrc(const AtomicString&);
@@ -96,7 +96,7 @@ public:
     String preload() const;
     void setPreload(const AtomicString&);
 
-    PassRefPtrWillBeRawPtr<TimeRanges> buffered() const;
+    PassRefPtr<TimeRanges> buffered() const;
     void load();
     String canPlayType(const String& mimeType, const String& keySystem = String()) const;
 
@@ -115,8 +115,8 @@ public:
     double playbackRate() const;
     void setPlaybackRate(double);
     void updatePlaybackRate();
-    PassRefPtrWillBeRawPtr<TimeRanges> played();
-    PassRefPtrWillBeRawPtr<TimeRanges> seekable() const;
+    PassRefPtr<TimeRanges> played();
+    PassRefPtr<TimeRanges> seekable() const;
     bool ended() const;
     bool autoplay() const;
     bool loop() const;
@@ -163,7 +163,7 @@ public:
     enum InvalidURLAction { DoNothing, Complain };
     bool isSafeToLoadURL(const KURL&, InvalidURLAction);
 
-    void scheduleEvent(PassRefPtrWillBeRawPtr<Event>);
+    void scheduleEvent(PassRefPtr<Event>);
 
     // Returns the "effective media volume" value as specified in the HTML5 spec.
     double effectiveMediaVolume() const;
@@ -264,7 +264,7 @@ private:
     void clearMediaPlayerAndAudioSourceProviderClientWithoutLocking();
     bool havePotentialSourceChild();
     void noneSupported();
-    void mediaEngineError(PassRefPtrWillBeRawPtr<MediaError>);
+    void mediaEngineError(PassRefPtr<MediaError>);
     void cancelPendingEventsAndCallbacks();
     void waitForSourceChange();
     void prepareToPlay();
@@ -324,8 +324,8 @@ private:
     Timer<HTMLMediaElement> m_loadTimer;
     Timer<HTMLMediaElement> m_progressEventTimer;
     Timer<HTMLMediaElement> m_playbackProgressTimer;
-    RefPtrWillBeMember<TimeRanges> m_playedTimeRanges;
-    OwnPtrWillBeMember<GenericEventQueue> m_asyncEventQueue;
+    RefPtr<TimeRanges> m_playedTimeRanges;
+    OwnPtr<GenericEventQueue> m_asyncEventQueue;
 
     double m_playbackRate;
     double m_defaultPlaybackRate;
@@ -334,7 +334,7 @@ private:
     ReadyState m_readyStateMaximum;
     KURL m_currentSrc;
 
-    RefPtrWillBeMember<MediaError> m_error;
+    RefPtr<MediaError> m_error;
 
     double m_volume;
     double m_lastSeekTime;
@@ -353,8 +353,8 @@ private:
     // Loading state.
     enum LoadState { WaitingForSource, LoadingFromSrcAttr, LoadingFromSourceElement };
     LoadState m_loadState;
-    RefPtrWillBeMember<HTMLSourceElement> m_currentSourceNode;
-    RefPtrWillBeMember<Node> m_nextChildNodeToConsider;
+    RefPtr<HTMLSourceElement> m_currentSourceNode;
+    RefPtr<Node> m_nextChildNodeToConsider;
 
     // "Deferred loading" state (for preload=none).
     enum DeferredLoadState {
@@ -379,7 +379,7 @@ private:
 
     DisplayMode m_displayMode;
 
-    RefPtrWillBeMember<HTMLMediaSource> m_mediaSource;
+    RefPtr<HTMLMediaSource> m_mediaSource;
 
     // Cached time value. Only valid when ready state is HAVE_METADATA or
     // higher, otherwise the current time is assumed to be zero.

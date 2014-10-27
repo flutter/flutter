@@ -49,9 +49,9 @@ DragCaretController::DragCaretController()
 {
 }
 
-PassOwnPtrWillBeRawPtr<DragCaretController> DragCaretController::create()
+PassOwnPtr<DragCaretController> DragCaretController::create()
 {
-    return adoptPtrWillBeNoop(new DragCaretController);
+    return adoptPtr(new DragCaretController);
 }
 
 bool DragCaretController::isContentRichlyEditable() const

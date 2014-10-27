@@ -40,7 +40,7 @@ class MediaQuerySet;
 class MediaValues;
 class RenderStyle;
 
-typedef WillBeHeapVector<RefPtrWillBeMember<MediaQueryResult> > MediaQueryResultList;
+typedef Vector<RefPtr<MediaQueryResult> > MediaQueryResultList;
 
 // Class that evaluates css media queries as defined in
 // CSS3 Module "Media Queries" (http://www.w3.org/TR/css3-mediaqueries/)

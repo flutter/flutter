@@ -37,15 +37,15 @@ class DocumentFragment;
 class TextEvent final : public UIEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<TextEvent> create();
-    static PassRefPtrWillBeRawPtr<TextEvent> create(PassRefPtrWillBeRawPtr<AbstractView>, const String& data, TextEventInputType = TextEventInputKeyboard);
-    static PassRefPtrWillBeRawPtr<TextEvent> createForPlainTextPaste(PassRefPtrWillBeRawPtr<AbstractView>, const String& data, bool shouldSmartReplace);
-    static PassRefPtrWillBeRawPtr<TextEvent> createForFragmentPaste(PassRefPtrWillBeRawPtr<AbstractView>, PassRefPtrWillBeRawPtr<DocumentFragment> data, bool shouldSmartReplace, bool shouldMatchStyle);
-    static PassRefPtrWillBeRawPtr<TextEvent> createForDrop(PassRefPtrWillBeRawPtr<AbstractView>, const String& data);
+    static PassRefPtr<TextEvent> create();
+    static PassRefPtr<TextEvent> create(PassRefPtr<AbstractView>, const String& data, TextEventInputType = TextEventInputKeyboard);
+    static PassRefPtr<TextEvent> createForPlainTextPaste(PassRefPtr<AbstractView>, const String& data, bool shouldSmartReplace);
+    static PassRefPtr<TextEvent> createForFragmentPaste(PassRefPtr<AbstractView>, PassRefPtr<DocumentFragment> data, bool shouldSmartReplace, bool shouldMatchStyle);
+    static PassRefPtr<TextEvent> createForDrop(PassRefPtr<AbstractView>, const String& data);
 
     virtual ~TextEvent();
 
-    void initTextEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView>, const String& data);
+    void initTextEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>, const String& data);
 
     String data() const { return m_data; }
 
@@ -65,13 +65,13 @@ public:
 private:
     TextEvent();
 
-    TextEvent(PassRefPtrWillBeRawPtr<AbstractView>, const String& data, TextEventInputType = TextEventInputKeyboard);
-    TextEvent(PassRefPtrWillBeRawPtr<AbstractView>, const String& data, PassRefPtrWillBeRawPtr<DocumentFragment>, bool shouldSmartReplace, bool shouldMatchStyle);
+    TextEvent(PassRefPtr<AbstractView>, const String& data, TextEventInputType = TextEventInputKeyboard);
+    TextEvent(PassRefPtr<AbstractView>, const String& data, PassRefPtr<DocumentFragment>, bool shouldSmartReplace, bool shouldMatchStyle);
 
     TextEventInputType m_inputType;
     String m_data;
 
-    RefPtrWillBeMember<DocumentFragment> m_pastingFragment;
+    RefPtr<DocumentFragment> m_pastingFragment;
     bool m_shouldSmartReplace;
     bool m_shouldMatchStyle;
 };

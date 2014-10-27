@@ -28,7 +28,7 @@
 
 namespace blink {
 
-class RectBase : public RefCountedWillBeGarbageCollected<RectBase>, public ScriptWrappableBase {
+class RectBase : public RefCounted<RectBase>, public ScriptWrappableBase {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(RectBase);
 public:
     CSSPrimitiveValue* top() const { return m_top.get(); }
@@ -36,10 +36,10 @@ public:
     CSSPrimitiveValue* bottom() const { return m_bottom.get(); }
     CSSPrimitiveValue* left() const { return m_left.get(); }
 
-    void setTop(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> top) { m_top = top; }
-    void setRight(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> right) { m_right = right; }
-    void setBottom(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> bottom) { m_bottom = bottom; }
-    void setLeft(PassRefPtrWillBeRawPtr<CSSPrimitiveValue> left) { m_left = left; }
+    void setTop(PassRefPtr<CSSPrimitiveValue> top) { m_top = top; }
+    void setRight(PassRefPtr<CSSPrimitiveValue> right) { m_right = right; }
+    void setBottom(PassRefPtr<CSSPrimitiveValue> bottom) { m_bottom = bottom; }
+    void setLeft(PassRefPtr<CSSPrimitiveValue> left) { m_left = left; }
 
     bool equals(const RectBase& other) const
     {
@@ -62,17 +62,17 @@ protected:
     }
 
 private:
-    RefPtrWillBeMember<CSSPrimitiveValue> m_top;
-    RefPtrWillBeMember<CSSPrimitiveValue> m_right;
-    RefPtrWillBeMember<CSSPrimitiveValue> m_bottom;
-    RefPtrWillBeMember<CSSPrimitiveValue> m_left;
+    RefPtr<CSSPrimitiveValue> m_top;
+    RefPtr<CSSPrimitiveValue> m_right;
+    RefPtr<CSSPrimitiveValue> m_bottom;
+    RefPtr<CSSPrimitiveValue> m_left;
 };
 
 class Rect : public RectBase {
 public:
-    static PassRefPtrWillBeRawPtr<Rect> create() { return adoptRefWillBeNoop(new Rect); }
+    static PassRefPtr<Rect> create() { return adoptRef(new Rect); }
 
-    PassRefPtrWillBeRawPtr<Rect> cloneForCSSOM() const { return adoptRefWillBeNoop(new Rect(*this)); }
+    PassRefPtr<Rect> cloneForCSSOM() const { return adoptRef(new Rect(*this)); }
 
     String cssText() const
     {
@@ -94,9 +94,9 @@ private:
 
 class Quad : public RectBase {
 public:
-    static PassRefPtrWillBeRawPtr<Quad> create() { return adoptRefWillBeNoop(new Quad); }
+    static PassRefPtr<Quad> create() { return adoptRef(new Quad); }
 
-    PassRefPtrWillBeRawPtr<Quad> cloneForCSSOM() const { return adoptRefWillBeNoop(new Quad(*this)); }
+    PassRefPtr<Quad> cloneForCSSOM() const { return adoptRef(new Quad(*this)); }
 
     String cssText() const
     {

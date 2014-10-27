@@ -18,9 +18,9 @@ class CSSValueList;
 
 class DeferredLegacyStyleInterpolation : public StyleInterpolation {
 public:
-    static PassRefPtrWillBeRawPtr<DeferredLegacyStyleInterpolation> create(PassRefPtrWillBeRawPtr<CSSValue> start, PassRefPtrWillBeRawPtr<CSSValue> end, CSSPropertyID id)
+    static PassRefPtr<DeferredLegacyStyleInterpolation> create(PassRefPtr<CSSValue> start, PassRefPtr<CSSValue> end, CSSPropertyID id)
     {
-        return adoptRefWillBeNoop(new DeferredLegacyStyleInterpolation(start, end, id));
+        return adoptRef(new DeferredLegacyStyleInterpolation(start, end, id));
     }
 
     virtual void apply(StyleResolverState&) const override;
@@ -35,15 +35,15 @@ public:
     static bool interpolationRequiresStyleResolve(const CSSBasicShape&);
 
 private:
-    DeferredLegacyStyleInterpolation(PassRefPtrWillBeRawPtr<CSSValue> start, PassRefPtrWillBeRawPtr<CSSValue> end, CSSPropertyID id)
+    DeferredLegacyStyleInterpolation(PassRefPtr<CSSValue> start, PassRefPtr<CSSValue> end, CSSPropertyID id)
         : StyleInterpolation(InterpolableNumber::create(0), InterpolableNumber::create(1), id)
         , m_startCSSValue(start)
         , m_endCSSValue(end)
     {
     }
 
-    RefPtrWillBeMember<CSSValue> m_startCSSValue;
-    RefPtrWillBeMember<CSSValue> m_endCSSValue;
+    RefPtr<CSSValue> m_startCSSValue;
+    RefPtr<CSSValue> m_endCSSValue;
 };
 
 }

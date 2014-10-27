@@ -59,9 +59,9 @@ class PumpSession;
 class HTMLDocumentParser :  public DocumentParser {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassRefPtrWillBeRawPtr<HTMLDocumentParser> create(HTMLDocument& document, bool reportErrors)
+    static PassRefPtr<HTMLDocumentParser> create(HTMLDocument& document, bool reportErrors)
     {
-        return adoptRefWillBeNoop(new HTMLDocumentParser(document, reportErrors));
+        return adoptRef(new HTMLDocumentParser(document, reportErrors));
     }
     virtual ~HTMLDocumentParser();
 
@@ -122,7 +122,7 @@ private:
     bool inPumpSession() const { return m_pumpSessionNestingLevel > 0; }
     bool shouldDelayEnd() const { return inPumpSession() || isWaitingForScripts() || isScheduledForResume() || isExecutingScript(); }
 
-    OwnPtrWillBeMember<HTMLTreeBuilder> m_treeBuilder;
+    OwnPtr<HTMLTreeBuilder> m_treeBuilder;
     OwnPtr<HTMLParserScheduler> m_parserScheduler;
     TextPosition m_textPosition;
 

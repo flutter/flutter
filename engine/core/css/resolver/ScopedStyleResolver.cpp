@@ -104,7 +104,7 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(const 
     return it->value.get();
 }
 
-void ScopedStyleResolver::addKeyframeStyle(PassRefPtrWillBeRawPtr<StyleRuleKeyframes> rule)
+void ScopedStyleResolver::addKeyframeStyle(PassRefPtr<StyleRuleKeyframes> rule)
 {
     AtomicString s(rule->name());
     if (rule->isVendorPrefixed()) {

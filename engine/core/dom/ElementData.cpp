@@ -37,7 +37,7 @@
 
 namespace blink {
 
-struct SameSizeAsElementData : public RefCountedWillBeGarbageCollectedFinalized<SameSizeAsElementData> {
+struct SameSizeAsElementData : public RefCounted<SameSizeAsElementData> {
     unsigned bitfield;
     void* pointers[3];
 };
@@ -91,11 +91,11 @@ void ElementData::destroy()
 }
 #endif
 
-PassRefPtrWillBeRawPtr<UniqueElementData> ElementData::makeUniqueCopy() const
+PassRefPtr<UniqueElementData> ElementData::makeUniqueCopy() const
 {
     if (isUnique())
-        return adoptRefWillBeNoop(new UniqueElementData(toUniqueElementData(*this)));
-    return adoptRefWillBeNoop(new UniqueElementData(toShareableElementData(*this)));
+        return adoptRef(new UniqueElementData(toUniqueElementData(*this)));
+    return adoptRef(new UniqueElementData(toShareableElementData(*this)));
 }
 
 bool ElementData::isEquivalent(const ElementData* other) const
@@ -154,10 +154,10 @@ ShareableElementData::ShareableElementData(const UniqueElementData& other)
         new (&m_attributeArray[i]) Attribute(other.m_attributeVector.at(i));
 }
 
-PassRefPtrWillBeRawPtr<ShareableElementData> ShareableElementData::createWithAttributes(const Vector<Attribute>& attributes)
+PassRefPtr<ShareableElementData> ShareableElementData::createWithAttributes(const Vector<Attribute>& attributes)
 {
     void* slot = WTF::fastMalloc(sizeForShareableElementDataWithAttributeCount(attributes.size()));
-    return adoptRefWillBeNoop(new (slot) ShareableElementData(attributes));
+    return adoptRef(new (slot) ShareableElementData(attributes));
 }
 
 UniqueElementData::UniqueElementData()
@@ -184,15 +184,15 @@ UniqueElementData::UniqueElementData(const ShareableElementData& other)
         m_attributeVector.uncheckedAppend(other.m_attributeArray[i]);
 }
 
-PassRefPtrWillBeRawPtr<UniqueElementData> UniqueElementData::create()
+PassRefPtr<UniqueElementData> UniqueElementData::create()
 {
-    return adoptRefWillBeNoop(new UniqueElementData);
+    return adoptRef(new UniqueElementData);
 }
 
-PassRefPtrWillBeRawPtr<ShareableElementData> UniqueElementData::makeShareableCopy() const
+PassRefPtr<ShareableElementData> UniqueElementData::makeShareableCopy() const
 {
     void* slot = WTF::fastMalloc(sizeForShareableElementDataWithAttributeCount(m_attributeVector.size()));
-    return adoptRefWillBeNoop(new (slot) ShareableElementData(*this));
+    return adoptRef(new (slot) ShareableElementData(*this));
 }
 
 void UniqueElementData::traceAfterDispatch(Visitor* visitor)

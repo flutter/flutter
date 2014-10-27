@@ -44,7 +44,7 @@ TEST(MediaConditionParserTest, Basic)
         MediaQueryTokenIterator endToken;
         // Stop the input once we hit a comma token
         for (endToken = tokens.begin(); endToken != tokens.end() && endToken->type() != CommaToken; ++endToken) { }
-        RefPtrWillBeRawPtr<MediaQuerySet> mediaConditionQuerySet = MediaQueryParser::parseMediaCondition(tokens.begin(), endToken);
+        RefPtr<MediaQuerySet> mediaConditionQuerySet = MediaQueryParser::parseMediaCondition(tokens.begin(), endToken);
         ASSERT_EQ(mediaConditionQuerySet->queryVector().size(), (unsigned)1);
         String queryText = mediaConditionQuerySet->queryVector()[0]->cssText();
         ASSERT_STREQ(testCases[i].output, queryText.ascii().data());

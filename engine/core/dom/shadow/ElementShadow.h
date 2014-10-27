@@ -38,11 +38,11 @@
 
 namespace blink {
 
-class ElementShadow final : public NoBaseWillBeGarbageCollectedFinalized<ElementShadow> {
+class ElementShadow final : public DummyBase<ElementShadow> {
     WTF_MAKE_NONCOPYABLE(ElementShadow);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<ElementShadow> create();
+    static PassOwnPtr<ElementShadow> create();
     ~ElementShadow();
 
     Element* host() const;
@@ -87,7 +87,7 @@ private:
     bool needsSelectFeatureSet() const { return m_needsSelectFeatureSet; }
     void setNeedsSelectFeatureSet() { m_needsSelectFeatureSet = true; }
 
-    typedef WillBeHeapHashMap<RawPtrWillBeMember<const Node>, DestinationInsertionPoints> NodeToDestinationInsertionPoints;
+    typedef HashMap<RawPtr<const Node>, DestinationInsertionPoints> NodeToDestinationInsertionPoints;
     NodeToDestinationInsertionPoints m_nodeToInsertionPoints;
 
     SelectRuleFeatureSet m_selectFeatures;

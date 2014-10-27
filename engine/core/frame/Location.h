@@ -43,12 +43,12 @@ class ExceptionState;
 class LocalFrame;
 class KURL;
 
-class Location final : public RefCountedWillBeGarbageCollectedFinalized<Location>, public ScriptWrappable, public DOMWindowProperty {
+class Location final : public RefCounted<Location>, public ScriptWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Location> create(LocalFrame* frame)
+    static PassRefPtr<Location> create(LocalFrame* frame)
     {
-        return adoptRefWillBeNoop(new Location(frame));
+        return adoptRef(new Location(frame));
     }
 
     void setHref(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
@@ -74,7 +74,7 @@ public:
     String hash() const;
     String origin() const;
 
-    PassRefPtrWillBeRawPtr<DOMStringList> ancestorOrigins() const;
+    PassRefPtr<DOMStringList> ancestorOrigins() const;
 
     void trace(Visitor*) { }
 

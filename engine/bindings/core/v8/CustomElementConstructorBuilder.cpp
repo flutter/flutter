@@ -278,7 +278,7 @@ static void constructCustomElement(const v8::FunctionCallbackInfo<v8::Value>& in
 
     ExceptionState exceptionState(ExceptionState::ConstructionContext, "CustomElement", info.Holder(), info.GetIsolate());
     CustomElementProcessingStack::CallbackDeliveryScope deliveryScope;
-    RefPtrWillBeRawPtr<Element> element = document->createElement(tagName, maybeType->IsNull() ? nullAtom : type, exceptionState);
+    RefPtr<Element> element = document->createElement(tagName, maybeType->IsNull() ? nullAtom : type, exceptionState);
     if (exceptionState.throwIfNeeded())
         return;
     v8SetReturnValueFast(info, element.release(), document);

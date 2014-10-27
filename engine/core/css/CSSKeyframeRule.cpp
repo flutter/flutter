@@ -99,7 +99,7 @@ MutableStylePropertySet& StyleKeyframe::mutableProperties()
     return *toMutableStylePropertySet(m_properties.get());
 }
 
-void StyleKeyframe::setProperties(PassRefPtrWillBeRawPtr<StylePropertySet> properties)
+void StyleKeyframe::setProperties(PassRefPtr<StylePropertySet> properties)
 {
     ASSERT(properties);
     m_properties = properties;

@@ -61,7 +61,7 @@ class MarkupAccumulator {
     WTF_MAKE_NONCOPYABLE(MarkupAccumulator);
     STACK_ALLOCATED();
 public:
-    MarkupAccumulator(WillBeHeapVector<RawPtrWillBeMember<Node> >*, EAbsoluteURLs, const Range* = 0);
+    MarkupAccumulator(Vector<RawPtr<Node> >*, EAbsoluteURLs, const Range* = 0);
     virtual ~MarkupAccumulator();
 
     String serializeNodes(Node& targetNode, EChildrenOnly, Vector<QualifiedName>* tagNamesToSkip = 0);
@@ -89,8 +89,8 @@ protected:
     void appendStartMarkup(StringBuilder&, Node&, Namespaces*);
     void appendEndMarkup(StringBuilder&, const Element&);
 
-    RawPtrWillBeMember<WillBeHeapVector<RawPtrWillBeMember<Node> > > const m_nodes;
-    RawPtrWillBeMember<const Range> const m_range;
+    RawPtr<Vector<RawPtr<Node> > > const m_nodes;
+    RawPtr<const Range> const m_range;
 
 private:
     String resolveURLIfNeeded(const Element&, const String&) const;

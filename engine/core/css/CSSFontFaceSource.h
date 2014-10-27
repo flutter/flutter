@@ -36,7 +36,7 @@ class CSSFontFace;
 class FontDescription;
 class SimpleFontData;
 
-class CSSFontFaceSource : public NoBaseWillBeGarbageCollectedFinalized<CSSFontFaceSource> {
+class CSSFontFaceSource : public DummyBase<CSSFontFaceSource> {
 public:
     virtual ~CSSFontFaceSource();
 
@@ -64,7 +64,7 @@ protected:
 
     typedef HashMap<unsigned, RefPtr<SimpleFontData> > FontDataTable; // The hash key is composed of size synthetic styles.
 
-    RawPtrWillBeMember<CSSFontFace> m_face; // Our owning font face.
+    RawPtr<CSSFontFace> m_face; // Our owning font face.
     FontDataTable m_fontDataTable;
 };
 

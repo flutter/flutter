@@ -38,14 +38,14 @@ class WebGLVertexArrayObjectOES;
 class OESVertexArrayObject final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<OESVertexArrayObject> create(WebGLRenderingContextBase*);
+    static PassRefPtr<OESVertexArrayObject> create(WebGLRenderingContextBase*);
     static bool supported(WebGLRenderingContextBase*);
     static const char* extensionName();
 
     virtual ~OESVertexArrayObject();
     virtual WebGLExtensionName name() const override;
 
-    PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> createVertexArrayOES();
+    PassRefPtr<WebGLVertexArrayObjectOES> createVertexArrayOES();
     void deleteVertexArrayOES(WebGLVertexArrayObjectOES*);
     GLboolean isVertexArrayOES(WebGLVertexArrayObjectOES*);
     void bindVertexArrayOES(WebGLVertexArrayObjectOES*);

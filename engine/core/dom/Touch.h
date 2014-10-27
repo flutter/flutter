@@ -40,14 +40,14 @@ namespace blink {
 
 class LocalFrame;
 
-class Touch final : public RefCountedWillBeGarbageCollected<Touch>, public ScriptWrappable {
+class Touch final : public RefCounted<Touch>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Touch> create(LocalFrame* frame, EventTarget* target,
+    static PassRefPtr<Touch> create(LocalFrame* frame, EventTarget* target,
         unsigned identifier, const FloatPoint& screenPos, const FloatPoint& pagePos,
         const FloatSize& radius, float rotationAngle, float force)
     {
-        return adoptRefWillBeNoop(
+        return adoptRef(
             new Touch(frame, target, identifier, screenPos, pagePos, radius, rotationAngle, force));
     }
 
@@ -68,7 +68,7 @@ public:
     // Blink-internal methods
     const LayoutPoint& absoluteLocation() const { return m_absoluteLocation; }
     const FloatPoint& screenLocation() const { return m_screenPos; }
-    PassRefPtrWillBeRawPtr<Touch> cloneWithNewTarget(EventTarget*) const;
+    PassRefPtr<Touch> cloneWithNewTarget(EventTarget*) const;
 
     void trace(Visitor*);
 
@@ -81,7 +81,7 @@ private:
         const FloatPoint& screenPos, const FloatPoint& pagePos,
         const FloatSize& radius, float rotationAngle, float force, LayoutPoint absoluteLocation);
 
-    RefPtrWillBeMember<EventTarget> m_target;
+    RefPtr<EventTarget> m_target;
     unsigned m_identifier;
     // Position relative to the viewport in CSS px.
     FloatPoint m_clientPos;

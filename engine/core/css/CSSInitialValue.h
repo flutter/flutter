@@ -28,13 +28,13 @@ namespace blink {
 
 class CSSInitialValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSInitialValue> createExplicit()
+    static PassRefPtr<CSSInitialValue> createExplicit()
     {
-        return adoptRefWillBeNoop(new CSSInitialValue(/* implicit */ false));
+        return adoptRef(new CSSInitialValue(/* implicit */ false));
     }
-    static PassRefPtrWillBeRawPtr<CSSInitialValue> createImplicit()
+    static PassRefPtr<CSSInitialValue> createImplicit()
     {
-        return adoptRefWillBeNoop(new CSSInitialValue(/* implicit */ true));
+        return adoptRef(new CSSInitialValue(/* implicit */ true));
     }
 
     String customCSSText() const;

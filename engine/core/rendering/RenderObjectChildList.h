@@ -61,8 +61,8 @@ public:
     }
 
 private:
-    RawPtrWillBeMember<RenderObject> m_firstChild;
-    RawPtrWillBeMember<RenderObject> m_lastChild;
+    RawPtr<RenderObject> m_firstChild;
+    RawPtr<RenderObject> m_lastChild;
 };
 
 } // namespace blink

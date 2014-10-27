@@ -56,7 +56,7 @@ void CustomElementRegistrationContext::registerElement(Document* document, Custo
         return;
 
     // Upgrade elements that were waiting for this definition.
-    OwnPtrWillBeRawPtr<CustomElementUpgradeCandidateMap::ElementSet> upgradeCandidates = m_candidates->takeUpgradeCandidatesFor(definition->descriptor());
+    OwnPtr<CustomElementUpgradeCandidateMap::ElementSet> upgradeCandidates = m_candidates->takeUpgradeCandidatesFor(definition->descriptor());
 
     if (!upgradeCandidates)
         return;
@@ -65,11 +65,11 @@ void CustomElementRegistrationContext::registerElement(Document* document, Custo
         CustomElement::define(*it, definition);
 }
 
-PassRefPtrWillBeRawPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Document& document, const QualifiedName& tagName)
+PassRefPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Document& document, const QualifiedName& tagName)
 {
     ASSERT(CustomElement::isValidName(tagName.localName()));
 
-    RefPtrWillBeRawPtr<Element> element = HTMLElement::create(tagName, document);
+    RefPtr<Element> element = HTMLElement::create(tagName, document);
     element->setCustomElementState(Element::WaitingForUpgrade);
     resolveOrScheduleResolution(element.get(), nullAtom);
     return element.release();

@@ -146,12 +146,12 @@ public:
     void copyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
     void copyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 
-    PassRefPtrWillBeRawPtr<WebGLBuffer> createBuffer();
-    PassRefPtrWillBeRawPtr<WebGLFramebuffer> createFramebuffer();
-    PassRefPtrWillBeRawPtr<WebGLProgram> createProgram();
-    PassRefPtrWillBeRawPtr<WebGLRenderbuffer> createRenderbuffer();
-    PassRefPtrWillBeRawPtr<WebGLShader> createShader(GLenum type);
-    PassRefPtrWillBeRawPtr<WebGLTexture> createTexture();
+    PassRefPtr<WebGLBuffer> createBuffer();
+    PassRefPtr<WebGLFramebuffer> createFramebuffer();
+    PassRefPtr<WebGLProgram> createProgram();
+    PassRefPtr<WebGLRenderbuffer> createRenderbuffer();
+    PassRefPtr<WebGLShader> createShader(GLenum type);
+    PassRefPtr<WebGLTexture> createTexture();
 
     void cullFace(GLenum mode);
 
@@ -183,15 +183,15 @@ public:
     void frontFace(GLenum mode);
     void generateMipmap(GLenum target);
 
-    PassRefPtrWillBeRawPtr<WebGLActiveInfo> getActiveAttrib(WebGLProgram*, GLuint index);
-    PassRefPtrWillBeRawPtr<WebGLActiveInfo> getActiveUniform(WebGLProgram*, GLuint index);
-    bool getAttachedShaders(WebGLProgram*, WillBeHeapVector<RefPtrWillBeMember<WebGLShader> >&);
-    Nullable<WillBeHeapVector<RefPtrWillBeMember<WebGLShader> > > getAttachedShaders(WebGLProgram*);
+    PassRefPtr<WebGLActiveInfo> getActiveAttrib(WebGLProgram*, GLuint index);
+    PassRefPtr<WebGLActiveInfo> getActiveUniform(WebGLProgram*, GLuint index);
+    bool getAttachedShaders(WebGLProgram*, Vector<RefPtr<WebGLShader> >&);
+    Nullable<Vector<RefPtr<WebGLShader> > > getAttachedShaders(WebGLProgram*);
     GLint getAttribLocation(WebGLProgram*, const String& name);
     WebGLGetInfo getBufferParameter(GLenum target, GLenum pname);
-    PassRefPtrWillBeRawPtr<WebGLContextAttributes> getContextAttributes();
+    PassRefPtr<WebGLContextAttributes> getContextAttributes();
     GLenum getError();
-    PassRefPtrWillBeRawPtr<WebGLExtension> getExtension(const String& name);
+    PassRefPtr<WebGLExtension> getExtension(const String& name);
     WebGLGetInfo getFramebufferAttachmentParameter(GLenum target, GLenum attachment, GLenum pname);
     WebGLGetInfo getParameter(GLenum pname);
     WebGLGetInfo getProgramParameter(WebGLProgram*, GLenum pname);
@@ -199,12 +199,12 @@ public:
     WebGLGetInfo getRenderbufferParameter(GLenum target, GLenum pname);
     WebGLGetInfo getShaderParameter(WebGLShader*, GLenum pname);
     String getShaderInfoLog(WebGLShader*);
-    PassRefPtrWillBeRawPtr<WebGLShaderPrecisionFormat> getShaderPrecisionFormat(GLenum shaderType, GLenum precisionType);
+    PassRefPtr<WebGLShaderPrecisionFormat> getShaderPrecisionFormat(GLenum shaderType, GLenum precisionType);
     String getShaderSource(WebGLShader*);
     Nullable<Vector<String> > getSupportedExtensions();
     WebGLGetInfo getTexParameter(GLenum target, GLenum pname);
     WebGLGetInfo getUniform(WebGLProgram*, const WebGLUniformLocation*);
-    PassRefPtrWillBeRawPtr<WebGLUniformLocation> getUniformLocation(WebGLProgram*, const String&);
+    PassRefPtr<WebGLUniformLocation> getUniformLocation(WebGLProgram*, const String&);
     WebGLGetInfo getVertexAttrib(GLuint index, GLenum pname);
     long long getVertexAttribOffset(GLuint index, GLenum pname);
 
@@ -348,7 +348,7 @@ public:
     void reshape(int width, int height);
 
     void markLayerComposited();
-    PassRefPtrWillBeRawPtr<ImageData> paintRenderingResultsToImageData();
+    PassRefPtr<ImageData> paintRenderingResultsToImageData();
 
     void removeSharedObject(WebGLSharedObject*);
     void removeContextObject(WebGLContextObject*);
@@ -366,8 +366,8 @@ public:
     class TextureUnitState {
         ALLOW_ONLY_INLINE_ALLOCATION();
     public:
-        RefPtrWillBeMember<WebGLTexture> m_texture2DBinding;
-        RefPtrWillBeMember<WebGLTexture> m_textureCubeMapBinding;
+        RefPtr<WebGLTexture> m_texture2DBinding;
+        RefPtr<WebGLTexture> m_textureCubeMapBinding;
 
         void trace(Visitor*);
     };
@@ -458,17 +458,17 @@ protected:
 
     bool m_needsUpdate;
     bool m_markedCanvasDirty;
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<WebGLContextObject> > m_contextObjects;
+    HashSet<RawPtr<WebGLContextObject> > m_contextObjects;
 
-    OwnPtrWillBeMember<WebGLRenderingContextLostCallback> m_contextLostCallbackAdapter;
-    OwnPtrWillBeMember<WebGLRenderingContextErrorMessageCallback> m_errorMessageCallbackAdapter;
+    OwnPtr<WebGLRenderingContextLostCallback> m_contextLostCallbackAdapter;
+    OwnPtr<WebGLRenderingContextErrorMessageCallback> m_errorMessageCallbackAdapter;
 
     // List of bound VBO's. Used to maintain info about sizes for ARRAY_BUFFER and stored values for ELEMENT_ARRAY_BUFFER
-    RefPtrWillBeMember<WebGLBuffer> m_boundArrayBuffer;
+    RefPtr<WebGLBuffer> m_boundArrayBuffer;
 
-    RefPtrWillBeMember<WebGLVertexArrayObjectOES> m_defaultVertexArrayObject;
-    RefPtrWillBeMember<WebGLVertexArrayObjectOES> m_boundVertexArrayObject;
-    void setBoundVertexArrayObject(PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> arrayObject)
+    RefPtr<WebGLVertexArrayObjectOES> m_defaultVertexArrayObject;
+    RefPtr<WebGLVertexArrayObjectOES> m_boundVertexArrayObject;
+    void setBoundVertexArrayObject(PassRefPtr<WebGLVertexArrayObjectOES> arrayObject)
     {
         if (arrayObject)
             m_boundVertexArrayObject = arrayObject;
@@ -495,21 +495,21 @@ protected:
     };
     Vector<VertexAttribValue> m_vertexAttribValue;
     unsigned m_maxVertexAttribs;
-    RefPtrWillBeMember<WebGLBuffer> m_vertexAttrib0Buffer;
+    RefPtr<WebGLBuffer> m_vertexAttrib0Buffer;
     long m_vertexAttrib0BufferSize;
     GLfloat m_vertexAttrib0BufferValue[4];
     bool m_forceAttrib0BufferRefill;
     bool m_vertexAttrib0UsedBefore;
 
-    RefPtrWillBeMember<WebGLProgram> m_currentProgram;
-    RefPtrWillBeMember<WebGLFramebuffer> m_framebufferBinding;
-    RefPtrWillBeMember<WebGLRenderbuffer> m_renderbufferBinding;
+    RefPtr<WebGLProgram> m_currentProgram;
+    RefPtr<WebGLFramebuffer> m_framebufferBinding;
+    RefPtr<WebGLRenderbuffer> m_renderbufferBinding;
 
-    WillBeHeapVector<TextureUnitState> m_textureUnits;
+    Vector<TextureUnitState> m_textureUnits;
     unsigned long m_activeTextureUnit;
 
-    RefPtrWillBeMember<WebGLTexture> m_blackTexture2D;
-    RefPtrWillBeMember<WebGLTexture> m_blackTextureCubeMap;
+    RefPtr<WebGLTexture> m_blackTexture2D;
+    RefPtr<WebGLTexture> m_blackTextureCubeMap;
 
     Vector<GLenum> m_compressedTextureFormats;
 
@@ -544,7 +544,7 @@ protected:
     bool m_unpackFlipY;
     bool m_unpackPremultiplyAlpha;
     GLenum m_unpackColorspaceConversion;
-    RefPtrWillBeMember<WebGLContextAttributes> m_requestedAttributes;
+    RefPtr<WebGLContextAttributes> m_requestedAttributes;
 
     bool m_layerCleared;
     GLfloat m_clearColor[4];
@@ -580,7 +580,7 @@ protected:
         DraftExtension                  = 0x01,
     };
 
-    class ExtensionTracker : public NoBaseWillBeGarbageCollected<ExtensionTracker> {
+    class ExtensionTracker : public DummyBase<ExtensionTracker> {
     public:
         ExtensionTracker(ExtensionFlags flags, const char* const* prefixes)
             : m_draft(flags & DraftExtension)
@@ -602,7 +602,7 @@ protected:
         const char* const* prefixes() const;
         bool matchesNameWithPrefixes(const String&) const;
 
-        virtual PassRefPtrWillBeRawPtr<WebGLExtension> getExtension(WebGLRenderingContextBase*) = 0;
+        virtual PassRefPtr<WebGLExtension> getExtension(WebGLRenderingContextBase*) = 0;
         virtual bool supported(WebGLRenderingContextBase*) const = 0;
         virtual const char* extensionName() const = 0;
         virtual void loseExtension() = 0;
@@ -617,9 +617,9 @@ protected:
     template <typename T>
     class TypedExtensionTracker final : public ExtensionTracker {
     public:
-        static PassOwnPtrWillBeRawPtr<TypedExtensionTracker<T> > create(RefPtrWillBeMember<T>& extensionField, ExtensionFlags flags, const char* const* prefixes)
+        static PassOwnPtr<TypedExtensionTracker<T> > create(RefPtr<T>& extensionField, ExtensionFlags flags, const char* const* prefixes)
         {
-            return adoptPtrWillBeNoop(new TypedExtensionTracker<T>(extensionField, flags, prefixes));
+            return adoptPtr(new TypedExtensionTracker<T>(extensionField, flags, prefixes));
         }
 
 #if !ENABLE(OILPAN)
@@ -632,7 +632,7 @@ protected:
         }
 #endif
 
-        virtual PassRefPtrWillBeRawPtr<WebGLExtension> getExtension(WebGLRenderingContextBase* context) override
+        virtual PassRefPtr<WebGLExtension> getExtension(WebGLRenderingContextBase* context) override
         {
             if (!m_extension) {
                 m_extension = T::create(context);
@@ -668,23 +668,23 @@ protected:
         }
 
     private:
-        TypedExtensionTracker(RefPtrWillBeMember<T>& extensionField, ExtensionFlags flags, const char* const* prefixes)
+        TypedExtensionTracker(RefPtr<T>& extensionField, ExtensionFlags flags, const char* const* prefixes)
             : ExtensionTracker(flags, prefixes)
             , m_extensionField(extensionField)
         {
         }
 
-        RefPtrWillBeMember<T>& m_extensionField;
+        RefPtr<T>& m_extensionField;
         // ExtensionTracker holds it's own reference to the extension to ensure
         // that it is not deleted before this object's destructor is called
-        RefPtrWillBeMember<T> m_extension;
+        RefPtr<T> m_extension;
     };
 
     bool m_extensionEnabled[WebGLExtensionNameCount];
-    WillBeHeapVector<OwnPtrWillBeMember<ExtensionTracker> > m_extensions;
+    Vector<OwnPtr<ExtensionTracker> > m_extensions;
 
     template <typename T>
-    void registerExtension(RefPtrWillBeMember<T>& extensionPtr, ExtensionFlags flags = ApprovedExtension, const char* const* prefixes = 0)
+    void registerExtension(RefPtr<T>& extensionPtr, ExtensionFlags flags = ApprovedExtension, const char* const* prefixes = 0)
     {
         m_extensions.append(TypedExtensionTracker<T>::create(extensionPtr, flags, prefixes));
     }

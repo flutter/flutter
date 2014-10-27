@@ -58,8 +58,8 @@ TEST(AnimationAnimatableDoubleTest, ToDouble)
 
 TEST(AnimationAnimatableDoubleTest, Interpolate)
 {
-    RefPtrWillBeRawPtr<AnimatableDouble> from10 = AnimatableDouble::create(10);
-    RefPtrWillBeRawPtr<AnimatableDouble> to20 = AnimatableDouble::create(20);
+    RefPtr<AnimatableDouble> from10 = AnimatableDouble::create(10);
+    RefPtr<AnimatableDouble> to20 = AnimatableDouble::create(20);
     EXPECT_EQ(5, toAnimatableDouble(AnimatableValue::interpolate(from10.get(), to20.get(), -0.5).get())->toDouble());
     EXPECT_EQ(10, toAnimatableDouble(AnimatableValue::interpolate(from10.get(), to20.get(), 0).get())->toDouble());
     EXPECT_EQ(14, toAnimatableDouble(AnimatableValue::interpolate(from10.get(), to20.get(), 0.4).get())->toDouble());
@@ -71,9 +71,9 @@ TEST(AnimationAnimatableDoubleTest, Interpolate)
 
 TEST(AnimationAnimatableDoubleTest, Distance)
 {
-    RefPtrWillBeRawPtr<AnimatableDouble> first = AnimatableDouble::create(-1.5);
-    RefPtrWillBeRawPtr<AnimatableDouble> second = AnimatableDouble::create(2.25);
-    RefPtrWillBeRawPtr<AnimatableDouble> third = AnimatableDouble::create(3);
+    RefPtr<AnimatableDouble> first = AnimatableDouble::create(-1.5);
+    RefPtr<AnimatableDouble> second = AnimatableDouble::create(2.25);
+    RefPtr<AnimatableDouble> third = AnimatableDouble::create(3);
 
     EXPECT_DOUBLE_EQ(3.75, AnimatableValue::distance(first.get(), second.get()));
     EXPECT_DOUBLE_EQ(0.75, AnimatableValue::distance(second.get(), third.get()));

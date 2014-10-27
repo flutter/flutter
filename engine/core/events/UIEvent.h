@@ -35,28 +35,28 @@ typedef LocalDOMWindow AbstractView;
 struct UIEventInit : public EventInit {
     UIEventInit();
 
-    RefPtrWillBeMember<AbstractView> view;
+    RefPtr<AbstractView> view;
     int detail;
 };
 
 class UIEvent : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<UIEvent> create()
+    static PassRefPtr<UIEvent> create()
     {
-        return adoptRefWillBeNoop(new UIEvent);
+        return adoptRef(new UIEvent);
     }
-    static PassRefPtrWillBeRawPtr<UIEvent> create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view, int detail)
+    static PassRefPtr<UIEvent> create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, int detail)
     {
-        return adoptRefWillBeNoop(new UIEvent(type, canBubble, cancelable, view, detail));
+        return adoptRef(new UIEvent(type, canBubble, cancelable, view, detail));
     }
-    static PassRefPtrWillBeRawPtr<UIEvent> create(const AtomicString& type, const UIEventInit& initializer)
+    static PassRefPtr<UIEvent> create(const AtomicString& type, const UIEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new UIEvent(type, initializer));
+        return adoptRef(new UIEvent(type, initializer));
     }
     virtual ~UIEvent();
 
-    void initUIEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView>, int detail);
+    void initUIEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>, int detail);
 
     AbstractView* view() const { return m_view.get(); }
     int detail() const { return m_detail; }
@@ -79,11 +79,11 @@ public:
 
 protected:
     UIEvent();
-    UIEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView>, int detail);
+    UIEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>, int detail);
     UIEvent(const AtomicString&, const UIEventInit&);
 
 private:
-    RefPtrWillBeMember<AbstractView> m_view;
+    RefPtr<AbstractView> m_view;
     int m_detail;
 };
 

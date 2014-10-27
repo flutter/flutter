@@ -59,7 +59,7 @@ DummyPageHolder::DummyPageHolder(
         m_pageClients.editorClient = pageClients->editorClient;
         m_pageClients.spellCheckerClient = pageClients->spellCheckerClient;
     }
-    m_page = adoptPtrWillBeNoop(new Page(m_pageClients));
+    m_page = adoptPtr(new Page(m_pageClients));
 
     // FIXME(sky): Delete the tests that use DummyPageHolder since
     // they no longer work and we're not running them.

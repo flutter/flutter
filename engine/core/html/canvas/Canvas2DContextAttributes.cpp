@@ -41,9 +41,9 @@ Canvas2DContextAttributes::Canvas2DContextAttributes()
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(Canvas2DContextAttributes);
 
-PassRefPtrWillBeRawPtr<Canvas2DContextAttributes> Canvas2DContextAttributes::create()
+PassRefPtr<Canvas2DContextAttributes> Canvas2DContextAttributes::create()
 {
-    return adoptRefWillBeNoop(new Canvas2DContextAttributes());
+    return adoptRef(new Canvas2DContextAttributes());
 }
 
 bool Canvas2DContextAttributes::alpha() const

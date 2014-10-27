@@ -37,7 +37,7 @@ void ContentDistribution::swap(ContentDistribution& other)
     m_indices.swap(other.m_indices);
 }
 
-void ContentDistribution::append(PassRefPtrWillBeRawPtr<Node> node)
+void ContentDistribution::append(PassRefPtr<Node> node)
 {
     ASSERT(node);
     ASSERT(!isActiveInsertionPoint(*node));
@@ -48,7 +48,7 @@ void ContentDistribution::append(PassRefPtrWillBeRawPtr<Node> node)
 
 size_t ContentDistribution::find(const Node* node) const
 {
-    WillBeHeapHashMap<RawPtrWillBeMember<const Node>, size_t>::const_iterator it = m_indices.find(node);
+    HashMap<RawPtr<const Node>, size_t>::const_iterator it = m_indices.find(node);
     if (it == m_indices.end())
         return kNotFound;
 

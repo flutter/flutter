@@ -53,12 +53,12 @@ class Node;
 typedef unsigned char MutationObserverOptions;
 typedef unsigned char MutationRecordDeliveryOptions;
 
-typedef WillBeHeapHashSet<RefPtrWillBeMember<MutationObserver> > MutationObserverSet;
-typedef WillBeHeapHashSet<RawPtrWillBeWeakMember<MutationObserverRegistration> > MutationObserverRegistrationSet;
-typedef WillBeHeapVector<RefPtrWillBeMember<MutationObserver> > MutationObserverVector;
-typedef WillBeHeapVector<RefPtrWillBeMember<MutationRecord> > MutationRecordVector;
+typedef HashSet<RefPtr<MutationObserver> > MutationObserverSet;
+typedef HashSet<RawPtr<MutationObserverRegistration> > MutationObserverRegistrationSet;
+typedef Vector<RefPtr<MutationObserver> > MutationObserverVector;
+typedef Vector<RefPtr<MutationRecord> > MutationRecordVector;
 
-class MutationObserver final : public RefCountedWillBeGarbageCollectedFinalized<MutationObserver>, public ScriptWrappable {
+class MutationObserver final : public RefCounted<MutationObserver>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum MutationType {
@@ -79,22 +79,22 @@ public:
         CharacterDataOldValue = 1 << 6,
     };
 
-    static PassRefPtrWillBeRawPtr<MutationObserver> create(PassOwnPtr<MutationCallback>);
+    static PassRefPtr<MutationObserver> create(PassOwnPtr<MutationCallback>);
     static void resumeSuspendedObservers();
     static void deliverMutations();
 
     ~MutationObserver();
 
     void observe(Node*, const Dictionary&, ExceptionState&);
-    WillBeHeapVector<RefPtrWillBeMember<MutationRecord> > takeRecords();
+    Vector<RefPtr<MutationRecord> > takeRecords();
     void disconnect();
     void observationStarted(MutationObserverRegistration*);
     void observationEnded(MutationObserverRegistration*);
-    void enqueueMutationRecord(PassRefPtrWillBeRawPtr<MutationRecord>);
+    void enqueueMutationRecord(PassRefPtr<MutationRecord>);
     void setHasTransientRegistration();
     bool canDeliver();
 
-    WillBeHeapHashSet<RawPtrWillBeMember<Node> > getObservedNodes() const;
+    HashSet<RawPtr<Node> > getObservedNodes() const;
 
     void trace(Visitor*);
 

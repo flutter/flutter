@@ -105,7 +105,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'Date': 'double',
     'Dictionary': 'Dictionary',
     'EventHandler': 'EventListener*',
-    'NodeFilter': 'RefPtrWillBeRawPtr<NodeFilter>',
+    'NodeFilter': 'RefPtr<NodeFilter>',
     'Promise': 'ScriptPromise',
     'ScriptValue': 'ScriptValue',
     'boolean': 'bool',

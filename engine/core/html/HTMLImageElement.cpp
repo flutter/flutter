@@ -48,9 +48,9 @@ namespace blink {
 
 class HTMLImageElement::ViewportChangeListener final : public MediaQueryListListener {
 public:
-    static RefPtrWillBeRawPtr<ViewportChangeListener> create(HTMLImageElement* element)
+    static RefPtr<ViewportChangeListener> create(HTMLImageElement* element)
     {
-        return adoptRefWillBeNoop(new ViewportChangeListener(element));
+        return adoptRef(new ViewportChangeListener(element));
     }
 
     virtual void notifyMediaQueryChanged() override
@@ -69,7 +69,7 @@ public:
     }
 private:
     explicit ViewportChangeListener(HTMLImageElement* element) : m_element(element) { }
-    RawPtrWillBeMember<HTMLImageElement> m_element;
+    RawPtr<HTMLImageElement> m_element;
 };
 
 HTMLImageElement::HTMLImageElement(Document& document, bool createdByParser)
@@ -84,14 +84,14 @@ HTMLImageElement::HTMLImageElement(Document& document, bool createdByParser)
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<HTMLImageElement> HTMLImageElement::create(Document& document)
+PassRefPtr<HTMLImageElement> HTMLImageElement::create(Document& document)
 {
-    return adoptRefWillBeNoop(new HTMLImageElement(document));
+    return adoptRef(new HTMLImageElement(document));
 }
 
-PassRefPtrWillBeRawPtr<HTMLImageElement> HTMLImageElement::create(Document& document, bool createdByParser)
+PassRefPtr<HTMLImageElement> HTMLImageElement::create(Document& document, bool createdByParser)
 {
-    return adoptRefWillBeNoop(new HTMLImageElement(document, createdByParser));
+    return adoptRef(new HTMLImageElement(document, createdByParser));
 }
 
 HTMLImageElement::~HTMLImageElement()
@@ -119,9 +119,9 @@ void HTMLImageElement::notifyViewportChanged()
     selectSourceURL(ImageLoader::UpdateSizeChanged);
 }
 
-PassRefPtrWillBeRawPtr<HTMLImageElement> HTMLImageElement::createForJSConstructor(Document& document, int width, int height)
+PassRefPtr<HTMLImageElement> HTMLImageElement::createForJSConstructor(Document& document, int width, int height)
 {
-    RefPtrWillBeRawPtr<HTMLImageElement> image = adoptRefWillBeNoop(new HTMLImageElement(document));
+    RefPtr<HTMLImageElement> image = adoptRef(new HTMLImageElement(document));
     if (width)
         image->setWidth(width);
     if (height)

@@ -28,14 +28,14 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<MediaQueryList> MediaQueryList::create(ExecutionContext* context, PassRefPtrWillBeRawPtr<MediaQueryMatcher> matcher, PassRefPtrWillBeRawPtr<MediaQuerySet> media)
+PassRefPtr<MediaQueryList> MediaQueryList::create(ExecutionContext* context, PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
 {
-    RefPtrWillBeRawPtr<MediaQueryList> list = adoptRefWillBeNoop(new MediaQueryList(context, matcher, media));
+    RefPtr<MediaQueryList> list = adoptRef(new MediaQueryList(context, matcher, media));
     list->suspendIfNeeded();
     return list.release();
 }
 
-MediaQueryList::MediaQueryList(ExecutionContext* context, PassRefPtrWillBeRawPtr<MediaQueryMatcher> matcher, PassRefPtrWillBeRawPtr<MediaQuerySet> media)
+MediaQueryList::MediaQueryList(ExecutionContext* context, PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
     : ActiveDOMObject(context)
     , m_matcher(matcher)
     , m_media(media)
@@ -69,7 +69,7 @@ void MediaQueryList::removeDeprecatedListener(PassRefPtr<EventListener> listener
     removeEventListener(EventTypeNames::change, listener, false);
 }
 
-void MediaQueryList::addListener(PassRefPtrWillBeRawPtr<MediaQueryListListener> listener)
+void MediaQueryList::addListener(PassRefPtr<MediaQueryListListener> listener)
 {
     if (!listener)
         return;
@@ -77,12 +77,12 @@ void MediaQueryList::addListener(PassRefPtrWillBeRawPtr<MediaQueryListListener> 
     m_listeners.add(listener);
 }
 
-void MediaQueryList::removeListener(PassRefPtrWillBeRawPtr<MediaQueryListListener> listener)
+void MediaQueryList::removeListener(PassRefPtr<MediaQueryListListener> listener)
 {
     if (!listener)
         return;
 
-    RefPtrWillBeRawPtr<MediaQueryList> protect(this);
+    RefPtr<MediaQueryList> protect(this);
     m_listeners.remove(listener);
 }
 
@@ -94,12 +94,12 @@ bool MediaQueryList::hasPendingActivity() const
 void MediaQueryList::stop()
 {
     // m_listeners.clear() can drop the last ref to this MediaQueryList.
-    RefPtrWillBeRawPtr<MediaQueryList> protect(this);
+    RefPtr<MediaQueryList> protect(this);
     m_listeners.clear();
     removeAllEventListeners();
 }
 
-bool MediaQueryList::mediaFeaturesChanged(WillBeHeapVector<RefPtrWillBeMember<MediaQueryListListener> >* listenersToNotify)
+bool MediaQueryList::mediaFeaturesChanged(Vector<RefPtr<MediaQueryListListener> >* listenersToNotify)
 {
     m_matchesDirty = true;
     if (!updateMatches())

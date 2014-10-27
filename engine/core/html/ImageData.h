@@ -40,13 +40,13 @@ namespace blink {
 
 class ExceptionState;
 
-class ImageData final : public RefCountedWillBeGarbageCollectedFinalized<ImageData>, public ScriptWrappable {
+class ImageData final : public RefCounted<ImageData>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ImageData> create(const IntSize&);
-    static PassRefPtrWillBeRawPtr<ImageData> create(const IntSize&, PassRefPtr<Uint8ClampedArray>);
-    static PassRefPtrWillBeRawPtr<ImageData> create(unsigned width, unsigned height, ExceptionState&);
-    static PassRefPtrWillBeRawPtr<ImageData> create(Uint8ClampedArray*, unsigned width, unsigned height, ExceptionState&);
+    static PassRefPtr<ImageData> create(const IntSize&);
+    static PassRefPtr<ImageData> create(const IntSize&, PassRefPtr<Uint8ClampedArray>);
+    static PassRefPtr<ImageData> create(unsigned width, unsigned height, ExceptionState&);
+    static PassRefPtr<ImageData> create(Uint8ClampedArray*, unsigned width, unsigned height, ExceptionState&);
 
     IntSize size() const { return m_size; }
     int width() const { return m_size.width(); }

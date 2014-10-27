@@ -50,7 +50,7 @@ FontFallbackList::FontFallbackList()
 {
 }
 
-void FontFallbackList::invalidate(PassRefPtrWillBeRawPtr<FontSelector> fontSelector)
+void FontFallbackList::invalidate(PassRefPtr<FontSelector> fontSelector)
 {
     releaseFontData();
     m_fontList.clear();

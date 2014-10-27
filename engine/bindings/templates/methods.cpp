@@ -89,7 +89,7 @@ static void {{method.name}}{{method.overload_index}}Method{{world_suffix}}(const
 {% if argument.idl_type == 'EventListener' %}
 RefPtr<{{argument.idl_type}}> {{argument.name}}
 {%- else %}
-OwnPtrWillBeRawPtr<{{argument.idl_type}}> {{argument.name}} = nullptr;
+OwnPtr<{{argument.idl_type}}> {{argument.name}} = nullptr;
 {%- endif %}{# argument.idl_type == 'EventListener' #}
 {%- elif argument.is_clamp %}{# argument.is_callback_interface #}
 {# NaN is treated as 0: http://www.w3.org/TR/WebIDL/#es-type-mapping #}
@@ -240,7 +240,7 @@ ExecutionContext* executionContext = currentExecutionContext(info.GetIsolate());
 {% endif %}
 {% if method.is_call_with_script_arguments %}
 {# [CallWith=ScriptArguments] #}
-RefPtrWillBeRawPtr<ScriptArguments> scriptArguments(createScriptArguments(scriptState, info, {{method.number_of_arguments}}));
+RefPtr<ScriptArguments> scriptArguments(createScriptArguments(scriptState, info, {{method.number_of_arguments}}));
 {% endif %}
 {% if method.is_call_with_document %}
 {# [ConstructorCallWith=Document] #}

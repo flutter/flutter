@@ -45,12 +45,12 @@ class TextCheckerClient;
 
 class SpellCheckRequest final : public TextCheckingRequest {
 public:
-    static PassRefPtr<SpellCheckRequest> create(TextCheckingTypeMask, TextCheckingProcessType, PassRefPtrWillBeRawPtr<Range> checkingRange, PassRefPtrWillBeRawPtr<Range> paragraphRange, int requestNumber = 0);
+    static PassRefPtr<SpellCheckRequest> create(TextCheckingTypeMask, TextCheckingProcessType, PassRefPtr<Range> checkingRange, PassRefPtr<Range> paragraphRange, int requestNumber = 0);
     virtual ~SpellCheckRequest();
 
-    PassRefPtrWillBeRawPtr<Range> checkingRange() const { return m_checkingRange; }
-    PassRefPtrWillBeRawPtr<Range> paragraphRange() const { return m_paragraphRange; }
-    PassRefPtrWillBeRawPtr<Element> rootEditableElement() const { return m_rootEditableElement; }
+    PassRefPtr<Range> checkingRange() const { return m_checkingRange; }
+    PassRefPtr<Range> paragraphRange() const { return m_paragraphRange; }
+    PassRefPtr<Element> rootEditableElement() const { return m_rootEditableElement; }
 
     void setCheckerAndSequence(SpellCheckRequester*, int sequence);
     void requesterDestroyed();
@@ -62,12 +62,12 @@ public:
     int requestNumber() const { return m_requestNumber; }
 
 private:
-    SpellCheckRequest(PassRefPtrWillBeRawPtr<Range> checkingRange, PassRefPtrWillBeRawPtr<Range> paragraphRange, const String&, TextCheckingTypeMask, TextCheckingProcessType, const Vector<uint32_t>& documentMarkersInRange, const Vector<unsigned>& documentMarkerOffsets, int requestNumber);
+    SpellCheckRequest(PassRefPtr<Range> checkingRange, PassRefPtr<Range> paragraphRange, const String&, TextCheckingTypeMask, TextCheckingProcessType, const Vector<uint32_t>& documentMarkersInRange, const Vector<unsigned>& documentMarkerOffsets, int requestNumber);
 
     SpellCheckRequester* m_requester;
-    RefPtrWillBePersistent<Range> m_checkingRange;
-    RefPtrWillBePersistent<Range> m_paragraphRange;
-    RefPtrWillBePersistent<Element> m_rootEditableElement;
+    RefPtr<Range> m_checkingRange;
+    RefPtr<Range> m_paragraphRange;
+    RefPtr<Element> m_rootEditableElement;
     TextCheckingRequestData m_requestData;
     int m_requestNumber;
 };

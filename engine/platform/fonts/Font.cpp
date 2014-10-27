@@ -91,7 +91,7 @@ bool Font::operator==(const Font& other) const
         && (m_fontFallbackList ? m_fontFallbackList->generation() : 0) == (other.m_fontFallbackList ? other.m_fontFallbackList->generation() : 0);
 }
 
-void Font::update(PassRefPtrWillBeRawPtr<FontSelector> fontSelector) const
+void Font::update(PassRefPtr<FontSelector> fontSelector) const
 {
     // FIXME: It is pretty crazy that we are willing to just poke into a RefPtr, but it ends up
     // being reasonably safe (because inherited fonts in the render tree pick up the new

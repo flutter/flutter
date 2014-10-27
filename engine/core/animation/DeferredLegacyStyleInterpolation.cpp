@@ -19,7 +19,7 @@ namespace blink {
 
 void DeferredLegacyStyleInterpolation::apply(StyleResolverState& state) const
 {
-    RefPtrWillBeRawPtr<LegacyStyleInterpolation> innerInterpolation = LegacyStyleInterpolation::create(
+    RefPtr<LegacyStyleInterpolation> innerInterpolation = LegacyStyleInterpolation::create(
         StyleResolver::createAnimatableValueSnapshot(state, m_id, *m_startCSSValue),
         StyleResolver::createAnimatableValueSnapshot(state, m_id, *m_endCSSValue),
         m_id);

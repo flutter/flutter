@@ -46,19 +46,19 @@ class Element;
 class CustomElementMicrotaskResolutionStep : public CustomElementMicrotaskStep {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskResolutionStep);
 public:
-    static PassOwnPtrWillBeRawPtr<CustomElementMicrotaskResolutionStep> create(PassRefPtrWillBeRawPtr<CustomElementRegistrationContext>, PassRefPtrWillBeRawPtr<Element>, const CustomElementDescriptor&);
+    static PassOwnPtr<CustomElementMicrotaskResolutionStep> create(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
 
     virtual ~CustomElementMicrotaskResolutionStep();
 
     virtual void trace(Visitor*) override;
 
 private:
-    CustomElementMicrotaskResolutionStep(PassRefPtrWillBeRawPtr<CustomElementRegistrationContext>, PassRefPtrWillBeRawPtr<Element>, const CustomElementDescriptor&);
+    CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
 
     virtual Result process() override;
 
-    RefPtrWillBeMember<CustomElementRegistrationContext> m_context;
-    RefPtrWillBeMember<Element> m_element;
+    RefPtr<CustomElementRegistrationContext> m_context;
+    RefPtr<Element> m_element;
     CustomElementDescriptor m_descriptor;
 };
 

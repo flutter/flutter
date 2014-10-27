@@ -103,7 +103,7 @@ unsigned Screen::availWidth() const
 
 void Screen::trace(Visitor* visitor)
 {
-    WillBeHeapSupplementable<Screen>::trace(visitor);
+    Supplementable<Screen>::trace(visitor);
 }
 
 } // namespace blink

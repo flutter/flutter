@@ -32,9 +32,9 @@ class CSSValueList;
 
 class CSSFontValue : public CSSValue {
 public:
-    static PassRefPtrWillBeRawPtr<CSSFontValue> create()
+    static PassRefPtr<CSSFontValue> create()
     {
-        return adoptRefWillBeNoop(new CSSFontValue);
+        return adoptRef(new CSSFontValue);
     }
 
     String customCSSText() const;
@@ -43,13 +43,13 @@ public:
 
     void traceAfterDispatch(Visitor*);
 
-    RefPtrWillBeMember<CSSPrimitiveValue> style;
-    RefPtrWillBeMember<CSSPrimitiveValue> variant;
-    RefPtrWillBeMember<CSSPrimitiveValue> weight;
-    RefPtrWillBeMember<CSSPrimitiveValue> stretch;
-    RefPtrWillBeMember<CSSPrimitiveValue> size;
-    RefPtrWillBeMember<CSSPrimitiveValue> lineHeight;
-    RefPtrWillBeMember<CSSValueList> family;
+    RefPtr<CSSPrimitiveValue> style;
+    RefPtr<CSSPrimitiveValue> variant;
+    RefPtr<CSSPrimitiveValue> weight;
+    RefPtr<CSSPrimitiveValue> stretch;
+    RefPtr<CSSPrimitiveValue> size;
+    RefPtr<CSSPrimitiveValue> lineHeight;
+    RefPtr<CSSValueList> family;
 
 private:
     CSSFontValue()

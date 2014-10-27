@@ -13,10 +13,10 @@
 
 namespace blink {
 
-class AnimationNodeTiming : public RefCountedWillBeGarbageCollectedFinalized<AnimationNodeTiming>, public ScriptWrappable {
+class AnimationNodeTiming : public RefCounted<AnimationNodeTiming>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<AnimationNodeTiming> create(AnimationNode* parent);
+    static PassRefPtr<AnimationNodeTiming> create(AnimationNode* parent);
     double delay();
     double endDelay();
     String fill();
@@ -40,7 +40,7 @@ public:
     void trace(Visitor*);
 
 private:
-    RefPtrWillBeMember<AnimationNode> m_parent;
+    RefPtr<AnimationNode> m_parent;
     explicit AnimationNodeTiming(AnimationNode*);
 };
 

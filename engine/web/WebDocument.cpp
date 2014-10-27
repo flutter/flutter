@@ -170,18 +170,18 @@ v8::Handle<v8::Value> WebDocument::registerEmbedderCustomElement(const WebString
     return constructor.v8Value();
 }
 
-WebDocument::WebDocument(const PassRefPtrWillBeRawPtr<Document>& elem)
+WebDocument::WebDocument(const PassRefPtr<Document>& elem)
     : WebNode(elem)
 {
 }
 
-WebDocument& WebDocument::operator=(const PassRefPtrWillBeRawPtr<Document>& elem)
+WebDocument& WebDocument::operator=(const PassRefPtr<Document>& elem)
 {
     m_private = elem;
     return *this;
 }
 
-WebDocument::operator PassRefPtrWillBeRawPtr<Document>() const
+WebDocument::operator PassRefPtr<Document>() const
 {
     return toDocument(m_private.get());
 }

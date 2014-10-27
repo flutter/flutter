@@ -59,9 +59,9 @@ public:
     }
 
     Operation operation;
-    RefPtrWillBeMember<ContainerNode> parent;
-    RefPtrWillBeMember<Node> nextChild;
-    RefPtrWillBeMember<Node> child;
+    RefPtr<ContainerNode> parent;
+    RefPtr<Node> nextChild;
+    RefPtr<Node> child;
     bool selfClosing;
 };
 
@@ -133,21 +133,21 @@ public:
 private:
     // In the common case, this queue will have only one task because most
     // tokens produce only one DOM mutation.
-    typedef WillBeHeapVector<HTMLConstructionSiteTask, 1> TaskQueue;
+    typedef Vector<HTMLConstructionSiteTask, 1> TaskQueue;
 
-    void attachLater(ContainerNode* parent, PassRefPtrWillBeRawPtr<Node> child, bool selfClosing = false);
+    void attachLater(ContainerNode* parent, PassRefPtr<Node> child, bool selfClosing = false);
 
-    PassRefPtrWillBeRawPtr<HTMLElement> createHTMLElement(AtomicHTMLToken*);
-    PassRefPtrWillBeRawPtr<Element> createElement(AtomicHTMLToken*, const AtomicString& namespaceURI);
+    PassRefPtr<HTMLElement> createHTMLElement(AtomicHTMLToken*);
+    PassRefPtr<Element> createElement(AtomicHTMLToken*, const AtomicString& namespaceURI);
 
     void queueTask(const HTMLConstructionSiteTask&);
 
-    RawPtrWillBeMember<Document> m_document;
+    RawPtr<Document> m_document;
 
     // This is the root ContainerNode to which the parser attaches all newly
     // constructed nodes. It points to a DocumentFragment when parsing fragments
     // and a Document in all other cases.
-    RawPtrWillBeMember<ContainerNode> m_attachmentRoot;
+    RawPtr<ContainerNode> m_attachmentRoot;
 
     mutable HTMLElementStack m_openElements;
 
@@ -161,7 +161,7 @@ private:
         {
         }
 
-        void append(PassRefPtrWillBeRawPtr<ContainerNode> newParent, PassRefPtrWillBeRawPtr<Node> newNextChild, const String& newString, WhitespaceMode newWhitespaceMode)
+        void append(PassRefPtr<ContainerNode> newParent, PassRefPtr<Node> newNextChild, const String& newString, WhitespaceMode newWhitespaceMode)
         {
             ASSERT(!parent || parent == newParent);
             parent = newParent;
@@ -196,8 +196,8 @@ private:
 
         void trace(Visitor*);
 
-        RefPtrWillBeMember<ContainerNode> parent;
-        RefPtrWillBeMember<Node> nextChild;
+        RefPtr<ContainerNode> parent;
+        RefPtr<Node> nextChild;
         StringBuilder stringBuilder;
         WhitespaceMode whitespaceMode;
     };

@@ -37,7 +37,7 @@ class IncrementLoadEventDelayCount;
 class FetchRequest;
 class Document;
 
-class ImageLoaderClient : public WillBeGarbageCollectedMixin {
+class ImageLoaderClient : public DummyBase<void> {
 public:
     virtual void notifyImageSourceChanged() = 0;
 
@@ -57,7 +57,7 @@ class RenderImageResource;
 template<typename T> class EventSender;
 typedef EventSender<ImageLoader> ImageEventSender;
 
-class ImageLoader : public NoBaseWillBeGarbageCollectedFinalized<ImageLoader>, public ImageResourceClient {
+class ImageLoader : public DummyBase<ImageLoader>, public ImageResourceClient {
 public:
     explicit ImageLoader(Element*);
     virtual ~ImageLoader();
@@ -142,12 +142,12 @@ private:
 
     void willRemoveClient(ImageLoaderClient&);
 
-    RawPtrWillBeMember<Element> m_element;
+    RawPtr<Element> m_element;
     ResourcePtr<ImageResource> m_image;
     // FIXME: Oilpan: We might be able to remove this Persistent hack when
     // ImageResourceClient is traceable.
     GC_PLUGIN_IGNORE("http://crbug.com/383741")
-    RefPtrWillBePersistent<Element> m_keepAlive;
+    RefPtr<Element> m_keepAlive;
 #if ENABLE(OILPAN)
     class ImageLoaderClientRemover {
     public:

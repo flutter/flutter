@@ -50,7 +50,7 @@ Timing::FillMode resolvedFillMode(Timing::FillMode fillMode, bool isAnimation)
 
 } // namespace
 
-AnimationNode::AnimationNode(const Timing& timing, PassOwnPtrWillBeRawPtr<EventDelegate> eventDelegate)
+AnimationNode::AnimationNode(const Timing& timing, PassOwnPtr<EventDelegate> eventDelegate)
     : m_parent(nullptr)
     , m_startTime(0)
     , m_player(nullptr)
@@ -182,7 +182,7 @@ const AnimationNode::CalculatedTiming& AnimationNode::ensureCalculated() const
     return m_calculated;
 }
 
-PassRefPtrWillBeRawPtr<AnimationNodeTiming> AnimationNode::timing()
+PassRefPtr<AnimationNodeTiming> AnimationNode::timing()
 {
     return AnimationNodeTiming::create(this);
 }

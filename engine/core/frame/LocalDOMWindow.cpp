@@ -229,7 +229,7 @@ void LocalDOMWindow::acceptLanguagesChanged()
     dispatchEvent(Event::create(EventTypeNames::languagechange));
 }
 
-PassRefPtrWillBeRawPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init)
+PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init)
 {
     ASSERT(init.frame() == m_frame);
 
@@ -248,7 +248,7 @@ EventQueue* LocalDOMWindow::eventQueue() const
     return m_eventQueue.get();
 }
 
-void LocalDOMWindow::enqueueWindowEvent(PassRefPtrWillBeRawPtr<Event> event)
+void LocalDOMWindow::enqueueWindowEvent(PassRefPtr<Event> event)
 {
     if (!m_eventQueue)
         return;
@@ -256,7 +256,7 @@ void LocalDOMWindow::enqueueWindowEvent(PassRefPtrWillBeRawPtr<Event> event)
     m_eventQueue->enqueueEvent(event);
 }
 
-void LocalDOMWindow::enqueueDocumentEvent(PassRefPtrWillBeRawPtr<Event> event)
+void LocalDOMWindow::enqueueDocumentEvent(PassRefPtr<Event> event)
 {
     if (!m_eventQueue)
         return;
@@ -346,7 +346,7 @@ LocalDOMWindow* LocalDOMWindow::toDOMWindow()
     return this;
 }
 
-PassRefPtrWillBeRawPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)
+PassRefPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)
 {
     return document() ? document()->mediaQueryMatcher().matchMedia(media) : nullptr;
 }
@@ -592,7 +592,7 @@ StyleMedia& LocalDOMWindow::styleMedia() const
     return *m_media;
 }
 
-PassRefPtrWillBeRawPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt, const String& pseudoElt) const
+PassRefPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt, const String& pseudoElt) const
 {
     if (!elt)
         return nullptr;
@@ -600,7 +600,7 @@ PassRefPtrWillBeRawPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Ele
     return CSSComputedStyleDeclaration::create(elt, false, pseudoElt);
 }
 
-PassRefPtrWillBeRawPtr<CSSRuleList> LocalDOMWindow::getMatchedCSSRules(Element* element, const String& pseudoElement) const
+PassRefPtr<CSSRuleList> LocalDOMWindow::getMatchedCSSRules(Element* element, const String& pseudoElement) const
 {
     if (!element)
         return nullptr;
@@ -683,7 +683,7 @@ void LocalDOMWindow::resizeTo(float width, float height) const
     host->chrome().setWindowRect(adjustWindowRect(*m_frame, update));
 }
 
-int LocalDOMWindow::requestAnimationFrame(PassOwnPtrWillBeRawPtr<RequestAnimationFrameCallback> callback)
+int LocalDOMWindow::requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback> callback)
 {
     callback->m_useLegacyTimeBase = false;
     if (Document* d = document())
@@ -743,18 +743,18 @@ bool LocalDOMWindow::removeEventListener(const AtomicString& eventType, PassRefP
 
 void LocalDOMWindow::dispatchLoadEvent()
 {
-    RefPtrWillBeRawPtr<Event> loadEvent(Event::create(EventTypeNames::load));
+    RefPtr<Event> loadEvent(Event::create(EventTypeNames::load));
     dispatchEvent(loadEvent, document());
 
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkLoad", "data", InspectorMarkLoadEvent::data(frame()));
 }
 
-bool LocalDOMWindow::dispatchEvent(PassRefPtrWillBeRawPtr<Event> prpEvent, PassRefPtrWillBeRawPtr<EventTarget> prpTarget)
+bool LocalDOMWindow::dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget)
 {
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
 
-    RefPtrWillBeRawPtr<EventTarget> protect(this);
-    RefPtrWillBeRawPtr<Event> event = prpEvent;
+    RefPtr<EventTarget> protect(this);
+    RefPtr<Event> event = prpEvent;
 
     event->setTarget(prpTarget ? prpTarget : this);
     event->setCurrentTarget(this);
@@ -826,7 +826,7 @@ void LocalDOMWindow::trace(Visitor* visitor)
     visitor->trace(m_media);
     visitor->trace(m_css);
     visitor->trace(m_eventQueue);
-    WillBeHeapSupplementable<LocalDOMWindow>::trace(visitor);
+    Supplementable<LocalDOMWindow>::trace(visitor);
     EventTargetWithInlineData::trace(visitor);
     LifecycleContext<LocalDOMWindow>::trace(visitor);
 }

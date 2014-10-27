@@ -34,9 +34,9 @@ namespace blink {
 
 class RenderedDocumentMarker final : public DocumentMarker {
 public:
-    static PassOwnPtrWillBeRawPtr<RenderedDocumentMarker> create(const DocumentMarker& marker)
+    static PassOwnPtr<RenderedDocumentMarker> create(const DocumentMarker& marker)
     {
-        return adoptPtrWillBeNoop(new RenderedDocumentMarker(marker));
+        return adoptPtr(new RenderedDocumentMarker(marker));
     }
 
     bool isRendered() const { return invalidMarkerRect() != m_renderedRect; }

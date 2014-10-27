@@ -20,19 +20,19 @@ class HTMLCanvasElement;
 class HTMLVideoElement;
 class ImageData;
 
-class ImageBitmap final : public RefCountedWillBeGarbageCollectedFinalized<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
+class ImageBitmap final : public RefCounted<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
     DEFINE_WRAPPERTYPEINFO();
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ImageBitmap);
 public:
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(HTMLVideoElement*, const IntRect&);
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(HTMLCanvasElement*, const IntRect&);
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(ImageData*, const IntRect&);
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(ImageBitmap*, const IntRect&);
-    static PassRefPtrWillBeRawPtr<ImageBitmap> create(Image*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(HTMLVideoElement*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(HTMLCanvasElement*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(ImageData*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(ImageBitmap*, const IntRect&);
+    static PassRefPtr<ImageBitmap> create(Image*, const IntRect&);
 
     PassRefPtr<Image> bitmapImage() const;
-    PassRefPtrWillBeRawPtr<HTMLImageElement> imageElement() const { return m_imageElement; }
+    PassRefPtr<HTMLImageElement> imageElement() const { return m_imageElement; }
 
     IntRect bitmapRect() const { return m_bitmapRect; }
 
@@ -63,7 +63,7 @@ private:
 
     // ImageBitmaps constructed from HTMLImageElements hold a reference to the HTMLImageElement until
     // the image source changes.
-    RefPtrWillBeMember<HTMLImageElement> m_imageElement;
+    RefPtr<HTMLImageElement> m_imageElement;
     RefPtr<Image> m_bitmap;
 
     IntRect m_bitmapRect; // The rect where the underlying Image should be placed in reference to the ImageBitmap.

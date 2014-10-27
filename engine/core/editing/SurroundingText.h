@@ -49,12 +49,12 @@ public:
     unsigned startOffsetInContent() const;
     unsigned endOffsetInContent() const;
 
-    PassRefPtrWillBeRawPtr<Range> rangeFromContentOffsets(unsigned startOffsetInContent, unsigned endOffsetInContent);
+    PassRefPtr<Range> rangeFromContentOffsets(unsigned startOffsetInContent, unsigned endOffsetInContent);
 
 private:
     void initialize(const Position&, const Position&, unsigned maxLength);
 
-    RefPtrWillBePersistent<Range> m_contentRange;
+    RefPtr<Range> m_contentRange;
     size_t m_startOffsetInContent;
     size_t m_endOffsetInContent;
 };

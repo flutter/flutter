@@ -164,9 +164,9 @@ private:
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ScriptArguments)
 
-PassRefPtrWillBeRawPtr<ScriptArguments> ScriptArguments::create(ScriptState* scriptState, Vector<ScriptValue>& arguments)
+PassRefPtr<ScriptArguments> ScriptArguments::create(ScriptState* scriptState, Vector<ScriptValue>& arguments)
 {
-    return adoptRefWillBeNoop(new ScriptArguments(scriptState, arguments));
+    return adoptRef(new ScriptArguments(scriptState, arguments));
 }
 
 ScriptArguments::ScriptArguments(ScriptState* scriptState, Vector<ScriptValue>& arguments)

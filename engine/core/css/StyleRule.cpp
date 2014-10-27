@@ -32,18 +32,18 @@
 
 namespace blink {
 
-struct SameSizeAsStyleRuleBase : public RefCountedWillBeGarbageCollectedFinalized<SameSizeAsStyleRuleBase> {
+struct SameSizeAsStyleRuleBase : public RefCounted<SameSizeAsStyleRuleBase> {
     unsigned bitfields;
 };
 
 COMPILE_ASSERT(sizeof(StyleRuleBase) <= sizeof(SameSizeAsStyleRuleBase), StyleRuleBase_should_stay_small);
 
-PassRefPtrWillBeRawPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet) const
+PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet) const
 {
     return createCSSOMWrapper(parentSheet, 0);
 }
 
-PassRefPtrWillBeRawPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSRule* parentRule) const
+PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSRule* parentRule) const
 {
     return createCSSOMWrapper(0, parentRule);
 }
@@ -135,7 +135,7 @@ void StyleRuleBase::destroy()
     ASSERT_NOT_REACHED();
 }
 
-PassRefPtrWillBeRawPtr<StyleRuleBase> StyleRuleBase::copy() const
+PassRefPtr<StyleRuleBase> StyleRuleBase::copy() const
 {
     switch (type()) {
     case Style:
@@ -159,9 +159,9 @@ PassRefPtrWillBeRawPtr<StyleRuleBase> StyleRuleBase::copy() const
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet, CSSRule* parentRule) const
+PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet, CSSRule* parentRule) const
 {
-    RefPtrWillBeRawPtr<CSSRule> rule = nullptr;
+    RefPtr<CSSRule> rule = nullptr;
     StyleRuleBase* self = const_cast<StyleRuleBase*>(this);
     switch (type()) {
     case Style:
@@ -220,7 +220,7 @@ MutableStylePropertySet& StyleRule::mutableProperties()
     return *toMutableStylePropertySet(m_properties.get());
 }
 
-void StyleRule::setProperties(PassRefPtrWillBeRawPtr<StylePropertySet> properties)
+void StyleRule::setProperties(PassRefPtr<StylePropertySet> properties)
 {
     m_properties = properties;
 }
@@ -253,7 +253,7 @@ MutableStylePropertySet& StyleRuleFontFace::mutableProperties()
     return *toMutableStylePropertySet(m_properties);
 }
 
-void StyleRuleFontFace::setProperties(PassRefPtrWillBeRawPtr<StylePropertySet> properties)
+void StyleRuleFontFace::setProperties(PassRefPtr<StylePropertySet> properties)
 {
     m_properties = properties;
 }
@@ -264,7 +264,7 @@ void StyleRuleFontFace::traceAfterDispatch(Visitor* visitor)
     StyleRuleBase::traceAfterDispatch(visitor);
 }
 
-StyleRuleGroup::StyleRuleGroup(Type type, WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& adoptRule)
+StyleRuleGroup::StyleRuleGroup(Type type, Vector<RefPtr<StyleRuleBase> >& adoptRule)
     : StyleRuleBase(type)
 {
     m_childRules.swap(adoptRule);
@@ -278,7 +278,7 @@ StyleRuleGroup::StyleRuleGroup(const StyleRuleGroup& o)
         m_childRules[i] = o.m_childRules[i]->copy();
 }
 
-void StyleRuleGroup::wrapperInsertRule(unsigned index, PassRefPtrWillBeRawPtr<StyleRuleBase> rule)
+void StyleRuleGroup::wrapperInsertRule(unsigned index, PassRefPtr<StyleRuleBase> rule)
 {
     m_childRules.insert(index, rule);
 }
@@ -294,7 +294,7 @@ void StyleRuleGroup::traceAfterDispatch(Visitor* visitor)
     StyleRuleBase::traceAfterDispatch(visitor);
 }
 
-StyleRuleMedia::StyleRuleMedia(PassRefPtrWillBeRawPtr<MediaQuerySet> media, WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& adoptRules)
+StyleRuleMedia::StyleRuleMedia(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     : StyleRuleGroup(Media, adoptRules)
     , m_mediaQueries(media)
 {
@@ -313,7 +313,7 @@ void StyleRuleMedia::traceAfterDispatch(Visitor* visitor)
     StyleRuleGroup::traceAfterDispatch(visitor);
 }
 
-StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool conditionIsSupported, WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& adoptRules)
+StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     : StyleRuleGroup(Supports, adoptRules)
     , m_conditionText(conditionText)
     , m_conditionIsSupported(conditionIsSupported)
@@ -351,7 +351,7 @@ MutableStylePropertySet& StyleRuleFilter::mutableProperties()
     return *toMutableStylePropertySet(m_properties);
 }
 
-void StyleRuleFilter::setProperties(PassRefPtrWillBeRawPtr<StylePropertySet> properties)
+void StyleRuleFilter::setProperties(PassRefPtr<StylePropertySet> properties)
 {
     m_properties = properties;
 }

@@ -12,9 +12,9 @@ namespace blink {
 
 class LegacyStyleInterpolation : public StyleInterpolation {
 public:
-    static PassRefPtrWillBeRawPtr<LegacyStyleInterpolation> create(PassRefPtrWillBeRawPtr<AnimatableValue> start, PassRefPtrWillBeRawPtr<AnimatableValue> end, CSSPropertyID id)
+    static PassRefPtr<LegacyStyleInterpolation> create(PassRefPtr<AnimatableValue> start, PassRefPtr<AnimatableValue> end, CSSPropertyID id)
     {
-        return adoptRefWillBeNoop(new LegacyStyleInterpolation(InterpolableAnimatableValue::create(start), InterpolableAnimatableValue::create(end), id));
+        return adoptRef(new LegacyStyleInterpolation(InterpolableAnimatableValue::create(start), InterpolableAnimatableValue::create(end), id));
     }
 
     virtual void apply(StyleResolverState& state) const override
@@ -23,7 +23,7 @@ public:
     }
 
     virtual bool isLegacyStyleInterpolation() const override final { return true; }
-    PassRefPtrWillBeRawPtr<AnimatableValue> currentValue() const
+    PassRefPtr<AnimatableValue> currentValue() const
     {
         return toInterpolableAnimatableValue(m_cachedValue.get())->value();
     }
@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    LegacyStyleInterpolation(PassOwnPtrWillBeRawPtr<InterpolableValue> start, PassOwnPtrWillBeRawPtr<InterpolableValue> end, CSSPropertyID id)
+    LegacyStyleInterpolation(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end, CSSPropertyID id)
         : StyleInterpolation(start, end, id)
     {
     }

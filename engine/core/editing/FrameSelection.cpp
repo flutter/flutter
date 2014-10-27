@@ -346,7 +346,7 @@ void FrameSelection::respondToNodeModification(Node& node, bool baseRemoved, boo
             m_selection.setWithoutValidation(m_selection.start(), m_selection.end());
         else
             m_selection.setWithoutValidation(m_selection.end(), m_selection.start());
-    } else if (RefPtrWillBeRawPtr<Range> range = m_selection.firstRange()) {
+    } else if (RefPtr<Range> range = m_selection.firstRange()) {
         TrackExceptionState exceptionState;
         Range::CompareResults compareResult = range->compareNode(&node, exceptionState);
         if (!exceptionState.hadException() && (compareResult == Range::NODE_BEFORE_AND_AFTER || compareResult == Range::NODE_INSIDE)) {
@@ -924,7 +924,7 @@ static bool isBoundary(TextGranularity granularity)
 bool FrameSelection::modify(EAlteration alter, SelectionDirection direction, TextGranularity granularity, EUserTriggered userTriggered)
 {
     if (userTriggered == UserTriggered) {
-        OwnPtrWillBeRawPtr<FrameSelection> trialFrameSelection = FrameSelection::create();
+        OwnPtr<FrameSelection> trialFrameSelection = FrameSelection::create();
         trialFrameSelection->setSelection(m_selection);
         trialFrameSelection->modify(alter, direction, granularity, NotUserTriggered);
 
@@ -1033,7 +1033,7 @@ bool FrameSelection::modify(EAlteration alter, unsigned verticalDistance, Vertic
         return false;
 
     if (userTriggered == UserTriggered) {
-        OwnPtrWillBeRawPtr<FrameSelection> trialFrameSelection = FrameSelection::create();
+        OwnPtr<FrameSelection> trialFrameSelection = FrameSelection::create();
         trialFrameSelection->setSelection(m_selection);
         trialFrameSelection->modify(alter, verticalDistance, direction, NotUserTriggered);
     }
@@ -1298,7 +1298,7 @@ void FrameSelection::selectAll()
 {
     Document* document = m_frame->document();
 
-    RefPtrWillBeRawPtr<Node> root = nullptr;
+    RefPtr<Node> root = nullptr;
     Node* selectStartTarget = 0;
     if (isContentEditable()) {
         root = highestEditableRoot(m_selection.start());
@@ -1346,7 +1346,7 @@ bool FrameSelection::setSelectedRange(Range* range, EAffinity affinity, Directoi
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Range> FrameSelection::firstRange() const
+PassRefPtr<Range> FrameSelection::firstRange() const
 {
     if (m_logicalRange)
         return m_logicalRange->cloneRange();
@@ -1374,7 +1374,7 @@ void FrameSelection::focusedOrActiveStateChanged()
 {
     bool activeAndFocused = isFocusedAndActive();
 
-    RefPtrWillBeRawPtr<Document> document = m_frame->document();
+    RefPtr<Document> document = m_frame->document();
     document->updateRenderTreeIfNeeded();
 
     // Because RenderObject::selectionBackgroundColor() and

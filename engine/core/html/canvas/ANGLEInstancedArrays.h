@@ -41,7 +41,7 @@ class WebGLRenderingContextBase;
 class ANGLEInstancedArrays final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ANGLEInstancedArrays> create(WebGLRenderingContextBase*);
+    static PassRefPtr<ANGLEInstancedArrays> create(WebGLRenderingContextBase*);
     static bool supported(WebGLRenderingContextBase*);
     static const char* extensionName();
 

@@ -14,7 +14,7 @@ namespace {
 // Once we setWholeSubtreeInvalid, we should not keep the HashSets.
 TEST(DescendantInvalidationSetTest, SubtreeInvalid_AddBefore)
 {
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set = DescendantInvalidationSet::create();
     set->addClass("a");
     set->setWholeSubtreeInvalid();
 
@@ -24,7 +24,7 @@ TEST(DescendantInvalidationSetTest, SubtreeInvalid_AddBefore)
 // Don't (re)create HashSets if we've already setWholeSubtreeInvalid.
 TEST(DescendantInvalidationSetTest, SubtreeInvalid_AddAfter)
 {
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set = DescendantInvalidationSet::create();
     set->setWholeSubtreeInvalid();
     set->addTagName("a");
 
@@ -34,8 +34,8 @@ TEST(DescendantInvalidationSetTest, SubtreeInvalid_AddAfter)
 // No need to keep the HashSets when combining with a wholeSubtreeInvalid set.
 TEST(DescendantInvalidationSetTest, SubtreeInvalid_Combine_1)
 {
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set1 = DescendantInvalidationSet::create();
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set2 = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set1 = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set2 = DescendantInvalidationSet::create();
 
     set1->addId("a");
     set2->setWholeSubtreeInvalid();
@@ -49,8 +49,8 @@ TEST(DescendantInvalidationSetTest, SubtreeInvalid_Combine_1)
 // No need to add HashSets from combining set when we already have wholeSubtreeInvalid.
 TEST(DescendantInvalidationSetTest, SubtreeInvalid_Combine_2)
 {
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set1 = DescendantInvalidationSet::create();
-    RefPtrWillBeRawPtr<DescendantInvalidationSet> set2 = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set1 = DescendantInvalidationSet::create();
+    RefPtr<DescendantInvalidationSet> set2 = DescendantInvalidationSet::create();
 
     set1->setWholeSubtreeInvalid();
     set2->addAttribute("a");

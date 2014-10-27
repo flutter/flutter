@@ -47,7 +47,7 @@ void HTMLScriptRunner::executeScript(PassRefPtr<HTMLScriptElement> element, Text
     Document& sourceDocument = element->document();
     String source = element->textContent();
 
-    RefPtrWillBeRawPtr<Document> contextDocument = sourceDocument.contextDocument().get();
+    RefPtr<Document> contextDocument = sourceDocument.contextDocument().get();
     if (!contextDocument)
         return;
 

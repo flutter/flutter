@@ -73,14 +73,14 @@ public:
     }
 
     NamedNodeMap* attributeMap() const { return m_attributeMap.get(); }
-    void setAttributeMap(PassOwnPtrWillBeRawPtr<NamedNodeMap> attributeMap) { m_attributeMap = attributeMap; }
+    void setAttributeMap(PassOwnPtr<NamedNodeMap> attributeMap) { m_attributeMap = attributeMap; }
 
     RenderStyle* computedStyle() const { return m_computedStyle.get(); }
     void setComputedStyle(PassRefPtr<RenderStyle> computedStyle) { m_computedStyle = computedStyle; }
     void clearComputedStyle() { m_computedStyle = nullptr; }
 
     ClassList* classList() const { return m_classList.get(); }
-    void setClassList(PassOwnPtrWillBeRawPtr<ClassList> classList) { m_classList = classList; }
+    void setClassList(PassOwnPtr<ClassList> classList) { m_classList = classList; }
 
     LayoutSize minimumSizeForResizing() const { return m_minimumSizeForResizing; }
     void setMinimumSizeForResizing(LayoutSize size) { m_minimumSizeForResizing = size; }
@@ -89,7 +89,7 @@ public:
     void setSavedLayerScrollOffset(IntSize size) { m_savedLayerScrollOffset = size; }
 
     ActiveAnimations* activeAnimations() { return m_activeAnimations.get(); }
-    void setActiveAnimations(PassOwnPtrWillBeRawPtr<ActiveAnimations> activeAnimations)
+    void setActiveAnimations(PassOwnPtr<ActiveAnimations> activeAnimations)
     {
         m_activeAnimations = activeAnimations;
     }
@@ -105,8 +105,8 @@ public:
     void setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition) { m_customElementDefinition = definition; }
     CustomElementDefinition* customElementDefinition() const { return m_customElementDefinition.get(); }
 
-    WillBeHeapVector<RefPtrWillBeMember<Attr> >& ensureAttrNodeList();
-    WillBeHeapVector<RefPtrWillBeMember<Attr> >* attrNodeList() { return m_attrNodeList.get(); }
+    Vector<RefPtr<Attr> >& ensureAttrNodeList();
+    Vector<RefPtr<Attr> >* attrNodeList() { return m_attrNodeList.get(); }
     void removeAttrNodeList() { m_attrNodeList.clear(); }
 
     void traceAfterDispatch(Visitor*);
@@ -117,13 +117,13 @@ private:
     LayoutSize m_minimumSizeForResizing;
     IntSize m_savedLayerScrollOffset;
 
-    OwnPtrWillBeMember<ClassList> m_classList;
-    OwnPtrWillBeMember<ElementShadow> m_shadow;
-    OwnPtrWillBeMember<NamedNodeMap> m_attributeMap;
-    OwnPtrWillBeMember<WillBeHeapVector<RefPtrWillBeMember<Attr> > > m_attrNodeList;
-    OwnPtrWillBeMember<InputMethodContext> m_inputMethodContext;
-    OwnPtrWillBeMember<ActiveAnimations> m_activeAnimations;
-    OwnPtrWillBeMember<InlineCSSStyleDeclaration> m_cssomWrapper;
+    OwnPtr<ClassList> m_classList;
+    OwnPtr<ElementShadow> m_shadow;
+    OwnPtr<NamedNodeMap> m_attributeMap;
+    OwnPtr<Vector<RefPtr<Attr> > > m_attrNodeList;
+    OwnPtr<InputMethodContext> m_inputMethodContext;
+    OwnPtr<ActiveAnimations> m_activeAnimations;
+    OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 
     RefPtr<RenderStyle> m_computedStyle;
     RefPtr<CustomElementDefinition> m_customElementDefinition;

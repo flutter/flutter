@@ -150,7 +150,7 @@ String Page::mainThreadScrollingReasonsAsText()
     return String();
 }
 
-PassRefPtrWillBeRawPtr<ClientRectList> Page::nonFastScrollableRects(const LocalFrame* frame)
+PassRefPtr<ClientRectList> Page::nonFastScrollableRects(const LocalFrame* frame)
 {
     if (mainFrame()->document())
         mainFrame()->document()->updateLayout();
@@ -302,8 +302,8 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
         }
         break;
     case SettingsDelegate::MultisamplingChange: {
-        WillBeHeapHashSet<RawPtrWillBeWeakMember<MultisamplingChangedObserver> >::iterator stop = m_multisamplingChangedObservers.end();
-        for (WillBeHeapHashSet<RawPtrWillBeWeakMember<MultisamplingChangedObserver> >::iterator it = m_multisamplingChangedObservers.begin(); it != stop; ++it)
+        HashSet<RawPtr<MultisamplingChangedObserver> >::iterator stop = m_multisamplingChangedObservers.end();
+        for (HashSet<RawPtr<MultisamplingChangedObserver> >::iterator it = m_multisamplingChangedObservers.begin(); it != stop; ++it)
             (*it)->multisamplingChanged(m_settings->openGLMultisamplingEnabled());
         break;
     }
@@ -367,7 +367,7 @@ void Page::trace(Visitor* visitor)
     visitor->trace(m_multisamplingChangedObservers);
     visitor->trace(m_frameHost);
 #endif
-    WillBeHeapSupplementable<Page>::trace(visitor);
+    Supplementable<Page>::trace(visitor);
     LifecycleContext<Page>::trace(visitor);
 }
 

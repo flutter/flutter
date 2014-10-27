@@ -55,7 +55,7 @@ void TreeScopeAdopter::moveTreeToNewScope(Node& root) const
             continue;
 
         if (node->hasSyntheticAttrChildNodes()) {
-            WillBeHeapVector<RefPtrWillBeMember<Attr> >& attrs = *toElement(node)->attrNodeList();
+            Vector<RefPtr<Attr> >& attrs = *toElement(node)->attrNodeList();
             for (unsigned i = 0; i < attrs.size(); ++i)
                 moveTreeToNewScope(*attrs[i]);
         }
@@ -79,7 +79,7 @@ void TreeScopeAdopter::moveTreeToNewDocument(Node& root, Document& oldDocument, 
         moveNodeToNewDocument(*node, oldDocument, newDocument);
 
         if (node->hasSyntheticAttrChildNodes()) {
-            WillBeHeapVector<RefPtrWillBeMember<Attr> >& attrs = *toElement(node)->attrNodeList();
+            Vector<RefPtr<Attr> >& attrs = *toElement(node)->attrNodeList();
             for (unsigned i = 0; i < attrs.size(); ++i)
                 moveTreeToNewDocument(*attrs[i], oldDocument, newDocument);
         }

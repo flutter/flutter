@@ -41,7 +41,7 @@ CompositionEvent::CompositionEvent()
     initializeSegments();
 }
 
-CompositionEvent::CompositionEvent(const AtomicString& type, PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, const Vector<CompositionUnderline>& underlines)
+CompositionEvent::CompositionEvent(const AtomicString& type, PassRefPtr<AbstractView> view, const String& data, const Vector<CompositionUnderline>& underlines)
     : UIEvent(type, true, true, view, 0)
     , m_data(data)
     , m_activeSegmentStart(0)
@@ -65,7 +65,7 @@ CompositionEvent::~CompositionEvent()
 {
 }
 
-void CompositionEvent::initCompositionEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view, const String& data)
+void CompositionEvent::initCompositionEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, const String& data)
 {
     if (dispatched())
         return;

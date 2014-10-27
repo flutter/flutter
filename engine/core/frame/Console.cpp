@@ -62,7 +62,7 @@ ExecutionContext* Console::context()
     return m_frame->document();
 }
 
-void Console::reportMessageToConsole(PassRefPtrWillBeRawPtr<ConsoleMessage> consoleMessage)
+void Console::reportMessageToConsole(PassRefPtr<ConsoleMessage> consoleMessage)
 {
     if (!m_frame)
         return;

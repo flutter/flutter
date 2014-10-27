@@ -44,7 +44,7 @@ public:
 
     virtual ~WebGLVertexArrayObjectOES();
 
-    static PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> create(WebGLRenderingContextBase*, VaoType);
+    static PassRefPtr<WebGLVertexArrayObjectOES> create(WebGLRenderingContextBase*, VaoType);
 
     // Cached values for vertex attrib range checks
     class VertexAttribState final {
@@ -66,7 +66,7 @@ public:
         void trace(Visitor*);
 
         bool enabled;
-        RefPtrWillBeMember<WebGLBuffer> bufferBinding;
+        RefPtr<WebGLBuffer> bufferBinding;
         GLsizei bytesPerElement;
         GLint size;
         GLenum type;
@@ -82,12 +82,12 @@ public:
     bool hasEverBeenBound() const { return object() && m_hasEverBeenBound; }
     void setHasEverBeenBound() { m_hasEverBeenBound = true; }
 
-    PassRefPtrWillBeRawPtr<WebGLBuffer> boundElementArrayBuffer() const { return m_boundElementArrayBuffer; }
-    void setElementArrayBuffer(PassRefPtrWillBeRawPtr<WebGLBuffer>);
+    PassRefPtr<WebGLBuffer> boundElementArrayBuffer() const { return m_boundElementArrayBuffer; }
+    void setElementArrayBuffer(PassRefPtr<WebGLBuffer>);
 
     VertexAttribState& getVertexAttribState(int index) { return m_vertexAttribState[index]; }
-    void setVertexAttribState(GLuint, GLsizei, GLint, GLenum, GLboolean, GLsizei, GLintptr, PassRefPtrWillBeRawPtr<WebGLBuffer>);
-    void unbindBuffer(PassRefPtrWillBeRawPtr<WebGLBuffer>);
+    void setVertexAttribState(GLuint, GLsizei, GLint, GLenum, GLboolean, GLsizei, GLintptr, PassRefPtr<WebGLBuffer>);
+    void unbindBuffer(PassRefPtr<WebGLBuffer>);
     void setVertexAttribDivisor(GLuint index, GLuint divisor);
 
     virtual void trace(Visitor*) override;
@@ -103,8 +103,8 @@ private:
 #if ENABLE(OILPAN)
     bool m_destructionInProgress;
 #endif
-    RefPtrWillBeMember<WebGLBuffer> m_boundElementArrayBuffer;
-    WillBeHeapVector<VertexAttribState> m_vertexAttribState;
+    RefPtr<WebGLBuffer> m_boundElementArrayBuffer;
+    Vector<VertexAttribState> m_vertexAttribState;
 };
 
 } // namespace blink

@@ -37,20 +37,20 @@ namespace blink {
 
 class IntRect;
 
-class ClientRect final : public RefCountedWillBeGarbageCollected<ClientRect>, public ScriptWrappable {
+class ClientRect final : public RefCounted<ClientRect>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ClientRect> create()
+    static PassRefPtr<ClientRect> create()
     {
-        return adoptRefWillBeNoop(new ClientRect);
+        return adoptRef(new ClientRect);
     }
-    static PassRefPtrWillBeRawPtr<ClientRect> create(const IntRect& rect)
+    static PassRefPtr<ClientRect> create(const IntRect& rect)
     {
-        return adoptRefWillBeNoop(new ClientRect(rect));
+        return adoptRef(new ClientRect(rect));
     }
-    static PassRefPtrWillBeRawPtr<ClientRect> create(const FloatRect& rect)
+    static PassRefPtr<ClientRect> create(const FloatRect& rect)
     {
-        return adoptRefWillBeNoop(new ClientRect(rect));
+        return adoptRef(new ClientRect(rect));
     }
 
     float top() const { return m_rect.y(); }

@@ -47,9 +47,9 @@ HTMLStyleElement::~HTMLStyleElement()
 #endif
 }
 
-PassRefPtrWillBeRawPtr<HTMLStyleElement> HTMLStyleElement::create(Document& document, bool createdByParser)
+PassRefPtr<HTMLStyleElement> HTMLStyleElement::create(Document& document, bool createdByParser)
 {
-    return adoptRefWillBeNoop(new HTMLStyleElement(document, createdByParser));
+    return adoptRef(new HTMLStyleElement(document, createdByParser));
 }
 
 void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicString& value)

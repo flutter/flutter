@@ -34,7 +34,7 @@ namespace blink {
 class HTMLAnchorElement : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<HTMLAnchorElement> create(Document&);
+    static PassRefPtr<HTMLAnchorElement> create(Document&);
 
     virtual ~HTMLAnchorElement();
 

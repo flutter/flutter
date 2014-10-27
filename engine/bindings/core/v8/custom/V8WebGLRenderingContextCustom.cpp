@@ -343,7 +343,7 @@ void V8WebGLRenderingContext::getExtensionMethodCustom(const v8::FunctionCallbac
         return;
     }
     TOSTRING_VOID(V8StringResource<>, name, info[0]);
-    RefPtrWillBeRawPtr<WebGLExtension> extension(impl->getExtension(name));
+    RefPtr<WebGLExtension> extension(impl->getExtension(name));
     v8SetReturnValue(info, toV8Object(extension.get(), info.Holder(), info.GetIsolate()));
 }
 

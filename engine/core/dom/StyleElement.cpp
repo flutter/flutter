@@ -87,7 +87,7 @@ void StyleElement::removedFromDocument(Document& document, Element* element, Con
         m_registeredAsCandidate = false;
     }
 
-    RefPtrWillBeRawPtr<StyleSheet> removedSheet = m_sheet.get();
+    RefPtr<StyleSheet> removedSheet = m_sheet.get();
 
     if (m_sheet)
         clearSheet(element);
@@ -147,7 +147,7 @@ void StyleElement::createSheet(Element* e, const String& text)
     // If type is empty or CSS, this is a CSS style sheet.
     const AtomicString& type = this->type();
     if (isCSS(e, type)) {
-        RefPtrWillBeRawPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
+        RefPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
 
         MediaQueryEvaluator screenEval("screen", true);
         MediaQueryEvaluator printEval("print", true);

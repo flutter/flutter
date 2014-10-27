@@ -33,7 +33,7 @@ namespace blink {
 class Attr final : public Node {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Attr> create(Element&, const QualifiedName&);
+    static PassRefPtr<Attr> create(Element&, const QualifiedName&);
     virtual ~Attr();
 
     String name() const { return m_name.localName(); }
@@ -57,11 +57,11 @@ private:
     virtual String nodeName() const override { return name(); }
     virtual NodeType nodeType() const override { return ATTRIBUTE_NODE; }
 
-    virtual PassRefPtrWillBeRawPtr<Node> cloneNode(bool deep = true) override { return nullptr; }
+    virtual PassRefPtr<Node> cloneNode(bool deep = true) override { return nullptr; }
 
     virtual bool isAttributeNode() const override { return true; }
 
-    RawPtrWillBeMember<Element> m_element;
+    RawPtr<Element> m_element;
     QualifiedName m_name;
 };
 

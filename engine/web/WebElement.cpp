@@ -163,18 +163,18 @@ WebImage WebElement::imageContents()
     return bitmap->bitmap();
 }
 
-WebElement::WebElement(const PassRefPtrWillBeRawPtr<Element>& elem)
+WebElement::WebElement(const PassRefPtr<Element>& elem)
     : WebNode(elem)
 {
 }
 
-WebElement& WebElement::operator=(const PassRefPtrWillBeRawPtr<Element>& elem)
+WebElement& WebElement::operator=(const PassRefPtr<Element>& elem)
 {
     m_private = elem;
     return *this;
 }
 
-WebElement::operator PassRefPtrWillBeRawPtr<Element>() const
+WebElement::operator PassRefPtr<Element>() const
 {
     return toElement(m_private.get());
 }

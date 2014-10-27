@@ -35,10 +35,10 @@
 
 namespace blink {
 
-class WebGLShaderPrecisionFormat final : public RefCountedWillBeGarbageCollected<WebGLShaderPrecisionFormat>, public ScriptWrappable {
+class WebGLShaderPrecisionFormat final : public RefCounted<WebGLShaderPrecisionFormat>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<WebGLShaderPrecisionFormat> create(GLint rangeMin, GLint rangeMax, GLint precision);
+    static PassRefPtr<WebGLShaderPrecisionFormat> create(GLint rangeMin, GLint rangeMax, GLint precision);
 
     GLint rangeMin() const;
     GLint rangeMax() const;

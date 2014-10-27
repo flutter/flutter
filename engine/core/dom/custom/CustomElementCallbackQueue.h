@@ -44,10 +44,10 @@ namespace blink {
 
 // FIXME: Rename this because it contains resolution and upgrade as
 // well as callbacks.
-class CustomElementCallbackQueue : public NoBaseWillBeGarbageCollectedFinalized<CustomElementCallbackQueue> {
+class CustomElementCallbackQueue : public DummyBase<CustomElementCallbackQueue> {
     WTF_MAKE_NONCOPYABLE(CustomElementCallbackQueue);
 public:
-    static PassOwnPtrWillBeRawPtr<CustomElementCallbackQueue> create(PassRefPtrWillBeRawPtr<Element>);
+    static PassOwnPtr<CustomElementCallbackQueue> create(PassRefPtr<Element>);
 
     typedef int ElementQueueId;
     ElementQueueId owner() const { return m_owner; }
@@ -68,9 +68,9 @@ public:
     void trace(Visitor*);
 
 private:
-    explicit CustomElementCallbackQueue(PassRefPtrWillBeRawPtr<Element>);
+    explicit CustomElementCallbackQueue(PassRefPtr<Element>);
 
-    RefPtrWillBeMember<Element> m_element;
+    RefPtr<Element> m_element;
     Vector<OwnPtr<CustomElementProcessingStep> > m_queue;
     ElementQueueId m_owner;
     size_t m_index;

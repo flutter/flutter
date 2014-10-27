@@ -42,7 +42,7 @@ namespace blink {
 
 class Interpolation;
 
-class AnimationEffect : public RefCountedWillBeGarbageCollectedFinalized<AnimationEffect>, public ScriptWrappable {
+class AnimationEffect : public RefCounted<AnimationEffect>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum CompositeOperation {
@@ -55,7 +55,7 @@ public:
         ScriptWrappable::init(this);
     }
     virtual ~AnimationEffect() { }
-    virtual PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const = 0;
+    virtual PassOwnPtr<Vector<RefPtr<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const = 0;
 
     virtual bool affects(CSSPropertyID) { return false; };
     virtual bool isKeyframeEffectModel() const { return false; }

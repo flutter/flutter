@@ -95,7 +95,7 @@
 
 namespace blink {
 
-typedef WillBeHeapVector<RefPtrWillBeMember<Attr> > AttrNodeList;
+typedef Vector<RefPtr<Attr> > AttrNodeList;
 
 static Attr* findAttrNodeInList(const AttrNodeList& attrNodeList, const QualifiedName& name)
 {
@@ -107,9 +107,9 @@ static Attr* findAttrNodeInList(const AttrNodeList& attrNodeList, const Qualifie
     return 0;
 }
 
-PassRefPtrWillBeRawPtr<Element> Element::create(const QualifiedName& tagName, Document* document)
+PassRefPtr<Element> Element::create(const QualifiedName& tagName, Document* document)
 {
-    return adoptRefWillBeNoop(new Element(tagName, document, CreateElement));
+    return adoptRef(new Element(tagName, document, CreateElement));
 }
 
 Element::Element(const QualifiedName& tagName, Document* document, ConstructionType type)
@@ -210,21 +210,21 @@ bool Element::rendererIsFocusable() const
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Node> Element::cloneNode(bool deep)
+PassRefPtr<Node> Element::cloneNode(bool deep)
 {
     return deep ? cloneElementWithChildren() : cloneElementWithoutChildren();
 }
 
-PassRefPtrWillBeRawPtr<Element> Element::cloneElementWithChildren()
+PassRefPtr<Element> Element::cloneElementWithChildren()
 {
-    RefPtrWillBeRawPtr<Element> clone = cloneElementWithoutChildren();
+    RefPtr<Element> clone = cloneElementWithoutChildren();
     cloneChildNodes(clone.get());
     return clone.release();
 }
 
-PassRefPtrWillBeRawPtr<Element> Element::cloneElementWithoutChildren()
+PassRefPtr<Element> Element::cloneElementWithoutChildren()
 {
-    RefPtrWillBeRawPtr<Element> clone = cloneElementWithoutAttributesAndChildren();
+    RefPtr<Element> clone = cloneElementWithoutAttributesAndChildren();
     // This will catch HTML elements in the wrong namespace that are not correctly copied.
     // This is a sanity check as HTML overloads some of the DOM methods.
     ASSERT(isHTMLElement() == clone->isHTMLElement());
@@ -233,7 +233,7 @@ PassRefPtrWillBeRawPtr<Element> Element::cloneElementWithoutChildren()
     return clone.release();
 }
 
-PassRefPtrWillBeRawPtr<Element> Element::cloneElementWithoutAttributesAndChildren()
+PassRefPtr<Element> Element::cloneElementWithoutAttributesAndChildren()
 {
     return document().createElement(tagQName(), false);
 }
@@ -279,7 +279,7 @@ ActiveAnimations& Element::ensureActiveAnimations()
 {
     ElementRareData& rareData = ensureElementRareData();
     if (!rareData.activeAnimations())
-        rareData.setActiveAnimations(adoptPtrWillBeNoop(new ActiveAnimations()));
+        rareData.setActiveAnimations(adoptPtr(new ActiveAnimations()));
     return *rareData.activeAnimations();
 }
 
@@ -580,7 +580,7 @@ IntRect Element::boundsInRootViewSpace()
     return result;
 }
 
-PassRefPtrWillBeRawPtr<ClientRectList> Element::getClientRects()
+PassRefPtr<ClientRectList> Element::getClientRects()
 {
     document().updateLayoutIgnorePendingStylesheets();
 
@@ -597,7 +597,7 @@ PassRefPtrWillBeRawPtr<ClientRectList> Element::getClientRects()
     return ClientRectList::create(quads);
 }
 
-PassRefPtrWillBeRawPtr<ClientRect> Element::getBoundingClientRect()
+PassRefPtr<ClientRect> Element::getBoundingClientRect()
 {
     document().updateLayoutIgnorePendingStylesheets();
 
@@ -1197,9 +1197,9 @@ CustomElementDefinition* Element::customElementDefinition() const
     return 0;
 }
 
-PassRefPtrWillBeRawPtr<ShadowRoot> Element::createShadowRoot(ExceptionState& exceptionState)
+PassRefPtr<ShadowRoot> Element::createShadowRoot(ExceptionState& exceptionState)
 {
-    return PassRefPtrWillBeRawPtr<ShadowRoot>(ensureShadow().addShadowRoot(*this));
+    return PassRefPtr<ShadowRoot>(ensureShadow().addShadowRoot(*this));
 }
 
 ShadowRoot* Element::shadowRoot() const
@@ -1263,12 +1263,12 @@ void Element::formatForDebugger(char* buffer, unsigned length) const
 }
 #endif
 
-WillBeHeapVector<RefPtrWillBeMember<Attr> >* Element::attrNodeList()
+Vector<RefPtr<Attr> >* Element::attrNodeList()
 {
     return hasRareData() ? elementRareData()->attrNodeList() : 0;
 }
 
-WillBeHeapVector<RefPtrWillBeMember<Attr> >& Element::ensureAttrNodeList()
+Vector<RefPtr<Attr> >& Element::ensureAttrNodeList()
 {
     setHasSyntheticAttrChildNodes(true);
     return ensureElementRareData().ensureAttrNodeList();
@@ -1325,7 +1325,7 @@ void Element::removeAttributeInternal(size_t index, SynchronizationOfLazyAttribu
             willModifyAttribute(name, valueBeingRemoved, nullAtom);
     }
 
-    if (RefPtrWillBeRawPtr<Attr> attrNode = attrIfExists(name))
+    if (RefPtr<Attr> attrNode = attrIfExists(name))
         attrNode->detachFromElement();
 
     attributes.remove(index);
@@ -1358,7 +1358,7 @@ void Element::removeAttribute(const AtomicString& localName)
     removeAttributeInternal(index, NotInSynchronizationOfLazyAttribute);
 }
 
-PassRefPtrWillBeRawPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
+PassRefPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
 {
     if (!elementData())
         return nullptr;
@@ -1384,7 +1384,7 @@ void Element::focus(bool restorePreviousSelection, FocusType type)
     if (!isFocusable())
         return;
 
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
     if (!document().page()->focusController().setFocusedElement(this, document().frame(), type))
         return;
 
@@ -1477,13 +1477,13 @@ void Element::dispatchFocusEvent(Element* oldFocusedElement, FocusType type)
     if (type != FocusTypePage)
         setWasFocusedByMouse(type == FocusTypeMouse);
 
-    RefPtrWillBeRawPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::focus, false, false, document().domWindow(), 0, oldFocusedElement);
+    RefPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::focus, false, false, document().domWindow(), 0, oldFocusedElement);
     EventDispatcher::dispatchEvent(this, FocusEventDispatchMediator::create(event.release()));
 }
 
 void Element::dispatchBlurEvent(Element* newFocusedElement)
 {
-    RefPtrWillBeRawPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::blur, false, false, document().domWindow(), 0, newFocusedElement);
+    RefPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::blur, false, false, document().domWindow(), 0, newFocusedElement);
     EventDispatcher::dispatchEvent(this, BlurEventDispatchMediator::create(event.release()));
 }
 
@@ -1641,13 +1641,13 @@ void Element::normalizeAttributes()
 {
     if (!hasAttributes())
         return;
-    WillBeHeapVector<RefPtrWillBeMember<Attr> >* attrNodes = attrNodeList();
+    Vector<RefPtr<Attr> >* attrNodes = attrNodeList();
     if (!attrNodes)
         return;
     // Copy the Attr Vector because Node::normalize() can fire synchronous JS
     // events (e.g. DOMSubtreeModified) and a JS listener could add / remove
     // attributes while we are iterating.
-    WillBeHeapVector<RefPtrWillBeMember<Attr> > attrNodesCopy(*attrNodes);
+    Vector<RefPtr<Attr> > attrNodesCopy(*attrNodes);
     for (size_t i = 0; i < attrNodesCopy.size(); ++i)
         attrNodesCopy[i]->normalize();
 }
@@ -1809,7 +1809,7 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
             CustomElement::attributeDidChange(this, name.localName(), oldValue, newValue);
     }
 
-    if (OwnPtrWillBeRawPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
+    if (OwnPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
         recipients->enqueueMutationRecord(MutationRecord::createAttributes(this, name, oldValue));
 }
 
@@ -1860,17 +1860,17 @@ void Element::setSavedLayerScrollOffset(const IntSize& size)
     ensureElementRareData().setSavedLayerScrollOffset(size);
 }
 
-PassRefPtrWillBeRawPtr<Attr> Element::attrIfExists(const QualifiedName& name)
+PassRefPtr<Attr> Element::attrIfExists(const QualifiedName& name)
 {
     if (AttrNodeList* attrNodeList = this->attrNodeList())
         return findAttrNodeInList(*attrNodeList, name);
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Attr> Element::ensureAttr(const QualifiedName& name)
+PassRefPtr<Attr> Element::ensureAttr(const QualifiedName& name)
 {
     AttrNodeList& attrNodeList = ensureAttrNodeList();
-    RefPtrWillBeRawPtr<Attr> attrNode = findAttrNodeInList(attrNodeList, name);
+    RefPtr<Attr> attrNode = findAttrNodeInList(attrNodeList, name);
     if (!attrNode) {
         attrNode = Attr::create(*this, name);
         treeScope().adoptIfNeeded(*attrNode);
@@ -1986,7 +1986,7 @@ CSSStyleDeclaration* Element::style()
 MutableStylePropertySet& Element::ensureMutableInlineStyle()
 {
     ASSERT(isStyledElement());
-    RefPtrWillBeMember<StylePropertySet>& inlineStyle = ensureUniqueElementData().m_inlineStyle;
+    RefPtr<StylePropertySet>& inlineStyle = ensureUniqueElementData().m_inlineStyle;
     if (!inlineStyle) {
         inlineStyle = MutableStylePropertySet::create(HTMLStandardMode);
     } else if (!inlineStyle->isMutable()) {
@@ -2005,7 +2005,7 @@ void Element::clearMutableInlineStyleIfEmpty()
 inline void Element::setInlineStyleFromString(const AtomicString& newStyleString)
 {
     ASSERT(isStyledElement());
-    RefPtrWillBeMember<StylePropertySet>& inlineStyle = elementData()->m_inlineStyle;
+    RefPtr<StylePropertySet>& inlineStyle = elementData()->m_inlineStyle;
 
     // Avoid redundant work if we're using shared attribute data with already parsed inline style.
     if (inlineStyle && !elementData()->isUnique())

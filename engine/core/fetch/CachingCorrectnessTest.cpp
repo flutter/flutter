@@ -153,10 +153,10 @@ private:
     blink::Platform* m_savedPlatform;
     ProxyPlatform m_proxyPlatform;
 
-    OwnPtrWillBePersistent<MemoryCache> m_globalMemoryCache;
+    OwnPtr<MemoryCache> m_globalMemoryCache;
 
-    RefPtrWillBePersistent<HTMLDocument> m_document;
-    RefPtrWillBePersistent<ResourceFetcher> m_fetcher;
+    RefPtr<HTMLDocument> m_document;
+    RefPtr<ResourceFetcher> m_fetcher;
 };
 
 TEST_F(CachingCorrectnessTest, FreshFromLastModified)

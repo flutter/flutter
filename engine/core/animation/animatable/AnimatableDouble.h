@@ -44,9 +44,9 @@ public:
         InterpolationIsNonContinuousWithZero,
     };
 
-    static PassRefPtrWillBeRawPtr<AnimatableDouble> create(double number, Constraint constraint = Unconstrained)
+    static PassRefPtr<AnimatableDouble> create(double number, Constraint constraint = Unconstrained)
     {
-        return adoptRefWillBeNoop(new AnimatableDouble(number, constraint));
+        return adoptRef(new AnimatableDouble(number, constraint));
     }
 
     double toDouble() const { return m_number; }
@@ -54,7 +54,7 @@ public:
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;
 
 private:

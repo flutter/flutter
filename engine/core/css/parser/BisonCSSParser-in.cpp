@@ -163,7 +163,7 @@ void BisonCSSParser::parseSheet(StyleSheetContents* sheet, const String& string,
     m_tokenizer.m_internal = true;
 }
 
-PassRefPtrWillBeRawPtr<StyleRuleBase> BisonCSSParser::parseRule(StyleSheetContents* sheet, const String& string)
+PassRefPtr<StyleRuleBase> BisonCSSParser::parseRule(StyleSheetContents* sheet, const String& string)
 {
     setStyleSheet(sheet);
     m_allowNamespaceDeclarations = false;
@@ -172,7 +172,7 @@ PassRefPtrWillBeRawPtr<StyleRuleBase> BisonCSSParser::parseRule(StyleSheetConten
     return m_rule.release();
 }
 
-PassRefPtrWillBeRawPtr<StyleKeyframe> BisonCSSParser::parseKeyframeRule(StyleSheetContents* sheet, const String& string)
+PassRefPtr<StyleKeyframe> BisonCSSParser::parseKeyframeRule(StyleSheetContents* sheet, const String& string)
 {
     setStyleSheet(sheet);
     setupParser("@-internal-keyframe-rule ", string, "");
@@ -234,14 +234,14 @@ static bool parseColorValue(MutableStylePropertySet* declaration, CSSPropertyID 
         validPrimitive = true;
 
     if (validPrimitive) {
-        RefPtrWillBeRawPtr<CSSValue> value = cssValuePool().createIdentifierValue(valueID);
+        RefPtr<CSSValue> value = cssValuePool().createIdentifierValue(valueID);
         declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
         return true;
     }
     RGBA32 color;
     if (!CSSPropertyParser::fastParseColor(color, string, !quirksMode && string[0] != '#'))
         return false;
-    RefPtrWillBeRawPtr<CSSValue> value = cssValuePool().createColorValue(color);
+    RefPtr<CSSValue> value = cssValuePool().createColorValue(color);
     declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
     return true;
 }
@@ -339,7 +339,7 @@ static bool parseSimpleLengthValue(MutableStylePropertySet* declaration, CSSProp
     if (number < 0 && !acceptsNegativeNumbers)
         return false;
 
-    RefPtrWillBeRawPtr<CSSValue> value = cssValuePool().createValue(number, unit);
+    RefPtr<CSSValue> value = cssValuePool().createValue(number, unit);
     declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
     return true;
 }
@@ -632,7 +632,7 @@ static bool parseKeywordValue(MutableStylePropertySet* declaration, CSSPropertyI
     if (!valueID)
         return false;
 
-    RefPtrWillBeRawPtr<CSSValue> value = nullptr;
+    RefPtr<CSSValue> value = nullptr;
     if (valueID == CSSValueInherit)
         value = cssValuePool().createInheritedValue();
     else if (valueID == CSSValueInitial)
@@ -687,7 +687,7 @@ static bool parseTransformNumberArguments(CharType*& pos, CharType* end, unsigne
 }
 
 template <typename CharType>
-static PassRefPtrWillBeRawPtr<CSSTransformValue> parseSimpleTransformValue(CharType*& pos, CharType* end)
+static PassRefPtr<CSSTransformValue> parseSimpleTransformValue(CharType*& pos, CharType* end)
 {
     static const int shortestValidTransformStringLength = 12;
 
@@ -727,7 +727,7 @@ static PassRefPtrWillBeRawPtr<CSSTransformValue> parseSimpleTransformValue(CharT
             return nullptr;
         }
         pos += argumentStart;
-        RefPtrWillBeRawPtr<CSSTransformValue> transformValue = CSSTransformValue::create(transformType);
+        RefPtr<CSSTransformValue> transformValue = CSSTransformValue::create(transformType);
         if (!parseTransformTranslateArguments(pos, end, expectedArgumentCount, transformValue.get()))
             return nullptr;
         return transformValue.release();
@@ -745,7 +745,7 @@ static PassRefPtrWillBeRawPtr<CSSTransformValue> parseSimpleTransformValue(CharT
 
     if (isMatrix3d) {
         pos += 9;
-        RefPtrWillBeRawPtr<CSSTransformValue> transformValue = CSSTransformValue::create(CSSTransformValue::Matrix3DTransformOperation);
+        RefPtr<CSSTransformValue> transformValue = CSSTransformValue::create(CSSTransformValue::Matrix3DTransformOperation);
         if (!parseTransformNumberArguments(pos, end, 16, transformValue.get()))
             return nullptr;
         return transformValue.release();
@@ -762,7 +762,7 @@ static PassRefPtrWillBeRawPtr<CSSTransformValue> parseSimpleTransformValue(CharT
 
     if (isScale3d) {
         pos += 8;
-        RefPtrWillBeRawPtr<CSSTransformValue> transformValue = CSSTransformValue::create(CSSTransformValue::Scale3DTransformOperation);
+        RefPtr<CSSTransformValue> transformValue = CSSTransformValue::create(CSSTransformValue::Scale3DTransformOperation);
         if (!parseTransformNumberArguments(pos, end, 3, transformValue.get()))
             return nullptr;
         return transformValue.release();
@@ -772,13 +772,13 @@ static PassRefPtrWillBeRawPtr<CSSTransformValue> parseSimpleTransformValue(CharT
 }
 
 template <typename CharType>
-static PassRefPtrWillBeRawPtr<CSSValueList> parseSimpleTransformList(CharType*& pos, CharType* end)
+static PassRefPtr<CSSValueList> parseSimpleTransformList(CharType*& pos, CharType* end)
 {
-    RefPtrWillBeRawPtr<CSSValueList> transformList = nullptr;
+    RefPtr<CSSValueList> transformList = nullptr;
     while (pos < end) {
         while (pos < end && isCSSSpace(*pos))
             ++pos;
-        RefPtrWillBeRawPtr<CSSTransformValue> transformValue = parseSimpleTransformValue(pos, end);
+        RefPtr<CSSTransformValue> transformValue = parseSimpleTransformValue(pos, end);
         if (!transformValue)
             return nullptr;
         if (!transformList)
@@ -798,7 +798,7 @@ static bool parseSimpleTransform(MutableStylePropertySet* properties, CSSPropert
         return false;
     if (string.isEmpty())
         return false;
-    RefPtrWillBeRawPtr<CSSValueList> transformList = nullptr;
+    RefPtr<CSSValueList> transformList = nullptr;
     if (string.is8Bit()) {
         const LChar* pos = string.characters8();
         const LChar* end = pos + string.length();
@@ -816,30 +816,30 @@ static bool parseSimpleTransform(MutableStylePropertySet* properties, CSSPropert
     return true;
 }
 
-PassRefPtrWillBeRawPtr<CSSValueList> BisonCSSParser::parseFontFaceValue(const AtomicString& string)
+PassRefPtr<CSSValueList> BisonCSSParser::parseFontFaceValue(const AtomicString& string)
 {
     if (string.isEmpty())
         return nullptr;
-    RefPtrWillBeRawPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
+    RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
     if (!parseValue(dummyStyle.get(), CSSPropertyFontFamily, string, false, HTMLStandardMode, 0))
         return nullptr;
 
-    RefPtrWillBeRawPtr<CSSValue> fontFamily = dummyStyle->getPropertyCSSValue(CSSPropertyFontFamily);
+    RefPtr<CSSValue> fontFamily = dummyStyle->getPropertyCSSValue(CSSPropertyFontFamily);
     if (!fontFamily->isValueList())
         return nullptr;
 
     return toCSSValueList(dummyStyle->getPropertyCSSValue(CSSPropertyFontFamily).get());
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> BisonCSSParser::parseAnimationTimingFunctionValue(const String& string)
+PassRefPtr<CSSValue> BisonCSSParser::parseAnimationTimingFunctionValue(const String& string)
 {
     if (string.isEmpty())
         return nullptr;
-    RefPtrWillBeRawPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
+    RefPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
     if (!parseValue(style.get(), CSSPropertyTransitionTimingFunction, string, false, HTMLStandardMode, 0))
         return nullptr;
 
-    RefPtrWillBeRawPtr<CSSValue> value = style->getPropertyCSSValue(CSSPropertyTransitionTimingFunction);
+    RefPtr<CSSValue> value = style->getPropertyCSSValue(CSSPropertyTransitionTimingFunction);
     if (!value || value->isInitialValue() || value->isInheritedValue())
         return nullptr;
     CSSValueList* valueList = toCSSValueList(value.get());
@@ -983,14 +983,14 @@ void BisonCSSParser::parseSelector(const String& string, CSSSelectorList& select
     m_selectorListForParseSelector = 0;
 }
 
-PassRefPtrWillBeRawPtr<ImmutableStylePropertySet> BisonCSSParser::parseInlineStyleDeclaration(const String& string, Element* element)
+PassRefPtr<ImmutableStylePropertySet> BisonCSSParser::parseInlineStyleDeclaration(const String& string, Element* element)
 {
     Document& document = element->document();
     CSSParserContext context = CSSParserContext(document.elementSheet().contents()->parserContext(), UseCounter::getFrom(&document));
     return BisonCSSParser(context).parseDeclaration(string, document.elementSheet().contents());
 }
 
-PassRefPtrWillBeRawPtr<ImmutableStylePropertySet> BisonCSSParser::parseDeclaration(const String& string, StyleSheetContents* contextStyleSheet)
+PassRefPtr<ImmutableStylePropertySet> BisonCSSParser::parseDeclaration(const String& string, StyleSheetContents* contextStyleSheet)
 {
     setStyleSheet(contextStyleSheet);
 
@@ -998,7 +998,7 @@ PassRefPtrWillBeRawPtr<ImmutableStylePropertySet> BisonCSSParser::parseDeclarati
     cssyyparse(this);
     m_rule = nullptr;
 
-    RefPtrWillBeRawPtr<ImmutableStylePropertySet> style = createStylePropertySet();
+    RefPtr<ImmutableStylePropertySet> style = createStylePropertySet();
     clearProperties();
     return style.release();
 }
@@ -1034,7 +1034,7 @@ bool BisonCSSParser::parseDeclaration(MutableStylePropertySet* declaration, cons
     return ok;
 }
 
-PassRefPtrWillBeRawPtr<MediaQuerySet> BisonCSSParser::parseMediaQueryList(const String& string)
+PassRefPtr<MediaQuerySet> BisonCSSParser::parseMediaQueryList(const String& string)
 {
     ASSERT(!m_mediaList);
 
@@ -1058,7 +1058,7 @@ bool BisonCSSParser::parseAttributeMatchType(CSSSelector::AttributeMatchType& ma
     return false;
 }
 
-static inline void filterProperties(bool important, const WillBeHeapVector<CSSProperty, 256>& input, WillBeHeapVector<CSSProperty, 256>& output, size_t& unusedEntries, BitArray<numCSSProperties>& seenProperties)
+static inline void filterProperties(bool important, const Vector<CSSProperty, 256>& input, Vector<CSSProperty, 256>& output, size_t& unusedEntries, BitArray<numCSSProperties>& seenProperties)
 {
     // Add properties in reverse order so that highest priority definitions are reached first. Duplicate definitions can then be ignored when found.
     for (int i = input.size() - 1; i >= 0; --i) {
@@ -1073,11 +1073,11 @@ static inline void filterProperties(bool important, const WillBeHeapVector<CSSPr
     }
 }
 
-PassRefPtrWillBeRawPtr<ImmutableStylePropertySet> BisonCSSParser::createStylePropertySet()
+PassRefPtr<ImmutableStylePropertySet> BisonCSSParser::createStylePropertySet()
 {
     BitArray<numCSSProperties> seenProperties;
     size_t unusedEntries = m_parsedProperties.size();
-    WillBeHeapVector<CSSProperty, 256> results(unusedEntries);
+    Vector<CSSProperty, 256> results(unusedEntries);
 
     // Important properties have higher priority, so add them first. Duplicate definitions can then be ignored when found.
     filterProperties(true, m_parsedProperties, results, unusedEntries, seenProperties);
@@ -1247,14 +1247,14 @@ private:
     CSSPropertyParser::Units m_unit;
 };
 
-PassRefPtrWillBeRawPtr<CSSValueList> CSSPropertyParser::parseTransform(CSSPropertyID propId)
+PassRefPtr<CSSValueList> CSSPropertyParser::parseTransform(CSSPropertyID propId)
 {
     if (!m_valueList)
         return nullptr;
 
-    RefPtrWillBeRawPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
+    RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
     for (CSSParserValue* value = m_valueList->current(); value; value = m_valueList->next()) {
-        RefPtrWillBeRawPtr<CSSValue> parsedTransformValue = parseTransformValue(propId, value);
+        RefPtr<CSSValue> parsedTransformValue = parseTransformValue(propId, value);
         if (!parsedTransformValue)
             return nullptr;
 
@@ -1264,7 +1264,7 @@ PassRefPtrWillBeRawPtr<CSSValueList> CSSPropertyParser::parseTransform(CSSProper
     return list.release();
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> CSSPropertyParser::parseTransformValue(CSSPropertyID propId, CSSParserValue *value)
+PassRefPtr<CSSValue> CSSPropertyParser::parseTransformValue(CSSPropertyID propId, CSSParserValue *value)
 {
     if (value->unit != CSSParserValue::Function || !value->function)
         return nullptr;
@@ -1286,7 +1286,7 @@ PassRefPtrWillBeRawPtr<CSSValue> CSSPropertyParser::parseTransformValue(CSSPrope
     // We collect a list of CSSTransformValues, where each value specifies a single operation.
 
     // Create the new CSSTransformValue for this operation and add it to our list.
-    RefPtrWillBeRawPtr<CSSTransformValue> transformValue = CSSTransformValue::create(info.type());
+    RefPtr<CSSTransformValue> transformValue = CSSTransformValue::create(info.type());
 
     // Snag our values.
     CSSParserValue* a = args->current();
@@ -1436,31 +1436,31 @@ MediaQueryExp* BisonCSSParser::createFloatingMediaQueryExp(const AtomicString& m
     return m_floatingMediaQueryExp.get();
 }
 
-PassOwnPtrWillBeRawPtr<MediaQueryExp> BisonCSSParser::sinkFloatingMediaQueryExp(MediaQueryExp* expression)
+PassOwnPtr<MediaQueryExp> BisonCSSParser::sinkFloatingMediaQueryExp(MediaQueryExp* expression)
 {
     ASSERT_UNUSED(expression, expression == m_floatingMediaQueryExp);
     return m_floatingMediaQueryExp.release();
 }
 
-WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> >* BisonCSSParser::createFloatingMediaQueryExpList()
+Vector<OwnPtr<MediaQueryExp> >* BisonCSSParser::createFloatingMediaQueryExpList()
 {
-    m_floatingMediaQueryExpList = adoptPtrWillBeNoop(new WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> >);
+    m_floatingMediaQueryExpList = adoptPtr(new Vector<OwnPtr<MediaQueryExp> >);
     return m_floatingMediaQueryExpList.get();
 }
 
-PassOwnPtrWillBeRawPtr<WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> > > BisonCSSParser::sinkFloatingMediaQueryExpList(WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> >* list)
+PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > BisonCSSParser::sinkFloatingMediaQueryExpList(Vector<OwnPtr<MediaQueryExp> >* list)
 {
     ASSERT_UNUSED(list, list == m_floatingMediaQueryExpList);
     return m_floatingMediaQueryExpList.release();
 }
 
-MediaQuery* BisonCSSParser::createFloatingMediaQuery(MediaQuery::Restrictor restrictor, const AtomicString& mediaType, PassOwnPtrWillBeRawPtr<WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> > > expressions)
+MediaQuery* BisonCSSParser::createFloatingMediaQuery(MediaQuery::Restrictor restrictor, const AtomicString& mediaType, PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > expressions)
 {
-    m_floatingMediaQuery = adoptPtrWillBeNoop(new MediaQuery(restrictor, mediaType, expressions));
+    m_floatingMediaQuery = adoptPtr(new MediaQuery(restrictor, mediaType, expressions));
     return m_floatingMediaQuery.get();
 }
 
-MediaQuery* BisonCSSParser::createFloatingMediaQuery(PassOwnPtrWillBeRawPtr<WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> > > expressions)
+MediaQuery* BisonCSSParser::createFloatingMediaQuery(PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > expressions)
 {
     return createFloatingMediaQuery(MediaQuery::None, AtomicString("all", AtomicString::ConstructFromLiteral), expressions);
 }
@@ -1470,19 +1470,19 @@ MediaQuery* BisonCSSParser::createFloatingNotAllQuery()
     return createFloatingMediaQuery(MediaQuery::Not, AtomicString("all", AtomicString::ConstructFromLiteral), sinkFloatingMediaQueryExpList(createFloatingMediaQueryExpList()));
 }
 
-PassOwnPtrWillBeRawPtr<MediaQuery> BisonCSSParser::sinkFloatingMediaQuery(MediaQuery* query)
+PassOwnPtr<MediaQuery> BisonCSSParser::sinkFloatingMediaQuery(MediaQuery* query)
 {
     ASSERT_UNUSED(query, query == m_floatingMediaQuery);
     return m_floatingMediaQuery.release();
 }
 
-WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> >* BisonCSSParser::createFloatingKeyframeVector()
+Vector<RefPtr<StyleKeyframe> >* BisonCSSParser::createFloatingKeyframeVector()
 {
-    m_floatingKeyframeVector = adoptPtrWillBeNoop(new WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> >());
+    m_floatingKeyframeVector = adoptPtr(new Vector<RefPtr<StyleKeyframe> >());
     return m_floatingKeyframeVector.get();
 }
 
-PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> > > BisonCSSParser::sinkFloatingKeyframeVector(WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> >* keyframeVector)
+PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > BisonCSSParser::sinkFloatingKeyframeVector(Vector<RefPtr<StyleKeyframe> >* keyframeVector)
 {
     ASSERT_UNUSED(keyframeVector, m_floatingKeyframeVector == keyframeVector);
     return m_floatingKeyframeVector.release();
@@ -1490,7 +1490,7 @@ PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> > > Bi
 
 MediaQuerySet* BisonCSSParser::createMediaQuerySet()
 {
-    RefPtrWillBeRawPtr<MediaQuerySet> queries = MediaQuerySet::create();
+    RefPtr<MediaQuerySet> queries = MediaQuerySet::create();
     MediaQuerySet* result = queries.get();
     m_parsedMediaQuerySets.append(queries.release());
     return result;
@@ -1499,7 +1499,7 @@ MediaQuerySet* BisonCSSParser::createMediaQuerySet()
 StyleRuleBase* BisonCSSParser::createMediaRule(MediaQuerySet* media, RuleList* rules)
 {
     m_allowImportRules = m_allowNamespaceDeclarations = false;
-    RefPtrWillBeRawPtr<StyleRuleMedia> rule = nullptr;
+    RefPtr<StyleRuleMedia> rule = nullptr;
     if (rules) {
         rule = StyleRuleMedia::create(media ? media : MediaQuerySet::create().get(), *rules);
     } else {
@@ -1515,8 +1515,8 @@ StyleRuleBase* BisonCSSParser::createSupportsRule(bool conditionIsSupported, Rul
 {
     m_allowImportRules = m_allowNamespaceDeclarations = false;
 
-    RefPtrWillBeRawPtr<CSSRuleSourceData> data = popSupportsRuleData();
-    RefPtrWillBeRawPtr<StyleRuleSupports> rule = nullptr;
+    RefPtr<CSSRuleSourceData> data = popSupportsRuleData();
+    RefPtr<StyleRuleSupports> rule = nullptr;
     String conditionText;
     unsigned conditionOffset = data->ruleHeaderRange.start + 9;
     unsigned conditionLength = data->ruleHeaderRange.length() - 9;
@@ -1542,9 +1542,9 @@ StyleRuleBase* BisonCSSParser::createSupportsRule(bool conditionIsSupported, Rul
 void BisonCSSParser::markSupportsRuleHeaderStart()
 {
     if (!m_supportsRuleDataStack)
-        m_supportsRuleDataStack = adoptPtrWillBeNoop(new RuleSourceDataList());
+        m_supportsRuleDataStack = adoptPtr(new RuleSourceDataList());
 
-    RefPtrWillBeRawPtr<CSSRuleSourceData> data = CSSRuleSourceData::create(CSSRuleSourceData::SUPPORTS_RULE);
+    RefPtr<CSSRuleSourceData> data = CSSRuleSourceData::create(CSSRuleSourceData::SUPPORTS_RULE);
     data->ruleHeaderRange.start = m_tokenizer.tokenStartOffset();
     m_supportsRuleDataStack->append(data);
 }
@@ -1559,17 +1559,17 @@ void BisonCSSParser::markSupportsRuleHeaderEnd()
         m_supportsRuleDataStack->last()->ruleHeaderRange.end = m_tokenizer.tokenStart<UChar>() - m_tokenizer.m_dataStart16.get();
 }
 
-PassRefPtrWillBeRawPtr<CSSRuleSourceData> BisonCSSParser::popSupportsRuleData()
+PassRefPtr<CSSRuleSourceData> BisonCSSParser::popSupportsRuleData()
 {
     ASSERT(m_supportsRuleDataStack && !m_supportsRuleDataStack->isEmpty());
-    RefPtrWillBeRawPtr<CSSRuleSourceData> data = m_supportsRuleDataStack->last();
+    RefPtr<CSSRuleSourceData> data = m_supportsRuleDataStack->last();
     m_supportsRuleDataStack->removeLast();
     return data.release();
 }
 
 BisonCSSParser::RuleList* BisonCSSParser::createRuleList()
 {
-    OwnPtrWillBeRawPtr<RuleList> list = adoptPtrWillBeNoop(new RuleList);
+    OwnPtr<RuleList> list = adoptPtr(new RuleList);
     RuleList* listPtr = list.get();
 
     m_parsedRuleLists.append(list.release());
@@ -1654,11 +1654,11 @@ void BisonCSSParser::logError(const String& message, const CSSParserLocation& lo
     console.addMessage(ConsoleMessage::create(CSSMessageSource, WarningMessageLevel, message, m_styleSheet->baseURL().string(), lineNumberInStyleSheet + m_startPosition.m_line.zeroBasedInt() + 1, columnNumber + 1));
 }
 
-StyleRuleKeyframes* BisonCSSParser::createKeyframesRule(const String& name, PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> > > popKeyframes, bool isPrefixed)
+StyleRuleKeyframes* BisonCSSParser::createKeyframesRule(const String& name, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > popKeyframes, bool isPrefixed)
 {
-    OwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> > > keyframes = popKeyframes;
+    OwnPtr<Vector<RefPtr<StyleKeyframe> > > keyframes = popKeyframes;
     m_allowImportRules = m_allowNamespaceDeclarations = false;
-    RefPtrWillBeRawPtr<StyleRuleKeyframes> rule = StyleRuleKeyframes::create();
+    RefPtr<StyleRuleKeyframes> rule = StyleRuleKeyframes::create();
     for (size_t i = 0; i < keyframes->size(); ++i)
         rule->parserAppendKeyframe(keyframes->at(i));
     rule->setName(name);
@@ -1699,7 +1699,7 @@ StyleRuleBase* BisonCSSParser::createStyleRule(Vector<OwnPtr<CSSParserSelector> 
     StyleRule* result = 0;
     if (selectors) {
         m_allowImportRules = m_allowNamespaceDeclarations = false;
-        RefPtrWillBeRawPtr<StyleRule> rule = StyleRule::create();
+        RefPtr<StyleRule> rule = StyleRule::create();
         rule->parserAdoptSelectorVector(*selectors);
         rule->setProperties(createStylePropertySet());
         result = rule.get();
@@ -1726,7 +1726,7 @@ StyleRuleBase* BisonCSSParser::createFontFaceRule()
             return 0;
         }
     }
-    RefPtrWillBeRawPtr<StyleRuleFontFace> rule = StyleRuleFontFace::create();
+    RefPtr<StyleRuleFontFace> rule = StyleRuleFontFace::create();
     rule->setProperties(createStylePropertySet());
     clearProperties();
     StyleRuleFontFace* result = rule.get();
@@ -1778,7 +1778,7 @@ StyleKeyframe* BisonCSSParser::createKeyframe(CSSParserValueList* keys)
     if (keyVector->isEmpty())
         return 0;
 
-    RefPtrWillBeRawPtr<StyleKeyframe> keyframe = StyleKeyframe::create();
+    RefPtr<StyleKeyframe> keyframe = StyleKeyframe::create();
     keyframe->setKeys(keyVector.release());
     keyframe->setProperties(createStylePropertySet());
 

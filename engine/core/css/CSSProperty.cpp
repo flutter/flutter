@@ -47,7 +47,7 @@ CSSPropertyID StylePropertyMetadata::shorthandID() const
 
 void CSSProperty::wrapValueInCommaSeparatedList()
 {
-    RefPtrWillBeRawPtr<CSSValue> value = m_value.release();
+    RefPtr<CSSValue> value = m_value.release();
     m_value = CSSValueList::createCommaSeparated();
     toCSSValueList(m_value.get())->append(value.release());
 }

@@ -41,9 +41,9 @@ class PopStateEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~PopStateEvent();
-    static PassRefPtrWillBeRawPtr<PopStateEvent> create();
-    static PassRefPtrWillBeRawPtr<PopStateEvent> create(PassRefPtr<SerializedScriptValue>, PassRefPtrWillBeRawPtr<History>);
-    static PassRefPtrWillBeRawPtr<PopStateEvent> create(const AtomicString&, const PopStateEventInit&);
+    static PassRefPtr<PopStateEvent> create();
+    static PassRefPtr<PopStateEvent> create(PassRefPtr<SerializedScriptValue>, PassRefPtr<History>);
+    static PassRefPtr<PopStateEvent> create(const AtomicString&, const PopStateEventInit&);
 
     SerializedScriptValue* serializedState() const { return m_serializedState.get(); }
     void setSerializedState(PassRefPtr<SerializedScriptValue> state)
@@ -60,10 +60,10 @@ public:
 private:
     PopStateEvent();
     PopStateEvent(const AtomicString&, const PopStateEventInit&);
-    PopStateEvent(PassRefPtr<SerializedScriptValue>, PassRefPtrWillBeRawPtr<History>);
+    PopStateEvent(PassRefPtr<SerializedScriptValue>, PassRefPtr<History>);
 
     RefPtr<SerializedScriptValue> m_serializedState;
-    RefPtrWillBeMember<History> m_history;
+    RefPtr<History> m_history;
 };
 
 } // namespace blink

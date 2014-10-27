@@ -35,7 +35,7 @@ namespace blink {
 class OESTextureFloat final : public WebGLExtension, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<OESTextureFloat> create(WebGLRenderingContextBase*);
+    static PassRefPtr<OESTextureFloat> create(WebGLRenderingContextBase*);
     static bool supported(WebGLRenderingContextBase*);
     static const char* extensionName();
 

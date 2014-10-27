@@ -42,13 +42,13 @@ class StyleResolver;
 class StyleSheetContents;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
-class ScopedStyleResolver final : public NoBaseWillBeGarbageCollected<ScopedStyleResolver> {
+class ScopedStyleResolver final : public DummyBase<ScopedStyleResolver> {
     WTF_MAKE_NONCOPYABLE(ScopedStyleResolver);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<ScopedStyleResolver> create(TreeScope& scope)
+    static PassOwnPtr<ScopedStyleResolver> create(TreeScope& scope)
     {
-        return adoptPtrWillBeNoop(new ScopedStyleResolver(scope));
+        return adoptPtr(new ScopedStyleResolver(scope));
     }
 
     static TreeScope* treeScopeFor(Document&, const CSSStyleSheet*);
@@ -58,7 +58,7 @@ public:
 
 public:
     const StyleRuleKeyframes* keyframeStylesForAnimation(const StringImpl* animationName);
-    void addKeyframeStyle(PassRefPtrWillBeRawPtr<StyleRuleKeyframes>);
+    void addKeyframeStyle(PassRefPtr<StyleRuleKeyframes>);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, bool includeEmptyRules, bool applyAuthorStyles, CascadeScope, CascadeOrder = ignoreCascadeOrder);
     void addRulesFromSheet(CSSStyleSheet*, const MediaQueryEvaluator&, StyleResolver*);
@@ -73,11 +73,11 @@ private:
     {
     }
 
-    RawPtrWillBeMember<TreeScope> m_scope;
+    RawPtr<TreeScope> m_scope;
 
-    WillBeHeapVector<RawPtrWillBeMember<CSSStyleSheet> > m_authorStyleSheets;
+    Vector<RawPtr<CSSStyleSheet> > m_authorStyleSheets;
 
-    typedef WillBeHeapHashMap<const StringImpl*, RefPtrWillBeMember<StyleRuleKeyframes> > KeyframesRuleMap;
+    typedef HashMap<const StringImpl*, RefPtr<StyleRuleKeyframes> > KeyframesRuleMap;
     KeyframesRuleMap m_keyframesRuleMap;
 };
 

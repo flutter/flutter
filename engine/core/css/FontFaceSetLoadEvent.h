@@ -46,19 +46,19 @@ struct FontFaceSetLoadEventInit : public EventInit {
 class FontFaceSetLoadEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<FontFaceSetLoadEvent> create()
+    static PassRefPtr<FontFaceSetLoadEvent> create()
     {
-        return adoptRefWillBeNoop(new FontFaceSetLoadEvent());
+        return adoptRef(new FontFaceSetLoadEvent());
     }
 
-    static PassRefPtrWillBeRawPtr<FontFaceSetLoadEvent> create(const AtomicString& type, const FontFaceSetLoadEventInit& initializer)
+    static PassRefPtr<FontFaceSetLoadEvent> create(const AtomicString& type, const FontFaceSetLoadEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new FontFaceSetLoadEvent(type, initializer));
+        return adoptRef(new FontFaceSetLoadEvent(type, initializer));
     }
 
-    static PassRefPtrWillBeRawPtr<FontFaceSetLoadEvent> createForFontFaces(const AtomicString& type, const FontFaceArray& fontfaces = FontFaceArray())
+    static PassRefPtr<FontFaceSetLoadEvent> createForFontFaces(const AtomicString& type, const FontFaceArray& fontfaces = FontFaceArray())
     {
-        return adoptRefWillBeNoop(new FontFaceSetLoadEvent(type, fontfaces));
+        return adoptRef(new FontFaceSetLoadEvent(type, fontfaces));
     }
 
     virtual ~FontFaceSetLoadEvent();

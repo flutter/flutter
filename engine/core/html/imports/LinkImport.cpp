@@ -40,9 +40,9 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<LinkImport> LinkImport::create(HTMLLinkElement* owner)
+PassOwnPtr<LinkImport> LinkImport::create(HTMLLinkElement* owner)
 {
-    return adoptPtrWillBeNoop(new LinkImport(owner));
+    return adoptPtr(new LinkImport(owner));
 }
 
 LinkImport::LinkImport(HTMLLinkElement* owner)

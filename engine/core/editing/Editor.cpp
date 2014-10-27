@@ -281,7 +281,7 @@ void Editor::pasteAsPlainText(const String& pastingText, bool smartReplace)
     target->dispatchEvent(TextEvent::createForPlainTextPaste(m_frame.domWindow(), pastingText, smartReplace), IGNORE_EXCEPTION);
 }
 
-void Editor::pasteAsFragment(PassRefPtrWillBeRawPtr<DocumentFragment> pastingFragment, bool smartReplace, bool matchStyle)
+void Editor::pasteAsFragment(PassRefPtr<DocumentFragment> pastingFragment, bool smartReplace, bool matchStyle)
 {
     Element* target = findEventTargetFromSelection();
     if (!target)
@@ -299,7 +299,7 @@ bool Editor::tryDHTMLCut()
     return false;
 }
 
-void Editor::replaceSelectionWithFragment(PassRefPtrWillBeRawPtr<DocumentFragment> fragment, bool selectReplacement, bool smartReplace, bool matchStyle)
+void Editor::replaceSelectionWithFragment(PassRefPtr<DocumentFragment> fragment, bool selectReplacement, bool smartReplace, bool matchStyle)
 {
     if (m_frame.selection().isNone() || !m_frame.selection().isContentEditable() || !fragment)
         return;
@@ -325,7 +325,7 @@ void Editor::replaceSelectionWithText(const String& text, bool selectReplacement
     replaceSelectionWithFragment(nullptr, selectReplacement, smartReplace, true);
 }
 
-PassRefPtrWillBeRawPtr<Range> Editor::selectedRange()
+PassRefPtr<Range> Editor::selectedRange()
 {
     return m_frame.selection().toNormalizedRange();
 }
@@ -381,7 +381,7 @@ TriState Editor::selectionHasStyle(CSSPropertyID propertyID, const String& value
 
 String Editor::selectionStartCSSPropertyValue(CSSPropertyID propertyID)
 {
-    RefPtrWillBeRawPtr<EditingStyle> selectionStyle = EditingStyle::styleAtSelectionStart(m_frame.selection().selection(),
+    RefPtr<EditingStyle> selectionStyle = EditingStyle::styleAtSelectionStart(m_frame.selection().selection(),
         propertyID == CSSPropertyBackgroundColor);
     if (!selectionStyle || !selectionStyle->style())
         return String();
@@ -391,7 +391,7 @@ String Editor::selectionStartCSSPropertyValue(CSSPropertyID propertyID)
     return selectionStyle->style()->getPropertyValue(propertyID);
 }
 
-static void dispatchEditableContentChangedEvents(PassRefPtrWillBeRawPtr<Element> startRoot, PassRefPtrWillBeRawPtr<Element> endRoot)
+static void dispatchEditableContentChangedEvents(PassRefPtr<Element> startRoot, PassRefPtr<Element> endRoot)
 {
     if (startRoot)
         startRoot->dispatchEvent(Event::create(EventTypeNames::webkitEditableContentChanged), IGNORE_EXCEPTION);
@@ -399,7 +399,7 @@ static void dispatchEditableContentChangedEvents(PassRefPtrWillBeRawPtr<Element>
         endRoot->dispatchEvent(Event::create(EventTypeNames::webkitEditableContentChanged), IGNORE_EXCEPTION);
 }
 
-void Editor::appliedEditing(PassRefPtrWillBeRawPtr<CompositeEditCommand> cmd)
+void Editor::appliedEditing(PassRefPtr<CompositeEditCommand> cmd)
 {
     EventQueueScope scope;
     m_frame.document()->updateLayout();
@@ -429,7 +429,7 @@ void Editor::appliedEditing(PassRefPtrWillBeRawPtr<CompositeEditCommand> cmd)
     respondToChangedContents(newSelection);
 }
 
-void Editor::unappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition> cmd)
+void Editor::unappliedEditing(PassRefPtr<EditCommandComposition> cmd)
 {
     EventQueueScope scope;
     m_frame.document()->updateLayout();
@@ -447,7 +447,7 @@ void Editor::unappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition> cmd
     respondToChangedContents(newSelection);
 }
 
-void Editor::reappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition> cmd)
+void Editor::reappliedEditing(PassRefPtr<EditCommandComposition> cmd)
 {
     EventQueueScope scope;
     m_frame.document()->updateLayout();
@@ -463,9 +463,9 @@ void Editor::reappliedEditing(PassRefPtrWillBeRawPtr<EditCommandComposition> cmd
     respondToChangedContents(newSelection);
 }
 
-PassOwnPtrWillBeRawPtr<Editor> Editor::create(LocalFrame& frame)
+PassOwnPtr<Editor> Editor::create(LocalFrame& frame)
 {
-    return adoptPtrWillBeNoop(new Editor(frame));
+    return adoptPtr(new Editor(frame));
 }
 
 Editor::Editor(LocalFrame& frame)
@@ -512,7 +512,7 @@ bool Editor::insertTextWithoutSendingTextEvent(const String& text, bool selectIn
     selection = selectionForCommand(triggeringEvent);
     if (selection.isContentEditable()) {
         if (Node* selectionStart = selection.start().deprecatedNode()) {
-            RefPtrWillBeRawPtr<Document> document(selectionStart->document());
+            RefPtr<Document> document(selectionStart->document());
 
             // Insert the text
             TypingCommand::Options options = 0;
@@ -621,7 +621,7 @@ void Editor::redo()
 
 void Editor::setBaseWritingDirection(WritingDirection direction)
 {
-    RefPtrWillBeRawPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
+    RefPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
     style->setProperty(CSSPropertyDirection, direction == LeftToRightWritingDirection ? "ltr" : direction == RightToLeftWritingDirection ? "rtl" : "inherit", false);
 }
 
@@ -651,7 +651,7 @@ void Editor::transpose()
     previous = previous.previous();
     if (!inSameParagraph(next, previous))
         return;
-    RefPtrWillBeRawPtr<Range> range = makeRange(previous, next);
+    RefPtr<Range> range = makeRange(previous, next);
     if (!range)
         return;
     VisibleSelection newSelection(range.get(), DOWNSTREAM);
@@ -730,7 +730,7 @@ bool Editor::findString(const String& target, FindOptions options)
 {
     VisibleSelection selection = m_frame.selection().selection();
 
-    RefPtrWillBeRawPtr<Range> resultRange = rangeOfString(target, selection.firstRange().get(), options);
+    RefPtr<Range> resultRange = rangeOfString(target, selection.firstRange().get(), options);
 
     if (!resultRange)
         return false;
@@ -740,9 +740,9 @@ bool Editor::findString(const String& target, FindOptions options)
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Range> Editor::findStringAndScrollToVisible(const String& target, Range* previousMatch, FindOptions options)
+PassRefPtr<Range> Editor::findStringAndScrollToVisible(const String& target, Range* previousMatch, FindOptions options)
 {
-    RefPtrWillBeRawPtr<Range> nextMatch = rangeOfString(target, previousMatch, options);
+    RefPtr<Range> nextMatch = rangeOfString(target, previousMatch, options);
     if (!nextMatch)
         return nullptr;
 
@@ -752,7 +752,7 @@ PassRefPtrWillBeRawPtr<Range> Editor::findStringAndScrollToVisible(const String&
     return nextMatch.release();
 }
 
-static PassRefPtrWillBeRawPtr<Range> findStringBetweenPositions(const String& target, const Position& start, const Position& end, FindOptions options)
+static PassRefPtr<Range> findStringBetweenPositions(const String& target, const Position& start, const Position& end, FindOptions options)
 {
     Position searchStart(start);
     Position searchEnd(end);
@@ -766,7 +766,7 @@ static PassRefPtrWillBeRawPtr<Range> findStringBetweenPositions(const String& ta
         if (resultStart == resultEnd)
             return nullptr;
 
-        RefPtrWillBeRawPtr<Range> resultRange = Range::create(*resultStart.document(), resultStart, resultEnd);
+        RefPtr<Range> resultRange = Range::create(*resultStart.document(), resultStart, resultEnd);
         if (!resultRange->collapsed())
             return resultRange.release();
 
@@ -783,7 +783,7 @@ static PassRefPtrWillBeRawPtr<Range> findStringBetweenPositions(const String& ta
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<Range> Editor::rangeOfString(const String& target, Range* referenceRange, FindOptions options)
+PassRefPtr<Range> Editor::rangeOfString(const String& target, Range* referenceRange, FindOptions options)
 {
     if (target.isEmpty())
         return nullptr;
@@ -802,7 +802,7 @@ PassRefPtrWillBeRawPtr<Range> Editor::rangeOfString(const String& target, Range*
             searchEnd = startInReferenceRange ? referenceRange->endPosition() : referenceRange->startPosition();
     }
 
-    RefPtrWillBeRawPtr<Range> resultRange = findStringBetweenPositions(target, searchStart, searchEnd, options);
+    RefPtr<Range> resultRange = findStringBetweenPositions(target, searchStart, searchEnd, options);
 
     // If we started in the reference range and the found range exactly matches the reference range, find again.
     // Build a selection with the found range to remove collapsed whitespace.

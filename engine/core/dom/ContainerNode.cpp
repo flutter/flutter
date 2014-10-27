@@ -70,7 +70,7 @@ void ContainerNode::removeDetachedChildren()
 
 void ContainerNode::parserTakeAllChildrenFrom(ContainerNode& oldParent)
 {
-    while (RefPtrWillBeRawPtr<Node> child = oldParent.firstChild()) {
+    while (RefPtr<Node> child = oldParent.firstChild()) {
         oldParent.parserRemoveChild(*child);
         treeScope().adoptIfNeeded(*child);
         parserAppendChild(child.get());
@@ -152,7 +152,7 @@ bool ContainerNode::checkAcceptChildGuaranteedNodeTypes(const Node& newChild, Ex
     return true;
 }
 
-PassRefPtrWillBeRawPtr<Node> ContainerNode::insertBefore(PassRefPtrWillBeRawPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
+PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
 {
 #if !ENABLE(OILPAN)
     // Check that this node is not "floating".
@@ -160,7 +160,7 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::insertBefore(PassRefPtrWillBeRawPtr<
     ASSERT(refCount() || parentOrShadowHostNode());
 #endif
 
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
 
     // insertBefore(node, 0) is equivalent to appendChild(node)
     if (!refChild) {
@@ -185,7 +185,7 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::insertBefore(PassRefPtrWillBeRawPtr<
     if (refChild->previousSibling() == newChild || refChild == newChild)
         return newChild;
 
-    RefPtrWillBeRawPtr<Node> next = refChild;
+    RefPtr<Node> next = refChild;
 
     NodeVector targets;
     collectChildrenAndRemoveFromOldParent(*newChild, targets, exceptionState);
@@ -265,7 +265,7 @@ void ContainerNode::appendChildCommon(Node& child)
     setLastChild(&child);
 }
 
-void ContainerNode::parserInsertBefore(PassRefPtrWillBeRawPtr<Node> newChild, Node& nextChild)
+void ContainerNode::parserInsertBefore(PassRefPtr<Node> newChild, Node& nextChild)
 {
     ASSERT(newChild);
     ASSERT(nextChild.parentNode() == this);
@@ -275,7 +275,7 @@ void ContainerNode::parserInsertBefore(PassRefPtrWillBeRawPtr<Node> newChild, No
     if (nextChild.previousSibling() == newChild || &nextChild == newChild) // nothing to do
         return;
 
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
 
     if (document() != newChild->document())
         document().adoptNode(newChild.get(), ASSERT_NO_EXCEPTION);
@@ -287,7 +287,7 @@ void ContainerNode::parserInsertBefore(PassRefPtrWillBeRawPtr<Node> newChild, No
     notifyNodeInserted(*newChild, ChildrenChangeSourceParser);
 }
 
-PassRefPtrWillBeRawPtr<Node> ContainerNode::replaceChild(PassRefPtrWillBeRawPtr<Node> newChild, PassRefPtrWillBeRawPtr<Node> oldChild, ExceptionState& exceptionState)
+PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
 #if !ENABLE(OILPAN)
     // Check that this node is not "floating".
@@ -295,7 +295,7 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::replaceChild(PassRefPtrWillBeRawPtr<
     ASSERT(refCount() || parentOrShadowHostNode());
 #endif
 
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
 
     if (oldChild == newChild) // nothing to do
         return oldChild;
@@ -305,7 +305,7 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::replaceChild(PassRefPtrWillBeRawPtr<
         return nullptr;
     }
 
-    RefPtrWillBeRawPtr<Node> child = oldChild;
+    RefPtr<Node> child = oldChild;
 
     // Make sure replacing the old child with the new is ok
     if (!checkAcceptChild(newChild.get(), child.get(), exceptionState)) {
@@ -322,7 +322,7 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::replaceChild(PassRefPtrWillBeRawPtr<
 
     ChildListMutationScope mutation(*this);
 
-    RefPtrWillBeRawPtr<Node> next = child->nextSibling();
+    RefPtr<Node> next = child->nextSibling();
 
     // Remove the node we're replacing
     removeChild(child, exceptionState);
@@ -459,7 +459,7 @@ void ContainerNode::addChildNodesToDeletionQueue(Node*& head, Node*& tail, Conta
 
             tail = n;
         } else {
-            RefPtrWillBeRawPtr<Node> protect(n); // removedFromDocument may remove all references to this node.
+            RefPtr<Node> protect(n); // removedFromDocument may remove all references to this node.
             container.document().adoptIfNeeded(*n);
             if (n->inDocument())
                 container.notifyNodeRemoved(*n);
@@ -477,7 +477,7 @@ void ContainerNode::trace(Visitor* visitor)
     Node::trace(visitor);
 }
 
-PassRefPtrWillBeRawPtr<Node> ContainerNode::removeChild(PassRefPtrWillBeRawPtr<Node> oldChild, ExceptionState& exceptionState)
+PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
 #if !ENABLE(OILPAN)
     // Check that this node is not "floating".
@@ -485,8 +485,8 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::removeChild(PassRefPtrWillBeRawPtr<N
     ASSERT(refCount() || parentOrShadowHostNode());
 #endif
 
-    RefPtrWillBeRawPtr<Node> protect(this);
-    RefPtrWillBeRawPtr<Node> child = oldChild;
+    RefPtr<Node> protect(this);
+    RefPtr<Node> child = oldChild;
 
     document().removeFocusedElementOfSubtree(child.get());
 
@@ -564,7 +564,7 @@ void ContainerNode::removeChildren()
         return;
 
     // The container node can be removed from event handlers.
-    RefPtrWillBeRawPtr<ContainerNode> protect(this);
+    RefPtr<ContainerNode> protect(this);
 
     // Do any prep work needed before actually starting to detach
     // and remove... e.g. stop loading frames, fire unload events.
@@ -593,7 +593,7 @@ void ContainerNode::removeChildren()
 
         removedChildren.reserveInitialCapacity(countChildren());
 
-        while (RefPtrWillBeRawPtr<Node> child = m_firstChild) {
+        while (RefPtr<Node> child = m_firstChild) {
             removeBetween(0, child->nextSibling(), *child);
             removedChildren.append(child.get());
             notifyNodeRemoved(*child);
@@ -604,9 +604,9 @@ void ContainerNode::removeChildren()
     }
 }
 
-PassRefPtrWillBeRawPtr<Node> ContainerNode::appendChild(PassRefPtrWillBeRawPtr<Node> newChild, ExceptionState& exceptionState)
+PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, ExceptionState& exceptionState)
 {
-    RefPtrWillBeRawPtr<ContainerNode> protect(this);
+    RefPtr<ContainerNode> protect(this);
 
 #if !ENABLE(OILPAN)
     // Check that this node is not "floating".
@@ -666,14 +666,14 @@ PassRefPtrWillBeRawPtr<Node> ContainerNode::appendChild(PassRefPtrWillBeRawPtr<N
     return newChild;
 }
 
-void ContainerNode::parserAppendChild(PassRefPtrWillBeRawPtr<Node> newChild)
+void ContainerNode::parserAppendChild(PassRefPtr<Node> newChild)
 {
     ASSERT(newChild);
     ASSERT(!newChild->parentNode()); // Use appendChild if you need to handle reparenting (and want DOM mutation events).
     ASSERT(!newChild->isDocumentFragment());
     ASSERT(!isHTMLTemplateElement(this));
 
-    RefPtrWillBeRawPtr<Node> protect(this);
+    RefPtr<Node> protect(this);
 
     if (document() != newChild->document())
         document().adoptNode(newChild.get(), ASSERT_NO_EXCEPTION);
@@ -695,8 +695,8 @@ void ContainerNode::notifyNodeInserted(Node& root, ChildrenChangeSource source)
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
     ASSERT(!root.isShadowRoot());
 
-    RefPtrWillBeRawPtr<Node> protect(this);
-    RefPtrWillBeRawPtr<Node> protectNode(root);
+    RefPtr<Node> protect(this);
+    RefPtr<Node> protectNode(root);
 
     NodeVector postInsertionNotificationTargets;
     notifyNodeInsertedInternal(root, postInsertionNotificationTargets);
@@ -983,7 +983,7 @@ unsigned ContainerNode::countChildren() const
     return count;
 }
 
-PassRefPtrWillBeRawPtr<Element> ContainerNode::querySelector(const AtomicString& selectors, ExceptionState& exceptionState)
+PassRefPtr<Element> ContainerNode::querySelector(const AtomicString& selectors, ExceptionState& exceptionState)
 {
     if (selectors.isEmpty()) {
         exceptionState.throwDOMException(SyntaxError, "The provided selector is empty.");
@@ -996,7 +996,7 @@ PassRefPtrWillBeRawPtr<Element> ContainerNode::querySelector(const AtomicString&
     return selectorQuery->queryFirst(*this);
 }
 
-PassRefPtrWillBeRawPtr<StaticElementList> ContainerNode::querySelectorAll(const AtomicString& selectors, ExceptionState& exceptionState)
+PassRefPtr<StaticElementList> ContainerNode::querySelectorAll(const AtomicString& selectors, ExceptionState& exceptionState)
 {
     if (selectors.isEmpty()) {
         exceptionState.throwDOMException(SyntaxError, "The provided selector is empty.");

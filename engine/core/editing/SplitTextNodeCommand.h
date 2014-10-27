@@ -34,23 +34,23 @@ class Text;
 
 class SplitTextNodeCommand final : public SimpleEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<SplitTextNodeCommand> create(PassRefPtrWillBeRawPtr<Text> node, int offset)
+    static PassRefPtr<SplitTextNodeCommand> create(PassRefPtr<Text> node, int offset)
     {
-        return adoptRefWillBeNoop(new SplitTextNodeCommand(node, offset));
+        return adoptRef(new SplitTextNodeCommand(node, offset));
     }
 
     virtual void trace(Visitor*) override;
 
 private:
-    SplitTextNodeCommand(PassRefPtrWillBeRawPtr<Text>, int offset);
+    SplitTextNodeCommand(PassRefPtr<Text>, int offset);
 
     virtual void doApply() override;
     virtual void doUnapply() override;
     virtual void doReapply() override;
     void insertText1AndTrimText2();
 
-    RefPtrWillBeMember<Text> m_text1;
-    RefPtrWillBeMember<Text> m_text2;
+    RefPtr<Text> m_text1;
+    RefPtr<Text> m_text2;
     unsigned m_offset;
 };
 

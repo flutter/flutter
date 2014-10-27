@@ -62,7 +62,7 @@ namespace blink {
     class TreeScope;
     class VisiblePosition;
 
-    class LocalFrame : public Frame, public WillBePersistentHeapSupplementable<LocalFrame>  {
+    class LocalFrame : public Frame, public Supplementable<LocalFrame>  {
     public:
         static PassRefPtr<LocalFrame> create(FrameLoaderClient*, FrameHost*);
 
@@ -81,7 +81,7 @@ namespace blink {
         void willDetachFrameHost();
         void detachFromFrameHost();
 
-        virtual void setDOMWindow(PassRefPtrWillBeRawPtr<LocalDOMWindow>) override;
+        virtual void setDOMWindow(PassRefPtr<LocalDOMWindow>) override;
         FrameView* view() const;
         Document* document() const;
 
@@ -124,7 +124,7 @@ namespace blink {
 
         VisiblePosition visiblePositionForPoint(const IntPoint& framePoint);
         Document* documentAtPoint(const IntPoint& windowPoint);
-        PassRefPtrWillBeRawPtr<Range> rangeForPoint(const IntPoint& framePoint);
+        PassRefPtr<Range> rangeForPoint(const IntPoint& framePoint);
 
         void removeSpellingMarkersUnderWords(const Vector<String>& words);
 
@@ -142,11 +142,11 @@ namespace blink {
         RefPtr<FrameView> m_view;
 
         OwnPtr<ScriptController> m_script;
-        const OwnPtrWillBePersistent<Editor> m_editor;
+        const OwnPtr<Editor> m_editor;
         const OwnPtr<SpellChecker> m_spellChecker;
-        const OwnPtrWillBePersistent<FrameSelection> m_selection;
-        const OwnPtrWillBePersistent<EventHandler> m_eventHandler;
-        const OwnPtrWillBePersistent<FrameConsole> m_console;
+        const OwnPtr<FrameSelection> m_selection;
+        const OwnPtr<EventHandler> m_eventHandler;
+        const OwnPtr<FrameConsole> m_console;
         OwnPtr<InputMethodController> m_inputMethodController;
 
         float m_pageZoomFactor;

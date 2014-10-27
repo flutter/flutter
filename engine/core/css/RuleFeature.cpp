@@ -395,31 +395,31 @@ void RuleFeatureSet::scheduleStyleInvalidationForClassChange(const SpaceSplitStr
 void RuleFeatureSet::scheduleStyleInvalidationForAttributeChange(const QualifiedName& attributeName, Element& element)
 {
 
-    if (RefPtrWillBeRawPtr<DescendantInvalidationSet> invalidationSet = m_attributeInvalidationSets.get(attributeName.localName()))
+    if (RefPtr<DescendantInvalidationSet> invalidationSet = m_attributeInvalidationSets.get(attributeName.localName()))
         m_styleInvalidator.scheduleInvalidation(invalidationSet, element);
 }
 
 void RuleFeatureSet::scheduleStyleInvalidationForIdChange(const AtomicString& oldId, const AtomicString& newId, Element& element)
 {
     if (!oldId.isEmpty()) {
-        if (RefPtrWillBeRawPtr<DescendantInvalidationSet> invalidationSet = m_idInvalidationSets.get(oldId))
+        if (RefPtr<DescendantInvalidationSet> invalidationSet = m_idInvalidationSets.get(oldId))
             m_styleInvalidator.scheduleInvalidation(invalidationSet, element);
     }
     if (!newId.isEmpty()) {
-        if (RefPtrWillBeRawPtr<DescendantInvalidationSet> invalidationSet = m_idInvalidationSets.get(newId))
+        if (RefPtr<DescendantInvalidationSet> invalidationSet = m_idInvalidationSets.get(newId))
             m_styleInvalidator.scheduleInvalidation(invalidationSet, element);
     }
 }
 
 void RuleFeatureSet::scheduleStyleInvalidationForPseudoChange(CSSSelector::PseudoType pseudo, Element& element)
 {
-    if (RefPtrWillBeRawPtr<DescendantInvalidationSet> invalidationSet = m_pseudoInvalidationSets.get(pseudo))
+    if (RefPtr<DescendantInvalidationSet> invalidationSet = m_pseudoInvalidationSets.get(pseudo))
         m_styleInvalidator.scheduleInvalidation(invalidationSet, element);
 }
 
 void RuleFeatureSet::addClassToInvalidationSet(const AtomicString& className, Element& element)
 {
-    if (RefPtrWillBeRawPtr<DescendantInvalidationSet> invalidationSet = m_classInvalidationSets.get(className))
+    if (RefPtr<DescendantInvalidationSet> invalidationSet = m_classInvalidationSets.get(className))
         m_styleInvalidator.scheduleInvalidation(invalidationSet, element);
 }
 

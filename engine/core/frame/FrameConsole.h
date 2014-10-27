@@ -46,19 +46,19 @@ class ScriptCallStack;
 
 // FrameConsole takes per-frame console messages and routes them up through the FrameHost to the ChromeClient and Inspector.
 // It's meant as an abstraction around ChromeClient calls and the way that Blink core/ can add messages to the console.
-class FrameConsole final : public NoBaseWillBeGarbageCollected<FrameConsole> {
+class FrameConsole final : public DummyBase<FrameConsole> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(FrameConsole);
 public:
-    static PassOwnPtrWillBeRawPtr<FrameConsole> create(LocalFrame& frame)
+    static PassOwnPtr<FrameConsole> create(LocalFrame& frame)
     {
-        return adoptPtrWillBeNoop(new FrameConsole(frame));
+        return adoptPtr(new FrameConsole(frame));
     }
 
-    void addMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>);
+    void addMessage(PassRefPtr<ConsoleMessage>);
 
     void reportResourceResponseReceived(Document*, unsigned long requestIdentifier, const ResourceResponse&);
 
-    static String formatStackTraceString(const String& originalMessage, PassRefPtrWillBeRawPtr<ScriptCallStack>);
+    static String formatStackTraceString(const String& originalMessage, PassRefPtr<ScriptCallStack>);
 
     static void mute();
     static void unmute();
@@ -73,7 +73,7 @@ private:
 
     LocalFrame& m_frame;
 
-    OwnPtrWillBeMember<ConsoleMessageStorage> m_consoleMessageStorage;
+    OwnPtr<ConsoleMessageStorage> m_consoleMessageStorage;
 };
 
 } // namespace blink

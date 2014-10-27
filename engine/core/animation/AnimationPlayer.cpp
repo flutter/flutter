@@ -49,9 +49,9 @@ static unsigned nextSequenceNumber()
 
 }
 
-PassRefPtrWillBeRawPtr<AnimationPlayer> AnimationPlayer::create(ExecutionContext* executionContext, AnimationTimeline& timeline, AnimationNode* content)
+PassRefPtr<AnimationPlayer> AnimationPlayer::create(ExecutionContext* executionContext, AnimationTimeline& timeline, AnimationNode* content)
 {
-    RefPtrWillBeRawPtr<AnimationPlayer> player = adoptRefWillBeNoop(new AnimationPlayer(executionContext, timeline, content));
+    RefPtr<AnimationPlayer> player = adoptRef(new AnimationPlayer(executionContext, timeline, content));
     timeline.document()->compositorPendingAnimations().add(player.get());
     player->suspendIfNeeded();
     return player.release();
@@ -504,7 +504,7 @@ void AnimationPlayer::stop()
     m_pendingFinishedEvent = nullptr;
 }
 
-bool AnimationPlayer::dispatchEvent(PassRefPtrWillBeRawPtr<Event> event)
+bool AnimationPlayer::dispatchEvent(PassRefPtr<Event> event)
 {
     if (m_pendingFinishedEvent == event)
         m_pendingFinishedEvent = nullptr;

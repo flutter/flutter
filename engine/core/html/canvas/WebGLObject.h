@@ -39,7 +39,7 @@ namespace blink {
 class WebGLContextGroup;
 class WebGLRenderingContextBase;
 
-class WebGLObject : public RefCountedWillBeGarbageCollectedFinalized<WebGLObject> {
+class WebGLObject : public RefCounted<WebGLObject> {
 public:
     virtual ~WebGLObject();
 

@@ -38,14 +38,14 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<FrameHost> FrameHost::create(Page& page)
+PassOwnPtr<FrameHost> FrameHost::create(Page& page)
 {
-    return adoptPtrWillBeNoop(new FrameHost(page));
+    return adoptPtr(new FrameHost(page));
 }
 
 FrameHost::FrameHost(Page& page)
     : m_page(&page)
-    , m_eventHandlerRegistry(adoptPtrWillBeNoop(new EventHandlerRegistry(*this)))
+    , m_eventHandlerRegistry(adoptPtr(new EventHandlerRegistry(*this)))
 {
 }
 

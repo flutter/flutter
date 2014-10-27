@@ -112,28 +112,28 @@ CanvasStyle::CanvasStyle(float c, float m, float y, float k, float a)
 {
 }
 
-CanvasStyle::CanvasStyle(PassRefPtrWillBeRawPtr<CanvasGradient> gradient)
+CanvasStyle::CanvasStyle(PassRefPtr<CanvasGradient> gradient)
     : m_type(Gradient)
     , m_gradient(gradient)
 {
 }
 
-CanvasStyle::CanvasStyle(PassRefPtrWillBeRawPtr<CanvasPattern> pattern)
+CanvasStyle::CanvasStyle(PassRefPtr<CanvasPattern> pattern)
     : m_type(ImagePattern)
     , m_pattern(pattern)
 {
 }
 
-PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromString(const String& color)
+PassRefPtr<CanvasStyle> CanvasStyle::createFromString(const String& color)
 {
     RGBA32 rgba;
     ColorParseResult parseResult = parseColor(rgba, color);
     switch (parseResult) {
     case ParsedRGBA:
     case ParsedSystemColor:
-        return adoptRefWillBeNoop(new CanvasStyle(rgba));
+        return adoptRef(new CanvasStyle(rgba));
     case ParsedCurrentColor:
-        return adoptRefWillBeNoop(new CanvasStyle(CurrentColor));
+        return adoptRef(new CanvasStyle(CurrentColor));
     case ParseFailed:
         return nullptr;
     default:
@@ -142,15 +142,15 @@ PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromString(const String& 
     }
 }
 
-PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromStringWithOverrideAlpha(const String& color, float alpha)
+PassRefPtr<CanvasStyle> CanvasStyle::createFromStringWithOverrideAlpha(const String& color, float alpha)
 {
     RGBA32 rgba;
     ColorParseResult parseResult = parseColor(rgba, color);
     switch (parseResult) {
     case ParsedRGBA:
-        return adoptRefWillBeNoop(new CanvasStyle(colorWithOverrideAlpha(rgba, alpha)));
+        return adoptRef(new CanvasStyle(colorWithOverrideAlpha(rgba, alpha)));
     case ParsedCurrentColor:
-        return adoptRefWillBeNoop(new CanvasStyle(CurrentColorWithOverrideAlpha, alpha));
+        return adoptRef(new CanvasStyle(CurrentColorWithOverrideAlpha, alpha));
     case ParseFailed:
         return nullptr;
     default:
@@ -159,18 +159,18 @@ PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromStringWithOverrideAlp
     }
 }
 
-PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromGradient(PassRefPtrWillBeRawPtr<CanvasGradient> gradient)
+PassRefPtr<CanvasStyle> CanvasStyle::createFromGradient(PassRefPtr<CanvasGradient> gradient)
 {
     if (!gradient)
         return nullptr;
-    return adoptRefWillBeNoop(new CanvasStyle(gradient));
+    return adoptRef(new CanvasStyle(gradient));
 }
 
-PassRefPtrWillBeRawPtr<CanvasStyle> CanvasStyle::createFromPattern(PassRefPtrWillBeRawPtr<CanvasPattern> pattern)
+PassRefPtr<CanvasStyle> CanvasStyle::createFromPattern(PassRefPtr<CanvasPattern> pattern)
 {
     if (!pattern)
         return nullptr;
-    return adoptRefWillBeNoop(new CanvasStyle(pattern));
+    return adoptRef(new CanvasStyle(pattern));
 }
 
 bool CanvasStyle::isEquivalentColor(const CanvasStyle& other) const

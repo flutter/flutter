@@ -36,11 +36,11 @@ namespace blink {
 
 class Event;
 
-class EventQueue : public NoBaseWillBeGarbageCollectedFinalized<EventQueue> {
+class EventQueue : public DummyBase<EventQueue> {
 public:
     virtual ~EventQueue() { }
     virtual void trace(Visitor*) { }
-    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) = 0;
+    virtual bool enqueueEvent(PassRefPtr<Event>) = 0;
     virtual bool cancelEvent(Event*) = 0;
     // The accumulated and all the future events will be discarded, no events will be dispatched anymore.
     virtual void close() = 0;

@@ -45,7 +45,7 @@ class Settings;
 class DocumentInit final {
     STACK_ALLOCATED();
 public:
-    explicit DocumentInit(const KURL& = KURL(), LocalFrame* = 0, WeakPtrWillBeRawPtr<Document> = nullptr, HTMLImportsController* = 0);
+    explicit DocumentInit(const KURL& = KURL(), LocalFrame* = 0, WeakPtr<Document> = nullptr, HTMLImportsController* = 0);
     DocumentInit(const DocumentInit&);
     ~DocumentInit();
 
@@ -63,21 +63,21 @@ public:
 
     DocumentInit& withRegistrationContext(CustomElementRegistrationContext*);
     DocumentInit& withNewRegistrationContext();
-    PassRefPtrWillBeRawPtr<CustomElementRegistrationContext> registrationContext(Document*) const;
-    WeakPtrWillBeRawPtr<Document> contextDocument() const;
+    PassRefPtr<CustomElementRegistrationContext> registrationContext(Document*) const;
+    WeakPtr<Document> contextDocument() const;
 
-    static DocumentInit fromContext(WeakPtrWillBeRawPtr<Document> contextDocument, const KURL& = KURL());
+    static DocumentInit fromContext(WeakPtr<Document> contextDocument, const KURL& = KURL());
 
 private:
     LocalFrame* frameForSecurityContext() const;
 
     KURL m_url;
     LocalFrame* m_frame;
-    RefPtrWillBeMember<Document> m_parent;
-    RefPtrWillBeMember<Document> m_owner;
-    WeakPtrWillBeMember<Document> m_contextDocument;
-    RawPtrWillBeMember<HTMLImportsController> m_importsController;
-    RefPtrWillBeMember<CustomElementRegistrationContext> m_registrationContext;
+    RefPtr<Document> m_parent;
+    RefPtr<Document> m_owner;
+    WeakPtr<Document> m_contextDocument;
+    RawPtr<HTMLImportsController> m_importsController;
+    RefPtr<CustomElementRegistrationContext> m_registrationContext;
     bool m_createNewRegistrationContext;
 };
 

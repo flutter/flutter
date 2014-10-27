@@ -40,21 +40,21 @@ class ExceptionState;
 class ExecutionContext;
 class URLRegistrable;
 
-class DOMURL final : public RefCountedWillBeGarbageCollectedFinalized<DOMURL>, public ScriptWrappable, public DOMURLUtils {
+class DOMURL final : public RefCounted<DOMURL>, public ScriptWrappable, public DOMURLUtils {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DOMURL> create(const String& url, ExceptionState& exceptionState)
+    static PassRefPtr<DOMURL> create(const String& url, ExceptionState& exceptionState)
     {
-        return adoptRefWillBeNoop(new DOMURL(url, blankURL(), exceptionState));
+        return adoptRef(new DOMURL(url, blankURL(), exceptionState));
     }
-    static PassRefPtrWillBeRawPtr<DOMURL> create(const String& url, const String& base, ExceptionState& exceptionState)
+    static PassRefPtr<DOMURL> create(const String& url, const String& base, ExceptionState& exceptionState)
     {
-        return adoptRefWillBeNoop(new DOMURL(url, KURL(KURL(), base), exceptionState));
+        return adoptRef(new DOMURL(url, KURL(KURL(), base), exceptionState));
     }
-    static PassRefPtrWillBeRawPtr<DOMURL> create(const String& url, PassRefPtrWillBeRawPtr<DOMURL> base, ExceptionState& exceptionState)
+    static PassRefPtr<DOMURL> create(const String& url, PassRefPtr<DOMURL> base, ExceptionState& exceptionState)
     {
         ASSERT(base);
-        return adoptRefWillBeNoop(new DOMURL(url, base->m_url, exceptionState));
+        return adoptRef(new DOMURL(url, base->m_url, exceptionState));
     }
 
     static void revokeObjectUUID(ExecutionContext*, const String&);

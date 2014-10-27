@@ -268,7 +268,7 @@ bool WindowProxy::installDOMWindow()
     v8::Handle<v8::Object> innerGlobalObject = toInnerGlobalObject(m_scriptState->context());
     V8DOMWrapper::setNativeInfoForHiddenWrapper(innerGlobalObject, &V8Window::wrapperTypeInfo, V8Window::toScriptWrappableBase(window));
     innerGlobalObject->SetPrototype(windowWrapper);
-    V8DOMWrapper::associateObjectWithWrapper<V8Window>(PassRefPtrWillBeRawPtr<LocalDOMWindow>(window), &V8Window::wrapperTypeInfo, windowWrapper, m_isolate);
+    V8DOMWrapper::associateObjectWithWrapper<V8Window>(PassRefPtr<LocalDOMWindow>(window), &V8Window::wrapperTypeInfo, windowWrapper, m_isolate);
     V8Window::installConditionallyEnabledProperties(windowWrapper, m_isolate);
     return true;
 }

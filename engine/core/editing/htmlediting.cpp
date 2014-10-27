@@ -508,9 +508,9 @@ VisiblePosition visiblePositionAfterNode(Node& node)
 // Create a range object with two visible positions, start and end.
 // create(Document*, const Position&, const Position&); will use deprecatedEditingOffset
 // Use this function instead of create a regular range object (avoiding editing offset).
-PassRefPtrWillBeRawPtr<Range> createRange(Document& document, const VisiblePosition& start, const VisiblePosition& end, ExceptionState& exceptionState)
+PassRefPtr<Range> createRange(Document& document, const VisiblePosition& start, const VisiblePosition& end, ExceptionState& exceptionState)
 {
-    RefPtrWillBeRawPtr<Range> selectedRange = Range::create(document);
+    RefPtr<Range> selectedRange = Range::create(document);
     selectedRange->setStart(start.deepEquivalent().containerNode(), start.deepEquivalent().computeOffsetInContainerNode(), exceptionState);
     if (!exceptionState.hadException())
         selectedRange->setEnd(end.deepEquivalent().containerNode(), end.deepEquivalent().computeOffsetInContainerNode(), exceptionState);
@@ -636,17 +636,17 @@ bool isEmptyTableCell(const Node* node)
     return false;
 }
 
-PassRefPtrWillBeRawPtr<HTMLElement> createDefaultParagraphElement(Document& document)
+PassRefPtr<HTMLElement> createDefaultParagraphElement(Document& document)
 {
     return nullptr;
 }
 
-PassRefPtrWillBeRawPtr<HTMLElement> createHTMLElement(Document& document, const QualifiedName& name)
+PassRefPtr<HTMLElement> createHTMLElement(Document& document, const QualifiedName& name)
 {
     return createHTMLElement(document, name.localName());
 }
 
-PassRefPtrWillBeRawPtr<HTMLElement> createHTMLElement(Document& document, const AtomicString& tagName)
+PassRefPtr<HTMLElement> createHTMLElement(Document& document, const AtomicString& tagName)
 {
     return HTMLElementFactory::createHTMLElement(tagName, document, false);
 }
@@ -833,7 +833,7 @@ VisibleSelection selectionForParagraphIteration(const VisibleSelection& original
 // opertion is unreliable. TextIterator's TextIteratorEmitsCharactersBetweenAllVisiblePositions mode needs to be fixed,
 // or these functions need to be changed to iterate using actual VisiblePositions.
 // FIXME: Deploy these functions everywhere that TextIterators are used to convert between VisiblePositions and indices.
-int indexForVisiblePosition(const VisiblePosition& visiblePosition, RefPtrWillBeRawPtr<ContainerNode>& scope)
+int indexForVisiblePosition(const VisiblePosition& visiblePosition, RefPtr<ContainerNode>& scope)
 {
     if (visiblePosition.isNull())
         return 0;
@@ -847,7 +847,7 @@ int indexForVisiblePosition(const VisiblePosition& visiblePosition, RefPtrWillBe
     else
         scope = document.documentElement();
 
-    RefPtrWillBeRawPtr<Range> range = Range::create(document, firstPositionInNode(scope.get()), p.parentAnchoredEquivalent());
+    RefPtr<Range> range = Range::create(document, firstPositionInNode(scope.get()), p.parentAnchoredEquivalent());
 
     return TextIterator::rangeLength(range.get(), true);
 }
@@ -856,7 +856,7 @@ VisiblePosition visiblePositionForIndex(int index, ContainerNode* scope)
 {
     if (!scope)
         return VisiblePosition();
-    RefPtrWillBeRawPtr<Range> range = PlainTextRange(index).createRangeForSelection(*scope);
+    RefPtr<Range> range = PlainTextRange(index).createRangeForSelection(*scope);
     // Check for an invalid index. Certain editing operations invalidate indices because
     // of problems with TextIteratorEmitsCharactersBetweenAllVisiblePositions.
     if (!range)

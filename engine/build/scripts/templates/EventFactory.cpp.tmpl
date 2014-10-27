@@ -9,7 +9,7 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<{{namespace}}> {{namespace}}{{suffix}}Factory::create(const String& type)
+PassRefPtr<{{namespace}}> {{namespace}}{{suffix}}Factory::create(const String& type)
 {
     {% for event in events %}
     {% filter enable_conditional(event.Conditional) %}

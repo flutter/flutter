@@ -94,7 +94,7 @@ bool InputMethodController::insertTextForConfirmedComposition(const String& text
 
 void InputMethodController::selectComposition() const
 {
-    RefPtrWillBeRawPtr<Range> range = compositionRange();
+    RefPtr<Range> range = compositionRange();
     if (!range)
         return;
 
@@ -198,7 +198,7 @@ bool InputMethodController::finishComposition(const String& text, FinishComposit
             underline.endOffset -= baseOffset;
             underlines.append(underline);
         }
-        RefPtrWillBeRawPtr<CompositionEvent> event = CompositionEvent::create(EventTypeNames::compositionend, m_frame.domWindow(), text, underlines);
+        RefPtr<CompositionEvent> event = CompositionEvent::create(EventTypeNames::compositionend, m_frame.domWindow(), text, underlines);
         target->dispatchEvent(event, IGNORE_EXCEPTION);
     }
 
@@ -252,7 +252,7 @@ void InputMethodController::setComposition(const String& text, const Vector<Comp
         // 3. Canceling the ongoing composition.
         //    Send a compositionend event when function deletes the existing composition node, i.e.
         //    m_compositionNode != 0 && test.isEmpty().
-        RefPtrWillBeRawPtr<CompositionEvent> event = nullptr;
+        RefPtr<CompositionEvent> event = nullptr;
         if (!hasComposition()) {
             // We should send a compositionstart event only when the given text is not empty because this
             // function doesn't create a composition node when the text is empty.
@@ -307,7 +307,7 @@ void InputMethodController::setComposition(const String& text, const Vector<Comp
 
             unsigned start = std::min(baseOffset + selectionStart, extentOffset);
             unsigned end = std::min(std::max(start, baseOffset + selectionEnd), extentOffset);
-            RefPtrWillBeRawPtr<Range> selectedRange = Range::create(baseNode->document(), baseNode, start, baseNode, end);
+            RefPtr<Range> selectedRange = Range::create(baseNode->document(), baseNode, start, baseNode, end);
             m_frame.selection().setSelectedRange(selectedRange.get(), DOWNSTREAM, FrameSelection::NonDirectional, NotUserTriggered);
         }
     }
@@ -328,7 +328,7 @@ void InputMethodController::setCompositionFromExistingText(const Vector<Composit
             return;
 
         m_compositionNode = toText(baseNode);
-        RefPtrWillBeRawPtr<Range> range = PlainTextRange(compositionStart, compositionEnd).createRange(*editable);
+        RefPtr<Range> range = PlainTextRange(compositionStart, compositionEnd).createRange(*editable);
         m_compositionStart = range->startOffset();
         m_compositionEnd = range->endOffset();
         m_customCompositionUnderlines = underlines;
@@ -348,7 +348,7 @@ void InputMethodController::setCompositionFromExistingText(const Vector<Composit
     setComposition(m_frame.selectedText(), underlines, 0, 0);
 }
 
-PassRefPtrWillBeRawPtr<Range> InputMethodController::compositionRange() const
+PassRefPtr<Range> InputMethodController::compositionRange() const
 {
     if (!hasComposition())
         return nullptr;
@@ -362,7 +362,7 @@ PassRefPtrWillBeRawPtr<Range> InputMethodController::compositionRange() const
 
 PlainTextRange InputMethodController::getSelectionOffsets() const
 {
-    RefPtrWillBeRawPtr<Range> range = m_frame.selection().selection().firstRange();
+    RefPtr<Range> range = m_frame.selection().selection().firstRange();
     if (!range)
         return PlainTextRange();
     ContainerNode* editable = m_frame.selection().rootEditableElementOrTreeScopeRootNode();
@@ -378,7 +378,7 @@ bool InputMethodController::setSelectionOffsets(const PlainTextRange& selectionO
     if (!rootEditableElement)
         return false;
 
-    RefPtrWillBeRawPtr<Range> range = selectionOffsets.createRange(*rootEditableElement);
+    RefPtr<Range> range = selectionOffsets.createRange(*rootEditableElement);
     if (!range)
         return false;
 

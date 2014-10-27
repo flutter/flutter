@@ -36,16 +36,16 @@ HTMLAudioElement::HTMLAudioElement(Document& document)
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<HTMLAudioElement> HTMLAudioElement::create(Document& document)
+PassRefPtr<HTMLAudioElement> HTMLAudioElement::create(Document& document)
 {
-    RefPtrWillBeRawPtr<HTMLAudioElement> audio = adoptRefWillBeNoop(new HTMLAudioElement(document));
+    RefPtr<HTMLAudioElement> audio = adoptRef(new HTMLAudioElement(document));
     audio->suspendIfNeeded();
     return audio.release();
 }
 
-PassRefPtrWillBeRawPtr<HTMLAudioElement> HTMLAudioElement::createForJSConstructor(Document& document, const AtomicString& src)
+PassRefPtr<HTMLAudioElement> HTMLAudioElement::createForJSConstructor(Document& document, const AtomicString& src)
 {
-    RefPtrWillBeRawPtr<HTMLAudioElement> audio = adoptRefWillBeNoop(new HTMLAudioElement(document));
+    RefPtr<HTMLAudioElement> audio = adoptRef(new HTMLAudioElement(document));
     audio->setPreload(AtomicString("auto", AtomicString::ConstructFromLiteral));
     if (!src.isNull())
         audio->setSrc(src);

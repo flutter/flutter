@@ -35,7 +35,7 @@ class MediaList;
 class Node;
 class StyleSheet;
 
-class StyleSheet : public RefCountedWillBeGarbageCollectedFinalized<StyleSheet>, public ScriptWrappable {
+class StyleSheet : public RefCounted<StyleSheet>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     StyleSheet()

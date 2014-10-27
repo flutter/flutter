@@ -54,8 +54,8 @@ public:
     RuleSet& ruleSet();
 
 private:
-    RefPtrWillBePersistent<Document> m_document;
-    RefPtrWillBePersistent<CSSStyleSheet> m_styleSheet;
+    RefPtr<Document> m_document;
+    RefPtr<CSSStyleSheet> m_styleSheet;
 };
 
 } // namespace blink

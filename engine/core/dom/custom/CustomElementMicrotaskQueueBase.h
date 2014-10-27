@@ -16,7 +16,7 @@
 
 namespace blink {
 
-class CustomElementMicrotaskQueueBase : public RefCountedWillBeGarbageCollectedFinalized<CustomElementMicrotaskQueueBase> {
+class CustomElementMicrotaskQueueBase : public RefCounted<CustomElementMicrotaskQueueBase> {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskQueueBase);
 public:
     virtual ~CustomElementMicrotaskQueueBase() { }
@@ -30,7 +30,7 @@ protected:
     CustomElementMicrotaskQueueBase() : m_inDispatch(false) { }
     virtual void doDispatch() = 0;
 
-    WillBeHeapVector<OwnPtrWillBeMember<CustomElementMicrotaskStep> > m_queue;
+    Vector<OwnPtr<CustomElementMicrotaskStep> > m_queue;
     bool m_inDispatch;
 };
 

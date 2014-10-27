@@ -54,10 +54,10 @@ class KeyframeEffectModelBase : public AnimationEffect {
 public:
     // FIXME: Implement accumulation.
 
-    typedef WillBeHeapVector<OwnPtrWillBeMember<Keyframe::PropertySpecificKeyframe> > PropertySpecificKeyframeVector;
-    class PropertySpecificKeyframeGroup : public NoBaseWillBeGarbageCollected<PropertySpecificKeyframeGroup> {
+    typedef Vector<OwnPtr<Keyframe::PropertySpecificKeyframe> > PropertySpecificKeyframeVector;
+    class PropertySpecificKeyframeGroup : public DummyBase<PropertySpecificKeyframeGroup> {
     public:
-        void appendKeyframe(PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe>);
+        void appendKeyframe(PassOwnPtr<Keyframe::PropertySpecificKeyframe>);
         const PropertySpecificKeyframeVector& keyframes() const { return m_keyframes; }
 
         void trace(Visitor*);
@@ -75,7 +75,7 @@ public:
 
     PropertySet properties() const;
 
-    typedef WillBeHeapVector<RefPtrWillBeMember<Keyframe> > KeyframeVector;
+    typedef Vector<RefPtr<Keyframe> > KeyframeVector;
     const KeyframeVector& getFrames() const { return m_keyframes; }
     // FIXME: Implement setFrames()
 
@@ -86,7 +86,7 @@ public:
     }
 
     // AnimationEffect implementation.
-    virtual PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const override;
+    virtual PassOwnPtr<Vector<RefPtr<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const override;
 
     virtual bool isKeyframeEffectModel() const override { return true; }
 
@@ -114,9 +114,9 @@ protected:
     // The spec describes filtering the normalized keyframes at sampling time
     // to get the 'property-specific keyframes'. For efficiency, we cache the
     // property-specific lists.
-    typedef WillBeHeapHashMap<CSSPropertyID, OwnPtrWillBeMember<PropertySpecificKeyframeGroup> > KeyframeGroupMap;
-    mutable OwnPtrWillBeMember<KeyframeGroupMap> m_keyframeGroups;
-    mutable RefPtrWillBeMember<InterpolationEffect> m_interpolationEffect;
+    typedef HashMap<CSSPropertyID, OwnPtr<PropertySpecificKeyframeGroup> > KeyframeGroupMap;
+    mutable OwnPtr<KeyframeGroupMap> m_keyframeGroups;
+    mutable RefPtr<InterpolationEffect> m_interpolationEffect;
 
     friend class KeyframeEffectModelTest;
 
@@ -130,8 +130,8 @@ protected:
 template <class Keyframe>
 class KeyframeEffectModel final : public KeyframeEffectModelBase {
 public:
-    typedef WillBeHeapVector<RefPtrWillBeMember<Keyframe> > KeyframeVector;
-    static PassRefPtrWillBeRawPtr<KeyframeEffectModel<Keyframe> > create(const KeyframeVector& keyframes) { return adoptRefWillBeNoop(new KeyframeEffectModel(keyframes)); }
+    typedef Vector<RefPtr<Keyframe> > KeyframeVector;
+    static PassRefPtr<KeyframeEffectModel<Keyframe> > create(const KeyframeVector& keyframes) { return adoptRef(new KeyframeEffectModel(keyframes)); }
 
 private:
     KeyframeEffectModel(const KeyframeVector& keyframes)

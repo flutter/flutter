@@ -48,12 +48,12 @@ class Range;
 class TreeScope;
 class VisibleSelection;
 
-class DOMSelection final : public RefCountedWillBeGarbageCollectedFinalized<DOMSelection>, public ScriptWrappable, public DOMWindowProperty {
+class DOMSelection final : public RefCounted<DOMSelection>, public ScriptWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DOMSelection> create(const TreeScope* treeScope)
+    static PassRefPtr<DOMSelection> create(const TreeScope* treeScope)
     {
-        return adoptRefWillBeNoop(new DOMSelection(treeScope));
+        return adoptRef(new DOMSelection(treeScope));
     }
 
     void clearTreeScope();
@@ -84,7 +84,7 @@ public:
     void collapseToEnd(ExceptionState&);
     void collapseToStart(ExceptionState&);
     void extend(Node*, int offset, ExceptionState&);
-    PassRefPtrWillBeRawPtr<Range> getRangeAt(int, ExceptionState&);
+    PassRefPtr<Range> getRangeAt(int, ExceptionState&);
     void removeAllRanges();
     void addRange(Range*);
     void deleteFromDocument();
@@ -111,7 +111,7 @@ private:
 
     void addConsoleError(const String& message);
 
-    RawPtrWillBeMember<const TreeScope> m_treeScope;
+    RawPtr<const TreeScope> m_treeScope;
 };
 
 } // namespace blink

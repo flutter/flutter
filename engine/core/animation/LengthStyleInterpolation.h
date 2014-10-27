@@ -12,9 +12,9 @@ namespace blink {
 
 class LengthStyleInterpolation : public StyleInterpolation {
 public:
-    static PassRefPtrWillBeRawPtr<LengthStyleInterpolation> create(CSSValue* start, CSSValue* end, CSSPropertyID id,  ValueRange range)
+    static PassRefPtr<LengthStyleInterpolation> create(CSSValue* start, CSSValue* end, CSSPropertyID id,  ValueRange range)
     {
-        return adoptRefWillBeNoop(new LengthStyleInterpolation(lengthToInterpolableValue(start), lengthToInterpolableValue(end), id, range));
+        return adoptRef(new LengthStyleInterpolation(lengthToInterpolableValue(start), lengthToInterpolableValue(end), id, range));
     }
 
     static bool canCreateFrom(const CSSValue&);
@@ -24,13 +24,13 @@ public:
     virtual void trace(Visitor*) override;
 
 private:
-    LengthStyleInterpolation(PassOwnPtrWillBeRawPtr<InterpolableValue> start, PassOwnPtrWillBeRawPtr<InterpolableValue> end, CSSPropertyID id,  ValueRange range)
+    LengthStyleInterpolation(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end, CSSPropertyID id,  ValueRange range)
         : StyleInterpolation(start, end, id)
         , m_range(range)
     { }
 
-    static PassOwnPtrWillBeRawPtr<InterpolableValue> lengthToInterpolableValue(CSSValue*);
-    static PassRefPtrWillBeRawPtr<CSSValue> interpolableValueToLength(InterpolableValue*, ValueRange);
+    static PassOwnPtr<InterpolableValue> lengthToInterpolableValue(CSSValue*);
+    static PassRefPtr<CSSValue> interpolableValueToLength(InterpolableValue*, ValueRange);
 
     ValueRange m_range;
 

@@ -79,7 +79,7 @@ void CSSFontSelector::unregisterForInvalidationCallbacks(CSSFontSelectorClient* 
 
 void CSSFontSelector::dispatchInvalidationCallbacks()
 {
-    WillBeHeapVector<RawPtrWillBeMember<CSSFontSelectorClient> > clients;
+    Vector<RawPtr<CSSFontSelectorClient> > clients;
     copyToVector(m_clients, clients);
     for (size_t i = 0; i < clients.size(); ++i)
         clients[i]->fontsNeedUpdate(this);

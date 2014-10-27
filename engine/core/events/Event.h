@@ -46,7 +46,7 @@ public:
     bool cancelable;
 };
 
-class Event : public RefCountedWillBeGarbageCollectedFinalized<Event>,  public ScriptWrappable {
+class Event : public RefCounted<Event>,  public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum PhaseType {
@@ -75,34 +75,34 @@ public:
         CHANGE              = 32768
     };
 
-    static PassRefPtrWillBeRawPtr<Event> create()
+    static PassRefPtr<Event> create()
     {
-        return adoptRefWillBeNoop(new Event);
+        return adoptRef(new Event);
     }
 
     // A factory for a simple event. The event doesn't bubble, and isn't
     // cancelable.
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/webappapis.html#fire-a-simple-event
-    static PassRefPtrWillBeRawPtr<Event> create(const AtomicString& type)
+    static PassRefPtr<Event> create(const AtomicString& type)
     {
-        return adoptRefWillBeNoop(new Event(type, false, false));
+        return adoptRef(new Event(type, false, false));
     }
-    static PassRefPtrWillBeRawPtr<Event> createCancelable(const AtomicString& type)
+    static PassRefPtr<Event> createCancelable(const AtomicString& type)
     {
-        return adoptRefWillBeNoop(new Event(type, false, true));
+        return adoptRef(new Event(type, false, true));
     }
-    static PassRefPtrWillBeRawPtr<Event> createBubble(const AtomicString& type)
+    static PassRefPtr<Event> createBubble(const AtomicString& type)
     {
-        return adoptRefWillBeNoop(new Event(type, true, false));
+        return adoptRef(new Event(type, true, false));
     }
-    static PassRefPtrWillBeRawPtr<Event> createCancelableBubble(const AtomicString& type)
+    static PassRefPtr<Event> createCancelableBubble(const AtomicString& type)
     {
-        return adoptRefWillBeNoop(new Event(type, true, true));
+        return adoptRef(new Event(type, true, true));
     }
 
-    static PassRefPtrWillBeRawPtr<Event> create(const AtomicString& type, const EventInit& initializer)
+    static PassRefPtr<Event> create(const AtomicString& type, const EventInit& initializer)
     {
-        return adoptRefWillBeNoop(new Event(type, initializer));
+        return adoptRef(new Event(type, initializer));
     }
 
     virtual ~Event();
@@ -113,7 +113,7 @@ public:
     void setType(const AtomicString& type) { m_type = type; }
 
     EventTarget* target() const { return m_target.get(); }
-    void setTarget(PassRefPtrWillBeRawPtr<EventTarget>);
+    void setTarget(PassRefPtr<EventTarget>);
 
     EventTarget* currentTarget() const;
     void setCurrentTarget(EventTarget* currentTarget) { m_currentTarget = currentTarget; }
@@ -171,12 +171,12 @@ public:
     void setCancelBubble(bool cancel) { m_cancelBubble = cancel; }
 
     Event* underlyingEvent() const { return m_underlyingEvent.get(); }
-    void setUnderlyingEvent(PassRefPtrWillBeRawPtr<Event>);
+    void setUnderlyingEvent(PassRefPtr<Event>);
 
     EventPath& eventPath() { ASSERT(m_eventPath); return *m_eventPath; }
     EventPath& ensureEventPath();
 
-    PassRefPtrWillBeRawPtr<StaticNodeList> path() const;
+    PassRefPtr<StaticNodeList> path() const;
 
     bool isBeingDispatched() const { return eventPhase(); }
 
@@ -202,11 +202,11 @@ private:
     bool m_cancelBubble;
 
     unsigned short m_eventPhase;
-    RefPtrWillBeMember<EventTarget> m_currentTarget;
-    RefPtrWillBeMember<EventTarget> m_target;
+    RefPtr<EventTarget> m_currentTarget;
+    RefPtr<EventTarget> m_target;
     DOMTimeStamp m_createTime;
-    RefPtrWillBeMember<Event> m_underlyingEvent;
-    OwnPtrWillBeMember<EventPath> m_eventPath;
+    RefPtr<Event> m_underlyingEvent;
+    OwnPtr<EventPath> m_eventPath;
 };
 
 #define DEFINE_EVENT_TYPE_CASTS(typeName) \

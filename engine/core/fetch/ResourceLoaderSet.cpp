@@ -35,9 +35,9 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<ResourceLoaderSet> ResourceLoaderSet::create()
+PassOwnPtr<ResourceLoaderSet> ResourceLoaderSet::create()
 {
-    return adoptPtrWillBeNoop(new ResourceLoaderSet);
+    return adoptPtr(new ResourceLoaderSet);
 }
 
 void ResourceLoaderSet::trace(Visitor* visitor)
@@ -49,7 +49,7 @@ void ResourceLoaderSet::trace(Visitor* visitor)
 
 void ResourceLoaderSet::cancelAll()
 {
-    WillBeHeapVector<RefPtrWillBeMember<ResourceLoader> > loadersCopy;
+    Vector<RefPtr<ResourceLoader> > loadersCopy;
     copyToVector(m_set, loadersCopy);
     size_t size = loadersCopy.size();
     for (size_t i = 0; i < size; ++i)

@@ -47,7 +47,7 @@ public:
 
     void trace(Visitor*);
 
-    RawPtrWillBeMember<StyleRule> rule;
+    RawPtr<StyleRule> rule;
     unsigned selectorIndex;
 };
 
@@ -100,11 +100,11 @@ public:
 
     void trace(Visitor*);
 
-    WillBeHeapVector<RuleFeature> attributeRules;
+    Vector<RuleFeature> attributeRules;
 
 private:
-    typedef WillBeHeapHashMap<AtomicString, RefPtrWillBeMember<DescendantInvalidationSet> > InvalidationSetMap;
-    typedef WillBeHeapHashMap<CSSSelector::PseudoType, RefPtrWillBeMember<DescendantInvalidationSet>, WTF::IntHash<unsigned>, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > PseudoTypeInvalidationSetMap;
+    typedef HashMap<AtomicString, RefPtr<DescendantInvalidationSet> > InvalidationSetMap;
+    typedef HashMap<CSSSelector::PseudoType, RefPtr<DescendantInvalidationSet>, WTF::IntHash<unsigned>, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > PseudoTypeInvalidationSetMap;
 
     enum InvalidationSetMode {
         AddFeatures,

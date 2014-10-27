@@ -13,7 +13,7 @@ namespace blink {
 
 struct Timing;
 
-class CSSTimingData : public NoBaseWillBeGarbageCollectedFinalized<CSSTimingData> {
+class CSSTimingData : public DummyBase<CSSTimingData> {
 public:
     ~CSSTimingData() { }
 

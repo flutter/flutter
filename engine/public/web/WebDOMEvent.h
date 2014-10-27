@@ -90,8 +90,8 @@ public:
     BLINK_EXPORT bool isProgressEvent() const;
 
 #if BLINK_IMPLEMENTATION
-    WebDOMEvent(const PassRefPtrWillBeRawPtr<Event>&);
-    operator PassRefPtrWillBeRawPtr<Event>() const;
+    WebDOMEvent(const PassRefPtr<Event>&);
+    operator PassRefPtr<Event>() const;
 #endif
 
     template<typename T> T to()
@@ -110,7 +110,7 @@ public:
 
 protected:
 #if BLINK_IMPLEMENTATION
-    void assign(const PassRefPtrWillBeRawPtr<Event>&);
+    void assign(const PassRefPtr<Event>&);
 
     template<typename T> T* unwrap()
     {

@@ -43,9 +43,9 @@ namespace blink {
 class Element;
 class TreeScope;
 
-class DocumentOrderedMap : public NoBaseWillBeGarbageCollected<DocumentOrderedMap> {
+class DocumentOrderedMap : public DummyBase<DocumentOrderedMap> {
 public:
-    static PassOwnPtrWillBeRawPtr<DocumentOrderedMap> create();
+    static PassOwnPtr<DocumentOrderedMap> create();
     void add(const AtomicString&, Element*);
     void remove(const AtomicString&, Element*);
 
@@ -53,7 +53,7 @@ public:
     bool containsMultiple(const AtomicString&) const;
     // concrete instantiations of the get<>() method template
     Element* getElementById(const AtomicString&, const TreeScope*) const;
-    const WillBeHeapVector<RawPtrWillBeMember<Element> >& getAllElementsById(const AtomicString&, const TreeScope*) const;
+    const Vector<RawPtr<Element> >& getAllElementsById(const AtomicString&, const TreeScope*) const;
     Element* getElementByMapName(const AtomicString&, const TreeScope*) const;
     Element* getElementByLowercasedMapName(const AtomicString&, const TreeScope*) const;
     Element* getElementByLabelForAttribute(const AtomicString&, const TreeScope*) const;
@@ -64,7 +64,7 @@ private:
     template<bool keyMatches(const AtomicString&, const Element&)>
     Element* get(const AtomicString&, const TreeScope*) const;
 
-    class MapEntry : public NoBaseWillBeGarbageCollected<MapEntry> {
+    class MapEntry : public DummyBase<MapEntry> {
     public:
         explicit MapEntry(Element* firstElement)
             : element(firstElement)
@@ -74,12 +74,12 @@ private:
 
         void trace(Visitor*);
 
-        RawPtrWillBeMember<Element> element;
+        RawPtr<Element> element;
         unsigned count;
-        WillBeHeapVector<RawPtrWillBeMember<Element> > orderedList;
+        Vector<RawPtr<Element> > orderedList;
     };
 
-    typedef WillBeHeapHashMap<AtomicString, OwnPtrWillBeMember<MapEntry> > Map;
+    typedef HashMap<AtomicString, OwnPtr<MapEntry> > Map;
 
     mutable Map m_map;
 };

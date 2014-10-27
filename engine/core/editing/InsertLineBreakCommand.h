@@ -32,9 +32,9 @@ namespace blink {
 
 class InsertLineBreakCommand final : public CompositeEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<InsertLineBreakCommand> create(Document& document)
+    static PassRefPtr<InsertLineBreakCommand> create(Document& document)
     {
-        return adoptRefWillBeNoop(new InsertLineBreakCommand(document));
+        return adoptRef(new InsertLineBreakCommand(document));
     }
 
 private:

@@ -59,7 +59,7 @@ static inline double nullValue()
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-class AnimationNode : public RefCountedWillBeGarbageCollectedFinalized<AnimationNode>, public ScriptWrappable {
+class AnimationNode : public RefCounted<AnimationNode>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
     friend class AnimationPlayer; // Calls attach/detach, updateInheritedTime.
 public:
@@ -71,7 +71,7 @@ public:
         PhaseNone,
     };
 
-    class EventDelegate : public NoBaseWillBeGarbageCollectedFinalized<EventDelegate> {
+    class EventDelegate : public DummyBase<EventDelegate> {
     public:
         virtual ~EventDelegate() { }
         virtual void onEventCondition(const AnimationNode*) = 0;
@@ -106,7 +106,7 @@ public:
     const AnimationPlayer* player() const { return m_player; }
     AnimationPlayer* player() { return m_player; }
     const Timing& specifiedTiming() const { return m_timing; }
-    PassRefPtrWillBeRawPtr<AnimationNodeTiming> timing();
+    PassRefPtr<AnimationNodeTiming> timing();
     void updateSpecifiedTiming(const Timing&);
 
     // This method returns time in ms as it is unused except via the API.
@@ -116,7 +116,7 @@ public:
     virtual void trace(Visitor*);
 
 protected:
-    explicit AnimationNode(const Timing&, PassOwnPtrWillBeRawPtr<EventDelegate> = nullptr);
+    explicit AnimationNode(const Timing&, PassOwnPtr<EventDelegate> = nullptr);
 
     // When AnimationNode receives a new inherited time via updateInheritedTime
     // it will (if necessary) recalculate timings and (if necessary) call
@@ -145,11 +145,11 @@ protected:
     virtual void specifiedTimingChanged() { }
 
     // FIXME: m_parent and m_startTime are placeholders, they depend on timing groups.
-    RawPtrWillBeMember<AnimationNode> m_parent;
+    RawPtr<AnimationNode> m_parent;
     const double m_startTime;
-    RawPtrWillBeMember<AnimationPlayer> m_player;
+    RawPtr<AnimationPlayer> m_player;
     Timing m_timing;
-    OwnPtrWillBeMember<EventDelegate> m_eventDelegate;
+    OwnPtr<EventDelegate> m_eventDelegate;
 
     mutable struct CalculatedTiming {
         Phase phase;

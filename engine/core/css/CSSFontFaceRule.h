@@ -33,9 +33,9 @@ class StyleRuleCSSStyleDeclaration;
 
 class CSSFontFaceRule final : public CSSRule {
 public:
-    static PassRefPtrWillBeRawPtr<CSSFontFaceRule> create(StyleRuleFontFace* rule, CSSStyleSheet* sheet)
+    static PassRefPtr<CSSFontFaceRule> create(StyleRuleFontFace* rule, CSSStyleSheet* sheet)
     {
-        return adoptRefWillBeNoop(new CSSFontFaceRule(rule, sheet));
+        return adoptRef(new CSSFontFaceRule(rule, sheet));
     }
 
     virtual ~CSSFontFaceRule();
@@ -53,8 +53,8 @@ public:
 private:
     CSSFontFaceRule(StyleRuleFontFace*, CSSStyleSheet* parent);
 
-    RefPtrWillBeMember<StyleRuleFontFace> m_fontFaceRule;
-    mutable RefPtrWillBeMember<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
+    RefPtr<StyleRuleFontFace> m_fontFaceRule;
+    mutable RefPtr<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
 };
 
 DEFINE_CSS_RULE_TYPE_CASTS(CSSFontFaceRule, FONT_FACE_RULE);

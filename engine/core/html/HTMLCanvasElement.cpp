@@ -239,8 +239,8 @@ void HTMLCanvasElement::finalizeFrameMicrotask()
 
 void HTMLCanvasElement::notifyObserversCanvasChanged(const FloatRect& rect)
 {
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CanvasObserver> >::iterator end = m_observers.end();
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<CanvasObserver> >::iterator it = m_observers.begin(); it != end; ++it)
+    HashSet<RawPtr<CanvasObserver> >::iterator end = m_observers.end();
+    for (HashSet<RawPtr<CanvasObserver> >::iterator it = m_observers.begin(); it != end; ++it)
         (*it)->canvasChanged(this, rect);
 }
 
@@ -299,8 +299,8 @@ void HTMLCanvasElement::reset()
         }
     }
 
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<CanvasObserver> >::iterator end = m_observers.end();
-    for (WillBeHeapHashSet<RawPtrWillBeWeakMember<CanvasObserver> >::iterator it = m_observers.begin(); it != end; ++it)
+    HashSet<RawPtr<CanvasObserver> >::iterator end = m_observers.end();
+    for (HashSet<RawPtr<CanvasObserver> >::iterator it = m_observers.begin(); it != end; ++it)
         (*it)->canvasResized(this);
 }
 
@@ -403,7 +403,7 @@ String HTMLCanvasElement::toDataURLInternal(const String& mimeType, const double
     String encodingMimeType = toEncodingMimeType(mimeType);
 
     // Try to get ImageData first, as that may avoid lossy conversions.
-    RefPtrWillBeRawPtr<ImageData> imageData = getImageData();
+    RefPtr<ImageData> imageData = getImageData();
 
     if (imageData)
         return ImageDataToDataURL(ImageDataBuffer(imageData->size(), imageData->data()), encodingMimeType, quality);
@@ -422,7 +422,7 @@ String HTMLCanvasElement::toDataURL(const String& mimeType, const double* qualit
     return toDataURLInternal(mimeType, quality);
 }
 
-PassRefPtrWillBeRawPtr<ImageData> HTMLCanvasElement::getImageData() const
+PassRefPtr<ImageData> HTMLCanvasElement::getImageData() const
 {
     if (!m_context || !m_context->is3d())
         return nullptr;

@@ -41,15 +41,15 @@ class NodeEventContext;
 class WindowEventContext {
     STACK_ALLOCATED();
 public:
-    WindowEventContext(Event*, PassRefPtrWillBeRawPtr<Node>, const NodeEventContext*);
+    WindowEventContext(Event*, PassRefPtr<Node>, const NodeEventContext*);
 
     LocalDOMWindow* window() const;
     EventTarget* target() const;
     bool handleLocalEvents(Event* event);
 
 private:
-    RefPtrWillBeMember<LocalDOMWindow> m_window;
-    RefPtrWillBeMember<EventTarget> m_target;
+    RefPtr<LocalDOMWindow> m_window;
+    RefPtr<EventTarget> m_target;
 };
 
 inline LocalDOMWindow* WindowEventContext::window() const

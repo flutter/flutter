@@ -40,9 +40,9 @@ class HTMLImageElement final : public HTMLElement, public CanvasImageSource {
 public:
     class ViewportChangeListener;
 
-    static PassRefPtrWillBeRawPtr<HTMLImageElement> create(Document&);
-    static PassRefPtrWillBeRawPtr<HTMLImageElement> create(Document&, bool createdByParser);
-    static PassRefPtrWillBeRawPtr<HTMLImageElement> createForJSConstructor(Document&, int width, int height);
+    static PassRefPtr<HTMLImageElement> create(Document&);
+    static PassRefPtr<HTMLImageElement> create(Document&, bool createdByParser);
+    static PassRefPtr<HTMLImageElement> createForJSConstructor(Document&, int width, int height);
 
     virtual ~HTMLImageElement();
     virtual void trace(Visitor*) override;
@@ -120,8 +120,8 @@ private:
     void notifyViewportChanged();
     void createMediaQueryListIfDoesNotExist();
 
-    OwnPtrWillBeMember<HTMLImageLoader> m_imageLoader;
-    RefPtrWillBeMember<ViewportChangeListener> m_listener;
+    OwnPtr<HTMLImageLoader> m_imageLoader;
+    RefPtr<ViewportChangeListener> m_listener;
     CompositeOperator m_compositeOperator;
     AtomicString m_bestFitImageURL;
     float m_imageDevicePixelRatio;

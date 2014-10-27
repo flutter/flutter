@@ -54,9 +54,9 @@ protected:
 
     void appendCSSTextForItems(StringBuilder&) const;
 
-    RefPtrWillBeMember<StyleRuleGroup> m_groupRule;
-    mutable WillBeHeapVector<RefPtrWillBeMember<CSSRule> > m_childRuleCSSOMWrappers;
-    mutable OwnPtrWillBeMember<CSSRuleList> m_ruleListCSSOMWrapper;
+    RefPtr<StyleRuleGroup> m_groupRule;
+    mutable Vector<RefPtr<CSSRule> > m_childRuleCSSOMWrappers;
+    mutable OwnPtr<CSSRuleList> m_ruleListCSSOMWrapper;
 };
 
 } // namespace blink

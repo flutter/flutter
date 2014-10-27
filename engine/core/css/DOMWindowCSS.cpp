@@ -37,9 +37,9 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<DOMWindowCSS> DOMWindowCSS::create()
+PassRefPtr<DOMWindowCSS> DOMWindowCSS::create()
 {
-    return adoptRefWillBeNoop(new DOMWindowCSS());
+    return adoptRef(new DOMWindowCSS());
 }
 
 static String valueWithoutImportant(const String& value)
@@ -72,7 +72,7 @@ bool DOMWindowCSS::supports(const String& property, const String& value) const
     if (normalizedValue.isEmpty())
         return false;
 
-    RefPtrWillBeRawPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
+    RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
     return BisonCSSParser::parseValue(dummyStyle.get(), propertyID, normalizedValue, false, HTMLStandardMode, 0);
 }
 

@@ -58,13 +58,13 @@ private:
 // but inefficient.
 class AnimatableColor final : public AnimatableValue {
 public:
-    static PassRefPtrWillBeRawPtr<AnimatableColor> create(const AnimatableColorImpl&);
+    static PassRefPtr<AnimatableColor> create(const AnimatableColorImpl&);
     Color color() const { return m_color.toColor(); }
 
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 
 private:
     AnimatableColor(const AnimatableColorImpl& color)

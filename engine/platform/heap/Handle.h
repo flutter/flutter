@@ -83,7 +83,6 @@ private:
 
     template<typename RootsAccessor, typename Owner> friend class PersistentBase;
     friend class PersistentAnchor;
-    friend class ThreadState;
 };
 
 
@@ -838,15 +837,6 @@ template<typename T> T* adoptPtrWillBeRefCountedGarbageCollected(T* ptr)
     return adoptRefCountedGarbageCollected(ptr);
 }
 
-template<typename T> T* adoptRefCountedGarbageCollectedWillBeNoop(T* ptr)
-{
-    static const bool notRefCountedGarbageCollected = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    static const bool notRefCounted = !WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCounted>::value;
-    COMPILE_ASSERT(notRefCountedGarbageCollected, useAdoptRefCountedWillBeRefCountedGarbageCollected);
-    COMPILE_ASSERT(notRefCounted, youMustAdopt);
-    return ptr;
-}
-
 #define WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED // do nothing when oilpan is enabled.
 #define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) // do nothing
 #define DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(type) // do nothing
@@ -922,13 +912,6 @@ template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeRefCountedGarbageCo
 template<typename T> PassRefPtrWillBeRawPtr<T> adoptRefWillBeThreadSafeRefCountedGarbageCollected(T* ptr) { return adoptRef(ptr); }
 template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeNoop(T* ptr) { return adoptPtr(ptr); }
 template<typename T> PassOwnPtrWillBeRawPtr<T> adoptPtrWillBeRefCountedGarbageCollected(T* ptr) { return adoptPtr(ptr); }
-
-template<typename T> T* adoptRefCountedGarbageCollectedWillBeNoop(T* ptr)
-{
-    static const bool isRefCountedGarbageCollected = WTF::IsSubclassOfTemplate<typename WTF::RemoveConst<T>::Type, RefCountedGarbageCollected>::value;
-    COMPILE_ASSERT(isRefCountedGarbageCollected, useAdoptRefWillBeNoop);
-    return adoptRefCountedGarbageCollected(ptr);
-}
 
 
 #define WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED WTF_MAKE_FAST_ALLOCATED

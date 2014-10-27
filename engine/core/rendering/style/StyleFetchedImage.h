@@ -40,7 +40,7 @@ public:
 
     virtual WrappedImagePtr data() const override { return m_image.get(); }
 
-    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const override;
+    virtual PassRefPtr<CSSValue> cssValue() const override;
 
     virtual bool canRender(const RenderObject&, float multiplier) const override;
     virtual bool isLoaded() const override;

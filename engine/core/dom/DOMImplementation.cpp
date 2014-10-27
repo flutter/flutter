@@ -46,7 +46,7 @@ DOMImplementation::DOMImplementation(Document& document)
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<Document> DOMImplementation::createDocument()
+PassRefPtr<Document> DOMImplementation::createDocument()
 {
     // FIXME: Removing this function will require adding new API:
     DocumentInit init = DocumentInit::fromContext(document().contextDocument())

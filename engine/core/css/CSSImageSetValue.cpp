@@ -184,9 +184,9 @@ CSSImageSetValue::CSSImageSetValue(const CSSImageSetValue& cloneFrom)
     // Non-CSSValueList data is not accessible through CSS OM, no need to clone.
 }
 
-PassRefPtrWillBeRawPtr<CSSImageSetValue> CSSImageSetValue::cloneForCSSOM() const
+PassRefPtr<CSSImageSetValue> CSSImageSetValue::cloneForCSSOM() const
 {
-    return adoptRefWillBeNoop(new CSSImageSetValue(*this));
+    return adoptRef(new CSSImageSetValue(*this));
 }
 
 } // namespace blink

@@ -39,7 +39,7 @@ class WebGLProgram final : public WebGLSharedObject, public ScriptWrappable {
 public:
     virtual ~WebGLProgram();
 
-    static PassRefPtrWillBeRawPtr<WebGLProgram> create(WebGLRenderingContextBase*);
+    static PassRefPtr<WebGLProgram> create(WebGLRenderingContextBase*);
 
     unsigned numActiveAttribLocations();
     GLint getActiveAttribLocation(GLuint index);
@@ -81,8 +81,8 @@ private:
     // program or not.
     unsigned m_linkCount;
 
-    RefPtrWillBeMember<WebGLShader> m_vertexShader;
-    RefPtrWillBeMember<WebGLShader> m_fragmentShader;
+    RefPtr<WebGLShader> m_vertexShader;
+    RefPtr<WebGLShader> m_fragmentShader;
 
     bool m_infoValid;
 };

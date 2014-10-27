@@ -55,26 +55,26 @@ public:
         DOM_KEY_LOCATION_NUMPAD     = 0x03
     };
 
-    static PassRefPtrWillBeRawPtr<KeyboardEvent> create()
+    static PassRefPtr<KeyboardEvent> create()
     {
-        return adoptRefWillBeNoop(new KeyboardEvent);
+        return adoptRef(new KeyboardEvent);
     }
 
-    static PassRefPtrWillBeRawPtr<KeyboardEvent> create(const PlatformKeyboardEvent& platformEvent, AbstractView* view)
+    static PassRefPtr<KeyboardEvent> create(const PlatformKeyboardEvent& platformEvent, AbstractView* view)
     {
-        return adoptRefWillBeNoop(new KeyboardEvent(platformEvent, view));
+        return adoptRef(new KeyboardEvent(platformEvent, view));
     }
 
-    static PassRefPtrWillBeRawPtr<KeyboardEvent> create(const AtomicString& type, const KeyboardEventInit& initializer)
+    static PassRefPtr<KeyboardEvent> create(const AtomicString& type, const KeyboardEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new KeyboardEvent(type, initializer));
+        return adoptRef(new KeyboardEvent(type, initializer));
     }
 
-    static PassRefPtrWillBeRawPtr<KeyboardEvent> create(const AtomicString& type, bool canBubble, bool cancelable, AbstractView* view,
+    static PassRefPtr<KeyboardEvent> create(const AtomicString& type, bool canBubble, bool cancelable, AbstractView* view,
         const String& keyIdentifier, unsigned location,
         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey)
     {
-        return adoptRefWillBeNoop(new KeyboardEvent(type, canBubble, cancelable, view, keyIdentifier, location,
+        return adoptRef(new KeyboardEvent(type, canBubble, cancelable, view, keyIdentifier, location,
         ctrlKey, altKey, shiftKey, metaKey));
     }
 
@@ -117,9 +117,9 @@ private:
 
 class KeyboardEventDispatchMediator : public EventDispatchMediator {
 public:
-    static PassRefPtrWillBeRawPtr<KeyboardEventDispatchMediator> create(PassRefPtrWillBeRawPtr<KeyboardEvent>);
+    static PassRefPtr<KeyboardEventDispatchMediator> create(PassRefPtr<KeyboardEvent>);
 private:
-    explicit KeyboardEventDispatchMediator(PassRefPtrWillBeRawPtr<KeyboardEvent>);
+    explicit KeyboardEventDispatchMediator(PassRefPtr<KeyboardEvent>);
     virtual bool dispatchEvent(EventDispatcher*) const override;
 };
 

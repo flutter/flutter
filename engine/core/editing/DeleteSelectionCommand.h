@@ -34,13 +34,13 @@ class EditingStyle;
 
 class DeleteSelectionCommand final : public CompositeEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<DeleteSelectionCommand> create(Document& document, bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool expandForSpecialElements = false, bool sanitizeMarkup = true)
+    static PassRefPtr<DeleteSelectionCommand> create(Document& document, bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool expandForSpecialElements = false, bool sanitizeMarkup = true)
     {
-        return adoptRefWillBeNoop(new DeleteSelectionCommand(document, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
+        return adoptRef(new DeleteSelectionCommand(document, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
     }
-    static PassRefPtrWillBeRawPtr<DeleteSelectionCommand> create(const VisibleSelection& selection, bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool expandForSpecialElements = false, bool sanitizeMarkup = true)
+    static PassRefPtr<DeleteSelectionCommand> create(const VisibleSelection& selection, bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool expandForSpecialElements = false, bool sanitizeMarkup = true)
     {
-        return adoptRefWillBeNoop(new DeleteSelectionCommand(selection, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
+        return adoptRef(new DeleteSelectionCommand(selection, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
     }
 
     virtual void trace(Visitor*) override;
@@ -64,8 +64,8 @@ private:
     void calculateTypingStyleAfterDelete();
     void clearTransientState();
     void makeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss();
-    virtual void removeNode(PassRefPtrWillBeRawPtr<Node>, ShouldAssumeContentIsAlwaysEditable = DoNotAssumeContentIsAlwaysEditable) override;
-    virtual void deleteTextFromNode(PassRefPtrWillBeRawPtr<Text>, unsigned, unsigned) override;
+    virtual void removeNode(PassRefPtr<Node>, ShouldAssumeContentIsAlwaysEditable = DoNotAssumeContentIsAlwaysEditable) override;
+    virtual void deleteTextFromNode(PassRefPtr<Text>, unsigned, unsigned) override;
     void removeRedundantBlocks();
 
     bool m_hasSelectionToDelete;
@@ -85,12 +85,12 @@ private:
     Position m_endingPosition;
     Position m_leadingWhitespace;
     Position m_trailingWhitespace;
-    RefPtrWillBeMember<Node> m_startBlock;
-    RefPtrWillBeMember<Node> m_endBlock;
-    RefPtrWillBeMember<EditingStyle> m_deleteIntoBlockquoteStyle;
-    RefPtrWillBeMember<Element> m_startRoot;
-    RefPtrWillBeMember<Element> m_endRoot;
-    RefPtrWillBeMember<Node> m_temporaryPlaceholder;
+    RefPtr<Node> m_startBlock;
+    RefPtr<Node> m_endBlock;
+    RefPtr<EditingStyle> m_deleteIntoBlockquoteStyle;
+    RefPtr<Element> m_startRoot;
+    RefPtr<Element> m_endRoot;
+    RefPtr<Node> m_temporaryPlaceholder;
 };
 
 } // namespace blink

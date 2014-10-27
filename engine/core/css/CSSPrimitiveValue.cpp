@@ -376,35 +376,35 @@ void CSSPrimitiveValue::init(const LengthSize& lengthSize, const RenderStyle& st
     m_value.pair = Pair::create(create(lengthSize.width(), style.effectiveZoom()), create(lengthSize.height(), style.effectiveZoom()), Pair::KeepIdenticalValues).leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtrWillBeRawPtr<Rect> r)
+void CSSPrimitiveValue::init(PassRefPtr<Rect> r)
 {
     m_primitiveUnitType = CSS_RECT;
     m_hasCachedCSSText = false;
     m_value.rect = r.leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtrWillBeRawPtr<Quad> quad)
+void CSSPrimitiveValue::init(PassRefPtr<Quad> quad)
 {
     m_primitiveUnitType = CSS_QUAD;
     m_hasCachedCSSText = false;
     m_value.quad = quad.leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtrWillBeRawPtr<Pair> p)
+void CSSPrimitiveValue::init(PassRefPtr<Pair> p)
 {
     m_primitiveUnitType = CSS_PAIR;
     m_hasCachedCSSText = false;
     m_value.pair = p.leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtrWillBeRawPtr<CSSCalcValue> c)
+void CSSPrimitiveValue::init(PassRefPtr<CSSCalcValue> c)
 {
     m_primitiveUnitType = CSS_CALC;
     m_hasCachedCSSText = false;
     m_value.calc = c.leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtrWillBeRawPtr<CSSBasicShape> shape)
+void CSSPrimitiveValue::init(PassRefPtr<CSSBasicShape> shape)
 {
     m_primitiveUnitType = CSS_SHAPE;
     m_hasCachedCSSText = false;
@@ -965,7 +965,7 @@ Quad* CSSPrimitiveValue::getQuadValue(ExceptionState& exceptionState) const
     return m_value.quad;
 }
 
-PassRefPtrWillBeRawPtr<RGBColor> CSSPrimitiveValue::getRGBColorValue(ExceptionState& exceptionState) const
+PassRefPtr<RGBColor> CSSPrimitiveValue::getRGBColorValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_RGBCOLOR) {
         exceptionState.throwDOMException(InvalidAccessError, "This object is not an RGB color value.");
@@ -1190,9 +1190,9 @@ String CSSPrimitiveValue::customCSSText(CSSTextFormattingFlags formattingFlag) c
     return text;
 }
 
-PassRefPtrWillBeRawPtr<CSSPrimitiveValue> CSSPrimitiveValue::cloneForCSSOM() const
+PassRefPtr<CSSPrimitiveValue> CSSPrimitiveValue::cloneForCSSOM() const
 {
-    RefPtrWillBeRawPtr<CSSPrimitiveValue> result = nullptr;
+    RefPtr<CSSPrimitiveValue> result = nullptr;
 
     switch (m_primitiveUnitType) {
     case CSS_STRING:

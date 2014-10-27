@@ -36,14 +36,14 @@ namespace blink {
 class Attr;
 class ExceptionState;
 
-class NamedNodeMap final : public NoBaseWillBeGarbageCollected<NamedNodeMap>, public ScriptWrappable {
+class NamedNodeMap final : public DummyBase<NamedNodeMap>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
     friend class Element;
 public:
-    static PassOwnPtrWillBeRawPtr<NamedNodeMap> create(Element* element)
+    static PassOwnPtr<NamedNodeMap> create(Element* element)
     {
-        return adoptPtrWillBeNoop(new NamedNodeMap(element));
+        return adoptPtr(new NamedNodeMap(element));
     }
 
 #if !ENABLE(OILPAN)
@@ -53,8 +53,8 @@ public:
 
     // Public DOM interface.
 
-    PassRefPtrWillBeRawPtr<Attr> getNamedItem(const AtomicString&) const;
-    PassRefPtrWillBeRawPtr<Attr> item(unsigned index) const;
+    PassRefPtr<Attr> getNamedItem(const AtomicString&) const;
+    PassRefPtr<Attr> item(unsigned index) const;
     size_t length() const;
 
     Element* element() const { return m_element; }
@@ -64,7 +64,7 @@ public:
 private:
     explicit NamedNodeMap(Element*);
 
-    RawPtrWillBeMember<Element> m_element;
+    RawPtr<Element> m_element;
 };
 
 } // namespace blink

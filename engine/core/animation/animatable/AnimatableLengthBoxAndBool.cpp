@@ -41,7 +41,7 @@ bool AnimatableLengthBoxAndBool::usesDefaultInterpolationWith(const AnimatableVa
     return AnimatableValue::usesDefaultInterpolation(lengthBox->box(), box());
 }
 
-PassRefPtrWillBeRawPtr<AnimatableValue> AnimatableLengthBoxAndBool::interpolateTo(const AnimatableValue* value, double fraction) const
+PassRefPtr<AnimatableValue> AnimatableLengthBoxAndBool::interpolateTo(const AnimatableValue* value, double fraction) const
 {
     const AnimatableLengthBoxAndBool* lengthBox = toAnimatableLengthBoxAndBool(value);
     if (lengthBox->flag() == flag()) {

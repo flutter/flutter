@@ -67,9 +67,9 @@ inline Range::Range(Document& ownerDocument)
     m_ownerDocument->attachRange(this);
 }
 
-PassRefPtrWillBeRawPtr<Range> Range::create(Document& ownerDocument)
+PassRefPtr<Range> Range::create(Document& ownerDocument)
 {
-    return adoptRefWillBeNoop(new Range(ownerDocument));
+    return adoptRef(new Range(ownerDocument));
 }
 
 inline Range::Range(Document& ownerDocument, Node* startContainer, int startOffset, Node* endContainer, int endOffset)
@@ -90,14 +90,14 @@ inline Range::Range(Document& ownerDocument, Node* startContainer, int startOffs
     setEnd(endContainer, endOffset);
 }
 
-PassRefPtrWillBeRawPtr<Range> Range::create(Document& ownerDocument, Node* startContainer, int startOffset, Node* endContainer, int endOffset)
+PassRefPtr<Range> Range::create(Document& ownerDocument, Node* startContainer, int startOffset, Node* endContainer, int endOffset)
 {
-    return adoptRefWillBeNoop(new Range(ownerDocument, startContainer, startOffset, endContainer, endOffset));
+    return adoptRef(new Range(ownerDocument, startContainer, startOffset, endContainer, endOffset));
 }
 
-PassRefPtrWillBeRawPtr<Range> Range::create(Document& ownerDocument, const Position& start, const Position& end)
+PassRefPtr<Range> Range::create(Document& ownerDocument, const Position& start, const Position& end)
 {
-    return adoptRefWillBeNoop(new Range(ownerDocument, start.containerNode(), start.computeOffsetInContainerNode(), end.containerNode(), end.computeOffsetInContainerNode()));
+    return adoptRef(new Range(ownerDocument, start.containerNode(), start.computeOffsetInContainerNode(), end.containerNode(), end.computeOffsetInContainerNode()));
 }
 
 Range::~Range()
@@ -151,7 +151,7 @@ static inline bool checkForDifferentRootContainer(const RangeBoundaryPoint& star
     return startRootContainer != endRootContainer || (Range::compareBoundaryPoints(start, end, ASSERT_NO_EXCEPTION) > 0);
 }
 
-void Range::setStart(PassRefPtrWillBeRawPtr<Node> refNode, int offset, ExceptionState& exceptionState)
+void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionState& exceptionState)
 {
     if (!refNode) {
         exceptionState.throwDOMException(NotFoundError, "The node provided was null.");
@@ -174,7 +174,7 @@ void Range::setStart(PassRefPtrWillBeRawPtr<Node> refNode, int offset, Exception
         collapse(true);
 }
 
-void Range::setEnd(PassRefPtrWillBeRawPtr<Node> refNode, int offset, ExceptionState& exceptionState)
+void Range::setEnd(PassRefPtr<Node> refNode, int offset, ExceptionState& exceptionState)
 {
     if (!refNode) {
         exceptionState.throwDOMException(NotFoundError, "The node provided was null.");
@@ -537,18 +537,18 @@ static inline Node* childOfCommonRootBeforeOffset(Node* container, unsigned offs
     return container;
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> Range::processContents(ActionType action, ExceptionState& exceptionState)
+PassRefPtr<DocumentFragment> Range::processContents(ActionType action, ExceptionState& exceptionState)
 {
-    typedef WillBeHeapVector<RefPtrWillBeMember<Node> > NodeVector;
+    typedef Vector<RefPtr<Node> > NodeVector;
 
-    RefPtrWillBeRawPtr<DocumentFragment> fragment = nullptr;
+    RefPtr<DocumentFragment> fragment = nullptr;
     if (action == EXTRACT_CONTENTS || action == CLONE_CONTENTS)
         fragment = DocumentFragment::create(*m_ownerDocument.get());
 
     if (collapsed())
         return fragment.release();
 
-    RefPtrWillBeRawPtr<Node> commonRoot = commonAncestorContainer();
+    RefPtr<Node> commonRoot = commonAncestorContainer();
     ASSERT(commonRoot);
 
     if (m_start.container() == m_end.container()) {
@@ -561,8 +561,8 @@ PassRefPtrWillBeRawPtr<DocumentFragment> Range::processContents(ActionType actio
     RangeBoundaryPoint originalEnd(m_end);
 
     // what is the highest node that partially selects the start / end of the range?
-    RefPtrWillBeRawPtr<Node> partialStart = highestAncestorUnderCommonRoot(originalStart.container(), commonRoot.get());
-    RefPtrWillBeRawPtr<Node> partialEnd = highestAncestorUnderCommonRoot(originalEnd.container(), commonRoot.get());
+    RefPtr<Node> partialStart = highestAncestorUnderCommonRoot(originalStart.container(), commonRoot.get());
+    RefPtr<Node> partialEnd = highestAncestorUnderCommonRoot(originalEnd.container(), commonRoot.get());
 
     // Start and end containers are different.
     // There are three possibilities here:
@@ -584,23 +584,23 @@ PassRefPtrWillBeRawPtr<DocumentFragment> Range::processContents(ActionType actio
     // Note that we are verifying that our common root hierarchy is still intact
     // after any DOM mutation event, at various stages below. See webkit bug 60350.
 
-    RefPtrWillBeRawPtr<Node> leftContents = nullptr;
+    RefPtr<Node> leftContents = nullptr;
     if (originalStart.container() != commonRoot && commonRoot->contains(originalStart.container())) {
         leftContents = processContentsBetweenOffsets(action, nullptr, originalStart.container(), originalStart.offset(), originalStart.container()->lengthOfContents(), exceptionState);
         leftContents = processAncestorsAndTheirSiblings(action, originalStart.container(), ProcessContentsForward, leftContents, commonRoot.get(), exceptionState);
     }
 
-    RefPtrWillBeRawPtr<Node> rightContents = nullptr;
+    RefPtr<Node> rightContents = nullptr;
     if (m_end.container() != commonRoot && commonRoot->contains(originalEnd.container())) {
         rightContents = processContentsBetweenOffsets(action, nullptr, originalEnd.container(), 0, originalEnd.offset(), exceptionState);
         rightContents = processAncestorsAndTheirSiblings(action, originalEnd.container(), ProcessContentsBackward, rightContents, commonRoot.get(), exceptionState);
     }
 
     // delete all children of commonRoot between the start and end container
-    RefPtrWillBeRawPtr<Node> processStart = childOfCommonRootBeforeOffset(originalStart.container(), originalStart.offset(), commonRoot.get());
+    RefPtr<Node> processStart = childOfCommonRootBeforeOffset(originalStart.container(), originalStart.offset(), commonRoot.get());
     if (processStart && originalStart.container() != commonRoot) // processStart contains nodes before m_start.
         processStart = processStart->nextSibling();
-    RefPtrWillBeRawPtr<Node> processEnd = childOfCommonRootBeforeOffset(originalEnd.container(), originalEnd.offset(), commonRoot.get());
+    RefPtr<Node> processEnd = childOfCommonRootBeforeOffset(originalEnd.container(), originalEnd.offset(), commonRoot.get());
 
     // Collapse the range, making sure that the result is not within a node that was partially selected.
     if (action == EXTRACT_CONTENTS || action == DELETE_CONTENTS) {
@@ -640,7 +640,7 @@ PassRefPtrWillBeRawPtr<DocumentFragment> Range::processContents(ActionType actio
     return fragment.release();
 }
 
-static inline void deleteCharacterData(PassRefPtrWillBeRawPtr<CharacterData> data, unsigned startOffset, unsigned endOffset, ExceptionState& exceptionState)
+static inline void deleteCharacterData(PassRefPtr<CharacterData> data, unsigned startOffset, unsigned endOffset, ExceptionState& exceptionState)
 {
     if (data->length() - endOffset)
         data->deleteData(endOffset, data->length() - endOffset, exceptionState);
@@ -648,19 +648,19 @@ static inline void deleteCharacterData(PassRefPtrWillBeRawPtr<CharacterData> dat
         data->deleteData(0, startOffset, exceptionState);
 }
 
-PassRefPtrWillBeRawPtr<Node> Range::processContentsBetweenOffsets(ActionType action, PassRefPtrWillBeRawPtr<DocumentFragment> fragment,
+PassRefPtr<Node> Range::processContentsBetweenOffsets(ActionType action, PassRefPtr<DocumentFragment> fragment,
     Node* container, unsigned startOffset, unsigned endOffset, ExceptionState& exceptionState)
 {
     ASSERT(container);
     ASSERT(startOffset <= endOffset);
 
     // This switch statement must be consistent with that of Node::lengthOfContents.
-    RefPtrWillBeRawPtr<Node> result = nullptr;
+    RefPtr<Node> result = nullptr;
     switch (container->nodeType()) {
     case Node::TEXT_NODE:
         endOffset = std::min(endOffset, toCharacterData(container)->length());
         if (action == EXTRACT_CONTENTS || action == CLONE_CONTENTS) {
-            RefPtrWillBeRawPtr<CharacterData> c = static_pointer_cast<CharacterData>(container->cloneNode(true));
+            RefPtr<CharacterData> c = static_pointer_cast<CharacterData>(container->cloneNode(true));
             deleteCharacterData(c, startOffset, endOffset, exceptionState);
             if (fragment) {
                 result = fragment;
@@ -684,7 +684,7 @@ PassRefPtrWillBeRawPtr<Node> Range::processContentsBetweenOffsets(ActionType act
         }
 
         Node* n = container->firstChild();
-        WillBeHeapVector<RefPtrWillBeMember<Node> > nodes;
+        Vector<RefPtr<Node> > nodes;
         for (unsigned i = startOffset; n && i; i--)
             n = n->nextSibling();
         for (unsigned i = startOffset; n && i < endOffset; i++, n = n->nextSibling())
@@ -697,7 +697,7 @@ PassRefPtrWillBeRawPtr<Node> Range::processContentsBetweenOffsets(ActionType act
     return result.release();
 }
 
-void Range::processNodes(ActionType action, WillBeHeapVector<RefPtrWillBeMember<Node> >& nodes, PassRefPtrWillBeRawPtr<Node> oldContainer, PassRefPtrWillBeRawPtr<Node> newContainer, ExceptionState& exceptionState)
+void Range::processNodes(ActionType action, Vector<RefPtr<Node> >& nodes, PassRefPtr<Node> oldContainer, PassRefPtr<Node> newContainer, ExceptionState& exceptionState)
 {
     for (unsigned i = 0; i < nodes.size(); i++) {
         switch (action) {
@@ -714,20 +714,20 @@ void Range::processNodes(ActionType action, WillBeHeapVector<RefPtrWillBeMember<
     }
 }
 
-PassRefPtrWillBeRawPtr<Node> Range::processAncestorsAndTheirSiblings(ActionType action, Node* container, ContentsProcessDirection direction, PassRefPtrWillBeRawPtr<Node> passedClonedContainer, Node* commonRoot, ExceptionState& exceptionState)
+PassRefPtr<Node> Range::processAncestorsAndTheirSiblings(ActionType action, Node* container, ContentsProcessDirection direction, PassRefPtr<Node> passedClonedContainer, Node* commonRoot, ExceptionState& exceptionState)
 {
-    typedef WillBeHeapVector<RefPtrWillBeMember<Node> > NodeVector;
+    typedef Vector<RefPtr<Node> > NodeVector;
 
-    RefPtrWillBeRawPtr<Node> clonedContainer = passedClonedContainer;
+    RefPtr<Node> clonedContainer = passedClonedContainer;
     NodeVector ancestors;
     for (ContainerNode* n = container->parentNode(); n && n != commonRoot; n = n->parentNode())
         ancestors.append(n);
 
-    RefPtrWillBeRawPtr<Node> firstChildInAncestorToProcess = direction == ProcessContentsForward ? container->nextSibling() : container->previousSibling();
+    RefPtr<Node> firstChildInAncestorToProcess = direction == ProcessContentsForward ? container->nextSibling() : container->previousSibling();
     for (NodeVector::const_iterator it = ancestors.begin(); it != ancestors.end(); ++it) {
-        RefPtrWillBeRawPtr<Node> ancestor = *it;
+        RefPtr<Node> ancestor = *it;
         if (action == EXTRACT_CONTENTS || action == CLONE_CONTENTS) {
-            if (RefPtrWillBeRawPtr<Node> clonedAncestor = ancestor->cloneNode(false)) { // Might have been removed already during mutation event.
+            if (RefPtr<Node> clonedAncestor = ancestor->cloneNode(false)) { // Might have been removed already during mutation event.
                 clonedAncestor->appendChild(clonedContainer, exceptionState);
                 clonedContainer = clonedAncestor;
             }
@@ -772,7 +772,7 @@ PassRefPtrWillBeRawPtr<Node> Range::processAncestorsAndTheirSiblings(ActionType 
     return clonedContainer.release();
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> Range::extractContents(ExceptionState& exceptionState)
+PassRefPtr<DocumentFragment> Range::extractContents(ExceptionState& exceptionState)
 {
     checkExtractPrecondition(exceptionState);
     if (exceptionState.hadException())
@@ -781,14 +781,14 @@ PassRefPtrWillBeRawPtr<DocumentFragment> Range::extractContents(ExceptionState& 
     return processContents(EXTRACT_CONTENTS, exceptionState);
 }
 
-PassRefPtrWillBeRawPtr<DocumentFragment> Range::cloneContents(ExceptionState& exceptionState)
+PassRefPtr<DocumentFragment> Range::cloneContents(ExceptionState& exceptionState)
 {
     return processContents(CLONE_CONTENTS, exceptionState);
 }
 
-void Range::insertNode(PassRefPtrWillBeRawPtr<Node> prpNewNode, ExceptionState& exceptionState)
+void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionState)
 {
-    RefPtrWillBeRawPtr<Node> newNode = prpNewNode;
+    RefPtr<Node> newNode = prpNewNode;
 
     if (!newNode) {
         exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
@@ -856,10 +856,10 @@ void Range::insertNode(PassRefPtrWillBeRawPtr<Node> prpNewNode, ExceptionState& 
 
     EventQueueScope scope;
     bool collapsed = m_start == m_end;
-    RefPtrWillBeRawPtr<Node> container = nullptr;
+    RefPtr<Node> container = nullptr;
     if (startIsText) {
         container = m_start.container();
-        RefPtrWillBeRawPtr<Text> newText = toText(container)->splitText(m_start.offset(), exceptionState);
+        RefPtr<Text> newText = toText(container)->splitText(m_start.offset(), exceptionState);
         if (exceptionState.hadException())
             return;
 
@@ -879,7 +879,7 @@ void Range::insertNode(PassRefPtrWillBeRawPtr<Node> prpNewNode, ExceptionState& 
             m_end.setToBeforeChild(*newText);
         }
     } else {
-        RefPtrWillBeRawPtr<Node> lastChild = (newNodeType == Node::DOCUMENT_FRAGMENT_NODE) ? toDocumentFragment(newNode)->lastChild() : newNode.get();
+        RefPtr<Node> lastChild = (newNodeType == Node::DOCUMENT_FRAGMENT_NODE) ? toDocumentFragment(newNode)->lastChild() : newNode.get();
         if (lastChild && lastChild == m_start.childBefore()) {
             // The insertion will do nothing, but we need to extend the range to include
             // the inserted nodes.
@@ -1001,7 +1001,7 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
     }
 }
 
-PassRefPtrWillBeRawPtr<Range> Range::cloneRange() const
+PassRefPtr<Range> Range::cloneRange() const
 {
     return Range::create(*m_ownerDocument.get(), m_start.container(), m_start.offset(), m_end.container(), m_end.offset());
 }
@@ -1080,9 +1080,9 @@ void Range::selectNodeContents(Node* refNode, ExceptionState& exceptionState)
     m_end.setToEndOfNode(*refNode);
 }
 
-void Range::surroundContents(PassRefPtrWillBeRawPtr<Node> passNewParent, ExceptionState& exceptionState)
+void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exceptionState)
 {
-    RefPtrWillBeRawPtr<Node> newParent = passNewParent;
+    RefPtr<Node> newParent = passNewParent;
     if (!newParent) {
         exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
         return;
@@ -1145,7 +1145,7 @@ void Range::surroundContents(PassRefPtrWillBeRawPtr<Node> passNewParent, Excepti
         if (exceptionState.hadException())
             return;
     }
-    RefPtrWillBeRawPtr<DocumentFragment> fragment = extractContents(exceptionState);
+    RefPtr<DocumentFragment> fragment = extractContents(exceptionState);
     if (exceptionState.hadException())
         return;
     insertNode(newParent, exceptionState);
@@ -1294,10 +1294,10 @@ bool areRangesEqual(const Range* a, const Range* b)
     return a->startPosition() == b->startPosition() && a->endPosition() == b->endPosition();
 }
 
-PassRefPtrWillBeRawPtr<Range> rangeOfContents(Node* node)
+PassRefPtr<Range> rangeOfContents(Node* node)
 {
     ASSERT(node);
-    RefPtrWillBeRawPtr<Range> range = Range::create(node->document());
+    RefPtr<Range> range = Range::create(node->document());
     range->selectNodeContents(node, IGNORE_EXCEPTION);
     return range.release();
 }
@@ -1485,7 +1485,7 @@ void Range::expand(const String& unit, ExceptionState& exceptionState)
     setEnd(end.deepEquivalent().containerNode(), end.deepEquivalent().computeOffsetInContainerNode(), exceptionState);
 }
 
-PassRefPtrWillBeRawPtr<ClientRectList> Range::getClientRects() const
+PassRefPtr<ClientRectList> Range::getClientRects() const
 {
     m_ownerDocument->updateLayoutIgnorePendingStylesheets();
 
@@ -1495,7 +1495,7 @@ PassRefPtrWillBeRawPtr<ClientRectList> Range::getClientRects() const
     return ClientRectList::create(quads);
 }
 
-PassRefPtrWillBeRawPtr<ClientRect> Range::getBoundingClientRect() const
+PassRefPtr<ClientRect> Range::getBoundingClientRect() const
 {
     return ClientRect::create(boundingRect());
 }
@@ -1506,7 +1506,7 @@ void Range::getBorderAndTextQuads(Vector<FloatQuad>& quads) const
     Node* endContainer = m_end.container();
     Node* stopNode = pastLastNode();
 
-    WillBeHeapHashSet<RawPtrWillBeMember<Node> > nodeSet;
+    HashSet<RawPtr<Node> > nodeSet;
     for (Node* node = firstNode(); node != stopNode; node = NodeTraversal::next(*node)) {
         if (node->isElementNode())
             nodeSet.add(node);

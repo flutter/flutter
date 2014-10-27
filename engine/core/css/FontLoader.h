@@ -16,11 +16,11 @@ namespace blink {
 class CSSFontSelector;
 class FontResource;
 
-class FontLoader : public RefCountedWillBeGarbageCollectedFinalized<FontLoader> {
+class FontLoader : public RefCounted<FontLoader> {
 public:
-    static PassRefPtrWillBeRawPtr<FontLoader> create(CSSFontSelector* fontSelector, ResourceFetcher* fetcher)
+    static PassRefPtr<FontLoader> create(CSSFontSelector* fontSelector, ResourceFetcher* fetcher)
     {
-        return adoptRefWillBeNoop(new FontLoader(fontSelector, fetcher));
+        return adoptRef(new FontLoader(fontSelector, fetcher));
     }
     ~FontLoader();
 
@@ -43,8 +43,8 @@ private:
 
     typedef Vector<std::pair<ResourcePtr<FontResource>, ResourceLoader::RequestCountTracker> > FontsToLoadVector;
     FontsToLoadVector m_fontsToBeginLoading;
-    RawPtrWillBeMember<CSSFontSelector> m_fontSelector;
-    RawPtrWillBeWeakMember<ResourceFetcher> m_resourceFetcher;
+    RawPtr<CSSFontSelector> m_fontSelector;
+    RawPtr<ResourceFetcher> m_resourceFetcher;
 };
 
 } // namespace blink

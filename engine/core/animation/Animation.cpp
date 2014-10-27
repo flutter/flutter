@@ -46,41 +46,41 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* target, PassRefPtrWillBeRawPtr<AnimationEffect> effect, const Timing& timing, Priority priority, PassOwnPtrWillBeRawPtr<EventDelegate> eventDelegate)
+PassRefPtr<Animation> Animation::create(Element* target, PassRefPtr<AnimationEffect> effect, const Timing& timing, Priority priority, PassOwnPtr<EventDelegate> eventDelegate)
 {
-    return adoptRefWillBeNoop(new Animation(target, effect, timing, priority, eventDelegate));
+    return adoptRef(new Animation(target, effect, timing, priority, eventDelegate));
 }
 
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, PassRefPtrWillBeRawPtr<AnimationEffect> effect, const Dictionary& timingInputDictionary)
+PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, const Dictionary& timingInputDictionary)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, TimingInput::convert(timingInputDictionary));
 }
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, PassRefPtrWillBeRawPtr<AnimationEffect> effect, double duration)
+PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, double duration)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, TimingInput::convert(duration));
 }
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, PassRefPtrWillBeRawPtr<AnimationEffect> effect)
+PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, Timing());
 }
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
+PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
         UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectObjectTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(timingInputDictionary));
 }
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
+PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
         UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectDoubleTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(duration));
 }
-PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
+PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
 {
     ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
@@ -88,7 +88,7 @@ PassRefPtrWillBeRawPtr<Animation> Animation::create(Element* element, const Vect
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), Timing());
 }
 
-Animation::Animation(Element* target, PassRefPtrWillBeRawPtr<AnimationEffect> effect, const Timing& timing, Priority priority, PassOwnPtrWillBeRawPtr<EventDelegate> eventDelegate)
+Animation::Animation(Element* target, PassRefPtr<AnimationEffect> effect, const Timing& timing, Priority priority, PassOwnPtr<EventDelegate> eventDelegate)
     : AnimationNode(timing, eventDelegate)
     , m_target(target)
     , m_effect(effect)
@@ -151,11 +151,11 @@ void Animation::applyEffects()
     double iteration = currentIteration();
     ASSERT(iteration >= 0);
     // FIXME: Handle iteration values which overflow int.
-    OwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > interpolations = m_effect->sample(static_cast<int>(iteration), timeFraction(), iterationDuration());
+    OwnPtr<Vector<RefPtr<Interpolation> > > interpolations = m_effect->sample(static_cast<int>(iteration), timeFraction(), iterationDuration());
     if (m_sampledEffect) {
         m_sampledEffect->setInterpolations(interpolations.release());
     } else if (!interpolations->isEmpty()) {
-        OwnPtrWillBeRawPtr<SampledEffect> sampledEffect = SampledEffect::create(this, interpolations.release());
+        OwnPtr<SampledEffect> sampledEffect = SampledEffect::create(this, interpolations.release());
         m_sampledEffect = sampledEffect.get();
         ensureAnimationStack(m_target).add(sampledEffect.release());
     } else {

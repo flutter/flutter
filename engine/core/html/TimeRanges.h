@@ -38,7 +38,7 @@ namespace blink {
 
 class ExceptionState;
 
-class TimeRanges : public RefCountedWillBeGarbageCollected<TimeRanges>, public ScriptWrappable {
+class TimeRanges : public RefCounted<TimeRanges>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     // We consider all the Ranges to be semi-bounded as follow: [start, end[
@@ -87,17 +87,17 @@ public:
         void trace(Visitor*) { }
     };
 
-    static PassRefPtrWillBeRawPtr<TimeRanges> create()
+    static PassRefPtr<TimeRanges> create()
     {
-        return adoptRefWillBeNoop(new TimeRanges);
+        return adoptRef(new TimeRanges);
     }
-    static PassRefPtrWillBeRawPtr<TimeRanges> create(double start, double end)
+    static PassRefPtr<TimeRanges> create(double start, double end)
     {
-        return adoptRefWillBeNoop(new TimeRanges(start, end));
+        return adoptRef(new TimeRanges(start, end));
     }
-    static PassRefPtrWillBeRawPtr<TimeRanges> create(const blink::WebTimeRanges&);
+    static PassRefPtr<TimeRanges> create(const blink::WebTimeRanges&);
 
-    PassRefPtrWillBeRawPtr<TimeRanges> copy() const;
+    PassRefPtr<TimeRanges> copy() const;
     void intersectWith(const TimeRanges*);
     void unionWith(const TimeRanges*);
 
@@ -123,7 +123,7 @@ private:
 
     void invert();
 
-    WillBeHeapVector<Range> m_ranges;
+    Vector<Range> m_ranges;
 };
 
 } // namespace blink

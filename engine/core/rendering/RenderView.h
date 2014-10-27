@@ -157,8 +157,8 @@ private:
 
     FrameView* m_frameView;
 
-    RawPtrWillBeMember<RenderObject> m_selectionStart;
-    RawPtrWillBeMember<RenderObject> m_selectionEnd;
+    RawPtr<RenderObject> m_selectionStart;
+    RawPtr<RenderObject> m_selectionEnd;
 
     int m_selectionStartPos;
     int m_selectionEndPos;

@@ -41,24 +41,24 @@ struct CompositionEventInit : UIEventInit {
 class CompositionEvent final : public UIEvent {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<CompositionEvent> create()
+    static PassRefPtr<CompositionEvent> create()
     {
-        return adoptRefWillBeNoop(new CompositionEvent);
+        return adoptRef(new CompositionEvent);
     }
 
-    static PassRefPtrWillBeRawPtr<CompositionEvent> create(const AtomicString& type, PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, const Vector<CompositionUnderline>& underlines)
+    static PassRefPtr<CompositionEvent> create(const AtomicString& type, PassRefPtr<AbstractView> view, const String& data, const Vector<CompositionUnderline>& underlines)
     {
-        return adoptRefWillBeNoop(new CompositionEvent(type, view, data, underlines));
+        return adoptRef(new CompositionEvent(type, view, data, underlines));
     }
 
-    static PassRefPtrWillBeRawPtr<CompositionEvent> create(const AtomicString& type, const CompositionEventInit& initializer)
+    static PassRefPtr<CompositionEvent> create(const AtomicString& type, const CompositionEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new CompositionEvent(type, initializer));
+        return adoptRef(new CompositionEvent(type, initializer));
     }
 
     virtual ~CompositionEvent();
 
-    void initCompositionEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView>, const String& data);
+    void initCompositionEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>, const String& data);
 
     String data() const { return m_data; }
     int activeSegmentStart() const { return m_activeSegmentStart; }
@@ -71,7 +71,7 @@ public:
 
 private:
     CompositionEvent();
-    CompositionEvent(const AtomicString& type, PassRefPtrWillBeRawPtr<AbstractView>, const String&, const Vector<CompositionUnderline>& underlines);
+    CompositionEvent(const AtomicString& type, PassRefPtr<AbstractView>, const String&, const Vector<CompositionUnderline>& underlines);
     CompositionEvent(const AtomicString& type, const CompositionEventInit&);
     void initializeSegments(const Vector<CompositionUnderline>* = 0);
 

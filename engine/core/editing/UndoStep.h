@@ -39,7 +39,7 @@ namespace blink {
 
 class LocalFrame;
 
-class UndoStep : public RefCountedWillBeGarbageCollectedFinalized<UndoStep> {
+class UndoStep : public RefCounted<UndoStep> {
 public:
     virtual ~UndoStep() { }
     virtual void trace(Visitor*) { }

@@ -35,7 +35,7 @@ namespace blink {
 // A base class for any attributes that are needed which would affect
 // the creation of the Canvas's rendering context.
 
-class CanvasContextAttributes : public RefCountedWillBeGarbageCollectedFinalized<CanvasContextAttributes> {
+class CanvasContextAttributes : public RefCounted<CanvasContextAttributes> {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(CanvasContextAttributes);
 public:
     virtual void trace(Visitor*) { }

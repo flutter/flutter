@@ -33,10 +33,10 @@
 
 namespace blink {
 
-class TextMetrics final : public RefCountedWillBeGarbageCollected<TextMetrics>, public ScriptWrappable {
+class TextMetrics final : public RefCounted<TextMetrics>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<TextMetrics> create() { return adoptRefWillBeNoop(new TextMetrics); }
+    static PassRefPtr<TextMetrics> create() { return adoptRef(new TextMetrics); }
 
     float width() const { return m_width; }
     void setWidth(float w) { m_width = w; }

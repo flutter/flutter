@@ -118,7 +118,7 @@ void HTMLDocumentParser::prepareToStopParsing()
 
     // pumpTokenizer can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
-    RefPtrWillBeRawPtr<HTMLDocumentParser> protect(this);
+    RefPtr<HTMLDocumentParser> protect(this);
 
     if (isStopped())
         return;
@@ -159,7 +159,7 @@ void HTMLDocumentParser::resumeParsingAfterYield()
 {
     // pumpTokenizer can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
-    RefPtrWillBeRawPtr<HTMLDocumentParser> protect(this);
+    RefPtr<HTMLDocumentParser> protect(this);
 
     ASSERT(m_haveBackgroundParser);
     pumpPendingSpeculations();
@@ -170,7 +170,7 @@ void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
     if (m_isFragment)
         return;
     TextPosition scriptStartPosition = TextPosition::belowRangePosition();
-    RefPtrWillBeRawPtr<Element> scriptToProcess = m_treeBuilder->takeScriptToProcess(scriptStartPosition);
+    RefPtr<Element> scriptToProcess = m_treeBuilder->takeScriptToProcess(scriptStartPosition);
     m_scriptRunner.runScript(toHTMLScriptElement(scriptToProcess.get()), scriptStartPosition);
 }
 
@@ -188,7 +188,7 @@ void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<Pa
 
     // processParsedChunkFromBackgroundParser can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
-    RefPtrWillBeRawPtr<HTMLDocumentParser> protect(this);
+    RefPtr<HTMLDocumentParser> protect(this);
 
     ASSERT(m_speculations.isEmpty());
     m_speculations.append(chunk);
@@ -419,7 +419,7 @@ void HTMLDocumentParser::resumeParsingAfterScriptExecution()
     ASSERT(!m_lastChunkBeforeScript);
     // processParsedChunkFromBackgroundParser can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
-    RefPtrWillBeRawPtr<HTMLDocumentParser> protect(this);
+    RefPtr<HTMLDocumentParser> protect(this);
     pumpPendingSpeculations();
 }
 
@@ -427,7 +427,7 @@ void HTMLDocumentParser::executeScriptsWaitingForResources()
 {
     if (!m_scriptRunner.hasPendingScripts())
         return;
-    RefPtrWillBeRawPtr<HTMLDocumentParser> protect(this);
+    RefPtr<HTMLDocumentParser> protect(this);
     m_scriptRunner.executePendingScripts();
     if (!isWaitingForScripts())
         resumeParsingAfterScriptExecution();

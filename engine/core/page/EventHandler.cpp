@@ -425,7 +425,7 @@ bool EventHandler::handleMousePressEventTripleClick(const MouseEventWithHitTestR
 
 static int textDistance(const Position& start, const Position& end)
 {
-    RefPtrWillBeRawPtr<Range> range = Range::create(*start.document(), start, end);
+    RefPtr<Range> range = Range::create(*start.document(), start, end);
     return TextIterator::rangeLength(range.get(), true);
 }
 
@@ -1345,7 +1345,7 @@ bool EventHandler::handlePasteGlobalSelection(const PlatformMouseEvent& mouseEve
     return false;
 }
 
-void EventHandler::setCapturingMouseEventsNode(PassRefPtrWillBeRawPtr<Node> n)
+void EventHandler::setCapturingMouseEventsNode(PassRefPtr<Node> n)
 {
     m_capturingMouseEventsNode = n;
     m_eventHandlerWillResetCapturingMouseEventsNode = false;
@@ -1624,7 +1624,7 @@ bool EventHandler::handleGestureEventInFrame(const GestureEventWithHitTestResult
 {
     ASSERT(!targetedEvent.event().isScrollEvent());
 
-    RefPtrWillBeRawPtr<Node> eventTarget = targetedEvent.hitTestResult().targetNode();
+    RefPtr<Node> eventTarget = targetedEvent.hitTestResult().targetNode();
     RefPtr<Scrollbar> scrollbar = targetedEvent.hitTestResult().scrollbar();
     const PlatformGestureEvent& gestureEvent = targetedEvent.event();
 
@@ -1665,7 +1665,7 @@ bool EventHandler::handleGestureEventInFrame(const GestureEventWithHitTestResult
 
 bool EventHandler::handleGestureScrollEvent(const PlatformGestureEvent& gestureEvent)
 {
-    RefPtrWillBeRawPtr<Node> eventTarget = nullptr;
+    RefPtr<Node> eventTarget = nullptr;
     RefPtr<Scrollbar> scrollbar;
     if (gestureEvent.type() != PlatformEvent::GestureScrollBegin) {
         scrollbar = m_scrollbarHandlingScrollGesture.get();
@@ -1881,7 +1881,7 @@ bool EventHandler::passScrollGestureEventToWidget(const PlatformGestureEvent& ge
 }
 
 bool EventHandler::handleGestureScrollEnd(const PlatformGestureEvent& gestureEvent) {
-    RefPtrWillBeRawPtr<Node> node = m_scrollGestureHandlingNode;
+    RefPtr<Node> node = m_scrollGestureHandlingNode;
     clearGestureScrollNodes();
 
     if (node)
@@ -2021,11 +2021,11 @@ bool EventHandler::bestClickableNodeForHitTestResult(const HitTestResult& result
     IntPoint touchCenter = m_frame->view()->contentsToWindow(result.roundedPointInMainFrame());
     IntRect touchRect = m_frame->view()->contentsToWindow(result.hitTestLocation().boundingBox());
 
-    WillBeHeapVector<RefPtrWillBeMember<Node>, 11> nodes;
+    Vector<RefPtr<Node>, 11> nodes;
     copyToVector(result.rectBasedTestResult(), nodes);
 
     // FIXME: the explicit Vector conversion copies into a temporary and is wasteful.
-    return findBestClickableCandidate(targetNode, targetPoint, touchCenter, touchRect, WillBeHeapVector<RefPtrWillBeMember<Node> > (nodes));
+    return findBestClickableCandidate(targetNode, targetPoint, touchCenter, touchRect, Vector<RefPtr<Node> > (nodes));
 }
 
 bool EventHandler::bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, const IntSize& touchRadius, IntRect& targetArea, Node*& targetNode)
@@ -2033,11 +2033,11 @@ bool EventHandler::bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, co
     HitTestResult result = hitTestResultAtPoint(touchCenter, HitTestRequest::ReadOnly | HitTestRequest::Active, touchRadius);
 
     IntRect touchRect(touchCenter - touchRadius, touchRadius + touchRadius);
-    WillBeHeapVector<RefPtrWillBeMember<Node>, 11> nodes;
+    Vector<RefPtr<Node>, 11> nodes;
     copyToVector(result.rectBasedTestResult(), nodes);
 
     // FIXME: the explicit Vector conversion copies into a temporary and is wasteful.
-    return findBestZoomableArea(targetNode, targetArea, touchCenter, touchRect, WillBeHeapVector<RefPtrWillBeMember<Node> >(nodes));
+    return findBestZoomableArea(targetNode, targetArea, touchCenter, touchRect, Vector<RefPtr<Node> >(nodes));
 }
 
 GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGestureEvent& gestureEvent, bool readOnly)
@@ -2317,7 +2317,7 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
 
     // Check for cases where we are too early for events -- possible unmatched key up
     // from pressing return in the location bar.
-    RefPtrWillBeRawPtr<Node> node = eventTargetNodeForDocument(m_frame->document());
+    RefPtr<Node> node = eventTargetNodeForDocument(m_frame->document());
     if (!node)
         return false;
 
@@ -2339,7 +2339,7 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     PlatformKeyboardEvent keyDownEvent = initialKeyEvent;
     if (keyDownEvent.type() != PlatformEvent::RawKeyDown)
         keyDownEvent.disambiguateKeyDownEvent(PlatformEvent::RawKeyDown);
-    RefPtrWillBeRawPtr<KeyboardEvent> keydown = KeyboardEvent::create(keyDownEvent, m_frame->document()->domWindow());
+    RefPtr<KeyboardEvent> keydown = KeyboardEvent::create(keyDownEvent, m_frame->document()->domWindow());
     if (matchedAnAccessKey)
         keydown->setDefaultPrevented(true);
     keydown->setTarget(node);
@@ -2368,7 +2368,7 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     keyPressEvent.disambiguateKeyDownEvent(PlatformEvent::Char);
     if (keyPressEvent.text().isEmpty())
         return keydownResult;
-    RefPtrWillBeRawPtr<KeyboardEvent> keypress = KeyboardEvent::create(keyPressEvent, m_frame->document()->domWindow());
+    RefPtr<KeyboardEvent> keypress = KeyboardEvent::create(keyPressEvent, m_frame->document()->domWindow());
     keypress->setTarget(node);
     if (keydownResult)
         keypress->setDefaultPrevented(true);
@@ -2433,7 +2433,7 @@ bool EventHandler::handleTextInputEvent(const String& text, Event* underlyingEve
     if (!target)
         return false;
 
-    RefPtrWillBeRawPtr<TextEvent> event = TextEvent::create(m_frame->domWindow(), text, inputType);
+    RefPtr<TextEvent> event = TextEvent::create(m_frame->domWindow(), text, inputType);
     event->setUnderlyingEvent(underlyingEvent);
 
     target->dispatchEvent(event, IGNORE_EXCEPTION);
@@ -2643,19 +2643,19 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
     // lists fit together.
 
     // Holds the complete set of touches on the screen.
-    RefPtrWillBeRawPtr<TouchList> touches = TouchList::create();
+    RefPtr<TouchList> touches = TouchList::create();
 
     // A different view on the 'touches' list above, filtered and grouped by
     // event target. Used for the 'targetTouches' list in the JS event.
-    typedef WillBeHeapHashMap<EventTarget*, RefPtrWillBeMember<TouchList> > TargetTouchesHeapMap;
+    typedef HashMap<EventTarget*, RefPtr<TouchList> > TargetTouchesHeapMap;
     TargetTouchesHeapMap touchesByTarget;
 
     // Array of touches per state, used to assemble the 'changedTouches' list.
-    typedef WillBeHeapHashSet<RefPtrWillBeMember<EventTarget> > EventTargetSet;
+    typedef HashSet<RefPtr<EventTarget> > EventTargetSet;
     struct {
         // The touches corresponding to the particular change state this struct
         // instance represents.
-        RefPtrWillBeMember<TouchList> m_touches;
+        RefPtr<TouchList> m_touches;
         // Set of targets involved in m_touches.
         EventTargetSet m_targets;
     } changedTouches[PlatformTouchPoint::TouchStateEnd];
@@ -2663,7 +2663,7 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
     for (i = 0; i < points.size(); ++i) {
         const PlatformTouchPoint& point = points[i];
         PlatformTouchPoint::State pointState = point.state();
-        RefPtrWillBeRawPtr<EventTarget> touchTarget = nullptr;
+        RefPtr<EventTarget> touchTarget = nullptr;
 
         if (pointState == PlatformTouchPoint::TouchReleased || pointState == PlatformTouchPoint::TouchCancelled) {
             // The target should be the original target for this touch, so get
@@ -2714,7 +2714,7 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
         FloatPoint adjustedPagePoint = pagePoint.scaledBy(scaleFactor);
         FloatSize adjustedRadius = point.radius().scaledBy(scaleFactor);
 
-        RefPtrWillBeRawPtr<Touch> touch = Touch::create(
+        RefPtr<Touch> touch = Touch::create(
             targetFrame, touchTarget.get(), point.id(), point.screenPos(), adjustedPagePoint, adjustedRadius, point.rotationAngle(), point.force());
 
         // Ensure this target's touch list exists, even if it ends up empty, so
@@ -2763,7 +2763,7 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
         const EventTargetSet& targetsForState = changedTouches[state].m_targets;
         for (EventTargetSet::const_iterator it = targetsForState.begin(); it != targetsForState.end(); ++it) {
             EventTarget* touchEventTarget = it->get();
-            RefPtrWillBeRawPtr<TouchEvent> touchEvent = TouchEvent::create(
+            RefPtr<TouchEvent> touchEvent = TouchEvent::create(
                 touches.get(), touchesByTarget.get(touchEventTarget), changedTouches[state].m_touches.get(),
                 stateName, touchEventTarget->toNode()->document().domWindow(),
                 event.ctrlKey(), event.altKey(), event.shiftKey(), event.metaKey(), event.cancelable());

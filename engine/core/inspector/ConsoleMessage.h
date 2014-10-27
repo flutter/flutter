@@ -21,11 +21,11 @@ class ScriptArguments;
 class ScriptCallStack;
 class ScriptState;
 
-class ConsoleMessage final: public RefCountedWillBeGarbageCollectedFinalized<ConsoleMessage> {
+class ConsoleMessage final: public RefCounted<ConsoleMessage> {
 public:
-    static PassRefPtrWillBeRawPtr<ConsoleMessage> create(MessageSource source, MessageLevel level, const String& message, const String& url = String(), unsigned lineNumber = 0, unsigned columnNumber = 0)
+    static PassRefPtr<ConsoleMessage> create(MessageSource source, MessageLevel level, const String& message, const String& url = String(), unsigned lineNumber = 0, unsigned columnNumber = 0)
     {
-        return adoptRefWillBeNoop(new ConsoleMessage(source, level, message, url, lineNumber, columnNumber));
+        return adoptRef(new ConsoleMessage(source, level, message, url, lineNumber, columnNumber));
     }
     ~ConsoleMessage();
 
@@ -37,12 +37,12 @@ public:
     void setURL(const String&);
     unsigned lineNumber() const;
     void setLineNumber(unsigned);
-    PassRefPtrWillBeRawPtr<ScriptCallStack> callStack() const;
-    void setCallStack(PassRefPtrWillBeRawPtr<ScriptCallStack>);
+    PassRefPtr<ScriptCallStack> callStack() const;
+    void setCallStack(PassRefPtr<ScriptCallStack>);
     ScriptState* scriptState() const;
     void setScriptState(ScriptState*);
-    PassRefPtrWillBeRawPtr<ScriptArguments> scriptArguments() const;
-    void setScriptArguments(PassRefPtrWillBeRawPtr<ScriptArguments>);
+    PassRefPtr<ScriptArguments> scriptArguments() const;
+    void setScriptArguments(PassRefPtr<ScriptArguments>);
     unsigned long requestIdentifier() const;
     void setRequestIdentifier(unsigned long);
     double timestamp() const;
@@ -71,9 +71,9 @@ private:
     String m_url;
     unsigned m_lineNumber;
     unsigned m_columnNumber;
-    RefPtrWillBeMember<ScriptCallStack> m_callStack;
+    RefPtr<ScriptCallStack> m_callStack;
     OwnPtr<ScriptStateProtectingContext> m_scriptState;
-    RefPtrWillBeMember<ScriptArguments> m_scriptArguments;
+    RefPtr<ScriptArguments> m_scriptArguments;
     unsigned long m_requestIdentifier;
     double m_timestamp;
 };

@@ -32,21 +32,21 @@ namespace blink {
 
 class AppendNodeCommand final : public SimpleEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<AppendNodeCommand> create(PassRefPtrWillBeRawPtr<ContainerNode> parent, PassRefPtrWillBeRawPtr<Node> node)
+    static PassRefPtr<AppendNodeCommand> create(PassRefPtr<ContainerNode> parent, PassRefPtr<Node> node)
     {
-        return adoptRefWillBeNoop(new AppendNodeCommand(parent, node));
+        return adoptRef(new AppendNodeCommand(parent, node));
     }
 
     virtual void trace(Visitor*) override;
 
 private:
-    AppendNodeCommand(PassRefPtrWillBeRawPtr<ContainerNode> parent, PassRefPtrWillBeRawPtr<Node>);
+    AppendNodeCommand(PassRefPtr<ContainerNode> parent, PassRefPtr<Node>);
 
     virtual void doApply() override;
     virtual void doUnapply() override;
 
-    RefPtrWillBeMember<ContainerNode> m_parent;
-    RefPtrWillBeMember<Node> m_node;
+    RefPtr<ContainerNode> m_parent;
+    RefPtr<Node> m_node;
 };
 
 } // namespace blink

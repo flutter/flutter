@@ -34,10 +34,10 @@ namespace blink {
 class HTMLStyleElement;
 class StyleSheet;
 
-class StyleSheetList : public RefCountedWillBeGarbageCollectedFinalized<StyleSheetList>, public ScriptWrappable {
+class StyleSheetList : public RefCounted<StyleSheetList>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<StyleSheetList> create(TreeScope* treeScope) { return adoptRefWillBeNoop(new StyleSheetList(treeScope)); }
+    static PassRefPtr<StyleSheetList> create(TreeScope* treeScope) { return adoptRef(new StyleSheetList(treeScope)); }
     ~StyleSheetList();
 
     unsigned length();
@@ -57,9 +57,9 @@ public:
 
 private:
     StyleSheetList(TreeScope*);
-    const WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& styleSheets();
+    const Vector<RefPtr<StyleSheet> >& styleSheets();
 
-    RawPtrWillBeMember<TreeScope> m_treeScope;
+    RawPtr<TreeScope> m_treeScope;
 #if !ENABLE(OILPAN)
     Vector<RefPtr<StyleSheet> > m_detachedStyleSheets;
 #endif

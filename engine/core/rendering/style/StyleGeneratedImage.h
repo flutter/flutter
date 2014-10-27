@@ -40,7 +40,7 @@ public:
 
     virtual WrappedImagePtr data() const override { return m_imageGeneratorValue.get(); }
 
-    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const override;
+    virtual PassRefPtr<CSSValue> cssValue() const override;
 
     virtual LayoutSize imageSize(const RenderObject*, float multiplier) const override;
     virtual bool imageHasRelativeWidth() const override { return !m_fixedSize; }
@@ -54,10 +54,10 @@ public:
     virtual bool knownToBeOpaque(const RenderObject*) const override;
 
 private:
-    StyleGeneratedImage(PassRefPtrWillBeRawPtr<CSSImageGeneratorValue>);
+    StyleGeneratedImage(PassRefPtr<CSSImageGeneratorValue>);
 
     // FIXME: oilpan: change to member once StyleImage is moved to the oilpan heap
-    RefPtrWillBePersistent<CSSImageGeneratorValue> m_imageGeneratorValue;
+    RefPtr<CSSImageGeneratorValue> m_imageGeneratorValue;
     IntSize m_containerSize;
     bool m_fixedSize;
 };

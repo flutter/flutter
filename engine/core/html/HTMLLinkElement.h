@@ -44,7 +44,7 @@ typedef EventSender<HTMLLinkElement> LinkEventSender;
 class HTMLLinkElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<HTMLLinkElement> create(Document&, bool createdByParser);
+    static PassRefPtr<HTMLLinkElement> create(Document&, bool createdByParser);
     virtual ~HTMLLinkElement();
 
     KURL href() const;
@@ -104,11 +104,11 @@ private:
 private:
     HTMLLinkElement(Document&, bool createdByParser);
 
-    OwnPtrWillBeMember<LinkResource> m_link;
+    OwnPtr<LinkResource> m_link;
 
     String m_type;
     String m_media;
-    RefPtrWillBeMember<DOMSettableTokenList> m_sizes;
+    RefPtr<DOMSettableTokenList> m_sizes;
     Vector<IntSize> m_iconSizes;
     LinkRelAttribute m_relAttribute;
 

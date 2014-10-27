@@ -15,7 +15,7 @@ class NullEventQueue final : public EventQueue {
 public:
     NullEventQueue() { }
     virtual ~NullEventQueue() { }
-    virtual bool enqueueEvent(PassRefPtrWillBeRawPtr<Event>) override { return true; }
+    virtual bool enqueueEvent(PassRefPtr<Event>) override { return true; }
     virtual bool cancelEvent(Event*) override { return true; }
     virtual void close() override { }
 };
@@ -23,7 +23,7 @@ public:
 } // namespace
 
 NullExecutionContext::NullExecutionContext()
-    : m_queue(adoptPtrWillBeNoop(new NullEventQueue()))
+    : m_queue(adoptPtr(new NullEventQueue()))
 {
 }
 

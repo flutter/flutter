@@ -30,14 +30,14 @@
 
 namespace blink {
 
-StyleGeneratedImage::StyleGeneratedImage(PassRefPtrWillBeRawPtr<CSSImageGeneratorValue> value)
+StyleGeneratedImage::StyleGeneratedImage(PassRefPtr<CSSImageGeneratorValue> value)
     : m_imageGeneratorValue(value)
     , m_fixedSize(m_imageGeneratorValue->isFixedSize())
 {
     m_isGeneratedImage = true;
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> StyleGeneratedImage::cssValue() const
+PassRefPtr<CSSValue> StyleGeneratedImage::cssValue() const
 {
     return m_imageGeneratorValue.get();
 }

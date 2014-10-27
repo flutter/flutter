@@ -38,7 +38,7 @@ MouseRelatedEvent::MouseRelatedEvent()
 {
 }
 
-MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> abstractView,
+MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtr<AbstractView> abstractView,
                                      int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
                                      const IntPoint& movementDelta,
                                      bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, bool isSimulated)

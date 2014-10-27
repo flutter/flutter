@@ -75,11 +75,11 @@ private:
     CaretVisibility m_caretVisibility;
 };
 
-class DragCaretController final : public NoBaseWillBeGarbageCollected<DragCaretController>, private CaretBase {
+class DragCaretController final : public DummyBase<DragCaretController>, private CaretBase {
     WTF_MAKE_NONCOPYABLE(DragCaretController);
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtrWillBeRawPtr<DragCaretController> create();
+    static PassOwnPtr<DragCaretController> create();
 
     RenderBlock* caretRenderer() const;
     void paintDragCaret(LocalFrame*, GraphicsContext*, const LayoutPoint&, const LayoutRect& clipRect) const;

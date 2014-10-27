@@ -18,7 +18,7 @@ typedef HashCountedSet<EventTarget*> EventTargetSet;
 // Registry for keeping track of event handlers. Note that only handlers on
 // documents that can be rendered or can receive input (i.e., are attached to a
 // FrameHost) are registered here.
-class EventHandlerRegistry final : public NoBaseWillBeGarbageCollectedFinalized<EventHandlerRegistry> {
+class EventHandlerRegistry final : public DummyBase<EventHandlerRegistry> {
 public:
     explicit EventHandlerRegistry(FrameHost&);
     virtual ~EventHandlerRegistry();

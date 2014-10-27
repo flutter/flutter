@@ -38,14 +38,14 @@ namespace blink {
 
 class CSSGridLineNamesValue : public CSSValueList {
 public:
-    static PassRefPtrWillBeRawPtr<CSSGridLineNamesValue> create()
+    static PassRefPtr<CSSGridLineNamesValue> create()
     {
-        return adoptRefWillBeNoop(new CSSGridLineNamesValue());
+        return adoptRef(new CSSGridLineNamesValue());
     }
 
     String customCSSText() const;
 
-    PassRefPtrWillBeRawPtr<CSSGridLineNamesValue> cloneForCSSOM() const;
+    PassRefPtr<CSSGridLineNamesValue> cloneForCSSOM() const;
 
     void traceAfterDispatch(Visitor* visitor) { CSSValueList::traceAfterDispatch(visitor); }
 

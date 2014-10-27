@@ -70,7 +70,7 @@ bool InsertParagraphSeparatorCommand::shouldUseDefaultParagraphElement(Element* 
     return m_mustUseDefaultParagraphElement;
 }
 
-void InsertParagraphSeparatorCommand::getAncestorsInsideBlock(const Node* insertionNode, Element* outerBlock, WillBeHeapVector<RefPtrWillBeMember<Element> >& ancestors)
+void InsertParagraphSeparatorCommand::getAncestorsInsideBlock(const Node* insertionNode, Element* outerBlock, Vector<RefPtr<Element> >& ancestors)
 {
     ancestors.clear();
 
@@ -81,12 +81,12 @@ void InsertParagraphSeparatorCommand::getAncestorsInsideBlock(const Node* insert
     }
 }
 
-PassRefPtrWillBeRawPtr<Element> InsertParagraphSeparatorCommand::cloneHierarchyUnderNewBlock(const WillBeHeapVector<RefPtrWillBeMember<Element> >& ancestors, PassRefPtrWillBeRawPtr<Element> blockToInsert)
+PassRefPtr<Element> InsertParagraphSeparatorCommand::cloneHierarchyUnderNewBlock(const Vector<RefPtr<Element> >& ancestors, PassRefPtr<Element> blockToInsert)
 {
     // Make clones of ancestors in between the start node and the start block.
-    RefPtrWillBeRawPtr<Element> parent = blockToInsert;
+    RefPtr<Element> parent = blockToInsert;
     for (size_t i = ancestors.size(); i != 0; --i) {
-        RefPtrWillBeRawPtr<Element> child = ancestors[i - 1]->cloneElementWithoutChildren();
+        RefPtr<Element> child = ancestors[i - 1]->cloneElementWithoutChildren();
         // It should always be okay to remove id from the cloned elements, since the originals are not deleted.
         child->removeAttribute(HTMLNames::idAttr);
         appendNode(child, parent);
@@ -114,7 +114,7 @@ void InsertParagraphSeparatorCommand::doApply()
     }
 
     // FIXME: The parentAnchoredEquivalent conversion needs to be moved into enclosingBlock.
-    RefPtrWillBeRawPtr<Element> startBlock = enclosingBlock(insertionPosition.parentAnchoredEquivalent().containerNode());
+    RefPtr<Element> startBlock = enclosingBlock(insertionPosition.parentAnchoredEquivalent().containerNode());
     Position canonicalPos = VisiblePosition(insertionPosition).deepEquivalent();
     if (!startBlock
         || !startBlock->nonShadowBoundaryParentNode()
@@ -147,7 +147,7 @@ void InsertParagraphSeparatorCommand::doApply()
     bool nestNewBlock = false;
 
     // Create block to be inserted.
-    RefPtrWillBeRawPtr<Element> blockToInsert = nullptr;
+    RefPtr<Element> blockToInsert = nullptr;
     if (startBlock->isRootEditableElement()) {
         blockToInsert = createDefaultParagraphElement(document());
         nestNewBlock = true;
@@ -165,7 +165,7 @@ void InsertParagraphSeparatorCommand::doApply()
             if (isFirstInBlock && !lineBreakExistsAtVisiblePosition(visiblePos)) {
                 // The block is empty.  Create an empty block to
                 // represent the paragraph that we're leaving.
-                RefPtrWillBeRawPtr<HTMLElement> extraBlock = createDefaultParagraphElement(document());
+                RefPtr<HTMLElement> extraBlock = createDefaultParagraphElement(document());
                 appendNode(extraBlock, startBlock);
             }
             appendNode(blockToInsert, startBlock);
@@ -178,9 +178,9 @@ void InsertParagraphSeparatorCommand::doApply()
 
         // Recreate the same structure in the new paragraph.
 
-        WillBeHeapVector<RefPtrWillBeMember<Element> > ancestors;
+        Vector<RefPtr<Element> > ancestors;
         getAncestorsInsideBlock(positionOutsideTabSpan(insertionPosition).deprecatedNode(), startBlock.get(), ancestors);
-        RefPtrWillBeRawPtr<Element> parent = cloneHierarchyUnderNewBlock(ancestors, blockToInsert);
+        RefPtr<Element> parent = cloneHierarchyUnderNewBlock(ancestors, blockToInsert);
 
         setEndingSelection(VisibleSelection(firstPositionInNode(parent.get()), DOWNSTREAM, endingSelection().isDirectional()));
         return;
@@ -215,7 +215,7 @@ void InsertParagraphSeparatorCommand::doApply()
 
         // Recreate the same structure in the new paragraph.
 
-        WillBeHeapVector<RefPtrWillBeMember<Element> > ancestors;
+        Vector<RefPtr<Element> > ancestors;
         getAncestorsInsideBlock(positionAvoidingSpecialElementBoundary(positionOutsideTabSpan(insertionPosition)).deprecatedNode(), startBlock.get(), ancestors);
 
         // In this case, we need to set the new ending selection.
@@ -258,7 +258,7 @@ void InsertParagraphSeparatorCommand::doApply()
     // Split at pos if in the middle of a text node.
     Position positionAfterSplit;
     if (insertionPosition.anchorType() == Position::PositionIsOffsetInAnchor && insertionPosition.containerNode()->isTextNode()) {
-        RefPtrWillBeRawPtr<Text> textNode = toText(insertionPosition.containerNode());
+        RefPtr<Text> textNode = toText(insertionPosition.containerNode());
         bool atEnd = static_cast<unsigned>(insertionPosition.offsetInContainerNode()) >= textNode->length();
         if (insertionPosition.deprecatedEditingOffset() > 0 && !atEnd) {
             splitTextNode(textNode, insertionPosition.offsetInContainerNode());

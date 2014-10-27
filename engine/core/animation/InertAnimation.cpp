@@ -34,19 +34,19 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<InertAnimation> InertAnimation::create(PassRefPtrWillBeRawPtr<AnimationEffect> effect, const Timing& timing, bool paused)
+PassRefPtr<InertAnimation> InertAnimation::create(PassRefPtr<AnimationEffect> effect, const Timing& timing, bool paused)
 {
-    return adoptRefWillBeNoop(new InertAnimation(effect, timing, paused));
+    return adoptRef(new InertAnimation(effect, timing, paused));
 }
 
-InertAnimation::InertAnimation(PassRefPtrWillBeRawPtr<AnimationEffect> effect, const Timing& timing, bool paused)
+InertAnimation::InertAnimation(PassRefPtr<AnimationEffect> effect, const Timing& timing, bool paused)
     : AnimationNode(timing)
     , m_effect(effect)
     , m_paused(paused)
 {
 }
 
-PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > InertAnimation::sample(double inheritedTime)
+PassOwnPtr<Vector<RefPtr<Interpolation> > > InertAnimation::sample(double inheritedTime)
 {
     updateInheritedTime(inheritedTime, TimingUpdateOnDemand);
     if (!isInEffect())

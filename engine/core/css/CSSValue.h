@@ -42,7 +42,7 @@ enum CSSTextFormattingFlags { QuoteCSSStringIfNeeded, AlwaysQuoteCSSString };
 // They should be handled by separate wrapper classes.
 
 // Please don't expose more CSSValue types to the web.
-class CSSValue : public RefCountedWillBeGarbageCollectedFinalized<CSSValue>, public ScriptWrappableBase {
+class CSSValue : public RefCounted<CSSValue>, public ScriptWrappableBase {
 public:
     enum Type {
         CSS_INHERIT = 0,
@@ -111,7 +111,7 @@ public:
         return isPrimitiveValue() || isValueList();
     }
 
-    PassRefPtrWillBeRawPtr<CSSValue> cloneForCSSOM() const;
+    PassRefPtr<CSSValue> cloneForCSSOM() const;
 
     bool hasFailedOrCanceledSubresources() const;
 
@@ -213,15 +213,15 @@ private:
 };
 
 template<typename CSSValueType, size_t inlineCapacity>
-inline bool compareCSSValueVector(const WillBeHeapVector<RefPtrWillBeMember<CSSValueType>, inlineCapacity>& firstVector, const WillBeHeapVector<RefPtrWillBeMember<CSSValueType>, inlineCapacity>& secondVector)
+inline bool compareCSSValueVector(const Vector<RefPtr<CSSValueType>, inlineCapacity>& firstVector, const Vector<RefPtr<CSSValueType>, inlineCapacity>& secondVector)
 {
     size_t size = firstVector.size();
     if (size != secondVector.size())
         return false;
 
     for (size_t i = 0; i < size; i++) {
-        const RefPtrWillBeMember<CSSValueType>& firstPtr = firstVector[i];
-        const RefPtrWillBeMember<CSSValueType>& secondPtr = secondVector[i];
+        const RefPtr<CSSValueType>& firstPtr = firstVector[i];
+        const RefPtr<CSSValueType>& secondPtr = secondVector[i];
         if (firstPtr == secondPtr || (firstPtr && secondPtr && firstPtr->equals(*secondPtr)))
             continue;
         return false;

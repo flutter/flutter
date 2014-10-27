@@ -51,7 +51,7 @@ private:
     virtual CSSRule* parentRule() const override { return 0; }
     virtual unsigned length() const override final;
     virtual String item(unsigned index) const override final;
-    virtual PassRefPtrWillBeRawPtr<CSSValue> getPropertyCSSValue(const String& propertyName) override final;
+    virtual PassRefPtr<CSSValue> getPropertyCSSValue(const String& propertyName) override final;
     virtual String getPropertyValue(const String& propertyName) override final;
     virtual String getPropertyPriority(const String& propertyName) override final;
     virtual String getPropertyShorthand(const String& propertyName) override final;
@@ -60,12 +60,12 @@ private:
     virtual String removeProperty(const String& propertyName, ExceptionState&) override final;
     virtual String cssText() const override final;
     virtual void setCSSText(const String&, ExceptionState&) override final;
-    virtual PassRefPtrWillBeRawPtr<CSSValue> getPropertyCSSValueInternal(CSSPropertyID) override final;
+    virtual PassRefPtr<CSSValue> getPropertyCSSValueInternal(CSSPropertyID) override final;
     virtual String getPropertyValueInternal(CSSPropertyID) override final;
     virtual void setPropertyInternal(CSSPropertyID, const String& value, bool important, ExceptionState&) override final;
 
     virtual bool cssPropertyMatches(CSSPropertyID, const CSSValue*) const override final;
-    virtual PassRefPtrWillBeRawPtr<MutableStylePropertySet> copyProperties() const override final;
+    virtual PassRefPtr<MutableStylePropertySet> copyProperties() const override final;
 
     CSSValue* cloneAndCacheForCSSOM(CSSValue*);
 
@@ -75,7 +75,7 @@ protected:
     virtual void didMutate(MutationType) { }
     virtual MutableStylePropertySet& propertySet() const = 0;
 
-    OwnPtrWillBeMember<WillBeHeapHashMap<RawPtrWillBeMember<CSSValue>, RefPtrWillBeMember<CSSValue> > > m_cssomCSSValueClones;
+    OwnPtr<HashMap<RawPtr<CSSValue>, RefPtr<CSSValue> > > m_cssomCSSValueClones;
 };
 
 class PropertySetCSSStyleDeclaration : public AbstractPropertySetCSSStyleDeclaration {
@@ -92,15 +92,15 @@ public:
 protected:
     virtual MutableStylePropertySet& propertySet() const override final { ASSERT(m_propertySet); return *m_propertySet; }
 
-    RawPtrWillBeMember<MutableStylePropertySet> m_propertySet; // Cannot be null
+    RawPtr<MutableStylePropertySet> m_propertySet; // Cannot be null
 };
 
 class StyleRuleCSSStyleDeclaration final : public PropertySetCSSStyleDeclaration
 {
 public:
-    static PassRefPtrWillBeRawPtr<StyleRuleCSSStyleDeclaration> create(MutableStylePropertySet& propertySet, CSSRule* parentRule)
+    static PassRefPtr<StyleRuleCSSStyleDeclaration> create(MutableStylePropertySet& propertySet, CSSRule* parentRule)
     {
-        return adoptRefWillBeNoop(new StyleRuleCSSStyleDeclaration(propertySet, parentRule));
+        return adoptRef(new StyleRuleCSSStyleDeclaration(propertySet, parentRule));
     }
 
 #if !ENABLE(OILPAN)
@@ -128,7 +128,7 @@ private:
 #if !ENABLE(OILPAN)
     unsigned m_refCount;
 #endif
-    RawPtrWillBeMember<CSSRule> m_parentRule;
+    RawPtr<CSSRule> m_parentRule;
 };
 
 class InlineCSSStyleDeclaration final : public AbstractPropertySetCSSStyleDeclaration
@@ -152,7 +152,7 @@ private:
 
     virtual void didMutate(MutationType) override;
 
-    RawPtrWillBeMember<Element> m_parentElement;
+    RawPtr<Element> m_parentElement;
 };
 
 } // namespace blink

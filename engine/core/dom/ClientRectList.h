@@ -38,17 +38,17 @@ namespace blink {
 
 class ClientRect;
 
-class ClientRectList final : public RefCountedWillBeGarbageCollected<ClientRectList>, public ScriptWrappable {
+class ClientRectList final : public RefCounted<ClientRectList>, public ScriptWrappable {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ClientRectList);
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<ClientRectList> create()
+    static PassRefPtr<ClientRectList> create()
     {
-        return adoptRefWillBeNoop(new ClientRectList);
+        return adoptRef(new ClientRectList);
     }
-    static PassRefPtrWillBeRawPtr<ClientRectList> create(const Vector<FloatQuad>& quads)
+    static PassRefPtr<ClientRectList> create(const Vector<FloatQuad>& quads)
     {
-        return adoptRefWillBeNoop(new ClientRectList(quads));
+        return adoptRef(new ClientRectList(quads));
     }
     unsigned length() const;
     ClientRect* item(unsigned index);
@@ -59,7 +59,7 @@ private:
     ClientRectList();
     explicit ClientRectList(const Vector<FloatQuad>&);
 
-    WillBeHeapVector<RefPtrWillBeMember<ClientRect> > m_list;
+    Vector<RefPtr<ClientRect> > m_list;
 };
 
 } // namespace blink

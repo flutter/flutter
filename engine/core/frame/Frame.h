@@ -64,7 +64,7 @@ public:
 
     // FIXME: LocalDOMWindow and Document should both be moved to LocalFrame
     // after RemoteFrame is complete enough to exist without them.
-    virtual void setDOMWindow(PassRefPtrWillBeRawPtr<LocalDOMWindow>);
+    virtual void setDOMWindow(PassRefPtr<LocalDOMWindow>);
     LocalDOMWindow* domWindow() const;
 
     ChromeClient& chromeClient() const;
@@ -76,7 +76,7 @@ protected:
 
     FrameHost* m_host;
 
-    RefPtrWillBePersistent<LocalDOMWindow> m_domWindow;
+    RefPtr<LocalDOMWindow> m_domWindow;
 
 private:
     FrameClient* m_client;

@@ -66,8 +66,8 @@ public:
     bool isCandidate() const;
 
 private:
-    RawPtrWillBeMember<Node> m_anchorNode;
-    RawPtrWillBeMember<Node> m_nodeAfterPositionInAnchor; // If this is non-null, m_nodeAfterPositionInAnchor->parentNode() == m_anchorNode;
+    RawPtr<Node> m_anchorNode;
+    RawPtr<Node> m_nodeAfterPositionInAnchor; // If this is non-null, m_nodeAfterPositionInAnchor->parentNode() == m_anchorNode;
     int m_offsetInAnchor;
 };
 

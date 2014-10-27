@@ -42,8 +42,8 @@ public:
     virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
 
 protected:
-    static PassRefPtrWillBeRawPtr<AnimatableNeutral> create() { return adoptRefWillBeNoop(new AnimatableNeutral()); }
-    virtual PassRefPtrWillBeRawPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
+    static PassRefPtr<AnimatableNeutral> create() { return adoptRef(new AnimatableNeutral()); }
+    virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
     {
         ASSERT_NOT_REACHED();
         return nullptr;

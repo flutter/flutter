@@ -31,29 +31,29 @@
 
 namespace blink {
 
-PassRefPtrWillBeRawPtr<TextEvent> TextEvent::create()
+PassRefPtr<TextEvent> TextEvent::create()
 {
-    return adoptRefWillBeNoop(new TextEvent);
+    return adoptRef(new TextEvent);
 }
 
-PassRefPtrWillBeRawPtr<TextEvent> TextEvent::create(PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, TextEventInputType inputType)
+PassRefPtr<TextEvent> TextEvent::create(PassRefPtr<AbstractView> view, const String& data, TextEventInputType inputType)
 {
-    return adoptRefWillBeNoop(new TextEvent(view, data, inputType));
+    return adoptRef(new TextEvent(view, data, inputType));
 }
 
-PassRefPtrWillBeRawPtr<TextEvent> TextEvent::createForPlainTextPaste(PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, bool shouldSmartReplace)
+PassRefPtr<TextEvent> TextEvent::createForPlainTextPaste(PassRefPtr<AbstractView> view, const String& data, bool shouldSmartReplace)
 {
-    return adoptRefWillBeNoop(new TextEvent(view, data, nullptr, shouldSmartReplace, false));
+    return adoptRef(new TextEvent(view, data, nullptr, shouldSmartReplace, false));
 }
 
-PassRefPtrWillBeRawPtr<TextEvent> TextEvent::createForFragmentPaste(PassRefPtrWillBeRawPtr<AbstractView> view, PassRefPtrWillBeRawPtr<DocumentFragment> data, bool shouldSmartReplace, bool shouldMatchStyle)
+PassRefPtr<TextEvent> TextEvent::createForFragmentPaste(PassRefPtr<AbstractView> view, PassRefPtr<DocumentFragment> data, bool shouldSmartReplace, bool shouldMatchStyle)
 {
-    return adoptRefWillBeNoop(new TextEvent(view, "", data, shouldSmartReplace, shouldMatchStyle));
+    return adoptRef(new TextEvent(view, "", data, shouldSmartReplace, shouldMatchStyle));
 }
 
-PassRefPtrWillBeRawPtr<TextEvent> TextEvent::createForDrop(PassRefPtrWillBeRawPtr<AbstractView> view, const String& data)
+PassRefPtr<TextEvent> TextEvent::createForDrop(PassRefPtr<AbstractView> view, const String& data)
 {
-    return adoptRefWillBeNoop(new TextEvent(view, data, TextEventInputDrop));
+    return adoptRef(new TextEvent(view, data, TextEventInputDrop));
 }
 
 TextEvent::TextEvent()
@@ -64,7 +64,7 @@ TextEvent::TextEvent()
     ScriptWrappable::init(this);
 }
 
-TextEvent::TextEvent(PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, TextEventInputType inputType)
+TextEvent::TextEvent(PassRefPtr<AbstractView> view, const String& data, TextEventInputType inputType)
     : UIEvent(EventTypeNames::textInput, true, true, view, 0)
     , m_inputType(inputType)
     , m_data(data)
@@ -75,7 +75,7 @@ TextEvent::TextEvent(PassRefPtrWillBeRawPtr<AbstractView> view, const String& da
     ScriptWrappable::init(this);
 }
 
-TextEvent::TextEvent(PassRefPtrWillBeRawPtr<AbstractView> view, const String& data, PassRefPtrWillBeRawPtr<DocumentFragment> pastingFragment,
+TextEvent::TextEvent(PassRefPtr<AbstractView> view, const String& data, PassRefPtr<DocumentFragment> pastingFragment,
                      bool shouldSmartReplace, bool shouldMatchStyle)
     : UIEvent(EventTypeNames::textInput, true, true, view, 0)
     , m_inputType(TextEventInputPaste)
@@ -91,7 +91,7 @@ TextEvent::~TextEvent()
 {
 }
 
-void TextEvent::initTextEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtrWillBeRawPtr<AbstractView> view, const String& data)
+void TextEvent::initTextEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, const String& data)
 {
     if (dispatched())
         return;

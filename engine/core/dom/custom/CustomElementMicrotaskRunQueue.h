@@ -16,12 +16,12 @@ class CustomElementAsyncImportMicrotaskQueue;
 class CustomElementMicrotaskStep;
 class HTMLImportLoader;
 
-class CustomElementMicrotaskRunQueue : public RefCountedWillBeGarbageCollectedFinalized<CustomElementMicrotaskRunQueue> {
+class CustomElementMicrotaskRunQueue : public RefCounted<CustomElementMicrotaskRunQueue> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskRunQueue)
 public:
-    static PassRefPtrWillBeRawPtr<CustomElementMicrotaskRunQueue> create() { return adoptRefWillBeNoop(new CustomElementMicrotaskRunQueue()); }
+    static PassRefPtr<CustomElementMicrotaskRunQueue> create() { return adoptRef(new CustomElementMicrotaskRunQueue()); }
 
-    void enqueue(HTMLImportLoader* parentLoader, PassOwnPtrWillBeRawPtr<CustomElementMicrotaskStep>, bool importIsSync);
+    void enqueue(HTMLImportLoader* parentLoader, PassOwnPtr<CustomElementMicrotaskStep>, bool importIsSync);
     void requestDispatchIfNeeded();
     bool isEmpty() const;
 
@@ -32,8 +32,8 @@ private:
 
     void dispatch();
 
-    RefPtrWillBeMember<CustomElementSyncMicrotaskQueue> m_syncQueue;
-    RefPtrWillBeMember<CustomElementAsyncImportMicrotaskQueue> m_asyncQueue;
+    RefPtr<CustomElementSyncMicrotaskQueue> m_syncQueue;
+    RefPtr<CustomElementAsyncImportMicrotaskQueue> m_asyncQueue;
     bool m_dispatchIsPending;
 
     base::WeakPtrFactory<CustomElementMicrotaskRunQueue> m_weakFactory;

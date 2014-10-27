@@ -245,7 +245,7 @@ void DeleteSelectionCommand::saveTypingStyleState()
         m_deleteIntoBlockquoteStyle = nullptr;
 }
 
-void DeleteSelectionCommand::removeNode(PassRefPtrWillBeRawPtr<Node> node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable)
+void DeleteSelectionCommand::removeNode(PassRefPtr<Node> node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable)
 {
     if (!node)
         return;
@@ -257,9 +257,9 @@ void DeleteSelectionCommand::removeNode(PassRefPtrWillBeRawPtr<Node> node, Shoul
             if (!node->hasChildren())
                 return;
             // Search this non-editable region for editable regions to empty.
-            RefPtrWillBeRawPtr<Node> child = node->firstChild();
+            RefPtr<Node> child = node->firstChild();
             while (child) {
-                RefPtrWillBeRawPtr<Node> nextChild = child->nextSibling();
+                RefPtr<Node> nextChild = child->nextSibling();
                 removeNode(child.get(), shouldAssumeContentIsAlwaysEditable);
                 // Bail if nextChild is no longer node's child.
                 if (nextChild && nextChild->parentNode() != node)
@@ -317,7 +317,7 @@ static void updatePositionForTextRemoval(Text* node, int offset, int count, Posi
         position.moveToOffset(offset);
 }
 
-void DeleteSelectionCommand::deleteTextFromNode(PassRefPtrWillBeRawPtr<Text> node, unsigned offset, unsigned count)
+void DeleteSelectionCommand::deleteTextFromNode(PassRefPtr<Text> node, unsigned offset, unsigned count)
 {
     // FIXME: Update the endpoints of the range being deleted.
     updatePositionForTextRemoval(node.get(), offset, count, m_endingPosition);
@@ -330,13 +330,13 @@ void DeleteSelectionCommand::deleteTextFromNode(PassRefPtrWillBeRawPtr<Text> nod
 
 void DeleteSelectionCommand::makeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss()
 {
-    RefPtrWillBeRawPtr<Range> range = m_selectionToDelete.toNormalizedRange();
-    RefPtrWillBeRawPtr<Node> node = range->firstNode();
+    RefPtr<Range> range = m_selectionToDelete.toNormalizedRange();
+    RefPtr<Node> node = range->firstNode();
     while (node && node != range->pastLastNode()) {
-        RefPtrWillBeRawPtr<Node> nextNode = NodeTraversal::next(*node);
+        RefPtr<Node> nextNode = NodeTraversal::next(*node);
         if (isHTMLStyleElement(*node) || isHTMLLinkElement(*node)) {
             nextNode = NodeTraversal::nextSkippingChildren(*node);
-            RefPtrWillBeRawPtr<Element> rootEditableElement = node->rootEditableElement();
+            RefPtr<Element> rootEditableElement = node->rootEditableElement();
             if (rootEditableElement.get()) {
                 removeNode(node);
                 appendNode(node, rootEditableElement);
@@ -399,7 +399,7 @@ void DeleteSelectionCommand::handleGeneralDelete()
     else {
         bool startNodeWasDescendantOfEndNode = m_upstreamStart.deprecatedNode()->isDescendantOf(m_downstreamEnd.deprecatedNode());
         // The selection to delete spans more than one node.
-        RefPtrWillBeRawPtr<Node> node(startNode);
+        RefPtr<Node> node(startNode);
 
         if (startOffset > 0) {
             if (startNode->isTextNode()) {
@@ -421,7 +421,7 @@ void DeleteSelectionCommand::handleGeneralDelete()
                 // NodeTraversal::nextSkippingChildren just blew past the end position, so stop deleting
                 node = nullptr;
             } else if (!m_downstreamEnd.deprecatedNode()->isDescendantOf(node.get())) {
-                RefPtrWillBeRawPtr<Node> nextNode = NodeTraversal::nextSkippingChildren(*node);
+                RefPtr<Node> nextNode = NodeTraversal::nextSkippingChildren(*node);
                 // if we just removed a node from the end container, update end position so the
                 // check above will work
                 updatePositionForNodeRemoval(m_downstreamEnd, *node);

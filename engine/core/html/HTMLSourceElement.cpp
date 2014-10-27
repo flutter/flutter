@@ -61,12 +61,12 @@ public:
         MediaQueryListListener::trace(visitor);
     }
 private:
-    RawPtrWillBeMember<HTMLSourceElement> m_element;
+    RawPtr<HTMLSourceElement> m_element;
 };
 
 inline HTMLSourceElement::HTMLSourceElement(Document& document)
     : HTMLElement(HTMLNames::sourceTag, document)
-    , m_listener(adoptRefWillBeNoop(new Listener(this)))
+    , m_listener(adoptRef(new Listener(this)))
 {
     WTF_LOG(Media, "HTMLSourceElement::HTMLSourceElement - %p", this);
     ScriptWrappable::init(this);
@@ -158,7 +158,7 @@ void HTMLSourceElement::parseAttribute(const QualifiedName& name, const AtomicSt
     if (name == HTMLNames::mediaAttr) {
         if (m_mediaQueryList)
             m_mediaQueryList->removeListener(m_listener);
-        RefPtrWillBeRawPtr<MediaQuerySet> set = MediaQuerySet::create(value);
+        RefPtr<MediaQuerySet> set = MediaQuerySet::create(value);
         m_mediaQueryList = MediaQueryList::create(&document(), &document().mediaQueryMatcher(), set.release());
         m_mediaQueryList->addListener(m_listener);
     }

@@ -38,7 +38,7 @@ namespace blink {
 
 class Element;
 
-class CustomElementObserver : public NoBaseWillBeGarbageCollectedFinalized<CustomElementObserver> {
+class CustomElementObserver : public DummyBase<CustomElementObserver> {
 public:
     virtual ~CustomElementObserver() { }
 

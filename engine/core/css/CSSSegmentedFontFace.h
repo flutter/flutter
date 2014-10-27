@@ -44,11 +44,11 @@ class FontDescription;
 class FontFace;
 class SegmentedFontData;
 
-class CSSSegmentedFontFace final : public RefCountedWillBeGarbageCollectedFinalized<CSSSegmentedFontFace> {
+class CSSSegmentedFontFace final : public RefCounted<CSSSegmentedFontFace> {
 public:
-    static PassRefPtrWillBeRawPtr<CSSSegmentedFontFace> create(CSSFontSelector* selector, FontTraits traits)
+    static PassRefPtr<CSSSegmentedFontFace> create(CSSFontSelector* selector, FontTraits traits)
     {
-        return adoptRefWillBeNoop(new CSSSegmentedFontFace(selector, traits));
+        return adoptRef(new CSSSegmentedFontFace(selector, traits));
     }
     ~CSSSegmentedFontFace();
 
@@ -58,14 +58,14 @@ public:
     void fontLoaded(CSSFontFace*);
     void fontLoadWaitLimitExceeded(CSSFontFace*);
 
-    void addFontFace(PassRefPtrWillBeRawPtr<FontFace>, bool cssConnected);
-    void removeFontFace(PassRefPtrWillBeRawPtr<FontFace>);
+    void addFontFace(PassRefPtr<FontFace>, bool cssConnected);
+    void removeFontFace(PassRefPtr<FontFace>);
     bool isEmpty() const { return m_fontFaces.isEmpty(); }
 
     PassRefPtr<FontData> getFontData(const FontDescription&);
 
     bool checkFont(const String&) const;
-    void match(const String&, WillBeHeapVector<RefPtrWillBeMember<FontFace> >&) const;
+    void match(const String&, Vector<RefPtr<FontFace> >&) const;
     void willUseFontData(const FontDescription&, UChar32);
 
     void trace(Visitor*);
@@ -78,9 +78,9 @@ private:
     bool isLoading() const;
     bool isLoaded() const;
 
-    typedef WillBeHeapListHashSet<RefPtrWillBeMember<FontFace> > FontFaceList;
+    typedef ListHashSet<RefPtr<FontFace> > FontFaceList;
 
-    RawPtrWillBeMember<CSSFontSelector> m_fontSelector;
+    RawPtr<CSSFontSelector> m_fontSelector;
     FontTraits m_traits;
     HashMap<unsigned, RefPtr<SegmentedFontData> > m_fontDataTable;
     // All non-CSS-connected FontFaces are stored after the CSS-connected ones.

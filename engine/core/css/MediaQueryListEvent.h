@@ -20,24 +20,24 @@ struct MediaQueryListEventInit : public EventInit {
 class MediaQueryListEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<MediaQueryListEvent> create()
+    static PassRefPtr<MediaQueryListEvent> create()
     {
-        return adoptRefWillBeNoop(new MediaQueryListEvent);
+        return adoptRef(new MediaQueryListEvent);
     }
 
-    static PassRefPtrWillBeRawPtr<MediaQueryListEvent> create(MediaQueryList* list)
+    static PassRefPtr<MediaQueryListEvent> create(MediaQueryList* list)
     {
-        return adoptRefWillBeNoop(new MediaQueryListEvent(list));
+        return adoptRef(new MediaQueryListEvent(list));
     }
 
-    static PassRefPtrWillBeRawPtr<MediaQueryListEvent> create(const String& media, bool matches)
+    static PassRefPtr<MediaQueryListEvent> create(const String& media, bool matches)
     {
-        return adoptRefWillBeNoop(new MediaQueryListEvent(media, matches));
+        return adoptRef(new MediaQueryListEvent(media, matches));
     }
 
-    static PassRefPtrWillBeRawPtr<MediaQueryListEvent> create(const AtomicString& eventType, const MediaQueryListEventInit& initializer)
+    static PassRefPtr<MediaQueryListEvent> create(const AtomicString& eventType, const MediaQueryListEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new MediaQueryListEvent(eventType, initializer));
+        return adoptRef(new MediaQueryListEvent(eventType, initializer));
     }
 
     String media() const { return m_mediaQueryList ? m_mediaQueryList->media() : m_media; }
@@ -84,7 +84,7 @@ private:
 
     // We have m_media/m_matches for JS-created events; we use m_mediaQueryList
     // for events that blink generates.
-    RefPtrWillBeMember<MediaQueryList> m_mediaQueryList;
+    RefPtr<MediaQueryList> m_mediaQueryList;
     String m_media;
     bool m_matches;
 };

@@ -73,10 +73,10 @@ public:
     void setFontSmoothing(FontSmoothingMode);
 
     // FIXME: These need to just vend a Font object eventually.
-    void createFont(PassRefPtrWillBeRawPtr<FontSelector>, const RenderStyle* parentStyle, RenderStyle*);
+    void createFont(PassRefPtr<FontSelector>, const RenderStyle* parentStyle, RenderStyle*);
     // FIXME: This is nearly static, should either made fully static or decomposed into
     // FontBuilder calls at the callsite.
-    void createFontForDocument(PassRefPtrWillBeRawPtr<FontSelector>, RenderStyle*);
+    void createFontForDocument(PassRefPtr<FontSelector>, RenderStyle*);
 
     bool fontSizeHasViewportUnits() { return m_fontSizehasViewportUnits; }
 
@@ -109,7 +109,7 @@ private:
 
     float getComputedSizeFromSpecifiedSize(FontDescription&, float effectiveZoom, float specifiedSize);
 
-    RawPtrWillBeMember<const Document> m_document;
+    RawPtr<const Document> m_document;
     bool m_fontSizehasViewportUnits;
     // FIXME: This member is here on a short-term lease. The plan is to remove
     // any notion of RenderStyle from here, allowing FontBuilder to build Font objects

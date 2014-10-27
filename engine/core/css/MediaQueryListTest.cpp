@@ -24,9 +24,9 @@ namespace blink {
 
 TEST(MediaQueryListTest, CrashInStop)
 {
-    RefPtrWillBeRawPtr<Document> document = Document::create();
-    RefPtrWillBeRawPtr<MediaQueryList> list = MediaQueryList::create(document.get(), MediaQueryMatcher::create(*document), MediaQuerySet::create());
-    list->addListener(adoptRefWillBeNoop(new TestListener()));
+    RefPtr<Document> document = Document::create();
+    RefPtr<MediaQueryList> list = MediaQueryList::create(document.get(), MediaQueryMatcher::create(*document), MediaQuerySet::create());
+    list->addListener(adoptRef(new TestListener()));
     list->stop();
     // This test passes if it's not crashed.
 }

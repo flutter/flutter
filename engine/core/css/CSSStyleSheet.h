@@ -46,22 +46,22 @@ enum StyleSheetUpdateType {
 class CSSStyleSheet final : public StyleSheet {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<CSSStyleSheet> create(PassRefPtrWillBeRawPtr<StyleSheetContents>);
-    static PassRefPtrWillBeRawPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
-    static PassRefPtrWillBeRawPtr<CSSStyleSheet> createInline(PassRefPtrWillBeRawPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
+    static PassRefPtr<CSSStyleSheet> create(PassRefPtr<StyleSheetContents>);
+    static PassRefPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
+    static PassRefPtr<CSSStyleSheet> createInline(PassRefPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
 
     virtual ~CSSStyleSheet();
 
     virtual Node* ownerNode() const override { return m_ownerNode; }
     virtual MediaList* media() const override;
 
-    PassRefPtrWillBeRawPtr<CSSRuleList> cssRules();
+    PassRefPtr<CSSRuleList> cssRules();
     unsigned insertRule(const String& rule, unsigned index, ExceptionState&);
     unsigned insertRule(const String& rule, ExceptionState&); // Deprecated.
     void deleteRule(unsigned index, ExceptionState&);
 
     // IE Extensions
-    PassRefPtrWillBeRawPtr<CSSRuleList> rules();
+    PassRefPtr<CSSRuleList> rules();
     int addRule(const String& selector, const String& style, int index, ExceptionState&);
     int addRule(const String& selector, const String& style, ExceptionState&);
     void removeRule(unsigned index, ExceptionState& exceptionState) { deleteRule(index, exceptionState); }
@@ -76,7 +76,7 @@ public:
 
     Document* ownerDocument() const;
     MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
-    void setMediaQueries(PassRefPtrWillBeRawPtr<MediaQuerySet>);
+    void setMediaQueries(PassRefPtr<MediaQuerySet>);
 
     class RuleMutationScope {
         WTF_MAKE_NONCOPYABLE(RuleMutationScope);
@@ -87,7 +87,7 @@ public:
         ~RuleMutationScope();
 
     private:
-        RawPtrWillBeMember<CSSStyleSheet> m_styleSheet;
+        RawPtr<CSSStyleSheet> m_styleSheet;
     };
 
     void willMutateRules();
@@ -104,24 +104,24 @@ public:
     virtual void trace(Visitor*) override;
 
 private:
-    CSSStyleSheet(PassRefPtrWillBeRawPtr<StyleSheetContents>);
-    CSSStyleSheet(PassRefPtrWillBeRawPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);
+    CSSStyleSheet(PassRefPtr<StyleSheetContents>);
+    CSSStyleSheet(PassRefPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);
 
     virtual bool isCSSStyleSheet() const override { return true; }
     virtual String type() const override { return "text/css"; }
 
     void reattachChildRuleCSSOMWrappers();
 
-    RefPtrWillBeMember<StyleSheetContents> m_contents;
+    RefPtr<StyleSheetContents> m_contents;
     bool m_isInlineStylesheet;
-    RefPtrWillBeMember<MediaQuerySet> m_mediaQueries;
+    RefPtr<MediaQuerySet> m_mediaQueries;
 
-    RawPtrWillBeMember<Node> m_ownerNode;
+    RawPtr<Node> m_ownerNode;
 
     TextPosition m_startPosition;
-    mutable RefPtrWillBeMember<MediaList> m_mediaCSSOMWrapper;
-    mutable WillBeHeapVector<RefPtrWillBeMember<CSSRule> > m_childRuleCSSOMWrappers;
-    mutable OwnPtrWillBeMember<CSSRuleList> m_ruleListCSSOMWrapper;
+    mutable RefPtr<MediaList> m_mediaCSSOMWrapper;
+    mutable Vector<RefPtr<CSSRule> > m_childRuleCSSOMWrappers;
+    mutable OwnPtr<CSSRuleList> m_ruleListCSSOMWrapper;
 };
 
 inline CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSStyleSheet* sheet)

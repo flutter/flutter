@@ -44,7 +44,7 @@ namespace blink {
 class HTMLMediaElement;
 class TimeRanges;
 
-class HTMLMediaSource : public URLRegistrable, public WillBeGarbageCollectedMixin {
+class HTMLMediaSource : public URLRegistrable, public DummyBase<void> {
 public:
     static void setRegistry(URLRegistry*);
     static HTMLMediaSource* lookup(const String& url) { return s_registry ? static_cast<HTMLMediaSource*>(s_registry->lookup(url)) : 0; }
@@ -66,7 +66,7 @@ public:
     virtual void close() = 0;
     virtual bool isClosed() const = 0;
     virtual double duration() const = 0;
-    virtual PassRefPtrWillBeRawPtr<TimeRanges> buffered() const = 0;
+    virtual PassRefPtr<TimeRanges> buffered() const = 0;
 #if !ENABLE(OILPAN)
     virtual void refHTMLMediaSource() = 0;
     virtual void derefHTMLMediaSource() = 0;

@@ -93,12 +93,12 @@ private:
     void invalidateCustomElementMicrotaskStep();
 
     KURL m_url;
-    WeakPtrWillBeWeakMember<CustomElementMicrotaskImportStep> m_customElementMicrotaskStep;
+    WeakPtr<CustomElementMicrotaskImportStep> m_customElementMicrotaskStep;
 #if !ENABLE(OILPAN)
     WeakPtrFactory<HTMLImportChild> m_weakFactory;
 #endif
-    RawPtrWillBeMember<HTMLImportLoader> m_loader;
-    RawPtrWillBeMember<HTMLImportChildClient> m_client;
+    RawPtr<HTMLImportLoader> m_loader;
+    RawPtr<HTMLImportChildClient> m_client;
 };
 
 inline HTMLImportChild* toHTMLImportChild(HTMLImport* import)

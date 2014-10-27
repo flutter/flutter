@@ -358,7 +358,7 @@ private:
     LayoutSize m_size;
 
     // FIXME: These are just "children" of the FrameView and should be RefPtr<Widget> instead.
-    WillBePersistentHeapHashSet<RefPtrWillBeMember<RenderWidget> > m_widgets;
+    HashSet<RefPtr<RenderWidget> > m_widgets;
 
     RefPtr<LocalFrame> m_frame;
     HashSet<RefPtr<Widget> > m_children;
@@ -402,7 +402,7 @@ private:
     bool m_isTrackingPaintInvalidations; // Used for testing.
     Vector<IntRect> m_trackedPaintInvalidationRects;
 
-    RefPtrWillBePersistent<Node> m_nodeToDraw;
+    RefPtr<Node> m_nodeToDraw;
     PaintBehavior m_paintBehavior;
     bool m_isPainting;
 

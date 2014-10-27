@@ -50,8 +50,8 @@ public:
     static PassOwnPtr<SelectorQuery> adopt(CSSSelectorList&);
 
     bool matches(Element&) const;
-    PassRefPtrWillBeRawPtr<StaticElementList> queryAll(ContainerNode& rootNode) const;
-    PassRefPtrWillBeRawPtr<Element> queryFirst(ContainerNode& rootNode) const;
+    PassRefPtr<StaticElementList> queryAll(ContainerNode& rootNode) const;
+    PassRefPtr<Element> queryFirst(ContainerNode& rootNode) const;
 private:
     explicit SelectorQuery(CSSSelectorList&);
     bool selectorMatches(ContainerNode& rootNode, Element& subject) const;

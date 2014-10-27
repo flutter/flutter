@@ -60,7 +60,7 @@
 
 namespace blink {
 
-PassOwnPtrWillBeRawPtr<WebGLRenderingContext> WebGLRenderingContext::create(HTMLCanvasElement* canvas, WebGLContextAttributes* attrs)
+PassOwnPtr<WebGLRenderingContext> WebGLRenderingContext::create(HTMLCanvasElement* canvas, WebGLContextAttributes* attrs)
 {
     Document& document = canvas->document();
     LocalFrame* frame = document.frame();
@@ -71,7 +71,7 @@ PassOwnPtrWillBeRawPtr<WebGLRenderingContext> WebGLRenderingContext::create(HTML
     Settings* settings = frame->settings();
 
     // The only situation that attrs is null is through Document::getCSSCanvasContext().
-    RefPtrWillBeRawPtr<WebGLContextAttributes> defaultAttrs = nullptr;
+    RefPtr<WebGLContextAttributes> defaultAttrs = nullptr;
     if (!attrs) {
         defaultAttrs = WebGLContextAttributes::create();
         attrs = defaultAttrs.get();
@@ -89,7 +89,7 @@ PassOwnPtrWillBeRawPtr<WebGLRenderingContext> WebGLRenderingContext::create(HTML
     if (extensionsUtil->supportsExtension("GL_EXT_debug_marker"))
         context->pushGroupMarkerEXT("WebGLRenderingContext");
 
-    OwnPtrWillBeRawPtr<WebGLRenderingContext> renderingContext = adoptPtrWillBeNoop(new WebGLRenderingContext(canvas, context.release(), attrs));
+    OwnPtr<WebGLRenderingContext> renderingContext = adoptPtr(new WebGLRenderingContext(canvas, context.release(), attrs));
     renderingContext->registerContextExtensions();
     renderingContext->suspendIfNeeded();
 

@@ -19,17 +19,17 @@ struct AnimationPlayerEventInit : public EventInit {
 class AnimationPlayerEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<AnimationPlayerEvent> create()
+    static PassRefPtr<AnimationPlayerEvent> create()
     {
-        return adoptRefWillBeNoop(new AnimationPlayerEvent);
+        return adoptRef(new AnimationPlayerEvent);
     }
-    static PassRefPtrWillBeRawPtr<AnimationPlayerEvent> create(const AtomicString& type, double currentTime, double timelineTime)
+    static PassRefPtr<AnimationPlayerEvent> create(const AtomicString& type, double currentTime, double timelineTime)
     {
-        return adoptRefWillBeNoop(new AnimationPlayerEvent(type, currentTime, timelineTime));
+        return adoptRef(new AnimationPlayerEvent(type, currentTime, timelineTime));
     }
-    static PassRefPtrWillBeRawPtr<AnimationPlayerEvent> create(const AtomicString& type, const AnimationPlayerEventInit& initializer)
+    static PassRefPtr<AnimationPlayerEvent> create(const AtomicString& type, const AnimationPlayerEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new AnimationPlayerEvent(type, initializer));
+        return adoptRef(new AnimationPlayerEvent(type, initializer));
     }
 
     virtual ~AnimationPlayerEvent();

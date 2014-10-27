@@ -17,7 +17,7 @@ namespace blink {
 
 TEST(BisonCSSParserTest, ParseAnimationTimingFunctionValue)
 {
-    RefPtrWillBeRawPtr<CSSValue> timingFunctionValue;
+    RefPtr<CSSValue> timingFunctionValue;
     timingFunctionValue = BisonCSSParser::parseAnimationTimingFunctionValue("ease");
     EXPECT_EQ(CSSValueEase, toCSSPrimitiveValue(timingFunctionValue.get())->getValueID());
 
@@ -69,7 +69,7 @@ TEST(BisonCSSParserTest, ParseAnimationTimingFunctionValue)
 
 static void testMediaQuery(const char* expected, MediaQuerySet& querySet)
 {
-    const WillBeHeapVector<OwnPtrWillBeMember<MediaQuery> >& queryVector = querySet.queryVector();
+    const Vector<OwnPtr<MediaQuery> >& queryVector = querySet.queryVector();
     size_t queryVectorSize = queryVector.size();
     StringBuilder output;
 
@@ -101,7 +101,7 @@ TEST(BisonCSSParserTest, MediaQuery)
     BisonCSSParser parser(strictCSSParserContext());
 
     for (unsigned i = 0; i < ARRAY_SIZE(testCases); ++i) {
-        RefPtrWillBeRawPtr<StyleRuleBase> rule = parser.parseRule(nullptr, String(testCases[i].input));
+        RefPtr<StyleRuleBase> rule = parser.parseRule(nullptr, String(testCases[i].input));
 
         EXPECT_TRUE(rule->isMediaRule());
         testMediaQuery(testCases[i].output, *static_cast<StyleRuleMedia*>(rule.get())->mediaQueries());

@@ -13,9 +13,9 @@ HTMLScriptElement::HTMLScriptElement(Document& document)
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<HTMLScriptElement> HTMLScriptElement::create(Document& document)
+PassRefPtr<HTMLScriptElement> HTMLScriptElement::create(Document& document)
 {
-    return adoptRefWillBeNoop(new HTMLScriptElement(document));
+    return adoptRef(new HTMLScriptElement(document));
 }
 
 }

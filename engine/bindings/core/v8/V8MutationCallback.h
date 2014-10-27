@@ -45,7 +45,7 @@ public:
         return adoptPtr(new V8MutationCallback(callback, owner, scriptState));
     }
 
-    virtual void call(const WillBeHeapVector<RefPtrWillBeMember<MutationRecord> >&, MutationObserver*) override;
+    virtual void call(const Vector<RefPtr<MutationRecord> >&, MutationObserver*) override;
     virtual ExecutionContext* executionContext() const override { return ContextLifecycleObserver::executionContext(); }
 
 private:

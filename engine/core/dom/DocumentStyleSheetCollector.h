@@ -47,10 +47,10 @@ class DocumentStyleSheetCollector {
 public:
     friend class ImportedDocumentStyleSheetCollector;
 
-    DocumentStyleSheetCollector(WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& sheetsForList, WillBeHeapVector<RefPtrWillBeMember<CSSStyleSheet> >& activeList, WillBeHeapHashSet<RawPtrWillBeMember<Document> >&);
+    DocumentStyleSheetCollector(Vector<RefPtr<StyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >&);
     ~DocumentStyleSheetCollector();
 
-    void appendActiveStyleSheets(const WillBeHeapVector<RefPtrWillBeMember<CSSStyleSheet> >&);
+    void appendActiveStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void appendActiveStyleSheet(CSSStyleSheet*);
     void appendSheetForList(StyleSheet*);
 
@@ -58,21 +58,21 @@ public:
     void willVisit(Document* document) { m_visitedDocuments.add(document); }
 
 private:
-    WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >& m_styleSheetsForStyleSheetList;
-    WillBeHeapVector<RefPtrWillBeMember<CSSStyleSheet> >& m_activeAuthorStyleSheets;
-    WillBeHeapHashSet<RawPtrWillBeMember<Document> >& m_visitedDocuments;
+    Vector<RefPtr<StyleSheet> >& m_styleSheetsForStyleSheetList;
+    Vector<RefPtr<CSSStyleSheet> >& m_activeAuthorStyleSheets;
+    HashSet<RawPtr<Document> >& m_visitedDocuments;
 };
 
 class ActiveDocumentStyleSheetCollector final : public DocumentStyleSheetCollector {
 public:
     ActiveDocumentStyleSheetCollector(StyleSheetCollection&);
 private:
-    WillBeHeapHashSet<RawPtrWillBeMember<Document> > m_visitedDocuments;
+    HashSet<RawPtr<Document> > m_visitedDocuments;
 };
 
 class ImportedDocumentStyleSheetCollector final : public DocumentStyleSheetCollector {
 public:
-    ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector&, WillBeHeapVector<RefPtrWillBeMember<StyleSheet> >&);
+    ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector&, Vector<RefPtr<StyleSheet> >&);
 };
 
 } // namespace blink

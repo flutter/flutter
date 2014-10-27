@@ -53,9 +53,9 @@ private:
     TreeScope& oldScope() const { return *m_oldScope; }
     TreeScope& newScope() const { return *m_newScope; }
 
-    RawPtrWillBeMember<Node> m_toAdopt;
-    RawPtrWillBeMember<TreeScope> m_newScope;
-    RawPtrWillBeMember<TreeScope> m_oldScope;
+    RawPtr<Node> m_toAdopt;
+    RawPtr<TreeScope> m_newScope;
+    RawPtr<TreeScope> m_oldScope;
 };
 
 inline TreeScopeAdopter::TreeScopeAdopter(Node& toAdopt, TreeScope& newScope)

@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class PLATFORM_EXPORT FontCacheClient : public RefCountedWillBeGarbageCollectedFinalized<FontCacheClient> {
+class PLATFORM_EXPORT FontCacheClient : public RefCounted<FontCacheClient> {
 public:
     virtual ~FontCacheClient() { }
 

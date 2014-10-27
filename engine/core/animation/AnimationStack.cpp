@@ -42,7 +42,7 @@ namespace blink {
 
 namespace {
 
-void copyToActiveInterpolationMap(const WillBeHeapVector<RefPtrWillBeMember<blink::Interpolation> >& source, WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<blink::Interpolation> >& target)
+void copyToActiveInterpolationMap(const Vector<RefPtr<blink::Interpolation> >& source, HashMap<CSSPropertyID, RefPtr<blink::Interpolation> >& target)
 {
     for (size_t i = 0; i < source.size(); ++i) {
         Interpolation* interpolation = source[i].get();
@@ -50,16 +50,16 @@ void copyToActiveInterpolationMap(const WillBeHeapVector<RefPtrWillBeMember<blin
     }
 }
 
-bool compareEffects(const OwnPtrWillBeMember<SampledEffect>& effect1, const OwnPtrWillBeMember<SampledEffect>& effect2)
+bool compareEffects(const OwnPtr<SampledEffect>& effect1, const OwnPtr<SampledEffect>& effect2)
 {
     ASSERT(effect1 && effect2);
     return effect1->sequenceNumber() < effect2->sequenceNumber();
 }
 
-void copyNewAnimationsToActiveInterpolationMap(const WillBeHeapVector<RawPtrWillBeMember<InertAnimation> >& newAnimations, WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<Interpolation> >& result)
+void copyNewAnimationsToActiveInterpolationMap(const Vector<RawPtr<InertAnimation> >& newAnimations, HashMap<CSSPropertyID, RefPtr<Interpolation> >& result)
 {
     for (size_t i = 0; i < newAnimations.size(); ++i) {
-        OwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > sample = newAnimations[i]->sample(0);
+        OwnPtr<Vector<RefPtr<Interpolation> > > sample = newAnimations[i]->sample(0);
         if (sample) {
             copyToActiveInterpolationMap(*sample, result);
         }
@@ -90,14 +90,14 @@ bool AnimationStack::hasActiveAnimationsOnCompositor(CSSPropertyID property) con
     return false;
 }
 
-WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<Interpolation> > AnimationStack::activeInterpolations(AnimationStack* animationStack, const WillBeHeapVector<RawPtrWillBeMember<InertAnimation> >* newAnimations, const WillBeHeapHashSet<RawPtrWillBeMember<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority priority, double timelineCurrentTime)
+HashMap<CSSPropertyID, RefPtr<Interpolation> > AnimationStack::activeInterpolations(AnimationStack* animationStack, const Vector<RawPtr<InertAnimation> >* newAnimations, const HashSet<RawPtr<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority priority, double timelineCurrentTime)
 {
     // We don't exactly know when new animations will start, but timelineCurrentTime is a good estimate.
 
-    WillBeHeapHashMap<CSSPropertyID, RefPtrWillBeMember<Interpolation> > result;
+    HashMap<CSSPropertyID, RefPtr<Interpolation> > result;
 
     if (animationStack) {
-        WillBeHeapVector<OwnPtrWillBeMember<SampledEffect> >& effects = animationStack->m_effects;
+        Vector<OwnPtr<SampledEffect> >& effects = animationStack->m_effects;
         // std::sort doesn't work with OwnPtrs
         nonCopyingSort(effects.begin(), effects.end(), compareEffects);
         animationStack->simplifyEffects();

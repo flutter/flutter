@@ -71,7 +71,7 @@ void ScriptProfiler::start(const String& title)
     profiler->StartProfiling(v8String(isolate, title), true);
 }
 
-PassRefPtrWillBeRawPtr<ScriptProfile> ScriptProfiler::stop(const String& title)
+PassRefPtr<ScriptProfile> ScriptProfiler::stop(const String& title)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
     v8::CpuProfiler* profiler = isolate->GetCpuProfiler();

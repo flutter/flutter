@@ -9,7 +9,7 @@ namespace blink {
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(InterpolableValue);
 
-PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableNumber::interpolate(const InterpolableValue &to, const double progress) const
+PassOwnPtr<InterpolableValue> InterpolableNumber::interpolate(const InterpolableValue &to, const double progress) const
 {
     const InterpolableNumber& toNumber = toInterpolableNumber(to);
     if (!progress)
@@ -19,7 +19,7 @@ PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableNumber::interpolate(const 
     return create(m_value * (1 - progress) + toNumber.m_value * progress);
 }
 
-PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableBool::interpolate(const InterpolableValue &to, const double progress) const
+PassOwnPtr<InterpolableValue> InterpolableBool::interpolate(const InterpolableValue &to, const double progress) const
 {
     if (progress < 0.5) {
         return clone();
@@ -27,7 +27,7 @@ PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableBool::interpolate(const In
     return to.clone();
 }
 
-PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableList::interpolate(const InterpolableValue &to, const double progress) const
+PassOwnPtr<InterpolableValue> InterpolableList::interpolate(const InterpolableValue &to, const double progress) const
 {
     const InterpolableList& toList = toInterpolableList(to);
     ASSERT(toList.m_size == m_size);
@@ -39,7 +39,7 @@ PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableList::interpolate(const In
         return InterpolableList::create(toList);
     }
 
-    OwnPtrWillBeRawPtr<InterpolableList> result = create(m_size);
+    OwnPtr<InterpolableList> result = create(m_size);
     for (size_t i = 0; i < m_size; i++) {
         ASSERT(m_values[i]);
         ASSERT(toList.m_values[i]);
@@ -56,7 +56,7 @@ void InterpolableList::trace(Visitor* visitor)
     InterpolableValue::trace(visitor);
 }
 
-PassOwnPtrWillBeRawPtr<InterpolableValue> InterpolableAnimatableValue::interpolate(const InterpolableValue &other, const double percentage) const
+PassOwnPtr<InterpolableValue> InterpolableAnimatableValue::interpolate(const InterpolableValue &other, const double percentage) const
 {
     const InterpolableAnimatableValue& otherValue = toInterpolableAnimatableValue(other);
     if (!percentage)

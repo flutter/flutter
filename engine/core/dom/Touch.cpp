@@ -62,9 +62,9 @@ Touch::Touch(EventTarget* target, unsigned identifier, const FloatPoint& clientP
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<Touch> Touch::cloneWithNewTarget(EventTarget* eventTarget) const
+PassRefPtr<Touch> Touch::cloneWithNewTarget(EventTarget* eventTarget) const
 {
-    return adoptRefWillBeNoop(new Touch(eventTarget, m_identifier, m_clientPos, m_screenPos, m_pagePos, m_radius, m_rotationAngle, m_force, m_absoluteLocation));
+    return adoptRef(new Touch(eventTarget, m_identifier, m_clientPos, m_screenPos, m_pagePos, m_radius, m_rotationAngle, m_force, m_absoluteLocation));
 }
 
 void Touch::trace(Visitor* visitor)

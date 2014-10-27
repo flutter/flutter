@@ -12,9 +12,9 @@ namespace blink {
 
 class DefaultStyleInterpolation : public StyleInterpolation {
 public:
-    static PassRefPtrWillBeRawPtr<DefaultStyleInterpolation> create(CSSValue* start, CSSValue* end, CSSPropertyID id)
+    static PassRefPtr<DefaultStyleInterpolation> create(CSSValue* start, CSSValue* end, CSSPropertyID id)
     {
-        return adoptRefWillBeNoop(new DefaultStyleInterpolation(start, end, id));
+        return adoptRef(new DefaultStyleInterpolation(start, end, id));
     }
 
     virtual void apply(StyleResolverState& state) const
@@ -37,8 +37,8 @@ private:
     {
     }
 
-    RefPtrWillBeMember<CSSValue> m_startCSSValue;
-    RefPtrWillBeMember<CSSValue> m_endCSSValue;
+    RefPtr<CSSValue> m_startCSSValue;
+    RefPtr<CSSValue> m_endCSSValue;
 };
 
 }

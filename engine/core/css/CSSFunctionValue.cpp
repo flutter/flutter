@@ -31,7 +31,7 @@
 
 namespace blink {
 
-CSSFunctionValue::CSSFunctionValue(String name, PassRefPtrWillBeRawPtr<CSSValueList> args)
+CSSFunctionValue::CSSFunctionValue(String name, PassRefPtr<CSSValueList> args)
     : CSSValue(FunctionClass)
     , m_name(name)
     , m_args(args)

@@ -22,16 +22,16 @@ struct HitRegionOptions {
 
 public:
     String id;
-    RefPtrWillBeMember<Element> control;
+    RefPtr<Element> control;
     Path path;
     WindRule fillRule;
 };
 
-class HitRegion final : public RefCountedWillBeGarbageCollectedFinalized<HitRegion> {
+class HitRegion final : public RefCounted<HitRegion> {
 public:
-    static PassRefPtrWillBeRawPtr<HitRegion> create(const HitRegionOptions& options)
+    static PassRefPtr<HitRegion> create(const HitRegionOptions& options)
     {
-        return adoptRefWillBeNoop(new HitRegion(options));
+        return adoptRef(new HitRegion(options));
     }
 
     virtual ~HitRegion() { }
@@ -52,18 +52,18 @@ private:
     explicit HitRegion(const HitRegionOptions&);
 
     String m_id;
-    RefPtrWillBeMember<Element> m_control;
+    RefPtr<Element> m_control;
     Path m_path;
     WindRule m_fillRule;
 };
 
-class HitRegionManager final : public NoBaseWillBeGarbageCollected<HitRegionManager> {
+class HitRegionManager final : public DummyBase<HitRegionManager> {
     WTF_MAKE_NONCOPYABLE(HitRegionManager);
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(HitRegionManager)
 public:
-    static PassOwnPtrWillBeRawPtr<HitRegionManager> create() { return adoptPtrWillBeNoop(new HitRegionManager()); }
+    static PassOwnPtr<HitRegionManager> create() { return adoptPtr(new HitRegionManager()); }
 
-    void addHitRegion(PassRefPtrWillBeRawPtr<HitRegion>);
+    void addHitRegion(PassRefPtr<HitRegion>);
 
     void removeHitRegion(HitRegion*);
     void removeHitRegionById(const String& id);
@@ -82,10 +82,10 @@ public:
 private:
     HitRegionManager() { }
 
-    typedef WillBeHeapListHashSet<RefPtrWillBeMember<HitRegion> > HitRegionList;
+    typedef ListHashSet<RefPtr<HitRegion> > HitRegionList;
     typedef HitRegionList::const_reverse_iterator HitRegionIterator;
-    typedef WillBeHeapHashMap<String, RefPtrWillBeMember<HitRegion> > HitRegionIdMap;
-    typedef WillBeHeapHashMap<RefPtrWillBeMember<Element>, RefPtrWillBeMember<HitRegion> > HitRegionControlMap;
+    typedef HashMap<String, RefPtr<HitRegion> > HitRegionIdMap;
+    typedef HashMap<RefPtr<Element>, RefPtr<HitRegion> > HitRegionControlMap;
 
     HitRegionList m_hitRegionList;
     HitRegionIdMap m_hitRegionIdMap;

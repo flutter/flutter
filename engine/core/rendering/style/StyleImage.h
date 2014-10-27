@@ -49,7 +49,7 @@ public:
         return data() == other.data();
     }
 
-    virtual PassRefPtrWillBeRawPtr<CSSValue> cssValue() const = 0;
+    virtual PassRefPtr<CSSValue> cssValue() const = 0;
 
     virtual bool canRender(const RenderObject&, float /*multiplier*/) const { return true; }
     virtual bool isLoaded() const { return true; }

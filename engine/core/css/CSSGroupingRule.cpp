@@ -71,7 +71,7 @@ unsigned CSSGroupingRule::insertRule(const String& ruleString, unsigned index, E
     CSSStyleSheet* styleSheet = parentStyleSheet();
     CSSParserContext context(parserContext(), UseCounter::getFrom(styleSheet));
     BisonCSSParser parser(context);
-    RefPtrWillBeRawPtr<StyleRuleBase> newRule = parser.parseRule(styleSheet ? styleSheet->contents() : 0, ruleString);
+    RefPtr<StyleRuleBase> newRule = parser.parseRule(styleSheet ? styleSheet->contents() : 0, ruleString);
     if (!newRule) {
         exceptionState.throwDOMException(SyntaxError, "the rule '" + ruleString + "' is invalid and cannot be parsed.");
         return 0;
@@ -81,7 +81,7 @@ unsigned CSSGroupingRule::insertRule(const String& ruleString, unsigned index, E
 
     m_groupRule->wrapperInsertRule(index, newRule);
 
-    m_childRuleCSSOMWrappers.insert(index, RefPtrWillBeMember<CSSRule>(nullptr));
+    m_childRuleCSSOMWrappers.insert(index, RefPtr<CSSRule>(nullptr));
     return index;
 }
 
@@ -123,7 +123,7 @@ CSSRule* CSSGroupingRule::item(unsigned index) const
     if (index >= length())
         return 0;
     ASSERT(m_childRuleCSSOMWrappers.size() == m_groupRule->childRules().size());
-    RefPtrWillBeMember<CSSRule>& rule = m_childRuleCSSOMWrappers[index];
+    RefPtr<CSSRule>& rule = m_childRuleCSSOMWrappers[index];
     if (!rule)
         rule = m_groupRule->childRules()[index]->createCSSOMWrapper(const_cast<CSSGroupingRule*>(this));
     return rule.get();

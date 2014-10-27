@@ -38,18 +38,18 @@
 namespace blink {
 class MediaQueryExp;
 
-typedef WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> > ExpressionHeapVector;
+typedef Vector<OwnPtr<MediaQueryExp> > ExpressionHeapVector;
 
-class MediaQuery : public NoBaseWillBeGarbageCollectedFinalized<MediaQuery> {
+class MediaQuery : public DummyBase<MediaQuery> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     enum Restrictor {
         Only, Not, None
     };
 
-    static PassOwnPtrWillBeRawPtr<MediaQuery> createNotAll();
+    static PassOwnPtr<MediaQuery> createNotAll();
 
-    MediaQuery(Restrictor, const String& mediaType, PassOwnPtrWillBeRawPtr<ExpressionHeapVector> exprs);
+    MediaQuery(Restrictor, const String& mediaType, PassOwnPtr<ExpressionHeapVector> exprs);
     ~MediaQuery();
 
     Restrictor restrictor() const { return m_restrictor; }
@@ -58,7 +58,7 @@ public:
     bool operator==(const MediaQuery& other) const;
     String cssText() const;
 
-    PassOwnPtrWillBeRawPtr<MediaQuery> copy() const { return adoptPtrWillBeNoop(new MediaQuery(*this)); }
+    PassOwnPtr<MediaQuery> copy() const { return adoptPtr(new MediaQuery(*this)); }
 
     void trace(Visitor*);
 
@@ -67,7 +67,7 @@ private:
 
     Restrictor m_restrictor;
     String m_mediaType;
-    OwnPtrWillBeMember<ExpressionHeapVector> m_expressions;
+    OwnPtr<ExpressionHeapVector> m_expressions;
     String m_serializationCache;
 
     String serialize() const;

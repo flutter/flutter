@@ -55,7 +55,7 @@ PropertySet KeyframeEffectModelBase::properties() const
     return result;
 }
 
-PassOwnPtrWillBeRawPtr<WillBeHeapVector<RefPtrWillBeMember<Interpolation> > > KeyframeEffectModelBase::sample(int iteration, double fraction, double iterationDuration) const
+PassOwnPtr<Vector<RefPtr<Interpolation> > > KeyframeEffectModelBase::sample(int iteration, double fraction, double iterationDuration) const
 {
     ASSERT(iteration >= 0);
     ASSERT(!isNull(fraction));
@@ -113,7 +113,7 @@ void KeyframeEffectModelBase::ensureKeyframeGroups() const
     if (m_keyframeGroups)
         return;
 
-    m_keyframeGroups = adoptPtrWillBeNoop(new KeyframeGroupMap);
+    m_keyframeGroups = adoptPtr(new KeyframeGroupMap);
     const KeyframeVector keyframes = normalizedKeyframes(getFrames());
     for (KeyframeVector::const_iterator keyframeIter = keyframes.begin(); keyframeIter != keyframes.end(); ++keyframeIter) {
         const Keyframe* keyframe = keyframeIter->get();
@@ -124,7 +124,7 @@ void KeyframeEffectModelBase::ensureKeyframeGroups() const
             KeyframeGroupMap::iterator groupIter = m_keyframeGroups->find(property);
             PropertySpecificKeyframeGroup* group;
             if (groupIter == m_keyframeGroups->end())
-                group = m_keyframeGroups->add(property, adoptPtrWillBeNoop(new PropertySpecificKeyframeGroup)).storedValue->value.get();
+                group = m_keyframeGroups->add(property, adoptPtr(new PropertySpecificKeyframeGroup)).storedValue->value.get();
             else
                 group = groupIter->value.get();
 
@@ -191,7 +191,7 @@ Keyframe::PropertySpecificKeyframe::PropertySpecificKeyframe(double offset, Pass
 {
 }
 
-void KeyframeEffectModelBase::PropertySpecificKeyframeGroup::appendKeyframe(PassOwnPtrWillBeRawPtr<Keyframe::PropertySpecificKeyframe> keyframe)
+void KeyframeEffectModelBase::PropertySpecificKeyframeGroup::appendKeyframe(PassOwnPtr<Keyframe::PropertySpecificKeyframe> keyframe)
 {
     ASSERT(m_keyframes.isEmpty() || m_keyframes.last()->offset() <= keyframe->offset());
     m_keyframes.append(keyframe);

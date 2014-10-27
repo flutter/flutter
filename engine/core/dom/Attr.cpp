@@ -43,9 +43,9 @@ Attr::Attr(Element& element, const QualifiedName& name)
     ScriptWrappable::init(this);
 }
 
-PassRefPtrWillBeRawPtr<Attr> Attr::create(Element& element, const QualifiedName& name)
+PassRefPtr<Attr> Attr::create(Element& element, const QualifiedName& name)
 {
-    RefPtrWillBeRawPtr<Attr> attr = adoptRefWillBeNoop(new Attr(element, name));
+    RefPtr<Attr> attr = adoptRef(new Attr(element, name));
     return attr.release();
 }
 

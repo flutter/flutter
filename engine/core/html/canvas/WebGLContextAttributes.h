@@ -41,10 +41,10 @@ class WebGLContextAttributes final : public CanvasContextAttributes, public Scri
     DEFINE_WRAPPERTYPEINFO();
 public:
     // Create a new attributes object
-    static PassRefPtrWillBeRawPtr<WebGLContextAttributes> create();
+    static PassRefPtr<WebGLContextAttributes> create();
 
     // Create a copy of this object.
-    PassRefPtrWillBeRawPtr<WebGLContextAttributes> clone() const;
+    PassRefPtr<WebGLContextAttributes> clone() const;
 
     // Whether or not the drawing buffer has an alpha channel; default=true
     bool alpha() const;

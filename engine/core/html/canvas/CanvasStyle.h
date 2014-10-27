@@ -40,16 +40,16 @@ namespace blink {
     class GraphicsContext;
     class HTMLCanvasElement;
 
-    class CanvasStyle final : public RefCountedWillBeGarbageCollected<CanvasStyle> {
+    class CanvasStyle final : public RefCounted<CanvasStyle> {
     public:
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromRGBA(RGBA32 rgba) { return adoptRefWillBeNoop(new CanvasStyle(rgba)); }
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromString(const String& color);
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromStringWithOverrideAlpha(const String& color, float alpha);
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromGrayLevelWithAlpha(float grayLevel, float alpha) { return adoptRefWillBeNoop(new CanvasStyle(grayLevel, alpha)); }
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromRGBAChannels(float r, float g, float b, float a) { return adoptRefWillBeNoop(new CanvasStyle(r, g, b, a)); }
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromCMYKAChannels(float c, float m, float y, float k, float a) { return adoptRefWillBeNoop(new CanvasStyle(c, m, y, k, a)); }
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromGradient(PassRefPtrWillBeRawPtr<CanvasGradient>);
-        static PassRefPtrWillBeRawPtr<CanvasStyle> createFromPattern(PassRefPtrWillBeRawPtr<CanvasPattern>);
+        static PassRefPtr<CanvasStyle> createFromRGBA(RGBA32 rgba) { return adoptRef(new CanvasStyle(rgba)); }
+        static PassRefPtr<CanvasStyle> createFromString(const String& color);
+        static PassRefPtr<CanvasStyle> createFromStringWithOverrideAlpha(const String& color, float alpha);
+        static PassRefPtr<CanvasStyle> createFromGrayLevelWithAlpha(float grayLevel, float alpha) { return adoptRef(new CanvasStyle(grayLevel, alpha)); }
+        static PassRefPtr<CanvasStyle> createFromRGBAChannels(float r, float g, float b, float a) { return adoptRef(new CanvasStyle(r, g, b, a)); }
+        static PassRefPtr<CanvasStyle> createFromCMYKAChannels(float c, float m, float y, float k, float a) { return adoptRef(new CanvasStyle(c, m, y, k, a)); }
+        static PassRefPtr<CanvasStyle> createFromGradient(PassRefPtr<CanvasGradient>);
+        static PassRefPtr<CanvasStyle> createFromPattern(PassRefPtr<CanvasPattern>);
 
         bool isCurrentColor() const { return m_type == CurrentColor || m_type == CurrentColorWithOverrideAlpha; }
         bool hasOverrideAlpha() const { return m_type == CurrentColorWithOverrideAlpha; }
@@ -76,8 +76,8 @@ namespace blink {
         CanvasStyle(float grayLevel, float alpha);
         CanvasStyle(float r, float g, float b, float a);
         CanvasStyle(float c, float m, float y, float k, float a);
-        CanvasStyle(PassRefPtrWillBeRawPtr<CanvasGradient>);
-        CanvasStyle(PassRefPtrWillBeRawPtr<CanvasPattern>);
+        CanvasStyle(PassRefPtr<CanvasGradient>);
+        CanvasStyle(PassRefPtr<CanvasPattern>);
 
         Type m_type;
 
@@ -86,8 +86,8 @@ namespace blink {
             float m_overrideAlpha;
         };
 
-        RefPtrWillBeMember<CanvasGradient> m_gradient;
-        RefPtrWillBeMember<CanvasPattern> m_pattern;
+        RefPtr<CanvasGradient> m_gradient;
+        RefPtr<CanvasPattern> m_pattern;
 
         struct CMYKAValues {
             CMYKAValues() : c(0), m(0), y(0), k(0), a(0) { }

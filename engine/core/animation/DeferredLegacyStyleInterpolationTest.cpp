@@ -20,7 +20,7 @@ protected:
     static bool test(CSSPropertyID propertyID, const String& string)
     {
         CSSParserMode parserMode = HTMLStandardMode;
-        RefPtrWillBeRawPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
+        RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
         bool parseSuccess = BisonCSSParser::parseValue(dummyStyle.get(), propertyID, string, false, parserMode, 0);
         ASSERT_UNUSED(parseSuccess, parseSuccess);
         return DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(*dummyStyle->getPropertyCSSValue(propertyID));

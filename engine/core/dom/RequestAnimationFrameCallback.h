@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class RequestAnimationFrameCallback : public NoBaseWillBeGarbageCollectedFinalized<RequestAnimationFrameCallback> {
+class RequestAnimationFrameCallback : public DummyBase<RequestAnimationFrameCallback> {
 public:
     virtual ~RequestAnimationFrameCallback() { }
     virtual void trace(Visitor*) { }

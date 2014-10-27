@@ -74,9 +74,9 @@ using namespace blink;
     // The content of the three below HeapVectors are guaranteed to be kept alive by
     // the corresponding m_parsedRules, m_floatingMediaQueryExpList, and m_parsedKeyFrames
     // lists in BisonCSSParser.h.
-    WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >* ruleList;
-    WillBeHeapVector<OwnPtrWillBeMember<MediaQueryExp> >* mediaQueryExpList;
-    WillBeHeapVector<RefPtrWillBeMember<StyleKeyframe> >* keyframeRuleList;
+    Vector<RefPtr<StyleRuleBase> >* ruleList;
+    Vector<OwnPtr<MediaQueryExp> >* mediaQueryExpList;
+    Vector<RefPtr<StyleKeyframe> >* keyframeRuleList;
     CSSParserSelector* selector;
     Vector<OwnPtr<CSSParserSelector> >* selectorList;
     CSSSelector::AttributeMatchType attributeMatchType;

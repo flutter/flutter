@@ -49,17 +49,17 @@ WebGLExtensionName OESVertexArrayObject::name() const
     return OESVertexArrayObjectName;
 }
 
-PassRefPtrWillBeRawPtr<OESVertexArrayObject> OESVertexArrayObject::create(WebGLRenderingContextBase* context)
+PassRefPtr<OESVertexArrayObject> OESVertexArrayObject::create(WebGLRenderingContextBase* context)
 {
-    return adoptRefWillBeNoop(new OESVertexArrayObject(context));
+    return adoptRef(new OESVertexArrayObject(context));
 }
 
-PassRefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> OESVertexArrayObject::createVertexArrayOES()
+PassRefPtr<WebGLVertexArrayObjectOES> OESVertexArrayObject::createVertexArrayOES()
 {
     if (isLost())
         return nullptr;
 
-    RefPtrWillBeRawPtr<WebGLVertexArrayObjectOES> o = WebGLVertexArrayObjectOES::create(m_context, WebGLVertexArrayObjectOES::VaoTypeUser);
+    RefPtr<WebGLVertexArrayObjectOES> o = WebGLVertexArrayObjectOES::create(m_context, WebGLVertexArrayObjectOES::VaoTypeUser);
     m_context->addContextObject(o.get());
     return o.release();
 }

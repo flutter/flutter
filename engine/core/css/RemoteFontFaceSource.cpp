@@ -16,7 +16,7 @@
 
 namespace blink {
 
-RemoteFontFaceSource::RemoteFontFaceSource(FontResource* font, PassRefPtrWillBeRawPtr<FontLoader> fontLoader)
+RemoteFontFaceSource::RemoteFontFaceSource(FontResource* font, PassRefPtr<FontLoader> fontLoader)
     : m_font(font)
     , m_fontLoader(fontLoader)
 {

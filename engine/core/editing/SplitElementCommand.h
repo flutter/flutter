@@ -32,24 +32,24 @@ namespace blink {
 
 class SplitElementCommand final : public SimpleEditCommand {
 public:
-    static PassRefPtrWillBeRawPtr<SplitElementCommand> create(PassRefPtrWillBeRawPtr<Element> element, PassRefPtrWillBeRawPtr<Node> splitPointChild)
+    static PassRefPtr<SplitElementCommand> create(PassRefPtr<Element> element, PassRefPtr<Node> splitPointChild)
     {
-        return adoptRefWillBeNoop(new SplitElementCommand(element, splitPointChild));
+        return adoptRef(new SplitElementCommand(element, splitPointChild));
     }
 
     virtual void trace(Visitor*) override;
 
 private:
-    SplitElementCommand(PassRefPtrWillBeRawPtr<Element>, PassRefPtrWillBeRawPtr<Node> splitPointChild);
+    SplitElementCommand(PassRefPtr<Element>, PassRefPtr<Node> splitPointChild);
 
     virtual void doApply() override;
     virtual void doUnapply() override;
     virtual void doReapply() override;
     void executeApply();
 
-    RefPtrWillBeMember<Element> m_element1;
-    RefPtrWillBeMember<Element> m_element2;
-    RefPtrWillBeMember<Node> m_atChild;
+    RefPtr<Element> m_element1;
+    RefPtr<Element> m_element2;
+    RefPtr<Node> m_atChild;
 };
 
 } // namespace blink

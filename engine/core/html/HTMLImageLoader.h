@@ -29,9 +29,9 @@ namespace blink {
 
 class HTMLImageLoader final : public ImageLoader {
 public:
-    static PassOwnPtrWillBeRawPtr<HTMLImageLoader> create(Element* element)
+    static PassOwnPtr<HTMLImageLoader> create(Element* element)
     {
-        return adoptPtrWillBeNoop(new HTMLImageLoader(element));
+        return adoptPtr(new HTMLImageLoader(element));
     }
     virtual ~HTMLImageLoader();
 

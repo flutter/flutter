@@ -37,12 +37,12 @@ namespace blink {
 
 // FIXME: Some consumers of this class may benefit from lazily fetching items rather
 //        than creating the list statically as is currently the only option.
-class DOMStringList final : public RefCountedWillBeGarbageCollectedFinalized<DOMStringList>, public ScriptWrappable {
+class DOMStringList final : public RefCounted<DOMStringList>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<DOMStringList> create()
+    static PassRefPtr<DOMStringList> create()
     {
-        return adoptRefWillBeNoop(new DOMStringList());
+        return adoptRef(new DOMStringList());
     }
 
     bool isEmpty() const { return m_strings.isEmpty(); }

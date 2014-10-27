@@ -36,14 +36,14 @@ namespace blink {
 
 class CSSPrimitiveValue;
 
-class RGBColor : public RefCountedWillBeGarbageCollected<RGBColor>, public ScriptWrappableBase {
+class RGBColor : public RefCounted<RGBColor>, public ScriptWrappableBase {
 public:
-    static PassRefPtrWillBeRawPtr<RGBColor> create(unsigned rgbColor);
+    static PassRefPtr<RGBColor> create(unsigned rgbColor);
 
-    PassRefPtrWillBeRawPtr<CSSPrimitiveValue> red();
-    PassRefPtrWillBeRawPtr<CSSPrimitiveValue> green();
-    PassRefPtrWillBeRawPtr<CSSPrimitiveValue> blue();
-    PassRefPtrWillBeRawPtr<CSSPrimitiveValue> alpha();
+    PassRefPtr<CSSPrimitiveValue> red();
+    PassRefPtr<CSSPrimitiveValue> green();
+    PassRefPtr<CSSPrimitiveValue> blue();
+    PassRefPtr<CSSPrimitiveValue> alpha();
 
     Color color() const { return Color(m_rgbColor); }
 

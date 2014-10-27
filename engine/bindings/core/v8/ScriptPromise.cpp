@@ -159,10 +159,10 @@ ScriptPromise ScriptPromise::reject(ScriptState* scriptState, v8::Handle<v8::Val
     return promise;
 }
 
-ScriptPromise ScriptPromise::rejectWithDOMException(ScriptState* scriptState, PassRefPtrWillBeRawPtr<DOMException> exception)
+ScriptPromise ScriptPromise::rejectWithDOMException(ScriptState* scriptState, PassRefPtr<DOMException> exception)
 {
     ASSERT(scriptState->isolate()->InContext());
-    return reject(scriptState, V8ValueTraits<PassRefPtrWillBeRawPtr<DOMException> >::toV8Value(exception, scriptState->context()->Global(), scriptState->isolate()));
+    return reject(scriptState, V8ValueTraits<PassRefPtr<DOMException> >::toV8Value(exception, scriptState->context()->Global(), scriptState->isolate()));
 }
 
 v8::Local<v8::Promise> ScriptPromise::rejectRaw(v8::Isolate* isolate, v8::Handle<v8::Value> value)

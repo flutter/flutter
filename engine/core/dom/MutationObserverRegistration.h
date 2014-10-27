@@ -41,9 +41,9 @@ namespace blink {
 
 class QualifiedName;
 
-class MutationObserverRegistration final : public NoBaseWillBeGarbageCollectedFinalized<MutationObserverRegistration> {
+class MutationObserverRegistration final : public DummyBase<MutationObserverRegistration> {
 public:
-    static PassOwnPtrWillBeRawPtr<MutationObserverRegistration> create(MutationObserver&, Node*, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
+    static PassOwnPtr<MutationObserverRegistration> create(MutationObserver&, Node*, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
     ~MutationObserverRegistration();
 
     void resetObservation(MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
@@ -59,7 +59,7 @@ public:
     MutationRecordDeliveryOptions deliveryOptions() const { return m_options & (MutationObserver::AttributeOldValue | MutationObserver::CharacterDataOldValue); }
     MutationObserverOptions mutationTypes() const { return m_options & MutationObserver::AllMutationTypes; }
 
-    void addRegistrationNodesToSet(WillBeHeapHashSet<RawPtrWillBeMember<Node> >&) const;
+    void addRegistrationNodesToSet(HashSet<RawPtr<Node> >&) const;
 
     void trace(Visitor*);
 
@@ -68,11 +68,11 @@ public:
 private:
     MutationObserverRegistration(MutationObserver&, Node*, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
 
-    RefPtrWillBeMember<MutationObserver> m_observer;
-    RawPtrWillBeWeakMember<Node> m_registrationNode;
-    RefPtrWillBeMember<Node> m_registrationNodeKeepAlive;
-    typedef WillBeHeapHashSet<RefPtrWillBeMember<Node> > NodeHashSet;
-    OwnPtrWillBeMember<NodeHashSet> m_transientRegistrationNodes;
+    RefPtr<MutationObserver> m_observer;
+    RawPtr<Node> m_registrationNode;
+    RefPtr<Node> m_registrationNodeKeepAlive;
+    typedef HashSet<RefPtr<Node> > NodeHashSet;
+    OwnPtr<NodeHashSet> m_transientRegistrationNodes;
 
     MutationObserverOptions m_options;
     HashSet<AtomicString> m_attributeFilter;

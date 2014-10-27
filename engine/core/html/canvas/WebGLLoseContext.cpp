@@ -52,9 +52,9 @@ WebGLExtensionName WebGLLoseContext::name() const
     return WebGLLoseContextName;
 }
 
-PassRefPtrWillBeRawPtr<WebGLLoseContext> WebGLLoseContext::create(WebGLRenderingContextBase* context)
+PassRefPtr<WebGLLoseContext> WebGLLoseContext::create(WebGLRenderingContextBase* context)
 {
-    return adoptRefWillBeNoop(new WebGLLoseContext(context));
+    return adoptRef(new WebGLLoseContext(context));
 }
 
 void WebGLLoseContext::loseContext()

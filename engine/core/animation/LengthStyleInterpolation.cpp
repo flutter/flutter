@@ -24,9 +24,9 @@ bool LengthStyleInterpolation::canCreateFrom(const CSSValue& value)
     return value.isCalcValue();
 }
 
-PassOwnPtrWillBeRawPtr<InterpolableValue> LengthStyleInterpolation::lengthToInterpolableValue(CSSValue* value)
+PassOwnPtr<InterpolableValue> LengthStyleInterpolation::lengthToInterpolableValue(CSSValue* value)
 {
-    OwnPtrWillBeRawPtr<InterpolableList> result = InterpolableList::create(CSSPrimitiveValue::LengthUnitTypeCount);
+    OwnPtr<InterpolableList> result = InterpolableList::create(CSSPrimitiveValue::LengthUnitTypeCount);
     CSSPrimitiveValue* primitive = toCSSPrimitiveValue(value);
 
     CSSLengthArray array;
@@ -47,12 +47,12 @@ static CSSPrimitiveValue::UnitType toUnitType(int lengthUnitType)
     return static_cast<CSSPrimitiveValue::UnitType>(CSSPrimitiveValue::lengthUnitTypeToUnitType(static_cast<CSSPrimitiveValue::LengthUnitType>(lengthUnitType)));
 }
 
-static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> constructCalcExpression(PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> previous, InterpolableList* list, size_t position)
+static PassRefPtr<CSSCalcExpressionNode> constructCalcExpression(PassRefPtr<CSSCalcExpressionNode> previous, InterpolableList* list, size_t position)
 {
     while (position != CSSPrimitiveValue::LengthUnitTypeCount) {
         const InterpolableNumber *subValue = toInterpolableNumber(list->get(position));
         if (subValue->value()) {
-            RefPtrWillBeRawPtr<CSSCalcExpressionNode> next;
+            RefPtr<CSSCalcExpressionNode> next;
             if (previous)
                 next = CSSCalcValue::createExpressionNode(previous, CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(subValue->value(), toUnitType(position))), CalcAdd);
             else
@@ -66,7 +66,7 @@ static PassRefPtrWillBeRawPtr<CSSCalcExpressionNode> constructCalcExpression(Pas
 
 }
 
-PassRefPtrWillBeRawPtr<CSSValue> LengthStyleInterpolation::interpolableValueToLength(InterpolableValue* value, ValueRange range)
+PassRefPtr<CSSValue> LengthStyleInterpolation::interpolableValueToLength(InterpolableValue* value, ValueRange range)
 {
     InterpolableList* listValue = toInterpolableList(value);
     unsigned unitCount = 0;

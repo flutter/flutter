@@ -36,7 +36,7 @@
 
 namespace blink {
 
-StyleSheetInvalidationAnalysis::StyleSheetInvalidationAnalysis(const WillBeHeapVector<RawPtrWillBeMember<StyleSheetContents> >& sheets)
+StyleSheetInvalidationAnalysis::StyleSheetInvalidationAnalysis(const Vector<RawPtr<StyleSheetContents> >& sheets)
     : m_dirtiesAllStyle(false)
 {
     for (unsigned i = 0; i < sheets.size() && !m_dirtiesAllStyle; ++i)
@@ -109,7 +109,7 @@ void StyleSheetInvalidationAnalysis::analyzeStyleSheet(StyleSheetContents* style
         }
     }
 
-    const WillBeHeapVector<RefPtrWillBeMember<StyleRuleBase> >& rules = styleSheetContents->childRules();
+    const Vector<RefPtr<StyleRuleBase> >& rules = styleSheetContents->childRules();
     for (unsigned i = 0; i < rules.size(); i++) {
         StyleRuleBase* rule = rules[i].get();
         if (!rule->isStyleRule()) {

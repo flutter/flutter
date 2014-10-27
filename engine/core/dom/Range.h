@@ -47,12 +47,12 @@ class Node;
 class NodeWithIndex;
 class Text;
 
-class Range final : public RefCountedWillBeGarbageCollectedFinalized<Range>, public ScriptWrappable {
+class Range final : public RefCounted<Range>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Range> create(Document&);
-    static PassRefPtrWillBeRawPtr<Range> create(Document&, Node* startContainer, int startOffset, Node* endContainer, int endOffset);
-    static PassRefPtrWillBeRawPtr<Range> create(Document&, const Position&, const Position&);
+    static PassRefPtr<Range> create(Document&);
+    static PassRefPtr<Range> create(Document&, Node* startContainer, int startOffset, Node* endContainer, int endOffset);
+    static PassRefPtr<Range> create(Document&, const Position&, const Position&);
     ~Range();
 
     Document& ownerDocument() const { ASSERT(m_ownerDocument); return *m_ownerDocument.get(); }
@@ -65,8 +65,8 @@ public:
 
     Node* commonAncestorContainer() const;
     static Node* commonAncestorContainer(Node* containerA, Node* containerB);
-    void setStart(PassRefPtrWillBeRawPtr<Node> container, int offset, ExceptionState& = ASSERT_NO_EXCEPTION);
-    void setEnd(PassRefPtrWillBeRawPtr<Node> container, int offset, ExceptionState& = ASSERT_NO_EXCEPTION);
+    void setStart(PassRefPtr<Node> container, int offset, ExceptionState& = ASSERT_NO_EXCEPTION);
+    void setEnd(PassRefPtr<Node> container, int offset, ExceptionState& = ASSERT_NO_EXCEPTION);
     void collapse(bool toStart);
     bool isPointInRange(Node* refNode, int offset, ExceptionState&);
     short comparePoint(Node* refNode, int offset, ExceptionState&) const;
@@ -79,23 +79,23 @@ public:
     bool boundaryPointsValid() const;
     bool intersectsNode(Node* refNode, ExceptionState&);
     void deleteContents(ExceptionState&);
-    PassRefPtrWillBeRawPtr<DocumentFragment> extractContents(ExceptionState&);
-    PassRefPtrWillBeRawPtr<DocumentFragment> cloneContents(ExceptionState&);
-    void insertNode(PassRefPtrWillBeRawPtr<Node>, ExceptionState&);
+    PassRefPtr<DocumentFragment> extractContents(ExceptionState&);
+    PassRefPtr<DocumentFragment> cloneContents(ExceptionState&);
+    void insertNode(PassRefPtr<Node>, ExceptionState&);
     String toString() const;
 
     String toHTML() const;
     String text() const;
 
     void detach();
-    PassRefPtrWillBeRawPtr<Range> cloneRange() const;
+    PassRefPtr<Range> cloneRange() const;
 
     void setStartAfter(Node*, ExceptionState& = ASSERT_NO_EXCEPTION);
     void setEndBefore(Node*, ExceptionState& = ASSERT_NO_EXCEPTION);
     void setEndAfter(Node*, ExceptionState& = ASSERT_NO_EXCEPTION);
     void selectNode(Node*, ExceptionState& = ASSERT_NO_EXCEPTION);
     void selectNodeContents(Node*, ExceptionState&);
-    void surroundContents(PassRefPtrWillBeRawPtr<Node>, ExceptionState&);
+    void surroundContents(PassRefPtr<Node>, ExceptionState&);
     void setStartBefore(Node*, ExceptionState& = ASSERT_NO_EXCEPTION);
 
     const Position startPosition() const { return m_start.toPosition(); }
@@ -138,8 +138,8 @@ public:
     // for details.
     void expand(const String&, ExceptionState&);
 
-    PassRefPtrWillBeRawPtr<ClientRectList> getClientRects() const;
-    PassRefPtrWillBeRawPtr<ClientRect> getBoundingClientRect() const;
+    PassRefPtr<ClientRectList> getClientRects() const;
+    PassRefPtr<ClientRect> getBoundingClientRect() const;
 
 #ifndef NDEBUG
     void formatForDebugger(char* buffer, unsigned length) const;
@@ -158,18 +158,18 @@ private:
     void checkExtractPrecondition(ExceptionState&);
 
     enum ActionType { DELETE_CONTENTS, EXTRACT_CONTENTS, CLONE_CONTENTS };
-    PassRefPtrWillBeRawPtr<DocumentFragment> processContents(ActionType, ExceptionState&);
-    static PassRefPtrWillBeRawPtr<Node> processContentsBetweenOffsets(ActionType, PassRefPtrWillBeRawPtr<DocumentFragment>, Node*, unsigned startOffset, unsigned endOffset, ExceptionState&);
-    static void processNodes(ActionType, WillBeHeapVector<RefPtrWillBeMember<Node> >&, PassRefPtrWillBeRawPtr<Node> oldContainer, PassRefPtrWillBeRawPtr<Node> newContainer, ExceptionState&);
+    PassRefPtr<DocumentFragment> processContents(ActionType, ExceptionState&);
+    static PassRefPtr<Node> processContentsBetweenOffsets(ActionType, PassRefPtr<DocumentFragment>, Node*, unsigned startOffset, unsigned endOffset, ExceptionState&);
+    static void processNodes(ActionType, Vector<RefPtr<Node> >&, PassRefPtr<Node> oldContainer, PassRefPtr<Node> newContainer, ExceptionState&);
     enum ContentsProcessDirection { ProcessContentsForward, ProcessContentsBackward };
-    static PassRefPtrWillBeRawPtr<Node> processAncestorsAndTheirSiblings(ActionType, Node* container, ContentsProcessDirection, PassRefPtrWillBeRawPtr<Node> clonedContainer, Node* commonRoot, ExceptionState&);
+    static PassRefPtr<Node> processAncestorsAndTheirSiblings(ActionType, Node* container, ContentsProcessDirection, PassRefPtr<Node> clonedContainer, Node* commonRoot, ExceptionState&);
 
-    RefPtrWillBeMember<Document> m_ownerDocument; // Cannot be null.
+    RefPtr<Document> m_ownerDocument; // Cannot be null.
     RangeBoundaryPoint m_start;
     RangeBoundaryPoint m_end;
 };
 
-PassRefPtrWillBeRawPtr<Range> rangeOfContents(Node*);
+PassRefPtr<Range> rangeOfContents(Node*);
 
 bool areRangesEqual(const Range*, const Range*);
 

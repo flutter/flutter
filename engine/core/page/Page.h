@@ -64,7 +64,7 @@ typedef uint64_t LinkHash;
 
 float deviceScaleFactor(LocalFrame*);
 
-class Page final : public NoBaseWillBeGarbageCollectedFinalized<Page>, public WillBeHeapSupplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
+class Page final : public DummyBase<Page>, public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Page);
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
@@ -120,7 +120,7 @@ public:
     ScrollingCoordinator* scrollingCoordinator();
 
     String mainThreadScrollingReasonsAsText();
-    PassRefPtrWillBeRawPtr<ClientRectList> nonFastScrollableRects(const LocalFrame*);
+    PassRefPtr<ClientRectList> nonFastScrollableRects(const LocalFrame*);
 
     Settings& settings() const { return *m_settings; }
 
@@ -147,7 +147,7 @@ public:
 
     double timerAlignmentInterval() const;
 
-    class MultisamplingChangedObserver : public WillBeGarbageCollectedMixin {
+    class MultisamplingChangedObserver : public DummyBase<void> {
     public:
         virtual void multisamplingChanged(bool) = 0;
     };
@@ -181,10 +181,10 @@ private:
     PageAnimator m_animator;
     const OwnPtr<AutoscrollController> m_autoscrollController;
     const OwnPtr<Chrome> m_chrome;
-    const OwnPtrWillBeMember<DragCaretController> m_dragCaretController;
+    const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
     OwnPtr<ScrollingCoordinator> m_scrollingCoordinator;
-    const OwnPtrWillBeMember<UndoStack> m_undoStack;
+    const OwnPtr<UndoStack> m_undoStack;
 
     // Typically, the main frame and Page should both be owned by the embedder,
     // which must call Page::willBeDestroyed() prior to destroying Page. This
@@ -221,11 +221,11 @@ private:
     bool m_isPainting;
 #endif
 
-    WillBeHeapHashSet<RawPtrWillBeWeakMember<MultisamplingChangedObserver> > m_multisamplingChangedObservers;
+    HashSet<RawPtr<MultisamplingChangedObserver> > m_multisamplingChangedObservers;
 
     // A pointer to all the interfaces provided to in-process Frames for this Page.
     // FIXME: Most of the members of Page should move onto FrameHost.
-    OwnPtrWillBeMember<FrameHost> m_frameHost;
+    OwnPtr<FrameHost> m_frameHost;
 };
 
 } // namespace blink

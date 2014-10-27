@@ -248,7 +248,7 @@ bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, unsi
 }
 
 template <>
-bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, RefPtrWillBeMember<LocalDOMWindow>& value)
+bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, RefPtr<LocalDOMWindow>& value)
 {
     v8::Local<v8::Value> v8Value;
     if (!dictionary.get(key, v8Value))
@@ -304,7 +304,7 @@ bool DictionaryHelper::convert(const Dictionary& dictionary, Dictionary::Convers
 }
 
 template <>
-bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, RefPtrWillBeMember<EventTarget>& value)
+bool DictionaryHelper::get(const Dictionary& dictionary, const String& key, RefPtr<EventTarget>& value)
 {
     v8::Local<v8::Value> v8Value;
     if (!dictionary.get(key, v8Value))
@@ -427,8 +427,8 @@ struct DictionaryHelperTraits<DOMError> {
 
 template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<Uint8Array>& value);
 template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<ArrayBufferView>& value);
-template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtrWillBeMember<MediaKeyError>& value);
-template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtrWillBeMember<DOMError>& value);
+template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<MediaKeyError>& value);
+template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<DOMError>& value);
 
 template <typename T>
 struct IntegralTypeTraits {
@@ -585,10 +585,10 @@ template bool DictionaryHelper::convert(const Dictionary&, Dictionary::Conversio
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, Nullable<long long>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, Nullable<unsigned long long>& value);
 
-template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtrWillBeMember<LocalDOMWindow>& value);
+template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<LocalDOMWindow>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<Uint8Array>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<ArrayBufferView>& value);
-template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtrWillBeMember<MediaKeyError>& value);
-template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtrWillBeMember<EventTarget>& value);
+template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<MediaKeyError>& value);
+template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<EventTarget>& value);
 
 } // namespace blink

@@ -48,8 +48,8 @@ public:
     bool isNotNull() const { return m_start != kNotFound; }
     size_t length() const { ASSERT(!isNull()); return m_end - m_start; }
 
-    PassRefPtrWillBeRawPtr<Range> createRange(const ContainerNode& scope) const;
-    PassRefPtrWillBeRawPtr<Range> createRangeForSelection(const ContainerNode& scope) const;
+    PassRefPtr<Range> createRange(const ContainerNode& scope) const;
+    PassRefPtr<Range> createRangeForSelection(const ContainerNode& scope) const;
 
     static PlainTextRange create(const ContainerNode& scope, const Range&);
 
@@ -57,7 +57,7 @@ private:
     PlainTextRange& operator=(const PlainTextRange&)  = delete;
 
     enum GetRangeFor { ForGeneric, ForSelection };
-    PassRefPtrWillBeRawPtr<Range> createRangeFor(const ContainerNode& scope, GetRangeFor) const;
+    PassRefPtr<Range> createRangeFor(const ContainerNode& scope, GetRangeFor) const;
 
     const size_t m_start;
     const size_t m_end;

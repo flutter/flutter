@@ -17,7 +17,7 @@ class ExceptionState;
 
 class EffectInput {
 public:
-    static PassRefPtrWillBeRawPtr<AnimationEffect> convert(Element*, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState&);
+    static PassRefPtr<AnimationEffect> convert(Element*, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState&);
 };
 
 } // namespace blink

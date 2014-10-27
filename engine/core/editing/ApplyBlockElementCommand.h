@@ -42,14 +42,14 @@ protected:
     ApplyBlockElementCommand(Document&, const QualifiedName& tagName);
 
     virtual void formatSelection(const VisiblePosition& startOfSelection, const VisiblePosition& endOfSelection);
-    PassRefPtrWillBeRawPtr<HTMLElement> createBlockElement() const;
+    PassRefPtr<HTMLElement> createBlockElement() const;
     const QualifiedName tagName() const { return m_tagName; }
 
     virtual void trace(Visitor*) override;
 
 private:
     virtual void doApply() override final;
-    virtual void formatRange(const Position& start, const Position& end, const Position& endOfSelection, RefPtrWillBeRawPtr<HTMLElement>&) = 0;
+    virtual void formatRange(const Position& start, const Position& end, const Position& endOfSelection, RefPtr<HTMLElement>&) = 0;
     void rangeForParagraphSplittingTextNodesIfNeeded(const VisiblePosition&, Position&, Position&);
     VisiblePosition endOfNextParagrahSplittingTextNodesIfNeeded(VisiblePosition&, Position&, Position&);
 

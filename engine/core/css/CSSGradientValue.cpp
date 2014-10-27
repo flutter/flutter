@@ -111,7 +111,7 @@ struct GradientStop {
     { }
 };
 
-PassRefPtrWillBeRawPtr<CSSGradientValue> CSSGradientValue::gradientWithStylesResolved(const TextLinkColors& textLinkColors, Color currentColor)
+PassRefPtr<CSSGradientValue> CSSGradientValue::gradientWithStylesResolved(const TextLinkColors& textLinkColors, Color currentColor)
 {
     bool derived = false;
     for (unsigned i = 0; i < m_stops.size(); i++)
@@ -121,7 +121,7 @@ PassRefPtrWillBeRawPtr<CSSGradientValue> CSSGradientValue::gradientWithStylesRes
             break;
         }
 
-    RefPtrWillBeRawPtr<CSSGradientValue> result = nullptr;
+    RefPtr<CSSGradientValue> result = nullptr;
     if (!derived)
         result = this;
     else if (isLinearGradientValue())

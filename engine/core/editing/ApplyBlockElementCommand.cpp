@@ -83,9 +83,9 @@ void ApplyBlockElementCommand::doApply()
     VisiblePosition endOfSelection = selection.visibleEnd();
     ASSERT(!startOfSelection.isNull());
     ASSERT(!endOfSelection.isNull());
-    RefPtrWillBeRawPtr<ContainerNode> startScope = nullptr;
+    RefPtr<ContainerNode> startScope = nullptr;
     int startIndex = indexForVisiblePosition(startOfSelection, startScope);
-    RefPtrWillBeRawPtr<ContainerNode> endScope = nullptr;
+    RefPtr<ContainerNode> endScope = nullptr;
     int endIndex = indexForVisiblePosition(endOfSelection, endScope);
 
     formatSelection(startOfSelection, endOfSelection);
@@ -177,7 +177,7 @@ void ApplyBlockElementCommand::rangeForParagraphSplittingTextNodesIfNeeded(const
 
         // If end is in the middle of a text node, split.
         if (!endStyle->collapseWhiteSpace() && end.offsetInContainerNode() && end.offsetInContainerNode() < end.containerNode()->maxCharacterOffset()) {
-            RefPtrWillBeRawPtr<Text> endContainer = end.containerText();
+            RefPtr<Text> endContainer = end.containerText();
             splitTextNode(endContainer, end.offsetInContainerNode());
             if (isStartAndEndOnSameNode)
                 start = firstPositionInOrBeforeNode(endContainer->previousSibling());
@@ -200,7 +200,7 @@ VisiblePosition ApplyBlockElementCommand::endOfNextParagrahSplittingTextNodesIfN
     if (!style)
         return endOfNextParagraph;
 
-    RefPtrWillBeRawPtr<Text> text = position.containerText();
+    RefPtr<Text> text = position.containerText();
     if (!style->preserveNewline() || !position.offsetInContainerNode() || !isNewLineAtPosition(firstPositionInNode(text.get())))
         return endOfNextParagraph;
 
@@ -230,9 +230,9 @@ VisiblePosition ApplyBlockElementCommand::endOfNextParagrahSplittingTextNodesIfN
     return VisiblePosition(Position(text.get(), position.offsetInContainerNode() - 1));
 }
 
-PassRefPtrWillBeRawPtr<HTMLElement> ApplyBlockElementCommand::createBlockElement() const
+PassRefPtr<HTMLElement> ApplyBlockElementCommand::createBlockElement() const
 {
-    RefPtrWillBeRawPtr<HTMLElement> element = createHTMLElement(document(), m_tagName);
+    RefPtr<HTMLElement> element = createHTMLElement(document(), m_tagName);
     if (m_inlineStyle.length())
         element->setAttribute(HTMLNames::styleAttr, m_inlineStyle);
     return element.release();

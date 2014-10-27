@@ -1159,7 +1159,7 @@ void RenderBlockFlow::setMustDiscardMarginBefore(bool value)
         return;
 
     if (!m_rareData)
-        m_rareData = adoptPtrWillBeNoop(new RenderBlockFlowRareData(this));
+        m_rareData = adoptPtr(new RenderBlockFlowRareData(this));
 
     m_rareData->m_discardMarginBefore = value;
 }
@@ -1175,7 +1175,7 @@ void RenderBlockFlow::setMustDiscardMarginAfter(bool value)
         return;
 
     if (!m_rareData)
-        m_rareData = adoptPtrWillBeNoop(new RenderBlockFlowRareData(this));
+        m_rareData = adoptPtr(new RenderBlockFlowRareData(this));
 
     m_rareData->m_discardMarginAfter = value;
 }
@@ -1220,7 +1220,7 @@ void RenderBlockFlow::setMaxMarginBeforeValues(LayoutUnit pos, LayoutUnit neg)
     if (!m_rareData) {
         if (pos == RenderBlockFlowRareData::positiveMarginBeforeDefault(this) && neg == RenderBlockFlowRareData::negativeMarginBeforeDefault(this))
             return;
-        m_rareData = adoptPtrWillBeNoop(new RenderBlockFlowRareData(this));
+        m_rareData = adoptPtr(new RenderBlockFlowRareData(this));
     }
     m_rareData->m_margins.setPositiveMarginBefore(pos);
     m_rareData->m_margins.setNegativeMarginBefore(neg);
@@ -1231,7 +1231,7 @@ void RenderBlockFlow::setMaxMarginAfterValues(LayoutUnit pos, LayoutUnit neg)
     if (!m_rareData) {
         if (pos == RenderBlockFlowRareData::positiveMarginAfterDefault(this) && neg == RenderBlockFlowRareData::negativeMarginAfterDefault(this))
             return;
-        m_rareData = adoptPtrWillBeNoop(new RenderBlockFlowRareData(this));
+        m_rareData = adoptPtr(new RenderBlockFlowRareData(this));
     }
     m_rareData->m_margins.setPositiveMarginAfter(pos);
     m_rareData->m_margins.setNegativeMarginAfter(neg);
@@ -2276,7 +2276,7 @@ RenderBlockFlow::RenderBlockFlowRareData& RenderBlockFlow::ensureRareData()
     if (m_rareData)
         return *m_rareData;
 
-    m_rareData = adoptPtrWillBeNoop(new RenderBlockFlowRareData(this));
+    m_rareData = adoptPtr(new RenderBlockFlowRareData(this));
     return *m_rareData;
 }
 

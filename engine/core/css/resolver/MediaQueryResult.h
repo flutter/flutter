@@ -29,7 +29,7 @@
 
 namespace blink {
 
-class MediaQueryResult : public RefCountedWillBeGarbageCollectedFinalized<MediaQueryResult> {
+class MediaQueryResult : public RefCounted<MediaQueryResult> {
     WTF_MAKE_NONCOPYABLE(MediaQueryResult); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
     MediaQueryResult(const MediaQueryExp& expr, bool result)

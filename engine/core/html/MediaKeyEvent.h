@@ -39,7 +39,7 @@ struct MediaKeyEventInit : public EventInit {
     RefPtr<Uint8Array> initData;
     RefPtr<Uint8Array> message;
     String defaultURL;
-    RefPtrWillBeMember<MediaKeyError> errorCode;
+    RefPtr<MediaKeyError> errorCode;
     unsigned short systemCode;
 };
 
@@ -48,14 +48,14 @@ class MediaKeyEvent final : public Event {
 public:
     virtual ~MediaKeyEvent();
 
-    static PassRefPtrWillBeRawPtr<MediaKeyEvent> create()
+    static PassRefPtr<MediaKeyEvent> create()
     {
-        return adoptRefWillBeNoop(new MediaKeyEvent);
+        return adoptRef(new MediaKeyEvent);
     }
 
-    static PassRefPtrWillBeRawPtr<MediaKeyEvent> create(const AtomicString& type, const MediaKeyEventInit& initializer)
+    static PassRefPtr<MediaKeyEvent> create(const AtomicString& type, const MediaKeyEventInit& initializer)
     {
-        return adoptRefWillBeNoop(new MediaKeyEvent(type, initializer));
+        return adoptRef(new MediaKeyEvent(type, initializer));
     }
 
     virtual const AtomicString& interfaceName() const override;
@@ -79,7 +79,7 @@ private:
     RefPtr<Uint8Array> m_initData;
     RefPtr<Uint8Array> m_message;
     String m_defaultURL;
-    RefPtrWillBeMember<MediaKeyError> m_errorCode;
+    RefPtr<MediaKeyError> m_errorCode;
     unsigned short m_systemCode;
 };
 

@@ -77,8 +77,8 @@ public:
     void add(FontFace*, ExceptionState&);
     void clear();
     bool remove(FontFace*, ExceptionState&);
-    void forEach(PassOwnPtrWillBeRawPtr<FontFaceSetForEachCallback>, const ScriptValue& thisArg) const;
-    void forEach(PassOwnPtrWillBeRawPtr<FontFaceSetForEachCallback>) const;
+    void forEach(PassOwnPtr<FontFaceSetForEachCallback>, const ScriptValue& thisArg) const;
+    void forEach(PassOwnPtr<FontFaceSetForEachCallback>) const;
     bool has(FontFace*, ExceptionState&) const;
 
     unsigned long size() const;
@@ -99,7 +99,7 @@ public:
     virtual void resume() override;
     virtual void stop() override;
 
-    static PassRefPtrWillBeRawPtr<FontFaceSet> from(Document&);
+    static PassRefPtr<FontFaceSet> from(Document&);
     static void didLayout(Document&);
 
     void addFontFacesToFontFaceCache(FontFaceCache*, CSSFontSelector*);
@@ -109,9 +109,9 @@ public:
 #endif
 
 private:
-    static PassRefPtrWillBeRawPtr<FontFaceSet> create(Document& document)
+    static PassRefPtr<FontFaceSet> create(Document& document)
     {
-        return adoptRefWillBeNoop(new FontFaceSet(document));
+        return adoptRef(new FontFaceSet(document));
     }
 
     class FontLoadHistogram {
@@ -133,23 +133,23 @@ private:
     bool hasLoadedFonts() const { return !m_loadedFonts.isEmpty() || !m_failedFonts.isEmpty(); }
 
     bool inActiveDocumentContext() const;
-    void forEachInternal(PassOwnPtrWillBeRawPtr<FontFaceSetForEachCallback>, const ScriptValue* thisArg) const;
-    void addToLoadingFonts(PassRefPtrWillBeRawPtr<FontFace>);
-    void removeFromLoadingFonts(PassRefPtrWillBeRawPtr<FontFace>);
+    void forEachInternal(PassOwnPtr<FontFaceSetForEachCallback>, const ScriptValue* thisArg) const;
+    void addToLoadingFonts(PassRefPtr<FontFace>);
+    void removeFromLoadingFonts(PassRefPtr<FontFace>);
     void fireLoadingEvent();
     void fireDoneEventIfPossible();
     bool resolveFontStyle(const String&, Font&);
     void handlePendingEventsAndPromisesSoon();
     void handlePendingEventsAndPromises();
-    const WillBeHeapListHashSet<RefPtrWillBeMember<FontFace> >& cssConnectedFontFaceList() const;
+    const ListHashSet<RefPtr<FontFace> >& cssConnectedFontFaceList() const;
     bool isCSSConnectedFontFace(FontFace*) const;
 
-    WillBeHeapHashSet<RefPtrWillBeMember<FontFace> > m_loadingFonts;
+    HashSet<RefPtr<FontFace> > m_loadingFonts;
     bool m_shouldFireLoadingEvent;
     Vector<OwnPtr<FontsReadyPromiseResolver> > m_readyResolvers;
     FontFaceArray m_loadedFonts;
     FontFaceArray m_failedFonts;
-    WillBeHeapListHashSet<RefPtrWillBeMember<FontFace> > m_nonCSSConnectedFaces;
+    ListHashSet<RefPtr<FontFace> > m_nonCSSConnectedFaces;
 
     AsyncMethodRunner<FontFaceSet> m_asyncRunner;
 

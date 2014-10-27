@@ -72,7 +72,7 @@ int WebRange::endOffset() const
 WebNode WebRange::startContainer(WebExceptionCode& exceptionCode) const
 {
     // FIXME: Create a wrapper class that just sets the internal int.
-    RefPtrWillBeRawPtr<Node> node(m_private->startContainer());
+    RefPtr<Node> node(m_private->startContainer());
     exceptionCode = 0;
     return node.release();
 }
@@ -80,7 +80,7 @@ WebNode WebRange::startContainer(WebExceptionCode& exceptionCode) const
 WebNode WebRange::endContainer(WebExceptionCode& exceptionCode) const
 {
     // FIXME: Create a wrapper class that just sets the internal int.
-    RefPtrWillBeRawPtr<Node> node(m_private->endContainer());
+    RefPtr<Node> node(m_private->endContainer());
     exceptionCode = 0;
     return node.release();
 }
@@ -111,12 +111,12 @@ WebRange WebRange::fromDocumentRange(WebLocalFrame* frame, int start, int length
     return PlainTextRange(start, start + length).createRange(*scope);
 }
 
-WebRange::WebRange(const PassRefPtrWillBeRawPtr<Range>& range)
+WebRange::WebRange(const PassRefPtr<Range>& range)
     : m_private(range)
 {
 }
 
-WebRange::operator PassRefPtrWillBeRawPtr<Range>() const
+WebRange::operator PassRefPtr<Range>() const
 {
     return m_private.get();
 }

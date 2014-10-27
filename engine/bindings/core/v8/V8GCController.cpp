@@ -162,7 +162,7 @@ public:
     }
 
 private:
-    bool traverseTree(Node* rootNode, WillBeHeapVector<RawPtrWillBeMember<Node>, initialNodeVectorSize>* partiallyDependentNodes)
+    bool traverseTree(Node* rootNode, Vector<RawPtr<Node>, initialNodeVectorSize>* partiallyDependentNodes)
     {
         // To make each minor GC time bounded, we might need to give up
         // traversing at some point for a large DOM tree. That being said,
@@ -211,7 +211,7 @@ private:
 
     void gcTree(v8::Isolate* isolate, Node* startNode)
     {
-        WillBeHeapVector<RawPtrWillBeMember<Node>, initialNodeVectorSize> partiallyDependentNodes;
+        Vector<RawPtr<Node>, initialNodeVectorSize> partiallyDependentNodes;
 
         Node* node = startNode;
         while (Node* parent = node->parentOrShadowHostOrTemplateHostNode())
@@ -231,7 +231,7 @@ private:
         }
     }
 
-    WillBePersistentHeapVector<RawPtrWillBeMember<Node> > m_nodesInNewSpace;
+    Vector<RawPtr<Node> > m_nodesInNewSpace;
     v8::Isolate* m_isolate;
 };
 
@@ -310,7 +310,7 @@ private:
     }
 
     v8::Isolate* m_isolate;
-    WillBePersistentHeapVector<RawPtrWillBeMember<Node> > m_groupsWhichNeedRetainerInfo;
+    Vector<RawPtr<Node> > m_groupsWhichNeedRetainerInfo;
     bool m_liveRootGroupIdSet;
     bool m_constructRetainedObjectInfos;
 };
