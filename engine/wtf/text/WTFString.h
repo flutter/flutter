@@ -24,6 +24,7 @@
 
 // This file would be called String.h, but that conflicts with <string.h>
 // on systems without case-sensitive file systems.
+#include <string>
 
 #include "wtf/HashTableDeletedValueType.h"
 #include "wtf/WTFExport.h"

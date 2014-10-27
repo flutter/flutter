@@ -317,8 +317,6 @@ void Canvas2DLayerBridge::freeReleasedMailbox()
     }
     // Invalidate texture state in case the compositor altered it since the copy-on-write.
     if (mailboxInfo->m_image) {
-        if (isHidden() || releasedMailboxHasExpired())
-            mailboxInfo->m_image->getTexture()->resetFlag(static_cast<GrTextureFlags>(GrTexture::kReturnToCache_FlagBit));
         mailboxInfo->m_image->getTexture()->textureParamsModified();
         mailboxInfo->m_image.clear();
     }
@@ -505,9 +503,9 @@ void Canvas2DLayerBridge::mailboxReleased(const WebExternalTextureMailbox& mailb
                 // texture and remove the mailbox from list to avoid reusing it
                 // in future.
                 if (mailboxInfo->m_image) {
-                    mailboxInfo->m_image->getTexture()->resetFlag(
-                        static_cast<GrTextureFlags>(GrTexture::kReturnToCache_FlagBit));
-                    mailboxInfo->m_image->getTexture()->textureParamsModified();
+                    GrTexture* texture = mailboxInfo->m_image->getTexture();
+                    if (texture)
+                        texture->textureParamsModified();
                     mailboxInfo->m_image.clear();
                 }
                 size_t i = mailboxInfo - m_mailboxes.begin();
