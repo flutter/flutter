@@ -779,6 +779,11 @@ _document_:
      1. Create an element _node_ with tag name and attributes given by
         the token.
      2. Append _node_ to the top node in the _stack of open nodes_.
+     3. Push _node_ onto the top of the _stack of open nodes_.
+     4. If _node_ is a ``template`` element, then:
+        1. Let _fragment_ be the ``DocumentFragment`` object that the
+          ``template`` element uses as its template contents container.
+        2. Push _fragment_ onto the top of the _stack of open nodes_.
    - If _token_ is an end tag token:
      1. Let _node_ be the topmost node in the _stack of open nodes_
         whose tag name is the same as the token's tag name, if any. If
