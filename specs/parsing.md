@@ -638,7 +638,7 @@ If the current character is...
   character.
 
 * Anything else: Run the _emitting operation_ for all but the last
-  character in _raw value_, and switch to the **data state** without
+  character in _raw value_, and switch to the _return state_ without
   consuming the current character.
 
 
@@ -648,8 +648,8 @@ Append the current character to _raw value_.
 
 If the current character is...
 
-* '``x``', '``X``': Let _value_ be zero, consume the character,
-  and switch to the **hexadecimal numeric character reference** state.
+* '``x``', '``X``': Consume the character and switch to the **before
+  hexadecimal numeric character reference** state.
 
 * '``0``'..'``9``': Let _value_ be the numeric value of the
   current character interpreted as a decimal digit, consume the
@@ -657,7 +657,23 @@ If the current character is...
   state.
 
 * Anything else: Run the _emitting operation_ for all but the last
-  character in _raw value_, and switch to the **data state** without
+  character in _raw value_, and switch to the _return state_ without
+  consuming the current character.
+
+
+#### **Before hexadecimal numeric character reference** state ####
+
+Append the current character to _raw value_.
+
+If the current character is...
+
+* '``0``'..'``9``', '``a``'..'``f``', '``A``'..'``F``':
+  Let _value_ be the numeric value of the current character
+  interpreted as a hexadecimal digit, consume the character, and
+  switch to the **hexadecimal numeric character reference** state.
+
+* Anything else: Run the _emitting operation_ for all but the last
+  character in _raw value_, and switch to the _return state_ without
   consuming the current character.
 
 
@@ -679,7 +695,7 @@ If the current character is...
   state_.
 
 * Anything else: Run the _emitting operation_ for all but the last
-  character in _raw value_, and switch to the **data state** without
+  character in _raw value_, and switch to the _return state_ without
   consuming the current character.
 
 
@@ -701,7 +717,7 @@ If the current character is...
   state_.
 
 * Anything else: Run the _emitting operation_ for all but the last
-  character in _raw value_, and switch to the **data state** without
+  character in _raw value_, and switch to the _return state_ without
   consuming the current character.
 
 
@@ -735,7 +751,7 @@ If the current character is...
   character and stay in this state.
 
 * Anything else: Run the _emitting operation_ for all but the last
-  character in _raw value_, and switch to the **data state** without
+  character in _raw value_, and switch to the _return state_ without
   consuming the current character.
 
 
