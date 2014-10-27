@@ -37,6 +37,7 @@ import logging
 import os
 import operator
 import optparse
+import math
 import re
 import sys
 
@@ -270,7 +271,7 @@ class Port(object):
         # FIXME: See if we can reduce the denominator here without causing timeouts.
         # Maybe we need to run one sky_shell process and multiple sky_viewers
         # instead of multiple sky_shells
-        return int(self._executive.cpu_count() / 4)
+        return int(math.ceil(float(self._executive.cpu_count()) / 4))
 
     def default_max_locked_shards(self):
         """Return the number of "locked" shards to run in parallel (like the http tests)."""
@@ -719,13 +720,12 @@ class Port(object):
 
     def _real_tests(self, paths):
         # When collecting test cases, skip these directories
-        skipped_directories = set(['.svn', '_svn', 'platform', 'resources', 'support', 'script-tests', 'reference', 'reftest'])
+        skipped_directories = set(['.svn', '_svn', 'platform', 'resources', 'support', 'script-tests', 'reference', 'reftest', 'conf'])
         files = find_files.find(self._filesystem, self.layout_tests_dir(), paths, skipped_directories, Port.is_test_file, self.test_key)
         return [self.relative_test_filename(f) for f in files]
 
     # When collecting test cases, we include any file with these extensions.
-    _supported_file_extensions = set(['.html', '.xml', '.xhtml', '.xht', '.pl',
-                                      '.htm', '.php', '.svg', '.mht', '.pdf'])
+    _supported_file_extensions = set(['.html'])
 
     @staticmethod
     # If any changes are made here be sure to update the isUsedInReftest method in old-run-webkit-tests as well.
