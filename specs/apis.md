@@ -31,7 +31,7 @@ module 'sky:core' {
     void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
   }
 
-  interface CustomEventTarget {
+  interface CustomEventTarget : EventTarget {
     constructor (); // O(1)
     attribute EventTarget parentNode; // getter O(1), setter O(N) in height of tree, throws if this would make a loop
 
