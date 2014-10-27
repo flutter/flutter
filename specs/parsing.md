@@ -28,9 +28,12 @@ object.
 Decoding stage
 --------------
 
-To decode a sequence of bytes _bytes_ for parsing, the [UTF-8
-decoder](https://encoding.spec.whatwg.org/#utf-8-decoder) must be used
-to transform _bytes_ into a sequence of characters _characters_.
+To decode a sequence of bytes _bytes_ for parsing, the [utf-8
+decode](https://encoding.spec.whatwg.org/#utf-8-decode) algorithm must
+be used to transform _bytes_ into a sequence of characters
+_characters_.
+
+Note: The decoder will strip a leading BOM if any.
 
 This sequence must then be passed to the normalisation stage.
 
