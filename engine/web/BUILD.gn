@@ -83,7 +83,6 @@ component("web") {
     "WebFontImpl.h",
     "WebFrame.cpp",
     "WebGlyphCache.cpp",
-    "WebHeap.cpp",
     "WebHitTestResult.cpp",
     "WebImageCache.cpp",
     "WebImageDecoder.cpp",

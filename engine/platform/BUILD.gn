@@ -160,8 +160,6 @@ component("platform") {
     "SharedTimer.cpp",
     "SharedTimer.h",
     "Supplementable.h",
-    "TaskSynchronizer.cpp",
-    "TaskSynchronizer.h",
     "ThreadTimers.cpp",
     "ThreadTimers.h",
     "Timer.cpp",
@@ -649,7 +647,6 @@ component("platform") {
   ]
 
   deps = [
-    ":heap_asm_stubs",
     ":make_platform_generated",
     "//base:base",
     "//gpu/command_buffer/client:gles2_c_lib",
@@ -718,48 +715,6 @@ component("platform") {
   if (cpu_arch == "arm") {
     deps += [ ":sky_arm_neon" ]
   }
-}
-
-if (cpu_arch == "x86" || cpu_arch == "x64") {
-
-import("//third_party/yasm/yasm_assemble.gni")
-
-yasm_assemble("heap_asm_stubs") {
-  sources = [ "heap/asm/SaveRegisters_x86.asm" ]
-
-  yasm_flags = []
-  if (is_mac) {
-    # Necessary to ensure symbols end up with a _ prefix; added by
-    # yasm_compile.gypi for Windows, but not Mac.
-    yasm_flags += [ "-DPREFIX" ]
-  }
-  if (cpu_arch == "x64") {
-    if (is_win) {
-      yasm_flags += [ "-DX64WIN=1" ]
-    } else {
-      yasm_flags += [ "-DX64POSIX=1" ]
-    }
-  } else if (cpu_arch == "x86") {
-    yasm_flags += [ "-DIA32=1" ]
-  }
-}
-
-} else { # cpu_arch == "x86" || cpu_arch == "x64"
-
-source_set("heap_asm_stubs") {
-  if (cpu_arch == "arm") {
-    sources = [ "heap/asm/SaveRegisters_arm.S" ]
-  } else if (cpu_arch == "arm64") {
-    sources = [ "heap/asm/SaveRegisters_arm64.S" ]
-  } else if (cpu_arch == "mipsel") {
-    sources = [ "heap/asm/SaveRegisters_mips.S" ]
-  }
-
-  if (cpu_arch == "arm") {
-    defines = [ "ARM=1" ]
-  }
-}
-
 }
 
 test("platform_unittests") {

@@ -27,8 +27,6 @@
 #include "core/css/RuleFeature.h"
 #include "core/css/StyleRule.h"
 #include "core/css/resolver/MediaQueryResult.h"
-#include "platform/heap/HeapLinkedStack.h"
-#include "platform/heap/HeapTerminatedArray.h"
 #include "wtf/Forward.h"
 #include "wtf/HashMap.h"
 #include "wtf/LinkedStack.h"

@@ -47,7 +47,6 @@
 #include "platform/RuntimeEnabledFeatures.h"
 #include "platform/graphics/ImageDecodingStore.h"
 #include "platform/graphics/media/MediaPlayer.h"
-#include "platform/heap/Heap.h"
 #include "public/platform/Platform.h"
 #include "web/WebMediaPlayerClientImpl.h"
 #include "wtf/Assertions.h"
@@ -116,8 +115,6 @@ void removeMessageLoopObservers()
 
 } // namespace
 
-static ThreadState::Interruptor* s_isolateInterruptor = 0;
-
 // Make sure we are not re-initialized in the same address space.
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
@@ -127,9 +124,6 @@ void initialize(Platform* platform)
     initializeWithoutV8(platform);
 
     V8Initializer::initializeMainThreadIfNeeded();
-
-    s_isolateInterruptor = new V8IsolateInterruptor(V8PerIsolateData::mainThreadIsolate());
-    ThreadState::current()->addInterruptor(s_isolateInterruptor);
 
     addMessageLoopObservers();
 }
@@ -170,9 +164,6 @@ void initializeWithoutV8(Platform* platform)
     WTF::setRandomSource(cryptographicallyRandomValues);
     WTF::initialize(currentTimeFunction, monotonicallyIncreasingTimeFunction);
     WTF::initializeMainThread(callOnMainThreadFunction);
-    Heap::init();
-
-    ThreadState::attachMainThread();
 
     DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());
     initializer.init();
@@ -193,13 +184,6 @@ void shutdown()
 {
     removeMessageLoopObservers();
 
-    ASSERT(s_isolateInterruptor);
-    ThreadState::current()->removeInterruptor(s_isolateInterruptor);
-
-    // Detach the main thread before starting the shutdown sequence
-    // so that the main thread won't get involved in a GC during the shutdown.
-    ThreadState::detachMainThread();
-
     v8::Isolate* isolate = V8PerIsolateData::mainThreadIsolate();
     V8PerIsolateData::dispose(isolate);
 
@@ -209,7 +193,6 @@ void shutdown()
 void shutdownWithoutV8()
 {
     CoreInitializer::shutdown();
-    Heap::shutdown();
     WTF::shutdown();
     Platform::shutdown();
 }

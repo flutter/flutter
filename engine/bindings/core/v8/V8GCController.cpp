@@ -381,26 +381,6 @@ void V8GCController::gcEpilogue(v8::GCType type, v8::GCCallbackFlags flags)
     else if (type == v8::kGCTypeMarkSweepCompact)
         majorGCEpilogue(isolate);
 
-    // Forces a Blink heap garbage collection when a garbage collection
-    // was forced from V8. This is used for tests that force GCs from
-    // JavaScript to verify that objects die when expected.
-    if (flags & v8::kGCCallbackFlagForced) {
-        // This single GC is not enough for two reasons:
-        //   (1) The GC is not precise because the GC scans on-stack pointers conservatively.
-        //   (2) One GC is not enough to break a chain of persistent handles. It's possible that
-        //       some heap allocated objects own objects that contain persistent handles
-        //       pointing to other heap allocated objects. To break the chain, we need multiple GCs.
-        //
-        // Regarding (1), we force a precise GC at the end of the current event loop. So if you want
-        // to collect all garbage, you need to wait until the next event loop.
-        // Regarding (2), it would be OK in practice to trigger only one GC per gcEpilogue, because
-        // GCController.collectAll() forces 7 V8's GC.
-        Heap::collectGarbage(ThreadState::HeapPointersOnStack);
-
-        // Forces a precise GC at the end of the current event loop.
-        Heap::setForcePreciseGCForTesting();
-    }
-
     TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "GCEvent", "usedHeapSizeAfter", usedHeapSize(isolate));
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", "data", InspectorUpdateCountersEvent::data());
 }

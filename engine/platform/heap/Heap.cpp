@@ -354,52 +354,6 @@ private:
     MemoryRegion m_writable;
 };
 
-class GCScope {
-public:
-    explicit GCScope(ThreadState::StackState stackState)
-        : m_state(ThreadState::current())
-        , m_safePointScope(stackState)
-        , m_parkedAllThreads(false)
-    {
-        TRACE_EVENT0("blink_gc", "Heap::GCScope");
-        const char* samplingState = TRACE_EVENT_GET_SAMPLING_STATE();
-        if (m_state->isMainThread())
-            TRACE_EVENT_SET_SAMPLING_STATE("blink_gc", "BlinkGCWaiting");
-
-        m_state->checkThread();
-
-        // FIXME: in an unlikely coincidence that two threads decide
-        // to collect garbage at the same time, avoid doing two GCs in
-        // a row.
-        RELEASE_ASSERT(!m_state->isInGC());
-        RELEASE_ASSERT(!m_state->isSweepInProgress());
-        if (LIKELY(ThreadState::stopThreads())) {
-            m_parkedAllThreads = true;
-            m_state->enterGC();
-        }
-        if (m_state->isMainThread())
-            TRACE_EVENT_SET_NONCONST_SAMPLING_STATE(samplingState);
-    }
-
-    bool allThreadsParked() { return m_parkedAllThreads; }
-
-    ~GCScope()
-    {
-        // Only cleanup if we parked all threads in which case the GC happened
-        // and we need to resume the other threads.
-        if (LIKELY(m_parkedAllThreads)) {
-            m_state->leaveGC();
-            ASSERT(!m_state->isInGC());
-            ThreadState::resumeThreads();
-        }
-    }
-
-private:
-    ThreadState* m_state;
-    ThreadState::SafePointScope m_safePointScope;
-    bool m_parkedAllThreads; // False if we fail to park all threads
-};
-
 NO_SANITIZE_ADDRESS
 bool HeapObjectHeader::isMarked() const
 {
@@ -2208,51 +2162,6 @@ private:
     CallbackStack** m_markingStack;
 };
 
-void Heap::init()
-{
-    ThreadState::init();
-    CallbackStack::init(&s_markingStack);
-    CallbackStack::init(&s_postMarkingCallbackStack);
-    CallbackStack::init(&s_weakCallbackStack);
-    CallbackStack::init(&s_ephemeronStack);
-    s_heapDoesNotContainCache = new HeapDoesNotContainCache();
-    s_markingVisitor = new MarkingVisitor(&s_markingStack);
-    s_freePagePool = new FreePagePool();
-    s_orphanedPagePool = new OrphanedPagePool();
-    s_markingThreads = new Vector<OwnPtr<blink::WebThread> >();
-}
-
-void Heap::shutdown()
-{
-    s_shutdownCalled = true;
-    ThreadState::shutdownHeapIfNecessary();
-}
-
-void Heap::doShutdown()
-{
-    // We don't want to call doShutdown() twice.
-    if (!s_markingVisitor)
-        return;
-
-    ASSERT(!ThreadState::isAnyThreadInGC());
-    ASSERT(!ThreadState::attachedThreads().size());
-    delete s_markingThreads;
-    s_markingThreads = 0;
-    delete s_markingVisitor;
-    s_markingVisitor = 0;
-    delete s_heapDoesNotContainCache;
-    s_heapDoesNotContainCache = 0;
-    delete s_freePagePool;
-    s_freePagePool = 0;
-    delete s_orphanedPagePool;
-    s_orphanedPagePool = 0;
-    CallbackStack::shutdown(&s_weakCallbackStack);
-    CallbackStack::shutdown(&s_postMarkingCallbackStack);
-    CallbackStack::shutdown(&s_markingStack);
-    CallbackStack::shutdown(&s_ephemeronStack);
-    ThreadState::shutdown();
-}
-
 BaseHeapPage* Heap::contains(Address address)
 {
     ASSERT(ThreadState::isAnyThreadInGC());
@@ -2440,114 +2349,10 @@ void Heap::prepareForGC()
 
 void Heap::collectGarbage(ThreadState::StackState stackState)
 {
-    ThreadState* state = ThreadState::current();
-    state->clearGCRequested();
-
-    GCScope gcScope(stackState);
-    // Check if we successfully parked the other threads. If not we bail out of the GC.
-    if (!gcScope.allThreadsParked()) {
-        ThreadState::current()->setGCRequested();
-        return;
-    }
-
-    if (state->isMainThread())
-        ScriptForbiddenScope::enter();
-
-    s_lastGCWasConservative = false;
-
-    TRACE_EVENT0("blink_gc", "Heap::collectGarbage");
-    TRACE_EVENT_SCOPED_SAMPLING_STATE("blink_gc", "BlinkGC");
-    double timeStamp = WTF::currentTimeMS();
-#if ENABLE(GC_PROFILE_MARKING)
-    static_cast<MarkingVisitor*>(s_markingVisitor)->objectGraph().clear();
-#endif
-
-    // Disallow allocation during garbage collection (but not
-    // during the finalization that happens when the gcScope is
-    // torn down).
-    NoAllocationScope<AnyThread> noAllocationScope;
-
-    prepareForGC();
-
-    // 1. trace persistent roots.
-    ThreadState::visitPersistentRoots(s_markingVisitor);
-
-    // 2. trace objects reachable from the persistent roots including ephemerons.
-    processMarkingStackInParallel();
-
-    // 3. trace objects reachable from the stack. We do this independent of the
-    // given stackState since other threads might have a different stack state.
-    ThreadState::visitStackRoots(s_markingVisitor);
-
-    // 4. trace objects reachable from the stack "roots" including ephemerons.
-    // Only do the processing if we found a pointer to an object on one of the
-    // thread stacks.
-    if (lastGCWasConservative())
-        processMarkingStackInParallel();
-
-    postMarkingProcessing();
-    globalWeakProcessing();
-
-    // After a global marking we know that any orphaned page that was not reached
-    // cannot be reached in a subsequent GC. This is due to a thread either having
-    // swept its heap or having done a "poor mans sweep" in prepareForGC which marks
-    // objects that are dead, but not swept in the previous GC as dead. In this GC's
-    // marking we check that any object marked as dead is not traced. E.g. via a
-    // conservatively found pointer or a programming error with an object containing
-    // a dangling pointer.
-    orphanedPagePool()->decommitOrphanedPages();
-
-#if ENABLE(GC_PROFILE_MARKING)
-    static_cast<MarkingVisitor*>(s_markingVisitor)->reportStats();
-#endif
-
-    if (blink::Platform::current()) {
-        uint64_t objectSpaceSize;
-        uint64_t allocatedSpaceSize;
-        getHeapSpaceSize(&objectSpaceSize, &allocatedSpaceSize);
-        blink::Platform::current()->histogramCustomCounts("BlinkGC.CollectGarbage", WTF::currentTimeMS() - timeStamp, 0, 10 * 1000, 50);
-        blink::Platform::current()->histogramCustomCounts("BlinkGC.TotalObjectSpace", objectSpaceSize / 1024, 0, 4 * 1024 * 1024, 50);
-        blink::Platform::current()->histogramCustomCounts("BlinkGC.TotalAllocatedSpace", allocatedSpaceSize / 1024, 0, 4 * 1024 * 1024, 50);
-    }
-
-    if (state->isMainThread())
-        ScriptForbiddenScope::exit();
 }
 
 void Heap::collectGarbageForTerminatingThread(ThreadState* state)
 {
-    // We explicitly do not enter a safepoint while doing thread specific
-    // garbage collection since we don't want to allow a global GC at the
-    // same time as a thread local GC.
-
-    {
-        NoAllocationScope<AnyThread> noAllocationScope;
-
-        state->enterGC();
-        state->prepareForGC();
-
-        // 1. trace the thread local persistent roots. For thread local GCs we
-        // don't trace the stack (ie. no conservative scanning) since this is
-        // only called during thread shutdown where there should be no objects
-        // on the stack.
-        // We also assume that orphaned pages have no objects reachable from
-        // persistent handles on other threads or CrossThreadPersistents. The
-        // only cases where this could happen is if a subsequent conservative
-        // global GC finds a "pointer" on the stack or due to a programming
-        // error where an object has a dangling cross-thread pointer to an
-        // object on this heap.
-        state->visitPersistents(s_markingVisitor);
-
-        // 2. trace objects reachable from the thread's persistent roots
-        // including ephemerons.
-        processMarkingStack<ThreadLocalMarking>();
-
-        postMarkingProcessing();
-        globalWeakProcessing();
-
-        state->leaveGC();
-    }
-    state->performPendingSweep();
 }
 
 void Heap::processMarkingStackEntries(int* runningMarkingThreads)

@@ -65,11 +65,6 @@ protected:
     }
     virtual void TearDown()
     {
-        // Garbage collection is required prior to switching out the
-        // test's memory cache; image resources are released, evicting
-        // them from the cache.
-        Heap::collectGarbage(ThreadState::NoHeapPointersOnStack);
-
         replaceMemoryCacheForTesting(m_globalMemoryCache.release());
     }
 
@@ -153,9 +148,6 @@ TEST_F(ImageBitmapTest, ImageBitmapLiveResourcePriority)
         // ImageBitmaps that do not contain any of the source image do not elevate CacheLiveResourcePriority.
         ASSERT_EQ(memoryCache()->priority(imageOutsideCrop->cachedImage()), MemoryCacheLiveResourcePriorityLow);
     }
-    // Force a garbage collection to sweep out the local ImageBitmaps.
-    Heap::collectGarbage(ThreadState::NoHeapPointersOnStack);
-
     // CacheLiveResourcePriroity should return to CacheLiveResourcePriorityLow when no ImageBitmaps reference the image.
     ASSERT_EQ(memoryCache()->priority(imageNoCrop->cachedImage()), MemoryCacheLiveResourcePriorityLow);
     ASSERT_EQ(memoryCache()->priority(imageExteriorCrop->cachedImage()), MemoryCacheLiveResourcePriorityLow);

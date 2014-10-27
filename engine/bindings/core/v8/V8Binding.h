@@ -41,7 +41,6 @@
 #include "bindings/core/v8/V8StringResource.h"
 #include "bindings/core/v8/V8ThrowException.h"
 #include "bindings/core/v8/V8ValueCache.h"
-#include "platform/heap/Heap.h"
 #include "wtf/GetPtr.h"
 #include "wtf/MathExtras.h"
 #include "wtf/text/AtomicString.h"
@@ -900,29 +899,6 @@ enum DeleteResult {
     DeleteSuccess,
     DeleteReject,
     DeleteUnknownProperty
-};
-
-class V8IsolateInterruptor : public ThreadState::Interruptor {
-public:
-    explicit V8IsolateInterruptor(v8::Isolate* isolate) : m_isolate(isolate) { }
-
-    static void onInterruptCallback(v8::Isolate* isolate, void* data)
-    {
-        reinterpret_cast<V8IsolateInterruptor*>(data)->onInterrupted();
-    }
-
-    virtual void requestInterrupt() override
-    {
-        m_isolate->RequestInterrupt(&onInterruptCallback, this);
-    }
-
-    virtual void clearInterrupt() override
-    {
-        m_isolate->ClearInterrupt();
-    }
-
-private:
-    v8::Isolate* m_isolate;
 };
 
 class V8TestingScope {

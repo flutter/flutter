@@ -2755,17 +2755,6 @@ void Document::checkLoadEventSoon()
 
 bool Document::isDelayingLoadEvent()
 {
-#if ENABLE(OILPAN)
-    // Always delay load events until after garbage collection.
-    // This way we don't have to explicitly delay load events via
-    // incrementLoadEventDelayCount and decrementLoadEventDelayCount in
-    // Node destructors.
-    if (ThreadState::current()->isSweepInProgress()) {
-        if (!m_loadEventDelayCount)
-            checkLoadEventSoon();
-        return true;
-    }
-#endif
     return m_loadEventDelayCount;
 }
 

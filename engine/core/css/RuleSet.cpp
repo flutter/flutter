@@ -36,7 +36,6 @@
 #include "core/css/StyleSheetContents.h"
 #include "platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
-#include "platform/heap/HeapTerminatedArrayBuilder.h"
 
 #include "wtf/TerminatedArrayBuilder.h"
 

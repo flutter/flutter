@@ -45,13 +45,6 @@ class DocumentTest : public ::testing::Test {
 protected:
     virtual void SetUp() override;
 
-#if ENABLE(OILPAN)
-    virtual void TearDown() override
-    {
-        Heap::collectAllGarbage();
-    }
-#endif
-
     Document& document() const { return m_dummyPageHolder->document(); }
     Page& page() const { return m_dummyPageHolder->page(); }
 

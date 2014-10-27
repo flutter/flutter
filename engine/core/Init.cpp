@@ -46,7 +46,6 @@
 #include "platform/FontFamilyNames.h"
 #include "platform/Partitions.h"
 #include "platform/PlatformThreadData.h"
-#include "platform/heap/Heap.h"
 #include "wtf/text/StringStatics.h"
 
 namespace blink {

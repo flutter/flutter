@@ -1050,10 +1050,6 @@ private:
 
 class PLATFORM_EXPORT Heap {
 public:
-    static void init();
-    static void shutdown();
-    static void doShutdown();
-
     static BaseHeapPage* contains(Address);
     static BaseHeapPage* contains(void* pointer) { return contains(reinterpret_cast<Address>(pointer)); }
     static BaseHeapPage* contains(const void* pointer) { return contains(const_cast<void*>(pointer)); }

@@ -48,11 +48,7 @@ static size_t sizeForImmutableStylePropertySetWithPropertyCount(unsigned count)
 PassRefPtrWillBeRawPtr<ImmutableStylePropertySet> ImmutableStylePropertySet::create(const CSSProperty* properties, unsigned count, CSSParserMode cssParserMode)
 {
     ASSERT(count <= MaxArraySize);
-#if ENABLE(OILPAN)
-    void* slot = Heap::allocate<StylePropertySet>(sizeForImmutableStylePropertySetWithPropertyCount(count));
-#else
     void* slot = WTF::fastMalloc(sizeForImmutableStylePropertySetWithPropertyCount(count));
-#endif // ENABLE(OILPAN)
     return adoptRefWillBeNoop(new (slot) ImmutableStylePropertySet(properties, count, cssParserMode));
 }
 

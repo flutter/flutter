@@ -256,12 +256,6 @@ class GC_PLUGIN_IGNORE("http://crbug.com/395036") Supplementable : public Supple
 public:
     virtual void trace(Visitor* visitor)
     {
-        // No tracing of off-heap supplements. We should not have any Supplementable
-        // object on the heap. Either the object is HeapSupplementable or if it is
-        // off heap it should use PersistentHeapSupplementable to trace any on-heap
-        // supplements.
-        COMPILE_ASSERT(!IsGarbageCollectedType<T>::value, GarbageCollectedObjectMustBeHeapSupplementable);
-        SupplementableBase<T, false>::trace(visitor);
     }
 };
 

@@ -33,7 +33,6 @@
 #include "platform/EventTracer.h"
 #include "platform/Partitions.h"
 #include "platform/TestingPlatformSupport.h"
-#include "platform/heap/Heap.h"
 #include "wtf/CryptographicallyRandomNumber.h"
 #include "wtf/MainThread.h"
 #include "wtf/WTF.h"
@@ -59,13 +58,9 @@ int main(int argc, char** argv)
     blink::TestingPlatformSupport::Config platformConfig;
     blink::TestingPlatformSupport platform(platformConfig);
 
-    blink::Heap::init();
-    blink::ThreadState::attachMainThread();
     blink::Partitions::init();
     blink::EventTracer::initialize();
     int result = base::RunUnitTestsUsingBaseTestSuite(argc, argv);
     blink::Partitions::shutdown();
-    blink::ThreadState::detachMainThread();
-    blink::Heap::shutdown();
     return result;
 }

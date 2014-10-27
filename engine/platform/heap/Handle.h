@@ -45,70 +45,6 @@ namespace blink {
 
 template<typename T> class HeapTerminatedArray;
 
-// Template to determine if a class is a GarbageCollectedMixin by checking if it
-// has adjustAndMark and isAlive. We can't check directly if the class is a
-// GarbageCollectedMixin because casting to it is potentially ambiguous.
-template<typename T>
-struct IsGarbageCollectedMixin {
-    typedef char TrueType;
-    struct FalseType {
-        char dummy[2];
-    };
-
-#if COMPILER(MSVC)
-    template<typename U> static TrueType hasAdjustAndMark(char[&U::adjustAndMark != 0]);
-    template<typename U> static TrueType hasIsAlive(char[&U::isAlive != 0]);
-#else
-    template<size_t> struct F;
-    template<typename U> static TrueType hasAdjustAndMark(F<sizeof(&U::adjustAndMark)>*);
-    template<typename U> static TrueType hasIsAlive(F<sizeof(&U::isAlive)>*);
-#endif
-    template<typename U> static FalseType hasIsAlive(...);
-    template<typename U> static FalseType hasAdjustAndMark(...);
-
-    static bool const value = (sizeof(TrueType) == sizeof(hasAdjustAndMark<T>(0))) && (sizeof(TrueType) == sizeof(hasIsAlive<T>(0)));
-};
-
-template <typename T>
-struct IsGarbageCollectedType {
-    typedef char TrueType;
-    struct FalseType {
-        char dummy[2];
-    };
-
-    typedef typename WTF::RemoveConst<T>::Type NonConstType;
-    typedef WTF::IsSubclassOfTemplate<NonConstType, GarbageCollected> GarbageCollectedSubclass;
-    typedef IsGarbageCollectedMixin<NonConstType> GarbageCollectedMixinSubclass;
-    typedef WTF::IsSubclassOfTemplate3<NonConstType, HeapHashSet> HeapHashSetSubclass;
-    typedef WTF::IsSubclassOfTemplate3<NonConstType, HeapLinkedHashSet> HeapLinkedHashSetSubclass;
-    typedef WTF::IsSubclassOfTemplateTypenameSizeTypename<NonConstType, HeapListHashSet> HeapListHashSetSubclass;
-    typedef WTF::IsSubclassOfTemplate5<NonConstType, HeapHashMap> HeapHashMapSubclass;
-    typedef WTF::IsSubclassOfTemplateTypenameSize<NonConstType, HeapVector> HeapVectorSubclass;
-    typedef WTF::IsSubclassOfTemplateTypenameSize<NonConstType, HeapDeque> HeapDequeSubclass;
-    typedef WTF::IsSubclassOfTemplate3<NonConstType, HeapHashCountedSet> HeapHashCountedSetSubclass;
-    typedef WTF::IsSubclassOfTemplate<NonConstType, HeapTerminatedArray> HeapTerminatedArraySubclass;
-
-    template<typename U, size_t inlineCapacity> static TrueType listHashSetNodeIsHeapAllocated(WTF::ListHashSetNode<U, HeapListHashSetAllocator<U, inlineCapacity> >*);
-    static FalseType listHashSetNodeIsHeapAllocated(...);
-    static const bool isHeapAllocatedListHashSetNode = sizeof(TrueType) == sizeof(listHashSetNodeIsHeapAllocated(reinterpret_cast<NonConstType*>(0)));
-
-    static const bool value =
-        GarbageCollectedSubclass::value
-        || GarbageCollectedMixinSubclass::value
-        || HeapHashSetSubclass::value
-        || HeapLinkedHashSetSubclass::value
-        || HeapListHashSetSubclass::value
-        || HeapHashMapSubclass::value
-        || HeapVectorSubclass::value
-        || HeapDequeSubclass::value
-        || HeapHashCountedSetSubclass::value
-        || HeapTerminatedArraySubclass::value
-        || isHeapAllocatedListHashSetNode;
-};
-
-#define COMPILE_ASSERT_IS_GARBAGE_COLLECTED(T, ErrorMessage) \
-    COMPILE_ASSERT(IsGarbageCollectedType<T>::value, ErrorMessage)
-
 template<typename T> class Member;
 
 class PersistentNode {
@@ -566,7 +502,6 @@ public:
 
     void trace(Visitor* visitor)
     {
-        COMPILE_ASSERT_IS_GARBAGE_COLLECTED(T, NonGarbageCollectedObjectInPersistent);
 #if ENABLE(GC_PROFILE_MARKING)
         visitor->setHostInfo(this, m_tracingName.isEmpty() ? "Persistent" : m_tracingName);
 #endif
@@ -839,7 +774,6 @@ public:
 protected:
     void verifyTypeIsGarbageCollected() const
     {
-        COMPILE_ASSERT_IS_GARBAGE_COLLECTED(T, NonGarbageCollectedObjectInMember);
     }
 
     T* m_raw;
@@ -902,7 +836,7 @@ template <typename T> struct RemoveHeapPointerWrapperTypes {
 // raw pointer types. To remove these tests, we may need support for
 // instantiating a template with a RawPtrOrMember'ish template.
 template<typename T>
-struct TraceIfNeeded : public TraceIfEnabled<T, WTF::NeedsTracing<T>::value || blink::IsGarbageCollectedType<typename RemoveHeapPointerWrapperTypes<typename WTF::RemovePointer<T>::Type>::Type>::value> { };
+struct TraceIfNeeded : public TraceIfEnabled<T, false> { };
 
 // This trace trait for std::pair will null weak members if their referent is
 // collected. If you have a collection that contain weakness it does not remove
@@ -1399,11 +1333,11 @@ struct PointerParamStorageTraits<T*, true> {
 };
 
 template<typename T>
-struct ParamStorageTraits<T*> : public PointerParamStorageTraits<T*, blink::IsGarbageCollectedType<T>::value> {
+struct ParamStorageTraits<T*> : public PointerParamStorageTraits<T*, false> {
 };
 
 template<typename T>
-struct ParamStorageTraits<RawPtr<T> > : public PointerParamStorageTraits<T*, blink::IsGarbageCollectedType<T>::value> {
+struct ParamStorageTraits<RawPtr<T> > : public PointerParamStorageTraits<T*, false> {
 };
 
 } // namespace WTF

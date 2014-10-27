@@ -156,11 +156,7 @@ ShareableElementData::ShareableElementData(const UniqueElementData& other)
 
 PassRefPtrWillBeRawPtr<ShareableElementData> ShareableElementData::createWithAttributes(const Vector<Attribute>& attributes)
 {
-#if ENABLE(OILPAN)
-    void* slot = Heap::allocate<ElementData>(sizeForShareableElementDataWithAttributeCount(attributes.size()));
-#else
     void* slot = WTF::fastMalloc(sizeForShareableElementDataWithAttributeCount(attributes.size()));
-#endif
     return adoptRefWillBeNoop(new (slot) ShareableElementData(attributes));
 }
 
@@ -195,11 +191,7 @@ PassRefPtrWillBeRawPtr<UniqueElementData> UniqueElementData::create()
 
 PassRefPtrWillBeRawPtr<ShareableElementData> UniqueElementData::makeShareableCopy() const
 {
-#if ENABLE(OILPAN)
-    void* slot = Heap::allocate<ElementData>(sizeForShareableElementDataWithAttributeCount(m_attributeVector.size()));
-#else
     void* slot = WTF::fastMalloc(sizeForShareableElementDataWithAttributeCount(m_attributeVector.size()));
-#endif
     return adoptRefWillBeNoop(new (slot) ShareableElementData(*this));
 }
 

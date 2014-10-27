@@ -300,15 +300,7 @@ public:
     typedef HashSet<ThreadState*> AttachedThreadStateSet;
     static AttachedThreadStateSet& attachedThreads();
 
-    // Initialize threading infrastructure. Should be called from the main
-    // thread.
-    static void init();
-    static void shutdown();
-    static void shutdownHeapIfNecessary();
     bool isTerminating() { return m_isTerminating; }
-
-    static void attachMainThread();
-    static void detachMainThread();
 
     // Trace all persistent roots, called when marking the managed heap objects.
     static void visitPersistentRoots(Visitor*);
