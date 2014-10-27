@@ -5,6 +5,5 @@
 [
     RuntimeEnabled=WebAnimationsAPI,
     NoInterfaceObject,
-    WillBeGarbageCollected
 ] interface AnimationEffect {
 };

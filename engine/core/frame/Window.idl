@@ -32,7 +32,6 @@
     Custom=ToV8,
     ImplementedAs=LocalDOMWindow,
     PrimaryGlobal,
-    WillBeGarbageCollected,
 ] interface Window : EventTarget {
     readonly attribute Screen screen;
     readonly attribute History history;

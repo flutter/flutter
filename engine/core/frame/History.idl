@@ -24,7 +24,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface History {
     readonly attribute unsigned long length;
     [Custom=Getter] readonly attribute SerializedScriptValue state;

@@ -53,7 +53,6 @@ public:
     static const WrapperTypeInfo wrapperTypeInfo;
     static void refObject(ScriptWrappableBase* internalPointer);
     static void derefObject(ScriptWrappableBase* internalPointer);
-    static WrapperPersistentNode* createPersistentHandle(ScriptWrappableBase* internalPointer);
     {% if has_visit_dom_wrapper %}
     static void visitDOMWrapper(ScriptWrappableBase* internalPointer, const v8::Persistent<v8::Object>&, v8::Isolate*);
     {% endif %}
@@ -134,19 +133,7 @@ public:
        FIXME: Remove this internal field, and share one field for either:
        * a persistent handle (if the object is in oilpan) or
        * a C++ pointer to the DOM object (if the object is not in oilpan) #}
-    {% if gc_type == 'GarbageCollectedObject' %}
-    static const int persistentHandleIndex = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}};
-    static const int internalFieldCount = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}} + 1;
-    {% elif gc_type == 'WillBeGarbageCollectedObject' %}
-#if ENABLE(OILPAN)
-    static const int persistentHandleIndex = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}};
-    static const int internalFieldCount = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}} + 1;
-#else
     static const int internalFieldCount = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}};
-#endif
-    {% elif gc_type == 'RefCountedObject' %}
-    static const int internalFieldCount = v8DefaultWrapperInternalFieldCount + {{custom_internal_field_counter}};
-    {% endif %}
     {# End custom internal fields #}
     static inline ScriptWrappableBase* toScriptWrappableBase({{cpp_class}}* impl)
     {

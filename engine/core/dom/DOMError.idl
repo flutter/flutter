@@ -27,7 +27,6 @@
  */
 [
     Constructor(DOMString name, optional DOMString message = null),
-    WillBeGarbageCollected
 ] interface DOMError {
     readonly attribute DOMString name;
     readonly attribute DOMString message;

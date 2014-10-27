@@ -24,7 +24,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface TouchList {
     readonly attribute unsigned long length;
 

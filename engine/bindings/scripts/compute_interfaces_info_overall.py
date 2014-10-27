@@ -86,9 +86,7 @@ from utilities import read_pickle_files, write_pickle_file
 INHERITED_EXTENDED_ATTRIBUTES = set([
     'ActiveDOMObject',
     'DependentLifetime',
-    'GarbageCollected',
     'NotScriptWrappable',
-    'WillBeGarbageCollected',
 ])
 
 # Main variable (filled in and exported)

@@ -22,7 +22,6 @@
 [
     Constructor,
     ConstructorCallWith=Document,
-    WillBeGarbageCollected,
 ] interface Range {
 
     readonly attribute Node startContainer;

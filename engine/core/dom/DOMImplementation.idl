@@ -20,7 +20,6 @@
 
 [
     SetWrapperReferenceFrom=document,
-    WillBeGarbageCollected,
 ] interface DOMImplementation {
     Document createDocument();
 };

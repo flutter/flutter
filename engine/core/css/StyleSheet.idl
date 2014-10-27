@@ -22,7 +22,6 @@
 [
     Custom=Wrap,
     SetWrapperReferenceFrom=ownerNode,
-    WillBeGarbageCollected
 ] interface StyleSheet {
     readonly attribute DOMString?       type;
     readonly attribute Node             ownerNode;

@@ -24,7 +24,6 @@
  */
 
 [
-    WillBeGarbageCollected,
     RuntimeEnabled=Media
 ] interface TimeRanges {
     readonly attribute unsigned long length;

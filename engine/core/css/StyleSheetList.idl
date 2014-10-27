@@ -21,7 +21,6 @@
 // Introduced in DOM Level 2:
 [
     SetWrapperReferenceFrom=document,
-    WillBeGarbageCollected
 ] interface StyleSheetList {
     readonly attribute unsigned long length;
     getter StyleSheet item(unsigned long index);

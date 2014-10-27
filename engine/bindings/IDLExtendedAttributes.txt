@@ -56,7 +56,6 @@ EnforceRange
 EventConstructor
 ExposeJSAccessors
 Exposed=*
-GarbageCollected
 Global=|*
 Immutable
 ImplementedAs=*
@@ -95,4 +94,3 @@ TreatUndefinedAs=NullString
 TypeChecking=Interface|Unrestricted
 URL
 Unforgeable
-WillBeGarbageCollected

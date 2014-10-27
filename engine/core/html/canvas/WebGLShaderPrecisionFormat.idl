@@ -25,7 +25,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface WebGLShaderPrecisionFormat {
     readonly attribute long rangeMin;
     readonly attribute long rangeMax;

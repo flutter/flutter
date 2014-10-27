@@ -151,7 +151,7 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
     else:
         native_array_element_type = idl_type.native_array_element_type
     if native_array_element_type:
-        vector_type = cpp_ptr_type('Vector', 'HeapVector', native_array_element_type.gc_type)
+        vector_type = 'Vector'
         vector_template_type = cpp_template_type(vector_type, native_array_element_type.cpp_type_args(used_in_cpp_sequence=True))
         if used_as_rvalue_type:
             return 'const %s&' % vector_template_type
@@ -183,7 +183,7 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
         if raw_type:
             return implemented_as_class + '*'
         new_type = 'Member' if used_in_cpp_sequence else 'RawPtr'
-        ptr_type = cpp_ptr_type(('PassRefPtr' if used_as_rvalue_type else 'RefPtr'), new_type, idl_type.gc_type)
+        ptr_type = ('PassRefPtr' if used_as_rvalue_type else 'RefPtr')
         return cpp_template_type(ptr_type, implemented_as_class)
     # Default, assume native type is a pointer with same type name as idl type
     return base_idl_type + '*'
@@ -245,16 +245,6 @@ def cpp_template_type(template, inner_type):
     return format_string.format(template=template, inner_type=inner_type)
 
 
-def cpp_ptr_type(old_type, new_type, gc_type):
-    if gc_type == 'GarbageCollectedObject':
-        return new_type
-    if gc_type == 'WillBeGarbageCollectedObject':
-        if old_type == 'Vector':
-            return 'WillBe' + new_type
-        return old_type + 'WillBe' + new_type
-    return old_type
-
-
 def v8_type(interface_name):
     return 'V8' + interface_name
 
@@ -282,38 +272,6 @@ IdlType.implemented_as = property(implemented_as)
 IdlType.set_implemented_as_interfaces = classmethod(
     lambda cls, new_implemented_as_interfaces:
         cls.implemented_as_interfaces.update(new_implemented_as_interfaces))
-
-
-# [GarbageCollected]
-IdlType.garbage_collected_types = set()
-
-IdlType.is_garbage_collected = property(
-    lambda self: self.base_type in IdlType.garbage_collected_types)
-
-IdlType.set_garbage_collected_types = classmethod(
-    lambda cls, new_garbage_collected_types:
-        cls.garbage_collected_types.update(new_garbage_collected_types))
-
-
-# [WillBeGarbageCollected]
-IdlType.will_be_garbage_collected_types = set()
-
-IdlType.is_will_be_garbage_collected = property(
-    lambda self: self.base_type in IdlType.will_be_garbage_collected_types)
-
-IdlType.set_will_be_garbage_collected_types = classmethod(
-    lambda cls, new_will_be_garbage_collected_types:
-        cls.will_be_garbage_collected_types.update(new_will_be_garbage_collected_types))
-
-
-def gc_type(idl_type):
-    if idl_type.is_garbage_collected:
-        return 'GarbageCollectedObject'
-    if idl_type.is_will_be_garbage_collected:
-        return 'WillBeGarbageCollectedObject'
-    return 'RefCountedObject'
-
-IdlTypeBase.gc_type = property(gc_type)
 
 
 ################################################################################
@@ -507,7 +465,7 @@ def v8_value_to_cpp_value_array_or_sequence(native_array_element_type, v8_value,
     if (native_array_element_type.is_interface_type and
         native_array_element_type.name != 'Dictionary'):
         this_cpp_type = None
-        ref_ptr_type = cpp_ptr_type('RefPtr', 'Member', native_array_element_type.gc_type)
+        ref_ptr_type = 'RefPtr'
         expression_format = '(to{ref_ptr_type}NativeArray<{native_array_element_type}, V8{native_array_element_type}>({v8_value}, {index}, {isolate}))'
         add_includes_for_type(native_array_element_type)
     else:

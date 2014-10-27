@@ -28,7 +28,6 @@
 
 [
     CheckSecurity=Frame,
-    WillBeGarbageCollected,
 ] interface Location {
     // |assign|, |replace|, and *writing* |href| do not require a security
     // check, as they *change* the page, and thus these do not change any

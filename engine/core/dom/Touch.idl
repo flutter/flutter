@@ -24,7 +24,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface Touch {
     readonly attribute double           clientX;
     readonly attribute double           clientY;

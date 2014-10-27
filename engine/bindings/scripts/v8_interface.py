@@ -44,9 +44,9 @@ import v8_attributes
 from v8_globals import includes
 import v8_methods
 import v8_types
-from v8_types import cpp_ptr_type, cpp_template_type
+from v8_types import cpp_template_type
 import v8_utilities
-from v8_utilities import (capitalize, conditional_string, cpp_name, gc_type,
+from v8_utilities import (capitalize, conditional_string, cpp_name,
                           has_extended_attribute_value, runtime_enabled_function_name,
                           extended_attribute_value_as_list)
 
@@ -151,14 +151,11 @@ def interface_context(interface):
         reachable_node_function or
         set_wrapper_reference_to_list)
 
-    this_gc_type = gc_type(interface)
-
     wrapper_class_id = ('NodeClassId' if inherits_interface(interface.name, 'Node') else 'ObjectClassId')
 
     context = {
         'conditional_string': conditional_string(interface),  # [Conditional]
         'cpp_class': cpp_name(interface),
-        'gc_type': this_gc_type,
         # FIXME: Remove 'EventTarget' special handling, http://crbug.com/383699
         'has_access_check_callbacks': (is_check_security and
                                        interface.name != 'Window' and
@@ -186,7 +183,7 @@ def interface_context(interface):
         'measure_as': v8_utilities.measure_as(interface),  # [MeasureAs]
         'parent_interface': parent_interface,
         'pass_cpp_type': cpp_template_type(
-            cpp_ptr_type('PassRefPtr', 'RawPtr', this_gc_type),
+            'PassRefPtr',
             cpp_name(interface)),
         'reachable_node_function': reachable_node_function,
         'runtime_enabled_function': runtime_enabled_function_name(interface),  # [RuntimeEnabled]
@@ -893,7 +890,7 @@ def constructor_context(interface, constructor):
                       for index, argument in enumerate(constructor.arguments)],
         'arguments_need_try_catch': arguments_need_try_catch,
         'cpp_type': cpp_template_type(
-            cpp_ptr_type('RefPtr', 'RawPtr', gc_type(interface)),
+            'RefPtr',
             cpp_name(interface)),
         'cpp_value': v8_methods.cpp_value(
             interface, constructor, len(constructor.arguments)),

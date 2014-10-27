@@ -186,8 +186,6 @@ interface TestObject {
     [PutForwards=hrefByteString] readonly attribute TestNode locationByteString;
     [PerWorldBindings, PutForwards=href] readonly attribute TestNode locationWithPerWorldBindings;
     [TypeChecking=Interface, PutForwards=href] readonly attribute TestNode locationTypeCheckingInterface;
-    [PutForwards=attr1] readonly attribute TestInterfaceGarbageCollected locationGarbageCollected;
-    [PutForwards=attr1] readonly attribute TestInterfaceWillBeGarbageCollected locationWillBeGarbageCollected;
     [RaisesException] attribute long raisesExceptionLongAttribute;
     [RaisesException=Getter] attribute long raisesExceptionGetterLongAttribute;
     [RaisesException=Setter] attribute long setterRaisesExceptionLongAttribute;
@@ -337,8 +335,6 @@ interface TestObject {
     TestInterface? nullableTestInterfaceMethod();
     sequence<long>? nullableLongSequenceMethod();
     // Union types
-    (TestInterfaceGarbageCollected or DOMString) testInterfaceGarbageCollectedOrDOMStringMethod();
-    (TestInterfaceWillBeGarbageCollected or TestDictionary) testInterfaceWillBeGarbageCollectedOrTestDictionaryMethod();
     (sequence<long> or DOMString[] or unrestricted double) longSequenceOrDOMStringArrayOrUnrestrictedDoubleMethod();
     // Currently only used on interface type arguments
     void voidMethodTestInterfaceEmptyOrNullArg(TestInterfaceEmpty? nullableTestInterfaceEmptyArg);
@@ -395,8 +391,6 @@ interface TestObject {
     void voidMethodStringArgVariadicStringArg(DOMString stringArg, DOMString... variadicStringArgs);
     void voidMethodVariadicTestInterfaceEmptyArg(TestInterfaceEmpty... variadicTestInterfaceEmptyArgs);
     void voidMethodTestInterfaceEmptyArgVariadicTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg, TestInterfaceEmpty... variadicTestInterfaceEmptyArgs);
-    void voidMethodVariadicTestInterfaceGarbageCollectedArg(TestInterfaceGarbageCollected... variadicTestInterfaceGarbageCollectedArg);
-    void voidMethodVariadicTestInterfaceWillBeGarbageCollectedArg(TestInterfaceWillBeGarbageCollected... variadicTestInterfaceWillBeGarbageCollectedArg);
 
     // Overloaded methods
     void overloadedMethodA(long longArg);
@@ -502,18 +496,10 @@ interface TestObject {
     [TypeChecking=Interface] void typeCheckingInterfaceVoidMethodTestInterfaceEmptyVariadicArg(TestInterfaceEmpty... testInterfaceEmptyArg);
     [TypeChecking=Unrestricted] void typeCheckingUnrestrictedVoidMethodFloatArgDoubleArg(float floatArg, double doubleArg);
     [Unforgeable] void unforgeableVoidMethod();
-    void voidMethodTestInterfaceGarbageCollectedSequenceArg(sequence<TestInterfaceGarbageCollected> testInterfaceGarbageCollectedSequenceArg);
-    void voidMethodTestInterfaceGarbageCollectedArrayArg(TestInterfaceGarbageCollected[] testInterfaceGarbageCollectedArrayArg);
-    void voidMethodTestInterfaceWillBeGarbageCollectedSequenceArg(sequence<TestInterfaceWillBeGarbageCollected> testInterfaceWillBeGarbageCollectedSequenceArg);
-    void voidMethodTestInterfaceWillBeGarbageCollectedArrayArg(TestInterfaceWillBeGarbageCollected[] testInterfaceWillBeGarbageCollectedArrayArg);
 
     // Extended attributes on referenced interfaces
     // (not self; self-reference tests at interface themselves)
     attribute TestInterface testInterfaceAttribute; // [ImplementedAs]
-    attribute TestInterfaceGarbageCollected testInterfaceGarbageCollectedAttribute; // [GarbageCollected]
-    attribute TestInterfaceGarbageCollected? testInterfaceGarbageCollectedOrNullAttribute; // [GarbageCollected]
-    attribute TestInterfaceWillBeGarbageCollected testInterfaceWillBeGarbageCollectedAttribute; // [WillBeGarbageCollected]
-    attribute TestInterfaceWillBeGarbageCollected? testInterfaceWillBeGarbageCollectedOrNullAttribute; // [WillBeGarbageCollected]
 
     // Private scripts
     [ImplementedInPrivateScript] void voidMethodImplementedInPrivateScript();

@@ -269,16 +269,6 @@ def expanded_exposure_set_for_interface(interface):
     return sorted(set(exposure_set))
 
 
-# [GarbageCollected], [WillBeGarbageCollected]
-def gc_type(definition):
-    extended_attributes = definition.extended_attributes
-    if 'GarbageCollected' in extended_attributes:
-        return 'GarbageCollectedObject'
-    elif 'WillBeGarbageCollected' in extended_attributes:
-        return 'WillBeGarbageCollectedObject'
-    return 'RefCountedObject'
-
-
 # [ImplementedAs]
 def cpp_name(definition_or_member):
     extended_attributes = definition_or_member.extended_attributes

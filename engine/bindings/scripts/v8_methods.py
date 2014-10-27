@@ -259,7 +259,7 @@ def argument_context(interface, method, argument, index):
         'v8_set_return_value': v8_set_return_value(interface.name, method, this_cpp_value),
         'v8_set_return_value_for_main_world': v8_set_return_value(interface.name, method, this_cpp_value, for_main_world=True),
         'v8_value_to_local_cpp_value': v8_value_to_local_cpp_value(argument, index, return_promise=return_promise),
-        'vector_type': v8_types.cpp_ptr_type('Vector', 'HeapVector', idl_type.gc_type),
+        'vector_type': 'Vector',
     }
 
 

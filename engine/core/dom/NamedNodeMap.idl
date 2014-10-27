@@ -20,7 +20,6 @@
 
 [
     SetWrapperReferenceFrom=element,
-    WillBeGarbageCollected,
 ] interface NamedNodeMap {
     [NotEnumerable, ImplementedAs=getNamedItem] getter Attr ([Default=Undefined] optional DOMString name);
     getter Attr item([Default=Undefined] optional unsigned long index);

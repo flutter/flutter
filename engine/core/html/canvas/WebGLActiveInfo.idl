@@ -24,7 +24,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface WebGLActiveInfo {
     readonly attribute long size;
     readonly attribute unsigned long type;

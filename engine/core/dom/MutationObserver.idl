@@ -31,7 +31,6 @@
 [
     CustomConstructor(MutationCallback callback),
     Custom=VisitDOMWrapper,
-    WillBeGarbageCollected,
 ] interface MutationObserver {
     [RaisesException] void observe(Node target, Dictionary options);
     sequence<MutationRecord> takeRecords();

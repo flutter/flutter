@@ -43,7 +43,6 @@ enum FontFaceLoadStatus {
     Constructor(DOMString family, ArrayBuffer source, optional Dictionary descriptors),
     Constructor(DOMString family, ArrayBufferView source, optional Dictionary descriptors),
     ConstructorCallWith=ExecutionContext,
-    WillBeGarbageCollected,
 ] interface FontFace {
 
     [RaisesException=Setter, SetterCallWith=ExecutionContext] attribute DOMString family;

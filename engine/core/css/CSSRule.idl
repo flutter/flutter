@@ -23,7 +23,6 @@
     Custom=Wrap,
     DependentLifetime,
     NotScriptWrappable,
-    WillBeGarbageCollected,
 ] interface CSSRule {
 
     // RuleType

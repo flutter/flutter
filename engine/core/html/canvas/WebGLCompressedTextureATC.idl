@@ -26,7 +26,6 @@
 [
     NoInterfaceObject,
     DoNotCheckConstants,
-    WillBeGarbageCollected,
 ] interface WebGLCompressedTextureATC {
     /* Compressed Texture Formats */
     const unsigned long COMPRESSED_RGB_ATC_WEBGL                     = 0x8C92;

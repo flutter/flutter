@@ -56,7 +56,6 @@ class HeapContainsCache;
 class HeapObjectHeader;
 class PageMemory;
 class PersistentNode;
-class WrapperPersistentRegion;
 class Visitor;
 class SafePointBarrier;
 class SafePointAwareMutexLocker;
@@ -539,14 +538,6 @@ public:
     BaseHeapPage* contains(void* pointer) { return contains(reinterpret_cast<Address>(pointer)); }
     BaseHeapPage* contains(const void* pointer) { return contains(const_cast<void*>(pointer)); }
 
-    WrapperPersistentRegion* wrapperRoots() const
-    {
-        ASSERT(m_liveWrapperPersistents);
-        return m_liveWrapperPersistents;
-    }
-    WrapperPersistentRegion* takeWrapperPersistentRegion();
-    void freeWrapperPersistentRegion(WrapperPersistentRegion*);
-
     // List of persistent roots allocated on the given thread.
     PersistentNode* roots() const { return m_persistents.get(); }
 
@@ -671,9 +662,6 @@ private:
     static uint8_t s_mainThreadStateStorage[];
 
     ThreadIdentifier m_thread;
-    WrapperPersistentRegion* m_liveWrapperPersistents;
-    WrapperPersistentRegion* m_pooledWrapperPersistents;
-    size_t m_pooledWrapperPersistentRegionCount;
     OwnPtr<PersistentNode> m_persistents;
     StackState m_stackState;
     intptr_t* m_startOfStack;

@@ -50,12 +50,10 @@ const WrapperTypeInfo V8ArrayBuffer::wrapperTypeInfo = {
     0,
     V8ArrayBuffer::refObject,
     V8ArrayBuffer::derefObject,
-    V8ArrayBuffer::createPersistentHandle,
     0, 0, 0, 0, 0, 0,
     WrapperTypeInfo::WrapperTypeObjectPrototype,
     WrapperTypeInfo::ObjectClassId,
     WrapperTypeInfo::Independent,
-    WrapperTypeInfo::RefCountedObject
 };
 
 bool V8ArrayBuffer::hasInstance(v8::Handle<v8::Value> value, v8::Isolate*)
@@ -71,12 +69,6 @@ void V8ArrayBuffer::refObject(ScriptWrappableBase* internalPointer)
 void V8ArrayBuffer::derefObject(ScriptWrappableBase* internalPointer)
 {
     fromInternalPointer(internalPointer)->deref();
-}
-
-WrapperPersistentNode* V8ArrayBuffer::createPersistentHandle(ScriptWrappableBase* internalPointer)
-{
-    ASSERT_NOT_REACHED();
-    return 0;
 }
 
 v8::Handle<v8::Object> V8ArrayBuffer::createWrapper(PassRefPtr<ArrayBuffer> impl, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)

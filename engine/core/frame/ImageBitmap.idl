@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 [
-    WillBeGarbageCollected,
 ] interface ImageBitmap {
     readonly attribute long width;
     readonly attribute long height;

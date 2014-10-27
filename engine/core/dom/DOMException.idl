@@ -28,7 +28,6 @@
 
 [
     DoNotCheckConstants,
-    WillBeGarbageCollected,
 ] exception DOMException {
 
     readonly attribute unsigned short   code;

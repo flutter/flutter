@@ -24,6 +24,5 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface WebGLShader {
 };

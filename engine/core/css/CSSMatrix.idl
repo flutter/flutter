@@ -28,7 +28,6 @@
     Constructor(optional DOMString cssValue = null),
     ImplementedAs=CSSMatrix,
     RaisesException=Constructor,
-    WillBeGarbageCollected
 ] interface CSSMatrix {
 
     // These attributes are simple aliases for certain elements of the 4x4 matrix

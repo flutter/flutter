@@ -31,7 +31,6 @@
 [
     Constructor,
     Constructor(Path2D path),
-    WillBeGarbageCollected,
 ] interface Path2D {
     // FIXME(sky): Fix this object.
 };

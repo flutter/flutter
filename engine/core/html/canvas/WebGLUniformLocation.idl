@@ -25,6 +25,5 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface WebGLUniformLocation {
 };

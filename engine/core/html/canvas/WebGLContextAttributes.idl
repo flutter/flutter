@@ -26,7 +26,6 @@
 
 [
     NoInterfaceObject,
-    WillBeGarbageCollected,
 ] interface WebGLContextAttributes {
     attribute boolean alpha;
     attribute boolean depth;

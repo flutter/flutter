@@ -22,7 +22,6 @@
     Custom=Wrap,
     DependentLifetime,
     NotScriptWrappable,
-    WillBeGarbageCollected,
 ] interface CSSValue {
 
     // UnitTypes

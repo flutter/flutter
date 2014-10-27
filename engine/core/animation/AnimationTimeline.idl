@@ -4,7 +4,6 @@
 
 [
     RuntimeEnabled=WebAnimationsAPI,
-    WillBeGarbageCollected,
 ] interface AnimationTimeline {
     readonly attribute double? currentTime;
     AnimationPlayer play(AnimationNode source);

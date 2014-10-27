@@ -30,7 +30,6 @@
 
 [
     NoInterfaceObject,
-    WillBeGarbageCollected,
     ActiveDOMObject,
 ] interface AnimationPlayer : EventTarget {
     [RuntimeEnabled=WebAnimationsAPI]          attribute AnimationNode? source;

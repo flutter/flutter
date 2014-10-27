@@ -21,7 +21,6 @@
 [
     ActiveDOMObject,
     NoInterfaceObject,
-    WillBeGarbageCollected
 ] interface MediaQueryList : EventTarget {
     readonly attribute DOMString media;
     readonly attribute boolean matches;

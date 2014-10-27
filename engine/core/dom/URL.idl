@@ -32,7 +32,6 @@
     Constructor(ScalarValueString url, URL base),
     ImplementedAs=DOMURL,
     RaisesException=Constructor,
-    WillBeGarbageCollected,
 ] interface URL {
 };
 

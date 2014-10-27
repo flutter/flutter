@@ -4,6 +4,5 @@
 
 [
     NoInterfaceObject,
-    WillBeGarbageCollected,
 ] interface EXTShaderTextureLOD {
 };

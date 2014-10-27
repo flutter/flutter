@@ -21,7 +21,6 @@
 // Introduced in DOM Level 2:
 [
     DependentLifetime,
-    WillBeGarbageCollected
 ] interface CSSStyleDeclaration {
     [RaisesException=Setter] attribute DOMString?       cssText;
 

@@ -25,7 +25,6 @@
 
 // Introduced in DOM Level 2:
 [
-    WillBeGarbageCollected
 ] interface MediaList {
 
              attribute DOMString? mediaText;

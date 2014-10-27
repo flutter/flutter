@@ -25,6 +25,5 @@
 
 [
     NoInterfaceObject,
-    WillBeGarbageCollected,
 ] interface OESTextureFloatLinear {
 };

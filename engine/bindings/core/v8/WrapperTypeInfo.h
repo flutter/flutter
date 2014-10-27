@@ -52,7 +52,6 @@ static const int v8PrototypeInternalFieldcount = 1;
 typedef v8::Handle<v8::FunctionTemplate> (*DomTemplateFunction)(v8::Isolate*);
 typedef void (*RefObjectFunction)(ScriptWrappableBase* internalPointer);
 typedef void (*DerefObjectFunction)(ScriptWrappableBase* internalPointer);
-typedef WrapperPersistentNode* (*CreatePersistentHandleFunction)(ScriptWrappableBase* internalPointer);
 typedef ActiveDOMObject* (*ToActiveDOMObjectFunction)(v8::Handle<v8::Object>);
 typedef EventTarget* (*ToEventTargetFunction)(v8::Handle<v8::Object>);
 typedef void (*ResolveWrapperReachabilityFunction)(ScriptWrappableBase* internalPointer, const v8::Persistent<v8::Object>&, v8::Isolate*);
@@ -81,12 +80,6 @@ struct WrapperTypeInfo {
     enum Lifetime {
         Dependent,
         Independent,
-    };
-
-    enum GCType {
-        GarbageCollectedObject,
-        WillBeGarbageCollectedObject,
-        RefCountedObject,
     };
 
     static const WrapperTypeInfo* unwrap(v8::Handle<v8::Value> typeInfoWrapper)
@@ -134,12 +127,6 @@ struct WrapperTypeInfo {
         derefObjectFunction(internalPointer);
     }
 
-    WrapperPersistentNode* createPersistentHandle(ScriptWrappableBase* internalPointer) const
-    {
-        ASSERT(createPersistentHandleFunction);
-        return createPersistentHandleFunction(internalPointer);
-    }
-
     void installConditionallyEnabledMethods(v8::Handle<v8::Object> prototypeTemplate, v8::Isolate* isolate) const
     {
         if (installConditionallyEnabledMethodsFunction)
@@ -180,7 +167,6 @@ struct WrapperTypeInfo {
     const DomTemplateFunction domTemplateFunction;
     const RefObjectFunction refObjectFunction;
     const DerefObjectFunction derefObjectFunction;
-    const CreatePersistentHandleFunction createPersistentHandleFunction;
     const ToActiveDOMObjectFunction toActiveDOMObjectFunction;
     const ToEventTargetFunction toEventTargetFunction;
     const ResolveWrapperReachabilityFunction visitDOMWrapperFunction;
@@ -190,7 +176,6 @@ struct WrapperTypeInfo {
     const WrapperTypePrototype wrapperTypePrototype;
     const WrapperClassId wrapperClassId;
     const Lifetime lifetime;
-    const GCType gcType;
 };
 
 COMPILE_ASSERT(offsetof(struct WrapperTypeInfo, ginEmbedder) == offsetof(struct gin::WrapperInfo, embedder), wrapper_type_info_compatible_to_gin);
@@ -226,34 +211,11 @@ inline const WrapperTypeInfo* toWrapperTypeInfo(v8::Handle<v8::Object> wrapper)
     return getInternalField<WrapperTypeInfo, v8DOMWrapperTypeIndex>(wrapper);
 }
 
-inline const WrapperPersistentNode* toPersistentHandle(const v8::Handle<v8::Object>& wrapper)
-{
-    // Persistent handle is stored in the last internal field.
-    return static_cast<WrapperPersistentNode*>(wrapper->GetAlignedPointerFromInternalField(wrapper->InternalFieldCount() - 1));
-}
-
 inline void releaseObject(v8::Handle<v8::Object> wrapper)
 {
     const WrapperTypeInfo* typeInfo = toWrapperTypeInfo(wrapper);
-    if (typeInfo->gcType == WrapperTypeInfo::GarbageCollectedObject) {
-        const WrapperPersistentNode* handle = toPersistentHandle(wrapper);
-        // This will be null iff a wrapper for a hidden wrapper object,
-        // see V8DOMWrapper::setNativeInfoForHiddenWrapper().
-        delete handle;
-    } else if (typeInfo->gcType == WrapperTypeInfo::WillBeGarbageCollectedObject) {
-#if ENABLE(OILPAN)
-        const WrapperPersistentNode* handle = toPersistentHandle(wrapper);
-        // This will be null iff a wrapper for a hidden wrapper object,
-        // see V8DOMWrapper::setNativeInfoForHiddenWrapper().
-        delete handle;
-#else
-        ASSERT(typeInfo->derefObjectFunction);
-        typeInfo->derefObjectFunction(toScriptWrappableBase(wrapper));
-#endif
-    } else {
-        ASSERT(typeInfo->derefObjectFunction);
-        typeInfo->derefObjectFunction(toScriptWrappableBase(wrapper));
-    }
+    ASSERT(typeInfo->derefObjectFunction);
+    typeInfo->derefObjectFunction(toScriptWrappableBase(wrapper));
 }
 
 } // namespace blink

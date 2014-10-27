@@ -82,10 +82,6 @@ static void* getStackStart()
 #endif
 }
 
-// The maximum number of WrapperPersistentRegions to keep around in the
-// m_pooledWrapperPersistentRegions pool.
-static const size_t MaxPooledWrapperPersistentRegionCount = 2;
-
 WTF::ThreadSpecific<ThreadState*>* ThreadState::s_threadSpecific = 0;
 uint8_t ThreadState::s_mainThreadStateStorage[sizeof(ThreadState)];
 SafePointBarrier* ThreadState::s_safePointBarrier = 0;
@@ -197,9 +193,6 @@ template<> struct InitializeHeaps<0> {
 
 ThreadState::ThreadState()
     : m_thread(currentThread())
-    , m_liveWrapperPersistents(new WrapperPersistentRegion())
-    , m_pooledWrapperPersistents(0)
-    , m_pooledWrapperPersistentRegionCount(0)
     , m_persistents(adoptPtr(new PersistentAnchor()))
     , m_startOfStack(reinterpret_cast<intptr_t*>(getStackStart()))
     , m_endOfStack(reinterpret_cast<intptr_t*>(getStackStart()))
@@ -235,14 +228,6 @@ ThreadState::~ThreadState()
     for (int i = 0; i < NumberOfHeaps; i++)
         delete m_heaps[i];
     deleteAllValues(m_interruptors);
-    while (m_liveWrapperPersistents) {
-        WrapperPersistentRegion* region = WrapperPersistentRegion::removeHead(&m_liveWrapperPersistents);
-        delete region;
-    }
-    while (m_pooledWrapperPersistents) {
-        WrapperPersistentRegion* region = WrapperPersistentRegion::removeHead(&m_pooledWrapperPersistents);
-        delete region;
-    }
     **s_threadSpecific = 0;
 }
 
@@ -410,7 +395,6 @@ void ThreadState::visitStack(Visitor* visitor)
 void ThreadState::visitPersistents(Visitor* visitor)
 {
     m_persistents->trace(visitor);
-    WrapperPersistentRegion::trace(m_liveWrapperPersistents, visitor);
 }
 
 bool ThreadState::checkAndMarkPointer(Visitor* visitor, Address address)
@@ -528,34 +512,6 @@ void ThreadState::pushWeakObjectPointerCallback(void* object, WeakPointerCallbac
 bool ThreadState::popAndInvokeWeakPointerCallback(Visitor* visitor)
 {
     return m_weakCallbackStack->popAndInvokeCallback<WeaknessProcessing>(&m_weakCallbackStack, visitor);
-}
-
-WrapperPersistentRegion* ThreadState::takeWrapperPersistentRegion()
-{
-    WrapperPersistentRegion* region;
-    if (m_pooledWrapperPersistentRegionCount) {
-        region = WrapperPersistentRegion::removeHead(&m_pooledWrapperPersistents);
-        m_pooledWrapperPersistentRegionCount--;
-    } else {
-        region = new WrapperPersistentRegion();
-    }
-    ASSERT(region);
-    WrapperPersistentRegion::insertHead(&m_liveWrapperPersistents, region);
-    return region;
-}
-
-void ThreadState::freeWrapperPersistentRegion(WrapperPersistentRegion* region)
-{
-    if (!region->removeIfNotLast(&m_liveWrapperPersistents))
-        return;
-
-    // Region was removed, ie. it was not the last region in the list.
-    if (m_pooledWrapperPersistentRegionCount < MaxPooledWrapperPersistentRegionCount) {
-        WrapperPersistentRegion::insertHead(&m_pooledWrapperPersistents, region);
-        m_pooledWrapperPersistentRegionCount++;
-    } else {
-        delete region;
-    }
 }
 
 PersistentNode* ThreadState::globalRoots()

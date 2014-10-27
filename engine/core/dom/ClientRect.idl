@@ -25,7 +25,6 @@
  */
 
 [
-    WillBeGarbageCollected,
 ] interface ClientRect {
     readonly attribute float top;
     readonly attribute float right;

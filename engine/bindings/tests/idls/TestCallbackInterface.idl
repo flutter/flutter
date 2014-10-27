@@ -36,7 +36,4 @@ callback interface TestCallbackInterface {
   void voidMethodTestInterfaceEmptyStringArg(TestInterfaceEmpty testInterfaceEmptyArg, DOMString stringArg);
   [CallWith=ThisValue] void callbackWithThisValueVoidMethodStringArg(DOMString stringArg);
   [Custom] void customVoidMethodTestInterfaceEmptyArg(TestInterfaceEmpty testInterfaceEmptyArg);
-  // [WillBeGarbageCollected]
-  void voidMethodWillBeGarbageCollectedSequenceArg(sequence<TestInterfaceWillBeGarbageCollected> sequenceArg);
-  void voidMethodWillBeGarbageCollectedArrayArg(TestInterfaceWillBeGarbageCollected[] arrayArg);
 };

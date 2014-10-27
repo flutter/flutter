@@ -39,7 +39,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
 
 [
     TypeChecking=(Interface,Unrestricted),
-    WillBeGarbageCollected,
 ] interface CanvasRenderingContext2D {
     // back-reference to the canvas
     readonly attribute HTMLCanvasElement canvas;

@@ -26,7 +26,6 @@
 [
     NoInterfaceObject,
     TypeChecking=Interface,
-    WillBeGarbageCollected,
 ] interface WebGLDebugShaders {
     DOMString? getTranslatedShaderSource(WebGLShader? shader);
 };
