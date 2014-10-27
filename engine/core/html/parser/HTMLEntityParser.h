@@ -31,40 +31,35 @@
 
 namespace blink {
 
-class DecodedHTMLEntity {
-private:
-    // HTML entities contain at most four UTF-16 code units.
-    static const unsigned kMaxLength = 4;
-
+class HTMLEntityParser {
 public:
-    DecodedHTMLEntity() : length(0) { }
+    typedef Vector<UChar, 32> OutputBuffer;
 
-    bool isEmpty() const { return !length; }
+    HTMLEntityParser();
+    ~HTMLEntityParser();
 
-    void append(UChar c)
-    {
-        RELEASE_ASSERT(length < kMaxLength);
-        data[length++] = c;
-    }
+    void reset();
+    bool parse(SegmentedString&);
 
-    void append(UChar32 c)
-    {
-        if (U_IS_BMP(c)) {
-            append(static_cast<UChar>(c));
-            return;
-        }
-        append(U16_LEAD(c));
-        append(U16_TRAIL(c));
-    }
+    const OutputBuffer& result() const { return m_buffer; }
 
-    unsigned length;
-    UChar data[kMaxLength];
+private:
+    enum EntityState {
+        Initial,
+        Numeric,
+        PossiblyHex,
+        Hex,
+        Decimal,
+        Named
+    };
+
+    void finalizeNumericEntity();
+    void finalizeNamedEntity();
+
+    EntityState m_state;
+    UChar32 m_result;
+    OutputBuffer m_buffer;
 };
-
-bool consumeHTMLEntity(SegmentedString&, DecodedHTMLEntity& decodedEntity, bool& notEnoughCharacters, UChar additionalAllowedCharacter = '\0');
-
-// Used by the XML parser.  Not suitable for use in HTML parsing.  Use consumeHTMLEntity instead.
-size_t decodeNamedEntityToUCharArray(const char*, UChar result[4]);
 
 }
 

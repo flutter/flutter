@@ -111,24 +111,6 @@ void HTMLTokenizer::reset()
 {
     m_state = HTMLTokenizer::DataState;
     m_token = 0;
-    m_additionalAllowedCharacter = '\0';
-}
-
-inline bool HTMLTokenizer::processEntity(SegmentedString& source)
-{
-    bool notEnoughCharacters = false;
-    DecodedHTMLEntity decodedEntity;
-    bool success = consumeHTMLEntity(source, decodedEntity, notEnoughCharacters);
-    if (notEnoughCharacters)
-        return false;
-    if (!success) {
-        ASSERT(decodedEntity.isEmpty());
-        bufferCharacter('&');
-    } else {
-        for (unsigned i = 0; i < decodedEntity.length; ++i)
-            bufferCharacter(decodedEntity.data[i]);
-    }
-    return true;
 }
 
 bool HTMLTokenizer::flushBufferedEndTag(SegmentedString& source)
@@ -146,7 +128,7 @@ bool HTMLTokenizer::flushBufferedEndTag(SegmentedString& source)
 
 #define FLUSH_AND_ADVANCE_TO(stateName)                                    \
     do {                                                                   \
-        m_state = HTMLTokenizer::stateName;                           \
+        m_state = HTMLTokenizer::stateName;                                \
         if (flushBufferedEndTag(source))                                   \
             return true;                                                   \
         if (source.isEmpty()                                               \
@@ -190,9 +172,11 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
     // Source: http://www.whatwg.org/specs/web-apps/current-work/#tokenisation0
     switch (m_state) {
     HTML_BEGIN_STATE(DataState) {
-        if (cc == '&')
+        if (cc == '&') {
+            m_returnState = DataState;
+            m_entityParser.reset();
             HTML_ADVANCE_TO(CharacterReferenceInDataState);
-        else if (cc == '<') {
+        } else if (cc == '<') {
             if (m_token->type() == HTMLToken::Character) {
                 // We have a bunch of character tokens queued up that we
                 // are emitting lazily here.
@@ -209,9 +193,31 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
     END_STATE()
 
     HTML_BEGIN_STATE(CharacterReferenceInDataState) {
-        if (!processEntity(source))
+        if (!m_entityParser.parse(source))
             return haveBufferedCharacterToken();
+        for (const UChar& entityCharacter : m_entityParser.result())
+            bufferCharacter(entityCharacter);
+        cc = m_inputStreamPreprocessor.nextInputCharacter();
+        ASSERT(m_returnState == m_returnState);
         HTML_SWITCH_TO(DataState);
+    }
+    END_STATE()
+
+    HTML_BEGIN_STATE(CharacterReferenceInAttributeValueState) {
+        if (!m_entityParser.parse(source))
+            return haveBufferedCharacterToken();
+        for (const UChar& entityCharacter : m_entityParser.result())
+            m_token->appendToAttributeValue(entityCharacter);
+        cc = m_inputStreamPreprocessor.nextInputCharacter();
+
+        if (m_returnState == AttributeValueDoubleQuotedState)
+            HTML_SWITCH_TO(AttributeValueDoubleQuotedState);
+        else if (m_returnState == AttributeValueSingleQuotedState)
+            HTML_SWITCH_TO(AttributeValueSingleQuotedState);
+        else if (m_returnState == AttributeValueUnquotedState)
+            HTML_SWITCH_TO(AttributeValueUnquotedState);
+        else
+            ASSERT_NOT_REACHED();
     }
     END_STATE()
 
@@ -477,7 +483,8 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
             m_token->endAttributeValue(source.numberOfCharactersConsumed());
             HTML_ADVANCE_TO(AfterAttributeValueQuotedState);
         } else if (cc == '&') {
-            m_additionalAllowedCharacter = '"';
+            m_returnState = AttributeValueDoubleQuotedState;
+            m_entityParser.reset();
             HTML_ADVANCE_TO(CharacterReferenceInAttributeValueState);
         } else if (cc == kEndOfFileMarker) {
             parseError();
@@ -495,7 +502,8 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
             m_token->endAttributeValue(source.numberOfCharactersConsumed());
             HTML_ADVANCE_TO(AfterAttributeValueQuotedState);
         } else if (cc == '&') {
-            m_additionalAllowedCharacter = '\'';
+            m_returnState = AttributeValueSingleQuotedState;
+            m_entityParser.reset();
             HTML_ADVANCE_TO(CharacterReferenceInAttributeValueState);
         } else if (cc == kEndOfFileMarker) {
             parseError();
@@ -513,7 +521,8 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
             m_token->endAttributeValue(source.numberOfCharactersConsumed());
             HTML_ADVANCE_TO(BeforeAttributeNameState);
         } else if (cc == '&') {
-            m_additionalAllowedCharacter = '>';
+            m_returnState = AttributeValueUnquotedState;
+            m_entityParser.reset();
             HTML_ADVANCE_TO(CharacterReferenceInAttributeValueState);
         } else if (cc == '>') {
             m_token->endAttributeValue(source.numberOfCharactersConsumed());
@@ -528,34 +537,6 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
             m_token->appendToAttributeValue(cc);
             HTML_ADVANCE_TO(AttributeValueUnquotedState);
         }
-    }
-    END_STATE()
-
-    HTML_BEGIN_STATE(CharacterReferenceInAttributeValueState) {
-        bool notEnoughCharacters = false;
-        DecodedHTMLEntity decodedEntity;
-        bool success = consumeHTMLEntity(source, decodedEntity, notEnoughCharacters, m_additionalAllowedCharacter);
-        if (notEnoughCharacters)
-            return haveBufferedCharacterToken();
-        if (!success) {
-            ASSERT(decodedEntity.isEmpty());
-            m_token->appendToAttributeValue('&');
-        } else {
-            for (unsigned i = 0; i < decodedEntity.length; ++i)
-                m_token->appendToAttributeValue(decodedEntity.data[i]);
-        }
-        // We're supposed to switch back to the attribute value state that
-        // we were in when we were switched into this state. Rather than
-        // keeping track of this explictly, we observe that the previous
-        // state can be determined by m_additionalAllowedCharacter.
-        if (m_additionalAllowedCharacter == '"')
-            HTML_SWITCH_TO(AttributeValueDoubleQuotedState);
-        else if (m_additionalAllowedCharacter == '\'')
-            HTML_SWITCH_TO(AttributeValueSingleQuotedState);
-        else if (m_additionalAllowedCharacter == '>')
-            HTML_SWITCH_TO(AttributeValueUnquotedState);
-        else
-            ASSERT_NOT_REACHED();
     }
     END_STATE()
 

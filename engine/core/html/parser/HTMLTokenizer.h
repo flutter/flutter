@@ -27,6 +27,7 @@
 #ifndef HTMLTokenizer_h
 #define HTMLTokenizer_h
 
+#include "core/html/parser/HTMLEntityParser.h"
 #include "core/html/parser/HTMLToken.h"
 #include "core/html/parser/InputStreamPreprocessor.h"
 #include "platform/text/SegmentedString.h"
@@ -45,6 +46,7 @@ public:
     enum State {
         DataState,
         CharacterReferenceInDataState,
+        CharacterReferenceInAttributeValueState,
         RAWTEXTState,
         TagOpenState,
         EndTagOpenState,
@@ -59,7 +61,6 @@ public:
         AttributeValueDoubleQuotedState,
         AttributeValueSingleQuotedState,
         AttributeValueUnquotedState,
-        CharacterReferenceInAttributeValueState,
         AfterAttributeValueQuotedState,
         SelfClosingStartTagState,
         BogusCommentState,
@@ -86,8 +87,6 @@ public:
 
 private:
     HTMLTokenizer();
-
-    inline bool processEntity(SegmentedString&);
 
     inline void parseError();
 
@@ -156,11 +155,11 @@ private:
     // this member might be pointing to unallocated memory.
     HTMLToken* m_token;
 
-    // http://www.whatwg.org/specs/web-apps/current-work/#additional-allowed-character
-    UChar m_additionalAllowedCharacter;
+    State m_returnState;
 
     // http://www.whatwg.org/specs/web-apps/current-work/#preprocessing-the-input-stream
     InputStreamPreprocessor<HTMLTokenizer> m_inputStreamPreprocessor;
+    HTMLEntityParser m_entityParser;
 
     Vector<UChar, 32> m_appropriateEndTagName;
 
