@@ -47,7 +47,6 @@ public:
         CharacterReferenceInDataState,
         RAWTEXTState,
         ScriptDataState,
-        PLAINTEXTState,
         TagOpenState,
         EndTagOpenState,
         TagNameState,
@@ -99,35 +98,6 @@ public:
     // must provide the same (in progress) token on the next call (unless
     // they call reset() first).
     bool nextToken(SegmentedString&, HTMLToken&);
-
-    // Returns a copy of any characters buffered internally by the tokenizer.
-    // The tokenizer buffers characters when searching for the </script> token
-    // that terminates a script element.
-    String bufferedCharacters() const;
-
-    size_t numberOfBufferedCharacters() const
-    {
-        // Notice that we add 2 to the length of the m_temporaryBuffer to
-        // account for the "</" characters, which are effecitvely buffered in
-        // the tokenizer's state machine.
-        return m_temporaryBuffer.size() ? m_temporaryBuffer.size() + 2 : 0;
-    }
-
-    // Updates the tokenizer's state according to the given tag name. This is
-    // an approximation of how the tree builder would update the tokenizer's
-    // state. This method is useful for approximating HTML tokenization. To
-    // get exactly the correct tokenization, you need the real tree builder.
-    //
-    // The main failures in the approximation are as follows:
-    //
-    //  * The first set of character tokens emitted for a <pre> element might
-    //    contain an extra leading newline.
-    //  * The replacement of U+0000 with U+FFFD will not be sensitive to the
-    //    tree builder's insertion mode.
-    //  * CDATA sections in foreign content will be tokenized as bogus comments
-    //    instead of as character tokens.
-    //
-    void updateStateFor(const String& tagName);
 
     State state() const { return m_state; }
     void setState(State state) { m_state = state; }

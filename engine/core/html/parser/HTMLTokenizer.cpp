@@ -243,14 +243,6 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(PLAINTEXTState) {
-        if (cc == kEndOfFileMarker)
-            return emitEndOfFile(source);
-        bufferCharacter(cc);
-        HTML_ADVANCE_TO(PLAINTEXTState);
-    }
-    END_STATE()
-
     HTML_BEGIN_STATE(TagOpenState) {
         if (cc == '!')
             HTML_ADVANCE_TO(MarkupDeclarationOpenState);
@@ -1075,25 +1067,6 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
 
     ASSERT_NOT_REACHED();
     return false;
-}
-
-String HTMLTokenizer::bufferedCharacters() const
-{
-    // FIXME: Add an assert about m_state.
-    StringBuilder characters;
-    characters.reserveCapacity(numberOfBufferedCharacters());
-    characters.append('<');
-    characters.append('/');
-    characters.append(m_temporaryBuffer.data(), m_temporaryBuffer.size());
-    return characters.toString();
-}
-
-void HTMLTokenizer::updateStateFor(const String& tagName)
-{
-    if (threadSafeMatch(tagName, HTMLNames::scriptTag))
-        setState(HTMLTokenizer::ScriptDataState);
-    else if (threadSafeMatch(tagName, HTMLNames::styleTag))
-        setState(HTMLTokenizer::RAWTEXTState);
 }
 
 inline bool HTMLTokenizer::temporaryBufferIs(const String& expectedString)
