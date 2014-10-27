@@ -705,7 +705,7 @@ If the current character is...
   consuming the current character.
 
 
-#### **Named character reference L** state ####
+#### **Named character reference** state ####
 
 Append the current character to _raw value_.
 
