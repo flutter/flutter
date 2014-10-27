@@ -200,22 +200,14 @@ void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalida
         getTransformFromContainer(0, LayoutSize(), t);
         transformState.applyTransform(t);
     }
-
-    if (mode & IsFixed && m_frameView)
-        transformState.move(m_frameView->scrollOffsetForFixedPosition());
-
-    if (paintInvalidationContainer == this)
-        return;
 }
 
 const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
 {
+    // FIXME(sky): Can we remove offsetForFixedPosition?
     LayoutSize offsetForFixedPosition;
     LayoutSize offset;
     RenderObject* container = 0;
-
-    if (m_frameView)
-        offsetForFixedPosition = m_frameView->scrollOffsetForFixedPosition();
 
     // If a container was specified, and was not 0 or the RenderView, then we
     // should have found it by now unless we're traversing to a parent document.
@@ -234,9 +226,6 @@ const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObj
 
 void RenderView::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
 {
-    if (mode & IsFixed && m_frameView)
-        transformState.move(m_frameView->scrollOffsetForFixedPosition());
-
     if (mode & UseTransforms && shouldUseTransformFromContainer(0)) {
         TransformationMatrix t;
         getTransformFromContainer(0, LayoutSize(), t);
@@ -360,12 +349,7 @@ void RenderView::invalidatePaintForViewAndCompositedLayers()
         compositor()->fullyInvalidatePaint();
 }
 
-void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* invalidationState) const
-{
-    mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, IsNotFixedPosition, invalidationState);
-}
-
-void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, ViewportConstrainedPosition viewportConstraint, const PaintInvalidationState* state) const
+void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
 {
     if (style()->isFlippedBlocksWritingMode()) {
         // We have to flip by hand since the view's logical height has not been determined.  We
@@ -374,10 +358,6 @@ void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject*
             rect.setY(viewHeight() - rect.maxY());
         else
             rect.setX(viewWidth() - rect.maxX());
-    }
-
-    if (viewportConstraint == IsFixedPosition && m_frameView) {
-        rect.move(m_frameView->scrollOffsetForFixedPosition());
     }
 
     // Apply our transform if we have one (because of full page zooming).

@@ -102,7 +102,6 @@ public:
     virtual void needTouchEvents(bool) override { }
     virtual void setTouchAction(TouchAction touchAction) override { };
 
-    virtual bool paintCustomOverhangArea(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&) override { return false; }
     virtual String acceptLanguages() override;
 };
 

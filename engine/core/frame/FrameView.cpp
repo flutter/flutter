@@ -228,8 +228,6 @@ IntPoint FrameView::clampOffsetAtScale(const IntPoint& offset, float scale) cons
     IntPoint clampedOffset = offset;
     clampedOffset = clampedOffset.shrunkTo(
         IntPoint(size()) - expandedIntSize(scaledSize));
-    clampedOffset = clampedOffset.expandedTo(-scrollOrigin());
-
     return clampedOffset;
 }
 
@@ -745,22 +743,9 @@ void FrameView::removeViewportConstrainedObject(RenderObject* object)
     }
 }
 
-LayoutRect FrameView::viewportConstrainedVisibleContentRect() const
-{
-    LayoutRect viewportRect = visibleContentRect();
-    // Ignore overhang. No-op when not using rubber banding.
-    viewportRect.setLocation(clampScrollPosition(scrollPosition()));
-    return viewportRect;
-}
-
 void FrameView::viewportConstrainedVisibleContentSizeChanged(bool widthChanged, bool heightChanged)
 {
     // FIXME(sky): Remove
-}
-
-IntSize FrameView::scrollOffsetForFixedPosition() const
-{
-    return toIntSize(clampScrollPosition(scrollPosition()));
 }
 
 IntPoint FrameView::lastKnownMousePosition() const
@@ -1304,14 +1289,6 @@ float FrameView::inputEventsScaleFactor() const
     return pageScale * m_inputEventsScaleFactorForEmulation;
 }
 
-bool FrameView::scrollbarsCanBeActive() const
-{
-    if (m_frame->view() != this)
-        return false;
-
-    return !!m_frame->document();
-}
-
 IntRect FrameView::scrollableAreaBoundingBox() const
 {
     return frameRect();
@@ -1321,25 +1298,6 @@ bool FrameView::isScrollable()
 {
     // FIXME(sky): Remove
     return false;
-}
-
-void FrameView::notifyPageThatContentAreaWillPaint() const
-{
-    Page* page = m_frame->page();
-    if (!page)
-        return;
-
-    if (!m_scrollableAreas)
-        return;
-
-    for (HashSet<ScrollableArea*>::const_iterator it = m_scrollableAreas->begin(), end = m_scrollableAreas->end(); it != end; ++it) {
-        ScrollableArea* scrollableArea = *it;
-
-        if (!scrollableArea->scrollbarsCanBeActive())
-            continue;
-
-        scrollableArea->contentAreaWillPaint();
-    }
 }
 
 bool FrameView::scrollAnimatorEnabled() const
@@ -1473,12 +1431,6 @@ bool FrameView::isPainting() const
 void FrameView::setNodeToDraw(Node* node)
 {
     m_nodeToDraw = node;
-}
-
-void FrameView::paintOverhangAreas(GraphicsContext* context, const IntRect& horizontalOverhangArea, const IntRect& verticalOverhangArea, const IntRect& dirtyRect)
-{
-    if (m_frame->page()->chrome().client().paintCustomOverhangArea(context, horizontalOverhangArea, verticalOverhangArea, dirtyRect))
-        return;
 }
 
 void FrameView::updateWidgetPositionsIfNeeded()

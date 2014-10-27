@@ -143,11 +143,6 @@ IntPoint ScrollbarGroup::lastKnownMousePosition() const
     return m_lastMousePosition;
 }
 
-bool ScrollbarGroup::scrollbarsCanBeActive() const
-{
-    return true;
-}
-
 bool ScrollbarGroup::userInputScrollable(ScrollbarOrientation orientation) const
 {
     return false;

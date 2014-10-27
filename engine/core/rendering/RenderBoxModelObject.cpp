@@ -883,8 +883,6 @@ void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderLayerMod
         IntRect viewportRect = pixelSnappedIntRect(viewRect());
         if (fixedBackgroundPaintsInLocalCoordinates())
             viewportRect.setLocation(IntPoint());
-        else if (FrameView* frameView = view()->frameView())
-            viewportRect.setLocation(IntPoint(frameView->scrollOffsetForFixedPosition()));
 
         if (paintContainer) {
             IntPoint absoluteContainerOffset = roundedIntPoint(paintContainer->localToAbsolute(FloatPoint()));

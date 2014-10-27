@@ -78,11 +78,6 @@ public:
 
     FrameView* frameView() const { return m_frameView; }
 
-    enum ViewportConstrainedPosition {
-        IsNotFixedPosition,
-        IsFixedPosition,
-    };
-    void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, ViewportConstrainedPosition, const PaintInvalidationState*) const;
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;
 
     void invalidatePaintForRectangle(const LayoutRect&) const;

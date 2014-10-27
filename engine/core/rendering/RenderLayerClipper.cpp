@@ -69,11 +69,6 @@ static void applyClipRects(const ClipRectsContext& context, RenderObject& render
 {
     ASSERT(renderer.hasOverflowClip() || renderer.hasClip());
 
-    RenderView* view = renderer.view();
-    ASSERT(view);
-    if (clipRects.fixed() && context.rootLayer->renderer() == view)
-        offset -= view->frameView()->scrollOffsetForFixedPosition();
-
     if (renderer.hasOverflowClip()) {
         ClipRect newOverflowClip = toRenderBox(renderer).overflowClipRect(offset, context.scrollbarRelevancy);
         newOverflowClip.setHasRadius(renderer.style()->hasBorderRadius());
@@ -329,13 +324,7 @@ ClipRect RenderLayerClipper::backgroundClipRect(const ClipRectsContext& context)
     else
         m_renderer.layer()->parent()->clipper().getOrCalculateClipRects(context, parentClipRects);
 
-    ClipRect result = backgroundClipRectForPosition(parentClipRects, m_renderer.style()->position());
-
-    // Note: infinite clipRects should not be scrolled here, otherwise they will accidentally no longer be considered infinite.
-    if (parentClipRects.fixed() && context.rootLayer->renderer() == m_renderer.view() && result != PaintInfo::infiniteRect())
-        result.move(m_renderer.view()->frameView()->scrollOffsetForFixedPosition());
-
-    return result;
+    return backgroundClipRectForPosition(parentClipRects, m_renderer.style()->position());
 }
 
 void RenderLayerClipper::getOrCalculateClipRects(const ClipRectsContext& context, ClipRects& clipRects) const

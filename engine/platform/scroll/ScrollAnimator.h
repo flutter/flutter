@@ -76,7 +76,6 @@ public:
     virtual void cancelAnimations() { }
     virtual void serviceScrollAnimations() { }
 
-    virtual void contentAreaWillPaint() const { }
     virtual void mouseEnteredContentArea() const { }
     virtual void mouseExitedContentArea() const { }
     virtual void mouseMovedInContentArea() const { }

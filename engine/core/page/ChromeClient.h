@@ -99,8 +99,6 @@ public:
 
     virtual void setToolTip(const String&, TextDirection) = 0;
 
-    virtual bool paintCustomOverhangArea(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&) = 0;
-
     // Allows ports to customize the type of graphics layers created by this page.
     virtual GraphicsLayerFactory* graphicsLayerFactory() const { return 0; }
 

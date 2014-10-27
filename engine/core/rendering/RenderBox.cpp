@@ -1794,7 +1794,7 @@ void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* 
     }
 
     if (o->isRenderView())
-        toRenderView(o)->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, position == FixedPosition ? RenderView::IsFixedPosition : RenderView::IsNotFixedPosition, paintInvalidationState);
+        toRenderView(o)->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
     else
         o->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
 }
@@ -2459,7 +2459,7 @@ LayoutUnit RenderBox::containingBlockLogicalWidthForPositioned(const RenderBoxMo
     if (style()->position() == FixedPosition && containingBlock->isRenderView()) {
         const RenderView* view = toRenderView(containingBlock);
         if (FrameView* frameView = view->frameView()) {
-            LayoutRect viewportRect = frameView->viewportConstrainedVisibleContentRect();
+            LayoutRect viewportRect = frameView->visibleContentRect();
             return containingBlock->isHorizontalWritingMode() ? viewportRect.width() : viewportRect.height();
         }
     }
@@ -2499,7 +2499,7 @@ LayoutUnit RenderBox::containingBlockLogicalHeightForPositioned(const RenderBoxM
     if (style()->position() == FixedPosition && containingBlock->isRenderView()) {
         const RenderView* view = toRenderView(containingBlock);
         if (FrameView* frameView = view->frameView()) {
-            LayoutRect viewportRect = frameView->viewportConstrainedVisibleContentRect();
+            LayoutRect viewportRect = frameView->visibleContentRect();
             return containingBlock->isHorizontalWritingMode() ? viewportRect.height() : viewportRect.width();
         }
     }

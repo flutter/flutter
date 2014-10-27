@@ -274,12 +274,6 @@ void ScrollableArea::willEndLiveResize()
         scrollAnimator->willEndLiveResize();
 }
 
-void ScrollableArea::contentAreaWillPaint() const
-{
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->contentAreaWillPaint();
-}
-
 void ScrollableArea::mouseEnteredContentArea() const
 {
     if (ScrollAnimator* scrollAnimator = existingScrollAnimator())

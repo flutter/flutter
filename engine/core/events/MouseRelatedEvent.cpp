@@ -48,22 +48,19 @@ MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubb
     , m_isSimulated(isSimulated)
 {
     LayoutPoint adjustedPageLocation;
-    LayoutPoint scrollPosition;
 
     LocalFrame* frame = view() ? view()->frame() : 0;
     if (frame && !isSimulated) {
         if (FrameView* frameView = frame->view()) {
-            scrollPosition = frameView->scrollPosition();
             adjustedPageLocation = frameView->windowToContents(windowLocation);
             float scaleFactor = 1 / frame->pageZoomFactor();
             if (scaleFactor != 1.0f) {
                 adjustedPageLocation.scale(scaleFactor, scaleFactor);
-                scrollPosition.scale(scaleFactor, scaleFactor);
             }
         }
     }
 
-    m_clientLocation = adjustedPageLocation - toLayoutSize(scrollPosition);
+    m_clientLocation = adjustedPageLocation;
     m_pageLocation = adjustedPageLocation;
 
     initCoordinates();

@@ -139,7 +139,6 @@ public:
 
     // This is different than visibleContentRect() in that it ignores negative (or overly positive)
     // offsets from rubber-banding, and it takes zooming into account.
-    LayoutRect viewportConstrainedVisibleContentRect() const;
     void viewportConstrainedVisibleContentSizeChanged(bool widthChanged, bool heightChanged);
 
     AtomicString mediaType() const;
@@ -174,9 +173,6 @@ public:
     bool hasEverPainted() const { return m_lastPaintTime; }
     void setNodeToDraw(Node*);
 
-    // FIXME(sky): Remove
-    void paintOverhangAreas(GraphicsContext*, const IntRect& horizontalOverhangArea, const IntRect& verticalOverhangArea, const IntRect& dirtyRect);
-
     Color documentBackgroundColor() const;
 
     static double currentFrameTimeStamp() { return s_currentFrameTimeStamp; }
@@ -206,9 +202,6 @@ public:
     bool shouldSetCursor() const;
 
     void setCursor(const Cursor&);
-
-    // FIXME(sky): Remove
-    bool scrollbarsCanBeActive() const;
 
     // FIXME: Remove this method once plugin loading is decoupled from layout.
     void flushAnyPendingPostLayoutTasks();
@@ -247,9 +240,6 @@ public:
     bool hasSoftwareFilters() const { return m_hasSoftwareFilters; }
 
     bool isActive() const;
-
-    // DEPRECATED: Use viewportConstrainedVisibleContentRect() instead.
-    IntSize scrollOffsetForFixedPosition() const;
 
     // FIXME: This should probably be renamed as the 'inSubtreeLayout' parameter
     // passed around the FrameView layout methods can be true while this returns
@@ -290,8 +280,6 @@ public:
     bool scheduleAnimation();
     IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
     IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }
-    IntPoint clampScrollPosition(const IntPoint& scrollPosition) const { return scrollPosition; }
-    const IntPoint scrollOrigin() const { return IntPoint(); }
     // FIXME(sky): Not clear what values these should return. This is just what they happen to be
     // returning today.
     bool paintsEntireContents() const { return false; }
@@ -349,9 +337,6 @@ private:
 
     bool wasViewportResized();
     void sendResizeEventIfNeeded();
-
-    // FIXME(sky): Remove now that we're not a ScrollView?
-    void notifyPageThatContentAreaWillPaint() const;
 
     void scrollPositionChanged();
     void didScrollTimerFired(Timer<FrameView>*);

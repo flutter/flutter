@@ -33,21 +33,10 @@
 
 namespace blink {
 
-static FloatPoint contentsOffset(LocalFrame* frame)
-{
-    if (!frame)
-        return FloatPoint();
-    FrameView* frameView = frame->view();
-    if (!frameView)
-        return FloatPoint();
-    float scale = 1.0f / frame->pageZoomFactor();
-    return FloatPoint(frameView->scrollPosition()).scaledBy(scale);
-}
-
 Touch::Touch(LocalFrame* frame, EventTarget* target, unsigned identifier, const FloatPoint& screenPos, const FloatPoint& pagePos, const FloatSize& radius, float rotationAngle, float force)
     : m_target(target)
     , m_identifier(identifier)
-    , m_clientPos(pagePos - contentsOffset(frame))
+    , m_clientPos(pagePos)
     , m_screenPos(screenPos)
     , m_pagePos(pagePos)
     , m_radius(radius)

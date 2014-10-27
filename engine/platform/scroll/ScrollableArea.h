@@ -91,7 +91,6 @@ public:
     void willStartLiveResize();
     void willEndLiveResize();
 
-    void contentAreaWillPaint() const;
     void mouseEnteredContentArea() const;
     void mouseExitedContentArea() const;
     void mouseMovedInContentArea() const;
@@ -172,8 +171,6 @@ public:
     virtual IntPoint lastKnownMousePosition() const { return IntPoint(); }
 
     virtual bool shouldSuspendScrollAnimations() const { return true; }
-
-    virtual bool scrollbarsCanBeActive() const = 0;
 
     // Returns the bounding box of this scrollable area, in the coordinate system of the enclosing scroll view.
     virtual IntRect scrollableAreaBoundingBox() const = 0;

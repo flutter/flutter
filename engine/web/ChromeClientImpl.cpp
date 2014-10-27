@@ -343,11 +343,6 @@ String ChromeClientImpl::acceptLanguages()
     return m_webView->client()->acceptLanguages();
 }
 
-bool ChromeClientImpl::paintCustomOverhangArea(GraphicsContext* context, const IntRect& horizontalOverhangArea, const IntRect& verticalOverhangArea, const IntRect& dirtyRect)
-{
-    return false;
-}
-
 GraphicsLayerFactory* ChromeClientImpl::graphicsLayerFactory() const
 {
     return m_webView->graphicsLayerFactory();

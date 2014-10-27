@@ -442,14 +442,6 @@ IntPoint RenderLayerScrollableArea::lastKnownMousePosition() const
     return box().frame() ? box().frame()->eventHandler().lastKnownMousePosition() : IntPoint();
 }
 
-bool RenderLayerScrollableArea::scrollbarsCanBeActive() const
-{
-    RenderView* view = box().view();
-    if (!view)
-        return false;
-    return view->frameView()->scrollbarsCanBeActive();
-}
-
 IntRect RenderLayerScrollableArea::scrollableAreaBoundingBox() const
 {
     return box().absoluteBoundingBoxRect();
