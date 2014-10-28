@@ -58,7 +58,6 @@
 #include "core/rendering/RenderText.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "platform/geometry/FloatQuad.h"
 #include "platform/graphics/GraphicsContext.h"
 #include "wtf/text/CString.h"
@@ -1540,13 +1539,8 @@ void FrameSelection::notifyRendererOfSelectionChange(EUserTriggered userTriggere
 // LocalFrame and FrameView, a <frame>, <iframe>, or <object>.
 static bool isFrameElement(const Node* n)
 {
-    if (!n)
-        return false;
-    RenderObject* renderer = n->renderer();
-    if (!renderer || !renderer->isWidget())
-        return false;
-    Widget* widget = toRenderWidget(renderer)->widget();
-    return widget && widget->isFrameView();
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 void FrameSelection::setFocusedNodeIfNeeded()

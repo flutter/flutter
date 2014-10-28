@@ -61,7 +61,6 @@
 #include "core/page/Page.h"
 #include "core/page/TouchDisambiguation.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "platform/Cursor.h"
 #include "platform/KeyboardCodes.h"

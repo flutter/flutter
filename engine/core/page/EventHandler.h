@@ -67,7 +67,6 @@ class PlatformWheelEvent;
 class RenderLayer;
 class RenderLayerScrollableArea;
 class RenderObject;
-class RenderWidget;
 class ScrollableArea;
 class Scrollbar;
 class TextEvent;

@@ -40,7 +40,6 @@
 #include "core/events/Event.h"
 #include "core/html/HTMLElement.h"
 #include "core/rendering/RenderObject.h"
-#include "core/rendering/RenderWidget.h"
 #include "platform/Widget.h"
 #include "public/platform/WebString.h"
 #include "public/platform/WebVector.h"

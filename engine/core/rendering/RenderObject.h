@@ -510,9 +510,6 @@ public:
         return node();
     }
 
-    // FIXME: Why does RenderWidget need this?
-    void clearNode() { m_node = nullptr; }
-
     // FIXME(sky): remove this.
     Node* generatingNode() const { return node(); }
 

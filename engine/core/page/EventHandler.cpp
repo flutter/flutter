@@ -64,7 +64,6 @@
 #include "core/rendering/HitTestResult.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/PlatformGestureEvent.h"
 #include "platform/PlatformKeyboardEvent.h"
@@ -1529,15 +1528,6 @@ bool EventHandler::handleWheelEvent(const PlatformWheelEvent& event)
     }
 
     if (node) {
-        // Figure out which view to send the event to.
-        RenderObject* target = node->renderer();
-
-        if (isOverWidget && target && target->isWidget()) {
-            Widget* widget = toRenderWidget(target)->widget();
-            if (widget && passWheelEventToWidget(event, widget))
-                RETURN_WHEEL_EVENT_HANDLED();
-        }
-
         if (node && !node->dispatchWheelEvent(event))
             RETURN_WHEEL_EVENT_HANDLED();
     }
@@ -1866,18 +1856,8 @@ bool EventHandler::passScrollGestureEventToWidget(const PlatformGestureEvent& ge
 {
     ASSERT(gestureEvent.isScrollEvent());
 
-    if (!m_lastGestureScrollOverWidget)
-        return false;
-
-    if (!renderer || !renderer->isWidget())
-        return false;
-
-    Widget* widget = toRenderWidget(renderer)->widget();
-
-    if (!widget || !widget->isFrameView())
-        return false;
-
-    return toFrameView(widget)->frame().eventHandler().handleGestureScrollEvent(gestureEvent);
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 bool EventHandler::handleGestureScrollEnd(const PlatformGestureEvent& gestureEvent) {

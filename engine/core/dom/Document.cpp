@@ -133,7 +133,6 @@
 #include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/HitTestResult.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "platform/DateComponents.h"
 #include "platform/EventDispatchForbiddenScope.h"
@@ -232,14 +231,6 @@ static inline bool isValidNamePart(UChar32 c)
         return false;
 
     return true;
-}
-
-static Widget* widgetForElement(const Element& focusedElement)
-{
-    RenderObject* renderer = focusedElement.renderer();
-    if (!renderer || !renderer->isWidget())
-        return 0;
-    return toRenderWidget(renderer)->widget();
 }
 
 static bool acceptsEditingFocus(const Element& element)
@@ -2085,13 +2076,8 @@ bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, Focus
             }
         }
 
-        if (view()) {
-            Widget* oldWidget = widgetForElement(*oldFocusedElement);
-            if (oldWidget)
-                oldWidget->setFocus(false);
-            else
-                view()->setFocus(false);
-        }
+        if (view())
+            view()->setFocus(false);
     }
 
     if (newFocusedElement && newFocusedElement->isFocusable()) {
@@ -2139,23 +2125,8 @@ bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, Focus
         if (m_focusedElement->isRootEditableElement())
             frame()->spellChecker().didBeginEditing(m_focusedElement.get());
 
-        // eww, I suck. set the qt focus correctly
-        // ### find a better place in the code for this
-        if (view()) {
-            Widget* focusWidget = widgetForElement(*m_focusedElement);
-            if (focusWidget) {
-                // Make sure a widget has the right size before giving it focus.
-                // Otherwise, we are testing edge cases of the Widget code.
-                // Specifically, in WebCore this does not work well for text fields.
-                updateLayout();
-                // Re-get the widget in case updating the layout changed things.
-                focusWidget = widgetForElement(*m_focusedElement);
-            }
-            if (focusWidget)
-                focusWidget->setFocus(true);
-            else
-                view()->setFocus(true);
-        }
+        if (view())
+            view()->setFocus(true);
     }
 
     if (!focusChangeBlocked && frameHost())

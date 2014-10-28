@@ -40,9 +40,6 @@ namespace blink {
 class RenderInline;
 class RenderLayerModelObject;
 class RenderObject;
-class RenderWidget;
-
-typedef HashMap<RenderWidget*, IntRect> OverlapTestRequestMap;
 
 /*
  * Paint the object and its children, clipped by (x|y|w|h).

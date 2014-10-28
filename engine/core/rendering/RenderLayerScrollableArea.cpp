@@ -343,8 +343,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
         // If we're in the middle of layout, we'll just update layers once layout has finished.
         layer()->clipper().clearClipRectsIncludingDescendants();
         box().setPreviousPaintInvalidationRect(box().boundsRectForPaintInvalidation(paintInvalidationContainer));
-        // Update regions, scrolling may change the clip of a particular region.
-        frameView->setNeedsUpdateWidgetPositions();
         updateCompositingLayersAfterScroll();
     }
 

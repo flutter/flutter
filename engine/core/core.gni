@@ -1099,7 +1099,6 @@ sky_core_files = [
   "rendering/RenderVideo.cpp",
   "rendering/RenderVideo.h",
   "rendering/RenderView.cpp",
-  "rendering/RenderWidget.cpp",
   "rendering/RootInlineBox.cpp",
   "rendering/ScrollAlignment.cpp",
   "rendering/SubtreeLayoutScope.cpp",

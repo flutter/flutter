@@ -36,7 +36,6 @@
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "wtf/HexNumber.h"
 #include "wtf/Vector.h"
@@ -332,20 +331,6 @@ void write(TextStream& ts, const RenderObject& o, int indent, RenderAsTextBehavi
         if (child->hasLayer())
             continue;
         write(ts, *child, indent + 1, behavior);
-    }
-
-    if (o.isWidget()) {
-        Widget* widget = toRenderWidget(o).widget();
-        if (widget && widget->isFrameView()) {
-            FrameView* view = toFrameView(widget);
-            RenderView* root = view->renderView();
-            if (root) {
-                view->layout();
-                RenderLayer* l = root->layer();
-                if (l)
-                    RenderTreeAsText::writeLayers(ts, l, l, l->rect(), indent + 1, behavior);
-            }
-        }
     }
 }
 

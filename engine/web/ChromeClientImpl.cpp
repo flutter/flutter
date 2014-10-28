@@ -43,7 +43,6 @@
 #include "core/frame/Settings.h"
 #include "core/page/Page.h"
 #include "core/rendering/HitTestResult.h"
-#include "core/rendering/RenderWidget.h"
 #include "platform/Cursor.h"
 #include "platform/NotImplemented.h"
 #include "platform/PlatformScreen.h"

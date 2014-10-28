@@ -53,7 +53,6 @@ class RenderBox;
 class RenderObject;
 class RenderStyle;
 class RenderView;
-class RenderWidget;
 
 typedef unsigned long long DOMTimeStamp;
 
@@ -94,8 +93,6 @@ public:
 
     bool needsLayout() const;
     void setNeedsLayout();
-
-    void setNeedsUpdateWidgetPositions() { m_needsUpdateWidgetPositions = true; }
 
     // Methods for getting/setting the size Blink should use to layout the contents.
     IntSize layoutSize(IncludeScrollbarsInRect = ExcludeScrollbars) const;
@@ -147,10 +144,6 @@ public:
 
     bool wasScrolledByUser() const;
     void setWasScrolledByUser(bool);
-
-    void addWidget(RenderWidget*);
-    void removeWidget(RenderWidget*);
-    void updateWidgetPositions();
 
     void paintContents(GraphicsContext*, const IntRect& damageRect);
     void setPaintBehavior(PaintBehavior);
@@ -288,8 +281,6 @@ private:
     virtual void frameRectsChanged() override;
     virtual bool isFrameView() const override { return true; }
 
-    friend class RenderWidget;
-
     bool contentsInCompositedLayer() const;
 
     void applyOverflowToViewportAndSetRenderer(RenderObject*, ScrollbarMode& hMode, ScrollbarMode& vMode);
@@ -319,8 +310,6 @@ private:
     virtual IntPoint convertToContainingView(const IntPoint&) const override;
     virtual IntPoint convertFromContainingView(const IntPoint&) const override;
 
-    void updateWidgetPositionsIfNeeded();
-
     bool wasViewportResized();
     void sendResizeEventIfNeeded();
 
@@ -340,9 +329,6 @@ private:
     static bool s_inPaintContents;
 
     LayoutSize m_size;
-
-    // FIXME: These are just "children" of the FrameView and should be RefPtr<Widget> instead.
-    HashSet<RefPtr<RenderWidget> > m_widgets;
 
     RefPtr<LocalFrame> m_frame;
     HashSet<RefPtr<Widget> > m_children;
@@ -404,8 +390,6 @@ private:
     Timer<FrameView> m_didScrollTimer;
 
     Vector<IntRect> m_tickmarks;
-
-    bool m_needsUpdateWidgetPositions;
 };
 
 DEFINE_TYPE_CASTS(FrameView, Widget, widget, widget->isFrameView(), widget.isFrameView());

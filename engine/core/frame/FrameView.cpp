@@ -47,7 +47,6 @@
 #include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "core/rendering/style/RenderStyle.h"
@@ -91,7 +90,6 @@ FrameView::FrameView(LocalFrame* frame)
     , m_inputEventsScaleFactorForEmulation(1)
     , m_layoutSizeFixedToFrameSize(true)
     , m_didScrollTimer(this, &FrameView::didScrollTimerFired)
-    , m_needsUpdateWidgetPositions(false)
 {
     ASSERT(m_frame);
     init();
@@ -637,30 +635,6 @@ void FrameView::gatherDebugLayoutRects(RenderObject* layoutRoot)
     }
 }
 
-void FrameView::addWidget(RenderWidget* object)
-{
-    m_widgets.add(object);
-}
-
-void FrameView::removeWidget(RenderWidget* object)
-{
-    m_widgets.remove(object);
-}
-
-void FrameView::updateWidgetPositions()
-{
-    Vector<RefPtr<RenderWidget> > widgets;
-    copyToVector(m_widgets, widgets);
-
-    // Script or plugins could detach the frame so abort processing if that happens.
-
-    for (size_t i = 0; i < widgets.size() && renderView(); ++i)
-        widgets[i]->updateWidgetPosition();
-
-    for (size_t i = 0; i < widgets.size() && renderView(); ++i)
-        widgets[i]->widgetPositionsUpdated();
-}
-
 void FrameView::setMediaType(const AtomicString& mediaType)
 {
     ASSERT(m_frame->document());
@@ -1020,12 +994,6 @@ void FrameView::performPostLayoutTasks()
 
     FontFaceSet::didLayout(*m_frame->document());
 
-    updateWidgetPositions();
-
-    // Plugins could have torn down the page inside updateWidgetPositions().
-    if (!renderView())
-        return;
-
     if (Page* page = m_frame->page()) {
         if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
             scrollingCoordinator->notifyLayoutUpdated();
@@ -1277,24 +1245,12 @@ void FrameView::setNodeToDraw(Node* node)
     m_nodeToDraw = node;
 }
 
-void FrameView::updateWidgetPositionsIfNeeded()
-{
-    if (!m_needsUpdateWidgetPositions)
-        return;
-
-    m_needsUpdateWidgetPositions = false;
-
-    updateWidgetPositions();
-}
-
 void FrameView::updateLayoutAndStyleForPainting()
 {
     // Updating layout can run script, which can tear down the FrameView.
     RefPtr<FrameView> protector(this);
 
     updateLayoutAndStyleIfNeededRecursive();
-
-    updateWidgetPositionsIfNeeded();
 
     if (RenderView* view = renderView()) {
         TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateLayerTree", "frame", m_frame.get());
