@@ -7,10 +7,14 @@ import argparse
 import os
 import cherrypy
 
+
 BUILD_DIRECTORY = 'out'
 CONFIG_DIRECTORY = 'Debug'
-GEN_DIRECTORY = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
-    os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen'))
+SRC_ROOT = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir))
+SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
+GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
+
 
 # FIXME: This doesn't yet support directory listings.  We'll do something like:
 # http://tools.cherrypy.org/wiki/staticdirindex
@@ -30,14 +34,25 @@ def main():
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.abspath(args.app_path),
         },
-        '/sky': {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_DIRECTORY, 'sky'),
-        },
         '/mojo': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_DIRECTORY, 'mojo'),
-        }
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo'),
+        },
+        '/sky': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky'),
+        },
+        # src-relative to avoid needing to rebuild when changing inspector:
+        '/sky/framework': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir':
+                os.path.join(SKY_ROOT, 'framework'),
+        },
+        '/sky/framework/inspector/server': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky', 'framework',
+                'inspector', 'server'),
+        },
      }
     cherrypy.quickstart(config=config)
 

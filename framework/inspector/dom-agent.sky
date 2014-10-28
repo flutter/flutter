@@ -60,10 +60,6 @@ DOMAgent.prototype.serializeNode_ = function(node) {
     if (!nodeValue.trim())
       return null;
     record.nodeValue = nodeValue;
-  } else if (node instanceof Comment) {
-    record.nodeType = 8;
-    record.nodeName = "#comment";
-    record.nodeValue = node.data;
   } else if (node instanceof Document) {
     isContainer = true;
     record.nodeType = 9;
