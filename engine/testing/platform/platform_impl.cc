@@ -13,29 +13,8 @@
 #include "net/base/data_url.h"
 #include "net/base/mime_util.h"
 #include "net/base/net_errors.h"
-#include "sky/engine/public/platform/WebWaitableEvent.h"
 
 namespace sky {
-namespace {
-
-class WebWaitableEventImpl : public blink::WebWaitableEvent {
- public:
-  WebWaitableEventImpl() : impl_(new base::WaitableEvent(false, false)) {}
-  virtual ~WebWaitableEventImpl() {}
-
-  virtual void wait() { impl_->Wait(); }
-  virtual void signal() { impl_->Signal(); }
-
-  base::WaitableEvent* impl() {
-    return impl_.get();
-  }
-
- private:
-  scoped_ptr<base::WaitableEvent> impl_;
-  DISALLOW_COPY_AND_ASSIGN(WebWaitableEventImpl);
-};
-
-}  // namespace
 
 PlatformImpl::PlatformImpl()
     : main_loop_(base::MessageLoop::current()),
@@ -143,21 +122,6 @@ blink::WebData PlatformImpl::parseDataURL(
     return data;
   }
   return blink::WebData();
-}
-
-blink::WebWaitableEvent* PlatformImpl::createWaitableEvent() {
-  return new WebWaitableEventImpl();
-}
-
-blink::WebWaitableEvent* PlatformImpl::waitMultipleEvents(
-    const blink::WebVector<blink::WebWaitableEvent*>& web_events) {
-  std::vector<base::WaitableEvent*> events;
-  for (size_t i = 0; i < web_events.size(); ++i)
-    events.push_back(static_cast<WebWaitableEventImpl*>(web_events[i])->impl());
-  size_t idx = base::WaitableEvent::WaitMany(
-      vector_as_array(&events), events.size());
-  DCHECK_LT(idx, web_events.size());
-  return web_events[idx];
 }
 
 }  // namespace sky

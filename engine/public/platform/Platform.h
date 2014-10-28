@@ -73,7 +73,6 @@ class WebThemeEngine;
 class WebURL;
 class WebURLLoader;
 class WebUnitTestSupport;
-class WebWaitableEvent;
 struct WebLocalizedString;
 struct WebSize;
 
@@ -201,18 +200,6 @@ public:
     virtual WebString queryLocalizedString(WebLocalizedString::Name) { return WebString(); }
     virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter) { return WebString(); }
     virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter1, const WebString& parameter2) { return WebString(); }
-
-
-    // WaitableEvent -------------------------------------------------------
-
-    // Creates an embedder-defined waitable event object.
-    virtual WebWaitableEvent* createWaitableEvent() { return 0; }
-
-    // Waits on multiple events and returns the event object that has been
-    // signaled. This may return 0 if it fails to wait events.
-    // Any event objects given to this method must not deleted while this
-    // wait is happening.
-    virtual WebWaitableEvent* waitMultipleEvents(const WebVector<WebWaitableEvent*>& events) { return 0; }
 
 
     // Profiling -----------------------------------------------------------

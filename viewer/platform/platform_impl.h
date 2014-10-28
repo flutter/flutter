@@ -47,9 +47,6 @@ class PlatformImpl : public blink::Platform {
       const blink::WebURL& url, blink::WebString& mime_type,
       blink::WebString& charset);
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;
-  virtual blink::WebWaitableEvent* createWaitableEvent();
-  virtual blink::WebWaitableEvent* waitMultipleEvents(
-      const blink::WebVector<blink::WebWaitableEvent*>& events);
   virtual blink::WebScrollbarBehavior* scrollbarBehavior();
   virtual const unsigned char* getTraceCategoryEnabledFlag(
       const char* category_name);
