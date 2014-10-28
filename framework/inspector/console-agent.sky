@@ -1,0 +1,12 @@
+<script>
+function ConsoleAgent() {
+}
+
+ConsoleAgent.prototype.enable = function() {
+  return {
+    result: true,
+  };
+};
+
+this.exports = ConsoleAgent;
+</script>

@@ -1,0 +1,83 @@
+<link rel="import" href="/mojo/public/html/connection.html" as="connection" />
+<link rel="import" href="/mojo/public/html/core.html" as="core" />
+<link rel="import" href="/mojo/public/html/support.html" as="support" />
+<link rel="import" href="/sky/framework/inspector/server/inspector.mojom.html" as="inspector" />
+<link rel="import" href="console-agent.sky" as="ConsoleAgent" />
+<link rel="import" href="dom-agent.sky" as="DOMAgent" />
+<link rel="import" href="page-agent.sky" as="PageAgent" />
+<link rel="import" href="worker-agent.sky" as="WorkerAgent" />
+<script>
+function InspectorBackend(frontend) {
+  this.frontend = frontend;
+  this.agents = {
+    Console: new ConsoleAgent(),
+    DOM: new DOMAgent(this),
+    Page: new PageAgent(),
+    Worker: new WorkerAgent(),
+  };
+}
+
+InspectorBackend.prototype = Object.create(
+    inspector.InspectorBackend.stubClass.prototype);
+
+InspectorBackend.prototype.onConnect = function() {
+};
+
+InspectorBackend.prototype.onDisconnect = function() {
+};
+
+InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
+  var parsed = descriptor.split('.');
+
+  var agentName = parsed[0];
+  var methodName = parsed[1];
+
+  if (!(agentName in this.agents)) {
+    console.log("InspectorBackend cannot find agent " + agentName);
+    return {};
+  }
+
+  var agent = this.agents[agentName];
+
+  if (!(methodName in agent)) {
+    console.log("InspectorBackend cannot find method " +
+                methodName + " on agent " + agentName);
+    return {};
+  }
+
+  try {
+    return agent[methodName](params);
+  } catch(ex) {
+    console.log(descriptor + ": " + ex);
+  }
+};
+
+InspectorBackend.prototype.onMessage = function(data) {
+  var message = JSON.parse(data);
+  var result = this.dispatch_(message.method, message.params);
+  var response = {
+    id: message.id,
+  };
+  if (typeof result !== "undefined")
+    response.result = result;
+  this.frontend.sendMessage(JSON.stringify(response));
+};
+
+InspectorBackend.prototype.sendMessage = function(method, params) {
+  var message = JSON.stringify({
+    method: method,
+    params: params,
+  });
+  this.frontend.sendMessage(message);
+};
+
+var frontendHandle = internals.connectToService(
+    "mojo:sky_inspector_server", inspector.InspectorFrontend.name);
+window.frontendConnection = new connection.Connection(
+    frontendHandle,
+    InspectorBackend,
+    inspector.InspectorFrontend.proxyClass);
+
+window.frontend = frontendConnection.remote;
+frontend.listen(9898);
+</script>

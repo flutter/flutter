@@ -1,0 +1,12 @@
+<script>
+function WorkerAgent() {
+}
+
+WorkerAgent.prototype.canInspectWorkers = function() {
+  return {
+    result: false
+  };
+};
+
+this.exports = WorkerAgent;
+</script>

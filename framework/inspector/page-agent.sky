@@ -1,0 +1,21 @@
+<script>
+function PageAgent() {
+}
+
+PageAgent.prototype.enable = function() {
+};
+
+PageAgent.prototype.canScreencast = function() {
+  return {
+    result: false
+  };
+};
+
+PageAgent.prototype.canEmulate = function() {
+  return {
+    result: false
+  };
+};
+
+this.exports = PageAgent;
+</script>
