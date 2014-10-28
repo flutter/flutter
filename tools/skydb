@@ -12,7 +12,8 @@ import urlparse
 
 BUILD_DIRECTORY = 'out'
 CONFIG_DIRECTORY = 'Debug'
-MOJO_SHELL_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+SKY_TOOLS_DIRECTORY = os.path.abspath(os.path.join(__file__, os.pardir))
+MOJO_SHELL_PATH = os.path.abspath(os.path.join(SKY_TOOLS_DIRECTORY, os.pardir,
     os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'mojo_shell'))
 
 SUPPORTED_MIME_TYPES = [
@@ -23,14 +24,12 @@ SUPPORTED_MIME_TYPES = [
 
 def start_http_server_for_file(path):
     HTTP_PORT = 9999
-    directory = os.path.dirname(os.path.abspath(path))
     server_command = [
-        'python',
-        '-m',
-        'SimpleHTTPServer',
-        str(HTTP_PORT)
+        os.path.join(SKY_TOOLS_DIRECTORY, 'sky_server'),
+        os.path.dirname(os.path.abspath(path)),
+        str(HTTP_PORT),
     ]
-    subprocess.Popen(server_command, cwd=directory)
+    subprocess.Popen(server_command)
     return 'http://localhost:%s/%s' % (HTTP_PORT, os.path.basename(path))
 
 
@@ -64,4 +63,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, SystemExit):
+        print "Quitting"
