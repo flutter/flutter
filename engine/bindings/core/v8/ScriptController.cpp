@@ -353,9 +353,11 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
                 String name = link->as();
                 if (!name.isEmpty()) {
                     module.formalDependenciesAndSource.append(v8String(m_isolate, name));
-                    v8::Handle<v8::Value> actual = v8::Undefined(m_isolate);
+                    v8::Handle<v8::Value> actual;
                     if (child->document())
                         actual = child->document()->exports().v8Value();
+                    if (actual.IsEmpty())
+                        actual = v8::Undefined(m_isolate);
                     module.resolvedDependencies.append(actual);
                 }
             }
