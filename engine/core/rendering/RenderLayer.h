@@ -367,8 +367,6 @@ public:
     inline bool isPositionedContainer() const
     {
         // FIXME: This is not in sync with containingBlock.
-        // RenderObject::canContainFixedPositionedObject() should probably be used
-        // instead.
         RenderLayerModelObject* layerRenderer = renderer();
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }

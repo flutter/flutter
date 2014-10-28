@@ -1171,14 +1171,8 @@ bool RenderBlock::simplifiedLayout()
         if (needsSimplifiedNormalFlowLayout())
             simplifiedNormalFlowLayout();
 
-        // Lay out our positioned objects if our positioned child bit is set.
-        // Also, if an absolute position element inside a relative positioned container moves, and the absolute element has a fixed position
-        // child, neither the fixed element nor its container learn of the movement since posChildNeedsLayout() is only marked as far as the
-        // relative positioned container. So if we can have fixed pos objects in our positioned objects list check if any of them
-        // are statically positioned and thus need to move with their absolute ancestors.
-        bool canContainFixedPosObjects = canContainFixedPositionObjects();
-        if (posChildNeedsLayout() || needsPositionedMovementLayout() || canContainFixedPosObjects)
-            layoutPositionedObjects(false, needsPositionedMovementLayout() ? ForcedLayoutAfterContainingBlockMoved : (!posChildNeedsLayout() && canContainFixedPosObjects ? LayoutOnlyFixedPositionedObjects : DefaultLayout));
+        if (posChildNeedsLayout() || needsPositionedMovementLayout())
+            layoutPositionedObjects(false, needsPositionedMovementLayout() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
 
         // Recompute our overflow information.
         // FIXME: We could do better here by computing a temporary overflow object from layoutPositionedObjects and only
@@ -1197,11 +1191,6 @@ bool RenderBlock::simplifiedLayout()
 
     clearNeedsLayout();
     return true;
-}
-
-void RenderBlock::markFixedPositionObjectForLayoutIfNeeded(RenderObject* child, SubtreeLayoutScope& layoutScope)
-{
-    // FIXME(sky): Remove
 }
 
 LayoutUnit RenderBlock::marginIntrinsicLogicalWidthForChild(RenderBox* child) const
@@ -1234,14 +1223,6 @@ void RenderBlock::layoutPositionedObjects(bool relayoutChildren, PositionedLayou
         r->setLayoutDidGetCalled(true);
 
         SubtreeLayoutScope layoutScope(*r);
-        // A fixed position element with an absolute positioned ancestor has no way of knowing if the latter has changed position. So
-        // if this is a fixed position element, mark it for layout if it has an abspos ancestor and needs to move with that ancestor, i.e.
-        // it has static position.
-        markFixedPositionObjectForLayoutIfNeeded(r, layoutScope);
-        if (info == LayoutOnlyFixedPositionedObjects) {
-            r->layoutIfNeeded();
-            continue;
-        }
 
         // When a non-positioned block element moves, it may have positioned children that are implicitly positioned relative to the
         // non-positioned block.  Rather than trying to detect all of these movement cases, we just always lay out positioned

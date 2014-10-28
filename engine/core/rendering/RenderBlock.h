@@ -233,12 +233,10 @@ protected:
 
     enum PositionedLayoutBehavior {
         DefaultLayout,
-        LayoutOnlyFixedPositionedObjects,
         ForcedLayoutAfterContainingBlockMoved
     };
 
     void layoutPositionedObjects(bool relayoutChildren, PositionedLayoutBehavior = DefaultLayout);
-    void markFixedPositionObjectForLayoutIfNeeded(RenderObject* child, SubtreeLayoutScope&);
 
     LayoutUnit marginIntrinsicLogicalWidthForChild(RenderBox* child) const;
 

@@ -635,7 +635,7 @@ RenderBlock* RenderObject::containingBlock() const
             if (o->style()->position() != StaticPosition && (!o->isInline() || o->isReplaced()))
                 break;
 
-            if (o->canContainFixedPositionObjects())
+            if (o->canContainAbsolutePositionObjects())
                 break;
 
             if (o->style()->hasInFlowPosition() && o->isInline() && !o->isReplaced()) {
@@ -2290,7 +2290,7 @@ RenderObject* RenderObject::container(const RenderLayerModelObject* paintInvalid
             if (o->style()->position() != StaticPosition)
                 break;
 
-            if (o->canContainFixedPositionObjects())
+            if (o->canContainAbsolutePositionObjects())
                 break;
 
             if (paintInvalidationContainerSkipped && o == paintInvalidationContainer)

@@ -621,11 +621,6 @@ public:
     // returns the containing block level element for this element.
     RenderBlock* containingBlock() const;
 
-    bool canContainFixedPositionObjects() const
-    {
-        return isRenderView() || (hasTransform() && isRenderBlock());
-    }
-
     // Convert the given local point to absolute coordinates
     // FIXME: Temporary. If UseTransforms is true, take transforms into account. Eventually localToAbsolute() will always be transform-aware.
     FloatPoint localToAbsolute(const FloatPoint& localPoint = FloatPoint(), MapCoordinatesFlags = 0) const;
@@ -1011,6 +1006,13 @@ private:
             container->setMayNeedPaintInvalidation(true);
     }
 
+    // FIXME(sky): This method is just to avoid copy-paste.
+    // Merge container into containingBlock and then get rid of this method.
+    bool canContainAbsolutePositionObjects() const
+    {
+        return isRenderView() || (hasTransform() && isRenderBlock());
+    }
+
     static bool isAllowedToModifyRenderTreeStructure(Document&);
 
     RefPtr<RenderStyle> m_style;
@@ -1038,6 +1040,7 @@ private:
         void set##Name(bool name) { m_##name = name; }\
 
     class RenderObjectBitfields {
+        // FIXME(sky): Remove this enum and just use EPosition directly.
         enum PositionedState {
             IsStaticallyPositioned = 0,
             IsRelativelyPositioned = 1,
@@ -1141,9 +1144,7 @@ private:
 
         void setPositionedState(int positionState)
         {
-            // FIXME(sky): Simplify now that we don't have FixedPosition.
-            // This mask maps FixedPosition and AbsolutePosition to IsOutOfFlowPositioned, saving one bit.
-            m_positionedState = static_cast<PositionedState>(positionState & 0x3);
+            m_positionedState = static_cast<PositionedState>(positionState);
         }
         void clearPositionedState() { m_positionedState = StaticPosition; }
 
