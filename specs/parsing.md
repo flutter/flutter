@@ -174,8 +174,8 @@ If the current character is...
 * '``/``': Consume the character and switch to the **script raw
   data: close 2** state.
 
-* Anything else: Emit '``<``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``<``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 2** state ####
@@ -185,8 +185,8 @@ If the current character is...
 * '``s``': Consume the character and switch to the **script raw
   data: close 3** state.
 
-* Anything else: Emit '``</``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 3** state ####
@@ -196,8 +196,8 @@ If the current character is...
 * '``c``': Consume the character and switch to the **script raw
   data: close 4** state.
 
-* Anything else: Emit '``</s``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</s``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 4** state ####
@@ -207,8 +207,8 @@ If the current character is...
 * '``r``': Consume the character and switch to the **script raw
   data: close 5** state.
 
-* Anything else: Emit '``</sc``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</sc``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 5** state ####
@@ -218,8 +218,8 @@ If the current character is...
 * '``i``': Consume the character and switch to the **script raw
   data: close 6** state.
 
-* Anything else: Emit '``</scr``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</scr``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 6** state ####
@@ -229,8 +229,8 @@ If the current character is...
 * '``p``': Consume the character and switch to the **script raw
   data: close 7** state.
 
-* Anything else: Emit '``</scri``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</scri``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 7** state ####
@@ -240,8 +240,8 @@ If the current character is...
 * '``t``': Consume the character and switch to the **script raw
   data: close 8** state.
 
-* Anything else: Emit '``</scrip``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</scrip``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Script raw data: close 8** state ####
@@ -252,8 +252,8 @@ If the current character is...
   let its tag name be the string '``script``'. Switch to the
   **before attribute name** state without consuming the character.
 
-* Anything else: Emit '``</script``' character tokens. Consume the
-  character. Switch to the **script raw data** state.
+* Anything else: Emit '``</script``' character tokens. Switch to the
+  **script raw data** state without consuming the character.
 
 
 #### **Style raw data** state ####
@@ -274,8 +274,8 @@ If the current character is...
 * '``/``': Consume the character and switch to the **style raw
   data: close 2** state.
 
-* Anything else: Emit '``<``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``<``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 2** state ####
@@ -285,8 +285,8 @@ If the current character is...
 * '``s``': Consume the character and switch to the **style raw
   data: close 3** state.
 
-* Anything else: Emit '``</``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 3** state ####
@@ -296,8 +296,8 @@ If the current character is...
 * '``t``': Consume the character and switch to the **style raw
   data: close 4** state.
 
-* Anything else: Emit '``</s``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</s``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 4** state ####
@@ -307,8 +307,8 @@ If the current character is...
 * '``y``': Consume the character and switch to the **style raw
   data: close 5** state.
 
-* Anything else: Emit '``</st``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</st``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 5** state ####
@@ -318,8 +318,8 @@ If the current character is...
 * '``l``': Consume the character and switch to the **style raw
   data: close 6** state.
 
-* Anything else: Emit '``</sty``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</sty``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 6** state ####
@@ -329,8 +329,8 @@ If the current character is...
 * '``e``': Consume the character and switch to the **style raw
   data: close 7** state.
 
-* Anything else: Emit '``</styl``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</styl``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Style raw data: close 7** state ####
@@ -341,8 +341,8 @@ If the current character is...
   let its tag name be the string '``style``'. Switch to the
   **before attribute name** state without consuming the character.
 
-* Anything else: Emit '``</style``' character tokens. Consume the
-  character. Switch to the **style raw data** state.
+* Anything else: Emit '``</style``' character tokens. Switch to the
+  **style raw data** state without consuming the character.
 
 
 #### **Tag open** state ####
@@ -424,8 +424,9 @@ If the current character is...
   tag** state.
 
 * Anything else: Create a new attribute in the tag token, and set its
-  name to the current character. Consume the current character. Switch
-  to the **attribute name** state.
+  name to the current character and its value to the empty string.
+  Consume the current character. Switch to the **attribute name**
+  state.
 
 
 #### **Attribute name** state ####
@@ -465,8 +466,9 @@ If the current character is...
   tag** state.
 
 * Anything else: Create a new attribute in the tag token, and set its
-  name to the current character. Consume the current character. Switch
-  to the **attribute name** state.
+  name to the current character and its value to the empty string.
+  Consume the current character. Switch to the **attribute name**
+  state.
 
 
 #### **Before attribute value** state ####
@@ -484,9 +486,8 @@ If the current character is...
 * '``"``': Consume the current character. Switch to the
   **double-quoted attribute value** state.
 
-* Anything else: Set the value of the most recently added attribute to
-  the current character. Consume the current character. Switch to the
-  **unquoted attribute value** state.
+* Anything else: Switch to the **unquoted attribute value** state
+  without consuming the current character.
 
 
 #### **Single-quoted attribute value** state ####
@@ -532,14 +533,14 @@ If the current character is...
 * U+0020, U+000A: Consume the current character. Switch to the
   **before attribute name** state.
 
-* '``>``': Consume the current character. Switch to the **data**
-  state. Switch to the **after tag** state.
+* '``>``': Consume the current character. Switch to the **after tag**
+  state.
 
 * '``&``': Consume the character and switch to the **character
   reference** state, with the _return state_ set to the **unquoted
-  attribute value** state which has the same effect), and the
-  _emitting operation_ being to append the given character to the
-  value of the most recently added attribute.
+  attribute value** state, and the _emitting operation_ being to
+  append the given character to the value of the most recently added
+  attribute.
 
 * Anything else: Append the current character to the value of the most
   recently added attribute. Consume the current character. Stay in
@@ -576,8 +577,8 @@ If the current character is...
 * '``-``': Consume the character and switch to the **comment start
   2** state.
 
-* '``>``': Emit character tokens for '``<!>``'. Consume the
-  current character. Switch to the **data** state.
+* Anything else: Emit character tokens for '``<!``'. Switch to the
+  **data** state without consuming the current character.
 
 
 #### **Comment start 2** state ####
@@ -587,8 +588,8 @@ If the current character is...
 * '``-``': Consume the character and switch to the **comment**
   state.
 
-* '``>``': Emit character tokens for '``<!->``'. Consume the
-  current character. Switch to the **data** state.
+* Anything else: Emit character tokens for '``<!-``'. Switch to the
+  **data** state without consuming the current character.
 
 
 #### **Comment** state ####
@@ -598,8 +599,7 @@ If the current character is...
 * '``-``': Consume the character and switch to the **comment end 1**
   state.
 
-* Anything else: Consume the character and switch to the **comment**
-  state.
+* Anything else: Consume the character and stay in this state.
 
 
 #### **Comment end 1** state ####
