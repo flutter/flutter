@@ -11,7 +11,7 @@ describe('Mojo network_service', function() {
 
   it('should be able to fetch text files', function(done) {
     var netServiceHandle = internals.connectToService(
-        "mojo://network_service//", "mojo::NetworkService");
+        "mojo://network_service/", "mojo::NetworkService");
     var netConnection = new connection.Connection(
         netServiceHandle,
         net.NetworkService.stubClass,
