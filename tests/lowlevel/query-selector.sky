@@ -1,0 +1,62 @@
+<html>
+<link rel="import" href="../resources/mocha.sky" />
+<link rel="import" href="../resources/chai.sky" />
+<div id="tests">
+  <div id="id1">
+    <div class="class2"></div>
+  </div>
+  <tag-name-3 class="class7" id="tag1"></tag-name-3>
+  <tag-name-3 class="class7" id="tag2"></tag-name-3>
+  <span class="class2">
+    <span class="class5" id="id5"></span>
+  </span>
+  <div id="id5"></div>
+  <tag-name-6 class="class6" id="id6">
+    <tag-name-3 class="class7" id="tag2"></tag-name-3>
+  </tag-name-6>
+</div>
+<script>
+function query(selector) { return document.querySelector(selector); }
+function queryAll(selector) { return document.querySelectorAll(selector); }
+
+describe("querySelector", function() {
+  it("should find elements by class name", function() {
+    assert.ok(query(".class2"));
+    assert.equal(query(".class2").classList.toString(), "class2");
+    assert.equal(queryAll(".class2").length, 2);
+    assert.equal(queryAll(".class2")[0].classList.toString(), "class2");
+    assert.equal(queryAll(".class2")[1].classList.toString(), "class2");
+    assert.notEqual(queryAll(".class2")[0], queryAll(".class2")[1]);
+  });
+  it("should find elements by id", function() {
+    assert.ok(query("#id5"));
+    assert.equal(query("#id5").id, "id5");
+    assert.equal(query("#id5").classList.toString(), "class5");
+    // FIXME(sky): Do we still want to allow multiple id stuff like this?
+    assert.equal(queryAll("#id5").length, 2);
+    assert.equal(queryAll("#id5")[0], query("#id5"));
+    assert.notEqual(queryAll("#id5")[1], query("#id5"));
+    assert.equal(queryAll("#id5")[1].id, "id5");
+  });
+  it("should find elements by tag name", function() {
+    assert.ok(query("tag-name-6"));
+    assert.equal(query("tag-name-6").tagName, "tag-name-6");
+    assert.equal(query("tag-name-6").classList.toString(), "class6");
+    var context = query("#tests");
+    assert.equal(context.querySelectorAll("span").length, 2);
+  });
+  it("should find an element by compound selector", function() {
+    assert.ok(query("tag-name-6.class6#id6"));
+    assert.equal(query("tag-name-6.class6#id6").id, "id6");
+    assert.equal(query("tag-name-6.class6#id6").classList.toString(), "class6");
+    assert.equal(query("tag-name-6.class6#id6").tagName, "tag-name-6");
+  });
+  it("should find all elements by compound selector", function() {
+    assert.ok(queryAll("tag-name-3.class7"));
+    assert.equal(queryAll("tag-name-3.class7").length, 3);
+    assert.equal(queryAll("tag-name-3.class7")[0].id, "tag1");
+    assert.equal(queryAll("tag-name-3.class7")[1].id, "tag2");
+  });
+});
+</script>
+</html>

@@ -1,0 +1,20 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+
+describe.only('This suite', function() {
+  it('should run this test', function() {
+    assert.ok(true);
+  });
+});
+
+describe('That suite', function() {
+  it('should not run this test', function() {
+    assert.ok(false);
+  });
+});
+
+
+</script>
+</html>

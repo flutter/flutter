@@ -1,0 +1,28 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('MutationObserver', function() {
+    var observer = new MutationObserver(function(mutations) { });
+
+    it('should have methods', function() {
+        assert.equal(typeof observer.observe, 'function');
+        assert.equal(typeof observer.disconnect, 'function');
+    });
+    it('should throw with incorrect constructor args', function() {
+        assert.throw(function() {
+            new MutationObserver({ handleEvent: function() {} });
+        }, TypeError);
+        assert.throw(function() {
+            new MutationObserver({});
+        }, TypeError);
+        assert.throw(function() {
+            new MutationObserver(42);
+        }, TypeError);
+        assert.throw(function() {
+            new MutationObserver("foo");
+        }, TypeError);
+    });
+});
+</script>
+</html>

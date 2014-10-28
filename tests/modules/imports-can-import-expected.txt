@@ -1,1 +1,1 @@
-{"message":"PASS: pass.html succesfully exported this string."}
+{"message":"PASS: pass.sky succesfully exported this string."}

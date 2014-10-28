@@ -1,0 +1,34 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('MutationObserver', function() {
+  it('should not interrupt delivery order on getting mutations during delivery', function(done) {
+    function finish() {
+      assert.deepEqual(order, [1, 3, 2]);
+      done();
+    }
+
+    var order = [];
+    var div = document.createElement('div');
+
+    var observer1 = new MutationObserver(function(mutations) {
+      order.push(1);
+      div.appendChild(document.createElement('span'));
+    });
+    var observer2 = new MutationObserver(function(mutations) {
+      order.push(2);
+    });
+    var observer3 = new MutationObserver(function(mutations) {
+      order.push(3);
+    });
+
+    observer1.observe(div, {attributes: true});
+    observer2.observe(div, {childList: true});
+    observer3.observe(div, {attributes: true});
+    div.setAttribute('foo', 'bar');
+    setTimeout(finish, 0);
+  });
+});
+</script>
+</html>

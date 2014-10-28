@@ -1,0 +1,49 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<link rel="import" href="/mojo/public/html/core.html" as="core" />
+<link rel="import" href="/mojo/public/html/connection.html" as="connection" />
+<link rel="import" href="/mojo/services/public/interfaces/network/network_service.mojom.html" as="net" />
+<link rel="import" href="/mojo/services/public/interfaces/network/url_loader.mojom.html" as="loader" />
+<script>
+describe('Mojo network_service', function() {
+  this.enableTimeouts(false);
+
+  it('should be able to fetch text files', function(done) {
+    var netServiceHandle = internals.connectToService(
+        "mojo://network_service//", "mojo::NetworkService");
+    var netConnection = new connection.Connection(
+        netServiceHandle,
+        net.NetworkService.stubClass,
+        net.NetworkService.proxyClass);
+    var urlLoaderPipe = new core.createMessagePipe();
+    netConnection.remote.createURLLoader(urlLoaderPipe.handle1);
+    var urlLoaderConnection = new connection.Connection(
+        urlLoaderPipe.handle0,
+        loader.URLLoader.stubClass,
+        loader.URLLoader.proxyClass);
+    var urlRequest = new loader.URLRequest();
+    urlRequest.url = "http://127.0.0.1:8000/services/resources/pass.txt";
+    urlRequest.method = "GET";
+    urlRequest.auto_follow_redirects = true;
+    var urlRequestPromise = urlLoaderConnection.remote.start(urlRequest);
+    urlRequestPromise.then(function(result) {
+      console.log("url => " + result.response["url"]);
+      console.log("status_line => " + result.response["status_line"]);
+      console.log("mime_type => " + result.response["mime_type"]);
+      var drainDataPromise = core.drainData(result.response.body);
+      drainDataPromise.then(function(result) {
+        console.log("read " + result.buffer.byteLength + " bytes");
+        done();
+      }).catch(function() {
+        assert.ok(false, "core.drainData failed");
+        done();
+      });
+    }).catch(function() {
+      assert.ok(false, "start failed");
+      done();
+    });
+  });
+});
+</script>
+</html>

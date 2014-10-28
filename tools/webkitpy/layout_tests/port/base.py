@@ -228,7 +228,7 @@ class Port(object):
         if driver_name == self.MOJO_SHELL_NAME:
             return [
                 '--args-for=mojo://native_viewport_service/ --use-headless-config',
-                '--content-handlers=text/html,mojo://sky_viewer/',
+                '--content-handlers=text/sky,mojo://sky_viewer/',
                 '--url-mappings=mojo:window_manager=mojo:sky_tester',
                 'mojo:window_manager',
             ]
@@ -725,7 +725,7 @@ class Port(object):
         return [self.relative_test_filename(f) for f in files]
 
     # When collecting test cases, we include any file with these extensions.
-    _supported_file_extensions = set(['.html'])
+    _supported_file_extensions = set(['.sky'])
 
     @staticmethod
     # If any changes are made here be sure to update the isUsedInReftest method in old-run-webkit-tests as well.

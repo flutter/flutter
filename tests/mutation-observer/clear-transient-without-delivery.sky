@@ -1,0 +1,28 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('Transient registrations', function() {
+    it('should be cleared even without delivery', function(done) {
+        var mutationsDelivered = false;
+        var observer = new MutationObserver(function(mutations) {
+            mutationsDelivered = true;
+        });
+        var div = document.createElement('div');
+        var span = div.appendChild(document.createElement('span'));
+        observer.observe(div, {attributes: true, subtree: true});
+        div.removeChild(span);
+        setTimeout(function() {
+            // By the time this function runs the transient registration should
+            // be cleared, so we expect not to be notified of this attribute
+            // mutation.
+            span.setAttribute('bar', 'baz');
+            setTimeout(function() {
+                assert.notOk(mutationsDelivered);
+                done();
+            }, 0);
+        }, 0);
+    });
+});
+</script>
+</html>

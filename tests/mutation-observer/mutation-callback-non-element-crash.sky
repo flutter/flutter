@@ -1,0 +1,15 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.sky" />
+<body id="body">
+<script>
+function mutationCallback(mutations, observer) {
+    mutations[0].addedNodes[-1];
+}
+
+var mutationObserver = new MutationObserver(mutationCallback);
+var body = document.getElementById("body");
+mutationObserver.observe(body, {childList: true});
+body.appendChild(document.createTextNode("PASS. We didn't crash"));
+</script>
+</body>
+</html>

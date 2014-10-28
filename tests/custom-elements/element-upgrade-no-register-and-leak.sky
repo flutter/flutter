@@ -1,0 +1,13 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.sky" />
+<body>
+Tests unresolved element not leaking if never resolved.
+<div id="container"></div>
+<script>
+// Verify that a custom tag for which no element is ever registered
+// doesn't cause a document nor elements to leak.
+var host = document.createElement('div');
+host.appendChild(document.createElement('x-a'));
+</script>
+</body>
+</html>

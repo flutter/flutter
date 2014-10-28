@@ -1,0 +1,42 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('Non-relevant properties on mutation records should be null, except for NodeLists, which should be empty', function() {
+
+  var observer = new MutationObserver(function() {});
+
+  it('on characterData records', function() {
+    var text = document.createTextNode('something');
+    observer.observe(text, {characterData: true});
+    text.data = 'something else';
+    var record = observer.takeRecords()[0];
+    assert.isNull(record.attributeName);
+    assert.isNull(record.oldValue);
+    assert.isNull(record.previousSibling);
+    assert.isNull(record.nextSibling);
+    assert.equal(record.addedNodes.length, 0);
+    assert.equal(record.removedNodes.length, 0);
+  });
+  it('on childList records', function() {
+    var div = document.createElement('div');
+    observer.observe(div, {childList: true});
+    div.appendChild(document.createElement('span'));
+    record = observer.takeRecords()[0];
+    assert.isNull(record.attributeName);
+    assert.isNull(record.oldValue);
+  });
+  it('on attribute records', function() {
+    var div = document.createElement('div');
+    observer.observe(div, {attributes: true});
+    div.setAttribute('data-foo', 'bar');
+    record = observer.takeRecords()[0];
+    assert.isNull(record.oldValue);
+    assert.isNull(record.previousSibling);
+    assert.isNull(record.nextSibling);
+    assert.equal(record.addedNodes.length, 0);
+    assert.equal(record.removedNodes.length, 0);
+  });
+});
+</script>
+</html>

@@ -1,0 +1,3 @@
+<script>
+this.exports = "PASS: pass.sky succesfully exported this string."
+</script>
