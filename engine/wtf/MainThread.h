@@ -44,9 +44,6 @@ WTF_EXPORT void initializeMainThread(void (*)(MainThreadFunction, void*));
 
 WTF_EXPORT void callOnMainThread(MainThreadFunction*, void* context);
 
-template<typename> class Function;
-WTF_EXPORT void callOnMainThread(const Function<void ()>&);
-
 WTF_EXPORT bool isMainThread();
 
 } // namespace WTF

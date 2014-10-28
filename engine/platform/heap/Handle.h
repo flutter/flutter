@@ -31,7 +31,6 @@
 #ifndef Handle_h
 #define Handle_h
 
-#include "wtf/Functional.h"
 #include "wtf/HashFunctions.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/RawPtr.h"
@@ -143,28 +142,5 @@ public:
     DEFINE_STATIC_REF(type, name, arguments)
 
 } // namespace blink
-
-namespace WTF {
-
-// For wtf/Functional.h
-template<typename T, bool isGarbageCollected> struct PointerParamStorageTraits;
-
-template<typename T>
-struct PointerParamStorageTraits<T*, false> {
-    typedef T* StorageType;
-
-    static StorageType wrap(T* value) { return value; }
-    static T* unwrap(const StorageType& value) { return value; }
-};
-
-template<typename T>
-struct ParamStorageTraits<T*> : public PointerParamStorageTraits<T*, false> {
-};
-
-template<typename T>
-struct ParamStorageTraits<RawPtr<T> > : public PointerParamStorageTraits<T*, false> {
-};
-
-} // namespace WTF
 
 #endif

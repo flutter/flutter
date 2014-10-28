@@ -47,6 +47,10 @@
 
 class GrContext;
 
+namespace base {
+class SingleThreadTaskRunner;
+}
+
 namespace mojo {
 class NetworkService;
 }
@@ -256,6 +260,7 @@ public:
 
     // Callable from a background WebKit thread.
     virtual void callOnMainThread(void (*func)(void*), void* context) { }
+    virtual base::SingleThreadTaskRunner* mainThreadTaskRunner() { return 0; }
 
 
     // Vibration -----------------------------------------------------------

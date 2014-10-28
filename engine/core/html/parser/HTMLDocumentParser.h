@@ -130,7 +130,7 @@ private:
 
     OwnPtr<ParsedChunk> m_lastChunkBeforeScript;
     Deque<OwnPtr<ParsedChunk> > m_speculations;
-    WeakPtrFactory<HTMLDocumentParser> m_weakFactory;
+    base::WeakPtrFactory<HTMLDocumentParser> m_weakFactory;
     base::WeakPtr<BackgroundHTMLParser> m_backgroundParser;
 
     bool m_isFragment;

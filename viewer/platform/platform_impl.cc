@@ -41,6 +41,7 @@ class ConvertableToTraceFormatWrapper
 
 PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
     : main_loop_(base::MessageLoop::current()),
+      main_thread_task_runner_(base::MessageLoop::current()->task_runner()),
       shared_timer_func_(NULL),
       shared_timer_fire_time_(0.0),
       shared_timer_fire_time_was_set_while_suspended_(false),
@@ -122,6 +123,11 @@ void PlatformImpl::callOnMainThread(
     void (*func)(void*), void* context) {
   main_loop_->PostTask(FROM_HERE, base::Bind(func, context));
 }
+
+base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
+  return main_thread_task_runner_.get();
+}
+
 
 bool PlatformImpl::isThreadedCompositingEnabled() {
   return true;

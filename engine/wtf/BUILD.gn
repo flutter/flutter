@@ -234,7 +234,6 @@ test("unittests") {
     "CheckedArithmeticTest.cpp",
     "DequeTest.cpp",
     "DoubleBufferedDequeTest.cpp",
-    "FunctionalTest.cpp",
     "HashMapTest.cpp",
     "HashSetTest.cpp",
     "ListHashSetTest.cpp",

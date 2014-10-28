@@ -41,7 +41,6 @@
 #include "core/inspector/InspectorTraceEvents.h"
 #include "platform/SharedBuffer.h"
 #include "platform/TraceEvent.h"
-#include "wtf/Functional.h"
 
 namespace blink {
 
@@ -82,7 +81,7 @@ void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source)
 
     OwnPtr<BackgroundHTMLParser::Configuration> config = adoptPtr(new BackgroundHTMLParser::Configuration);
     config->source = source.Pass();
-    config->parser = m_weakFactory.createWeakPtr();
+    config->parser = m_weakFactory.GetWeakPtr();
 
     m_backgroundParser = BackgroundHTMLParser::create(config.release());
     HTMLParserThread::taskRunner()->PostTask(FROM_HERE,
@@ -350,7 +349,7 @@ void HTMLDocumentParser::stopBackgroundParser()
 
     HTMLParserThread::taskRunner()->PostTask(FROM_HERE,
         base::Bind(&BackgroundHTMLParser::stop, m_backgroundParser));
-    m_weakFactory.revokeAll();
+    m_weakFactory.InvalidateWeakPtrs();
 }
 
 void HTMLDocumentParser::end()

@@ -26,9 +26,12 @@
 #include "config.h"
 #include "core/html/parser/BackgroundHTMLParser.h"
 
+#include "base/bind.h"
+#include "base/single_thread_task_runner.h"
 #include "core/html/parser/HTMLDocumentParser.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/html/parser/TextResourceDecoder.h"
+#include "public/platform/Platform.h"
 #include "wtf/MainThread.h"
 #include "wtf/text/TextPosition.h"
 
@@ -152,7 +155,8 @@ void BackgroundHTMLParser::sendTokensToMainThread()
 
     OwnPtr<HTMLDocumentParser::ParsedChunk> chunk = adoptPtr(new HTMLDocumentParser::ParsedChunk);
     chunk->tokens = m_pendingTokens.release();
-    callOnMainThread(bind(&HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser, m_parser, chunk.release()));
+    Platform::current()->mainThreadTaskRunner()->PostTask(FROM_HERE,
+        base::Bind(&HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser, m_parser, chunk.release()));
 
     m_pendingTokens = adoptPtr(new CompactHTMLTokenStream);
 }

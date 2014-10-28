@@ -37,7 +37,6 @@
 #include "platform/Supplementable.h"
 #include "platform/heap/Handle.h"
 #include "platform/weborigin/KURL.h"
-#include "wtf/Functional.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/PassOwnPtr.h"
 

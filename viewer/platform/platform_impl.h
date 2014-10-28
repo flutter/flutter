@@ -39,6 +39,7 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
   virtual void callOnMainThread(void (*func)(void*), void* context);
+  virtual base::SingleThreadTaskRunner* mainThreadTaskRunner();
   virtual bool isThreadedCompositingEnabled();
   virtual blink::WebCompositorSupport* compositorSupport();
   virtual mojo::NetworkService* networkService();
@@ -88,6 +89,7 @@ class PlatformImpl : public blink::Platform {
 
   mojo::NetworkServicePtr network_service_;
   base::MessageLoop* main_loop_;
+  scoped_refptr<base::SingleThreadTaskRunner> main_thread_task_runner_;
   base::OneShotTimer<PlatformImpl> shared_timer_;
   void (*shared_timer_func_)();
   double shared_timer_fire_time_;

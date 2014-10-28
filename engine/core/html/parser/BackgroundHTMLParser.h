@@ -46,7 +46,7 @@ class BackgroundHTMLParser : public DataPipeDrainer::Client {
 public:
     struct Configuration {
         mojo::ScopedDataPipeConsumerHandle source;
-        WeakPtr<HTMLDocumentParser> parser;
+        base::WeakPtr<HTMLDocumentParser> parser;
     };
 
     static base::WeakPtr<BackgroundHTMLParser> create(PassOwnPtr<Configuration>);
@@ -70,7 +70,7 @@ private:
     SegmentedString m_input;
     OwnPtr<HTMLToken> m_token;
     OwnPtr<HTMLTokenizer> m_tokenizer;
-    WeakPtr<HTMLDocumentParser> m_parser;
+    base::WeakPtr<HTMLDocumentParser> m_parser;
 
     OwnPtr<CompactHTMLTokenStream> m_pendingTokens;
     OwnPtr<TextResourceDecoder> m_decoder;
