@@ -2075,9 +2075,6 @@ bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, Focus
                 newFocusedElement = nullptr;
             }
         }
-
-        if (view())
-            view()->setFocus(false);
     }
 
     if (newFocusedElement && newFocusedElement->isFocusable()) {
@@ -2124,9 +2121,6 @@ bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, Focus
 
         if (m_focusedElement->isRootEditableElement())
             frame()->spellChecker().didBeginEditing(m_focusedElement.get());
-
-        if (view())
-            view()->setFocus(true);
     }
 
     if (!focusChangeBlocked && frameHost())

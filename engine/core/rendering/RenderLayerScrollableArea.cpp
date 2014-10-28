@@ -788,7 +788,6 @@ PassRefPtr<Scrollbar> RenderLayerScrollableArea::createScrollbar(ScrollbarOrient
         didAddScrollbar(widget.get(), HorizontalScrollbar);
     else
         didAddScrollbar(widget.get(), VerticalScrollbar);
-    box().document().view()->addChild(widget.get());
     return widget.release();
 }
 
@@ -801,7 +800,6 @@ void RenderLayerScrollableArea::destroyScrollbar(ScrollbarOrientation orientatio
     if (!scrollbar->isCustomScrollbar())
         willRemoveScrollbar(scrollbar.get(), orientation);
 
-    scrollbar->removeFromParent();
     scrollbar->disconnectFromScrollableArea();
     scrollbar = nullptr;
 }

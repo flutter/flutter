@@ -26,11 +26,9 @@
 #include "config.h"
 #include "platform/scroll/Scrollbar.h"
 
-#include <algorithm>
 #include "platform/graphics/GraphicsContext.h"
 #include "platform/PlatformGestureEvent.h"
 #include "platform/PlatformMouseEvent.h"
-#include "platform/FrameWidget.h"
 #include "platform/scroll/ScrollableArea.h"
 #include "platform/scroll/ScrollAnimator.h"
 #include "platform/scroll/Scrollbar.h"
@@ -86,12 +84,6 @@ Scrollbar::Scrollbar(ScrollableArea* scrollableArea, ScrollbarOrientation orient
 Scrollbar::~Scrollbar()
 {
     stopTimerIfNeeded();
-}
-
-void Scrollbar::removeFromParent()
-{
-    if (parent())
-        toFrameWidget(parent())->removeChild(this);
 }
 
 ScrollbarOverlayStyle Scrollbar::scrollbarOverlayStyle() const

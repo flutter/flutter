@@ -98,7 +98,6 @@ FrameView::FrameView(LocalFrame* frame)
 PassRefPtr<FrameView> FrameView::create(LocalFrame* frame)
 {
     RefPtr<FrameView> view = adoptRef(new FrameView(frame));
-    view->show();
     return view.release();
 }
 
@@ -107,8 +106,6 @@ PassRefPtr<FrameView> FrameView::create(LocalFrame* frame, const IntSize& initia
     RefPtr<FrameView> view = adoptRef(new FrameView(frame));
     view->Widget::setFrameRect(IntRect(view->location(), initialSize));
     view->setLayoutSizeInternal(initialSize);
-
-    view->show();
     return view.release();
 }
 
@@ -1430,21 +1427,6 @@ void FrameView::removeScrollableArea(ScrollableArea* scrollableArea)
     m_scrollableAreas->remove(scrollableArea);
 }
 
-void FrameView::addChild(PassRefPtr<Widget> prpChild)
-{
-    Widget* child = prpChild.get();
-    ASSERT(child != this && !child->parent());
-    child->setParent(this);
-    m_children.add(prpChild);
-}
-
-void FrameView::removeChild(Widget* widget)
-{
-    ASSERT(widget->parent() == this);
-    widget->setParent(0);
-    m_children.remove(widget);
-}
-
 bool FrameView::wheelEvent(const PlatformWheelEvent& wheelEvent)
 {
     // FIXME(sky): Remove
@@ -1475,16 +1457,6 @@ void FrameView::setCursor(const Cursor& cursor)
     if (!page || !page->settings().deviceSupportsMouse())
         return;
     page->chrome().setCursor(cursor);
-}
-
-void FrameView::frameRectsChanged()
-{
-    if (layoutSizeFixedToFrameSize())
-        setLayoutSizeInternal(frameRect().size());
-
-    for (const auto& widget : m_children) {
-        widget->frameRectsChanged();
-    }
 }
 
 void FrameView::setLayoutSizeInternal(const IntSize& size)

@@ -58,8 +58,6 @@ public:
     Widget* parent() const { return Widget::parent(); }
     Widget* root() const { return Widget::root(); }
 
-    void removeFromParent();
-
     void setFrameRect(const IntRect& r) { Widget::setFrameRect(r); }
     IntRect frameRect() const { return Widget::frameRect(); }
 

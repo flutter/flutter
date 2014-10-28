@@ -73,10 +73,6 @@ public:
     void invalidate() { invalidateRect(boundsRect()); }
     virtual void invalidateRect(const IntRect&) = 0;
 
-    virtual void setFocus(bool) { }
-
-    virtual void show() { }
-    virtual void hide() { }
     bool isSelfVisible() const { return m_selfVisible; } // Whether or not we have been explicitly marked as visible or not.
     bool isParentVisible() const { return m_parentVisible; } // Whether or not our parent is visible.
     bool isVisible() const { return m_selfVisible && m_parentVisible; } // Whether or not we are actually visible.
@@ -111,11 +107,6 @@ public:
     IntPoint convertFromContainingWindow(const IntPoint&) const;
     FloatPoint convertFromContainingWindow(const FloatPoint&) const;
 
-    virtual void frameRectsChanged() { }
-
-    // Notifies this widget that other widgets on the page have been repositioned.
-    virtual void widgetPositionsUpdated() { }
-
     // Virtual methods to convert points to/from the containing ScrollView
     virtual IntRect convertToContainingView(const IntRect&) const;
     virtual IntRect convertFromContainingView(const IntRect&) const;
@@ -125,13 +116,6 @@ public:
     // Virtual methods to convert points to/from child widgets
     virtual IntPoint convertChildToSelf(const Widget*, const IntPoint&) const;
     virtual IntPoint convertSelfToChild(const Widget*, const IntPoint&) const;
-
-    // Notifies this widget that it will no longer be receiving events.
-    virtual void eventListenersRemoved() { }
-
-#if ENABLE(OILPAN)
-    virtual void detach() { }
-#endif
 
 private:
     Widget* m_parent;

@@ -26,10 +26,8 @@
 #define FrameView_h
 
 #include "core/rendering/PaintPhase.h"
-#include "platform/FrameWidget.h"
 #include "platform/HostWindow.h"
 #include "platform/RuntimeEnabledFeatures.h"
-#include "platform/Widget.h"
 #include "platform/Widget.h"
 #include "platform/geometry/LayoutRect.h"
 #include "platform/graphics/Color.h"
@@ -56,7 +54,7 @@ class RenderView;
 
 typedef unsigned long long DOMTimeStamp;
 
-class FrameView final : public FrameWidget {
+class FrameView final : public Widget {
 public:
     friend class RenderView;
 
@@ -204,9 +202,6 @@ public:
     void removeResizerArea(RenderBox&);
     const ResizerAreaSet* resizerAreas() const { return m_resizerAreas.get(); }
 
-    void addChild(PassRefPtr<Widget>);
-    void removeChild(Widget*) final;
-
     // This function exists for ports that need to handle wheel events manually.
     // On Mac WebKit1 the underlying NSScrollView just does the scrolling, but on most other platforms
     // we need this function in order to do the scroll ourselves.
@@ -278,7 +273,6 @@ private:
     void reset();
     void init();
 
-    virtual void frameRectsChanged() override;
     virtual bool isFrameView() const override { return true; }
 
     bool contentsInCompositedLayer() const;
@@ -331,7 +325,6 @@ private:
     LayoutSize m_size;
 
     RefPtr<LocalFrame> m_frame;
-    HashSet<RefPtr<Widget> > m_children;
 
     bool m_doFullPaintInvalidation;
 
