@@ -32,12 +32,13 @@
 
 #include "bindings/core/v8/ScriptState.h"
 #include "bindings/core/v8/ScriptWrappable.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/ScriptCallStack.h"
 #include "core/frame/ConsoleTypes.h"
 #include "core/frame/DOMWindowProperty.h"
+#include "core/inspector/ConsoleAPITypes.h"
+#include "core/inspector/ScriptCallStack.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
+#include "wtf/HashCountedSet.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
 

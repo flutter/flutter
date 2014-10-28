@@ -31,7 +31,6 @@
 #ifndef Handle_h
 #define Handle_h
 
-#include "platform/heap/Heap.h"
 #include "platform/heap/ThreadState.h"
 #include "platform/heap/Visitor.h"
 #include "wtf/Functional.h"
@@ -40,6 +39,62 @@
 #include "wtf/RawPtr.h"
 #include "wtf/RefCounted.h"
 #include "wtf/TypeTraits.h"
+
+// Classes that contain heap references but aren't themselves heap
+// allocated, have some extra macros available which allows their use
+// to be restricted to cases where the garbage collector is able
+// to discover their heap references.
+//
+// STACK_ALLOCATED(): Use if the object is only stack allocated. Heap objects
+// should be in Members but you do not need the trace method as they are on
+// the stack. (Down the line these might turn in to raw pointers, but for
+// now Members indicates that we have thought about them and explicitly
+// taken care of them.)
+//
+// DISALLOW_ALLOCATION(): Cannot be allocated with new operators but can
+// be a part object. If it has Members you need a trace method and the
+// containing object needs to call that trace method.
+//
+// ALLOW_ONLY_INLINE_ALLOCATION(): Allows only placement new operator.
+// This disallows general allocation of this object but allows to put
+// the object as a value object in collections. If these have Members you
+// need to have a trace method. That trace method will be called
+// automatically by the Heap collections.
+//
+#define DISALLOW_ALLOCATION()                                   \
+    private:                                                    \
+        void* operator new(size_t) = delete;                    \
+        void* operator new(size_t, NotNullTag, void*) = delete; \
+        void* operator new(size_t, void*) = delete;
+
+#define ALLOW_ONLY_INLINE_ALLOCATION()                                              \
+    public:                                                                         \
+        void* operator new(size_t, NotNullTag, void* location) { return location; } \
+        void* operator new(size_t, void* location) { return location; }             \
+    private:                                                                        \
+        void* operator new(size_t) = delete;
+
+#define STATIC_ONLY(Type) \
+    private:              \
+        Type() = delete;
+
+// These macros insert annotations that the Blink GC plugin for clang uses for
+// verification. STACK_ALLOCATED is used to declare that objects of this type
+// are always stack allocated. GC_PLUGIN_IGNORE is used to make the plugin
+// ignore a particular class or field when checking for proper usage. When using
+// GC_PLUGIN_IGNORE a bug-number should be provided as an argument where the
+// bug describes what needs to happen to remove the GC_PLUGIN_IGNORE again.
+#if COMPILER(CLANG)
+#define STACK_ALLOCATED()                                       \
+    private:                                                    \
+        __attribute__((annotate("blink_stack_allocated")))      \
+        void* operator new(size_t) = delete;                    \
+        void* operator new(size_t, NotNullTag, void*) = delete; \
+        void* operator new(size_t, void*) = delete;
+
+#else
+#define STACK_ALLOCATED() DISALLOW_ALLOCATION()
+#endif
 
 namespace blink {
 
@@ -210,7 +265,7 @@ private:
 //
 // We have to construct and destruct Persistent with default RootsAccessor in
 // the same thread.
-template<typename T, typename RootsAccessor /* = ThreadLocalPersistents<ThreadingTrait<T>::Affinity > */ >
+template<typename T, typename RootsAccessor = ThreadLocalPersistents<ThreadingTrait<T>::Affinity > >
 class Persistent : public PersistentBase<RootsAccessor, Persistent<T, RootsAccessor> > {
     WTF_DISALLOW_CONSTRUCTION_FROM_ZERO(Persistent);
     WTF_DISALLOW_ZERO_ASSIGNMENT(Persistent);

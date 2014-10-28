@@ -25,6 +25,8 @@
 #include "core/events/EventTarget.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
+#include "wtf/LinkedHashSet.h"
+#include "wtf/ListHashSet.h"
 #include "wtf/RefCounted.h"
 #include "wtf/RefPtr.h"
 

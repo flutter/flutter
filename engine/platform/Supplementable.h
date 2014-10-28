@@ -174,7 +174,6 @@ public:
 
     // FIXME: Oilpan: Make private and remove this ignore once PersistentHeapSupplementable is removed again.
 protected:
-    GC_PLUGIN_IGNORE("")
     typename SupplementableTraits<T, isGarbageCollected>::SupplementMap m_supplements;
 
 #if ENABLE(ASSERT)
@@ -193,7 +192,7 @@ class Supplement : public SupplementBase<T, false> { };
 // This class is used to make an off-heap class supplementable with off-heap
 // supplements (Supplement).
 template<typename T>
-class GC_PLUGIN_IGNORE("http://crbug.com/395036") Supplementable : public SupplementableBase<T, false> {
+class Supplementable : public SupplementableBase<T, false> {
 };
 
 } // namespace blink

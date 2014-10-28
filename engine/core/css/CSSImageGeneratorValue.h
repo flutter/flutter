@@ -79,14 +79,6 @@ protected:
     HashCountedSet<IntSize> m_sizes; // A count of how many times a given image size is in use.
     RenderObjectSizeCountMap m_clients; // A map from RenderObjects (with entry count) to image sizes.
     HashMap<IntSize, RefPtr<Image> > m_images; // A cache of Image objects by image size.
-
-#if ENABLE(OILPAN)
-    // FIXME: Oilpan: when/if we can make the renderer point directly to the CSSImageGenerator value using
-    // a member we don't need to have this hack where we keep a persistent to the instance as long as
-    // there are clients in the RenderObjectSizeCountMap.
-    GC_PLUGIN_IGNORE("366546")
-    OwnPtr<Persistent<CSSImageGeneratorValue> > m_keepAlive;
-#endif
 };
 
 DEFINE_CSS_VALUE_TYPE_CASTS(CSSImageGeneratorValue, isImageGeneratorValue());
