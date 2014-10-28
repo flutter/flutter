@@ -1,6 +1,6 @@
 <html>
 <link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="inspector/backend/dom-agent.sky" as="DOMAgent" />
+<link rel="import" href="/sky/framework/inspector/dom-agent.sky" as="DOMAgent" />
 <div><div></div></div>
 <script>
 // setTimeout to flush pending DOM modifications and measure
@@ -33,5 +33,4 @@ setTimeout(function() {
     });
 });
 </script>
-
 </html>
