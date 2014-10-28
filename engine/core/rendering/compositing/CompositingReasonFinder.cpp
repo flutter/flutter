@@ -30,7 +30,6 @@ void CompositingReasonFinder::updateTriggers()
     if (settings.preferCompositingToLCDTextEnabled()) {
         m_compositingTriggers |= ScrollableInnerFrameTrigger;
         m_compositingTriggers |= OverflowScrollTrigger;
-        m_compositingTriggers |= ViewportConstrainedPositionedTrigger;
     }
 }
 
@@ -128,9 +127,6 @@ CompositingReasons CompositingReasonFinder::nonStyleDeterminedDirectReasons(cons
             directReasons |= CompositingReasonOverflowScrollingTouch;
     }
 
-    if (requiresCompositingForPositionFixed(layer))
-        directReasons |= CompositingReasonPositionFixed;
-
     directReasons |= renderer->additionalCompositingReasons();
 
     ASSERT(!(directReasons & CompositingReasonComboAllStyleDeterminedReasons));
@@ -143,15 +139,6 @@ bool CompositingReasonFinder::requiresCompositingForAnimation(RenderStyle* style
         return style->isRunningAnimationOnCompositor();
 
     return style->shouldCompositeForCurrentAnimations();
-}
-
-bool CompositingReasonFinder::requiresCompositingForPositionFixed(const RenderLayer* layer) const
-{
-    if (!(m_compositingTriggers & ViewportConstrainedPositionedTrigger))
-        return false;
-    // Don't promote fixed position elements that are descendants of a non-view container, e.g. transformed elements.
-    // They will stay fixed wrt the container rather than the enclosing frame.
-    return layer->scrollsWithViewport() && m_renderView.frameView()->isScrollable();
 }
 
 }

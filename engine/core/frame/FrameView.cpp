@@ -151,7 +151,6 @@ void FrameView::reset()
     m_lastPaintTime = 0;
     m_paintBehavior = PaintBehaviorNormal;
     m_isPainting = false;
-    m_viewportConstrainedObjects.clear();
 }
 
 void FrameView::init()
@@ -205,8 +204,6 @@ void FrameView::setFrameRect(const IntRect& newRect)
         if (renderView->usesCompositing())
             renderView->compositor()->frameViewDidChangeSize();
     }
-
-    viewportConstrainedVisibleContentSizeChanged(newRect.width() != oldRect.width(), newRect.height() != oldRect.height());
 }
 
 Page* FrameView::page() const
@@ -716,38 +713,6 @@ void FrameView::removeSlowRepaintObject()
     }
 }
 
-void FrameView::addViewportConstrainedObject(RenderObject* object)
-{
-    if (!m_viewportConstrainedObjects)
-        m_viewportConstrainedObjects = adoptPtr(new ViewportConstrainedObjectSet);
-
-    if (!m_viewportConstrainedObjects->contains(object)) {
-        m_viewportConstrainedObjects->add(object);
-
-        if (Page* page = m_frame->page()) {
-            if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-                scrollingCoordinator->frameViewFixedObjectsDidChange(this);
-        }
-    }
-}
-
-void FrameView::removeViewportConstrainedObject(RenderObject* object)
-{
-    if (m_viewportConstrainedObjects && m_viewportConstrainedObjects->contains(object)) {
-        m_viewportConstrainedObjects->remove(object);
-
-        if (Page* page = m_frame->page()) {
-            if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-                scrollingCoordinator->frameViewFixedObjectsDidChange(this);
-        }
-    }
-}
-
-void FrameView::viewportConstrainedVisibleContentSizeChanged(bool widthChanged, bool heightChanged)
-{
-    // FIXME(sky): Remove
-}
-
 IntPoint FrameView::lastKnownMousePosition() const
 {
     return m_frame->eventHandler().lastKnownMousePosition();
@@ -822,29 +787,6 @@ void FrameView::didScrollTimerFired(Timer<FrameView>*)
     if (m_frame->document() && m_frame->document()->renderView()) {
         ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->updateAllImageResourcePriorities();
     }
-}
-
-void FrameView::updateLayersAndCompositingAfterScrollIfNeeded()
-{
-    // Nothing to do after scrolling if there are no fixed position elements.
-    if (!hasViewportConstrainedObjects())
-        return;
-
-    RefPtr<FrameView> protect(this);
-
-    // If there fixed position elements, scrolling may cause compositing layers to change.
-    // Update widget and layer positions after scrolling, but only if we're not inside of
-    // layout.
-    if (!m_nestedLayoutCount) {
-        updateWidgetPositions();
-        if (RenderView* renderView = this->renderView())
-            renderView->layer()->setNeedsCompositingInputsUpdate();
-    }
-}
-
-void FrameView::updateFixedElementPaintInvalidationRectsAfterScroll()
-{
-    // FIXME(sky): Remove
 }
 
 void FrameView::updateCompositedSelectionBoundsIfNeeded()

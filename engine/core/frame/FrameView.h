@@ -138,23 +138,12 @@ public:
     IntSize inputEventsOffsetForEmulation() const;
     void setInputEventsTransformForEmulation(const IntSize&, float);
 
-    // This is different than visibleContentRect() in that it ignores negative (or overly positive)
-    // offsets from rubber-banding, and it takes zooming into account.
-    void viewportConstrainedVisibleContentSizeChanged(bool widthChanged, bool heightChanged);
-
     AtomicString mediaType() const;
     void setMediaType(const AtomicString&);
 
     void addSlowRepaintObject();
     void removeSlowRepaintObject();
     bool hasSlowRepaintObjects() const { return m_slowRepaintObjectCount; }
-
-    // Fixed-position objects.
-    typedef HashSet<RenderObject*> ViewportConstrainedObjectSet;
-    void addViewportConstrainedObject(RenderObject*);
-    void removeViewportConstrainedObject(RenderObject*);
-    const ViewportConstrainedObjectSet* viewportConstrainedObjects() const { return m_viewportConstrainedObjects.get(); }
-    bool hasViewportConstrainedObjects() const { return m_viewportConstrainedObjects && m_viewportConstrainedObjects->size() > 0; }
 
     void restoreScrollbar();
 
@@ -342,8 +331,6 @@ private:
     void scrollPositionChanged();
     void didScrollTimerFired(Timer<FrameView>*);
 
-    void updateLayersAndCompositingAfterScrollIfNeeded();
-    void updateFixedElementPaintInvalidationRectsAfterScroll();
     void updateCompositedSelectionBoundsIfNeeded();
 
     void setLayoutSizeInternal(const IntSize&);
@@ -409,7 +396,6 @@ private:
 
     OwnPtr<ScrollableAreaSet> m_scrollableAreas;
     OwnPtr<ResizerAreaSet> m_resizerAreas;
-    OwnPtr<ViewportConstrainedObjectSet> m_viewportConstrainedObjects;
 
     bool m_hasSoftwareFilters;
 

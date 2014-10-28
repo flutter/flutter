@@ -742,12 +742,6 @@ void ScrollingCoordinator::handleWheelEventPhase(PlatformWheelEventPhase phase)
 }
 #endif
 
-bool ScrollingCoordinator::hasVisibleSlowRepaintViewportConstrainedObjects(FrameView* frameView) const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 MainThreadScrollingReasons ScrollingCoordinator::mainThreadScrollingReasons() const
 {
     MainThreadScrollingReasons reasons = static_cast<MainThreadScrollingReasons>(0);
@@ -758,26 +752,15 @@ MainThreadScrollingReasons ScrollingCoordinator::mainThreadScrollingReasons() co
 
     if (frameView->hasSlowRepaintObjects())
         reasons |= HasSlowRepaintObjects;
-    if (frameView->isScrollable() && hasVisibleSlowRepaintViewportConstrainedObjects(frameView))
-        reasons |= HasNonLayerViewportConstrainedObjects;
 
     return reasons;
 }
 
 String ScrollingCoordinator::mainThreadScrollingReasonsAsText(MainThreadScrollingReasons reasons)
 {
-    StringBuilder stringBuilder;
-
     if (reasons & ScrollingCoordinator::HasSlowRepaintObjects)
-        stringBuilder.appendLiteral("Has slow repaint objects, ");
-    if (reasons & ScrollingCoordinator::HasViewportConstrainedObjectsWithoutSupportingFixedLayers)
-        stringBuilder.appendLiteral("Has viewport constrained objects without supporting fixed layers, ");
-    if (reasons & ScrollingCoordinator::HasNonLayerViewportConstrainedObjects)
-        stringBuilder.appendLiteral("Has non-layer viewport-constrained objects, ");
-
-    if (stringBuilder.length())
-        stringBuilder.resize(stringBuilder.length() - 2);
-    return stringBuilder.toString();
+        return "Has slow repaint objects";
+    return "";
 }
 
 String ScrollingCoordinator::mainThreadScrollingReasonsAsText() const

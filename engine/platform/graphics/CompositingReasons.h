@@ -14,6 +14,8 @@ namespace blink {
 const uint64_t CompositingReasonNone                                     = 0;
 const uint64_t CompositingReasonAll                                      = ~static_cast<uint64_t>(0);
 
+// FIXME(sky): Get rid of all this.
+
 // Intrinsic reasons that can be known right away by the layer
 const uint64_t CompositingReason3DTransform                              = UINT64_C(1) << 0;
 const uint64_t CompositingReasonVideo                                    = UINT64_C(1) << 1;
@@ -22,7 +24,6 @@ const uint64_t CompositingReasonIFrame                                   = UINT6
 const uint64_t CompositingReasonBackfaceVisibilityHidden                 = UINT64_C(1) << 5;
 const uint64_t CompositingReasonActiveAnimation                          = UINT64_C(1) << 6;
 const uint64_t CompositingReasonTransitionProperty                       = UINT64_C(1) << 7;
-const uint64_t CompositingReasonPositionFixed                            = UINT64_C(1) << 8;
 const uint64_t CompositingReasonOverflowScrollingTouch                   = UINT64_C(1) << 9;
 const uint64_t CompositingReasonOverflowScrollingParent                  = UINT64_C(1) << 10;
 const uint64_t CompositingReasonOutOfFlowClipping                        = UINT64_C(1) << 11;
@@ -90,7 +91,6 @@ const uint64_t CompositingReasonComboAllDirectReasons =
     | CompositingReasonBackfaceVisibilityHidden
     | CompositingReasonActiveAnimation
     | CompositingReasonTransitionProperty
-    | CompositingReasonPositionFixed
     | CompositingReasonOverflowScrollingTouch
     | CompositingReasonOverflowScrollingParent
     | CompositingReasonOutOfFlowClipping

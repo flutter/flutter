@@ -81,10 +81,9 @@ public:
     void handleWheelEventPhase(PlatformWheelEventPhase);
 #endif
 
+    // FIXME(sky): get rid of this enum.
     enum MainThreadScrollingReasonFlags {
         HasSlowRepaintObjects = 1 << 0,
-        HasViewportConstrainedObjectsWithoutSupportingFixedLayers = 1 << 1,
-        HasNonLayerViewportConstrainedObjects = 1 << 2,
     };
 
     MainThreadScrollingReasons mainThreadScrollingReasons() const;
@@ -128,8 +127,6 @@ private:
     bool shouldUpdateAfterCompositingChange() const { return m_scrollGestureRegionIsDirty || m_touchEventTargetRectsAreDirty || frameViewIsDirty(); }
 
     void setShouldUpdateScrollLayerPositionOnMainThread(MainThreadScrollingReasons);
-
-    bool hasVisibleSlowRepaintViewportConstrainedObjects(FrameView*) const;
 
     void setShouldHandleScrollGestureOnMainThreadRegion(const Region&);
     void setTouchEventTargetRects(LayerHitTestRects&);
