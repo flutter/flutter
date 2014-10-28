@@ -191,10 +191,8 @@ void RenderView::layout()
     clearNeedsLayout();
 }
 
-void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, bool* wasFixed, const PaintInvalidationState* paintInvalidationState) const
+void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
 {
-    ASSERT_UNUSED(wasFixed, !wasFixed || *wasFixed == static_cast<bool>(mode & IsFixed));
-
     if (!paintInvalidationContainer && mode & UseTransforms && shouldUseTransformFromContainer(0)) {
         TransformationMatrix t;
         getTransformFromContainer(0, LayoutSize(), t);
@@ -369,10 +367,8 @@ void RenderView::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumu
     rects.append(pixelSnappedIntRect(accumulatedOffset, layer()->size()));
 }
 
-void RenderView::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
+void RenderView::absoluteQuads(Vector<FloatQuad>& quads) const
 {
-    if (wasFixed)
-        *wasFixed = false;
     quads.append(FloatRect(FloatPoint(), layer()->size()));
 }
 

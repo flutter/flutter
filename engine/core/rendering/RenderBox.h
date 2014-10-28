@@ -333,7 +333,7 @@ public:
     virtual LayoutUnit collapsedMarginAfter() const { return marginAfter(); }
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
-    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const override;
+    virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual void layout() override;
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
@@ -645,8 +645,7 @@ protected:
 
     virtual bool shouldComputeSizeAsReplaced() const { return isReplaced() && !isInlineBlock(); }
 
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, bool* wasFixed = 0, const PaintInvalidationState* = 0) const override;
-    virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;
 
     void paintRootBoxFillLayers(const PaintInfo&);
 

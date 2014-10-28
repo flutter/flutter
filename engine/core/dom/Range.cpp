@@ -1207,15 +1207,12 @@ IntRect Range::boundingBox() const
     return result;
 }
 
-void Range::textRects(Vector<IntRect>& rects, bool useSelectionHeight, RangeInFixedPosition* inFixed) const
+void Range::textRects(Vector<IntRect>& rects, bool useSelectionHeight) const
 {
     Node* startContainer = m_start.container();
     ASSERT(startContainer);
     Node* endContainer = m_end.container();
     ASSERT(endContainer);
-
-    bool allFixed = true;
-    bool someFixed = false;
 
     Node* stopNode = pastLastNode();
     for (Node* node = firstNode(); node != stopNode; node = NodeTraversal::next(*node)) {
@@ -1225,25 +1222,16 @@ void Range::textRects(Vector<IntRect>& rects, bool useSelectionHeight, RangeInFi
         RenderText* renderText = toRenderText(r);
         int startOffset = node == startContainer ? m_start.offset() : 0;
         int endOffset = node == endContainer ? m_end.offset() : std::numeric_limits<int>::max();
-        bool isFixed = false;
-        renderText->absoluteRectsForRange(rects, startOffset, endOffset, useSelectionHeight, &isFixed);
-        allFixed &= isFixed;
-        someFixed |= isFixed;
+        renderText->absoluteRectsForRange(rects, startOffset, endOffset, useSelectionHeight);
     }
-
-    if (inFixed)
-        *inFixed = allFixed ? EntirelyFixedPosition : (someFixed ? PartiallyFixedPosition : NotFixedPosition);
 }
 
-void Range::textQuads(Vector<FloatQuad>& quads, bool useSelectionHeight, RangeInFixedPosition* inFixed) const
+void Range::textQuads(Vector<FloatQuad>& quads, bool useSelectionHeight) const
 {
     Node* startContainer = m_start.container();
     ASSERT(startContainer);
     Node* endContainer = m_end.container();
     ASSERT(endContainer);
-
-    bool allFixed = true;
-    bool someFixed = false;
 
     Node* stopNode = pastLastNode();
     for (Node* node = firstNode(); node != stopNode; node = NodeTraversal::next(*node)) {
@@ -1253,14 +1241,8 @@ void Range::textQuads(Vector<FloatQuad>& quads, bool useSelectionHeight, RangeIn
         RenderText* renderText = toRenderText(r);
         int startOffset = node == startContainer ? m_start.offset() : 0;
         int endOffset = node == endContainer ? m_end.offset() : std::numeric_limits<int>::max();
-        bool isFixed = false;
-        renderText->absoluteQuadsForRange(quads, startOffset, endOffset, useSelectionHeight, &isFixed);
-        allFixed &= isFixed;
-        someFixed |= isFixed;
+        renderText->absoluteQuadsForRange(quads, startOffset, endOffset, useSelectionHeight);
     }
-
-    if (inFixed)
-        *inFixed = allFixed ? EntirelyFixedPosition : (someFixed ? PartiallyFixedPosition : NotFixedPosition);
 }
 
 #ifndef NDEBUG

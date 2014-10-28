@@ -421,9 +421,9 @@ void RenderBox::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumul
     rects.append(pixelSnappedIntRect(accumulatedOffset, size()));
 }
 
-void RenderBox::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
+void RenderBox::absoluteQuads(Vector<FloatQuad>& quads) const
 {
-    quads.append(localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */, wasFixed));
+    quads.append(localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));
 }
 
 void RenderBox::updateLayerTransformAfterLayout()
@@ -1538,7 +1538,7 @@ LayoutUnit RenderBox::perpendicularContainingBlockLogicalHeight() const
     return cb->adjustContentBoxLogicalHeightForBoxSizing(logicalHeightLength.value());
 }
 
-void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, bool* wasFixed, const PaintInvalidationState* paintInvalidationState) const
+void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
 {
     if (paintInvalidationContainer == this)
         return;
@@ -1555,15 +1555,6 @@ void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidat
     RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
     if (!o)
         return;
-
-    bool hasTransform = hasLayer() && layer()->transform();
-    // If this box has a transform, it acts as a fixed position container for fixed descendants,
-    // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
-    if (hasTransform)
-        mode &= ~IsFixed;
-
-    if (wasFixed)
-        *wasFixed = mode & IsFixed;
 
     LayoutSize containerOffset = offsetFromContainer(o, roundedLayoutPoint(transformState.mappedPoint()));
 
@@ -1585,19 +1576,7 @@ void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidat
 
     mode &= ~ApplyContainerFlip;
 
-    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode, wasFixed);
-}
-
-void RenderBox::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
-{
-    bool hasTransform = hasLayer() && layer()->transform();
-    if (hasTransform) {
-        // If this box has a transform, it acts as a fixed position container for fixed descendants,
-        // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
-        mode &= ~IsFixed;
-    }
-
-    RenderBoxModelObject::mapAbsoluteToLocalPoint(mode, transformState);
+    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode);
 }
 
 LayoutSize RenderBox::offsetFromContainer(const RenderObject* o, const LayoutPoint& point, bool* offsetDependsOnPoint) const

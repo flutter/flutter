@@ -674,13 +674,13 @@ private:
 
 } // unnamed namespace
 
-void RenderInline::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
+void RenderInline::absoluteQuads(Vector<FloatQuad>& quads) const
 {
     AbsoluteQuadsGeneratorContext context(this, quads);
     generateLineBoxRects(context);
 
     if (continuation())
-        continuation()->absoluteQuads(quads, wasFixed);
+        continuation()->absoluteQuads(quads);
 }
 
 LayoutUnit RenderInline::offsetLeft() const
@@ -1125,7 +1125,7 @@ LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, cons
     return offset;
 }
 
-void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, bool* wasFixed, const PaintInvalidationState* paintInvalidationState) const
+void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
 {
     if (paintInvalidationContainer == this)
         return;
@@ -1169,7 +1169,7 @@ void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvali
         return;
     }
 
-    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode, wasFixed, paintInvalidationState);
+    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode, paintInvalidationState);
 }
 
 void RenderInline::childBecameNonInline(RenderObject* child)

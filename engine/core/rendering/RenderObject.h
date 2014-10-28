@@ -102,10 +102,11 @@ enum MarkingBehavior {
 };
 
 enum MapCoordinatesMode {
-    IsFixed = 1 << 0,
-    UseTransforms = 1 << 1,
-    ApplyContainerFlip = 1 << 2,
-    TraverseDocumentBoundaries = 1 << 3,
+    UseTransforms = 1 << 0,
+    // FIXME(sky): What is this for? Do we need it?
+    ApplyContainerFlip = 1 << 1,
+    // FIXME(sky): Remove
+    TraverseDocumentBoundaries = 1 << 2,
 };
 typedef unsigned MapCoordinatesFlags;
 
@@ -631,16 +632,16 @@ public:
     FloatPoint absoluteToLocal(const FloatPoint&, MapCoordinatesFlags = 0) const;
 
     // Convert a local quad to absolute coordinates, taking transforms into account.
-    FloatQuad localToAbsoluteQuad(const FloatQuad& quad, MapCoordinatesFlags mode = 0, bool* wasFixed = 0) const
+    FloatQuad localToAbsoluteQuad(const FloatQuad& quad, MapCoordinatesFlags mode = 0) const
     {
-        return localToContainerQuad(quad, 0, mode, wasFixed);
+        return localToContainerQuad(quad, 0, mode);
     }
     // Convert an absolute quad to local coordinates.
     FloatQuad absoluteToLocalQuad(const FloatQuad&, MapCoordinatesFlags mode = 0) const;
 
     // Convert a local quad into the coordinate system of container, taking transforms into account.
-    FloatQuad localToContainerQuad(const FloatQuad&, const RenderLayerModelObject* paintInvalidatinoContainer, MapCoordinatesFlags = 0, bool* wasFixed = 0) const;
-    FloatPoint localToContainerPoint(const FloatPoint&, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags = 0, bool* wasFixed = 0, const PaintInvalidationState* = 0) const;
+    FloatQuad localToContainerQuad(const FloatQuad&, const RenderLayerModelObject* paintInvalidatinoContainer, MapCoordinatesFlags = 0) const;
+    FloatPoint localToContainerPoint(const FloatPoint&, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags = 0, const PaintInvalidationState* = 0) const;
 
     // Return the offset from the container() renderer (excluding transforms). In multi-column layout,
     // different offsets apply at different points, so return the offset that applies to the given point.
@@ -658,7 +659,7 @@ public:
     IntRect absoluteBoundingBoxRectIgnoringTransforms() const;
 
     // Build an array of quads in absolute coords for line boxes
-    virtual void absoluteQuads(Vector<FloatQuad>&, bool* /*wasFixed*/ = 0) const { }
+    virtual void absoluteQuads(Vector<FloatQuad>&) const { }
 
     virtual void absoluteFocusRingQuads(Vector<FloatQuad>&);
 
@@ -832,7 +833,7 @@ public:
 
     // Map points and quads through elements, potentially via 3d transforms. You should never need to call these directly; use
     // localToAbsolute/absoluteToLocal methods instead.
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, bool* wasFixed = 0, const PaintInvalidationState* = 0) const;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const;
 
     // Pushes state onto RenderGeometryMap about how to map coordinates from this renderer to its container, or ancestorToStopAt (whichever is encountered first).

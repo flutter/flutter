@@ -27,7 +27,6 @@
 #include "core/rendering/RenderBoxModelObject.h"
 
 #include "core/frame/Settings.h"
-#include "core/page/scrolling/ScrollingConstraints.h"
 #include "core/rendering/ImageQualityController.h"
 #include "core/rendering/RenderBlock.h"
 #include "core/rendering/RenderGeometryMap.h"

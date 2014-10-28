@@ -54,7 +54,6 @@
 #include "platform/scroll/Scrollbar.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebCompositorSupport.h"
-#include "public/platform/WebLayerPositionConstraint.h"
 #include "public/platform/WebScrollbarLayer.h"
 #include "public/platform/WebScrollbarThemeGeometry.h"
 #include "public/platform/WebScrollbarThemePainter.h"
@@ -159,33 +158,6 @@ void ScrollingCoordinator::setLayerIsContainerForFixedPositionLayers(GraphicsLay
 {
     if (WebLayer* scrollableLayer = toWebLayer(layer))
         scrollableLayer->setIsContainerForFixedPositionLayers(enable);
-}
-
-static void clearPositionConstraintExceptForLayer(GraphicsLayer* layer, GraphicsLayer* except)
-{
-    if (layer && layer != except && toWebLayer(layer))
-        toWebLayer(layer)->setPositionConstraint(WebLayerPositionConstraint());
-}
-
-static WebLayerPositionConstraint computePositionConstraint(const RenderLayer* layer)
-{
-    // FIXME(sky): Remove
-    return WebLayerPositionConstraint();
-}
-
-void ScrollingCoordinator::updateLayerPositionConstraint(RenderLayer* layer)
-{
-    ASSERT(layer->hasCompositedLayerMapping());
-    CompositedLayerMapping* compositedLayerMapping = layer->compositedLayerMapping();
-    GraphicsLayer* mainLayer = compositedLayerMapping->childForSuperlayers();
-
-    // Avoid unnecessary commits
-    clearPositionConstraintExceptForLayer(compositedLayerMapping->squashingContainmentLayer(), mainLayer);
-    clearPositionConstraintExceptForLayer(compositedLayerMapping->ancestorClippingLayer(), mainLayer);
-    clearPositionConstraintExceptForLayer(compositedLayerMapping->mainGraphicsLayer(), mainLayer);
-
-    if (WebLayer* scrollableLayer = toWebLayer(mainLayer))
-        scrollableLayer->setPositionConstraint(computePositionConstraint(layer));
 }
 
 void ScrollingCoordinator::willDestroyScrollableArea(ScrollableArea* scrollableArea)

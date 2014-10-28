@@ -368,7 +368,7 @@ private:
     virtual void clipOutFloatingObjects(RenderBlock*, const PaintInfo*, const LayoutPoint&, const LayoutSize&) { };
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
-    virtual void absoluteQuads(Vector<FloatQuad>&, bool* wasFixed) const override;
+    virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     void paintContinuationOutlines(PaintInfo&, const LayoutPoint&);
 

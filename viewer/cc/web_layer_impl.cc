@@ -23,7 +23,6 @@
 #include "sky/engine/public/platform/WebFloatRect.h"
 #include "sky/engine/public/platform/WebGraphicsLayerDebugInfo.h"
 #include "sky/engine/public/platform/WebLayerClient.h"
-#include "sky/engine/public/platform/WebLayerPositionConstraint.h"
 #include "sky/engine/public/platform/WebLayerScrollClient.h"
 #include "sky/engine/public/platform/WebSize.h"
 #include "third_party/skia/include/utils/SkMatrix44.h"
@@ -386,33 +385,6 @@ void WebLayerImpl::setIsContainerForFixedPositionLayers(bool enable) {
 
 bool WebLayerImpl::isContainerForFixedPositionLayers() const {
   return layer_->IsContainerForFixedPositionLayers();
-}
-
-static blink::WebLayerPositionConstraint ToWebLayerPositionConstraint(
-    const cc::LayerPositionConstraint& constraint) {
-  blink::WebLayerPositionConstraint web_constraint;
-  web_constraint.isFixedPosition = constraint.is_fixed_position();
-  web_constraint.isFixedToRightEdge = constraint.is_fixed_to_right_edge();
-  web_constraint.isFixedToBottomEdge = constraint.is_fixed_to_bottom_edge();
-  return web_constraint;
-}
-
-static cc::LayerPositionConstraint ToLayerPositionConstraint(
-    const blink::WebLayerPositionConstraint& web_constraint) {
-  cc::LayerPositionConstraint constraint;
-  constraint.set_is_fixed_position(web_constraint.isFixedPosition);
-  constraint.set_is_fixed_to_right_edge(web_constraint.isFixedToRightEdge);
-  constraint.set_is_fixed_to_bottom_edge(web_constraint.isFixedToBottomEdge);
-  return constraint;
-}
-
-void WebLayerImpl::setPositionConstraint(
-    const blink::WebLayerPositionConstraint& constraint) {
-  layer_->SetPositionConstraint(ToLayerPositionConstraint(constraint));
-}
-
-blink::WebLayerPositionConstraint WebLayerImpl::positionConstraint() const {
-  return ToWebLayerPositionConstraint(layer_->position_constraint());
 }
 
 void WebLayerImpl::setScrollClient(blink::WebLayerScrollClient* scroll_client) {

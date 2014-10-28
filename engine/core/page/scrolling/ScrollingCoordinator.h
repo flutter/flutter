@@ -29,7 +29,6 @@
 #include "core/rendering/RenderObject.h"
 #include "platform/PlatformWheelEvent.h"
 #include "platform/geometry/IntRect.h"
-#include "platform/scroll/ScrollTypes.h"
 #include "wtf/text/WTFString.h"
 
 namespace blink {
@@ -48,7 +47,6 @@ class GraphicsLayer;
 class Page;
 class Region;
 class ScrollableArea;
-class ViewportConstraints;
 
 class ScrollingCoordinator {
 public:
@@ -99,7 +97,6 @@ public:
     bool scrollableAreaScrollLayerDidChange(ScrollableArea*);
     void scrollableAreaScrollbarLayerDidChange(ScrollableArea*, ScrollbarOrientation);
     void setLayerIsContainerForFixedPositionLayers(GraphicsLayer*, bool);
-    void updateLayerPositionConstraint(RenderLayer*);
     void touchEventTargetRectsDidChange();
     void willDestroyRenderLayer(RenderLayer*);
 

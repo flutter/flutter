@@ -189,11 +189,6 @@ public:
     virtual void setIsContainerForFixedPositionLayers(bool) = 0;
     virtual bool isContainerForFixedPositionLayers() const = 0;
 
-    // This function sets layer position constraint. The constraint will be used
-    // to adjust layer position during threaded scrolling.
-    virtual void setPositionConstraint(const WebLayerPositionConstraint&) = 0;
-    virtual WebLayerPositionConstraint positionConstraint() const = 0;
-
     // The scroll client is notified when the scroll position of the WebLayer
     // changes. Only a single scroll client can be set for a WebLayer at a time.
     // The WebLayer does not take ownership of the scroll client, and it is the

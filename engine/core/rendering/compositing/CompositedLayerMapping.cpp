@@ -921,12 +921,12 @@ void CompositedLayerMapping::updateBackgroundLayerGeometry(const FloatSize& rela
 
 void CompositedLayerMapping::registerScrollingLayers()
 {
+    // FIXME(sky): Remove this whole function. I think this doesn't do anything now that we don't support position:fixed.
+
     // Register fixed position layers and their containers with the scrolling coordinator.
     ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer);
     if (!scrollingCoordinator)
         return;
-
-    scrollingCoordinator->updateLayerPositionConstraint(&m_owningLayer);
 
     // Page scale is applied as a transform on the root render view layer. Because the scroll
     // layer is further up in the hierarchy, we need to avoid marking the root render view

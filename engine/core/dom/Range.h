@@ -108,18 +108,12 @@ public:
 
     ShadowRoot* shadowRoot() const;
 
-    enum RangeInFixedPosition {
-        NotFixedPosition,
-        PartiallyFixedPosition,
-        EntirelyFixedPosition
-    };
-
     // Not transform-friendly
-    void textRects(Vector<IntRect>&, bool useSelectionHeight = false, RangeInFixedPosition* = 0) const;
+    void textRects(Vector<IntRect>&, bool useSelectionHeight = false) const;
     IntRect boundingBox() const;
 
     // Transform-friendly
-    void textQuads(Vector<FloatQuad>&, bool useSelectionHeight = false, RangeInFixedPosition* = 0) const;
+    void textQuads(Vector<FloatQuad>&, bool useSelectionHeight = false) const;
     void getBorderAndTextQuads(Vector<FloatQuad>&) const;
     FloatRect boundingRect() const;
 
