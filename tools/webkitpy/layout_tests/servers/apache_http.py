@@ -58,6 +58,8 @@ class ApacheHTTP(server_base.ServerBase):
         test_dir = self._port_obj.layout_tests_dir()
         mojo_gen_dir = self._filesystem.join(
             self._filesystem.abspath(port_obj.gen_dir()), "mojo")
+        sky_gen_dir = self._filesystem.join(
+            self._filesystem.abspath(port_obj.gen_dir()), "sky")
         js_test_resources_dir = self._filesystem.join(test_dir, "resources")
         media_resources_dir = self._filesystem.join(test_dir, "media")
         mime_types_path = self._filesystem.join(test_dir, "http", "conf", "mime.types")
@@ -73,6 +75,7 @@ class ApacheHTTP(server_base.ServerBase):
             '-C', 'ServerRoot "%s"' % server_root,
             '-C', 'DocumentRoot "%s"' % test_dir,
             '-c', 'Alias /mojo "%s"' % mojo_gen_dir,
+            '-c', 'Alias /sky "%s"' % sky_gen_dir,
             '-c', 'Alias /js-test-resources "%s"' % js_test_resources_dir,
             '-c', 'Alias /media-resources "%s"' % media_resources_dir,
             '-c', 'TypesConfig "%s"' % mime_types_path,

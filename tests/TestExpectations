@@ -7,6 +7,3 @@ crbug.com/1 mutation-observer/observer-wrapper-dropoff-transient.sky [ Skip ]
 crbug.com/1 mutation-observer/observer-wrapper-dropoff.sky [ Skip ]
 crbug.com/1 mutation-observer/transient-gc-crash.sky [ Skip ]
 crbug.com/1 mutation-observer/weak-callback-gc-crash.sky [ Skip ]
-
-# We need to land the new inspector backend
-Bug(abarth) inspector [ Skip ]
