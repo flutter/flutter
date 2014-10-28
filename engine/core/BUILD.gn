@@ -93,9 +93,6 @@ source_set("core_generated") {
   sources += bindings_core_generated_aggregate_files
 
   sources += [
-    # Generated from HTMLEntityNames.in
-    "$sky_core_output_dir/HTMLEntityTable.cpp",
-
     # Generated from CSSTokenizer-in.cpp
     "$sky_core_output_dir/CSSTokenizer.cpp",
 
@@ -191,7 +188,6 @@ group("make_core_generated") {
     ":make_core_generated_event_factory",
     ":make_core_generated_html_element_lookup_trie",
     ":make_core_generated_html_element_type_helpers",
-    ":make_core_generated_html_entity_table",
     ":make_core_generated_make_parser",
     ":make_core_generated_make_token_matcher",
     ":make_core_generated_make_token_matcher_for_viewport",
@@ -449,22 +445,6 @@ make_token_matcher("make_core_generated_make_token_matcher_for_viewport") {
 }
 
 # One-off scripts --------------------------------------------------------------
-
-action("make_core_generated_html_entity_table") {
-  script = "html/parser/create-html-entity-table"
-
-  inputs = [
-    "html/parser/HTMLEntityNames.in",
-  ]
-  outputs = [
-    "$sky_core_output_dir/HTMLEntityTable.cpp",
-  ]
-
-  args = [ "-o" ] + rebase_path(outputs, root_build_dir)
-  args += rebase_path(inputs, root_build_dir)
-
-  deps = make_core_generated_deps
-}
 
 action("make_core_generated_media_query_tokenizer_codepoints") {
   script = "../build/scripts/make_mediaquery_tokenizer_codepoints.py"
