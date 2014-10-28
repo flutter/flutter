@@ -24,18 +24,6 @@ public:
         TemporaryChange<unsigned> m_change;
     };
 
-    // FIXME: This should be removed. AllowSuperUnsafeScript is used
-    // to exceptionally allow script execution in ScriptForbiddenScope, because
-    // some real-world plugins try to execute script in ScriptForbiddenScope.
-    // This is unsafe and we should get rid of all the unsafe script executions.
-    class PLATFORM_EXPORT AllowSuperUnsafeScript {
-    public:
-        AllowSuperUnsafeScript();
-        ~AllowSuperUnsafeScript();
-    private:
-        TemporaryChange<unsigned> m_change;
-    };
-
     static void enter();
     static void exit();
     static bool isScriptForbidden();
