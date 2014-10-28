@@ -47,13 +47,13 @@ public:
         DataState,
         CharacterReferenceInDataState,
         CharacterReferenceInAttributeValueState,
-        RAWTEXTState,
+        RawDataState,
+        RawDataLessThanSignState,
+        RawDataEndTagOpenState,
+        RawDataEndTagNameState,
         TagOpenState,
         CloseTagState,
         TagNameState,
-        RAWTEXTLessThanSignState,
-        RAWTEXTEndTagOpenState,
-        RAWTEXTEndTagNameState,
         BeforeAttributeNameState,
         AttributeNameState,
         AfterAttributeNameState,
@@ -61,8 +61,7 @@ public:
         AttributeValueDoubleQuotedState,
         AttributeValueSingleQuotedState,
         AttributeValueUnquotedState,
-        AfterAttributeValueQuotedState,
-        SelfClosingStartTagState,
+        VoidTagState,
         CommentStart1State,
         CommentStart2State,
         CommentState,
@@ -76,6 +75,7 @@ public:
     bool nextToken(SegmentedString&, HTMLToken&);
 
     State state() const { return m_state; }
+
     void setState(State state) { m_state = state; }
 
 private:
@@ -121,12 +121,6 @@ private:
     // Return whether we need to emit a character token before dealing with
     // the buffered end tag.
     inline bool flushBufferedEndTag(SegmentedString&);
-    inline bool temporaryBufferIs(const String&);
-
-    // Sometimes we speculatively consume input characters and we don't
-    // know whether they represent end tags or RCDATA, etc. These
-    // functions help manage these state.
-    inline void addToPossibleEndTag(LChar cc);
 
     inline void saveEndTagNameIfNeeded()
     {
@@ -135,7 +129,6 @@ private:
             m_appropriateEndTagName = m_token->name();
     }
     inline bool isAppropriateEndTag();
-
 
     inline bool haveBufferedCharacterToken()
     {
@@ -158,11 +151,6 @@ private:
 
     // http://www.whatwg.org/specs/web-apps/current-work/#temporary-buffer
     Vector<LChar, 32> m_temporaryBuffer;
-
-    // We occationally want to emit both a character token and an end tag
-    // token (e.g., when lexing script). We buffer the name of the end tag
-    // token here so we remember it next time we re-enter the tokenizer.
-    Vector<LChar, 32> m_bufferedEndTagName;
 };
 
 }

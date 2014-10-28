@@ -150,7 +150,7 @@ public:
         m_selfClosing = true;
     }
 
-    void beginStartTag(UChar character)
+    void beginStartTag(LChar character)
     {
         ASSERT(character);
         ASSERT(m_type == Uninitialized);
@@ -160,7 +160,6 @@ public:
         m_attributes.clear();
 
         m_data.append(character);
-        m_orAllData |= character;
     }
 
     void beginEndTag(LChar character)

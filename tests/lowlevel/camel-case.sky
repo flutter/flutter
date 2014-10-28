@@ -4,7 +4,7 @@
 <script>
 describe('Element tag names', function() {
   it('should have various casing', function() {
-    assert.equal(document.documentElement.tagName, 'camelcase');
+    assert.equal(document.documentElement.tagName, 'CamelCase');
 
     var element = document.createElement('CamelCase');
     assert.equal(element.tagName, 'CamelCase');

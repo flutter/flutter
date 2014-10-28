@@ -114,7 +114,7 @@ bool BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& token)
     if (token.type() == HTMLToken::StartTag) {
         const String& tagName = token.data();
         if (threadSafeMatch(tagName, HTMLNames::scriptTag) || threadSafeMatch(tagName, HTMLNames::styleTag))
-            m_tokenizer->setState(HTMLTokenizer::RAWTEXTState);
+            m_tokenizer->setState(HTMLTokenizer::RawDataState);
     }
 
     return token.type() != HTMLToken::EndTag || !threadSafeMatch(token.data(), HTMLNames::scriptTag);

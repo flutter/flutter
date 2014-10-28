@@ -34,7 +34,18 @@ namespace blink {
 
 inline bool isTokenizerWhitespace(UChar cc)
 {
-    return cc == ' ' || cc == '\x0A' || cc == '\x09' || cc == '\x0C';
+    return cc == ' ' || cc == '\x0A';
+}
+
+inline bool isTokenizerTagName(UChar cc)
+{
+    if (cc >= 'a' && cc <= 'z')
+        return true;
+    if (cc >= 'A' && cc <= 'Z')
+        return true;
+    if (cc >= '0' && cc <= '9')
+        return true;
+    return cc == '-' || cc == '_' || cc == '.';
 }
 
 inline void advanceStringAndASSERTIgnoringCase(SegmentedString& source, const char* expectedCharacters)
