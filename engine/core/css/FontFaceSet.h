@@ -57,15 +57,9 @@ class FontResource;
 class FontsReadyPromiseResolver;
 class ExecutionContext;
 
-#if ENABLE(OILPAN)
-class FontFaceSet final : public GarbageCollectedFinalized<FontFaceSet>, public HeapSupplement<Document>, public ActiveDOMObject, public EventTargetWithInlineData {
-    USING_GARBAGE_COLLECTED_MIXIN(FontFaceSet);
-    typedef HeapSupplement<Document> SupplementType;
-#else
 class FontFaceSet final : public RefCountedSupplement<Document, FontFaceSet>, public ActiveDOMObject, public EventTargetWithInlineData {
     DEFINE_EVENT_TARGET_REFCOUNTING(RefCounted<FontFaceSet>);
     typedef RefCountedSupplement<Document, FontFaceSet> SupplementType;
-#endif
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~FontFaceSet();

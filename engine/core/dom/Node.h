@@ -106,13 +106,9 @@ protected:
     RenderObject* m_renderer;
 };
 
-#if ENABLE(OILPAN)
-#define NODE_BASE_CLASSES public GarbageCollectedFinalized<Node>, public EventTarget
-#else
 // TreeShared should be the last to pack TreeShared::m_refCount and
 // Node::m_nodeFlags on 64bit platforms.
 #define NODE_BASE_CLASSES public EventTarget, public TreeShared<Node>
-#endif
 
 class Node : NODE_BASE_CLASSES {
     DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(TreeShared<Node>);

@@ -42,27 +42,8 @@
 namespace blink {
 
 #if INSIDE_BLINK
-enum LifetimeManagementType {
-    RefCountedLifetime,
-    GarbageCollectedLifetime,
-    RefCountedGarbageCollectedLifetime
-};
-
 template<typename T>
-class LifetimeOf {
-    static const bool isGarbageCollected = WTF::IsSubclassOfTemplate<T, GarbageCollected>::value;
-    static const bool isRefCountedGarbageCollected = WTF::IsSubclassOfTemplate<T, RefCountedGarbageCollected>::value;
-public:
-    static const LifetimeManagementType value =
-        !isGarbageCollected ? RefCountedLifetime :
-        isRefCountedGarbageCollected ? RefCountedGarbageCollectedLifetime : GarbageCollectedLifetime;
-};
-
-template<typename T, LifetimeManagementType lifetime>
-class PtrStorageImpl;
-
-template<typename T>
-class PtrStorageImpl<T, RefCountedLifetime> {
+class PtrStorageImpl {
 public:
     typedef PassRefPtr<T> BlinkPtrType;
 
@@ -93,48 +74,7 @@ private:
 };
 
 template<typename T>
-class PtrStorageImpl<T, GarbageCollectedLifetime> {
-public:
-    void assign(const RawPtr<T>& val)
-    {
-        if (!val) {
-            release();
-            return;
-        }
-
-        if (!m_handle)
-            m_handle = new Persistent<T>();
-
-        (*m_handle) = val;
-    }
-
-    void assign(T* ptr) { assign(RawPtr<T>(ptr)); }
-    template<typename U> void assign(const RawPtr<U>& val) { assign(RawPtr<T>(val)); }
-
-    void assign(const PtrStorageImpl& other) { assign(other.get()); }
-
-    T* get() const { return m_handle ? m_handle->get() : 0; }
-
-    void release()
-    {
-        delete m_handle;
-        m_handle = 0;
-    }
-
-private:
-    Persistent<T>* m_handle;
-};
-
-template<typename T>
-class PtrStorageImpl<T, RefCountedGarbageCollectedLifetime> : public PtrStorageImpl<T, GarbageCollectedLifetime> {
-public:
-    void assign(const PassRefPtr<T>& val) { PtrStorageImpl<T, GarbageCollectedLifetime>::assign(val.get()); }
-
-    void assign(const PtrStorageImpl& other) { PtrStorageImpl<T, GarbageCollectedLifetime>::assign(other.get()); }
-};
-
-template<typename T>
-class PtrStorage : public PtrStorageImpl<T, LifetimeOf<T>::value> {
+class PtrStorage : public PtrStorageImpl<T> {
 public:
     static PtrStorage& fromSlot(void** slot)
     {

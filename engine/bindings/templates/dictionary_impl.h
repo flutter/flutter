@@ -13,7 +13,7 @@
 
 namespace blink {
 
-class {{cpp_class}} final : public GarbageCollectedFinalized<{{cpp_class}}> {
+class {{cpp_class}} final {
 public:
     static {{cpp_class}}* create()
     {
@@ -25,8 +25,6 @@ public:
     {{member.rvalue_cpp_type}} {{member.name}}() const { return {{member.getter_expression}}; }
     void {{member.setter_name}}({{member.rvalue_cpp_type}} value) { m_{{member.name}} = value; }
     {% endfor %}
-
-    void trace(Visitor*);
 
 private:
     {{cpp_class}}();

@@ -20,7 +20,7 @@ class DOMWrapperWorld;
 class ExecutionContext;
 class ScriptState;
 
-class ScriptPromisePropertyBase : public GarbageCollectedFinalized<ScriptPromisePropertyBase>, public ContextLifecycleObserver {
+class ScriptPromisePropertyBase : public ContextLifecycleObserver {
 public:
     virtual ~ScriptPromisePropertyBase();
 

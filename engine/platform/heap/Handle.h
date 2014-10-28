@@ -196,9 +196,6 @@ private:
     friend class ThreadState;
 };
 
-template<typename T>
-class CrossThreadPersistent;
-
 // Persistent handles are used to store pointers into the
 // managed heap. As long as the Persistent handle is alive
 // the GC will keep the object pointed to alive. Persistent
@@ -328,97 +325,8 @@ public:
     T* get() const { return m_raw; }
 
 private:
-#if ENABLE(GC_PROFILE_MARKING)
-    void recordBacktrace()
-    {
-        if (m_raw)
-            m_tracingName = Heap::createBacktraceString();
-    }
-
-    String m_tracingName;
-#else
     inline void recordBacktrace() const { }
-#endif
     T* m_raw;
-
-    friend class CrossThreadPersistent<T>;
-};
-
-// FIXME: derive affinity based on the collection.
-template<typename Collection, ThreadAffinity Affinity = AnyThread>
-class PersistentHeapCollectionBase
-    : public Collection
-    , public PersistentBase<ThreadLocalPersistents<Affinity>, PersistentHeapCollectionBase<Collection, Affinity> > {
-    // We overload the various new and delete operators with using the WTF DefaultAllocator to ensure persistent
-    // heap collections are always allocated off-heap. This allows persistent collections to be used in
-    // DEFINE_STATIC_LOCAL et. al.
-    WTF_USE_ALLOCATOR(PersistentHeapCollectionBase, WTF::DefaultAllocator);
-public:
-    PersistentHeapCollectionBase() { }
-
-    template<typename OtherCollection>
-    PersistentHeapCollectionBase(const OtherCollection& other) : Collection(other) { }
-
-    void trace(Visitor* visitor)
-    {
-#if ENABLE(GC_PROFILE_MARKING)
-        visitor->setHostInfo(this, "PersistentHeapCollectionBase");
-#endif
-        visitor->trace(*static_cast<Collection*>(this));
-    }
-};
-
-template<
-    typename KeyArg,
-    typename MappedArg,
-    typename HashArg = typename DefaultHash<KeyArg>::Hash,
-    typename KeyTraitsArg = HashTraits<KeyArg>,
-    typename MappedTraitsArg = HashTraits<MappedArg> >
-class PersistentHeapHashMap : public PersistentHeapCollectionBase<HeapHashMap<KeyArg, MappedArg, HashArg, KeyTraitsArg, MappedTraitsArg> > { };
-
-template<
-    typename ValueArg,
-    typename HashArg = typename DefaultHash<ValueArg>::Hash,
-    typename TraitsArg = HashTraits<ValueArg> >
-class PersistentHeapHashSet : public PersistentHeapCollectionBase<HeapHashSet<ValueArg, HashArg, TraitsArg> > { };
-
-template<
-    typename ValueArg,
-    typename HashArg = typename DefaultHash<ValueArg>::Hash,
-    typename TraitsArg = HashTraits<ValueArg> >
-class PersistentHeapLinkedHashSet : public PersistentHeapCollectionBase<HeapLinkedHashSet<ValueArg, HashArg, TraitsArg> > { };
-
-template<
-    typename ValueArg,
-    size_t inlineCapacity = 0,
-    typename HashArg = typename DefaultHash<ValueArg>::Hash>
-class PersistentHeapListHashSet : public PersistentHeapCollectionBase<HeapListHashSet<ValueArg, inlineCapacity, HashArg> > { };
-
-template<typename T, typename U, typename V>
-class PersistentHeapHashCountedSet : public PersistentHeapCollectionBase<HeapHashCountedSet<T, U, V> > { };
-
-template<typename T, size_t inlineCapacity = 0>
-class PersistentHeapVector : public PersistentHeapCollectionBase<HeapVector<T, inlineCapacity> > {
-public:
-    PersistentHeapVector() { }
-
-    template<size_t otherCapacity>
-    PersistentHeapVector(const HeapVector<T, otherCapacity>& other)
-        : PersistentHeapCollectionBase<HeapVector<T, inlineCapacity> >(other)
-    {
-    }
-};
-
-template<typename T, size_t inlineCapacity = 0>
-class PersistentHeapDeque : public PersistentHeapCollectionBase<HeapDeque<T, inlineCapacity> > {
-public:
-    PersistentHeapDeque() { }
-
-    template<size_t otherCapacity>
-    PersistentHeapDeque(const HeapDeque<T, otherCapacity>& other)
-        : PersistentHeapCollectionBase<HeapDeque<T, inlineCapacity> >(other)
-    {
-    }
 };
 
 // Members are used in classes to contain strong pointers to other oilpan heap
@@ -850,14 +758,6 @@ struct PointerParamStorageTraits<T*, false> {
 
     static StorageType wrap(T* value) { return value; }
     static T* unwrap(const StorageType& value) { return value; }
-};
-
-template<typename T>
-struct PointerParamStorageTraits<T*, true> {
-    typedef blink::CrossThreadPersistent<T> StorageType;
-
-    static StorageType wrap(T* value) { return value; }
-    static T* unwrap(const StorageType& value) { return value.get(); }
 };
 
 template<typename T>

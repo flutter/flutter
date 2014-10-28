@@ -49,11 +49,10 @@ namespace blink {
 //         return self->bindToV8Function();
 //     }
 // };
-class ScriptFunction : public GarbageCollectedFinalized<ScriptFunction> {
+class ScriptFunction {
 public:
     virtual ~ScriptFunction() { }
     ScriptState* scriptState() const { return m_scriptState.get(); }
-    virtual void trace(Visitor*) { }
 
 protected:
     explicit ScriptFunction(ScriptState* scriptState)

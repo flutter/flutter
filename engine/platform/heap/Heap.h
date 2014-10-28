@@ -109,7 +109,6 @@ class HeapStats;
 class PageMemory;
 template<ThreadAffinity affinity> class ThreadLocalPersistents;
 template<typename T, typename RootsAccessor = ThreadLocalPersistents<ThreadingTrait<T>::Affinity > > class Persistent;
-template<typename T> class CrossThreadPersistent;
 
 #if ENABLE(GC_PROFILE_HEAP)
 class TracedValue;
@@ -683,61 +682,6 @@ public:
 
 class HeapDoesNotContainCache : public HeapExtentCache<NegativeEntry> { };
 
-// FIXME: This is currently used by the WebAudio code.
-// We should attempt to restructure the WebAudio code so that the main thread
-// alone determines life-time and receives messages about life-time from the
-// audio thread.
-template<typename T>
-class ThreadSafeRefCountedGarbageCollected : public GarbageCollectedFinalized<T>, public WTF::ThreadSafeRefCountedBase {
-    WTF_MAKE_NONCOPYABLE(ThreadSafeRefCountedGarbageCollected);
-
-public:
-    ThreadSafeRefCountedGarbageCollected()
-    {
-        makeKeepAlive();
-    }
-
-    // Override ref to deal with a case where a reference count goes up
-    // from 0 to 1. This can happen in the following scenario:
-    // (1) The reference count becomes 0, but on-stack pointers keep references to the object.
-    // (2) The on-stack pointer is assigned to a RefPtr. The reference count becomes 1.
-    // In this case, we have to resurrect m_keepAlive.
-    void ref()
-    {
-        MutexLocker lock(m_mutex);
-        if (UNLIKELY(!refCount())) {
-            makeKeepAlive();
-        }
-        WTF::ThreadSafeRefCountedBase::ref();
-    }
-
-    // Override deref to deal with our own deallocation based on ref counting.
-    void deref()
-    {
-        MutexLocker lock(m_mutex);
-        if (derefBase()) {
-            ASSERT(m_keepAlive);
-            m_keepAlive.clear();
-        }
-    }
-
-    using GarbageCollectedFinalized<T>::operator new;
-    using GarbageCollectedFinalized<T>::operator delete;
-
-protected:
-    ~ThreadSafeRefCountedGarbageCollected() { }
-
-private:
-    void makeKeepAlive()
-    {
-        ASSERT(!m_keepAlive);
-        m_keepAlive = adoptPtr(new CrossThreadPersistent<T>(static_cast<T*>(this)));
-    }
-
-    OwnPtr<CrossThreadPersistent<T> > m_keepAlive;
-    mutable Mutex m_mutex;
-};
-
 template<typename DataType>
 class PagePool {
 protected:
@@ -1206,81 +1150,6 @@ private:
     }
 
     bool m_active;
-};
-
-// Base class for objects allocated in the Blink garbage-collected
-// heap.
-//
-// Defines a 'new' operator that allocates the memory in the
-// heap. 'delete' should not be called on objects that inherit from
-// GarbageCollected.
-//
-// Instances of GarbageCollected will *NOT* get finalized. Their
-// destructor will not be called. Therefore, only classes that have
-// trivial destructors with no semantic meaning (including all their
-// subclasses) should inherit from GarbageCollected. If there are
-// non-trival destructors in a given class or any of its subclasses,
-// GarbageCollectedFinalized should be used which guarantees that the
-// destructor is called on an instance when the garbage collector
-// determines that it is no longer reachable.
-template<typename T>
-class GarbageCollected {
-    WTF_MAKE_NONCOPYABLE(GarbageCollected);
-
-    // For now direct allocation of arrays on the heap is not allowed.
-    void* operator new[](size_t size);
-    void operator delete[](void* p);
-public:
-    typedef T GarbageCollectedBase;
-
-    void* operator new(size_t size)
-    {
-        return Heap::allocate<T>(size);
-    }
-
-    void operator delete(void* p)
-    {
-        ASSERT_NOT_REACHED();
-    }
-
-protected:
-    GarbageCollected()
-    {
-    }
-};
-
-// Base class for objects allocated in the Blink garbage-collected
-// heap.
-//
-// Defines a 'new' operator that allocates the memory in the
-// heap. 'delete' should not be called on objects that inherit from
-// GarbageCollected.
-//
-// Instances of GarbageCollectedFinalized will have their destructor
-// called when the garbage collector determines that the object is no
-// longer reachable.
-template<typename T>
-class GarbageCollectedFinalized : public GarbageCollected<T> {
-    WTF_MAKE_NONCOPYABLE(GarbageCollectedFinalized);
-
-protected:
-    // finalizeGarbageCollectedObject is called when the object is
-    // freed from the heap. By default finalization means calling the
-    // destructor on the object. finalizeGarbageCollectedObject can be
-    // overridden to support calling the destructor of a
-    // subclass. This is useful for objects without vtables that
-    // require explicit dispatching. The name is intentionally a bit
-    // long to make name conflicts less likely.
-    void finalizeGarbageCollectedObject()
-    {
-        static_cast<T*>(this)->~T();
-    }
-
-    GarbageCollectedFinalized() { }
-    ~GarbageCollectedFinalized() { }
-
-    template<typename U> friend struct HasFinalizer;
-    template<typename U, bool> friend struct FinalizerTraitImpl;
 };
 
 // Base class for objects that are in the Blink garbage-collected heap

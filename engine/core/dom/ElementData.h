@@ -49,15 +49,9 @@ class UniqueElementData;
 class ElementData : public RefCounted<ElementData> {
     WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-#if ENABLE(OILPAN)
-    // Override GarbageCollectedFinalized's finalizeGarbageCollectedObject to
-    // dispatch to the correct subclass destructor.
-    void finalizeGarbageCollectedObject();
-#else
     // Override RefCounted's deref() to ensure operator delete is called on
     // the appropriate subclass type.
     void deref();
-#endif
 
     void clearClass() const { m_classNames.clear(); }
     void setClass(const AtomicString& className, bool shouldFoldCase) const { m_classNames.set(className, shouldFoldCase); }
