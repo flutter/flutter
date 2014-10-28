@@ -204,8 +204,6 @@ void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalida
 
 const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
 {
-    // FIXME(sky): Can we remove offsetForFixedPosition?
-    LayoutSize offsetForFixedPosition;
     LayoutSize offset;
     RenderObject* container = 0;
 
@@ -216,9 +214,9 @@ const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObj
     if ((!ancestorToStopAt || container) && shouldUseTransformFromContainer(container)) {
         TransformationMatrix t;
         getTransformFromContainer(container, LayoutSize(), t);
-        geometryMap.push(this, t, false, false, false, true, offsetForFixedPosition);
+        geometryMap.push(this, t, false, false, true);
     } else {
-        geometryMap.push(this, offset, false, false, false, false, offsetForFixedPosition);
+        geometryMap.push(this, offset, false, false, false);
     }
 
     return container;

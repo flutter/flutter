@@ -71,8 +71,8 @@ public:
 
     // Push geometry info between this renderer and some ancestor. The ancestor must be its container() or some
     // stacking context between the renderer and its container.
-    void push(const RenderObject*, const LayoutSize&, bool accumulatingTransform = false, bool isNonUniform = false, bool isFixedPosition = false, bool hasTransform = false, LayoutSize offsetForFixedPosition = LayoutSize());
-    void push(const RenderObject*, const TransformationMatrix&, bool accumulatingTransform = false, bool isNonUniform = false, bool isFixedPosition = false, bool hasTransform = false, LayoutSize offsetForFixedPosition = LayoutSize());
+    void push(const RenderObject*, const LayoutSize&, bool accumulatingTransform = false, bool isNonUniform = false, bool hasTransform = false);
+    void push(const RenderObject*, const TransformationMatrix&, bool accumulatingTransform = false, bool isNonUniform = false, bool hasTransform = false);
 
 private:
     void mapToContainer(TransformState&, const RenderLayerModelObject* container = 0) const;
@@ -82,7 +82,6 @@ private:
 
     bool hasNonUniformStep() const { return m_nonUniformStepsCount; }
     bool hasTransformStep() const { return m_transformedStepsCount; }
-    bool hasFixedPositionStep() const { return m_fixedStepsCount; }
 
 #ifndef NDEBUG
     void dumpSteps() const;
@@ -97,7 +96,6 @@ private:
     size_t m_insertionPosition;
     int m_nonUniformStepsCount;
     int m_transformedStepsCount;
-    int m_fixedStepsCount;
     RenderGeometryMapSteps m_mapping;
     LayoutSize m_accumulatedOffset;
     MapCoordinatesFlags m_mapCoordinatesFlags;

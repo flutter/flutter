@@ -523,7 +523,6 @@ public:
     // If paintInvalidationContainer and paintInvalidationContainerSkipped are not null, on return *paintInvalidationContainerSkipped
     // is true if the renderer returned is an ancestor of paintInvalidationContainer.
     RenderObject* container(const RenderLayerModelObject* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
-    RenderBlock* containerForFixedPosition(const RenderLayerModelObject* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
 
     virtual RenderObject* hoverAncestor() const { return parent(); }
 
@@ -552,7 +551,7 @@ public:
 
     void setPositionState(EPosition position)
     {
-        ASSERT((position != AbsolutePosition && position != FixedPosition) || isBox());
+        ASSERT(position != AbsolutePosition || isBox());
         m_bitfields.setPositionedState(position);
     }
     void clearPositionedState() { m_bitfields.clearPositionedState(); }
@@ -1141,6 +1140,7 @@ private:
 
         void setPositionedState(int positionState)
         {
+            // FIXME(sky): Simplify now that we don't have FixedPosition.
             // This mask maps FixedPosition and AbsolutePosition to IsOutOfFlowPositioned, saving one bit.
             m_positionedState = static_cast<PositionedState>(positionState & 0x3);
         }

@@ -1556,14 +1556,11 @@ void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidat
     if (!o)
         return;
 
-    bool isFixedPos = style()->position() == FixedPosition;
     bool hasTransform = hasLayer() && layer()->transform();
     // If this box has a transform, it acts as a fixed position container for fixed descendants,
     // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
-    if (hasTransform && !isFixedPos)
+    if (hasTransform)
         mode &= ~IsFixed;
-    else if (isFixedPos)
-        mode |= IsFixed;
 
     if (wasFixed)
         *wasFixed = mode & IsFixed;
@@ -1593,14 +1590,12 @@ void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidat
 
 void RenderBox::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
 {
-    bool isFixedPos = style()->position() == FixedPosition;
     bool hasTransform = hasLayer() && layer()->transform();
-    if (hasTransform && !isFixedPos) {
+    if (hasTransform) {
         // If this box has a transform, it acts as a fixed position container for fixed descendants,
         // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
         mode &= ~IsFixed;
-    } else if (isFixedPos)
-        mode |= IsFixed;
+    }
 
     RenderBoxModelObject::mapAbsoluteToLocalPoint(mode, transformState);
 }
@@ -1726,7 +1721,7 @@ void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* 
     // included into the visual overflow for repaint, we wouldn't have this issue.
     inflatePaintInvalidationRectForReflectionAndFilter(rect);
 
-    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer) && position != FixedPosition) {
+    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer)) {
         if (layer() && layer()->transform())
             rect = layer()->transform()->mapRect(pixelSnappedIntRect(rect));
 
@@ -2455,15 +2450,6 @@ LayoutUnit RenderBox::containingBlockLogicalWidthForPositioned(const RenderBoxMo
     if (checkForPerpendicularWritingMode && containingBlock->isHorizontalWritingMode() != isHorizontalWritingMode())
         return containingBlockLogicalHeightForPositioned(containingBlock, false);
 
-    // Use viewport as container for top-level fixed-position elements.
-    if (style()->position() == FixedPosition && containingBlock->isRenderView()) {
-        const RenderView* view = toRenderView(containingBlock);
-        if (FrameView* frameView = view->frameView()) {
-            LayoutRect viewportRect = frameView->visibleContentRect();
-            return containingBlock->isHorizontalWritingMode() ? viewportRect.width() : viewportRect.height();
-        }
-    }
-
     if (containingBlock->isBox())
         return toRenderBox(containingBlock)->clientLogicalWidth();
 
@@ -2494,15 +2480,6 @@ LayoutUnit RenderBox::containingBlockLogicalHeightForPositioned(const RenderBoxM
 {
     if (checkForPerpendicularWritingMode && containingBlock->isHorizontalWritingMode() != isHorizontalWritingMode())
         return containingBlockLogicalWidthForPositioned(containingBlock, false);
-
-    // Use viewport as container for top-level fixed-position elements.
-    if (style()->position() == FixedPosition && containingBlock->isRenderView()) {
-        const RenderView* view = toRenderView(containingBlock);
-        if (FrameView* frameView = view->frameView()) {
-            LayoutRect viewportRect = frameView->visibleContentRect();
-            return containingBlock->isHorizontalWritingMode() ? viewportRect.height() : viewportRect.width();
-        }
-    }
 
     if (containingBlock->isBox()) {
         const RenderBlock* cb = containingBlock->isRenderBlock() ?

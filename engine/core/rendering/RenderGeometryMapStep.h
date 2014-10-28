@@ -40,29 +40,24 @@ struct RenderGeometryMapStep {
     RenderGeometryMapStep(const RenderGeometryMapStep& o)
         : m_renderer(o.m_renderer)
         , m_offset(o.m_offset)
-        , m_offsetForFixedPosition(o.m_offsetForFixedPosition)
         , m_accumulatingTransform(o.m_accumulatingTransform)
         , m_isNonUniform(o.m_isNonUniform)
-        , m_isFixedPosition(o.m_isFixedPosition)
         , m_hasTransform(o.m_hasTransform)
     {
         ASSERT(!o.m_transform);
     }
-    RenderGeometryMapStep(const RenderObject* renderer, bool accumulatingTransform, bool isNonUniform, bool isFixedPosition, bool hasTransform)
+    RenderGeometryMapStep(const RenderObject* renderer, bool accumulatingTransform, bool isNonUniform, bool hasTransform)
         : m_renderer(renderer)
         , m_accumulatingTransform(accumulatingTransform)
         , m_isNonUniform(isNonUniform)
-        , m_isFixedPosition(isFixedPosition)
         , m_hasTransform(hasTransform)
     {
     }
     const RenderObject* m_renderer;
     LayoutSize m_offset;
     OwnPtr<TransformationMatrix> m_transform; // Includes offset if non-null.
-    LayoutSize m_offsetForFixedPosition;
     bool m_accumulatingTransform;
     bool m_isNonUniform; // Mapping depends on the input point, e.g. because of CSS columns.
-    bool m_isFixedPosition;
     bool m_hasTransform;
 };
 

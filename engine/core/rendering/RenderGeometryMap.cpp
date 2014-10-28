@@ -38,7 +38,6 @@ RenderGeometryMap::RenderGeometryMap(MapCoordinatesFlags flags)
     : m_insertionPosition(kNotFound)
     , m_nonUniformStepsCount(0)
     , m_transformedStepsCount(0)
-    , m_fixedStepsCount(0)
     , m_mapCoordinatesFlags(flags)
 {
 }
@@ -56,7 +55,6 @@ void RenderGeometryMap::mapToContainer(TransformState& transformState, const Ren
         return;
     }
 
-    bool inFixed = false;
 #if ENABLE(ASSERT)
     bool foundContainer = !container || (m_mapping.size() && m_mapping[0].m_renderer == container);
 #endif
@@ -72,14 +70,6 @@ void RenderGeometryMap::mapToContainer(TransformState& transformState, const Ren
             break;
         }
 
-        // If this box has a transform, it acts as a fixed position container
-        // for fixed descendants, which prevents the propagation of 'fixed'
-        // unless the layer itself is also fixed position.
-        if (i && currentStep.m_hasTransform && !currentStep.m_isFixedPosition)
-            inFixed = false;
-        else if (currentStep.m_isFixedPosition)
-            inFixed = true;
-
         ASSERT(!i == isTopmostRenderView(currentStep.m_renderer));
 
         if (!i) {
@@ -93,11 +83,6 @@ void RenderGeometryMap::mapToContainer(TransformState& transformState, const Ren
             else
                 transformState.move(currentStep.m_offset.width(), currentStep.m_offset.height(), accumulate);
         }
-
-        if (inFixed && !currentStep.m_offsetForFixedPosition.isZero()) {
-            ASSERT(currentStep.m_renderer->isRenderView());
-            transformState.move(currentStep.m_offsetForFixedPosition);
-        }
     }
 
     ASSERT(foundContainer);
@@ -108,7 +93,7 @@ FloatPoint RenderGeometryMap::mapToContainer(const FloatPoint& p, const RenderLa
 {
     FloatPoint result;
 
-    if (!hasFixedPositionStep() && !hasTransformStep() && !hasNonUniformStep() && (!container || (m_mapping.size() && container == m_mapping[0].m_renderer)))
+    if (!hasTransformStep() && !hasNonUniformStep() && (!container || (m_mapping.size() && container == m_mapping[0].m_renderer)))
         result = p + m_accumulatedOffset;
     else {
         TransformState transformState(TransformState::ApplyTransformDirection, p);
@@ -153,7 +138,7 @@ FloatQuad RenderGeometryMap::mapToContainer(const FloatRect& rect, const RenderL
 {
     FloatRect result;
 
-    if (!hasFixedPositionStep() && !hasTransformStep() && !hasNonUniformStep() && (!container || (m_mapping.size() && container == m_mapping[0].m_renderer))) {
+    if (!hasTransformStep() && !hasNonUniformStep() && (!container || (m_mapping.size() && container == m_mapping[0].m_renderer))) {
         result = rect;
         result.move(m_accumulatedOffset);
     } else {
@@ -195,7 +180,7 @@ static bool canMapBetweenRenderers(const RenderObject* renderer, const RenderObj
 {
     for (const RenderObject* current = renderer; ; current = current->parent()) {
         const RenderStyle* style = current->style();
-        if (style->position() == FixedPosition || style->isFlippedBlocksWritingMode())
+        if (style->isFlippedBlocksWritingMode())
             return false;
 
         if (current->hasTransform())
@@ -233,40 +218,36 @@ void RenderGeometryMap::pushMappingsToAncestor(const RenderLayer* layer, const R
 
         TemporaryChange<size_t> positionChange(m_insertionPosition, m_mapping.size());
         bool accumulatingTransform = layer->renderer()->style()->preserves3D() || ancestorLayer->renderer()->style()->preserves3D();
-        push(renderer, toLayoutSize(layerOffset), accumulatingTransform, /*isNonUniform*/ false, /*isFixedPosition*/ false, /*hasTransform*/ false);
+        push(renderer, toLayoutSize(layerOffset), accumulatingTransform, /*isNonUniform*/ false, /*hasTransform*/ false);
         return;
     }
     const RenderLayerModelObject* ancestorRenderer = ancestorLayer ? ancestorLayer->renderer() : 0;
     pushMappingsToAncestor(renderer, ancestorRenderer);
 }
 
-void RenderGeometryMap::push(const RenderObject* renderer, const LayoutSize& offsetFromContainer, bool accumulatingTransform, bool isNonUniform, bool isFixedPosition, bool hasTransform, LayoutSize offsetForFixedPosition)
+void RenderGeometryMap::push(const RenderObject* renderer, const LayoutSize& offsetFromContainer, bool accumulatingTransform, bool isNonUniform, bool hasTransform)
 {
 //    fprintf(stderr, "RenderGeometryMap::push %p %d,%d isNonUniform=%d\n", renderer, offsetFromContainer.width().toInt(), offsetFromContainer.height().toInt(), isNonUniform);
 
     ASSERT(m_insertionPosition != kNotFound);
     ASSERT(!renderer->isRenderView() || !m_insertionPosition || m_mapCoordinatesFlags & TraverseDocumentBoundaries);
-    ASSERT(offsetForFixedPosition.isZero() || renderer->isRenderView());
 
-    m_mapping.insert(m_insertionPosition, RenderGeometryMapStep(renderer, accumulatingTransform, isNonUniform, isFixedPosition, hasTransform));
+    m_mapping.insert(m_insertionPosition, RenderGeometryMapStep(renderer, accumulatingTransform, isNonUniform, hasTransform));
 
     RenderGeometryMapStep& step = m_mapping[m_insertionPosition];
     step.m_offset = offsetFromContainer;
-    step.m_offsetForFixedPosition = offsetForFixedPosition;
 
     stepInserted(step);
 }
 
-void RenderGeometryMap::push(const RenderObject* renderer, const TransformationMatrix& t, bool accumulatingTransform, bool isNonUniform, bool isFixedPosition, bool hasTransform, LayoutSize offsetForFixedPosition)
+void RenderGeometryMap::push(const RenderObject* renderer, const TransformationMatrix& t, bool accumulatingTransform, bool isNonUniform, bool hasTransform)
 {
     ASSERT(m_insertionPosition != kNotFound);
     ASSERT(!renderer->isRenderView() || !m_insertionPosition || m_mapCoordinatesFlags & TraverseDocumentBoundaries);
-    ASSERT(offsetForFixedPosition.isZero() || renderer->isRenderView());
 
-    m_mapping.insert(m_insertionPosition, RenderGeometryMapStep(renderer, accumulatingTransform, isNonUniform, isFixedPosition, hasTransform));
+    m_mapping.insert(m_insertionPosition, RenderGeometryMapStep(renderer, accumulatingTransform, isNonUniform, hasTransform));
 
     RenderGeometryMapStep& step = m_mapping[m_insertionPosition];
-    step.m_offsetForFixedPosition = offsetForFixedPosition;
 
     if (!t.isIntegerTranslation())
         step.m_transform = adoptPtr(new TransformationMatrix(t));
@@ -301,9 +282,6 @@ void RenderGeometryMap::stepInserted(const RenderGeometryMapStep& step)
 
     if (step.m_transform)
         ++m_transformedStepsCount;
-
-    if (step.m_isFixedPosition)
-        ++m_fixedStepsCount;
 }
 
 void RenderGeometryMap::stepRemoved(const RenderGeometryMapStep& step)
@@ -318,11 +296,6 @@ void RenderGeometryMap::stepRemoved(const RenderGeometryMapStep& step)
     if (step.m_transform) {
         ASSERT(m_transformedStepsCount);
         --m_transformedStepsCount;
-    }
-
-    if (step.m_isFixedPosition) {
-        ASSERT(m_fixedStepsCount);
-        --m_fixedStepsCount;
     }
 }
 

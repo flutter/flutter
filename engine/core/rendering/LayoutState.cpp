@@ -48,16 +48,9 @@ LayoutState::LayoutState(RenderBox& renderer, const LayoutSize& offset, bool con
     , m_renderer(renderer)
 {
     renderer.view()->pushLayoutState(*this);
-    bool fixed = renderer.isOutOfFlowPositioned() && renderer.style()->position() == FixedPosition;
-    if (fixed) {
-        // FIXME: This doesn't work correctly with transforms.
-        FloatPoint fixedOffset = renderer.view()->localToAbsolute(FloatPoint(), IsFixed);
-        m_layoutOffset = LayoutSize(fixedOffset.x(), fixedOffset.y()) + offset;
-    } else {
-        m_layoutOffset = m_next->m_layoutOffset + offset;
-    }
+    m_layoutOffset = m_next->m_layoutOffset + offset;
 
-    if (renderer.isOutOfFlowPositioned() && !fixed) {
+    if (renderer.isOutOfFlowPositioned()) {
         if (RenderObject* container = renderer.container()) {
             if (container->style()->hasInFlowPosition() && container->isRenderInline())
                 m_layoutOffset += toRenderInline(container)->offsetForInFlowPositionedInline(renderer);

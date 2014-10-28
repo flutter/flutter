@@ -771,61 +771,8 @@ void FrameView::scrollContentsIfNeeded()
 
 bool FrameView::scrollContentsFastPath(const IntSize& scrollDelta)
 {
-    if (!contentsInCompositedLayer() || hasSlowRepaintObjects())
-        return false;
-
-    if (!m_viewportConstrainedObjects || m_viewportConstrainedObjects->isEmpty())
-        return true;
-
-    Region regionToUpdate;
-    ViewportConstrainedObjectSet::const_iterator end = m_viewportConstrainedObjects->end();
-    for (ViewportConstrainedObjectSet::const_iterator it = m_viewportConstrainedObjects->begin(); it != end; ++it) {
-        RenderObject* renderer = *it;
-        ASSERT(renderer->style()->hasViewportConstrainedPosition());
-        ASSERT(renderer->hasLayer());
-        RenderLayer* layer = toRenderBoxModelObject(renderer)->layer();
-
-        CompositingState state = layer->compositingState();
-        if (state == PaintsIntoOwnBacking || state == PaintsIntoGroupedBacking)
-            continue;
-
-        // If the fixed layer has a blur/drop-shadow filter applied on at least one of its parents, we cannot
-        // scroll using the fast path, otherwise the outsets of the filter will be moved around the page.
-        if (layer->hasAncestorWithFilterOutsets())
-            return false;
-
-        IntRect updateRect = pixelSnappedIntRect(layer->paintInvalidator().paintInvalidationRectIncludingNonCompositingDescendants());
-
-        const RenderLayerModelObject* repaintContainer = layer->renderer()->containerForPaintInvalidation();
-        if (repaintContainer && !repaintContainer->isRenderView()) {
-            // Invalidate the old and new locations of fixed position elements that are not drawn into the RenderView.
-            updateRect.moveBy(scrollPosition());
-            IntRect previousRect = updateRect;
-            previousRect.move(scrollDelta);
-            // FIXME: Rather than uniting the rects, we should just issue both invalidations.
-            updateRect.unite(previousRect);
-            layer->renderer()->invalidatePaintUsingContainer(repaintContainer, updateRect, InvalidationScroll);
-        } else {
-            // Coalesce the paint invalidations that will be issued to the renderView.
-            updateRect = contentsToRootView(updateRect);
-            if (!updateRect.isEmpty())
-                regionToUpdate.unite(updateRect);
-        }
-    }
-
-    // Invalidate the old and new locations of fixed position elements that are drawn into the RenderView.
-    Vector<IntRect> subRectsToUpdate = regionToUpdate.rects();
-    size_t viewportConstrainedObjectsCount = subRectsToUpdate.size();
-    for (size_t i = 0; i < viewportConstrainedObjectsCount; ++i) {
-        IntRect updateRect = subRectsToUpdate[i];
-        IntRect scrolledRect = updateRect;
-        scrolledRect.move(-scrollDelta);
-        updateRect.unite(scrolledRect);
-        // FIXME: We should be able to issue these invalidations separately and before we actually scroll.
-        renderView()->layer()->paintInvalidator().setBackingNeedsPaintInvalidationInRect(rootViewToContents(updateRect));
-    }
-
-    return true;
+    // FIXME(sky): Remove
+    return false;
 }
 
 void FrameView::scrollContentsSlowPath(const IntRect& updateRect)
@@ -897,28 +844,7 @@ void FrameView::updateLayersAndCompositingAfterScrollIfNeeded()
 
 void FrameView::updateFixedElementPaintInvalidationRectsAfterScroll()
 {
-    if (!hasViewportConstrainedObjects())
-        return;
-
-    // Update the paint invalidation rects for fixed elements after scrolling and invalidation to reflect
-    // the new scroll position.
-    ViewportConstrainedObjectSet::const_iterator end = m_viewportConstrainedObjects->end();
-    for (ViewportConstrainedObjectSet::const_iterator it = m_viewportConstrainedObjects->begin(); it != end; ++it) {
-        RenderObject* renderer = *it;
-        // m_viewportConstrainedObjects should not contain non-viewport constrained objects.
-        ASSERT(renderer->style()->hasViewportConstrainedPosition());
-
-        // Fixed items should always have layers.
-        ASSERT(renderer->hasLayer());
-
-        RenderLayer* layer = toRenderBoxModelObject(renderer)->layer();
-
-        // Don't need to do this for composited fixed items.
-        if (layer->compositingState() == PaintsIntoOwnBacking)
-            continue;
-
-        layer->paintInvalidator().computePaintInvalidationRectsIncludingNonCompositingDescendants();
-    }
+    // FIXME(sky): Remove
 }
 
 void FrameView::updateCompositedSelectionBoundsIfNeeded()

@@ -408,9 +408,8 @@ public:
     bool hasStaticBlockPosition(bool horizontal) const { return horizontal ? hasAutoTopAndBottom() : hasAutoLeftAndRight(); }
 
     EPosition position() const { return static_cast<EPosition>(noninherited_flags.position); }
-    bool hasOutOfFlowPosition() const { return position() == AbsolutePosition || position() == FixedPosition; }
+    bool hasOutOfFlowPosition() const { return position() == AbsolutePosition; }
     bool hasInFlowPosition() const { return position() == RelativePosition; }
-    bool hasViewportConstrainedPosition() const { return position() == FixedPosition; }
     EFloat floating() const { return static_cast<EFloat>(noninherited_flags.floating); }
 
     const Length& width() const { return m_box->width(); }

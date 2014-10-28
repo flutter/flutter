@@ -138,7 +138,6 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
         || style->hasFilter()
         || style->hasBlendMode()
         || style->hasIsolation()
-        || style->position() == FixedPosition
         || hasWillChangeThatCreatesStackingContext(style)))
         style->setZIndex(0);
 

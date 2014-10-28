@@ -1096,10 +1096,7 @@ void RenderBlock::addOverflowFromPositionedObjects()
     TrackedRendererListHashSet::iterator end = positionedDescendants->end();
     for (TrackedRendererListHashSet::iterator it = positionedDescendants->begin(); it != end; ++it) {
         positionedObject = *it;
-
-        // Fixed positioned elements don't contribute to layout overflow, since they don't scroll with the content.
-        if (positionedObject->style()->position() != FixedPosition)
-            addOverflowFromChild(positionedObject, LayoutSize(positionedObject->x(), positionedObject->y()));
+        addOverflowFromChild(positionedObject, LayoutSize(positionedObject->x(), positionedObject->y()));
     }
 }
 
@@ -1204,33 +1201,7 @@ bool RenderBlock::simplifiedLayout()
 
 void RenderBlock::markFixedPositionObjectForLayoutIfNeeded(RenderObject* child, SubtreeLayoutScope& layoutScope)
 {
-    if (child->style()->position() != FixedPosition)
-        return;
-
-    bool hasStaticBlockPosition = child->style()->hasStaticBlockPosition(isHorizontalWritingMode());
-    bool hasStaticInlinePosition = child->style()->hasStaticInlinePosition(isHorizontalWritingMode());
-    if (!hasStaticBlockPosition && !hasStaticInlinePosition)
-        return;
-
-    RenderObject* o = child->parent();
-    while (o && !o->isRenderView() && o->style()->position() != AbsolutePosition)
-        o = o->parent();
-    if (o->style()->position() != AbsolutePosition)
-        return;
-
-    RenderBox* box = toRenderBox(child);
-    if (hasStaticInlinePosition) {
-        LogicalExtentComputedValues computedValues;
-        box->computeLogicalWidth(computedValues);
-        LayoutUnit newLeft = computedValues.m_position;
-        if (newLeft != box->logicalLeft())
-            layoutScope.setChildNeedsLayout(child);
-    } else if (hasStaticBlockPosition) {
-        LayoutUnit oldTop = box->logicalTop();
-        box->updateLogicalHeight();
-        if (box->logicalTop() != oldTop)
-            layoutScope.setChildNeedsLayout(child);
-    }
+    // FIXME(sky): Remove
 }
 
 LayoutUnit RenderBlock::marginIntrinsicLogicalWidthForChild(RenderBox* child) const
@@ -3195,7 +3166,7 @@ bool RenderBlock::recalcChildOverflowAfterStyleChange()
         if (!box->needsOverflowRecalcAfterStyleChange())
             continue;
         RenderBlock* block = toRenderBlock(box);
-        if (!block->recalcOverflowAfterStyleChange() || box->style()->position() == FixedPosition)
+        if (!block->recalcOverflowAfterStyleChange())
             continue;
 
         childrenOverflowChanged = true;

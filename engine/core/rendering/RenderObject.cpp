@@ -622,28 +622,10 @@ void RenderObject::invalidateContainerPreferredLogicalWidths()
     }
 }
 
-RenderBlock* RenderObject::containerForFixedPosition(const RenderLayerModelObject* paintInvalidationContainer, bool* paintInvalidationContainerSkipped) const
-{
-    ASSERT(!paintInvalidationContainerSkipped || !*paintInvalidationContainerSkipped);
-    ASSERT(!isText());
-    ASSERT(style()->position() == FixedPosition);
-
-    RenderObject* ancestor = parent();
-    for (; ancestor && !ancestor->canContainFixedPositionObjects(); ancestor = ancestor->parent()) {
-        if (paintInvalidationContainerSkipped && ancestor == paintInvalidationContainer)
-            *paintInvalidationContainerSkipped = true;
-    }
-
-    ASSERT(!ancestor || !ancestor->isAnonymousBlock());
-    return toRenderBlock(ancestor);
-}
-
 RenderBlock* RenderObject::containingBlock() const
 {
     RenderObject* o = parent();
-    if (!isText() && m_style->position() == FixedPosition) {
-        return containerForFixedPosition();
-    } else if (!isText() && m_style->position() == AbsolutePosition) {
+    if (!isText() && m_style->position() == AbsolutePosition) {
         while (o) {
             // For relpositioned inlines, we return the nearest non-anonymous enclosing block. We don't try
             // to return the inline itself.  This allows us to avoid having a positioned objects
@@ -2300,9 +2282,7 @@ RenderObject* RenderObject::container(const RenderLayerModelObject* paintInvalid
         return o;
 
     EPosition pos = m_style->position();
-    if (pos == FixedPosition) {
-        return containerForFixedPosition(paintInvalidationContainer, paintInvalidationContainerSkipped);
-    } else if (pos == AbsolutePosition) {
+    if (pos == AbsolutePosition) {
         // We technically just want our containing block, but
         // we may not have one if we're part of an uninstalled
         // subtree. We'll climb as high as we can though.
@@ -2682,9 +2662,6 @@ void RenderObject::imageChanged(ImageResource* image, const IntRect* rect)
 Element* RenderObject::offsetParent() const
 {
     if (isDocumentElement())
-        return 0;
-
-    if (isOutOfFlowPositioned() && style()->position() == FixedPosition)
         return 0;
 
     // If A is an area HTML element which has a map HTML element somewhere in the ancestor

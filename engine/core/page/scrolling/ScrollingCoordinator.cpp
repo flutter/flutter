@@ -169,20 +169,7 @@ static void clearPositionConstraintExceptForLayer(GraphicsLayer* layer, Graphics
 
 static WebLayerPositionConstraint computePositionConstraint(const RenderLayer* layer)
 {
-    ASSERT(layer->hasCompositedLayerMapping());
-    do {
-        if (layer->renderer()->style()->position() == FixedPosition) {
-            const RenderObject* fixedPositionObject = layer->renderer();
-            bool fixedToRight = !fixedPositionObject->style()->right().isAuto();
-            bool fixedToBottom = !fixedPositionObject->style()->bottom().isAuto();
-            return WebLayerPositionConstraint::fixedPosition(fixedToRight, fixedToBottom);
-        }
-
-        layer = layer->parent();
-
-        // Composited layers that inherit a fixed position state will be positioned with respect to the nearest compositedLayerMapping's GraphicsLayer.
-        // So, once we find a layer that has its own compositedLayerMapping, we can stop searching for a fixed position RenderObject.
-    } while (layer && !layer->hasCompositedLayerMapping());
+    // FIXME(sky): Remove
     return WebLayerPositionConstraint();
 }
 
@@ -791,30 +778,7 @@ void ScrollingCoordinator::handleWheelEventPhase(PlatformWheelEventPhase phase)
 
 bool ScrollingCoordinator::hasVisibleSlowRepaintViewportConstrainedObjects(FrameView* frameView) const
 {
-    const FrameView::ViewportConstrainedObjectSet* viewportConstrainedObjects = frameView->viewportConstrainedObjects();
-    if (!viewportConstrainedObjects)
-        return false;
-
-    for (FrameView::ViewportConstrainedObjectSet::const_iterator it = viewportConstrainedObjects->begin(), end = viewportConstrainedObjects->end(); it != end; ++it) {
-        RenderObject* renderer = *it;
-        ASSERT(renderer->isBoxModelObject() && renderer->hasLayer());
-        ASSERT(renderer->style()->position() == FixedPosition);
-        RenderLayer* layer = toRenderBoxModelObject(renderer)->layer();
-
-        // Whether the RenderLayer scrolls with the viewport is a tree-depenent
-        // property and our viewportConstrainedObjects collection is maintained
-        // with only RenderObject-level information.
-        if (!layer->scrollsWithViewport())
-            continue;
-
-        // We're only smart enough to scroll viewport-constrainted objects
-        // in the compositor if they have their own backing or they paint
-        // into a grouped back (which necessarily all have the same viewport
-        // constraints).
-        CompositingState compositingState = layer->compositingState();
-        if (compositingState != PaintsIntoOwnBacking && compositingState != PaintsIntoGroupedBacking)
-            return true;
-    }
+    // FIXME(sky): Remove
     return false;
 }
 

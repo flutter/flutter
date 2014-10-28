@@ -71,18 +71,7 @@ ScrollableArea* RenderLayerModelObject::scrollableArea() const
 
 void RenderLayerModelObject::willBeDestroyed()
 {
-    if (isPositioned()) {
-        // Don't use this->view() because the document's renderView has been set to 0 during destruction.
-        if (LocalFrame* frame = this->frame()) {
-            if (FrameView* frameView = frame->view()) {
-                if (style()->hasViewportConstrainedPosition())
-                    frameView->removeViewportConstrainedObject(this);
-            }
-        }
-    }
-
     RenderObject::willBeDestroyed();
-
     destroyLayer();
 }
 
@@ -136,17 +125,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
         // from the style.
         layer()->setLayerType(type);
         layer()->styleChanged(diff, oldStyle);
-    }
-
-    if (FrameView *frameView = view()->frameView()) {
-        bool newStyleIsViewportConstained = style()->hasViewportConstrainedPosition();
-        bool oldStyleIsViewportConstrained = oldStyle && oldStyle->hasViewportConstrainedPosition();
-        if (newStyleIsViewportConstained != oldStyleIsViewportConstrained) {
-            if (newStyleIsViewportConstained && layer())
-                frameView->addViewportConstrainedObject(this);
-            else
-                frameView->removeViewportConstrainedObject(this);
-        }
     }
 }
 

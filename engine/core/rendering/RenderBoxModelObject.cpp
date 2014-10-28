@@ -2580,7 +2580,6 @@ const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderLay
         return 0;
 
     bool isInline = isRenderInline();
-    bool isFixedPos = !isInline && style()->position() == FixedPosition;
     bool hasTransform = !isInline && hasLayer() && layer()->transform();
 
     LayoutSize adjustmentForSkippedAncestor;
@@ -2598,10 +2597,10 @@ const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderLay
         TransformationMatrix t;
         getTransformFromContainer(container, containerOffset, t);
         t.translateRight(adjustmentForSkippedAncestor.width().toFloat(), adjustmentForSkippedAncestor.height().toFloat());
-        geometryMap.push(this, t, preserve3D, offsetDependsOnPoint, isFixedPos, hasTransform);
+        geometryMap.push(this, t, preserve3D, offsetDependsOnPoint, hasTransform);
     } else {
         containerOffset += adjustmentForSkippedAncestor;
-        geometryMap.push(this, containerOffset, preserve3D, offsetDependsOnPoint, isFixedPos, hasTransform);
+        geometryMap.push(this, containerOffset, preserve3D, offsetDependsOnPoint, hasTransform);
     }
 
     return ancestorSkipped ? ancestorToStopAt : container;

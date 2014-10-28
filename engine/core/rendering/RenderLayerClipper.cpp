@@ -52,13 +52,7 @@ namespace blink {
 static void adjustClipRectsForChildren(const RenderObject& renderer, ClipRects& clipRects)
 {
     EPosition position = renderer.style()->position();
-    // A fixed object is essentially the root of its containing block hierarchy, so when
-    // we encounter such an object, we reset our clip rects to the fixedClipRect.
-    if (position == FixedPosition) {
-        clipRects.setPosClipRect(clipRects.fixedClipRect());
-        clipRects.setOverflowClipRect(clipRects.fixedClipRect());
-        clipRects.setFixed(true);
-    } else if (position == RelativePosition) {
+    if (position == RelativePosition) {
         clipRects.setPosClipRect(clipRects.overflowClipRect());
     } else if (position == AbsolutePosition) {
         clipRects.setOverflowClipRect(clipRects.posClipRect());
@@ -81,7 +75,6 @@ static void applyClipRects(const ClipRectsContext& context, RenderObject& render
         LayoutRect newClip = toRenderBox(renderer).clipRect(offset);
         clipRects.setPosClipRect(intersection(newClip, clipRects.posClipRect()));
         clipRects.setOverflowClipRect(intersection(newClip, clipRects.overflowClipRect()));
-        clipRects.setFixedClipRect(intersection(newClip, clipRects.fixedClipRect()));
     }
 }
 
@@ -304,12 +297,8 @@ void RenderLayerClipper::calculateClipRects(const ClipRectsContext& context, Cli
 
 static ClipRect backgroundClipRectForPosition(const ClipRects& parentRects, EPosition position)
 {
-    if (position == FixedPosition)
-        return parentRects.fixedClipRect();
-
     if (position == AbsolutePosition)
         return parentRects.posClipRect();
-
     return parentRects.overflowClipRect();
 }
 

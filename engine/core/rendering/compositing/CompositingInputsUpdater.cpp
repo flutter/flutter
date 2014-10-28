@@ -33,18 +33,7 @@ static const RenderLayer* findParentLayerOnClippingContainerChain(const RenderLa
 {
     RenderObject* current = layer->renderer();
     while (current) {
-        if (current->style()->position() == FixedPosition) {
-            for (current = current->parent(); current && !current->canContainFixedPositionObjects(); current = current->parent()) {
-                // CSS clip applies to fixed position elements even for ancestors that are not what the
-                // fixed element is positioned with respect to.
-                if (current->hasClip()) {
-                    ASSERT(current->hasLayer());
-                    return static_cast<const RenderLayerModelObject*>(current)->layer();
-                }
-            }
-        } else {
-            current = current->containingBlock();
-        }
+        current = current->containingBlock();
 
         if (current->hasLayer())
             return static_cast<const RenderLayerModelObject*>(current)->layer();

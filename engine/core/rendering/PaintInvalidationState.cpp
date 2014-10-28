@@ -42,7 +42,6 @@ PaintInvalidationState::PaintInvalidationState(const PaintInvalidationState& nex
 {
     // FIXME: SVG could probably benefit from a stack-based optimization like html does. crbug.com/391054
     bool establishesPaintInvalidationContainer = &m_renderer == &m_paintInvalidationContainer;
-    bool fixed = m_renderer.style()->position() == FixedPosition;
 
     if (establishesPaintInvalidationContainer) {
         // When we hit a new paint invalidation container, we don't need to
@@ -53,15 +52,10 @@ PaintInvalidationState::PaintInvalidationState(const PaintInvalidationState& nex
         if (!renderer.supportsPaintInvalidationStateCachedOffsets() || !next.m_cachedOffsetsEnabled) {
             m_cachedOffsetsEnabled = false;
         } else {
-            if (fixed) {
-                FloatPoint fixedOffset = m_renderer.localToContainerPoint(FloatPoint(), &m_paintInvalidationContainer, TraverseDocumentBoundaries);
-                m_paintOffset = LayoutSize(fixedOffset.x(), fixedOffset.y());
-            } else {
-                LayoutSize offset = m_renderer.isBox() ? toRenderBox(renderer).locationOffset() : LayoutSize();
-                m_paintOffset = next.m_paintOffset + offset;
-            }
+            LayoutSize offset = m_renderer.isBox() ? toRenderBox(renderer).locationOffset() : LayoutSize();
+            m_paintOffset = next.m_paintOffset + offset;
 
-            if (m_renderer.isOutOfFlowPositioned() && !fixed) {
+            if (m_renderer.isOutOfFlowPositioned()) {
                 if (RenderObject* container = m_renderer.container()) {
                     if (container->style()->hasInFlowPosition() && container->isRenderInline())
                         m_paintOffset += toRenderInline(container)->offsetForInFlowPositionedInline(toRenderBox(renderer));
@@ -72,7 +66,7 @@ PaintInvalidationState::PaintInvalidationState(const PaintInvalidationState& nex
                 m_paintOffset += renderer.layer()->offsetForInFlowPosition();
         }
 
-        m_clipped = !fixed && next.m_clipped;
+        m_clipped = next.m_clipped;
         if (m_clipped)
             m_clipRect = next.m_clipRect;
     }

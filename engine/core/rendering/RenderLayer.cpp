@@ -251,7 +251,8 @@ void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
 
 bool RenderLayer::scrollsWithViewport() const
 {
-    return renderer()->style()->position() == FixedPosition && renderer()->containerForFixedPosition() == renderer()->view();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayer::scrollsWithRespectTo(const RenderLayer* other) const
@@ -600,11 +601,6 @@ FloatPoint RenderLayer::perspectiveOrigin() const
     RenderStyle* style = renderer()->style();
 
     return FloatPoint(floatValueForLength(style->perspectiveOriginX(), borderBox.width().toFloat()), floatValueForLength(style->perspectiveOriginY(), borderBox.height().toFloat()));
-}
-
-static inline bool isFixedPositionedContainer(RenderLayer* layer)
-{
-    return layer->isRootLayer() || layer->hasTransform();
 }
 
 RenderLayer* RenderLayer::enclosingPositionedAncestor() const
@@ -1017,57 +1013,8 @@ static inline const RenderLayer* accumulateOffsetTowardsAncestor(const RenderLay
     const RenderLayerModelObject* renderer = layer->renderer();
     EPosition position = renderer->style()->position();
 
-    // FIXME: Positioning of out-of-flow(fixed, absolute) elements collected in a RenderFlowThread
-    // may need to be revisited in a future patch.
-    // If the fixed renderer is inside a RenderFlowThread, we should not compute location using localToAbsolute,
-    // since localToAbsolute maps the coordinates from flow thread to regions coordinates and regions can be
-    // positioned in a completely different place in the viewport (RenderView).
-    if (position == FixedPosition && (!ancestorLayer || ancestorLayer == renderer->view()->layer())) {
-        // If the fixed layer's container is the root, just add in the offset of the view. We can obtain this by calling
-        // localToAbsolute() on the RenderView.
-        FloatPoint absPos = renderer->localToAbsolute(FloatPoint(), IsFixed);
-        location += LayoutSize(absPos.x(), absPos.y());
-        return ancestorLayer;
-    }
-
-    // For the fixed positioned elements inside a render flow thread, we should also skip the code path below
-    // Otherwise, for the case of ancestorLayer == rootLayer and fixed positioned element child of a transformed
-    // element in render flow thread, we will hit the fixed positioned container before hitting the ancestor layer.
-    if (position == FixedPosition) {
-        // For a fixed layers, we need to walk up to the root to see if there's a fixed position container
-        // (e.g. a transformed layer). It's an error to call convertToLayerCoords() across a layer with a transform,
-        // so we should always find the ancestor at or before we find the fixed position container.
-        RenderLayer* fixedPositionContainerLayer = 0;
-        bool foundAncestor = false;
-        for (RenderLayer* currLayer = layer->parent(); currLayer; currLayer = currLayer->parent()) {
-            if (currLayer == ancestorLayer)
-                foundAncestor = true;
-
-            if (isFixedPositionedContainer(currLayer)) {
-                fixedPositionContainerLayer = currLayer;
-                ASSERT_UNUSED(foundAncestor, foundAncestor);
-                break;
-            }
-        }
-
-        ASSERT(fixedPositionContainerLayer); // We should have hit the RenderView's layer at least.
-
-        if (fixedPositionContainerLayer != ancestorLayer) {
-            LayoutPoint fixedContainerCoords;
-            layer->convertToLayerCoords(fixedPositionContainerLayer, fixedContainerCoords);
-
-            LayoutPoint ancestorCoords;
-            ancestorLayer->convertToLayerCoords(fixedPositionContainerLayer, ancestorCoords);
-
-            location += (fixedContainerCoords - ancestorCoords);
-        } else {
-            location += toSize(layer->location());
-        }
-        return ancestorLayer;
-    }
-
     RenderLayer* parentLayer;
-    if (position == AbsolutePosition || position == FixedPosition) {
+    if (position == AbsolutePosition) {
         // Do what enclosingPositionedAncestor() does, but check for ancestorLayer along the way.
         parentLayer = layer->parent();
         bool foundAncestorFirst = false;
