@@ -42,16 +42,10 @@ def main():
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky'),
         },
-        # src-relative to avoid needing to rebuild when changing inspector:
         '/sky/framework': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir':
                 os.path.join(SKY_ROOT, 'framework'),
-        },
-        '/sky/framework/inspector/server': {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky', 'framework',
-                'inspector', 'server'),
         },
      }
     cherrypy.quickstart(config=config)
