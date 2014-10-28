@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="resources/does-not-exist.html" as="hello" />
-<link rel="import" href="../resources/dump-as-text.html" />
+<link rel="import" href="resources/does-not-exist.sky" as="hello" />
+<link rel="import" href="../resources/dump-as-text.sky" />
 <div id="result">FAIL - Script did not execute</div>
 <script>
 document.getElementById("result").textContent =
