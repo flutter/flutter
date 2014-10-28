@@ -10,5 +10,3 @@ crbug.com/1 mutation-observer/weak-callback-gc-crash.sky [ Skip ]
 
 # We need to land the new inspector backend
 Bug(abarth) inspector [ Skip ]
-
-Bug(abarth) services/network.sky [ Crash ]
