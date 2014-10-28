@@ -13,6 +13,7 @@ group("sky") {
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
+    "//sky/framework/inspector/server",
     "//sky/viewer",
   ]
   if (use_aura) {
