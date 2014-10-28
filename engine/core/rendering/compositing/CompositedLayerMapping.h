@@ -253,7 +253,6 @@ private:
     void updateDrawsContent();
     void updateChildrenTransform();
     void updateCompositedBounds();
-    void registerScrollingLayers();
 
     // Also sets subpixelAccumulation on the layer.
     void computeBoundsOfOwningLayer(const RenderLayer* compositedAncestor, IntRect& localCompositingBounds, IntRect& compositingBoundsRelativeToCompositedAncestor, LayoutPoint& offsetFromCompositedAncestor, IntPoint& snappedOffsetFromCompositedAncestor);

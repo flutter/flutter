@@ -186,9 +186,6 @@ public:
     virtual void setTouchEventHandlerRegion(const WebVector<WebRect>&) = 0;
     virtual WebVector<WebRect> touchEventHandlerRegion() const = 0;
 
-    virtual void setIsContainerForFixedPositionLayers(bool) = 0;
-    virtual bool isContainerForFixedPositionLayers() const = 0;
-
     // The scroll client is notified when the scroll position of the WebLayer
     // changes. Only a single scroll client can be set for a WebLayer at a time.
     // The WebLayer does not take ownership of the scroll client, and it is the

@@ -96,7 +96,6 @@ public:
     // Returns true if the coordinator handled this change.
     bool scrollableAreaScrollLayerDidChange(ScrollableArea*);
     void scrollableAreaScrollbarLayerDidChange(ScrollableArea*, ScrollbarOrientation);
-    void setLayerIsContainerForFixedPositionLayers(GraphicsLayer*, bool);
     void touchEventTargetRectsDidChange();
     void willDestroyRenderLayer(RenderLayer*);
 

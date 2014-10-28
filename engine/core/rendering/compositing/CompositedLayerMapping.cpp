@@ -652,7 +652,6 @@ void CompositedLayerMapping::updateGraphicsLayerGeometry(const RenderLayer* comp
     updateShouldFlattenTransform();
     updateChildrenTransform();
     updateScrollParent(compositor()->preferCompositingToLCDTextEnabled() ? m_owningLayer.scrollParent() : 0);
-    registerScrollingLayers();
 
     updateCompositingReasons();
 }
@@ -917,23 +916,6 @@ void CompositedLayerMapping::updateBackgroundLayerGeometry(const FloatSize& rela
         m_backgroundLayer->setNeedsDisplay();
     }
     m_backgroundLayer->setOffsetFromRenderer(m_graphicsLayer->offsetFromRenderer());
-}
-
-void CompositedLayerMapping::registerScrollingLayers()
-{
-    // FIXME(sky): Remove this whole function. I think this doesn't do anything now that we don't support position:fixed.
-
-    // Register fixed position layers and their containers with the scrolling coordinator.
-    ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer);
-    if (!scrollingCoordinator)
-        return;
-
-    // Page scale is applied as a transform on the root render view layer. Because the scroll
-    // layer is further up in the hierarchy, we need to avoid marking the root render view
-    // layer as a container.
-    bool isContainer = m_owningLayer.hasTransform() && !m_owningLayer.isRootLayer();
-    // FIXME: we should make certain that childForSuperLayers will never be the m_squashingContainmentLayer here
-    scrollingCoordinator->setLayerIsContainerForFixedPositionLayers(childForSuperlayers(), isContainer);
 }
 
 void CompositedLayerMapping::updateInternalHierarchy()

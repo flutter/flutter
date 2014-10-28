@@ -791,8 +791,6 @@ void RenderLayerCompositor::ensureRootLayer()
         m_containerLayer->setMasksToBounds(containerMasksToBounds);
 
         m_scrollLayer = GraphicsLayer::create(graphicsLayerFactory(), this);
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->setLayerIsContainerForFixedPositionLayers(m_scrollLayer.get(), true);
 
         // Hook them up
         m_overflowControlsHostLayer->addChild(m_containerLayer.get());

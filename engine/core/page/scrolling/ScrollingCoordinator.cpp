@@ -154,12 +154,6 @@ void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
     }
 }
 
-void ScrollingCoordinator::setLayerIsContainerForFixedPositionLayers(GraphicsLayer* layer, bool enable)
-{
-    if (WebLayer* scrollableLayer = toWebLayer(layer))
-        scrollableLayer->setIsContainerForFixedPositionLayers(enable);
-}
-
 void ScrollingCoordinator::willDestroyScrollableArea(ScrollableArea* scrollableArea)
 {
     removeWebScrollbarLayer(scrollableArea, HorizontalScrollbar);

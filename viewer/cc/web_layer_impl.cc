@@ -379,14 +379,6 @@ WebVector<WebRect> WebLayerImpl::touchEventHandlerRegion() const {
   return result;
 }
 
-void WebLayerImpl::setIsContainerForFixedPositionLayers(bool enable) {
-  layer_->SetIsContainerForFixedPositionLayers(enable);
-}
-
-bool WebLayerImpl::isContainerForFixedPositionLayers() const {
-  return layer_->IsContainerForFixedPositionLayers();
-}
-
 void WebLayerImpl::setScrollClient(blink::WebLayerScrollClient* scroll_client) {
   if (scroll_client) {
     layer_->set_did_scroll_callback(
