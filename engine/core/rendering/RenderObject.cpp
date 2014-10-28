@@ -1838,37 +1838,6 @@ void RenderObject::styleWillChange(StyleDifference diff, const RenderStyle& newS
         s_affectsParentBlock = false;
     }
 
-    if (view()->frameView()) {
-        bool shouldBlitOnFixedBackgroundImage = false;
-        if (RuntimeEnabledFeatures::fastMobileScrollingEnabled()) {
-            // On low-powered/mobile devices, preventing blitting on a scroll can cause noticeable delays
-            // when scrolling a page with a fixed background image. As an optimization, assuming there are
-            // no fixed positoned elements on the page, we can acclerate scrolling (via blitting) if we
-            // ignore the CSS property "background-attachment: fixed".
-            shouldBlitOnFixedBackgroundImage = true;
-        }
-        bool newStyleSlowScroll = !shouldBlitOnFixedBackgroundImage && newStyle.hasFixedBackgroundImage();
-        bool oldStyleSlowScroll = m_style && !shouldBlitOnFixedBackgroundImage && m_style->hasFixedBackgroundImage();
-
-        bool drawsRootBackground = isDocumentElement();
-        if (drawsRootBackground && !shouldBlitOnFixedBackgroundImage) {
-            if (view()->compositor()->supportsFixedRootBackgroundCompositing()) {
-                if (newStyleSlowScroll && newStyle.hasEntirelyFixedBackground())
-                    newStyleSlowScroll = false;
-
-                if (oldStyleSlowScroll && m_style->hasEntirelyFixedBackground())
-                    oldStyleSlowScroll = false;
-            }
-        }
-
-        if (oldStyleSlowScroll != newStyleSlowScroll) {
-            if (oldStyleSlowScroll)
-                view()->frameView()->removeSlowRepaintObject();
-            if (newStyleSlowScroll)
-                view()->frameView()->addSlowRepaintObject();
-        }
-    }
-
     // Elements with non-auto touch-action will send a SetTouchAction message
     // on touchstart in EventHandler::handleTouchEvent, and so effectively have
     // a touchstart handler that must be reported.

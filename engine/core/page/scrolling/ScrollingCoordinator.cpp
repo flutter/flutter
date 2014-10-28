@@ -87,7 +87,6 @@ ScrollingCoordinator::ScrollingCoordinator(Page* page)
     , m_touchEventTargetRectsAreDirty(false)
     , m_shouldScrollOnMainThreadDirty(false)
     , m_wasFrameScrollable(false)
-    , m_lastMainThreadScrollingReasons(0)
 {
 }
 
@@ -140,12 +139,7 @@ void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
     }
 
     FrameView* frameView = m_page->mainFrame()->view();
-    bool frameIsScrollable = frameView && frameView->isScrollable();
-    if (m_shouldScrollOnMainThreadDirty || m_wasFrameScrollable != frameIsScrollable) {
-        setShouldUpdateScrollLayerPositionOnMainThread(mainThreadScrollingReasons());
-        m_shouldScrollOnMainThreadDirty = false;
-    }
-    m_wasFrameScrollable = frameIsScrollable;
+    m_wasFrameScrollable = frameView && frameView->isScrollable();
 
     // The mainFrame view doesn't get included in the FrameTree below, so we
     // update its size separately.
@@ -427,10 +421,6 @@ void ScrollingCoordinator::reset()
     m_verticalScrollbars.clear();
     m_layersWithTouchRects.clear();
     m_wasFrameScrollable = false;
-
-    // This is retained for testing.
-    m_lastMainThreadScrollingReasons = 0;
-    setShouldUpdateScrollLayerPositionOnMainThread(m_lastMainThreadScrollingReasons);
 }
 
 // Note that in principle this could be called more often than computeTouchEventTargetRects, for
@@ -540,14 +530,6 @@ void ScrollingCoordinator::updateHaveScrollEventHandlers()
     }
 }
 
-void ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThread(MainThreadScrollingReasons reasons)
-{
-    if (WebLayer* scrollLayer = toWebLayer(m_page->mainFrame()->view()->layerForScrolling())) {
-        m_lastMainThreadScrollingReasons = reasons;
-        scrollLayer->setShouldScrollOnMainThread(reasons);
-    }
-}
-
 void ScrollingCoordinator::willBeDestroyed()
 {
     ASSERT(m_page);
@@ -556,22 +538,6 @@ void ScrollingCoordinator::willBeDestroyed()
         GraphicsLayer::unregisterContentsLayer(it->value->layer());
     for (ScrollbarMap::iterator it = m_verticalScrollbars.begin(); it != m_verticalScrollbars.end(); ++it)
         GraphicsLayer::unregisterContentsLayer(it->value->layer());
-}
-
-bool ScrollingCoordinator::coordinatesScrollingForFrameView(FrameView* frameView) const
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-
-    // We currently only handle the main frame.
-    if (&frameView->frame() != m_page->mainFrame())
-        return false;
-
-    // We currently only support composited mode.
-    RenderView* renderView = m_page->mainFrame()->contentRenderer();
-    if (!renderView)
-        return false;
-    return renderView->usesCompositing();
 }
 
 Region ScrollingCoordinator::computeShouldHandleScrollGestureOnMainThreadRegion(const LocalFrame* frame, const IntPoint& frameLocation) const
@@ -685,45 +651,10 @@ void ScrollingCoordinator::computeTouchEventTargetRects(LayerHitTestRects& rects
     accumulateDocumentTouchEventTargetRects(rects, document);
 }
 
-void ScrollingCoordinator::frameViewHasSlowRepaintObjectsDidChange(FrameView* frameView)
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-
-    if (!coordinatesScrollingForFrameView(frameView))
-        return;
-
-    m_shouldScrollOnMainThreadDirty = true;
-}
-
-void ScrollingCoordinator::frameViewFixedObjectsDidChange(FrameView* frameView)
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-
-    if (!coordinatesScrollingForFrameView(frameView))
-        return;
-
-    m_shouldScrollOnMainThreadDirty = true;
-}
-
 bool ScrollingCoordinator::isForMainFrame(ScrollableArea* scrollableArea) const
 {
     // FIXME(sky): Remove
     return false;
-}
-
-void ScrollingCoordinator::frameViewRootLayerDidChange(FrameView* frameView)
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-
-    if (!coordinatesScrollingForFrameView(frameView))
-        return;
-
-    notifyLayoutUpdated();
-    updateHaveWheelEventHandlers();
-    updateHaveScrollEventHandlers();
 }
 
 #if OS(MACOSX)
@@ -741,33 +672,6 @@ void ScrollingCoordinator::handleWheelEventPhase(PlatformWheelEventPhase phase)
     frameView->scrollAnimator()->handleWheelEventPhase(phase);
 }
 #endif
-
-MainThreadScrollingReasons ScrollingCoordinator::mainThreadScrollingReasons() const
-{
-    MainThreadScrollingReasons reasons = static_cast<MainThreadScrollingReasons>(0);
-
-    FrameView* frameView = m_page->mainFrame()->view();
-    if (!frameView)
-        return reasons;
-
-    if (frameView->hasSlowRepaintObjects())
-        reasons |= HasSlowRepaintObjects;
-
-    return reasons;
-}
-
-String ScrollingCoordinator::mainThreadScrollingReasonsAsText(MainThreadScrollingReasons reasons)
-{
-    if (reasons & ScrollingCoordinator::HasSlowRepaintObjects)
-        return "Has slow repaint objects";
-    return "";
-}
-
-String ScrollingCoordinator::mainThreadScrollingReasonsAsText() const
-{
-    ASSERT(m_page->mainFrame()->document()->lifecycle().state() >= DocumentLifecycle::CompositingClean);
-    return mainThreadScrollingReasonsAsText(m_lastMainThreadScrollingReasons);
-}
 
 bool ScrollingCoordinator::frameViewIsDirty() const
 {

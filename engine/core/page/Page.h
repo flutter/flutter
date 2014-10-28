@@ -119,7 +119,6 @@ public:
 
     ScrollingCoordinator* scrollingCoordinator();
 
-    String mainThreadScrollingReasonsAsText();
     PassRefPtr<ClientRectList> nonFastScrollableRects(const LocalFrame*);
 
     Settings& settings() const { return *m_settings; }

@@ -75,7 +75,6 @@ static const double resourcePriorityUpdateDelayAfterScroll = 0.250;
 FrameView::FrameView(LocalFrame* frame)
     : m_frame(frame)
     , m_canHaveScrollbars(true)
-    , m_slowRepaintObjectCount(0)
     , m_hasPendingLayout(false)
     , m_layoutSubtreeRoot(0)
     , m_inSynchronousPostLayout(false)
@@ -689,28 +688,6 @@ bool FrameView::contentsInCompositedLayer() const
     }
 
     return false;
-}
-
-void FrameView::addSlowRepaintObject()
-{
-    if (!m_slowRepaintObjectCount++) {
-        if (Page* page = m_frame->page()) {
-            if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-                scrollingCoordinator->frameViewHasSlowRepaintObjectsDidChange(this);
-        }
-    }
-}
-
-void FrameView::removeSlowRepaintObject()
-{
-    ASSERT(m_slowRepaintObjectCount > 0);
-    m_slowRepaintObjectCount--;
-    if (!m_slowRepaintObjectCount) {
-        if (Page* page = m_frame->page()) {
-            if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-                scrollingCoordinator->frameViewHasSlowRepaintObjectsDidChange(this);
-        }
-    }
 }
 
 IntPoint FrameView::lastKnownMousePosition() const

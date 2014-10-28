@@ -38,8 +38,6 @@ class WebScrollbarLayer;
 
 namespace blink {
 
-typedef unsigned MainThreadScrollingReasons;
-
 class Document;
 class LocalFrame;
 class FrameView;
@@ -56,9 +54,6 @@ public:
 
     void willBeDestroyed();
 
-    // Return whether this scrolling coordinator handles scrolling for the given frame view.
-    bool coordinatesScrollingForFrameView(FrameView*) const;
-
     // Called when any frame has done its layout.
     void notifyLayoutUpdated();
 
@@ -67,27 +62,10 @@ public:
     void updateHaveWheelEventHandlers();
     void updateHaveScrollEventHandlers();
 
-    // Should be called whenever the slow repaint objects counter changes between zero and one.
-    void frameViewHasSlowRepaintObjectsDidChange(FrameView*);
-
-    // Should be called whenever the set of fixed objects changes.
-    void frameViewFixedObjectsDidChange(FrameView*);
-
-    // Should be called whenever the root layer for the given frame view changes.
-    void frameViewRootLayerDidChange(FrameView*);
-
 #if OS(MACOSX)
     // Dispatched by the scrolling tree during handleWheelEvent. This is required as long as scrollbars are painted on the main thread.
     void handleWheelEventPhase(PlatformWheelEventPhase);
 #endif
-
-    // FIXME(sky): get rid of this enum.
-    enum MainThreadScrollingReasonFlags {
-        HasSlowRepaintObjects = 1 << 0,
-    };
-
-    MainThreadScrollingReasons mainThreadScrollingReasons() const;
-    bool shouldUpdateScrollLayerPositionOnMainThread() const { return mainThreadScrollingReasons() != 0; }
 
     PassOwnPtr<blink::WebScrollbarLayer> createSolidColorScrollbarLayer(ScrollbarOrientation, int thumbThickness, int trackStart, bool isLeftSideVerticalScrollbar);
 
@@ -101,8 +79,6 @@ public:
     void updateScrollParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
     void updateClipParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
 
-    static String mainThreadScrollingReasonsAsText(MainThreadScrollingReasons);
-    String mainThreadScrollingReasonsAsText() const;
     Region computeShouldHandleScrollGestureOnMainThreadRegion(const LocalFrame*, const IntPoint& frameLocation) const;
 
     void updateTouchEventTargetRectsIfNeeded();
@@ -126,8 +102,6 @@ protected:
 private:
     bool shouldUpdateAfterCompositingChange() const { return m_scrollGestureRegionIsDirty || m_touchEventTargetRectsAreDirty || frameViewIsDirty(); }
 
-    void setShouldUpdateScrollLayerPositionOnMainThread(MainThreadScrollingReasons);
-
     void setShouldHandleScrollGestureOnMainThreadRegion(const Region&);
     void setTouchEventTargetRects(LayerHitTestRects&);
     void computeTouchEventTargetRects(LayerHitTestRects&);
@@ -143,9 +117,6 @@ private:
     ScrollbarMap m_verticalScrollbars;
     HashSet<const RenderLayer*> m_layersWithTouchRects;
     bool m_wasFrameScrollable;
-
-    // This is retained for testing.
-    MainThreadScrollingReasons m_lastMainThreadScrollingReasons;
 };
 
 } // namespace blink

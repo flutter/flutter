@@ -141,10 +141,6 @@ public:
     AtomicString mediaType() const;
     void setMediaType(const AtomicString&);
 
-    void addSlowRepaintObject();
-    void removeSlowRepaintObject();
-    bool hasSlowRepaintObjects() const { return m_slowRepaintObjectCount; }
-
     void restoreScrollbar();
 
     void postLayoutTimerFired(Timer<FrameView>*);
@@ -355,7 +351,6 @@ private:
 
     // FIXME(sky): Remove
     bool m_canHaveScrollbars;
-    unsigned m_slowRepaintObjectCount;
 
     bool m_hasPendingLayout;
     RenderObject* m_layoutSubtreeRoot;

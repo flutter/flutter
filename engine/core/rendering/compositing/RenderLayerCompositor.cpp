@@ -317,12 +317,6 @@ bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer* l
 
         layer->ensureCompositedLayerMapping();
         compositedLayerMappingChanged = true;
-
-        // At this time, the ScrollingCooridnator only supports the top-level frame.
-        if (layer->isRootLayer()) {
-            if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-                scrollingCoordinator->frameViewRootLayerDidChange(m_renderView.frameView());
-        }
         break;
     case RemoveOwnCompositedLayerMapping:
     // PutInSquashingLayer means you might have to remove the composited layer mapping first.
@@ -350,13 +344,6 @@ bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer* l
 
     if (compositedLayerMappingChanged)
         layer->clipper().clearClipRectsIncludingDescendants(PaintingClipRects);
-
-    // If a fixed position layer gained/lost a compositedLayerMapping or the reason not compositing it changed,
-    // the scrolling coordinator needs to recalculate whether it can do fast scrolling.
-    if (compositedLayerMappingChanged) {
-        if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-            scrollingCoordinator->frameViewFixedObjectsDidChange(m_renderView.frameView());
-    }
 
     return compositedLayerMappingChanged;
 }
