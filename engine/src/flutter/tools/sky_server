@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import os
+import cherrypy
+
+BUILD_DIRECTORY = 'out'
+CONFIG_DIRECTORY = 'Debug'
+GEN_DIRECTORY = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen'))
+
+# FIXME: This doesn't yet support directory listings.  We'll do something like:
+# http://tools.cherrypy.org/wiki/staticdirindex
+# but have it spit .sky instead of HTML
+
+def main():
+    parser = argparse.ArgumentParser(description='Sky development server')
+    parser.add_argument('app_path', type=str)
+    parser.add_argument('port', type=int)
+    args = parser.parse_args()
+
+    config = {
+        'global': {
+            'server.socket_port': args.port,
+        },
+        '/': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.abspath(args.app_path),
+        },
+        '/sky': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(GEN_DIRECTORY, 'sky'),
+        },
+        '/mojo': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(GEN_DIRECTORY, 'mojo'),
+        }
+     }
+    cherrypy.quickstart(config=config)
+
+
+if __name__ == '__main__':
+    main()
