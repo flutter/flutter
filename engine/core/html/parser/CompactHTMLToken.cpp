@@ -59,7 +59,6 @@ CompactHTMLToken::CompactHTMLToken(const HTMLToken* token, const TextPosition& t
     case HTMLToken::EndTag:
         m_selfClosing = token->selfClosing();
         // Fall through!
-    case HTMLToken::Comment:
     case HTMLToken::Character: {
         m_isAll8BitData = token->isAll8BitData();
         m_data = attemptStaticStringCreation(token->data(), token->isAll8BitData() ? Force8Bit : Force16Bit);

@@ -49,7 +49,7 @@ public:
         CharacterReferenceInAttributeValueState,
         RAWTEXTState,
         TagOpenState,
-        EndTagOpenState,
+        CloseTagState,
         TagNameState,
         RAWTEXTLessThanSignState,
         RAWTEXTEndTagOpenState,
@@ -63,18 +63,11 @@ public:
         AttributeValueUnquotedState,
         AfterAttributeValueQuotedState,
         SelfClosingStartTagState,
-        BogusCommentState,
-        // The ContinueBogusCommentState is not in the HTML5 spec, but we use
-        // it internally to keep track of whether we've started the bogus
-        // comment token yet.
-        ContinueBogusCommentState,
-        MarkupDeclarationOpenState,
-        CommentStartState,
-        CommentStartDashState,
+        CommentStart1State,
+        CommentStart2State,
         CommentState,
-        CommentEndDashState,
-        CommentEndState,
-        CommentEndBangState,
+        CommentEnd1State,
+        CommentEnd2State,
     };
 
     // This function returns true if it emits a token. Otherwise, callers

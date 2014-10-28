@@ -50,7 +50,6 @@ public:
         Uninitialized,
         StartTag,
         EndTag,
-        Comment,
         Character,
         EndOfFile,
     };
@@ -114,7 +113,7 @@ public:
 
     const DataVector& data() const
     {
-        ASSERT(m_type == Character || m_type == Comment || m_type == StartTag || m_type == EndTag);
+        ASSERT(m_type == Character || m_type == StartTag || m_type == EndTag);
         return m_data;
     }
 
@@ -296,28 +295,6 @@ public:
     {
         ASSERT(m_type == Character);
         m_data.appendVector(characters);
-    }
-
-    /* Comment Tokens */
-
-    const DataVector& comment() const
-    {
-        ASSERT(m_type == Comment);
-        return m_data;
-    }
-
-    void beginComment()
-    {
-        ASSERT(m_type == Uninitialized);
-        m_type = Comment;
-    }
-
-    void appendToComment(UChar character)
-    {
-        ASSERT(character);
-        ASSERT(m_type == Comment);
-        m_data.append(character);
-        m_orAllData |= character;
     }
 
 private:

@@ -235,21 +235,15 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
 
     HTML_BEGIN_STATE(TagOpenState) {
         if (cc == '!')
-            HTML_ADVANCE_TO(MarkupDeclarationOpenState);
+            HTML_ADVANCE_TO(CommentStart1State);
         else if (cc == '/')
-            HTML_ADVANCE_TO(EndTagOpenState);
+            HTML_ADVANCE_TO(CloseTagState);
         else if (isASCIIUpper(cc)) {
             m_token->beginStartTag(toLowerCase(cc));
             HTML_ADVANCE_TO(TagNameState);
         } else if (isASCIILower(cc)) {
             m_token->beginStartTag(cc);
             HTML_ADVANCE_TO(TagNameState);
-        } else if (cc == '?') {
-            parseError();
-            // The spec consumes the current character before switching
-            // to the bogus comment state, but it's easier to implement
-            // if we reconsume the current character.
-            HTML_RECONSUME_IN(BogusCommentState);
         } else {
             parseError();
             bufferCharacter('<');
@@ -258,7 +252,7 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(EndTagOpenState) {
+    HTML_BEGIN_STATE(CloseTagState) {
         if (isASCIIUpper(cc)) {
             m_token->beginEndTag(static_cast<LChar>(toLowerCase(cc)));
             m_appropriateEndTagName.clear();
@@ -268,16 +262,14 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
             m_appropriateEndTagName.clear();
             HTML_ADVANCE_TO(TagNameState);
         } else if (cc == '>') {
-            parseError();
+            bufferCharacter('<');
+            bufferCharacter('/');
+            bufferCharacter('>');
             HTML_ADVANCE_TO(DataState);
-        } else if (cc == kEndOfFileMarker) {
-            parseError();
+        } else {
             bufferCharacter('<');
             bufferCharacter('/');
             HTML_RECONSUME_IN(DataState);
-        } else {
-            parseError();
-            HTML_RECONSUME_IN(BogusCommentState);
         }
     }
     END_STATE()
@@ -571,144 +563,54 @@ bool HTMLTokenizer::nextToken(SegmentedString& source, HTMLToken& token)
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(BogusCommentState) {
-        m_token->beginComment();
-        HTML_RECONSUME_IN(ContinueBogusCommentState);
-    }
-    END_STATE()
-
-    HTML_BEGIN_STATE(ContinueBogusCommentState) {
-        if (cc == '>')
-            return emitAndResumeIn(source, HTMLTokenizer::DataState);
-        else if (cc == kEndOfFileMarker)
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        else {
-            m_token->appendToComment(cc);
-            HTML_ADVANCE_TO(ContinueBogusCommentState);
-        }
-    }
-    END_STATE()
-
-    HTML_BEGIN_STATE(MarkupDeclarationOpenState) {
+    HTML_BEGIN_STATE(CommentStart1State) {
         if (cc == '-') {
-            SegmentedString::LookAheadResult result = source.lookAhead(HTMLTokenizerNames::dashDash);
-            if (result == SegmentedString::DidMatch) {
-                source.advanceAndASSERT('-');
-                source.advanceAndASSERT('-');
-                m_token->beginComment();
-                HTML_SWITCH_TO(CommentStartState);
-            } else if (result == SegmentedString::NotEnoughCharacters)
-                return haveBufferedCharacterToken();
-        }
-        parseError();
-        HTML_RECONSUME_IN(BogusCommentState);
-    }
-    END_STATE()
-
-    HTML_BEGIN_STATE(CommentStartState) {
-        if (cc == '-')
-            HTML_ADVANCE_TO(CommentStartDashState);
-        else if (cc == '>') {
-            parseError();
-            return emitAndResumeIn(source, HTMLTokenizer::DataState);
-        } else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
+            HTML_ADVANCE_TO(CommentStart2State);
         } else {
-            m_token->appendToComment(cc);
-            HTML_ADVANCE_TO(CommentState);
+            bufferCharacter('<');
+            bufferCharacter('!');
+            HTML_RECONSUME_IN(DataState);
         }
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(CommentStartDashState) {
-        if (cc == '-')
-            HTML_ADVANCE_TO(CommentEndState);
-        else if (cc == '>') {
-            parseError();
-            return emitAndResumeIn(source, HTMLTokenizer::DataState);
-        } else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        } else {
-            m_token->appendToComment('-');
-            m_token->appendToComment(cc);
+    HTML_BEGIN_STATE(CommentStart2State) {
+        if (cc == '-') {
             HTML_ADVANCE_TO(CommentState);
+        } else {
+            bufferCharacter('<');
+            bufferCharacter('!');
+            bufferCharacter('-');
+            HTML_RECONSUME_IN(DataState);
         }
     }
     END_STATE()
 
     HTML_BEGIN_STATE(CommentState) {
         if (cc == '-')
-            HTML_ADVANCE_TO(CommentEndDashState);
-        else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        } else {
-            m_token->appendToComment(cc);
+            HTML_ADVANCE_TO(CommentEnd1State);
+        else
             HTML_ADVANCE_TO(CommentState);
-        }
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(CommentEndDashState) {
+    HTML_BEGIN_STATE(CommentEnd1State) {
         if (cc == '-')
-            HTML_ADVANCE_TO(CommentEndState);
-        else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        } else {
-            m_token->appendToComment('-');
-            m_token->appendToComment(cc);
+            HTML_ADVANCE_TO(CommentEnd2State);
+        else
             HTML_ADVANCE_TO(CommentState);
-        }
     }
     END_STATE()
 
-    HTML_BEGIN_STATE(CommentEndState) {
-        if (cc == '>')
-            return emitAndResumeIn(source, HTMLTokenizer::DataState);
-        else if (cc == '!') {
-            parseError();
-            HTML_ADVANCE_TO(CommentEndBangState);
-        } else if (cc == '-') {
-            parseError();
-            m_token->appendToComment('-');
-            HTML_ADVANCE_TO(CommentEndState);
-        } else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        } else {
-            parseError();
-            m_token->appendToComment('-');
-            m_token->appendToComment('-');
-            m_token->appendToComment(cc);
+    HTML_BEGIN_STATE(CommentEnd2State) {
+        if (cc == '-')
+            HTML_ADVANCE_TO(CommentEnd2State);
+        else if (cc == '>')
+            HTML_ADVANCE_TO(DataState);
+        else
             HTML_ADVANCE_TO(CommentState);
-        }
     }
     END_STATE()
-
-    HTML_BEGIN_STATE(CommentEndBangState) {
-        if (cc == '-') {
-            m_token->appendToComment('-');
-            m_token->appendToComment('-');
-            m_token->appendToComment('!');
-            HTML_ADVANCE_TO(CommentEndDashState);
-        } else if (cc == '>')
-            return emitAndResumeIn(source, HTMLTokenizer::DataState);
-        else if (cc == kEndOfFileMarker) {
-            parseError();
-            return emitAndReconsumeIn(source, HTMLTokenizer::DataState);
-        } else {
-            m_token->appendToComment('-');
-            m_token->appendToComment('-');
-            m_token->appendToComment('!');
-            m_token->appendToComment(cc);
-            HTML_ADVANCE_TO(CommentState);
-        }
-    }
-    END_STATE()
-
     }
 
     ASSERT_NOT_REACHED();

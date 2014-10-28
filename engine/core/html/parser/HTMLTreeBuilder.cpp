@@ -128,8 +128,7 @@ void HTMLTreeBuilder::constructTree(AtomicHTMLToken* token)
     } else if (type == HTMLToken::EndOfFile) {
         processEndOfFile(token);
     } else {
-        // We ignore Comments.
-        ASSERT(type == HTMLToken::Comment);
+        ASSERT_NOT_REACHED();
     }
 
     m_tree.executeQueuedTasks();

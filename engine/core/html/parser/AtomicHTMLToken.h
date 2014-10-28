@@ -83,12 +83,6 @@ public:
         return m_data;
     }
 
-    const String& comment() const
-    {
-        ASSERT(m_type == HTMLToken::Comment);
-        return m_data;
-    }
-
     explicit AtomicHTMLToken(HTMLToken& token)
         : m_type(token.type())
     {
@@ -109,7 +103,6 @@ public:
             break;
         }
         case HTMLToken::Character:
-        case HTMLToken::Comment:
             if (token.isAll8BitData())
                 m_data = String::make8BitFrom16BitSource(token.data());
             else
@@ -141,7 +134,6 @@ public:
             m_name = AtomicString(token.data());
             break;
         case HTMLToken::Character:
-        case HTMLToken::Comment:
             m_data = token.data();
             break;
         }
@@ -175,7 +167,7 @@ private:
     // "name" for StartTag and EndTag
     AtomicString m_name;
 
-    // "data" for Comment, "characters" for Character
+    // "characters" for Character
     String m_data;
 
     // For StartTag and EndTag
