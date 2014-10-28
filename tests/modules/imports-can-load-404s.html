@@ -1,0 +1,9 @@
+<html>
+<link rel="import" href="resources/does-not-exist.html" as="hello" />
+<link rel="import" href="../resources/dump-as-text.html" />
+<div id="result">FAIL - Script did not execute</div>
+<script>
+document.getElementById("result").textContent =
+    hello === undefined ? "PASS" : "FAIL";
+</script>
+</html>

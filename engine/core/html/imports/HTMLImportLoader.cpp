@@ -121,8 +121,10 @@ void HTMLImportLoader::setState(State state)
 
     m_state = state;
 
-    if (m_state == StateParsed || m_state == StateError || m_state == StateWritten)
-        m_document->cancelParsing();
+    if (m_state == StateParsed || m_state == StateError || m_state == StateWritten) {
+        if (m_document)
+            m_document->cancelParsing();
+    }
 
     // Since DocumentWriter::end() can let setState() reenter, we shouldn't refer to m_state here.
     if (state == StateLoaded || state == StateError)
