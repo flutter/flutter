@@ -6,7 +6,7 @@
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
-#include "sky/framework/inspector/server/inspector_frontend_impl.h"
+#include "sky/services/inspector/inspector_frontend_impl.h"
 
 namespace sky {
 namespace inspector {

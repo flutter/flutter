@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/framework/inspector/server/inspector_frontend_impl.h"
+#include "sky/services/inspector/inspector_frontend_impl.h"
 
 #include "base/lazy_instance.h"
 #include "net/server/http_server.h"

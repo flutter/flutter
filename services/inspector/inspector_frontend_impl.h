@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_FRAMEWORK_INSPECTOR_SERVER_INSPECTOR_FRONTEND_IMPL_H_
-#define SKY_FRAMEWORK_INSPECTOR_SERVER_INSPECTOR_FRONTEND_IMPL_H_
+#ifndef SKY_SERVICES_INSPECTOR_INSPECTOR_FRONTEND_IMPL_H_
+#define SKY_SERVICES_INSPECTOR_INSPECTOR_FRONTEND_IMPL_H_
 
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/public/cpp/bindings/interface_impl.h"
 #include "net/server/http_server.h"
 #include "net/socket/tcp_server_socket.h"
-#include "sky/framework/inspector/server/inspector.mojom.h"
+#include "sky/services/inspector/inspector.mojom.h"
 
 namespace sky {
 namespace inspector {
@@ -53,4 +53,4 @@ typedef mojo::InterfaceFactoryImpl<
 }  // namespace tester
 }  // namespace sky
 
-#endif  // SKY_FRAMEWORK_INSPECTOR_SERVER_INSPECTOR_FRONTEND_IMPL_H_
+#endif  // SKY_SERVICES_INSPECTOR_INSPECTOR_FRONTEND_IMPL_H_

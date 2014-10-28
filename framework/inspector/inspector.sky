@@ -1,7 +1,7 @@
 <link rel="import" href="/mojo/public/html/connection.html" as="connection" />
 <link rel="import" href="/mojo/public/html/core.html" as="core" />
 <link rel="import" href="/mojo/public/html/support.html" as="support" />
-<link rel="import" href="/sky/framework/inspector/server/inspector.mojom.html" as="inspector" />
+<link rel="import" href="/sky/services/inspector/inspector.mojom.html" as="inspector" />
 <link rel="import" href="console-agent.sky" as="ConsoleAgent" />
 <link rel="import" href="dom-agent.sky" as="DOMAgent" />
 <link rel="import" href="page-agent.sky" as="PageAgent" />

@@ -4,7 +4,7 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
-group("server") {
+group("inspector") {
   testonly = true
 
   deps = [
