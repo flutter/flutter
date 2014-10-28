@@ -543,6 +543,7 @@ text/rfc822-headers
 text/richtext			rtx
 text/rtf			rtf
 text/sgml			sgml sgm
+text/sky			sky
 text/t140
 text/tab-separated-values	tsv
 text/uri-list

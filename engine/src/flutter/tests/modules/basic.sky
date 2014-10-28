@@ -1,0 +1,8 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.sky" />
+<link rel="import" href="resources/pass.sky" as="hello" />
+<div id="result">FAIL</div>
+<script>
+document.getElementById("result").textContent = hello;
+</script>
+</html>

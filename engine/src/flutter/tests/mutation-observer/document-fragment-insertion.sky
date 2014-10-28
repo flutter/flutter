@@ -1,0 +1,69 @@
+<html>
+<link rel="import" href="../resources/mocha.sky" />
+<link rel="import" href="../resources/chai.sky" />
+<script>
+describe('DocumentFragments should remove all children of the fragment before moving children, ', function() {
+  var mutations;
+  var observer;
+
+  beforeEach(function() {
+    mutations = null;
+    observer = new MutationObserver(function(records) {
+      mutations = records;
+    });
+  });
+
+  function createObservedFragment() {
+    var fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('b'));
+    fragment.appendChild(document.createElement('i'));
+    observer.observe(fragment, {childList: true});
+    return fragment;
+  }
+
+  it('using appendChild', function(done) {
+    var div = document.createElement('div');
+    observer.observe(div, {childList: true});
+    div.appendChild(createObservedFragment());
+    setTimeout(function() {
+      assert.equal(mutations.length, 2);
+      assert.equal(mutations[0].addedNodes.length, 0);
+      assert.equal(mutations[0].removedNodes.length, 2);
+      assert.equal(mutations[1].addedNodes.length, 2);
+      assert.equal(mutations[1].removedNodes.length, 0);
+      done();
+    }, 0);
+  });
+
+  it('using insertBefore', function(done) {
+    var div = document.createElement('div');
+    div.appendChild(document.createElement('span'));
+    observer.observe(div, {childList: true});
+    div.insertBefore(createObservedFragment(), div.firstChild);
+    setTimeout(function() {
+      assert.equal(mutations.length, 2);
+      assert.equal(mutations[0].addedNodes.length, 0);
+      assert.equal(mutations[0].removedNodes.length, 2);
+      assert.equal(mutations[1].addedNodes.length, 2);
+      assert.equal(mutations[1].removedNodes.length, 0);
+      done();
+    }, 0);
+  });
+
+  it('using replaceChild', function(done) {
+    var div = document.createElement('div');
+    div.appendChild(document.createElement('span'));
+    observer.observe(div, {childList: true});
+    div.replaceChild(createObservedFragment(), div.firstChild);
+    setTimeout(function() {
+      assert.equal(mutations.length, 2);
+      assert.equal(mutations[0].addedNodes.length, 0);
+      assert.equal(mutations[0].removedNodes.length, 2);
+      assert.equal(mutations[1].addedNodes.length, 2);
+      assert.equal(mutations[1].removedNodes.length, 1);
+      done();
+    }, 0);
+  });
+});
+</script>
+</html>

@@ -1,0 +1,18 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky" />
+<body>
+<div>aaa&apos;bbb</div>
+<div>&lt;</div>
+<div>aaa&xxx;bbb</div>
+<div foo="bar&#x20;">&#65;</div>
+<div>&</div>
+<div>&#</div>
+<div>&#x</div>
+<div>&#x41</div>
+<div>&;</div>
+<div>&#;</div>
+<div>&#x;</div>
+<div>&#x41;</div>
+<div>&#x0;</div>
+</body>
+</html>

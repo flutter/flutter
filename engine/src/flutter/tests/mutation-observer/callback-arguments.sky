@@ -1,0 +1,18 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('MutationObserver', function() {
+    it('should pass the callback and observer arguments', function(done) {
+        var mutationObserver = new MutationObserver(function(mutations, observer) {
+            assert.equal(this, mutationObserver);
+            assert.equal(mutationObserver, observer);
+            done();
+        });
+        var div = document.createElement('div');
+        mutationObserver.observe(div, {attributes: true});
+        div.setAttribute('foo', 'bar');
+    });
+});
+</script>
+</html>

@@ -17,6 +17,7 @@ MOJO_SHELL_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
 
 SUPPORTED_MIME_TYPES = [
     'text/html',
+    'text/sky',
     'text/plain',
 ]
 

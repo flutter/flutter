@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="../resources/dump-as-markup.html"></link>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
 <body>
 <div>aaa'bbb</div>
 <div>&lt;</div>

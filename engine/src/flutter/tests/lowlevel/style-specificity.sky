@@ -1,0 +1,19 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<style>
+    #sandbox { color: red; }
+    .blue { color: blue; }
+</style>
+<body>
+    <div id="sandbox" class="blue">This should be blue.</div>
+    <script>
+    describe('Specificity', function() {
+      it('should not exist', function() {
+        var sandbox = document.getElementById("sandbox");
+        assert.equal(getComputedStyle(sandbox).color, "rgb(0, 0, 255)");
+      });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<html>
+<link rel="import" href="../resources/dump-as-text.sky" />
+<link rel="import" href="/mojo/public/html/core.html" as="core" />
+<div id="result">FAIL</div>
+<script>
+document.getElementById("result").textContent =
+    core.readMessage ? "PASS" : "FAIL: core.readMessage is missing";
+</script>
+</html>

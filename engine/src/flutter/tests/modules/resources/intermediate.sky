@@ -1,0 +1,7 @@
+<link rel="import" href="../../resources/dump-as-text.sky" />
+<link rel="import" href="pass.sky" as="banana" />
+<script>
+this.exports = {
+  message: banana,
+};
+</script>

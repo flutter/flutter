@@ -1,0 +1,14 @@
+<CamelCase>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('Element tag names', function() {
+  it('should have various casing', function() {
+    assert.equal(document.documentElement.tagName, 'camelcase');
+
+    var element = document.createElement('CamelCase');
+    assert.equal(element.tagName, 'CamelCase');
+  });
+});
+</script>
+</CamelCase>

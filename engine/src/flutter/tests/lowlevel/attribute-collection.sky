@@ -1,0 +1,56 @@
+<html>
+<link rel="import" href="../resources/mocha.sky" />
+<link rel="import" href="../resources/chai.sky" />
+<script>
+describe("Attribute collection", function() {
+  var div;
+  beforeEach(function() {
+    div = document.createElement("div");
+  });
+
+  it("should get by index", function() {
+    div.setAttribute("attr0", "value0");
+    div.setAttribute("attr1", "value1");
+    assert.equal(div.attributes.length, 2);
+    assert.equal(div.attributes[0].name, "attr0");
+    assert.equal(div.attributes[0].value, "value0");
+    assert.equal(div.attributes[1].name, "attr1");
+    assert.equal(div.attributes[1].value, "value1");
+  });
+  it("should get by name", function() {
+    div.setAttribute("attr0", "value0");
+    div.setAttribute("attr1", "value1");
+    assert.equal(div.attributes.length, 2);
+    assert.equal(div.attributes.attr0.value, "value0");
+    assert.equal(div.attributes.attr1.value, "value1");
+  });
+  it("should set by name", function() {
+    div.setAttribute("attrName", "value0");
+    div.attributes.attrName.value = "new value";
+    assert.equal(div.getAttribute("attrName"), "new value");
+    assert.equal(div.attributes.attrName.value, "new value");
+  });
+  it("should be case sensitive", function() {
+    div.setAttribute("attrName", "value0");
+    assert.isUndefined(div.attributes.attrname);
+    assert.ok(div.attributes.attrName);
+    assert.equal(div.attributes.attrName.value, "value0");
+  });
+  it("should live update", function() {
+    div.setAttribute("attr0", "");
+    div.setAttribute("attr1", "");
+    div.setAttribute("attr2", "");
+    assert.equal(div.attributes.length, 3);
+    div.removeAttribute("attr1");
+    assert.equal(div.attributes.length, 2);
+    assert.equal(div.attributes[0].name, "attr0");
+    assert.equal(div.attributes[1].name, "attr2");
+    div.setAttribute("attr3", "");
+    div.setAttribute("attr2", "value2");
+    assert.equal(div.attributes.length, 3);
+    assert.equal(div.attributes[2].name, "attr3");
+    assert.equal(div.attributes.attr2.value, "value2");
+  });
+});
+</script>
+</html>

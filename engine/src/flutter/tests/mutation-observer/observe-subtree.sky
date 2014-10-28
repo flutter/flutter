@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<script>
+describe('MutationObserver.observe on a subtree', function() {
+  it('should handle basic aspects of subtree observation', function(done) {
+    var observer;
+    var subDiv;
+    var mutations;
+
+    function start() {
+      var div = document.createElement('div');
+      subDiv = div.appendChild(document.createElement('div'));
+      subDiv.textContent = 'hello, world';
+      observer = new MutationObserver(function(records) {
+        mutations = records;
+      });
+
+      observer.observe(div, {attributes: true, characterData: true, subtree: true});
+      subDiv.setAttribute('foo', 'bar');
+      subDiv.firstChild.textContent = 'goodbye!';
+      setTimeout(finish, 0);
+    }
+
+    function finish() {
+      // ...attribute and characterData changes in subtree
+      assert.equal(mutations.length, 2);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "foo");
+      assert.equal(mutations[1].type, "characterData");
+      assert.equal(mutations[1].target, subDiv.firstChild);
+      observer.disconnect();
+      done();
+    }
+
+    start();
+  });
+
+  it('should handle two observers at different depths', function(done) {
+    var observer;
+    var observer2;
+    var mutations;
+    var mutations2;
+    var subDiv;
+
+    function start() {
+      var div = document.createElement('div');
+      subDiv = div.appendChild(document.createElement('div'));
+      observer = new MutationObserver(function(records) {
+        mutations = records;
+      });
+      observer2 = new MutationObserver(function(records) {
+        mutations2 = records;
+      });
+
+      observer.observe(div, {attributes: true, subtree: true});
+      observer2.observe(subDiv, {attributes: true});
+      subDiv.setAttribute('foo', 'bar');
+      setTimeout(finish, 0);
+    }
+
+    function finish() {
+      assert.equal(mutations.length, 1);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "foo");
+      assert.equal(mutations2.length, 1);
+      assert.equal(mutations2[0].type, "attributes");
+      assert.equal(mutations2[0].target, subDiv);
+      assert.equal(mutations2[0].attributeName, "foo");
+      observer.disconnect();
+      observer2.disconnect();
+      done();
+    }
+
+    start();
+  });
+
+  it('should handle one observer at two different depths', function(done) {
+    var observer;
+    var mutations;
+    var calls = 0;
+    var subDiv;
+
+    function start() {
+      var div = document.createElement('div');
+      subDiv = div.appendChild(document.createElement('div'));
+      observer = new MutationObserver(function(records) {
+        mutations = records;
+        ++calls;
+      });
+
+      observer.observe(div, {attributes: true, subtree: true});
+      observer.observe(subDiv, {attributes: true, subtree: true});
+      subDiv.setAttribute('foo', 'bar');
+      setTimeout(finish, 0);
+    }
+
+    function finish() {
+      assert.equal(calls, 1);
+      assert.equal(mutations.length, 1);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "foo");
+      observer.disconnect();
+      done();
+    }
+
+    start();
+  });
+
+  // FIXME(sky): This test is huge, it should be broken up.
+  it('should handle transiently detached nodes are still observed via subtree', function(done) {
+    var observer;
+    var mutations;
+    var div;
+    var subDiv;
+
+    function start() {
+      div = document.createElement('div');
+      subDiv = div.appendChild(document.createElement('div'));
+      subDiv.textContent = 'hello, world';
+      observer = new MutationObserver(function(records) {
+        mutations = records;
+      });
+
+      observer.observe(div, {attributes: true, characterData: true, subtree: true});
+      subDiv.setAttribute('foo', 'bar');
+      div.removeChild(subDiv);
+      subDiv.setAttribute('test', 'test');
+      setTimeout(checkDeliveredAndChangeAgain, 0);
+    }
+
+    function checkDeliveredAndChangeAgain() {
+      // ...both changes should be received. Change detached subDiv again.
+
+      assert.equal(mutations.length, 2);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "foo");
+      assert.equal(mutations[1].type, "attributes");
+      assert.equal(mutations[1].target, subDiv);
+      assert.equal(mutations[1].attributeName, "test");
+
+      mutations = null;
+      subDiv.setAttribute('foo', 'baz');
+
+      setTimeout(checkNotDeliveredAndReattach, 0);
+    }
+
+    function checkNotDeliveredAndReattach() {
+      // ...transient subtree observation was stopped after delivery, so subDiv change should not be received. Reattach and change again.
+
+      assert.equal(mutations, null);
+
+      mutations = null
+      div.appendChild(subDiv);
+      subDiv.setAttribute('foo', 'bat');
+
+      setTimeout(checkDeliveredAndReobserve, 0);
+    }
+
+    function checkDeliveredAndReobserve() {
+      //...reattached subtree should now be observable. Try detaching and re-observing.
+
+      assert.equal(mutations.length, 1);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "foo");
+
+      mutations = null;
+      div.removeChild(subDiv);
+      subDiv.firstChild.textContent = 'badbye';
+      observer.observe(div, {attributes: true, characterData: true, subtree: true});
+      subDiv.setAttribute('foo', 'boo');
+
+      setTimeout(finish, 0);
+    }
+
+    function finish() {
+      // ...The change made before re-observing should be received, but not the one after.
+
+      assert.equal(mutations.length, 1);
+      assert.equal(mutations[0].type, "characterData");
+      assert.equal(mutations[0].target, subDiv.firstChild);
+
+      observer.disconnect();
+      done();
+    }
+
+    start();
+  });
+
+  it('should have correct behavior of transient observation with complex movement', function(done) {
+    var observer;
+    var subDiv;
+    var mutations;
+
+    function start() {
+      var div = document.createElement('div');
+      subDiv = div.appendChild(document.createElement('div'));
+      subDiv2 = subDiv.appendChild(document.createElement('div'));
+      subDiv2.textContent = 'hello, world';
+      subDiv3 = document.createElement('div');
+
+      observer = new MutationObserver(function(records) {
+        mutations = records;
+      });
+
+      observer.observe(div, {attributes: true, characterData: true, subtree: true});
+      div.removeChild(subDiv);
+      subDiv.removeChild(subDiv2);
+      text = subDiv2.removeChild(subDiv2.firstChild);
+
+      subDiv.setAttribute('a', 'a');
+      subDiv2.setAttribute('b', 'b');
+      text.textContent = 'c';
+      subDiv3.appendChild(subDiv2);
+      subDiv3.setAttribute('d', 'd');
+      subDiv2.setAttribute('e', 'e');
+      div.appendChild(subDiv3);
+      subDiv3.setAttribute('f', 'f');
+      subDiv2.setAttribute('g', 'g');
+
+      setTimeout(finish, 0);
+    }
+
+    function finish() {
+      // ...All changes should be received except for setting the "d" attribute on subDiv3 before it was reachable from div.
+
+      assert.equal(mutations.length, 6);
+      assert.equal(mutations[0].type, "attributes");
+      assert.equal(mutations[0].target, subDiv);
+      assert.equal(mutations[0].attributeName, "a");
+
+      assert.equal(mutations[1].type, "attributes");
+      assert.equal(mutations[1].target, subDiv2);
+      assert.equal(mutations[1].attributeName, "b");
+
+      assert.equal(mutations[2].type, "characterData");
+      assert.equal(mutations[2].target, text);
+
+      assert.equal(mutations[3].type, "attributes");
+      assert.equal(mutations[3].target, subDiv2);
+      assert.equal(mutations[3].attributeName, "e");
+
+      assert.equal(mutations[4].type, "attributes");
+      assert.equal(mutations[4].target, subDiv3);
+      assert.equal(mutations[4].attributeName, "f");
+
+      assert.equal(mutations[5].type, "attributes");
+      assert.equal(mutations[5].target, subDiv2);
+      assert.equal(mutations[5].attributeName, "g");
+
+      observer.disconnect();
+      done();
+    }
+    start();
+  });
+});
+</script>
+</html>
