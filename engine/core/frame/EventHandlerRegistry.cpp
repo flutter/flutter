@@ -195,31 +195,6 @@ void EventHandlerRegistry::notifyDidAddOrRemoveEventHandlerTarget(EventHandlerCl
         scrollingCoordinator->touchEventTargetRectsDidChange();
 }
 
-void EventHandlerRegistry::trace(Visitor* visitor)
-{
-    visitor->registerWeakMembers<EventHandlerRegistry, &EventHandlerRegistry::clearWeakMembers>(this);
-}
-
-void EventHandlerRegistry::clearWeakMembers(Visitor* visitor)
-{
-    Vector<EventTarget*> deadTargets;
-    for (size_t i = 0; i < EventHandlerClassCount; ++i) {
-        EventHandlerClass handlerClass = static_cast<EventHandlerClass>(i);
-        const EventTargetSet* targets = &m_targets[handlerClass];
-        for (EventTargetSet::const_iterator it = targets->begin(); it != targets->end(); ++it) {
-            Node* node = it->key->toNode();
-            LocalDOMWindow* window = it->key->toDOMWindow();
-            if (node && !visitor->isAlive(node)) {
-                deadTargets.append(node);
-            } else if (window && !visitor->isAlive(window)) {
-                deadTargets.append(window);
-            }
-        }
-    }
-    for (size_t i = 0; i < deadTargets.size(); ++i)
-        didRemoveAllEventHandlers(*deadTargets[i]);
-}
-
 void EventHandlerRegistry::documentDetached(Document& document)
 {
     // Remove all event targets under the detached document.

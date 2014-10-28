@@ -27,18 +27,6 @@ bool dataEquivalent(const RefPtr<T>& a, const RefPtr<T>& b)
 }
 
 template <typename T>
-bool dataEquivalent(const Persistent<T>& a, const Persistent<T>& b)
-{
-    return dataEquivalent(a.get(), b.get());
-}
-
-template <typename T>
-bool dataEquivalent(const Member<T>& a, const Member<T>& b)
-{
-    return dataEquivalent(a.get(), b.get());
-}
-
-template <typename T>
 bool dataEquivalent(const OwnPtr<T>& a, const OwnPtr<T>& b)
 {
     return dataEquivalent(a.get(), b.get());

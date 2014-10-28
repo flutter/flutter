@@ -32,6 +32,7 @@
 #define DOMWrapperWorld_h
 
 #include "bindings/core/v8/ScriptState.h"
+#include "wtf/HashSet.h"
 #include "wtf/MainThread.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
@@ -141,7 +142,7 @@ private:
         {
         }
 
-        Persistent<T> m_object;
+        OwnPtr<T> m_object;
     };
 
 public:

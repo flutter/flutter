@@ -7,6 +7,7 @@
 
 #include "core/inspector/ConsoleMessage.h"
 #include "platform/heap/Handle.h"
+#include "wtf/Deque.h"
 #include "wtf/Forward.h"
 
 namespace blink {

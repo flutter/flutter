@@ -354,7 +354,7 @@ void FontFace::setError(PassRefPtr<DOMException> error)
 ScriptPromise FontFace::fontStatusPromise(ScriptState* scriptState)
 {
     if (!m_loadedProperty) {
-        m_loadedProperty = new LoadedProperty(scriptState->executionContext(), this, LoadedProperty::Loaded);
+        m_loadedProperty = adoptPtr(new LoadedProperty(scriptState->executionContext(), this, LoadedProperty::Loaded));
         if (m_status == Loaded)
             m_loadedProperty->resolve(this);
         else if (m_status == Error)

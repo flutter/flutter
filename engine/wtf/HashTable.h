@@ -97,8 +97,6 @@ namespace WTF {
     class HashTableConstIterator;
     template<typename Value, typename HashFunctions, typename HashTraits, typename Allocator>
     class LinkedHashSet;
-    template<WeakHandlingFlag x, typename T, typename U, typename V, typename W, typename X, typename Y, typename Z>
-    struct WeakProcessingHashTableHelper;
 
     typedef enum { HashItemKnownGood } HashItemKnownGoodTag;
 
@@ -563,7 +561,6 @@ namespace WTF {
         mutable OwnPtr<Stats> m_stats;
 #endif
 
-        template<WeakHandlingFlag x, typename T, typename U, typename V, typename W, typename X, typename Y, typename Z> friend struct WeakProcessingHashTableHelper;
         template<typename T, typename U, typename V, typename W> friend class LinkedHashSet;
     };
 
@@ -1149,136 +1146,6 @@ namespace WTF {
         HashTable tmp(other);
         swap(tmp);
         return *this;
-    }
-
-    template<WeakHandlingFlag weakHandlingFlag, typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits, typename Allocator>
-    struct WeakProcessingHashTableHelper;
-
-    template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits, typename Allocator>
-    struct WeakProcessingHashTableHelper<NoWeakHandlingInCollections, Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator> {
-        static void process(typename Allocator::Visitor* visitor, void* closure) { }
-        static void ephemeronIteration(typename Allocator::Visitor* visitor, void* closure) { }
-        static void ephemeronIterationDone(typename Allocator::Visitor* visitor, void* closure) { }
-    };
-
-    template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits, typename Allocator>
-    struct WeakProcessingHashTableHelper<WeakHandlingInCollections, Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator> {
-        // Used for purely weak and for weak-and-strong tables (ephemerons).
-        static void process(typename Allocator::Visitor* visitor, void* closure)
-        {
-            typedef HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator> HashTableType;
-            HashTableType* table = reinterpret_cast<HashTableType*>(closure);
-            if (table->m_table) {
-                // This is run as part of weak processing after full
-                // marking. The backing store is therefore marked if
-                // we get here.
-                ASSERT(visitor->isAlive(table->m_table));
-                // Now perform weak processing (this is a no-op if the backing
-                // was accessible through an iterator and was already marked
-                // strongly).
-                typedef typename HashTableType::ValueType ValueType;
-                for (ValueType* element = table->m_table + table->m_tableSize - 1; element >= table->m_table; element--) {
-                    if (!HashTableType::isEmptyOrDeletedBucket(*element)) {
-                        // At this stage calling trace can make no difference
-                        // (everything is already traced), but we use the
-                        // return value to remove things from the collection.
-                        if (TraceInCollectionTrait<WeakHandlingInCollections, WeakPointersActWeak, ValueType, Traits>::trace(visitor, *element)) {
-                            table->registerModification();
-                            HashTableType::deleteBucket(*element); // Also calls the destructor.
-                            table->m_deletedCount++;
-                            table->m_keyCount--;
-                            // We don't rehash the backing until the next add
-                            // or delete, because that would cause allocation
-                            // during GC.
-                        }
-                    }
-                }
-            }
-        }
-
-        // Called repeatedly for tables that have both weak and strong pointers.
-        static void ephemeronIteration(typename Allocator::Visitor* visitor, void* closure)
-        {
-            typedef HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator> HashTableType;
-            HashTableType* table = reinterpret_cast<HashTableType*>(closure);
-            if (table->m_table) {
-                // Check the hash table for elements that we now know will not
-                // be removed by weak processing. Those elements need to have
-                // their strong pointers traced.
-                typedef typename HashTableType::ValueType ValueType;
-                for (ValueType* element = table->m_table + table->m_tableSize - 1; element >= table->m_table; element--) {
-                    if (!HashTableType::isEmptyOrDeletedBucket(*element))
-                        TraceInCollectionTrait<WeakHandlingInCollections, WeakPointersActWeak, ValueType, Traits>::trace(visitor, *element);
-                }
-            }
-        }
-
-        // Called when the ephemeron iteration is done and before running the per thread
-        // weak processing. It is guaranteed to be called before any thread is resumed.
-        static void ephemeronIterationDone(typename Allocator::Visitor* visitor, void* closure)
-        {
-            typedef HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator> HashTableType;
-            HashTableType* table = reinterpret_cast<HashTableType*>(closure);
-            ASSERT(Allocator::weakTableRegistered(visitor, table));
-            table->clearEnqueued();
-        }
-    };
-
-    template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits, typename Allocator>
-    void HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator>::trace(typename Allocator::Visitor* visitor)
-    {
-        // If someone else already marked the backing and queued up the trace
-        // and/or weak callback then we are done. This optimization does not
-        // happen for ListHashSet since its iterator does not point at the
-        // backing.
-        if (!m_table || visitor->isAlive(m_table))
-            return;
-        // Normally, we mark the backing store without performing trace. This
-        // means it is marked live, but the pointers inside it are not marked.
-        // Instead we will mark the pointers below. However, for backing
-        // stores that contain weak pointers the handling is rather different.
-        // We don't mark the backing store here, so the marking GC will leave
-        // the backing unmarked. If the backing is found in any other way than
-        // through its HashTable (ie from an iterator) then the mark bit will
-        // be set and the pointers will be marked strongly, avoiding problems
-        // with iterating over things that disappear due to weak processing
-        // while we are iterating over them. We register the backing store
-        // pointer for delayed marking which will take place after we know if
-        // the backing is reachable from elsewhere. We also register a
-        // weakProcessing callback which will perform weak processing if needed.
-        if (Traits::weakHandlingFlag == NoWeakHandlingInCollections) {
-            Allocator::markNoTracing(visitor, m_table);
-        } else {
-            Allocator::registerDelayedMarkNoTracing(visitor, m_table);
-            Allocator::registerWeakMembers(visitor, this, m_table, WeakProcessingHashTableHelper<Traits::weakHandlingFlag, Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator>::process);
-        }
-        if (ShouldBeTraced<Traits>::value) {
-            if (Traits::weakHandlingFlag == WeakHandlingInCollections) {
-                // If we have both strong and weak pointers in the collection
-                // then we queue up the collection for fixed point iteration a
-                // la Ephemerons:
-                // http://dl.acm.org/citation.cfm?doid=263698.263733 - see also
-                // http://www.jucs.org/jucs_14_21/eliminating_cycles_in_weak
-                ASSERT(!enqueued() || Allocator::weakTableRegistered(visitor, this));
-                if (!enqueued()) {
-                    Allocator::registerWeakTable(visitor, this,
-                        WeakProcessingHashTableHelper<Traits::weakHandlingFlag, Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator>::ephemeronIteration,
-                        WeakProcessingHashTableHelper<Traits::weakHandlingFlag, Key, Value, Extractor, HashFunctions, Traits, KeyTraits, Allocator>::ephemeronIterationDone);
-                    setEnqueued();
-                }
-                // We don't need to trace the elements here, since registering
-                // as a weak table above will cause them to be traced (perhaps
-                // several times). It's better to wait until everything else is
-                // traced before tracing the elements for the first time; this
-                // may reduce (by one) the number of iterations needed to get
-                // to a fixed point.
-                return;
-            }
-            for (ValueType* element = m_table + m_tableSize - 1; element >= m_table; element--) {
-                if (!isEmptyOrDeletedBucket(*element))
-                    Allocator::template trace<ValueType, Traits>(visitor, *element);
-            }
-        }
     }
 
     // iterator adapters

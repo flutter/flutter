@@ -59,9 +59,6 @@ public:
     // references to handlers that are no longer related to it.
     void documentDetached(Document&);
 
-    void trace(Visitor*);
-    void clearWeakMembers(Visitor*);
-
 private:
     enum ChangeOperation {
         Add, // Add a new event handler.

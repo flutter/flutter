@@ -6,15 +6,10 @@ visibility = ["//sky/engine/*"]
 
 source_set("heap") {
   sources = [
-    "AddressSanitizer.h",
     "Handle.h",
-    "ThreadState.h",
-    "Visitor.h",
   ]
 
   configs += [ "//sky/engine:config" ]
-
-  deps = [
-    "//third_party/icu",
-  ]
 }
+
+

@@ -26,6 +26,7 @@
 #ifndef MediaPlayer_h
 #define MediaPlayer_h
 
+#include "platform/PlatformExport.h"
 #include "public/platform/WebMediaPlayer.h"
 #include "wtf/Forward.h"
 #include "wtf/Noncopyable.h"

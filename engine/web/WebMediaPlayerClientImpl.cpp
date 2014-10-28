@@ -14,6 +14,7 @@
 #include "platform/graphics/GraphicsContext.h"
 #include "platform/graphics/GraphicsLayer.h"
 #include "platform/graphics/gpu/Extensions3DUtil.h"
+#include "platform/graphics/media/MediaPlayer.h"
 #include "platform/graphics/skia/GaneshUtils.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebCString.h"

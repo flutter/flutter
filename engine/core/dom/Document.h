@@ -694,8 +694,6 @@ private:
 
     void detachParser();
 
-    void clearWeakMembers(Visitor*);
-
     virtual bool isDocument() const override final { return true; }
 
     virtual void childrenChanged(const ChildrenChange&) override;

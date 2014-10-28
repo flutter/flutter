@@ -248,16 +248,6 @@ inline MutableStylePropertySet* toMutableStylePropertySet(const RefPtr<StyleProp
     return toMutableStylePropertySet(set.get());
 }
 
-inline MutableStylePropertySet* toMutableStylePropertySet(const Persistent<StylePropertySet>& set)
-{
-    return toMutableStylePropertySet(set.get());
-}
-
-inline MutableStylePropertySet* toMutableStylePropertySet(const Member<StylePropertySet>& set)
-{
-    return toMutableStylePropertySet(set.get());
-}
-
 inline const StylePropertyMetadata& StylePropertySet::PropertyReference::propertyMetadata() const
 {
     if (m_propertySet.isMutable())

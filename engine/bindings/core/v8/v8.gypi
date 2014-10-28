@@ -49,8 +49,6 @@
             'ScriptCallStackFactory.h',
             'ScriptController.cpp',
             'ScriptController.h',
-            'ScriptFunction.cpp',
-            'ScriptFunction.h',
             'ScriptFunctionCall.cpp',
             'ScriptFunctionCall.h',
             'ScriptGCEvent.cpp',

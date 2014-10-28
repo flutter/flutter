@@ -3141,10 +3141,6 @@ bool Document::hasFocus() const
     return focusedFrame && focusedFrame == frame();
 }
 
-void Document::clearWeakMembers(Visitor* visitor)
-{
-}
-
 v8::Handle<v8::Object> Document::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
 {
     ASSERT(!DOMDataStore::containsWrapperNonTemplate(this, isolate));

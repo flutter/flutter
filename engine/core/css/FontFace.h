@@ -130,7 +130,7 @@ private:
     LoadStatus m_status;
     RefPtr<DOMException> m_error;
 
-    Persistent<LoadedProperty> m_loadedProperty;
+    OwnPtr<LoadedProperty> m_loadedProperty;
     OwnPtr<CSSFontFace> m_cssFontFace;
     Vector<RefPtr<LoadFontCallback> > m_callbacks;
 };

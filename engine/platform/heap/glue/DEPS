@@ -1,4 +1,0 @@
-include_rules = [
-    "+heap",
-    "+public/platform",
-]

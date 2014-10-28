@@ -31,7 +31,6 @@
 #ifndef ScriptPromise_h
 #define ScriptPromise_h
 
-#include "bindings/core/v8/ScriptFunction.h"
 #include "bindings/core/v8/ScriptValue.h"
 #include "bindings/core/v8/V8ThrowException.h"
 #include "core/dom/ExceptionCode.h"

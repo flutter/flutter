@@ -35,6 +35,7 @@
 #include "platform/graphics/Color.h"
 #include "platform/scroll/ScrollableArea.h"
 #include "wtf/Forward.h"
+#include "wtf/HashSet.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/text/WTFString.h"
 

@@ -12,6 +12,7 @@ namespace blink {
 class DescendantInvalidationSet;
 class Document;
 class Element;
+class Node;
 
 class StyleInvalidator {
     DISALLOW_ALLOCATION();
