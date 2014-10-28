@@ -46,7 +46,6 @@
 #include "public/web/WebView.h"
 #include "web/ChromeClientImpl.h"
 #include "web/EditorClientImpl.h"
-#include "web/PageOverlayList.h"
 #include "web/PageWidgetDelegate.h"
 #include "web/SpellCheckerClientImpl.h"
 #include "wtf/OwnPtr.h"
@@ -173,8 +172,6 @@ public:
                                     unsigned inactiveBackgroundColor,
                                     unsigned inactiveForegroundColor) override;
     virtual void extractSmartClipData(WebRect, WebString&, WebString&, WebRect&) override;
-    virtual void addPageOverlay(WebPageOverlay*, int /* zOrder */) override;
-    virtual void removePageOverlay(WebPageOverlay*) override;
     virtual void transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters&) override;
     virtual bool endActiveFlingAnimation() override;
     virtual void setShowPaintRects(bool) override;
@@ -196,8 +193,6 @@ public:
     void setZoomFactorOverride(float);
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }
-
-    PageOverlayList* pageOverlays() const { return m_pageOverlays.get(); }
 
     void setOverlayLayer(GraphicsLayer*);
 
@@ -444,8 +439,6 @@ private:
     // When not equal to DragOperationNone, the drag data can be dropped onto the
     // current drop target in this WebView (the drop target can accept the drop).
     WebDragOperation m_dragOperation;
-
-    OwnPtr<PageOverlayList> m_pageOverlays;
 
     // Whether the webview is rendering transparently.
     bool m_isTransparent;

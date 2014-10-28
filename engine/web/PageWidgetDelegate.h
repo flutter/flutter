@@ -39,7 +39,6 @@ namespace blink {
 
 class LocalFrame;
 class Page;
-class PageOverlayList;
 class WebGestureEvent;
 class WebInputEvent;
 class WebKeyboardEvent;
@@ -74,7 +73,7 @@ public:
     // Page's mainFrame(), if it is a LocalFrame.
     static void animate(Page*, double monotonicFrameBeginTime, LocalFrame* rootFrame = 0);
     static void layout(Page*, LocalFrame* rootFrame = 0);
-    static void paint(Page*, PageOverlayList*, WebCanvas*, const WebRect&, CanvasBackground, LocalFrame* rootFrame = 0);
+    static void paint(Page*, WebCanvas*, const WebRect&, CanvasBackground, LocalFrame* rootFrame = 0);
     static bool handleInputEvent(Page*, PageWidgetEventHandler&, const WebInputEvent&, LocalFrame* rootFrame = 0);
 
 private:

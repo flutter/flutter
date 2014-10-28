@@ -31,7 +31,6 @@
 
 namespace blink {
 class GraphicsLayer;
-class PageOverlayList;
 
 // This class is responsible for calling setNeedsDisplay on all
 // GraphicsLayers in continuous painting mode.
@@ -39,8 +38,7 @@ class ContinuousPainter {
 public:
     // Calls setNeedsDisplay on the layer, then recursively calls
     // on mask layers, replica layers and all child layers.
-    // Overlays are excluded, because they impact the page paint time metric.
-    static void setNeedsDisplayRecursive(GraphicsLayer*, PageOverlayList*);
+    static void setNeedsDisplayRecursive(GraphicsLayer*);
 };
 
 } // namespace blink

@@ -995,7 +995,7 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
     PageWidgetDelegate::animate(m_page.get(), validFrameTime.lastFrameTimeMonotonic);
 
     if (m_continuousPaintingEnabled) {
-        ContinuousPainter::setNeedsDisplayRecursive(m_rootGraphicsLayer, m_pageOverlays.get());
+        ContinuousPainter::setNeedsDisplayRecursive(m_rootGraphicsLayer);
         m_client->scheduleAnimation();
     }
 }
@@ -1024,7 +1024,7 @@ void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
     ASSERT(!isAcceleratedCompositingActive());
 
     double paintStart = currentTime();
-    PageWidgetDelegate::paint(m_page.get(), pageOverlays(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
+    PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
     double paintEnd = currentTime();
     double pixelsPerSec = (rect.width * rect.height) / (paintEnd - paintStart);
     Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintDurationMS", (paintEnd - paintStart) * 1000, 0, 120, 30);
@@ -1043,7 +1043,7 @@ void WebViewImpl::paintCompositedDeprecated(WebCanvas* canvas, const WebRect& re
     PaintBehavior oldPaintBehavior = view->paintBehavior();
     view->setPaintBehavior(oldPaintBehavior | PaintBehaviorFlattenCompositingLayers);
 
-    PageWidgetDelegate::paint(m_page.get(), pageOverlays(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
+    PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
 
     view->setPaintBehavior(oldPaintBehavior);
 }
@@ -2000,9 +2000,6 @@ void WebViewImpl::sendResizeEventAndRepaint()
         WebRect damagedRect(0, 0, m_size.width, m_size.height);
         m_client->didInvalidateRect(damagedRect);
     }
-
-    if (m_pageOverlays)
-        m_pageOverlays->update();
 }
 
 void WebViewImpl::setCompositorDeviceScaleFactorOverride(float deviceScaleFactor)
@@ -2143,20 +2140,6 @@ void WebViewImpl::setZoomFactorOverride(float zoomFactor)
 {
     m_zoomFactorOverride = zoomFactor;
     setZoomLevel(zoomLevel());
-}
-
-void WebViewImpl::addPageOverlay(WebPageOverlay* overlay, int zOrder)
-{
-    if (!m_pageOverlays)
-        m_pageOverlays = PageOverlayList::create(this);
-
-    m_pageOverlays->add(overlay, zOrder);
-}
-
-void WebViewImpl::removePageOverlay(WebPageOverlay* overlay)
-{
-    if (m_pageOverlays && m_pageOverlays->remove(overlay) && m_pageOverlays->empty())
-        m_pageOverlays = nullptr;
 }
 
 void WebViewImpl::setOverlayLayer(GraphicsLayer* layer)
@@ -2324,8 +2307,6 @@ void WebViewImpl::setIsAcceleratedCompositingActive(bool active)
         updateLayerTreeBackgroundColor();
         m_layerTreeView->setHasTransparentBackground(isTransparent());
         m_isAcceleratedCompositingActive = true;
-        if (m_pageOverlays)
-            m_pageOverlays->update();
         m_layerTreeView->setShowFPSCounter(m_showFPSCounter);
         m_layerTreeView->setShowPaintRects(m_showPaintRects);
         m_layerTreeView->setShowDebugBorders(m_showDebugBorders);

@@ -151,7 +151,6 @@
 #include "public/web/WebScriptSource.h"
 #include "public/web/WebSerializedScriptValue.h"
 #include "web/CompositionUnderlineVectorBuilder.h"
-#include "web/PageOverlay.h"
 #include "web/WebViewImpl.h"
 #include "wtf/CurrentTime.h"
 #include "wtf/HashMap.h"

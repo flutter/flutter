@@ -41,7 +41,6 @@
 #include "platform/Logging.h"
 #include "platform/graphics/GraphicsContext.h"
 #include "public/web/WebInputEvent.h"
-#include "web/PageOverlayList.h"
 #include "web/WebInputEventConversion.h"
 #include "wtf/CurrentTime.h"
 
@@ -80,7 +79,7 @@ void PageWidgetDelegate::layout(Page* page, LocalFrame* rootFrame)
     page->animator().updateLayoutAndStyleForPainting(rootFrame);
 }
 
-void PageWidgetDelegate::paint(Page* page, PageOverlayList* overlays, WebCanvas* canvas, const WebRect& rect, CanvasBackground background, LocalFrame* rootFrame)
+void PageWidgetDelegate::paint(Page* page, WebCanvas* canvas, const WebRect& rect, CanvasBackground background, LocalFrame* rootFrame)
 {
     if (rect.isEmpty())
         return;
@@ -94,8 +93,6 @@ void PageWidgetDelegate::paint(Page* page, PageOverlayList* overlays, WebCanvas*
     if (view) {
         gc.clip(dirtyRect);
         view->paint(&gc, dirtyRect);
-        if (overlays)
-            overlays->paintWebFrame(gc);
     } else {
         gc.fillRect(dirtyRect, Color::white);
     }
