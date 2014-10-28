@@ -36,7 +36,6 @@
 #include "core/EventTypeNames.h"
 #include "core/FetchInitiatorTypeNames.h"
 #include "core/HTMLNames.h"
-#include "core/HTMLTokenizerNames.h"
 #include "core/MediaFeatureNames.h"
 #include "core/MediaTypeNames.h"
 #include "core/dom/Document.h"
@@ -72,7 +71,6 @@ void CoreInitializer::init()
     EventTypeNames::init();
     FetchInitiatorTypeNames::init();
     FontFamilyNames::init();
-    HTMLTokenizerNames::init();
     MediaFeatureNames::init();
     MediaTypeNames::init();
 

@@ -174,7 +174,6 @@ group("core_names") {
     ":make_core_generated_event_type_names",
     ":make_core_generated_fetch_initiator_type_names",
     ":make_core_generated_html_element_factory",
-    ":make_core_generated_html_tokenizer_names",
     ":make_core_generated_media_type_names",
   ]
 }
@@ -414,16 +413,6 @@ make_names("make_core_generated_event_type_names") {
   outputs = [
     "$sky_core_output_dir/EventTypeNames.cpp",
     "$sky_core_output_dir/EventTypeNames.h",
-  ]
-}
-
-make_names("make_core_generated_html_tokenizer_names") {
-  in_files = [
-    "html/parser/HTMLTokenizerNames.in",
-  ]
-  outputs = [
-    "$sky_core_output_dir/HTMLTokenizerNames.cpp",
-    "$sky_core_output_dir/HTMLTokenizerNames.h",
   ]
 }
 
