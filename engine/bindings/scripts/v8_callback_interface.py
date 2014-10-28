@@ -63,7 +63,7 @@ def cpp_type(idl_type):
         return 'void'
     # Callbacks use raw pointers, so raw_type=True
     raw_cpp_type = idl_type.cpp_type_args(raw_type=True)
-    if raw_cpp_type.startswith(('Vector', 'HeapVector', 'Vector')):
+    if raw_cpp_type.startswith(('Vector', 'Vector')):
         return 'const %s&' % raw_cpp_type
     return raw_cpp_type
 

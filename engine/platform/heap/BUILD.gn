@@ -7,13 +7,8 @@ visibility = ["//sky/engine/*"]
 source_set("heap") {
   sources = [
     "AddressSanitizer.h",
-    "Handle.cpp",
     "Handle.h",
-    "Heap.cpp",
-    "Heap.h",
-    "ThreadState.cpp",
     "ThreadState.h",
-    "Visitor.cpp",
     "Visitor.h",
   ]
 

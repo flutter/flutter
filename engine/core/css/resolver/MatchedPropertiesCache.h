@@ -49,15 +49,6 @@ public:
     void trace(Visitor* visitor) { visitor->trace(matchedProperties); }
 };
 
-// Specialize the HashTraits for CachedMatchedProperties to check for dead
-// entries in the MatchedPropertiesCache.
-#if ENABLE(OILPAN)
-struct CachedMatchedPropertiesHashTraits : HashTraits<Member<CachedMatchedProperties> > {
-    static const WTF::WeakHandlingFlag weakHandlingFlag = WTF::WeakHandlingInCollections;
-    static bool traceInCollection(Visitor*, Member<CachedMatchedProperties>&, WTF::ShouldWeakPointersBeMarkedStrongly);
-};
-#endif
-
 class MatchedPropertiesCache {
     DISALLOW_ALLOCATION();
     WTF_MAKE_NONCOPYABLE(MatchedPropertiesCache);
@@ -75,9 +66,6 @@ public:
     void trace(Visitor*);
 
 private:
-#if ENABLE(OILPAN)
-    typedef HeapHashMap<unsigned, Member<CachedMatchedProperties>, DefaultHash<unsigned>::Hash, HashTraits<unsigned>, CachedMatchedPropertiesHashTraits > Cache;
-#else
     // Every N additions to the matched declaration cache trigger a sweep where entries holding
     // the last reference to a style declaration are garbage collected.
     void sweep(Timer<MatchedPropertiesCache>*);
@@ -86,7 +74,6 @@ private:
 
     typedef HashMap<unsigned, OwnPtr<CachedMatchedProperties> > Cache;
     Timer<MatchedPropertiesCache> m_sweepTimer;
-#endif
     Cache m_cache;
 };
 

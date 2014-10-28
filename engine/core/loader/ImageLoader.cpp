@@ -464,11 +464,7 @@ void ImageLoader::addClient(ImageLoaderClient* client)
         if (m_image && !m_highPriorityClientCount++)
             memoryCache()->updateDecodedResource(m_image.get(), UpdateForPropertyChange, MemoryCacheLiveResourcePriorityHigh);
     }
-#if ENABLE(OILPAN)
-    m_clients.add(client, adoptPtr(new ImageLoaderClientRemover(*this, *client)));
-#else
     m_clients.add(client);
-#endif
 }
 
 void ImageLoader::willRemoveClient(ImageLoaderClient& client)
@@ -507,25 +503,11 @@ void ImageLoader::elementDidMoveToNewDocument()
 
 void ImageLoader::sourceImageChanged()
 {
-#if ENABLE(OILPAN)
-    PersistentHeapHashMap<WeakMember<ImageLoaderClient>, OwnPtr<ImageLoaderClientRemover> >::iterator end = m_clients.end();
-    for (PersistentHeapHashMap<WeakMember<ImageLoaderClient>, OwnPtr<ImageLoaderClientRemover> >::iterator it = m_clients.begin(); it != end; ++it) {
-        it->key->notifyImageSourceChanged();
-    }
-#else
     HashSet<ImageLoaderClient*>::iterator end = m_clients.end();
     for (HashSet<ImageLoaderClient*>::iterator it = m_clients.begin(); it != end; ++it) {
         ImageLoaderClient* handle = *it;
         handle->notifyImageSourceChanged();
     }
-#endif
 }
-
-#if ENABLE(OILPAN)
-ImageLoader::ImageLoaderClientRemover::~ImageLoaderClientRemover()
-{
-    m_loader.willRemoveClient(m_client);
-}
-#endif
 
 }

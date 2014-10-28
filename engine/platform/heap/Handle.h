@@ -104,21 +104,6 @@ private:
     static ThreadState* state() { return ThreadStateFor<Affinity>::state(); }
 };
 
-// RootsAccessor for Persistent that provides synchronized access to global
-// list of persistent handles. Can be used for persistent handles that are
-// passed between threads.
-class GlobalPersistents {
-public:
-    static PersistentNode* roots() { return ThreadState::globalRoots(); }
-
-    class Lock {
-    public:
-        Lock() : m_locker(ThreadState::globalRootsMutex()) { }
-    private:
-        MutexLocker m_locker;
-    };
-};
-
 // Base class for persistent handles. RootsAccessor specifies which list to
 // link resulting handle into. Owner specifies the class containing trace
 // method.
@@ -158,7 +143,6 @@ protected:
     {
         // We don't support allocation of thread local Persistents while doing
         // thread shutdown/cleanup.
-        ASSERT(!ThreadState::current()->isTerminating());
         typename RootsAccessor::Lock lock;
         ASSERT(otherref.m_roots == m_roots); // Handles must belong to the same list.
         PersistentBase* other = const_cast<PersistentBase*>(&otherref);
@@ -212,17 +196,6 @@ private:
     friend class ThreadState;
 };
 
-#if ENABLE(ASSERT)
-    // For global persistent handles we cannot check that the
-    // pointer is in the heap because that would involve
-    // inspecting the heap of running threads.
-#define ASSERT_IS_VALID_PERSISTENT_POINTER(pointer) \
-    bool isGlobalPersistent = WTF::IsSubclass<RootsAccessor, GlobalPersistents>::value; \
-    ASSERT(!pointer || isGlobalPersistent || ThreadStateFor<ThreadingTrait<T>::Affinity>::state()->contains(pointer))
-#else
-#define ASSERT_IS_VALID_PERSISTENT_POINTER(pointer)
-#endif
-
 template<typename T>
 class CrossThreadPersistent;
 
@@ -251,13 +224,11 @@ public:
 
     Persistent(T* raw) : m_raw(raw)
     {
-        ASSERT_IS_VALID_PERSISTENT_POINTER(m_raw);
         recordBacktrace();
     }
 
     explicit Persistent(T& raw) : m_raw(&raw)
     {
-        ASSERT_IS_VALID_PERSISTENT_POINTER(m_raw);
         recordBacktrace();
     }
 
@@ -371,18 +342,6 @@ private:
     T* m_raw;
 
     friend class CrossThreadPersistent<T>;
-};
-
-// Unlike Persistent, we can destruct a CrossThreadPersistent in a thread
-// different from the construction thread.
-template<typename T>
-class CrossThreadPersistent : public Persistent<T, GlobalPersistents> {
-    WTF_DISALLOW_CONSTRUCTION_FROM_ZERO(CrossThreadPersistent);
-    WTF_DISALLOW_ZERO_ASSIGNMENT(CrossThreadPersistent);
-public:
-    CrossThreadPersistent(T* raw) : Persistent<T, GlobalPersistents>(raw) { }
-
-    using Persistent<T, GlobalPersistents>::operator=;
 };
 
 // FIXME: derive affinity based on the collection.

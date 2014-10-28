@@ -1527,12 +1527,8 @@ Address ThreadHeap<Header>::allocate(size_t size, const GCInfo* gcInfo)
 template<typename T, typename HeapTraits>
 Address Heap::allocate(size_t size)
 {
-    ThreadState* state = ThreadStateFor<ThreadingTrait<T>::Affinity>::state();
-    ASSERT(state->isAllocationAllowed());
-    const GCInfo* gcInfo = GCInfoTrait<T>::get();
-    int heapIndex = HeapTraits::index(gcInfo->hasFinalizer());
-    BaseHeap* heap = state->heap(heapIndex);
-    return static_cast<typename HeapTraits::HeapType*>(heap)->allocate(size, gcInfo);
+    ASSERT_NOT_REACHED();
+    return 0;
 }
 
 template<typename T>
@@ -1619,7 +1615,8 @@ public:
 
     static bool isAllocationAllowed()
     {
-        return ThreadState::current()->isAllocationAllowed();
+        ASSERT_NOT_REACHED();
+        return false;
     }
 
     static void markUsingGCInfo(Visitor* visitor, const void* buffer)

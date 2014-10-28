@@ -316,7 +316,6 @@ public:
     // can no longer use the garbage collected heap after this call.
     static void detach();
 
-    static ThreadState* current() { return **s_threadSpecific; }
     static ThreadState* mainThreadState()
     {
         return reinterpret_cast<ThreadState*>(s_mainThreadStateStorage);
@@ -438,36 +437,6 @@ public:
     void enterSafePointWithPointers(void* scopeMarker) { enterSafePoint(HeapPointersOnStack, scopeMarker); }
     void leaveSafePoint(SafePointAwareMutexLocker* = 0);
     bool isAtSafePoint() const { return m_atSafePoint; }
-
-    class SafePointScope {
-    public:
-        enum ScopeNesting {
-            NoNesting,
-            AllowNesting
-        };
-
-        explicit SafePointScope(StackState stackState, ScopeNesting nesting = NoNesting)
-            : m_state(ThreadState::current())
-        {
-            if (m_state->isAtSafePoint()) {
-                RELEASE_ASSERT(nesting == AllowNesting);
-                // We can ignore stackState because there should be no heap object
-                // pointers manipulation after outermost safepoint was entered.
-                m_state = 0;
-            } else {
-                m_state->enterSafePoint(stackState, this);
-            }
-        }
-
-        ~SafePointScope()
-        {
-            if (m_state)
-                m_state->leaveSafePoint();
-        }
-
-    private:
-        ThreadState* m_state;
-    };
 
     // If attached thread enters long running loop that can call back
     // into Blink and leaving and reentering safepoint at every
@@ -613,7 +582,6 @@ private:
     ~ThreadState();
 
     friend class SafePointBarrier;
-    friend class SafePointAwareMutexLocker;
 
     void enterSafePoint(StackState, void*);
     NO_SANITIZE_ADDRESS void copyStackUntilSafePointScope();
@@ -705,69 +673,13 @@ public:
     static ThreadState* state()
     {
         // This specialization must only be used from the main thread.
-        ASSERT(ThreadState::current()->isMainThread());
         return ThreadState::mainThreadState();
     }
 };
 
 template<> class ThreadStateFor<AnyThread> {
 public:
-    static ThreadState* state() { return ThreadState::current(); }
-};
-
-// The SafePointAwareMutexLocker is used to enter a safepoint while waiting for
-// a mutex lock. It also ensures that the lock is not held while waiting for a GC
-// to complete in the leaveSafePoint method, by releasing the lock if the
-// leaveSafePoint method cannot complete without blocking, see
-// SafePointBarrier::checkAndPark.
-class SafePointAwareMutexLocker {
-    WTF_MAKE_NONCOPYABLE(SafePointAwareMutexLocker);
-public:
-    explicit SafePointAwareMutexLocker(MutexBase& mutex, ThreadState::StackState stackState = ThreadState::HeapPointersOnStack)
-        : m_mutex(mutex)
-        , m_locked(false)
-    {
-        ThreadState* state = ThreadState::current();
-        do {
-            bool leaveSafePoint = false;
-            // We cannot enter a safepoint if we are currently sweeping. In that
-            // case we just try to acquire the lock without being at a safepoint.
-            // If another thread tries to do a GC at that time it might time out
-            // due to this thread not being at a safepoint and waiting on the lock.
-            if (!state->isSweepInProgress() && !state->isAtSafePoint()) {
-                state->enterSafePoint(stackState, this);
-                leaveSafePoint = true;
-            }
-            m_mutex.lock();
-            m_locked = true;
-            if (leaveSafePoint) {
-                // When leaving the safepoint we might end up release the mutex
-                // if another thread is requesting a GC, see
-                // SafePointBarrier::checkAndPark. This is the case where we
-                // loop around to reacquire the lock.
-                state->leaveSafePoint(this);
-            }
-        } while (!m_locked);
-    }
-
-    ~SafePointAwareMutexLocker()
-    {
-        ASSERT(m_locked);
-        m_mutex.unlock();
-    }
-
-private:
-    friend class SafePointBarrier;
-
-    void reset()
-    {
-        ASSERT(m_locked);
-        m_mutex.unlock();
-        m_locked = false;
-    }
-
-    MutexBase& m_mutex;
-    bool m_locked;
+    static ThreadState* state() { return 0; }
 };
 
 // Common header for heap pages. Needs to be defined before class Visitor.
