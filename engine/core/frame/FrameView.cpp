@@ -46,7 +46,6 @@
 #include "core/page/Page.h"
 #include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"

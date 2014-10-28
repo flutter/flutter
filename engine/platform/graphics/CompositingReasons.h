@@ -43,7 +43,6 @@ const uint64_t CompositingReasonSquashingFilterAncestorMismatch          = UINT6
 const uint64_t CompositingReasonSquashingWouldBreakPaintOrder            = UINT64_C(1) << 23;
 const uint64_t CompositingReasonSquashingVideoIsDisallowed               = UINT64_C(1) << 24;
 const uint64_t CompositingReasonSquashedLayerClipsCompositingDescendants = UINT64_C(1) << 25;
-const uint64_t CompositingReasonSquashingRenderPartIsDisallowed          = UINT64_C(1) << 26;
 
 // Subtree reasons that require knowing what the status of your subtree is before knowing the answer
 const uint64_t CompositingReasonTransformWithCompositedDescendants       = UINT64_C(1) << 28;
@@ -137,7 +136,6 @@ const uint64_t CompositingReasonComboReasonsThatRequireOwnBacking =
     | CompositingReasonSquashingWouldBreakPaintOrder
     | CompositingReasonSquashingVideoIsDisallowed
     | CompositingReasonSquashedLayerClipsCompositingDescendants
-    | CompositingReasonSquashingRenderPartIsDisallowed
     | CompositingReasonTransformWithCompositedDescendants
     | CompositingReasonOpacityWithCompositedDescendants
     | CompositingReasonMaskWithCompositedDescendants

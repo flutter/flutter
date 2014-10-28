@@ -34,7 +34,6 @@
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderLayerModelObject.h"
 #include "core/rendering/RenderObject.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/style/ShadowData.h"

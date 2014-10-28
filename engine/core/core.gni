@@ -1090,7 +1090,6 @@ sky_core_files = [
   "rendering/RenderMedia.h",
   "rendering/RenderObject.cpp",
   "rendering/RenderObjectChildList.cpp",
-  "rendering/RenderPart.cpp",
   "rendering/RenderReplaced.cpp",
   "rendering/RenderSelectionInfo.h",
   "rendering/RenderText.cpp",

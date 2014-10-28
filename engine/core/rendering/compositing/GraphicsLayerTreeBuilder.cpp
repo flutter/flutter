@@ -29,7 +29,6 @@
 
 #include "core/html/HTMLMediaElement.h"
 #include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
@@ -93,12 +92,7 @@ void GraphicsLayerTreeBuilder::rebuild(RenderLayer& layer, AncestorInfo info)
         rebuild(*curNode->layer(), infoForChildren);
 
     if (hasCompositedLayerMapping) {
-        bool parented = false;
-        if (layer.renderer()->isRenderPart())
-            parented = RenderLayerCompositor::parentFrameContentLayers(toRenderPart(layer.renderer()));
-
-        if (!parented)
-            currentCompositedLayerMapping->parentForSublayers()->setChildren(layerChildren);
+        currentCompositedLayerMapping->parentForSublayers()->setChildren(layerChildren);
 
         // If the layer has a clipping layer the overflow controls layers will be siblings of the clipping layer.
         // Otherwise, the overflow control layers are normal children.

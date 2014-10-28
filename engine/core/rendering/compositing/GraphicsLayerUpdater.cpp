@@ -29,7 +29,6 @@
 
 #include "core/html/HTMLMediaElement.h"
 #include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "platform/TraceEvent.h"

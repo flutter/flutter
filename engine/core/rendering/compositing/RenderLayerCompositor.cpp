@@ -38,7 +38,6 @@
 #include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/RenderLayerStackingNode.h"
 #include "core/rendering/RenderLayerStackingNodeIterator.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderVideo.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
@@ -336,12 +335,6 @@ bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer* l
     if (layer->hasCompositedLayerMapping() && layer->compositedLayerMapping()->updateRequiresOwnBackingStoreForIntrinsicReasons())
         compositedLayerMappingChanged = true;
 
-    if (compositedLayerMappingChanged && layer->renderer()->isRenderPart()) {
-        RenderLayerCompositor* innerCompositor = frameContentsCompositor(toRenderPart(layer->renderer()));
-        if (innerCompositor && innerCompositor->staleInCompositingMode())
-            innerCompositor->updateRootLayerAttachment();
-    }
-
     if (compositedLayerMappingChanged)
         layer->clipper().clearClipRectsIncludingDescendants(PaintingClipRects);
 
@@ -462,32 +455,6 @@ String RenderLayerCompositor::layerTreeAsText(LayerTreeFlags flags)
         return m_renderView.frameView()->trackedPaintInvalidationRectsAsText() + layerTreeText;
 
     return layerTreeText;
-}
-
-RenderLayerCompositor* RenderLayerCompositor::frameContentsCompositor(RenderPart* renderer)
-{
-    return 0;
-}
-
-// FIXME: What does this function do? It needs a clearer name.
-bool RenderLayerCompositor::parentFrameContentLayers(RenderPart* renderer)
-{
-    RenderLayerCompositor* innerCompositor = frameContentsCompositor(renderer);
-    if (!innerCompositor || !innerCompositor->staleInCompositingMode() || innerCompositor->rootLayerAttachment() != RootLayerAttachedViaEnclosingFrame)
-        return false;
-
-    RenderLayer* layer = renderer->layer();
-    if (!layer->hasCompositedLayerMapping())
-        return false;
-
-    CompositedLayerMapping* compositedLayerMapping = layer->compositedLayerMapping();
-    GraphicsLayer* hostingLayer = compositedLayerMapping->parentForSublayers();
-    GraphicsLayer* rootLayer = innerCompositor->rootGraphicsLayer();
-    if (hostingLayer->children().size() != 1 || hostingLayer->children()[0] != rootLayer) {
-        hostingLayer->removeAllChildren();
-        hostingLayer->addChild(rootLayer);
-    }
-    return true;
 }
 
 static void fullyInvalidatePaintRecursive(RenderLayer* layer)

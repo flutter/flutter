@@ -334,7 +334,6 @@ public:
     virtual bool isRenderGrid() const { return false; }
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
-    virtual bool isRenderPart() const { return false; }
     virtual bool isRenderView() const { return false; }
     virtual bool isVideo() const { return false; }
     virtual bool isWidget() const { return false; }

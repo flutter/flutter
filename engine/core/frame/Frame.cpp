@@ -42,7 +42,6 @@
 #include "core/page/FocusController.h"
 #include "core/page/Page.h"
 #include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderPart.h"
 #include "platform/graphics/GraphicsLayer.h"
 #include "public/platform/WebLayer.h"
 #include "wtf/PassOwnPtr.h"

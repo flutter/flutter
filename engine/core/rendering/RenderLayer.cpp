@@ -58,7 +58,6 @@
 #include "core/rendering/HitTestingTransformState.h"
 #include "core/rendering/RenderGeometryMap.h"
 #include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderTreeAsText.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
@@ -2525,8 +2524,6 @@ bool RenderLayer::childBackgroundIsKnownToBeOpaqueInRect(const LayoutRect& local
 
 bool RenderLayer::shouldBeSelfPaintingLayer() const
 {
-    if (renderer()->isRenderPart() && toRenderPart(renderer())->requiresAcceleratedCompositing())
-        return true;
     return m_layerType == NormalLayer
         || (m_scrollableArea && m_scrollableArea->hasOverlayScrollbars())
         || needsCompositedScrolling();

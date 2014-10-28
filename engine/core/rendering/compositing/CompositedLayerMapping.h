@@ -283,7 +283,6 @@ private:
     void updateBackgroundColor();
     void updateContentsRect();
     void updateContentsOffsetInCompositingLayer(const IntPoint& snappedOffsetFromCompositedAncestor, const IntPoint& graphicsLayerParentLocation);
-    void updateAfterWidgetResize();
     void updateCompositingReasons();
 
     void doPaintTask(const GraphicsLayerPaintInfo&, const PaintLayerFlags&, GraphicsContext*, const IntRect& clip);

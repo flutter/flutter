@@ -41,7 +41,6 @@
 #include "core/rendering/FilterEffectRenderer.h"
 #include "core/rendering/RenderImage.h"
 #include "core/rendering/RenderLayerStackingNodeIterator.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderVideo.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
@@ -283,18 +282,6 @@ void CompositedLayerMapping::updateCompositedBounds()
     m_contentOffsetInCompositingLayerDirty = true;
 }
 
-void CompositedLayerMapping::updateAfterWidgetResize()
-{
-    if (renderer()->isRenderPart()) {
-        if (RenderLayerCompositor* innerCompositor = RenderLayerCompositor::frameContentsCompositor(toRenderPart(renderer()))) {
-            innerCompositor->frameViewDidChangeSize();
-            // We can floor this point because our frameviews are always aligned to pixel boundaries.
-            ASSERT(m_compositedBounds.location() == flooredIntPoint(m_compositedBounds.location()));
-            innerCompositor->frameViewDidChangeLocation(flooredIntPoint(contentsBox().location()));
-        }
-    }
-}
-
 void CompositedLayerMapping::updateCompositingReasons()
 {
     // All other layers owned by this mapping will have the same compositing reason
@@ -455,8 +442,6 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
             m_graphicsLayer->setContentsToPlatformLayer(context->platformLayer());
         layerConfigChanged = true;
     }
-    if (renderer->isRenderPart())
-        layerConfigChanged = RenderLayerCompositor::parentFrameContentLayers(toRenderPart(renderer));
 
     // Changes to either the internal hierarchy or the mask layer have an impact
     // on painting phases, so we need to update when either are updated.
@@ -647,7 +632,6 @@ void CompositedLayerMapping::updateGraphicsLayerGeometry(const RenderLayer* comp
     updateBackgroundColor();
     updateDrawsContent();
     updateContentsOpaque();
-    updateAfterWidgetResize();
     updateRenderingContext();
     updateShouldFlattenTransform();
     updateChildrenTransform();

@@ -43,7 +43,6 @@ class FrameClient;
 class FrameHost;
 class LocalDOMWindow;
 class Page;
-class RenderPart;
 class Settings;
 
 class Frame : public RefCounted<Frame> {

@@ -55,7 +55,6 @@
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderText.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/RenderView.h"

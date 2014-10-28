@@ -35,7 +35,6 @@
 #include "core/rendering/InlineTextBox.h"
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderPart.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/RenderWidget.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
