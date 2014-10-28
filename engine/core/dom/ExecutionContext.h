@@ -55,8 +55,6 @@ class ExecutionContext
     : public LifecycleContext<ExecutionContext>
     , public Supplementable<ExecutionContext> {
 public:
-    virtual void trace(Visitor*) override;
-
     // Delegating to ExecutionContextClient
     bool isDocument() const { return m_client && m_client->isDocument(); }
     const KURL& url() const;

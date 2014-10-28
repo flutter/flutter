@@ -61,12 +61,6 @@ PassRefPtr<HTMLVideoElement> HTMLVideoElement::create(Document& document)
     return video.release();
 }
 
-void HTMLVideoElement::trace(Visitor* visitor)
-{
-    visitor->trace(m_imageLoader);
-    HTMLMediaElement::trace(visitor);
-}
-
 bool HTMLVideoElement::rendererIsNeeded(const RenderStyle& style)
 {
     return HTMLElement::rendererIsNeeded(style);

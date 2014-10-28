@@ -160,9 +160,6 @@ public:
     // DocumentVisibilityObserver::setDocument
     void setObservedDocument(Document&);
 
-protected:
-    virtual void trace(Visitor*);
-
 private:
     void registerObserver(Document&);
     void unregisterObserver();
@@ -654,8 +651,6 @@ public:
     void unregisterVisibilityObserver(DocumentVisibilityObserver*);
 
     void updateStyleInvalidationIfNeeded();
-
-    virtual void trace(Visitor*) override;
 
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
 

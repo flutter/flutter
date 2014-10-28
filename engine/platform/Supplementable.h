@@ -98,12 +98,6 @@ template<typename T, bool isGarbageCollected>
 struct SupplementableTraits;
 
 template<typename T>
-struct SupplementableTraits<T, true> {
-    typedef RawPtr<SupplementBase<T, true> > SupplementArgumentType;
-    typedef HeapHashMap<const char*, Member<SupplementBase<T, true> >, PtrHash<const char*> > SupplementMap;
-};
-
-template<typename T>
 struct SupplementableTraits<T, false> {
     typedef PassOwnPtr<SupplementBase<T, false> > SupplementArgumentType;
     typedef HashMap<const char*, OwnPtr<SupplementBase<T, false> >, PtrHash<const char*> > SupplementMap;
@@ -113,13 +107,9 @@ template<bool>
 class SupplementTracing;
 
 template<>
-class SupplementTracing<true> : public GarbageCollectedMixin { };
-
-template<>
 class SupplementTracing<false> {
 public:
     virtual ~SupplementTracing() { }
-    virtual void trace(Visitor*) { }
 };
 
 template<typename T, bool isGarbageCollected = false>
@@ -196,21 +186,6 @@ private:
 #endif
 };
 
-// This class is used to make an on-heap class supplementable. Its supplements
-// must be HeapSupplement.
-template<typename T>
-class HeapSupplement : public SupplementBase<T, true> { };
-
-// FIXME: Oilpan: Move GarbageCollectedMixin to SupplementableBase<T, true> once PersistentHeapSupplementable is removed again.
-template<typename T>
-class GC_PLUGIN_IGNORE("http://crbug.com/395036") HeapSupplementable : public SupplementableBase<T, true>, public GarbageCollectedMixin {
-public:
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(this->m_supplements);
-        SupplementableBase<T, true>::trace(visitor);
-    }
-};
 
 template<typename T>
 class Supplement : public SupplementBase<T, false> { };
@@ -219,20 +194,6 @@ class Supplement : public SupplementBase<T, false> { };
 // supplements (Supplement).
 template<typename T>
 class GC_PLUGIN_IGNORE("http://crbug.com/395036") Supplementable : public SupplementableBase<T, false> {
-public:
-    virtual void trace(Visitor* visitor)
-    {
-    }
-};
-
-template<typename T>
-struct ThreadingTrait<SupplementBase<T, true> > {
-    static const ThreadAffinity Affinity = ThreadingTrait<T>::Affinity;
-};
-
-template<typename T>
-struct ThreadingTrait<SupplementableBase<T, true> > {
-    static const ThreadAffinity Affinity = ThreadingTrait<T>::Affinity;
 };
 
 } // namespace blink

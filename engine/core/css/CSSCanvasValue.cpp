@@ -101,11 +101,4 @@ bool CSSCanvasValue::equals(const CSSCanvasValue& other) const
     return m_name == other.m_name;
 }
 
-void CSSCanvasValue::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_canvasObserver);
-    visitor->trace(m_element);
-    CSSImageGeneratorValue::traceAfterDispatch(visitor);
-}
-
 } // namespace blink

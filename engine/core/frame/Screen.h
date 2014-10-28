@@ -59,8 +59,6 @@ public:
     unsigned availHeight() const;
     unsigned availWidth() const;
 
-    void trace(Visitor*);
-
 private:
     explicit Screen(LocalFrame*);
 };

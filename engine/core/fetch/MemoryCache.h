@@ -277,15 +277,6 @@ private:
     typedef HashMap<String, OwnPtr<MemoryCacheEntry> > ResourceMap;
     ResourceMap m_resources;
 
-#if ENABLE(OILPAN)
-    // Unlike m_allResources, m_liveResources is a set of Resource objects which
-    // should not be deleted. m_allResources only contains on-cache Resource
-    // objects.
-    // FIXME: Can we remove manual lifetime management of Resource and this?
-    HeapHashSet<Member<Resource> > m_liveResources;
-    friend RawPtr<MemoryCache> replaceMemoryCacheForTesting(RawPtr<MemoryCache>);
-#endif
-
     friend class MemoryCacheTest;
 #ifdef MEMORY_CACHE_STATS
     Timer<MemoryCache> m_statsTimer;

@@ -14,40 +14,6 @@
 
 namespace blink {
 
-#if ENABLE(OILPAN)
-typedef HeapHashMap<WeakMember<Node>, int> NodeToIdMap;
-typedef HeapHashMap<int, WeakMember<Node> > IdToNodeMap;
-
-static NodeToIdMap& nodeToIdMap()
-{
-    DEFINE_STATIC_LOCAL(Persistent<NodeToIdMap>, nodeToIdMap, (new NodeToIdMap()));
-    return *nodeToIdMap;
-}
-
-static IdToNodeMap& idToNodeMap()
-{
-    DEFINE_STATIC_LOCAL(Persistent<IdToNodeMap>, idToNodeMap, (new IdToNodeMap()));
-    return *idToNodeMap;
-}
-
-int InspectorNodeIds::idForNode(Node* node)
-{
-    static int s_nextNodeId = 1;
-    NodeToIdMap::iterator it = nodeToIdMap().find(node);
-    if (it != nodeToIdMap().end())
-        return it->value;
-    int id = s_nextNodeId++;
-    nodeToIdMap().set(node, id);
-    ASSERT(idToNodeMap().find(id) == idToNodeMap().end());
-    idToNodeMap().set(id, node);
-    return id;
-}
-
-Node* InspectorNodeIds::nodeForId(int id)
-{
-    return idToNodeMap().get(id);
-}
-#else
 static WeakNodeMap& nodeIds()
 {
     DEFINE_STATIC_LOCAL(WeakNodeMap, self, ());
@@ -70,6 +36,5 @@ Node* InspectorNodeIds::nodeForId(int id)
 {
     return nodeIds().node(id);
 }
-#endif
 
 }

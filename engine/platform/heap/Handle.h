@@ -606,30 +606,6 @@ template <typename T> struct VectorTraits<blink::WeakMember<T> > : VectorTraitsB
     static const bool canMoveWithMemcpy = true;
 };
 
-template <typename T> struct VectorTraits<blink::HeapVector<T, 0> > : VectorTraitsBase<blink::HeapVector<T, 0> > {
-    static const bool needsDestruction = false;
-    static const bool canInitializeWithMemset = true;
-    static const bool canMoveWithMemcpy = true;
-};
-
-template <typename T> struct VectorTraits<blink::HeapDeque<T, 0> > : VectorTraitsBase<blink::HeapDeque<T, 0> > {
-    static const bool needsDestruction = false;
-    static const bool canInitializeWithMemset = true;
-    static const bool canMoveWithMemcpy = true;
-};
-
-template <typename T, size_t inlineCapacity> struct VectorTraits<blink::HeapVector<T, inlineCapacity> > : VectorTraitsBase<blink::HeapVector<T, inlineCapacity> > {
-    static const bool needsDestruction = VectorTraits<T>::needsDestruction;
-    static const bool canInitializeWithMemset = VectorTraits<T>::canInitializeWithMemset;
-    static const bool canMoveWithMemcpy = VectorTraits<T>::canMoveWithMemcpy;
-};
-
-template <typename T, size_t inlineCapacity> struct VectorTraits<blink::HeapDeque<T, inlineCapacity> > : VectorTraitsBase<blink::HeapDeque<T, inlineCapacity> > {
-    static const bool needsDestruction = VectorTraits<T>::needsDestruction;
-    static const bool canInitializeWithMemset = VectorTraits<T>::canInitializeWithMemset;
-    static const bool canMoveWithMemcpy = VectorTraits<T>::canMoveWithMemcpy;
-};
-
 template<typename T> struct HashTraits<blink::Member<T> > : SimpleClassHashTraits<blink::Member<T> > {
     static const bool needsDestruction = false;
     // FIXME: The distinction between PeekInType and PassInType is there for
@@ -740,14 +716,6 @@ template<typename T> inline T* getPtr(const blink::Persistent<T>& p)
 {
     return p.get();
 }
-
-template<typename T, size_t inlineCapacity>
-struct NeedsTracing<ListHashSetNode<T, blink::HeapListHashSetAllocator<T, inlineCapacity> > *> {
-    // All heap allocated node pointers need visiting to keep the nodes alive,
-    // regardless of whether they contain pointers to other heap allocated
-    // objects.
-    static const bool value = true;
-};
 
 // For wtf/Functional.h
 template<typename T, bool isGarbageCollected> struct PointerParamStorageTraits;

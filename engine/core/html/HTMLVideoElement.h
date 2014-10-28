@@ -50,7 +50,6 @@ class HTMLVideoElement final : public HTMLMediaElement, public CanvasImageSource
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<HTMLVideoElement> create(Document&);
-    virtual void trace(Visitor*) override;
 
     unsigned videoWidth() const;
     unsigned videoHeight() const;

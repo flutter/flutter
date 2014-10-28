@@ -62,8 +62,6 @@ class HTMLMediaElement : public HTMLElement, public Supplementable<HTMLMediaElem
 public:
     static blink::WebMimeRegistry::SupportsType supportsType(const ContentType&, const String& keySystem = String());
 
-    virtual void trace(Visitor*) override;
-
     // Do not use player().
     // FIXME: Replace all uses with webMediaPlayer() and remove this API.
     MediaPlayer* player() const { return m_player.get(); }

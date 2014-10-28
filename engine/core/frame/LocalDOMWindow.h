@@ -208,8 +208,6 @@ public:
 
     void acceptLanguagesChanged();
 
-    virtual void trace(Visitor*) override;
-
 protected:
     DOMWindowLifecycleNotifier& lifecycleNotifier();
 

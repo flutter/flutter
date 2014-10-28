@@ -542,16 +542,6 @@ void HTMLCanvasElement::notifySurfaceInvalid()
     }
 }
 
-void HTMLCanvasElement::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_observers);
-    visitor->trace(m_context);
-#endif
-    DocumentVisibilityObserver::trace(visitor);
-    HTMLElement::trace(visitor);
-}
-
 void HTMLCanvasElement::updateExternallyAllocatedMemory() const
 {
     int bufferCount = 0;

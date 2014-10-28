@@ -2424,16 +2424,4 @@ void HTMLMediaElement::defaultEventHandler(Event* event)
     HTMLElement::defaultEventHandler(event);
 }
 
-void HTMLMediaElement::trace(Visitor* visitor)
-{
-    visitor->trace(m_playedTimeRanges);
-    visitor->trace(m_asyncEventQueue);
-    visitor->trace(m_error);
-    visitor->trace(m_currentSourceNode);
-    visitor->trace(m_nextChildNodeToConsider);
-    visitor->trace(m_mediaSource);
-    Supplementable<HTMLMediaElement>::trace(visitor);
-    HTMLElement::trace(visitor);
-}
-
 }

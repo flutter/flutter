@@ -52,8 +52,6 @@ public:
 
     bool equals(const CSSCanvasValue&) const;
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     explicit CSSCanvasValue(const String& name)
         : CSSImageGeneratorValue(CanvasClass)
@@ -84,11 +82,6 @@ private:
             m_ownerValue->canvasDestroyed(canvas);
         }
 #endif
-        virtual void trace(Visitor* visitor) override
-        {
-            visitor->trace(m_ownerValue);
-            CanvasObserver::trace(visitor);
-        }
 
     private:
         RawPtr<CSSCanvasValue> m_ownerValue;

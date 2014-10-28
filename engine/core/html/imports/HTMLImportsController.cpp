@@ -157,11 +157,4 @@ Document* HTMLImportsController::loaderDocumentAt(size_t i) const
     return loaderAt(i)->document();
 }
 
-void HTMLImportsController::trace(Visitor* visitor)
-{
-    visitor->trace(m_root);
-    visitor->trace(m_loaders);
-    DocumentSupplement::trace(visitor);
-}
-
 } // namespace blink

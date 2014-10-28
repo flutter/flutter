@@ -49,8 +49,6 @@ public:
 #endif
         ThisType* wrapped() const { return m_wrapped.get(); }
 
-        virtual void trace(Visitor*) override { }
-
     private:
 
         RefPtr<ThisType> m_wrapped;

@@ -76,8 +76,6 @@ public:
     Document* loaderDocumentAt(size_t) const;
     HTMLImportLoader* loaderFor(const Document&) const;
 
-    virtual void trace(Visitor*);
-
 private:
     HTMLImportChild* createChild(const KURL&, HTMLImportLoader*, HTMLImport* parent, HTMLImportChildClient*);
 

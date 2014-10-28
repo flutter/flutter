@@ -271,11 +271,6 @@ DocumentVisibilityObserver::~DocumentVisibilityObserver()
 #endif
 }
 
-void DocumentVisibilityObserver::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-}
-
 void DocumentVisibilityObserver::unregisterObserver()
 {
     if (m_document) {
@@ -3175,48 +3170,6 @@ v8::Handle<v8::Object> Document::wrap(v8::Handle<v8::Object> creationContext, v8
         frame()->script().windowProxy(world)->updateDocumentWrapper(wrapper);
 
     return wrapper;
-}
-
-void Document::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_importsController);
-    visitor->trace(m_implementation);
-    visitor->trace(m_autofocusElement);
-    visitor->trace(m_focusedElement);
-    visitor->trace(m_hoverNode);
-    visitor->trace(m_activeHoverElement);
-    visitor->trace(m_documentElement);
-    visitor->trace(m_titleElement);
-    visitor->trace(m_markers);
-    visitor->trace(m_currentScriptStack);
-    visitor->trace(m_cssCanvasElements);
-    visitor->trace(m_elemSheet);
-    visitor->trace(m_ranges);
-    visitor->trace(m_styleEngine);
-    visitor->trace(m_domWindow);
-    visitor->trace(m_fetcher);
-    visitor->trace(m_parser);
-    visitor->trace(m_styleSheetList);
-    visitor->trace(m_mediaQueryMatcher);
-    visitor->trace(m_scriptedAnimationController);
-    visitor->trace(m_registrationContext);
-    visitor->trace(m_customElementMicrotaskRunQueue);
-    visitor->trace(m_elementDataCache);
-    visitor->trace(m_templateDocument);
-    visitor->trace(m_templateDocumentHost);
-    visitor->trace(m_visibilityObservers);
-    visitor->trace(m_userActionElements);
-    visitor->trace(m_timeline);
-    visitor->trace(m_compositorPendingAnimations);
-    visitor->trace(m_contextDocument);
-    visitor->registerWeakMembers<Document, &Document::clearWeakMembers>(this);
-#endif
-    DocumentSupplementable::trace(visitor);
-    TreeScope::trace(visitor);
-    ContainerNode::trace(visitor);
-    ExecutionContext::trace(visitor);
-    LifecycleContext<Document>::trace(visitor);
 }
 
 } // namespace blink

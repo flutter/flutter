@@ -49,10 +49,6 @@ public:
         , m_callStack(callStack)
     {
     }
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_callStack);
-    }
     String m_errorMessage;
     int m_lineNumber;
     int m_columnNumber;
@@ -246,15 +242,6 @@ ContextLifecycleNotifier& ExecutionContext::lifecycleNotifier()
 bool ExecutionContext::isIteratingOverObservers() const
 {
     return m_lifecycleNotifier && m_lifecycleNotifier->isIteratingOverObservers();
-}
-
-void ExecutionContext::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_pendingExceptions);
-#endif
-    Supplementable<ExecutionContext>::trace(visitor);
-    LifecycleContext<ExecutionContext>::trace(visitor);
 }
 
 } // namespace blink

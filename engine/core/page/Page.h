@@ -162,7 +162,6 @@ public:
     static void networkStateChanged(bool online);
     PassOwnPtr<LifecycleNotifier<Page> > createLifecycleNotifier();
 
-    void trace(Visitor*);
     void willBeDestroyed();
 
 protected:

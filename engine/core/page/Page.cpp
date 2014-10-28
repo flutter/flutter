@@ -359,18 +359,6 @@ PassOwnPtr<LifecycleNotifier<Page> > Page::createLifecycleNotifier()
     return PageLifecycleNotifier::create(this);
 }
 
-void Page::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_dragCaretController);
-    visitor->trace(m_undoStack);
-    visitor->trace(m_multisamplingChangedObservers);
-    visitor->trace(m_frameHost);
-#endif
-    Supplementable<Page>::trace(visitor);
-    LifecycleContext<Page>::trace(visitor);
-}
-
 void Page::willBeDestroyed()
 {
     RefPtr<LocalFrame> mainFrame = m_mainFrame;

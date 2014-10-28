@@ -65,8 +65,6 @@ public:
 #if !ENABLE(OILPAN)
     virtual void canvasDestroyed(HTMLCanvasElement*) = 0;
 #endif
-
-    virtual void trace(Visitor*) { }
 };
 
 class HTMLCanvasElement final : public HTMLElement, public DocumentVisibilityObserver, public CanvasImageSource, public ImageBufferClient {
@@ -149,8 +147,6 @@ public:
     virtual void notifySurfaceInvalid() override;
     virtual bool isDirty() override { return !m_dirtyRect.isEmpty(); }
     virtual void didFinalizeFrame() override;
-
-    virtual void trace(Visitor*) override;
 
 protected:
     virtual void didMoveToNewDocument(Document& oldDocument) override;

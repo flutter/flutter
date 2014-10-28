@@ -816,19 +816,4 @@ PassOwnPtr<LifecycleNotifier<LocalDOMWindow> > LocalDOMWindow::createLifecycleNo
     return DOMWindowLifecycleNotifier::create(this);
 }
 
-void LocalDOMWindow::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-    visitor->trace(m_screen);
-    visitor->trace(m_history);
-    visitor->trace(m_console);
-    visitor->trace(m_location);
-    visitor->trace(m_media);
-    visitor->trace(m_css);
-    visitor->trace(m_eventQueue);
-    Supplementable<LocalDOMWindow>::trace(visitor);
-    EventTargetWithInlineData::trace(visitor);
-    LifecycleContext<LocalDOMWindow>::trace(visitor);
-}
-
 } // namespace blink
