@@ -130,13 +130,7 @@ void FrameLoader::finishedParsing()
     // because doing so will cause us to re-enter the destructor when protector goes out of scope.
     // Null-checking the FrameView indicates whether or not we're in the destructor.
     RefPtr<LocalFrame> protector = m_frame->view() ? m_frame : 0;
-
     m_frame->document()->checkCompleted();
-
-    // Check if the scrollbars are really needed for the content.
-    // If not, remove them, relayout, and repaint.
-    if (m_frame->view())
-        m_frame->view()->restoreScrollbar();
 }
 
 void FrameLoader::reportLocalLoadFailed(LocalFrame* frame, const String& url)

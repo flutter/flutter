@@ -183,9 +183,6 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
         }
     }
 
-    if (isDocumentElement())
-        document().view()->recalculateScrollbarOverlayStyle();
-
     updateShapeOutsideInfoAfterStyleChange(*style(), oldStyle);
     updateGridPositionAfterStyleChange(oldStyle);
 }
@@ -589,13 +586,9 @@ bool RenderBox::autoscrollInProgress() const
     return frame() && frame()->page() && frame()->page()->autoscrollController().autoscrollInProgress(this);
 }
 
-// There are two kinds of renderer that can autoscroll.
+// FIXME(sky): Replace with canBeScrolledAndHasScrollableArea.
 bool RenderBox::canAutoscroll() const
 {
-    if (node() && node()->isDocumentNode())
-        return view()->frameView()->isScrollable();
-
-    // Check for a box that can be scrolled in its own right.
     return canBeScrolledAndHasScrollableArea();
 }
 

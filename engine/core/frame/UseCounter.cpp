@@ -229,9 +229,6 @@ String UseCounter::deprecationMessage(Feature feature)
     case RangeDetach:
         return "'Range.detach' is now a no-op, as per DOM (http://dom.spec.whatwg.org/#dom-range-detach).";
 
-    case OverflowChangedEvent:
-        return "The 'overflowchanged' event is deprecated and may be removed. Please do not use it.";
-
     case HTMLHeadElementProfile:
         return "'HTMLHeadElement.profile' is deprecated. The reflected attribute has no effect.";
 

@@ -85,7 +85,6 @@ ScrollingCoordinator::ScrollingCoordinator(Page* page)
     , m_scrollGestureRegionIsDirty(false)
     , m_touchEventTargetRectsAreDirty(false)
     , m_shouldScrollOnMainThreadDirty(false)
-    , m_wasFrameScrollable(false)
 {
 }
 
@@ -137,11 +136,9 @@ void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
         m_touchEventTargetRectsAreDirty = false;
     }
 
-    FrameView* frameView = m_page->mainFrame()->view();
-    m_wasFrameScrollable = frameView && frameView->isScrollable();
-
     // The mainFrame view doesn't get included in the FrameTree below, so we
     // update its size separately.
+    FrameView* frameView = m_page->mainFrame()->view();
     if (WebLayer* scrollingWebLayer = frameView ? toWebLayer(frameView->layerForScrolling()) : 0) {
         scrollingWebLayer->setBounds(frameView->size());
     }
@@ -419,7 +416,6 @@ void ScrollingCoordinator::reset()
     m_horizontalScrollbars.clear();
     m_verticalScrollbars.clear();
     m_layersWithTouchRects.clear();
-    m_wasFrameScrollable = false;
 }
 
 // Note that in principle this could be called more often than computeTouchEventTargetRects, for

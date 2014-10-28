@@ -2303,10 +2303,7 @@ PassRefPtr<Event> Document::createEvent(const String& eventType, ExceptionState&
 
 void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
 {
-    if (eventType == EventTypeNames::overflowchanged) {
-        UseCounter::countDeprecation(*this, UseCounter::OverflowChangedEvent);
-        addListenerType(OVERFLOWCHANGED_LISTENER);
-    } else if (eventType == EventTypeNames::webkitAnimationStart || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationstart)) {
+    if (eventType == EventTypeNames::webkitAnimationStart || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationstart)) {
         addListenerType(ANIMATIONSTART_LISTENER);
     } else if (eventType == EventTypeNames::webkitAnimationEnd || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationend)) {
         addListenerType(ANIMATIONEND_LISTENER);
@@ -2595,12 +2592,6 @@ void Document::finishedParsing()
 
     if (RefPtr<LocalFrame> f = frame()) {
         checkCompleted();
-
-        // Check if the scrollbars are really needed for the content.
-        // If not, remove them, relayout, and repaint.
-        if (m_frame->view())
-            m_frame->view()->restoreScrollbar();
-
         TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", "data", InspectorMarkLoadEvent::data(f.get()));
     }
 

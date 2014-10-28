@@ -116,7 +116,6 @@ private:
     ScrollbarMap m_horizontalScrollbars;
     ScrollbarMap m_verticalScrollbars;
     HashSet<const RenderLayer*> m_layersWithTouchRects;
-    bool m_wasFrameScrollable;
 };
 
 } // namespace blink

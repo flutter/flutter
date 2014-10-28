@@ -188,7 +188,6 @@ public:
         SVGLocatableNearestViewportElement = 204,
         SVGLocatableFarthestViewportElement = 205,
         HTMLHeadElementProfile = 207,
-        OverflowChangedEvent = 208,
         SVGPointMatrixTransform = 209,
         DOMFocusInOutEvent = 211,
         FileGetLastModifiedDate = 212,

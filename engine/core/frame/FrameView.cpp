@@ -72,7 +72,6 @@ static const double resourcePriorityUpdateDelayAfterScroll = 0.250;
 
 FrameView::FrameView(LocalFrame* frame)
     : m_frame(frame)
-    , m_canHaveScrollbars(true)
     , m_hasPendingLayout(false)
     , m_layoutSubtreeRoot(0)
     , m_inSynchronousPostLayout(false)
@@ -158,11 +157,6 @@ void FrameView::prepareForDetach()
     // FIXME(sky): Remove
 }
 
-void FrameView::recalculateScrollbarOverlayStyle()
-{
-    // FIXME(sky): Remove.
-}
-
 void FrameView::clear()
 {
     reset();
@@ -219,72 +213,6 @@ IntPoint FrameView::clampOffsetAtScale(const IntPoint& offset, float scale) cons
     clampedOffset = clampedOffset.shrunkTo(
         IntPoint(size()) - expandedIntSize(scaledSize));
     return clampedOffset;
-}
-
-void FrameView::applyOverflowToViewportAndSetRenderer(RenderObject* o, ScrollbarMode& hMode, ScrollbarMode& vMode)
-{
-    // Handle the overflow:hidden/scroll case for the body/html elements.  WinIE treats
-    // overflow:hidden and overflow:scroll on <body> as applying to the document's
-    // scrollbars.  The CSS2.1 draft states that HTML UAs should use the <html> or <body> element and XML/XHTML UAs should
-    // use the root element.
-
-    EOverflow overflowX = o->style()->overflowX();
-    EOverflow overflowY = o->style()->overflowY();
-
-    switch (overflowX) {
-        case OHIDDEN:
-            hMode = ScrollbarAlwaysOff;
-            break;
-        case OSCROLL:
-            hMode = ScrollbarAlwaysOn;
-            break;
-        case OAUTO:
-            hMode = ScrollbarAuto;
-            break;
-        default:
-            // Don't set it at all.
-            ;
-    }
-
-     switch (overflowY) {
-        case OHIDDEN:
-            vMode = ScrollbarAlwaysOff;
-            break;
-        case OSCROLL:
-            vMode = ScrollbarAlwaysOn;
-            break;
-        case OAUTO:
-            vMode = ScrollbarAuto;
-            break;
-        default:
-            // Don't set it at all.
-            ;
-    }
-
-    m_viewportRenderer = o;
-}
-
-void FrameView::calculateScrollbarModesForLayoutAndSetViewportRenderer(ScrollbarMode& hMode, ScrollbarMode& vMode, ScrollbarModesCalculationStrategy strategy)
-{
-    m_viewportRenderer = 0;
-
-    if (m_canHaveScrollbars || strategy == RulesFromWebContentOnly) {
-        hMode = ScrollbarAuto;
-        vMode = ScrollbarAuto;
-    } else {
-        hMode = ScrollbarAlwaysOff;
-        vMode = ScrollbarAlwaysOff;
-    }
-
-    if (!isSubtreeLayout()) {
-        Document* document = m_frame->document();
-        if (Element* viewportElement = document->viewportDefiningElement()) {
-            if (RenderObject* viewportRenderer = viewportElement->renderer()) {
-                if (viewportRenderer->style())
-                    applyOverflowToViewportAndSetRenderer(viewportRenderer, hMode, vMode);
-            }
-        }
-    }
 }
 
 void FrameView::updateAcceleratedCompositingSettings()
@@ -547,11 +475,6 @@ void FrameView::layout(bool allowSubtree)
 
     ASSERT(!rootForThisLayout->needsLayout());
 
-    if (document->hasListenerType(Document::OVERFLOWCHANGED_LISTENER)) {
-        updateOverflowStatus(layoutSize().width() < width(),
-            layoutSize().height() < height());
-    }
-
     scheduleOrPerformPostLayoutTasks();
 
     TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Layout", "endData", InspectorLayoutEvent::endData(rootForThisLayout));
@@ -660,41 +583,10 @@ bool FrameView::contentsInCompositedLayer() const
     return false;
 }
 
-IntPoint FrameView::lastKnownMousePosition() const
-{
-    return m_frame->eventHandler().lastKnownMousePosition();
-}
-
 bool FrameView::shouldSetCursor() const
 {
     Page* page = frame().page();
     return page && page->visibilityState() != PageVisibilityStateHidden && page->focusController().isActive() && page->settings().deviceSupportsMouse();
-}
-
-void FrameView::scrollContentsIfNeededRecursive()
-{
-    // FIXME(sky): Remove
-}
-
-void FrameView::scrollContentsIfNeeded()
-{
-    // FIXME(sky): Remove
-}
-
-bool FrameView::scrollContentsFastPath(const IntSize& scrollDelta)
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-void FrameView::scrollContentsSlowPath(const IntRect& updateRect)
-{
-    // FIXME(sky): Remove
-}
-
-void FrameView::restoreScrollbar()
-{
-    // FIXME(sky): Remove
 }
 
 // FIXME(sky): remove
@@ -788,19 +680,6 @@ void FrameView::contentRectangleForPaintInvalidation(const IntRect& r)
 void FrameView::contentsResized()
 {
     setNeedsLayout();
-}
-
-void FrameView::scrollbarExistenceDidChange()
-{
-    // We check to make sure the view is attached to a frame() as this method can
-    // be triggered before the view is attached by LocalFrame::createView(...) setting
-    // various values such as setScrollBarModes(...) for example.  An ASSERT is
-    // triggered when a view is layout before being attached to a frame().
-    if (!frame().view())
-        return;
-
-    if (renderView() && renderView()->usesCompositing())
-        renderView()->compositor()->frameViewScrollbarsExistenceDidChange();
 }
 
 void FrameView::scheduleRelayout()
@@ -946,7 +825,6 @@ void FrameView::setBaseBackgroundColor(const Color& backgroundColor)
         if (compositedLayerMapping->mainGraphicsLayer())
             compositedLayerMapping->mainGraphicsLayer()->setNeedsDisplay();
     }
-    recalculateScrollbarOverlayStyle();
 }
 
 void FrameView::updateBackgroundRecursively(const Color& backgroundColor, bool transparent)
@@ -1030,19 +908,6 @@ void FrameView::postLayoutTimerFired(Timer<FrameView>*)
     performPostLayoutTasks();
 }
 
-void FrameView::updateOverflowStatus(bool horizontalOverflow, bool verticalOverflow)
-{
-    if (!m_viewportRenderer)
-        return;
-
-    if (m_overflowStatusDirty) {
-        m_horizontalOverflow = horizontalOverflow;
-        m_verticalOverflow = verticalOverflow;
-        m_overflowStatusDirty = false;
-        return;
-    }
-}
-
 IntRect FrameView::windowClipRect(IncludeScrollbarsInRect scrollbarInclusion) const
 {
     ASSERT(m_frame->view() == this);
@@ -1059,11 +924,6 @@ bool FrameView::isActive() const
 {
     Page* page = frame().page();
     return page && page->focusController().isActive();
-}
-
-void FrameView::invalidateScrollbarRect(Scrollbar*, const IntRect&)
-{
-    // FIXME(sky): remove
 }
 
 void FrameView::getTickmarks(Vector<IntRect>& tickmarks) const
@@ -1101,12 +961,6 @@ float FrameView::inputEventsScaleFactor() const
 IntRect FrameView::scrollableAreaBoundingBox() const
 {
     return frameRect();
-}
-
-bool FrameView::isScrollable()
-{
-    // FIXME(sky): Remove
-    return false;
 }
 
 bool FrameView::scrollAnimatorEnabled() const
@@ -1261,7 +1115,6 @@ void FrameView::updateLayoutAndStyleForPainting()
         invalidateTreeIfNeededRecursive();
     }
 
-    scrollContentsIfNeededRecursive();
     ASSERT(lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);
 }
 

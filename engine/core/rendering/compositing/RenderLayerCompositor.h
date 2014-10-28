@@ -136,7 +136,6 @@ public:
     void frameViewDidChangeLocation(const IntPoint& contentsOffset);
     void frameViewDidChangeSize();
     void frameViewDidScroll();
-    void frameViewScrollbarsExistenceDidChange();
     void rootFixedBackgroundsChanged();
 
     bool scrollingLayerDidChange(RenderLayer*);

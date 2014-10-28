@@ -93,6 +93,7 @@ public:
     void setNeedsLayout();
 
     // Methods for getting/setting the size Blink should use to layout the contents.
+    // FIXME(sky): Remove the scrollbars argument now that FrameView doesn't scroll.
     IntSize layoutSize(IncludeScrollbarsInRect = ExcludeScrollbars) const;
     void setLayoutSize(const IntSize&);
 
@@ -110,7 +111,6 @@ public:
     bool isEnclosedInCompositingLayer() const;
 
     void prepareForDetach();
-    virtual void recalculateScrollbarOverlayStyle();
 
     void clear();
 
@@ -136,8 +136,6 @@ public:
     AtomicString mediaType() const;
     void setMediaType(const AtomicString&);
 
-    void restoreScrollbar();
-
     void postLayoutTimerFired(Timer<FrameView>*);
 
     bool wasScrolledByUser() const;
@@ -161,21 +159,12 @@ public:
 
     void forceLayout(bool allowSubtree = false);
 
-    void scrollContentsIfNeededRecursive();
-
     // Methods to convert points and rects between the coordinate space of the renderer, and this view.
     IntRect convertFromRenderer(const RenderObject&, const IntRect&) const;
     IntRect convertToRenderer(const RenderObject&, const IntRect&) const;
     IntPoint convertFromRenderer(const RenderObject&, const IntPoint&) const;
     IntPoint convertToRenderer(const RenderObject&, const IntPoint&) const;
 
-    bool isScrollable();
-
-    enum ScrollbarModesCalculationStrategy { RulesFromWebContentOnly, AnyRule };
-    void calculateScrollbarModesForLayoutAndSetViewportRenderer(ScrollbarMode& hMode, ScrollbarMode& vMode, ScrollbarModesCalculationStrategy = AnyRule);
-
-    // FIXME(sky): Maybe remove now that we're not a ScrollView?
-    IntPoint lastKnownMousePosition() const;
     bool shouldSetCursor() const;
 
     void setCursor(const Cursor&);
@@ -227,7 +216,6 @@ public:
 
     // ScrollableArea interface
     // FIXME(sky): Remove
-    void invalidateScrollbarRect(Scrollbar*, const IntRect&);
     void getTickmarks(Vector<IntRect>&) const;
     IntRect scrollableAreaBoundingBox() const;
     bool scrollAnimatorEnabled() const;
@@ -260,10 +248,6 @@ public:
     bool clipsPaintInvalidations() const { return true; }
 
 protected:
-    virtual void scrollContentsIfNeeded();
-    bool scrollContentsFastPath(const IntSize& scrollDelta);
-    void scrollContentsSlowPath(const IntRect& updateRect);
-
     bool isVerticalDocument() const;
     bool isFlippedDocument() const;
 
@@ -276,9 +260,6 @@ private:
     virtual bool isFrameView() const override { return true; }
 
     bool contentsInCompositedLayer() const;
-
-    void applyOverflowToViewportAndSetRenderer(RenderObject*, ScrollbarMode& hMode, ScrollbarMode& vMode);
-    void updateOverflowStatus(bool horizontalOverflow, bool verticalOverflow);
 
     void forceLayoutParentViewIfNeeded();
     void performPreLayoutTasks();
@@ -295,7 +276,6 @@ private:
     // FIXME(sky): Remove now that we're not a ScrollView?
     void contentRectangleForPaintInvalidation(const IntRect&);
     void contentsResized();
-    void scrollbarExistenceDidChange();
 
     // Override ScrollView methods to do point conversion via renderers, in order to
     // take transforms into account.
@@ -327,9 +307,6 @@ private:
     RefPtr<LocalFrame> m_frame;
 
     bool m_doFullPaintInvalidation;
-
-    // FIXME(sky): Remove
-    bool m_canHaveScrollbars;
 
     bool m_hasPendingLayout;
     RenderObject* m_layoutSubtreeRoot;
