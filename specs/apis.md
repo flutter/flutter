@@ -77,8 +77,6 @@ module 'sky:core' {
     void append(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
     void prepend(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
     void replaceChildrenWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
-    
-    Element? findId(String id); // O(1)
   }
 
   interface Attr {
@@ -129,6 +127,8 @@ module 'sky:core' {
   abstract interface TreeScope : ParentNode {
     readonly attribute Document? ownerDocument; // O(1)
     readonly attribute TreeScope? parentScope; // O(1)
+
+    Element? findId(String id); // O(1)
   }
 
   interface ShadowRoot : TreeScope {
