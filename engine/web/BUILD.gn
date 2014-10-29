@@ -50,8 +50,6 @@ component("web") {
     "LinkHighlight.h",
     "PageWidgetDelegate.cpp",
     "PageWidgetDelegate.h",
-    "ScrollbarGroup.cpp",
-    "ScrollbarGroup.h",
     "SpellCheckerClientImpl.cpp",
     "SpellCheckerClientImpl.h",
     "ViewportAnchor.cpp",
