@@ -22,7 +22,7 @@ describe('Non-relevant properties on mutation records should be null, except for
     var div = document.createElement('div');
     observer.observe(div, {childList: true});
     div.appendChild(document.createElement('span'));
-    record = observer.takeRecords()[0];
+    var record = observer.takeRecords()[0];
     assert.isNull(record.attributeName);
     assert.isNull(record.oldValue);
   });
@@ -30,7 +30,7 @@ describe('Non-relevant properties on mutation records should be null, except for
     var div = document.createElement('div');
     observer.observe(div, {attributes: true});
     div.setAttribute('data-foo', 'bar');
-    record = observer.takeRecords()[0];
+    var record = observer.takeRecords()[0];
     assert.isNull(record.oldValue);
     assert.isNull(record.previousSibling);
     assert.isNull(record.nextSibling);

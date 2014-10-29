@@ -201,16 +201,34 @@ void V8ScriptRunner::runModule(v8::Isolate* isolate, ExecutionContext* context, 
     TRACE_EVENT_SCOPED_SAMPLING_STATE("v8", "V8Execution");
     V8RecursionScope scope(isolate, context);
 
-    v8::Handle<v8::Function> constructor = V8PerContextData::from(
-        isolate->GetCurrentContext())->functionConstructor();
-    v8::Handle<v8::Object> function = v8::Handle<v8::Object>::Cast(
-        constructor->CallAsConstructor(module.formalDependenciesAndSource.size(),
-                                       module.formalDependenciesAndSource.data()));
-    if (!function.IsEmpty()) {
-        function->CallAsFunction(module.receiver,
-                                 module.resolvedDependencies.size(),
-                                 module.resolvedDependencies.data());
+    StringBuilder hackedSource;
+    hackedSource.append("(function(");
+    for (String& formal : module.formalDependencies) {
+        hackedSource.append(formal);
+        hackedSource.append(", ");
     }
+    hackedSource.append("module) {");
+    hackedSource.append(module.source);
+    hackedSource.append("\n/**/})");
+
+    v8::Handle<v8::Script> script = compileScript(
+        v8String(isolate, hackedSource.toString()),
+        module.resourceName,
+        module.textPosition,
+        isolate,
+        V8CacheOptionsOff);
+
+    if (script.IsEmpty())
+        return;
+
+    v8::Handle<v8::Value> scriptResult = script->Run();
+
+    auto arguments = module.resolvedDependencies;
+    arguments.append(module.receiver);
+
+    RELEASE_ASSERT(scriptResult->IsObject());
+    scriptResult.As<v8::Object>()->CallAsFunction(
+        module.receiver, arguments.size(), arguments.data());
     crashIfV8IsDead();
 }
 

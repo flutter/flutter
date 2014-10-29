@@ -63,7 +63,6 @@ public:
     ~V8PerContextData();
 
     v8::Handle<v8::Context> context() { return m_context.newLocal(m_isolate); }
-    v8::Handle<v8::Function> functionConstructor() { return m_functionConstructor.newLocal(m_isolate); }
 
     // To create JS Wrapper objects, we create a cache of a 'boiler plate'
     // object, and then simply Clone that object each time we need a new one.
@@ -106,7 +105,6 @@ private:
 
     ScopedPersistent<v8::Context> m_context;
     ScopedPersistent<v8::Value> m_errorPrototype;
-    ScopedPersistent<v8::Function> m_functionConstructor;
 
     typedef WTF::HashMap<CustomElementDefinition*, OwnPtr<CustomElementBinding> > CustomElementBindingMap;
     OwnPtr<CustomElementBindingMap> m_customElementBindings;

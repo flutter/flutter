@@ -329,7 +329,7 @@ void ScriptController::executeScriptInIsolatedWorld(int worldID, const Vector<Sc
     }
 }
 
-void ScriptController::executeModuleScript(Document& document, const String& source)
+void ScriptController::executeModuleScript(Document& document, const String& source, const TextPosition& textPosition)
 {
     v8::HandleScope handleScope(m_isolate);
     v8::Handle<v8::Context> context = toV8Context(m_frame, DOMWrapperWorld::mainWorld());
@@ -345,14 +345,17 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
     tryCatch.SetVerbose(true);
 
     V8ScriptModule module;
+    module.resourceName = document.url().string();
+    module.textPosition = textPosition;
     module.receiver = toV8(&document, context->Global(), m_isolate);
+    module.source = source;
 
     if (HTMLImport* parent = document.import()) {
         for (HTMLImport* child = parent->firstChild(); child; child = child->next()) {
             if (HTMLLinkElement* link = static_cast<HTMLImportChild*>(child)->link()) {
                 String name = link->as();
                 if (!name.isEmpty()) {
-                    module.formalDependenciesAndSource.append(v8String(m_isolate, name));
+                    module.formalDependencies.append(name);
                     v8::Handle<v8::Value> actual;
                     if (child->document())
                         actual = child->document()->exports().v8Value();
@@ -364,7 +367,6 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
         }
     }
 
-    module.formalDependenciesAndSource.append(v8String(m_isolate, source));
     V8ScriptRunner::runModule(m_isolate, m_frame->document(), module);
 }
 

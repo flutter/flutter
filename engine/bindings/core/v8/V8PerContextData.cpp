@@ -57,8 +57,6 @@ V8PerContextData::V8PerContextData(v8::Handle<v8::Context> context)
     v8::Handle<v8::Value> prototypeValue = object->Get(v8AtomicString(m_isolate, "prototype"));
     ASSERT(!prototypeValue.IsEmpty());
     m_errorPrototype.set(m_isolate, prototypeValue);
-
-    m_functionConstructor.set(m_isolate, v8::Handle<v8::Function>::Cast(context->Global()->Get(v8AtomicString(m_isolate, "Function"))));
 }
 
 V8PerContextData::~V8PerContextData()

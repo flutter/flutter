@@ -195,8 +195,11 @@ describe('MutationObserver.observe on a subtree', function() {
 
   it('should have correct behavior of transient observation with complex movement', function(done) {
     var observer;
+    var text;
     var subDiv;
     var mutations;
+    var subDiv2;
+    var subDiv3;
 
     function start() {
       var div = document.createElement('div');

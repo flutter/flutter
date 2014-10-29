@@ -72,7 +72,7 @@ public:
     v8::Local<v8::Value> executeScriptInMainWorldAndReturnValue(const ScriptSourceCode&);
     v8::Local<v8::Value> executeScriptAndReturnValue(v8::Handle<v8::Context>, const ScriptSourceCode&);
 
-    void executeModuleScript(Document& document, const String& source);
+    void executeModuleScript(Document& document, const String& source, const TextPosition& textPosition);
 
     // Executes JavaScript in an isolated world. The script gets its own global scope,
     // its own prototypes for intrinsic JavaScript objects (String, Array, and so-on),

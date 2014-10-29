@@ -38,8 +38,11 @@ class ScriptSourceCode;
 class ExecutionContext;
 
 struct V8ScriptModule {
+    String resourceName;
+    TextPosition textPosition;
     v8::Handle<v8::Value> receiver;
-    Vector<v8::Handle<v8::Value> > formalDependenciesAndSource;
+    String source;
+    Vector<String> formalDependencies;
     Vector<v8::Handle<v8::Value> > resolvedDependencies;
 };
 

@@ -59,7 +59,7 @@ void HTMLScriptRunner::executeScript(PassRefPtr<HTMLScriptElement> element, Text
     TemporaryChange<bool> executingScript(m_isExecutingScript, true);
 
     contextDocument->pushCurrentScript(element);
-    frame->script().executeModuleScript(sourceDocument, source);
+    frame->script().executeModuleScript(sourceDocument, source, textPosition);
     contextDocument->popCurrentScript();
 }
 
