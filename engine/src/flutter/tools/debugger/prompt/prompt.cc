@@ -73,6 +73,10 @@ class Prompt : public mojo::ApplicationDelegate {
       Reload();
       return true;
     }
+    if (command == "inspect") {
+      Inspect();
+      return true;
+    }
     if (command.size() == 1) {
       char c = command[0];
       if (c == 'h')
@@ -111,14 +115,23 @@ class Prompt : public mojo::ApplicationDelegate {
       << "Sky Debugger" << std::endl
       << "============" << std::endl
       << "Type a URL to load in the debugger, enter to reload." << std::endl
-      << "Commands: help   -- Help" << std::endl
-      << "          trace  -- Capture a trace" << std::endl
-      << "          reload -- Reload the current page" << std::endl
-      << "          q      -- Quit" << std::endl;
+      << "Commands: help    -- Help" << std::endl
+      << "          trace   -- Capture a trace" << std::endl
+      << "          reload  -- Reload the current page" << std::endl
+      << "          inspect -- Inspect the current page" << std::endl
+      << "          q       -- Quit" << std::endl;
   }
 
   void Reload() {
     debugger_->NavigateToURL(url_);
+  }
+
+  void Inspect() {
+    debugger_->InjectInspector();
+    std::cout
+      << "Open the following URL in Chrome:" << std::endl
+      << "chrome-devtools://devtools/bundled/devtools.html?ws=localhost:9898"
+      << std::endl;
   }
 
   void Quit() {
