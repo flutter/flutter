@@ -23,7 +23,6 @@
 #include "unicode/unorm2.h"
 
 #include "MinikinInternal.h"
-#include <minikin/CmapCoverage.h>
 #include <minikin/FontCollection.h>
 
 using std::vector;
@@ -54,28 +53,12 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
             continue;
         }
         family->RefLocked();
-        FontInstance dummy;
-        mInstances.push_back(dummy);  // emplace_back would be better
-        FontInstance* instance = &mInstances.back();
-        instance->mFamily = family;
-        instance->mCoverage = new SparseBitSet;
-#ifdef VERBOSE_DEBUG
-        ALOGD("closest match = %p, family size = %d\n", typeface, family->getNumFonts());
-#endif
-        const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
-        size_t cmapSize = 0;
-        bool ok = typeface->GetTable(cmapTag, NULL, &cmapSize);
-        UniquePtr<uint8_t[]> cmapData(new uint8_t[cmapSize]);
-        ok = typeface->GetTable(cmapTag, cmapData.get(), &cmapSize);
-        CmapCoverage::getCoverage(*instance->mCoverage, cmapData.get(), cmapSize);
-#ifdef VERBOSE_DEBUG
-        ALOGD("font coverage length=%d, first ch=%x\n", instance->mCoverage->length(),
-                instance->mCoverage->nextSetBit(0));
-#endif
-        mMaxChar = max(mMaxChar, instance->mCoverage->length());
-        lastChar.push_back(instance->mCoverage->nextSetBit(0));
+        mFamilies.push_back(family);  // emplace_back would be better
+        const SparseBitSet* coverage = family->getCoverage();
+        mMaxChar = max(mMaxChar, coverage->length());
+        lastChar.push_back(coverage->nextSetBit(0));
     }
-    nTypefaces = mInstances.size();
+    nTypefaces = mFamilies.size();
     LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
         "Font collection must have at least one valid typeface");
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
@@ -90,10 +73,10 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         range->start = offset;
         for (size_t j = 0; j < nTypefaces; j++) {
             if (lastChar[j] < (i + 1) << kLogCharsPerPage) {
-                const FontInstance* instance = &mInstances[j];
-                mInstanceVec.push_back(instance);
+                FontFamily* family = mFamilies[j];
+                mFamilyVec.push_back(family);
                 offset++;
-                uint32_t nextChar = instance->mCoverage->nextSetBit((i + 1) << kLogCharsPerPage);
+                uint32_t nextChar = family->getCoverage()->nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
                 ALOGD("nextChar = %d (j = %d)\n", nextChar, j);
 #endif
@@ -105,9 +88,8 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
 }
 
 FontCollection::~FontCollection() {
-    for (size_t i = 0; i < mInstances.size(); i++) {
-        delete mInstances[i].mCoverage;
-        mInstances[i].mFamily->UnrefLocked();
+    for (size_t i = 0; i < mFamilies.size(); i++) {
+        mFamilies[i]->UnrefLocked();
     }
 }
 
@@ -117,7 +99,7 @@ FontCollection::~FontCollection() {
 // 3. If a font matches just language, it gets a score of 2.
 // 4. Matching the "compact" or "elegant" variant adds one to the score.
 // 5. Highest score wins, with ties resolved to the first font.
-const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t ch,
+FontFamily* FontCollection::getFamilyForChar(uint32_t ch,
             FontLanguage lang, int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
@@ -126,15 +108,14 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
 #ifdef VERBOSE_DEBUG
     ALOGD("querying range %d:%d\n", range.start, range.end);
 #endif
-    const FontInstance* bestInstance = NULL;
+    FontFamily* bestFamily = NULL;
     int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
-        const FontInstance* instance = mInstanceVec[i];
-        if (instance->mCoverage->get(ch)) {
-            FontFamily* family = instance->mFamily;
+        FontFamily* family = mFamilyVec[i];
+        if (family->getCoverage()->get(ch)) {
             // First font family in collection always matches
-            if (mInstances[0].mFamily == family) {
-                return instance;
+            if (mFamilies[0] == family) {
+                return family;
             }
             int score = lang.match(family->lang()) * 2;
             if (variant != 0 && variant == family->variant()) {
@@ -142,11 +123,11 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestInstance = instance;
+                bestFamily = family;
             }
         }
     }
-    if (bestInstance == NULL && !mInstanceVec.empty()) {
+    if (bestFamily == NULL && !mFamilyVec.empty()) {
         UErrorCode errorCode = U_ZERO_ERROR;
         const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
         if (U_SUCCESS(errorCode)) {
@@ -155,12 +136,12 @@ const FontCollection::FontInstance* FontCollection::getInstanceForChar(uint32_t 
             if (U_SUCCESS(errorCode) && len > 0) {
                 int off = 0;
                 U16_NEXT_UNSAFE(decomposed, off, ch);
-                return getInstanceForChar(ch, lang, variant);
+                return getFamilyForChar(ch, lang, variant);
             }
         }
-        bestInstance = &mInstances[0];
+        bestFamily = mFamilies[0];
     }
-    return bestInstance;
+    return bestFamily;
 }
 
 const uint32_t NBSP = 0xa0;
@@ -183,7 +164,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
         vector<Run>* result) const {
     FontLanguage lang = style.getLanguage();
     int variant = style.getVariant();
-    const FontInstance* lastInstance = NULL;
+    FontFamily* lastFamily = NULL;
     Run* run = NULL;
     int nShorts;
     for (size_t i = 0; i < string_size; i += nShorts) {
@@ -197,17 +178,17 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
             }
         }
         // Continue using existing font as long as it has coverage and is whitelisted
-        if (lastInstance == NULL
-                || !(isStickyWhitelisted(ch) && lastInstance->mCoverage->get(ch))) {
-            const FontInstance* instance = getInstanceForChar(ch, lang, variant);
-            if (i == 0 || instance != lastInstance) {
+        if (lastFamily == NULL
+                || !(isStickyWhitelisted(ch) && lastFamily->getCoverage()->get(ch))) {
+            FontFamily* family = getFamilyForChar(ch, lang, variant);
+            if (i == 0 || family != lastFamily) {
                 size_t start = i;
                 // Workaround for Emoji keycap until we implement per-cluster font
                 // selection: if keycap is found in a different font that also
                 // supports previous char, attach previous char to the new run.
                 // Only handles non-surrogate characters.
                 // Bug 7557244.
-                if (ch == KEYCAP && i && instance && instance->mCoverage->get(string[i - 1])) {
+                if (ch == KEYCAP && i && family && family->getCoverage()->get(string[i - 1])) {
                     run->end--;
                     if (run->start == run->end) {
                         result->pop_back();
@@ -217,12 +198,12 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 Run dummy;
                 result->push_back(dummy);
                 run = &result->back();
-                if (instance == NULL) {
+                if (family == NULL) {
                     run->fakedFont.font = NULL;
                 } else {
-                    run->fakedFont = instance->mFamily->getClosestMatch(style);
+                    run->fakedFont = family->getClosestMatch(style);
                 }
-                lastInstance = instance;
+                lastFamily = family;
                 run->start = start;
             }
         }
@@ -235,10 +216,10 @@ MinikinFont* FontCollection::baseFont(FontStyle style) {
 }
 
 FakedFont FontCollection::baseFontFaked(FontStyle style) {
-    if (mInstances.empty()) {
+    if (mFamilies.empty()) {
         return FakedFont();
     }
-    return mInstances[0].mFamily->getClosestMatch(style);
+    return mFamilies[0]->getClosestMatch(style);
 }
 
 uint32_t FontCollection::getId() const {
