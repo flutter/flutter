@@ -41,37 +41,18 @@ class PlatformGestureEvent;
 class PlatformMouseEvent;
 class ScrollableArea;
 
-class PLATFORM_EXPORT Scrollbar : public Widget {
-
+class PLATFORM_EXPORT Scrollbar final : public Widget {
 public:
     static PassRefPtr<Scrollbar> create(ScrollableArea*, ScrollbarOrientation);
 
     virtual ~Scrollbar();
 
-    int x() const { return Widget::x(); }
-    int y() const { return Widget::y(); }
-    int width() const { return Widget::width(); }
-    int height() const { return Widget::height(); }
-    IntSize size() const { return Widget::size(); }
-    IntPoint location() const { return Widget::location(); }
-
-    Widget* parent() const { return Widget::parent(); }
-    Widget* root() const { return Widget::root(); }
-
-    void setFrameRect(const IntRect& r) { Widget::setFrameRect(r); }
-    IntRect frameRect() const { return Widget::frameRect(); }
-
-    void invalidate() { Widget::invalidate(); }
     void invalidateRect(const IntRect&);
 
     ScrollbarOverlayStyle scrollbarOverlayStyle() const;
     void getTickmarks(Vector<IntRect>&) const;
     bool isScrollableAreaActive() const;
-    bool isScrollViewScrollbar() const;
 
-    IntPoint convertFromContainingWindow(const IntPoint& windowPoint) { return Widget::convertFromContainingWindow(windowPoint); }
-
-    bool isCustomScrollbar() const { return false; }
     ScrollbarOrientation orientation() const { return m_orientation; }
     bool isLeftSideVerticalScrollbar() const;
 
@@ -84,8 +65,6 @@ public:
     ScrollbarPart pressedPart() const { return m_pressedPart; }
     ScrollbarPart hoveredPart() const { return m_hoveredPart; }
 
-    void styleChanged() { }
-
     bool enabled() const { return m_enabled; }
     void setEnabled(bool);
 
@@ -97,8 +76,8 @@ public:
 
     int pressedPos() const { return m_pressedPos; }
 
-    virtual void setHoveredPart(ScrollbarPart);
-    virtual void setPressedPart(ScrollbarPart);
+    void setHoveredPart(ScrollbarPart);
+    void setPressedPart(ScrollbarPart);
 
     void setProportion(int visibleSize, int totalSize);
     void setPressedPos(int p) { m_pressedPos = p; }
@@ -107,8 +86,6 @@ public:
 
     bool isOverlayScrollbar() const;
     bool shouldParticipateInHitTesting();
-
-    bool isWindowActive() const;
 
     bool gestureEvent(const PlatformGestureEvent&);
 
@@ -123,12 +100,6 @@ public:
     void mouseUp(const PlatformMouseEvent&);
     void mouseDown(const PlatformMouseEvent&);
 
-    // FIXME(sky): Remove this.
-    Scrollbar* theme() { return this; }
-
-    bool suppressInvalidation() const { return m_suppressInvalidation; }
-    void setSuppressInvalidation(bool s) { m_suppressInvalidation = s; }
-
     virtual IntRect convertToContainingView(const IntRect&) const override;
     virtual IntRect convertFromContainingView(const IntRect&) const override;
 
@@ -136,9 +107,6 @@ public:
     virtual IntPoint convertFromContainingView(const IntPoint&) const override;
 
     void moveThumb(int pos);
-
-    bool isAlphaLocked() const { return m_isAlphaLocked; }
-    void setIsAlphaLocked(bool flag) { m_isAlphaLocked = flag; }
 
     static int scrollbarThickness();
 
@@ -152,8 +120,6 @@ public:
     void invalidatePart(ScrollbarPart);
 
     static void paintScrollCorner(GraphicsContext*, const IntRect& cornerRect);
-
-    static void paintOverhangBackground(GraphicsContext*, const IntRect&, const IntRect&, const IntRect&);
 
     bool shouldCenterOnThumb(const PlatformMouseEvent&);
     bool shouldSnapBackToDragOrigin(const PlatformMouseEvent&);
@@ -184,8 +150,6 @@ protected:
     Scrollbar(ScrollableArea*, ScrollbarOrientation);
 
     void updateThumb();
-    virtual void updateThumbPosition();
-    virtual void updateThumbProportion();
 
     void autoscrollTimerFired(Timer<Scrollbar>*);
     void startTimerIfNeeded(double delay);
@@ -212,10 +176,6 @@ protected:
 
     Timer<Scrollbar> m_scrollTimer;
     bool m_overlapsResizer;
-
-    bool m_suppressInvalidation;
-
-    bool m_isAlphaLocked;
 
 private:
     virtual bool isScrollbar() const override { return true; }

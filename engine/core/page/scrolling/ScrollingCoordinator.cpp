@@ -218,10 +218,6 @@ void ScrollingCoordinator::scrollableAreaScrollbarLayerDidChange(ScrollableArea*
 
     if (scrollbarGraphicsLayer) {
         Scrollbar* scrollbar = orientation == HorizontalScrollbar ? scrollableArea->horizontalScrollbar() : scrollableArea->verticalScrollbar();
-        if (scrollbar->isCustomScrollbar()) {
-            detachScrollbarLayer(scrollbarGraphicsLayer);
-            return;
-        }
 
         WebScrollbarLayer* scrollbarLayer = getWebScrollbarLayer(scrollableArea, orientation);
         if (!scrollbarLayer) {
@@ -230,7 +226,7 @@ void ScrollingCoordinator::scrollableAreaScrollbarLayerDidChange(ScrollableArea*
             OwnPtr<WebScrollbarLayer> webScrollbarLayer;
             if (settings->useSolidColorScrollbars()) {
                 ASSERT(RuntimeEnabledFeatures::overlayScrollbarsEnabled());
-                webScrollbarLayer = createSolidColorScrollbarLayer(orientation, scrollbar->theme()->thumbThickness(), scrollbar->theme()->trackPosition(), scrollableArea->shouldPlaceVerticalScrollbarOnLeft());
+                webScrollbarLayer = createSolidColorScrollbarLayer(orientation, scrollbar->thumbThickness(), scrollbar->trackPosition(), scrollableArea->shouldPlaceVerticalScrollbarOnLeft());
             } else {
                 webScrollbarLayer = createScrollbarLayer(scrollbar);
             }

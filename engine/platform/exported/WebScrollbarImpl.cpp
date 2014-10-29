@@ -71,11 +71,6 @@ int WebScrollbarImpl::totalSize() const
     return m_scrollbar->totalSize();
 }
 
-bool WebScrollbarImpl::isScrollViewScrollbar() const
-{
-    return m_scrollbar->isScrollViewScrollbar();
-}
-
 bool WebScrollbarImpl::isScrollableAreaActive() const
 {
     return m_scrollbar->isScrollableAreaActive();
@@ -116,21 +111,6 @@ WebScrollbar::Orientation WebScrollbarImpl::orientation() const
 bool WebScrollbarImpl::isLeftSideVerticalScrollbar() const
 {
     return m_scrollbar->isLeftSideVerticalScrollbar();
-}
-
-bool WebScrollbarImpl::isCustomScrollbar() const
-{
-    return m_scrollbar->isCustomScrollbar();
-}
-
-bool WebScrollbarImpl::isAlphaLocked() const
-{
-    return m_scrollbar->isAlphaLocked();
-}
-
-void WebScrollbarImpl::setIsAlphaLocked(bool flag)
-{
-    m_scrollbar->setIsAlphaLocked(flag);
 }
 
 } // namespace blink

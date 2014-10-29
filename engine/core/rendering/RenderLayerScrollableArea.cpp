@@ -680,12 +680,6 @@ void RenderLayerScrollableArea::updateAfterStyleChange(const RenderStyle* oldSty
         m_vBar->setEnabled(true);
     }
 
-    // FIXME: Need to detect a swap from custom to native scrollbars (and vice versa).
-    if (m_hBar)
-        m_hBar->styleChanged();
-    if (m_vBar)
-        m_vBar->styleChanged();
-
     updateResizerAreaSet();
 }
 
@@ -797,8 +791,7 @@ void RenderLayerScrollableArea::destroyScrollbar(ScrollbarOrientation orientatio
     if (!scrollbar)
         return;
 
-    if (!scrollbar->isCustomScrollbar())
-        willRemoveScrollbar(scrollbar.get(), orientation);
+    willRemoveScrollbar(scrollbar.get(), orientation);
 
     scrollbar->disconnectFromScrollableArea();
     scrollbar = nullptr;
@@ -817,12 +810,6 @@ void RenderLayerScrollableArea::setHasHorizontalScrollbar(bool hasScrollbar)
     } else {
         destroyScrollbar(HorizontalScrollbar);
     }
-
-    // Destroying or creating one bar can cause our scrollbar corner to come and go. We need to update the opposite scrollbar's style.
-    if (m_hBar)
-        m_hBar->styleChanged();
-    if (m_vBar)
-        m_vBar->styleChanged();
 }
 
 void RenderLayerScrollableArea::setHasVerticalScrollbar(bool hasScrollbar)
@@ -837,12 +824,6 @@ void RenderLayerScrollableArea::setHasVerticalScrollbar(bool hasScrollbar)
     } else {
         destroyScrollbar(VerticalScrollbar);
     }
-
-    // Destroying or creating one bar can cause our scrollbar corner to come and go. We need to update the opposite scrollbar's style.
-    if (m_hBar)
-        m_hBar->styleChanged();
-    if (m_vBar)
-        m_vBar->styleChanged();
 }
 
 int RenderLayerScrollableArea::verticalScrollbarWidth(OverlayScrollbarSizeRelevancy relevancy) const

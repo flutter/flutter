@@ -43,17 +43,13 @@ public:
     virtual bool enabled() const override;
     virtual int maximum() const override;
     virtual int totalSize() const override;
-    virtual bool isScrollViewScrollbar() const override;
     virtual bool isScrollableAreaActive() const override;
     virtual void getTickmarks(WebVector<WebRect>& tickmarks) const override;
     virtual ScrollbarPart pressedPart() const override;
     virtual ScrollbarPart hoveredPart() const override;
     virtual ScrollbarOverlayStyle scrollbarOverlayStyle() const override;
-    virtual bool isCustomScrollbar() const override;
     virtual Orientation orientation() const override;
     virtual bool isLeftSideVerticalScrollbar() const override;
-    virtual bool isAlphaLocked() const override;
-    virtual void setIsAlphaLocked(bool) override;
 
 private:
     RefPtr<Scrollbar> m_scrollbar;
