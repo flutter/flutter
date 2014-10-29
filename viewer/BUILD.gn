@@ -34,6 +34,8 @@ shared_library("viewer") {
     "script/script_runner.h",
     "services/tracing_impl.cc",
     "services/tracing_impl.h",
+    "services/inspector_impl.cc",
+    "services/inspector_impl.h",
     "viewer.cc",
   ]
 
@@ -78,6 +80,7 @@ mojom("bindings") {
   sources = [
     "test_observer.mojom",
     "services/tracing.mojom",
+    "services/inspector.mojom",
   ]
 }
 

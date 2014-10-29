@@ -118,6 +118,7 @@ public:
 
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
+    virtual void injectModule(const WebString&) override;
     virtual void setSpellCheckClient(WebSpellCheckClient*) override;
     virtual WebSettings* settings() override;
     virtual WebString pageEncoding() const override;

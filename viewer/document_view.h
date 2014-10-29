@@ -16,6 +16,7 @@
 #include "mojo/services/public/interfaces/network/url_loader.mojom.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
+#include "sky/viewer/services/inspector_impl.h"
 
 namespace base {
 class MessageLoopProxy;
@@ -98,6 +99,7 @@ class DocumentView : public blink::WebViewClient,
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
+  InspectorServiceFactory inspector_service_factory_;
   scoped_ptr<WebLayerTreeViewImpl> web_layer_tree_view_impl_;
   scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   scoped_ptr<ScriptRunner> script_runner_;

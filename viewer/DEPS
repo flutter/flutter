@@ -1,5 +1,6 @@
 include_rules = [
   "+cc",
+  "+mojo/public",
   "+mojo/application",
   "+mojo/cc",
   "+mojo/converters/geometry",

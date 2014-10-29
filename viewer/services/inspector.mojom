@@ -4,9 +4,8 @@
 
 module sky {
 
-interface Debugger {
-  NavigateToURL(string url);
-  InjectInspector();
+interface InspectorService {
+  Inject();
 };
 
 }

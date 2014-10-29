@@ -128,6 +128,9 @@ public:
 
     virtual WebFrame* mainFrame() = 0;
 
+    virtual void injectModule(const WebString& path) = 0;
+
+
     // Focus ---------------------------------------------------------------
 
     virtual WebFrame* focusedFrame() = 0;

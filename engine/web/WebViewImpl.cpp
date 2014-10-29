@@ -50,6 +50,7 @@
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
+#include "core/html/HTMLLinkElement.h"
 #include "core/html/HTMLMediaElement.h"
 #include "core/html/ime/InputMethodContext.h"
 #include "core/loader/FrameLoader.h"
@@ -1657,6 +1658,17 @@ WebFrame* WebViewImpl::mainFrame()
 WebFrame* WebViewImpl::focusedFrame()
 {
     return WebFrame::fromFrame(focusedCoreFrame());
+}
+
+void WebViewImpl::injectModule(const WebString& path)
+{
+    RefPtr<Document> document = m_page->mainFrame()->document();
+    RefPtr<HTMLLinkElement> link = HTMLLinkElement::create(*document, false);
+    link->setAttribute(HTMLNames::relAttr, "import");
+    link->setAttribute(HTMLNames::hrefAttr, path);
+    if (!document->documentElement())
+        return;
+    document->documentElement()->appendChild(link.release());
 }
 
 void WebViewImpl::setFocusedFrame(WebFrame* frame)

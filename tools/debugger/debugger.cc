@@ -16,6 +16,7 @@
 #include "mojo/services/window_manager/window_manager_delegate.h"
 #include "sky/tools/debugger/focus_rules.h"
 #include "sky/tools/debugger/debugger.mojom.h"
+#include "sky/viewer/services/inspector.mojom.h"
 
 namespace sky {
 
@@ -58,7 +59,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
       mojo::ViewManager* view_manager,
       mojo::View* root,
       mojo::ServiceProviderImpl* exported_services,
-      scoped_ptr<mojo::ServiceProvider> remote_service_provider) override {
+      scoped_ptr<mojo::ServiceProvider> imported_services) override {
     view_manager_ = view_manager;
 
     root_ = root;
@@ -104,10 +105,19 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     // We can get Navigate commands before we've actually been
     // embedded into the view and content_ created.
     // Just save the last one.
-    if (content_)
-      content_->Embed(url);
-    else
+    if (content_) {
+      scoped_ptr<mojo::ServiceProviderImpl> exported_services(
+        new mojo::ServiceProviderImpl());
+      viewer_services_ = content_->Embed(url, exported_services.Pass());
+    } else {
       pending_url_ = url;
+    }
+  }
+
+  virtual void InjectInspector() override {
+    InspectorServicePtr inspector_service;
+    mojo::ConnectToService(viewer_services_.get(), &inspector_service);
+    inspector_service->Inject();
   }
 
   scoped_ptr<mojo::WindowManagerApp> window_manager_app_;
@@ -116,6 +126,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   mojo::View* root_;
   mojo::View* content_;
   std::string pending_url_;
+
+  scoped_ptr<mojo::ServiceProvider> viewer_services_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyDebugger);
 };

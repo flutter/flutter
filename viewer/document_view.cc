@@ -75,6 +75,7 @@ DocumentView::DocumentView(
       web_view_(NULL),
       root_(NULL),
       view_manager_client_factory_(shell, this),
+      inspector_service_factory_(this),
       compositor_thread_(compositor_thread),
       weak_factory_(this) {
   mojo::ServiceProviderImpl* exported_services = new mojo::ServiceProviderImpl();
@@ -102,6 +103,7 @@ void DocumentView::OnEmbed(
   root_ = root;
   imported_services_ = imported_services.Pass();
   navigator_host_.set_service_provider(imported_services_.get());
+  exported_services->AddService(&inspector_service_factory_);
 
   Load(response_.Pass());
 
