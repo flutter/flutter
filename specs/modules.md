@@ -61,8 +61,8 @@ The parser executes the contents of script elements inside a module as
 if they were executed as follow:
 
 ```javascript
-(new Function(module, name_1, ..., name_n, source_code)).call(
-  source_module, value_1, ..., value_n);
+(new Function(name_1, ..., name_n, module, source_code)).call(
+  value_1, ..., value_n, source_module);
 ```
 
 Where ```name_1``` through ```name_n``` are the names bound to the
