@@ -39,7 +39,7 @@ WebLayerTreeViewImpl::WebLayerTreeViewImpl(
   settings.layer_transforms_should_scale_layer_contents = true;
 
   cc::SharedBitmapManager* shared_bitmap_manager = NULL;
-  cc::GpuMemoryBufferManager* gpu_memory_buffer_manager = NULL;
+  gpu::GpuMemoryBufferManager* gpu_memory_buffer_manager = NULL;
 
   layer_tree_host_ =
       cc::LayerTreeHost::CreateThreaded(this,
