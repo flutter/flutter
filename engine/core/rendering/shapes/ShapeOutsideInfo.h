@@ -123,7 +123,7 @@ protected:
     { }
 
 private:
-    PassOwnPtr<Shape> createShapeForImage(StyleImage*, float shapeImageThreshold, WritingMode, float margin) const;
+    PassOwnPtr<Shape> createShapeForImage(StyleImage*, float shapeImageThreshold, float margin) const;
 
     LayoutUnit logicalTopOffset() const;
     LayoutUnit logicalLeftOffset() const;

@@ -245,11 +245,6 @@ void StyleAdjuster::adjustStyleForDisplay(RenderStyle* style, RenderStyle* paren
     if (style->display() == BLOCK)
         return;
 
-    // FIXME: Don't support this mutation for pseudo styles like first-letter or first-line, since it's not completely
-    // clear how that should work.
-    if (style->display() == INLINE && style->styleType() == NOPSEUDO && style->writingMode() != parentStyle->writingMode())
-        style->setDisplay(INLINE_BLOCK);
-
     if (parentStyle->isDisplayFlexibleOrGridBox()) {
         style->setDisplay(equivalentBlockDisplay(style->display()));
     }

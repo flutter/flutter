@@ -33,7 +33,7 @@ void StyleBuilder::applyProperty(CSSPropertyID property, StyleResolverState& sta
     case {{property_id}}:
     {% endfor %}
     {
-        CSSPropertyID resolvedProperty = CSSProperty::resolveDirectionAwareProperty(property, state.style()->direction(), state.style()->writingMode());
+        CSSPropertyID resolvedProperty = CSSProperty::resolveDirectionAwareProperty(property, state.style()->direction());
         ASSERT(resolvedProperty != property);
         applyProperty(resolvedProperty, state, value);
         return;

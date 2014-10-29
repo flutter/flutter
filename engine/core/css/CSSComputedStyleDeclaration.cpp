@@ -1463,7 +1463,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
     if (!style)
         return nullptr;
 
-    propertyID = CSSProperty::resolveDirectionAwareProperty(propertyID, style->direction(), style->writingMode());
+    propertyID = CSSProperty::resolveDirectionAwareProperty(propertyID, style->direction());
 
     switch (propertyID) {
         case CSSPropertyInvalid:

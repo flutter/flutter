@@ -317,7 +317,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
     , m_directionSetOnDocumentElement(false)
-    , m_writingModeSetOnDocumentElement(false)
     , m_registrationContext(initializer.registrationContext(this))
     , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
     , m_timeline(AnimationTimeline::create(this))

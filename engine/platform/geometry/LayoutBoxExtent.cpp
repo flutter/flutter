@@ -35,67 +35,67 @@
 
 namespace blink {
 
-LayoutUnit LayoutBoxExtent::logicalTop(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::logicalTop() const
 {
-    return isHorizontalWritingMode(writingMode) ? m_top : m_left;
+    return isHorizontalWritingMode() ? m_top : m_left;
 }
 
-LayoutUnit LayoutBoxExtent::logicalBottom(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::logicalBottom() const
 {
-    return isHorizontalWritingMode(writingMode) ? m_bottom : m_right;
+    return isHorizontalWritingMode() ? m_bottom : m_right;
 }
 
-LayoutUnit LayoutBoxExtent::logicalLeft(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::logicalLeft() const
 {
-    return isHorizontalWritingMode(writingMode) ? m_left : m_top;
+    return isHorizontalWritingMode() ? m_left : m_top;
 }
 
-LayoutUnit LayoutBoxExtent::logicalRight(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::logicalRight() const
 {
-    return isHorizontalWritingMode(writingMode) ? m_right : m_bottom;
+    return isHorizontalWritingMode() ? m_right : m_bottom;
 }
 
-LayoutUnit LayoutBoxExtent::before(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::before() const
 {
     // FIXME(sky): Remove
     return m_top;
 }
 
-LayoutUnit LayoutBoxExtent::after(WritingMode writingMode) const
+LayoutUnit LayoutBoxExtent::after() const
 {
     // FIXME(sky): Remove
     return m_bottom;
 }
 
-LayoutUnit LayoutBoxExtent::start(WritingMode writingMode, TextDirection direction) const
+LayoutUnit LayoutBoxExtent::start(TextDirection direction) const
 {
-    if (isHorizontalWritingMode(writingMode))
+    if (isHorizontalWritingMode())
         return isLeftToRightDirection(direction) ? m_left : m_right;
     return isLeftToRightDirection(direction) ? m_top : m_bottom;
 }
 
-LayoutUnit LayoutBoxExtent::end(WritingMode writingMode, TextDirection direction) const
+LayoutUnit LayoutBoxExtent::end(TextDirection direction) const
 {
-    if (isHorizontalWritingMode(writingMode))
+    if (isHorizontalWritingMode())
         return isLeftToRightDirection(direction) ? m_right : m_left;
     return isLeftToRightDirection(direction) ? m_bottom : m_top;
 }
 
-void LayoutBoxExtent::setBefore(WritingMode writingMode, LayoutUnit value)
+void LayoutBoxExtent::setBefore(LayoutUnit value)
 {
     // FIXME(sky): Remove
     m_top = value;
 }
 
-void LayoutBoxExtent::setAfter(WritingMode writingMode, LayoutUnit value)
+void LayoutBoxExtent::setAfter(LayoutUnit value)
 {
     // FIXME(sky): Remove
     m_bottom = value;
 }
 
-void LayoutBoxExtent::setStart(WritingMode writingMode, TextDirection direction, LayoutUnit value)
+void LayoutBoxExtent::setStart(TextDirection direction, LayoutUnit value)
 {
-    if (isHorizontalWritingMode(writingMode)) {
+    if (isHorizontalWritingMode()) {
         if (isLeftToRightDirection(direction))
             m_left = value;
         else
@@ -108,9 +108,9 @@ void LayoutBoxExtent::setStart(WritingMode writingMode, TextDirection direction,
     }
 }
 
-void LayoutBoxExtent::setEnd(WritingMode writingMode, TextDirection direction, LayoutUnit value)
+void LayoutBoxExtent::setEnd(TextDirection direction, LayoutUnit value)
 {
-    if (isHorizontalWritingMode(writingMode)) {
+    if (isHorizontalWritingMode()) {
         if (isLeftToRightDirection(direction))
             m_right = value;
         else
@@ -123,28 +123,28 @@ void LayoutBoxExtent::setEnd(WritingMode writingMode, TextDirection direction, L
     }
 }
 
-LayoutUnit& LayoutBoxExtent::mutableLogicalLeft(WritingMode writingMode)
+LayoutUnit& LayoutBoxExtent::mutableLogicalLeft()
 {
-    return isHorizontalWritingMode(writingMode) ? m_left : m_top;
+    return isHorizontalWritingMode() ? m_left : m_top;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableLogicalRight(WritingMode writingMode)
+LayoutUnit& LayoutBoxExtent::mutableLogicalRight()
 {
-    return isHorizontalWritingMode(writingMode) ? m_right : m_bottom;
+    return isHorizontalWritingMode() ? m_right : m_bottom;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableBefore(WritingMode writingMode)
+LayoutUnit& LayoutBoxExtent::mutableBefore()
 {
-    return isHorizontalWritingMode(writingMode) ?
-        (isFlippedBlocksWritingMode(writingMode) ? m_bottom : m_top) :
-        (isFlippedBlocksWritingMode(writingMode) ? m_right: m_left);
+    return isHorizontalWritingMode() ?
+        (isFlippedBlocksWritingMode() ? m_bottom : m_top) :
+        (isFlippedBlocksWritingMode() ? m_right: m_left);
 }
 
-LayoutUnit& LayoutBoxExtent::mutableAfter(WritingMode writingMode)
+LayoutUnit& LayoutBoxExtent::mutableAfter()
 {
-    return isHorizontalWritingMode(writingMode) ?
-        (isFlippedBlocksWritingMode(writingMode) ? m_top : m_bottom) :
-        (isFlippedBlocksWritingMode(writingMode) ? m_left: m_right);
+    return isHorizontalWritingMode() ?
+        (isFlippedBlocksWritingMode() ? m_top : m_bottom) :
+        (isFlippedBlocksWritingMode() ? m_left: m_right);
 }
 
 } // namespace blink

@@ -398,7 +398,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
 static inline void resetDirectionAndWritingModeOnDocument(Document& document)
 {
     document.setDirectionSetOnDocumentElement(false);
-    document.setWritingModeSetOnDocumentElement(false);
 }
 
 static void addContentAttrValuesToFeatures(const Vector<AtomicString>& contentAttrValues, RuleFeatureSet& features)

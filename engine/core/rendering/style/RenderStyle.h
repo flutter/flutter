@@ -150,8 +150,7 @@ protected:
                 && (_border_collapse == other._border_collapse)
                 && (m_rtlOrdering == other.m_rtlOrdering)
                 && (m_printColorAdjust == other.m_printColorAdjust)
-                && (_pointerEvents == other._pointerEvents)
-                && (m_writingMode == other.m_writingMode);
+                && (_pointerEvents == other._pointerEvents);
         }
 
         bool operator!=(const InheritedFlags& other) const { return !(*this == other); }
@@ -173,10 +172,6 @@ protected:
         unsigned m_rtlOrdering : 1; // Order
         unsigned m_printColorAdjust : PrintColorAdjustBits;
         unsigned _pointerEvents : 4; // EPointerEvents
-
-        // CSS Text Layout Module Level 3: Vertical writing support
-        unsigned m_writingMode : 2; // WritingMode
-        // 42 bits
     } inherited_flags;
 
 // don't inherit
@@ -269,7 +264,6 @@ protected:
         inherited_flags.m_rtlOrdering = initialRTLOrdering();
         inherited_flags.m_printColorAdjust = initialPrintColorAdjust();
         inherited_flags._pointerEvents = initialPointerEvents();
-        inherited_flags.m_writingMode = initialWritingMode();
 
         noninherited_flags.effectiveDisplay = noninherited_flags.originalDisplay = initialDisplay();
         noninherited_flags.overflowX = initialOverflowX();
@@ -395,10 +389,10 @@ public:
     const Length& bottom() const { return surround->offset.bottom(); }
 
     // Accessors for positioned object edges that take into account writing mode.
-    const Length& logicalLeft() const { return surround->offset.logicalLeft(writingMode()); }
-    const Length& logicalRight() const { return surround->offset.logicalRight(writingMode()); }
-    const Length& logicalTop() const { return surround->offset.before(writingMode()); }
-    const Length& logicalBottom() const { return surround->offset.after(writingMode()); }
+    const Length& logicalLeft() const { return surround->offset.logicalLeft(); }
+    const Length& logicalRight() const { return surround->offset.logicalRight(); }
+    const Length& logicalTop() const { return surround->offset.before(); }
+    const Length& logicalBottom() const { return surround->offset.after(); }
 
     // Whether or not a positioned element requires normal flow x/y to be computed
     // to determine its position.
@@ -636,24 +630,24 @@ public:
     const Length& marginBottom() const { return surround->margin.bottom(); }
     const Length& marginLeft() const { return surround->margin.left(); }
     const Length& marginRight() const { return surround->margin.right(); }
-    const Length& marginBefore() const { return surround->margin.before(writingMode()); }
-    const Length& marginAfter() const { return surround->margin.after(writingMode()); }
-    const Length& marginStart() const { return surround->margin.start(writingMode(), direction()); }
-    const Length& marginEnd() const { return surround->margin.end(writingMode(), direction()); }
-    const Length& marginStartUsing(const RenderStyle* otherStyle) const { return surround->margin.start(otherStyle->writingMode(), otherStyle->direction()); }
-    const Length& marginEndUsing(const RenderStyle* otherStyle) const { return surround->margin.end(otherStyle->writingMode(), otherStyle->direction()); }
-    const Length& marginBeforeUsing(const RenderStyle* otherStyle) const { return surround->margin.before(otherStyle->writingMode()); }
-    const Length& marginAfterUsing(const RenderStyle* otherStyle) const { return surround->margin.after(otherStyle->writingMode()); }
+    const Length& marginBefore() const { return surround->margin.before(); }
+    const Length& marginAfter() const { return surround->margin.after(); }
+    const Length& marginStart() const { return surround->margin.start(direction()); }
+    const Length& marginEnd() const { return surround->margin.end(direction()); }
+    const Length& marginStartUsing(const RenderStyle* otherStyle) const { return surround->margin.start(otherStyle->direction()); }
+    const Length& marginEndUsing(const RenderStyle* otherStyle) const { return surround->margin.end(otherStyle->direction()); }
+    const Length& marginBeforeUsing(const RenderStyle* otherStyle) const { return surround->margin.before(); }
+    const Length& marginAfterUsing(const RenderStyle* otherStyle) const { return surround->margin.after(); }
 
     const LengthBox& paddingBox() const { return surround->padding; }
     const Length& paddingTop() const { return surround->padding.top(); }
     const Length& paddingBottom() const { return surround->padding.bottom(); }
     const Length& paddingLeft() const { return surround->padding.left(); }
     const Length& paddingRight() const { return surround->padding.right(); }
-    const Length& paddingBefore() const { return surround->padding.before(writingMode()); }
-    const Length& paddingAfter() const { return surround->padding.after(writingMode()); }
-    const Length& paddingStart() const { return surround->padding.start(writingMode(), direction()); }
-    const Length& paddingEnd() const { return surround->padding.end(writingMode(), direction()); }
+    const Length& paddingBefore() const { return surround->padding.before(); }
+    const Length& paddingAfter() const { return surround->padding.after(); }
+    const Length& paddingStart() const { return surround->padding.start(direction()); }
+    const Length& paddingEnd() const { return surround->padding.end(direction()); }
 
     ECursor cursor() const { return static_cast<ECursor>(inherited_flags._cursor_style); }
     CursorList* cursors() const { return rareInheritedData->cursorData.get(); }
@@ -837,10 +831,9 @@ public:
     const LineClampValue& lineClamp() const { return rareNonInheritedData->lineClamp; }
     Color tapHighlightColor() const { return rareInheritedData->tapHighlightColor; }
 
-    WritingMode writingMode() const { return static_cast<WritingMode>(inherited_flags.m_writingMode); }
-    bool isHorizontalWritingMode() const { return blink::isHorizontalWritingMode(writingMode()); }
-    bool isFlippedLinesWritingMode() const { return blink::isFlippedLinesWritingMode(writingMode()); }
-    bool isFlippedBlocksWritingMode() const { return blink::isFlippedBlocksWritingMode(writingMode()); }
+    bool isHorizontalWritingMode() const { return blink::isHorizontalWritingMode(); }
+    bool isFlippedLinesWritingMode() const { return blink::isFlippedLinesWritingMode(); }
+    bool isFlippedBlocksWritingMode() const { return blink::isFlippedBlocksWritingMode(); }
 
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
 
@@ -1326,16 +1319,6 @@ public:
     bool isOriginalDisplayInlineType() const { return isDisplayInlineType(originalDisplay()); }
     bool isDisplayFlexibleOrGridBox() const { return isDisplayFlexibleBox(display()) || isDisplayGridBox(display()); }
 
-
-    bool setWritingMode(WritingMode v)
-    {
-        if (v == writingMode())
-            return false;
-
-        inherited_flags.m_writingMode = v;
-        return true;
-    }
-
     // A unique style is one that has matches something that makes it impossible to share.
     bool unique() const { return noninherited_flags.unique; }
     void setUnique() { noninherited_flags.unique = true; }
@@ -1370,7 +1353,6 @@ public:
     static EClear initialClear() { return CNONE; }
     static LengthBox initialClip() { return LengthBox(); }
     static TextDirection initialDirection() { return LTR; }
-    static WritingMode initialWritingMode() { return TopToBottomWritingMode; }
     static TextCombine initialTextCombine() { return TextCombineNone; }
     static TextOrientation initialTextOrientation() { return TextOrientationVerticalRight; }
     static ObjectFit initialObjectFit() { return ObjectFitFill; }

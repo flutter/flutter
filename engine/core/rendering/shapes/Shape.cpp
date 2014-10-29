@@ -70,36 +70,36 @@ static PassOwnPtr<Shape> createPolygonShape(PassOwnPtr<Vector<FloatPoint> > vert
     return adoptPtr(new PolygonShape(vertices, fillRule));
 }
 
-static inline FloatRect physicalRectToLogical(const FloatRect& rect, float logicalBoxHeight, WritingMode writingMode)
+static inline FloatRect physicalRectToLogical(const FloatRect& rect, float logicalBoxHeight)
 {
-    if (isHorizontalWritingMode(writingMode))
+    if (isHorizontalWritingMode())
         return rect;
-    if (isFlippedBlocksWritingMode(writingMode))
+    if (isFlippedBlocksWritingMode())
         return FloatRect(rect.y(), logicalBoxHeight - rect.maxX(), rect.height(), rect.width());
     return rect.transposedRect();
 }
 
-static inline FloatPoint physicalPointToLogical(const FloatPoint& point, float logicalBoxHeight, WritingMode writingMode)
+static inline FloatPoint physicalPointToLogical(const FloatPoint& point, float logicalBoxHeight)
 {
-    if (isHorizontalWritingMode(writingMode))
+    if (isHorizontalWritingMode())
         return point;
-    if (isFlippedBlocksWritingMode(writingMode))
+    if (isFlippedBlocksWritingMode())
         return FloatPoint(point.y(), logicalBoxHeight - point.x());
     return point.transposedPoint();
 }
 
-static inline FloatSize physicalSizeToLogical(const FloatSize& size, WritingMode writingMode)
+static inline FloatSize physicalSizeToLogical(const FloatSize& size)
 {
-    if (isHorizontalWritingMode(writingMode))
+    if (isHorizontalWritingMode())
         return size;
     return size.transposedSize();
 }
 
-PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutSize& logicalBoxSize, WritingMode writingMode, float margin)
+PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutSize& logicalBoxSize, float margin)
 {
     ASSERT(basicShape);
 
-    bool horizontalWritingMode = isHorizontalWritingMode(writingMode);
+    bool horizontalWritingMode = isHorizontalWritingMode();
     float boxWidth = horizontalWritingMode ? logicalBoxSize.width().toFloat() : logicalBoxSize.height().toFloat();
     float boxHeight = horizontalWritingMode ? logicalBoxSize.height().toFloat() : logicalBoxSize.width().toFloat();
     OwnPtr<Shape> shape;
@@ -110,7 +110,7 @@ PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutS
         const BasicShapeCircle* circle = toBasicShapeCircle(basicShape);
         FloatPoint center = floatPointForCenterCoordinate(circle->centerX(), circle->centerY(), FloatSize(boxWidth, boxHeight));
         float radius = circle->floatValueForRadiusInBox(FloatSize(boxWidth, boxHeight));
-        FloatPoint logicalCenter = physicalPointToLogical(center, logicalBoxSize.height().toFloat(), writingMode);
+        FloatPoint logicalCenter = physicalPointToLogical(center, logicalBoxSize.height().toFloat());
 
         shape = createCircleShape(logicalCenter, radius);
         break;
@@ -121,7 +121,7 @@ PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutS
         FloatPoint center = floatPointForCenterCoordinate(ellipse->centerX(), ellipse->centerY(), FloatSize(boxWidth, boxHeight));
         float radiusX = ellipse->floatValueForRadiusInBox(ellipse->radiusX(), center.x(), boxWidth);
         float radiusY = ellipse->floatValueForRadiusInBox(ellipse->radiusY(), center.y(), boxHeight);
-        FloatPoint logicalCenter = physicalPointToLogical(center, logicalBoxSize.height().toFloat(), writingMode);
+        FloatPoint logicalCenter = physicalPointToLogical(center, logicalBoxSize.height().toFloat());
 
         shape = createEllipseShape(logicalCenter, FloatSize(radiusX, radiusY));
         break;
@@ -137,7 +137,7 @@ PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutS
             FloatPoint vertex(
                 floatValueForLength(values.at(i), boxWidth),
                 floatValueForLength(values.at(i + 1), boxHeight));
-            (*vertices)[i / 2] = physicalPointToLogical(vertex, logicalBoxSize.height().toFloat(), writingMode);
+            (*vertices)[i / 2] = physicalPointToLogical(vertex, logicalBoxSize.height().toFloat());
         }
         shape = createPolygonShape(vertices.release(), polygon->windRule());
         break;
@@ -150,13 +150,13 @@ PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutS
         float right = floatValueForLength(inset.right(), boxWidth);
         float bottom = floatValueForLength(inset.bottom(), boxHeight);
         FloatRect rect(left, top, std::max<float>(boxWidth - left - right, 0), std::max<float>(boxHeight - top - bottom, 0));
-        FloatRect logicalRect = physicalRectToLogical(rect, logicalBoxSize.height().toFloat(), writingMode);
+        FloatRect logicalRect = physicalRectToLogical(rect, logicalBoxSize.height().toFloat());
 
         FloatSize boxSize(boxWidth, boxHeight);
-        FloatSize topLeftRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.topLeftRadius(), boxSize), writingMode);
-        FloatSize topRightRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.topRightRadius(), boxSize), writingMode);
-        FloatSize bottomLeftRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.bottomLeftRadius(), boxSize), writingMode);
-        FloatSize bottomRightRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.bottomRightRadius(), boxSize), writingMode);
+        FloatSize topLeftRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.topLeftRadius(), boxSize));
+        FloatSize topRightRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.topRightRadius(), boxSize));
+        FloatSize bottomLeftRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.bottomLeftRadius(), boxSize));
+        FloatSize bottomRightRadius = physicalSizeToLogical(floatSizeForLengthSize(inset.bottomRightRadius(), boxSize));
         FloatRoundedRect::Radii cornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
 
         cornerRadii.scale(calcBorderRadiiConstraintScaleFor(logicalRect, cornerRadii));
@@ -169,22 +169,20 @@ PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutS
         ASSERT_NOT_REACHED();
     }
 
-    shape->m_writingMode = writingMode;
     shape->m_margin = margin;
 
     return shape.release();
 }
 
-PassOwnPtr<Shape> Shape::createEmptyRasterShape(WritingMode writingMode, float margin)
+PassOwnPtr<Shape> Shape::createEmptyRasterShape(float margin)
 {
     OwnPtr<RasterShapeIntervals> intervals = adoptPtr(new RasterShapeIntervals(0, 0));
     OwnPtr<RasterShape> rasterShape = adoptPtr(new RasterShape(intervals.release(), IntSize()));
-    rasterShape->m_writingMode = writingMode;
     rasterShape->m_margin = margin;
     return rasterShape.release();
 }
 
-PassOwnPtr<Shape> Shape::createRasterShape(Image* image, float threshold, const LayoutRect& imageR, const LayoutRect& marginR, WritingMode writingMode, float margin)
+PassOwnPtr<Shape> Shape::createRasterShape(Image* image, float threshold, const LayoutRect& imageR, const LayoutRect& marginR, float margin)
 {
     IntRect imageRect = pixelSnappedIntRect(imageR);
     IntRect marginRect = pixelSnappedIntRect(marginR);
@@ -222,17 +220,15 @@ PassOwnPtr<Shape> Shape::createRasterShape(Image* image, float threshold, const 
     }
 
     OwnPtr<RasterShape> rasterShape = adoptPtr(new RasterShape(intervals.release(), marginRect.size()));
-    rasterShape->m_writingMode = writingMode;
     rasterShape->m_margin = margin;
     return rasterShape.release();
 }
 
-PassOwnPtr<Shape> Shape::createLayoutBoxShape(const RoundedRect& roundedRect, WritingMode writingMode, float margin)
+PassOwnPtr<Shape> Shape::createLayoutBoxShape(const RoundedRect& roundedRect, float margin)
 {
     FloatRect rect(0, 0, roundedRect.rect().width(), roundedRect.rect().height());
     FloatRoundedRect bounds(rect, roundedRect.radii());
     OwnPtr<Shape> shape = createInsetShape(bounds);
-    shape->m_writingMode = writingMode;
     shape->m_margin = margin;
 
     return shape.release();

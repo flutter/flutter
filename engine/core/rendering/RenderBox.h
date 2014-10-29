@@ -293,32 +293,32 @@ public:
     void setMarginLeft(LayoutUnit margin) { m_marginBox.setLeft(margin); }
     void setMarginRight(LayoutUnit margin) { m_marginBox.setRight(margin); }
 
-    LayoutUnit marginLogicalLeft() const { return m_marginBox.logicalLeft(style()->writingMode()); }
-    LayoutUnit marginLogicalRight() const { return m_marginBox.logicalRight(style()->writingMode()); }
+    LayoutUnit marginLogicalLeft() const { return m_marginBox.logicalLeft(); }
+    LayoutUnit marginLogicalRight() const { return m_marginBox.logicalRight(); }
 
-    virtual LayoutUnit marginBefore(const RenderStyle* overrideStyle = 0) const override final { return m_marginBox.before((overrideStyle ? overrideStyle : style())->writingMode()); }
-    virtual LayoutUnit marginAfter(const RenderStyle* overrideStyle = 0) const override final { return m_marginBox.after((overrideStyle ? overrideStyle : style())->writingMode()); }
+    virtual LayoutUnit marginBefore(const RenderStyle* overrideStyle = 0) const override final { return m_marginBox.before(); }
+    virtual LayoutUnit marginAfter(const RenderStyle* overrideStyle = 0) const override final { return m_marginBox.after(); }
     virtual LayoutUnit marginStart(const RenderStyle* overrideStyle = 0) const override final
     {
         const RenderStyle* styleToUse = overrideStyle ? overrideStyle : style();
-        return m_marginBox.start(styleToUse->writingMode(), styleToUse->direction());
+        return m_marginBox.start(styleToUse->direction());
     }
     virtual LayoutUnit marginEnd(const RenderStyle* overrideStyle = 0) const override final
     {
         const RenderStyle* styleToUse = overrideStyle ? overrideStyle : style();
-        return m_marginBox.end(styleToUse->writingMode(), styleToUse->direction());
+        return m_marginBox.end(styleToUse->direction());
     }
-    void setMarginBefore(LayoutUnit value, const RenderStyle* overrideStyle = 0) { m_marginBox.setBefore((overrideStyle ? overrideStyle : style())->writingMode(), value); }
-    void setMarginAfter(LayoutUnit value, const RenderStyle* overrideStyle = 0) { m_marginBox.setAfter((overrideStyle ? overrideStyle : style())->writingMode(), value); }
+    void setMarginBefore(LayoutUnit value, const RenderStyle* overrideStyle = 0) { m_marginBox.setBefore(value); }
+    void setMarginAfter(LayoutUnit value, const RenderStyle* overrideStyle = 0) { m_marginBox.setAfter(value); }
     void setMarginStart(LayoutUnit value, const RenderStyle* overrideStyle = 0)
     {
         const RenderStyle* styleToUse = overrideStyle ? overrideStyle : style();
-        m_marginBox.setStart(styleToUse->writingMode(), styleToUse->direction(), value);
+        m_marginBox.setStart(styleToUse->direction(), value);
     }
     void setMarginEnd(LayoutUnit value, const RenderStyle* overrideStyle = 0)
     {
         const RenderStyle* styleToUse = overrideStyle ? overrideStyle : style();
-        m_marginBox.setEnd(styleToUse->writingMode(), styleToUse->direction(), value);
+        m_marginBox.setEnd(styleToUse->direction(), value);
     }
 
     // The following five functions are used to implement collapsing margins.
@@ -527,7 +527,7 @@ public:
     bool shrinkToAvoidFloats() const;
     virtual bool avoidsFloats() const;
 
-    bool isWritingModeRoot() const { return !parent() || parent()->style()->writingMode() != style()->writingMode(); }
+    bool isWritingModeRoot() const { return false; }
 
     bool isFlexItemIncludingDeprecated() const { return !isInline() && !isFloatingOrOutOfFlowPositioned() && parent() && parent()->isFlexibleBox(); }
 

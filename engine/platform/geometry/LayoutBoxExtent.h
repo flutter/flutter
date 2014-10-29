@@ -54,26 +54,26 @@ public:
     inline void setBottom(LayoutUnit value) { m_bottom = value; }
     inline void setLeft(LayoutUnit value) { m_left = value; }
 
-    LayoutUnit logicalTop(WritingMode) const;
-    LayoutUnit logicalBottom(WritingMode) const;
-    LayoutUnit logicalLeft(WritingMode) const;
-    LayoutUnit logicalRight(WritingMode) const;
+    LayoutUnit logicalTop() const;
+    LayoutUnit logicalBottom() const;
+    LayoutUnit logicalLeft() const;
+    LayoutUnit logicalRight() const;
 
-    LayoutUnit before(WritingMode) const;
-    LayoutUnit after(WritingMode) const;
-    LayoutUnit start(WritingMode, TextDirection) const;
-    LayoutUnit end(WritingMode, TextDirection) const;
+    LayoutUnit before() const;
+    LayoutUnit after() const;
+    LayoutUnit start(TextDirection) const;
+    LayoutUnit end(TextDirection) const;
 
-    void setBefore(WritingMode, LayoutUnit);
-    void setAfter(WritingMode, LayoutUnit);
-    void setStart(WritingMode, TextDirection, LayoutUnit);
-    void setEnd(WritingMode, TextDirection, LayoutUnit);
+    void setBefore(LayoutUnit);
+    void setAfter(LayoutUnit);
+    void setStart(TextDirection, LayoutUnit);
+    void setEnd(TextDirection, LayoutUnit);
 
-    LayoutUnit& mutableLogicalLeft(WritingMode);
-    LayoutUnit& mutableLogicalRight(WritingMode);
+    LayoutUnit& mutableLogicalLeft();
+    LayoutUnit& mutableLogicalRight();
 
-    LayoutUnit& mutableBefore(WritingMode);
-    LayoutUnit& mutableAfter(WritingMode);
+    LayoutUnit& mutableBefore();
+    LayoutUnit& mutableAfter();
 
 private:
     LayoutUnit m_top;

@@ -784,10 +784,10 @@ inline void InlineFlowBox::addBorderOutsetVisualOverflow(LayoutRect& logicalVisu
 
     LayoutBoxExtent borderOutsets = style->borderImageOutsets();
 
-    LayoutUnit borderOutsetLogicalTop = borderOutsets.logicalTop(style->writingMode());
-    LayoutUnit borderOutsetLogicalBottom = borderOutsets.logicalBottom(style->writingMode());
-    LayoutUnit borderOutsetLogicalLeft = borderOutsets.logicalLeft(style->writingMode());
-    LayoutUnit borderOutsetLogicalRight = borderOutsets.logicalRight(style->writingMode());
+    LayoutUnit borderOutsetLogicalTop = borderOutsets.logicalTop();
+    LayoutUnit borderOutsetLogicalBottom = borderOutsets.logicalBottom();
+    LayoutUnit borderOutsetLogicalLeft = borderOutsets.logicalLeft();
+    LayoutUnit borderOutsetLogicalRight = borderOutsets.logicalRight();
 
     // Similar to how glyph overflow works, if our lines are flipped, then it's actually the opposite border that applies, since
     // the line is "upside down" in terms of block coordinates. vertical-rl and horizontal-bt are the flipped line modes.

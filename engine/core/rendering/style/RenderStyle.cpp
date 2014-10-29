@@ -414,8 +414,7 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
     if (inherited_flags.m_rtlOrdering != other.inherited_flags.m_rtlOrdering
         || inherited_flags._text_align != other.inherited_flags._text_align
         || inherited_flags._direction != other.inherited_flags._direction
-        || inherited_flags._white_space != other.inherited_flags._white_space
-        || inherited_flags.m_writingMode != other.inherited_flags.m_writingMode)
+        || inherited_flags._white_space != other.inherited_flags._white_space)
         return true;
 
     if (noninherited_flags.overflowX != other.noninherited_flags.overflowX

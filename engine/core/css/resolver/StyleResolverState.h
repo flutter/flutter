@@ -101,7 +101,6 @@ public:
     const FontDescription& parentFontDescription() { return m_parentStyle->fontDescription(); }
     void setZoom(float f) { m_fontBuilder.didChangeFontParameters(m_style->setZoom(f)); }
     void setEffectiveZoom(float f) { m_fontBuilder.didChangeFontParameters(m_style->setEffectiveZoom(f)); }
-    void setWritingMode(WritingMode writingMode) { m_fontBuilder.didChangeFontParameters(m_style->setWritingMode(writingMode)); }
     void setTextOrientation(TextOrientation textOrientation) { m_fontBuilder.didChangeFontParameters(m_style->setTextOrientation(textOrientation)); }
 
 private:

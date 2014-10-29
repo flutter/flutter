@@ -99,7 +99,7 @@ static bool isValidRasterShapeRect(const LayoutRect& rect)
     return (rect.width().toFloat() * rect.height().toFloat() * 4.0) < maxImageSizeBytes;
 }
 
-PassOwnPtr<Shape> ShapeOutsideInfo::createShapeForImage(StyleImage* styleImage, float shapeImageThreshold, WritingMode writingMode, float margin) const
+PassOwnPtr<Shape> ShapeOutsideInfo::createShapeForImage(StyleImage* styleImage, float shapeImageThreshold, float margin) const
 {
     const IntSize& imageSize = m_renderer.calculateImageIntrinsicDimensions(styleImage, roundedIntSize(m_referenceBoxLogicalSize), RenderImage::ScaleByEffectiveZoom);
     styleImage->setContainerSizeForRenderer(&m_renderer, imageSize, m_renderer.style()->effectiveZoom());
@@ -111,13 +111,13 @@ PassOwnPtr<Shape> ShapeOutsideInfo::createShapeForImage(StyleImage* styleImage, 
 
     if (!isValidRasterShapeRect(marginRect) || !isValidRasterShapeRect(imageRect)) {
         m_renderer.document().addConsoleMessage(ConsoleMessage::create(RenderingMessageSource, ErrorMessageLevel, "The shape-outside image is too large."));
-        return Shape::createEmptyRasterShape(writingMode, margin);
+        return Shape::createEmptyRasterShape(margin);
     }
 
     ASSERT(!styleImage->isPendingImage());
     RefPtr<Image> image = styleImage->image(const_cast<RenderBox*>(&m_renderer), imageSize);
 
-    return Shape::createRasterShape(image.get(), shapeImageThreshold, imageRect, marginRect, writingMode, margin);
+    return Shape::createRasterShape(image.get(), shapeImageThreshold, imageRect, marginRect, margin);
 }
 
 const Shape& ShapeOutsideInfo::computedShape() const
@@ -127,9 +127,6 @@ const Shape& ShapeOutsideInfo::computedShape() const
 
     const RenderStyle& style = *m_renderer.style();
     ASSERT(m_renderer.containingBlock());
-    const RenderStyle& containingBlockStyle = *m_renderer.containingBlock()->style();
-
-    WritingMode writingMode = containingBlockStyle.writingMode();
     LayoutUnit maximumValue = m_renderer.containingBlock() ? m_renderer.containingBlock()->contentWidth() : LayoutUnit();
     float margin = floatValueForLength(m_renderer.style()->shapeMargin(), maximumValue.toFloat());
 
@@ -140,15 +137,15 @@ const Shape& ShapeOutsideInfo::computedShape() const
     switch (shapeValue.type()) {
     case ShapeValue::Shape:
         ASSERT(shapeValue.shape());
-        m_shape = Shape::createShape(shapeValue.shape(), m_referenceBoxLogicalSize, writingMode, margin);
+        m_shape = Shape::createShape(shapeValue.shape(), m_referenceBoxLogicalSize, margin);
         break;
     case ShapeValue::Image:
         ASSERT(shapeValue.isImageValid());
-        m_shape = createShapeForImage(shapeValue.image(), shapeImageThreshold, writingMode, margin);
+        m_shape = createShapeForImage(shapeValue.image(), shapeImageThreshold, margin);
         break;
     case ShapeValue::Box: {
         const RoundedRect& shapeRect = style.getRoundedBorderFor(LayoutRect(LayoutPoint(), m_referenceBoxLogicalSize), m_renderer.view());
-        m_shape = Shape::createLayoutBoxShape(shapeRect, writingMode, margin);
+        m_shape = Shape::createLayoutBoxShape(shapeRect, margin);
         break;
     }
     }
@@ -157,13 +154,13 @@ const Shape& ShapeOutsideInfo::computedShape() const
     return *m_shape;
 }
 
-inline LayoutUnit borderBeforeInWritingMode(const RenderBox& renderer, WritingMode writingMode)
+inline LayoutUnit borderBeforeInWritingMode(const RenderBox& renderer)
 {
     // FIXME(sky): Remove
     return renderer.borderBefore();
 }
 
-inline LayoutUnit borderAndPaddingBeforeInWritingMode(const RenderBox& renderer, WritingMode writingMode)
+inline LayoutUnit borderAndPaddingBeforeInWritingMode(const RenderBox& renderer)
 {
     // FIXME(sky): Remove
     return renderer.borderAndPaddingBefore();
@@ -174,8 +171,8 @@ LayoutUnit ShapeOutsideInfo::logicalTopOffset() const
     switch (referenceBox(*m_renderer.style()->shapeOutside())) {
     case MarginBox: return -m_renderer.marginBefore(m_renderer.containingBlock()->style());
     case BorderBox: return LayoutUnit();
-    case PaddingBox: return borderBeforeInWritingMode(m_renderer, m_renderer.containingBlock()->style()->writingMode());
-    case ContentBox: return borderAndPaddingBeforeInWritingMode(m_renderer, m_renderer.containingBlock()->style()->writingMode());
+    case PaddingBox: return borderBeforeInWritingMode(m_renderer);
+    case ContentBox: return borderAndPaddingBeforeInWritingMode(m_renderer);
     case BoxMissing: break;
     }
 

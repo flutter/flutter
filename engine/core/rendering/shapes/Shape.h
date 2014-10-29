@@ -72,10 +72,10 @@ public:
         Path shape;
         Path marginShape;
     };
-    static PassOwnPtr<Shape> createShape(const BasicShape*, const LayoutSize& logicalBoxSize, WritingMode, float margin);
-    static PassOwnPtr<Shape> createRasterShape(Image*, float threshold, const LayoutRect& imageRect, const LayoutRect& marginRect, WritingMode, float margin);
-    static PassOwnPtr<Shape> createEmptyRasterShape(WritingMode, float margin);
-    static PassOwnPtr<Shape> createLayoutBoxShape(const RoundedRect&, WritingMode, float margin);
+    static PassOwnPtr<Shape> createShape(const BasicShape*, const LayoutSize& logicalBoxSize, float margin);
+    static PassOwnPtr<Shape> createRasterShape(Image*, float threshold, const LayoutRect& imageRect, const LayoutRect& marginRect, float margin);
+    static PassOwnPtr<Shape> createEmptyRasterShape(float margin);
+    static PassOwnPtr<Shape> createLayoutBoxShape(const RoundedRect&, float margin);
 
     virtual ~Shape() { }
 
@@ -97,7 +97,6 @@ private:
         return (lineTop < rect.maxY() && lineTop + lineHeight > rect.y()) || (!lineHeight && lineTop == rect.y());
     }
 
-    WritingMode m_writingMode;
     float m_margin;
 };
 

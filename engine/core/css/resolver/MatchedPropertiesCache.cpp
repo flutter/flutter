@@ -144,8 +144,6 @@ bool MatchedPropertiesCache::isCacheable(const Element* element, const RenderSty
         return false;
     if (style->zoom() != RenderStyle::initialZoom())
         return false;
-    if (style->writingMode() != RenderStyle::initialWritingMode())
-        return false;
     if (style->hasCurrentColor())
         return false;
     // The cache assumes static knowledge about which properties are inherited.

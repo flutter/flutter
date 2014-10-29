@@ -78,7 +78,7 @@ public:
 
     void wrapValueInCommaSeparatedList();
 
-    static CSSPropertyID resolveDirectionAwareProperty(CSSPropertyID, TextDirection, WritingMode);
+    static CSSPropertyID resolveDirectionAwareProperty(CSSPropertyID, TextDirection);
     static bool isAffectedByAllProperty(CSSPropertyID);
 
     const StylePropertyMetadata& metadata() const { return m_metadata; }

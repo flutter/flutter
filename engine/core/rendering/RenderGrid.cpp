@@ -1296,26 +1296,8 @@ LayoutUnit RenderGrid::rowPositionForChild(const RenderBox* child) const
 
     switch (alignSelf) {
     case ItemPositionSelfStart:
-        // If orthogonal writing-modes, this computes to 'Start'.
-        // FIXME: grid track sizing and positioning does not support orthogonal modes yet.
-        if (hasOrthogonalWritingMode)
-            return startOfRowForChild(child);
-
-        // self-start is based on the child's block axis direction. That's why we need to check against the grid container's block flow.
-        if (child->style()->writingMode() != style()->writingMode())
-            return endOfRowForChild(child);
-
         return startOfRowForChild(child);
     case ItemPositionSelfEnd:
-        // If orthogonal writing-modes, this computes to 'End'.
-        // FIXME: grid track sizing and positioning does not support orthogonal modes yet.
-        if (hasOrthogonalWritingMode)
-            return endOfRowForChild(child);
-
-        // self-end is based on the child's block axis direction. That's why we need to check against the grid container's block flow.
-        if (child->style()->writingMode() != style()->writingMode())
-            return startOfRowForChild(child);
-
         return endOfRowForChild(child);
 
     case ItemPositionLeft:

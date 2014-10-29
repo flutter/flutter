@@ -72,13 +72,13 @@ public:
     const Length& top() const { return m_top; }
     const Length& bottom() const { return m_bottom; }
 
-    const Length& logicalLeft(WritingMode) const;
-    const Length& logicalRight(WritingMode) const;
+    const Length& logicalLeft() const;
+    const Length& logicalRight() const;
 
-    const Length& before(WritingMode) const;
-    const Length& after(WritingMode) const;
-    const Length& start(WritingMode, TextDirection) const;
-    const Length& end(WritingMode, TextDirection) const;
+    const Length& before() const;
+    const Length& after() const;
+    const Length& start(TextDirection) const;
+    const Length& end(TextDirection) const;
 
     bool operator==(const LengthBox& o) const
     {
