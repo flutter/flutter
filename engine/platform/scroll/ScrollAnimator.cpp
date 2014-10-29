@@ -49,6 +49,11 @@ ScrollAnimator::~ScrollAnimator()
 {
 }
 
+PassOwnPtr<ScrollAnimator> ScrollAnimator::create(ScrollableArea* scrollableArea)
+{
+    return adoptPtr(new ScrollAnimator(scrollableArea));
+}
+
 bool ScrollAnimator::scroll(ScrollbarOrientation orientation, ScrollGranularity, float step, float delta)
 {
     float& currentPos = (orientation == HorizontalScrollbar) ? m_currentPosX : m_currentPosY;

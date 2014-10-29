@@ -533,8 +533,6 @@ component("platform") {
     "scroll/ProgrammaticScrollAnimator.h",
     "scroll/ScrollAnimator.cpp",
     "scroll/ScrollAnimator.h",
-    "scroll/ScrollAnimatorNone.cpp",
-    "scroll/ScrollAnimatorNone.h",
     "scroll/ScrollTypes.h",
     "scroll/ScrollableArea.cpp",
     "scroll/ScrollableArea.h",

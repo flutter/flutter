@@ -209,22 +209,6 @@ public:
     // false.
     bool isSubtreeLayout() const { return !!m_layoutSubtreeRoot; }
 
-    // Sets the tickmarks for the FrameView, overriding the default behavior
-    // which is to display the tickmarks corresponding to find results.
-    // If |m_tickmarks| is empty, the default behavior is restored.
-    void setTickmarks(const Vector<IntRect>& tickmarks) { m_tickmarks = tickmarks; }
-
-    // ScrollableArea interface
-    // FIXME(sky): Remove
-    void getTickmarks(Vector<IntRect>&) const;
-    IntRect scrollableAreaBoundingBox() const;
-    bool scrollAnimatorEnabled() const;
-    bool usesCompositedScrolling() const;
-    GraphicsLayer* layerForScrolling() const;
-    GraphicsLayer* layerForHorizontalScrollbar() const;
-    GraphicsLayer* layerForVerticalScrollbar() const;
-    GraphicsLayer* layerForScrollCorner() const;
-
     // FIXME(sky): remove
     IntRect contentsToScreen(const IntRect& rect) const;
     IntPoint contentsToRootView(const IntPoint& contentsPoint) const { return convertToRootView(contentsPoint); }

@@ -231,48 +231,6 @@ void FrameView::recalcOverflowAfterStyleChange()
     renderView->recalcOverflowAfterStyleChange();
 }
 
-bool FrameView::usesCompositedScrolling() const
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return false;
-    if (m_frame->settings() && m_frame->settings()->preferCompositingToLCDTextEnabled())
-        return renderView->compositor()->inCompositingMode();
-    return false;
-}
-
-GraphicsLayer* FrameView::layerForScrolling() const
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return 0;
-    return renderView->compositor()->scrollLayer();
-}
-
-GraphicsLayer* FrameView::layerForHorizontalScrollbar() const
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return 0;
-    return renderView->compositor()->layerForHorizontalScrollbar();
-}
-
-GraphicsLayer* FrameView::layerForVerticalScrollbar() const
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return 0;
-    return renderView->compositor()->layerForVerticalScrollbar();
-}
-
-GraphicsLayer* FrameView::layerForScrollCorner() const
-{
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return 0;
-    return renderView->compositor()->layerForScrollCorner();
-}
-
 IntRect FrameView::contentsToScreen(const IntRect& rect) const
 {
     HostWindow* window = hostWindow();
@@ -926,14 +884,6 @@ bool FrameView::isActive() const
     return page && page->focusController().isActive();
 }
 
-void FrameView::getTickmarks(Vector<IntRect>& tickmarks) const
-{
-    if (!m_tickmarks.isEmpty())
-        tickmarks = m_tickmarks;
-    else
-        tickmarks = frame().document()->markers().renderedRectsForMarkers(DocumentMarker::TextMatch);
-}
-
 void FrameView::setVisibleContentScaleFactor(float visibleContentScaleFactor)
 {
     if (m_visibleContentScaleFactor == visibleContentScaleFactor)
@@ -956,16 +906,6 @@ float FrameView::inputEventsScaleFactor() const
 {
     float pageScale = visibleContentScaleFactor();
     return pageScale * m_inputEventsScaleFactorForEmulation;
-}
-
-IntRect FrameView::scrollableAreaBoundingBox() const
-{
-    return frameRect();
-}
-
-bool FrameView::scrollAnimatorEnabled() const
-{
-    return m_frame->settings() && m_frame->settings()->scrollAnimatorEnabled();
 }
 
 Color FrameView::documentBackgroundColor() const

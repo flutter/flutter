@@ -82,9 +82,7 @@ PassOwnPtr<ScrollingCoordinator> ScrollingCoordinator::create(Page* page)
 
 ScrollingCoordinator::ScrollingCoordinator(Page* page)
     : m_page(page)
-    , m_scrollGestureRegionIsDirty(false)
     , m_touchEventTargetRectsAreDirty(false)
-    , m_shouldScrollOnMainThreadDirty(false)
 {
 }
 
@@ -92,56 +90,19 @@ ScrollingCoordinator::~ScrollingCoordinator()
 {
 }
 
-void ScrollingCoordinator::setShouldHandleScrollGestureOnMainThreadRegion(const Region& region)
-{
-    if (WebLayer* scrollLayer = toWebLayer(m_page->mainFrame()->view()->layerForScrolling())) {
-        Vector<IntRect> rects = region.rects();
-        WebVector<WebRect> webRects(rects.size());
-        for (size_t i = 0; i < rects.size(); ++i)
-            webRects[i] = rects[i];
-        scrollLayer->setNonFastScrollableRegion(webRects);
-    }
-}
-
 void ScrollingCoordinator::notifyLayoutUpdated()
 {
-    m_scrollGestureRegionIsDirty = true;
     m_touchEventTargetRectsAreDirty = true;
-    m_shouldScrollOnMainThreadDirty = true;
 }
 
 void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
 {
-    if (!shouldUpdateAfterCompositingChange())
+    if (!m_touchEventTargetRectsAreDirty)
         return;
 
     TRACE_EVENT0("input", "ScrollingCoordinator::updateAfterCompositingChangeIfNeeded");
-
-    if (m_scrollGestureRegionIsDirty) {
-        // Compute the region of the page where we can't handle scroll gestures and mousewheel events
-        // on the impl thread. This currently includes:
-        // 1. All scrollable areas, such as subframes, overflow divs and list boxes, whose composited
-        // scrolling are not enabled. We need to do this even if the frame view whose layout was updated
-        // is not the main frame.
-        // 2. Resize control areas, e.g. the small rect at the right bottom of div/textarea/iframe when
-        // CSS property "resize" is enabled.
-        // 3. Plugin areas.
-        Region shouldHandleScrollGestureOnMainThreadRegion = computeShouldHandleScrollGestureOnMainThreadRegion(m_page->mainFrame(), IntPoint());
-        setShouldHandleScrollGestureOnMainThreadRegion(shouldHandleScrollGestureOnMainThreadRegion);
-        m_scrollGestureRegionIsDirty = false;
-    }
-
-    if (m_touchEventTargetRectsAreDirty) {
-        updateTouchEventTargetRectsIfNeeded();
-        m_touchEventTargetRectsAreDirty = false;
-    }
-
-    // The mainFrame view doesn't get included in the FrameTree below, so we
-    // update its size separately.
-    FrameView* frameView = m_page->mainFrame()->view();
-    if (WebLayer* scrollingWebLayer = frameView ? toWebLayer(frameView->layerForScrolling()) : 0) {
-        scrollingWebLayer->setBounds(frameView->size());
-    }
+    updateTouchEventTargetRectsIfNeeded();
+    m_touchEventTargetRectsAreDirty = false;
 }
 
 void ScrollingCoordinator::willDestroyScrollableArea(ScrollableArea* scrollableArea)
@@ -492,35 +453,6 @@ void ScrollingCoordinator::willDestroyRenderLayer(RenderLayer* layer)
     m_layersWithTouchRects.remove(layer);
 }
 
-void ScrollingCoordinator::updateHaveWheelEventHandlers()
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-    if (!m_page->mainFrame()->view())
-        return;
-
-    if (WebLayer* scrollLayer = toWebLayer(m_page->mainFrame()->view()->layerForScrolling())) {
-        bool haveHandlers = m_page->frameHost().eventHandlerRegistry().hasEventHandlers(EventHandlerRegistry::WheelEvent);
-        scrollLayer->setHaveWheelEventHandlers(haveHandlers);
-    }
-}
-
-void ScrollingCoordinator::updateHaveScrollEventHandlers()
-{
-    ASSERT(isMainThread());
-    ASSERT(m_page);
-    if (!m_page->mainFrame()->view())
-        return;
-
-    // Currently the compositor only cares whether there are scroll handlers anywhere on the page
-    // instead on a per-layer basis. We therefore only update this information for the root
-    // scrolling layer.
-    if (WebLayer* scrollLayer = toWebLayer(m_page->mainFrame()->view()->layerForScrolling())) {
-        bool haveHandlers = m_page->frameHost().eventHandlerRegistry().hasEventHandlers(EventHandlerRegistry::ScrollEvent);
-        scrollLayer->setHaveScrollEventHandlers(haveHandlers);
-    }
-}
-
 void ScrollingCoordinator::willBeDestroyed()
 {
     ASSERT(m_page);
@@ -663,11 +595,5 @@ void ScrollingCoordinator::handleWheelEventPhase(PlatformWheelEventPhase phase)
     frameView->scrollAnimator()->handleWheelEventPhase(phase);
 }
 #endif
-
-bool ScrollingCoordinator::frameViewIsDirty() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
 
 } // namespace blink

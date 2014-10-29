@@ -325,11 +325,6 @@ void WebSettingsImpl::setShouldClearDocumentBackground(bool enabled)
     m_settings->setShouldClearDocumentBackground(enabled);
 }
 
-void WebSettingsImpl::setEnableScrollAnimator(bool enabled)
-{
-    m_settings->setScrollAnimatorEnabled(enabled);
-}
-
 void WebSettingsImpl::setEnableTouchAdjustment(bool enabled)
 {
     m_settings->setTouchAdjustmentEnabled(enabled);

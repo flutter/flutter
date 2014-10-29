@@ -59,9 +59,6 @@ public:
 
     void updateAfterCompositingChangeIfNeeded();
 
-    void updateHaveWheelEventHandlers();
-    void updateHaveScrollEventHandlers();
-
 #if OS(MACOSX)
     // Dispatched by the scrolling tree during handleWheelEvent. This is required as long as scrollbars are painted on the main thread.
     void handleWheelEventPhase(PlatformWheelEventPhase);
@@ -95,22 +92,15 @@ protected:
     Page* m_page;
 
     // Dirty flags used to idenfity what really needs to be computed after compositing is updated.
-    bool m_scrollGestureRegionIsDirty;
     bool m_touchEventTargetRectsAreDirty;
-    bool m_shouldScrollOnMainThreadDirty;
 
 private:
-    bool shouldUpdateAfterCompositingChange() const { return m_scrollGestureRegionIsDirty || m_touchEventTargetRectsAreDirty || frameViewIsDirty(); }
-
-    void setShouldHandleScrollGestureOnMainThreadRegion(const Region&);
     void setTouchEventTargetRects(LayerHitTestRects&);
     void computeTouchEventTargetRects(LayerHitTestRects&);
 
     blink::WebScrollbarLayer* addWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation, PassOwnPtr<blink::WebScrollbarLayer>);
     blink::WebScrollbarLayer* getWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation);
     void removeWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation);
-
-    bool frameViewIsDirty() const;
 
     typedef HashMap<ScrollableArea*, OwnPtr<blink::WebScrollbarLayer> > ScrollbarMap;
     ScrollbarMap m_horizontalScrollbars;

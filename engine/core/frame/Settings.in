@@ -67,8 +67,6 @@ asynchronousSpellCheckingEnabled initial=false
 
 mediaPlaybackRequiresUserGesture initial=false
 
-scrollAnimatorEnabled initial=true
-
 # Used in layout tests for gesture tap highlights. Makes the highlights square
 # (rather than rounded) to make it possible to reftest the results.
 mockGestureTapHighlightsEnabled initial=false

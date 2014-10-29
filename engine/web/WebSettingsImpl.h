@@ -70,7 +70,6 @@ public:
 
     virtual void setDoubleTapToZoomEnabled(bool) override;
     virtual void setDownloadableBinaryFontsEnabled(bool) override;
-    virtual void setEnableScrollAnimator(bool) override;
     virtual void setEnableTouchAdjustment(bool) override;
     virtual void setExperimentalWebGLEnabled(bool) override;
     virtual void setFantasyFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) override;
