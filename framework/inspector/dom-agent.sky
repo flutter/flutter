@@ -165,5 +165,5 @@ DOMAgent.prototype.mutationCallback_ = function(mutationRecords) {
   }
 };
 
-this.exports = DOMAgent;
+module.exports = DOMAgent;
 </script>

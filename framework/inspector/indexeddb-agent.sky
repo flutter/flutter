@@ -7,5 +7,5 @@ IndexedDB.prototype.requestDatabaseNames = function() {
   return { "databaseNames": [] };
 };
 
-this.exports = IndexedDB;
+module.exports = IndexedDB;
 </script>

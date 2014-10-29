@@ -8,5 +8,5 @@ WorkerAgent.prototype.canInspectWorkers = function() {
   };
 };
 
-this.exports = WorkerAgent;
+module.exports = WorkerAgent;
 </script>

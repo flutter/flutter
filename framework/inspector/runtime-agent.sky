@@ -117,5 +117,5 @@ Runtime.prototype.evaluate = function(params) {
 
 Runtime.prototype.getProperties = debug.loggingStub("getProperties");
 
-this.exports = Runtime;
+module.exports = Runtime;
 </script>

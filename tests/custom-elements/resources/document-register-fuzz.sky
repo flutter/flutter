@@ -52,7 +52,7 @@ function register(name, options)
     } catch (e) { console.log(e); }
 }
 
-this.exports = {
+module.exports = {
     setupObjectHooks: setupObjectHooks,
     exerciseDocumentRegister: exerciseDocumentRegister,
     register: register,

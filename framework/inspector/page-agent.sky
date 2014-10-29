@@ -34,5 +34,5 @@ Page.prototype.getResourceTree = function() {
   };
 };
 
-this.exports = Page;
+module.exports = Page;
 </script>

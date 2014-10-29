@@ -16,7 +16,7 @@ function connectToService(url, service, client) {
   return wrapHandle(handle, service, client);
 }
 
-this.exports = {
+module.exports = {
   connectToService: connectToService,
   wrapHandle: wrapHandle,
 };

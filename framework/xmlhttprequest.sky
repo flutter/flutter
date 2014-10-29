@@ -41,5 +41,5 @@ XMLHttpRequest.prototype.send = function() {
   });
 };
 
-this.exports = XMLHttpRequest;
+module.exports = XMLHttpRequest;
 </script>

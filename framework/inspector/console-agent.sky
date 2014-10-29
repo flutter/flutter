@@ -8,5 +8,5 @@ ConsoleAgent.prototype.enable = function() {
   };
 };
 
-this.exports = ConsoleAgent;
+module.exports = ConsoleAgent;
 </script>
