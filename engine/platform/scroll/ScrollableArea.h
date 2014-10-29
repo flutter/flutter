@@ -132,7 +132,6 @@ public:
     virtual bool isScrollCornerVisible() const = 0;
     virtual IntRect scrollCornerRect() const = 0;
     virtual void invalidateScrollCorner(const IntRect&);
-    virtual void getTickmarks(Vector<IntRect>&) const { }
 
     // Convert points and rects between the scrollbar and its containing view.
     // The client needs to implement these in order to be aware of layout effects

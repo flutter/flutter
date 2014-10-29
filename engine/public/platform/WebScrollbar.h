@@ -81,7 +81,6 @@ public:
     virtual int maximum() const = 0;
     virtual int totalSize() const = 0;
     virtual bool isScrollableAreaActive() const = 0;
-    virtual void getTickmarks(WebVector<WebRect>& tickmarks) const = 0;
     virtual ScrollbarPart pressedPart() const = 0;
     virtual ScrollbarPart hoveredPart() const = 0;
     virtual ScrollbarOverlayStyle scrollbarOverlayStyle() const = 0;

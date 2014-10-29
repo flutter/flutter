@@ -50,7 +50,6 @@ public:
     void invalidateRect(const IntRect&);
 
     ScrollbarOverlayStyle scrollbarOverlayStyle() const;
-    void getTickmarks(Vector<IntRect>&) const;
     bool isScrollableAreaActive() const;
 
     ScrollbarOrientation orientation() const { return m_orientation; }

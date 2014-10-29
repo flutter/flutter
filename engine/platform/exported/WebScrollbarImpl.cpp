@@ -76,18 +76,6 @@ bool WebScrollbarImpl::isScrollableAreaActive() const
     return m_scrollbar->isScrollableAreaActive();
 }
 
-void WebScrollbarImpl::getTickmarks(WebVector<WebRect>& webTickmarks) const
-{
-    Vector<IntRect> tickmarks;
-    m_scrollbar->getTickmarks(tickmarks);
-
-    WebVector<WebRect> result(tickmarks.size());
-    for (size_t i = 0; i < tickmarks.size(); ++i)
-        result[i] = tickmarks[i];
-
-    webTickmarks.swap(result);
-}
-
 WebScrollbar::ScrollbarPart WebScrollbarImpl::pressedPart() const
 {
     return static_cast<WebScrollbar::ScrollbarPart>(m_scrollbar->pressedPart());
