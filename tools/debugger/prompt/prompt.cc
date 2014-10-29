@@ -61,7 +61,7 @@ class Prompt : public mojo::ApplicationDelegate {
   }
 
   bool ExecuteCommand(const std::string& command) {
-    if (command == "help") {
+    if (command == "help" || command == "h") {
       PrintHelp();
       return true;
     }
@@ -69,7 +69,7 @@ class Prompt : public mojo::ApplicationDelegate {
       ToggleTracing();
       return true;
     }
-    if (command == "reload") {
+    if (command == "reload" || command == "r") {
       Reload();
       return true;
     }
@@ -77,16 +77,12 @@ class Prompt : public mojo::ApplicationDelegate {
       Inspect();
       return true;
     }
+    if (command == "quit" || command == "q") {
+      Quit();
+      return true;
+    }
     if (command.size() == 1) {
-      char c = command[0];
-      if (c == 'h')
-        PrintHelp();
-      else if (c == 'q')
-        Quit();
-      else if (c == 'r')
-        Reload();
-      else
-        std::cout << "Unknown command: " << c << std::endl;
+      std::cout << "Unknown command: " << command << std::endl;
       return true;
     }
     return false;
@@ -119,7 +115,7 @@ class Prompt : public mojo::ApplicationDelegate {
       << "          trace   -- Capture a trace" << std::endl
       << "          reload  -- Reload the current page" << std::endl
       << "          inspect -- Inspect the current page" << std::endl
-      << "          q       -- Quit" << std::endl;
+      << "          quit    -- Quit" << std::endl;
   }
 
   void Reload() {

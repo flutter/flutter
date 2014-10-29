@@ -58,10 +58,6 @@ def main():
     if args.gdb:
         shell_command = ['gdb', '--args'] + shell_command
 
-    print "To inspect, include:"
-    print '<link rel="import" href="/sky/framework/inspector/inspector.sky" />'
-    print "And open:"
-    print "chrome-devtools://devtools/bundled/devtools.html?ws=localhost:9898"
     subprocess.check_call(shell_command)
 
 
