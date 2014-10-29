@@ -1,21 +1,38 @@
 <script>
-function PageAgent() {
+function Page() {
 }
 
-PageAgent.prototype.enable = function() {
+Page.prototype.enable = function() {
 };
 
-PageAgent.prototype.canScreencast = function() {
+Page.prototype.canScreencast = function() {
   return {
     result: false
   };
 };
 
-PageAgent.prototype.canEmulate = function() {
+Page.prototype.canEmulate = function() {
   return {
     result: false
   };
 };
 
-this.exports = PageAgent;
+Page.prototype.getResourceTree = function() {
+  // Unclear if this is all needed, but if we don't return something here
+  // the inspector hits an exception in WebInspector.ResourceTreeModel.
+  return {
+    "frameTree": {
+      "frame": {
+        "id": 1,
+        "loaderId": 1,
+        "url": document.URL,
+        "mimeType": "text/html",
+        "securityOrigin": document.URL,
+      },
+      "resources": [], // FIXME
+    }
+  };
+};
+
+this.exports = Page;
 </script>

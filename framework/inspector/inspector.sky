@@ -6,6 +6,8 @@
 <link rel="import" href="dom-agent.sky" as="DOMAgent" />
 <link rel="import" href="page-agent.sky" as="PageAgent" />
 <link rel="import" href="worker-agent.sky" as="WorkerAgent" />
+<link rel="import" href="runtime-agent.sky" as="RuntimeAgent" />
+<link rel="import" href="indexeddb-agent.sky" as="IndexedDBAgent" />
 <script>
 function InspectorBackend(frontend) {
   this.frontend = frontend;
@@ -14,6 +16,8 @@ function InspectorBackend(frontend) {
     DOM: new DOMAgent(this),
     Page: new PageAgent(),
     Worker: new WorkerAgent(),
+    Runtime: new RuntimeAgent(this),
+    IndexedDB: new IndexedDBAgent(),
   };
 }
 
@@ -33,15 +37,14 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
   var methodName = parsed[1];
 
   if (!(agentName in this.agents)) {
-    console.log("InspectorBackend cannot find agent " + agentName);
+    console.log("InspectorBackend missing " + agentName);
     return {};
   }
 
   var agent = this.agents[agentName];
 
   if (!(methodName in agent)) {
-    console.log("InspectorBackend cannot find method " +
-                methodName + " on agent " + agentName);
+    console.log("InspectorBackend missing " + agentName + "." + methodName);
     return {};
   }
 

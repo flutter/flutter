@@ -1,0 +1,134 @@
+<script>
+
+function Runtime(delegate) {
+  this.delegate_ = delegate;
+}
+
+// FIXME: Move these to their own 'debug' module.
+function logParams(name, params) {
+  console.log(name + "(" + JSON.stringify(params, null, " ") + ")")
+}
+
+function debug(name) {
+  return function(params) {
+    logParams(name, params);
+  }
+}
+
+Runtime.prototype.enable = function() {
+  this.delegate_.sendMessage("Runtime.executionContextCreated", {
+    "context": {
+      "frameId": 1,
+      "id": 1,
+    }
+  });
+  return {
+    result: true,
+  };
+};
+
+Runtime.prototype.callFunctionOn = function(params) {
+  logParams("callFunctionOn", params);
+  var object = g_objectRegistry.lookup(params.objectId);
+  // This is a horrible hack:
+  var functionName = params.functionDeclaration.match(/^function (\w+)\(/)[1];
+  var expression = params.functionDeclaration + "; return " + functionName + ";";
+  var wasThrown = false;
+  var value;
+  try {
+    var func = new Function('', expression)();
+    value = func(object);
+  } catch (e) {
+    value = e;
+    wasThrown = true;
+  }
+
+  return makeResult(params, value, wasThrown);
+}
+
+// FIXME: This should release all objects associated with an object
+// group, see InjectedScriptSource.js for an example.  Just have to
+// track which object ids are associated with which object groups first.
+Runtime.prototype.releaseObjectGroup = debug("releaseObjectGroup");
+
+// See InjectedScript._bind for a fancier version of this:
+
+function RemoteObjectRegistery() {
+  this.lastObjectId = 0;
+  this.objectsById = [];
+}
+
+RemoteObjectRegistery.prototype.register = function(object) {
+  var objectId = ++this.lastObjectId;
+  this.objectsById[objectId] = object;
+  return String(objectId);
+}
+
+RemoteObjectRegistery.prototype.lookup = function(objectId) {
+  return this.objectsById[Number(objectId)];
+}
+
+var g_objectRegistry = new RemoteObjectRegistery();
+
+
+function makeResult(params, value, wasThrown) {
+  var type = typeof(value)
+  var result = {
+    "result": {
+      "type": type,
+    },
+    "wasThrown": wasThrown,
+  };
+
+  // Unclear why this often fails with:
+  // "TypeError: Cannot convert object to primitive value"
+  try {
+    result['result']['description'] = String(value);
+  } catch (e) {}
+
+  if (type == "object") {
+    result["result"]["objectId"] = g_objectRegistry.register(value);
+  }
+
+  if (params.returnByValue) {
+    result["result"]["value"] = value;
+  }
+
+  if (wasThrown) {
+    // If we don"t have exceptionDetails, inspector hits an exception.
+    result["exceptionDetails"] = {
+      "text": value.message,
+      "url": "",
+      "line": 0,
+      "column": 0,
+      "stackTrace": [{
+        "functionName": "",
+        "scriptId": "1",
+        "url": "",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }]
+    }
+  }
+  return result;
+}
+
+// FIXME: See Blink"s inspected-script-source.js InjectedScript.RemoteObject.
+Runtime.prototype.evaluate = function(params) {
+  logParams("evaluate", params);
+  var wasThrown = false;
+  var value;
+  try {
+    value = eval(params.expression);
+  } catch (e) {
+    value = e;
+    wasThrown = true;
+  }
+
+  return makeResult(params, value, wasThrown);
+}
+
+Runtime.prototype.getProperties = debug("getProperties");
+
+this.exports = Runtime;
+</script>

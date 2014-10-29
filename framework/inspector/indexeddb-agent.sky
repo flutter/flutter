@@ -1,0 +1,11 @@
+<script>
+function IndexedDB() {
+}
+
+// Needed to make the inspector not throw an exception.
+IndexedDB.prototype.requestDatabaseNames = function() {
+  return { "databaseNames": [] };
+};
+
+this.exports = IndexedDB;
+</script>
