@@ -906,22 +906,6 @@ void GraphicsLayer::setContentsToImage(Image* image)
     setContentsTo(m_imageLayer ? m_imageLayer->layer() : 0);
 }
 
-void GraphicsLayer::setContentsToNinePatch(Image* image, const IntRect& aperture)
-{
-    if (m_ninePatchLayer) {
-        unregisterContentsLayer(m_ninePatchLayer->layer());
-        m_ninePatchLayer.clear();
-    }
-    RefPtr<NativeImageSkia> nativeImage = image ? image->nativeImageForCurrentFrame() : nullptr;
-    if (nativeImage) {
-        m_ninePatchLayer = adoptPtr(Platform::current()->compositorSupport()->createNinePatchLayer());
-        m_ninePatchLayer->setBitmap(nativeImage->bitmap(), aperture);
-        m_ninePatchLayer->layer()->setOpaque(image->currentFrameKnownToBeOpaque());
-        registerContentsLayer(m_ninePatchLayer->layer());
-    }
-    setContentsTo(m_ninePatchLayer ? m_ninePatchLayer->layer() : 0);
-}
-
 bool GraphicsLayer::addAnimation(PassOwnPtr<WebCompositorAnimation> popAnimation)
 {
     OwnPtr<WebCompositorAnimation> animation(popAnimation);

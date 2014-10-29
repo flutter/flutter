@@ -48,8 +48,6 @@ component("cc") {
     "web_layer_impl.h",
     "web_layer_impl_fixed_bounds.cc",
     "web_layer_impl_fixed_bounds.h",
-    "web_nine_patch_layer_impl.cc",
-    "web_nine_patch_layer_impl.h",
     "web_scroll_offset_animation_curve_impl.cc",
     "web_scroll_offset_animation_curve_impl.h",
     "web_scrollbar_layer_impl.cc",

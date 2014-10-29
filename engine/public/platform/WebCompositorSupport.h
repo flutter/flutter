@@ -47,7 +47,6 @@ class WebFilterOperations;
 class WebFloatAnimationCurve;
 class WebGraphicsContext3D;
 class WebImageLayer;
-class WebNinePatchLayer;
 class WebLayer;
 class WebScrollbarLayer;
 class WebScrollbarThemeGeometry;
@@ -72,8 +71,6 @@ public:
     virtual WebExternalTextureLayer* createExternalTextureLayer(WebExternalTextureLayerClient*) { return 0; }
 
     virtual WebImageLayer* createImageLayer() { return 0; }
-
-    virtual WebNinePatchLayer* createNinePatchLayer() { return 0; }
 
     // The ownership of the WebScrollbarThemeGeometry pointer is passed to Chromium.
     virtual WebScrollbarLayer* createScrollbarLayer(WebScrollbar*, WebScrollbarThemePainter, WebScrollbarThemeGeometry*) { return 0; }

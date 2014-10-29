@@ -15,7 +15,6 @@
 #include "sky/viewer/cc/web_float_animation_curve_impl.h"
 #include "sky/viewer/cc/web_image_layer_impl.h"
 #include "sky/viewer/cc/web_layer_impl.h"
-#include "sky/viewer/cc/web_nine_patch_layer_impl.h"
 #include "sky/viewer/cc/web_scroll_offset_animation_curve_impl.h"
 #include "sky/viewer/cc/web_scrollbar_layer_impl.h"
 #include "sky/viewer/cc/web_transform_animation_curve_impl.h"
@@ -33,7 +32,6 @@ using blink::WebFilterAnimationCurve;
 using blink::WebFilterOperations;
 using blink::WebFloatAnimationCurve;
 using blink::WebImageLayer;
-using blink::WebNinePatchLayer;
 using blink::WebLayer;
 using blink::WebScrollbar;
 using blink::WebScrollbarLayer;
@@ -67,10 +65,6 @@ WebExternalTextureLayer* WebCompositorSupportImpl::createExternalTextureLayer(
 
 blink::WebImageLayer* WebCompositorSupportImpl::createImageLayer() {
   return new WebImageLayerImpl();
-}
-
-blink::WebNinePatchLayer* WebCompositorSupportImpl::createNinePatchLayer() {
-  return new WebNinePatchLayerImpl();
 }
 
 WebScrollbarLayer* WebCompositorSupportImpl::createScrollbarLayer(
