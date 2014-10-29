@@ -33,8 +33,6 @@ class PlatformImpl : public blink::Platform {
   virtual blink::WebString defaultLocale();
   virtual double currentTime();
   virtual double monotonicallyIncreasingTime();
-  virtual void cryptographicallyRandomValues(
-      unsigned char* buffer, size_t length);
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();

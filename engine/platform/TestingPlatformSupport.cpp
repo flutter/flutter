@@ -80,10 +80,6 @@ blink::WebDiscardableMemory* TestingPlatformSupport::allocateAndLockDiscardableM
     return !m_config.hasDiscardableMemorySupport ? 0 : new TestingDiscardableMemory(bytes);
 }
 
-void TestingPlatformSupport::cryptographicallyRandomValues(unsigned char* buffer, size_t length)
-{
-}
-
 const unsigned char* TestingPlatformSupport::getTraceCategoryEnabledFlag(const char* categoryName)
 {
     static const unsigned char tracingIsDisabled = 0;

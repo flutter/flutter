@@ -76,11 +76,6 @@ double PlatformImpl::monotonicallyIncreasingTime() {
       static_cast<double>(base::Time::kMicrosecondsPerSecond);
 }
 
-void PlatformImpl::cryptographicallyRandomValues(unsigned char* buffer,
-                                                      size_t length) {
-  base::RandBytes(buffer, length);
-}
-
 void PlatformImpl::setSharedTimerFiredFunction(void (*func)()) {
   shared_timer_func_ = func;
 }

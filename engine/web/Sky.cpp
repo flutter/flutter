@@ -32,6 +32,7 @@
 #include "public/web/Sky.h"
 
 #include "base/message_loop/message_loop.h"
+#include "base/rand_util.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8GCController.h"
 #include "bindings/core/v8/V8Initializer.h"
@@ -145,7 +146,7 @@ static double monotonicallyIncreasingTimeFunction()
 
 static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
 {
-    Platform::current()->cryptographicallyRandomValues(buffer, length);
+    base::RandBytes(buffer, length);
 }
 
 static void callOnMainThreadFunction(WTF::MainThreadFunction function, void* context)

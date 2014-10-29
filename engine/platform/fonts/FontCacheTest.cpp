@@ -16,7 +16,6 @@ class EmptyPlatform : public Platform {
 public:
     EmptyPlatform() { }
     virtual ~EmptyPlatform() { }
-    virtual void cryptographicallyRandomValues(unsigned char* buffer, size_t length) override { }
 };
 
 TEST(FontCache, getLastResortFallbackFont)
