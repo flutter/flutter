@@ -14,7 +14,7 @@ SKY MODULE - radio button and radio button group
  module.exports.RadioElement = sky.registerElement('radio', class extends Element {
    constructor () {
      this.addEventListener('click', (event) => this.checked = true);
-     this.createShadowTree().appendChild(module.document.findId('radio-shadow').content.cloneNode(true));
+     this.addShadowRoot(new sky.ShadowRoot(module.document.findId('radio-shadow').content.cloneNode(true)));
    }
    get checked () {
      return this.hasAttribute('checked');
@@ -48,7 +48,7 @@ SKY MODULE - radio button and radio button group
 <script>
  module.exports.RadioGroupElement = sky.registerElement('radiogroup', class extends Element {
    constructor () {
-     this.createShadowTree().appendChild(module.document.findId('radiogroup-shadow').cloneNode(true));
+     this.addShadowRoot(new sky.ShadowRoot(module.document.findId('radiogroup-shadow').content.cloneNode(true)));
    }
    get value () {
      let children = this.getChildNodes();
