@@ -57,33 +57,13 @@ LayoutUnit LayoutBoxExtent::logicalRight(WritingMode writingMode) const
 
 LayoutUnit LayoutBoxExtent::before(WritingMode writingMode) const
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode:
-        return m_top;
-    case BottomToTopWritingMode:
-        return m_bottom;
-    case LeftToRightWritingMode:
-        return m_left;
-    case RightToLeftWritingMode:
-        return m_right;
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return m_top;
 }
 
 LayoutUnit LayoutBoxExtent::after(WritingMode writingMode) const
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode:
-        return m_bottom;
-    case BottomToTopWritingMode:
-        return m_top;
-    case LeftToRightWritingMode:
-        return m_right;
-    case RightToLeftWritingMode:
-        return m_left;
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return m_bottom;
 }
 
@@ -103,44 +83,14 @@ LayoutUnit LayoutBoxExtent::end(WritingMode writingMode, TextDirection direction
 
 void LayoutBoxExtent::setBefore(WritingMode writingMode, LayoutUnit value)
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode:
-        m_top = value;
-        break;
-    case BottomToTopWritingMode:
-        m_bottom = value;
-        break;
-    case LeftToRightWritingMode:
-        m_left = value;
-        break;
-    case RightToLeftWritingMode:
-        m_right = value;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        m_top = value;
-    }
+    // FIXME(sky): Remove
+    m_top = value;
 }
 
 void LayoutBoxExtent::setAfter(WritingMode writingMode, LayoutUnit value)
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode:
-        m_bottom = value;
-        break;
-    case BottomToTopWritingMode:
-        m_top = value;
-        break;
-    case LeftToRightWritingMode:
-        m_right = value;
-        break;
-    case RightToLeftWritingMode:
-        m_left = value;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        m_bottom = value;
-    }
+    // FIXME(sky): Remove
+    m_bottom = value;
 }
 
 void LayoutBoxExtent::setStart(WritingMode writingMode, TextDirection direction, LayoutUnit value)

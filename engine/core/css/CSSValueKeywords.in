@@ -669,20 +669,6 @@ geometricPrecision
 economy
 exact
 
-// -webkit-writing-mode
-// SVG compatibility
-lr
-rl
-tb
-lr-tb
-rl-tb
-tb-rl
-// Standard values from CSS3
-horizontal-tb
-vertical-rl
-vertical-lr
-horizontal-bt
-
 // -webkit-text-emphasis-position
 over
 under

@@ -1258,33 +1258,13 @@ Color RenderStyle::colorIncludingFallback(int colorProperty) const
 
 const BorderValue& RenderStyle::borderBefore() const
 {
-    switch (writingMode()) {
-    case TopToBottomWritingMode:
-        return borderTop();
-    case BottomToTopWritingMode:
-        return borderBottom();
-    case LeftToRightWritingMode:
-        return borderLeft();
-    case RightToLeftWritingMode:
-        return borderRight();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderTop();
 }
 
 const BorderValue& RenderStyle::borderAfter() const
 {
-    switch (writingMode()) {
-    case TopToBottomWritingMode:
-        return borderBottom();
-    case BottomToTopWritingMode:
-        return borderTop();
-    case LeftToRightWritingMode:
-        return borderRight();
-    case RightToLeftWritingMode:
-        return borderLeft();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderBottom();
 }
 
@@ -1304,33 +1284,13 @@ const BorderValue& RenderStyle::borderEnd() const
 
 unsigned short RenderStyle::borderBeforeWidth() const
 {
-    switch (writingMode()) {
-    case TopToBottomWritingMode:
-        return borderTopWidth();
-    case BottomToTopWritingMode:
-        return borderBottomWidth();
-    case LeftToRightWritingMode:
-        return borderLeftWidth();
-    case RightToLeftWritingMode:
-        return borderRightWidth();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderTopWidth();
 }
 
 unsigned short RenderStyle::borderAfterWidth() const
 {
-    switch (writingMode()) {
-    case TopToBottomWritingMode:
-        return borderBottomWidth();
-    case BottomToTopWritingMode:
-        return borderTopWidth();
-    case LeftToRightWritingMode:
-        return borderRightWidth();
-    case RightToLeftWritingMode:
-        return borderLeftWidth();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderBottomWidth();
 }
 

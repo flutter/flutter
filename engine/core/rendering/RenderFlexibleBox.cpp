@@ -328,7 +328,7 @@ bool RenderFlexibleBox::isHorizontalFlow() const
 bool RenderFlexibleBox::isLeftToRightFlow() const
 {
     if (isColumnFlow())
-        return style()->writingMode() == TopToBottomWritingMode || style()->writingMode() == LeftToRightWritingMode;
+        return true;
     return style()->isLeftToRightDirection() ^ (style()->flexDirection() == FlowRowReverse);
 }
 
@@ -424,19 +424,7 @@ LayoutUnit RenderFlexibleBox::computeMainAxisExtentForChild(RenderBox* child, Si
 
 WritingMode RenderFlexibleBox::transformedWritingMode() const
 {
-    WritingMode mode = style()->writingMode();
-    if (!isColumnFlow())
-        return mode;
-
-    switch (mode) {
-    case TopToBottomWritingMode:
-    case BottomToTopWritingMode:
-        return style()->isLeftToRightDirection() ? LeftToRightWritingMode : RightToLeftWritingMode;
-    case LeftToRightWritingMode:
-    case RightToLeftWritingMode:
-        return style()->isLeftToRightDirection() ? TopToBottomWritingMode : BottomToTopWritingMode;
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return TopToBottomWritingMode;
 }
 
@@ -456,33 +444,13 @@ LayoutUnit RenderFlexibleBox::flowAwareBorderEnd() const
 
 LayoutUnit RenderFlexibleBox::flowAwareBorderBefore() const
 {
-    switch (transformedWritingMode()) {
-    case TopToBottomWritingMode:
-        return borderTop();
-    case BottomToTopWritingMode:
-        return borderBottom();
-    case LeftToRightWritingMode:
-        return borderLeft();
-    case RightToLeftWritingMode:
-        return borderRight();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderTop();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwareBorderAfter() const
 {
-    switch (transformedWritingMode()) {
-    case TopToBottomWritingMode:
-        return borderBottom();
-    case BottomToTopWritingMode:
-        return borderTop();
-    case LeftToRightWritingMode:
-        return borderRight();
-    case RightToLeftWritingMode:
-        return borderLeft();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return borderTop();
 }
 
@@ -502,33 +470,13 @@ LayoutUnit RenderFlexibleBox::flowAwarePaddingEnd() const
 
 LayoutUnit RenderFlexibleBox::flowAwarePaddingBefore() const
 {
-    switch (transformedWritingMode()) {
-    case TopToBottomWritingMode:
-        return paddingTop();
-    case BottomToTopWritingMode:
-        return paddingBottom();
-    case LeftToRightWritingMode:
-        return paddingLeft();
-    case RightToLeftWritingMode:
-        return paddingRight();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return paddingTop();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwarePaddingAfter() const
 {
-    switch (transformedWritingMode()) {
-    case TopToBottomWritingMode:
-        return paddingBottom();
-    case BottomToTopWritingMode:
-        return paddingTop();
-    case LeftToRightWritingMode:
-        return paddingRight();
-    case RightToLeftWritingMode:
-        return paddingLeft();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return paddingTop();
 }
 
@@ -548,17 +496,7 @@ LayoutUnit RenderFlexibleBox::flowAwareMarginEndForChild(RenderBox* child) const
 
 LayoutUnit RenderFlexibleBox::flowAwareMarginBeforeForChild(RenderBox* child) const
 {
-    switch (transformedWritingMode()) {
-    case TopToBottomWritingMode:
-        return child->marginTop();
-    case BottomToTopWritingMode:
-        return child->marginBottom();
-    case LeftToRightWritingMode:
-        return child->marginLeft();
-    case RightToLeftWritingMode:
-        return child->marginRight();
-    }
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return marginTop();
 }
 

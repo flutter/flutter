@@ -2442,46 +2442,6 @@ template<> inline CSSPrimitiveValue::operator TextDirection() const
     return LTR;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(WritingMode e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case TopToBottomWritingMode:
-        m_value.valueID = CSSValueHorizontalTb;
-        break;
-    case RightToLeftWritingMode:
-        m_value.valueID = CSSValueVerticalRl;
-        break;
-    case LeftToRightWritingMode:
-        m_value.valueID = CSSValueVerticalLr;
-        break;
-    case BottomToTopWritingMode:
-        m_value.valueID = CSSValueHorizontalBt;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator WritingMode() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueHorizontalTb:
-        return TopToBottomWritingMode;
-    case CSSValueVerticalRl:
-        return RightToLeftWritingMode;
-    case CSSValueVerticalLr:
-        return LeftToRightWritingMode;
-    case CSSValueHorizontalBt:
-        return BottomToTopWritingMode;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return TopToBottomWritingMode;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(TextCombine e)
     : CSSValue(PrimitiveClass)
 {

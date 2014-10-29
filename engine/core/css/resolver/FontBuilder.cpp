@@ -457,12 +457,6 @@ static void getFontAndGlyphOrientation(const RenderStyle* style, FontOrientation
         glyphOrientation = NonCJKGlyphOrientationUpright;
         return;
     case TextOrientationSideways:
-        if (style->writingMode() == LeftToRightWritingMode) {
-            // FIXME: This should map to sideways-left, which is not supported yet.
-            fontOrientation = Vertical;
-            glyphOrientation = NonCJKGlyphOrientationVerticalRight;
-            return;
-        }
         fontOrientation = Horizontal;
         glyphOrientation = NonCJKGlyphOrientationVerticalRight;
         return;

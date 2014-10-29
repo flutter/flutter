@@ -303,7 +303,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitUserDrag,
     CSSPropertyWebkitUserModify,
     CSSPropertyWebkitUserSelect,
-    CSSPropertyWebkitWritingMode,
     CSSPropertyMaskSourceType,
 };
 
@@ -2409,8 +2408,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         }
         case CSSPropertyPointerEvents:
             return cssValuePool().createValue(style->pointerEvents());
-        case CSSPropertyWebkitWritingMode:
-            return cssValuePool().createValue(style->writingMode());
         case CSSPropertyWebkitTextCombine:
             return cssValuePool().createValue(style->textCombine());
         case CSSPropertyWebkitTextOrientation:

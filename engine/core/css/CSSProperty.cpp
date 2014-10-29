@@ -55,118 +55,34 @@ void CSSProperty::wrapValueInCommaSeparatedList()
 enum LogicalBoxSide { BeforeSide, EndSide, AfterSide, StartSide };
 enum PhysicalBoxSide { TopSide, RightSide, BottomSide, LeftSide };
 
-static CSSPropertyID resolveToPhysicalProperty(TextDirection direction, WritingMode writingMode, LogicalBoxSide logicalSide, const StylePropertyShorthand& shorthand)
+static CSSPropertyID resolveToPhysicalProperty(TextDirection direction, WritingMode, LogicalBoxSide logicalSide, const StylePropertyShorthand& shorthand)
 {
     if (direction == LTR) {
-        if (writingMode == TopToBottomWritingMode) {
-            // The common case. The logical and physical box sides match.
-            // Left = Start, Right = End, Before = Top, After = Bottom
-            return shorthand.properties()[logicalSide];
-        }
-
-        if (writingMode == BottomToTopWritingMode) {
-            // Start = Left, End = Right, Before = Bottom, After = Top.
-            switch (logicalSide) {
-            case StartSide:
-                return shorthand.properties()[LeftSide];
-            case EndSide:
-                return shorthand.properties()[RightSide];
-            case BeforeSide:
-                return shorthand.properties()[BottomSide];
-            default:
-                return shorthand.properties()[TopSide];
-            }
-        }
-
-        if (writingMode == LeftToRightWritingMode) {
-            // Start = Top, End = Bottom, Before = Left, After = Right.
-            switch (logicalSide) {
-            case StartSide:
-                return shorthand.properties()[TopSide];
-            case EndSide:
-                return shorthand.properties()[BottomSide];
-            case BeforeSide:
-                return shorthand.properties()[LeftSide];
-            default:
-                return shorthand.properties()[RightSide];
-            }
-        }
-
-        // Start = Top, End = Bottom, Before = Right, After = Left
-        switch (logicalSide) {
-        case StartSide:
-            return shorthand.properties()[TopSide];
-        case EndSide:
-            return shorthand.properties()[BottomSide];
-        case BeforeSide:
-            return shorthand.properties()[RightSide];
-        default:
-            return shorthand.properties()[LeftSide];
-        }
+        // The common case. The logical and physical box sides match.
+        // Left = Start, Right = End, Before = Top, After = Bottom
+        return shorthand.properties()[logicalSide];
     }
 
-    if (writingMode == TopToBottomWritingMode) {
-        // Start = Right, End = Left, Before = Top, After = Bottom
-        switch (logicalSide) {
-        case StartSide:
-            return shorthand.properties()[RightSide];
-        case EndSide:
-            return shorthand.properties()[LeftSide];
-        case BeforeSide:
-            return shorthand.properties()[TopSide];
-        default:
-            return shorthand.properties()[BottomSide];
-        }
-    }
-
-    if (writingMode == BottomToTopWritingMode) {
-        // Start = Right, End = Left, Before = Bottom, After = Top
-        switch (logicalSide) {
-        case StartSide:
-            return shorthand.properties()[RightSide];
-        case EndSide:
-            return shorthand.properties()[LeftSide];
-        case BeforeSide:
-            return shorthand.properties()[BottomSide];
-        default:
-            return shorthand.properties()[TopSide];
-        }
-    }
-
-    if (writingMode == LeftToRightWritingMode) {
-        // Start = Bottom, End = Top, Before = Left, After = Right
-        switch (logicalSide) {
-        case StartSide:
-            return shorthand.properties()[BottomSide];
-        case EndSide:
-            return shorthand.properties()[TopSide];
-        case BeforeSide:
-            return shorthand.properties()[LeftSide];
-        default:
-            return shorthand.properties()[RightSide];
-        }
-    }
-
-    // Start = Bottom, End = Top, Before = Right, After = Left
+    // FIXME(sky): Remove this. We no longer have logical properties beyond RTL.
+    // Start = Right, End = Left, Before = Top, After = Bottom
     switch (logicalSide) {
     case StartSide:
-        return shorthand.properties()[BottomSide];
-    case EndSide:
-        return shorthand.properties()[TopSide];
-    case BeforeSide:
         return shorthand.properties()[RightSide];
-    default:
+    case EndSide:
         return shorthand.properties()[LeftSide];
+    case BeforeSide:
+        return shorthand.properties()[TopSide];
+    default:
+        return shorthand.properties()[BottomSide];
     }
 }
 
 enum LogicalExtent { LogicalWidth, LogicalHeight };
 
-static CSSPropertyID resolveToPhysicalProperty(WritingMode writingMode, LogicalExtent logicalSide, const CSSPropertyID* properties)
+static CSSPropertyID resolveToPhysicalProperty(WritingMode, LogicalExtent logicalSide, const CSSPropertyID* properties)
 {
-    if (writingMode == TopToBottomWritingMode || writingMode == BottomToTopWritingMode)
-        return properties[logicalSide];
-    return logicalSide == LogicalWidth ? properties[1] : properties[0];
+    // FIXME(sky): Remove
+    return properties[logicalSide];
 }
 
 static const StylePropertyShorthand& borderDirections()

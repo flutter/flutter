@@ -33,26 +33,30 @@
 
 namespace blink {
 
+// FIXME(sky): Remove
 enum WritingMode {
-    TopToBottomWritingMode, RightToLeftWritingMode, LeftToRightWritingMode, BottomToTopWritingMode
+    TopToBottomWritingMode
 };
 
 // Lines have horizontal orientation; modes horizontal-tb or horizontal-bt.
 inline bool isHorizontalWritingMode(WritingMode writingMode)
 {
-    return writingMode == TopToBottomWritingMode || writingMode == BottomToTopWritingMode;
+    // FIXME(sky): Remove
+    return true;
 }
 
 // Bottom of the line occurs earlier in the block; modes vertical-lr or horizontal-bt.
 inline bool isFlippedLinesWritingMode(WritingMode writingMode)
 {
-    return writingMode == LeftToRightWritingMode || writingMode == BottomToTopWritingMode;
+    // FIXME(sky): Remove
+    return false;
 }
 
 // Block progression increases in the opposite direction to normal; modes vertical-rl or horizontal-bt.
 inline bool isFlippedBlocksWritingMode(WritingMode writingMode)
 {
-    return writingMode == RightToLeftWritingMode || writingMode == BottomToTopWritingMode;
+    // FIXME(sky): Remove
+    return false;
 }
 
 } // namespace blink

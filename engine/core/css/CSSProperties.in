@@ -95,7 +95,6 @@ font-weight animatable, inherited, font, type_name=FontWeight, name_for_methods=
 -webkit-font-smoothing inherited, font, type_name=FontSmoothingMode
 -webkit-locale inherited, custom_value
 -webkit-text-orientation inherited, custom_value
--webkit-writing-mode inherited, custom_value
 text-rendering inherited, font, type_name=TextRenderingMode
 zoom animatable, custom_all
 line-height animatable, inherited, getter=specifiedLineHeight, custom_value
@@ -432,7 +431,6 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 -epub-text-emphasis-style alias_for=-webkit-text-emphasis-style
 -epub-text-orientation alias_for=-webkit-text-orientation
 -epub-word-break alias_for=word-break
--epub-writing-mode alias_for=-webkit-writing-mode
 -webkit-align-content alias_for=align-content
 -webkit-align-items alias_for=align-items
 -webkit-align-self alias_for=align-self

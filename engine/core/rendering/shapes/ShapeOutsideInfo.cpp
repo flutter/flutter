@@ -159,27 +159,13 @@ const Shape& ShapeOutsideInfo::computedShape() const
 
 inline LayoutUnit borderBeforeInWritingMode(const RenderBox& renderer, WritingMode writingMode)
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode: return renderer.borderTop();
-    case BottomToTopWritingMode: return renderer.borderBottom();
-    case LeftToRightWritingMode: return renderer.borderLeft();
-    case RightToLeftWritingMode: return renderer.borderRight();
-    }
-
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return renderer.borderBefore();
 }
 
 inline LayoutUnit borderAndPaddingBeforeInWritingMode(const RenderBox& renderer, WritingMode writingMode)
 {
-    switch (writingMode) {
-    case TopToBottomWritingMode: return renderer.borderTop() + renderer.paddingTop();
-    case BottomToTopWritingMode: return renderer.borderBottom() + renderer.paddingBottom();
-    case LeftToRightWritingMode: return renderer.borderLeft() + renderer.paddingLeft();
-    case RightToLeftWritingMode: return renderer.borderRight() + renderer.paddingRight();
-    }
-
-    ASSERT_NOT_REACHED();
+    // FIXME(sky): Remove
     return renderer.borderAndPaddingBefore();
 }
 

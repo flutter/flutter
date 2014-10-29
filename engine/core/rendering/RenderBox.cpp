@@ -3862,20 +3862,8 @@ LayoutRect RenderBox::logicalVisualOverflowRectForPropagation(RenderStyle* paren
 
 LayoutRect RenderBox::visualOverflowRectForPropagation(RenderStyle* parentStyle) const
 {
-    // If the writing modes of the child and parent match, then we don't have to
-    // do anything fancy. Just return the result.
-    LayoutRect rect = visualOverflowRect();
-    if (parentStyle->writingMode() == style()->writingMode())
-        return rect;
-
-    // We are putting ourselves into our parent's coordinate space.  If there is a flipped block mismatch
-    // in a particular axis, then we have to flip the rect along that axis.
-    if (style()->writingMode() == RightToLeftWritingMode || parentStyle->writingMode() == RightToLeftWritingMode)
-        rect.setX(width() - rect.maxX());
-    else if (style()->writingMode() == BottomToTopWritingMode || parentStyle->writingMode() == BottomToTopWritingMode)
-        rect.setY(height() - rect.maxY());
-
-    return rect;
+    // FIXME(sky): Remove
+    return visualOverflowRect();
 }
 
 LayoutRect RenderBox::logicalLayoutOverflowRectForPropagation(RenderStyle* parentStyle) const
@@ -3914,18 +3902,6 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle)
         // Now we need to flip back.
         flipForWritingMode(rect);
     }
-
-    // If the writing modes of the child and parent match, then we don't have to
-    // do anything fancy. Just return the result.
-    if (parentStyle->writingMode() == style()->writingMode())
-        return rect;
-
-    // We are putting ourselves into our parent's coordinate space.  If there is a flipped block mismatch
-    // in a particular axis, then we have to flip the rect along that axis.
-    if (style()->writingMode() == RightToLeftWritingMode || parentStyle->writingMode() == RightToLeftWritingMode)
-        rect.setX(width() - rect.maxX());
-    else if (style()->writingMode() == BottomToTopWritingMode || parentStyle->writingMode() == BottomToTopWritingMode)
-        rect.setY(height() - rect.maxY());
 
     return rect;
 }

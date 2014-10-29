@@ -140,9 +140,6 @@ void MatchedPropertiesCache::sweep(Timer<MatchedPropertiesCache>*)
 
 bool MatchedPropertiesCache::isCacheable(const Element* element, const RenderStyle* style, const RenderStyle* parentStyle)
 {
-    // FIXME: CSSPropertyWebkitWritingMode modifies state when applying to document element. We can't skip the applying by caching.
-    if (element == element->document().documentElement() && element->document().writingModeSetOnDocumentElement())
-        return false;
     if (style->unique() || (style->styleType() != NOPSEUDO && parentStyle->unique()))
         return false;
     if (style->zoom() != RenderStyle::initialZoom())
