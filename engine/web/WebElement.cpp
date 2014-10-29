@@ -142,11 +142,6 @@ void WebElement::requestFullScreen()
 {
 }
 
-WebRect WebElement::boundsInViewportSpace()
-{
-    return unwrap<Element>()->boundsInRootViewSpace();
-}
-
 WebImage WebElement::imageContents()
 {
     if (isNull())

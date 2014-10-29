@@ -81,7 +81,7 @@ PlatformMouseEventBuilder::PlatformMouseEventBuilder(Widget* widget, const WebMo
 
     // FIXME: Widget is always toplevel, unless it's a popup. We may be able
     // to get rid of this once we abstract popups into a WebKit API.
-    m_position = widget->convertFromContainingWindow(
+    m_position = widget->convertFromContainingView(
         IntPoint((e.x - offset.width()) / scale, (e.y - offset.height()) / scale));
     m_globalPosition = IntPoint(e.globalX, e.globalY);
     m_movementDelta = IntPoint(e.movementX / scale, e.movementY / scale);
@@ -127,7 +127,7 @@ PlatformWheelEventBuilder::PlatformWheelEventBuilder(Widget* widget, const WebMo
     float scale = widgetInputEventsScaleFactor(widget);
     IntSize offset = widgetInputEventsOffset(widget);
 
-    m_position = widget->convertFromContainingWindow(
+    m_position = widget->convertFromContainingView(
         IntPoint((e.x - offset.width()) / scale, (e.y - offset.height()) / scale));
     m_globalPosition = IntPoint(e.globalX, e.globalY);
     m_deltaX = e.deltaX;
@@ -245,7 +245,7 @@ PlatformGestureEventBuilder::PlatformGestureEventBuilder(Widget* widget, const W
     default:
         ASSERT_NOT_REACHED();
     }
-    m_position = widget->convertFromContainingWindow(
+    m_position = widget->convertFromContainingView(
         IntPoint((e.x - offset.width()) / scale, (e.y - offset.height()) / scale));
     m_globalPosition = IntPoint(e.globalX, e.globalY);
     m_timestamp = e.timeStampSeconds;
@@ -412,8 +412,8 @@ PlatformTouchPointBuilder::PlatformTouchPointBuilder(Widget* widget, const WebTo
     m_state = toPlatformTouchPointState(point.state);
     FloatPoint pos = (point.position - offset).scaledBy(scale);
     IntPoint flooredPoint = flooredIntPoint(pos);
-    // This assumes convertFromContainingWindow does only translations, not scales.
-    m_pos = widget->convertFromContainingWindow(flooredPoint) + (pos - flooredPoint);
+    // This assumes convertFromContainingView does only translations, not scales.
+    m_pos = widget->convertFromContainingView(flooredPoint) + (pos - flooredPoint);
     m_screenPos = FloatPoint(point.screenPosition.x, point.screenPosition.y);
     m_radius = FloatSize(point.radiusX, point.radiusY).scaledBy(scale);
     m_rotationAngle = point.rotationAngle;
@@ -471,10 +471,8 @@ static void updateWebMouseEventFromCoreMouseEvent(const MouseRelatedEvent& event
     webEvent.timeStampSeconds = event.timeStamp() / millisPerSecond;
     webEvent.modifiers = getWebInputModifiers(event);
 
-    FrameView* view = toFrameView(widget.parent());
     IntPoint windowPoint = IntPoint(event.absoluteLocation().x(), event.absoluteLocation().y());
-    if (view)
-        windowPoint = view->contentsToWindow(windowPoint);
+    windowPoint = widget.convertToContainingView(windowPoint);
     webEvent.globalX = event.screenX();
     webEvent.globalY = event.screenY();
     webEvent.windowX = windowPoint.x();
@@ -559,10 +557,8 @@ WebMouseEventBuilder::WebMouseEventBuilder(const Widget* widget, const RenderObj
     modifiers = getWebInputModifiers(event);
 
     // The mouse event co-ordinates should be generated from the co-ordinates of the touch point.
-    FrameView* view = toFrameView(widget->parent());
     IntPoint windowPoint = roundedIntPoint(touch->absoluteLocation());
-    if (view)
-        windowPoint = view->contentsToWindow(windowPoint);
+    windowPoint = widget->convertToContainingView(windowPoint);
     IntPoint screenPoint = roundedIntPoint(touch->screenLocation());
     globalX = screenPoint.x();
     globalY = screenPoint.y();
@@ -608,9 +604,7 @@ WebMouseEventBuilder::WebMouseEventBuilder(const Widget* widget, const PlatformM
 
     timeStampSeconds = event.timestamp();
 
-    // FIXME: Widget is always toplevel, unless it's a popup. We may be able
-    // to get rid of this once we abstract popups into a WebKit API.
-    IntPoint position = widget->convertToContainingWindow(event.position());
+    IntPoint position = event.position();
     float scale = widgetInputEventsScaleFactor(widget);
     position.scale(scale, scale);
     x = position.x();

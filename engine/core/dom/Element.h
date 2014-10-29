@@ -158,13 +158,8 @@ public:
     virtual int scrollWidth();
     virtual int scrollHeight();
 
-    IntRect boundsInRootViewSpace();
-
     PassRefPtr<ClientRectList> getClientRects();
     PassRefPtr<ClientRect> getBoundingClientRect();
-
-    // Returns the absolute bounding box translated into screen coordinates:
-    IntRect screenRect() const;
 
     virtual void didMoveToNewDocument(Document&) override;
 

@@ -221,14 +221,6 @@ void FrameView::recalcOverflowAfterStyleChange()
     renderView->recalcOverflowAfterStyleChange();
 }
 
-IntRect FrameView::contentsToScreen(const IntRect& rect) const
-{
-    HostWindow* window = hostWindow();
-    if (!window)
-        return IntRect();
-    return window->rootViewToScreen(contentsToRootView(rect));
-}
-
 bool FrameView::scheduleAnimation()
 {
     if (HostWindow* window = hostWindow()) {

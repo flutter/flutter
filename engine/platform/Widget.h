@@ -70,32 +70,14 @@ public:
     virtual bool isScrollbar() const { return false; }
 
     virtual HostWindow* hostWindow() const { ASSERT_NOT_REACHED(); return 0; }
-    void setParent(Widget* parent) { m_parent = parent; }
     Widget* parent() const { return m_parent; }
     Widget* root() const;
 
-    IntRect convertToRootView(const IntRect&) const;
-    IntRect convertFromRootView(const IntRect&) const;
-
-    IntPoint convertToRootView(const IntPoint&) const;
-    IntPoint convertFromRootView(const IntPoint&) const;
-
-    // It is important for cross-platform code to realize that Mac has flipped coordinates. Therefore any code
-    // that tries to convert the location of a rect using the point-based convertFromContainingWindow will end
-    // up with an inaccurate rect. Always make sure to use the rect-based convertFromContainingWindow method
-    // when converting window rects.
-    IntRect convertToContainingWindow(const IntRect&) const;
-    IntRect convertFromContainingWindow(const IntRect&) const;
-
-    IntPoint convertToContainingWindow(const IntPoint&) const;
-    IntPoint convertFromContainingWindow(const IntPoint&) const;
-    FloatPoint convertFromContainingWindow(const FloatPoint&) const;
-
     // Virtual methods to convert points to/from the containing ScrollView
-    virtual IntRect convertToContainingView(const IntRect&) const;
-    virtual IntRect convertFromContainingView(const IntRect&) const;
-    virtual IntPoint convertToContainingView(const IntPoint&) const;
-    virtual IntPoint convertFromContainingView(const IntPoint&) const;
+    virtual IntRect convertToContainingView(const IntRect& localRect) const { return localRect; }
+    virtual IntRect convertFromContainingView(const IntRect& localRect) const { return localRect; }
+    virtual IntPoint convertToContainingView(const IntPoint& localPoint) const  { return localPoint; }
+    virtual IntPoint convertFromContainingView(const IntPoint& localPoint) const { return localPoint; }
 
 private:
     Widget* m_parent;

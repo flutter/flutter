@@ -556,30 +556,6 @@ int Element::scrollHeight()
     return 0;
 }
 
-IntRect Element::boundsInRootViewSpace()
-{
-    document().updateLayoutIgnorePendingStylesheets();
-
-    FrameView* view = document().view();
-    if (!view)
-        return IntRect();
-
-    Vector<FloatQuad> quads;
-    // Get the bounding rectangle from the box model.
-    if (renderBoxModelObject())
-        renderBoxModelObject()->absoluteQuads(quads);
-
-    if (quads.isEmpty())
-        return IntRect();
-
-    IntRect result = quads[0].enclosingBoundingBox();
-    for (size_t i = 1; i < quads.size(); ++i)
-        result.unite(quads[i].enclosingBoundingBox());
-
-    result = view->contentsToRootView(result);
-    return result;
-}
-
 PassRefPtr<ClientRectList> Element::getClientRects()
 {
     document().updateLayoutIgnorePendingStylesheets();
@@ -616,14 +592,6 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect()
     ASSERT(renderer());
     document().adjustFloatRectForScrollAndAbsoluteZoom(result, *renderer());
     return ClientRect::create(result);
-}
-
-IntRect Element::screenRect() const
-{
-    if (!renderer())
-        return IntRect();
-    // FIXME: this should probably respect transforms
-    return document().view()->contentsToScreen(renderer()->absoluteBoundingBoxRectIgnoringTransforms());
 }
 
 void Element::setAttribute(const AtomicString& localName, const AtomicString& value, ExceptionState& exceptionState)

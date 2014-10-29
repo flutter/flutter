@@ -136,25 +136,13 @@ public:
     // Convert points and rects between the scrollbar and its containing view.
     // The client needs to implement these in order to be aware of layout effects
     // like CSS transforms.
-    virtual IntRect convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntRect& scrollbarRect) const
-    {
-        return scrollbar->Widget::convertToContainingView(scrollbarRect);
-    }
-    virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntRect& parentRect) const
-    {
-        return scrollbar->Widget::convertFromContainingView(parentRect);
-    }
-    virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntPoint& scrollbarPoint) const
-    {
-        return scrollbar->Widget::convertToContainingView(scrollbarPoint);
-    }
-    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntPoint& parentPoint) const
-    {
-        return scrollbar->Widget::convertFromContainingView(parentPoint);
-    }
+    virtual IntRect convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntRect& scrollbarRect) const = 0;
+    virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntRect& parentRect) const = 0;
+    virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntPoint& scrollbarPoint) const = 0;
+    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntPoint& parentPoint) const = 0;
 
-    virtual Scrollbar* horizontalScrollbar() const { return 0; }
-    virtual Scrollbar* verticalScrollbar() const { return 0; }
+    virtual Scrollbar* horizontalScrollbar() const = 0;
+    virtual Scrollbar* verticalScrollbar() const = 0;
 
     // scrollPosition is relative to the scrollOrigin. i.e. If the page is RTL
     // then scrollPosition will be negative.

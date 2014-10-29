@@ -72,12 +72,6 @@ public:
     // "Content-Language" header as a fallback.
     BLINK_EXPORT WebString computeInheritedLanguage() const;
 
-    // Returns the bounds of the element in viewport space. The bounds
-    // have been adjusted to include any transformations. This view is
-    // also called the Root View in Blink.
-    // This function will update the layout if required.
-    BLINK_EXPORT WebRect boundsInViewportSpace();
-
     // Returns the image contents of this element or a null WebImage
     // if there isn't any.
     BLINK_EXPORT WebImage imageContents();

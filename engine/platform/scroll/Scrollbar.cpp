@@ -284,7 +284,7 @@ bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
     case PlatformEvent::GestureTapDown:
         // FIXME(sky): Is setting the pressed part needed since we only have overlay scrollbars?
         setPressedPart(NoPart);
-        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingWindow(evt.position()).x() : convertFromContainingWindow(evt.position()).y();
+        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
         return true;
     case PlatformEvent::GestureTapDownCancel:
     case PlatformEvent::GestureScrollBegin:
@@ -330,14 +330,14 @@ void Scrollbar::mouseMoved(const PlatformMouseEvent& evt)
                 m_scrollableArea->scrollToOffsetWithoutAnimation(m_orientation, m_dragOrigin + m_scrollableArea->minimumScrollPosition(m_orientation));
         } else {
             moveThumb(m_orientation == HorizontalScrollbar ?
-                      convertFromContainingWindow(evt.position()).x() :
-                      convertFromContainingWindow(evt.position()).y());
+                      convertFromContainingView(evt.position()).x() :
+                      convertFromContainingView(evt.position()).y());
         }
         return;
     }
 
     if (m_pressedPart != NoPart)
-        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingWindow(evt.position()).x() : convertFromContainingWindow(evt.position()).y();
+        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
 
     // FIXME(sky): Cleanup this code now that part is always NoPart.
     ScrollbarPart part = NoPart;
@@ -396,7 +396,7 @@ void Scrollbar::mouseDown(const PlatformMouseEvent& evt)
 
     // FIXME(sky): Do we still need setPressedPart now that we only set it to NoPart?
     setPressedPart(NoPart);
-    int pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingWindow(evt.position()).x() : convertFromContainingWindow(evt.position()).y();
+    int pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
 
     if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && shouldCenterOnThumb(evt)) {
         setHoveredPart(ThumbPart);
@@ -527,7 +527,7 @@ bool Scrollbar::shouldCenterOnThumb(const PlatformMouseEvent& evt)
 
 bool Scrollbar::shouldSnapBackToDragOrigin(const PlatformMouseEvent& evt)
 {
-    IntPoint mousePosition = convertFromContainingWindow(evt.position());
+    IntPoint mousePosition = convertFromContainingView(evt.position());
     mousePosition.move(x(), y());
     return blink::Platform::current()->scrollbarBehavior()->shouldSnapBackToDragOrigin(mousePosition, trackRect(), orientation() == HorizontalScrollbar);
 }

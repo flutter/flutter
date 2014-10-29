@@ -203,15 +203,11 @@ public:
     bool isSubtreeLayout() const { return !!m_layoutSubtreeRoot; }
 
     // FIXME(sky): remove
-    IntRect contentsToScreen(const IntRect& rect) const;
-    IntPoint contentsToRootView(const IntPoint& contentsPoint) const { return convertToRootView(contentsPoint); }
-    IntRect contentsToRootView(const IntRect& contentsRect) const { return convertToRootView(contentsRect); }
-    IntRect rootViewToContents(const IntRect& rootViewRect) const { return convertFromRootView(rootViewRect); }
-    IntPoint windowToContents(const IntPoint& windowPoint) const { return convertFromContainingWindow(windowPoint); }
-    FloatPoint windowToContents(const FloatPoint& windowPoint) const { return convertFromContainingWindow(windowPoint); }
-    IntPoint contentsToWindow(const IntPoint& contentsPoint) const { return contentsToWindow(contentsPoint); }
-    IntRect windowToContents(const IntRect& windowRect) const { return convertFromContainingWindow(windowRect); }
-    IntRect contentsToWindow(const IntRect& contentsRect) const { return contentsToWindow(contentsRect); }
+    IntPoint windowToContents(const IntPoint& windowPoint) const { return windowPoint; }
+    IntPoint contentsToWindow(const IntPoint& contentsPoint) const { return contentsPoint; }
+    IntRect windowToContents(const IntRect& windowRect) const { return windowRect; }
+    IntRect contentsToWindow(const IntRect& contentsRect) const { return contentsRect; }
+
     bool scheduleAnimation();
     IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
     IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }

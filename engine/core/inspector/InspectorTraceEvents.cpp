@@ -207,13 +207,11 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorParseHtmlEvent::beginD
 
 static void localToPageQuad(const RenderObject& renderer, const LayoutRect& rect, FloatQuad* quad)
 {
-    LocalFrame* frame = renderer.frame();
-    FrameView* view = frame->view();
     FloatQuad absolute = renderer.localToAbsoluteQuad(FloatQuad(rect));
-    quad->setP1(view->contentsToRootView(roundedIntPoint(absolute.p1())));
-    quad->setP2(view->contentsToRootView(roundedIntPoint(absolute.p2())));
-    quad->setP3(view->contentsToRootView(roundedIntPoint(absolute.p3())));
-    quad->setP4(view->contentsToRootView(roundedIntPoint(absolute.p4())));
+    quad->setP1(roundedIntPoint(absolute.p1()));
+    quad->setP2(roundedIntPoint(absolute.p2()));
+    quad->setP3(roundedIntPoint(absolute.p3()));
+    quad->setP4(roundedIntPoint(absolute.p4()));
 }
 
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(RenderObject* renderer, const LayoutRect& clipRect, const GraphicsLayer* graphicsLayer)

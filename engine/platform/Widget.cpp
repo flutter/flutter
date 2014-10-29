@@ -39,7 +39,6 @@ Widget::Widget()
 
 Widget::~Widget()
 {
-    ASSERT(!parent());
 }
 
 Widget* Widget::root() const
@@ -50,118 +49,6 @@ Widget* Widget::root() const
     if (top->isFrameView())
         return const_cast<Widget*>(static_cast<const Widget*>(top));
     return 0;
-}
-
-IntRect Widget::convertFromRootView(const IntRect& rootRect) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntRect parentRect = parentWidget->convertFromRootView(rootRect);
-        return convertFromContainingView(parentRect);
-    }
-    return rootRect;
-}
-
-IntRect Widget::convertToRootView(const IntRect& localRect) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntRect parentRect = convertToContainingView(localRect);
-        return parentWidget->convertToRootView(parentRect);
-    }
-    return localRect;
-}
-
-IntPoint Widget::convertFromRootView(const IntPoint& rootPoint) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntPoint parentPoint = parentWidget->convertFromRootView(rootPoint);
-        return convertFromContainingView(parentPoint);
-    }
-    return rootPoint;
-}
-
-IntPoint Widget::convertToRootView(const IntPoint& localPoint) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntPoint parentPoint = convertToContainingView(localPoint);
-        return parentWidget->convertToRootView(parentPoint);
-    }
-    return localPoint;
-}
-
-IntRect Widget::convertFromContainingWindow(const IntRect& windowRect) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntRect parentRect = parentWidget->convertFromContainingWindow(windowRect);
-        return convertFromContainingView(parentRect);
-    }
-    return windowRect;
-}
-
-IntRect Widget::convertToContainingWindow(const IntRect& localRect) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntRect parentRect = convertToContainingView(localRect);
-        return parentWidget->convertToContainingWindow(parentRect);
-    }
-    return localRect;
-}
-
-IntPoint Widget::convertFromContainingWindow(const IntPoint& windowPoint) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntPoint parentPoint = parentWidget->convertFromContainingWindow(windowPoint);
-        return convertFromContainingView(parentPoint);
-    }
-    return windowPoint;
-}
-
-
-FloatPoint Widget::convertFromContainingWindow(const FloatPoint& windowPoint) const
-{
-    // Widgets / windows are required to be IntPoint aligned, but we may need to convert
-    // FloatPoint values within them (eg. for event co-ordinates).
-    IntPoint flooredPoint = flooredIntPoint(windowPoint);
-    FloatPoint parentPoint = this->convertFromContainingWindow(flooredPoint);
-    FloatSize windowFraction = windowPoint - flooredPoint;
-    // Use linear interpolation handle any fractional value (eg. for iframes subject to a transform
-    // beyond just a simple translation).
-    // FIXME: Add FloatPoint variants of all co-ordinate space conversion APIs.
-    if (!windowFraction.isEmpty()) {
-        const int kFactor = 1000;
-        IntPoint parentLineEnd = this->convertFromContainingWindow(flooredPoint + roundedIntSize(windowFraction.scaledBy(kFactor)));
-        FloatSize parentFraction = (parentLineEnd - parentPoint).scaledBy(1.0f / kFactor);
-        parentPoint.move(parentFraction);
-    }
-    return parentPoint;
-}
-
-IntPoint Widget::convertToContainingWindow(const IntPoint& localPoint) const
-{
-    if (const Widget* parentWidget = parent()) {
-        IntPoint parentPoint = convertToContainingView(localPoint);
-        return parentWidget->convertToContainingWindow(parentPoint);
-    }
-    return localPoint;
-}
-
-IntRect Widget::convertToContainingView(const IntRect& localRect) const
-{
-    return localRect;
-}
-
-IntRect Widget::convertFromContainingView(const IntRect& parentRect) const
-{
-    return parentRect;
-}
-
-IntPoint Widget::convertToContainingView(const IntPoint& localPoint) const
-{
-    return localPoint;
-}
-
-IntPoint Widget::convertFromContainingView(const IntPoint& parentPoint) const
-{
-    return parentPoint;
 }
 
 } // namespace blink
