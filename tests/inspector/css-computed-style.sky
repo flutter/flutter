@@ -1,0 +1,18 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="/sky/framework/inspector/css-agent.sky" as="CSSAgent" />
+<script>
+var fakeDOMAgent = {
+  getNodeForId: function(id) {
+    return document.documentElement;
+  }
+};
+
+var cssAgent = new CSSAgent(fakeDOMAgent);
+cssAgent.enable();
+var response = cssAgent.getComputedStyleForNode({nodeId: '1'});
+
+assert.isTrue(response["computedStyle"].length > 0);
+internals.notifyTestComplete("Done!");
+</script>
+</html>

@@ -8,17 +8,21 @@
 <link rel="import" href="worker-agent.sky" as="WorkerAgent" />
 <link rel="import" href="runtime-agent.sky" as="RuntimeAgent" />
 <link rel="import" href="indexeddb-agent.sky" as="IndexedDBAgent" />
+<link rel="import" href="css-agent.sky" as="CSSAgent" />
 <script>
 function InspectorBackend(frontend) {
   this.frontend = frontend;
+  var domAgent = new DOMAgent(this);
   this.agents = {
     Console: new ConsoleAgent(),
-    DOM: new DOMAgent(this),
+    DOM: domAgent,
     Page: new PageAgent(),
     Worker: new WorkerAgent(),
     Runtime: new RuntimeAgent(this),
+    CSS: new CSSAgent(domAgent),
     IndexedDB: new IndexedDBAgent(),
   };
+  this.missingNames_ = {};
 }
 
 InspectorBackend.prototype = Object.create(
@@ -30,6 +34,13 @@ InspectorBackend.prototype.onConnect = function() {
 InspectorBackend.prototype.onDisconnect = function() {
 };
 
+InspectorBackend.prototype.logMissing_ = function(name) {
+  if (name in this.missingNames_)
+    return;
+  this.missingNames_[name] = true;
+  console.log("InspectorBackend missing " + name);
+}
+
 InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
   var parsed = descriptor.split('.');
 
@@ -37,14 +48,14 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
   var methodName = parsed[1];
 
   if (!(agentName in this.agents)) {
-    console.log("InspectorBackend missing " + agentName);
+    this.logMissing_(agentName);
     return {};
   }
 
   var agent = this.agents[agentName];
 
   if (!(methodName in agent)) {
-    console.log("InspectorBackend missing " + agentName + "." + methodName);
+    this.logMissing_(agentName + "." + methodName);
     return {};
   }
 

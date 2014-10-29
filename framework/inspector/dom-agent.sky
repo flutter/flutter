@@ -16,6 +16,10 @@ DOMAgent.prototype.getIdForNode_ = function(node) {
   return id;
 };
 
+DOMAgent.prototype.getNodeForId = function(nodeId) {
+  return this.idToNode_.get(nodeId);
+};
+
 DOMAgent.prototype.serializeChildren_ = function(node) {
   var children = [];
   for (var child = node.firstChild; child; child = child.nextSibling) {

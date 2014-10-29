@@ -1,18 +1,7 @@
+<link rel="import" href="debug.sky" as="debug" />
 <script>
-
 function Runtime(delegate) {
   this.delegate_ = delegate;
-}
-
-// FIXME: Move these to their own 'debug' module.
-function logParams(name, params) {
-  console.log(name + "(" + JSON.stringify(params, null, " ") + ")")
-}
-
-function debug(name) {
-  return function(params) {
-    logParams(name, params);
-  }
 }
 
 Runtime.prototype.enable = function() {
@@ -28,7 +17,6 @@ Runtime.prototype.enable = function() {
 };
 
 Runtime.prototype.callFunctionOn = function(params) {
-  logParams("callFunctionOn", params);
   var object = g_objectRegistry.lookup(params.objectId);
   // This is a horrible hack:
   var functionName = params.functionDeclaration.match(/^function (\w+)\(/)[1];
@@ -49,7 +37,7 @@ Runtime.prototype.callFunctionOn = function(params) {
 // FIXME: This should release all objects associated with an object
 // group, see InjectedScriptSource.js for an example.  Just have to
 // track which object ids are associated with which object groups first.
-Runtime.prototype.releaseObjectGroup = debug("releaseObjectGroup");
+Runtime.prototype.releaseObjectGroup = debug.loggingStub("releaseObjectGroup");
 
 // See InjectedScript._bind for a fancier version of this:
 
@@ -115,7 +103,6 @@ function makeResult(params, value, wasThrown) {
 
 // FIXME: See Blink"s inspected-script-source.js InjectedScript.RemoteObject.
 Runtime.prototype.evaluate = function(params) {
-  logParams("evaluate", params);
   var wasThrown = false;
   var value;
   try {
@@ -128,7 +115,7 @@ Runtime.prototype.evaluate = function(params) {
   return makeResult(params, value, wasThrown);
 }
 
-Runtime.prototype.getProperties = debug("getProperties");
+Runtime.prototype.getProperties = debug.loggingStub("getProperties");
 
 this.exports = Runtime;
 </script>

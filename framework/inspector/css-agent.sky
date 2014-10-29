@@ -1,0 +1,51 @@
+<script>
+function CSS(domAgent) {
+  this.domAgent_ = domAgent;
+}
+
+CSS.prototype.enable = function() {
+};
+
+CSS.prototype.getInlineStylesForNode = function(params) {
+  return {
+      "inlineStyle": {
+      "cssProperties": [],
+      "shorthandEntries": [],
+      "styleSheetId": "0",
+      "range": {
+        "startLine": 0,
+        "startColumn": 0,
+        "endLine": 0,
+        "endColumn": 0
+      },
+      "cssText": "",
+    }
+  }
+}
+
+CSS.prototype.getComputedStyleForNode = function(params) {
+  var node = this.domAgent_.getNodeForId(params.nodeId);
+  if (!node){
+    console.log("Error, missing node" + params.nodeId);
+    return { "computedStyle": [] };
+  }
+  var style = window.getComputedStyle(node, null);
+  if (!style){
+    console.log("Error, no computed style for " + params.nodeId + " " + node);
+    return { "computedStyle": [] };
+  }
+  var computedStyles = [];
+  for (var i = 0; i < style.length; i++) {
+    var name = style.item(i);
+    computedStyles.push({
+      "name": name,
+      "value": style.getPropertyValue(name),
+    });
+  }
+  return {
+    "computedStyle": computedStyles,
+  }
+}
+
+this.exports = CSS;
+</script>
