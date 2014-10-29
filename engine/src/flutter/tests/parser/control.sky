@@ -1,0 +1,7 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky" />
+<body>
+THIS TEST SHOULD PASS
+(control test for success)
+</body>
+</html>

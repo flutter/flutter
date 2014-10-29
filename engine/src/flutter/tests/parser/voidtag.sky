@@ -1,0 +1,22 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<body>
+
+ <p/>               a </p>
+ <p />              a </p>
+ <p test/>          a </p>
+ <p test />         a </p>
+ <p test=/>         a </p>
+ <p test= />        a </p>
+ <p test=a/>        a </p>
+ <p test=a />       a </p>
+ <p test='a'/>      a </p>
+ <p test='a' />     a </p>
+ <p test="a"/>      a </p>
+ <p test="a" />     a </p>
+ <p test=&/>        a </p>
+ <p test=& />       a </p>
+ <p test=&#x61;/>   a </p>
+ <p test=&#x61; />  a </p>
+
+</body>

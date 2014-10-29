@@ -1,0 +1,77 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<body>
+
+ <a>1</a>
+
+<a >2</a >
+<a.>3</a.>
+<a_>4</a_>
+<a->5</a->
+<a!>6</a!>
+<a%>7</a%>
+
+< a>8</ a>
+<.a>9</.a>
+<_a>a</_a>
+<-a>b</-a>
+<!a>c</!a>
+<%a>d</%a>
+
+<a/_a></a>
+
+<a foo=bar
+</a></a>
+
+<a a1
+   a2=
+   xx=xx
+
+   a3=&
+   a4=&#
+   a5=&#x
+   a6=&#x1
+   a7=&#x1;
+   a8=&#1
+   a9=&#1;
+   aa=&a
+   ab=&a;
+   ac=&;
+   ad=a
+   ae=&lt;
+   af=&lt
+   ag=&LT;
+
+   b3='&'
+   b4='&#'
+   b5='&#x'
+   b6='&#x1'
+   b7='&#x1;'
+   b8='&#1'
+   b9='&#1;'
+   ba='&a'
+   bb='&a;'
+   bc='&;'
+   bd='a'
+   be='&lt;'
+   bf='&lt'
+   bg='&LT;'
+
+   c3="&"
+   c4="&#"
+   c5="&#x"
+   c6="&#x1"
+   c7="&#x1;"
+   c8="&#1"
+   c9="&#1;"
+   ca="&a"
+   cb="&a;"
+   cc="&;"
+   cd="a"
+   ce="&lt;"
+   cf="&lt"
+   cg="&LT;"
+
+>
+
+</body>
