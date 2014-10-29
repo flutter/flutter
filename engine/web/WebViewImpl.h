@@ -91,7 +91,6 @@ public:
     virtual bool handleInputEvent(const WebInputEvent&) override;
     virtual void setCursorVisibilityState(bool isVisible) override;
     virtual bool hasTouchEventHandlersAt(const WebPoint&) override;
-    virtual void applyScrollAndScale(const WebSize&, float) override;
     virtual void mouseCaptureLost() override;
     virtual void setFocus(bool enable) override;
     virtual bool setComposition(

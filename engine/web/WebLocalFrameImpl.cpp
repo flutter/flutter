@@ -227,30 +227,6 @@ void WebLocalFrameImpl::close()
     deref(); // Balances ref() acquired in WebFrame::create
 }
 
-WebSize WebLocalFrameImpl::scrollOffset() const
-{
-    FrameView* view = frameView();
-    if (!view)
-        return WebSize();
-    return view->scrollOffset();
-}
-
-WebSize WebLocalFrameImpl::minimumScrollOffset() const
-{
-    FrameView* view = frameView();
-    if (!view)
-        return WebSize();
-    return toIntSize(view->minimumScrollPosition());
-}
-
-WebSize WebLocalFrameImpl::maximumScrollOffset() const
-{
-    FrameView* view = frameView();
-    if (!view)
-        return WebSize();
-    return toIntSize(view->maximumScrollPosition());
-}
-
 WebSize WebLocalFrameImpl::contentsSize() const
 {
     return frame()->view()->size();

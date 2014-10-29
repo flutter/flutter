@@ -68,8 +68,6 @@ namespace blink {
 double FrameView::s_currentFrameTimeStamp = 0.0;
 bool FrameView::s_inPaintContents = false;
 
-static const double resourcePriorityUpdateDelayAfterScroll = 0.250;
-
 FrameView::FrameView(LocalFrame* frame)
     : m_frame(frame)
     , m_hasPendingLayout(false)
@@ -88,7 +86,6 @@ FrameView::FrameView(LocalFrame* frame)
     , m_visibleContentScaleFactor(1)
     , m_inputEventsScaleFactorForEmulation(1)
     , m_layoutSizeFixedToFrameSize(true)
-    , m_didScrollTimer(this, &FrameView::didScrollTimerFired)
 {
     ASSERT(m_frame);
     init();
@@ -113,12 +110,8 @@ FrameView::~FrameView()
     if (m_postLayoutTasksTimer.isActive())
         m_postLayoutTasksTimer.stop();
 
-    if (m_didScrollTimer.isActive())
-        m_didScrollTimer.stop();
-
     ASSERT(m_frame);
     ASSERT(m_frame->view() != this || !m_frame->contentRenderer());
-    // FIXME: Do we need to do something here for OOPI?
 }
 
 void FrameView::reset()
@@ -560,32 +553,6 @@ void FrameView::setLayoutSize(const IntSize& size)
     setLayoutSizeInternal(size);
 }
 
-void FrameView::scrollPositionChanged()
-{
-    setWasScrolledByUser(true);
-
-    Document* document = m_frame->document();
-    document->enqueueScrollEventForNode(document);
-
-    m_frame->eventHandler().dispatchFakeMouseMoveEventSoon();
-
-    if (RenderView* renderView = document->renderView()) {
-        if (renderView->usesCompositing())
-            renderView->compositor()->frameViewDidScroll();
-    }
-
-    if (m_didScrollTimer.isActive())
-        m_didScrollTimer.stop();
-    m_didScrollTimer.startOneShot(resourcePriorityUpdateDelayAfterScroll, FROM_HERE);
-}
-
-void FrameView::didScrollTimerFired(Timer<FrameView>*)
-{
-    if (m_frame->document() && m_frame->document()->renderView()) {
-        ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->updateAllImageResourcePriorities();
-    }
-}
-
 void FrameView::updateCompositedSelectionBoundsIfNeeded()
 {
     if (!RuntimeEnabledFeatures::compositedSelectionUpdatesEnabled())
@@ -616,9 +583,7 @@ void FrameView::contentRectangleForPaintInvalidation(const IntRect& r)
     ASSERT(paintInvalidationIsAllowed());
 
     if (m_isTrackingPaintInvalidations) {
-        IntRect paintInvalidationRect = r;
-        paintInvalidationRect.move(-scrollOffset());
-        m_trackedPaintInvalidationRects.append(paintInvalidationRect);
+        m_trackedPaintInvalidationRects.append(r);
         // FIXME: http://crbug.com/368518. Eventually, invalidateContentRectangleForPaint
         // is going away entirely once all layout tests are FCM. In the short
         // term, no code should be tracking non-composited FrameView paint invalidations.
@@ -1098,21 +1063,12 @@ void FrameView::forceLayout(bool allowSubtree)
 
 IntRect FrameView::convertFromRenderer(const RenderObject& renderer, const IntRect& rendererRect) const
 {
-    IntRect rect = pixelSnappedIntRect(enclosingLayoutRect(renderer.localToAbsoluteQuad(FloatRect(rendererRect)).boundingBox()));
-
-    // Convert from page ("absolute") to FrameView coordinates.
-    rect.moveBy(-scrollPosition());
-
-    return rect;
+    return pixelSnappedIntRect(enclosingLayoutRect(renderer.localToAbsoluteQuad(FloatRect(rendererRect)).boundingBox()));
 }
 
 IntRect FrameView::convertToRenderer(const RenderObject& renderer, const IntRect& viewRect) const
 {
     IntRect rect = viewRect;
-
-    // Convert from FrameView coords into page ("absolute") coordinates.
-    rect.moveBy(scrollPosition());
-
     // FIXME: we don't have a way to map an absolute rect down to a local quad, so just
     // move the rect for now.
     rect.setLocation(roundedIntPoint(renderer.absoluteToLocal(rect.location(), UseTransforms)));
@@ -1121,11 +1077,7 @@ IntRect FrameView::convertToRenderer(const RenderObject& renderer, const IntRect
 
 IntPoint FrameView::convertFromRenderer(const RenderObject& renderer, const IntPoint& rendererPoint) const
 {
-    IntPoint point = roundedIntPoint(renderer.localToAbsolute(rendererPoint, UseTransforms));
-
-    // Convert from page ("absolute") to FrameView coordinates.
-    point.moveBy(-scrollPosition());
-    return point;
+    return roundedIntPoint(renderer.localToAbsolute(rendererPoint, UseTransforms));
 }
 
 IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoint& viewPoint) const

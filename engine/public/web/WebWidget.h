@@ -136,12 +136,6 @@ public:
     // Check whether the given point hits any registered touch event handlers.
     virtual bool hasTouchEventHandlersAt(const WebPoint&) { return true; }
 
-    // Applies a scroll delta to the root layer, which is bundled with a page
-    // scale factor that may apply a CSS transform on the whole document (used
-    // for mobile-device pinch zooming). This is triggered by events sent to the
-    // compositor thread.
-    virtual void applyScrollAndScale(const WebSize& scrollDelta, float scaleFactor) { }
-
     // Called to inform the WebWidget that mouse capture was lost.
     virtual void mouseCaptureLost() { }
 

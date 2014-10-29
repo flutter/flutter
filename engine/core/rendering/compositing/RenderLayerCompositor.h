@@ -135,7 +135,6 @@ public:
     // Update the geometry of the layers used for clipping and scrolling in frames.
     void frameViewDidChangeLocation(const IntPoint& contentsOffset);
     void frameViewDidChangeSize();
-    void frameViewDidScroll();
     void rootFixedBackgroundsChanged();
 
     bool scrollingLayerDidChange(RenderLayer*);

@@ -619,13 +619,10 @@ WebRect WebViewImpl::widenRectWithinPageBounds(const WebRect& source, int target
     WebSize maxSize;
     if (mainFrame())
         maxSize = mainFrame()->contentsSize();
-    IntSize scrollOffset;
-    if (mainFrame())
-        scrollOffset = mainFrame()->scrollOffset();
     int leftMargin = targetMargin;
     int rightMargin = targetMargin;
 
-    const int absoluteSourceX = source.x + scrollOffset.width();
+    const int absoluteSourceX = source.x;
     if (leftMargin > absoluteSourceX) {
         leftMargin = absoluteSourceX;
         rightMargin = std::max(leftMargin, minimumMargin);
@@ -641,7 +638,7 @@ WebRect WebViewImpl::widenRectWithinPageBounds(const WebRect& source, int target
     const int newX = source.x - leftMargin;
 
     ASSERT(newWidth >= 0);
-    ASSERT(scrollOffset.width() + newX + newWidth <= maxSize.width);
+    ASSERT(newX + newWidth <= maxSize.width);
 
     return WebRect(newX, source.y, newWidth, source.height);
 }
@@ -2331,19 +2328,6 @@ void WebViewImpl::setIsAcceleratedCompositingActive(bool active)
 void WebViewImpl::updateMainFrameScrollPosition(const IntPoint& scrollPosition, bool programmaticScroll)
 {
     // FIXME(sky): Remove
-}
-
-void WebViewImpl::applyScrollAndScale(const WebSize& scrollDelta, float pageScaleDelta)
-{
-    if (!mainFrameImpl() || !mainFrameImpl()->frameView())
-        return;
-
-    // TODO(bokan): Old pinch path only - virtual viewport pinch scrolls are automatically updated via GraphicsLayer::DidScroll.
-    // this should be removed once old pinch is removed.
-        TRACE_EVENT_INSTANT2("blink", "WebViewImpl::applyScrollAndScale::scrollBy", "x", scrollDelta.width, "y", scrollDelta.height);
-        WebSize webScrollOffset = mainFrame()->scrollOffset();
-        IntPoint scrollOffset(webScrollOffset.width + scrollDelta.width, webScrollOffset.height + scrollDelta.height);
-        updateMainFrameScrollPosition(scrollOffset, false);
 }
 
 void WebViewImpl::updateLayerTreeBackgroundColor()

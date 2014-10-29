@@ -136,27 +136,6 @@ WebElement WebDocument::createElement(const WebString& tagName)
     return element;
 }
 
-WebSize WebDocument::scrollOffset() const
-{
-    if (FrameView* view = constUnwrap<Document>()->view())
-        return view->scrollOffset();
-    return WebSize();
-}
-
-WebSize WebDocument::minimumScrollOffset() const
-{
-    if (FrameView* view = constUnwrap<Document>()->view())
-        return toIntSize(view->minimumScrollPosition());
-    return WebSize();
-}
-
-WebSize WebDocument::maximumScrollOffset() const
-{
-    if (FrameView* view = constUnwrap<Document>()->view())
-        return toIntSize(view->maximumScrollPosition());
-    return WebSize();
-}
-
 v8::Handle<v8::Value> WebDocument::registerEmbedderCustomElement(const WebString& name, v8::Handle<v8::Value> options, WebExceptionCode& ec)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();

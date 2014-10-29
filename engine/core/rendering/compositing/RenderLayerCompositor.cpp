@@ -366,36 +366,8 @@ void RenderLayerCompositor::frameViewDidChangeSize()
     if (m_containerLayer) {
         FrameView* frameView = m_renderView.frameView();
         m_containerLayer->setSize(frameView->unscaledVisibleContentSize());
-
-        frameViewDidScroll();
         updateOverflowControlsLayers();
     }
-}
-
-enum AcceleratedFixedRootBackgroundHistogramBuckets {
-    ScrolledMainFrameBucket = 0,
-    ScrolledMainFrameWithAcceleratedFixedRootBackground = 1,
-    ScrolledMainFrameWithUnacceleratedFixedRootBackground = 2,
-    AcceleratedFixedRootBackgroundHistogramMax = 3
-};
-
-void RenderLayerCompositor::frameViewDidScroll()
-{
-    FrameView* frameView = m_renderView.frameView();
-    IntPoint scrollPosition = frameView->scrollPosition();
-
-    if (!m_scrollLayer)
-        return;
-
-    // Scroll position = scroll minimum + scroll offset. Adjust the layer's
-    // position to handle whatever the scroll coordinator isn't handling.
-    // The minimum scroll position is non-zero for RTL pages with overflow.
-    m_scrollLayer->setPosition(-scrollPosition);
-
-
-    Platform::current()->histogramEnumeration("Renderer.AcceleratedFixedRootBackground",
-        ScrolledMainFrameBucket,
-        AcceleratedFixedRootBackgroundHistogramMax);
 }
 
 void RenderLayerCompositor::rootFixedBackgroundsChanged()

@@ -219,10 +219,6 @@ public:
     IntPoint contentsToWindow(const IntPoint& contentsPoint) const { return contentsToWindow(contentsPoint); }
     IntRect windowToContents(const IntRect& windowRect) const { return convertFromContainingWindow(windowRect); }
     IntRect contentsToWindow(const IntRect& contentsRect) const { return contentsToWindow(contentsRect); }
-    IntSize scrollOffset() const { return IntSize(); }
-    IntPoint minimumScrollPosition() const { return IntPoint(); }
-    IntPoint maximumScrollPosition() const { return IntPoint(); }
-    IntPoint scrollPosition() const { return IntPoint(); }
     bool scheduleAnimation();
     IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
     IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }
@@ -270,9 +266,6 @@ private:
 
     bool wasViewportResized();
     void sendResizeEventIfNeeded();
-
-    void scrollPositionChanged();
-    void didScrollTimerFired(Timer<FrameView>*);
 
     void updateCompositedSelectionBoundsIfNeeded();
 
@@ -340,8 +333,6 @@ private:
 
     IntSize m_layoutSize;
     bool m_layoutSizeFixedToFrameSize;
-
-    Timer<FrameView> m_didScrollTimer;
 
     Vector<IntRect> m_tickmarks;
 };

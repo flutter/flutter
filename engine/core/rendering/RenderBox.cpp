@@ -604,7 +604,6 @@ IntSize RenderBox::calculateAutoscrollDirection(const IntPoint& windowPoint) con
         return IntSize();
 
     IntRect box(absoluteBoundingBoxRect());
-    box.move(view()->frameView()->scrollOffset());
     IntRect windowBox = view()->frameView()->contentsToWindow(box);
 
     IntPoint windowAutoscrollPoint = windowPoint;
