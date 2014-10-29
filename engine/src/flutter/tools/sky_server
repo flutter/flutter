@@ -22,13 +22,23 @@ GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
 
 def main():
     parser = argparse.ArgumentParser(description='Sky development server')
+    parser.add_argument('-v', '--verbose', action='store_true',
+        help='Enable logging to the console.')
     parser.add_argument('app_path', type=str)
     parser.add_argument('port', type=int)
     args = parser.parse_args()
 
+    log_dir = os.path.abspath(os.getcwd())
+    print "%s logging to access_log.txt in %s" % (
+        parser.prog, log_dir)
+
     config = {
         'global': {
             'server.socket_port': args.port,
+            'log.screen': args.verbose,
+            'log.access_log': os.path.join(log_dir, 'access_log.txt'),
+            # This causes some strange python exception??
+            # 'log.error_log': os.path.join(log_dir, 'error_log.txt'),
         },
         '/': {
             'tools.staticdir.on': True,
