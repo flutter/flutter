@@ -57,7 +57,6 @@ public:
         , m_blockStyle(block->style())
         , m_lineInfo(inLineInfo)
         , m_renderTextInfo(inRenderTextInfo)
-        , m_lastFloatFromPreviousLine(inLastFloatFromPreviousLine)
         , m_width(lineWidth)
         , m_currWS(NORMAL)
         , m_lastWS(NORMAL)
@@ -70,7 +69,6 @@ public:
         , m_includeEndWidth(true)
         , m_autoWrap(false)
         , m_autoWrapWasEverTrueOnLine(false)
-        , m_floatsFitOnLine(true)
         , m_collapseWhiteSpace(false)
         , m_startingNewParagraph(m_lineInfo.previousLineBrokeCleanly())
         , m_atEnd(false)
@@ -89,7 +87,6 @@ public:
 
     void handleBR(EClear&);
     void handleOutOfFlowPositioned(Vector<RenderBox*>& positionedObjects);
-    void handleFloat();
     void handleEmptyInline();
     void handleReplaced();
     bool handleText(WordMeasurements&, bool& hyphenated);
@@ -122,8 +119,6 @@ private:
 
     RenderTextInfo& m_renderTextInfo;
 
-    FloatingObject* m_lastFloatFromPreviousLine;
-
     LineWidth m_width;
 
     EWhiteSpace m_currWS;
@@ -138,7 +133,6 @@ private:
     bool m_includeEndWidth;
     bool m_autoWrap;
     bool m_autoWrapWasEverTrueOnLine;
-    bool m_floatsFitOnLine;
     bool m_collapseWhiteSpace;
     bool m_startingNewParagraph;
     bool m_atEnd;
@@ -226,8 +220,6 @@ inline void BreakingContext::skipTrailingWhitespace(InlineIterator& iterator, co
         RenderObject* object = iterator.object();
         if (object->isOutOfFlowPositioned())
             setStaticPositions(m_block, toRenderBox(object));
-        else if (object->isFloating())
-            m_block->insertFloatingObject(toRenderBox(object));
         iterator.increment();
     }
 }
@@ -354,27 +346,6 @@ inline void BreakingContext::handleOutOfFlowPositioned(Vector<RenderBox*>& posit
     m_width.addUncommittedWidth(inlineLogicalWidth(box).toFloat());
     // Reset prior line break context characters.
     m_renderTextInfo.m_lineBreakIterator.resetPriorContext();
-}
-
-inline void BreakingContext::handleFloat()
-{
-    RenderBox* floatBox = toRenderBox(m_current.object());
-    FloatingObject* floatingObject = m_block->insertFloatingObject(floatBox);
-    // check if it fits in the current line.
-    // If it does, position it now, otherwise, position
-    // it after moving to next line (in newLine() func)
-    // FIXME: Bug 110372: Properly position multiple stacked floats with non-rectangular shape outside.
-    if (m_floatsFitOnLine && m_width.fitsOnLine(m_block->logicalWidthForFloat(floatingObject).toFloat(), ExcludeWhitespace)) {
-        m_block->positionNewFloatOnLine(floatingObject, m_lastFloatFromPreviousLine, m_lineInfo, m_width);
-        if (m_lineBreak.object() == m_current.object()) {
-            ASSERT(!m_lineBreak.offset());
-            m_lineBreak.increment();
-        }
-    } else {
-        m_floatsFitOnLine = false;
-    }
-    // Update prior line break context characters, using U+FFFD (OBJECT REPLACEMENT CHARACTER) for floating element.
-    m_renderTextInfo.m_lineBreakIterator.updatePriorContext(replacementCharacter);
 }
 
 // This is currently just used for list markers and inline flows that have line boxes. Neither should

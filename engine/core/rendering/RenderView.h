@@ -123,8 +123,6 @@ public:
     // Renderer that paints the root background has background-images which all have background-attachment: fixed.
     bool rootBackgroundIsEntirelyFixed() const;
 
-    IntervalArena* intervalArena();
-
     virtual bool backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const override;
 
     double layoutViewportWidth() const;
@@ -165,7 +163,6 @@ private:
 
     LayoutState* m_layoutState;
     OwnPtr<RenderLayerCompositor> m_compositor;
-    RefPtr<IntervalArena> m_intervalArena;
 
     unsigned m_renderCounterCount;
 

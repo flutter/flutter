@@ -23,7 +23,6 @@
 #ifndef RenderBlock_h
 #define RenderBlock_h
 
-#include "core/rendering/FloatingObjects.h"
 #include "core/rendering/GapRects.h"
 #include "core/rendering/RenderBox.h"
 #include "core/rendering/RenderLineBoxList.h"
@@ -361,9 +360,6 @@ private:
                                  LayoutUnit lastLogicalTop, LayoutUnit lastLogicalLeft, LayoutUnit lastLogicalRight, LayoutUnit logicalBottom, const PaintInfo*);
     virtual LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position);
     virtual LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position);
-
-    // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
-    virtual void clipOutFloatingObjects(RenderBlock*, const PaintInfo*, const LayoutPoint&, const LayoutSize&) { };
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;

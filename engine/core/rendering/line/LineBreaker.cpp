@@ -38,8 +38,6 @@ void LineBreaker::skipLeadingWhitespace(InlineBidiResolver& resolver, LineInfo& 
                 resolver.runs().addRun(createRun(0, 1, object, resolver));
                 lineInfo.incrementRunsFromLeadingWhitespace();
             }
-        } else if (object->isFloating()) {
-            m_block->positionNewFloatOnLine(m_block->insertFloatingObject(toRenderBox(object)), lastFloatFromPreviousLine, lineInfo, width);
         } else if (object->isText() && object->style()->hasTextCombine() && object->isCombineText() && !toRenderCombineText(object)->isCombined()) {
             toRenderCombineText(object)->combineText();
             if (toRenderCombineText(object)->isCombined())
@@ -80,8 +78,6 @@ InlineIterator LineBreaker::nextLineBreak(InlineBidiResolver& resolver, LineInfo
         context.initializeForCurrentObject();
         if (context.currentObject()->isOutOfFlowPositioned()) {
             context.handleOutOfFlowPositioned(m_positionedObjects);
-        } else if (context.currentObject()->isFloating()) {
-            context.handleFloat();
         } else if (context.currentObject()->isRenderInline()) {
             context.handleEmptyInline();
         } else if (context.currentObject()->isReplaced()) {

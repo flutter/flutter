@@ -59,45 +59,6 @@ void LineWidth::updateAvailableWidth(LayoutUnit replacedHeight)
     computeAvailableWidthFromLeftAndRight();
 }
 
-void LineWidth::shrinkAvailableWidthForNewFloatIfNeeded(FloatingObject* newFloat)
-{
-    LayoutUnit height = m_block.logicalHeight();
-    if (height < m_block.logicalTopForFloat(newFloat) || height >= m_block.logicalBottomForFloat(newFloat))
-        return;
-
-    ShapeOutsideDeltas shapeDeltas;
-    if (ShapeOutsideInfo* shapeOutsideInfo = newFloat->renderer()->shapeOutsideInfo()) {
-        LayoutUnit lineHeight = m_block.lineHeight(m_isFirstLine, m_block.isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes);
-        shapeDeltas = shapeOutsideInfo->computeDeltasForContainingBlockLine(m_block, *newFloat, m_block.logicalHeight(), lineHeight);
-    }
-
-    if (newFloat->type() == FloatingObject::FloatLeft) {
-        float newLeft = m_block.logicalRightForFloat(newFloat).toFloat();
-        if (shapeDeltas.isValid()) {
-            if (shapeDeltas.lineOverlapsShape())
-                newLeft += shapeDeltas.rightMarginBoxDelta();
-            else // Per the CSS Shapes spec, If the line doesn't overlap the shape, then ignore this shape for this line.
-                newLeft = m_left;
-        }
-        if (shouldIndentText() && m_block.style()->isLeftToRightDirection())
-            newLeft += floorToInt(m_block.textIndentOffset());
-        m_left = std::max<float>(m_left, newLeft);
-    } else {
-        float newRight = m_block.logicalLeftForFloat(newFloat).toFloat();
-        if (shapeDeltas.isValid()) {
-            if (shapeDeltas.lineOverlapsShape())
-                newRight += shapeDeltas.leftMarginBoxDelta();
-            else // Per the CSS Shapes spec, If the line doesn't overlap the shape, then ignore this shape for this line.
-                newRight = m_right;
-        }
-        if (shouldIndentText() && !m_block.style()->isLeftToRightDirection())
-            newRight -= floorToInt(m_block.textIndentOffset());
-        m_right = std::min<float>(m_right, newRight);
-    }
-
-    computeAvailableWidthFromLeftAndRight();
-}
-
 void LineWidth::commit()
 {
     m_committedWidth += m_uncommittedWidth;
@@ -144,7 +105,7 @@ void LineWidth::wrapNextToShapeOutside(bool isFirstLine)
     LayoutUnit lineHeight = m_block.lineHeight(isFirstLine, m_block.isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes);
     LayoutUnit lineLogicalTop = m_block.logicalHeight();
     LayoutUnit newLineTop = lineLogicalTop;
-    LayoutUnit floatLogicalBottom = m_block.nextFloatLogicalBottomBelow(lineLogicalTop);
+    LayoutUnit floatLogicalBottom = lineLogicalTop;
 
     float newLineWidth;
     float newLineLeft = m_left;
@@ -173,12 +134,8 @@ void LineWidth::fitBelowFloats(bool isFirstLine)
     float newLineLeft = m_left;
     float newLineRight = m_right;
 
-    FloatingObject* lastFloatFromPreviousLine = (m_block.containsFloats() ? m_block.m_floatingObjects->set().last().get() : 0);
-        if (lastFloatFromPreviousLine && lastFloatFromPreviousLine->renderer()->shapeOutsideInfo())
-            return wrapNextToShapeOutside(isFirstLine);
-
     while (true) {
-        floatLogicalBottom = m_block.nextFloatLogicalBottomBelow(lastFloatLogicalBottom, ShapeOutsideFloatShapeOffset);
+        floatLogicalBottom = lastFloatLogicalBottom;
         if (floatLogicalBottom <= lastFloatLogicalBottom)
             break;
 

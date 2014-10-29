@@ -514,11 +514,6 @@ void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutSc
             adjustPositionedBlock(child, marginInfo);
             continue;
         }
-        if (child->isFloating()) {
-            insertFloatingObject(child);
-            adjustFloatingBlock(marginInfo);
-            continue;
-        }
 
         // Lay out the child.
         layoutBlockChild(child, marginInfo, previousFloatLogicalBottom);
@@ -1155,9 +1150,6 @@ RootInlineBox* RenderBlockFlow::createAndAppendRootInlineBox()
 
 void RenderBlockFlow::deleteLineBoxTree()
 {
-    if (containsFloats())
-        m_floatingObjects->clearLineBoxTreePointers();
-
     m_lineBoxes.deleteLineBoxTree();
 }
 
@@ -1177,11 +1169,6 @@ LayoutUnit RenderBlockFlow::getClearDelta(RenderBox* child, LayoutUnit logicalTo
     return 0;
 }
 
-void RenderBlockFlow::createFloatingObjects()
-{
-    // FIXME(sky): Remove this.
-}
-
 void RenderBlockFlow::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
 {
     RenderStyle* oldStyle = style();
@@ -1195,37 +1182,8 @@ void RenderBlockFlow::styleWillChange(StyleDifference diff, const RenderStyle& n
 
 void RenderBlockFlow::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
 {
+    // FIXME(sky): Remove this.
     RenderBlock::styleDidChange(diff, oldStyle);
-
-    // After our style changed, if we lose our ability to propagate floats into next sibling
-    // blocks, then we need to find the top most parent containing that overhanging float and
-    // then mark its descendants with floats for layout and clear all floats from its next
-    // sibling blocks that exist in our floating objects list. See bug 56299 and 62875.
-    bool canPropagateFloatIntoSibling = !isFloatingOrOutOfFlowPositioned() && !avoidsFloats();
-    if (diff.needsFullLayout() && s_canPropagateFloatIntoSibling && !canPropagateFloatIntoSibling && hasOverhangingFloats()) {
-        RenderBlockFlow* parentBlockFlow = this;
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator end = floatingObjectSet.end();
-
-        for (RenderObject* curr = parent(); curr && !curr->isRenderView(); curr = curr->parent()) {
-            if (curr->isRenderBlockFlow()) {
-                RenderBlockFlow* currBlock = toRenderBlockFlow(curr);
-
-                if (currBlock->hasOverhangingFloats()) {
-                    for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-                        RenderBox* renderer = (*it)->renderer();
-                        if (currBlock->hasOverhangingFloat(renderer)) {
-                            parentBlockFlow = currBlock;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        parentBlockFlow->markAllDescendantsWithFloatsForLayout();
-        parentBlockFlow->markSiblingsWithFloatsForLayout();
-    }
 }
 
 void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox* child, LayoutUnit logicalTop)
@@ -1303,23 +1261,7 @@ void RenderBlockFlow::paintFloats(PaintInfo& paintInfo, const LayoutPoint& paint
     // FIXME(sky): Remove this.
 }
 
-void RenderBlockFlow::clipOutFloatingObjects(RenderBlock* rootBlock, const PaintInfo* paintInfo, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock)
-{
-    // FIXME(sky): Remove this.
-}
-
 void RenderBlockFlow::clearFloats(EClear clear)
-{
-    // FIXME(sky): Remove this.
-}
-
-bool RenderBlockFlow::containsFloat(RenderBox* renderer) const
-{
-    // FIXME(sky): Remove this.
-    return false;
-}
-
-void RenderBlockFlow::removeFloatingObjects()
 {
     // FIXME(sky): Remove this.
 }
@@ -1370,21 +1312,6 @@ LayoutPoint RenderBlockFlow::computeLogicalLocationForFloat(const FloatingObject
     return LayoutPoint();
 }
 
-FloatingObject* RenderBlockFlow::insertFloatingObject(RenderBox* floatBox)
-{
-    return 0;
-}
-
-void RenderBlockFlow::removeFloatingObject(RenderBox* floatBox)
-{
-    // FIXME(sky): Remove this.
-}
-
-void RenderBlockFlow::removeFloatingObjectsBelow(FloatingObject* lastFloat, int logicalOffset)
-{
-    // FIXME(sky): Remove this.
-}
-
 bool RenderBlockFlow::positionNewFloats()
 {
     // FIXME(sky): Remove this.
@@ -1405,18 +1332,6 @@ void RenderBlockFlow::addIntrudingFloats(RenderBlockFlow* prev, LayoutUnit logic
 void RenderBlockFlow::addOverhangingFloats(RenderBlockFlow* child, bool makeChildPaintOtherFloats)
 {
     // FIXME(sky): Remove this.
-}
-
-LayoutUnit RenderBlockFlow::lowestFloatLogicalBottom(FloatingObject::Type floatType) const
-{
-    // FIXME(sky): Remove this.
-    return 0;
-}
-
-LayoutUnit RenderBlockFlow::nextFloatLogicalBottomBelow(LayoutUnit logicalHeight, ShapeOutsideFloatOffsetMode offsetMode) const
-{
-    // FIXME(sky): Remove this.
-    return logicalHeight;
 }
 
 bool RenderBlockFlow::hitTestFloats(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
@@ -1479,17 +1394,13 @@ void RenderBlockFlow::fitBorderToLinesIfNeeded()
 
 LayoutUnit RenderBlockFlow::logicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const
 {
-    if (m_floatingObjects && m_floatingObjects->hasLeftObjects())
-        return m_floatingObjects->logicalLeftOffset(fixedOffset, logicalTop, logicalHeight);
-
+    // FIXME(sky): remove this.
     return fixedOffset;
 }
 
 LayoutUnit RenderBlockFlow::logicalRightFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const
 {
-    if (m_floatingObjects && m_floatingObjects->hasRightObjects())
-        return m_floatingObjects->logicalRightOffset(fixedOffset, logicalTop, logicalHeight);
-
+    // FIXME(sky): remove this.
     return fixedOffset;
 }
 

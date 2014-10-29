@@ -1032,8 +1032,6 @@ sky_core_files = [
   "rendering/EllipsisBox.h",
   "rendering/FilterEffectRenderer.cpp",
   "rendering/FilterEffectRenderer.h",
-  "rendering/FloatingObjects.cpp",
-  "rendering/FloatingObjects.h",
   "rendering/GraphicsContextAnnotator.cpp",
   "rendering/GraphicsContextAnnotator.h",
   "rendering/HitTestLocation.cpp",

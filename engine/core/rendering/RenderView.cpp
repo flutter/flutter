@@ -769,13 +769,6 @@ void RenderView::popLayoutState()
     m_layoutState = m_layoutState->next();
 }
 
-IntervalArena* RenderView::intervalArena()
-{
-    if (!m_intervalArena)
-        m_intervalArena = IntervalArena::create();
-    return m_intervalArena.get();
-}
-
 bool RenderView::backgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const
 {
     return m_frameView->hasOpaqueBackground();

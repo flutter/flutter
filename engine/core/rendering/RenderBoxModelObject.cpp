@@ -2629,8 +2629,6 @@ void RenderBoxModelObject::moveChildrenTo(RenderBoxModelObject* toBoxModelObject
     if (fullRemoveInsert && isRenderBlock()) {
         RenderBlock* block = toRenderBlock(this);
         block->removePositionedObjects(0);
-        if (block->isRenderBlockFlow())
-            toRenderBlockFlow(block)->removeFloatingObjects();
     }
 
     ASSERT(!beforeChild || toBoxModelObject == beforeChild->parent());

@@ -1670,7 +1670,6 @@ GapRects RenderBlock::selectionGaps(RenderBlock* rootBlock, const LayoutPoint& r
         if (isDocumentElement()) // The <body> must make sure to examine its containingBlock's positioned objects.
             for (RenderBlock* cb = containingBlock(); cb && !cb->isRenderView(); cb = cb->containingBlock())
                 clipOutPositionedObjects(paintInfo, LayoutPoint(cb->x(), cb->y()), cb->positionedObjects()); // FIXME: Not right for flipped writing modes.
-        clipOutFloatingObjects(rootBlock, paintInfo, rootBlockPhysicalPosition, offsetFromRootBlock);
     }
 
     // FIXME: overflow: auto/scroll regions need more math here, since painting in the border box is different from painting in the padding box (one is scrolled, the other is
