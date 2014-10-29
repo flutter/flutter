@@ -15,6 +15,6 @@ https://github.com/domokit/mojo/issues/15 parser/empty.sky [ Skip ]
 #https://github.com/domokit/mojo/issues/15 parser/utf16.sky [ Skip ]
 
 # These tests fail
-https://github.com/domokit/mojo/issues/14 parser/normaliser-null.sky [ Crash ]
-https://github.com/domokit/mojo/issues/14 parser/utf16.sky [ Crash ]
+https://github.com/domokit/mojo/issues/14 parser/normaliser-null.sky [ Skip ]
+https://github.com/domokit/mojo/issues/14 parser/utf16.sky [ Skip ]
 https://github.com/domokit/mojo/issues/16 parser/normaliser-crlf.sky [ Skip ]
