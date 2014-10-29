@@ -784,7 +784,6 @@ bool EventHandler::scroll(ScrollDirection direction, ScrollGranularity granulari
             *stopNode = curBox->node();
 
         if (didScroll || shouldStopBubbling) {
-            setFrameWasScrolledByUser();
             return true;
         }
 
@@ -1481,12 +1480,6 @@ bool EventHandler::isInsideScrollbar(const IntPoint& windowPoint) const
 
 bool EventHandler::handleWheelEvent(const PlatformWheelEvent& event)
 {
-#define RETURN_WHEEL_EVENT_HANDLED() \
-    { \
-        setFrameWasScrolledByUser(); \
-        return true; \
-    }
-
     Document* doc = m_frame->document();
 
     if (!doc->renderView())
@@ -1529,7 +1522,7 @@ bool EventHandler::handleWheelEvent(const PlatformWheelEvent& event)
 
     if (node) {
         if (node && !node->dispatchWheelEvent(event))
-            RETURN_WHEEL_EVENT_HANDLED();
+            return true;
     }
 
     // We do another check on the frame view because the event handler can run JS which results in the frame getting destroyed.
@@ -1537,9 +1530,7 @@ bool EventHandler::handleWheelEvent(const PlatformWheelEvent& event)
     if (!view || !view->wheelEvent(event))
         return false;
 
-    RETURN_WHEEL_EVENT_HANDLED();
-
-#undef RETURN_WHEEL_EVENT_HANDLED
+    return true;
 }
 
 void EventHandler::defaultWheelEventHandler(Node* startNode, WheelEvent* wheelEvent)
@@ -1936,7 +1927,6 @@ bool EventHandler::handleGestureScrollUpdate(const PlatformGestureEvent& gesture
         m_previousGestureScrolledNode = stopNode;
 
     if (horizontalScroll || verticalScroll) {
-        setFrameWasScrolledByUser();
         return true;
     }
 
@@ -1961,9 +1951,6 @@ bool EventHandler::sendScrollEventToView(const PlatformGestureEvent& gestureEven
     syntheticWheelEvent.setHasPreciseScrollingDeltas(true);
 
     bool scrolledFrame = view->wheelEvent(syntheticWheelEvent);
-    if (scrolledFrame)
-        setFrameWasScrolledByUser();
-
     return scrolledFrame;
 }
 
@@ -2448,12 +2435,6 @@ void EventHandler::defaultTabEventHandler(KeyboardEvent* event)
 
 void EventHandler::capsLockStateMayHaveChanged()
 {
-}
-
-void EventHandler::setFrameWasScrolledByUser()
-{
-    if (FrameView* view = m_frame->view())
-        view->setWasScrolledByUser(true);
 }
 
 bool EventHandler::passMousePressEventToScrollbar(MouseEventWithHitTestResults& mev)

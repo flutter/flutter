@@ -79,8 +79,6 @@ FrameView::FrameView(LocalFrame* frame)
     , m_mediaType("screen")
     , m_overflowStatusDirty(true)
     , m_viewportRenderer(0)
-    , m_wasScrolledByUser(false)
-    , m_inProgrammaticScroll(false)
     , m_isTrackingPaintInvalidations(false)
     , m_hasSoftwareFilters(false)
     , m_visibleContentScaleFactor(1)
@@ -128,7 +126,6 @@ void FrameView::reset()
     m_postLayoutTasksTimer.stop();
     m_firstLayout = true;
     m_firstLayoutCallbackPending = false;
-    m_wasScrolledByUser = false;
     m_lastViewportSize = IntSize();
     m_lastZoomFactor = 1.0f;
     m_isTrackingPaintInvalidations = false;
@@ -348,9 +345,6 @@ void FrameView::layout(bool allowSubtree)
 
     // Protect the view from being deleted during layout (in recalcStyle)
     RefPtr<FrameView> protector(this);
-
-    // Every scroll that happens during layout is programmatic.
-    TemporaryChange<bool> changeInProgrammaticScroll(m_inProgrammaticScroll, true);
 
     m_hasPendingLayout = false;
     DocumentLifecycle::Scope lifecycleScope(lifecycle(), DocumentLifecycle::LayoutClean);
@@ -898,18 +892,6 @@ Color FrameView::documentBackgroundColor() const
     return result;
 }
 
-bool FrameView::wasScrolledByUser() const
-{
-    return m_wasScrolledByUser;
-}
-
-void FrameView::setWasScrolledByUser(bool wasScrolledByUser)
-{
-    if (m_inProgrammaticScroll)
-        return;
-    m_wasScrolledByUser = wasScrolledByUser;
-}
-
 void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
 {
     Document* document = m_frame->document();
@@ -1083,26 +1065,6 @@ IntPoint FrameView::convertFromRenderer(const RenderObject& renderer, const IntP
 IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoint& viewPoint) const
 {
     return roundedIntPoint(renderer.absoluteToLocal(viewPoint, UseTransforms));
-}
-
-IntRect FrameView::convertToContainingView(const IntRect& localRect) const
-{
-    return localRect;
-}
-
-IntRect FrameView::convertFromContainingView(const IntRect& parentRect) const
-{
-    return parentRect;
-}
-
-IntPoint FrameView::convertToContainingView(const IntPoint& localPoint) const
-{
-    return localPoint;
-}
-
-IntPoint FrameView::convertFromContainingView(const IntPoint& parentPoint) const
-{
-    return parentPoint;
 }
 
 void FrameView::setTracksPaintInvalidations(bool trackPaintInvalidations)

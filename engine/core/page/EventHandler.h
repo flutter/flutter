@@ -261,8 +261,6 @@ private:
 
     void updateLastScrollbarUnderMouse(Scrollbar*, bool);
 
-    void setFrameWasScrolledByUser();
-
     bool capturesDragging() const { return m_capturesDragging; }
 
     bool handleGestureShowPress();

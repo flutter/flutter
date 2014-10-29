@@ -138,9 +138,6 @@ public:
 
     void postLayoutTimerFired(Timer<FrameView>*);
 
-    bool wasScrolledByUser() const;
-    void setWasScrolledByUser(bool);
-
     void paintContents(GraphicsContext*, const IntRect& damageRect);
     void setPaintBehavior(PaintBehavior);
     PaintBehavior paintBehavior() const;
@@ -195,9 +192,6 @@ public:
     // On Mac WebKit1 the underlying NSScrollView just does the scrolling, but on most other platforms
     // we need this function in order to do the scroll ourselves.
     bool wheelEvent(const PlatformWheelEvent&);
-
-    bool inProgrammaticScroll() const { return m_inProgrammaticScroll; }
-    void setInProgrammaticScroll(bool programmaticScroll) { m_inProgrammaticScroll = programmaticScroll; }
 
     void setHasSoftwareFilters(bool hasSoftwareFilters) { m_hasSoftwareFilters = hasSoftwareFilters; }
     bool hasSoftwareFilters() const { return m_hasSoftwareFilters; }
@@ -257,13 +251,6 @@ private:
     void contentRectangleForPaintInvalidation(const IntRect&);
     void contentsResized();
 
-    // Override ScrollView methods to do point conversion via renderers, in order to
-    // take transforms into account.
-    virtual IntRect convertToContainingView(const IntRect&) const override;
-    virtual IntRect convertFromContainingView(const IntRect&) const override;
-    virtual IntPoint convertToContainingView(const IntPoint&) const override;
-    virtual IntPoint convertFromContainingView(const IntPoint&) const override;
-
     bool wasViewportResized();
     void sendResizeEventIfNeeded();
 
@@ -309,9 +296,6 @@ private:
     bool m_horizontalOverflow;
     bool m_verticalOverflow;
     RenderObject* m_viewportRenderer;
-
-    bool m_wasScrolledByUser;
-    bool m_inProgrammaticScroll;
 
     double m_lastPaintTime;
 
