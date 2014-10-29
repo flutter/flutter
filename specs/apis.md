@@ -1,4 +1,4 @@
-APIS
+APIs
 ====
 
 The Sky core API
@@ -29,6 +29,8 @@ module 'sky:core' {
     any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain // returns Event.result
     void addEventListener(String type, EventListener listener); // O(1)
     void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
+    private Array<String> getRegisteredEventListenerTypes(); // O(N)
+    private Array<EventListener> getRegisteredEventListenersForType(String type); // O(N)
   }
 
   interface CustomEventTarget : EventTarget {
@@ -255,6 +257,9 @@ module 'sky:modulename' {
       // The default implementations of 'virtual' methods all end by calling the identically named method
       // on the superclass, if there is such a method.
 
+    // private APIs - see below
+    private void method();
+
     // arguments and overloading are done as follows
     // note that the argument names are only for documentation purposes
     ReturnType method(ArgumentType argumentName1, ArgumentType argumentName2);
@@ -268,6 +273,33 @@ module 'sky:modulename' {
 
 }
 ```
+
+### Private APIs ###
+
+Private APIs are only accessible via Symbol objects, which are then
+exposed on the sky:debug module's exports object as the name of the
+member given in the IDL.
+
+For example, consider:
+
+```javascript
+interface Foo {
+  private void Bar();
+}
+```
+
+In a script with a ``foo`` object of type ``Foo``, ``foo.Bar`` is
+undefined. However, it can be obtained as follows:
+
+```html
+<import src="sky:debug" as="debug"/>
+<!-- ... import whatever defines 'foo' ... -->
+<script>
+  foo[debug.Bar]
+</script>
+```
+
+### Types ###
 
 The following types are available:
 
@@ -291,6 +323,7 @@ TODO(ianh): Figure out what should happen with omitted and extraneous parameters
 
 TODO(ianh): Define in detail how this actually works
 
+
 Mojom IDL
 ---------
 
@@ -313,6 +346,7 @@ magical imports:
   the asyncWait/cancelWait mojo fabric JS API (interface to IPC thread)  sky:mojo:fabric:ipc
   the mojom for the shell, proxying through C++ so that the shell pipe isn't exposed  sky:mojo:shell
   the sky API  sky:core
+  the sky debug symbols for private APIs  sky:debug
 ```
 
 TODO(ianh): determine if we want to separate the "this" from the

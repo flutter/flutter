@@ -1,4 +1,4 @@
-The Sky environment
+The Sky Environment
 ===================
 
 The main files loaded by the Sky environment are Sky files, though

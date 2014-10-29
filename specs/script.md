@@ -1,4 +1,4 @@
-SKY SCRIPT LANGUAGE
+Sky Script Language
 ===================
 
 The Sky script language is JavaScript, with strict mode enabled.
@@ -8,3 +8,5 @@ with the following changes:
 
  - An additional property, with the "global", whose value is the
    global object itself.
+
+The getOwnPropertyKeys() method is removed.

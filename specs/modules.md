@@ -1,4 +1,4 @@
-Sky module system
+Sky Module System
 =================
 
 This document describes the Sky module system.
