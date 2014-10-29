@@ -23,6 +23,7 @@
 #include "MinikinInternal.h"
 #include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
+#include <minikin/CmapCoverage.h>
 #include <minikin/FontFamily.h>
 #include <UniquePtr.h>
 
@@ -128,6 +129,7 @@ void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
 
 void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {    typeface->RefLocked();
     mFonts.push_back(Font(typeface, style));
+    mCoverageValid = false;
 }
 
 // Compute a matching metric between two styles - 0 is an exact match
@@ -181,6 +183,25 @@ MinikinFont* FontFamily::getFont(size_t index) const {
 
 FontStyle FontFamily::getStyle(size_t index) const {
     return mFonts[index].style;
+}
+
+const SparseBitSet* FontFamily::getCoverage() {
+    if (!mCoverageValid) {
+        const FontStyle defaultStyle;
+        MinikinFont* typeface = getClosestMatch(defaultStyle).font;
+        const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
+        size_t cmapSize = 0;
+        bool ok = typeface->GetTable(cmapTag, NULL, &cmapSize);
+        UniquePtr<uint8_t[]> cmapData(new uint8_t[cmapSize]);
+        ok = typeface->GetTable(cmapTag, cmapData.get(), &cmapSize);
+        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize);
+#ifdef VERBOSE_DEBUG
+        ALOGD("font coverage length=%d, first ch=%x\n", mCoverage->length(),
+                mCoverage->nextSetBit(0));
+#endif
+        mCoverageValid = true;
+    }
+    return &mCoverage;
 }
 
 }  // namespace android
