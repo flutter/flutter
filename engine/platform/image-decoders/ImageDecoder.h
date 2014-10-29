@@ -36,6 +36,7 @@
 #include "public/platform/Platform.h"
 #include "wtf/Assertions.h"
 #include "wtf/RefPtr.h"
+#include "wtf/Threading.h"
 #include "wtf/Vector.h"
 #include "wtf/text/WTFString.h"
 
