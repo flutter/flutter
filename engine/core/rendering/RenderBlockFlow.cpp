@@ -485,137 +485,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo,
 
 void RenderBlockFlow::rebuildFloatsFromIntruding()
 {
-    if (m_floatingObjects)
-        m_floatingObjects->setHorizontalWritingMode(isHorizontalWritingMode());
-
-    HashSet<RenderBox*> oldIntrudingFloatSet;
-    if (!childrenInline() && m_floatingObjects) {
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator end = floatingObjectSet.end();
-        for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-            FloatingObject* floatingObject = it->get();
-            if (!floatingObject->isDescendant())
-                oldIntrudingFloatSet.add(floatingObject->renderer());
-        }
-    }
-
-    // Inline blocks are covered by the isReplaced() check in the avoidFloats method.
-    if (avoidsFloats() || isDocumentElement() || isRenderView() || isFloatingOrOutOfFlowPositioned()) {
-        if (m_floatingObjects) {
-            m_floatingObjects->clear();
-        }
-        if (!oldIntrudingFloatSet.isEmpty())
-            markAllDescendantsWithFloatsForLayout();
-        return;
-    }
-
-    RendererToFloatInfoMap floatMap;
-
-    if (m_floatingObjects) {
-        if (childrenInline())
-            m_floatingObjects->moveAllToFloatInfoMap(floatMap);
-        else
-            m_floatingObjects->clear();
-    }
-
-    // We should not process floats if the parent node is not a RenderBlockFlow. Otherwise, we will add
-    // floats in an invalid context. This will cause a crash arising from a bad cast on the parent.
-    // See <rdar://problem/8049753>, where float property is applied on a text node in a SVG.
-    if (!parent() || !parent()->isRenderBlockFlow())
-        return;
-
-    // Attempt to locate a previous sibling with overhanging floats. We skip any elements that
-    // may have shifted to avoid floats, and any objects whose floats cannot interact with objects
-    // outside it (i.e. objects that create a new block formatting context).
-    RenderBlockFlow* parentBlockFlow = toRenderBlockFlow(parent());
-    bool parentHasFloats = false;
-    RenderObject* prev = previousSibling();
-    while (prev && (!prev->isBox() || !prev->isRenderBlock() || toRenderBlock(prev)->avoidsFloats() || toRenderBlock(prev)->createsBlockFormattingContext())) {
-        if (prev->isFloating())
-            parentHasFloats = true;
-        prev = prev->previousSibling();
-    }
-
-    // First add in floats from the parent. Self-collapsing blocks let their parent track any floats that intrude into
-    // them (as opposed to floats they contain themselves) so check for those here too.
-    LayoutUnit logicalTopOffset = logicalTop();
-    bool parentHasIntrudingFloats = !parentHasFloats && (!prev || toRenderBlockFlow(prev)->isSelfCollapsingBlock()) && parentBlockFlow->lowestFloatLogicalBottom() > logicalTopOffset;
-    if (parentHasFloats || parentHasIntrudingFloats)
-        addIntrudingFloats(parentBlockFlow, parentBlockFlow->logicalLeftOffsetForContent(), logicalTopOffset);
-
-    // Add overhanging floats from the previous RenderBlockFlow, but only if it has a float that intrudes into our space.
-    if (prev) {
-        RenderBlockFlow* blockFlow = toRenderBlockFlow(prev);
-        logicalTopOffset -= blockFlow->logicalTop();
-        if (blockFlow->lowestFloatLogicalBottom() > logicalTopOffset)
-            addIntrudingFloats(blockFlow, 0, logicalTopOffset);
-    }
-
-    if (childrenInline()) {
-        LayoutUnit changeLogicalTop = LayoutUnit::max();
-        LayoutUnit changeLogicalBottom = LayoutUnit::min();
-        if (m_floatingObjects) {
-            const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-            FloatingObjectSetIterator end = floatingObjectSet.end();
-            for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-                FloatingObject* floatingObject = it->get();
-                FloatingObject* oldFloatingObject = floatMap.get(floatingObject->renderer());
-                LayoutUnit logicalBottom = logicalBottomForFloat(floatingObject);
-                if (oldFloatingObject) {
-                    LayoutUnit oldLogicalBottom = logicalBottomForFloat(oldFloatingObject);
-                    if (logicalWidthForFloat(floatingObject) != logicalWidthForFloat(oldFloatingObject) || logicalLeftForFloat(floatingObject) != logicalLeftForFloat(oldFloatingObject)) {
-                        changeLogicalTop = 0;
-                        changeLogicalBottom = std::max(changeLogicalBottom, std::max(logicalBottom, oldLogicalBottom));
-                    } else {
-                        if (logicalBottom != oldLogicalBottom) {
-                            changeLogicalTop = std::min(changeLogicalTop, std::min(logicalBottom, oldLogicalBottom));
-                            changeLogicalBottom = std::max(changeLogicalBottom, std::max(logicalBottom, oldLogicalBottom));
-                        }
-                        LayoutUnit logicalTop = logicalTopForFloat(floatingObject);
-                        LayoutUnit oldLogicalTop = logicalTopForFloat(oldFloatingObject);
-                        if (logicalTop != oldLogicalTop) {
-                            changeLogicalTop = std::min(changeLogicalTop, std::min(logicalTop, oldLogicalTop));
-                            changeLogicalBottom = std::max(changeLogicalBottom, std::max(logicalTop, oldLogicalTop));
-                        }
-                    }
-
-                    if (oldFloatingObject->originatingLine() && !selfNeedsLayout()) {
-                        ASSERT(oldFloatingObject->originatingLine()->renderer() == this);
-                        oldFloatingObject->originatingLine()->markDirty();
-                    }
-
-                    floatMap.remove(floatingObject->renderer());
-                } else {
-                    changeLogicalTop = 0;
-                    changeLogicalBottom = std::max(changeLogicalBottom, logicalBottom);
-                }
-            }
-        }
-
-        RendererToFloatInfoMap::iterator end = floatMap.end();
-        for (RendererToFloatInfoMap::iterator it = floatMap.begin(); it != end; ++it) {
-            OwnPtr<FloatingObject>& floatingObject = it->value;
-            if (!floatingObject->isDescendant()) {
-                changeLogicalTop = 0;
-                changeLogicalBottom = std::max(changeLogicalBottom, logicalBottomForFloat(floatingObject.get()));
-            }
-        }
-
-        markLinesDirtyInBlockRange(changeLogicalTop, changeLogicalBottom);
-    } else if (!oldIntrudingFloatSet.isEmpty()) {
-        // If there are previously intruding floats that no longer intrude, then children with floats
-        // should also get layout because they might need their floating object lists cleared.
-        if (m_floatingObjects->set().size() < oldIntrudingFloatSet.size()) {
-            markAllDescendantsWithFloatsForLayout();
-        } else {
-            const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-            FloatingObjectSetIterator end = floatingObjectSet.end();
-            for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end && !oldIntrudingFloatSet.isEmpty(); ++it)
-                oldIntrudingFloatSet.remove((*it)->renderer());
-            if (!oldIntrudingFloatSet.isEmpty())
-                markAllDescendantsWithFloatsForLayout();
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
@@ -1265,16 +1135,7 @@ bool RenderBlockFlow::mustSeparateMarginAfterForChild(const RenderBox* child) co
 
 void RenderBlockFlow::addOverflowFromFloats()
 {
-    if (!m_floatingObjects)
-        return;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-    for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-        FloatingObject* floatingObject = it->get();
-        if (floatingObject->isDescendant())
-            addOverflowFromChild(floatingObject->renderer(), IntSize(xPositionForFloatIncludingMargin(floatingObject), yPositionForFloatIncludingMargin(floatingObject)));
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::computeOverflow(LayoutUnit oldClientAfterEdge, bool recomputeFloats)
@@ -1302,133 +1163,23 @@ void RenderBlockFlow::deleteLineBoxTree()
 
 void RenderBlockFlow::markAllDescendantsWithFloatsForLayout(RenderBox* floatToRemove, bool inLayout)
 {
-    if (!everHadLayout() && !containsFloats())
-        return;
-
-    if (m_descendantsWithFloatsMarkedForLayout && !floatToRemove)
-        return;
-    m_descendantsWithFloatsMarkedForLayout |= !floatToRemove;
-
-    MarkingBehavior markParents = inLayout ? MarkOnlyThis : MarkContainingBlockChain;
-    setChildNeedsLayout(markParents);
-
-    if (floatToRemove)
-        removeFloatingObject(floatToRemove);
-
-    // Iterate over our children and mark them as needed.
-    if (!childrenInline()) {
-        for (RenderObject* child = firstChild(); child; child = child->nextSibling()) {
-            if ((!floatToRemove && child->isFloatingOrOutOfFlowPositioned()) || !child->isRenderBlock())
-                continue;
-            if (!child->isRenderBlockFlow()) {
-                RenderBlock* childBlock = toRenderBlock(child);
-                if (childBlock->shrinkToAvoidFloats() && childBlock->everHadLayout())
-                    childBlock->setChildNeedsLayout(markParents);
-                continue;
-            }
-            RenderBlockFlow* childBlockFlow = toRenderBlockFlow(child);
-            if ((floatToRemove ? childBlockFlow->containsFloat(floatToRemove) : childBlockFlow->containsFloats()) || childBlockFlow->shrinkToAvoidFloats())
-                childBlockFlow->markAllDescendantsWithFloatsForLayout(floatToRemove, inLayout);
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::markSiblingsWithFloatsForLayout(RenderBox* floatToRemove)
 {
-    if (!m_floatingObjects)
-        return;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-
-    for (RenderObject* next = nextSibling(); next; next = next->nextSibling()) {
-        if (!next->isRenderBlockFlow() || next->isFloatingOrOutOfFlowPositioned() || toRenderBlockFlow(next)->avoidsFloats())
-            continue;
-
-        RenderBlockFlow* nextBlock = toRenderBlockFlow(next);
-        for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-            RenderBox* floatingBox = (*it)->renderer();
-            if (floatToRemove && floatingBox != floatToRemove)
-                continue;
-            if (nextBlock->containsFloat(floatingBox))
-                nextBlock->markAllDescendantsWithFloatsForLayout(floatingBox);
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 LayoutUnit RenderBlockFlow::getClearDelta(RenderBox* child, LayoutUnit logicalTop)
 {
-    // There is no need to compute clearance if we have no floats.
-    if (!containsFloats())
-        return 0;
-
-    // At least one float is present. We need to perform the clearance computation.
-    bool clearSet = child->style()->clear() != CNONE;
-    LayoutUnit logicalBottom = 0;
-    switch (child->style()->clear()) {
-    case CNONE:
-        break;
-    case CLEFT:
-        logicalBottom = lowestFloatLogicalBottom(FloatingObject::FloatLeft);
-        break;
-    case CRIGHT:
-        logicalBottom = lowestFloatLogicalBottom(FloatingObject::FloatRight);
-        break;
-    case CBOTH:
-        logicalBottom = lowestFloatLogicalBottom();
-        break;
-    }
-
-    // We also clear floats if we are too big to sit on the same line as a float (and wish to avoid floats by default).
-    LayoutUnit result = clearSet ? std::max<LayoutUnit>(0, logicalBottom - logicalTop) : LayoutUnit();
-    if (!result && child->avoidsFloats()) {
-        LayoutUnit newLogicalTop = logicalTop;
-        while (true) {
-            LayoutUnit availableLogicalWidthAtNewLogicalTopOffset = availableLogicalWidthForLine(newLogicalTop, false, logicalHeightForChild(child));
-            if (availableLogicalWidthAtNewLogicalTopOffset == availableLogicalWidthForContent())
-                return newLogicalTop - logicalTop;
-
-            LayoutRect borderBox = child->borderBoxRect();
-            LayoutUnit childLogicalWidthAtOldLogicalTopOffset = isHorizontalWritingMode() ? borderBox.width() : borderBox.height();
-
-            // FIXME: None of this is right for perpendicular writing-mode children.
-            LayoutUnit childOldLogicalWidth = child->logicalWidth();
-            LayoutUnit childOldMarginLeft = child->marginLeft();
-            LayoutUnit childOldMarginRight = child->marginRight();
-            LayoutUnit childOldLogicalTop = child->logicalTop();
-
-            child->setLogicalTop(newLogicalTop);
-            child->updateLogicalWidth();
-            borderBox = child->borderBoxRect();
-            LayoutUnit childLogicalWidthAtNewLogicalTopOffset = isHorizontalWritingMode() ? borderBox.width() : borderBox.height();
-
-            child->setLogicalTop(childOldLogicalTop);
-            child->setLogicalWidth(childOldLogicalWidth);
-            child->setMarginLeft(childOldMarginLeft);
-            child->setMarginRight(childOldMarginRight);
-
-            if (childLogicalWidthAtNewLogicalTopOffset <= availableLogicalWidthAtNewLogicalTopOffset) {
-                // Even though we may not be moving, if the logical width did shrink because of the presence of new floats, then
-                // we need to force a relayout as though we shifted. This happens because of the dynamic addition of overhanging floats
-                // from previous siblings when negative margins exist on a child (see the addOverhangingFloats call at the end of collapseMargins).
-                if (childLogicalWidthAtOldLogicalTopOffset != childLogicalWidthAtNewLogicalTopOffset)
-                    child->setChildNeedsLayout(MarkOnlyThis);
-                return newLogicalTop - logicalTop;
-            }
-
-            newLogicalTop = nextFloatLogicalBottomBelow(newLogicalTop);
-            ASSERT(newLogicalTop >= logicalTop);
-            if (newLogicalTop < logicalTop)
-                break;
-        }
-        ASSERT_NOT_REACHED();
-    }
-    return result;
+    // FIXME(sky): Remove this.
+    return 0;
 }
 
 void RenderBlockFlow::createFloatingObjects()
 {
-    m_floatingObjects = adoptPtr(new FloatingObjects(this, isHorizontalWritingMode()));
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
@@ -1497,69 +1248,14 @@ void RenderBlockFlow::addChild(RenderObject* newChild, RenderObject* beforeChild
 
 void RenderBlockFlow::moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, bool fullRemoveInsert)
 {
+    // FIXME(sky): Merge this into callers.
     RenderBlockFlow* toBlockFlow = toRenderBlockFlow(toBlock);
     moveAllChildrenTo(toBlockFlow, fullRemoveInsert);
-
-    // When a portion of the render tree is being detached, anonymous blocks
-    // will be combined as their children are deleted. In this process, the
-    // anonymous block later in the tree is merged into the one preceeding it.
-    // It can happen that the later block (this) contains floats that the
-    // previous block (toBlockFlow) did not contain, and thus are not in the
-    // floating objects list for toBlockFlow. This can result in toBlockFlow containing
-    // floats that are not in it's floating objects list, but are in the
-    // floating objects lists of siblings and parents. This can cause problems
-    // when the float itself is deleted, since the deletion code assumes that
-    // if a float is not in it's containing block's floating objects list, it
-    // isn't in any floating objects list. In order to preserve this condition
-    // (removing it has serious performance implications), we need to copy the
-    // floating objects from the old block (this) to the new block (toBlockFlow).
-    // The float's metrics will likely all be wrong, but since toBlockFlow is
-    // already marked for layout, this will get fixed before anything gets
-    // displayed.
-    // See bug https://code.google.com/p/chromium/issues/detail?id=230907
-    if (m_floatingObjects) {
-        if (!toBlockFlow->m_floatingObjects)
-            toBlockFlow->createFloatingObjects();
-
-        const FloatingObjectSet& fromFloatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator end = fromFloatingObjectSet.end();
-
-        for (FloatingObjectSetIterator it = fromFloatingObjectSet.begin(); it != end; ++it) {
-            FloatingObject* floatingObject = it->get();
-
-            // Don't insert the object again if it's already in the list
-            if (toBlockFlow->containsFloat(floatingObject->renderer()))
-                continue;
-
-            toBlockFlow->m_floatingObjects->add(floatingObject->unsafeClone());
-        }
-    }
-
 }
 
 void RenderBlockFlow::invalidatePaintForOverhangingFloats(bool paintAllDescendants)
 {
-    // Invalidate paint of any overhanging floats (if we know we're the one to paint them).
-    // Otherwise, bail out.
-    if (!hasOverhangingFloats())
-        return;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-    for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-        FloatingObject* floatingObject = it->get();
-        // Only issue paint invaldiations for the object if it is overhanging, is not in its own layer, and
-        // is our responsibility to paint (m_shouldPaint is set). When paintAllDescendants is true, the latter
-        // condition is replaced with being a descendant of us.
-        if (logicalBottomForFloat(floatingObject) > logicalHeight()
-            && !floatingObject->renderer()->hasSelfPaintingLayer()
-            && (floatingObject->shouldPaint() || (paintAllDescendants && floatingObject->renderer()->isDescendantOf(this)))) {
-
-            RenderBox* floatingRenderer = floatingObject->renderer();
-            floatingRenderer->setShouldDoFullPaintInvalidation(true);
-            floatingRenderer->invalidatePaintForOverhangingFloats(false);
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::invalidatePaintForOverflow()
@@ -1604,113 +1300,47 @@ void RenderBlockFlow::invalidatePaintForOverflow()
 
 void RenderBlockFlow::paintFloats(PaintInfo& paintInfo, const LayoutPoint& paintOffset, bool preservePhase)
 {
-    if (!m_floatingObjects)
-        return;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-    for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-        FloatingObject* floatingObject = it->get();
-        // Only paint the object if our m_shouldPaint flag is set.
-        if (floatingObject->shouldPaint() && !floatingObject->renderer()->hasSelfPaintingLayer()) {
-            PaintInfo currentPaintInfo(paintInfo);
-            currentPaintInfo.phase = preservePhase ? paintInfo.phase : PaintPhaseBlockBackground;
-            // FIXME: LayoutPoint version of xPositionForFloatIncludingMargin would make this much cleaner.
-            LayoutPoint childPoint = flipFloatForWritingModeForChild(floatingObject, LayoutPoint(paintOffset.x() + xPositionForFloatIncludingMargin(floatingObject) - floatingObject->renderer()->x(), paintOffset.y() + yPositionForFloatIncludingMargin(floatingObject) - floatingObject->renderer()->y()));
-            floatingObject->renderer()->paint(currentPaintInfo, childPoint);
-            if (!preservePhase) {
-                currentPaintInfo.phase = PaintPhaseChildBlockBackgrounds;
-                floatingObject->renderer()->paint(currentPaintInfo, childPoint);
-                currentPaintInfo.phase = PaintPhaseFloat;
-                floatingObject->renderer()->paint(currentPaintInfo, childPoint);
-                currentPaintInfo.phase = PaintPhaseForeground;
-                floatingObject->renderer()->paint(currentPaintInfo, childPoint);
-                currentPaintInfo.phase = PaintPhaseOutline;
-                floatingObject->renderer()->paint(currentPaintInfo, childPoint);
-            }
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::clipOutFloatingObjects(RenderBlock* rootBlock, const PaintInfo* paintInfo, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock)
 {
-    if (m_floatingObjects) {
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator end = floatingObjectSet.end();
-        for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-            FloatingObject* floatingObject = it->get();
-            LayoutRect floatBox(offsetFromRootBlock.width() + xPositionForFloatIncludingMargin(floatingObject),
-                offsetFromRootBlock.height() + yPositionForFloatIncludingMargin(floatingObject),
-                floatingObject->renderer()->width(), floatingObject->renderer()->height());
-            rootBlock->flipForWritingMode(floatBox);
-            floatBox.move(rootBlockPhysicalPosition.x(), rootBlockPhysicalPosition.y());
-            paintInfo->context->clipOut(pixelSnappedIntRect(floatBox));
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::clearFloats(EClear clear)
 {
-    positionNewFloats();
-    // set y position
-    LayoutUnit newY = 0;
-    switch (clear) {
-    case CLEFT:
-        newY = lowestFloatLogicalBottom(FloatingObject::FloatLeft);
-        break;
-    case CRIGHT:
-        newY = lowestFloatLogicalBottom(FloatingObject::FloatRight);
-        break;
-    case CBOTH:
-        newY = lowestFloatLogicalBottom();
-    default:
-        break;
-    }
-    if (height() < newY)
-        setLogicalHeight(newY);
+    // FIXME(sky): Remove this.
 }
 
 bool RenderBlockFlow::containsFloat(RenderBox* renderer) const
 {
-    return m_floatingObjects && m_floatingObjects->set().contains<FloatingObjectHashTranslator>(renderer);
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 void RenderBlockFlow::removeFloatingObjects()
 {
-    if (!m_floatingObjects)
-        return;
-
-    markSiblingsWithFloatsForLayout();
-
-    m_floatingObjects->clear();
+    // FIXME(sky): Remove this.
 }
 
 LayoutPoint RenderBlockFlow::flipFloatForWritingModeForChild(const FloatingObject* child, const LayoutPoint& point) const
 {
-    if (!style()->isFlippedBlocksWritingMode())
-        return point;
-
-    // This is similar to RenderBox::flipForWritingModeForChild. We have to subtract out our left/top offsets twice, since
-    // it's going to get added back in. We hide this complication here so that the calling code looks normal for the unflipped
-    // case.
-    if (isHorizontalWritingMode())
-        return LayoutPoint(point.x(), point.y() + height() - child->renderer()->height() - 2 * yPositionForFloatIncludingMargin(child));
-    return LayoutPoint(point.x() + width() - child->renderer()->width() - 2 * xPositionForFloatIncludingMargin(child), point.y());
+    // FIXME(sky): Remove this.
+    return LayoutPoint();
 }
 
 LayoutUnit RenderBlockFlow::logicalLeftOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
 {
+    // FIXME(sky): Remove this.
     LayoutUnit offset = fixedOffset;
-    if (m_floatingObjects && m_floatingObjects->hasLeftObjects())
-        offset = m_floatingObjects->logicalLeftOffsetForPositioningFloat(fixedOffset, logicalTop, heightRemaining);
     return adjustLogicalLeftOffsetForLine(offset, applyTextIndent);
 }
 
 LayoutUnit RenderBlockFlow::logicalRightOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
 {
+    // FIXME(sky): Remove this.
     LayoutUnit offset = fixedOffset;
-    if (m_floatingObjects && m_floatingObjects->hasRightObjects())
-        offset = m_floatingObjects->logicalRightOffsetForPositioningFloat(fixedOffset, logicalTop, heightRemaining);
     return adjustLogicalRightOffsetForLine(offset, applyTextIndent);
 }
 
@@ -1736,356 +1366,62 @@ LayoutUnit RenderBlockFlow::adjustLogicalRightOffsetForLine(LayoutUnit offsetFro
 
 LayoutPoint RenderBlockFlow::computeLogicalLocationForFloat(const FloatingObject* floatingObject, LayoutUnit logicalTopOffset) const
 {
-    RenderBox* childBox = floatingObject->renderer();
-    LayoutUnit logicalLeftOffset = logicalLeftOffsetForContent(); // Constant part of left offset.
-    LayoutUnit logicalRightOffset; // Constant part of right offset.
-    logicalRightOffset = logicalRightOffsetForContent();
-
-    LayoutUnit floatLogicalWidth = std::min(logicalWidthForFloat(floatingObject), logicalRightOffset - logicalLeftOffset); // The width we look for.
-
-    LayoutUnit floatLogicalLeft;
-
-    if (childBox->style()->floating() == LeftFloat) {
-        LayoutUnit heightRemainingLeft = 1;
-        LayoutUnit heightRemainingRight = 1;
-        floatLogicalLeft = logicalLeftOffsetForPositioningFloat(logicalTopOffset, logicalLeftOffset, false, &heightRemainingLeft);
-        while (logicalRightOffsetForPositioningFloat(logicalTopOffset, logicalRightOffset, false, &heightRemainingRight) - floatLogicalLeft < floatLogicalWidth) {
-            logicalTopOffset += std::min(heightRemainingLeft, heightRemainingRight);
-            floatLogicalLeft = logicalLeftOffsetForPositioningFloat(logicalTopOffset, logicalLeftOffset, false, &heightRemainingLeft);
-        }
-        floatLogicalLeft = std::max(logicalLeftOffset - borderAndPaddingLogicalLeft(), floatLogicalLeft);
-    } else {
-        LayoutUnit heightRemainingLeft = 1;
-        LayoutUnit heightRemainingRight = 1;
-        floatLogicalLeft = logicalRightOffsetForPositioningFloat(logicalTopOffset, logicalRightOffset, false, &heightRemainingRight);
-        while (floatLogicalLeft - logicalLeftOffsetForPositioningFloat(logicalTopOffset, logicalLeftOffset, false, &heightRemainingLeft) < floatLogicalWidth) {
-            logicalTopOffset += std::min(heightRemainingLeft, heightRemainingRight);
-            floatLogicalLeft = logicalRightOffsetForPositioningFloat(logicalTopOffset, logicalRightOffset, false, &heightRemainingRight);
-        }
-        // Use the original width of the float here, since the local variable
-        // |floatLogicalWidth| was capped to the available line width. See
-        // fast/block/float/clamped-right-float.html.
-        floatLogicalLeft -= logicalWidthForFloat(floatingObject);
-    }
-
-    return LayoutPoint(floatLogicalLeft, logicalTopOffset);
+    // FIXME(sky): Remove this.
+    return LayoutPoint();
 }
 
 FloatingObject* RenderBlockFlow::insertFloatingObject(RenderBox* floatBox)
 {
-    ASSERT(floatBox->isFloating());
-
-    // Create the list of special objects if we don't aleady have one
-    if (!m_floatingObjects) {
-        createFloatingObjects();
-    } else {
-        // Don't insert the object again if it's already in the list
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator it = floatingObjectSet.find<FloatingObjectHashTranslator>(floatBox);
-        if (it != floatingObjectSet.end())
-            return it->get();
-    }
-
-    // Create the special object entry & append it to the list
-
-    OwnPtr<FloatingObject> newObj = FloatingObject::create(floatBox);
-
-    floatBox->layoutIfNeeded();
-
-    setLogicalWidthForFloat(newObj.get(), logicalWidthForChild(floatBox) + marginStartForChild(floatBox) + marginEndForChild(floatBox));
-
-    return m_floatingObjects->add(newObj.release());
+    return 0;
 }
 
 void RenderBlockFlow::removeFloatingObject(RenderBox* floatBox)
 {
-    if (m_floatingObjects) {
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator it = floatingObjectSet.find<FloatingObjectHashTranslator>(floatBox);
-        if (it != floatingObjectSet.end()) {
-            FloatingObject* floatingObject = it->get();
-            if (childrenInline()) {
-                LayoutUnit logicalTop = logicalTopForFloat(floatingObject);
-                LayoutUnit logicalBottom = logicalBottomForFloat(floatingObject);
-
-                // Fix for https://bugs.webkit.org/show_bug.cgi?id=54995.
-                if (logicalBottom < 0 || logicalBottom < logicalTop || logicalTop == LayoutUnit::max()) {
-                    logicalBottom = LayoutUnit::max();
-                } else {
-                    // Special-case zero- and less-than-zero-height floats: those don't touch
-                    // the line that they're on, but it still needs to be dirtied. This is
-                    // accomplished by pretending they have a height of 1.
-                    logicalBottom = std::max(logicalBottom, logicalTop + 1);
-                }
-                if (floatingObject->originatingLine()) {
-                    if (!selfNeedsLayout()) {
-                        ASSERT(floatingObject->originatingLine()->renderer() == this);
-                        floatingObject->originatingLine()->markDirty();
-                    }
-#if ENABLE(ASSERT)
-                    floatingObject->setOriginatingLine(0);
-#endif
-                }
-                markLinesDirtyInBlockRange(0, logicalBottom);
-            }
-            m_floatingObjects->remove(floatingObject);
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::removeFloatingObjectsBelow(FloatingObject* lastFloat, int logicalOffset)
 {
-    if (!containsFloats())
-        return;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObject* curr = floatingObjectSet.last().get();
-    while (curr != lastFloat && (!curr->isPlaced() || logicalTopForFloat(curr) >= logicalOffset)) {
-        m_floatingObjects->remove(curr);
-        if (floatingObjectSet.isEmpty())
-            break;
-        curr = floatingObjectSet.last().get();
-    }
+    // FIXME(sky): Remove this.
 }
 
 bool RenderBlockFlow::positionNewFloats()
 {
-    if (!m_floatingObjects)
-        return false;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    if (floatingObjectSet.isEmpty())
-        return false;
-
-    // If all floats have already been positioned, then we have no work to do.
-    if (floatingObjectSet.last()->isPlaced())
-        return false;
-
-    // Move backwards through our floating object list until we find a float that has
-    // already been positioned. Then we'll be able to move forward, positioning all of
-    // the new floats that need it.
-    FloatingObjectSetIterator it = floatingObjectSet.end();
-    --it; // Go to last item.
-    FloatingObjectSetIterator begin = floatingObjectSet.begin();
-    FloatingObject* lastPlacedFloatingObject = 0;
-    while (it != begin) {
-        --it;
-        if ((*it)->isPlaced()) {
-            lastPlacedFloatingObject = it->get();
-            ++it;
-            break;
-        }
-    }
-
-    LayoutUnit logicalTop = logicalHeight();
-
-    // The float cannot start above the top position of the last positioned float.
-    if (lastPlacedFloatingObject)
-        logicalTop = std::max(logicalTopForFloat(lastPlacedFloatingObject), logicalTop);
-
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-    // Now walk through the set of unpositioned floats and place them.
-    for (; it != end; ++it) {
-        FloatingObject* floatingObject = it->get();
-        // The containing block is responsible for positioning floats, so if we have floats in our
-        // list that come from somewhere else, do not attempt to position them.
-        if (floatingObject->renderer()->containingBlock() != this)
-            continue;
-
-        RenderBox* childBox = floatingObject->renderer();
-
-        // FIXME Investigate if this can be removed. crbug.com/370006
-        childBox->setMayNeedPaintInvalidation(true);
-
-        LayoutUnit childLogicalLeftMargin = style()->isLeftToRightDirection() ? marginStartForChild(childBox) : marginEndForChild(childBox);
-        if (childBox->style()->clear() & CLEFT)
-            logicalTop = std::max(lowestFloatLogicalBottom(FloatingObject::FloatLeft), logicalTop);
-        if (childBox->style()->clear() & CRIGHT)
-            logicalTop = std::max(lowestFloatLogicalBottom(FloatingObject::FloatRight), logicalTop);
-
-        LayoutPoint floatLogicalLocation = computeLogicalLocationForFloat(floatingObject, logicalTop);
-
-        setLogicalLeftForFloat(floatingObject, floatLogicalLocation.x());
-
-        setLogicalLeftForChild(childBox, floatLogicalLocation.x() + childLogicalLeftMargin);
-        setLogicalTopForChild(childBox, floatLogicalLocation.y() + marginBeforeForChild(childBox));
-
-        SubtreeLayoutScope layoutScope(*childBox);
-        childBox->layoutIfNeeded();
-
-        setLogicalTopForFloat(floatingObject, floatLogicalLocation.y());
-        setLogicalHeightForFloat(floatingObject, logicalHeightForChild(childBox) + marginBeforeForChild(childBox) + marginAfterForChild(childBox));
-
-        m_floatingObjects->addPlacedObject(floatingObject);
-
-        if (ShapeOutsideInfo* shapeOutside = childBox->shapeOutsideInfo())
-            shapeOutside->setReferenceBoxLogicalSize(logicalSizeForChild(childBox));
-    }
-    return true;
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 bool RenderBlockFlow::hasOverhangingFloat(RenderBox* renderer)
 {
-    if (!m_floatingObjects || !parent())
-        return false;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator it = floatingObjectSet.find<FloatingObjectHashTranslator>(renderer);
-    if (it == floatingObjectSet.end())
-        return false;
-
-    return logicalBottomForFloat(it->get()) > logicalHeight();
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 void RenderBlockFlow::addIntrudingFloats(RenderBlockFlow* prev, LayoutUnit logicalLeftOffset, LayoutUnit logicalTopOffset)
 {
-    ASSERT(!avoidsFloats());
-
-    // If we create our own block formatting context then our contents don't interact with floats outside it, even those from our parent.
-    if (createsBlockFormattingContext())
-        return;
-
-    // If the parent or previous sibling doesn't have any floats to add, don't bother.
-    if (!prev->m_floatingObjects)
-        return;
-
-    logicalLeftOffset += marginLogicalLeft();
-
-    const FloatingObjectSet& prevSet = prev->m_floatingObjects->set();
-    FloatingObjectSetIterator prevEnd = prevSet.end();
-    for (FloatingObjectSetIterator prevIt = prevSet.begin(); prevIt != prevEnd; ++prevIt) {
-        FloatingObject* floatingObject = prevIt->get();
-        if (logicalBottomForFloat(floatingObject) > logicalTopOffset) {
-            if (!m_floatingObjects || !m_floatingObjects->set().contains(floatingObject)) {
-                // We create the floating object list lazily.
-                if (!m_floatingObjects)
-                    createFloatingObjects();
-
-                // Applying the child's margin makes no sense in the case where the child was passed in.
-                // since this margin was added already through the modification of the |logicalLeftOffset| variable
-                // above. |logicalLeftOffset| will equal the margin in this case, so it's already been taken
-                // into account. Only apply this code if prev is the parent, since otherwise the left margin
-                // will get applied twice.
-                LayoutSize offset = isHorizontalWritingMode()
-                    ? LayoutSize(logicalLeftOffset - (prev != parent() ? prev->marginLeft() : LayoutUnit()), logicalTopOffset)
-                    : LayoutSize(logicalTopOffset, logicalLeftOffset - (prev != parent() ? prev->marginTop() : LayoutUnit()));
-
-                m_floatingObjects->add(floatingObject->copyToNewContainer(offset));
-            }
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::addOverhangingFloats(RenderBlockFlow* child, bool makeChildPaintOtherFloats)
 {
-    // Prevent floats from being added to the canvas by the root element, e.g., <html>.
-    if (!child->containsFloats() || child->createsBlockFormattingContext())
-        return;
-
-    LayoutUnit childLogicalTop = child->logicalTop();
-    LayoutUnit childLogicalLeft = child->logicalLeft();
-
-    // Floats that will remain the child's responsibility to paint should factor into its
-    // overflow.
-    FloatingObjectSetIterator childEnd = child->m_floatingObjects->set().end();
-    for (FloatingObjectSetIterator childIt = child->m_floatingObjects->set().begin(); childIt != childEnd; ++childIt) {
-        FloatingObject* floatingObject = childIt->get();
-        LayoutUnit logicalBottomForFloat = std::min(this->logicalBottomForFloat(floatingObject), LayoutUnit::max() - childLogicalTop);
-        LayoutUnit logicalBottom = childLogicalTop + logicalBottomForFloat;
-
-        if (logicalBottom > logicalHeight()) {
-            // If the object is not in the list, we add it now.
-            if (!containsFloat(floatingObject->renderer())) {
-                LayoutSize offset = isHorizontalWritingMode() ? LayoutSize(-childLogicalLeft, -childLogicalTop) : LayoutSize(-childLogicalTop, -childLogicalLeft);
-                bool shouldPaint = false;
-
-                // The nearest enclosing layer always paints the float (so that zindex and stacking
-                // behaves properly). We always want to propagate the desire to paint the float as
-                // far out as we can, to the outermost block that overlaps the float, stopping only
-                // if we hit a self-painting layer boundary.
-                if (floatingObject->renderer()->enclosingFloatPaintingLayer() == enclosingFloatPaintingLayer()) {
-                    floatingObject->setShouldPaint(false);
-                    shouldPaint = true;
-                }
-                // We create the floating object list lazily.
-                if (!m_floatingObjects)
-                    createFloatingObjects();
-
-                m_floatingObjects->add(floatingObject->copyToNewContainer(offset, shouldPaint, true));
-            }
-        } else {
-            if (makeChildPaintOtherFloats && !floatingObject->shouldPaint() && !floatingObject->renderer()->hasSelfPaintingLayer()
-                && floatingObject->renderer()->isDescendantOf(child) && floatingObject->renderer()->enclosingFloatPaintingLayer() == child->enclosingFloatPaintingLayer()) {
-                // The float is not overhanging from this block, so if it is a descendant of the child, the child should
-                // paint it (the other case is that it is intruding into the child), unless it has its own layer or enclosing
-                // layer.
-                // If makeChildPaintOtherFloats is false, it means that the child must already know about all the floats
-                // it should paint.
-                floatingObject->setShouldPaint(true);
-            }
-
-            // Since the float doesn't overhang, it didn't get put into our list. We need to go ahead and add its overflow in to the
-            // child now.
-            if (floatingObject->isDescendant())
-                child->addOverflowFromChild(floatingObject->renderer(), LayoutSize(xPositionForFloatIncludingMargin(floatingObject), yPositionForFloatIncludingMargin(floatingObject)));
-        }
-    }
+    // FIXME(sky): Remove this.
 }
 
 LayoutUnit RenderBlockFlow::lowestFloatLogicalBottom(FloatingObject::Type floatType) const
 {
-    if (!m_floatingObjects)
-        return 0;
-
-    return m_floatingObjects->lowestFloatLogicalBottom(floatType);
+    // FIXME(sky): Remove this.
+    return 0;
 }
 
 LayoutUnit RenderBlockFlow::nextFloatLogicalBottomBelow(LayoutUnit logicalHeight, ShapeOutsideFloatOffsetMode offsetMode) const
 {
-    if (!m_floatingObjects)
-        return logicalHeight;
-
-    LayoutUnit logicalBottom;
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator end = floatingObjectSet.end();
-    for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-        FloatingObject* floatingObject = it->get();
-        LayoutUnit floatLogicalBottom = logicalBottomForFloat(floatingObject);
-        ShapeOutsideInfo* shapeOutside = floatingObject->renderer()->shapeOutsideInfo();
-        if (shapeOutside && (offsetMode == ShapeOutsideFloatShapeOffset)) {
-            LayoutUnit shapeLogicalBottom = logicalTopForFloat(floatingObject) + marginBeforeForChild(floatingObject->renderer()) + shapeOutside->shapeLogicalBottom();
-            // Use the shapeLogicalBottom unless it extends outside of the margin box, in which case it is clipped.
-            if (shapeLogicalBottom < floatLogicalBottom)
-                floatLogicalBottom = shapeLogicalBottom;
-        }
-        if (floatLogicalBottom > logicalHeight)
-            logicalBottom = logicalBottom ? std::min(floatLogicalBottom, logicalBottom) : floatLogicalBottom;
-    }
-
-    return logicalBottom;
+    // FIXME(sky): Remove this.
+    return logicalHeight;
 }
 
 bool RenderBlockFlow::hitTestFloats(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
-    if (!m_floatingObjects)
-        return false;
-
-    const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-    FloatingObjectSetIterator begin = floatingObjectSet.begin();
-    for (FloatingObjectSetIterator it = floatingObjectSet.end(); it != begin;) {
-        --it;
-        FloatingObject* floatingObject = it->get();
-        if (floatingObject->shouldPaint() && !floatingObject->renderer()->hasSelfPaintingLayer()) {
-            LayoutUnit xOffset = xPositionForFloatIncludingMargin(floatingObject) - floatingObject->renderer()->x();
-            LayoutUnit yOffset = yPositionForFloatIncludingMargin(floatingObject) - floatingObject->renderer()->y();
-            LayoutPoint childPoint = flipFloatForWritingModeForChild(floatingObject, accumulatedOffset + LayoutSize(xOffset, yOffset));
-            if (floatingObject->renderer()->hitTest(request, result, locationInContainer, childPoint)) {
-                updateHitTestResult(result, locationInContainer.point() - toLayoutSize(childPoint));
-                return true;
-            }
-        }
-    }
-
+    // FIXME(sky): Remove this.
     return false;
 }
 
@@ -2110,21 +1446,6 @@ void RenderBlockFlow::adjustForBorderFit(LayoutUnit x, LayoutUnit& left, LayoutU
                     left = std::min(left, x + obj->x());
                     right = std::max(right, x + obj->x() + obj->width());
                 }
-            }
-        }
-    }
-
-    if (m_floatingObjects) {
-        const FloatingObjectSet& floatingObjectSet = m_floatingObjects->set();
-        FloatingObjectSetIterator end = floatingObjectSet.end();
-        for (FloatingObjectSetIterator it = floatingObjectSet.begin(); it != end; ++it) {
-            FloatingObject* floatingObject = it->get();
-            // Only examine the object if our m_shouldPaint flag is set.
-            if (floatingObject->shouldPaint()) {
-                LayoutUnit floatLeft = xPositionForFloatIncludingMargin(floatingObject) - floatingObject->renderer()->x();
-                LayoutUnit floatRight = floatLeft + floatingObject->renderer()->width();
-                left = std::min(left, floatLeft);
-                right = std::max(right, floatRight);
             }
         }
     }
