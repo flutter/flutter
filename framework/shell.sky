@@ -1,0 +1,23 @@
+<link rel="import" href="/mojo/public/html/core.html" as="core" />
+<link rel="import" href="/mojo/public/html/connection.html" as="connection" />
+<script>
+function wrapHandle(handle, service, client) {
+  var clientClass = client && service.client.delegatingStubClass;
+  var serviceConnection = new connection.Connection(
+      handle, clientClass, service.proxyClass);
+  if (serviceConnection.local)
+      serviceConnection.local.delegate$ = client;
+  serviceConnection.remote.connection$ = serviceConnection;
+  return serviceConnection.remote;
+}
+
+function connectToService(url, service, client) {
+  var handle = internals.connectToService(url, service.name);
+  return wrapHandle(handle, service, client);
+}
+
+this.exports = {
+  connectToService: connectToService,
+  wrapHandle: wrapHandle,
+};
+</script>

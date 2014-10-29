@@ -1,0 +1,45 @@
+<link rel="import" href="/mojo/public/html/core.html" as="core" />
+<link rel="import" href="/mojo/public/html/unicode.html" as="unicode" />
+<link rel="import" href="/mojo/services/public/interfaces/network/network_service.mojom.html" as="net" />
+<link rel="import" href="/mojo/services/public/interfaces/network/url_loader.mojom.html" as="loader" />
+<link rel="import" href="shell.sky" as="shell" />
+<script>
+function XMLHttpRequest() {
+  this.networkService_ = shell.connectToService(
+    "mojo://network_service/", net.NetworkService);
+  this.request_ = null;
+  this.loader_ = null;
+  this.responseText = null;
+};
+
+XMLHttpRequest.prototype.onload = function() { };
+XMLHttpRequest.prototype.onerror = function(error) { };
+
+XMLHttpRequest.prototype.open = function(method, url) {
+  this.request_ = new loader.URLRequest();
+  this.request_.url = url;
+  this.request_.method = method;
+  this.request_.auto_follow_redirects = true;
+};
+
+XMLHttpRequest.prototype.send = function() {
+  // FIXME: Factor this into the JS bindings.
+  var pipe = new core.createMessagePipe();
+  this.networkService_.createURLLoader(pipe.handle1);
+  this.loader_ = shell.wrapHandle(pipe.handle0, loader.URLLoader);
+
+  var self = this;
+  this.loader_.start(this.request_).then(function(result) {
+    core.drainData(result.response.body).then(function(result) {
+      self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
+      self.onload();
+    }).catch(function(error) {
+      self.onerror(error);
+    });
+  }).catch(function(error) {
+    self.onerror(error);
+  });
+};
+
+this.exports = XMLHttpRequest;
+</script>

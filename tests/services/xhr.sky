@@ -1,0 +1,25 @@
+<html>
+<link rel="import" href="../resources/chai.sky" />
+<link rel="import" href="../resources/mocha.sky" />
+<link rel="import" href="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+<script>
+describe('XMLHttpRequest', function() {
+  this.enableTimeouts(false);
+
+  it('should be able to fetch text files', function(done) {
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      assert.equal(xhr.responseText, "This is data from the network.\n");
+      done();
+    };
+    xhr.onerror = function(error) {
+      assert.ok(false, "Got error: " + JSON.stringify(error));
+      done();
+    };
+    xhr.open("GET", "http://127.0.0.1:8000/services/resources/pass.txt");
+    xhr.send();
+  });
+});
+</script>
+</html>
