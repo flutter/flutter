@@ -40,14 +40,7 @@ class Event;
 class GraphicsContext;
 class HostWindow;
 
-// The Widget class serves as a base class for three kinds of objects:
-// (1) Scrollable areas (ScrollView)
-// (2) Scrollbars (Scrollbar)
-// (3) Plugins (PluginView)
-//
-// Widgets are connected in a hierarchy, with the restriction that plugins and
-// scrollbars are always leaves of the tree. Only ScrollViews can have children
-// (and therefore the Widget class has no concept of children).
+// The Widget class serves as a base class for Scrollbar and FrameView.
 class PLATFORM_EXPORT Widget : public RefCounted<Widget> {
 public:
     Widget();
@@ -73,22 +66,13 @@ public:
     void invalidate() { invalidateRect(boundsRect()); }
     virtual void invalidateRect(const IntRect&) = 0;
 
-    bool isSelfVisible() const { return m_selfVisible; } // Whether or not we have been explicitly marked as visible or not.
-    bool isParentVisible() const { return m_parentVisible; } // Whether or not our parent is visible.
-    bool isVisible() const { return m_selfVisible && m_parentVisible; } // Whether or not we are actually visible.
-    virtual void setParentVisible(bool visible) { m_parentVisible = visible; }
-    void setSelfVisible(bool v) { m_selfVisible = v; }
-
     virtual bool isFrameView() const { return false; }
     virtual bool isScrollbar() const { return false; }
-    virtual bool isScrollView() const { return false; }
 
     virtual HostWindow* hostWindow() const { ASSERT_NOT_REACHED(); return 0; }
-    virtual void setParent(Widget*);
+    void setParent(Widget* parent) { m_parent = parent; }
     Widget* parent() const { return m_parent; }
     Widget* root() const;
-
-    virtual void handleEvent(Event*) { }
 
     IntRect convertToRootView(const IntRect&) const;
     IntRect convertFromRootView(const IntRect&) const;
@@ -113,15 +97,9 @@ public:
     virtual IntPoint convertToContainingView(const IntPoint&) const;
     virtual IntPoint convertFromContainingView(const IntPoint&) const;
 
-    // Virtual methods to convert points to/from child widgets
-    virtual IntPoint convertChildToSelf(const Widget*, const IntPoint&) const;
-    virtual IntPoint convertSelfToChild(const Widget*, const IntPoint&) const;
-
 private:
     Widget* m_parent;
     IntRect m_frame;
-    bool m_selfVisible;
-    bool m_parentVisible;
 };
 
 } // namespace blink

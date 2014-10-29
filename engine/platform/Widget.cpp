@@ -34,24 +34,12 @@ namespace blink {
 
 Widget::Widget()
     : m_parent(0)
-    , m_selfVisible(false)
-    , m_parentVisible(false)
 {
 }
 
 Widget::~Widget()
 {
     ASSERT(!parent());
-}
-
-void Widget::setParent(Widget* widget)
-{
-    ASSERT(!widget || !m_parent);
-    if (!widget || !widget->isVisible())
-        setParentVisible(false);
-    m_parent = widget;
-    if (widget && widget->isVisible())
-        setParentVisible(true);
 }
 
 Widget* Widget::root() const
@@ -127,6 +115,7 @@ IntPoint Widget::convertFromContainingWindow(const IntPoint& windowPoint) const
     return windowPoint;
 }
 
+
 FloatPoint Widget::convertFromContainingWindow(const FloatPoint& windowPoint) const
 {
     // Widgets / windows are required to be IntPoint aligned, but we may need to convert
@@ -157,49 +146,22 @@ IntPoint Widget::convertToContainingWindow(const IntPoint& localPoint) const
 
 IntRect Widget::convertToContainingView(const IntRect& localRect) const
 {
-    if (const Widget* parentWidget = parent()) {
-        IntRect parentRect(localRect);
-        parentRect.setLocation(parentWidget->convertChildToSelf(this, localRect.location()));
-        return parentRect;
-    }
     return localRect;
 }
 
 IntRect Widget::convertFromContainingView(const IntRect& parentRect) const
 {
-    if (const Widget* parentWidget = parent()) {
-        IntRect localRect = parentRect;
-        localRect.setLocation(parentWidget->convertSelfToChild(this, localRect.location()));
-        return localRect;
-    }
-
     return parentRect;
 }
 
 IntPoint Widget::convertToContainingView(const IntPoint& localPoint) const
 {
-    if (const Widget* parentWidget = parent())
-        return parentWidget->convertChildToSelf(this, localPoint);
-
     return localPoint;
 }
 
 IntPoint Widget::convertFromContainingView(const IntPoint& parentPoint) const
 {
-    if (const Widget* parentWidget = parent())
-        return parentWidget->convertSelfToChild(this, parentPoint);
-
     return parentPoint;
-}
-
-IntPoint Widget::convertChildToSelf(const Widget*, const IntPoint& point) const
-{
-    return point;
-}
-
-IntPoint Widget::convertSelfToChild(const Widget*, const IntPoint& point) const
-{
-    return point;
 }
 
 } // namespace blink

@@ -307,9 +307,6 @@ void LocalFrame::createView(const IntSize& viewportSize, const Color& background
     ASSERT(this);
     ASSERT(page());
 
-    if (view())
-        view()->setParentVisible(false);
-
     setView(nullptr);
 
     RefPtr<FrameView> frameView;
@@ -321,8 +318,6 @@ void LocalFrame::createView(const IntSize& viewportSize, const Color& background
     setView(frameView);
 
     frameView->updateBackgroundRecursively(backgroundColor, transparent);
-
-    frameView->setParentVisible(true);
 }
 
 
