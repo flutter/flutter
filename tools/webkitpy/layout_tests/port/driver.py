@@ -451,6 +451,8 @@ class Driver(object):
         out_seen_eof = False
 
         have_seen_begin = not is_first_block
+        have_printed_stdout_limbo_line = False
+        have_printed_stderr_limbo_line = False
 
         while not self.has_crashed():
             if out_seen_eof and (self.err_seen_eof or not wait_for_stderr_eof):
@@ -468,16 +470,20 @@ class Driver(object):
             if not have_seen_begin:
                 # FIXME(sky): Instead of logging, this should cause the previous test to fail.
                 if err_line:
-                    _log.error('Saw a stderr line between the end of the previous test and the start of the current one: %s' % (
-                        err_line))
+                    if not have_printed_stdout_limbo_line:
+                        have_printed_stdout_limbo_line = True
+                        _log.error('\nSaw a stderr lines between the end of the previous test and the start of the current one:')
+                    _log.error(err_line)
                 if out_line:
                     if out_line == '#BEGIN\n':
                         have_seen_begin = True
                         out_line = ''
                         block.content = ''
                     else:
-                        _log.error('Saw a stdout line between the end of the previous test and the start of the current one: %s' % (
-                            out_line))
+                        if not have_printed_stdout_limbo_line:
+                            have_printed_stdout_limbo_line = True
+                            _log.error('\nSaw a stdout line between the end of the previous test and the start of the current one:')
+                        _log.error(out_line)
 
             if self._server_process.timed_out or self.has_crashed():
                 break
