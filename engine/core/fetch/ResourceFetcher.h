@@ -78,10 +78,6 @@ public:
 
     ResourcePtr<ImageResource> fetchImage(FetchRequest&);
     ResourcePtr<FontResource> fetchFont(FetchRequest&);
-    ResourcePtr<RawResource> fetchRawResource(FetchRequest&);
-    ResourcePtr<Resource> fetchLinkResource(Resource::Type, FetchRequest&);
-    ResourcePtr<RawResource> fetchImport(FetchRequest&);
-    ResourcePtr<RawResource> fetchMedia(FetchRequest&);
 
     // Logs an access denied message to the console for the specified URL.
     void printAccessDeniedMessage(const KURL&) const;

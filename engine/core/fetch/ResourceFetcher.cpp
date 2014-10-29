@@ -236,37 +236,6 @@ ResourcePtr<FontResource> ResourceFetcher::fetchFont(FetchRequest& request)
     return toFontResource(requestResource(Resource::Font, request));
 }
 
-ResourcePtr<RawResource> ResourceFetcher::fetchImport(FetchRequest& request)
-{
-    ASSERT(request.resourceRequest().frameType() == WebURLRequest::FrameTypeNone);
-    request.mutableResourceRequest().setRequestContext(WebURLRequest::RequestContextImport);
-    return toRawResource(requestResource(Resource::ImportResource, request));
-}
-
-ResourcePtr<Resource> ResourceFetcher::fetchLinkResource(Resource::Type type, FetchRequest& request)
-{
-    ASSERT(frame());
-    ASSERT(type == Resource::LinkPrefetch || type == Resource::LinkSubresource);
-    ASSERT(request.resourceRequest().frameType() == WebURLRequest::FrameTypeNone);
-    request.mutableResourceRequest().setRequestContext(type == Resource::LinkPrefetch ? WebURLRequest::RequestContextPrefetch : WebURLRequest::RequestContextSubresource);
-    return requestResource(type, request);
-}
-
-ResourcePtr<RawResource> ResourceFetcher::fetchRawResource(FetchRequest& request)
-{
-    ASSERT(request.resourceRequest().frameType() == WebURLRequest::FrameTypeNone);
-    ASSERT(request.resourceRequest().requestContext() != WebURLRequest::RequestContextUnspecified);
-    return toRawResource(requestResource(Resource::Raw, request));
-}
-
-ResourcePtr<RawResource> ResourceFetcher::fetchMedia(FetchRequest& request)
-{
-    ASSERT(request.resourceRequest().frameType() == WebURLRequest::FrameTypeNone);
-    // FIXME: Split this into audio and video.
-    request.mutableResourceRequest().setRequestContext(WebURLRequest::RequestContextVideo);
-    return toRawResource(requestResource(Resource::Media, request));
-}
-
 bool ResourceFetcher::canRequest(Resource::Type type, const KURL& url, const ResourceLoaderOptions& options, bool forPreload, FetchRequest::OriginRestriction originRestriction) const
 {
     // FIXME(sky): Remove
