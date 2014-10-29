@@ -1,0 +1,44 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<body>
+
+<script>
+ TEST <a></a>
+</script>
+
+<SCRIPT>
+ TEST <a></a>
+</SCRIPT>
+
+<script>
+<SCRIPT>
+ TEST <a></a>
+</SCRIPT>
+</script>
+
+<SCRIPT>
+<script>
+ TEST <a></a>
+</SCRIPT>
+</script>
+</SCRIPT>
+
+<script
+> TEST </script
+>
+
+<
+script
+> TEST </script>
+
+<script> TEST </
+script>
+</script>
+
+<script> TEST </scrip>
+</script>
+
+<script> TEST <//script>
+</script>
+
+</body>

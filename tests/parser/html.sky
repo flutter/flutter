@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<body>
+
+A <!DOCTYPE HTMLAGAIN>
+B <!BOGUSCOMMENT>
+C <!--->
+D -->
+E <!-- -- >
+F -->
+G <! -- -- >
+H <image></image>
+I <keygen>
+J <isindex>
+K <table><div></div><input type=hidden /></table>
+L <frameset></frameset>
+M <p></p>
+N </p>
+O <br/>
+P </br>
+
+</body>

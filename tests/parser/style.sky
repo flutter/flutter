@@ -1,0 +1,56 @@
+<html>
+<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<body>
+
+<style>
+& TEST <a></a>
+</style>
+
+<STYLE>
+& TEST <a></a>
+</STYLE>
+
+<style>
+& TEST
+<STYLE>
+& TEST <a></a>
+</STYLE>
+& TEST
+</style>
+
+<STYLE>
+& TEST
+<style>
+ TEST <a></a>
+</STYLE>
+& TEST
+</style>
+& TEST
+</STYLE>
+
+<style
+> TEST </style
+>
+
+<
+style
+> & TEST </style>
+
+& TEST
+
+<style> & TEST </
+style>
+& TEST
+</style>
+
+<style> & TEST </styl>
+& TEST
+</style>
+
+<style> & TEST <//style>
+& TEST
+</style>
+
+& TEST
+
+</body>

@@ -51,6 +51,7 @@ BASELINE_SUFFIX_LIST = ('png', 'wav', 'txt')
 WEBKIT_BUG_PREFIX = 'webkit.org/b/'
 CHROMIUM_BUG_PREFIX = 'crbug.com/'
 V8_BUG_PREFIX = 'code.google.com/p/v8/issues/detail?id='
+MOJO_BUG_PREFIX = 'https://github.com/domokit/mojo/issues/'
 NAMED_BUG_PREFIX = 'Bug('
 
 MISSING_KEYWORD = 'Missing'
@@ -284,15 +285,15 @@ class TestExpectationParser(object):
             if (token.startswith(WEBKIT_BUG_PREFIX) or
                 token.startswith(CHROMIUM_BUG_PREFIX) or
                 token.startswith(V8_BUG_PREFIX) or
+                token.startswith(MOJO_BUG_PREFIX) or
                 token.startswith(NAMED_BUG_PREFIX)):
                 if state != 'start':
                     warnings.append('"%s" is not at the start of the line.' % token)
                     break
-                if token.startswith(WEBKIT_BUG_PREFIX):
-                    bugs.append(token)
-                elif token.startswith(CHROMIUM_BUG_PREFIX):
-                    bugs.append(token)
-                elif token.startswith(V8_BUG_PREFIX):
+                if (token.startswith(WEBKIT_BUG_PREFIX) or
+                    token.startswith(CHROMIUM_BUG_PREFIX) or
+                    token.startswith(MOJO_BUG_PREFIX) or
+                    token.startswith(V8_BUG_PREFIX)):
                     bugs.append(token)
                 else:
                     match = re.match('Bug\((\w+)\)$', token)
