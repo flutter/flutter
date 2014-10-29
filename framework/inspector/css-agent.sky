@@ -47,5 +47,5 @@ CSS.prototype.getComputedStyleForNode = function(params) {
   }
 }
 
-this.exports = CSS;
+module.exports = CSS;
 </script>

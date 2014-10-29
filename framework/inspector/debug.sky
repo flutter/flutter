@@ -9,7 +9,7 @@ function loggingStub(name) {
   }
 }
 
-this.exports = {
+module.exports = {
     logParams: logParams,
     loggingStub: loggingStub,
 }
