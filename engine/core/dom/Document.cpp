@@ -1066,8 +1066,8 @@ void Document::scheduleRenderTreeUpdate()
     page()->animator().scheduleVisualUpdate();
     m_lifecycle.ensureStateAtMost(DocumentLifecycle::VisualUpdatePending);
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ScheduleStyleRecalculation", "frame", frame());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ScheduleStyleRecalculation", TRACE_EVENT_SCOPE_PROCESS, "frame", frame());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 }
 
 bool Document::hasPendingForcedStyleRecalc() const
@@ -1156,7 +1156,7 @@ void Document::updateRenderTree(StyleRecalcChange change)
     // FIXME: Remove m_styleRecalcElementCounter, we should just use the accessCount() on the resolver.
     m_styleRecalcElementCounter = 0;
     TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RecalculateStyles", "frame", frame());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     DocumentAnimations::updateOutdatedAnimationPlayersIfNeeded(*this);
     evaluateMediaQueryListIfNeeded();
@@ -2591,7 +2591,7 @@ void Document::finishedParsing()
 
     if (RefPtr<LocalFrame> f = frame()) {
         checkCompleted();
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", "data", InspectorMarkLoadEvent::data(f.get()));
+        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data(f.get()));
     }
 
     // Schedule dropping of the ElementDataCache. We keep it alive for a while after parsing finishes

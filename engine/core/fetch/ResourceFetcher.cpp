@@ -822,7 +822,7 @@ void ResourceFetcher::willTerminateResourceLoader(ResourceLoader* loader)
 
 void ResourceFetcher::willStartLoadingResource(Resource* resource, ResourceRequest& request)
 {
-    TRACE_EVENT_ASYNC_BEGIN2("net", "Resource", resource, "url", resource->url().string().ascii(), "priority", resource->resourceRequest().priority());
+    TRACE_EVENT_ASYNC_BEGIN2("net", "Resource", resource, "url", resource->url().string().ascii().data(), "priority", resource->resourceRequest().priority());
 }
 
 void ResourceFetcher::stopFetching()

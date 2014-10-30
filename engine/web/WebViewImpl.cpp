@@ -1141,7 +1141,7 @@ static String inputTypeToName(WebInputEvent::Type type)
 
 bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
 {
-    TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii());
+    TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
     // If we've started a drag and drop operation, ignore input events until
     // we're done.
     if (m_doingDragAndDrop)

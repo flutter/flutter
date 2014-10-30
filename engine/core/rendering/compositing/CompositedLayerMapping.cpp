@@ -2032,7 +2032,7 @@ void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, G
         page->setIsPainting(true);
 #endif
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Paint", "data", InspectorPaintEvent::data(m_owningLayer.renderer(), clip, graphicsLayer));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     PaintLayerFlags paintLayerFlags = 0;
     if (graphicsLayerPaintingPhase & GraphicsLayerPaintBackground)

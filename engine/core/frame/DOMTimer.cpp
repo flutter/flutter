@@ -70,8 +70,8 @@ double DOMTimer::visiblePageAlignmentInterval()
 int DOMTimer::install(ExecutionContext* context, PassOwnPtr<ScheduledAction> action, int timeout, bool singleShot)
 {
     int timeoutID = context->installNewTimeout(action, timeout, singleShot);
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimerInstall", "data", InspectorTimerInstallEvent::data(context, timeoutID, timeout, singleShot));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimerInstall", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorTimerInstallEvent::data(context, timeoutID, timeout, singleShot));
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
     WTF_LOG(Timers, "DOMTimer::install: timeoutID = %d, timeout = %d, singleShot = %d", timeoutID, timeout, singleShot ? 1 : 0);
     return timeoutID;
 }
@@ -80,8 +80,8 @@ void DOMTimer::removeByID(ExecutionContext* context, int timeoutID)
 {
     WTF_LOG(Timers, "DOMTimer::removeByID: timeoutID = %d", timeoutID);
     context->removeTimeoutByID(timeoutID);
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimerRemove", "data", InspectorTimerRemoveEvent::data(context, timeoutID));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimerRemove", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorTimerRemoveEvent::data(context, timeoutID));
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 }
 
 DOMTimer::DOMTimer(ExecutionContext* context, PassOwnPtr<ScheduledAction> action, int interval, bool singleShot, int timeoutID)
@@ -147,7 +147,7 @@ void DOMTimer::fired()
 
     action->execute(context);
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", "data", InspectorUpdateCountersEvent::data());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 
     timerNestingLevel = 0;
 }

@@ -171,7 +171,7 @@ void ConsoleBase::timeEnd(ScriptState* scriptState, const String& title)
 
 void ConsoleBase::timeStamp(const String& title)
 {
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimeStamp", "data", InspectorTimeStampEvent::data(context(), title));
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimeStamp", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorTimeStampEvent::data(context(), title));
 }
 
 void ConsoleBase::timeline(ScriptState* scriptState, const String& title)

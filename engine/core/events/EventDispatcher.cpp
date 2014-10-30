@@ -131,7 +131,7 @@ bool EventDispatcher::dispatch()
     // outermost shadow DOM boundary.
     m_event->setTarget(windowEventContext.target());
     m_event->setCurrentTarget(0);
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", "data", InspectorUpdateCountersEvent::data());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 
     return !m_event->defaultPrevented();
 }

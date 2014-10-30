@@ -382,16 +382,14 @@ void V8GCController::gcEpilogue(v8::GCType type, v8::GCCallbackFlags flags)
         majorGCEpilogue(isolate);
 
     TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "GCEvent", "usedHeapSizeAfter", usedHeapSize(isolate));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", "data", InspectorUpdateCountersEvent::data());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 }
 
 void V8GCController::minorGCEpilogue(v8::Isolate* isolate)
 {
     TRACE_EVENT_END0("v8", "minorGC");
-    if (isMainThread()) {
-        TRACE_EVENT_SET_NONCONST_SAMPLING_STATE(V8PerIsolateData::from(isolate)->previousSamplingState());
+    if (isMainThread())
         ScriptForbiddenScope::exit();
-    }
 }
 
 void V8GCController::majorGCEpilogue(v8::Isolate* isolate)
@@ -399,10 +397,8 @@ void V8GCController::majorGCEpilogue(v8::Isolate* isolate)
     v8::HandleScope scope(isolate);
 
     TRACE_EVENT_END0("v8", "majorGC");
-    if (isMainThread()) {
-        TRACE_EVENT_SET_NONCONST_SAMPLING_STATE(V8PerIsolateData::from(isolate)->previousSamplingState());
+    if (isMainThread())
         ScriptForbiddenScope::exit();
-    }
 }
 
 void V8GCController::collectGarbage(v8::Isolate* isolate)

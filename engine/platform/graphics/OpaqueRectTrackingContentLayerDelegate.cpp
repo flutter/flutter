@@ -26,6 +26,7 @@
 
 #include "platform/graphics/OpaqueRectTrackingContentLayerDelegate.h"
 
+#include "base/debug/trace_event.h"
 #include "platform/EventTracer.h"
 #include "platform/geometry/IntRect.h"
 #include "platform/graphics/GraphicsContext.h"

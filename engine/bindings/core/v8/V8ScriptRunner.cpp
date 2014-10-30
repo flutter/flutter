@@ -69,7 +69,7 @@ v8::Local<v8::Script> V8ScriptRunner::compileScript(const ScriptSourceCode& sour
 
 v8::Local<v8::Script> V8ScriptRunner::compileScript(v8::Handle<v8::String> code, const String& fileName, const TextPosition& scriptStartPosition, v8::Isolate* isolate, V8CacheOptions cacheOptions)
 {
-    TRACE_EVENT1("v8", "v8.compile", "fileName", fileName.utf8());
+    TRACE_EVENT1("v8", "v8.compile", "fileName", fileName.utf8().data());
     TRACE_EVENT_SCOPED_SAMPLING_STATE("v8", "V8Compile");
 
     // NOTE: For compatibility with WebCore, ScriptSourceCode's line starts at

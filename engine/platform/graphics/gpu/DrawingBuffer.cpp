@@ -150,7 +150,7 @@ DrawingBuffer::DrawingBuffer(PassOwnPtr<WebGraphicsContext3D> context,
     , m_contextEvictionManager(contextEvictionManager)
 {
     // Used by browser tests to detect the use of a DrawingBuffer.
-    TRACE_EVENT_INSTANT0("test_gpu", "DrawingBufferCreation");
+    TRACE_EVENT_INSTANT0("test_gpu", "DrawingBufferCreation", TRACE_EVENT_SCOPE_NAME_PROCESS);
 #ifndef NDEBUG
     drawingBufferCounter.increment();
 #endif

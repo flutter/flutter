@@ -90,8 +90,8 @@ ScriptedAnimationController::CallbackId ScriptedAnimationController::registerCal
     m_callbacks.append(callback);
     scheduleAnimationIfNeeded();
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RequestAnimationFrame", "data", InspectorAnimationFrameEvent::data(m_document, id));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RequestAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     return id;
 }
@@ -101,16 +101,16 @@ void ScriptedAnimationController::cancelCallback(CallbackId id)
     WTF_LOG(ScriptedAnimationController, "cancelCallback: id = %d", id);
     for (size_t i = 0; i < m_callbacks.size(); ++i) {
         if (m_callbacks[i]->m_id == id) {
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", "data", InspectorAnimationFrameEvent::data(m_document, id));
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
+            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
             m_callbacks.remove(i);
             return;
         }
     }
     for (size_t i = 0; i < m_callbacksToInvoke.size(); ++i) {
         if (m_callbacksToInvoke[i]->m_id == id) {
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", "data", InspectorAnimationFrameEvent::data(m_document, id));
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", "stack", InspectorCallStackEvent::currentCallStack());
+            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
+            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
             m_callbacksToInvoke[i]->m_cancelled = true;
             // will be removed at the end of executeCallbacks()
             return;
@@ -158,7 +158,7 @@ void ScriptedAnimationController::executeCallbacks(double monotonicTimeNow)
                 callback->handleEvent(legacyHighResNowMs);
             else
                 callback->handleEvent(highResNowMs);
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", "data", InspectorUpdateCountersEvent::data());
+            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
         }
     }
 

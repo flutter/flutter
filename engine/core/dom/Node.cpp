@@ -617,7 +617,7 @@ void Node::traceStyleChange(StyleChangeType changeType)
         return;
 
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("style.debug"),
-        "Node::setNeedsStyleRecalc",
+        "Node::setNeedsStyleRecalc", TRACE_EVENT_SCOPE_PROCESS, 
         "data", jsonObjectForStyleInvalidation(nodeCount, this)
     );
 }

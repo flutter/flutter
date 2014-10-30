@@ -1293,7 +1293,7 @@ void RenderObject::invalidatePaintUsingContainer(const RenderLayerModelObject* p
         return;
 
     TRACE_EVENT2(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"), "RenderObject::invalidatePaintUsingContainer()",
-        "object", this->debugName().ascii(),
+        "object", this->debugName().ascii().data(),
         "info", jsonObjectForPaintInvalidationInfo(r, invalidationReasonToString(invalidationReason)));
 
     if (paintInvalidationContainer->hasFilter() && paintInvalidationContainer->layer()->requiresFullLayerImageForFilters()) {
@@ -1422,7 +1422,7 @@ InvalidationReason RenderObject::invalidatePaintIfNeeded(const RenderLayerModelO
     ASSERT(newBounds == boundsRectForPaintInvalidation(&paintInvalidationContainer, &paintInvalidationState));
 
     TRACE_EVENT2(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"), "RenderObject::invalidatePaintIfNeeded()",
-        "object", this->debugName().ascii(),
+        "object", this->debugName().ascii().data(),
         "info", jsonObjectForOldAndNewRects(oldBounds, newBounds));
 
     InvalidationReason invalidationReason = getPaintInvalidationReason(paintInvalidationContainer, oldBounds, oldLocation, newBounds, newLocation);
