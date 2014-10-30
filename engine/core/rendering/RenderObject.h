@@ -280,7 +280,6 @@ public:
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0);
     virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) { return addChild(newChild, beforeChild); }
     virtual void removeChild(RenderObject*);
-    virtual bool createsAnonymousWrapper() const { return false; }
     //////////////////////////////////////////
 
 protected:

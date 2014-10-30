@@ -449,7 +449,7 @@ void RenderInline::splitFlow(RenderObject* beforeChild, RenderBlock* newBlockBox
     block->deleteLineBoxTree();
 
     bool madeNewBeforeBlock = false;
-    if (block->isAnonymousBlock() && (!block->parent() || !block->parent()->createsAnonymousWrapper())) {
+    if (block->isAnonymousBlock()) {
         // We can reuse this block and make it the preBlock of the next continuation.
         pre = block;
         pre->removePositionedObjects(0);
