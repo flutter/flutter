@@ -102,7 +102,6 @@ void InlineFlowBox::addToLine(InlineBox* child)
         m_lastChild = child;
     }
     child->setFirstLineStyleBit(isFirstLineStyle());
-    child->setIsHorizontal(isHorizontal());
     if (child->isText()) {
         if (child->renderer().parent() == renderer())
             m_hasTextChildren = true;
@@ -406,8 +405,8 @@ float InlineFlowBox::placeBoxRangeInInlineDirection(InlineBox* firstChild, Inlin
             } else {
                 // The box can have a different writing-mode than the overall line, so this is a bit complicated.
                 // Just get all the physical margin and overflow values by hand based off |isVertical|.
-                LayoutUnit logicalLeftMargin = isHorizontal() ? curr->boxModelObject()->marginLeft() : curr->boxModelObject()->marginTop();
-                LayoutUnit logicalRightMargin = isHorizontal() ? curr->boxModelObject()->marginRight() : curr->boxModelObject()->marginBottom();
+                LayoutUnit logicalLeftMargin = curr->boxModelObject()->marginLeft();
+                LayoutUnit logicalRightMargin = curr->boxModelObject()->marginRight();
 
                 logicalLeft += logicalLeftMargin;
                 curr->setLogicalLeft(logicalLeft);
@@ -423,44 +422,6 @@ float InlineFlowBox::placeBoxRangeInInlineDirection(InlineBox* firstChild, Inlin
         }
     }
     return logicalLeft;
-}
-
-bool InlineFlowBox::requiresIdeographicBaseline(const GlyphOverflowAndFallbackFontsMap& textBoxDataMap) const
-{
-    if (isHorizontal())
-        return false;
-
-    if (renderer().style(isFirstLineStyle())->fontDescription().nonCJKGlyphOrientation() == NonCJKGlyphOrientationUpright
-        || renderer().style(isFirstLineStyle())->font().primaryFont()->hasVerticalGlyphs())
-        return true;
-
-    for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
-        if (curr->renderer().isOutOfFlowPositioned())
-            continue; // Positioned placeholders don't affect calculations.
-
-        if (curr->isInlineFlowBox()) {
-            if (toInlineFlowBox(curr)->requiresIdeographicBaseline(textBoxDataMap))
-                return true;
-        } else {
-            if (curr->renderer().style(isFirstLineStyle())->font().primaryFont()->hasVerticalGlyphs())
-                return true;
-
-            const Vector<const SimpleFontData*>* usedFonts = 0;
-            if (curr->isInlineTextBox()) {
-                GlyphOverflowAndFallbackFontsMap::const_iterator it = textBoxDataMap.find(toInlineTextBox(curr));
-                usedFonts = it == textBoxDataMap.end() ? 0 : &it->value.first;
-            }
-
-            if (usedFonts) {
-                for (size_t i = 0; i < usedFonts->size(); ++i) {
-                    if (usedFonts->at(i)->hasVerticalGlyphs())
-                        return true;
-                }
-            }
-        }
-    }
-
-    return false;
 }
 
 void InlineFlowBox::adjustMaxAscentAndDescent(int& maxAscent, int& maxDescent, int maxPositionTop, int maxPositionBottom)
@@ -645,8 +606,8 @@ void InlineFlowBox::placeBoxesInBlockDirection(LayoutUnit top, LayoutUnit maxHei
         } else {
             RenderBox& box = toRenderBox(curr->renderer());
             newLogicalTopIncludingMargins = newLogicalTop;
-            LayoutUnit overSideMargin = curr->isHorizontal() ? box.marginTop() : box.marginRight();
-            LayoutUnit underSideMargin = curr->isHorizontal() ? box.marginBottom() : box.marginLeft();
+            LayoutUnit overSideMargin = box.marginTop();
+            LayoutUnit underSideMargin = box.marginBottom();
             newLogicalTop += overSideMargin;
             boxHeightIncludingMargins += overSideMargin + underSideMargin;
         }
@@ -967,12 +928,8 @@ void InlineFlowBox::setVisualOverflow(const LayoutRect& rect, const LayoutRect& 
 void InlineFlowBox::setOverflowFromLogicalRects(const LayoutRect& logicalLayoutOverflow, const LayoutRect& logicalVisualOverflow, LayoutUnit lineTop, LayoutUnit lineBottom)
 {
     LayoutRect frameBox = enclosingLayoutRect(frameRectIncludingLineHeight(lineTop, lineBottom));
-
-    LayoutRect layoutOverflow(isHorizontal() ? logicalLayoutOverflow : logicalLayoutOverflow.transposedRect());
-    setLayoutOverflow(layoutOverflow, frameBox);
-
-    LayoutRect visualOverflow(isHorizontal() ? logicalVisualOverflow : logicalVisualOverflow.transposedRect());
-    setVisualOverflow(visualOverflow, frameBox);
+    setLayoutOverflow(logicalLayoutOverflow, frameBox);
+    setVisualOverflow(logicalVisualOverflow, frameBox);
 }
 
 bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
@@ -1148,10 +1105,10 @@ void InlineFlowBox::paintFillLayer(const PaintInfo& paintInfo, const Color& c, c
             for (InlineFlowBox* curr = this; curr; curr = curr->prevLineBox())
                 totalLogicalWidth += curr->logicalWidth();
         }
-        LayoutUnit stripX = rect.x() - (isHorizontal() ? logicalOffsetOnLine : LayoutUnit());
-        LayoutUnit stripY = rect.y() - (isHorizontal() ? LayoutUnit() : logicalOffsetOnLine);
-        LayoutUnit stripWidth = isHorizontal() ? totalLogicalWidth : static_cast<LayoutUnit>(width());
-        LayoutUnit stripHeight = isHorizontal() ? static_cast<LayoutUnit>(height()) : totalLogicalWidth;
+        LayoutUnit stripX = rect.x() - logicalOffsetOnLine;
+        LayoutUnit stripY = rect.y();
+        LayoutUnit stripWidth = totalLogicalWidth;
+        LayoutUnit stripHeight = static_cast<LayoutUnit>(height());
 
         GraphicsContextStateSaver stateSaver(*paintInfo.context);
         paintInfo.context->clip(LayoutRect(rect.x(), rect.y(), width(), height()));
@@ -1175,25 +1132,14 @@ static LayoutRect clipRectForNinePieceImageStrip(InlineFlowBox* box, const NineP
     LayoutRect clipRect(paintRect);
     RenderStyle* style = box->renderer().style();
     LayoutBoxExtent outsets = style->imageOutsets(image);
-    if (box->isHorizontal()) {
-        clipRect.setY(paintRect.y() - outsets.top());
-        clipRect.setHeight(paintRect.height() + outsets.top() + outsets.bottom());
-        if (box->includeLogicalLeftEdge()) {
-            clipRect.setX(paintRect.x() - outsets.left());
-            clipRect.setWidth(paintRect.width() + outsets.left());
-        }
-        if (box->includeLogicalRightEdge())
-            clipRect.setWidth(clipRect.width() + outsets.right());
-    } else {
+    clipRect.setY(paintRect.y() - outsets.top());
+    clipRect.setHeight(paintRect.height() + outsets.top() + outsets.bottom());
+    if (box->includeLogicalLeftEdge()) {
         clipRect.setX(paintRect.x() - outsets.left());
-        clipRect.setWidth(paintRect.width() + outsets.left() + outsets.right());
-        if (box->includeLogicalLeftEdge()) {
-            clipRect.setY(paintRect.y() - outsets.top());
-            clipRect.setHeight(paintRect.height() + outsets.top());
-        }
-        if (box->includeLogicalRightEdge())
-            clipRect.setHeight(clipRect.height() + outsets.bottom());
+        clipRect.setWidth(paintRect.width() + outsets.left());
     }
+    if (box->includeLogicalRightEdge())
+        clipRect.setWidth(clipRect.width() + outsets.right());
     return clipRect;
 }
 
@@ -1260,10 +1206,10 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
             LayoutUnit totalLogicalWidth = logicalOffsetOnLine;
             for (InlineFlowBox* curr = this; curr; curr = curr->nextLineBox())
                 totalLogicalWidth += curr->logicalWidth();
-            LayoutUnit stripX = adjustedPaintOffset.x() - (isHorizontal() ? logicalOffsetOnLine : LayoutUnit());
-            LayoutUnit stripY = adjustedPaintOffset.y() - (isHorizontal() ? LayoutUnit() : logicalOffsetOnLine);
-            LayoutUnit stripWidth = isHorizontal() ? totalLogicalWidth : frameRect.width();
-            LayoutUnit stripHeight = isHorizontal() ? frameRect.height() : totalLogicalWidth;
+            LayoutUnit stripX = adjustedPaintOffset.x() - logicalOffsetOnLine;
+            LayoutUnit stripY = adjustedPaintOffset.y();
+            LayoutUnit stripWidth = totalLogicalWidth;
+            LayoutUnit stripHeight = frameRect.height();
 
             LayoutRect clipRect = clipRectForNinePieceImageStrip(this, borderImage, paintRect);
             GraphicsContextStateSaver stateSaver(*paintInfo.context);
@@ -1328,10 +1274,10 @@ void InlineFlowBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffs
         LayoutUnit totalLogicalWidth = logicalOffsetOnLine;
         for (InlineFlowBox* curr = this; curr; curr = curr->nextLineBox())
             totalLogicalWidth += curr->logicalWidth();
-        LayoutUnit stripX = adjustedPaintOffset.x() - (isHorizontal() ? logicalOffsetOnLine : LayoutUnit());
-        LayoutUnit stripY = adjustedPaintOffset.y() - (isHorizontal() ? LayoutUnit() : logicalOffsetOnLine);
-        LayoutUnit stripWidth = isHorizontal() ? totalLogicalWidth : frameRect.width();
-        LayoutUnit stripHeight = isHorizontal() ? frameRect.height() : totalLogicalWidth;
+        LayoutUnit stripX = adjustedPaintOffset.x() - logicalOffsetOnLine;
+        LayoutUnit stripY = adjustedPaintOffset.y();
+        LayoutUnit stripWidth = totalLogicalWidth;
+        LayoutUnit stripHeight = frameRect.height();
 
         LayoutRect clipRect = clipRectForNinePieceImageStrip(this, maskNinePieceImage, paintRect);
         GraphicsContextStateSaver stateSaver(*paintInfo.context);

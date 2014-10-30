@@ -30,8 +30,8 @@ class HitTestResult;
 class EllipsisBox final : public InlineBox {
 public:
     EllipsisBox(RenderObject& obj, const AtomicString& ellipsisStr, InlineFlowBox* parent,
-        int width, int height, int x, int y, bool firstLine, bool isVertical, InlineBox* markupBox)
-        : InlineBox(obj, FloatPoint(x, y), width, firstLine, true, false, false, isVertical, 0, 0, parent)
+        int width, int height, int x, int y, bool firstLine, InlineBox* markupBox)
+        : InlineBox(obj, FloatPoint(x, y), width, firstLine, true, false, false, 0, 0, parent)
         , m_shouldPaintMarkupBox(markupBox)
         , m_height(height)
         , m_str(ellipsisStr)

@@ -51,14 +51,14 @@ public:
     }
 
     InlineBox(RenderObject& obj, FloatPoint topLeft, float logicalWidth, bool firstLine, bool constructed,
-              bool dirty, bool extracted, bool isHorizontal, InlineBox* next, InlineBox* prev, InlineFlowBox* parent)
+              bool dirty, bool extracted, InlineBox* next, InlineBox* prev, InlineFlowBox* parent)
         : m_next(next)
         , m_prev(prev)
         , m_parent(parent)
         , m_renderer(obj)
         , m_topLeft(topLeft)
         , m_logicalWidth(logicalWidth)
-        , m_bitfields(firstLine, constructed, dirty, extracted, isHorizontal)
+        , m_bitfields(firstLine, constructed, dirty, extracted)
 #if ENABLE(ASSERT)
         , m_hasBadParent(false)
 #endif
@@ -78,24 +78,16 @@ public:
     virtual void adjustPosition(float dx, float dy);
     void adjustLogicalPosition(float deltaLogicalLeft, float deltaLogicalTop)
     {
-        if (isHorizontal())
-            adjustPosition(deltaLogicalLeft, deltaLogicalTop);
-        else
-            adjustPosition(deltaLogicalTop, deltaLogicalLeft);
+        // FIXME(sky): Remove
+        adjustPosition(deltaLogicalLeft, deltaLogicalTop);
     }
     void adjustLineDirectionPosition(float delta)
     {
-        if (isHorizontal())
-            adjustPosition(delta, 0);
-        else
-            adjustPosition(0, delta);
+        adjustPosition(delta, 0);
     }
     void adjustBlockDirectionPosition(float delta)
     {
-        if (isHorizontal())
-            adjustPosition(0, delta);
-        else
-            adjustPosition(delta, 0);
+        adjustPosition(0, delta);
     }
 
     virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom);
@@ -132,9 +124,6 @@ public:
         ASSERT_NOT_REACHED();
         return 0;
     }
-
-    bool isHorizontal() const { return m_bitfields.isHorizontal(); }
-    void setIsHorizontal(bool isHorizontal) { m_bitfields.setIsHorizontal(isHorizontal); }
 
     virtual FloatRect calculateBoundaries() const
     {
@@ -201,21 +190,19 @@ public:
 
     const FloatPoint& topLeft() const { return m_topLeft; }
 
-    float width() const { return isHorizontal() ? logicalWidth() : hasVirtualLogicalHeight() ? virtualLogicalHeight() : logicalHeight(); }
-    float height() const { return isHorizontal() ? hasVirtualLogicalHeight() ? virtualLogicalHeight() : logicalHeight() : logicalWidth(); }
+    float width() const { return logicalWidth(); }
+    float height() const { return hasVirtualLogicalHeight() ? virtualLogicalHeight() : logicalHeight(); }
     FloatSize size() const { return FloatSize(width(), height()); }
     float right() const { return left() + width(); }
     float bottom() const { return top() + height(); }
 
     // The logicalLeft position is the left edge of the line box in a horizontal line and the top edge in a vertical line.
-    float logicalLeft() const { return isHorizontal() ? m_topLeft.x() : m_topLeft.y(); }
+    float logicalLeft() const { return m_topLeft.x(); }
     float logicalRight() const { return logicalLeft() + logicalWidth(); }
     void setLogicalLeft(float left)
     {
-        if (isHorizontal())
-            setX(left);
-        else
-            setY(left);
+        // FIXME(sky): Remove
+        setX(left);
     }
     int pixelSnappedLogicalLeft() const { return logicalLeft(); }
     int pixelSnappedLogicalRight() const { return ceilf(logicalRight()); }
@@ -223,14 +210,11 @@ public:
     int pixelSnappedLogicalBottom() const { return ceilf(logicalBottom()); }
 
     // The logicalTop[ position is the top edge of the line box in a horizontal line and the left edge in a vertical line.
-    float logicalTop() const { return isHorizontal() ? m_topLeft.y() : m_topLeft.x(); }
+    float logicalTop() const { return m_topLeft.y(); }
     float logicalBottom() const { return logicalTop() + logicalHeight(); }
     void setLogicalTop(float top)
     {
-        if (isHorizontal())
-            setY(top);
-        else
-            setX(top);
+        setY(top);
     }
 
     // The logical width is our extent in the line's overall inline direction, i.e., width for horizontal text and height for vertical text.
@@ -240,7 +224,7 @@ public:
     // The logical height is our extent in the block flow direction, i.e., height for horizontal text and width for vertical text.
     float logicalHeight() const;
 
-    FloatRect logicalFrameRect() const { return isHorizontal() ? FloatRect(m_topLeft.x(), m_topLeft.y(), m_logicalWidth, logicalHeight()) : FloatRect(m_topLeft.y(), m_topLeft.x(), m_logicalWidth, logicalHeight()); }
+    FloatRect logicalFrameRect() const { return FloatRect(m_topLeft.x(), m_topLeft.y(), m_logicalWidth, logicalHeight()); }
 
     virtual int baselinePosition(FontBaseline baselineType) const;
     virtual LayoutUnit lineHeight() const;
@@ -303,14 +287,13 @@ public:
 
     class InlineBoxBitfields {
     public:
-        InlineBoxBitfields(bool firstLine = false, bool constructed = false, bool dirty = false, bool extracted = false, bool isHorizontal = true)
+        InlineBoxBitfields(bool firstLine = false, bool constructed = false, bool dirty = false, bool extracted = false)
             : m_firstLine(firstLine)
             , m_constructed(constructed)
             , m_bidiEmbeddingLevel(0)
             , m_dirty(dirty)
             , m_extracted(extracted)
             , m_hasVirtualLogicalHeight(false)
-            , m_isHorizontal(isHorizontal)
             , m_endsWithBreak(false)
             , m_hasSelectedChildrenOrCanHaveLeadingExpansion(false)
             , m_knownToHaveNoOverflow(true)
@@ -338,7 +321,6 @@ public:
         ADD_BOOLEAN_BITFIELD(dirty, Dirty);
         ADD_BOOLEAN_BITFIELD(extracted, Extracted);
         ADD_BOOLEAN_BITFIELD(hasVirtualLogicalHeight, HasVirtualLogicalHeight);
-        ADD_BOOLEAN_BITFIELD(isHorizontal, IsHorizontal);
         // for RootInlineBox
         ADD_BOOLEAN_BITFIELD(endsWithBreak, EndsWithBreak); // Whether the line ends with a <br>.
         // shared between RootInlineBox and InlineTextBox

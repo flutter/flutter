@@ -124,7 +124,7 @@ float InlineBox::logicalHeight() const
     if (renderer().isText())
         return m_bitfields.isText() ? renderer().style(isFirstLineStyle())->fontMetrics().height() : 0;
     if (renderer().isBox() && parent())
-        return isHorizontal() ? toRenderBox(renderer()).height().toFloat() : toRenderBox(renderer()).width().toFloat();
+        return toRenderBox(renderer()).height().toFloat();
 
     ASSERT(isInlineFlowBox());
     RenderBoxModelObject* flowObject = boxModelObject();
@@ -137,12 +137,12 @@ float InlineBox::logicalHeight() const
 
 int InlineBox::baselinePosition(FontBaseline baselineType) const
 {
-    return boxModelObject()->baselinePosition(baselineType, m_bitfields.firstLine(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOnContainingLine);
+    return boxModelObject()->baselinePosition(baselineType, m_bitfields.firstLine(), HorizontalLine, PositionOnContainingLine);
 }
 
 LayoutUnit InlineBox::lineHeight() const
 {
-    return boxModelObject()->lineHeight(m_bitfields.firstLine(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOnContainingLine);
+    return boxModelObject()->lineHeight(m_bitfields.firstLine(), HorizontalLine, PositionOnContainingLine);
 }
 
 int InlineBox::caretMinOffset() const

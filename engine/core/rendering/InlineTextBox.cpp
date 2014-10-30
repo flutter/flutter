@@ -101,7 +101,7 @@ int InlineTextBox::baselinePosition(FontBaseline baselineType) const
         return 0;
     if (parent()->renderer() == renderer().parent())
         return parent()->baselinePosition(baselineType);
-    return toRenderBoxModelObject(renderer().parent())->baselinePosition(baselineType, isFirstLineStyle(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOnContainingLine);
+    return toRenderBoxModelObject(renderer().parent())->baselinePosition(baselineType, isFirstLineStyle(), HorizontalLine, PositionOnContainingLine);
 }
 
 LayoutUnit InlineTextBox::lineHeight() const
@@ -110,7 +110,7 @@ LayoutUnit InlineTextBox::lineHeight() const
         return 0;
     if (parent()->renderer() == renderer().parent())
         return parent()->lineHeight();
-    return toRenderBoxModelObject(renderer().parent())->lineHeight(isFirstLineStyle(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOnContainingLine);
+    return toRenderBoxModelObject(renderer().parent())->lineHeight(isFirstLineStyle(), HorizontalLine, PositionOnContainingLine);
 }
 
 LayoutUnit InlineTextBox::selectionTop()
@@ -215,11 +215,8 @@ LayoutRect InlineTextBox::localSelectionRect(int startPos, int endPos)
     else if (r.maxX() > logicalRight())
         logicalWidth = logicalRight() - r.x();
 
-    LayoutPoint topPoint = isHorizontal() ? LayoutPoint(r.x(), selTop) : LayoutPoint(selTop, r.x());
-    LayoutUnit width = isHorizontal() ? logicalWidth : selHeight;
-    LayoutUnit height = isHorizontal() ? selHeight : logicalWidth;
-
-    return LayoutRect(topPoint, LayoutSize(width, height));
+    LayoutPoint topPoint = LayoutPoint(r.x(), selTop);
+    return LayoutRect(topPoint, LayoutSize(logicalWidth, selHeight));
 }
 
 void InlineTextBox::deleteLine()
@@ -412,7 +409,7 @@ TextPaintingStyle selectionPaintingStyle(RenderText& renderer, bool haveSelectio
     return selectionStyle;
 }
 
-void updateGraphicsContext(GraphicsContext* context, const TextPaintingStyle& textStyle, bool horizontal, GraphicsContextStateSaver& stateSaver)
+void updateGraphicsContext(GraphicsContext* context, const TextPaintingStyle& textStyle, GraphicsContextStateSaver& stateSaver)
 {
     TextDrawingModeFlags mode = context->textDrawingMode();
     if (textStyle.strokeWidth > 0) {
@@ -438,7 +435,7 @@ void updateGraphicsContext(GraphicsContext* context, const TextPaintingStyle& te
     if (textStyle.shadow) {
         if (!stateSaver.saved())
             stateSaver.save();
-        context->setDrawLooper(textStyle.shadow->createDrawLooper(DrawLooperBuilder::ShadowIgnoresAlpha, horizontal));
+        context->setDrawLooper(textStyle.shadow->createDrawLooper(DrawLooperBuilder::ShadowIgnoresAlpha));
     }
 }
 
@@ -490,10 +487,10 @@ inline void paintEmphasisMark(GraphicsContext* context,
 void paintTextWithEmphasisMark(
     GraphicsContext* context, const Font& font, const TextPaintingStyle& textStyle, const TextRun& textRun,
     const AtomicString& emphasisMark, int emphasisMarkOffset, int startOffset, int endOffset, int length,
-    const FloatPoint& textOrigin, const FloatRect& boxRect, bool horizontal)
+    const FloatPoint& textOrigin, const FloatRect& boxRect)
 {
     GraphicsContextStateSaver stateSaver(*context, false);
-    updateGraphicsContext(context, textStyle, horizontal, stateSaver);
+    updateGraphicsContext(context, textStyle, stateSaver);
     paintText(context, font, textRun, nullAtom, 0, startOffset, endOffset, length, textOrigin, boxRect);
 
     if (!emphasisMark.isEmpty()) {
@@ -514,11 +511,11 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     ASSERT(paintInfo.phase != PaintPhaseSelfOutline && paintInfo.phase != PaintPhaseChildOutlines);
 
     LayoutRect logicalVisualOverflow = logicalOverflowRect();
-    LayoutUnit logicalStart = logicalVisualOverflow.x() + (isHorizontal() ? paintOffset.x() : paintOffset.y());
+    LayoutUnit logicalStart = logicalVisualOverflow.x() + paintOffset.x();
     LayoutUnit logicalExtent = logicalVisualOverflow.width();
 
-    LayoutUnit paintEnd = isHorizontal() ? paintInfo.rect.maxX() : paintInfo.rect.maxY();
-    LayoutUnit paintStart = isHorizontal() ? paintInfo.rect.x() : paintInfo.rect.y();
+    LayoutUnit paintEnd = paintInfo.rect.maxX();
+    LayoutUnit paintStart = paintInfo.rect.x();
 
     // When subpixel font scaling is enabled text runs are positioned at
     // subpixel boundaries on the x-axis and thus there is no reason to
@@ -551,7 +548,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
             LayoutUnit widthOfHiddenText = m_logicalWidth - widthOfVisibleText;
             // FIXME: The hit testing logic also needs to take this translation into account.
             LayoutSize truncationOffset(isLeftToRightDirection() ? widthOfHiddenText : -widthOfHiddenText, 0);
-            adjustedPaintOffset.move(isHorizontal() ? truncationOffset : truncationOffset.transposedSize());
+            adjustedPaintOffset.move(truncationOffset);
         }
     }
 
@@ -561,10 +558,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     FloatPoint boxOrigin = locationIncludingFlipping();
     boxOrigin.move(adjustedPaintOffset.x().toFloat(), adjustedPaintOffset.y().toFloat());
     FloatRect boxRect(boxOrigin, LayoutSize(logicalWidth(), logicalHeight()));
-
-    bool shouldRotate = !isHorizontal();
-    if (shouldRotate)
-        context->concatCTM(rotation(boxRect, Clockwise));
 
     // Determine whether or not we have composition underlines to draw.
     bool containsComposition = renderer().node() && renderer().frame()->inputMethodController().compositionNode() == renderer().node();
@@ -637,19 +630,19 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
             startOffset = ePos;
             endOffset = sPos;
         }
-        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, isHorizontal());
+        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect);
     }
 
     if ((paintSelectedTextOnly || paintSelectedTextSeparately) && sPos < ePos) {
         // paint only the text that is selected
-        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect, isHorizontal());
+        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect);
     }
 
     // Paint decorations
     TextDecoration textDecorations = styleToUse->textDecorationsInEffect();
     if (textDecorations != TextDecorationNone && !paintSelectedTextOnly) {
         GraphicsContextStateSaver stateSaver(*context, false);
-        updateGraphicsContext(context, textStyle, isHorizontal(), stateSaver);
+        updateGraphicsContext(context, textStyle, stateSaver);
         paintDecoration(context, boxOrigin, textDecorations);
     }
 
@@ -667,9 +660,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
             }
         }
     }
-
-    if (shouldRotate)
-        context->concatCTM(rotation(boxRect, Counterclockwise));
 }
 
 void InlineTextBox::selectionStartEnd(int& sPos, int& ePos)

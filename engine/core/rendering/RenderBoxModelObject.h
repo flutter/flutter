@@ -32,7 +32,8 @@ namespace blink {
 
 // Modes for some of the line-related functions.
 enum LinePositionMode { PositionOnContainingLine, PositionOfInteriorLineBoxes };
-enum LineDirectionMode { HorizontalLine, VerticalLine };
+// FIXME(sky): Remove this enum
+enum LineDirectionMode { HorizontalLine };
 typedef unsigned BorderEdgeFlags;
 
 enum BackgroundBleedAvoidance {

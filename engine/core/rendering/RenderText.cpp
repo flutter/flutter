@@ -238,13 +238,8 @@ static FloatRect localQuadForTextBox(InlineTextBox* box, unsigned start, unsigne
         if (!useSelectionHeight) {
             // Change the height and y position (or width and x for vertical text)
             // because selectionRect uses selection-specific values.
-            if (box->isHorizontal()) {
-                r.setHeight(box->height());
-                r.setY(box->y());
-            } else {
-                r.setWidth(box->width());
-                r.setX(box->x());
-            }
+            r.setHeight(box->height());
+            r.setY(box->y());
         }
         return FloatRect(r);
     }
@@ -269,13 +264,8 @@ void RenderText::absoluteRectsForRange(Vector<IntRect>& rects, unsigned start, u
             FloatRect r = box->calculateBoundaries();
             if (useSelectionHeight) {
                 LayoutRect selectionRect = box->localSelectionRect(start, end);
-                if (box->isHorizontal()) {
-                    r.setHeight(selectionRect.height().toFloat());
-                    r.setY(selectionRect.y().toFloat());
-                } else {
-                    r.setWidth(selectionRect.width().toFloat());
-                    r.setX(selectionRect.x().toFloat());
-                }
+                r.setHeight(selectionRect.height().toFloat());
+                r.setY(selectionRect.y().toFloat());
             }
             rects.append(localToAbsoluteQuad(r, 0).enclosingBoundingBox());
         } else {
@@ -349,13 +339,8 @@ void RenderText::absoluteQuadsForRange(Vector<FloatQuad>& quads, unsigned start,
             FloatRect r = box->calculateBoundaries();
             if (useSelectionHeight) {
                 LayoutRect selectionRect = box->localSelectionRect(start, end);
-                if (box->isHorizontal()) {
-                    r.setHeight(selectionRect.height().toFloat());
-                    r.setY(selectionRect.y().toFloat());
-                } else {
-                    r.setWidth(selectionRect.width().toFloat());
-                    r.setX(selectionRect.x().toFloat());
-                }
+                r.setHeight(selectionRect.height().toFloat());
+                r.setY(selectionRect.y().toFloat());
             }
             quads.append(localToAbsoluteQuad(r, 0));
         } else {
@@ -499,8 +484,8 @@ PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point)
     if (!firstTextBox() || textLength() == 0)
         return createPositionWithAffinity(0, DOWNSTREAM);
 
-    LayoutUnit pointLineDirection = firstTextBox()->isHorizontal() ? point.x() : point.y();
-    LayoutUnit pointBlockDirection = firstTextBox()->isHorizontal() ? point.y() : point.x();
+    LayoutUnit pointLineDirection = point.x();
+    LayoutUnit pointBlockDirection = point.y();
 
     InlineTextBox* lastBox = 0;
     for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {

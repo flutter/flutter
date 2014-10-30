@@ -41,12 +41,8 @@ void EllipsisBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, La
     const Font& font = style->font();
     FloatPoint boxOrigin = locationIncludingFlipping();
     boxOrigin.moveBy(FloatPoint(paintOffset));
-    if (!isHorizontal())
-        boxOrigin.move(0, -virtualLogicalHeight());
     FloatRect boxRect(boxOrigin, LayoutSize(logicalWidth(), virtualLogicalHeight()));
     GraphicsContextStateSaver stateSaver(*context);
-    if (!isHorizontal())
-        context->concatCTM(InlineTextBox::rotation(boxRect, InlineTextBox::Clockwise));
     FloatPoint textOrigin = FloatPoint(boxOrigin.x(), boxOrigin.y() + font.fontMetrics().ascent());
 
     Color styleTextColor = renderer().resolveColor(style, CSSPropertyWebkitTextFillColor);
@@ -65,7 +61,7 @@ void EllipsisBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, La
     const ShadowList* shadowList = style->textShadow();
     bool hasShadow = shadowList;
     if (hasShadow)
-        context->setDrawLooper(shadowList->createDrawLooper(DrawLooperBuilder::ShadowIgnoresAlpha, isHorizontal()));
+        context->setDrawLooper(shadowList->createDrawLooper(DrawLooperBuilder::ShadowIgnoresAlpha));
 
     TextRun textRun = constructTextRun(&renderer(), font, m_str, style, TextRun::AllowTrailingExpansion);
     TextRunPaintInfo textRunPaintInfo(textRun);

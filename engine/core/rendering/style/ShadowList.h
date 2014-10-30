@@ -63,7 +63,7 @@ public:
     void adjustRectForShadow(LayoutRect&) const;
     void adjustRectForShadow(FloatRect&) const;
 
-    PassOwnPtr<DrawLooperBuilder> createDrawLooper(DrawLooperBuilder::ShadowAlphaMode, bool isHorizontal = true) const;
+    PassOwnPtr<DrawLooperBuilder> createDrawLooper(DrawLooperBuilder::ShadowAlphaMode) const;
 
 private:
     ShadowList(ShadowDataVector& shadows)

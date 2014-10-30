@@ -238,9 +238,7 @@ bool RenderLineBoxList::hitTest(RenderBoxModelObject* renderer, const HitTestReq
         return false;
 
     LayoutPoint point = locationInContainer.point();
-    LayoutRect rect = firstLineBox()->isHorizontal() ?
-        IntRect(point.x(), point.y() - locationInContainer.topPadding(), 1, locationInContainer.topPadding() + locationInContainer.bottomPadding() + 1) :
-        IntRect(point.x() - locationInContainer.leftPadding(), point.y(), locationInContainer.rightPadding() + locationInContainer.leftPadding() + 1, 1);
+    LayoutRect rect = IntRect(point.x(), point.y() - locationInContainer.topPadding(), 1, locationInContainer.topPadding() + locationInContainer.bottomPadding() + 1);
 
     if (!anyLineIntersectsRect(renderer, rect, accumulatedOffset))
         return false;

@@ -56,8 +56,6 @@ RootInlineBox::RootInlineBox(RenderBlockFlow& block)
     , m_lineBottomWithLeading(0)
     , m_selectionBottom(0)
 {
-    // FIXME(sky): Remove
-    setIsHorizontal(true);
 }
 
 
@@ -92,12 +90,12 @@ void RootInlineBox::clearTruncation()
 
 int RootInlineBox::baselinePosition(FontBaseline baselineType) const
 {
-    return boxModelObject()->baselinePosition(baselineType, isFirstLineStyle(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes);
+    return boxModelObject()->baselinePosition(baselineType, isFirstLineStyle(), HorizontalLine, PositionOfInteriorLineBoxes);
 }
 
 LayoutUnit RootInlineBox::lineHeight() const
 {
-    return boxModelObject()->lineHeight(isFirstLineStyle(), isHorizontal() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes);
+    return boxModelObject()->lineHeight(isFirstLineStyle(), HorizontalLine, PositionOfInteriorLineBoxes);
 }
 
 bool RootInlineBox::lineCanAccommodateEllipsis(bool ltr, int blockEdge, int lineBoxEdge, int ellipsisWidth)
@@ -118,7 +116,7 @@ float RootInlineBox::placeEllipsis(const AtomicString& ellipsisStr,  bool ltr, f
     // Create an ellipsis box.
     EllipsisBox* ellipsisBox = new EllipsisBox(renderer(), ellipsisStr, this,
         ellipsisWidth - (markupBox ? markupBox->logicalWidth() : 0), logicalHeight(),
-        x(), y(), !prevRootBox(), isHorizontal(), markupBox);
+        x(), y(), !prevRootBox(), markupBox);
 
     if (!gEllipsisBoxMap)
         gEllipsisBoxMap = new EllipsisBoxMap();
@@ -177,7 +175,7 @@ bool RootInlineBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
 void RootInlineBox::adjustPosition(float dx, float dy)
 {
     InlineFlowBox::adjustPosition(dx, dy);
-    LayoutUnit blockDirectionDelta = isHorizontal() ? dy : dx; // The block direction delta is a LayoutUnit.
+    LayoutUnit blockDirectionDelta = dy; // The block direction delta is a LayoutUnit.
     m_lineTop += blockDirectionDelta;
     m_lineBottom += blockDirectionDelta;
     m_lineTopWithLeading += blockDirectionDelta;
@@ -211,7 +209,7 @@ LayoutUnit RootInlineBox::alignBoxesInBlockDirection(LayoutUnit heightOfBlock, G
     bool setMaxAscent = false;
     bool setMaxDescent = false;
 
-    m_baselineType = requiresIdeographicBaseline(textBoxDataMap) ? IdeographicBaseline : AlphabeticBaseline;
+    m_baselineType = AlphabeticBaseline;
 
     computeLogicalBoxHeights(this, maxPositionTop, maxPositionBottom, maxAscent, maxDescent, setMaxAscent, setMaxDescent, true,
                              textBoxDataMap, baselineType(), verticalPositionCache);
@@ -540,17 +538,10 @@ LayoutRect RootInlineBox::paddedLayoutOverflowRect(LayoutUnit endPadding) const
     if (!endPadding)
         return lineLayoutOverflow;
 
-    if (isHorizontal()) {
-        if (isLeftToRightDirection())
-            lineLayoutOverflow.shiftMaxXEdgeTo(std::max<LayoutUnit>(lineLayoutOverflow.maxX(), logicalRight() + endPadding));
-        else
-            lineLayoutOverflow.shiftXEdgeTo(std::min<LayoutUnit>(lineLayoutOverflow.x(), logicalLeft() - endPadding));
-    } else {
-        if (isLeftToRightDirection())
-            lineLayoutOverflow.shiftMaxYEdgeTo(std::max<LayoutUnit>(lineLayoutOverflow.maxY(), logicalRight() + endPadding));
-        else
-            lineLayoutOverflow.shiftYEdgeTo(std::min<LayoutUnit>(lineLayoutOverflow.y(), logicalLeft() - endPadding));
-    }
+    if (isLeftToRightDirection())
+        lineLayoutOverflow.shiftMaxXEdgeTo(std::max<LayoutUnit>(lineLayoutOverflow.maxX(), logicalRight() + endPadding));
+    else
+        lineLayoutOverflow.shiftXEdgeTo(std::min<LayoutUnit>(lineLayoutOverflow.x(), logicalLeft() - endPadding));
 
     return lineLayoutOverflow;
 }
@@ -760,7 +751,7 @@ bool RootInlineBox::includeFontForBox(InlineBox* box) const
 
     // For now map "glyphs" to "font" in vertical text mode until the bounds returned by glyphs aren't garbage.
     LineBoxContain lineBoxContain = renderer().style()->lineBoxContain();
-    return (lineBoxContain & LineBoxContainFont) || (!isHorizontal() && (lineBoxContain & LineBoxContainGlyphs));
+    return lineBoxContain & LineBoxContainFont;
 }
 
 bool RootInlineBox::includeGlyphsForBox(InlineBox* box) const
@@ -773,7 +764,7 @@ bool RootInlineBox::includeGlyphsForBox(InlineBox* box) const
 
     // FIXME: We can't fit to glyphs yet for vertical text, since the bounds returned are garbage.
     LineBoxContain lineBoxContain = renderer().style()->lineBoxContain();
-    return isHorizontal() && (lineBoxContain & LineBoxContainGlyphs);
+    return lineBoxContain & LineBoxContainGlyphs;
 }
 
 bool RootInlineBox::includeMarginForBox(InlineBox* box) const
@@ -790,7 +781,7 @@ bool RootInlineBox::fitsToGlyphs() const
 {
     // FIXME: We can't fit to glyphs yet for vertical text, since the bounds returned are garbage.
     LineBoxContain lineBoxContain = renderer().style()->lineBoxContain();
-    return isHorizontal() && (lineBoxContain & LineBoxContainGlyphs);
+    return lineBoxContain & LineBoxContainGlyphs;
 }
 
 bool RootInlineBox::includesRootLineBoxFontOrLeading() const
