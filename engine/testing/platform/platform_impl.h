@@ -32,9 +32,6 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
-  virtual blink::WebData parseDataURL(
-      const blink::WebURL& url, blink::WebString& mime_type,
-      blink::WebString& charset);
   virtual blink::WebScrollbarBehavior* scrollbarBehavior();
   virtual const unsigned char* getTraceCategoryEnabledFlag(
       const char* category_name);

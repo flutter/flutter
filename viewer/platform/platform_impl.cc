@@ -138,20 +138,6 @@ blink::WebURLLoader* PlatformImpl::createURLLoader() {
   return new WebURLLoaderImpl(network_service_.get());
 }
 
-blink::WebData PlatformImpl::parseDataURL(
-    const blink::WebURL& url,
-    blink::WebString& mimetype_out,
-    blink::WebString& charset_out) {
-  std::string mimetype, charset, data;
-  if (net::DataURL::Parse(url, &mimetype, &charset, &data)
-      && net::IsSupportedMimeType(mimetype)) {
-    mimetype_out = blink::WebString::fromUTF8(mimetype);
-    charset_out = blink::WebString::fromUTF8(charset);
-    return data;
-  }
-  return blink::WebData();
-}
-
 blink::WebURLError PlatformImpl::cancelledError(const blink::WebURL& url)
     const {
   blink::WebURLError error;

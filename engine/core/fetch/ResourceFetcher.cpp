@@ -114,27 +114,6 @@ static ResourceLoadPriority loadPriority(Resource::Type type, const FetchRequest
     return ResourceLoadPriorityUnresolved;
 }
 
-static Resource* resourceFromDataURIRequest(const ResourceRequest& request, const ResourceLoaderOptions& resourceOptions)
-{
-    const KURL& url = request.url();
-    ASSERT(url.protocolIsData());
-
-    blink::WebString mimetype;
-    blink::WebString charset;
-    RefPtr<SharedBuffer> data = PassRefPtr<SharedBuffer>(blink::Platform::current()->parseDataURL(url, mimetype, charset));
-    if (!data)
-        return 0;
-    ResourceResponse response(url, mimetype, data->size(), charset, String());
-
-    Resource* resource = createResource(Resource::Image, request, charset);
-    resource->setOptions(resourceOptions);
-    resource->responseReceived(response);
-    if (data->size())
-        resource->setResourceBuffer(data);
-    resource->finish();
-    return resource;
-}
-
 static WebURLRequest::RequestContext requestContextFromType(const ResourceFetcher* fetcher, Resource::Type type)
 {
     switch (type) {
@@ -207,26 +186,9 @@ FetchContext& ResourceFetcher::context() const
 
 ResourcePtr<ImageResource> ResourceFetcher::fetchImage(FetchRequest& request)
 {
-    if (request.resourceRequest().url().protocolIsData())
-        preCacheDataURIImage(request);
-
     request.setDefer(clientDefersImage(request.resourceRequest().url()) ? FetchRequest::DeferredByClient : FetchRequest::NoDefer);
     ResourcePtr<Resource> resource = requestResource(Resource::Image, request);
     return resource && resource->type() == Resource::Image ? toImageResource(resource) : 0;
-}
-
-void ResourceFetcher::preCacheDataURIImage(const FetchRequest& request)
-{
-    const KURL& url = request.resourceRequest().url();
-    ASSERT(url.protocolIsData());
-
-    if (memoryCache()->resourceForURL(url))
-        return;
-
-    if (Resource* resource = resourceFromDataURIRequest(request.resourceRequest(), request.options())) {
-        memoryCache()->add(resource);
-        scheduleDocumentResourcesGC();
-    }
 }
 
 ResourcePtr<FontResource> ResourceFetcher::fetchFont(FetchRequest& request)

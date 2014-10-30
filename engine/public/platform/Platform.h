@@ -184,9 +184,6 @@ public:
     // A suggestion to cache this metadata in association with this URL.
     virtual void cacheMetadata(const WebURL&, double responseTime, const char* data, size_t dataSize) { }
 
-    // Returns the decoded data url if url had a supported mimetype and parsing was successful.
-    virtual WebData parseDataURL(const WebURL&, WebString& mimetype, WebString& charset) { return WebData(); }
-
     virtual WebURLError cancelledError(const WebURL&) const { return WebURLError(); }
 
     virtual bool isReservedIPAddress(const WebURL&) const { return false; }

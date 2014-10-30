@@ -100,18 +100,4 @@ const unsigned char* PlatformImpl::getTraceCategoryEnabledFlag(
   return buf;
 }
 
-blink::WebData PlatformImpl::parseDataURL(
-    const blink::WebURL& url,
-    blink::WebString& mimetype_out,
-    blink::WebString& charset_out) {
-  std::string mimetype, charset, data;
-  if (net::DataURL::Parse(url, &mimetype, &charset, &data)
-      && net::IsSupportedMimeType(mimetype)) {
-    mimetype_out = blink::WebString::fromUTF8(mimetype);
-    charset_out = blink::WebString::fromUTF8(charset);
-    return data;
-  }
-  return blink::WebData();
-}
-
 }  // namespace sky

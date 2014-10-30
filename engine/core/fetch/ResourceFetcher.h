@@ -147,7 +147,6 @@ private:
     ResourcePtr<Resource> requestResource(Resource::Type, FetchRequest&);
     ResourcePtr<Resource> createResourceForRevalidation(const FetchRequest&, Resource*);
     ResourcePtr<Resource> createResourceForLoading(Resource::Type, FetchRequest&, const String& charset);
-    void preCacheDataURIImage(const FetchRequest&);
     void requestPreload(Resource::Type, FetchRequest&, const String& charset);
 
     enum RevalidationPolicy { Use, Revalidate, Reload, Load };

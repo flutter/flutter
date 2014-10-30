@@ -41,9 +41,6 @@ class PlatformImpl : public blink::Platform {
   virtual blink::WebCompositorSupport* compositorSupport();
   virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
-  virtual blink::WebData parseDataURL(
-      const blink::WebURL& url, blink::WebString& mime_type,
-      blink::WebString& charset);
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;
   virtual blink::WebScrollbarBehavior* scrollbarBehavior();
   virtual const unsigned char* getTraceCategoryEnabledFlag(
