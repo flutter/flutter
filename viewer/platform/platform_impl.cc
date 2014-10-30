@@ -114,15 +114,9 @@ void PlatformImpl::stopSharedTimer() {
   shared_timer_.Stop();
 }
 
-void PlatformImpl::callOnMainThread(
-    void (*func)(void*), void* context) {
-  main_loop_->PostTask(FROM_HERE, base::Bind(func, context));
-}
-
 base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
   return main_thread_task_runner_.get();
 }
-
 
 bool PlatformImpl::isThreadedCompositingEnabled() {
   return true;

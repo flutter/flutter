@@ -27,6 +27,8 @@
 #include "config.h"
 #include "platform/SharedBuffer.h"
 
+#include "base/bind.h"
+#include "public/platform/Platform.h"
 #include "wtf/unicode/Unicode.h"
 #include "wtf/unicode/UTF8.h"
 
@@ -34,7 +36,6 @@
 
 #ifdef SHARED_BUFFER_STATS
 #include "wtf/DataLog.h"
-#include "wtf/MainThread.h"
 #endif
 
 namespace blink {
@@ -106,7 +107,7 @@ static CString snippetForBuffer(SharedBuffer* sharedBuffer)
     return result;
 }
 
-static void printStats(void*)
+static void printStats()
 {
     MutexLocker locker(statsMutex());
     Vector<SharedBuffer*> buffers;
@@ -126,7 +127,7 @@ static void didCreateSharedBuffer(SharedBuffer* buffer)
     MutexLocker locker(statsMutex());
     liveBuffers().add(buffer);
 
-    callOnMainThread(printStats, 0);
+    Platform::current()->mainThreadTaskRunner()->PostTask(FROM_HERE, base::Bind(&printStats));
 }
 
 static void willDestroySharedBuffer(SharedBuffer* buffer)

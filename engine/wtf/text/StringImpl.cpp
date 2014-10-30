@@ -184,7 +184,7 @@ bool operator<(const RefPtr<PerStringStats>& a, const RefPtr<PerStringStats>& b)
     return a->m_numberOfAtomicCopies < b->m_numberOfAtomicCopies;
 }
 
-static void printLiveStringStats(void*)
+static void printLiveStringStats()
 {
     MutexLocker locker(statsMutex());
     HashSet<void*>& strings = liveStrings();
@@ -255,7 +255,7 @@ void StringStats::printStats()
     double overheadPercent = (double)totalOverhead / (double)totalDataBytes * 100;
     dataLogF("         StringImpl overheader: %8u (%5.2f%%)\n", totalOverhead, overheadPercent);
 
-    callOnMainThread(printLiveStringStats, 0);
+    printLiveStringStats();
 }
 #endif
 

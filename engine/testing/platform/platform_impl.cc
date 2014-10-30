@@ -86,11 +86,6 @@ void PlatformImpl::stopSharedTimer() {
   shared_timer_.Stop();
 }
 
-void PlatformImpl::callOnMainThread(
-    void (*func)(void*), void* context) {
-  main_loop_->PostTask(FROM_HERE, base::Bind(func, context));
-}
-
 blink::WebUnitTestSupport* PlatformImpl::unitTestSupport() {
   return &unit_test_support_;
 }

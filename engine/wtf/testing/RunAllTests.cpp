@@ -50,6 +50,6 @@ int main(int argc, char** argv)
 {
     WTF::setRandomSource(AlwaysZeroNumberSource);
     WTF::initialize(CurrentTime, 0);
-    WTF::initializeMainThread(0);
+    WTF::initializeMainThread();
     return base::RunUnitTestsUsingBaseTestSuite(argc, argv);
 }

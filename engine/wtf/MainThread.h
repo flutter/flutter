@@ -39,15 +39,11 @@ namespace WTF {
 typedef uint32_t ThreadIdentifier;
 typedef void MainThreadFunction(void*);
 
-// Must be called from the main thread.
-WTF_EXPORT void initializeMainThread(void (*)(MainThreadFunction, void*));
-
-WTF_EXPORT void callOnMainThread(MainThreadFunction*, void* context);
+WTF_EXPORT void initializeMainThread();
 
 WTF_EXPORT bool isMainThread();
 
 } // namespace WTF
 
-using WTF::callOnMainThread;
 using WTF::isMainThread;
 #endif // MainThread_h

@@ -149,11 +149,6 @@ static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
     base::RandBytes(buffer, length);
 }
 
-static void callOnMainThreadFunction(WTF::MainThreadFunction function, void* context)
-{
-    Platform::current()->callOnMainThread(function, context);
-}
-
 void initializeWithoutV8(Platform* platform)
 {
     ASSERT(!s_webKitInitialized);
@@ -164,7 +159,7 @@ void initializeWithoutV8(Platform* platform)
 
     WTF::setRandomSource(cryptographicallyRandomValues);
     WTF::initialize(currentTimeFunction, monotonicallyIncreasingTimeFunction);
-    WTF::initializeMainThread(callOnMainThreadFunction);
+    WTF::initializeMainThread();
 
     DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());
     initializer.init();

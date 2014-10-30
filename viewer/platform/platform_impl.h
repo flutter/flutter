@@ -36,7 +36,6 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
-  virtual void callOnMainThread(void (*func)(void*), void* context);
   virtual base::SingleThreadTaskRunner* mainThreadTaskRunner();
   virtual bool isThreadedCompositingEnabled();
   virtual blink::WebCompositorSupport* compositorSupport();

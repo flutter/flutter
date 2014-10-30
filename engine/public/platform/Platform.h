@@ -255,8 +255,6 @@ public:
     virtual void setSharedTimerFireInterval(double) { }
     virtual void stopSharedTimer() { }
 
-    // Callable from a background WebKit thread.
-    virtual void callOnMainThread(void (*func)(void*), void* context) { }
     virtual base::SingleThreadTaskRunner* mainThreadTaskRunner() { return 0; }
 
 

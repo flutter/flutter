@@ -38,24 +38,16 @@
 namespace WTF {
 
 static ThreadIdentifier mainThreadIdentifier;
-static void (*callOnMainThreadFunction)(MainThreadFunction, void*);
 
-void initializeMainThread(void (*function)(MainThreadFunction, void*))
+void initializeMainThread()
 {
     static bool initializedMainThread;
     if (initializedMainThread)
         return;
     initializedMainThread = true;
-    callOnMainThreadFunction = function;
 
     mainThreadIdentifier = currentThread();
-
     AtomicString::init();
-}
-
-void callOnMainThread(MainThreadFunction* function, void* context)
-{
-    (*callOnMainThreadFunction)(function, context);
 }
 
 bool isMainThread()

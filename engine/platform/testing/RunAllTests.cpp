@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 {
     WTF::setRandomSource(AlwaysZeroNumberSource);
     WTF::initialize(CurrentTime, 0);
-    WTF::initializeMainThread(0);
+    WTF::initializeMainThread();
 
     blink::TestingPlatformSupport::Config platformConfig;
     blink::TestingPlatformSupport platform(platformConfig);
