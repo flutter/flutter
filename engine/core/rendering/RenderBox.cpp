@@ -3462,7 +3462,7 @@ static bool isReplacedElement(Node* node)
 
 bool RenderBox::avoidsFloats() const
 {
-    return isReplaced() || isReplacedElement(node()) || hasOverflowClip() || isWritingModeRoot() || isFlexItemIncludingDeprecated();
+    return isReplaced() || isReplacedElement(node()) || hasOverflowClip() || isFlexItemIncludingDeprecated();
 }
 
 InvalidationReason RenderBox::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,

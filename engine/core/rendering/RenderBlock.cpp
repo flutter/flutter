@@ -1083,8 +1083,7 @@ void RenderBlock::addOverflowFromPositionedObjects()
 
 bool RenderBlock::createsBlockFormattingContext() const
 {
-    return isInlineBlock() || isFloatingOrOutOfFlowPositioned() || hasOverflowClip() || isFlexItemIncludingDeprecated()
-        || isWritingModeRoot() || isDocumentElement();
+    return isInlineBlock() || isFloatingOrOutOfFlowPositioned() || hasOverflowClip() || isFlexItemIncludingDeprecated() || isDocumentElement();
 }
 
 void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox* child)
@@ -1542,7 +1541,7 @@ bool RenderBlock::isSelectionRoot() const
     if (isDocumentElement() || hasOverflowClip()
         || isPositioned() || isFloating()
         || isInlineBlock()
-        || hasTransform() || hasMask() || isWritingModeRoot()
+        || hasTransform() || hasMask()
         || isFlexItemIncludingDeprecated())
         return true;
 
@@ -2571,7 +2570,7 @@ int RenderBlock::baselinePosition(FontBaseline baselineType, bool firstLine, Lin
         // We also give up on finding a baseline if we have a vertical scrollbar, or if we are scrolled
         // vertically (e.g., an overflow:hidden block that has had scrollTop moved).
         bool ignoreBaseline = (layer() && layer()->scrollableArea() && ((direction == HorizontalLine ? (layer()->scrollableArea()->verticalScrollbar() || layer()->scrollableArea()->scrollYOffset())
-            : (layer()->scrollableArea()->horizontalScrollbar() || layer()->scrollableArea()->scrollXOffset())))) || isWritingModeRoot();
+            : (layer()->scrollableArea()->horizontalScrollbar() || layer()->scrollableArea()->scrollXOffset()))));
 
         int baselinePos = ignoreBaseline ? -1 : inlineBlockBaseline(direction);
 
@@ -2599,9 +2598,6 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
 
 int RenderBlock::firstLineBoxBaseline() const
 {
-    if (isWritingModeRoot())
-        return -1;
-
     if (childrenInline()) {
         if (firstLineBox())
             return firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(firstRootBox()->baselineType());
@@ -2633,9 +2629,6 @@ int RenderBlock::inlineBlockBaseline(LineDirectionMode direction) const
 
 int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection) const
 {
-    if (isWritingModeRoot())
-        return -1;
-
     if (childrenInline()) {
         if (!firstLineBox() && hasLineIfEmpty()) {
             const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
@@ -2934,40 +2927,24 @@ RenderBox* RenderBlock::createAnonymousBoxWithSameTypeAs(const RenderObject* par
 
 LayoutUnit RenderBlock::collapsedMarginBeforeForChild(const RenderBox* child) const
 {
-    // If the child has the same directionality as we do, then we can just return its
-    // collapsed margin.
-    if (!child->isWritingModeRoot())
-        return child->collapsedMarginBefore();
-    return child->collapsedMarginAfter();
+    // FIXME(sky): Remove
+    return child->collapsedMarginBefore();
 }
 
 LayoutUnit RenderBlock::collapsedMarginAfterForChild(const  RenderBox* child) const
 {
-    // If the child has the same directionality as we do, then we can just return its
-    // collapsed margin.
-    if (!child->isWritingModeRoot())
-        return child->collapsedMarginAfter();
-    return child->collapsedMarginBefore();
+    // FIXME(sky): Remove
+    return child->collapsedMarginAfter();
 }
 
 bool RenderBlock::hasMarginBeforeQuirk(const RenderBox* child) const
 {
-    // If the child has the same directionality as we do, then we can just return its
-    // margin quirk.
-    if (!child->isWritingModeRoot())
-        return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
-
-    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
+    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
 }
 
 bool RenderBlock::hasMarginAfterQuirk(const RenderBox* child) const
 {
-    // If the child has the same directionality as we do, then we can just return its
-    // margin quirk.
-    if (!child->isWritingModeRoot())
-        return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
-
-    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
+    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
 }
 
 const char* RenderBlock::renderName() const

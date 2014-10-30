@@ -142,7 +142,7 @@ int RenderFlexibleBox::baselinePosition(FontBaseline, bool, LineDirectionMode di
 
 int RenderFlexibleBox::firstLineBoxBaseline() const
 {
-    if (isWritingModeRoot() || m_numberOfInFlowChildrenOnFirstLine <= 0)
+    if (m_numberOfInFlowChildrenOnFirstLine <= 0)
         return -1;
     RenderBox* baselineChild = 0;
     int childNumber = 0;

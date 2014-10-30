@@ -394,8 +394,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo,
     if (childRenderBlockFlow) {
         if (markDescendantsWithFloats)
             childRenderBlockFlow->markAllDescendantsWithFloatsForLayout();
-        if (!child->isWritingModeRoot())
-            previousFloatLogicalBottom = std::max(previousFloatLogicalBottom, oldLogicalTop + childRenderBlockFlow->lowestFloatLogicalBottom());
+        previousFloatLogicalBottom = std::max(previousFloatLogicalBottom, oldLogicalTop + childRenderBlockFlow->lowestFloatLogicalBottom());
     }
 
     SubtreeLayoutScope layoutScope(*child);
@@ -864,7 +863,7 @@ void RenderBlockFlow::marginBeforeEstimateForChild(RenderBox* child, LayoutUnit&
         return;
 
     RenderBlockFlow* childBlockFlow = toRenderBlockFlow(child);
-    if (childBlockFlow->childrenInline() || childBlockFlow->isWritingModeRoot())
+    if (childBlockFlow->childrenInline())
         return;
 
     MarginInfo childMarginInfo(childBlockFlow, childBlockFlow->borderBefore() + childBlockFlow->paddingBefore(), childBlockFlow->borderAfter() + childBlockFlow->paddingAfter());
@@ -1063,18 +1062,14 @@ bool RenderBlockFlow::mustSeparateMarginBeforeForChild(const RenderBox* child) c
 {
     ASSERT(!child->selfNeedsLayout());
     const RenderStyle* childStyle = child->style();
-    if (!child->isWritingModeRoot())
-        return childStyle->marginBeforeCollapse() == MSEPARATE;
-    return childStyle->marginAfterCollapse() == MSEPARATE;
+    return childStyle->marginBeforeCollapse() == MSEPARATE;
 }
 
 bool RenderBlockFlow::mustSeparateMarginAfterForChild(const RenderBox* child) const
 {
     ASSERT(!child->selfNeedsLayout());
     const RenderStyle* childStyle = child->style();
-    if (!child->isWritingModeRoot())
-        return childStyle->marginAfterCollapse() == MSEPARATE;
-    return childStyle->marginBeforeCollapse() == MSEPARATE;
+    return childStyle->marginAfterCollapse() == MSEPARATE;
 }
 
 void RenderBlockFlow::addOverflowFromFloats()

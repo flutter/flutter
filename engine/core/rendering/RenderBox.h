@@ -509,8 +509,6 @@ public:
     bool shrinkToAvoidFloats() const;
     virtual bool avoidsFloats() const;
 
-    bool isWritingModeRoot() const { return false; }
-
     bool isFlexItemIncludingDeprecated() const { return !isInline() && !isFloatingOrOutOfFlowPositioned() && parent() && parent()->isFlexibleBox(); }
 
     virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
