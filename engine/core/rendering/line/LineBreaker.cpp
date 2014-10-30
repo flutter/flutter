@@ -38,10 +38,6 @@ void LineBreaker::skipLeadingWhitespace(InlineBidiResolver& resolver, LineInfo& 
                 resolver.runs().addRun(createRun(0, 1, object, resolver));
                 lineInfo.incrementRunsFromLeadingWhitespace();
             }
-        } else if (object->isText() && object->style()->hasTextCombine() && object->isCombineText() && !toRenderCombineText(object)->isCombined()) {
-            toRenderCombineText(object)->combineText();
-            if (toRenderCombineText(object)->isCombined())
-                continue;
         }
         resolver.position().increment(&resolver);
     }

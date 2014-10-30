@@ -281,7 +281,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyShapeImageThreshold,
     CSSPropertyShapeMargin,
     CSSPropertyWebkitTapHighlightColor,
-    CSSPropertyWebkitTextCombine,
     CSSPropertyWebkitTextDecorationsInEffect,
     CSSPropertyWebkitTextEmphasisColor,
     CSSPropertyWebkitTextEmphasisPosition,
@@ -2408,8 +2407,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         }
         case CSSPropertyPointerEvents:
             return cssValuePool().createValue(style->pointerEvents());
-        case CSSPropertyWebkitTextCombine:
-            return cssValuePool().createValue(style->textCombine());
         case CSSPropertyWebkitTextOrientation:
             return CSSPrimitiveValue::create(style->textOrientation());
         case CSSPropertyWebkitLineBoxContain:

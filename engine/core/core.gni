@@ -1058,8 +1058,6 @@ sky_core_files = [
   "rendering/RenderBlockLineLayout.cpp",
   "rendering/RenderBox.cpp",
   "rendering/RenderBoxModelObject.cpp",
-  "rendering/RenderCombineText.cpp",
-  "rendering/RenderCombineText.h",
   "rendering/RenderFlexibleBox.cpp",
   "rendering/RenderFlexibleBox.h",
   "rendering/RenderGeometryMap.cpp",

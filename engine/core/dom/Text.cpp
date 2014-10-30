@@ -32,7 +32,6 @@
 #include "core/dom/RenderTreeBuilder.h"
 #include "core/dom/shadow/ShadowRoot.h"
 #include "core/events/ScopedEventQueue.h"
-#include "core/rendering/RenderCombineText.h"
 #include "core/rendering/RenderText.h"
 #include "wtf/text/CString.h"
 #include "wtf/text/StringBuilder.h"
@@ -280,9 +279,6 @@ bool Text::textRendererIsNeeded(const RenderStyle& style, const RenderObject& pa
 
 RenderText* Text::createTextRenderer(RenderStyle* style)
 {
-    if (style->hasTextCombine())
-        return new RenderCombineText(this, dataImpl());
-
     return new RenderText(this, dataImpl());
 }
 

@@ -290,7 +290,6 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-print-color-adjust inherited, type_name=PrintColorAdjust
 -webkit-rtl-ordering inherited, type_name=Order, setter=setRTLOrdering, initial=initialRTLOrdering
 -webkit-tap-highlight-color inherited, converter=convertColor
--webkit-text-combine inherited, type_name=TextCombine
 -webkit-text-emphasis-color inherited, custom_all
 -webkit-text-emphasis-position inherited, type_name=TextEmphasisPosition
 -webkit-text-emphasis-style inherited, custom_all
@@ -425,7 +424,6 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 // Aliases; these map to the same CSSPropertyID
 
 -epub-caption-side alias_for=caption-side
--epub-text-combine alias_for=-webkit-text-combine
 -epub-text-emphasis alias_for=-webkit-text-emphasis
 -epub-text-emphasis-color alias_for=-webkit-text-emphasis-color
 -epub-text-emphasis-style alias_for=-webkit-text-emphasis-style

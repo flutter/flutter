@@ -108,10 +108,6 @@ enum ETableLayout {
     TAUTO, TFIXED
 };
 
-enum TextCombine {
-    TextCombineNone, TextCombineHorizontal
-};
-
 enum EFillAttachment {
     ScrollBackgroundAttachment, LocalBackgroundAttachment, FixedBackgroundAttachment
 };

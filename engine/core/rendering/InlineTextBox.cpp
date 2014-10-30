@@ -38,7 +38,6 @@
 #include "core/rendering/HitTestResult.h"
 #include "core/rendering/PaintInfo.h"
 #include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderCombineText.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/style/ShadowList.h"
 #include "platform/RuntimeEnabledFeatures.h"
@@ -481,26 +480,17 @@ void paintText(GraphicsContext* context,
 inline void paintEmphasisMark(GraphicsContext* context,
     const AtomicString& emphasisMark, int emphasisMarkOffset,
     int startOffset, int endOffset, int paintRunLength,
-    const Font& font, RenderCombineText* combinedText, const TextRun& textRun,
+    const Font& font, const TextRun& textRun,
     const FloatPoint& textOrigin, const FloatRect& boxRect)
 {
     ASSERT(!emphasisMark.isEmpty());
-
-    if (combinedText) {
-        DEFINE_STATIC_LOCAL(TextRun, objectReplacementCharacterTextRun, (&objectReplacementCharacter, 1));
-        FloatPoint emphasisMarkTextOrigin(boxRect.x() + boxRect.width() / 2, boxRect.y() + font.fontMetrics().ascent());
-        context->concatCTM(InlineTextBox::rotation(boxRect, InlineTextBox::Clockwise));
-        paintText(context, combinedText->originalFont(), objectReplacementCharacterTextRun, emphasisMark, emphasisMarkOffset, 0, 1, 1, emphasisMarkTextOrigin, boxRect);
-        context->concatCTM(InlineTextBox::rotation(boxRect, InlineTextBox::Counterclockwise));
-    } else {
-        paintText(context, font, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, paintRunLength, textOrigin, boxRect);
-    }
+    paintText(context, font, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, paintRunLength, textOrigin, boxRect);
 }
 
 void paintTextWithEmphasisMark(
     GraphicsContext* context, const Font& font, const TextPaintingStyle& textStyle, const TextRun& textRun,
     const AtomicString& emphasisMark, int emphasisMarkOffset, int startOffset, int endOffset, int length,
-    RenderCombineText* combinedText, const FloatPoint& textOrigin, const FloatRect& boxRect, bool horizontal)
+    const FloatPoint& textOrigin, const FloatRect& boxRect, bool horizontal)
 {
     GraphicsContextStateSaver stateSaver(*context, false);
     updateGraphicsContext(context, textStyle, horizontal, stateSaver);
@@ -509,7 +499,7 @@ void paintTextWithEmphasisMark(
     if (!emphasisMark.isEmpty()) {
         if (textStyle.emphasisMarkColor != textStyle.fillColor)
             context->setFillColor(textStyle.emphasisMarkColor);
-        paintEmphasisMark(context, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, font, combinedText, textRun, textOrigin, boxRect);
+        paintEmphasisMark(context, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, font, textRun, textOrigin, boxRect);
     }
 }
 
@@ -572,9 +562,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     boxOrigin.move(adjustedPaintOffset.x().toFloat(), adjustedPaintOffset.y().toFloat());
     FloatRect boxRect(boxOrigin, LayoutSize(logicalWidth(), logicalHeight()));
 
-    RenderCombineText* combinedText = styleToUse->hasTextCombine() && renderer().isCombineText() && toRenderCombineText(renderer()).isCombined() ? &toRenderCombineText(renderer()) : 0;
-
-    bool shouldRotate = !isHorizontal() && !combinedText;
+    bool shouldRotate = !isHorizontal();
     if (shouldRotate)
         context->concatCTM(rotation(boxRect, Clockwise));
 
@@ -592,8 +580,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     const Font& font = styleToUse->font();
 
     FloatPoint textOrigin = FloatPoint(boxOrigin.x(), boxOrigin.y() + font.fontMetrics().ascent());
-    if (combinedText)
-        combinedText->adjustTextOrigin(textOrigin, boxRect);
 
     // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection
     // and composition highlights.
@@ -611,16 +597,10 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     // 2. Now paint the foreground, including text and decorations like underline/overline (in quirks mode only).
     int length = m_len;
     int maximumLength;
-    StringView string;
-    if (!combinedText) {
-        string = renderer().text().createView();
-        if (static_cast<unsigned>(length) != string.length() || m_start)
-            string.narrow(m_start, length);
-        maximumLength = renderer().textLength() - m_start;
-    } else {
-        combinedText->getStringToRender(m_start, string, length);
-        maximumLength = length;
-    }
+    StringView string = renderer().text().createView();
+    if (static_cast<unsigned>(length) != string.length() || m_start)
+        string.narrow(m_start, length);
+    maximumLength = renderer().textLength() - m_start;
 
     StringBuilder charactersWithHyphen;
     TextRun textRun = constructTextRun(styleToUse, font, string, maximumLength, hasHyphen() ? &charactersWithHyphen : 0);
@@ -657,12 +637,12 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
             startOffset = ePos;
             endOffset = sPos;
         }
-        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, combinedText, textOrigin, boxRect, isHorizontal());
+        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, isHorizontal());
     }
 
     if ((paintSelectedTextOnly || paintSelectedTextSeparately) && sPos < ePos) {
         // paint only the text that is selected
-        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, combinedText, textOrigin, boxRect, isHorizontal());
+        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect, isHorizontal());
     }
 
     // Paint decorations
@@ -670,11 +650,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (textDecorations != TextDecorationNone && !paintSelectedTextOnly) {
         GraphicsContextStateSaver stateSaver(*context, false);
         updateGraphicsContext(context, textStyle, isHorizontal(), stateSaver);
-        if (combinedText)
-            context->concatCTM(rotation(boxRect, Clockwise));
         paintDecoration(context, boxOrigin, textDecorations);
-        if (combinedText)
-            context->concatCTM(rotation(boxRect, Counterclockwise));
     }
 
     if (paintInfo.phase == PaintPhaseForeground) {

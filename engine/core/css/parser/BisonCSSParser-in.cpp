@@ -497,8 +497,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueExact || valueID == CSSValueEconomy;
     case CSSPropertyWebkitRtlOrdering:
         return valueID == CSSValueLogical || valueID == CSSValueVisual;
-    case CSSPropertyWebkitTextCombine:
-        return valueID == CSSValueNone || valueID == CSSValueHorizontal;
     case CSSPropertyWebkitTextEmphasisPosition:
         return valueID == CSSValueOver || valueID == CSSValueUnder;
     case CSSPropertyTransformStyle:
@@ -588,7 +586,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyWebkitMarginTopCollapse:
     case CSSPropertyWebkitPrintColorAdjust:
     case CSSPropertyWebkitRtlOrdering:
-    case CSSPropertyWebkitTextCombine:
     case CSSPropertyWebkitTextEmphasisPosition:
     case CSSPropertyTransformStyle:
     case CSSPropertyWebkitTransformStyle:

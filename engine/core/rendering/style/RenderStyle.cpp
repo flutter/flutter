@@ -150,7 +150,6 @@ StyleRecalcChange RenderStyle::stylePropagationDiff(const RenderStyle* oldStyle,
 
     if (oldStyle->display() != newStyle->display()
         || !oldStyle->contentDataEquivalent(newStyle)
-        || oldStyle->hasTextCombine() != newStyle->hasTextCombine()
         || oldStyle->justifyItems() != newStyle->justifyItems()
         || oldStyle->alignItems() != newStyle->alignItems())
         return Reattach;
@@ -341,7 +340,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
             || rareNonInheritedData->m_justifyContent != other.rareNonInheritedData->m_justifyContent
             || rareNonInheritedData->m_grid.get() != other.rareNonInheritedData->m_grid.get()
             || rareNonInheritedData->m_gridItem.get() != other.rareNonInheritedData->m_gridItem.get()
-            || rareNonInheritedData->m_textCombine != other.rareNonInheritedData->m_textCombine
             || rareNonInheritedData->hasFilters() != other.rareNonInheritedData->hasFilters())
             return true;
 

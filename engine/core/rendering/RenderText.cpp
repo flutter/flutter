@@ -35,7 +35,6 @@
 #include "core/rendering/EllipsisBox.h"
 #include "core/rendering/InlineTextBox.h"
 #include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderCombineText.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/TextRunConstructor.h"
@@ -605,12 +604,6 @@ LayoutRect RenderText::localCaretRect(InlineBox* inlineBox, int caretOffset, Lay
 
 ALWAYS_INLINE float RenderText::widthFromCache(const Font& f, int start, int len, float xPos, TextDirection textDirection, HashSet<const SimpleFontData*>* fallbackFonts, GlyphOverflow* glyphOverflow) const
 {
-    if (style()->hasTextCombine() && isCombineText()) {
-        const RenderCombineText* combineText = toRenderCombineText(this);
-        if (combineText->isCombined())
-            return combineText->combinedTextWidth(f);
-    }
-
     if (f.isFixedPitch() && f.fontDescription().variant() == FontVariantNormal && m_isAllASCII && (!glyphOverflow || !glyphOverflow->computeBounds)) {
         float monospaceCharacterWidth = f.spaceWidth();
         float w = 0;

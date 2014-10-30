@@ -1133,9 +1133,6 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             // Case (3). Text.
             RenderText* t = toRenderText(child);
 
-            if (t->style()->hasTextCombine() && t->isCombineText())
-                toRenderCombineText(t)->combineText();
-
             // Determine if we have a breakable character. Pass in
             // whether or not we should ignore any spaces at the front
             // of the string. If those are going to be stripped out,

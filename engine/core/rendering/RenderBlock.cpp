@@ -41,7 +41,6 @@
 #include "core/rendering/InlineIterator.h"
 #include "core/rendering/InlineTextBox.h"
 #include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderCombineText.h"
 #include "core/rendering/RenderFlexibleBox.h"
 #include "core/rendering/RenderGrid.h"
 #include "core/rendering/RenderInline.h"

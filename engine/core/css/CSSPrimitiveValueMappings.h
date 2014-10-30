@@ -2441,36 +2441,6 @@ template<> inline CSSPrimitiveValue::operator TextDirection() const
     return LTR;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(TextCombine e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case TextCombineNone:
-        m_value.valueID = CSSValueNone;
-        break;
-    case TextCombineHorizontal:
-        m_value.valueID = CSSValueHorizontal;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator TextCombine() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueNone:
-        return TextCombineNone;
-    case CSSValueHorizontal:
-        return TextCombineHorizontal;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return TextCombineNone;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(TextEmphasisPosition position)
     : CSSValue(PrimitiveClass)
 {

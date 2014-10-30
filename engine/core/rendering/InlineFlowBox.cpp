@@ -125,7 +125,7 @@ void InlineFlowBox::addToLine(InlineBox* child)
                     || (parentStyle->verticalAlign() != BASELINE && !isRootInlineBox()) || childStyle->verticalAlign() != BASELINE)
                     shouldClearDescendantsHaveSameLineHeightAndBaseline = true;
             }
-            if (childStyle->hasTextCombine() || childStyle->textEmphasisMark() != TextEmphasisMarkNone)
+            if (childStyle->textEmphasisMark() != TextEmphasisMarkNone)
                 shouldClearDescendantsHaveSameLineHeightAndBaseline = true;
         } else {
             ASSERT(isInlineFlowBox());
@@ -135,7 +135,7 @@ void InlineFlowBox::addToLine(InlineBox* child)
                 || !parentStyle->font().fontMetrics().hasIdenticalAscentDescentAndLineGap(childStyle->font().fontMetrics())
                 || parentStyle->lineHeight() != childStyle->lineHeight()
                 || (parentStyle->verticalAlign() != BASELINE && !isRootInlineBox()) || childStyle->verticalAlign() != BASELINE
-                || childStyle->hasBorder() || childStyle->hasPadding() || childStyle->hasTextCombine())
+                || childStyle->hasBorder() || childStyle->hasPadding())
                 shouldClearDescendantsHaveSameLineHeightAndBaseline = true;
         }
 

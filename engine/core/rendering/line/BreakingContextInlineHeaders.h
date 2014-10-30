@@ -26,7 +26,6 @@
 
 #include "core/rendering/InlineIterator.h"
 #include "core/rendering/InlineTextBox.h"
-#include "core/rendering/RenderCombineText.h"
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
@@ -431,11 +430,6 @@ inline void BreakingContext::handleReplaced()
     m_renderTextInfo.m_lineBreakIterator.updatePriorContext(replacementCharacter);
 }
 
-inline bool iteratorIsBeyondEndOfRenderCombineText(const InlineIterator& iter, RenderCombineText* renderer)
-{
-    return iter.object() == renderer && iter.offset() >= renderer->textLength();
-}
-
 inline void nextCharacter(UChar& currentCharacter, UChar& lastCharacter, UChar& secondToLastCharacter)
 {
     secondToLastCharacter = lastCharacter;
@@ -467,7 +461,7 @@ ALWAYS_INLINE TextDirection textDirectionFromUnicode(WTF::Unicode::Direction dir
 ALWAYS_INLINE float textWidth(RenderText* text, unsigned from, unsigned len, const Font& font, float xPos, bool isFixedPitch, bool collapseWhiteSpace, HashSet<const SimpleFontData*>* fallbackFonts = 0)
 {
     GlyphOverflow glyphOverflow;
-    if (isFixedPitch || (!from && len == text->textLength()) || text->style()->hasTextCombine())
+    if (isFixedPitch || (!from && len == text->textLength()))
         return text->width(from, len, font, xPos, text->style()->direction(), fallbackFonts, &glyphOverflow);
 
     TextRun run = constructTextRun(text, font, text, from, len, text->style());
@@ -489,17 +483,6 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
     if (m_autoWrap && !RenderStyle::autoWrap(m_lastWS) && m_ignoringSpaces) {
         m_width.commit();
         m_lineBreak.moveToStartOf(m_current.object());
-    }
-
-    if (renderText->style()->hasTextCombine() && m_current.object()->isCombineText() && !toRenderCombineText(m_current.object())->isCombined()) {
-        RenderCombineText* combineRenderer = toRenderCombineText(m_current.object());
-        combineRenderer->combineText();
-        // The length of the renderer's text may have changed. Increment stale iterator positions
-        if (iteratorIsBeyondEndOfRenderCombineText(m_lineBreak, combineRenderer)) {
-            ASSERT(iteratorIsBeyondEndOfRenderCombineText(m_resolver.position(), combineRenderer));
-            m_lineBreak.increment();
-            m_resolver.position().increment(&m_resolver);
-        }
     }
 
     RenderStyle* style = renderText->style(m_lineInfo.isFirstLine());

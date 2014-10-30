@@ -123,7 +123,7 @@ public:
 
     void addOverflowFromInlineChildren();
 
-    // FIXME: This should be const to avoid a const_cast, but can modify child dirty bits and RenderCombineText
+    // FIXME: This should be const to avoid a const_cast, but can modify child dirty bits
     void computeInlinePreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth);
 
     GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
