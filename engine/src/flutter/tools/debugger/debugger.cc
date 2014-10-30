@@ -65,6 +65,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     root_ = root;
     root_->AddObserver(this);
 
+    window_manager_app_->SetViewportSize(gfx::Size(320, 640));
+
     content_ = mojo::View::Create(view_manager_);
     content_->SetBounds(root_->bounds());
     root_->AddChild(content_);
