@@ -6,6 +6,7 @@
 import argparse
 import os
 import cherrypy
+import staticdirindex
 
 
 BUILD_DIRECTORY = 'out'
@@ -14,6 +15,25 @@ SRC_ROOT = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
     os.pardir))
 SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
 GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
+
+
+# FIXME: This should be replaced by just json and inflated into DOM client-side.
+def skydir(section="", dir="", path="", **kwargs):
+    url = "%s%s" % (cherrypy.request.headers.get('Host', ''),
+        cherrypy.request.path_info)
+    sky = "<listing>"
+    sky += "<style>a { display: block; }"
+    sky += "header { border-bottom: 1px solid lightgrey }</style>"
+    sky += '<header>Listing for: <a href="' + url + '">' + url +'</a></header>'
+    for _, dir_names, file_names in os.walk(path.rstrip(r"\/")):
+        for dir_name in sorted(dir_names):
+            sky += "<a href=\"%s/\">%s/</a>\n" % (dir_name, dir_name)
+
+        del dir_names[:] # limit to one level
+
+        for file_name in sorted(file_names):
+            sky += "<a href=\"%s\">%s</a>\n" % (file_name, file_name)
+    return sky + "</listing>"
 
 
 # FIXME: This doesn't yet support directory listings.  We'll do something like:
@@ -43,6 +63,7 @@ def main():
         '/': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.abspath(args.app_path),
+            'tools.staticdir.indexlister': skydir,
         },
         '/mojo': {
             'tools.staticdir.on': True,
