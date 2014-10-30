@@ -558,8 +558,6 @@ void RenderInline::generateCulledLineBoxRects(GeneratorContext& yield, const Ren
         return;
     }
 
-    bool isHorizontal = style()->isHorizontalWritingMode();
-
     for (RenderObject* curr = firstChild(); curr; curr = curr->nextSibling()) {
         if (curr->isFloatingOrOutOfFlowPositioned())
             continue;
@@ -572,10 +570,7 @@ void RenderInline::generateCulledLineBoxRects(GeneratorContext& yield, const Ren
                 RootInlineBox& rootBox = currBox->inlineBoxWrapper()->root();
                 int logicalTop = rootBox.logicalTop() + (rootBox.renderer().style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent() - container->style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent());
                 int logicalHeight = container->style(rootBox.isFirstLineStyle())->font().fontMetrics().height();
-                if (isHorizontal)
-                    yield(FloatRect(currBox->inlineBoxWrapper()->x() - currBox->marginLeft(), logicalTop, (currBox->width() + currBox->marginWidth()).toFloat(), logicalHeight));
-                else
-                    yield(FloatRect(logicalTop, currBox->inlineBoxWrapper()->y() - currBox->marginTop(), logicalHeight, (currBox->height() + currBox->marginHeight()).toFloat()));
+                yield(FloatRect(currBox->inlineBoxWrapper()->x() - currBox->marginLeft(), logicalTop, (currBox->width() + currBox->marginWidth()).toFloat(), logicalHeight));
             }
         } else if (curr->isRenderInline()) {
             // If the child doesn't need line boxes either, then we can recur.
@@ -587,16 +582,10 @@ void RenderInline::generateCulledLineBoxRects(GeneratorContext& yield, const Ren
                     RootInlineBox& rootBox = childLine->root();
                     int logicalTop = rootBox.logicalTop() + (rootBox.renderer().style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent() - container->style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent());
                     int logicalHeight = container->style(rootBox.isFirstLineStyle())->font().fontMetrics().height();
-                    if (isHorizontal)
-                        yield(FloatRect(childLine->x() - childLine->marginLogicalLeft(),
-                            logicalTop,
-                            childLine->logicalWidth() + childLine->marginLogicalLeft() + childLine->marginLogicalRight(),
-                            logicalHeight));
-                    else
-                        yield(FloatRect(logicalTop,
-                            childLine->y() - childLine->marginLogicalLeft(),
-                            logicalHeight,
-                            childLine->logicalWidth() + childLine->marginLogicalLeft() + childLine->marginLogicalRight()));
+                    yield(FloatRect(childLine->x() - childLine->marginLogicalLeft(),
+                        logicalTop,
+                        childLine->logicalWidth() + childLine->marginLogicalLeft() + childLine->marginLogicalRight(),
+                        logicalHeight));
                 }
             }
         } else if (curr->isText()) {
@@ -605,10 +594,7 @@ void RenderInline::generateCulledLineBoxRects(GeneratorContext& yield, const Ren
                 RootInlineBox& rootBox = childText->root();
                 int logicalTop = rootBox.logicalTop() + (rootBox.renderer().style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent() - container->style(rootBox.isFirstLineStyle())->font().fontMetrics().ascent());
                 int logicalHeight = container->style(rootBox.isFirstLineStyle())->font().fontMetrics().height();
-                if (isHorizontal)
-                    yield(FloatRect(childText->x(), logicalTop, childText->logicalWidth(), logicalHeight));
-                else
-                    yield(FloatRect(logicalTop, childText->y(), logicalHeight, childText->logicalWidth()));
+                yield(FloatRect(childText->x(), logicalTop, childText->logicalWidth(), logicalHeight));
             }
         }
     }
@@ -869,12 +855,10 @@ IntRect RenderInline::linesBoundingBox() const
                 logicalRightSide = curr->logicalRight();
         }
 
-        bool isHorizontal = style()->isHorizontalWritingMode();
-
-        float x = isHorizontal ? logicalLeftSide : firstLineBox()->x();
-        float y = isHorizontal ? firstLineBox()->y() : logicalLeftSide;
-        float width = isHorizontal ? logicalRightSide - logicalLeftSide : lastLineBox()->logicalBottom() - x;
-        float height = isHorizontal ? lastLineBox()->logicalBottom() - y : logicalRightSide - logicalLeftSide;
+        float x = logicalLeftSide;
+        float y = firstLineBox()->y();
+        float width = logicalRightSide - logicalLeftSide;
+        float height = lastLineBox()->logicalBottom() - y;
         result = enclosingIntRect(FloatRect(x, y, width, height));
     }
 
@@ -935,7 +919,6 @@ LayoutRect RenderInline::culledInlineVisualOverflowBoundingBox() const
     LinesBoundingBoxGeneratorContext context(floatResult);
     generateCulledLineBoxRects(context, this);
     LayoutRect result(enclosingLayoutRect(floatResult));
-    bool isHorizontal = style()->isHorizontalWritingMode();
     for (RenderObject* curr = firstChild(); curr; curr = curr->nextSibling()) {
         if (curr->isFloatingOrOutOfFlowPositioned())
             continue;
@@ -945,13 +928,8 @@ LayoutRect RenderInline::culledInlineVisualOverflowBoundingBox() const
             RenderBox* currBox = toRenderBox(curr);
             if (!currBox->hasSelfPaintingLayer() && currBox->inlineBoxWrapper()) {
                 LayoutRect logicalRect = currBox->logicalVisualOverflowRectForPropagation(style());
-                if (isHorizontal) {
-                    logicalRect.moveBy(currBox->location());
-                    result.uniteIfNonZero(logicalRect);
-                } else {
-                    logicalRect.moveBy(currBox->location());
-                    result.uniteIfNonZero(logicalRect.transposedRect());
-                }
+                logicalRect.moveBy(currBox->location());
+                result.uniteIfNonZero(logicalRect);
             }
         } else if (curr->isRenderInline()) {
             // If the child doesn't need line boxes either, then we can recur.
@@ -994,8 +972,6 @@ LayoutRect RenderInline::linesVisualOverflowBoundingBox() const
     LayoutUnit logicalHeight = lastLineBox()->logicalBottomVisualOverflow(lastRootBox.lineBottom()) - logicalTop;
 
     LayoutRect rect(logicalLeftSide, logicalTop, logicalWidth, logicalHeight);
-    if (!style()->isHorizontalWritingMode())
-        rect = rect.transposedRect();
     return rect;
 }
 
@@ -1117,8 +1093,9 @@ LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, cons
     if (container->hasOverflowClip())
         offset -= toRenderBox(container)->scrolledContentOffset();
 
+    // FIXME(sky): Remove now that it's always false?
     if (offsetDependsOnPoint)
-        *offsetDependsOnPoint = container->isBox() && container->style()->isFlippedBlocksWritingMode();
+        *offsetDependsOnPoint = false;
 
     return offset;
 }
@@ -1142,10 +1119,6 @@ void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvali
         return;
 
     if (mode & ApplyContainerFlip && o->isBox()) {
-        if (o->style()->isFlippedBlocksWritingMode()) {
-            IntPoint centerPoint = roundedIntPoint(transformState.mappedPoint());
-            transformState.move(toRenderBox(o)->flipForWritingModeIncludingColumns(centerPoint) - centerPoint);
-        }
         mode &= ~ApplyContainerFlip;
     }
 

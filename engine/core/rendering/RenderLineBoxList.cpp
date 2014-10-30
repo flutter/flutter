@@ -155,15 +155,9 @@ bool RenderLineBoxList::rangeIntersectsRect(RenderBoxModelObject* renderer, Layo
     LayoutUnit physicalExtent = absoluteValue(physicalEnd - physicalStart);
     physicalStart = std::min(physicalStart, physicalEnd);
 
-    if (renderer->style()->isHorizontalWritingMode()) {
-        physicalStart += offset.y();
-        if (physicalStart >= rect.maxY() || physicalStart + physicalExtent <= rect.y())
-            return false;
-    } else {
-        physicalStart += offset.x();
-        if (physicalStart >= rect.maxX() || physicalStart + physicalExtent <= rect.x())
-            return false;
-    }
+    physicalStart += offset.y();
+    if (physicalStart >= rect.maxY() || physicalStart + physicalExtent <= rect.y())
+        return false;
 
     return true;
 }

@@ -139,7 +139,7 @@ bool RenderView::shouldDoFullPaintInvalidationForNextLayout() const
     // and discrete paint invalidation rects, so marking full paint invalidation here is more likely to cost less.
     // Otherwise, per-descendant paint invalidation is more likely to avoid unnecessary full paint invalidation.
 
-    if (!style()->isHorizontalWritingMode() || width() != viewWidth())
+    if (width() != viewWidth())
         return true;
 
     if (height() != viewHeight()) {
@@ -346,15 +346,6 @@ void RenderView::invalidatePaintForViewAndCompositedLayers()
 
 void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
 {
-    if (style()->isFlippedBlocksWritingMode()) {
-        // We have to flip by hand since the view's logical height has not been determined.  We
-        // can use the viewport width and height.
-        if (style()->isHorizontalWritingMode())
-            rect.setY(viewHeight() - rect.maxY());
-        else
-            rect.setX(viewWidth() - rect.maxX());
-    }
-
     // Apply our transform if we have one (because of full page zooming).
     if (!paintInvalidationContainer && layer() && layer()->transform())
         rect = layer()->transform()->mapRect(rect);

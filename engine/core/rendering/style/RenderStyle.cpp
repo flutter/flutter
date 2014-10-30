@@ -786,19 +786,17 @@ RoundedRect RenderStyle::getRoundedBorderFor(const LayoutRect& borderRect, bool 
     if (hasBorderRadius()) {
         RoundedRect::Radii radii = calcRadiiFor(surround->border, snappedBorderRect.size());
         radii.scale(calcBorderRadiiConstraintScaleFor(borderRect, radii));
-        roundedRect.includeLogicalEdges(radii, isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
+        roundedRect.includeLogicalEdges(radii, includeLogicalLeftEdge, includeLogicalRightEdge);
     }
     return roundedRect;
 }
 
 RoundedRect RenderStyle::getRoundedInnerBorderFor(const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
 {
-    bool horizontal = isHorizontalWritingMode();
-
-    int leftWidth = (!horizontal || includeLogicalLeftEdge) ? borderLeftWidth() : 0;
-    int rightWidth = (!horizontal || includeLogicalRightEdge) ? borderRightWidth() : 0;
-    int topWidth = (horizontal || includeLogicalLeftEdge) ? borderTopWidth() : 0;
-    int bottomWidth = (horizontal || includeLogicalRightEdge) ? borderBottomWidth() : 0;
+    int leftWidth = (includeLogicalLeftEdge) ? borderLeftWidth() : 0;
+    int rightWidth = (includeLogicalRightEdge) ? borderRightWidth() : 0;
+    int topWidth = borderTopWidth();
+    int bottomWidth = borderBottomWidth();
 
     return getRoundedInnerBorderFor(borderRect, topWidth, bottomWidth, leftWidth, rightWidth, includeLogicalLeftEdge, includeLogicalRightEdge);
 }
@@ -816,7 +814,7 @@ RoundedRect RenderStyle::getRoundedInnerBorderFor(const LayoutRect& borderRect,
     if (hasBorderRadius()) {
         RoundedRect::Radii radii = getRoundedBorderFor(borderRect).radii();
         radii.shrink(topWidth, bottomWidth, leftWidth, rightWidth);
-        roundedRect.includeLogicalEdges(radii, isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
+        roundedRect.includeLogicalEdges(radii, includeLogicalLeftEdge, includeLogicalRightEdge);
     }
     return roundedRect;
 }
@@ -1269,16 +1267,12 @@ const BorderValue& RenderStyle::borderAfter() const
 
 const BorderValue& RenderStyle::borderStart() const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection() ? borderLeft() : borderRight();
-    return isLeftToRightDirection() ? borderTop() : borderBottom();
+    return isLeftToRightDirection() ? borderLeft() : borderRight();
 }
 
 const BorderValue& RenderStyle::borderEnd() const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection() ? borderRight() : borderLeft();
-    return isLeftToRightDirection() ? borderBottom() : borderTop();
+    return isLeftToRightDirection() ? borderRight() : borderLeft();
 }
 
 unsigned short RenderStyle::borderBeforeWidth() const
@@ -1295,46 +1289,28 @@ unsigned short RenderStyle::borderAfterWidth() const
 
 unsigned short RenderStyle::borderStartWidth() const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection() ? borderLeftWidth() : borderRightWidth();
-    return isLeftToRightDirection() ? borderTopWidth() : borderBottomWidth();
+    return isLeftToRightDirection() ? borderLeftWidth() : borderRightWidth();
 }
 
 unsigned short RenderStyle::borderEndWidth() const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection() ? borderRightWidth() : borderLeftWidth();
-    return isLeftToRightDirection() ? borderBottomWidth() : borderTopWidth();
+    return isLeftToRightDirection() ? borderRightWidth() : borderLeftWidth();
 }
 
 void RenderStyle::setMarginStart(const Length& margin)
 {
-    if (isHorizontalWritingMode()) {
-        if (isLeftToRightDirection())
-            setMarginLeft(margin);
-        else
-            setMarginRight(margin);
-    } else {
-        if (isLeftToRightDirection())
-            setMarginTop(margin);
-        else
-            setMarginBottom(margin);
-    }
+    if (isLeftToRightDirection())
+        setMarginLeft(margin);
+    else
+        setMarginRight(margin);
 }
 
 void RenderStyle::setMarginEnd(const Length& margin)
 {
-    if (isHorizontalWritingMode()) {
-        if (isLeftToRightDirection())
-            setMarginRight(margin);
-        else
-            setMarginLeft(margin);
-    } else {
-        if (isLeftToRightDirection())
-            setMarginBottom(margin);
-        else
-            setMarginTop(margin);
-    }
+    if (isLeftToRightDirection())
+        setMarginRight(margin);
+    else
+        setMarginLeft(margin);
 }
 
 TextEmphasisMark RenderStyle::textEmphasisMark() const
@@ -1342,11 +1318,7 @@ TextEmphasisMark RenderStyle::textEmphasisMark() const
     TextEmphasisMark mark = static_cast<TextEmphasisMark>(rareInheritedData->textEmphasisMark);
     if (mark != TextEmphasisMarkAuto)
         return mark;
-
-    if (isHorizontalWritingMode())
-        return TextEmphasisMarkDot;
-
-    return TextEmphasisMarkSesame;
+    return TextEmphasisMarkDot;
 }
 
 Color RenderStyle::initialTapHighlightColor()

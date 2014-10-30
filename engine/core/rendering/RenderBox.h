@@ -125,45 +125,27 @@ public:
 
     void setLogicalLeft(LayoutUnit left)
     {
-        if (style()->isHorizontalWritingMode())
-            setX(left);
-        else
-            setY(left);
+        setX(left);
     }
     void setLogicalTop(LayoutUnit top)
     {
-        if (style()->isHorizontalWritingMode())
-            setY(top);
-        else
-            setX(top);
+        setY(top);
     }
     void setLogicalLocation(const LayoutPoint& location)
     {
-        if (style()->isHorizontalWritingMode())
-            setLocation(location);
-        else
-            setLocation(location.transposedPoint());
+        setLocation(location);
     }
     void setLogicalWidth(LayoutUnit size)
     {
-        if (style()->isHorizontalWritingMode())
-            setWidth(size);
-        else
-            setHeight(size);
+        setWidth(size);
     }
     void setLogicalHeight(LayoutUnit size)
     {
-        if (style()->isHorizontalWritingMode())
-            setHeight(size);
-        else
-            setWidth(size);
+        setHeight(size);
     }
     void setLogicalSize(const LayoutSize& size)
     {
-        if (style()->isHorizontalWritingMode())
-            setSize(size);
-        else
-            setSize(size.transposedSize());
+        setSize(size);
     }
 
     LayoutPoint location() const { return m_frameRect.location(); }

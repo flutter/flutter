@@ -133,10 +133,9 @@ void EllipsisBox::paintSelection(GraphicsContext* context, const FloatPoint& box
         c = Color(0xff - c.red(), 0xff - c.green(), 0xff - c.blue());
 
     GraphicsContextStateSaver stateSaver(*context);
-    LayoutUnit selectionBottom = root().selectionBottom();
     LayoutUnit top = root().selectionTop();
     LayoutUnit h = root().selectionHeight();
-    const int deltaY = roundToInt(renderer().style()->isFlippedLinesWritingMode() ? selectionBottom - logicalBottom() : logicalTop() - top);
+    const int deltaY = roundToInt(logicalTop() - top);
     const FloatPoint localOrigin(boxOrigin.x(), boxOrigin.y() - deltaY);
     FloatRect clipRect(localOrigin, FloatSize(m_logicalWidth, h.toFloat()));
     context->clip(clipRect);

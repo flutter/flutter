@@ -831,11 +831,6 @@ public:
     const LineClampValue& lineClamp() const { return rareNonInheritedData->lineClamp; }
     Color tapHighlightColor() const { return rareInheritedData->tapHighlightColor; }
 
-    // FIXME(sky): Remove these.
-    bool isHorizontalWritingMode() const { return true; }
-    bool isFlippedLinesWritingMode() const { return false; }
-    bool isFlippedBlocksWritingMode() const { return false; }
-
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
 
     ESpeak speak() const { return static_cast<ESpeak>(rareInheritedData->speak); }
@@ -852,7 +847,7 @@ public:
     void setIsolation(EIsolation v);
     bool hasIsolation() const;
 
-    bool shouldPlaceBlockDirectionScrollbarOnLogicalLeft() const { return !isLeftToRightDirection() && isHorizontalWritingMode(); }
+    bool shouldPlaceBlockDirectionScrollbarOnLogicalLeft() const { return !isLeftToRightDirection(); }
 
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
     TouchActionDelay touchActionDelay() const { return static_cast<TouchActionDelay>(rareInheritedData->m_touchActionDelay); }
@@ -882,20 +877,14 @@ public:
 
     void setLogicalWidth(const Length& v)
     {
-        if (isHorizontalWritingMode()) {
-            SET_VAR(m_box, m_width, v);
-        } else {
-            SET_VAR(m_box, m_height, v);
-        }
+        // FIXME(sky): Remove
+        SET_VAR(m_box, m_width, v);
     }
 
     void setLogicalHeight(const Length& v)
     {
-        if (isHorizontalWritingMode()) {
-            SET_VAR(m_box, m_height, v);
-        } else {
-            SET_VAR(m_box, m_width, v);
-        }
+        // FIXME(sky): Remove
+        SET_VAR(m_box, m_height, v);
     }
 
     void setMinWidth(const Length& v) { SET_VAR(m_box, m_minWidth, v); }

@@ -1692,8 +1692,6 @@ void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* 
     }
 
     if (paintInvalidationContainer == this) {
-        if (paintInvalidationContainer->style()->isFlippedBlocksWritingMode())
-            flipForWritingMode(rect);
         return;
     }
 
@@ -2159,9 +2157,7 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
     // explicitly specified that can be used for any percentage computations.
     bool isOutOfFlowPositionedWithSpecifiedHeight = cb->isOutOfFlowPositioned() && (!cbstyle->logicalHeight().isAuto() || (!cbstyle->logicalTop().isAuto() && !cbstyle->logicalBottom().isAuto()));
 
-    if (isHorizontalWritingMode() != cb->isHorizontalWritingMode())
-        availableHeight = containingBlockChild->containingBlockLogicalWidthForContent();
-    else if (hasOverrideContainingBlockLogicalHeight())
+    if (hasOverrideContainingBlockLogicalHeight())
         availableHeight = overrideContainingBlockContentLogicalHeight();
     else if (cbstyle->logicalHeight().isFixed()) {
         LayoutUnit contentBoxHeight = cb->adjustContentBoxLogicalHeightForBoxSizing(cbstyle->logicalHeight().value());
@@ -2615,14 +2611,8 @@ void RenderBox::computePositionedLogicalWidth(LogicalExtentComputedValues& compu
 
 static void computeLogicalLeftPositionedOffset(LayoutUnit& logicalLeftPos, const RenderBox* child, LayoutUnit logicalWidthValue, const RenderBoxModelObject* containerBlock, LayoutUnit containerLogicalWidth)
 {
-    // Deal with differing writing modes here.  Our offset needs to be in the containing block's coordinate space. If the containing block is flipped
-    // along this axis, then we need to flip the coordinate.  This can only happen if the containing block is both a flipped mode and perpendicular to us.
-    if (containerBlock->isHorizontalWritingMode() != child->isHorizontalWritingMode() && containerBlock->style()->isFlippedBlocksWritingMode()) {
-        logicalLeftPos = containerLogicalWidth - logicalWidthValue - logicalLeftPos;
-        logicalLeftPos += containerBlock->borderRight();
-    } else {
-        logicalLeftPos += containerBlock->borderLeft();
-    }
+    // FIXME(sky): Remove
+    logicalLeftPos += containerBlock->borderLeft();
 }
 
 void RenderBox::shrinkToFitWidth(const LayoutUnit availableSpace, const LayoutUnit logicalLeftValue, const LayoutUnit bordersPlusPadding, LogicalExtentComputedValues& computedValues) const
@@ -2923,24 +2913,8 @@ void RenderBox::computePositionedLogicalHeight(LogicalExtentComputedValues& comp
 
 static void computeLogicalTopPositionedOffset(LayoutUnit& logicalTopPos, const RenderBox* child, LayoutUnit logicalHeightValue, const RenderBoxModelObject* containerBlock, LayoutUnit containerLogicalHeight)
 {
-    // Deal with differing writing modes here.  Our offset needs to be in the containing block's coordinate space. If the containing block is flipped
-    // along this axis, then we need to flip the coordinate.  This can only happen if the containing block is both a flipped mode and perpendicular to us.
-    if ((child->style()->isFlippedBlocksWritingMode() && child->isHorizontalWritingMode() != containerBlock->isHorizontalWritingMode())
-        || (child->style()->isFlippedBlocksWritingMode() != containerBlock->style()->isFlippedBlocksWritingMode() && child->isHorizontalWritingMode() == containerBlock->isHorizontalWritingMode()))
-        logicalTopPos = containerLogicalHeight - logicalHeightValue - logicalTopPos;
-
-    // Our offset is from the logical bottom edge in a flipped environment, e.g., right for vertical-rl and bottom for horizontal-bt.
-    if (containerBlock->style()->isFlippedBlocksWritingMode() && child->isHorizontalWritingMode() == containerBlock->isHorizontalWritingMode()) {
-        if (child->isHorizontalWritingMode())
-            logicalTopPos += containerBlock->borderBottom();
-        else
-            logicalTopPos += containerBlock->borderRight();
-    } else {
-        if (child->isHorizontalWritingMode())
-            logicalTopPos += containerBlock->borderTop();
-        else
-            logicalTopPos += containerBlock->borderLeft();
-    }
+    // FIXME(sky): Remove
+    logicalTopPos += containerBlock->borderTop();
 }
 
 void RenderBox::computePositionedLogicalHeightUsing(Length logicalHeightLength, const RenderBoxModelObject* containerBlock,
@@ -3087,11 +3061,10 @@ void RenderBox::computePositionedLogicalWidthReplaced(LogicalExtentComputedValue
     TextDirection containerDirection = containerBlock->style()->direction();
 
     // Variables to solve.
-    bool isHorizontal = isHorizontalWritingMode();
     Length logicalLeft = style()->logicalLeft();
     Length logicalRight = style()->logicalRight();
-    Length marginLogicalLeft = isHorizontal ? style()->marginLeft() : style()->marginTop();
-    Length marginLogicalRight = isHorizontal ? style()->marginRight() : style()->marginBottom();
+    Length marginLogicalLeft = style()->marginLeft();
+    Length marginLogicalRight = style()->marginRight();
     LayoutUnit& marginLogicalLeftAlias = style()->isLeftToRightDirection() ? computedValues.m_margins.m_start : computedValues.m_margins.m_end;
     LayoutUnit& marginLogicalRightAlias = style()->isLeftToRightDirection() ? computedValues.m_margins.m_end : computedValues.m_margins.m_start;
 
@@ -3411,9 +3384,6 @@ LayoutRect RenderBox::localCaretRect(InlineBox* box, int caretOffset, LayoutUnit
         rect.setY(rect.y() + paddingTop() + borderTop());
     }
 
-    if (!isHorizontalWritingMode())
-        return rect.transposedRect();
-
     return rect;
 }
 
@@ -3687,8 +3657,8 @@ void RenderBox::addLayoutOverflow(const LayoutRect& rect)
         // Overflow is in the block's coordinate space and thus is flipped for horizontal-bt and vertical-rl
         // writing modes.  At this stage that is actually a simplification, since we can treat horizontal-tb/bt as the same
         // and vertical-lr/rl as the same.
-        bool hasTopOverflow = !style()->isLeftToRightDirection() && !isHorizontalWritingMode();
-        bool hasLeftOverflow = !style()->isLeftToRightDirection() && isHorizontalWritingMode();
+        bool hasTopOverflow = false;
+        bool hasLeftOverflow = !style()->isLeftToRightDirection();
         if (isFlexibleBox() && style()->isReverseFlexDirection()) {
             RenderFlexibleBox* flexibleBox = toRenderFlexibleBox(this);
             if (flexibleBox->isHorizontalFlow())
@@ -3826,10 +3796,8 @@ RenderLayer* RenderBox::enclosingFloatPaintingLayer() const
 
 LayoutRect RenderBox::logicalVisualOverflowRectForPropagation(RenderStyle* parentStyle) const
 {
-    LayoutRect rect = visualOverflowRectForPropagation(parentStyle);
-    if (!parentStyle->isHorizontalWritingMode())
-        return rect.transposedRect();
-    return rect;
+    // FIXME(sky): Remove
+    return visualOverflowRectForPropagation(parentStyle);
 }
 
 LayoutRect RenderBox::visualOverflowRectForPropagation(RenderStyle* parentStyle) const
@@ -3840,10 +3808,8 @@ LayoutRect RenderBox::visualOverflowRectForPropagation(RenderStyle* parentStyle)
 
 LayoutRect RenderBox::logicalLayoutOverflowRectForPropagation(RenderStyle* parentStyle) const
 {
-    LayoutRect rect = layoutOverflowRectForPropagation(parentStyle);
-    if (!parentStyle->isHorizontalWritingMode())
-        return rect.transposedRect();
-    return rect;
+    // FIXME(sky): Remove
+    return layoutOverflowRectForPropagation(parentStyle);
 }
 
 LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle) const

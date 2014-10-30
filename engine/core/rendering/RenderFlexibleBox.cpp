@@ -101,9 +101,8 @@ void RenderFlexibleBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidt
             continue;
 
         LayoutUnit margin = marginIntrinsicLogicalWidthForChild(child);
-        bool hasOrthogonalWritingMode = child->isHorizontalWritingMode() != isHorizontalWritingMode();
-        LayoutUnit minPreferredLogicalWidth = hasOrthogonalWritingMode ? child->logicalHeight() : child->minPreferredLogicalWidth();
-        LayoutUnit maxPreferredLogicalWidth = hasOrthogonalWritingMode ? child->logicalHeight() : child->maxPreferredLogicalWidth();
+        LayoutUnit minPreferredLogicalWidth = child->minPreferredLogicalWidth();
+        LayoutUnit maxPreferredLogicalWidth = child->maxPreferredLogicalWidth();
         minPreferredLogicalWidth += margin;
         maxPreferredLogicalWidth += margin;
         if (!isColumnFlow()) {
@@ -310,7 +309,7 @@ LayoutUnit RenderFlexibleBox::clientLogicalBottomAfterRepositioning()
 bool RenderFlexibleBox::hasOrthogonalFlow(RenderBox* child) const
 {
     // FIXME: If the child is a flexbox, then we need to check isHorizontalFlow.
-    return isHorizontalFlow() != child->isHorizontalWritingMode();
+    return !isHorizontalFlow();
 }
 
 bool RenderFlexibleBox::isColumnFlow() const
@@ -320,9 +319,7 @@ bool RenderFlexibleBox::isColumnFlow() const
 
 bool RenderFlexibleBox::isHorizontalFlow() const
 {
-    if (isHorizontalWritingMode())
-        return !isColumnFlow();
-    return isColumnFlow();
+    return !isColumnFlow();
 }
 
 bool RenderFlexibleBox::isLeftToRightFlow() const
@@ -358,15 +355,14 @@ static inline LayoutUnit constrainedChildIntrinsicContentLogicalHeight(RenderBox
 
 LayoutUnit RenderFlexibleBox::childIntrinsicHeight(RenderBox* child) const
 {
-    if (child->isHorizontalWritingMode() && needToStretchChildLogicalHeight(child))
+    if (needToStretchChildLogicalHeight(child))
         return constrainedChildIntrinsicContentLogicalHeight(child);
     return child->height();
 }
 
 LayoutUnit RenderFlexibleBox::childIntrinsicWidth(RenderBox* child) const
 {
-    if (!child->isHorizontalWritingMode() && needToStretchChildLogicalHeight(child))
-        return constrainedChildIntrinsicContentLogicalHeight(child);
+    // FIXME(sky): Remove
     return child->width();
 }
 
@@ -699,11 +695,6 @@ bool RenderFlexibleBox::updateAutoMarginsInCrossAxis(RenderBox* child, LayoutUni
     if (isColumnFlow() && !child->style()->isLeftToRightDirection()) {
         // For column flows, only make this adjustment if topOrLeft corresponds to the "before" margin,
         // so that flipForRightToLeftColumn will do the right thing.
-        shouldAdjustTopOrLeft = false;
-    }
-    if (!isColumnFlow() && child->style()->isFlippedBlocksWritingMode()) {
-        // If we are a flipped writing mode, we need to adjust the opposite side. This is only needed
-        // for row flows because this only affects the block-direction axis.
         shouldAdjustTopOrLeft = false;
     }
 

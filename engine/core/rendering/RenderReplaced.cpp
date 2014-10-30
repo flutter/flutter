@@ -487,10 +487,8 @@ LayoutRect RenderReplaced::localSelectionRect(bool checkWhetherSelected) const
         return LayoutRect(LayoutPoint(), size());
 
     RootInlineBox& root = inlineBoxWrapper()->root();
-    LayoutUnit newLogicalTop = root.block().style()->isFlippedBlocksWritingMode() ? inlineBoxWrapper()->logicalBottom() - root.selectionBottom() : root.selectionTop() - inlineBoxWrapper()->logicalTop();
-    if (root.block().style()->isHorizontalWritingMode())
-        return LayoutRect(0, newLogicalTop, width(), root.selectionHeight());
-    return LayoutRect(newLogicalTop, 0, root.selectionHeight(), height());
+    LayoutUnit newLogicalTop = root.selectionTop() - inlineBoxWrapper()->logicalTop();
+    return LayoutRect(0, newLogicalTop, width(), root.selectionHeight());
 }
 
 void RenderReplaced::setSelectionState(SelectionState state)

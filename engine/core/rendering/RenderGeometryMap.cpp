@@ -179,10 +179,6 @@ void RenderGeometryMap::pushMappingsToAncestor(const RenderObject* renderer, con
 static bool canMapBetweenRenderers(const RenderObject* renderer, const RenderObject* ancestor)
 {
     for (const RenderObject* current = renderer; ; current = current->parent()) {
-        const RenderStyle* style = current->style();
-        if (style->isFlippedBlocksWritingMode())
-            return false;
-
         if (current->hasTransform())
             return false;
 

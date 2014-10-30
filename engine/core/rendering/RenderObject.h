@@ -427,7 +427,6 @@ public:
     bool isInline() const { return m_bitfields.isInline(); } // inline object
     bool isDragging() const { return m_bitfields.isDragging(); }
     bool isReplaced() const { return m_bitfields.isReplaced(); } // a "replaced" element (see CSS)
-    bool isHorizontalWritingMode() const { return m_bitfields.horizontalWritingMode(); }
 
     bool hasLayer() const { return m_bitfields.hasLayer(); }
 
@@ -902,7 +901,7 @@ public:
         return layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation() || shouldDoFullPaintInvalidationIfSelfPaintingLayer();
     }
 
-    bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform() && !style()->isFlippedBlocksWritingMode(); }
+    bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform(); }
 
     void setNeedsOverflowRecalcAfterStyleChange();
     void markContainingBlocksForOverflowRecalc();

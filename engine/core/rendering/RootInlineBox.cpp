@@ -56,7 +56,8 @@ RootInlineBox::RootInlineBox(RenderBlockFlow& block)
     , m_lineBottomWithLeading(0)
     , m_selectionBottom(0)
 {
-    setIsHorizontal(block.isHorizontalWritingMode());
+    // FIXME(sky): Remove
+    setIsHorizontal(true);
 }
 
 
@@ -258,29 +259,16 @@ LayoutUnit RootInlineBox::beforeAnnotationsAdjustment() const
 {
     LayoutUnit result = 0;
 
-    if (!renderer().style()->isFlippedLinesWritingMode()) {
-        // Annotations under the previous line may push us down.
-        if (prevRootBox() && prevRootBox()->hasAnnotationsAfter())
-            result = prevRootBox()->computeUnderAnnotationAdjustment(lineTop());
+    // Annotations under the previous line may push us down.
+    if (prevRootBox() && prevRootBox()->hasAnnotationsAfter())
+        result = prevRootBox()->computeUnderAnnotationAdjustment(lineTop());
 
-        if (!hasAnnotationsBefore())
-            return result;
+    if (!hasAnnotationsBefore())
+        return result;
 
-        // Annotations over this line may push us further down.
-        LayoutUnit highestAllowedPosition = prevRootBox() ? std::min(prevRootBox()->lineBottom(), lineTop()) + result : static_cast<LayoutUnit>(block().borderBefore());
-        result = computeOverAnnotationAdjustment(highestAllowedPosition);
-    } else {
-        // Annotations under this line may push us up.
-        if (hasAnnotationsBefore())
-            result = computeUnderAnnotationAdjustment(prevRootBox() ? prevRootBox()->lineBottom() : static_cast<LayoutUnit>(block().borderBefore()));
-
-        if (!prevRootBox() || !prevRootBox()->hasAnnotationsAfter())
-            return result;
-
-        // We have to compute the expansion for annotations over the previous line to see how much we should move.
-        LayoutUnit lowestAllowedPosition = std::max(prevRootBox()->lineBottom(), lineTop()) - result;
-        result = prevRootBox()->computeOverAnnotationAdjustment(lowestAllowedPosition);
-    }
+    // Annotations over this line may push us further down.
+    LayoutUnit highestAllowedPosition = prevRootBox() ? std::min(prevRootBox()->lineBottom(), lineTop()) + result : static_cast<LayoutUnit>(block().borderBefore());
+    result = computeOverAnnotationAdjustment(highestAllowedPosition);
 
     return result;
 }
@@ -388,9 +376,9 @@ LayoutUnit RootInlineBox::selectionTop() const
     LayoutUnit selectionTop = m_lineTop;
 
     if (m_hasAnnotationsBefore)
-        selectionTop -= !renderer().style()->isFlippedLinesWritingMode() ? computeOverAnnotationAdjustment(m_lineTop) : computeUnderAnnotationAdjustment(m_lineTop);
+        selectionTop -= computeOverAnnotationAdjustment(m_lineTop);
 
-    if (renderer().style()->isFlippedLinesWritingMode() || !prevRootBox())
+    if (!prevRootBox())
         return selectionTop;
 
     LayoutUnit prevBottom = prevRootBox()->selectionBottom();
@@ -437,32 +425,14 @@ LayoutUnit RootInlineBox::selectionTopAdjustedForPrecedingBlock() const
 LayoutUnit RootInlineBox::selectionBottom() const
 {
     LayoutUnit selectionBottom = m_selectionBottom;
-
     if (m_hasAnnotationsAfter)
-        selectionBottom += !renderer().style()->isFlippedLinesWritingMode() ? computeUnderAnnotationAdjustment(m_lineBottom) : computeOverAnnotationAdjustment(m_lineBottom);
-
-    if (!renderer().style()->isFlippedLinesWritingMode() || !nextRootBox())
-        return selectionBottom;
-
-    LayoutUnit nextTop = nextRootBox()->selectionTop();
-    if (nextTop > selectionBottom && block().containsFloats()) {
-        // The next line has actually been moved further over, probably from a large line-height, but possibly because the
-        // line was forced to clear floats.  If so, let's check the offsets, and only be willing to use the next
-        // line's top if the offsets are greater on both sides.
-        LayoutUnit nextLeft = block().logicalLeftOffsetForLine(nextTop, false);
-        LayoutUnit nextRight = block().logicalRightOffsetForLine(nextTop, false);
-        LayoutUnit newLeft = block().logicalLeftOffsetForLine(selectionBottom, false);
-        LayoutUnit newRight = block().logicalRightOffsetForLine(selectionBottom, false);
-        if (nextLeft > newLeft || nextRight < newRight)
-            return selectionBottom;
-    }
-
-    return nextTop;
+        selectionBottom += computeUnderAnnotationAdjustment(m_lineBottom);
+    return selectionBottom;
 }
 
 int RootInlineBox::blockDirectionPointInLine() const
 {
-    return !block().style()->isFlippedBlocksWritingMode() ? std::max(lineTop(), selectionTop()) : std::min(lineBottom(), selectionBottom());
+    return std::max(lineTop(), selectionTop());
 }
 
 RenderBlockFlow& RootInlineBox::block() const

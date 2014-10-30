@@ -59,8 +59,7 @@ public:
 
         bool isZero() const;
 
-        void includeLogicalEdges(const Radii& edges, bool isHorizontal, bool includeLogicalLeftEdge, bool includeLogicalRightEdge);
-        void excludeLogicalEdges(bool isHorizontal, bool excludeLogicalLeftEdge, bool excludeLogicalRightEdge);
+        void includeLogicalEdges(const Radii& edges, bool includeLogicalLeftEdge, bool includeLogicalRightEdge);
 
         void scale(float factor);
         void expand(int topWidth, int bottomWidth, int leftWidth, int rightWidth);
@@ -96,8 +95,7 @@ public:
     void expandRadii(int size) { m_radii.expand(size); }
     void shrinkRadii(int size) { m_radii.shrink(size); }
 
-    void includeLogicalEdges(const Radii& edges, bool isHorizontal, bool includeLogicalLeftEdge, bool includeLogicalRightEdge);
-    void excludeLogicalEdges(bool isHorizontal, bool excludeLogicalLeftEdge, bool excludeLogicalRightEdge);
+    void includeLogicalEdges(const Radii& edges, bool includeLogicalLeftEdge, bool includeLogicalRightEdge);
 
     bool isRenderable() const;
     void adjustRadii();

@@ -948,15 +948,6 @@ void RenderBlock::finishDelayUpdateScrollInfo()
 void RenderBlock::updateScrollInfoAfterLayout()
 {
     if (hasOverflowClip()) {
-        if (style()->isFlippedBlocksWritingMode()) {
-            // FIXME: https://bugs.webkit.org/show_bug.cgi?id=97937
-            // Workaround for now. We cannot delay the scroll info for overflow
-            // for items with opposite writing directions, as the contents needs
-            // to overflow in that direction
-            layer()->scrollableArea()->updateAfterLayout();
-            return;
-        }
-
         if (gDelayUpdateScrollInfo)
             gDelayedUpdateScrollInfoSet->add(this);
         else
@@ -2285,9 +2276,6 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
     if (!firstRootBox())
         return createPositionWithAffinity(0, DOWNSTREAM);
 
-    bool linesAreFlipped = style()->isFlippedLinesWritingMode();
-    bool blocksAreFlipped = style()->isFlippedBlocksWritingMode();
-
     // look for the closest line box in the root box which is at the passed-in y coordinate
     InlineBox* closestBox = 0;
     RootInlineBox* firstRootBoxWithChildren = 0;
@@ -2298,23 +2286,13 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
         if (!firstRootBoxWithChildren)
             firstRootBoxWithChildren = root;
 
-        if (!linesAreFlipped && root->isFirstAfterPageBreak() && (pointInLogicalContents.y() < root->lineTopWithLeading()
-            || (blocksAreFlipped && pointInLogicalContents.y() == root->lineTopWithLeading())))
+        if (root->isFirstAfterPageBreak() && (pointInLogicalContents.y() < root->lineTopWithLeading()))
             break;
 
         lastRootBoxWithChildren = root;
 
         // check if this root line box is located at this y coordinate
-        if (pointInLogicalContents.y() < root->selectionBottom() || (blocksAreFlipped && pointInLogicalContents.y() == root->selectionBottom())) {
-            if (linesAreFlipped) {
-                RootInlineBox* nextRootBoxWithChildren = root->nextRootBox();
-                while (nextRootBoxWithChildren && !nextRootBoxWithChildren->firstLeafChild())
-                    nextRootBoxWithChildren = nextRootBoxWithChildren->nextRootBox();
-
-                if (nextRootBoxWithChildren && nextRootBoxWithChildren->isFirstAfterPageBreak() && (pointInLogicalContents.y() > nextRootBoxWithChildren->lineTopWithLeading()
-                    || (!blocksAreFlipped && pointInLogicalContents.y() == nextRootBoxWithChildren->lineTopWithLeading())))
-                    continue;
-            }
+        if (pointInLogicalContents.y() < root->selectionBottom()) {
             closestBox = root->closestLeafChildForLogicalLeftPosition(pointInLogicalContents.x());
             if (closestBox)
                 break;
@@ -2331,8 +2309,7 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
     if (closestBox) {
         if (moveCaretToBoundary) {
             LayoutUnit firstRootBoxWithChildrenTop = std::min<LayoutUnit>(firstRootBoxWithChildren->selectionTop(), firstRootBoxWithChildren->logicalTop());
-            if (pointInLogicalContents.y() < firstRootBoxWithChildrenTop
-                || (blocksAreFlipped && pointInLogicalContents.y() == firstRootBoxWithChildrenTop)) {
+            if (pointInLogicalContents.y() < firstRootBoxWithChildrenTop) {
                 InlineBox* box = firstRootBoxWithChildren->firstLeafChild();
                 if (box->isLineBreak()) {
                     if (InlineBox* newBox = box->nextLeafChildIgnoringLineBreak())
@@ -2397,10 +2374,9 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
     while (lastCandidateBox && !isChildHitTestCandidate(lastCandidateBox))
         lastCandidateBox = lastCandidateBox->previousSiblingBox();
 
-    bool blocksAreFlipped = style()->isFlippedBlocksWritingMode();
     if (lastCandidateBox) {
         if (pointInLogicalContents.y() > logicalTopForChild(lastCandidateBox)
-            || (!blocksAreFlipped && pointInLogicalContents.y() == logicalTopForChild(lastCandidateBox)))
+            || (pointInLogicalContents.y() == logicalTopForChild(lastCandidateBox)))
             return positionForPointRespectingEditingBoundaries(this, lastCandidateBox, pointInContents);
 
         for (RenderBox* childBox = firstChildBox(); childBox; childBox = childBox->nextSiblingBox()) {
@@ -2408,8 +2384,7 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
                 continue;
             LayoutUnit childLogicalBottom = logicalTopForChild(childBox) + logicalHeightForChild(childBox);
             // We hit child if our click is above the bottom of its padding box (like IE6/7 and FF3).
-            if (isChildHitTestCandidate(childBox) && (pointInLogicalContents.y() < childLogicalBottom
-                || (blocksAreFlipped && pointInLogicalContents.y() == childLogicalBottom)))
+            if (isChildHitTestCandidate(childBox) && (pointInLogicalContents.y() < childLogicalBottom))
                 return positionForPointRespectingEditingBoundaries(this, childBox, pointInContents);
         }
     }

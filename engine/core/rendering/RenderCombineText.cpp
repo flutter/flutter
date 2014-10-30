@@ -25,8 +25,6 @@
 
 namespace blink {
 
-const float textCombineMargin = 1.1f; // Allow em + 10% margin
-
 RenderCombineText::RenderCombineText(Node* node, PassRefPtr<StringImpl> string)
      : RenderText(node, string)
      , m_combinedTextWidth(0)
@@ -96,52 +94,7 @@ void RenderCombineText::combineText()
     m_needsFontUpdate = false;
 
     // CSS3 spec says text-combine works only in vertical writing mode.
-    if (style()->isHorizontalWritingMode())
-        return;
-
-    TextRun run = constructTextRun(this, originalFont(), this, style(), style()->direction());
-    FontDescription description = originalFont().fontDescription();
-    float emWidth = description.computedSize() * textCombineMargin;
-    bool shouldUpdateFont = false;
-
-    description.setOrientation(Horizontal); // We are going to draw combined text horizontally.
-    m_combinedTextWidth = originalFont().width(run);
-    m_isCombined = m_combinedTextWidth <= emWidth;
-
-    FontSelector* fontSelector = style()->font().fontSelector();
-
-    if (m_isCombined)
-        shouldUpdateFont = style()->setFontDescription(description); // Need to change font orientation to horizontal.
-    else {
-        // Need to try compressed glyphs.
-        static const FontWidthVariant widthVariants[] = { HalfWidth, ThirdWidth, QuarterWidth };
-        for (size_t i = 0 ; i < WTF_ARRAY_LENGTH(widthVariants) ; ++i) {
-            description.setWidthVariant(widthVariants[i]);
-            Font compressedFont = Font(description);
-            compressedFont.update(fontSelector);
-            float runWidth = compressedFont.width(run);
-            if (runWidth <= emWidth) {
-                m_combinedTextWidth = runWidth;
-                m_isCombined = true;
-
-                // Replace my font with the new one.
-                shouldUpdateFont = style()->setFontDescription(description);
-                break;
-            }
-        }
-    }
-
-    if (!m_isCombined)
-        shouldUpdateFont = style()->setFontDescription(originalFont().fontDescription());
-
-    if (shouldUpdateFont)
-        style()->font().update(fontSelector);
-
-    if (m_isCombined) {
-        DEFINE_STATIC_LOCAL(String, objectReplacementCharacterString, (&objectReplacementCharacter, 1));
-        m_renderingText = text();
-        RenderText::setTextInternal(objectReplacementCharacterString.impl());
-    }
+    // FIXME(sky): Remove
 }
 
 } // namespace blink

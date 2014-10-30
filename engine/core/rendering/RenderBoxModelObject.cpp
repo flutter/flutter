@@ -127,7 +127,6 @@ void RenderBoxModelObject::updateFromStyle()
     setHasBoxDecorationBackground(calculateHasBoxDecorations());
     setInline(styleToUse->isDisplayInlineType());
     setPositionState(styleToUse->position());
-    setHorizontalWritingMode(styleToUse->isHorizontalWritingMode());
 }
 
 static LayoutSize accumulateInFlowPositionOffsets(const RenderObject* child)
@@ -2198,31 +2197,29 @@ void RenderBoxModelObject::clipBorderSideForComplexInnerPath(GraphicsContext* gr
 
 void RenderBoxModelObject::getBorderEdgeInfo(BorderEdge edges[], const RenderStyle* style, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
 {
-    bool horizontal = style->isHorizontalWritingMode();
-
     edges[BSTop] = BorderEdge(style->borderTopWidth(),
         resolveColor(style, CSSPropertyBorderTopColor),
         style->borderTopStyle(),
         style->borderTopIsTransparent(),
-        horizontal || includeLogicalLeftEdge);
+        true);
 
     edges[BSRight] = BorderEdge(style->borderRightWidth(),
         resolveColor(style, CSSPropertyBorderRightColor),
         style->borderRightStyle(),
         style->borderRightIsTransparent(),
-        !horizontal || includeLogicalRightEdge);
+        includeLogicalRightEdge);
 
     edges[BSBottom] = BorderEdge(style->borderBottomWidth(),
         resolveColor(style, CSSPropertyBorderBottomColor),
         style->borderBottomStyle(),
         style->borderBottomIsTransparent(),
-        horizontal || includeLogicalRightEdge);
+        true);
 
     edges[BSLeft] = BorderEdge(style->borderLeftWidth(),
         resolveColor(style, CSSPropertyBorderLeftColor),
         style->borderLeftStyle(),
         style->borderLeftIsTransparent(),
-        !horizontal || includeLogicalLeftEdge);
+        includeLogicalLeftEdge);
 }
 
 bool RenderBoxModelObject::borderObscuresBackgroundEdge(const FloatSize& contextScale) const
@@ -2323,7 +2320,6 @@ void RenderBoxModelObject::paintBoxShadow(const PaintInfo& info, const LayoutRec
         : s->getRoundedBorderFor(paintRect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
     bool hasBorderRadius = s->hasBorderRadius();
-    bool isHorizontal = s->isHorizontalWritingMode();
     bool hasOpaqueBackground = s->colorIncludingFallback(CSSPropertyBackgroundColor).alpha() == 255;
 
     GraphicsContextStateSaver stateSaver(*context, false);
@@ -2422,16 +2418,10 @@ void RenderBoxModelObject::paintBoxShadow(const PaintInfo& info, const LayoutRec
             // The inset shadow case.
             GraphicsContext::Edges clippedEdges = GraphicsContext::NoEdge;
             if (!includeLogicalLeftEdge) {
-                if (isHorizontal)
-                    clippedEdges |= GraphicsContext::LeftEdge;
-                else
-                    clippedEdges |= GraphicsContext::TopEdge;
+                clippedEdges |= GraphicsContext::LeftEdge;
             }
             if (!includeLogicalRightEdge) {
-                if (isHorizontal)
-                    clippedEdges |= GraphicsContext::RightEdge;
-                else
-                    clippedEdges |= GraphicsContext::BottomEdge;
+                clippedEdges |= GraphicsContext::RightEdge;
             }
             // TODO: support non-integer shadows - crbug.com/334828
             context->drawInnerShadow(border, shadowColor, flooredIntSize(shadowOffset), shadowBlur, shadowSpread, clippedEdges);

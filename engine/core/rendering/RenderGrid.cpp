@@ -620,11 +620,6 @@ LayoutUnit RenderGrid::logicalHeightForChild(RenderBox* child, Vector<GridTrack>
 
 LayoutUnit RenderGrid::minContentForChild(RenderBox* child, GridTrackSizingDirection direction, Vector<GridTrack>& columnTracks)
 {
-    bool hasOrthogonalWritingMode = child->isHorizontalWritingMode() != isHorizontalWritingMode();
-    // FIXME: Properly support orthogonal writing mode.
-    if (hasOrthogonalWritingMode)
-        return 0;
-
     if (direction == ForColumns) {
         // FIXME: It's unclear if we should return the intrinsic width or the preferred width.
         // See http://lists.w3.org/Archives/Public/www-style/2013Jan/0245.html
@@ -636,11 +631,6 @@ LayoutUnit RenderGrid::minContentForChild(RenderBox* child, GridTrackSizingDirec
 
 LayoutUnit RenderGrid::maxContentForChild(RenderBox* child, GridTrackSizingDirection direction, Vector<GridTrack>& columnTracks)
 {
-    bool hasOrthogonalWritingMode = child->isHorizontalWritingMode() != isHorizontalWritingMode();
-    // FIXME: Properly support orthogonal writing mode.
-    if (hasOrthogonalWritingMode)
-        return LayoutUnit();
-
     if (direction == ForColumns) {
         // FIXME: It's unclear if we should return the intrinsic width or the preferred width.
         // See http://lists.w3.org/Archives/Public/www-style/2013Jan/0245.html
@@ -1170,26 +1160,14 @@ static ItemPosition resolveJustification(const RenderStyle* parentStyle, const R
 
 LayoutUnit RenderGrid::columnPositionForChild(const RenderBox* child) const
 {
-    bool hasOrthogonalWritingMode = child->isHorizontalWritingMode() != isHorizontalWritingMode();
-
     switch (resolveJustification(style(), child->style())) {
     case ItemPositionSelfStart:
-        // For orthogonal writing-modes, this computes to 'start'
-        // FIXME: grid track sizing and positioning do not support orthogonal modes yet.
-        if (hasOrthogonalWritingMode)
-            return columnPositionAlignedWithGridContainerStart(child);
-
         // self-start is based on the child's direction. That's why we need to check against the grid container's direction.
         if (child->style()->direction() != style()->direction())
             return columnPositionAlignedWithGridContainerEnd(child);
 
         return columnPositionAlignedWithGridContainerStart(child);
     case ItemPositionSelfEnd:
-        // For orthogonal writing-modes, this computes to 'start'
-        // FIXME: grid track sizing and positioning do not support orthogonal modes yet.
-        if (hasOrthogonalWritingMode)
-            return columnPositionAlignedWithGridContainerEnd(child);
-
         // self-end is based on the child's direction. That's why we need to check against the grid container's direction.
         if (child->style()->direction() != style()->direction())
             return columnPositionAlignedWithGridContainerStart(child);
@@ -1204,19 +1182,11 @@ LayoutUnit RenderGrid::columnPositionForChild(const RenderBox* child) const
         return columnPositionAlignedWithGridContainerEnd(child);
 
     case ItemPositionLeft:
-        // If the property's axis is not parallel with the inline axis, this is equivalent to ‘start’.
-        if (!isHorizontalWritingMode())
-            return columnPositionAlignedWithGridContainerStart(child);
-
         if (style()->isLeftToRightDirection())
             return columnPositionAlignedWithGridContainerStart(child);
 
         return columnPositionAlignedWithGridContainerEnd(child);
     case ItemPositionRight:
-        // If the property's axis is not parallel with the inline axis, this is equivalent to ‘start’.
-        if (!isHorizontalWritingMode())
-            return columnPositionAlignedWithGridContainerStart(child);
-
         if (style()->isLeftToRightDirection())
             return columnPositionAlignedWithGridContainerEnd(child);
 
@@ -1291,7 +1261,6 @@ static ItemPosition resolveAlignment(const RenderStyle* parentStyle, const Rende
 
 LayoutUnit RenderGrid::rowPositionForChild(const RenderBox* child) const
 {
-    bool hasOrthogonalWritingMode = child->isHorizontalWritingMode() != isHorizontalWritingMode();
     ItemPosition alignSelf = resolveAlignment(style(), child->style());
 
     switch (alignSelf) {
@@ -1309,11 +1278,6 @@ LayoutUnit RenderGrid::rowPositionForChild(const RenderBox* child) const
         return startOfRowForChild(child);
 
     case ItemPositionRight:
-        // orthogonal modes make property and inline axes to be parallel.
-        // FIXME: grid track sizing and positioning does not support orthogonal modes yet.
-        if (hasOrthogonalWritingMode)
-            return endOfRowForChild(child);
-
         // self-align's axis is never parallel to the inline axis, except in orthogonal
         // writing-mode, so this is equivalent to 'Start'.
         return startOfRowForChild(child);

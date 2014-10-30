@@ -48,27 +48,17 @@ CSSBoxType referenceBox(const ShapeValue& shapeValue)
 
 void ShapeOutsideInfo::setReferenceBoxLogicalSize(LayoutSize newReferenceBoxLogicalSize)
 {
-    bool isHorizontalWritingMode = m_renderer.containingBlock()->style()->isHorizontalWritingMode();
     switch (referenceBox(*m_renderer.style()->shapeOutside())) {
     case MarginBox:
-        if (isHorizontalWritingMode)
-            newReferenceBoxLogicalSize.expand(m_renderer.marginWidth(), m_renderer.marginHeight());
-        else
-            newReferenceBoxLogicalSize.expand(m_renderer.marginHeight(), m_renderer.marginWidth());
+        newReferenceBoxLogicalSize.expand(m_renderer.marginWidth(), m_renderer.marginHeight());
         break;
     case BorderBox:
         break;
     case PaddingBox:
-        if (isHorizontalWritingMode)
-            newReferenceBoxLogicalSize.shrink(m_renderer.borderWidth(), m_renderer.borderHeight());
-        else
-            newReferenceBoxLogicalSize.shrink(m_renderer.borderHeight(), m_renderer.borderWidth());
+        newReferenceBoxLogicalSize.shrink(m_renderer.borderWidth(), m_renderer.borderHeight());
         break;
     case ContentBox:
-        if (isHorizontalWritingMode)
-            newReferenceBoxLogicalSize.shrink(m_renderer.borderAndPaddingWidth(), m_renderer.borderAndPaddingHeight());
-        else
-            newReferenceBoxLogicalSize.shrink(m_renderer.borderAndPaddingHeight(), m_renderer.borderAndPaddingWidth());
+        newReferenceBoxLogicalSize.shrink(m_renderer.borderAndPaddingWidth(), m_renderer.borderAndPaddingHeight());
         break;
     case BoxMissing:
         ASSERT_NOT_REACHED();
@@ -181,30 +171,17 @@ LayoutUnit ShapeOutsideInfo::logicalTopOffset() const
 
 inline LayoutUnit borderStartWithStyleForWritingMode(const RenderBox& renderer, const RenderStyle* style)
 {
-    if (style->isHorizontalWritingMode()) {
-        if (style->isLeftToRightDirection())
-            return renderer.borderLeft();
-
-        return renderer.borderRight();
-    }
     if (style->isLeftToRightDirection())
-        return renderer.borderTop();
-
-    return renderer.borderBottom();
+        return renderer.borderLeft();
+    return renderer.borderRight();
 }
 
 inline LayoutUnit borderAndPaddingStartWithStyleForWritingMode(const RenderBox& renderer, const RenderStyle* style)
 {
-    if (style->isHorizontalWritingMode()) {
-        if (style->isLeftToRightDirection())
-            return renderer.borderLeft() + renderer.paddingLeft();
-
-        return renderer.borderRight() + renderer.paddingRight();
-    }
     if (style->isLeftToRightDirection())
-        return renderer.borderTop() + renderer.paddingTop();
+        return renderer.borderLeft() + renderer.paddingLeft();
 
-    return renderer.borderBottom() + renderer.paddingBottom();
+    return renderer.borderRight() + renderer.paddingRight();
 }
 
 LayoutUnit ShapeOutsideInfo::logicalLeftOffset() const
@@ -251,33 +228,20 @@ LayoutRect ShapeOutsideInfo::computedShapePhysicalBoundingBox() const
     LayoutRect physicalBoundingBox = computedShape().shapeMarginLogicalBoundingBox();
     physicalBoundingBox.setX(physicalBoundingBox.x() + logicalLeftOffset());
 
-    if (m_renderer.style()->isFlippedBlocksWritingMode())
-        physicalBoundingBox.setY(m_renderer.logicalHeight() - physicalBoundingBox.maxY());
-    else
-        physicalBoundingBox.setY(physicalBoundingBox.y() + logicalTopOffset());
-
-    if (!m_renderer.style()->isHorizontalWritingMode())
-        physicalBoundingBox = physicalBoundingBox.transposedRect();
-    else
-        physicalBoundingBox.setY(physicalBoundingBox.y() + logicalTopOffset());
+    // FIXME(sky): Doing this twice doesn't seem right, but it's what the old code did.
+    physicalBoundingBox.setY(physicalBoundingBox.y() + logicalTopOffset());
+    physicalBoundingBox.setY(physicalBoundingBox.y() + logicalTopOffset());
 
     return physicalBoundingBox;
 }
 
 FloatPoint ShapeOutsideInfo::shapeToRendererPoint(FloatPoint point) const
 {
-    FloatPoint result = FloatPoint(point.x() + logicalLeftOffset(), point.y() + logicalTopOffset());
-    if (m_renderer.style()->isFlippedBlocksWritingMode())
-        result.setY(m_renderer.logicalHeight() - result.y());
-    if (!m_renderer.style()->isHorizontalWritingMode())
-        result = result.transposedPoint();
-    return result;
+    return FloatPoint(point.x() + logicalLeftOffset(), point.y() + logicalTopOffset());
 }
 
 FloatSize ShapeOutsideInfo::shapeToRendererSize(FloatSize size) const
 {
-    if (!m_renderer.style()->isHorizontalWritingMode())
-        return size.transposedSize();
     return size;
 }
 

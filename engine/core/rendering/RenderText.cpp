@@ -321,10 +321,7 @@ void RenderText::absoluteQuads(Vector<FloatQuad>& quads, ClippingOption option) 
         // FIXME: ellipsisRectForBox should switch to return FloatRect soon with the subpixellayout branch.
         IntRect ellipsisRect = (option == ClipToEllipsis) ? ellipsisRectForBox(box, 0, textLength()) : IntRect();
         if (!ellipsisRect.isEmpty()) {
-            if (style()->isHorizontalWritingMode())
-                boundaries.setWidth(ellipsisRect.maxX() - boundaries.x());
-            else
-                boundaries.setHeight(ellipsisRect.maxY() - boundaries.y());
+            boundaries.setWidth(ellipsisRect.maxX() - boundaries.x());
         }
         quads.append(localToAbsoluteQuad(boundaries, 0));
     }
@@ -505,7 +502,6 @@ PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point)
 
     LayoutUnit pointLineDirection = firstTextBox()->isHorizontal() ? point.x() : point.y();
     LayoutUnit pointBlockDirection = firstTextBox()->isHorizontal() ? point.y() : point.x();
-    bool blocksAreFlipped = style()->isFlippedBlocksWritingMode();
 
     InlineTextBox* lastBox = 0;
     for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {
@@ -514,12 +510,12 @@ PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point)
 
         RootInlineBox& rootBox = box->root();
         LayoutUnit top = std::min(rootBox.selectionTop(), rootBox.lineTop());
-        if (pointBlockDirection > top || (!blocksAreFlipped && pointBlockDirection == top)) {
+        if (pointBlockDirection > top || pointBlockDirection == top) {
             LayoutUnit bottom = rootBox.selectionBottom();
             if (rootBox.nextRootBox())
                 bottom = std::min(bottom, rootBox.nextRootBox()->lineTop());
 
-            if (pointBlockDirection < bottom || (blocksAreFlipped && pointBlockDirection == bottom)) {
+            if (pointBlockDirection < bottom) {
                 ShouldAffinityBeDownstream shouldAffinityBeDownstream;
                 if (lineDirectionPointFitsInBox(pointLineDirection, box, shouldAffinityBeDownstream))
                     return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(box, box->offsetForPosition(pointLineDirection.toFloat()), shouldAffinityBeDownstream);
@@ -1366,12 +1362,10 @@ IntRect RenderText::linesBoundingBox() const
                 logicalRightSide = curr->logicalRight();
         }
 
-        bool isHorizontal = style()->isHorizontalWritingMode();
-
-        float x = isHorizontal ? logicalLeftSide : firstTextBox()->x();
-        float y = isHorizontal ? firstTextBox()->y() : logicalLeftSide;
-        float width = isHorizontal ? logicalRightSide - logicalLeftSide : lastTextBox()->logicalBottom() - x;
-        float height = isHorizontal ? lastTextBox()->logicalBottom() - y : logicalRightSide - logicalLeftSide;
+        float x = logicalLeftSide;
+        float y = firstTextBox()->y();
+        float width = logicalRightSide - logicalLeftSide;
+        float height = lastTextBox()->logicalBottom() - y;
         result = enclosingIntRect(FloatRect(x, y, width, height));
     }
 
@@ -1397,8 +1391,6 @@ LayoutRect RenderText::linesVisualOverflowBoundingBox() const
     LayoutUnit logicalHeight = lastTextBox()->logicalBottomVisualOverflow() - logicalTop;
 
     LayoutRect rect(logicalLeftSide, logicalTop, logicalWidth, logicalHeight);
-    if (!style()->isHorizontalWritingMode())
-        rect = rect.transposedRect();
     return rect;
 }
 
