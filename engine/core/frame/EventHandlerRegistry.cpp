@@ -165,6 +165,10 @@ void EventHandlerRegistry::didRemoveAllEventHandlers(EventTarget& target)
 void EventHandlerRegistry::notifyHasHandlersChanged(EventHandlerClass handlerClass, bool hasActiveHandlers)
 {
     switch (handlerClass) {
+    // FIXME(sky): Remove these enums from the EventHandlerClass entirely.
+    case ScrollEvent:
+    case WheelEvent:
+        break;
     case TouchEvent:
         m_frameHost.chrome().client().needTouchEvents(hasActiveHandlers);
         break;
