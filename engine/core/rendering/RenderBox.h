@@ -109,19 +109,19 @@ public:
     void setWidth(LayoutUnit width) { m_frameRect.setWidth(width); }
     void setHeight(LayoutUnit height) { m_frameRect.setHeight(height); }
 
-    LayoutUnit logicalLeft() const { return style()->isHorizontalWritingMode() ? x() : y(); }
+    LayoutUnit logicalLeft() const { return x(); }
     LayoutUnit logicalRight() const { return logicalLeft() + logicalWidth(); }
-    LayoutUnit logicalTop() const { return style()->isHorizontalWritingMode() ? y() : x(); }
+    LayoutUnit logicalTop() const { return y(); }
     LayoutUnit logicalBottom() const { return logicalTop() + logicalHeight(); }
-    LayoutUnit logicalWidth() const { return style()->isHorizontalWritingMode() ? width() : height(); }
-    LayoutUnit logicalHeight() const { return style()->isHorizontalWritingMode() ? height() : width(); }
+    LayoutUnit logicalWidth() const { return width(); }
+    LayoutUnit logicalHeight() const { return height(); }
 
     LayoutUnit constrainLogicalWidthByMinMax(LayoutUnit, LayoutUnit, RenderBlock*) const;
     LayoutUnit constrainLogicalHeightByMinMax(LayoutUnit logicalHeight, LayoutUnit intrinsicContentHeight) const;
     LayoutUnit constrainContentBoxLogicalHeightByMinMax(LayoutUnit logicalHeight, LayoutUnit intrinsicContentHeight) const;
 
-    int pixelSnappedLogicalHeight() const { return style()->isHorizontalWritingMode() ? pixelSnappedHeight() : pixelSnappedWidth(); }
-    int pixelSnappedLogicalWidth() const { return style()->isHorizontalWritingMode() ? pixelSnappedWidth() : pixelSnappedHeight(); }
+    int pixelSnappedLogicalHeight() const { return pixelSnappedHeight(); }
+    int pixelSnappedLogicalWidth() const { return pixelSnappedWidth(); }
 
     void setLogicalLeft(LayoutUnit left)
     {
@@ -213,12 +213,12 @@ public:
     LayoutRect layoutOverflowRect() const { return m_overflow ? m_overflow->layoutOverflowRect() : noOverflowRect(); }
     IntRect pixelSnappedLayoutOverflowRect() const { return pixelSnappedIntRect(layoutOverflowRect()); }
     LayoutSize maxLayoutOverflow() const { return LayoutSize(layoutOverflowRect().maxX(), layoutOverflowRect().maxY()); }
-    LayoutUnit logicalLeftLayoutOverflow() const { return style()->isHorizontalWritingMode() ? layoutOverflowRect().x() : layoutOverflowRect().y(); }
-    LayoutUnit logicalRightLayoutOverflow() const { return style()->isHorizontalWritingMode() ? layoutOverflowRect().maxX() : layoutOverflowRect().maxY(); }
+    LayoutUnit logicalLeftLayoutOverflow() const { return layoutOverflowRect().x(); }
+    LayoutUnit logicalRightLayoutOverflow() const { return layoutOverflowRect().maxX(); }
 
     virtual LayoutRect visualOverflowRect() const { return m_overflow ? m_overflow->visualOverflowRect() : borderBoxRect(); }
-    LayoutUnit logicalLeftVisualOverflow() const { return style()->isHorizontalWritingMode() ? visualOverflowRect().x() : visualOverflowRect().y(); }
-    LayoutUnit logicalRightVisualOverflow() const { return style()->isHorizontalWritingMode() ? visualOverflowRect().maxX() : visualOverflowRect().maxY(); }
+    LayoutUnit logicalLeftVisualOverflow() const { return visualOverflowRect().x(); }
+    LayoutUnit logicalRightVisualOverflow() const { return visualOverflowRect().maxX(); }
 
     LayoutRect overflowRectForPaintRejection() const;
 
@@ -241,8 +241,8 @@ public:
 
     LayoutUnit contentWidth() const { return clientWidth() - paddingLeft() - paddingRight(); }
     LayoutUnit contentHeight() const { return clientHeight() - paddingTop() - paddingBottom(); }
-    LayoutUnit contentLogicalWidth() const { return style()->isHorizontalWritingMode() ? contentWidth() : contentHeight(); }
-    LayoutUnit contentLogicalHeight() const { return style()->isHorizontalWritingMode() ? contentHeight() : contentWidth(); }
+    LayoutUnit contentLogicalWidth() const { return contentWidth(); }
+    LayoutUnit contentLogicalHeight() const { return contentHeight(); }
 
     // IE extensions. Used to calculate offsetWidth/Height.  Overridden by inlines (RenderFlow)
     // to return the remaining width on a given line (and the height of a single line).
@@ -258,8 +258,8 @@ public:
     LayoutUnit clientTop() const { return borderTop(); }
     LayoutUnit clientWidth() const;
     LayoutUnit clientHeight() const;
-    LayoutUnit clientLogicalWidth() const { return style()->isHorizontalWritingMode() ? clientWidth() : clientHeight(); }
-    LayoutUnit clientLogicalHeight() const { return style()->isHorizontalWritingMode() ? clientHeight() : clientWidth(); }
+    LayoutUnit clientLogicalWidth() const { return clientWidth(); }
+    LayoutUnit clientLogicalHeight() const { return clientHeight(); }
     LayoutUnit clientLogicalBottom() const { return borderBefore() + clientLogicalHeight(); }
     LayoutRect clientBoxRect() const { return LayoutRect(clientLeft(), clientTop(), clientWidth(), clientHeight()); }
 
@@ -395,7 +395,7 @@ public:
     void computeAndSetBlockDirectionMargins(const RenderBlock* containingBlock);
 
     void positionLineBox(InlineBox*);
-    void moveWithEdgeOfInlineContainerIfNecessary(bool isHorizontal);
+    void moveWithEdgeOfInlineContainerIfNecessary();
 
     virtual InlineBox* createInlineBox();
     void dirtyLineBoxes(bool fullLayout);
@@ -424,8 +424,8 @@ public:
     void computeLogicalWidth(LogicalExtentComputedValues&) const;
 
     virtual LayoutSize intrinsicSize() const { return LayoutSize(); }
-    LayoutUnit intrinsicLogicalWidth() const { return style()->isHorizontalWritingMode() ? intrinsicSize().width() : intrinsicSize().height(); }
-    LayoutUnit intrinsicLogicalHeight() const { return style()->isHorizontalWritingMode() ? intrinsicSize().height() : intrinsicSize().width(); }
+    LayoutUnit intrinsicLogicalWidth() const { return intrinsicSize().width(); }
+    LayoutUnit intrinsicLogicalHeight() const { return intrinsicSize().height(); }
     virtual LayoutUnit intrinsicContentLogicalHeight() const { return m_intrinsicContentLogicalHeight; }
 
     // Whether or not the element shrinks to its intrinsic width (rather than filling the width
@@ -456,13 +456,13 @@ public:
 
     // There are a few cases where we need to refer specifically to the available physical width and available physical height.
     // Relative positioning is one of those cases, since left/top offsets are physical.
-    LayoutUnit availableWidth() const { return style()->isHorizontalWritingMode() ? availableLogicalWidth() : availableLogicalHeight(IncludeMarginBorderPadding); }
-    LayoutUnit availableHeight() const { return style()->isHorizontalWritingMode() ? availableLogicalHeight(IncludeMarginBorderPadding) : availableLogicalWidth(); }
+    LayoutUnit availableWidth() const { return availableLogicalWidth(); }
+    LayoutUnit availableHeight() const { return availableLogicalHeight(IncludeMarginBorderPadding); }
 
     virtual int verticalScrollbarWidth() const;
     int horizontalScrollbarHeight() const;
     int instrinsicScrollbarLogicalWidth() const;
-    int scrollbarLogicalHeight() const { return style()->isHorizontalWritingMode() ? horizontalScrollbarHeight() : verticalScrollbarWidth(); }
+    int scrollbarLogicalHeight() const { return horizontalScrollbarHeight(); }
     virtual bool scroll(ScrollDirection, ScrollGranularity, float delta = 1);
     bool canBeScrolledAndHasScrollableArea() const;
     virtual bool canBeProgramaticallyScrolled() const;
@@ -677,8 +677,8 @@ private:
 
     bool skipContainingBlockForPercentHeightCalculation(const RenderBox* containingBlock) const;
 
-    LayoutUnit containingBlockLogicalWidthForPositioned(const RenderBoxModelObject* containingBlock, bool checkForPerpendicularWritingMode = true) const;
-    LayoutUnit containingBlockLogicalHeightForPositioned(const RenderBoxModelObject* containingBlock, bool checkForPerpendicularWritingMode = true) const;
+    LayoutUnit containingBlockLogicalWidthForPositioned(const RenderBoxModelObject* containingBlock) const;
+    LayoutUnit containingBlockLogicalHeightForPositioned(const RenderBoxModelObject* containingBlock) const;
 
     void computePositionedLogicalHeight(LogicalExtentComputedValues&) const;
     void computePositionedLogicalWidthUsing(Length logicalWidth, const RenderBoxModelObject* containerBlock, TextDirection containerDirection,

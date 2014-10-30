@@ -174,7 +174,7 @@ int RenderFlexibleBox::firstLineBoxBaseline() const
     if (baseline == -1) {
         // FIXME: We should pass |direction| into firstLineBoxBaseline and stop bailing out if we're a writing mode root.
         // This would also fix some cases where the flexbox is orthogonal to its container.
-        LineDirectionMode direction = isHorizontalWritingMode() ? HorizontalLine : VerticalLine;
+        LineDirectionMode direction = HorizontalLine;
         return synthesizedBaselineFromContentBox(baselineChild, direction) + baselineChild->logicalTop();
     }
 
@@ -422,12 +422,6 @@ LayoutUnit RenderFlexibleBox::computeMainAxisExtentForChild(RenderBox* child, Si
     return child->computeLogicalWidthUsing(sizeType, size, contentLogicalWidth(), this) - child->borderAndPaddingLogicalWidth();
 }
 
-WritingMode RenderFlexibleBox::transformedWritingMode() const
-{
-    // FIXME(sky): Remove
-    return TopToBottomWritingMode;
-}
-
 LayoutUnit RenderFlexibleBox::flowAwareBorderStart() const
 {
     if (isHorizontalFlow())
@@ -603,7 +597,7 @@ void RenderFlexibleBox::layoutFlexItems(bool relayoutChildren)
         // Instead of just checking if we have a line, make sure the flexbox
         // has at least a line's worth of height to cover this case.
         LayoutUnit minHeight = borderAndPaddingLogicalHeight()
-            + lineHeight(true, isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes)
+            + lineHeight(true, HorizontalLine, PositionOfInteriorLineBoxes)
             + scrollbarLogicalHeight();
         if (height() < minHeight)
             setLogicalHeight(minHeight);
@@ -940,7 +934,7 @@ void RenderFlexibleBox::prepareChildForPositionedLayout(RenderBox* child, Layout
     LayoutUnit staticBlockPosition = isColumnFlow() ? mainAxisOffset : crossAxisOffset;
     if (childLayer->staticBlockPosition() != staticBlockPosition) {
         childLayer->setStaticBlockPosition(staticBlockPosition);
-        if (child->style()->hasStaticBlockPosition(style()->isHorizontalWritingMode()))
+        if (child->style()->hasStaticBlockPosition())
             child->setChildNeedsLayout(MarkOnlyThis);
     }
 }

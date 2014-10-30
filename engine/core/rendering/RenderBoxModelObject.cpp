@@ -2536,9 +2536,9 @@ LayoutRect RenderBoxModelObject::localCaretRectForEmptyElement(LayoutUnit width,
     x = std::min(x, std::max<LayoutUnit>(maxX - caretWidth, 0));
 
     LayoutUnit height = style()->fontMetrics().height();
-    LayoutUnit verticalSpace = lineHeight(true, currentStyle->isHorizontalWritingMode() ? HorizontalLine : VerticalLine,  PositionOfInteriorLineBoxes) - height;
+    LayoutUnit verticalSpace = lineHeight(true, HorizontalLine,  PositionOfInteriorLineBoxes) - height;
     LayoutUnit y = paddingTop() + borderTop() + (verticalSpace / 2);
-    return currentStyle->isHorizontalWritingMode() ? LayoutRect(x, y, caretWidth, height) : LayoutRect(y, x, height, caretWidth);
+    return LayoutRect(x, y, caretWidth, height);
 }
 
 bool RenderBoxModelObject::shouldAntialiasLines(GraphicsContext* context)

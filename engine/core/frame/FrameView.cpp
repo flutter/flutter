@@ -1134,20 +1134,14 @@ bool FrameView::wheelEvent(const PlatformWheelEvent& wheelEvent)
 
 bool FrameView::isVerticalDocument() const
 {
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return true;
-
-    return renderView->style()->isHorizontalWritingMode();
+    // FIXME(sky): Remove
+    return true;
 }
 
 bool FrameView::isFlippedDocument() const
 {
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return false;
-
-    return renderView->style()->isFlippedBlocksWritingMode();
+    // FIXME(sky): Remove
+    return false;
 }
 
 void FrameView::setCursor(const Cursor& cursor)

@@ -237,7 +237,7 @@ void RenderReplaced::computeAspectRatioInformationForRenderBox(FloatSize& constr
     FloatSize intrinsicSize;
     computeIntrinsicRatioInformation(intrinsicSize, intrinsicRatio);
     if (intrinsicRatio && !intrinsicSize.isEmpty())
-        m_intrinsicSize = LayoutSize(isHorizontalWritingMode() ? intrinsicSize : intrinsicSize.transposedSize());
+        m_intrinsicSize = LayoutSize(intrinsicSize);
 
     // Now constrain the intrinsic size along each axis according to minimum and maximum width/heights along the
     // opposite axis. So for example a maximum width that shrinks our width will result in the height we compute here
@@ -443,8 +443,8 @@ PositionWithAffinity RenderReplaced::positionForPoint(const LayoutPoint& point)
     LayoutUnit top = rootBox ? rootBox->selectionTop() : logicalTop();
     LayoutUnit bottom = rootBox ? rootBox->selectionBottom() : logicalBottom();
 
-    LayoutUnit blockDirectionPosition = isHorizontalWritingMode() ? point.y() + y() : point.x() + x();
-    LayoutUnit lineDirectionPosition = isHorizontalWritingMode() ? point.x() + x() : point.y() + y();
+    LayoutUnit blockDirectionPosition = point.y() + y();
+    LayoutUnit lineDirectionPosition = point.x() + x();
 
     if (blockDirectionPosition < top)
         return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM); // coordinates are above

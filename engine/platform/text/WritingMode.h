@@ -33,11 +33,6 @@
 
 namespace blink {
 
-// FIXME(sky): Remove
-enum WritingMode {
-    TopToBottomWritingMode
-};
-
 // Lines have horizontal orientation; modes horizontal-tb or horizontal-bt.
 inline bool isHorizontalWritingMode()
 {

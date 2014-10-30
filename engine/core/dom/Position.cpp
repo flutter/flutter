@@ -744,19 +744,14 @@ Position Position::downstream(EditingBoundaryCrossingRule rule) const
     return lastVisible;
 }
 
-static int boundingBoxLogicalHeight(RenderObject *o, const IntRect &rect)
-{
-    return o->style()->isHorizontalWritingMode() ? rect.height() : rect.width();
-}
-
 bool Position::hasRenderedNonAnonymousDescendantsWithHeight(RenderObject* renderer)
 {
     RenderObject* stop = renderer->nextInPreOrderAfterChildren();
     for (RenderObject *o = renderer->slowFirstChild(); o && o != stop; o = o->nextInPreOrder())
         if (o->nonPseudoNode()) {
-            if ((o->isText() && boundingBoxLogicalHeight(o, toRenderText(o)->linesBoundingBox()))
+            if ((o->isText() && toRenderText(o)->linesBoundingBox().height())
                 || (o->isBox() && toRenderBox(o)->pixelSnappedLogicalHeight())
-                || (o->isRenderInline() && isEmptyInline(o) && boundingBoxLogicalHeight(o, toRenderInline(o)->linesBoundingBox())))
+                || (o->isRenderInline() && isEmptyInline(o) && toRenderInline(o)->linesBoundingBox().height()))
                 return true;
         }
     return false;

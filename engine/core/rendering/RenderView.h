@@ -69,7 +69,7 @@ public:
     int viewWidth(IncludeScrollbarsInRect = ExcludeScrollbars) const;
     int viewLogicalWidth() const
     {
-        return style()->isHorizontalWritingMode() ? viewWidth(ExcludeScrollbars) : viewHeight(ExcludeScrollbars);
+        return viewWidth(ExcludeScrollbars);
     }
     int viewLogicalHeight() const;
     LayoutUnit viewLogicalHeightForPercentages() const;

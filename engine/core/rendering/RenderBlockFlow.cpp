@@ -345,20 +345,12 @@ void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
 
 void RenderBlockFlow::setLogicalLeftForChild(RenderBox* child, LayoutUnit logicalLeft)
 {
-    if (isHorizontalWritingMode()) {
-        child->setX(logicalLeft);
-    } else {
-        child->setY(logicalLeft);
-    }
+    child->setX(logicalLeft);
 }
 
 void RenderBlockFlow::setLogicalTopForChild(RenderBox* child, LayoutUnit logicalTop)
 {
-    if (isHorizontalWritingMode()) {
-        child->setY(logicalTop);
-    } else {
-        child->setX(logicalTop);
-    }
+    child->setY(logicalTop);
 }
 
 void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo, LayoutUnit& previousFloatLogicalBottom)
@@ -566,35 +558,14 @@ RenderBlockFlow::MarginValues RenderBlockFlow::marginValuesForChild(RenderBox* c
 
     RenderBlockFlow* childRenderBlockFlow = child->isRenderBlockFlow() ? toRenderBlockFlow(child) : 0;
 
-    // If the child has the same directionality as we do, then we can just return its
-    // margins in the same direction.
-    if (!child->isWritingModeRoot()) {
-        if (childRenderBlockFlow) {
-            childBeforePositive = childRenderBlockFlow->maxPositiveMarginBefore();
-            childBeforeNegative = childRenderBlockFlow->maxNegativeMarginBefore();
-            childAfterPositive = childRenderBlockFlow->maxPositiveMarginAfter();
-            childAfterNegative = childRenderBlockFlow->maxNegativeMarginAfter();
-        } else {
-            beforeMargin = child->marginBefore();
-            afterMargin = child->marginAfter();
-        }
-    } else if (child->isHorizontalWritingMode() == isHorizontalWritingMode()) {
-        // The child has a different directionality. If the child is parallel, then it's just
-        // flipped relative to us. We can use the margins for the opposite edges.
-        if (childRenderBlockFlow) {
-            childBeforePositive = childRenderBlockFlow->maxPositiveMarginAfter();
-            childBeforeNegative = childRenderBlockFlow->maxNegativeMarginAfter();
-            childAfterPositive = childRenderBlockFlow->maxPositiveMarginBefore();
-            childAfterNegative = childRenderBlockFlow->maxNegativeMarginBefore();
-        } else {
-            beforeMargin = child->marginAfter();
-            afterMargin = child->marginBefore();
-        }
+    if (childRenderBlockFlow) {
+        childBeforePositive = childRenderBlockFlow->maxPositiveMarginBefore();
+        childBeforeNegative = childRenderBlockFlow->maxNegativeMarginBefore();
+        childAfterPositive = childRenderBlockFlow->maxPositiveMarginAfter();
+        childAfterNegative = childRenderBlockFlow->maxNegativeMarginAfter();
     } else {
-        // The child is perpendicular to us, which means its margins don't collapse but are on the
-        // "logical left/right" sides of the child box. We can just return the raw margin in this case.
-        beforeMargin = marginBeforeForChild(child);
-        afterMargin = marginAfterForChild(child);
+        beforeMargin = child->marginBefore();
+        afterMargin = child->marginAfter();
     }
 
     // Resolve uncollapsing margins into their positive/negative buckets.
@@ -766,8 +737,7 @@ LayoutUnit RenderBlockFlow::collapseMargins(RenderBox* child, MarginInfo& margin
 
 void RenderBlockFlow::adjustPositionedBlock(RenderBox* child, const MarginInfo& marginInfo)
 {
-    bool isHorizontal = isHorizontalWritingMode();
-    bool hasStaticBlockPosition = child->style()->hasStaticBlockPosition(isHorizontal);
+    bool hasStaticBlockPosition = child->style()->hasStaticBlockPosition();
 
     LayoutUnit logicalTop = logicalHeight();
     updateStaticInlinePositionForChild(child, logicalTop);
@@ -1058,26 +1028,13 @@ bool RenderBlockFlow::mustDiscardMarginAfter() const
 bool RenderBlockFlow::mustDiscardMarginBeforeForChild(const RenderBox* child) const
 {
     ASSERT(!child->selfNeedsLayout());
-    if (!child->isWritingModeRoot())
-        return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginBefore() : (child->style()->marginBeforeCollapse() == MDISCARD);
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginAfter() : (child->style()->marginAfterCollapse() == MDISCARD);
-
-    // FIXME: We return false here because the implementation is not geometrically complete. We have values only for before/after, not start/end.
-    // In case the boxes are perpendicular we assume the property is not specified.
-    return false;
+    return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginBefore() : (child->style()->marginBeforeCollapse() == MDISCARD);
 }
 
 bool RenderBlockFlow::mustDiscardMarginAfterForChild(const RenderBox* child) const
 {
     ASSERT(!child->selfNeedsLayout());
-    if (!child->isWritingModeRoot())
-        return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginAfter() : (child->style()->marginAfterCollapse() == MDISCARD);
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginBefore() : (child->style()->marginBeforeCollapse() == MDISCARD);
-
-    // FIXME: See |mustDiscardMarginBeforeForChild| above.
-    return false;
+    return child->isRenderBlockFlow() ? toRenderBlockFlow(child)->mustDiscardMarginAfter() : (child->style()->marginAfterCollapse() == MDISCARD);
 }
 
 void RenderBlockFlow::setMaxMarginBeforeValues(LayoutUnit pos, LayoutUnit neg)
@@ -1108,11 +1065,7 @@ bool RenderBlockFlow::mustSeparateMarginBeforeForChild(const RenderBox* child) c
     const RenderStyle* childStyle = child->style();
     if (!child->isWritingModeRoot())
         return childStyle->marginBeforeCollapse() == MSEPARATE;
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return childStyle->marginAfterCollapse() == MSEPARATE;
-
-    // FIXME: See |mustDiscardMarginBeforeForChild| above.
-    return false;
+    return childStyle->marginAfterCollapse() == MSEPARATE;
 }
 
 bool RenderBlockFlow::mustSeparateMarginAfterForChild(const RenderBox* child) const
@@ -1121,11 +1074,7 @@ bool RenderBlockFlow::mustSeparateMarginAfterForChild(const RenderBox* child) co
     const RenderStyle* childStyle = child->style();
     if (!child->isWritingModeRoot())
         return childStyle->marginAfterCollapse() == MSEPARATE;
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return childStyle->marginBeforeCollapse() == MSEPARATE;
-
-    // FIXME: See |mustDiscardMarginBeforeForChild| above.
-    return false;
+    return childStyle->marginBeforeCollapse() == MSEPARATE;
 }
 
 void RenderBlockFlow::addOverflowFromFloats()
@@ -1230,11 +1179,7 @@ void RenderBlockFlow::invalidatePaintForOverflow()
         paintInvalidationLogicalRight = std::max(paintInvalidationLogicalRight, logicalRightLayoutOverflow());
     }
 
-    LayoutRect paintInvalidationRect;
-    if (isHorizontalWritingMode())
-        paintInvalidationRect = LayoutRect(paintInvalidationLogicalLeft, m_paintInvalidationLogicalTop, paintInvalidationLogicalRight - paintInvalidationLogicalLeft, m_paintInvalidationLogicalBottom - m_paintInvalidationLogicalTop);
-    else
-        paintInvalidationRect = LayoutRect(m_paintInvalidationLogicalTop, paintInvalidationLogicalLeft, m_paintInvalidationLogicalBottom - m_paintInvalidationLogicalTop, paintInvalidationLogicalRight - paintInvalidationLogicalLeft);
+    LayoutRect paintInvalidationRect = LayoutRect(paintInvalidationLogicalLeft, m_paintInvalidationLogicalTop, paintInvalidationLogicalRight - paintInvalidationLogicalLeft, m_paintInvalidationLogicalBottom - m_paintInvalidationLogicalTop);
 
     if (hasOverflowClip()) {
         // Adjust the paint invalidation rect for scroll offset
@@ -1437,10 +1382,9 @@ GapRects RenderBlockFlow::inlineSelectionGaps(RenderBlock* rootBlock, const Layo
         }
 
         LayoutRect logicalRect(curr->logicalLeft(), selTop, curr->logicalWidth(), selTop + selHeight);
-        logicalRect.move(isHorizontalWritingMode() ? offsetFromRootBlock : offsetFromRootBlock.transposedSize());
+        logicalRect.move(offsetFromRootBlock);
         LayoutRect physicalRect = rootBlock->logicalRectToPhysicalRect(rootBlockPhysicalPosition, logicalRect);
-        if (!paintInfo || (isHorizontalWritingMode() && physicalRect.y() < paintInfo->rect.maxY() && physicalRect.maxY() > paintInfo->rect.y())
-            || (!isHorizontalWritingMode() && physicalRect.x() < paintInfo->rect.maxX() && physicalRect.maxX() > paintInfo->rect.x()))
+        if (!paintInfo || (physicalRect.y() < paintInfo->rect.maxY() && physicalRect.maxY() > paintInfo->rect.y()))
             result.unite(curr->lineSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, selTop, selHeight, paintInfo));
 
         lastSelectedLine = curr;

@@ -314,41 +314,30 @@ void InlineBox::clearKnownToHaveNoOverflow()
 
 FloatPoint InlineBox::locationIncludingFlipping()
 {
-    if (!renderer().style()->isFlippedBlocksWritingMode())
-        return FloatPoint(x(), y());
-    RenderBlockFlow& block = root().block();
-    if (block.style()->isHorizontalWritingMode())
-        return FloatPoint(x(), block.height() - height() - y());
-
-    return FloatPoint(block.width() - width() - x(), y());
+    // FIXME(sky): remove
+    return FloatPoint(x(), y());
 }
 
 void InlineBox::flipForWritingMode(FloatRect& rect)
 {
-    if (!renderer().style()->isFlippedBlocksWritingMode())
-        return;
-    root().block().flipForWritingMode(rect);
+    // FIXME(sky): remove
 }
 
 FloatPoint InlineBox::flipForWritingMode(const FloatPoint& point)
 {
-    if (!renderer().style()->isFlippedBlocksWritingMode())
-        return point;
-    return root().block().flipForWritingMode(point);
+    // FIXME(sky): remove
+    return point;
 }
 
 void InlineBox::flipForWritingMode(LayoutRect& rect)
 {
-    if (!renderer().style()->isFlippedBlocksWritingMode())
-        return;
-    root().block().flipForWritingMode(rect);
+    // FIXME(sky): remove
 }
 
 LayoutPoint InlineBox::flipForWritingMode(const LayoutPoint& point)
 {
-    if (!renderer().style()->isFlippedBlocksWritingMode())
-        return point;
-    return root().block().flipForWritingMode(point);
+    // FIXME(sky): remove
+    return point;
 }
 
 } // namespace blink

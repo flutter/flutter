@@ -72,36 +72,25 @@ static PassOwnPtr<Shape> createPolygonShape(PassOwnPtr<Vector<FloatPoint> > vert
 
 static inline FloatRect physicalRectToLogical(const FloatRect& rect, float logicalBoxHeight)
 {
-    if (isHorizontalWritingMode())
-        return rect;
-    if (isFlippedBlocksWritingMode())
-        return FloatRect(rect.y(), logicalBoxHeight - rect.maxX(), rect.height(), rect.width());
-    return rect.transposedRect();
+    return rect;
 }
 
 static inline FloatPoint physicalPointToLogical(const FloatPoint& point, float logicalBoxHeight)
 {
-    if (isHorizontalWritingMode())
-        return point;
-    if (isFlippedBlocksWritingMode())
-        return FloatPoint(point.y(), logicalBoxHeight - point.x());
-    return point.transposedPoint();
+    return point;
 }
 
 static inline FloatSize physicalSizeToLogical(const FloatSize& size)
 {
-    if (isHorizontalWritingMode())
-        return size;
-    return size.transposedSize();
+    return size;
 }
 
 PassOwnPtr<Shape> Shape::createShape(const BasicShape* basicShape, const LayoutSize& logicalBoxSize, float margin)
 {
     ASSERT(basicShape);
 
-    bool horizontalWritingMode = isHorizontalWritingMode();
-    float boxWidth = horizontalWritingMode ? logicalBoxSize.width().toFloat() : logicalBoxSize.height().toFloat();
-    float boxHeight = horizontalWritingMode ? logicalBoxSize.height().toFloat() : logicalBoxSize.width().toFloat();
+    float boxWidth = logicalBoxSize.width().toFloat();
+    float boxHeight = logicalBoxSize.height().toFloat();
     OwnPtr<Shape> shape;
 
     switch (basicShape->type()) {

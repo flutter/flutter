@@ -670,7 +670,7 @@ int VisiblePosition::lineDirectionPointForBlockDirectionNavigation() const
     RenderObject* containingBlock = renderer->containingBlock();
     if (!containingBlock)
         containingBlock = renderer; // Just use ourselves to determine the writing mode if we have no containing block.
-    return containingBlock->isHorizontalWritingMode() ? caretPoint.x() : caretPoint.y();
+    return caretPoint.x();
 }
 
 #ifndef NDEBUG

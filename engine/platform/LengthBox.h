@@ -25,7 +25,6 @@
 #include "platform/Length.h"
 #include "platform/PlatformExport.h"
 #include "platform/text/TextDirection.h"
-#include "platform/text/WritingMode.h"
 
 namespace blink {
 

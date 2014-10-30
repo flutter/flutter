@@ -910,8 +910,7 @@ OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
 
     switch (style ? style->cursor() : CURSOR_AUTO) {
     case CURSOR_AUTO: {
-        bool horizontalText = !style || style->isHorizontalWritingMode();
-        const Cursor& iBeam = horizontalText ? iBeamCursor() : verticalTextCursor();
+        const Cursor& iBeam = iBeamCursor();
         return selectAutoCursor(result, node, iBeam);
     }
     case CURSOR_CROSS:

@@ -638,8 +638,7 @@ void InlineFlowBox::placeBoxesInBlockDirection(LayoutUnit top, LayoutUnit maxHei
             newLogicalTop += curr->baselinePosition(baselineType) - fontMetrics.ascent(baselineType);
             if (curr->isInlineFlowBox()) {
                 RenderBoxModelObject& boxObject = toRenderBoxModelObject(curr->renderer());
-                newLogicalTop -= boxObject.style(isFirstLineStyle())->isHorizontalWritingMode() ? boxObject.borderTop() + boxObject.paddingTop() :
-                    boxObject.borderRight() + boxObject.paddingRight();
+                newLogicalTop -= boxObject.borderTop() + boxObject.paddingTop();
                 borderPaddingHeight = boxObject.borderAndPaddingLogicalHeight();
             }
             newLogicalTopIncludingMargins = newLogicalTop;
@@ -659,7 +658,7 @@ void InlineFlowBox::placeBoxesInBlockDirection(LayoutUnit top, LayoutUnit maxHei
                 TextEmphasisPosition emphasisMarkPosition;
                 if (toInlineTextBox(curr)->getEmphasisMarkPosition(curr->renderer().style(isFirstLineStyle()), emphasisMarkPosition)) {
                     bool emphasisMarkIsOver = emphasisMarkPosition == TextEmphasisPositionOver;
-                    if (emphasisMarkIsOver != curr->renderer().style(isFirstLineStyle())->isFlippedLinesWritingMode())
+                    if (emphasisMarkIsOver)
                         hasAnnotationsBefore = true;
                     else
                         hasAnnotationsAfter = true;

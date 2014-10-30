@@ -35,7 +35,6 @@
 #include "platform/geometry/LayoutRect.h"
 #include "platform/geometry/RoundedRect.h"
 #include "platform/graphics/Path.h"
-#include "platform/text/WritingMode.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/Vector.h"
 

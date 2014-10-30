@@ -182,10 +182,10 @@ public:
     virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const override;
 
     // Accessors for logical width/height and margins in the containing block's block-flow direction.
-    LayoutUnit logicalWidthForChild(const RenderBox* child) const { return isHorizontalWritingMode() ? child->width() : child->height(); }
-    LayoutUnit logicalHeightForChild(const RenderBox* child) const { return isHorizontalWritingMode() ? child->height() : child->width(); }
-    LayoutSize logicalSizeForChild(const RenderBox* child) const { return isHorizontalWritingMode() ? child->size() : child->size().transposedSize(); }
-    LayoutUnit logicalTopForChild(const RenderBox* child) const { return isHorizontalWritingMode() ? child->y() : child->x(); }
+    LayoutUnit logicalWidthForChild(const RenderBox* child) const { return child->width(); }
+    LayoutUnit logicalHeightForChild(const RenderBox* child) const { return child->height(); }
+    LayoutSize logicalSizeForChild(const RenderBox* child) const { return child->size(); }
+    LayoutUnit logicalTopForChild(const RenderBox* child) const { return child->y(); }
     LayoutUnit marginBeforeForChild(const RenderBoxModelObject* child) const { return child->marginBefore(style()); }
     LayoutUnit marginAfterForChild(const RenderBoxModelObject* child) const { return child->marginAfter(style()); }
     LayoutUnit marginStartForChild(const RenderBoxModelObject* child) const { return child->marginStart(style()); }
@@ -202,7 +202,7 @@ public:
     virtual void scrollbarsChanged(bool /*horizontalScrollbarChanged*/, bool /*verticalScrollbarChanged*/) { }
 
     LayoutUnit availableLogicalWidthForContent() const { return max<LayoutUnit>(0, logicalRightOffsetForContent() - logicalLeftOffsetForContent()); }
-    LayoutUnit logicalLeftOffsetForContent() const { return isHorizontalWritingMode() ? borderLeft() + paddingLeft() : borderTop() + paddingTop(); }
+    LayoutUnit logicalLeftOffsetForContent() const { return borderLeft() + paddingLeft(); }
     LayoutUnit logicalRightOffsetForContent() const { return logicalLeftOffsetForContent() + availableLogicalWidth(); }
     LayoutUnit startOffsetForContent() const { return style()->isLeftToRightDirection() ? logicalLeftOffsetForContent() : logicalWidth() - logicalRightOffsetForContent(); }
     LayoutUnit endOffsetForContent() const { return !style()->isLeftToRightDirection() ? logicalLeftOffsetForContent() : logicalWidth() - logicalRightOffsetForContent(); }

@@ -113,7 +113,8 @@ InlineFlowBox* RenderBlockFlow::createLineBoxes(RenderObject* obj, const LineInf
             ASSERT_WITH_SECURITY_IMPLICATION(newBox->isInlineFlowBox());
             parentBox = toInlineFlowBox(newBox);
             parentBox->setFirstLineStyleBit(lineInfo.isFirstLine());
-            parentBox->setIsHorizontal(isHorizontalWritingMode());
+            // FIXME(sky): Remove
+            parentBox->setIsHorizontal(true);
             if (!hasDefaultLineBoxContain)
                 parentBox->clearDescendantsHaveSameLineHeightAndBaseline();
             constructedNewBox = true;
@@ -1062,16 +1063,8 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             // Case (2). Inline replaced elements and floats.
             // Go ahead and terminate the current line as far as
             // minwidth is concerned.
-            LayoutUnit childMinPreferredLogicalWidth, childMaxPreferredLogicalWidth;
-            if (child->isBox() && child->isHorizontalWritingMode() != isHorizontalWritingMode()) {
-                RenderBox* childBox = toRenderBox(child);
-                LogicalExtentComputedValues computedValues;
-                childBox->computeLogicalHeight(childBox->borderAndPaddingLogicalHeight(), 0, computedValues);
-                childMinPreferredLogicalWidth = childMaxPreferredLogicalWidth = computedValues.m_extent;
-            } else {
-                childMinPreferredLogicalWidth = child->minPreferredLogicalWidth();
-                childMaxPreferredLogicalWidth = child->maxPreferredLogicalWidth();
-            }
+            LayoutUnit childMinPreferredLogicalWidth = child->minPreferredLogicalWidth();
+            LayoutUnit childMaxPreferredLogicalWidth = child->maxPreferredLogicalWidth();
             childMin += childMinPreferredLogicalWidth.ceilToFloat();
             childMax += childMaxPreferredLogicalWidth.ceilToFloat();
 
@@ -1335,7 +1328,7 @@ void RenderBlockFlow::layoutInlineChildren(bool relayoutChildren, LayoutUnit& pa
     setLogicalHeight(logicalHeight() + lastLineAnnotationsAdjustment + afterEdge);
 
     if (!firstLineBox() && hasLineIfEmpty())
-        setLogicalHeight(logicalHeight() + lineHeight(true, isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes));
+        setLogicalHeight(logicalHeight() + lineHeight(true, HorizontalLine, PositionOfInteriorLineBoxes));
 
     // See if we have any lines that spill out of our block.  If we do, then we will possibly need to
     // truncate text.
@@ -1364,9 +1357,8 @@ void RenderBlockFlow::checkFloatsInCleanLine(RootInlineBox* line, Vector<FloatWi
         }
 
         if (floats[floatIndex].rect.size() != newSize) {
-            LayoutUnit floatTop = isHorizontalWritingMode() ? floats[floatIndex].rect.y() : floats[floatIndex].rect.x();
-            LayoutUnit floatHeight = isHorizontalWritingMode() ? std::max(floats[floatIndex].rect.height(), newSize.height())
-                : std::max(floats[floatIndex].rect.width(), newSize.width());
+            LayoutUnit floatTop = floats[floatIndex].rect.y();
+            LayoutUnit floatHeight = std::max(floats[floatIndex].rect.height(), newSize.height());
             floatHeight = std::min(floatHeight, LayoutUnit::max() - floatTop);
             line->markDirty();
             markLinesDirtyInBlockRange(line->lineBottomWithLeading(), floatTop + floatHeight, line);

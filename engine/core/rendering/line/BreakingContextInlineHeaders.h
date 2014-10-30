@@ -202,7 +202,7 @@ inline void setStaticPositions(RenderBlockFlow* block, RenderBox* child)
 
         // If |child| is a leading or trailing positioned object this is its only opportunity to ensure it moves with an inline
         // container changing width.
-        child->moveWithEdgeOfInlineContainerIfNecessary(child->isHorizontalWritingMode());
+        child->moveWithEdgeOfInlineContainerIfNecessary();
     }
     block->updateStaticInlinePositionForChild(child, blockHeight);
     child->layer()->setStaticBlockPosition(blockHeight);

@@ -223,32 +223,28 @@ public:
     }
     LayoutUnit logicalLeftLayoutOverflow() const
     {
-        return m_overflow ? (isHorizontal() ? m_overflow->layoutOverflowRect().x() : m_overflow->layoutOverflowRect().y()) :
-                            static_cast<LayoutUnit>(logicalLeft());
+        return m_overflow ? m_overflow->layoutOverflowRect().x() : static_cast<LayoutUnit>(logicalLeft());
     }
     LayoutUnit logicalRightLayoutOverflow() const
     {
-        return m_overflow ? (isHorizontal() ? m_overflow->layoutOverflowRect().maxX() : m_overflow->layoutOverflowRect().maxY()) :
-                            static_cast<LayoutUnit>(ceilf(logicalRight()));
+        return m_overflow ? m_overflow->layoutOverflowRect().maxX() : static_cast<LayoutUnit>(ceilf(logicalRight()));
     }
     LayoutUnit logicalTopLayoutOverflow(LayoutUnit lineTop) const
     {
         if (m_overflow)
-            return isHorizontal() ? m_overflow->layoutOverflowRect().y() : m_overflow->layoutOverflowRect().x();
+            return m_overflow->layoutOverflowRect().y();
         return lineTop;
     }
     LayoutUnit logicalBottomLayoutOverflow(LayoutUnit lineBottom) const
     {
         if (m_overflow)
-            return isHorizontal() ? m_overflow->layoutOverflowRect().maxY() : m_overflow->layoutOverflowRect().maxX();
+            return m_overflow->layoutOverflowRect().maxY();
         return lineBottom;
     }
     LayoutRect logicalLayoutOverflowRect(LayoutUnit lineTop, LayoutUnit lineBottom) const
     {
-        LayoutRect result = layoutOverflowRect(lineTop, lineBottom);
-        if (!renderer().isHorizontalWritingMode())
-            result = result.transposedRect();
-        return result;
+        // FIXME(sky): Remove
+        return layoutOverflowRect(lineTop, lineBottom);
     }
 
     LayoutRect visualOverflowRect(LayoutUnit lineTop, LayoutUnit lineBottom) const
@@ -271,19 +267,14 @@ public:
     }
     LayoutRect logicalVisualOverflowRect(LayoutUnit lineTop, LayoutUnit lineBottom) const
     {
-        LayoutRect result = visualOverflowRect(lineTop, lineBottom);
-        if (!renderer().isHorizontalWritingMode())
-            result = result.transposedRect();
-        return result;
+        return visualOverflowRect(lineTop, lineBottom);
     }
 
     void setOverflowFromLogicalRects(const LayoutRect& logicalLayoutOverflow, const LayoutRect& logicalVisualOverflow, LayoutUnit lineTop, LayoutUnit lineBottom);
 
     FloatRect frameRectIncludingLineHeight(LayoutUnit lineTop, LayoutUnit lineBottom) const
     {
-        if (isHorizontal())
-            return FloatRect(m_topLeft.x(), lineTop.toFloat(), width(), (lineBottom - lineTop).toFloat());
-        return FloatRect(lineTop.toFloat(), m_topLeft.y(), (lineBottom - lineTop).toFloat(), height());
+        return FloatRect(m_topLeft.x(), lineTop.toFloat(), width(), (lineBottom - lineTop).toFloat());
     }
 
     FloatRect logicalFrameRectIncludingLineHeight(LayoutUnit lineTop, LayoutUnit lineBottom) const

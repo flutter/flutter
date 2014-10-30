@@ -35,12 +35,12 @@ namespace blink {
 
 const Length& LengthBox::logicalLeft() const
 {
-    return isHorizontalWritingMode() ? m_left : m_top;
+    return m_left;
 }
 
 const Length& LengthBox::logicalRight() const
 {
-    return isHorizontalWritingMode() ? m_right : m_bottom;
+    return m_right;
 }
 
 const Length& LengthBox::before() const
@@ -57,16 +57,12 @@ const Length& LengthBox::after() const
 
 const Length& LengthBox::start(TextDirection direction) const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection(direction) ? m_left : m_right;
-    return isLeftToRightDirection(direction) ? m_top : m_bottom;
+    return isLeftToRightDirection(direction) ? m_left : m_right;
 }
 
 const Length& LengthBox::end(TextDirection direction) const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection(direction) ? m_right : m_left;
-    return isLeftToRightDirection(direction) ? m_bottom : m_top;
+    return isLeftToRightDirection(direction) ? m_right : m_left;
 }
 
 } // namespace blink

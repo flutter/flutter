@@ -398,8 +398,8 @@ public:
     // to determine its position.
     bool hasAutoLeftAndRight() const { return left().isAuto() && right().isAuto(); }
     bool hasAutoTopAndBottom() const { return top().isAuto() && bottom().isAuto(); }
-    bool hasStaticInlinePosition(bool horizontal) const { return horizontal ? hasAutoLeftAndRight() : hasAutoTopAndBottom(); }
-    bool hasStaticBlockPosition(bool horizontal) const { return horizontal ? hasAutoTopAndBottom() : hasAutoLeftAndRight(); }
+    bool hasStaticInlinePosition() const { return hasAutoLeftAndRight(); }
+    bool hasStaticBlockPosition() const { return hasAutoTopAndBottom(); }
 
     EPosition position() const { return static_cast<EPosition>(noninherited_flags.position); }
     bool hasOutOfFlowPosition() const { return position() == AbsolutePosition; }
@@ -413,12 +413,12 @@ public:
     const Length& minHeight() const { return m_box->minHeight(); }
     const Length& maxHeight() const { return m_box->maxHeight(); }
 
-    const Length& logicalWidth() const { return isHorizontalWritingMode() ? width() : height(); }
-    const Length& logicalHeight() const { return isHorizontalWritingMode() ? height() : width(); }
-    const Length& logicalMinWidth() const { return isHorizontalWritingMode() ? minWidth() : minHeight(); }
-    const Length& logicalMaxWidth() const { return isHorizontalWritingMode() ? maxWidth() : maxHeight(); }
-    const Length& logicalMinHeight() const { return isHorizontalWritingMode() ? minHeight() : minWidth(); }
-    const Length& logicalMaxHeight() const { return isHorizontalWritingMode() ? maxHeight() : maxWidth(); }
+    const Length& logicalWidth() const { return width(); }
+    const Length& logicalHeight() const { return height(); }
+    const Length& logicalMinWidth() const { return minWidth(); }
+    const Length& logicalMaxWidth() const { return maxWidth(); }
+    const Length& logicalMinHeight() const { return minHeight(); }
+    const Length& logicalMaxHeight() const { return maxHeight(); }
 
     const BorderData& border() const { return surround->border; }
     const BorderValue& borderLeft() const { return surround->border.left(); }
@@ -831,9 +831,10 @@ public:
     const LineClampValue& lineClamp() const { return rareNonInheritedData->lineClamp; }
     Color tapHighlightColor() const { return rareInheritedData->tapHighlightColor; }
 
-    bool isHorizontalWritingMode() const { return blink::isHorizontalWritingMode(); }
-    bool isFlippedLinesWritingMode() const { return blink::isFlippedLinesWritingMode(); }
-    bool isFlippedBlocksWritingMode() const { return blink::isFlippedBlocksWritingMode(); }
+    // FIXME(sky): Remove these.
+    bool isHorizontalWritingMode() const { return true; }
+    bool isFlippedLinesWritingMode() const { return false; }
+    bool isFlippedBlocksWritingMode() const { return false; }
 
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
 
@@ -1529,11 +1530,11 @@ private:
     void getShadowVerticalExtent(const ShadowList*, LayoutUnit& top, LayoutUnit& bottom) const;
     void getShadowInlineDirectionExtent(const ShadowList* shadow, LayoutUnit& logicalLeft, LayoutUnit& logicalRight) const
     {
-        return isHorizontalWritingMode() ? getShadowHorizontalExtent(shadow, logicalLeft, logicalRight) : getShadowVerticalExtent(shadow, logicalLeft, logicalRight);
+        return getShadowHorizontalExtent(shadow, logicalLeft, logicalRight);
     }
     void getShadowBlockDirectionExtent(const ShadowList* shadow, LayoutUnit& logicalTop, LayoutUnit& logicalBottom) const
     {
-        return isHorizontalWritingMode() ? getShadowVerticalExtent(shadow, logicalTop, logicalBottom) : getShadowHorizontalExtent(shadow, logicalTop, logicalBottom);
+        return getShadowVerticalExtent(shadow, logicalTop, logicalBottom);
     }
 
     bool isDisplayFlexibleBox(EDisplay display) const

@@ -259,16 +259,10 @@ void RenderBlock::styleWillChange(StyleDifference diff, const RenderStyle& newSt
 
 static bool borderOrPaddingLogicalWidthChanged(const RenderStyle* oldStyle, const RenderStyle* newStyle)
 {
-    if (newStyle->isHorizontalWritingMode())
-        return oldStyle->borderLeftWidth() != newStyle->borderLeftWidth()
-            || oldStyle->borderRightWidth() != newStyle->borderRightWidth()
-            || oldStyle->paddingLeft() != newStyle->paddingLeft()
-            || oldStyle->paddingRight() != newStyle->paddingRight();
-
-    return oldStyle->borderTopWidth() != newStyle->borderTopWidth()
-        || oldStyle->borderBottomWidth() != newStyle->borderBottomWidth()
-        || oldStyle->paddingTop() != newStyle->paddingTop()
-        || oldStyle->paddingBottom() != newStyle->paddingBottom();
+    return oldStyle->borderLeftWidth() != newStyle->borderLeftWidth()
+        || oldStyle->borderRightWidth() != newStyle->borderRightWidth()
+        || oldStyle->paddingLeft() != newStyle->paddingLeft()
+        || oldStyle->paddingRight() != newStyle->paddingRight();
 }
 
 void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
@@ -1066,10 +1060,7 @@ void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
         // be considered reachable.
         LayoutRect clientRect(noOverflowRect());
         LayoutRect rectToApply;
-        if (isHorizontalWritingMode())
-            rectToApply = LayoutRect(clientRect.x(), clientRect.y(), 1, std::max<LayoutUnit>(0, oldClientAfterEdge - clientRect.y()));
-        else
-            rectToApply = LayoutRect(clientRect.x(), clientRect.y(), std::max<LayoutUnit>(0, oldClientAfterEdge - clientRect.x()), 1);
+        rectToApply = LayoutRect(clientRect.x(), clientRect.y(), 1, std::max<LayoutUnit>(0, oldClientAfterEdge - clientRect.y()));
         addLayoutOverflow(rectToApply);
         if (hasRenderOverflow())
             m_overflow->setLayoutClientAfterEdge(oldClientAfterEdge);
@@ -1228,7 +1219,7 @@ void RenderBlock::layoutPositionedObjects(bool relayoutChildren, PositionedLayou
         // non-positioned block.  Rather than trying to detect all of these movement cases, we just always lay out positioned
         // objects that are positioned implicitly like this.  Such objects are rare, and so in typical DHTML menu usage (where everything is
         // positioned explicitly) this should not incur a performance penalty.
-        if (relayoutChildren || (r->style()->hasStaticBlockPosition(isHorizontalWritingMode()) && r->parent() != this))
+        if (relayoutChildren || (r->style()->hasStaticBlockPosition() && r->parent() != this))
             layoutScope.setChildNeedsLayout(r);
 
         // If relayoutChildren is set and the child has percentage padding or an embedded content box, we also need to invalidate the childs pref widths.
@@ -1636,22 +1627,19 @@ static void clipOutPositionedObjects(const PaintInfo* paintInfo, const LayoutPoi
 
 LayoutUnit RenderBlock::blockDirectionOffset(const LayoutSize& offsetFromBlock) const
 {
-    return isHorizontalWritingMode() ? offsetFromBlock.height() : offsetFromBlock.width();
+    // FIXME(sky): Remove
+    return offsetFromBlock.height();
 }
 
 LayoutUnit RenderBlock::inlineDirectionOffset(const LayoutSize& offsetFromBlock) const
 {
-    return isHorizontalWritingMode() ? offsetFromBlock.width() : offsetFromBlock.height();
+    // FIXME(sky): Remove
+    return offsetFromBlock.width();
 }
 
 LayoutRect RenderBlock::logicalRectToPhysicalRect(const LayoutPoint& rootBlockPhysicalPosition, const LayoutRect& logicalRect)
 {
-    LayoutRect result;
-    if (isHorizontalWritingMode())
-        result = logicalRect;
-    else
-        result = LayoutRect(logicalRect.y(), logicalRect.x(), logicalRect.height(), logicalRect.width());
-    flipForWritingMode(result);
+    LayoutRect result = logicalRect;
     result.moveBy(rootBlockPhysicalPosition);
     return result;
 }
@@ -2284,7 +2272,7 @@ static PositionWithAffinity positionForPointRespectingEditingBoundaries(RenderBl
 
     // Otherwise return before or after the child, depending on if the click was to the logical left or logical right of the child
     LayoutUnit childMiddle = parent->logicalWidthForChild(child) / 2;
-    LayoutUnit logicalLeft = parent->isHorizontalWritingMode() ? pointInChildCoordinates.x() : pointInChildCoordinates.y();
+    LayoutUnit logicalLeft = pointInChildCoordinates.x();
     if (logicalLeft < childMiddle)
         return ancestor->createPositionWithAffinity(childNode->nodeIndex(), DOWNSTREAM);
     return ancestor->createPositionWithAffinity(childNode->nodeIndex() + 1, UPSTREAM);
@@ -2357,8 +2345,6 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
 
         // pass the box a top position that is inside it
         LayoutPoint point(pointInLogicalContents.x(), closestBox->root().blockDirectionPointInLine());
-        if (!isHorizontalWritingMode())
-            point = point.transposedPoint();
         if (closestBox->renderer().isReplaced())
             return positionForPointRespectingEditingBoundaries(this, &toRenderBox(closestBox->renderer()), point);
         return closestBox->renderer().positionForPoint(point);
@@ -2387,8 +2373,8 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
 {
     if (isReplaced()) {
         // FIXME: This seems wrong when the object's writing-mode doesn't match the line's writing-mode.
-        LayoutUnit pointLogicalLeft = isHorizontalWritingMode() ? point.x() : point.y();
-        LayoutUnit pointLogicalTop = isHorizontalWritingMode() ? point.y() : point.x();
+        LayoutUnit pointLogicalLeft = point.x();
+        LayoutUnit pointLogicalTop = point.y();
 
         if (pointLogicalLeft < 0)
             return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
@@ -2403,8 +2389,6 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
     LayoutPoint pointInContents = point;
     offsetForContents(pointInContents);
     LayoutPoint pointInLogicalContents(pointInContents);
-    if (!isHorizontalWritingMode())
-        pointInLogicalContents = pointInLogicalContents.transposedPoint();
 
     if (childrenInline())
         return positionForPointWithInlineChildren(pointInLogicalContents);
@@ -2539,16 +2523,8 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
             marginEnd += endMarginLength.value();
         margin = marginStart + marginEnd;
 
-        LayoutUnit childMinPreferredLogicalWidth, childMaxPreferredLogicalWidth;
-        if (child->isBox() && child->isHorizontalWritingMode() != isHorizontalWritingMode()) {
-            RenderBox* childBox = toRenderBox(child);
-            LogicalExtentComputedValues computedValues;
-            childBox->computeLogicalHeight(childBox->borderAndPaddingLogicalHeight(), 0, computedValues);
-            childMinPreferredLogicalWidth = childMaxPreferredLogicalWidth = computedValues.m_extent;
-        } else {
-            childMinPreferredLogicalWidth = child->minPreferredLogicalWidth();
-            childMaxPreferredLogicalWidth = child->maxPreferredLogicalWidth();
-        }
+        LayoutUnit childMinPreferredLogicalWidth = child->minPreferredLogicalWidth();
+        LayoutUnit childMaxPreferredLogicalWidth = child->maxPreferredLogicalWidth();
 
         LayoutUnit w = childMinPreferredLogicalWidth + margin;
         minLogicalWidth = std::max(w, minLogicalWidth);
@@ -2655,7 +2631,7 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
     if (!(style(isFirstLine)->lineBoxContain() & LineBoxContainBlock))
         return 0;
 
-    return std::max<LayoutUnit>(replacedHeight, lineHeight(isFirstLine, isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes));
+    return std::max<LayoutUnit>(replacedHeight, lineHeight(isFirstLine, HorizontalLine, PositionOfInteriorLineBoxes));
 }
 
 int RenderBlock::firstLineBoxBaseline() const
@@ -2999,15 +2975,7 @@ LayoutUnit RenderBlock::collapsedMarginBeforeForChild(const RenderBox* child) co
     // collapsed margin.
     if (!child->isWritingModeRoot())
         return child->collapsedMarginBefore();
-
-    // The child has a different directionality.  If the child is parallel, then it's just
-    // flipped relative to us.  We can use the collapsed margin for the opposite edge.
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->collapsedMarginAfter();
-
-    // The child is perpendicular to us, which means its margins don't collapse but are on the
-    // "logical left/right" sides of the child box.  We can just return the raw margin in this case.
-    return marginBeforeForChild(child);
+    return child->collapsedMarginAfter();
 }
 
 LayoutUnit RenderBlock::collapsedMarginAfterForChild(const  RenderBox* child) const
@@ -3016,15 +2984,7 @@ LayoutUnit RenderBlock::collapsedMarginAfterForChild(const  RenderBox* child) co
     // collapsed margin.
     if (!child->isWritingModeRoot())
         return child->collapsedMarginAfter();
-
-    // The child has a different directionality.  If the child is parallel, then it's just
-    // flipped relative to us.  We can use the collapsed margin for the opposite edge.
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->collapsedMarginBefore();
-
-    // The child is perpendicular to us, which means its margins don't collapse but are on the
-    // "logical left/right" side of the child box.  We can just return the raw margin in this case.
-    return marginAfterForChild(child);
+    return child->collapsedMarginBefore();
 }
 
 bool RenderBlock::hasMarginBeforeQuirk(const RenderBox* child) const
@@ -3034,14 +2994,7 @@ bool RenderBlock::hasMarginBeforeQuirk(const RenderBox* child) const
     if (!child->isWritingModeRoot())
         return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
 
-    // The child has a different directionality. If the child is parallel, then it's just
-    // flipped relative to us. We can use the opposite edge.
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
-
-    // The child is perpendicular to us and box sides are never quirky in html.css, and we don't really care about
-    // whether or not authors specified quirky ems, since they're an implementation detail.
-    return false;
+    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
 }
 
 bool RenderBlock::hasMarginAfterQuirk(const RenderBox* child) const
@@ -3051,14 +3004,7 @@ bool RenderBlock::hasMarginAfterQuirk(const RenderBox* child) const
     if (!child->isWritingModeRoot())
         return child->isRenderBlock() ? toRenderBlock(child)->hasMarginAfterQuirk() : child->style()->hasMarginAfterQuirk();
 
-    // The child has a different directionality. If the child is parallel, then it's just
-    // flipped relative to us. We can use the opposite edge.
-    if (child->isHorizontalWritingMode() == isHorizontalWritingMode())
-        return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
-
-    // The child is perpendicular to us and box sides are never quirky in html.css, and we don't really care about
-    // whether or not authors specified quirky ems, since they're an implementation detail.
-    return false;
+    return child->isRenderBlock() ? toRenderBlock(child)->hasMarginBeforeQuirk() : child->style()->hasMarginBeforeQuirk();
 }
 
 const char* RenderBlock::renderName() const

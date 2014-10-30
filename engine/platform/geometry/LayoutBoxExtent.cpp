@@ -37,22 +37,22 @@ namespace blink {
 
 LayoutUnit LayoutBoxExtent::logicalTop() const
 {
-    return isHorizontalWritingMode() ? m_top : m_left;
+    return m_top;
 }
 
 LayoutUnit LayoutBoxExtent::logicalBottom() const
 {
-    return isHorizontalWritingMode() ? m_bottom : m_right;
+    return m_bottom;
 }
 
 LayoutUnit LayoutBoxExtent::logicalLeft() const
 {
-    return isHorizontalWritingMode() ? m_left : m_top;
+    return m_left;
 }
 
 LayoutUnit LayoutBoxExtent::logicalRight() const
 {
-    return isHorizontalWritingMode() ? m_right : m_bottom;
+    return m_right;
 }
 
 LayoutUnit LayoutBoxExtent::before() const
@@ -69,16 +69,12 @@ LayoutUnit LayoutBoxExtent::after() const
 
 LayoutUnit LayoutBoxExtent::start(TextDirection direction) const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection(direction) ? m_left : m_right;
-    return isLeftToRightDirection(direction) ? m_top : m_bottom;
+    return isLeftToRightDirection(direction) ? m_left : m_right;
 }
 
 LayoutUnit LayoutBoxExtent::end(TextDirection direction) const
 {
-    if (isHorizontalWritingMode())
-        return isLeftToRightDirection(direction) ? m_right : m_left;
-    return isLeftToRightDirection(direction) ? m_bottom : m_top;
+    return isLeftToRightDirection(direction) ? m_right : m_left;
 }
 
 void LayoutBoxExtent::setBefore(LayoutUnit value)
@@ -95,56 +91,38 @@ void LayoutBoxExtent::setAfter(LayoutUnit value)
 
 void LayoutBoxExtent::setStart(TextDirection direction, LayoutUnit value)
 {
-    if (isHorizontalWritingMode()) {
-        if (isLeftToRightDirection(direction))
-            m_left = value;
-        else
-            m_right = value;
-    } else {
-        if (isLeftToRightDirection(direction))
-            m_top = value;
-        else
-            m_bottom = value;
-    }
+    if (isLeftToRightDirection(direction))
+        m_left = value;
+    else
+        m_right = value;
 }
 
 void LayoutBoxExtent::setEnd(TextDirection direction, LayoutUnit value)
 {
-    if (isHorizontalWritingMode()) {
-        if (isLeftToRightDirection(direction))
-            m_right = value;
-        else
-            m_left = value;
-    } else {
-        if (isLeftToRightDirection(direction))
-            m_bottom = value;
-        else
-            m_top = value;
-    }
+    if (isLeftToRightDirection(direction))
+        m_right = value;
+    else
+        m_left = value;
 }
 
 LayoutUnit& LayoutBoxExtent::mutableLogicalLeft()
 {
-    return isHorizontalWritingMode() ? m_left : m_top;
+    return m_left;
 }
 
 LayoutUnit& LayoutBoxExtent::mutableLogicalRight()
 {
-    return isHorizontalWritingMode() ? m_right : m_bottom;
+    return m_right;
 }
 
 LayoutUnit& LayoutBoxExtent::mutableBefore()
 {
-    return isHorizontalWritingMode() ?
-        (isFlippedBlocksWritingMode() ? m_bottom : m_top) :
-        (isFlippedBlocksWritingMode() ? m_right: m_left);
+    return m_top;
 }
 
 LayoutUnit& LayoutBoxExtent::mutableAfter()
 {
-    return isHorizontalWritingMode() ?
-        (isFlippedBlocksWritingMode() ? m_top : m_bottom) :
-        (isFlippedBlocksWritingMode() ? m_left: m_right);
+    return m_bottom;
 }
 
 } // namespace blink

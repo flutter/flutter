@@ -102,7 +102,7 @@ inline static bool isWholeLineFit(const RenderBlockFlow& block, const LayoutUnit
 
 void LineWidth::wrapNextToShapeOutside(bool isFirstLine)
 {
-    LayoutUnit lineHeight = m_block.lineHeight(isFirstLine, m_block.isHorizontalWritingMode() ? HorizontalLine : VerticalLine, PositionOfInteriorLineBoxes);
+    LayoutUnit lineHeight = m_block.lineHeight(isFirstLine, HorizontalLine, PositionOfInteriorLineBoxes);
     LayoutUnit lineLogicalTop = m_block.logicalHeight();
     LayoutUnit newLineTop = lineLogicalTop;
     LayoutUnit floatLogicalBottom = lineLogicalTop;

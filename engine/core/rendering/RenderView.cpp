@@ -708,7 +708,7 @@ int RenderView::viewWidth(IncludeScrollbarsInRect scrollbarInclusion) const
 
 int RenderView::viewLogicalHeight() const
 {
-    return style()->isHorizontalWritingMode() ? viewHeight(ExcludeScrollbars) : viewWidth(ExcludeScrollbars);
+    return viewHeight(ExcludeScrollbars);
 }
 
 LayoutUnit RenderView::viewLogicalHeightForPercentages() const

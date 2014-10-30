@@ -1301,15 +1301,15 @@ LayoutSize RenderInline::offsetForInFlowPositionedInline(const RenderBox& child)
     // with a static position should locate itself as though it is a normal flow box in relation to
     // its containing block. If this relative-positioned inline has a negative offset we need to
     // compensate for it so that we align the positioned object with the edge of its containing block.
-    if (child.style()->hasStaticInlinePosition(style()->isHorizontalWritingMode()))
+    if (child.style()->hasStaticInlinePosition())
         logicalOffset.setWidth(std::max(LayoutUnit(), -offsetForInFlowPosition().width()));
     else
         logicalOffset.setWidth(inlinePosition);
 
-    if (!child.style()->hasStaticBlockPosition(style()->isHorizontalWritingMode()))
+    if (!child.style()->hasStaticBlockPosition())
         logicalOffset.setHeight(blockPosition);
 
-    return style()->isHorizontalWritingMode() ? logicalOffset : logicalOffset.transposedSize();
+    return logicalOffset;
 }
 
 void RenderInline::imageChanged(WrappedImagePtr, const IntRect*)

@@ -57,7 +57,7 @@ public:
     virtual ~RenderBoxModelObject();
 
     LayoutSize relativePositionOffset() const;
-    LayoutSize relativePositionLogicalOffset() const { return style()->isHorizontalWritingMode() ? relativePositionOffset() : relativePositionOffset().transposedSize(); }
+    LayoutSize relativePositionLogicalOffset() const { return relativePositionOffset(); }
 
     LayoutSize offsetForInFlowPosition() const;
 
@@ -119,16 +119,16 @@ public:
     LayoutUnit borderAndPaddingWidth() const { return borderLeft() + borderRight() + paddingLeft() + paddingRight(); }
     LayoutUnit borderAndPaddingLogicalHeight() const { return borderAndPaddingBefore() + borderAndPaddingAfter(); }
     LayoutUnit borderAndPaddingLogicalWidth() const { return borderStart() + borderEnd() + paddingStart() + paddingEnd(); }
-    LayoutUnit borderAndPaddingLogicalLeft() const { return style()->isHorizontalWritingMode() ? borderLeft() + paddingLeft() : borderTop() + paddingTop(); }
+    LayoutUnit borderAndPaddingLogicalLeft() const { return borderLeft() + paddingLeft(); }
 
 
-    LayoutUnit borderLogicalLeft() const { return style()->isHorizontalWritingMode() ? borderLeft() : borderTop(); }
-    LayoutUnit borderLogicalRight() const { return style()->isHorizontalWritingMode() ? borderRight() : borderBottom(); }
+    LayoutUnit borderLogicalLeft() const { return borderLeft(); }
+    LayoutUnit borderLogicalRight() const { return borderRight(); }
     LayoutUnit borderLogicalWidth() const { return borderStart() + borderEnd(); }
     LayoutUnit borderLogicalHeight() const { return borderBefore() + borderAfter(); }
 
-    LayoutUnit paddingLogicalLeft() const { return style()->isHorizontalWritingMode() ? paddingLeft() : paddingTop(); }
-    LayoutUnit paddingLogicalRight() const { return style()->isHorizontalWritingMode() ? paddingRight() : paddingBottom(); }
+    LayoutUnit paddingLogicalLeft() const { return paddingLeft(); }
+    LayoutUnit paddingLogicalRight() const { return paddingRight(); }
     LayoutUnit paddingLogicalWidth() const { return paddingStart() + paddingEnd(); }
     LayoutUnit paddingLogicalHeight() const { return paddingBefore() + paddingAfter(); }
 
