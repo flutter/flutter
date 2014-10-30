@@ -1326,6 +1326,17 @@ void Element::removeAttribute(const AtomicString& localName)
     removeAttributeInternal(index, NotInSynchronizationOfLazyAttribute);
 }
 
+Vector<RefPtr<Attr>> Element::getAttributes()
+{
+    if (!elementData())
+        return Vector<RefPtr<Attr>>();
+    synchronizeAllAttributes();
+    Vector<RefPtr<Attr>> attributes;
+    for (const Attribute& attribute : elementData()->attributes())
+        attributes.append(ensureAttr(attribute.name()));
+    return attributes;
+}
+
 PassRefPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
 {
     if (!elementData())

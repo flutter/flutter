@@ -32,6 +32,8 @@
 
     boolean hasAttribute(DOMString name);
 
+    sequence<Attr> getAttributes();
+
     [PerWorldBindings] readonly attribute CSSStyleDeclaration style;
 
     [Reflect] attribute DOMString id;

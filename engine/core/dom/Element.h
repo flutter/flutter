@@ -91,6 +91,8 @@ public:
     bool hasAttribute(const QualifiedName&) const;
     const AtomicString& getAttribute(const QualifiedName&) const;
 
+    Vector<RefPtr<Attr>> getAttributes();
+
     // Passing nullAtom as the second parameter removes the attribute when calling either of these set methods.
     void setAttribute(const QualifiedName&, const AtomicString& value);
     void setSynchronizedLazyAttribute(const QualifiedName&, const AtomicString& value);
