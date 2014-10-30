@@ -573,7 +573,7 @@ bool EventHandler::handleMouseDraggedEvent(const MouseEventWithHitTestResults& e
             return false;
 
         renderer = parent->renderer();
-        if (!renderer || !renderer->isListBox())
+        if (!renderer)
             return false;
     }
 

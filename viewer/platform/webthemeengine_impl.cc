@@ -44,8 +44,6 @@ static ui::NativeTheme::Part NativeThemePart(
       return ui::NativeTheme::kRadio;
     case WebThemeEngine::PartButton:
       return ui::NativeTheme::kPushButton;
-    case WebThemeEngine::PartTextField:
-      return ui::NativeTheme::kTextField;
     case WebThemeEngine::PartMenuList:
       return ui::NativeTheme::kMenuList;
     case WebThemeEngine::PartSliderTrack:
@@ -112,14 +110,6 @@ static void GetNativeThemeExtraParams(
       native_theme_extra_params->button.is_focused = false;
       native_theme_extra_params->button.background_color =
           extra_params->button.backgroundColor;
-      break;
-    case WebThemeEngine::PartTextField:
-      native_theme_extra_params->text_field.is_text_area =
-          extra_params->textField.isTextArea;
-      native_theme_extra_params->text_field.is_listbox =
-          extra_params->textField.isListbox;
-      native_theme_extra_params->text_field.background_color =
-          extra_params->textField.backgroundColor;
       break;
     case WebThemeEngine::PartMenuList:
       native_theme_extra_params->menu_list.has_border =

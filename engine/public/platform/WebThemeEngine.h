@@ -101,7 +101,6 @@ public:
         PartCheckbox,
         PartRadio,
         PartButton,
-        PartTextField,
         PartMenuList,
         PartSliderTrack,
         PartSliderThumb,
@@ -128,13 +127,6 @@ public:
         bool indeterminate; // Whether the button state is indeterminate.
         bool isDefault; // Whether the button is default button.
         bool hasBorder;
-        WebColor backgroundColor;
-    };
-
-    // Extra parameters for PartTextField
-    struct TextFieldExtraParams {
-        bool isTextArea;
-        bool isListbox;
         WebColor backgroundColor;
     };
 
@@ -173,7 +165,6 @@ public:
     union ExtraParams {
         ScrollbarTrackExtraParams scrollbarTrack;
         ButtonExtraParams button;
-        TextFieldExtraParams textField;
         MenuListExtraParams menuList;
         SliderExtraParams slider;
         InnerSpinButtonExtraParams innerSpin;

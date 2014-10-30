@@ -326,7 +326,6 @@ public:
     virtual bool isImage() const { return false; }
     virtual bool isInlineBlock() const { return false; }
     virtual bool isLayerModelObject() const { return false; }
-    virtual bool isListBox() const { return false; }
     virtual bool isMedia() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
