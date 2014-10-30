@@ -651,9 +651,7 @@ LayoutRect RenderView::viewRect() const
 
 IntRect RenderView::unscaledDocumentRect() const
 {
-    LayoutRect overflowRect(layoutOverflowRect());
-    flipForWritingMode(overflowRect);
-    return pixelSnappedIntRect(overflowRect);
+    return pixelSnappedIntRect(layoutOverflowRect());
 }
 
 bool RenderView::rootBackgroundIsEntirelyFixed() const

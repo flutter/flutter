@@ -978,7 +978,6 @@ void InlineFlowBox::setOverflowFromLogicalRects(const LayoutRect& logicalLayoutO
 bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
 {
     LayoutRect overflowRect(visualOverflowRect(lineTop, lineBottom));
-    flipForWritingMode(overflowRect);
     overflowRect.moveBy(accumulatedOffset);
     if (!locationInContainer.intersects(overflowRect))
         return false;
@@ -1023,11 +1022,10 @@ bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     // Now check ourselves. Pixel snap hit testing.
     // Move x/y to our coordinates.
     LayoutRect rect(roundedFrameRect());
-    flipForWritingMode(rect);
     rect.moveBy(accumulatedOffset);
 
     if (visibleToHitTestRequest(request) && locationInContainer.intersects(rect)) {
-        renderer().updateHitTestResult(result, flipForWritingMode(locationInContainer.point() - toLayoutSize(accumulatedOffset))); // Don't add in m_x or m_y here, we want coords in the containing block's space.
+        renderer().updateHitTestResult(result, locationInContainer.point() - toLayoutSize(accumulatedOffset)); // Don't add in m_x or m_y here, we want coords in the containing block's space.
         if (!result.addNodeToRectBasedTestResult(renderer().node(), request, locationInContainer, rect))
             return true;
     }
@@ -1038,7 +1036,6 @@ bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
 void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
 {
     LayoutRect overflowRect(visualOverflowRect(lineTop, lineBottom));
-    flipForWritingMode(overflowRect);
     overflowRect.moveBy(paintOffset);
 
     if (!paintInfo.rect.intersects(pixelSnappedIntRect(overflowRect)))
@@ -1223,7 +1220,6 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
 
     // Move x/y to our coordinates.
     LayoutRect localRect(frameRect);
-    flipForWritingMode(localRect);
     LayoutPoint adjustedPaintOffset = paintOffset + localRect.location();
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, frameRect.size());
@@ -1287,7 +1283,6 @@ void InlineFlowBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 
     // Move x/y to our coordinates.
     LayoutRect localRect(frameRect);
-    flipForWritingMode(localRect);
     LayoutPoint adjustedPaintOffset = paintOffset + localRect.location();
 
     const NinePieceImage& maskNinePieceImage = renderer().style()->maskBoxImage();

@@ -1415,6 +1415,7 @@ InvalidationReason RenderObject::invalidatePaintIfNeeded(const RenderLayerModelO
     const LayoutRect& newBounds = previousPaintInvalidationRect();
     const LayoutPoint& newLocation = previousPositionFromPaintInvalidationContainer();
 
+    // FIXME(sky): Do we need this now that we don't have flipForWritingMode?
     // FIXME: PaintInvalidationState should not be required here, but the call to flipForWritingMode
     // in mapRectToPaintInvalidationBacking will give us the wrong results with it disabled.
     // crbug.com/393762

@@ -1759,7 +1759,7 @@ bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& 
         // return ourselves. We do this so mouse events continue getting delivered after a drag has
         // exited the WebView, and so hit testing over a scrollbar hits the content document.
         if (!request.isChildFrameHitTest() && (request.active() || request.release()) && isRootLayer()) {
-            renderer()->updateHitTestResult(result, toRenderView(renderer())->flipForWritingMode(hitTestLocation.point()));
+            renderer()->updateHitTestResult(result, hitTestLocation.point());
             insideLayer = this;
         }
     }
@@ -2239,18 +2239,13 @@ LayoutRect RenderLayer::logicalBoundingBox() const
 
 LayoutRect RenderLayer::physicalBoundingBox(const RenderLayer* ancestorLayer, const LayoutPoint* offsetFromRoot) const
 {
-    LayoutRect result = logicalBoundingBox();
-    if (m_renderer->isBox())
-        renderBox()->flipForWritingMode(result);
-    else
-        m_renderer->containingBlock()->flipForWritingMode(result);
-
     LayoutPoint delta;
     if (offsetFromRoot)
         delta = *offsetFromRoot;
     else
         convertToLayerCoords(ancestorLayer, delta);
 
+    LayoutRect result = logicalBoundingBox();
     result.moveBy(delta);
     return result;
 }

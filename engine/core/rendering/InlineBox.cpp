@@ -312,28 +312,6 @@ FloatPoint InlineBox::locationIncludingFlipping()
     return FloatPoint(x(), y());
 }
 
-void InlineBox::flipForWritingMode(FloatRect& rect)
-{
-    // FIXME(sky): remove
-}
-
-FloatPoint InlineBox::flipForWritingMode(const FloatPoint& point)
-{
-    // FIXME(sky): remove
-    return point;
-}
-
-void InlineBox::flipForWritingMode(LayoutRect& rect)
-{
-    // FIXME(sky): remove
-}
-
-LayoutPoint InlineBox::flipForWritingMode(const LayoutPoint& point)
-{
-    // FIXME(sky): remove
-    return point;
-}
-
 } // namespace blink
 
 #ifndef NDEBUG

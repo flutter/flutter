@@ -333,7 +333,7 @@ bool InlineTextBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     boxOrigin.moveBy(accumulatedOffset);
     FloatRect rect(boxOrigin, size());
     if (m_truncation != cFullTruncation && visibleToHitTestRequest(request) && locationInContainer.intersects(rect)) {
-        renderer().updateHitTestResult(result, flipForWritingMode(locationInContainer.point() - toLayoutSize(accumulatedOffset)));
+        renderer().updateHitTestResult(result, locationInContainer.point() - toLayoutSize(accumulatedOffset));
         if (!result.addNodeToRectBasedTestResult(renderer().node(), request, locationInContainer, rect))
             return true;
     }

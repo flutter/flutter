@@ -659,21 +659,17 @@ void RenderBox::applyCachedClipAndScrollOffsetForPaintInvalidation(LayoutRect& p
     ASSERT(hasLayer());
     ASSERT(hasOverflowClip());
 
-    flipForWritingMode(paintRect);
     paintRect.move(-scrolledContentOffset()); // For overflow:auto/scroll/hidden.
 
     // Do not clip scroll layer contents to reduce the number of paint invalidations while scrolling.
-    if (usesCompositedScrolling()) {
-        flipForWritingMode(paintRect);
+    if (usesCompositedScrolling())
         return;
-    }
 
     // height() is inaccurate if we're in the middle of a layout of this RenderBox, so use the
     // layer's size instead. Even if the layer's size is wrong, the layer itself will issue paint invalidations
     // anyway if its size does change.
     LayoutRect clipRect(LayoutPoint(), layer()->size());
     paintRect = intersection(paintRect, clipRect);
-    flipForWritingMode(paintRect);
 }
 
 void RenderBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
@@ -1660,9 +1656,6 @@ LayoutRect RenderBox::clippedOverflowRectForPaintInvalidation(const RenderLayerM
 void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
 {
     // The rect we compute at each step is shifted by our x/y offset in the parent container's coordinate space.
-    // Only when we cross a writing mode boundary will we have to possibly flipForWritingMode (to convert into a more appropriate
-    // offset corner for the enclosing container). This allows for a fully RL or BT document to issue paint invalidations
-    // properly even during layout, since the rect remains flipped all the way until the end.
     //
     // RenderView::computeRectForPaintInvalidation then converts the rect to physical coordinates. We also convert to
     // physical when we hit a paintInvalidationContainer boundary. Therefore the final rect returned is always in the
@@ -1699,9 +1692,6 @@ void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* 
     RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
     if (!o)
         return;
-
-    if (isWritingModeRoot())
-        flipForWritingMode(rect);
 
     LayoutPoint topLeft = rect.location();
     topLeft.move(locationOffset());
@@ -3826,19 +3816,11 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle)
 
     bool hasTransform = hasLayer() && layer()->transform();
     if (isRelPositioned() || hasTransform) {
-        // If we are relatively positioned or if we have a transform, then we have to convert
-        // this rectangle into physical coordinates, apply relative positioning and transforms
-        // to it, and then convert it back.
-        flipForWritingMode(rect);
-
         if (hasTransform)
             rect = layer()->currentTransform().mapRect(rect);
 
         if (isRelPositioned())
             rect.move(offsetForInFlowPosition());
-
-        // Now we need to flip back.
-        flipForWritingMode(rect);
     }
 
     return rect;
@@ -3860,7 +3842,6 @@ LayoutRect RenderBox::noOverflowRect() const
     LayoutUnit right = borderRight();
     LayoutUnit bottom = borderBottom();
     LayoutRect rect(left, top, width() - left - right, height() - top - bottom);
-    flipForWritingMode(rect);
     // Subtract space occupied by scrollbars. Order is important here: first flip, then subtract
     // scrollbars. This may seem backwards and weird, since one would think that a horizontal
     // scrollbar at the physical bottom in horizontal-bt ought to be at the logical top (physical
@@ -3898,69 +3879,16 @@ LayoutUnit RenderBox::offsetTop() const
     return adjustedPositionRelativeToOffsetParent(topLeftLocation()).y();
 }
 
-LayoutPoint RenderBox::flipForWritingModeForChild(const RenderBox* child, const LayoutPoint& point) const
-{
-    // FIXME(sky): Remove
-    return point;
-}
-
-void RenderBox::flipForWritingMode(LayoutRect& rect) const
-{
-    // FIXME(sky): Remove
-}
-
-LayoutUnit RenderBox::flipForWritingMode(LayoutUnit position) const
-{
-    // FIXME(sky): Remove
-    return position;
-}
-
-LayoutPoint RenderBox::flipForWritingMode(const LayoutPoint& position) const
-{
-    // FIXME(sky): Remove
-    return position;
-}
-
-LayoutPoint RenderBox::flipForWritingModeIncludingColumns(const LayoutPoint& point) const
-{
-    // FIXME(sky): Remove
-    return point;
-}
-
-LayoutSize RenderBox::flipForWritingMode(const LayoutSize& offset) const
-{
-    // FIXME(sky): Remove
-    return offset;
-}
-
-FloatPoint RenderBox::flipForWritingMode(const FloatPoint& position) const
-{
-    // FIXME(sky): Remove
-    return position;
-}
-
-void RenderBox::flipForWritingMode(FloatRect& rect) const
-{
-    // FIXME(sky): Remove
-}
-
 LayoutPoint RenderBox::topLeftLocation() const
 {
-    RenderBlock* containerBlock = containingBlock();
-    if (!containerBlock || containerBlock == this)
-        return location();
-    return containerBlock->flipForWritingModeForChild(this, location());
+    // FIXME(sky): Remove this.
+    return location();
 }
 
 LayoutSize RenderBox::topLeftLocationOffset() const
 {
-    RenderBlock* containerBlock = containingBlock();
-    if (!containerBlock || containerBlock == this)
-        return locationOffset();
-
-    LayoutRect rect(frameRect());
-    containerBlock->flipForWritingMode(rect); // FIXME: This is wrong if we are an absolutely positioned object enclosed by a relative-positioned inline.
-    return LayoutSize(rect.x(), rect.y());
+    // FIXME(sky): Remove this.
+    return locationOffset();
 }
 
 bool RenderBox::hasRelativeLogicalHeight() const

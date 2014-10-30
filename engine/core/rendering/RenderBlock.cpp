@@ -1246,7 +1246,6 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // paints the root's background.
     if (!isDocumentElement()) {
         overflowBox = overflowRectForPaintRejection();
-        flipForWritingMode(overflowBox);
         overflowBox.moveBy(adjustedPaintOffset);
         if (!overflowBox.intersects(paintInfo.rect))
             return;
@@ -1309,16 +1308,14 @@ void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOf
 
 void RenderBlock::paintChild(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    LayoutPoint childPoint = flipForWritingModeForChild(child, paintOffset);
     if (!child->hasSelfPaintingLayer() && !child->isFloating())
-        child->paint(paintInfo, childPoint);
+        child->paint(paintInfo, paintOffset);
 }
 
 void RenderBlock::paintChildAsInlineBlock(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    LayoutPoint childPoint = flipForWritingModeForChild(child, paintOffset);
     if (!child->hasSelfPaintingLayer() && !child->isFloating())
-        paintAsInlineBlock(child, paintInfo, childPoint);
+        paintAsInlineBlock(child, paintInfo, paintOffset);
 }
 
 void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInfo, const LayoutPoint& childPoint)
@@ -1593,7 +1590,6 @@ void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintO
             gapRectsBounds.moveBy(-paintOffset);
             if (!hasLayer()) {
                 LayoutRect localBounds(gapRectsBounds);
-                flipForWritingMode(localBounds);
                 gapRectsBounds = localToContainerQuad(FloatRect(localBounds), layer->renderer()).enclosingBoundingBox();
                 if (layer->renderer()->hasOverflowClip())
                     gapRectsBounds.move(layer->renderBox()->scrolledContentOffset());
@@ -1641,13 +1637,12 @@ GapRects RenderBlock::selectionGaps(RenderBlock* rootBlock, const LayoutPoint& r
     // Clip out floating and positioned objects when painting selection gaps.
     if (paintInfo) {
         // Note that we don't clip out overflow for positioned objects.  We just stick to the border box.
-        LayoutRect flippedBlockRect(offsetFromRootBlock.width(), offsetFromRootBlock.height(), width(), height());
-        rootBlock->flipForWritingMode(flippedBlockRect);
-        flippedBlockRect.moveBy(rootBlockPhysicalPosition);
-        clipOutPositionedObjects(paintInfo, flippedBlockRect.location(), positionedObjects());
+        LayoutRect blockRect(offsetFromRootBlock.width(), offsetFromRootBlock.height(), width(), height());
+        blockRect.moveBy(rootBlockPhysicalPosition);
+        clipOutPositionedObjects(paintInfo, blockRect.location(), positionedObjects());
         if (isDocumentElement()) // The <body> must make sure to examine its containingBlock's positioned objects.
             for (RenderBlock* cb = containingBlock(); cb && !cb->isRenderView(); cb = cb->containingBlock())
-                clipOutPositionedObjects(paintInfo, LayoutPoint(cb->x(), cb->y()), cb->positionedObjects()); // FIXME: Not right for flipped writing modes.
+                clipOutPositionedObjects(paintInfo, LayoutPoint(cb->x(), cb->y()), cb->positionedObjects());
     }
 
     // FIXME: overflow: auto/scroll regions need more math here, since painting in the border box is different from painting in the padding box (one is scrolled, the other is
@@ -2109,7 +2104,6 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
         // Check if we need to do anything at all.
         // If we have clipping, then we can't have any spillout.
         LayoutRect overflowBox = hasOverflowClip() ? borderBoxRect() : visualOverflowRect();
-        flipForWritingMode(overflowBox);
         overflowBox.moveBy(adjustedLocation);
         if (!locationInContainer.intersects(overflowBox))
             return false;
@@ -2160,7 +2154,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
             scrolledOffset -= scrolledContentOffset();
 
         if (hitTestContents(request, result, locationInContainer, toLayoutPoint(scrolledOffset), hitTestAction)) {
-            updateHitTestResult(result, flipForWritingMode(locationInContainer.point() - localOffset));
+            updateHitTestResult(result, locationInContainer.point() - localOffset);
             return true;
         }
         if (hitTestAction == HitTestFloat && hitTestFloats(request, result, locationInContainer, toLayoutPoint(scrolledOffset)))
@@ -2180,7 +2174,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
     if (hitTestAction == HitTestBlockBackground || hitTestAction == HitTestChildBlockBackground) {
         LayoutRect boundsRect(adjustedLocation, size());
         if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
-            updateHitTestResult(result, flipForWritingMode(locationInContainer.point() - localOffset));
+            updateHitTestResult(result, locationInContainer.point() - localOffset);
             if (!result.addNodeToRectBasedTestResult(nodeForHitTest(), request, locationInContainer, boundsRect))
                 return true;
         }
@@ -2201,8 +2195,7 @@ bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& 
         if (hitTestAction == HitTestChildBlockBackgrounds)
             childHitTest = HitTestChildBlockBackground;
         for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
-            LayoutPoint childPoint = flipForWritingModeForChild(child, accumulatedOffset);
-            if (!child->hasSelfPaintingLayer() && !child->isFloating() && child->nodeAtPoint(request, result, locationInContainer, childPoint, childHitTest))
+            if (!child->hasSelfPaintingLayer() && !child->isFloating() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
                 return true;
         }
     }
@@ -2394,12 +2387,8 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
 
 void RenderBlock::offsetForContents(LayoutPoint& offset) const
 {
-    offset = flipForWritingMode(offset);
-
     if (hasOverflowClip())
         offset += scrolledContentOffset();
-
-    offset = flipForWritingMode(offset);
 }
 
 LayoutUnit RenderBlock::availableLogicalWidth() const

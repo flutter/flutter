@@ -190,10 +190,7 @@ IntRect CaretBase::absoluteBoundsForLocalRect(Node* node, const LayoutRect& rect
     RenderBlock* caretPainter = caretRenderer(node);
     if (!caretPainter)
         return IntRect();
-
-    LayoutRect localRect(rect);
-    caretPainter->flipForWritingMode(localRect);
-    return caretPainter->localToAbsoluteQuad(FloatRect(localRect)).enclosingBoundingBox();
+    return caretPainter->localToAbsoluteQuad(FloatRect(rect)).enclosingBoundingBox();
 }
 
 void CaretBase::invalidateLocalCaretRect(Node* node, const LayoutRect& rect)
@@ -238,8 +235,6 @@ void CaretBase::paintCaret(Node* node, GraphicsContext* context, const LayoutPoi
         return;
 
     LayoutRect drawingRect = localCaretRectWithoutUpdate();
-    if (RenderBlock* renderer = caretRenderer(node))
-        renderer->flipForWritingMode(drawingRect);
     drawingRect.moveBy(roundedIntPoint(paintOffset));
     LayoutRect caret = intersection(drawingRect, clipRect);
     if (caret.isEmpty())
