@@ -562,7 +562,6 @@ public:
     void setIsText() { m_bitfields.setIsText(true); }
     void setIsBox() { m_bitfields.setIsBox(true); }
     void setReplaced(bool isReplaced) { m_bitfields.setIsReplaced(isReplaced); }
-    void setHorizontalWritingMode(bool hasHorizontalWritingMode) { m_bitfields.setHorizontalWritingMode(hasHorizontalWritingMode); }
     void setHasOverflowClip(bool hasOverflowClip) { m_bitfields.setHasOverflowClip(hasOverflowClip); }
     void setHasLayer(bool hasLayer) { m_bitfields.setHasLayer(hasLayer); }
     void setHasTransform(bool hasTransform) { m_bitfields.setHasTransform(hasTransform); }
@@ -1064,7 +1063,6 @@ private:
             , m_isBox(false)
             , m_isInline(true)
             , m_isReplaced(false)
-            , m_horizontalWritingMode(true)
             , m_isDragging(false)
             , m_hasLayer(false)
             , m_hasOverflowClip(false)
@@ -1104,7 +1102,6 @@ private:
         ADD_BOOLEAN_BITFIELD(isBox, IsBox);
         ADD_BOOLEAN_BITFIELD(isInline, IsInline);
         ADD_BOOLEAN_BITFIELD(isReplaced, IsReplaced);
-        ADD_BOOLEAN_BITFIELD(horizontalWritingMode, HorizontalWritingMode);
         ADD_BOOLEAN_BITFIELD(isDragging, IsDragging);
 
         ADD_BOOLEAN_BITFIELD(hasLayer, HasLayer);

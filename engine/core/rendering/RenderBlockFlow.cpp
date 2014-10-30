@@ -1206,12 +1206,6 @@ void RenderBlockFlow::clearFloats(EClear clear)
     // FIXME(sky): Remove this.
 }
 
-LayoutPoint RenderBlockFlow::flipFloatForWritingModeForChild(const FloatingObject* child, const LayoutPoint& point) const
-{
-    // FIXME(sky): Remove this.
-    return LayoutPoint();
-}
-
 LayoutUnit RenderBlockFlow::logicalLeftOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
 {
     // FIXME(sky): Remove this.

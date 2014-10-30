@@ -395,11 +395,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
     return documentStyle.release();
 }
 
-static inline void resetDirectionAndWritingModeOnDocument(Document& document)
-{
-    document.setDirectionSetOnDocumentElement(false);
-}
-
 static void addContentAttrValuesToFeatures(const Vector<AtomicString>& contentAttrValues, RuleFeatureSet& features)
 {
     for (size_t i = 0; i < contentAttrValues.size(); ++i)
@@ -437,7 +432,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     didAccess();
 
     if (element == document().documentElement())
-        resetDirectionAndWritingModeOnDocument(document());
+        document().setDirectionSetOnDocumentElement(false);
     StyleResolverState state(document(), element, defaultParent);
 
     if (sharingBehavior == AllowStyleSharing && state.parentStyle()) {
@@ -507,7 +502,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
     ASSERT(!hasPendingAuthorStyleSheets());
 
     if (element == document().documentElement())
-        resetDirectionAndWritingModeOnDocument(document());
+        document().setDirectionSetOnDocumentElement(false);
     StyleResolverState state(document(), element, parentStyle);
 
     MatchResult result;

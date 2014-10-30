@@ -143,25 +143,13 @@ const Shape& ShapeOutsideInfo::computedShape() const
     return *m_shape;
 }
 
-inline LayoutUnit borderBeforeInWritingMode(const RenderBox& renderer)
-{
-    // FIXME(sky): Remove
-    return renderer.borderBefore();
-}
-
-inline LayoutUnit borderAndPaddingBeforeInWritingMode(const RenderBox& renderer)
-{
-    // FIXME(sky): Remove
-    return renderer.borderAndPaddingBefore();
-}
-
 LayoutUnit ShapeOutsideInfo::logicalTopOffset() const
 {
     switch (referenceBox(*m_renderer.style()->shapeOutside())) {
     case MarginBox: return -m_renderer.marginBefore(m_renderer.containingBlock()->style());
     case BorderBox: return LayoutUnit();
-    case PaddingBox: return borderBeforeInWritingMode(m_renderer);
-    case ContentBox: return borderAndPaddingBeforeInWritingMode(m_renderer);
+    case PaddingBox: return m_renderer.borderBefore();
+    case ContentBox: return m_renderer.borderAndPaddingBefore();
     case BoxMissing: break;
     }
 
@@ -169,14 +157,14 @@ LayoutUnit ShapeOutsideInfo::logicalTopOffset() const
     return LayoutUnit();
 }
 
-inline LayoutUnit borderStartWithStyleForWritingMode(const RenderBox& renderer, const RenderStyle* style)
+inline LayoutUnit borderStartWithStyle(const RenderBox& renderer, const RenderStyle* style)
 {
     if (style->isLeftToRightDirection())
         return renderer.borderLeft();
     return renderer.borderRight();
 }
 
-inline LayoutUnit borderAndPaddingStartWithStyleForWritingMode(const RenderBox& renderer, const RenderStyle* style)
+inline LayoutUnit borderAndPaddingStartWithStyle(const RenderBox& renderer, const RenderStyle* style)
 {
     if (style->isLeftToRightDirection())
         return renderer.borderLeft() + renderer.paddingLeft();
@@ -189,8 +177,8 @@ LayoutUnit ShapeOutsideInfo::logicalLeftOffset() const
     switch (referenceBox(*m_renderer.style()->shapeOutside())) {
     case MarginBox: return -m_renderer.marginStart(m_renderer.containingBlock()->style());
     case BorderBox: return LayoutUnit();
-    case PaddingBox: return borderStartWithStyleForWritingMode(m_renderer, m_renderer.containingBlock()->style());
-    case ContentBox: return borderAndPaddingStartWithStyleForWritingMode(m_renderer, m_renderer.containingBlock()->style());
+    case PaddingBox: return borderStartWithStyle(m_renderer, m_renderer.containingBlock()->style());
+    case ContentBox: return borderAndPaddingStartWithStyle(m_renderer, m_renderer.containingBlock()->style());
     case BoxMissing: break;
     }
 
