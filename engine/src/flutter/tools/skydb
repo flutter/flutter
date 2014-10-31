@@ -8,13 +8,16 @@ import os
 import subprocess
 import sys
 import urlparse
+import logging
+import socket;
 
 
-BUILD_DIRECTORY = 'out'
-CONFIG_DIRECTORY = 'Debug'
+OUT_DIR = 'out'
+CONFIG_NAME = 'Debug'
 SKY_TOOLS_DIRECTORY = os.path.abspath(os.path.join(__file__, os.pardir))
-MOJO_SHELL_PATH = os.path.abspath(os.path.join(SKY_TOOLS_DIRECTORY, os.pardir,
-    os.pardir, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'mojo_shell'))
+MOJO_ROOT = os.path.abspath(os.path.join(SKY_TOOLS_DIRECTORY, os.pardir,
+    os.pardir))
+MOJO_SHELL_PATH = os.path.join(MOJO_ROOT, OUT_DIR, CONFIG_NAME, 'mojo_shell')
 
 SUPPORTED_MIME_TYPES = [
     'text/html',
@@ -22,47 +25,77 @@ SUPPORTED_MIME_TYPES = [
     'text/plain',
 ]
 
-def start_http_server_for_file(path):
-    HTTP_PORT = 9999
-    server_command = [
-        os.path.join(SKY_TOOLS_DIRECTORY, 'sky_server'),
-        os.path.dirname(os.path.abspath(path)),
-        str(HTTP_PORT),
-    ]
-    subprocess.Popen(server_command)
-    return 'http://localhost:%s/%s' % (HTTP_PORT, os.path.basename(path))
+class SkyDebugger(object):
+    @staticmethod
+    def _port_in_use(port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        return sock.connect_ex(('localhost', port)) == 0
 
+    def _start_http_server_for_file(self, path):
+        HTTP_PORT = 9999
 
-def main():
-    parser = argparse.ArgumentParser(description='Sky launcher/debugger')
-    parser.add_argument('--gdb', action='store_true')
-    parser.add_argument('url', nargs='?', type=str)
-    args = parser.parse_args()
+        path = os.path.abspath(path)
+        if os.path.commonprefix([path, MOJO_ROOT]) == MOJO_ROOT:
+            server_root = MOJO_ROOT
+        else:
+            server_root = os.path.dirname(path)
+            logging.warn(
+                '%s is outside of mojo root, using %s as server root' %
+                (path, server_root))
+        relative_path = os.path.relpath(path, server_root)
 
-    content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
-        for mime_type in SUPPORTED_MIME_TYPES]
-    shell_command = [
-        MOJO_SHELL_PATH,
-        '--v=1',
-        '--content-handlers=%s' % ','.join(content_handlers),
-        '--url-mappings=mojo:window_manager=mojo:sky_debugger',
-        'mojo:window_manager',
-    ]
-    if args.url:
-        url = args.url
-        if not urlparse.urlparse(url).scheme:
-            url = start_http_server_for_file(url)
+        if self._port_in_use(HTTP_PORT):
+            logging.warn(
+                'Port %s already in use, assuming custom sky_server started.')
+        else:
+            server_command = [
+                os.path.join(SKY_TOOLS_DIRECTORY, 'sky_server'),
+                server_root,
+                str(HTTP_PORT),
+            ]
+            self._sky_server = subprocess.Popen(server_command)
+        return 'http://localhost:%s/%s' % (HTTP_PORT, relative_path)
 
-        prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
-        shell_command.append(prompt_args)
-    if args.gdb:
-        shell_command = ['gdb', '--args'] + shell_command
+    def main(self):
+        logging.basicConfig(level=logging.INFO)
 
-    subprocess.check_call(shell_command)
+        parser = argparse.ArgumentParser(description='Sky launcher/debugger')
+        parser.add_argument('--gdb', action='store_true')
+        parser.add_argument('url', nargs='?', type=str)
+        args = parser.parse_args()
+
+        content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+            for mime_type in SUPPORTED_MIME_TYPES]
+        shell_command = [
+            MOJO_SHELL_PATH,
+            '--v=1',
+            '--content-handlers=%s' % ','.join(content_handlers),
+            '--url-mappings=mojo:window_manager=mojo:sky_debugger',
+            'mojo:window_manager',
+        ]
+        if args.url:
+            url = args.url
+            if not urlparse.urlparse(url).scheme:
+                url = self._start_http_server_for_file(url)
+
+            prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
+            shell_command.append(prompt_args)
+        if args.gdb:
+            shell_command = ['gdb', '--args'] + shell_command
+
+        subprocess.check_call(shell_command)
+
+    def shutdown(self):
+        print "Quitting"
+        if self._sky_server:
+            self._sky_server.terminate()
 
 
 if __name__ == '__main__':
+    skydb = SkyDebugger()
     try:
-        main()
+        skydb.main()
     except (KeyboardInterrupt, SystemExit):
-        print "Quitting"
+        pass
+    finally:
+        skydb.shutdown()
