@@ -72,7 +72,7 @@ shared_library("viewer") {
     "//ui/native_theme",
     "//url",
     ":bindings",
-    ":html_modules",
+    ":sky_modules",
   ]
 }
 
@@ -84,12 +84,12 @@ mojom("bindings") {
   ]
 }
 
-copy("html_modules") {
+copy("sky_modules") {
   sources = [
-    "script/core.html",
-    "script/support.html",
+    "script/core.sky",
+    "script/support.sky",
   ]
   outputs = [
-    "$root_gen_dir/mojo/public/html/{{source_file_part}}",
+    "$root_gen_dir/mojo/public/sky/{{source_file_part}}",
   ]
 }

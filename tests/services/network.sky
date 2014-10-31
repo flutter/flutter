@@ -1,10 +1,10 @@
 <html>
 <link rel="import" href="../resources/chai.sky" />
 <link rel="import" href="../resources/mocha.sky" />
-<link rel="import" href="/mojo/public/html/core.html" as="core" />
-<link rel="import" href="/mojo/public/html/connection.html" as="connection" />
-<link rel="import" href="/mojo/services/public/interfaces/network/network_service.mojom.html" as="net" />
-<link rel="import" href="/mojo/services/public/interfaces/network/url_loader.mojom.html" as="loader" />
+<link rel="import" href="/mojo/public/sky/core.sky" as="core" />
+<link rel="import" href="/mojo/public/sky/connection.sky" as="connection" />
+<link rel="import" href="/mojo/services/public/interfaces/network/network_service.mojom.sky" as="net" />
+<link rel="import" href="/mojo/services/public/interfaces/network/url_loader.mojom.sky" as="loader" />
 <script>
 describe('Mojo network_service', function() {
   this.enableTimeouts(false);

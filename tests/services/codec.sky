@@ -1,6 +1,6 @@
 <html>
 <link rel="import" href="../resources/dump-as-text.sky" />
-<link rel="import" href="/mojo/public/html/codec.html" as="codec" />
+<link rel="import" href="/mojo/public/sky/codec.sky" as="codec" />
 <div id="result">FAIL</div>
 <script>
 document.getElementById("result").textContent =
