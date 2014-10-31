@@ -653,9 +653,6 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
 
         return newElement.release();
     }
-    case ATTRIBUTE_NODE:
-        exceptionState.throwDOMException(NotSupportedError, "Cannot clone an Attr.");
-        return nullptr;
     case DOCUMENT_FRAGMENT_NODE: {
         if (importedNode->isShadowRoot()) {
             // ShadowRoot nodes should not be explicitly importable.
@@ -687,10 +684,6 @@ PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& ex
     case DOCUMENT_NODE:
         exceptionState.throwDOMException(NotSupportedError, "The node provided is of type '" + source->nodeName() + "', which may not be adopted.");
         return nullptr;
-    case ATTRIBUTE_NODE: {
-        exceptionState.throwDOMException(NotSupportedError, "Cannot adopt Attr.");
-        break;
-    }
     default:
         if (source->isShadowRoot()) {
             // ShadowRoot cannot disconnect itself from the host node.
@@ -1821,7 +1814,6 @@ MouseEventWithHitTestResults Document::prepareMouseEvent(const HitTestRequest& r
 bool Document::childTypeAllowed(NodeType type) const
 {
     switch (type) {
-    case ATTRIBUTE_NODE:
     case DOCUMENT_FRAGMENT_NODE:
     case DOCUMENT_NODE:
     case TEXT_NODE:
@@ -1863,7 +1855,6 @@ bool Document::canReplaceChild(const Node& newChild, const Node& oldChild) const
     if (newChild.isDocumentFragment()) {
         for (Node* c = toDocumentFragment(newChild).firstChild(); c; c = c->nextSibling()) {
             switch (c->nodeType()) {
-            case ATTRIBUTE_NODE:
             case DOCUMENT_FRAGMENT_NODE:
             case DOCUMENT_NODE:
             case TEXT_NODE:
@@ -1875,7 +1866,6 @@ bool Document::canReplaceChild(const Node& newChild, const Node& oldChild) const
         }
     } else {
         switch (newChild.nodeType()) {
-        case ATTRIBUTE_NODE:
         case DOCUMENT_FRAGMENT_NODE:
         case DOCUMENT_NODE:
         case TEXT_NODE:

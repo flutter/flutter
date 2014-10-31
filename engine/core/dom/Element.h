@@ -106,9 +106,6 @@ public:
     double getFloatingPointAttribute(const QualifiedName& attributeName, double fallbackValue = std::numeric_limits<double>::quiet_NaN()) const;
     void setFloatingPointAttribute(const QualifiedName& attributeName, double value);
 
-#ifdef DUMP_NODE_STATISTICS
-    bool hasNamedNodeMap() const;
-#endif
     bool hasAttributes() const;
 
     bool hasAttribute(const AtomicString& name) const;
@@ -166,13 +163,6 @@ public:
 
     void removeAttribute(const AtomicString& name);
 
-    PassRefPtr<Attr> getAttributeNode(const AtomicString& name);
-
-    PassRefPtr<Attr> attrIfExists(const QualifiedName&);
-    PassRefPtr<Attr> ensureAttr(const QualifiedName&);
-
-    Vector<RefPtr<Attr> >* attrNodeList();
-
     CSSStyleDeclaration* style();
 
     const QualifiedName& tagQName() const { return m_tagName; }
@@ -191,8 +181,6 @@ public:
     PassRefPtr<Element> cloneElementWithChildren();
     PassRefPtr<Element> cloneElementWithoutChildren();
 
-    void normalizeAttributes();
-
     void setBooleanAttribute(const QualifiedName& name, bool);
 
     void invalidateStyleAttribute();
@@ -206,9 +194,6 @@ public:
     void removeAllInlineStyleProperties();
 
     void synchronizeStyleAttributeInternal() const;
-
-    // For exposing to DOM only.
-    NamedNodeMap* attributesForBindings() const;
 
     enum AttributeModificationReason {
         ModifiedDirectly,
@@ -452,10 +437,6 @@ private:
 
     ElementRareData* elementRareData() const;
     ElementRareData& ensureElementRareData();
-
-    Vector<RefPtr<Attr> >& ensureAttrNodeList();
-    void removeAttrNodeList();
-    void detachAllAttrNodesFromElement();
 
     RefPtr<ElementData> m_elementData;
 };

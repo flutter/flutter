@@ -49,7 +49,6 @@
 #include "core/dom/ExceptionCode.h"
 #include "core/dom/MutationObserverInterestGroup.h"
 #include "core/dom/MutationRecord.h"
-#include "core/dom/NamedNodeMap.h"
 #include "core/dom/NodeRenderStyle.h"
 #include "core/dom/RenderTreeBuilder.h"
 #include "core/dom/SelectorQuery.h"
@@ -95,18 +94,6 @@
 
 namespace blink {
 
-typedef Vector<RefPtr<Attr> > AttrNodeList;
-
-static Attr* findAttrNodeInList(const AttrNodeList& attrNodeList, const QualifiedName& name)
-{
-    AttrNodeList::const_iterator end = attrNodeList.end();
-    for (AttrNodeList::const_iterator it = attrNodeList.begin(); it != end; ++it) {
-        if ((*it)->name() == name.localName())
-            return it->get();
-    }
-    return 0;
-}
-
 PassRefPtr<Element> Element::create(const QualifiedName& tagName, Document* document)
 {
     return adoptRef(new Element(tagName, document, CreateElement));
@@ -129,9 +116,6 @@ Element::~Element()
 
     if (isCustomElement())
         CustomElement::wasDestroyed(this);
-
-    if (hasSyntheticAttrChildNodes())
-        detachAllAttrNodesFromElement();
 #endif
 }
 
@@ -256,16 +240,6 @@ void Element::setBooleanAttribute(const QualifiedName& name, bool value)
         setAttribute(name, emptyAtom);
     else
         removeAttribute(name);
-}
-
-NamedNodeMap* Element::attributesForBindings() const
-{
-    ElementRareData& rareData = const_cast<Element*>(this)->ensureElementRareData();
-    if (NamedNodeMap* attributeMap = rareData.attributeMap())
-        return attributeMap;
-
-    rareData.setAttributeMap(NamedNodeMap::create(const_cast<Element*>(this)));
-    return rareData.attributeMap();
 }
 
 ActiveAnimations* Element::activeAnimations() const
@@ -1231,25 +1205,6 @@ void Element::formatForDebugger(char* buffer, unsigned length) const
 }
 #endif
 
-Vector<RefPtr<Attr> >* Element::attrNodeList()
-{
-    return hasRareData() ? elementRareData()->attrNodeList() : 0;
-}
-
-Vector<RefPtr<Attr> >& Element::ensureAttrNodeList()
-{
-    setHasSyntheticAttrChildNodes(true);
-    return ensureElementRareData().ensureAttrNodeList();
-}
-
-void Element::removeAttrNodeList()
-{
-    ASSERT(hasSyntheticAttrChildNodes());
-    if (hasRareData())
-        elementRareData()->removeAttrNodeList();
-    setHasSyntheticAttrChildNodes(false);
-}
-
 void Element::parseAttribute(const QualifiedName& name, const AtomicString& value)
 {
     if (name == HTMLNames::tabindexAttr) {
@@ -1293,9 +1248,6 @@ void Element::removeAttributeInternal(size_t index, SynchronizationOfLazyAttribu
             willModifyAttribute(name, valueBeingRemoved, nullAtom);
     }
 
-    if (RefPtr<Attr> attrNode = attrIfExists(name))
-        attrNode->detachFromElement();
-
     attributes.remove(index);
 
     if (!inSynchronizationOfLazyAttribute)
@@ -1333,19 +1285,8 @@ Vector<RefPtr<Attr>> Element::getAttributes()
     synchronizeAllAttributes();
     Vector<RefPtr<Attr>> attributes;
     for (const Attribute& attribute : elementData()->attributes())
-        attributes.append(ensureAttr(attribute.name()));
+        attributes.append(Attr::create(attribute.name(), attribute.value()));
     return attributes;
-}
-
-PassRefPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
-{
-    if (!elementData())
-        return nullptr;
-    synchronizeAttribute(localName);
-    const Attribute* attribute = elementData()->attributes().find(localName);
-    if (!attribute)
-        return nullptr;
-    return ensureAttr(attribute->name());
 }
 
 void Element::focus(bool restorePreviousSelection, FocusType type)
@@ -1616,21 +1557,6 @@ Locale& Element::locale() const
     return document().getCachedLocale(computeInheritedLanguage());
 }
 
-void Element::normalizeAttributes()
-{
-    if (!hasAttributes())
-        return;
-    Vector<RefPtr<Attr> >* attrNodes = attrNodeList();
-    if (!attrNodes)
-        return;
-    // Copy the Attr Vector because Node::normalize() can fire synchronous JS
-    // events (e.g. DOMSubtreeModified) and a JS listener could add / remove
-    // attributes while we are iterating.
-    Vector<RefPtr<Attr> > attrNodesCopy(*attrNodes);
-    for (size_t i = 0; i < attrNodesCopy.size(); ++i)
-        attrNodesCopy[i]->normalize();
-}
-
 bool Element::matches(const String& selectors, ExceptionState& exceptionState)
 {
     SelectorQuery* selectorQuery = document().selectorQueryCache().add(AtomicString(selectors), document(), exceptionState);
@@ -1745,13 +1671,6 @@ bool Element::isSpellCheckingEnabled() const
     return true;
 }
 
-#ifdef DUMP_NODE_STATISTICS
-bool Element::hasNamedNodeMap() const
-{
-    return hasRareData() && elementRareData()->attributeMap();
-}
-#endif
-
 inline void Element::updateId(const AtomicString& oldId, const AtomicString& newId)
 {
     if (!isInTreeScope())
@@ -1839,35 +1758,6 @@ void Element::setSavedLayerScrollOffset(const IntSize& size)
     ensureElementRareData().setSavedLayerScrollOffset(size);
 }
 
-PassRefPtr<Attr> Element::attrIfExists(const QualifiedName& name)
-{
-    if (AttrNodeList* attrNodeList = this->attrNodeList())
-        return findAttrNodeInList(*attrNodeList, name);
-    return nullptr;
-}
-
-PassRefPtr<Attr> Element::ensureAttr(const QualifiedName& name)
-{
-    AttrNodeList& attrNodeList = ensureAttrNodeList();
-    RefPtr<Attr> attrNode = findAttrNodeInList(attrNodeList, name);
-    if (!attrNode) {
-        attrNode = Attr::create(*this, name);
-        treeScope().adoptIfNeeded(*attrNode);
-        attrNodeList.append(attrNode);
-    }
-    return attrNode.release();
-}
-
-void Element::detachAllAttrNodesFromElement()
-{
-    AttrNodeList* list = this->attrNodeList();
-    ASSERT(list);
-
-    for (unsigned i = 0; i < list->size(); ++i)
-        list->at(i)->detachFromElement();
-    removeAttrNodeList();
-}
-
 void Element::willRecalcStyle(StyleRecalcChange)
 {
     ASSERT(hasCustomStyleCallbacks());
@@ -1887,9 +1777,6 @@ PassRefPtr<RenderStyle> Element::customStyleForRenderer()
 
 void Element::cloneAttributesFromElement(const Element& other)
 {
-    if (hasSyntheticAttrChildNodes())
-        detachAllAttrNodesFromElement();
-
     other.synchronizeAllAttributes();
     if (!other.m_elementData) {
         m_elementData.clear();

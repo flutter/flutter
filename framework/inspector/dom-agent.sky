@@ -32,7 +32,7 @@ DOMAgent.prototype.serializeChildren_ = function(node) {
 
 DOMAgent.prototype.serializeAttributes_ = function(element) {
   var attributes = [];
-  var attrs = element.attributes;
+  var attrs = element.getAttributes();
   for (var i = 0; i < attrs.length; ++i) {
     var attr = attrs[i];
     attributes.push(attr.name);

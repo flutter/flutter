@@ -124,7 +124,6 @@ void Node::dumpStatistics()
     size_t nodesWithRareData = 0;
 
     size_t elementNodes = 0;
-    size_t attrNodes = 0;
     size_t textNodes = 0;
     size_t piNodes = 0;
     size_t documentNodes = 0;
@@ -137,7 +136,6 @@ void Node::dumpStatistics()
     size_t attributes = 0;
     size_t elementsWithAttributeStorage = 0;
     size_t elementsWithRareData = 0;
-    size_t elementsWithNamedNodeMap = 0;
 
     for (WeakNodeSet::iterator it = liveNodeSet().begin(); it != liveNodeSet().end(); ++it) {
         Node* node = *it;
@@ -146,8 +144,6 @@ void Node::dumpStatistics()
             ++nodesWithRareData;
             if (node->isElementNode()) {
                 ++elementsWithRareData;
-                if (toElement(node)->hasNamedNodeMap())
-                    ++elementsWithNamedNodeMap;
             }
         }
 
@@ -165,10 +161,6 @@ void Node::dumpStatistics()
                     attributes += elementData->attributes().size();
                     ++elementsWithAttributeStorage;
                 }
-                break;
-            }
-            case ATTRIBUTE_NODE: {
-                ++attrNodes;
                 break;
             }
             case TEXT_NODE: {
@@ -194,7 +186,6 @@ void Node::dumpStatistics()
 
     printf("NodeType distribution:\n");
     printf("  Number of Element nodes: %zu\n", elementNodes);
-    printf("  Number of Attribute nodes: %zu\n", attrNodes);
     printf("  Number of Text nodes: %zu\n", textNodes);
     printf("  Number of Document nodes: %zu\n", documentNodes);
     printf("  Number of DocumentType nodes: %zu\n", docTypeNodes);
@@ -209,7 +200,6 @@ void Node::dumpStatistics()
     printf("  Number of Attributes (non-Node and Node): %zu [%zu]\n", attributes, sizeof(Attribute));
     printf("  Number of Elements with attribute storage: %zu [%zu]\n", elementsWithAttributeStorage, sizeof(ElementData));
     printf("  Number of Elements with RareData: %zu\n", elementsWithRareData);
-    printf("  Number of Elements with NamedNodeMap: %zu [%zu]\n", elementsWithNamedNodeMap, sizeof(NamedNodeMap));
 #endif
 }
 
@@ -412,9 +402,6 @@ void Node::normalize()
     while (Node* firstChild = node->firstChild())
         node = firstChild;
     while (node) {
-        if (node->isElementNode())
-            toElement(node)->normalizeAttributes();
-
         if (node == this)
             break;
 
@@ -1118,7 +1105,6 @@ void Node::setTextContent(const String& text)
             setNodeValue(text);
             return;
         case ELEMENT_NODE:
-        case ATTRIBUTE_NODE:
         case DOCUMENT_FRAGMENT_NODE: {
             // FIXME: Merge this logic into replaceChildrenWithText.
             RefPtr<ContainerNode> container = toContainerNode(this);
@@ -1158,11 +1144,8 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
     if (otherNode == this)
         return DOCUMENT_POSITION_EQUIVALENT;
 
-    const Attr* attr1 = nodeType() == ATTRIBUTE_NODE ? toAttr(this) : 0;
-    const Attr* attr2 = otherNode->nodeType() == ATTRIBUTE_NODE ? toAttr(otherNode) : 0;
-
-    const Node* start1 = attr1 ? attr1->ownerElement() : this;
-    const Node* start2 = attr2 ? attr2->ownerElement() : otherNode;
+    const Node* start1 = this;
+    const Node* start2 = otherNode;
 
     // If either of start1 or start2 is null, then we are disconnected, since one of the nodes is
     // an orphaned attribute node.
@@ -1173,32 +1156,6 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
 
     Vector<const Node*, 16> chain1;
     Vector<const Node*, 16> chain2;
-    if (attr1)
-        chain1.append(attr1);
-    if (attr2)
-        chain2.append(attr2);
-
-    // FIXME(sky): Attrs are not nodes, remove all this code.
-    if (attr1 && attr2 && start1 == start2 && start1) {
-        // We are comparing two attributes on the same node. Crawl our attribute map and see which one we hit first.
-        const Element* owner1 = attr1->ownerElement();
-        AttributeCollection attributes = owner1->attributes();
-        AttributeCollection::iterator end = attributes.end();
-        for (AttributeCollection::iterator it = attributes.begin(); it != end; ++it) {
-            // If neither of the two determining nodes is a child node and nodeType is the same for both determining nodes, then an
-            // implementation-dependent order between the determining nodes is returned. This order is stable as long as no nodes of
-            // the same nodeType are inserted into or removed from the direct container. This would be the case, for example,
-            // when comparing two attributes of the same element, and inserting or removing additional attributes might change
-            // the order between existing attributes.
-            if (attr1->name() == it->localName())
-                return DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_FOLLOWING;
-            if (attr2->name() == it->localName())
-                return DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_PRECEDING;
-        }
-
-        ASSERT_NOT_REACHED();
-        return DOCUMENT_POSITION_DISCONNECTED;
-    }
 
     // If one node is in the document and the other is not, we must be disconnected.
     // If the nodes have different owning documents, they must be disconnected.  Note that we avoid
@@ -1231,12 +1188,6 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
         const Node* child1 = chain1[--index1];
         const Node* child2 = chain2[--index2];
         if (child1 != child2) {
-            // If one of the children is an attribute, it wins.
-            if (child1->nodeType() == ATTRIBUTE_NODE)
-                return DOCUMENT_POSITION_FOLLOWING | connection;
-            if (child2->nodeType() == ATTRIBUTE_NODE)
-                return DOCUMENT_POSITION_PRECEDING | connection;
-
             // If one of the children is a shadow root,
             if (child1->isShadowRoot() || child2->isShadowRoot()) {
                 if (!child2->isShadowRoot())
@@ -1380,9 +1331,6 @@ void Node::showNodePathForThis() const
         }
         case TEXT_NODE:
             fprintf(stderr, "/text()");
-            break;
-        case ATTRIBUTE_NODE:
-            fprintf(stderr, "/@%s", node->nodeName().utf8().data());
             break;
         default:
             break;
@@ -2007,7 +1955,6 @@ unsigned Node::lengthOfContents() const
     case Node::TEXT_NODE:
         return toCharacterData(this)->length();
     case Node::ELEMENT_NODE:
-    case Node::ATTRIBUTE_NODE:
     case Node::DOCUMENT_NODE:
     case Node::DOCUMENT_FRAGMENT_NODE:
         return toContainerNode(this)->countChildren();

@@ -300,9 +300,6 @@ void MarkupAccumulator::appendStartMarkup(StringBuilder& result, Node& node, Nam
     case Node::ELEMENT_NODE:
         appendElement(result, toElement(node), namespaces);
         break;
-    case Node::ATTRIBUTE_NODE:
-        ASSERT_NOT_REACHED();
-        break;
     }
 }
 

@@ -253,10 +253,7 @@ public:
         AttrSetValueWithElement = 303,
         PrefixedCancelAnimationFrame = 304,
         PrefixedCancelRequestAnimationFrame = 305,
-        NamedNodeMapGetNamedItem = 306,
-        NamedNodeMapSetNamedItem = 307,
-        NamedNodeMapRemoveNamedItem = 308,
-        NamedNodeMapItem = 309,
+
         OpenWebDatabaseInWorker = 313, // This didn't work because of crbug.com/376039. Available since M37.
         OpenWebDatabaseSyncInWorker = 314, // This didn't work because of crbug.com/376039. Available since M37.
         XHRProgressEventPosition = 316,

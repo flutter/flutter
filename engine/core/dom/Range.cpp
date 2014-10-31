@@ -672,7 +672,6 @@ PassRefPtr<Node> Range::processContentsBetweenOffsets(ActionType action, PassRef
             toCharacterData(container)->deleteData(startOffset, endOffset - startOffset, exceptionState);
         break;
     case Node::ELEMENT_NODE:
-    case Node::ATTRIBUTE_NODE:
     case Node::DOCUMENT_NODE:
     case Node::DOCUMENT_FRAGMENT_NODE:
         // FIXME: Should we assert that some nodes never appear here?
@@ -842,7 +841,6 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
 
     // InvalidNodeTypeError: Raised if newNode is an Attr, Entity, Notation, ShadowRoot or Document node.
     switch (newNodeType) {
-    case Node::ATTRIBUTE_NODE:
     case Node::DOCUMENT_NODE:
         exceptionState.throwDOMException(InvalidNodeTypeError, "The node to be inserted is a '" + newNode->nodeName() + "' node, which may not be inserted here.");
         return;
@@ -942,7 +940,6 @@ Node* Range::checkNodeWOffset(Node* n, int offset, ExceptionState& exceptionStat
             if (static_cast<unsigned>(offset) > toCharacterData(n)->length())
                 exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is larger than or equal to the node's length (" + String::number(toCharacterData(n)->length()) + ").");
             return 0;
-        case Node::ATTRIBUTE_NODE:
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
         case Node::ELEMENT_NODE: {
@@ -975,7 +972,6 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
     }
 
     switch (n->nodeType()) {
-        case Node::ATTRIBUTE_NODE:
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
             exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + n->nodeName() + "'.");
@@ -990,7 +986,6 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
         root = parent;
 
     switch (root->nodeType()) {
-        case Node::ATTRIBUTE_NODE:
         case Node::DOCUMENT_NODE:
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::ELEMENT_NODE:
@@ -1052,7 +1047,6 @@ void Range::selectNode(Node* refNode, ExceptionState& exceptionState)
         case Node::ELEMENT_NODE:
         case Node::TEXT_NODE:
             break;
-        case Node::ATTRIBUTE_NODE:
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
             exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + refNode->nodeName() + "'.");
@@ -1103,7 +1097,6 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
     // InvalidNodeTypeError: Raised if node is an Attr, Entity, DocumentType, Notation,
     // Document, or DocumentFragment node.
     switch (newParent->nodeType()) {
-        case Node::ATTRIBUTE_NODE:
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
             exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + newParent->nodeName() + "'.");

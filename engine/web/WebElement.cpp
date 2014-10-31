@@ -33,7 +33,6 @@
 
 #include "bindings/core/v8/ExceptionState.h"
 #include "core/dom/Element.h"
-#include "core/dom/NamedNodeMap.h"
 #include "core/dom/custom/CustomElementProcessingStack.h"
 #include "core/dom/shadow/ShadowRoot.h"
 #include "core/rendering/RenderBoxModelObject.h"

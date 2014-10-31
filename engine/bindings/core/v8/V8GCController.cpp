@@ -84,13 +84,6 @@ Node* V8GCController::opaqueRootForGC(Node* node, v8::Isolate*)
         return &document;
     }
 
-    if (node->isAttributeNode()) {
-        Node* ownerElement = toAttr(node)->ownerElement();
-        if (!ownerElement)
-            return node;
-        node = ownerElement;
-    }
-
     while (Node* parent = node->parentOrShadowHostOrTemplateHostNode())
         node = parent;
 

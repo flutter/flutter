@@ -60,8 +60,6 @@ v8::Handle<v8::Object> wrap(Node* impl, v8::Handle<v8::Object> creationContext, 
         if (impl->isHTMLElement())
             return wrap(toHTMLElement(impl), creationContext, isolate);
         return V8Element::createWrapper(toElement(impl), creationContext, isolate);
-    case Node::ATTRIBUTE_NODE:
-        return wrap(toAttr(impl), creationContext, isolate);
     case Node::TEXT_NODE:
         return wrap(toText(impl), creationContext, isolate);
     case Node::DOCUMENT_NODE:

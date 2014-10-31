@@ -26,12 +26,8 @@
     DOMString? getAttribute(DOMString name);
     [RaisesException, CustomElementCallbacks] void setAttribute(DOMString name, DOMString value);
     [CustomElementCallbacks] void removeAttribute(DOMString name);
-
-    [PerWorldBindings, ImplementedAs=attributesForBindings] readonly attribute NamedNodeMap     attributes;
-    [MeasureAs=HasAttributes] boolean hasAttributes();
-
     boolean hasAttribute(DOMString name);
-
+    boolean hasAttributes();
     sequence<Attr> getAttributes();
 
     [PerWorldBindings] readonly attribute CSSStyleDeclaration style;

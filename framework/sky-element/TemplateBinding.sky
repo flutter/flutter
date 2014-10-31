@@ -539,9 +539,10 @@ function parseAttributeBindings(element, prepareBindingFn) {
   var bindings = [];
   var ifFound = false;
   var bindFound = false;
+  var attributes = element.getAttributes();
 
-  for (var i = 0; i < element.attributes.length; i++) {
-    var attr = element.attributes[i];
+  for (var i = 0; i < attributes.length; i++) {
+    var attr = attributes[i];
     var name = attr.name;
     var value = attr.value;
 

@@ -23,59 +23,23 @@
 #include "config.h"
 #include "core/dom/Attr.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/Text.h"
-#include "core/events/ScopedEventQueue.h"
-#include "core/frame/UseCounter.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/StringBuilder.h"
-
 namespace blink {
 
-Attr::Attr(Element& element, const QualifiedName& name)
-    : Node(&element.document(), Node::CreateOther)
-    , m_element(&element)
-    , m_name(name)
+Attr::Attr(const QualifiedName& name, const AtomicString& value)
+    : m_name(name)
+    , m_value(value)
 {
     ScriptWrappable::init(this);
 }
 
-PassRefPtr<Attr> Attr::create(Element& element, const QualifiedName& name)
+PassRefPtr<Attr> Attr::create(const QualifiedName& name, const AtomicString& value)
 {
-    RefPtr<Attr> attr = adoptRef(new Attr(element, name));
+    RefPtr<Attr> attr = adoptRef(new Attr(name, value));
     return attr.release();
 }
 
 Attr::~Attr()
 {
-}
-
-void Attr::setValue(const AtomicString& value)
-{
-    if (!m_element)
-        return;
-    m_element->setAttribute(m_name, value);
-}
-
-const AtomicString& Attr::value() const
-{
-    if (m_element)
-        return m_element->getAttribute(m_name);
-    return nullAtom;
-}
-
-void Attr::detachFromElement()
-{
-    m_element = nullptr;
-}
-
-void Attr::trace(Visitor* visitor)
-{
-    visitor->trace(m_element);
-    Node::trace(visitor);
 }
 
 }

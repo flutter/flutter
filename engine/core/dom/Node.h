@@ -59,7 +59,6 @@ class HTMLQualifiedName;
 class IntRect;
 class KeyboardEvent;
 class NSResolver;
-class NamedNodeMap;
 class NodeEventContext;
 class NodeList;
 class NodeRareData;
@@ -120,7 +119,6 @@ class Node : NODE_BASE_CLASSES {
 public:
     enum NodeType {
         ELEMENT_NODE = 1,
-        ATTRIBUTE_NODE = 2,
         TEXT_NODE = 3,
         DOCUMENT_NODE = 9,
         DOCUMENT_FRAGMENT_NODE = 11,
@@ -204,7 +202,6 @@ public:
     }
     void setCustomElementState(CustomElementState newState);
 
-    virtual bool isAttributeNode() const { return false; }
     virtual bool isCharacterDataNode() const { return false; }
 
     // StyledElements allow inline style (style="border: 1px"), presentational attributes (ex. color),
@@ -224,9 +221,6 @@ public:
     bool isInsertionPoint() const { return getFlag(IsInsertionPointFlag); }
 
     bool hasCustomStyleCallbacks() const { return getFlag(HasCustomStyleCallbacksFlag); }
-
-    bool hasSyntheticAttrChildNodes() const { return getFlag(HasSyntheticAttrChildNodesFlag); }
-    void setHasSyntheticAttrChildNodes(bool flag) { setFlag(flag, HasSyntheticAttrChildNodesFlag); }
 
     // If this node is in a shadow tree, returns its shadow host. Otherwise, returns 0.
     Element* shadowHost() const;
@@ -631,14 +625,13 @@ private:
         IsEditingTextFlag = 1 << 23,
         HasWeakReferencesFlag = 1 << 24,
         V8CollectableDuringMinorGCFlag = 1 << 25,
-        HasSyntheticAttrChildNodesFlag = 1 << 26,
-        HasEventTargetDataFlag = 1 << 27,
-        AlreadySpellCheckedFlag = 1 << 28,
+        HasEventTargetDataFlag = 1 << 26,
+        AlreadySpellCheckedFlag = 1 << 27,
 
         DefaultNodeFlags = IsFinishedParsingChildrenFlag | ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
 
-    // 4 bits remaining.
+    // 5 bits remaining.
 
     bool getFlag(NodeFlags mask) const { return m_nodeFlags & mask; }
     void setFlag(bool f, NodeFlags mask) { m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t)f & mask); }

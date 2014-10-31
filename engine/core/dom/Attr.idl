@@ -20,5 +20,5 @@
 
 interface Attr {
     readonly attribute DOMString? name;
-    attribute DOMString? value;
+    readonly attribute DOMString? value;
 };

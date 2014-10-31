@@ -25,47 +25,28 @@
 #ifndef Attr_h
 #define Attr_h
 
-#include "core/dom/Node.h"
+#include "bindings/core/v8/ScriptWrappable.h"
 #include "core/dom/QualifiedName.h"
+#include "wtf/RefCounted.h"
+#include "wtf/text/AtomicString.h"
 
 namespace blink {
 
-class Attr final : public Node {
+class Attr : public RefCounted<Attr>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<Attr> create(Element&, const QualifiedName&);
-    virtual ~Attr();
+    static PassRefPtr<Attr> create(const QualifiedName& name, const AtomicString& value);
+    ~Attr();
 
     String name() const { return m_name.localName(); }
-    Element* ownerElement() const { return m_element; }
-
-    const AtomicString& value() const;
-    void setValue(const AtomicString&);
-
-    void detachFromElement();
-
-    // FIXME(sky): Remove this.
-    virtual const AtomicString& localName() const override { return m_name.localName(); }
-
-    virtual void trace(Visitor*) override;
+    const AtomicString& value() const { return m_value; }
 
 private:
-    Attr(Element&, const QualifiedName&);
+    Attr(const QualifiedName& name, const AtomicString& value);
 
-    bool isElementNode() const = delete; // This will catch anyone doing an unnecessary check.
-
-    virtual String nodeName() const override { return name(); }
-    virtual NodeType nodeType() const override { return ATTRIBUTE_NODE; }
-
-    virtual PassRefPtr<Node> cloneNode(bool deep = true) override { return nullptr; }
-
-    virtual bool isAttributeNode() const override { return true; }
-
-    RawPtr<Element> m_element;
     QualifiedName m_name;
+    AtomicString m_value;
 };
-
-DEFINE_NODE_TYPE_CASTS(Attr, isAttributeNode());
 
 } // namespace blink
 
