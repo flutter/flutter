@@ -5,7 +5,12 @@ Building
 --------
 
 * Follow the setup & build instructions for [Mojo](https://github.com/domokit/mojo)
-* Build ``sky`` with ``ninja``, e.g. ``ninja -C out/Debug sky``
+* Build ``sky`` with ``ninja``, e.g. ``ninja -C out/Debug sky`` for a debug build.
+
+If you want to build release, run the following commands:
+
+* ``gn gen out/Release --args="is_debug=false"``
+* ``ninja -C out/Release sky``
 
 Running applications
 --------------------
@@ -13,9 +18,11 @@ Running applications
 * ``./sky/tools/skydb [url]``
   * You should see a ``(skydb)`` prompt
   * Type ``help`` to see the list of available commands
+  * Note: skydb is currently hard-coded to use ``//out/Debug``
 
 * ``./sky/tools/test_sky --debug``
-  * This should run the tests
+  * This runs the tests against ``//out/Debug``. If you want to run against
+    ``//out/Release``, omit the ``--debug`` flag.
 
 Running tests manually
 ----------------------
