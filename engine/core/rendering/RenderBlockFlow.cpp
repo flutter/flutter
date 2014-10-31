@@ -161,42 +161,6 @@ bool RenderBlockFlow::updateLogicalWidthAndColumnWidth()
     return RenderBlock::updateLogicalWidthAndColumnWidth();
 }
 
-void RenderBlockFlow::setBreakAtLineToAvoidWidow(int lineToBreak)
-{
-    ASSERT(lineToBreak >= 0);
-    ensureRareData();
-    ASSERT(!m_rareData->m_didBreakAtLineToAvoidWidow);
-    m_rareData->m_lineBreakToAvoidWidow = lineToBreak;
-}
-
-void RenderBlockFlow::setDidBreakAtLineToAvoidWidow()
-{
-    ASSERT(!shouldBreakAtLineToAvoidWidow());
-
-    // This function should be called only after a break was applied to avoid widows
-    // so assert |m_rareData| exists.
-    ASSERT(m_rareData);
-
-    m_rareData->m_didBreakAtLineToAvoidWidow = true;
-}
-
-void RenderBlockFlow::clearDidBreakAtLineToAvoidWidow()
-{
-    if (!m_rareData)
-        return;
-
-    m_rareData->m_didBreakAtLineToAvoidWidow = false;
-}
-
-void RenderBlockFlow::clearShouldBreakAtLineToAvoidWidow() const
-{
-    ASSERT(shouldBreakAtLineToAvoidWidow());
-    if (!m_rareData)
-        return;
-
-    m_rareData->m_lineBreakToAvoidWidow = -1;
-}
-
 bool RenderBlockFlow::isSelfCollapsingBlock() const
 {
     m_hasOnlySelfCollapsingChildren = RenderBlock::isSelfCollapsingBlock();
@@ -218,13 +182,7 @@ void RenderBlockFlow::layoutBlock(bool relayoutChildren)
 
     SubtreeLayoutScope layoutScope(*this);
 
-    // Multiple passes might be required for column and pagination based layout
-    // In the case of the old column code the number of passes will only be two
-    // however, in the newer column code the number of passes could equal the
-    // number of columns.
-    bool done = false;
-    while (!done)
-        done = layoutBlockFlow(relayoutChildren, layoutScope);
+    layoutBlockFlow(relayoutChildren, layoutScope);
 
     updateLayerTransformAfterLayout();
 
@@ -238,7 +196,7 @@ void RenderBlockFlow::layoutBlock(bool relayoutChildren)
     clearNeedsLayout();
 }
 
-inline bool RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope& layoutScope)
+inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope& layoutScope)
 {
     LayoutUnit oldLeft = logicalLeft();
     bool logicalWidthChanged = updateLogicalWidthAndColumnWidth();
@@ -278,11 +236,6 @@ inline bool RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     if (lowestFloatLogicalBottom() > (logicalHeight() - afterEdge) && createsBlockFormattingContext())
         setLogicalHeight(lowestFloatLogicalBottom() + afterEdge);
 
-    if (shouldBreakAtLineToAvoidWidow()) {
-        setEverHadLayout(true);
-        return false;
-    }
-
     // Calculate our new height.
     LayoutUnit oldHeight = logicalHeight();
     LayoutUnit oldClientAfterEdge = clientLogicalBottom();
@@ -311,7 +264,6 @@ inline bool RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     computeOverflow(oldClientAfterEdge);
 
     m_descendantsWithFloatsMarkedForLayout = false;
-    return true;
 }
 
 void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)

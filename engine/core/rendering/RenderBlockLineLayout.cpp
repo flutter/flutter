@@ -800,8 +800,6 @@ void RenderBlockFlow::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
         lineMidpointState.reset();
         resolver.setPosition(endOfLine, numberOfIsolateAncestors(endOfLine));
     }
-
-    clearDidBreakAtLineToAvoidWidow();
 }
 
 void RenderBlockFlow::linkToEndLineIfNeeded(LineLayoutState& layoutState)

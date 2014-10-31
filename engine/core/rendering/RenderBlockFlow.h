@@ -156,7 +156,7 @@ protected:
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:
-    bool layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
+    void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
     void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
     void layoutBlockChild(RenderBox* child, MarginInfo&, LayoutUnit& previousFloatLogicalBottom);
@@ -198,14 +198,6 @@ private:
     virtual RootInlineBox* createRootInlineBox(); // Subclassed by SVG
 
     void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
-
-    bool shouldBreakAtLineToAvoidWidow() const { return m_rareData && m_rareData->m_lineBreakToAvoidWidow >= 0; }
-    void clearShouldBreakAtLineToAvoidWidow() const;
-    int lineBreakToAvoidWidow() const { return m_rareData ? m_rareData->m_lineBreakToAvoidWidow : -1; }
-    void setBreakAtLineToAvoidWidow(int);
-    void clearDidBreakAtLineToAvoidWidow();
-    void setDidBreakAtLineToAvoidWidow();
-    bool didBreakAtLineToAvoidWidow() const { return m_rareData && m_rareData->m_didBreakAtLineToAvoidWidow; }
 
 public:
     struct FloatWithRect {
@@ -254,8 +246,6 @@ public:
     public:
         RenderBlockFlowRareData(const RenderBlockFlow* block)
             : m_margins(positiveMarginBeforeDefault(block), negativeMarginBeforeDefault(block), positiveMarginAfterDefault(block), negativeMarginAfterDefault(block))
-            , m_lineBreakToAvoidWidow(-1)
-            , m_didBreakAtLineToAvoidWidow(false)
             , m_discardMarginBefore(false)
             , m_discardMarginAfter(false)
         {
@@ -280,9 +270,6 @@ public:
         }
 
         MarginValues m_margins;
-
-        int m_lineBreakToAvoidWidow;
-        bool m_didBreakAtLineToAvoidWidow : 1;
         bool m_discardMarginBefore : 1;
         bool m_discardMarginAfter : 1;
     };
