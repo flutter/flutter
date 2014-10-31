@@ -25,8 +25,8 @@ SkyElement({
 </script>
 ```
 
-Note that an element's declared ShadowDOM is the previous <template>
-element to the <script> element which defines the element.
+Note that an element's declared ShadowDOM is the previous `<template>`
+element to the `<script>` element which defines the element.
 
 Databinding
 --------
@@ -36,9 +36,9 @@ there are some key differences:
 There is not yet support for
  * Declarative event handlers
  * Inline expressions
- * Self-observation (e.g. fooChanged() gets invoked when this.foo is changed)
+ * Self-observation (e.g. `fooChanged()` gets invoked when `this.foo` is changed)
  * Computed properties (e.g. the computed block)
- * Conditional attributes (e.g. `<my-foo checked?="{{ val }}" `)
+ * Conditional attributes (e.g. `<my-foo checked?="{{ val }}"`)
 
  Also, because there are so few built-in elements in Sky, the default behavior
  of HTMLElement with bindings is to assign to the property. e.g.
@@ -47,6 +47,6 @@ There is not yet support for
  <my-foo bar="{{ bas }}">
  ```
 
- Will not setAttribute on the my-foo, instead it will assign to the `bar`
+ Will not `setAttribute` on the `my-foo`, instead it will assign to the `bar`
  property of `my-foo`. There are two exceptions to this: `class` & `style` --
  those still`setAttribute`.
