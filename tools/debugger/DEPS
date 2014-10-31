@@ -1,0 +1,5 @@
+include_rules = [
+  "+mojo/public",
+  "+mojo/application",
+  "+mojo/services",
+]

@@ -10,6 +10,7 @@
 #include "ui/wm/core/focus_rules.h"
 
 namespace sky {
+namespace debugger {
 
 class FocusRules : public wm::FocusRules {
  public:
@@ -32,6 +33,7 @@ class FocusRules : public wm::FocusRules {
   DISALLOW_COPY_AND_ASSIGN(FocusRules);
 };
 
+}  // namespace debugger
 }  // namespace sky
 
 #endif  // SKY_TOOLS_DEBUGGER_FOCUS_RULES_H_

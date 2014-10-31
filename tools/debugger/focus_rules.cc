@@ -5,6 +5,7 @@
 #include "sky/tools/debugger/focus_rules.h"
 
 namespace sky {
+namespace debugger {
 
 FocusRules::FocusRules(mojo::WindowManagerApp* window_manager_app,
                        mojo::View* content)
@@ -56,4 +57,5 @@ aura::Window* FocusRules::GetNextActivatableWindow(aura::Window* ignore) const {
   return NULL;
 }
 
+}  // namespace debugger
 }  // namespace sky
