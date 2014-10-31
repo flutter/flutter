@@ -33,7 +33,6 @@
 #include "core/dom/Document.h"
 #include "core/dom/Element.h"
 #include "core/dom/NodeRenderStyle.h"
-#include "core/rendering/style/GridPosition.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/RenderStyleConstants.h"
 #include "platform/Length.h"
@@ -47,12 +46,9 @@ static EDisplay equivalentBlockDisplay(EDisplay display)
     switch (display) {
     case BLOCK:
     case FLEX:
-    case GRID:
         return display;
     case INLINE_FLEX:
         return FLEX;
-    case INLINE_GRID:
-        return GRID;
 
     case INLINE:
     case INLINE_BLOCK:
@@ -75,7 +71,7 @@ static bool doesNotInheritTextDecoration(const RenderStyle* style, const Element
 
 static bool parentStyleForcesZIndexToCreateStackingContext(const RenderStyle* parentStyle)
 {
-    return parentStyle->isDisplayFlexibleOrGridBox();
+    return parentStyle->isDisplayFlexibleBox();
 }
 
 static bool hasWillChangeThatCreatesStackingContext(const RenderStyle* style)
@@ -175,19 +171,19 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
 
 void StyleAdjuster::adjustStyleForAlignment(RenderStyle& style, const RenderStyle& parentStyle)
 {
-    bool isFlexOrGrid = style.isDisplayFlexibleOrGridBox();
+    bool isFlex = style.isDisplayFlexibleBox();
     bool absolutePositioned = style.position() == AbsolutePosition;
 
     // If the inherited value of justify-items includes the legacy keyword, 'auto'
     // computes to the the inherited value.
     // Otherwise, auto computes to:
-    //  - 'stretch' for flex containers and grid containers.
+    //  - 'stretch' for flex containers.
     //  - 'start' for everything else.
     if (style.justifyItems() == ItemPositionAuto) {
         if (parentStyle.justifyItemsPositionType() == LegacyPosition) {
             style.setJustifyItems(parentStyle.justifyItems());
             style.setJustifyItemsPositionType(parentStyle.justifyItemsPositionType());
-        } else if (isFlexOrGrid) {
+        } else if (isFlex) {
             style.setJustifyItems(ItemPositionStretch);
         }
     }
@@ -205,10 +201,10 @@ void StyleAdjuster::adjustStyleForAlignment(RenderStyle& style, const RenderStyl
     }
 
     // The 'auto' keyword computes to:
-    //  - 'stretch' for flex containers and grid containers,
+    //  - 'stretch' for flex containers,
     //  - 'start' for everything else.
     if (style.alignItems() == ItemPositionAuto) {
-        if (isFlexOrGrid)
+        if (isFlex)
             style.setAlignItems(ItemPositionStretch);
     }
 
@@ -242,10 +238,7 @@ void StyleAdjuster::adjustOverflow(RenderStyle* style)
 
 void StyleAdjuster::adjustStyleForDisplay(RenderStyle* style, RenderStyle* parentStyle)
 {
-    if (style->display() == BLOCK)
-        return;
-
-    if (parentStyle->isDisplayFlexibleOrGridBox()) {
+    if (parentStyle->isDisplayFlexibleBox()) {
         style->setDisplay(equivalentBlockDisplay(style->display()));
     }
 }

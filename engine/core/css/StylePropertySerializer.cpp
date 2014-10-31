@@ -278,12 +278,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
         return getShorthandValue(flexShorthand());
     case CSSPropertyFlexFlow:
         return getShorthandValue(flexFlowShorthand());
-    case CSSPropertyGridColumn:
-        return getShorthandValue(gridColumnShorthand());
-    case CSSPropertyGridRow:
-        return getShorthandValue(gridRowShorthand());
-    case CSSPropertyGridArea:
-        return getShorthandValue(gridAreaShorthand());
     case CSSPropertyFont:
         return fontValue();
     case CSSPropertyMargin:

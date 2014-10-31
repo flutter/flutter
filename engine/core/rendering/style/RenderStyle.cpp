@@ -120,8 +120,6 @@ ALWAYS_INLINE RenderStyle::RenderStyle(DefaultStyleTag)
     rareNonInheritedData.access()->m_transform.init();
     rareNonInheritedData.access()->m_willChange.init();
     rareNonInheritedData.access()->m_filter.init();
-    rareNonInheritedData.access()->m_grid.init();
-    rareNonInheritedData.access()->m_gridItem.init();
     rareInheritedData.init();
     inherited.init();
 }
@@ -338,8 +336,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
             || rareNonInheritedData->m_alignItems != other.rareNonInheritedData->m_alignItems
             || rareNonInheritedData->m_alignSelf != other.rareNonInheritedData->m_alignSelf
             || rareNonInheritedData->m_justifyContent != other.rareNonInheritedData->m_justifyContent
-            || rareNonInheritedData->m_grid.get() != other.rareNonInheritedData->m_grid.get()
-            || rareNonInheritedData->m_gridItem.get() != other.rareNonInheritedData->m_gridItem.get()
             || rareNonInheritedData->hasFilters() != other.rareNonInheritedData->hasFilters())
             return true;
 

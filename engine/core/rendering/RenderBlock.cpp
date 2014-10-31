@@ -42,7 +42,6 @@
 #include "core/rendering/InlineTextBox.h"
 #include "core/rendering/PaintInfo.h"
 #include "core/rendering/RenderFlexibleBox.h"
-#include "core/rendering/RenderGrid.h"
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
@@ -701,10 +700,6 @@ void RenderBlock::removeLeftoverAnonymousBlock(RenderBlock* child)
     child->children()->setFirstChild(0);
     child->m_next = nullptr;
 
-    // RenderGrid keeps track of its children, we must notify it about changes in the tree.
-    if (child->parent()->isRenderGrid())
-        toRenderGrid(child->parent())->dirtyGrid();
-
     child->setParent(0);
     child->setPreviousSibling(0);
     child->setNextSibling(0);
@@ -1325,7 +1320,7 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
     // Paint all phases atomically, as though the element established its own
     // stacking context.  (See Appendix E.2, section 7.2.1.4 on
     // inline block/table/replaced elements in the CSS2.1 specification.)
-    // This is also used by other elements (e.g. flex items and grid items).
+    // This is also used by other elements (e.g. flex items).
     bool preservePhase = paintInfo.phase == PaintPhaseSelection || paintInfo.phase == PaintPhaseTextClip;
     PaintInfo info(paintInfo);
     info.phase = preservePhase ? paintInfo.phase : PaintPhaseBlockBackground;

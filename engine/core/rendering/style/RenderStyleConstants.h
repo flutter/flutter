@@ -382,7 +382,6 @@ enum EDisplay {
     INLINE,
     BLOCK, INLINE_BLOCK,
     FLEX, INLINE_FLEX,
-    GRID, INLINE_GRID,
     NONE,
 };
 
@@ -427,27 +426,6 @@ enum Order { LogicalOrder = 0, VisualOrder };
 enum WrapFlow { WrapFlowAuto, WrapFlowBoth, WrapFlowStart, WrapFlowEnd, WrapFlowMaximum, WrapFlowClear };
 
 enum WrapThrough { WrapThroughWrap, WrapThroughNone };
-
-static const size_t GridAutoFlowBits = 5;
-enum InternalGridAutoFlowAlgorithm {
-    InternalAutoFlowAlgorithmSparse = 0x1,
-    InternalAutoFlowAlgorithmDense = 0x2,
-    InternalAutoFlowAlgorithmStack = 0x4
-};
-
-enum InternalGridAutoFlowDirection {
-    InternalAutoFlowDirectionRow = 0x8,
-    InternalAutoFlowDirectionColumn = 0x10
-};
-
-enum GridAutoFlow {
-    AutoFlowRow = InternalAutoFlowAlgorithmSparse | InternalAutoFlowDirectionRow,
-    AutoFlowColumn = InternalAutoFlowAlgorithmSparse | InternalAutoFlowDirectionColumn,
-    AutoFlowRowDense = InternalAutoFlowAlgorithmDense | InternalAutoFlowDirectionRow,
-    AutoFlowColumnDense = InternalAutoFlowAlgorithmDense | InternalAutoFlowDirectionColumn,
-    AutoFlowStackRow = InternalAutoFlowAlgorithmStack | InternalAutoFlowDirectionRow,
-    AutoFlowStackColumn = InternalAutoFlowAlgorithmStack | InternalAutoFlowDirectionColumn
-};
 
 static const size_t TouchActionBits = 4;
 enum TouchAction {

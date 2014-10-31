@@ -978,12 +978,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EDisplay e)
     case INLINE_FLEX:
         m_value.valueID = CSSValueInlineFlex;
         break;
-    case GRID:
-        m_value.valueID = CSSValueGrid;
-        break;
-    case INLINE_GRID:
-        m_value.valueID = CSSValueInlineGrid;
-        break;
     case NONE:
         m_value.valueID = CSSValueNone;
         break;
@@ -995,11 +989,6 @@ template<> inline CSSPrimitiveValue::operator EDisplay() const
     ASSERT(isValueID());
     if (m_value.valueID == CSSValueNone)
         return NONE;
-
-    if (m_value.valueID == CSSValueWebkitFlex)
-        return FLEX;
-    if (m_value.valueID == CSSValueWebkitInlineFlex)
-        return INLINE_FLEX;
 
     EDisplay display = static_cast<EDisplay>(m_value.valueID - CSSValueInline);
     ASSERT(display >= INLINE && display <= NONE);

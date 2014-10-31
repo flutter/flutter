@@ -105,7 +105,6 @@ private:
     PassRefPtr<CSSValueList> valuesForShorthandProperty(const StylePropertyShorthand&) const;
     PassRefPtr<CSSValueList> valuesForSidesShorthand(const StylePropertyShorthand&) const;
     PassRefPtr<CSSValueList> valuesForBackgroundShorthand() const;
-    PassRefPtr<CSSValueList> valuesForGridShorthand(const StylePropertyShorthand&) const;
 
     RefPtr<Node> m_node;
     PseudoId m_pseudoElementSpecifier;

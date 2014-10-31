@@ -35,8 +35,6 @@
 #include "core/css/CSSFontFeatureValue.h"
 #include "core/css/CSSFontValue.h"
 #include "core/css/CSSFunctionValue.h"
-#include "core/css/CSSGridLineNamesValue.h"
-#include "core/css/CSSGridTemplateAreasValue.h"
 #include "core/css/CSSLineBoxContainValue.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/CSSPrimitiveValue.h"
@@ -55,7 +53,6 @@
 #include "core/dom/Document.h"
 #include "core/dom/ExceptionCode.h"
 #include "core/rendering/RenderBox.h"
-#include "core/rendering/RenderGrid.h"
 #include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/ShadowList.h"
@@ -133,8 +130,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyHeight,
     CSSPropertyImageRendering,
     CSSPropertyIsolation,
-    CSSPropertyJustifyItems,
-    CSSPropertyJustifySelf,
     CSSPropertyLeft,
     CSSPropertyLetterSpacing,
     CSSPropertyLineHeight,
@@ -238,16 +233,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyFlexWrap,
     CSSPropertyJustifyContent,
     CSSPropertyWebkitFontSmoothing,
-    CSSPropertyGridAutoColumns,
-    CSSPropertyGridAutoFlow,
-    CSSPropertyGridAutoRows,
-    CSSPropertyGridColumnEnd,
-    CSSPropertyGridColumnStart,
-    CSSPropertyGridTemplateAreas,
-    CSSPropertyGridTemplateColumns,
-    CSSPropertyGridTemplateRows,
-    CSSPropertyGridRowEnd,
-    CSSPropertyGridRowStart,
     CSSPropertyWebkitHighlight,
     CSSPropertyWebkitHyphenateCharacter,
     CSSPropertyWebkitLineBoxContain,
@@ -745,97 +730,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::valueForFilter(const RenderObj
     }
 
     return list.release();
-}
-
-static PassRefPtr<CSSValue> specifiedValueForGridTrackBreadth(const GridLength& trackBreadth, const RenderStyle& style)
-{
-    if (!trackBreadth.isLength())
-        return cssValuePool().createValue(trackBreadth.flex(), CSSPrimitiveValue::CSS_FR);
-
-    const Length& trackBreadthLength = trackBreadth.length();
-    if (trackBreadthLength.isAuto())
-        return cssValuePool().createIdentifierValue(CSSValueAuto);
-    return zoomAdjustedPixelValueForLength(trackBreadthLength, style);
-}
-
-static PassRefPtr<CSSValue> specifiedValueForGridTrackSize(const GridTrackSize& trackSize, const RenderStyle& style)
-{
-    switch (trackSize.type()) {
-    case LengthTrackSizing:
-        return specifiedValueForGridTrackBreadth(trackSize.length(), style);
-    case MinMaxTrackSizing:
-        RefPtr<CSSValueList> minMaxTrackBreadths = CSSValueList::createCommaSeparated();
-        minMaxTrackBreadths->append(specifiedValueForGridTrackBreadth(trackSize.minTrackBreadth(), style));
-        minMaxTrackBreadths->append(specifiedValueForGridTrackBreadth(trackSize.maxTrackBreadth(), style));
-        return CSSFunctionValue::create("minmax(", minMaxTrackBreadths);
-    }
-    ASSERT_NOT_REACHED();
-    return nullptr;
-}
-
-static void addValuesForNamedGridLinesAtIndex(const OrderedNamedGridLines& orderedNamedGridLines, size_t i, CSSValueList& list)
-{
-    const Vector<String>& namedGridLines = orderedNamedGridLines.get(i);
-    if (namedGridLines.isEmpty())
-        return;
-
-    RefPtr<CSSGridLineNamesValue> lineNames = CSSGridLineNamesValue::create();
-    for (size_t j = 0; j < namedGridLines.size(); ++j)
-        lineNames->append(cssValuePool().createValue(namedGridLines[j], CSSPrimitiveValue::CSS_STRING));
-    list.append(lineNames.release());
-}
-
-static PassRefPtr<CSSValue> valueForGridTrackList(GridTrackSizingDirection direction, RenderObject* renderer, const RenderStyle& style)
-{
-    const Vector<GridTrackSize>& trackSizes = direction == ForColumns ? style.gridTemplateColumns() : style.gridTemplateRows();
-    const OrderedNamedGridLines& orderedNamedGridLines = direction == ForColumns ? style.orderedNamedGridColumnLines() : style.orderedNamedGridRowLines();
-
-    // Handle the 'none' case here.
-    if (!trackSizes.size()) {
-        ASSERT(orderedNamedGridLines.isEmpty());
-        return cssValuePool().createIdentifierValue(CSSValueNone);
-    }
-
-    RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
-    if (renderer && renderer->isRenderGrid()) {
-        const Vector<LayoutUnit>& trackPositions = direction == ForColumns ? toRenderGrid(renderer)->columnPositions() : toRenderGrid(renderer)->rowPositions();
-        // There are at least #tracks + 1 grid lines (trackPositions). Apart from that, the grid container can generate implicit grid tracks,
-        // so we'll have more trackPositions than trackSizes as the latter only contain the explicit grid.
-        ASSERT(trackPositions.size() - 1 >= trackSizes.size());
-
-        for (size_t i = 0; i < trackSizes.size(); ++i) {
-            addValuesForNamedGridLinesAtIndex(orderedNamedGridLines, i, *list);
-            list->append(zoomAdjustedPixelValue(trackPositions[i + 1] - trackPositions[i], style));
-        }
-    } else {
-        for (size_t i = 0; i < trackSizes.size(); ++i) {
-            addValuesForNamedGridLinesAtIndex(orderedNamedGridLines, i, *list);
-            list->append(specifiedValueForGridTrackSize(trackSizes[i], style));
-        }
-    }
-    // Those are the trailing <string>* allowed in the syntax.
-    addValuesForNamedGridLinesAtIndex(orderedNamedGridLines, trackSizes.size(), *list);
-    return list.release();
-}
-
-static PassRefPtr<CSSValue> valueForGridPosition(const GridPosition& position)
-{
-    if (position.isAuto())
-        return cssValuePool().createIdentifierValue(CSSValueAuto);
-
-    if (position.isNamedGridArea())
-        return cssValuePool().createValue(position.namedGridLine(), CSSPrimitiveValue::CSS_STRING);
-
-    RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
-    if (position.isSpan()) {
-        list->append(cssValuePool().createIdentifierValue(CSSValueSpan));
-        list->append(cssValuePool().createValue(position.spanPosition(), CSSPrimitiveValue::CSS_NUMBER));
-    } else
-        list->append(cssValuePool().createValue(position.integerPosition(), CSSPrimitiveValue::CSS_NUMBER));
-
-    if (!position.namedGridLine().isNull())
-        list->append(cssValuePool().createValue(position.namedGridLine(), CSSPrimitiveValue::CSS_STRING));
-    return list;
 }
 
 static PassRefPtr<CSSValue> createTransitionPropertyValue(const CSSTransitionData::TransitionProperty& property)
@@ -1361,8 +1255,6 @@ static bool isLayoutDependent(CSSPropertyID propertyID, PassRefPtr<RenderStyle> 
     // FIXME: Some of these cases could be narrowed down or optimized better.
     switch (propertyID) {
     case CSSPropertyBottom:
-    case CSSPropertyGridTemplateColumns:
-    case CSSPropertyGridTemplateRows:
     case CSSPropertyHeight:
     case CSSPropertyLeft:
     case CSSPropertyRight:
@@ -1411,10 +1303,10 @@ static ItemPosition resolveAlignmentAuto(ItemPosition position, Node* element)
     if (position != ItemPositionAuto)
         return position;
 
-    bool isFlexOrGrid = element && element->computedStyle()
-        && element->computedStyle()->isDisplayFlexibleOrGridBox();
+    bool isFlex = element && element->computedStyle()
+        && element->computedStyle()->isDisplayFlexibleBox();
 
-    return isFlexOrGrid ? ItemPositionStretch : ItemPositionStart;
+    return isFlex ? ItemPositionStretch : ItemPositionStart;
 }
 
 static PassRefPtr<CSSValueList> valueForItemPositionWithOverflowAlignment(ItemPosition itemPosition, OverflowAlignment overflowAlignment, ItemPositionType positionType)
@@ -1709,83 +1601,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             }
             return list.release();
         }
-        case CSSPropertyGridAutoFlow: {
-            RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
-            switch (style->gridAutoFlow()) {
-            case AutoFlowRow:
-            case AutoFlowRowDense:
-                list->append(cssValuePool().createIdentifierValue(CSSValueRow));
-                break;
-            case AutoFlowColumn:
-            case AutoFlowColumnDense:
-                list->append(cssValuePool().createIdentifierValue(CSSValueColumn));
-                break;
-            case AutoFlowStackRow:
-            case AutoFlowStackColumn:
-                list->append(cssValuePool().createIdentifierValue(CSSValueStack));
-                break;
-            default:
-                ASSERT_NOT_REACHED();
-            }
-
-            switch (style->gridAutoFlow()) {
-            case AutoFlowRowDense:
-            case AutoFlowColumnDense:
-                list->append(cssValuePool().createIdentifierValue(CSSValueDense));
-                break;
-            case AutoFlowStackRow:
-                list->append(cssValuePool().createIdentifierValue(CSSValueRow));
-                break;
-            case AutoFlowStackColumn:
-                list->append(cssValuePool().createIdentifierValue(CSSValueColumn));
-                break;
-            default:
-                // Do nothing.
-                break;
-            }
-
-            return list.release();
-        }
-        // Specs mention that getComputedStyle() should return the used value of the property instead of the computed
-        // one for grid-definition-{rows|columns} but not for the grid-auto-{rows|columns} as things like
-        // grid-auto-columns: 2fr; cannot be resolved to a value in pixels as the '2fr' means very different things
-        // depending on the size of the explicit grid or the number of implicit tracks added to the grid. See
-        // http://lists.w3.org/Archives/Public/www-style/2013Nov/0014.html
-        case CSSPropertyGridAutoColumns:
-            return specifiedValueForGridTrackSize(style->gridAutoColumns(), *style);
-        case CSSPropertyGridAutoRows:
-            return specifiedValueForGridTrackSize(style->gridAutoRows(), *style);
-
-        case CSSPropertyGridTemplateColumns:
-            return valueForGridTrackList(ForColumns, renderer, *style);
-        case CSSPropertyGridTemplateRows:
-            return valueForGridTrackList(ForRows, renderer, *style);
-
-        case CSSPropertyGridColumnStart:
-            return valueForGridPosition(style->gridColumnStart());
-        case CSSPropertyGridColumnEnd:
-            return valueForGridPosition(style->gridColumnEnd());
-        case CSSPropertyGridRowStart:
-            return valueForGridPosition(style->gridRowStart());
-        case CSSPropertyGridRowEnd:
-            return valueForGridPosition(style->gridRowEnd());
-        case CSSPropertyGridColumn:
-            return valuesForGridShorthand(gridColumnShorthand());
-        case CSSPropertyGridRow:
-            return valuesForGridShorthand(gridRowShorthand());
-        case CSSPropertyGridArea:
-            return valuesForGridShorthand(gridAreaShorthand());
-        case CSSPropertyGridTemplate:
-            return valuesForGridShorthand(gridTemplateShorthand());
-        case CSSPropertyGrid:
-            return valuesForGridShorthand(gridShorthand());
-        case CSSPropertyGridTemplateAreas:
-            if (!style->namedGridAreaRowCount()) {
-                ASSERT(!style->namedGridAreaColumnCount());
-                return cssValuePool().createIdentifierValue(CSSValueNone);
-            }
-
-            return CSSGridTemplateAreasValue::create(style->namedGridArea(), style->namedGridAreaRowCount(), style->namedGridAreaColumnCount());
 
         case CSSPropertyHeight:
             if (renderer) {
@@ -1808,10 +1623,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return CSSPrimitiveValue::create(style->imageRendering());
         case CSSPropertyIsolation:
             return cssValuePool().createValue(style->isolation());
-        case CSSPropertyJustifyItems:
-            return valueForItemPositionWithOverflowAlignment(resolveAlignmentAuto(style->justifyItems(), m_node.get()), style->justifyItemsOverflowAlignment(), style->justifyItemsPositionType());
-        case CSSPropertyJustifySelf:
-            return valueForItemPositionWithOverflowAlignment(resolveAlignmentAuto(style->justifySelf(), m_node->parentNode()), style->justifySelfOverflowAlignment(), NonLegacyPosition);
         case CSSPropertyLeft:
             return valueForPositionOffset(*style, CSSPropertyLeft, renderer);
         case CSSPropertyLetterSpacing:
@@ -2638,16 +2449,6 @@ PassRefPtr<CSSValueList> CSSComputedStyleDeclaration::valuesForSidesShorthand(co
     if (showLeft)
         list->append(leftValue.release());
 
-    return list.release();
-}
-
-PassRefPtr<CSSValueList> CSSComputedStyleDeclaration::valuesForGridShorthand(const StylePropertyShorthand& shorthand) const
-{
-    RefPtr<CSSValueList> list = CSSValueList::createSlashSeparated();
-    for (size_t i = 0; i < shorthand.length(); ++i) {
-        RefPtr<CSSValue> value = getPropertyCSSValue(shorthand.properties()[i], DoNotUpdateLayout);
-        list->append(value.release());
-    }
     return list.release();
 }
 

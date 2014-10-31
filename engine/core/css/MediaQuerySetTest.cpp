@@ -83,8 +83,6 @@ TEST(MediaQuerySetTest, Basic)
         {"all and (min-monochrome: 1)", "(min-monochrome: 1)", true},
         {"all and (min-monochrome: 2)", "(min-monochrome: 2)", true},
         {"print and (monochrome)", 0, true},
-        {"handheld and (grid) and (max-width: 15em)", 0, true},
-        {"handheld and (grid) and (max-device-height: 7em)", 0, true},
         {"screen and (max-width: 50%)", "not all", true},
         {"screen and (max-WIDTH: 500px)", "screen and (max-width: 500px)", true},
         {"screen and (max-width: 24.4em)", 0, true},

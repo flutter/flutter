@@ -35,7 +35,6 @@ Crypto status=stable
 CSSAnimationUnprefixed status=experimental
 CSSAttributeCaseSensitivity status=experimental
 CSSCompositing status=experimental
-CSSGridLayout status=experimental
 CSSMaskSourceType status=experimental
 CSSOMSmoothScroll status=experimental
 CSSTouchActionDelay status=test

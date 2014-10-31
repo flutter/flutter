@@ -100,8 +100,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_transform(o.m_transform)
     , m_willChange(o.m_willChange)
     , m_filter(o.m_filter)
-    , m_grid(o.m_grid)
-    , m_gridItem(o.m_gridItem)
     , m_content(o.m_content ? o.m_content->clone() : nullptr)
     , m_counterDirectives(o.m_counterDirectives ? clone(*o.m_counterDirectives) : nullptr)
     , m_boxShadow(o.m_boxShadow)
@@ -172,8 +170,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_transform == o.m_transform
         && m_willChange == o.m_willChange
         && m_filter == o.m_filter
-        && m_grid == o.m_grid
-        && m_gridItem == o.m_gridItem
         && contentDataEquivalent(o)
         && counterDataEquivalent(o)
         && shadowDataEquivalent(o)

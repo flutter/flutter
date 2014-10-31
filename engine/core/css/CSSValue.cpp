@@ -39,8 +39,6 @@
 #include "core/css/CSSFontValue.h"
 #include "core/css/CSSFunctionValue.h"
 #include "core/css/CSSGradientValue.h"
-#include "core/css/CSSGridLineNamesValue.h"
-#include "core/css/CSSGridTemplateAreasValue.h"
 #include "core/css/CSSImageSetValue.h"
 #include "core/css/CSSImageValue.h"
 #include "core/css/CSSInheritedValue.h"
@@ -180,10 +178,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSInheritedValue>(*this, other);
         case InitialClass:
             return compareCSSValues<CSSInitialValue>(*this, other);
-        case GridLineNamesClass:
-            return compareCSSValues<CSSGridLineNamesValue>(*this, other);
-        case GridTemplateAreasClass:
-            return compareCSSValues<CSSGridTemplateAreasValue>(*this, other);
         case PrimitiveClass:
             return compareCSSValues<CSSPrimitiveValue>(*this, other);
         case ShadowClass:
@@ -254,10 +248,6 @@ String CSSValue::cssText() const
         return toCSSInheritedValue(this)->customCSSText();
     case InitialClass:
         return toCSSInitialValue(this)->customCSSText();
-    case GridLineNamesClass:
-        return toCSSGridLineNamesValue(this)->customCSSText();
-    case GridTemplateAreasClass:
-        return toCSSGridTemplateAreasValue(this)->customCSSText();
     case PrimitiveClass:
         return toCSSPrimitiveValue(this)->customCSSText();
     case ShadowClass:
@@ -336,12 +326,6 @@ void CSSValue::destroy()
         return;
     case InitialClass:
         delete toCSSInitialValue(this);
-        return;
-    case GridLineNamesClass:
-        delete toCSSGridLineNamesValue(this);
-        return;
-    case GridTemplateAreasClass:
-        delete toCSSGridTemplateAreasValue(this);
         return;
     case PrimitiveClass:
         delete toCSSPrimitiveValue(this);
@@ -432,12 +416,6 @@ void CSSValue::finalizeGarbageCollectedObject()
     case InitialClass:
         toCSSInitialValue(this)->~CSSInitialValue();
         return;
-    case GridLineNamesClass:
-        toCSSGridLineNamesValue(this)->~CSSGridLineNamesValue();
-        return;
-    case GridTemplateAreasClass:
-        toCSSGridTemplateAreasValue(this)->~CSSGridTemplateAreasValue();
-        return;
     case PrimitiveClass:
         toCSSPrimitiveValue(this)->~CSSPrimitiveValue();
         return;
@@ -526,12 +504,6 @@ void CSSValue::trace(Visitor* visitor)
         return;
     case InitialClass:
         toCSSInitialValue(this)->traceAfterDispatch(visitor);
-        return;
-    case GridLineNamesClass:
-        toCSSGridLineNamesValue(this)->traceAfterDispatch(visitor);
-        return;
-    case GridTemplateAreasClass:
-        toCSSGridTemplateAreasValue(this)->traceAfterDispatch(visitor);
         return;
     case PrimitiveClass:
         toCSSPrimitiveValue(this)->traceAfterDispatch(visitor);

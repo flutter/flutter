@@ -50,8 +50,6 @@ public:
     static PassRefPtr<FontFeatureSettings> convertFontFeatureSettings(StyleResolverState&, CSSValue*);
     static FontWeight convertFontWeight(StyleResolverState&, CSSValue*);
     static FontDescription::VariantLigatures convertFontVariantLigatures(StyleResolverState&, CSSValue*);
-    static GridPosition convertGridPosition(StyleResolverState&, CSSValue*);
-    static GridTrackSize convertGridTrackSize(StyleResolverState&, CSSValue*);
     template <typename T> static T convertLineWidth(StyleResolverState&, CSSValue*);
     static Length convertLength(StyleResolverState&, CSSValue*);
     static Length convertLengthOrAuto(StyleResolverState&, CSSValue*);
@@ -66,9 +64,6 @@ public:
     static float convertSpacing(StyleResolverState&, CSSValue*);
     template <CSSValueID IdForNone> static AtomicString convertString(StyleResolverState&, CSSValue*);
     static float convertTextStrokeWidth(StyleResolverState&, CSSValue*);
-
-    static bool convertGridTrackList(CSSValue*, Vector<GridTrackSize>&, NamedGridLinesMap&, OrderedNamedGridLines&, StyleResolverState&);
-    static void createImplicitNamedGridLinesFromGridArea(const NamedGridAreaMap&, NamedGridLinesMap&, GridTrackSizingDirection);
 };
 
 template <typename T>

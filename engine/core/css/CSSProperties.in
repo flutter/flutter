@@ -9,7 +9,7 @@
 // UseCounter will not pick up on these (crbug.com/304855)
 
 
-// - runtime_flag=CSSGridLayout
+// - runtime_flag=CSSFooProperty
 // The flag on RuntimeEnabledFeatures conditionally enables the property
 
 
@@ -152,22 +152,10 @@ flex-grow animatable, type_name=float
 flex-shrink animatable, type_name=float
 flex-wrap
 float type_name=EFloat, name_for_methods=Floating
-grid-auto-columns runtime_flag=CSSGridLayout, converter=convertGridTrackSize
-grid-auto-flow runtime_flag=CSSGridLayout, custom_value
-grid-auto-rows runtime_flag=CSSGridLayout, converter=convertGridTrackSize
-grid-column-end runtime_flag=CSSGridLayout, converter=convertGridPosition
-grid-column-start runtime_flag=CSSGridLayout, converter=convertGridPosition
-grid-row-end runtime_flag=CSSGridLayout, converter=convertGridPosition
-grid-row-start runtime_flag=CSSGridLayout, converter=convertGridPosition
-grid-template-areas runtime_flag=CSSGridLayout, custom_all
-grid-template-columns runtime_flag=CSSGridLayout, custom_all
-grid-template-rows runtime_flag=CSSGridLayout, custom_all
 height animatable, initial=initialSize, converter=convertLengthSizing
 image-rendering inherited
 isolation runtime_flag=CSSCompositing
 justify-content
-justify-items runtime_flag=CSSGridLayout, custom_all
-justify-self runtime_flag=CSSGridLayout, custom_all
 left animatable, initial=initialOffset, converter=convertLengthOrAuto
 letter-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 list-style-image animatable, inherited, custom_value
@@ -392,11 +380,6 @@ border-top longhands=border-top-width;border-top-style;border-top-color
 border-width longhands=border-top-width;border-right-width;border-bottom-width;border-left-width
 flex longhands=flex-grow;flex-shrink;flex-basis
 flex-flow longhands=flex-direction;flex-wrap
-grid runtime_flag=CSSGridLayout, longhands=grid-template;grid-auto-flow;grid-auto-columns;grid-auto-rows
-grid-area runtime_flag=CSSGridLayout, longhands=grid-row-start;grid-column-start;grid-row-end;grid-column-end
-grid-column runtime_flag=CSSGridLayout, longhands=grid-column-start;grid-column-end
-grid-row runtime_flag=CSSGridLayout, longhands=grid-row-start;grid-row-end
-grid-template runtime_flag=CSSGridLayout, longhands=grid-template-columns;grid-template-rows;grid-template-areas
 list-style longhands=list-style-type;list-style-position;list-style-image
 margin longhands=margin-top;margin-right;margin-bottom;margin-left
 outline longhands=outline-color;outline-style;outline-width

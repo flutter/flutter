@@ -36,7 +36,6 @@ TestCase screenTestCases[] = {
     {"all and (min-color-index: 1)", 0},
     {"all and (monochrome)", 0},
     {"all and (min-monochrome: 0)", 1},
-    {"all and (grid: 0)", 1},
     {"(resolution: 2dppx)", 1},
     {"(resolution: 1dppx)", 0},
     {"(orientation: portrait)", 1},

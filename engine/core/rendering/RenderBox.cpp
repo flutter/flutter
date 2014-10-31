@@ -40,7 +40,6 @@
 #include "core/rendering/PaintInfo.h"
 #include "core/rendering/RenderFlexibleBox.h"
 #include "core/rendering/RenderGeometryMap.h"
-#include "core/rendering/RenderGrid.h"
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
@@ -57,8 +56,7 @@ namespace blink {
 // Used by flexible boxes when flexing this element and by table cells.
 typedef WTF::HashMap<const RenderBox*, LayoutUnit> OverrideSizeMap;
 
-// Used by grid elements to properly size their grid items.
-// FIXME: Move these into RenderBoxRareData.
+//FIXME(sky): Remove
 static OverrideSizeMap* gOverrideContainingBlockLogicalHeightMap = 0;
 static OverrideSizeMap* gOverrideContainingBlockLogicalWidthMap = 0;
 
@@ -175,7 +173,6 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
     }
 
     updateShapeOutsideInfoAfterStyleChange(*style(), oldStyle);
-    updateGridPositionAfterStyleChange(oldStyle);
 }
 
 void RenderBox::updateShapeOutsideInfoAfterStyleChange(const RenderStyle& style, const RenderStyle* oldStyle)
@@ -200,24 +197,6 @@ void RenderBox::updateShapeOutsideInfoAfterStyleChange(const RenderStyle& style,
 
     if (shapeOutside || shapeOutside != oldShapeOutside)
         markShapeOutsideDependentsForLayout();
-}
-
-void RenderBox::updateGridPositionAfterStyleChange(const RenderStyle* oldStyle)
-{
-    if (!oldStyle || !parent() || !parent()->isRenderGrid())
-        return;
-
-    if (oldStyle->gridColumnStart() == style()->gridColumnStart()
-        && oldStyle->gridColumnEnd() == style()->gridColumnEnd()
-        && oldStyle->gridRowStart() == style()->gridRowStart()
-        && oldStyle->gridRowEnd() == style()->gridRowEnd()
-        && oldStyle->order() == style()->order()
-        && oldStyle->hasOutOfFlowPosition() == style()->hasOutOfFlowPosition())
-        return;
-
-    // It should be possible to not dirty the grid in some cases (like moving an explicitly placed grid item).
-    // For now, it's more simple to just always recompute the grid.
-    toRenderGrid(parent())->dirtyGrid();
 }
 
 void RenderBox::updateFromStyle()
@@ -1820,7 +1799,7 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
         computedValues.m_margins.m_end, style()->marginStart(), style()->marginEnd());
 
     if (!hasPerpendicularContainingBlock && containerLogicalWidth && containerLogicalWidth != (computedValues.m_extent + computedValues.m_margins.m_start + computedValues.m_margins.m_end)
-        && !isFloating() && !isInline() && !cb->isFlexibleBox() && !cb->isRenderGrid()) {
+        && !isFloating() && !isInline() && !cb->isFlexibleBox()) {
         LayoutUnit newMargin = containerLogicalWidth - computedValues.m_extent - cb->marginStartForChild(this);
         bool hasInvertedDirection = cb->style()->isLeftToRightDirection() != style()->isLeftToRightDirection();
         if (hasInvertedDirection)

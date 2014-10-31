@@ -29,32 +29,12 @@
 
 #include "core/css/CSSFontFeatureValue.h"
 #include "core/css/CSSFunctionValue.h"
-#include "core/css/CSSGridLineNamesValue.h"
 #include "core/css/CSSPrimitiveValueMappings.h"
 #include "core/css/CSSShadowValue.h"
 #include "core/css/Pair.h"
 #include "core/css/Rect.h"
 
 namespace blink {
-
-namespace {
-
-static GridLength convertGridTrackBreadth(const StyleResolverState& state, CSSPrimitiveValue* primitiveValue)
-{
-    if (primitiveValue->getValueID() == CSSValueMinContent)
-        return Length(MinContent);
-
-    if (primitiveValue->getValueID() == CSSValueMaxContent)
-        return Length(MaxContent);
-
-    // Fractional unit.
-    if (primitiveValue->isFlex())
-        return GridLength(primitiveValue->getDoubleValue());
-
-    return primitiveValue->convertToLength<FixedConversion | PercentConversion | AutoConversion>(state.cssToLengthConversionData());
-}
-
-} // namespace
 
 Color StyleBuilderConverter::convertColor(StyleResolverState& state, CSSValue* value)
 {
@@ -149,129 +129,6 @@ FontDescription::VariantLigatures StyleBuilderConverter::convertFontVariantLigat
     ASSERT_WITH_SECURITY_IMPLICATION(value->isPrimitiveValue());
     ASSERT(toCSSPrimitiveValue(value)->getValueID() == CSSValueNormal);
     return FontDescription::VariantLigatures();
-}
-
-GridPosition StyleBuilderConverter::convertGridPosition(StyleResolverState&, CSSValue* value)
-{
-    // We accept the specification's grammar:
-    // 'auto' | [ <integer> || <custom-ident> ] | [ span && [ <integer> || <custom-ident> ] ] | <custom-ident>
-
-    GridPosition position;
-
-    if (value->isPrimitiveValue()) {
-        CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-        // We translate <custom-ident> to <string> during parsing as it
-        // makes handling it more simple.
-        if (primitiveValue->isString()) {
-            position.setNamedGridArea(primitiveValue->getStringValue());
-            return position;
-        }
-
-        ASSERT(primitiveValue->getValueID() == CSSValueAuto);
-        return position;
-    }
-
-    CSSValueList* values = toCSSValueList(value);
-    ASSERT(values->length());
-
-    bool isSpanPosition = false;
-    // The specification makes the <integer> optional, in which case it default to '1'.
-    int gridLineNumber = 1;
-    String gridLineName;
-
-    CSSValueListIterator it = values;
-    CSSPrimitiveValue* currentValue = toCSSPrimitiveValue(it.value());
-    if (currentValue->getValueID() == CSSValueSpan) {
-        isSpanPosition = true;
-        it.advance();
-        currentValue = it.hasMore() ? toCSSPrimitiveValue(it.value()) : 0;
-    }
-
-    if (currentValue && currentValue->isNumber()) {
-        gridLineNumber = currentValue->getIntValue();
-        it.advance();
-        currentValue = it.hasMore() ? toCSSPrimitiveValue(it.value()) : 0;
-    }
-
-    if (currentValue && currentValue->isString()) {
-        gridLineName = currentValue->getStringValue();
-        it.advance();
-    }
-
-    ASSERT(!it.hasMore());
-    if (isSpanPosition)
-        position.setSpanPosition(gridLineNumber, gridLineName);
-    else
-        position.setExplicitPosition(gridLineNumber, gridLineName);
-
-    return position;
-}
-
-GridTrackSize StyleBuilderConverter::convertGridTrackSize(StyleResolverState& state, CSSValue* value)
-{
-    if (value->isPrimitiveValue())
-        return GridTrackSize(convertGridTrackBreadth(state, toCSSPrimitiveValue(value)));
-
-    CSSFunctionValue* minmaxFunction = toCSSFunctionValue(value);
-    CSSValueList* arguments = minmaxFunction->arguments();
-    ASSERT_WITH_SECURITY_IMPLICATION(arguments->length() == 2);
-    GridLength minTrackBreadth(convertGridTrackBreadth(state, toCSSPrimitiveValue(arguments->item(0))));
-    GridLength maxTrackBreadth(convertGridTrackBreadth(state, toCSSPrimitiveValue(arguments->item(1))));
-    return GridTrackSize(minTrackBreadth, maxTrackBreadth);
-}
-
-bool StyleBuilderConverter::convertGridTrackList(CSSValue* value, Vector<GridTrackSize>& trackSizes, NamedGridLinesMap& namedGridLines, OrderedNamedGridLines& orderedNamedGridLines, StyleResolverState& state)
-{
-    // Handle 'none'.
-    if (value->isPrimitiveValue()) {
-        CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-        return primitiveValue->getValueID() == CSSValueNone;
-    }
-
-    if (!value->isValueList())
-        return false;
-
-    size_t currentNamedGridLine = 0;
-    for (CSSValueListIterator i = value; i.hasMore(); i.advance()) {
-        CSSValue* currValue = i.value();
-        if (currValue->isGridLineNamesValue()) {
-            CSSGridLineNamesValue* lineNamesValue = toCSSGridLineNamesValue(currValue);
-            for (CSSValueListIterator j = lineNamesValue; j.hasMore(); j.advance()) {
-                String namedGridLine = toCSSPrimitiveValue(j.value())->getStringValue();
-                NamedGridLinesMap::AddResult result = namedGridLines.add(namedGridLine, Vector<size_t>());
-                result.storedValue->value.append(currentNamedGridLine);
-                OrderedNamedGridLines::AddResult orderedInsertionResult = orderedNamedGridLines.add(currentNamedGridLine, Vector<String>());
-                orderedInsertionResult.storedValue->value.append(namedGridLine);
-            }
-            continue;
-        }
-
-        ++currentNamedGridLine;
-        trackSizes.append(convertGridTrackSize(state, currValue));
-    }
-
-    // The parser should have rejected any <track-list> without any <track-size> as
-    // this is not conformant to the syntax.
-    ASSERT(!trackSizes.isEmpty());
-    return true;
-}
-
-void StyleBuilderConverter::createImplicitNamedGridLinesFromGridArea(const NamedGridAreaMap& namedGridAreas, NamedGridLinesMap& namedGridLines, GridTrackSizingDirection direction)
-{
-    NamedGridAreaMap::const_iterator end = namedGridAreas.end();
-    for (NamedGridAreaMap::const_iterator it = namedGridAreas.begin(); it != end; ++it) {
-        GridSpan areaSpan = direction == ForRows ? it->value.rows : it->value.columns;
-        {
-            NamedGridLinesMap::AddResult startResult = namedGridLines.add(it->key + "-start", Vector<size_t>());
-            startResult.storedValue->value.append(areaSpan.resolvedInitialPosition.toInt());
-            std::sort(startResult.storedValue->value.begin(), startResult.storedValue->value.end());
-        }
-        {
-            NamedGridLinesMap::AddResult endResult = namedGridLines.add(it->key + "-end", Vector<size_t>());
-            endResult.storedValue->value.append(areaSpan.resolvedFinalPosition.toInt() + 1);
-            std::sort(endResult.storedValue->value.begin(), endResult.storedValue->value.end());
-        }
-    }
 }
 
 Length StyleBuilderConverter::convertLength(StyleResolverState& state, CSSValue* value)

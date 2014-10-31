@@ -49,7 +49,6 @@
 #include "core/rendering/HitTestResult.h"
 #include "core/rendering/RenderFlexibleBox.h"
 #include "core/rendering/RenderGeometryMap.h"
-#include "core/rendering/RenderGrid.h"
 #include "core/rendering/RenderImage.h"
 #include "core/rendering/RenderImageResourceStyleImage.h"
 #include "core/rendering/RenderInline.h"
@@ -148,9 +147,6 @@ RenderObject* RenderObject::createObject(Element* element, RenderStyle* style)
     case FLEX:
     case INLINE_FLEX:
         return new RenderFlexibleBox(element);
-    case GRID:
-    case INLINE_GRID:
-        return new RenderGrid(element);
     }
 
     return 0;

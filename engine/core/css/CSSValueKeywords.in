@@ -267,11 +267,8 @@ block
 inline-block
 flex
 inline-flex
-grid
-inline-grid
 //none
--webkit-flex
--webkit-inline-flex
+
 //
 // cursor
 // The order here must match the order of the ECursor enum in RenderStyleConstants.h.
@@ -443,10 +440,6 @@ column-reverse
 wrap
 wrap-reverse
 
-// grid-auto-flow
-dense
-stack
-
 // -internal-marquee-direction
 forwards
 backwards
@@ -492,7 +485,6 @@ min-intrinsic
 -webkit-max-content
 -webkit-fill-available
 -webkit-fit-content
-// Unprefixed for CSS Grid Layout.
 min-content
 max-content
 
@@ -760,9 +752,6 @@ balance
 // -webkit-app-region
 drag
 no-drag
-
-// grid-{column|row}-{start|end}
-span
 
 // text-indent
 each-line

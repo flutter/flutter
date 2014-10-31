@@ -101,9 +101,7 @@ public:
     bool isLineBoxContainValue() const { return m_classType == LineBoxContainClass; }
     bool isCalcValue() const {return m_classType == CalculationClass; }
     bool isFilterValue() const { return m_classType == CSSFilterClass; }
-    bool isGridTemplateAreasValue() const { return m_classType == GridTemplateAreasClass; }
     bool isUnicodeRangeValue() const { return m_classType == UnicodeRangeClass; }
-    bool isGridLineNamesValue() const { return m_classType == GridLineNamesClass; }
 
     bool isCSSOMSafe() const { return m_isCSSOMSafe; }
     bool isSubtypeExposedToCSSOM() const
@@ -156,14 +154,12 @@ protected:
         UnicodeRangeClass,
         LineBoxContainClass,
         CalculationClass,
-        GridTemplateAreasClass,
 
         // List class types must appear after ValueListClass.
         ValueListClass,
         ImageSetClass,
         CSSFilterClass,
         CSSTransformClass,
-        GridLineNamesClass,
         // Do not append non-list class types here.
     };
 

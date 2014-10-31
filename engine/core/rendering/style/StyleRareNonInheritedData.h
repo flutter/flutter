@@ -50,8 +50,6 @@ class LengthSize;
 class ShadowList;
 class StyleFilterData;
 class StyleFlexibleBoxData;
-class StyleGridData;
-class StyleGridItemData;
 class StyleTransformData;
 class StyleWillChangeData;
 
@@ -101,9 +99,6 @@ public:
     DataRef<StyleWillChangeData> m_willChange; // CSS Will Change
 
     DataRef<StyleFilterData> m_filter; // Filter operations (url, sepia, blur, etc.)
-
-    DataRef<StyleGridData> m_grid;
-    DataRef<StyleGridItemData> m_gridItem;
 
     OwnPtr<ContentData> m_content;
     OwnPtr<CounterDirectiveMap> m_counterDirectives;

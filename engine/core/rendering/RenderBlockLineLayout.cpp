@@ -1250,7 +1250,7 @@ void RenderBlockFlow::layoutInlineChildren(bool relayoutChildren, LayoutUnit& pa
     //     1) If your overflow isn't visible and your text-overflow-mode isn't clip.
     //     2) If you're an anonymous block with a block parent that satisfies #1 that was created
     //        to accomodate a block that has inline and block children. This excludes parents where
-    //        canCollapseAnonymousBlockChild is false, notabley flex items and grid items.
+    //        canCollapseAnonymousBlockChild is false, notabley flex items.
     // FIXME: CSS3 says that descendants that are clipped must also know how to truncate.  This is insanely
     // difficult to figure out in general (especially in the middle of doing layout), so we only handle the
     // simple case of an anonymous block truncating when it's parent is clipped.

@@ -19,7 +19,7 @@ def _RunUseCounterChecks(input_api, output_api):
 
     largestFoundBucket = 0
     maximumBucket = 0
-    # Looking for a line like "case CSSPropertyGrid: return 453;"
+    # Looking for a line like "case CSSPropertyFoo: return 453;"
     bucketFinder = input_api.re.compile(r'.*CSSProperty.*return\s*([0-9]+).*')
     # Looking for a line like "static int maximumCSSSampleId() { return 452; }"
     maximumFinder = input_api.re.compile(

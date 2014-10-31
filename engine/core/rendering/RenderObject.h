@@ -328,7 +328,6 @@ public:
     virtual bool isMedia() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
-    virtual bool isRenderGrid() const { return false; }
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
@@ -395,9 +394,7 @@ public:
 
     virtual bool canHaveWhitespaceChildren() const
     {
-        if (isFlexibleBox() || isRenderGrid())
-            return false;
-        return true;
+        return !isFlexibleBox();
     }
 
     bool isAnonymous() const { return m_bitfields.isAnonymous(); }

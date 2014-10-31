@@ -47,7 +47,6 @@
 #include "core/css/CSSCursorImageValue.h"
 #include "core/css/CSSFontValue.h"
 #include "core/css/CSSGradientValue.h"
-#include "core/css/CSSGridTemplateAreasValue.h"
 #include "core/css/CSSHelper.h"
 #include "core/css/CSSImageSetValue.h"
 #include "core/css/CSSLineBoxContainValue.h"
@@ -119,37 +118,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyColor(StyleResolverState& state
     state.style()->setColor(StyleBuilderConverter::convertColor(state, value));
 }
 
-void StyleBuilderFunctions::applyInitialCSSPropertyJustifyItems(StyleResolverState& state)
-{
-    state.style()->setJustifyItems(RenderStyle::initialJustifyItems());
-    state.style()->setJustifyItemsOverflowAlignment(RenderStyle::initialJustifyItemsOverflowAlignment());
-    state.style()->setJustifyItemsPositionType(RenderStyle::initialJustifyItemsPositionType());
-}
-
-void StyleBuilderFunctions::applyInheritCSSPropertyJustifyItems(StyleResolverState& state)
-{
-    state.style()->setJustifyItems(state.parentStyle()->justifyItems());
-    state.style()->setJustifyItemsOverflowAlignment(state.parentStyle()->justifyItemsOverflowAlignment());
-    state.style()->setJustifyItemsPositionType(state.parentStyle()->justifyItemsPositionType());
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyJustifyItems(StyleResolverState& state, CSSValue* value)
-{
-
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-    if (Pair* pairValue = primitiveValue->getPairValue()) {
-        if (pairValue->first()->getValueID() == CSSValueLegacy) {
-            state.style()->setJustifyItemsPositionType(LegacyPosition);
-            state.style()->setJustifyItems(*pairValue->second());
-        } else {
-            state.style()->setJustifyItems(*pairValue->first());
-            state.style()->setJustifyItemsOverflowAlignment(*pairValue->second());
-        }
-    } else {
-        state.style()->setJustifyItems(*primitiveValue);
-    }
-}
-
 void StyleBuilderFunctions::applyInitialCSSPropertyCursor(StyleResolverState& state)
 {
     state.style()->clearCursorList();
@@ -219,43 +187,6 @@ void StyleBuilderFunctions::applyInheritCSSPropertyFontSize(StyleResolverState& 
 void StyleBuilderFunctions::applyValueCSSPropertyFontSize(StyleResolverState& state, CSSValue* value)
 {
     state.fontBuilder().setFontSizeValue(value, state.parentStyle(), state.rootElementStyle());
-}
-
-void StyleBuilderFunctions::applyInitialCSSPropertyGridTemplateAreas(StyleResolverState& state)
-{
-    state.style()->setNamedGridArea(RenderStyle::initialNamedGridArea());
-    state.style()->setNamedGridAreaRowCount(RenderStyle::initialNamedGridAreaCount());
-    state.style()->setNamedGridAreaColumnCount(RenderStyle::initialNamedGridAreaCount());
-}
-
-void StyleBuilderFunctions::applyInheritCSSPropertyGridTemplateAreas(StyleResolverState& state)
-{
-    state.style()->setNamedGridArea(state.parentStyle()->namedGridArea());
-    state.style()->setNamedGridAreaRowCount(state.parentStyle()->namedGridAreaRowCount());
-    state.style()->setNamedGridAreaColumnCount(state.parentStyle()->namedGridAreaColumnCount());
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyGridTemplateAreas(StyleResolverState& state, CSSValue* value)
-{
-    if (value->isPrimitiveValue()) {
-        // FIXME: Shouldn't we clear the grid-area values
-        ASSERT(toCSSPrimitiveValue(value)->getValueID() == CSSValueNone);
-        return;
-    }
-
-    CSSGridTemplateAreasValue* gridTemplateAreasValue = toCSSGridTemplateAreasValue(value);
-    const NamedGridAreaMap& newNamedGridAreas = gridTemplateAreasValue->gridAreaMap();
-
-    NamedGridLinesMap namedGridColumnLines = state.style()->namedGridColumnLines();
-    NamedGridLinesMap namedGridRowLines = state.style()->namedGridRowLines();
-    StyleBuilderConverter::createImplicitNamedGridLinesFromGridArea(newNamedGridAreas, namedGridColumnLines, ForColumns);
-    StyleBuilderConverter::createImplicitNamedGridLinesFromGridArea(newNamedGridAreas, namedGridRowLines, ForRows);
-    state.style()->setNamedGridColumnLines(namedGridColumnLines);
-    state.style()->setNamedGridRowLines(namedGridRowLines);
-
-    state.style()->setNamedGridArea(newNamedGridAreas);
-    state.style()->setNamedGridAreaRowCount(gridTemplateAreasValue->rowCount());
-    state.style()->setNamedGridAreaColumnCount(gridTemplateAreasValue->columnCount());
 }
 
 void StyleBuilderFunctions::applyValueCSSPropertyLineHeight(StyleResolverState& state, CSSValue* value)
@@ -1039,62 +970,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyWebkitTextOrientation(StyleReso
 {
     if (value->isPrimitiveValue())
         state.setTextOrientation(*toCSSPrimitiveValue(value));
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyGridAutoFlow(StyleResolverState& state, CSSValue* value)
-{
-    ASSERT(value->isValueList());
-    CSSValueList* list = toCSSValueList(value);
-
-    CSSPrimitiveValue* first = list->length() >= 1 ? toCSSPrimitiveValue(list->item(0)) : nullptr;
-
-    if (!first) {
-        applyInitialCSSPropertyGridAutoFlow(state);
-        return;
-    }
-
-    CSSPrimitiveValue* second = list->length() == 2 ? toCSSPrimitiveValue(list->item(1)) : nullptr;
-
-    GridAutoFlow autoFlow = RenderStyle::initialGridAutoFlow();
-    switch (first->getValueID()) {
-    case CSSValueRow:
-        if (second) {
-            if (second->getValueID() == CSSValueDense)
-                autoFlow = AutoFlowRowDense;
-            else
-                autoFlow = AutoFlowStackRow;
-        } else {
-            autoFlow = AutoFlowRow;
-        }
-        break;
-    case CSSValueColumn:
-        if (second) {
-            if (second->getValueID() == CSSValueDense)
-                autoFlow = AutoFlowColumnDense;
-            else
-                autoFlow = AutoFlowStackColumn;
-        } else {
-            autoFlow = AutoFlowColumn;
-        }
-        break;
-    case CSSValueDense:
-        if (second && second->getValueID() == CSSValueColumn)
-            autoFlow = AutoFlowColumnDense;
-        else
-            autoFlow = AutoFlowRowDense;
-        break;
-    case CSSValueStack:
-        if (second && second->getValueID() == CSSValueColumn)
-            autoFlow = AutoFlowStackColumn;
-        else
-            autoFlow = AutoFlowStackRow;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        break;
-    }
-
-    state.style()->setGridAutoFlow(autoFlow);
 }
 
 } // namespace blink

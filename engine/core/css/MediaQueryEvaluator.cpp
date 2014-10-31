@@ -315,16 +315,6 @@ static bool resolutionMediaFeatureEval(const MediaQueryExpValue& value, MediaFea
     return (!value.isValid() || CSSPrimitiveValue::isResolution(value.unit)) && evalResolution(value, op, MediaValues);
 }
 
-static bool gridMediaFeatureEval(const MediaQueryExpValue& value, MediaFeaturePrefix op, const MediaValues&)
-{
-    // if output device is bitmap, grid: 0 == true
-    // assume we have bitmap device
-    float number;
-    if (value.isValid() && numberValue(value, number))
-        return compareValue(static_cast<int>(number), 0, op);
-    return false;
-}
-
 static bool computeLength(const MediaQueryExpValue& value, const MediaValues& mediaValues, int& result)
 {
     if (!value.isValue)

@@ -155,8 +155,7 @@ static inline bool featureWithZeroOrOne(const String& mediaFeature, const CSSPar
     if (!value->isInt || !(value->fValue == 1 || !value->fValue))
         return false;
 
-    return mediaFeature == gridMediaFeature
-        || (mediaFeature == hoverMediaFeature && !RuntimeEnabledFeatures::hoverMediaQueryKeywordsEnabled());
+    return mediaFeature == hoverMediaFeature && !RuntimeEnabledFeatures::hoverMediaQueryKeywordsEnabled();
 }
 
 static inline bool featureWithAspectRatio(const String& mediaFeature)
@@ -175,7 +174,6 @@ static inline bool featureWithoutValue(const String& mediaFeature)
     return mediaFeature == monochromeMediaFeature
         || mediaFeature == colorMediaFeature
         || mediaFeature == colorIndexMediaFeature
-        || mediaFeature == gridMediaFeature
         || mediaFeature == heightMediaFeature
         || mediaFeature == widthMediaFeature
         || mediaFeature == deviceHeightMediaFeature
