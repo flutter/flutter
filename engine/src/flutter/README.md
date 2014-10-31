@@ -72,10 +72,10 @@ SKY MODULE
 class extends SkyElement {
   constructor () {
     this.addEventListener('click', (event) => this.updateTime());
-    this.createShadowTree().appendChild('Click to show the time');
+    this.shadowRoot.appendChild('Click to show the time');
   }
   updateTime() {
-    this.shadowTree.firstChild.replaceWith(new Date());
+    this.shadowRoot.firstChild.replaceWith(new Date());
   }
 }
 </sky-element>
