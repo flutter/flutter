@@ -1734,10 +1734,6 @@ void Node::handleLocalEvents(Event* event)
 {
     if (!hasEventTargetData())
         return;
-
-    if (isDisabledFormControl(this) && event->isMouseEvent())
-        return;
-
     fireEventListeners(event);
 }
 
@@ -1851,22 +1847,16 @@ void Node::willCallDefaultEventHandler(const Event&)
 
 bool Node::willRespondToMouseMoveEvents()
 {
-    if (isDisabledFormControl(this))
-        return false;
     return hasEventListeners(EventTypeNames::mousemove) || hasEventListeners(EventTypeNames::mouseover) || hasEventListeners(EventTypeNames::mouseout);
 }
 
 bool Node::willRespondToMouseClickEvents()
 {
-    if (isDisabledFormControl(this))
-        return false;
     return isContentEditable(UserSelectAllIsAlwaysNonEditable) || hasEventListeners(EventTypeNames::mouseup) || hasEventListeners(EventTypeNames::mousedown) || hasEventListeners(EventTypeNames::click) || hasEventListeners(EventTypeNames::DOMActivate);
 }
 
 bool Node::willRespondToTouchEvents()
 {
-    if (isDisabledFormControl(this))
-        return false;
     return hasEventListeners(EventTypeNames::touchstart) || hasEventListeners(EventTypeNames::touchmove) || hasEventListeners(EventTypeNames::touchcancel) || hasEventListeners(EventTypeNames::touchend);
 }
 

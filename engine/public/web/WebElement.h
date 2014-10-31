@@ -48,8 +48,6 @@ public:
     WebElement& operator=(const WebElement& e) { WebNode::assign(e); return *this; }
     void assign(const WebElement& e) { WebNode::assign(e); }
 
-    BLINK_EXPORT bool isFormControlElement() const;
-    BLINK_EXPORT bool isTextFormControlElement() const;
     // Returns the qualified name, which may contain a prefix and a colon.
     BLINK_EXPORT WebString tagName() const;
     // Check if this element has the specified local tag name, and the HTML

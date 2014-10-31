@@ -79,9 +79,6 @@ void EventDispatcher::dispatchSimulatedClick(Node* node, Event* underlyingEvent,
     // the code from running into an infinite recursion of dispatchSimulatedClick().
     DEFINE_STATIC_LOCAL(OwnPtr<HashSet<RawPtr<Node> > >, nodesDispatchingSimulatedClicks, (adoptPtr(new HashSet<RawPtr<Node> >())));
 
-    if (isDisabledFormControl(node))
-        return;
-
     if (nodesDispatchingSimulatedClicks->contains(node))
         return;
 

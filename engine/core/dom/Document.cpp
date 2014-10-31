@@ -2870,7 +2870,7 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
         setActiveHoverElement(nullptr);
     } else {
         Element* newActiveElement = innerElementInDocument;
-        if (!oldActiveElement && newActiveElement && !newActiveElement->isDisabledFormControl() && request.active() && !request.touchMove()) {
+        if (!oldActiveElement && newActiveElement && request.active() && !request.touchMove()) {
             // We are setting the :active chain and freezing it. If future moves happen, they
             // will need to reference this chain.
             for (Node* node = newActiveElement; node; node = NodeRenderingTraversal::parent(node)) {

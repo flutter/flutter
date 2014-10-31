@@ -1920,8 +1920,8 @@ void Element::cloneAttributesFromElement(const Element& other)
 
 void Element::cloneDataFromElement(const Element& other)
 {
+    // FIXME(sky): Merge these.
     cloneAttributesFromElement(other);
-    copyNonAttributePropertiesFromElement(other);
 }
 
 void Element::createUniqueElementData()

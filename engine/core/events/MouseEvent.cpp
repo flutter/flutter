@@ -248,9 +248,6 @@ bool MouseEventDispatchMediator::dispatchEvent(EventDispatcher* dispatcher) cons
         return dispatcher->dispatch();
     }
 
-    if (isDisabledFormControl(dispatcher->node()))
-        return false;
-
     if (event()->type().isEmpty())
         return true; // Shouldn't happen.
 

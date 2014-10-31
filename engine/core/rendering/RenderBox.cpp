@@ -3456,8 +3456,8 @@ bool RenderBox::shrinkToAvoidFloats() const
 
 static bool isReplacedElement(Node* node)
 {
-    // Checkboxes and radioboxes are not isReplaced() nor do they have their own renderer in which to override avoidFloats().
-    return node && node->isElementNode() && toElement(node)->isFormControlElement();
+    // FIXME(sky): Remove this.
+    return false;
 }
 
 bool RenderBox::avoidsFloats() const

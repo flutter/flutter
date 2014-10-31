@@ -44,16 +44,6 @@
 
 namespace blink {
 
-bool WebElement::isFormControlElement() const
-{
-    return constUnwrap<Element>()->isFormControlElement();
-}
-
-bool WebElement::isTextFormControlElement() const
-{
-    return false;
-}
-
 WebString WebElement::tagName() const
 {
     return constUnwrap<Element>()->tagName();

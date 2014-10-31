@@ -237,8 +237,6 @@ public:
 
     bool hasEquivalentAttributes(const Element* other) const;
 
-    virtual void copyNonAttributePropertiesFromElement(const Element&) { }
-
     virtual void attach(const AttachContext& = AttachContext()) override;
     virtual void detach(const AttachContext& = AttachContext()) override;
     virtual RenderObject* createRenderer(RenderStyle*);
@@ -329,20 +327,7 @@ public:
 
     DOMTokenList& classList();
 
-    virtual bool isFormControlElement() const { return false; }
-    virtual bool isOptionalFormControl() const { return false; }
-    virtual bool isRequiredFormControl() const { return false; }
-    virtual bool isDefaultButtonForForm() const { return false; }
-    virtual bool willValidate() const { return false; }
-    virtual bool isValidFormControlElement() { return false; }
-    virtual bool isInRange() const { return false; }
-    virtual bool isOutOfRange() const { return false; }
-
     virtual bool canContainRangeEndPoint() const override { return true; }
-
-    // Used for disabled form elements; if true, prevents mouse events from being dispatched
-    // to event listeners, and prevents DOMActivate events from being sent at all.
-    virtual bool isDisabledFormControl() const { return false; }
 
     void setCustomElementDefinition(PassRefPtr<CustomElementDefinition>);
     CustomElementDefinition* customElementDefinition() const;
@@ -503,11 +488,6 @@ template<typename T> inline const T* toElement(const Node* node)
     return static_cast<const T*>(node);
 }
 template<typename T, typename U> inline T* toElement(const RefPtr<U>& node) { return toElement<T>(node.get()); }
-
-inline bool isDisabledFormControl(const Node* node)
-{
-    return node->isElementNode() && toElement(node)->isDisabledFormControl();
-}
 
 inline Element* Node::parentElement() const
 {
