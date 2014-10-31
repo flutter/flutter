@@ -1,0 +1,64 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<script>
+function StateHeader(state) {
+  this.state = state;
+  this.headerOrder = 1;
+};
+
+function LetterHeader(letter) {
+  this.letter = letter;
+  this.headerOrder = 2;
+}
+
+function CitySequence(cities)
+{
+  this.items = [];
+  this.cursor = 0;
+
+  var lastState;
+  var lastLetter;
+
+  for (var i = 0; i < cities.length; i++) {
+    var city = cities[i];
+    if (!lastState || lastState.state != city.state) {
+      lastState = new StateHeader(city.state);
+      this.items.push(lastState);
+      lastLetter = undefined;
+    }
+    if (!lastLetter || lastLetter.letter != city.name[0]) {
+      lastLetter = new LetterHeader(city.name[0]);
+      this.items.push(lastLetter);
+    }
+    this.items.push(city);
+  }
+};
+
+CitySequence.prototype = {
+  append: function(other) {
+    var lastCity = this.items[this.items.length - 1];
+    var firstOtherCity = other.items[2];
+
+    var index = 0;
+    if (firstOtherCity.state == lastCity.state) {
+      // skip StateHeader
+      if (firstOtherCity.name[0] == lastCity.name[0]) {
+        // skip LetterHeader
+        index = 2;
+      } else {
+        index = 1;
+      }
+    }
+
+    for (; index < other.items.length; index++) {
+      this.items.push(other.items[index]);
+    }
+  }
+};
+
+module.exports = CitySequence;
+
+</script>

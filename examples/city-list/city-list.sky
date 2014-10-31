@@ -1,0 +1,595 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<link rel="import"
+      href="../../framework/sky-element/sky-element.sky"
+      as="SkyElement" />
+<link rel="import" href="city-data-service.sky" as="CityDataService" />
+<link rel="import" href="city-sequence.sky" as="CitySequence" />
+
+<template>
+  <style>
+    div {
+      font-size: 16px;
+      color: #FFF;
+      background-color: #333;
+      padding: 4px 4px 4px 12px;
+    }
+  </style>
+  <div>{{ state }}</div>
+</template>
+<script>
+SkyElement({
+  name: 'state-header',
+
+  set datum(datum) {
+    this.state = datum.state;
+  }
+});
+</script>
+
+<template>
+  <style>
+    div {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 2px 4px 4px 12px;
+      background-color: #DDD;
+    }
+  </style>
+  <div>{{ letter }}</div>
+</template>
+<script>
+SkyElement({
+  name: 'letter-header',
+
+  set datum(datum) {
+    this.letter = datum.letter;
+  }
+});
+</script>
+
+<template>
+  <style>
+    :host {
+      display: flex;
+      font-size: 13px;
+      padding: 8px 4px 4px 12px;
+      border-bottom: 1px solid #EEE;
+      line-height: 15px;
+      overflow: hidden;
+    }
+
+    span {
+      display: inline;
+    }
+
+    #name {
+      font-weight: bold
+    }
+
+    #population {
+      color: #AAA;
+    }
+
+  </style>
+  <div>
+    <span id="name">{{ name }}</span>,
+    <span id="population">population {{ population }}</span>
+  </div>
+</template>
+<script>
+  SkyElement({
+    name: 'city-item',
+
+    set datum(datum) {
+      this.name = datum.name;
+      this.population = datum.population;
+    }
+  });
+</script>
+
+<template>
+  <style>
+
+  :host {
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: block;
+      background-color: #fff;
+  }
+
+  #scroller {
+    overflow-x: hidden;
+    overflow-y: auto;
+    perspective: 5px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+  #scroller::-webkit-scrollbar {
+    display:none;
+  }
+
+  #scrollarea {
+    will-change: transform;
+    transform-style: preserve-3d;
+  }
+
+  #contentarea {
+    position: absolute;
+    will-change: contents;
+    width: 100%;
+  }
+
+  .void {
+    display: none;
+  }
+
+  .position {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+
+  </style>
+
+  <div id="scroller" fit>
+    <div id="scrollarea">
+      <div id="contentarea">
+      </div>
+    </div>
+  </div>
+
+</template>
+<script>
+
+(function(global) {
+    "use strict";
+
+    var LOAD_LENGTH = 20;
+    var LOAD_BUFFER_PRE = LOAD_LENGTH * 4;
+    var LOAD_BUFFER_POST = LOAD_LENGTH * 4;
+
+    function Loader() {
+      this.loadingData = false;
+      this.data = null;
+      this.zeroIndex = 0;
+      this.loadIndex = 0;
+    }
+
+    Loader.prototype.localIndex = function(externalIndex) {
+      return externalIndex + this.zeroIndex;
+    }
+
+    Loader.prototype.externalIndex = function(localIndex) {
+      return localIndex - this.zeroIndex;
+    }
+
+    Loader.prototype.getItems = function() {
+      return this.data ? this.data.items : [];
+    }
+
+    Loader.prototype.maybeLoadMoreData = function(dataloadedCallback,
+                                                  firstVisible) {
+      if (this.loadingData)
+        return;
+
+      if (firstVisible) {
+        this.loadIndex = this.externalIndex(
+            this.data.items.indexOf(firstVisible));
+      }
+
+      var localIndex = this.localIndex(this.loadIndex);
+      var loadedPre = 0;
+      var loadedPost = 0;
+
+      if (this.data) {
+        loadedPre = localIndex;
+        loadedPost = this.data.items.length - loadedPre;
+      }
+
+      var loadTime;
+      if (loadedPre >= LOAD_BUFFER_PRE && loadedPost >= LOAD_BUFFER_POST) {
+        if (window.startLoad) {
+          loadTime = new Date().getTime() - window.startLoad;
+          console.log('Load: ' + loadTime + 'ms');
+          window.startLoad = undefined;
+        }
+        return;
+      }
+
+      this.loadingData = true;
+
+      var loadIndex;
+
+      if (!this.data) {
+        // Initial batch
+        loadIndex = 0;
+      } else if (loadedPost < LOAD_BUFFER_POST) {
+        // Load forward first
+        loadIndex = this.data.items.length;
+      } else {
+        // Then load backward
+        loadIndex = -LOAD_LENGTH;
+      }
+
+      var self = this;
+      var externalIndex = this.externalIndex(loadIndex);
+
+      try {
+        CityDataService.service.then(function(cityService) {
+          return cityService.get(externalIndex, LOAD_LENGTH)
+              .then(function(cities) {
+            var indexOffset = 0;
+            var newData = new CitySequence(cities);
+            if (!self.data) {
+              self.data = newData;
+            } else if (loadIndex > 0) {
+              self.data.append(newData);
+            } else {
+              self.zeroIndex += LOAD_LENGTH;
+              indexOffset = LOAD_LENGTH;
+              newData.append(self.data);
+              self.data = newData;
+            }
+
+            self.loadingData = false;
+            dataloadedCallback(self.data, indexOffset);
+          });
+        }).catch(function(ex) {
+          console.log(ex.stack);
+        });
+      } catch (ex) {
+        console.log(ex.stack);
+      }
+    }
+
+    function Scroller() {
+      this.contentarea = null;
+      this.scroller = null;
+      this.contentTop = 0; // #contentarea's current top
+      this.scrollTop = 0; // #scrollarea's current top
+      this.scrollHeight = -1; // height of #scroller (the viewport)
+      this.lastScrollTop = 0; // last known scrollTop to compute deltas
+    }
+
+    Scroller.prototype.setup = function(scroller, scrollarea, contentarea) {
+      this.contentarea = contentarea;
+      this.scroller = scroller;
+
+      this.scrollHeight = scroller.offsetHeight;
+      scrollarea.style.height = (this.scrollHeight) * 4 + 'px';
+
+      this.reset();
+    }
+
+    Scroller.prototype.captureNewFrame = function(event) {
+        var scrollTop = event.target.scrollTop;
+
+        // Protect from re-entry.
+        if (this.lastScrollTop == scrollTop)
+          return false;
+
+        var scrollDown = scrollTop > this.lastScrollTop;
+        if (scrollDown) {
+          while (scrollTop > this.scrollHeight * 1.5) {
+            scrollTop -= this.scrollHeight;
+            this.contentTop -= this.scrollHeight;
+          }
+        } else {
+          while(scrollTop < this.scrollHeight * 1.5) {
+            scrollTop += this.scrollHeight;
+            this.contentTop += this.scrollHeight;
+          }
+        }
+
+        this.lastScrollTop = scrollTop;
+        event.target.scrollTop = scrollTop;
+        this.contentarea.style.top = this.contentTop + 'px';
+
+        this.scrollTop = scrollTop - this.contentTop;
+
+        return true;
+    }
+
+    Scroller.prototype.reset = function() {
+      if (!this.contentarea)
+        return;
+
+      this.scroller.scrollTop = this.scrollHeight;
+      this.lastScrollTop = this.scrollHeight;
+
+      this.contentarea.style.top = this.scrollHeight + 'px';
+      this.contentTop = this.scrollHeight;
+      this.scrollTop = 0;
+    }
+
+    // Current position and height of the scroller, that could
+    // be used (by Tiler, for example) to reason about where to
+    // place visible things.
+    Scroller.prototype.getCurrentFrame = function() {
+      return { top: this.scrollTop, height: this.scrollHeight };
+    }
+
+    Scroller.prototype.hasFrame = function() {
+      return this.scrollHeight != -1;
+    }
+
+    function Tile(datum, element, viewType, index) {
+      this.datum = datum;
+      this.element = element;
+      this.viewType = viewType;
+      this.index = index;
+    }
+
+    function Tiler(contentArea, views, viewHeights) {
+      this.contentArea = contentArea;
+      this.drawTop = 0;
+      this.drawBottom = 0;
+      this.firstItem = -1;
+      this.tiles = [];
+      this.viewHeights = viewHeights;
+      this.views = views;
+    }
+
+    Tiler.prototype.setupViews = function(scrollFrame) {
+      for (var type in this.viewHeights) {
+        this.initializeViewType(scrollFrame, type, this.viewHeights[type]);
+      }
+    }
+
+    Tiler.prototype.initializeViewType = function(scrollFrame, viewType,
+                                                  height) {
+      var count = Math.ceil(scrollFrame.height / height) * 2;
+      var viewCache = this.views[viewType] = {
+        indices: [],
+        elements: []
+      };
+
+      var protoElement;
+      switch (viewType) {
+        case 'stateHeader':
+          protoElement = document.createElement('state-header');
+          break;
+        case 'letterHeader':
+          protoElement = document.createElement('letter-header');
+          break;
+        case 'cityItem':
+          protoElement = document.createElement('city-item');
+          break;
+        default:
+          console.warn('Unknown viewType: ' + viewType);
+      }
+      protoElement.style.display = 'none';
+      protoElement.style.height = height;
+      protoElement.classList.add('position');
+
+      for (var i = 0; i < count; i++) {
+        var clone = protoElement.cloneNode(false);
+        this.contentArea.appendChild(clone);
+        viewCache.elements.push(clone);
+        viewCache.indices.push(i);
+      }
+    }
+
+    Tiler.prototype.checkoutTile = function(viewType, datum, top) {
+      var viewCache = this.views[viewType];
+      var index = viewCache.indices.pop();
+      var element = viewCache.elements[index];
+      element.datum = datum;
+      element.style.display = '';
+      element.style.top = top + 'px';
+
+      return new Tile(datum, element, viewType, index);
+    }
+
+    Tiler.prototype.checkinTile = function(tile) {
+      if (!tile.element)
+        return;
+
+      tile.element.style.display = 'none';
+      this.views[tile.viewType].indices.push(tile.index);
+    }
+
+    Tiler.prototype.getFirstVisibleDatum = function(scrollFrame) {
+      var tiles = this.tiles;
+      var viewHeights = this.viewHeights;
+
+      var itemTop = this.drawTop - scrollFrame.top;
+      if (itemTop >= 0 && tiles.length)
+        return tiles[0].datum;
+
+      var tile;
+      for (var i = 0; i < tiles.length && itemTop < 0; i++) {
+        tile = tiles[i];
+        var height = viewHeights[tile.viewType];
+        itemTop += height;
+      }
+
+      return tile ? tile.datum : null;
+    }
+
+    Tiler.prototype.viewType = function(datum) {
+      switch (datum.headerOrder) {
+        case 1: return 'stateHeader';
+        case 2: return 'letterHeader';
+        default: return 'cityItem';
+      }
+    }
+
+    Tiler.prototype.drawTiles = function(scrollFrame, data) {
+      var tiles = this.tiles;
+      var viewHeights = this.viewHeights;
+
+      var buffer = Math.round(scrollFrame.height / 2);
+      var targetTop = scrollFrame.top - buffer;
+      var targetBottom = scrollFrame.top + scrollFrame.height + buffer;
+
+      // Collect down to targetTop
+      var first = tiles[0];
+      while (tiles.length &&
+             targetTop > this.drawTop + viewHeights[first.viewType]) {
+
+        var height = viewHeights[first.viewType];
+        this.drawTop += height;
+
+        this.firstItem++;
+        this.checkinTile(tiles.shift());
+
+        first = tiles[0];
+      }
+
+      // Collect up to targetBottom
+      var last = tiles[tiles.length - 1];
+      while(tiles.length &&
+            targetBottom < this.drawBottom - viewHeights[last.viewType]) {
+
+        var height = viewHeights[last.viewType];
+        this.drawBottom -= height;
+
+        this.checkinTile(tiles.pop());
+
+        last = tiles[tiles.length - 1];
+      }
+
+      // Layout up to targetTop
+      while (this.firstItem > 0 &&
+             targetTop < this.drawTop) {
+
+        var datum = data[this.firstItem - 1];
+        var type = this.viewType(datum);
+        var height = viewHeights[type];
+
+        this.drawTop -= height;
+
+        var tile = targetBottom < this.drawTop ?
+            new Tile(datum, null, viewType, -1) : // off-screen
+            this.checkoutTile(type, datum, this.drawTop);
+
+        this.firstItem--;
+        tiles.unshift(tile);
+      }
+
+      // Layout down to targetBottom
+      while (this.firstItem + tiles.length < data.length - 1 &&
+             targetBottom > this.drawBottom) {
+
+        var datum = data[this.firstItem + tiles.length];
+        var type = this.viewType(datum);
+        var height = viewHeights[type];
+
+        this.drawBottom += height;
+
+        var tile = targetTop > this.drawBottom ?
+            new Tile(datum, null, viewType, -1) : // off-screen
+            this.checkoutTile(type, datum, this.drawBottom - height);
+
+        tiles.push(tile);
+      }
+
+      // Debug validate:
+      // for (var i = 0; i < tiles.length; i++) {
+      //   if (tiles[i].datum !== data[this.firstItem + i])
+      //     throw Error('Invalid')
+      // }
+    }
+
+    // FIXME: Needs better name.
+    Tiler.prototype.updateFirstItem = function(offset) {
+      var tiles = this.tiles;
+
+      if (!tiles.length) {
+        this.firstItem = 0;
+      } else {
+        this.firstItem += offset;
+      }
+    }
+
+    Tiler.prototype.checkinAllTiles = function() {
+      var tiles = this.tiles;
+      while (tiles.length) {
+        this.checkinTile(tiles.pop());
+      }
+    }
+
+    Tiler.prototype.reset = function() {
+      this.checkinAllTiles();
+      this.drawTop = 0;
+      this.drawBottom = 0;
+    }
+
+    SkyElement({
+      name: 'city-list',
+      loader: null,
+      scroller: null,
+      tiler: null,
+      date: null,
+      month: null,
+      views: null,
+
+      attached: function() {
+        this.views = {};
+        this.loader = new Loader();
+        this.scroller = new Scroller();
+        this.tiler = new Tiler(
+            this.shadowRoot.getElementById('contentarea'), this.views, {
+          stateHeader: 27,
+          letterHeader: 18,
+          cityItem: 30
+        });
+
+        this.dataLoaded = this.dataLoaded.bind(this);
+        this.shadowRoot.getElementById('scroller')
+            .addEventListener('scroll', this.handleScroll.bind(this));
+
+        var self = this;
+        requestAnimationFrame(function() {
+          self.domReady();
+          self.loader.maybeLoadMoreData(self.dataLoaded);
+        });
+      },
+
+      domReady: function() {
+        this.scroller.setup(this.shadowRoot.getElementById('scroller'),
+            this.shadowRoot.getElementById('scrollarea'),
+            this.shadowRoot.getElementById('contentarea'));
+        var scrollFrame = this.scroller.getCurrentFrame();
+        this.tiler.setupViews(scrollFrame);
+      },
+
+      updateView: function(data, scrollChanged) {
+        var scrollFrame = this.scroller.getCurrentFrame();
+        this.tiler.drawTiles(scrollFrame, data);
+        var datum = scrollChanged ?
+            this.tiler.getFirstVisibleDatum(scrollFrame) : null;
+        this.loader.maybeLoadMoreData(this.dataLoaded, datum);
+      },
+
+      dataLoaded: function(data, indexOffset) {
+        var scrollFrame = this.scroller.getCurrentFrame();
+        this.tiler.updateFirstItem(indexOffset);
+        this.updateView(data.items, false);
+      },
+
+      handleScroll: function(event) {
+        if (!this.scroller.captureNewFrame(event))
+          return;
+
+        this.updateView(this.loader.getItems(), true);
+      }
+    });
+
+})(this);
+
+</script>
+
