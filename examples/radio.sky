@@ -1,6 +1,9 @@
 SKY MODULE - radio button and radio button group
 <!-- accessibility handling not implemented yet, pending mojo service -->
-<import src="sky:core" as="sky"/>
+
+<script>
+ module.exports = {};
+</script>
 
 <!-- <radio> -->
 <template id="radio-shadow">
@@ -10,8 +13,7 @@ SKY MODULE - radio button and radio button group
  </style>
 </template>
 <script>
- module.exports = {};
- module.exports.RadioElement = sky.registerElement({
+ module.exports.RadioElement = module.registerElement({
    tagName: 'radio',
    shadow: true,
    prototype: class extends Element {
@@ -51,7 +53,7 @@ SKY MODULE - radio button and radio button group
  </style>
 </template>
 <script>
- module.exports.RadioGroupElement = sky.registerElement({
+ module.exports.RadioGroupElement = module.registerElement({
    tagName: 'radiogroup',
    shadow: true,
    prototype: class extends Element {
