@@ -56,6 +56,7 @@ class RenderObject;
 class VisibleSelection;
 class ScrollableArea;
 class ScrollingCoordinator;
+class ServiceProvider;
 class Settings;
 class SpellCheckerClient;
 class UndoStack;
@@ -83,7 +84,7 @@ public:
         SpellCheckerClient* spellCheckerClient;
     };
 
-    explicit Page(PageClients&);
+    Page(PageClients&, ServiceProvider*);
     virtual ~Page();
 
     void makeOrdinary();

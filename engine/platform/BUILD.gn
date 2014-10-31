@@ -186,6 +186,7 @@ component("platform") {
     "clipboard/ClipboardUtilities.h",
     "clipboard/ClipboardUtilitiesPosix.cpp",
     "exported/Platform.cpp",
+    "exported/ServiceProvider.cpp",
     "exported/WebActiveGestureAnimation.cpp",
     "exported/WebActiveGestureAnimation.h",
     "exported/WebArrayBuffer.cpp",

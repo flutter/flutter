@@ -42,6 +42,7 @@ namespace blink {
 class Chrome;
 class EventHandlerRegistry;
 class Page;
+class ServiceProvider;
 class Settings;
 class UseCounter;
 class Visitor;
@@ -58,7 +59,7 @@ class Visitor;
 class FrameHost final : public DummyBase<FrameHost> {
     WTF_MAKE_NONCOPYABLE(FrameHost); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtr<FrameHost> create(Page&);
+    static PassOwnPtr<FrameHost> create(Page&, ServiceProvider*);
     ~FrameHost();
 
     // Careful: This function will eventually be removed.
@@ -66,6 +67,8 @@ public:
     Settings& settings() const;
     Chrome& chrome() const;
     UseCounter& useCounter() const;
+
+    ServiceProvider* services() const { return m_services; }
 
     // Corresponds to pixel density of the device where this Page is
     // being displayed. In multi-monitor setups this can vary between pages.
@@ -77,9 +80,10 @@ public:
     void trace(Visitor*);
 
 private:
-    explicit FrameHost(Page&);
+    FrameHost(Page&, ServiceProvider*);
 
     RawPtr<Page> m_page;
+    ServiceProvider* m_services;
     const OwnPtr<EventHandlerRegistry> m_eventHandlerRegistry;
 };
 

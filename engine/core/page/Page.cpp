@@ -91,7 +91,7 @@ float deviceScaleFactor(LocalFrame* frame)
     return page->deviceScaleFactor();
 }
 
-Page::Page(PageClients& pageClients)
+Page::Page(PageClients& pageClients, ServiceProvider* services)
     : SettingsDelegate(Settings::create())
     , m_animator(this)
     , m_autoscrollController(AutoscrollController::create(*this))
@@ -110,7 +110,7 @@ Page::Page(PageClients& pageClients)
 #if ENABLE(ASSERT)
     , m_isPainting(false)
 #endif
-    , m_frameHost(FrameHost::create(*this))
+    , m_frameHost(FrameHost::create(*this, services))
 {
     ASSERT(m_editorClient);
 

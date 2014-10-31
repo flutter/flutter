@@ -17,6 +17,7 @@
 #include "mojo/services/public/interfaces/content_handler/content_handler.mojom.h"
 #include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
 #include "mojo/services/public/interfaces/network/url_loader.mojom.h"
+#include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/viewer/services/inspector_impl.h"
@@ -35,6 +36,7 @@ class ScriptRunner;
 class WebLayerTreeViewImpl;
 
 class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
+                     public blink::ServiceProvider,
                      public blink::WebViewClient,
                      public blink::WebFrameClient,
                      public mojo::ViewManagerDelegate,
@@ -67,31 +69,40 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   virtual blink::WebLayerTreeView* initializeLayerTreeView();
 
   // WebFrameClient methods:
-  virtual void frameDetached(blink::WebFrame*);
-  virtual blink::WebNavigationPolicy decidePolicyForNavigation(
-    const blink::WebFrameClient::NavigationPolicyInfo& info);
-  virtual void didAddMessageToConsole(
+  void frameDetached(blink::WebFrame*) override;
+  blink::WebNavigationPolicy decidePolicyForNavigation(
+    const blink::WebFrameClient::NavigationPolicyInfo& info) override;
+  void didAddMessageToConsole(
       const blink::WebConsoleMessage& message,
       const blink::WebString& source_name,
       unsigned source_line,
-      const blink::WebString& stack_trace);
-  virtual void didCreateScriptContext(
-      blink::WebLocalFrame*, v8::Handle<v8::Context>, int extensionGroup, int worldId);
+      const blink::WebString& stack_trace) override;
+  void didCreateScriptContext(
+      blink::WebLocalFrame*,
+      v8::Handle<v8::Context>,
+      int extensionGroup,
+      int worldId) override;
+
+  // WebViewClient methods:
+  blink::ServiceProvider* services() override;
+
+  // Services methods:
+  mojo::NavigatorHost* NavigatorHost() override;
 
   // ViewManagerDelegate methods:
-  virtual void OnEmbed(
+  void OnEmbed(
       mojo::ViewManager* view_manager,
       mojo::View* root,
       mojo::ServiceProviderImpl* exported_services,
       scoped_ptr<mojo::ServiceProvider> imported_services) override;
-  virtual void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
+  void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
 
   // ViewObserver methods:
-  virtual void OnViewBoundsChanged(mojo::View* view,
-                                   const mojo::Rect& old_bounds,
-                                   const mojo::Rect& new_bounds) override;
-  virtual void OnViewDestroyed(mojo::View* view) override;
-  virtual void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
+  void OnViewBoundsChanged(mojo::View* view,
+                           const mojo::Rect& old_bounds,
+                           const mojo::Rect& new_bounds) override;
+  void OnViewDestroyed(mojo::View* view) override;
+  void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 
   void Load(mojo::URLResponsePtr response);
 

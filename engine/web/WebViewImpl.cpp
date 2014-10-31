@@ -194,7 +194,7 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     pageClients.editorClient = &m_editorClientImpl;
     pageClients.spellCheckerClient = &m_spellCheckerClientImpl;
 
-    m_page = adoptPtr(new Page(pageClients));
+    m_page = adoptPtr(new Page(pageClients, m_client->services()));
     m_page->makeOrdinary();
 
     setDeviceScaleFactor(m_client->screenInfo().deviceScaleFactor);

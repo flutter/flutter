@@ -44,6 +44,7 @@
 
 namespace blink {
 
+class ServiceProvider;
 class WebCompositorOutputSurface;
 class WebElement;
 class WebGestureEvent;
@@ -66,6 +67,8 @@ struct WebSize;
 // easily reused as part of an implementation of WebViewClient.
 class WebViewClient : virtual public WebWidgetClient {
 public:
+    virtual ServiceProvider* services() = 0;
+
     // Editing -------------------------------------------------------------
 
     // This method is called in response to WebView's handleInputEvent()
