@@ -25,6 +25,7 @@ shared_library("sky_inspector_server") {
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
+    "//net",
     "//net:http_server",
     ":bindings",
   ]
