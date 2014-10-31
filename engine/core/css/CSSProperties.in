@@ -252,7 +252,6 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-background-composite custom_all
 -webkit-background-origin use_handlers_for=CSSPropertyBackgroundOrigin
 -webkit-background-size animatable, use_handlers_for=CSSPropertyBackgroundSize
--webkit-border-fit
 -webkit-border-horizontal-spacing animatable, inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
 -webkit-border-image initial=initialNinePieceImage, custom_value
 -webkit-border-vertical-spacing animatable, inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>

@@ -61,7 +61,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , textOverflow(RenderStyle::initialTextOverflow())
     , marginBeforeCollapse(MCOLLAPSE)
     , marginAfterCollapse(MCOLLAPSE)
-    , m_borderFit(RenderStyle::initialBorderFit())
     , m_textDecorationStyle(RenderStyle::initialTextDecorationStyle())
     , m_wrapFlow(RenderStyle::initialWrapFlow())
     , m_wrapThrough(RenderStyle::initialWrapThrough())
@@ -131,7 +130,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , textOverflow(o.textOverflow)
     , marginBeforeCollapse(o.marginBeforeCollapse)
     , marginAfterCollapse(o.marginAfterCollapse)
-    , m_borderFit(o.m_borderFit)
     , m_textDecorationStyle(o.m_textDecorationStyle)
     , m_wrapFlow(o.m_wrapFlow)
     , m_wrapThrough(o.m_wrapThrough)
@@ -204,7 +202,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && textOverflow == o.textOverflow
         && marginBeforeCollapse == o.marginBeforeCollapse
         && marginAfterCollapse == o.marginAfterCollapse
-        && m_borderFit == o.m_borderFit
         && m_textDecorationStyle == o.m_textDecorationStyle
         && m_wrapFlow == o.m_wrapFlow
         && m_wrapThrough == o.m_wrapThrough

@@ -272,8 +272,6 @@ enum EListStyleType {
     NoneListStyle
 };
 
-enum EBorderFit { BorderFitBorder, BorderFitLines };
-
 enum EAnimPlayState {
     AnimPlayStatePlaying,
     AnimPlayStatePaused

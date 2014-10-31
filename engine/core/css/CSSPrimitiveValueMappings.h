@@ -3399,36 +3399,6 @@ template<> inline CSSPrimitiveValue::operator EBorderCollapse() const
     return BSEPARATE;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EBorderFit e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case BorderFitBorder:
-        m_value.valueID = CSSValueBorder;
-        break;
-    case BorderFitLines:
-        m_value.valueID = CSSValueLines;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EBorderFit() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueBorder:
-        return BorderFitBorder;
-    case CSSValueLines:
-        return BorderFitLines;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return BorderFitLines;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EImageRendering e)
     : CSSValue(PrimitiveClass)
 {

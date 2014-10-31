@@ -502,7 +502,6 @@ bool RenderStyle::diffNeedsPaintInvalidationObject(const RenderStyle& other) con
 
     if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
         if (rareNonInheritedData->userDrag != other.rareNonInheritedData->userDrag
-            || rareNonInheritedData->m_borderFit != other.rareNonInheritedData->m_borderFit
             || rareNonInheritedData->m_objectFit != other.rareNonInheritedData->m_objectFit
             || rareNonInheritedData->m_objectPosition != other.rareNonInheritedData->m_objectPosition
             || !dataEquivalent(rareNonInheritedData->m_shapeOutside, other.rareNonInheritedData->m_shapeOutside)

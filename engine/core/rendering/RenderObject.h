@@ -114,7 +114,6 @@ enum InvalidationReason {
     InvalidationNone,
     InvalidationIncremental,
     InvalidationFull,
-    InvalidationBorderFitLines,
     InvalidationBorderBoxChange,
     InvalidationBoundsChange,
     InvalidationLocationChange,

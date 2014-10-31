@@ -462,8 +462,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
             || valueID == CSSValueDarken || valueID == CSSValueLighten || valueID == CSSValueColorDodge || valueID == CSSValueColorBurn
             || valueID == CSSValueHardLight || valueID == CSSValueSoftLight || valueID == CSSValueDifference || valueID == CSSValueExclusion
             || valueID == CSSValueHue || valueID == CSSValueSaturation || valueID == CSSValueColor || valueID == CSSValueLuminosity;
-    case CSSPropertyWebkitBorderFit:
-        return valueID == CSSValueBorder || valueID == CSSValueLines;
     case CSSPropertyWebkitBoxDecorationBreak:
         return valueID == CSSValueClone || valueID == CSSValueSlice;
     case CSSPropertyAlignContent:
@@ -570,7 +568,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyWebkitBorderAfterStyle:
     case CSSPropertyWebkitBorderBeforeStyle:
     case CSSPropertyWebkitBorderEndStyle:
-    case CSSPropertyWebkitBorderFit:
     case CSSPropertyWebkitBorderStartStyle:
     case CSSPropertyWebkitBoxDecorationBreak:
     case CSSPropertyAlignContent:

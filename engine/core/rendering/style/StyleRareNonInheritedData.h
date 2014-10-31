@@ -145,7 +145,6 @@ public:
     unsigned textOverflow : 1; // Whether or not lines that spill out should be truncated with "..."
     unsigned marginBeforeCollapse : 2; // EMarginCollapse
     unsigned marginAfterCollapse : 2; // EMarginCollapse
-    unsigned m_borderFit : 1; // EBorderFit
 
     unsigned m_textDecorationStyle : 3; // TextDecorationStyle
     unsigned m_wrapFlow: 3; // WrapFlow
