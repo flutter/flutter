@@ -172,9 +172,6 @@ that everything of note would be provided by frameworks.
    The select="" attribute gives the selector to use to pick the nodes
    to place in this insertion point; it defaults to everything.
 
-``<shadow>``
- - In a shadow tree, acts as an insertion point for older shadow trees.
-
 ``<img src="foo.bin">``
  - Sky fetches the bits for foo.bin, looks for a decoder for those
    bits, and renders the bits that the decoder returns.

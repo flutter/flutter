@@ -98,12 +98,10 @@ module 'sky:core' {
     // Returns a new Array and new Attr instances every time.
     Array<Attr> getAttributes(); // O(N) in arguments
 
-    readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the youngest shadow root
-    void addShadowRoot(ShadowRoot root); // O(N) in descendants of argument
+    readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root
     Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
 
     virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
-    virtual void shadowRootChangeCallback(ShadowRoot root); // noop
     // TODO(ianh): does a node ever need to know when it's been redistributed?
   }
   Element createElement(String tagName, Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -111,7 +109,12 @@ module 'sky:core' {
   Element createElement(String tagName, ChildArguments... nodes); // shorthand
   Element createElement(String tagName); // shorthand
 
-  Object registerElement(String tagName, Object interfaceObject); // O(N) in number of outstanding elements with that tag name to be upgraded
+  dictionary ElementRegistration {
+    String tagName;
+    Boolean shadow;
+    Object prototype;
+  }
+  Object registerElement(ElementRegistration options); // O(N) in number of outstanding elements with that tag name to be upgraded
 
   interface Text : Node {
     constructor (String value); // O(1)
@@ -134,10 +137,8 @@ module 'sky:core' {
   }
 
   interface ShadowRoot : TreeScope {
-    constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
-    readonly attribute Element? host; // O(1)
-    readonly attribute ShadowRoot? olderShadowRoot; // O(1)
-    void removeShadowRoot(); // O(N) in descendants
+    constructor (Element host); // O(1) // note that there is no way in the API to use a newly created ShadowRoot
+    readonly attribute Element host; // O(1)
   }
 
   interface Document : TreeScope {
@@ -160,9 +161,6 @@ module 'sky:core' {
   interface ScriptElement : Element { }
   interface StyleElement : Element { }
   interface ContentElement : Element {
-    Array<Node> getDistributedNodes(); // O(N) in distributed nodes
-  }
-  interface ShadowElement : Element {
     Array<Node> getDistributedNodes(); // O(N) in distributed nodes
   }
   interface ImgElement : Element { }
@@ -267,6 +265,11 @@ module 'sky:modulename' {
     ReturnType method(ArgumentType argumentName1, ArgumentType... allSubsequentArguments);
   }
 
+  dictionary Options {
+    String foo;
+    Integer bar;
+  }
+
   // the module can have properties and methods also
   attribute String Foo;
   void method();
@@ -309,6 +312,7 @@ The following types are available:
 * ``Boolean`` - WebIDL ``boolean``
 # ``Object`` - WebIDL ``object``
 * ``InterfaceName`` - an instance of the interface InterfaceName
+* ``DictionaryName`` - an instance of the dictionary DictionaryName
 * ``Promise<Type>`` - WebIDL ``Promise<T>``
 * ``Array<Type>`` - WebIDL ``sequence<T>``
 * ``Dictionary`` - unordered set of name-value String-String pairs with no duplicate names
