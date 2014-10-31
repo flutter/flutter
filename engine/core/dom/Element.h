@@ -77,7 +77,6 @@ enum SpellcheckAttributeState {
 
 enum ElementFlags {
     TabIndexWasSetExplicitly = 1 << 0,
-    HasPendingResources = 1 << 1,
 
     NumberOfElementFlags = 2, // Required size of bitfield used to store the flags.
 };
@@ -344,11 +343,6 @@ public:
     // Used for disabled form elements; if true, prevents mouse events from being dispatched
     // to event listeners, and prevents DOMActivate events from being sent at all.
     virtual bool isDisabledFormControl() const { return false; }
-
-    bool hasPendingResources() const { return hasElementFlag(HasPendingResources); }
-    void setHasPendingResources() { setElementFlag(HasPendingResources); }
-    void clearHasPendingResources() { clearElementFlag(HasPendingResources); }
-    virtual void buildPendingResource() { };
 
     void setCustomElementDefinition(PassRefPtr<CustomElementDefinition>);
     CustomElementDefinition* customElementDefinition() const;
