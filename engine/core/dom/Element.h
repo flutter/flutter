@@ -59,16 +59,6 @@ class PseudoElement;
 class ShadowRoot;
 class StylePropertySet;
 
-enum AffectedSelectorType {
-    AffectedSelectorChecked = 1,
-    AffectedSelectorEnabled = 1 << 1,
-    AffectedSelectorDisabled = 1 << 2,
-    AffectedSelectorIndeterminate = 1 << 3,
-    AffectedSelectorLink = 1 << 4,
-    AffectedSelectorVisited = 1 << 5
-};
-typedef int AffectedSelectorMask;
-
 enum SpellcheckAttributeState {
     SpellcheckAttributeTrue,
     SpellcheckAttributeFalse,
@@ -89,14 +79,17 @@ public:
 
     bool hasAttribute(const QualifiedName&) const;
     const AtomicString& getAttribute(const QualifiedName&) const;
-
     Vector<RefPtr<Attr>> getAttributes();
+    bool hasAttributes() const;
+    bool hasAttribute(const AtomicString& name) const;
+    const AtomicString& getAttribute(const AtomicString& name) const;
+    void setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState&);
+    void removeAttribute(const AtomicString& name);
+    void removeAttribute(const QualifiedName&);
 
     // Passing nullAtom as the second parameter removes the attribute when calling either of these set methods.
     void setAttribute(const QualifiedName&, const AtomicString& value);
     void setSynchronizedLazyAttribute(const QualifiedName&, const AtomicString& value);
-
-    void removeAttribute(const QualifiedName&);
 
     // Typed getters and setters for language bindings.
     int getIntegralAttribute(const QualifiedName& attributeName) const;
@@ -105,15 +98,6 @@ public:
     void setUnsignedIntegralAttribute(const QualifiedName& attributeName, unsigned value);
     double getFloatingPointAttribute(const QualifiedName& attributeName, double fallbackValue = std::numeric_limits<double>::quiet_NaN()) const;
     void setFloatingPointAttribute(const QualifiedName& attributeName, double value);
-
-    bool hasAttributes() const;
-
-    bool hasAttribute(const AtomicString& name) const;
-
-    const AtomicString& getAttribute(const AtomicString& name) const;
-
-    void setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState&);
-    static bool parseAttributeName(QualifiedName&, const AtomicString& namespaceURI, const AtomicString& qualifiedName, ExceptionState&);
 
     const AtomicString& getIdAttribute() const;
     void setIdAttribute(const AtomicString&);
@@ -161,8 +145,6 @@ public:
 
     virtual void didMoveToNewDocument(Document&) override;
 
-    void removeAttribute(const AtomicString& name);
-
     CSSStyleDeclaration* style();
 
     const QualifiedName& tagQName() const { return m_tagName; }
@@ -200,7 +182,6 @@ public:
         ModifiedByCloning
     };
 
-    virtual void attributeChanged(const QualifiedName&, const AtomicString&, AttributeModificationReason = ModifiedDirectly);
     virtual void parseAttribute(const QualifiedName&, const AtomicString&);
 
     virtual bool hasLegalLinkAttribute(const QualifiedName&) const;
@@ -208,9 +189,6 @@ public:
 
     // Only called by the parser immediately after element construction.
     void parserSetAttributes(const Vector<Attribute>&);
-
-    // Remove attributes that might introduce scripting from the vector leaving the element unchanged.
-    void stripScriptingAttributes(Vector<Attribute>&) const;
 
     bool sharesSameElementData(const Element& other) const { return elementData() == other.elementData(); }
 
@@ -227,7 +205,6 @@ public:
     virtual RenderObject* createRenderer(RenderStyle*);
     virtual bool rendererIsNeeded(const RenderStyle&);
     void recalcStyle(StyleRecalcChange, Text* nextTextSibling = 0);
-    void didAffectSelector(AffectedSelectorMask);
     void setAnimationStyleChange(bool);
     void setNeedsAnimationStyleRecalc();
 
@@ -243,8 +220,6 @@ public:
 
     bool hasAuthorShadowRoot() const { return shadowRoot(); }
 
-    bool isInDescendantTreeOf(const Element* shadowHost) const;
-
     RenderStyle* computedStyle(PseudoId = NOPSEUDO);
 
     bool isUpgradedCustomElement() { return customElementState() == Upgraded; }
@@ -256,7 +231,6 @@ public:
     virtual void accessKeyAction(bool /*sendToAnyEvent*/) { }
 
     virtual bool isURLAttribute(const Attribute&) const { return false; }
-    virtual bool isHTMLContentAttribute(const Attribute&) const { return false; }
 
     virtual bool isLiveLink() const { return false; }
     KURL hrefURL() const;
@@ -277,18 +251,13 @@ public:
     virtual bool supportsFocus() const;
     // Whether the node can actually be focused.
     bool isFocusable() const;
-    virtual bool isKeyboardFocusable() const;
+    bool isKeyboardFocusable() const;
     virtual bool isMouseFocusable() const;
     virtual void willCallDefaultEventHandler(const Event&) override final;
-    virtual void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
-    virtual void dispatchBlurEvent(Element* newFocusedElement);
+    void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
+    void dispatchBlurEvent(Element* newFocusedElement);
     void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
     void dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement);
-
-    String innerText();
-    String outerText();
-
-    String textFromChildren();
 
     virtual String title() const { return String(); }
 
@@ -301,14 +270,9 @@ public:
     // until they know all of their nested <param>s. [Radar 3603191, 4040848].
     // Also used for script elements and some SVG elements for similar purposes,
     // but making parsing a special case in this respect should be avoided if possible.
-    virtual void finishParsingChildren();
+    virtual void finishParsingChildren() { }
 
-    void beginParsingChildren() { setIsFinishedParsingChildren(false); }
-
-    virtual bool matchesReadOnlyPseudoClass() const { return false; }
-    virtual bool matchesReadWritePseudoClass() const { return false; }
     bool matches(const String& selectors, ExceptionState&);
-    virtual bool shouldAppearIndeterminate() const { return false; }
 
     DOMTokenList& classList();
 
@@ -344,7 +308,7 @@ public:
     void setTabIndex(int);
     virtual short tabIndex() const override;
 
-    virtual void trace(Visitor*) override;
+    String textFromChildren();
 
 protected:
     Element(const QualifiedName& tagName, Document*, ConstructionType);
@@ -381,6 +345,8 @@ protected:
     PassRefPtr<RenderStyle> originalStyleForRenderer();
 
 private:
+    void attributeChanged(const QualifiedName&, const AtomicString&, AttributeModificationReason = ModifiedDirectly);
+
     bool hasElementFlag(ElementFlags mask) const { return hasRareData() && hasElementFlagInternal(mask); }
     void setElementFlag(ElementFlags, bool value = true);
     void clearElementFlag(ElementFlags);

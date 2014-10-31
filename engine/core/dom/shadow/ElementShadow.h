@@ -57,7 +57,6 @@ public:
     void attach(const Node::AttachContext&);
     void detach(const Node::AttachContext&);
 
-    void didAffectSelector(AffectedSelectorMask);
     void willAffectSelector();
     const SelectRuleFeatureSet& ensureSelectFeatureSet();
 

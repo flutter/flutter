@@ -117,11 +117,6 @@ WebString WebElement::attributeValue(unsigned index) const
     return constUnwrap<Element>()->attributes().at(index).value();
 }
 
-WebString WebElement::innerText()
-{
-    return unwrap<Element>()->innerText();
-}
-
 WebString WebElement::computeInheritedLanguage() const
 {
     return WebString(constUnwrap<Element>()->computeInheritedLanguage());

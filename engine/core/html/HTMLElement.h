@@ -56,9 +56,6 @@ public:
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/elements.html#interactive-content
     virtual bool isInteractiveContent() const;
 
-    virtual bool matchesReadOnlyPseudoClass() const override;
-    virtual bool matchesReadWritePseudoClass() const override;
-
     static const AtomicString& eventParameterName();
 
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;

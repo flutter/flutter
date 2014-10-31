@@ -324,12 +324,6 @@ void ElementShadow::collectSelectFeatureSetFrom(ShadowRoot& root)
     }
 }
 
-void ElementShadow::didAffectSelector(AffectedSelectorMask mask)
-{
-    if (ensureSelectFeatureSet().hasSelectorFor(mask))
-        setNeedsDistributionRecalc();
-}
-
 void ElementShadow::willAffectSelector()
 {
     for (ElementShadow* shadow = this; shadow; shadow = shadow->containingShadow()) {

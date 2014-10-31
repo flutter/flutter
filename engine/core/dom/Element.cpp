@@ -757,21 +757,6 @@ bool Element::shouldInvalidateDistributionWhenAttributeChanged(ElementShadow* el
     return featureSet.hasSelectorForAttribute(name.localName());
 }
 
-void Element::stripScriptingAttributes(Vector<Attribute>& attributeVector) const
-{
-    size_t destination = 0;
-    for (size_t source = 0; source < attributeVector.size(); ++source) {
-        if (isHTMLContentAttribute(attributeVector[source]))
-            continue;
-
-        if (source != destination)
-            attributeVector[destination] = attributeVector[source];
-
-        ++destination;
-    }
-    attributeVector.shrink(destination);
-}
-
 void Element::parserSetAttributes(const Vector<Attribute>& attributeVector)
 {
     ASSERT(!inDocument());
@@ -1088,13 +1073,6 @@ ElementShadow& Element::ensureShadow()
     return ensureElementRareData().ensureShadow();
 }
 
-void Element::didAffectSelector(AffectedSelectorMask mask)
-{
-    setNeedsStyleRecalc(SubtreeStyleChange);
-    if (ElementShadow* elementShadow = shadowWhereNodeCanBeDistributed(*this))
-        elementShadow->didAffectSelector(mask);
-}
-
 void Element::setAnimationStyleChange(bool animationStyleChange)
 {
     if (animationStyleChange && document().inStyleRecalc())
@@ -1172,11 +1150,6 @@ void Element::childrenChanged(const ChildrenChange& change)
         shadow->setNeedsDistributionRecalc();
 }
 
-void Element::finishParsingChildren()
-{
-    setIsFinishedParsingChildren(true);
-}
-
 #ifndef NDEBUG
 void Element::formatForDebugger(char* buffer, unsigned length) const
 {
@@ -1221,18 +1194,6 @@ void Element::parseAttribute(const QualifiedName& name, const AtomicString& valu
             setTabIndexExplicitly(max(static_cast<int>(std::numeric_limits<short>::min()), std::min(tabindex, static_cast<int>(std::numeric_limits<short>::max()))));
         }
     }
-}
-
-bool Element::parseAttributeName(QualifiedName& out, const AtomicString& namespaceURI, const AtomicString& qualifiedName, ExceptionState& exceptionState)
-{
-    AtomicString prefix, localName;
-    if (!Document::parseQualifiedName(qualifiedName, prefix, localName, exceptionState))
-        return false;
-    ASSERT(!exceptionState.hadException());
-
-    QualifiedName qName(localName);
-    out = qName;
-    return true;
 }
 
 void Element::removeAttributeInternal(size_t index, SynchronizationOfLazyAttribute inSynchronizationOfLazyAttribute)
@@ -1421,27 +1382,6 @@ void Element::dispatchFocusOutEvent(const AtomicString& eventType, Element* newF
     dispatchScopedEventDispatchMediator(FocusOutEventDispatchMediator::create(FocusEvent::create(eventType, true, false, document().domWindow(), 0, newFocusedElement)));
 }
 
-String Element::innerText()
-{
-    // We need to update layout, since plainText uses line boxes in the render tree.
-    document().updateLayoutIgnorePendingStylesheets();
-
-    if (!renderer())
-        return textContent(true);
-
-    return plainText(rangeOfContents(const_cast<Element*>(this)).get());
-}
-
-String Element::outerText()
-{
-    // Getting outerText is the same as getting innerText, only
-    // setting is different. You would think this should get the plain
-    // text for the outer range, but this is wrong, <br> for instance
-    // would return different values for inner and outer text by such
-    // a rule, but it doesn't in WinIE, and we want to match that.
-    return innerText();
-}
-
 String Element::textFromChildren()
 {
     Text* firstTextNode = 0;
@@ -1480,21 +1420,6 @@ String Element::textFromChildren()
 
     ASSERT(content.length() == totalLength);
     return content.toString();
-}
-
-bool Element::isInDescendantTreeOf(const Element* shadowHost) const
-{
-    ASSERT(shadowHost);
-    ASSERT(isShadowHost(shadowHost));
-
-    const ShadowRoot* shadowRoot = containingShadowRoot();
-    while (shadowRoot) {
-        const Element* ancestorShadowHost = shadowRoot->shadowHost();
-        if (ancestorShadowHost == shadowHost)
-            return true;
-        shadowRoot = ancestorShadowHost->containingShadowRoot();
-    }
-    return false;
 }
 
 LayoutSize Element::minimumSizeForResizing() const
@@ -1984,16 +1909,6 @@ bool Element::supportsStyleSharing() const
     if (isHTMLCanvasElement(*this))
         return false;
     return true;
-}
-
-void Element::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    if (hasRareData())
-        visitor->trace(elementRareData());
-    visitor->trace(m_elementData);
-#endif
-    ContainerNode::trace(visitor);
 }
 
 } // namespace blink

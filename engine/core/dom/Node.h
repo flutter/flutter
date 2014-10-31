@@ -572,8 +572,6 @@ public:
     void setAlreadySpellChecked(bool flag) { setFlag(flag, AlreadySpellCheckedFlag); }
     bool isAlreadySpellChecked() { return getFlag(AlreadySpellCheckedFlag); }
 
-    bool isFinishedParsingChildren() const { return getFlag(IsFinishedParsingChildrenFlag); }
-
     virtual void trace(Visitor*) override;
 
     unsigned lengthOfContents() const;
@@ -605,12 +603,9 @@ private:
         InDocumentFlag = 1 << 10,
         IsInShadowTreeFlag = 1 << 11,
 
-        // Set by the parser when the children are done parsing.
-        IsFinishedParsingChildrenFlag = 1 << 12,
-
         // Flags related to recalcStyle.
 
-        // FIXME(sky): Flag 13 is free.
+        // FIXME(sky): Flags 12 and 13 are free.
 
         HasCustomStyleCallbacksFlag = 1 << 14,
         ChildNeedsStyleInvalidationFlag = 1 << 15,
@@ -628,10 +623,10 @@ private:
         HasEventTargetDataFlag = 1 << 26,
         AlreadySpellCheckedFlag = 1 << 27,
 
-        DefaultNodeFlags = IsFinishedParsingChildrenFlag | ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
+        DefaultNodeFlags = ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
 
-    // 5 bits remaining.
+    // 6 bits remaining.
 
     bool getFlag(NodeFlags mask) const { return m_nodeFlags & mask; }
     void setFlag(bool f, NodeFlags mask) { m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t)f & mask); }
@@ -682,8 +677,6 @@ protected:
     bool isTreeScopeInitialized() const { return m_treeScope; }
 
     void markAncestorsWithChildNeedsStyleRecalc();
-
-    void setIsFinishedParsingChildren(bool value) { setFlag(value, IsFinishedParsingChildrenFlag); }
 
 private:
     friend class TreeShared<Node>;

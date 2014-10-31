@@ -48,7 +48,6 @@ static const unsigned maximumHTMLParserDOMTreeDepth = 512;
 
 static inline void setAttributes(Element* element, AtomicHTMLToken* token)
 {
-    element->stripScriptingAttributes(token->attributes());
     element->parserSetAttributes(token->attributes());
 }
 
@@ -90,7 +89,6 @@ static inline void executeInsertTask(HTMLConstructionSiteTask& task)
 
     if (task.child->isElementNode()) {
         Element& child = toElement(*task.child);
-        child.beginParsingChildren();
         if (task.selfClosing)
             child.finishParsingChildren();
     }

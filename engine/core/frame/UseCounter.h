@@ -191,8 +191,6 @@ public:
         SVGPointMatrixTransform = 209,
         DOMFocusInOutEvent = 211,
         FileGetLastModifiedDate = 212,
-        HTMLElementInnerText = 213,
-        HTMLElementOuterText = 214,
         ElementPrefixedMatchesSelector = 217,
         CSSStyleSheetRules = 219,
         CSSStyleSheetAddRule = 220,

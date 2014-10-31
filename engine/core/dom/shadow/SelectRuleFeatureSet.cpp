@@ -38,20 +38,17 @@
 namespace blink {
 
 SelectRuleFeatureSet::SelectRuleFeatureSet()
-    : m_featureFlags(0)
 {
 }
 
 void SelectRuleFeatureSet::add(const SelectRuleFeatureSet& featureSet)
 {
     m_cssRuleFeatureSet.add(featureSet.m_cssRuleFeatureSet);
-    m_featureFlags |= featureSet.m_featureFlags;
 }
 
 void SelectRuleFeatureSet::clear()
 {
     m_cssRuleFeatureSet.clear();
-    m_featureFlags = 0;
 }
 
 void SelectRuleFeatureSet::collectFeaturesFromSelector(const CSSSelector& selector)
