@@ -10,7 +10,7 @@ module 'sky:core' {
   // EVENTS
 
   class Event {
-    constructor (String type, Boolean bubbles, any data); // O(1)
+    constructor (String type, Boolean bubbles = true, any data = null); // O(1)
     readonly attribute String type; // O(1)
     readonly attribute Boolean bubbles; // O(1)
     attribute any data; // O(1)
@@ -60,7 +60,7 @@ module 'sky:core' {
     void insertAfter(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
     void replaceWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
     void remove(); // O(N) in number of descendants
-    Node cloneNode(Boolean deep); // O(1) if deep=false, O(N) in the number of descendants if deep=true
+    Node cloneNode(Boolean deep = false); // O(1) if deep=false, O(N) in the number of descendants if deep=true
 
     // called when parentNode changes
     virtual void parentChangeCallback(ParentNode? oldParent, ParentNode? newParent, ChildNode? previousSibling, ChildNode? nextSibling); // O(N) in descendants (calls attached/detached)
@@ -82,7 +82,7 @@ module 'sky:core' {
   }
 
   class Attr {
-    constructor (String name, String value); // O(1)
+    constructor (String name, String value = ''); // O(1)
     readonly attribute String name; // O(1)
     readonly attribute String value; // O(1)
   }
@@ -92,7 +92,7 @@ module 'sky:core' {
 
     Boolean hasAttribute(String name); // O(N) in arguments
     String getAttribute(String name); // O(N) in arguments
-    void setAttribute(String name, String value); // O(N) in arguments
+    void setAttribute(String name, String value = ''); // O(N) in arguments
     void removeAttribute(String name); // O(N) in arguments
     
     // Returns a new Array and new Attr instances every time.
@@ -106,7 +106,7 @@ module 'sky:core' {
   }
 
   class Text : Node {
-    constructor (String value); // O(1)
+    constructor (String value = ''); // O(1)
     attribute String value; // O(1)
 
     void replaceWith(String node); // O(1) // special case override of Node.replaceWith()
@@ -210,8 +210,8 @@ module 'sky:core' {
 
   dictionary ElementRegistration {
     String tagName;
-    Boolean shadow;
-    Object prototype;
+    Boolean shadow = false;
+    Object prototype = Element;
   }
 
   interface ElementConstructor {
@@ -315,6 +315,8 @@ module 'sky:modulename' {
       // When the platform calls this method, it always invokes the "real" method, even if it's been
       // deleted from the prototypes (as if it took a reference to the method at startup, and stored
       // state using Symbols)
+      // Calling a method with fewer arguments than defined will throw.
+      // Calling a method with more arguments ignores the extra arguments.
     virtual ReturnType methodCallback();
       // when the platform calls this, it actually calls it the way JS would, so author overrides do
       // affect what gets called. Make sure if you override it that you call the superclass implementation!
@@ -332,11 +334,13 @@ module 'sky:modulename' {
     ReturnType method(ArgumentType argumentName1, ArgumentType argumentName2);
     // the last argument's type can have "..." appended to it to indicate a varargs-like situation
     ReturnType method(ArgumentType argumentName1, ArgumentType... allSubsequentArguments);
+    // trailing arguments can have a default value, which must be a literal of the given type
+    ReturnType method(ArgumentType argumentName1, ArgumentType argumentName2 = defaultValue);
   }
 
   dictionary Options {
-    String foo;
-    Integer bar;
+    String foo; // if there's no default, the property must be specified or it's a TypeError
+    Integer bar = 4; // properties can have default values
   }
 
   // the module can have properties and methods also
@@ -384,20 +388,19 @@ The following types are available:
 * ``Float`` - WebIDL ``double``
 * ``String`` - WebIDL ``USVString``
 * ``Boolean`` - WebIDL ``boolean``
-# ``Object`` - WebIDL ``object``
+# ``Object`` - WebIDL ``object`` (``ClassName`` can be used as a literal for this type)
 * ``ClassName`` - an instance of the class ClassName
 * ``DictionaryName`` - an instance of the dictionary DictionaryName
 * ``Promise<Type>`` - WebIDL ``Promise<T>``
 * ``Array<Type>`` - WebIDL ``sequence<T>``
 * ``Dictionary`` - unordered set of name-value String-String pairs with no duplicate names
-* ``Type?`` - union of Type and the singleton type with value "null" (WebIDL nullable)
+* ``Type?`` - union of Type and the singleton type with value ``null`` (WebIDL nullable)
 * ``(Type1 or Type2)`` - union of Type1 and Type2 (WebIDL union)
 * ``any`` - union of all types (WebIDL ``any``)
 
 Methods that return nothing (undefined, in JS) use the keyword "void"
 instead of a type.
 
-TODO(ianh): Figure out what should happen with omitted and extraneous parameters
 
 TODO(ianh): Define in detail how this actually works
 

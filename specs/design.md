@@ -30,3 +30,6 @@ Design Principles
 
 * APIs should always spell acronyms like words (findId, not findID;
   XmlHttpRequest, not XMLHttpRequest)
+
+* If we extend a method to have new arguments, they must be optional
+  if there's any content using the existing method.
