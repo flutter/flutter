@@ -16,8 +16,12 @@ group("debugger") {
 shared_library("sky_debugger") {
   sources = [
     "debugger.cc",
+    "debugger.h",
     "focus_rules.cc",
     "focus_rules.h",
+    "main.cc",
+    "navigator_host_impl.cc",
+    "navigator_host_impl.h",
   ]
 
   deps = [
@@ -30,6 +34,7 @@ shared_library("sky_debugger") {
     "//mojo/public/cpp/utility",
     "//mojo/services/public/cpp/view_manager",
     "//mojo/services/public/interfaces/input_events:input_events",
+    "//mojo/services/public/interfaces/navigation",
     "//mojo/services/window_manager:lib",
     "//sky/viewer:bindings",
     "//ui/aura:aura",
