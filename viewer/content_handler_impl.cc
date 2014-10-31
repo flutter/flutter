@@ -9,21 +9,16 @@
 namespace sky {
 
 ContentHandlerImpl::ContentHandlerImpl(
-    mojo::Shell* shell,
     scoped_refptr<base::MessageLoopProxy> compositor_thread)
-  : shell_(shell),
-    compositor_thread_(compositor_thread) {
+    : compositor_thread_(compositor_thread) {
 }
 
 ContentHandlerImpl::~ContentHandlerImpl() {
 }
 
-void ContentHandlerImpl::OnConnect(
-      const mojo::String& url,
-      mojo::URLResponsePtr response,
-      mojo::InterfaceRequest<mojo::ServiceProvider> service_provider_request) {
-  new DocumentView(response.Pass(), service_provider_request.Pass(),
-                   shell_, compositor_thread_);
+void ContentHandlerImpl::StartApplication(mojo::ShellPtr shell,
+                                          mojo::URLResponsePtr response) {
+  new DocumentView(response.Pass(), shell.Pass(), compositor_thread_);
 }
 
 }  // namespace sky

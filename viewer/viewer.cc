@@ -33,7 +33,6 @@ class Viewer : public mojo::ApplicationDelegate,
  private:
   // Overridden from ApplicationDelegate:
   virtual void Initialize(mojo::ApplicationImpl* app) override {
-    shell_ = app->shell();
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());
     // FIXME: Why not in the component build?
@@ -54,12 +53,11 @@ class Viewer : public mojo::ApplicationDelegate,
   virtual void Create(mojo::ApplicationConnection* connection,
                       mojo::InterfaceRequest<mojo::ContentHandler> request) override {
     mojo::BindToRequest(
-        new ContentHandlerImpl(shell_, compositor_thread_.message_loop_proxy()),
+        new ContentHandlerImpl(compositor_thread_.message_loop_proxy()),
         &request);
   }
 
   scoped_ptr<PlatformImpl> platform_impl_;
-  mojo::Shell* shell_;
   base::Thread compositor_thread_;
 
   TracingFactory tracing_;

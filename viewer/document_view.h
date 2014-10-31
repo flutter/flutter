@@ -8,6 +8,9 @@
 #include "base/compiler_specific.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/lazy_interface_ptr.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
+#include "mojo/public/cpp/bindings/interface_impl.h"
+#include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/services/public/cpp/view_manager/view_manager_client_factory.h"
 #include "mojo/services/public/cpp/view_manager/view_manager_delegate.h"
 #include "mojo/services/public/cpp/view_manager/view_observer.h"
@@ -31,22 +34,17 @@ namespace sky {
 class ScriptRunner;
 class WebLayerTreeViewImpl;
 
-class DocumentView : public blink::WebViewClient,
+class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
+                     public blink::WebViewClient,
                      public blink::WebFrameClient,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
   // Load a new HTMLDocument with |response|.
   //
-  // |sp_request| should be used to implement a
-  // ServiceProvider which exposes services to the connecting application.
-  // Commonly, the connecting application is the ViewManager and it will
-  // request ViewManagerClient.
-  //
   // |shell| is the Shell connection for this mojo::Application.
   DocumentView(mojo::URLResponsePtr response,
-               mojo::InterfaceRequest<mojo::ServiceProvider> sp_request,
-               mojo::Shell* shell,
+               mojo::ShellPtr shell,
                scoped_refptr<base::MessageLoopProxy> compositor_thread);
   virtual ~DocumentView();
 
@@ -57,9 +55,14 @@ class DocumentView : public blink::WebViewClient,
     return imported_services_.get();
   }
 
-  mojo::Shell* shell() const { return shell_; }
+  mojo::Shell* shell() const { return shell_.get(); }
 
  private:
+  // Application methods:
+  void AcceptConnection(const mojo::String& requestor_url,
+                        mojo::ServiceProviderPtr provider) override;
+  void Initialize(mojo::Array<mojo::String> args) override;
+
   // WebWidgetClient methods:
   virtual blink::WebLayerTreeView* initializeLayerTreeView();
 
@@ -93,8 +96,9 @@ class DocumentView : public blink::WebViewClient,
   void Load(mojo::URLResponsePtr response);
 
   mojo::URLResponsePtr response_;
+  mojo::ServiceProviderImpl exported_services_;
   scoped_ptr<mojo::ServiceProvider> imported_services_;
-  mojo::Shell* shell_;
+  mojo::ShellPtr shell_;
   mojo::LazyInterfacePtr<mojo::NavigatorHost> navigator_host_;
   blink::WebView* web_view_;
   mojo::View* root_;

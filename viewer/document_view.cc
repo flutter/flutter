@@ -12,7 +12,6 @@
 #include "base/thread_task_runner_handle.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
-#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/public/cpp/view_manager/view.h"
@@ -67,20 +66,17 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
 
 DocumentView::DocumentView(
     mojo::URLResponsePtr response,
-    mojo::InterfaceRequest<mojo::ServiceProvider> service_provider_request,
-    mojo::Shell* shell,
+    mojo::ShellPtr shell,
     scoped_refptr<base::MessageLoopProxy> compositor_thread)
     : response_(response.Pass()),
-      shell_(shell),
+      shell_(shell.Pass()),
       web_view_(NULL),
       root_(NULL),
-      view_manager_client_factory_(shell, this),
+      view_manager_client_factory_(shell_.get(), this),
       inspector_service_factory_(this),
       compositor_thread_(compositor_thread),
       weak_factory_(this) {
-  mojo::ServiceProviderImpl* exported_services = new mojo::ServiceProviderImpl();
-  exported_services->AddService(&view_manager_client_factory_);
-  BindToRequest(exported_services, &service_provider_request);
+  shell_.set_client(this);
 }
 
 DocumentView::~DocumentView() {
@@ -92,6 +88,15 @@ DocumentView::~DocumentView() {
 
 base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
+}
+
+void DocumentView::AcceptConnection(const mojo::String& requestor_url,
+                                    mojo::ServiceProviderPtr provider) {
+  exported_services_.AddService(&view_manager_client_factory_);
+  mojo::WeakBindToPipe(&exported_services_, provider.PassMessagePipe());
+}
+
+void DocumentView::Initialize(mojo::Array<mojo::String> args) {
 }
 
 void DocumentView::OnEmbed(
