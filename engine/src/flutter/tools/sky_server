@@ -65,18 +65,17 @@ def main():
             'tools.staticdir.dir': os.path.abspath(args.app_path),
             'tools.staticdir.indexlister': skydir,
         },
-        '/mojo': {
+        '/mojo/public': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo'),
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo', 'public'),
         },
-        '/sky': {
+        '/mojo/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky'),
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo', 'services'),
         },
-        '/sky/framework': {
+        '/sky/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.join(SKY_ROOT, 'framework'),
+            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky', 'services'),
         },
      }
     cherrypy.quickstart(config=config)
