@@ -91,7 +91,7 @@ float deviceScaleFactor(LocalFrame* frame)
     return page->deviceScaleFactor();
 }
 
-Page::Page(PageClients& pageClients, ServiceProvider* services)
+Page::Page(PageClients& pageClients, ServiceProvider& services)
     : SettingsDelegate(Settings::create())
     , m_animator(this)
     , m_autoscrollController(AutoscrollController::create(*this))

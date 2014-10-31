@@ -67,7 +67,7 @@ struct WebSize;
 // easily reused as part of an implementation of WebViewClient.
 class WebViewClient : virtual public WebWidgetClient {
 public:
-    virtual ServiceProvider* services() = 0;
+    virtual ServiceProvider& services() = 0;
 
     // Editing -------------------------------------------------------------
 

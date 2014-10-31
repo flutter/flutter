@@ -84,7 +84,7 @@ public:
         SpellCheckerClient* spellCheckerClient;
     };
 
-    Page(PageClients&, ServiceProvider*);
+    Page(PageClients&, ServiceProvider&);
     virtual ~Page();
 
     void makeOrdinary();

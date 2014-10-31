@@ -59,7 +59,7 @@ class Visitor;
 class FrameHost final : public DummyBase<FrameHost> {
     WTF_MAKE_NONCOPYABLE(FrameHost); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
 public:
-    static PassOwnPtr<FrameHost> create(Page&, ServiceProvider*);
+    static PassOwnPtr<FrameHost> create(Page&, ServiceProvider&);
     ~FrameHost();
 
     // Careful: This function will eventually be removed.
@@ -68,7 +68,7 @@ public:
     Chrome& chrome() const;
     UseCounter& useCounter() const;
 
-    ServiceProvider* services() const { return m_services; }
+    ServiceProvider& services() const { return m_services; }
 
     // Corresponds to pixel density of the device where this Page is
     // being displayed. In multi-monitor setups this can vary between pages.
@@ -80,10 +80,10 @@ public:
     void trace(Visitor*);
 
 private:
-    FrameHost(Page&, ServiceProvider*);
+    FrameHost(Page&, ServiceProvider&);
 
     RawPtr<Page> m_page;
-    ServiceProvider* m_services;
+    ServiceProvider& m_services;
     const OwnPtr<EventHandlerRegistry> m_eventHandlerRegistry;
 };
 

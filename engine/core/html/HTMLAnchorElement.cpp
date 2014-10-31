@@ -39,11 +39,13 @@
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
 #include "core/rendering/RenderImage.h"
+#include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
 #include "platform/PlatformMouseEvent.h"
 #include "platform/network/ResourceRequest.h"
 #include "platform/weborigin/KnownPorts.h"
 #include "platform/weborigin/SecurityPolicy.h"
 #include "public/platform/Platform.h"
+#include "public/platform/ServiceProvider.h"
 #include "public/platform/WebURL.h"
 #include "public/platform/WebURLRequest.h"
 #include "wtf/text/StringBuilder.h"
@@ -128,8 +130,17 @@ bool HTMLAnchorElement::isLiveLink() const
 
 void HTMLAnchorElement::handleClick(Event* event)
 {
+    Frame* frame = document().frame();
+    if (!frame)
+        return;
+    FrameHost* host = frame->host();
+    if (!host)
+        return;
+    mojo::URLRequestPtr request = mojo::URLRequest::New();
+    request->url = href().string().toUTF8();
+    host->services().NavigatorHost()->RequestNavigate(
+        mojo::TARGET_SOURCE_NODE, request.Pass());
     event->setDefaultHandled();
-    // FIXME(sky): reimplement
 }
 
 bool HTMLAnchorElement::willRespondToMouseClickEvents()

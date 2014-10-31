@@ -36,9 +36,18 @@
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
 #include "core/loader/EmptyClients.h"
+#include "public/platform/ServiceProvider.h"
 #include "wtf/Assertions.h"
 
 namespace blink {
+namespace {
+
+class DummyServiceProvider : public blink::ServiceProvider {
+public:
+    mojo::NavigatorHost* NavigatorHost() { return 0; }
+};
+
+}
 
 PassOwnPtr<DummyPageHolder> DummyPageHolder::create(
     const IntSize& initialViewSize,
@@ -52,6 +61,8 @@ DummyPageHolder::DummyPageHolder(
     Page::PageClients* pageClients,
     PassOwnPtr<FrameLoaderClient> frameLoaderClient)
 {
+    DEFINE_STATIC_LOCAL(DummyServiceProvider, serviceProvider, ());
+
     if (!pageClients) {
         fillWithEmptyClients(m_pageClients);
     } else {
@@ -59,7 +70,7 @@ DummyPageHolder::DummyPageHolder(
         m_pageClients.editorClient = pageClients->editorClient;
         m_pageClients.spellCheckerClient = pageClients->spellCheckerClient;
     }
-    m_page = adoptPtr(new Page(m_pageClients, 0));
+    m_page = adoptPtr(new Page(m_pageClients, serviceProvider));
 
     // FIXME(sky): Delete the tests that use DummyPageHolder since
     // they no longer work and we're not running them.

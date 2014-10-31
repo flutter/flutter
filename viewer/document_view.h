@@ -84,7 +84,7 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
       int worldId) override;
 
   // WebViewClient methods:
-  blink::ServiceProvider* services() override;
+  blink::ServiceProvider& services() override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
