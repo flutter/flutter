@@ -9,7 +9,7 @@ module 'sky:core' {
 
   // EVENTS
 
-  interface Event {
+  class Event {
     constructor (String type, Boolean bubbles, any data); // O(1)
     readonly attribute String type; // O(1)
     readonly attribute Boolean bubbles; // O(1)
@@ -25,7 +25,7 @@ module 'sky:core' {
 
   callback EventListener any (Event event); // return value is assigned to Event.result
 
-  interface EventTarget {
+  abstract class EventTarget {
     any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain // returns Event.result
     void addEventListener(String type, EventListener listener); // O(1)
     void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
@@ -33,7 +33,7 @@ module 'sky:core' {
     private Array<EventListener> getRegisteredEventListenersForType(String type); // O(N)
   }
 
-  interface CustomEventTarget : EventTarget {
+  class CustomEventTarget : EventTarget {
     constructor (); // O(1)
     attribute EventTarget parentNode; // getter O(1), setter O(N) in height of tree, throws if this would make a loop
 
@@ -47,7 +47,7 @@ module 'sky:core' {
   typedef ChildNode (Element or Text);
   typedef ChildArgument (Element or Text or String);
 
-  abstract interface Node : EventTarget {
+  abstract class Node : EventTarget {
     readonly attribute TreeScope? ownerScope; // O(1)
     
     readonly attribute ParentNode? parentNode; // O(1)
@@ -68,7 +68,7 @@ module 'sky:core' {
     virtual void detachedCallback(); // noop
   }
 
-  abstract interface ParentNode : Node {
+  abstract class ParentNode : Node {
     readonly attribute ChildNode? firstChild; // O(1)
     readonly attribute ChildNode? lastChild; // O(1)
     
@@ -81,13 +81,13 @@ module 'sky:core' {
     void replaceChildrenWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
   }
 
-  interface Attr {
+  class Attr {
     constructor (String name, String value); // O(1)
     readonly attribute String name; // O(1)
     readonly attribute String value; // O(1)
   }
 
-  interface Element : ParentNode {
+  abstract class Element : ParentNode {
     readonly attribute String tagName; // O(1)
 
     Boolean hasAttribute(String name); // O(N) in arguments
@@ -104,19 +104,8 @@ module 'sky:core' {
     virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
     // TODO(ianh): does a node ever need to know when it's been redistributed?
   }
-  Element createElement(String tagName, Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  Element createElement(String tagName, Dictionary attributes); // shorthand
-  Element createElement(String tagName, ChildArguments... nodes); // shorthand
-  Element createElement(String tagName); // shorthand
 
-  dictionary ElementRegistration {
-    String tagName;
-    Boolean shadow;
-    Object prototype;
-  }
-  Object registerElement(ElementRegistration options); // O(N) in number of outstanding elements with that tag name to be upgraded
-
-  interface Text : Node {
+  class Text : Node {
     constructor (String value); // O(1)
     attribute String value; // O(1)
 
@@ -125,27 +114,27 @@ module 'sky:core' {
     virtual void valueChangeCallback(String? oldValue, String? newValue); // noop
   }
 
-  interface DocumentFragment : ParentNode {
+  class DocumentFragment : ParentNode {
     constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
   }
 
-  abstract interface TreeScope : ParentNode {
+  abstract class TreeScope : ParentNode {
     readonly attribute Document? ownerDocument; // O(1)
     readonly attribute TreeScope? parentScope; // O(1)
 
     Element? findId(String id); // O(1)
   }
 
-  interface ShadowRoot : TreeScope {
+  class ShadowRoot : TreeScope {
     constructor (Element host); // O(1) // note that there is no way in the API to use a newly created ShadowRoot
     readonly attribute Element host; // O(1)
   }
 
-  interface Document : TreeScope {
+  class Document : TreeScope {
     constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
   }
   
-  interface SelectorQuery {
+  class SelectorQuery {
     constructor (String selector); // O(F()) where F() is the complexity of the selector
 
     Boolean matches(Element element); // O(F())
@@ -154,40 +143,112 @@ module 'sky:core' {
   }
 
   // Built-in Elements
-  interface ImportElement : Element { }
-  interface TemplateElement : Element {
+  class ImportElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class TemplateElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
     readonly attribute DocumentFragment content; // O(1)
   }
-  interface ScriptElement : Element { }
-  interface StyleElement : Element { }
-  interface ContentElement : Element {
+  class ScriptElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class StyleElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class ContentElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
     Array<Node> getDistributedNodes(); // O(N) in distributed nodes
   }
-  interface ImgElement : Element { }
-  interface IframeElement : Element { }
-  interface TElement : Element { }
-  interface AElement : Element { }
-  interface TitleElement : Element { }
+  class ImgElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class IframeElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class TElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class AElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
+  class TitleElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+  }
 
 
+
+  dictionary ElementRegistration {
+    String tagName;
+    Boolean shadow;
+    Object prototype;
+  }
+
+  interface ElementConstructor {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+
+    constructor attribute String tagName;
+  }
 
   // MODULES
-  abstract interface AbstractModule : EventTarget {
+  abstract class AbstractModule : EventTarget {
+    readonly attribute Document document; // O(1) // the Documentof the module or application
     Promise<any> import(String url); // O(Yikes) // returns the module's exports
+
+    // createElement() lets you create elements that will be upgraded later when you register the element
+    Element createElement(String tagName, Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    Element createElement(String tagName, Dictionary attributes); // shorthand
+    Element createElement(String tagName, ChildArguments... nodes); // shorthand
+    Element createElement(String tagName); // shorthand
+
+    ElementConstructor registerElement(ElementRegistration options); // O(N) in number of outstanding elements with that tag name to be upgraded
+
     ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
 
-  interface Module : AbstractModule {
+  class Module : AbstractModule {
     constructor (Application application, Document document); // O(1)
-    attribute any exports; // O(1) // defaults to the module's document
-    readonly attribute Document document; // O(1) // the module's document
     readonly attribute Application application; // O(1)
+
+    attribute any exports; // O(1) // defaults to the module's document
   }
 
-  interface Application : AbstractModule {
+  class Application : AbstractModule {
     constructor (Document document); // O(1)
     attribute String title; // O(1)
-    readonly attribute Document document; // O(1) // the application's document
   }
 
   // see script.md for a description of the global object, though note that
@@ -195,6 +256,10 @@ module 'sky:core' {
 
 }
 ```
+
+TODO(ianh): is it ok that you can do
+module.application.registerElement()? we need application so that a
+module can implement <title> and get to application.title...
 
 TODO(ianh): event loop
 
@@ -229,16 +294,17 @@ module 'sky:modulename' {
 
   typedef NewType OldType; // useful when OldType is a commonly-used union
 
-  interface InterfaceName {
-    // an interface corresponds to a JavaScript prototype
+  class ClassName {
+    // a class corresponds to a JavaScript prototype
+    // corresponds to a WebIDL 'interface'
   }
 
-  abstract interface Superinterface {
-    // an abstract interface can't have a constructor
-    // in every other respect it is the same as a regular interface
+  abstract class Superclass {
+    // an abstract class can't have a constructor
+    // in every other respect it is the same as a regular class
   }
 
-  interface Subinterface : Superinterface {
+  class Subclass : Superclass {
     // properties
     readonly attribute ReturnType attributeName; // getter
     attribute ReturnType attributeName; // getter and setter
@@ -254,6 +320,9 @@ module 'sky:modulename' {
       // affect what gets called. Make sure if you override it that you call the superclass implementation!
       // The default implementations of 'virtual' methods all end by calling the identically named method
       // on the superclass, if there is such a method.
+
+    // properties on the constructor
+    constructor readonly attribute ReturnType staticName;
 
     // private APIs - see below
     private void method();
@@ -274,6 +343,11 @@ module 'sky:modulename' {
   attribute String Foo;
   void method();
 
+  interface InterfaceName {
+    // describes a template of a prototype, in the same syntax as a class
+    // not actually exposed in the runtime
+  }
+
 }
 ```
 
@@ -286,7 +360,7 @@ member given in the IDL.
 For example, consider:
 
 ```javascript
-interface Foo {
+class Foo {
   private void Bar();
 }
 ```
@@ -311,7 +385,7 @@ The following types are available:
 * ``String`` - WebIDL ``USVString``
 * ``Boolean`` - WebIDL ``boolean``
 # ``Object`` - WebIDL ``object``
-* ``InterfaceName`` - an instance of the interface InterfaceName
+* ``ClassName`` - an instance of the class ClassName
 * ``DictionaryName`` - an instance of the dictionary DictionaryName
 * ``Promise<Type>`` - WebIDL ``Promise<T>``
 * ``Array<Type>`` - WebIDL ``sequence<T>``
