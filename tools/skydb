@@ -26,6 +26,9 @@ SUPPORTED_MIME_TYPES = [
 ]
 
 class SkyDebugger(object):
+    def __init__(self):
+        self._sky_server = None
+
     @staticmethod
     def _port_in_use(port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,7 +49,8 @@ class SkyDebugger(object):
 
         if self._port_in_use(HTTP_PORT):
             logging.warn(
-                'Port %s already in use, assuming custom sky_server started.')
+                'Port %s already in use, assuming custom sky_server started.' %
+                HTTP_PORT)
         else:
             server_command = [
                 os.path.join(SKY_TOOLS_DIRECTORY, 'sky_server'),
