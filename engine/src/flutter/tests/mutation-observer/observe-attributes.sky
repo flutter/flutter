@@ -563,38 +563,6 @@ describe('MutationObserver.observe on attributes', function() {
 
     start();
   });
-
-  it('should create records when mutating through the attribute collection', function(done) {
-    var observer;
-    var mutations;
-    var div;
-
-    function start() {
-      observer = new MutationObserver(function(records) {
-        mutations = records;
-      });
-
-      div = document.createElement('div');
-      div.setAttribute('data-test', 'foo');
-      observer.observe(div, { attributes: true, attributeOldValue: true });
-      div.attributes['data-test'].value = 'bar';
-
-      setTimeout(finish, 0);
-    }
-
-    function finish() {
-      assert.equal(mutations.length, 1);
-      assert.equal(mutations[0].target, div);
-      assert.equal(mutations[0].type, "attributes");
-      assert.equal(mutations[0].attributeName, "data-test");
-      assert.equal(mutations[0].oldValue, "foo");
-
-      observer.disconnect();
-      done();
-    }
-
-    start();
-  });
 });
 </script>
 </body>

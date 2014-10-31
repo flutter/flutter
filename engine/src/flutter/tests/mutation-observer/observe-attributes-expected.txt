@@ -1,4 +1,4 @@
-Running 15 tests
+Running 14 tests
 ok 1 MutationObserver.observe on attributes should handle basic aspects of attribute observation
 ok 2 MutationObserver.observe on attributes should not notify of attribute changes without asking
 ok 3 MutationObserver.observe on attributes re-observing the same node with the same observer has the effect of resetting the options
@@ -13,7 +13,6 @@ ok 11 MutationObserver.observe on attributes should respect different attributeF
 ok 12 MutationObserver.observe on attributes should create records for the style property
 ok 13 MutationObserver.observe on attributes should have oldValue for style property mutations
 ok 14 MutationObserver.observe on attributes should not create records for noop style property mutation
-ok 15 MutationObserver.observe on attributes should create records when mutating through the attribute collection
-15 tests
-15 pass
+14 tests
+14 pass
 0 fail
