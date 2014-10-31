@@ -347,7 +347,8 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
     V8ScriptModule module;
     module.resourceName = document.url().string();
     module.textPosition = textPosition;
-    module.receiver = toV8(&document, context->Global(), m_isolate);
+    // FIXME: This should be the actual module object instead of the document.
+    module.moduleObject = toV8(&document, context->Global(), m_isolate);
     module.source = source;
 
     if (HTMLImport* parent = document.import()) {

@@ -40,7 +40,7 @@ class ExecutionContext;
 struct V8ScriptModule {
     String resourceName;
     TextPosition textPosition;
-    v8::Handle<v8::Value> receiver;
+    v8::Handle<v8::Value> moduleObject;
     String source;
     Vector<String> formalDependencies;
     Vector<v8::Handle<v8::Value> > resolvedDependencies;

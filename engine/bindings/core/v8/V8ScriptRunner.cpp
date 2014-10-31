@@ -224,11 +224,11 @@ void V8ScriptRunner::runModule(v8::Isolate* isolate, ExecutionContext* context, 
     v8::Handle<v8::Value> scriptResult = script->Run();
 
     auto arguments = module.resolvedDependencies;
-    arguments.append(module.receiver);
+    arguments.append(module.moduleObject);
 
     RELEASE_ASSERT(scriptResult->IsObject());
     scriptResult.As<v8::Object>()->CallAsFunction(
-        module.receiver, arguments.size(), arguments.data());
+        v8::Null(isolate), arguments.size(), arguments.data());
     crashIfV8IsDead();
 }
 
