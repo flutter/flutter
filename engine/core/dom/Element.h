@@ -150,14 +150,14 @@ public:
     int clientTop();
     int clientWidth();
     int clientHeight();
-    virtual int scrollLeft();
-    virtual int scrollTop();
-    virtual void setScrollLeft(int);
-    virtual void setScrollLeft(const Dictionary& scrollOptionsHorizontal, ExceptionState&);
-    virtual void setScrollTop(int);
-    virtual void setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionState&);
-    virtual int scrollWidth();
-    virtual int scrollHeight();
+    int scrollLeft();
+    int scrollTop();
+    void setScrollLeft(int);
+    void setScrollLeft(const Dictionary& scrollOptionsHorizontal, ExceptionState&);
+    void setScrollTop(int);
+    void setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionState&);
+    int scrollWidth();
+    int scrollHeight();
 
     PassRefPtr<ClientRectList> getClientRects();
     PassRefPtr<ClientRect> getBoundingClientRect();
@@ -282,9 +282,9 @@ public:
     virtual const AtomicString imageSourceURL() const;
     virtual Image* imageContents() { return 0; }
 
-    virtual void focus(bool restorePreviousSelection = true, FocusType = FocusTypeNone);
-    virtual void updateFocusAppearance(bool restorePreviousSelection);
-    virtual void blur();
+    void focus(bool restorePreviousSelection = true, FocusType = FocusTypeNone);
+    void updateFocusAppearance(bool restorePreviousSelection);
+    void blur();
     // Whether this element can receive focus at all. Most elements are not
     // focusable but some elements, such as form controls and links, are. Unlike
     // rendererIsFocusable(), this method may be called when layout is not up to
