@@ -174,7 +174,7 @@ module 'sky:core' {
   // MODULES
   abstract interface AbstractModule : EventTarget {
     Promise<any> import(String url); // O(Yikes) // returns the module's exports
-    ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, else null
+    ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
 
   interface Module : AbstractModule {
