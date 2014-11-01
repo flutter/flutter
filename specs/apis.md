@@ -90,13 +90,13 @@ module 'sky:core' {
   abstract class Element : ParentNode {
     readonly attribute String tagName; // O(1)
 
-    Boolean hasAttribute(String name); // O(N) in arguments
-    String getAttribute(String name); // O(N) in arguments
-    void setAttribute(String name, String value = ''); // O(N) in arguments
-    void removeAttribute(String name); // O(N) in arguments
+    Boolean hasAttribute(String name); // O(N) in number of attributes
+    String getAttribute(String name); // O(N) in number of attributes
+    void setAttribute(String name, String value = ''); // O(N) in number of attributes
+    void removeAttribute(String name); // O(N) in number of attributes
     
     // Returns a new Array and new Attr instances every time.
-    Array<Attr> getAttributes(); // O(N) in arguments
+    Array<Attr> getAttributes(); // O(N) in number of attributes
 
     readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root
     Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in

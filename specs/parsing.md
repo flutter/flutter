@@ -769,6 +769,8 @@ For each start tag token, remove all but the first name/value pair for
 each name (i.e. remove duplicate attributes, keeping only the first
 one).
 
+TODO(ianh): maybe sort the attributes?
+
 For each end tag token, remove the attributes entirely.
 
 If the token is a start tag token, notify the JavaScript token stream
