@@ -61,6 +61,7 @@ Node* nextSibling(const Node*);
 Node* previousSibling(const Node*);
 Node* previous(const Node*, const Node* stayWithin);
 Node* next(const Node*, const Node* stayWithin);
+Node* commonAncestor(Node&, Node&);
 RenderObject* nextSiblingRenderer(const Node*);
 RenderObject* previousSiblingRenderer(const Node*);
 

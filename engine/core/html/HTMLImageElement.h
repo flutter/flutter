@@ -111,7 +111,6 @@ private:
 
     virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
-    virtual bool isInteractiveContent() const override;
     virtual Image* imageContents() override;
 
     ImageCandidate findBestFitImageFromPictureParent();

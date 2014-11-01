@@ -137,6 +137,43 @@ RenderObject* previousSiblingRenderer(const Node* node)
     return 0;
 }
 
+Node* commonAncestor(Node& a, Node& b)
+{
+    if (a == b)
+        return &a;
+    if (a.document() != b.document())
+        return 0;
+    int thisDepth = 0;
+    for (Node* node = &a; node; node = parent(node)) {
+        if (node == b)
+            return node;
+        thisDepth++;
+    }
+    int otherDepth = 0;
+    for (const Node* node = &b; node; node = parent(node)) {
+        if (node == a)
+            return &a;
+        otherDepth++;
+    }
+    Node* thisIterator = &a;
+    const Node* otherIterator = &b;
+    if (thisDepth > otherDepth) {
+        for (int i = thisDepth; i > otherDepth; --i)
+            thisIterator = parent(thisIterator);
+    } else if (otherDepth > thisDepth) {
+        for (int i = otherDepth; i > thisDepth; --i)
+            otherIterator = parent(otherIterator);
+    }
+    while (thisIterator) {
+        if (thisIterator == otherIterator)
+            return thisIterator;
+        thisIterator = parent(thisIterator);
+        otherIterator = parent(otherIterator);
+    }
+    ASSERT(!otherIterator);
+    return 0;
+}
+
 }
 
 } // namespace

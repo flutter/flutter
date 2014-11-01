@@ -2414,11 +2414,6 @@ void HTMLMediaElement::mediaPlayerMediaSourceOpened(blink::WebMediaSource* webMe
     m_mediaSource->setWebMediaSourceAndOpen(adoptPtr(webMediaSource));
 }
 
-bool HTMLMediaElement::isInteractiveContent() const
-{
-    return hasAttribute(HTMLNames::controlsAttr);
-}
-
 void HTMLMediaElement::defaultEventHandler(Event* event)
 {
     HTMLElement::defaultEventHandler(event);

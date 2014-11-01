@@ -209,7 +209,6 @@ private:
     virtual void removedFrom(ContainerNode*) override final;
     virtual void didRecalcStyle(StyleRecalcChange) override final;
 
-    virtual bool isInteractiveContent() const override final;
     virtual void defaultEventHandler(Event*) override final;
 
     // ActiveDOMObject functions.

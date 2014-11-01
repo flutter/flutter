@@ -228,8 +228,6 @@ public:
     AtomicString computeInheritedLanguage() const;
     Locale& locale() const;
 
-    virtual void accessKeyAction(bool /*sendToAnyEvent*/) { }
-
     virtual bool isURLAttribute(const Attribute&) const { return false; }
 
     virtual bool isLiveLink() const { return false; }

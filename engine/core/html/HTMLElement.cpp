@@ -84,11 +84,6 @@ void HTMLElement::click()
     dispatchSimulatedClick(0, SendNoEvents);
 }
 
-void HTMLElement::accessKeyAction(bool sendMouseEvents)
-{
-    dispatchSimulatedClick(0, sendMouseEvents ? SendMouseUpDownEvents : SendNoEvents);
-}
-
 String HTMLElement::title() const
 {
     return getAttribute(HTMLNames::titleAttr);
@@ -128,17 +123,6 @@ const AtomicString& HTMLElement::dir()
 void HTMLElement::setDir(const AtomicString& value)
 {
     setAttribute(HTMLNames::dirAttr, value);
-}
-
-bool HTMLElement::isInteractiveContent() const
-{
-    return false;
-}
-
-const AtomicString& HTMLElement::eventParameterName()
-{
-    DEFINE_STATIC_LOCAL(const AtomicString, eventString, ("event", AtomicString::ConstructFromLiteral));
-    return eventString;
 }
 
 v8::Handle<v8::Object> HTMLElement::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)

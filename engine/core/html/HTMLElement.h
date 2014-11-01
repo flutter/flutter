@@ -50,14 +50,6 @@ public:
 
     void click();
 
-    virtual void accessKeyAction(bool sendMouseEvents) override;
-
-    virtual bool isLabelable() const { return false; }
-    // http://www.whatwg.org/specs/web-apps/current-work/multipage/elements.html#interactive-content
-    virtual bool isInteractiveContent() const;
-
-    static const AtomicString& eventParameterName();
-
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:

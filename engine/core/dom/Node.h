@@ -404,7 +404,6 @@ public:
     bool contains(const Node*) const;
     bool containsIncludingShadowDOM(const Node*) const;
     bool containsIncludingHostElements(const Node&) const;
-    Node* commonAncestor(const Node&, Node* (*parent)(const Node&));
 
     // Used to determine whether range offsets use characters or node indices.
     virtual bool offsetInCharacters() const;

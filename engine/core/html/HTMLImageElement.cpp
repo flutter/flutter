@@ -464,11 +464,6 @@ Image* HTMLImageElement::imageContents()
     return imageLoader().image()->image();
 }
 
-bool HTMLImageElement::isInteractiveContent() const
-{
-    return hasAttribute(HTMLNames::usemapAttr);
-}
-
 PassRefPtr<Image> HTMLImageElement::getSourceImageForCanvas(SourceImageMode, SourceImageStatus* status) const
 {
     if (!complete() || !cachedImage()) {

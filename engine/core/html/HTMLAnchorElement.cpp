@@ -148,9 +148,4 @@ bool HTMLAnchorElement::willRespondToMouseClickEvents()
     return isLiveLink();
 }
 
-bool HTMLAnchorElement::isInteractiveContent() const
-{
-    return isLiveLink();
-}
-
 }

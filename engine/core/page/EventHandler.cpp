@@ -1246,15 +1246,6 @@ void EventHandler::invalidateClick()
     m_clickNode = nullptr;
 }
 
-static Node* parentForClickEvent(const Node& node)
-{
-    // IE doesn't dispatch click events for mousedown/mouseup events across form
-    // controls.
-    if (node.isHTMLElement() && toHTMLElement(node).isInteractiveContent())
-        return 0;
-    return NodeRenderingTraversal::parent(&node);
-}
-
 bool EventHandler::handleMouseReleaseEvent(const PlatformMouseEvent& mouseEvent)
 {
     TRACE_EVENT0("blink", "EventHandler::handleMouseReleaseEvent");
@@ -1293,7 +1284,7 @@ bool EventHandler::handleMouseReleaseEvent(const PlatformMouseEvent& mouseEvent)
 
     bool swallowClickEvent = false;
     if (m_clickCount > 0 && mev.targetNode() && m_clickNode) {
-        if (Node* clickTargetNode = mev.targetNode()->commonAncestor(*m_clickNode, parentForClickEvent))
+        if (Node* clickTargetNode = NodeRenderingTraversal::commonAncestor(*mev.targetNode(), *m_clickNode))
             swallowClickEvent = !dispatchMouseEvent(EventTypeNames::click, clickTargetNode, m_clickCount, mouseEvent, true);
     }
 
@@ -1770,7 +1761,7 @@ bool EventHandler::handleGestureTap(const GestureEventWithHitTestResults& target
     bool swallowClickEvent = false;
     if (m_clickNode) {
         if (currentHitTest.innerNode()) {
-            Node* clickTargetNode = currentHitTest.innerNode()->commonAncestor(*m_clickNode, parentForClickEvent);
+            Node* clickTargetNode = NodeRenderingTraversal::commonAncestor(*currentHitTest.innerNode(), *m_clickNode);
             swallowClickEvent = !dispatchMouseEvent(EventTypeNames::click, clickTargetNode, gestureEvent.tapCount(), fakeMouseUp, true);
         }
         m_clickNode = nullptr;
@@ -2270,7 +2261,9 @@ bool EventHandler::handleAccessKey(const PlatformKeyboardEvent& evt)
     Element* elem = m_frame->document()->getElementByAccessKey(key.lower());
     if (!elem)
         return false;
-    elem->accessKeyAction(false);
+    // FIXME(sky): We should probably pass SendMouseUpDownEvents here, not
+    // firing mouseup and mousedown is IE legacy.
+    elem->dispatchSimulatedClick(0, SendNoEvents);
     return true;
 }
 
