@@ -53,9 +53,7 @@ MutationObserverRegistration::MutationObserverRegistration(MutationObserver& obs
 
 MutationObserverRegistration::~MutationObserverRegistration()
 {
-#if !ENABLE(OILPAN)
     dispose();
-#endif
 }
 
 void MutationObserverRegistration::dispose()
@@ -136,16 +134,6 @@ void MutationObserverRegistration::addRegistrationNodesToSet(HashSet<RawPtr<Node
         return;
     for (NodeHashSet::const_iterator iter = m_transientRegistrationNodes->begin(); iter != m_transientRegistrationNodes->end(); ++iter)
         nodes.add(iter->get());
-}
-
-void MutationObserverRegistration::trace(Visitor* visitor)
-{
-    visitor->trace(m_observer);
-    visitor->trace(m_registrationNode);
-    visitor->trace(m_registrationNodeKeepAlive);
-#if ENABLE(OILPAN)
-    visitor->trace(m_transientRegistrationNodes);
-#endif
 }
 
 } // namespace blink

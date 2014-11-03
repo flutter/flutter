@@ -61,8 +61,6 @@ public:
 
     void addRegistrationNodesToSet(HashSet<RawPtr<Node> >&) const;
 
-    void trace(Visitor*);
-
     void dispose();
 
 private:

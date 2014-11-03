@@ -219,15 +219,16 @@ String StyledMarkupAccumulator::renderedText(Node& node, const Range* range)
 
 String StyledMarkupAccumulator::stringValueForRange(const Node& node, const Range* range)
 {
+    if (!node.isTextNode())
+        return emptyString();
+    String text = toText(node).data();
     if (!range)
-        return node.nodeValue();
-
-    String str = node.nodeValue();
+        return text;
     if (node == range->endContainer())
-        str.truncate(range->endOffset());
+        text.truncate(range->endOffset());
     if (node == range->startContainer())
-        str.remove(0, range->startOffset());
-    return str;
+        text.remove(0, range->startOffset());
+    return text;
 }
 
 void StyledMarkupAccumulator::appendElement(StringBuilder& out, Element& element, bool addDisplayInline, RangeFullySelectsNode rangeFullySelectsNode)

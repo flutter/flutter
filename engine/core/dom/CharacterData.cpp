@@ -73,7 +73,7 @@ void CharacterData::parserAppendData(const String& string)
         toText(this)->updateTextRenderer(oldLength, 0);
 
     if (parentNode()) {
-        ContainerNode::ChildrenChange change = {ContainerNode::TextChanged, previousSibling(), nextSibling(), ContainerNode::ChildrenChangeSourceParser};
+        ContainerNode::ChildrenChange change = {ContainerNode::TextChanged, ContainerNode::ChildrenChangeSourceParser};
         parentNode()->childrenChanged(change);
     }
 }
@@ -151,19 +151,9 @@ void CharacterData::replaceData(unsigned offset, unsigned count, const String& d
     document().didInsertText(this, offset, data.length());
 }
 
-String CharacterData::nodeValue() const
-{
-    return m_data;
-}
-
 bool CharacterData::containsOnlyWhitespace() const
 {
     return m_data.containsOnlyWhitespace();
-}
-
-void CharacterData::setNodeValue(const String& nodeValue)
-{
-    setData(nodeValue);
 }
 
 void CharacterData::setDataAndUpdate(const String& newData, unsigned offsetOfReplacedData, unsigned oldLength, unsigned newLength, RecalcStyleBehavior recalcStyleBehavior)
@@ -187,7 +177,7 @@ void CharacterData::didModifyData(const String& oldData)
         mutationRecipients->enqueueMutationRecord(MutationRecord::createCharacterData(this, oldData));
 
     if (parentNode()) {
-        ContainerNode::ChildrenChange change = {ContainerNode::TextChanged, previousSibling(), nextSibling(), ContainerNode::ChildrenChangeSourceAPI};
+        ContainerNode::ChildrenChange change = {ContainerNode::TextChanged, ContainerNode::ChildrenChangeSourceAPI};
         parentNode()->childrenChanged(change);
     }
 }

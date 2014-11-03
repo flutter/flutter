@@ -70,8 +70,6 @@ protected:
     String m_data;
 
 private:
-    virtual String nodeValue() const override final;
-    virtual void setNodeValue(const String&) override final;
     virtual bool isCharacterDataNode() const override final { return true; }
     virtual int maxCharacterOffset() const override final;
     virtual bool offsetInCharacters() const override final;

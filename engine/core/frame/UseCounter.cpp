@@ -220,9 +220,6 @@ String UseCounter::deprecationMessage(Feature feature)
     case AttributeOwnerElement:
         return "'Attr.ownerElement' is deprecated and has been removed from DOM4 (http://w3.org/tr/dom).";
 
-    case AttrNodeValue:
-        return replacedBy("Attr.nodeValue", "value");
-
     case AttrTextContent:
         return replacedBy("Attr.textContent", "value");
 

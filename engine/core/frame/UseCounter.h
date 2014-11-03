@@ -285,7 +285,6 @@ public:
         EventCancelBubble = 344,
         EventPath = 345,
         EventClipboardData = 346,
-        AttrNodeValue = 348,
         AttrTextContent = 349,
         EventGetReturnValueTrue = 350,
         EventGetReturnValueFalse = 351,

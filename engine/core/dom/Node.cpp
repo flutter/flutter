@@ -88,7 +88,7 @@
 
 namespace blink {
 
-struct SameSizeAsNode : NODE_BASE_CLASSES {
+struct SameSizeAsNode : public EventTarget, public TreeShared<Node> {
     uint32_t m_nodeFlags;
     void* m_pointer[5];
 };
@@ -315,7 +315,6 @@ NodeRareData& Node::ensureRareData()
     return *rareData();
 }
 
-#if !ENABLE(OILPAN)
 void Node::clearRareData()
 {
     ASSERT(hasRareData());
@@ -329,7 +328,6 @@ void Node::clearRareData()
     m_data.m_renderer = renderer;
     clearFlag(HasRareDataFlag);
 }
-#endif
 
 Node* Node::toNode()
 {
@@ -339,16 +337,6 @@ Node* Node::toNode()
 short Node::tabIndex() const
 {
     return 0;
-}
-
-String Node::nodeValue() const
-{
-    return String();
-}
-
-void Node::setNodeValue(const String&)
-{
-    // By default, setting nodeValue has no effect.
 }
 
 PassRefPtr<Node> Node::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
@@ -1019,9 +1007,6 @@ bool Node::isEqualNode(Node* other) const
     if (localName() != other->localName())
         return false;
 
-    if (nodeValue() != other->nodeValue())
-        return false;
-
     if (isElementNode() && !toElement(this)->hasEquivalentAttributes(toElement(other)))
         return false;
 
@@ -1065,7 +1050,7 @@ void Node::setTextContent(const String& text)
 {
     switch (nodeType()) {
         case TEXT_NODE:
-            setNodeValue(text);
+            toText(this)->setData(text);
             return;
         case ELEMENT_NODE:
         case DOCUMENT_FRAGMENT_NODE: {
@@ -1235,7 +1220,7 @@ void Node::showNode(const char* prefix) const
     if (!prefix)
         prefix = "";
     if (isTextNode()) {
-        String value = nodeValue();
+        String value = toText(this)->data();
         value.replaceWithLiteral('\\', "\\\\");
         value.replaceWithLiteral('\n', "\\n");
         fprintf(stderr, "%s%s\t%p \"%s\"\n", prefix, nodeName().utf8().data(), this, value.utf8().data());
@@ -1509,12 +1494,10 @@ EventTargetData& Node::ensureEventTargetData()
     return *data;
 }
 
-#if !ENABLE(OILPAN)
 void Node::clearEventTargetData()
 {
     eventTargetDataMap().remove(this);
 }
-#endif
 
 Vector<OwnPtr<MutationObserverRegistration> >* Node::mutationObserverRegistry()
 {
@@ -1598,11 +1581,6 @@ void Node::unregisterMutationObserver(MutationObserverRegistration* registration
     // before that, in case |this| is destroyed (see MutationObserverRegistration::m_registrationNodeKeepAlive).
     // FIXME: Simplify the registration/transient registration logic to make this understandable by humans.
     RefPtr<Node> protect(this);
-#if ENABLE(OILPAN)
-    // The explicit dispose() is needed to have the registration
-    // object unregister itself promptly.
-    registration->dispose();
-#endif
     registry->remove(index);
 }
 
@@ -1892,23 +1870,6 @@ void Node::setCustomElementState(CustomElementState newState)
 
     if (oldState == NotCustomElement || newState == Upgraded)
         setNeedsStyleRecalc(SubtreeStyleChange); // :unresolved has changed
-}
-
-void Node::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_parentOrShadowHostNode);
-    visitor->trace(m_previous);
-    visitor->trace(m_next);
-    // rareData() and m_data.m_renderer share their storage. We have to trace
-    // only one of them.
-    if (hasRareData())
-        visitor->trace(rareData());
-    else
-        visitor->trace(m_data.m_renderer);
-    visitor->trace(m_treeScope);
-#endif
-    EventTarget::trace(visitor);
 }
 
 unsigned Node::lengthOfContents() const

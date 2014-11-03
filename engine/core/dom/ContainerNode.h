@@ -52,7 +52,6 @@ public:
 
     bool hasOneChild() const { return m_firstChild && !m_firstChild->nextSibling(); }
     bool hasOneTextChild() const { return hasOneChild() && m_firstChild->isTextNode(); }
-    bool hasChildCount(unsigned) const;
 
     unsigned countChildren() const;
 
@@ -71,7 +70,6 @@ public:
     void parserAppendChild(PassRefPtr<Node>);
     void parserRemoveChild(Node&);
     void parserInsertBefore(PassRefPtr<Node> newChild, Node& refChild);
-    void parserTakeAllChildrenFrom(ContainerNode&);
 
     void removeChildren();
 
@@ -97,31 +95,23 @@ public:
         {
             ChildrenChange change = {
                 node.isElementNode() ? ElementInserted : NonElementInserted,
-                node.previousSibling(),
-                node.nextSibling(),
                 byParser
             };
             return change;
         }
 
-        static ChildrenChange forRemoval(Node& node, Node* previousSibling, Node* nextSibling, ChildrenChangeSource byParser)
+        static ChildrenChange forRemoval(Node& node, ChildrenChangeSource byParser)
         {
             ChildrenChange change = {
                 node.isElementNode() ? ElementRemoved : NonElementRemoved,
-                previousSibling,
-                nextSibling,
                 byParser
             };
             return change;
         }
 
         bool isChildInsertion() const { return type == ElementInserted || type == NonElementInserted; }
-        bool isChildRemoval() const { return type == ElementRemoved || type == NonElementRemoved; }
-        bool isChildElementChange() const { return type == ElementInserted || type == ElementRemoved; }
 
         ChildrenChangeType type;
-        RawPtr<Node> siblingBeforeChange;
-        RawPtr<Node> siblingAfterChange;
         ChildrenChangeSource byParser;
     };
 
@@ -129,14 +119,10 @@ public:
     // node that is of the type TEXT_NODE has changed its value.
     virtual void childrenChanged(const ChildrenChange&);
 
-    virtual void trace(Visitor*) override;
-
 protected:
     ContainerNode(TreeScope*, ConstructionType = CreateContainer);
 
-#if !ENABLE(OILPAN)
     void removeDetachedChildren();
-#endif
 
     void setFirstChild(Node* child) { m_firstChild = child; }
     void setLastChild(Node* child) { m_lastChild = child; }
@@ -178,16 +164,6 @@ bool childAttachedAllowedWhenAttachingChildren(ContainerNode*);
 #endif
 
 DEFINE_NODE_TYPE_CASTS(ContainerNode, isContainerNode());
-
-inline bool ContainerNode::hasChildCount(unsigned count) const
-{
-    Node* child = m_firstChild;
-    while (count && child) {
-        child = child->nextSibling();
-        --count;
-    }
-    return !count && !child;
-}
 
 inline ContainerNode::ContainerNode(TreeScope* treeScope, ConstructionType type)
     : Node(treeScope, type)

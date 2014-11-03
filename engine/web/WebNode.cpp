@@ -86,11 +86,6 @@ WebString WebNode::nodeName() const
     return m_private->nodeName();
 }
 
-WebString WebNode::nodeValue() const
-{
-    return m_private->nodeValue();
-}
-
 WebDocument WebNode::document() const
 {
     return WebDocument(&m_private->document());

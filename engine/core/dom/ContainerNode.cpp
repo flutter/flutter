@@ -60,21 +60,10 @@ static void collectChildrenAndRemoveFromOldParent(Node& node, NodeVector& nodes,
         oldParent->removeChild(&node, exceptionState);
 }
 
-#if !ENABLE(OILPAN)
 void ContainerNode::removeDetachedChildren()
 {
     ASSERT(needsAttach());
     removeDetachedChildrenInContainer(*this);
-}
-#endif
-
-void ContainerNode::parserTakeAllChildrenFrom(ContainerNode& oldParent)
-{
-    while (RefPtr<Node> child = oldParent.firstChild()) {
-        oldParent.parserRemoveChild(*child);
-        treeScope().adoptIfNeeded(*child);
-        parserAppendChild(child.get());
-    }
 }
 
 ContainerNode::~ContainerNode()
@@ -470,13 +459,6 @@ void ContainerNode::addChildNodesToDeletionQueue(Node*& head, Node*& tail, Conta
 }
 #endif
 
-void ContainerNode::trace(Visitor* visitor)
-{
-    visitor->trace(m_firstChild);
-    visitor->trace(m_lastChild);
-    Node::trace(visitor);
-}
-
 PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
 #if !ENABLE(OILPAN)
@@ -509,7 +491,7 @@ PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, Exception
     Node* next = child->nextSibling();
     removeBetween(prev, next, *child);
     notifyNodeRemoved(*child);
-    childrenChanged(ChildrenChange::forRemoval(*child, prev, next, ChildrenChangeSourceAPI));
+    childrenChanged(ChildrenChange::forRemoval(*child, ChildrenChangeSourceAPI));
 
     return child;
 }
@@ -553,7 +535,7 @@ void ContainerNode::parserRemoveChild(Node& oldChild)
     removeBetween(prev, next, oldChild);
 
     notifyNodeRemoved(oldChild);
-    childrenChanged(ChildrenChange::forRemoval(oldChild, prev, next, ChildrenChangeSourceParser));
+    childrenChanged(ChildrenChange::forRemoval(oldChild, ChildrenChangeSourceParser));
 }
 
 // this differs from other remove functions because it forcibly removes all the children,
@@ -599,7 +581,7 @@ void ContainerNode::removeChildren()
             notifyNodeRemoved(*child);
         }
 
-        ChildrenChange change = {AllChildrenRemoved, nullptr, nullptr, ChildrenChangeSourceAPI};
+        ChildrenChange change = {AllChildrenRemoved, ChildrenChangeSourceAPI};
         childrenChanged(change);
     }
 }

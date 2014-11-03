@@ -107,12 +107,9 @@ protected:
 
 // TreeShared should be the last to pack TreeShared::m_refCount and
 // Node::m_nodeFlags on 64bit platforms.
-#define NODE_BASE_CLASSES public EventTarget, public TreeShared<Node>
-
-class Node : NODE_BASE_CLASSES {
+class Node : public EventTarget, public TreeShared<Node> {
     DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(TreeShared<Node>);
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Node);
     friend class Document;
     friend class TreeScope;
     friend class TreeScopeAdopter;
@@ -149,8 +146,6 @@ public:
 
     bool hasTagName(const HTMLQualifiedName&) const;
     virtual String nodeName() const = 0;
-    virtual String nodeValue() const;
-    virtual void setNodeValue(const String&);
     virtual NodeType nodeType() const = 0;
     ContainerNode* parentNode() const;
     Element* parentElement() const;
@@ -570,8 +565,6 @@ public:
 
     void setAlreadySpellChecked(bool flag) { setFlag(flag, AlreadySpellCheckedFlag); }
     bool isAlreadySpellChecked() { return getFlag(AlreadySpellCheckedFlag); }
-
-    virtual void trace(Visitor*) override;
 
     unsigned lengthOfContents() const;
 
