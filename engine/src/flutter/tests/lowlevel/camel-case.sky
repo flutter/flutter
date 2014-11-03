@@ -1,6 +1,6 @@
 <CamelCase>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
 <script>
 describe('Element tag names', function() {
   it('should have various casing', function() {

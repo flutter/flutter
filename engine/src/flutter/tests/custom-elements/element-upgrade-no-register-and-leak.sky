@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="../resources/dump-as-text.sky" />
+<import src="../resources/dump-as-text.sky" />
 <body>
 Tests unresolved element not leaking if never resolved.
 <div id="container"></div>

@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<import src="../resources/dump-as-markup.sky"></import>
 <body>
 THIS TEST SHOULD PASS
 (control test for success)

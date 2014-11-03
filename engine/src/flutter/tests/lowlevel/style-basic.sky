@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<link rel="import" href="../resources/dump-as-text.sky" />
+<import src="../resources/dump-as-text.sky" />
 <style>
     #id1 { order: 1; }
     .class2 { order: 2; }

@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/dump-as-text.sky" />
-<link rel="import" href="resources/document-register-fuzz.sky" as="fuzzer" />
+<import src="../resources/dump-as-text.sky" />
+<import src="resources/document-register-fuzz.sky" as="fuzzer" />
 <body>
 <div id="container"></div>
 Fuzzing document.registerElement() through getters. PASS uless crash.

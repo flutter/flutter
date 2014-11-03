@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="/sky/framework/inspector/dom-agent.sky" as="DOMAgent" />
+<import src="/sky/framework/inspector/dom-agent.sky" as="DOMAgent" />
 <div></div>
 <script>
 // FIXME: This shows a bug in our DOM mutation handling, we should

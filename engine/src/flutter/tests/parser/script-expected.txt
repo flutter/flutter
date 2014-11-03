@@ -13,7 +13,7 @@ SOURCE: http://127.0.0.1:8000/parser/script.sky:38
 ERROR: Uncaught SyntaxError: Unexpected token } 
 SOURCE: http://127.0.0.1:8000/parser/script.sky:43
 <html>
-<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<import src="../resources/dump-as-markup.sky"></import>
 <body>
 
 <script>
