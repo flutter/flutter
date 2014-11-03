@@ -786,7 +786,8 @@ To construct a node tree from a _sequence of tokens_ and a document
 _document_:
 
 1. Initialize the _stack of open nodes_ to be _document_.
-2. Consider each token _token_ in the _sequence of tokens_ in turn, as
+2. Initialize _imported modules_ to an empty list.
+3. Consider each token _token_ in the _sequence of tokens_ in turn, as
    follows. If a token is to be skipped, then jump straight to the
    next token, without doing any more work with the skipped token.
    - If _token_ is a string token,
@@ -803,8 +804,15 @@ _document_:
      3. Push _node_ onto the top of the _stack of open nodes_.
      4. If _node_ is a ``template`` element, then:
         1. Let _fragment_ be the ``DocumentFragment`` object that the
-          ``template`` element uses as its template contents container.
+           ``template`` element uses as its template contents container.
         2. Push _fragment_ onto the top of the _stack of open nodes_.
+        If _node_ is an ``import`` element, then:
+        1. Let ``url`` be the value of _node_'s ``src`` attribute.
+        2. Call ``parsing context``'s ``importModule()`` method,
+           passing it ``url``.
+        3. Add the returned promise to _imported modules_; if _node_
+           has an ``as`` attribute, associate the entry with that
+           name.
    - If _token_ is an end tag token:
      1. Let _node_ be the topmost node in the _stack of open nodes_
         whose tag name is the same as the token's tag name, if any. If
@@ -813,8 +821,9 @@ _document_:
         nodes_ above _node_, then skip this token.
      3. Pop nodes from the _stack of open nodes_ until _node_ has been
         popped.
-     4. If _node_'s tag name is ``script``, then yield until there
-        are no pending import loads, then execute the script given by
-        the element's contents.
-3. Yield until there are no pending import loads.
-3. Fire a ``load`` event at the _parsing context_ object.
+     4. If _node_'s tag name is ``script``, then yield until _imported
+        modules_ contains no entries with unresolved promises, then
+        execute the script given by the element's contents, using the
+        associated names as appropriate.
+4. Yield until _imported modules_ has no promises.
+5. Fire a ``load`` event at the _parsing context_ object.

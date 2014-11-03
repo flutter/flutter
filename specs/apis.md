@@ -221,6 +221,7 @@ module 'sky:core' {
     constructor (); // shorthand
 
     constructor attribute String tagName;
+    constructor attribute Boolean shadow;
   }
 
   // MODULES
@@ -237,6 +238,9 @@ module 'sky:core' {
     Element createElement(String tagName); // shorthand
 
     ElementConstructor registerElement(ElementRegistration options); // O(N) in number of outstanding elements with that tag name to be upgraded
+    // if you call registerElement() with an object that was created by
+    // registerElement(), it just returns the object after registering it,
+    // rather than creating a new constructor
 
     ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
