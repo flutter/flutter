@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/mocha.sky" />
-<link rel="import" href="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
 <script>
 describe('DocumentFragments should remove all children of the fragment before moving children, ', function() {
   var mutations;

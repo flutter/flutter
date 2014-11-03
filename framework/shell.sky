@@ -1,5 +1,5 @@
-<link rel="import" href="/mojo/public/sky/core.sky" as="core" />
-<link rel="import" href="/mojo/public/sky/connection.sky" as="connection" />
+<import src="/mojo/public/sky/core.sky" as="core" />
+<import src="/mojo/public/sky/connection.sky" as="connection" />
 <script>
 function wrapHandle(handle, service, client) {
   var clientClass = client && service.client.delegatingStubClass;

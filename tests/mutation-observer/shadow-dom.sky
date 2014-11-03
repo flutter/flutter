@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
 <div id="range"></div>
 <script>
 describe('MutationObservers', function() {

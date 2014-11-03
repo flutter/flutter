@@ -1,4 +1,4 @@
 <foo>
-<link rel="import" href="../resources/dump-as-render-tree.sky" />
+<import src="../resources/dump-as-render-tree.sky" />
 Hello World!
 </foo>

@@ -1,6 +1,6 @@
 &lt;!DOCTYPE HTML&gt;
 <html>
-<link rel="import" href="../resources/dump-as-markup.sky"></link>
+<import src="../resources/dump-as-markup.sky"></import>
 <body>
 
 A &lt;!DOCTYPE HTMLAGAIN&gt;

@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/dump-as-text.sky" />
-<link rel="import" href="../resources/chai.sky" />
+<import src="../resources/dump-as-text.sky" />
+<import src="../resources/chai.sky" />
 <body>
 This test ensures that the lifecycle callback of a parser-made element is visible in following script block.
 <script>

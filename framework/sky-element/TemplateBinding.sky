@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<link rel="import" href="observe.sky" as="observe" />
+<import src="observe.sky" as="observe" />
 
 <script>
 Node.prototype.bind = function(name, observable, oneTime) {

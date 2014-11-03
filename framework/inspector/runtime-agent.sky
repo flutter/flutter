@@ -1,4 +1,4 @@
-<link rel="import" href="debug.sky" as="debug" />
+<import src="debug.sky" as="debug" />
 <script>
 function Runtime(delegate) {
   this.delegate_ = delegate;

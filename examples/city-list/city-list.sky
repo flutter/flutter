@@ -3,13 +3,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<link rel="import"
-      href="../../framework/sky-element/sky-element.sky"
-      as="SkyElement" />
-<link rel="import" href="city-data-service.sky" as="CityDataService" />
-<link rel="import" href="city-sequence.sky" as="CitySequence" />
+<import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="city-data-service.sky" as="CityDataService" />
+<import src="city-sequence.sky" as="CitySequence" />
 
-<template>
+<template>  
   <style>
     div {
       font-size: 16px;

@@ -1,7 +1,7 @@
 <html>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
-<link rel="import" href="/sky/framework/sky-element/observe.sky" as="observe" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="/sky/framework/sky-element/observe.sky" as="observe" />
 
 <script>
 

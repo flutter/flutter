@@ -1,14 +1,14 @@
-<link rel="import" href="/mojo/public/sky/connection.sky" as="connection" />
-<link rel="import" href="/mojo/public/sky/core.sky" as="core" />
-<link rel="import" href="/mojo/public/sky/support.sky" as="support" />
-<link rel="import" href="/sky/services/inspector/inspector.mojom.sky" as="inspector" />
-<link rel="import" href="console-agent.sky" as="ConsoleAgent" />
-<link rel="import" href="dom-agent.sky" as="DOMAgent" />
-<link rel="import" href="page-agent.sky" as="PageAgent" />
-<link rel="import" href="worker-agent.sky" as="WorkerAgent" />
-<link rel="import" href="runtime-agent.sky" as="RuntimeAgent" />
-<link rel="import" href="indexeddb-agent.sky" as="IndexedDBAgent" />
-<link rel="import" href="css-agent.sky" as="CSSAgent" />
+<import src="/mojo/public/sky/connection.sky" as="connection" />
+<import src="/mojo/public/sky/core.sky" as="core" />
+<import src="/mojo/public/sky/support.sky" as="support" />
+<import src="/sky/services/inspector/inspector.mojom.sky" as="inspector" />
+<import src="console-agent.sky" as="ConsoleAgent" />
+<import src="dom-agent.sky" as="DOMAgent" />
+<import src="page-agent.sky" as="PageAgent" />
+<import src="worker-agent.sky" as="WorkerAgent" />
+<import src="runtime-agent.sky" as="RuntimeAgent" />
+<import src="indexeddb-agent.sky" as="IndexedDBAgent" />
+<import src="css-agent.sky" as="CSSAgent" />
 <script>
 function InspectorBackend(frontend) {
   this.frontend = frontend;

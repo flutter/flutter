@@ -1,6 +1,6 @@
 <test>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
 <script>
 describe('createElementNS tests from mozilla, attached to webkit bug 16833', function() {
   it('should behave like mozilla', function() {

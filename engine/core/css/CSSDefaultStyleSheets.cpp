@@ -68,7 +68,7 @@ CSSDefaultStyleSheets::CSSDefaultStyleSheets()
     m_defaultViewportStyle = RuleSet::create();
 
     String defaultRules =
-        "link, meta, script, style, template, title {\n"
+        "link, import, meta, script, style, template, title {\n"
         "    display: none;\n"
         "}\n"
         "a {\n"

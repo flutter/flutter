@@ -8,7 +8,7 @@ featured...yet
 Declaring an element
 --------
 ```HTML
-<link rel="import" href="../path/to/sky-element.sky" as="SkyElement" />
+<import src="../path/to/sky-element.sky" as="SkyElement" />
 <template>
   <my-other-element>Hello, {{ place }}</my-other-element>
 </template>

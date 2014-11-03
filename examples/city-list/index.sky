@@ -9,7 +9,7 @@
 <meta charset="utf-8">
 <meta name="viewport"
       content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes, width=device-width">
-<link rel="import" href="city-list.sky" />
+<import src="city-list.sky" />
 <style>
 html, body {
     margin: 0;

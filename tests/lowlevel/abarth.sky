@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="import" href="../resources/dump-as-render-tree.sky" />
+<import src="../resources/dump-as-render-tree.sky" />
 <title>Adam Barth</title>
 <style>
 html {

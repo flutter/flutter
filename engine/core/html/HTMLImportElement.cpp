@@ -18,6 +18,14 @@ HTMLImportElement::HTMLImportElement(Document& document)
     ScriptWrappable::init(this);
 }
 
+HTMLImportElement::~HTMLImportElement()
+{
+    if (m_child) {
+        m_child->clearClient();
+        m_child = nullptr;
+    }
+}
+
 PassRefPtr<HTMLImportElement> HTMLImportElement::create(Document& document)
 {
     return adoptRef(new HTMLImportElement(document));

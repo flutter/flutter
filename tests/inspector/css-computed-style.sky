@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="/sky/framework/inspector/css-agent.sky" as="CSSAgent" />
+<import src="../resources/chai.sky" />
+<import src="/sky/framework/inspector/css-agent.sky" as="CSSAgent" />
 <script>
 var fakeDOMAgent = {
   getNodeForId: function(id) {

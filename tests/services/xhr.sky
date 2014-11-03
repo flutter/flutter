@@ -1,7 +1,7 @@
 <html>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
-<link rel="import" href="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 describe('XMLHttpRequest', function() {
   this.enableTimeouts(false);

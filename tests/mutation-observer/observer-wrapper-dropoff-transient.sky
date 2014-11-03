@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/chai.sky" />
-<link rel="import" href="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
 <script>
 describe('MutationObserver wrappers', function() {
     it('should survive GC for passing into the callback even if JS has lost references and the only remaining observations are transient.', function(done) {

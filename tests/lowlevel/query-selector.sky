@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="../resources/mocha.sky" />
-<link rel="import" href="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
 <div id="tests">
   <div id="id1">
     <div class="class2"></div>

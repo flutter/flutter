@@ -15,9 +15,9 @@ class HTMLImportElement final : public HTMLElement, public HTMLImportChildClient
 public:
     static PassRefPtr<HTMLImportElement> create(Document&);
 
-
 private:
     explicit HTMLImportElement(Document&);
+    ~HTMLImportElement();
 
     bool shouldLoad() const;
     void load();

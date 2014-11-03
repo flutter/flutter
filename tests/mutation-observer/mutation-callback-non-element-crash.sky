@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="../resources/dump-as-text.sky" />
+<import src="../resources/dump-as-text.sky" />
 <body id="body">
 <script>
 function mutationCallback(mutations, observer) {
