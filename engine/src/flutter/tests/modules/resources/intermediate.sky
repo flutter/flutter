@@ -1,5 +1,5 @@
-<link rel="import" href="../../resources/dump-as-text.sky" />
-<link rel="import" href="pass.sky" as="banana" />
+<import src="../../resources/dump-as-text.sky" />
+<import src="pass.sky" as="banana" />
 <script>
 module.exports = {
   message: banana,
