@@ -59,8 +59,6 @@ public:
 
     virtual void layoutBlock(bool relayoutChildren) override;
 
-    virtual void computeOverflow(LayoutUnit oldClientAfterEdge, bool recomputeFloats = false) override;
-
     virtual void deleteLineBoxTree() override final;
 
     LayoutUnit availableLogicalWidthForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
@@ -99,12 +97,6 @@ public:
 
     RootInlineBox* createAndAppendRootInlineBox();
 
-    void markAllDescendantsWithFloatsForLayout(RenderBox* floatToRemove = 0, bool inLayout = true);
-    void markSiblingsWithFloatsForLayout(RenderBox* floatToRemove = 0);
-
-    bool containsFloats() const { return false; }
-    bool containsFloat(RenderBox*) const { return false; }
-
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
 
     void moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, bool fullRemoveInsert);
@@ -132,13 +124,7 @@ public:
     virtual bool avoidsFloats() const override;
 
 protected:
-    void rebuildFloatsFromIntruding();
     void layoutInlineChildren(bool relayoutChildren, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit afterEdge);
-
-    virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
-
-    void addOverflowFromFloats();
 
     LayoutUnit logicalRightOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit logicalHeight = 0) const
     {
@@ -159,32 +145,13 @@ private:
     void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
     void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
-    void layoutBlockChild(RenderBox* child, MarginInfo&, LayoutUnit& previousFloatLogicalBottom);
+    void layoutBlockChild(RenderBox* child, MarginInfo&);
     void adjustPositionedBlock(RenderBox* child, const MarginInfo&);
-    void adjustFloatingBlock(const MarginInfo&);
-
-    LayoutPoint computeLogicalLocationForFloat(const FloatingObject*, LayoutUnit logicalTopOffset) const;
-
-    // Called from lineWidth, to position the floats added in the last line.
-    // Returns true if and only if it has positioned any floats.
-    bool positionNewFloats();
-
-    LayoutUnit getClearDelta(RenderBox* child, LayoutUnit yPos);
-
-    bool hasOverhangingFloats() { return parent() && containsFloats() && lowestFloatLogicalBottom() > logicalHeight(); }
-    bool hasOverhangingFloat(RenderBox*);
-    void addIntrudingFloats(RenderBlockFlow* prev, LayoutUnit xoffset, LayoutUnit yoffset);
-    void addOverhangingFloats(RenderBlockFlow* child, bool makeChildPaintOtherFloats);
-
-    // FIXME(sky): Remove this.
-    LayoutUnit lowestFloatLogicalBottom() const { return 0; }
 
     virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
-    virtual void invalidatePaintForOverhangingFloats(bool paintAllDescendants) override final;
     virtual void invalidatePaintForOverflow() override final;
     virtual void paintFloats(PaintInfo&, const LayoutPoint&, bool preservePhase = false) override final;
-    void clearFloats(EClear);
 
     LayoutUnit logicalRightFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const;
     LayoutUnit logicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const;
@@ -313,14 +280,10 @@ private:
     virtual LayoutUnit collapsedMarginAfter() const override final { return maxPositiveMarginAfter() - maxNegativeMarginAfter(); }
 
     LayoutUnit collapseMargins(RenderBox* child, MarginInfo&, bool childIsSelfCollapsing);
-    LayoutUnit clearFloatsIfNeeded(RenderBox* child, MarginInfo&, LayoutUnit oldTopPosMargin, LayoutUnit oldTopNegMargin, LayoutUnit yPos, bool childIsSelfCollapsing);
     LayoutUnit estimateLogicalTopPosition(RenderBox* child, const MarginInfo&);
     void marginBeforeEstimateForChild(RenderBox*, LayoutUnit&, LayoutUnit&, bool&) const;
     void handleAfterSideOfBlock(RenderBox* lastChild, LayoutUnit top, LayoutUnit bottom, MarginInfo&);
     void setCollapsedBottomMargin(const MarginInfo&);
-
-    // Used to store state between styleWillChange and styleDidChange
-    static bool s_canPropagateFloatIntoSibling;
 
     RenderBlockFlowRareData& ensureRareData();
 

@@ -792,10 +792,8 @@ void RenderBlockFlow::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
         for (size_t i = 0; i < lineBreaker.positionedObjects().size(); ++i)
             setStaticPositions(this, lineBreaker.positionedObjects()[i]);
 
-        if (!layoutState.lineInfo().isEmpty()) {
+        if (!layoutState.lineInfo().isEmpty())
             layoutState.lineInfo().setFirstLine(false);
-            clearFloats(lineBreaker.clear());
-        }
 
         lineMidpointState.reset();
         resolver.setPosition(endOfLine, numberOfIsolateAncestors(endOfLine));

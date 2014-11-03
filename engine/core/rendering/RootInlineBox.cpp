@@ -379,20 +379,7 @@ LayoutUnit RootInlineBox::selectionTop() const
     if (!prevRootBox())
         return selectionTop;
 
-    LayoutUnit prevBottom = prevRootBox()->selectionBottom();
-    if (prevBottom < selectionTop && block().containsFloats()) {
-        // This line has actually been moved further down, probably from a large line-height, but possibly because the
-        // line was forced to clear floats.  If so, let's check the offsets, and only be willing to use the previous
-        // line's bottom if the offsets are greater on both sides.
-        LayoutUnit prevLeft = block().logicalLeftOffsetForLine(prevBottom, false);
-        LayoutUnit prevRight = block().logicalRightOffsetForLine(prevBottom, false);
-        LayoutUnit newLeft = block().logicalLeftOffsetForLine(selectionTop, false);
-        LayoutUnit newRight = block().logicalRightOffsetForLine(selectionTop, false);
-        if (prevLeft > newLeft || prevRight < newRight)
-            return selectionTop;
-    }
-
-    return prevBottom;
+    return prevRootBox()->selectionBottom();
 }
 
 LayoutUnit RootInlineBox::selectionTopAdjustedForPrecedingBlock() const

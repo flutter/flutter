@@ -43,8 +43,6 @@
 
 namespace blink {
 
-bool RenderBlockFlow::s_canPropagateFloatIntoSibling = false;
-
 struct SameSizeAsMarginInfo {
     uint16_t bitfields;
     LayoutUnit margins[2];
@@ -202,8 +200,6 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     bool logicalWidthChanged = updateLogicalWidthAndColumnWidth();
     relayoutChildren |= logicalWidthChanged;
 
-    rebuildFloatsFromIntruding();
-
     LayoutState state(*this, locationOffset(), logicalWidthChanged);
 
     // We use four values, maxTopPos, maxTopNeg, maxBottomPos, and maxBottomNeg, to track
@@ -232,30 +228,11 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     else
         layoutBlockChildren(relayoutChildren, layoutScope, beforeEdge, afterEdge);
 
-    // Expand our intrinsic height to encompass floats.
-    if (lowestFloatLogicalBottom() > (logicalHeight() - afterEdge) && createsBlockFormattingContext())
-        setLogicalHeight(lowestFloatLogicalBottom() + afterEdge);
-
-    // Calculate our new height.
-    LayoutUnit oldHeight = logicalHeight();
     LayoutUnit oldClientAfterEdge = clientLogicalBottom();
 
     updateLogicalHeight();
-    LayoutUnit newHeight = logicalHeight();
-    if (oldHeight > newHeight && !childrenInline()) {
-        // One of our children's floats may have become an overhanging float for us.
-        for (RenderObject* child = lastChild(); child; child = child->previousSibling()) {
-            if (child->isRenderBlockFlow() && !child->isFloatingOrOutOfFlowPositioned()) {
-                RenderBlockFlow* block = toRenderBlockFlow(child);
-                if (block->lowestFloatLogicalBottom() + block->logicalTop() <= newHeight)
-                    break;
-                addOverhangingFloats(block, false);
-            }
-        }
-    }
 
-    bool heightChanged = (previousHeight != newHeight);
-    if (heightChanged)
+    if (previousHeight != logicalHeight())
         relayoutChildren = true;
 
     layoutPositionedObjects(relayoutChildren || isDocumentElement(), oldLeft != logicalLeft() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
@@ -269,7 +246,6 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
 void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
 {
     LayoutUnit startPosition = borderStart() + paddingStart();
-    LayoutUnit initialStartPosition = startPosition;
     if (style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft())
         startPosition -= verticalScrollbarWidth();
     LayoutUnit totalAvailableLogicalWidth = borderAndPaddingLogicalWidth() + availableLogicalWidth();
@@ -277,18 +253,12 @@ void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
     LayoutUnit childMarginStart = marginStartForChild(child);
     LayoutUnit newPosition = startPosition + childMarginStart;
 
-    LayoutUnit positionToAvoidFloats;
-    if (child->avoidsFloats() && containsFloats())
-        positionToAvoidFloats = startOffsetForLine(logicalTopForChild(child), false, logicalHeightForChild(child));
-
     // If the child has an offset from the content edge to avoid floats then use that, otherwise let any negative
     // margin pull it back over the content edge or any positive margin push it out.
     // If the child is being centred then the margin calculated to do that has factored in any offset required to
     // avoid floats, so use it if necessary.
     if (style()->textAlign() == WEBKIT_CENTER || child->style()->marginStartUsing(style()).isAuto())
-        newPosition = std::max(newPosition, positionToAvoidFloats + childMarginStart);
-    else if (positionToAvoidFloats > initialStartPosition)
-        newPosition = std::max(newPosition, positionToAvoidFloats);
+        newPosition = std::max(newPosition, childMarginStart);
 
     setLogicalLeftForChild(child, style()->isLeftToRightDirection() ? newPosition : totalAvailableLogicalWidth - newPosition - logicalWidthForChild(child));
 }
@@ -303,88 +273,29 @@ void RenderBlockFlow::setLogicalTopForChild(RenderBox* child, LayoutUnit logical
     child->setY(logicalTop);
 }
 
-void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo, LayoutUnit& previousFloatLogicalBottom)
+void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo)
 {
-    LayoutUnit oldPosMarginBefore = maxPositiveMarginBefore();
-    LayoutUnit oldNegMarginBefore = maxNegativeMarginBefore();
-
     // The child is a normal flow object. Compute the margins we will use for collapsing now.
     child->computeAndSetBlockDirectionMargins(this);
 
     // Try to guess our correct logical top position. In most cases this guess will
     // be correct. Only if we're wrong (when we compute the real logical top position)
     // will we have to potentially relayout.
-    LayoutUnit logicalTopEstimate = estimateLogicalTopPosition(child, marginInfo);
-
-    // Cache our old rect so that we can dirty the proper paint invalidation rects if the child moves.
-    LayoutRect oldRect = child->frameRect();
-    LayoutUnit oldLogicalTop = logicalTopForChild(child);
-
     // Go ahead and position the child as though it didn't collapse with the top.
-    setLogicalTopForChild(child, logicalTopEstimate);
+    setLogicalTopForChild(child, estimateLogicalTopPosition(child, marginInfo));
 
-    RenderBlockFlow* childRenderBlockFlow = child->isRenderBlockFlow() ? toRenderBlockFlow(child) : 0;
-    bool markDescendantsWithFloats = false;
-    if (logicalTopEstimate != oldLogicalTop && childRenderBlockFlow && !childRenderBlockFlow->avoidsFloats() && childRenderBlockFlow->containsFloats()) {
-        markDescendantsWithFloats = true;
-    } else if (UNLIKELY(logicalTopEstimate.mightBeSaturated())) {
-        // logicalTopEstimate, returned by estimateLogicalTopPosition, might be saturated for
-        // very large elements. If it does the comparison with oldLogicalTop might yield a
-        // false negative as adding and removing margins, borders etc from a saturated number
-        // might yield incorrect results. If this is the case always mark for layout.
-        markDescendantsWithFloats = true;
-    } else if (!child->avoidsFloats() || child->shrinkToAvoidFloats()) {
-        // If an element might be affected by the presence of floats, then always mark it for
-        // layout.
-        LayoutUnit fb = std::max(previousFloatLogicalBottom, lowestFloatLogicalBottom());
-        if (fb > logicalTopEstimate)
-            markDescendantsWithFloats = true;
-    }
-
-    if (childRenderBlockFlow) {
-        if (markDescendantsWithFloats)
-            childRenderBlockFlow->markAllDescendantsWithFloatsForLayout();
-        previousFloatLogicalBottom = std::max(previousFloatLogicalBottom, oldLogicalTop + childRenderBlockFlow->lowestFloatLogicalBottom());
-    }
-
-    SubtreeLayoutScope layoutScope(*child);
-
-    bool childHadLayout = child->everHadLayout();
-    bool childNeededLayout = child->needsLayout();
-    if (childNeededLayout)
-        child->layout();
+    child->layoutIfNeeded();
 
     // Cache if we are at the top of the block right now.
     bool childIsSelfCollapsing = child->isSelfCollapsingBlock();
 
     // Now determine the correct ypos based off examination of collapsing margin
     // values.
-    LayoutUnit logicalTopBeforeClear = collapseMargins(child, marginInfo, childIsSelfCollapsing);
+    setLogicalTopForChild(child, collapseMargins(child, marginInfo, childIsSelfCollapsing));
 
-    // Now check for clear.
-    LayoutUnit logicalTopAfterClear = clearFloatsIfNeeded(child, marginInfo, oldPosMarginBefore, oldNegMarginBefore, logicalTopBeforeClear, childIsSelfCollapsing);
-
-    setLogicalTopForChild(child, logicalTopAfterClear);
-
-    // Now we have a final top position. See if it really does end up being different from our estimate.
-    // clearFloatsIfNeeded can also mark the child as needing a layout even though we didn't move. This happens
-    // when collapseMargins dynamically adds overhanging floats because of a child with negative margins.
-    if (logicalTopAfterClear != logicalTopEstimate || child->needsLayout()) {
-        SubtreeLayoutScope layoutScope(*child);
-        if (child->shrinkToAvoidFloats()) {
-            // The child's width depends on the line width.
-            // When the child shifts to clear an item, its width can
-            // change (because it has more available line width).
-            // So go ahead and mark the item as dirty.
-            layoutScope.setChildNeedsLayout(child);
-        }
-
-        if (childRenderBlockFlow && !childRenderBlockFlow->avoidsFloats() && childRenderBlockFlow->containsFloats())
-            childRenderBlockFlow->markAllDescendantsWithFloatsForLayout();
-
-        // Our guess was wrong. Make the child lay itself out again.
-        child->layoutIfNeeded();
-    }
+    // FIXME(sky): Is it still actually possible for the child to need layout here?
+    // This used to be needed for floats and/or margin collapsing.
+    child->layoutIfNeeded();
 
     // If we previously encountered a self-collapsing sibling of this child that had clearance then
     // we set this bit to ensure we would not collapse the child's margins, and those of any subsequent
@@ -401,32 +312,12 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo,
     // Now place the child in the correct left position
     determineLogicalLeftPositionForChild(child);
 
-    LayoutSize childOffset = child->location() - oldRect.location();
-
     // Update our height now that the child has been placed in the correct position.
     setLogicalHeight(logicalHeight() + logicalHeightForChild(child));
     if (mustSeparateMarginAfterForChild(child)) {
         setLogicalHeight(logicalHeight() + marginAfterForChild(child));
         marginInfo.clearMargin();
     }
-    // If the child has overhanging floats that intrude into following siblings (or possibly out
-    // of this block), then the parent gets notified of the floats now.
-    if (childRenderBlockFlow)
-        addOverhangingFloats(childRenderBlockFlow, !childNeededLayout);
-
-    // If the child moved, we have to invalidate it's paint  as well as any floating/positioned
-    // descendants. An exception is if we need a layout. In this case, we know we're going to
-    // invalidate our paint (and the child) anyway.
-    bool didNotDoFullLayoutAndMoved = childHadLayout && !selfNeedsLayout() && (childOffset.width() || childOffset.height());
-    bool didNotLayoutAndNeedsPaintInvalidation = !childHadLayout && child->checkForPaintInvalidation();
-
-    if (didNotDoFullLayoutAndMoved || didNotLayoutAndNeedsPaintInvalidation)
-        child->invalidatePaintForOverhangingFloats(true);
-}
-
-void RenderBlockFlow::rebuildFloatsFromIntruding()
-{
-    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
@@ -435,8 +326,6 @@ void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutSc
 
     // The margin struct caches all our current margin collapsing state. The compact struct caches state when we encounter compacts,
     MarginInfo marginInfo(this, beforeEdge, afterEdge);
-
-    LayoutUnit previousFloatLogicalBottom = 0;
 
     RenderBox* next = firstChildBox();
     RenderBox* lastNormalFlowChild = 0;
@@ -457,7 +346,7 @@ void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutSc
         }
 
         // Lay out the child.
-        layoutBlockChild(child, marginInfo, previousFloatLogicalBottom);
+        layoutBlockChild(child, marginInfo);
         lastNormalFlowChild = child;
     }
 
@@ -664,23 +553,6 @@ LayoutUnit RenderBlockFlow::collapseMargins(RenderBox* child, MarginInfo& margin
             marginInfo.setHasMarginAfterQuirk(hasMarginAfterQuirk(child));
     }
 
-    if (previousBlockFlow) {
-        // If |child| is a self-collapsing block it may have collapsed into a previous sibling and although it hasn't reduced the height of the parent yet
-        // any floats from the parent will now overhang.
-        LayoutUnit oldLogicalHeight = logicalHeight();
-        setLogicalHeight(logicalTop);
-        if (!previousBlockFlow->avoidsFloats() && (previousBlockFlow->logicalTop() + previousBlockFlow->lowestFloatLogicalBottom()) > logicalTop)
-            addOverhangingFloats(previousBlockFlow, false);
-        setLogicalHeight(oldLogicalHeight);
-
-        // If |child|'s previous sibling is a self-collapsing block that cleared a float and margin collapsing resulted in |child| moving up
-        // into the margin area of the self-collapsing block then the float it clears is now intruding into |child|. Layout again so that we can look for
-        // floats in the parent that overhang |child|'s new logical top.
-        bool logicalTopIntrudesIntoFloat = clearanceForSelfCollapsingBlock > 0 && logicalTop < beforeCollapseLogicalTop;
-        if (logicalTopIntrudesIntoFloat && containsFloats() && !child->avoidsFloats() && lowestFloatLogicalBottom() > logicalTop)
-            child->setNeedsLayoutAndFullPaintInvalidation();
-    }
-
     return logicalTop;
 }
 
@@ -705,61 +577,6 @@ void RenderBlockFlow::adjustPositionedBlock(RenderBox* child, const MarginInfo& 
         if (hasStaticBlockPosition)
             child->setChildNeedsLayout(MarkOnlyThis);
     }
-}
-
-LayoutUnit RenderBlockFlow::clearFloatsIfNeeded(RenderBox* child, MarginInfo& marginInfo, LayoutUnit oldTopPosMargin, LayoutUnit oldTopNegMargin, LayoutUnit yPos, bool childIsSelfCollapsing)
-{
-    LayoutUnit heightIncrease = getClearDelta(child, yPos);
-    if (!heightIncrease)
-        return yPos;
-
-    if (childIsSelfCollapsing) {
-        bool childDiscardMargin = mustDiscardMarginBeforeForChild(child) || mustDiscardMarginAfterForChild(child);
-
-        // For self-collapsing blocks that clear, they can still collapse their
-        // margins with following siblings. Reset the current margins to represent
-        // the self-collapsing block's margins only.
-        // If DISCARD is specified for -webkit-margin-collapse, reset the margin values.
-        RenderBlockFlow::MarginValues childMargins = marginValuesForChild(child);
-        if (!childDiscardMargin) {
-            marginInfo.setPositiveMargin(std::max(childMargins.positiveMarginBefore(), childMargins.positiveMarginAfter()));
-            marginInfo.setNegativeMargin(std::max(childMargins.negativeMarginBefore(), childMargins.negativeMarginAfter()));
-        } else {
-            marginInfo.clearMargin();
-        }
-        marginInfo.setDiscardMargin(childDiscardMargin);
-
-        // CSS2.1 states:
-        // "If the top and bottom margins of an element with clearance are adjoining, its margins collapse with
-        // the adjoining margins of following siblings but that resulting margin does not collapse with the bottom margin of the parent block."
-        // So the parent's bottom margin cannot collapse through this block or any subsequent self-collapsing blocks. Set a bit to ensure
-        // this happens; it will get reset if we encounter an in-flow sibling that is not self-collapsing.
-        marginInfo.setCanCollapseMarginAfterWithLastChild(false);
-
-        // For now set the border-top of |child| flush with the bottom border-edge of the float so it can layout any floating or positioned children of
-        // its own at the correct vertical position. If subsequent siblings attempt to collapse with |child|'s margins in |collapseMargins| we will
-        // adjust the height of the parent to |child|'s margin top (which if it is positive sits up 'inside' the float it's clearing) so that all three
-        // margins can collapse at the correct vertical position.
-        // Per CSS2.1 we need to ensure that any negative margin-top clears |child| beyond the bottom border-edge of the float so that the top border edge of the child
-        // (i.e. its clearance)  is at a position that satisfies the equation: "the amount of clearance is set so that clearance + margin-top = [height of float],
-        // i.e., clearance = [height of float] - margin-top".
-        setLogicalHeight(child->logicalTop() + childMargins.negativeMarginBefore());
-    } else {
-        // Increase our height by the amount we had to clear.
-        setLogicalHeight(logicalHeight() + heightIncrease);
-    }
-
-    if (marginInfo.canCollapseWithMarginBefore()) {
-        // We can no longer collapse with the top of the block since a clear
-        // occurred. The empty blocks collapse into the cleared block.
-        setMaxMarginBeforeValues(oldTopPosMargin, oldTopNegMargin);
-        marginInfo.setAtBeforeSideOfBlock(false);
-
-        // In case the child discarded the before margin of the block we need to reset the mustDiscardMarginBefore flag to the initial value.
-        setMustDiscardMarginBefore(style()->marginBeforeCollapse() == MDISCARD);
-    }
-
-    return yPos + heightIncrease;
 }
 
 void RenderBlockFlow::setCollapsedBottomMargin(const MarginInfo& marginInfo)
@@ -870,38 +687,14 @@ LayoutUnit RenderBlockFlow::estimateLogicalTopPosition(RenderBox* child, const M
             logicalTopEstimate += std::max(marginInfo.positiveMargin(), positiveMarginBefore) - std::max(marginInfo.negativeMargin(), negativeMarginBefore);
     }
 
-    logicalTopEstimate += getClearDelta(child, logicalTopEstimate);
     return logicalTopEstimate;
 }
 
 LayoutUnit RenderBlockFlow::marginOffsetForSelfCollapsingBlock()
 {
+    // FIXME(sky): Remove
     ASSERT(isSelfCollapsingBlock());
-    RenderBlockFlow* parentBlock = toRenderBlockFlow(parent());
-    if (parentBlock && style()->clear() && parentBlock->getClearDelta(this, logicalHeight()))
-        return marginValuesForChild(this).positiveMarginBefore();
     return LayoutUnit();
-}
-
-void RenderBlockFlow::adjustFloatingBlock(const MarginInfo& marginInfo)
-{
-    // The float should be positioned taking into account the bottom margin
-    // of the previous flow. We add that margin into the height, get the
-    // float positioned properly, and then subtract the margin out of the
-    // height again. In the case of self-collapsing blocks, we always just
-    // use the top margins, since the self-collapsing block collapsed its
-    // own bottom margin into its top margin.
-    //
-    // Note also that the previous flow may collapse its margin into the top of
-    // our block. If this is the case, then we do not add the margin in to our
-    // height when computing the position of the float. This condition can be tested
-    // for by simply calling canCollapseWithMarginBefore. See
-    // http://www.hixie.ch/tests/adhoc/css/box/block/margin-collapse/046.html for
-    // an example of this scenario.
-    LayoutUnit marginOffset = marginInfo.canCollapseWithMarginBefore() ? LayoutUnit() : marginInfo.margin();
-    setLogicalHeight(logicalHeight() + marginOffset);
-    positionNewFloats();
-    setLogicalHeight(logicalHeight() - marginOffset);
 }
 
 void RenderBlockFlow::handleAfterSideOfBlock(RenderBox* lastChild, LayoutUnit beforeSide, LayoutUnit afterSide, MarginInfo& marginInfo)
@@ -1022,18 +815,6 @@ bool RenderBlockFlow::mustSeparateMarginAfterForChild(const RenderBox* child) co
     return childStyle->marginAfterCollapse() == MSEPARATE;
 }
 
-void RenderBlockFlow::addOverflowFromFloats()
-{
-    // FIXME(sky): Remove this.
-}
-
-void RenderBlockFlow::computeOverflow(LayoutUnit oldClientAfterEdge, bool recomputeFloats)
-{
-    RenderBlock::computeOverflow(oldClientAfterEdge, recomputeFloats);
-    if (recomputeFloats || createsBlockFormattingContext() || hasSelfPaintingLayer())
-        addOverflowFromFloats();
-}
-
 RootInlineBox* RenderBlockFlow::createAndAppendRootInlineBox()
 {
     RootInlineBox* rootBox = createRootInlineBox();
@@ -1045,39 +826,6 @@ RootInlineBox* RenderBlockFlow::createAndAppendRootInlineBox()
 void RenderBlockFlow::deleteLineBoxTree()
 {
     m_lineBoxes.deleteLineBoxTree();
-}
-
-void RenderBlockFlow::markAllDescendantsWithFloatsForLayout(RenderBox* floatToRemove, bool inLayout)
-{
-    // FIXME(sky): Remove this.
-}
-
-void RenderBlockFlow::markSiblingsWithFloatsForLayout(RenderBox* floatToRemove)
-{
-    // FIXME(sky): Remove this.
-}
-
-LayoutUnit RenderBlockFlow::getClearDelta(RenderBox* child, LayoutUnit logicalTop)
-{
-    // FIXME(sky): Remove this.
-    return 0;
-}
-
-void RenderBlockFlow::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
-{
-    RenderStyle* oldStyle = style();
-    s_canPropagateFloatIntoSibling = oldStyle ? !isFloatingOrOutOfFlowPositioned() && !avoidsFloats() : false;
-    if (oldStyle && parent() && diff.needsFullLayout() && oldStyle->position() != newStyle.position()
-        && containsFloats() && !isFloating() && !isOutOfFlowPositioned() && newStyle.hasOutOfFlowPosition())
-            markAllDescendantsWithFloatsForLayout();
-
-    RenderBlock::styleWillChange(diff, newStyle);
-}
-
-void RenderBlockFlow::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
-{
-    // FIXME(sky): Remove this.
-    RenderBlock::styleDidChange(diff, oldStyle);
 }
 
 void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox* child, LayoutUnit logicalTop)
@@ -1103,11 +851,6 @@ void RenderBlockFlow::moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, boo
     // FIXME(sky): Merge this into callers.
     RenderBlockFlow* toBlockFlow = toRenderBlockFlow(toBlock);
     moveAllChildrenTo(toBlockFlow, fullRemoveInsert);
-}
-
-void RenderBlockFlow::invalidatePaintForOverhangingFloats(bool paintAllDescendants)
-{
-    // FIXME(sky): Remove this.
 }
 
 void RenderBlockFlow::invalidatePaintForOverflow()
@@ -1151,11 +894,6 @@ void RenderBlockFlow::paintFloats(PaintInfo& paintInfo, const LayoutPoint& paint
     // FIXME(sky): Remove this.
 }
 
-void RenderBlockFlow::clearFloats(EClear clear)
-{
-    // FIXME(sky): Remove this.
-}
-
 LayoutUnit RenderBlockFlow::logicalLeftOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
 {
     // FIXME(sky): Remove this.
@@ -1188,34 +926,6 @@ LayoutUnit RenderBlockFlow::adjustLogicalRightOffsetForLine(LayoutUnit offsetFro
         right -= textIndentOffset();
 
     return right;
-}
-
-LayoutPoint RenderBlockFlow::computeLogicalLocationForFloat(const FloatingObject* floatingObject, LayoutUnit logicalTopOffset) const
-{
-    // FIXME(sky): Remove this.
-    return LayoutPoint();
-}
-
-bool RenderBlockFlow::positionNewFloats()
-{
-    // FIXME(sky): Remove this.
-    return false;
-}
-
-bool RenderBlockFlow::hasOverhangingFloat(RenderBox* renderer)
-{
-    // FIXME(sky): Remove this.
-    return false;
-}
-
-void RenderBlockFlow::addIntrudingFloats(RenderBlockFlow* prev, LayoutUnit logicalLeftOffset, LayoutUnit logicalTopOffset)
-{
-    // FIXME(sky): Remove this.
-}
-
-void RenderBlockFlow::addOverhangingFloats(RenderBlockFlow* child, bool makeChildPaintOtherFloats)
-{
-    // FIXME(sky): Remove this.
 }
 
 bool RenderBlockFlow::hitTestFloats(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)

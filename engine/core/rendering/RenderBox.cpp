@@ -94,22 +94,6 @@ void RenderBox::removeFloatingOrPositionedChildFromBlockLists()
     if (documentBeingDestroyed())
         return;
 
-    if (isFloating()) {
-        RenderBlockFlow* parentBlockFlow = 0;
-        for (RenderObject* curr = parent(); curr && !curr->isRenderView(); curr = curr->parent()) {
-            if (curr->isRenderBlockFlow()) {
-                RenderBlockFlow* currBlockFlow = toRenderBlockFlow(curr);
-                if (!parentBlockFlow || currBlockFlow->containsFloat(this))
-                    parentBlockFlow = currBlockFlow;
-            }
-        }
-
-        if (parentBlockFlow) {
-            parentBlockFlow->markSiblingsWithFloatsForLayout(this);
-            parentBlockFlow->markAllDescendantsWithFloatsForLayout(this, false);
-        }
-    }
-
     if (isOutOfFlowPositioned())
         RenderBlock::removePositionedObject(this);
 }
@@ -126,8 +110,6 @@ void RenderBox::styleWillChange(StyleDifference diff, const RenderStyle& newStyl
                 setShouldDoFullPaintInvalidation(true);
             else if (newStyle.hasOutOfFlowPosition())
                 parent()->setChildNeedsLayout();
-            if (isFloating() && !isOutOfFlowPositioned() && newStyle.hasOutOfFlowPosition())
-                removeFloatingOrPositionedChildFromBlockLists();
         }
     }
 
@@ -1722,10 +1704,6 @@ void RenderBox::inflatePaintInvalidationRectForReflectionAndFilter(LayoutRect& p
         style()->filterOutsets().expandRect(paintInvalidationRect);
 }
 
-void RenderBox::invalidatePaintForOverhangingFloats(bool)
-{
-}
-
 void RenderBox::updateLogicalWidth()
 {
     LogicalExtentComputedValues computedValues;
@@ -1811,15 +1789,8 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
 
 LayoutUnit RenderBox::fillAvailableMeasure(LayoutUnit availableLogicalWidth) const
 {
-    LayoutUnit marginStart = 0;
-    LayoutUnit marginEnd = 0;
-    return fillAvailableMeasure(availableLogicalWidth, marginStart, marginEnd);
-}
-
-LayoutUnit RenderBox::fillAvailableMeasure(LayoutUnit availableLogicalWidth, LayoutUnit& marginStart, LayoutUnit& marginEnd) const
-{
-    marginStart = minimumValueForLength(style()->marginStart(), availableLogicalWidth);
-    marginEnd = minimumValueForLength(style()->marginEnd(), availableLogicalWidth);
+    LayoutUnit marginStart = minimumValueForLength(style()->marginStart(), availableLogicalWidth);
+    LayoutUnit marginEnd = minimumValueForLength(style()->marginEnd(), availableLogicalWidth);
     return availableLogicalWidth - marginStart - marginEnd;
 }
 
@@ -1858,12 +1829,7 @@ LayoutUnit RenderBox::computeLogicalWidthUsing(SizeType widthType, const Length&
     if (logicalWidth.isIntrinsic())
         return computeIntrinsicLogicalWidthUsing(logicalWidth, availableLogicalWidth, borderAndPaddingLogicalWidth());
 
-    LayoutUnit marginStart = 0;
-    LayoutUnit marginEnd = 0;
-    LayoutUnit logicalWidthResult = fillAvailableMeasure(availableLogicalWidth, marginStart, marginEnd);
-
-    if (shrinkToAvoidFloats() && cb->isRenderBlockFlow() && toRenderBlockFlow(cb)->containsFloats())
-        logicalWidthResult = std::min(logicalWidthResult, shrinkLogicalWidthToAvoidFloats(marginStart, marginEnd, toRenderBlockFlow(cb)));
+    LayoutUnit logicalWidthResult = fillAvailableMeasure(availableLogicalWidth);
 
     if (widthType == MainOrPreferredSize && sizesLogicalWidthToFitContent(logicalWidth))
         return std::max(minPreferredLogicalWidth(), std::min(maxPreferredLogicalWidth(), logicalWidthResult));
@@ -1929,15 +1895,6 @@ void RenderBox::computeMarginsForDirection(MarginDirection flowDirection, const 
     LayoutUnit marginStartWidth = minimumValueForLength(marginStartLength, containerWidth);
     LayoutUnit marginEndWidth = minimumValueForLength(marginEndLength, containerWidth);
 
-    LayoutUnit availableWidth = containerWidth;
-    if (avoidsFloats() && containingBlock->isRenderBlockFlow() && toRenderBlockFlow(containingBlock)->containsFloats()) {
-        availableWidth = containingBlockAvailableLineWidth();
-        if (shrinkToAvoidFloats() && availableWidth < containerWidth) {
-            marginStart = std::max<LayoutUnit>(0, marginStartWidth);
-            marginEnd = std::max<LayoutUnit>(0, marginEndWidth);
-        }
-    }
-
     // CSS 2.1 (10.3.3): "If 'width' is not 'auto' and 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width'
     // (plus any of 'margin-left' or 'margin-right' that are not 'auto') is larger than the width of the containing block, then any 'auto'
     // values for 'margin-left' or 'margin-right' are, for the following rules, treated as zero.
@@ -1946,27 +1903,27 @@ void RenderBox::computeMarginsForDirection(MarginDirection flowDirection, const 
     // CSS 2.1: "If both 'margin-left' and 'margin-right' are 'auto', their used values are equal. This horizontally centers the element
     // with respect to the edges of the containing block."
     const RenderStyle* containingBlockStyle = containingBlock->style();
-    if ((marginStartLength.isAuto() && marginEndLength.isAuto() && marginBoxWidth < availableWidth)
+    if ((marginStartLength.isAuto() && marginEndLength.isAuto() && marginBoxWidth < containerWidth)
         || (!marginStartLength.isAuto() && !marginEndLength.isAuto() && containingBlockStyle->textAlign() == WEBKIT_CENTER)) {
         // Other browsers center the margin box for align=center elements so we match them here.
-        LayoutUnit centeredMarginBoxStart = std::max<LayoutUnit>(0, (availableWidth - childWidth - marginStartWidth - marginEndWidth) / 2);
+        LayoutUnit centeredMarginBoxStart = std::max<LayoutUnit>(0, (containerWidth - childWidth - marginStartWidth - marginEndWidth) / 2);
         marginStart = centeredMarginBoxStart + marginStartWidth;
-        marginEnd = availableWidth - childWidth - marginStart + marginEndWidth;
+        marginEnd = containerWidth - childWidth - marginStart + marginEndWidth;
         return;
     }
 
     // CSS 2.1: "If there is exactly one value specified as 'auto', its used value follows from the equality."
-    if (marginEndLength.isAuto() && marginBoxWidth < availableWidth) {
+    if (marginEndLength.isAuto() && marginBoxWidth < containerWidth) {
         marginStart = marginStartWidth;
-        marginEnd = availableWidth - childWidth - marginStart;
+        marginEnd = containerWidth - childWidth - marginStart;
         return;
     }
 
     bool pushToEndFromTextAlign = !marginEndLength.isAuto() && ((!containingBlockStyle->isLeftToRightDirection() && containingBlockStyle->textAlign() == WEBKIT_LEFT)
         || (containingBlockStyle->isLeftToRightDirection() && containingBlockStyle->textAlign() == WEBKIT_RIGHT));
-    if ((marginStartLength.isAuto() && marginBoxWidth < availableWidth) || pushToEndFromTextAlign) {
+    if ((marginStartLength.isAuto() && marginBoxWidth < containerWidth) || pushToEndFromTextAlign) {
         marginEnd = marginEndWidth;
-        marginStart = availableWidth - childWidth - marginEnd;
+        marginStart = containerWidth - childWidth - marginEnd;
         return;
     }
 
@@ -3421,16 +3378,6 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
     if (closestRenderer)
         return closestRenderer->positionForPoint(adjustedPoint - closestRenderer->locationOffset());
     return createPositionWithAffinity(firstPositionInOrBeforeNode(nonPseudoNode()));
-}
-
-bool RenderBox::shrinkToAvoidFloats() const
-{
-    // Floating objects don't shrink.  Objects that don't avoid floats don't shrink.  Marquees don't shrink.
-    if (isInline() || !avoidsFloats() || isFloating())
-        return false;
-
-    // Only auto width objects can possibly shrink to avoid floats.
-    return style()->width().isAuto();
 }
 
 static bool isReplacedElement(Node* node)
