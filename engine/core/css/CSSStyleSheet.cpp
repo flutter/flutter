@@ -77,7 +77,6 @@ static bool isAcceptableCSSStyleSheetParent(Node* parentNode)
     // clearOwnerNode() in the owner's destructor in oilpan.
     return !parentNode
         || parentNode->isDocumentNode()
-        || isHTMLLinkElement(*parentNode)
         || isHTMLStyleElement(*parentNode);
 }
 #endif

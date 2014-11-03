@@ -33,7 +33,6 @@
 
 #include "core/dom/DocumentSupplementable.h"
 #include "core/fetch/RawResource.h"
-#include "core/html/LinkResource.h"
 #include "core/html/imports/HTMLImport.h"
 #include "platform/Supplementable.h"
 #include "platform/Timer.h"

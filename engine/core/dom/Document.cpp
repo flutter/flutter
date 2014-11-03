@@ -101,7 +101,6 @@
 #include "core/html/HTMLAnchorElement.h"
 #include "core/html/HTMLCanvasElement.h"
 #include "core/html/HTMLDocument.h"
-#include "core/html/HTMLLinkElement.h"
 #include "core/html/HTMLMetaElement.h"
 #include "core/html/HTMLScriptElement.h"
 #include "core/html/HTMLStyleElement.h"
@@ -1525,7 +1524,6 @@ void Document::implicitClose()
     if (frame()) {
         ImageLoader::dispatchPendingLoadEvents();
         ImageLoader::dispatchPendingErrorEvents();
-        HTMLLinkElement::dispatchPendingLoadEvents();
     }
 
     // JS running below could remove the frame or destroy the RenderView so we call

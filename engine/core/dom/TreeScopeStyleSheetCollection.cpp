@@ -33,7 +33,6 @@
 #include "core/css/resolver/StyleResolver.h"
 #include "core/dom/Element.h"
 #include "core/dom/StyleEngine.h"
-#include "core/html/HTMLLinkElement.h"
 #include "core/html/HTMLStyleElement.h"
 
 namespace blink {

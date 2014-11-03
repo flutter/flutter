@@ -36,7 +36,7 @@
 #include "core/dom/Element.h"
 #include "core/dom/ShadowTreeStyleSheetCollection.h"
 #include "core/dom/shadow/ShadowRoot.h"
-#include "core/html/HTMLLinkElement.h"
+#include "core/html/HTMLStyleElement.h"
 #include "core/html/imports/HTMLImportsController.h"
 #include "core/page/Page.h"
 #include "core/frame/Settings.h"

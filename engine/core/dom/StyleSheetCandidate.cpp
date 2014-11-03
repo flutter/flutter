@@ -29,22 +29,10 @@
 
 #include "core/dom/Element.h"
 #include "core/dom/StyleEngine.h"
-#include "core/html/HTMLLinkElement.h"
 #include "core/html/HTMLStyleElement.h"
 #include "core/html/imports/HTMLImport.h"
 
 namespace blink {
-
-bool StyleSheetCandidate::isImport() const
-{
-    return m_type == HTMLLink && toHTMLLinkElement(node()).isImport();
-}
-
-Document* StyleSheetCandidate::importedDocument() const
-{
-    ASSERT(isImport());
-    return toHTMLLinkElement(node()).import();
-}
 
 bool StyleSheetCandidate::canBeActivated() const
 {
@@ -55,8 +43,6 @@ bool StyleSheetCandidate::canBeActivated() const
 StyleSheetCandidate::Type StyleSheetCandidate::typeOf(Node& node)
 {
     if (node.isHTMLElement()) {
-        if (isHTMLLinkElement(node))
-            return HTMLLink;
         if (isHTMLStyleElement(node))
             return HTMLStyle;
 
@@ -71,8 +57,6 @@ StyleSheetCandidate::Type StyleSheetCandidate::typeOf(Node& node)
 StyleSheet* StyleSheetCandidate::sheet() const
 {
     switch (m_type) {
-    case HTMLLink:
-        return toHTMLLinkElement(node()).sheet();
     case HTMLStyle:
         return toHTMLStyleElement(node()).sheet();
     }

@@ -41,7 +41,6 @@ class StyleSheetCandidate {
     STACK_ALLOCATED();
 public:
     enum Type {
-        HTMLLink,
         HTMLStyle,
     };
 
@@ -50,11 +49,9 @@ public:
         , m_type(typeOf(node))
     { }
 
-    bool isImport() const;
     bool canBeActivated() const;
 
     StyleSheet* sheet() const;
-    Document* importedDocument() const;
 
 private:
     Node& node() const { return *m_node; }

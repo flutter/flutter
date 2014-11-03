@@ -94,7 +94,6 @@ class HTMLElement;
 class HTMLImport;
 class HTMLImportLoader;
 class HTMLImportsController;
-class HTMLLinkElement;
 class HTMLScriptElement;
 class HitTestRequest;
 class LayoutPoint;

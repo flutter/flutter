@@ -31,7 +31,6 @@
 #include "config.h"
 #include "core/dom/Document.h"
 
-#include "core/html/HTMLLinkElement.h"
 #include "core/testing/DummyPageHolder.h"
 #include "platform/heap/Handle.h"
 #include <gmock/gmock.h>

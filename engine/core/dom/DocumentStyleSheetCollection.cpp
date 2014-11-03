@@ -50,17 +50,6 @@ void DocumentStyleSheetCollection::collectStyleSheetsFromCandidates(StyleEngine*
         Node* n = *it;
         StyleSheetCandidate candidate(*n);
 
-        if (candidate.isImport()) {
-            Document* document = candidate.importedDocument();
-            if (!document)
-                continue;
-            if (collector.hasVisited(document))
-                continue;
-            collector.willVisit(document);
-            document->styleEngine()->updateStyleSheetsInImport(collector);
-            continue;
-        }
-
         StyleSheet* sheet = candidate.sheet();
         if (!sheet)
             continue;

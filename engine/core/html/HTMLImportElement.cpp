@@ -6,6 +6,7 @@
 #include "core/html/HTMLImportElement.h"
 
 #include "core/dom/Document.h"
+#include "core/fetch/FetchRequest.h"
 #include "core/html/imports/HTMLImportsController.h"
 #include "core/html/imports/HTMLImportChild.h"
 

@@ -1502,7 +1502,7 @@ KURL Element::hrefURL() const
 {
     // FIXME: These all have href() or url(), but no common super class. Why doesn't
     // <link> implement URLUtils?
-    if (isHTMLAnchorElement(*this) || isHTMLLinkElement(*this))
+    if (isHTMLAnchorElement(*this))
         return getURLAttribute(HTMLNames::hrefAttr);
     return KURL();
 }
