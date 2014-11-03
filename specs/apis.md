@@ -228,6 +228,8 @@ module 'sky:core' {
     readonly attribute Document document; // O(1) // the Documentof the module or application
     Promise<any> import(String url); // O(Yikes) // returns the module's exports
 
+    readonly attribute String url;
+
     // createElement() lets you create elements that will be upgraded later when you register the element
     Element createElement(String tagName, Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     Element createElement(String tagName, Dictionary attributes); // shorthand
@@ -240,14 +242,14 @@ module 'sky:core' {
   }
 
   class Module : AbstractModule {
-    constructor (Application application, Document document); // O(1)
+    constructor (Application application, Document document, String url); // O(1)
     readonly attribute Application application; // O(1)
 
     attribute any exports; // O(1) // defaults to the module's document
   }
 
   class Application : AbstractModule {
-    constructor (Document document); // O(1)
+    constructor (Document document, String url); // O(1)
     attribute String title; // O(1)
   }
 
