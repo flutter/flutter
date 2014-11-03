@@ -34,7 +34,7 @@
 namespace blink {
 
 class HTMLImportChild;
-class HTMLLinkElement;
+class Element;
 
 class HTMLImportChildClient : public DummyBase<void> {
 public:
@@ -44,7 +44,7 @@ public:
     virtual void importChildWasDestroyed(HTMLImportChild*) = 0;
 #endif
     virtual bool isSync() const = 0;
-    virtual HTMLLinkElement* link() = 0;
+    virtual Element* link() = 0;
     virtual void trace(Visitor*) { }
 };
 

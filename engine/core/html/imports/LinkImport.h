@@ -68,7 +68,7 @@ public:
     virtual void importChildWasDestroyed(HTMLImportChild*) override;
 #endif
     virtual bool isSync() const override;
-    virtual HTMLLinkElement* link() override;
+    virtual Element* link() override;
 
     Document* importedDocument() const;
 

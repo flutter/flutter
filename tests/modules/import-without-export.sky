@@ -1,6 +1,6 @@
 <html>
-<link rel="import" href="resources/does-not-export.sky" as="hello" />
-<link rel="import" href="../resources/dump-as-text.sky" />
+<import src="resources/does-not-export.sky" as="hello" />
+<import src="../resources/dump-as-text.sky" />
 <div id="result">FAIL - Script did not execute</div>
 <script>
 document.getElementById("result").textContent =

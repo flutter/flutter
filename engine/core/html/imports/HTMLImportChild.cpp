@@ -182,7 +182,7 @@ void HTMLImportChild::clearClient()
 }
 #endif
 
-HTMLLinkElement* HTMLImportChild::link() const
+Element* HTMLImportChild::link() const
 {
     if (!m_client)
         return 0;

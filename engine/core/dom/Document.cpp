@@ -563,6 +563,15 @@ void Document::setImportsController(HTMLImportsController* controller)
     m_importsController = controller;
 }
 
+HTMLImportsController& Document::ensureImportsController()
+{
+    if (!m_importsController) {
+        ASSERT(frame()); // The document should be the master.
+        HTMLImportsController::provideTo(*this);
+    }
+    return *m_importsController;
+}
+
 HTMLImportLoader* Document::importLoader() const
 {
     if (!m_importsController)

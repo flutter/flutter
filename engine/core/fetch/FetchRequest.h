@@ -40,7 +40,7 @@ public:
     enum DeferOption { NoDefer, DeferredByClient };
     enum OriginRestriction { UseDefaultOriginRestrictionForType, RestrictToSameOrigin, NoOriginRestriction };
 
-    explicit FetchRequest(const ResourceRequest&, const AtomicString& initiator, const String& charset = String(), ResourceLoadPriority = ResourceLoadPriorityUnresolved);
+    explicit FetchRequest(const ResourceRequest&, const AtomicString& initiator = AtomicString(), const String& charset = String(), ResourceLoadPriority = ResourceLoadPriorityUnresolved);
     FetchRequest(const ResourceRequest&, const AtomicString& initiator, const ResourceLoaderOptions&);
     FetchRequest(const ResourceRequest&, const FetchInitiatorInfo&);
     ~FetchRequest();

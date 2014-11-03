@@ -586,6 +586,7 @@ public:
 
     void setImportsController(HTMLImportsController*);
     HTMLImportsController* importsController() const { return m_importsController; }
+    HTMLImportsController& ensureImportsController();
     HTMLImportLoader* importLoader() const;
     HTMLImport* import() const;
 

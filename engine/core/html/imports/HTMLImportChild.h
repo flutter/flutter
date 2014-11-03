@@ -41,7 +41,7 @@ namespace blink {
 class CustomElementMicrotaskImportStep;
 class HTMLImportLoader;
 class HTMLImportChildClient;
-class HTMLLinkElement;
+class Element;
 
 //
 // An import tree node subclas to encapsulate imported document
@@ -54,7 +54,7 @@ public:
     HTMLImportChild(const KURL&, HTMLImportLoader*, SyncMode);
     virtual ~HTMLImportChild();
 
-    HTMLLinkElement* link() const;
+    Element* link() const;
     const KURL& url() const { return m_url; }
 
     void ownerInserted();

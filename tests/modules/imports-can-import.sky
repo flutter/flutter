@@ -1,5 +1,5 @@
 <html>
-<link rel="import" href="resources/intermediate.sky" as="chocolate" />
+<import src="resources/intermediate.sky" as="chocolate" />
 <div id="result">FAIL</div>
 <script>
 document.getElementById("result").textContent = JSON.stringify(chocolate);

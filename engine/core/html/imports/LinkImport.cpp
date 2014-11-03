@@ -118,7 +118,7 @@ bool LinkImport::isSync() const
     return m_owner && !m_owner->async();
 }
 
-HTMLLinkElement* LinkImport::link()
+Element* LinkImport::link()
 {
     return m_owner;
 }

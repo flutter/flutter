@@ -353,8 +353,8 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
 
     if (HTMLImport* parent = document.import()) {
         for (HTMLImport* child = parent->firstChild(); child; child = child->next()) {
-            if (HTMLLinkElement* link = static_cast<HTMLImportChild*>(child)->link()) {
-                String name = link->as();
+            if (Element* link = static_cast<HTMLImportChild*>(child)->link()) {
+                String name = link->getAttribute(HTMLNames::asAttr);
                 if (!name.isEmpty()) {
                     module.formalDependencies.append(name);
                     v8::Handle<v8::Value> actual;
