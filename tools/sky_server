@@ -4,8 +4,9 @@
 # found in the LICENSE file.
 
 import argparse
-import os
 import cherrypy
+import json
+import os
 import staticdirindex
 
 
@@ -17,28 +18,22 @@ SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
 GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
 
 
-# FIXME: This should be replaced by just json and inflated into DOM client-side.
 def skydir(section="", dir="", path="", **kwargs):
-    url = "%s%s" % (cherrypy.request.headers.get('Host', ''),
-        cherrypy.request.path_info)
-    sky = "<listing>"
-    sky += "<style>a { display: block; }"
-    sky += "header { border-bottom: 1px solid lightgrey }</style>"
-    sky += '<header>Listing for: <a href="' + url + '">' + url +'</a></header>'
+    if cherrypy.request.params.get('format') is None:
+        return '<sky><import src="/sky/examples/file-browser.sky"/><file-browser/></sky>'
+    result = dict()
+    result['directories'] = []
+    result['files'] = []
     for _, dir_names, file_names in os.walk(path.rstrip(r"\/")):
         for dir_name in sorted(dir_names):
-            sky += "<a href=\"%s/\">%s/</a>\n" % (dir_name, dir_name)
+            result["directories"].append(dir_name)
 
         del dir_names[:] # limit to one level
 
         for file_name in sorted(file_names):
-            sky += "<a href=\"%s\">%s</a>\n" % (file_name, file_name)
-    return sky + "</listing>"
+            result["files"].append(file_name)
+    return json.dumps(result)
 
-
-# FIXME: This doesn't yet support directory listings.  We'll do something like:
-# http://tools.cherrypy.org/wiki/staticdirindex
-# but have it spit .sky instead of HTML
 
 def main():
     parser = argparse.ArgumentParser(description='Sky development server')

@@ -1,0 +1,41 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="../framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="../framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+
+<template>
+  <style>
+    heading {
+      font-size: 16px;
+    }
+  </style>
+  <heading>File browser for {{ url }}</heading>
+  <template repeat="{{ directory in directories }}">
+    <a href="{{ directory }}">{{ directory }}</a>
+  </template>
+  <template repeat="{{ file in files }}">
+    <a href="{{ file }}">{{ file }}</a>
+  </template>
+</template>
+<script>
+SkyElement({
+  name: 'file-browser',
+  url: '',
+  files: [],
+  directories: [],
+  attached: function() {
+    this.url = this.ownerDocument.URL;
+    var xhr = this.xhr_ = new XMLHttpRequest();
+    xhr.open('GET', this.url + '?format=json');
+    xhr.onload = (function() {
+      var listing = JSON.parse(xhr.responseText);
+      this.files = listing.files;
+      this.directories = listing.directories;
+    }).bind(this);
+    xhr.send();
+  }
+});
+</script>

@@ -10,6 +10,7 @@ function XMLHttpRequest() {
   this.request_ = null;
   this.loader_ = null;
   this.responseText = null;
+  this.headers_ = new Map();
 };
 
 XMLHttpRequest.prototype.onload = function() { };
@@ -20,9 +21,20 @@ XMLHttpRequest.prototype.open = function(method, url) {
   this.request_.url = url;
   this.request_.method = method;
   this.request_.auto_follow_redirects = true;
+  this.headers_.clear();
+};
+
+XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
+  this.headers_.set(header, value);
 };
 
 XMLHttpRequest.prototype.send = function() {
+  var requestHeaders = [];
+  this.headers_.forEach(function(value, key) {
+    requestHeaders.push(key + ': ' + value);
+  });
+  this.request_.headers = requestHeaders;
+
   // FIXME: Factor this into the JS bindings.
   var pipe = new core.createMessagePipe();
   this.networkService_.createURLLoader(pipe.handle1);
