@@ -65,6 +65,7 @@ class SkyDebugger(object):
 
         parser = argparse.ArgumentParser(description='Sky launcher/debugger')
         parser.add_argument('--gdb', action='store_true')
+        parser.add_argument('--use-osmesa', action='store_true')
         parser.add_argument('url', nargs='?', type=str)
         args = parser.parse_args()
 
@@ -84,6 +85,8 @@ class SkyDebugger(object):
 
             prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
             shell_command.append(prompt_args)
+        if args.use_osmesa:
+            shell_command.append('--args-for=mojo://native_viewport_service/ --use-osmesa')
         if args.gdb:
             shell_command = ['gdb', '--args'] + shell_command
 
