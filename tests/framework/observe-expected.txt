@@ -2,7 +2,7 @@ ERROR: Exception caught during observer callback: ouch
 SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:627
 ERROR: Exception caught during observer callback: ouch 
 SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:627
-Running 80 tests
+Running 79 tests
 ok 1 Path constructor throws
 ok 2 Path path validity
 ok 3 Path Paths are interned
@@ -81,8 +81,7 @@ ok 75 ArrayObserver Tests Array Tracker Delete Mid Array
 ok 76 ArrayObserver Tests Array Random Case 1
 ok 77 ArrayObserver Tests Array Random Case 2
 ok 78 ArrayObserver Tests Array Random Case 3
-ok 79 ArrayObserver Tests Array Tracker Fuzzer
-ok 80 ArrayObserver Tests Array Tracker No Proxies Edits
-80 tests
-80 pass
+ok 79 ArrayObserver Tests Array Tracker No Proxies Edits
+79 tests
+79 pass
 0 fail
