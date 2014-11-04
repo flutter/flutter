@@ -295,6 +295,7 @@ module 'sky:core' {
     //  3. let that new Function's prototype be the aforementioned prototype
     //  4. let that new Function have tagName and shadow properties set to
     //     the values passed in
+    //  5. register the new element
 
     ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
