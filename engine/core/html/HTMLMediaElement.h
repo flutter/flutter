@@ -179,9 +179,6 @@ public:
     void setCloseMediaSourceWhenFinalizing();
 #endif
 
-    // Predicates also used when dispatching wrapper creation (cf. [SpecialWrapFor] IDL attribute usage.)
-    virtual bool isHTMLAudioElement() const { return false; }
-
 protected:
     HTMLMediaElement(const QualifiedName&, Document&);
     virtual ~HTMLMediaElement();
@@ -432,9 +429,10 @@ struct ValueToString<double> {
 };
 #endif
 
+// FIXME(sky): Remove this.
 inline bool isHTMLMediaElement(const HTMLElement& element)
 {
-    return isHTMLAudioElement(element);
+    return false;
 }
 
 DEFINE_HTMLELEMENT_TYPE_CASTS_WITH_FUNCTION(HTMLMediaElement);

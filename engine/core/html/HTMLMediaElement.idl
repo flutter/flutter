@@ -26,7 +26,6 @@
 [
     ActiveDOMObject,
     RuntimeEnabled=Media,
-    SpecialWrapFor=(HTMLAudioElement),
     TypeChecking=Unrestricted,
 ] interface HTMLMediaElement : HTMLElement {
 

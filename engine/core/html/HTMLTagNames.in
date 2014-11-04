@@ -2,7 +2,6 @@ namespace="HTML"
 fallbackInterfaceName="HTMLElement"
 
 a interfaceName=HTMLAnchorElement
-audio
 canvas
 content interfaceName=HTMLContentElement
 img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
