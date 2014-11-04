@@ -101,6 +101,7 @@ module 'sky:core' {
     readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root
     Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
 
+    virtual void endTagParsedCallback(); // noop
     virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
     // TODO(ianh): does a node ever need to know when it's been redistributed?
   }
@@ -284,6 +285,16 @@ module 'sky:core' {
     // if you call registerElement() with an object that was created by
     // registerElement(), it just returns the object after registering it,
     // rather than creating a new constructor
+    // otherwise, it proceeds as follows:
+    //  0. let prototype be the prototype passed in (defaulting to Element)
+    //  1. let constructor be prototype.constructor
+    //  2. create a new Function that:
+    //      0. throws if not called as a constructor
+    //      1. initialises the shadow tree is shadow on the options is true
+    //      2. calls constructor, if it's not null, with the module as the argument
+    //  3. let that new Function's prototype be the aforementioned prototype
+    //  4. let that new Function have tagName and shadow properties set to
+    //     the values passed in
 
     ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }

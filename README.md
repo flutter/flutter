@@ -28,9 +28,12 @@ to create custom elements.  The following elements are built into the engine:
  - ``content``: Visually projects descendents of the shadow host
  - ``shadow``: Visually projects older shadow roots of the shadow host
  - ``img``: Displays an image
+ - ``div``: Neutral element for hooking styles in shadow trees
+ - ``span``: Neutral element for hooking styles in shadow trees
  - ``a``: Links to another Mojo application
  - ``title``: Briefly describes the current application state to the user
  - ``t``: Preserve whitespace (by default, whitespace nodes are dropped)
+ - ``error``: Represents a parse error
 
 ### Additional Elements ###
 
