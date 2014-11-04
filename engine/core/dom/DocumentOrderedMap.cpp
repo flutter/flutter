@@ -37,26 +37,6 @@
 
 namespace blink {
 
-inline bool keyMatchesId(const AtomicString& key, const Element& element)
-{
-    return element.getIdAttribute() == key;
-}
-
-inline bool keyMatchesMapName(const AtomicString& key, const Element& element)
-{
-    return false;
-}
-
-inline bool keyMatchesLowercasedMapName(const AtomicString& key, const Element& element)
-{
-    return false;
-}
-
-inline bool keyMatchesLabelForAttribute(const AtomicString& key, const Element& element)
-{
-    return false;
-}
-
 PassOwnPtr<DocumentOrderedMap> DocumentOrderedMap::create()
 {
     return adoptPtr(new DocumentOrderedMap());
@@ -75,7 +55,6 @@ void DocumentOrderedMap::add(const AtomicString& key, Element* element)
     ASSERT(entry->count);
     entry->element = nullptr;
     entry->count++;
-    entry->orderedList.clear();
 }
 
 void DocumentOrderedMap::remove(const AtomicString& key, Element* element)
@@ -89,21 +68,15 @@ void DocumentOrderedMap::remove(const AtomicString& key, Element* element)
 
     OwnPtr<MapEntry>& entry = it->value;
     ASSERT(entry->count);
-    if (entry->count == 1) {
-        ASSERT(!entry->element || entry->element == element);
+
+    entry->count--;
+    if (!entry->count)
         m_map.remove(it);
-    } else {
-        if (entry->element == element) {
-            ASSERT(entry->orderedList.isEmpty() || entry->orderedList.first() == element);
-            entry->element = entry->orderedList.size() > 1 ? entry->orderedList[1] : nullptr;
-        }
-        entry->count--;
-        entry->orderedList.clear();
-    }
+    else if (entry->element == element)
+        entry->element = nullptr;
 }
 
-template<bool keyMatches(const AtomicString&, const Element&)>
-inline Element* DocumentOrderedMap::get(const AtomicString& key, const TreeScope* scope) const
+Element* DocumentOrderedMap::getElementById(const AtomicString& key, const TreeScope* scope) const
 {
     ASSERT(key);
     ASSERT(scope);
@@ -118,76 +91,13 @@ inline Element* DocumentOrderedMap::get(const AtomicString& key, const TreeScope
 
     // We know there's at least one node that matches; iterate to find the first one.
     for (Element* element = ElementTraversal::firstWithin(scope->rootNode()); element; element = ElementTraversal::next(*element)) {
-        if (!keyMatches(key, *element))
+        if (element->getIdAttribute() != key)
             continue;
         entry->element = element;
         return element;
     }
     ASSERT_NOT_REACHED();
     return 0;
-}
-
-Element* DocumentOrderedMap::getElementById(const AtomicString& key, const TreeScope* scope) const
-{
-    return get<keyMatchesId>(key, scope);
-}
-
-const Vector<RawPtr<Element> >& DocumentOrderedMap::getAllElementsById(const AtomicString& key, const TreeScope* scope) const
-{
-    ASSERT(key);
-    ASSERT(scope);
-    DEFINE_STATIC_LOCAL(OwnPtr<Vector<RawPtr<Element> > >, emptyVector, (adoptPtr(new Vector<RawPtr<Element> >())));
-
-    Map::iterator it = m_map.find(key);
-    if (it == m_map.end())
-        return *emptyVector;
-
-    OwnPtr<MapEntry>& entry = it->value;
-    ASSERT(entry->count);
-
-    if (entry->orderedList.isEmpty()) {
-        entry->orderedList.reserveCapacity(entry->count);
-        for (Element* element = entry->element ? entry->element.get() : ElementTraversal::firstWithin(scope->rootNode()); entry->orderedList.size() < entry->count; element = ElementTraversal::next(*element)) {
-            ASSERT(element);
-            if (!keyMatchesId(key, *element))
-                continue;
-            entry->orderedList.uncheckedAppend(element);
-        }
-        if (!entry->element)
-            entry->element = entry->orderedList.first();
-    }
-
-    return entry->orderedList;
-}
-
-Element* DocumentOrderedMap::getElementByMapName(const AtomicString& key, const TreeScope* scope) const
-{
-    return get<keyMatchesMapName>(key, scope);
-}
-
-Element* DocumentOrderedMap::getElementByLowercasedMapName(const AtomicString& key, const TreeScope* scope) const
-{
-    return get<keyMatchesLowercasedMapName>(key, scope);
-}
-
-Element* DocumentOrderedMap::getElementByLabelForAttribute(const AtomicString& key, const TreeScope* scope) const
-{
-    return get<keyMatchesLabelForAttribute>(key, scope);
-}
-
-void DocumentOrderedMap::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_map);
-#endif
-}
-
-void DocumentOrderedMap::MapEntry::trace(Visitor* visitor)
-{
-    visitor->trace(element);
-#if ENABLE(OILPAN)
-    visitor->trace(orderedList);
-#endif
 }
 
 } // namespace blink

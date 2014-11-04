@@ -31,69 +31,41 @@
 #ifndef DocumentOrderedMap_h
 #define DocumentOrderedMap_h
 
-#include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
 #include "wtf/HashMap.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/AtomicStringHash.h"
-#include "wtf/text/StringImpl.h"
 
 namespace blink {
 
 class Element;
 class TreeScope;
 
-class DocumentOrderedMap : public DummyBase<DocumentOrderedMap> {
+class DocumentOrderedMap {
 public:
     static PassOwnPtr<DocumentOrderedMap> create();
+
     void add(const AtomicString&, Element*);
     void remove(const AtomicString&, Element*);
 
-    bool contains(const AtomicString&) const;
-    bool containsMultiple(const AtomicString&) const;
-    // concrete instantiations of the get<>() method template
     Element* getElementById(const AtomicString&, const TreeScope*) const;
-    const Vector<RawPtr<Element> >& getAllElementsById(const AtomicString&, const TreeScope*) const;
-    Element* getElementByMapName(const AtomicString&, const TreeScope*) const;
-    Element* getElementByLowercasedMapName(const AtomicString&, const TreeScope*) const;
-    Element* getElementByLabelForAttribute(const AtomicString&, const TreeScope*) const;
-
-    void trace(Visitor*);
 
 private:
-    template<bool keyMatches(const AtomicString&, const Element&)>
-    Element* get(const AtomicString&, const TreeScope*) const;
-
-    class MapEntry : public DummyBase<MapEntry> {
+    class MapEntry {
     public:
-        explicit MapEntry(Element* firstElement)
-            : element(firstElement)
+        explicit MapEntry(Element* element)
+            : element(element)
             , count(1)
         {
         }
 
-        void trace(Visitor*);
-
-        RawPtr<Element> element;
+        Element* element;
         unsigned count;
-        Vector<RawPtr<Element> > orderedList;
     };
 
     typedef HashMap<AtomicString, OwnPtr<MapEntry> > Map;
-
-    mutable Map m_map;
+    Map m_map;
 };
-
-inline bool DocumentOrderedMap::contains(const AtomicString& id) const
-{
-    return m_map.contains(id);
-}
-
-inline bool DocumentOrderedMap::containsMultiple(const AtomicString& id) const
-{
-    Map::const_iterator it = m_map.find(id);
-    return it != m_map.end() && it->value->count > 1;
-}
 
 } // namespace blink
 

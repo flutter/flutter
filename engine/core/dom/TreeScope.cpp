@@ -160,16 +160,6 @@ Element* TreeScope::getElementById(const AtomicString& elementId) const
     return m_elementsById->getElementById(elementId, this);
 }
 
-const Vector<RawPtr<Element> >& TreeScope::getAllElementsById(const AtomicString& elementId) const
-{
-    DEFINE_STATIC_LOCAL(OwnPtr<Vector<RawPtr<Element> > >, emptyVector, (adoptPtr(new Vector<RawPtr<Element> >())));
-    if (elementId.isEmpty())
-        return *emptyVector;
-    if (!m_elementsById)
-        return *emptyVector;
-    return m_elementsById->getAllElementsById(elementId, this);
-}
-
 void TreeScope::addElementById(const AtomicString& elementId, Element* element)
 {
     if (!m_elementsById)
