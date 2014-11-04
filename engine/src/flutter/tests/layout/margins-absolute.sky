@@ -1,0 +1,21 @@
+<sky>
+  <import src="../resources/check-layout.sky" as="checkLayout" />
+  <style>
+  .root {
+    margin: 5px;
+  }
+  .child {
+    margin: 10px;
+    height: 30px;
+    position: absolute;
+  }
+  </style>
+  <div class="root" data-expected-height="0" data-total-y="5" style="background-color: pink">
+    <div class="child" data-total-y="15" style="background-color: salmon"></div>
+  </div>
+
+  <script>
+    checkLayout('.root');
+  </script>
+</sky>
+
