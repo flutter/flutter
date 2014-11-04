@@ -42,7 +42,6 @@
 
 namespace blink {
 
-class MarginInfo;
 class LineBreaker;
 class LineWidth;
 class FloatingObject;
@@ -51,7 +50,6 @@ class RenderBlockFlow : public RenderBlock {
 public:
     explicit RenderBlockFlow(ContainerNode*);
     virtual ~RenderBlockFlow();
-    virtual void trace(Visitor*) override;
 
     static RenderBlockFlow* createAnonymous(Document*);
 
@@ -141,8 +139,8 @@ private:
     void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
     void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
-    void layoutBlockChild(RenderBox* child, MarginInfo&);
-    void adjustPositionedBlock(RenderBox* child, const MarginInfo&);
+    void layoutBlockChild(RenderBox* child);
+    void adjustPositionedBlock(RenderBox* child);
 
     virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
@@ -176,123 +174,14 @@ public:
         bool everHadLayout;
     };
 
-    class MarginValues {
-    public:
-        MarginValues(LayoutUnit beforePos, LayoutUnit beforeNeg, LayoutUnit afterPos, LayoutUnit afterNeg)
-            : m_positiveMarginBefore(beforePos)
-            , m_negativeMarginBefore(beforeNeg)
-            , m_positiveMarginAfter(afterPos)
-            , m_negativeMarginAfter(afterNeg)
-        { }
-
-        LayoutUnit positiveMarginBefore() const { return m_positiveMarginBefore; }
-        LayoutUnit negativeMarginBefore() const { return m_negativeMarginBefore; }
-        LayoutUnit positiveMarginAfter() const { return m_positiveMarginAfter; }
-        LayoutUnit negativeMarginAfter() const { return m_negativeMarginAfter; }
-
-        void setPositiveMarginBefore(LayoutUnit pos) { m_positiveMarginBefore = pos; }
-        void setNegativeMarginBefore(LayoutUnit neg) { m_negativeMarginBefore = neg; }
-        void setPositiveMarginAfter(LayoutUnit pos) { m_positiveMarginAfter = pos; }
-        void setNegativeMarginAfter(LayoutUnit neg) { m_negativeMarginAfter = neg; }
-
-    private:
-        LayoutUnit m_positiveMarginBefore;
-        LayoutUnit m_negativeMarginBefore;
-        LayoutUnit m_positiveMarginAfter;
-        LayoutUnit m_negativeMarginAfter;
-    };
-    MarginValues marginValuesForChild(RenderBox* child) const;
-
-    // Allocated only when some of these fields have non-default values
-    struct RenderBlockFlowRareData : public DummyBase<RenderBlockFlowRareData> {
-        WTF_MAKE_NONCOPYABLE(RenderBlockFlowRareData); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
-    public:
-        RenderBlockFlowRareData(const RenderBlockFlow* block)
-            : m_margins(positiveMarginBeforeDefault(block), negativeMarginBeforeDefault(block), positiveMarginAfterDefault(block), negativeMarginAfterDefault(block))
-            , m_discardMarginBefore(false)
-            , m_discardMarginAfter(false)
-        {
-        }
-        void trace(Visitor*);
-
-        static LayoutUnit positiveMarginBeforeDefault(const RenderBlockFlow* block)
-        {
-            return std::max<LayoutUnit>(block->marginBefore(), 0);
-        }
-        static LayoutUnit negativeMarginBeforeDefault(const RenderBlockFlow* block)
-        {
-            return std::max<LayoutUnit>(-block->marginBefore(), 0);
-        }
-        static LayoutUnit positiveMarginAfterDefault(const RenderBlockFlow* block)
-        {
-            return std::max<LayoutUnit>(block->marginAfter(), 0);
-        }
-        static LayoutUnit negativeMarginAfterDefault(const RenderBlockFlow* block)
-        {
-            return std::max<LayoutUnit>(-block->marginAfter(), 0);
-        }
-
-        MarginValues m_margins;
-        bool m_discardMarginBefore : 1;
-        bool m_discardMarginAfter : 1;
-    };
-    LayoutUnit marginOffsetForSelfCollapsingBlock();
-
 protected:
-    LayoutUnit maxPositiveMarginBefore() const { return m_rareData ? m_rareData->m_margins.positiveMarginBefore() : RenderBlockFlowRareData::positiveMarginBeforeDefault(this); }
-    LayoutUnit maxNegativeMarginBefore() const { return m_rareData ? m_rareData->m_margins.negativeMarginBefore() : RenderBlockFlowRareData::negativeMarginBeforeDefault(this); }
-    LayoutUnit maxPositiveMarginAfter() const { return m_rareData ? m_rareData->m_margins.positiveMarginAfter() : RenderBlockFlowRareData::positiveMarginAfterDefault(this); }
-    LayoutUnit maxNegativeMarginAfter() const { return m_rareData ? m_rareData->m_margins.negativeMarginAfter() : RenderBlockFlowRareData::negativeMarginAfterDefault(this); }
-
-    void setMaxMarginBeforeValues(LayoutUnit pos, LayoutUnit neg);
-    void setMaxMarginAfterValues(LayoutUnit pos, LayoutUnit neg);
-
-    void setMustDiscardMarginBefore(bool = true);
-    void setMustDiscardMarginAfter(bool = true);
-
-    bool mustDiscardMarginBefore() const;
-    bool mustDiscardMarginAfter() const;
-
-    bool mustDiscardMarginBeforeForChild(const RenderBox*) const;
-    bool mustDiscardMarginAfterForChild(const RenderBox*) const;
-
-    bool mustSeparateMarginBeforeForChild(const RenderBox*) const;
-    bool mustSeparateMarginAfterForChild(const RenderBox*) const;
-
-    void initMaxMarginValues()
-    {
-        if (m_rareData) {
-            m_rareData->m_margins = MarginValues(RenderBlockFlowRareData::positiveMarginBeforeDefault(this) , RenderBlockFlowRareData::negativeMarginBeforeDefault(this),
-                RenderBlockFlowRareData::positiveMarginAfterDefault(this), RenderBlockFlowRareData::negativeMarginAfterDefault(this));
-
-            m_rareData->m_discardMarginBefore = false;
-            m_rareData->m_discardMarginAfter = false;
-        }
-    }
-
     virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 private:
-    virtual LayoutUnit collapsedMarginBefore() const override final { return maxPositiveMarginBefore() - maxNegativeMarginBefore(); }
-    virtual LayoutUnit collapsedMarginAfter() const override final { return maxPositiveMarginAfter() - maxNegativeMarginAfter(); }
-
-    LayoutUnit collapseMargins(RenderBox* child, MarginInfo&, bool childIsSelfCollapsing);
-    LayoutUnit estimateLogicalTopPosition(RenderBox* child, const MarginInfo&);
-    void marginBeforeEstimateForChild(RenderBox*, LayoutUnit&, LayoutUnit&, bool&) const;
-    void handleAfterSideOfBlock(RenderBox* lastChild, LayoutUnit top, LayoutUnit bottom, MarginInfo&);
-    void setCollapsedBottomMargin(const MarginInfo&);
-
-    RenderBlockFlowRareData& ensureRareData();
-
     LayoutUnit m_paintInvalidationLogicalTop;
     LayoutUnit m_paintInvalidationLogicalBottom;
 
-    virtual bool isSelfCollapsingBlock() const override;
-
 protected:
-    OwnPtr<RenderBlockFlowRareData> m_rareData;
-
     friend class BreakingContext; // FIXME: It uses insertFloatingObject and positionNewFloatOnLine, if we move those out from the private scope/add a helper to LineBreaker, we can remove this friend
-    friend class MarginInfo;
     friend class LineBreaker;
 
 // FIXME-BLOCKFLOW: These methods have implementations in

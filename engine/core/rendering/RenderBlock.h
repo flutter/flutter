@@ -194,8 +194,8 @@ public:
     void setMarginEndForChild(RenderBox* child, LayoutUnit value) const { child->setMarginEnd(value, style()); }
     void setMarginBeforeForChild(RenderBox* child, LayoutUnit value) const { child->setMarginBefore(value, style()); }
     void setMarginAfterForChild(RenderBox* child, LayoutUnit value) const { child->setMarginAfter(value, style()); }
-    LayoutUnit collapsedMarginBeforeForChild(const RenderBox* child) const;
-    LayoutUnit collapsedMarginAfterForChild(const RenderBox* child) const;
+    LayoutUnit marginBeforeForChild(const RenderBox* child) const;
+    LayoutUnit marginAfterForChild(const RenderBox* child) const;
 
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
 
@@ -313,8 +313,6 @@ private:
 
     void addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild = 0);
 
-    virtual bool isSelfCollapsingBlock() const override;
-
     void insertIntoTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
 
@@ -402,7 +400,6 @@ protected:
     unsigned m_beingDestroyed : 1;
     unsigned m_hasMarkupTruncation : 1;
     unsigned m_hasBorderOrPaddingLogicalWidthChanged : 1;
-    mutable unsigned m_hasOnlySelfCollapsingChildren : 1;
 
     // FIXME-BLOCKFLOW: Remove this when the line layout stuff has all moved out of RenderBlock
     friend class LineBreaker;

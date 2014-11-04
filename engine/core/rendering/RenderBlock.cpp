@@ -88,7 +88,6 @@ RenderBlock::RenderBlock(ContainerNode* node)
     , m_beingDestroyed(false)
     , m_hasMarkupTruncation(false)
     , m_hasBorderOrPaddingLogicalWidthChanged(false)
-    , m_hasOnlySelfCollapsingChildren(false)
 {
     // RenderBlockFlow calls setChildrenInline(true).
     // By default, subclasses do not have inline children.
@@ -836,64 +835,6 @@ void RenderBlock::removeChild(RenderObject* oldChild)
             destroy();
         }
     }
-}
-
-bool RenderBlock::isSelfCollapsingBlock() const
-{
-    // We are not self-collapsing if we
-    // (a) have a non-zero height according to layout (an optimization to avoid wasting time)
-    // (b) are a table,
-    // (c) have border/padding,
-    // (d) have a min-height
-    // (e) have specified that one of our margins can't collapse using a CSS extension
-    // (f) establish a new block formatting context.
-
-    // The early exit must be done before we check for clean layout.
-    // We should be able to give a quick answer if the box is a relayout boundary.
-    // Being a relayout boundary implies a block formatting context, and also
-    // our internal layout shouldn't affect our container in any way.
-    if (createsBlockFormattingContext())
-        return false;
-
-    ASSERT(!needsLayout());
-
-    if (logicalHeight() > 0
-        || borderAndPaddingLogicalHeight()
-        || style()->logicalMinHeight().isPositive()
-        || style()->marginBeforeCollapse() == MSEPARATE || style()->marginAfterCollapse() == MSEPARATE)
-        return false;
-
-    Length logicalHeightLength = style()->logicalHeight();
-    bool hasAutoHeight = logicalHeightLength.isAuto();
-    if (logicalHeightLength.isPercent()) {
-        hasAutoHeight = true;
-        for (RenderBlock* cb = containingBlock(); !cb->isRenderView(); cb = cb->containingBlock()) {
-            if (cb->style()->logicalHeight().isFixed())
-                hasAutoHeight = false;
-        }
-    }
-
-    // If the height is 0 or auto, then whether or not we are a self-collapsing block depends
-    // on whether we have content that is all self-collapsing or not.
-    if (hasAutoHeight || ((logicalHeightLength.isFixed() || logicalHeightLength.isPercent()) && logicalHeightLength.isZero())) {
-        // If the block has inline children, see if we generated any line boxes.  If we have any
-        // line boxes, then we can't be self-collapsing, since we have content.
-        if (childrenInline())
-            return !firstLineBox();
-
-        // Whether or not we collapse is dependent on whether all our normal flow children
-        // are also self-collapsing.
-        if (m_hasOnlySelfCollapsingChildren)
-            return true;
-        for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-            if (child->isFloatingOrOutOfFlowPositioned())
-                continue;
-            if (!child->isSelfCollapsingBlock())
-                return false;
-        }
-        return true;
-    }
-    return false;
 }
 
 void RenderBlock::startDelayUpdateScrollInfo()
@@ -2735,8 +2676,8 @@ void RenderBlock::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accum
     if (isAnonymousBlockContinuation()) {
         // FIXME: This is wrong for block-flows that are horizontal.
         // https://bugs.webkit.org/show_bug.cgi?id=46781
-        rects.append(pixelSnappedIntRect(accumulatedOffset.x(), accumulatedOffset.y() - collapsedMarginBefore(),
-                                width(), height() + collapsedMarginBefore() + collapsedMarginAfter()));
+        rects.append(pixelSnappedIntRect(accumulatedOffset.x(), accumulatedOffset.y() - marginBefore(),
+                                width(), height() + marginBefore() + marginAfter()));
         continuation()->absoluteRects(rects, accumulatedOffset - toLayoutSize(location() +
                 inlineElementContinuation()->containingBlock()->location()));
     } else
@@ -2751,8 +2692,8 @@ void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads) const
     if (isAnonymousBlockContinuation()) {
         // FIXME: This is wrong for block-flows that are horizontal.
         // https://bugs.webkit.org/show_bug.cgi?id=46781
-        FloatRect localRect(0, -collapsedMarginBefore().toFloat(),
-            width().toFloat(), (height() + collapsedMarginBefore() + collapsedMarginAfter()).toFloat());
+        FloatRect localRect(0, -marginBefore().toFloat(),
+            width().toFloat(), (height() + marginBefore() + marginAfter()).toFloat());
         quads.append(localToAbsoluteQuad(localRect, 0 /* mode */));
         continuation()->absoluteQuads(quads);
     } else {
@@ -2764,7 +2705,7 @@ LayoutRect RenderBlock::rectWithOutlineForPaintInvalidation(const RenderLayerMod
 {
     LayoutRect r(RenderBox::rectWithOutlineForPaintInvalidation(paintInvalidationContainer, outlineWidth, paintInvalidationState));
     if (isAnonymousBlockContinuation())
-        r.inflateY(collapsedMarginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
+        r.inflateY(marginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
     return r;
 }
 
@@ -2820,8 +2761,8 @@ void RenderBlock::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& a
         // FIXME: This is wrong for block-flows that are horizontal.
         // https://bugs.webkit.org/show_bug.cgi?id=46781
         bool prevInlineHasLineBox = toRenderInline(inlineElementContinuation()->node()->renderer())->firstLineBox();
-        LayoutUnit topMargin = prevInlineHasLineBox ? collapsedMarginBefore() : LayoutUnit();
-        LayoutUnit bottomMargin = nextInlineHasLineBox ? collapsedMarginAfter() : LayoutUnit();
+        LayoutUnit topMargin = prevInlineHasLineBox ? marginBefore() : LayoutUnit();
+        LayoutUnit bottomMargin = nextInlineHasLineBox ? marginAfter() : LayoutUnit();
         LayoutRect rect(additionalOffset.x(), additionalOffset.y() - topMargin, width(), height() + topMargin + bottomMargin);
         if (!rect.isEmpty())
             rects.append(pixelSnappedIntRect(rect));
@@ -2866,16 +2807,16 @@ RenderBox* RenderBlock::createAnonymousBoxWithSameTypeAs(const RenderObject* par
     return createAnonymousWithParentRendererAndDisplay(parent, style()->display());
 }
 
-LayoutUnit RenderBlock::collapsedMarginBeforeForChild(const RenderBox* child) const
+LayoutUnit RenderBlock::marginBeforeForChild(const RenderBox* child) const
 {
     // FIXME(sky): Remove
-    return child->collapsedMarginBefore();
+    return child->marginBefore();
 }
 
-LayoutUnit RenderBlock::collapsedMarginAfterForChild(const  RenderBox* child) const
+LayoutUnit RenderBlock::marginAfterForChild(const  RenderBox* child) const
 {
     // FIXME(sky): Remove
-    return child->collapsedMarginAfter();
+    return child->marginAfter();
 }
 
 bool RenderBlock::hasMarginBeforeQuirk(const RenderBox* child) const
