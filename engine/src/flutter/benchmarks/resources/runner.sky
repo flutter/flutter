@@ -3,6 +3,7 @@ function PerfRunner(options) {
   this.unit_ = options.unit || "ms";
   this.iterationsRemaining_ = options.iterations || 10;
   this.results_ = [];
+  this.setup_ = options.setup;
 }
 
 PerfRunner.prototype.log = function(line) {
@@ -17,9 +18,15 @@ PerfRunner.prototype.recordResult = function(result) {
 PerfRunner.prototype.runAsync = function(test) {
   var self = this;
   window.setTimeout(function() {
+    if (self.setup_) {
+      var setup = self.setup_;
+      setup();
+    }
+
     var startTime = Date.now();
     test(function() {
       var endTime = Date.now();
+
       self.recordResult(endTime - startTime);
       if (--self.iterationsRemaining_ > 0)
         self.runAsync(test);
