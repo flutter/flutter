@@ -32,7 +32,7 @@
 #include "public/web/WebRuntimeFeatures.h"
 
 #include "platform/RuntimeEnabledFeatures.h"
-#include "web/WebMediaPlayerClientImpl.h"
+#include "wtf/Assertions.h"
 
 namespace blink {
 
@@ -57,34 +57,6 @@ void WebRuntimeFeatures::enableTestOnlyFeatures(bool enable)
 void WebRuntimeFeatures::enableDatabase(bool enable)
 {
     RuntimeEnabledFeatures::setDatabaseEnabled(enable);
-}
-
-void WebRuntimeFeatures::enableEncryptedMedia(bool enable)
-{
-    RuntimeEnabledFeatures::setEncryptedMediaEnabled(enable);
-    // FIXME: Hack to allow MediaKeyError to be enabled for either version.
-    RuntimeEnabledFeatures::setEncryptedMediaAnyVersionEnabled(
-        RuntimeEnabledFeatures::encryptedMediaEnabled()
-        || RuntimeEnabledFeatures::prefixedEncryptedMediaEnabled());
-}
-
-bool WebRuntimeFeatures::isEncryptedMediaEnabled()
-{
-    return RuntimeEnabledFeatures::encryptedMediaEnabled();
-}
-
-void WebRuntimeFeatures::enablePrefixedEncryptedMedia(bool enable)
-{
-    RuntimeEnabledFeatures::setPrefixedEncryptedMediaEnabled(enable);
-    // FIXME: Hack to allow MediaKeyError to be enabled for either version.
-    RuntimeEnabledFeatures::setEncryptedMediaAnyVersionEnabled(
-        RuntimeEnabledFeatures::encryptedMediaEnabled()
-        || RuntimeEnabledFeatures::prefixedEncryptedMediaEnabled());
-}
-
-bool WebRuntimeFeatures::isPrefixedEncryptedMediaEnabled()
-{
-    return RuntimeEnabledFeatures::prefixedEncryptedMediaEnabled();
 }
 
 void WebRuntimeFeatures::enableExperimentalCanvasFeatures(bool enable)
@@ -115,11 +87,6 @@ void WebRuntimeFeatures::enableSubpixelFontScaling(bool enable)
 void WebRuntimeFeatures::enableMediaCapture(bool enable)
 {
     RuntimeEnabledFeatures::setMediaCaptureEnabled(enable);
-}
-
-void WebRuntimeFeatures::enableMediaSource(bool enable)
-{
-    RuntimeEnabledFeatures::setMediaSourceEnabled(enable);
 }
 
 void WebRuntimeFeatures::enableNotifications(bool enable)

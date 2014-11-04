@@ -47,9 +47,6 @@ public:
     virtual SupportsType supportsJavaScriptMIMEType(const WebString& mimeType) = 0;
     virtual SupportsType supportsMediaMIMEType(const WebString& mimeType, const WebString& codecs, const WebString& keySystem) = 0;
 
-    virtual bool supportsMediaSourceMIMEType(const WebString& mimeType, const WebString& codecs) = 0;
-    virtual bool supportsEncryptedMediaMIMEType(const WebString& keySystem, const WebString& mimeType, const WebString& codecs) = 0;
-
     virtual SupportsType supportsNonImageMIMEType(const WebString& mimeType) = 0;
 
     virtual WebString mimeTypeForExtension(const WebString& fileExtension) = 0;

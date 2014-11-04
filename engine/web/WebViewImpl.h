@@ -156,9 +156,6 @@ public:
 
     virtual void setFixedLayoutSize(const WebSize&) override;
 
-    virtual void performMediaPlayerAction(
-        const WebMediaPlayerAction& action,
-        const WebPoint& location) override;
     virtual WebHitTestResult hitTestResultAt(const WebPoint&) override;
     virtual void copyImageAt(const WebPoint&) override;
     virtual void saveImageAt(const WebPoint&) override;

@@ -98,16 +98,4 @@ bool MIMETypeRegistry::isSupportedNonImageMIMEType(const String& mimeType)
         != blink::WebMimeRegistry::IsNotSupported;
 }
 
-bool MIMETypeRegistry::isSupportedMediaSourceMIMEType(const String& mimeType, const String& codecs)
-{
-    return !mimeType.isEmpty()
-        && blink::Platform::current()->mimeRegistry()->supportsMediaSourceMIMEType(mimeType.lower(), codecs);
-}
-
-bool MIMETypeRegistry::isSupportedEncryptedMediaMIMEType(const String& keySystem, const String& mimeType, const String& codecs)
-{
-    // Key system names are case-sensitive!
-    return blink::Platform::current()->mimeRegistry()->supportsEncryptedMediaMIMEType(keySystem, mimeType.lower(), codecs);
-}
-
 } // namespace blink

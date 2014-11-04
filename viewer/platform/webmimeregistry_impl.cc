@@ -62,21 +62,6 @@ blink::WebMimeRegistry::SupportsType WebMimeRegistryImpl::supportsMediaMIMEType(
   return IsNotSupported;
 }
 
-bool WebMimeRegistryImpl::supportsMediaSourceMIMEType(
-    const blink::WebString& mime_type,
-    const blink::WebString& codecs) {
-  NOTIMPLEMENTED();
-  return false;
-}
-
-bool WebMimeRegistryImpl::supportsEncryptedMediaMIMEType(
-    const blink::WebString& key_system,
-    const blink::WebString& mime_type,
-    const blink::WebString& codecs) {
-  NOTIMPLEMENTED();
-  return false;
-}
-
 blink::WebMimeRegistry::SupportsType
     WebMimeRegistryImpl::supportsNonImageMIMEType(
     const blink::WebString& mime_type) {

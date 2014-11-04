@@ -47,8 +47,6 @@ namespace blink {
 class WebCachedURLRequest;
 class WebDOMEvent;
 class WebInputEvent;
-class WebMediaPlayer;
-class WebMediaPlayerClient;
 class WebNode;
 class WebString;
 class WebURL;
@@ -62,12 +60,6 @@ struct WebURLError;
 
 class WebFrameClient {
 public:
-    // Factory methods -----------------------------------------------------
-
-    // May return null.
-    virtual WebMediaPlayer* createMediaPlayer(WebLocalFrame*, const WebURL&, WebMediaPlayerClient*) { return 0; }
-
-
     // General notifications -----------------------------------------------
 
     // A child frame was created in this frame. This is called when the frame

@@ -27,7 +27,6 @@
 #include "config.h"
 #include "core/rendering/compositing/GraphicsLayerTreeBuilder.h"
 
-#include "core/html/HTMLMediaElement.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
@@ -41,16 +40,6 @@ GraphicsLayerTreeBuilder::GraphicsLayerTreeBuilder()
 
 GraphicsLayerTreeBuilder::~GraphicsLayerTreeBuilder()
 {
-}
-
-static bool shouldAppendLayer(const RenderLayer& layer)
-{
-    if (!RuntimeEnabledFeatures::overlayFullscreenVideoEnabled())
-        return true;
-    Node* node = layer.renderer()->node();
-    if (node && isHTMLMediaElement(*node) && toHTMLMediaElement(node)->isFullscreen())
-        return false;
-    return true;
 }
 
 void GraphicsLayerTreeBuilder::rebuild(RenderLayer& layer, AncestorInfo info)
@@ -114,8 +103,7 @@ void GraphicsLayerTreeBuilder::rebuild(RenderLayer& layer, AncestorInfo info)
             }
         }
 
-        if (shouldAppendLayer(layer))
-            info.childLayersOfEnclosingCompositedLayer->append(currentCompositedLayerMapping->childForSuperlayers());
+        info.childLayersOfEnclosingCompositedLayer->append(currentCompositedLayerMapping->childForSuperlayers());
     }
 
     if (layer.scrollParent()

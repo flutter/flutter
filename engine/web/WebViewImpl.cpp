@@ -51,7 +51,6 @@
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
 #include "core/html/HTMLImportElement.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/html/ime/InputMethodContext.h"
 #include "core/loader/FrameLoader.h"
 #include "core/loader/UniqueIdentifier.h"
@@ -92,7 +91,6 @@
 #include "public/web/WebBeginFrameArgs.h"
 #include "public/web/WebFrameClient.h"
 #include "public/web/WebHitTestResult.h"
-#include "public/web/WebMediaPlayerAction.h"
 #include "public/web/WebNode.h"
 #include "public/web/WebRange.h"
 #include "public/web/WebTextInputInfo.h"
@@ -1886,12 +1884,6 @@ void WebViewImpl::setFixedLayoutSize(const WebSize& layoutSize)
         view->setLayoutSize(layoutSize);
     else
         updateMainFrameLayoutSize();
-}
-
-void WebViewImpl::performMediaPlayerAction(const WebMediaPlayerAction& action,
-                                           const WebPoint& location)
-{
-    // FIXME(sky): Remove this.
 }
 
 WebHitTestResult WebViewImpl::hitTestResultAt(const WebPoint& point)

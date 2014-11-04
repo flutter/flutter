@@ -56,7 +56,6 @@
 #include "core/html/HTMLDocument.h"
 #include "core/inspector/ScriptCallStack.h"
 #include "platform/PlatformScreen.h"
-#include "platform/graphics/media/MediaPlayer.h"
 #include "wtf/ArrayBuffer.h"
 #include "wtf/Assertions.h"
 #include "wtf/OwnPtr.h"

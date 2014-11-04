@@ -61,12 +61,6 @@ public:
     // Check to see if a non-image mime type is suitable for being loaded as a
     // document in a frame. Includes supported JavaScript MIME types.
     static bool isSupportedNonImageMIMEType(const String& mimeType);
-
-    // Check to see if the mime type and codecs are supported by the MediaSource implementation.
-    static bool isSupportedMediaSourceMIMEType(const String& mimeType, const String& codecs);
-
-    // Check to see if the key system, mime type and codecs are supported by the Encrypted Media Extensions implementation.
-    static bool isSupportedEncryptedMediaMIMEType(const String& keySystem, const String& mimeType, const String& codecs);
 };
 
 } // namespace blink

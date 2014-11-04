@@ -28,13 +28,6 @@ class WebMimeRegistryImpl : public blink::WebMimeRegistry {
       const blink::WebString& mime_type,
       const blink::WebString& codecs,
       const blink::WebString& key_system);
-  virtual bool supportsMediaSourceMIMEType(
-      const blink::WebString& mime_type,
-      const blink::WebString& codecs);
-  virtual bool supportsEncryptedMediaMIMEType(
-      const blink::WebString& key_system,
-      const blink::WebString& mime_type,
-      const blink::WebString& codecs);
   virtual blink::WebMimeRegistry::SupportsType supportsNonImageMIMEType(
       const blink::WebString& mime_type);
   virtual blink::WebString mimeTypeForExtension(

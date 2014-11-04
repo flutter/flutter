@@ -33,7 +33,6 @@
 #include "core/dom/Document.h"
 #include "core/events/Event.h"
 #include "core/events/EventSender.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/html/HTMLPictureElement.h"
 #include "platform/Logging.h"
 
@@ -86,8 +85,6 @@ Node::InsertionNotificationRequest HTMLSourceElement::insertedInto(ContainerNode
 {
     HTMLElement::insertedInto(insertionPoint);
     Element* parent = parentElement();
-    if (isHTMLMediaElement(parent))
-        toHTMLMediaElement(parent)->sourceWasAdded(this);
     if (isHTMLPictureElement(parent))
         toHTMLPictureElement(parent)->sourceOrMediaChanged();
     return InsertionDone;
@@ -98,8 +95,6 @@ void HTMLSourceElement::removedFrom(ContainerNode* removalRoot)
     Element* parent = parentElement();
     if (!parent && removalRoot->isElementNode())
         parent = toElement(removalRoot);
-    if (isHTMLMediaElement(parent))
-        toHTMLMediaElement(parent)->sourceWasRemoved(this);
     if (isHTMLPictureElement(parent))
         toHTMLPictureElement(parent)->sourceOrMediaChanged();
     HTMLElement::removedFrom(removalRoot);

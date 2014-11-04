@@ -31,7 +31,6 @@
 #include "core/frame/LocalFrame.h"
 #include "core/html/HTMLAnchorElement.h"
 #include "core/html/HTMLImageElement.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/rendering/RenderImage.h"
 #include "platform/scroll/Scrollbar.h"
@@ -267,26 +266,6 @@ KURL HitTestResult::absoluteImageURLInternal(bool allowCanvas) const
         return KURL();
 
     return m_innerNonSharedNode->document().completeURL(stripLeadingAndTrailingHTMLSpaces(urlString));
-}
-
-KURL HitTestResult::absoluteMediaURL() const
-{
-    if (HTMLMediaElement* mediaElt = mediaElement())
-        return mediaElt->currentSrc();
-    return KURL();
-}
-
-HTMLMediaElement* HitTestResult::mediaElement() const
-{
-    if (!m_innerNonSharedNode)
-        return 0;
-
-    if (!(m_innerNonSharedNode->renderer() && m_innerNonSharedNode->renderer()->isMedia()))
-        return 0;
-
-    if (isHTMLMediaElement(*m_innerNonSharedNode))
-        return toHTMLMediaElement(m_innerNonSharedNode);
-    return 0;
 }
 
 KURL HitTestResult::absoluteLinkURL() const

@@ -44,12 +44,6 @@ public:
 
     BLINK_EXPORT static void enableDatabase(bool);
 
-    BLINK_EXPORT static void enableEncryptedMedia(bool);
-    BLINK_EXPORT static bool isEncryptedMediaEnabled();
-
-    BLINK_EXPORT static void enablePrefixedEncryptedMedia(bool);
-    BLINK_EXPORT static bool isPrefixedEncryptedMediaEnabled();
-
     BLINK_EXPORT static void enableBleedingEdgeFastPaths(bool);
 
     BLINK_EXPORT static void enableExperimentalCanvasFeatures(bool);
@@ -63,8 +57,6 @@ public:
     BLINK_EXPORT static void enableSubpixelFontScaling(bool);
 
     BLINK_EXPORT static void enableMediaCapture(bool);
-
-    BLINK_EXPORT static void enableMediaSource(bool);
 
     BLINK_EXPORT static void enableNotifications(bool);
 

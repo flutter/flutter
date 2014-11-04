@@ -51,7 +51,6 @@ class WebSpellCheckClient;
 class WebString;
 class WebViewClient;
 struct WebActiveWheelFlingParameters;
-struct WebMediaPlayerAction;
 struct WebPoint;
 struct WebFloatPoint;
 
@@ -218,14 +217,6 @@ public:
     // Locks main frame's layout size to specified size. Passing WebSize(0, 0)
     // removes the lock.
     virtual void setFixedLayoutSize(const WebSize&) = 0;
-
-
-    // Media ---------------------------------------------------------------
-
-    // Performs the specified media player action on the node at the given location.
-    virtual void performMediaPlayerAction(
-        const WebMediaPlayerAction&, const WebPoint& location) = 0;
-
 
     // Data exchange -------------------------------------------------------
 

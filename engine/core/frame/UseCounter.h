@@ -205,7 +205,6 @@ public:
         FormNameAccessForImageElement = 246,
         FormNameAccessForPastNamesMap = 247,
         FormAssociationByParser = 248,
-        MediaErrorEncrypted = 253,
         WebSocketURL = 255,
         WorkerAllowedByChildBlockedByScript = 258,
         DeprecatedWebKitGradient = 260,
@@ -220,8 +219,6 @@ public:
         TextAutosizing = 274,
         HTMLAnchorElementPingAttribute = 276,
         SVGClassName = 279,
-        HTMLMediaElementSeekToFragmentStart = 281,
-        HTMLMediaElementPauseAtFragmentEnd = 282,
         PrefixedWindowURL = 283,
         PrefixedWorkerURL = 284, // This didn't work because of crbug.com/376039. Available since M37.
         WindowOrientation = 285,

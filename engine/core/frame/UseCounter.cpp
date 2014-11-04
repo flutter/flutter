@@ -157,9 +157,6 @@ String UseCounter::deprecationMessage(Feature feature)
     case CSSStyleSheetInsertRuleOptionalArg:
         return "Calling CSSStyleSheet.insertRule() with one argument is deprecated. Please pass the index argument as well: insertRule(x, 0).";
 
-    case MediaErrorEncrypted:
-        return "'MediaError.MEDIA_ERR_ENCRYPTED' is deprecated. This error code is never used.";
-
     case PrefixedIndexedDB:
         return replacedBy("webkitIndexedDB", "indexedDB");
 

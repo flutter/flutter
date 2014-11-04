@@ -30,7 +30,6 @@
 #include "core/fetch/ImageResource.h"
 #include "core/frame/FrameView.h"
 #include "core/html/HTMLCanvasElement.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/html/canvas/CanvasRenderingContext.h"
 #include "core/inspector/InspectorNodeIds.h"
 #include "core/inspector/InspectorTraceEvents.h"
@@ -430,10 +429,7 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
         }
     }
 
-    if (renderer->isVideo()) {
-        HTMLMediaElement* mediaElement = toHTMLMediaElement(renderer->node());
-        m_graphicsLayer->setContentsToPlatformLayer(mediaElement->platformLayer());
-    } else if (isAcceleratedCanvas(renderer)) {
+    if (isAcceleratedCanvas(renderer)) {
         HTMLCanvasElement* canvas = toHTMLCanvasElement(renderer->node());
         if (CanvasRenderingContext* context = canvas->renderingContext())
             m_graphicsLayer->setContentsToPlatformLayer(context->platformLayer());

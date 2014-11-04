@@ -33,7 +33,6 @@
 #include "bindings/core/v8/V8DOMError.h"
 #include "bindings/core/v8/V8Element.h"
 #include "bindings/core/v8/V8EventTarget.h"
-#include "bindings/core/v8/V8MediaKeyError.h"
 #include "bindings/core/v8/V8Path2D.h"
 #include "bindings/core/v8/V8VoidCallback.h"
 #include "bindings/core/v8/V8Window.h"
@@ -416,18 +415,12 @@ struct DictionaryHelperTraits<ArrayBufferView> {
 };
 
 template <>
-struct DictionaryHelperTraits<MediaKeyError> {
-    typedef V8MediaKeyError type;
-};
-
-template <>
 struct DictionaryHelperTraits<DOMError> {
     typedef V8DOMError type;
 };
 
 template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<Uint8Array>& value);
 template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<ArrayBufferView>& value);
-template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<MediaKeyError>& value);
 template bool DictionaryHelper::get(const Dictionary&, const String& key, RefPtr<DOMError>& value);
 
 template <typename T>
@@ -588,7 +581,6 @@ template bool DictionaryHelper::convert(const Dictionary&, Dictionary::Conversio
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<LocalDOMWindow>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<Uint8Array>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<ArrayBufferView>& value);
-template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<MediaKeyError>& value);
 template bool DictionaryHelper::convert(const Dictionary&, Dictionary::ConversionContext&, const String& key, RefPtr<EventTarget>& value);
 
 } // namespace blink

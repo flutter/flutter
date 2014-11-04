@@ -48,7 +48,6 @@
 #include "core/frame/ImageBitmap.h"
 #include "core/html/HTMLCanvasElement.h"
 #include "core/html/HTMLImageElement.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/html/ImageData.h"
 #include "core/html/TextMetrics.h"
 #include "core/html/canvas/CanvasGradient.h"

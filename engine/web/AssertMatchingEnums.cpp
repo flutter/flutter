@@ -36,10 +36,10 @@
 #include "bindings/core/v8/SerializedScriptValue.h"
 #include "core/dom/DocumentMarker.h"
 #include "core/dom/ExceptionCode.h"
+#include "core/dom/Node.h"
 #include "core/editing/TextAffinity.h"
 #include "core/frame/ConsoleTypes.h"
 #include "core/frame/Settings.h"
-#include "core/html/HTMLMediaElement.h"
 #include "core/loader/FrameLoaderTypes.h"
 #include "core/loader/NavigationPolicy.h"
 #include "core/page/PageVisibilityState.h"
@@ -49,7 +49,6 @@
 #include "platform/fonts/FontDescription.h"
 #include "platform/fonts/FontSmoothingMode.h"
 #include "platform/graphics/filters/FilterOperation.h"
-#include "platform/graphics/media/MediaPlayer.h"
 #include "platform/network/ResourceLoadPriority.h"
 #include "platform/network/ResourceResponse.h"
 #include "platform/scroll/ScrollTypes.h"
@@ -58,9 +57,6 @@
 #include "platform/weborigin/ReferrerPolicy.h"
 #include "public/platform/WebClipboard.h"
 #include "public/platform/WebCursorInfo.h"
-#include "public/platform/WebMediaPlayer.h"
-#include "public/platform/WebMediaPlayerClient.h"
-#include "public/platform/WebMediaSource.h"
 #include "public/platform/WebReferrerPolicy.h"
 #include "public/platform/WebScrollbar.h"
 #include "public/platform/WebScrollbarBehavior.h"
@@ -166,16 +162,6 @@ COMPILE_ASSERT_MATCHING_ENUM(WebNode::ElementNode, Node::ELEMENT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::TextNode, Node::TEXT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::DocumentNode, Node::DOCUMENT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::DocumentFragmentNode, Node::DOCUMENT_FRAGMENT_NODE);
-
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::ReadyStateHaveNothing, HTMLMediaElement::HAVE_NOTHING);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::ReadyStateHaveMetadata, HTMLMediaElement::HAVE_METADATA);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::ReadyStateHaveCurrentData, HTMLMediaElement::HAVE_CURRENT_DATA);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::ReadyStateHaveFutureData, HTMLMediaElement::HAVE_FUTURE_DATA);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::ReadyStateHaveEnoughData, HTMLMediaElement::HAVE_ENOUGH_DATA);
-
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::PreloadNone, MediaPlayer::None);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::PreloadMetaData, MediaPlayer::MetaData);
-COMPILE_ASSERT_MATCHING_ENUM(WebMediaPlayer::PreloadAuto, MediaPlayer::Auto);
 
 COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonNone, NoButton);
 COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonLeft, LeftButton);

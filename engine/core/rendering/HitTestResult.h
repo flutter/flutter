@@ -38,7 +38,6 @@ namespace blink {
 
 class Element;
 class LocalFrame;
-class HTMLMediaElement;
 class Image;
 class KURL;
 class Node;
@@ -110,7 +109,6 @@ public:
     // This variant of absoluteImageURL will also convert <canvas> elements
     // to huge image data URLs (very expensive).
     KURL absoluteImageURLIncludingCanvasDataURL() const;
-    KURL absoluteMediaURL() const;
     KURL absoluteLinkURL() const;
     String textContent() const;
     bool isLiveLink() const;
@@ -138,7 +136,6 @@ public:
 private:
     KURL absoluteImageURLInternal(bool allowCanvas) const;
     NodeSet& mutableRectBasedTestResult(); // See above.
-    HTMLMediaElement* mediaElement() const;
 
     HitTestLocation m_hitTestLocation;
 
