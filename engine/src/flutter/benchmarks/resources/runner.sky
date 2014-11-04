@@ -1,0 +1,81 @@
+<script>
+function PerfRunner(options) {
+  this.unit_ = options.unit || "ms";
+  this.iterationsRemaining_ = options.iterations || 10;
+  this.results_ = [];
+}
+
+PerfRunner.prototype.log = function(line) {
+  console.log(line);
+};
+
+PerfRunner.prototype.recordResult = function(result) {
+  console.log(result);
+  this.results_.push(result);
+};
+
+PerfRunner.prototype.runAsync = function(test) {
+  var self = this;
+  window.setTimeout(function() {
+    var startTime = Date.now();
+    test(function() {
+      var endTime = Date.now();
+      self.recordResult(endTime - startTime);
+      if (--self.iterationsRemaining_ > 0)
+        self.runAsync(test);
+      else
+        self.finish();
+    });
+  });
+};
+
+PerfRunner.prototype.computeStatistics = function() {
+  var data = this.results_.slice();
+
+  // Add values from the smallest to the largest to avoid the loss of significance
+  data.sort(function(a, b) { return a - b; });
+
+  var middle = Math.floor(data.length / 2);
+  var stats = {
+    min: data[0],
+    max: data[data.length - 1],
+    median: data.length % 2 ? data[middle] : (data[middle - 1] + data[middle]) / 2,
+  };
+
+  // Compute the mean and variance using Knuth's online algorithm (has good numerical stability).
+  var squareSum = 0;
+  stats.values = this.results_;
+  stats.mean = 0;
+  for (var i = 0; i < data.length; ++i) {
+      var x = data[i];
+      var delta = x - stats.mean;
+      var sweep = i + 1.0;
+      stats.mean += delta / sweep;
+      squareSum += delta * (x - stats.mean);
+  }
+  stats.variance = data.length <= 1 ? 0 : squareSum / (data.length - 1);
+  stats.stdev = Math.sqrt(stats.variance);
+  stats.unit = this.unit_;
+
+  return stats;
+};
+
+PerfRunner.prototype.logStatistics = function(title) {
+  var stats = this.computeStatistics();
+  this.log("");
+  this.log(title);
+  if (stats.values)
+    this.log("values " + stats.values.join(", ") + " " + stats.unit);
+  this.log("avg " + stats.mean + " " + stats.unit);
+  this.log("median " + stats.median + " " + stats.unit);
+  this.log("stdev " + stats.stdev + " " + stats.unit);
+  this.log("min " + stats.min + " " + stats.unit);
+  this.log("max " + stats.max + " " + stats.unit);
+};
+
+PerfRunner.prototype.finish = function () {
+  this.logStatistics("Time:");
+}
+
+module.exports = PerfRunner;
+</script>

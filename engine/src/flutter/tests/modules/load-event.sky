@@ -1,0 +1,17 @@
+<html>
+<import src="../resources/dump-as-text.sky" />
+<div id="result1">FAIL</div>
+<div id="result2">FAIL</div>
+<script>
+var element = document.createElement("import");
+element.setAttribute("src", "resources/pass.sky");
+element.setAttribute("as", "hello");
+element.addEventListener("load", function() {
+  document.getElementById("result1").textContent = "PASS: Load event fired.";
+});
+document.documentElement.appendChild(element);
+</script>
+<script>
+document.getElementById("result2").textContent = hello;
+</script>
+</html>
