@@ -18,27 +18,18 @@ document's list of outstanding dependencies grows. When an imported
 module completes, it is removed from the document's list of
 outstanding dependencies.
 
-Before executing any ```script``` elements, the parser waits until the
-list of outstanding dependencies is empty. After the parser has
-finished parsing, the document waits until its list of outstanding
-dependencies is empty before the module it represents is marked
-complete.
+Before executing script or inserting an element that is not already
+registered, the parser waits until the list of outstanding
+dependencies is empty. After the parser has finished parsing, the
+document waits until its list of outstanding dependencies is empty
+before the module it represents is marked complete.
 
 
 Module API
 ----------
 
 Within a script in a module, the ```module``` identifier is bound to
-the ```Module``` object that represents the module:
-
-```javascript
-interface Module : EventTarget {
-  constructor (Application application, Document document); // O(1)
-  attribute any exports; // O(1) // defaults to the module's document
-  readonly attribute Document document; // O(1) // the module's document
-  readonly attribute Application application; // O(1)
-}
-```
+the [```Module``` object](apis.md) that represents the module.
 
 ### Exporting values ###
 

@@ -144,6 +144,11 @@ Sky Markup: Elements
 The Sky language consists of very few elements, since it is expected
 that everything of note would be provided by frameworks.
 
+The following elements are implicitly registered by default, even if
+you haven't imported anything. You can get to their constructors if
+you import sky:core (basically, sky:core is always imported by defaul;
+it's the runtime library). None of these elements have shadow trees.
+
 ``<import src="foo.sky">``
  - Downloads and imports foo.sky in the background.
 
@@ -176,6 +181,12 @@ that everything of note would be provided by frameworks.
  - Sky fetches the bits for foo.bin, looks for a decoder for those
    bits, and renders the bits that the decoder returns.
 
+``<div>``
+ - Element that does nothing.
+
+``<span>``
+ - Element that does nothing.
+
 ``<iframe src="foo.bin">``
  - Sky tells mojo to open an application for foo.bin, and hands that
    application a view so that the application can render appropriately.
@@ -194,6 +205,9 @@ that everything of note would be provided by frameworks.
    the view manager). (Actually just ensures that any time the element
    is mutated, theTitleElement.ownerScope.ownerDocument.title is set
    to the element's contents.)
+
+``<error>``
+ - Represents a parse error.
 
 
 Sky Markup: Global Attributes

@@ -798,11 +798,16 @@ _document_:
         the token.
      3. Append _node_ to the top node in the _stack of open nodes_.
    - If _token_ is a start tag token,
-     1. Create an element _node_ with tag name and attributes given by
-        the token.
-     2. Append _node_ to the top node in the _stack of open nodes_.
-     3. Push _node_ onto the top of the _stack of open nodes_.
-     4. If _node_ is a ``template`` element, then:
+     1. If the tag name isn't a registered tag name, then yield until
+        _imported modules_ contains no entries with unresolved
+        promises.
+     2. If the tag name is registered, create an element _node_ with
+        tag name and attributes given by the token. Otherwise, create
+        an element with the tag name "error" and the attributes given
+        by the token.
+     3. Append _node_ to the top node in the _stack of open nodes_.
+     4. Push _node_ onto the top of the _stack of open nodes_.
+     5. If _node_ is a ``template`` element, then:
         1. Let _fragment_ be the ``DocumentFragment`` object that the
            ``template`` element uses as its template contents container.
         2. Push _fragment_ onto the top of the _stack of open nodes_.
@@ -814,14 +819,16 @@ _document_:
            has an ``as`` attribute, associate the entry with that
            name.
    - If _token_ is an end tag token:
-     1. Let _node_ be the topmost node in the _stack of open nodes_
-        whose tag name is the same as the token's tag name, if any. If
-        there isn't one, skip this token.
-     2. If there's a ``template`` element in the _stack of open
+     1. If the tag name is registered, let _tag name_ be that tag
+        name. Otherwise, let _tag name_ be "error".
+     2. Let _node_ be the topmost node in the _stack of open nodes_
+        whose tag name is _tag name_, if any. If there isn't one, skip
+        this token.
+     3. If there's a ``template`` element in the _stack of open
         nodes_ above _node_, then skip this token.
-     3. Pop nodes from the _stack of open nodes_ until _node_ has been
+     4. Pop nodes from the _stack of open nodes_ until _node_ has been
         popped.
-     4. If _node_'s tag name is ``script``, then yield until _imported
+     5. If _node_'s tag name is ``script``, then yield until _imported
         modules_ contains no entries with unresolved promises, then
         execute the script given by the element's contents, using the
         associated names as appropriate.

@@ -142,18 +142,25 @@ module 'sky:core' {
     Array<Element> findAll(ParentNode root); // O(N*F()) where N is the number of descendants
   }
 
-  // Built-in Elements
+
+  // BUILT-IN ELEMENTS
+
   class ImportElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "import"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class TemplateElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "template"
+    constructor attribute Boolean shadow; // O(1) // false
+
     readonly attribute DocumentFragment content; // O(1)
   }
   class ScriptElement : Element {
@@ -161,18 +168,25 @@ module 'sky:core' {
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "script"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class StyleElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "style"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class ContentElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "content"
+    constructor attribute Boolean shadow; // O(1) // false
+
     Array<Node> getDistributedNodes(); // O(N) in distributed nodes
   }
   class ImgElement : Element {
@@ -180,33 +194,69 @@ module 'sky:core' {
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "img"
+    constructor attribute Boolean shadow; // O(1) // false
+  }
+  class DivElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "div"
+    constructor attribute Boolean shadow; // O(1) // false
+  }
+  class SpanElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "span"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class IframeElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "iframe"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class TElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "t"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class AElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "a"
+    constructor attribute Boolean shadow; // O(1) // false
   }
   class TitleElement : Element {
     constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
     constructor (Dictionary attributes); // shorthand
     constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "title"
+    constructor attribute Boolean shadow; // O(1) // false
+  }
+  class ErrorElement : Element {
+    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (ChildArguments... nodes); // shorthand
+    constructor (Dictionary attributes); // shorthand
+    constructor (); // shorthand
+    constructor attribute String tagName; // O(1) // "error"
+    constructor attribute Boolean shadow; // O(1) // false
   }
 
 
+
+  // MODULES
 
   dictionary ElementRegistration {
     String tagName;
@@ -224,20 +274,13 @@ module 'sky:core' {
     constructor attribute Boolean shadow;
   }
 
-  // MODULES
   abstract class AbstractModule : EventTarget {
     readonly attribute Document document; // O(1) // the Documentof the module or application
     Promise<any> import(String url); // O(Yikes) // returns the module's exports
 
     readonly attribute String url;
 
-    // createElement() lets you create elements that will be upgraded later when you register the element
-    Element createElement(String tagName, Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-    Element createElement(String tagName, Dictionary attributes); // shorthand
-    Element createElement(String tagName, ChildArguments... nodes); // shorthand
-    Element createElement(String tagName); // shorthand
-
-    ElementConstructor registerElement(ElementRegistration options); // O(N) in number of outstanding elements with that tag name to be upgraded
+    ElementConstructor registerElement(ElementRegistration options); // O(1)
     // if you call registerElement() with an object that was created by
     // registerElement(), it just returns the object after registering it,
     // rather than creating a new constructor
