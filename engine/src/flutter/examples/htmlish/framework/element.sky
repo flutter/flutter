@@ -1,0 +1,72 @@
+SKY MODULE - defines an <element> element
+<import src="sky:core" as="sky"/>
+
+<!-- usage:
+
+   <element name="tagname">
+    <style> style here (optional) </style>
+    <template> shadow tree here (optional) </template>
+    <script> // optional
+     module.currentScript.parentNode.setPrototype({
+       init: function () {
+         // constructor here
+       },
+       // rest of api here
+     });
+    </script>
+   </element>
+
+-->
+
+<script>
+ module.exports.Element = sky.registerElement({
+   tagName: 'element',
+   prototype: class extends Element {
+     constructor (module) {
+       super();
+       this.state = 'loading';
+       this.module = module;
+       this.definedPrototype = sky.Element;
+     }
+     setPrototype(prototype) {
+       this.definedPrototype = prototype;
+     }
+     endTagParsedCallback() {
+       let style = null;
+       let template = null;
+       let child = this.firstChild;
+       while (child && !(style && template)) {
+         if ((!style) && (child instanceof sky.StyleElement))
+           style = child;
+         if ((!template) && (template instanceof sky.TemplateElement))
+           template = child;
+         child = child.nextSibling;
+       }
+       let tagName = this.getAttribute('name');
+       let constructorName = tagName.charAt(0).toUpperCase() + tagName.slice(1) + 'Element';
+       let constructor = function (module) {
+         super(module);
+         if (this.init)
+           this.init();
+         if (style)
+           this.shadowRoot.append(style.cloneNode(true));
+         if (template)
+           this.shadowRoot.append(template.cloneNode(true));
+         }
+       };
+       if (this.definedPrototype)
+         constructor.prototype = this.definedPrototype;
+       else
+         constructor.prototype = sky.Element;
+       this.module.exports[constructorName] = this.registerElement({
+         tagName: this.getAttribute('name'),
+         shadow: style || template,
+         constructor: constructor,
+       });
+       delete this.definedPrototype;
+       delete this.module;
+       this.state = 'loaded';
+     }
+   },
+ });
+</script>
