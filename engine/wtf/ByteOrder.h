@@ -35,4 +35,8 @@
 #include <arpa/inet.h>
 #endif
 
+#if OS(WIN)
+#include <winsock2.h>
+#endif
+
 #endif // WTF_ByteOrder_h

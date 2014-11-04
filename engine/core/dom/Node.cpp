@@ -1882,7 +1882,6 @@ unsigned Node::lengthOfContents() const
     case Node::DOCUMENT_NODE:
     case Node::DOCUMENT_FRAGMENT_NODE:
         return toContainerNode(this)->countChildren();
-        return 0;
     }
     ASSERT_NOT_REACHED();
     return 0;

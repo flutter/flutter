@@ -40,8 +40,11 @@ config("config") {
 
   if (is_win) {
     cflags += [
+      "/wd4065",  # Switch statement contains 'default' but no 'case' labels.
+                  # In generated parser code.
       "/wd4305",  # Truncation from 'type1' to 'type2'.
       "/wd4324",  # Struct padded due to declspec(align).
+      "/wd4702",  # Unreachable code, happens in bison-generated code.
       "/wd4714",  # Function marked forceinline not inlined.
       "/wd4800",  # Value forced to bool.
       "/wd4996",  # Deprecated function call.
