@@ -29,7 +29,6 @@
 // FIXME: Use union type in drawImage and createPattern once supported:
 // http://crbug.com/372891
 typedef (HTMLImageElement or
-         HTMLVideoElement or
          HTMLCanvasElement // or
          // CanvasRenderingContext2D or
          // ImageBitmap
@@ -70,7 +69,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     [RaisesException] CanvasGradient createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1);
     [RaisesException] CanvasPattern createPattern(HTMLCanvasElement canvas, DOMString? repetitionType);
     [RaisesException] CanvasPattern createPattern(HTMLImageElement image, DOMString? repetitionType);
-    [RaisesException] CanvasPattern createPattern(HTMLVideoElement image, DOMString? repetitionType);
 
     // shadows
     attribute unrestricted float shadowOffsetX;
@@ -113,9 +111,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float x, unrestricted float y);
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);
-    [RaisesException] void drawImage(HTMLVideoElement video, unrestricted float x, unrestricted float y);
-    [RaisesException] void drawImage(HTMLVideoElement video, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
-    [RaisesException] void drawImage(HTMLVideoElement video, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);
     [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y);
     [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
     [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);

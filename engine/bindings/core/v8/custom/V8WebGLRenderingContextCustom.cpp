@@ -40,7 +40,6 @@
 #include "bindings/core/v8/V8EXTTextureFilterAnisotropic.h"
 #include "bindings/core/v8/V8HTMLCanvasElement.h"
 #include "bindings/core/v8/V8HTMLImageElement.h"
-#include "bindings/core/v8/V8HTMLVideoElement.h"
 #include "bindings/core/v8/V8HiddenValue.h"
 #include "bindings/core/v8/V8ImageData.h"
 #include "bindings/core/v8/V8OESElementIndexUint.h"

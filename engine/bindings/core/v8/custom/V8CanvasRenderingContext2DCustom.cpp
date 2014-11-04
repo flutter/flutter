@@ -36,7 +36,6 @@
 #include "bindings/core/v8/V8CanvasPattern.h"
 #include "bindings/core/v8/V8HTMLCanvasElement.h"
 #include "bindings/core/v8/V8HTMLImageElement.h"
-#include "bindings/core/v8/V8HTMLVideoElement.h"
 #include "bindings/core/v8/V8ImageData.h"
 #include "core/html/canvas/CanvasGradient.h"
 #include "core/html/canvas/CanvasPattern.h"

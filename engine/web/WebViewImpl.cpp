@@ -1891,31 +1891,7 @@ void WebViewImpl::setFixedLayoutSize(const WebSize& layoutSize)
 void WebViewImpl::performMediaPlayerAction(const WebMediaPlayerAction& action,
                                            const WebPoint& location)
 {
-    HitTestResult result = hitTestResultForWindowPos(location);
-    RefPtr<Node> node = result.innerNonSharedNode();
-    if (!isHTMLVideoElement(*node) && !isHTMLAudioElement(*node))
-        return;
-
-    RefPtr<HTMLMediaElement> mediaElement = static_pointer_cast<HTMLMediaElement>(node);
-    switch (action.type) {
-    case WebMediaPlayerAction::Play:
-        if (action.enable)
-            mediaElement->play();
-        else
-            mediaElement->pause();
-        break;
-    case WebMediaPlayerAction::Mute:
-        mediaElement->setMuted(action.enable);
-        break;
-    case WebMediaPlayerAction::Loop:
-        mediaElement->setLoop(action.enable);
-        break;
-    case WebMediaPlayerAction::Controls:
-        mediaElement->setBooleanAttribute(HTMLNames::controlsAttr, action.enable);
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
+    // FIXME(sky): Remove this.
 }
 
 WebHitTestResult WebViewImpl::hitTestResultAt(const WebPoint& point)

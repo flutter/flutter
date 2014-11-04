@@ -44,7 +44,6 @@
 #include "core/html/MediaError.h"
 #include "core/html/MediaFragmentURIParser.h"
 #include "core/html/TimeRanges.h"
-#include "core/rendering/RenderVideo.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "platform/ContentType.h"
@@ -400,7 +399,7 @@ bool HTMLMediaElement::rendererIsNeeded(const RenderStyle& style)
 
 RenderObject* HTMLMediaElement::createRenderer(RenderStyle*)
 {
-    return new RenderMedia(this);
+    return 0;
 }
 
 Node::InsertionNotificationRequest HTMLMediaElement::insertedInto(ContainerNode* insertionPoint)
@@ -1162,9 +1161,6 @@ void HTMLMediaElement::setReadyState(ReadyState state)
 
         m_duration = duration();
         scheduleEvent(EventTypeNames::durationchange);
-
-        if (isHTMLVideoElement())
-            scheduleEvent(EventTypeNames::resize);
         scheduleEvent(EventTypeNames::loadedmetadata);
         if (renderer())
             renderer()->updateFromElement();
@@ -2032,10 +2028,6 @@ void HTMLMediaElement::mediaPlayerRepaint()
 void HTMLMediaElement::mediaPlayerSizeChanged()
 {
     WTF_LOG(Media, "HTMLMediaElement::mediaPlayerSizeChanged");
-
-    ASSERT(hasVideo()); // "resize" makes no sense absent video.
-    if (m_readyState > HAVE_NOTHING && isHTMLVideoElement())
-        scheduleEvent(EventTypeNames::resize);
 
     if (renderer())
         renderer()->updateFromElement();

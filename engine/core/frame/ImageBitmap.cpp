@@ -6,7 +6,6 @@
 #include "core/frame/ImageBitmap.h"
 
 #include "core/html/HTMLCanvasElement.h"
-#include "core/html/HTMLVideoElement.h"
 #include "core/html/ImageData.h"
 #include "core/html/canvas/CanvasRenderingContext.h"
 #include "platform/graphics/BitmapImage.h"
@@ -48,33 +47,6 @@ ImageBitmap::ImageBitmap(HTMLImageElement* image, const IntRect& cropRect)
         m_imageElement = nullptr;
     else
         m_imageElement->addClient(this);
-
-    ScriptWrappable::init(this);
-}
-
-ImageBitmap::ImageBitmap(HTMLVideoElement* video, const IntRect& cropRect)
-    : m_imageElement(nullptr)
-    , m_cropRect(cropRect)
-    , m_bitmapOffset(IntPoint())
-{
-    IntSize playerSize;
-
-    if (video->webMediaPlayer())
-        playerSize = video->webMediaPlayer()->naturalSize();
-
-    IntRect videoRect = IntRect(IntPoint(), playerSize);
-    IntRect srcRect = intersection(cropRect, videoRect);
-    IntRect dstRect(IntPoint(), srcRect.size());
-
-    OwnPtr<ImageBuffer> buf = ImageBuffer::create(videoRect.size());
-    if (!buf)
-        return;
-    GraphicsContext* c = buf->context();
-    c->clip(dstRect);
-    c->translate(-srcRect.x(), -srcRect.y());
-    video->paintCurrentFrameInContext(c, videoRect);
-    m_bitmap = buf->copyImage(DontCopyBackingStore);
-    m_bitmapRect = IntRect(IntPoint(std::max(0, -cropRect.x()), std::max(0, -cropRect.y())), srcRect.size());
 
     ScriptWrappable::init(this);
 }
@@ -158,12 +130,6 @@ PassRefPtr<ImageBitmap> ImageBitmap::create(HTMLImageElement* image, const IntRe
 {
     IntRect normalizedCropRect = normalizeRect(cropRect);
     return adoptRef(new ImageBitmap(image, normalizedCropRect));
-}
-
-PassRefPtr<ImageBitmap> ImageBitmap::create(HTMLVideoElement* video, const IntRect& cropRect)
-{
-    IntRect normalizedCropRect = normalizeRect(cropRect);
-    return adoptRef(new ImageBitmap(video, normalizedCropRect));
 }
 
 PassRefPtr<ImageBitmap> ImageBitmap::create(HTMLCanvasElement* canvas, const IntRect& cropRect)

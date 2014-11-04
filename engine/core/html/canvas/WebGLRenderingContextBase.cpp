@@ -34,7 +34,6 @@
 #include "core/frame/Settings.h"
 #include "core/html/HTMLCanvasElement.h"
 #include "core/html/HTMLImageElement.h"
-#include "core/html/HTMLVideoElement.h"
 #include "core/html/ImageData.h"
 #include "core/html/canvas/ANGLEInstancedArrays.h"
 #include "core/html/canvas/EXTBlendMinMax.h"
@@ -3543,44 +3542,6 @@ void WebGLRenderingContextBase::texImage2D(GLenum target, GLint level, GLenum in
         texImage2DImpl(target, level, internalformat, format, type, canvas->copiedImage(), WebGLImageConversion::HtmlDomCanvas, m_unpackFlipY, m_unpackPremultiplyAlpha, exceptionState);
 }
 
-PassRefPtr<Image> WebGLRenderingContextBase::videoFrameToImage(HTMLVideoElement* video, BackingStoreCopy backingStoreCopy)
-{
-    IntSize size(video->videoWidth(), video->videoHeight());
-    ImageBuffer* buf = m_generatedImageCache.imageBuffer(size);
-    if (!buf) {
-        synthesizeGLError(GL_OUT_OF_MEMORY, "texImage2D", "out of memory");
-        return nullptr;
-    }
-    IntRect destRect(0, 0, size.width(), size.height());
-    // FIXME: Turn this into a GPU-GPU texture copy instead of CPU readback.
-    video->paintCurrentFrameInContext(buf->context(), destRect);
-    return buf->copyImage(backingStoreCopy);
-}
-
-void WebGLRenderingContextBase::texImage2D(GLenum target, GLint level, GLenum internalformat,
-    GLenum format, GLenum type, HTMLVideoElement* video, ExceptionState& exceptionState)
-{
-    if (isContextLost() || !validateHTMLVideoElement("texImage2D", video, exceptionState)
-        || !validateTexFunc("texImage2D", NotTexSubImage2D, SourceHTMLVideoElement, target, level, internalformat, video->videoWidth(), video->videoHeight(), 0, format, type, 0, 0))
-        return;
-
-    // Go through the fast path doing a GPU-GPU textures copy without a readback to system memory if possible.
-    // Otherwise, it will fall back to the normal SW path.
-    WebGLTexture* texture = validateTextureBinding("texImage2D", target, true);
-    if (GL_TEXTURE_2D == target && texture) {
-        if (video->copyVideoTextureToPlatformTexture(webContext(), texture->object(), level, internalformat, type, m_unpackPremultiplyAlpha, m_unpackFlipY)) {
-            texture->setLevelInfo(target, level, internalformat, video->videoWidth(), video->videoHeight(), type);
-            return;
-        }
-    }
-
-    // Normal pure SW path.
-    RefPtr<Image> image = videoFrameToImage(video, ImageBuffer::fastCopyImageMode());
-    if (!image)
-        return;
-    texImage2DImpl(target, level, internalformat, format, type, image.get(), WebGLImageConversion::HtmlDomVideo, m_unpackFlipY, m_unpackPremultiplyAlpha, exceptionState);
-}
-
 void WebGLRenderingContextBase::texParameter(GLenum target, GLenum pname, GLfloat paramf, GLint parami, bool isFloat)
 {
     if (isContextLost())
@@ -3757,19 +3718,6 @@ void WebGLRenderingContextBase::texSubImage2D(GLenum target, GLint level, GLint 
         texSubImage2D(target, level, xoffset, yoffset, format, type, imageData.get(), exceptionState);
     else
         texSubImage2DImpl(target, level, xoffset, yoffset, format, type, canvas->copiedImage(), WebGLImageConversion::HtmlDomCanvas, m_unpackFlipY, m_unpackPremultiplyAlpha, exceptionState);
-}
-
-void WebGLRenderingContextBase::texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
-    GLenum format, GLenum type, HTMLVideoElement* video, ExceptionState& exceptionState)
-{
-    if (isContextLost() || !validateHTMLVideoElement("texSubImage2D", video, exceptionState)
-        || !validateTexFunc("texSubImage2D", TexSubImage2D, SourceHTMLVideoElement, target, level, format, video->videoWidth(), video->videoHeight(), 0, format, type, xoffset, yoffset))
-        return;
-
-    RefPtr<Image> image = videoFrameToImage(video, ImageBuffer::fastCopyImageMode());
-    if (!image)
-        return;
-    texSubImage2DImpl(target, level, xoffset, yoffset, format, type, image.get(), WebGLImageConversion::HtmlDomVideo, m_unpackFlipY, m_unpackPremultiplyAlpha, exceptionState);
 }
 
 void WebGLRenderingContextBase::uniform1f(const WebGLUniformLocation* location, GLfloat x)
@@ -5257,15 +5205,6 @@ bool WebGLRenderingContextBase::validateHTMLCanvasElement(const char* functionNa
 {
     if (!canvas || !canvas->buffer()) {
         synthesizeGLError(GL_INVALID_VALUE, functionName, "no canvas");
-        return false;
-    }
-    return true;
-}
-
-bool WebGLRenderingContextBase::validateHTMLVideoElement(const char* functionName, HTMLVideoElement* video, ExceptionState& exceptionState)
-{
-    if (!video || !video->videoWidth() || !video->videoHeight()) {
-        synthesizeGLError(GL_INVALID_VALUE, functionName, "no video");
         return false;
     }
     return true;

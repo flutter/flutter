@@ -58,7 +58,6 @@ class EXTShaderTextureLOD;
 class EXTTextureFilterAnisotropic;
 class ExceptionState;
 class HTMLImageElement;
-class HTMLVideoElement;
 class ImageBuffer;
 class ImageData;
 class IntSize;
@@ -243,8 +242,6 @@ public:
         GLenum format, GLenum type, HTMLImageElement*, ExceptionState&);
     void texImage2D(GLenum target, GLint level, GLenum internalformat,
         GLenum format, GLenum type, HTMLCanvasElement*, ExceptionState&);
-    void texImage2D(GLenum target, GLint level, GLenum internalformat,
-        GLenum format, GLenum type, HTMLVideoElement*, ExceptionState&);
 
     void texParameterf(GLenum target, GLenum pname, GLfloat param);
     void texParameteri(GLenum target, GLenum pname, GLint param);
@@ -258,8 +255,6 @@ public:
         GLenum format, GLenum type, HTMLImageElement*, ExceptionState&);
     void texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
         GLenum format, GLenum type, HTMLCanvasElement*, ExceptionState&);
-    void texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
-        GLenum format, GLenum type, HTMLVideoElement*, ExceptionState&);
 
     void uniform1f(const WebGLUniformLocation*, GLfloat x);
     void uniform1fv(const WebGLUniformLocation*, Float32Array* v);
@@ -429,8 +424,6 @@ protected:
     void removeAllCompressedTextureFormats();
 
     PassRefPtr<Image> drawImageIntoBuffer(Image*, int width, int height, const char* functionName);
-
-    PassRefPtr<Image> videoFrameToImage(HTMLVideoElement*, BackingStoreCopy);
 
     WebGLRenderbuffer* ensureEmulatedStencilBuffer(GLenum target, WebGLRenderbuffer*);
 
@@ -773,7 +766,6 @@ protected:
         SourceImageData,
         SourceHTMLImageElement,
         SourceHTMLCanvasElement,
-        SourceHTMLVideoElement,
     };
 
     // Helper function for tex{Sub}Image2D to check if the input format/type/level/target/width/height/border/xoffset/yoffset are valid.
@@ -868,9 +860,6 @@ protected:
 
     // Helper function for tex{Sub}Image2D to make sure canvas is ready and wouldn't taint Origin.
     bool validateHTMLCanvasElement(const char* functionName, HTMLCanvasElement*, ExceptionState&);
-
-    // Helper function for tex{Sub}Image2D to make sure video is ready wouldn't taint Origin.
-    bool validateHTMLVideoElement(const char* functionName, HTMLVideoElement*, ExceptionState&);
 
     // Helper function to validate drawArrays(Instanced) calls
     bool validateDrawArrays(const char* functionName, GLenum mode, GLint first, GLsizei count);

@@ -17,7 +17,6 @@
 namespace blink {
 
 class HTMLCanvasElement;
-class HTMLVideoElement;
 class ImageData;
 
 class ImageBitmap final : public RefCounted<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
@@ -25,7 +24,6 @@ class ImageBitmap final : public RefCounted<ImageBitmap>, public ScriptWrappable
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ImageBitmap);
 public:
     static PassRefPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);
-    static PassRefPtr<ImageBitmap> create(HTMLVideoElement*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(HTMLCanvasElement*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(ImageData*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(ImageBitmap*, const IntRect&);
@@ -51,7 +49,6 @@ public:
 
 private:
     ImageBitmap(HTMLImageElement*, const IntRect&);
-    ImageBitmap(HTMLVideoElement*, const IntRect&);
     ImageBitmap(HTMLCanvasElement*, const IntRect&);
     ImageBitmap(ImageData*, const IntRect&);
     ImageBitmap(ImageBitmap*, const IntRect&);

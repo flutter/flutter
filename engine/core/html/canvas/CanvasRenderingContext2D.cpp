@@ -49,7 +49,6 @@
 #include "core/html/HTMLCanvasElement.h"
 #include "core/html/HTMLImageElement.h"
 #include "core/html/HTMLMediaElement.h"
-#include "core/html/HTMLVideoElement.h"
 #include "core/html/ImageData.h"
 #include "core/html/TextMetrics.h"
 #include "core/html/canvas/CanvasGradient.h"
@@ -1512,42 +1511,23 @@ void CanvasRenderingContext2D::drawImageInternal(CanvasImageSource* imageSource,
         return;
 
     FloatRect dirtyRect = clipBounds;
-    if (imageSource->isVideoElement()) {
-        // TODO(dshwang): unify video code into below code to composite correctly; crbug.com/407079
-        drawVideo(static_cast<HTMLVideoElement*>(imageSource), srcRect, dstRect);
-        computeDirtyRect(dstRect, clipBounds, &dirtyRect);
+    if (rectContainsTransformedRect(dstRect, clipBounds)) {
+        c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
+    } else if (isFullCanvasCompositeMode(op)) {
+        fullCanvasCompositedDrawImage(image.get(), dstRect, srcRect, op);
+    } else if (op == CompositeCopy) {
+        clearCanvas();
+        c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
     } else {
-        if (rectContainsTransformedRect(dstRect, clipBounds)) {
-            c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
-        } else if (isFullCanvasCompositeMode(op)) {
-            fullCanvasCompositedDrawImage(image.get(), dstRect, srcRect, op);
-        } else if (op == CompositeCopy) {
-            clearCanvas();
-            c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
-        } else {
-            FloatRect dirtyRect;
-            computeDirtyRect(dstRect, clipBounds, &dirtyRect);
-            c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
-        }
-
-        if (sourceImageStatus == ExternalSourceImageStatus && isAccelerated() && canvas()->buffer())
-            canvas()->buffer()->flush();
+        FloatRect dirtyRect;
+        computeDirtyRect(dstRect, clipBounds, &dirtyRect);
+        c->drawImage(image.get(), dstRect, srcRect, op, blendMode);
     }
 
-    didDraw(dirtyRect);
-}
+    if (sourceImageStatus == ExternalSourceImageStatus && isAccelerated() && canvas()->buffer())
+        canvas()->buffer()->flush();
 
-void CanvasRenderingContext2D::drawVideo(HTMLVideoElement* video, FloatRect srcRect, FloatRect dstRect)
-{
-    GraphicsContext* c = drawingContext();
-    GraphicsContextStateSaver stateSaver(*c);
-    c->clip(dstRect);
-    c->translate(dstRect.x(), dstRect.y());
-    c->scale(dstRect.width() / srcRect.width(), dstRect.height() / srcRect.height());
-    c->translate(-srcRect.x(), -srcRect.y());
-    video->paintCurrentFrameInContext(c, IntRect(IntPoint(), IntSize(video->videoWidth(), video->videoHeight())));
-    stateSaver.restore();
-    validateStateStack();
+    didDraw(dirtyRect);
 }
 
 void CanvasRenderingContext2D::drawImageFromRect(HTMLImageElement* image,

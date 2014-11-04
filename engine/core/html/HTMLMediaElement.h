@@ -181,7 +181,6 @@ public:
 
     // Predicates also used when dispatching wrapper creation (cf. [SpecialWrapFor] IDL attribute usage.)
     virtual bool isHTMLAudioElement() const { return false; }
-    virtual bool isHTMLVideoElement() const { return false; }
 
 protected:
     HTMLMediaElement(const QualifiedName&, Document&);
@@ -435,7 +434,7 @@ struct ValueToString<double> {
 
 inline bool isHTMLMediaElement(const HTMLElement& element)
 {
-    return isHTMLAudioElement(element) || isHTMLVideoElement(element);
+    return isHTMLAudioElement(element);
 }
 
 DEFINE_HTMLELEMENT_TYPE_CASTS_WITH_FUNCTION(HTMLMediaElement);

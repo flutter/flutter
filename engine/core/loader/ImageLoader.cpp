@@ -36,7 +36,6 @@
 #include "core/html/HTMLImageElement.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/rendering/RenderImage.h"
-#include "core/rendering/RenderVideo.h"
 #include "platform/Logging.h"
 #include "public/platform/WebURLRequest.h"
 
@@ -369,9 +368,6 @@ RenderImageResource* ImageLoader::renderImageResource()
     // See <https://bugs.webkit.org/show_bug.cgi?id=42840>
     if (renderer->isImage() && !static_cast<RenderImage*>(renderer)->isGeneratedContent())
         return toRenderImage(renderer)->imageResource();
-
-    if (renderer->isVideo())
-        return toRenderVideo(renderer)->imageResource();
 
     return 0;
 }

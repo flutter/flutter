@@ -43,11 +43,6 @@ HTMLImageLoader::~HTMLImageLoader()
 void HTMLImageLoader::dispatchLoadEvent()
 {
     WTF_LOG(Timers, "HTMLImageLoader::dispatchLoadEvent %p", this);
-
-    // HTMLVideoElement uses this class to load the poster image, but it should not fire events for loading or failure.
-    if (isHTMLVideoElement(*element()))
-        return;
-
     bool errorOccurred = image()->errorOccurred();
     element()->dispatchEvent(Event::create(errorOccurred ? EventTypeNames::error : EventTypeNames::load));
 }

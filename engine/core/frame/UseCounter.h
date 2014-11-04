@@ -163,15 +163,6 @@ public:
         AttributeOwnerElement = 160, // Removed in DOM4.
         AttributeSpecified = 162, // Removed in DOM4.
         PrefixedAudioDecodedByteCount = 164,
-        PrefixedVideoDecodedByteCount = 165,
-        PrefixedVideoSupportsFullscreen = 166,
-        PrefixedVideoDisplayingFullscreen = 167,
-        PrefixedVideoEnterFullscreen = 168,
-        PrefixedVideoExitFullscreen = 169,
-        PrefixedVideoEnterFullScreen = 170,
-        PrefixedVideoExitFullScreen = 171,
-        PrefixedVideoDecodedFrameCount = 172,
-        PrefixedVideoDroppedFrameCount = 173,
         PrefixedElementRequestFullscreen = 176,
         PrefixedElementRequestFullScreen = 177,
         InputTypeEmailMultiple = 184,
@@ -390,7 +381,6 @@ public:
         MapElement = 482,
         MeterElement = 483,
         ProgressElement = 484,
-        VideoFullscreenAllowedExemption = 485,
         PrefixedHTMLElementDropzone = 490,
         WheelEventWheelDeltaX = 491,
         WheelEventWheelDeltaY = 492,
