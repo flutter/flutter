@@ -100,9 +100,6 @@ source_set("core_generated") {
     # Generated from BisonCSSParser-in.cpp
     "$sky_core_output_dir/BisonCSSParser.cpp",
 
-    # Generated from HTMLMetaElement-in.cpp
-    "$sky_core_output_dir/HTMLMetaElement.cpp",
-
     # Additional .cpp files from the make_core_generated rules.
     "$sky_core_output_dir/CSSGrammar.cpp",
   ]
@@ -190,7 +187,6 @@ group("make_core_generated") {
     ":make_core_generated_html_element_type_helpers",
     ":make_core_generated_make_parser",
     ":make_core_generated_make_token_matcher",
-    ":make_core_generated_make_token_matcher_for_viewport",
     ":make_core_generated_media_feature_names",
     ":make_core_generated_media_features",
     ":make_core_generated_media_query_tokenizer_codepoints",
@@ -427,11 +423,6 @@ make_token_matcher("make_core_generated_make_token_matcher") {
 make_token_matcher("make_core_generated_make_parser") {
   input_file = "css/parser/BisonCSSParser-in.cpp"
   output_file = "$sky_core_output_dir/BisonCSSParser.cpp"
-}
-
-make_token_matcher("make_core_generated_make_token_matcher_for_viewport") {
-  input_file = "html/HTMLMetaElement-in.cpp"
-  output_file = "$sky_core_output_dir/HTMLMetaElement.cpp"
 }
 
 # One-off scripts --------------------------------------------------------------

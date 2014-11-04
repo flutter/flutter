@@ -7,7 +7,6 @@ canvas
 content interfaceName=HTMLContentElement
 img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
 import
-meta
 picture interfaceName=HTMLPictureElement
 script
 shadow interfaceName=HTMLShadowElement
