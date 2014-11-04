@@ -103,11 +103,6 @@ bool HTMLAnchorElement::isURLAttribute(const Attribute& attribute) const
     return attribute.name() == HTMLNames::hrefAttr || HTMLElement::isURLAttribute(attribute);
 }
 
-bool HTMLAnchorElement::hasLegalLinkAttribute(const QualifiedName& name) const
-{
-    return name == HTMLNames::hrefAttr || HTMLElement::hasLegalLinkAttribute(name);
-}
-
 bool HTMLAnchorElement::canStartSelection() const
 {
     return hasEditableStyle();

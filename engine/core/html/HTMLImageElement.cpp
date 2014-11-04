@@ -377,16 +377,6 @@ bool HTMLImageElement::isURLAttribute(const Attribute& attribute) const
         || HTMLElement::isURLAttribute(attribute);
 }
 
-bool HTMLImageElement::hasLegalLinkAttribute(const QualifiedName& name) const
-{
-    return name == HTMLNames::srcAttr || HTMLElement::hasLegalLinkAttribute(name);
-}
-
-const QualifiedName& HTMLImageElement::subResourceAttributeName() const
-{
-    return HTMLNames::srcAttr;
-}
-
 void HTMLImageElement::setHeight(int value)
 {
     setIntegralAttribute(HTMLNames::heightAttr, value);

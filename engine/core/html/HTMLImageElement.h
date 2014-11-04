@@ -106,8 +106,6 @@ private:
     virtual bool canStartSelection() const override;
 
     virtual bool isURLAttribute(const Attribute&) const override;
-    virtual bool hasLegalLinkAttribute(const QualifiedName&) const override;
-    virtual const QualifiedName& subResourceAttributeName() const override;
 
     virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;

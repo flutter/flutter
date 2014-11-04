@@ -50,7 +50,6 @@ private:
     virtual void defaultEventHandler(Event*) override final;
     virtual bool willRespondToMouseClickEvents() override final;
     virtual bool isURLAttribute(const Attribute&) const override final;
-    virtual bool hasLegalLinkAttribute(const QualifiedName&) const override final;
     virtual bool canStartSelection() const override final;
 
     void handleClick(Event*);
