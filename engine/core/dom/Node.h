@@ -168,7 +168,6 @@ public:
     bool hasChildren() const { return firstChild(); }
     virtual PassRefPtr<Node> cloneNode(bool deep = false) = 0;
     virtual const AtomicString& localName() const;
-    void normalize();
 
     bool isSameNode(Node* other) const { return this == other; }
     bool isEqualNode(Node*) const;

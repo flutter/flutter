@@ -381,25 +381,6 @@ void Node::remove(ExceptionState& exceptionState)
         parent->removeChild(this, exceptionState);
 }
 
-void Node::normalize()
-{
-    // Go through the subtree beneath us, normalizing all nodes. This means that
-    // any two adjacent text nodes are merged and any empty text nodes are removed.
-
-    RefPtr<Node> node = this;
-    while (Node* firstChild = node->firstChild())
-        node = firstChild;
-    while (node) {
-        if (node == this)
-            break;
-
-        if (node->nodeType() == TEXT_NODE)
-            node = toText(node)->mergeNextSiblingNodesIfPossible();
-        else
-            node = NodeTraversal::nextPostOrder(*node);
-    }
-}
-
 const AtomicString& Node::localName() const
 {
     return nullAtom;

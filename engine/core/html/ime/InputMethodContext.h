@@ -63,7 +63,6 @@ public:
     unsigned compositionEndOffset();
     void confirmComposition();
 
-    String compositionText() const;
     int selectionStart() const;
     int selectionEnd() const;
     const Vector<unsigned>& segments();

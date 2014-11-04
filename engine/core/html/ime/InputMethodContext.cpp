@@ -95,15 +95,6 @@ bool InputMethodContext::hasFocus() const
     return element && element->isHTMLElement() && m_element == toHTMLElement(element);
 }
 
-String InputMethodContext::compositionText() const
-{
-    if (!hasFocus())
-        return emptyString();
-
-    Text* text = inputMethodController().compositionNode();
-    return text ? text->wholeText() : emptyString();
-}
-
 CompositionUnderline InputMethodContext::selectedSegment() const
 {
     CompositionUnderline underline;
