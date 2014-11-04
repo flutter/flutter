@@ -1,0 +1,44 @@
+<sky>
+<import src="../resources/runner.sky" as="PerfRunner" />
+<style>
+div {
+  height: 10px;
+}
+span {
+  display: inline;
+}
+</style>
+<div id='content'></div>
+<script>
+var content = document.getElementById('content');
+
+var out = [];
+for (var i = 0; i < 1000; i++) {
+  var div = document.createElement('div');
+  div.appendChild(document.createElement('span')).appendChild(document.createTextNode('foo'));
+  div.appendChild(document.createTextNode(' '));
+  div.appendChild(document.createElement('span')).appendChild(document.createTextNode('bar'));
+  content.appendChild(div);
+}
+
+var b = document.querySelector('sky');
+
+var runner = new PerfRunner({
+  setup: function() {
+    b.style.width = '210px';
+    getComputedStyle(b).color;
+    b.offsetHeight;
+
+    b.style.width = '200px';
+    getComputedStyle(b).color;
+  },
+  iterations: 10,
+  unit: 'ms',
+});
+
+runner.runAsync(function(done) {
+  b.offsetHeight;
+  done();
+});
+</script>
+</sky>
