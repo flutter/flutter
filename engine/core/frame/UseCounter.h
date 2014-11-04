@@ -192,8 +192,6 @@ public:
         ElementSetPrefix = 224, // Element.prefix is readonly in DOM4.
         CSSStyleDeclarationGetPropertyCSSValue = 225,
         PrefixedMediaCancelKeyRequest = 229,
-        DOMImplementationHasFeature = 230,
-        DOMImplementationHasFeatureReturnFalse = 231,
         CanPlayTypeKeySystem = 232,
         PrefixedDevicePixelRatioMediaFeature = 233,
         PrefixedMaxDevicePixelRatioMediaFeature = 234,

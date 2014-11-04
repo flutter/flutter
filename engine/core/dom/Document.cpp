@@ -53,7 +53,6 @@
 #include "core/css/resolver/StyleResolver.h"
 #include "core/css/resolver/StyleResolverStats.h"
 #include "core/dom/Attr.h"
-#include "core/dom/DOMImplementation.h"
 #include "core/dom/DocumentFragment.h"
 #include "core/dom/DocumentLifecycleNotifier.h"
 #include "core/dom/DocumentLifecycleObserver.h"
@@ -414,6 +413,13 @@ Document::~Document()
     InspectorCounters::decrementCounter(InspectorCounters::DocumentCounter);
 }
 
+PassRefPtr<Document> Document::create(Document& document)
+{
+    DocumentInit init = DocumentInit::fromContext(document.contextDocument())
+        .withRegistrationContext(document.registrationContext());
+    return HTMLDocument::create(init);
+}
+
 #if !ENABLE(OILPAN)
 void Document::dispose()
 {
@@ -473,13 +479,6 @@ void Document::mediaQueryAffectingValueChanged()
 {
     m_evaluateMediaQueriesOnStyleRecalc = true;
     styleEngine()->clearMediaQueryRuleSetStyleSheets();
-}
-
-DOMImplementation& Document::implementation()
-{
-    if (!m_implementation)
-        m_implementation = DOMImplementation::create(*this);
-    return *m_implementation;
 }
 
 Location* Document::location() const

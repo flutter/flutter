@@ -69,7 +69,6 @@ class Comment;
 class ConsoleMessage;
 class CustomElementMicrotaskRunQueue;
 class CustomElementRegistrationContext;
-class DOMImplementation;
 class DocumentFragment;
 class DocumentLifecycleNotifier;
 class DocumentLoadTiming;
@@ -177,6 +176,9 @@ public:
     }
     virtual ~Document();
 
+    // Called by JS.
+    static PassRefPtr<Document> create(Document&);
+
     MediaQueryMatcher& mediaQueryMatcher();
 
     void mediaQueryAffectingValueChanged();
@@ -204,8 +206,6 @@ public:
     ReferrerPolicy referrerPolicy() const { return m_referrerPolicy; }
 
     String outgoingReferrer();
-
-    DOMImplementation& implementation();
 
     Element* documentElement() const
     {
@@ -766,8 +766,6 @@ private:
 
     // Mime-type of the document in case it was cloned or created by XHR.
     AtomicString m_mimeType;
-
-    OwnPtr<DOMImplementation> m_implementation;
 
     RefPtr<CSSStyleSheet> m_elemSheet;
 

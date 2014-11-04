@@ -137,7 +137,9 @@ function getTemplateStagingDocument(template) {
   if (!template.stagingDocument_) {
     var owner = template.ownerDocument;
     if (!owner.stagingDocument_) {
-      owner.stagingDocument_ = owner.implementation.createDocument('');
+      // FIXME(sky): Does this need to create a Document without a registration
+      // context?
+      owner.stagingDocument_ = new Document();
       owner.stagingDocument_.isStagingDocument = true;
       owner.stagingDocument_.stagingDocument_ = owner.stagingDocument_;
     }

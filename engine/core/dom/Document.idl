@@ -23,9 +23,10 @@ callback CustomElementConstructor = Element ();
 typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 
 [
+    Constructor(),
+    ConstructorCallWith=Document,
     SpecialWrapFor=(HTMLDocument)
 ] interface Document : Node {
-    readonly attribute DOMImplementation implementation;
     readonly attribute Element documentElement;
 
     [CustomElementCallbacks, PerWorldBindings, RaisesException] Element createElement(DOMString tagName);

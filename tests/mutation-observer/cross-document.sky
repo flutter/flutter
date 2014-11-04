@@ -11,7 +11,7 @@ describe('MutationObserver cross document moves', function() {
         });
 
         observer.observe(div, {attributes: true});
-        var newDoc = document.implementation.createDocument('', '', null);
+        var newDoc = new Document();
         newDoc.appendChild(div);
         div.id = 'foo';
         setTimeout(function() {
@@ -32,7 +32,7 @@ describe('MutationObserver cross document moves', function() {
         });
 
         observer.observe(div, {attributes: true, subtree: true});
-        var newDoc = document.implementation.createDocument();
+        var newDoc = new Document();
         newDoc.appendChild(div);
         subDiv.id = 'foo';
         setTimeout(function() {
