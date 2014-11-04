@@ -57,8 +57,15 @@ function attributeBinding(el, name) {
   };
 }
 
+function bindAsAttribute(el, name) {
+  if (name == 'style' || name == 'class')
+    return true;
+  if (el.tagName == 'a' && name == 'href')
+    return true;
+}
+
 Element.prototype.bind = function(name, value, oneTime) {
-  if (name !== 'style' && name !== 'class')
+  if (!bindAsAttribute(this, name))
     return Node.prototype.bind.call(this, name, value, oneTime);
 
   if (oneTime)
@@ -121,7 +128,7 @@ var templateAttributeDirectives = {
 
 function isTemplate(el) {
   if (el.isTemplate_ === undefined)
-    el.isTemplate_ = el.tagName == 'TEMPLATE';
+    el.isTemplate_ = el.tagName == 'template';
 
   return el.isTemplate_;
 }

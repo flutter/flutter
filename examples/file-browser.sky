@@ -13,11 +13,11 @@
     }
   </style>
   <heading>File browser for {{ url }}</heading>
-  <template repeat="{{ directory in directories }}">
-    <a href="{{ directory }}">{{ directory }}</a>
+  <template repeat="{{ directories }}">
+    <a href="{{}}">{{}}</a>
   </template>
-  <template repeat="{{ file in files }}">
-    <a href="{{ file }}">{{ file }}</a>
+  <template repeat="{{ files }}">
+    <a href="{{}}">{{}}</a>
   </template>
 </template>
 <script>
