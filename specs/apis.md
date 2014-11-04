@@ -259,10 +259,11 @@ module 'sky:core' {
 
   // MODULES
 
+  callback InternalElementConstructor void (Module module);
   dictionary ElementRegistration {
     String tagName;
     Boolean shadow = false;
-    Object prototype = Element;
+    InternalElementConstructor? constructor = null;
   }
 
   interface ElementConstructor {
@@ -286,16 +287,18 @@ module 'sky:core' {
     // registerElement(), it just returns the object after registering it,
     // rather than creating a new constructor
     // otherwise, it proceeds as follows:
-    //  0. let prototype be the prototype passed in (defaulting to Element)
-    //  1. let constructor be prototype.constructor
-    //  2. create a new Function that:
-    //      0. throws if not called as a constructor
-    //      1. initialises the shadow tree is shadow on the options is true
-    //      2. calls constructor, if it's not null, with the module as the argument
-    //  3. let that new Function's prototype be the aforementioned prototype
-    //  4. let that new Function have tagName and shadow properties set to
-    //     the values passed in
-    //  5. register the new element
+    //  1. let constructor be the constructor passed in, if any
+    //  2. let prototype be the constructor's prototype; if there is no
+    //     constructor, let prototype be Element
+    //  3. create a new Function that:
+    //      1. throws if not called as a constructor
+    //      2. creates an actual Element object
+    //      3. initialises the shadow tree if shadow on the options is true
+    //      4. calls constructor, if it's not null, with the module as the argument
+    //  4. let that new Function's prototype be the aforementioned prototype
+    //  5. let that new Function have tagName and shadow properties set to
+    //     the values passed in on options
+    //  6. register the new element
 
     ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
@@ -317,10 +320,6 @@ module 'sky:core' {
 
 }
 ```
-
-TODO(ianh): is it ok that you can do
-module.application.registerElement()? we need application so that a
-module can implement <title> and get to application.title...
 
 TODO(ianh): event loop
 
@@ -354,6 +353,8 @@ module 'sky:modulename' {
   // this is a comment
 
   typedef NewType OldType; // useful when OldType is a commonly-used union
+
+  callback CallbackName ReturnType (ArgumentType argumentName);
 
   class ClassName {
     // a class corresponds to a JavaScript prototype
