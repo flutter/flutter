@@ -28,7 +28,7 @@ SkyElement({
   directories: [],
   attached: function() {
     this.url = this.ownerDocument.URL;
-    var xhr = this.xhr_ = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
     xhr.open('GET', this.url + '?format=json');
     xhr.onload = (function() {
       var listing = JSON.parse(xhr.responseText);
