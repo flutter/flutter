@@ -110,7 +110,7 @@ public:
 
     static bool shouldSkipCreatingRunsForObject(RenderObject* obj)
     {
-        return obj->isFloating() || (obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline());
+        return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
     }
 
     void addOverflowFromInlineChildren();
@@ -120,8 +120,6 @@ public:
 
     GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
         LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
-
-    virtual bool avoidsFloats() const override;
 
 protected:
     void layoutInlineChildren(bool relayoutChildren, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit afterEdge);
@@ -137,8 +135,6 @@ protected:
 
     virtual bool updateLogicalWidthAndColumnWidth() override;
 
-    void setLogicalLeftForChild(RenderBox* child, LayoutUnit logicalLeft);
-    void setLogicalTopForChild(RenderBox* child, LayoutUnit logicalTop);
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:

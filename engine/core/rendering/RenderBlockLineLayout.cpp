@@ -865,7 +865,7 @@ RenderObject* InlineMinMaxIterator::next()
     bool oldEndOfInline = endOfInline;
     endOfInline = false;
     while (current || current == parent) {
-        if (!oldEndOfInline && (current == parent || (!current->isFloating() && !current->isReplaced() && !current->isOutOfFlowPositioned())))
+        if (!oldEndOfInline && (current == parent || (!current->isReplaced() && !current->isOutOfFlowPositioned())))
             result = current->slowFirstChild();
 
         if (!result) {
@@ -892,7 +892,7 @@ RenderObject* InlineMinMaxIterator::next()
         if (!result)
             break;
 
-        if (!result->isOutOfFlowPositioned() && (result->isText() || result->isFloating() || result->isReplaced() || result->isRenderInline()))
+        if (!result->isOutOfFlowPositioned() && (result->isText() || result->isReplaced() || result->isRenderInline()))
             break;
 
         current = result;
@@ -980,7 +980,6 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
     bool hasRemainingNegativeTextIndent = false;
 
     LayoutUnit textIndent = minimumValueForLength(styleToUse->textIndent(), cw);
-    RenderObject* prevFloat = 0;
     bool isPrevChildInlineFlow = false;
     bool shouldBreakLineAfterText = false;
     while (RenderObject* child = childIterator.next()) {
@@ -1062,30 +1061,14 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             childMin += childMinPreferredLogicalWidth.ceilToFloat();
             childMax += childMaxPreferredLogicalWidth.ceilToFloat();
 
-            bool clearPreviousFloat;
-            if (child->isFloating()) {
-                clearPreviousFloat = (prevFloat
-                    && ((prevFloat->style()->floating() == LeftFloat && (childStyle->clear() & CLEFT))
-                        || (prevFloat->style()->floating() == RightFloat && (childStyle->clear() & CRIGHT))));
-                prevFloat = child;
-            } else {
-                clearPreviousFloat = false;
-            }
-
             bool canBreakReplacedElement = true;
-            if ((canBreakReplacedElement && (autoWrap || oldAutoWrap) && (!isPrevChildInlineFlow || shouldBreakLineAfterText)) || clearPreviousFloat) {
+            if ((canBreakReplacedElement && (autoWrap || oldAutoWrap) && (!isPrevChildInlineFlow || shouldBreakLineAfterText))) {
                 updatePreferredWidth(minLogicalWidth, inlineMin);
                 inlineMin = 0;
             }
 
-            // If we're supposed to clear the previous float, then terminate maxwidth as well.
-            if (clearPreviousFloat) {
-                updatePreferredWidth(maxLogicalWidth, inlineMax);
-                inlineMax = 0;
-            }
-
             // Add in text-indent. This is added in only once.
-            if (!addedTextIndent && !child->isFloating()) {
+            if (!addedTextIndent) {
                 float ceiledTextIndent = textIndent.ceilToFloat();
                 childMin += ceiledTextIndent;
                 childMax += ceiledTextIndent;
@@ -1100,10 +1083,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             inlineMax += std::max<float>(0, childMax);
 
             if (!autoWrap || !canBreakReplacedElement || (isPrevChildInlineFlow && !shouldBreakLineAfterText)) {
-                if (child->isFloating())
-                    updatePreferredWidth(minLogicalWidth, childMin);
-                else
-                    inlineMin += childMin;
+                inlineMin += childMin;
             } else {
                 // Now check our line.
                 updatePreferredWidth(minLogicalWidth, childMin);
@@ -1119,10 +1099,8 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
 
             // We are no longer stripping whitespace at the start of
             // a line.
-            if (!child->isFloating()) {
-                stripFrontSpaces = false;
-                trailingSpaceChild = 0;
-            }
+            stripFrontSpaces = false;
+            trailingSpaceChild = 0;
         } else if (child->isText()) {
             // Case (3). Text.
             RenderText* t = toRenderText(child);
@@ -1273,16 +1251,14 @@ void RenderBlockFlow::layoutInlineChildren(bool relayoutChildren, LayoutUnit& pa
             if (!layoutState.hasInlineChild() && o->isInline())
                 layoutState.setHasInlineChild(true);
 
-            if (o->isReplaced() || o->isFloating() || o->isOutOfFlowPositioned()) {
+            if (o->isReplaced() || o->isOutOfFlowPositioned()) {
                 RenderBox* box = toRenderBox(o);
 
                 updateBlockChildDirtyBitsBeforeLayout(relayoutChildren, box);
 
-                if (o->isOutOfFlowPositioned())
+                if (o->isOutOfFlowPositioned()) {
                     o->containingBlock()->insertPositionedObject(box);
-                else if (o->isFloating())
-                    layoutState.floats().append(FloatWithRect(box));
-                else if (isFullLayout || o->needsLayout()) {
+                } else if (isFullLayout || o->needsLayout()) {
                     // Replaced element.
                     box->dirtyLineBoxes(isFullLayout);
                     if (isFullLayout)

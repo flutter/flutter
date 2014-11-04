@@ -328,8 +328,6 @@ private:
 
     bool hasCaret() const;
 
-    virtual bool avoidsFloats() const override { return true; }
-
     bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
     // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
     virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation&, const LayoutPoint&) { return false; }
@@ -405,7 +403,6 @@ protected:
     unsigned m_hasMarkupTruncation : 1;
     unsigned m_hasBorderOrPaddingLogicalWidthChanged : 1;
     mutable unsigned m_hasOnlySelfCollapsingChildren : 1;
-    mutable unsigned m_descendantsWithFloatsMarkedForLayout : 1;
 
     // FIXME-BLOCKFLOW: Remove this when the line layout stuff has all moved out of RenderBlock
     friend class LineBreaker;

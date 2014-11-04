@@ -31,8 +31,6 @@
 
 namespace blink {
 
-bool RenderLayerModelObject::s_wasFloating = false;
-
 RenderLayerModelObject::RenderLayerModelObject(ContainerNode* node)
     : RenderObject(node)
 {
@@ -77,8 +75,6 @@ void RenderLayerModelObject::willBeDestroyed()
 
 void RenderLayerModelObject::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
 {
-    s_wasFloating = isFloating();
-
     if (RenderStyle* oldStyle = style()) {
         if (parent() && diff.needsPaintInvalidationLayer()) {
             if (oldStyle->hasAutoClip() != newStyle.hasAutoClip()
@@ -100,8 +96,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
     LayerType type = layerTypeRequired();
     if (type != NoLayer) {
         if (!layer()) {
-            if (s_wasFloating && isFloating())
-                setChildNeedsLayout();
             createLayer(type);
             if (parent() && !needsLayout()) {
                 // FIXME: This invalidation is overly broad. We should update to
@@ -114,8 +108,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
     } else if (layer() && layer()->parent()) {
         setHasTransform(false); // Either a transform wasn't specified or the object doesn't support transforms, so just null out the bit.
         layer()->removeOnlyThisLayer(); // calls destroyLayer() which clears m_layer
-        if (s_wasFloating && isFloating())
-            setChildNeedsLayout();
         if (hadTransform)
             setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
     }

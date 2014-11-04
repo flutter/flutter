@@ -176,7 +176,7 @@ static inline void notifyObserverWillExitObject(Observer* observer, RenderObject
 static inline bool isIteratorTarget(RenderObject* object)
 {
     ASSERT(object); // The iterator will of course return 0, but its not an expected argument to this function.
-    return object->isText() || object->isFloating() || object->isOutOfFlowPositioned() || object->isReplaced();
+    return object->isText() || object->isOutOfFlowPositioned() || object->isReplaced();
 }
 
 // This enum is only used for bidiNextShared()

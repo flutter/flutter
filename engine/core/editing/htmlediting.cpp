@@ -397,13 +397,6 @@ bool isSpecialHTMLElement(const Node* n)
     if (n->isLink())
         return true;
 
-    RenderObject* renderer = n->renderer();
-    if (!renderer)
-        return false;
-
-    if (renderer->style()->isFloating())
-        return true;
-
     return false;
 }
 

@@ -140,7 +140,6 @@ bottom animatable, initial=initialOffset, converter=convertLengthOrAuto
 box-shadow animatable, converter=convertShadow
 box-sizing
 caption-side inherited
-clear
 clip animatable, converter=convertClip, custom_all
 content custom_all
 cursor inherited, custom_all
@@ -151,7 +150,6 @@ flex-direction
 flex-grow animatable, type_name=float
 flex-shrink animatable, type_name=float
 flex-wrap
-float type_name=EFloat, name_for_methods=Floating
 height animatable, initial=initialSize, converter=convertLengthSizing
 image-rendering inherited
 isolation runtime_flag=CSSCompositing

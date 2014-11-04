@@ -1805,23 +1805,18 @@ void RenderObject::setStyle(PassRefPtr<RenderStyle> style)
 void RenderObject::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
 {
     if (m_style) {
-        if (isFloating() && (m_style->floating() != newStyle.floating()))
-            // For changes in float styles, we need to conceivably remove ourselves
-            // from the floating objects list.
-            toRenderBox(this)->removeFloatingOrPositionedChildFromBlockLists();
-        else if (isOutOfFlowPositioned() && (m_style->position() != newStyle.position()))
+        if (isOutOfFlowPositioned() && (m_style->position() != newStyle.position()))
             // For changes in positioning styles, we need to conceivably remove ourselves
             // from the positioned objects list.
             toRenderBox(this)->removeFloatingOrPositionedChildFromBlockLists();
 
         s_affectsParentBlock = isFloatingOrOutOfFlowPositioned()
-            && (!newStyle.isFloating() && !newStyle.hasOutOfFlowPosition())
+            && !newStyle.hasOutOfFlowPosition()
             && parent() && (parent()->isRenderBlockFlow() || parent()->isRenderInline());
 
         // Clearing these bits is required to avoid leaving stale renderers.
         // FIXME: We shouldn't need that hack if our logic was totally correct.
         if (diff.needsLayout()) {
-            setFloating(false);
             clearPositionedState();
         }
     } else {
@@ -2320,7 +2315,7 @@ void RenderObject::insertedIntoTree()
         addLayers(layer);
     }
 
-    if (!isFloating() && parent()->childrenInline())
+    if (parent()->childrenInline())
         parent()->dirtyLinesFromChangedChild(this);
 }
 

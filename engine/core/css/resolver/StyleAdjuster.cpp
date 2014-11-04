@@ -108,9 +108,6 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
 {
     ASSERT(parentStyle);
 
-    // FIXME(sky): Remove floats.
-    style->setFloating(NoFloat);
-
     if (style->display() != NONE) {
         // Absolute/fixed positioned elements, floating elements and the document element need block-like outside display.
         if (style->hasOutOfFlowPosition() || element.document().documentElement() == element)

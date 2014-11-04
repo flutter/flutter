@@ -111,14 +111,12 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyBoxShadow,
     CSSPropertyBoxSizing,
     CSSPropertyCaptionSide,
-    CSSPropertyClear,
     CSSPropertyClip,
     CSSPropertyColor,
     CSSPropertyCursor,
     CSSPropertyDirection,
     CSSPropertyDisplay,
     CSSPropertyEmptyCells,
-    CSSPropertyFloat,
     CSSPropertyFontFamily,
     CSSPropertyFontKerning,
     CSSPropertyFontSize,
@@ -1502,8 +1500,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return valueForShadowList(style->boxShadow(), *style, true);
         case CSSPropertyCaptionSide:
             return cssValuePool().createValue(style->captionSide());
-        case CSSPropertyClear:
-            return cssValuePool().createValue(style->clear());
         case CSSPropertyColor:
             return cssValuePool().createColorValue(m_allowVisitedStyle ? style->colorIncludingFallback(CSSPropertyColor).rgb() : style->color().rgb());
         case CSSPropertyWebkitPrintColorAdjust:
@@ -1556,10 +1552,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->justifyContent());
         case CSSPropertyOrder:
             return cssValuePool().createValue(style->order(), CSSPrimitiveValue::CSS_NUMBER);
-        case CSSPropertyFloat:
-            if (style->display() != NONE && style->hasOutOfFlowPosition())
-                return cssValuePool().createIdentifierValue(CSSValueNone);
-            return cssValuePool().createValue(style->floating());
         case CSSPropertyFont: {
             RefPtr<CSSFontValue> computedFont = CSSFontValue::create();
             computedFont->style = valueForFontStyle(*style);

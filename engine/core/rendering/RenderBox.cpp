@@ -176,9 +176,6 @@ void RenderBox::updateShapeOutsideInfoAfterStyleChange(const RenderStyle& style,
         ShapeOutsideInfo::removeInfo(*this);
     else
         ShapeOutsideInfo::ensureInfo(*this).markShapeAsDirty();
-
-    if (shapeOutside || shapeOutside != oldShapeOutside)
-        markShapeOutsideDependentsForLayout();
 }
 
 void RenderBox::updateFromStyle()
@@ -192,8 +189,6 @@ void RenderBox::updateFromStyle()
     // The root and the RenderView always paint their backgrounds/borders.
     if (isRootObject || isViewObject)
         setHasBoxDecorationBackground(true);
-
-    setFloating(!isOutOfFlowPositioned() && styleToUse->isFloating());
 
     bool boxHasOverflowClip = false;
     if (!styleToUse->isOverflowVisible() && isRenderBlock() && !isViewObject) {
@@ -1209,12 +1204,6 @@ void RenderBox::imageChanged(WrappedImagePtr image, const IntRect*)
         return;
     }
 
-    ShapeValue* shapeOutsideValue = style()->shapeOutside();
-    if (!frameView()->isInPerformLayout() && isFloating() && shapeOutsideValue && shapeOutsideValue->image() && shapeOutsideValue->image()->data() == image) {
-        ShapeOutsideInfo::ensureInfo(*this).markShapeAsDirty();
-        markShapeOutsideDependentsForLayout();
-    }
-
     if (!paintInvalidationLayerRectsForImage(image, style()->backgroundLayers(), true))
         paintInvalidationLayerRectsForImage(image, style()->maskLayers(), false);
 }
@@ -1777,7 +1766,7 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
         computedValues.m_margins.m_end, style()->marginStart(), style()->marginEnd());
 
     if (!hasPerpendicularContainingBlock && containerLogicalWidth && containerLogicalWidth != (computedValues.m_extent + computedValues.m_margins.m_start + computedValues.m_margins.m_end)
-        && !isFloating() && !isInline() && !cb->isFlexibleBox()) {
+        && !isInline() && !cb->isFlexibleBox()) {
         LayoutUnit newMargin = containerLogicalWidth - computedValues.m_extent - cb->marginStartForChild(this);
         bool hasInvertedDirection = cb->style()->isLeftToRightDirection() != style()->isLeftToRightDirection();
         if (hasInvertedDirection)
@@ -1849,9 +1838,7 @@ static bool columnFlexItemHasStretchAlignment(const RenderObject* flexitem)
 
 bool RenderBox::sizesLogicalWidthToFitContent(const Length& logicalWidth) const
 {
-    // Marquees in WinIE are like a mixture of blocks and inline-blocks.  They size as though they're blocks,
-    // but they allow text to sit on the same line as the marquee.
-    if (isFloating() || isInlineBlock())
+    if (isInlineBlock())
         return true;
 
     if (logicalWidth.type() == Intrinsic)
@@ -1873,7 +1860,7 @@ bool RenderBox::sizesLogicalWidthToFitContent(const Length& logicalWidth) const
 
 void RenderBox::computeMarginsForDirection(MarginDirection flowDirection, const RenderBlock* containingBlock, LayoutUnit containerWidth, LayoutUnit childWidth, LayoutUnit& marginStart, LayoutUnit& marginEnd, Length marginStartLength, Length marginEndLength) const
 {
-    if (flowDirection == BlockDirection || isFloating() || isInline()) {
+    if (flowDirection == BlockDirection || isInline()) {
         // Margins are calculated with respect to the logical width of
         // the containing block (8.3)
         // Inline blocks/tables and floats don't have their margins increased.
@@ -3378,17 +3365,6 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
     if (closestRenderer)
         return closestRenderer->positionForPoint(adjustedPoint - closestRenderer->locationOffset());
     return createPositionWithAffinity(firstPositionInOrBeforeNode(nonPseudoNode()));
-}
-
-static bool isReplacedElement(Node* node)
-{
-    // FIXME(sky): Remove this.
-    return false;
-}
-
-bool RenderBox::avoidsFloats() const
-{
-    return isReplaced() || isReplacedElement(node()) || hasOverflowClip() || isFlexItemIncludingDeprecated();
 }
 
 InvalidationReason RenderBox::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,

@@ -84,7 +84,7 @@ public:
 
     void increment();
 
-    void handleBR(EClear&);
+    void handleBR();
     void handleOutOfFlowPositioned(Vector<RenderBox*>& positionedObjects);
     void handleEmptyInline();
     void handleReplaced();
@@ -251,7 +251,7 @@ inline void BreakingContext::increment()
     m_atStart = false;
 }
 
-inline void BreakingContext::handleBR(EClear& clear)
+inline void BreakingContext::handleBR()
 {
     if (m_width.fitsOnLine()) {
         RenderObject* br = m_current.object();
@@ -267,15 +267,6 @@ inline void BreakingContext::handleBR(EClear& clear)
             m_lineInfo.setEmpty(false, m_block, &m_width);
         m_trailingObjects.clear();
         m_lineInfo.setPreviousLineBrokeCleanly(true);
-
-        // A <br> with clearance always needs a linebox in case the lines below it get dirtied later and
-        // need to check for floats to clear - so if we're ignoring spaces, stop ignoring them and add a
-        // run for this object.
-        if (m_ignoringSpaces && m_currentStyle->clear() != CNONE)
-            m_lineMidpointState.ensureLineBoxInsideIgnoredSpaces(br);
-
-        if (!m_lineInfo.isEmpty())
-            clear = m_currentStyle->clear();
     }
     m_atEnd = true;
 }

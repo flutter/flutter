@@ -75,10 +75,6 @@ enum EPosition {
     AbsolutePosition = 2,
 };
 
-enum EFloat {
-    NoFloat, LeftFloat, RightFloat
-};
-
 enum EMarginCollapse { MCOLLAPSE, MSEPARATE, MDISCARD };
 
 // Box decoration attributes. Not inherited.
@@ -98,10 +94,6 @@ enum EOverflow {
 enum EVerticalAlign {
     BASELINE, MIDDLE, SUB, SUPER, TEXT_TOP,
     TEXT_BOTTOM, TOP, BOTTOM, BASELINE_MIDDLE, LENGTH
-};
-
-enum EClear {
-    CNONE = 0, CLEFT = 1, CRIGHT = 2, CBOTH = 3
 };
 
 enum ETableLayout {

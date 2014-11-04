@@ -368,8 +368,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueBorderBox || valueID == CSSValueContentBox;
     case CSSPropertyCaptionSide: // top | bottom | left | right
         return valueID == CSSValueLeft || valueID == CSSValueRight || valueID == CSSValueTop || valueID == CSSValueBottom;
-    case CSSPropertyClear: // none | left | right | both
-        return valueID == CSSValueNone || valueID == CSSValueLeft || valueID == CSSValueRight || valueID == CSSValueBoth;
     case CSSPropertyDirection: // ltr | rtl
         return valueID == CSSValueLtr || valueID == CSSValueRtl;
     case CSSPropertyDisplay:
@@ -380,8 +378,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return (valueID >= CSSValueInline && valueID <= CSSValueInlineFlex) || valueID == CSSValueNone;
     case CSSPropertyEmptyCells: // show | hide
         return valueID == CSSValueShow || valueID == CSSValueHide;
-    case CSSPropertyFloat: // left | right | none | center (for buggy CSS, maps to none)
-        return valueID == CSSValueLeft || valueID == CSSValueRight || valueID == CSSValueNone || valueID == CSSValueCenter;
     case CSSPropertyFontStyle: // normal | italic | oblique
         return valueID == CSSValueNormal || valueID == CSSValueItalic || valueID == CSSValueOblique;
     case CSSPropertyFontStretch: // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
@@ -531,11 +527,9 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyBorderTopStyle:
     case CSSPropertyBoxSizing:
     case CSSPropertyCaptionSide:
-    case CSSPropertyClear:
     case CSSPropertyDirection:
     case CSSPropertyDisplay:
     case CSSPropertyEmptyCells:
-    case CSSPropertyFloat:
     case CSSPropertyFontStyle:
     case CSSPropertyFontStretch:
     case CSSPropertyImageRendering:

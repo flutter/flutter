@@ -48,7 +48,6 @@ void LineBreaker::reset()
 {
     m_positionedObjects.clear();
     m_hyphenated = false;
-    m_clear = CNONE;
 }
 
 InlineIterator LineBreaker::nextLineBreak(InlineBidiResolver& resolver, LineInfo& lineInfo,

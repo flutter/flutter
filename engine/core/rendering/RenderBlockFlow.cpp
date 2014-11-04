@@ -239,8 +239,6 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
 
     // Add overflow from children (unless we're multi-column, since in that case all our child overflow is clipped anyway).
     computeOverflow(oldClientAfterEdge);
-
-    m_descendantsWithFloatsMarkedForLayout = false;
 }
 
 void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
@@ -260,17 +258,7 @@ void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
     if (style()->textAlign() == WEBKIT_CENTER || child->style()->marginStartUsing(style()).isAuto())
         newPosition = std::max(newPosition, childMarginStart);
 
-    setLogicalLeftForChild(child, style()->isLeftToRightDirection() ? newPosition : totalAvailableLogicalWidth - newPosition - logicalWidthForChild(child));
-}
-
-void RenderBlockFlow::setLogicalLeftForChild(RenderBox* child, LayoutUnit logicalLeft)
-{
-    child->setX(logicalLeft);
-}
-
-void RenderBlockFlow::setLogicalTopForChild(RenderBox* child, LayoutUnit logicalTop)
-{
-    child->setY(logicalTop);
+    child->setX(style()->isLeftToRightDirection() ? newPosition : totalAvailableLogicalWidth - newPosition - logicalWidthForChild(child));
 }
 
 void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo)
@@ -282,7 +270,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo)
     // be correct. Only if we're wrong (when we compute the real logical top position)
     // will we have to potentially relayout.
     // Go ahead and position the child as though it didn't collapse with the top.
-    setLogicalTopForChild(child, estimateLogicalTopPosition(child, marginInfo));
+    child->setY(estimateLogicalTopPosition(child, marginInfo));
 
     child->layoutIfNeeded();
 
@@ -291,7 +279,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child, MarginInfo& marginInfo)
 
     // Now determine the correct ypos based off examination of collapsing margin
     // values.
-    setLogicalTopForChild(child, collapseMargins(child, marginInfo, childIsSelfCollapsing));
+    child->setY(collapseMargins(child, marginInfo, childIsSelfCollapsing));
 
     // FIXME(sky): Is it still actually possible for the child to need layout here?
     // This used to be needed for floats and/or margin collapsing.
@@ -643,8 +631,7 @@ void RenderBlockFlow::marginBeforeEstimateForChild(RenderBox* child, LayoutUnit&
             break;
     }
 
-    // Give up if there is clearance on the box, since it probably won't collapse into us.
-    if (!grandchildBox || grandchildBox->style()->clear() != CNONE)
+    if (!grandchildBox)
         return;
 
     // Make sure to update the block margins now for the grandchild box so that we're looking at current values.
@@ -999,11 +986,6 @@ GapRects RenderBlockFlow::inlineSelectionGaps(RenderBlock* rootBlock, const Layo
         lastLogicalRight = logicalRightSelectionOffset(rootBlock, lastSelectedLine->selectionBottom());
     }
     return result;
-}
-
-bool RenderBlockFlow::avoidsFloats() const
-{
-    return RenderBox::avoidsFloats();
 }
 
 LayoutUnit RenderBlockFlow::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)

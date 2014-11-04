@@ -410,8 +410,6 @@ public:
     bool isInlineElementContinuation() const { return isElementContinuation() && isInline(); }
     virtual RenderBoxModelObject* virtualContinuation() const { return 0; }
 
-    bool isFloating() const { return m_bitfields.floating(); }
-
     bool isOutOfFlowPositioned() const { return m_bitfields.isOutOfFlowPositioned(); } // absolute or fixed positioning
     bool isRelPositioned() const { return m_bitfields.isRelPositioned(); } // relative positioning
     bool isPositioned() const { return m_bitfields.isPositioned(); }
@@ -546,7 +544,6 @@ public:
     }
     void clearPositionedState() { m_bitfields.clearPositionedState(); }
 
-    void setFloating(bool isFloating) { m_bitfields.setFloating(isFloating); }
     void setInline(bool isInline) { m_bitfields.setIsInline(isInline); }
 
     void setHasBoxDecorationBackground(bool);
@@ -733,7 +730,8 @@ public:
 
     virtual unsigned length() const { return 1; }
 
-    bool isFloatingOrOutOfFlowPositioned() const { return (isFloating() || isOutOfFlowPositioned()); }
+    // FIXME(sky): Remove
+    bool isFloatingOrOutOfFlowPositioned() const { return isOutOfFlowPositioned(); }
 
     bool isTransparent() const { return style()->hasOpacity(); }
     float opacity() const { return style()->opacity(); }

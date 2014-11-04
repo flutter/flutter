@@ -505,8 +505,6 @@ public:
     virtual int firstLineBoxBaseline() const { return -1; }
     virtual int inlineBlockBaseline(LineDirectionMode) const { return -1; } // Returns -1 if we should skip this box when computing the baseline of an inline-block.
 
-    virtual bool avoidsFloats() const;
-
     bool isFlexItemIncludingDeprecated() const { return !isInline() && !isFloatingOrOutOfFlowPositioned() && parent() && parent()->isFlexibleBox(); }
 
     virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
@@ -567,12 +565,6 @@ public:
     ShapeOutsideInfo* shapeOutsideInfo() const
     {
         return ShapeOutsideInfo::isEnabledFor(*this) ? ShapeOutsideInfo::info(*this) : 0;
-    }
-
-    void markShapeOutsideDependentsForLayout()
-    {
-        if (isFloating())
-            removeFloatingOrPositionedChildFromBlockLists();
     }
 
 protected:

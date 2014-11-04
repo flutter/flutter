@@ -181,9 +181,7 @@ protected:
                 && overflowX == other.overflowX
                 && overflowY == other.overflowY
                 && verticalAlign == other.verticalAlign
-                && clear == other.clear
                 && position == other.position
-                && floating == other.floating
                 && tableLayout == other.tableLayout
                 && pageBreakBefore == other.pageBreakBefore
                 && pageBreakAfter == other.pageBreakAfter
@@ -209,9 +207,7 @@ protected:
         unsigned overflowX : 3; // EOverflow
         unsigned overflowY : 3; // EOverflow
         unsigned verticalAlign : 4; // EVerticalAlign
-        unsigned clear : 2; // EClear
         unsigned position : 3; // EPosition
-        unsigned floating : 2; // EFloat
         unsigned tableLayout : 1; // ETableLayout
         unsigned unicodeBidi : 3; // EUnicodeBidi
 
@@ -267,9 +263,7 @@ protected:
         noninherited_flags.overflowX = initialOverflowX();
         noninherited_flags.overflowY = initialOverflowY();
         noninherited_flags.verticalAlign = initialVerticalAlign();
-        noninherited_flags.clear = initialClear();
         noninherited_flags.position = initialPosition();
-        noninherited_flags.floating = initialFloating();
         noninherited_flags.tableLayout = initialTableLayout();
         noninherited_flags.unicodeBidi = initialUnicodeBidi();
         noninherited_flags.pageBreakBefore = initialPageBreak();
@@ -332,7 +326,6 @@ public:
 
     bool operator==(const RenderStyle& other) const;
     bool operator!=(const RenderStyle& other) const { return !(*this == other); }
-    bool isFloating() const { return noninherited_flags.floating != NoFloat; }
     bool hasMargin() const { return surround->margin.nonZero(); }
     bool hasBorder() const { return surround->border.hasBorder(); }
     bool hasPadding() const { return surround->padding.nonZero(); }
@@ -402,7 +395,6 @@ public:
     EPosition position() const { return static_cast<EPosition>(noninherited_flags.position); }
     bool hasOutOfFlowPosition() const { return position() == AbsolutePosition; }
     bool hasInFlowPosition() const { return position() == RelativePosition; }
-    EFloat floating() const { return static_cast<EFloat>(noninherited_flags.floating); }
 
     const Length& width() const { return m_box->width(); }
     const Length& height() const { return m_box->height(); }
@@ -488,7 +480,6 @@ public:
 
     EUnicodeBidi unicodeBidi() const { return static_cast<EUnicodeBidi>(noninherited_flags.unicodeBidi); }
 
-    EClear clear() const { return static_cast<EClear>(noninherited_flags.clear); }
     ETableLayout tableLayout() const { return static_cast<ETableLayout>(noninherited_flags.tableLayout); }
     bool isFixedTableLayout() const { return tableLayout() == TFIXED && !logicalWidth().isAuto(); }
 
@@ -836,7 +827,6 @@ public:
     void setDisplay(EDisplay v) { noninherited_flags.effectiveDisplay = v; }
     void setOriginalDisplay(EDisplay v) { noninherited_flags.originalDisplay = v; }
     void setPosition(EPosition v) { noninherited_flags.position = v; }
-    void setFloating(EFloat v) { noninherited_flags.floating = v; }
 
     void setLeft(const Length& v) { SET_VAR(surround, offset.m_left, v); }
     void setRight(const Length& v) { SET_VAR(surround, offset.m_right, v); }
@@ -962,7 +952,6 @@ public:
 
     void setUnicodeBidi(EUnicodeBidi b) { noninherited_flags.unicodeBidi = b; }
 
-    void setClear(EClear v) { noninherited_flags.clear = v; }
     void setTableLayout(ETableLayout v) { noninherited_flags.tableLayout = v; }
 
     bool setFontDescription(const FontDescription&);
@@ -1292,7 +1281,6 @@ public:
     static NinePieceImage initialNinePieceImage() { return NinePieceImage(); }
     static LengthSize initialBorderRadius() { return LengthSize(Length(0, Fixed), Length(0, Fixed)); }
     static ECaptionSide initialCaptionSide() { return CAPTOP; }
-    static EClear initialClear() { return CNONE; }
     static LengthBox initialClip() { return LengthBox(); }
     static TextDirection initialDirection() { return LTR; }
     static TextOrientation initialTextOrientation() { return TextOrientationVerticalRight; }
@@ -1300,7 +1288,6 @@ public:
     static LengthPoint initialObjectPosition() { return LengthPoint(Length(50.0, Percent), Length(50.0, Percent)); }
     static EDisplay initialDisplay() { return BLOCK; }
     static EEmptyCell initialEmptyCells() { return SHOW; }
-    static EFloat initialFloating() { return NoFloat; }
     static EListStylePosition initialListStylePosition() { return OUTSIDE; }
     static EListStyleType initialListStyleType() { return Disc; }
     static EOverflow initialOverflowX() { return OVISIBLE; }

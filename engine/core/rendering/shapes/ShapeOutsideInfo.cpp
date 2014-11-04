@@ -190,7 +190,7 @@ LayoutUnit ShapeOutsideInfo::logicalLeftOffset() const
 bool ShapeOutsideInfo::isEnabledFor(const RenderBox& box)
 {
     ShapeValue* shapeValue = box.style()->shapeOutside();
-    if (!box.isFloating() || !shapeValue)
+    if (!shapeValue)
         return false;
 
     switch (shapeValue->type()) {

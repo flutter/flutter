@@ -785,46 +785,6 @@ template<> inline CSSPrimitiveValue::operator ECaptionSide() const
     return CAPTOP;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EClear e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case CNONE:
-        m_value.valueID = CSSValueNone;
-        break;
-    case CLEFT:
-        m_value.valueID = CSSValueLeft;
-        break;
-    case CRIGHT:
-        m_value.valueID = CSSValueRight;
-        break;
-    case CBOTH:
-        m_value.valueID = CSSValueBoth;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EClear() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueNone:
-        return CNONE;
-    case CSSValueLeft:
-        return CLEFT;
-    case CSSValueRight:
-        return CRIGHT;
-    case CSSValueBoth:
-        return CBOTH;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return CNONE;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ECursor e)
     : CSSValue(PrimitiveClass)
 {
@@ -1193,42 +1153,6 @@ template<> inline CSSPrimitiveValue::operator EFlexWrap() const
 
     ASSERT_NOT_REACHED();
     return FlexNoWrap;
-}
-
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EFloat e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case NoFloat:
-        m_value.valueID = CSSValueNone;
-        break;
-    case LeftFloat:
-        m_value.valueID = CSSValueLeft;
-        break;
-    case RightFloat:
-        m_value.valueID = CSSValueRight;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EFloat() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueLeft:
-        return LeftFloat;
-    case CSSValueRight:
-        return RightFloat;
-    case CSSValueNone:
-    case CSSValueCenter: // Non-standard CSS value.
-        return NoFloat;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return NoFloat;
 }
 
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(LineBreak e)

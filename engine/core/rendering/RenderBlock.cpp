@@ -90,7 +90,6 @@ RenderBlock::RenderBlock(ContainerNode* node)
     , m_hasMarkupTruncation(false)
     , m_hasBorderOrPaddingLogicalWidthChanged(false)
     , m_hasOnlySelfCollapsingChildren(false)
-    , m_descendantsWithFloatsMarkedForLayout(false)
 {
     // RenderBlockFlow calls setChildrenInline(true).
     // By default, subclasses do not have inline children.
@@ -807,16 +806,6 @@ void RenderBlock::removeChild(RenderObject* oldChild)
         // box.  We can go ahead and pull the content right back up into our
         // box.
         collapseAnonymousBlockChild(this, toRenderBlock(child));
-    } else if (((prev && prev->isAnonymousBlock()) || (next && next->isAnonymousBlock())) && canCollapseAnonymousBlockChild()) {
-        // It's possible that the removal has knocked us down to a single anonymous
-        // block with pseudo-style element siblings (e.g. first-letter). If these
-        // are floating, then we need to pull the content up also.
-        RenderBlock* anonymousBlock = toRenderBlock((prev && prev->isAnonymousBlock()) ? prev : next);
-        if ((anonymousBlock->previousSibling() || anonymousBlock->nextSibling())
-            && (!anonymousBlock->previousSibling() || (anonymousBlock->previousSibling()->style()->styleType() != NOPSEUDO && anonymousBlock->previousSibling()->isFloating() && !anonymousBlock->previousSibling()->previousSibling()))
-            && (!anonymousBlock->nextSibling() || (anonymousBlock->nextSibling()->style()->styleType() != NOPSEUDO && anonymousBlock->nextSibling()->isFloating() && !anonymousBlock->nextSibling()->nextSibling()))) {
-            collapseAnonymousBlockChild(this, anonymousBlock);
-        }
     }
 
     if (!firstChild()) {
@@ -1099,7 +1088,7 @@ void RenderBlock::simplifiedNormalFlowLayout()
         ListHashSet<RootInlineBox*> lineBoxes;
         for (InlineWalker walker(this); !walker.atEnd(); walker.advance()) {
             RenderObject* o = walker.current();
-            if (!o->isOutOfFlowPositioned() && (o->isReplaced() || o->isFloating())) {
+            if (!o->isOutOfFlowPositioned() && o->isReplaced()) {
                 o->layoutIfNeeded();
                 if (toRenderBox(o)->inlineBoxWrapper()) {
                     RootInlineBox& box = toRenderBox(o)->inlineBoxWrapper()->root();
@@ -1302,13 +1291,13 @@ void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOf
 
 void RenderBlock::paintChild(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!child->hasSelfPaintingLayer() && !child->isFloating())
+    if (!child->hasSelfPaintingLayer())
         child->paint(paintInfo, paintOffset);
 }
 
 void RenderBlock::paintChildAsInlineBlock(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!child->hasSelfPaintingLayer() && !child->isFloating())
+    if (!child->hasSelfPaintingLayer())
         paintAsInlineBlock(child, paintInfo, paintOffset);
 }
 
@@ -1534,7 +1523,7 @@ bool RenderBlock::isSelectionRoot() const
     ASSERT(node() || isAnonymous());
 
     if (isDocumentElement() || hasOverflowClip()
-        || isPositioned() || isFloating()
+        || isPositioned()
         || isInlineBlock()
         || hasTransform() || hasMask()
         || isFlexItemIncludingDeprecated())
@@ -2189,7 +2178,7 @@ bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& 
         if (hitTestAction == HitTestChildBlockBackgrounds)
             childHitTest = HitTestChildBlockBackground;
         for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
-            if (!child->hasSelfPaintingLayer() && !child->isFloating() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
+            if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
                 return true;
         }
     }
@@ -2444,8 +2433,6 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
     bool nowrap = styleToUse->whiteSpace() == NOWRAP;
 
     RenderObject* child = firstChild();
-    RenderBlock* containingBlock = this->containingBlock();
-    LayoutUnit floatLeftWidth = 0, floatRightWidth = 0;
     while (child) {
         // Positioned children don't affect the min/max width
         if (child->isOutOfFlowPositioned()) {
@@ -2454,17 +2441,6 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
         }
 
         RefPtr<RenderStyle> childStyle = child->style();
-        if (child->isFloating() || (child->isBox() && toRenderBox(child)->avoidsFloats())) {
-            LayoutUnit floatTotalWidth = floatLeftWidth + floatRightWidth;
-            if (childStyle->clear() & CLEFT) {
-                maxLogicalWidth = std::max(floatTotalWidth, maxLogicalWidth);
-                floatLeftWidth = 0;
-            }
-            if (childStyle->clear() & CRIGHT) {
-                maxLogicalWidth = std::max(floatTotalWidth, maxLogicalWidth);
-                floatRightWidth = 0;
-            }
-        }
 
         // A margin basically has three types: fixed, percentage, and auto (variable).
         // Auto and percentage margins simply become 0 when computing min/max width.
@@ -2492,32 +2468,7 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
 
         w = childMaxPreferredLogicalWidth + margin;
 
-        if (!child->isFloating()) {
-            if (child->isBox() && toRenderBox(child)->avoidsFloats()) {
-                // Determine a left and right max value based off whether or not the floats can fit in the
-                // margins of the object.  For negative margins, we will attempt to overlap the float if the negative margin
-                // is smaller than the float width.
-                bool ltr = containingBlock ? containingBlock->style()->isLeftToRightDirection() : styleToUse->isLeftToRightDirection();
-                LayoutUnit marginLogicalLeft = ltr ? marginStart : marginEnd;
-                LayoutUnit marginLogicalRight = ltr ? marginEnd : marginStart;
-                LayoutUnit maxLeft = marginLogicalLeft > 0 ? std::max(floatLeftWidth, marginLogicalLeft) : floatLeftWidth + marginLogicalLeft;
-                LayoutUnit maxRight = marginLogicalRight > 0 ? std::max(floatRightWidth, marginLogicalRight) : floatRightWidth + marginLogicalRight;
-                w = childMaxPreferredLogicalWidth + maxLeft + maxRight;
-                w = std::max(w, floatLeftWidth + floatRightWidth);
-            } else {
-                maxLogicalWidth = std::max(floatLeftWidth + floatRightWidth, maxLogicalWidth);
-            }
-            floatLeftWidth = floatRightWidth = 0;
-        }
-
-        if (child->isFloating()) {
-            if (childStyle->floating() == LeftFloat)
-                floatLeftWidth += w;
-            else
-                floatRightWidth += w;
-        } else {
-            maxLogicalWidth = std::max(w, maxLogicalWidth);
-        }
+        maxLogicalWidth = std::max(w, maxLogicalWidth);
 
         child = child->nextSibling();
     }
@@ -2525,8 +2476,6 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
     // Always make sure these values are non-negative.
     minLogicalWidth = std::max<LayoutUnit>(0, minLogicalWidth);
     maxLogicalWidth = std::max<LayoutUnit>(0, maxLogicalWidth);
-
-    maxLogicalWidth = std::max(floatLeftWidth + floatRightWidth, maxLogicalWidth);
 }
 
 bool RenderBlock::hasLineIfEmpty() const
@@ -2665,7 +2614,7 @@ RenderBlock* RenderBlock::firstLineBlock() const
         if (hasPseudo)
             break;
         RenderObject* parentBlock = firstLineBlock->parent();
-        if (firstLineBlock->isReplaced() || firstLineBlock->isFloating()
+        if (firstLineBlock->isReplaced()
             || !parentBlock
             || !parentBlock->isRenderBlockFlow())
             break;
@@ -2944,8 +2893,6 @@ bool RenderBlock::hasMarginAfterQuirk(const RenderBox* child) const
 
 const char* RenderBlock::renderName() const
 {
-    if (isFloating())
-        return "RenderBlock (floating)";
     if (isOutOfFlowPositioned())
         return "RenderBlock (positioned)";
     if (isAnonymousBlock())

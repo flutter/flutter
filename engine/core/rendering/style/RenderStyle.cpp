@@ -189,9 +189,7 @@ void RenderStyle::copyNonInheritedFrom(const RenderStyle* other)
     noninherited_flags.overflowX = other->noninherited_flags.overflowX;
     noninherited_flags.overflowY = other->noninherited_flags.overflowY;
     noninherited_flags.verticalAlign = other->noninherited_flags.verticalAlign;
-    noninherited_flags.clear = other->noninherited_flags.clear;
     noninherited_flags.position = other->noninherited_flags.position;
-    noninherited_flags.floating = other->noninherited_flags.floating;
     noninherited_flags.tableLayout = other->noninherited_flags.tableLayout;
     noninherited_flags.unicodeBidi = other->noninherited_flags.unicodeBidi;
     noninherited_flags.pageBreakBefore = other->noninherited_flags.pageBreakBefore;
@@ -413,10 +411,8 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
 
     if (noninherited_flags.overflowX != other.noninherited_flags.overflowX
         || noninherited_flags.overflowY != other.noninherited_flags.overflowY
-        || noninherited_flags.clear != other.noninherited_flags.clear
         || noninherited_flags.unicodeBidi != other.noninherited_flags.unicodeBidi
         || noninherited_flags.position != other.noninherited_flags.position
-        || noninherited_flags.floating != other.noninherited_flags.floating
         || noninherited_flags.originalDisplay != other.noninherited_flags.originalDisplay)
         return true;
 

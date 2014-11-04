@@ -98,12 +98,10 @@ namespace blink {
 
 class StyledMarkupAccumulator final : public MarkupAccumulator {
 public:
-    enum RangeFullySelectsNode { DoesFullySelectNode, DoesNotFullySelectNode };
-
     StyledMarkupAccumulator(Vector<RawPtr<Node> >* nodes, EAbsoluteURLs, EAnnotateForInterchange, RawPtr<const Range>, Node* highestNodeToBeSerialized = 0);
     Node* serializeNodes(Node* startNode, Node* pastEnd);
     void appendString(const String& s) { return MarkupAccumulator::appendString(s); }
-    void wrapWithNode(ContainerNode&, bool convertBlocksToInlines = false, RangeFullySelectsNode = DoesFullySelectNode);
+    void wrapWithNode(ContainerNode&, bool convertBlocksToInlines = false);
     void wrapWithStyleNode(StylePropertySet*, const Document&, bool isBlock = false);
     String takeResults();
 
@@ -113,8 +111,8 @@ private:
     virtual void appendText(StringBuilder& out, Text&) override;
     String renderedText(Node&, const Range*);
     String stringValueForRange(const Node&, const Range*);
-    void appendElement(StringBuilder& out, Element&, bool addDisplayInline, RangeFullySelectsNode);
-    virtual void appendElement(StringBuilder& out, Element& element, Namespaces*) override { appendElement(out, element, false, DoesFullySelectNode); }
+    void appendElement(StringBuilder& out, Element&, bool addDisplayInline);
+    virtual void appendElement(StringBuilder& out, Element& element, Namespaces*) override { appendElement(out, element, false); }
 
     enum NodeTraversalMode { EmitString, DoNotEmitString };
     Node* traverseNodesForSerialization(Node* startNode, Node* pastEnd, NodeTraversalMode);
@@ -139,11 +137,11 @@ inline StyledMarkupAccumulator::StyledMarkupAccumulator(Vector<RawPtr<Node> >* n
 {
 }
 
-void StyledMarkupAccumulator::wrapWithNode(ContainerNode& node, bool convertBlocksToInlines, RangeFullySelectsNode rangeFullySelectsNode)
+void StyledMarkupAccumulator::wrapWithNode(ContainerNode& node, bool convertBlocksToInlines)
 {
     StringBuilder markup;
     if (node.isElementNode())
-        appendElement(markup, toElement(node), convertBlocksToInlines && isBlock(&node), rangeFullySelectsNode);
+        appendElement(markup, toElement(node), convertBlocksToInlines && isBlock(&node));
     else
         appendStartMarkup(markup, node, 0);
     m_reversedPrecedingMarkup.append(markup.toString());
@@ -231,7 +229,7 @@ String StyledMarkupAccumulator::stringValueForRange(const Node& node, const Rang
     return text;
 }
 
-void StyledMarkupAccumulator::appendElement(StringBuilder& out, Element& element, bool addDisplayInline, RangeFullySelectsNode rangeFullySelectsNode)
+void StyledMarkupAccumulator::appendElement(StringBuilder& out, Element& element, bool addDisplayInline)
 {
     const bool documentIsHTML = element.document().isHTMLDocument();
     appendOpenTag(out, element, 0);
@@ -270,11 +268,6 @@ void StyledMarkupAccumulator::appendElement(StringBuilder& out, Element& element
 
             if (addDisplayInline)
                 newInlineStyle->forceInline();
-
-            // If the node is not fully selected by the range, then we don't want to keep styles that affect its relationship to the nodes around it
-            // only the ones that affect it and the nodes within it.
-            if (rangeFullySelectsNode == DoesNotFullySelectNode && newInlineStyle->style())
-                newInlineStyle->style()->removeProperty(CSSPropertyFloat);
         }
 
         if (!newInlineStyle->isEmpty()) {
@@ -500,9 +493,7 @@ static String createMarkupInternal(Document& document, const Range* range, const
                     accumulator.wrapWithStyleNode(fullySelectedRootStyle->style(), document, true);
                 }
             } else {
-                // Since this node and all the other ancestors are not in the selection we want to set RangeFullySelectsNode to DoesNotFullySelectNode
-                // so that styles that affect the exterior of the node are not included.
-                accumulator.wrapWithNode(*ancestor, convertBlocksToInlines, StyledMarkupAccumulator::DoesNotFullySelectNode);
+                accumulator.wrapWithNode(*ancestor, convertBlocksToInlines);
             }
             if (nodes)
                 nodes->append(ancestor);
