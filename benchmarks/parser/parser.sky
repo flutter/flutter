@@ -1,0 +1,22 @@
+<import src="../resources/runner.sky" as="PerfRunner" />
+<script>
+var specURL = "resources/html5.html";
+var cacheBust = 100;
+
+var runner = new PerfRunner({
+  iterations: 10,
+  unit: 'ms',
+});
+
+runner.runAsync(function(done) {
+  var element = document.createElement("import");
+
+  element.addEventListener("load", function() {
+    element.remove();
+    done();
+  });
+
+  element.setAttribute("src", specURL + "?cacheBust=" + cacheBust++);
+  document.documentElement.appendChild(element);
+});
+</script>

@@ -9,6 +9,8 @@
 #include "core/fetch/FetchRequest.h"
 #include "core/html/imports/HTMLImportsController.h"
 #include "core/html/imports/HTMLImportChild.h"
+#include "core/events/Event.h"
+#include "core/EventTypeNames.h"
 
 namespace blink {
 
@@ -62,6 +64,7 @@ void HTMLImportElement::load()
 
 void HTMLImportElement::didFinish()
 {
+    dispatchEvent(Event::create(EventTypeNames::load));
 }
 
 void HTMLImportElement::importChildWasDestroyed(HTMLImportChild* child)

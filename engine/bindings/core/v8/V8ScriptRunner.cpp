@@ -222,6 +222,8 @@ void V8ScriptRunner::runModule(v8::Isolate* isolate, ExecutionContext* context, 
         return;
 
     v8::Handle<v8::Value> scriptResult = script->Run();
+    if (scriptResult.IsEmpty())
+        return;
 
     auto arguments = module.resolvedDependencies;
     arguments.append(module.moduleObject);
