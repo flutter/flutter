@@ -1766,8 +1766,6 @@ void RenderObject::setStyle(PassRefPtr<RenderStyle> style)
     updateImage(oldStyle ? oldStyle->borderImage().image() : 0, m_style->borderImage().image());
     updateImage(oldStyle ? oldStyle->maskBoxImage().image() : 0, m_style->maskBoxImage().image());
 
-    updateShapeImage(oldStyle ? oldStyle->shapeOutside() : 0, m_style->shapeOutside());
-
     bool doesNotNeedLayout = !m_parent || isText();
 
     styleDidChange(diff, oldStyle.get());
@@ -1934,12 +1932,6 @@ void RenderObject::updateImage(StyleImage* oldImage, StyleImage* newImage)
         if (newImage)
             newImage->addClient(this);
     }
-}
-
-void RenderObject::updateShapeImage(const ShapeValue* oldShapeValue, const ShapeValue* newShapeValue)
-{
-    if (oldShapeValue || newShapeValue)
-        updateImage(oldShapeValue ? oldShapeValue->image() : 0, newShapeValue ? newShapeValue->image() : 0);
 }
 
 LayoutRect RenderObject::viewRect() const
@@ -2363,14 +2355,6 @@ void RenderObject::destroy()
     postDestroy();
 }
 
-void RenderObject::removeShapeImageClient(ShapeValue* shapeValue)
-{
-    if (!shapeValue)
-        return;
-    if (StyleImage* shapeImage = shapeValue->image())
-        shapeImage->removeClient(this);
-}
-
 void RenderObject::postDestroy()
 {
     // It seems ugly that this is not in willBeDestroyed().
@@ -2390,8 +2374,6 @@ void RenderObject::postDestroy()
 
         if (StyleImage* maskBoxImage = m_style->maskBoxImage().image())
             maskBoxImage->removeClient(this);
-
-        removeShapeImageClient(m_style->shapeOutside());
     }
     ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->removeRenderObject(this);
 #if !ENABLE(OILPAN)

@@ -1195,16 +1195,6 @@ public:
     bool requiresAcceleratedCompositingForExternalReasons(bool b) { return rareNonInheritedData->m_requiresAcceleratedCompositingForExternalReasons; }
     void setRequiresAcceleratedCompositingForExternalReasons(bool b) { SET_VAR(rareNonInheritedData, m_requiresAcceleratedCompositingForExternalReasons, b); }
 
-    void setShapeOutside(PassRefPtr<ShapeValue> value)
-    {
-        if (rareNonInheritedData->m_shapeOutside == value)
-            return;
-        rareNonInheritedData.access()->m_shapeOutside = value;
-    }
-    ShapeValue* shapeOutside() const { return rareNonInheritedData->m_shapeOutside.get(); }
-
-    static ShapeValue* initialShapeOutside() { return 0; }
-
     void setClipPath(PassRefPtr<ClipPathOperation> operation)
     {
         if (rareNonInheritedData->m_clipPath != operation)
@@ -1213,18 +1203,6 @@ public:
     ClipPathOperation* clipPath() const { return rareNonInheritedData->m_clipPath.get(); }
 
     static ClipPathOperation* initialClipPath() { return 0; }
-
-    const Length& shapeMargin() const { return rareNonInheritedData->m_shapeMargin; }
-    void setShapeMargin(const Length& shapeMargin) { SET_VAR(rareNonInheritedData, m_shapeMargin, shapeMargin); }
-    static Length initialShapeMargin() { return Length(0, Fixed); }
-
-    float shapeImageThreshold() const { return rareNonInheritedData->m_shapeImageThreshold; }
-    void setShapeImageThreshold(float shapeImageThreshold)
-    {
-        float clampedShapeImageThreshold = clampTo<float>(shapeImageThreshold, 0, 1);
-        SET_VAR(rareNonInheritedData, m_shapeImageThreshold, clampedShapeImageThreshold);
-    }
-    static float initialShapeImageThreshold() { return 0; }
 
     bool hasContent() const { return contentData(); }
     const ContentData* contentData() const { return rareNonInheritedData->m_content.get(); }

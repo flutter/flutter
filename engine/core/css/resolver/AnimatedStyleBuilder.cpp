@@ -480,15 +480,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         style->setPerspectiveOriginY(animatableValueToLength(animatableLengthPoint->y(), state));
         return;
     }
-    case CSSPropertyShapeOutside:
-        style->setShapeOutside(toAnimatableShapeValue(value)->shapeValue());
-        return;
-    case CSSPropertyShapeMargin:
-        style->setShapeMargin(animatableValueToLength(value, state, ValueRangeNonNegative));
-        return;
-    case CSSPropertyShapeImageThreshold:
-        style->setShapeImageThreshold(clampTo<float>(toAnimatableDouble(value)->toDouble(), 0, 1));
-        return;
     case CSSPropertyWebkitTextStrokeColor:
         style->setTextStrokeColor(toAnimatableColor(value)->color());
         return;

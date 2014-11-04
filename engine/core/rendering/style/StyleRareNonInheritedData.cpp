@@ -41,9 +41,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , lineClamp(RenderStyle::initialLineClamp())
     , m_mask(MaskFillLayer, true)
     , m_pageSize()
-    , m_shapeOutside(RenderStyle::initialShapeOutside())
-    , m_shapeMargin(RenderStyle::initialShapeMargin())
-    , m_shapeImageThreshold(RenderStyle::initialShapeImageThreshold())
     , m_clipPath(RenderStyle::initialClipPath())
     , m_textDecorationColor(StyleColor::currentColor())
     , m_order(RenderStyle::initialOrder())
@@ -108,9 +105,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_mask(o.m_mask)
     , m_maskBoxImage(o.m_maskBoxImage)
     , m_pageSize(o.m_pageSize)
-    , m_shapeOutside(o.m_shapeOutside)
-    , m_shapeMargin(o.m_shapeMargin)
-    , m_shapeImageThreshold(o.m_shapeImageThreshold)
     , m_clipPath(o.m_clipPath)
     , m_textDecorationColor(o.m_textDecorationColor)
     , m_order(o.m_order)
@@ -178,9 +172,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_mask == o.m_mask
         && m_maskBoxImage == o.m_maskBoxImage
         && m_pageSize == o.m_pageSize
-        && m_shapeOutside == o.m_shapeOutside
-        && m_shapeMargin == o.m_shapeMargin
-        && m_shapeImageThreshold == o.m_shapeImageThreshold
         && m_clipPath == o.m_clipPath
         && m_textDecorationColor == o.m_textDecorationColor
         && m_order == o.m_order

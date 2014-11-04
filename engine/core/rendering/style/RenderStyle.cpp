@@ -328,7 +328,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
             || rareNonInheritedData->textOverflow != other.rareNonInheritedData->textOverflow
             || rareNonInheritedData->m_wrapFlow != other.rareNonInheritedData->m_wrapFlow
             || rareNonInheritedData->m_wrapThrough != other.rareNonInheritedData->m_wrapThrough
-            || rareNonInheritedData->m_shapeMargin != other.rareNonInheritedData->m_shapeMargin
             || rareNonInheritedData->m_order != other.rareNonInheritedData->m_order
             || rareNonInheritedData->m_alignContent != other.rareNonInheritedData->m_alignContent
             || rareNonInheritedData->m_alignItems != other.rareNonInheritedData->m_alignItems
@@ -496,7 +495,6 @@ bool RenderStyle::diffNeedsPaintInvalidationObject(const RenderStyle& other) con
         if (rareNonInheritedData->userDrag != other.rareNonInheritedData->userDrag
             || rareNonInheritedData->m_objectFit != other.rareNonInheritedData->m_objectFit
             || rareNonInheritedData->m_objectPosition != other.rareNonInheritedData->m_objectPosition
-            || !dataEquivalent(rareNonInheritedData->m_shapeOutside, other.rareNonInheritedData->m_shapeOutside)
             || !dataEquivalent(rareNonInheritedData->m_clipPath, other.rareNonInheritedData->m_clipPath))
             return true;
     }

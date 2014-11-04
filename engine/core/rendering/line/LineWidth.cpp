@@ -72,13 +72,6 @@ inline static float availableWidthAtOffset(const RenderBlockFlow& block, const L
     return std::max(0.0f, newLineRight - newLineLeft);
 }
 
-inline static float availableWidthAtOffset(const RenderBlockFlow& block, const LayoutUnit& offset, bool shouldIndentText)
-{
-    float newLineLeft = block.logicalLeftOffsetForLine(offset, shouldIndentText).toFloat();
-    float newLineRight = block.logicalRightOffsetForLine(offset, shouldIndentText).toFloat();
-    return std::max(0.0f, newLineRight - newLineLeft);
-}
-
 void LineWidth::updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, const float& newLineLeft, const float& newLineRight)
 {
     if (newLineWidth <= m_availableWidth)
@@ -90,38 +83,6 @@ void LineWidth::updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWid
     m_right = newLineRight;
 }
 
-inline static bool isWholeLineFit(const RenderBlockFlow& block, const LayoutUnit& lineTop, LayoutUnit lineHeight, float uncommittedWidth, bool shouldIndentText)
-{
-    for (LayoutUnit lineBottom = lineTop; lineBottom <= lineTop + lineHeight; lineBottom++) {
-        LayoutUnit availableWidthAtBottom = availableWidthAtOffset(block, lineBottom, shouldIndentText);
-        if (availableWidthAtBottom < uncommittedWidth)
-            return false;
-    }
-    return true;
-}
-
-void LineWidth::wrapNextToShapeOutside(bool isFirstLine)
-{
-    LayoutUnit lineHeight = m_block.lineHeight(isFirstLine, HorizontalLine, PositionOfInteriorLineBoxes);
-    LayoutUnit lineLogicalTop = m_block.logicalHeight();
-    LayoutUnit newLineTop = lineLogicalTop;
-    LayoutUnit floatLogicalBottom = lineLogicalTop;
-
-    float newLineWidth;
-    float newLineLeft = m_left;
-    float newLineRight = m_right;
-    while (true) {
-        newLineWidth = availableWidthAtOffset(m_block, newLineTop, shouldIndentText(), newLineLeft, newLineRight);
-        if (newLineWidth >= m_uncommittedWidth && isWholeLineFit(m_block, newLineTop, lineHeight, m_uncommittedWidth, shouldIndentText()))
-            break;
-
-        if (newLineTop >= floatLogicalBottom)
-            break;
-
-        newLineTop++;
-    }
-    updateLineDimension(newLineTop, newLineWidth, newLineLeft, newLineRight);
-}
 
 void LineWidth::fitBelowFloats(bool isFirstLine)
 {

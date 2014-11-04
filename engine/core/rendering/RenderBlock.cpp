@@ -46,7 +46,6 @@
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/shapes/ShapeOutsideInfo.h"
 #include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/geometry/FloatQuad.h"
@@ -145,8 +144,6 @@ static void appendImagesFromStyle(Vector<ImageResource*>& images, RenderStyle& b
     appendImageIfNotNull(images, blockStyle.listStyleImage());
     appendImageIfNotNull(images, blockStyle.borderImageSource());
     appendImageIfNotNull(images, blockStyle.maskBoxImageSource());
-    if (blockStyle.shapeOutside())
-        appendImageIfNotNull(images, blockStyle.shapeOutside()->image());
 }
 
 void RenderBlock::removeFromGlobalMaps()

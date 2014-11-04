@@ -259,9 +259,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitPerspectiveOrigin,
     CSSPropertyWebkitPrintColorAdjust,
     CSSPropertyWebkitRtlOrdering,
-    CSSPropertyShapeOutside,
-    CSSPropertyShapeImageThreshold,
-    CSSPropertyShapeMargin,
     CSSPropertyWebkitTapHighlightColor,
     CSSPropertyWebkitTextDecorationsInEffect,
     CSSPropertyWebkitTextEmphasisColor,
@@ -1200,27 +1197,6 @@ static PassRefPtr<CSSPrimitiveValue> valueForFontVariant(RenderStyle& style)
 static PassRefPtr<CSSPrimitiveValue> valueForFontWeight(RenderStyle& style)
 {
     return cssValuePool().createValue(style.fontDescription().weight());
-}
-
-static PassRefPtr<CSSValue> valueForShape(const RenderStyle& style, ShapeValue* shapeValue)
-{
-    if (!shapeValue)
-        return cssValuePool().createIdentifierValue(CSSValueNone);
-    if (shapeValue->type() == ShapeValue::Box)
-        return cssValuePool().createValue(shapeValue->cssBox());
-    if (shapeValue->type() == ShapeValue::Image) {
-        if (shapeValue->image())
-            return shapeValue->image()->cssValue();
-        return cssValuePool().createIdentifierValue(CSSValueNone);
-    }
-
-    ASSERT(shapeValue->type() == ShapeValue::Shape);
-
-    RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
-    list->append(valueForBasicShape(style, shapeValue->shape()));
-    if (shapeValue->cssBox() != BoxMissing)
-        list->append(cssValuePool().createValue(shapeValue->cssBox()));
-    return list.release();
 }
 
 static PassRefPtr<CSSValue> touchActionFlagsToCSSValue(TouchAction touchAction)
@@ -2217,12 +2193,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
                     return valueForBasicShape(*style, toShapeClipPathOperation(operation)->basicShape());
             }
             return cssValuePool().createIdentifierValue(CSSValueNone);
-        case CSSPropertyShapeMargin:
-            return cssValuePool().createValue(style->shapeMargin(), *style);
-        case CSSPropertyShapeImageThreshold:
-            return cssValuePool().createValue(style->shapeImageThreshold(), CSSPrimitiveValue::CSS_NUMBER);
-        case CSSPropertyShapeOutside:
-            return valueForShape(*style, style->shapeOutside());
         case CSSPropertyWebkitFilter:
             return valueForFilter(renderer, *style);
         case CSSPropertyMixBlendMode:

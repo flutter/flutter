@@ -173,12 +173,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.paddingTop() == b.paddingTop();
     case CSSPropertyRight:
         return a.right() == b.right();
-    case CSSPropertyShapeImageThreshold:
-        return a.shapeImageThreshold() == b.shapeImageThreshold();
-    case CSSPropertyShapeMargin:
-        return a.shapeMargin() == b.shapeMargin();
-    case CSSPropertyShapeOutside:
-        return dataEquivalent(a.shapeOutside(), b.shapeOutside());
     case CSSPropertyTextDecorationColor:
         return a.textDecorationColor().resolve(a.color()) == b.textDecorationColor().resolve(b.color());
     case CSSPropertyTextIndent:

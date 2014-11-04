@@ -1321,16 +1321,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
             return true;
         }
         break;
-    case CSSPropertyShapeOutside:
-        parsedValue = parseShapeProperty(propId);
-        break;
-    case CSSPropertyShapeMargin:
-        validPrimitive = (!id && validUnit(value, FLength | FPercent | FNonNeg));
-        break;
-    case CSSPropertyShapeImageThreshold:
-        validPrimitive = (!id && validUnit(value, FNumber));
-        break;
-
     case CSSPropertyTouchAction:
         parsedValue = parseTouchAction();
         break;

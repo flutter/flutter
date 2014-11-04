@@ -113,10 +113,6 @@ public:
 
     LengthSize m_pageSize;
 
-    RefPtr<ShapeValue> m_shapeOutside;
-    Length m_shapeMargin;
-    float m_shapeImageThreshold;
-
     RefPtr<ClipPathOperation> m_clipPath;
 
     StyleColor m_textDecorationColor;

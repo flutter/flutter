@@ -482,8 +482,6 @@ public:
 
     bool hasBlendMode() const;
 
-    bool hasShapeOutside() const { return style() && style()->shapeOutside(); }
-
     inline bool preservesNewline() const;
 
     RenderView* view() const { return document().renderView(); };
@@ -561,7 +559,6 @@ public:
 
     void updateFillImages(const FillLayer* oldLayers, const FillLayer& newLayers);
     void updateImage(StyleImage*, StyleImage*);
-    void updateShapeImage(const ShapeValue*, const ShapeValue*);
 
     // paintOffset is the offset from the origin of the GraphicsContext at which to paint the current object.
     virtual void paint(PaintInfo&, const LayoutPoint& paintOffset);
@@ -976,8 +973,6 @@ private:
     StyleDifference adjustStyleDifference(StyleDifference) const;
 
     Color selectionColor(int colorProperty) const;
-
-    void removeShapeImageClient(ShapeValue*);
 
 #if ENABLE(ASSERT)
     void checkBlockPositionedObjectsNeedLayout();

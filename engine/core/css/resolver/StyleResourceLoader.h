@@ -48,7 +48,6 @@ public:
 private:
     PassRefPtr<StyleImage> loadPendingImage(StylePendingImage*, float deviceScaleFactor);
     void loadPendingImages(RenderStyle*, ElementStyleResources&);
-    void loadPendingShapeImage(RenderStyle*, ShapeValue*, float deviceScaleFactor);
 
     ResourceFetcher* m_fetcher;
 };

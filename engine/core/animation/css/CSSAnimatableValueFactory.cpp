@@ -213,13 +213,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::createFromColor(CSSProper
     return AnimatableColor::create(color);
 }
 
-inline static PassRefPtr<AnimatableValue> createFromShapeValue(ShapeValue* value)
-{
-    if (value)
-        return AnimatableShapeValue::create(value);
-    return AnimatableUnknown::create(CSSValueNone);
-}
-
 static double fontStretchToDouble(FontStretch fontStretch)
 {
     return static_cast<unsigned>(fontStretch);
@@ -425,12 +418,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         return AnimatableLengthPoint::create(
             createFromLength(style.perspectiveOriginX(), style),
             createFromLength(style.perspectiveOriginY(), style));
-    case CSSPropertyShapeOutside:
-        return createFromShapeValue(style.shapeOutside());
-    case CSSPropertyShapeMargin:
-        return createFromLength(style.shapeMargin(), style);
-    case CSSPropertyShapeImageThreshold:
-        return createFromDouble(style.shapeImageThreshold());
     case CSSPropertyWebkitTextStrokeColor:
         return createFromColor(property, style);
     case CSSPropertyTransform:

@@ -69,23 +69,6 @@ PassRefPtr<StyleImage> StyleResourceLoader::loadPendingImage(StylePendingImage* 
     return doLoadPendingImage(m_fetcher, pendingImage, deviceScaleFactor, ResourceFetcher::defaultResourceOptions());
 }
 
-void StyleResourceLoader::loadPendingShapeImage(RenderStyle* renderStyle, ShapeValue* shapeValue, float deviceScaleFactor)
-{
-    if (!shapeValue)
-        return;
-
-    StyleImage* image = shapeValue->image();
-    if (!image || !image->isPendingImage())
-        return;
-
-    ResourceLoaderOptions options = ResourceFetcher::defaultResourceOptions();
-    options.allowCredentials = DoNotAllowStoredCredentials;
-    options.credentialsRequested  = ClientDidNotRequestCredentials;
-    options.corsEnabled = IsCORSEnabled;
-
-    shapeValue->setImage(doLoadPendingImage(m_fetcher, toStylePendingImage(image), deviceScaleFactor, options));
-}
-
 void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleResources& elementStyleResources)
 {
     if (elementStyleResources.pendingImageProperties().isEmpty())
@@ -150,9 +133,6 @@ void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleReso
             }
             break;
         }
-        case CSSPropertyShapeOutside:
-            loadPendingShapeImage(style, style->shapeOutside(), elementStyleResources.deviceScaleFactor());
-            break;
         default:
             ASSERT_NOT_REACHED();
         }

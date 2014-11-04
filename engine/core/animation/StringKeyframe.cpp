@@ -93,7 +93,6 @@ PassRefPtr<Interpolation> StringKeyframe::PropertySpecificKeyframe::createInterp
     case CSSPropertyPaddingRight:
     case CSSPropertyPaddingTop:
     case CSSPropertyPerspective:
-    case CSSPropertyShapeMargin:
     case CSSPropertyWidth:
         range = ValueRangeNonNegative;
         // Fall through

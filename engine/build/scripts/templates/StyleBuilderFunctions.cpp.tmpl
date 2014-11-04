@@ -452,42 +452,6 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 }
 {% endmacro %}
 
-{% macro apply_value_shape(property_id) %}
-{{declare_value_function(property_id)}}
-{
-    {% set property = properties[property_id] %}
-    if (value->isPrimitiveValue()) {
-        CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-        if (primitiveValue->getValueID() == CSSValueNone)
-            {{set_value(property)}}(nullptr);
-    } else if (value->isImageValue() || value->isImageGeneratorValue() || value->isImageSetValue()) {
-        {{set_value(property)}}(ShapeValue::createImageValue(state.styleImage({{property_id}}, value)));
-    } else if (value->isValueList()) {
-        RefPtr<BasicShape> shape;
-        CSSBoxType cssBox = BoxMissing;
-        CSSValueList* valueList = toCSSValueList(value);
-        for (unsigned i = 0; i < valueList->length(); ++i) {
-            CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(valueList->item(i));
-            if (primitiveValue->isShape())
-                shape = basicShapeForValue(state, primitiveValue->getShapeValue());
-            else if (primitiveValue->getValueID() == CSSValueContentBox
-                || primitiveValue->getValueID() == CSSValueBorderBox
-                || primitiveValue->getValueID() == CSSValuePaddingBox
-                || primitiveValue->getValueID() == CSSValueMarginBox)
-                cssBox = CSSBoxType(*primitiveValue);
-            else
-                return;
-        }
-
-        if (shape)
-            {{set_value(property)}}(ShapeValue::createShapeValue(shape.release(), cssBox));
-        else if (cssBox != BoxMissing)
-            {{set_value(property)}}(ShapeValue::createBoxShapeValue(cssBox));
-    }
-}
-{% endmacro %}
-{{apply_value_shape('CSSPropertyShapeOutside')}}
-
 {% macro apply_alignment(property_id, alignment_type) %}
 {% set property = properties[property_id] %}
 {{declare_initial_function(property_id)}}

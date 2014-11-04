@@ -197,9 +197,6 @@ quotes inherited, converter=convertQuotes
 resize inherited, custom_value
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
 scroll-behavior runtime_flag=CSSOMSmoothScroll, type_name=ScrollBehavior
-shape-image-threshold animatable, type_name=float
-shape-margin animatable, converter=convertLength
-shape-outside animatable, custom_value
 size custom_all
 speak inherited
 table-layout
@@ -427,6 +424,3 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 -webkit-justify-content alias_for=justify-content
 -webkit-opacity alias_for=opacity
 -webkit-order alias_for=order
--webkit-shape-image-threshold alias_for=shape-image-threshold
--webkit-shape-margin alias_for=shape-margin
--webkit-shape-outside alias_for=shape-outside
