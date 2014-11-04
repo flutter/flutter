@@ -42,11 +42,9 @@ XMLHttpRequest.prototype.send = function() {
 
   var self = this;
   this.loader_.start(this.request_).then(function(result) {
-    core.drainData(result.response.body).then(function(result) {
+    return core.drainData(result.response.body).then(function(result) {
       self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
       self.onload();
-    }).catch(function(error) {
-      self.onerror(error);
     });
   }).catch(function(error) {
     self.onerror(error);
