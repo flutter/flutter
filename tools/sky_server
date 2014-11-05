@@ -8,15 +8,7 @@ import cherrypy
 import json
 import os
 import staticdirindex
-
-
-BUILD_DIRECTORY = 'out'
-CONFIG_DIRECTORY = 'Debug'
-SRC_ROOT = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
-    os.pardir))
-SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
-GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
-
+import skypy.paths as paths
 
 def skydir(section="", dir="", path="", **kwargs):
     if cherrypy.request.params.get('format') is None:
@@ -63,15 +55,15 @@ def main():
         },
         '/mojo/public': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo', 'public'),
+            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'mojo', 'public'),
         },
         '/mojo/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'mojo', 'services'),
+            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'mojo', 'services'),
         },
         '/sky/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(GEN_ROOT, 'sky', 'services'),
+            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'sky', 'services'),
         },
      }
     cherrypy.quickstart(config=config)

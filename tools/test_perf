@@ -1,40 +1,110 @@
 #!/usr/bin/env python
-# Copyright (C) 2012 Google Inc. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#
-#     * Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#     * Redistributions in binary form must reproduce the above
-# copyright notice, this list of conditions and the following disclaimer
-# in the documentation and/or other materials provided with the
-# distribution.
-#     * Neither the name of Google Inc. nor the names of its
-# contributors may be used to endorse or promote products derived from
-# this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
-"""Run performance tests."""
+import os
+import re
+import skypy.paths as paths
+import subprocess
+import requests
 
-import logging
-import sys
 
-from webkitpy.performance_tests.perftestsrunner import PerfTestsRunner
+SUPPORTED_MIME_TYPES = [
+    'text/html',
+    'text/sky',
+    'text/plain',
+]
+HTTP_PORT = 9999
 
-if '__main__' == __name__:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+DASHBOARD_URL = 'https://chromeperf.appspot.com/add_point'
 
-    sys.exit(PerfTestsRunner().run())
+
+def sky_tester_command(url):
+    content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+        for mime_type in SUPPORTED_MIME_TYPES]
+    return [
+        paths.MOJO_SHELL_PATH,
+        '--args-for=mojo://native_viewport_service/ --use-headless-config --use-osmesa',
+        '--args-for=mojo://window_manager/ %s' % url,
+        '--content-handlers=%s' % ','.join(content_handlers),
+        '--url-mappings=mojo:window_manager=mojo://sky_tester/',
+        'mojo:window_manager',
+    ]
+
+
+def start_sky_server(port):
+    return subprocess.Popen([
+        os.path.join(paths.SKY_TOOLS_DIRECTORY, 'sky_server'),
+        paths.SRC_ROOT,
+        str(port),
+    ])
+
+
+def values_from_output(output):
+    # Parse out the raw values from the PerfRunner output:
+    #   values 90, 89, 93 ms
+    # We'll probably need a fancier parser at some point.
+    match = re.search(r'values (.+) ms', output, flags=re.MULTILINE)
+    return map(float, match.group(1).split(', '))
+
+
+def create_json_blob(values):
+    revision = subprocess.check_output(["git", "show-ref", "HEAD", "-s"]).strip()
+    return {
+        "master": "master.mojo.perf",
+        "bot": "sky-release",
+        "point_id": 123456, # FIXME: We need to generate a monotonicly increasing number somehow.
+        "versions": {
+          "mojo": revision
+        },
+        "chart_data": {
+            "format_version": "1.0",
+            "benchmark_name": "layout.simple-blocks",
+            "charts": {
+                "warm_times": {
+                    "traces": {
+                        "layout.simple-blocks": {
+                            "type": "list_of_scalar_values",
+                            "values": values,
+                        },
+                    }
+                }
+            }
+        }
+    }
+
+
+def send_json_to_dashboard(json):
+    requests.post(DASHBOARD_URL, params={ 'data': json })
+
+
+class PerfHarness(object):
+    def __init__(self):
+        self._sky_server = None
+
+    def _start_server(self):
+        self._sky_server = start_sky_server(HTTP_PORT)
+
+    def main(self):
+        test = 'http://localhost:9999/sky/benchmarks/layout/simple-blocks.sky'
+
+        self._start_server()
+        output = subprocess.check_output(sky_tester_command(test))
+        values = values_from_output(output)
+        json = create_json_blob(values)
+        send_json_to_dashboard(json)
+
+    def shutdown(self):
+        if self._sky_server:
+            self._sky_server.terminate()
+
+
+if __name__ == '__main__':
+    harness = PerfHarness()
+    try:
+        harness.main()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        harness.shutdown()
