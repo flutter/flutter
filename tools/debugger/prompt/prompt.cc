@@ -132,7 +132,7 @@ class Prompt : public mojo::ApplicationDelegate {
 
   void Quit() {
     std::cout << "quitting" << std::endl;
-    exit(0);
+    debugger_->Shutdown();
   }
 
   void ToggleTracing() {
