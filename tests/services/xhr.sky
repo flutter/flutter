@@ -17,7 +17,7 @@ describe('XMLHttpRequest', function() {
       assert.ok(false, "Got error: " + JSON.stringify(error));
       done();
     };
-    xhr.open("GET", "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt");
+    xhr.open("GET", "http://127.0.0.1:8000/services/resources/pass.txt");
     xhr.send();
   });
 });
