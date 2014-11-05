@@ -36,6 +36,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   // Overridden from Debugger
   void NavigateToURL(const mojo::String& url) override;
   void InjectInspector() override;
+  void Shutdown() override;
 
  private:
   // Overridden from mojo::ApplicationDelegate:

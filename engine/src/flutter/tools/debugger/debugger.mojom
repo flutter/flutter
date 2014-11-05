@@ -7,4 +7,5 @@ module sky;
 interface Debugger {
   NavigateToURL(string url);
   InjectInspector();
+  Shutdown();
 };

@@ -66,13 +66,11 @@ void SkyDebugger::OnEmbed(
 }
 
 void SkyDebugger::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
-  CHECK(false); // FIXME: This is dead code, why?
   view_manager_ = nullptr;
   root_ = nullptr;
 }
 
 void SkyDebugger::OnViewDestroyed(mojo::View* view) {
-  CHECK(false); // FIXME: This is dead code, why?
   view->RemoveObserver(this);
 }
 
@@ -99,6 +97,16 @@ void SkyDebugger::NavigateToURL(const mojo::String& url) {
   } else {
     pending_url_ = url;
   }
+}
+
+void SkyDebugger::Shutdown() {
+  // Make sure we shut down mojo before quitting the message loop or things
+  // like blink::shutdown() may try to talk to the message loop and crash.
+  window_manager_app_.reset();
+
+  // TODO(eseidel): This still hits an X11 error which I don't understand
+  // "X Error of failed request:  GLXBadDrawable", crbug.com/430581
+  mojo::ApplicationImpl::Terminate();
 }
 
 void SkyDebugger::InjectInspector() {
