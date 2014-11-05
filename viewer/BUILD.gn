@@ -47,7 +47,7 @@ shared_library("viewer") {
     "//cc/surfaces",
     "//gin",
     "//mojo/application",
-    "//mojo/bindings/js",
+    "//mojo/edk/js",
     "//mojo/cc",
     "//mojo/common",
     "//mojo/converters/geometry",

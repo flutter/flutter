@@ -4,9 +4,9 @@
 
 #include "sky/viewer/internals.h"
 
-#include "mojo/bindings/js/core.h"
-#include "mojo/bindings/js/support.h"
-#include "mojo/bindings/js/handle.h"
+#include "mojo/edk/js/core.h"
+#include "mojo/edk/js/handle.h"
+#include "mojo/edk/js/support.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/engine/public/web/WebFrame.h"
