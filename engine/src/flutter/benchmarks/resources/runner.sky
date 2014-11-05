@@ -4,14 +4,14 @@ function PerfRunner(options) {
   this.iterationsRemaining_ = options.iterations || 10;
   this.results_ = [];
   this.setup_ = options.setup;
+  this.logLines_ = [];
 }
 
 PerfRunner.prototype.log = function(line) {
-  console.log(line);
+  this.logLines_.push(line);
 };
 
 PerfRunner.prototype.recordResult = function(result) {
-  console.log(result);
   this.results_.push(result);
 };
 
@@ -82,6 +82,7 @@ PerfRunner.prototype.logStatistics = function(title) {
 
 PerfRunner.prototype.finish = function () {
   this.logStatistics("Time:");
+  internals.notifyTestComplete(this.logLines_.join('\n'));
 }
 
 module.exports = PerfRunner;
