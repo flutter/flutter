@@ -34,11 +34,12 @@ import difflib
 import errno
 import itertools
 import logging
-import os
+import math
 import operator
 import optparse
-import math
+import os
 import re
+import subprocess
 import sys
 
 try:
@@ -1098,11 +1099,12 @@ class Port(object):
         Ports can stub this out if they don't need a web server to be running."""
         assert not self._http_server, 'Already running an http server.'
 
-        server = apache_http.ApacheHTTP(self, self.results_directory(),
-                                        additional_dirs=additional_dirs,
-                                        number_of_servers=number_of_drivers)
-        server.start()
-        self._http_server = server
+        self._http_server = subprocess.Popen([
+            self.path_to_script('sky_server'),
+            '-t', self.get_option('configuration'),
+            self.path_from_chromium_base(),
+            '8000',
+        ])
 
     def start_websocket_server(self):
         """Start a web server. Raise an error if it can't start or is already running.
@@ -1138,7 +1140,7 @@ class Port(object):
     def stop_http_server(self):
         """Shut down the http server if it is running. Do nothing if it isn't."""
         if self._http_server:
-            self._http_server.stop()
+            self._http_server.terminate()
             self._http_server = None
 
     def stop_websocket_server(self):

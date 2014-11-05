@@ -72,7 +72,7 @@ class WebKitFinder(object):
         """Returns the relative path to the script from the top of the WebKit tree."""
         # This is intentionally relative in order to force callers to consider what
         # their current working directory is (and change to the top of the tree if necessary).
-        return self._filesystem.join("tools", script_name)
+        return self.path_from_chromium_base("sky", "tools", script_name)
 
     def layout_tests_dir(self):
         return self.path_from_webkit_base('tests')
