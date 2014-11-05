@@ -43,6 +43,10 @@ def main():
 
     config = {
         'global': {
+            # Cherrypy appears to just drop requests if it doesn't have
+            # a thread to service them, so set our thread_pool high enough
+            # so that a z620 can run all the tests w/o timeouts.
+            'server.thread_pool': 30,
             'server.socket_port': args.port,
             'tools.staticdir.content_types' : {
                 'sky': 'text/sky',
