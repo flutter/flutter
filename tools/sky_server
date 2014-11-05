@@ -44,12 +44,13 @@ def main():
     args = parser.parse_args()
 
     log_dir = os.path.abspath(os.getcwd())
-    print "%s logging to access_log.txt in %s" % (
-        parser.prog, log_dir)
 
     config = {
         'global': {
             'server.socket_port': args.port,
+            'tools.staticdir.content_types' : {
+                'sky': 'text/sky',
+            },
             'log.screen': args.verbose,
             'log.access_log': os.path.join(log_dir, 'access_log.txt'),
             # This causes some strange python exception??

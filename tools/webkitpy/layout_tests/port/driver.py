@@ -230,12 +230,8 @@ class Driver(object):
         '/http/tests/security/mixedContent/https/test1.html') will be loaded
         over HTTPS; all other tests over HTTP.
         """
-        if not self.is_http_test(test_name):
-            return path.abspath_to_uri(self._port.host.platform, self._port.abspath_for_test(test_name))
-
-        if "/https/" in test_name:
-            return "https://127.0.0.1:8443/" + test_name
-        return "http://127.0.0.1:8000/" + test_name
+        assert self.is_http_test(test_name)
+        return "http://127.0.0.1:8000/sky/tests/" + test_name
 
     def uri_to_test(self, uri):
         """Return the base layout test name for a given URI.

@@ -1,17 +1,17 @@
 ERROR: Uncaught SyntaxError: Unexpected token < 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:6
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:6
 ERROR: Uncaught SyntaxError: Unexpected token < 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:14
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:14
 ERROR: Uncaught SyntaxError: Unexpected token < 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:21
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:21
 ERROR: Uncaught ReferenceError: TEST is not defined 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:27
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:27
 ERROR: Uncaught SyntaxError: Invalid regular expression: missing / 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:34
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:34
 ERROR: Uncaught SyntaxError: Invalid regular expression: missing / 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:38
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:38
 ERROR: Uncaught SyntaxError: Unexpected token } 
-SOURCE: http://127.0.0.1:8000/parser/script.sky:43
+SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:43
 <html>
 <import src="../resources/dump-as-markup.sky"></import>
 <body>
