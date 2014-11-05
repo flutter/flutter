@@ -1,4 +1,4 @@
-CONSOLE: LOG: url => http://127.0.0.1:8000/sky/tests/services/resources/pass.txt
+CONSOLE: LOG: url => http://127.0.0.1:8000/services/resources/pass.txt
 CONSOLE: LOG: status_line => HTTP/1.1 200 OK
 CONSOLE: LOG: mime_type => text/plain
 CONSOLE: LOG: read 31 bytes

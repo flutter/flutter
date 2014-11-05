@@ -23,7 +23,7 @@ describe('Mojo network_service', function() {
         loader.URLLoader.stubClass,
         loader.URLLoader.proxyClass);
     var urlRequest = new loader.URLRequest();
-    urlRequest.url = "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt";
+    urlRequest.url = "http://127.0.0.1:8000/services/resources/pass.txt";
     urlRequest.method = "GET";
     urlRequest.auto_follow_redirects = true;
     var urlRequestPromise = urlLoaderConnection.remote.start(urlRequest);
