@@ -8,7 +8,8 @@ import cherrypy
 import json
 import os
 import staticdirindex
-import skypy.paths as paths
+from skypy.paths import Paths
+import skypy.configuration as configuration
 
 def skydir(section="", dir="", path="", **kwargs):
     if cherrypy.request.params.get('format') is None:
@@ -33,9 +34,12 @@ def main():
         help='Enable logging to the console.')
     parser.add_argument('app_path', type=str)
     parser.add_argument('port', type=int)
+    configuration.add_arguments(parser)
     args = parser.parse_args()
 
     log_dir = os.path.abspath(os.getcwd())
+
+    paths = Paths(os.path.join('out', args.configuration))
 
     config = {
         'global': {
@@ -55,15 +59,15 @@ def main():
         },
         '/mojo/public': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'mojo', 'public'),
+            'tools.staticdir.dir': os.path.join(paths.gen_root, 'mojo', 'public'),
         },
         '/mojo/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'mojo', 'services'),
+            'tools.staticdir.dir': os.path.join(paths.gen_root, 'mojo', 'services'),
         },
         '/sky/services': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.join(paths.GEN_ROOT, 'sky', 'services'),
+            'tools.staticdir.dir': os.path.join(paths.gen_root, 'sky', 'services'),
         },
      }
     cherrypy.quickstart(config=config)

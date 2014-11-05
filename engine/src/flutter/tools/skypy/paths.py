@@ -4,11 +4,11 @@
 
 import os
 
-BUILD_DIRECTORY = 'out'
-CONFIG_DIRECTORY = 'Debug'
-SRC_ROOT = os.path.abspath(os.path.join(__file__,
-    os.pardir, os.pardir, os.pardir, os.pardir))
-SKY_ROOT = os.path.join(SRC_ROOT, 'sky')
-GEN_ROOT = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'gen')
-SKY_TOOLS_DIRECTORY = os.path.join(SRC_ROOT, 'sky', 'tools')
-MOJO_SHELL_PATH = os.path.join(SRC_ROOT, BUILD_DIRECTORY, CONFIG_DIRECTORY, 'mojo_shell')
+class Paths(object):
+    def __init__(self, build_directory):
+        self.src_root = os.path.abspath(os.path.join(__file__,
+            os.pardir, os.pardir, os.pardir, os.pardir))
+        self.sky_root = os.path.join(self.src_root, 'sky')
+        self.gen_root = os.path.join(self.src_root, build_directory, 'gen')
+        self.sky_tools_directory = os.path.join(self.src_root, 'sky', 'tools')
+        self.mojo_shell_path = os.path.join(self.src_root, build_directory, 'mojo_shell')
