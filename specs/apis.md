@@ -115,15 +115,17 @@ module 'sky:core' {
     virtual void valueChangeCallback(String? oldValue, String? newValue); // noop
   }
 
-  class DocumentFragment : ParentNode {
+  abstract class TreeRoot : ParentNode {
+    Element? findId(String id); // O(1)
+  }
+
+  class DocumentFragment : TreeRoot {
     constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
   }
 
-  abstract class TreeScope : ParentNode {
+  abstract class TreeScope : TreeRoot {
     readonly attribute Document? ownerDocument; // O(1)
     readonly attribute TreeScope? parentScope; // O(1)
-
-    Element? findId(String id); // O(1)
   }
 
   class ShadowRoot : TreeScope {
@@ -139,8 +141,10 @@ module 'sky:core' {
     constructor (String selector); // O(F()) where F() is the complexity of the selector
 
     Boolean matches(Element element); // O(F())
-    Element? find(ParentNode root); // O(N*F()) where N is the number of descendants
-    Array<Element> findAll(ParentNode root); // O(N*F()) where N is the number of descendants
+    Element? find(Element root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
+    Element? find(TreeRoot root); // O(N*F()) where N is the number of descendants
+    Array<Element> findAll(Element root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
+    Array<Element> findAll(TreeRoot root); // O(N*F()) where N is the number of descendants
   }
 
 
