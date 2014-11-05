@@ -1,0 +1,79 @@
+SKY MODULE - button widgets for calculator
+<!-- TODO(ianh): implement accessibility handling once the ax service exists -->
+
+<script>
+  class AbstractButton extends Element {
+    constructor (module) {
+      super(module);
+      let selector = new SelectorQuery('.dynamic');
+      this.addEventListener('pointer-down', (event) => {
+        selector.findAll(this.shadowRoot).every((element) => element.setAttribute('clicked'));
+        // TODO(ianh): track the pointer; if it leaves the button, cancel the click
+        // TOOD(ianh): if the pointer doesn't leave the button before being released, then fire some event on ourselves
+        module.application.document.addEventListener('pointer-up', function upHandler (event) {
+          module.application.document.removeEventListener('pointer-up', upHandler);
+          selector.findAll(this.shadowRoot).every((element) => element.removeAttribute('clicked'));
+        });
+      });
+    }
+  }
+</script>
+
+<template id="threed-button-shadow-tree">
+ <style>
+  /* TODO(ianh): make this shrink-wrap the contents */
+  div { border: solid 1px; }
+  #a { border-color: #666666 #333333 #333333 #666666; }
+  #b { border-color: #EEEEEE #666666 #666666 #EEEEEE; }
+  #c { border-color: #EEEEEE #666666 #666666 #EEEEEE; }
+  #d { border-color: #EEEEEE #999999 #999999 #EEEEEE; padding: 2px 0 0 0; background: #DDDDDD; color: black; text-align: center; }
+  #a[clicked] { border-color: #666666 #333333 #333333 #666666; width: 6em; }
+  #b[clicked] { border-color: #666666 #DDDDDD #DDDDDD #666666; border-width: 1px 0 0 1px; }
+  #c[clicked] { border-color: #666666 #DDDDDD #DDDDDD #666666; border-width: 1px 0 0 1px; }
+  #d[clicked] { border-color: #999999 #DDDDDD #DDDDDD #999999; padding: 4px 0 0 2px; }
+ </style>
+ <div class="dynamic" id="a">
+  <div class="dynamic" id="b">
+   <div class="dynamic" id="c">
+    <div class="dynamic" id="d">
+     <content/>
+    </div>
+   </div>
+  </div>
+ </div>
+</template>
+
+<template id="threed-button-shadow-tree">
+ <style>
+  div { background: green; color: yellow; }
+  div[clicked] { background: yellow; color: green; }
+ </style>
+ <div class=dynamic>
+  <content/>
+ </div>
+</template>
+
+<script>
+ module.exports = {
+   ThreeDButtonElement: module.registerElement({
+     tagName: 'graybutton',
+     shadow: true,
+     constructor: class extends AbstractButton {
+       constructor (module) {
+         super(module);
+         this.shadowRoot.append(module.document.findId('threed-button-shadow-tree').cloneNode(true));
+       }
+     },
+   }),
+   FlatButtonElement: module.registerElement({
+     tagName: 'graybutton',
+     shadow: true,
+     constructor: class extends AbstractButton {
+       constructor (module) {
+         super(module);
+         this.shadowRoot.append(module.document.findId('flat-shadow-tree').cloneNode(true));
+       }
+     },
+   }),
+ };
+</script>
