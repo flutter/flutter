@@ -5,7 +5,7 @@
 
 import os
 import re
-import skypy.paths as paths
+from skypy.paths import Paths
 import subprocess
 import requests
 
@@ -18,27 +18,6 @@ SUPPORTED_MIME_TYPES = [
 HTTP_PORT = 9999
 
 DASHBOARD_URL = 'https://chromeperf.appspot.com/add_point'
-
-
-def sky_tester_command(url):
-    content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
-        for mime_type in SUPPORTED_MIME_TYPES]
-    return [
-        paths.MOJO_SHELL_PATH,
-        '--args-for=mojo://native_viewport_service/ --use-headless-config --use-osmesa',
-        '--args-for=mojo://window_manager/ %s' % url,
-        '--content-handlers=%s' % ','.join(content_handlers),
-        '--url-mappings=mojo:window_manager=mojo://sky_tester/',
-        'mojo:window_manager',
-    ]
-
-
-def start_sky_server(port):
-    return subprocess.Popen([
-        os.path.join(paths.SKY_TOOLS_DIRECTORY, 'sky_server'),
-        paths.SRC_ROOT,
-        str(port),
-    ])
 
 
 def values_from_output(output):
@@ -82,15 +61,33 @@ def send_json_to_dashboard(json):
 class PerfHarness(object):
     def __init__(self):
         self._sky_server = None
+        self.paths = Paths(os.path.join('out', 'Debug'))
 
     def _start_server(self):
-        self._sky_server = start_sky_server(HTTP_PORT)
+        return subprocess.Popen([
+            os.path.join(self.paths.sky_tools_directory, 'sky_server'),
+            self.paths.src_root,
+            str(HTTP_PORT),
+        ])
+
+    def _sky_tester_command(self, url):
+        content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+            for mime_type in SUPPORTED_MIME_TYPES]
+        return [
+            self.paths.mojo_shell_path,
+            '--args-for=mojo://native_viewport_service/ --use-headless-config --use-osmesa',
+            '--args-for=mojo://window_manager/ %s' % url,
+            '--content-handlers=%s' % ','.join(content_handlers),
+            '--url-mappings=mojo:window_manager=mojo://sky_tester/',
+            'mojo:window_manager',
+        ]
+
 
     def main(self):
         test = 'http://localhost:9999/sky/benchmarks/layout/simple-blocks.sky'
 
         self._start_server()
-        output = subprocess.check_output(sky_tester_command(test))
+        output = subprocess.check_output(self._sky_tester_command(test))
         values = values_from_output(output)
         json = create_json_blob(values)
         send_json_to_dashboard(json)

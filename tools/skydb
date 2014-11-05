@@ -6,7 +6,7 @@
 import argparse
 import logging
 import os
-import skypy.paths as paths
+from skypy.paths import Paths
 import socket;
 import subprocess
 import sys
@@ -23,6 +23,7 @@ SUPPORTED_MIME_TYPES = [
 class SkyDebugger(object):
     def __init__(self):
         self._sky_server = None
+        self.paths = Paths(os.path.join('out', 'Debug'))
 
     @staticmethod
     def _port_in_use(port):
@@ -32,9 +33,10 @@ class SkyDebugger(object):
     def _start_http_server_for_file(self, path):
         HTTP_PORT = 9999
 
+
         path = os.path.abspath(path)
-        if os.path.commonprefix([path, paths.SRC_ROOT]) == paths.SRC_ROOT:
-            server_root = paths.SRC_ROOT
+        if os.path.commonprefix([path, self.paths.src_root]) == self.paths.src_root:
+            server_root = self.paths.src_root
         else:
             server_root = os.path.dirname(path)
             logging.warn(
@@ -48,7 +50,8 @@ class SkyDebugger(object):
                 HTTP_PORT)
         else:
             server_command = [
-                os.path.join(paths.SKY_TOOLS_DIRECTORY, 'sky_server'),
+                os.path.join(self.paths.sky_tools_directory, 'sky_server'),
+                '--debug',
                 server_root,
                 str(HTTP_PORT),
             ]
@@ -67,7 +70,7 @@ class SkyDebugger(object):
         content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
             for mime_type in SUPPORTED_MIME_TYPES]
         shell_command = [
-            paths.MOJO_SHELL_PATH,
+            self.paths.mojo_shell_path,
             '--v=1',
             '--content-handlers=%s' % ','.join(content_handlers),
             '--url-mappings=mojo:window_manager=mojo:sky_debugger',

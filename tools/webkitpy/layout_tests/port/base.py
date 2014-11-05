@@ -1101,6 +1101,7 @@ class Port(object):
 
         self._http_server = subprocess.Popen([
             self.path_to_script('sky_server'),
+            '-t', self.get_option('configuration'),
             self.path_from_chromium_base(),
             '8000',
         ])
