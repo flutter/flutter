@@ -28,7 +28,7 @@ Running tests manually
 ----------------------
 
 * ``sky/tools/run_sky_httpd``
-* ``out/Debug/mojo_shell --args-for="mojo://native_viewport_service/ --use-headless-config" --content-handlers=text/html,mojo://sky_viewer/ --url-mappings=mojo:window_manager=mojo:sky_tester mojo:window_manager``
+* ``out/Debug/mojo_shell --args-for="mojo:native_viewport_service --use-headless-config" --content-handlers=text/html,mojo:sky_viewer --url-mappings=mojo:window_manager=mojo:sky_tester mojo:window_manager``
 * The ``sky_tester`` should print ``#READY`` when ready
 * Type the URL you wish to run, for example ``http://127.0.0.1:8000/lowlevel/text.html``, and press the enter key
 * The harness should print the results of the test.  You can then type another URL.

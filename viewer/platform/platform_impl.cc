@@ -46,7 +46,7 @@ PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
       shared_timer_fire_time_(0.0),
       shared_timer_fire_time_was_set_while_suspended_(false),
       shared_timer_suspended_(0) {
-  app->ConnectToService("mojo://network_service/", &network_service_);
+  app->ConnectToService("mojo:network_service", &network_service_);
 
   mojo::CookieStorePtr cookie_store;
   network_service_->GetCookieStore(GetProxy(&cookie_store));

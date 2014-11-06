@@ -6,7 +6,7 @@
 <script>
 function XMLHttpRequest() {
   this.networkService_ = shell.connectToService(
-    "mojo://network_service/", net.NetworkService);
+    "mojo:network_service", net.NetworkService);
   this.request_ = null;
   this.loader_ = null;
   this.responseText = null;

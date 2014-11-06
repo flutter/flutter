@@ -134,14 +134,14 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
 
 blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
   mojo::ServiceProviderPtr surfaces_service_provider;
-  shell_->ConnectToApplication("mojo://surfaces_service/",
+  shell_->ConnectToApplication("mojo:surfaces_service",
                                mojo::GetProxy(&surfaces_service_provider));
   mojo::InterfacePtr<mojo::SurfacesService> surfaces_service;
   mojo::ConnectToService(surfaces_service_provider.get(), &surfaces_service);
 
   mojo::ServiceProviderPtr gpu_service_provider;
-  // TODO(jamesr): Should be mojo://gpu_service
-  shell_->ConnectToApplication("mojo://native_viewport_service/",
+  // TODO(jamesr): Should be mojo:gpu_service
+  shell_->ConnectToApplication("mojo:native_viewport_service",
                                mojo::GetProxy(&gpu_service_provider));
   mojo::InterfacePtr<mojo::Gpu> gpu_service;
   mojo::ConnectToService(gpu_service_provider.get(), &gpu_service);
