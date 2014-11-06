@@ -196,14 +196,14 @@ inline void setStaticPositions(RenderBlockFlow* block, RenderBox* child)
         // A relative positioned inline encloses us. In this case, we also have to determine our
         // position as though we were an inline. Set |staticInlinePosition| and |staticBlockPosition| on the relative positioned
         // inline so that we can obtain the value later.
-        toRenderInline(containerBlock)->layer()->setStaticInlinePosition(block->startAlignedOffsetForLine(blockHeight, false));
+        toRenderInline(containerBlock)->layer()->setStaticInlinePosition(block->startAlignedOffsetForLine(false));
         toRenderInline(containerBlock)->layer()->setStaticBlockPosition(blockHeight);
 
         // If |child| is a leading or trailing positioned object this is its only opportunity to ensure it moves with an inline
         // container changing width.
         child->moveWithEdgeOfInlineContainerIfNecessary();
     }
-    block->updateStaticInlinePositionForChild(child, blockHeight);
+    block->updateStaticInlinePositionForChild(child);
     child->layer()->setStaticBlockPosition(blockHeight);
 }
 
@@ -397,7 +397,7 @@ inline void BreakingContext::handleReplaced()
     RenderBox* replacedBox = toRenderBox(m_current.object());
 
     if (m_atStart)
-        m_width.updateAvailableWidth(replacedBox->logicalHeight());
+        m_width.updateAvailableWidth();
 
     // Break on replaced elements if either has normal white-space.
     if (m_autoWrap || RenderStyle::autoWrap(m_lastWS)) {

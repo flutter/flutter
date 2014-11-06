@@ -192,7 +192,7 @@ void RenderBlockFlow::adjustPositionedBlock(RenderBox* child)
     bool hasStaticBlockPosition = child->style()->hasStaticBlockPosition();
 
     LayoutUnit logicalTop = logicalHeight();
-    updateStaticInlinePositionForChild(child, logicalTop);
+    updateStaticInlinePositionForChild(child);
 
     RenderLayer* childLayer = child->layer();
     if (childLayer->staticBlockPosition() != logicalTop) {
@@ -215,10 +215,10 @@ void RenderBlockFlow::deleteLineBoxTree()
     m_lineBoxes.deleteLineBoxTree();
 }
 
-void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox* child, LayoutUnit logicalTop)
+void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox* child)
 {
     if (child->style()->isOriginalDisplayInlineType())
-        setStaticInlinePositionForChild(child, startAlignedOffsetForLine(logicalTop, false));
+        setStaticInlinePositionForChild(child, startAlignedOffsetForLine(false));
     else
         setStaticInlinePositionForChild(child, startOffsetForContent());
 }
@@ -231,13 +231,6 @@ void RenderBlockFlow::setStaticInlinePositionForChild(RenderBox* child, LayoutUn
 void RenderBlockFlow::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
     RenderBlock::addChild(newChild, beforeChild);
-}
-
-void RenderBlockFlow::moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, bool fullRemoveInsert)
-{
-    // FIXME(sky): Merge this into callers.
-    RenderBlockFlow* toBlockFlow = toRenderBlockFlow(toBlock);
-    moveAllChildrenTo(toBlockFlow, fullRemoveInsert);
 }
 
 void RenderBlockFlow::invalidatePaintForOverflow()
@@ -274,63 +267,6 @@ void RenderBlockFlow::invalidatePaintForOverflow()
 
     m_paintInvalidationLogicalTop = 0;
     m_paintInvalidationLogicalBottom = 0;
-}
-
-void RenderBlockFlow::paintFloats(PaintInfo& paintInfo, const LayoutPoint& paintOffset, bool preservePhase)
-{
-    // FIXME(sky): Remove this.
-}
-
-LayoutUnit RenderBlockFlow::logicalLeftOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
-{
-    // FIXME(sky): Remove this.
-    LayoutUnit offset = fixedOffset;
-    return adjustLogicalLeftOffsetForLine(offset, applyTextIndent);
-}
-
-LayoutUnit RenderBlockFlow::logicalRightOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const
-{
-    // FIXME(sky): Remove this.
-    LayoutUnit offset = fixedOffset;
-    return adjustLogicalRightOffsetForLine(offset, applyTextIndent);
-}
-
-LayoutUnit RenderBlockFlow::adjustLogicalLeftOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const
-{
-    LayoutUnit left = offsetFromFloats;
-
-    if (applyTextIndent && style()->isLeftToRightDirection())
-        left += textIndentOffset();
-
-    return left;
-}
-
-LayoutUnit RenderBlockFlow::adjustLogicalRightOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const
-{
-    LayoutUnit right = offsetFromFloats;
-
-    if (applyTextIndent && !style()->isLeftToRightDirection())
-        right -= textIndentOffset();
-
-    return right;
-}
-
-bool RenderBlockFlow::hitTestFloats(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
-{
-    // FIXME(sky): Remove this.
-    return false;
-}
-
-LayoutUnit RenderBlockFlow::logicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const
-{
-    // FIXME(sky): remove this.
-    return fixedOffset;
-}
-
-LayoutUnit RenderBlockFlow::logicalRightFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const
-{
-    // FIXME(sky): remove this.
-    return fixedOffset;
 }
 
 GapRects RenderBlockFlow::inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
@@ -390,7 +326,7 @@ GapRects RenderBlockFlow::inlineSelectionGaps(RenderBlock* rootBlock, const Layo
 
 LayoutUnit RenderBlockFlow::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
 {
-    LayoutUnit logicalLeft = logicalLeftOffsetForLine(position, false);
+    LayoutUnit logicalLeft = logicalLeftOffsetForLine(false);
     if (logicalLeft == logicalLeftOffsetForContent())
         return RenderBlock::logicalLeftSelectionOffset(rootBlock, position);
 
@@ -404,7 +340,7 @@ LayoutUnit RenderBlockFlow::logicalLeftSelectionOffset(RenderBlock* rootBlock, L
 
 LayoutUnit RenderBlockFlow::logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
 {
-    LayoutUnit logicalRight = logicalRightOffsetForLine(position, false);
+    LayoutUnit logicalRight = logicalRightOffsetForLine(false);
     if (logicalRight == logicalRightOffsetForContent())
         return RenderBlock::logicalRightSelectionOffset(rootBlock, position);
 

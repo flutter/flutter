@@ -56,8 +56,6 @@ static const char* paintPhaseName(blink::PaintPhase phase)
         return "ChildBlockBackground";
     case blink::PaintPhaseChildBlockBackgrounds:
         return "ChildBlockBackgrounds";
-    case blink::PaintPhaseFloat:
-        return "Float";
     case blink::PaintPhaseForeground:
         return "Foreground";
     case blink::PaintPhaseOutline:

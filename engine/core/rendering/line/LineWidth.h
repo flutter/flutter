@@ -59,7 +59,7 @@ public:
     float availableWidth() const { return m_availableWidth; }
     float trailingWhitespaceWidth() const { return m_trailingWhitespaceWidth; }
 
-    void updateAvailableWidth(LayoutUnit minimumHeight = 0);
+    void updateAvailableWidth();
     void addUncommittedWidth(float delta) { m_uncommittedWidth += delta; }
     void commit();
     void fitBelowFloats(bool isFirstLine = false);
@@ -78,7 +78,6 @@ private:
     float m_left;
     float m_right;
     float m_availableWidth;
-    bool m_isFirstLine;
     IndentTextOrNot m_shouldIndentText;
 };
 

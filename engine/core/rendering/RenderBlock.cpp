@@ -785,7 +785,7 @@ void RenderBlock::removeChild(RenderObject* oldChild)
         } else {
             // Take all the children out of the |next| block and put them in
             // the |prev| block.
-            nextBlock->moveAllChildrenIncludingFloatsTo(prevBlock, nextBlock->hasLayer() || prevBlock->hasLayer());
+            nextBlock->moveAllChildrenTo(prevBlock, nextBlock->hasLayer() || prevBlock->hasLayer());
 
             // Delete the now-empty block's lines and nuke it.
             nextBlock->deleteLineBoxTree();
@@ -1255,8 +1255,6 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
     if (!preservePhase) {
         info.phase = PaintPhaseChildBlockBackgrounds;
         renderer->paint(info, childPoint);
-        info.phase = PaintPhaseFloat;
-        renderer->paint(info, childPoint);
         info.phase = PaintPhaseForeground;
         renderer->paint(info, childPoint);
         info.phase = PaintPhaseOutline;
@@ -1329,10 +1327,6 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     // 3. paint selection
     // FIXME: Make this work with multi column layouts.  For now don't fill gaps.
     paintSelection(paintInfo, scrolledOffset); // Fill in gaps in selection on lines and between blocks.
-
-    // 4. paint floats.
-    if (paintPhase == PaintPhaseFloat || paintPhase == PaintPhaseSelection || paintPhase == PaintPhaseTextClip)
-        paintFloats(paintInfo, scrolledOffset, paintPhase == PaintPhaseSelection || paintPhase == PaintPhaseTextClip);
 
     // 5. paint outline.
     if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline) && style()->hasOutline()) {
@@ -2078,8 +2072,6 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
             updateHitTestResult(result, locationInContainer.point() - localOffset);
             return true;
         }
-        if (hitTestAction == HitTestFloat && hitTestFloats(request, result, locationInContainer, toLayoutPoint(scrolledOffset)))
-            return true;
     }
 
     // Check if the point is outside radii.

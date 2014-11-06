@@ -43,19 +43,15 @@ LineWidth::LineWidth(RenderBlockFlow& block, bool isFirstLine, IndentTextOrNot s
     , m_left(0)
     , m_right(0)
     , m_availableWidth(0)
-    , m_isFirstLine(isFirstLine)
     , m_shouldIndentText(shouldIndentText)
 {
     updateAvailableWidth();
 }
 
-void LineWidth::updateAvailableWidth(LayoutUnit replacedHeight)
+void LineWidth::updateAvailableWidth()
 {
-    LayoutUnit height = m_block.logicalHeight();
-    LayoutUnit logicalHeight = m_block.minLineHeightForReplacedRenderer(m_isFirstLine, replacedHeight);
-    m_left = m_block.logicalLeftOffsetForLine(height, shouldIndentText(), logicalHeight).toFloat();
-    m_right = m_block.logicalRightOffsetForLine(height, shouldIndentText(), logicalHeight).toFloat();
-
+    m_left = m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
+    m_right = m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
     computeAvailableWidthFromLeftAndRight();
 }
 
@@ -63,13 +59,6 @@ void LineWidth::commit()
 {
     m_committedWidth += m_uncommittedWidth;
     m_uncommittedWidth = 0;
-}
-
-inline static float availableWidthAtOffset(const RenderBlockFlow& block, const LayoutUnit& offset, bool shouldIndentText, float& newLineLeft, float& newLineRight)
-{
-    newLineLeft = block.logicalLeftOffsetForLine(offset, shouldIndentText).toFloat();
-    newLineRight = block.logicalRightOffsetForLine(offset, shouldIndentText).toFloat();
-    return std::max(0.0f, newLineRight - newLineLeft);
 }
 
 void LineWidth::updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, const float& newLineLeft, const float& newLineRight)
@@ -100,7 +89,10 @@ void LineWidth::fitBelowFloats(bool isFirstLine)
         if (floatLogicalBottom <= lastFloatLogicalBottom)
             break;
 
-        newLineWidth = availableWidthAtOffset(m_block, floatLogicalBottom, shouldIndentText(), newLineLeft, newLineRight);
+        newLineLeft = m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
+        newLineRight = m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
+        newLineWidth = std::max(0.0f, newLineRight - newLineLeft);
+
         lastFloatLogicalBottom = floatLogicalBottom;
 
         if (newLineWidth >= m_uncommittedWidth)

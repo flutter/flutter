@@ -59,27 +59,27 @@ public:
 
     virtual void deleteLineBoxTree() override final;
 
-    LayoutUnit availableLogicalWidthForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
+    LayoutUnit availableLogicalWidthForLine(bool shouldIndentText) const
     {
-        return max<LayoutUnit>(0, logicalRightOffsetForLine(position, shouldIndentText, logicalHeight) - logicalLeftOffsetForLine(position, shouldIndentText, logicalHeight));
+        return max<LayoutUnit>(0, logicalRightOffsetForLine(shouldIndentText) - logicalLeftOffsetForLine(shouldIndentText));
     }
-    LayoutUnit logicalRightOffsetForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
+    LayoutUnit logicalRightOffsetForLine(bool shouldIndentText) const
     {
-        return logicalRightOffsetForLine(position, logicalRightOffsetForContent(), shouldIndentText, logicalHeight);
+        return logicalRightOffsetForLine(logicalRightOffsetForContent(), shouldIndentText);
     }
-    LayoutUnit logicalLeftOffsetForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
+    LayoutUnit logicalLeftOffsetForLine(bool shouldIndentText) const
     {
-        return logicalLeftOffsetForLine(position, logicalLeftOffsetForContent(), shouldIndentText, logicalHeight);
+        return logicalLeftOffsetForLine(logicalLeftOffsetForContent(), shouldIndentText);
     }
-    LayoutUnit startOffsetForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
+    LayoutUnit startOffsetForLine(bool shouldIndentText) const
     {
-        return style()->isLeftToRightDirection() ? logicalLeftOffsetForLine(position, shouldIndentText, logicalHeight)
-            : logicalWidth() - logicalRightOffsetForLine(position, shouldIndentText, logicalHeight);
+        return style()->isLeftToRightDirection() ? logicalLeftOffsetForLine(shouldIndentText)
+            : logicalWidth() - logicalRightOffsetForLine(shouldIndentText);
     }
-    LayoutUnit endOffsetForLine(LayoutUnit position, bool shouldIndentText, LayoutUnit logicalHeight = 0) const
+    LayoutUnit endOffsetForLine(bool shouldIndentText) const
     {
-        return !style()->isLeftToRightDirection() ? logicalLeftOffsetForLine(position, shouldIndentText, logicalHeight)
-            : logicalWidth() - logicalRightOffsetForLine(position, shouldIndentText, logicalHeight);
+        return !style()->isLeftToRightDirection() ? logicalLeftOffsetForLine(shouldIndentText)
+            : logicalWidth() - logicalRightOffsetForLine(shouldIndentText);
     }
 
     // FIXME-BLOCKFLOW: Move this into RenderBlockFlow once there are no calls
@@ -97,14 +97,12 @@ public:
 
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
 
-    void moveAllChildrenIncludingFloatsTo(RenderBlock* toBlock, bool fullRemoveInsert);
-
     bool generatesLineBoxesForInlineChild(RenderObject*);
 
-    LayoutUnit startAlignedOffsetForLine(LayoutUnit position, bool shouldIndentText);
+    LayoutUnit startAlignedOffsetForLine(bool shouldIndentText);
 
     void setStaticInlinePositionForChild(RenderBox*, LayoutUnit inlinePosition);
-    void updateStaticInlinePositionForChild(RenderBox*, LayoutUnit logicalTop);
+    void updateStaticInlinePositionForChild(RenderBox*);
 
     static bool shouldSkipCreatingRunsForObject(RenderObject* obj)
     {
@@ -122,41 +120,35 @@ public:
 protected:
     void layoutInlineChildren(bool relayoutChildren, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit afterEdge);
 
-    LayoutUnit logicalRightOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit logicalHeight = 0) const
-    {
-        return adjustLogicalRightOffsetForLine(logicalRightFloatOffsetForLine(logicalTop, fixedOffset, logicalHeight), applyTextIndent);
-    }
-    LayoutUnit logicalLeftOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit logicalHeight = 0) const
-    {
-        return adjustLogicalLeftOffsetForLine(logicalLeftFloatOffsetForLine(logicalTop, fixedOffset, logicalHeight), applyTextIndent);
-    }
-
     virtual bool updateLogicalWidthAndColumnWidth() override;
 
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:
+    LayoutUnit logicalRightOffsetForLine(LayoutUnit fixedOffset, bool applyTextIndent) const
+    {
+        LayoutUnit right = fixedOffset;
+        if (applyTextIndent && !style()->isLeftToRightDirection())
+            right -= textIndentOffset();
+        return right;
+    }
+    LayoutUnit logicalLeftOffsetForLine(LayoutUnit fixedOffset, bool applyTextIndent) const
+    {
+        LayoutUnit left = fixedOffset;
+        if (applyTextIndent && style()->isLeftToRightDirection())
+            left += textIndentOffset();
+        return left;
+    }
+
     void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
     void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
     void layoutBlockChild(RenderBox* child);
     void adjustPositionedBlock(RenderBox* child);
 
-    virtual bool hitTestFloats(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
-
     virtual void invalidatePaintForOverflow() override final;
-    virtual void paintFloats(PaintInfo&, const LayoutPoint&, bool preservePhase = false) override final;
 
-    LayoutUnit logicalRightFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const;
-    LayoutUnit logicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const;
-
-    LayoutUnit logicalRightOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const;
-    LayoutUnit logicalLeftOffsetForPositioningFloat(LayoutUnit logicalTop, LayoutUnit fixedOffset, bool applyTextIndent, LayoutUnit* heightRemaining) const;
-
-    LayoutUnit adjustLogicalRightOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const;
-    LayoutUnit adjustLogicalLeftOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const;
-
-    virtual RootInlineBox* createRootInlineBox(); // Subclassed by SVG
+    RootInlineBox* createRootInlineBox();
 
     void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
 

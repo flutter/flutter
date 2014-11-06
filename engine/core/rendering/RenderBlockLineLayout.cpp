@@ -504,11 +504,10 @@ void RenderBlockFlow::updateLogicalWidthForAlignment(const ETextAlign& textAlign
         logicalLeft += verticalScrollbarWidth();
 }
 
-static void updateLogicalInlinePositions(RenderBlockFlow* block, float& lineLogicalLeft, float& lineLogicalRight, float& availableLogicalWidth, bool firstLine, IndentTextOrNot shouldIndentText, LayoutUnit boxLogicalHeight)
+static void updateLogicalInlinePositions(RenderBlockFlow* block, float& lineLogicalLeft, float& lineLogicalRight, float& availableLogicalWidth, IndentTextOrNot shouldIndentText)
 {
-    LayoutUnit lineLogicalHeight = block->minLineHeightForReplacedRenderer(firstLine, boxLogicalHeight);
-    lineLogicalLeft = block->logicalLeftOffsetForLine(block->logicalHeight(), shouldIndentText == IndentText, lineLogicalHeight).toFloat();
-    lineLogicalRight = block->logicalRightOffsetForLine(block->logicalHeight(), shouldIndentText == IndentText, lineLogicalHeight).toFloat();
+    lineLogicalLeft = block->logicalLeftOffsetForLine(shouldIndentText == IndentText).toFloat();
+    lineLogicalRight = block->logicalRightOffsetForLine(shouldIndentText == IndentText).toFloat();
     availableLogicalWidth = lineLogicalRight - lineLogicalLeft;
 }
 
@@ -527,13 +526,11 @@ void RenderBlockFlow::computeInlineDirectionPositionsForLine(RootInlineBox* line
     float lineLogicalLeft;
     float lineLogicalRight;
     float availableLogicalWidth;
-    updateLogicalInlinePositions(this, lineLogicalLeft, lineLogicalRight, availableLogicalWidth, isFirstLine, shouldIndentText, 0);
+    updateLogicalInlinePositions(this, lineLogicalLeft, lineLogicalRight, availableLogicalWidth, shouldIndentText);
     bool needsWordSpacing;
 
-    if (firstRun && firstRun->m_object->isReplaced()) {
-        RenderBox* renderBox = toRenderBox(firstRun->m_object);
-        updateLogicalInlinePositions(this, lineLogicalLeft, lineLogicalRight, availableLogicalWidth, isFirstLine, shouldIndentText, renderBox->logicalHeight());
-    }
+    if (firstRun && firstRun->m_object->isReplaced())
+        updateLogicalInlinePositions(this, lineLogicalLeft, lineLogicalRight, availableLogicalWidth, shouldIndentText);
 
     computeInlineDirectionPositionsForSegment(lineBox, lineInfo, textAlign, lineLogicalLeft, availableLogicalWidth, firstRun, trailingSpaceRun, textBoxDataMap, verticalPositionCache, wordMeasurements);
     // The widths of all runs are now known. We can now place every inline box (and
@@ -1592,12 +1589,12 @@ void RenderBlockFlow::checkLinesForTextOverflow()
     }
 }
 
-LayoutUnit RenderBlockFlow::startAlignedOffsetForLine(LayoutUnit position, bool firstLine)
+LayoutUnit RenderBlockFlow::startAlignedOffsetForLine(bool firstLine)
 {
     ETextAlign textAlign = style()->textAlign();
 
     if (textAlign == TASTART) // FIXME: Handle TAEND here
-        return startOffsetForLine(position, firstLine);
+        return startOffsetForLine(firstLine);
 
     // updateLogicalWidthForAlignment() handles the direction of the block so no need to consider it here
     float totalLogicalWidth = 0;

@@ -41,7 +41,6 @@ enum PaintPhase {
     PaintPhaseBlockBackground,
     PaintPhaseChildBlockBackground,
     PaintPhaseChildBlockBackgrounds,
-    PaintPhaseFloat,
     PaintPhaseForeground,
     PaintPhaseOutline,
     PaintPhaseChildOutlines,

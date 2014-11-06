@@ -84,7 +84,6 @@ enum HitTestAction {
     HitTestBlockBackground,
     HitTestChildBlockBackground,
     HitTestChildBlockBackgrounds,
-    HitTestFloat,
     HitTestForeground
 };
 

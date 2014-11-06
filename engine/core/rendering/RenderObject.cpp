@@ -2403,10 +2403,6 @@ bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result,
         // First test the foreground layer (lines and inlines).
         inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestForeground);
 
-        // Test floats next.
-        if (!inside)
-            inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestFloat);
-
         // Finally test to see if the mouse is in the background (within a child block's background).
         if (!inside)
             inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestChildBlockBackgrounds);
