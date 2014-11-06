@@ -43,7 +43,6 @@ InsertionPoint::InsertionPoint(const QualifiedName& tagName, Document& document)
     : HTMLElement(tagName, document, CreateInsertionPoint)
     , m_registeredWithShadowRoot(false)
 {
-    setHasCustomStyleCallbacks();
 }
 
 InsertionPoint::~InsertionPoint()
@@ -237,12 +236,6 @@ void InsertionPoint::removedFrom(ContainerNode* insertionPoint)
     }
 
     HTMLElement::removedFrom(insertionPoint);
-}
-
-void InsertionPoint::trace(Visitor* visitor)
-{
-    visitor->trace(m_distribution);
-    HTMLElement::trace(visitor);
 }
 
 const InsertionPoint* resolveReprojection(const Node* projectedNode)

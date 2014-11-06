@@ -67,7 +67,7 @@ public:
     Node* nextTo(const Node* node) const { return m_distribution.nextTo(node); }
     Node* previousTo(const Node* node) const { return m_distribution.previousTo(node); }
 
-    virtual void trace(Visitor*) override;
+    void willRecalcStyle(StyleRecalcChange);
 
 protected:
     InsertionPoint(const QualifiedName&, Document&);
@@ -75,7 +75,6 @@ protected:
     virtual void childrenChanged(const ChildrenChange&) override;
     virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
-    virtual void willRecalcStyle(StyleRecalcChange) override;
 
 private:
     bool isInsertionPoint() const = delete; // This will catch anyone doing an unnecessary check.

@@ -315,10 +315,6 @@ protected:
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 
-    virtual void willRecalcStyle(StyleRecalcChange);
-    virtual void didRecalcStyle(StyleRecalcChange);
-    virtual PassRefPtr<RenderStyle> customStyleForRenderer();
-
     void clearTabIndexExplicitlyIfNeeded();
     void setTabIndexExplicitly(short);
     // Subclasses may override this method to affect focusability. Unlike
@@ -336,8 +332,6 @@ protected:
     // parseAttribute (called via setAttribute()) and
     // svgAttributeChanged (called when element.className.baseValue is set)
     void classAttributeChanged(const AtomicString& newClassString);
-
-    PassRefPtr<RenderStyle> originalStyleForRenderer();
 
 private:
     void attributeChanged(const QualifiedName&, const AtomicString&, AttributeModificationReason = ModifiedDirectly);

@@ -105,9 +105,6 @@ PassRefPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& exceptionState)
 
 void ShadowRoot::recalcStyle(StyleRecalcChange change)
 {
-    // ShadowRoot doesn't support custom callbacks.
-    ASSERT(!hasCustomStyleCallbacks());
-
     if (styleChangeType() >= SubtreeStyleChange)
         change = Force;
 

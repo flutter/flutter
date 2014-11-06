@@ -902,17 +902,12 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
 {
     ASSERT(document().inStyleRecalc());
 
-    RefPtr<RenderStyle> style;
-
     // FIXME: Instead of clearing updates that may have been added from calls to styleForElement
     // outside recalcStyle, we should just never set them if we're not inside recalcStyle.
     if (ActiveAnimations* activeAnimations = this->activeAnimations())
         activeAnimations->cssAnimations().setPendingUpdate(nullptr);
 
-    if (hasCustomStyleCallbacks())
-        style = customStyleForRenderer();
-    if (!style)
-        style = originalStyleForRenderer();
+    RefPtr<RenderStyle> style = document().ensureStyleResolver().styleForElement(this);
     ASSERT(style);
 
     // styleForElement() might add active animations so we need to get it again.
@@ -930,19 +925,13 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
     return style.release();
 }
 
-PassRefPtr<RenderStyle> Element::originalStyleForRenderer()
-{
-    ASSERT(document().inStyleRecalc());
-    return document().ensureStyleResolver().styleForElement(this);
-}
-
 void Element::recalcStyle(StyleRecalcChange change, Text* nextTextSibling)
 {
     ASSERT(document().inStyleRecalc());
     ASSERT(!parentOrShadowHostNode()->needsStyleRecalc());
 
-    if (hasCustomStyleCallbacks())
-        willRecalcStyle(change);
+    if (isInsertionPoint())
+        toInsertionPoint(this)->willRecalcStyle(change);
 
     if (change >= Inherit || needsStyleRecalc()) {
         if (hasRareData()) {
@@ -964,9 +953,6 @@ void Element::recalcStyle(StyleRecalcChange change, Text* nextTextSibling)
         recalcChildStyle(change);
         clearChildNeedsStyleRecalc();
     }
-
-    if (hasCustomStyleCallbacks())
-        didRecalcStyle(change);
 
     if (change == Reattach)
         reattachWhitespaceSiblings(nextTextSibling);
@@ -1671,23 +1657,6 @@ void Element::setSavedLayerScrollOffset(const IntSize& size)
     if (size.isZero() && !hasRareData())
         return;
     ensureElementRareData().setSavedLayerScrollOffset(size);
-}
-
-void Element::willRecalcStyle(StyleRecalcChange)
-{
-    ASSERT(hasCustomStyleCallbacks());
-}
-
-void Element::didRecalcStyle(StyleRecalcChange)
-{
-    ASSERT(hasCustomStyleCallbacks());
-}
-
-
-PassRefPtr<RenderStyle> Element::customStyleForRenderer()
-{
-    ASSERT(hasCustomStyleCallbacks());
-    return nullptr;
 }
 
 void Element::cloneAttributesFromElement(const Element& other)

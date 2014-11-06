@@ -214,8 +214,6 @@ public:
     bool isShadowRoot() const { return isDocumentFragment() && isTreeScope(); }
     bool isInsertionPoint() const { return getFlag(IsInsertionPointFlag); }
 
-    bool hasCustomStyleCallbacks() const { return getFlag(HasCustomStyleCallbacksFlag); }
-
     // If this node is in a shadow tree, returns its shadow host. Otherwise, returns 0.
     Element* shadowHost() const;
     ShadowRoot* containingShadowRoot() const;
@@ -596,9 +594,8 @@ private:
 
         // Flags related to recalcStyle.
 
-        // FIXME(sky): Flags 12 and 13 are free.
+        // FIXME(sky): Flags 12-14 are free.
 
-        HasCustomStyleCallbacksFlag = 1 << 14,
         ChildNeedsStyleInvalidationFlag = 1 << 15,
         NeedsStyleInvalidationFlag = 1 << 16,
         ChildNeedsDistributionRecalcFlag = 1 << 17,
@@ -617,7 +614,7 @@ private:
         DefaultNodeFlags = ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
 
-    // 6 bits remaining.
+    // 7 bits remaining.
 
     bool getFlag(NodeFlags mask) const { return m_nodeFlags & mask; }
     void setFlag(bool f, NodeFlags mask) { m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t)f & mask); }
@@ -657,8 +654,6 @@ protected:
 
     void clearEventTargetData();
 #endif
-
-    void setHasCustomStyleCallbacks() { setFlag(true, HasCustomStyleCallbacksFlag); }
 
     void setTreeScope(TreeScope* scope) { m_treeScope = scope; }
 
