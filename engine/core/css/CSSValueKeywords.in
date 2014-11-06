@@ -152,14 +152,10 @@ bottom
 // text-align
 // The order here must match the order of the ETextAlign enum in RenderStyleConstants.h.
 //
--webkit-auto
 left
 right
 center
 justify
--webkit-left
--webkit-right
--webkit-center
 -webkit-match-parent
 //
 // text-justify

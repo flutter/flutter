@@ -137,9 +137,7 @@ void RenderBlockFlow::determineLogicalLeftPositionForChild(RenderBox* child)
 
     // If the child has an offset from the content edge to avoid floats then use that, otherwise let any negative
     // margin pull it back over the content edge or any positive margin push it out.
-    // If the child is being centred then the margin calculated to do that has factored in any offset required to
-    // avoid floats, so use it if necessary.
-    if (style()->textAlign() == WEBKIT_CENTER || child->style()->marginStartUsing(style()).isAuto())
+    if (child->style()->marginStartUsing(style()).isAuto())
         newPosition = std::max(newPosition, childMarginStart);
 
     child->setX(style()->isLeftToRightDirection() ? newPosition : totalAvailableLogicalWidth - newPosition - logicalWidthForChild(child));

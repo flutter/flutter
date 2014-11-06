@@ -389,15 +389,12 @@ static int textAlignResolvingStartAndEnd(int textAlign, int direction)
 {
     switch (textAlign) {
     case CSSValueCenter:
-    case CSSValueWebkitCenter:
         return CSSValueCenter;
     case CSSValueJustify:
         return CSSValueJustify;
     case CSSValueLeft:
-    case CSSValueWebkitLeft:
         return CSSValueLeft;
     case CSSValueRight:
-    case CSSValueWebkitRight:
         return CSSValueRight;
     case CSSValueStart:
         return direction != CSSValueRtl ? CSSValueLeft : CSSValueRight;

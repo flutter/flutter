@@ -521,9 +521,9 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
     }
 
     case CSSPropertyTextAlign:
-        // left | right | center | justify | -webkit-left | -webkit-right | -webkit-center | -webkit-match-parent
-        // | start | end | <string> | inherit | -webkit-auto (converted to start)
-        if ((id >= CSSValueWebkitAuto && id <= CSSValueWebkitMatchParent) || id == CSSValueStart || id == CSSValueEnd
+        // left | right | center | justify | -webkit-match-parent
+        // | start | end | <string> | inherit
+        if ((id >= CSSValueLeft && id <= CSSValueWebkitMatchParent) || id == CSSValueStart || id == CSSValueEnd
             || value->unit == CSSPrimitiveValue::CSS_STRING)
             validPrimitive = true;
         break;

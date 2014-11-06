@@ -1750,15 +1750,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETextAlign e)
     case JUSTIFY:
         m_value.valueID = CSSValueJustify;
         break;
-    case WEBKIT_LEFT:
-        m_value.valueID = CSSValueWebkitLeft;
-        break;
-    case WEBKIT_RIGHT:
-        m_value.valueID = CSSValueWebkitRight;
-        break;
-    case WEBKIT_CENTER:
-        m_value.valueID = CSSValueWebkitCenter;
-        break;
     }
 }
 
@@ -1766,7 +1757,6 @@ template<> inline CSSPrimitiveValue::operator ETextAlign() const
 {
     ASSERT(isValueID());
     switch (m_value.valueID) {
-    case CSSValueWebkitAuto: // Legacy -webkit-auto. Eqiuvalent to start.
     case CSSValueStart:
         return TASTART;
     case CSSValueEnd:

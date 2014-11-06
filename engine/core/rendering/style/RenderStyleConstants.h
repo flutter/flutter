@@ -275,7 +275,7 @@ enum EWhiteSpace {
 
 // The order of this enum must match the order of the text align values in CSSValueKeywords.in.
 enum ETextAlign {
-    LEFT, RIGHT, CENTER, JUSTIFY, WEBKIT_LEFT, WEBKIT_RIGHT, WEBKIT_CENTER, TASTART, TAEND,
+    LEFT, RIGHT, CENTER, JUSTIFY, TASTART, TAEND,
 };
 
 static const size_t TextDecorationBits = 4;

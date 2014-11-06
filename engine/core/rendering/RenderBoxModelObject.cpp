@@ -2481,14 +2481,11 @@ LayoutRect RenderBoxModelObject::localCaretRectForEmptyElement(LayoutUnit width,
 
     switch (currentStyle->textAlign()) {
     case LEFT:
-    case WEBKIT_LEFT:
         break;
     case CENTER:
-    case WEBKIT_CENTER:
         alignment = alignCenter;
         break;
     case RIGHT:
-    case WEBKIT_RIGHT:
         alignment = alignRight;
         break;
     case JUSTIFY:

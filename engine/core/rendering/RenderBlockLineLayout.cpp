@@ -466,15 +466,12 @@ void RenderBlockFlow::updateLogicalWidthForAlignment(const ETextAlign& textAlign
     // justifying text.
     switch (textAlign) {
     case LEFT:
-    case WEBKIT_LEFT:
         updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
         break;
     case RIGHT:
-    case WEBKIT_RIGHT:
         updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
         break;
     case CENTER:
-    case WEBKIT_CENTER:
         updateLogicalWidthForCenterAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
         break;
     case JUSTIFY:
