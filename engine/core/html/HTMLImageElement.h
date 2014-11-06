@@ -90,8 +90,6 @@ public:
     virtual FloatSize defaultDestinationSize() const override;
     virtual const KURL& sourceURL() const override;
 
-    // public so that HTMLPictureElement can call this as well.
-    void selectSourceURL(ImageLoader::UpdateFromElementBehavior);
 protected:
     explicit HTMLImageElement(Document&, bool createdByParser = false);
 
@@ -99,6 +97,8 @@ protected:
 
 private:
     virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
+
+    void selectSourceURL(ImageLoader::UpdateFromElementBehavior);
 
     virtual void attach(const AttachContext& = AttachContext()) override;
     virtual RenderObject* createRenderer(RenderStyle*) override;
@@ -111,7 +111,6 @@ private:
     virtual void removedFrom(ContainerNode*) override;
     virtual Image* imageContents() override;
 
-    ImageCandidate findBestFitImageFromPictureParent();
     void setBestFitURLAndDPRFromImageCandidate(const ImageCandidate&);
     HTMLImageLoader& imageLoader() const { return *m_imageLoader; }
     void notifyViewportChanged();

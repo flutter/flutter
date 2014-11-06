@@ -6,10 +6,8 @@ canvas
 content interfaceName=HTMLContentElement
 img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
 import
-picture interfaceName=HTMLPictureElement
 script
 shadow interfaceName=HTMLShadowElement
-source
 style constructorNeedsCreatedByParser
 template
 title

@@ -26,6 +26,7 @@
 #include "core/CSSPropertyNames.h"
 #include "core/HTMLNames.h"
 #include "core/MediaTypeNames.h"
+#include "core/css/MediaQueryListListener.h"
 #include "core/css/MediaQueryMatcher.h"
 #include "core/css/MediaValuesDynamic.h"
 #include "core/css/parser/SizesAttributeParser.h"
@@ -35,7 +36,6 @@
 #include "core/frame/UseCounter.h"
 #include "core/html/HTMLAnchorElement.h"
 #include "core/html/HTMLCanvasElement.h"
-#include "core/html/HTMLSourceElement.h"
 #include "core/html/canvas/CanvasRenderingContext.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/html/parser/HTMLSrcsetParser.h"
@@ -183,52 +183,6 @@ const AtomicString& HTMLImageElement::altText() const
     return getAttribute(HTMLNames::titleAttr);
 }
 
-static bool supportedImageType(const String& type)
-{
-    return MIMETypeRegistry::isSupportedImagePrefixedMIMEType(type);
-}
-
-// http://picture.responsiveimages.org/#update-source-set
-ImageCandidate HTMLImageElement::findBestFitImageFromPictureParent()
-{
-    ASSERT(isMainThread());
-    Node* parent = parentNode();
-    if (!parent || !isHTMLPictureElement(*parent))
-        return ImageCandidate();
-    for (Node* child = parent->firstChild(); child; child = child->nextSibling()) {
-        if (child == this)
-            return ImageCandidate();
-
-        if (!isHTMLSourceElement(*child))
-            continue;
-
-        HTMLSourceElement* source = toHTMLSourceElement(child);
-        if (!source->getAttribute(HTMLNames::srcAttr).isNull())
-            UseCounter::countDeprecation(document(), UseCounter::PictureSourceSrc);
-        String srcset = source->getAttribute(HTMLNames::srcsetAttr);
-        if (srcset.isEmpty())
-            continue;
-        String type = source->getAttribute(HTMLNames::typeAttr);
-        if (!type.isEmpty() && !supportedImageType(type))
-            continue;
-
-        if (!source->mediaQueryMatches())
-            continue;
-
-        String sizes = source->getAttribute(HTMLNames::sizesAttr);
-        if (!sizes.isNull())
-            UseCounter::count(document(), UseCounter::Sizes);
-        SizesAttributeParser parser = SizesAttributeParser(MediaValuesDynamic::create(document()), sizes);
-        unsigned effectiveSize = parser.length();
-        m_effectiveSizeViewportDependant = parser.viewportDependant();
-        ImageCandidate candidate = bestFitSourceForSrcsetAttribute(document().devicePixelRatio(), effectiveSize, source->getAttribute(HTMLNames::srcsetAttr));
-        if (candidate.isEmpty())
-            continue;
-        return candidate;
-    }
-    return ImageCandidate();
-}
-
 RenderObject* HTMLImageElement::createRenderer(RenderStyle* style)
 {
     RenderImage* image = new RenderImage(this);
@@ -270,18 +224,9 @@ Node::InsertionNotificationRequest HTMLImageElement::insertedInto(ContainerNode*
     if (m_listener)
         document().mediaQueryMatcher().addViewportListener(m_listener.get());
 
-    bool imageWasModified = false;
-    if (RuntimeEnabledFeatures::pictureEnabled()) {
-        ImageCandidate candidate = findBestFitImageFromPictureParent();
-        if (!candidate.isEmpty()) {
-            setBestFitURLAndDPRFromImageCandidate(candidate);
-            imageWasModified = true;
-        }
-    }
-
     // If we have been inserted from a renderer-less document,
     // our loader may have not fetched the image, so do it now.
-    if ((insertionPoint->inDocument() && !imageLoader().image()) || imageWasModified)
+    if ((insertionPoint->inDocument() && !imageLoader().image()))
         imageLoader().updateFromElement(ImageLoader::UpdateNormal, m_elementCreatedByParser ? ImageLoader::ForceLoadImmediately : ImageLoader::LoadNormally);
 
     return HTMLElement::insertedInto(insertionPoint);
@@ -501,30 +446,19 @@ FloatSize HTMLImageElement::defaultDestinationSize() const
 
 void HTMLImageElement::selectSourceURL(ImageLoader::UpdateFromElementBehavior behavior)
 {
-    bool foundURL = false;
-    if (RuntimeEnabledFeatures::pictureEnabled()) {
-        ImageCandidate candidate = findBestFitImageFromPictureParent();
-        if (!candidate.isEmpty()) {
-            setBestFitURLAndDPRFromImageCandidate(candidate);
-            foundURL = true;
-        }
+    unsigned effectiveSize = 0;
+    if (RuntimeEnabledFeatures::pictureSizesEnabled()) {
+        String sizes = getAttribute(HTMLNames::sizesAttr);
+        if (!sizes.isNull())
+            UseCounter::count(document(), UseCounter::Sizes);
+        SizesAttributeParser parser = SizesAttributeParser(MediaValuesDynamic::create(document()), sizes);
+        effectiveSize = parser.length();
+        m_effectiveSizeViewportDependant = parser.viewportDependant();
     }
-
-    if (!foundURL) {
-        unsigned effectiveSize = 0;
-        if (RuntimeEnabledFeatures::pictureSizesEnabled()) {
-            String sizes = getAttribute(HTMLNames::sizesAttr);
-            if (!sizes.isNull())
-                UseCounter::count(document(), UseCounter::Sizes);
-            SizesAttributeParser parser = SizesAttributeParser(MediaValuesDynamic::create(document()), sizes);
-            effectiveSize = parser.length();
-            m_effectiveSizeViewportDependant = parser.viewportDependant();
-        }
-        ImageCandidate candidate = bestFitSourceForImageAttributes(
-            document().devicePixelRatio(), effectiveSize,
-            getAttribute(HTMLNames::srcAttr), getAttribute(HTMLNames::srcsetAttr));
-        setBestFitURLAndDPRFromImageCandidate(candidate);
-    }
+    ImageCandidate candidate = bestFitSourceForImageAttributes(
+        document().devicePixelRatio(), effectiveSize,
+        getAttribute(HTMLNames::srcAttr), getAttribute(HTMLNames::srcsetAttr));
+    setBestFitURLAndDPRFromImageCandidate(candidate);
     if (m_intrinsicSizingViewportDependant && m_effectiveSizeViewportDependant && !m_listener.get()) {
         m_listener = ViewportChangeListener::create(this);
         document().mediaQueryMatcher().addViewportListener(m_listener.get());
