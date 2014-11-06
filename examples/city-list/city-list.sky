@@ -7,7 +7,7 @@
 <import src="city-data-service.sky" as="CityDataService" />
 <import src="city-sequence.sky" as="CitySequence" />
 
-<template>  
+<template>
   <style>
     div {
       font-size: 16px;
@@ -158,7 +158,8 @@ SkyElement({
     var LOAD_BUFFER_PRE = LOAD_LENGTH * 4;
     var LOAD_BUFFER_POST = LOAD_LENGTH * 4;
 
-    function Loader() {
+    function Loader(cityList) {
+      this.cityList = cityList;
       this.loadingData = false;
       this.data = null;
       this.zeroIndex = 0;
@@ -177,8 +178,8 @@ SkyElement({
       return this.data ? this.data.items : [];
     }
 
-    Loader.prototype.maybeLoadMoreData = function(dataloadedCallback,
-                                                  firstVisible) {
+    Loader.prototype.maybeLoadMoreData =
+        function(dataloadedCallback, firstVisible) {
       if (this.loadingData)
         return;
 
@@ -197,7 +198,14 @@ SkyElement({
       }
 
       var loadTime;
-      if (loadedPre >= LOAD_BUFFER_PRE && loadedPost >= LOAD_BUFFER_POST) {
+      if (loadedPre >= LOAD_BUFFER_PRE &&
+          loadedPost >= LOAD_BUFFER_POST) {
+
+        var cityList = this.cityList;
+        setTimeout(function() {
+           cityList.dispatchEvent(new Event('load'));
+        });
+
         if (window.startLoad) {
           loadTime = new Date().getTime() - window.startLoad;
           console.log('Load: ' + loadTime + 'ms');
@@ -537,7 +545,7 @@ SkyElement({
 
       attached: function() {
         this.views = {};
-        this.loader = new Loader();
+        this.loader = new Loader(this);
         this.scroller = new Scroller();
         this.tiler = new Tiler(
             this.shadowRoot.getElementById('contentarea'), this.views, {
@@ -547,11 +555,12 @@ SkyElement({
         });
 
         this.dataLoaded = this.dataLoaded.bind(this);
-        this.shadowRoot.getElementById('scroller')
-            .addEventListener('scroll', this.handleScroll.bind(this));
+        this.scrollerElement = this.shadowRoot.getElementById('scroller');
+        this.scrollerElement.addEventListener('scroll',
+            this.handleScroll.bind(this));
 
         var self = this;
-        requestAnimationFrame(function() {
+        setTimeout(function() {
           self.domReady();
           self.loader.maybeLoadMoreData(self.dataLoaded);
         });

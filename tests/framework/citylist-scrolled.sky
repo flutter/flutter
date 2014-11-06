@@ -1,0 +1,19 @@
+<html>
+<import src="/sky/examples/city-list/city-list.sky" />
+<city-list></city-list>
+<script>
+var cityList = document.querySelector('city-list');
+var scrolled = false
+cityList.addEventListener('load', function() {
+  if (scrolled) {
+    internals.notifyTestComplete(internals.renderTreeAsText());
+  } else {
+    scrolled = true;
+    setTimeout(function() {
+      cityList.scrollerElement.scrollTop = 200;
+      cityList.handleScroll({ target: cityList.scrollerElement });
+    }, 0);
+  }
+});
+</script>
+</html>
