@@ -23,11 +23,11 @@ class Server : public mojo::ApplicationDelegate {
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
-    connection->AddService(&fronend_factory_);
+    connection->AddService(&frontend_factory_);
     return true;
   }
 
-  InspectorFronendFactory fronend_factory_;
+  InspectorFrontendFactory frontend_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(Server);
 };

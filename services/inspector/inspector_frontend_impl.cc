@@ -12,27 +12,27 @@ namespace sky {
 namespace inspector {
 namespace {
 const int kNotConnected = -1;
-static base::LazyInstance<std::map<int, InspectorFronendImpl*>> g_servers =
+static base::LazyInstance<std::map<int, InspectorFrontendImpl*>> g_servers =
     LAZY_INSTANCE_INITIALIZER;
 }
 
-InspectorFronendImpl::InspectorFronendImpl()
+InspectorFrontendImpl::InspectorFrontendImpl()
   : connection_id_(kNotConnected) {
 }
 
-InspectorFronendImpl::~InspectorFronendImpl() {
+InspectorFrontendImpl::~InspectorFrontendImpl() {
   StopListening();
 }
 
-void InspectorFronendImpl::OnConnect(int connection_id) {
+void InspectorFrontendImpl::OnConnect(int connection_id) {
 }
 
-void InspectorFronendImpl::OnHttpRequest(
+void InspectorFrontendImpl::OnHttpRequest(
     int connection_id, const net::HttpServerRequestInfo& info) {
   web_server_->Send500(connection_id, "websockets protocol only");
 }
 
-void InspectorFronendImpl::OnWebSocketRequest(
+void InspectorFrontendImpl::OnWebSocketRequest(
     int connection_id, const net::HttpServerRequestInfo& info) {
   if (connection_id_ != kNotConnected) {
     web_server_->Close(connection_id);
@@ -43,20 +43,20 @@ void InspectorFronendImpl::OnWebSocketRequest(
   client()->OnConnect();
 }
 
-void InspectorFronendImpl::OnWebSocketMessage(
+void InspectorFrontendImpl::OnWebSocketMessage(
     int connection_id, const std::string& data) {
   DCHECK_EQ(connection_id, connection_id_);
   client()->OnMessage(data);
 }
 
-void InspectorFronendImpl::OnClose(int connection_id) {
+void InspectorFrontendImpl::OnClose(int connection_id) {
   if (connection_id != connection_id_)
     return;
   connection_id_ = kNotConnected;
   client()->OnDisconnect();
 }
 
-void InspectorFronendImpl::Listen(int32_t port) {
+void InspectorFrontendImpl::Listen(int32_t port) {
   Register(port);
   scoped_ptr<net::ServerSocket> server_socket(
       new net::TCPServerSocket(NULL, net::NetLog::Source()));
@@ -64,14 +64,14 @@ void InspectorFronendImpl::Listen(int32_t port) {
   web_server_.reset(new net::HttpServer(server_socket.Pass(), this));
 }
 
-void InspectorFronendImpl::StopListening() {
+void InspectorFrontendImpl::StopListening() {
   if (!web_server_)
     return;
   web_server_.reset();
   Unregister();
 }
 
-void InspectorFronendImpl::Register(int port) {
+void InspectorFrontendImpl::Register(int port) {
   auto& servers = g_servers.Get();
   auto iter = servers.find(port);
   if (iter != servers.end())
@@ -81,13 +81,13 @@ void InspectorFronendImpl::Register(int port) {
   port_ = port;
 }
 
-void InspectorFronendImpl::Unregister() {
+void InspectorFrontendImpl::Unregister() {
   DCHECK(g_servers.Get().find(port_)->second == this);
   g_servers.Get().erase(port_);
   port_ = kNotConnected;
 }
 
-void InspectorFronendImpl::SendMessage(const mojo::String& message) {
+void InspectorFrontendImpl::SendMessage(const mojo::String& message) {
   if (connection_id_ == kNotConnected)
     return;
   web_server_->SendOverWebSocket(connection_id_, message);

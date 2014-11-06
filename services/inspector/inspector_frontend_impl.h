@@ -14,11 +14,11 @@
 namespace sky {
 namespace inspector {
 
-class InspectorFronendImpl : public mojo::InterfaceImpl<InspectorFrontend>,
+class InspectorFrontendImpl : public mojo::InterfaceImpl<InspectorFrontend>,
                              public net::HttpServer::Delegate {
  public:
-  InspectorFronendImpl();
-  virtual ~InspectorFronendImpl();
+  InspectorFrontendImpl();
+  virtual ~InspectorFrontendImpl();
 
  private:
   // From net::HttpServer::Delegate
@@ -31,7 +31,7 @@ class InspectorFronendImpl : public mojo::InterfaceImpl<InspectorFrontend>,
       int connection_id, const std::string& data) override;
   virtual void OnClose(int connection_id) override;
 
-  // From InspectorFronend
+  // From InspectorFrontend
   virtual void Listen(int32_t port) override;
   virtual void SendMessage(const mojo::String&) override;
 
@@ -44,11 +44,11 @@ class InspectorFronendImpl : public mojo::InterfaceImpl<InspectorFrontend>,
   int connection_id_;
   scoped_ptr<net::HttpServer> web_server_;
 
-  MOJO_DISALLOW_COPY_AND_ASSIGN(InspectorFronendImpl);
+  MOJO_DISALLOW_COPY_AND_ASSIGN(InspectorFrontendImpl);
 };
 
 typedef mojo::InterfaceFactoryImpl<
-    InspectorFronendImpl> InspectorFronendFactory;
+    InspectorFrontendImpl> InspectorFrontendFactory;
 
 }  // namespace tester
 }  // namespace sky
