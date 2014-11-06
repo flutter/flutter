@@ -1,3 +1,5 @@
+ERROR: Failed to load resource: the server responded with a status of 404 () 
+SOURCE: http://127.0.0.1:8000/sky/tests/mutation-observer/baz.png:0
 Running 14 tests
 ok 1 MutationObserver.observe on attributes should handle basic aspects of attribute observation
 ok 2 MutationObserver.observe on attributes should not notify of attribute changes without asking

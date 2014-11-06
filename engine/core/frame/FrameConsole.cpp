@@ -96,9 +96,6 @@ void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
 
     messageStorage()->reportMessage(consoleMessage);
 
-    if (consoleMessage->source() == CSSMessageSource || consoleMessage->source() == NetworkMessageSource)
-        return;
-
     RefPtr<ScriptCallStack> reportedCallStack = nullptr;
     if (consoleMessage->source() != ConsoleAPIMessageSource) {
         if (consoleMessage->callStack() && m_frame.chromeClient().shouldReportDetailedMessageForSource(messageURL))

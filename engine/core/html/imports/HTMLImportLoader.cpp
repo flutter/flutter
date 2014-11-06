@@ -81,6 +81,10 @@ void HTMLImportLoader::startLoading(const KURL& url)
 void HTMLImportLoader::OnReceivedResponse(mojo::URLResponsePtr response)
 {
     if (response->error || response->status_code >= 400) {
+        // FIXME: Consider refactoring to use FrameConsole::reportResourceResponseReceived
+        String message = "Failed to load resource: the server responded with a status of " + String::number(response->status_code) + " (" + response->status_line.data() + ')';
+        RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(NetworkMessageSource, ErrorMessageLevel, message, response->url.data());
+        m_controller->master()->addMessage(consoleMessage);
         setState(StateError);
         return;
     }
