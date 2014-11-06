@@ -128,14 +128,14 @@ As an example, the following is a sketch of a module that wraps Mojo's
 
 ```html
 SKY MODULE
-<import src=”mojo://shell” as=”shell” />
+<import src=”mojo:shell” as=”shell” />
 <import src="/mojo/network/network_service.mojom.sky" as="net" />
 <import src="/mojo/network/url_loader.mojom.sky" as="loader" />
 <script>
 module.exports = function fetch(url) {
   return new Promise(function(resolve, reject) {
     var networkService = shell.connectToService(
-        "mojo://network_service", net.NetworkService);
+        "mojo:network_service", net.NetworkService);
     var request = new loader.URLRequest({
         url: url, method: "GET", auto_follow_redirects: true});
     var urlLoader = networkService.createURLLoader();

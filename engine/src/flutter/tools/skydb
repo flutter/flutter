@@ -67,7 +67,7 @@ class SkyDebugger(object):
         parser.add_argument('url', nargs='?', type=str)
         args = parser.parse_args()
 
-        content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+        content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
             for mime_type in SUPPORTED_MIME_TYPES]
         shell_command = [
             self.paths.mojo_shell_path,
@@ -81,10 +81,10 @@ class SkyDebugger(object):
             if not urlparse.urlparse(url).scheme:
                 url = self._start_http_server_for_file(url)
 
-            prompt_args = '--args-for=mojo://sky_debugger_prompt/ %s' % url
+            prompt_args = '--args-for=mojo:sky_debugger_prompt %s' % url
             shell_command.append(prompt_args)
         if args.use_osmesa:
-            shell_command.append('--args-for=mojo://native_viewport_service/ --use-osmesa')
+            shell_command.append('--args-for=mojo:native_viewport_service --use-osmesa')
         if args.gdb:
             shell_command = ['gdb', '--args'] + shell_command
 

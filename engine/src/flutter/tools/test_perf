@@ -71,14 +71,14 @@ class PerfHarness(object):
         ])
 
     def _sky_tester_command(self, url):
-        content_handlers = ['%s,%s' % (mime_type, 'mojo://sky_viewer/')
+        content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
             for mime_type in SUPPORTED_MIME_TYPES]
         return [
             self.paths.mojo_shell_path,
-            '--args-for=mojo://native_viewport_service/ --use-headless-config --use-osmesa',
-            '--args-for=mojo://window_manager/ %s' % url,
+            '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
+            '--args-for=mojo:window_manager %s' % url,
             '--content-handlers=%s' % ','.join(content_handlers),
-            '--url-mappings=mojo:window_manager=mojo://sky_tester/',
+            '--url-mappings=mojo:window_manager=mojo:sky_tester',
             'mojo:window_manager',
         ]
 
