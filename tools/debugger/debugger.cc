@@ -107,6 +107,9 @@ void SkyDebugger::Shutdown() {
   // TODO(eseidel): This still hits an X11 error which I don't understand
   // "X Error of failed request:  GLXBadDrawable", crbug.com/430581
   mojo::ApplicationImpl::Terminate();
+  // TODO(eseidel): REMOVE THIS, temporarily fast-exit now to stop confusing
+  // folks with exit-time crashes due to GLXBadDrawable above.
+  exit(0);
 }
 
 void SkyDebugger::InjectInspector() {
