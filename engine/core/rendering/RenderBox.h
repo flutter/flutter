@@ -200,8 +200,6 @@ public:
     LayoutUnit logicalLeftVisualOverflow() const { return visualOverflowRect().x(); }
     LayoutUnit logicalRightVisualOverflow() const { return visualOverflowRect().maxX(); }
 
-    LayoutRect overflowRectForPaintRejection() const;
-
     LayoutRect contentsVisualOverflowRect() const { return m_overflow ? m_overflow->contentsVisualOverflowRect() : LayoutRect(); }
 
     void addLayoutOverflow(const LayoutRect&);
@@ -449,11 +447,6 @@ public:
     bool hasScrollableOverflowY() const { return scrollsOverflowY() && pixelSnappedScrollHeight() != pixelSnappedClientHeight(); }
     virtual bool scrollsOverflowX() const { return hasOverflowClip() && (style()->overflowX() == OSCROLL || hasAutoHorizontalScrollbar()); }
     virtual bool scrollsOverflowY() const { return hasOverflowClip() && (style()->overflowY() == OSCROLL || hasAutoVerticalScrollbar()); }
-    bool usesCompositedScrolling() const;
-
-    // Elements such as the <input> field override this to specify that they are scrollable
-    // outside the context of the CSS overflow style
-    virtual bool isIntristicallyScrollable(ScrollbarOrientation orientation) const { return false; }
 
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override;
 

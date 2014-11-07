@@ -76,8 +76,6 @@ public:
     void updateScrollParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
     void updateClipParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
 
-    Region computeShouldHandleScrollGestureOnMainThreadRegion(const LocalFrame*, const IntPoint& frameLocation) const;
-
     void updateTouchEventTargetRectsIfNeeded();
 
     // For testing purposes only. This ScrollingCoordinator is reused between layout test, and must be reset

@@ -1166,7 +1166,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // FIXME: Could eliminate the isDocumentElement() check if we fix background painting so that the RenderView
     // paints the root's background.
     if (!isDocumentElement()) {
-        overflowBox = overflowRectForPaintRejection();
+        overflowBox = visualOverflowRect();
         overflowBox.moveBy(adjustedPaintOffset);
         if (!overflowBox.intersects(paintInfo.rect))
             return;

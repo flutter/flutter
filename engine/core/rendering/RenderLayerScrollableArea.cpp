@@ -295,31 +295,13 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
     quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(quadForFakeMouseMoveEvent);
     frame->eventHandler().dispatchFakeMouseMoveEventSoonInQuad(quadForFakeMouseMoveEvent);
 
-    bool requiresPaintInvalidation = true;
-
-    if (box().view()->compositor()->inCompositingMode()) {
-        // Hits in virtual/gpu/fast/canvas/canvas-scroll-path-into-view.html.
-        DisableCompositingQueryAsserts disabler;
-        bool onlyScrolledCompositedLayers = scrollsOverflow()
-            && !layer()->hasVisibleNonLayerContent()
-            && !layer()->hasNonCompositedChild()
-            && !layer()->hasBlockSelectionGapBounds()
-            && box().style()->backgroundLayers().attachment() != LocalBackgroundAttachment;
-
-        if (usesCompositedScrolling() || onlyScrolledCompositedLayers)
-            requiresPaintInvalidation = false;
-    }
-
-    // Just schedule a full paint invalidation of our object.
-    if (requiresPaintInvalidation) {
-        // For querying RenderLayer::compositingState()
-        // This code appears correct, since scrolling outside of layout happens during activities that do not dirty compositing state.
-        DisableCompositingQueryAsserts disabler;
-        if (box().frameView()->isInPerformLayout())
-            box().setShouldDoFullPaintInvalidation(true);
-        else
-            box().invalidatePaintUsingContainer(paintInvalidationContainer, layer()->renderer()->previousPaintInvalidationRect(), InvalidationScroll);
-    }
+    // For querying RenderLayer::compositingState()
+    // This code appears correct, since scrolling outside of layout happens during activities that do not dirty compositing state.
+    DisableCompositingQueryAsserts disabler;
+    if (box().frameView()->isInPerformLayout())
+        box().setShouldDoFullPaintInvalidation(true);
+    else
+        box().invalidatePaintUsingContainer(paintInvalidationContainer, layer()->renderer()->previousPaintInvalidationRect(), InvalidationScroll);
 
     // Schedule the scroll DOM event.
     if (box().node())
@@ -388,9 +370,6 @@ IntRect RenderLayerScrollableArea::scrollableAreaBoundingBox() const
 
 bool RenderLayerScrollableArea::userInputScrollable(ScrollbarOrientation orientation) const
 {
-    if (box().isIntristicallyScrollable(orientation))
-        return true;
-
     EOverflow overflowStyle = (orientation == HorizontalScrollbar) ?
         box().style()->overflowX() : box().style()->overflowY();
     return (overflowStyle == OSCROLL || overflowStyle == OAUTO || overflowStyle == OOVERLAY);
@@ -623,7 +602,6 @@ void RenderLayerScrollableArea::updateAfterStyleChange(const RenderStyle* oldSty
 
 bool RenderLayerScrollableArea::updateAfterCompositingChange()
 {
-    layer()->updateScrollingStateAfterCompositingChange();
     const bool layersChanged = m_topmostScrollChild != m_nextTopmostScrollChild;
     m_topmostScrollChild = m_nextTopmostScrollChild;
     m_nextTopmostScrollChild = nullptr;
@@ -910,26 +888,8 @@ void RenderLayerScrollableArea::updateCompositingLayersAfterScroll()
 {
     RenderLayerCompositor* compositor = box().view()->compositor();
     if (compositor->inCompositingMode()) {
-        if (usesCompositedScrolling()) {
-            DisableCompositingQueryAsserts disabler;
-            ASSERT(layer()->hasCompositedLayerMapping());
-            layer()->compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
-            compositor->setNeedsCompositingUpdate(CompositingUpdateAfterGeometryChange);
-        } else {
-            layer()->setNeedsCompositingInputsUpdate();
-        }
+        layer()->setNeedsCompositingInputsUpdate();
     }
-}
-
-bool RenderLayerScrollableArea::usesCompositedScrolling() const
-{
-    // Scroll form controls on the main thread so they exhibit correct touch scroll event bubbling
-    if (box().isIntristicallyScrollable(VerticalScrollbar) || box().isIntristicallyScrollable(HorizontalScrollbar))
-        return false;
-
-    // See https://codereview.chromium.org/176633003/ for the tests that fail without this disabler.
-    DisableCompositingQueryAsserts disabler;
-    return layer()->hasCompositedLayerMapping() && layer()->compositedLayerMapping()->scrollingLayer();
 }
 
 static bool layerNeedsCompositedScrolling(const RenderLayer* layer)

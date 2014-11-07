@@ -120,8 +120,6 @@ public:
 
     ScrollingCoordinator* scrollingCoordinator();
 
-    PassRefPtr<ClientRectList> nonFastScrollableRects(const LocalFrame*);
-
     Settings& settings() const { return *m_settings; }
 
     UseCounter& useCounter() { return m_useCounter; }

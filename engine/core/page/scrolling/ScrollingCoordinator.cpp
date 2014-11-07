@@ -463,31 +463,6 @@ void ScrollingCoordinator::willBeDestroyed()
         GraphicsLayer::unregisterContentsLayer(it->value->layer());
 }
 
-Region ScrollingCoordinator::computeShouldHandleScrollGestureOnMainThreadRegion(const LocalFrame* frame, const IntPoint& frameLocation) const
-{
-    Region shouldHandleScrollGestureOnMainThreadRegion;
-    FrameView* frameView = frame->view();
-    if (!frameView)
-        return shouldHandleScrollGestureOnMainThreadRegion;
-
-    IntPoint offset = frameLocation;
-    offset.moveBy(frameView->frameRect().location());
-
-    if (const FrameView::ScrollableAreaSet* scrollableAreas = frameView->scrollableAreas()) {
-        for (FrameView::ScrollableAreaSet::const_iterator it = scrollableAreas->begin(), end = scrollableAreas->end(); it != end; ++it) {
-            ScrollableArea* scrollableArea = *it;
-            // Composited scrollable areas can be scrolled off the main thread.
-            if (scrollableArea->usesCompositedScrolling())
-                continue;
-            IntRect box = scrollableArea->scrollableAreaBoundingBox();
-            box.moveBy(offset);
-            shouldHandleScrollGestureOnMainThreadRegion.unite(box);
-        }
-    }
-
-    return shouldHandleScrollGestureOnMainThreadRegion;
-}
-
 static void accumulateDocumentTouchEventTargetRects(LayerHitTestRects& rects, const Document* document)
 {
     ASSERT(document);

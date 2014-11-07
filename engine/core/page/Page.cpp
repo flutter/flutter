@@ -142,21 +142,6 @@ ScrollingCoordinator* Page::scrollingCoordinator()
     return m_scrollingCoordinator.get();
 }
 
-PassRefPtr<ClientRectList> Page::nonFastScrollableRects(const LocalFrame* frame)
-{
-    if (mainFrame()->document())
-        mainFrame()->document()->updateLayout();
-
-    Vector<IntRect> rects;
-    if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-        rects = scrollingCoordinator->computeShouldHandleScrollGestureOnMainThreadRegion(frame, IntPoint()).rects();
-
-    Vector<FloatQuad> quads(rects.size());
-    for (size_t i = 0; i < rects.size(); ++i)
-        quads[i] = FloatRect(rects[i]);
-    return ClientRectList::create(quads);
-}
-
 void Page::setMainFrame(LocalFrame* mainFrame)
 {
     // Should only be called during initialization or swaps between local and

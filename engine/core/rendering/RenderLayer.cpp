@@ -94,7 +94,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_hasSelfPaintingLayerDescendantDirty(false)
     , m_isRootLayer(renderer->isRenderView())
     , m_usedTransparency(false)
-    , m_hasVisibleNonLayerContent(false)
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
     , m_containsDirtyOverlayScrollbars(false)
@@ -103,7 +102,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_needsDescendantDependentCompositingInputsUpdate(true)
     , m_childNeedsCompositingInputsUpdate(true)
     , m_hasCompositingDescendant(false)
-    , m_hasNonCompositedChild(false)
     , m_shouldIsolateCompositedDescendants(false)
     , m_lostGroupedMapping(false)
     , m_renderer(renderer)
@@ -422,28 +420,6 @@ LayoutRect RenderLayer::computePaintInvalidationRect(const RenderObject* renderO
     LayoutRect rect = renderObject->clippedOverflowRectForPaintInvalidation(paintInvalidationContainer->renderer(), paintInvalidationState);
     mapRectToPaintBackingCoordinates(paintInvalidationContainer->renderer(), rect);
     return rect;
-}
-
-// FIXME: this is quite brute-force. We could be more efficient if we were to
-// track state and update it as appropriate as changes are made in the Render tree.
-void RenderLayer::updateScrollingStateAfterCompositingChange()
-{
-    TRACE_EVENT0("blink", "RenderLayer::updateScrollingStateAfterCompositingChange");
-    m_hasVisibleNonLayerContent = false;
-    for (RenderObject* r = renderer()->slowFirstChild(); r; r = r->nextSibling()) {
-        if (!r->hasLayer()) {
-            m_hasVisibleNonLayerContent = true;
-            break;
-        }
-    }
-
-    m_hasNonCompositedChild = false;
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
-        if (child->compositingState() == NotComposited || child->compositingState() == HasOwnBackingButPaintsIntoAncestor) {
-            m_hasNonCompositedChild = true;
-            return;
-        }
-    }
 }
 
 void RenderLayer::dirty3DTransformedDescendantStatus()
@@ -2152,8 +2128,7 @@ void RenderLayer::invalidatePaintForBlockSelectionGaps()
     if (renderer()->hasOverflowClip()) {
         RenderBox* box = renderBox();
         rect.move(-box->scrolledContentOffset());
-        if (!scrollableArea()->usesCompositedScrolling())
-            rect.intersect(box->overflowClipRect(LayoutPoint()));
+        rect.intersect(box->overflowClipRect(LayoutPoint()));
     }
     if (renderer()->hasClip())
         rect.intersect(toRenderBox(renderer())->clipRect(LayoutPoint()));
@@ -2170,18 +2145,6 @@ IntRect RenderLayer::blockSelectionGapsBounds() const
     LayoutRect gapRects = renderBlock->selectionGapRectsForPaintInvalidation(renderBlock);
 
     return pixelSnappedIntRect(gapRects);
-}
-
-bool RenderLayer::hasBlockSelectionGapBounds() const
-{
-    // FIXME: it would be more accurate to return !blockSelectionGapsBounds().isEmpty(), but this is impossible
-    // at the moment because it causes invalid queries to layout-dependent code (crbug.com/372802).
-    // ASSERT(renderer()->document().lifecycle().state() >= DocumentLifecycle::LayoutClean);
-
-    if (!renderer()->isRenderBlock())
-        return false;
-
-    return toRenderBlock(renderer())->shouldPaintSelectionGaps();
 }
 
 bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot) const

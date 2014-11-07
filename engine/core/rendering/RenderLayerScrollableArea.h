@@ -70,7 +70,6 @@ public:
     virtual GraphicsLayer* layerForScrolling() const override;
     virtual GraphicsLayer* layerForHorizontalScrollbar() const override;
     virtual GraphicsLayer* layerForVerticalScrollbar() const override;
-    virtual bool usesCompositedScrolling() const override;
     virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
     virtual bool isActive() const override;
     IntRect scrollCornerRect() const;

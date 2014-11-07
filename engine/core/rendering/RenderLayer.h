@@ -156,7 +156,6 @@ public:
     void clearBlockSelectionGapsBounds();
     void invalidatePaintForBlockSelectionGaps();
     IntRect blockSelectionGapsBounds() const;
-    bool hasBlockSelectionGapBounds() const;
 
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
     const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
@@ -167,11 +166,6 @@ public:
     bool isVisuallyNonEmpty() const;
     // True if this layer container renderers that paint.
     bool hasNonEmptyChildRenderers() const;
-
-    // Will ensure that hasNonCompositiedChild are up to date.
-    void updateScrollingStateAfterCompositingChange();
-    bool hasVisibleNonLayerContent() const { return m_hasVisibleNonLayerContent; }
-    bool hasNonCompositedChild() const { ASSERT(isAllowedToQueryCompositingState()); return m_hasNonCompositedChild; }
 
     bool usedTransparency() const { return m_usedTransparency; }
 
@@ -614,8 +608,6 @@ private:
                                  // we ended up painting this layer or any descendants (and therefore need to
                                  // blend).
 
-    unsigned m_hasVisibleNonLayerContent : 1;
-
     unsigned m_3DTransformedDescendantStatusDirty : 1;
     // Set on a stacking context layer that has 3D descendants anywhere
     // in a preserves3D hierarchy. Hint to do 3D-aware hit testing.
@@ -630,10 +622,6 @@ private:
 
     // Used only while determining what layers should be composited. Applies to the tree of z-order lists.
     unsigned m_hasCompositingDescendant : 1;
-
-    // Applies to the real render layer tree (i.e., the tree determined by the layer's parent and children and
-    // as opposed to the tree formed by the z-order and normal flow lists).
-    unsigned m_hasNonCompositedChild : 1;
 
     // Should be for stacking contexts having unisolated blending descendants.
     unsigned m_shouldIsolateCompositedDescendants : 1;

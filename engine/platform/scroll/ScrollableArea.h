@@ -169,8 +169,6 @@ public:
     bool scheduleAnimation();
     void serviceScrollAnimations(double monotonicTime);
 
-    virtual bool usesCompositedScrolling() const { return false; }
-
     // Returns true if the GraphicsLayer tree needs to be rebuilt.
     virtual bool updateAfterCompositingChange() { return false; }
 
