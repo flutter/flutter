@@ -78,7 +78,6 @@
 #include "core/dom/custom/CustomElementRegistrationContext.h"
 #include "core/dom/shadow/ElementShadow.h"
 #include "core/dom/shadow/ShadowRoot.h"
-#include "core/editing/Editor.h"
 #include "core/editing/FrameSelection.h"
 #include "core/editing/SpellChecker.h"
 #include "core/editing/markup.h"
@@ -2471,66 +2470,6 @@ KURL Document::completeURL(const String& url) const
     if (url.isNull())
         return KURL();
     return KURL(m_baseURL, url);
-}
-
-// Support for Javascript execCommand, and related methods
-
-static Editor::Command command(Document* document, const String& commandName, bool userInterface = false)
-{
-    LocalFrame* frame = document->frame();
-    if (!frame || frame->document() != document)
-        return Editor::Command();
-
-    document->updateRenderTreeIfNeeded();
-    return frame->editor().command(commandName, userInterface ? CommandFromDOMWithUserInterface : CommandFromDOM);
-}
-
-bool Document::execCommand(const String& commandName, bool userInterface, const String& value)
-{
-    // We don't allow recusrive |execCommand()| to protect against attack code.
-    // Recursive call of |execCommand()| could be happened by moving iframe
-    // with script triggered by insertion, e.g. <iframe src="javascript:...">
-    // <iframe onload="...">. This usage is valid as of the specification
-    // although, it isn't common use case, rather it is used as attack code.
-    static bool inExecCommand = false;
-    if (inExecCommand) {
-        String message = "We don't execute document.execCommand() this time, because it is called recursively.";
-        addConsoleMessage(ConsoleMessage::create(JSMessageSource, WarningMessageLevel, message));
-        return false;
-    }
-    TemporaryChange<bool> executeScope(inExecCommand, true);
-
-    // Postpone DOM mutation events, which can execute scripts and change
-    // DOM tree against implementation assumption.
-    EventQueueScope eventQueueScope;
-    Editor::Command editorCommand = command(this, commandName, userInterface);
-    Platform::current()->histogramSparse("WebCore.Document.execCommand", editorCommand.idForHistogram());
-    return editorCommand.execute(value);
-}
-
-bool Document::queryCommandEnabled(const String& commandName)
-{
-    return command(this, commandName).isEnabled();
-}
-
-bool Document::queryCommandIndeterm(const String& commandName)
-{
-    return command(this, commandName).state() == MixedTriState;
-}
-
-bool Document::queryCommandState(const String& commandName)
-{
-    return command(this, commandName).state() == TrueTriState;
-}
-
-bool Document::queryCommandSupported(const String& commandName)
-{
-    return command(this, commandName).isSupported();
-}
-
-String Document::queryCommandValue(const String& commandName)
-{
-    return command(this, commandName).value();
 }
 
 KURL Document::openSearchDescriptionURL()

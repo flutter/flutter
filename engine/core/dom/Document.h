@@ -494,13 +494,6 @@ public:
     bool directionSetOnDocumentElement() const { return m_directionSetOnDocumentElement; }
     void setDirectionSetOnDocumentElement(bool b) { m_directionSetOnDocumentElement = b; }
 
-    bool execCommand(const String& command, bool userInterface = false, const String& value = String());
-    bool queryCommandEnabled(const String& command);
-    bool queryCommandIndeterm(const String& command);
-    bool queryCommandState(const String& command);
-    bool queryCommandSupported(const String& command);
-    String queryCommandValue(const String& command);
-
     KURL openSearchDescriptionURL();
 
     Document& topDocument() const;
