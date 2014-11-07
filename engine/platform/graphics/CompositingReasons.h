@@ -34,7 +34,6 @@ const uint64_t CompositingReasonAssumedOverlap                           = UINT6
 const uint64_t CompositingReasonOverlap                                  = UINT64_C(1) << 15;
 const uint64_t CompositingReasonNegativeZIndexChildren                   = UINT64_C(1) << 16;
 const uint64_t CompositingReasonScrollsWithRespectToSquashingLayer       = UINT64_C(1) << 17;
-const uint64_t CompositingReasonSquashingSparsityExceeded                = UINT64_C(1) << 18;
 const uint64_t CompositingReasonSquashingClippingContainerMismatch       = UINT64_C(1) << 19;
 const uint64_t CompositingReasonSquashingOpacityAncestorMismatch         = UINT64_C(1) << 20;
 const uint64_t CompositingReasonSquashingTransformAncestorMismatch       = UINT64_C(1) << 21;
@@ -126,7 +125,6 @@ const uint64_t CompositingReasonComboReasonsThatRequireOwnBacking =
     | CompositingReasonAssumedOverlap
     | CompositingReasonNegativeZIndexChildren
     | CompositingReasonScrollsWithRespectToSquashingLayer
-    | CompositingReasonSquashingSparsityExceeded
     | CompositingReasonSquashingClippingContainerMismatch
     | CompositingReasonSquashingOpacityAncestorMismatch
     | CompositingReasonSquashingTransformAncestorMismatch

@@ -81,7 +81,6 @@ private:
 
     void assignLayersToBackingsInternal(RenderLayer*, SquashingState&, Vector<RenderLayer*>& layersNeedingPaintInvalidation);
     CompositingReasons getReasonsPreventingSquashing(const RenderLayer*, const SquashingState&);
-    bool squashingWouldExceedSparsityTolerance(const RenderLayer* candidate, const SquashingState&);
     void updateSquashingAssignment(RenderLayer*, SquashingState&, CompositingStateTransitionType, Vector<RenderLayer*>& layersNeedingPaintInvalidation);
     bool needsOwnBacking(const RenderLayer*) const;
 

@@ -32,10 +32,6 @@
 
 namespace blink {
 
-// We will only allow squashing if the bbox-area:squashed-area doesn't exceed
-// the ratio |gSquashingSparsityTolerance|:1.
-static uint64_t gSquashingSparsityTolerance = 6;
-
 CompositingLayerAssigner::CompositingLayerAssigner(RenderLayerCompositor* compositor)
     : m_compositor(compositor)
     , m_layerSquashingEnabled(compositor->layerSquashingEnabled())
@@ -68,16 +64,6 @@ void CompositingLayerAssigner::SquashingState::updateSquashingStateForNewMapping
     mostRecentMapping = newCompositedLayerMapping;
     hasMostRecentMapping = hasNewCompositedLayerMapping;
     haveAssignedBackingsToEntireSquashingLayerSubtree = false;
-}
-
-bool CompositingLayerAssigner::squashingWouldExceedSparsityTolerance(const RenderLayer* candidate, const CompositingLayerAssigner::SquashingState& squashingState)
-{
-    IntRect bounds = candidate->clippedAbsoluteBoundingBox();
-    IntRect newBoundingRect = squashingState.boundingRect;
-    newBoundingRect.unite(bounds);
-    const uint64_t newBoundingRectArea = newBoundingRect.size().area();
-    const uint64_t newSquashedArea = squashingState.totalAreaOfSquashedRects + bounds.size().area();
-    return newBoundingRectArea > gSquashingSparsityTolerance * newSquashedArea;
 }
 
 bool CompositingLayerAssigner::needsOwnBacking(const RenderLayer* layer) const
@@ -119,9 +105,6 @@ CompositingReasons CompositingLayerAssigner::getReasonsPreventingSquashing(const
 {
     if (!squashingState.haveAssignedBackingsToEntireSquashingLayerSubtree)
         return CompositingReasonSquashingWouldBreakPaintOrder;
-
-    if (squashingWouldExceedSparsityTolerance(layer, squashingState))
-        return CompositingReasonSquashingSparsityExceeded;
 
     // FIXME: this is not efficient, since it walks up the tree . We should store these values on the CompositingInputsCache.
     ASSERT(squashingState.hasMostRecentMapping);
