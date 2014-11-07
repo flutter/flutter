@@ -789,11 +789,6 @@ const AtomicString Element::imageSourceURL() const
     return getAttribute(HTMLNames::srcAttr);
 }
 
-bool Element::rendererIsNeeded(const RenderStyle& style)
-{
-    return style.display() != NONE;
-}
-
 RenderObject* Element::createRenderer(RenderStyle* style)
 {
     return RenderObject::createObject(this, style);

@@ -200,7 +200,6 @@ public:
     virtual void attach(const AttachContext& = AttachContext()) override;
     virtual void detach(const AttachContext& = AttachContext()) override;
     virtual RenderObject* createRenderer(RenderStyle*);
-    virtual bool rendererIsNeeded(const RenderStyle&);
     void recalcStyle(StyleRecalcChange, Text* nextTextSibling = 0);
     void setAnimationStyleChange(bool);
     void setNeedsAnimationStyleRecalc();

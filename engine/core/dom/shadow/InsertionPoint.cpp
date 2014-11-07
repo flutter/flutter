@@ -176,11 +176,6 @@ PassRefPtr<StaticNodeList> InsertionPoint::getDistributedNodes()
     return StaticNodeList::adopt(nodes);
 }
 
-bool InsertionPoint::rendererIsNeeded(const RenderStyle& style)
-{
-    return !isActive() && HTMLElement::rendererIsNeeded(style);
-}
-
 void InsertionPoint::childrenChanged(const ChildrenChange& change)
 {
     HTMLElement::childrenChanged(change);

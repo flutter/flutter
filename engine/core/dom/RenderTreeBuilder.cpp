@@ -29,10 +29,10 @@
 #include "core/css/resolver/StyleResolver.h"
 #include "core/dom/Node.h"
 #include "core/dom/Text.h"
+#include "core/dom/shadow/InsertionPoint.h"
 #include "core/rendering/RenderObject.h"
 #include "core/rendering/RenderText.h"
 #include "core/rendering/RenderView.h"
-#include "platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 
@@ -62,6 +62,8 @@ bool RenderTreeBuilder::shouldCreateRenderer() const
         return false;
     if (!parentRenderer->canHaveChildren())
         return false;
+    if (isActiveInsertionPoint(*m_node))
+        return false;
     return true;
 }
 
@@ -82,7 +84,7 @@ void RenderTreeBuilder::createRendererForElementIfNeeded()
     Element* element = toElement(m_node);
     RenderStyle& style = this->style();
 
-    if (!element->rendererIsNeeded(style))
+    if (style.display() == NONE)
         return;
 
     RenderObject* newRenderer = element->createRenderer(&style);
