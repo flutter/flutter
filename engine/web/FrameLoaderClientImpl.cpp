@@ -37,6 +37,7 @@
 #include "core/events/MouseEvent.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/Settings.h"
+#include "core/html/HTMLIFrameElement.h"
 #include "core/page/Chrome.h"
 #include "core/page/EventHandler.h"
 #include "core/page/Page.h"
@@ -247,6 +248,13 @@ void FrameLoaderClientImpl::loadURLExternally(const ResourceRequest& request, Na
         WrappedResourceRequest webreq(request);
         m_webFrame->client()->loadURLExternally(
             m_webFrame, webreq, static_cast<WebNavigationPolicy>(policy), suggestedName);
+    }
+}
+
+void FrameLoaderClientImpl::createView(const KURL& url)
+{
+    if (m_webFrame->client()) {
+        m_webFrame->client()->createChildView(url);
     }
 }
 

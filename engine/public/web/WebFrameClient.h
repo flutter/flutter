@@ -70,6 +70,8 @@ public:
     // frameDetached().
     virtual WebFrame* createChildFrame(WebLocalFrame* parent, const WebString& frameName) { return 0; }
 
+    virtual void createChildView(const WebURL& url) { }
+
     // This frame has been detached from the view, but has not been closed yet.
     virtual void frameDetached(WebFrame*) { }
 

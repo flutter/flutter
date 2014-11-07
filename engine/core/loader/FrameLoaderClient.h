@@ -87,6 +87,9 @@ namespace blink {
 
         virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) = 0;
 
+        // TODO(mpcomplete): return surface ID?
+        virtual void createView(const KURL&) = 0;
+
         // Transmits the change in the set of watched CSS selectors property
         // that match any element on the frame.
         virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) = 0;

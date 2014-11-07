@@ -151,6 +151,22 @@ blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
   return web_layer_tree_view_impl_.get();
 }
 
+void DocumentView::createChildView(const blink::WebURL& url) {
+  if (!root_)
+    return;
+
+  mojo::View* child = mojo::View::Create(root_->view_manager());
+  root_->AddChild(child);
+  // TODO(mpcomplete): actual bounds.
+  mojo::Rect mojo_bounds;
+  mojo_bounds.x = 0;
+  mojo_bounds.y = 50;
+  mojo_bounds.width = 300;
+  mojo_bounds.height = 100;
+  child->SetBounds(mojo_bounds);
+  child->Embed(mojo::String::From(url.string().utf8()));
+}
+
 void DocumentView::frameDetached(blink::WebFrame* frame) {
   // |frame| is invalid after here.
   frame->close();
@@ -206,6 +222,10 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
 
 void DocumentView::OnViewDestroyed(mojo::View* view) {
   DCHECK_EQ(view, root_);
+
+  for (auto& child : root_->children())
+    child->Destroy();
+
   delete this;
 }
 

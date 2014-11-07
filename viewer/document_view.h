@@ -69,6 +69,7 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   virtual blink::WebLayerTreeView* initializeLayerTreeView();
 
   // WebFrameClient methods:
+  void createChildView(const blink::WebURL&) override;
   void frameDetached(blink::WebFrame*) override;
   blink::WebNavigationPolicy decidePolicyForNavigation(
     const blink::WebFrameClient::NavigationPolicyInfo& info) override;
