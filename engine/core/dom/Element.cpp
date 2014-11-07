@@ -1448,11 +1448,6 @@ AtomicString Element::computeInheritedLanguage() const
     return value;
 }
 
-Locale& Element::locale() const
-{
-    return document().getCachedLocale(computeInheritedLanguage());
-}
-
 bool Element::matches(const String& selectors, ExceptionState& exceptionState)
 {
     SelectorQuery* selectorQuery = document().selectorQueryCache().add(AtomicString(selectors), document(), exceptionState);

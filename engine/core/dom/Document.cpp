@@ -140,7 +140,6 @@
 #include "platform/TraceEvent.h"
 #include "platform/network/HTTPParsers.h"
 #include "platform/scroll/Scrollbar.h"
-#include "platform/text/PlatformLocale.h"
 #include "platform/text/SegmentedString.h"
 #include "platform/weborigin/SchemeRegistry.h"
 #include "public/platform/Platform.h"
@@ -2978,17 +2977,6 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
                 nodesToAddToChain[i]->dispatchMouseEvent(*event, EventTypeNames::mouseenter, 0, oldHoverNode.get());
         }
     }
-}
-
-Locale& Document::getCachedLocale(const AtomicString& locale)
-{
-    AtomicString localeKey = locale;
-    if (locale.isEmpty() || !RuntimeEnabledFeatures::langAttributeAwareFormControlUIEnabled())
-        return Locale::defaultLocale();
-    LocaleIdentifierToLocaleMap::AddResult result = m_localeCache.add(localeKey, nullptr);
-    if (result.isNewEntry)
-        result.storedValue->value = Locale::create(localeKey);
-    return *(result.storedValue->value);
 }
 
 Document& Document::ensureTemplateDocument()

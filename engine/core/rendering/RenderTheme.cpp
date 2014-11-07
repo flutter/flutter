@@ -38,7 +38,6 @@
 #include "platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/FontSelector.h"
 #include "platform/graphics/GraphicsContextStateSaver.h"
-#include "platform/text/PlatformLocale.h"
 #include "platform/text/StringTruncator.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebFallbackThemeEngine.h"

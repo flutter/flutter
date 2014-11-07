@@ -52,7 +52,6 @@ class ExceptionState;
 class Image;
 class InputMethodContext;
 class IntSize;
-class Locale;
 class MutableStylePropertySet;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
@@ -222,7 +221,6 @@ public:
     bool isUnresolvedCustomElement() { return customElementState() == WaitingForUpgrade; }
 
     AtomicString computeInheritedLanguage() const;
-    Locale& locale() const;
 
     virtual bool isURLAttribute(const Attribute&) const { return false; }
 

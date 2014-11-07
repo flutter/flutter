@@ -96,7 +96,6 @@ class HTMLImportsController;
 class HTMLScriptElement;
 class HitTestRequest;
 class LayoutPoint;
-class Locale;
 class LocalDOMWindow;
 class LocalFrame;
 class Location;
@@ -608,9 +607,6 @@ public:
 
     bool inStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::InStyleRecalc; }
 
-    // Return a Locale for the default locale if the argument is null or empty.
-    Locale& getCachedLocale(const AtomicString& locale = nullAtom);
-
     AnimationClock& animationClock() { return m_animationClock; }
     AnimationTimeline& timeline() const { return *m_timeline; }
     CompositorPendingAnimations& compositorPendingAnimations() { return m_compositorPendingAnimations; }
@@ -848,9 +844,6 @@ private:
     Timer<Document> m_elementDataCacheClearTimer;
 
     OwnPtr<ElementDataCache> m_elementDataCache;
-
-    typedef HashMap<AtomicString, OwnPtr<Locale> > LocaleIdentifierToLocaleMap;
-    LocaleIdentifierToLocaleMap m_localeCache;
 
     AnimationClock m_animationClock;
     RefPtr<AnimationTimeline> m_timeline;
