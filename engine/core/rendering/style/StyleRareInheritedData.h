@@ -98,7 +98,6 @@ public:
     unsigned wordBreak : 2; // EWordBreak
     unsigned overflowWrap : 1; // EOverflowWrap
     unsigned lineBreak : 3; // LineBreak
-    unsigned resize : 2; // EResize
     unsigned userSelect : 2; // EUserSelect
     unsigned speak : 3; // ESpeak
     unsigned hyphens : 2; // Hyphens

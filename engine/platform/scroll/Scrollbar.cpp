@@ -513,13 +513,6 @@ void Scrollbar::invalidatePart(ScrollbarPart part)
     invalidateRect(result);
 }
 
-void Scrollbar::paintScrollCorner(GraphicsContext* context, const IntRect& cornerRect)
-{
-    if (cornerRect.isEmpty())
-        return;
-    blink::Platform::current()->themeEngine()->paint(context->canvas(), blink::WebThemeEngine::PartScrollbarCorner, blink::WebThemeEngine::StateNormal, blink::WebRect(cornerRect), 0);
-}
-
 bool Scrollbar::shouldCenterOnThumb(const PlatformMouseEvent& evt)
 {
     return blink::Platform::current()->scrollbarBehavior()->shouldCenterOnThumb(static_cast<blink::WebScrollbarBehavior::Button>(evt.button()), evt.shiftKey(), evt.altKey());

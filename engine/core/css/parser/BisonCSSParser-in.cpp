@@ -411,8 +411,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueVisible || valueID == CSSValueNone || valueID == CSSValueAll || valueID == CSSValueAuto || (valueID >= CSSValueVisiblepainted && valueID <= CSSValueBoundingBox);
     case CSSPropertyPosition: // static | relative | absolute | fixed
         return valueID == CSSValueStatic || valueID == CSSValueRelative || valueID == CSSValueAbsolute || valueID == CSSValueFixed;
-    case CSSPropertyResize: // none | both | horizontal | vertical | auto
-        return valueID == CSSValueNone || valueID == CSSValueBoth || valueID == CSSValueHorizontal || valueID == CSSValueVertical || valueID == CSSValueAuto;
     case CSSPropertyScrollBehavior: // instant | smooth
         ASSERT(RuntimeEnabledFeatures::cssomSmoothScrollEnabled());
         return valueID == CSSValueInstant || valueID == CSSValueSmooth;
@@ -542,7 +540,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyPageBreakInside:
     case CSSPropertyPointerEvents:
     case CSSPropertyPosition:
-    case CSSPropertyResize:
     case CSSPropertyScrollBehavior:
     case CSSPropertySpeak:
     case CSSPropertyTableLayout:

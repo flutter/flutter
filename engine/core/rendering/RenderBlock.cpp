@@ -1994,14 +1994,6 @@ void RenderBlock::markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit l
     }
 }
 
-bool RenderBlock::isPointInOverflowControl(HitTestResult& result, const LayoutPoint& locationInContainer, const LayoutPoint& accumulatedOffset)
-{
-    if (!scrollsOverflow())
-        return false;
-
-    return layer()->scrollableArea()->hitTestOverflowControls(result, roundedIntPoint(locationInContainer - toLayoutSize(accumulatedOffset)));
-}
-
 Node* RenderBlock::nodeForHitTest() const
 {
     // If we are in the margins of block elements that are part of a
@@ -2022,15 +2014,6 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
         overflowBox.moveBy(adjustedLocation);
         if (!locationInContainer.intersects(overflowBox))
             return false;
-    }
-
-    if ((hitTestAction == HitTestBlockBackground || hitTestAction == HitTestChildBlockBackground)
-        && visibleToHitTestRequest(request)
-        && isPointInOverflowControl(result, locationInContainer.point(), adjustedLocation)) {
-        updateHitTestResult(result, locationInContainer.point() - localOffset);
-        // FIXME: isPointInOverflowControl() doesn't handle rect-based tests yet.
-        if (!result.addNodeToRectBasedTestResult(nodeForHitTest(), request, locationInContainer))
-           return true;
     }
 
     if (style()->clipPath()) {

@@ -179,14 +179,6 @@ public:
     void removeScrollableArea(ScrollableArea*);
     const ScrollableAreaSet* scrollableAreas() const { return m_scrollableAreas.get(); }
 
-    // With CSS style "resize:" enabled, a little resizer handle will appear at the bottom
-    // right of the object. We keep track of these resizer areas for checking if touches
-    // (implemented using Scroll gesture) are targeting the resizer.
-    typedef HashSet<RenderBox*> ResizerAreaSet;
-    void addResizerArea(RenderBox&);
-    void removeResizerArea(RenderBox&);
-    const ResizerAreaSet* resizerAreas() const { return m_resizerAreas.get(); }
-
     // This function exists for ports that need to handle wheel events manually.
     // On Mac WebKit1 the underlying NSScrollView just does the scrolling, but on most other platforms
     // we need this function in order to do the scroll ourselves.
@@ -302,7 +294,6 @@ private:
     bool m_isPainting;
 
     OwnPtr<ScrollableAreaSet> m_scrollableAreas;
-    OwnPtr<ResizerAreaSet> m_resizerAreas;
 
     bool m_hasSoftwareFilters;
 

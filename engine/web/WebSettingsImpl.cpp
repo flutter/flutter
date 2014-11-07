@@ -190,11 +190,6 @@ void WebSettingsImpl::setShrinksViewportContentToFit(bool shrinkViewportContent)
     m_shrinksViewportContentToFit = shrinkViewportContent;
 }
 
-void WebSettingsImpl::setTextAreasAreResizable(bool areResizable)
-{
-    m_settings->setTextAreasAreResizable(areResizable);
-}
-
 void WebSettingsImpl::setUseWideViewport(bool useWideViewport)
 {
     m_settings->setUseWideViewport(useWideViewport);

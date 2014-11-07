@@ -64,7 +64,7 @@ const uint64_t CompositingReasonLayerForPerspective                      = UINT6
 const uint64_t CompositingReasonLayerForHorizontalScrollbar              = UINT64_C(1) << 43;
 const uint64_t CompositingReasonLayerForVerticalScrollbar                = UINT64_C(1) << 44;
 const uint64_t CompositingReasonLayerForOverflowControlsHost             = UINT64_C(1) << 45;
-const uint64_t CompositingReasonLayerForScrollCorner                     = UINT64_C(1) << 46;
+// FIXME(sky): 46 is unused.
 const uint64_t CompositingReasonLayerForScrollingContents                = UINT64_C(1) << 47;
 const uint64_t CompositingReasonLayerForScrollingContainer               = UINT64_C(1) << 48;
 const uint64_t CompositingReasonLayerForSquashingContents                = UINT64_C(1) << 49;

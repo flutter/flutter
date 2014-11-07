@@ -165,7 +165,6 @@ public:
 
     GraphicsLayer* layerForHorizontalScrollbar() const { return m_layerForHorizontalScrollbar.get(); }
     GraphicsLayer* layerForVerticalScrollbar() const { return m_layerForVerticalScrollbar.get(); }
-    GraphicsLayer* layerForScrollCorner() const { return m_layerForScrollCorner.get(); }
 
     // Returns true if the overflow controls cannot be positioned within this
     // CLM's internal hierarchy without incorrectly stacking under some
@@ -238,14 +237,13 @@ private:
     void updatePaintingPhases();
     bool updateClippingLayers(bool needsAncestorClip, bool needsDescendantClip);
     bool updateChildTransformLayer(bool needsChildTransformLayer);
-    bool updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsScrollCornerLayer, bool needsAncestorClip);
+    bool updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsAncestorClip);
     bool updateForegroundLayer(bool needsForegroundLayer);
     bool updateBackgroundLayer(bool needsBackgroundLayer);
     bool updateMaskLayer(bool needsMaskLayer);
     bool updateClippingMaskLayers(bool needsChildClippingMaskLayer);
     bool requiresHorizontalScrollbarLayer() const { return m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->horizontalScrollbar(); }
     bool requiresVerticalScrollbarLayer() const { return m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->verticalScrollbar(); }
-    bool requiresScrollCornerLayer() const { return m_owningLayer.scrollableArea() && !m_owningLayer.scrollableArea()->scrollCornerAndResizerRect().isEmpty(); }
     bool updateScrollingLayers(bool scrollingLayers);
     void updateScrollParent(RenderLayer*);
     void updateClipParent();
@@ -312,7 +310,6 @@ private:
     //          + m_overflowControlsHostLayer              //  graphics layer tree by the RLC to ensure that they stack
     //            + m_layerForVerticalScrollbar            //  above scrolling content.
     //            + m_layerForHorizontalScrollbar
-    //            + m_layerForScrollCorner
     //
     // We need an ancestor clipping layer if our clipping ancestor is not our ancestor in the
     // clipping tree. Here's what that might look like.
@@ -375,7 +372,6 @@ private:
 
     OwnPtr<GraphicsLayer> m_layerForHorizontalScrollbar;
     OwnPtr<GraphicsLayer> m_layerForVerticalScrollbar;
-    OwnPtr<GraphicsLayer> m_layerForScrollCorner;
 
     // This layer exists to simplify the reparenting of overflow control that is occasionally required
     // to ensure that scrollbars appear above scrolling content.

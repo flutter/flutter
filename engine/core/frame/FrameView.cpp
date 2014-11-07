@@ -1094,23 +1094,6 @@ String FrameView::trackedPaintInvalidationRectsAsText() const
     return ts.release();
 }
 
-void FrameView::addResizerArea(RenderBox& resizerBox)
-{
-    if (!m_resizerAreas)
-        m_resizerAreas = adoptPtr(new ResizerAreaSet);
-    m_resizerAreas->add(&resizerBox);
-}
-
-void FrameView::removeResizerArea(RenderBox& resizerBox)
-{
-    if (!m_resizerAreas)
-        return;
-
-    ResizerAreaSet::iterator it = m_resizerAreas->find(&resizerBox);
-    if (it != m_resizerAreas->end())
-        m_resizerAreas->remove(it);
-}
-
 void FrameView::addScrollableArea(ScrollableArea* scrollableArea)
 {
     ASSERT(scrollableArea);

@@ -70,11 +70,8 @@
 
 namespace blink {
 
-const int ResizerControlExpandRatioForTouch = 2;
-
 RenderLayerScrollableArea::RenderLayerScrollableArea(RenderLayer& layer)
     : m_layer(layer)
-    , m_inResizeMode(false)
     , m_scrollsOverflow(false)
     , m_scrollDimensionsDirty(true)
     , m_inOverflowRelayout(false)
@@ -93,17 +90,10 @@ RenderLayerScrollableArea::RenderLayerScrollableArea(RenderLayer& layer)
             scrollAnimator()->setCurrentPosition(FloatPoint(m_scrollOffset.width(), m_scrollOffset.height()));
         element->setSavedLayerScrollOffset(IntSize());
     }
-
-    updateResizerAreaSet();
 }
 
 RenderLayerScrollableArea::~RenderLayerScrollableArea()
 {
-    if (inResizeMode() && !box().documentBeingDestroyed()) {
-        if (LocalFrame* frame = box().frame())
-            frame->eventHandler().resizeScrollableAreaDestroyed();
-    }
-
     if (box().frame() && box().frame()->page()) {
         if (ScrollingCoordinator* scrollingCoordinator = box().frame()->page()->scrollingCoordinator())
             scrollingCoordinator->willDestroyScrollableArea(this);
@@ -113,11 +103,6 @@ RenderLayerScrollableArea::~RenderLayerScrollableArea()
         Node* node = box().node();
         if (node && node->isElementNode())
             toElement(node)->setSavedLayerScrollOffset(m_scrollOffset);
-    }
-
-    if (LocalFrame* frame = box().frame()) {
-        if (FrameView* frameView = frame->view())
-            frameView->removeResizerArea(box());
     }
 
     destroyScrollbar(HorizontalScrollbar);
@@ -150,14 +135,6 @@ GraphicsLayer* RenderLayerScrollableArea::layerForVerticalScrollbar() const
     DisableCompositingQueryAsserts disabler;
 
     return layer()->hasCompositedLayerMapping() ? layer()->compositedLayerMapping()->layerForVerticalScrollbar() : 0;
-}
-
-GraphicsLayer* RenderLayerScrollableArea::layerForScrollCorner() const
-{
-    // See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
-
-    return layer()->hasCompositedLayerMapping() ? layer()->compositedLayerMapping()->layerForScrollCorner() : 0;
 }
 
 void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, const IntRect& rect)
@@ -198,23 +175,10 @@ void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, co
         box().invalidatePaintRectangle(intRect);
 }
 
-void RenderLayerScrollableArea::invalidateScrollCornerRect(const IntRect& rect)
-{
-    if (GraphicsLayer* layer = layerForScrollCorner()) {
-        layer->setNeedsDisplayInRect(rect);
-        return;
-    }
-}
-
 bool RenderLayerScrollableArea::isActive() const
 {
     Page* page = box().frame()->page();
     return page && page->focusController().isActive();
-}
-
-bool RenderLayerScrollableArea::isScrollCornerVisible() const
-{
-    return !scrollCornerRect().isEmpty();
 }
 
 static int cornerStart(const RenderStyle* style, int minX, int maxX, int thickness)
@@ -224,42 +188,22 @@ static int cornerStart(const RenderStyle* style, int minX, int maxX, int thickne
     return maxX - thickness - style->borderRightWidth();
 }
 
-static IntRect cornerRect(const RenderStyle* style, const Scrollbar* horizontalScrollbar, const Scrollbar* verticalScrollbar, const IntRect& bounds)
-{
-    int horizontalThickness;
-    int verticalThickness;
-    if (!verticalScrollbar && !horizontalScrollbar) {
-        // FIXME: This isn't right. We need to know the thickness of custom scrollbars
-        // even when they don't exist in order to set the resizer square size properly.
-        horizontalThickness = Scrollbar::scrollbarThickness();
-        verticalThickness = horizontalThickness;
-    } else if (verticalScrollbar && !horizontalScrollbar) {
-        horizontalThickness = verticalScrollbar->width();
-        verticalThickness = horizontalThickness;
-    } else if (horizontalScrollbar && !verticalScrollbar) {
-        verticalThickness = horizontalScrollbar->height();
-        horizontalThickness = verticalThickness;
-    } else {
-        horizontalThickness = verticalScrollbar->width();
-        verticalThickness = horizontalScrollbar->height();
-    }
-    return IntRect(cornerStart(style, bounds.x(), bounds.maxX(), horizontalThickness),
-        bounds.maxY() - verticalThickness - style->borderBottomWidth(),
-        horizontalThickness, verticalThickness);
-}
-
 IntRect RenderLayerScrollableArea::scrollCornerRect() const
 {
     // We have a scrollbar corner when a scrollbar is visible and not filling the entire length of the box.
-    // This happens when:
-    // (a) A resizer is present and at least one scrollbar is present
-    // (b) Both scrollbars are present.
-    bool hasHorizontalBar = horizontalScrollbar();
-    bool hasVerticalBar = verticalScrollbar();
-    bool hasResizer = box().style()->resize() != RESIZE_NONE;
-    if ((hasHorizontalBar && hasVerticalBar) || (hasResizer && (hasHorizontalBar || hasVerticalBar)))
-        return cornerRect(box().style(), horizontalScrollbar(), verticalScrollbar(), box().pixelSnappedBorderBoxRect());
-    return IntRect();
+    // This happens when both scrollbars are present.
+    const Scrollbar* horizontalBar = horizontalScrollbar();
+    const Scrollbar* verticalBar = verticalScrollbar();
+    if (!horizontalBar || !verticalBar)
+        return IntRect();
+
+    const RenderStyle* style = box().style();
+    int horizontalThickness = verticalBar->width();
+    int verticalThickness = horizontalBar->height();
+    const IntRect& bounds = box().pixelSnappedBorderBoxRect();
+    return IntRect(cornerStart(style, bounds.x(), bounds.maxX(), horizontalThickness),
+        bounds.maxY() - verticalThickness - style->borderBottomWidth(),
+        horizontalThickness, verticalThickness);
 }
 
 IntRect RenderLayerScrollableArea::convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntRect& scrollbarRect) const
@@ -675,8 +619,6 @@ void RenderLayerScrollableArea::updateAfterStyleChange(const RenderStyle* oldSty
         ASSERT(hasVerticalScrollbar());
         m_vBar->setEnabled(true);
     }
-
-    updateResizerAreaSet();
 }
 
 bool RenderLayerScrollableArea::updateAfterCompositingChange()
@@ -753,10 +695,7 @@ LayoutUnit RenderLayerScrollableArea::verticalScrollbarStart(int minX, int maxX)
 
 LayoutUnit RenderLayerScrollableArea::horizontalScrollbarStart(int minX) const
 {
-    int x = minX + box().borderLeft();
-    if (box().style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft())
-        x += m_vBar ? m_vBar->width() : resizerCornerRect(box().pixelSnappedBorderBoxRect(), ResizerForPointer).width();
-    return x;
+    return minX + box().borderLeft();
 }
 
 IntSize RenderLayerScrollableArea::scrollbarOffset(const Scrollbar* scrollbar) const
@@ -838,7 +777,7 @@ int RenderLayerScrollableArea::horizontalScrollbarHeight(OverlayScrollbarSizeRel
 
 void RenderLayerScrollableArea::positionOverflowControls(const IntSize& offsetFromRoot)
 {
-    if (!hasScrollbar() && !box().canResize())
+    if (!hasScrollbar())
         return;
 
     const IntRect borderBox = box().pixelSnappedBorderBoxRect();
@@ -911,95 +850,6 @@ void RenderLayerScrollableArea::paintOverflowControls(GraphicsContext* context, 
         m_hBar->paint(context, damageRect);
     if (m_vBar && !layerForVerticalScrollbar())
         m_vBar->paint(context, damageRect);
-
-    if (layerForScrollCorner())
-        return;
-
-    // We fill our scroll corner with white if we have a scrollbar that doesn't run all the way up to the
-    // edge of the box.
-    paintScrollCorner(context, adjustedPaintOffset, damageRect);
-
-    // Paint our resizer last, since it sits on top of the scroll corner.
-    paintResizer(context, adjustedPaintOffset, damageRect);
-}
-
-void RenderLayerScrollableArea::paintScrollCorner(GraphicsContext* context, const IntPoint& paintOffset, const IntRect& damageRect)
-{
-    IntRect absRect = scrollCornerRect();
-    absRect.moveBy(paintOffset);
-    if (!absRect.intersects(damageRect))
-        return;
-
-    // We don't want to paint white if we have overlay scrollbars, since we need
-    // to see what is behind it.
-    if (!hasOverlayScrollbars())
-        context->fillRect(absRect, Color::white);
-}
-
-bool RenderLayerScrollableArea::hitTestOverflowControls(HitTestResult& result, const IntPoint& localPoint)
-{
-    if (!hasScrollbar() && !box().canResize())
-        return false;
-
-    IntRect resizeControlRect;
-    if (box().style()->resize() != RESIZE_NONE) {
-        resizeControlRect = resizerCornerRect(box().pixelSnappedBorderBoxRect(), ResizerForPointer);
-        if (resizeControlRect.contains(localPoint))
-            return true;
-    }
-
-    int resizeControlSize = max(resizeControlRect.height(), 0);
-    if (m_vBar && m_vBar->shouldParticipateInHitTesting()) {
-        LayoutRect vBarRect(verticalScrollbarStart(0, box().width()),
-            box().borderTop(),
-            m_vBar->width(),
-            box().height() - (box().borderTop() + box().borderBottom()) - (m_hBar ? m_hBar->height() : resizeControlSize));
-        if (vBarRect.contains(localPoint)) {
-            result.setScrollbar(m_vBar.get());
-            return true;
-        }
-    }
-
-    resizeControlSize = max(resizeControlRect.width(), 0);
-    if (m_hBar && m_hBar->shouldParticipateInHitTesting()) {
-        LayoutRect hBarRect(horizontalScrollbarStart(0),
-            box().height() - box().borderBottom() - m_hBar->height(),
-            box().width() - (box().borderLeft() + box().borderRight()) - (m_vBar ? m_vBar->width() : resizeControlSize),
-            m_hBar->height());
-        if (hBarRect.contains(localPoint)) {
-            result.setScrollbar(m_hBar.get());
-            return true;
-        }
-    }
-
-    return false;
-}
-
-IntRect RenderLayerScrollableArea::resizerCornerRect(const IntRect& bounds, ResizerHitTestType resizerHitTestType) const
-{
-    if (box().style()->resize() == RESIZE_NONE)
-        return IntRect();
-    IntRect corner = cornerRect(box().style(), horizontalScrollbar(), verticalScrollbar(), bounds);
-
-    if (resizerHitTestType == ResizerForTouch) {
-        // We make the resizer virtually larger for touch hit testing. With the
-        // expanding ratio k = ResizerControlExpandRatioForTouch, we first move
-        // the resizer rect (of width w & height h), by (-w * (k-1), -h * (k-1)),
-        // then expand the rect by new_w/h = w/h * k.
-        int expandRatio = ResizerControlExpandRatioForTouch - 1;
-        corner.move(-corner.width() * expandRatio, -corner.height() * expandRatio);
-        corner.expand(corner.width() * expandRatio, corner.height() * expandRatio);
-    }
-
-    return corner;
-}
-
-IntRect RenderLayerScrollableArea::scrollCornerAndResizerRect() const
-{
-    IntRect scrollCornerAndResizer = scrollCornerRect();
-    if (scrollCornerAndResizer.isEmpty())
-        scrollCornerAndResizer = resizerCornerRect(box().pixelSnappedBorderBoxRect(), ResizerForPointer);
-    return scrollCornerAndResizer;
 }
 
 bool RenderLayerScrollableArea::overflowControlsIntersectRect(const IntRect& localRect) const
@@ -1012,190 +862,7 @@ bool RenderLayerScrollableArea::overflowControlsIntersectRect(const IntRect& loc
     if (rectForVerticalScrollbar(borderBox).intersects(localRect))
         return true;
 
-    if (scrollCornerRect().intersects(localRect))
-        return true;
-
-    if (resizerCornerRect(borderBox, ResizerForPointer).intersects(localRect))
-        return true;
-
     return false;
-}
-
-void RenderLayerScrollableArea::paintResizer(GraphicsContext* context, const IntPoint& paintOffset, const IntRect& damageRect)
-{
-    if (box().style()->resize() == RESIZE_NONE)
-        return;
-
-    IntRect absRect = resizerCornerRect(box().pixelSnappedBorderBoxRect(), ResizerForPointer);
-    absRect.moveBy(paintOffset);
-    if (!absRect.intersects(damageRect))
-        return;
-
-    drawPlatformResizerImage(context, absRect);
-
-    // Draw a frame around the resizer (1px grey line) if there are any scrollbars present.
-    // Clipping will exclude the right and bottom edges of this frame.
-    if (!hasOverlayScrollbars() && hasScrollbar()) {
-        GraphicsContextStateSaver stateSaver(*context);
-        context->clip(absRect);
-        IntRect largerCorner = absRect;
-        largerCorner.setSize(IntSize(largerCorner.width() + 1, largerCorner.height() + 1));
-        context->setStrokeColor(Color(217, 217, 217));
-        context->setStrokeThickness(1.0f);
-        context->setFillColor(Color::transparent);
-        context->drawRect(largerCorner);
-    }
-}
-
-bool RenderLayerScrollableArea::isPointInResizeControl(const IntPoint& absolutePoint, ResizerHitTestType resizerHitTestType) const
-{
-    if (!box().canResize())
-        return false;
-
-    IntPoint localPoint = roundedIntPoint(box().absoluteToLocal(absolutePoint, UseTransforms));
-    IntRect localBounds(0, 0, box().pixelSnappedWidth(), box().pixelSnappedHeight());
-    return resizerCornerRect(localBounds, resizerHitTestType).contains(localPoint);
-}
-
-bool RenderLayerScrollableArea::hitTestResizerInFragments(const LayerFragments& layerFragments, const HitTestLocation& hitTestLocation) const
-{
-    if (!box().canResize())
-        return false;
-
-    if (layerFragments.isEmpty())
-        return false;
-
-    for (int i = layerFragments.size() - 1; i >= 0; --i) {
-        const LayerFragment& fragment = layerFragments.at(i);
-        if (fragment.backgroundRect.intersects(hitTestLocation) && resizerCornerRect(pixelSnappedIntRect(fragment.layerBounds), ResizerForPointer).contains(hitTestLocation.roundedPoint()))
-            return true;
-    }
-
-    return false;
-}
-
-void RenderLayerScrollableArea::updateResizerAreaSet()
-{
-    LocalFrame* frame = box().frame();
-    if (!frame)
-        return;
-    FrameView* frameView = frame->view();
-    if (!frameView)
-        return;
-    if (box().canResize())
-        frameView->addResizerArea(box());
-    else
-        frameView->removeResizerArea(box());
-}
-
-void RenderLayerScrollableArea::drawPlatformResizerImage(GraphicsContext* context, IntRect resizerCornerRect)
-{
-    float deviceScaleFactor = blink::deviceScaleFactor(box().frame());
-
-    RefPtr<Image> resizeCornerImage;
-    IntSize cornerResizerSize;
-    if (deviceScaleFactor >= 2) {
-        DEFINE_STATIC_REF(Image, resizeCornerImageHiRes, (Image::loadPlatformResource("textAreaResizeCorner@2x")));
-        resizeCornerImage = resizeCornerImageHiRes;
-        cornerResizerSize = resizeCornerImage->size();
-        cornerResizerSize.scale(0.5f);
-    } else {
-        DEFINE_STATIC_REF(Image, resizeCornerImageLoRes, (Image::loadPlatformResource("textAreaResizeCorner")));
-        resizeCornerImage = resizeCornerImageLoRes;
-        cornerResizerSize = resizeCornerImage->size();
-    }
-
-    if (box().style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft()) {
-        context->save();
-        context->translate(resizerCornerRect.x() + cornerResizerSize.width(), resizerCornerRect.y() + resizerCornerRect.height() - cornerResizerSize.height());
-        context->scale(-1.0, 1.0);
-        context->drawImage(resizeCornerImage.get(), IntRect(IntPoint(), cornerResizerSize));
-        context->restore();
-        return;
-    }
-    IntRect imageRect(resizerCornerRect.maxXMaxYCorner() - cornerResizerSize, cornerResizerSize);
-    context->drawImage(resizeCornerImage.get(), imageRect);
-}
-
-IntSize RenderLayerScrollableArea::offsetFromResizeCorner(const IntPoint& absolutePoint) const
-{
-    // Currently the resize corner is either the bottom right corner or the bottom left corner.
-    // FIXME: This assumes the location is 0, 0. Is this guaranteed to always be the case?
-    IntSize elementSize = layer()->size();
-    if (box().style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft())
-        elementSize.setWidth(0);
-    IntPoint resizerPoint = IntPoint(elementSize);
-    IntPoint localPoint = roundedIntPoint(box().absoluteToLocal(absolutePoint, UseTransforms));
-    return localPoint - resizerPoint;
-}
-
-void RenderLayerScrollableArea::resize(const PlatformEvent& evt, const LayoutSize& oldOffset)
-{
-    // FIXME: This should be possible on generated content but is not right now.
-    if (!inResizeMode() || !box().canResize() || !box().node())
-        return;
-
-    ASSERT(box().node()->isElementNode());
-    Element* element = toElement(box().node());
-
-    Document& document = element->document();
-
-    IntPoint pos;
-    const PlatformGestureEvent* gevt = 0;
-
-    switch (evt.type()) {
-    case PlatformEvent::MouseMoved:
-        if (!document.frame()->eventHandler().mousePressed())
-            return;
-        pos = static_cast<const PlatformMouseEvent*>(&evt)->position();
-        break;
-    case PlatformEvent::GestureScrollUpdate:
-    case PlatformEvent::GestureScrollUpdateWithoutPropagation:
-        pos = static_cast<const PlatformGestureEvent*>(&evt)->position();
-        gevt = static_cast<const PlatformGestureEvent*>(&evt);
-        pos = gevt->position();
-        pos.move(gevt->deltaX(), gevt->deltaY());
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-
-    float zoomFactor = box().style()->effectiveZoom();
-
-    LayoutSize newOffset = offsetFromResizeCorner(document.view()->windowToContents(pos));
-    newOffset.setWidth(newOffset.width() / zoomFactor);
-    newOffset.setHeight(newOffset.height() / zoomFactor);
-
-    LayoutSize currentSize = LayoutSize(box().width() / zoomFactor, box().height() / zoomFactor);
-    LayoutSize minimumSize = element->minimumSizeForResizing().shrunkTo(currentSize);
-    element->setMinimumSizeForResizing(minimumSize);
-
-    LayoutSize adjustedOldOffset = LayoutSize(oldOffset.width() / zoomFactor, oldOffset.height() / zoomFactor);
-    if (box().style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft()) {
-        newOffset.setWidth(-newOffset.width());
-        adjustedOldOffset.setWidth(-adjustedOldOffset.width());
-    }
-
-    LayoutSize difference = (currentSize + newOffset - adjustedOldOffset).expandedTo(minimumSize) - currentSize;
-
-    bool isBoxSizingBorder = box().style()->boxSizing() == BORDER_BOX;
-
-    EResize resize = box().style()->resize();
-    if (resize != RESIZE_VERTICAL && difference.width()) {
-        LayoutUnit baseWidth = box().width() - (isBoxSizingBorder ? LayoutUnit() : box().borderAndPaddingWidth());
-        baseWidth = baseWidth / zoomFactor;
-        element->setInlineStyleProperty(CSSPropertyWidth, roundToInt(baseWidth + difference.width()), CSSPrimitiveValue::CSS_PX);
-    }
-
-    if (resize != RESIZE_HORIZONTAL && difference.height()) {
-        LayoutUnit baseHeight = box().height() - (isBoxSizingBorder ? LayoutUnit() : box().borderAndPaddingHeight());
-        baseHeight = baseHeight / zoomFactor;
-        element->setInlineStyleProperty(CSSPropertyHeight, roundToInt(baseHeight + difference.height()), CSSPrimitiveValue::CSS_PX);
-    }
-
-    document.updateLayout();
-
-    // FIXME (Radar 4118564): We should also autoscroll the window as necessary to keep the point under the cursor in view.
 }
 
 LayoutRect RenderLayerScrollableArea::exposeRect(const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)

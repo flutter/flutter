@@ -385,15 +385,6 @@ void ScrollableArea::invalidateScrollbar(Scrollbar* scrollbar, const IntRect& re
     invalidateScrollbarRect(scrollbar, rect);
 }
 
-void ScrollableArea::invalidateScrollCorner(const IntRect& rect)
-{
-    if (GraphicsLayer* graphicsLayer = layerForScrollCorner()) {
-        graphicsLayer->setNeedsDisplay();
-        return;
-    }
-    invalidateScrollCornerRect(rect);
-}
-
 bool ScrollableArea::hasLayerForHorizontalScrollbar() const
 {
     return layerForHorizontalScrollbar();
@@ -402,11 +393,6 @@ bool ScrollableArea::hasLayerForHorizontalScrollbar() const
 bool ScrollableArea::hasLayerForVerticalScrollbar() const
 {
     return layerForVerticalScrollbar();
-}
-
-bool ScrollableArea::hasLayerForScrollCorner() const
-{
-    return layerForScrollCorner();
 }
 
 bool ScrollableArea::scheduleAnimation()

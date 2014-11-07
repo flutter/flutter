@@ -129,9 +129,6 @@ public:
     virtual bool isActive() const = 0;
     virtual int scrollSize(ScrollbarOrientation) const = 0;
     virtual void invalidateScrollbar(Scrollbar*, const IntRect&);
-    virtual bool isScrollCornerVisible() const = 0;
-    virtual IntRect scrollCornerRect() const = 0;
-    virtual void invalidateScrollCorner(const IntRect&);
 
     // Convert points and rects between the scrollbar and its containing view.
     // The client needs to implement these in order to be aware of layout effects
@@ -209,10 +206,8 @@ public:
     virtual GraphicsLayer* layerForScrolling() const { return 0; }
     virtual GraphicsLayer* layerForHorizontalScrollbar() const { return 0; }
     virtual GraphicsLayer* layerForVerticalScrollbar() const { return 0; }
-    virtual GraphicsLayer* layerForScrollCorner() const { return 0; }
     bool hasLayerForHorizontalScrollbar() const;
     bool hasLayerForVerticalScrollbar() const;
-    bool hasLayerForScrollCorner() const;
 
     void cancelProgrammaticScrollAnimation();
 
@@ -224,7 +219,6 @@ protected:
     void resetScrollOriginChanged() { m_scrollOriginChanged = false; }
 
     virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) = 0;
-    virtual void invalidateScrollCornerRect(const IntRect&) = 0;
 
 private:
     void scrollPositionChanged(const IntPoint&);

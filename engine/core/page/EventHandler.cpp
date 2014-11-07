@@ -164,7 +164,6 @@ EventHandler::EventHandler(LocalFrame* frame)
     , m_cursorUpdateTimer(this, &EventHandler::cursorUpdateTimerFired)
     , m_mouseDownMayStartAutoscroll(false)
     , m_fakeMouseMoveEventTimer(this, &EventHandler::fakeMouseMoveEventTimerFired)
-    , m_resizeScrollableArea(0)
     , m_eventHandlerWillResetCapturingMouseEventsNode(0)
     , m_clickCount(0)
     , m_shouldOnlyFireDragOverEvent(false)
@@ -211,7 +210,6 @@ void EventHandler::clear()
     m_cursorUpdateTimer.stop();
     m_fakeMouseMoveEventTimer.stop();
     m_activeIntervalTimer.stop();
-    m_resizeScrollableArea = 0;
     m_nodeUnderMouse = nullptr;
     m_lastNodeUnderMouse = nullptr;
     m_lastScrollbarUnderMouse = nullptr;
@@ -852,9 +850,6 @@ void EventHandler::updateCursor()
 
 OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
 {
-    if (m_resizeScrollableArea && m_resizeScrollableArea->inResizeMode())
-        return NoCursorChange;
-
     Page* page = m_frame->page();
     if (!page)
         return NoCursorChange;
@@ -994,13 +989,6 @@ OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node*
     if (useHandCursor(node, result.isOverLink()))
         return handCursor();
 
-    bool inResizer = false;
-    RenderObject* renderer = node ? node->renderer() : 0;
-    if (renderer && m_frame->view()) {
-        RenderLayer* layer = renderer->enclosingLayer();
-        inResizer = layer->scrollableArea() && layer->scrollableArea()->isPointInResizeControl(result.roundedPointInMainFrame(), ResizerForPointer);
-    }
-
     // During selection, use an I-beam no matter what we're over.
     // If a drag may be starting or we're capturing mouse events for a particular node, don't treat this as a selection.
     if (m_mousePressed && m_mouseDownMayStartSelect
@@ -1010,7 +998,8 @@ OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node*
         return iBeam;
     }
 
-    if ((editable || (renderer && renderer->isText() && node->canStartSelection())) && !inResizer && !result.scrollbar())
+    RenderObject* renderer = node ? node->renderer() : 0;
+    if ((editable || (renderer && renderer->isText() && node->canStartSelection())) && !result.scrollbar())
         return iBeam;
     return pointerCursor();
 }
@@ -1066,16 +1055,6 @@ bool EventHandler::handleMousePressEvent(const PlatformMouseEvent& mouseEvent)
 
     m_clickCount = mouseEvent.clickCount();
     m_clickNode = mev.targetNode()->isTextNode() ?  NodeRenderingTraversal::parent(mev.targetNode()) : mev.targetNode();
-
-    RenderLayer* layer = mev.targetNode()->renderer() ? mev.targetNode()->renderer()->enclosingLayer() : 0;
-    IntPoint p = mouseEvent.position();
-    if (layer && layer->scrollableArea() && layer->scrollableArea()->isPointInResizeControl(p, ResizerForPointer)) {
-        m_resizeScrollableArea = layer->scrollableArea();
-        m_resizeScrollableArea->setInResizeMode(true);
-        m_offsetFromResizeCorner = m_resizeScrollableArea->offsetFromResizeCorner(p);
-        invalidateClick();
-        return true;
-    }
 
     m_frame->selection().setCaretBlinkingSuspended(true);
 
@@ -1207,16 +1186,10 @@ bool EventHandler::handleMouseMoveOrLeaveEvent(const PlatformMouseEvent& mouseEv
     if (hoveredNode)
         *hoveredNode = mev.hitTestResult();
 
-    Scrollbar* scrollbar = 0;
-
-    if (m_resizeScrollableArea && m_resizeScrollableArea->inResizeMode())
-        m_resizeScrollableArea->resize(mouseEvent, m_offsetFromResizeCorner);
-    else {
-        scrollbar = mev.scrollbar();
-        updateLastScrollbarUnderMouse(scrollbar, !m_mousePressed);
-        if (onlyUpdateScrollbars)
-            return true;
-    }
+    Scrollbar* scrollbar = mev.scrollbar();
+    updateLastScrollbarUnderMouse(scrollbar, !m_mousePressed);
+    if (onlyUpdateScrollbars)
+        return true;
 
     bool swallowEvent = false;
 
@@ -1286,11 +1259,6 @@ bool EventHandler::handleMouseReleaseEvent(const PlatformMouseEvent& mouseEvent)
     if (m_clickCount > 0 && mev.targetNode() && m_clickNode) {
         if (Node* clickTargetNode = NodeRenderingTraversal::commonAncestor(*mev.targetNode(), *m_clickNode))
             swallowClickEvent = !dispatchMouseEvent(EventTypeNames::click, clickTargetNode, m_clickCount, mouseEvent, true);
-    }
-
-    if (m_resizeScrollableArea) {
-        m_resizeScrollableArea->setInResizeMode(false);
-        m_resizeScrollableArea = 0;
     }
 
     bool swallowMouseReleaseEvent = false;
@@ -1674,13 +1642,8 @@ bool EventHandler::handleGestureScrollEvent(const PlatformGestureEvent& gestureE
             return true;
     }
 
-    if (eventTarget) {
-        bool eventSwallowed = handleScrollGestureOnResizer(eventTarget.get(), gestureEvent);
-        if (!eventSwallowed)
-            eventSwallowed = eventTarget->dispatchGestureEvent(gestureEvent);
-        if (eventSwallowed)
-            return true;
-    }
+    if (eventTarget && eventTarget->dispatchGestureEvent(gestureEvent))
+        return true;
 
     switch (gestureEvent.type()) {
     case PlatformEvent::GestureScrollBegin:
@@ -1803,33 +1766,6 @@ bool EventHandler::handleGestureLongPress(const GestureEventWithHitTestResults& 
 
 bool EventHandler::handleGestureLongTap(const GestureEventWithHitTestResults& targetedEvent)
 {
-    return false;
-}
-
-bool EventHandler::handleScrollGestureOnResizer(Node* eventTarget, const PlatformGestureEvent& gestureEvent) {
-    if (gestureEvent.type() == PlatformEvent::GestureScrollBegin) {
-        RenderLayer* layer = eventTarget->renderer() ? eventTarget->renderer()->enclosingLayer() : 0;
-        IntPoint p = gestureEvent.position();
-        if (layer && layer->scrollableArea() && layer->scrollableArea()->isPointInResizeControl(p, ResizerForTouch)) {
-            m_resizeScrollableArea = layer->scrollableArea();
-            m_resizeScrollableArea->setInResizeMode(true);
-            m_offsetFromResizeCorner = m_resizeScrollableArea->offsetFromResizeCorner(p);
-            return true;
-        }
-    } else if (gestureEvent.type() == PlatformEvent::GestureScrollUpdate ||
-               gestureEvent.type() == PlatformEvent::GestureScrollUpdateWithoutPropagation) {
-        if (m_resizeScrollableArea && m_resizeScrollableArea->inResizeMode()) {
-            m_resizeScrollableArea->resize(gestureEvent, m_offsetFromResizeCorner);
-            return true;
-        }
-    } else if (gestureEvent.type() == PlatformEvent::GestureScrollEnd) {
-        if (m_resizeScrollableArea && m_resizeScrollableArea->inResizeMode()) {
-            m_resizeScrollableArea->setInResizeMode(false);
-            m_resizeScrollableArea = 0;
-            return false;
-        }
-    }
-
     return false;
 }
 
@@ -2202,12 +2138,6 @@ void EventHandler::cancelFakeMouseMoveEvent()
 bool EventHandler::isCursorVisible() const
 {
     return m_frame->page()->isCursorVisible();
-}
-
-void EventHandler::resizeScrollableAreaDestroyed()
-{
-    ASSERT(m_resizeScrollableArea);
-    m_resizeScrollableArea = 0;
 }
 
 void EventHandler::hoverTimerFired(Timer<EventHandler>*)

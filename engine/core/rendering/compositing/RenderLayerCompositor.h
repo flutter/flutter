@@ -143,7 +143,6 @@ public:
 
     GraphicsLayer* layerForHorizontalScrollbar() const { return m_layerForHorizontalScrollbar.get(); }
     GraphicsLayer* layerForVerticalScrollbar() const { return m_layerForVerticalScrollbar.get(); }
-    GraphicsLayer* layerForScrollCorner() const { return m_layerForScrollCorner.get(); }
 
     void resetTrackedPaintInvalidationRects();
     void setTracksPaintInvalidations(bool);
@@ -195,7 +194,6 @@ private:
 
     bool requiresHorizontalScrollbarLayer() const;
     bool requiresVerticalScrollbarLayer() const;
-    bool requiresScrollCornerLayer() const;
 
     RenderView& m_renderView;
     OwnPtr<GraphicsLayer> m_rootContentLayer;
@@ -230,7 +228,6 @@ private:
     // Layers for overflow controls
     OwnPtr<GraphicsLayer> m_layerForHorizontalScrollbar;
     OwnPtr<GraphicsLayer> m_layerForVerticalScrollbar;
-    OwnPtr<GraphicsLayer> m_layerForScrollCorner;
 };
 
 } // namespace blink

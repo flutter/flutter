@@ -1096,7 +1096,7 @@ void RenderLayer::updateScrollableArea()
 
 bool RenderLayer::hasOverflowControls() const
 {
-    return m_scrollableArea && (m_scrollableArea->hasScrollbar() || renderer()->style()->resize() != RESIZE_NONE);
+    return m_scrollableArea && m_scrollableArea->hasScrollbar();
 }
 
 void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* paintingRoot, PaintLayerFlags paintFlags)
@@ -1958,11 +1958,6 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     // Collect the fragments. This will compute the clip rectangles for each layer fragment.
     LayerFragments layerFragments;
     collectFragments(layerFragments, rootLayer, hitTestRect, RootRelativeClipRects, IncludeOverlayScrollbarSize);
-
-    if (m_scrollableArea && m_scrollableArea->hitTestResizerInFragments(layerFragments, hitTestLocation)) {
-        renderer()->updateHitTestResult(result, hitTestLocation.point());
-        return this;
-    }
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer. Check
     // every fragment in reverse order.

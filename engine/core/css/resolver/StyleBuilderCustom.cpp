@@ -241,20 +241,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyOutlineStyle(StyleResolverState
     state.style()->setOutlineStyle(*primitiveValue);
 }
 
-void StyleBuilderFunctions::applyValueCSSPropertyResize(StyleResolverState& state, CSSValue* value)
-{
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-
-    EResize r = RESIZE_NONE;
-    if (primitiveValue->getValueID() == CSSValueAuto) {
-        if (Settings* settings = state.document().settings())
-            r = settings->textAreasAreResizable() ? RESIZE_BOTH : RESIZE_NONE;
-    } else {
-        r = *primitiveValue;
-    }
-    state.style()->setResize(r);
-}
-
 static Length mmLength(double mm) { return Length(mm * cssPixelsPerMillimeter, Fixed); }
 static Length inchLength(double inch) { return Length(inch * cssPixelsPerInch, Fixed); }
 static bool getPageSizeFromName(CSSPrimitiveValue* pageSizeName, CSSPrimitiveValue* pageOrientation, Length& width, Length& height)

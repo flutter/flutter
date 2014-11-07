@@ -629,12 +629,6 @@ bool RenderLayerCompositor::requiresVerticalScrollbarLayer() const
     return false;
 }
 
-bool RenderLayerCompositor::requiresScrollCornerLayer() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 void RenderLayerCompositor::updateOverflowControlsLayers()
 {
     GraphicsLayer* controlsParent = m_rootTransformLayer.get() ? m_rootTransformLayer.get() : m_overflowControlsHostLayer.get();
@@ -663,16 +657,6 @@ void RenderLayerCompositor::updateOverflowControlsLayers()
     } else if (m_layerForVerticalScrollbar) {
         m_layerForVerticalScrollbar->removeFromParent();
         m_layerForVerticalScrollbar = nullptr;
-    }
-
-    if (requiresScrollCornerLayer()) {
-        if (!m_layerForScrollCorner) {
-            m_layerForScrollCorner = GraphicsLayer::create(graphicsLayerFactory(), this);
-            controlsParent->addChild(m_layerForScrollCorner.get());
-        }
-    } else if (m_layerForScrollCorner) {
-        m_layerForScrollCorner->removeFromParent();
-        m_layerForScrollCorner = nullptr;
     }
 }
 
@@ -741,10 +725,6 @@ void RenderLayerCompositor::destroyRootLayer()
     if (m_layerForVerticalScrollbar) {
         m_layerForVerticalScrollbar->removeFromParent();
         m_layerForVerticalScrollbar = nullptr;
-    }
-
-    if (m_layerForScrollCorner) {
-        m_layerForScrollCorner = nullptr;
     }
 
     if (m_overflowControlsHostLayer) {
@@ -849,8 +829,6 @@ String RenderLayerCompositor::debugName(const GraphicsLayer* graphicsLayer)
         name = "Horizontal Scrollbar Layer";
     } else if (graphicsLayer == m_layerForVerticalScrollbar.get()) {
         name = "Vertical Scrollbar Layer";
-    } else if (graphicsLayer == m_layerForScrollCorner.get()) {
-        name = "Scroll Corner Layer";
     } else if (graphicsLayer == m_containerLayer.get()) {
         name = "LocalFrame Clipping Layer";
     } else if (graphicsLayer == m_scrollLayer.get()) {

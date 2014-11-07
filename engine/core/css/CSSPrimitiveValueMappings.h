@@ -1654,49 +1654,6 @@ template<> inline CSSPrimitiveValue::operator EPosition() const
     return StaticPosition;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EResize e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case RESIZE_BOTH:
-        m_value.valueID = CSSValueBoth;
-        break;
-    case RESIZE_HORIZONTAL:
-        m_value.valueID = CSSValueHorizontal;
-        break;
-    case RESIZE_VERTICAL:
-        m_value.valueID = CSSValueVertical;
-        break;
-    case RESIZE_NONE:
-        m_value.valueID = CSSValueNone;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EResize() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueBoth:
-        return RESIZE_BOTH;
-    case CSSValueHorizontal:
-        return RESIZE_HORIZONTAL;
-    case CSSValueVertical:
-        return RESIZE_VERTICAL;
-    case CSSValueAuto:
-        ASSERT_NOT_REACHED(); // Depends on settings, thus should be handled by the caller.
-        return RESIZE_NONE;
-    case CSSValueNone:
-        return RESIZE_NONE;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return RESIZE_NONE;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETableLayout e)
     : CSSValue(PrimitiveClass)
 {

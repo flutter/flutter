@@ -42,8 +42,6 @@ defaultFixedFontSize type=int, initial=0, invalidate=Style
 javaScriptCanAccessClipboard initial=false
 shouldClearDocumentBackground initial=true
 
-textAreasAreResizable initial=false, invalidate=Style
-
 deferredFiltersEnabled initial=true
 
 containerCullingEnabled initial=false

@@ -485,20 +485,6 @@ Region ScrollingCoordinator::computeShouldHandleScrollGestureOnMainThreadRegion(
         }
     }
 
-    // We use GestureScrollBegin/Update/End for moving the resizer handle. So we mark these
-    // small resizer areas as non-fast-scrollable to allow the scroll gestures to be passed to
-    // main thread if they are targeting the resizer area. (Resizing is done in EventHandler.cpp
-    // on main thread).
-    if (const FrameView::ResizerAreaSet* resizerAreas = frameView->resizerAreas()) {
-        for (FrameView::ResizerAreaSet::const_iterator it = resizerAreas->begin(), end = resizerAreas->end(); it != end; ++it) {
-            RenderBox* box = *it;
-            IntRect bounds = box->absoluteBoundingBoxRect();
-            IntRect corner = box->layer()->scrollableArea()->touchResizerCornerRect(bounds);
-            corner.moveBy(offset);
-            shouldHandleScrollGestureOnMainThreadRegion.unite(corner);
-        }
-    }
-
     return shouldHandleScrollGestureOnMainThreadRegion;
 }
 

@@ -96,11 +96,6 @@ void GraphicsLayerTreeBuilder::rebuild(RenderLayer& layer, AncestorInfo info)
                 overflowControlLayer->removeFromParent();
                 currentCompositedLayerMapping->parentForSublayers()->addChild(overflowControlLayer);
             }
-
-            if (GraphicsLayer* overflowControlLayer = currentCompositedLayerMapping->layerForScrollCorner()) {
-                overflowControlLayer->removeFromParent();
-                currentCompositedLayerMapping->parentForSublayers()->addChild(overflowControlLayer);
-            }
         }
 
         info.childLayersOfEnclosingCompositedLayer->append(currentCompositedLayerMapping->childForSuperlayers());

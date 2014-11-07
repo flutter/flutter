@@ -112,8 +112,6 @@ public:
     void scheduleHoverStateUpdate();
     void scheduleCursorUpdate();
 
-    void resizeScrollableAreaDestroyed();
-
     IntPoint lastKnownMousePosition() const;
     Cursor currentMouseCursor() const { return m_currentMouseCursor; }
 
@@ -265,8 +263,6 @@ private:
 
     bool handleGestureShowPress();
 
-    bool handleScrollGestureOnResizer(Node*, const PlatformGestureEvent&);
-
     bool passScrollGestureEventToWidget(const PlatformGestureEvent&, RenderObject*);
     bool sendScrollEventToView(const PlatformGestureEvent&, const FloatSize&);
 
@@ -294,8 +290,6 @@ private:
 
     Timer<EventHandler> m_fakeMouseMoveEventTimer;
 
-    RenderLayerScrollableArea* m_resizeScrollableArea;
-
     RefPtr<Node> m_capturingMouseEventsNode;
     bool m_eventHandlerWillResetCapturingMouseEventsNode;
 
@@ -309,8 +303,6 @@ private:
 
     RefPtr<Node> m_dragTarget;
     bool m_shouldOnlyFireDragOverEvent;
-
-    LayoutSize m_offsetFromResizeCorner; // In the coords of m_resizeScrollableArea.
 
     bool m_mousePositionIsUnknown;
     IntPoint m_lastKnownMousePosition;

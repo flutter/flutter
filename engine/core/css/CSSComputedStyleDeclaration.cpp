@@ -163,7 +163,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyPageBreakInside,
     CSSPropertyPointerEvents,
     CSSPropertyPosition,
-    CSSPropertyResize,
     CSSPropertyRight,
     CSSPropertyScrollBehavior,
     CSSPropertySpeak,
@@ -1880,8 +1879,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->overflowWrap());
         case CSSPropertyWebkitLineBreak:
             return cssValuePool().createValue(style->lineBreak());
-        case CSSPropertyResize:
-            return cssValuePool().createValue(style->resize());
         case CSSPropertyFontKerning:
             return cssValuePool().createValue(style->fontDescription().kerning());
         case CSSPropertyWebkitFontSmoothing:

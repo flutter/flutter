@@ -160,7 +160,7 @@ CompositedLayerMapping::~CompositedLayerMapping()
     }
 
     updateClippingLayers(false, false);
-    updateOverflowControlsLayers(false, false, false, false);
+    updateOverflowControlsLayers(false, false, false);
     updateChildTransformLayer(false);
     updateForegroundLayer(false);
     updateBackgroundLayer(false);
@@ -360,7 +360,7 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
     if (updateClippingLayers(needsAncestorClip, needsDescendantsClippingLayer))
         layerConfigChanged = true;
 
-    if (updateOverflowControlsLayers(requiresHorizontalScrollbarLayer(), requiresVerticalScrollbarLayer(), requiresScrollCornerLayer(), needsAncestorClip))
+    if (updateOverflowControlsLayers(requiresHorizontalScrollbarLayer(), requiresVerticalScrollbarLayer(), needsAncestorClip))
         layerConfigChanged = true;
 
     bool scrollingConfigChanged = false;
@@ -938,8 +938,6 @@ void CompositedLayerMapping::updateInternalHierarchy()
         m_overflowControlsHostLayer->addChild(m_layerForHorizontalScrollbar.get());
     if (m_layerForVerticalScrollbar)
         m_overflowControlsHostLayer->addChild(m_layerForVerticalScrollbar.get());
-    if (m_layerForScrollCorner)
-        m_overflowControlsHostLayer->addChild(m_layerForScrollCorner.get());
 
     // The squashing containment layer, if it exists, becomes a no-op parent.
     if (m_squashingLayer) {
@@ -1148,13 +1146,12 @@ bool CompositedLayerMapping::toggleScrollbarLayerIfNeeded(OwnPtr<GraphicsLayer>&
     return true;
 }
 
-bool CompositedLayerMapping::updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsScrollCornerLayer, bool needsAncestorClip)
+bool CompositedLayerMapping::updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsAncestorClip)
 {
     bool horizontalScrollbarLayerChanged = toggleScrollbarLayerIfNeeded(m_layerForHorizontalScrollbar, needsHorizontalScrollbarLayer, CompositingReasonLayerForHorizontalScrollbar);
     bool verticalScrollbarLayerChanged = toggleScrollbarLayerIfNeeded(m_layerForVerticalScrollbar, needsVerticalScrollbarLayer, CompositingReasonLayerForVerticalScrollbar);
-    bool scrollCornerLayerChanged = toggleScrollbarLayerIfNeeded(m_layerForScrollCorner, needsScrollCornerLayer, CompositingReasonLayerForScrollCorner);
 
-    bool needsOverflowControlsHostLayer = needsHorizontalScrollbarLayer || needsVerticalScrollbarLayer || needsScrollCornerLayer;
+    bool needsOverflowControlsHostLayer = needsHorizontalScrollbarLayer || needsVerticalScrollbarLayer;
     toggleScrollbarLayerIfNeeded(m_overflowControlsHostLayer, needsOverflowControlsHostLayer, CompositingReasonLayerForOverflowControlsHost);
     bool needsOverflowClipLayer = needsOverflowControlsHostLayer && needsAncestorClip;
     toggleScrollbarLayerIfNeeded(m_overflowControlsClippingLayer, needsOverflowClipLayer, CompositingReasonLayerForOverflowControlsHost);
@@ -1166,7 +1163,7 @@ bool CompositedLayerMapping::updateOverflowControlsLayers(bool needsHorizontalSc
             scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_owningLayer.scrollableArea(), VerticalScrollbar);
     }
 
-    return horizontalScrollbarLayerChanged || verticalScrollbarLayerChanged || scrollCornerLayerChanged;
+    return horizontalScrollbarLayerChanged || verticalScrollbarLayerChanged;
 }
 
 void CompositedLayerMapping::positionOverflowControlsLayers(const IntSize& offsetFromRoot)
@@ -1193,13 +1190,6 @@ void CompositedLayerMapping::positionOverflowControlsLayers(const IntSize& offse
         }
         layer->setDrawsContent(vBar && !layer->hasContentsLayer());
     }
-
-    if (GraphicsLayer* layer = layerForScrollCorner()) {
-        const LayoutRect& scrollCornerAndResizer = m_owningLayer.scrollableArea()->scrollCornerAndResizerRect();
-        layer->setPosition(scrollCornerAndResizer.location() - offsetFromRenderer);
-        layer->setSize(scrollCornerAndResizer.size());
-        layer->setDrawsContent(!scrollCornerAndResizer.isEmpty());
-    }
 }
 
 bool CompositedLayerMapping::hasUnpositionedOverflowControlsLayers() const
@@ -1210,11 +1200,6 @@ bool CompositedLayerMapping::hasUnpositionedOverflowControlsLayers() const
     }
 
     if (GraphicsLayer* layer = layerForVerticalScrollbar()) {
-        if (!layer->drawsContent())
-            return true;
-    }
-
-    if (GraphicsLayer* layer = layerForScrollCorner()) {
         if (!layer->drawsContent())
             return true;
     }
@@ -1272,8 +1257,6 @@ static void ApplyToGraphicsLayers(const CompositedLayerMapping* mapping, const F
         f(mapping->layerForHorizontalScrollbar());
     if ((mode & ApplyToScrollbarLayers) && mapping->layerForVerticalScrollbar())
         f(mapping->layerForVerticalScrollbar());
-    if ((mode & ApplyToScrollbarLayers) && mapping->layerForScrollCorner())
-        f(mapping->layerForScrollCorner());
 }
 
 struct UpdateRenderingContextFunctor {
@@ -2064,15 +2047,6 @@ void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, G
         paintScrollbar(m_owningLayer.scrollableArea()->horizontalScrollbar(), context, clip);
     } else if (graphicsLayer == layerForVerticalScrollbar()) {
         paintScrollbar(m_owningLayer.scrollableArea()->verticalScrollbar(), context, clip);
-    } else if (graphicsLayer == layerForScrollCorner()) {
-        const IntRect& scrollCornerAndResizer = m_owningLayer.scrollableArea()->scrollCornerAndResizerRect();
-        context.save();
-        context.translate(-scrollCornerAndResizer.x(), -scrollCornerAndResizer.y());
-        IntRect transformedClip = clip;
-        transformedClip.moveBy(scrollCornerAndResizer.location());
-        m_owningLayer.scrollableArea()->paintScrollCorner(&context, IntPoint(), transformedClip);
-        m_owningLayer.scrollableArea()->paintResizer(&context, IntPoint(), transformedClip);
-        context.restore();
     }
 #if ENABLE(ASSERT)
     if (Page* page = renderer()->frame()->page())
@@ -2185,8 +2159,6 @@ String CompositedLayerMapping::debugName(const GraphicsLayer* graphicsLayer)
         name = "Horizontal Scrollbar Layer";
     } else if (graphicsLayer == m_layerForVerticalScrollbar.get()) {
         name = "Vertical Scrollbar Layer";
-    } else if (graphicsLayer == m_layerForScrollCorner.get()) {
-        name = "Scroll Corner Layer";
     } else if (graphicsLayer == m_overflowControlsHostLayer.get()) {
         name = "Overflow Controls Host Layer";
     } else if (graphicsLayer == m_overflowControlsClippingLayer.get()) {

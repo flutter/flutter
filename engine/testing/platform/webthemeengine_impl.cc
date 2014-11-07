@@ -35,8 +35,6 @@ static ui::NativeTheme::Part NativeThemePart(
       return ui::NativeTheme::kScrollbarHorizontalTrack;
     case WebThemeEngine::PartScrollbarVerticalTrack:
       return ui::NativeTheme::kScrollbarVerticalTrack;
-    case WebThemeEngine::PartScrollbarCorner:
-      return ui::NativeTheme::kScrollbarCorner;
     case WebThemeEngine::PartCheckbox:
       return ui::NativeTheme::kCheckbox;
     case WebThemeEngine::PartRadio:

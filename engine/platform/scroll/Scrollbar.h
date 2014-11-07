@@ -118,8 +118,6 @@ public:
 
     void invalidatePart(ScrollbarPart);
 
-    static void paintScrollCorner(GraphicsContext*, const IntRect& cornerRect);
-
     bool shouldCenterOnThumb(const PlatformMouseEvent&);
     bool shouldSnapBackToDragOrigin(const PlatformMouseEvent&);
 

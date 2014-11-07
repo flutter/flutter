@@ -403,11 +403,6 @@ void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& add
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
 }
 
-bool RenderBox::canResize() const
-{
-    return hasOverflowClip() && style()->resize() != RESIZE_NONE;
-}
-
 void RenderBox::addLayerHitTestRects(LayerHitTestRects& layerRects, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const
 {
     LayoutPoint adjustedLayerOffset = layerOffset + locationOffset();

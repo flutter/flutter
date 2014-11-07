@@ -723,7 +723,6 @@ public:
     const AtomicString& highlight() const { return rareInheritedData->highlight; }
     const AtomicString& hyphenationString() const { return rareInheritedData->hyphenationString; }
     const AtomicString& locale() const { return rareInheritedData->locale; }
-    EResize resize() const { return static_cast<EResize>(rareInheritedData->resize); }
     bool hasInlineTransform() const { return rareNonInheritedData->m_hasInlineTransform; }
     const TransformOperations& transform() const { return rareNonInheritedData->m_transform->m_operations; }
     const Length& transformOriginX() const { return rareNonInheritedData->m_transform->m_x; }
@@ -1122,7 +1121,6 @@ public:
     void setHyphens(Hyphens h) { SET_VAR(rareInheritedData, hyphens, h); }
     void setHyphenationString(const AtomicString& h) { SET_VAR(rareInheritedData, hyphenationString, h); }
     void setLocale(const AtomicString& locale) { SET_VAR(rareInheritedData, locale, locale); }
-    void setResize(EResize r) { SET_VAR(rareInheritedData, resize, r); }
     void setHasInlineTransform(bool b) { SET_VAR(rareNonInheritedData, m_hasInlineTransform, b); }
     void setTransform(const TransformOperations& ops) { SET_VAR(rareNonInheritedData.access()->m_transform, m_operations, ops); }
     void setTransformOriginX(const Length& l) { SET_VAR(rareNonInheritedData.access()->m_transform, m_x, l); }
@@ -1347,7 +1345,6 @@ public:
     static ESpeak initialSpeak() { return SpeakNormal; }
     static const AtomicString& initialHyphenationString() { return nullAtom; }
     static const AtomicString& initialLocale() { return nullAtom; }
-    static EResize initialResize() { return RESIZE_NONE; }
     static bool initialHasAspectRatio() { return false; }
     static float initialAspectRatioDenominator() { return 1; }
     static float initialAspectRatioNumerator() { return 1; }

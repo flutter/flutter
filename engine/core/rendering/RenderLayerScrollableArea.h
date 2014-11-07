@@ -48,11 +48,6 @@
 
 namespace blink {
 
-enum ResizerHitTestType {
-    ResizerForPointer,
-    ResizerForTouch
-};
-
 class PlatformEvent;
 class RenderBox;
 class RenderLayer;
@@ -75,13 +70,10 @@ public:
     virtual GraphicsLayer* layerForScrolling() const override;
     virtual GraphicsLayer* layerForHorizontalScrollbar() const override;
     virtual GraphicsLayer* layerForVerticalScrollbar() const override;
-    virtual GraphicsLayer* layerForScrollCorner() const override;
     virtual bool usesCompositedScrolling() const override;
     virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
-    virtual void invalidateScrollCornerRect(const IntRect&) override;
     virtual bool isActive() const override;
-    virtual bool isScrollCornerVisible() const override;
-    virtual IntRect scrollCornerRect() const override;
+    IntRect scrollCornerRect() const;
     virtual IntRect convertFromScrollbarToContainingView(const Scrollbar*, const IntRect&) const override;
     virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar*, const IntRect&) const override;
     virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar*, const IntPoint&) const override;
@@ -122,17 +114,6 @@ public:
 
     bool hasScrollbar() const { return m_hBar || m_vBar; }
 
-    void resize(const PlatformEvent&, const LayoutSize&);
-    IntSize offsetFromResizeCorner(const IntPoint& absolutePoint) const;
-
-    bool inResizeMode() const { return m_inResizeMode; }
-    void setInResizeMode(bool inResizeMode) { m_inResizeMode = inResizeMode; }
-
-    IntRect touchResizerCornerRect(const IntRect& bounds) const
-    {
-        return resizerCornerRect(bounds, ResizerForTouch);
-    }
-
     LayoutUnit scrollWidth() const;
     LayoutUnit scrollHeight() const;
     int pixelSnappedScrollWidth() const;
@@ -143,18 +124,8 @@ public:
 
     IntSize adjustedScrollOffset() const { return IntSize(scrollXOffset(), scrollYOffset()); }
 
-    void paintResizer(GraphicsContext*, const IntPoint& paintOffset, const IntRect& damageRect);
     void paintOverflowControls(GraphicsContext*, const IntPoint& paintOffset, const IntRect& damageRect, bool paintingOverlayControls);
-    void paintScrollCorner(GraphicsContext*, const IntPoint&, const IntRect& damageRect);
-
     void positionOverflowControls(const IntSize& offsetFromRoot);
-
-    // isPointInResizeControl() is used for testing if a pointer/touch position is in the resize control
-    // area.
-    bool isPointInResizeControl(const IntPoint& absolutePoint, ResizerHitTestType) const;
-    bool hitTestOverflowControls(HitTestResult&, const IntPoint& localPoint);
-
-    bool hitTestResizerInFragments(const LayerFragments&, const HitTestLocation&) const;
 
     LayoutRect exposeRect(const LayoutRect&, const ScrollAlignment& alignX, const ScrollAlignment& alignY);
 
@@ -162,9 +133,6 @@ public:
     // only happen if we're both scrollable, and we do in fact overflow. This means that overflow: hidden
     // layers never get added to the FrameView's collection.
     bool scrollsOverflow() const { return m_scrollsOverflow; }
-
-    // Rectangle encompassing the scroll corner and resizer rect.
-    IntRect scrollCornerAndResizerRect() const;
 
     void updateNeedsCompositedScrolling();
     bool needsCompositedScrolling() const { return m_needsCompositedScrolling; }
@@ -198,11 +166,7 @@ private:
     void setHasHorizontalScrollbar(bool hasScrollbar);
     void setHasVerticalScrollbar(bool hasScrollbar);
 
-    // See comments on isPointInResizeControl.
-    IntRect resizerCornerRect(const IntRect&, ResizerHitTestType) const;
     bool overflowControlsIntersectRect(const IntRect& localRect) const;
-    void updateResizerAreaSet();
-    void drawPlatformResizerImage(GraphicsContext*, IntRect resizerCornerRect);
 
     RenderBox& box() const;
     RenderLayer* layer() const;
@@ -213,8 +177,6 @@ private:
 
     RenderLayer& m_layer;
 
-    // Keeps track of whether the layer is currently resizing, so events can cause resizing to start and stop.
-    unsigned m_inResizeMode : 1;
     unsigned m_scrollsOverflow : 1;
 
     unsigned m_scrollDimensionsDirty : 1;

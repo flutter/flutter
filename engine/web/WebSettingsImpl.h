@@ -104,7 +104,6 @@ public:
     virtual void setSmartInsertDeleteEnabled(bool) override;
     virtual void setStandardFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) override;
     virtual void setSupportDeprecatedTargetDensityDPI(bool) override;
-    virtual void setTextAreasAreResizable(bool) override;
     virtual void setTouchEditingEnabled(bool) override;
     virtual void setUnifiedTextCheckerEnabled(bool) override;
     virtual void setUseSolidColorScrollbars(bool) override;

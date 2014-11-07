@@ -69,7 +69,6 @@ StyleRareInheritedData::StyleRareInheritedData()
     , wordBreak(RenderStyle::initialWordBreak())
     , overflowWrap(RenderStyle::initialOverflowWrap())
     , lineBreak(LineBreakAuto)
-    , resize(RenderStyle::initialResize())
     , userSelect(RenderStyle::initialUserSelect())
     , speak(SpeakNormal)
     , hyphens(HyphensManual)
@@ -117,7 +116,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , wordBreak(o.wordBreak)
     , overflowWrap(o.overflowWrap)
     , lineBreak(o.lineBreak)
-    , resize(o.resize)
     , userSelect(o.userSelect)
     , speak(o.speak)
     , hyphens(o.hyphens)
@@ -173,7 +171,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && wordBreak == o.wordBreak
         && overflowWrap == o.overflowWrap
         && lineBreak == o.lineBreak
-        && resize == o.resize
         && userSelect == o.userSelect
         && speak == o.speak
         && hyphens == o.hyphens

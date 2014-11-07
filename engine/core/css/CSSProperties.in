@@ -193,8 +193,6 @@ perspective-origin animatable, custom_all
 pointer-events inherited
 position
 quotes inherited, converter=convertQuotes
-// FIXME: This shouldn't be inherited, as per css-ui
-resize inherited, custom_value
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
 scroll-behavior runtime_flag=CSSOMSmoothScroll, type_name=ScrollBehavior
 size custom_all
