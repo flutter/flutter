@@ -1,1 +1,4 @@
-<div>This is an <iframe src="abarth.sky">iframe</iframe> element.</div>
+<sky>
+    <import src="../resources/dump-as-render-tree.sky" />
+    <div>This is an <iframe src="abarth.sky">iframe</iframe> element.</div>
+</sky>
