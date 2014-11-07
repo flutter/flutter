@@ -69,7 +69,6 @@ class WebGestureCurveTarget;
 class WebGestureCurve;
 class WebGraphicsContext3DProvider;
 class WebMimeRegistry;
-class WebPublicSuffixList;
 class WebSandboxSupport;
 class WebScrollbarBehavior;
 struct WebFloatPoint;
@@ -185,15 +184,6 @@ public:
     virtual void cacheMetadata(const WebURL&, double responseTime, const char* data, size_t dataSize) { }
 
     virtual WebURLError cancelledError(const WebURL&) const { return WebURLError(); }
-
-    virtual bool isReservedIPAddress(const WebURL&) const { return false; }
-
-
-    // Public Suffix List --------------------------------------------------
-
-    // May return null on some platforms.
-    virtual WebPublicSuffixList* publicSuffixList() { return 0; }
-
 
     // Resources -----------------------------------------------------------
 
