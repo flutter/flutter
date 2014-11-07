@@ -47,7 +47,6 @@ class LocalDOMWindow;
 class ErrorEvent;
 class EventQueue;
 class ScriptState;
-class PublicURLManager;
 class ScriptCallStack;
 
 class ExecutionContext
@@ -70,8 +69,6 @@ public:
     void reportException(PassRefPtr<ErrorEvent>, int scriptId, PassRefPtr<ScriptCallStack>);
 
     void addConsoleMessage(PassRefPtr<ConsoleMessage>);
-
-    PublicURLManager& publicURLManager();
 
     // Active objects are not garbage collected even if inaccessible, e.g. because their activity may result in callbacks being invoked.
     bool hasPendingActivity();
@@ -137,8 +134,6 @@ private:
 
     bool m_activeDOMObjectsAreSuspended;
     bool m_activeDOMObjectsAreStopped;
-
-    OwnPtr<PublicURLManager> m_publicURLManager;
 
     // The location of this member is important; to make sure contextDestroyed() notification on
     // ExecutionContext's members (notably m_timeouts) is called before they are destructed,

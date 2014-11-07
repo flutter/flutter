@@ -57,8 +57,6 @@ public:
         return adoptRef(new DOMURL(url, base->m_url, exceptionState));
     }
 
-    static void revokeObjectUUID(ExecutionContext*, const String&);
-
     virtual KURL url() const override { return m_url; }
     virtual void setURL(const KURL& url) override { m_url = url; }
 

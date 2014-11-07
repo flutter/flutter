@@ -31,7 +31,6 @@
 #include "core/dom/ContextLifecycleNotifier.h"
 #include "core/events/ErrorEvent.h"
 #include "core/events/EventTarget.h"
-#include "core/html/PublicURLManager.h"
 #include "core/inspector/ScriptCallStack.h"
 #include "wtf/MainThread.h"
 
@@ -180,13 +179,6 @@ void ExecutionContext::removeTimeoutByID(int timeoutID)
     if (timeoutID <= 0)
         return;
     m_timeouts.remove(timeoutID);
-}
-
-PublicURLManager& ExecutionContext::publicURLManager()
-{
-    if (!m_publicURLManager)
-        m_publicURLManager = PublicURLManager::create(this);
-    return *m_publicURLManager;
 }
 
 void ExecutionContext::didChangeTimerAlignmentInterval()

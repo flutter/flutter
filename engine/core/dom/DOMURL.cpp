@@ -32,7 +32,6 @@
 #include "core/dom/ExceptionCode.h"
 #include "core/dom/ExecutionContext.h"
 #include "core/fetch/MemoryCache.h"
-#include "core/html/PublicURLManager.h"
 #include "wtf/MainThread.h"
 
 namespace blink {
@@ -58,14 +57,6 @@ void DOMURL::setInput(const String& value)
         m_url = KURL();
         m_input = value;
     }
-}
-
-void DOMURL::revokeObjectUUID(ExecutionContext* executionContext, const String& uuid)
-{
-    if (!executionContext)
-        return;
-
-    executionContext->publicURLManager().revoke(uuid);
 }
 
 } // namespace blink

@@ -771,8 +771,6 @@ sky_core_files = [
   "html/HTMLIFrameElement.h",
   "html/ImageData.cpp",
   "html/ImageData.h",
-  "html/PublicURLManager.cpp",
-  "html/PublicURLManager.h",
   "html/TextMetrics.h",
   "html/TimeRanges.cpp",
   "html/TimeRanges.h",
