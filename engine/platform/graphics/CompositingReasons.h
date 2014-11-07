@@ -27,7 +27,6 @@ const uint64_t CompositingReasonTransitionProperty                       = UINT6
 const uint64_t CompositingReasonOverflowScrollingTouch                   = UINT64_C(1) << 9;
 const uint64_t CompositingReasonOverflowScrollingParent                  = UINT64_C(1) << 10;
 const uint64_t CompositingReasonOutOfFlowClipping                        = UINT64_C(1) << 11;
-const uint64_t CompositingReasonVideoOverlay                             = UINT64_C(1) << 12;
 const uint64_t CompositingReasonWillChangeCompositingHint                = UINT64_C(1) << 13;
 
 // Overlap reasons that require knowing what's behind you in paint-order before knowing the answer
@@ -93,7 +92,6 @@ const uint64_t CompositingReasonComboAllDirectReasons =
     | CompositingReasonOverflowScrollingTouch
     | CompositingReasonOverflowScrollingParent
     | CompositingReasonOutOfFlowClipping
-    | CompositingReasonVideoOverlay
     | CompositingReasonWillChangeCompositingHint;
 
 const uint64_t CompositingReasonComboAllDirectStyleDeterminedReasons =

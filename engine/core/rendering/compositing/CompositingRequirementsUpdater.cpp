@@ -213,13 +213,6 @@ void CompositingRequirementsUpdater::updateRecursive(RenderLayer* ancestorLayer,
     CompositingReasons reasonsToComposite = CompositingReasonNone;
     CompositingReasons directReasons = m_compositingReasonFinder.directReasons(layer);
 
-    // Video is special. It's the only RenderLayer type that can both have
-    // RenderLayer children and whose children can't use its backing to render
-    // into. These children (the controls) always need to be promoted into their
-    // own layers to draw on top of the accelerated video.
-    if (currentRecursionData.m_compositingAncestor && currentRecursionData.m_compositingAncestor->renderer()->isVideo())
-        directReasons |= CompositingReasonVideoOverlay;
-
     if (compositor->canBeComposited(layer))
         reasonsToComposite |= directReasons;
 

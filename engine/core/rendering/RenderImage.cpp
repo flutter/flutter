@@ -520,7 +520,7 @@ void RenderImage::computeIntrinsicRatioInformation(FloatSize& intrinsicSize, dou
     }
     // Don't compute an intrinsic ratio to preserve historical WebKit behavior if we're painting alt text and/or a broken image.
     // Video is excluded from this behavior because video elements have a default aspect ratio that a failed poster image load should not override.
-    if (m_imageResource && m_imageResource->errorOccurred() && !isVideo()) {
+    if (m_imageResource && m_imageResource->errorOccurred()) {
         intrinsicRatio = 1;
         return;
     }

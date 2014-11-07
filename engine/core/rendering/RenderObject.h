@@ -330,7 +330,6 @@ public:
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
-    virtual bool isVideo() const { return false; }
     virtual bool isWidget() const { return false; }
 
     bool isDocumentElement() const { return document().documentElement() == m_node; }

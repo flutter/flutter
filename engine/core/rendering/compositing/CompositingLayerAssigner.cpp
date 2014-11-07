@@ -120,16 +120,6 @@ CompositingReasons CompositingLayerAssigner::getReasonsPreventingSquashing(const
     if (!squashingState.haveAssignedBackingsToEntireSquashingLayerSubtree)
         return CompositingReasonSquashingWouldBreakPaintOrder;
 
-    // FIXME: this special case for video exists only to deal with corner cases
-    // where a RenderVideo does not report that it needs to be directly composited.
-    // Video does not currently support sharing a backing, but this could be
-    // generalized in the future. The following layout tests fail if we permit the
-    // video to share a backing with other layers.
-    //
-    // compositing/video/video-controls-layer-creation.html
-    if (layer->renderer()->isVideo())
-        return CompositingReasonSquashingVideoIsDisallowed;
-
     if (squashingWouldExceedSparsityTolerance(layer, squashingState))
         return CompositingReasonSquashingSparsityExceeded;
 

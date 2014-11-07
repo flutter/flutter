@@ -120,8 +120,7 @@ static bool contentLayerSupportsDirectBackgroundComposition(const RenderObject* 
 
 static inline bool isAcceleratedContents(RenderObject* renderer)
 {
-    return isAcceleratedCanvas(renderer)
-        || renderer->isVideo();
+    return isAcceleratedCanvas(renderer);
 }
 
 // Get the scrolling coordinator in a way that works inside CompositedLayerMapping's destructor.

@@ -229,7 +229,7 @@ bool RenderReplaced::needsPreferredWidthsRecalculation() const
 static inline bool rendererHasAspectRatio(const RenderObject* renderer)
 {
     ASSERT(renderer);
-    return renderer->isImage() || renderer->isCanvas() || renderer->isVideo();
+    return renderer->isImage() || renderer->isCanvas();
 }
 
 void RenderReplaced::computeAspectRatioInformationForRenderBox(FloatSize& constrainedSize, double& intrinsicRatio) const
@@ -260,7 +260,7 @@ LayoutRect RenderReplaced::replacedContentRect(const LayoutSize* overriddenIntri
     ObjectFit objectFit = style()->objectFit();
 
     if (objectFit == ObjectFitFill && style()->objectPosition() == RenderStyle::initialObjectPosition()) {
-        if (!isVideo() || RuntimeEnabledFeatures::objectFitPositionEnabled())
+        if (RuntimeEnabledFeatures::objectFitPositionEnabled())
             return contentRect;
         objectFit = ObjectFitContain;
     }
