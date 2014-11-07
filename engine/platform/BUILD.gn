@@ -643,10 +643,10 @@ component("platform") {
 
   deps = [
     ":make_platform_generated",
-    "//base:base",
+    "//base",
     "//gpu/command_buffer/client:gles2_c_lib",
     "//mojo/application",
-    "//mojo/common:common",
+    "//mojo/common",
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
