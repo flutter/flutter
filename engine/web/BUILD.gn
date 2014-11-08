@@ -52,8 +52,6 @@ component("web") {
     "PageWidgetDelegate.h",
     "SpellCheckerClientImpl.cpp",
     "SpellCheckerClientImpl.h",
-    "ViewportAnchor.cpp",
-    "ViewportAnchor.h",
     "WebArrayBufferConverter.cpp",
     "WebArrayBufferView.cpp",
     "WebCache.cpp",

@@ -98,7 +98,6 @@
 #include "web/CompositionUnderlineVectorBuilder.h"
 #include "web/GraphicsLayerFactoryChromium.h"
 #include "web/LinkHighlight.h"
-#include "web/ViewportAnchor.h"
 #include "web/WebInputEventConversion.h"
 #include "web/WebLocalFrameImpl.h"
 #include "web/WebSettingsImpl.h"
