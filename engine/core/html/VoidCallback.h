@@ -30,7 +30,7 @@
 
 namespace blink {
 
-class VoidCallback : public DummyBase<VoidCallback> {
+class VoidCallback {
 public:
     virtual ~VoidCallback() { }
     virtual void trace(Visitor*) { }

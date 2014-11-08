@@ -18,7 +18,7 @@ class CustomElementMicrotaskStep;
 class Document;
 class HTMLImportLoader;
 
-class CustomElementMicrotaskDispatcher final : public DummyBase<CustomElementMicrotaskDispatcher> {
+class CustomElementMicrotaskDispatcher final {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskDispatcher);
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskDispatcher);
 public:

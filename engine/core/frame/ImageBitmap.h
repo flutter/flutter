@@ -21,7 +21,6 @@ class ImageData;
 
 class ImageBitmap final : public RefCounted<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ImageBitmap);
 public:
     static PassRefPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(HTMLCanvasElement*, const IntRect&);

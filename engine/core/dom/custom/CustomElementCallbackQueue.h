@@ -44,7 +44,7 @@ namespace blink {
 
 // FIXME: Rename this because it contains resolution and upgrade as
 // well as callbacks.
-class CustomElementCallbackQueue : public DummyBase<CustomElementCallbackQueue> {
+class CustomElementCallbackQueue {
     WTF_MAKE_NONCOPYABLE(CustomElementCallbackQueue);
 public:
     static PassOwnPtr<CustomElementCallbackQueue> create(PassRefPtr<Element>);

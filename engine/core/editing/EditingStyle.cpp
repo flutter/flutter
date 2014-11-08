@@ -150,8 +150,8 @@ static bool hasTransparentBackgroundColor(CSSStyleDeclaration*);
 static bool hasTransparentBackgroundColor(StylePropertySet*);
 static PassRefPtr<CSSValue> backgroundColorInEffect(Node*);
 
-class HTMLElementEquivalent : public DummyBase<HTMLElementEquivalent> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class HTMLElementEquivalent {
+    WTF_MAKE_FAST_ALLOCATED;
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(HTMLElementEquivalent);
 public:
     static PassOwnPtr<HTMLElementEquivalent> create(CSSPropertyID propertyID, CSSValueID primitiveValue, const HTMLQualifiedName& tagName)

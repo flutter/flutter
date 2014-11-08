@@ -34,7 +34,7 @@ namespace blink {
 class FontFace;
 class FontFaceSet;
 
-class FontFaceSetForEachCallback : public DummyBase<FontFaceSetForEachCallback> {
+class FontFaceSetForEachCallback {
 public:
     virtual ~FontFaceSetForEachCallback() { }
     virtual void trace(Visitor*) { }

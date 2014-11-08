@@ -15,13 +15,15 @@
 
 namespace blink {
 
-DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskRunQueue)
-
 CustomElementMicrotaskRunQueue::CustomElementMicrotaskRunQueue()
     : m_syncQueue(CustomElementSyncMicrotaskQueue::create())
     , m_asyncQueue(CustomElementAsyncImportMicrotaskQueue::create())
     , m_dispatchIsPending(false)
     , m_weakFactory(this)
+{
+}
+
+CustomElementMicrotaskRunQueue::~CustomElementMicrotaskRunQueue()
 {
 }
 
@@ -45,12 +47,6 @@ void CustomElementMicrotaskRunQueue::requestDispatchIfNeeded()
         return;
     Microtask::enqueueMicrotask(base::Bind(&CustomElementMicrotaskRunQueue::dispatch, m_weakFactory.GetWeakPtr()));
     m_dispatchIsPending = true;
-}
-
-void CustomElementMicrotaskRunQueue::trace(Visitor* visitor)
-{
-    visitor->trace(m_syncQueue);
-    visitor->trace(m_asyncQueue);
 }
 
 void CustomElementMicrotaskRunQueue::dispatch()

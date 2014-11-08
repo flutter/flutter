@@ -42,7 +42,7 @@ class TouchEvent;
 class TouchList;
 class TreeScope;
 
-class EventPath final : public DummyBase<EventPath> {
+class EventPath final {
 public:
     explicit EventPath(Event*);
     explicit EventPath(Node*);

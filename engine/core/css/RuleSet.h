@@ -77,9 +77,9 @@ struct SameSizeAsRuleData {
 
 COMPILE_ASSERT(sizeof(RuleData) == sizeof(SameSizeAsRuleData), RuleData_should_stay_small);
 
-class RuleSet : public DummyBase<RuleSet> {
+class RuleSet {
     WTF_MAKE_NONCOPYABLE(RuleSet);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<RuleSet> create() { return adoptPtr(new RuleSet); }
 
@@ -132,7 +132,7 @@ private:
     void compactRules();
     static void compactPendingRules(PendingRuleMap&, CompactRuleMap&);
 
-    class PendingRuleMaps : public DummyBase<PendingRuleMaps> {
+    class PendingRuleMaps {
     public:
         static PassOwnPtr<PendingRuleMaps> create() { return adoptPtr(new PendingRuleMaps); }
 

@@ -38,7 +38,7 @@ namespace blink {
 class CSSFontSelector;
 class Visitor;
 
-class CSSFontSelectorClient : public DummyBase<CSSFontSelectorClient> {
+class CSSFontSelectorClient {
 public:
     virtual ~CSSFontSelectorClient() { }
 

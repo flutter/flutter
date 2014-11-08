@@ -56,10 +56,9 @@ enum RevealExtentOption {
     DoNotRevealExtent
 };
 
-class FrameSelection final : public DummyBase<FrameSelection>, public VisibleSelection::ChangeObserver, private CaretBase {
+class FrameSelection final : public VisibleSelection::ChangeObserver, private CaretBase {
     WTF_MAKE_NONCOPYABLE(FrameSelection);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(FrameSelection);
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<FrameSelection> create(LocalFrame* frame = 0)
     {

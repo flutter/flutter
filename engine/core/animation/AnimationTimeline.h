@@ -50,7 +50,7 @@ class AnimationNode;
 class AnimationTimeline : public RefCounted<AnimationTimeline>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    class PlatformTiming : public DummyBase<PlatformTiming> {
+    class PlatformTiming {
 
     public:
         // Calls AnimationTimeline's wake() method after duration seconds.

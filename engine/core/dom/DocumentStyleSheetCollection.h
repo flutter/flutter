@@ -38,7 +38,7 @@ class TreeScope;
 
 class DocumentStyleSheetCollection final : public TreeScopeStyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(DocumentStyleSheetCollection);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<DocumentStyleSheetCollection> create(TreeScope& treeScope)
     {

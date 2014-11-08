@@ -62,8 +62,7 @@ class ResourceLoaderSet;
 // are initialized without a LocalFrame), so a Document can keep a ResourceFetcher
 // alive past detach if scripts still reference the Document.
 class ResourceFetcher final : public RefCounted<ResourceFetcher>, public ResourceLoaderHost {
-    WTF_MAKE_NONCOPYABLE(ResourceFetcher); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ResourceFetcher);
+    WTF_MAKE_NONCOPYABLE(ResourceFetcher); WTF_MAKE_FAST_ALLOCATED;
 friend class ImageLoader;
 friend class ResourceCacheValidationSuppressor;
 

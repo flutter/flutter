@@ -41,9 +41,9 @@ class HTMLCanvasElement;
 class KURL;
 class WebGLObject;
 
-class CanvasRenderingContext : public DummyBase<CanvasRenderingContext> {
+class CanvasRenderingContext {
     WTF_MAKE_NONCOPYABLE(CanvasRenderingContext);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     virtual ~CanvasRenderingContext() { }
 

@@ -13,7 +13,7 @@
 
 namespace blink {
 
-class SampledEffect : public DummyBase<SampledEffect> {
+class SampledEffect {
 public:
     static PassOwnPtr<SampledEffect> create(Animation* animation, PassOwnPtr<Vector<RefPtr<Interpolation> > > interpolations)
     {

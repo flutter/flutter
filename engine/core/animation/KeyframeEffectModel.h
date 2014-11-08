@@ -55,7 +55,7 @@ public:
     // FIXME: Implement accumulation.
 
     typedef Vector<OwnPtr<Keyframe::PropertySpecificKeyframe> > PropertySpecificKeyframeVector;
-    class PropertySpecificKeyframeGroup : public DummyBase<PropertySpecificKeyframeGroup> {
+    class PropertySpecificKeyframeGroup {
     public:
         void appendKeyframe(PassOwnPtr<Keyframe::PropertySpecificKeyframe>);
         const PropertySpecificKeyframeVector& keyframes() const { return m_keyframes; }

@@ -46,7 +46,7 @@ class Element;
 
 typedef HashCountedSet<RawPtr<AnimationPlayer> > AnimationPlayerCountedSet;
 
-class ActiveAnimations : public DummyBase<ActiveAnimations> {
+class ActiveAnimations {
     WTF_MAKE_NONCOPYABLE(ActiveAnimations);
 public:
     ActiveAnimations()

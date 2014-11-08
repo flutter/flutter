@@ -145,7 +145,7 @@ typedef unsigned char DocumentClassFlags;
 
 class Document;
 
-class DocumentVisibilityObserver : public DummyBase<void> {
+class DocumentVisibilityObserver {
 public:
     DocumentVisibilityObserver(Document&);
     virtual ~DocumentVisibilityObserver();
@@ -167,7 +167,6 @@ private:
 class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
     , public DocumentSupplementable, public LifecycleContext<Document>, public ResourceClient {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Document);
 public:
     static PassRefPtr<Document> create(const DocumentInit& initializer = DocumentInit())
     {

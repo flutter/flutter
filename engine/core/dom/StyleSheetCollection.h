@@ -38,9 +38,9 @@ namespace blink {
 class CSSStyleSheet;
 class StyleSheet;
 
-class StyleSheetCollection : public DummyBase<StyleSheetCollection> {
+class StyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(StyleSheetCollection);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     friend class ActiveDocumentStyleSheetCollector;
     friend class ImportedDocumentStyleSheetCollector;

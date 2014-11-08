@@ -44,7 +44,7 @@ class Node;
 // A class which inherits both Node and TreeScope must call clearRareData() in its destructor
 // so that the Node destructor no longer does problematic NodeList cache manipulation in
 // the destructor.
-class TreeScope : public DummyBase<void> {
+class TreeScope {
 public:
     TreeScope* parentTreeScope() const { return m_parentTreeScope; }
 

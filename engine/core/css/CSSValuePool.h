@@ -39,8 +39,8 @@ namespace blink {
 
 class CSSValueList;
 
-class CSSValuePool :  public DummyBase<CSSValuePool> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class CSSValuePool {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     PassRefPtr<CSSValueList> createFontFaceValue(const AtomicString&);
     PassRefPtr<CSSPrimitiveValue> createFontFamilyValue(const String&);

@@ -74,7 +74,7 @@ enum UpdateReason {
 // MemoryCacheEntry class is used only in MemoryCache class, but we don't make
 // MemoryCacheEntry class an inner class of MemoryCache because of dependency
 // from MemoryCacheLRUList.
-class MemoryCacheEntry final : public DummyBase<MemoryCacheEntry> {
+class MemoryCacheEntry final {
 public:
     static PassOwnPtr<MemoryCacheEntry> create(Resource* resource) { return adoptPtr(new MemoryCacheEntry(resource)); }
     void trace(Visitor*);
@@ -124,8 +124,8 @@ WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::MemoryCacheLRUList);
 
 namespace blink {
 
-class MemoryCache final : public DummyBase<MemoryCache> {
-    WTF_MAKE_NONCOPYABLE(MemoryCache); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class MemoryCache final {
+    WTF_MAKE_NONCOPYABLE(MemoryCache); WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<MemoryCache> create();
     ~MemoryCache();

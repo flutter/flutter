@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class ShadowRootRareData : public DummyBase<ShadowRootRareData> {
+class ShadowRootRareData {
 public:
     ShadowRootRareData()
         : m_descendantShadowElementCount(0)

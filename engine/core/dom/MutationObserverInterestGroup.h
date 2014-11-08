@@ -41,7 +41,7 @@
 
 namespace blink {
 
-class MutationObserverInterestGroup final : public DummyBase<MutationObserverInterestGroup> {
+class MutationObserverInterestGroup final {
 public:
     static PassOwnPtr<MutationObserverInterestGroup> createForChildListMutation(Node& target)
     {

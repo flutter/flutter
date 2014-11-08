@@ -71,7 +71,7 @@ public:
         PhaseNone,
     };
 
-    class EventDelegate : public DummyBase<EventDelegate> {
+    class EventDelegate {
     public:
         virtual ~EventDelegate() { }
         virtual void onEventCondition(const AnimationNode*) = 0;

@@ -40,8 +40,8 @@ class MediaQueryExp;
 
 typedef Vector<OwnPtr<MediaQueryExp> > ExpressionHeapVector;
 
-class MediaQuery : public DummyBase<MediaQuery> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class MediaQuery {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     enum Restrictor {
         Only, Not, None

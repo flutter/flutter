@@ -38,7 +38,7 @@ class StylePropertySet;
 class StyleRuleCSSStyleDeclaration;
 
 class StyleKeyframe final : public RefCounted<StyleKeyframe> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassRefPtr<StyleKeyframe> create()
     {

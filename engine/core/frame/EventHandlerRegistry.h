@@ -7,6 +7,7 @@
 
 #include "core/frame/FrameHost.h"
 #include "wtf/HashCountedSet.h"
+#include "wtf/text/AtomicString.h"
 
 namespace blink {
 
@@ -18,7 +19,7 @@ typedef HashCountedSet<EventTarget*> EventTargetSet;
 // Registry for keeping track of event handlers. Note that only handlers on
 // documents that can be rendered or can receive input (i.e., are attached to a
 // FrameHost) are registered here.
-class EventHandlerRegistry final : public DummyBase<EventHandlerRegistry> {
+class EventHandlerRegistry final {
 public:
     explicit EventHandlerRegistry(FrameHost&);
     virtual ~EventHandlerRegistry();

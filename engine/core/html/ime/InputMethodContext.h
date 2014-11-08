@@ -45,9 +45,8 @@ class ExecutionContext;
 class InputMethodController;
 class Node;
 
-class InputMethodContext final : public DummyBase<InputMethodContext>, public EventTargetWithInlineData {
+class InputMethodContext final : public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(InputMethodContext);
 public:
     static PassOwnPtr<InputMethodContext> create(HTMLElement*);
     virtual ~InputMethodContext();

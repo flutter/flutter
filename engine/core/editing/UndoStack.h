@@ -40,7 +40,7 @@ namespace blink {
 class LocalFrame;
 class UndoStep;
 
-class UndoStack final : public DummyBase<UndoStack> {
+class UndoStack final {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(UndoStack)
 public:
     static PassOwnPtr<UndoStack> create();

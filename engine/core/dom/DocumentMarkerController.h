@@ -51,8 +51,8 @@ private:
     Vector<String> m_words;
 };
 
-class DocumentMarkerController final : public DummyBase<DocumentMarkerController> {
-    WTF_MAKE_NONCOPYABLE(DocumentMarkerController); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class DocumentMarkerController final {
+    WTF_MAKE_NONCOPYABLE(DocumentMarkerController); WTF_MAKE_FAST_ALLOCATED;
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(DocumentMarkerController);
 public:
 

@@ -42,9 +42,9 @@ class StyleResolver;
 class StyleSheetContents;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
-class ScopedStyleResolver final : public DummyBase<ScopedStyleResolver> {
+class ScopedStyleResolver final {
     WTF_MAKE_NONCOPYABLE(ScopedStyleResolver);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<ScopedStyleResolver> create(TreeScope& scope)
     {

@@ -492,8 +492,8 @@ private:
     RawPtr<WebGLRenderingContextBase> m_context;
 };
 
-class WebGLRenderingContextLostCallback final : public DummyBase<WebGLRenderingContextLostCallback>, public blink::WebGraphicsContext3D::WebGraphicsContextLostCallback {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class WebGLRenderingContextLostCallback final : public blink::WebGraphicsContext3D::WebGraphicsContextLostCallback {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<WebGLRenderingContextLostCallback> create(WebGLRenderingContextBase* context)
     {
@@ -516,8 +516,8 @@ private:
     RawPtr<WebGLRenderingContextBase> m_context;
 };
 
-class WebGLRenderingContextErrorMessageCallback final : public DummyBase<WebGLRenderingContextErrorMessageCallback>, public blink::WebGraphicsContext3D::WebGraphicsErrorMessageCallback {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class WebGLRenderingContextErrorMessageCallback final : public blink::WebGraphicsContext3D::WebGraphicsErrorMessageCallback {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<WebGLRenderingContextErrorMessageCallback> create(WebGLRenderingContextBase* context)
     {

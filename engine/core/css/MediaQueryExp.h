@@ -76,8 +76,8 @@ struct MediaQueryExpValue {
     }
 };
 
-class MediaQueryExp  : public DummyBase<MediaQueryExp> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class MediaQueryExp  {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<MediaQueryExp> createIfValid(const String& mediaFeature, CSSParserValueList*);
     ~MediaQueryExp();

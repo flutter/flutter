@@ -81,7 +81,7 @@ typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults
 enum AppendTrailingWhitespace { ShouldAppendTrailingWhitespace, DontAppendTrailingWhitespace };
 enum CheckDragHysteresis { ShouldCheckDragHysteresis, DontCheckDragHysteresis };
 
-class EventHandler : public DummyBase<EventHandler> {
+class EventHandler {
     WTF_MAKE_NONCOPYABLE(EventHandler);
 public:
     explicit EventHandler(LocalFrame*);

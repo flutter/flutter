@@ -13,7 +13,7 @@ namespace blink {
 
 struct Timing;
 
-class CSSTimingData : public DummyBase<CSSTimingData> {
+class CSSTimingData {
 public:
     ~CSSTimingData() { }
 

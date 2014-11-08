@@ -43,7 +43,7 @@ class RemoteFontFaceSource;
 class SimpleFontData;
 class StyleRuleFontFace;
 
-class CSSFontFace final : public DummyBase<CSSFontFace> {
+class CSSFontFace final {
 public:
     struct UnicodeRange;
     class UnicodeRangeSet;

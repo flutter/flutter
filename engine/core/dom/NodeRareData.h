@@ -31,9 +31,9 @@
 
 namespace blink {
 
-class NodeMutationObserverData final : public DummyBase<NodeMutationObserverData> {
+class NodeMutationObserverData final {
     WTF_MAKE_NONCOPYABLE(NodeMutationObserverData);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     Vector<OwnPtr<MutationObserverRegistration> > registry;
     HashSet<RawPtr<MutationObserverRegistration> > transientRegistry;
@@ -55,9 +55,9 @@ private:
     NodeMutationObserverData() { }
 };
 
-class NodeRareData : public DummyBase<NodeRareData>, public NodeRareDataBase {
+class NodeRareData : public NodeRareDataBase {
     WTF_MAKE_NONCOPYABLE(NodeRareData);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static NodeRareData* create(RenderObject* renderer)
     {

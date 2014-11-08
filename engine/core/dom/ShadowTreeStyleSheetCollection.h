@@ -38,7 +38,7 @@ class StyleEngine;
 
 class ShadowTreeStyleSheetCollection final : public TreeScopeStyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(ShadowTreeStyleSheetCollection);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit ShadowTreeStyleSheetCollection(ShadowRoot&);
 

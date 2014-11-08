@@ -5,8 +5,8 @@
 #ifndef IncrementLoadEventDelayCount_h
 #define IncrementLoadEventDelayCount_h
 
-#include "platform/heap/Handle.h"
 #include "wtf/Noncopyable.h"
+#include "wtf/PassOwnPtr.h"
 #include "wtf/RefPtr.h"
 
 namespace blink {

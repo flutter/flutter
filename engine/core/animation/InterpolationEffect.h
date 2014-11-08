@@ -30,7 +30,7 @@ private:
     {
     }
 
-    class InterpolationRecord : public DummyBase<InterpolationRecord> {
+    class InterpolationRecord {
     public:
         RefPtr<Interpolation> m_interpolation;
         RefPtr<TimingFunction> m_easing;

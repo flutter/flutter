@@ -51,8 +51,8 @@ class SharedBuffer;
 // A resource that is held in the cache. Classes who want to use this object should derive
 // from ResourceClient, to get the function calls in case the requested data has arrived.
 // This class also does the actual communication with the loader to obtain the resource from the network.
-class Resource : public DummyBase<Resource> {
-    WTF_MAKE_NONCOPYABLE(Resource); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class Resource {
+    WTF_MAKE_NONCOPYABLE(Resource); WTF_MAKE_FAST_ALLOCATED;
     friend class InspectorResource;
 
 public:

@@ -29,8 +29,10 @@
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "core/html/canvas/WebGLContextObject.h"
 #include "core/html/canvas/WebGLSharedObject.h"
+#include "wtf/HashMap.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
+#include "wtf/Vector.h"
 
 namespace blink {
 
@@ -58,8 +60,6 @@ public:
         virtual void onDetached(blink::WebGraphicsContext3D*) = 0;
         virtual void attach(blink::WebGraphicsContext3D*, GLenum attachment) = 0;
         virtual void unattach(blink::WebGraphicsContext3D*, GLenum attachment) = 0;
-
-        virtual void trace(Visitor*) { }
 
     protected:
         WebGLAttachment();
@@ -101,8 +101,6 @@ public:
     void drawBuffers(const Vector<GLenum>& bufs);
 
     GLenum getDrawBuffer(GLenum);
-
-    virtual void trace(Visitor*) override;
 
 protected:
     explicit WebGLFramebuffer(WebGLRenderingContextBase*);

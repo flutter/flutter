@@ -31,7 +31,7 @@ class Document;
 class Element;
 class TreeScope;
 
-class StyleElement : public DummyBase<void> {
+class StyleElement {
 public:
     StyleElement(Document*, bool createdByParser);
     virtual ~StyleElement();

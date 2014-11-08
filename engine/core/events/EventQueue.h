@@ -36,7 +36,7 @@ namespace blink {
 
 class Event;
 
-class EventQueue : public DummyBase<EventQueue> {
+class EventQueue {
 public:
     virtual ~EventQueue() { }
     virtual void trace(Visitor*) { }

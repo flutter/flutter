@@ -34,7 +34,7 @@
 namespace blink {
 
 class WebGLExtension : public RefCounted<WebGLExtension> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     WebGLRenderingContextBase* context() { return m_context; }
 

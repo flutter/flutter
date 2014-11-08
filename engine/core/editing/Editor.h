@@ -58,7 +58,7 @@ class UndoStack;
 enum EditorCommandSource { CommandFromMenuOrKeyBinding, CommandFromDOM, CommandFromDOMWithUserInterface };
 enum EditorParagraphSeparator { EditorParagraphSeparatorIsDiv, EditorParagraphSeparatorIsP };
 
-class Editor final : public DummyBase<Editor> {
+class Editor final {
     WTF_MAKE_NONCOPYABLE(Editor);
 public:
     static PassOwnPtr<Editor> create(LocalFrame&);

@@ -49,7 +49,7 @@ class Document;
 class Element;
 class HTMLImportChild;
 
-class CustomElementScheduler final : public DummyBase<CustomElementScheduler> {
+class CustomElementScheduler final {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementScheduler);
 public:
 

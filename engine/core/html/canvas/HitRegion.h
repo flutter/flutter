@@ -57,7 +57,7 @@ private:
     WindRule m_fillRule;
 };
 
-class HitRegionManager final : public DummyBase<HitRegionManager> {
+class HitRegionManager final {
     WTF_MAKE_NONCOPYABLE(HitRegionManager);
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(HitRegionManager)
 public:

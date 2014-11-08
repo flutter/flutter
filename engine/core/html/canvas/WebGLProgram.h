@@ -60,8 +60,6 @@ public:
     bool attachShader(WebGLShader*);
     bool detachShader(WebGLShader*);
 
-    virtual void trace(Visitor*) override;
-
 protected:
     explicit WebGLProgram(WebGLRenderingContextBase*);
 

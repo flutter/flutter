@@ -396,26 +396,6 @@ namespace WTF {
             allocator->deallocate(this);
         }
 
-        // This is not called in normal tracing, but it is called if we find a
-        // pointer to a node on the stack using conservative scanning. Since
-        // the original ListHashSet may no longer exist we make sure to mark
-        // the neighbours in the chain too.
-        void trace(typename NodeAllocator::Visitor* visitor)
-        {
-            // The conservative stack scan can find nodes that have been
-            // removed from the set and destructed. We don't need to trace
-            // these, and it would be wrong to do so, because the class will
-            // not expect the trace method to be called after the destructor.
-            // It's an error to remove a node from the ListHashSet while an
-            // iterator is positioned at that node, so there should be no valid
-            // pointers from the stack to a destructed node.
-            if (wasAlreadyDestructed())
-                return;
-            NodeAllocator::traceValue(visitor, this);
-            visitor->mark(next());
-            visitor->mark(prev());
-        }
-
         ListHashSetNode* next() const { return reinterpret_cast<ListHashSetNode*>(this->m_next); }
         ListHashSetNode* prev() const { return reinterpret_cast<ListHashSetNode*>(this->m_prev); }
 

@@ -29,8 +29,9 @@
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "core/html/canvas/WebGLBuffer.h"
 #include "core/html/canvas/WebGLContextObject.h"
-#include "platform/heap/Handle.h"
+#include "wtf/RefCounted.h"
 #include "wtf/PassRefPtr.h"
+#include "wtf/Vector.h"
 
 namespace blink {
 
@@ -63,8 +64,6 @@ public:
         {
         }
 
-        void trace(Visitor*);
-
         bool enabled;
         RefPtr<WebGLBuffer> bufferBinding;
         GLsizei bytesPerElement;
@@ -89,8 +88,6 @@ public:
     void setVertexAttribState(GLuint, GLsizei, GLint, GLenum, GLboolean, GLsizei, GLintptr, PassRefPtr<WebGLBuffer>);
     void unbindBuffer(PassRefPtr<WebGLBuffer>);
     void setVertexAttribDivisor(GLuint index, GLuint divisor);
-
-    virtual void trace(Visitor*) override;
 
 private:
     WebGLVertexArrayObjectOES(WebGLRenderingContextBase*, VaoType);

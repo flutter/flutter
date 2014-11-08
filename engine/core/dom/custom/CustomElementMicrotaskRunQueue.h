@@ -6,8 +6,9 @@
 #define CustomElementMicrotaskRunQueue_h
 
 #include "base/memory/weak_ptr.h"
-#include "platform/heap/Handle.h"
+#include "wtf/PassOwnPtr.h"
 #include "wtf/RefCounted.h"
+#include "wtf/RefPtr.h"
 
 namespace blink {
 
@@ -17,15 +18,13 @@ class CustomElementMicrotaskStep;
 class HTMLImportLoader;
 
 class CustomElementMicrotaskRunQueue : public RefCounted<CustomElementMicrotaskRunQueue> {
-    DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CustomElementMicrotaskRunQueue)
 public:
     static PassRefPtr<CustomElementMicrotaskRunQueue> create() { return adoptRef(new CustomElementMicrotaskRunQueue()); }
+    ~CustomElementMicrotaskRunQueue();
 
     void enqueue(HTMLImportLoader* parentLoader, PassOwnPtr<CustomElementMicrotaskStep>, bool importIsSync);
     void requestDispatchIfNeeded();
     bool isEmpty() const;
-
-    void trace(Visitor*);
 
 private:
     CustomElementMicrotaskRunQueue();

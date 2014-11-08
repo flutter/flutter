@@ -12,7 +12,7 @@
 
 namespace blink {
 
-class InterpolableValue : public DummyBase<InterpolableValue> {
+class InterpolableValue {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(InterpolableValue);
 public:
     virtual bool isNumber() const { return false; }

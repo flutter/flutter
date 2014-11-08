@@ -63,8 +63,7 @@ private:
 
     // NOTE: We put the CanvasObserver in a member instead of inheriting from it
     // to avoid adding a vptr to CSSCanvasValue.
-    class CanvasObserverProxy final : public DummyBase<CanvasObserverProxy>, public CanvasObserver {
-        WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(CanvasObserverProxy);
+    class CanvasObserverProxy final : public CanvasObserver {
     public:
         explicit CanvasObserverProxy(CSSCanvasValue* ownerValue) : m_ownerValue(ownerValue) { }
 

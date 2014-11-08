@@ -36,7 +36,7 @@ class MutableStylePropertySet;
 class StylePropertySet;
 
 class StyleRuleBase : public RefCounted<StyleRuleBase> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     enum Type {
         Unknown, // Not used.
@@ -91,7 +91,7 @@ private:
 };
 
 class StyleRule : public StyleRuleBase {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassRefPtr<StyleRule> create() { return adoptRef(new StyleRule()); }
 

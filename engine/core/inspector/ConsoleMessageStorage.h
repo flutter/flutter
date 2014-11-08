@@ -14,9 +14,9 @@ namespace blink {
 
 class LocalDOMWindow;
 
-class ConsoleMessageStorage final : public DummyBase<ConsoleMessageStorage> {
+class ConsoleMessageStorage final {
     WTF_MAKE_NONCOPYABLE(ConsoleMessageStorage);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<ConsoleMessageStorage> createForFrame(LocalFrame* frame)
     {

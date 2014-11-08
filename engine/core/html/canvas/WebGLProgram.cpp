@@ -203,11 +203,4 @@ void WebGLProgram::cacheInfoIfNeeded()
     m_infoValid = true;
 }
 
-void WebGLProgram::trace(Visitor* visitor)
-{
-    visitor->trace(m_vertexShader);
-    visitor->trace(m_fragmentShader);
-    WebGLSharedObject::trace(visitor);
-}
-
 }

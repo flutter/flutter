@@ -33,7 +33,7 @@
 
 namespace blink {
 
-class DOMWindowEventQueueTimer : public DummyBase<DOMWindowEventQueueTimer>, public SuspendableTimer {
+class DOMWindowEventQueueTimer : public SuspendableTimer {
     WTF_MAKE_NONCOPYABLE(DOMWindowEventQueueTimer);
 public:
     DOMWindowEventQueueTimer(DOMWindowEventQueue* eventQueue, ExecutionContext* context)

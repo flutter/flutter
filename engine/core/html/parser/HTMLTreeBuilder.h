@@ -50,8 +50,8 @@ class HTMLDocument;
 class Node;
 class HTMLDocumentParser;
 
-class HTMLTreeBuilder final : public DummyBase<HTMLTreeBuilder> {
-    WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class HTMLTreeBuilder final {
+    WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors)
     {

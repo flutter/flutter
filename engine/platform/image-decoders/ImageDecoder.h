@@ -35,6 +35,7 @@
 #include "platform/image-decoders/ImageFrame.h"
 #include "public/platform/Platform.h"
 #include "wtf/Assertions.h"
+#include "wtf/PassOwnPtr.h"
 #include "wtf/RefPtr.h"
 #include "wtf/Threading.h"
 #include "wtf/Vector.h"

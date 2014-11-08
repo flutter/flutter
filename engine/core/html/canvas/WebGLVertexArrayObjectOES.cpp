@@ -162,16 +162,4 @@ void WebGLVertexArrayObjectOES::setVertexAttribDivisor(GLuint index, GLuint divi
     state.divisor = divisor;
 }
 
-void WebGLVertexArrayObjectOES::VertexAttribState::trace(Visitor* visitor)
-{
-    visitor->trace(bufferBinding);
-}
-
-void WebGLVertexArrayObjectOES::trace(Visitor* visitor)
-{
-    visitor->trace(m_boundElementArrayBuffer);
-    visitor->trace(m_vertexAttribState);
-    WebGLContextObject::trace(visitor);
-}
-
 }

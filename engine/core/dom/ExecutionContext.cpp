@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class ExecutionContext::PendingException : public DummyBase<ExecutionContext::PendingException> {
+class ExecutionContext::PendingException {
     WTF_MAKE_NONCOPYABLE(PendingException);
 public:
     PendingException(const String& errorMessage, int lineNumber, int columnNumber, int scriptId, const String& sourceURL, PassRefPtr<ScriptCallStack> callStack)

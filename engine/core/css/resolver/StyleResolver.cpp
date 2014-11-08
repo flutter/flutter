@@ -459,11 +459,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
 
     state.fontBuilder().initForStyleResolve(state.document(), state.style());
 
-    bool needsCollection = false;
-    CSSDefaultStyleSheets::instance().ensureDefaultStyleSheetsForElement(element, needsCollection);
-    if (needsCollection)
-        collectFeatures();
-
     {
         ElementRuleCollector collector(state.elementContext(), state.style());
 

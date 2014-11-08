@@ -37,7 +37,7 @@ class IncrementLoadEventDelayCount;
 class FetchRequest;
 class Document;
 
-class ImageLoaderClient : public DummyBase<void> {
+class ImageLoaderClient {
 public:
     virtual void notifyImageSourceChanged() = 0;
 
@@ -57,7 +57,7 @@ class RenderImageResource;
 template<typename T> class EventSender;
 typedef EventSender<ImageLoader> ImageEventSender;
 
-class ImageLoader : public DummyBase<ImageLoader>, public ImageResourceClient {
+class ImageLoader : public ImageResourceClient {
 public:
     explicit ImageLoader(Element*);
     virtual ~ImageLoader();

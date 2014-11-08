@@ -29,6 +29,7 @@
 
 #include "core/html/canvas/WebGLRenderingContextBase.h"
 #include "platform/NotImplemented.h"
+#include "wtf/Vector.h"
 
 namespace blink {
 
@@ -42,8 +43,6 @@ namespace {
     class WebGLRenderbufferAttachment final : public WebGLFramebuffer::WebGLAttachment {
     public:
         static PassRefPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLRenderbuffer*);
-
-        virtual void trace(Visitor*) override;
 
     private:
         explicit WebGLRenderbufferAttachment(WebGLRenderbuffer*);
@@ -66,12 +65,6 @@ namespace {
     PassRefPtr<WebGLFramebuffer::WebGLAttachment> WebGLRenderbufferAttachment::create(WebGLRenderbuffer* renderbuffer)
     {
         return adoptRef(new WebGLRenderbufferAttachment(renderbuffer));
-    }
-
-    void WebGLRenderbufferAttachment::trace(Visitor* visitor)
-    {
-        visitor->trace(m_renderbuffer);
-        WebGLFramebuffer::WebGLAttachment::trace(visitor);
     }
 
     WebGLRenderbufferAttachment::WebGLRenderbufferAttachment(WebGLRenderbuffer* renderbuffer)
@@ -151,8 +144,6 @@ namespace {
     public:
         static PassRefPtr<WebGLFramebuffer::WebGLAttachment> create(WebGLTexture*, GLenum target, GLint level);
 
-        virtual void trace(Visitor*) override;
-
     private:
         WebGLTextureAttachment(WebGLTexture*, GLenum target, GLint level);
         WebGLTextureAttachment() { }
@@ -176,12 +167,6 @@ namespace {
     PassRefPtr<WebGLFramebuffer::WebGLAttachment> WebGLTextureAttachment::create(WebGLTexture* texture, GLenum target, GLint level)
     {
         return adoptRef(new WebGLTextureAttachment(texture, target, level));
-    }
-
-    void WebGLTextureAttachment::trace(Visitor* visitor)
-    {
-        visitor->trace(m_texture);
-        WebGLFramebuffer::WebGLAttachment::trace(visitor);
     }
 
     WebGLTextureAttachment::WebGLTextureAttachment(WebGLTexture* texture, GLenum target, GLint level)
@@ -626,14 +611,6 @@ GLenum WebGLFramebuffer::getDrawBuffer(GLenum drawBuffer)
     if (drawBuffer == GL_DRAW_BUFFER0_EXT)
         return GL_COLOR_ATTACHMENT0;
     return GL_NONE;
-}
-
-void WebGLFramebuffer::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_attachments);
-#endif
-    WebGLContextObject::trace(visitor);
 }
 
 }

@@ -41,7 +41,7 @@ class RenderView;
 
 class CaretBase {
     WTF_MAKE_NONCOPYABLE(CaretBase);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 protected:
     enum CaretVisibility { Visible, Hidden };
     explicit CaretBase(CaretVisibility = Hidden);
@@ -75,9 +75,9 @@ private:
     CaretVisibility m_caretVisibility;
 };
 
-class DragCaretController final : public DummyBase<DragCaretController>, private CaretBase {
+class DragCaretController final : private CaretBase {
     WTF_MAKE_NONCOPYABLE(DragCaretController);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<DragCaretController> create();
 

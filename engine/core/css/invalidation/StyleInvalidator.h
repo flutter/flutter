@@ -6,6 +6,8 @@
 #define StyleInvalidator_h
 
 #include "platform/heap/Handle.h"
+#include "wtf/HashMap.h"
+#include "wtf/Vector.h"
 
 namespace blink {
 

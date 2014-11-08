@@ -50,7 +50,7 @@ public:
 
     virtual void trace(Visitor*) { }
 
-    class PropertySpecificKeyframe : public DummyBase<PropertySpecificKeyframe> {
+    class PropertySpecificKeyframe {
     public:
         virtual ~PropertySpecificKeyframe() { }
         double offset() const { return m_offset; }

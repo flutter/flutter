@@ -53,7 +53,7 @@ class StyleSheet;
 class StyleSheetContents;
 
 class StyleEngine final : public CSSFontSelectorClient  {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
 
     class IgnoringPendingStylesheet : public TemporaryChange<bool> {

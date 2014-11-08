@@ -117,7 +117,7 @@ public:
     // or end is moved to a different position.
     //
     // Objects implementing |ChangeObserver| interface must outlive the VisibleSelection object.
-    class ChangeObserver : public DummyBase<void> {
+    class ChangeObserver {
         WTF_MAKE_NONCOPYABLE(ChangeObserver);
     public:
         ChangeObserver();

@@ -65,8 +65,7 @@ typedef uint64_t LinkHash;
 
 float deviceScaleFactor(LocalFrame*);
 
-class Page final : public DummyBase<Page>, public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(Page);
+class Page final : public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
 public:
@@ -145,7 +144,7 @@ public:
 
     double timerAlignmentInterval() const;
 
-    class MultisamplingChangedObserver : public DummyBase<void> {
+    class MultisamplingChangedObserver {
     public:
         virtual void multisamplingChanged(bool) = 0;
     };

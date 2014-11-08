@@ -41,7 +41,7 @@ namespace blink {
 
 class QualifiedName;
 
-class MutationObserverRegistration final : public DummyBase<MutationObserverRegistration> {
+class MutationObserverRegistration final {
 public:
     static PassOwnPtr<MutationObserverRegistration> create(MutationObserver&, Node*, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
     ~MutationObserverRegistration();

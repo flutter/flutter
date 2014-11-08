@@ -30,8 +30,8 @@
 
 namespace blink {
 
-class RenderSelectionInfoBase : public DummyBase<RenderSelectionInfoBase> {
-    WTF_MAKE_NONCOPYABLE(RenderSelectionInfoBase); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class RenderSelectionInfoBase {
+    WTF_MAKE_NONCOPYABLE(RenderSelectionInfoBase); WTF_MAKE_FAST_ALLOCATED;
 public:
     RenderSelectionInfoBase()
         : m_object(nullptr)

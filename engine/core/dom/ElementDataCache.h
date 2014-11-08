@@ -40,7 +40,7 @@ namespace blink {
 class Attribute;
 class ShareableElementData;
 
-class ElementDataCache final : public DummyBase<ElementDataCache>  {
+class ElementDataCache {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ElementDataCache)
 public:
     static PassOwnPtr<ElementDataCache> create() { return adoptPtr(new ElementDataCache); }

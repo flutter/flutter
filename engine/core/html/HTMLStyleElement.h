@@ -35,7 +35,6 @@ typedef EventSender<HTMLStyleElement> StyleEventSender;
 
 class HTMLStyleElement final : public HTMLElement, private StyleElement {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLStyleElement);
 public:
     static PassRefPtr<HTMLStyleElement> create(Document&, bool createdByParser);
     virtual ~HTMLStyleElement();

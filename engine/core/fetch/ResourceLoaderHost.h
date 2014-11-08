@@ -45,7 +45,7 @@ class ResourceResponse;
 
 struct FetchInitiatorInfo;
 
-class ResourceLoaderHost : public DummyBase<void> {
+class ResourceLoaderHost {
 public:
     virtual void incrementRequestCount(const Resource*) = 0;
     virtual void decrementRequestCount(const Resource*) = 0;

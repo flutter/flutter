@@ -45,7 +45,6 @@ class StyleSheetList;
 
 class ShadowRoot final : public DocumentFragment, public TreeScope, public DoublyLinkedListNode<ShadowRoot> {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(ShadowRoot);
     friend class WTF::DoublyLinkedListNode<ShadowRoot>;
 public:
 

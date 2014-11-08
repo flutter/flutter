@@ -86,7 +86,7 @@ private:
 
     // Every DocumentParser needs a pointer back to the document.
     // m_document will be 0 after the parser is stopped.
-    RawPtr<Document> m_document;
+    Document* m_document;
 };
 
 } // namespace blink

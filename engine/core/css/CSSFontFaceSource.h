@@ -36,7 +36,7 @@ class CSSFontFace;
 class FontDescription;
 class SimpleFontData;
 
-class CSSFontFaceSource : public DummyBase<CSSFontFaceSource> {
+class CSSFontFaceSource {
 public:
     virtual ~CSSFontFaceSource();
 

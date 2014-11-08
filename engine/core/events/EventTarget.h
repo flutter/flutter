@@ -75,10 +75,7 @@ public:
 //   EventTarget directly).
 // - Figure out if you now need to inherit from ActiveDOMObject as well.
 // - In your class declaration, you will typically use
-//   REFCOUNTED_EVENT_TARGET(YourClassName) and
-//   WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(YourClassName). Make sure to include
-//   this header file in your .h file, or you will get very strange compiler
-//   errors.
+//   REFCOUNTED_EVENT_TARGET(YourClassName).
 // - Call ScriptWrappable::init(this) in your constructor, unless you are already
 //   doing so.
 // - Override EventTarget::interfaceName() and executionContext(). The former
@@ -89,7 +86,7 @@ public:
 //
 // Optionally, add a FooEvent.idl class, but that's outside the scope of this
 // comment (and much more straightforward).
-class EventTarget : public DummyBase<void>, public ScriptWrappable {
+class EventTarget : public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
 #if !ENABLE(OILPAN)

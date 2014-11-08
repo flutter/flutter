@@ -46,7 +46,6 @@ class AnimationPlayer final : public RefCounted<AnimationPlayer>
     , public EventTargetWithInlineData {
     DEFINE_WRAPPERTYPEINFO();
     REFCOUNTED_EVENT_TARGET(AnimationPlayer);
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(AnimationPlayer);
 public:
     enum AnimationPlayState {
         Idle,

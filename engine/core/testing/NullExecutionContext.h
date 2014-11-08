@@ -14,7 +14,6 @@
 namespace blink {
 
 class NullExecutionContext final : public RefCounted<NullExecutionContext>, public ExecutionContext {
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(NullExecutionContext);
 public:
     NullExecutionContext();
 

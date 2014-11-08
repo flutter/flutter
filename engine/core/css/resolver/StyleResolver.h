@@ -92,8 +92,8 @@ public:
 };
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
-class StyleResolver final : public DummyBase<StyleResolver> {
-    WTF_MAKE_NONCOPYABLE(StyleResolver); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+class StyleResolver final {
+    WTF_MAKE_NONCOPYABLE(StyleResolver); WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit StyleResolver(Document&);
     virtual ~StyleResolver();

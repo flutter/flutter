@@ -31,17 +31,8 @@
 #ifndef Handle_h
 #define Handle_h
 
-#include "wtf/HashFunctions.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RawPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/TypeTraits.h"
-#include "wtf/text/AtomicString.h"
+#include "wtf/StdLibExtras.h"
 
-// Classes that contain heap references but aren't themselves heap
-// allocated, have some extra macros available which allows their use
-// to be restricted to cases where the garbage collector is able
-// to discover their heap references.
 //
 // STACK_ALLOCATED(): Use if the object is only stack allocated. Heap objects
 // should be in Members but you do not need the trace method as they are on
@@ -99,10 +90,6 @@ namespace blink {
 class Visitor {
 public:
     template<typename T>
-    void mark(T* t)
-    {
-    }
-    template<typename T>
     void trace(const T* t)
     {
     }
@@ -116,16 +103,6 @@ public:
     }
 };
 
-#define WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(TYPE)
-
-template<typename T>
-class DummyBase {
-public:
-    DummyBase() { }
-    ~DummyBase() { }
-};
-
-#define WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED WTF_MAKE_FAST_ALLOCATED
 #define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) \
     public:                                            \
         ~type();                                       \

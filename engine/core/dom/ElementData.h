@@ -47,7 +47,7 @@ class UniqueElementData;
 // ElementData represents very common, but not necessarily unique to an element,
 // data such as attributes, inline style, and parsed class names and ids.
 class ElementData : public RefCounted<ElementData> {
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     // Override RefCounted's deref() to ensure operator delete is called on
     // the appropriate subclass type.

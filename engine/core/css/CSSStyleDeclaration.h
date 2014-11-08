@@ -35,9 +35,9 @@ class CSSValue;
 class ExceptionState;
 class MutableStylePropertySet;
 
-class CSSStyleDeclaration : public DummyBase<CSSStyleDeclaration>, public ScriptWrappable {
+class CSSStyleDeclaration : public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
-    WTF_MAKE_NONCOPYABLE(CSSStyleDeclaration); WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_NONCOPYABLE(CSSStyleDeclaration); WTF_MAKE_FAST_ALLOCATED;
 public:
     virtual ~CSSStyleDeclaration() { }
 

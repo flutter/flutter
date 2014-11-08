@@ -99,7 +99,6 @@ class WebGLRenderingContextLostCallback;
 class WebGLRenderingContextErrorMessageCallback;
 
 class WebGLRenderingContextBase: public CanvasRenderingContext, public ActiveDOMObject, public Page::MultisamplingChangedObserver {
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(WebGLRenderingContextBase);
 public:
     virtual ~WebGLRenderingContextBase();
 
@@ -573,7 +572,7 @@ protected:
         DraftExtension                  = 0x01,
     };
 
-    class ExtensionTracker : public DummyBase<ExtensionTracker> {
+    class ExtensionTracker {
     public:
         ExtensionTracker(ExtensionFlags flags, const char* const* prefixes)
             : m_draft(flags & DraftExtension)

@@ -29,6 +29,7 @@
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "core/html/canvas/WebGLSharedObject.h"
 #include "wtf/PassRefPtr.h"
+#include "wtf/RefPtr.h"
 
 namespace blink {
 

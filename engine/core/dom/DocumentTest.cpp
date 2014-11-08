@@ -56,10 +56,7 @@ void DocumentTest::SetUp()
     m_dummyPageHolder = DummyPageHolder::create(IntSize(800, 600));
 }
 
-class MockDocumentVisibilityObserver
-    : public DummyBase<MockDocumentVisibilityObserver>
-    , public DocumentVisibilityObserver {
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(MockDocumentVisibilityObserver);
+class MockDocumentVisibilityObserver : public DocumentVisibilityObserver {
 public:
     static PassOwnPtr<MockDocumentVisibilityObserver> create(Document& document)
     {

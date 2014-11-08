@@ -52,8 +52,6 @@ public:
 
     void detachContext();
 
-    virtual void trace(Visitor*) override;
-
 protected:
     explicit WebGLContextObject(WebGLRenderingContextBase*);
 
@@ -65,7 +63,7 @@ protected:
     virtual blink::WebGraphicsContext3D* getAWebGraphicsContext3D() const override final;
 
 private:
-    RawPtr<WebGLRenderingContextBase> m_context;
+    WebGLRenderingContextBase* m_context;
 #if ENABLE(OILPAN)
     RefPtr<WebGLSharedWebGraphicsContext3D> m_sharedWebGraphicsContext3D;
 #endif

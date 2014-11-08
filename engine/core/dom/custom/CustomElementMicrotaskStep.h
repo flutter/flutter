@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class CustomElementMicrotaskStep : public DummyBase<CustomElementMicrotaskStep> {
+class CustomElementMicrotaskStep {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskStep);
 public:
     CustomElementMicrotaskStep() { }

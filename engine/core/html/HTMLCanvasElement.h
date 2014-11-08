@@ -57,7 +57,7 @@ class ImageBuffer;
 class ImageBufferSurface;
 class IntSize;
 
-class CanvasObserver : public DummyBase<void> {
+class CanvasObserver {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(CanvasObserver);
 public:
     virtual void canvasChanged(HTMLCanvasElement*, const FloatRect& changedRect) = 0;
@@ -69,7 +69,6 @@ public:
 
 class HTMLCanvasElement final : public HTMLElement, public DocumentVisibilityObserver, public CanvasImageSource, public ImageBufferClient {
     DEFINE_WRAPPERTYPEINFO();
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(HTMLCanvasElement);
 public:
     DECLARE_NODE_FACTORY(HTMLCanvasElement);
     virtual ~HTMLCanvasElement();

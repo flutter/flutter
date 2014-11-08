@@ -38,7 +38,7 @@ namespace blink {
 
 class Element;
 
-class CustomElementObserver : public DummyBase<CustomElementObserver> {
+class CustomElementObserver {
 public:
     virtual ~CustomElementObserver() { }
 

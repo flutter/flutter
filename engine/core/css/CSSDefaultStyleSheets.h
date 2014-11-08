@@ -23,7 +23,8 @@
 #ifndef CSSDefaultStyleSheets_h
 #define CSSDefaultStyleSheets_h
 
-#include "platform/heap/Handle.h"
+#include "wtf/OwnPtr.h"
+#include "wtf/RefPtr.h"
 
 namespace blink {
 
@@ -31,19 +32,15 @@ class Element;
 class RuleSet;
 class StyleSheetContents;
 
-class CSSDefaultStyleSheets : public DummyBase<CSSDefaultStyleSheets> {
+class CSSDefaultStyleSheets {
 public:
     static CSSDefaultStyleSheets& instance();
-
-    void ensureDefaultStyleSheetsForElement(Element*, bool& changedDefaultStyle);
 
     RuleSet* defaultStyle() { return m_defaultStyle.get(); }
     RuleSet* defaultViewportStyle() { return m_defaultViewportStyle.get(); }
 
     StyleSheetContents* defaultStyleSheet() { return m_defaultStyleSheet.get(); }
     StyleSheetContents* viewportStyleSheet() { return m_viewportStyleSheet.get(); }
-
-    void trace(Visitor*);
 
 private:
     CSSDefaultStyleSheets();

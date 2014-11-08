@@ -71,10 +71,4 @@ blink::WebGraphicsContext3D* WebGLContextObject::getAWebGraphicsContext3D() cons
 #endif
 }
 
-void WebGLContextObject::trace(Visitor* visitor)
-{
-    visitor->trace(m_context);
-    WebGLObject::trace(visitor);
-}
-
 }

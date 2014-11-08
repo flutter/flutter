@@ -83,7 +83,6 @@ enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForw
 class LocalDOMWindow final : public RefCounted<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
     DEFINE_WRAPPERTYPEINFO();
     REFCOUNTED_EVENT_TARGET(LocalDOMWindow);
-    WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LocalDOMWindow);
 public:
     static PassRefPtr<LocalDOMWindow> create(LocalFrame& frame)
     {

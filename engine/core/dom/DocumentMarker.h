@@ -35,7 +35,7 @@ class DocumentMarkerDetails;
 // It optionally includes a description that could be displayed in the user interface.
 // It also optionally includes a flag specifying whether the match is active, which is ignored
 // for all types other than type TextMatch.
-class DocumentMarker : public DummyBase<DocumentMarker> {
+class DocumentMarker {
 public:
     enum MarkerTypeIndex {
         SpellingMarkerIndex = 0,

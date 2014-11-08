@@ -38,9 +38,9 @@
 
 namespace blink {
 
-class ElementShadow final : public DummyBase<ElementShadow> {
+class ElementShadow final {
     WTF_MAKE_NONCOPYABLE(ElementShadow);
-    WTF_MAKE_FAST_ALLOCATED_WILL_BE_REMOVED;
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<ElementShadow> create();
     ~ElementShadow();

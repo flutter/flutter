@@ -36,7 +36,7 @@
 
 namespace blink {
 
-class ResourceLoaderSet final : public DummyBase<ResourceLoaderSet> {
+class ResourceLoaderSet final {
 public:
     typedef HashSet<RefPtr<ResourceLoader> > SetType;
 

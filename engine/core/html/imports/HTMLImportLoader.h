@@ -45,8 +45,7 @@ class Document;
 class HTMLImportChild;
 class HTMLImportsController;
 
-class HTMLImportLoader final : public DummyBase<HTMLImportLoader>,
-                               public MojoFetcher::Client {
+class HTMLImportLoader final : public MojoFetcher::Client {
 public:
     enum State {
         StateLoading,

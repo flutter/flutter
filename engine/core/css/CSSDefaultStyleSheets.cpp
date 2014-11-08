@@ -83,16 +83,4 @@ CSSDefaultStyleSheets::CSSDefaultStyleSheets()
     m_defaultViewportStyle->addRulesFromSheet(viewportStyleSheet(), screenEval());
 }
 
-void CSSDefaultStyleSheets::ensureDefaultStyleSheetsForElement(Element* element, bool& changedDefaultStyle)
-{
-}
-
-void CSSDefaultStyleSheets::trace(Visitor* visitor)
-{
-    visitor->trace(m_defaultStyle);
-    visitor->trace(m_defaultViewportStyle);
-    visitor->trace(m_defaultStyleSheet);
-    visitor->trace(m_viewportStyleSheet);
-}
-
 } // namespace blink

@@ -6,6 +6,7 @@
 #include "platform/graphics/gpu/Extensions3DUtil.h"
 
 #include "public/platform/WebGraphicsContext3D.h"
+#include "wtf/PassOwnPtr.h"
 #include "wtf/text/CString.h"
 #include "wtf/text/StringHash.h"
 

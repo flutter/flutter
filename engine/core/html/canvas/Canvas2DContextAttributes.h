@@ -30,6 +30,7 @@
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "core/html/canvas/CanvasContextAttributes.h"
 #include "wtf/PassRefPtr.h"
+#include "wtf/text/WTFString.h"
 
 namespace blink {
 
