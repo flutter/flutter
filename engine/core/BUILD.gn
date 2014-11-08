@@ -115,7 +115,6 @@ source_set("core_generated") {
     "//skia",
     "//third_party/iccjpeg",
     "//third_party/libpng",
-    "//third_party/libxml",
     "//third_party/qcms",
     "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
     "//sky/engine/wtf",
