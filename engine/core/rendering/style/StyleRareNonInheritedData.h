@@ -43,7 +43,6 @@
 
 namespace blink {
 
-class ContentData;
 class CSSAnimationData;
 class CSSTransitionData;
 class LengthSize;
@@ -75,7 +74,6 @@ public:
     bool operator==(const StyleRareNonInheritedData&) const;
     bool operator!=(const StyleRareNonInheritedData& o) const { return !(*this == o); }
 
-    bool contentDataEquivalent(const StyleRareNonInheritedData&) const;
     bool counterDataEquivalent(const StyleRareNonInheritedData&) const;
     bool shadowDataEquivalent(const StyleRareNonInheritedData&) const;
     bool animationDataEquivalent(const StyleRareNonInheritedData&) const;
@@ -100,7 +98,6 @@ public:
 
     DataRef<StyleFilterData> m_filter; // Filter operations (url, sepia, blur, etc.)
 
-    OwnPtr<ContentData> m_content;
     OwnPtr<CounterDirectiveMap> m_counterDirectives;
 
     RefPtr<ShadowList> m_boxShadow;

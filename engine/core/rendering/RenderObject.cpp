@@ -59,7 +59,6 @@
 #include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/ShadowList.h"
 #include "platform/JSONValues.h"
 #include "platform/Partitions.h"

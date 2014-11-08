@@ -141,7 +141,6 @@ box-shadow animatable, converter=convertShadow
 box-sizing
 caption-side inherited
 clip animatable, converter=convertClip, custom_all
-content custom_all
 cursor inherited, custom_all
 display
 empty-cells inherited, type_name=EEmptyCell

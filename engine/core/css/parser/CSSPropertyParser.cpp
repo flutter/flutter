@@ -487,10 +487,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
             parsedValue = parseQuotes();
         break;
 
-    case CSSPropertyContent:              // [ <string> | <uri> | <counter> | attr(X) | open-quote |
-        // close-quote | no-open-quote | no-close-quote ]+ | inherit
-        return parseContent(propId, important);
-
     case CSSPropertyClip:                 // <shape> | auto | inherit
         if (id == CSSValueAuto)
             validPrimitive = true;
@@ -1880,66 +1876,6 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseQuotes()
     if (values->length() && values->length() % 2 == 0)
         return values.release();
     return nullptr;
-}
-
-// [ <string> | <uri> | <counter> | attr(X) | open-quote | close-quote | no-open-quote | no-close-quote ]+ | inherit
-// in CSS 2.1 this got somewhat reduced:
-// [ <string> | attr(X) | open-quote | close-quote | no-open-quote | no-close-quote ]+ | inherit
-bool CSSPropertyParser::parseContent(CSSPropertyID propId, bool important)
-{
-    RefPtr<CSSValueList> values = CSSValueList::createCommaSeparated();
-
-    while (CSSParserValue* val = m_valueList->current()) {
-        RefPtr<CSSValue> parsedValue = nullptr;
-        if (val->unit == CSSPrimitiveValue::CSS_URI) {
-            // url
-            parsedValue = createCSSImageValueWithReferrer(val->string, completeURL(val->string));
-        } else if (val->unit == CSSParserValue::Function) {
-            // attr(X) | counter(X [,Y]) | counters(X, Y, [,Z]) | -webkit-gradient(...)
-            CSSParserValueList* args = val->function->args.get();
-            if (!args)
-                return false;
-            if (equalIgnoringCase(val->function->name, "attr(")) {
-                parsedValue = parseAttr(args);
-                if (!parsedValue)
-                    return false;
-            } else if (equalIgnoringCase(val->function->name, "-webkit-image-set(")) {
-                parsedValue = parseImageSet(m_valueList);
-                if (!parsedValue)
-                    return false;
-            } else if (isGeneratedImageValue(val)) {
-                if (!parseGeneratedImage(m_valueList, parsedValue))
-                    return false;
-            } else
-                return false;
-        } else if (val->unit == CSSPrimitiveValue::CSS_IDENT) {
-            // inherit
-            // FIXME: These are not yet implemented (http://bugs.webkit.org/show_bug.cgi?id=6503).
-            // none
-            // normal
-            switch (val->id) {
-            case CSSValueNone:
-            case CSSValueNormal:
-                parsedValue = cssValuePool().createIdentifierValue(val->id);
-            default:
-                break;
-            }
-        } else if (val->unit == CSSPrimitiveValue::CSS_STRING) {
-            parsedValue = createPrimitiveStringValue(val);
-        }
-        if (!parsedValue)
-            break;
-        values->append(parsedValue.release());
-        m_valueList->next();
-    }
-
-    if (values->length()) {
-        addProperty(propId, values.release(), important);
-        m_valueList->next();
-        return true;
-    }
-
-    return false;
 }
 
 PassRefPtr<CSSValue> CSSPropertyParser::parseAttr(CSSParserValueList* args)

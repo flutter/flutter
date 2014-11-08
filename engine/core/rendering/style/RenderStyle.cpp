@@ -27,7 +27,6 @@
 #include "core/css/resolver/StyleResolver.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/style/AppliedTextDecoration.h"
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/DataEquivalency.h"
 #include "core/rendering/style/QuotesData.h"
 #include "core/rendering/style/ShadowList.h"
@@ -147,7 +146,6 @@ StyleRecalcChange RenderStyle::stylePropagationDiff(const RenderStyle* oldStyle,
         return NoChange;
 
     if (oldStyle->display() != newStyle->display()
-        || !oldStyle->contentDataEquivalent(newStyle)
         || oldStyle->justifyItems() != newStyle->justifyItems()
         || oldStyle->alignItems() != newStyle->alignItems())
         return Reattach;
@@ -560,61 +558,6 @@ void RenderStyle::clearCursorList()
 {
     if (rareInheritedData->cursorData)
         rareInheritedData.access()->cursorData = nullptr;
-}
-
-void RenderStyle::clearContent()
-{
-    if (rareNonInheritedData->m_content)
-        rareNonInheritedData.access()->m_content = nullptr;
-}
-
-void RenderStyle::appendContent(PassOwnPtr<ContentData> contentData)
-{
-    OwnPtr<ContentData>& content = rareNonInheritedData.access()->m_content;
-    ContentData* lastContent = content.get();
-    while (lastContent && lastContent->next())
-        lastContent = lastContent->next();
-
-    if (lastContent)
-        lastContent->setNext(contentData);
-    else
-        content = contentData;
-}
-
-void RenderStyle::setContent(PassRefPtr<StyleImage> image, bool add)
-{
-    if (!image)
-        return;
-
-    if (add) {
-        appendContent(ContentData::create(image));
-        return;
-    }
-
-    rareNonInheritedData.access()->m_content = ContentData::create(image);
-}
-
-void RenderStyle::setContent(const String& string, bool add)
-{
-    OwnPtr<ContentData>& content = rareNonInheritedData.access()->m_content;
-    if (add) {
-        ContentData* lastContent = content.get();
-        while (lastContent && lastContent->next())
-            lastContent = lastContent->next();
-
-        if (lastContent) {
-            // We attempt to merge with the last ContentData if possible.
-            if (lastContent->isText()) {
-                TextContentData* textContent = toTextContentData(lastContent);
-                textContent->setText(textContent->text() + string);
-            } else
-                lastContent->setNext(ContentData::create(string));
-
-            return;
-        }
-    }
-
-    content = ContentData::create(string);
 }
 
 WebBlendMode RenderStyle::blendMode() const

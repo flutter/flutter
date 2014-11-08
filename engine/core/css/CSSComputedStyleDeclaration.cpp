@@ -53,7 +53,6 @@
 #include "core/dom/Document.h"
 #include "core/dom/ExceptionCode.h"
 #include "core/rendering/RenderBox.h"
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/ShadowList.h"
 #include "core/rendering/style/ShapeValue.h"
@@ -1131,21 +1130,6 @@ static PassRefPtr<CSSValue> valueForFillSize(const FillSize& fillSize, const Ren
     return list.release();
 }
 
-static PassRefPtr<CSSValue> valueForContentData(const RenderStyle& style)
-{
-    RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
-    for (const ContentData* contentData = style.contentData(); contentData; contentData = contentData->next()) {
-        if (contentData->isImage()) {
-            const StyleImage* image = toImageContentData(contentData)->image();
-            ASSERT(image);
-            list->append(image->cssValue());
-        } else if (contentData->isText()) {
-            list->append(cssValuePool().createValue(toTextContentData(contentData)->text(), CSSPrimitiveValue::CSS_STRING));
-        }
-    }
-    return list.release();
-}
-
 static void logUnimplementedPropertyID(CSSPropertyID propertyID)
 {
     DEFINE_STATIC_LOCAL(HashSet<CSSPropertyID>, propertyIDSet, ());
@@ -2182,8 +2166,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return CSSPrimitiveValue::create(style->textOrientation());
         case CSSPropertyWebkitLineBoxContain:
             return createLineBoxContainValue(style->lineBoxContain());
-        case CSSPropertyContent:
-            return valueForContentData(*style);
         case CSSPropertyWebkitClipPath:
             if (ClipPathOperation* operation = style->clipPath()) {
                 if (operation->type() == ClipPathOperation::SHAPE)

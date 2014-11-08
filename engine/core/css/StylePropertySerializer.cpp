@@ -88,10 +88,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyBackgroundRepeatY:
             shorthandPropertyAppeared.set(CSSPropertyBackground - firstCSSProperty);
             continue;
-        case CSSPropertyContent:
-            if (property.value()->isValueList())
-                value = toCSSValueList(property.value())->customCSSText(AlwaysQuoteCSSString);
-            break;
         case CSSPropertyBorderTopWidth:
         case CSSPropertyBorderRightWidth:
         case CSSPropertyBorderBottomWidth:

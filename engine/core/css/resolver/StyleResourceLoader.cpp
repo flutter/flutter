@@ -28,7 +28,6 @@
 #include "core/css/CSSImageValue.h"
 #include "core/css/resolver/ElementStyleResources.h"
 #include "core/fetch/ResourceFetcher.h"
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/FillLayer.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/StyleFetchedImage.h"
@@ -83,19 +82,6 @@ void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleReso
             for (FillLayer* backgroundLayer = &style->accessBackgroundLayers(); backgroundLayer; backgroundLayer = backgroundLayer->next()) {
                 if (backgroundLayer->image() && backgroundLayer->image()->isPendingImage())
                     backgroundLayer->setImage(loadPendingImage(toStylePendingImage(backgroundLayer->image()), elementStyleResources.deviceScaleFactor()));
-            }
-            break;
-        }
-        case CSSPropertyContent: {
-            for (ContentData* contentData = const_cast<ContentData*>(style->contentData()); contentData; contentData = contentData->next()) {
-                if (contentData->isImage()) {
-                    StyleImage* image = toImageContentData(contentData)->image();
-                    if (image->isPendingImage()) {
-                        RefPtr<StyleImage> loadedImage = loadPendingImage(toStylePendingImage(image), elementStyleResources.deviceScaleFactor());
-                        if (loadedImage)
-                            toImageContentData(contentData)->setImage(loadedImage.release());
-                    }
-                }
             }
             break;
         }

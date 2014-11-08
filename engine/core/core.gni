@@ -1098,7 +1098,6 @@ sky_core_files = [
   "rendering/style/BasicShapes.cpp",
   "rendering/style/BorderImageLength.h",
   "rendering/style/BorderImageLengthBox.h",
-  "rendering/style/ContentData.cpp",
   "rendering/style/CounterDirectives.cpp",
   "rendering/style/FillLayer.cpp",
   "rendering/style/KeyframeList.cpp",

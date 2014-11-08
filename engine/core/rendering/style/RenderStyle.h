@@ -100,8 +100,6 @@ class StyleInheritedData;
 class StyleResolver;
 class TransformationMatrix;
 
-class ContentData;
-
 class RenderStyle: public RefCounted<RenderStyle> {
     friend class AnimatedStyleBuilder; // Used by Web Animations CSS. Sets the color styles
     friend class CSSAnimatableValueFactory; // Used by Web Animations CSS. Gets visited and unvisited colors separately.
@@ -1202,13 +1200,6 @@ public:
 
     static ClipPathOperation* initialClipPath() { return 0; }
 
-    bool hasContent() const { return contentData(); }
-    const ContentData* contentData() const { return rareNonInheritedData->m_content.get(); }
-    bool contentDataEquivalent(const RenderStyle* otherStyle) const { return const_cast<RenderStyle*>(this)->rareNonInheritedData->contentDataEquivalent(*const_cast<RenderStyle*>(otherStyle)->rareNonInheritedData); }
-    void clearContent();
-    void setContent(const String&, bool add = false);
-    void setContent(PassRefPtr<StyleImage>, bool add = false);
-
     const CounterDirectiveMap* counterDirectives() const;
     CounterDirectiveMap& accessCounterDirectives();
     const CounterDirectives getCounterDirectives(const AtomicString& identifier) const;
@@ -1443,7 +1434,6 @@ private:
 
     StyleColor textDecorationColor() const { return rareNonInheritedData->m_textDecorationColor; }
 
-    void appendContent(PassOwnPtr<ContentData>);
     void addAppliedTextDecoration(const AppliedTextDecoration&);
 
     bool diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& other) const;

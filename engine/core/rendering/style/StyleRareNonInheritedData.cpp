@@ -22,7 +22,6 @@
 #include "config.h"
 #include "core/rendering/style/StyleRareNonInheritedData.h"
 
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/DataEquivalency.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/ShadowList.h"
@@ -97,7 +96,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_transform(o.m_transform)
     , m_willChange(o.m_willChange)
     , m_filter(o.m_filter)
-    , m_content(o.m_content ? o.m_content->clone() : nullptr)
     , m_counterDirectives(o.m_counterDirectives ? clone(*o.m_counterDirectives) : nullptr)
     , m_boxShadow(o.m_boxShadow)
     , m_animations(o.m_animations ? CSSAnimationData::create(*o.m_animations) : nullptr)
@@ -164,7 +162,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_transform == o.m_transform
         && m_willChange == o.m_willChange
         && m_filter == o.m_filter
-        && contentDataEquivalent(o)
         && counterDataEquivalent(o)
         && shadowDataEquivalent(o)
         && animationDataEquivalent(o)
@@ -208,19 +205,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_scrollBehavior == o.m_scrollBehavior
         && m_requiresAcceleratedCompositingForExternalReasons == o.m_requiresAcceleratedCompositingForExternalReasons
         && m_hasInlineTransform == o.m_hasInlineTransform;
-}
-
-bool StyleRareNonInheritedData::contentDataEquivalent(const StyleRareNonInheritedData& o) const
-{
-    ContentData* a = m_content.get();
-    ContentData* b = o.m_content.get();
-
-    while (a && b && *a == *b) {
-        a = a->next();
-        b = b->next();
-    }
-
-    return !a && !b;
 }
 
 bool StyleRareNonInheritedData::counterDataEquivalent(const StyleRareNonInheritedData& o) const

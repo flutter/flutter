@@ -46,7 +46,6 @@
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
 #include "core/rendering/RenderView.h"
-#include "core/rendering/style/ContentData.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/geometry/FloatQuad.h"
 #include "platform/geometry/TransformState.h"
@@ -137,9 +136,6 @@ static void appendImagesFromStyle(Vector<ImageResource*>& images, RenderStyle& b
     appendLayers(images, blockStyle.backgroundLayers());
     appendLayers(images, blockStyle.maskLayers());
 
-    const ContentData* contentData = blockStyle.contentData();
-    if (contentData && contentData->isImage())
-        appendImageIfNotNull(images, toImageContentData(contentData)->image());
     appendImageIfNotNull(images, blockStyle.listStyleImage());
     appendImageIfNotNull(images, blockStyle.borderImageSource());
     appendImageIfNotNull(images, blockStyle.maskBoxImageSource());

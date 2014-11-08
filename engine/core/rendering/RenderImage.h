@@ -50,10 +50,6 @@ public:
 
     void highQualityRepaintTimerFired(Timer<RenderImage>*);
 
-    void setIsGeneratedContent(bool generated = true) { m_isGeneratedContent = generated; }
-
-    bool isGeneratedContent() const { return m_isGeneratedContent; }
-
     String altText() const { return m_altText; }
 
     inline void setImageDevicePixelRatio(float factor) { m_imageDevicePixelRatio = factor; }
@@ -105,7 +101,6 @@ private:
     // Text to display as long as the image isn't available.
     String m_altText;
     OwnPtr<RenderImageResource> m_imageResource;
-    bool m_isGeneratedContent;
     float m_imageDevicePixelRatio;
 
     friend class RenderImageScaleObserver;

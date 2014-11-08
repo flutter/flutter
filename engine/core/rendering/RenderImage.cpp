@@ -51,7 +51,6 @@ float deviceScaleFactor(LocalFrame*);
 
 RenderImage::RenderImage(Element* element)
     : RenderReplaced(element, IntSize())
-    , m_isGeneratedContent(false)
     , m_imageDevicePixelRatio(1.0f)
 {
     updateAltText();
