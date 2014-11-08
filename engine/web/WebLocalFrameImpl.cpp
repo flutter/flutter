@@ -138,17 +138,12 @@
 #include "public/platform/WebURLError.h"
 #include "public/platform/WebVector.h"
 #include "public/web/WebConsoleMessage.h"
-#include "public/web/WebDOMEvent.h"
 #include "public/web/WebDocument.h"
 #include "public/web/WebElement.h"
-#include "public/web/WebFindOptions.h"
 #include "public/web/WebFrameClient.h"
-#include "public/web/WebIconURL.h"
 #include "public/web/WebNode.h"
-#include "public/web/WebPerformance.h"
 #include "public/web/WebRange.h"
 #include "public/web/WebScriptSource.h"
-#include "public/web/WebSerializedScriptValue.h"
 #include "web/CompositionUnderlineVectorBuilder.h"
 #include "web/WebViewImpl.h"
 #include "wtf/CurrentTime.h"
@@ -263,11 +258,6 @@ WebDocument WebLocalFrameImpl::document() const
     if (!frame() || !frame()->document())
         return WebDocument();
     return WebDocument(frame()->document());
-}
-
-WebPerformance WebLocalFrameImpl::performance() const
-{
-    return WebPerformance();
 }
 
 void WebLocalFrameImpl::executeScript(const WebScriptSource& source)

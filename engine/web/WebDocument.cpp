@@ -44,8 +44,6 @@
 #include "core/rendering/RenderObject.h"
 #include "core/rendering/RenderView.h"
 #include "public/platform/WebURL.h"
-#include "public/web/WebDOMEvent.h"
-#include "public/web/WebDocumentType.h"
 #include "public/web/WebElement.h"
 #include "web/WebLocalFrameImpl.h"
 #include "wtf/PassRefPtr.h"
@@ -111,15 +109,6 @@ WebElement WebDocument::getElementById(const WebString& id) const
 WebElement WebDocument::focusedElement() const
 {
     return WebElement(constUnwrap<Document>()->focusedElement());
-}
-
-WebDOMEvent WebDocument::createEvent(const WebString& eventType)
-{
-    TrackExceptionState exceptionState;
-    WebDOMEvent event(unwrap<Document>()->createEvent(eventType, exceptionState));
-    if (exceptionState.hadException())
-        return WebDOMEvent();
-    return event;
 }
 
 WebReferrerPolicy WebDocument::referrerPolicy() const

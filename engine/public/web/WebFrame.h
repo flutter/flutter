@@ -32,7 +32,6 @@
 #define WebFrame_h
 
 #include "WebCompositionUnderline.h"
-#include "WebIconURL.h"
 #include "WebNode.h"
 #include "WebURLLoaderOptions.h"
 #include "public/platform/WebCanvas.h"
@@ -61,7 +60,6 @@ class WebElement;
 class WebFrameClient;
 class WebLayer;
 class WebLocalFrame;
-class WebPerformance;
 class WebRange;
 class WebString;
 class WebURL;
@@ -69,7 +67,6 @@ class WebURLLoader;
 class WebURLRequest;
 class WebView;
 struct WebConsoleMessage;
-struct WebFindOptions;
 struct WebFloatPoint;
 struct WebFloatRect;
 struct WebPoint;
@@ -124,8 +121,6 @@ public:
     // Content ------------------------------------------------------------
 
     virtual WebDocument document() const = 0;
-
-    virtual WebPerformance performance() const = 0;
 
 
     // Closing -------------------------------------------------------------

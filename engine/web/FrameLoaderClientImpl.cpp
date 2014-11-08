@@ -54,7 +54,6 @@
 #include "public/platform/WebURLError.h"
 #include "public/platform/WebVector.h"
 #include "public/web/WebCachedURLRequest.h"
-#include "public/web/WebDOMEvent.h"
 #include "public/web/WebDocument.h"
 #include "public/web/WebFrameClient.h"
 #include "public/web/WebNode.h"

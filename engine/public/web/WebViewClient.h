@@ -34,7 +34,6 @@
 #include "../platform/WebGraphicsContext3D.h"
 #include "../platform/WebString.h"
 #include "WebContentDetectionResult.h"
-#include "WebDragOperation.h"
 #include "WebFrame.h"
 #include "WebNavigatorContentUtilsClient.h"
 #include "WebPageVisibilityState.h"

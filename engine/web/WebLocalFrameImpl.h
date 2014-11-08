@@ -48,7 +48,6 @@ class KURL;
 class Node;
 class Range;
 class WebFrameClient;
-class WebPerformance;
 class WebView;
 class WebViewImpl;
 
@@ -70,7 +69,6 @@ public:
     virtual bool hasVerticalScrollbar() const override;
     virtual WebView* view() const override;
     virtual WebDocument document() const override;
-    virtual WebPerformance performance() const override;
     virtual void executeScript(const WebScriptSource&) override;
     virtual void executeScriptInIsolatedWorld(
         int worldID, const WebScriptSource* sources, unsigned numSources,

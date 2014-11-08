@@ -68,8 +68,6 @@
 #include "public/web/WebNavigationPolicy.h"
 #include "public/web/WebNavigatorContentUtilsClient.h"
 #include "public/web/WebNode.h"
-#include "public/web/WebPageVisibilityState.h"
-#include "public/web/WebSerializedScriptValueVersion.h"
 #include "public/web/WebSettings.h"
 #include "public/web/WebTextAffinity.h"
 #include "public/web/WebTextCheckingResult.h"
@@ -254,7 +252,5 @@ COMPILE_ASSERT_MATCHING_ENUM(WebSettings::PointerTypeFine, PointerTypeFine);
 COMPILE_ASSERT_MATCHING_ENUM(WebSettings::HoverTypeNone, HoverTypeNone);
 COMPILE_ASSERT_MATCHING_ENUM(WebSettings::HoverTypeOnDemand, HoverTypeOnDemand);
 COMPILE_ASSERT_MATCHING_ENUM(WebSettings::HoverTypeHover, HoverTypeHover);
-
-COMPILE_ASSERT_MATCHING_UINT64(kSerializedScriptValueVersion, SerializedScriptValue::wireFormatVersion);
 
 } // namespace blink

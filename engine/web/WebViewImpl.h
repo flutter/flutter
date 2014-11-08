@@ -429,14 +429,6 @@ private:
     // Represents whether or not this object should process incoming IME events.
     bool m_imeAcceptEvents;
 
-    // The available drag operations (copy, move link...) allowed by the source.
-    WebDragOperation m_operationsAllowed;
-
-    // The current drag operation as negotiated by the source and destination.
-    // When not equal to DragOperationNone, the drag data can be dropped onto the
-    // current drop target in this WebView (the drop target can accept the drop).
-    WebDragOperation m_dragOperation;
-
     // Whether the webview is rendering transparently.
     bool m_isTransparent;
 

@@ -43,7 +43,6 @@
 #include "platform/Widget.h"
 #include "public/platform/WebString.h"
 #include "public/platform/WebVector.h"
-#include "public/web/WebDOMEvent.h"
 #include "public/web/WebDocument.h"
 #include "public/web/WebElement.h"
 #include "web/FrameLoaderClientImpl.h"
@@ -147,13 +146,6 @@ bool WebNode::isContentEditable() const
 bool WebNode::isElementNode() const
 {
     return m_private->isElementNode();
-}
-
-bool WebNode::dispatchEvent(const WebDOMEvent& event)
-{
-    if (!event.isNull())
-        return m_private->dispatchEvent(event);
-    return false;
 }
 
 void WebNode::simulateClick()

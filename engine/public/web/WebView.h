@@ -34,7 +34,6 @@
 #include "../platform/WebColor.h"
 #include "../platform/WebString.h"
 #include "../platform/WebVector.h"
-#include "WebDragOperation.h"
 #include "WebPageVisibilityState.h"
 #include "WebWidget.h"
 

@@ -33,7 +33,6 @@
 
 #include "../platform/WebColor.h"
 #include "WebFrame.h"
-#include "WebIconURL.h"
 #include "WebNavigationPolicy.h"
 #include "WebNavigationType.h"
 #include "WebTextDirection.h"
@@ -45,14 +44,12 @@
 namespace blink {
 
 class WebCachedURLRequest;
-class WebDOMEvent;
 class WebInputEvent;
 class WebNode;
 class WebString;
 class WebURL;
 class WebURLLoader;
 class WebURLResponse;
-struct WebColorSuggestion;
 struct WebConsoleMessage;
 struct WebRect;
 struct WebSize;

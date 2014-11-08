@@ -211,12 +211,6 @@ String UseCounter::deprecationMessage(Feature feature)
     case ElementSetPrefix:
         return "Setting 'Element.prefix' is deprecated, as it is read-only per DOM (http://dom.spec.whatwg.org/#element).";
 
-    case OpenWebDatabaseInWorker:
-        return "'openDatabase' in Workers is deprecated. Please switch to Indexed Database API.";
-
-    case OpenWebDatabaseSyncInWorker:
-        return "'openDatabaseSync' is deprecated. Please switch to Indexed Database API.";
-
     case WebSocketURL:
         return "'WebSocket.URL' is deprecated. Please use 'WebSocket.url' instead.";
 

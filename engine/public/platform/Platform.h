@@ -40,7 +40,6 @@
 #include "WebGestureDevice.h"
 #include "WebGraphicsContext3D.h"
 #include "WebLocalizedString.h"
-#include "WebPlatformEventType.h"
 #include "WebString.h"
 #include "WebURLError.h"
 #include "WebVector.h"
@@ -62,7 +61,6 @@ class WebClipboard;
 class WebCompositorSupport;
 class WebConvertableToTraceFormat;
 class WebDiscardableMemory;
-class WebPlatformEventListener;
 class WebFallbackThemeEngine;
 class WebFlingAnimator;
 class WebGestureCurveTarget;
@@ -392,18 +390,6 @@ public:
     // Creates a new fling animation curve instance for device |deviceSource|
     // with |velocity| and already scrolled |cumulativeScroll| pixels.
     virtual WebGestureCurve* createFlingAnimationCurve(WebGestureDevice deviceSource, const WebFloatPoint& velocity, const WebSize& cumulativeScroll) { return 0; }
-
-
-    // Platform events -----------------------------------------------------
-    // Device Orientation, Device Motion, Device Light, Battery, Gamepad.
-
-    // Request the platform to start listening to the events of the specified
-    // type and notify the given listener (if not null) when there is an update.
-    virtual void startListening(WebPlatformEventType type, WebPlatformEventListener* listener) { }
-
-    // Request the platform to stop listening to the specified event and no
-    // longer notify the listener, if any.
-    virtual void stopListening(WebPlatformEventType type) { }
 
 protected:
     virtual ~Platform() { }

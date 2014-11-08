@@ -50,7 +50,6 @@ namespace blink {
 
 class Document;
 class DocumentType;
-class WebDocumentType;
 class WebElement;
 class WebString;
 class WebURL;
@@ -85,8 +84,6 @@ public:
     BLINK_EXPORT WebURL completeURL(const WebString&) const;
     BLINK_EXPORT WebElement getElementById(const WebString&) const;
     BLINK_EXPORT WebElement focusedElement() const;
-    BLINK_EXPORT WebDocumentType doctype() const;
-    BLINK_EXPORT WebDOMEvent createEvent(const WebString& eventType);
     BLINK_EXPORT WebReferrerPolicy referrerPolicy() const;
     BLINK_EXPORT WebElement createElement(const WebString& tagName);
 

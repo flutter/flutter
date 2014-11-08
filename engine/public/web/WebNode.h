@@ -39,7 +39,6 @@
 namespace blink {
 
 class Node;
-class WebDOMEvent;
 class WebDocument;
 class WebElement;
 
@@ -101,7 +100,6 @@ public:
     BLINK_EXPORT bool isFocusable() const;
     BLINK_EXPORT bool isContentEditable() const;
     BLINK_EXPORT bool isElementNode() const;
-    BLINK_EXPORT bool dispatchEvent(const WebDOMEvent&);
     BLINK_EXPORT void simulateClick();
     BLINK_EXPORT WebElement querySelector(const WebString&, WebExceptionCode&) const;
     BLINK_EXPORT WebElement rootEditableElement() const;
