@@ -420,14 +420,6 @@ void ScrollableArea::cancelProgrammaticScrollAnimation()
         programmaticScrollAnimator->cancelAnimation();
 }
 
-IntRect ScrollableArea::visibleContentRect(IncludeScrollbarsInRect scrollbarInclusion) const
-{
-    return IntRect(scrollPosition().x(),
-                   scrollPosition().y(),
-                   std::max(0, visibleWidth()),
-                   std::max(0, visibleHeight()));
-}
-
 IntPoint ScrollableArea::clampScrollPosition(const IntPoint& scrollPosition) const
 {
     return scrollPosition.shrunkTo(maximumScrollPosition()).expandedTo(minimumScrollPosition());
@@ -436,15 +428,6 @@ IntPoint ScrollableArea::clampScrollPosition(const IntPoint& scrollPosition) con
 int ScrollableArea::lineStep(ScrollbarOrientation) const
 {
     return pixelsPerLineStep();
-}
-
-int ScrollableArea::pageStep(ScrollbarOrientation orientation) const
-{
-    int length = (orientation == HorizontalScrollbar) ? visibleWidth() : visibleHeight();
-    int minPageStep = static_cast<float>(length) * minFractionToStepWhenPaging();
-    int pageStep = std::max(minPageStep, length - maxOverlapBetweenPages());
-
-    return std::max(pageStep, 1);
 }
 
 int ScrollableArea::documentStep(ScrollbarOrientation orientation) const

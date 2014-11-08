@@ -61,7 +61,7 @@ public:
 
     // The window that hosts the ScrollView. The ScrollView will communicate scrolls and repaints to the
     // host window in the window's coordinate space.
-    virtual HostWindow* hostWindow() const { return 0; };
+    virtual HostWindow* hostWindow() const = 0;
 
     bool scroll(ScrollDirection, ScrollGranularity, float delta = 1);
     void scrollToOffsetWithoutAnimation(const FloatPoint&);
@@ -101,10 +101,10 @@ public:
 
     void finishCurrentScrollAnimations() const;
 
-    virtual void didAddScrollbar(Scrollbar*, ScrollbarOrientation);
-    virtual void willRemoveScrollbar(Scrollbar*, ScrollbarOrientation);
+    void didAddScrollbar(Scrollbar*, ScrollbarOrientation);
+    void willRemoveScrollbar(Scrollbar*, ScrollbarOrientation);
 
-    virtual void contentsResized();
+    void contentsResized();
 
     bool hasOverlayScrollbars() const;
     void setScrollbarOverlayStyle(ScrollbarOverlayStyle);
@@ -128,15 +128,15 @@ public:
     // FIXME(bokan): Meaningless name, rename to isActiveFocus
     virtual bool isActive() const = 0;
     virtual int scrollSize(ScrollbarOrientation) const = 0;
-    virtual void invalidateScrollbar(Scrollbar*, const IntRect&);
+    void invalidateScrollbar(Scrollbar*, const IntRect&);
 
     // Convert points and rects between the scrollbar and its containing view.
     // The client needs to implement these in order to be aware of layout effects
     // like CSS transforms.
-    virtual IntRect convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntRect& scrollbarRect) const = 0;
-    virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntRect& parentRect) const = 0;
-    virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar* scrollbar, const IntPoint& scrollbarPoint) const = 0;
-    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar* scrollbar, const IntPoint& parentPoint) const = 0;
+    virtual IntRect convertFromScrollbarToContainingView(const Scrollbar*, const IntRect&) const = 0;
+    virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar*, const IntRect&) const = 0;
+    virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar*, const IntPoint&) const = 0;
+    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar*, const IntPoint&) const = 0;
 
     virtual Scrollbar* horizontalScrollbar() const = 0;
     virtual Scrollbar* verticalScrollbar() const = 0;
@@ -147,17 +147,9 @@ public:
     virtual IntPoint minimumScrollPosition() const = 0;
     virtual IntPoint maximumScrollPosition() const = 0;
 
-    virtual IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const;
-    virtual int visibleHeight() const = 0;
-    virtual int visibleWidth() const = 0;
     virtual IntSize contentsSize() const = 0;
-    virtual IntSize overhangAmount() const { return IntSize(); }
-    virtual IntPoint lastKnownMousePosition() const { return IntPoint(); }
 
-    virtual bool shouldSuspendScrollAnimations() const { return true; }
-
-    // Returns the bounding box of this scrollable area, in the coordinate system of the enclosing scroll view.
-    virtual IntRect scrollableAreaBoundingBox() const = 0;
+    bool shouldSuspendScrollAnimations() const { return true; }
 
     // NOTE: Only called from Internals for testing.
     void setScrollOffsetFromInternals(const IntPoint&);
@@ -170,12 +162,11 @@ public:
     void serviceScrollAnimations(double monotonicTime);
 
     // Returns true if the GraphicsLayer tree needs to be rebuilt.
-    virtual bool updateAfterCompositingChange() { return false; }
+    virtual bool updateAfterCompositingChange() = 0;
 
     virtual bool userInputScrollable(ScrollbarOrientation) const = 0;
     virtual bool shouldPlaceVerticalScrollbarOnLeft() const = 0;
 
-    // Convenience functions
     int scrollPosition(ScrollbarOrientation orientation) { return orientation == HorizontalScrollbar ? scrollPosition().x() : scrollPosition().y(); }
     int minimumScrollPosition(ScrollbarOrientation orientation) { return orientation == HorizontalScrollbar ? minimumScrollPosition().x() : minimumScrollPosition().y(); }
     int maximumScrollPosition(ScrollbarOrientation orientation) { return orientation == HorizontalScrollbar ? maximumScrollPosition().x() : maximumScrollPosition().y(); }
@@ -200,10 +191,10 @@ public:
         m_horizontalBarDamage = IntRect();
     }
 
-    virtual GraphicsLayer* layerForContainer() const;
-    virtual GraphicsLayer* layerForScrolling() const { return 0; }
-    virtual GraphicsLayer* layerForHorizontalScrollbar() const { return 0; }
-    virtual GraphicsLayer* layerForVerticalScrollbar() const { return 0; }
+    GraphicsLayer* layerForContainer() const;
+    virtual GraphicsLayer* layerForScrolling() const = 0;
+    virtual GraphicsLayer* layerForHorizontalScrollbar() const = 0;
+    virtual GraphicsLayer* layerForVerticalScrollbar() const = 0;
     bool hasLayerForHorizontalScrollbar() const;
     bool hasLayerForVerticalScrollbar() const;
 
@@ -229,10 +220,10 @@ private:
     // scroll of the content.
     virtual void setScrollOffset(const IntPoint&) = 0;
 
-    virtual int lineStep(ScrollbarOrientation) const;
-    virtual int pageStep(ScrollbarOrientation) const;
-    virtual int documentStep(ScrollbarOrientation) const;
-    virtual float pixelStep(ScrollbarOrientation) const;
+    int lineStep(ScrollbarOrientation) const;
+    int documentStep(ScrollbarOrientation) const;
+    virtual int pageStep(ScrollbarOrientation) const = 0;
+    float pixelStep(ScrollbarOrientation) const;
 
     // Stores the paint invalidations for the scrollbars during layout.
     IntRect m_horizontalBarDamage;

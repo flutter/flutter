@@ -62,36 +62,36 @@ public:
     bool hasHorizontalScrollbar() const { return horizontalScrollbar(); }
     bool hasVerticalScrollbar() const { return verticalScrollbar(); }
 
-    virtual Scrollbar* horizontalScrollbar() const override { return m_hBar.get(); }
-    virtual Scrollbar* verticalScrollbar() const override { return m_vBar.get(); }
+    Scrollbar* horizontalScrollbar() const override { return m_hBar.get(); }
+    Scrollbar* verticalScrollbar() const override { return m_vBar.get(); }
 
-    virtual HostWindow* hostWindow() const override;
+    HostWindow* hostWindow() const override;
 
-    virtual GraphicsLayer* layerForScrolling() const override;
-    virtual GraphicsLayer* layerForHorizontalScrollbar() const override;
-    virtual GraphicsLayer* layerForVerticalScrollbar() const override;
-    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
-    virtual bool isActive() const override;
+    GraphicsLayer* layerForScrolling() const override;
+    GraphicsLayer* layerForHorizontalScrollbar() const override;
+    GraphicsLayer* layerForVerticalScrollbar() const override;
+    void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
+    bool isActive() const override;
     IntRect scrollCornerRect() const;
-    virtual IntRect convertFromScrollbarToContainingView(const Scrollbar*, const IntRect&) const override;
-    virtual IntRect convertFromContainingViewToScrollbar(const Scrollbar*, const IntRect&) const override;
-    virtual IntPoint convertFromScrollbarToContainingView(const Scrollbar*, const IntPoint&) const override;
-    virtual IntPoint convertFromContainingViewToScrollbar(const Scrollbar*, const IntPoint&) const override;
-    virtual int scrollSize(ScrollbarOrientation) const override;
-    virtual void setScrollOffset(const IntPoint&) override;
-    virtual IntPoint scrollPosition() const override;
-    virtual IntPoint minimumScrollPosition() const override;
-    virtual IntPoint maximumScrollPosition() const override;
-    virtual IntRect visibleContentRect(IncludeScrollbarsInRect) const override;
-    virtual int visibleHeight() const override;
-    virtual int visibleWidth() const override;
-    virtual IntSize contentsSize() const override;
-    virtual IntSize overhangAmount() const override;
-    virtual IntPoint lastKnownMousePosition() const override;
-    virtual IntRect scrollableAreaBoundingBox() const override;
-    virtual bool userInputScrollable(ScrollbarOrientation) const override;
-    virtual bool shouldPlaceVerticalScrollbarOnLeft() const override;
-    virtual int pageStep(ScrollbarOrientation) const override;
+    IntRect convertFromScrollbarToContainingView(const Scrollbar*, const IntRect&) const override;
+    IntRect convertFromContainingViewToScrollbar(const Scrollbar*, const IntRect&) const override;
+    IntPoint convertFromScrollbarToContainingView(const Scrollbar*, const IntPoint&) const override;
+    IntPoint convertFromContainingViewToScrollbar(const Scrollbar*, const IntPoint&) const override;
+    int scrollSize(ScrollbarOrientation) const override;
+    void setScrollOffset(const IntPoint&) override;
+    IntPoint scrollPosition() const override;
+    IntPoint minimumScrollPosition() const override;
+    IntPoint maximumScrollPosition() const override;
+    IntRect visibleContentRect(IncludeScrollbarsInRect) const;
+    int visibleHeight() const;
+    int visibleWidth() const;
+    IntSize contentsSize() const override;
+    IntSize overhangAmount() const;
+    IntPoint lastKnownMousePosition() const;
+    IntRect scrollableAreaBoundingBox() const;
+    bool userInputScrollable(ScrollbarOrientation) const override;
+    bool shouldPlaceVerticalScrollbarOnLeft() const override;
+    int pageStep(ScrollbarOrientation) const override;
 
     int scrollXOffset() const { return m_scrollOffset.width() + scrollOrigin().x(); }
     int scrollYOffset() const { return m_scrollOffset.height() + scrollOrigin().y(); }
@@ -109,7 +109,7 @@ public:
     void updateAfterStyleChange(const RenderStyle*);
     void updateAfterOverflowRecalc();
 
-    virtual bool updateAfterCompositingChange() override;
+    bool updateAfterCompositingChange() override;
 
     bool hasScrollbar() const { return m_hBar || m_vBar; }
 
