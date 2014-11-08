@@ -382,15 +382,13 @@ void RenderImage::paintIntoRect(GraphicsContext* context, const LayoutRect& rect
     if (!img || img->isNull())
         return;
 
-    HTMLImageElement* imageElt = isHTMLImageElement(node()) ? toHTMLImageElement(node()) : 0;
-    CompositeOperator compositeOperator = imageElt ? imageElt->compositeOperator() : CompositeSourceOver;
     Image* image = img.get();
     InterpolationQuality interpolationQuality = chooseInterpolationQuality(context, image, image, alignedRect.size());
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "PaintImage", "data", InspectorPaintImageEvent::data(*this));
     InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
     context->setImageInterpolationQuality(interpolationQuality);
-    context->drawImage(image, alignedRect, compositeOperator, shouldRespectImageOrientation());
+    context->drawImage(image, alignedRect, CompositeSourceOver, shouldRespectImageOrientation());
     context->setImageInterpolationQuality(previousInterpolationQuality);
 }
 

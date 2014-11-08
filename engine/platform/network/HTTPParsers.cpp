@@ -168,66 +168,6 @@ ContentDispositionType contentDispositionType(const String& contentDisposition)
     return ContentDispositionAttachment;
 }
 
-bool parseHTTPRefresh(const String& refresh, bool fromHttpEquivMeta, double& delay, String& url)
-{
-    unsigned len = refresh.length();
-    unsigned pos = 0;
-
-    if (!skipWhiteSpace(refresh, pos, fromHttpEquivMeta))
-        return false;
-
-    while (pos != len && refresh[pos] != ',' && refresh[pos] != ';')
-        ++pos;
-
-    if (pos == len) { // no URL
-        url = String();
-        bool ok;
-        delay = refresh.stripWhiteSpace().toDouble(&ok);
-        return ok;
-    } else {
-        bool ok;
-        delay = refresh.left(pos).stripWhiteSpace().toDouble(&ok);
-        if (!ok)
-            return false;
-
-        ++pos;
-        skipWhiteSpace(refresh, pos, fromHttpEquivMeta);
-        unsigned urlStartPos = pos;
-        if (refresh.find("url", urlStartPos, false) == urlStartPos) {
-            urlStartPos += 3;
-            skipWhiteSpace(refresh, urlStartPos, fromHttpEquivMeta);
-            if (refresh[urlStartPos] == '=') {
-                ++urlStartPos;
-                skipWhiteSpace(refresh, urlStartPos, fromHttpEquivMeta);
-            } else {
-                urlStartPos = pos; // e.g. "Refresh: 0; url.html"
-            }
-        }
-
-        unsigned urlEndPos = len;
-
-        if (refresh[urlStartPos] == '"' || refresh[urlStartPos] == '\'') {
-            UChar quotationMark = refresh[urlStartPos];
-            urlStartPos++;
-            while (urlEndPos > urlStartPos) {
-                urlEndPos--;
-                if (refresh[urlEndPos] == quotationMark)
-                    break;
-            }
-
-            // https://bugs.webkit.org/show_bug.cgi?id=27868
-            // Sometimes there is no closing quote for the end of the URL even though there was an opening quote.
-            // If we looped over the entire alleged URL string back to the opening quote, just go ahead and use everything
-            // after the opening quote instead.
-            if (urlEndPos == urlStartPos)
-                urlEndPos = len;
-        }
-
-        url = refresh.substring(urlStartPos, urlEndPos - urlStartPos).stripWhiteSpace();
-        return true;
-    }
-}
-
 double parseDate(const String& value)
 {
     return parseDateFromNullTerminatedCharacters(value.utf8().data());

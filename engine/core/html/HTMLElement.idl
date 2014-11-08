@@ -25,8 +25,7 @@
     [Reflect] attribute DOMString lang;
     attribute DOMString dir;
 
-    [CustomElementCallbacks] attribute long              tabIndex;
-    [Reflect] attribute boolean hidden;
+    [CustomElementCallbacks] attribute long tabIndex;
     [Reflect] attribute DOMString accessKey;
 
     [RuntimeEnabled=IMEAPI] readonly attribute InputMethodContext inputMethodContext;

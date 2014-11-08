@@ -78,7 +78,6 @@ struct CacheControlHeader {
 PLATFORM_EXPORT ContentDispositionType contentDispositionType(const String&);
 PLATFORM_EXPORT bool isValidHTTPHeaderValue(const String&);
 PLATFORM_EXPORT bool isValidHTTPToken(const String&);
-PLATFORM_EXPORT bool parseHTTPRefresh(const String& refresh, bool fromHttpEquivMeta, double& delay, String& url);
 PLATFORM_EXPORT double parseDate(const String&);
 PLATFORM_EXPORT String filenameFromHTTPContentDisposition(const String&);
 PLATFORM_EXPORT AtomicString extractMIMETypeFromMediaType(const AtomicString&);

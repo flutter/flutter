@@ -75,7 +75,6 @@ private:
 HTMLImageElement::HTMLImageElement(Document& document, bool createdByParser)
     : HTMLElement(HTMLNames::imgTag, document)
     , m_imageLoader(HTMLImageLoader::create(this))
-    , m_compositeOperator(CompositeSourceOver)
     , m_imageDevicePixelRatio(1.0f)
     , m_elementCreatedByParser(createdByParser)
     , m_intrinsicSizingViewportDependant(false)
@@ -158,14 +157,6 @@ void HTMLImageElement::parseAttribute(const QualifiedName& name, const AtomicStr
             toRenderImage(renderer())->updateAltText();
     } else if (name == HTMLNames::srcAttr || name == HTMLNames::srcsetAttr || name == HTMLNames::sizesAttr) {
         selectSourceURL(ImageLoader::UpdateIgnorePreviousError);
-    } else if (name == HTMLNames::usemapAttr) {
-        setIsLink(!value.isNull());
-    } else if (name == HTMLNames::compositeAttr) {
-        blink::WebBlendMode blendOp = blink::WebBlendModeNormal;
-        if (!parseCompositeAndBlendOperator(value, m_compositeOperator, blendOp))
-            m_compositeOperator = CompositeSourceOver;
-        else if (m_compositeOperator != CompositeSourceOver)
-            UseCounter::count(document(), UseCounter::HTMLImageElementComposite);
     } else {
         HTMLElement::parseAttribute(name, value);
     }
@@ -316,9 +307,6 @@ const String& HTMLImageElement::currentSrc() const
 bool HTMLImageElement::isURLAttribute(const Attribute& attribute) const
 {
     return attribute.name() == HTMLNames::srcAttr
-        || attribute.name() == HTMLNames::lowsrcAttr
-        || attribute.name() == HTMLNames::longdescAttr
-        || (attribute.name() == HTMLNames::usemapAttr && attribute.value().string()[0] != '#')
         || HTMLElement::isURLAttribute(attribute);
 }
 
@@ -375,20 +363,6 @@ void HTMLImageElement::didMoveToNewDocument(Document& oldDocument)
 {
     imageLoader().elementDidMoveToNewDocument();
     HTMLElement::didMoveToNewDocument(oldDocument);
-}
-
-bool HTMLImageElement::isServerMap() const
-{
-    if (!hasAttribute(HTMLNames::ismapAttr))
-        return false;
-
-    const AtomicString& usemap = getAttribute(HTMLNames::usemapAttr);
-
-    // If the usemap attribute starts with '#', it refers to a map element in the document.
-    if (usemap.string()[0] == '#')
-        return false;
-
-    return document().completeURL(stripLeadingAndTrailingHTMLSpaces(usemap)).isEmpty();
 }
 
 Image* HTMLImageElement::imageContents()

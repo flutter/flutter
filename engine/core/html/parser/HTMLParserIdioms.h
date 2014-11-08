@@ -60,10 +60,6 @@ bool parseHTMLInteger(const String&, int&);
 // http://www.whatwg.org/specs/web-apps/current-work/#rules-for-parsing-non-negative-integers
 bool parseHTMLNonNegativeInteger(const String&, unsigned&);
 
-typedef Vector<pair<String, String> > HTMLAttributeList;
-// The returned encoding might not be valid.
-WTF::TextEncoding encodingFromMetaAttributes(const HTMLAttributeList&);
-
 // Space characters as defined by the HTML specification.
 template<typename CharType>
 inline bool isHTMLSpace(CharType character)

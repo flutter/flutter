@@ -201,7 +201,6 @@ public:
 
     Length viewportDefaultMinWidth() const { return m_viewportDefaultMinWidth; }
 
-    void setReferrerPolicy(ReferrerPolicy);
     ReferrerPolicy referrerPolicy() const { return m_referrerPolicy; }
 
     String outgoingReferrer();
@@ -444,19 +443,6 @@ public:
     }
     bool hasMutationObservers() const { return m_mutationObserverTypes; }
     void addMutationObserverTypes(MutationObserverOptions types) { m_mutationObserverTypes |= types; }
-
-    /**
-     * Handles a HTTP header equivalent set by a meta tag using <meta http-equiv="..." content="...">. This is called
-     * when a meta tag is encountered during document parsing, and also when a script dynamically changes or adds a meta
-     * tag. This enables scripts to use meta tags to perform refreshes and set expiry dates in addition to them being
-     * specified in a HTML file.
-     *
-     * @param equiv The http header name (value of the meta tag's "equiv" attribute)
-     * @param content The header value (value of the meta tag's "content" attribute)
-     * @param inDocumentHeadElement Is the element in the document's <head> element?
-     */
-    void processHttpEquiv(const AtomicString& equiv, const AtomicString& content, bool inDocumentHeadElement);
-    void processReferrerPolicy(const String& policy);
 
     String title() const { return m_title; }
     void setTitle(const String&);
@@ -719,8 +705,6 @@ private:
     void clearFocusedElementSoon();
     void clearFocusedElementTimerFired(Timer<Document>*);
     void focusAutofocusElementTimerFired(Timer<Document>*);
-
-    void processHttpEquivRefresh(const AtomicString& content);
 
     void setHoverNode(PassRefPtr<Node>);
     Node* hoverNode() const { return m_hoverNode.get(); }

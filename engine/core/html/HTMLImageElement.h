@@ -54,11 +54,7 @@ public:
     int naturalHeight() const;
     const String& currentSrc() const;
 
-    bool isServerMap() const;
-
     const AtomicString& altText() const;
-
-    CompositeOperator compositeOperator() const { return m_compositeOperator; }
 
     ImageResource* cachedImage() const { return imageLoader().image(); }
     void setImageResource(ImageResource* i) { imageLoader().setImage(i); };
@@ -118,7 +114,6 @@ private:
 
     OwnPtr<HTMLImageLoader> m_imageLoader;
     RefPtr<ViewportChangeListener> m_listener;
-    CompositeOperator m_compositeOperator;
     AtomicString m_bestFitImageURL;
     float m_imageDevicePixelRatio;
     unsigned m_elementCreatedByParser : 1;

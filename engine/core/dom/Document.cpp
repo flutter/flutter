@@ -1734,55 +1734,6 @@ CSSStyleSheet& Document::elementSheet()
     return *m_elemSheet;
 }
 
-void Document::processHttpEquiv(const AtomicString& equiv, const AtomicString& content, bool inDocumentHeadElement)
-{
-    ASSERT(!equiv.isNull() && !content.isNull());
-
-    if (equalIgnoringCase(equiv, "refresh")) {
-        processHttpEquivRefresh(content);
-    } else if (equalIgnoringCase(equiv, "content-language")) {
-        setContentLanguage(content);
-    }
-}
-
-void Document::processHttpEquivRefresh(const AtomicString& content)
-{
-    maybeHandleHttpRefresh(content, HttpRefreshFromMetaTag);
-}
-
-void Document::maybeHandleHttpRefresh(const String& content, HttpRefreshType httpRefreshType)
-{
-    // FIXME(sky): remove
-}
-
-void Document::processReferrerPolicy(const String& policy)
-{
-    ASSERT(!policy.isNull());
-
-    if (equalIgnoringCase(policy, "never")) {
-        setReferrerPolicy(ReferrerPolicyNever);
-    } else if (equalIgnoringCase(policy, "always")) {
-        setReferrerPolicy(ReferrerPolicyAlways);
-    } else if (equalIgnoringCase(policy, "origin")) {
-        setReferrerPolicy(ReferrerPolicyOrigin);
-    } else if (equalIgnoringCase(policy, "default")) {
-        setReferrerPolicy(ReferrerPolicyDefault);
-    } else {
-        addConsoleMessage(ConsoleMessage::create(RenderingMessageSource, ErrorMessageLevel, "Failed to set referrer policy: The value '" + policy + "' is not one of 'always', 'default', 'never', or 'origin'. Defaulting to 'never'."));
-        setReferrerPolicy(ReferrerPolicyNever);
-    }
-}
-
-void Document::setReferrerPolicy(ReferrerPolicy referrerPolicy)
-{
-    // FIXME: Can we adopt the CSP referrer policy merge algorithm? Or does the web rely on being able to modify the referrer policy in-flight?
-    if (m_didSetReferrerPolicy)
-        UseCounter::count(this, UseCounter::ResetReferrerPolicy);
-    m_didSetReferrerPolicy = true;
-
-    m_referrerPolicy = referrerPolicy;
-}
-
 String Document::outgoingReferrer()
 {
     // See http://www.whatwg.org/specs/web-apps/current-work/#fetching-resources

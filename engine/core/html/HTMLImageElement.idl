@@ -24,29 +24,19 @@
     NamedConstructor=Image([Default=Undefined] optional long width, [Default=Undefined] optional long height),
     ConstructorCallWith=Document
 ] interface HTMLImageElement : HTMLElement {
-    [Reflect] attribute DOMString align;
     [Reflect] attribute DOMString alt;
-    [Reflect, TreatNullAs=EmptyString] attribute DOMString border;
     readonly attribute boolean complete;
     [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] attribute DOMString crossOrigin;
     attribute long height;
-    [Reflect] attribute long hspace;
-    [Reflect] attribute boolean isMap;
-    [Reflect, URL] attribute DOMString longDesc;
-    [Reflect, URL] attribute DOMString lowsrc;
     readonly attribute long naturalHeight;
     readonly attribute long naturalWidth;
     [Reflect, URL] attribute DOMString src;
     [Reflect] attribute DOMString srcset;
     [Reflect, RuntimeEnabled=PictureSizes] attribute DOMString sizes;
     [RuntimeEnabled=PictureSizes] readonly attribute DOMString currentSrc;
-    [Reflect] attribute DOMString useMap;
-    [Reflect] attribute long vspace;
     attribute long width;
 
     // Extensions
     [MeasureAs=HTMLImageElementX] readonly attribute long x;
     [MeasureAs=HTMLImageElementY] readonly attribute long y;
-
-    [Reflect, RuntimeEnabled=SubresourceIntegrity] attribute DOMString integrity;
 };

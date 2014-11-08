@@ -105,7 +105,6 @@ LaxMixedContentChecking status=deprecated
 
 Stream status=experimental
 SubpixelFontScaling status=stable
-SubresourceIntegrity status=test
 
 // Enable optimizations to recalculate style on the fewest possible number of
 // elements when updating classes, ids or attributes of DOM elements.

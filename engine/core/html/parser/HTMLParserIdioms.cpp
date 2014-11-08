@@ -317,37 +317,6 @@ enum Mode {
     Pragma,
 };
 
-WTF::TextEncoding encodingFromMetaAttributes(const HTMLAttributeList& attributes)
-{
-    bool gotPragma = false;
-    Mode mode = None;
-    String charset;
-
-    for (HTMLAttributeList::const_iterator iter = attributes.begin(); iter != attributes.end(); ++iter) {
-        const String& attributeName = iter->first;
-        const String& attributeValue = AtomicString(iter->second);
-
-        if (threadSafeMatch(attributeName, HTMLNames::http_equivAttr)) {
-            if (equalIgnoringCase(attributeValue, "content-type"))
-                gotPragma = true;
-        } else if (charset.isEmpty()) {
-            if (threadSafeMatch(attributeName, HTMLNames::charsetAttr)) {
-                charset = attributeValue;
-                mode = Charset;
-            } else if (threadSafeMatch(attributeName, HTMLNames::contentAttr)) {
-                charset = extractCharset(attributeValue);
-                if (charset.length())
-                    mode = Pragma;
-            }
-        }
-    }
-
-    if (mode == Charset || (mode == Pragma && gotPragma))
-        return WTF::TextEncoding(stripLeadingAndTrailingHTMLSpaces(charset));
-
-    return WTF::TextEncoding();
-}
-
 static bool threadSafeEqual(const StringImpl* a, const StringImpl* b)
 {
     if (a == b)
