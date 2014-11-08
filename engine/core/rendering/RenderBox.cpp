@@ -207,12 +207,12 @@ void RenderBox::layout()
 // excluding border and scrollbar.
 LayoutUnit RenderBox::clientWidth() const
 {
-    return width() - borderLeft() - borderRight() - verticalScrollbarWidth();
+    return width() - borderLeft() - borderRight();
 }
 
 LayoutUnit RenderBox::clientHeight() const
 {
-    return height() - borderTop() - borderBottom() - horizontalScrollbarHeight();
+    return height() - borderTop() - borderBottom();
 }
 
 int RenderBox::pixelSnappedClientWidth() const
@@ -413,35 +413,6 @@ void RenderBox::computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutP
 {
     if (!size().isEmpty())
         rects.append(LayoutRect(layerOffset, size()));
-}
-
-int RenderBox::verticalScrollbarWidth() const
-{
-    if (!hasOverflowClip() || style()->overflowY() == OOVERLAY)
-        return 0;
-
-    return layer()->scrollableArea()->verticalScrollbarWidth();
-}
-
-int RenderBox::horizontalScrollbarHeight() const
-{
-    if (!hasOverflowClip() || style()->overflowX() == OOVERLAY)
-        return 0;
-
-    return layer()->scrollableArea()->horizontalScrollbarHeight();
-}
-
-int RenderBox::instrinsicScrollbarLogicalWidth() const
-{
-    if (!hasOverflowClip())
-        return 0;
-
-    if (style()->overflowY() == OSCROLL) {
-        ASSERT(layer()->scrollableArea() && layer()->scrollableArea()->hasVerticalScrollbar());
-        return verticalScrollbarWidth();
-    }
-
-    return 0;
 }
 
 bool RenderBox::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
@@ -1302,20 +1273,9 @@ void RenderBox::popContentsClip(PaintInfo& paintInfo, PaintPhase originalPhase, 
 
 LayoutRect RenderBox::overflowClipRect(const LayoutPoint& location, OverlayScrollbarSizeRelevancy relevancy)
 {
-    // FIXME: When overflow-clip (CSS3) is implemented, we'll obtain the property
-    // here.
     LayoutRect clipRect = borderBoxRect();
     clipRect.setLocation(location + clipRect.location() + LayoutSize(borderLeft(), borderTop()));
     clipRect.setSize(clipRect.size() - LayoutSize(borderLeft() + borderRight(), borderTop() + borderBottom()));
-
-    if (!hasOverflowClip())
-        return clipRect;
-
-    // Subtract out scrollbars if we have them.
-    if (style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft())
-        clipRect.move(layer()->scrollableArea()->verticalScrollbarWidth(relevancy), 0);
-    clipRect.contract(layer()->scrollableArea()->verticalScrollbarWidth(relevancy), layer()->scrollableArea()->horizontalScrollbarHeight(relevancy));
-
     return clipRect;
 }
 
@@ -1948,7 +1908,7 @@ void RenderBox::computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logica
 
 LayoutUnit RenderBox::computeLogicalHeightUsing(const Length& height, LayoutUnit intrinsicContentHeight) const
 {
-    LayoutUnit logicalHeight = computeContentAndScrollbarLogicalHeightUsing(height, intrinsicContentHeight);
+    LayoutUnit logicalHeight = computeContentLogicalHeightUsing(height, intrinsicContentHeight);
     if (logicalHeight != -1)
         logicalHeight = adjustBorderBoxLogicalHeightForBoxSizing(logicalHeight);
     return logicalHeight;
@@ -1956,10 +1916,10 @@ LayoutUnit RenderBox::computeLogicalHeightUsing(const Length& height, LayoutUnit
 
 LayoutUnit RenderBox::computeContentLogicalHeight(const Length& height, LayoutUnit intrinsicContentHeight) const
 {
-    LayoutUnit heightIncludingScrollbar = computeContentAndScrollbarLogicalHeightUsing(height, intrinsicContentHeight);
+    LayoutUnit heightIncludingScrollbar = computeContentLogicalHeightUsing(height, intrinsicContentHeight);
     if (heightIncludingScrollbar == -1)
         return -1;
-    return std::max<LayoutUnit>(0, adjustContentBoxLogicalHeightForBoxSizing(heightIncludingScrollbar) - scrollbarLogicalHeight());
+    return std::max<LayoutUnit>(0, adjustContentBoxLogicalHeightForBoxSizing(heightIncludingScrollbar));
 }
 
 LayoutUnit RenderBox::computeIntrinsicLogicalContentHeightUsing(const Length& logicalHeightLength, LayoutUnit intrinsicContentHeight, LayoutUnit borderAndPadding) const
@@ -1979,7 +1939,7 @@ LayoutUnit RenderBox::computeIntrinsicLogicalContentHeightUsing(const Length& lo
     return 0;
 }
 
-LayoutUnit RenderBox::computeContentAndScrollbarLogicalHeightUsing(const Length& height, LayoutUnit intrinsicContentHeight) const
+LayoutUnit RenderBox::computeContentLogicalHeightUsing(const Length& height, LayoutUnit intrinsicContentHeight) const
 {
     // FIXME(cbiesinger): The css-sizing spec is considering changing what min-content/max-content should resolve to.
     // If that happens, this code will have to change.
@@ -2029,7 +1989,7 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
         availableHeight = overrideContainingBlockContentLogicalHeight();
     else if (cbstyle->logicalHeight().isFixed()) {
         LayoutUnit contentBoxHeight = cb->adjustContentBoxLogicalHeightForBoxSizing(cbstyle->logicalHeight().value());
-        availableHeight = std::max<LayoutUnit>(0, cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeight - cb->scrollbarLogicalHeight(), -1));
+        availableHeight = std::max<LayoutUnit>(0, cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeight, -1));
     } else if (cbstyle->logicalHeight().isPercent() && !isOutOfFlowPositionedWithSpecifiedHeight) {
         // We need to recur and compute the percentage height for our containing block.
         LayoutUnit heightWithScrollbar = cb->computePercentageLogicalHeight(cbstyle->logicalHeight());
@@ -2039,7 +1999,7 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
             // handle the min/max of the current block, its caller does. So the
             // return value from the recursive call will not have been adjusted
             // yet.
-            LayoutUnit contentBoxHeight = cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeightWithScrollbar - cb->scrollbarLogicalHeight(), -1);
+            LayoutUnit contentBoxHeight = cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeightWithScrollbar, -1);
             availableHeight = std::max<LayoutUnit>(0, contentBoxHeight);
         }
     } else if (isOutOfFlowPositionedWithSpecifiedHeight) {
@@ -2047,7 +2007,7 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
         // can get called while the block is still laying out its kids.
         LogicalExtentComputedValues computedValues;
         cb->computeLogicalHeight(cb->logicalHeight(), 0, computedValues);
-        availableHeight = computedValues.m_extent - cb->borderAndPaddingLogicalHeight() - cb->scrollbarLogicalHeight();
+        availableHeight = computedValues.m_extent - cb->borderAndPaddingLogicalHeight();
     } else if (cb->isRenderView())
         availableHeight = view()->viewLogicalHeightForPercentages();
 
@@ -2175,7 +2135,7 @@ LayoutUnit RenderBox::computeReplacedLogicalHeightUsing(const Length& logicalHei
                 RenderBlock* block = toRenderBlock(cb);
                 LogicalExtentComputedValues computedValues;
                 block->computeLogicalHeight(block->logicalHeight(), 0, computedValues);
-                LayoutUnit newContentHeight = computedValues.m_extent - block->borderAndPaddingLogicalHeight() - block->scrollbarLogicalHeight();
+                LayoutUnit newContentHeight = computedValues.m_extent - block->borderAndPaddingLogicalHeight();
                 LayoutUnit newHeight = block->adjustContentBoxLogicalHeightForBoxSizing(newContentHeight);
                 return adjustContentBoxLogicalHeightForBoxSizing(valueForLength(logicalHeight, newHeight));
             }
@@ -2227,9 +2187,9 @@ LayoutUnit RenderBox::availableLogicalHeightUsing(const Length& h, AvailableLogi
         return adjustContentBoxLogicalHeightForBoxSizing(valueForLength(h, availableHeight));
     }
 
-    LayoutUnit heightIncludingScrollbar = computeContentAndScrollbarLogicalHeightUsing(h, -1);
+    LayoutUnit heightIncludingScrollbar = computeContentLogicalHeightUsing(h, -1);
     if (heightIncludingScrollbar != -1)
-        return std::max<LayoutUnit>(0, adjustContentBoxLogicalHeightForBoxSizing(heightIncludingScrollbar) - scrollbarLogicalHeight());
+        return std::max<LayoutUnit>(0, adjustContentBoxLogicalHeightForBoxSizing(heightIncludingScrollbar));
 
     // FIXME: Check logicalTop/logicalBottom here to correctly handle vertical writing-mode.
     // https://bugs.webkit.org/show_bug.cgi?id=46500
@@ -2237,7 +2197,7 @@ LayoutUnit RenderBox::availableLogicalHeightUsing(const Length& h, AvailableLogi
         RenderBlock* block = const_cast<RenderBlock*>(toRenderBlock(this));
         LogicalExtentComputedValues computedValues;
         block->computeLogicalHeight(block->logicalHeight(), 0, computedValues);
-        LayoutUnit newContentHeight = computedValues.m_extent - block->borderAndPaddingLogicalHeight() - block->scrollbarLogicalHeight();
+        LayoutUnit newContentHeight = computedValues.m_extent - block->borderAndPaddingLogicalHeight();
         return adjustContentBoxLogicalHeightForBoxSizing(newContentHeight);
     }
 
@@ -2663,10 +2623,6 @@ void RenderBox::computePositionedLogicalWidthUsing(Length logicalWidth, const Re
             computedValues.m_position = logicalLeftValue + marginLogicalLeftValue + lastLine->borderLogicalLeft() + (lastLine->logicalLeft() - firstLine->logicalLeft());
             return;
         }
-    }
-
-    if (containerBlock->isBox() && toRenderBox(containerBlock)->scrollsOverflowY() && containerBlock->style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft()) {
-        logicalLeftValue = logicalLeftValue + toRenderBox(containerBlock)->verticalScrollbarWidth();
     }
 
     computedValues.m_position = logicalLeftValue + marginLogicalLeftValue;
@@ -3682,33 +3638,12 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle)
 
 LayoutRect RenderBox::noOverflowRect() const
 {
-    // Because of the special coordinate system used for overflow rectangles and many other
-    // rectangles (not quite logical, not quite physical), we need to flip the block progression
-    // coordinate in vertical-rl and horizontal-bt writing modes. In other words, the rectangle
-    // returned is physical, except for the block direction progression coordinate (y in horizontal
-    // writing modes, x in vertical writing modes), which is always "logical top". Apart from the
-    // flipping, this method does the same as clientBoxRect().
-
-    const int scrollBarWidth = verticalScrollbarWidth();
-    const int scrollBarHeight = horizontalScrollbarHeight();
-    LayoutUnit left = borderLeft() + (style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft() ? scrollBarWidth : 0);
+    // FIXME(sky): Replace with borderBoxRect?
+    LayoutUnit left = borderLeft();
     LayoutUnit top = borderTop();
     LayoutUnit right = borderRight();
     LayoutUnit bottom = borderBottom();
     LayoutRect rect(left, top, width() - left - right, height() - top - bottom);
-    // Subtract space occupied by scrollbars. Order is important here: first flip, then subtract
-    // scrollbars. This may seem backwards and weird, since one would think that a horizontal
-    // scrollbar at the physical bottom in horizontal-bt ought to be at the logical top (physical
-    // bottom), between the logical top (physical bottom) border and the logical top (physical
-    // bottom) padding. But this is how the rest of the code expects us to behave. This is highly
-    // related to https://bugs.webkit.org/show_bug.cgi?id=76129
-    // FIXME: when the above mentioned bug is fixed, it should hopefully be possible to call
-    // clientBoxRect() or paddingBoxRect() in this method, rather than fiddling with the edges on
-    // our own.
-    if (style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft())
-        rect.contract(0, scrollBarHeight);
-    else
-        rect.contract(scrollBarWidth, scrollBarHeight);
     return rect;
 }
 

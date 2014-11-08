@@ -327,15 +327,8 @@ IntPoint RenderLayerScrollableArea::maximumScrollPosition() const
 
 IntRect RenderLayerScrollableArea::visibleContentRect(IncludeScrollbarsInRect scrollbarInclusion) const
 {
-    int verticalScrollbarWidth = 0;
-    int horizontalScrollbarHeight = 0;
-    if (scrollbarInclusion == IncludeScrollbars) {
-        verticalScrollbarWidth = (verticalScrollbar() && !verticalScrollbar()->isOverlayScrollbar()) ? verticalScrollbar()->width() : 0;
-        horizontalScrollbarHeight = (horizontalScrollbar() && !horizontalScrollbar()->isOverlayScrollbar()) ? horizontalScrollbar()->height() : 0;
-    }
-
     return IntRect(IntPoint(scrollXOffset(), scrollYOffset()),
-        IntSize(max(0, layer()->size().width() - verticalScrollbarWidth), max(0, layer()->size().height() - horizontalScrollbarHeight)));
+        IntSize(max(0, layer()->size().width()), max(0, layer()->size().height())));
 }
 
 int RenderLayerScrollableArea::visibleHeight() const
@@ -430,7 +423,7 @@ void RenderLayerScrollableArea::computeScrollDimensions()
 
     m_overflowRect = box().layoutOverflowRect();
 
-    int scrollableLeftOverflow = m_overflowRect.x() - box().borderLeft() - (box().style()->shouldPlaceBlockDirectionScrollbarOnLogicalLeft() ? box().verticalScrollbarWidth() : 0);
+    int scrollableLeftOverflow = m_overflowRect.x() - box().borderLeft();
     int scrollableTopOverflow = m_overflowRect.y() - box().borderTop();
     setScrollOrigin(IntPoint(-scrollableLeftOverflow, -scrollableTopOverflow));
 }
@@ -737,20 +730,6 @@ void RenderLayerScrollableArea::setHasVerticalScrollbar(bool hasScrollbar)
     } else {
         destroyScrollbar(VerticalScrollbar);
     }
-}
-
-int RenderLayerScrollableArea::verticalScrollbarWidth(OverlayScrollbarSizeRelevancy relevancy) const
-{
-    if (!m_vBar || (m_vBar->isOverlayScrollbar() && (relevancy == IgnoreOverlayScrollbarSize || !m_vBar->shouldParticipateInHitTesting())))
-        return 0;
-    return m_vBar->width();
-}
-
-int RenderLayerScrollableArea::horizontalScrollbarHeight(OverlayScrollbarSizeRelevancy relevancy) const
-{
-    if (!m_hBar || (m_hBar->isOverlayScrollbar() && (relevancy == IgnoreOverlayScrollbarSize || !m_hBar->shouldParticipateInHitTesting())))
-        return 0;
-    return m_hBar->height();
 }
 
 void RenderLayerScrollableArea::positionOverflowControls(const IntSize& offsetFromRoot)

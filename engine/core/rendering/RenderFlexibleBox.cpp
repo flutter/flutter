@@ -119,10 +119,6 @@ void RenderFlexibleBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidt
     }
 
     maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
-
-    LayoutUnit scrollbarWidth = instrinsicScrollbarLogicalWidth();
-    maxLogicalWidth += scrollbarWidth;
-    minLogicalWidth += scrollbarWidth;
 }
 
 static int synthesizedBaselineFromContentBox(const RenderBox* box, LineDirectionMode direction)
@@ -230,7 +226,7 @@ void RenderFlexibleBox::layoutBlock(bool relayoutChildren)
         relayoutChildren = true;
 
     LayoutUnit previousHeight = logicalHeight();
-    setLogicalHeight(borderAndPaddingLogicalHeight() + scrollbarLogicalHeight());
+    setLogicalHeight(borderAndPaddingLogicalHeight());
 
     {
         LayoutState state(*this, locationOffset());
@@ -395,7 +391,7 @@ LayoutUnit RenderFlexibleBox::mainAxisContentExtent(LayoutUnit contentLogicalHei
 {
     if (isColumnFlow()) {
         LogicalExtentComputedValues computedValues;
-        LayoutUnit borderPaddingAndScrollbar = borderAndPaddingLogicalHeight() + scrollbarLogicalHeight();
+        LayoutUnit borderPaddingAndScrollbar = borderAndPaddingLogicalHeight();
         LayoutUnit borderBoxLogicalHeight = contentLogicalHeight + borderPaddingAndScrollbar;
         computeLogicalHeight(borderBoxLogicalHeight, logicalTop(), computedValues);
         if (computedValues.m_extent == LayoutUnit::max())
@@ -413,7 +409,7 @@ LayoutUnit RenderFlexibleBox::computeMainAxisExtentForChild(RenderBox* child, Si
         // We don't have to check for "auto" here - computeContentLogicalHeight will just return -1 for that case anyway.
         if (size.isIntrinsic())
             child->layoutIfNeeded();
-        return child->computeContentLogicalHeight(size, child->logicalHeight() - child->borderAndPaddingLogicalHeight()) + child->scrollbarLogicalHeight();
+        return child->computeContentLogicalHeight(size, child->logicalHeight() - child->borderAndPaddingLogicalHeight());
     }
     return child->computeLogicalWidthUsing(sizeType, size, contentLogicalWidth(), this) - child->borderAndPaddingLogicalWidth();
 }
@@ -493,16 +489,6 @@ LayoutUnit RenderFlexibleBox::flowAwareMarginBeforeForChild(RenderBox* child) co
 LayoutUnit RenderFlexibleBox::crossAxisMarginExtentForChild(RenderBox* child) const
 {
     return isHorizontalFlow() ? child->marginHeight() : child->marginWidth();
-}
-
-LayoutUnit RenderFlexibleBox::crossAxisScrollbarExtent() const
-{
-    return isHorizontalFlow() ? horizontalScrollbarHeight() : verticalScrollbarWidth();
-}
-
-LayoutUnit RenderFlexibleBox::crossAxisScrollbarExtentForChild(RenderBox* child) const
-{
-    return isHorizontalFlow() ? child->horizontalScrollbarHeight() : child->verticalScrollbarWidth();
 }
 
 LayoutPoint RenderFlexibleBox::flowAwareLocationForChild(RenderBox* child) const
@@ -593,8 +579,7 @@ void RenderFlexibleBox::layoutFlexItems(bool relayoutChildren)
         // Instead of just checking if we have a line, make sure the flexbox
         // has at least a line's worth of height to cover this case.
         LayoutUnit minHeight = borderAndPaddingLogicalHeight()
-            + lineHeight(true, HorizontalLine, PositionOfInteriorLineBoxes)
-            + scrollbarLogicalHeight();
+            + lineHeight(true, HorizontalLine, PositionOfInteriorLineBoxes);
         if (height() < minHeight)
             setLogicalHeight(minHeight);
     }
@@ -992,8 +977,6 @@ void RenderFlexibleBox::layoutAndPlaceChildren(LayoutUnit& crossAxisOffset, cons
     LayoutUnit autoMarginOffset = autoMarginOffsetInMainAxis(children, availableFreeSpace);
     LayoutUnit mainAxisOffset = flowAwareBorderStart() + flowAwarePaddingStart();
     mainAxisOffset += initialJustifyContentOffset(availableFreeSpace, style()->justifyContent(), numberOfChildrenForJustifyContent);
-    if (style()->flexDirection() == FlowRowReverse)
-        mainAxisOffset += isHorizontalFlow() ? verticalScrollbarWidth() : horizontalScrollbarHeight();
 
     LayoutUnit totalMainExtent = mainAxisExtent();
     LayoutUnit maxAscent = 0, maxDescent = 0; // Used when align-items: baseline.
@@ -1036,10 +1019,10 @@ void RenderFlexibleBox::layoutAndPlaceChildren(LayoutUnit& crossAxisOffset, cons
 
             childCrossAxisMarginBoxExtent = maxAscent + maxDescent;
         } else {
-            childCrossAxisMarginBoxExtent = crossAxisIntrinsicExtentForChild(child) + crossAxisMarginExtentForChild(child) + crossAxisScrollbarExtentForChild(child);
+            childCrossAxisMarginBoxExtent = crossAxisIntrinsicExtentForChild(child) + crossAxisMarginExtentForChild(child);
         }
         if (!isColumnFlow())
-            setLogicalHeight(std::max(logicalHeight(), crossAxisOffset + flowAwareBorderAfter() + flowAwarePaddingAfter() + childCrossAxisMarginBoxExtent + crossAxisScrollbarExtent()));
+            setLogicalHeight(std::max(logicalHeight(), crossAxisOffset + flowAwareBorderAfter() + flowAwarePaddingAfter() + childCrossAxisMarginBoxExtent));
         maxChildCrossAxisExtent = std::max(maxChildCrossAxisExtent, childCrossAxisMarginBoxExtent);
 
         mainAxisOffset += flowAwareMarginStartForChild(child);
@@ -1060,7 +1043,7 @@ void RenderFlexibleBox::layoutAndPlaceChildren(LayoutUnit& crossAxisOffset, cons
     }
 
     if (isColumnFlow())
-        setLogicalHeight(mainAxisOffset + flowAwareBorderEnd() + flowAwarePaddingEnd() + scrollbarLogicalHeight());
+        setLogicalHeight(mainAxisOffset + flowAwareBorderEnd() + flowAwarePaddingEnd());
 
     if (style()->flexDirection() == FlowColumnReverse) {
         // We have to do an extra pass for column-reverse to reposition the flex items since the start depends
@@ -1083,7 +1066,6 @@ void RenderFlexibleBox::layoutColumnReverse(const OrderedFlexItemList& children,
     size_t numberOfChildrenForJustifyContent = numberOfInFlowPositionedChildren(children);
     LayoutUnit mainAxisOffset = logicalHeight() - flowAwareBorderEnd() - flowAwarePaddingEnd();
     mainAxisOffset -= initialJustifyContentOffset(availableFreeSpace, style()->justifyContent(), numberOfChildrenForJustifyContent);
-    mainAxisOffset -= isHorizontalFlow() ? verticalScrollbarWidth() : horizontalScrollbarHeight();
 
     size_t seenInFlowPositionedChildren = 0;
     for (size_t i = 0; i < children.size(); ++i) {

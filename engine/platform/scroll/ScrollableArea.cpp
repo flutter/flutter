@@ -422,20 +422,10 @@ void ScrollableArea::cancelProgrammaticScrollAnimation()
 
 IntRect ScrollableArea::visibleContentRect(IncludeScrollbarsInRect scrollbarInclusion) const
 {
-    int verticalScrollbarWidth = 0;
-    int horizontalScrollbarHeight = 0;
-
-    if (scrollbarInclusion == IncludeScrollbars) {
-        if (Scrollbar* verticalBar = verticalScrollbar())
-            verticalScrollbarWidth = !verticalBar->isOverlayScrollbar() ? verticalBar->width() : 0;
-        if (Scrollbar* horizontalBar = horizontalScrollbar())
-            horizontalScrollbarHeight = !horizontalBar->isOverlayScrollbar() ? horizontalBar->height() : 0;
-    }
-
     return IntRect(scrollPosition().x(),
                    scrollPosition().y(),
-                   std::max(0, visibleWidth() + verticalScrollbarWidth),
-                   std::max(0, visibleHeight() + horizontalScrollbarHeight));
+                   std::max(0, visibleWidth()),
+                   std::max(0, visibleHeight()));
 }
 
 IntPoint ScrollableArea::clampScrollPosition(const IntPoint& scrollPosition) const
