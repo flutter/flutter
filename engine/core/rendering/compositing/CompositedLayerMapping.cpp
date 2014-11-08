@@ -308,7 +308,7 @@ bool CompositedLayerMapping::owningLayerClippedByLayerNotAboveCompositedAncestor
     // infinite.
     // FIXME: this should use cached clip rects, but this sometimes give
     // inaccurate results (and trips the ASSERTS in RenderLayerClipper).
-    ClipRectsContext clipRectsContext(compositingAncestor, UncachedClipRects, IgnoreOverlayScrollbarSize);
+    ClipRectsContext clipRectsContext(compositingAncestor, UncachedClipRects);
     clipRectsContext.setIgnoreOverflowClip();
     IntRect parentClipRect = pixelSnappedIntRect(m_owningLayer.clipper().backgroundClipRect(clipRectsContext).rect());
     return parentClipRect != PaintInfo::infiniteRect();
@@ -676,7 +676,7 @@ void CompositedLayerMapping::updateAncestorClippingLayerGeometry(const RenderLay
     if (!compositingContainer || !m_ancestorClippingLayer)
         return;
 
-    ClipRectsContext clipRectsContext(compositingContainer, PaintingClipRectsIgnoringOverflowClip, IgnoreOverlayScrollbarSize);
+    ClipRectsContext clipRectsContext(compositingContainer, PaintingClipRectsIgnoringOverflowClip);
     IntRect parentClipRect = pixelSnappedIntRect(m_owningLayer.clipper().backgroundClipRect(clipRectsContext).rect());
     ASSERT(parentClipRect != PaintInfo::infiniteRect());
     m_ancestorClippingLayer->setPosition(FloatPoint(parentClipRect.location() - graphicsLayerParentLocation));

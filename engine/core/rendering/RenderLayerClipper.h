@@ -59,9 +59,8 @@ enum ShouldRespectOverflowClip {
 
 class ClipRectsContext {
 public:
-    ClipRectsContext(const RenderLayer* root, ClipRectsCacheSlot slot, OverlayScrollbarSizeRelevancy relevancy = IgnoreOverlayScrollbarSize, const LayoutSize& accumulation = LayoutSize())
+    ClipRectsContext(const RenderLayer* root, ClipRectsCacheSlot slot, const LayoutSize& accumulation = LayoutSize())
         : rootLayer(root)
-        , scrollbarRelevancy(relevancy)
         , cacheSlot(slot)
         , subPixelAccumulation(accumulation)
         , respectOverflowClip(slot == PaintingClipRectsIgnoringOverflowClip ? IgnoreOverflowClip : RespectOverflowClip)
@@ -83,7 +82,6 @@ public:
     }
 
     const RenderLayer* const rootLayer;
-    const OverlayScrollbarSizeRelevancy scrollbarRelevancy;
 
 private:
     friend class RenderLayerClipper;

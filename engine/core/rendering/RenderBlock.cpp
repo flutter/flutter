@@ -2038,7 +2038,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
         if (hasControlClip()) {
             checkChildren = locationInContainer.intersects(controlClipRect(adjustedLocation));
         } else {
-            LayoutRect clipRect = overflowClipRect(adjustedLocation, IncludeOverlayScrollbarSize);
+            LayoutRect clipRect = overflowClipRect(adjustedLocation);
             if (style()->hasBorderRadius())
                 checkChildren = locationInContainer.intersects(style()->getRoundedBorderFor(clipRect));
             else

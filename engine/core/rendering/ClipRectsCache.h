@@ -7,10 +7,6 @@
 
 #include "core/rendering/ClipRects.h"
 
-#if ENABLE(ASSERT)
-#include "core/rendering/RenderBox.h" // For OverlayScrollbarSizeRelevancy.
-#endif
-
 namespace blink {
 
 enum ClipRectsCacheSlot {
@@ -34,17 +30,11 @@ public:
     struct Entry {
         Entry()
             : root(0)
-#if ENABLE(ASSERT)
-            , scrollbarRelevancy(IgnoreOverlayScrollbarSize)
-#endif
         {
         }
 
         const RenderLayer* root;
         RefPtr<ClipRects> clipRects;
-#if ENABLE(ASSERT)
-        OverlayScrollbarSizeRelevancy scrollbarRelevancy;
-#endif
     };
 
     Entry& get(ClipRectsCacheSlot slot)

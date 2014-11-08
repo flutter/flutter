@@ -64,7 +64,7 @@ static void applyClipRects(const ClipRectsContext& context, RenderObject& render
     ASSERT(renderer.hasOverflowClip() || renderer.hasClip());
 
     if (renderer.hasOverflowClip()) {
-        ClipRect newOverflowClip = toRenderBox(renderer).overflowClipRect(offset, context.scrollbarRelevancy);
+        ClipRect newOverflowClip = toRenderBox(renderer).overflowClipRect(offset);
         newOverflowClip.setHasRadius(renderer.style()->hasBorderRadius());
         clipRects.setOverflowClipRect(intersection(newOverflowClip, clipRects.overflowClipRect()));
         if (renderer.isPositioned())
@@ -94,7 +94,6 @@ ClipRects* RenderLayerClipper::clipRectsIfCached(const ClipRectsContext& context
     // http://crbug.com/366118 for an example.
     if (context.rootLayer != entry.root)
         return 0;
-    ASSERT(entry.scrollbarRelevancy == context.scrollbarRelevancy);
 
 #ifdef CHECK_CACHED_CLIP_RECTS
     // This code is useful to check cached clip rects, but is too expensive to leave enabled in debug builds by default.
@@ -112,9 +111,6 @@ ClipRects* RenderLayerClipper::storeClipRectsInCache(const ClipRectsContext& con
 {
     ClipRectsCache::Entry& entry = cache().get(context.cacheSlot);
     entry.root = context.rootLayer;
-#if ENABLE(ASSERT)
-    entry.scrollbarRelevancy = context.scrollbarRelevancy;
-#endif
 
     if (parentClipRects) {
         // If our clip rects match the clip rects of our parent, we share storage.
@@ -222,7 +218,7 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
     if (m_renderer.hasOverflowClip()) {
         // This layer establishes a clip of some kind.
         if (!isClippingRoot || context.respectOverflowClip == RespectOverflowClip) {
-            foregroundRect.intersect(toRenderBox(m_renderer).overflowClipRect(offset, context.scrollbarRelevancy));
+            foregroundRect.intersect(toRenderBox(m_renderer).overflowClipRect(offset));
             if (m_renderer.style()->hasBorderRadius())
                 foregroundRect.setHasRadius(true);
         }
