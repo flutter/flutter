@@ -37,7 +37,6 @@ namespace blink {
 
 struct SameSizeAsElementRareData : NodeRareData {
     short index;
-    LayoutSize sizeForResizing;
     IntSize scrollOffset;
     void* pointers[7];
 };
@@ -47,16 +46,6 @@ CSSStyleDeclaration& ElementRareData::ensureInlineCSSStyleDeclaration(Element* o
     if (!m_cssomWrapper)
         m_cssomWrapper = adoptPtr(new InlineCSSStyleDeclaration(ownerElement));
     return *m_cssomWrapper;
-}
-
-void ElementRareData::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_classList);
-    visitor->trace(m_shadow);
-    visitor->trace(m_inputMethodContext);
-    visitor->trace(m_activeAnimations);
-    visitor->trace(m_cssomWrapper);
-    NodeRareData::traceAfterDispatch(visitor);
 }
 
 COMPILE_ASSERT(sizeof(ElementRareData) == sizeof(SameSizeAsElementRareData), ElementRareDataShouldStaySmall);

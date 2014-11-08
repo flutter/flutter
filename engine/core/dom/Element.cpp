@@ -1393,18 +1393,6 @@ String Element::textFromChildren()
     return content.toString();
 }
 
-LayoutSize Element::minimumSizeForResizing() const
-{
-    return hasRareData() ? elementRareData()->minimumSizeForResizing() : defaultMinimumSizeForResizing();
-}
-
-void Element::setMinimumSizeForResizing(const LayoutSize& size)
-{
-    if (!hasRareData() && size == defaultMinimumSizeForResizing())
-        return;
-    ensureElementRareData().setMinimumSizeForResizing(size);
-}
-
 // FIXME(sky): Remove pseudoElementSpecifier.
 RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
 {

@@ -29,7 +29,6 @@
 #include "core/html/ClassList.h"
 #include "core/html/ime/InputMethodContext.h"
 #include "core/rendering/style/StyleInheritedData.h"
-#include "platform/heap/Handle.h"
 #include "wtf/OwnPtr.h"
 
 namespace blink {
@@ -77,9 +76,6 @@ public:
     ClassList* classList() const { return m_classList.get(); }
     void setClassList(PassOwnPtr<ClassList> classList) { m_classList = classList; }
 
-    LayoutSize minimumSizeForResizing() const { return m_minimumSizeForResizing; }
-    void setMinimumSizeForResizing(LayoutSize size) { m_minimumSizeForResizing = size; }
-
     IntSize savedLayerScrollOffset() const { return m_savedLayerScrollOffset; }
     void setSavedLayerScrollOffset(IntSize size) { m_savedLayerScrollOffset = size; }
 
@@ -100,12 +96,9 @@ public:
     void setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition) { m_customElementDefinition = definition; }
     CustomElementDefinition* customElementDefinition() const { return m_customElementDefinition.get(); }
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     short m_tabindex;
 
-    LayoutSize m_minimumSizeForResizing;
     IntSize m_savedLayerScrollOffset;
 
     OwnPtr<ClassList> m_classList;
@@ -120,15 +113,9 @@ private:
     explicit ElementRareData(RenderObject*);
 };
 
-inline IntSize defaultMinimumSizeForResizing()
-{
-    return IntSize(LayoutUnit::max(), LayoutUnit::max());
-}
-
 inline ElementRareData::ElementRareData(RenderObject* renderer)
     : NodeRareData(renderer)
     , m_tabindex(0)
-    , m_minimumSizeForResizing(defaultMinimumSizeForResizing())
 {
     m_isElementRareData = true;
 }

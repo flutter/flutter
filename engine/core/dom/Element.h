@@ -253,9 +253,6 @@ public:
 
     virtual String title() const { return String(); }
 
-    LayoutSize minimumSizeForResizing() const;
-    void setMinimumSizeForResizing(const LayoutSize&);
-
     // Called by the parser when this element's close tag is reached,
     // signaling that all child tags have been parsed and added.
     // This is needed for <applet> and <object> elements, which can't lay themselves out
