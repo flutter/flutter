@@ -36,7 +36,6 @@
 #include "core/editing/htmlediting.h"
 #include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/fetch/ResourceLoader.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/HTMLAnchorElement.h"
@@ -1819,21 +1818,6 @@ void RenderObject::styleWillChange(StyleDifference diff, const RenderStyle& newS
     } else {
         s_affectsParentBlock = false;
     }
-
-    // Elements with non-auto touch-action will send a SetTouchAction message
-    // on touchstart in EventHandler::handleTouchEvent, and so effectively have
-    // a touchstart handler that must be reported.
-    //
-    // Since a CSS property cannot be applied directly to a text node, a
-    // handler will have already been added for its parent so ignore it.
-    TouchAction oldTouchAction = m_style ? m_style->touchAction() : TouchActionAuto;
-    if (node() && !node()->isTextNode() && (oldTouchAction == TouchActionAuto) != (newStyle.touchAction() == TouchActionAuto)) {
-        EventHandlerRegistry& registry = document().frameHost()->eventHandlerRegistry();
-        if (newStyle.touchAction() != TouchActionAuto)
-            registry.didAddEventHandler(*node(), EventHandlerRegistry::TouchEvent);
-        else
-            registry.didRemoveEventHandler(*node(), EventHandlerRegistry::TouchEvent);
-    }
 }
 
 static bool areNonIdenticalCursorListsEqual(const RenderStyle* a, const RenderStyle* b)
@@ -2104,84 +2088,6 @@ LayoutRect RenderObject::localCaretRect(InlineBox*, int, LayoutUnit* extraWidthT
     return LayoutRect();
 }
 
-void RenderObject::computeLayerHitTestRects(LayerHitTestRects& layerRects) const
-{
-    // Figure out what layer our container is in. Any offset (or new layer) for this
-    // renderer within it's container will be applied in addLayerHitTestRects.
-    LayoutPoint layerOffset;
-    const RenderLayer* currentLayer = 0;
-
-    if (!hasLayer()) {
-        RenderObject* container = this->container();
-        currentLayer = container->enclosingLayer();
-        if (container && currentLayer->renderer() != container) {
-            layerOffset.move(container->offsetFromAncestorContainer(currentLayer->renderer()));
-            // If the layer itself is scrolled, we have to undo the subtraction of its scroll
-            // offset since we want the offset relative to the scrolling content, not the
-            // element itself.
-            if (currentLayer->renderer()->hasOverflowClip())
-                layerOffset.move(currentLayer->renderBox()->scrolledContentOffset());
-        }
-    }
-
-    this->addLayerHitTestRects(layerRects, currentLayer, layerOffset, LayoutRect());
-}
-
-void RenderObject::addLayerHitTestRects(LayerHitTestRects& layerRects, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const
-{
-    ASSERT(currentLayer);
-    ASSERT(currentLayer == this->enclosingLayer());
-
-    // Compute the rects for this renderer only and add them to the results.
-    // Note that we could avoid passing the offset and instead adjust each result, but this
-    // seems slightly simpler.
-    Vector<LayoutRect> ownRects;
-    LayoutRect newContainerRect;
-    computeSelfHitTestRects(ownRects, layerOffset);
-
-    // When we get to have a lot of rects on a layer, the performance cost of tracking those
-    // rects outweighs the benefit of doing compositor thread hit testing.
-    // FIXME: This limit needs to be low due to the O(n^2) algorithm in
-    // WebLayer::setTouchEventHandlerRegion - crbug.com/300282.
-    const size_t maxRectsPerLayer = 100;
-
-    LayerHitTestRects::iterator iter = layerRects.find(currentLayer);
-    Vector<LayoutRect>* iterValue;
-    if (iter == layerRects.end())
-        iterValue = &layerRects.add(currentLayer, Vector<LayoutRect>()).storedValue->value;
-    else
-        iterValue = &iter->value;
-    for (size_t i = 0; i < ownRects.size(); i++) {
-        if (!containerRect.contains(ownRects[i])) {
-            iterValue->append(ownRects[i]);
-            if (iterValue->size() > maxRectsPerLayer) {
-                // Just mark the entire layer instead, and switch to walking the layer
-                // tree instead of the render tree.
-                layerRects.remove(currentLayer);
-                currentLayer->addLayerHitTestRects(layerRects);
-                return;
-            }
-            if (newContainerRect.isEmpty())
-                newContainerRect = ownRects[i];
-        }
-    }
-    if (newContainerRect.isEmpty())
-        newContainerRect = containerRect;
-
-    // If it's possible for children to have rects outside our bounds, then we need to descend into
-    // the children and compute them.
-    // Ideally there would be other cases where we could detect that children couldn't have rects
-    // outside our bounds and prune the tree walk.
-    // Note that we don't use Region here because Union is O(N) - better to just keep a list of
-    // partially redundant rectangles. If we find examples where this is expensive, then we could
-    // rewrite Region to be more efficient. See https://bugs.webkit.org/show_bug.cgi?id=100814.
-    if (!isRenderView()) {
-        for (RenderObject* curr = slowFirstChild(); curr; curr = curr->nextSibling()) {
-            curr->addLayerHitTestRects(layerRects, currentLayer,  layerOffset, newContainerRect);
-        }
-    }
-}
-
 bool RenderObject::isRooted() const
 {
     const RenderObject* object = this;
@@ -2281,13 +2187,6 @@ void RenderObject::willBeDestroyed()
     }
 
     remove();
-
-    // Remove the handler if node had touch-action set. Don't call when
-    // document is being destroyed as all handlers will have been cleared
-    // previously. Handlers are not added for text nodes so don't try removing
-    // for one too. Need to check if m_style is null in cases of partial construction.
-    if (!documentBeingDestroyed() && node() && !node()->isTextNode() && m_style && m_style->touchAction() != TouchActionAuto)
-        document().frameHost()->eventHandlerRegistry().didRemoveEventHandler(*node(), EventHandlerRegistry::TouchEvent);
 
     setAncestorLineBoxDirty(false);
 

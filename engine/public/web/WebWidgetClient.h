@@ -153,9 +153,6 @@ public:
     // Called when a gesture event is handled.
     virtual void didHandleGestureEvent(const WebGestureEvent& event, bool eventCancelled) { }
 
-    // Called to update if touch events should be sent.
-    virtual void hasTouchEventHandlers(bool) { }
-
     // Called during WebWidget::HandleInputEvent for a TouchStart event to inform the embedder
     // of the touch actions that are permitted for this touch.
     virtual void setTouchAction(WebTouchAction touchAction) { }

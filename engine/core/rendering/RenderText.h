@@ -145,8 +145,6 @@ protected:
     virtual void setTextInternal(PassRefPtr<StringImpl>);
     virtual UChar previousCharacter() const;
 
-    virtual void addLayerHitTestRects(LayerHitTestRects&, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const override;
-
     InlineTextBox* createTextBox();
 
 private:

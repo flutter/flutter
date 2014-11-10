@@ -347,11 +347,6 @@ public:
     bool scrollsWithViewport() const;
     bool scrollsWithRespectTo(const RenderLayer*) const;
 
-    void addLayerHitTestRects(LayerHitTestRects&) const;
-
-    // Compute rects only for this layer
-    void computeSelfHitTestRects(LayerHitTestRects&) const;
-
     // FIXME: This should probably return a ScrollableArea but a lot of internal methods are mistakenly exposed.
     RenderLayerScrollableArea* scrollableArea() const { return m_scrollableArea.get(); }
     RenderLayerRepainter& paintInvalidator() { return m_paintInvalidator; }

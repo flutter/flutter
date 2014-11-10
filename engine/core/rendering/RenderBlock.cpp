@@ -2753,22 +2753,6 @@ void RenderBlock::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& a
         inlineElementContinuation()->addFocusRingRects(rects, flooredLayoutPoint(additionalOffset + inlineElementContinuation()->containingBlock()->location() - location()), paintContainer);
 }
 
-void RenderBlock::computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint& layerOffset) const
-{
-    RenderBox::computeSelfHitTestRects(rects, layerOffset);
-
-    if (hasHorizontalLayoutOverflow() || hasVerticalLayoutOverflow()) {
-        for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
-            LayoutUnit top = std::max<LayoutUnit>(curr->lineTop(), curr->top());
-            LayoutUnit bottom = std::min<LayoutUnit>(curr->lineBottom(), curr->top() + curr->height());
-            LayoutRect rect(layerOffset.x() + curr->x(), layerOffset.y() + top, curr->width(), bottom - top);
-            // It's common for this rect to be entirely contained in our box, so exclude that simple case.
-            if (!rect.isEmpty() && (rects.isEmpty() || !rects[0].contains(rect)))
-                rects.append(rect);
-        }
-    }
-}
-
 RenderBox* RenderBlock::createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const
 {
     return createAnonymousWithParentRendererAndDisplay(parent, style()->display());

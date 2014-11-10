@@ -285,8 +285,6 @@ protected:
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override;
 
-    virtual void computeSelfHitTestRects(Vector<LayoutRect>&, const LayoutPoint& layerOffset) const override;
-
     void updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox*);
 
     virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }

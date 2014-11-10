@@ -778,11 +778,6 @@ void FrameView::performPostLayoutTasks()
 
     FontFaceSet::didLayout(*m_frame->document());
 
-    if (Page* page = m_frame->page()) {
-        if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-            scrollingCoordinator->notifyLayoutUpdated();
-    }
-
     sendResizeEventIfNeeded();
 }
 
@@ -985,9 +980,6 @@ void FrameView::updateLayoutAndStyleForPainting()
     if (RenderView* view = renderView()) {
         TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateLayerTree", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
         view->compositor()->updateIfNeededRecursive();
-
-        if (view->compositor()->inCompositingMode())
-            m_frame->page()->scrollingCoordinator()->updateAfterCompositingChangeIfNeeded();
 
         updateCompositedSelectionBoundsIfNeeded();
 

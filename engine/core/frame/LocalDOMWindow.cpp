@@ -54,7 +54,6 @@
 #include "core/events/PopStateEvent.h"
 #include "core/frame/Console.h"
 #include "core/frame/DOMWindowLifecycleNotifier.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameConsole.h"
 #include "core/frame/FrameHost.h"
 #include "core/frame/FrameView.h"
@@ -363,7 +362,6 @@ void LocalDOMWindow::frameDestroyed()
 
 void LocalDOMWindow::willDetachFrameHost()
 {
-    m_frame->host()->eventHandlerRegistry().didRemoveAllEventHandlers(*this);
     m_frame->console().messageStorage()->frameWindowDiscarded(this);
 }
 
@@ -708,9 +706,6 @@ bool LocalDOMWindow::addEventListener(const AtomicString& eventType, PassRefPtr<
     if (!EventTarget::addEventListener(eventType, listener, useCapture))
         return false;
 
-    if (m_frame && m_frame->host())
-        m_frame->host()->eventHandlerRegistry().didAddEventHandler(*this, eventType);
-
     if (Document* document = this->document())
         document->addListenerTypeIfNeeded(eventType);
 
@@ -727,9 +722,6 @@ bool LocalDOMWindow::removeEventListener(const AtomicString& eventType, PassRefP
 {
     if (!EventTarget::removeEventListener(eventType, listener, useCapture))
         return false;
-
-    if (m_frame && m_frame->host())
-        m_frame->host()->eventHandlerRegistry().didRemoveEventHandler(*this, eventType);
 
     lifecycleNotifier().notifyRemoveEventListener(this, eventType);
 
@@ -771,11 +763,6 @@ void LocalDOMWindow::removeAllEventListenersInternal(BroadcastListenerRemoval mo
     EventTarget::removeAllEventListeners();
 
     lifecycleNotifier().notifyRemoveAllEventListeners(this);
-
-    if (mode == DoBroadcastListenerRemoval) {
-        if (m_frame && m_frame->host())
-            m_frame->host()->eventHandlerRegistry().didRemoveAllEventHandlers(*this);
-    }
 
     removeAllUnloadEventListeners(this);
 }

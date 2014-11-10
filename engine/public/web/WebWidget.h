@@ -133,9 +133,6 @@ public:
     // Called to inform the WebWidget of the mouse cursor's visibility.
     virtual void setCursorVisibilityState(bool isVisible) { }
 
-    // Check whether the given point hits any registered touch event handlers.
-    virtual bool hasTouchEventHandlersAt(const WebPoint&) { return true; }
-
     // Called to inform the WebWidget that mouse capture was lost.
     virtual void mouseCaptureLost() { }
 

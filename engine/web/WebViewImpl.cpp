@@ -45,7 +45,6 @@
 #include "core/editing/markup.h"
 #include "core/events/KeyboardEvent.h"
 #include "core/events/WheelEvent.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameHost.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
@@ -758,17 +757,6 @@ void WebViewImpl::zoomToFindInPageRect(const WebRect& rect)
 bool WebViewImpl::zoomToMultipleTargetsRect(const WebRect& rect)
 {
     return false;
-}
-
-void WebViewImpl::hasTouchEventHandlers(bool hasTouchHandlers)
-{
-    m_client->hasTouchEventHandlers(hasTouchHandlers);
-}
-
-bool WebViewImpl::hasTouchEventHandlersAt(const WebPoint& point)
-{
-    // FIXME: Implement this. Note that the point must be divided by pageScaleFactor.
-    return true;
 }
 
 bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)

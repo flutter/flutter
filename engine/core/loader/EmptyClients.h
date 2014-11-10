@@ -99,7 +99,6 @@ public:
 
     virtual void attachRootGraphicsLayer(GraphicsLayer*) override { }
 
-    virtual void needTouchEvents(bool) override { }
     virtual void setTouchAction(TouchAction touchAction) override { };
 
     virtual String acceptLanguages() override;

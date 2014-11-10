@@ -88,7 +88,6 @@
 #include "core/events/PageTransitionEvent.h"
 #include "core/events/ScopedEventQueue.h"
 #include "core/fetch/ResourceFetcher.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameConsole.h"
 #include "core/frame/FrameHost.h"
 #include "core/frame/FrameView.h"
@@ -1382,8 +1381,6 @@ void Document::detach(const AttachContext& context)
     ContainerNode::detach(context);
 
     m_styleEngine->didDetach();
-
-    frameHost()->eventHandlerRegistry().documentDetached(*this);
 
     // This is required, as our LocalFrame might delete itself as soon as it detaches
     // us. However, this violates Node::detach() semantics, as it's never

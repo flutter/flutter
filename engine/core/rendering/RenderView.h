@@ -135,8 +135,6 @@ private:
     virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
-    virtual void computeSelfHitTestRects(Vector<LayoutRect>&, const LayoutPoint& layerOffset) const override;
-
 
     bool shouldInvalidatePaint(const LayoutRect&) const;
 

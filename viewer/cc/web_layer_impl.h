@@ -119,10 +119,6 @@ class WebLayerImpl : public blink::WebLayer, public cc::LayerClient {
   virtual bool shouldScrollOnMainThread() const;
   virtual void setNonFastScrollableRegion(
       const blink::WebVector<blink::WebRect>& region);
-  virtual blink::WebVector<blink::WebRect> nonFastScrollableRegion() const;
-  virtual void setTouchEventHandlerRegion(
-      const blink::WebVector<blink::WebRect>& region);
-  virtual blink::WebVector<blink::WebRect> touchEventHandlerRegion() const;
   virtual void setScrollClient(blink::WebLayerScrollClient* client);
   virtual bool isOrphan() const;
   virtual void setWebLayerClient(blink::WebLayerClient* client);

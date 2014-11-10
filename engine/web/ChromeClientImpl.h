@@ -86,7 +86,6 @@ public:
         const HitTestResult&, unsigned modifierFlags) override;
     virtual void setToolTip(const WTF::String& tooltipText, TextDirection) override;
     virtual void setCursor(const Cursor&) override;
-    virtual void needTouchEvents(bool needTouchEvents) override;
     virtual void setTouchAction(TouchAction) override;
 
     virtual GraphicsLayerFactory* graphicsLayerFactory() const override;

@@ -29,7 +29,6 @@
 
 #include "core/dom/Document.h"
 #include "core/dom/Node.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
@@ -82,27 +81,11 @@ PassOwnPtr<ScrollingCoordinator> ScrollingCoordinator::create(Page* page)
 
 ScrollingCoordinator::ScrollingCoordinator(Page* page)
     : m_page(page)
-    , m_touchEventTargetRectsAreDirty(false)
 {
 }
 
 ScrollingCoordinator::~ScrollingCoordinator()
 {
-}
-
-void ScrollingCoordinator::notifyLayoutUpdated()
-{
-    m_touchEventTargetRectsAreDirty = true;
-}
-
-void ScrollingCoordinator::updateAfterCompositingChangeIfNeeded()
-{
-    if (!m_touchEventTargetRectsAreDirty)
-        return;
-
-    TRACE_EVENT0("input", "ScrollingCoordinator::updateAfterCompositingChangeIfNeeded");
-    updateTouchEventTargetRectsIfNeeded();
-    m_touchEventTargetRectsAreDirty = false;
 }
 
 void ScrollingCoordinator::willDestroyScrollableArea(ScrollableArea* scrollableArea)
@@ -237,132 +220,6 @@ bool ScrollingCoordinator::scrollableAreaScrollLayerDidChange(ScrollableArea* sc
     return !!webLayer;
 }
 
-typedef WTF::HashMap<const GraphicsLayer*, Vector<LayoutRect> > GraphicsLayerHitTestRects;
-
-// In order to do a DFS cross-frame walk of the RenderLayer tree, we need to know which
-// RenderLayers have child frames inside of them. This computes a mapping for the
-// current frame which we can consult while walking the layers of that frame.
-// Whenever we descend into a new frame, a new map will be created.
-typedef HashMap<const RenderLayer*, Vector<const LocalFrame*> > LayerFrameMap;
-static void makeLayerChildFrameMap(const LocalFrame* currentFrame, LayerFrameMap* map)
-{
-    map->clear();
-}
-
-static void projectRectsToGraphicsLayerSpaceRecursive(
-    const RenderLayer* curLayer,
-    const LayerHitTestRects& layerRects,
-    GraphicsLayerHitTestRects& graphicsRects,
-    RenderGeometryMap& geometryMap,
-    HashSet<const RenderLayer*>& layersWithRects,
-    LayerFrameMap& layerChildFrameMap)
-{
-    // Project any rects for the current layer
-    LayerHitTestRects::const_iterator layerIter = layerRects.find(curLayer);
-    if (layerIter != layerRects.end()) {
-        // Find the enclosing composited layer when it's in another document (for non-composited iframes).
-        const RenderLayer* compositedLayer = layerIter->key->enclosingLayerForPaintInvalidationCrossingFrameBoundaries();
-        ASSERT(compositedLayer);
-
-        // Find the appropriate GraphicsLayer for the composited RenderLayer.
-        GraphicsLayer* graphicsLayer = compositedLayer->graphicsLayerBackingForScrolling();
-
-        GraphicsLayerHitTestRects::iterator glIter = graphicsRects.find(graphicsLayer);
-        Vector<LayoutRect>* glRects;
-        if (glIter == graphicsRects.end())
-            glRects = &graphicsRects.add(graphicsLayer, Vector<LayoutRect>()).storedValue->value;
-        else
-            glRects = &glIter->value;
-
-        // Transform each rect to the co-ordinate space of the graphicsLayer.
-        for (size_t i = 0; i < layerIter->value.size(); ++i) {
-            LayoutRect rect = layerIter->value[i];
-            if (compositedLayer != curLayer) {
-                FloatQuad compositorQuad = geometryMap.mapToContainer(rect, compositedLayer->renderer());
-                rect = LayoutRect(compositorQuad.boundingBox());
-                // If the enclosing composited layer itself is scrolled, we have to undo the subtraction
-                // of its scroll offset since we want the offset relative to the scrolling content, not
-                // the element itself.
-                if (compositedLayer->renderer()->hasOverflowClip())
-                    rect.move(compositedLayer->renderBox()->scrolledContentOffset());
-            }
-            RenderLayer::mapRectToPaintBackingCoordinates(compositedLayer->renderer(), rect);
-            glRects->append(rect);
-        }
-    }
-
-    // Walk child layers of interest
-    for (const RenderLayer* childLayer = curLayer->firstChild(); childLayer; childLayer = childLayer->nextSibling()) {
-        if (layersWithRects.contains(childLayer)) {
-            geometryMap.pushMappingsToAncestor(childLayer, curLayer);
-            projectRectsToGraphicsLayerSpaceRecursive(childLayer, layerRects, graphicsRects, geometryMap, layersWithRects, layerChildFrameMap);
-            geometryMap.popMappingsToAncestor(curLayer);
-        }
-    }
-
-    // If this layer has any frames of interest as a child of it, walk those (with an updated frame map).
-    LayerFrameMap::iterator mapIter = layerChildFrameMap.find(curLayer);
-    if (mapIter != layerChildFrameMap.end()) {
-        for (size_t i = 0; i < mapIter->value.size(); i++) {
-            const LocalFrame* childFrame = mapIter->value[i];
-            const RenderLayer* childLayer = childFrame->view()->renderView()->layer();
-            if (layersWithRects.contains(childLayer)) {
-                LayerFrameMap newLayerChildFrameMap;
-                makeLayerChildFrameMap(childFrame, &newLayerChildFrameMap);
-                geometryMap.pushMappingsToAncestor(childLayer, curLayer);
-                projectRectsToGraphicsLayerSpaceRecursive(childLayer, layerRects, graphicsRects, geometryMap, layersWithRects, newLayerChildFrameMap);
-                geometryMap.popMappingsToAncestor(curLayer);
-            }
-        }
-    }
-}
-
-static void projectRectsToGraphicsLayerSpace(LocalFrame* mainFrame, const LayerHitTestRects& layerRects, GraphicsLayerHitTestRects& graphicsRects)
-{
-    TRACE_EVENT0("input", "ScrollingCoordinator::projectRectsToGraphicsLayerSpace");
-    bool touchHandlerInChildFrame = false;
-
-    // We have a set of rects per RenderLayer, we need to map them to their bounding boxes in their
-    // enclosing composited layer. To do this most efficiently we'll walk the RenderLayer tree using
-    // RenderGeometryMap. First record all the branches we should traverse in the tree (including
-    // all documents on the page).
-    HashSet<const RenderLayer*> layersWithRects;
-    for (LayerHitTestRects::const_iterator layerIter = layerRects.begin(); layerIter != layerRects.end(); ++layerIter) {
-        const RenderLayer* layer = layerIter->key;
-        do {
-            if (!layersWithRects.add(layer).isNewEntry)
-                break;
-
-            if (layer->parent()) {
-                layer = layer->parent();
-            }
-        } while (layer);
-    }
-
-    // Now walk the layer projecting rects while maintaining a RenderGeometryMap
-    MapCoordinatesFlags flags = UseTransforms;
-    if (touchHandlerInChildFrame)
-        flags |= TraverseDocumentBoundaries;
-    RenderLayer* rootLayer = mainFrame->contentRenderer()->layer();
-    RenderGeometryMap geometryMap(flags);
-    geometryMap.pushMappingsToAncestor(rootLayer, 0);
-    LayerFrameMap layerChildFrameMap;
-    makeLayerChildFrameMap(mainFrame, &layerChildFrameMap);
-    projectRectsToGraphicsLayerSpaceRecursive(rootLayer, layerRects, graphicsRects, geometryMap, layersWithRects, layerChildFrameMap);
-}
-
-void ScrollingCoordinator::updateTouchEventTargetRectsIfNeeded()
-{
-    TRACE_EVENT0("input", "ScrollingCoordinator::updateTouchEventTargetRectsIfNeeded");
-
-    if (!RuntimeEnabledFeatures::touchEnabled())
-        return;
-
-    LayerHitTestRects touchEventTargetRects;
-    computeTouchEventTargetRects(touchEventTargetRects);
-    setTouchEventTargetRects(touchEventTargetRects);
-}
-
 void ScrollingCoordinator::reset()
 {
     for (ScrollbarMap::iterator it = m_horizontalScrollbars.begin(); it != m_horizontalScrollbars.end(); ++it)
@@ -373,61 +230,6 @@ void ScrollingCoordinator::reset()
     m_horizontalScrollbars.clear();
     m_verticalScrollbars.clear();
     m_layersWithTouchRects.clear();
-}
-
-// Note that in principle this could be called more often than computeTouchEventTargetRects, for
-// example during a non-composited scroll (although that's not yet implemented - crbug.com/261307).
-void ScrollingCoordinator::setTouchEventTargetRects(LayerHitTestRects& layerRects)
-{
-    TRACE_EVENT0("input", "ScrollingCoordinator::setTouchEventTargetRects");
-
-    // Update the list of layers with touch hit rects.
-    HashSet<const RenderLayer*> oldLayersWithTouchRects;
-    m_layersWithTouchRects.swap(oldLayersWithTouchRects);
-    for (LayerHitTestRects::iterator it = layerRects.begin(); it != layerRects.end(); ++it) {
-        if (!it->value.isEmpty()) {
-            const RenderLayer* compositedLayer = it->key->enclosingLayerForPaintInvalidationCrossingFrameBoundaries();
-            ASSERT(compositedLayer);
-            m_layersWithTouchRects.add(compositedLayer);
-        }
-    }
-
-    // Ensure we have an entry for each composited layer that previously had rects (so that old
-    // ones will get cleared out). Note that ideally we'd track this on GraphicsLayer instead of
-    // RenderLayer, but we have no good hook into the lifetime of a GraphicsLayer.
-    for (HashSet<const RenderLayer*>::iterator it = oldLayersWithTouchRects.begin(); it != oldLayersWithTouchRects.end(); ++it) {
-        if (!layerRects.contains(*it))
-            layerRects.add(*it, Vector<LayoutRect>());
-    }
-
-    GraphicsLayerHitTestRects graphicsLayerRects;
-    projectRectsToGraphicsLayerSpace(m_page->mainFrame(), layerRects, graphicsLayerRects);
-
-    for (GraphicsLayerHitTestRects::const_iterator iter = graphicsLayerRects.begin(); iter != graphicsLayerRects.end(); ++iter) {
-        const GraphicsLayer* graphicsLayer = iter->key;
-        WebVector<WebRect> webRects(iter->value.size());
-        for (size_t i = 0; i < iter->value.size(); ++i)
-            webRects[i] = enclosingIntRect(iter->value[i]);
-        graphicsLayer->platformLayer()->setTouchEventHandlerRegion(webRects);
-    }
-}
-
-void ScrollingCoordinator::touchEventTargetRectsDidChange()
-{
-    if (!RuntimeEnabledFeatures::touchEnabled())
-        return;
-
-    // Wait until after layout to update.
-    if (!m_page->mainFrame()->view() || m_page->mainFrame()->view()->needsLayout())
-        return;
-
-    // FIXME: scheduleAnimation() is just a method of forcing the compositor to realize that it
-    // needs to commit here. We should expose a cleaner API for this.
-    RenderView* renderView = m_page->mainFrame()->contentRenderer();
-    if (renderView && renderView->compositor() && renderView->compositor()->staleInCompositingMode())
-        m_page->mainFrame()->view()->scheduleAnimation();
-
-    m_touchEventTargetRectsAreDirty = true;
 }
 
 void ScrollingCoordinator::updateScrollParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent)
@@ -461,78 +263,6 @@ void ScrollingCoordinator::willBeDestroyed()
         GraphicsLayer::unregisterContentsLayer(it->value->layer());
     for (ScrollbarMap::iterator it = m_verticalScrollbars.begin(); it != m_verticalScrollbars.end(); ++it)
         GraphicsLayer::unregisterContentsLayer(it->value->layer());
-}
-
-static void accumulateDocumentTouchEventTargetRects(LayerHitTestRects& rects, const Document* document)
-{
-    ASSERT(document);
-    const EventTargetSet* targets = document->frameHost()->eventHandlerRegistry().eventHandlerTargets(EventHandlerRegistry::TouchEvent);
-    if (!targets)
-        return;
-
-    // If there's a handler on the window, document, html or body element (fairly common in practice),
-    // then we can quickly mark the entire document and skip looking at any other handlers.
-    // Note that technically a handler on the body doesn't cover the whole document, but it's
-    // reasonable to be conservative and report the whole document anyway.
-    for (EventTargetSet::const_iterator iter = targets->begin(); iter != targets->end(); ++iter) {
-        EventTarget* target = iter->key;
-        Node* node = target->toNode();
-        if (target->toDOMWindow() || node == document || node == document->documentElement()) {
-            if (RenderView* rendererView = document->renderView()) {
-                rendererView->computeLayerHitTestRects(rects);
-            }
-            return;
-        }
-    }
-
-    for (EventTargetSet::const_iterator iter = targets->begin(); iter != targets->end(); ++iter) {
-        EventTarget* target = iter->key;
-        Node* node = target->toNode();
-        if (!node || !node->inDocument())
-            continue;
-
-        if (node->isDocumentNode() && node != document) {
-            accumulateDocumentTouchEventTargetRects(rects, toDocument(node));
-        } else if (RenderObject* renderer = node->renderer()) {
-            // If the set also contains one of our ancestor nodes then processing
-            // this node would be redundant.
-            bool hasTouchEventTargetAncestor = false;
-            for (Node* ancestor = node->parentNode(); ancestor && !hasTouchEventTargetAncestor; ancestor = ancestor->parentNode()) {
-                if (targets->contains(ancestor))
-                    hasTouchEventTargetAncestor = true;
-            }
-            if (!hasTouchEventTargetAncestor) {
-                // Walk up the tree to the outermost non-composited scrollable layer.
-                RenderLayer* enclosingNonCompositedScrollLayer = 0;
-                for (RenderLayer* parent = renderer->enclosingLayer(); parent && parent->compositingState() == NotComposited; parent = parent->parent()) {
-                    if (parent->scrollsOverflow())
-                        enclosingNonCompositedScrollLayer = parent;
-                }
-
-                // Report the whole non-composited scroll layer as a touch hit rect because any
-                // rects inside of it may move around relative to their enclosing composited layer
-                // without causing the rects to be recomputed. Non-composited scrolling occurs on
-                // the main thread, so we're not getting much benefit from compositor touch hit
-                // testing in this case anyway.
-                if (enclosingNonCompositedScrollLayer)
-                    enclosingNonCompositedScrollLayer->computeSelfHitTestRects(rects);
-
-                renderer->computeLayerHitTestRects(rects);
-            }
-        }
-    }
-}
-
-void ScrollingCoordinator::computeTouchEventTargetRects(LayerHitTestRects& rects)
-{
-    TRACE_EVENT0("input", "ScrollingCoordinator::computeTouchEventTargetRects");
-    ASSERT(RuntimeEnabledFeatures::touchEnabled());
-
-    Document* document = m_page->mainFrame()->document();
-    if (!document || !document->view())
-        return;
-
-    accumulateDocumentTouchEventTargetRects(rects, document);
 }
 
 bool ScrollingCoordinator::isForMainFrame(ScrollableArea* scrollableArea) const

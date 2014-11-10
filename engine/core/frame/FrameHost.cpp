@@ -31,7 +31,6 @@
 #include "config.h"
 #include "core/frame/FrameHost.h"
 
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
 #include "core/page/Page.h"
@@ -46,7 +45,6 @@ PassOwnPtr<FrameHost> FrameHost::create(Page& page, ServiceProvider& services)
 FrameHost::FrameHost(Page& page, ServiceProvider& services)
     : m_page(&page)
     , m_services(services)
-    , m_eventHandlerRegistry(adoptPtr(new EventHandlerRegistry(*this)))
 {
 }
 
@@ -75,15 +73,9 @@ float FrameHost::deviceScaleFactor() const
     return m_page->deviceScaleFactor();
 }
 
-EventHandlerRegistry& FrameHost::eventHandlerRegistry() const
-{
-    return *m_eventHandlerRegistry;
-}
-
 void FrameHost::trace(Visitor* visitor)
 {
     visitor->trace(m_page);
-    visitor->trace(m_eventHandlerRegistry);
 }
 
 }

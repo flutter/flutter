@@ -509,26 +509,6 @@ public:
 
     virtual bool hasRelativeLogicalHeight() const;
 
-    bool hasHorizontalLayoutOverflow() const
-    {
-        if (!m_overflow)
-            return false;
-
-        LayoutRect layoutOverflowRect = m_overflow->layoutOverflowRect();
-        LayoutRect noOverflowRect = this->noOverflowRect();
-        return layoutOverflowRect.x() < noOverflowRect.x() || layoutOverflowRect.maxX() > noOverflowRect.maxX();
-    }
-
-    bool hasVerticalLayoutOverflow() const
-    {
-        if (!m_overflow)
-            return false;
-
-        LayoutRect layoutOverflowRect = m_overflow->layoutOverflowRect();
-        LayoutRect noOverflowRect = this->noOverflowRect();
-        return layoutOverflowRect.y() < noOverflowRect.y() || layoutOverflowRect.maxY() > noOverflowRect.maxY();
-    }
-
     virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject*) const
     {
         ASSERT_NOT_REACHED();
@@ -582,9 +562,6 @@ protected:
     void paintRootBoxFillLayers(const PaintInfo&);
 
     RenderObject* splitAnonymousBoxesAroundChild(RenderObject* beforeChild);
-
-    virtual void addLayerHitTestRects(LayerHitTestRects&, const RenderLayer* currentCompositedLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const override;
-    virtual void computeSelfHitTestRects(Vector<LayoutRect>&, const LayoutPoint& layerOffset) const override;
 
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 

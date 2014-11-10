@@ -336,49 +336,6 @@ void WebLayerImpl::setNonFastScrollableRegion(const WebVector<WebRect>& rects) {
   layer_->SetNonFastScrollableRegion(region);
 }
 
-WebVector<WebRect> WebLayerImpl::nonFastScrollableRegion() const {
-  size_t num_rects = 0;
-  for (cc::Region::Iterator region_rects(layer_->non_fast_scrollable_region());
-       region_rects.has_rect();
-       region_rects.next())
-    ++num_rects;
-
-  WebVector<WebRect> result(num_rects);
-  size_t i = 0;
-  for (cc::Region::Iterator region_rects(layer_->non_fast_scrollable_region());
-       region_rects.has_rect();
-       region_rects.next()) {
-    result[i] = region_rects.rect();
-    ++i;
-  }
-  return result;
-}
-
-void WebLayerImpl::setTouchEventHandlerRegion(const WebVector<WebRect>& rects) {
-  cc::Region region;
-  for (size_t i = 0; i < rects.size(); ++i)
-    region.Union(rects[i]);
-  layer_->SetTouchEventHandlerRegion(region);
-}
-
-WebVector<WebRect> WebLayerImpl::touchEventHandlerRegion() const {
-  size_t num_rects = 0;
-  for (cc::Region::Iterator region_rects(layer_->touch_event_handler_region());
-       region_rects.has_rect();
-       region_rects.next())
-    ++num_rects;
-
-  WebVector<WebRect> result(num_rects);
-  size_t i = 0;
-  for (cc::Region::Iterator region_rects(layer_->touch_event_handler_region());
-       region_rects.has_rect();
-       region_rects.next()) {
-    result[i] = region_rects.rect();
-    ++i;
-  }
-  return result;
-}
-
 void WebLayerImpl::setScrollClient(blink::WebLayerScrollClient* scroll_client) {
   if (scroll_client) {
     layer_->set_did_scroll_callback(

@@ -172,8 +172,6 @@ public:
     void contentChanged(ContentChangeType);
     bool hasAcceleratedCompositing() const;
 
-    virtual void computeLayerHitTestRects(LayerHitTestRects&) const override;
-
 protected:
     virtual void willBeDestroyed() override;
 

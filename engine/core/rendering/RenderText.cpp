@@ -1186,11 +1186,6 @@ UChar RenderText::previousCharacter() const
     return prev;
 }
 
-void RenderText::addLayerHitTestRects(LayerHitTestRects&, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const
-{
-    // Text nodes aren't event targets, so don't descend any further.
-}
-
 void RenderText::setTextInternal(PassRefPtr<StringImpl> text)
 {
     ASSERT(text);

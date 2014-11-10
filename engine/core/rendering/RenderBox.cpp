@@ -403,18 +403,6 @@ void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& add
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
 }
 
-void RenderBox::addLayerHitTestRects(LayerHitTestRects& layerRects, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const
-{
-    LayoutPoint adjustedLayerOffset = layerOffset + locationOffset();
-    RenderBoxModelObject::addLayerHitTestRects(layerRects, currentLayer, adjustedLayerOffset, containerRect);
-}
-
-void RenderBox::computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint& layerOffset) const
-{
-    if (!size().isEmpty())
-        rects.append(LayoutRect(layerOffset, size()));
-}
-
 bool RenderBox::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
 {
     // Presumably the same issue as in setScrollTop. See crbug.com/343132.

@@ -71,8 +71,6 @@ protected:
 
     virtual void willBeDestroyed() override;
 
-    virtual void addLayerHitTestRects(LayerHitTestRects&, const RenderLayer*, const LayoutPoint&, const LayoutRect&) const override;
-
     virtual InvalidationReason invalidatePaintIfNeeded(const PaintInvalidationState&, const RenderLayerModelObject& newPaintInvalidationContainer);
 private:
     virtual bool isLayerModelObject() const override final { return true; }

@@ -2453,18 +2453,6 @@ void RenderBoxModelObject::setContinuation(RenderBoxModelObject* continuation)
     }
 }
 
-void RenderBoxModelObject::computeLayerHitTestRects(LayerHitTestRects& rects) const
-{
-    RenderLayerModelObject::computeLayerHitTestRects(rects);
-
-    // If there is a continuation then we need to consult it here, since this is
-    // the root of the tree walk and it wouldn't otherwise get picked up.
-    // Continuations should always be siblings in the tree, so any others should
-    // get picked up already by the tree walk.
-    if (continuation())
-        continuation()->computeLayerHitTestRects(rects);
-}
-
 LayoutRect RenderBoxModelObject::localCaretRectForEmptyElement(LayoutUnit width, LayoutUnit textIndentOffset)
 {
     ASSERT(!slowFirstChild());

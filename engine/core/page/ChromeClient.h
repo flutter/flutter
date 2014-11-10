@@ -107,8 +107,6 @@ public:
 
     virtual void clearCompositedSelectionBounds() { }
 
-    virtual void needTouchEvents(bool) = 0;
-
     virtual void setTouchAction(TouchAction) = 0;
 
     virtual String acceptLanguages() = 0;

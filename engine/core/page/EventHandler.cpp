@@ -47,7 +47,6 @@
 #include "core/events/TouchEvent.h"
 #include "core/events/WheelEvent.h"
 #include "core/fetch/ImageResource.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
@@ -2509,10 +2508,9 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
 
     m_touchPressed = !allTouchReleased;
 
-    // If there's no document receiving touch events, or no handlers on the
-    // document set to receive the events, then we can skip all the rest of
-    // this work.
-    if (!m_touchSequenceDocument || !m_touchSequenceDocument->frameHost() || !m_touchSequenceDocument->frameHost()->eventHandlerRegistry().hasEventHandlers(EventHandlerRegistry::TouchEvent) || !m_touchSequenceDocument->frame()) {
+    // If there's no document receiving touch events,  then we can skip all the
+    // rest of this work.
+    if (!m_touchSequenceDocument || !m_touchSequenceDocument->frame()) {
         if (allTouchReleased) {
             m_touchSequenceDocument.clear();
             m_touchSequenceUserGestureToken.clear();

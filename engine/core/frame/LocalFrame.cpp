@@ -39,7 +39,6 @@
 #include "core/editing/markup.h"
 #include "core/events/Event.h"
 #include "core/fetch/ResourceFetcher.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/FrameConsole.h"
 #include "core/frame/FrameDestructionObserver.h"
 #include "core/frame/FrameHost.h"

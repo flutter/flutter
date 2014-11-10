@@ -40,7 +40,6 @@
 namespace blink {
 
 class Chrome;
-class EventHandlerRegistry;
 class Page;
 class ServiceProvider;
 class Settings;
@@ -75,8 +74,6 @@ public:
     // This value does not account for Page zoom, use LocalFrame::devicePixelRatio instead.
     float deviceScaleFactor() const;
 
-    EventHandlerRegistry& eventHandlerRegistry() const;
-
     void trace(Visitor*);
 
 private:
@@ -84,7 +81,6 @@ private:
 
     Page* m_page;
     ServiceProvider& m_services;
-    const OwnPtr<EventHandlerRegistry> m_eventHandlerRegistry;
 };
 
 }

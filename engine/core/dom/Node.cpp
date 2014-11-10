@@ -67,7 +67,6 @@
 #include "core/events/TouchEvent.h"
 #include "core/events/UIEvent.h"
 #include "core/events/WheelEvent.h"
-#include "core/frame/EventHandlerRegistry.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
 #include "core/html/HTMLAnchorElement.h"
@@ -285,9 +284,6 @@ void Node::willBeDeletedFromDocument()
 
     if (hasEventTargetData())
         clearEventTargetData();
-
-    if (document.frameHost())
-        document.frameHost()->eventHandlerRegistry().didRemoveAllEventHandlers(*this);
 
     document.markers().removeMarkers(this);
 }
@@ -573,7 +569,7 @@ void Node::traceStyleChange(StyleChangeType changeType)
         return;
 
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("style.debug"),
-        "Node::setNeedsStyleRecalc", TRACE_EVENT_SCOPE_PROCESS, 
+        "Node::setNeedsStyleRecalc", TRACE_EVENT_SCOPE_PROCESS,
         "data", jsonObjectForStyleInvalidation(nodeCount, this)
     );
 }
@@ -1379,12 +1375,6 @@ void Node::didMoveToNewDocument(Document& oldDocument)
 
     oldDocument.markers().removeMarkers(this);
     oldDocument.updateRangesAfterNodeMovedToAnotherDocument(*this);
-    if (oldDocument.frameHost() && !document().frameHost())
-        oldDocument.frameHost()->eventHandlerRegistry().didMoveOutOfFrameHost(*this);
-    else if (document().frameHost() && !oldDocument.frameHost())
-        document().frameHost()->eventHandlerRegistry().didMoveIntoFrameHost(*this);
-    else if (oldDocument.frameHost() != document().frameHost())
-        EventHandlerRegistry::didMoveBetweenFrameHosts(*this, oldDocument.frameHost(), document().frameHost());
 
     if (Vector<OwnPtr<MutationObserverRegistration> >* registry = mutationObserverRegistry()) {
         for (size_t i = 0; i < registry->size(); ++i) {
@@ -1406,8 +1396,6 @@ static inline bool tryAddEventListener(Node* targetNode, const AtomicString& eve
 
     Document& document = targetNode->document();
     document.addListenerTypeIfNeeded(eventType);
-    if (document.frameHost())
-        document.frameHost()->eventHandlerRegistry().didAddEventHandler(*targetNode, eventType);
 
     return true;
 }
@@ -1419,16 +1407,7 @@ bool Node::addEventListener(const AtomicString& eventType, PassRefPtr<EventListe
 
 static inline bool tryRemoveEventListener(Node* targetNode, const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
 {
-    if (!targetNode->EventTarget::removeEventListener(eventType, listener, useCapture))
-        return false;
-
-    // FIXME: Notify Document that the listener has vanished. We need to keep track of a number of
-    // listeners for each type, not just a bool - see https://bugs.webkit.org/show_bug.cgi?id=33861
-    Document& document = targetNode->document();
-    if (document.frameHost())
-        document.frameHost()->eventHandlerRegistry().didRemoveEventHandler(*targetNode, eventType);
-
-    return true;
+    return targetNode->EventTarget::removeEventListener(eventType, listener, useCapture);
 }
 
 bool Node::removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
@@ -1438,8 +1417,6 @@ bool Node::removeEventListener(const AtomicString& eventType, PassRefPtr<EventLi
 
 void Node::removeAllEventListeners()
 {
-    if (hasEventListeners() && document().frameHost())
-        document().frameHost()->eventHandlerRegistry().didRemoveAllEventHandlers(*this);
     EventTarget::removeAllEventListeners();
 }
 

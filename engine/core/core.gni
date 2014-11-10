@@ -708,8 +708,6 @@ sky_core_files = [
   "frame/DOMWindowProperty.h",
   "frame/DOMWindowTimers.cpp",
   "frame/DOMWindowTimers.h",
-  "frame/EventHandlerRegistry.cpp",
-  "frame/EventHandlerRegistry.h",
   "frame/Frame.cpp",
   "frame/Frame.h",
   "frame/FrameConsole.cpp",

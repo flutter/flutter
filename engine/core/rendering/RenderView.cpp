@@ -228,14 +228,6 @@ void RenderView::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformStat
     }
 }
 
-void RenderView::computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint&) const
-{
-    // Record the entire size of the contents of the frame. Note that we don't just
-    // use the viewport size (containing block) here because we want to ensure this includes
-    // all children (so we can avoid walking them explicitly).
-    rects.append(LayoutRect(LayoutPoint::zero(), frameView()->size()));
-}
-
 void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     // If we ever require layout but receive a paint anyway, something has gone horribly wrong.

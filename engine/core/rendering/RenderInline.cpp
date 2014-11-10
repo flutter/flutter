@@ -1349,12 +1349,6 @@ private:
 
 }
 
-void RenderInline::computeSelfHitTestRects(Vector<LayoutRect>& rects, const LayoutPoint& layerOffset) const
-{
-    AbsoluteLayoutRectsGeneratorContext context(rects, layerOffset);
-    generateLineBoxRects(context);
-}
-
 void RenderInline::paintOutline(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     RenderStyle* styleToUse = style();

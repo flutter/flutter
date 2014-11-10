@@ -54,11 +54,6 @@ public:
 
     void willBeDestroyed();
 
-    // Called when any frame has done its layout.
-    void notifyLayoutUpdated();
-
-    void updateAfterCompositingChangeIfNeeded();
-
 #if OS(MACOSX)
     // Dispatched by the scrolling tree during handleWheelEvent. This is required as long as scrollbars are painted on the main thread.
     void handleWheelEventPhase(PlatformWheelEventPhase);
@@ -70,13 +65,10 @@ public:
     // Returns true if the coordinator handled this change.
     bool scrollableAreaScrollLayerDidChange(ScrollableArea*);
     void scrollableAreaScrollbarLayerDidChange(ScrollableArea*, ScrollbarOrientation);
-    void touchEventTargetRectsDidChange();
     void willDestroyRenderLayer(RenderLayer*);
 
     void updateScrollParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
     void updateClipParentForGraphicsLayer(GraphicsLayer* child, RenderLayer* parent);
-
-    void updateTouchEventTargetRectsIfNeeded();
 
     // For testing purposes only. This ScrollingCoordinator is reused between layout test, and must be reset
     // for the results to be valid.
@@ -89,13 +81,7 @@ protected:
 
     Page* m_page;
 
-    // Dirty flags used to idenfity what really needs to be computed after compositing is updated.
-    bool m_touchEventTargetRectsAreDirty;
-
 private:
-    void setTouchEventTargetRects(LayerHitTestRects&);
-    void computeTouchEventTargetRects(LayerHitTestRects&);
-
     blink::WebScrollbarLayer* addWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation, PassOwnPtr<blink::WebScrollbarLayer>);
     blink::WebScrollbarLayer* getWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation);
     void removeWebScrollbarLayer(ScrollableArea*, ScrollbarOrientation);

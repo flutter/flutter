@@ -90,7 +90,6 @@ public:
     virtual void themeChanged() override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
     virtual void setCursorVisibilityState(bool isVisible) override;
-    virtual bool hasTouchEventHandlersAt(const WebPoint&) override;
     virtual void mouseCaptureLost() override;
     virtual void setFocus(bool enable) override;
     virtual bool setComposition(
@@ -234,8 +233,6 @@ public:
     void mouseDoubleClick(const WebMouseEvent&);
 
     bool detectContentOnTouch(const WebPoint&);
-
-    void hasTouchEventHandlers(bool);
 
     // WebGestureCurveTarget implementation for fling.
     virtual bool scrollBy(const WebFloatSize& delta, const WebFloatSize& velocity) override;

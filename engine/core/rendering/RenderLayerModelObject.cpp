@@ -120,24 +120,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
     }
 }
 
-void RenderLayerModelObject::addLayerHitTestRects(LayerHitTestRects& rects, const RenderLayer* currentLayer, const LayoutPoint& layerOffset, const LayoutRect& containerRect) const
-{
-    if (hasLayer()) {
-        if (isRenderView()) {
-            // RenderView is handled with a special fast-path, but it needs to know the current layer.
-            RenderObject::addLayerHitTestRects(rects, layer(), LayoutPoint(), LayoutRect());
-        } else {
-            // Since a RenderObject never lives outside it's container RenderLayer, we can switch
-            // to marking entire layers instead. This may sometimes mark more than necessary (when
-            // a layer is made of disjoint objects) but in practice is a significant performance
-            // savings.
-            layer()->addLayerHitTestRects(rects);
-        }
-    } else {
-        RenderObject::addLayerHitTestRects(rects, currentLayer, layerOffset, containerRect);
-    }
-}
-
 InvalidationReason RenderLayerModelObject::invalidatePaintIfNeeded(const PaintInvalidationState& paintInvalidationState, const RenderLayerModelObject& newPaintInvalidationContainer)
 {
     const LayoutRect oldPaintInvalidationRect = previousPaintInvalidationRect();
