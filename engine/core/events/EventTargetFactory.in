@@ -1,9 +1,10 @@
 namespace="EventTarget"
 
 core/animation/AnimationPlayer
+core/app/Application
+core/app/Module
 core/css/FontFaceSet
 core/css/MediaQueryList
 core/dom/Node
 core/html/ime/InputMethodContext
 core/frame/Window ImplementedAs=LocalDOMWindow
-
