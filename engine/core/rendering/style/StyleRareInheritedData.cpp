@@ -42,7 +42,6 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     AtomicString atomicStrings[4];
     void* refPtrs[3];
     Length lengths[1];
-    float secondFloat;
     unsigned m_bitfields[2];
     short pagedMediaShorts[2];
     unsigned unsigneds[1];
