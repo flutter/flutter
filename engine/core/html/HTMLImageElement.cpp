@@ -250,7 +250,7 @@ int HTMLImageElement::width(bool ignorePendingStylesheets)
         document().updateLayout();
 
     RenderBox* box = renderBox();
-    return box ? adjustForAbsoluteZoom(box->contentBoxRect().pixelSnappedWidth(), box) : 0;
+    return box ? box->contentBoxRect().pixelSnappedWidth() : 0;
 }
 
 int HTMLImageElement::height(bool ignorePendingStylesheets)
@@ -273,7 +273,7 @@ int HTMLImageElement::height(bool ignorePendingStylesheets)
         document().updateLayout();
 
     RenderBox* box = renderBox();
-    return box ? adjustForAbsoluteZoom(box->contentBoxRect().pixelSnappedHeight(), box) : 0;
+    return box ? box->contentBoxRect().pixelSnappedHeight() : 0;
 }
 
 int HTMLImageElement::naturalWidth() const

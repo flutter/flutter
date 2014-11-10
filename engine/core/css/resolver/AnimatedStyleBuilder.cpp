@@ -511,9 +511,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
     case CSSPropertyZIndex:
         style->setZIndex(animatableValueRoundClampTo<int>(value));
         return;
-    case CSSPropertyZoom:
-        style->setZoom(clampTo<float>(toAnimatableDouble(value)->toDouble(), std::numeric_limits<float>::denorm_min()));
-        return;
     default:
         ASSERT_NOT_REACHED();
     }

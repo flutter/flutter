@@ -96,7 +96,6 @@ font-weight animatable, inherited, font, type_name=FontWeight, name_for_methods=
 -webkit-locale inherited, custom_value
 -webkit-text-orientation inherited, custom_value
 text-rendering inherited, font, type_name=TextRenderingMode
-zoom animatable, custom_all
 line-height animatable, inherited, getter=specifiedLineHeight, custom_value
 
 align-content
@@ -339,8 +338,6 @@ animation-iteration-count runtime_flag=CSSAnimationUnprefixed, builder_skip
 animation-name runtime_flag=CSSAnimationUnprefixed, builder_skip
 animation-play-state runtime_flag=CSSAnimationUnprefixed, builder_skip
 animation-timing-function runtime_flag=CSSAnimationUnprefixed, builder_skip
-max-zoom builder_skip
-min-zoom builder_skip
 orientation builder_skip
 page builder_skip
 src builder_skip
@@ -349,7 +346,6 @@ transition-duration builder_skip
 transition-property builder_skip
 transition-timing-function builder_skip
 unicode-range builder_skip
-user-zoom builder_skip
 -webkit-font-size-delta builder_skip
 -webkit-text-decorations-in-effect inherited, builder_skip
 

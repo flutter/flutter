@@ -230,8 +230,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.wordSpacing() == b.wordSpacing();
     case CSSPropertyZIndex:
         return a.zIndex() == b.zIndex();
-    case CSSPropertyZoom:
-        return a.zoom() == b.zoom();
     default:
         ASSERT_NOT_REACHED();
         return true;

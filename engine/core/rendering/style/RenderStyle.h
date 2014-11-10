@@ -504,8 +504,9 @@ public:
     float wordSpacing() const;
     float letterSpacing() const;
 
-    float zoom() const { return visual->m_zoom; }
-    float effectiveZoom() const { return rareInheritedData->m_effectiveZoom; }
+    // FIXME(sky): Remove
+    float zoom() const { return 1.0f; }
+    float effectiveZoom() const { return 1.0f; }
 
     TextDirection direction() const { return static_cast<TextDirection>(inherited_flags._direction); }
     bool isLeftToRightDirection() const { return direction() == LTR; }
@@ -971,8 +972,6 @@ public:
     void setTextDecorationStyle(TextDecorationStyle v) { SET_VAR(rareNonInheritedData, m_textDecorationStyle, v); }
     void setDirection(TextDirection v) { inherited_flags._direction = v; }
     void setLineHeight(const Length& specifiedLineHeight);
-    bool setZoom(float);
-    bool setEffectiveZoom(float);
 
     void setImageRendering(EImageRendering v) { SET_VAR(rareInheritedData, m_imageRendering, v); }
 
@@ -1293,7 +1292,6 @@ public:
     static TextDecoration initialTextDecoration() { return TextDecorationNone; }
     static TextUnderlinePosition initialTextUnderlinePosition() { return TextUnderlinePositionAuto; }
     static TextDecorationStyle initialTextDecorationStyle() { return TextDecorationStyleSolid; }
-    static float initialZoom() { return 1.0f; }
     static int initialOutlineOffset() { return 0; }
     static float initialOpacity() { return 1.0f; }
     static EBoxAlignment initialBoxAlign() { return BSTRETCH; }
@@ -1443,61 +1441,6 @@ private:
     bool diffNeedsRecompositeLayer(const RenderStyle& other) const;
     void updatePropertySpecificDifferences(const RenderStyle& other, StyleDifference&) const;
 };
-
-// FIXME: Reduce/remove the dependency on zoom adjusted int values.
-// The float or LayoutUnit versions of layout values should be used.
-inline int adjustForAbsoluteZoom(int value, float zoomFactor)
-{
-    if (zoomFactor == 1)
-        return value;
-    // Needed because computeLengthInt truncates (rather than rounds) when scaling up.
-    float fvalue = value;
-    if (zoomFactor > 1) {
-        if (value < 0)
-            fvalue -= 0.5f;
-        else
-            fvalue += 0.5f;
-    }
-
-    return roundForImpreciseConversion<int>(fvalue / zoomFactor);
-}
-
-inline int adjustForAbsoluteZoom(int value, const RenderStyle* style)
-{
-    return adjustForAbsoluteZoom(value, style->effectiveZoom());
-}
-
-inline float adjustFloatForAbsoluteZoom(float value, const RenderStyle& style)
-{
-    return value / style.effectiveZoom();
-}
-
-inline double adjustDoubleForAbsoluteZoom(double value, const RenderStyle& style)
-{
-    return value / style.effectiveZoom();
-}
-
-inline LayoutUnit adjustLayoutUnitForAbsoluteZoom(LayoutUnit value, const RenderStyle& style)
-{
-    return value / style.effectiveZoom();
-}
-
-inline bool RenderStyle::setZoom(float f)
-{
-    if (compareEqual(visual->m_zoom, f))
-        return false;
-    visual.access()->m_zoom = f;
-    setEffectiveZoom(effectiveZoom() * zoom());
-    return true;
-}
-
-inline bool RenderStyle::setEffectiveZoom(float f)
-{
-    if (compareEqual(rareInheritedData->m_effectiveZoom, f))
-        return false;
-    rareInheritedData.access()->m_effectiveZoom = f;
-    return true;
-}
 
 inline bool RenderStyle::isSharable() const
 {

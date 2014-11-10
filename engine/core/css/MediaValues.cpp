@@ -34,15 +34,13 @@ PassRefPtr<MediaValues> MediaValues::createDynamicIfFrameExists(LocalFrame* fram
 int MediaValues::calculateViewportWidth(LocalFrame* frame) const
 {
     ASSERT(frame && frame->view() && frame->document());
-    int viewportWidth = frame->view()->layoutSize(IncludeScrollbars).width();
-    return adjustForAbsoluteZoom(viewportWidth, frame->document()->renderView());
+    return frame->view()->layoutSize(IncludeScrollbars).width();
 }
 
 int MediaValues::calculateViewportHeight(LocalFrame* frame) const
 {
     ASSERT(frame && frame->view() && frame->document());
-    int viewportHeight = frame->view()->layoutSize(IncludeScrollbars).height();
-    return adjustForAbsoluteZoom(viewportHeight, frame->document()->renderView());
+    return frame->view()->layoutSize(IncludeScrollbars).height();
 }
 
 int MediaValues::calculateDeviceWidth(LocalFrame* frame) const

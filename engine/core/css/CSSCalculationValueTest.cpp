@@ -87,44 +87,6 @@ bool lengthArraysEqual(CSSLengthArray& a, CSSLengthArray& b)
     return true;
 }
 
-TEST(CSSCalculationValue, AccumulatePixelsAndPercent)
-{
-    RefPtr<RenderStyle> style = RenderStyle::createDefaultStyle();
-    style->setEffectiveZoom(5);
-    CSSToLengthConversionData conversionData(style.get(), style.get(), 0);
-
-    testAccumulatePixelsAndPercent(conversionData,
-        CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(10, CSSPrimitiveValue::CSS_PX), true),
-        50, 0);
-
-    testAccumulatePixelsAndPercent(conversionData,
-        CSSCalcValue::createExpressionNode(
-            CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(10, CSSPrimitiveValue::CSS_PX), true),
-            CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(20, CSSPrimitiveValue::CSS_PX), true),
-            CalcAdd),
-        150, 0);
-
-    testAccumulatePixelsAndPercent(conversionData,
-        CSSCalcValue::createExpressionNode(
-            CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(1, CSSPrimitiveValue::CSS_IN), true),
-            CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(2, CSSPrimitiveValue::CSS_NUMBER), true),
-            CalcMultiply),
-        960, 0);
-
-    testAccumulatePixelsAndPercent(conversionData,
-        CSSCalcValue::createExpressionNode(
-            CSSCalcValue::createExpressionNode(
-                CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(50, CSSPrimitiveValue::CSS_PX), true),
-                CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(0.25, CSSPrimitiveValue::CSS_NUMBER), false),
-                CalcMultiply),
-            CSSCalcValue::createExpressionNode(
-                CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(20, CSSPrimitiveValue::CSS_PX), true),
-                CSSCalcValue::createExpressionNode(CSSPrimitiveValue::create(40, CSSPrimitiveValue::CSS_PERCENTAGE), false),
-                CalcSubtract),
-            CalcSubtract),
-        -37.5, 40);
-}
-
 TEST(CSSCalculationValue, RefCount)
 {
     RefPtr<CalculationValue> calc = CalculationValue::create(PixelsAndPercent(1, 2), ValueRangeAll);

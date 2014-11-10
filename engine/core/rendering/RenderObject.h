@@ -1280,37 +1280,6 @@ inline void makeMatrixRenderable(TransformationMatrix& matrix, bool has3DRenderi
         matrix.makeAffine();
 }
 
-inline int adjustForAbsoluteZoom(int value, RenderObject* renderer)
-{
-    return adjustForAbsoluteZoom(value, renderer->style());
-}
-
-inline double adjustDoubleForAbsoluteZoom(double value, RenderObject& renderer)
-{
-    ASSERT(renderer.style());
-    return adjustDoubleForAbsoluteZoom(value, *renderer.style());
-}
-
-inline LayoutUnit adjustLayoutUnitForAbsoluteZoom(LayoutUnit value, RenderObject& renderer)
-{
-    ASSERT(renderer.style());
-    return adjustLayoutUnitForAbsoluteZoom(value, *renderer.style());
-}
-
-inline void adjustFloatQuadForAbsoluteZoom(FloatQuad& quad, RenderObject& renderer)
-{
-    float zoom = renderer.style()->effectiveZoom();
-    if (zoom != 1)
-        quad.scale(1 / zoom, 1 / zoom);
-}
-
-inline void adjustFloatRectForAbsoluteZoom(FloatRect& rect, RenderObject& renderer)
-{
-    float zoom = renderer.style()->effectiveZoom();
-    if (zoom != 1)
-        rect.scale(1 / zoom, 1 / zoom);
-}
-
 #define DEFINE_RENDER_OBJECT_TYPE_CASTS(thisType, predicate) \
     DEFINE_TYPE_CASTS(thisType, RenderObject, object, object->predicate, object.predicate)
 

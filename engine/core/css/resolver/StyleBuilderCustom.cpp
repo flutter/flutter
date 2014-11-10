@@ -592,50 +592,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyVerticalAlign(StyleResolverStat
     state.style()->setVerticalAlignLength(primitiveValue->convertToLength<FixedConversion | PercentConversion>(state.cssToLengthConversionData()));
 }
 
-static void resetEffectiveZoom(StyleResolverState& state)
-{
-    // Reset the zoom in effect. This allows the setZoom method to accurately compute a new zoom in effect.
-    state.setEffectiveZoom(state.parentStyle() ? state.parentStyle()->effectiveZoom() : RenderStyle::initialZoom());
-}
-
-void StyleBuilderFunctions::applyInitialCSSPropertyZoom(StyleResolverState& state)
-{
-    resetEffectiveZoom(state);
-    state.setZoom(RenderStyle::initialZoom());
-}
-
-void StyleBuilderFunctions::applyInheritCSSPropertyZoom(StyleResolverState& state)
-{
-    resetEffectiveZoom(state);
-    state.setZoom(state.parentStyle()->zoom());
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyZoom(StyleResolverState& state, CSSValue* value)
-{
-    ASSERT_WITH_SECURITY_IMPLICATION(value->isPrimitiveValue());
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-
-    if (primitiveValue->getValueID() == CSSValueNormal) {
-        resetEffectiveZoom(state);
-        state.setZoom(RenderStyle::initialZoom());
-    } else if (primitiveValue->getValueID() == CSSValueReset) {
-        state.setEffectiveZoom(RenderStyle::initialZoom());
-        state.setZoom(RenderStyle::initialZoom());
-    } else if (primitiveValue->getValueID() == CSSValueDocument) {
-        float docZoom = state.rootElementStyle() ? state.rootElementStyle()->zoom() : RenderStyle::initialZoom();
-        state.setEffectiveZoom(docZoom);
-        state.setZoom(docZoom);
-    } else if (primitiveValue->isPercentage()) {
-        resetEffectiveZoom(state);
-        if (float percent = primitiveValue->getFloatValue())
-            state.setZoom(percent / 100.0f);
-    } else if (primitiveValue->isNumber()) {
-        resetEffectiveZoom(state);
-        if (float number = primitiveValue->getFloatValue())
-            state.setZoom(number);
-    }
-}
-
 void StyleBuilderFunctions::applyInitialCSSPropertyWebkitAspectRatio(StyleResolverState& state)
 {
     state.style()->setHasAspectRatio(RenderStyle::initialHasAspectRatio());

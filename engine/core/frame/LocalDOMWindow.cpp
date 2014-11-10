@@ -532,7 +532,7 @@ int LocalDOMWindow::innerHeight() const
     if (!view)
         return 0;
 
-    return adjustForAbsoluteZoom(view->visibleContentRect(IncludeScrollbars).height(), m_frame->pageZoomFactor());
+    return view->visibleContentRect(IncludeScrollbars).height();
 }
 
 int LocalDOMWindow::innerWidth() const
@@ -544,7 +544,7 @@ int LocalDOMWindow::innerWidth() const
     if (!view)
         return 0;
 
-    return adjustForAbsoluteZoom(view->visibleContentRect(IncludeScrollbars).width(), m_frame->pageZoomFactor());
+    return view->visibleContentRect(IncludeScrollbars).width();
 }
 
 int LocalDOMWindow::screenX() const

@@ -63,8 +63,6 @@ protected:
 
     bool isSelected() const;
 
-    virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
-
     void setIntrinsicSize(const LayoutSize& intrinsicSize) { m_intrinsicSize = intrinsicSize; }
     virtual void intrinsicSizeChanged();
 

@@ -196,7 +196,6 @@ void RenderStyle::copyNonInheritedFrom(const RenderStyle* other)
     noninherited_flags.explicitInheritance = other->noninherited_flags.explicitInheritance;
     noninherited_flags.currentColor = other->noninherited_flags.currentColor;
     noninherited_flags.hasViewportUnits = other->noninherited_flags.hasViewportUnits;
-    ASSERT(zoom() == initialZoom());
 }
 
 bool RenderStyle::operator==(const RenderStyle& o) const
@@ -365,7 +364,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
             || rareInheritedData->indent != other.rareInheritedData->indent
             || rareInheritedData->m_textAlignLast != other.rareInheritedData->m_textAlignLast
             || rareInheritedData->m_textIndentLine != other.rareInheritedData->m_textIndentLine
-            || rareInheritedData->m_effectiveZoom != other.rareInheritedData->m_effectiveZoom
             || rareInheritedData->wordBreak != other.rareInheritedData->wordBreak
             || rareInheritedData->overflowWrap != other.rareInheritedData->overflowWrap
             || rareInheritedData->lineBreak != other.rareInheritedData->lineBreak

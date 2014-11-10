@@ -196,7 +196,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWordSpacing,
     CSSPropertyWordWrap,
     CSSPropertyZIndex,
-    CSSPropertyZoom,
 
     CSSPropertyWebkitAnimationDelay,
     CSSPropertyWebkitAnimationDirection,
@@ -447,16 +446,19 @@ static PassRefPtr<CSSValue> valueForNinePieceImage(const NinePieceImage& image, 
     return createBorderImageValue(imageValue.release(), imageSlices.release(), borderSlices.release(), outset.release(), repeat.release());
 }
 
-inline static PassRefPtr<CSSPrimitiveValue> zoomAdjustedPixelValue(double value, const RenderStyle& style)
+// FIXME(sky): Rename and remove RenderStyle argument now that we don't have zoom.
+inline static PassRefPtr<CSSPrimitiveValue> zoomAdjustedPixelValue(double value, const RenderStyle&)
 {
-    return cssValuePool().createValue(adjustFloatForAbsoluteZoom(value, style), CSSPrimitiveValue::CSS_PX);
+    return cssValuePool().createValue(value, CSSPrimitiveValue::CSS_PX);
 }
 
-inline static PassRefPtr<CSSPrimitiveValue> zoomAdjustedNumberValue(double value, const RenderStyle& style)
+// FIXME(sky): Rename and remove RenderStyle argument now that we don't have zoom.
+inline static PassRefPtr<CSSPrimitiveValue> zoomAdjustedNumberValue(double value, const RenderStyle&)
 {
-    return cssValuePool().createValue(value / style.effectiveZoom(), CSSPrimitiveValue::CSS_NUMBER);
+    return cssValuePool().createValue(value, CSSPrimitiveValue::CSS_NUMBER);
 }
 
+// FIXME(sky): Rename now that we don't have zoom.
 static PassRefPtr<CSSPrimitiveValue> zoomAdjustedPixelValueForLength(const Length& length, const RenderStyle& style)
 {
     if (length.isFixed())
@@ -1891,8 +1893,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             if (style->hasAutoZIndex())
                 return cssValuePool().createIdentifierValue(CSSValueAuto);
             return cssValuePool().createValue(style->zIndex(), CSSPrimitiveValue::CSS_NUMBER);
-        case CSSPropertyZoom:
-            return cssValuePool().createValue(style->zoom(), CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyBoxSizing:
             if (style->boxSizing() == CONTENT_BOX)
                 return cssValuePool().createIdentifierValue(CSSValueContentBox);
@@ -2290,10 +2290,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             break;
 
         /* @viewport rule properties */
-        case CSSPropertyMaxZoom:
-        case CSSPropertyMinZoom:
         case CSSPropertyOrientation:
-        case CSSPropertyUserZoom:
             break;
 
         case CSSPropertyAll:

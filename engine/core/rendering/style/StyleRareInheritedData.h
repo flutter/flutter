@@ -82,7 +82,6 @@ public:
 
     RefPtr<CursorList> cursorData;
     Length indent;
-    float m_effectiveZoom;
 
     // Paged media properties.
     short widows;

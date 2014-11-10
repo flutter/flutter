@@ -2686,7 +2686,8 @@ Node* eventTargetNodeForDocument(Document* doc)
     return node;
 }
 
-void Document::adjustFloatQuadsForScrollAndAbsoluteZoom(Vector<FloatQuad>& quads, RenderObject& renderer)
+// FIXME(sky): Rename and remove RenderObject argument now that we don't have zoom.
+void Document::adjustFloatQuadsForScrollAndAbsoluteZoom(Vector<FloatQuad>& quads, RenderObject&)
 {
     if (!view())
         return;
@@ -2694,18 +2695,17 @@ void Document::adjustFloatQuadsForScrollAndAbsoluteZoom(Vector<FloatQuad>& quads
     LayoutRect visibleContentRect = view()->visibleContentRect();
     for (size_t i = 0; i < quads.size(); ++i) {
         quads[i].move(-FloatSize(visibleContentRect.x().toFloat(), visibleContentRect.y().toFloat()));
-        adjustFloatQuadForAbsoluteZoom(quads[i], renderer);
     }
 }
 
-void Document::adjustFloatRectForScrollAndAbsoluteZoom(FloatRect& rect, RenderObject& renderer)
+// FIXME(sky): Rename and remove RenderObject argument now that we don't have zoom.
+void Document::adjustFloatRectForScrollAndAbsoluteZoom(FloatRect& rect, RenderObject&)
 {
     if (!view())
         return;
 
     LayoutRect visibleContentRect = view()->visibleContentRect();
     rect.move(-FloatSize(visibleContentRect.x().toFloat(), visibleContentRect.y().toFloat()));
-    adjustFloatRectForAbsoluteZoom(rect, renderer);
 }
 
 bool Document::hasActiveParser()

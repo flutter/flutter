@@ -439,8 +439,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         return AnimatableUnknown::create(CSSPrimitiveValue::create(style.verticalAlign()));
     case CSSPropertyZIndex:
         return createFromDouble(style.zIndex());
-    case CSSPropertyZoom:
-        return createFromDouble(style.zoom());
     default:
         ASSERT_NOT_REACHED();
         // This return value is to avoid a release crash if possible.

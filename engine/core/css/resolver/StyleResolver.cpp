@@ -380,12 +380,9 @@ void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollecto
 
 PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
 {
-    const LocalFrame* frame = document.frame();
-
     RefPtr<RenderStyle> documentStyle = RenderStyle::create();
     documentStyle->setDisplay(BLOCK);
     documentStyle->setRTLOrdering(LogicalOrder);
-    documentStyle->setZoom(frame ? frame->pageZoomFactor() : 1);
     documentStyle->setLocale(document.contentLanguage());
     documentStyle->setZIndex(0);
     documentStyle->setUserModify(READ_ONLY);
@@ -723,8 +720,8 @@ template<> CSSPropertyID StyleResolver::firstCSSPropertyId<StyleResolver::HighPr
 // This method returns the last CSSPropertyId of high priority properties.
 template<> CSSPropertyID StyleResolver::lastCSSPropertyId<StyleResolver::HighPriorityProperties>()
 {
-    COMPILE_ASSERT(CSSPropertyLineHeight == CSSPropertyColor + 17, CSS_line_height_is_end_of_high_prioity_property_range);
-    COMPILE_ASSERT(CSSPropertyZoom == CSSPropertyLineHeight - 1, CSS_zoom_is_before_line_height);
+    COMPILE_ASSERT(CSSPropertyLineHeight == CSSPropertyColor + 16, CSS_line_height_is_end_of_high_prioity_property_range);
+    COMPILE_ASSERT(CSSPropertyTextRendering == CSSPropertyLineHeight - 1, CSS_text_rendering_is_before_line_height);
     return CSSPropertyLineHeight;
 }
 

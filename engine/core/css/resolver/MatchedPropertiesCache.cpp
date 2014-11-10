@@ -142,8 +142,6 @@ bool MatchedPropertiesCache::isCacheable(const Element* element, const RenderSty
 {
     if (style->unique() || (style->styleType() != NOPSEUDO && parentStyle->unique()))
         return false;
-    if (style->zoom() != RenderStyle::initialZoom())
-        return false;
     if (style->hasCurrentColor())
         return false;
     // The cache assumes static knowledge about which properties are inherited.

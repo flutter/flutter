@@ -99,8 +99,6 @@ public:
     // want to design a better wrapper around RenderStyle for tracking these mutations
     // and separate it from StyleResolverState.
     const FontDescription& parentFontDescription() { return m_parentStyle->fontDescription(); }
-    void setZoom(float f) { m_fontBuilder.didChangeFontParameters(m_style->setZoom(f)); }
-    void setEffectiveZoom(float f) { m_fontBuilder.didChangeFontParameters(m_style->setEffectiveZoom(f)); }
     void setTextOrientation(TextOrientation textOrientation) { m_fontBuilder.didChangeFontParameters(m_style->setTextOrientation(textOrientation)); }
 
 private:

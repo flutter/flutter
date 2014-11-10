@@ -867,13 +867,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
         ASSERT(RuntimeEnabledFeatures::css3TextDecorationsEnabled());
         return parseTextUnderlinePosition(important);
 
-    case CSSPropertyZoom:          // normal | reset | document | <number> | <percentage> | inherit
-        if (id == CSSValueNormal || id == CSSValueReset || id == CSSValueDocument)
-            validPrimitive = true;
-        else
-            validPrimitive = (!id && validUnit(value, FNumber | FPercent | FNonNeg));
-        break;
-
     case CSSPropertySrc: // Only used within @font-face and @-webkit-filter, so cannot use inherit | initial or be !important. This is a list of urls or local references.
         parsedValue = parseFontFaceSrc();
         break;
@@ -1324,10 +1317,7 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
     // Properties below are validated inside parseViewportProperty, because we
     // check for parser state. We need to invalidate if someone adds them outside
     // a @viewport rule.
-    case CSSPropertyMaxZoom:
-    case CSSPropertyMinZoom:
     case CSSPropertyOrientation:
-    case CSSPropertyUserZoom:
         validPrimitive = false;
         break;
 
@@ -6114,18 +6104,6 @@ bool CSSPropertyParser::parseViewportProperty(CSSPropertyID propId, bool importa
         return parseViewportShorthand(propId, CSSPropertyMinWidth, CSSPropertyMaxWidth, important);
     case CSSPropertyHeight:
         return parseViewportShorthand(propId, CSSPropertyMinHeight, CSSPropertyMaxHeight, important);
-    case CSSPropertyMinZoom: // auto | <number> | <percentage>
-    case CSSPropertyMaxZoom:
-    case CSSPropertyZoom:
-        if (id == CSSValueAuto)
-            validPrimitive = true;
-        else
-            validPrimitive = (!id && validUnit(value, FNumber | FPercent | FNonNeg));
-        break;
-    case CSSPropertyUserZoom: // zoom | fixed
-        if (id == CSSValueZoom || id == CSSValueFixed)
-            validPrimitive = true;
-        break;
     case CSSPropertyOrientation: // auto | portrait | landscape
         if (id == CSSValueAuto || id == CSSValuePortrait || id == CSSValueLandscape)
             validPrimitive = true;

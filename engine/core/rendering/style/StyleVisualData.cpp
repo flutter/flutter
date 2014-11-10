@@ -29,7 +29,8 @@ namespace blink {
 StyleVisualData::StyleVisualData()
     : hasAutoClip(true)
     , textDecoration(RenderStyle::initialTextDecoration())
-    , m_zoom(RenderStyle::initialZoom())
+    // FIXME(sky): Remove
+    , m_zoom(1.0f)
 {
 }
 
@@ -42,7 +43,8 @@ StyleVisualData::StyleVisualData(const StyleVisualData& o)
     , clip(o.clip)
     , hasAutoClip(o.hasAutoClip)
     , textDecoration(o.textDecoration)
-    , m_zoom(RenderStyle::initialZoom())
+    // FIXME(sky): Remove
+    , m_zoom(1.0f)
 {
 }
 

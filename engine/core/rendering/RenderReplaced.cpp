@@ -65,16 +65,6 @@ void RenderReplaced::willBeDestroyed()
     RenderBox::willBeDestroyed();
 }
 
-void RenderReplaced::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
-{
-    RenderBox::styleDidChange(diff, oldStyle);
-
-    bool hadStyle = (oldStyle != 0);
-    float oldZoom = hadStyle ? oldStyle->effectiveZoom() : RenderStyle::initialZoom();
-    if (style() && style()->effectiveZoom() != oldZoom)
-        intrinsicSizeChanged();
-}
-
 void RenderReplaced::layout()
 {
     ASSERT(needsLayout());

@@ -57,7 +57,6 @@ StyleRareInheritedData::StyleRareInheritedData()
     : listStyleImage(RenderStyle::initialListStyleImage())
     , textStrokeWidth(RenderStyle::initialTextStrokeWidth())
     , indent(RenderStyle::initialTextIndent())
-    , m_effectiveZoom(RenderStyle::initialZoom())
     , widows(RenderStyle::initialWidows())
     , orphans(RenderStyle::initialOrphans())
     , m_hasAutoWidows(true)
@@ -104,7 +103,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , highlight(o.highlight)
     , cursorData(o.cursorData)
     , indent(o.indent)
-    , m_effectiveZoom(o.m_effectiveZoom)
     , widows(o.widows)
     , orphans(o.orphans)
     , m_hasAutoWidows(o.m_hasAutoWidows)
@@ -159,7 +157,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && highlight == o.highlight
         && dataEquivalent(cursorData.get(), o.cursorData.get())
         && indent == o.indent
-        && m_effectiveZoom == o.m_effectiveZoom
         && widows == o.widows
         && orphans == o.orphans
         && m_hasAutoWidows == o.m_hasAutoWidows

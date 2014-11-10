@@ -356,7 +356,7 @@ int Element::offsetWidth()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
-        return adjustLayoutUnitForAbsoluteZoom(renderer->pixelSnappedOffsetWidth(), *renderer).round();
+        return renderer->pixelSnappedOffsetWidth();
     return 0;
 }
 
@@ -364,7 +364,7 @@ int Element::offsetHeight()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
-        return adjustLayoutUnitForAbsoluteZoom(renderer->pixelSnappedOffsetHeight(), *renderer).round();
+        return renderer->pixelSnappedOffsetHeight();
     return 0;
 }
 
@@ -381,7 +381,7 @@ int Element::clientLeft()
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(roundToInt(renderer->clientLeft()), *renderer);
+        return roundToInt(renderer->clientLeft());
     return 0;
 }
 
@@ -390,7 +390,7 @@ int Element::clientTop()
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(roundToInt(renderer->clientTop()), *renderer);
+        return roundToInt(renderer->clientTop());
     return 0;
 }
 
@@ -400,14 +400,12 @@ int Element::clientWidth()
 
     // FIXME(sky): Can we just use getBoundingClientRect() instead?
     if (document().documentElement() == this) {
-        if (FrameView* view = document().view()) {
-            if (RenderView* renderView = document().renderView())
-                return adjustLayoutUnitForAbsoluteZoom(view->layoutSize().width(), *renderView);
-        }
+        if (FrameView* view = document().view())
+            return view->layoutSize().width();
     }
 
     if (RenderBox* renderer = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(renderer->pixelSnappedClientWidth(), *renderer).round();
+        return renderer->pixelSnappedClientWidth();
     return 0;
 }
 
@@ -417,14 +415,12 @@ int Element::clientHeight()
 
     // FIXME(sky): Can we just use getBoundingClientRect() instead?
     if (document().documentElement() == this) {
-        if (FrameView* view = document().view()) {
-            if (RenderView* renderView = document().renderView())
-                return adjustLayoutUnitForAbsoluteZoom(view->layoutSize().height(), *renderView);
-        }
+        if (FrameView* view = document().view())
+            return view->layoutSize().height();
     }
 
     if (RenderBox* renderer = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(renderer->pixelSnappedClientHeight(), *renderer).round();
+        return renderer->pixelSnappedClientHeight();
     return 0;
 }
 
@@ -434,7 +430,7 @@ int Element::scrollLeft()
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
-            return adjustDoubleForAbsoluteZoom(rend->scrollLeft(), *rend);
+            return rend->scrollLeft();
     }
 
     return 0;
@@ -446,7 +442,7 @@ int Element::scrollTop()
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
-            return adjustLayoutUnitForAbsoluteZoom(rend->scrollTop(), *rend);
+            return rend->scrollTop();
     }
 
     return 0;
@@ -518,7 +514,7 @@ int Element::scrollWidth()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBox* rend = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(rend->scrollWidth(), *rend).toDouble();
+        return rend->scrollWidth().toDouble();
     return 0;
 }
 
@@ -526,7 +522,7 @@ int Element::scrollHeight()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBox* rend = renderBox())
-        return adjustLayoutUnitForAbsoluteZoom(rend->scrollHeight(), *rend).toDouble();
+        return rend->scrollHeight().toDouble();
     return 0;
 }
 
