@@ -3,11 +3,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from skypy.find_tests import find_tests
+from skypy.paths import Paths
+import argparse
 import os
 import re
-from skypy.paths import Paths
-import subprocess
 import requests
+import skypy.configuration as configuration
+import subprocess
 
 
 SUPPORTED_MIME_TYPES = [
@@ -16,8 +19,9 @@ SUPPORTED_MIME_TYPES = [
     'text/plain',
 ]
 HTTP_PORT = 9999
-
+URL_ROOT = 'http://localhost:%s/' % HTTP_PORT
 DASHBOARD_URL = 'https://chromeperf.appspot.com/add_point'
+BENCHMARKS_DIR = 'benchmarks'
 
 
 def values_from_output(output):
@@ -59,15 +63,17 @@ def send_json_to_dashboard(json):
 
 
 class PerfHarness(object):
-    def __init__(self):
+    def __init__(self, args):
         self._sky_server = None
         self.paths = Paths(os.path.join('out', 'Debug'))
+        self.args = args
 
     def _start_server(self):
         return subprocess.Popen([
             os.path.join(self.paths.sky_tools_directory, 'sky_server'),
             self.paths.src_root,
             str(HTTP_PORT),
+            '-t', self.args.configuration
         ])
 
     def _sky_tester_command(self, url):
@@ -82,26 +88,42 @@ class PerfHarness(object):
             'mojo:window_manager',
         ]
 
+    def _url_for_path(self, path):
+        return URL_ROOT + os.path.relpath(path, self.paths.src_root)
+
+    def _run_tests(self, path):
+        url = self._url_for_path(path)
+        output = subprocess.check_output(
+            self._sky_tester_command(url),
+            stderr=subprocess.STDOUT)
+        values = values_from_output(output)
+        print os.path.basename(path), "=>", values
+        # FIXME: Upload JSON blob to results server:
+        # json = create_json_blob(values)
+        # send_json_to_dashboard(json)
 
     def main(self):
-        test = 'http://localhost:9999/sky/benchmarks/layout/simple-blocks.sky'
-
         self._start_server()
-        output = subprocess.check_output(self._sky_tester_command(test))
-        values = values_from_output(output)
-        json = create_json_blob(values)
-        send_json_to_dashboard(json)
+        map(self._run_tests, find_tests(os.path.join(self.paths.sky_root, BENCHMARKS_DIR)))
 
     def shutdown(self):
         if self._sky_server:
             self._sky_server.terminate()
 
 
-if __name__ == '__main__':
-    harness = PerfHarness()
+def main():
+    parser = argparse.ArgumentParser(description='Sky performance tester')
+    configuration.add_arguments(parser)
+    args = parser.parse_args()
+
+    harness = PerfHarness(args)
     try:
         harness.main()
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:
         harness.shutdown()
+
+
+if __name__ == '__main__':
+    main()
