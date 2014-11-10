@@ -44,6 +44,7 @@ class CustomElementSyncMicrotaskQueue;
 class Document;
 class HTMLImportChild;
 class HTMLImportsController;
+class Module;
 
 class HTMLImportLoader final : public MojoFetcher::Client {
 public:
@@ -63,6 +64,8 @@ public:
     virtual ~HTMLImportLoader();
 
     Document* document() const { return m_document.get(); }
+    Module* module() const { return m_module.get(); }
+
     void addImport(HTMLImportChild*);
 #if !ENABLE(OILPAN)
     void removeImport(HTMLImportChild*);
@@ -112,6 +115,7 @@ private:
     RawPtr<HTMLImportsController> m_controller;
     Vector<RawPtr<HTMLImportChild> > m_imports;
     State m_state;
+    RefPtr<Module> m_module;
     RefPtr<Document> m_document;
     RefPtr<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
 

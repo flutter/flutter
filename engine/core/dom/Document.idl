@@ -96,7 +96,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
     readonly attribute boolean hidden;
 
     readonly attribute HTMLScriptElement currentScript;
-    attribute any exports;
 };
 
 Document implements ParentNode;

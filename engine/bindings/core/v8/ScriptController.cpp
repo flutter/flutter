@@ -45,6 +45,7 @@
 #include "bindings/core/v8/V8ScriptRunner.h"
 #include "bindings/core/v8/V8Window.h"
 #include "bindings/core/v8/WindowProxy.h"
+#include "core/app/Module.h"
 #include "core/dom/Document.h"
 #include "core/dom/Node.h"
 #include "core/events/Event.h"
@@ -328,7 +329,7 @@ void ScriptController::executeScriptInIsolatedWorld(int worldID, const Vector<Sc
     }
 }
 
-void ScriptController::executeModuleScript(Document& document, const String& source, const TextPosition& textPosition)
+void ScriptController::executeModuleScript(AbstractModule& module, const String& source, const TextPosition& textPosition)
 {
     v8::HandleScope handleScope(m_isolate);
     v8::Handle<v8::Context> context = toV8Context(m_frame, DOMWrapperWorld::mainWorld());
@@ -343,31 +344,31 @@ void ScriptController::executeModuleScript(Document& document, const String& sou
     v8::TryCatch tryCatch;
     tryCatch.SetVerbose(true);
 
-    V8ScriptModule module;
-    module.resourceName = document.url().string();
-    module.textPosition = textPosition;
-    // FIXME: This should be the actual module object instead of the document.
-    module.moduleObject = toV8(&document, context->Global(), m_isolate);
-    module.source = source;
+    V8ScriptModule scriptModule;
+    scriptModule.resourceName = module.url();
+    scriptModule.textPosition = textPosition;
+    scriptModule.moduleObject = toV8(&module, context->Global(), m_isolate);
+    scriptModule.source = source;
 
-    if (HTMLImport* parent = document.import()) {
-        for (HTMLImport* child = parent->firstChild(); child; child = child->next()) {
-            if (Element* link = static_cast<HTMLImportChild*>(child)->link()) {
+    if (HTMLImport* parent = module.document()->import()) {
+        for (HTMLImportChild* child = static_cast<HTMLImportChild*>(parent->firstChild());
+             child; child = static_cast<HTMLImportChild*>(child->next())) {
+            if (Element* link = child->link()) {
                 String name = link->getAttribute(HTMLNames::asAttr);
                 if (!name.isEmpty()) {
-                    module.formalDependencies.append(name);
+                    scriptModule.formalDependencies.append(name);
                     v8::Handle<v8::Value> actual;
-                    if (child->document())
-                        actual = child->document()->exports().v8Value();
+                    if (Module* childModule = child->module())
+                        actual = childModule->exports().v8Value();
                     if (actual.IsEmpty())
                         actual = v8::Undefined(m_isolate);
-                    module.resolvedDependencies.append(actual);
+                    scriptModule.resolvedDependencies.append(actual);
                 }
             }
         }
     }
 
-    V8ScriptRunner::runModule(m_isolate, m_frame->document(), module);
+    V8ScriptRunner::runModule(m_isolate, m_frame->document(), scriptModule);
 }
 
 } // namespace blink

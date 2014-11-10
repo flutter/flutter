@@ -42,6 +42,7 @@ class CustomElementMicrotaskImportStep;
 class HTMLImportLoader;
 class HTMLImportChildClient;
 class Element;
+class Module;
 
 //
 // An import tree node subclas to encapsulate imported document
@@ -64,6 +65,8 @@ public:
     void importDestroyed();
     WeakPtr<HTMLImportChild> weakPtr() { return m_weakFactory.createWeakPtr(); }
 #endif
+
+    Module* module() const;
 
     // HTMLImport
     virtual Document* document() const override;

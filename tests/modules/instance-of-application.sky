@@ -1,0 +1,8 @@
+<html>
+<import src="../resources/dump-as-text.sky" />
+<div id="result">FAIL</div>
+<script>
+document.getElementById("result").textContent =
+    module instanceof Application ? 'PASS': 'FAIL: ' + module;
+</script>
+</html>

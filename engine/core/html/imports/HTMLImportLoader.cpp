@@ -31,6 +31,7 @@
 #include "config.h"
 #include "core/html/imports/HTMLImportLoader.h"
 
+#include "core/app/Module.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentParser.h"
 #include "core/dom/StyleEngine.h"
@@ -64,6 +65,7 @@ void HTMLImportLoader::importDestroyed()
 void HTMLImportLoader::clear()
 {
     m_controller = nullptr;
+    m_module.clear();
     if (m_document) {
         m_document->setImportsController(0);
         m_document->cancelParsing();
@@ -94,10 +96,13 @@ void HTMLImportLoader::OnReceivedResponse(mojo::URLResponsePtr response)
 HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLResponsePtr response)
 {
     ASSERT(!m_imports.isEmpty());
+    WeakPtr<Document> contextDocument = m_controller->master()->contextDocument();
+    ASSERT(contextDocument.get());
     KURL url(ParsedURLString, String::fromUTF8(response->url));
-    DocumentInit init = DocumentInit(url, 0, m_controller->master()->contextDocument(), m_controller)
+    DocumentInit init = DocumentInit(url, 0, contextDocument, m_controller)
         .withRegistrationContext(m_controller->master()->registrationContext());
     m_document = HTMLDocument::create(init);
+    m_module = Module::create(contextDocument.get(), nullptr, m_document.get(), url.string());
     m_document->startParsing();
     m_document->parser()->parse(response->body.Pass());
     return StateLoading;

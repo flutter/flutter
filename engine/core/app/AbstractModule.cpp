@@ -13,9 +13,11 @@ AbstractModule::AbstractModule(ExecutionContext* context,
   : ContextLifecycleObserver(context),
     document_(document),
     url_(url) {
+  document_->setModule(this);
 }
 
 AbstractModule::~AbstractModule() {
+  document_->setModule(nullptr);
 }
 
 ExecutionContext* AbstractModule::executionContext() const {

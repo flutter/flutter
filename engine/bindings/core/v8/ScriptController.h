@@ -44,12 +44,12 @@
 namespace blink {
 
 class DOMWrapperWorld;
-class Document;
 class ExecutionContext;
 class Event;
 class HTMLDocument;
 class KURL;
 class LocalFrame;
+class AbstractModule;
 class ScriptState;
 class ScriptSourceCode;
 class WindowProxy;
@@ -72,7 +72,7 @@ public:
     v8::Local<v8::Value> executeScriptInMainWorldAndReturnValue(const ScriptSourceCode&);
     v8::Local<v8::Value> executeScriptAndReturnValue(v8::Handle<v8::Context>, const ScriptSourceCode&);
 
-    void executeModuleScript(Document& document, const String& source, const TextPosition& textPosition);
+    void executeModuleScript(AbstractModule&, const String& source, const TextPosition& textPosition);
 
     // Executes JavaScript in an isolated world. The script gets its own global scope,
     // its own prototypes for intrinsic JavaScript objects (String, Array, and so-on),

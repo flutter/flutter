@@ -34,6 +34,7 @@
 #include "bindings/core/v8/ScriptCallStackFactory.h"
 #include "bindings/core/v8/ScriptController.h"
 #include "bindings/core/v8/SerializedScriptValue.h"
+#include "core/app/Application.h"
 #include "core/css/CSSComputedStyleDeclaration.h"
 #include "core/css/CSSRuleList.h"
 #include "core/css/DOMWindowCSS.h"
@@ -234,6 +235,7 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
     clearDocument();
 
     m_document = HTMLDocument::create(init);
+    m_application = Application::create(m_document.get(), m_document.get(), m_document->url().string());
     m_eventQueue = DOMWindowEventQueue::create(m_document.get());
     m_document->attach();
 

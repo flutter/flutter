@@ -60,6 +60,7 @@
 
 namespace blink {
 
+class AbstractModule;
 class AnimationTimeline;
 class Attr;
 class CSSStyleDeclaration;
@@ -195,6 +196,9 @@ public:
     // Focus Management.
     Element* activeElement() const;
     bool hasFocus() const;
+
+    AbstractModule* module() const { return m_module; }
+    void setModule(AbstractModule* module) { m_module = module; }
 
     // DOM methods & attributes for Document
 
@@ -341,9 +345,6 @@ public:
 
     const KURL& url() const { return m_url; }
     void setURL(const KURL&);
-
-    ScriptValue exports() const { return m_exports; }
-    void setExports(ScriptValue exports) { m_exports = exports; }
 
     // To understand how these concepts relate to one another, please see the
     // comments surrounding their declaration.
@@ -713,6 +714,8 @@ private:
 
     DocumentLifecycle m_lifecycle;
 
+    AbstractModule* m_module;
+
     bool m_hasNodesWithPlaceholderStyle;
     bool m_evaluateMediaQueriesOnStyleRecalc;
 
@@ -764,8 +767,6 @@ private:
     RefPtr<StyleSheetList> m_styleSheetList;
 
     TextLinkColors m_textLinkColors;
-
-    ScriptValue m_exports;
 
     ReadyState m_readyState;
     bool m_isParsing;

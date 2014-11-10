@@ -40,6 +40,7 @@
 
 namespace blink {
 
+class Application;
 class CSSRuleList;
 class CSSStyleDeclaration;
 class Console;
@@ -234,6 +235,7 @@ private:
 
     void removeAllEventListenersInternal(BroadcastListenerRemoval);
 
+    RefPtr<Application> m_application;
     RefPtr<Document> m_document;
 
 #if ENABLE(ASSERT)

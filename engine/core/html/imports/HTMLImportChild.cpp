@@ -112,6 +112,12 @@ void HTMLImportChild::importDestroyed()
 }
 #endif
 
+Module* HTMLImportChild::module() const
+{
+    ASSERT(m_loader);
+    return m_loader->module();
+}
+
 Document* HTMLImportChild::document() const
 {
     ASSERT(m_loader);
