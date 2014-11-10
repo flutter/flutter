@@ -304,7 +304,7 @@ module 'sky:core' {
     //     the values passed in on options
     //  6. register the new element
 
-    ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
+    attribute ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
   }
 
   class Module : AbstractModule {
