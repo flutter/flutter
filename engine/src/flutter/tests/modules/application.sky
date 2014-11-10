@@ -1,0 +1,14 @@
+<html>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<script>
+describe('Application', function() {
+  it('should have a constructor', function() {
+    var doc = new Document();
+    var app = new Application(doc, "http://www.example.com/app");
+    assert.equal(app.document, doc);
+    assert.equal(app.url, "http://www.example.com/app");
+  });
+});
+</script>
+</html>
