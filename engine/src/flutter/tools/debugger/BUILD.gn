@@ -17,8 +17,6 @@ shared_library("sky_debugger") {
   sources = [
     "debugger.cc",
     "debugger.h",
-    "focus_rules.cc",
-    "focus_rules.h",
     "main.cc",
     "navigator_host_impl.cc",
     "navigator_host_impl.h",
@@ -37,8 +35,6 @@ shared_library("sky_debugger") {
     "//mojo/services/public/interfaces/navigation",
     "//mojo/services/window_manager:lib",
     "//sky/viewer:bindings",
-    "//ui/aura:aura",
-    "//ui/wm:wm",
     ":bindings",
   ]
 }

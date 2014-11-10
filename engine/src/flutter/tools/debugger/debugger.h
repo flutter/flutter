@@ -15,7 +15,6 @@
 #include "mojo/services/window_manager/window_manager_app.h"
 #include "mojo/services/window_manager/window_manager_delegate.h"
 #include "sky/tools/debugger/debugger.mojom.h"
-#include "sky/tools/debugger/focus_rules.h"
 #include "sky/tools/debugger/navigator_host_impl.h"
 #include "sky/viewer/services/inspector.mojom.h"
 
