@@ -35,7 +35,6 @@ FetchRequest::FetchRequest(const ResourceRequest& resourceRequest, const AtomicS
     , m_charset(charset)
     , m_options(ResourceFetcher::defaultResourceOptions())
     , m_priority(priority)
-    , m_forPreload(false)
     , m_defer(NoDefer)
     , m_originRestriction(UseDefaultOriginRestrictionForType)
 {
@@ -46,7 +45,6 @@ FetchRequest::FetchRequest(const ResourceRequest& resourceRequest, const AtomicS
     : m_resourceRequest(resourceRequest)
     , m_options(options)
     , m_priority(ResourceLoadPriorityUnresolved)
-    , m_forPreload(false)
     , m_defer(NoDefer)
     , m_originRestriction(UseDefaultOriginRestrictionForType)
 {
@@ -57,7 +55,6 @@ FetchRequest::FetchRequest(const ResourceRequest& resourceRequest, const FetchIn
     : m_resourceRequest(resourceRequest)
     , m_options(ResourceFetcher::defaultResourceOptions())
     , m_priority(ResourceLoadPriorityUnresolved)
-    , m_forPreload(false)
     , m_defer(NoDefer)
     , m_originRestriction(UseDefaultOriginRestrictionForType)
 {

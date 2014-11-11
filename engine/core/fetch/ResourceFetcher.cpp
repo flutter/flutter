@@ -58,8 +58,6 @@
 #include "wtf/text/CString.h"
 #include "wtf/text/WTFString.h"
 
-#define PRELOAD_DEBUG 0
-
 using blink::WebURLRequest;
 
 namespace blink {
@@ -153,8 +151,6 @@ ResourceFetcher::~ResourceFetcher()
 {
     m_document = nullptr;
 
-    clearPreloads();
-
     // Make sure no requests still point to this ResourceFetcher
     ASSERT(!m_requestCount);
 }
@@ -198,7 +194,7 @@ ResourcePtr<FontResource> ResourceFetcher::fetchFont(FetchRequest& request)
     return toFontResource(requestResource(Resource::Font, request));
 }
 
-bool ResourceFetcher::canRequest(Resource::Type type, const KURL& url, const ResourceLoaderOptions& options, bool forPreload, FetchRequest::OriginRestriction originRestriction) const
+bool ResourceFetcher::canRequest(Resource::Type type, const KURL& url, const ResourceLoaderOptions& options, FetchRequest::OriginRestriction originRestriction) const
 {
     // FIXME(sky): Remove
     return true;
@@ -239,7 +235,7 @@ ResourcePtr<Resource> ResourceFetcher::requestResource(Resource::Type type, Fetc
 
     KURL url = request.resourceRequest().url();
 
-    WTF_LOG(ResourceLoading, "ResourceFetcher::requestResource '%s', charset '%s', priority=%d, forPreload=%u, type=%s", url.elidedString().latin1().data(), request.charset().latin1().data(), request.priority(), request.forPreload(), ResourceTypeName(type));
+    WTF_LOG(ResourceLoading, "ResourceFetcher::requestResource '%s', charset '%s', priority=%d, type=%s", url.elidedString().latin1().data(), request.charset().latin1().data(), request.priority(), ResourceTypeName(type));
 
     // If only the fragment identifiers differ, it is the same resource.
     url = MemoryCache::removeFragmentIdentifierIfNeeded(url);
@@ -247,7 +243,7 @@ ResourcePtr<Resource> ResourceFetcher::requestResource(Resource::Type type, Fetc
     if (!url.isValid())
         return 0;
 
-    if (!canRequest(type, url, request.options(), request.forPreload(), request.originRestriction()))
+    if (!canRequest(type, url, request.options(), request.originRestriction()))
         return 0;
 
     if (LocalFrame* f = frame())
@@ -281,12 +277,10 @@ ResourcePtr<Resource> ResourceFetcher::requestResource(Resource::Type type, Fetc
     if (policy != Use)
         resource->setIdentifier(createUniqueIdentifier());
 
-    if (!request.forPreload() || policy != Use) {
-        ResourceLoadPriority priority = loadPriority(type, request);
-        if (priority != resource->resourceRequest().priority()) {
-            resource->mutableResourceRequest().setPriority(priority);
-            resource->didChangePriority(priority, 0);
-        }
+    ResourceLoadPriority priority = loadPriority(type, request);
+    if (priority != resource->resourceRequest().priority()) {
+        resource->mutableResourceRequest().setPriority(priority);
+        resource->didChangePriority(priority, 0);
     }
 
     if (resourceNeedsLoad(resource.get(), request, policy)) {
@@ -401,16 +395,8 @@ ResourceFetcher::RevalidationPolicy ResourceFetcher::determineRevalidationPolicy
     if (!existingResource)
         return Load;
 
-    // We already have a preload going for this URL.
-    if (fetchRequest.forPreload() && existingResource->isPreloaded())
-        return Use;
-
     // If the same URL has been loaded as a different type, we need to reload.
     if (existingResource->type() != type) {
-        // FIXME: If existingResource is a Preload and the new type is LinkPrefetch
-        // We really should discard the new prefetch since the preload has more
-        // specific type information! crbug.com/379893
-        // fast/dom/HTMLLinkElement/link-and-subresource-test hits this case.
         WTF_LOG(ResourceLoading, "ResourceFetcher::determineRevalidationPolicy reloading due to type mismatch.");
         return Reload;
     }
@@ -444,10 +430,6 @@ ResourceFetcher::RevalidationPolicy ResourceFetcher::determineRevalidationPolicy
 
     if (!fetchRequest.options().canReuseRequest(existingResource->options()))
         return Reload;
-
-    // Always use preloads.
-    if (existingResource->isPreloaded())
-        return Use;
 
     // CachePolicyHistoryBuffer uses the cache no matter what.
     CachePolicy cachePolicy = context().cachePolicy(document());
@@ -648,76 +630,6 @@ void ResourceFetcher::decrementRequestCount(const Resource* res)
     ASSERT(m_requestCount > -1);
 }
 
-void ResourceFetcher::preload(Resource::Type type, FetchRequest& request, const String& charset)
-{
-    requestPreload(type, request, charset);
-}
-
-void ResourceFetcher::requestPreload(Resource::Type type, FetchRequest& request, const String& charset)
-{
-    // Ensure main resources aren't preloaded, since the cache can't actually reuse the preload.
-    if (type == Resource::MainResource)
-        return;
-
-    String encoding;
-    request.setCharset(encoding);
-    request.setForPreload(true);
-
-    ResourcePtr<Resource> resource;
-    // Loading images involves several special cases, so use dedicated fetch method instead.
-    if (type == Resource::Image)
-        resource = fetchImage(request);
-    if (!resource)
-        resource = requestResource(type, request);
-    if (!resource || (m_preloads && m_preloads->contains(resource.get())))
-        return;
-    TRACE_EVENT_ASYNC_STEP_INTO0("net", "Resource", resource.get(), "Preload");
-    resource->increasePreloadCount();
-
-    if (!m_preloads)
-        m_preloads = adoptPtr(new ListHashSet<Resource*>);
-    m_preloads->add(resource.get());
-
-#if PRELOAD_DEBUG
-    printf("PRELOADING %s\n",  resource->url().string().latin1().data());
-#endif
-}
-
-bool ResourceFetcher::isPreloaded(const String& urlString) const
-{
-    const KURL& url = m_document->completeURL(urlString);
-
-    if (m_preloads) {
-        ListHashSet<Resource*>::iterator end = m_preloads->end();
-        for (ListHashSet<Resource*>::iterator it = m_preloads->begin(); it != end; ++it) {
-            Resource* resource = *it;
-            if (resource->url() == url)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-void ResourceFetcher::clearPreloads()
-{
-#if PRELOAD_DEBUG
-    printPreloadStats();
-#endif
-    if (!m_preloads)
-        return;
-
-    ListHashSet<Resource*>::iterator end = m_preloads->end();
-    for (ListHashSet<Resource*>::iterator it = m_preloads->begin(); it != end; ++it) {
-        Resource* res = *it;
-        res->decreasePreloadCount();
-        bool deleted = res->deleteIfPossible();
-        if (!deleted && res->preloadResult() == Resource::PreloadNotReferenced)
-            memoryCache()->remove(res);
-    }
-    m_preloads.clear();
-}
-
 void ResourceFetcher::didFinishLoading(const Resource* resource, double finishTime, int64_t encodedDataLength)
 {
     TRACE_EVENT_ASYNC_END0("net", "Resource", resource);
@@ -814,48 +726,6 @@ void ResourceFetcher::refResourceLoaderHost()
 void ResourceFetcher::derefResourceLoaderHost()
 {
     deref();
-}
-#endif
-
-#if PRELOAD_DEBUG
-void ResourceFetcher::printPreloadStats()
-{
-    if (!m_preloads)
-        return;
-
-    unsigned scripts = 0;
-    unsigned scriptMisses = 0;
-    unsigned stylesheets = 0;
-    unsigned stylesheetMisses = 0;
-    unsigned images = 0;
-    unsigned imageMisses = 0;
-    ListHashSet<Resource*>::iterator end = m_preloads->end();
-    for (ListHashSet<Resource*>::iterator it = m_preloads->begin(); it != end; ++it) {
-        Resource* res = *it;
-        if (res->preloadResult() == Resource::PreloadNotReferenced)
-            printf("!! UNREFERENCED PRELOAD %s\n", res->url().string().latin1().data());
-        else if (res->preloadResult() == Resource::PreloadReferencedWhileComplete)
-            printf("HIT COMPLETE PRELOAD %s\n", res->url().string().latin1().data());
-        else if (res->preloadResult() == Resource::PreloadReferencedWhileLoading)
-            printf("HIT LOADING PRELOAD %s\n", res->url().string().latin1().data());
-
-        images++;
-        if (res->preloadResult() < Resource::PreloadReferencedWhileLoading)
-            imageMisses++;
-
-        if (res->errorOccurred())
-            memoryCache()->remove(res);
-
-        res->decreasePreloadCount();
-    }
-    m_preloads.clear();
-
-    if (scripts)
-        printf("SCRIPTS: %d (%d hits, hit rate %d%%)\n", scripts, scripts - scriptMisses, (scripts - scriptMisses) * 100 / scripts);
-    if (stylesheets)
-        printf("STYLESHEETS: %d (%d hits, hit rate %d%%)\n", stylesheets, stylesheets - stylesheetMisses, (stylesheets - stylesheetMisses) * 100 / stylesheets);
-    if (images)
-        printf("IMAGES:  %d (%d hits, hit rate %d%%)\n", images, images - imageMisses, (images - imageMisses) * 100 / images);
 }
 #endif
 

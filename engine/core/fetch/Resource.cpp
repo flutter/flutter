@@ -101,9 +101,7 @@ Resource::Resource(const ResourceRequest& request, Type type)
     , m_encodedSize(0)
     , m_decodedSize(0)
     , m_handleCount(0)
-    , m_preloadCount(0)
     , m_protectorCount(0)
-    , m_preloadResult(PreloadNotReferenced)
     , m_requestedFromNetworkingLayer(false)
     , m_loading(false)
     , m_switchingClientsToRevalidatedResource(false)
@@ -240,7 +238,7 @@ void Resource::error(Resource::Status status)
     if (m_resourceToRevalidate)
         revalidationFailed();
 
-    if (!m_error.isNull() && (m_error.isCancellation() || !isPreloaded()))
+    if (!m_error.isNull())
         memoryCache()->remove(this);
 
     setStatus(status);
@@ -377,7 +375,7 @@ void Resource::responseReceived(const ResourceResponse& response)
 
 bool Resource::canDelete() const
 {
-    return !hasClients() && !m_loader && !m_preloadCount && hasRightHandleCountApartFromCache(0)
+    return !hasClients() && !m_loader && hasRightHandleCountApartFromCache(0)
         && !m_protectorCount && !m_resourceToRevalidate && !m_proxyResource;
 }
 
@@ -422,14 +420,6 @@ bool Resource::addClientToSet(ResourceClient* client)
 {
     ASSERT(!isPurgeable());
 
-    if (m_preloadResult == PreloadNotReferenced) {
-        if (isLoaded())
-            m_preloadResult = PreloadReferencedWhileComplete;
-        else if (m_requestedFromNetworkingLayer)
-            m_preloadResult = PreloadReferencedWhileLoading;
-        else
-            m_preloadResult = PreloadReferenced;
-    }
     if (!hasClients())
         memoryCache()->makeLive(this);
 

@@ -120,14 +120,6 @@ public:
     bool hasClients() const { return !m_clients.isEmpty() || !m_clientsAwaitingCallback.isEmpty(); }
     bool deleteIfPossible();
 
-    enum PreloadResult {
-        PreloadNotReferenced,
-        PreloadReferenced,
-        PreloadReferencedWhileLoading,
-        PreloadReferencedWhileComplete
-    };
-    PreloadResult preloadResult() const { return static_cast<PreloadResult>(m_preloadResult); }
-
     virtual void didAddClient(ResourceClient*);
     virtual void didRemoveClient(ResourceClient*) { }
     virtual void allClientsRemoved();
@@ -190,11 +182,6 @@ public:
 
     DataBufferingPolicy dataBufferingPolicy() const { return m_options.dataBufferingPolicy; }
     void setDataBufferingPolicy(DataBufferingPolicy);
-
-    bool isUnusedPreload() const { return isPreloaded() && preloadResult() == PreloadNotReferenced; }
-    bool isPreloaded() const { return m_preloadCount; }
-    void increasePreloadCount() { ++m_preloadCount; }
-    void decreasePreloadCount() { ASSERT(m_preloadCount); --m_preloadCount; }
 
     void registerHandle(ResourcePtrBase* h);
     void unregisterHandle(ResourcePtrBase* h);
@@ -324,10 +311,8 @@ private:
     size_t m_encodedSize;
     size_t m_decodedSize;
     unsigned m_handleCount;
-    unsigned m_preloadCount;
     unsigned m_protectorCount;
 
-    unsigned m_preloadResult : 2; // PreloadResult
     unsigned m_requestedFromNetworkingLayer : 1;
 
     unsigned m_loading : 1;

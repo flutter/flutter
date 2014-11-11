@@ -49,7 +49,6 @@ public:
 
     BLINK_EXPORT const WebURLRequest& urlRequest() const;
     BLINK_EXPORT WebString charset() const;
-    BLINK_EXPORT bool forPreload() const;
     BLINK_EXPORT WebString initiatorName() const;
 
 #if BLINK_IMPLEMENTATION

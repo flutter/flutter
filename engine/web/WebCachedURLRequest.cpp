@@ -57,11 +57,6 @@ WebString WebCachedURLRequest::charset() const
     return WebString(m_private->charset());
 }
 
-bool WebCachedURLRequest::forPreload() const
-{
-    return m_private->forPreload();
-}
-
 WebString WebCachedURLRequest::initiatorName() const
 {
     return WebString(m_private->options().initiatorInfo.name);

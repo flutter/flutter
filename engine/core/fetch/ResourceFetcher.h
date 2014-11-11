@@ -101,11 +101,6 @@ public:
 
     int requestCount() const { return m_requestCount; }
 
-    bool isPreloaded(const String& urlString) const;
-    void clearPreloads();
-    void preload(Resource::Type, FetchRequest&, const String& charset);
-    void printPreloadStats();
-
     void stopFetching();
     bool isFetching() const;
 
@@ -146,7 +141,6 @@ private:
     ResourcePtr<Resource> requestResource(Resource::Type, FetchRequest&);
     ResourcePtr<Resource> createResourceForRevalidation(const FetchRequest&, Resource*);
     ResourcePtr<Resource> createResourceForLoading(Resource::Type, FetchRequest&, const String& charset);
-    void requestPreload(Resource::Type, FetchRequest&, const String& charset);
 
     enum RevalidationPolicy { Use, Revalidate, Reload, Load };
     RevalidationPolicy determineRevalidationPolicy(Resource::Type, const FetchRequest&, Resource* existingResource) const;
@@ -155,7 +149,7 @@ private:
     ResourceRequestCachePolicy resourceRequestCachePolicy(const ResourceRequest&, Resource::Type);
     void addAdditionalRequestHeaders(ResourceRequest&, Resource::Type);
 
-    bool canRequest(Resource::Type, const KURL&, const ResourceLoaderOptions&, bool forPreload, FetchRequest::OriginRestriction) const;
+    bool canRequest(Resource::Type, const KURL&, const ResourceLoaderOptions&, FetchRequest::OriginRestriction) const;
 
     static bool resourceNeedsLoad(Resource*, const FetchRequest&, RevalidationPolicy);
 
@@ -172,8 +166,6 @@ private:
     Document* m_document;
 
     int m_requestCount;
-
-    OwnPtr<ListHashSet<Resource*> > m_preloads;
 
     Timer<ResourceFetcher> m_garbageCollectDocumentResourcesTimer;
 

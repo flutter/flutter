@@ -265,7 +265,6 @@ void MemoryCache::pruneDeadResources()
             if (current->m_resource->wasPurged() && current->m_resource->canDelete()
                 && current->m_resource->type() != Resource::MainResource) {
                 ASSERT(!current->m_resource->hasClients());
-                ASSERT(!current->m_resource->isPreloaded());
                 bool wasEvicted = evict(current);
                 ASSERT_UNUSED(wasEvicted, wasEvicted);
             }
@@ -285,7 +284,7 @@ void MemoryCache::pruneDeadResources()
             // Protect 'previous' so it can't get deleted during destroyDecodedData().
             MemoryCacheEntry* previous = current->m_previousInAllResourcesList;
             ASSERT(!previous || contains(previous->m_resource.get()));
-            if (!current->m_resource->hasClients() && !current->m_resource->isPreloaded() && current->m_resource->isLoaded()) {
+            if (!current->m_resource->hasClients() && current->m_resource->isLoaded()) {
                 // Destroy our decoded data. This will remove us from
                 // m_liveDecodedResources, and possibly move us to a different
                 // LRU list in m_allResources.
@@ -306,7 +305,7 @@ void MemoryCache::pruneDeadResources()
         while (current) {
             MemoryCacheEntry* previous = current->m_previousInAllResourcesList;
             ASSERT(!previous || contains(previous->m_resource.get()));
-            if (!current->m_resource->hasClients() && !current->m_resource->isPreloaded()
+            if (!current->m_resource->hasClients()
                 && !current->m_resource->isCacheValidator() && current->m_resource->canDelete()
                 && current->m_resource->type() != Resource::MainResource) {
                 // Main Resources in the cache are only substitue data that was

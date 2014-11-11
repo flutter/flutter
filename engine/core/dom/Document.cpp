@@ -2396,9 +2396,6 @@ void Document::finishedParsing()
     // alive indefinitely by something innocuous like JS setting .innerHTML repeatedly on a timer.
     m_elementDataCacheClearTimer.startOneShot(10, FROM_HERE);
 
-    // Parser should have picked up all preloads by now
-    m_fetcher->clearPreloads();
-
     if (HTMLImportLoader* import = importLoader())
         import->didFinishParsing();
 }

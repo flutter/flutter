@@ -53,8 +53,6 @@ public:
     const ResourceLoaderOptions& options() const { return m_options; }
     void setOptions(const ResourceLoaderOptions& options) { m_options = options; }
     ResourceLoadPriority priority() const { return m_priority; }
-    bool forPreload() const { return m_forPreload; }
-    void setForPreload(bool forPreload) { m_forPreload = forPreload; }
     DeferOption defer() const { return m_defer; }
     void setDefer(DeferOption defer) { m_defer = defer; }
     OriginRestriction originRestriction() const { return m_originRestriction; }
@@ -65,7 +63,6 @@ private:
     String m_charset;
     ResourceLoaderOptions m_options;
     ResourceLoadPriority m_priority;
-    bool m_forPreload;
     DeferOption m_defer;
     OriginRestriction m_originRestriction;
 };
