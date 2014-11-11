@@ -41,17 +41,10 @@ DocumentParser::DocumentParser(Document* document)
 
 DocumentParser::~DocumentParser()
 {
-#if !ENABLE(OILPAN)
     // Document is expected to call detach() before releasing its ref.
     // This ASSERT is slightly awkward for parsers with a fragment case
     // as there is no Document to release the ref.
     ASSERT(!m_document);
-#endif
-}
-
-void DocumentParser::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
 }
 
 void DocumentParser::prepareToStopParsing()

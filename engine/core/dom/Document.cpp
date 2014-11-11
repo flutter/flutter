@@ -1343,12 +1343,6 @@ void Document::removeAllEventListeners()
         domWindow->removeAllEventListeners();
 }
 
-PassRefPtr<DocumentParser> Document::createParser()
-{
-    // FIXME(sky): Should we pass true for report errors like the inspector did?
-    return HTMLDocumentParser::create(toHTMLDocument(*this), false);
-}
-
 HTMLDocumentParser* Document::scriptableDocumentParser() const
 {
     return parser() ? parser()->asHTMLDocumentParser() : 0;
@@ -1388,7 +1382,7 @@ void Document::startParsing()
     ASSERT(!firstChild());
     ASSERT(!m_focusedElement);
 
-    m_parser = createParser();
+    m_parser = HTMLDocumentParser::create(toHTMLDocument(*this), false);
     setParsing(true);
     setReadyState(Loading);
 }

@@ -1718,9 +1718,6 @@ inline void Element::setInlineStyleFromString(const AtomicString& newStyleString
 void Element::styleAttributeChanged(const AtomicString& newStyleString)
 {
     ASSERT(isStyledElement());
-    WTF::OrdinalNumber startLineNumber = WTF::OrdinalNumber::beforeFirst();
-    if (document().scriptableDocumentParser())
-        startLineNumber = document().scriptableDocumentParser()->lineNumber();
 
     if (newStyleString.isNull()) {
         ensureUniqueElementData().m_inlineStyle.clear();

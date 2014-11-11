@@ -335,7 +335,6 @@ public:
 
     CSSStyleSheet& elementSheet();
 
-    virtual PassRefPtr<DocumentParser> createParser();
     DocumentParser* parser() const { return m_parser.get(); }
     HTMLDocumentParser* scriptableDocumentParser() const;
 

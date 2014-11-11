@@ -39,7 +39,6 @@ class TextResourceDecoder;
 class DocumentParser : public RefCounted<DocumentParser> {
 public:
     virtual ~DocumentParser();
-    virtual void trace(Visitor*);
 
     virtual HTMLDocumentParser* asHTMLDocumentParser() { return 0; }
 
