@@ -74,7 +74,6 @@ AnimationPlayer::AnimationPlayer(ExecutionContext* executionContext, AnimationTi
     , m_compositorPending(true)
     , m_currentTimePending(false)
 {
-    ScriptWrappable::init(this);
     if (m_content) {
         if (m_content->player())
             m_content->player()->cancel();

@@ -36,7 +36,6 @@ namespace blink {
 OESVertexArrayObject::OESVertexArrayObject(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->extensionsUtil()->ensureExtensionEnabled("GL_OES_vertex_array_object");
 }
 

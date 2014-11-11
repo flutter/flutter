@@ -69,7 +69,6 @@ inline HTMLElement::HTMLElement(const QualifiedName& tagName, Document& document
     : Element(tagName, &document, type)
 {
     ASSERT(!tagName.localName().isNull());
-    ScriptWrappable::init(this);
 }
 
 inline bool Node::hasTagName(const HTMLQualifiedName& name) const

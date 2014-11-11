@@ -200,7 +200,6 @@ LocalDOMWindow::LocalDOMWindow(LocalFrame& frame)
     , m_hasBeenReset(false)
 #endif
 {
-    ScriptWrappable::init(this);
 }
 
 void LocalDOMWindow::clearDocument()

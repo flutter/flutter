@@ -38,7 +38,6 @@ namespace blink {
 
 DOMURL::DOMURL(const String& url, const KURL& base, ExceptionState& exceptionState)
 {
-    ScriptWrappable::init(this);
     if (!base.isValid())
         exceptionState.throwDOMException(SyntaxError, "Invalid base URL");
 

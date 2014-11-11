@@ -59,7 +59,6 @@ WebGLRenderbuffer::WebGLRenderbuffer(WebGLRenderingContextBase* ctx)
     , m_height(0)
     , m_hasEverBeenBound(false)
 {
-    ScriptWrappable::init(this);
     setObject(ctx->webContext()->createRenderbuffer());
 }
 

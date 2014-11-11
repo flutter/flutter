@@ -38,7 +38,6 @@ inline HTMLTitleElement::HTMLTitleElement(Document& document)
     : HTMLElement(HTMLNames::titleTag, document)
     , m_ignoreTitleUpdatesWhenChildrenChange(false)
 {
-    ScriptWrappable::init(this);
 }
 
 DEFINE_NODE_FACTORY(HTMLTitleElement)

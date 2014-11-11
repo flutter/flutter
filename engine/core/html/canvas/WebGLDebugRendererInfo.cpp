@@ -32,7 +32,6 @@ namespace blink {
 WebGLDebugRendererInfo::WebGLDebugRendererInfo(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
 }
 
 WebGLDebugRendererInfo::~WebGLDebugRendererInfo()

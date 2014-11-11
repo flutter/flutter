@@ -55,7 +55,6 @@ private:
     MediaQueryListEvent()
         : m_matches(false)
     {
-        ScriptWrappable::init(this);
     }
 
     MediaQueryListEvent(const String& media, bool matches)
@@ -63,7 +62,6 @@ private:
         , m_media(media)
         , m_matches(matches)
     {
-        ScriptWrappable::init(this);
     }
 
     explicit MediaQueryListEvent(MediaQueryList* list)
@@ -71,7 +69,6 @@ private:
         , m_mediaQueryList(list)
         , m_matches(false)
     {
-        ScriptWrappable::init(this);
     }
 
     MediaQueryListEvent(const AtomicString& eventType, const MediaQueryListEventInit& initializer)
@@ -79,7 +76,6 @@ private:
         , m_media(initializer.media)
         , m_matches(initializer.matches)
     {
-        ScriptWrappable::init(this);
     }
 
     // We have m_media/m_matches for JS-created events; we use m_mediaQueryList

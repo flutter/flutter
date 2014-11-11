@@ -183,7 +183,6 @@ MediaList::MediaList(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
     , m_parentStyleSheet(parentSheet)
     , m_parentRule(nullptr)
 {
-    ScriptWrappable::init(this);
 }
 
 MediaList::MediaList(MediaQuerySet* mediaQueries, CSSRule* parentRule)
@@ -191,7 +190,6 @@ MediaList::MediaList(MediaQuerySet* mediaQueries, CSSRule* parentRule)
     , m_parentStyleSheet(nullptr)
     , m_parentRule(parentRule)
 {
-    ScriptWrappable::init(this);
 }
 
 MediaList::~MediaList()

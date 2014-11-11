@@ -59,7 +59,6 @@ EventTargetData::~EventTargetData()
 
 EventTarget::EventTarget()
 {
-    ScriptWrappable::init(this);
 }
 
 EventTarget::~EventTarget()

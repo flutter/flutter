@@ -40,7 +40,6 @@ class StyleSheet : public RefCounted<StyleSheet>, public ScriptWrappable {
 public:
     StyleSheet()
     {
-        ScriptWrappable::init(this);
     }
     virtual ~StyleSheet();
 

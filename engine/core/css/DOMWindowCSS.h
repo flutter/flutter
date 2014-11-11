@@ -51,7 +51,6 @@ public:
 private:
     DOMWindowCSS()
     {
-        ScriptWrappable::init(this);
     }
 };
 

@@ -50,10 +50,8 @@ public:
         CompositeAdd,
     };
 
-    AnimationEffect()
-    {
-        ScriptWrappable::init(this);
-    }
+    AnimationEffect() { }
+
     virtual ~AnimationEffect() { }
     virtual PassOwnPtr<Vector<RefPtr<Interpolation> > > sample(int iteration, double fraction, double iterationDuration) const = 0;
 

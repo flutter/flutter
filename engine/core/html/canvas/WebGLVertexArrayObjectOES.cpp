@@ -45,7 +45,6 @@ WebGLVertexArrayObjectOES::WebGLVertexArrayObjectOES(WebGLRenderingContextBase* 
 #endif
     , m_boundElementArrayBuffer(nullptr)
 {
-    ScriptWrappable::init(this);
     m_vertexAttribState.resize(ctx->maxVertexAttribs());
 
     switch (m_type) {

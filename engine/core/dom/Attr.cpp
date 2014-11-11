@@ -29,7 +29,6 @@ Attr::Attr(const QualifiedName& name, const AtomicString& value)
     : m_name(name)
     , m_value(value)
 {
-    ScriptWrappable::init(this);
 }
 
 PassRefPtr<Attr> Attr::create(const QualifiedName& name, const AtomicString& value)

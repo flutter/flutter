@@ -54,7 +54,6 @@ Pattern::RepeatMode CanvasPattern::parseRepetitionType(const String& type,
 CanvasPattern::CanvasPattern(PassRefPtr<Image> image, Pattern::RepeatMode repeat)
     : m_pattern(Pattern::createBitmapPattern(image, repeat))
 {
-    ScriptWrappable::init(this);
 }
 
 }

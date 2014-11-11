@@ -32,13 +32,11 @@ namespace blink {
 
 CustomEvent::CustomEvent()
 {
-    ScriptWrappable::init(this);
 }
 
 CustomEvent::CustomEvent(const AtomicString& type, const CustomEventInit& initializer)
     : Event(type, initializer)
 {
-    ScriptWrappable::init(this);
 }
 
 CustomEvent::~CustomEvent()

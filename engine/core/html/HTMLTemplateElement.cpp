@@ -41,7 +41,6 @@ namespace blink {
 inline HTMLTemplateElement::HTMLTemplateElement(Document& document)
     : HTMLElement(HTMLNames::templateTag, document)
 {
-    ScriptWrappable::init(this);
 }
 
 DEFINE_NODE_FACTORY(HTMLTemplateElement)

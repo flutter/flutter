@@ -42,7 +42,6 @@ class DOMTokenList : public ScriptWrappable {
 public:
     DOMTokenList()
     {
-        ScriptWrappable::init(this);
     }
     virtual ~DOMTokenList() { }
 

@@ -35,21 +35,18 @@ namespace blink {
 
 FontFaceSetLoadEvent::FontFaceSetLoadEvent()
 {
-    ScriptWrappable::init(this);
 }
 
 FontFaceSetLoadEvent::FontFaceSetLoadEvent(const AtomicString& type, const FontFaceArray& fontfaces)
     : Event(type, false, false)
     , m_fontfaces(fontfaces)
 {
-    ScriptWrappable::init(this);
 }
 
 FontFaceSetLoadEvent::FontFaceSetLoadEvent(const AtomicString& type, const FontFaceSetLoadEventInit& initializer)
     : Event(type, initializer)
     , m_fontfaces(initializer.fontfaces)
 {
-    ScriptWrappable::init(this);
 }
 
 FontFaceSetLoadEvent::~FontFaceSetLoadEvent()

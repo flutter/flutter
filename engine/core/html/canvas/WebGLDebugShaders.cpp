@@ -35,7 +35,6 @@ namespace blink {
 WebGLDebugShaders::WebGLDebugShaders(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
 }
 
 WebGLDebugShaders::~WebGLDebugShaders()

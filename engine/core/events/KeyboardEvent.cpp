@@ -99,7 +99,6 @@ KeyboardEvent::KeyboardEvent()
     : m_location(DOM_KEY_LOCATION_STANDARD)
     , m_isAutoRepeat(false)
 {
-    ScriptWrappable::init(this);
 }
 
 KeyboardEvent::KeyboardEvent(const PlatformKeyboardEvent& key, AbstractView* view)
@@ -110,7 +109,6 @@ KeyboardEvent::KeyboardEvent(const PlatformKeyboardEvent& key, AbstractView* vie
     , m_location(keyLocationCode(key))
     , m_isAutoRepeat(key.isAutoRepeat())
 {
-    ScriptWrappable::init(this);
 }
 
 KeyboardEvent::KeyboardEvent(const AtomicString& eventType, const KeyboardEventInit& initializer)
@@ -119,7 +117,6 @@ KeyboardEvent::KeyboardEvent(const AtomicString& eventType, const KeyboardEventI
     , m_location(initializer.location)
     , m_isAutoRepeat(initializer.repeat)
 {
-    ScriptWrappable::init(this);
 }
 
 KeyboardEvent::KeyboardEvent(const AtomicString& eventType, bool canBubble, bool cancelable, AbstractView *view,
@@ -130,7 +127,6 @@ KeyboardEvent::KeyboardEvent(const AtomicString& eventType, bool canBubble, bool
     , m_location(location)
     , m_isAutoRepeat(false)
 {
-    ScriptWrappable::init(this);
 }
 
 KeyboardEvent::~KeyboardEvent()

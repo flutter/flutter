@@ -112,9 +112,6 @@ class ScriptWrappable : public ScriptWrappableBase {
 public:
     ScriptWrappable() { }
 
-    template<typename T>
-    static void init(T*) {}
-
     // Returns the WrapperTypeInfo of the instance.
     //
     // This method must be overridden by DEFINE_WRAPPERTYPEINFO macro.

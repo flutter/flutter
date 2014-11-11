@@ -96,7 +96,6 @@ DOMException::DOMException(unsigned short code, const String& name, const String
     m_name = name;
     m_sanitizedMessage = sanitizedMessage;
     m_unsanitizedMessage = unsanitizedMessage;
-    ScriptWrappable::init(this);
 }
 
 PassRefPtr<DOMException> DOMException::create(ExceptionCode ec, const String& sanitizedMessage, const String& unsanitizedMessage)

@@ -223,7 +223,6 @@ Node::Node(TreeScope* treeScope, ConstructionType type)
     , m_next(nullptr)
 {
     ASSERT(m_treeScope || type == CreateDocument || type == CreateShadowRoot);
-    ScriptWrappable::init(this);
 #if !ENABLE(OILPAN)
     if (m_treeScope)
         m_treeScope->guardRef();

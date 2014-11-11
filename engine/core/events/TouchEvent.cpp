@@ -37,7 +37,6 @@ namespace blink {
 
 TouchEvent::TouchEvent()
 {
-    ScriptWrappable::init(this);
 }
 
 TouchEvent::TouchEvent(TouchList* touches, TouchList* targetTouches,
@@ -50,7 +49,6 @@ TouchEvent::TouchEvent(TouchList* touches, TouchList* targetTouches,
     , m_targetTouches(targetTouches)
     , m_changedTouches(changedTouches)
 {
-    ScriptWrappable::init(this);
 }
 
 TouchEvent::~TouchEvent()

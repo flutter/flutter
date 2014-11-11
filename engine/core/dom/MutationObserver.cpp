@@ -65,7 +65,6 @@ MutationObserver::MutationObserver(PassOwnPtr<MutationCallback> callback)
     : m_callback(callback)
     , m_priority(s_observerPriority++)
 {
-    ScriptWrappable::init(this);
 }
 
 MutationObserver::~MutationObserver()

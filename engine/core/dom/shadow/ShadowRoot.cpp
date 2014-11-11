@@ -58,7 +58,6 @@ ShadowRoot::ShadowRoot(Document& document)
     , m_registeredWithParentShadowRoot(false)
     , m_descendantInsertionPointsIsValid(false)
 {
-    ScriptWrappable::init(this);
 }
 
 ShadowRoot::~ShadowRoot()

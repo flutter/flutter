@@ -96,7 +96,6 @@ CanvasRenderingContext2D::CanvasRenderingContext2D(HTMLCanvasElement* canvas, co
     , m_tryRestoreContextEventTimer(this, &CanvasRenderingContext2D::tryRestoreContextEvent)
 {
     m_stateStack.append(adoptPtr(new State()));
-    ScriptWrappable::init(this);
 }
 
 void CanvasRenderingContext2D::unwindStateStack()

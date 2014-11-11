@@ -62,7 +62,6 @@ PassRefPtr<AnimationTimeline> AnimationTimeline::create(Document* document, Pass
 AnimationTimeline::AnimationTimeline(Document* document, PassOwnPtr<PlatformTiming> timing)
     : m_document(document)
 {
-    ScriptWrappable::init(this);
     if (!timing)
         m_timing = adoptPtr(new AnimationTimelineTiming(this));
     else

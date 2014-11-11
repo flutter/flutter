@@ -32,7 +32,6 @@ namespace blink {
 OESTextureHalfFloat::OESTextureHalfFloat(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->extensionsUtil()->ensureExtensionEnabled("GL_OES_texture_half_float");
 }
 

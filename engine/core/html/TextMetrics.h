@@ -91,7 +91,6 @@ private:
         , m_alphabeticBaseline(0)
         , m_ideographicBaseline(0)
     {
-        ScriptWrappable::init(this);
     }
 
     // x-direction

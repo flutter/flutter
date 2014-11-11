@@ -105,7 +105,6 @@ CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents)
     , m_ownerNode(nullptr)
     , m_startPosition(TextPosition::minimumPosition())
 {
-    ScriptWrappable::init(this);
     m_contents->registerClient(this);
 }
 
@@ -115,7 +114,6 @@ CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents, Node* owne
     , m_ownerNode(ownerNode)
     , m_startPosition(startPosition)
 {
-    ScriptWrappable::init(this);
     ASSERT(isAcceptableCSSStyleSheetParent(ownerNode));
     m_contents->registerClient(this);
 }

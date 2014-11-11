@@ -51,7 +51,6 @@ ErrorEvent::ErrorEvent()
     , m_columnNumber(0)
     , m_world(DOMWrapperWorld::current(v8::Isolate::GetCurrent()))
 {
-    ScriptWrappable::init(this);
 }
 
 ErrorEvent::ErrorEvent(const AtomicString& type, const ErrorEventInit& initializer)
@@ -62,7 +61,6 @@ ErrorEvent::ErrorEvent(const AtomicString& type, const ErrorEventInit& initializ
     , m_columnNumber(initializer.colno)
     , m_world(DOMWrapperWorld::current(v8::Isolate::GetCurrent()))
 {
-    ScriptWrappable::init(this);
 }
 
 ErrorEvent::ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld* world)
@@ -73,7 +71,6 @@ ErrorEvent::ErrorEvent(const String& message, const String& fileName, unsigned l
     , m_columnNumber(columnNumber)
     , m_world(world)
 {
-    ScriptWrappable::init(this);
 }
 
 void ErrorEvent::setUnsanitizedMessage(const String& message)

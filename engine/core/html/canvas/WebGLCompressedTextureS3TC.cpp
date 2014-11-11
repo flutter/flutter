@@ -34,7 +34,6 @@ namespace blink {
 WebGLCompressedTextureS3TC::WebGLCompressedTextureS3TC(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->addCompressedTextureFormat(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
     context->addCompressedTextureFormat(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT);
     context->addCompressedTextureFormat(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT);

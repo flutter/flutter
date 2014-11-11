@@ -56,7 +56,6 @@ private:
         ASSERT(name.length());
         ASSERT(type);
         ASSERT(size);
-        ScriptWrappable::init(this);
     }
     String m_name;
     GLenum m_type;

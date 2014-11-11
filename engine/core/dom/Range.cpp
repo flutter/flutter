@@ -63,7 +63,6 @@ inline Range::Range(Document& ownerDocument)
     rangeCounter.increment();
 #endif
 
-    ScriptWrappable::init(this);
     m_ownerDocument->attachRange(this);
 }
 
@@ -81,7 +80,6 @@ inline Range::Range(Document& ownerDocument, Node* startContainer, int startOffs
     rangeCounter.increment();
 #endif
 
-    ScriptWrappable::init(this);
     m_ownerDocument->attachRange(this);
 
     // Simply setting the containers and offsets directly would not do any of the checking

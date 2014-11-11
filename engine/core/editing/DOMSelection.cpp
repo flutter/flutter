@@ -64,7 +64,6 @@ DOMSelection::DOMSelection(const TreeScope* treeScope)
     : DOMWindowProperty(treeScope->rootNode().document().frame())
     , m_treeScope(treeScope)
 {
-    ScriptWrappable::init(this);
 }
 
 void DOMSelection::clearTreeScope()

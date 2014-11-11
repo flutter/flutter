@@ -62,7 +62,6 @@ public:
 private:
     DOMStringList()
     {
-        ScriptWrappable::init(this);
     }
 
     Vector<String> m_strings;

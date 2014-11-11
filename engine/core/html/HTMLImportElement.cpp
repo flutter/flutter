@@ -18,7 +18,6 @@ HTMLImportElement::HTMLImportElement(Document& document)
     : HTMLElement(HTMLNames::importTag, document)
     , m_child(nullptr)
 {
-    ScriptWrappable::init(this);
 }
 
 HTMLImportElement::~HTMLImportElement()

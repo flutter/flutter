@@ -43,7 +43,6 @@ class Document;
 inline HTMLShadowElement::HTMLShadowElement(Document& document)
     : InsertionPoint(HTMLNames::shadowTag, document)
 {
-    ScriptWrappable::init(this);
 }
 
 DEFINE_NODE_FACTORY(HTMLShadowElement)

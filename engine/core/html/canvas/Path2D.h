@@ -60,19 +60,16 @@ public:
 private:
     Path2D() : CanvasPathMethods()
     {
-        ScriptWrappable::init(this);
     }
 
     Path2D(const Path& path)
         : CanvasPathMethods(path)
     {
-        ScriptWrappable::init(this);
     }
 
     Path2D(Path2D* path)
         : CanvasPathMethods(path->path())
     {
-        ScriptWrappable::init(this);
     }
 };
 

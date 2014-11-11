@@ -134,7 +134,6 @@ FontFaceSet::FontFaceSet(Document& document)
     , m_shouldFireLoadingEvent(false)
     , m_asyncRunner(this, &FontFaceSet::handlePendingEventsAndPromises)
 {
-    ScriptWrappable::init(this);
     suspendIfNeeded();
 }
 

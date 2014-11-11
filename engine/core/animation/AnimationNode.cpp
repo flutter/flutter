@@ -60,7 +60,6 @@ AnimationNode::AnimationNode(const Timing& timing, PassOwnPtr<EventDelegate> eve
     , m_needsUpdate(true)
     , m_lastUpdateTime(nullValue())
 {
-    ScriptWrappable::init(this);
     m_timing.assertValid();
 }
 

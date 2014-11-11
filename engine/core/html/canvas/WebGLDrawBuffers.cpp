@@ -32,7 +32,6 @@ namespace blink {
 WebGLDrawBuffers::WebGLDrawBuffers(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->extensionsUtil()->ensureExtensionEnabled("GL_EXT_draw_buffers");
 }
 

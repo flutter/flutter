@@ -11,7 +11,6 @@ namespace blink {
 EXTBlendMinMax::EXTBlendMinMax(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->extensionsUtil()->ensureExtensionEnabled("GL_EXT_blend_minmax");
 }
 

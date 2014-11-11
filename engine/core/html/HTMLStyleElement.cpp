@@ -37,7 +37,6 @@ inline HTMLStyleElement::HTMLStyleElement(Document& document, bool createdByPars
     : HTMLElement(HTMLNames::styleTag, document)
     , StyleElement(&document, createdByParser)
 {
-    ScriptWrappable::init(this);
 }
 
 HTMLStyleElement::~HTMLStyleElement()

@@ -37,7 +37,6 @@ AnimationEventInit::AnimationEventInit()
 AnimationEvent::AnimationEvent()
     : m_elapsedTime(0.0)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationEvent::AnimationEvent(const AtomicString& type, const AnimationEventInit& initializer)
@@ -45,7 +44,6 @@ AnimationEvent::AnimationEvent(const AtomicString& type, const AnimationEventIni
     , m_animationName(initializer.animationName)
     , m_elapsedTime(initializer.elapsedTime)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationEvent::AnimationEvent(const AtomicString& type, const String& animationName, double elapsedTime)
@@ -53,7 +51,6 @@ AnimationEvent::AnimationEvent(const AtomicString& type, const String& animation
     , m_animationName(animationName)
     , m_elapsedTime(elapsedTime)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationEvent::~AnimationEvent()

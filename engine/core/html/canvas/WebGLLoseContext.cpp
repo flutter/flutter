@@ -34,7 +34,6 @@ namespace blink {
 WebGLLoseContext::WebGLLoseContext(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
 }
 
 WebGLLoseContext::~WebGLLoseContext()

@@ -43,12 +43,10 @@ namespace blink {
 CSSMatrix::CSSMatrix(const TransformationMatrix& m)
     : m_matrix(m)
 {
-    ScriptWrappable::init(this);
 }
 
 CSSMatrix::CSSMatrix(const String& s, ExceptionState& exceptionState)
 {
-    ScriptWrappable::init(this);
     setMatrixValue(s, exceptionState);
 }
 

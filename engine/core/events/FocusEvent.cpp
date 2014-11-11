@@ -48,21 +48,18 @@ bool FocusEvent::isFocusEvent() const
 
 FocusEvent::FocusEvent()
 {
-    ScriptWrappable::init(this);
 }
 
 FocusEvent::FocusEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, int detail, EventTarget* relatedTarget)
     : UIEvent(type, canBubble, cancelable, view, detail)
     , m_relatedTarget(relatedTarget)
 {
-    ScriptWrappable::init(this);
 }
 
 FocusEvent::FocusEvent(const AtomicString& type, const FocusEventInit& initializer)
     : UIEvent(type, initializer)
     , m_relatedTarget(initializer.relatedTarget)
 {
-    ScriptWrappable::init(this);
 }
 
 void FocusEvent::trace(Visitor* visitor)

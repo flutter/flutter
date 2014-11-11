@@ -13,7 +13,6 @@ namespace blink {
 WebGLCompressedTextureETC1::WebGLCompressedTextureETC1(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->addCompressedTextureFormat(GL_ETC1_RGB8_OES);
 }
 

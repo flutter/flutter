@@ -51,7 +51,6 @@ public:
 protected:
     NodeList()
     {
-        ScriptWrappable::init(this);
     }
 };
 

@@ -47,7 +47,6 @@ PassOwnPtr<InputMethodContext> InputMethodContext::create(HTMLElement* element)
 InputMethodContext::InputMethodContext(HTMLElement* element)
     : m_element(element)
 {
-    ScriptWrappable::init(this);
 }
 
 InputMethodContext::~InputMethodContext()

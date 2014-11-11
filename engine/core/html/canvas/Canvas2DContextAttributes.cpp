@@ -36,7 +36,6 @@ Canvas2DContextAttributes::Canvas2DContextAttributes()
     : m_alpha(true)
     , m_storage(PersistentStorage)
 {
-    ScriptWrappable::init(this);
 }
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(Canvas2DContextAttributes);

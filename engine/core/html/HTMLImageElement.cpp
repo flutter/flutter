@@ -80,7 +80,6 @@ HTMLImageElement::HTMLImageElement(Document& document, bool createdByParser)
     , m_intrinsicSizingViewportDependant(false)
     , m_effectiveSizeViewportDependant(false)
 {
-    ScriptWrappable::init(this);
 }
 
 PassRefPtr<HTMLImageElement> HTMLImageElement::create(Document& document)

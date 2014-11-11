@@ -80,7 +80,6 @@ MouseEvent::MouseEvent()
     : m_button(0)
     , m_buttonDown(false)
 {
-    ScriptWrappable::init(this);
 }
 
 MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view,
@@ -98,7 +97,6 @@ MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cance
     , m_relatedTarget(relatedTarget)
     , m_syntheticEventType(syntheticEventType)
 {
-    ScriptWrappable::init(this);
 }
 
 MouseEvent::MouseEvent(const AtomicString& eventType, const MouseEventInit& initializer)
@@ -110,7 +108,6 @@ MouseEvent::MouseEvent(const AtomicString& eventType, const MouseEventInit& init
     , m_buttonDown(initializer.button != (unsigned short)-1)
     , m_relatedTarget(initializer.relatedTarget)
 {
-    ScriptWrappable::init(this);
     initCoordinates(IntPoint(initializer.clientX, initializer.clientY));
 }
 

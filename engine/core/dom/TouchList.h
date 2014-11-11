@@ -59,13 +59,11 @@ public:
 private:
     TouchList()
     {
-        ScriptWrappable::init(this);
     }
 
     TouchList(Vector<RefPtr<Touch> >& touches)
     {
         m_values.swap(touches);
-        ScriptWrappable::init(this);
     }
 
     Vector<RefPtr<Touch> > m_values;

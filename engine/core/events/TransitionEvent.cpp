@@ -37,7 +37,6 @@ TransitionEventInit::TransitionEventInit()
 TransitionEvent::TransitionEvent()
     : m_elapsedTime(0)
 {
-    ScriptWrappable::init(this);
 }
 
 TransitionEvent::TransitionEvent(const AtomicString& type, const String& propertyName, double elapsedTime)
@@ -45,7 +44,6 @@ TransitionEvent::TransitionEvent(const AtomicString& type, const String& propert
     , m_propertyName(propertyName)
     , m_elapsedTime(elapsedTime)
 {
-    ScriptWrappable::init(this);
 }
 
 TransitionEvent::TransitionEvent(const AtomicString& type, const TransitionEventInit& initializer)
@@ -53,7 +51,6 @@ TransitionEvent::TransitionEvent(const AtomicString& type, const TransitionEvent
     , m_propertyName(initializer.propertyName)
     , m_elapsedTime(initializer.elapsedTime)
 {
-    ScriptWrappable::init(this);
 }
 
 TransitionEvent::~TransitionEvent()

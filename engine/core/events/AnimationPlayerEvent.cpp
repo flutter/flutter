@@ -17,7 +17,6 @@ AnimationPlayerEvent::AnimationPlayerEvent()
     : m_currentTime(0.0)
     , m_timelineTime(0.0)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationPlayerEvent::AnimationPlayerEvent(const AtomicString& type, double currentTime, double timelineTime)
@@ -25,7 +24,6 @@ AnimationPlayerEvent::AnimationPlayerEvent(const AtomicString& type, double curr
     , m_currentTime(currentTime)
     , m_timelineTime(timelineTime)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationPlayerEvent::AnimationPlayerEvent(const AtomicString& type, const AnimationPlayerEventInit& initializer)
@@ -33,7 +31,6 @@ AnimationPlayerEvent::AnimationPlayerEvent(const AtomicString& type, const Anima
     , m_currentTime(initializer.currentTime)
     , m_timelineTime(initializer.timelineTime)
 {
-    ScriptWrappable::init(this);
 }
 
 AnimationPlayerEvent::~AnimationPlayerEvent()

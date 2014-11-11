@@ -70,7 +70,6 @@ PassRefPtr<HTMLAnchorElement> HTMLAnchorElement::create(Document& document)
 HTMLAnchorElement::HTMLAnchorElement(Document& document)
     : HTMLElement(HTMLNames::aTag, document)
 {
-    ScriptWrappable::init(this);
 }
 
 HTMLAnchorElement::~HTMLAnchorElement()

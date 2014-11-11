@@ -17,9 +17,8 @@ PassRefPtr<AnimationNodeTiming> AnimationNodeTiming::create(AnimationNode* paren
 }
 
 AnimationNodeTiming::AnimationNodeTiming(AnimationNode* parent)
-: m_parent(parent)
+    : m_parent(parent)
 {
-    ScriptWrappable::init(this);
 }
 
 double AnimationNodeTiming::delay()

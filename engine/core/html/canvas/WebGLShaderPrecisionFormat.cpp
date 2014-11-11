@@ -56,7 +56,6 @@ WebGLShaderPrecisionFormat::WebGLShaderPrecisionFormat(GLint rangeMin, GLint ran
     , m_rangeMax(rangeMax)
     , m_precision(precision)
 {
-    ScriptWrappable::init(this);
 }
 
 }

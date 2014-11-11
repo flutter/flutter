@@ -32,7 +32,6 @@ namespace blink {
 OESElementIndexUint::OESElementIndexUint(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     context->extensionsUtil()->ensureExtensionEnabled("GL_OES_element_index_uint");
 }
 

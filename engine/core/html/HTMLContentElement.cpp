@@ -42,7 +42,6 @@ inline HTMLContentElement::HTMLContentElement(Document& document)
     , m_shouldParseSelect(false)
     , m_isValidSelector(true)
 {
-    ScriptWrappable::init(this);
 }
 
 DEFINE_NODE_FACTORY(HTMLContentElement)

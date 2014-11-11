@@ -76,8 +76,6 @@ public:
 // - Figure out if you now need to inherit from ActiveDOMObject as well.
 // - In your class declaration, you will typically use
 //   REFCOUNTED_EVENT_TARGET(YourClassName).
-// - Call ScriptWrappable::init(this) in your constructor, unless you are already
-//   doing so.
 // - Override EventTarget::interfaceName() and executionContext(). The former
 //   will typically return EventTargetNames::YourClassName. The latter will
 //   return ActiveDOMObject::executionContext (if you are an ActiveDOMObject)

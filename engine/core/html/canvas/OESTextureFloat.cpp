@@ -32,7 +32,6 @@ namespace blink {
 OESTextureFloat::OESTextureFloat(WebGLRenderingContextBase* context)
     : WebGLExtension(context)
 {
-    ScriptWrappable::init(this);
     if (context->extensionsUtil()->ensureExtensionEnabled("GL_OES_texture_float")) {
         // Implicitly enable rendering to float textures
         context->extensionsUtil()->ensureExtensionEnabled("GL_CHROMIUM_color_buffer_float_rgba");

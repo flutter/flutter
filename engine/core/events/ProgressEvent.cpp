@@ -40,7 +40,6 @@ ProgressEvent::ProgressEvent()
     , m_loaded(0)
     , m_total(0)
 {
-    ScriptWrappable::init(this);
 }
 
 ProgressEvent::ProgressEvent(const AtomicString& type, const ProgressEventInit& initializer)
@@ -49,7 +48,6 @@ ProgressEvent::ProgressEvent(const AtomicString& type, const ProgressEventInit& 
     , m_loaded(initializer.loaded)
     , m_total(initializer.total)
 {
-    ScriptWrappable::init(this);
 }
 
 ProgressEvent::ProgressEvent(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total)
@@ -58,7 +56,6 @@ ProgressEvent::ProgressEvent(const AtomicString& type, bool lengthComputable, un
     , m_loaded(loaded)
     , m_total(total)
 {
-    ScriptWrappable::init(this);
 }
 
 const AtomicString& ProgressEvent::interfaceName() const

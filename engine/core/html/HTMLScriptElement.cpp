@@ -10,7 +10,6 @@ namespace blink {
 HTMLScriptElement::HTMLScriptElement(Document& document)
     : HTMLElement(HTMLNames::scriptTag, document)
 {
-    ScriptWrappable::init(this);
 }
 
 PassRefPtr<HTMLScriptElement> HTMLScriptElement::create(Document& document)

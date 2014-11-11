@@ -48,7 +48,6 @@ ImageBitmap::ImageBitmap(HTMLImageElement* image, const IntRect& cropRect)
     else
         m_imageElement->addClient(this);
 
-    ScriptWrappable::init(this);
 }
 
 ImageBitmap::ImageBitmap(HTMLCanvasElement* canvas, const IntRect& cropRect)
@@ -63,8 +62,6 @@ ImageBitmap::ImageBitmap(HTMLCanvasElement* canvas, const IntRect& cropRect)
     IntRect srcRect = intersection(cropRect, IntRect(IntPoint(), canvas->size()));
     m_bitmapRect = IntRect(IntPoint(std::max(0, -cropRect.x()), std::max(0, -cropRect.y())), srcRect.size());
     m_bitmap = cropImage(canvas->buffer()->copyImage(CopyBackingStore).get(), cropRect);
-
-    ScriptWrappable::init(this);
 }
 
 ImageBitmap::ImageBitmap(ImageData* data, const IntRect& cropRect)
@@ -82,8 +79,6 @@ ImageBitmap::ImageBitmap(ImageData* data, const IntRect& cropRect)
 
     m_bitmap = buf->copyImage(DontCopyBackingStore);
     m_bitmapRect = IntRect(IntPoint(std::max(0, -cropRect.x()), std::max(0, -cropRect.y())),  srcRect.size());
-
-    ScriptWrappable::init(this);
 }
 
 ImageBitmap::ImageBitmap(ImageBitmap* bitmap, const IntRect& cropRect)
@@ -103,8 +98,6 @@ ImageBitmap::ImageBitmap(ImageBitmap* bitmap, const IntRect& cropRect)
         IntRect adjustedCropRect(IntPoint(cropRect.x() -oldBitmapRect.x(), cropRect.y() - oldBitmapRect.y()), cropRect.size());
         m_bitmap = cropImage(bitmap->bitmapImage().get(), adjustedCropRect);
     }
-
-    ScriptWrappable::init(this);
 }
 
 ImageBitmap::ImageBitmap(Image* image, const IntRect& cropRect)
@@ -114,8 +107,6 @@ ImageBitmap::ImageBitmap(Image* image, const IntRect& cropRect)
     IntRect srcRect = intersection(cropRect, IntRect(IntPoint(), image->size()));
     m_bitmap = cropImage(image, cropRect);
     m_bitmapRect = IntRect(IntPoint(std::max(0, -cropRect.x()), std::max(0, -cropRect.y())),  srcRect.size());
-
-    ScriptWrappable::init(this);
 }
 
 ImageBitmap::~ImageBitmap()

@@ -320,7 +320,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_styleRecalcElementCounter(0)
 {
     setClient(this);
-    ScriptWrappable::init(this);
 
     m_fetcher = ResourceFetcher::create(this);
 

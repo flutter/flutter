@@ -49,7 +49,6 @@ WebGLContextAttributes::WebGLContextAttributes()
     , m_preserveDrawingBuffer(false)
     , m_failIfMajorPerformanceCaveat(false)
 {
-    ScriptWrappable::init(this);
 }
 
 WebGLContextAttributes::WebGLContextAttributes(const WebGLContextAttributes& attrs)
@@ -62,7 +61,6 @@ WebGLContextAttributes::WebGLContextAttributes(const WebGLContextAttributes& att
     , m_preserveDrawingBuffer(attrs.m_preserveDrawingBuffer)
     , m_failIfMajorPerformanceCaveat(attrs.m_failIfMajorPerformanceCaveat)
 {
-    ScriptWrappable::init(this);
 }
 
 PassRefPtr<WebGLContextAttributes> WebGLContextAttributes::clone() const

@@ -37,7 +37,6 @@ CompositionEvent::CompositionEvent()
     : m_activeSegmentStart(0)
     , m_activeSegmentEnd(0)
 {
-    ScriptWrappable::init(this);
     initializeSegments();
 }
 
@@ -47,7 +46,6 @@ CompositionEvent::CompositionEvent(const AtomicString& type, PassRefPtr<Abstract
     , m_activeSegmentStart(0)
     , m_activeSegmentEnd(0)
 {
-    ScriptWrappable::init(this);
     initializeSegments(&underlines);
 }
 
@@ -57,7 +55,6 @@ CompositionEvent::CompositionEvent(const AtomicString& type, const CompositionEv
     , m_activeSegmentStart(0)
     , m_activeSegmentEnd(0)
 {
-    ScriptWrappable::init(this);
     initializeSegments();
 }
 

@@ -76,7 +76,6 @@ public:
 protected:
     CSSStyleDeclaration()
     {
-        ScriptWrappable::init(this);
     }
 };
 

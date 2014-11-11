@@ -54,7 +54,6 @@ public:
 
     MutationRecord()
     {
-        ScriptWrappable::init(this);
     }
 
     virtual ~MutationRecord();
