@@ -4,8 +4,6 @@
 
 #include "sky/tools/debugger/debugger.h"
 
-#include "mojo/services/window_manager/basic_focus_rules.h"
-
 namespace sky {
 namespace debugger {
 
@@ -60,8 +58,8 @@ void SkyDebugger::OnEmbed(
   content_->SetBounds(root_->bounds());
   root_->AddChild(content_);
 
-  window_manager_app_->InitFocus(scoped_ptr<mojo::FocusRules>(
-      new mojo::BasicFocusRules(window_manager_app_.get(), content_)));
+  window_manager_app_->InitFocus(
+      new FocusRules(window_manager_app_.get(), content_));
 
   if (!pending_url_.empty())
     NavigateToURL(pending_url_);
