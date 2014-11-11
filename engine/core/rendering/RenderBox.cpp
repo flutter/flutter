@@ -53,14 +53,6 @@
 
 namespace blink {
 
-// Used by flexible boxes when flexing this element and by table cells.
-typedef WTF::HashMap<const RenderBox*, LayoutUnit> OverrideSizeMap;
-
-//FIXME(sky): Remove
-static OverrideSizeMap* gOverrideContainingBlockLogicalHeightMap = 0;
-static OverrideSizeMap* gOverrideContainingBlockLogicalWidthMap = 0;
-
-
 // Size of border belt for autoscroll. When mouse pointer in border belt,
 // autoscroll is started.
 static const int autoscrollBeltSize = 20;
@@ -78,10 +70,7 @@ RenderBox::RenderBox(ContainerNode* node)
 void RenderBox::willBeDestroyed()
 {
     clearOverrideSize();
-    clearContainingBlockOverrideSize();
-
     RenderBlock::removePercentHeightDescendantIfNeeded(this);
-
     RenderBoxModelObject::willBeDestroyed();
 }
 
@@ -617,55 +606,6 @@ LayoutUnit RenderBox::overrideLogicalContentHeight() const
     return m_rareData->m_overrideLogicalContentHeight;
 }
 
-LayoutUnit RenderBox::overrideContainingBlockContentLogicalWidth() const
-{
-    ASSERT(hasOverrideContainingBlockLogicalWidth());
-    return gOverrideContainingBlockLogicalWidthMap->get(this);
-}
-
-LayoutUnit RenderBox::overrideContainingBlockContentLogicalHeight() const
-{
-    ASSERT(hasOverrideContainingBlockLogicalHeight());
-    return gOverrideContainingBlockLogicalHeightMap->get(this);
-}
-
-bool RenderBox::hasOverrideContainingBlockLogicalWidth() const
-{
-    return gOverrideContainingBlockLogicalWidthMap && gOverrideContainingBlockLogicalWidthMap->contains(this);
-}
-
-bool RenderBox::hasOverrideContainingBlockLogicalHeight() const
-{
-    return gOverrideContainingBlockLogicalHeightMap && gOverrideContainingBlockLogicalHeightMap->contains(this);
-}
-
-void RenderBox::setOverrideContainingBlockContentLogicalWidth(LayoutUnit logicalWidth)
-{
-    if (!gOverrideContainingBlockLogicalWidthMap)
-        gOverrideContainingBlockLogicalWidthMap = new OverrideSizeMap;
-    gOverrideContainingBlockLogicalWidthMap->set(this, logicalWidth);
-}
-
-void RenderBox::setOverrideContainingBlockContentLogicalHeight(LayoutUnit logicalHeight)
-{
-    if (!gOverrideContainingBlockLogicalHeightMap)
-        gOverrideContainingBlockLogicalHeightMap = new OverrideSizeMap;
-    gOverrideContainingBlockLogicalHeightMap->set(this, logicalHeight);
-}
-
-void RenderBox::clearContainingBlockOverrideSize()
-{
-    if (gOverrideContainingBlockLogicalWidthMap)
-        gOverrideContainingBlockLogicalWidthMap->remove(this);
-    clearOverrideContainingBlockContentLogicalHeight();
-}
-
-void RenderBox::clearOverrideContainingBlockContentLogicalHeight()
-{
-    if (gOverrideContainingBlockLogicalHeightMap)
-        gOverrideContainingBlockLogicalHeightMap->remove(this);
-}
-
 LayoutUnit RenderBox::adjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit width) const
 {
     LayoutUnit bordersPlusPadding = borderAndPaddingLogicalWidth();
@@ -696,7 +636,6 @@ LayoutUnit RenderBox::adjustContentBoxLogicalHeightForBoxSizing(LayoutUnit heigh
     return std::max<LayoutUnit>(0, height);
 }
 
-// Hit Testing
 bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction action)
 {
     LayoutPoint adjustedLocation = accumulatedOffset + location();
@@ -1304,22 +1243,9 @@ LayoutUnit RenderBox::shrinkLogicalWidthToAvoidFloats(LayoutUnit childMarginStar
     return width;
 }
 
-LayoutUnit RenderBox::containingBlockLogicalWidthForContent() const
-{
-    if (hasOverrideContainingBlockLogicalWidth())
-        return overrideContainingBlockContentLogicalWidth();
-
-    RenderBlock* cb = containingBlock();
-    return cb->availableLogicalWidth();
-}
-
 LayoutUnit RenderBox::containingBlockLogicalHeightForContent(AvailableLogicalHeightType heightType) const
 {
-    if (hasOverrideContainingBlockLogicalHeight())
-        return overrideContainingBlockContentLogicalHeight();
-
-    RenderBlock* cb = containingBlock();
-    return cb->availableLogicalHeight(heightType);
+    return containingBlock()->availableLogicalHeight(heightType);
 }
 
 LayoutUnit RenderBox::containingBlockAvailableLineWidth() const
@@ -1328,29 +1254,6 @@ LayoutUnit RenderBox::containingBlockAvailableLineWidth() const
     if (cb->isRenderBlockFlow())
         return toRenderBlockFlow(cb)->availableLogicalWidthForLine(false);
     return 0;
-}
-
-LayoutUnit RenderBox::perpendicularContainingBlockLogicalHeight() const
-{
-    if (hasOverrideContainingBlockLogicalHeight())
-        return overrideContainingBlockContentLogicalHeight();
-
-    RenderBlock* cb = containingBlock();
-    if (cb->hasOverrideHeight())
-        return cb->overrideLogicalContentHeight();
-
-    RenderStyle* containingBlockStyle = cb->style();
-    Length logicalHeightLength = containingBlockStyle->logicalHeight();
-
-    // FIXME: For now just support fixed heights.  Eventually should support percentage heights as well.
-    if (!logicalHeightLength.isFixed()) {
-        LayoutUnit fillFallbackExtent = view()->frameView()->unscaledVisibleContentSize().height();
-        LayoutUnit fillAvailableExtent = containingBlock()->availableLogicalHeight(ExcludeMarginBorderPadding);
-        return std::min(fillAvailableExtent, fillFallbackExtent);
-    }
-
-    // Use the content box logical height as specified by the style.
-    return cb->adjustContentBoxLogicalHeightForBoxSizing(logicalHeightLength.value());
 }
 
 void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
@@ -1631,8 +1534,6 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
 
     RenderBlock* cb = containingBlock();
     LayoutUnit containerLogicalWidth = std::max<LayoutUnit>(0, containingBlockLogicalWidthForContent());
-    // FIXME(sky): Remove
-    bool hasPerpendicularContainingBlock = false;
 
     if (isInline() && !isInlineBlock()) {
         // just calculate margins
@@ -1647,18 +1548,15 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
     if (treatAsReplaced)
         computedValues.m_extent = logicalWidthLength.value() + borderAndPaddingLogicalWidth();
     else {
-        LayoutUnit containerWidthInInlineDirection = containerLogicalWidth;
-        if (hasPerpendicularContainingBlock)
-            containerWidthInInlineDirection = perpendicularContainingBlockLogicalHeight();
-        LayoutUnit preferredWidth = computeLogicalWidthUsing(MainOrPreferredSize, styleToUse->logicalWidth(), containerWidthInInlineDirection, cb);
-        computedValues.m_extent = constrainLogicalWidthByMinMax(preferredWidth, containerWidthInInlineDirection, cb);
+        LayoutUnit preferredWidth = computeLogicalWidthUsing(MainOrPreferredSize, styleToUse->logicalWidth(), containerLogicalWidth, cb);
+        computedValues.m_extent = constrainLogicalWidthByMinMax(preferredWidth, containerLogicalWidth, cb);
     }
 
     // Margin calculations.
     computeMarginsForDirection(InlineDirection, cb, containerLogicalWidth, computedValues.m_extent, computedValues.m_margins.m_start,
         computedValues.m_margins.m_end, style()->marginStart(), style()->marginEnd());
 
-    if (!hasPerpendicularContainingBlock && containerLogicalWidth && containerLogicalWidth != (computedValues.m_extent + computedValues.m_margins.m_start + computedValues.m_margins.m_end)
+    if (containerLogicalWidth && containerLogicalWidth != (computedValues.m_extent + computedValues.m_margins.m_start + computedValues.m_margins.m_end)
         && !isInline() && !cb->isFlexibleBox()) {
         LayoutUnit newMargin = containerLogicalWidth - computedValues.m_extent - cb->marginStartForChild(this);
         bool hasInvertedDirection = cb->style()->isLeftToRightDirection() != style()->isLeftToRightDirection();
@@ -1960,9 +1858,7 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
     // explicitly specified that can be used for any percentage computations.
     bool isOutOfFlowPositionedWithSpecifiedHeight = cb->isOutOfFlowPositioned() && (!cbstyle->logicalHeight().isAuto() || (!cbstyle->logicalTop().isAuto() && !cbstyle->logicalBottom().isAuto()));
 
-    if (hasOverrideContainingBlockLogicalHeight())
-        availableHeight = overrideContainingBlockContentLogicalHeight();
-    else if (cbstyle->logicalHeight().isFixed()) {
+    if (cbstyle->logicalHeight().isFixed()) {
         LayoutUnit contentBoxHeight = cb->adjustContentBoxLogicalHeightForBoxSizing(cbstyle->logicalHeight().value());
         availableHeight = std::max<LayoutUnit>(0, cb->constrainContentBoxLogicalHeightByMinMax(contentBoxHeight, -1));
     } else if (cbstyle->logicalHeight().isPercent() && !isOutOfFlowPositionedWithSpecifiedHeight) {

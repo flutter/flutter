@@ -149,7 +149,7 @@ public:
     bool hasInlineDirectionBordersPaddingOrMargin() const { return hasInlineDirectionBordersOrPadding() || marginStart()|| marginEnd(); }
     bool hasInlineDirectionBordersOrPadding() const { return borderStart() || borderEnd() || paddingStart()|| paddingEnd(); }
 
-    virtual LayoutUnit containingBlockLogicalWidthForContent() const;
+    LayoutUnit containingBlockLogicalWidthForContent() const;
 
     virtual void childBecameNonInline(RenderObject* /*child*/) { }
 

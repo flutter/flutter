@@ -322,15 +322,6 @@ public:
     void clearOverrideLogicalContentHeight();
     void clearOverrideLogicalContentWidth();
 
-    LayoutUnit overrideContainingBlockContentLogicalWidth() const;
-    LayoutUnit overrideContainingBlockContentLogicalHeight() const;
-    bool hasOverrideContainingBlockLogicalWidth() const;
-    bool hasOverrideContainingBlockLogicalHeight() const;
-    void setOverrideContainingBlockContentLogicalWidth(LayoutUnit);
-    void setOverrideContainingBlockContentLogicalHeight(LayoutUnit);
-    void clearContainingBlockOverrideSize();
-    void clearOverrideContainingBlockContentLogicalHeight();
-
     virtual LayoutSize offsetFromContainer(const RenderObject*, const LayoutPoint&, bool* offsetDependsOnPoint = 0) const override;
 
     LayoutUnit adjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit width) const;
@@ -376,7 +367,6 @@ public:
     virtual LayoutRect clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const override;
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;
 
-    virtual LayoutUnit containingBlockLogicalWidthForContent() const override;
     LayoutUnit containingBlockLogicalHeightForContent(AvailableLogicalHeightType) const;
 
     LayoutUnit containingBlockAvailableLineWidth() const;
