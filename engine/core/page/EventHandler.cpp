@@ -1917,18 +1917,6 @@ bool EventHandler::bestClickableNodeForHitTestResult(const HitTestResult& result
     return findBestClickableCandidate(targetNode, targetPoint, touchCenter, touchRect, Vector<RefPtr<Node> > (nodes));
 }
 
-bool EventHandler::bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, const IntSize& touchRadius, IntRect& targetArea, Node*& targetNode)
-{
-    HitTestResult result = hitTestResultAtPoint(touchCenter, HitTestRequest::ReadOnly | HitTestRequest::Active, touchRadius);
-
-    IntRect touchRect(touchCenter - touchRadius, touchRadius + touchRadius);
-    Vector<RefPtr<Node>, 11> nodes;
-    copyToVector(result.rectBasedTestResult(), nodes);
-
-    // FIXME: the explicit Vector conversion copies into a temporary and is wasteful.
-    return findBestZoomableArea(targetNode, targetArea, touchCenter, touchRect, Vector<RefPtr<Node> >(nodes));
-}
-
 GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGestureEvent& gestureEvent, bool readOnly)
 {
     // Scrolling events get hit tested per frame (like wheel events do).

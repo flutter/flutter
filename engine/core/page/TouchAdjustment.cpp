@@ -97,15 +97,6 @@ bool nodeRespondsToTapGesture(Node* node)
     return false;
 }
 
-bool nodeIsZoomTarget(Node* node)
-{
-    if (node->isTextNode() || node->isShadowRoot())
-        return false;
-
-    ASSERT(node->renderer());
-    return node->renderer()->isBox();
-}
-
 static inline void appendQuadsToSubtargetList(Vector<FloatQuad>& quads, Node* node, SubtargetGeometryList& subtargets)
 {
     Vector<FloatQuad>::const_iterator it = quads.begin();
@@ -123,32 +114,6 @@ static inline void appendBasicSubtargetsForNode(Node* node, SubtargetGeometryLis
     node->renderer()->absoluteQuads(quads);
 
     appendQuadsToSubtargetList(quads, node, subtargets);
-}
-
-static inline void appendZoomableSubtargets(Node* node, SubtargetGeometryList& subtargets)
-{
-    RenderBox* renderer = toRenderBox(node->renderer());
-    ASSERT(renderer);
-
-    Vector<FloatQuad> quads;
-    FloatRect borderBoxRect = renderer->borderBoxRect();
-    FloatRect contentBoxRect = renderer->contentBoxRect();
-    quads.append(renderer->localToAbsoluteQuad(borderBoxRect));
-    if (borderBoxRect != contentBoxRect)
-        quads.append(renderer->localToAbsoluteQuad(contentBoxRect));
-    // FIXME: For RenderBlocks, add column boxes and content boxes cleared for floats.
-
-    Vector<FloatQuad>::const_iterator it = quads.begin();
-    const Vector<FloatQuad>::const_iterator end = quads.end();
-    for (; it != end; ++it)
-        subtargets.append(SubtargetGeometry(node, *it));
-}
-
-static inline Node* parentShadowHostOrOwner(const Node* node)
-{
-    if (Node* ancestor = node->parentOrShadowHostNode())
-        return ancestor;
-    return 0;
 }
 
 // Compiles a list of subtargets of all the relevant target nodes.
@@ -177,7 +142,7 @@ void compileSubtargetList(const Vector<RefPtr<Node> >& intersectedNodes, Subtarg
             if (nodeFilter(visitedNode)) {
                 respondingNode = visitedNode;
                 // Continue the iteration to collect the ancestors of the responder, which we will need later.
-                for (visitedNode = parentShadowHostOrOwner(visitedNode); visitedNode; visitedNode = parentShadowHostOrOwner(visitedNode)) {
+                for (visitedNode = visitedNode->parentOrShadowHostNode(); visitedNode; visitedNode = visitedNode->parentOrShadowHostNode()) {
                     HashSet<RawPtr<Node> >::AddResult addResult = ancestorsToRespondersSet.add(visitedNode);
                     if (!addResult.isNewEntry)
                         break;
@@ -224,35 +189,6 @@ void compileSubtargetList(const Vector<RefPtr<Node> >& intersectedNodes, Subtarg
         if (candidate)
             appendSubtargetsForNode(candidate, subtargets);
     }
-}
-
-// Compiles a list of zoomable subtargets.
-void compileZoomableSubtargets(const Vector<RefPtr<Node> >& intersectedNodes, SubtargetGeometryList& subtargets)
-{
-    for (unsigned i = 0; i < intersectedNodes.size(); ++i) {
-        Node* candidate = intersectedNodes[i].get();
-        if (nodeIsZoomTarget(candidate))
-            appendZoomableSubtargets(candidate, subtargets);
-    }
-}
-
-// This returns quotient of the target area and its intersection with the touch area.
-// This will prioritize largest intersection and smallest area, while balancing the two against each other.
-float zoomableIntersectionQuotient(const IntPoint& touchHotspot, const IntRect& touchArea, const SubtargetGeometry& subtarget)
-{
-    IntRect rect = subtarget.boundingBox();
-
-    // Convert from frame coordinates to window coordinates.
-    rect = subtarget.node()->document().view()->contentsToWindow(rect);
-
-    // Check the rectangle is meaningful zoom target. It should at least contain the hotspot.
-    if (!rect.contains(touchHotspot))
-        return std::numeric_limits<float>::infinity();
-    IntRect intersection = rect;
-    intersection.intersect(touchArea);
-
-    // Return the quotient of the intersection.
-    return rect.size().area() / (float)intersection.size().area();
 }
 
 // Uses a hybrid of distance to adjust and intersect ratio, normalizing each score between 0 and 1
@@ -399,14 +335,6 @@ bool findBestClickableCandidate(Node*& targetNode, IntPoint& targetPoint, const 
     TouchAdjustment::SubtargetGeometryList subtargets;
     TouchAdjustment::compileSubtargetList(nodes, subtargets, TouchAdjustment::nodeRespondsToTapGesture, TouchAdjustment::appendBasicSubtargetsForNode);
     return TouchAdjustment::findNodeWithLowestDistanceMetric(targetNode, targetPoint, targetArea, touchHotspot, touchArea, subtargets, TouchAdjustment::hybridDistanceFunction);
-}
-
-bool findBestZoomableArea(Node*& targetNode, IntRect& targetArea, const IntPoint& touchHotspot, const IntRect& touchArea, const Vector<RefPtr<Node> >& nodes)
-{
-    IntPoint targetPoint;
-    TouchAdjustment::SubtargetGeometryList subtargets;
-    TouchAdjustment::compileZoomableSubtargets(nodes, subtargets);
-    return TouchAdjustment::findNodeWithLowestDistanceMetric(targetNode, targetPoint, targetArea, touchHotspot, touchArea, subtargets, TouchAdjustment::zoomableIntersectionQuotient);
 }
 
 } // namespace blink

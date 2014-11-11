@@ -146,8 +146,6 @@ public:
     bool isScrollbarHandlingGestures() const;
 
     bool bestClickableNodeForHitTestResult(const HitTestResult&, IntPoint& targetPoint, Node*& targetNode);
-    // FIXME: This doesn't appear to be used outside tests anymore, what path are we using now and is it tested?
-    bool bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, const IntSize& touchRadius, IntRect& targetArea, Node*& targetNode);
 
     void setMouseDownMayStartAutoscroll() { m_mouseDownMayStartAutoscroll = true; }
 

@@ -31,8 +31,6 @@ namespace blink {
 class Node;
 
 bool findBestClickableCandidate(Node*& targetNode, IntPoint& targetPoint, const IntPoint& touchHotspot, const IntRect& touchArea, const Vector<RefPtr<Node> >&);
-bool findBestZoomableArea(Node*& targetNode, IntRect& targetArea, const IntPoint& touchHotspot, const IntRect& touchArea, const Vector<RefPtr<Node> >&);
-// FIXME: Implement the similar functions for other gestures here as well.
 
 } // namespace blink
 
