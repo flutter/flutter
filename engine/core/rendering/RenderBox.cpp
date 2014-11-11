@@ -2040,7 +2040,6 @@ LayoutUnit RenderBox::computeReplacedLogicalWidthUsing(const Length& logicalWidt
         case Auto:
         case MaxSizeNone:
             return intrinsicLogicalWidth();
-        case ExtendToZoom:
         case DeviceWidth:
         case DeviceHeight:
             break;

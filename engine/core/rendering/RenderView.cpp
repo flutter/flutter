@@ -163,7 +163,6 @@ void RenderView::layout()
 {
     SubtreeLayoutScope layoutScope(*this);
 
-    // Use calcWidth/Height to get the new width/height, since this will take the full page zoom factor into account.
     bool relayoutChildren = (!m_frameView || width() != viewWidth() || height() != viewHeight());
     if (relayoutChildren) {
         layoutScope.setChildNeedsLayout(this);

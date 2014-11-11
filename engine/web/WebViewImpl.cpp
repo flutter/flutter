@@ -111,14 +111,6 @@
 
 namespace blink {
 
-// Change the text zoom level by kTextSizeMultiplierRatio each time the user
-// zooms text in or out (ie., change by 20%).  The min and max values limit
-// text zoom to half and 3x the original text size.  These three values match
-// those in Apple's port in WebKit/WebKit/WebView/WebView.mm
-const double WebView::textSizeMultiplierRatio = 1.2;
-const double WebView::minTextSizeMultiplier = 0.5;
-const double WebView::maxTextSizeMultiplier = 3.0;
-
 // WebView ----------------------------------------------------------------
 
 WebView* WebView::create(WebViewClient* client)
@@ -738,21 +730,6 @@ void WebViewImpl::enableTapHighlights(Vector<RawPtr<Node> >& highlightNodes)
 
         m_linkHighlights.append(LinkHighlight::create(node, this));
     }
-}
-
-void WebViewImpl::animateDoubleTapZoom(const IntPoint& point)
-{
-    //FIXME(sky)
-}
-
-void WebViewImpl::zoomToFindInPageRect(const WebRect& rect)
-{
-    //FIXME(sky)
-}
-
-bool WebViewImpl::zoomToMultipleTargetsRect(const WebRect& rect)
-{
-    return false;
 }
 
 bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)

@@ -55,10 +55,6 @@ struct WebFloatPoint;
 
 class WebView : public WebWidget {
 public:
-    BLINK_EXPORT static const double textSizeMultiplierRatio;
-    BLINK_EXPORT static const double minTextSizeMultiplier;
-    BLINK_EXPORT static const double maxTextSizeMultiplier;
-
     // Initialization ------------------------------------------------------
 
     // Creates a WebView that is NOT yet initialized. You will need to
@@ -150,14 +146,6 @@ public:
     // previous element in the tab sequence (if reverse is true).
     virtual void advanceFocus(bool reverse) { }
 
-    // Animate a scale into the specified find-in-page rect.
-    virtual void zoomToFindInPageRect(const WebRect&) = 0;
-
-    // Animate a scale into the specified rect where multiple targets were
-    // found from previous tap gesture.
-    // Returns false if it doesn't do any zooming.
-    virtual bool zoomToMultipleTargetsRect(const WebRect&) = 0;
-
 
     // Zoom ----------------------------------------------------------------
 
@@ -172,7 +160,6 @@ public:
 
     // Returns the "preferred" contents size, defined as the preferred minimum width of the main document's contents
     // and the minimum height required to display the main document without scrollbars.
-    // The returned size has the page zoom factor applied.
     virtual WebSize contentsPreferredMinimumSize() = 0;
 
     // The ratio of the current device's screen DPI to the target device's screen DPI.

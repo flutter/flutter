@@ -938,9 +938,6 @@ void RenderStyle::setLetterSpacing(float letterSpacing)
 
 void RenderStyle::setFontSize(float size)
 {
-    // size must be specifiedSize if Text Autosizing is enabled, but computedSize if text
-    // zoom is enabled (if neither is enabled it's irrelevant as they're probably the same).
-
     ASSERT(std::isfinite(size));
     if (!std::isfinite(size) || size < 0)
         size = 0;

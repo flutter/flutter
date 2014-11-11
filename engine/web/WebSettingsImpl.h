@@ -68,7 +68,6 @@ public:
     // new APIs (e.g. setPrimaryPointerType) on the chromium side
     virtual void setDeviceSupportsTouch(bool) override;
 
-    virtual void setDoubleTapToZoomEnabled(bool) override;
     virtual void setDownloadableBinaryFontsEnabled(bool) override;
     virtual void setEnableTouchAdjustment(bool) override;
     virtual void setExperimentalWebGLEnabled(bool) override;
@@ -114,7 +113,6 @@ public:
     bool showFPSCounter() const { return m_showFPSCounter; }
     bool showPaintRects() const { return m_showPaintRects; }
     bool renderVSyncNotificationEnabled() const { return m_renderVSyncNotificationEnabled; }
-    bool doubleTapToZoomEnabled() const { return m_doubleTapToZoomEnabled; }
     bool perTilePaintingEnabled() const { return m_perTilePaintingEnabled; }
     bool supportDeprecatedTargetDensityDPI() const { return m_supportDeprecatedTargetDensityDPI; }
 
@@ -127,7 +125,6 @@ private:
     bool m_showPaintRects;
     bool m_renderVSyncNotificationEnabled;
     bool m_deferredImageDecodingEnabled;
-    bool m_doubleTapToZoomEnabled;
     bool m_perTilePaintingEnabled;
     bool m_supportDeprecatedTargetDensityDPI;
     bool m_shrinksViewportContentToFit;

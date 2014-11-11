@@ -75,7 +75,6 @@ static PassRefPtr<AnimatableValue> createFromLength(const Length& length, const 
         return AnimatableUnknown::create(CSSPrimitiveValue::create(length));
     case MaxSizeNone:
         return AnimatableUnknown::create(CSSValueNone);
-    case ExtendToZoom: // Does not apply to elements.
     case DeviceWidth:
     case DeviceHeight:
         ASSERT_NOT_REACHED();

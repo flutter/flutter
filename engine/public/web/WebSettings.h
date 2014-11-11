@@ -105,7 +105,6 @@ public:
     virtual void setDeferredImageDecodingEnabled(bool) = 0;
     virtual void setDeviceSupportsMouse(bool) = 0;
     virtual void setDeviceSupportsTouch(bool) = 0;
-    virtual void setDoubleTapToZoomEnabled(bool) = 0;
     virtual void setDownloadableBinaryFontsEnabled(bool) = 0;
     virtual void setEnableTouchAdjustment(bool) = 0;
     virtual void setExperimentalWebGLEnabled(bool) = 0;

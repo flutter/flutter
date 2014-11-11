@@ -192,8 +192,8 @@ private:
     void updateTypesettingFeatures() const;
 
     float m_specifiedSize;   // Specified CSS value. Independent of rendering issues such as integer
-                             // rounding, minimum font sizes, and zooming.
-    float m_computedSize;    // Computed size adjusted for the minimum font size and the zoom factor.
+                             // rounding, minimum font sizes.
+    float m_computedSize;    // Computed size adjusted for the minimum font size.
 
     float m_letterSpacing;
     float m_wordSpacing;

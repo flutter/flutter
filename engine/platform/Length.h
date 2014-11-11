@@ -42,7 +42,7 @@ enum LengthType {
     Intrinsic, MinIntrinsic,
     MinContent, MaxContent, FillAvailable, FitContent,
     Calculated,
-    ExtendToZoom, DeviceWidth, DeviceHeight,
+    DeviceWidth, DeviceHeight,
     MaxSizeNone
 };
 

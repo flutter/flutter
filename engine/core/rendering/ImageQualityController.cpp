@@ -173,8 +173,6 @@ bool ImageQualityController::shouldPaintAtLowQuality(GraphicsContext* context, R
     const AffineTransform& currentTransform = context->getCTM();
     bool contextIsScaled = !currentTransform.isIdentityOrTranslationOrFlipped();
 
-    // Make sure to use the unzoomed image size, since if a full page zoom is in effect, the image
-    // is actually being scaled.
     LayoutSize scaledImageSize = currentTransform.mapSize(image->size());
     LayoutSize scaledLayoutSize = currentTransform.mapSize(roundedIntSize(layoutSize));
 

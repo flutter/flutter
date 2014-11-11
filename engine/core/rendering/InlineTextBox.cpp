@@ -991,7 +991,6 @@ void InlineTextBox::paintDecoration(GraphicsContext* context, const FloatPoint& 
     int baseline = styleToUse->fontMetrics().ascent();
 
     // Set the thick of the line to be 10% (or something else ?)of the computed font size and not less than 1px.
-    // Using computedFontSize should take care of zoom as well.
 
     // Update Underline thickness, in case we have Faulty Font Metrics calculating underline thickness by old method.
     float textDecorationThickness = styleToUse->fontMetrics().underlineThickness();

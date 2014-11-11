@@ -601,18 +601,6 @@ step-middle
 step-end
 
 //
-// zoom
-//
-document
-reset
-
-//
-// user-zoom
-//
-// fixed
-zoom
-
-//
 // pointer-events
 //
 visiblePainted
@@ -764,11 +752,6 @@ interlace
 // fill
 // stroke
 markers
-
-//
-// CSS3 viewport-length keywords
-//
--internal-extend-to-zoom
 
 // isolation
 // auto

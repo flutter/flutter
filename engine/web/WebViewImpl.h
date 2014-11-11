@@ -138,9 +138,7 @@ public:
     virtual void setInitialFocus(bool reverse) override;
     virtual void clearFocusedElement() override;
     virtual void scrollFocusedNodeIntoRect(const WebRect&) override;
-    virtual void zoomToFindInPageRect(const WebRect&) override;
     virtual void advanceFocus(bool reverse) override;
-    virtual bool zoomToMultipleTargetsRect(const WebRect&) override;
     virtual void setMainFrameScrollOffset(const WebPoint&) override;
     virtual void resetScrollAndScaleState() override;
     virtual WebSize contentsPreferredMinimumSize() override;
@@ -276,8 +274,6 @@ public:
     void enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent);
     void enableTapHighlights(Vector<RawPtr<Node> >&);
     void computeScaleAndScrollForFocusedNode(Node* focusedNode, float& scale, IntPoint& scroll, bool& needAnimation);
-
-    void animateDoubleTapZoom(const IntPoint&);
 
     void clearCompositedSelectionBounds();
 

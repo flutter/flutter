@@ -45,7 +45,6 @@ WebSettingsImpl::WebSettingsImpl(Settings* settings)
     , m_showPaintRects(false)
     , m_renderVSyncNotificationEnabled(false)
     , m_deferredImageDecodingEnabled(false)
-    , m_doubleTapToZoomEnabled(false)
     , m_supportDeprecatedTargetDensityDPI(false)
     , m_shrinksViewportContentToFit(false)
     , m_mainFrameResizesAreOrientationChanges(false)
@@ -193,11 +192,6 @@ void WebSettingsImpl::setShrinksViewportContentToFit(bool shrinkViewportContent)
 void WebSettingsImpl::setUseWideViewport(bool useWideViewport)
 {
     m_settings->setUseWideViewport(useWideViewport);
-}
-
-void WebSettingsImpl::setDoubleTapToZoomEnabled(bool doubleTapToZoomEnabled)
-{
-    m_doubleTapToZoomEnabled = doubleTapToZoomEnabled;
 }
 
 void WebSettingsImpl::setDownloadableBinaryFontsEnabled(bool enabled)

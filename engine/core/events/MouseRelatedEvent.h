@@ -32,8 +32,6 @@ namespace blink {
     // Internal only: Helper class for what's common between mouse and wheel events.
     class MouseRelatedEvent : public UIEventWithKeyState {
     public:
-        // Note that these values are adjusted to counter the effects of zoom, so that values
-        // exposed via DOM APIs are invariant under zooming.
         int screenX() const { return m_screenLocation.x(); }
         int screenY() const { return m_screenLocation.y(); }
         const IntPoint& screenLocation() const { return m_screenLocation; }
@@ -55,7 +53,7 @@ namespace blink {
         int x() const;
         int y() const;
 
-        // Page point in "absolute" coordinates (i.e. post-zoomed, page-relative coords,
+        // Page point in "absolute" coordinates (i.e. page-relative coords,
         // usable with RenderObject::absoluteToLocal).
         const LayoutPoint& absoluteLocation() const { return m_absoluteLocation; }
         void setAbsoluteLocation(const LayoutPoint& p) { m_absoluteLocation = p; }

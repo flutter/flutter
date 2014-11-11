@@ -51,7 +51,6 @@ float floatValueForLength(const Length& length, float maximumValue)
     case MinContent:
     case MaxContent:
     case FitContent:
-    case ExtendToZoom:
     case DeviceWidth:
     case DeviceHeight:
     case MaxSizeNone:
@@ -80,7 +79,6 @@ LayoutUnit minimumValueForLength(const Length& length, LayoutUnit maximumValue)
     case MinContent:
     case MaxContent:
     case FitContent:
-    case ExtendToZoom:
     case DeviceWidth:
     case DeviceHeight:
     case MaxSizeNone:
@@ -113,7 +111,6 @@ LayoutUnit valueForLength(const Length& length, LayoutUnit maximumValue)
     case MinContent:
     case MaxContent:
     case FitContent:
-    case ExtendToZoom:
     case DeviceWidth:
     case DeviceHeight:
     case MaxSizeNone:
