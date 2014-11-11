@@ -32,7 +32,6 @@
 #include "core/dom/DocumentMarkerController.h"
 #include "core/editing/FrameSelection.h"
 #include "core/fetch/ResourceFetcher.h"
-#include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/frame/FrameHost.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
@@ -290,8 +289,6 @@ void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLay
     // FIXME (crbug.com/256657): Do not do two layouts for text autosizing.
     rootForThisLayout->layout();
     gatherDebugLayoutRects(rootForThisLayout);
-
-    ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->updateAllImageResourcePriorities();
 
     lifecycle().advanceTo(DocumentLifecycle::AfterPerformLayout);
 }

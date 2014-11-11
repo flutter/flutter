@@ -34,7 +34,6 @@
 #include "core/editing/EditingBoundary.h"
 #include "core/editing/FrameSelection.h"
 #include "core/editing/htmlediting.h"
-#include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/fetch/ResourceLoader.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
@@ -2273,10 +2272,7 @@ void RenderObject::postDestroy()
         if (StyleImage* maskBoxImage = m_style->maskBoxImage().image())
             maskBoxImage->removeClient(this);
     }
-    ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->removeRenderObject(this);
-#if !ENABLE(OILPAN)
     delete this;
-#endif
 }
 
 PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)

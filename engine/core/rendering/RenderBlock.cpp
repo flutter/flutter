@@ -30,7 +30,6 @@
 #include "core/dom/shadow/ShadowRoot.h"
 #include "core/editing/Editor.h"
 #include "core/editing/FrameSelection.h"
-#include "core/fetch/ResourceLoadPriorityOptimizer.h"
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/page/Page.h"
@@ -114,31 +113,6 @@ static void removeBlockFromDescendantAndContainerMaps(RenderBlock* block, Tracke
                 containerMap->remove(it);
         }
     }
-}
-
-static void appendImageIfNotNull(Vector<ImageResource*>& imageResources, const StyleImage* styleImage)
-{
-    if (styleImage && styleImage->cachedImage()) {
-        ImageResource* imageResource = styleImage->cachedImage();
-        if (imageResource && !imageResource->isLoaded())
-            imageResources.append(styleImage->cachedImage());
-    }
-}
-
-static void appendLayers(Vector<ImageResource*>& images, const FillLayer& styleLayer)
-{
-    for (const FillLayer* layer = &styleLayer; layer; layer = layer->next())
-        appendImageIfNotNull(images, layer->image());
-}
-
-static void appendImagesFromStyle(Vector<ImageResource*>& images, RenderStyle& blockStyle)
-{
-    appendLayers(images, blockStyle.backgroundLayers());
-    appendLayers(images, blockStyle.maskLayers());
-
-    appendImageIfNotNull(images, blockStyle.listStyleImage());
-    appendImageIfNotNull(images, blockStyle.borderImageSource());
-    appendImageIfNotNull(images, blockStyle.maskBoxImageSource());
 }
 
 void RenderBlock::removeFromGlobalMaps()
@@ -275,15 +249,6 @@ void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldSty
     // It's possible for our border/padding to change, but for the overall logical width of the block to
     // end up being the same. We keep track of this change so in layoutBlock, we can know to set relayoutChildren=true.
     m_hasBorderOrPaddingLogicalWidthChanged = oldStyle && diff.needsFullLayout() && needsLayout() && borderOrPaddingLogicalWidthChanged(oldStyle, newStyle);
-
-    // If the style has unloaded images, want to notify the ResourceLoadPriorityOptimizer so that
-    // network priorities can be set.
-    Vector<ImageResource*> images;
-    appendImagesFromStyle(images, *newStyle);
-    if (images.isEmpty())
-        ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->removeRenderObject(this);
-    else
-        ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->addRenderObject(this);
 }
 
 void RenderBlock::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
@@ -884,39 +849,6 @@ void RenderBlock::layout()
         clearLayoutOverflow();
 
     invalidateBackgroundObscurationStatus();
-}
-
-bool RenderBlock::updateImageLoadingPriorities()
-{
-    Vector<ImageResource*> images;
-    appendImagesFromStyle(images, *style());
-
-    if (images.isEmpty())
-        return false;
-
-    LayoutRect viewBounds = viewRect();
-    LayoutRect objectBounds = absoluteContentBox();
-    // The object bounds might be empty right now, so intersects will fail since it doesn't deal
-    // with empty rects. Use LayoutRect::contains in that case.
-    bool isVisible;
-    if (!objectBounds.isEmpty())
-        isVisible =  viewBounds.intersects(objectBounds);
-    else
-        isVisible = viewBounds.contains(objectBounds);
-
-    ResourceLoadPriorityOptimizer::VisibilityStatus status = isVisible ?
-        ResourceLoadPriorityOptimizer::Visible : ResourceLoadPriorityOptimizer::NotVisible;
-
-    LayoutRect screenArea;
-    if (!objectBounds.isEmpty()) {
-        screenArea = viewBounds;
-        screenArea.intersect(objectBounds);
-    }
-
-    for (Vector<ImageResource*>::iterator it = images.begin(), end = images.end(); it != end; ++it)
-        ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->notifyImageResourceVisibility(*it, status, screenArea);
-
-    return true;
 }
 
 bool RenderBlock::widthAvailableToChildrenHasChanged()

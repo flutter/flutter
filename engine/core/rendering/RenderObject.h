@@ -564,7 +564,6 @@ public:
     // Subclasses must reimplement this method to compute the size and position
     // of this object and all its descendants.
     virtual void layout() = 0;
-    virtual bool updateImageLoadingPriorities() { return false; }
     void setHasPendingResourceUpdate(bool hasPendingResourceUpdate) { m_bitfields.setHasPendingResourceUpdate(hasPendingResourceUpdate); }
     bool hasPendingResourceUpdate() const { return m_bitfields.hasPendingResourceUpdate(); }
 

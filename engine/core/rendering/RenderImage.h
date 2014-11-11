@@ -70,7 +70,6 @@ protected:
     void paintIntoRect(GraphicsContext*, const LayoutRect&);
     virtual void paint(PaintInfo&, const LayoutPoint&) override final;
     virtual void layout() override;
-    virtual bool updateImageLoadingPriorities() override final;
 
 private:
     virtual const char* renderName() const override { return "RenderImage"; }

@@ -228,7 +228,6 @@ protected:
     void dirtyForLayoutFromPercentageHeightDescendants(SubtreeLayoutScope&);
 
     virtual void layout() override;
-    virtual bool updateImageLoadingPriorities() override final;
 
     enum PositionedLayoutBehavior {
         DefaultLayout,
