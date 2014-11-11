@@ -250,11 +250,13 @@ void FrameLoaderClientImpl::loadURLExternally(const ResourceRequest& request, Na
     }
 }
 
-void FrameLoaderClientImpl::createView(const KURL& url)
+mojo::View* FrameLoaderClientImpl::createChildFrame(const KURL& url)
 {
     if (m_webFrame->client()) {
-        m_webFrame->client()->createChildView(url);
+        return m_webFrame->client()->createChildFrame(url);
     }
+    ASSERT_NOT_REACHED();
+    return nullptr;
 }
 
 void FrameLoaderClientImpl::selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors)

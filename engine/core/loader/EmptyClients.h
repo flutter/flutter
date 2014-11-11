@@ -129,7 +129,7 @@ public:
     virtual void didStopLoading() override { }
 
     virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& = String()) override { }
-    virtual void createView(const KURL&) override {}
+    virtual mojo::View* createChildFrame(const KURL&) override { return nullptr; }
 
     virtual void transitionToCommittedForNewPage() override { }
 

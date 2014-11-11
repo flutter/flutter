@@ -21,6 +21,7 @@ source_set("libraries") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
     "//mojo/public/cpp/system",
+    "//mojo/services/public/cpp/view_manager",
     "//mojo/services/public/interfaces/navigation",
     "//skia",
     "//sky/engine/wtf",

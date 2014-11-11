@@ -39,6 +39,10 @@
 #include "wtf/Vector.h"
 #include <v8.h>
 
+namespace mojo {
+class View;
+}
+
 namespace blink {
 
     class Color;
@@ -49,10 +53,12 @@ namespace blink {
     class FetchRequest;
     class FrameLoader;
     class FrameNetworkingContext;
+    class IntRect;
     class IntSize;
     class KURL;
     class LocalFrame;
     class Page;
+    class RemoteFrame;
     class ResourceError;
     class ResourceHandle;
     class ResourceRequest;
@@ -87,8 +93,7 @@ namespace blink {
 
         virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) = 0;
 
-        // TODO(mpcomplete): return surface ID?
-        virtual void createView(const KURL&) = 0;
+        virtual mojo::View* createChildFrame(const KURL&) = 0;
 
         // Transmits the change in the set of watched CSS selectors property
         // that match any element on the frame.

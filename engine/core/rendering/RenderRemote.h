@@ -16,9 +16,12 @@ public:
     explicit RenderRemote(HTMLIFrameElement*);
     virtual ~RenderRemote();
 
+protected:
+    void layout() override;
+
 private:
-    virtual LayerType layerTypeRequired() const override { return NormalLayer; }
-    virtual void paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOffset);
+    LayerType layerTypeRequired() const override { return NormalLayer; }
+    void paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOffset) override;
 };
 
 } // namespace blink

@@ -73,7 +73,7 @@ public:
     virtual void didStopLoading() override;
     virtual void progressEstimateChanged(double progressEstimate) override;
     virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) override;
-    virtual void createView(const KURL&) override;
+    virtual mojo::View* createChildFrame(const KURL&) override;
     virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) override;
     virtual void transitionToCommittedForNewPage() override;
     virtual void didChangeScrollOffset() override;

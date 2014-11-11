@@ -19,7 +19,8 @@ PassRefPtr<HTMLIFrameElement> HTMLIFrameElement::create(Document& document)
 }
 
 HTMLIFrameElement::HTMLIFrameElement(Document& document)
-    : HTMLElement(HTMLNames::iframeTag, document)
+    : HTMLElement(HTMLNames::iframeTag, document),
+      m_contentView(nullptr)
 {
 }
 
@@ -48,6 +49,12 @@ RenderObject* HTMLIFrameElement::createRenderer(RenderStyle* style)
     return new RenderRemote(this);
 }
 
+void HTMLIFrameElement::OnViewDestroyed(mojo::View* view)
+{
+    DCHECK_EQ(view, m_contentView);
+    m_contentView = nullptr;
+}
+
 void HTMLIFrameElement::createView()
 {
     String urlString = stripLeadingAndTrailingHTMLSpaces(getAttribute(HTMLNames::srcAttr));
@@ -59,7 +66,7 @@ void HTMLIFrameElement::createView()
         return;
 
     KURL url = document().completeURL(urlString);
-    parentFrame->loaderClient()->createView(url);
+    m_contentView = parentFrame->loaderClient()->createChildFrame(url);
 }
 
 }

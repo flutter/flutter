@@ -41,6 +41,10 @@
 #include "public/platform/WebURLRequest.h"
 #include <v8.h>
 
+namespace mojo {
+class View;
+}
+
 namespace blink {
 
 class WebCachedURLRequest;
@@ -65,11 +69,10 @@ public:
     // until frameDetached() is called on it.
     // Note: If you override this, you should almost certainly be overriding
     // frameDetached().
-    virtual WebFrame* createChildFrame(WebLocalFrame* parent, const WebString& frameName) { return 0; }
-
-    virtual void createChildView(const WebURL& url) { }
+    virtual mojo::View* createChildFrame(const WebURL& url) { return nullptr; }
 
     // This frame has been detached from the view, but has not been closed yet.
+    // TODO(mpcomplete): reuse these.
     virtual void frameDetached(WebFrame*) { }
 
     // This frame has become focused..
@@ -238,9 +241,6 @@ public:
     // FIXME: Remove this method once we have input routing in the browser
     // process. See http://crbug.com/339659.
     virtual void forwardInputEvent(const WebInputEvent*) { }
-
-    // Send initial drawing parameters to a child frame that is being rendered out of process.
-    virtual void initializeChildFrame(const WebRect& frameRect, float scaleFactor) { }
 
 protected:
     virtual ~WebFrameClient() { }
