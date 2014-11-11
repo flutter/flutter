@@ -30,7 +30,6 @@
 
 #include "core/dom/Element.h"
 #include "core/dom/shadow/ElementShadow.h"
-#include "core/html/HTMLShadowElement.h"
 
 namespace blink {
 
@@ -72,7 +71,7 @@ Node* ComposedTreeWalker::traverseNode(const Node* node, TraversalDirection dire
     const InsertionPoint* insertionPoint = toInsertionPoint(node);
     if (Node* found = traverseDistributedNodes(direction == TraversalDirectionForward ? insertionPoint->first() : insertionPoint->last(), insertionPoint, direction))
         return found;
-    ASSERT(isHTMLShadowElement(node) || (isHTMLContentElement(node) && !node->hasChildren()));
+    ASSERT(isHTMLContentElement(node) && !node->hasChildren());
     return 0;
 }
 
@@ -113,15 +112,7 @@ Node* ComposedTreeWalker::traverseSiblingInCurrentTree(const Node* node, Travers
 
 Node* ComposedTreeWalker::traverseBackToYoungerShadowRoot(const Node* node, TraversalDirection direction)
 {
-    ASSERT(node);
-    if (node->parentNode() && node->parentNode()->isShadowRoot()) {
-        ShadowRoot* parentShadowRoot = toShadowRoot(node->parentNode());
-        if (!parentShadowRoot->isYoungest()) {
-            HTMLShadowElement* assignedInsertionPoint = parentShadowRoot->shadowInsertionPointOfYoungerShadowRoot();
-            ASSERT(assignedInsertionPoint);
-            return traverseSiblingInCurrentTree(assignedInsertionPoint, direction);
-        }
-    }
+    // FIXME(sky): Remove this.
     return 0;
 }
 
@@ -151,7 +142,6 @@ inline Node* ComposedTreeWalker::traverseParentOrHost(const Node* node) const
     if (!parent->isShadowRoot())
         return parent;
     ShadowRoot* shadowRoot = toShadowRoot(parent);
-    ASSERT(!shadowRoot->shadowInsertionPointOfYoungerShadowRoot());
     if (!shadowRoot->isYoungest())
         return 0;
     return shadowRoot->host();

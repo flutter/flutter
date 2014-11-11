@@ -39,7 +39,6 @@ struct FocusCandidate;
 class Document;
 class Element;
 class LocalFrame;
-class HTMLShadowElement;
 class IntRect;
 class KeyboardEvent;
 class Node;
@@ -54,7 +53,6 @@ public:
     static FocusNavigationScope focusNavigationScopeOf(Node*);
     static FocusNavigationScope ownedByNonFocusableFocusScopeOwner(Node*);
     static FocusNavigationScope ownedByShadowHost(Node*);
-    static FocusNavigationScope ownedByShadowInsertionPoint(HTMLShadowElement*);
 
 private:
     explicit FocusNavigationScope(TreeScope*);

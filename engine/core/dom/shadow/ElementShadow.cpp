@@ -33,7 +33,6 @@
 #include "core/dom/NodeTraversal.h"
 #include "core/dom/shadow/ContentDistribution.h"
 #include "core/html/HTMLContentElement.h"
-#include "core/html/HTMLShadowElement.h"
 #include "platform/EventDispatchForbiddenScope.h"
 #include "platform/ScriptForbiddenScope.h"
 
@@ -250,41 +249,18 @@ const DestinationInsertionPoints* ElementShadow::destinationInsertionPointsFor(c
 void ElementShadow::distribute()
 {
     host()->setNeedsStyleRecalc(SubtreeStyleChange);
-    Vector<RawPtr<HTMLShadowElement>, 32> shadowInsertionPoints;
     DistributionPool pool(*host());
 
     for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
-        HTMLShadowElement* shadowInsertionPoint = 0;
         const Vector<RefPtr<InsertionPoint> >& insertionPoints = root->descendantInsertionPoints();
         for (size_t i = 0; i < insertionPoints.size(); ++i) {
             InsertionPoint* point = insertionPoints[i].get();
             if (!point->isActive())
                 continue;
-            if (isHTMLShadowElement(*point)) {
-                ASSERT(!shadowInsertionPoint);
-                shadowInsertionPoint = toHTMLShadowElement(point);
-                shadowInsertionPoints.append(shadowInsertionPoint);
-            } else {
-                pool.distributeTo(point, this);
-                if (ElementShadow* shadow = shadowWhereNodeCanBeDistributed(*point))
-                    shadow->setNeedsDistributionRecalc();
-            }
+            pool.distributeTo(point, this);
+            if (ElementShadow* shadow = shadowWhereNodeCanBeDistributed(*point))
+                shadow->setNeedsDistributionRecalc();
         }
-    }
-
-    for (size_t i = shadowInsertionPoints.size(); i > 0; --i) {
-        HTMLShadowElement* shadowInsertionPoint = shadowInsertionPoints[i - 1];
-        ShadowRoot* root = shadowInsertionPoint->containingShadowRoot();
-        ASSERT(root);
-        if (root->isOldest()) {
-            pool.distributeTo(shadowInsertionPoint, this);
-        } else {
-            DistributionPool olderShadowRootPool(*root->olderShadowRoot());
-            olderShadowRootPool.distributeTo(shadowInsertionPoint, this);
-            root->olderShadowRoot()->setShadowInsertionPointOfYoungerShadowRoot(shadowInsertionPoint);
-        }
-        if (ElementShadow* shadow = shadowWhereNodeCanBeDistributed(*shadowInsertionPoint))
-            shadow->setNeedsDistributionRecalc();
     }
 }
 
@@ -337,9 +313,6 @@ void ElementShadow::willAffectSelector()
 void ElementShadow::clearDistribution()
 {
     m_nodeToInsertionPoints.clear();
-
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot())
-        root->setShadowInsertionPointOfYoungerShadowRoot(nullptr);
 }
 
 void ElementShadow::trace(Visitor* visitor)

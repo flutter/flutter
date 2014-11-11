@@ -42,7 +42,6 @@
 #include "core/frame/FrameView.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/HTMLImageElement.h"
-#include "core/html/HTMLShadowElement.h"
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
 #include "core/page/EventHandler.h"
@@ -53,11 +52,6 @@
 #include <limits>
 
 namespace blink {
-
-static inline bool isShadowInsertionPointFocusScopeOwner(Node& node)
-{
-    return isActiveShadowInsertionPoint(node) && toHTMLShadowElement(node).olderShadowRoot();
-}
 
 // FIXME: Some of Node* return values and Node* arguments should be Element*.
 
@@ -77,7 +71,7 @@ Element* FocusNavigationScope::owner() const
     Node* root = rootNode();
     if (root->isShadowRoot()) {
         ShadowRoot* shadowRoot = toShadowRoot(root);
-        return shadowRoot->isYoungest() ? shadowRoot->host() : shadowRoot->shadowInsertionPointOfYoungerShadowRoot();
+        return shadowRoot->host();
     }
     return 0;
 }
@@ -96,22 +90,13 @@ FocusNavigationScope FocusNavigationScope::focusNavigationScopeOf(Node* node)
 FocusNavigationScope FocusNavigationScope::ownedByNonFocusableFocusScopeOwner(Node* node)
 {
     ASSERT(node);
-    if (isShadowHost(node))
-        return FocusNavigationScope::ownedByShadowHost(node);
-    ASSERT(isShadowInsertionPointFocusScopeOwner(*node));
-    return FocusNavigationScope::ownedByShadowInsertionPoint(toHTMLShadowElement(node));
+    return FocusNavigationScope::ownedByShadowHost(node);
 }
 
 FocusNavigationScope FocusNavigationScope::ownedByShadowHost(Node* node)
 {
     ASSERT(isShadowHost(node));
     return FocusNavigationScope(toElement(node)->shadow()->youngestShadowRoot());
-}
-
-FocusNavigationScope FocusNavigationScope::ownedByShadowInsertionPoint(HTMLShadowElement* shadowInsertionPoint)
-{
-    ASSERT(isShadowInsertionPointFocusScopeOwner(*shadowInsertionPoint));
-    return FocusNavigationScope(shadowInsertionPoint->olderShadowRoot());
 }
 
 static inline void dispatchEventsOnWindowAndFocusedNode(Document* document, bool focused)
@@ -177,7 +162,7 @@ static inline bool isKeyboardFocusableShadowHost(Node* node)
 static inline bool isNonFocusableFocusScopeOwner(Node* node)
 {
     ASSERT(node);
-    return isNonKeyboardFocusableShadowHost(node) || isShadowInsertionPointFocusScopeOwner(*node);
+    return isNonKeyboardFocusableShadowHost(node);
 }
 
 static inline int adjustedTabIndex(Node* node)

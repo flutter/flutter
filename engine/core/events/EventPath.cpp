@@ -109,12 +109,6 @@ void EventPath::calculatePath()
         if (!insertionPoints.isEmpty()) {
             for (size_t i = 0; i < insertionPoints.size(); ++i) {
                 InsertionPoint* insertionPoint = insertionPoints[i];
-                if (insertionPoint->isShadowInsertionPoint()) {
-                    ShadowRoot* containingShadowRoot = insertionPoint->containingShadowRoot();
-                    ASSERT(containingShadowRoot);
-                    if (!containingShadowRoot->isOldest())
-                        addNodeEventContext(containingShadowRoot->olderShadowRoot());
-                }
                 addNodeEventContext(insertionPoint);
             }
             current = insertionPoints.last();

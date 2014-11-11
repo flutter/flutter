@@ -8,7 +8,6 @@ iframe interfaceName=HTMLIFrameElement
 img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
 import
 script
-shadow interfaceName=HTMLShadowElement
 style constructorNeedsCreatedByParser
 template
 title

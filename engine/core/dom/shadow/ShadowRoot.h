@@ -38,7 +38,6 @@ namespace blink {
 class Document;
 class ElementShadow;
 class ExceptionState;
-class HTMLShadowElement;
 class InsertionPoint;
 class ShadowRootRareData;
 class StyleSheetList;
@@ -74,19 +73,13 @@ public:
     void registerScopedHTMLStyleChild();
     void unregisterScopedHTMLStyleChild();
 
-    bool containsShadowElements() const;
     bool containsContentElements() const;
-    bool containsInsertionPoints() const { return containsShadowElements() || containsContentElements(); }
+    bool containsInsertionPoints() const { return containsContentElements(); }
     bool containsShadowRoots() const;
-
-    unsigned descendantShadowElementCount() const;
 
     // For Internals, don't use this.
     unsigned childShadowRootCount() const;
     unsigned numberOfStyles() const { return m_numberOfStyles; }
-
-    HTMLShadowElement* shadowInsertionPointOfYoungerShadowRoot() const;
-    void setShadowInsertionPointOfYoungerShadowRoot(PassRefPtr<HTMLShadowElement>);
 
     void didAddInsertionPoint(InsertionPoint*);
     void didRemoveInsertionPoint(InsertionPoint*);
@@ -115,8 +108,6 @@ private:
 #if !ENABLE(OILPAN)
     virtual void dispose() override;
 #endif
-
-    virtual void childrenChanged(const ChildrenChange&) override;
 
     ShadowRootRareData* ensureShadowRootRareData();
 

@@ -37,7 +37,6 @@
 #include "core/dom/shadow/InsertionPoint.h"
 #include "core/dom/shadow/ShadowRootRareData.h"
 #include "core/editing/markup.h"
-#include "core/html/HTMLShadowElement.h"
 #include "public/platform/Platform.h"
 
 namespace blink {
@@ -162,16 +161,6 @@ void ShadowRoot::removedFrom(ContainerNode* insertionPoint)
     DocumentFragment::removedFrom(insertionPoint);
 }
 
-void ShadowRoot::childrenChanged(const ChildrenChange& change)
-{
-    ContainerNode::childrenChanged(change);
-
-    if (InsertionPoint* point = shadowInsertionPointOfYoungerShadowRoot()) {
-        if (ShadowRoot* root = point->containingShadowRoot())
-            root->owner()->setNeedsDistributionRecalc();
-    }
-}
-
 void ShadowRoot::registerScopedHTMLStyleChild()
 {
     ++m_numberOfStyles;
@@ -192,11 +181,6 @@ ShadowRootRareData* ShadowRoot::ensureShadowRootRareData()
     return m_shadowRootRareData.get();
 }
 
-bool ShadowRoot::containsShadowElements() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->containsShadowElements() : 0;
-}
-
 bool ShadowRoot::containsContentElements() const
 {
     return m_shadowRootRareData ? m_shadowRootRareData->containsContentElements() : 0;
@@ -205,23 +189,6 @@ bool ShadowRoot::containsContentElements() const
 bool ShadowRoot::containsShadowRoots() const
 {
     return m_shadowRootRareData ? m_shadowRootRareData->containsShadowRoots() : 0;
-}
-
-unsigned ShadowRoot::descendantShadowElementCount() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->descendantShadowElementCount() : 0;
-}
-
-HTMLShadowElement* ShadowRoot::shadowInsertionPointOfYoungerShadowRoot() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->shadowInsertionPointOfYoungerShadowRoot() : 0;
-}
-
-void ShadowRoot::setShadowInsertionPointOfYoungerShadowRoot(PassRefPtr<HTMLShadowElement> shadowInsertionPoint)
-{
-    if (!m_shadowRootRareData && !shadowInsertionPoint)
-        return;
-    ensureShadowRootRareData()->setShadowInsertionPointOfYoungerShadowRoot(shadowInsertionPoint);
 }
 
 void ShadowRoot::didAddInsertionPoint(InsertionPoint* insertionPoint)

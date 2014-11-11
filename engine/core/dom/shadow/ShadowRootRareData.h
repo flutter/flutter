@@ -40,23 +40,16 @@ namespace blink {
 class ShadowRootRareData {
 public:
     ShadowRootRareData()
-        : m_descendantShadowElementCount(0)
-        , m_descendantContentElementCount(0)
+        : m_descendantContentElementCount(0)
         , m_childShadowRootCount(0)
     {
     }
 
-    HTMLShadowElement* shadowInsertionPointOfYoungerShadowRoot() const { return m_shadowInsertionPointOfYoungerShadowRoot.get(); }
-    void setShadowInsertionPointOfYoungerShadowRoot(PassRefPtr<HTMLShadowElement> shadowInsertionPoint) { m_shadowInsertionPointOfYoungerShadowRoot = shadowInsertionPoint; }
-
     void didAddInsertionPoint(InsertionPoint*);
     void didRemoveInsertionPoint(InsertionPoint*);
 
-    bool containsShadowElements() const { return m_descendantShadowElementCount; }
     bool containsContentElements() const { return m_descendantContentElementCount; }
     bool containsShadowRoots() const { return m_childShadowRootCount; }
-
-    unsigned descendantShadowElementCount() const { return m_descendantShadowElementCount; }
 
     void didAddChildShadowRoot() { ++m_childShadowRootCount; }
     void didRemoveChildShadowRoot() { ASSERT(m_childShadowRootCount > 0); --m_childShadowRootCount; }
@@ -70,16 +63,8 @@ public:
     StyleSheetList* styleSheets() { return m_styleSheetList.get(); }
     void setStyleSheets(PassRefPtr<StyleSheetList> styleSheetList) { m_styleSheetList = styleSheetList; }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_shadowInsertionPointOfYoungerShadowRoot);
-        visitor->trace(m_descendantInsertionPoints);
-        visitor->trace(m_styleSheetList);
-    }
 
 private:
-    RefPtr<HTMLShadowElement> m_shadowInsertionPointOfYoungerShadowRoot;
-    unsigned m_descendantShadowElementCount;
     unsigned m_descendantContentElementCount;
     unsigned m_childShadowRootCount;
     Vector<RefPtr<InsertionPoint> > m_descendantInsertionPoints;
@@ -89,9 +74,7 @@ private:
 inline void ShadowRootRareData::didAddInsertionPoint(InsertionPoint* point)
 {
     ASSERT(point);
-    if (isHTMLShadowElement(*point))
-        ++m_descendantShadowElementCount;
-    else if (isHTMLContentElement(*point))
+    if (isHTMLContentElement(*point))
         ++m_descendantContentElementCount;
     else
         ASSERT_NOT_REACHED();
@@ -100,15 +83,12 @@ inline void ShadowRootRareData::didAddInsertionPoint(InsertionPoint* point)
 inline void ShadowRootRareData::didRemoveInsertionPoint(InsertionPoint* point)
 {
     ASSERT(point);
-    if (isHTMLShadowElement(*point))
-        --m_descendantShadowElementCount;
-    else if (isHTMLContentElement(*point))
+    if (isHTMLContentElement(*point))
         --m_descendantContentElementCount;
     else
         ASSERT_NOT_REACHED();
 
     ASSERT(m_descendantContentElementCount >= 0);
-    ASSERT(m_descendantShadowElementCount >= 0);
 }
 
 } // namespace blink

@@ -48,7 +48,6 @@ public:
     bool isActive() const;
     bool canBeActive() const;
 
-    bool isShadowInsertionPoint() const;
     bool isContentInsertionPoint() const;
 
     PassRefPtr<StaticNodeList> getDistributedNodes();
@@ -89,11 +88,6 @@ DEFINE_ELEMENT_TYPE_CASTS(InsertionPoint, isInsertionPoint());
 inline bool isActiveInsertionPoint(const Node& node)
 {
     return node.isInsertionPoint() && toInsertionPoint(node).isActive();
-}
-
-inline bool isActiveShadowInsertionPoint(const Node& node)
-{
-    return node.isInsertionPoint() && toInsertionPoint(node).isShadowInsertionPoint();
 }
 
 inline ElementShadow* shadowWhereNodeCanBeDistributed(const Node& node)

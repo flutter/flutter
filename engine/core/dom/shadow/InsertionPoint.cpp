@@ -136,27 +136,8 @@ bool InsertionPoint::canBeActive() const
 
 bool InsertionPoint::isActive() const
 {
-    if (!canBeActive())
-        return false;
-    ShadowRoot* shadowRoot = containingShadowRoot();
-    if (!shadowRoot)
-        return false;
-    if (!isHTMLShadowElement(*this) || shadowRoot->descendantShadowElementCount() <= 1)
-        return true;
-
-    // Slow path only when there are more than one shadow elements in a shadow tree. That should be a rare case.
-    const Vector<RefPtr<InsertionPoint> >& insertionPoints = shadowRoot->descendantInsertionPoints();
-    for (size_t i = 0; i < insertionPoints.size(); ++i) {
-        InsertionPoint* point = insertionPoints[i].get();
-        if (isHTMLShadowElement(*point))
-            return point == this;
-    }
-    return true;
-}
-
-bool InsertionPoint::isShadowInsertionPoint() const
-{
-    return isHTMLShadowElement(*this) && isActive();
+    // FIXME(sky): Remove this.
+    return canBeActive();
 }
 
 bool InsertionPoint::isContentInsertionPoint() const
