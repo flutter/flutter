@@ -486,7 +486,7 @@ LayoutPoint RenderLayer::location() const
         inlineBoundingBoxOffset = toSize(lineBox.location());
         localPoint += inlineBoundingBoxOffset;
     } else if (RenderBox* box = renderBox()) {
-        localPoint += box->topLeftLocationOffset();
+        localPoint += box->locationOffset();
     }
 
     if (!renderer()->isOutOfFlowPositioned() && renderer()->parent()) {
@@ -497,7 +497,7 @@ LayoutPoint RenderLayer::location() const
             if (curr->isBox()) {
                 // Rows and cells share the same coordinate space (that of the section).
                 // Omit them when computing our xpos/ypos.
-                localPoint += toRenderBox(curr)->topLeftLocationOffset();
+                localPoint += toRenderBox(curr)->locationOffset();
             }
             curr = curr->parent();
         }

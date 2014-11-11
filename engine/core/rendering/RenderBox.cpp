@@ -1219,41 +1219,9 @@ LayoutRect RenderBox::clipRect(const LayoutPoint& location)
     return clipRect;
 }
 
-static LayoutUnit portionOfMarginNotConsumedByFloat(LayoutUnit childMargin, LayoutUnit contentSide, LayoutUnit offset)
-{
-    if (childMargin <= 0)
-        return 0;
-    LayoutUnit contentSideWithMargin = contentSide + childMargin;
-    if (offset > contentSideWithMargin)
-        return childMargin;
-    return offset - contentSide;
-}
-
-LayoutUnit RenderBox::shrinkLogicalWidthToAvoidFloats(LayoutUnit childMarginStart, LayoutUnit childMarginEnd, const RenderBlockFlow* cb) const
-{
-    LayoutUnit width = cb->availableLogicalWidthForLine(false) - std::max<LayoutUnit>(0, childMarginStart) - std::max<LayoutUnit>(0, childMarginEnd);
-
-    // We need to see if margins on either the start side or the end side can contain the floats in question. If they can,
-    // then just using the line width is inaccurate. In the case where a float completely fits, we don't need to use the line
-    // offset at all, but can instead push all the way to the content edge of the containing block. In the case where the float
-    // doesn't fit, we can use the line offset, but we need to grow it by the margin to reflect the fact that the margin was
-    // "consumed" by the float. Negative margins aren't consumed by the float, and so we ignore them.
-    width += portionOfMarginNotConsumedByFloat(childMarginStart, cb->startOffsetForContent(), cb->startOffsetForLine(false));
-    width += portionOfMarginNotConsumedByFloat(childMarginEnd, cb->endOffsetForContent(), cb->endOffsetForLine(false));
-    return width;
-}
-
 LayoutUnit RenderBox::containingBlockLogicalHeightForContent(AvailableLogicalHeightType heightType) const
 {
     return containingBlock()->availableLogicalHeight(heightType);
-}
-
-LayoutUnit RenderBox::containingBlockAvailableLineWidth() const
-{
-    RenderBlock* cb = containingBlock();
-    if (cb->isRenderBlockFlow())
-        return toRenderBlockFlow(cb)->availableLogicalWidthForLine(false);
-    return 0;
 }
 
 void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
@@ -1306,7 +1274,7 @@ LayoutSize RenderBox::offsetFromContainer(const RenderObject* o, const LayoutPoi
         offset += offsetForInFlowPosition();
 
     if (!isInline() || isReplaced())
-        offset += topLeftLocationOffset();
+        offset += locationOffset();
 
     if (o->hasOverflowClip())
         offset -= toRenderBox(o)->scrolledContentOffset();
@@ -3304,7 +3272,7 @@ void RenderBox::addOverflowFromChild(RenderBox* child, const LayoutSize& delta)
     // Only propagate layout overflow from the child if the child isn't clipping its overflow.  If it is, then
     // its overflow is internal to it, and we don't care about it.  layoutOverflowRectForPropagation takes care of this
     // and just propagates the border box rect instead.
-    LayoutRect childLayoutOverflowRect = child->layoutOverflowRectForPropagation(style());
+    LayoutRect childLayoutOverflowRect = child->layoutOverflowRectForPropagation();
     childLayoutOverflowRect.move(delta);
     addLayoutOverflow(childLayoutOverflowRect);
 
@@ -3313,14 +3281,14 @@ void RenderBox::addOverflowFromChild(RenderBox* child, const LayoutSize& delta)
     // overflow if we are clipping our own overflow.
     if (child->hasSelfPaintingLayer())
         return;
-    LayoutRect childVisualOverflowRect = child->visualOverflowRectForPropagation(style());
+    LayoutRect childVisualOverflowRect = child->visualOverflowRect();
     childVisualOverflowRect.move(delta);
     addContentsVisualOverflow(childVisualOverflowRect);
 }
 
 void RenderBox::addLayoutOverflow(const LayoutRect& rect)
 {
-    LayoutRect clientBox = noOverflowRect();
+    LayoutRect clientBox = paddingBoxRect();
     if (clientBox.contains(rect) || rect.isEmpty())
         return;
 
@@ -3368,7 +3336,7 @@ void RenderBox::addVisualOverflow(const LayoutRect& rect)
         return;
 
     if (!m_overflow)
-        m_overflow = adoptPtr(new RenderOverflow(noOverflowRect(), borderBox));
+        m_overflow = adoptPtr(new RenderOverflow(paddingBoxRect(), borderBox));
 
     m_overflow->addVisualOverflow(rect);
 }
@@ -3381,7 +3349,7 @@ void RenderBox::addContentsVisualOverflow(const LayoutRect& rect)
     }
 
     if (!m_overflow)
-        m_overflow = adoptPtr(new RenderOverflow(noOverflowRect(), borderBoxRect()));
+        m_overflow = adoptPtr(new RenderOverflow(paddingBoxRect(), borderBoxRect()));
     m_overflow->addContentsVisualOverflow(rect);
 }
 
@@ -3395,7 +3363,7 @@ void RenderBox::clearLayoutOverflow()
         return;
     }
 
-    m_overflow->setLayoutOverflow(noOverflowRect());
+    m_overflow->setLayoutOverflow(paddingBoxRect());
 }
 
 bool RenderBox::percentageLogicalHeightIsResolvableFromBlock(const RenderBlock* containingBlock, bool isOutOfFlowPositioned)
@@ -3467,25 +3435,7 @@ RenderLayer* RenderBox::enclosingFloatPaintingLayer() const
     return 0;
 }
 
-LayoutRect RenderBox::logicalVisualOverflowRectForPropagation(RenderStyle* parentStyle) const
-{
-    // FIXME(sky): Remove
-    return visualOverflowRectForPropagation(parentStyle);
-}
-
-LayoutRect RenderBox::visualOverflowRectForPropagation(RenderStyle* parentStyle) const
-{
-    // FIXME(sky): Remove
-    return visualOverflowRect();
-}
-
-LayoutRect RenderBox::logicalLayoutOverflowRectForPropagation(RenderStyle* parentStyle) const
-{
-    // FIXME(sky): Remove
-    return layoutOverflowRectForPropagation(parentStyle);
-}
-
-LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle) const
+LayoutRect RenderBox::layoutOverflowRectForPropagation() const
 {
     // Only propagate interior layout overflow if we don't clip it.
     LayoutRect rect = borderBoxRect();
@@ -3506,37 +3456,14 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation(RenderStyle* parentStyle)
     return rect;
 }
 
-LayoutRect RenderBox::noOverflowRect() const
-{
-    // FIXME(sky): Replace with borderBoxRect?
-    LayoutUnit left = borderLeft();
-    LayoutUnit top = borderTop();
-    LayoutUnit right = borderRight();
-    LayoutUnit bottom = borderBottom();
-    LayoutRect rect(left, top, width() - left - right, height() - top - bottom);
-    return rect;
-}
-
 LayoutUnit RenderBox::offsetLeft() const
 {
-    return adjustedPositionRelativeToOffsetParent(topLeftLocation()).x();
+    return adjustedPositionRelativeToOffsetParent(location()).x();
 }
 
 LayoutUnit RenderBox::offsetTop() const
 {
-    return adjustedPositionRelativeToOffsetParent(topLeftLocation()).y();
-}
-
-LayoutPoint RenderBox::topLeftLocation() const
-{
-    // FIXME(sky): Remove this.
-    return location();
-}
-
-LayoutSize RenderBox::topLeftLocationOffset() const
-{
-    // FIXME(sky): Remove this.
-    return locationOffset();
+    return adjustedPositionRelativeToOffsetParent(location()).y();
 }
 
 bool RenderBox::hasRelativeLogicalHeight() const

@@ -281,7 +281,7 @@ LayoutPoint RenderBoxModelObject::adjustedPositionRelativeToOffsetParent(const L
                 // FIXME: What are we supposed to do inside SVG content?
                 if (!isOutOfFlowPositioned()) {
                     if (current->isBox())
-                        referencePoint.moveBy(toRenderBox(current)->topLeftLocation());
+                        referencePoint.moveBy(toRenderBox(current)->location());
                 }
             }
         }

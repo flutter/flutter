@@ -966,7 +966,7 @@ void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
         // When we have overflow clip, propagate the original spillout since it will include collapsed bottom margins
         // and bottom padding.  Set the axis we don't care about to be 1, since we want this overflow to always
         // be considered reachable.
-        LayoutRect clientRect(noOverflowRect());
+        LayoutRect clientRect(paddingBoxRect());
         LayoutRect rectToApply;
         rectToApply = LayoutRect(clientRect.x(), clientRect.y(), 1, std::max<LayoutUnit>(0, oldClientAfterEdge - clientRect.y()));
         addLayoutOverflow(rectToApply);
@@ -1001,7 +1001,7 @@ void RenderBlock::addOverflowFromPositionedObjects()
 
 bool RenderBlock::createsBlockFormattingContext() const
 {
-    return isInlineBlock() || isFloatingOrOutOfFlowPositioned() || hasOverflowClip() || isFlexItemIncludingDeprecated() || isDocumentElement();
+    return isInlineBlock() || isFloatingOrOutOfFlowPositioned() || hasOverflowClip() || isFlexItem() || isDocumentElement();
 }
 
 void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox* child)
@@ -1454,7 +1454,7 @@ bool RenderBlock::isSelectionRoot() const
         || isPositioned()
         || isInlineBlock()
         || hasTransform() || hasMask()
-        || isFlexItemIncludingDeprecated())
+        || isFlexItem())
         return true;
 
     if (view() && view()->selectionStart()) {

@@ -927,7 +927,7 @@ LayoutRect RenderInline::culledInlineVisualOverflowBoundingBox() const
         if (curr->isBox()) {
             RenderBox* currBox = toRenderBox(curr);
             if (!currBox->hasSelfPaintingLayer() && currBox->inlineBoxWrapper()) {
-                LayoutRect logicalRect = currBox->logicalVisualOverflowRectForPropagation(style());
+                LayoutRect logicalRect = currBox->visualOverflowRect();
                 logicalRect.moveBy(currBox->location());
                 result.uniteIfNonZero(logicalRect);
             }
