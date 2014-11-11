@@ -1815,9 +1815,6 @@ bool EventHandler::handleGestureScrollUpdate(const PlatformGestureEvent& gesture
     if (delta.isZero())
         return false;
 
-    const float scaleFactor = m_frame->pageZoomFactor();
-    delta.scale(1 / scaleFactor, 1 / scaleFactor);
-
     Node* node = m_scrollGestureHandlingNode.get();
     if (!node)
         return sendScrollEventToView(gestureEvent, delta);
@@ -2588,15 +2585,8 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
         }
         ASSERT(targetFrame);
 
-        FloatPoint pagePoint = point.pos();
-
-        float scaleFactor = 1.0f / targetFrame->pageZoomFactor();
-
-        FloatPoint adjustedPagePoint = pagePoint.scaledBy(scaleFactor);
-        FloatSize adjustedRadius = point.radius().scaledBy(scaleFactor);
-
         RefPtr<Touch> touch = Touch::create(
-            targetFrame, touchTarget.get(), point.id(), point.screenPos(), adjustedPagePoint, adjustedRadius, point.rotationAngle(), point.force());
+            targetFrame, touchTarget.get(), point.id(), point.screenPos(), point.pos(), point.radius(), point.rotationAngle(), point.force());
 
         // Ensure this target's touch list exists, even if it ends up empty, so
         // it can always be passed to TouchEvent::Create below.

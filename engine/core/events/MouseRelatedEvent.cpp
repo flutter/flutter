@@ -51,13 +51,8 @@ MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubb
 
     LocalFrame* frame = view() ? view()->frame() : 0;
     if (frame && !isSimulated) {
-        if (FrameView* frameView = frame->view()) {
+        if (FrameView* frameView = frame->view())
             adjustedPageLocation = frameView->windowToContents(windowLocation);
-            float scaleFactor = 1 / frame->pageZoomFactor();
-            if (scaleFactor != 1.0f) {
-                adjustedPageLocation.scale(scaleFactor, scaleFactor);
-            }
-        }
     }
 
     m_clientLocation = adjustedPageLocation;
@@ -92,21 +87,9 @@ void MouseRelatedEvent::initCoordinates(const LayoutPoint& clientLocation)
     m_hasCachedRelativePosition = false;
 }
 
-static float pageZoomFactor(const UIEvent* event)
-{
-    LocalDOMWindow* window = event->view();
-    if (!window)
-        return 1;
-    LocalFrame* frame = window->frame();
-    if (!frame)
-        return 1;
-    return frame->pageZoomFactor();
-}
-
 void MouseRelatedEvent::computePageLocation()
 {
-    float scaleFactor = pageZoomFactor(this);
-    setAbsoluteLocation(roundedLayoutPoint(FloatPoint(pageX() * scaleFactor, pageY() * scaleFactor)));
+    setAbsoluteLocation(LayoutPoint(pageX(), pageY()));
 }
 
 void MouseRelatedEvent::receivedTarget()
@@ -131,9 +114,6 @@ void MouseRelatedEvent::computeRelativePosition()
     if (RenderObject* r = targetNode->renderer()) {
         FloatPoint localPos = r->absoluteToLocal(absoluteLocation(), UseTransforms);
         m_offsetLocation = roundedLayoutPoint(localPos);
-        float scaleFactor = 1 / pageZoomFactor(this);
-        if (scaleFactor != 1.0f)
-            m_offsetLocation.scale(scaleFactor, scaleFactor);
     }
 
     // Adjust layerLocation to be relative to the layer.

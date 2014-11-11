@@ -140,11 +140,6 @@ public:
     virtual void scrollFocusedNodeIntoRect(const WebRect&) override;
     virtual void zoomToFindInPageRect(const WebRect&) override;
     virtual void advanceFocus(bool reverse) override;
-    virtual double zoomLevel() override;
-    virtual double setZoomLevel(double) override;
-    virtual void zoomLimitsChanged(double minimumZoomLevel, double maximumZoomLevel) override;
-    virtual float textZoomFactor() override;
-    virtual float setTextZoomFactor(float) override;
     virtual bool zoomToMultipleTargetsRect(const WebRect&) override;
     virtual void setMainFrameScrollOffset(const WebPoint&) override;
     virtual void resetScrollAndScaleState() override;
@@ -186,7 +181,6 @@ public:
 
     void setIgnoreInputEvents(bool newValue);
     void setBackgroundColorOverride(WebColor);
-    void setZoomFactorOverride(float);
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }
 
@@ -401,14 +395,6 @@ private:
     // dragged by the time a drag is initiated.
     WebPoint m_lastMouseDownPoint;
 
-    // Keeps track of the current zoom level. 0 means no zoom, positive numbers
-    // mean zoom in, negative numbers mean zoom out.
-    double m_zoomLevel;
-
-    double m_minimumZoomLevel;
-
-    double m_maximumZoomLevel;
-
     bool m_doingDragAndDrop;
 
     bool m_ignoreInputEvents;
@@ -464,7 +450,6 @@ private:
     bool m_showScrollBottleneckRects;
     WebColor m_baseBackgroundColor;
     WebColor m_backgroundColorOverride;
-    float m_zoomFactorOverride;
 
     bool m_userGestureObserved;
 };

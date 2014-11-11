@@ -198,9 +198,7 @@ HitTestResult hitTestInDocument(const Document* document, int x, int y)
     if (!frameView)
         return HitTestResult();
 
-    float scaleFactor = frame->pageZoomFactor();
-    IntPoint point = roundedIntPoint(FloatPoint(x * scaleFactor, y * scaleFactor));
-
+    IntPoint point(x, y);
     if (!frameView->visibleContentRect().contains(point))
         return HitTestResult();
 

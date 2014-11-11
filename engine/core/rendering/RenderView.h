@@ -73,8 +73,6 @@ public:
     int viewLogicalHeight() const;
     LayoutUnit viewLogicalHeightForPercentages() const;
 
-    float zoomFactor() const;
-
     FrameView* frameView() const { return m_frameView; }
 
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;

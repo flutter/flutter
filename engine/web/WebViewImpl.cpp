@@ -150,9 +150,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_editorClientImpl(this)
     , m_spellCheckerClientImpl(this)
     , m_fixedLayoutSizeLock(false)
-    , m_zoomLevel(0)
-    , m_minimumZoomLevel(zoomFactorToZoomLevel(minTextSizeMultiplier))
-    , m_maximumZoomLevel(zoomFactorToZoomLevel(maxTextSizeMultiplier))
     , m_doingDragAndDrop(false)
     , m_ignoreInputEvents(false)
     , m_compositorDeviceScaleFactorOverride(0)
@@ -180,7 +177,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_showScrollBottleneckRects(false)
     , m_baseBackgroundColor(Color::white)
     , m_backgroundColorOverride(Color::transparent)
-    , m_zoomFactorOverride(0)
     , m_userGestureObserved(false)
 {
     Page::PageClients pageClients;
@@ -1722,58 +1718,6 @@ void WebViewImpl::advanceFocus(bool reverse)
     page()->focusController().advanceFocus(reverse ? FocusTypeBackward : FocusTypeForward);
 }
 
-double WebViewImpl::zoomLevel()
-{
-    return m_zoomLevel;
-}
-
-double WebViewImpl::setZoomLevel(double zoomLevel)
-{
-    if (zoomLevel < m_minimumZoomLevel)
-        m_zoomLevel = m_minimumZoomLevel;
-    else if (zoomLevel > m_maximumZoomLevel)
-        m_zoomLevel = m_maximumZoomLevel;
-    else
-        m_zoomLevel = zoomLevel;
-
-    LocalFrame* frame = mainFrameImpl()->frame();
-    float zoomFactor = m_zoomFactorOverride ? m_zoomFactorOverride : static_cast<float>(zoomLevelToZoomFactor(m_zoomLevel));
-    frame->setPageZoomFactor(zoomFactor);
-
-    return m_zoomLevel;
-}
-
-void WebViewImpl::zoomLimitsChanged(double minimumZoomLevel,
-                                    double maximumZoomLevel)
-{
-    m_minimumZoomLevel = minimumZoomLevel;
-    m_maximumZoomLevel = maximumZoomLevel;
-    m_client->zoomLimitsChanged(m_minimumZoomLevel, m_maximumZoomLevel);
-}
-
-float WebViewImpl::textZoomFactor()
-{
-    return mainFrameImpl()->frame()->textZoomFactor();
-}
-
-float WebViewImpl::setTextZoomFactor(float textZoomFactor)
-{
-    LocalFrame* frame = mainFrameImpl()->frame();
-    frame->setTextZoomFactor(textZoomFactor);
-    return textZoomFactor;
-}
-
-double WebView::zoomLevelToZoomFactor(double zoomLevel)
-{
-    return pow(textSizeMultiplierRatio, zoomLevel);
-}
-
-double WebView::zoomFactorToZoomLevel(double factor)
-{
-    // Since factor = 1.2^level, level = log(factor) / log(1.2)
-    return log(factor) / log(textSizeMultiplierRatio);
-}
-
 IntPoint WebViewImpl::clampOffsetAtScale(const IntPoint& offset, float scale)
 {
     FrameView* view = mainFrameImpl()->frameView();
@@ -1840,9 +1784,7 @@ WebSize WebViewImpl::contentsPreferredMinimumSize()
 
     layout();
     FontCachePurgePreventer fontCachePurgePreventer; // Required by minPreferredLogicalWidth().
-    IntSize preferredMinimumSize(document->renderView()->minPreferredLogicalWidth(), document->documentElement()->scrollHeight());
-    preferredMinimumSize.scale(zoomLevelToZoomFactor(zoomLevel()));
-    return preferredMinimumSize;
+    return IntSize(document->renderView()->minPreferredLogicalWidth(), document->documentElement()->scrollHeight());
 }
 
 void WebViewImpl::resetScrollAndScaleState()
@@ -2095,12 +2037,6 @@ void WebViewImpl::setBackgroundColorOverride(WebColor color)
 {
     m_backgroundColorOverride = color;
     updateLayerTreeBackgroundColor();
-}
-
-void WebViewImpl::setZoomFactorOverride(float zoomFactor)
-{
-    m_zoomFactorOverride = zoomFactor;
-    setZoomLevel(zoomLevel());
 }
 
 void WebViewImpl::setOverlayLayer(GraphicsLayer* layer)

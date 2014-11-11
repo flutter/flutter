@@ -43,8 +43,7 @@ Touch::Touch(LocalFrame* frame, EventTarget* target, unsigned identifier, const 
     , m_rotationAngle(rotationAngle)
     , m_force(force)
 {
-    float scaleFactor = frame ? frame->pageZoomFactor() : 1.0f;
-    m_absoluteLocation = roundedLayoutPoint(pagePos.scaledBy(scaleFactor));
+    m_absoluteLocation = roundedLayoutPoint(pagePos);
 }
 
 Touch::Touch(EventTarget* target, unsigned identifier, const FloatPoint& clientPos, const FloatPoint& screenPos, const FloatPoint& pagePos, const FloatSize& radius, float rotationAngle, float force, LayoutPoint absoluteLocation)

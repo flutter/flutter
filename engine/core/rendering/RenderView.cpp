@@ -697,11 +697,6 @@ LayoutUnit RenderView::viewLogicalHeightForPercentages() const
     return viewLogicalHeight();
 }
 
-float RenderView::zoomFactor() const
-{
-    return m_frameView->frame().pageZoomFactor();
-}
-
 void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
 {
     if (result.innerNode())
@@ -755,16 +750,16 @@ bool RenderView::backgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const
     return m_frameView->hasOpaqueBackground();
 }
 
+// FIXME(sky): remove
 double RenderView::layoutViewportWidth() const
 {
-    float scale = m_frameView ? m_frameView->frame().pageZoomFactor() : 1;
-    return viewWidth(IncludeScrollbars) / scale;
+    return viewWidth(IncludeScrollbars);
 }
 
+// FIXME(sky): remove
 double RenderView::layoutViewportHeight() const
 {
-    float scale = m_frameView ? m_frameView->frame().pageZoomFactor() : 1;
-    return viewHeight(IncludeScrollbars) / scale;
+    return viewHeight(IncludeScrollbars);
 }
 
 } // namespace blink

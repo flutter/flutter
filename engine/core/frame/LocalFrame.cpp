@@ -77,8 +77,6 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     , m_eventHandler(adoptPtr(new EventHandler(this)))
     , m_console(FrameConsole::create(*this))
     , m_inputMethodController(InputMethodController::create(*this))
-    , m_pageZoomFactor(1)
-    , m_textZoomFactor(1)
 {
     page()->setMainFrame(this);
 }
@@ -347,36 +345,6 @@ String LocalFrame::localLayerTreeAsText(unsigned flags) const
     return contentRenderer()->compositor()->layerTreeAsText(static_cast<LayerTreeFlags>(flags));
 }
 
-void LocalFrame::setPageZoomFactor(float factor)
-{
-    setPageAndTextZoomFactors(factor, m_textZoomFactor);
-}
-
-void LocalFrame::setTextZoomFactor(float factor)
-{
-    setPageAndTextZoomFactors(m_pageZoomFactor, factor);
-}
-
-void LocalFrame::setPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor)
-{
-    if (m_pageZoomFactor == pageZoomFactor && m_textZoomFactor == textZoomFactor)
-        return;
-
-    Page* page = this->page();
-    if (!page)
-        return;
-
-    Document* document = this->document();
-    if (!document)
-        return;
-
-    m_pageZoomFactor = pageZoomFactor;
-    m_textZoomFactor = textZoomFactor;
-
-    document->setNeedsStyleRecalc(SubtreeStyleChange);
-    document->updateLayoutIgnorePendingStylesheets();
-}
-
 void LocalFrame::deviceOrPageScaleFactorChanged()
 {
     document()->mediaQueryAffectingValueChanged();
@@ -408,10 +376,7 @@ double LocalFrame::devicePixelRatio() const
 {
     if (!m_host)
         return 0;
-
-    double ratio = m_host->deviceScaleFactor();
-    ratio *= pageZoomFactor();
-    return ratio;
+    return m_host->deviceScaleFactor();
 }
 
 } // namespace blink

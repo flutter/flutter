@@ -110,12 +110,6 @@ namespace blink {
 
         FloatSize resizePageRectsKeepingRatio(const FloatSize& originalSize, const FloatSize& expectedSize);
 
-        void setPageZoomFactor(float factor);
-        float pageZoomFactor() const { return m_pageZoomFactor; }
-        void setTextZoomFactor(float factor);
-        float textZoomFactor() const { return m_textZoomFactor; }
-        void setPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor);
-
         void deviceOrPageScaleFactorChanged();
         double devicePixelRatio() const;
 
@@ -148,9 +142,6 @@ namespace blink {
         const OwnPtr<EventHandler> m_eventHandler;
         const OwnPtr<FrameConsole> m_console;
         OwnPtr<InputMethodController> m_inputMethodController;
-
-        float m_pageZoomFactor;
-        float m_textZoomFactor;
     };
 
     inline FrameView* LocalFrame::view() const

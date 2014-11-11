@@ -161,35 +161,6 @@ public:
 
     // Zoom ----------------------------------------------------------------
 
-    // Returns the current zoom level.  0 is "original size", and each increment
-    // above or below represents zooming 20% larger or smaller to default limits
-    // of 300% and 50% of original size, respectively.  Only plugins use
-    // non whole-numbers, since they might choose to have specific zoom level so
-    // that fixed-width content is fit-to-page-width, for example.
-    virtual double zoomLevel() = 0;
-
-    // Changes the zoom level to the specified level, clamping at the limits
-    // noted above, and returns the current zoom level after applying the
-    // change.
-    virtual double setZoomLevel(double) = 0;
-
-    // Updates the zoom limits for this view.
-    virtual void zoomLimitsChanged(double minimumZoomLevel,
-                                   double maximumZoomLevel) = 0;
-
-    // Helper functions to convert between zoom level and zoom factor.  zoom
-    // factor is zoom percent / 100, so 300% = 3.0.
-    BLINK_EXPORT static double zoomLevelToZoomFactor(double zoomLevel);
-    BLINK_EXPORT static double zoomFactorToZoomLevel(double factor);
-
-    // Returns the current text zoom factor, where 1.0 is the normal size, > 1.0
-    // is scaled up and < 1.0 is scaled down.
-    virtual float textZoomFactor() = 0;
-
-    // Scales the text in the page by a factor of textZoomFactor.
-    // Note: this has no effect on plugins.
-    virtual float setTextZoomFactor(float) = 0;
-
     // TODO: Reevaluate if this is needed once all users are converted to using the
     // virtual viewport pinch model.
     // Temporary to keep old style pinch viewport working while we gradually bring up
