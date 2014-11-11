@@ -76,7 +76,6 @@ DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(CanvasObserver);
 
 inline HTMLCanvasElement::HTMLCanvasElement(Document& document)
     : HTMLElement(HTMLNames::canvasTag, document)
-    , DocumentVisibilityObserver(document)
     , m_size(DefaultWidth, DefaultHeight)
     , m_ignoreReset(false)
     , m_accelerationDisabled(false)
@@ -650,26 +649,6 @@ AffineTransform HTMLCanvasElement::baseTransform() const
 {
     ASSERT(hasImageBuffer() && !m_didFailToCreateImageBuffer);
     return m_imageBuffer->baseTransform();
-}
-
-void HTMLCanvasElement::didChangeVisibilityState(PageVisibilityState visibility)
-{
-    if (!m_context)
-        return;
-    bool hidden = visibility != PageVisibilityStateVisible;
-    m_context->setIsHidden(hidden);
-    if (hidden) {
-        clearCopiedImage();
-        if (is3D()) {
-            discardImageBuffer();
-        }
-    }
-}
-
-void HTMLCanvasElement::didMoveToNewDocument(Document& oldDocument)
-{
-    setObservedDocument(document());
-    HTMLElement::didMoveToNewDocument(oldDocument);
 }
 
 PassRefPtr<Image> HTMLCanvasElement::getSourceImageForCanvas(SourceImageMode mode, SourceImageStatus* status) const

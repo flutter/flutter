@@ -146,25 +146,6 @@ typedef unsigned char DocumentClassFlags;
 
 class Document;
 
-class DocumentVisibilityObserver {
-public:
-    DocumentVisibilityObserver(Document&);
-    virtual ~DocumentVisibilityObserver();
-
-    virtual void didChangeVisibilityState(PageVisibilityState) = 0;
-
-    // Classes that inherit Node and DocumentVisibilityObserver must have a
-    // virtual override of Node::didMoveToNewDocument that calls
-    // DocumentVisibilityObserver::setDocument
-    void setObservedDocument(Document&);
-
-private:
-    void registerObserver(Document&);
-    void unregisterObserver();
-
-    RawPtr<Document> m_document;
-};
-
 class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
     , public DocumentSupplementable, public LifecycleContext<Document>, public ResourceClient {
     DEFINE_WRAPPERTYPEINFO();
@@ -618,9 +599,6 @@ public:
     bool hasViewportUnits() const { return m_hasViewportUnits; }
     void notifyResizeForViewportUnits();
 
-    void registerVisibilityObserver(DocumentVisibilityObserver*);
-    void unregisterVisibilityObserver(DocumentVisibilityObserver*);
-
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
 
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
@@ -831,9 +809,6 @@ private:
     RawPtr<Document> m_templateDocumentHost;
 
     bool m_hasViewportUnits;
-
-    typedef HashSet<RawPtr<DocumentVisibilityObserver> > DocumentVisibilityObserverSet;
-    DocumentVisibilityObserverSet m_visibilityObservers;
 
     int m_styleRecalcElementCounter;
     mutable DocumentLoadTiming m_documentLoadTiming;

@@ -67,7 +67,7 @@ public:
 #endif
 };
 
-class HTMLCanvasElement final : public HTMLElement, public DocumentVisibilityObserver, public CanvasImageSource, public ImageBufferClient {
+class HTMLCanvasElement final : public HTMLElement, public CanvasImageSource, public ImageBufferClient {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_NODE_FACTORY(HTMLCanvasElement);
@@ -135,9 +135,6 @@ public:
 
     virtual const AtomicString imageSourceURL() const override;
 
-    // DocumentVisibilityObserver implementation
-    virtual void didChangeVisibilityState(PageVisibilityState) override;
-
     // CanvasImageSource implementation
     virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const override;
     virtual FloatSize sourceSize() const override;
@@ -146,9 +143,6 @@ public:
     virtual void notifySurfaceInvalid() override;
     virtual bool isDirty() override { return !m_dirtyRect.isEmpty(); }
     virtual void didFinalizeFrame() override;
-
-protected:
-    virtual void didMoveToNewDocument(Document& oldDocument) override;
 
 private:
     explicit HTMLCanvasElement(Document&);
