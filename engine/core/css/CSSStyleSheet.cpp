@@ -54,10 +54,8 @@ public:
 private:
     StyleSheetCSSRuleList(CSSStyleSheet* sheet) : m_styleSheet(sheet) { }
 
-#if !ENABLE(OILPAN)
     virtual void ref() override { m_styleSheet->ref(); }
     virtual void deref() override { m_styleSheet->deref(); }
-#endif
 
     virtual unsigned length() const override { return m_styleSheet->length(); }
     virtual CSSRule* item(unsigned index) const override { return m_styleSheet->item(index); }
@@ -124,7 +122,6 @@ CSSStyleSheet::~CSSStyleSheet()
     // its RuleCSSOMWrappers die together and we don't need to clear them here.
     // Also with oilpan the StyleSheetContents client pointers are weak and
     // therefore do not need to be cleared here.
-#if !ENABLE(OILPAN)
     // For style rules outside the document, .parentStyleSheet can become null even if the style rule
     // is still observable from JavaScript. This matches the behavior of .parentNode for nodes, but
     // it's not ideal because it makes the CSSOM's behavior depend on the timing of garbage collection.
@@ -137,7 +134,6 @@ CSSStyleSheet::~CSSStyleSheet()
         m_mediaCSSOMWrapper->clearParentStyleSheet();
 
     m_contents->unregisterClient(this);
-#endif
 }
 
 void CSSStyleSheet::willMutateRules()

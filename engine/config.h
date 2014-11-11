@@ -49,39 +49,13 @@
 /* OS(ANDROID) - Android */
 #ifdef ANDROID
 #define WTF_OS_ANDROID 1
-/* OS(MACOSX) - Any Darwin-based OS, including Mac OS X and iPhone OS */
-#elif defined(__APPLE__)
-#define WTF_OS_MACOSX 1
-/* OS(FREEBSD) - FreeBSD */
-#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
-#define WTF_OS_FREEBSD 1
 /* OS(LINUX) - Linux */
 #elif defined(__linux__)
 #define WTF_OS_LINUX 1
-/* OS(OPENBSD) - OpenBSD */
-#elif defined(__OpenBSD__)
-#define WTF_OS_OPENBSD 1
-/* OS(WIN) - Any version of Windows */
-#elif defined(WIN32) || defined(_WIN32)
-#define WTF_OS_WIN 1
 #endif
 
-/* OS(POSIX) - Any Unix-like system */
-#if OS(ANDROID)          \
-    || OS(MACOSX)           \
-    || OS(FREEBSD)          \
-    || OS(LINUX)            \
-    || OS(OPENBSD)          \
-    || defined(unix)        \
-    || defined(__unix)      \
-    || defined(__unix__)
+/* Always OS(POSIX) */
 #define WTF_OS_POSIX 1
-#endif
-
-/* There is an assumption in the project that either OS(WIN) or OS(POSIX) is set. */
-#if !OS(WIN) && !OS(POSIX)
-#error Either OS(WIN) or OS(POSIX) needs to be set.
-#endif
 
 /* Operating environments */
 
@@ -94,42 +68,20 @@
 #define WTF_USE_QCMSLIB 1
 #endif
 
-#if OS(MACOSX)
-#define WTF_USE_CF 1
-#endif /* OS(MACOSX) */
-
 #if OS(POSIX)
 #define HAVE_SIGNAL_H 1
 #define HAVE_SYS_TIME_H 1
 #define WTF_USE_PTHREADS 1
-#endif /* OS(POSIX) */
+#endif
 
-#if !OS(WIN) && !OS(ANDROID)
+#if !OS(ANDROID)
 #define HAVE_TM_GMTOFF 1
 #define HAVE_TM_ZONE 1
 #define HAVE_TIMEGM 1
 #endif
 
-#if OS(MACOSX)
-#define WTF_USE_NEW_THEME 1
-#endif /* OS(MACOSX) */
-
-#if OS(WIN)
-
-// If we don't define these, they get defined in windef.h.
-// We want to use std::min and std::max.
-#ifndef max
-#define max max
-#endif
-#ifndef min
-#define min min
-#endif
-
-#endif /* OS(WIN) */
-
 #ifdef __cplusplus
 
-// These undefs match up with defines in build/mac/Prefix.h for Mac OS X.
 // Helps us catch if anyone uses new or delete by accident in code and doesn't include "config.h".
 #undef new
 #undef delete

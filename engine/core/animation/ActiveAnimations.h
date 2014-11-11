@@ -76,10 +76,8 @@ public:
     void updateAnimationFlags(RenderStyle&);
     void setAnimationStyleChange(bool animationStyleChange) { m_animationStyleChange = animationStyleChange; }
 
-#if !ENABLE(OILPAN)
     void addAnimation(Animation* animation) { m_animations.append(animation); }
     void notifyAnimationDestroyed(Animation* animation) { m_animations.remove(m_animations.find(animation)); }
-#endif
 
     void trace(Visitor*);
 
@@ -91,11 +89,8 @@ private:
     AnimationPlayerCountedSet m_players;
     bool m_animationStyleChange;
 
-#if !ENABLE(OILPAN)
-    // FIXME: Oilpan: This is to avoid a reference cycle that keeps Elements alive
-    // and won't be needed once the Node hierarchy becomes traceable.
+    // This is to avoid a reference cycle that keeps Elements alive.
     Vector<Animation*> m_animations;
-#endif
 
     // CSSAnimations checks if a style change is due to animation.
     friend class CSSAnimations;

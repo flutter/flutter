@@ -37,11 +37,9 @@ namespace blink {
 
 ActiveAnimations::~ActiveAnimations()
 {
-#if !ENABLE(OILPAN)
     for (size_t i = 0; i < m_animations.size(); ++i)
         m_animations[i]->notifyElementDestroyed();
     m_animations.clear();
-#endif
 }
 
 void ActiveAnimations::updateAnimationFlags(RenderStyle& style)
@@ -78,11 +76,6 @@ void ActiveAnimations::cancelAnimationOnCompositor()
 
 void ActiveAnimations::trace(Visitor* visitor)
 {
-#if ENABLE(OILPAN)
-    visitor->trace(m_cssAnimations);
-    visitor->trace(m_defaultStack);
-    visitor->trace(m_players);
-#endif
 }
 
 } // namespace blink

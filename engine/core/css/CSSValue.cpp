@@ -54,20 +54,6 @@
 namespace blink {
 
 struct SameSizeAsCSSValue : public RefCounted<SameSizeAsCSSValue>
-// VC++ 2013 doesn't support EBCO (Empty Base Class Optimization), and having
-// multiple empty base classes makes the size of CSSValue bloat (Note that both
-// of GarbageCollectedFinalized and ScriptWrappableBase are empty classes).
-// See the following article for details.
-// http://social.msdn.microsoft.com/forums/vstudio/en-US/504c6598-6076-4acf-96b6-e6acb475d302/vc-multiple-inheritance-empty-base-classes-bloats-object-size
-//
-// FIXME: Remove this #if directive once VC++'s issue gets fixed.
-// Note that we're going to split CSSValue class into two classes; CSSOMValue
-// (assumed name) which derives ScriptWrappable and CSSValue (new one) which
-// doesn't derive ScriptWrappable or ScriptWrappableBase. Then, we can safely
-// remove this #if directive.
-#if ENABLE(OILPAN) && COMPILER(MSVC)
-    , public ScriptWrappableBase
-#endif
 {
     uint32_t bitfields;
 };

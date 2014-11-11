@@ -95,18 +95,14 @@ Animation::Animation(Element* target, PassRefPtr<AnimationEffect> effect, const 
     , m_sampledEffect(nullptr)
     , m_priority(priority)
 {
-#if !ENABLE(OILPAN)
     if (m_target)
         m_target->ensureActiveAnimations().addAnimation(this);
-#endif
 }
 
 Animation::~Animation()
 {
-#if !ENABLE(OILPAN)
     if (m_target)
         m_target->activeAnimations()->notifyAnimationDestroyed(this);
-#endif
 }
 
 void Animation::attach(AnimationPlayer* player)
@@ -230,7 +226,6 @@ void Animation::notifySampledEffectRemovedFromAnimationStack()
     m_sampledEffect = nullptr;
 }
 
-#if !ENABLE(OILPAN)
 void Animation::notifyElementDestroyed()
 {
     // If our player is kept alive just by the sampledEffect, we might get our
@@ -243,7 +238,6 @@ void Animation::notifyElementDestroyed()
     if (sampledEffect)
         sampledEffect->clear();
 }
-#endif
 
 bool Animation::isCandidateForAnimationOnCompositor() const
 {

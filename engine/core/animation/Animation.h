@@ -70,9 +70,7 @@ public:
     Element* target() { return m_target; }
 
     void notifySampledEffectRemovedFromAnimationStack();
-#if !ENABLE(OILPAN)
     void notifyElementDestroyed();
-#endif
 
     bool isCandidateForAnimationOnCompositor() const;
     // Must only be called once.

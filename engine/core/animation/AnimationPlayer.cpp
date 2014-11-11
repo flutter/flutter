@@ -83,12 +83,10 @@ AnimationPlayer::AnimationPlayer(ExecutionContext* executionContext, AnimationTi
 
 AnimationPlayer::~AnimationPlayer()
 {
-#if !ENABLE(OILPAN)
     if (m_content)
         m_content->detach();
     if (m_timeline)
         m_timeline->playerDestroyed(this);
-#endif
 }
 
 double AnimationPlayer::sourceEnd() const
@@ -633,13 +631,11 @@ void AnimationPlayer::cancel()
     setSource(0);
 }
 
-#if !ENABLE(OILPAN)
 bool AnimationPlayer::canFree() const
 {
     ASSERT(m_content);
     return hasOneRef() && m_content->isAnimation() && m_content->hasOneRef();
 }
-#endif
 
 bool AnimationPlayer::addEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
 {

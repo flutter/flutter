@@ -101,9 +101,7 @@ public:
     const AnimationTimeline* timeline() const { return m_timeline; }
     AnimationTimeline* timeline() { return m_timeline; }
 
-#if !ENABLE(OILPAN)
     void timelineDestroyed() { m_timeline = nullptr; }
-#endif
 
     double calculateStartTime(double currentTime) const;
     bool hasStartTime() const { return !isNull(m_startTime); }
@@ -143,11 +141,8 @@ public:
         return player1->sequenceNumber() < player2->sequenceNumber();
     }
 
-#if !ENABLE(OILPAN)
     // Checks if the AnimationStack is the last reference holder to the Player.
-    // This won't be needed when AnimationPlayer is moved to Oilpan.
     bool canFree() const;
-#endif
 
     virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
 
