@@ -5,8 +5,6 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("inspector") {
-  testonly = true
-
   deps = [
     ":sky_inspector_server",
   ]
@@ -14,8 +12,6 @@ group("inspector") {
 
 shared_library("sky_inspector_server") {
   sources = [
-    "inspector_frontend_impl.cc",
-    "inspector_frontend_impl.h",
     "server.cc",
   ]
 

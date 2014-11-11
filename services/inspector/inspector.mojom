@@ -4,9 +4,12 @@
 
 module sky;
 
+interface InspectorServer {
+  Listen(int32 port) => ();
+};
+
 [Client=InspectorBackend]
 interface InspectorFrontend {
-  Listen(int32 port);
   SendMessage(string message);
 };
 

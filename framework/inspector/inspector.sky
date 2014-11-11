@@ -93,5 +93,4 @@ window.frontendConnection = new connection.Connection(
     inspector.InspectorFrontend.proxyClass);
 
 window.frontend = frontendConnection.remote;
-frontend.listen(9898);
 </script>
