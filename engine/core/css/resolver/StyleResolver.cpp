@@ -392,12 +392,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
     return documentStyle.release();
 }
 
-static void addContentAttrValuesToFeatures(const Vector<AtomicString>& contentAttrValues, RuleFeatureSet& features)
-{
-    for (size_t i = 0; i < contentAttrValues.size(); ++i)
-        features.addContentAttr(contentAttrValues[i]);
-}
-
 // Start loading resources referenced by this style.
 void StyleResolver::loadPendingResources(StyleResolverState& state)
 {
@@ -462,8 +456,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
         matchAllRules(state, collector, matchingBehavior != MatchAllRulesExcludingSMIL);
 
         applyMatchedProperties(state, collector.matchedResult());
-
-        addContentAttrValuesToFeatures(state.contentAttrValues(), m_features);
     }
 
     // Cache our original display.

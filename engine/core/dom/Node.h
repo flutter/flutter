@@ -288,14 +288,6 @@ public:
     void clearChildNeedsDistributionRecalc()  { clearFlag(ChildNeedsDistributionRecalcFlag); }
     void markAncestorsWithChildNeedsDistributionRecalc();
 
-    bool childNeedsStyleInvalidation() const { return getFlag(ChildNeedsStyleInvalidationFlag); }
-    void setChildNeedsStyleInvalidation()  { setFlag(ChildNeedsStyleInvalidationFlag); }
-    void clearChildNeedsStyleInvalidation()  { clearFlag(ChildNeedsStyleInvalidationFlag); }
-    void markAncestorsWithChildNeedsStyleInvalidation();
-    bool needsStyleInvalidation() const { return getFlag(NeedsStyleInvalidationFlag); }
-    void clearNeedsStyleInvalidation() { clearFlag(NeedsStyleInvalidationFlag); }
-    void setNeedsStyleInvalidation();
-
     void recalcDistribution();
 
     void setIsLink(bool f);
@@ -594,10 +586,8 @@ private:
 
         // Flags related to recalcStyle.
 
-        // FIXME(sky): Flags 12-14 are free.
+        // FIXME(sky): Flags 12-16 are free.
 
-        ChildNeedsStyleInvalidationFlag = 1 << 15,
-        NeedsStyleInvalidationFlag = 1 << 16,
         ChildNeedsDistributionRecalcFlag = 1 << 17,
         ChildNeedsStyleRecalcFlag = 1 << 18,
         StyleChangeMask = 1 << nodeStyleChangeShift | 1 << (nodeStyleChangeShift + 1),
@@ -614,7 +604,7 @@ private:
         DefaultNodeFlags = ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
 
-    // 7 bits remaining.
+    // 9 bits remaining.
 
     bool getFlag(NodeFlags mask) const { return m_nodeFlags & mask; }
     void setFlag(bool f, NodeFlags mask) { m_nodeFlags = (m_nodeFlags & ~mask) | (-(int32_t)f & mask); }

@@ -621,8 +621,6 @@ public:
     void registerVisibilityObserver(DocumentVisibilityObserver*);
     void unregisterVisibilityObserver(DocumentVisibilityObserver*);
 
-    void updateStyleInvalidationIfNeeded();
-
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
 
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;

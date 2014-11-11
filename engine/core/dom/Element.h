@@ -530,8 +530,6 @@ inline UniqueElementData& Element::ensureUniqueElementData()
 
 inline Node::InsertionNotificationRequest Node::insertedInto(ContainerNode* insertionPoint)
 {
-    ASSERT(!childNeedsStyleInvalidation());
-    ASSERT(!needsStyleInvalidation());
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
         setFlag(InDocumentFlag);

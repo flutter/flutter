@@ -352,9 +352,6 @@ void StyleEngine::clearResolver()
     for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
         const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
     m_scopedStyleResolvers.clear();
-
-    if (m_resolver)
-        document().updateStyleInvalidationIfNeeded();
     m_resolver.clear();
 }
 

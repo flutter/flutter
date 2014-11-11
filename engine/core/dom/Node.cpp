@@ -502,19 +502,6 @@ void Node::setIsLink(bool isLink)
     setFlag(isLink, IsLinkFlag);
 }
 
-void Node::setNeedsStyleInvalidation()
-{
-    setFlag(NeedsStyleInvalidationFlag);
-    markAncestorsWithChildNeedsStyleInvalidation();
-}
-
-void Node::markAncestorsWithChildNeedsStyleInvalidation()
-{
-    for (Node* node = parentOrShadowHostNode(); node && !node->childNeedsStyleInvalidation(); node = node->parentOrShadowHostNode())
-        node->setChildNeedsStyleInvalidation();
-    document().scheduleRenderTreeUpdateIfNeeded();
-}
-
 void Node::markAncestorsWithChildNeedsDistributionRecalc()
 {
     for (Node* node = this; node && !node->childNeedsDistributionRecalc(); node = node->parentOrShadowHostNode())
@@ -774,11 +761,6 @@ void Node::detach(const AttachContext& context)
 
     setStyleChange(NeedsReattachStyleChange);
     setChildNeedsStyleRecalc();
-
-    if (StyleResolver* resolver = document().styleResolver())
-        resolver->ruleFeatureSet().styleInvalidator().clearInvalidation(*this);
-    clearChildNeedsStyleInvalidation();
-    clearNeedsStyleInvalidation();
 
 #if ENABLE(ASSERT)
     detachingNode = 0;

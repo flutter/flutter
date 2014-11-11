@@ -47,7 +47,6 @@
 #include "core/css/StylePropertySet.h"
 #include "core/css/StyleSheetContents.h"
 #include "core/css/StyleSheetList.h"
-#include "core/css/invalidation/StyleInvalidator.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/resolver/FontBuilder.h"
 #include "core/css/resolver/StyleResolver.h"
@@ -1018,8 +1017,6 @@ bool Document::needsRenderTreeUpdate() const
         return true;
     if (childNeedsStyleRecalc())
         return true;
-    if (childNeedsStyleInvalidation())
-        return true;
     return false;
 }
 
@@ -1028,8 +1025,6 @@ bool Document::needsFullRenderTreeUpdate() const
     if (!isActive() || !view())
         return false;
     if (needsStyleRecalc())
-        return true;
-    if (needsStyleInvalidation())
         return true;
     // FIXME: The childNeedsDistributionRecalc bit means either self or children, we should fix that.
     if (childNeedsDistributionRecalc())
@@ -1079,20 +1074,6 @@ void Document::updateDistributionIfNeeded()
         return;
     TRACE_EVENT0("blink", "Document::updateDistributionIfNeeded");
     recalcDistribution();
-}
-
-void Document::updateStyleInvalidationIfNeeded()
-{
-    ScriptForbiddenScope forbidScript;
-
-    if (!isActive())
-        return;
-    if (!childNeedsStyleInvalidation())
-        return;
-    TRACE_EVENT0("blink", "Document::updateStyleInvalidationIfNeeded");
-    ASSERT(styleResolver());
-
-    styleResolver()->ruleFeatureSet().styleInvalidator().invalidate(*this);
 }
 
 void Document::updateDistributionForNodeIfNeeded(Node* node)
@@ -1157,7 +1138,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
     DocumentAnimations::updateOutdatedAnimationPlayersIfNeeded(*this);
     evaluateMediaQueryListIfNeeded();
     updateDistributionIfNeeded();
-    updateStyleInvalidationIfNeeded();
 
     // FIXME: We should update style on our ancestor chain before proceeding
     // however doing so currently causes several tests to crash, as LocalFrame::setDocument calls Document::attach
@@ -1247,7 +1227,7 @@ void Document::updateRenderTreeForNodeIfNeeded(Node* node)
     bool needsRecalc = needsFullRenderTreeUpdate();
 
     for (const Node* ancestor = node; ancestor && !needsRecalc; ancestor = NodeRenderingTraversal::parent(ancestor))
-        needsRecalc = ancestor->needsStyleRecalc() || ancestor->needsStyleInvalidation();
+        needsRecalc = ancestor->needsStyleRecalc();
 
     if (needsRecalc)
         updateRenderTreeIfNeeded();

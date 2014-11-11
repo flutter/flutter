@@ -23,7 +23,6 @@
 #define RuleFeature_h
 
 #include "core/css/CSSSelector.h"
-#include "core/css/invalidation/StyleInvalidator.h"
 #include "wtf/Forward.h"
 #include "wtf/HashSet.h"
 #include "wtf/text/AtomicStringHash.h"
@@ -31,28 +30,24 @@
 namespace blink {
 
 class CSSSelectorList;
-class DescendantInvalidationSet;
-class Document;
-class Node;
+class Element;
 class QualifiedName;
 class RuleData;
-class ShadowRoot;
 class SpaceSplitString;
 class StyleRule;
 
 struct RuleFeature {
-    ALLOW_ONLY_INLINE_ALLOCATION();
-public:
-    RuleFeature(StyleRule* rule, unsigned selectorIndex);
+    RuleFeature(StyleRule* rule, unsigned selectorIndex)
+        : rule(rule)
+        , selectorIndex(selectorIndex)
+    {
+    }
 
-    void trace(Visitor*);
-
-    RawPtr<StyleRule> rule;
+    StyleRule* rule;
     unsigned selectorIndex;
 };
 
 class RuleFeatureSet {
-    DISALLOW_ALLOCATION();
 public:
     RuleFeatureSet();
     ~RuleFeatureSet();
@@ -66,92 +61,37 @@ public:
     inline bool hasSelectorForAttribute(const AtomicString& attributeName) const
     {
         ASSERT(!attributeName.isEmpty());
-        return m_attributeInvalidationSets.contains(attributeName);
+        return m_attributeNames.contains(attributeName);
     }
 
     inline bool hasSelectorForClass(const AtomicString& classValue) const
     {
         ASSERT(!classValue.isEmpty());
-        return m_classInvalidationSets.contains(classValue);
+        return m_classNames.contains(classValue);
     }
 
     inline bool hasSelectorForId(const AtomicString& idValue) const
     {
-        return m_idInvalidationSets.contains(idValue);
+        ASSERT(!idValue.isEmpty());
+        return m_idNames.contains(idValue);
     }
 
     void scheduleStyleInvalidationForClassChange(const SpaceSplitString& changedClasses, Element&);
     void scheduleStyleInvalidationForClassChange(const SpaceSplitString& oldClasses, const SpaceSplitString& newClasses, Element&);
+
+    void scheduleStyleInvalidationForClassChange(const AtomicString& className, Element& element);
     void scheduleStyleInvalidationForAttributeChange(const QualifiedName& attributeName, Element&);
     void scheduleStyleInvalidationForIdChange(const AtomicString& oldId, const AtomicString& newId, Element&);
-    void scheduleStyleInvalidationForPseudoChange(CSSSelector::PseudoType, Element&);
-
-    bool hasIdsInSelectors() const
-    {
-        return m_idInvalidationSets.size() > 0;
-    }
-
-    // Marks the given attribute name as "appearing in a selector". Used for
-    // CSS properties such as content: ... attr(...) ...
-    // FIXME: record these internally to this class instead calls from StyleResolver to here.
-    void addContentAttr(const AtomicString& attributeName);
-
-    StyleInvalidator& styleInvalidator();
-
-    void trace(Visitor*);
 
     Vector<RuleFeature> attributeRules;
 
 private:
-    typedef HashMap<AtomicString, RefPtr<DescendantInvalidationSet> > InvalidationSetMap;
-    typedef HashMap<CSSSelector::PseudoType, RefPtr<DescendantInvalidationSet>, WTF::IntHash<unsigned>, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > PseudoTypeInvalidationSetMap;
+    void addSelectorFeatures(const CSSSelector&);
+    void collectFeaturesFromSelectorList(const CSSSelectorList*);
 
-    enum InvalidationSetMode {
-        AddFeatures,
-        UseLocalStyleChange,
-        UseSubtreeStyleChange
-    };
-
-    static InvalidationSetMode invalidationSetModeForSelector(const CSSSelector&);
-
-    void collectFeaturesFromSelector(const CSSSelector&, InvalidationSetMode);
-    void collectFeaturesFromSelectorList(const CSSSelectorList*, InvalidationSetMode);
-
-    DescendantInvalidationSet& ensureClassInvalidationSet(const AtomicString& className);
-    DescendantInvalidationSet& ensureAttributeInvalidationSet(const AtomicString& attributeName);
-    DescendantInvalidationSet& ensureIdInvalidationSet(const AtomicString& attributeName);
-    DescendantInvalidationSet& ensurePseudoInvalidationSet(CSSSelector::PseudoType);
-    DescendantInvalidationSet* invalidationSetForSelector(const CSSSelector&);
-
-    InvalidationSetMode updateInvalidationSets(const CSSSelector&);
-
-    struct InvalidationSetFeatures {
-        InvalidationSetFeatures()
-            : customPseudoElement(false)
-            , treeBoundaryCrossing(false)
-            , wholeSubtree(false)
-        { }
-        Vector<AtomicString> classes;
-        Vector<AtomicString> attributes;
-        AtomicString id;
-        AtomicString tagName;
-        bool customPseudoElement;
-        bool treeBoundaryCrossing;
-        bool wholeSubtree;
-    };
-
-    static void extractInvalidationSetFeature(const CSSSelector&, InvalidationSetFeatures&);
-    const CSSSelector* extractInvalidationSetFeatures(const CSSSelector&, InvalidationSetFeatures&, bool negated);
-    void addFeaturesToInvalidationSets(const CSSSelector&, InvalidationSetFeatures&);
-
-    void addClassToInvalidationSet(const AtomicString& className, Element&);
-
-    InvalidationSetMap m_classInvalidationSets;
-    InvalidationSetMap m_attributeInvalidationSets;
-    InvalidationSetMap m_idInvalidationSets;
-    PseudoTypeInvalidationSetMap m_pseudoInvalidationSets;
-    bool m_targetedStyleRecalcEnabled;
-    StyleInvalidator m_styleInvalidator;
+    HashSet<AtomicString> m_classNames;
+    HashSet<AtomicString> m_attributeNames;
+    HashSet<AtomicString> m_idNames;
 };
 
 
