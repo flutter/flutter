@@ -32,14 +32,6 @@
 #include "wtf/MathExtras.h"
 #include <algorithm>
 
-#if OS(MACOSX)
-typedef struct CGPoint CGPoint;
-
-#ifdef __OBJC__
-#import <Foundation/Foundation.h>
-#endif
-#endif
-
 struct SkPoint;
 
 namespace blink {
@@ -137,15 +129,6 @@ public:
     {
         return FloatPoint(m_x * scale, m_y * scale);
     }
-
-#if OS(MACOSX)
-    FloatPoint(const CGPoint&);
-    operator CGPoint() const;
-#if defined(__OBJC__) && !defined(NSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES)
-    FloatPoint(const NSPoint&);
-    operator NSPoint() const;
-#endif
-#endif
 
     SkPoint data() const;
 

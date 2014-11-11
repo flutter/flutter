@@ -30,14 +30,6 @@
 #include "platform/PlatformExport.h"
 #include "public/platform/WebCommon.h"
 
-#if OS(MACOSX)
-typedef struct CGSize CGSize;
-
-#ifdef __OBJC__
-#import <Foundation/Foundation.h>
-#endif
-#endif
-
 namespace blink {
 
 class PLATFORM_EXPORT IntSize {
@@ -113,16 +105,6 @@ public:
     {
         return IntSize(m_height, m_width);
     }
-
-#if OS(MACOSX)
-    explicit IntSize(const CGSize&); // don't do this implicitly since it's lossy
-    operator CGSize() const;
-
-#if defined(__OBJC__) && !defined(NSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES)
-    explicit IntSize(const NSSize &); // don't do this implicitly since it's lossy
-    operator NSSize() const;
-#endif
-#endif
 
 private:
     int m_width, m_height;

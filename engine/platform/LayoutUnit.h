@@ -131,11 +131,7 @@ public:
         returnValue.setRawValue(::abs(m_value));
         return returnValue;
     }
-#if OS(MACOSX)
-    int wtf_ceil() const
-#else
     int ceil() const
-#endif
     {
         if (UNLIKELY(m_value >= INT_MAX - kFixedPointDenominator + 1))
             return intMaxForLayoutUnit;

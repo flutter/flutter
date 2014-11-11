@@ -2022,20 +2022,7 @@ void WebGLRenderingContextBase::generateMipmap(GLenum target)
     if (!validateSettableTexFormat("generateMipmap", tex->getInternalFormat(target, 0)))
         return;
 
-    // generateMipmap won't work properly if minFilter is not NEAREST_MIPMAP_LINEAR
-    // on Mac.  Remove the hack once this driver bug is fixed.
-#if OS(MACOSX)
-    bool needToResetMinFilter = false;
-    if (tex->getMinFilter() != GL_NEAREST_MIPMAP_LINEAR) {
-        webContext()->texParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-        needToResetMinFilter = true;
-    }
-#endif
     webContext()->generateMipmap(target);
-#if OS(MACOSX)
-    if (needToResetMinFilter)
-        webContext()->texParameteri(target, GL_TEXTURE_MIN_FILTER, tex->getMinFilter());
-#endif
     tex->generateMipmapLevelInfo();
 }
 
@@ -3135,21 +3122,6 @@ void WebGLRenderingContextBase::readPixels(GLint x, GLint y, GLsizei width, GLsi
         ScopedDrawingBufferBinder binder(drawingBuffer(), m_framebufferBinding.get());
         webContext()->readPixels(x, y, width, height, format, type, data);
     }
-
-#if OS(MACOSX)
-    // FIXME: remove this section when GL driver bug on Mac is fixed, i.e.,
-    // when alpha is off, readPixels should set alpha to 255 instead of 0.
-    if (!m_framebufferBinding && !drawingBuffer()->getActualAttributes().alpha) {
-        unsigned char* pixels = reinterpret_cast<unsigned char*>(data);
-        for (GLsizei iy = 0; iy < height; ++iy) {
-            for (GLsizei ix = 0; ix < width; ++ix) {
-                pixels[3] = 255;
-                pixels += 4;
-            }
-            pixels += padding;
-        }
-    }
-#endif
 }
 
 void WebGLRenderingContextBase::renderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height)

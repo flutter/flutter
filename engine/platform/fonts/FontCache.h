@@ -136,7 +136,7 @@ private:
     // Don't purge if this count is > 0;
     int m_purgePreventCount;
 
-#if OS(MACOSX) || OS(ANDROID)
+#if OS(ANDROID)
     friend class ComplexTextController;
 #endif
     friend class SimpleFontData; // For fontDataFromFontPlatformData

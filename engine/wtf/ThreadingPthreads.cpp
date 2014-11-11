@@ -46,15 +46,9 @@
 #include "wtf/dtoa/cached-powers.h"
 #include <errno.h>
 
-#if !COMPILER(MSVC)
 #include <limits.h>
 #include <sched.h>
 #include <sys/time.h>
-#endif
-
-#if OS(MACOSX)
-#include <objc/objc-auto.h>
-#endif
 
 namespace WTF {
 
@@ -164,14 +158,6 @@ static ThreadIdentifier establishIdentifierForPthreadHandle(const pthread_t& pth
 
 void initializeCurrentThreadInternal(const char* threadName)
 {
-#if OS(MACOSX)
-    pthread_setname_np(threadName);
-
-    // All threads that potentially use APIs above the BSD layer must be registered with the Objective-C
-    // garbage collector in case API implementations use garbage-collected memory.
-    objc_registerThreadWithCollector();
-#endif
-
     ThreadIdentifier id = identifierByPthreadHandle(pthread_self());
     ASSERT(id);
     ThreadIdentifierData::initialize(id);

@@ -66,10 +66,6 @@ public:
 
     virtual bool handleWheelEvent(const PlatformWheelEvent&);
 
-#if OS(MACOSX)
-    virtual void handleWheelEventPhase(PlatformWheelEventPhase) { }
-#endif
-
     void setCurrentPosition(const FloatPoint&);
     FloatPoint currentPosition() const;
 

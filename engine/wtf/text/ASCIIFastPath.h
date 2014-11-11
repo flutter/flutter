@@ -28,10 +28,6 @@
 #include "wtf/unicode/Unicode.h"
 #include <stdint.h>
 
-#if OS(MACOSX) && (CPU(X86) || CPU(X86_64))
-#include <emmintrin.h>
-#endif
-
 namespace WTF {
 
 // Assuming that a pointer is the size of a "machine word", then
@@ -104,37 +100,7 @@ inline bool charactersAreAllASCII(const CharacterType* characters, size_t length
 
 inline void copyLCharsFromUCharSource(LChar* destination, const UChar* source, size_t length)
 {
-#if OS(MACOSX) && (CPU(X86) || CPU(X86_64))
-    const uintptr_t memoryAccessSize = 16; // Memory accesses on 16 byte (128 bit) alignment
-    const uintptr_t memoryAccessMask = memoryAccessSize - 1;
-
-    size_t i = 0;
-    for (;i < length && !isAlignedTo<memoryAccessMask>(&source[i]); ++i) {
-        ASSERT(!(source[i] & 0xff00));
-        destination[i] = static_cast<LChar>(source[i]);
-    }
-
-    const uintptr_t sourceLoadSize = 32; // Process 32 bytes (16 UChars) each iteration
-    const size_t ucharsPerLoop = sourceLoadSize / sizeof(UChar);
-    if (length > ucharsPerLoop) {
-        const size_t endLength = length - ucharsPerLoop + 1;
-        for (; i < endLength; i += ucharsPerLoop) {
-#if ENABLE(ASSERT)
-            for (unsigned checkIndex = 0; checkIndex < ucharsPerLoop; ++checkIndex)
-                ASSERT(!(source[i+checkIndex] & 0xff00));
-#endif
-            __m128i first8UChars = _mm_load_si128(reinterpret_cast<const __m128i*>(&source[i]));
-            __m128i second8UChars = _mm_load_si128(reinterpret_cast<const __m128i*>(&source[i+8]));
-            __m128i packedChars = _mm_packus_epi16(first8UChars, second8UChars);
-            _mm_storeu_si128(reinterpret_cast<__m128i*>(&destination[i]), packedChars);
-        }
-    }
-
-    for (; i < length; ++i) {
-        ASSERT(!(source[i] & 0xff00));
-        destination[i] = static_cast<LChar>(source[i]);
-    }
-#elif COMPILER(GCC) && CPU(ARM_NEON) && !(CPU(BIG_ENDIAN) || CPU(MIDDLE_ENDIAN)) && defined(NDEBUG)
+#if COMPILER(GCC) && CPU(ARM_NEON) && !(CPU(BIG_ENDIAN) || CPU(MIDDLE_ENDIAN)) && defined(NDEBUG)
     const LChar* const end = destination + length;
     const uintptr_t memoryAccessSize = 8;
 

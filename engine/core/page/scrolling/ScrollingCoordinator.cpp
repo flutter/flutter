@@ -45,9 +45,6 @@
 #include "platform/geometry/Region.h"
 #include "platform/geometry/TransformState.h"
 #include "platform/graphics/GraphicsLayer.h"
-#if OS(MACOSX)
-#include "platform/mac/ScrollAnimatorMac.h"
-#endif
 #include "platform/scroll/ScrollAnimator.h"
 #include "platform/scroll/Scrollbar.h"
 #include "public/platform/Platform.h"
@@ -270,21 +267,5 @@ bool ScrollingCoordinator::isForMainFrame(ScrollableArea* scrollableArea) const
     // FIXME(sky): Remove
     return false;
 }
-
-#if OS(MACOSX)
-void ScrollingCoordinator::handleWheelEventPhase(PlatformWheelEventPhase phase)
-{
-    ASSERT(isMainThread());
-
-    if (!m_page)
-        return;
-
-    FrameView* frameView = m_page->mainFrame()->view();
-    if (!frameView)
-        return;
-
-    frameView->scrollAnimator()->handleWheelEventPhase(phase);
-}
-#endif
 
 } // namespace blink

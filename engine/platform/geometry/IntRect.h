@@ -31,14 +31,6 @@
 #include "wtf/Vector.h"
 #include "wtf/VectorTraits.h"
 
-#if OS(MACOSX)
-typedef struct CGRect CGRect;
-
-#ifdef __OBJC__
-#import <Foundation/Foundation.h>
-#endif
-#endif
-
 struct SkRect;
 struct SkIRect;
 
@@ -151,13 +143,6 @@ public:
 
     IntRect transposedRect() const { return IntRect(m_location.transposedPoint(), m_size.transposedSize()); }
 
-#if OS(MACOSX)
-    operator CGRect() const;
-#if defined(__OBJC__) && !defined(NSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES)
-    operator NSRect() const;
-#endif
-#endif
-
     operator SkRect() const;
     operator SkIRect() const;
 
@@ -196,13 +181,6 @@ inline bool operator!=(const IntRect& a, const IntRect& b)
 {
     return a.location() != b.location() || a.size() != b.size();
 }
-
-#if OS(MACOSX)
-PLATFORM_EXPORT IntRect enclosingIntRect(const CGRect&);
-#if defined(__OBJC__) && !defined(NSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES)
-PLATFORM_EXPORT IntRect enclosingIntRect(const NSRect&);
-#endif
-#endif
 
 } // namespace blink
 

@@ -39,10 +39,6 @@
 #include "wtf/PassOwnPtr.h"
 #include "wtf/text/StringHash.h"
 
-#if OS(MACOSX)
-#include "wtf/RetainPtr.h"
-#endif
-
 namespace blink {
 
 class FontDescription;
@@ -118,10 +114,6 @@ public:
     float spaceWidth() const { return m_spaceWidth; }
     void setSpaceWidth(float spaceWidth) { m_spaceWidth = spaceWidth; }
 
-#if OS(MACOSX)
-    float syntheticBoldOffset() const { return m_syntheticBoldOffset; }
-#endif
-
     Glyph spaceGlyph() const { return m_spaceGlyph; }
     void setSpaceGlyph(Glyph spaceGlyph) { m_spaceGlyph = spaceGlyph; }
     Glyph zeroWidthSpaceGlyph() const { return m_zeroWidthSpaceGlyph; }
@@ -149,15 +141,6 @@ public:
 
 #ifndef NDEBUG
     virtual String description() const override;
-#endif
-
-#if OS(MACOSX)
-    const SimpleFontData* getCompositeFontReferenceFontData(NSFont *key) const;
-    NSFont* getNSFont() const { return m_platformData.font(); }
-#endif
-
-#if OS(MACOSX)
-    CFDictionaryRef getCFStringAttributes(TypesettingFeatures, FontOrientation) const;
 #endif
 
     bool canRenderCombiningCharacterSequence(const UChar*, size_t) const;
@@ -219,9 +202,6 @@ private:
         RefPtr<SimpleFontData> brokenIdeograph;
         RefPtr<SimpleFontData> verticalRightOrientation;
         RefPtr<SimpleFontData> uprightOrientation;
-#if OS(MACOSX)
-        mutable RetainPtr<CFMutableDictionaryRef> compositeFontReferences;
-#endif
 
     private:
         DerivedFontData(bool custom)
@@ -233,12 +213,6 @@ private:
     mutable OwnPtr<DerivedFontData> m_derivedFontData;
 
     RefPtr<CustomFontData> m_customFontData;
-
-#if OS(MACOSX)
-    float m_syntheticBoldOffset;
-
-    mutable HashMap<unsigned, RetainPtr<CFDictionaryRef> > m_CFStringAttributes;
-#endif
 
     mutable OwnPtr<HashMap<String, bool> > m_combiningCharacterSequenceSupport;
 };
@@ -273,11 +247,7 @@ ALWAYS_INLINE float SimpleFontData::widthForGlyph(Glyph glyph) const
 
 #if ENABLE(OPENTYPE_VERTICAL)
     if (m_verticalData)
-#if OS(MACOSX)
-        width = m_verticalData->advanceHeight(this, glyph) + m_syntheticBoldOffset;
-#else
         width = m_verticalData->advanceHeight(this, glyph);
-#endif
     else
 #endif
         width = platformWidthForGlyph(glyph);

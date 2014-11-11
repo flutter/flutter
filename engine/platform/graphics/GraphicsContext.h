@@ -424,10 +424,6 @@ private:
 
     static PassRefPtr<SkColorFilter> WebCoreColorFilterToSkiaColorFilter(ColorFilter);
 
-#if OS(MACOSX)
-    static inline int focusRingOutset(int offset) { return offset + 2; }
-    static inline int focusRingWidth(int width) { return width; }
-#else
     static inline int focusRingOutset(int offset) { return 0; }
     static inline int focusRingWidth(int width) { return 1; }
     static SkPMColor lineColors(int);
@@ -435,7 +431,6 @@ private:
     static SkPMColor antiColors2(int);
     static void draw1xMarker(SkBitmap*, int);
     static void draw2xMarker(SkBitmap*, int);
-#endif
 
     // Helpers for drawing a focus ring (drawFocusRing)
     float prepareFocusRingPaint(SkPaint&, const Color&, int width) const;

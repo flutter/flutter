@@ -30,16 +30,6 @@
 #include <cmath>
 #include <limits>
 
-#if COMPILER(MSVC)
-#include "wtf/Assertions.h"
-#include <stdint.h>
-#endif
-
-#if OS(OPENBSD)
-#include <sys/types.h>
-#include <machine/ieee.h>
-#endif
-
 const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);
 
@@ -52,56 +42,7 @@ const float piOverFourFloat = static_cast<float>(M_PI_4);
 const double twoPiDouble = piDouble * 2.0;
 const float twoPiFloat = piFloat * 2.0f;
 
-#if OS(MACOSX)
-
-// Work around a bug in the Mac OS X libc where ceil(-0.1) return +0.
-inline double wtf_ceil(double x) { return copysign(ceil(x), x); }
-
-#define ceil(x) wtf_ceil(x)
-
-#endif
-
-#if OS(OPENBSD)
-
-namespace std {
-
-#ifndef isfinite
-inline bool isfinite(double x) { return finite(x); }
-#endif
-#ifndef signbit
-inline bool signbit(double x) { struct ieee_double *p = (struct ieee_double *)&x; return p->dbl_sign; }
-#endif
-
-} // namespace std
-
-#endif
-
-#if COMPILER(MSVC) && (_MSC_VER < 1800)
-
-// We must not do 'num + 0.5' or 'num - 0.5' because they can cause precision loss.
-static double round(double num)
-{
-    double integer = ceil(num);
-    if (num > 0)
-        return integer - num > 0.5 ? integer - 1.0 : integer;
-    return integer - num >= 0.5 ? integer - 1.0 : integer;
-}
-static float roundf(float num)
-{
-    float integer = ceilf(num);
-    if (num > 0)
-        return integer - num > 0.5f ? integer - 1.0f : integer;
-    return integer - num >= 0.5f ? integer - 1.0f : integer;
-}
-inline long long llround(double num) { return static_cast<long long>(round(num)); }
-inline long long llroundf(float num) { return static_cast<long long>(roundf(num)); }
-inline long lround(double num) { return static_cast<long>(round(num)); }
-inline long lroundf(float num) { return static_cast<long>(roundf(num)); }
-inline double trunc(double num) { return num > 0 ? floor(num) : ceil(num); }
-
-#endif
-
-#if OS(ANDROID) || COMPILER(MSVC)
+#if OS(ANDROID)
 // ANDROID and MSVC's math.h does not currently supply log2 or log2f.
 inline double log2(double num)
 {
@@ -115,90 +56,6 @@ inline float log2f(float num)
     return logf(num) / 0.693147180559945309417232121458176568f;
 }
 #endif
-
-#if COMPILER(MSVC)
-
-// VS2013 has most of the math functions now, but we still need to work
-// around various differences in behavior of Inf.
-
-#if _MSC_VER < 1800
-
-namespace std {
-
-inline bool isinf(double num) { return !_finite(num) && !_isnan(num); }
-inline bool isnan(double num) { return !!_isnan(num); }
-inline bool isfinite(double x) { return _finite(x); }
-inline bool signbit(double num) { return _copysign(1.0, num) < 0; }
-
-} // namespace std
-
-inline double nextafter(double x, double y) { return _nextafter(x, y); }
-inline float nextafterf(float x, float y) { return x > y ? x - FLT_EPSILON : x + FLT_EPSILON; }
-
-inline double copysign(double x, double y) { return _copysign(x, y); }
-
-#endif // _MSC_VER
-
-// Work around a bug in Win, where atan2(+-infinity, +-infinity) yields NaN instead of specific values.
-inline double wtf_atan2(double x, double y)
-{
-    double posInf = std::numeric_limits<double>::infinity();
-    double negInf = -std::numeric_limits<double>::infinity();
-    double nan = std::numeric_limits<double>::quiet_NaN();
-
-    double result = nan;
-
-    if (x == posInf && y == posInf)
-        result = piOverFourDouble;
-    else if (x == posInf && y == negInf)
-        result = 3 * piOverFourDouble;
-    else if (x == negInf && y == posInf)
-        result = -piOverFourDouble;
-    else if (x == negInf && y == negInf)
-        result = -3 * piOverFourDouble;
-    else
-        result = ::atan2(x, y);
-
-    return result;
-}
-
-// Work around a bug in the Microsoft CRT, where fmod(x, +-infinity) yields NaN instead of x.
-inline double wtf_fmod(double x, double y) { return (!std::isinf(x) && std::isinf(y)) ? x : fmod(x, y); }
-
-// Work around a bug in the Microsoft CRT, where pow(NaN, 0) yields NaN instead of 1.
-inline double wtf_pow(double x, double y) { return y == 0 ? 1 : pow(x, y); }
-
-#define atan2(x, y) wtf_atan2(x, y)
-#define fmod(x, y) wtf_fmod(x, y)
-#define pow(x, y) wtf_pow(x, y)
-
-#if _MSC_VER < 1800
-
-// MSVC's math functions do not bring lrint.
-inline long int lrint(double flt)
-{
-    int64_t intgr;
-#if CPU(X86)
-    __asm {
-        fld flt
-        fistp intgr
-    };
-#else
-    ASSERT(std::isfinite(flt));
-    double rounded = round(flt);
-    intgr = static_cast<int64_t>(rounded);
-    // If the fractional part is exactly 0.5, we need to check whether
-    // the rounded result is even. If it is not we need to add 1 to
-    // negative values and subtract one from positive values.
-    if ((fabs(intgr - flt) == 0.5) & intgr)
-        intgr -= ((intgr >> 62) | 1); // 1 with the sign of result, i.e. -1 or 1.
-#endif
-    return static_cast<long int>(intgr);
-}
-
-#endif // _MSC_VER
-
-#endif // COMPILER(MSVC)
 
 inline double deg2rad(double d)  { return d * piDouble / 180.0; }
 inline double rad2deg(double r)  { return r * 180.0 / piDouble; }
@@ -288,11 +145,7 @@ inline size_t lowestCommonMultiple(size_t a, size_t b)
 }
 
 #ifndef UINT64_C
-#if COMPILER(MSVC)
-#define UINT64_C(c) c ## ui64
-#else
 #define UINT64_C(c) c ## ull
-#endif
 #endif
 
 // Calculate d % 2^{64}.

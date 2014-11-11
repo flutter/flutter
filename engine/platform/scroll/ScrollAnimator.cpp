@@ -86,11 +86,7 @@ bool ScrollAnimator::handleWheelEvent(const PlatformWheelEvent& e)
 
     bool handled = false;
 
-#if !OS(MACOSX)
     ScrollGranularity granularity = e.hasPreciseScrollingDeltas() ? ScrollByPrecisePixel : ScrollByPixel;
-#else
-    ScrollGranularity granularity = ScrollByPixel;
-#endif
 
     IntSize maxForwardScrollDelta = m_scrollableArea->maximumScrollPosition() - m_scrollableArea->scrollPosition();
     IntSize maxBackwardScrollDelta = m_scrollableArea->scrollPosition() - m_scrollableArea->minimumScrollPosition();

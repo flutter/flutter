@@ -31,14 +31,6 @@
 #include "platform/geometry/IntPoint.h"
 #include "wtf/MathExtras.h"
 
-#if OS(MACOSX)
-typedef struct CGSize CGSize;
-
-#ifdef __OBJC__
-#import <Foundation/Foundation.h>
-#endif
-#endif
-
 namespace blink {
 
 class IntSize;
@@ -111,15 +103,6 @@ public:
     {
         return FloatSize(m_width * scaleX, m_height * scaleY);
     }
-
-#if OS(MACOSX)
-    explicit FloatSize(const CGSize&); // don't do this implicitly since it's lossy
-    operator CGSize() const;
-#if defined(__OBJC__) && !defined(NSGEOMETRY_TYPES_SAME_AS_CGGEOMETRY_TYPES)
-    explicit FloatSize(const NSSize &); // don't do this implicitly since it's lossy
-    operator NSSize() const;
-#endif
-#endif
 
 private:
     float m_width, m_height;

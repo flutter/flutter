@@ -54,11 +54,6 @@ public:
 
     void willBeDestroyed();
 
-#if OS(MACOSX)
-    // Dispatched by the scrolling tree during handleWheelEvent. This is required as long as scrollbars are painted on the main thread.
-    void handleWheelEventPhase(PlatformWheelEventPhase);
-#endif
-
     PassOwnPtr<blink::WebScrollbarLayer> createSolidColorScrollbarLayer(ScrollbarOrientation, int thumbThickness, int trackStart, bool isLeftSideVerticalScrollbar);
 
     void willDestroyScrollableArea(ScrollableArea*);

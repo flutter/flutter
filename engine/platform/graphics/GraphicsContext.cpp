@@ -580,13 +580,7 @@ float GraphicsContext::prepareFocusRingPaint(SkPaint& paint, const Color& color,
     paint.setStyle(SkPaint::kStroke_Style);
     paint.setColor(color.rgb());
     paint.setStrokeWidth(focusRingWidth(width));
-
-#if OS(MACOSX)
-    paint.setAlpha(64);
-    return (width - 1) * 0.5f;
-#else
     return 1;
-#endif
 }
 
 void GraphicsContext::drawFocusRingPath(const SkPath& path, const Color& color, int width)
@@ -598,13 +592,6 @@ void GraphicsContext::drawFocusRingPath(const SkPath& path, const Color& color, 
 
     // Outer path
     drawPath(path, paint);
-
-#if OS(MACOSX)
-    // Inner path
-    paint.setAlpha(128);
-    paint.setStrokeWidth(paint.getStrokeWidth() * 0.5f);
-    drawPath(path, paint);
-#endif
 }
 
 void GraphicsContext::drawFocusRingRect(const SkRect& rect, const Color& color, int width)
@@ -617,13 +604,6 @@ void GraphicsContext::drawFocusRingRect(const SkRect& rect, const Color& color, 
 
     // Outer rect
     drawRRect(rrect, paint);
-
-#if OS(MACOSX)
-    // Inner rect
-    paint.setAlpha(128);
-    paint.setStrokeWidth(paint.getStrokeWidth() * 0.5f);
-    drawRRect(rrect, paint);
-#endif
 }
 
 void GraphicsContext::drawFocusRing(const Path& focusRingPath, int width, int offset, const Color& color)
@@ -792,62 +772,6 @@ void GraphicsContext::drawLineForDocumentMarker(const FloatPoint& pt, float widt
     static SkBitmap* misspellBitmap2x[2] = { 0, 0 };
     SkBitmap** misspellBitmap = deviceScaleFactor == 2 ? misspellBitmap2x : misspellBitmap1x;
     if (!misspellBitmap[index]) {
-#if OS(MACOSX)
-        // Match the artwork used by the Mac.
-        const int rowPixels = 4 * deviceScaleFactor;
-        const int colPixels = 3 * deviceScaleFactor;
-        SkBitmap bitmap;
-        bitmap.allocN32Pixels(rowPixels, colPixels);
-
-        bitmap.eraseARGB(0, 0, 0, 0);
-        const uint32_t transparentColor = 0x00000000;
-
-        if (deviceScaleFactor == 1) {
-            const uint32_t colors[2][6] = {
-                { 0x2a2a0600, 0x57571000,  0xa8a81b00, 0xbfbf1f00,  0x70701200, 0xe0e02400 },
-                { 0x2a0f0f0f, 0x571e1e1e,  0xa83d3d3d, 0xbf454545,  0x70282828, 0xe0515151 }
-            };
-
-            // Pattern: a b a   a b a
-            //          c d c   c d c
-            //          e f e   e f e
-            for (int x = 0; x < colPixels; ++x) {
-                uint32_t* row = bitmap.getAddr32(0, x);
-                row[0] = colors[index][x * 2];
-                row[1] = colors[index][x * 2 + 1];
-                row[2] = colors[index][x * 2];
-                row[3] = transparentColor;
-            }
-        } else if (deviceScaleFactor == 2) {
-            const uint32_t colors[2][18] = {
-                { 0x0a090101, 0x33320806, 0x55540f0a,  0x37360906, 0x6e6c120c, 0x6e6c120c,  0x7674140d, 0x8d8b1810, 0x8d8b1810,
-                  0x96941a11, 0xb3b01f15, 0xb3b01f15,  0x6d6b130c, 0xd9d62619, 0xd9d62619,  0x19180402, 0x7c7a150e, 0xcecb2418 },
-                { 0x0a020202, 0x33141414, 0x55232323,  0x37161616, 0x6e2e2e2e, 0x6e2e2e2e,  0x76313131, 0x8d3a3a3a, 0x8d3a3a3a,
-                  0x963e3e3e, 0xb34b4b4b, 0xb34b4b4b,  0x6d2d2d2d, 0xd95b5b5b, 0xd95b5b5b,  0x19090909, 0x7c343434, 0xce575757 }
-            };
-
-            // Pattern: a b c c b a
-            //          d e f f e d
-            //          g h j j h g
-            //          k l m m l k
-            //          n o p p o n
-            //          q r s s r q
-            for (int x = 0; x < colPixels; ++x) {
-                uint32_t* row = bitmap.getAddr32(0, x);
-                row[0] = colors[index][x * 3];
-                row[1] = colors[index][x * 3 + 1];
-                row[2] = colors[index][x * 3 + 2];
-                row[3] = colors[index][x * 3 + 2];
-                row[4] = colors[index][x * 3 + 1];
-                row[5] = colors[index][x * 3];
-                row[6] = transparentColor;
-                row[7] = transparentColor;
-            }
-        } else
-            ASSERT_NOT_REACHED();
-
-        misspellBitmap[index] = new SkBitmap(bitmap);
-#else
         // We use a 2-pixel-high misspelling indicator because that seems to be
         // what WebKit is designed for, and how much room there is in a typical
         // page for it.
@@ -865,26 +789,14 @@ void GraphicsContext::drawLineForDocumentMarker(const FloatPoint& pt, float widt
             ASSERT_NOT_REACHED();
 
         misspellBitmap[index] = new SkBitmap(bitmap);
-#endif
     }
 
-#if OS(MACOSX)
-    SkScalar originX = WebCoreFloatToSkScalar(pt.x()) * deviceScaleFactor;
-    SkScalar originY = WebCoreFloatToSkScalar(pt.y()) * deviceScaleFactor;
-
-    // Make sure to draw only complete dots.
-    int rowPixels = misspellBitmap[index]->width();
-    float widthMod = fmodf(width * deviceScaleFactor, rowPixels);
-    if (rowPixels - widthMod > deviceScaleFactor)
-        width -= widthMod / deviceScaleFactor;
-#else
     SkScalar originX = WebCoreFloatToSkScalar(pt.x());
 
     // Offset it vertically by 1 so that there's some space under the text.
     SkScalar originY = WebCoreFloatToSkScalar(pt.y()) + 1;
     originX *= deviceScaleFactor;
     originY *= deviceScaleFactor;
-#endif
 
     SkMatrix localMatrix;
     localMatrix.setTranslate(originX, originY);
@@ -1819,7 +1731,6 @@ PassRefPtr<SkColorFilter> GraphicsContext::WebCoreColorFilterToSkiaColorFilter(C
     return nullptr;
 }
 
-#if !OS(MACOSX)
 void GraphicsContext::draw2xMarker(SkBitmap* bitmap, int index)
 {
     const SkPMColor lineColor = lineColors(index);
@@ -1909,7 +1820,6 @@ SkPMColor GraphicsContext::antiColors2(int index)
 
     return colors[index];
 }
-#endif
 
 void GraphicsContext::didDrawTextInRect(const SkRect& textRect)
 {
