@@ -136,8 +136,6 @@ sky_core_files = [
   "css/CSSCrossfadeValue.h",
   "css/CSSCursorImageValue.cpp",
   "css/CSSCustomFontData.h",
-  "css/CSSDefaultStyleSheets.cpp",
-  "css/CSSDefaultStyleSheets.h",
   "css/CSSFilterRule.cpp",
   "css/CSSFilterRule.h",
   "css/CSSFilterValue.cpp",

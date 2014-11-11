@@ -40,7 +40,6 @@
 #include "core/animation/css/CSSAnimatableValueFactory.h"
 #include "core/animation/css/CSSAnimations.h"
 #include "core/css/CSSCalculationValue.h"
-#include "core/css/CSSDefaultStyleSheets.h"
 #include "core/css/CSSFontSelector.h"
 #include "core/css/CSSKeyframeRule.h"
 #include "core/css/CSSKeyframesRule.h"
@@ -52,6 +51,7 @@
 #include "core/css/ElementRuleCollector.h"
 #include "core/css/FontFace.h"
 #include "core/css/MediaQueryEvaluator.h"
+#include "core/css/RuleSet.h"
 #include "core/css/StylePropertySet.h"
 #include "core/css/StyleSheetContents.h"
 #include "core/css/parser/BisonCSSParser.h"
@@ -72,6 +72,7 @@
 #include "core/rendering/RenderView.h"
 #include "core/rendering/style/KeyframeList.h"
 #include "platform/RuntimeEnabledFeatures.h"
+#include "wtf/LeakAnnotations.h"
 #include "wtf/StdLibExtras.h"
 
 namespace {
@@ -97,6 +98,35 @@ static void addFontFaceRule(Document* document, CSSFontSelector* cssFontSelector
     RefPtr<FontFace> fontFace = FontFace::create(document, fontFaceRule);
     if (fontFace)
         cssFontSelector->fontFaceCache()->add(cssFontSelector, fontFaceRule, fontFace);
+}
+
+static RuleSet& defaultStyles()
+{
+    DEFINE_STATIC_LOCAL(RefPtr<StyleSheetContents>, styleSheet, ());
+    DEFINE_STATIC_LOCAL(OwnPtr<RuleSet>, ruleSet, ());
+    DEFINE_STATIC_LOCAL(const MediaQueryEvaluator, screenEval, ("screen"));
+
+    if (ruleSet)
+        return *ruleSet;
+
+    String cssText =
+        "link, import, meta, script, style, template, title {\n"
+        "    display: none;\n"
+        "}\n"
+        "a {\n"
+        "    color: blue;\n"
+        "    display: inline;\n"
+        "    text-decoration: underline;\n"
+        "}\n";
+
+
+    styleSheet = StyleSheetContents::create(CSSParserContext(0));
+    styleSheet->parseString(cssText);
+
+    ruleSet = RuleSet::create();
+    ruleSet->addRulesFromSheet(styleSheet.get(), screenEval);
+
+    return *ruleSet;
 }
 
 StyleResolver::StyleResolver(Document& document)
@@ -227,12 +257,7 @@ static PassOwnPtr<RuleSet> makeRuleSet(const Vector<RuleFeature>& rules)
 void StyleResolver::collectFeatures()
 {
     m_features.clear();
-    // Collect all ids and rules using sibling selectors (:first-child and similar)
-    // in the current set of stylesheets. Style sharing code uses this information to reject
-    // sharing candidates.
-    CSSDefaultStyleSheets& defaultStyleSheets = CSSDefaultStyleSheets::instance();
-    if (defaultStyleSheets.defaultStyle())
-        m_features.add(defaultStyleSheets.defaultStyle()->features());
+    m_features.add(defaultStyles().features());
 
     document().styleEngine()->collectScopedStyleFeaturesTo(m_features);
 
@@ -346,9 +371,7 @@ void StyleResolver::matchUARules(ElementRuleCollector& collector)
 {
     collector.setMatchingUARules(true);
 
-    CSSDefaultStyleSheets& defaultStyleSheets = CSSDefaultStyleSheets::instance();
-    RuleSet* userAgentStyleSheet = defaultStyleSheets.defaultStyle();
-    matchUARules(collector, userAgentStyleSheet);
+    matchUARules(collector, &defaultStyles());
 
     collector.setMatchingUARules(false);
 }
