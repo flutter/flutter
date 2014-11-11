@@ -14,14 +14,10 @@ group("sky") {
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
     "//sky/services/inspector",
+    "//sky/tools/debugger",
+    "//sky/tools/tester",
     "//sky/viewer",
   ]
-  if (use_aura) {
-    deps += [
-      "//sky/tools/debugger",
-      "//sky/tools/tester",
-    ]
-  }
   if (!is_android) {
     deps += [ "//third_party/mesa:osmesa" ]
   }
