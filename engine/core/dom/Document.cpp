@@ -2663,8 +2663,7 @@ Node* eventTargetNodeForDocument(Document* doc)
     return node;
 }
 
-// FIXME(sky): Rename and remove RenderObject argument now that we don't have zoom.
-void Document::adjustFloatQuadsForScrollAndAbsoluteZoom(Vector<FloatQuad>& quads, RenderObject&)
+void Document::adjustFloatQuadsForScroll(Vector<FloatQuad>& quads)
 {
     if (!view())
         return;
@@ -2675,8 +2674,7 @@ void Document::adjustFloatQuadsForScrollAndAbsoluteZoom(Vector<FloatQuad>& quads
     }
 }
 
-// FIXME(sky): Rename and remove RenderObject argument now that we don't have zoom.
-void Document::adjustFloatRectForScrollAndAbsoluteZoom(FloatRect& rect, RenderObject&)
+void Document::adjustFloatRectForScroll(FloatRect& rect)
 {
     if (!view())
         return;
