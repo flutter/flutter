@@ -130,19 +130,6 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
             parent()->setChildNeedsLayout();
     }
 
-    // If our zoom factor changes and we have a defined scrollLeft/Top, we need to adjust that value into the
-    // new zoomed coordinate space.
-    if (hasOverflowClip() && oldStyle && newStyle && oldStyle->effectiveZoom() != newStyle->effectiveZoom() && layer()) {
-        if (int left = layer()->scrollableArea()->scrollXOffset()) {
-            left = (left / oldStyle->effectiveZoom()) * newStyle->effectiveZoom();
-            layer()->scrollableArea()->scrollToXOffset(left);
-        }
-        if (int top = layer()->scrollableArea()->scrollYOffset()) {
-            top = (top / oldStyle->effectiveZoom()) * newStyle->effectiveZoom();
-            layer()->scrollableArea()->scrollToYOffset(top);
-        }
-    }
-
     // Our opaqueness might have changed without triggering layout.
     if (diff.needsPaintInvalidation()) {
         RenderObject* parentToInvalidate = parent();
@@ -976,7 +963,7 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
     if (hasOverflowClip() && fillLayer.attachment() == LocalBackgroundAttachment)
         return false;
 
-    if (fillLayer.hasOpaqueImage(this) && fillLayer.hasRepeatXY() && fillLayer.image()->canRender(*this, style()->effectiveZoom()))
+    if (fillLayer.hasOpaqueImage(this) && fillLayer.hasRepeatXY() && fillLayer.image()->canRender(*this))
         return true;
 
     // If there is only one layer and no image, check whether the background color is opaque
@@ -1070,7 +1057,7 @@ void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, cons
             shouldDrawBackgroundInSeparateBuffer = true;
 
         // The clipOccludesNextLayers condition must be evaluated first to avoid short-circuiting.
-        if (curLayer->clipOccludesNextLayers(curLayer == &fillLayer) && curLayer->hasOpaqueImage(this) && curLayer->image()->canRender(*this, style()->effectiveZoom()) && curLayer->hasRepeatXY() && curLayer->blendMode() == WebBlendModeNormal && !boxShadowShouldBeAppliedToBackground(bleedAvoidance))
+        if (curLayer->clipOccludesNextLayers(curLayer == &fillLayer) && curLayer->hasOpaqueImage(this) && curLayer->image()->canRender(*this) && curLayer->hasRepeatXY() && curLayer->blendMode() == WebBlendModeNormal && !boxShadowShouldBeAppliedToBackground(bleedAvoidance))
             break;
         curLayer = curLayer->next();
     }
@@ -1135,7 +1122,7 @@ bool RenderBox::paintInvalidationLayerRectsForImage(WrappedImagePtr image, const
         layerRenderer = this;
 
     for (const FillLayer* curLayer = &layers; curLayer; curLayer = curLayer->next()) {
-        if (curLayer->image() && image == curLayer->image()->data() && curLayer->image()->canRender(*this, style()->effectiveZoom())) {
+        if (curLayer->image() && image == curLayer->image()->data() && curLayer->image()->canRender(*this)) {
             layerRenderer->setShouldDoFullPaintInvalidation(true);
             return true;
         }

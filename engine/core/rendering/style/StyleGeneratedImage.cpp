@@ -42,33 +42,17 @@ PassRefPtr<CSSValue> StyleGeneratedImage::cssValue() const
     return m_imageGeneratorValue.get();
 }
 
-LayoutSize StyleGeneratedImage::imageSize(const RenderObject* renderer, float multiplier) const
+LayoutSize StyleGeneratedImage::imageSize(const RenderObject* renderer) const
 {
-    if (m_fixedSize) {
-        IntSize fixedSize = m_imageGeneratorValue->fixedSize(renderer);
-        if (multiplier == 1.0f)
-            return fixedSize;
-
-        LayoutUnit width = fixedSize.width() * multiplier;
-        LayoutUnit height = fixedSize.height() * multiplier;
-
-        // Don't let images that have a width/height >= 1 shrink below 1 when zoomed.
-        if (fixedSize.width() > 0)
-            width = max<LayoutUnit>(1, width);
-
-        if (fixedSize.height() > 0)
-            height = max<LayoutUnit>(1, height);
-
-        return LayoutSize(width, height);
-    }
-
+    if (m_fixedSize)
+        return m_imageGeneratorValue->fixedSize(renderer);
     return m_containerSize;
 }
 
 void StyleGeneratedImage::computeIntrinsicDimensions(const RenderObject* renderer, Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio)
 {
     // At a zoom level of 1 the image is guaranteed to have an integer size.
-    IntSize size = flooredIntSize(imageSize(renderer, 1));
+    IntSize size = flooredIntSize(imageSize(renderer));
     intrinsicWidth = Length(size.width(), Fixed);
     intrinsicHeight = Length(size.height(), Fixed);
     intrinsicRatio = size;

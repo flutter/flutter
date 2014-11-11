@@ -86,7 +86,6 @@ bool TransformBuilder::createTransformOperations(CSSValue* inValue, const CSSToL
         return false;
     }
 
-    float zoomFactor = conversionData.zoom();
     TransformOperations operations;
     for (CSSValueListIterator i = inValue; i.hasMore(); i.advance()) {
         CSSValue* currValue = i.value();
@@ -265,8 +264,8 @@ bool TransformBuilder::createTransformOperations(CSSValue* inValue, const CSSToL
             double b = toCSSPrimitiveValue(transformValue->item(1))->getDoubleValue();
             double c = toCSSPrimitiveValue(transformValue->item(2))->getDoubleValue();
             double d = toCSSPrimitiveValue(transformValue->item(3))->getDoubleValue();
-            double e = zoomFactor * toCSSPrimitiveValue(transformValue->item(4))->getDoubleValue();
-            double f = zoomFactor * toCSSPrimitiveValue(transformValue->item(5))->getDoubleValue();
+            double e = toCSSPrimitiveValue(transformValue->item(4))->getDoubleValue();
+            double f = toCSSPrimitiveValue(transformValue->item(5))->getDoubleValue();
             operations.operations().append(MatrixTransformOperation::create(a, b, c, d, e, f));
             break;
         }
@@ -285,8 +284,8 @@ bool TransformBuilder::createTransformOperations(CSSValue* inValue, const CSSToL
                 toCSSPrimitiveValue(transformValue->item(9))->getDoubleValue(),
                 toCSSPrimitiveValue(transformValue->item(10))->getDoubleValue(),
                 toCSSPrimitiveValue(transformValue->item(11))->getDoubleValue(),
-                zoomFactor * toCSSPrimitiveValue(transformValue->item(12))->getDoubleValue(),
-                zoomFactor * toCSSPrimitiveValue(transformValue->item(13))->getDoubleValue(),
+                toCSSPrimitiveValue(transformValue->item(12))->getDoubleValue(),
+                toCSSPrimitiveValue(transformValue->item(13))->getDoubleValue(),
                 toCSSPrimitiveValue(transformValue->item(14))->getDoubleValue(),
                 toCSSPrimitiveValue(transformValue->item(15))->getDoubleValue());
             operations.operations().append(Matrix3DTransformOperation::create(matrix));

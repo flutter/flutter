@@ -46,12 +46,12 @@ public:
     // FIXME: The name is probably wrong, but matches StyleResolverState callsite for consistency.
     void initForStyleResolve(const Document&, RenderStyle*);
 
-    void setInitial(float effectiveZoom);
+    void setInitial();
 
     void didChangeFontParameters(bool);
 
     void inheritFrom(const FontDescription&);
-    void fromSystemFont(CSSValueID, float effectiveZoom);
+    void fromSystemFont(CSSValueID);
 
     void setFontFamilyInitial();
     void setFontFamilyInherit(const FontDescription&);
@@ -80,8 +80,6 @@ public:
 
     bool fontSizeHasViewportUnits() { return m_fontSizehasViewportUnits; }
 
-    // FIXME: These should not be necessary eventually.
-    void setFontDirty(bool fontDirty) { m_fontDirty = fontDirty; }
     // FIXME: This is only used by an ASSERT in StyleResolver. Remove?
     bool fontDirty() const { return m_fontDirty; }
 
@@ -101,13 +99,13 @@ public:
 private:
 
     // FIXME: "size" arg should be first for consistency with other similar functions.
-    void setSize(FontDescription&, float effectiveZoom, float size);
+    void setSize(FontDescription&, float size);
     void checkForOrientationChange(RenderStyle*);
     // This function fixes up the default font size if it detects that the current generic font family has changed. -dwh
     void checkForGenericFamilyChange(RenderStyle*, const RenderStyle* parentStyle);
     void updateComputedSize(RenderStyle*, const RenderStyle* parentStyle);
 
-    float getComputedSizeFromSpecifiedSize(FontDescription&, float effectiveZoom, float specifiedSize);
+    float getComputedSizeFromSpecifiedSize(FontDescription&, float specifiedSize);
 
     RawPtr<const Document> m_document;
     bool m_fontSizehasViewportUnits;

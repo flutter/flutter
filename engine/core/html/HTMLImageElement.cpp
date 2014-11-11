@@ -240,7 +240,7 @@ int HTMLImageElement::width(bool ignorePendingStylesheets)
 
         // if the image is available, use its width
         if (imageLoader().image())
-            return imageLoader().image()->imageSizeForRenderer(renderer(), 1.0f).width();
+            return imageLoader().image()->imageSizeForRenderer(renderer()).width();
     }
 
     if (ignorePendingStylesheets)
@@ -263,7 +263,7 @@ int HTMLImageElement::height(bool ignorePendingStylesheets)
 
         // if the image is available, use its height
         if (imageLoader().image())
-            return imageLoader().image()->imageSizeForRenderer(renderer(), 1.0f).height();
+            return imageLoader().image()->imageSizeForRenderer(renderer()).height();
     }
 
     if (ignorePendingStylesheets)
@@ -280,7 +280,7 @@ int HTMLImageElement::naturalWidth() const
     if (!imageLoader().image())
         return 0;
 
-    return imageLoader().image()->imageSizeForRenderer(renderer(), 1.0f, ImageResource::IntrinsicSize).width();
+    return imageLoader().image()->imageSizeForRenderer(renderer(), ImageResource::IntrinsicSize).width();
 }
 
 int HTMLImageElement::naturalHeight() const
@@ -288,7 +288,7 @@ int HTMLImageElement::naturalHeight() const
     if (!imageLoader().image())
         return 0;
 
-    return imageLoader().image()->imageSizeForRenderer(renderer(), 1.0f, ImageResource::IntrinsicSize).height();
+    return imageLoader().image()->imageSizeForRenderer(renderer(), ImageResource::IntrinsicSize).height();
 }
 
 const String& HTMLImageElement::currentSrc() const
@@ -399,10 +399,7 @@ FloatSize HTMLImageElement::sourceSize() const
     ImageResource* image = cachedImage();
     if (!image)
         return FloatSize();
-    LayoutSize size;
-    size = image->imageSizeForRenderer(renderer(), 1.0f); // FIXME: Not sure about this.
-
-    return size;
+    return image->imageSizeForRenderer(renderer()); // FIXME: Not sure about this.
 }
 
 FloatSize HTMLImageElement::defaultDestinationSize() const
@@ -411,7 +408,7 @@ FloatSize HTMLImageElement::defaultDestinationSize() const
     if (!image)
         return FloatSize();
     LayoutSize size;
-    size = image->imageSizeForRenderer(renderer(), 1.0f); // FIXME: Not sure about this.
+    size = image->imageSizeForRenderer(renderer()); // FIXME: Not sure about this.
     if (renderer() && renderer()->isRenderImage() && image->image() && !image->image()->hasRelativeWidth())
         size.scale(toRenderImage(renderer())->imageDevicePixelRatio());
     return size;

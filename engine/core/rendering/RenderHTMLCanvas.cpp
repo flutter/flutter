@@ -85,12 +85,11 @@ void RenderHTMLCanvas::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& pa
 void RenderHTMLCanvas::canvasSizeChanged()
 {
     IntSize canvasSize = toHTMLCanvasElement(node())->size();
-    LayoutSize zoomedSize(canvasSize.width() * style()->effectiveZoom(), canvasSize.height() * style()->effectiveZoom());
 
-    if (zoomedSize == intrinsicSize())
+    if (canvasSize == intrinsicSize())
         return;
 
-    setIntrinsicSize(zoomedSize);
+    setIntrinsicSize(canvasSize);
 
     if (!parent())
         return;

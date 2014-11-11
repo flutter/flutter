@@ -54,8 +54,8 @@ public:
     virtual bool imageHasRelativeWidth() const override { return m_styleImage->imageHasRelativeWidth(); }
     virtual bool imageHasRelativeHeight() const override { return m_styleImage->imageHasRelativeHeight(); }
 
-    virtual LayoutSize imageSize(float multiplier) const override { return m_styleImage->imageSize(m_renderer, multiplier); }
-    virtual LayoutSize intrinsicSize(float multiplier) const override { return m_styleImage->imageSize(m_renderer, multiplier); }
+    virtual LayoutSize imageSize() const override { return m_styleImage->imageSize(m_renderer); }
+    virtual LayoutSize intrinsicSize() const override { return m_styleImage->imageSize(m_renderer); }
 
     virtual WrappedImagePtr imagePtr() const override { return m_styleImage->data(); }
 

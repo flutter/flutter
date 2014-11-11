@@ -660,7 +660,7 @@ bool RenderObject::canRenderBorderImage() const
     ASSERT(style()->hasBorder());
 
     StyleImage* borderImage = style()->borderImage().image();
-    return borderImage && borderImage->canRender(*this, style()->effectiveZoom()) && borderImage->isLoaded();
+    return borderImage && borderImage->canRender(*this) && borderImage->isLoaded();
 }
 
 bool RenderObject::mustInvalidateFillLayersPaintOnWidthChange(const FillLayer& layer) const
@@ -671,7 +671,7 @@ bool RenderObject::mustInvalidateFillLayersPaintOnWidthChange(const FillLayer& l
 
     // Make sure we have a valid image.
     StyleImage* img = layer.image();
-    if (!img || !img->canRender(*this, style()->effectiveZoom()))
+    if (!img || !img->canRender(*this))
         return false;
 
     if (layer.repeatX() != RepeatFill && layer.repeatX() != NoRepeatFill)
@@ -708,7 +708,7 @@ bool RenderObject::mustInvalidateFillLayersPaintOnHeightChange(const FillLayer& 
 
     // Make sure we have a valid image.
     StyleImage* img = layer.image();
-    if (!img || !img->canRender(*this, style()->effectiveZoom()))
+    if (!img || !img->canRender(*this))
         return false;
 
     if (layer.repeatY() != RepeatFill && layer.repeatY() != NoRepeatFill)
@@ -2487,25 +2487,14 @@ Element* RenderObject::offsetParent() const
     if (isDocumentElement())
         return 0;
 
-    // If A is an area HTML element which has a map HTML element somewhere in the ancestor
-    // chain return the nearest ancestor map HTML element and stop this algorithm.
-    // FIXME: Implement!
-
-    float effectiveZoom = style()->effectiveZoom();
     Node* node = 0;
     for (RenderObject* ancestor = parent(); ancestor; ancestor = ancestor->parent()) {
         // Spec: http://www.w3.org/TR/cssom-view/#offset-attributes
-
         node = ancestor->node();
-
         if (!node)
             continue;
 
         if (ancestor->isPositioned())
-            break;
-
-        // Webkit specific extension where offsetParent stops at zoom level changes.
-        if (effectiveZoom != ancestor->style()->effectiveZoom())
             break;
     }
 

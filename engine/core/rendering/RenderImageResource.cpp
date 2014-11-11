@@ -93,14 +93,14 @@ void RenderImageResource::setContainerSizeForRenderer(const IntSize& imageContai
 {
     ASSERT(m_renderer);
     if (m_cachedImage)
-        m_cachedImage->setContainerSizeForRenderer(m_renderer, imageContainerSize, m_renderer->style()->effectiveZoom());
+        m_cachedImage->setContainerSizeForRenderer(m_renderer, imageContainerSize);
 }
 
-LayoutSize RenderImageResource::getImageSize(float multiplier, ImageResource::SizeType type) const
+LayoutSize RenderImageResource::getImageSize(ImageResource::SizeType type) const
 {
     if (!m_cachedImage)
         return LayoutSize();
-    LayoutSize size = m_cachedImage->imageSizeForRenderer(m_renderer, multiplier, type);
+    LayoutSize size = m_cachedImage->imageSizeForRenderer(m_renderer, type);
     if (m_renderer && m_renderer->isRenderImage())
         size.scale(toRenderImage(m_renderer)->imageDevicePixelRatio());
     return size;

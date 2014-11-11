@@ -227,9 +227,9 @@ public:
     {
         return adoptRef(new CSSPrimitiveValue(value, type));
     }
-    static PassRefPtr<CSSPrimitiveValue> create(const Length& value, float zoom)
+    static PassRefPtr<CSSPrimitiveValue> create(const Length& value)
     {
-        return adoptRef(new CSSPrimitiveValue(value, zoom));
+        return adoptRef(new CSSPrimitiveValue(value));
     }
     static PassRefPtr<CSSPrimitiveValue> create(const LengthSize& value, const RenderStyle& style)
     {
@@ -342,7 +342,7 @@ private:
     // int vs. unsigned is too subtle to distinguish types, so require a UnitType.
     CSSPrimitiveValue(int parserOperator, UnitType);
     CSSPrimitiveValue(unsigned color, UnitType); // RGB value
-    CSSPrimitiveValue(const Length&, float zoom);
+    CSSPrimitiveValue(const Length&);
     CSSPrimitiveValue(const LengthSize&, const RenderStyle&);
     CSSPrimitiveValue(const String&, UnitType);
     CSSPrimitiveValue(double, UnitType);

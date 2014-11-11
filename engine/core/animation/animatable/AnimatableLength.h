@@ -38,11 +38,11 @@ namespace blink {
 
 class AnimatableLength final : public AnimatableValue {
 public:
-    static PassRefPtr<AnimatableLength> create(const Length& length, float zoom)
+    static PassRefPtr<AnimatableLength> create(const Length& length)
     {
-        return adoptRef(new AnimatableLength(length, zoom));
+        return adoptRef(new AnimatableLength(length));
     }
-    Length length(float zoom, ValueRange) const;
+    Length length(ValueRange) const;
 
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
@@ -52,7 +52,7 @@ private:
     {
         return adoptRef(new AnimatableLength(pixels, percent, hasPixels, hasPercent));
     }
-    AnimatableLength(const Length&, float zoom);
+    AnimatableLength(const Length&);
     AnimatableLength(double pixels, double percent, bool hasPixels, bool hasPercent)
         : m_pixels(pixels)
         , m_percent(percent)

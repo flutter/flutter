@@ -304,42 +304,11 @@ void Element::scrollIntoViewIfNeeded(bool centerIfNeeded)
         renderer()->scrollRectToVisible(bounds, ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignToEdgeIfNeeded);
 }
 
-static float localZoomForRenderer(RenderObject& renderer)
-{
-    // FIXME: This does the wrong thing if two opposing zooms are in effect and canceled each
-    // other out, but the alternative is that we'd have to crawl up the whole render tree every
-    // time (or store an additional bit in the RenderStyle to indicate that a zoom was specified).
-    float zoomFactor = 1;
-    if (renderer.style()->effectiveZoom() != 1) {
-        // Need to find the nearest enclosing RenderObject that set up
-        // a differing zoom, and then we divide our result by it to eliminate the zoom.
-        RenderObject* prev = &renderer;
-        for (RenderObject* curr = prev->parent(); curr; curr = curr->parent()) {
-            if (curr->style()->effectiveZoom() != prev->style()->effectiveZoom()) {
-                zoomFactor = prev->style()->zoom();
-                break;
-            }
-            prev = curr;
-        }
-        if (prev->isRenderView())
-            zoomFactor = prev->style()->zoom();
-    }
-    return zoomFactor;
-}
-
-static double adjustForLocalZoom(LayoutUnit value, RenderObject& renderer)
-{
-    float zoomFactor = localZoomForRenderer(renderer);
-    if (zoomFactor == 1)
-        return value.toDouble();
-    return value.toDouble() / zoomFactor;
-}
-
 int Element::offsetLeft()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
-        return lroundf(adjustForLocalZoom(renderer->offsetLeft(), *renderer));
+        return renderer->offsetLeft();
     return 0;
 }
 
@@ -347,7 +316,7 @@ int Element::offsetTop()
 {
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
-        return lroundf(adjustForLocalZoom(renderer->pixelSnappedOffsetTop(), *renderer));
+        return renderer->pixelSnappedOffsetTop();
     return 0;
 }
 
@@ -453,7 +422,7 @@ void Element::setScrollLeft(int newLeft)
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
-            rend->setScrollLeft(LayoutUnit::fromFloatRound(newLeft * rend->style()->effectiveZoom()));
+            rend->setScrollLeft(newLeft);
     }
 }
 
@@ -484,7 +453,7 @@ void Element::setScrollTop(int newTop)
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
-            rend->setScrollTop(LayoutUnit::fromFloatRound(newTop * rend->style()->effectiveZoom()));
+            rend->setScrollTop(newTop);
     }
 }
 

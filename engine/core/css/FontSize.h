@@ -38,7 +38,7 @@ private:
     }
 
 public:
-    static float getComputedSizeFromSpecifiedSize(const Document*, float zoomFactor, bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize = UseSmartMinimumForFontFize);
+    static float getComputedSizeFromSpecifiedSize(const Document*, bool isAbsoluteSize, float specifiedSize, ESmartMinimumForFontSize = UseSmartMinimumForFontFize);
 
     // Given a CSS keyword in the range (xx-small to -webkit-xxx-large), this function will return
     // the correct font size scaled relative to the user's default (medium).

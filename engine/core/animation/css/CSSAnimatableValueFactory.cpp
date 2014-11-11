@@ -64,7 +64,7 @@ static PassRefPtr<AnimatableValue> createFromLength(const Length& length, const 
     case Fixed:
     case Percent:
     case Calculated:
-        return AnimatableLength::create(length, style.effectiveZoom());
+        return AnimatableLength::create(length);
     case Auto:
     case Intrinsic:
     case MinIntrinsic:
@@ -72,7 +72,7 @@ static PassRefPtr<AnimatableValue> createFromLength(const Length& length, const 
     case MaxContent:
     case FillAvailable:
     case FitContent:
-        return AnimatableUnknown::create(CSSPrimitiveValue::create(length, 1));
+        return AnimatableUnknown::create(CSSPrimitiveValue::create(length));
     case MaxSizeNone:
         return AnimatableUnknown::create(CSSValueNone);
     case ExtendToZoom: // Does not apply to elements.

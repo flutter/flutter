@@ -42,12 +42,12 @@ public:
 
     virtual PassRefPtr<CSSValue> cssValue() const override;
 
-    virtual LayoutSize imageSize(const RenderObject*, float multiplier) const override;
+    virtual LayoutSize imageSize(const RenderObject*) const override;
     virtual bool imageHasRelativeWidth() const override { return !m_fixedSize; }
     virtual bool imageHasRelativeHeight() const override { return !m_fixedSize; }
     virtual void computeIntrinsicDimensions(const RenderObject*, Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio) override;
     virtual bool usesImageContainerSize() const override { return !m_fixedSize; }
-    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize& containerSize, float) override { m_containerSize = containerSize; }
+    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize& containerSize) override { m_containerSize = containerSize; }
     virtual void addClient(RenderObject*) override;
     virtual void removeClient(RenderObject*) override;
     virtual PassRefPtr<Image> image(RenderObject*, const IntSize&) const override;

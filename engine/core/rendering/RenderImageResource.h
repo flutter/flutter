@@ -64,8 +64,8 @@ public:
     virtual bool imageHasRelativeWidth() const { return m_cachedImage ? m_cachedImage->imageHasRelativeWidth() : false; }
     virtual bool imageHasRelativeHeight() const { return m_cachedImage ? m_cachedImage->imageHasRelativeHeight() : false; }
 
-    virtual LayoutSize imageSize(float multiplier) const { return getImageSize(multiplier, ImageResource::NormalSize); }
-    virtual LayoutSize intrinsicSize(float multiplier) const { return getImageSize(multiplier, ImageResource::IntrinsicSize); }
+    virtual LayoutSize imageSize() const { return getImageSize(ImageResource::NormalSize); }
+    virtual LayoutSize intrinsicSize() const { return getImageSize(ImageResource::IntrinsicSize); }
 
     virtual WrappedImagePtr imagePtr() const { return m_cachedImage.get(); }
 
@@ -75,7 +75,7 @@ protected:
     ResourcePtr<ImageResource> m_cachedImage;
 
 private:
-    LayoutSize getImageSize(float multiplier, ImageResource::SizeType) const;
+    LayoutSize getImageSize(ImageResource::SizeType) const;
 };
 
 } // namespace blink

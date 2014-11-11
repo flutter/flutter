@@ -41,13 +41,10 @@ class RenderView;
 
 class CSSToLengthConversionData {
 public:
-    CSSToLengthConversionData(const RenderStyle* currStyle, const RenderStyle* rootStyle, const RenderView*, float zoom, bool computingFontSize = false);
     CSSToLengthConversionData(const RenderStyle* currStyle, const RenderStyle* rootStyle, const RenderView*, bool computingFontSize = false);
-    CSSToLengthConversionData(const RenderStyle* currStyle, const RenderStyle* rootStyle, float viewportWidth, float viewportHeight, float zoom, bool computingFontSize = false);
 
     const RenderStyle& style() const { return *m_style; }
     const RenderStyle* rootStyle() const { return m_rootStyle; }
-    float zoom() const;
     bool computingFontSize() const { return m_computingFontSize; }
 
     // Accessing these marks the style as having viewport units
@@ -59,18 +56,11 @@ public:
     void setStyle(const RenderStyle* style) { m_style = style; }
     void setRootStyle(const RenderStyle* rootStyle) { m_rootStyle = rootStyle; }
 
-    CSSToLengthConversionData copyWithAdjustedZoom(float newZoom) const
-    {
-        return CSSToLengthConversionData(m_style, m_rootStyle, m_viewportWidth, m_viewportHeight, newZoom, m_computingFontSize);
-    }
-
 private:
     const RenderStyle* m_style;
     const RenderStyle* m_rootStyle;
     float m_viewportWidth;
     float m_viewportHeight;
-    float m_zoom;
-    bool m_useEffectiveZoom;
     bool m_computingFontSize;
 };
 

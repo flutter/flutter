@@ -127,7 +127,6 @@ void FrameView::reset()
     m_firstLayout = true;
     m_firstLayoutCallbackPending = false;
     m_lastViewportSize = IntSize();
-    m_lastZoomFactor = 1.0f;
     m_isTrackingPaintInvalidations = false;
     m_trackedPaintInvalidationRects.clear();
     m_lastPaintTime = 0;
@@ -380,7 +379,6 @@ void FrameView::layout(bool allowSubtree)
                 m_firstLayout = false;
                 m_firstLayoutCallbackPending = true;
                 m_lastViewportSize = layoutSize(IncludeScrollbars);
-                m_lastZoomFactor = rootForThisLayout->style()->zoom();
             }
 
             m_size = LayoutSize(layoutSize().width(), layoutSize().height());
@@ -783,27 +781,15 @@ void FrameView::performPostLayoutTasks()
 
 bool FrameView::wasViewportResized()
 {
-    ASSERT(m_frame);
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return false;
-    return (layoutSize(IncludeScrollbars) != m_lastViewportSize || renderView->style()->zoom() != m_lastZoomFactor);
+    return layoutSize(IncludeScrollbars) != m_lastViewportSize;
 }
 
 void FrameView::sendResizeEventIfNeeded()
 {
-    ASSERT(m_frame);
-
-    RenderView* renderView = this->renderView();
-    if (!renderView)
-        return;
-
     if (!wasViewportResized())
         return;
 
     m_lastViewportSize = layoutSize(IncludeScrollbars);
-    m_lastZoomFactor = renderView->style()->zoom();
-
     m_frame->document()->enqueueResizeEvent();
 }
 

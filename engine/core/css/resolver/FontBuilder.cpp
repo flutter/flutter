@@ -91,7 +91,7 @@ inline static void setFontFamilyToStandard(FontDescription& fontDescription, con
     fontDescription.firstFamily().appendFamily(nullptr);
 }
 
-void FontBuilder::setInitial(float effectiveZoom)
+void FontBuilder::setInitial()
 {
     ASSERT(m_document && m_document->settings());
     if (!m_document || !m_document->settings())
@@ -102,7 +102,7 @@ void FontBuilder::setInitial(float effectiveZoom)
     scope.reset();
     setFontFamilyToStandard(scope.fontDescription(), m_document);
     scope.fontDescription().setKeywordSize(CSSValueMedium - CSSValueXxSmall + 1);
-    setSize(scope.fontDescription(), effectiveZoom, FontSize::fontSizeForKeyword(m_document, CSSValueMedium, NonFixedPitchFont));
+    setSize(scope.fontDescription(), FontSize::fontSizeForKeyword(m_document, CSSValueMedium, NonFixedPitchFont));
 }
 
 void FontBuilder::inheritFrom(const FontDescription& fontDescription)
@@ -117,7 +117,7 @@ void FontBuilder::didChangeFontParameters(bool changed)
     m_fontDirty |= changed;
 }
 
-void FontBuilder::fromSystemFont(CSSValueID valueId, float effectiveZoom)
+void FontBuilder::fromSystemFont(CSSValueID valueId)
 {
     FontDescriptionChangeScope scope(this);
 
@@ -134,8 +134,7 @@ void FontBuilder::fromSystemFont(CSSValueID valueId, float effectiveZoom)
     if (!settings)
         return;
 
-    // Handle the zoom factor.
-    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, effectiveZoom, fontDescription.specifiedSize()));
+    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, fontDescription.specifiedSize()));
     scope.set(fontDescription);
 }
 
@@ -329,7 +328,7 @@ void FontBuilder::setFontSizeValue(CSSValue* value, RenderStyle* parentStyle, co
             // If we have viewport units the conversion will mark the parent style as having viewport units.
             bool parentHasViewportUnits = parentStyle->hasViewportUnits();
             parentStyle->setHasViewportUnits(false);
-            CSSToLengthConversionData conversionData(parentStyle, rootElementStyle, m_document->renderView(), 1.0f, true);
+            CSSToLengthConversionData conversionData(parentStyle, rootElementStyle, m_document->renderView(), true);
             if (primitiveValue->isLength())
                 size = primitiveValue->computeLength<float>(conversionData);
             else if (primitiveValue->isCalculatedPercentageWithLength())
@@ -423,20 +422,15 @@ void FontBuilder::setFeatureSettings(PassRefPtr<FontFeatureSettings> settings)
     scope.fontDescription().setFeatureSettings(settings);
 }
 
-void FontBuilder::setSize(FontDescription& fontDescription, float effectiveZoom, float size)
+void FontBuilder::setSize(FontDescription& fontDescription, float size)
 {
     fontDescription.setSpecifiedSize(size);
-    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, effectiveZoom, size));
+    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, size));
 }
 
-float FontBuilder::getComputedSizeFromSpecifiedSize(FontDescription& fontDescription, float effectiveZoom, float specifiedSize)
+float FontBuilder::getComputedSizeFromSpecifiedSize(FontDescription& fontDescription, float specifiedSize)
 {
-    float zoomFactor = effectiveZoom;
-    // FIXME: Why is this here!!!!?!
-    if (LocalFrame* frame = m_document->frame())
-        zoomFactor *= frame->textZoomFactor();
-
-    return FontSize::getComputedSizeFromSpecifiedSize(m_document, zoomFactor, fontDescription.isAbsoluteSize(), specifiedSize);
+    return FontSize::getComputedSizeFromSpecifiedSize(m_document, fontDescription.isAbsoluteSize(), specifiedSize);
 }
 
 static void getFontAndGlyphOrientation(const RenderStyle* style, FontOrientation& fontOrientation, NonCJKGlyphOrientation& glyphOrientation)
@@ -494,14 +488,14 @@ void FontBuilder::checkForGenericFamilyChange(RenderStyle* style, const RenderSt
             scope.fontDescription().specifiedSize() * fixedScaleFactor;
     }
 
-    setSize(scope.fontDescription(), style->effectiveZoom(), size);
+    setSize(scope.fontDescription(), size);
 }
 
 void FontBuilder::updateComputedSize(RenderStyle* style, const RenderStyle* parentStyle)
 {
     FontDescriptionChangeScope scope(this);
 
-    float computedSize = getComputedSizeFromSpecifiedSize(scope.fontDescription(), style->effectiveZoom(), scope.fontDescription().specifiedSize());
+    float computedSize = getComputedSizeFromSpecifiedSize(scope.fontDescription(), scope.fontDescription().specifiedSize());
     scope.fontDescription().setComputedSize(computedSize);
 }
 
@@ -527,7 +521,7 @@ void FontBuilder::createFontForDocument(PassRefPtr<FontSelector> fontSelector, R
     fontDescription.setKeywordSize(CSSValueMedium - CSSValueXxSmall + 1);
     int size = FontSize::fontSizeForKeyword(m_document, CSSValueMedium, NonFixedPitchFont);
     fontDescription.setSpecifiedSize(size);
-    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, documentStyle->effectiveZoom(), size));
+    fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontDescription, size));
 
     FontOrientation fontOrientation;
     NonCJKGlyphOrientation glyphOrientation;

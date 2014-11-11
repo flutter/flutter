@@ -275,7 +275,6 @@ private:
     bool m_isTransparent;
     Color m_baseBackgroundColor;
     IntSize m_lastViewportSize;
-    float m_lastZoomFactor;
 
     AtomicString m_mediaType;
 

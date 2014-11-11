@@ -52,7 +52,7 @@ PassRefPtr<AnimatableValue> unknownAnimatableValue(double n)
 
 PassRefPtr<AnimatableValue> pixelAnimatableValue(double n)
 {
-    return AnimatableLength::create(Length(n, Fixed), 1);
+    return AnimatableLength::create(Length(n, Fixed));
 }
 
 AnimatableValueKeyframeVector keyframesAtZeroAndOne(PassRefPtr<AnimatableValue> zeroValue, PassRefPtr<AnimatableValue> oneValue)

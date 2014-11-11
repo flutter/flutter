@@ -297,7 +297,7 @@ CSSPrimitiveValue::CSSPrimitiveValue(RGBA32 color, UnitType type)
     m_value.rgbcolor = color;
 }
 
-CSSPrimitiveValue::CSSPrimitiveValue(const Length& length, float zoom)
+CSSPrimitiveValue::CSSPrimitiveValue(const Length& length)
     : CSSValue(PrimitiveClass)
 {
     switch (length.type()) {
@@ -340,13 +340,13 @@ CSSPrimitiveValue::CSSPrimitiveValue(const Length& length, float zoom)
         break;
     case Fixed:
         m_primitiveUnitType = CSS_PX;
-        m_value.num = length.value() / zoom;
+        m_value.num = length.value();
         break;
     case Calculated: {
         const CalculationValue& calc = length.calculationValue();
         if (calc.pixels() && calc.percent()) {
             init(CSSCalcValue::create(
-                CSSCalcValue::createExpressionNode(calc.pixels() / zoom, calc.percent()),
+                CSSCalcValue::createExpressionNode(calc.pixels(), calc.percent()),
                 calc.isNonNegative() ? ValueRangeNonNegative : ValueRangeAll));
             break;
         }
@@ -355,7 +355,7 @@ CSSPrimitiveValue::CSSPrimitiveValue(const Length& length, float zoom)
             m_value.num = calc.percent();
         } else {
             m_primitiveUnitType = CSS_PX;
-            m_value.num = calc.pixels() / zoom;
+            m_value.num = calc.pixels();
         }
         if (m_value.num < 0 && calc.isNonNegative())
             m_value.num = 0;
@@ -373,7 +373,7 @@ void CSSPrimitiveValue::init(const LengthSize& lengthSize, const RenderStyle& st
 {
     m_primitiveUnitType = CSS_PAIR;
     m_hasCachedCSSText = false;
-    m_value.pair = Pair::create(create(lengthSize.width(), style.effectiveZoom()), create(lengthSize.height(), style.effectiveZoom()), Pair::KeepIdenticalValues).leakRef();
+    m_value.pair = Pair::create(create(lengthSize.width()), create(lengthSize.height()), Pair::KeepIdenticalValues).leakRef();
 }
 
 void CSSPrimitiveValue::init(PassRefPtr<Rect> r)
@@ -652,7 +652,7 @@ double CSSPrimitiveValue::computeLengthDouble(const CSSToLengthConversionData& c
     if (computingFontSize || isFontRelativeLength())
         return result;
 
-    return result * conversionData.zoom();
+    return result;
 }
 
 void CSSPrimitiveValue::accumulateLengthArray(CSSLengthArray& lengthArray, double multiplier) const

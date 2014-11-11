@@ -63,7 +63,7 @@ namespace {
 Length animatableValueToLength(const AnimatableValue* value, const StyleResolverState& state, ValueRange range = ValueRangeAll)
 {
     if (value->isLength())
-        return toAnimatableLength(value)->length(state.style()->effectiveZoom(), range);
+        return toAnimatableLength(value)->length(range);
     RefPtr<CSSValue> cssValue = toAnimatableUnknown(value)->toCSSValue();
     CSSPrimitiveValue* cssPrimitiveValue = toCSSPrimitiveValue(cssValue.get());
     return cssPrimitiveValue->convertToLength<AnyConversion>(state.cssToLengthConversionData());
@@ -72,7 +72,7 @@ Length animatableValueToLength(const AnimatableValue* value, const StyleResolver
 BorderImageLength animatableValueToBorderImageLength(const AnimatableValue* value, const StyleResolverState& state)
 {
     if (value->isLength())
-        return BorderImageLength(toAnimatableLength(value)->length(state.style()->effectiveZoom(), ValueRangeNonNegative));
+        return BorderImageLength(toAnimatableLength(value)->length(ValueRangeNonNegative));
     if (value->isDouble())
         return BorderImageLength(clampTo<double>(toAnimatableDouble(value)->toDouble(), 0));
     RefPtr<CSSValue> cssValue = toAnimatableUnknown(value)->toCSSValue();

@@ -95,13 +95,7 @@ T StyleBuilderConverter::convertLineWidth(StyleResolverState& state, CSSValue* v
     if (valueID == CSSValueInvalid) {
         // Any original result that was >= 1 should not be allowed to fall below 1.
         // This keeps border lines from vanishing.
-        T result = primitiveValue->computeLength<T>(state.cssToLengthConversionData());
-        if (state.style()->effectiveZoom() < 1.0f && result < 1.0) {
-            T originalLength = primitiveValue->computeLength<T>(state.cssToLengthConversionData().copyWithAdjustedZoom(1.0));
-            if (originalLength >= 1.0)
-                return 1.0;
-        }
-        return result;
+        return primitiveValue->computeLength<T>(state.cssToLengthConversionData());
     }
     ASSERT_NOT_REACHED();
     return 0;

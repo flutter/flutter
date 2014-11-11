@@ -61,9 +61,9 @@ public:
     static std::pair<blink::Image*, float> brokenImage(float deviceScaleFactor); // Returns an image and the image's resolution scale factor.
     bool willPaintBrokenImage() const;
 
-    bool canRender(const RenderObject& renderer, float multiplier) { return !errorOccurred() && !imageSizeForRenderer(&renderer, multiplier).isEmpty(); }
+    bool canRender(const RenderObject& renderer) { return !errorOccurred() && !imageSizeForRenderer(&renderer).isEmpty(); }
 
-    void setContainerSizeForRenderer(const ImageResourceClient*, const IntSize&, float);
+    void setContainerSizeForRenderer(const ImageResourceClient*, const IntSize&);
     bool usesImageContainerSize() const;
     bool imageHasRelativeWidth() const;
     bool imageHasRelativeHeight() const;
@@ -75,8 +75,7 @@ public:
         NormalSize, // Report the size of the image associated with a certain renderer
         IntrinsicSize // Report the intrinsic size, i.e. ignore whatever has been set extrinsically.
     };
-    // This method takes a zoom multiplier that can be used to increase the natural size of the image by the zoom.
-    LayoutSize imageSizeForRenderer(const RenderObject*, float multiplier, SizeType = NormalSize); // returns the size of the complete image.
+    LayoutSize imageSizeForRenderer(const RenderObject*, SizeType = NormalSize); // returns the size of the complete image.
     void computeIntrinsicDimensions(Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio);
 
     virtual void didAddClient(ResourceClient*) override;
@@ -119,8 +118,7 @@ private:
 
     virtual void switchClientsToRevalidatedResource() override;
 
-    typedef pair<IntSize, float> SizeAndZoom;
-    typedef HashMap<const ImageResourceClient*, SizeAndZoom> ContainerSizeRequests;
+    typedef HashMap<const ImageResourceClient*, IntSize> ContainerSizeRequests;
     ContainerSizeRequests m_pendingContainerSizeRequests;
     float m_devicePixelRatioHeaderValue;
 

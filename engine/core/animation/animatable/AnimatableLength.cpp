@@ -48,23 +48,22 @@ double clampNumber(double value, ValueRange range)
 
 } // namespace
 
-AnimatableLength::AnimatableLength(const Length& length, float zoom)
+AnimatableLength::AnimatableLength(const Length& length)
 {
-    ASSERT(zoom);
     PixelsAndPercent pixelsAndPercent = length.pixelsAndPercent();
-    m_pixels = pixelsAndPercent.pixels / zoom;
+    m_pixels = pixelsAndPercent.pixels;
     m_percent = pixelsAndPercent.percent;
     m_hasPixels = length.type() != Percent;
     m_hasPercent = !length.isFixed();
 }
 
-Length AnimatableLength::length(float zoom, ValueRange range) const
+Length AnimatableLength::length(ValueRange range) const
 {
     if (!m_hasPercent)
-        return Length(clampNumber(m_pixels, range) * zoom, Fixed);
+        return Length(clampNumber(m_pixels, range), Fixed);
     if (!m_hasPixels)
         return Length(clampNumber(m_percent, range), Percent);
-    return Length(CalculationValue::create(PixelsAndPercent(m_pixels * zoom, m_percent), range));
+    return Length(CalculationValue::create(PixelsAndPercent(m_pixels, m_percent), range));
 }
 
 PassRefPtr<AnimatableValue> AnimatableLength::interpolateTo(const AnimatableValue* value, double fraction) const

@@ -197,20 +197,14 @@ void StyleBuilderFunctions::applyValueCSSPropertyLineHeight(StyleResolverState& 
     if (primitiveValue->getValueID() == CSSValueNormal) {
         lineHeight = RenderStyle::initialLineHeight();
     } else if (primitiveValue->isLength()) {
-        float multiplier = state.style()->effectiveZoom();
-        if (LocalFrame* frame = state.document().frame())
-            multiplier *= frame->textZoomFactor();
-        lineHeight = primitiveValue->computeLength<Length>(state.cssToLengthConversionData().copyWithAdjustedZoom(multiplier));
+        lineHeight = primitiveValue->computeLength<Length>(state.cssToLengthConversionData());
     } else if (primitiveValue->isPercentage()) {
         lineHeight = Length((state.style()->computedFontSize() * primitiveValue->getIntValue()) / 100.0, Fixed);
     } else if (primitiveValue->isNumber()) {
         lineHeight = Length(primitiveValue->getDoubleValue() * 100.0, Percent);
     } else if (primitiveValue->isCalculated()) {
-        double multiplier = state.style()->effectiveZoom();
-        if (LocalFrame* frame = state.document().frame())
-            multiplier *= frame->textZoomFactor();
-        Length zoomedLength = Length(primitiveValue->cssCalcValue()->toCalcValue(state.cssToLengthConversionData().copyWithAdjustedZoom(multiplier)));
-        lineHeight = Length(valueForLength(zoomedLength, state.style()->fontSize()), Fixed);
+        Length length = Length(primitiveValue->cssCalcValue()->toCalcValue(state.cssToLengthConversionData()));
+        lineHeight = Length(valueForLength(length, state.style()->fontSize()), Fixed);
     } else {
         return;
     }
@@ -337,8 +331,8 @@ void StyleBuilderFunctions::applyValueCSSPropertySize(StyleResolverState& state,
             // <length>{2}
             if (!second->isLength())
                 return;
-            width = first->computeLength<Length>(state.cssToLengthConversionData().copyWithAdjustedZoom(1.0));
-            height = second->computeLength<Length>(state.cssToLengthConversionData().copyWithAdjustedZoom(1.0));
+            width = first->computeLength<Length>(state.cssToLengthConversionData());
+            height = second->computeLength<Length>(state.cssToLengthConversionData());
         } else {
             // <page-size> <orientation>
             // The value order is guaranteed. See BisonCSSParser::parseSizeParameter.
@@ -356,7 +350,7 @@ void StyleBuilderFunctions::applyValueCSSPropertySize(StyleResolverState& state,
         if (primitiveValue->isLength()) {
             // <length>
             pageSizeType = PAGE_SIZE_RESOLVED;
-            width = height = primitiveValue->computeLength<Length>(state.cssToLengthConversionData().copyWithAdjustedZoom(1.0));
+            width = height = primitiveValue->computeLength<Length>(state.cssToLengthConversionData());
         } else {
             switch (primitiveValue->getValueID()) {
             case 0:
@@ -782,7 +776,7 @@ void StyleBuilderFunctions::applyValueCSSPropertyFont(StyleResolverState& state,
     // short-hand CSSProperty like this (crbug.com/353932)
     state.style()->setLineHeight(RenderStyle::initialLineHeight());
     state.setLineHeightValue(0);
-    state.fontBuilder().fromSystemFont(toCSSPrimitiveValue(value)->getValueID(), state.style()->effectiveZoom());
+    state.fontBuilder().fromSystemFont(toCSSPrimitiveValue(value)->getValueID());
 }
 
 void StyleBuilderFunctions::applyValueCSSPropertyWebkitLocale(StyleResolverState& state, CSSValue* value)

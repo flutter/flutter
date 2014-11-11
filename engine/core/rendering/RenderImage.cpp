@@ -107,7 +107,7 @@ IntSize RenderImage::imageSizeForError(ImageResource* newImage) const
 
     // imageSize() returns 0 for the error image. We need the true size of the
     // error image, so we have to get it by grabbing image() directly.
-    return IntSize(paddingWidth + imageSize.width() * style()->effectiveZoom(), paddingHeight + imageSize.height() * style()->effectiveZoom());
+    return IntSize(paddingWidth + imageSize.width(), paddingHeight + imageSize.height());
 }
 
 // Sets the image height and width to fit the alt text.  Returns true if the
@@ -185,7 +185,7 @@ void RenderImage::updateInnerContentRect()
 void RenderImage::paintInvalidationOrMarkForLayout(bool imageSizeChangedToAccomodateAltText, const IntRect* rect)
 {
     LayoutSize oldIntrinsicSize = intrinsicSize();
-    LayoutSize newIntrinsicSize = m_imageResource->intrinsicSize(style()->effectiveZoom());
+    LayoutSize newIntrinsicSize = m_imageResource->intrinsicSize();
     updateIntrinsicSizeIfNeeded(newIntrinsicSize);
 
     // In the case of generated image content using :before/:after/content, we might not be
@@ -225,7 +225,7 @@ void RenderImage::paintInvalidationOrMarkForLayout(bool imageSizeChangedToAccomo
     if (rect) {
         // The image changed rect is in source image coordinates (without zoom),
         // so map from the bounds of the image to the contentsBox.
-        const LayoutSize imageSizeWithoutZoom = m_imageResource->imageSize(1 / style()->effectiveZoom());
+        const LayoutSize imageSizeWithoutZoom = m_imageResource->imageSize();
         paintInvalidationRect = enclosingIntRect(mapRect(*rect, FloatRect(FloatPoint(), imageSizeWithoutZoom), contentBoxRect()));
         // Guard against too-large changed rects.
         paintInvalidationRect.intersect(contentBoxRect());

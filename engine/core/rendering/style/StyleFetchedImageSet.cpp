@@ -52,9 +52,9 @@ PassRefPtr<CSSValue> StyleFetchedImageSet::cssValue() const
     return m_imageSetValue;
 }
 
-bool StyleFetchedImageSet::canRender(const RenderObject& renderer, float multiplier) const
+bool StyleFetchedImageSet::canRender(const RenderObject& renderer) const
 {
-    return m_bestFitImage->canRender(renderer, multiplier);
+    return m_bestFitImage->canRender(renderer);
 }
 
 bool StyleFetchedImageSet::isLoaded() const
@@ -67,9 +67,9 @@ bool StyleFetchedImageSet::errorOccurred() const
     return m_bestFitImage->errorOccurred();
 }
 
-LayoutSize StyleFetchedImageSet::imageSize(const RenderObject* renderer, float multiplier) const
+LayoutSize StyleFetchedImageSet::imageSize(const RenderObject* renderer) const
 {
-    LayoutSize scaledImageSize = m_bestFitImage->imageSizeForRenderer(renderer, multiplier);
+    LayoutSize scaledImageSize = m_bestFitImage->imageSizeForRenderer(renderer);
     scaledImageSize.scale(1 / m_imageScaleFactor);
     return scaledImageSize;
 }
@@ -94,9 +94,9 @@ bool StyleFetchedImageSet::usesImageContainerSize() const
     return m_bestFitImage->usesImageContainerSize();
 }
 
-void StyleFetchedImageSet::setContainerSizeForRenderer(const RenderObject* renderer, const IntSize& imageContainerSize, float imageContainerZoomFactor)
+void StyleFetchedImageSet::setContainerSizeForRenderer(const RenderObject* renderer, const IntSize& imageContainerSize)
 {
-    m_bestFitImage->setContainerSizeForRenderer(renderer, imageContainerSize, imageContainerZoomFactor);
+    m_bestFitImage->setContainerSizeForRenderer(renderer, imageContainerSize);
 }
 
 void StyleFetchedImageSet::addClient(RenderObject* renderer)

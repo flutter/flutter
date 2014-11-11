@@ -433,7 +433,7 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
 
     Color bgColor = color;
     StyleImage* bgImage = bgLayer.image();
-    bool shouldPaintBackgroundImage = bgImage && bgImage->canRender(*this, style()->effectiveZoom());
+    bool shouldPaintBackgroundImage = bgImage && bgImage->canRender(*this);
 
     bool colorVisible = bgColor.alpha();
 
@@ -657,7 +657,7 @@ static inline IntSize resolveAgainstIntrinsicRatio(const IntSize& size, const Fl
     return IntSize(size.width(), solutionHeight);
 }
 
-IntSize RenderBoxModelObject::calculateImageIntrinsicDimensions(StyleImage* image, const IntSize& positioningAreaSize, ScaleByEffectiveZoomOrNot shouldScaleOrNot) const
+IntSize RenderBoxModelObject::calculateImageIntrinsicDimensions(StyleImage* image, const IntSize& positioningAreaSize) const
 {
     // A generated image without a fixed size, will always return the container size as intrinsic size.
     if (image->isGeneratedImage() && image->usesImageContainerSize())
@@ -673,8 +673,6 @@ IntSize RenderBoxModelObject::calculateImageIntrinsicDimensions(StyleImage* imag
 
     IntSize resolvedSize(intrinsicWidth.value(), intrinsicHeight.value());
     IntSize minimumSize(resolvedSize.width() > 0 ? 1 : 0, resolvedSize.height() > 0 ? 1 : 0);
-    if (shouldScaleOrNot == ScaleByEffectiveZoom)
-        resolvedSize.scale(style()->effectiveZoom());
     resolvedSize.clampToMinimumSize(minimumSize);
 
     if (!resolvedSize.isEmpty())
@@ -709,7 +707,7 @@ IntSize RenderBoxModelObject::calculateFillTileSize(const FillLayer& fillLayer, 
     StyleImage* image = fillLayer.image();
     EFillSizeType type = fillLayer.size().type;
 
-    IntSize imageIntrinsicSize = calculateImageIntrinsicDimensions(image, positioningAreaSize, ScaleByEffectiveZoom);
+    IntSize imageIntrinsicSize = calculateImageIntrinsicDimensions(image, positioningAreaSize);
     imageIntrinsicSize.scale(1 / image->imageScaleFactor(), 1 / image->imageScaleFactor());
     switch (type) {
         case SizeLength: {
@@ -893,7 +891,7 @@ void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderLayerMod
 
     const RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
     IntSize fillTileSize = calculateFillTileSize(fillLayer, positioningAreaSize);
-    fillLayer.image()->setContainerSizeForRenderer(clientForBackgroundImage, fillTileSize, style()->effectiveZoom());
+    fillLayer.image()->setContainerSizeForRenderer(clientForBackgroundImage, fillTileSize);
     geometry.setTileSize(fillTileSize);
 
     EFillRepeat backgroundRepeatX = fillLayer.repeatX();
@@ -997,7 +995,7 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
     if (!styleImage->isLoaded())
         return true; // Never paint a nine-piece image incrementally, but don't paint the fallback borders either.
 
-    if (!styleImage->canRender(*this, style->effectiveZoom()))
+    if (!styleImage->canRender(*this))
         return false;
 
     // FIXME: border-image is broken with full page zooming when tiling has to happen, since the tiling function
@@ -1006,10 +1004,10 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
     rectWithOutsets.expand(style->imageOutsets(ninePieceImage));
     IntRect borderImageRect = pixelSnappedIntRect(rectWithOutsets);
 
-    IntSize imageSize = calculateImageIntrinsicDimensions(styleImage, borderImageRect.size(), DoNotScaleByEffectiveZoom);
+    IntSize imageSize = calculateImageIntrinsicDimensions(styleImage, borderImageRect.size());
 
     // If both values are ‘auto’ then the intrinsic width and/or height of the image should be used, if any.
-    styleImage->setContainerSizeForRenderer(this, imageSize, style->effectiveZoom());
+    styleImage->setContainerSizeForRenderer(this, imageSize);
 
     int imageWidth = imageSize.width();
     int imageHeight = imageSize.height();

@@ -504,10 +504,6 @@ public:
     float wordSpacing() const;
     float letterSpacing() const;
 
-    // FIXME(sky): Remove
-    float zoom() const { return 1.0f; }
-    float effectiveZoom() const { return 1.0f; }
-
     TextDirection direction() const { return static_cast<TextDirection>(inherited_flags._direction); }
     bool isLeftToRightDirection() const { return direction() == LTR; }
 

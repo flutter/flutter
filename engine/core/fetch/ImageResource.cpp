@@ -124,7 +124,7 @@ void ImageResource::switchClientsToRevalidatedResource()
         Resource::switchClientsToRevalidatedResource();
         ImageResource* revalidatedImageResource = toImageResource(resourceToRevalidate());
         for (ContainerSizeRequests::iterator it = switchContainerSizeRequests.begin(); it != switchContainerSizeRequests.end(); ++it)
-            revalidatedImageResource->setContainerSizeForRenderer(it->key, it->value.first, it->value.second);
+            revalidatedImageResource->setContainerSizeForRenderer(it->key, it->value);
         return;
     }
 
@@ -205,14 +205,13 @@ blink::Image* ImageResource::imageForRenderer(const RenderObject* renderer)
     return m_image.get();
 }
 
-void ImageResource::setContainerSizeForRenderer(const ImageResourceClient* renderer, const IntSize& containerSize, float containerZoom)
+void ImageResource::setContainerSizeForRenderer(const ImageResourceClient* renderer, const IntSize& containerSize)
 {
     if (containerSize.isEmpty())
         return;
     ASSERT(renderer);
-    ASSERT(containerZoom);
     if (!m_image) {
-        m_pendingContainerSizeRequests.set(renderer, SizeAndZoom(containerSize, containerZoom));
+        m_pendingContainerSizeRequests.set(renderer, containerSize);
         return;
     }
 
@@ -243,31 +242,17 @@ bool ImageResource::imageHasRelativeHeight() const
     return false;
 }
 
-LayoutSize ImageResource::imageSizeForRenderer(const RenderObject* renderer, float multiplier, SizeType sizeType)
+LayoutSize ImageResource::imageSizeForRenderer(const RenderObject* renderer, SizeType sizeType)
 {
     ASSERT(!isPurgeable());
 
     if (!m_image)
         return IntSize();
 
-    LayoutSize imageSize;
-
     if (m_image->isBitmapImage() && (renderer && renderer->shouldRespectImageOrientation() == RespectImageOrientation))
-        imageSize = toBitmapImage(m_image.get())->sizeRespectingOrientation();
-    else
-        imageSize = m_image->size();
+        return toBitmapImage(m_image.get())->sizeRespectingOrientation();
 
-    if (multiplier == 1.0f)
-        return imageSize;
-
-    // Don't let images that have a width/height >= 1 shrink below 1 when zoomed.
-    float widthScale = m_image->hasRelativeWidth() ? 1.0f : multiplier;
-    float heightScale = m_image->hasRelativeHeight() ? 1.0f : multiplier;
-    LayoutSize minimumSize(imageSize.width() > 0 ? 1 : 0, imageSize.height() > 0 ? 1 : 0);
-    imageSize.scale(widthScale, heightScale);
-    imageSize.clampToMinimumSize(minimumSize);
-    ASSERT(multiplier != 1.0f || (imageSize.width().fraction() == 0.0f && imageSize.height().fraction() == 0.0f));
-    return imageSize;
+    return m_image->size();
 }
 
 void ImageResource::computeIntrinsicDimensions(Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio)
@@ -309,7 +294,7 @@ inline void ImageResource::createImage()
         // Send queued container size requests.
         if (m_image->usesContainerSize()) {
             for (ContainerSizeRequests::iterator it = m_pendingContainerSizeRequests.begin(); it != m_pendingContainerSizeRequests.end(); ++it)
-                setContainerSizeForRenderer(it->key, it->value.first, it->value.second);
+                setContainerSizeForRenderer(it->key, it->value);
         }
         m_pendingContainerSizeRequests.clear();
     }

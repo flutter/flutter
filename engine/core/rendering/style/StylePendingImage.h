@@ -51,12 +51,12 @@ public:
     CSSCursorImageValue* cssCursorImageValue() const { return m_value->isCursorImageValue() ? toCSSCursorImageValue(m_value) : 0; }
     CSSImageSetValue* cssImageSetValue() const { return m_value->isImageSetValue() ? toCSSImageSetValue(m_value) : 0; }
 
-    virtual LayoutSize imageSize(const RenderObject*, float /*multiplier*/) const override { return LayoutSize(); }
+    virtual LayoutSize imageSize(const RenderObject*) const override { return LayoutSize(); }
     virtual bool imageHasRelativeWidth() const override { return false; }
     virtual bool imageHasRelativeHeight() const override { return false; }
     virtual void computeIntrinsicDimensions(const RenderObject*, Length& /* intrinsicWidth */ , Length& /* intrinsicHeight */, FloatSize& /* intrinsicRatio */) override { }
     virtual bool usesImageContainerSize() const override { return false; }
-    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize&, float) override { }
+    virtual void setContainerSizeForRenderer(const RenderObject*, const IntSize&) override { }
     virtual void addClient(RenderObject*) override { }
     virtual void removeClient(RenderObject*) override { }
     virtual PassRefPtr<Image> image(RenderObject*, const IntSize&) const override

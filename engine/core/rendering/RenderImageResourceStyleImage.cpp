@@ -72,7 +72,7 @@ PassRefPtr<Image> RenderImageResourceStyleImage::image(int width, int height) co
 void RenderImageResourceStyleImage::setContainerSizeForRenderer(const IntSize& size)
 {
     ASSERT(m_renderer);
-    m_styleImage->setContainerSizeForRenderer(m_renderer, size, m_renderer->style()->effectiveZoom());
+    m_styleImage->setContainerSizeForRenderer(m_renderer, size);
 }
 
 } // namespace blink

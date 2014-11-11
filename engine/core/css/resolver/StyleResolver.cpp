@@ -561,7 +561,7 @@ PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
     state.fontBuilder().initForStyleResolve(document(), state.style());
     state.style()->setLineHeight(RenderStyle::initialLineHeight());
     state.setLineHeightValue(0);
-    state.fontBuilder().setInitial(state.style()->effectiveZoom());
+    state.fontBuilder().setInitial();
     state.style()->font().update(document().styleEngine()->fontSelector());
     return state.takeStyle();
 }
@@ -883,11 +883,6 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
     applyMatchedProperties<HighPriorityProperties>(state, matchResult, false, 0, matchResult.matchedProperties.size() - 1, applyInheritedOnly);
     applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, matchResult.ranges.firstAuthorRule, matchResult.ranges.lastAuthorRule, applyInheritedOnly);
     applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, matchResult.ranges.firstUARule, matchResult.ranges.lastUARule, applyInheritedOnly);
-
-    if (cachedMatchedProperties && cachedMatchedProperties->renderStyle->effectiveZoom() != state.style()->effectiveZoom()) {
-        state.fontBuilder().setFontDirty(true);
-        applyInheritedOnly = false;
-    }
 
     // If our font got dirtied, go ahead and update it now.
     updateFont(state);

@@ -82,10 +82,6 @@ bool FilterEffectRenderer::build(RenderObject* renderer, const FilterOperations&
 {
     m_hasFilterThatMovesPixels = operations.hasFilterThatMovesPixels();
 
-    // Inverse zoom the pre-zoomed CSS shorthand filters, so that they are in the same zoom as the unzoomed reference filters.
-    const RenderStyle* style = renderer->style();
-    float invZoom = style ? 1.0f / style->effectiveZoom() : 1.0f;
-
     RefPtr<FilterEffect> previousEffect = m_sourceGraphic;
     for (size_t i = 0; i < operations.operations().size(); ++i) {
         RefPtr<FilterEffect> effect;
@@ -207,15 +203,15 @@ bool FilterEffectRenderer::build(RenderObject* renderer, const FilterOperations&
             break;
         }
         case FilterOperation::BLUR: {
-            float stdDeviation = floatValueForLength(toBlurFilterOperation(filterOperation)->stdDeviation(), 0) * invZoom;
+            float stdDeviation = floatValueForLength(toBlurFilterOperation(filterOperation)->stdDeviation(), 0);
             effect = FEGaussianBlur::create(this, stdDeviation, stdDeviation);
             break;
         }
         case FilterOperation::DROP_SHADOW: {
             DropShadowFilterOperation* dropShadowOperation = toDropShadowFilterOperation(filterOperation);
-            float stdDeviation = dropShadowOperation->stdDeviation() * invZoom;
-            float x = dropShadowOperation->x() * invZoom;
-            float y = dropShadowOperation->y() * invZoom;
+            float stdDeviation = dropShadowOperation->stdDeviation();
+            float x = dropShadowOperation->x();
+            float y = dropShadowOperation->y();
             effect = FEDropShadow::create(this, stdDeviation, stdDeviation, x, y, dropShadowOperation->color(), 1);
             break;
         }
@@ -303,17 +299,11 @@ bool FilterEffectRendererHelper::prepareFilterEffect(RenderLayer* renderLayer, c
     m_renderLayer = renderLayer;
     m_paintInvalidationRect = dirtyRect;
 
-    // Get the zoom factor to scale the filterSourceRect input
-    const RenderLayerModelObject* renderer = renderLayer->renderer();
-    const RenderStyle* style = renderer ? renderer->style() : 0;
-    float zoom = style ? style->effectiveZoom() : 1.0f;
-
     // Prepare a transformation that brings the coordinates into the space
     // filter coordinates are defined in.
     AffineTransform absoluteTransform;
     // FIXME: Should these really be upconverted to doubles and not rounded? crbug.com/350474
     absoluteTransform.translate(filterBoxRect.x().toDouble(), filterBoxRect.y().toDouble());
-    absoluteTransform.scale(zoom, zoom);
 
     FilterEffectRenderer* filter = renderLayer->filterRenderer();
     filter->setAbsoluteTransform(absoluteTransform);

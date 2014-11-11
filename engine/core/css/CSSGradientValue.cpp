@@ -408,7 +408,7 @@ static float positionFromValue(CSSPrimitiveValue* value, const CSSToLengthConver
     }
 
     if (value->isNumber())
-        return origin + sign * value->getFloatValue() * conversionData.zoom();
+        return origin + sign * value->getFloatValue();
 
     if (value->isPercentage())
         return origin + sign * value->getFloatValue() / 100.f * edgeDistance;
@@ -919,7 +919,7 @@ float CSSRadialGradientValue::resolveRadius(CSSPrimitiveValue* radius, const CSS
 {
     float result = 0;
     if (radius->isNumber()) // Can the radius be a percentage?
-        result = radius->getFloatValue() * conversionData.zoom();
+        result = radius->getFloatValue();
     else if (widthOrHeight && radius->isPercentage())
         result = *widthOrHeight * radius->getFloatValue() / 100;
     else

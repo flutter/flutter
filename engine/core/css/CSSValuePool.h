@@ -53,7 +53,7 @@ public:
     PassRefPtr<CSSPrimitiveValue> createValue(double value, CSSPrimitiveValue::UnitType);
     PassRefPtr<CSSPrimitiveValue> createValue(const String& value, CSSPrimitiveValue::UnitType type) { return CSSPrimitiveValue::create(value, type); }
     PassRefPtr<CSSPrimitiveValue> createValue(const Length& value, const RenderStyle&);
-    PassRefPtr<CSSPrimitiveValue> createValue(const Length& value, float zoom) { return CSSPrimitiveValue::create(value, zoom); }
+    PassRefPtr<CSSPrimitiveValue> createValue(const Length& value) { return CSSPrimitiveValue::create(value); }
     template<typename T> static PassRefPtr<CSSPrimitiveValue> createValue(T value) { return CSSPrimitiveValue::create(value); }
 
     void trace(Visitor*);

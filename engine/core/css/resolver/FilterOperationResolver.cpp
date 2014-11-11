@@ -68,7 +68,7 @@ static FilterOperation::OperationType filterOperationForType(CSSFilterValue::Fil
     return FilterOperation::NONE;
 }
 
-bool FilterOperationResolver::createFilterOperations(CSSValue* inValue, const CSSToLengthConversionData& unadjustedConversionData, FilterOperations& outOperations, StyleResolverState& state)
+bool FilterOperationResolver::createFilterOperations(CSSValue* inValue, const CSSToLengthConversionData& conversionData, FilterOperations& outOperations, StyleResolverState& state)
 {
     ASSERT(outOperations.isEmpty());
 
@@ -84,8 +84,6 @@ bool FilterOperationResolver::createFilterOperations(CSSValue* inValue, const CS
     if (!inValue->isValueList())
         return false;
 
-    float zoomFactor = unadjustedConversionData.zoom();
-    const CSSToLengthConversionData& conversionData = unadjustedConversionData.copyWithAdjustedZoom(zoomFactor);
     FilterOperations operations;
     for (CSSValueListIterator i = inValue; i.hasMore(); i.advance()) {
         CSSValue* currValue = i.value();
