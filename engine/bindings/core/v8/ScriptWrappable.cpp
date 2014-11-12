@@ -10,6 +10,9 @@
 
 namespace blink {
 
+#if COMPILER(MSVC)
+__declspec(align(4))
+#endif
 struct SameSizeAsScriptWrappableBase { };
 
 COMPILE_ASSERT(sizeof(ScriptWrappableBase) <= sizeof(SameSizeAsScriptWrappableBase), ScriptWrappableBase_should_stay_small);

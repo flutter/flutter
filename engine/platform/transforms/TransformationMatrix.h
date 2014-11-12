@@ -51,7 +51,11 @@ class PLATFORM_EXPORT TransformationMatrix {
 public:
 
 #if CPU(APPLE_ARMV7S) || defined(TRANSFORMATION_MATRIX_USE_X86_64_SSE2)
+#if COMPILER(MSVC)
+    __declspec(align(16)) typedef double Matrix4[4][4];
+#else
     typedef double Matrix4[4][4] __attribute__((aligned (16)));
+#endif
 #else
     typedef double Matrix4[4][4];
 #endif

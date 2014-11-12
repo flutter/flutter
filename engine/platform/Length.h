@@ -120,6 +120,7 @@ public:
         return *this;
     }
 
+#if COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES)
     Length(Length&& length)
     {
         memcpy(this, &length, sizeof(Length));
@@ -147,6 +148,7 @@ public:
 
         return *this;
     }
+#endif
 
     ~Length()
     {

@@ -27,6 +27,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef NullPtr_h
 #define NullPtr_h
 
+// For compilers and standard libraries that do not yet include it, this adds the
+// nullptr_t type and nullptr object. They are defined in the same namespaces they
+// would be in compiler and library that had the support.
+
+#if COMPILER_SUPPORTS(CXX_NULLPTR) || defined(_LIBCPP_VERSION)
+
+// libstdc++ supports nullptr_t starting with gcc 4.6. STLport doesn't define it.
+#if (defined(__GLIBCXX__) && __GLIBCXX__ < 20110325) || defined(_STLPORT_VERSION)
+namespace std {
+typedef decltype(nullptr) nullptr_t;
+}
+#endif
+
+#else
+
+#include "wtf/WTFExport.h"
+
+namespace std {
+class nullptr_t {
+public:
+    // Required in order to create const nullptr_t objects without an
+    // explicit initializer in GCC 4.5, a la:
+    //
+    // const std::nullptr_t nullptr;
+    nullptr_t() { }
+
+    // Make nullptr convertible to any pointer type.
+    template<typename T> operator T*() const { return 0; }
+    // Make nullptr convertible to any member pointer type.
+    template<typename C, typename T> operator T C::*() { return 0; }
+private:
+    // Do not allow taking the address of nullptr.
+    void operator&();
+};
+}
+WTF_EXPORT extern const std::nullptr_t nullptr;
+
+#endif
+
 #define WTF_DISALLOW_CONSTRUCTION_FROM_ZERO(ClassName) \
     private: \
         ClassName(int) = delete

@@ -35,11 +35,50 @@
 
 #include <stdint.h>
 
+#if COMPILER(MSVC)
+#include <windows.h>
+#endif
+
 #if defined(THREAD_SANITIZER)
 #include <sanitizer/tsan_interface_atomic.h>
 #endif
 
 namespace WTF {
+
+#if COMPILER(MSVC)
+
+// atomicAdd returns the result of the addition.
+ALWAYS_INLINE int atomicAdd(int volatile* addend, int increment)
+{
+    return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend), static_cast<long>(increment)) + increment;
+}
+
+// atomicSubtract returns the result of the subtraction.
+ALWAYS_INLINE int atomicSubtract(int volatile* addend, int decrement)
+{
+    return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend), static_cast<long>(-decrement)) - decrement;
+}
+
+ALWAYS_INLINE int atomicIncrement(int volatile* addend) { return InterlockedIncrement(reinterpret_cast<long volatile*>(addend)); }
+ALWAYS_INLINE int atomicDecrement(int volatile* addend) { return InterlockedDecrement(reinterpret_cast<long volatile*>(addend)); }
+
+ALWAYS_INLINE int64_t atomicIncrement(int64_t volatile* addend) { return InterlockedIncrement64(reinterpret_cast<long long volatile*>(addend)); }
+ALWAYS_INLINE int64_t atomicDecrement(int64_t volatile* addend) { return InterlockedDecrement64(reinterpret_cast<long long volatile*>(addend)); }
+
+ALWAYS_INLINE int atomicTestAndSetToOne(int volatile* ptr)
+{
+    int ret = InterlockedExchange(reinterpret_cast<long volatile*>(ptr), 1);
+    ASSERT(!ret || ret == 1);
+    return ret;
+}
+
+ALWAYS_INLINE void atomicSetOneToZero(int volatile* ptr)
+{
+    ASSERT(*ptr == 1);
+    InterlockedExchange(reinterpret_cast<long volatile*>(ptr), 0);
+}
+
+#else
 
 // atomicAdd returns the result of the addition.
 ALWAYS_INLINE int atomicAdd(int volatile* addend, int increment) { return __sync_add_and_fetch(addend, increment); }
@@ -64,6 +103,7 @@ ALWAYS_INLINE void atomicSetOneToZero(int volatile* ptr)
     ASSERT(*ptr == 1);
     __sync_lock_release(ptr);
 }
+#endif
 
 #if defined(THREAD_SANITIZER)
 ALWAYS_INLINE void releaseStore(volatile int* ptr, int value)
@@ -89,7 +129,14 @@ ALWAYS_INLINE unsigned acquireLoad(volatile const unsigned* ptr)
 
 #if CPU(X86) || CPU(X86_64)
 // Only compiler barrier is needed.
+#if COMPILER(MSVC)
+// Starting from Visual Studio 2005 compiler guarantees acquire and release
+// semantics for operations on volatile variables. See MSDN entry for
+// MemoryBarrier macro.
+#define MEMORY_BARRIER()
+#else
 #define MEMORY_BARRIER() __asm__ __volatile__("" : : : "memory")
+#endif
 #elif CPU(ARM) && (OS(LINUX) || OS(ANDROID))
 // On ARM __sync_synchronize generates dmb which is very expensive on single
 // core devices which don't actually need it. Avoid the cost by calling into

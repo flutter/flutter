@@ -49,12 +49,34 @@ defined(__ARMEL__) || defined(__aarch64__) || \
 defined(__MIPSEL__)
 #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
 #elif defined(_M_IX86) || defined(__i386__)
+#if defined(_WIN32)
+// Windows uses a 64bit wide floating point stack.
+#define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
+#else
 #undef DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS
+#endif  // _WIN32
 #else
 #error Target architecture was not detected as supported by Double-Conversion.
 #endif
 
+
+#if defined(_WIN32) && !defined(__MINGW32__)
+
+typedef signed char int8_t;
+typedef unsigned char uint8_t;
+typedef short int16_t;  // NOLINT
+typedef unsigned short uint16_t;  // NOLINT
+typedef int int32_t;
+typedef unsigned int uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+// intptr_t and friends are defined in crtdefs.h through stdio.h.
+
+#else
+
 #include <stdint.h>
+
+#endif
 
 // The following macro works on both 32 and 64-bit platforms.
 // Usage: instead of writing 0x1234567890123456

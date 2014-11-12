@@ -20,6 +20,7 @@ TEST(RefPtrTest, Basic)
     EXPECT_TRUE(!string);
 }
 
+#if COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES)
 TEST(RefPtrTest, MoveAssignmentOperator)
 {
     RefPtr<StringImpl> a = StringImpl::create("a");
@@ -30,5 +31,6 @@ TEST(RefPtrTest, MoveAssignmentOperator)
     EXPECT_TRUE(!!b);
     EXPECT_TRUE(!a);
 }
+#endif
 
 }

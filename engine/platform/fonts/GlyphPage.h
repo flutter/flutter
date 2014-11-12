@@ -56,6 +56,11 @@ struct GlyphData {
     const SimpleFontData* fontData;
 };
 
+#if COMPILER(MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4200) // Disable "zero-sized array in struct/union" warning
+#endif
+
 // A GlyphPage contains a fixed-size set of GlyphData mappings for a contiguous
 // range of characters in the Unicode code space. GlyphPages are indexed
 // starting from 0 and incrementing for each 256 glyphs.
@@ -212,6 +217,10 @@ private:
     // NOTE: This array has (GlyphPage::size) elements if m_fontDataForAllGlyphs is null.
     const SimpleFontData* m_perGlyphFontData[0];
 };
+
+#if COMPILER(MSVC)
+#pragma warning(pop)
+#endif
 
 } // namespace blink
 

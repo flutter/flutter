@@ -61,7 +61,9 @@ namespace WTF {
     template<> struct IsInteger<unsigned long>      { static const bool value = true; };
     template<> struct IsInteger<long long>          { static const bool value = true; };
     template<> struct IsInteger<unsigned long long> { static const bool value = true; };
+#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
     template<> struct IsInteger<wchar_t>            { static const bool value = true; };
+#endif
 
     template<typename T> struct IsFloatingPoint     { static const bool value = false; };
     template<> struct IsFloatingPoint<float>        { static const bool value = true; };
@@ -312,8 +314,12 @@ class NeedsTracing {
     typedef struct NoType {
         char padding[8];
     } NoType;
+#if COMPILER(MSVC)
+    template<typename V> static YesType checkHasTraceMethod(char[&V::trace != 0]);
+#else
     template<size_t> struct HasMethod;
     template<typename V> static YesType checkHasTraceMethod(HasMethod<sizeof(&V::trace)>*);
+#endif // COMPILER(MSVC)
     template<typename V> static NoType checkHasTraceMethod(...);
 public:
     // We add sizeof(T) to both sides here, because we want it to fail for

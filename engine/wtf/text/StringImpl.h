@@ -32,6 +32,14 @@
 #include "wtf/WTFExport.h"
 #include "wtf/unicode/Unicode.h"
 
+#if USE(CF)
+typedef const struct __CFString * CFStringRef;
+#endif
+
+#ifdef __OBJC__
+@class NSString;
+#endif
+
 namespace WTF {
 
 struct AlreadyHashed;
@@ -42,6 +50,7 @@ struct LCharBufferTranslator;
 struct CharBufferFromLiteralDataTranslator;
 struct SubstringTranslator;
 struct UCharBufferTranslator;
+template<typename> class RetainPtr;
 
 enum TextCaseSensitivity { TextCaseSensitive, TextCaseInsensitive };
 
@@ -389,6 +398,13 @@ public:
     PassRefPtr<StringImpl> replace(StringImpl*, StringImpl*);
     PassRefPtr<StringImpl> replace(unsigned index, unsigned len, StringImpl*);
     PassRefPtr<StringImpl> upconvertedString();
+
+#if USE(CF)
+    RetainPtr<CFStringRef> createCFString();
+#endif
+#ifdef __OBJC__
+    operator NSString*();
+#endif
 
 #ifdef STRING_STATS
     ALWAYS_INLINE static StringStats& stringStats() { return m_stringStats; }

@@ -40,6 +40,9 @@ WebCursorInfo::WebCursorInfo(const Cursor& cursor)
     , hotSpot(cursor.hotSpot())
     , imageScaleFactor(cursor.imageScaleFactor())
     , customImage(cursor.image())
+#ifdef WIN32
+    , externalHandle(0)
+#endif
 {
 }
 

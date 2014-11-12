@@ -36,9 +36,21 @@
 
 #include <stdint.h>
 
+#if COMPILER(MSVC)
+#include <stdlib.h>
+#endif
+
 namespace WTF {
 
 inline uint32_t wswap32(uint32_t x) { return ((x & 0xffff0000) >> 16) | ((x & 0x0000ffff) << 16); }
+
+#if COMPILER(MSVC)
+
+ALWAYS_INLINE uint64_t bswap64(uint64_t x) { return _byteswap_uint64(x); }
+ALWAYS_INLINE uint32_t bswap32(uint32_t x) { return _byteswap_ulong(x); }
+ALWAYS_INLINE uint16_t bswap16(uint16_t x) { return _byteswap_ushort(x); }
+
+#else
 
 ALWAYS_INLINE uint64_t bswap64(uint64_t x) { return __builtin_bswap64(x); }
 ALWAYS_INLINE uint32_t bswap32(uint32_t x) { return __builtin_bswap32(x); }
@@ -47,6 +59,8 @@ ALWAYS_INLINE uint32_t bswap32(uint32_t x) { return __builtin_bswap32(x); }
 ALWAYS_INLINE uint16_t bswap16(uint16_t x) { return __builtin_bswap16(x); }
 #else
 inline uint16_t bswap16(uint16_t x) { return ((x & 0xff00) >> 8) | ((x & 0x00ff) << 8); }
+#endif
+
 #endif
 
 #if CPU(64BIT)

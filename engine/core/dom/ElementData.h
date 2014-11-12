@@ -104,6 +104,11 @@ private:
     template<typename T> inline thisType* to##thisType(const RefPtr<T>& data) { return to##thisType(data.get()); } \
     DEFINE_TYPE_CASTS(thisType, ElementData, data, pointerPredicate, referencePredicate)
 
+#if COMPILER(MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4200) // Disable "zero-sized array in struct/union" warning
+#endif
+
 // SharableElementData is managed by ElementDataCache and is produced by
 // the parser during page load for elements that have identical attributes. This
 // is a memory optimization since it's very common for many elements to have
@@ -134,6 +139,10 @@ public:
 };
 
 DEFINE_ELEMENT_DATA_TYPE_CASTS(ShareableElementData, !data->isUnique(), !data.isUnique());
+
+#if COMPILER(MSVC)
+#pragma warning(pop)
+#endif
 
 // UniqueElementData is created when an element needs to mutate its attributes
 // or gains presentation attribute style (ex. width="10"). It does not need to

@@ -38,7 +38,9 @@ COMPILE_ASSERT(IsInteger<long>::value, WTF_IsInteger_long_true);
 COMPILE_ASSERT(IsInteger<unsigned long>::value, WTF_IsInteger_unsigned_long_true);
 COMPILE_ASSERT(IsInteger<long long>::value, WTF_IsInteger_long_long_true);
 COMPILE_ASSERT(IsInteger<unsigned long long>::value, WTF_IsInteger_unsigned_long_long_true);
+#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 COMPILE_ASSERT(IsInteger<wchar_t>::value, WTF_IsInteger_wchar_t_true);
+#endif
 COMPILE_ASSERT(!IsInteger<char*>::value, WTF_IsInteger_char_pointer_false);
 COMPILE_ASSERT(!IsInteger<const char*>::value, WTF_IsInteger_const_char_pointer_false);
 COMPILE_ASSERT(!IsInteger<volatile char*>::value, WTF_IsInteger_volatile_char_pointer_false);
@@ -62,7 +64,9 @@ COMPILE_ASSERT(IsPod<long>::value, WTF_IsPod_long_true);
 COMPILE_ASSERT(IsPod<unsigned long>::value, WTF_IsPod_unsigned_long_true);
 COMPILE_ASSERT(IsPod<long long>::value, WTF_IsPod_long_long_true);
 COMPILE_ASSERT(IsPod<unsigned long long>::value, WTF_IsPod_unsigned_long_long_true);
+#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 COMPILE_ASSERT(IsPod<wchar_t>::value, WTF_IsPod_wchar_t_true);
+#endif
 COMPILE_ASSERT(IsPod<char*>::value, WTF_IsPod_char_pointer_true);
 COMPILE_ASSERT(IsPod<const char*>::value, WTF_IsPod_const_char_pointer_true);
 COMPILE_ASSERT(IsPod<volatile char*>::value, WTF_IsPod_volatile_char_pointer_true);
@@ -85,7 +89,9 @@ COMPILE_ASSERT(IsConvertibleToInteger<long>::value, WTF_IsConvertibleToInteger_l
 COMPILE_ASSERT(IsConvertibleToInteger<unsigned long>::value, WTF_IsConvertibleToInteger_unsigned_long_true);
 COMPILE_ASSERT(IsConvertibleToInteger<long long>::value, WTF_IsConvertibleToInteger_long_long_true);
 COMPILE_ASSERT(IsConvertibleToInteger<unsigned long long>::value, WTF_IsConvertibleToInteger_unsigned_long_long_true);
+#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 COMPILE_ASSERT(IsConvertibleToInteger<wchar_t>::value, WTF_IsConvertibleToInteger_wchar_t_true);
+#endif
 COMPILE_ASSERT(IsConvertibleToInteger<double>::value, WTF_IsConvertibleToInteger_double_true);
 COMPILE_ASSERT(IsConvertibleToInteger<long double>::value, WTF_IsConvertibleToInteger_long_double_true);
 COMPILE_ASSERT(IsConvertibleToInteger<float>::value, WTF_IsConvertibleToInteger_float_true);

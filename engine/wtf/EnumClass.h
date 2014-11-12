@@ -53,12 +53,82 @@ namespace WTF {
 // The ENUM_CLASS macros will use C++11's enum class if the compiler supports it.
 // Otherwise, it will use the EnumClass template below.
 
+#if COMPILER_SUPPORTS(CXX_STRONG_ENUMS)
 
 #define ENUM_CLASS(__enumName) \
     enum class __enumName
 
 #define ENUM_CLASS_END(__enumName)
 
+#else // !COMPILER_SUPPORTS(CXX_STRONG_ENUMS)
+
+// How to define a type safe enum list using the EnumClass template?
+// ================================================================
+// Definition should be a struct that encapsulates an enum list.
+// The enum list should be names Enums.
+//
+// Here's an example of how to define a type safe enum named MyEnum using
+// the EnumClass template:
+//
+//     struct MyEnumDefinition {
+//         enum Enums {
+//             ValueDefault,
+//             Value1,
+//             ...
+//             ValueN
+//         };
+//     };
+//     typedef EnumClass<MyEnumDefinition, MyEnumDefinition::ValueDefault> MyEnum;
+//
+// With that, you can now use MyEnum enum values as follow:
+//
+//     MyEnum value1; // value1 is assigned MyEnum::ValueDefault by default.
+//     MyEnum value2 = MyEnum::Value1; // value2 is assigned MyEnum::Value1;
+
+template <typename Definition>
+class EnumClass : public Definition {
+    typedef enum Definition::Enums Value;
+public:
+    ALWAYS_INLINE EnumClass() { }
+    ALWAYS_INLINE EnumClass(Value value) : m_value(value) { }
+
+    ALWAYS_INLINE Value value() const { return m_value; }
+
+    ALWAYS_INLINE bool operator==(const EnumClass other) { return m_value == other.m_value; }
+    ALWAYS_INLINE bool operator!=(const EnumClass other) { return m_value != other.m_value; }
+    ALWAYS_INLINE bool operator<(const EnumClass other) { return m_value < other.m_value; }
+    ALWAYS_INLINE bool operator<=(const EnumClass other) { return m_value <= other.m_value; }
+    ALWAYS_INLINE bool operator>(const EnumClass other) { return m_value > other.m_value; }
+    ALWAYS_INLINE bool operator>=(const EnumClass other) { return m_value >= other.m_value; }
+
+    ALWAYS_INLINE bool operator==(const Value value) { return m_value == value; }
+    ALWAYS_INLINE bool operator!=(const Value value) { return m_value != value; }
+    ALWAYS_INLINE bool operator<(const Value value) { return m_value < value; }
+    ALWAYS_INLINE bool operator<=(const Value value) { return m_value <= value; }
+    ALWAYS_INLINE bool operator>(const Value value) { return m_value > value; }
+    ALWAYS_INLINE bool operator>=(const Value value) { return m_value >= value; }
+
+    ALWAYS_INLINE operator Value() { return m_value; }
+
+private:
+    Value m_value;
+};
+
+#define ENUM_CLASS(__enumName) \
+    struct __enumName ## Definition { \
+        enum Enums
+
+#define ENUM_CLASS_END(__enumName) \
+        ; \
+    }; \
+    typedef EnumClass< __enumName ## Definition > __enumName
+
+#endif // !COMPILER_SUPPORTS(CXX_STRONG_ENUMS)
+
 } // namespace WTF
+
+#if !COMPILER_SUPPORTS(CXX_STRONG_ENUMS)
+using WTF::EnumClass;
+#endif
 
 #endif // WTF_EnumClass_h

@@ -70,6 +70,7 @@
 #elif !defined(__ARM_EABI__) \
     && !defined(__EABI__) \
     && !defined(__VFP_FP__) \
+    && !defined(_WIN32_WCE) \
     && !defined(ANDROID)
 #define WTF_CPU_MIDDLE_ENDIAN 1
 
@@ -158,7 +159,7 @@
 #define WTF_CPU_ARM_NEON 1
 #endif
 
-#if CPU(ARM_NEON)
+#if CPU(ARM_NEON) && (!COMPILER(GCC) || GCC_VERSION_AT_LEAST(4, 7, 0))
 // All NEON intrinsics usage can be disabled by this macro.
 #define HAVE_ARM_NEON_INTRINSICS 1
 #endif

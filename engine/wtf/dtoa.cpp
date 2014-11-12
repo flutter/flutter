@@ -40,6 +40,12 @@
 #include "wtf/ThreadingPrimitives.h"
 #include "wtf/Vector.h"
 
+#if COMPILER(MSVC)
+#pragma warning(disable: 4244)
+#pragma warning(disable: 4245)
+#pragma warning(disable: 4554)
+#endif
+
 namespace WTF {
 
 Mutex* s_dtoaP5Mutex;

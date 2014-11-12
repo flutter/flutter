@@ -24,6 +24,10 @@
 /* Include compiler specific macros */
 #include "wtf/Compiler.h"
 
+#if COMPILER(MSVC)
+#define _USE_MATH_DEFINES // Make math.h behave like other platforms.
+#endif
+
 /* ==== Platform adaptation macros: these describe properties of the target environment. ==== */
 
 /* HAVE() - specific system features (headers, functions or similar) that are present or not */
