@@ -51,12 +51,15 @@ class SkyDebugger : public mojo::ApplicationDelegate,
                mojo::ServiceProviderImpl* exported_services,
                scoped_ptr<mojo::ServiceProvider> imported_services) override;
   void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
+
+  // Overriden from mojo::ViewObserver:
   void OnViewDestroyed(mojo::View* view) override;
   void OnViewBoundsChanged(mojo::View* view,
                            const mojo::Rect& old_bounds,
                            const mojo::Rect& new_bounds) override;
+  void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 
-  // Overridden from InterfaceFactory<Debugger>
+  // Overridden from InterfaceFactory<Debugger>:
   void Create(mojo::ApplicationConnection* connection,
               mojo::InterfaceRequest<Debugger> request) override;
 
