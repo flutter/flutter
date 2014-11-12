@@ -400,20 +400,13 @@ bool Node::hasEditableStyle(EditableLevel editableLevel, UserSelectAllTreatment 
     // would fire in the middle of Document::setFocusedNode().
 
     for (const Node* node = this; node; node = node->parentNode()) {
-        if ((node->isHTMLElement() || node->isDocumentNode()) && node->renderer()) {
+        if (node->isHTMLElement() && node->renderer()) {
             // Elements with user-select: all style are considered atomic
             // therefore non editable.
             if (Position::nodeIsUserSelectAll(node) && treatment == UserSelectAllIsAlwaysNonEditable)
                 return false;
-            switch (node->renderer()->style()->userModify()) {
-            case READ_ONLY:
-                return false;
-            case READ_WRITE:
-                return true;
-            case READ_WRITE_PLAINTEXT_ONLY:
+            if (static_cast<const Element*>(node)->hasAttribute(HTMLNames::contenteditableAttr))
                 return editableLevel != RichlyEditable;
-            }
-            ASSERT_NOT_REACHED();
             return false;
         }
     }

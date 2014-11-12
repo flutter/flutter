@@ -114,6 +114,9 @@ void DocumentView::OnEmbed(
 
   gfx::Size size = root_->bounds().To<gfx::Rect>().size();
   web_view_->resize(size);
+  // TODO(abarth): We should ask the view whether it is focused instead of
+  // assuming that we're focused.
+  web_view_->setFocus(true);
   web_layer_tree_view_impl_->setViewportSize(size);
   web_layer_tree_view_impl_->set_view(root_);
   root_->AddObserver(this);
@@ -213,6 +216,15 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
   gfx::Size size = new_bounds.To<gfx::Rect>().size();
   web_view_->resize(size);
   web_layer_tree_view_impl_->setViewportSize(size);
+}
+
+void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,
+                                      mojo::View* lost_focus) {
+  if (root_ == lost_focus) {
+    web_view_->setFocus(false);
+  } else if (root_ == gained_focus) {
+    web_view_->setFocus(true);
+  }
 }
 
 void DocumentView::OnViewDestroyed(mojo::View* view) {
