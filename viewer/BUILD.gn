@@ -70,6 +70,7 @@ shared_library("viewer") {
     "//skia",
     "//sky/engine/public:blink",
     "//sky/services/inspector:bindings",
+    "//sky/services/testing:bindings",
     "//sky/viewer/cc",
     "//third_party/icu",
     "//ui/native_theme",
@@ -79,7 +80,6 @@ shared_library("viewer") {
 
 mojom("bindings") {
   sources = [
-    "services/test_harness.mojom",
     "services/tracing.mojom",
     "services/inspector.mojom",
   ]

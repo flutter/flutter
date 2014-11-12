@@ -25,6 +25,7 @@ shared_library("tester") {
     "//mojo/services/public/cpp/view_manager",
     "//mojo/services/public/interfaces/input_events",
     "//mojo/services/window_manager:lib",
+    "//sky/services/testing:bindings",
     "//sky/viewer:bindings",
   ]
 }

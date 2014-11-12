@@ -8,7 +8,7 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/public/cpp/system/core.h"
-#include "sky/viewer/services/test_harness.mojom.h"
+#include "sky/services/testing/test_harness.mojom.h"
 
 namespace sky {
 namespace tester {
@@ -22,6 +22,7 @@ class TestHarnessImpl : public mojo::InterfaceImpl<TestHarness> {
  private:
   // TestHarness implementation.
   void OnTestComplete(const mojo::String& test_result) override;
+  void DispatchInputEvent(mojo::EventPtr event) override;
 
   base::WeakPtr<TestRunner> test_runner_;
 

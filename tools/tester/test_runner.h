@@ -18,6 +18,10 @@ namespace tester {
 class TestRunnerClient {
  public:
   virtual void OnTestComplete() = 0;
+  virtual void DispatchInputEvent(mojo::EventPtr event) = 0;
+
+ protected:
+  virtual ~TestRunnerClient();
 };
 
 class TestRunner {
@@ -25,6 +29,9 @@ class TestRunner {
   TestRunner(TestRunnerClient* client, mojo::View* container,
       const std::string& url);
   virtual ~TestRunner();
+
+  TestRunnerClient* client() const { return client_; }
+  TestHarnessFactory* test_harness_factory() { return &test_harness_factory_; }
 
   base::WeakPtr<TestRunner> GetWeakPtr();
   void OnTestStart();

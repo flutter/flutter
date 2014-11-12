@@ -9,7 +9,7 @@
 #include "gin/handle.h"
 #include "gin/object_template_builder.h"
 #include "gin/wrappable.h"
-#include "sky/viewer/services/test_harness.mojom.h"
+#include "sky/services/testing/test_harness.mojom.h"
 
 namespace sky {
 class DocumentView;
