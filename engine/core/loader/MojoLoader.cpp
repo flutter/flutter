@@ -41,8 +41,7 @@ void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStre
     // FIXME: This should read the Content-Language out of the
     // response headers and set them on Document::contentLanguage.
 
-    document->startParsing();
-    document->parser()->parse(responseStream.Pass());
+    document->startParsing()->parse(responseStream.Pass());
 }
 
 }

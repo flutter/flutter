@@ -103,8 +103,7 @@ HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLRespon
         .withRegistrationContext(m_controller->master()->registrationContext());
     m_document = HTMLDocument::create(init);
     m_module = Module::create(contextDocument.get(), nullptr, m_document.get(), url.string());
-    m_document->startParsing();
-    m_document->parser()->parse(response->body.Pass());
+    m_document->startParsing()->parse(response->body.Pass());
     return StateLoading;
 }
 

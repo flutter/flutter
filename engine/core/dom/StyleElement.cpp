@@ -47,8 +47,8 @@ StyleElement::StyleElement(Document* document, bool createdByParser)
     , m_registeredAsCandidate(false)
     , m_startPosition(TextPosition::belowRangePosition())
 {
-    if (createdByParser && document && document->scriptableDocumentParser())
-        m_startPosition = document->scriptableDocumentParser()->textPosition();
+    if (createdByParser)
+        m_startPosition = document->parserPosition();
 }
 
 StyleElement::~StyleElement()

@@ -91,8 +91,6 @@ public:
 
     static void setCaptureCallStackForUncaughtExceptions(bool);
 
-    TextPosition eventHandlerPosition() const;
-
     void clearWindowProxy();
     void updateDocument();
 

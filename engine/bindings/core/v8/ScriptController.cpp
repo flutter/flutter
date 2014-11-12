@@ -188,14 +188,6 @@ WindowProxy* ScriptController::windowProxy(DOMWrapperWorld& world)
     return windowProxy;
 }
 
-TextPosition ScriptController::eventHandlerPosition() const
-{
-    HTMLDocumentParser* parser = m_frame->document()->scriptableDocumentParser();
-    if (parser)
-        return parser->textPosition();
-    return TextPosition::minimumPosition();
-}
-
 V8Extensions& ScriptController::registeredExtensions()
 {
     DEFINE_STATIC_LOCAL(V8Extensions, extensions, ());

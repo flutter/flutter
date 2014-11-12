@@ -302,7 +302,7 @@ public:
 
     DocumentLoadTiming* timing() const;
 
-    void startParsing();
+    DocumentParser* startParsing();
     void cancelParsing();
 
     // close() is the DOM API document.close()
@@ -335,8 +335,7 @@ public:
 
     CSSStyleSheet& elementSheet();
 
-    DocumentParser* parser() const { return m_parser.get(); }
-    HTMLDocumentParser* scriptableDocumentParser() const;
+    TextPosition parserPosition() const;
 
     enum ReadyState {
         Loading,
@@ -638,6 +637,7 @@ private:
     void updateRenderTree(StyleRecalcChange);
     void updateStyle(StyleRecalcChange);
 
+    HTMLDocumentParser* scriptableDocumentParser() const;
     void detachParser();
 
     virtual bool isDocument() const override final { return true; }

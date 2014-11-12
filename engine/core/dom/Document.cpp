@@ -1344,7 +1344,7 @@ void Document::removeAllEventListeners()
 
 HTMLDocumentParser* Document::scriptableDocumentParser() const
 {
-    return parser() ? parser()->asHTMLDocumentParser() : 0;
+    return m_parser ? m_parser->asHTMLDocumentParser() : 0;
 }
 
 void Document::detachParser()
@@ -1374,7 +1374,7 @@ void Document::cancelParsing()
     checkCompleted();
 }
 
-void Document::startParsing()
+DocumentParser* Document::startParsing()
 {
     ASSERT(!m_parser);
     ASSERT(!m_isParsing);
@@ -1384,6 +1384,7 @@ void Document::startParsing()
     m_parser = HTMLDocumentParser::create(toHTMLDocument(*this), false);
     setParsing(true);
     setReadyState(Loading);
+    return m_parser.get();
 }
 
 Element* Document::viewportDefiningElement(RenderStyle* rootStyle) const
@@ -1636,6 +1637,13 @@ void Document::executeScriptsWaitingForResourcesTimerFired(Timer<Document>*)
         return;
     if (HTMLDocumentParser* parser = scriptableDocumentParser())
         parser->executeScriptsWaitingForResources();
+}
+
+TextPosition Document::parserPosition() const
+{
+    if (HTMLDocumentParser* parser = scriptableDocumentParser())
+        return parser->textPosition();
+    return TextPosition::belowRangePosition();
 }
 
 CSSStyleSheet& Document::elementSheet()
