@@ -17,12 +17,14 @@
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
 
-#include <string>
-#include <vector>
+#include <math.h>
+#include <stdio.h>  // for debugging
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>  // for debugging
-#include <stdio.h>  // ditto
+#include <string>
+#include <vector>
 
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
