@@ -79,7 +79,7 @@ shared_library("viewer") {
 
 mojom("bindings") {
   sources = [
-    "test_observer.mojom",
+    "services/test_harness.mojom",
     "services/tracing.mojom",
     "services/inspector.mojom",
   ]

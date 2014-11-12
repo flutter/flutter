@@ -6,7 +6,7 @@
 #define SKY_TOOLS_TESTER_TEST_RUNNER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "sky/tools/tester/test_observer_impl.h"
+#include "sky/tools/tester/test_harness_impl.h"
 
 namespace mojo{
 class View;
@@ -31,7 +31,7 @@ class TestRunner {
   void OnTestComplete(const std::string& test_result);
 
  private:
-  TestObserverFactory test_observer_factory_;
+  TestHarnessFactory test_harness_factory_;
   TestRunnerClient* client_;
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
 

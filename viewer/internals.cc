@@ -34,7 +34,7 @@ gin::Handle<Internals> Internals::Create(
 
 Internals::Internals(DocumentView* document_view)
     : document_view_(document_view->GetWeakPtr()) {
-  mojo::ConnectToService(document_view->imported_services(), &test_observer_);
+  mojo::ConnectToService(document_view->imported_services(), &test_harness_);
 }
 
 Internals::~Internals() {
@@ -70,7 +70,7 @@ std::string Internals::ContentAsMarkup() {
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {
-  test_observer_->OnTestComplete(test_result);
+  test_harness_->OnTestComplete(test_result);
 }
 
 mojo::Handle Internals::ConnectToService(

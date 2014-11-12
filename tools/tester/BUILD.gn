@@ -6,8 +6,8 @@ shared_library("tester") {
   output_name = "sky_tester"
 
   sources = [
-    "test_observer_impl.cc",
-    "test_observer_impl.h",
+    "test_harness_impl.cc",
+    "test_harness_impl.h",
     "test_runner.cc",
     "test_runner.h",
     "tester.cc",

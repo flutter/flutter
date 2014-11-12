@@ -15,14 +15,14 @@ namespace tester {
 
 TestRunner::TestRunner(TestRunnerClient* client, mojo::View* container,
     const std::string& url)
-    : test_observer_factory_(this),
+    : test_harness_factory_(this),
       client_(client),
       weak_ptr_factory_(this) {
   CHECK(client);
 
   scoped_ptr<mojo::ServiceProviderImpl> exported_services(
     new mojo::ServiceProviderImpl());
-  exported_services->AddService(&test_observer_factory_);
+  exported_services->AddService(&test_harness_factory_);
 
   container->Embed(url, exported_services.Pass());
 }

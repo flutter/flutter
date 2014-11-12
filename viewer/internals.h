@@ -9,7 +9,7 @@
 #include "gin/handle.h"
 #include "gin/object_template_builder.h"
 #include "gin/wrappable.h"
-#include "sky/viewer/test_observer.mojom.h"
+#include "sky/viewer/services/test_harness.mojom.h"
 
 namespace sky {
 class DocumentView;
@@ -36,7 +36,7 @@ class Internals : public gin::Wrappable<Internals> {
       const std::string& application_url, const std::string& interface_name);
 
   base::WeakPtr<DocumentView> document_view_;
-  TestObserverPtr test_observer_;
+  TestHarnessPtr test_harness_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Internals);
 };

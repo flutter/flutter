@@ -4,6 +4,6 @@
 
 module sky;
 
-interface TestObserver {
+interface TestHarness {
   OnTestComplete(string test_result);
 };
