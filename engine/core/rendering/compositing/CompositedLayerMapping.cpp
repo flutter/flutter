@@ -36,7 +36,6 @@
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
 #include "core/page/Page.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/FilterEffectRenderer.h"
 #include "core/rendering/RenderImage.h"
 #include "core/rendering/RenderLayerStackingNodeIterator.h"
@@ -123,16 +122,6 @@ static inline bool isAcceleratedContents(RenderObject* renderer)
     return isAcceleratedCanvas(renderer);
 }
 
-// Get the scrolling coordinator in a way that works inside CompositedLayerMapping's destructor.
-static ScrollingCoordinator* scrollingCoordinatorFromLayer(RenderLayer& layer)
-{
-    Page* page = layer.renderer()->frame()->page();
-    if (!page)
-        return 0;
-
-    return page->scrollingCoordinator();
-}
-
 CompositedLayerMapping::CompositedLayerMapping(RenderLayer& layer)
     : m_owningLayer(layer)
     , m_contentOffsetInCompositingLayerDirty(false)
@@ -140,7 +129,6 @@ CompositedLayerMapping::CompositedLayerMapping(RenderLayer& layer)
     , m_requiresOwnBackingStoreForIntrinsicReasons(false)
     , m_requiresOwnBackingStoreForAncestorReasons(false)
     , m_backgroundLayerPaintsFixedRootBackground(false)
-    , m_scrollingContentsAreEmpty(false)
 {
     createPrimaryGraphicsLayer();
 }
@@ -160,13 +148,11 @@ CompositedLayerMapping::~CompositedLayerMapping()
     }
 
     updateClippingLayers(false, false);
-    updateOverflowControlsLayers(false, false, false);
     updateChildTransformLayer(false);
     updateForegroundLayer(false);
     updateBackgroundLayer(false);
     updateMaskLayer(false);
     updateClippingMaskLayers(false);
-    updateScrollingLayers(false);
     updateSquashingLayers(false);
     destroyGraphicsLayers();
 }
@@ -213,10 +199,6 @@ void CompositedLayerMapping::destroyGraphicsLayers()
     m_childTransformLayer = nullptr;
     m_maskLayer = nullptr;
     m_childClippingMaskLayer = nullptr;
-
-    m_scrollingLayer = nullptr;
-    m_scrollingContentsLayer = nullptr;
-    m_scrollingBlockSelectionLayer = nullptr;
 }
 
 void CompositedLayerMapping::updateOpacity(const RenderStyle* style)
@@ -360,15 +342,6 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
     if (updateClippingLayers(needsAncestorClip, needsDescendantsClippingLayer))
         layerConfigChanged = true;
 
-    if (updateOverflowControlsLayers(requiresHorizontalScrollbarLayer(), requiresVerticalScrollbarLayer(), needsAncestorClip))
-        layerConfigChanged = true;
-
-    bool scrollingConfigChanged = false;
-    if (updateScrollingLayers(m_owningLayer.needsCompositedScrolling())) {
-        layerConfigChanged = true;
-        scrollingConfigChanged = true;
-    }
-
     bool hasPerspective = false;
     if (RenderStyle* style = renderer->style())
         hasPerspective = style->hasPerspective();
@@ -376,7 +349,6 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
     if (updateChildTransformLayer(needsChildTransformLayer))
         layerConfigChanged = true;
 
-    updateScrollParent(scrollParent);
     updateClipParent();
 
     if (updateSquashingLayers(!m_squashedLayers.isEmpty()))
@@ -384,11 +356,6 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
 
     if (layerConfigChanged)
         updateInternalHierarchy();
-
-    if (scrollingConfigChanged) {
-        if (renderer->view())
-            compositor->scrollingLayerDidChange(&m_owningLayer);
-    }
 
     // A mask layer is not part of the hierarchy proper, it's an auxiliary layer
     // that's plugged into another GraphicsLayer that is part of the hierarchy.
@@ -400,11 +367,11 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
         m_graphicsLayer->setMaskLayer(m_maskLayer.get());
     }
 
-    bool hasChildClippingLayer = compositor->clipsCompositingDescendants(&m_owningLayer) && (hasClippingLayer() || hasScrollingLayer());
+    bool hasChildClippingLayer = compositor->clipsCompositingDescendants(&m_owningLayer) && (hasClippingLayer());
     // If we have a border radius or clip path on a scrolling layer, we need a clipping mask to properly
     // clip the scrolled contents, even if there are no composited descendants.
     bool hasClipPath = renderer->style()->clipPath();
-    bool needsChildClippingMask = (hasClipPath || renderer->style()->hasBorderRadius()) && (hasChildClippingLayer || isAcceleratedContents(renderer) || hasScrollingLayer());
+    bool needsChildClippingMask = (hasClipPath || renderer->style()->hasBorderRadius()) && (hasChildClippingLayer || isAcceleratedContents(renderer));
     if (updateClippingMaskLayers(needsChildClippingMask)) {
         // Clip path clips the entire subtree, including scrollbars. It must be attached directly onto
         // the main m_graphicsLayer.
@@ -412,8 +379,6 @@ bool CompositedLayerMapping::updateGraphicsLayerConfiguration()
             m_graphicsLayer->setMaskLayer(m_childClippingMaskLayer.get());
         else if (hasClippingLayer())
             clippingLayer()->setMaskLayer(m_childClippingMaskLayer.get());
-        else if (hasScrollingLayer())
-            scrollingLayer()->setMaskLayer(m_childClippingMaskLayer.get());
         else if (isAcceleratedContents(renderer))
             m_graphicsLayer->setContentsClippingMaskLayer(m_childClippingMaskLayer.get());
     }
@@ -609,7 +574,6 @@ void CompositedLayerMapping::updateGraphicsLayerGeometry(const RenderLayer* comp
     updateTransformGeometry(snappedOffsetFromCompositedAncestor, relativeCompositingBounds);
     updateForegroundLayerGeometry(contentsSize, clippingBox);
     updateBackgroundLayerGeometry(contentsSize);
-    updateScrollingLayerGeometry(localCompositingBounds);
     updateChildClippingMaskLayerGeometry();
 
     if (m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->scrollsOverflow())
@@ -627,7 +591,6 @@ void CompositedLayerMapping::updateGraphicsLayerGeometry(const RenderLayer* comp
     updateRenderingContext();
     updateShouldFlattenTransform();
     updateChildrenTransform();
-    updateScrollParent(compositor()->preferCompositingToLCDTextEnabled() ? m_owningLayer.scrollParent() : 0);
 
     updateCompositingReasons();
 }
@@ -723,7 +686,7 @@ void CompositedLayerMapping::updateChildContainmentLayerGeometry(const IntRect& 
     m_childContainmentLayer->setPosition(FloatPoint(clippingBox.location() - localCompositingBounds.location() + roundedIntSize(m_owningLayer.subpixelAccumulation())));
     m_childContainmentLayer->setSize(clippingBox.size());
     m_childContainmentLayer->setOffsetFromRenderer(toIntSize(clippingBox.location()));
-    if (m_childClippingMaskLayer && !m_scrollingLayer && !renderer()->style()->clipPath()) {
+    if (m_childClippingMaskLayer && !renderer()->style()->clipPath()) {
         m_childClippingMaskLayer->setPosition(m_childContainmentLayer->position());
         m_childClippingMaskLayer->setSize(m_childContainmentLayer->size());
         m_childClippingMaskLayer->setOffsetFromRenderer(m_childContainmentLayer->offsetFromRenderer());
@@ -780,54 +743,6 @@ void CompositedLayerMapping::updateTransformGeometry(const IntPoint& snappedOffs
     }
 }
 
-void CompositedLayerMapping::updateScrollingLayerGeometry(const IntRect& localCompositingBounds)
-{
-    if (!m_scrollingLayer)
-        return;
-
-    ASSERT(m_scrollingContentsLayer);
-    RenderBox* renderBox = toRenderBox(renderer());
-    IntRect clientBox = enclosingIntRect(renderBox->clientBoxRect());
-
-    IntSize adjustedScrollOffset = m_owningLayer.scrollableArea()->adjustedScrollOffset();
-    m_scrollingLayer->setPosition(FloatPoint(clientBox.location() - localCompositingBounds.location() + roundedIntSize(m_owningLayer.subpixelAccumulation())));
-    m_scrollingLayer->setSize(clientBox.size());
-
-    IntSize oldScrollingLayerOffset = m_scrollingLayer->offsetFromRenderer();
-    m_scrollingLayer->setOffsetFromRenderer(-toIntSize(clientBox.location()));
-
-    if (m_childClippingMaskLayer && !renderer()->style()->clipPath()) {
-        m_childClippingMaskLayer->setPosition(m_scrollingLayer->position());
-        m_childClippingMaskLayer->setSize(m_scrollingLayer->size());
-        m_childClippingMaskLayer->setOffsetFromRenderer(toIntSize(clientBox.location()));
-    }
-
-    bool clientBoxOffsetChanged = oldScrollingLayerOffset != m_scrollingLayer->offsetFromRenderer();
-
-    IntSize scrollSize(renderBox->scrollWidth(), renderBox->scrollHeight());
-    if (scrollSize != m_scrollingContentsLayer->size() || clientBoxOffsetChanged)
-        m_scrollingContentsLayer->setNeedsDisplay();
-
-    IntSize scrollingContentsOffset = toIntSize(clientBox.location() - adjustedScrollOffset);
-    if (scrollingContentsOffset != m_scrollingContentsLayer->offsetFromRenderer() || scrollSize != m_scrollingContentsLayer->size()) {
-        bool coordinatorHandlesOffset = compositor()->scrollingLayerDidChange(&m_owningLayer);
-        m_scrollingContentsLayer->setPosition(coordinatorHandlesOffset ? FloatPoint() : FloatPoint(-adjustedScrollOffset));
-    }
-
-    m_scrollingContentsLayer->setSize(scrollSize);
-    // FIXME: The paint offset and the scroll offset should really be separate concepts.
-    m_scrollingContentsLayer->setOffsetFromRenderer(scrollingContentsOffset, GraphicsLayer::DontSetNeedsDisplay);
-
-    if (m_foregroundLayer) {
-        if (m_foregroundLayer->size() != m_scrollingContentsLayer->size())
-            m_foregroundLayer->setSize(m_scrollingContentsLayer->size());
-        m_foregroundLayer->setNeedsDisplay();
-        m_foregroundLayer->setOffsetFromRenderer(m_scrollingContentsLayer->offsetFromRenderer());
-    }
-
-    updateScrollingBlockSelection();
-}
-
 void CompositedLayerMapping::updateChildClippingMaskLayerGeometry()
 {
     if (!m_childClippingMaskLayer || !renderer()->style()->clipPath())
@@ -872,8 +787,6 @@ void CompositedLayerMapping::updateForegroundLayerGeometry(const FloatSize& rela
         m_foregroundLayer->setNeedsDisplay();
     }
     m_foregroundLayer->setOffsetFromRenderer(foregroundOffset);
-
-    // NOTE: there is some more configuring going on in updateScrollingLayerGeometry().
 }
 
 void CompositedLayerMapping::updateBackgroundLayerGeometry(const FloatSize& relativeCompositingBoundsSize)
@@ -911,18 +824,6 @@ void CompositedLayerMapping::updateInternalHierarchy()
     else if (m_childTransformLayer)
         m_graphicsLayer->addChild(m_childTransformLayer.get());
 
-    if (m_scrollingLayer) {
-        GraphicsLayer* superLayer = m_graphicsLayer.get();
-
-        if (m_childContainmentLayer)
-            superLayer = m_childContainmentLayer.get();
-
-        if (m_childTransformLayer)
-            superLayer = m_childTransformLayer.get();
-
-        superLayer->addChild(m_scrollingLayer.get());
-    }
-
     // The clip for child layers does not include space for overflow controls, so they exist as
     // siblings of the clipping layer if we have one. Normal children of this layer are set as
     // children of the clipping layer.
@@ -933,11 +834,6 @@ void CompositedLayerMapping::updateInternalHierarchy()
     } else if (m_overflowControlsHostLayer) {
         m_graphicsLayer->addChild(m_overflowControlsHostLayer.get());
     }
-
-    if (m_layerForHorizontalScrollbar)
-        m_overflowControlsHostLayer->addChild(m_layerForHorizontalScrollbar.get());
-    if (m_layerForVerticalScrollbar)
-        m_overflowControlsHostLayer->addChild(m_layerForVerticalScrollbar.get());
 
     // The squashing containment layer, if it exists, becomes a no-op parent.
     if (m_squashingLayer) {
@@ -958,13 +854,6 @@ void CompositedLayerMapping::updateInternalHierarchy()
 void CompositedLayerMapping::updatePaintingPhases()
 {
     m_graphicsLayer->setPaintingPhase(paintingPhaseForPrimaryLayer());
-    if (m_scrollingContentsLayer) {
-        GraphicsLayerPaintingPhase paintPhase = GraphicsLayerPaintOverflowContents | GraphicsLayerPaintCompositedScroll;
-        if (!m_foregroundLayer)
-            paintPhase |= GraphicsLayerPaintForeground;
-        m_scrollingContentsLayer->setPaintingPhase(paintPhase);
-        m_scrollingBlockSelectionLayer->setPaintingPhase(paintPhase);
-    }
 }
 
 void CompositedLayerMapping::updateContentsRect()
@@ -1010,49 +899,8 @@ void CompositedLayerMapping::updateContentsOffsetInCompositingLayer(const IntPoi
     m_contentOffsetInCompositingLayerDirty = false;
 }
 
-void CompositedLayerMapping::updateScrollingBlockSelection()
-{
-    if (!m_scrollingBlockSelectionLayer)
-        return;
-
-    if (!m_scrollingContentsAreEmpty) {
-        // In this case, the selection will be painted directly into m_scrollingContentsLayer.
-        m_scrollingBlockSelectionLayer->setDrawsContent(false);
-        return;
-    }
-
-    const IntRect blockSelectionGapsBounds = m_owningLayer.blockSelectionGapsBounds();
-    const bool shouldDrawContent = !blockSelectionGapsBounds.isEmpty();
-    m_scrollingBlockSelectionLayer->setDrawsContent(shouldDrawContent);
-    if (!shouldDrawContent)
-        return;
-
-    const IntPoint position = blockSelectionGapsBounds.location() + m_owningLayer.scrollableArea()->adjustedScrollOffset();
-    if (m_scrollingBlockSelectionLayer->size() == blockSelectionGapsBounds.size() && m_scrollingBlockSelectionLayer->position() == position)
-        return;
-
-    m_scrollingBlockSelectionLayer->setPosition(position);
-    m_scrollingBlockSelectionLayer->setSize(blockSelectionGapsBounds.size());
-    m_scrollingBlockSelectionLayer->setOffsetFromRenderer(toIntSize(blockSelectionGapsBounds.location()), GraphicsLayer::SetNeedsDisplay);
-}
-
 void CompositedLayerMapping::updateDrawsContent()
 {
-    if (m_scrollingLayer) {
-        // We don't have to consider overflow controls, because we know that the scrollbars are drawn elsewhere.
-        // m_graphicsLayer only needs backing store if the non-scrolling parts (background, outlines, borders, shadows etc) need to paint.
-        // m_scrollingLayer never has backing store.
-        // m_scrollingContentsLayer only needs backing store if the scrolled contents need to paint.
-        bool hasNonScrollingPaintedContent = m_owningLayer.hasBoxDecorationsOrBackground();
-        m_graphicsLayer->setDrawsContent(hasNonScrollingPaintedContent);
-
-        m_scrollingContentsAreEmpty = !(renderer()->hasBackground() || paintsChildren());
-        m_scrollingContentsLayer->setDrawsContent(!m_scrollingContentsAreEmpty);
-
-        updateScrollingBlockSelection();
-        return;
-    }
-
     bool hasPaintedContent = containsPaintedContent();
     if (hasPaintedContent && isAcceleratedCanvas(renderer())) {
         CanvasRenderingContext* context = toHTMLCanvasElement(renderer()->node())->renderingContext();
@@ -1137,84 +985,13 @@ void CompositedLayerMapping::setBackgroundLayerPaintsFixedRootBackground(bool ba
     m_backgroundLayerPaintsFixedRootBackground = backgroundLayerPaintsFixedRootBackground;
 }
 
-// Only a member function so it can call createGraphicsLayer.
-bool CompositedLayerMapping::toggleScrollbarLayerIfNeeded(OwnPtr<GraphicsLayer>& layer, bool needsLayer, CompositingReasons reason)
-{
-    if (needsLayer == !!layer)
-        return false;
-    layer = needsLayer ? createGraphicsLayer(reason) : nullptr;
-    return true;
-}
-
-bool CompositedLayerMapping::updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsAncestorClip)
-{
-    bool horizontalScrollbarLayerChanged = toggleScrollbarLayerIfNeeded(m_layerForHorizontalScrollbar, needsHorizontalScrollbarLayer, CompositingReasonLayerForHorizontalScrollbar);
-    bool verticalScrollbarLayerChanged = toggleScrollbarLayerIfNeeded(m_layerForVerticalScrollbar, needsVerticalScrollbarLayer, CompositingReasonLayerForVerticalScrollbar);
-
-    bool needsOverflowControlsHostLayer = needsHorizontalScrollbarLayer || needsVerticalScrollbarLayer;
-    toggleScrollbarLayerIfNeeded(m_overflowControlsHostLayer, needsOverflowControlsHostLayer, CompositingReasonLayerForOverflowControlsHost);
-    bool needsOverflowClipLayer = needsOverflowControlsHostLayer && needsAncestorClip;
-    toggleScrollbarLayerIfNeeded(m_overflowControlsClippingLayer, needsOverflowClipLayer, CompositingReasonLayerForOverflowControlsHost);
-
-    if (ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer)) {
-        if (horizontalScrollbarLayerChanged)
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_owningLayer.scrollableArea(), HorizontalScrollbar);
-        if (verticalScrollbarLayerChanged)
-            scrollingCoordinator->scrollableAreaScrollbarLayerDidChange(m_owningLayer.scrollableArea(), VerticalScrollbar);
-    }
-
-    return horizontalScrollbarLayerChanged || verticalScrollbarLayerChanged;
-}
-
-void CompositedLayerMapping::positionOverflowControlsLayers(const IntSize& offsetFromRoot)
-{
-    IntSize offsetFromRenderer = m_graphicsLayer->offsetFromRenderer() - roundedIntSize(m_owningLayer.subpixelAccumulation());
-    if (GraphicsLayer* layer = layerForHorizontalScrollbar()) {
-        Scrollbar* hBar = m_owningLayer.scrollableArea()->horizontalScrollbar();
-        if (hBar) {
-            layer->setPosition(hBar->frameRect().location() - offsetFromRoot - offsetFromRenderer);
-            layer->setSize(hBar->frameRect().size());
-            if (layer->hasContentsLayer())
-                layer->setContentsRect(IntRect(IntPoint(), hBar->frameRect().size()));
-        }
-        layer->setDrawsContent(hBar && !layer->hasContentsLayer());
-    }
-
-    if (GraphicsLayer* layer = layerForVerticalScrollbar()) {
-        Scrollbar* vBar = m_owningLayer.scrollableArea()->verticalScrollbar();
-        if (vBar) {
-            layer->setPosition(vBar->frameRect().location() - offsetFromRoot - offsetFromRenderer);
-            layer->setSize(vBar->frameRect().size());
-            if (layer->hasContentsLayer())
-                layer->setContentsRect(IntRect(IntPoint(), vBar->frameRect().size()));
-        }
-        layer->setDrawsContent(vBar && !layer->hasContentsLayer());
-    }
-}
-
-bool CompositedLayerMapping::hasUnpositionedOverflowControlsLayers() const
-{
-    if (GraphicsLayer* layer = layerForHorizontalScrollbar()) {
-        if (!layer->drawsContent())
-            return true;
-    }
-
-    if (GraphicsLayer* layer = layerForVerticalScrollbar()) {
-        if (!layer->drawsContent())
-            return true;
-    }
-
-    return false;
-}
-
 enum ApplyToGraphicsLayersModeFlags {
     ApplyToCoreLayers = (1 << 0),
     ApplyToSquashingLayer = (1 << 1),
-    ApplyToScrollbarLayers = (1 << 2),
     ApplyToBackgroundLayer = (1 << 3),
     ApplyToMaskLayers = (1 << 4),
     ApplyToContentLayers = (1 << 5),
-    ApplyToAllGraphicsLayers = (ApplyToSquashingLayer | ApplyToScrollbarLayers | ApplyToBackgroundLayer | ApplyToMaskLayers | ApplyToCoreLayers | ApplyToContentLayers)
+    ApplyToAllGraphicsLayers = (ApplyToSquashingLayer | ApplyToBackgroundLayer | ApplyToMaskLayers | ApplyToCoreLayers | ApplyToContentLayers)
 };
 typedef unsigned ApplyToGraphicsLayersMode;
 
@@ -1233,12 +1010,6 @@ static void ApplyToGraphicsLayers(const CompositedLayerMapping* mapping, const F
         f(mapping->mainGraphicsLayer());
     if ((mode & ApplyToCoreLayers) && mapping->clippingLayer())
         f(mapping->clippingLayer());
-    if ((mode & ApplyToCoreLayers) && mapping->scrollingLayer())
-        f(mapping->scrollingLayer());
-    if ((mode & ApplyToCoreLayers) && mapping->scrollingBlockSelectionLayer())
-        f(mapping->scrollingBlockSelectionLayer());
-    if (((mode & ApplyToCoreLayers) || (mode & ApplyToContentLayers)) && mapping->scrollingContentsLayer())
-        f(mapping->scrollingContentsLayer());
     if (((mode & ApplyToCoreLayers) || (mode & ApplyToContentLayers)) && mapping->foregroundLayer())
         f(mapping->foregroundLayer());
 
@@ -1252,11 +1023,6 @@ static void ApplyToGraphicsLayers(const CompositedLayerMapping* mapping, const F
 
     if (((mode & ApplyToBackgroundLayer) || (mode & ApplyToContentLayers)) && mapping->backgroundLayer())
         f(mapping->backgroundLayer());
-
-    if ((mode & ApplyToScrollbarLayers) && mapping->layerForHorizontalScrollbar())
-        f(mapping->layerForHorizontalScrollbar());
-    if ((mode & ApplyToScrollbarLayers) && mapping->layerForVerticalScrollbar())
-        f(mapping->layerForVerticalScrollbar());
 }
 
 struct UpdateRenderingContextFunctor {
@@ -1309,16 +1075,6 @@ void CompositedLayerMapping::updateShouldFlattenTransform()
             hasPerspective = style->hasPerspective();
         if (hasPerspective)
             childTransformLayer->setShouldFlattenTransform(false);
-
-        // Note, if the target is the scrolling layer, we need to ensure that the
-        // scrolling content layer doesn't flatten the transform. (It would be nice
-        // if we could apply transform to the scrolling content layer, but that's
-        // too late, we need the children transform to be applied _before_ the
-        // scrolling offset.)
-        if (childTransformLayer == m_scrollingLayer.get()) {
-            m_scrollingContentsLayer->setShouldFlattenTransform(false);
-            m_scrollingBlockSelectionLayer->setShouldFlattenTransform(false);
-        }
     }
 }
 
@@ -1408,65 +1164,6 @@ bool CompositedLayerMapping::updateClippingMaskLayers(bool needsChildClippingMas
     return layerChanged;
 }
 
-bool CompositedLayerMapping::updateScrollingLayers(bool needsScrollingLayers)
-{
-    ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer);
-
-    bool layerChanged = false;
-    if (needsScrollingLayers) {
-        if (!m_scrollingLayer) {
-            // Outer layer which corresponds with the scroll view.
-            m_scrollingLayer = createGraphicsLayer(CompositingReasonLayerForScrollingContainer);
-            m_scrollingLayer->setDrawsContent(false);
-            m_scrollingLayer->setMasksToBounds(true);
-
-            // Inner layer which renders the content that scrolls.
-            m_scrollingContentsLayer = createGraphicsLayer(CompositingReasonLayerForScrollingContents);
-            m_scrollingContentsLayer->setDrawsContent(true);
-            m_scrollingLayer->addChild(m_scrollingContentsLayer.get());
-
-            m_scrollingBlockSelectionLayer = createGraphicsLayer(CompositingReasonLayerForScrollingBlockSelection);
-            m_scrollingBlockSelectionLayer->setDrawsContent(true);
-            m_scrollingContentsLayer->addChild(m_scrollingBlockSelectionLayer.get());
-
-            layerChanged = true;
-            if (scrollingCoordinator)
-                scrollingCoordinator->scrollableAreaScrollLayerDidChange(m_owningLayer.scrollableArea());
-        }
-    } else if (m_scrollingLayer) {
-        m_scrollingLayer = nullptr;
-        m_scrollingContentsLayer = nullptr;
-        m_scrollingBlockSelectionLayer = nullptr;
-        layerChanged = true;
-        if (scrollingCoordinator)
-            scrollingCoordinator->scrollableAreaScrollLayerDidChange(m_owningLayer.scrollableArea());
-    }
-
-    return layerChanged;
-}
-
-static void updateScrollParentForGraphicsLayer(GraphicsLayer* layer, GraphicsLayer* topmostLayer, RenderLayer* scrollParent, ScrollingCoordinator* scrollingCoordinator)
-{
-    if (!layer)
-        return;
-
-    // Only the topmost layer has a scroll parent. All other layers have a null scroll parent.
-    if (layer != topmostLayer)
-        scrollParent = 0;
-
-    scrollingCoordinator->updateScrollParentForGraphicsLayer(layer, scrollParent);
-}
-
-void CompositedLayerMapping::updateScrollParent(RenderLayer* scrollParent)
-{
-    if (ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer)) {
-        GraphicsLayer* topmostLayer = childForSuperlayers();
-        updateScrollParentForGraphicsLayer(m_squashingContainmentLayer.get(), topmostLayer, scrollParent, scrollingCoordinator);
-        updateScrollParentForGraphicsLayer(m_ancestorClippingLayer.get(), topmostLayer, scrollParent, scrollingCoordinator);
-        updateScrollParentForGraphicsLayer(m_graphicsLayer.get(), topmostLayer, scrollParent, scrollingCoordinator);
-    }
-}
-
 void CompositedLayerMapping::updateClipParent()
 {
     if (owningLayerClippedByLayerNotAboveCompositedAncestor())
@@ -1475,9 +1172,6 @@ void CompositedLayerMapping::updateClipParent()
     RenderLayer* clipParent = m_owningLayer.clipParent();
     if (clipParent)
         clipParent = clipParent->enclosingLayerWithCompositedLayerMapping(IncludeSelf);
-
-    if (ScrollingCoordinator* scrollingCoordinator = scrollingCoordinatorFromLayer(m_owningLayer))
-        scrollingCoordinator->updateClipParentForGraphicsLayer(m_graphicsLayer.get(), clipParent);
 }
 
 bool CompositedLayerMapping::updateSquashingLayers(bool needsSquashingLayers)
@@ -1534,11 +1228,6 @@ GraphicsLayerPaintingPhase CompositedLayerMapping::paintingPhaseForPrimaryLayer(
         phase |= GraphicsLayerPaintForeground;
     if (!m_maskLayer)
         phase |= GraphicsLayerPaintMask;
-
-    if (m_scrollingContentsLayer) {
-        phase &= ~GraphicsLayerPaintForeground;
-        phase |= GraphicsLayerPaintCompositedScroll;
-    }
 
     return static_cast<GraphicsLayerPaintingPhase>(phase);
 }
@@ -1744,12 +1433,6 @@ GraphicsLayer* CompositedLayerMapping::detachLayerForOverflowControls(const Rend
 
 GraphicsLayer* CompositedLayerMapping::parentForSublayers() const
 {
-    if (m_scrollingBlockSelectionLayer)
-        return m_scrollingBlockSelectionLayer.get();
-
-    if (m_scrollingContentsLayer)
-        return m_scrollingContentsLayer.get();
-
     if (m_childContainmentLayer)
         return m_childContainmentLayer.get();
 
@@ -1774,8 +1457,6 @@ GraphicsLayer* CompositedLayerMapping::layerForChildrenTransform() const
 {
     if (GraphicsLayer* clipLayer = clippingLayer())
         return clipLayer;
-    if (m_scrollingLayer)
-        return m_scrollingLayer.get();
     return m_childTransformLayer.get();
 }
 
@@ -1978,20 +1659,6 @@ void CompositedLayerMapping::doPaintTask(const GraphicsLayerPaintInfo& paintInfo
     context->translate(offset.width(), offset.height());
 }
 
-static void paintScrollbar(Scrollbar* scrollbar, GraphicsContext& context, const IntRect& clip)
-{
-    if (!scrollbar)
-        return;
-
-    context.save();
-    const IntRect& scrollbarRect = scrollbar->frameRect();
-    context.translate(-scrollbarRect.x(), -scrollbarRect.y());
-    IntRect transformedClip = clip;
-    transformedClip.moveBy(scrollbarRect.location());
-    scrollbar->paint(&context, transformedClip);
-    context.restore();
-}
-
 // Up-call from compositing layer drawing callback.
 void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, GraphicsContext& context, GraphicsLayerPaintingPhase graphicsLayerPaintingPhase, const IntRect& clip)
 {
@@ -2016,8 +1683,6 @@ void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, G
         paintLayerFlags |= PaintLayerPaintingChildClippingMaskPhase;
     if (graphicsLayerPaintingPhase & GraphicsLayerPaintOverflowContents)
         paintLayerFlags |= PaintLayerPaintingOverflowContents;
-    if (graphicsLayerPaintingPhase & GraphicsLayerPaintCompositedScroll)
-        paintLayerFlags |= PaintLayerPaintingCompositingScrollingPhase;
 
     if (graphicsLayer == m_backgroundLayer)
         paintLayerFlags |= (PaintLayerPaintingRootBackgroundOnly | PaintLayerPaintingCompositingForegroundPhase); // Need PaintLayerPaintingCompositingForegroundPhase to walk child layers.
@@ -2028,9 +1693,7 @@ void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, G
         || graphicsLayer == m_foregroundLayer.get()
         || graphicsLayer == m_backgroundLayer.get()
         || graphicsLayer == m_maskLayer.get()
-        || graphicsLayer == m_childClippingMaskLayer.get()
-        || graphicsLayer == m_scrollingContentsLayer.get()
-        || graphicsLayer == m_scrollingBlockSelectionLayer.get()) {
+        || graphicsLayer == m_childClippingMaskLayer.get()) {
 
         GraphicsLayerPaintInfo paintInfo;
         paintInfo.renderLayer = &m_owningLayer;
@@ -2043,10 +1706,6 @@ void CompositedLayerMapping::paintContents(const GraphicsLayer* graphicsLayer, G
         ASSERT(compositor()->layerSquashingEnabled());
         for (size_t i = 0; i < m_squashedLayers.size(); ++i)
             doPaintTask(m_squashedLayers[i], paintLayerFlags, &context, clip);
-    } else if (graphicsLayer == layerForHorizontalScrollbar()) {
-        paintScrollbar(m_owningLayer.scrollableArea()->horizontalScrollbar(), context, clip);
-    } else if (graphicsLayer == layerForVerticalScrollbar()) {
-        paintScrollbar(m_owningLayer.scrollableArea()->verticalScrollbar(), context, clip);
     }
 #if ENABLE(ASSERT)
     if (Page* page = renderer()->frame()->page())
@@ -2155,20 +1814,10 @@ String CompositedLayerMapping::debugName(const GraphicsLayer* graphicsLayer)
         name = "Mask Layer";
     } else if (graphicsLayer == m_childClippingMaskLayer.get()) {
         name = "Child Clipping Mask Layer";
-    } else if (graphicsLayer == m_layerForHorizontalScrollbar.get()) {
-        name = "Horizontal Scrollbar Layer";
-    } else if (graphicsLayer == m_layerForVerticalScrollbar.get()) {
-        name = "Vertical Scrollbar Layer";
     } else if (graphicsLayer == m_overflowControlsHostLayer.get()) {
         name = "Overflow Controls Host Layer";
     } else if (graphicsLayer == m_overflowControlsClippingLayer.get()) {
         name = "Overflow Controls ClipLayer Layer";
-    } else if (graphicsLayer == m_scrollingLayer.get()) {
-        name = "Scrolling Layer";
-    } else if (graphicsLayer == m_scrollingContentsLayer.get()) {
-        name = "Scrolling Contents Layer";
-    } else if (graphicsLayer == m_scrollingBlockSelectionLayer.get()) {
-        name = "Scrolling Block Selection Layer";
     } else {
         ASSERT_NOT_REACHED();
     }

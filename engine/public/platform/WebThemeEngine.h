@@ -80,8 +80,6 @@ public:
         int totalSize;
     };
 
-    virtual void paintScrollbarThumb(WebCanvas*, State, Size, const WebRect&, const ScrollbarInfo&) { }
-
     // FIXME: The remaining definitions are only used on the non-Apple ports.
 
     // The UI part which is being accessed.

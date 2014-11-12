@@ -116,9 +116,6 @@ RenderLayer* LinkHighlight::computeEnclosingCompositingLayer()
     ASSERT(renderLayer->compositingState() != NotComposited);
 
     GraphicsLayer* newGraphicsLayer = renderLayer->graphicsLayerBacking();
-    if (!newGraphicsLayer->drawsContent()) {
-        newGraphicsLayer = renderLayer->graphicsLayerBackingForScrolling();
-    }
 
     m_clipLayer->setTransform(SkMatrix44(SkMatrix44::kIdentity_Constructor));
 

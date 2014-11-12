@@ -51,7 +51,6 @@
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
 #include "core/page/Page.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/FilterEffectRenderer.h"
 #include "core/rendering/HitTestRequest.h"
 #include "core/rendering/HitTestResult.h"
@@ -127,11 +126,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
 
 RenderLayer::~RenderLayer()
 {
-    if (renderer()->frame() && renderer()->frame()->page()) {
-        if (ScrollingCoordinator* scrollingCoordinator = renderer()->frame()->page()->scrollingCoordinator())
-            scrollingCoordinator->willDestroyRenderLayer(this);
-    }
-
     removeFilterInfoIfNeeded();
 
     if (groupedMapping()) {
@@ -2331,18 +2325,6 @@ GraphicsLayer* RenderLayer::graphicsLayerBacking() const
         return groupedMapping()->squashingLayer();
     default:
         return compositedLayerMapping()->mainGraphicsLayer();
-    }
-}
-
-GraphicsLayer* RenderLayer::graphicsLayerBackingForScrolling() const
-{
-    switch (compositingState()) {
-    case NotComposited:
-        return 0;
-    case PaintsIntoGroupedBacking:
-        return groupedMapping()->squashingLayer();
-    default:
-        return compositedLayerMapping()->scrollingContentsLayer() ? compositedLayerMapping()->scrollingContentsLayer() : compositedLayerMapping()->mainGraphicsLayer();
     }
 }
 

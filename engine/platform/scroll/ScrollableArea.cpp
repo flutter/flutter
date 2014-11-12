@@ -117,11 +117,6 @@ void ScrollableArea::setScrollOrigin(const IntPoint& origin)
     }
 }
 
-GraphicsLayer* ScrollableArea::layerForContainer() const
-{
-    return layerForScrolling() ? layerForScrolling()->parent() : 0;
-}
-
 bool ScrollableArea::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
 {
     ScrollbarOrientation orientation;
@@ -199,7 +194,7 @@ void ScrollableArea::scrollPositionChanged(const IntPoint& position)
     // Tell the scrollbars to update their thumb postions.
     if (Scrollbar* horizontalScrollbar = this->horizontalScrollbar()) {
         horizontalScrollbar->offsetDidChange();
-        if (horizontalScrollbar->isOverlayScrollbar() && !hasLayerForHorizontalScrollbar()) {
+        if (horizontalScrollbar->isOverlayScrollbar()) {
             if (!verticalScrollbar)
                 horizontalScrollbar->invalidate();
             else {
@@ -213,7 +208,7 @@ void ScrollableArea::scrollPositionChanged(const IntPoint& position)
     }
     if (verticalScrollbar) {
         verticalScrollbar->offsetDidChange();
-        if (verticalScrollbar->isOverlayScrollbar() && !hasLayerForVerticalScrollbar())
+        if (verticalScrollbar->isOverlayScrollbar())
             verticalScrollbar->invalidate();
     }
 
@@ -369,30 +364,7 @@ void ScrollableArea::setScrollbarOverlayStyle(ScrollbarOverlayStyle overlayStyle
 
 void ScrollableArea::invalidateScrollbar(Scrollbar* scrollbar, const IntRect& rect)
 {
-    if (scrollbar == horizontalScrollbar()) {
-        if (GraphicsLayer* graphicsLayer = layerForHorizontalScrollbar()) {
-            graphicsLayer->setNeedsDisplay();
-            graphicsLayer->setContentsNeedsDisplay();
-            return;
-        }
-    } else if (scrollbar == verticalScrollbar()) {
-        if (GraphicsLayer* graphicsLayer = layerForVerticalScrollbar()) {
-            graphicsLayer->setNeedsDisplay();
-            graphicsLayer->setContentsNeedsDisplay();
-            return;
-        }
-    }
     invalidateScrollbarRect(scrollbar, rect);
-}
-
-bool ScrollableArea::hasLayerForHorizontalScrollbar() const
-{
-    return layerForHorizontalScrollbar();
-}
-
-bool ScrollableArea::hasLayerForVerticalScrollbar() const
-{
-    return layerForVerticalScrollbar();
 }
 
 bool ScrollableArea::scheduleAnimation()

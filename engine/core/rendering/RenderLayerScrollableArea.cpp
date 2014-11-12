@@ -54,7 +54,6 @@
 #include "core/page/EventHandler.h"
 #include "core/page/FocusController.h"
 #include "core/page/Page.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/HitTestResult.h"
 #include "core/rendering/RenderGeometryMap.h"
 #include "core/rendering/RenderView.h"
@@ -94,11 +93,6 @@ RenderLayerScrollableArea::RenderLayerScrollableArea(RenderLayer& layer)
 
 RenderLayerScrollableArea::~RenderLayerScrollableArea()
 {
-    if (box().frame() && box().frame()->page()) {
-        if (ScrollingCoordinator* scrollingCoordinator = box().frame()->page()->scrollingCoordinator())
-            scrollingCoordinator->willDestroyScrollableArea(this);
-    }
-
     if (!box().documentBeingDestroyed()) {
         Node* node = box().node();
         if (node && node->isElementNode())
@@ -116,43 +110,10 @@ HostWindow* RenderLayerScrollableArea::hostWindow() const
     return nullptr;
 }
 
-GraphicsLayer* RenderLayerScrollableArea::layerForScrolling() const
-{
-    return layer()->hasCompositedLayerMapping() ? layer()->compositedLayerMapping()->scrollingContentsLayer() : 0;
-}
-
-GraphicsLayer* RenderLayerScrollableArea::layerForHorizontalScrollbar() const
-{
-    // See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
-
-    return layer()->hasCompositedLayerMapping() ? layer()->compositedLayerMapping()->layerForHorizontalScrollbar() : 0;
-}
-
-GraphicsLayer* RenderLayerScrollableArea::layerForVerticalScrollbar() const
-{
-    // See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
-
-    return layer()->hasCompositedLayerMapping() ? layer()->compositedLayerMapping()->layerForVerticalScrollbar() : 0;
-}
-
 void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, const IntRect& rect)
 {
     // See crbug.com/343132.
     DisableCompositingQueryAsserts disabler;
-
-    if (scrollbar == m_vBar.get()) {
-        if (GraphicsLayer* layer = layerForVerticalScrollbar()) {
-            layer->setNeedsDisplayInRect(rect);
-            return;
-        }
-    } else {
-        if (GraphicsLayer* layer = layerForHorizontalScrollbar()) {
-            layer->setNeedsDisplayInRect(rect);
-            return;
-        }
-    }
 
     IntRect scrollRect = rect;
     // If we are not yet inserted into the tree, there is no need to issue paint invaldiations.
@@ -749,12 +710,6 @@ void RenderLayerScrollableArea::positionOverflowControls(const IntSize& offsetFr
         hBarRect.move(offsetFromRoot);
         horizontalScrollbar->setFrameRect(hBarRect);
     }
-
-    // FIXME, this should eventually be removed, once we are certain that composited
-    // controls get correctly positioned on a compositor update. For now, conservatively
-    // leaving this unchanged.
-    if (layer()->hasCompositedLayerMapping())
-        layer()->compositedLayerMapping()->positionOverflowControlsLayers(offsetFromRoot);
 }
 
 void RenderLayerScrollableArea::paintOverflowControls(GraphicsContext* context, const IntPoint& paintOffset, const IntRect& damageRect, bool paintingOverlayControls)
@@ -780,9 +735,6 @@ void RenderLayerScrollableArea::paintOverflowControls(GraphicsContext* context, 
     // second pass doesn't need to re-enter the RenderTree to get it right.
     if (hasOverlayScrollbars() && !paintingOverlayControls) {
         m_cachedOverlayScrollbarOffset = paintOffset;
-        // It's not necessary to do the second pass if the scrollbars paint into layers.
-        if ((m_hBar && layerForHorizontalScrollbar()) || (m_vBar && layerForVerticalScrollbar()))
-            return;
         IntRect localDamgeRect = damageRect;
         localDamgeRect.moveBy(-paintOffset);
         if (!overflowControlsIntersectRect(localDamgeRect))
@@ -803,9 +755,9 @@ void RenderLayerScrollableArea::paintOverflowControls(GraphicsContext* context, 
         return;
 
     // Now that we're sure the scrollbars are in the right place, paint them.
-    if (m_hBar && !layerForHorizontalScrollbar())
+    if (m_hBar)
         m_hBar->paint(context, damageRect);
-    if (m_vBar && !layerForVerticalScrollbar())
+    if (m_vBar)
         m_vBar->paint(context, damageRect);
 }
 

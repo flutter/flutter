@@ -96,11 +96,6 @@ public:
     GraphicsLayer* backgroundLayer() const { return m_backgroundLayer.get(); }
     bool backgroundLayerPaintsFixedRootBackground() const { return m_backgroundLayerPaintsFixedRootBackground; }
 
-    bool hasScrollingLayer() const { return m_scrollingLayer; }
-    GraphicsLayer* scrollingLayer() const { return m_scrollingLayer.get(); }
-    GraphicsLayer* scrollingContentsLayer() const { return m_scrollingContentsLayer.get(); }
-    GraphicsLayer* scrollingBlockSelectionLayer() const { return m_scrollingBlockSelectionLayer.get(); }
-
     bool hasMaskLayer() const { return m_maskLayer; }
     GraphicsLayer* maskLayer() const { return m_maskLayer.get(); }
 
@@ -141,9 +136,6 @@ public:
     LayoutRect compositedBounds() const { return m_compositedBounds; }
     IntRect pixelSnappedCompositedBounds() const;
 
-    void positionOverflowControlsLayers(const IntSize& offsetFromRoot);
-    bool hasUnpositionedOverflowControlsLayers() const;
-
     // Returns true if the assignment actually changed the assigned squashing layer.
     bool updateSquashingLayerAssignment(RenderLayer* squashedLayer, const RenderLayer& owningLayer, size_t nextSquashedLayerIndex);
     void removeRenderLayerFromSquashingGraphicsLayer(const RenderLayer*);
@@ -162,9 +154,6 @@ public:
 #endif
 
     LayoutRect contentsBox() const;
-
-    GraphicsLayer* layerForHorizontalScrollbar() const { return m_layerForHorizontalScrollbar.get(); }
-    GraphicsLayer* layerForVerticalScrollbar() const { return m_layerForVerticalScrollbar.get(); }
 
     // Returns true if the overflow controls cannot be positioned within this
     // CLM's internal hierarchy without incorrectly stacking under some
@@ -204,8 +193,6 @@ public:
     // If there is a squashed layer painting into this CLM that is an ancestor of the given RenderObject, return it. Otherwise return 0.
     const GraphicsLayerPaintInfo* containingSquashedLayer(const RenderObject*);
 
-    void updateScrollingBlockSelection();
-
 private:
     static const GraphicsLayerPaintInfo* containingSquashedLayer(const RenderObject*,  const Vector<GraphicsLayerPaintInfo>& layers);
 
@@ -221,14 +208,12 @@ private:
     void updateTransformGeometry(const IntPoint& snappedOffsetFromCompositedAncestor, const IntRect& relativeCompositingBounds);
     void updateForegroundLayerGeometry(const FloatSize& relativeCompositingBoundsSize, const IntRect& clippingBox);
     void updateBackgroundLayerGeometry(const FloatSize& relativeCompositingBoundsSize);
-    void updateScrollingLayerGeometry(const IntRect& localCompositingBounds);
     void updateChildClippingMaskLayerGeometry();
 
     void createPrimaryGraphicsLayer();
     void destroyGraphicsLayers();
 
     PassOwnPtr<GraphicsLayer> createGraphicsLayer(CompositingReasons);
-    bool toggleScrollbarLayerIfNeeded(OwnPtr<GraphicsLayer>&, bool needsLayer, CompositingReasons);
 
     RenderLayerModelObject* renderer() const { return m_owningLayer.renderer(); }
     RenderLayerCompositor* compositor() const { return m_owningLayer.compositor(); }
@@ -237,15 +222,10 @@ private:
     void updatePaintingPhases();
     bool updateClippingLayers(bool needsAncestorClip, bool needsDescendantClip);
     bool updateChildTransformLayer(bool needsChildTransformLayer);
-    bool updateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer, bool needsAncestorClip);
     bool updateForegroundLayer(bool needsForegroundLayer);
     bool updateBackgroundLayer(bool needsBackgroundLayer);
     bool updateMaskLayer(bool needsMaskLayer);
     bool updateClippingMaskLayers(bool needsChildClippingMaskLayer);
-    bool requiresHorizontalScrollbarLayer() const { return m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->horizontalScrollbar(); }
-    bool requiresVerticalScrollbarLayer() const { return m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->verticalScrollbar(); }
-    bool updateScrollingLayers(bool scrollingLayers);
-    void updateScrollParent(RenderLayer*);
     void updateClipParent();
     bool updateSquashingLayers(bool needsSquashingLayers);
     void updateDrawsContent();
@@ -302,14 +282,10 @@ private:
     //
     //  + m_ancestorClippingLayer [OPTIONAL]
     //     + m_graphicsLayer
-    //        + m_childContainmentLayer [OPTIONAL] <-OR-> m_scrollingLayer [OPTIONAL] <-OR-> m_childTransformLayer
-    //        |                                            + m_scrollingContentsLayer [Present iff m_scrollingLayer is present]
-    //        |                                               + m_scrollingBlockSelectionLayer [Present iff m_scrollingLayer is present]
+    //        + m_childContainmentLayer [OPTIONAL] <-OR-> m_childTransformLayer
     //        |
     //        + m_overflowControlsClippingLayer [OPTIONAL] // *The overflow controls may need to be repositioned in the
     //          + m_overflowControlsHostLayer              //  graphics layer tree by the RLC to ensure that they stack
-    //            + m_layerForVerticalScrollbar            //  above scrolling content.
-    //            + m_layerForHorizontalScrollbar
     //
     // We need an ancestor clipping layer if our clipping ancestor is not our ancestor in the
     // clipping tree. Here's what that might look like.
@@ -335,9 +311,6 @@ private:
     OwnPtr<GraphicsLayer> m_graphicsLayer;
     OwnPtr<GraphicsLayer> m_childContainmentLayer; // Only used if we have clipping on a stacking context with compositing children.
     OwnPtr<GraphicsLayer> m_childTransformLayer; // Only used if we have perspective and no m_childContainmentLayer.
-    OwnPtr<GraphicsLayer> m_scrollingLayer; // Only used if the layer is using composited scrolling.
-    OwnPtr<GraphicsLayer> m_scrollingContentsLayer; // Only used if the layer is using composited scrolling.
-    OwnPtr<GraphicsLayer> m_scrollingBlockSelectionLayer; // Only used if the layer is using composited scrolling, but has no scrolling contents apart from block selection gaps.
 
     // This layer is also added to the hierarchy by the RLB, but in a different way than
     // the layers above. It's added to m_graphicsLayer as its mask layer (naturally) if
@@ -369,9 +342,6 @@ private:
     // the background layer (or paint invalidation).
     OwnPtr<GraphicsLayer> m_foregroundLayer; // Only used in cases where we need to draw the foreground separately.
     OwnPtr<GraphicsLayer> m_backgroundLayer; // Only used in cases where we need to draw the background separately.
-
-    OwnPtr<GraphicsLayer> m_layerForHorizontalScrollbar;
-    OwnPtr<GraphicsLayer> m_layerForVerticalScrollbar;
 
     // This layer exists to simplify the reparenting of overflow control that is occasionally required
     // to ensure that scrollbars appear above scrolling content.
@@ -415,7 +385,6 @@ private:
     unsigned m_requiresOwnBackingStoreForIntrinsicReasons : 1;
     unsigned m_requiresOwnBackingStoreForAncestorReasons : 1;
     unsigned m_backgroundLayerPaintsFixedRootBackground : 1;
-    unsigned m_scrollingContentsAreEmpty : 1;
 };
 
 } // namespace blink

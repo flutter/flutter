@@ -39,7 +39,6 @@
 #include "core/page/ChromeClient.h"
 #include "core/page/FocusController.h"
 #include "core/page/PageLifecycleNotifier.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/RenderView.h"
 #include "wtf/HashMap.h"
 #include "wtf/RefCountedLeakCounter.h"
@@ -132,14 +131,6 @@ void Page::makeOrdinary()
 {
     ASSERT(!ordinaryPages().contains(this));
     ordinaryPages().add(this);
-}
-
-ScrollingCoordinator* Page::scrollingCoordinator()
-{
-    if (!m_scrollingCoordinator)
-        m_scrollingCoordinator = ScrollingCoordinator::create(this);
-
-    return m_scrollingCoordinator.get();
 }
 
 void Page::setMainFrame(LocalFrame* mainFrame)
@@ -346,9 +337,6 @@ void Page::willBeDestroyed()
     allPages().remove(this);
     if (ordinaryPages().contains(this))
         ordinaryPages().remove(this);
-
-    if (m_scrollingCoordinator)
-        m_scrollingCoordinator->willBeDestroyed();
 
 #ifndef NDEBUG
     pageCounter.decrement();

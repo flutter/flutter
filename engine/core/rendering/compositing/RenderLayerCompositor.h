@@ -37,7 +37,6 @@ class DocumentLifecycle;
 class GraphicsLayer;
 class GraphicsLayerFactory;
 class Page;
-class ScrollingCoordinator;
 
 enum CompositingUpdateType {
     CompositingUpdateNone,
@@ -137,12 +136,7 @@ public:
     void frameViewDidChangeSize();
     void rootFixedBackgroundsChanged();
 
-    bool scrollingLayerDidChange(RenderLayer*);
-
     String layerTreeAsText(LayerTreeFlags);
-
-    GraphicsLayer* layerForHorizontalScrollbar() const { return m_layerForHorizontalScrollbar.get(); }
-    GraphicsLayer* layerForVerticalScrollbar() const { return m_layerForVerticalScrollbar.get(); }
 
     void resetTrackedPaintInvalidationRects();
     void setTracksPaintInvalidations(bool);
@@ -183,17 +177,11 @@ private:
     void attachRootLayer(RootLayerAttachment);
     void detachRootLayer();
 
-    void updateOverflowControlsLayers();
-
     Page* page() const;
 
     GraphicsLayerFactory* graphicsLayerFactory() const;
-    ScrollingCoordinator* scrollingCoordinator() const;
 
     void enableCompositingModeIfNeeded();
-
-    bool requiresHorizontalScrollbarLayer() const;
-    bool requiresVerticalScrollbarLayer() const;
 
     RenderView& m_renderView;
     OwnPtr<GraphicsLayer> m_rootContentLayer;
@@ -224,10 +212,6 @@ private:
 
     // Enclosing layer for overflow controls and the clipping layer
     OwnPtr<GraphicsLayer> m_overflowControlsHostLayer;
-
-    // Layers for overflow controls
-    OwnPtr<GraphicsLayer> m_layerForHorizontalScrollbar;
-    OwnPtr<GraphicsLayer> m_layerForVerticalScrollbar;
 };
 
 } // namespace blink

@@ -40,7 +40,7 @@ enum GraphicsLayerPaintingPhaseFlags {
     GraphicsLayerPaintForeground = (1 << 1),
     GraphicsLayerPaintMask = (1 << 2),
     GraphicsLayerPaintOverflowContents = (1 << 3),
-    GraphicsLayerPaintCompositedScroll = (1 << 4),
+    // FIXME(sky): 4 is unused.
     GraphicsLayerPaintChildClippingMask = (1 << 5),
     GraphicsLayerPaintAllWithOverflowClip = (GraphicsLayerPaintBackground | GraphicsLayerPaintForeground | GraphicsLayerPaintMask)
 };

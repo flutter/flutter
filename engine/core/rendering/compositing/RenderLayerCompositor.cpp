@@ -35,7 +35,6 @@
 #include "core/page/Chrome.h"
 #include "core/page/ChromeClient.h"
 #include "core/page/Page.h"
-#include "core/page/scrolling/ScrollingCoordinator.h"
 #include "core/rendering/RenderLayerStackingNode.h"
 #include "core/rendering/RenderLayerStackingNodeIterator.h"
 #include "core/rendering/RenderView.h"
@@ -365,7 +364,6 @@ void RenderLayerCompositor::frameViewDidChangeSize()
     if (m_containerLayer) {
         FrameView* frameView = m_renderView.frameView();
         m_containerLayer->setSize(frameView->unscaledVisibleContentSize());
-        updateOverflowControlsLayers();
     }
 }
 
@@ -389,13 +387,6 @@ void RenderLayerCompositor::rootFixedBackgroundsChanged()
     // just positions it (like the foreground layer).
     if (GraphicsLayer* backgroundLayer = fixedRootBackgroundLayer())
         m_containerLayer->addChildBelow(backgroundLayer, m_scrollLayer.get());
-}
-
-bool RenderLayerCompositor::scrollingLayerDidChange(RenderLayer* layer)
-{
-    if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
-        return scrollingCoordinator->scrollableAreaScrollLayerDidChange(layer->scrollableArea());
-    return false;
 }
 
 String RenderLayerCompositor::layerTreeAsText(LayerTreeFlags flags)
@@ -471,7 +462,6 @@ GraphicsLayer* RenderLayerCompositor::ensureRootTransformLayer()
         m_rootTransformLayer = GraphicsLayer::create(graphicsLayerFactory(), this);
         m_overflowControlsHostLayer->addChild(m_rootTransformLayer.get());
         m_rootTransformLayer->addChild(m_containerLayer.get());
-        updateOverflowControlsLayers();
     }
 
     return m_rootTransformLayer.get();
@@ -617,49 +607,6 @@ bool RenderLayerCompositor::isTrackingPaintInvalidations() const
     return m_isTrackingPaintInvalidations;
 }
 
-bool RenderLayerCompositor::requiresHorizontalScrollbarLayer() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-bool RenderLayerCompositor::requiresVerticalScrollbarLayer() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-void RenderLayerCompositor::updateOverflowControlsLayers()
-{
-    GraphicsLayer* controlsParent = m_rootTransformLayer.get() ? m_rootTransformLayer.get() : m_overflowControlsHostLayer.get();
-
-    if (requiresHorizontalScrollbarLayer()) {
-        if (!m_layerForHorizontalScrollbar) {
-            m_layerForHorizontalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), this);
-        }
-
-        if (m_layerForHorizontalScrollbar->parent() != controlsParent) {
-            controlsParent->addChild(m_layerForHorizontalScrollbar.get());
-        }
-    } else if (m_layerForHorizontalScrollbar) {
-        m_layerForHorizontalScrollbar->removeFromParent();
-        m_layerForHorizontalScrollbar = nullptr;
-    }
-
-    if (requiresVerticalScrollbarLayer()) {
-        if (!m_layerForVerticalScrollbar) {
-            m_layerForVerticalScrollbar = GraphicsLayer::create(graphicsLayerFactory(), this);
-        }
-
-        if (m_layerForVerticalScrollbar->parent() != controlsParent) {
-            controlsParent->addChild(m_layerForVerticalScrollbar.get());
-        }
-    } else if (m_layerForVerticalScrollbar) {
-        m_layerForVerticalScrollbar->removeFromParent();
-        m_layerForVerticalScrollbar = nullptr;
-    }
-}
-
 void RenderLayerCompositor::ensureRootLayer()
 {
     RootLayerAttachment expectedAttachment = RootLayerAttachedViaChromeClient;
@@ -716,16 +663,6 @@ void RenderLayerCompositor::destroyRootLayer()
         return;
 
     detachRootLayer();
-
-    if (m_layerForHorizontalScrollbar) {
-        m_layerForHorizontalScrollbar->removeFromParent();
-        m_layerForHorizontalScrollbar = nullptr;
-    }
-
-    if (m_layerForVerticalScrollbar) {
-        m_layerForVerticalScrollbar->removeFromParent();
-        m_layerForVerticalScrollbar = nullptr;
-    }
 
     if (m_overflowControlsHostLayer) {
         m_overflowControlsHostLayer = nullptr;
@@ -791,14 +728,6 @@ void RenderLayerCompositor::updateRootLayerAttachment()
     ensureRootLayer();
 }
 
-ScrollingCoordinator* RenderLayerCompositor::scrollingCoordinator() const
-{
-    if (Page* page = this->page())
-        return page->scrollingCoordinator();
-
-    return 0;
-}
-
 GraphicsLayerFactory* RenderLayerCompositor::graphicsLayerFactory() const
 {
     if (Page* page = this->page())
@@ -825,10 +754,6 @@ String RenderLayerCompositor::debugName(const GraphicsLayer* graphicsLayer)
         name = "Root Transform Layer";
     } else if (graphicsLayer == m_overflowControlsHostLayer.get()) {
         name = "Overflow Controls Host Layer";
-    } else if (graphicsLayer == m_layerForHorizontalScrollbar.get()) {
-        name = "Horizontal Scrollbar Layer";
-    } else if (graphicsLayer == m_layerForVerticalScrollbar.get()) {
-        name = "Vertical Scrollbar Layer";
     } else if (graphicsLayer == m_containerLayer.get()) {
         name = "LocalFrame Clipping Layer";
     } else if (graphicsLayer == m_scrollLayer.get()) {

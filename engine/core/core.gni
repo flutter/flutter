@@ -981,8 +981,6 @@ sky_core_files = [
   "page/TouchDisambiguation.cpp",
   "page/TouchDisambiguation.h",
   "page/WindowFocusAllowedIndicator.cpp",
-  "page/scrolling/ScrollingCoordinator.cpp",
-  "page/scrolling/ScrollingCoordinator.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",

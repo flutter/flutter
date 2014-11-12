@@ -603,8 +603,6 @@ PassRefPtr<JSONObject> GraphicsLayer::layerTreeAsJSON(LayerTreeFlags flags, Rend
             paintingPhasesJSON->pushString("GraphicsLayerPaintChildClippingMask");
         if (m_paintingPhase & GraphicsLayerPaintOverflowContents)
             paintingPhasesJSON->pushString("GraphicsLayerPaintOverflowContents");
-        if (m_paintingPhase & GraphicsLayerPaintCompositedScroll)
-            paintingPhasesJSON->pushString("GraphicsLayerPaintCompositedScroll");
         json->setArray("paintingPhases", paintingPhasesJSON);
     }
 

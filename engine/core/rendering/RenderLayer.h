@@ -277,7 +277,6 @@ public:
     // FIXME: This should return a reference.
     CompositedLayerMapping* ensureCompositedLayerMapping();
     GraphicsLayer* graphicsLayerBacking() const;
-    GraphicsLayer* graphicsLayerBackingForScrolling() const;
     // NOTE: If you are using hasCompositedLayerMapping to determine the state of compositing for this layer,
     // (and not just to do bookkeeping related to the mapping like, say, allocating or deallocating a mapping),
     // then you may have incorrect logic. Use compositingState() instead.

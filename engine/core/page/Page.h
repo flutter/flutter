@@ -55,7 +55,6 @@ class RenderBox;
 class RenderObject;
 class VisibleSelection;
 class ScrollableArea;
-class ScrollingCoordinator;
 class ServiceProvider;
 class Settings;
 class SpellCheckerClient;
@@ -117,8 +116,6 @@ public:
     DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
 
-    ScrollingCoordinator* scrollingCoordinator();
-
     Settings& settings() const { return *m_settings; }
 
     UseCounter& useCounter() { return m_useCounter; }
@@ -179,7 +176,6 @@ private:
     const OwnPtr<Chrome> m_chrome;
     const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
-    OwnPtr<ScrollingCoordinator> m_scrollingCoordinator;
     const OwnPtr<UndoStack> m_undoStack;
 
     // Typically, the main frame and Page should both be owned by the embedder,

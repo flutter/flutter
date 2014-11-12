@@ -191,13 +191,6 @@ public:
         m_horizontalBarDamage = IntRect();
     }
 
-    GraphicsLayer* layerForContainer() const;
-    virtual GraphicsLayer* layerForScrolling() const = 0;
-    virtual GraphicsLayer* layerForHorizontalScrollbar() const = 0;
-    virtual GraphicsLayer* layerForVerticalScrollbar() const = 0;
-    bool hasLayerForHorizontalScrollbar() const;
-    bool hasLayerForVerticalScrollbar() const;
-
     void cancelProgrammaticScrollAnimation();
 
 protected:
