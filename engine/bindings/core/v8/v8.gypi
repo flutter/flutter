@@ -61,6 +61,8 @@
             'ScriptProfiler.h',
             'ScriptPromise.cpp',
             'ScriptPromise.h',
+            'ScriptDebugServer.cpp',
+            'ScriptDebugServer.h',
             'ScriptPromiseResolver.cpp',
             'ScriptPromiseResolver.h',
             'ScriptPromiseProperties.h',

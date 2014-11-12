@@ -167,3 +167,8 @@ Contributing
 Instructions for building and testing Sky are contained in [HACKING.md](HACKING.md). For
 coordination, we use the ``#mojo`` IRC channel on
 [Freenode](https://freenode.net/).
+
+History
+-------
+Sky started from the Blink codebase r181355:
+http://blink.lc/blink/tree/?id=086acdd04cbe6fcb89b2fc6bd438fb8819a26776

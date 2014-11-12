@@ -1,0 +1,48 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings/bindings.gni")
+import("//sky/engine/core/core.gni")
+
+protocol_file = "protocol.json"
+
+action("protocol_sources") {
+  script = "CodeGeneratorInspector.py"
+
+  inputs = [
+    # The helper script imported by CodeGeneratorInspector.py.
+    "CodeGeneratorInspectorStrings.py",
+    protocol_file,
+  ]
+  outputs = [
+    "$sky_core_output_dir/InspectorBackendDispatcher.cpp",
+    "$sky_core_output_dir/InspectorBackendDispatcher.h",
+    "$sky_core_output_dir/InspectorFrontend.cpp",
+    "$sky_core_output_dir/InspectorFrontend.h",
+    "$sky_core_output_dir/InspectorTypeBuilder.cpp",
+    "$sky_core_output_dir/InspectorTypeBuilder.h",
+  ]
+
+  args = [
+    rebase_path(protocol_file, root_build_dir),
+    "--output_dir", rebase_path(sky_core_output_dir, root_build_dir),
+  ]
+
+  deps = [
+    ":protocol_version",
+  ]
+}
+
+action("protocol_version") {
+  script = "generate-inspector-protocol-version"
+
+  inputs = [ protocol_file ]
+  output_file = "$sky_core_output_dir/InspectorProtocolVersion.h"
+  outputs = [ output_file ]
+
+  args = [
+    "-o", rebase_path(output_file, root_build_dir),
+    rebase_path(protocol_file, root_build_dir),
+  ]
+}

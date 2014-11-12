@@ -42,6 +42,7 @@ source_set("prerequisites") {
     ":make_core_generated",
     "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
     "//sky/engine/platform",
+    "inspector:protocol_sources",
   ]
 
   forward_dependent_configs_from = [
