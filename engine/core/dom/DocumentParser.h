@@ -24,6 +24,7 @@
 #ifndef DocumentParser_h
 #define DocumentParser_h
 
+#include "base/callback_forward.h"
 #include "mojo/public/cpp/system/core.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
@@ -41,7 +42,8 @@ class DocumentParser : public RefCounted<DocumentParser> {
 public:
     virtual ~DocumentParser();
 
-    virtual void parse(mojo::ScopedDataPipeConsumerHandle) = 0;
+    virtual void parse(mojo::ScopedDataPipeConsumerHandle,
+                       const base::Closure& completionCallback) = 0;
 
     virtual TextPosition textPosition() const = 0;
     virtual void executeScriptsWaitingForResources() = 0;

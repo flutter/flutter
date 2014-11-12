@@ -25,4 +25,8 @@ const AtomicString& Module::interfaceName() const {
   return EventTargetNames::Module;
 }
 
+Application* Module::GetApplication() {
+  return application();
+}
+
 } // namespace blink

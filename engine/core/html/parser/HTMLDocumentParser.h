@@ -26,6 +26,7 @@
 #ifndef HTMLDocumentParser_h
 #define HTMLDocumentParser_h
 
+#include "base/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "core/dom/DocumentParser.h"
 #include "core/fetch/ResourceClient.h"
@@ -65,7 +66,8 @@ public:
     }
     virtual ~HTMLDocumentParser();
 
-    void parse(mojo::ScopedDataPipeConsumerHandle) override;
+    void parse(mojo::ScopedDataPipeConsumerHandle,
+               const base::Closure& completionCallback) override;
 
     // Exposed for HTMLParserScheduler
     void resumeParsingAfterYield();
@@ -128,6 +130,8 @@ private:
     Deque<OwnPtr<ParsedChunk> > m_speculations;
     base::WeakPtrFactory<HTMLDocumentParser> m_weakFactory;
     base::WeakPtr<BackgroundHTMLParser> m_backgroundParser;
+
+    base::Closure m_completionCallback;
 
     bool m_isFragment;
     bool m_endWasDelayed;

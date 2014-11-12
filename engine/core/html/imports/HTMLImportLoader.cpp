@@ -31,6 +31,7 @@
 #include "config.h"
 #include "core/html/imports/HTMLImportLoader.h"
 
+#include "base/bind.h"
 #include "core/app/Module.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentParser.h"
@@ -103,7 +104,7 @@ HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLRespon
         .withRegistrationContext(m_controller->master()->registrationContext());
     m_document = HTMLDocument::create(init);
     m_module = Module::create(contextDocument.get(), nullptr, m_document.get(), url.string());
-    m_document->startParsing()->parse(response->body.Pass());
+    m_document->startParsing()->parse(response->body.Pass(), base::Bind(base::DoNothing));
     return StateLoading;
 }
 

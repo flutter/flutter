@@ -58,6 +58,7 @@ namespace WTF {
 
     public:
         typedef typename KeyTraits::TraitType KeyType;
+        typedef typename KeyTraits::PassInType KeyPassInType;
         typedef const typename KeyTraits::PeekInType& KeyPeekInType;
         typedef typename MappedTraits::TraitType MappedType;
         typedef typename ValueTraits::TraitType ValueType;
@@ -118,12 +119,12 @@ namespace WTF {
         // replaces value but not key if key is already present
         // return value is a pair of the iterator to the key location,
         // and a boolean that's true if a new value was actually added
-        AddResult set(KeyPeekInType, MappedPassInType);
+        AddResult set(KeyPassInType, MappedPassInType);
 
         // does nothing if key is already present
         // return value is a pair of the iterator to the key location,
         // and a boolean that's true if a new value was actually added
-        AddResult add(KeyPeekInType, MappedPassInType);
+        AddResult add(KeyPassInType, MappedPassInType);
 
         void remove(KeyPeekInType);
         void remove(iterator);
@@ -155,7 +156,7 @@ namespace WTF {
         void trace(typename Allocator::Visitor* visitor) { m_impl.trace(visitor); }
 
     private:
-        AddResult inlineAdd(KeyPeekInType, MappedPassInReferenceType);
+        AddResult inlineAdd(KeyPassInType, MappedPassInReferenceType);
 
         HashTableType m_impl;
     };
@@ -352,14 +353,14 @@ namespace WTF {
 
     template<typename T, typename U, typename V, typename W, typename X, typename Y>
     typename HashMap<T, U, V, W, X, Y>::AddResult
-    HashMap<T, U, V, W, X, Y>::inlineAdd(KeyPeekInType key, MappedPassInReferenceType mapped)
+    HashMap<T, U, V, W, X, Y>::inlineAdd(KeyPassInType key, MappedPassInReferenceType mapped)
     {
         return m_impl.template add<HashMapTranslator<ValueTraits, HashFunctions> >(key, mapped);
     }
 
     template<typename T, typename U, typename V, typename W, typename X, typename Y>
     typename HashMap<T, U, V, W, X, Y>::AddResult
-    HashMap<T, U, V, W, X, Y>::set(KeyPeekInType key, MappedPassInType mapped)
+    HashMap<T, U, V, W, X, Y>::set(KeyPassInType key, MappedPassInType mapped)
     {
         AddResult result = inlineAdd(key, mapped);
         if (!result.isNewEntry) {
@@ -379,7 +380,7 @@ namespace WTF {
 
     template<typename T, typename U, typename V, typename W, typename X, typename Y>
     typename HashMap<T, U, V, W, X, Y>::AddResult
-    HashMap<T, U, V, W, X, Y>::add(KeyPeekInType key, MappedPassInType mapped)
+    HashMap<T, U, V, W, X, Y>::add(KeyPassInType key, MappedPassInType mapped)
     {
         return inlineAdd(key, mapped);
     }

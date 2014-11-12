@@ -5,6 +5,7 @@
 #include "config.h"
 #include "core/loader/MojoLoader.h"
 
+#include "base/bind.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentInit.h"
 #include "core/frame/LocalDOMWindow.h"
@@ -41,7 +42,7 @@ void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStre
     // FIXME: This should read the Content-Language out of the
     // response headers and set them on Document::contentLanguage.
 
-    document->startParsing()->parse(responseStream.Pass());
+    document->startParsing()->parse(responseStream.Pass(), base::Bind(base::DoNothing));
 }
 
 }

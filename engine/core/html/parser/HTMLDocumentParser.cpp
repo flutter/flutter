@@ -73,11 +73,14 @@ HTMLDocumentParser::~HTMLDocumentParser()
 #endif
 }
 
-void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source)
+void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source,
+                               const base::Closure& completionCallback)
 {
     ASSERT(!isStopped());
     ASSERT(!m_haveBackgroundParser);
     m_haveBackgroundParser = true;
+
+    m_completionCallback = completionCallback;
 
     OwnPtr<BackgroundHTMLParser::Configuration> config = adoptPtr(new BackgroundHTMLParser::Configuration);
     config->source = source.Pass();
@@ -355,8 +358,14 @@ void HTMLDocumentParser::end()
     if (m_haveBackgroundParser)
         stopBackgroundParser();
 
+    // Notice that we copy the compleition callback into a local variable
+    // because we might be deleted after we call ffinish() below.
+    base::Closure completionCallback = m_completionCallback;
+
     // Informs the the rest of WebCore that parsing is really finished (and deletes this).
     m_treeBuilder->finished();
+
+    completionCallback.Run();
 }
 
 void HTMLDocumentParser::attemptToEnd()

@@ -29,6 +29,8 @@ private:
               const String& url);
   const AtomicString& interfaceName() const override;
 
+  Application* GetApplication() override;
+
   String title_;
 };
 

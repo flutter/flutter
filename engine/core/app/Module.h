@@ -34,6 +34,8 @@ private:
          const String& url);
   const AtomicString& interfaceName() const override;
 
+  Application* GetApplication() override;
+
   RefPtr<Application> application_;
   ScriptValue exports_;
 };

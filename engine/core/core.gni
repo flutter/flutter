@@ -116,6 +116,8 @@ sky_core_files = [
   "app/Application.h",
   "app/Module.cpp",
   "app/Module.h",
+  "app/ModuleLoader.cpp",
+  "app/ModuleLoader.h",
   "css/BasicShapeFunctions.cpp",
   "css/BasicShapeFunctions.h",
   "css/BinaryDataFontFaceSource.cpp",
