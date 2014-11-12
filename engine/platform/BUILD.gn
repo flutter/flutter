@@ -195,11 +195,8 @@ component("platform") {
     "fonts/GlyphPageTreeNode.cpp",
     "fonts/GlyphPageTreeNode.h",
     "fonts/harfbuzz/FontHarfBuzz.cpp",
-    "fonts/harfbuzz/FontPlatformDataHarfBuzz.cpp",
-    "fonts/harfbuzz/FontPlatformDataHarfBuzz.h",
     "fonts/harfbuzz/HarfBuzzFace.cpp",
     "fonts/harfbuzz/HarfBuzzFace.h",
-    "fonts/harfbuzz/HarfBuzzFaceCoreText.cpp",
     "fonts/harfbuzz/HarfBuzzFaceSkia.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.h",
@@ -694,14 +691,6 @@ component("platform") {
     "//third_party/qcms",
     "//url",
     "//v8",
-  ]
-
-  # FIXME(sky): Can sky use this stuff? Why mac only?
-  sources -= [
-    # FIXME: We will eventually compile this too, but for now it's
-    # only used on mac.
-    "fonts/FontPlatformData.cpp",
-    "fonts/harfbuzz/HarfBuzzFaceCoreText.cpp",
   ]
 
   if (is_android) {

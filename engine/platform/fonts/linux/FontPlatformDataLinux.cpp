@@ -34,7 +34,7 @@
 #include "SkTypeface.h"
 #include "platform/LayoutTestSupport.h"
 #include "platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/harfbuzz/FontPlatformDataHarfBuzz.h"
+#include "platform/fonts/FontPlatformData.h"
 #include "platform/graphics/GraphicsContext.h"
 #include "public/platform/linux/WebFontRenderStyle.h"
 #include "public/platform/linux/WebSandboxSupport.h"

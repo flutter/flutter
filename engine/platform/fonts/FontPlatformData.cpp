@@ -1,120 +1,178 @@
 /*
- * Copyright (C) 2011 Brent Fulgham
+ * Copyright (c) 2006, 2007, 2008, Google Inc. All rights reserved.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
 #include "platform/fonts/FontPlatformData.h"
 
-#include "wtf/HashMap.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
-
-#if OS(MACOSX)
+#include "SkTypeface.h"
 #include "platform/fonts/harfbuzz/HarfBuzzFace.h"
-#endif
+#include "wtf/text/WTFString.h"
 
 namespace blink {
 
 FontPlatformData::FontPlatformData(WTF::HashTableDeletedValueType)
-    : m_syntheticBold(false)
-    , m_syntheticOblique(false)
+    : m_textSize(0)
+    , m_syntheticBold(false)
+    , m_syntheticItalic(false)
     , m_orientation(Horizontal)
-    , m_size(0)
-    , m_widthVariant(RegularWidth)
-#if OS(MACOSX)
-    , m_font(hashTableDeletedFontValue())
-#endif
-    , m_isColorBitmapFont(false)
-    , m_isCompositeFontReference(false)
+    , m_isHashTableDeletedValue(true)
 {
 }
 
 FontPlatformData::FontPlatformData()
-    : m_syntheticBold(false)
-    , m_syntheticOblique(false)
+    : m_textSize(0)
+    , m_syntheticBold(false)
+    , m_syntheticItalic(false)
     , m_orientation(Horizontal)
-    , m_size(0)
-    , m_widthVariant(RegularWidth)
-#if OS(MACOSX)
-    , m_font(0)
-#endif
-    , m_isColorBitmapFont(false)
-    , m_isCompositeFontReference(false)
+    , m_isHashTableDeletedValue(false)
 {
 }
 
-FontPlatformData::FontPlatformData(float size, bool syntheticBold, bool syntheticOblique, FontOrientation orientation, FontWidthVariant widthVariant)
-    : m_syntheticBold(syntheticBold)
-    , m_syntheticOblique(syntheticOblique)
+FontPlatformData::FontPlatformData(float textSize, bool syntheticBold, bool syntheticItalic)
+    : m_textSize(textSize)
+    , m_syntheticBold(syntheticBold)
+    , m_syntheticItalic(syntheticItalic)
+    , m_orientation(Horizontal)
+    , m_isHashTableDeletedValue(false)
+{
+}
+
+FontPlatformData::FontPlatformData(const FontPlatformData& src)
+    : m_typeface(src.m_typeface)
+    , m_family(src.m_family)
+    , m_textSize(src.m_textSize)
+    , m_syntheticBold(src.m_syntheticBold)
+    , m_syntheticItalic(src.m_syntheticItalic)
+    , m_orientation(src.m_orientation)
+    , m_style(src.m_style)
+    , m_harfBuzzFace(nullptr)
+    , m_isHashTableDeletedValue(false)
+{
+}
+
+FontPlatformData::FontPlatformData(PassRefPtr<SkTypeface> tf, const char* family, float textSize, bool syntheticBold, bool syntheticItalic, FontOrientation orientation, bool subpixelTextPosition)
+    : m_typeface(tf)
+    , m_family(family)
+    , m_textSize(textSize)
+    , m_syntheticBold(syntheticBold)
+    , m_syntheticItalic(syntheticItalic)
     , m_orientation(orientation)
-    , m_size(size)
-    , m_widthVariant(widthVariant)
-#if OS(MACOSX)
-    , m_font(0)
+    , m_isHashTableDeletedValue(false)
+{
+    querySystemForRenderStyle(subpixelTextPosition);
+}
+
+FontPlatformData::FontPlatformData(const FontPlatformData& src, float textSize)
+    : m_typeface(src.m_typeface)
+    , m_family(src.m_family)
+    , m_textSize(textSize)
+    , m_syntheticBold(src.m_syntheticBold)
+    , m_syntheticItalic(src.m_syntheticItalic)
+    , m_orientation(src.m_orientation)
+    , m_harfBuzzFace(nullptr)
+    , m_isHashTableDeletedValue(false)
+{
+    querySystemForRenderStyle(FontDescription::subpixelPositioning());
+}
+
+FontPlatformData::~FontPlatformData()
+{
+}
+
+FontPlatformData& FontPlatformData::operator=(const FontPlatformData& src)
+{
+    m_typeface = src.m_typeface;
+    m_family = src.m_family;
+    m_textSize = src.m_textSize;
+    m_syntheticBold = src.m_syntheticBold;
+    m_syntheticItalic = src.m_syntheticItalic;
+    m_harfBuzzFace = nullptr;
+    m_orientation = src.m_orientation;
+    m_style = src.m_style;
+    return *this;
+}
+
+#ifndef NDEBUG
+String FontPlatformData::description() const
+{
+    return String();
+}
 #endif
-    , m_isColorBitmapFont(false)
-    , m_isCompositeFontReference(false)
+
+SkFontID FontPlatformData::uniqueID() const
 {
+    return m_typeface->uniqueID();
 }
 
-#if OS(MACOSX)
-FontPlatformData::FontPlatformData(CGFontRef cgFont, float size, bool syntheticBold, bool syntheticOblique, FontOrientation orientation, FontWidthVariant widthVariant)
-    : m_syntheticBold(syntheticBold)
-    , m_syntheticOblique(syntheticOblique)
-    , m_orientation(orientation)
-    , m_size(size)
-    , m_widthVariant(widthVariant)
-    , m_font(0)
-    , m_cgFont(cgFont)
-    , m_isColorBitmapFont(false)
-    , m_isCompositeFontReference(false)
+String FontPlatformData::fontFamilyName() const
 {
-}
-#endif
-
-FontPlatformData::FontPlatformData(const FontPlatformData& source)
-    : m_syntheticBold(source.m_syntheticBold)
-    , m_syntheticOblique(source.m_syntheticOblique)
-    , m_orientation(source.m_orientation)
-    , m_size(source.m_size)
-    , m_widthVariant(source.m_widthVariant)
-    , m_isColorBitmapFont(source.m_isColorBitmapFont)
-    , m_isCompositeFontReference(source.m_isCompositeFontReference)
-{
-    platformDataInit(source);
+    // FIXME(crbug.com/326582): come up with a proper way of handling SVG.
+    if (!this->typeface())
+        return "";
+    SkTypeface::LocalizedStrings* fontFamilyIterator = this->typeface()->createFamilyNameIterator();
+    SkTypeface::LocalizedString localizedString;
+    while (fontFamilyIterator->next(&localizedString) && !localizedString.fString.size()) { }
+    fontFamilyIterator->unref();
+    return String(localizedString.fString.c_str());
 }
 
-const FontPlatformData& FontPlatformData::operator=(const FontPlatformData& other)
+bool FontPlatformData::operator==(const FontPlatformData& a) const
 {
-    // Check for self-assignment.
-    if (this == &other)
-        return *this;
+    // If either of the typeface pointers are null then we test for pointer
+    // equality. Otherwise, we call SkTypeface::Equal on the valid pointers.
+    bool typefacesEqual;
+    if (!m_typeface || !a.m_typeface)
+        typefacesEqual = m_typeface == a.m_typeface;
+    else
+        typefacesEqual = SkTypeface::Equal(m_typeface.get(), a.m_typeface.get());
 
-    m_syntheticBold = other.m_syntheticBold;
-    m_syntheticOblique = other.m_syntheticOblique;
-    m_orientation = other.m_orientation;
-    m_size = other.m_size;
-    m_widthVariant = other.m_widthVariant;
-    m_isColorBitmapFont = other.m_isColorBitmapFont;
-    m_isCompositeFontReference = other.m_isCompositeFontReference;
+    return typefacesEqual
+        && m_textSize == a.m_textSize
+        && m_syntheticBold == a.m_syntheticBold
+        && m_syntheticItalic == a.m_syntheticItalic
+        && m_orientation == a.m_orientation
+        && m_style == a.m_style
+        && m_isHashTableDeletedValue == a.m_isHashTableDeletedValue;
+}
 
-    return platformDataAssign(other);
+bool FontPlatformData::isFixedPitch() const
+{
+    return typeface() && typeface()->isFixedPitch();
+}
+
+HarfBuzzFace* FontPlatformData::harfBuzzFace() const
+{
+    if (!m_harfBuzzFace)
+        m_harfBuzzFace = HarfBuzzFace::create(const_cast<FontPlatformData*>(this), uniqueID());
+
+    return m_harfBuzzFace.get();
 }
 
 } // namespace blink
