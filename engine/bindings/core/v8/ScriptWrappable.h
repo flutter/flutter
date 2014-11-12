@@ -48,26 +48,6 @@ namespace blink {
  * variable which increase the size of instances. Some of the classes sensitive
  * to the size inherit from this class. So this class must be zero size.
  */
-#if COMPILER(MSVC)
-// VC++ 2013 doesn't support EBCO (Empty Base Class Optimization). It causes
-// that not always pointers to an empty base class are aligned to 4 byte
-// alignment. For example,
-//
-//   class EmptyBase1 {};
-//   class EmptyBase2 {};
-//   class Derived : public EmptyBase1, public EmptyBase2 {};
-//   Derived d;
-//   // &d                           == 0x1000
-//   // static_cast<EmptyBase1*>(&d) == 0x1000
-//   // static_cast<EmptyBase2*>(&d) == 0x1001  // Not 4 byte alignment!
-//
-// This doesn't happen with other compilers which support EBCO. All the
-// addresses in the above example will be 0x1000 with EBCO supported.
-//
-// Since v8::Object::SetAlignedPointerInInternalField requires the pointers to
-// be aligned, we need a hack to specify at least 4 byte alignment to MSVC.
-__declspec(align(4))
-#endif
 class ScriptWrappableBase {
 public:
     template<typename T>
