@@ -45,7 +45,8 @@ def used_files(target):
 
 def find_on_disk(path):
     # FIXME: Use os.walk and do fancier ignoring.
-    return stripped_lines_from_command(['find', path, '-type', 'f'])
+    find_cmd = ['find', path, '-type', 'f']
+    return stripped_lines_from_command(find_cmd, cwd=ROOT_DIR)
 
 
 def main():
@@ -72,7 +73,6 @@ def main():
         '.gypi',
         '.gn',
         '.gni',
-        '.h', # Ignore headers for the moment.
     ]
     for ext in IGNORED_EXTENSIONS:
         missing_from_gn = filter(lambda p: not p.endswith(ext), missing_from_gn)
