@@ -148,41 +148,6 @@ TEST(WTF, DISABLED_StringOperators)
     EXPECT_N_WTF_STRING_COPIES(2, atomicString + literal + string + literal);
     EXPECT_N_WTF_STRING_COPIES(2, atomicString + (literal + string + literal));
     EXPECT_N_WTF_STRING_COPIES(2, (atomicString + literal) + (string + literal));
-
-#if COMPILER(MSVC)
-    EXPECT_N_WTF_STRING_COPIES(1, L"wide string" + string);
-    EXPECT_N_WTF_STRING_COPIES(1, string + L"wide string");
-    EXPECT_N_WTF_STRING_COPIES(1, L"wide string" + atomicString);
-    EXPECT_N_WTF_STRING_COPIES(1, atomicString + L"wide string");
-
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + string + L"wide string" + string);
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + (string + L"wide string" + string));
-    EXPECT_N_WTF_STRING_COPIES(2, (L"wide string" + string) + (L"wide string" + string));
-    EXPECT_N_WTF_STRING_COPIES(2, string + L"wide string" + string + L"wide string");
-    EXPECT_N_WTF_STRING_COPIES(2, string + (L"wide string" + string + L"wide string"));
-    EXPECT_N_WTF_STRING_COPIES(2, (string + L"wide string") + (string + L"wide string"));
-
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + atomicString + L"wide string" + atomicString);
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + (atomicString + L"wide string" + atomicString));
-    EXPECT_N_WTF_STRING_COPIES(2, (L"wide string" + atomicString) + (L"wide string" + atomicString));
-    EXPECT_N_WTF_STRING_COPIES(2, atomicString + L"wide string" + atomicString + L"wide string");
-    EXPECT_N_WTF_STRING_COPIES(2, atomicString + (L"wide string" + atomicString + L"wide string"));
-    EXPECT_N_WTF_STRING_COPIES(2, (atomicString + L"wide string") + (atomicString + L"wide string"));
-
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + string + L"wide string" + atomicString);
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + (string + L"wide string" + atomicString));
-    EXPECT_N_WTF_STRING_COPIES(2, (L"wide string" + string) + (L"wide string" + atomicString));
-    EXPECT_N_WTF_STRING_COPIES(2, string + L"wide string" + atomicString + L"wide string");
-    EXPECT_N_WTF_STRING_COPIES(2, string + (L"wide string" + atomicString + L"wide string"));
-    EXPECT_N_WTF_STRING_COPIES(2, (string + L"wide string") + (atomicString + L"wide string"));
-
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + atomicString + L"wide string" + string);
-    EXPECT_N_WTF_STRING_COPIES(2, L"wide string" + (atomicString + L"wide string" + string));
-    EXPECT_N_WTF_STRING_COPIES(2, (L"wide string" + atomicString) + (L"wide string" + string));
-    EXPECT_N_WTF_STRING_COPIES(2, atomicString + L"wide string" + string + L"wide string");
-    EXPECT_N_WTF_STRING_COPIES(2, atomicString + (L"wide string" + string + L"wide string"));
-    EXPECT_N_WTF_STRING_COPIES(2, (atomicString + L"wide string") + (string + L"wide string"));
-#endif
 }
 
 } // namespace

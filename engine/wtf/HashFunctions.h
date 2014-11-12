@@ -124,14 +124,7 @@ namespace WTF {
     template<typename T> struct PtrHash {
         static unsigned hash(T key)
         {
-#if COMPILER(MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4244) // work around what seems to be a bug in MSVC's conversion warnings
-#endif
             return IntHash<uintptr_t>::hash(reinterpret_cast<uintptr_t>(key));
-#if COMPILER(MSVC)
-#pragma warning(pop)
-#endif
         }
         static bool equal(T a, T b) { return a == b; }
         static bool equal(std::nullptr_t, T b) { return b == 0; }
@@ -205,11 +198,7 @@ namespace WTF {
     template<> struct DefaultHash<unsigned long> { typedef IntHash<unsigned long> Hash; };
     template<> struct DefaultHash<long long> { typedef IntHash<unsigned long long> Hash; };
     template<> struct DefaultHash<unsigned long long> { typedef IntHash<unsigned long long> Hash; };
-
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
     template<> struct DefaultHash<wchar_t> { typedef IntHash<wchar_t> Hash; };
-#endif
-
     template<> struct DefaultHash<float> { typedef FloatHash<float> Hash; };
     template<> struct DefaultHash<double> { typedef FloatHash<double> Hash; };
 

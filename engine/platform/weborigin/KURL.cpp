@@ -261,7 +261,6 @@ KURL& KURL::operator=(const KURL& other)
     return *this;
 }
 
-#if COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES)
 KURL::KURL(KURL&& other)
     : m_isValid(other.m_isValid)
     , m_protocolIsInHTTPFamily(other.m_protocolIsInHTTPFamily)
@@ -284,7 +283,6 @@ KURL& KURL::operator=(KURL&& other)
     m_innerURL = other.m_innerURL.release();
     return *this;
 }
-#endif
 
 KURL KURL::copy() const
 {

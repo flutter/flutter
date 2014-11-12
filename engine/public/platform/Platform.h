@@ -31,10 +31,6 @@
 #ifndef Platform_h
 #define Platform_h
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "WebCommon.h"
 #include "WebData.h"
 #include "WebGestureDevice.h"
@@ -80,12 +76,7 @@ struct WebSize;
 class Platform {
 public:
     // HTML5 Database ------------------------------------------------------
-
-#ifdef WIN32
-    typedef HANDLE FileHandle;
-#else
     typedef int FileHandle;
-#endif
 
     BLINK_PLATFORM_EXPORT static void initialize(Platform*);
     BLINK_PLATFORM_EXPORT static void shutdown();

@@ -110,7 +110,6 @@ component("wtf") {
     "Noncopyable.h",
     "NonCopyingSort.h",
     "NotFound.h",
-    "NullPtr.cpp",
     "NullPtr.h",
     "OwnPtr.h",
     "OwnPtrCommon.h",

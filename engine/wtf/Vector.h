@@ -613,10 +613,8 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         template<size_t otherCapacity>
         Vector& operator=(const Vector<T, otherCapacity, Allocator>&);
 
-#if COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES)
         Vector(Vector&&);
         Vector& operator=(Vector&&);
-#endif
 
         size_t size() const { return m_size; }
         size_t capacity() const { return Base::capacity(); }
@@ -796,7 +794,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         return *this;
     }
 
-#if COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES)
     template<typename T, size_t inlineCapacity, typename Allocator>
     Vector<T, inlineCapacity, Allocator>::Vector(Vector<T, inlineCapacity, Allocator>&& other)
     {
@@ -812,7 +809,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         swap(other);
         return *this;
     }
-#endif
 
     template<typename T, size_t inlineCapacity, typename Allocator>
     template<typename U>

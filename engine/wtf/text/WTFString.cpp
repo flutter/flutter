@@ -469,9 +469,6 @@ String String::format(const char *format, ...)
     Vector<char, 256> buffer;
 
     // Do the format once to get the length.
-#if COMPILER(MSVC)
-    int result = _vscprintf(format, args);
-#else
     char ch;
     int result = vsnprintf(&ch, 1, format, args);
     // We need to call va_end() and then va_start() again here, as the
@@ -482,7 +479,6 @@ String String::format(const char *format, ...)
     // systems, but fails e.g. on 64bit Linux.
     va_end(args);
     va_start(args, format);
-#endif
 
     if (result == 0)
         return String("");
@@ -1015,17 +1011,8 @@ static inline IntegralType toIntegralType(const CharType* data, size_t length, b
         ++data;
     }
 
-#if COMPILER(MSVC)
-#pragma warning(push, 0)
-#pragma warning(disable:4146)
-#endif
-
     if (isNegative)
         value = -value;
-
-#if COMPILER(MSVC)
-#pragma warning(pop)
-#endif
 
     // skip trailing space
     while (length && isSpaceOrNewline(*data)) {
