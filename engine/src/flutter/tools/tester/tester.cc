@@ -56,6 +56,8 @@ class SkyTester : public mojo::ApplicationDelegate,
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     window_manager_app_->ConfigureIncomingConnection(connection);
+    if (test_runner_)
+      connection->AddService(test_runner_->test_harness_factory());
     return true;
   }
 
@@ -116,6 +118,10 @@ class SkyTester : public mojo::ApplicationDelegate,
     if (url_from_args_.length())
       exit(0);
     ScheduleRun();
+  }
+
+  void DispatchInputEvent(mojo::EventPtr event) override {
+    window_manager_app_->DispatchInputEventToView(content_, event.Pass());
   }
 
   scoped_ptr<mojo::WindowManagerApp> window_manager_app_;

@@ -1,0 +1,35 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="/mojo/services/public/interfaces/input_events/input_event_constants.mojom.sky" as="constants" />
+<import src="/mojo/services/public/interfaces/input_events/input_events.mojom.sky" as="events" />
+<import src="/sky/framework/shell.sky" as="shell" />
+<import src="/sky/services/testing/test_harness.mojom.sky" as="harness" />
+
+<script>
+describe('Sky event sender', function() {
+  it('should be able to send events', function(done) {
+    var sky = document.querySelector('sky')
+    sky.focus();
+    sky.addEventListener('keypress', function(event) {
+      assert.equal(event.type, 'keypress');
+      assert.equal(event.keyCode, 0x41);
+      done();
+    });
+
+    var testHarness = shell.connectToService(
+        "mojo:sky_tester", harness.TestHarness);
+    testHarness.dispatchInputEvent(new events.Event({
+      action: constants.EventType.KEY_PRESSED,
+      key_data: new events.KeyData({
+        native_key_code: 0x41,
+        text: 0x41,
+        unmodified_text: 0x41,
+        is_char: true,
+        character: 0x41,
+      }),
+    }));
+  });
+});
+</script>
+</sky>

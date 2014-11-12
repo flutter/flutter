@@ -13,6 +13,9 @@
 namespace sky {
 namespace tester {
 
+TestRunnerClient::~TestRunnerClient() {
+}
+
 TestRunner::TestRunner(TestRunnerClient* client, mojo::View* container,
     const std::string& url)
     : test_harness_factory_(this),

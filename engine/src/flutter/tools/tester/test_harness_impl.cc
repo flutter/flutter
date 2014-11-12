@@ -25,5 +25,10 @@ void TestHarnessImpl::OnTestComplete(const mojo::String& test_result) {
     test_runner_->OnTestComplete(test_result);
 }
 
+void TestHarnessImpl::DispatchInputEvent(mojo::EventPtr event) {
+  if (test_runner_)
+    test_runner_->client()->DispatchInputEvent(event.Pass());
+}
+
 }  // namespace tester
 }  // namespace sky
