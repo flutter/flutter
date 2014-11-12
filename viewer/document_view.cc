@@ -218,9 +218,6 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
 void DocumentView::OnViewDestroyed(mojo::View* view) {
   DCHECK_EQ(view, root_);
 
-  for (auto& child : root_->children())
-    child->Destroy();
-
   delete this;
 }
 

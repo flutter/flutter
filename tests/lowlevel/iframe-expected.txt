@@ -1,0 +1,13 @@
+layer at (0,0) size 800x600
+  RenderView {#document} at (0,0) size 800x600
+layer at (0,0) size 800x188
+  RenderBlock {sky} at (0,0) size 800x188
+    RenderBlock {div} at (0,0) size 800x188
+      RenderBlock (anonymous) at (0,0) size 800x19
+        RenderText {#text} at (0,0) size 76x19
+          text run at (0,0) width 76: "This is an"
+      RenderBlock (anonymous) at (0,169) size 800x19
+        RenderText {#text} at (0,0) size 72x19
+          text run at (0,0) width 72: "element."
+layer at (250,19) size 300x150
+  RenderReplaced {iframe} at (250,19) size 300x150
