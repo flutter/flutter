@@ -114,7 +114,6 @@ namespace blink {
         double devicePixelRatio() const;
 
         String selectedText() const;
-        String selectedTextForClipboard() const;
 
         VisiblePosition visiblePositionForPoint(const IntPoint& framePoint);
         Document* documentAtPoint(const IntPoint& windowPoint);

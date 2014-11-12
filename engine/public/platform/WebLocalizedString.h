@@ -96,7 +96,6 @@ struct WebLocalizedString {
         FileButtonChooseFileLabel,
         FileButtonChooseMultipleFilesLabel,
         FileButtonNoFileSelectedLabel,
-        InputElementAltText,
         KeygenMenuHighGradeKeySize,
         KeygenMenuMediumGradeKeySize,
         MultipleFileUploadText,

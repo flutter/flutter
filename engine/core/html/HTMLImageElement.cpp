@@ -151,26 +151,11 @@ void HTMLImageElement::setBestFitURLAndDPRFromImageCandidate(const ImageCandidat
 
 void HTMLImageElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
 {
-    if (name == HTMLNames::altAttr) {
-        if (renderer() && renderer()->isImage())
-            toRenderImage(renderer())->updateAltText();
-    } else if (name == HTMLNames::srcAttr || name == HTMLNames::srcsetAttr || name == HTMLNames::sizesAttr) {
+    if (name == HTMLNames::srcAttr || name == HTMLNames::srcsetAttr || name == HTMLNames::sizesAttr) {
         selectSourceURL(ImageLoader::UpdateIgnorePreviousError);
     } else {
         HTMLElement::parseAttribute(name, value);
     }
-}
-
-const AtomicString& HTMLImageElement::altText() const
-{
-    // lets figure out the alt text.. magic stuff
-    // http://www.w3.org/TR/1998/REC-html40-19980424/appendix/notes.html#altgen
-    // also heavily discussed by Hixie on bugzilla
-    const AtomicString& alt = getAttribute(HTMLNames::altAttr);
-    if (!alt.isNull())
-        return alt;
-    // fall back to title attribute
-    return getAttribute(HTMLNames::titleAttr);
 }
 
 RenderObject* HTMLImageElement::createRenderer(RenderStyle* style)
@@ -199,13 +184,8 @@ void HTMLImageElement::attach(const AttachContext& context)
         if (renderImageResource->hasImage())
             return;
 
-        // If we have no image at all because we have no src attribute, set
-        // image height and width for the alt text instead.
-        if (!imageLoader().image() && !renderImageResource->cachedImage())
-            renderImage->setImageSizeForAltText();
-        else
+        if (imageLoader().image() || renderImageResource->cachedImage())
             renderImageResource->setImageResource(imageLoader().image());
-
     }
 }
 

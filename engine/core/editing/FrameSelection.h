@@ -199,7 +199,6 @@ public:
     void clearTypingStyle();
 
     String selectedText() const;
-    String selectedTextForClipboard() const;
 
     FloatRect bounds(bool clipToVisibleContent = true) const;
 

@@ -222,11 +222,6 @@ String LocalFrame::selectedText() const
     return selection().selectedText();
 }
 
-String LocalFrame::selectedTextForClipboard() const
-{
-    return selection().selectedTextForClipboard();
-}
-
 VisiblePosition LocalFrame::visiblePositionForPoint(const IntPoint& framePoint)
 {
     HitTestResult result = eventHandler().hitTestResultAtPoint(framePoint);

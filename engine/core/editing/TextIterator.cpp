@@ -250,7 +250,6 @@ TextIterator::TextIterator(const Range* range, TextIteratorBehaviorFlags behavio
     , m_emitsCharactersBetweenAllVisiblePositions(behavior & TextIteratorEmitsCharactersBetweenAllVisiblePositions)
     , m_emitsOriginalText(behavior & TextIteratorEmitsOriginalText)
     , m_ignoresStyleVisibility(behavior & TextIteratorIgnoresStyleVisibility)
-    , m_emitsImageAltText(behavior & TextIteratorEmitsImageAltText)
     , m_entersAuthorShadowRoots(behavior & TextIteratorEntersAuthorShadowRoots)
     , m_emitsObjectReplacementCharacter(behavior & TextIteratorEmitsObjectReplacementCharacter)
 {
@@ -275,7 +274,6 @@ TextIterator::TextIterator(const Position& start, const Position& end, TextItera
     , m_emitsCharactersBetweenAllVisiblePositions(behavior & TextIteratorEmitsCharactersBetweenAllVisiblePositions)
     , m_emitsOriginalText(behavior & TextIteratorEmitsOriginalText)
     , m_ignoresStyleVisibility(behavior & TextIteratorIgnoresStyleVisibility)
-    , m_emitsImageAltText(behavior & TextIteratorEmitsImageAltText)
     , m_entersAuthorShadowRoots(behavior & TextIteratorEntersAuthorShadowRoots)
     , m_emitsObjectReplacementCharacter(behavior & TextIteratorEmitsObjectReplacementCharacter)
 {
@@ -672,7 +670,6 @@ bool TextIterator::handleReplacedElement()
     if (m_fullyClippedStack.top())
         return false;
 
-    RenderObject* renderer = m_node->renderer();
     if (m_emitsObjectReplacementCharacter) {
         emitCharacter(objectReplacementCharacter, m_node->parentNode(), m_node, 0, 1);
         return true;
@@ -698,16 +695,6 @@ bool TextIterator::handleReplacedElement()
     m_positionStartOffset = 0;
     m_positionEndOffset = 1;
     m_singleCharacterBuffer = 0;
-
-    if (m_emitsImageAltText && renderer->isImage() && renderer->isRenderImage()) {
-        m_text = toRenderImage(renderer)->altText();
-        if (!m_text.isEmpty()) {
-            m_textLength = m_text.length();
-            m_lastCharacter = m_text[m_textLength - 1];
-            return true;
-        }
-    }
-
     m_textLength = 0;
     m_lastCharacter = 0;
 

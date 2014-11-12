@@ -41,9 +41,8 @@ enum TextIteratorBehavior {
     TextIteratorEmitsCharactersBetweenAllVisiblePositions = 1 << 0,
     TextIteratorIgnoresStyleVisibility = 1 << 2,
     TextIteratorEmitsOriginalText = 1 << 3,
-    TextIteratorEmitsImageAltText = 1 << 5,
-    TextIteratorEntersAuthorShadowRoots = 1 << 6,
-    TextIteratorEmitsObjectReplacementCharacter = 1 << 7
+    TextIteratorEntersAuthorShadowRoots = 1 << 5,
+    TextIteratorEmitsObjectReplacementCharacter = 1 << 6
 };
 typedef unsigned TextIteratorBehaviorFlags;
 
@@ -195,8 +194,6 @@ private:
 
     // Used when the visibility of the style should not affect text gathering.
     bool m_ignoresStyleVisibility;
-
-    bool m_emitsImageAltText;
 
     bool m_entersAuthorShadowRoots;
 

@@ -44,13 +44,7 @@ public:
     const RenderImageResource* imageResource() const { return m_imageResource.get(); }
     ImageResource* cachedImage() const { return m_imageResource ? m_imageResource->cachedImage() : 0; }
 
-    bool setImageSizeForAltText(ImageResource* newImage = 0);
-
-    void updateAltText();
-
     void highQualityRepaintTimerFired(Timer<RenderImage>*);
-
-    String altText() const { return m_altText; }
 
     inline void setImageDevicePixelRatio(float factor) { m_imageDevicePixelRatio = factor; }
     float imageDevicePixelRatio() const { return m_imageDevicePixelRatio; }
@@ -89,16 +83,13 @@ private:
 
     virtual bool boxShadowShouldBeAppliedToBackground(BackgroundBleedAvoidance, InlineFlowBox*) const override final;
 
-    IntSize imageSizeForError(ImageResource*) const;
-    void paintInvalidationOrMarkForLayout(bool imageSizeChanged, const IntRect* = 0);
+    void paintInvalidationOrMarkForLayout(const IntRect* = 0);
     void updateIntrinsicSizeIfNeeded(const LayoutSize&);
     // Update the size of the image to be rendered. Object-fit may cause this to be different from the CSS box's content rect.
     void updateInnerContentRect();
 
     void paintAreaElementFocusRing(PaintInfo&);
 
-    // Text to display as long as the image isn't available.
-    String m_altText;
     OwnPtr<RenderImageResource> m_imageResource;
     float m_imageDevicePixelRatio;
 

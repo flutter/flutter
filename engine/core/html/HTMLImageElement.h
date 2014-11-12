@@ -54,8 +54,6 @@ public:
     int naturalHeight() const;
     const String& currentSrc() const;
 
-    const AtomicString& altText() const;
-
     ImageResource* cachedImage() const { return imageLoader().image(); }
     void setImageResource(ImageResource* i) { imageLoader().setImage(i); };
 

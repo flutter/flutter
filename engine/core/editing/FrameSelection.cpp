@@ -1564,22 +1564,10 @@ void FrameSelection::setFocusedNodeIfNeeded()
     }
 }
 
-static String extractSelectedText(const FrameSelection& selection, TextIteratorBehavior behavior)
-{
-    // We remove '\0' characters because they are not visibly rendered to the user.
-    return plainText(selection.toNormalizedRange().get(), behavior).replace(0, "");
-}
-
 String FrameSelection::selectedText() const
 {
-    return extractSelectedText(*this, TextIteratorDefaultBehavior);
-}
-
-String FrameSelection::selectedTextForClipboard() const
-{
-    if (m_frame->settings() && m_frame->settings()->selectionIncludesAltImageText())
-        return extractSelectedText(*this, TextIteratorEmitsImageAltText);
-    return selectedText();
+    // We remove '\0' characters because they are not visibly rendered to the user.
+    return plainText(toNormalizedRange().get()).replace(0, "");
 }
 
 FloatRect FrameSelection::bounds(bool clipToVisibleContent) const

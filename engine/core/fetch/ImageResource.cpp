@@ -166,11 +166,6 @@ pair<blink::Image*, float> ImageResource::brokenImage(float deviceScaleFactor)
     return std::make_pair(brokenImageLoRes, 1);
 }
 
-bool ImageResource::willPaintBrokenImage() const
-{
-    return errorOccurred();
-}
-
 blink::Image* ImageResource::image()
 {
     ASSERT(!isPurgeable());
