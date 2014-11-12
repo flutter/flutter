@@ -5,22 +5,36 @@
 -->
 <import src="TemplateBinding.sky" />
 <script>
-var Base = {
-  __proto__: HTMLElement.prototype,
+var templates = new Map();
 
-  register: function() {
-    // |this| is prototype
-    var template = document.currentScript.previousElementSibling;
-    if (template && template.localName == 'template')
-      this.template_ = template;
-  },
+function createPrototype(proto, definition) {
+  var result = Object.create(proto);
+  var names = Object.getOwnPropertyNames(definition);
+  for (var i = 0; i < names.length; ++i) {
+    var descriptor = Object.getOwnPropertyDescriptor(definition, names[i]);
+    Object.defineProperty(result, names[i], descriptor);
+  }
+  return result;
+}
+
+var BasePrototype = createPrototype(HTMLElement.prototype, {
 
   createdCallback: function() {
+    this.created();
+  },
+
+  created: function() {
+    // override
   },
 
   attachedCallback: function() {
-    var shadow = this.createShadowRoot();
-    shadow.appendChild(this.template_.createInstance(this));
+    if (!this.shadowRoot) {
+      var template = templates.get(this.localName);
+      if (template) {
+        var shadow = this.createShadowRoot();
+        shadow.appendChild(template.createInstance(this));
+      }
+    }
     this.attached();
   },
 
@@ -44,12 +58,16 @@ var Base = {
   attributeChanged: function(attrName, oldValue, newValue) {
     // override
   }
-};
+});
 
 function SkyElement(prototype) {
-  prototype.__proto__ = Base;
-  document.registerElement(prototype.name, { prototype: prototype });
-  prototype.register();
+  var template = document.currentScript.previousElementSibling;
+  if (template && template.localName === 'template')
+    templates.set(prototype.name, template);
+
+  document.registerElement(prototype.name, {
+    prototype: createPrototype(BasePrototype, prototype),
+  });
 };
 
 module.exports = SkyElement;
