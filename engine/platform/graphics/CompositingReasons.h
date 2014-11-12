@@ -51,7 +51,7 @@ const uint64_t CompositingReasonBlendingWithCompositedDescendants        = UINT6
 const uint64_t CompositingReasonClipsCompositingDescendants              = UINT64_C(1) << 34;
 const uint64_t CompositingReasonPerspectiveWith3DDescendants             = UINT64_C(1) << 35;
 const uint64_t CompositingReasonPreserve3DWith3DDescendants              = UINT64_C(1) << 36;
-const uint64_t CompositingReasoWnIsolateCompositedDescendants             = UINT64_C(1) << 38;
+const uint64_t CompositingReasonIsolateCompositedDescendants             = UINT64_C(1) << 38;
 
 // The root layer is a special case that may be forced to be a layer, but also it needs to be
 // a layer if anything else in the subtree is composited.
