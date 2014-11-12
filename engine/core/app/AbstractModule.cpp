@@ -8,7 +8,7 @@
 namespace blink {
 
 AbstractModule::AbstractModule(ExecutionContext* context,
-                               Document* document,
+                               PassRefPtr<Document> document,
                                const String& url)
   : ContextLifecycleObserver(context),
     document_(document),

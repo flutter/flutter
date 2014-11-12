@@ -24,7 +24,7 @@ class AbstractModule : public RefCounted<AbstractModule>,
   const String& url() const { return url_; }
 
  protected:
-  AbstractModule(ExecutionContext*, Document*, const String& url);
+  AbstractModule(ExecutionContext*, PassRefPtr<Document>, const String& url);
 
  private:
   ExecutionContext* executionContext() const override;

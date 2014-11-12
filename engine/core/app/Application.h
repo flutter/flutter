@@ -13,7 +13,7 @@ class Application : public AbstractModule {
   DEFINE_WRAPPERTYPEINFO();
 public:
   static PassRefPtr<Application> create(ExecutionContext* context,
-                                        Document* document,
+                                        PassRefPtr<Document> document,
                                         const String& url) {
     return adoptRef(new Application(context, document, url));
   }
@@ -24,7 +24,9 @@ public:
   const String& title() { return title_; }
 
 private:
-  Application(ExecutionContext* context, Document* document, const String& url);
+  Application(ExecutionContext* context,
+              PassRefPtr<Document> document,
+              const String& url);
   const AtomicString& interfaceName() const override;
 
   String title_;

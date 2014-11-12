@@ -10,7 +10,7 @@
 namespace blink {
 
 Application::Application(ExecutionContext* context,
-                         Document* document,
+                         PassRefPtr<Document> document,
                          const String& url)
   : AbstractModule(context, document, url) {
 }

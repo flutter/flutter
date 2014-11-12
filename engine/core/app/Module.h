@@ -15,7 +15,7 @@ class Module : public AbstractModule {
 public:
   static PassRefPtr<Module> create(ExecutionContext* context,
                                    Application* application,
-                                   Document* document,
+                                   PassRefPtr<Document> document,
                                    const String& url) {
     return adoptRef(new Module(context, application, document, url));
   }
@@ -30,7 +30,7 @@ public:
 private:
   Module(ExecutionContext* context,
          Application* application,
-         Document* document,
+         PassRefPtr<Document> document,
          const String& url);
   const AtomicString& interfaceName() const override;
 
