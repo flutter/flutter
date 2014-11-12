@@ -78,9 +78,13 @@ public:
     };
     void didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
 
-    bool isWaitingForScripts() const;
-    bool isExecutingScript() const;
-    void executeScriptsWaitingForResources();
+    // From DocumentParser:
+    void detach() override final;
+    void prepareToStopParsing() override final;
+    void stopParsing() override final;
+    bool isWaitingForScripts() const override final;
+    bool isExecutingScript() const override final;
+    void executeScriptsWaitingForResources() override final;
 
     UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
@@ -88,14 +92,6 @@ private:
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);
 
     HTMLTreeBuilder* treeBuilder() const { return m_treeBuilder.get(); }
-
-    virtual HTMLDocumentParser* asHTMLDocumentParser() override final { return this; }
-
-    // DocumentParser
-    virtual void detach() override final;
-    virtual bool processingData() const override final;
-    virtual void prepareToStopParsing() override final;
-    virtual void stopParsing() override final;
 
     bool hasInsertionPoint();
 

@@ -1342,11 +1342,6 @@ void Document::removeAllEventListeners()
         domWindow->removeAllEventListeners();
 }
 
-HTMLDocumentParser* Document::scriptableDocumentParser() const
-{
-    return m_parser ? m_parser->asHTMLDocumentParser() : 0;
-}
-
 void Document::detachParser()
 {
     if (!m_parser)
@@ -1635,14 +1630,14 @@ void Document::executeScriptsWaitingForResourcesTimerFired(Timer<Document>*)
 {
     if (!isRenderingReady())
         return;
-    if (HTMLDocumentParser* parser = scriptableDocumentParser())
-        parser->executeScriptsWaitingForResources();
+    if (m_parser)
+        m_parser->executeScriptsWaitingForResources();
 }
 
 TextPosition Document::parserPosition() const
 {
-    if (HTMLDocumentParser* parser = scriptableDocumentParser())
-        return parser->textPosition();
+    if (m_parser)
+        m_parser->textPosition();
     return TextPosition::belowRangePosition();
 }
 
@@ -2382,8 +2377,8 @@ WeakPtr<Document> Document::contextDocument()
 
 void Document::finishedParsing()
 {
-    ASSERT(!scriptableDocumentParser() || !m_parser->isParsing());
-    ASSERT(!scriptableDocumentParser() || m_readyState != Loading);
+    ASSERT(!m_parser || !m_parser->isParsing());
+    ASSERT(!m_parser || m_readyState != Loading);
     setParsing(false);
     dispatchEvent(Event::createBubble(EventTypeNames::DOMContentLoaded));
 
@@ -2479,10 +2474,9 @@ void Document::addMessage(PassRefPtr<ConsoleMessage> consoleMessage)
 
     if (!consoleMessage->scriptState() && consoleMessage->url().isNull() && !consoleMessage->lineNumber()) {
         consoleMessage->setURL(url().string());
-        if (parsing() && scriptableDocumentParser()) {
-            HTMLDocumentParser* parser = scriptableDocumentParser();
-            if (!parser->isWaitingForScripts() && !parser->isExecutingScript())
-                consoleMessage->setLineNumber(parser->lineNumber().oneBasedInt());
+        if (parsing() && m_parser) {
+            if (!m_parser->isWaitingForScripts() && !m_parser->isExecutingScript())
+                consoleMessage->setLineNumber(m_parser->textPosition().m_line.oneBasedInt());
         }
     }
     m_frame->console().addMessage(consoleMessage);
@@ -2620,11 +2614,6 @@ void Document::adjustFloatRectForScroll(FloatRect& rect)
 
     LayoutRect visibleContentRect = view()->visibleContentRect();
     rect.move(-FloatSize(visibleContentRect.x().toFloat(), visibleContentRect.y().toFloat()));
-}
-
-bool Document::hasActiveParser()
-{
-    return m_activeParserCount || (m_parser && m_parser->processingData());
 }
 
 void Document::decrementActiveParserCount()

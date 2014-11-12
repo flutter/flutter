@@ -552,7 +552,6 @@ public:
     void adjustFloatQuadsForScroll(Vector<FloatQuad>&);
     void adjustFloatRectForScroll(FloatRect&);
 
-    bool hasActiveParser();
     unsigned activeParserCount() { return m_activeParserCount; }
     void incrementActiveParserCount() { ++m_activeParserCount; }
     void decrementActiveParserCount();
@@ -637,7 +636,6 @@ private:
     void updateRenderTree(StyleRecalcChange);
     void updateStyle(StyleRecalcChange);
 
-    HTMLDocumentParser* scriptableDocumentParser() const;
     void detachParser();
 
     virtual bool isDocument() const override final { return true; }

@@ -28,6 +28,7 @@
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
 #include "wtf/RefCounted.h"
+#include "wtf/text/TextPosition.h"
 
 namespace blink {
 
@@ -40,22 +41,14 @@ class DocumentParser : public RefCounted<DocumentParser> {
 public:
     virtual ~DocumentParser();
 
-    virtual HTMLDocumentParser* asHTMLDocumentParser() { return 0; }
-
     virtual void parse(mojo::ScopedDataPipeConsumerHandle) = 0;
-    virtual bool processingData() const { return false; }
 
-    // document() will return 0 after detach() is called.
-    Document* document() const { ASSERT(m_document); return m_document; }
+    virtual TextPosition textPosition() const = 0;
+    virtual void executeScriptsWaitingForResources() = 0;
+    virtual bool isWaitingForScripts() const = 0;
+    virtual bool isExecutingScript() const = 0;
 
     bool isParsing() const { return m_state == ParsingState; }
-    bool isStopping() const { return m_state == StoppingState; }
-    bool isStopped() const { return m_state >= StoppedState; }
-    bool isDetached() const { return m_state == DetachedState; }
-
-    // prepareToStop() is used when the EOF token is encountered and parsing is to be
-    // stopped normally.
-    virtual void prepareToStopParsing();
 
     // stopParsing() is used when a load is canceled/stopped.
     // stopParsing() is currently different from detach(), but shouldn't be.
@@ -73,6 +66,15 @@ public:
 
 protected:
     explicit DocumentParser(Document*);
+
+    // document() will return 0 after detach() is called.
+    Document* document() const { ASSERT(m_document); return m_document; }
+
+    virtual void prepareToStopParsing();
+
+    bool isStopping() const { return m_state == StoppingState; }
+    bool isStopped() const { return m_state >= StoppedState; }
+    bool isDetached() const { return m_state == DetachedState; }
 
 private:
     enum ParserState {

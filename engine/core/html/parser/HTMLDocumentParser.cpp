@@ -143,11 +143,6 @@ bool HTMLDocumentParser::isParsingFragment() const
     return m_treeBuilder->isParsingFragment();
 }
 
-bool HTMLDocumentParser::processingData() const
-{
-    return isScheduledForResume() || inPumpSession() || m_haveBackgroundParser;
-}
-
 bool HTMLDocumentParser::isScheduledForResume() const
 {
     return m_parserScheduler && m_parserScheduler->isScheduledForResume();
