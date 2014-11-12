@@ -15,7 +15,6 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-include external/stlport/libstlport.mk
 
 LOCAL_SRC_FILES := \
     AnalyzeStyle.cpp \
@@ -43,7 +42,6 @@ LOCAL_SHARED_LIBRARIES := \
     liblog \
     libpng \
     libz \
-    libstlport \
     libicuuc \
     libutils
 

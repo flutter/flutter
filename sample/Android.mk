@@ -15,7 +15,6 @@
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
-include external/stlport/libstlport.mk
 
 LOCAL_MODULE_TAGS := tests
 
@@ -31,7 +30,6 @@ LOCAL_SHARED_LIBRARIES += \
 	libutils \
 	liblog \
 	libcutils \
-	libstlport \
 	libharfbuzz_ng \
 	libicuuc \
 	libft2 \
@@ -45,7 +43,6 @@ include $(BUILD_EXECUTABLE)
 
 
 include $(CLEAR_VARS)
-include external/stlport/libstlport.mk
 
 LOCAL_MODULE_TAG := tests
 
@@ -63,7 +60,6 @@ LOCAL_SHARED_LIBRARIES += \
 	libutils \
 	liblog \
 	libcutils \
-	libstlport \
 	libharfbuzz_ng \
 	libicuuc \
 	libskia \
