@@ -166,21 +166,6 @@ public:
 
     // To set a WebLayer as scrollable we must specify the corresponding clip layer.
     virtual void setScrollClipLayer(WebLayer*) = 0;
-    virtual bool scrollable() const = 0;
-    virtual void setUserScrollable(bool horizontal, bool vertical) = 0;
-    virtual bool userScrollableHorizontal() const = 0;
-    virtual bool userScrollableVertical() const = 0;
-
-    virtual void setHaveWheelEventHandlers(bool) = 0;
-    virtual bool haveWheelEventHandlers() const = 0;
-
-    virtual void setHaveScrollEventHandlers(bool) = 0;
-    virtual bool haveScrollEventHandlers() const = 0;
-
-    virtual void setShouldScrollOnMainThread(bool) = 0;
-    virtual bool shouldScrollOnMainThread() const = 0;
-
-    virtual void setNonFastScrollableRegion(const WebVector<WebRect>&) = 0;
 
     // The scroll client is notified when the scroll position of the WebLayer
     // changes. Only a single scroll client can be set for a WebLayer at a time.

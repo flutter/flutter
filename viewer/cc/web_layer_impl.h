@@ -107,18 +107,6 @@ class WebLayerImpl : public blink::WebLayer, public cc::LayerClient {
   virtual void setScrollPosition(blink::WebPoint position);
   virtual blink::WebPoint scrollPosition() const;
   virtual void setScrollClipLayer(blink::WebLayer* clip_layer);
-  virtual bool scrollable() const;
-  virtual void setUserScrollable(bool horizontal, bool vertical);
-  virtual bool userScrollableHorizontal() const;
-  virtual bool userScrollableVertical() const;
-  virtual void setHaveWheelEventHandlers(bool have_wheel_event_handlers);
-  virtual bool haveWheelEventHandlers() const;
-  virtual void setHaveScrollEventHandlers(bool have_scroll_event_handlers);
-  virtual bool haveScrollEventHandlers() const;
-  virtual void setShouldScrollOnMainThread(bool scroll_on_main);
-  virtual bool shouldScrollOnMainThread() const;
-  virtual void setNonFastScrollableRegion(
-      const blink::WebVector<blink::WebRect>& region);
   virtual void setScrollClient(blink::WebLayerScrollClient* client);
   virtual bool isOrphan() const;
   virtual void setWebLayerClient(blink::WebLayerClient* client);

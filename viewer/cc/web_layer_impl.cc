@@ -288,54 +288,6 @@ void WebLayerImpl::setScrollClipLayer(WebLayer* clip_layer) {
   layer_->SetScrollClipLayerId(clip_layer->id());
 }
 
-bool WebLayerImpl::scrollable() const {
-  return layer_->scrollable();
-}
-
-void WebLayerImpl::setUserScrollable(bool horizontal, bool vertical) {
-  layer_->SetUserScrollable(horizontal, vertical);
-}
-
-bool WebLayerImpl::userScrollableHorizontal() const {
-  return layer_->user_scrollable_horizontal();
-}
-
-bool WebLayerImpl::userScrollableVertical() const {
-  return layer_->user_scrollable_vertical();
-}
-
-void WebLayerImpl::setHaveWheelEventHandlers(bool have_wheel_event_handlers) {
-  layer_->SetHaveWheelEventHandlers(have_wheel_event_handlers);
-}
-
-bool WebLayerImpl::haveWheelEventHandlers() const {
-  return layer_->have_wheel_event_handlers();
-}
-
-void WebLayerImpl::setHaveScrollEventHandlers(bool have_scroll_event_handlers) {
-  layer_->SetHaveScrollEventHandlers(have_scroll_event_handlers);
-}
-
-bool WebLayerImpl::haveScrollEventHandlers() const {
-  return layer_->have_scroll_event_handlers();
-}
-
-void WebLayerImpl::setShouldScrollOnMainThread(
-    bool should_scroll_on_main_thread) {
-  layer_->SetShouldScrollOnMainThread(should_scroll_on_main_thread);
-}
-
-bool WebLayerImpl::shouldScrollOnMainThread() const {
-  return layer_->should_scroll_on_main_thread();
-}
-
-void WebLayerImpl::setNonFastScrollableRegion(const WebVector<WebRect>& rects) {
-  cc::Region region;
-  for (size_t i = 0; i < rects.size(); ++i)
-    region.Union(rects[i]);
-  layer_->SetNonFastScrollableRegion(region);
-}
-
 void WebLayerImpl::setScrollClient(blink::WebLayerScrollClient* scroll_client) {
   if (scroll_client) {
     layer_->set_did_scroll_callback(
