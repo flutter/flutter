@@ -22,8 +22,6 @@ component("cc") {
 
   sources = [
     "sky_viewer_cc_export.h",
-    "scrollbar_impl.cc",
-    "scrollbar_impl.h",
     "web_animation_curve_common.cc",
     "web_animation_curve_common.h",
     "web_animation_impl.cc",
@@ -48,10 +46,6 @@ component("cc") {
     "web_layer_impl.h",
     "web_layer_impl_fixed_bounds.cc",
     "web_layer_impl_fixed_bounds.h",
-    "web_scroll_offset_animation_curve_impl.cc",
-    "web_scroll_offset_animation_curve_impl.h",
-    "web_scrollbar_layer_impl.cc",
-    "web_scrollbar_layer_impl.h",
     "web_to_cc_animation_delegate_adapter.cc",
     "web_to_cc_animation_delegate_adapter.h",
     "web_transform_animation_curve_impl.cc",

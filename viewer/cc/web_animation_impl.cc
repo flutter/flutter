@@ -9,7 +9,6 @@
 #include "cc/animation/animation_id_provider.h"
 #include "sky/viewer/cc/web_filter_animation_curve_impl.h"
 #include "sky/viewer/cc/web_float_animation_curve_impl.h"
-#include "sky/viewer/cc/web_scroll_offset_animation_curve_impl.h"
 #include "sky/viewer/cc/web_transform_animation_curve_impl.h"
 #include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
 
@@ -50,12 +49,6 @@ WebCompositorAnimationImpl::WebCompositorAnimationImpl(
       const WebFilterAnimationCurveImpl* filter_curve_impl =
           static_cast<const WebFilterAnimationCurveImpl*>(&web_curve);
       curve = filter_curve_impl->CloneToAnimationCurve();
-      break;
-    }
-    case WebCompositorAnimationCurve::AnimationCurveTypeScrollOffset: {
-      const WebScrollOffsetAnimationCurveImpl* scroll_curve_impl =
-          static_cast<const WebScrollOffsetAnimationCurveImpl*>(&web_curve);
-      curve = scroll_curve_impl->CloneToAnimationCurve();
       break;
     }
   }

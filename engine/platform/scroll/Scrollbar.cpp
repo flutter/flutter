@@ -35,7 +35,6 @@
 #include "public/platform/Platform.h"
 #include "public/platform/WebPoint.h"
 #include "public/platform/WebRect.h"
-#include "public/platform/WebScrollbarBehavior.h"
 #include "public/platform/WebThemeEngine.h"
 
 // The position of the scrollbar thumb affects the appearance of the steppers, so
@@ -323,14 +322,9 @@ bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
 void Scrollbar::mouseMoved(const PlatformMouseEvent& evt)
 {
     if (m_pressedPart == ThumbPart) {
-        if (shouldSnapBackToDragOrigin(evt)) {
-            if (m_scrollableArea)
-                m_scrollableArea->scrollToOffsetWithoutAnimation(m_orientation, m_dragOrigin + m_scrollableArea->minimumScrollPosition(m_orientation));
-        } else {
-            moveThumb(m_orientation == HorizontalScrollbar ?
-                      convertFromContainingView(evt.position()).x() :
-                      convertFromContainingView(evt.position()).y());
-        }
+        moveThumb(m_orientation == HorizontalScrollbar ?
+                  convertFromContainingView(evt.position()).x() :
+                  convertFromContainingView(evt.position()).y());
         return;
     }
 
@@ -396,18 +390,7 @@ void Scrollbar::mouseDown(const PlatformMouseEvent& evt)
     setPressedPart(NoPart);
     int pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
 
-    if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && shouldCenterOnThumb(evt)) {
-        setHoveredPart(ThumbPart);
-        setPressedPart(ThumbPart);
-        m_dragOrigin = m_currentPos;
-        int thumbLen = thumbLength();
-        int desiredPos = pressedPos;
-        // Set the pressed position to the middle of the thumb so that when we do the move, the delta
-        // will be from the current pixel position of the thumb to the new desired position for the thumb.
-        m_pressedPos = trackPosition() + thumbPosition() + thumbLen / 2;
-        moveThumb(desiredPos);
-        return;
-    } else if (m_pressedPart == ThumbPart)
+    if (m_pressedPart == ThumbPart)
         m_dragOrigin = m_currentPos;
 
     m_pressedPos = pressedPos;
@@ -509,18 +492,6 @@ void Scrollbar::invalidatePart(ScrollbarPart part)
 
     result.moveBy(-location());
     invalidateRect(result);
-}
-
-bool Scrollbar::shouldCenterOnThumb(const PlatformMouseEvent& evt)
-{
-    return blink::Platform::current()->scrollbarBehavior()->shouldCenterOnThumb(static_cast<blink::WebScrollbarBehavior::Button>(evt.button()), evt.shiftKey(), evt.altKey());
-}
-
-bool Scrollbar::shouldSnapBackToDragOrigin(const PlatformMouseEvent& evt)
-{
-    IntPoint mousePosition = convertFromContainingView(evt.position());
-    mousePosition.move(x(), y());
-    return blink::Platform::current()->scrollbarBehavior()->shouldSnapBackToDragOrigin(mousePosition, trackRect(), orientation() == HorizontalScrollbar);
 }
 
 int Scrollbar::thumbPosition()

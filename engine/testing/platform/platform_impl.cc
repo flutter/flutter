@@ -90,10 +90,6 @@ blink::WebUnitTestSupport* PlatformImpl::unitTestSupport() {
   return &unit_test_support_;
 }
 
-blink::WebScrollbarBehavior* PlatformImpl::scrollbarBehavior() {
-  return &scrollbar_behavior_;
-}
-
 const unsigned char* PlatformImpl::getTraceCategoryEnabledFlag(
     const char* category_name) {
   static const unsigned char buf[] = "*";

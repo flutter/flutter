@@ -11,7 +11,6 @@
 #include "base/timer/timer.h"
 #include "mojo/services/public/interfaces/network/network_service.mojom.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebScrollbarBehavior.h"
 #include "sky/viewer/cc/web_compositor_support_impl.h"
 #include "sky/viewer/platform/webmimeregistry_impl.h"
 #include "sky/viewer/platform/webthemeengine_impl.h"
@@ -42,7 +41,6 @@ class PlatformImpl : public blink::Platform {
   virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;
-  virtual blink::WebScrollbarBehavior* scrollbarBehavior();
   virtual const unsigned char* getTraceCategoryEnabledFlag(
       const char* category_name);
   virtual long* getTraceSamplingState(const unsigned thread_bucket);
@@ -92,7 +90,6 @@ class PlatformImpl : public blink::Platform {
   sky_viewer_cc::WebCompositorSupportImpl compositor_support_;
   WebThemeEngineImpl theme_engine_;
   WebMimeRegistryImpl mime_registry_;
-  blink::WebScrollbarBehavior scrollbar_behavior_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

@@ -38,7 +38,6 @@ class FloatPoint;
 class GraphicsLayer;
 class HostWindow;
 class PlatformWheelEvent;
-class ProgrammaticScrollAnimator;
 class ScrollAnimator;
 
 enum ScrollBehavior {
@@ -66,8 +65,6 @@ public:
     bool scroll(ScrollDirection, ScrollGranularity, float delta = 1);
     void scrollToOffsetWithoutAnimation(const FloatPoint&);
     void scrollToOffsetWithoutAnimation(ScrollbarOrientation, float offset);
-
-    void programmaticallyScrollSmoothlyToOffset(const FloatPoint&);
 
     // Should be called when the scroll position changes externally, for example if the scroll layer position
     // is updated on the scrolling thread and we need to notify the main thread.
@@ -115,12 +112,6 @@ public:
 
     // This getter will return null if the ScrollAnimator hasn't been created yet.
     ScrollAnimator* existingScrollAnimator() const { return m_animators ? m_animators->scrollAnimator.get() : 0; }
-
-    ProgrammaticScrollAnimator* programmaticScrollAnimator() const;
-    ProgrammaticScrollAnimator* existingProgrammaticScrollAnimator() const
-    {
-        return m_animators ? m_animators->programmaticScrollAnimator.get() : 0;
-    }
 
     const IntPoint& scrollOrigin() const { return m_scrollOrigin; }
     bool scrollOriginChanged() const { return m_scrollOriginChanged; }
@@ -191,8 +182,6 @@ public:
         m_horizontalBarDamage = IntRect();
     }
 
-    void cancelProgrammaticScrollAnimation();
-
 protected:
     ScrollableArea();
     virtual ~ScrollableArea();
@@ -224,7 +213,6 @@ private:
 
     struct ScrollableAreaAnimators {
         OwnPtr<ScrollAnimator> scrollAnimator;
-        OwnPtr<ProgrammaticScrollAnimator> programmaticScrollAnimator;
     };
 
     mutable OwnPtr<ScrollableAreaAnimators> m_animators;

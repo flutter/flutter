@@ -126,10 +126,6 @@ blink::WebCompositorSupport* PlatformImpl::compositorSupport() {
   return &compositor_support_;
 }
 
-blink::WebScrollbarBehavior* PlatformImpl::scrollbarBehavior() {
-  return &scrollbar_behavior_;
-}
-
 mojo::NetworkService* PlatformImpl::networkService() {
   return network_service_.get();
 }

@@ -31,8 +31,6 @@
 #include "WebCompositorAnimationCurve.h"
 #include "WebFloatPoint.h"
 #include "WebLayerTreeView.h"
-#include "WebScrollbar.h"
-#include "WebScrollbarThemePainter.h"
 
 namespace blink {
 
@@ -48,9 +46,6 @@ class WebFloatAnimationCurve;
 class WebGraphicsContext3D;
 class WebImageLayer;
 class WebLayer;
-class WebScrollbarLayer;
-class WebScrollbarThemeGeometry;
-class WebScrollOffsetAnimationCurve;
 class WebTransformAnimationCurve;
 class WebTransformOperations;
 
@@ -79,8 +74,6 @@ public:
     virtual WebFilterAnimationCurve* createFilterAnimationCurve() { return 0; }
 
     virtual WebFloatAnimationCurve* createFloatAnimationCurve() { return 0; }
-
-    virtual WebScrollOffsetAnimationCurve* createScrollOffsetAnimationCurve(WebFloatPoint targetValue, WebCompositorAnimationCurve::TimingFunctionType) { return 0; }
 
     virtual WebTransformAnimationCurve* createTransformAnimationCurve() { return 0; }
 

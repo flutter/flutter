@@ -64,7 +64,6 @@ class WebGestureCurve;
 class WebGraphicsContext3DProvider;
 class WebMimeRegistry;
 class WebSandboxSupport;
-class WebScrollbarBehavior;
 struct WebFloatPoint;
 class WebThemeEngine;
 class WebURL;
@@ -198,12 +197,6 @@ public:
 
     // Supplies the system monitor color profile.
     virtual void screenColorProfile(WebVector<char>* profile) { }
-
-
-    // Scrollbar ----------------------------------------------------------
-
-    // Must return non-null.
-    virtual WebScrollbarBehavior* scrollbarBehavior() { return 0; }
 
 
     // Sudden Termination --------------------------------------------------

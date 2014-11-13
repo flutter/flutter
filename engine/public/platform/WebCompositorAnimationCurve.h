@@ -24,7 +24,6 @@ public:
     enum AnimationCurveType {
         AnimationCurveTypeFilter,
         AnimationCurveTypeFloat,
-        AnimationCurveTypeScrollOffset,
         AnimationCurveTypeTransform,
     };
 

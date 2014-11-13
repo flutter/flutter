@@ -118,9 +118,6 @@ public:
 
     void invalidatePart(ScrollbarPart);
 
-    bool shouldCenterOnThumb(const PlatformMouseEvent&);
-    bool shouldSnapBackToDragOrigin(const PlatformMouseEvent&);
-
     // The position of the thumb relative to the track.
     int thumbPosition();
     // The length of the thumb along the axis of the scrollbar.

@@ -10,7 +10,6 @@
 #include "base/threading/thread_local_storage.h"
 #include "base/timer/timer.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebScrollbarBehavior.h"
 #include "sky/engine/testing/platform/webmimeregistry_impl.h"
 #include "sky/engine/testing/platform/webthemeengine_impl.h"
 #include "sky/engine/testing/platform/webunittestsupport_impl.h"
@@ -32,7 +31,6 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
-  virtual blink::WebScrollbarBehavior* scrollbarBehavior();
   virtual const unsigned char* getTraceCategoryEnabledFlag(
       const char* category_name);
 
@@ -54,7 +52,6 @@ class PlatformImpl : public blink::Platform {
   WebThemeEngineImpl theme_engine_;
   WebMimeRegistryImpl mime_registry_;
   WebUnitTestSupportImpl unit_test_support_;
-  blink::WebScrollbarBehavior scrollbar_behavior_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };
