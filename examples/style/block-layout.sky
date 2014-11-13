@@ -1,0 +1,74 @@
+SKY MODULE
+<import src="sky:core" as="sky"/>
+<!--
+ ! this module provides trivial vertical block layout
+ ! no margins, padding, borders, etc
+ !-->
+<script>
+ module.exports.BlockLayoutManager = class BlockLayoutManager extends sky.LayoutManager {
+   function layout(width, height) {
+     if (width == null)
+       width = this.getIntrinsicWidth().value;
+     let autoHeight = false;
+     if (height == null) {
+       height = 0;
+       autoHeight = true;
+     }
+     this.assumeDimensions(width, height);
+     let children = this.walkChildren();
+     let loop = children.next();
+     let y = 0;
+     while (!loop.done) {
+       let child = loop.value;
+       if (child.needsLayout) {
+         let dims = child.layoutManager.layout(width, null);
+         this.setChildSize(child, dims.width, dims.height);
+       }
+       this.setChildPosition(child, 0, y);
+       y += child.height;
+       loop = children.next();
+     }
+     if (autoHeight)
+       height = y;
+     return {
+       width: width,
+       height: height,
+     }
+   }
+   function getIntrinsicWidth() {
+     let width = this.node.getProperty('width');
+     if (typeof height != 'number') {
+       // e.g. width: auto
+       width = 0;
+       let children = this.walkChildren();
+       let loop = children.next();
+       while (!loop.done) {
+         let child = loop.value;
+         let childWidth = child.layoutManager.getIntrinsicWidth();
+         if (width < childWidth.value)
+           width = childWidth.value;
+         loop = children.next();
+       }
+     }
+     return super(width); // applies and provides our own min-width/max-width rules
+   }
+   function getIntrinsicHeight() {
+     let height = this.node.getProperty('height');
+     if (typeof height != 'number') {
+       // e.g. height: auto
+       height = 0;
+       let children = this.walkChildren();
+       let loop = children.next();
+       while (!loop.done) {
+         let child = loop.value;
+         let childHeight = child.layoutManager.getIntrinsicHeight();
+         if (height < childHeight.value)
+           height = childHeight.value;
+         loop = children.next();
+       }
+     }
+     return super(height); // applies and provides our own min-width/max-width rules
+   }
+ }
+ sky.registerLayoutManager('block', module.exports.BlockLayoutManager);
+</script>

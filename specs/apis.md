@@ -151,17 +151,17 @@ module 'sky:core' {
   // BUILT-IN ELEMENTS
 
   class ImportElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "import"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class TemplateElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "template"
     constructor attribute Boolean shadow; // O(1) // false
@@ -169,25 +169,25 @@ module 'sky:core' {
     readonly attribute DocumentFragment content; // O(1)
   }
   class ScriptElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "script"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class StyleElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "style"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class ContentElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "content"
     constructor attribute Boolean shadow; // O(1) // false
@@ -195,65 +195,65 @@ module 'sky:core' {
     Array<Node> getDistributedNodes(); // O(N) in distributed nodes
   }
   class ImgElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "img"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class DivElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "div"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class SpanElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "span"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class IframeElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "iframe"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class TElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "t"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class AElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "a"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class TitleElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "title"
     constructor attribute Boolean shadow; // O(1) // false
   }
   class ErrorElement : Element {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "error"
     constructor attribute Boolean shadow; // O(1) // false
@@ -271,9 +271,9 @@ module 'sky:core' {
   }
 
   interface ElementConstructor {
-    constructor (Dictionary attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+    constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
     constructor (ChildArguments... nodes); // shorthand
-    constructor (Dictionary attributes); // shorthand
+    constructor (Dictionary<String> attributes); // shorthand
     constructor (); // shorthand
 
     constructor attribute String tagName;
@@ -452,14 +452,16 @@ The following types are available:
 
 * ``Integer`` - WebIDL ``long long``
 * ``Float`` - WebIDL ``double``
+* ``Infinity`` - singleton type with value ``Infinity``
 * ``String`` - WebIDL ``USVString``
 * ``Boolean`` - WebIDL ``boolean``
 # ``Object`` - WebIDL ``object`` (``ClassName`` can be used as a literal for this type)
 * ``ClassName`` - an instance of the class ClassName
 * ``DictionaryName`` - an instance of the dictionary DictionaryName
 * ``Promise<Type>`` - WebIDL ``Promise<T>``
+* ``Generator<Type>`` - An ECMAScript generator function that returns data of the given type
 * ``Array<Type>`` - WebIDL ``sequence<T>``
-* ``Dictionary`` - unordered set of name-value String-String pairs with no duplicate names
+* ``Dictionary<Type>`` - unordered set of name-value String-Type pairs with no duplicate names
 * ``Type?`` - union of Type and the singleton type with value ``null`` (WebIDL nullable)
 * ``(Type1 or Type2)`` - union of Type1 and Type2 (WebIDL union)
 * ``any`` - union of all types (WebIDL ``any``)
