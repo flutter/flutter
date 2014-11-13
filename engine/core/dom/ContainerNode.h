@@ -214,18 +214,6 @@ inline Node* Node::lastChild() const
     return toContainerNode(this)->lastChild();
 }
 
-inline ContainerNode* Node::parentElementOrShadowRoot() const
-{
-    ContainerNode* parent = parentNode();
-    return parent && (parent->isElementNode() || parent->isShadowRoot()) ? parent : 0;
-}
-
-inline ContainerNode* Node::parentElementOrDocumentFragment() const
-{
-    ContainerNode* parent = parentNode();
-    return parent && (parent->isElementNode() || parent->isDocumentFragment()) ? parent : 0;
-}
-
 inline bool Node::isTreeScope() const
 {
     return &treeScope().rootNode() == this;

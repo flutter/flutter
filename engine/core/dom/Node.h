@@ -149,8 +149,6 @@ public:
     virtual NodeType nodeType() const = 0;
     ContainerNode* parentNode() const;
     Element* parentElement() const;
-    ContainerNode* parentElementOrShadowRoot() const;
-    ContainerNode* parentElementOrDocumentFragment() const;
     Node* previousSibling() const { return m_previous; }
     Node* nextSibling() const { return m_next; }
     Node* firstChild() const;
@@ -732,16 +730,6 @@ inline void Node::lazyReattachIfAttached()
 inline bool Node::shouldCallRecalcStyle(StyleRecalcChange change)
 {
     return change >= Inherit || needsStyleRecalc() || childNeedsStyleRecalc();
-}
-
-inline bool isTreeScopeRoot(const Node* node)
-{
-    return !node || node->isDocumentNode() || node->isShadowRoot();
-}
-
-inline bool isTreeScopeRoot(const Node& node)
-{
-    return node.isDocumentNode() || node.isShadowRoot();
 }
 
 // Allow equality comparisons of Nodes by reference or pointer, interchangeably.
