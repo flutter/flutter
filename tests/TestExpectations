@@ -1,7 +1,4 @@
 
-# These tests rely upon eventSender, which isn't implemented yet.
-crbug.com/1 editing/ [ Skip ]
-
 # These tests require gc() to be exposed.
 crbug.com/1 mutation-observer/observer-wrapper-dropoff-transient.sky [ Skip ]
 crbug.com/1 mutation-observer/observer-wrapper-dropoff.sky [ Skip ]
