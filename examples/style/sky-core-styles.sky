@@ -1,0 +1,143 @@
+SKY MODULE
+<!-- this is part of sky:core -->
+<script>
+ // "internals" is an object only made visible to this module that exports stuff implemented in C++
+ module.exports.registerProperty = internals.registerProperty;
+ internals.registerLayoutManager('none', null);
+ module.exports.LayoutManager = internals.LayoutManager;
+ module.exports.InlineLayoutManager = internals.InlineLayoutManager;
+ internals.registerLayoutManager('inline', internals.InlineLayoutManager);
+ module.exports.ParagraphLayoutManager = internals.ParagraphLayoutManager;
+ internals.registerLayoutManager('paragraph', internals.ParagraphLayoutManager);
+ module.exports.BlockLayoutManager = internals.BlockLayoutManager;
+ internals.registerLayoutManager('block', internals.BlockLayoutManager);
+
+ let displayTypes = new Map();
+ module.exports.registerLayoutManager = function registerLayoutManager(displayValue, layoutManagerConstructor) {
+   // TODO(ianh): apply rules for type-checking displayValue is a String
+   // TODO(ianh): apply rules for type-checking layoutManagerConstructor implements the LayoutManagerConstructor interface (or is null)
+   if (displayTypes.has(displayValue))
+     throw new Error();
+   displayTypes.set(displayValue, layoutManagerConstructor);
+ };
+
+ module.exports.DisplayStyleValueType = new StyleValueType(); // value is null or a LayoutManagerConstructor
+ module.exports.DisplayStyleValueType.addParser((tokens) => {
+   let token = tokens.next();
+   if (token.done)
+     throw new Error();
+   if (token.value.kind != 'identifier')
+     throw new Error();
+   if (!displayTypes.has(token.value.value))
+     throw new Error();
+   return {
+     value: displayTypes.get(token.value.value),
+   }
+ });
+
+ internals.registerProperty({
+   name: 'display',
+   type: module.exports.DisplayStyleValueType,
+   inherits: false,
+   initialValue: internals.BlockLayoutManager,
+   needsLayout: true,
+ });
+
+ module.exports.PositiveLengthStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is a number in 96dpi pixels, >=0
+ module.exports.PositiveLengthStyleValueType.addParser((tokens) => {
+   // just handle "<number>px"
+   let token = tokens.next();
+   if (token.done)
+     throw new Error();
+   if (token.value.kind != 'dimension')
+     throw new Error();
+   if (token.value.unit != 'px')
+     throw new Error();
+   if (token.value.value < 0)
+     throw new Error();
+   return {
+     value: token.value.value;
+   };
+ });
+
+ internals.registerProperty({
+   name: 'min-width',
+   type: module.exports.PositiveLengthStyleValueType,
+   inherits: false,
+   initialValue: 0,
+   needsLayout: true,
+ });
+ internals.registerProperty({
+   name: 'min-height',
+   type: module.exports.PositiveLengthStyleValueType,
+   inherits: false,
+   initialValue: 0,
+   needsLayout: true,
+ });
+
+ module.exports.PositiveLengthOrAutoStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or null (meaning 'auto')
+ module.exports.PositiveLengthOrAutoStyleValueType.addParser((tokens) => {
+   // handle 'auto'
+   let token = tokens.next();
+   if (token.done)
+     throw new Error();
+   if (token.value.kind != 'identifier')
+     throw new Error();
+   if (token.value.value != 'auto')
+     throw new Error();
+   return {
+     value: null,
+   };
+ });
+ module.exports.PositiveLengthOrAutoStyleValueType.addParser((tokens) => {
+   return module.exports.PositiveLengthStyleValueType.parse(tokens);
+ });
+
+ internals.registerProperty({
+   name: 'width',
+   type: module.exports.PositiveLengthOrAutoStyleValueType,
+   inherits: false,
+   initialValue: null,
+   needsLayout: true,
+ });
+ internals.registerProperty({
+   name: 'height',
+   type: module.exporets.PositiveLengthOrAutoStyleValueType,
+   inherits: false,
+   initialValue: null,
+   needsLayout: true,
+ });
+
+ module.exports.PositiveLengthOrInfinityStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or Infinity
+ module.exports.PositiveLengthOrInfinityStyleValueType.addParser((tokens) => {
+   // handle 'infinity'
+   let token = tokens.next();
+   if (token.done)
+     throw new Error();
+   if (token.value.kind != 'identifier')
+     throw new Error();
+   if (token.value.value != 'infinity')
+     throw new Error();
+   return {
+     value: Infinity,
+   };
+ });
+ module.exports.PositiveLengthOrInfinityStyleValueType.addParser((tokens) => {
+   return module.exports.PositiveLengthStyleValueType.parse(tokens);
+ });
+
+ internals.registerProperty({
+   name: 'width',
+   type: module.exports.PositiveLengthOrInfinityStyleValueType,
+   inherits: false,
+   initialValue: Infinity,
+   needsLayout: true,
+ });
+ internals.registerProperty({
+   name: 'height',
+   type: module.exporets.PositiveLengthOrInfinityStyleValueType,
+   inherits: false,
+   initialValue: Infinity,
+   needsLayout: true,
+ });
+</script>
