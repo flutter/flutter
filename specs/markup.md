@@ -163,10 +163,9 @@ it's the runtime library). None of these elements have shadow trees.
 
 ``<script>``
  - Blocks until all previous imports have been loaded, then runs the
-   script, with either 'module' or 'application' as the first
-   argument, the exports of any imports that have "as" attributes at
-   this time passed in as subsequent arguments, and with "this" set to
-   null.
+   script, with 'module' as the first argument, the exports of any
+   imports that have "as" attributes at this time passed in as
+   subsequent arguments, and with "this" set to null.
 
 ``<style>``
  - Adds the contents to the document's styles.
