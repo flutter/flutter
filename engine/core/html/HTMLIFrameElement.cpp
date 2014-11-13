@@ -9,7 +9,7 @@
 #include "core/frame/LocalFrame.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/loader/FrameLoaderClient.h"
-#include "core/rendering/RenderRemote.h"
+#include "core/rendering/RenderIFrame.h"
 
 namespace blink {
 
@@ -46,7 +46,7 @@ void HTMLIFrameElement::removedFrom(ContainerNode* insertionPoint)
 
 RenderObject* HTMLIFrameElement::createRenderer(RenderStyle* style)
 {
-    return new RenderRemote(this);
+    return new RenderIFrame(this);
 }
 
 void HTMLIFrameElement::OnViewDestroyed(mojo::View* view)

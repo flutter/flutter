@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#include "core/rendering/RenderRemote.h"
+#include "core/rendering/RenderIFrame.h"
 
 #include "core/editing/FrameSelection.h"
 #include "core/html/HTMLIFrameElement.h"
@@ -14,16 +14,16 @@
 
 namespace blink {
 
-RenderRemote::RenderRemote(HTMLIFrameElement* iframe)
+RenderIFrame::RenderIFrame(HTMLIFrameElement* iframe)
     : RenderReplaced(iframe)
 {
 }
 
-RenderRemote::~RenderRemote()
+RenderIFrame::~RenderIFrame()
 {
 }
 
-void RenderRemote::layout()
+void RenderIFrame::layout()
 {
     RenderReplaced::layout();
 
@@ -43,7 +43,7 @@ void RenderRemote::layout()
     contentView->SetBounds(mojo_bounds);
 }
 
-void RenderRemote::paintReplaced(PaintInfo& paintInfo,
+void RenderIFrame::paintReplaced(PaintInfo& paintInfo,
                                  const LayoutPoint& paintOffset)
 {
     // Draw a gray background. This should be painted over by the actual

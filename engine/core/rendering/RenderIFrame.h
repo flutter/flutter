@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef RenderRemote_h
-#define RenderRemote_h
+#ifndef RenderIFrame_h
+#define RenderIFrame_h
 
 #include "core/rendering/RenderReplaced.h"
 
@@ -11,10 +11,10 @@ namespace blink {
 
 class HTMLIFrameElement;
 
-class RenderRemote : public RenderReplaced {
+class RenderIFrame : public RenderReplaced {
 public:
-    explicit RenderRemote(HTMLIFrameElement*);
-    virtual ~RenderRemote();
+    explicit RenderIFrame(HTMLIFrameElement*);
+    virtual ~RenderIFrame();
 
 protected:
     void layout() override;
@@ -26,4 +26,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderRemote_h
+#endif // RenderIFrame_h
