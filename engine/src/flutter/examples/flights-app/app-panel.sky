@@ -1,0 +1,16 @@
+<import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+<template>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+    }
+  </style>
+  <content></content>
+</template>
+<script>
+SkyElement({
+  name: "app-panel"
+});
+</script>
