@@ -1,20 +1,17 @@
 <body>
+<import src="../resources/event-sender.sky" as="eventSender" />
 <style>
-.editable {
-  -webkit-user-modify: read-write-plaintext-only;
+.blue {
   border: 2px solid blue;
 }
 </style>
-<div class="editable"></div>
+<div class="blue" contenteditable></div>
 <script>
-if (window.eventSender) {
-    var control = document.querySelector('.editable');
-    control.focus();
-    eventSender.keyDown('a');
-    eventSender.keyDown('b');
-    eventSender.keyDown('backspace');
-}
-if (window.testRunner)
-    testRunner.dumpAsText();
+var control = document.querySelector('.blue');
+control.focus();
+eventSender.keyDown('a');
+eventSender.keyDown('b');
+eventSender.keyDown('BACK');
+eventSender.done();
 </script>
 </body>
