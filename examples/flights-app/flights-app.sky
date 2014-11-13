@@ -1,0 +1,206 @@
+<import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="app-header.sky" />
+<import src="app-title.sky" />
+<import src="app-menu-button.sky" />
+<import src="app-panel.sky" />
+<import src="app-panel-header.sky" />
+<import src="app-panel-content.sky" />
+<import src="app-toolbar.sky" />
+<import src="app-search-input.sky" />
+<import src="app-scrollable.sky" />
+<import src="app-toast.sky" />
+
+<template>
+  <style>
+    * { box-sizing: border-box; }
+
+    t, span {
+      display: inline;
+    }
+
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background-color: #494949;
+      font-family: "Helvetica Neue", sans-serif;
+      font-size: 16px;
+      color: #2B2B2B;
+    }
+
+    .toast-icon {
+      font-weight: bold;
+      font-size: 24px;
+      border-radius: 16px;
+      width: 32px;
+      height: 32px;
+      border: 2px solid black;
+      line-height: 30px;
+      text-align: center;
+    }
+
+    .tip-price {
+      font-weight: bold;
+    }
+
+    .route-result {
+      margin: 16px 16px 0 16px;
+    }
+
+    .route-title {
+      flex: 1;
+    }
+
+    .airline {
+      border-radius: 2px;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .airline-name {
+      flex: 1;
+    }
+
+    .airline-logo-image {
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    .airline-best-price {
+      color: #ABB4B6;
+    }
+
+    .airline-name,
+    .airline-best-price {
+      padding: 8px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #1155CC;
+    }
+  </style>
+  <app-header>
+    <app-title>
+      <t>Search</t>
+    </app-title>
+    <app-menu-button>
+      <img src="../flights/images/menu-white.png" style="width: 18px" />
+    </app-menu-button>
+  </app-header>
+  <app-toolbar>
+    <app-search-input />
+  </app-toolbar>
+  <app-scrollable>
+    <app-panel class="route-result">
+      <app-panel-header>
+        <div class="route-title">
+          <t>SFO to DCA</t>
+        </div>
+        <app-menu-button>
+          <img src="../flights/images/menu-enabled.png" style="width: 14px" />
+        </app-menu-button>
+      </app-panel-header>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/virgin-america.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>Virgin America</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$800</a></t>
+        </div>
+      </app-panel-content>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/ba.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>British Airways</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$700</a></t>
+        </div>
+      </app-panel-content>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/united.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>United</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$667</a></t>
+        </div>
+      </app-panel-content>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/delta.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>Delta</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$450</a></t>
+        </div>
+      </app-panel-content>
+    </app-panel>
+    <app-panel class="route-result">
+      <app-panel-header>
+        <div class="route-title">
+          <t>SJC to DCA</t>
+        </div>
+        <app-menu-button>
+          <img src="../flights/images/menu-enabled.png" style="width: 14px" />
+        </app-menu-button>
+      </app-panel-header>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/virgin-america.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>Virgin America</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$1500</a></t>
+        </div>
+      </app-panel-content>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/jetblue.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>jetBlue</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$650</a></t>
+        </div>
+      </app-panel-content>
+      <app-panel-content class="airline">
+        <div class="airline-logo">
+          <img class="airline-logo-image" src="../flights/images/united.jpg" />
+        </div>
+        <div class="airline-name">
+          <t>United</t>
+        </div>
+        <div class="airline-best-price">
+          <t><a>$367</a></t>
+        </div>
+      </app-panel-content>
+    </app-panel>
+  </app-scrollable>
+  <app-toast>
+    <div class="toast-icon">
+      <t>?</t>
+    </div>
+    <div class="toast-content">
+      <t>Flights are <span class="tip-price">$200</span> cheaper tomorrow.</t>
+    </div>
+  </app-toast>
+</template>
+<script>
+SkyElement({
+  name: "flights-app",
+});
+</script>
