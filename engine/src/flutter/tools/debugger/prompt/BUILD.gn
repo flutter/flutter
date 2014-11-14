@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-shared_library("prompt") {
+import("//mojo/public/mojo_application.gni")
+
+mojo_native_application("prompt") {
   output_name = "sky_debugger_prompt"
 
   sources = [
