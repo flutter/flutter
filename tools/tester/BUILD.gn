@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-shared_library("tester") {
+import("//mojo/public/mojo_application.gni")
+
+mojo_native_application("tester") {
   output_name = "sky_tester"
 
   sources = [

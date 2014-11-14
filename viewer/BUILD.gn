@@ -2,9 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
-shared_library("viewer") {
+mojo_native_application("viewer") {
   output_name = "sky_viewer"
 
   sources = [

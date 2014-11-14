@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("debugger") {
@@ -13,7 +14,7 @@ group("debugger") {
   ]
 }
 
-shared_library("sky_debugger") {
+mojo_native_application("sky_debugger") {
   sources = [
     "debugger.cc",
     "debugger.h",

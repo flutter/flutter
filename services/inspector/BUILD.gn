@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("inspector") {
@@ -10,7 +11,7 @@ group("inspector") {
   ]
 }
 
-shared_library("sky_inspector_server") {
+mojo_native_application("sky_inspector_server") {
   sources = [
     "server.cc",
   ]
