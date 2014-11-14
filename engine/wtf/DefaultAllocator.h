@@ -60,7 +60,6 @@ public:
 class DefaultAllocator {
 public:
     typedef DefaultAllocatorQuantizer Quantizer;
-    typedef DefaultAllocatorDummyVisitor Visitor;
     static const bool isGarbageCollected = false;
     template<typename T, typename Traits>
     struct VectorBackingHelper {

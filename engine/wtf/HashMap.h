@@ -153,8 +153,6 @@ namespace WTF {
 
         static bool isValidKey(KeyPeekInType);
 
-        void trace(typename Allocator::Visitor* visitor) { m_impl.trace(visitor); }
-
     private:
         AddResult inlineAdd(KeyPassInType, MappedPassInReferenceType);
 
@@ -492,13 +490,6 @@ namespace WTF {
         for (unsigned i = 0; it != end; ++it, ++i)
             vector[i] = *it;
     }
-
-#if !ENABLE(OILPAN)
-template<typename T, typename U, typename V, typename W, typename X>
-struct NeedsTracing<HashMap<T, U, V, W, X> > {
-    static const bool value = false;
-};
-#endif
 
 } // namespace WTF
 

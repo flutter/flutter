@@ -64,11 +64,6 @@ namespace WTF {
 #else
         static const unsigned minimumTableSize = 8;
 #endif
-
-        template<typename U = void>
-        struct NeedsTracingLazily {
-            static const bool value = NeedsTracing<T>::value;
-        };
         static const WeakHandlingFlag weakHandlingFlag = IsWeak<T>::value ? WeakHandlingInCollections : NoWeakHandlingInCollections;
     };
 
@@ -285,10 +280,6 @@ namespace WTF {
         static EmptyValueType emptyValue() { return KeyValuePair<typename KeyTraits::EmptyValueType, typename ValueTraits::EmptyValueType>(KeyTraits::emptyValue(), ValueTraits::emptyValue()); }
 
         static const bool needsDestruction = KeyTraits::needsDestruction || ValueTraits::needsDestruction;
-        template<typename U = void>
-        struct NeedsTracingLazily {
-            static const bool value = ShouldBeTraced<KeyTraits>::value || ShouldBeTraced<ValueTraits>::value;
-        };
         static const WeakHandlingFlag weakHandlingFlag = (KeyTraits::weakHandlingFlag == WeakHandlingInCollections || ValueTraits::weakHandlingFlag == WeakHandlingInCollections) ? WeakHandlingInCollections : NoWeakHandlingInCollections;
 
         static const unsigned minimumTableSize = KeyTraits::minimumTableSize;

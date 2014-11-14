@@ -34,21 +34,14 @@
 #include "wtf/StdLibExtras.h"
 
 //
-// STACK_ALLOCATED(): Use if the object is only stack allocated. Heap objects
-// should be in Members but you do not need the trace method as they are on
-// the stack. (Down the line these might turn in to raw pointers, but for
-// now Members indicates that we have thought about them and explicitly
-// taken care of them.)
+// STACK_ALLOCATED(): Use if the object is only stack allocated.
 //
 // DISALLOW_ALLOCATION(): Cannot be allocated with new operators but can
-// be a part object. If it has Members you need a trace method and the
-// containing object needs to call that trace method.
+// be a part object.
 //
 // ALLOW_ONLY_INLINE_ALLOCATION(): Allows only placement new operator.
 // This disallows general allocation of this object but allows to put
-// the object as a value object in collections. If these have Members you
-// need to have a trace method. That trace method will be called
-// automatically by the Heap collections.
+// the object as a value object in collections.
 //
 #define DISALLOW_ALLOCATION()                                   \
     private:                                                    \

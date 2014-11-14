@@ -44,7 +44,6 @@ class Page;
 class ServiceProvider;
 class Settings;
 class UseCounter;
-class Visitor;
 
 // FrameHost is the set of global data shared between multiple frames
 // and is provided by the embedder to each frame when created.

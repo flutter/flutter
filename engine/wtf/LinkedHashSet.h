@@ -245,8 +245,6 @@ public:
     template<typename Collection>
     void removeAll(const Collection& other) { WTF::removeAll(*this, other); }
 
-    void trace(typename Allocator::Visitor* visitor) { m_impl.trace(visitor); }
-
     int64_t modifications() const { return m_impl.modifications(); }
     void checkModifications(int64_t mods) const { m_impl.checkModifications(mods); }
 
@@ -726,13 +724,6 @@ void deleteAllValues(const LinkedHashSet<ValueType, T, U>& set)
     for (iterator it = set.begin(); it != end; ++it)
         delete *it;
 }
-
-#if !ENABLE(OILPAN)
-template<typename T, typename U, typename V>
-struct NeedsTracing<LinkedHashSet<T, U, V> > {
-    static const bool value = false;
-};
-#endif
 
 }
 

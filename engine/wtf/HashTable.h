@@ -477,8 +477,6 @@ namespace WTF {
         template<typename HashTranslator, typename T> ValueType* lookup(T);
         template<typename HashTranslator, typename T> const ValueType* lookup(T) const;
 
-        void trace(typename Allocator::Visitor*);
-
 #if ENABLE(ASSERT)
         int64_t modifications() const { return m_modifications; }
         void registerModification() { m_modifications++; }

@@ -65,24 +65,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         }
     };
 
-    template <bool unusedSlotsMustBeZeroed, typename T>
-    struct VectorUnusedSlotClearer;
-
-    template<typename T>
-    struct VectorUnusedSlotClearer<false, T> {
-        static void clear(T*, T*) { }
-    };
-
-    template<typename T>
-    struct VectorUnusedSlotClearer<true, T> {
-        static void clear(T* begin, T* end)
-        {
-            // We clear out unused slots so that the visitor and the finalizer
-            // do not visit them (or at least it does not matter if they do).
-            memset(begin, 0, sizeof(T) * (end - begin));
-        }
-    };
-
     template <bool canInitializeWithMemset, typename T>
     struct VectorInitializer;
 
@@ -305,11 +287,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         const T* buffer() const { return m_buffer; }
         size_t capacity() const { return m_capacity; }
 
-        void clearUnusedSlots(T* from, T* to)
-        {
-            VectorUnusedSlotClearer<Allocator::isGarbageCollected && (VectorTraits<T>::needsDestruction || ShouldBeTraced<VectorTraits<T> >::value), T>::clear(from, to);
-        }
-
     protected:
         VectorBufferBase()
             : m_buffer(0)
@@ -376,8 +353,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
 
         using Base::buffer;
         using Base::capacity;
-
-        using Base::clearUnusedSlots;
 
         bool hasOutOfLineBuffer() const
         {
@@ -707,8 +682,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
 
         void reverse();
 
-        void trace(typename Allocator::Visitor*);
-
     private:
         void expandCapacity(size_t newMinCapacity);
         const T* expandCapacity(size_t newMinCapacity, const T*);
@@ -722,7 +695,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         using Base::swapVectorBuffer;
         using Base::allocateBuffer;
         using Base::allocationSize;
-        using Base::clearUnusedSlots;
     };
 
     template<typename T, size_t inlineCapacity, typename Allocator>
@@ -923,7 +895,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
     {
         ASSERT(size <= m_size);
         TypeOperations::destruct(begin() + size, end());
-        clearUnusedSlots(begin() + size, end());
         m_size = size;
     }
 
@@ -1111,7 +1082,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         T* spot = begin() + position;
         spot->~T();
         TypeOperations::moveOverlapping(spot + 1, end(), spot);
-        clearUnusedSlots(end() - 1, end());
         --m_size;
     }
 
@@ -1124,7 +1094,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
         T* endSpot = beginSpot + length;
         TypeOperations::destruct(beginSpot, endSpot);
         TypeOperations::moveOverlapping(endSpot, end(), beginSpot);
-        clearUnusedSlots(end() - length, end());
         m_size -= length;
     }
 
@@ -1164,29 +1133,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
     {
         return !(a == b);
     }
-
-    // This is only called if the allocator is a HeapAllocator. It is used when
-    // visiting during a tracing GC.
-    template<typename T, size_t inlineCapacity, typename Allocator>
-    void Vector<T, inlineCapacity, Allocator>::trace(typename Allocator::Visitor* visitor)
-    {
-        ASSERT(Allocator::isGarbageCollected); // Garbage collector must be enabled.
-        const T* bufferBegin = buffer();
-        const T* bufferEnd = buffer() + size();
-        if (ShouldBeTraced<VectorTraits<T> >::value) {
-            for (const T* bufferEntry = bufferBegin; bufferEntry != bufferEnd; bufferEntry++)
-                Allocator::template trace<T, VectorTraits<T> >(visitor, *const_cast<T*>(bufferEntry));
-        }
-        if (this->hasOutOfLineBuffer())
-            Allocator::markNoTracing(visitor, buffer());
-    }
-
-#if !ENABLE(OILPAN)
-    template<typename T, size_t N>
-    struct NeedsTracing<Vector<T, N> > {
-        static const bool value = false;
-    };
-#endif
 
 } // namespace WTF
 

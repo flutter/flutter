@@ -111,8 +111,6 @@ namespace WTF {
         template<typename Predicate>
         iterator findIf(Predicate&);
 
-        void trace(typename Allocator::Visitor*);
-
     private:
         friend class DequeIteratorBase<T, inlineCapacity, Allocator>;
 
@@ -254,12 +252,9 @@ namespace WTF {
     {
         if (m_start <= m_end) {
             TypeOperations::destruct(m_buffer.buffer() + m_start, m_buffer.buffer() + m_end);
-            m_buffer.clearUnusedSlots(m_buffer.buffer() + m_start, m_buffer.buffer() + m_end);
         } else {
             TypeOperations::destruct(m_buffer.buffer(), m_buffer.buffer() + m_end);
-            m_buffer.clearUnusedSlots(m_buffer.buffer(), m_buffer.buffer() + m_end);
             TypeOperations::destruct(m_buffer.buffer() + m_start, m_buffer.buffer() + m_buffer.capacity());
-            m_buffer.clearUnusedSlots(m_buffer.buffer() + m_start, m_buffer.buffer() + m_buffer.capacity());
         }
     }
 
@@ -384,7 +379,6 @@ namespace WTF {
     {
         ASSERT(!isEmpty());
         TypeOperations::destruct(&m_buffer.buffer()[m_start], &m_buffer.buffer()[m_start + 1]);
-        m_buffer.clearUnusedSlots(&m_buffer.buffer()[m_start], &m_buffer.buffer()[m_start + 1]);
         if (m_start == m_buffer.capacity() - 1)
             m_start = 0;
         else
@@ -400,7 +394,6 @@ namespace WTF {
         else
             --m_end;
         TypeOperations::destruct(&m_buffer.buffer()[m_end], &m_buffer.buffer()[m_end + 1]);
-        m_buffer.clearUnusedSlots(&m_buffer.buffer()[m_end], &m_buffer.buffer()[m_end + 1]);
     }
 
     template<typename T, size_t inlineCapacity, typename Allocator>
@@ -427,11 +420,9 @@ namespace WTF {
         // Find which segment of the circular buffer contained the remove element, and only move elements in that part.
         if (position >= m_start) {
             TypeOperations::moveOverlapping(buffer + m_start, buffer + position, buffer + m_start + 1);
-            m_buffer.clearUnusedSlots(buffer + m_start, buffer + m_start + 1);
             m_start = (m_start + 1) % m_buffer.capacity();
         } else {
             TypeOperations::moveOverlapping(buffer + position + 1, buffer + m_end, buffer + position);
-            m_buffer.clearUnusedSlots(buffer + m_end - 1, buffer + m_end);
             m_end = (m_end - 1 + m_buffer.capacity()) % m_buffer.capacity();
         }
     }
@@ -513,42 +504,11 @@ namespace WTF {
         return &m_deque->m_buffer.buffer()[m_index - 1];
     }
 
-    // This is only called if the allocator is a HeapAllocator. It is used when
-    // visiting during a tracing GC.
-    template<typename T, size_t inlineCapacity, typename Allocator>
-    void Deque<T, inlineCapacity, Allocator>::trace(typename Allocator::Visitor* visitor)
-    {
-        ASSERT(Allocator::isGarbageCollected); // Garbage collector must be enabled.
-        const T* bufferBegin = m_buffer.buffer();
-        const T* end = bufferBegin + m_end;
-        if (ShouldBeTraced<VectorTraits<T> >::value) {
-            if (m_start <= m_end) {
-                for (const T* bufferEntry = bufferBegin + m_start; bufferEntry != end; bufferEntry++)
-                    Allocator::template trace<T, VectorTraits<T> >(visitor, *const_cast<T*>(bufferEntry));
-            } else {
-                for (const T* bufferEntry = bufferBegin; bufferEntry != end; bufferEntry++)
-                    Allocator::template trace<T, VectorTraits<T> >(visitor, *const_cast<T*>(bufferEntry));
-                const T* bufferEnd = m_buffer.buffer() + m_buffer.capacity();
-                for (const T* bufferEntry = bufferBegin + m_start; bufferEntry != bufferEnd; bufferEntry++)
-                    Allocator::template trace<T, VectorTraits<T> >(visitor, *const_cast<T*>(bufferEntry));
-            }
-        }
-        if (m_buffer.hasOutOfLineBuffer())
-            Allocator::markNoTracing(visitor, m_buffer.buffer());
-    }
-
     template<typename T, size_t inlineCapacity, typename Allocator>
     inline void swap(Deque<T, inlineCapacity, Allocator>& a, Deque<T, inlineCapacity, Allocator>& b)
     {
         a.swap(b);
     }
-
-#if !ENABLE(OILPAN)
-    template<typename T, size_t N>
-    struct NeedsTracing<Deque<T, N> > {
-        static const bool value = false;
-    };
-#endif
 
 } // namespace WTF
 

@@ -108,8 +108,6 @@ namespace WTF {
         ValuePassOutType take(ValuePeekInType);
         ValuePassOutType takeAny();
 
-        void trace(typename Allocator::Visitor* visitor) { m_impl.trace(visitor); }
-
     private:
         HashTableType m_impl;
     };
@@ -271,13 +269,6 @@ namespace WTF {
         for (unsigned i = 0; it != end; ++it, ++i)
             vector[i] = *it;
     }
-
-#if !ENABLE(OILPAN)
-    template<typename T, typename U, typename V>
-    struct NeedsTracing<HashSet<T, U, V> > {
-        static const bool value = false;
-    };
-#endif
 
 } // namespace WTF
 

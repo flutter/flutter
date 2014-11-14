@@ -36,8 +36,6 @@
 
 namespace blink {
 
-class Visitor;
-
 template <typename T>
 class LifecycleContext {
 public:

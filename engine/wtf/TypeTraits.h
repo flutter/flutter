@@ -306,35 +306,6 @@ namespace WTF {
         };
     };
 
-template<typename T>
-class NeedsTracing {
-    typedef char YesType;
-    typedef struct NoType {
-        char padding[8];
-    } NoType;
-    template<size_t> struct HasMethod;
-    template<typename V> static YesType checkHasTraceMethod(HasMethod<sizeof(&V::trace)>*);
-    template<typename V> static NoType checkHasTraceMethod(...);
-public:
-    // We add sizeof(T) to both sides here, because we want it to fail for
-    // incomplete types. Otherwise it just assumes that incomplete types do not
-    // have a trace method, which may not be true.
-    static const bool value = sizeof(YesType) + sizeof(T) == sizeof(checkHasTraceMethod<T>(0)) + sizeof(T);
-};
-
-// Convenience template wrapping the NeedsTracingLazily template in
-// Collection Traits. It helps make the code more readable.
-template<typename Traits>
-class ShouldBeTraced {
-public:
-    static const bool value = Traits::template NeedsTracingLazily<>::value;
-};
-
-template<typename T, typename U>
-struct NeedsTracing<std::pair<T, U> > {
-    static const bool value = NeedsTracing<T>::value || NeedsTracing<U>::value || IsWeak<T>::value || IsWeak<U>::value;
-};
-
 } // namespace WTF
 
 #endif // TypeTraits_h

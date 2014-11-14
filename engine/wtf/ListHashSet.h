@@ -185,8 +185,6 @@ namespace WTF {
         ValuePassOutType take(ValuePeekInType);
         ValuePassOutType takeFirst();
 
-        void trace(typename Allocator::Visitor*);
-
     private:
         void unlink(Node*);
         void unlinkAndDelete(Node*);
@@ -329,8 +327,6 @@ namespace WTF {
         {
             return node >= pool() && node < pastPool();
         }
-
-        static void traceValue(typename DefaultAllocator::Visitor* visitor, Node* node) { }
 
     private:
         Node* pool() { return reinterpret_cast_ptr<Node*>(m_pool.buffer); }
@@ -972,23 +968,6 @@ namespace WTF {
         for (Node* node = m_head, *next = m_head->next(); node; node = next, next = node ? node->next() : 0)
             node->destroy(this->allocator());
     }
-
-    template<typename T, size_t inlineCapacity, typename U, typename V>
-    void ListHashSet<T, inlineCapacity, U, V>::trace(typename Allocator::Visitor* visitor)
-    {
-        COMPILE_ASSERT(HashTraits<T>::weakHandlingFlag == NoWeakHandlingInCollections, ListHashSetDoesNotSupportWeakness);
-        // This marks all the nodes and their contents live that can be
-        // accessed through the HashTable. That includes m_head and m_tail
-        // so we do not have to explicitly trace them here.
-        m_impl.trace(visitor);
-    }
-
-#if !ENABLE(OILPAN)
-    template<typename T, size_t U, typename V>
-    struct NeedsTracing<ListHashSet<T, U, V> > {
-        static const bool value = false;
-    };
-#endif
 
 } // namespace WTF
 
