@@ -1,4 +1,16 @@
-<app>
+<import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="app-header.sky" />
+<import src="app-title.sky" />
+<import src="app-menu-button.sky" />
+<import src="app-panel.sky" />
+<import src="app-panel-header.sky" />
+<import src="app-panel-content.sky" />
+<import src="app-toolbar.sky" />
+<import src="app-search-input.sky" />
+<import src="app-scrollable.sky" />
+<import src="app-toast.sky" />
+
+<template>
   <style>
     * { box-sizing: border-box; }
 
@@ -6,107 +18,17 @@
       display: inline;
     }
 
-    app {
+    :host {
       display: flex;
       flex-direction: column;
       height: 100%;
       background-color: #494949;
-      font-family: sans-serif;
+      font-family: "Helvetica", sans-serif;
       font-size: 16px;
       color: #2B2B2B;
     }
 
-    app-header {
-      display: flex;
-      background: linear-gradient(#3E77B7, #6C98C4);
-      padding: 8px;
-      color: white;
-      border-bottom: 1px solid #3E77B7;
-    }
-
-    app-title {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      font-size: 22px;
-      margin-left: 8px;
-    }
-
-    app-menu-button {
-      display: flex;
-      border-radius: 4px;
-      justify-content: center;
-      align-items: center;
-      width: 30px;
-      height: 30px;
-    }
-
-    .menu-icon {
-      width: 18px;
-    }
-
-    .menu-icon-inner {
-      width: 14px;
-    }
-
-    app-scrollable {
-      flex: 1;
-      box-shadow: inset 0px 0px 22px 2px rgba(22, 22, 22, 0.63);
-      overflow: scroll;
-    }
-
-    app-panel {
-      display: flex;
-      flex-direction: column;
-      background-color: white;
-    }
-
-    app-panel-header {
-      background-color: #DEDEDE;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-    }
-
-    app-panel-content {
-      display: flex;
-    }
-
-    app-toolbar {
-      background-color: #F6F6F6;
-      padding: 0 8px;
-    }
-
-    app-search-input {
-      background-color: #F6F6F6;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      font-size: 1.2em;
-    }
-
-    app-toast {
-      position: absolute;
-      bottom: 32px;
-      right: 32px;
-      max-width: 55%;
-      box-shadow: 0px 0px 12px 2px rgba(22, 22, 22, 0.4);
-      background-color: #b0281a;
-      background-image: linear-gradient(#E5D658, #DFCF43);
-      border: 1px solid #AEA477;
-      padding: 6px;
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      font-size: 0.8em;
-    }
-
-    app-toast-header {
-      flex-shrink: 0;
-      margin-right: 6px;
-    }
-
-    .tip-icon {
+    .toast-icon {
       font-weight: bold;
       font-size: 24px;
       border-radius: 16px;
@@ -119,10 +41,6 @@
 
     .tip-price {
       font-weight: bold;
-    }
-
-    .input-text {
-      margin-left: 8px;
     }
 
     .route-result {
@@ -167,16 +85,11 @@
       <t>Search</t>
     </app-title>
     <app-menu-button>
-      <img src="images/menu-white.png" class="menu-icon">
+      <img src="/sky/examples/flights/images/menu-white.png" style="width: 18px" />
     </app-menu-button>
   </app-header>
   <app-toolbar>
-    <app-search-input>
-      <span class="input-icon">
-        <img src="/sky/examples/flights/images/magnifying-glass.png" style="width: 16px">
-      </span>
-      <span class="input-text"><t>flights today to dc by price</t></span>
-    </app-search-input>
+    <app-search-input />
   </app-toolbar>
   <app-scrollable>
     <app-panel class="route-result">
@@ -185,12 +98,12 @@
           <t>SFO to DCA</t>
         </div>
         <app-menu-button>
-          <img src="images/menu-enabled.png" class="menu-icon-inner">
+          <img src="/sky/examples/flights/images/menu-enabled.png" style="width: 14px" />
         </app-menu-button>
       </app-panel-header>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/virgin-america.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/virgin-america.jpg" />
         </div>
         <div class="airline-name">
           <t>Virgin America</t>
@@ -201,7 +114,7 @@
       </app-panel-content>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/ba.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/ba.jpg" />
         </div>
         <div class="airline-name">
           <t>British Airways</t>
@@ -212,7 +125,7 @@
       </app-panel-content>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/united.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/united.jpg" />
         </div>
         <div class="airline-name">
           <t>United</t>
@@ -223,7 +136,7 @@
       </app-panel-content>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/delta.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/delta.jpg" />
         </div>
         <div class="airline-name">
           <t>Delta</t>
@@ -239,12 +152,12 @@
           <t>SJC to DCA</t>
         </div>
         <app-menu-button>
-          <img src="images/menu-enabled.png" class="menu-icon-inner">
+          <img src="/sky/examples/flights/images/menu-enabled.png" style="width: 14px" />
         </app-menu-button>
       </app-panel-header>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/virgin-america.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/virgin-america.jpg" />
         </div>
         <div class="airline-name">
           <t>Virgin America</t>
@@ -255,7 +168,7 @@
       </app-panel-content>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/jetblue.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/jetblue.jpg" />
         </div>
         <div class="airline-name">
           <t>jetBlue</t>
@@ -266,7 +179,7 @@
       </app-panel-content>
       <app-panel-content class="airline">
         <div class="airline-logo">
-          <img class="airline-logo-image" src="images/united.jpg">
+          <img class="airline-logo-image" src="/sky/examples/flights/images/united.jpg" />
         </div>
         <div class="airline-name">
           <t>United</t>
@@ -278,13 +191,16 @@
     </app-panel>
   </app-scrollable>
   <app-toast>
-    <app-toast-header>
-      <div class="tip-icon">
-        <t>?</t>
-      </div>
-    </app-toast-header>
-    <app-toast-content>
+    <div class="toast-icon">
+      <t>?</t>
+    </div>
+    <div class="toast-content">
       <t>Flights are <span class="tip-price">$200</span> cheaper tomorrow.</t>
-    </app-toast-content>
+    </div>
   </app-toast>
-</app>
+</template>
+<script>
+SkyElement({
+  name: "flights-app",
+});
+</script>

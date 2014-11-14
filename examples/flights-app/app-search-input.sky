@@ -1,0 +1,25 @@
+<import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+<template>
+  <style>
+    :host {
+      background-color: #F6F6F6;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      font-size: 1.2em;
+    }
+
+    .input-text {
+      margin-left: 8px;
+    }
+  </style>
+  <span class="input-icon">
+    <img src="/sky/examples/flights/images/magnifying-glass.png" style="width: 16px">
+  </span>
+  <span class="input-text"><t>flights today to dc by price</t></span>
+</template>
+<script>
+SkyElement({
+  name: "app-search-input"
+});
+</script>
