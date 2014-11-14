@@ -1,0 +1,7 @@
+layer at (0,0) size 800x600
+  RenderView {#document} at (0,0) size 800x600
+layer at (0,0) size 800x89
+  RenderBlock {foo} at (0,0) size 800x89
+    RenderImage {img} at (272,0) size 256x64
+    RenderImage {img} at (350,64) size 100x25
+
