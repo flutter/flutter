@@ -48,11 +48,6 @@ public:
     void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);
     void collectStyleSheets(StyleEngine*, DocumentStyleSheetCollector&);
 
-    virtual void trace(Visitor* visitor) override
-    {
-        TreeScopeStyleSheetCollection::trace(visitor);
-    }
-
 private:
     explicit DocumentStyleSheetCollection(TreeScope&);
 

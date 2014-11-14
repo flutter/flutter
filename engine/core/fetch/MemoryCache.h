@@ -77,7 +77,6 @@ enum UpdateReason {
 class MemoryCacheEntry final {
 public:
     static PassOwnPtr<MemoryCacheEntry> create(Resource* resource) { return adoptPtr(new MemoryCacheEntry(resource)); }
-    void trace(Visitor*);
 
     ResourcePtr<Resource> m_resource;
     bool m_inLiveDecodedResourcesList;
@@ -115,7 +114,6 @@ public:
     RawPtr<MemoryCacheEntry> m_tail;
 
     MemoryCacheLRUList() : m_head(nullptr), m_tail(nullptr) { }
-    void trace(Visitor*);
 };
 
 }
@@ -129,7 +127,6 @@ class MemoryCache final {
 public:
     static PassOwnPtr<MemoryCache> create();
     ~MemoryCache();
-    void trace(Visitor*);
 
     struct TypeStatistic {
         int count;

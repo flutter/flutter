@@ -48,7 +48,6 @@ class TreeScopeEventContext final : public RefCounted<TreeScopeEventContext> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(TreeScopeEventContext);
 public:
     static PassRefPtr<TreeScopeEventContext> create(TreeScope&);
-    void trace(Visitor*);
 
     TreeScope& treeScope() const { return *m_treeScope; }
 

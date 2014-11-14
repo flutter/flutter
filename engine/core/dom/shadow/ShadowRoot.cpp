@@ -255,13 +255,4 @@ StyleSheetList* ShadowRoot::styleSheets()
     return m_shadowRootRareData->styleSheets();
 }
 
-void ShadowRoot::trace(Visitor* visitor)
-{
-    visitor->trace(m_prev);
-    visitor->trace(m_next);
-    visitor->trace(m_shadowRootRareData);
-    TreeScope::trace(visitor);
-    DocumentFragment::trace(visitor);
-}
-
 }

@@ -61,8 +61,6 @@ public:
 
     PassRefPtr<CSSValueList> cloneForCSSOM() const;
 
-    void traceAfterDispatch(Visitor*);
-
 protected:
     CSSValueList(ClassType, ValueListSeparator);
     CSSValueList(const CSSValueList& cloneFrom);

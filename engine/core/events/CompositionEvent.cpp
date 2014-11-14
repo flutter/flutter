@@ -100,9 +100,4 @@ const AtomicString& CompositionEvent::interfaceName() const
     return EventNames::CompositionEvent;
 }
 
-void CompositionEvent::trace(Visitor* visitor)
-{
-    UIEvent::trace(visitor);
-}
-
 } // namespace blink

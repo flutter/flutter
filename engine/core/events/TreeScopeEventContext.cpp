@@ -73,18 +73,6 @@ TreeScopeEventContext::TreeScopeEventContext(TreeScope& treeScope)
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(TreeScopeEventContext)
 
-void TreeScopeEventContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_treeScope);
-    visitor->trace(m_target);
-    visitor->trace(m_relatedTarget);
-    visitor->trace(m_eventPath);
-    visitor->trace(m_touchEventContext);
-#if ENABLE(OILPAN)
-    visitor->trace(m_children);
-#endif
-}
-
 int TreeScopeEventContext::calculatePrePostOrderNumber(int orderNumber)
 {
     m_preOrder = orderNumber;

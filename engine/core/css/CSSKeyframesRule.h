@@ -59,8 +59,6 @@ public:
 
     PassRefPtr<StyleRuleKeyframes> copy() const { return adoptRef(new StyleRuleKeyframes(*this)); }
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     StyleRuleKeyframes();
     explicit StyleRuleKeyframes(const StyleRuleKeyframes&);
@@ -100,8 +98,6 @@ public:
 
     bool isVendorPrefixed() const { return m_isPrefixed; }
     void setVendorPrefixed(bool isPrefixed) { m_isPrefixed = isPrefixed; }
-
-    virtual void trace(Visitor*) override;
 
 private:
     CSSKeyframesRule(StyleRuleKeyframes*, CSSStyleSheet* parent);

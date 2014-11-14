@@ -63,9 +63,4 @@ const AtomicString& ProgressEvent::interfaceName() const
     return EventNames::ProgressEvent;
 }
 
-void ProgressEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
 }

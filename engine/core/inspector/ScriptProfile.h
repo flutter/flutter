@@ -45,7 +45,6 @@ public:
         return adoptRef(new ScriptProfile(profile, idleTime));
     }
     ~ScriptProfile();
-    void trace(Visitor*) { }
 
     String title() const;
     double idleTime() const;

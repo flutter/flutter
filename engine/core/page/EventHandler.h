@@ -86,7 +86,6 @@ class EventHandler {
 public:
     explicit EventHandler(LocalFrame*);
     ~EventHandler();
-    void trace(Visitor*);
 
     void clear();
     void nodeWillBeRemoved(Node&);

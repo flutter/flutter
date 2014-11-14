@@ -53,8 +53,6 @@ public:
     int height() const { return m_size.height(); }
     Uint8ClampedArray* data() const { return m_data.get(); }
 
-    void trace(Visitor*) { }
-
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 private:

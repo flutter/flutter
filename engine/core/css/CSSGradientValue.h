@@ -47,11 +47,6 @@ enum CSSGradientType {
 };
 enum CSSGradientRepeat { NonRepeating, Repeating };
 
-// This struct is stack allocated and allocated as part of vectors.
-// When allocated on the stack its members are found by conservative
-// stack scanning. When allocated as part of Vectors in heap-allocated
-// objects its members are visited via the containing object's
-// (CSSGradientValue) traceAfterDispatch method.
 struct CSSGradientColorStop {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
@@ -65,8 +60,6 @@ public:
         return compareCSSValuePtr(m_color, other.m_color)
             && compareCSSValuePtr(m_position, other.m_position);
     }
-
-    void trace(Visitor*);
 };
 
 } // namespace blink
@@ -105,8 +98,6 @@ public:
 
     void loadSubimages(ResourceFetcher*) { }
     PassRefPtr<CSSGradientValue> gradientWithStylesResolved(const TextLinkColors&, Color currentColor);
-
-    void traceAfterDispatch(Visitor*);
 
 protected:
     CSSGradientValue(ClassType classType, CSSGradientRepeat repeat, CSSGradientType gradientType)
@@ -175,8 +166,6 @@ public:
 
     bool equals(const CSSLinearGradientValue&) const;
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     CSSLinearGradientValue(CSSGradientRepeat repeat, CSSGradientType gradientType = CSSLinearGradient)
         : CSSGradientValue(LinearGradientClass, repeat, gradientType)
@@ -221,8 +210,6 @@ public:
     PassRefPtr<Gradient> createGradient(const CSSToLengthConversionData&, const IntSize&);
 
     bool equals(const CSSRadialGradientValue&) const;
-
-    void traceAfterDispatch(Visitor*);
 
 private:
     CSSRadialGradientValue(CSSGradientRepeat repeat, CSSGradientType gradientType = CSSRadialGradient)

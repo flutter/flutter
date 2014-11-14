@@ -129,8 +129,6 @@ public:
     RuleSet& ensureRuleSet(const MediaQueryEvaluator&, AddRuleFlags);
     void clearRuleSet();
 
-    void trace(Visitor*);
-
 private:
     StyleSheetContents(const String& originalURL, const CSSParserContext&);
     StyleSheetContents(const StyleSheetContents&);

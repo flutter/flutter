@@ -58,11 +58,4 @@ void AppendNodeCommand::doUnapply()
     m_node->remove(IGNORE_EXCEPTION);
 }
 
-void AppendNodeCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_parent);
-    visitor->trace(m_node);
-    SimpleEditCommand::trace(visitor);
-}
-
 } // namespace blink

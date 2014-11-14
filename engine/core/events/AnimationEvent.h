@@ -63,8 +63,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     AnimationEvent();
     AnimationEvent(const AtomicString& type, const String& animationName, double elapsedTime);

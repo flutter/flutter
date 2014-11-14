@@ -198,8 +198,6 @@ public:
     void showTreeForThis() const;
 #endif
 
-    void trace(Visitor*);
-
 private:
     int offsetForPositionAfterAnchor() const;
 

@@ -115,10 +115,6 @@ public:
 
     bool equals(const CSSValue&) const;
 
-    void finalizeGarbageCollectedObject();
-    void traceAfterDispatch(Visitor*) { }
-    void trace(Visitor*);
-
 protected:
 
     static const size_t ClassTypeBits = 6;

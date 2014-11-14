@@ -56,8 +56,6 @@ public:
     PassRefPtr<CSSPrimitiveValue> createValue(const Length& value) { return CSSPrimitiveValue::create(value); }
     template<typename T> static PassRefPtr<CSSPrimitiveValue> createValue(T value) { return CSSPrimitiveValue::create(value); }
 
-    void trace(Visitor*);
-
 private:
     CSSValuePool();
 

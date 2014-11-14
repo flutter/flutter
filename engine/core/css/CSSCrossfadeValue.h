@@ -67,8 +67,6 @@ public:
 
     bool equals(const CSSCrossfadeValue&) const;
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     CSSCrossfadeValue(PassRefPtr<CSSValue> fromValue, PassRefPtr<CSSValue> toValue)
         : CSSImageGeneratorValue(CrossfadeClass)

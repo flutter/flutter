@@ -58,8 +58,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     WebGLContextEvent();
     WebGLContextEvent(const AtomicString& type, bool canBubble, bool cancelable, const String& statusMessage);

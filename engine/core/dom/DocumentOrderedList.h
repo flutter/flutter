@@ -54,8 +54,6 @@ public:
     iterator begin() { return m_nodes.begin(); }
     iterator end() { return m_nodes.end(); }
 
-    void trace(Visitor*);
-
 private:
     ListHashSet<RawPtr<Node>, 32> m_nodes;
 };

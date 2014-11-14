@@ -45,8 +45,6 @@ public:
     virtual Element* parentElement() const { return 0; }
     StyleSheetContents* contextStyleSheet() const;
 
-    virtual void trace(Visitor*) override;
-
 private:
     virtual CSSRule* parentRule() const override { return 0; }
     virtual unsigned length() const override final;
@@ -87,8 +85,6 @@ public:
     virtual void deref() override;
 #endif
 
-    virtual void trace(Visitor*) override;
-
 protected:
     virtual MutableStylePropertySet& propertySet() const override final { ASSERT(m_propertySet); return *m_propertySet; }
 
@@ -111,8 +107,6 @@ public:
 #endif
 
     void reattach(MutableStylePropertySet&);
-
-    virtual void trace(Visitor*) override;
 
 private:
     StyleRuleCSSStyleDeclaration(MutableStylePropertySet&, CSSRule*);
@@ -138,8 +132,6 @@ public:
         : m_parentElement(parentElement)
     {
     }
-
-    virtual void trace(Visitor*) override;
 
 private:
     virtual MutableStylePropertySet& propertySet() const override;

@@ -96,8 +96,6 @@ public:
 
     MediaQueryExp(const MediaQueryExp& other);
 
-    void trace(Visitor* visitor) { }
-
 private:
     MediaQueryExp(const String&, const MediaQueryExpValue&);
 

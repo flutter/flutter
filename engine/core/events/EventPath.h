@@ -60,8 +60,6 @@ public:
 
     static EventTarget* eventTargetRespectingTargetRules(Node*);
 
-    void trace(Visitor*);
-
 private:
     EventPath();
 

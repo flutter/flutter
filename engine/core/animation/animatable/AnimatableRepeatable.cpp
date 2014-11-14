@@ -91,10 +91,4 @@ bool AnimatableRepeatable::equalTo(const AnimatableValue* value) const
     return true;
 }
 
-void AnimatableRepeatable::trace(Visitor* visitor)
-{
-    visitor->trace(m_values);
-    AnimatableValue::trace(visitor);
-}
-
 } // namespace blink

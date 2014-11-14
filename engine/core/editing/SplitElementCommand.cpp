@@ -107,12 +107,4 @@ void SplitElementCommand::doReapply()
     executeApply();
 }
 
-void SplitElementCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_element1);
-    visitor->trace(m_element2);
-    visitor->trace(m_atChild);
-    SimpleEditCommand::trace(visitor);
-}
-
 } // namespace blink

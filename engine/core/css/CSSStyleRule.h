@@ -52,8 +52,6 @@ public:
     // FIXME: Not CSSOM. Remove.
     StyleRule* styleRule() const { return m_styleRule.get(); }
 
-    virtual void trace(Visitor*) override;
-
 private:
     CSSStyleRule(StyleRule*, CSSStyleSheet*);
 

@@ -62,8 +62,6 @@ public:
     WebGLRenderbuffer* emulatedStencilBuffer() const { return m_emulatedStencilBuffer.get(); }
     void deleteEmulatedStencilBuffer(blink::WebGraphicsContext3D* context3d);
 
-    virtual void trace(Visitor*) override;
-
 protected:
     explicit WebGLRenderbuffer(WebGLRenderingContextBase*);
 

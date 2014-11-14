@@ -55,8 +55,6 @@ public:
     virtual unsigned length() const override;
     virtual NodeType* item(unsigned index) const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     ptrdiff_t AllocationSize()
     {
@@ -96,13 +94,6 @@ NodeType* StaticNodeTypeList<NodeType>::item(unsigned index) const
     if (index < m_nodes.size())
         return m_nodes[index].get();
     return 0;
-}
-
-template <typename NodeType>
-void StaticNodeTypeList<NodeType>::trace(Visitor* visitor)
-{
-    visitor->trace(m_nodes);
-    NodeList::trace(visitor);
 }
 
 } // namespace blink

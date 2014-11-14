@@ -22,10 +22,4 @@ ScriptAsyncCallStack::ScriptAsyncCallStack(const String& description, PassRefPtr
     ASSERT(m_callStack);
 }
 
-void ScriptAsyncCallStack::trace(Visitor* visitor)
-{
-    visitor->trace(m_callStack);
-    visitor->trace(m_asyncStackTrace);
-}
-
 } // namespace blink

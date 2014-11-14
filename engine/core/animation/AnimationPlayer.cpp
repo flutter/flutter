@@ -654,12 +654,4 @@ void AnimationPlayer::pauseForTesting(double pauseTime)
     pause();
 }
 
-void AnimationPlayer::trace(Visitor* visitor)
-{
-    visitor->trace(m_content);
-    visitor->trace(m_timeline);
-    visitor->trace(m_pendingFinishedEvent);
-    EventTargetWithInlineData::trace(visitor);
-}
-
 } // namespace

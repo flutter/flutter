@@ -58,7 +58,6 @@ public:
     HitTestResult(const HitTestResult&);
     ~HitTestResult();
     HitTestResult& operator=(const HitTestResult&);
-    void trace(Visitor*);
 
     // For point-based hit tests, these accessors provide information about the node
     // under the point. For rect-based hit tests they are meaningless (reflect the

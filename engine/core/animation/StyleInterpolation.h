@@ -26,11 +26,6 @@ public:
 
     CSSPropertyID id() const { return m_id; }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        Interpolation::trace(visitor);
-    }
-
 protected:
     CSSPropertyID m_id;
 

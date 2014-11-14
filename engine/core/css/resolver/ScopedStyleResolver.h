@@ -65,8 +65,6 @@ public:
     void collectFeaturesTo(RuleFeatureSet&, HashSet<const StyleSheetContents*>& visitedSharedStyleSheetContents) const;
     void resetAuthorStyle();
 
-    void trace(Visitor*);
-
 private:
     explicit ScopedStyleResolver(TreeScope& scope)
         : m_scope(scope)

@@ -127,10 +127,4 @@ ContainerNode* HTMLStyleElement::scopingNode()
     return &document();
 }
 
-void HTMLStyleElement::trace(Visitor* visitor)
-{
-    StyleElement::trace(visitor);
-    HTMLElement::trace(visitor);
-}
-
 }

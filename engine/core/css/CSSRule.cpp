@@ -60,8 +60,4 @@ const CSSParserContext& CSSRule::parserContext() const
     return styleSheet ? styleSheet->contents()->parserContext() : strictCSSParserContext();
 }
 
-void CSSRule::trace(Visitor* visitor)
-{
-}
-
 } // namespace blink

@@ -512,20 +512,4 @@ void StyleEngine::fontsNeedUpdate(CSSFontSelector*)
     document().setNeedsStyleRecalc(SubtreeStyleChange);
 }
 
-void StyleEngine::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_document);
-    visitor->trace(m_authorStyleSheets);
-    visitor->trace(m_documentStyleSheetCollection);
-    visitor->trace(m_styleSheetCollectionMap);
-    visitor->trace(m_scopedStyleResolvers);
-    visitor->trace(m_resolver);
-    visitor->trace(m_fontSelector);
-    visitor->trace(m_textToSheetCache);
-    visitor->trace(m_sheetToTextCache);
-#endif
-    CSSFontSelectorClient::trace(visitor);
-}
-
 }

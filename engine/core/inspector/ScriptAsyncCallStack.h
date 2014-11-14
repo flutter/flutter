@@ -17,8 +17,6 @@ class ScriptAsyncCallStack : public RefCounted<ScriptAsyncCallStack> {
 public:
     static PassRefPtr<ScriptAsyncCallStack> create(const String&, PassRefPtr<ScriptCallStack>, PassRefPtr<ScriptAsyncCallStack>);
 
-    void trace(Visitor*);
-
 private:
     ScriptAsyncCallStack(const String&, PassRefPtr<ScriptCallStack>, PassRefPtr<ScriptAsyncCallStack>);
 

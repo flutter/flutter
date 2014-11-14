@@ -186,11 +186,4 @@ PassRefPtr<AnimationNodeTiming> AnimationNode::timing()
     return AnimationNodeTiming::create(this);
 }
 
-void AnimationNode::trace(Visitor* visitor)
-{
-    visitor->trace(m_parent);
-    visitor->trace(m_player);
-    visitor->trace(m_eventDelegate);
-}
-
 } // namespace blink

@@ -95,12 +95,6 @@ public:
         return result;
     }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_eventDelegate);
-        AnimationNode::trace(visitor);
-    }
-
 private:
     TestAnimationNode(const Timing& specified, TestAnimationNodeEventDelegate* eventDelegate)
         : AnimationNode(specified, adoptPtr(eventDelegate))

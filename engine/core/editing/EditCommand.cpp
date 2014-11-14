@@ -120,12 +120,4 @@ void SimpleEditCommand::doReapply()
     doApply();
 }
 
-void EditCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-    visitor->trace(m_startingSelection);
-    visitor->trace(m_endingSelection);
-    visitor->trace(m_parent);
-}
-
 } // namespace blink

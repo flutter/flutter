@@ -54,8 +54,6 @@ public:
 
     void append(const PassRefPtr<Touch> touch) { m_values.append(touch); }
 
-    void trace(Visitor*);
-
 private:
     TouchList()
     {

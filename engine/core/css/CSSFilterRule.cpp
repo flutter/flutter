@@ -84,12 +84,5 @@ void CSSFilterRule::reattach(StyleRuleBase* rule)
         m_propertiesCSSOMWrapper->reattach(m_filterRule->mutableProperties());
 }
 
-void CSSFilterRule::trace(Visitor* visitor)
-{
-    visitor->trace(m_filterRule);
-    visitor->trace(m_propertiesCSSOMWrapper);
-    CSSRule::trace(visitor);
-}
-
 } // namespace blink
 

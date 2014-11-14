@@ -90,12 +90,6 @@ ResourceLoader::~ResourceLoader()
     ASSERT(m_state == Terminated);
 }
 
-void ResourceLoader::trace(Visitor* visitor)
-{
-    visitor->trace(m_host);
-    visitor->trace(m_resource);
-}
-
 void ResourceLoader::releaseResources()
 {
     ASSERT(m_state != Terminated);

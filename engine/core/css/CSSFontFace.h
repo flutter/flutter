@@ -110,8 +110,6 @@ public:
 
     bool hadBlankText() { return isValid() && m_sources.first()->hadBlankText(); }
 
-    void trace(Visitor*);
-
 private:
     void setLoadStatus(FontFace::LoadStatus);
 

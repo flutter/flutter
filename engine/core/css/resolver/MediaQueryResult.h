@@ -38,8 +38,6 @@ public:
     {
     }
 
-    void trace(Visitor* visitor) { visitor->trace(m_expression); }
-
     const MediaQueryExp* expression() const
     {
         return &m_expression;

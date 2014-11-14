@@ -52,7 +52,6 @@ public:
     virtual ~DOMWindowEventQueue();
 
     // EventQueue
-    virtual void trace(Visitor*) override;
     virtual bool enqueueEvent(PassRefPtr<Event>) override;
     virtual bool cancelEvent(Event*) override;
     virtual void close() override;

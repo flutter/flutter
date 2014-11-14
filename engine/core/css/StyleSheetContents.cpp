@@ -378,14 +378,4 @@ void StyleSheetContents::findFontFaceRules(Vector<RawPtr<const StyleRuleFontFace
     findFontFaceRulesFromRules(childRules(), fontFaceRules);
 }
 
-void StyleSheetContents::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_childRules);
-    visitor->trace(m_loadingClients);
-    visitor->trace(m_completedClients);
-    visitor->trace(m_ruleSet);
-#endif
-}
-
 }

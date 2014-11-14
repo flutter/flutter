@@ -39,8 +39,6 @@ public:
         return adoptRef(new DeleteFromTextNodeCommand(node, offset, count));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     DeleteFromTextNodeCommand(PassRefPtr<Text>, unsigned offset, unsigned count);
 

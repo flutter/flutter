@@ -73,15 +73,6 @@ ElementData::ElementData(const ElementData& other, bool isUnique)
     // NOTE: The inline style is copied by the subclass copy constructor since we don't know what to do with it here.
 }
 
-#if ENABLE(OILPAN)
-void ElementData::finalizeGarbageCollectedObject()
-{
-    if (m_isUnique)
-        toUniqueElementData(this)->~UniqueElementData();
-    else
-        toShareableElementData(this)->~ShareableElementData();
-}
-#else
 void ElementData::destroy()
 {
     if (m_isUnique)
@@ -89,7 +80,6 @@ void ElementData::destroy()
     else
         delete toShareableElementData(this);
 }
-#endif
 
 PassRefPtr<UniqueElementData> ElementData::makeUniqueCopy() const
 {
@@ -115,19 +105,6 @@ bool ElementData::isEquivalent(const ElementData* other) const
             return false;
     }
     return true;
-}
-
-void ElementData::trace(Visitor* visitor)
-{
-    if (m_isUnique)
-        toUniqueElementData(this)->traceAfterDispatch(visitor);
-    else
-        toShareableElementData(this)->traceAfterDispatch(visitor);
-}
-
-void ElementData::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_inlineStyle);
 }
 
 ShareableElementData::ShareableElementData(const Vector<Attribute>& attributes)
@@ -193,11 +170,6 @@ PassRefPtr<ShareableElementData> UniqueElementData::makeShareableCopy() const
 {
     void* slot = WTF::fastMalloc(sizeForShareableElementDataWithAttributeCount(m_attributeVector.size()));
     return adoptRef(new (slot) ShareableElementData(*this));
-}
-
-void UniqueElementData::traceAfterDispatch(Visitor* visitor)
-{
-    ElementData::traceAfterDispatch(visitor);
 }
 
 } // namespace blink

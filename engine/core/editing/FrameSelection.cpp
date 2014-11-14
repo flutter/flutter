@@ -1696,16 +1696,6 @@ void FrameSelection::showTreeForThis() const
 
 #endif
 
-void FrameSelection::trace(Visitor* visitor)
-{
-    visitor->trace(m_selection);
-    visitor->trace(m_originalBase);
-    visitor->trace(m_logicalRange);
-    visitor->trace(m_previousCaretNode);
-    visitor->trace(m_typingStyle);
-    VisibleSelection::ChangeObserver::trace(visitor);
-}
-
 void FrameSelection::setCaretRectNeedsUpdate()
 {
     m_caretRectDirty = true;

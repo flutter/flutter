@@ -851,10 +851,4 @@ void Editor::toggleOverwriteModeEnabled()
     frame().selection().setShouldShowBlockCursor(m_overwriteModeEnabled);
 }
 
-void Editor::trace(Visitor* visitor)
-{
-    visitor->trace(m_lastEditCommand);
-    visitor->trace(m_mark);
-}
-
 } // namespace blink

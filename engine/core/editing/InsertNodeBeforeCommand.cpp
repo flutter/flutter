@@ -63,11 +63,4 @@ void InsertNodeBeforeCommand::doUnapply()
     m_insertChild->remove(IGNORE_EXCEPTION);
 }
 
-void InsertNodeBeforeCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_insertChild);
-    visitor->trace(m_refChild);
-    SimpleEditCommand::trace(visitor);
-}
-
 }

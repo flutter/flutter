@@ -90,9 +90,4 @@ CSSStyleSheet* StyleSheetList::anonymousNamedGetter(const AtomicString& name)
     return item->sheet();
 }
 
-void StyleSheetList::trace(Visitor* visitor)
-{
-    visitor->trace(m_treeScope);
-}
-
 } // namespace blink

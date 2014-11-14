@@ -37,8 +37,6 @@ public:
         return adoptRef(new SplitTextNodeContainingElementCommand(node, offset));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     SplitTextNodeContainingElementCommand(PassRefPtr<Text>, int offset);
 

@@ -64,8 +64,6 @@ public:
     unsigned version() const { return m_version; }
     void incrementVersion() { ++m_version; }
 
-    void trace(Visitor*);
-
 private:
     typedef HashMap<unsigned, RefPtr<CSSSegmentedFontFace> > TraitsMap;
     typedef HashMap<String, OwnPtr<TraitsMap>, CaseFoldingHash> FamilyToTraitsMap;

@@ -24,8 +24,6 @@ public:
     bool isEmpty() const { return m_queue.isEmpty(); }
     void dispatch();
 
-    void trace(Visitor*);
-
 protected:
     CustomElementMicrotaskQueueBase() : m_inDispatch(false) { }
     virtual void doDispatch() = 0;

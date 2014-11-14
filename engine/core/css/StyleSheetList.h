@@ -53,8 +53,6 @@ public:
 
     CSSStyleSheet* anonymousNamedGetter(const AtomicString&);
 
-    void trace(Visitor*);
-
 private:
     StyleSheetList(TreeScope*);
     const Vector<RefPtr<StyleSheet> >& styleSheets();

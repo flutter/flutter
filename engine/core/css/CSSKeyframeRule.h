@@ -61,8 +61,6 @@ public:
 
     String cssText() const;
 
-    void trace(Visitor*);
-
     static PassOwnPtr<Vector<double> > createKeyList(CSSParserValueList*);
 
 private:
@@ -86,8 +84,6 @@ public:
     void setKeyText(const String& s) { m_keyframe->setKeyText(s); }
 
     CSSStyleDeclaration* style() const;
-
-    virtual void trace(Visitor*) override;
 
 private:
     CSSKeyframeRule(StyleKeyframe*, CSSKeyframesRule* parent);

@@ -47,8 +47,6 @@ public:
     static void notifyElementDidFinishParsingChildren(Element*);
     static void notifyElementWasDestroyed(Element*);
 
-    virtual void trace(Visitor*) { }
-
 protected:
     CustomElementObserver() { }
 

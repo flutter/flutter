@@ -23,8 +23,6 @@ public:
         m_interpolations.append(InterpolationRecord::create(interpolation, easing, start, end, applyFrom, applyTo));
     }
 
-    void trace(Visitor*);
-
 private:
     InterpolationEffect()
     {
@@ -43,8 +41,6 @@ private:
         {
             return adoptPtr(new InterpolationRecord(interpolation, easing, start, end, applyFrom, applyTo));
         }
-
-        void trace(Visitor*);
 
     private:
         InterpolationRecord(PassRefPtr<Interpolation> interpolation, PassRefPtr<TimingFunction> easing, double start, double end, double applyFrom, double applyTo)

@@ -48,7 +48,6 @@ class ResourceLoader final : public RefCounted<ResourceLoader>, protected WebURL
 public:
     static PassRefPtr<ResourceLoader> create(ResourceLoaderHost*, Resource*, const ResourceRequest&, const ResourceLoaderOptions&);
     virtual ~ResourceLoader();
-    void trace(Visitor*);
 
     void start();
 

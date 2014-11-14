@@ -39,8 +39,6 @@ public:
         return adoptRef(new MoveSelectionCommand(fragment, position, smartInsert, smartDelete));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     MoveSelectionCommand(PassRefPtr<DocumentFragment>, const Position&, bool smartInsert, bool smartDelete);
 

@@ -1162,11 +1162,6 @@ TextDirection Position::primaryDirection() const
     return primaryDirection;
 }
 
-void Position::trace(Visitor* visitor)
-{
-    visitor->trace(m_anchorNode);
-}
-
 void Position::debugPosition(const char* msg) const
 {
     if (isNull())

@@ -62,8 +62,6 @@ public:
 
     const Vector<RefPtr<Node> >& nodes() const { return m_nodes; }
 
-    void trace(Visitor*);
-
 private:
     Vector<RefPtr<Node> > m_nodes;
     HashMap<RawPtr<const Node>, size_t> m_indices;

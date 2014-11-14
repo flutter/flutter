@@ -66,8 +66,6 @@ public:
     ConsoleMessageStorage* messageStorage();
     void clearMessages();
 
-    void trace(Visitor*);
-
 private:
     explicit FrameConsole(LocalFrame&);
 

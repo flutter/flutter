@@ -96,8 +96,6 @@ public:
     // Microsoft Selection Object API
     void empty();
 
-    void trace(Visitor* visitor) { visitor->trace(m_treeScope); }
-
 private:
     explicit DOMSelection(const TreeScope*);
 

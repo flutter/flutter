@@ -64,8 +64,6 @@ public:
 
     virtual blink::WebLayer* platformLayer() const { return 0; }
 
-    virtual void trace(Visitor* visitor) { visitor->trace(m_canvas); }
-
 protected:
     CanvasRenderingContext(HTMLCanvasElement*);
 

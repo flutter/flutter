@@ -23,8 +23,6 @@ public:
     virtual bool isStyleInterpolation() const { return false; }
     virtual bool isLegacyStyleInterpolation() const { return false; }
 
-    virtual void trace(Visitor*);
-
 protected:
     const OwnPtr<InterpolableValue> m_start;
     const OwnPtr<InterpolableValue> m_end;

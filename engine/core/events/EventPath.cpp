@@ -325,12 +325,4 @@ void EventPath::checkReachability(TreeScope& treeScope, TouchList& touchList)
 }
 #endif
 
-void EventPath::trace(Visitor* visitor)
-{
-    visitor->trace(m_nodeEventContexts);
-    visitor->trace(m_node);
-    visitor->trace(m_event);
-    visitor->trace(m_treeScopeEventContexts);
-}
-
 } // namespace

@@ -75,7 +75,6 @@ public:
     public:
         virtual ~EventDelegate() { }
         virtual void onEventCondition(const AnimationNode*) = 0;
-        virtual void trace(Visitor*) { }
     };
 
     virtual ~AnimationNode() { }
@@ -112,8 +111,6 @@ public:
     // This method returns time in ms as it is unused except via the API.
     double localTime(bool& isNull) const { isNull = !m_player; return ensureCalculated().localTime * 1000; }
     double currentIteration(bool& isNull) const { isNull = !ensureCalculated().isInEffect; return ensureCalculated().currentIteration; }
-
-    virtual void trace(Visitor*);
 
 protected:
     explicit AnimationNode(const Timing&, PassOwnPtr<EventDelegate> = nullptr);

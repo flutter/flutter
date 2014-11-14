@@ -68,8 +68,6 @@ public:
 
     void didDistributeNode(const Node*, InsertionPoint*);
 
-    void trace(Visitor*);
-
 private:
     ElementShadow();
 

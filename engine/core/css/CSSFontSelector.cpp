@@ -172,15 +172,4 @@ void CSSFontSelector::updateGenericFontFamilySettings(Document& document)
     m_fontFaceCache.incrementVersion();
 }
 
-void CSSFontSelector::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_document);
-    visitor->trace(m_fontFaceCache);
-    visitor->trace(m_clients);
-    visitor->trace(m_fontLoader);
-#endif
-    FontSelector::trace(visitor);
-}
-
 }

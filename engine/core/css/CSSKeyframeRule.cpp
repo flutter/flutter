@@ -136,11 +136,6 @@ PassOwnPtr<Vector<double> > StyleKeyframe::createKeyList(CSSParserValueList* key
     return keyVector.release();
 }
 
-void StyleKeyframe::trace(Visitor* visitor)
-{
-    visitor->trace(m_properties);
-}
-
 CSSKeyframeRule::CSSKeyframeRule(StyleKeyframe* keyframe, CSSKeyframesRule* parent)
     : CSSRule(0)
     , m_keyframe(keyframe)
@@ -167,13 +162,6 @@ void CSSKeyframeRule::reattach(StyleRuleBase*)
 {
     // No need to reattach, the underlying data is shareable on mutation.
     ASSERT_NOT_REACHED();
-}
-
-void CSSKeyframeRule::trace(Visitor* visitor)
-{
-    visitor->trace(m_keyframe);
-    visitor->trace(m_propertiesCSSOMWrapper);
-    CSSRule::trace(visitor);
 }
 
 } // namespace blink

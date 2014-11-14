@@ -68,9 +68,4 @@ void ScriptCallStack::setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack> asyncCa
     m_asyncCallStack = asyncCallStack;
 }
 
-void ScriptCallStack::trace(Visitor* visitor)
-{
-    visitor->trace(m_asyncCallStack);
-}
-
 } // namespace blink

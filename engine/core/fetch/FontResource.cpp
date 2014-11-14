@@ -79,11 +79,6 @@ FontResource::~FontResource()
 {
 }
 
-void FontResource::trace(Visitor* visitor)
-{
-    Resource::trace(visitor);
-}
-
 void FontResource::didScheduleLoad()
 {
     if (m_state == Unloaded)

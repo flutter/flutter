@@ -110,13 +110,4 @@ unsigned CSSPropertySourceData::hash() const
     return StringHash::hash(name) + 3 * StringHash::hash(value) + 7 * important + 13 * parsedOk + 31;
 }
 
-void CSSRuleSourceData::trace(Visitor* visitor)
-{
-    visitor->trace(ruleHeaderRange);
-    visitor->trace(ruleBodyRange);
-    visitor->trace(selectorRanges);
-    visitor->trace(styleSourceData);
-    visitor->trace(childRules);
-}
-
 } // namespace blink

@@ -56,8 +56,6 @@ public:
     // For UMA reporting
     virtual bool hadBlankText() { return false; }
 
-    virtual void trace(Visitor*);
-
 protected:
     CSSFontFaceSource();
     virtual PassRefPtr<SimpleFontData> createFontData(const FontDescription&) = 0;

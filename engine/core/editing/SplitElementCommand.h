@@ -37,8 +37,6 @@ public:
         return adoptRef(new SplitElementCommand(element, splitPointChild));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     SplitElementCommand(PassRefPtr<Element>, PassRefPtr<Node> splitPointChild);
 

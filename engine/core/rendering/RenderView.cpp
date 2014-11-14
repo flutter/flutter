@@ -66,13 +66,6 @@ RenderView::~RenderView()
 {
 }
 
-void RenderView::trace(Visitor* visitor)
-{
-    visitor->trace(m_selectionStart);
-    visitor->trace(m_selectionEnd);
-    RenderBlockFlow::trace(visitor);
-}
-
 bool RenderView::hitTest(const HitTestRequest& request, HitTestResult& result)
 {
     return hitTest(request, result.hitTestLocation(), result);

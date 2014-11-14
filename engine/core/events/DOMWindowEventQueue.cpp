@@ -39,7 +39,6 @@ public:
     DOMWindowEventQueueTimer(DOMWindowEventQueue* eventQueue, ExecutionContext* context)
         : SuspendableTimer(context)
         , m_eventQueue(eventQueue) { }
-    void trace(Visitor* visitor) { visitor->trace(m_eventQueue); }
 
 private:
     virtual void fired() { m_eventQueue->pendingEventTimerFired(); }
@@ -61,15 +60,6 @@ DOMWindowEventQueue::DOMWindowEventQueue(ExecutionContext* context)
 
 DOMWindowEventQueue::~DOMWindowEventQueue()
 {
-}
-
-void DOMWindowEventQueue::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_pendingEventTimer);
-    visitor->trace(m_queuedEvents);
-#endif
-    EventQueue::trace(visitor);
 }
 
 bool DOMWindowEventQueue::enqueueEvent(PassRefPtr<Event> event)

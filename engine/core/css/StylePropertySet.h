@@ -45,16 +45,9 @@ class StylePropertySet : public RefCounted<StylePropertySet> {
     friend class PropertyReference;
 public:
 
-#if ENABLE(OILPAN)
-    // When oilpan is enabled override the finalize method to dispatch to the subclasses'
-    // destructor. This can be removed once the MutableStylePropertySet's OwnPtr is moved
-    // to the heap.
-    void finalizeGarbageCollectedObject();
-#else
     // Override RefCounted's deref() to ensure operator delete is called on
     // the appropriate subclass type.
     void deref();
-#endif
 
     class PropertyReference {
     public:
@@ -126,9 +119,6 @@ public:
 
     bool propertyMatches(CSSPropertyID, const CSSValue*) const;
 
-    void trace(Visitor*);
-    void traceAfterDispatch(Visitor*) { }
-
 protected:
 
     enum { MaxArraySize = (1 << 28) - 1 };
@@ -162,8 +152,6 @@ public:
     const RawPtr<CSSValue>* valueArray() const;
     const StylePropertyMetadata* metadataArray() const;
     int findPropertyIndex(CSSPropertyID) const;
-
-    void traceAfterDispatch(Visitor*);
 
     void* operator new(std::size_t, void* location)
     {
@@ -224,8 +212,6 @@ public:
 
     CSSStyleDeclaration* ensureCSSStyleDeclaration();
     int findPropertyIndex(CSSPropertyID) const;
-
-    void traceAfterDispatch(Visitor*);
 
 private:
     explicit MutableStylePropertySet(CSSParserMode);

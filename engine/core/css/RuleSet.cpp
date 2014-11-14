@@ -246,40 +246,6 @@ void RuleSet::compactRules()
     m_keyframesRules.shrinkToFit();
 }
 
-void RuleData::trace(Visitor* visitor)
-{
-    visitor->trace(m_rule);
-}
-
-void RuleSet::PendingRuleMaps::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(idRules);
-    visitor->trace(classRules);
-    visitor->trace(tagRules);
-    visitor->trace(shadowPseudoElementRules);
-#endif
-}
-
-void RuleSet::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_idRules);
-    visitor->trace(m_classRules);
-    visitor->trace(m_tagRules);
-    visitor->trace(m_shadowPseudoElementRules);
-    visitor->trace(m_universalRules);
-    visitor->trace(m_features);
-    visitor->trace(m_fontFaceRules);
-    visitor->trace(m_keyframesRules);
-    visitor->trace(m_viewportDependentMediaQueryResults);
-    visitor->trace(m_pendingRules);
-#ifndef NDEBUG
-    visitor->trace(m_allRules);
-#endif
-#endif
-}
-
 #ifndef NDEBUG
 void RuleSet::show()
 {

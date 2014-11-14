@@ -139,8 +139,6 @@ public:
     void formatForDebugger(char* buffer, unsigned length) const;
 #endif
 
-    void trace(Visitor*);
-
 private:
     explicit Range(Document&);
     Range(Document&, Node* startContainer, int startOffset, Node* endContainer, int endOffset);

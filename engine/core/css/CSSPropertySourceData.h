@@ -48,8 +48,6 @@ public:
     SourceRange(unsigned start, unsigned end);
     unsigned length() const;
 
-    void trace(Visitor*) { }
-
     unsigned start;
     unsigned end;
 };
@@ -64,8 +62,6 @@ public:
     String toString() const;
     unsigned hash() const;
 
-    void trace(Visitor* visitor) { visitor->trace(range); }
-
     String name;
     String value;
     bool important;
@@ -79,8 +75,6 @@ struct CSSStyleSourceData : public RefCounted<CSSStyleSourceData> {
     {
         return adoptRef(new CSSStyleSourceData());
     }
-
-    void trace(Visitor* visitor) { visitor->trace(propertyData); }
 
     Vector<CSSPropertySourceData> propertyData;
 };
@@ -116,8 +110,6 @@ struct CSSRuleSourceData : public RefCounted<CSSRuleSourceData> {
         if (type == STYLE_RULE || type == FONT_FACE_RULE)
             styleSourceData = CSSStyleSourceData::create();
     }
-
-    void trace(Visitor*);
 
     Type type;
 

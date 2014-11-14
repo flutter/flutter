@@ -62,8 +62,6 @@ public:
 
     void stateObjectAdded(PassRefPtr<SerializedScriptValue>, const String& title, const String& url, FrameLoadType, ExceptionState&);
 
-    void trace(Visitor*) { }
-
 private:
     explicit History(LocalFrame*);
 

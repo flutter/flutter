@@ -49,8 +49,6 @@ public:
             && compareCSSValuePtr(m_bottom, other.m_bottom);
     }
 
-    void trace(Visitor*);
-
 protected:
     RectBase() { }
     RectBase(const RectBase& cloneFrom)

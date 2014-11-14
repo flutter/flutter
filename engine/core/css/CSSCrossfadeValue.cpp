@@ -218,12 +218,4 @@ bool CSSCrossfadeValue::equals(const CSSCrossfadeValue& other) const
         && compareCSSValuePtr(m_percentageValue, other.m_percentageValue);
 }
 
-void CSSCrossfadeValue::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_fromValue);
-    visitor->trace(m_toValue);
-    visitor->trace(m_percentageValue);
-    CSSImageGeneratorValue::traceAfterDispatch(visitor);
-}
-
 } // namespace blink

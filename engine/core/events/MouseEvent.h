@@ -91,8 +91,6 @@ public:
     virtual bool isDragEvent() const override final;
     virtual int which() const override final;
 
-    virtual void trace(Visitor*) override;
-
 protected:
     MouseEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>,
         int detail, int screenX, int screenY, int pageX, int pageY,
@@ -116,8 +114,6 @@ class SimulatedMouseEvent final : public MouseEvent {
 public:
     static PassRefPtr<SimulatedMouseEvent> create(const AtomicString& eventType, PassRefPtr<AbstractView>, PassRefPtr<Event> underlyingEvent);
     virtual ~SimulatedMouseEvent();
-
-    virtual void trace(Visitor*) override;
 
 private:
     SimulatedMouseEvent(const AtomicString& eventType, PassRefPtr<AbstractView>, PassRefPtr<Event> underlyingEvent);

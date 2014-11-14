@@ -86,11 +86,6 @@ bool WheelEvent::isWheelEvent() const
     return true;
 }
 
-void WheelEvent::trace(Visitor* visitor)
-{
-    MouseEvent::trace(visitor);
-}
-
 inline static unsigned deltaMode(const PlatformWheelEvent& event)
 {
     return event.granularity() == ScrollByPageWheelEvent ? WheelEvent::DOM_DELTA_PAGE : WheelEvent::DOM_DELTA_PIXEL;

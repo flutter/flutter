@@ -58,8 +58,6 @@ public:
 
     void collectCallStack();
 
-    void trace(Visitor*);
-
 private:
     ConsoleMessage(MessageSource, MessageLevel, const String& message, const String& url = String(), unsigned lineNumber = 0, unsigned columnNumber = 0);
 

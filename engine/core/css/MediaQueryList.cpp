@@ -125,16 +125,6 @@ bool MediaQueryList::matches()
     return m_matches;
 }
 
-void MediaQueryList::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_matcher);
-    visitor->trace(m_media);
-    visitor->trace(m_listeners);
-#endif
-    EventTargetWithInlineData::trace(visitor);
-}
-
 const AtomicString& MediaQueryList::interfaceName() const
 {
     return EventTargetNames::MediaQueryList;

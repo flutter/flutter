@@ -39,8 +39,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     AnimationPlayerEvent();
     AnimationPlayerEvent(const AtomicString& type, double currentTime, double timelineTime);

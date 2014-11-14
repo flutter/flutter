@@ -58,7 +58,6 @@ public:
         virtual void cancelWake() = 0;
         virtual void serviceOnNextFrame() = 0;
         virtual ~PlatformTiming() { }
-        virtual void trace(Visitor*) { }
     };
 
     static PassRefPtr<AnimationTimeline> create(Document*, PassOwnPtr<PlatformTiming> = nullptr);
@@ -97,8 +96,6 @@ public:
 #endif
     void wake();
 
-    void trace(Visitor*);
-
 protected:
     AnimationTimeline(Document*, PassOwnPtr<PlatformTiming>);
 
@@ -128,8 +125,6 @@ private:
         virtual void serviceOnNextFrame() override;
 
         void timerFired(Timer<AnimationTimelineTiming>*) { m_timeline->wake(); }
-
-        virtual void trace(Visitor*) override;
 
     private:
         RawPtr<AnimationTimeline> m_timeline;

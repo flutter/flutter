@@ -43,12 +43,6 @@ public:
     void clearHost() { m_host = nullptr; }
 #endif
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_host);
-        DocumentFragment::trace(visitor);
-    }
-
 private:
     TemplateContentDocumentFragment(Document& document, Element* host)
         : DocumentFragment(&document, CreateDocumentFragment)

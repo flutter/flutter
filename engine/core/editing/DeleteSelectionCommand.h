@@ -43,8 +43,6 @@ public:
         return adoptRef(new DeleteSelectionCommand(selection, smartDelete, mergeBlocksAfterDelete, expandForSpecialElements, sanitizeMarkup));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     DeleteSelectionCommand(Document&, bool smartDelete, bool mergeBlocksAfterDelete, bool expandForSpecialElements, bool santizeMarkup);
     DeleteSelectionCommand(const VisibleSelection&, bool smartDelete, bool mergeBlocksAfterDelete, bool expandForSpecialElements, bool sanitizeMarkup);

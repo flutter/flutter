@@ -31,11 +31,6 @@ void HitRegion::removePixels(const Path& clearArea)
     m_path.subtractPath(clearArea);
 }
 
-void HitRegion::trace(Visitor* visitor)
-{
-    visitor->trace(m_control);
-}
-
 void HitRegionManager::addHitRegion(PassRefPtr<HitRegion> passHitRegion)
 {
     RefPtr<HitRegion> hitRegion = passHitRegion;
@@ -131,15 +126,6 @@ HitRegion* HitRegionManager::getHitRegionAtPoint(const LayoutPoint& point) const
 unsigned HitRegionManager::getHitRegionsCount() const
 {
     return m_hitRegionList.size();
-}
-
-void HitRegionManager::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_hitRegionList);
-    visitor->trace(m_hitRegionIdMap);
-    visitor->trace(m_hitRegionControlMap);
-#endif
 }
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(HitRegionManager)

@@ -355,15 +355,11 @@ public:
 
     void setSavingImage(bool isSaving) { m_savingImage = isSaving; }
 
-    virtual void trace(Visitor*) override;
-
     class TextureUnitState {
         ALLOW_ONLY_INLINE_ALLOCATION();
     public:
         RefPtr<WebGLTexture> m_texture2DBinding;
         RefPtr<WebGLTexture> m_textureCubeMapBinding;
-
-        void trace(Visitor*);
     };
 
 protected:
@@ -599,8 +595,6 @@ protected:
         virtual const char* extensionName() const = 0;
         virtual void loseExtension() = 0;
 
-        virtual void trace(Visitor*) { }
-
     private:
         bool m_draft;
         const char* const* m_prefixes;
@@ -651,12 +645,6 @@ protected:
                 if (m_extension->isLost())
                     m_extension = nullptr;
             }
-        }
-
-        virtual void trace(Visitor* visitor) override
-        {
-            visitor->trace(m_extension);
-            ExtensionTracker::trace(visitor);
         }
 
     private:

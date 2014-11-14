@@ -76,10 +76,4 @@ void WebGLRenderbuffer::deleteEmulatedStencilBuffer(blink::WebGraphicsContext3D*
     m_emulatedStencilBuffer.clear();
 }
 
-void WebGLRenderbuffer::trace(Visitor* visitor)
-{
-    visitor->trace(m_emulatedStencilBuffer);
-    WebGLSharedObject::trace(visitor);
-}
-
 }

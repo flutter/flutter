@@ -1527,13 +1527,6 @@ FloatRect Range::boundingRect() const
     return result;
 }
 
-void Range::trace(Visitor* visitor)
-{
-    visitor->trace(m_ownerDocument);
-    visitor->trace(m_start);
-    visitor->trace(m_end);
-}
-
 } // namespace blink
 
 #ifndef NDEBUG

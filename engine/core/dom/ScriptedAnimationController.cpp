@@ -53,18 +53,6 @@ ScriptedAnimationController::~ScriptedAnimationController()
 {
 }
 
-void ScriptedAnimationController::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_callbacks);
-    visitor->trace(m_callbacksToInvoke);
-    visitor->trace(m_document);
-    visitor->trace(m_eventQueue);
-    visitor->trace(m_mediaQueryListListeners);
-    visitor->trace(m_perFrameEvents);
-#endif
-}
-
 void ScriptedAnimationController::suspend()
 {
     ++m_suspendCount;

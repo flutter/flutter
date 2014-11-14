@@ -55,12 +55,4 @@ void SampledEffect::removeReplacedInterpolationsIfNeeded(const BitArray<numCSSPr
     m_interpolations->shrink(dest);
 }
 
-void SampledEffect::trace(Visitor* visitor)
-{
-    visitor->trace(m_animation);
-#if ENABLE(OILPAN)
-    visitor->trace(m_interpolations);
-#endif
-}
-
 } // namespace blink

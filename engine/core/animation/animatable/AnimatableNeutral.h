@@ -39,8 +39,6 @@ class AnimatableNeutral final : public AnimatableValue {
 public:
     virtual ~AnimatableNeutral() { }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     static PassRefPtr<AnimatableNeutral> create() { return adoptRef(new AnimatableNeutral()); }
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override

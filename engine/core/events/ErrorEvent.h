@@ -83,8 +83,6 @@ public:
 
     void setUnsanitizedMessage(const String&);
 
-    virtual void trace(Visitor*) override;
-
 private:
     ErrorEvent();
     ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld*);

@@ -83,11 +83,4 @@ EditAction MoveSelectionCommand::editingAction() const
     return EditActionDrag;
 }
 
-void MoveSelectionCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_fragment);
-    visitor->trace(m_position);
-    CompositeEditCommand::trace(visitor);
-}
-
 } // namespace blink

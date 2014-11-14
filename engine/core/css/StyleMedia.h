@@ -45,8 +45,6 @@ public:
     AtomicString type() const;
     bool matchMedium(const String&) const;
 
-    void trace(Visitor*) { }
-
 private:
     explicit StyleMedia(LocalFrame*);
 };

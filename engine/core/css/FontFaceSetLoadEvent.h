@@ -67,8 +67,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     FontFaceSetLoadEvent();
     FontFaceSetLoadEvent(const AtomicString&, const FontFaceArray&);

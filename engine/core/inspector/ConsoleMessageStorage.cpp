@@ -84,10 +84,4 @@ ExecutionContext* ConsoleMessageStorage::executionContext() const
     return m_frame ? m_frame->document() : m_context;
 }
 
-void ConsoleMessageStorage::trace(Visitor* visitor)
-{
-    visitor->trace(m_messages);
-    visitor->trace(m_context);
-}
-
 } // namespace blink

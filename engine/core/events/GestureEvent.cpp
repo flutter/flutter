@@ -94,11 +94,6 @@ GestureEvent::GestureEvent(const AtomicString& type, PassRefPtr<AbstractView> vi
 {
 }
 
-void GestureEvent::trace(Visitor* visitor)
-{
-    MouseRelatedEvent::trace(visitor);
-}
-
 GestureEventDispatchMediator::GestureEventDispatchMediator(PassRefPtr<GestureEvent> gestureEvent)
     : EventDispatchMediator(gestureEvent)
 {

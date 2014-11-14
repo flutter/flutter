@@ -17,9 +17,4 @@ void CustomElementMicrotaskQueueBase::dispatch()
     m_inDispatch = false;
 }
 
-void CustomElementMicrotaskQueueBase::trace(Visitor* visitor)
-{
-    visitor->trace(m_queue);
-}
-
 } // namespace blink

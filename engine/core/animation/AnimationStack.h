@@ -56,7 +56,6 @@ public:
     static HashMap<CSSPropertyID, RefPtr<Interpolation> > activeInterpolations(AnimationStack*, const Vector<RawPtr<InertAnimation> >* newAnimations, const HashSet<RawPtr<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority, double timelineCurrentTime);
 
     bool getAnimatedBoundingBox(FloatBox&, CSSPropertyID) const;
-    void trace(Visitor*);
 
 private:
     void simplifyEffects();

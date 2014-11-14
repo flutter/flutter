@@ -43,8 +43,6 @@ public:
 
     bool equals(const CSSInitialValue&) const { return true; }
 
-    void traceAfterDispatch(Visitor* visitor) { CSSValue::traceAfterDispatch(visitor); }
-
 private:
     explicit CSSInitialValue(bool implicit)
         : CSSValue(InitialClass)

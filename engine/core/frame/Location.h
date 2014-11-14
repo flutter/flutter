@@ -76,8 +76,6 @@ public:
 
     PassRefPtr<DOMStringList> ancestorOrigins() const;
 
-    void trace(Visitor*) { }
-
 private:
     explicit Location(LocalFrame*);
 

@@ -63,8 +63,6 @@ public:
     WeakPtr<CustomElementMicrotaskImportStep> weakPtr() { return m_weakFactory.createWeakPtr(); }
 #endif
 
-    virtual void trace(Visitor*) override;
-
 private:
     explicit CustomElementMicrotaskImportStep(HTMLImportChild*);
 

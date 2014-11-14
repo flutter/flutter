@@ -43,7 +43,6 @@ class NodeEventContext {
 public:
     // FIXME: Use ContainerNode instead of Node.
     NodeEventContext(PassRefPtr<Node>, PassRefPtr<EventTarget> currentTarget);
-    void trace(Visitor*);
 
     Node* node() const { return m_node.get(); }
 

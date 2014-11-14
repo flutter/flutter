@@ -128,11 +128,6 @@ ImageLoader::~ImageLoader()
         errorEventSender().cancelEvent(this);
 }
 
-void ImageLoader::trace(Visitor* visitor)
-{
-    visitor->trace(m_element);
-}
-
 void ImageLoader::setImage(ImageResource* newImage)
 {
     setImageWithoutConsideringPendingLoadEvent(newImage);

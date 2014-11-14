@@ -77,11 +77,6 @@ public:
         EXPECT_CALL(*this, cancelWake()).InSequence(sequence);
         EXPECT_CALL(*this, wakeAfter(when)).InSequence(sequence);
     }
-
-    void trace(Visitor* visitor)
-    {
-        AnimationTimeline::PlatformTiming::trace(visitor);
-    }
 };
 
 class AnimationAnimationTimelineTest : public ::testing::Test {

@@ -141,8 +141,6 @@ public:
     bool hasOnlyScopedResolverForDocument() const { return m_scopedStyleResolvers.size() == 1; }
     void collectScopedStyleFeaturesTo(RuleFeatureSet&) const;
 
-    virtual void trace(Visitor*) override;
-
 private:
     // CSSFontSelectorClient implementation.
     virtual void fontsNeedUpdate(CSSFontSelector*) override;

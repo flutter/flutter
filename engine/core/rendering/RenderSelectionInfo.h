@@ -47,12 +47,6 @@ public:
     {
     }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_object);
-        visitor->trace(m_paintInvalidationContainer);
-    }
-
     RenderObject* object() const { return m_object; }
     const RenderLayerModelObject* paintInvalidationContainer() const { return m_paintInvalidationContainer; }
     RenderObject::SelectionState state() const { return m_state; }

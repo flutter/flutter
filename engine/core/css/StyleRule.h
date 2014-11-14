@@ -72,10 +72,6 @@ public:
     PassRefPtr<CSSRule> createCSSOMWrapper(CSSStyleSheet* parentSheet = 0) const;
     PassRefPtr<CSSRule> createCSSOMWrapper(CSSRule* parentRule) const;
 
-    void trace(Visitor*);
-    void traceAfterDispatch(Visitor*) { };
-    void finalizeGarbageCollectedObject();
-
 protected:
     StyleRuleBase(Type type) : m_type(type) { }
     StyleRuleBase(const StyleRuleBase& o) : m_type(o.m_type) { }
@@ -109,8 +105,6 @@ public:
 
     static unsigned averageSizeInBytes();
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     StyleRule();
     StyleRule(const StyleRule&);
@@ -132,8 +126,6 @@ public:
 
     PassRefPtr<StyleRuleFontFace> copy() const { return adoptRef(new StyleRuleFontFace(*this)); }
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     StyleRuleFontFace();
     StyleRuleFontFace(const StyleRuleFontFace&);
@@ -147,8 +139,6 @@ public:
 
     void wrapperInsertRule(unsigned, PassRefPtr<StyleRuleBase>);
     void wrapperRemoveRule(unsigned);
-
-    void traceAfterDispatch(Visitor*);
 
 protected:
     StyleRuleGroup(Type, Vector<RefPtr<StyleRuleBase> >& adoptRule);
@@ -169,8 +159,6 @@ public:
 
     PassRefPtr<StyleRuleMedia> copy() const { return adoptRef(new StyleRuleMedia(*this)); }
 
-    void traceAfterDispatch(Visitor*);
-
 private:
     StyleRuleMedia(PassRefPtr<MediaQuerySet>, Vector<RefPtr<StyleRuleBase> >& adoptRules);
     StyleRuleMedia(const StyleRuleMedia&);
@@ -188,8 +176,6 @@ public:
     String conditionText() const { return m_conditionText; }
     bool conditionIsSupported() const { return m_conditionIsSupported; }
     PassRefPtr<StyleRuleSupports> copy() const { return adoptRef(new StyleRuleSupports(*this)); }
-
-    void traceAfterDispatch(Visitor* visitor) { StyleRuleGroup::traceAfterDispatch(visitor); }
 
 private:
     StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules);
@@ -213,8 +199,6 @@ public:
     void setProperties(PassRefPtr<StylePropertySet>);
 
     PassRefPtr<StyleRuleFilter> copy() const { return adoptRef(new StyleRuleFilter(*this)); }
-
-    void traceAfterDispatch(Visitor*);
 
 private:
     StyleRuleFilter(const String&);

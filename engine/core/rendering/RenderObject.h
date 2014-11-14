@@ -153,7 +153,6 @@ public:
     // marked as anonymous in the constructor.
     explicit RenderObject(Node*);
     virtual ~RenderObject();
-    virtual void trace(Visitor*);
 
     virtual const char* renderName() const = 0;
 

@@ -138,30 +138,4 @@ void WebGLRenderingContext::registerContextExtensions()
     registerExtension<WebGLLoseContext>(m_webglLoseContext, ApprovedExtension, bothPrefixes);
 }
 
-void WebGLRenderingContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_angleInstancedArrays);
-    visitor->trace(m_extBlendMinMax);
-    visitor->trace(m_extFragDepth);
-    visitor->trace(m_extShaderTextureLOD);
-    visitor->trace(m_extTextureFilterAnisotropic);
-    visitor->trace(m_oesTextureFloat);
-    visitor->trace(m_oesTextureFloatLinear);
-    visitor->trace(m_oesTextureHalfFloat);
-    visitor->trace(m_oesTextureHalfFloatLinear);
-    visitor->trace(m_oesStandardDerivatives);
-    visitor->trace(m_oesVertexArrayObject);
-    visitor->trace(m_oesElementIndexUint);
-    visitor->trace(m_webglLoseContext);
-    visitor->trace(m_webglDebugRendererInfo);
-    visitor->trace(m_webglDebugShaders);
-    visitor->trace(m_webglDrawBuffers);
-    visitor->trace(m_webglCompressedTextureATC);
-    visitor->trace(m_webglCompressedTextureETC1);
-    visitor->trace(m_webglCompressedTexturePVRTC);
-    visitor->trace(m_webglCompressedTextureS3TC);
-    visitor->trace(m_webglDepthTexture);
-    WebGLRenderingContextBase::trace(visitor);
-}
-
 } // namespace blink

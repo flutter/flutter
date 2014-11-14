@@ -53,8 +53,6 @@ public:
 
     bool getFirstArgumentAsString(WTF::String& result, bool checkForNullOrUndefined = false);
 
-    void trace(Visitor*) { }
-
 private:
     ScriptArguments(ScriptState*, Vector<ScriptValue>& arguments);
 

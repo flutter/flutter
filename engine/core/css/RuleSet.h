@@ -58,8 +58,6 @@ public:
 
     bool containsAttributeSelector() const { return m_containsAttributeSelector; }
 
-    void trace(Visitor*);
-
 private:
     RawPtr<StyleRule> m_rule;
     unsigned m_selectorIndex : 12;
@@ -111,8 +109,6 @@ public:
     void show();
 #endif
 
-    void trace(Visitor*);
-
 private:
     typedef HashMap<AtomicString, OwnPtr<LinkedStack<RuleData> > > PendingRuleMap;
     typedef HashMap<AtomicString, OwnPtr<TerminatedArray<RuleData> > > CompactRuleMap;
@@ -140,8 +136,6 @@ private:
         PendingRuleMap classRules;
         PendingRuleMap tagRules;
         PendingRuleMap shadowPseudoElementRules;
-
-        void trace(Visitor*);
 
     private:
         PendingRuleMaps() { }

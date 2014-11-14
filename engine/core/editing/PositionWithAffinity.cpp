@@ -22,9 +22,4 @@ PositionWithAffinity::~PositionWithAffinity()
 {
 }
 
-void PositionWithAffinity::trace(Visitor* visitor)
-{
-    visitor->trace(m_position);
-}
-
 } // namespace blink

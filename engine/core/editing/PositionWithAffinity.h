@@ -20,8 +20,6 @@ public:
     EAffinity affinity() const { return m_affinity; }
     const Position& position() const { return m_position; }
 
-    void trace(Visitor*);
-
 private:
     Position m_position;
     EAffinity m_affinity;

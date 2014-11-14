@@ -101,8 +101,6 @@ public:
     bool isInline() const { return m_isInlineStylesheet; }
     TextPosition startPositionInSource() const { return m_startPosition; }
 
-    virtual void trace(Visitor*) override;
-
 private:
     CSSStyleSheet(PassRefPtr<StyleSheetContents>);
     CSSStyleSheet(PassRefPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);

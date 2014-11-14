@@ -45,7 +45,6 @@ public:
 #endif
     virtual bool isSync() const = 0;
     virtual Element* link() = 0;
-    virtual void trace(Visitor*) { }
 };
 
 } // namespace blink

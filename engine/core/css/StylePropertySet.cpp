@@ -112,14 +112,6 @@ int ImmutableStylePropertySet::findPropertyIndex(CSSPropertyID propertyID) const
     return -1;
 }
 
-void ImmutableStylePropertySet::traceAfterDispatch(Visitor* visitor)
-{
-    const RawPtr<CSSValue>* values = valueArray();
-    for (unsigned i = 0; i < m_arraySize; i++)
-        visitor->trace(values[i]);
-    StylePropertySet::traceAfterDispatch(visitor);
-}
-
 MutableStylePropertySet::MutableStylePropertySet(const StylePropertySet& other)
     : StylePropertySet(other.cssParserMode())
 {
@@ -148,24 +140,6 @@ PassRefPtr<CSSValue> StylePropertySet::getPropertyCSSValue(CSSPropertyID propert
         return nullptr;
     return propertyAt(foundPropertyIndex).value();
 }
-
-void StylePropertySet::trace(Visitor* visitor)
-{
-    if (m_isMutable)
-        toMutableStylePropertySet(this)->traceAfterDispatch(visitor);
-    else
-        toImmutableStylePropertySet(this)->traceAfterDispatch(visitor);
-}
-
-#if ENABLE(OILPAN)
-void StylePropertySet::finalizeGarbageCollectedObject()
-{
-    if (m_isMutable)
-        toMutableStylePropertySet(this)->~MutableStylePropertySet();
-    else
-        toImmutableStylePropertySet(this)->~ImmutableStylePropertySet();
-}
-#endif
 
 bool MutableStylePropertySet::removeShorthandProperty(CSSPropertyID propertyID)
 {
@@ -547,13 +521,6 @@ int MutableStylePropertySet::findPropertyIndex(CSSPropertyID propertyID) const
     }
 
     return -1;
-}
-
-void MutableStylePropertySet::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_cssomWrapper);
-    visitor->trace(m_propertyVector);
-    StylePropertySet::traceAfterDispatch(visitor);
 }
 
 unsigned StylePropertySet::averageSizeInBytes()

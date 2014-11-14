@@ -45,8 +45,6 @@ public:
     }
     ClipPathOperation* clipPathOperation() const { return m_operation.get(); }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;

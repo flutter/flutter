@@ -170,9 +170,4 @@ void AnimationNodeTiming::setEasing(String easing)
     m_parent->updateSpecifiedTiming(timing);
 }
 
-void AnimationNodeTiming::trace(Visitor* visitor)
-{
-    visitor->trace(m_parent);
-}
-
 } // namespace blink

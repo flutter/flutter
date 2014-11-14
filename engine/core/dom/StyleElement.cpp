@@ -164,9 +164,4 @@ void StyleElement::createSheet(Element* e, const String& text)
     document.styleResolverMayHaveChanged();
 }
 
-void StyleElement::trace(Visitor* visitor)
-{
-    visitor->trace(m_sheet);
-}
-
 }

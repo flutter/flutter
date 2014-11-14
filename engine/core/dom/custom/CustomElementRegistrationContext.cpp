@@ -144,9 +144,4 @@ void CustomElementRegistrationContext::setTypeExtension(Element* element, const 
     context->didGiveTypeExtension(element, type);
 }
 
-void CustomElementRegistrationContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_candidates);
-}
-
 } // namespace blink

@@ -53,16 +53,6 @@ public:
     {
     }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_target);
-        visitor->trace(m_addedNodes);
-        visitor->trace(m_removedNodes);
-        visitor->trace(m_previousSibling);
-        visitor->trace(m_nextSibling);
-        MutationRecord::trace(visitor);
-    }
-
 private:
     virtual const AtomicString& type() override;
     virtual Node* target() override { return m_target.get(); }
@@ -84,14 +74,6 @@ public:
         : m_target(target)
         , m_oldValue(oldValue)
     {
-    }
-
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_target);
-        visitor->trace(m_addedNodes);
-        visitor->trace(m_removedNodes);
-        MutationRecord::trace(visitor);
     }
 
 private:
@@ -144,12 +126,6 @@ public:
     MutationRecordWithNullOldValue(PassRefPtr<MutationRecord> record)
         : m_record(record)
     {
-    }
-
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_record);
-        MutationRecord::trace(visitor);
     }
 
 private:

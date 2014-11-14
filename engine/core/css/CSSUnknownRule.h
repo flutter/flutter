@@ -34,7 +34,6 @@ public:
     virtual CSSRule::Type type() const override { return UNKNOWN_RULE; }
     virtual String cssText() const override { return String(); }
     virtual void reattach(StyleRuleBase*) override { }
-    virtual void trace(Visitor* visitor) override { CSSRule::trace(visitor); }
 };
 
 } // namespace blink

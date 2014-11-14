@@ -91,12 +91,6 @@ RenderBlock::RenderBlock(ContainerNode* node)
     // By default, subclasses do not have inline children.
 }
 
-void RenderBlock::trace(Visitor* visitor)
-{
-    visitor->trace(m_children);
-    RenderBox::trace(visitor);
-}
-
 static void removeBlockFromDescendantAndContainerMaps(RenderBlock* block, TrackedDescendantsMap*& descendantMap, TrackedContainerMap*& containerMap)
 {
     if (OwnPtr<TrackedRendererListHashSet> descendantSet = descendantMap->take(block)) {

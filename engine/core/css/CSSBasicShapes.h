@@ -55,8 +55,6 @@ public:
     CSSPrimitiveValue* referenceBox() const { return m_referenceBox.get(); }
     void setReferenceBox(PassRefPtr<CSSPrimitiveValue> referenceBox) { m_referenceBox = referenceBox; }
 
-    virtual void trace(Visitor* visitor) { visitor->trace(m_referenceBox); }
-
 protected:
     CSSBasicShape() { }
     RefPtr<CSSPrimitiveValue> m_referenceBox;
@@ -77,8 +75,6 @@ public:
     void setCenterX(PassRefPtr<CSSPrimitiveValue> centerX) { m_centerX = centerX; }
     void setCenterY(PassRefPtr<CSSPrimitiveValue> centerY) { m_centerY = centerY; }
     void setRadius(PassRefPtr<CSSPrimitiveValue> radius) { m_radius = radius; }
-
-    virtual void trace(Visitor*);
 
 private:
     CSSBasicShapeCircle() { }
@@ -105,8 +101,6 @@ public:
     void setCenterY(PassRefPtr<CSSPrimitiveValue> centerY) { m_centerY = centerY; }
     void setRadiusX(PassRefPtr<CSSPrimitiveValue> radiusX) { m_radiusX = radiusX; }
     void setRadiusY(PassRefPtr<CSSPrimitiveValue> radiusY) { m_radiusY = radiusY; }
-
-    virtual void trace(Visitor*);
 
 private:
     CSSBasicShapeEllipse() { }
@@ -137,8 +131,6 @@ public:
     virtual Type type() const override { return CSSBasicShapePolygonType; }
     virtual String cssText() const override;
     virtual bool equals(const CSSBasicShape&) const override;
-
-    virtual void trace(Visitor*);
 
 private:
     CSSBasicShapePolygon()
@@ -201,8 +193,6 @@ public:
     virtual Type type() const override { return CSSBasicShapeInsetType; }
     virtual String cssText() const override;
     virtual bool equals(const CSSBasicShape&) const override;
-
-    virtual void trace(Visitor*);
 
 private:
     CSSBasicShapeInset() { }

@@ -132,13 +132,4 @@ void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& colle
     }
 }
 
-void ScopedStyleResolver::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_scope);
-    visitor->trace(m_authorStyleSheets);
-    visitor->trace(m_keyframesRuleMap);
-#endif
-}
-
 } // namespace blink

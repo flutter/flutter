@@ -58,8 +58,6 @@ public:
     void viewportChanged();
     bool evaluate(const MediaQuerySet*);
 
-    void trace(Visitor*);
-
 private:
     explicit MediaQueryMatcher(Document&);
 

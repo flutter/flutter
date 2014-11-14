@@ -50,8 +50,6 @@ public:
 
     virtual ~CustomElementMicrotaskResolutionStep();
 
-    virtual void trace(Visitor*) override;
-
 private:
     CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
 

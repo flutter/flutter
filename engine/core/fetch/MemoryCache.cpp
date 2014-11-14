@@ -63,20 +63,6 @@ PassOwnPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtr<MemoryCache> cac
     return oldCache.release();
 }
 
-void MemoryCacheEntry::trace(Visitor* visitor)
-{
-    visitor->trace(m_previousInLiveResourcesList);
-    visitor->trace(m_nextInLiveResourcesList);
-    visitor->trace(m_previousInAllResourcesList);
-    visitor->trace(m_nextInAllResourcesList);
-}
-
-void MemoryCacheLRUList::trace(Visitor* visitor)
-{
-    visitor->trace(m_head);
-    visitor->trace(m_tail);
-}
-
 inline MemoryCache::MemoryCache()
     : m_inPruneResources(false)
     , m_maxPruneDeferralDelay(cMaxPruneDeferralDelay)
@@ -105,17 +91,6 @@ PassOwnPtr<MemoryCache> MemoryCache::create()
 
 MemoryCache::~MemoryCache()
 {
-}
-
-void MemoryCache::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_allResources);
-    for (size_t i = 0; i < WTF_ARRAY_LENGTH(m_liveDecodedResources); ++i)
-        visitor->trace(m_liveDecodedResources[i]);
-    visitor->trace(m_resources);
-    visitor->trace(m_liveResources);
-#endif
 }
 
 KURL MemoryCache::removeFragmentIdentifierIfNeeded(const KURL& originalURL)

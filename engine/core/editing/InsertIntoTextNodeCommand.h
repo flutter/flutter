@@ -39,8 +39,6 @@ public:
         return adoptRef(new InsertIntoTextNodeCommand(node, offset, text));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     InsertIntoTextNodeCommand(PassRefPtr<Text> node, unsigned offset, const String& text);
 

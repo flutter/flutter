@@ -622,12 +622,6 @@ void CSSAnimations::AnimationEventDelegate::onEventCondition(const AnimationNode
     m_previousIteration = currentIteration;
 }
 
-void CSSAnimations::AnimationEventDelegate::trace(Visitor* visitor)
-{
-    visitor->trace(m_target);
-    AnimationNode::EventDelegate::trace(visitor);
-}
-
 void CSSAnimations::TransitionEventDelegate::onEventCondition(const AnimationNode* animationNode)
 {
     const AnimationNode::Phase currentPhase = animationNode->phase();
@@ -642,12 +636,6 @@ void CSSAnimations::TransitionEventDelegate::onEventCondition(const AnimationNod
     }
 
     m_previousPhase = currentPhase;
-}
-
-void CSSAnimations::TransitionEventDelegate::trace(Visitor* visitor)
-{
-    visitor->trace(m_target);
-    AnimationNode::EventDelegate::trace(visitor);
 }
 
 const StylePropertyShorthand& CSSAnimations::animatableProperties()
@@ -703,27 +691,6 @@ bool CSSAnimations::isAllowedAnimation(CSSPropertyID property)
     default:
         return true;
     }
-}
-
-void CSSAnimations::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_transitions);
-    visitor->trace(m_pendingUpdate);
-    visitor->trace(m_animations);
-    visitor->trace(m_previousActiveInterpolationsForAnimations);
-#endif
-}
-
-void CSSAnimationUpdate::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_newTransitions);
-    visitor->trace(m_activeInterpolationsForAnimations);
-    visitor->trace(m_activeInterpolationsForTransitions);
-    visitor->trace(m_newAnimations);
-    visitor->trace(m_cancelledAnimationPlayers);
-#endif
 }
 
 } // namespace blink

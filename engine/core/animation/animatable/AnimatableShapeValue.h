@@ -45,8 +45,6 @@ public:
     }
     ShapeValue* shapeValue() const { return m_shape.get(); }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;

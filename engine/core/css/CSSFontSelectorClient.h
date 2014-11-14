@@ -43,8 +43,6 @@ public:
     virtual ~CSSFontSelectorClient() { }
 
     virtual void fontsNeedUpdate(CSSFontSelector*) = 0;
-
-    virtual void trace(Visitor*) { }
 };
 
 } // namespace blink

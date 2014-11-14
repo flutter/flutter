@@ -207,9 +207,4 @@ v8::Handle<v8::Object> JavaScriptCallFrame::createExceptionDetails(v8::Handle<v8
     return exceptionDetails;
 }
 
-void JavaScriptCallFrame::trace(Visitor* visitor)
-{
-    visitor->trace(m_caller);
-}
-
 } // namespace blink

@@ -46,8 +46,6 @@ public:
     bool supports(const String& property, const String& value) const;
     bool supports(const String& conditionText) const;
 
-    void trace(Visitor*) { }
-
 private:
     DOMWindowCSS()
     {

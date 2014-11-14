@@ -37,7 +37,6 @@ class FontFaceSet;
 class FontFaceSetForEachCallback {
 public:
     virtual ~FontFaceSetForEachCallback() { }
-    virtual void trace(Visitor*) { }
     virtual bool handleItem(ScriptValue thisValue, FontFace*, FontFace*, FontFaceSet*) = 0;
     virtual bool handleItem(FontFace*, FontFace*, FontFaceSet*) = 0;
 };

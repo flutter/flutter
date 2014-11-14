@@ -28,8 +28,6 @@ public:
     }
     virtual PropertySet properties() const override;
 
-    virtual void trace(Visitor*) override;
-
     class PropertySpecificKeyframe : public Keyframe::PropertySpecificKeyframe {
     public:
         PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, CSSValue*, AnimationEffect::CompositeOperation);
@@ -41,8 +39,6 @@ public:
 
         virtual PassOwnPtr<Keyframe::PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const override final;
         virtual PassRefPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const override final;
-
-        virtual void trace(Visitor*) override;
 
     private:
         PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, CSSValue*);

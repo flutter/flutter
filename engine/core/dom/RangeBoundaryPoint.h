@@ -58,8 +58,6 @@ public:
     void invalidateOffset() const;
     void ensureOffsetIsValid() const;
 
-    void trace(Visitor*);
-
 private:
     static const int invalidOffset = -1;
 
@@ -180,12 +178,6 @@ inline void RangeBoundaryPoint::childBeforeWillBeRemoved()
 inline void RangeBoundaryPoint::invalidateOffset() const
 {
     m_offsetInContainer = invalidOffset;
-}
-
-inline void RangeBoundaryPoint::trace(Visitor* visitor)
-{
-    visitor->trace(m_containerNode);
-    visitor->trace(m_childBeforeBoundary);
 }
 
 inline bool operator==(const RangeBoundaryPoint& a, const RangeBoundaryPoint& b)

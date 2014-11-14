@@ -761,15 +761,6 @@ void VisibleSelection::didChange()
         m_changeObserver->didChangeVisibleSelection();
 }
 
-void VisibleSelection::trace(Visitor* visitor)
-{
-    visitor->trace(m_base);
-    visitor->trace(m_extent);
-    visitor->trace(m_start);
-    visitor->trace(m_end);
-    visitor->trace(m_changeObserver);
-}
-
 static bool isValidPosition(const Position& position)
 {
     if (!position.inDocument())

@@ -165,8 +165,6 @@ public:
     virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const;
     virtual void addToStyle(Element*, EditingStyle*) const;
 
-    virtual void trace(Visitor* visitor) { visitor->trace(m_primitiveValue); }
-
 protected:
     HTMLElementEquivalent(CSSPropertyID);
     HTMLElementEquivalent(CSSPropertyID, const HTMLQualifiedName& tagName);
@@ -218,8 +216,6 @@ public:
     virtual bool propertyExistsInStyle(const StylePropertySet*) const override;
     virtual bool valueIsPresentInStyle(HTMLElement*, StylePropertySet*) const override;
 
-    virtual void trace(Visitor* visitor) override { HTMLElementEquivalent::trace(visitor); }
-
 private:
     HTMLTextDecorationEquivalent(CSSValueID primitiveValue, const HTMLQualifiedName& tagName);
 };
@@ -261,8 +257,6 @@ public:
     virtual void addToStyle(Element*, EditingStyle*) const override;
     virtual PassRefPtr<CSSValue> attributeValueAsCSSValue(Element*) const;
     inline const QualifiedName& attributeName() const { return m_attrName; }
-
-    virtual void trace(Visitor* visitor) override { HTMLElementEquivalent::trace(visitor); }
 
 protected:
     HTMLAttributeEquivalent(CSSPropertyID, const HTMLQualifiedName& tagName, const QualifiedName& attrName);
@@ -1264,11 +1258,6 @@ WritingDirection EditingStyle::textDirectionForSelection(const VisibleSelection&
     }
     hasNestedOrMultipleEmbeddings = false;
     return foundDirection;
-}
-
-void EditingStyle::trace(Visitor* visitor)
-{
-    visitor->trace(m_mutableStyle);
 }
 
 static void reconcileTextDecorationProperties(MutableStylePropertySet* style)

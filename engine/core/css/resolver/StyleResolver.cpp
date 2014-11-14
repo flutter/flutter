@@ -1001,18 +1001,4 @@ bool StyleResolver::mediaQueryAffectedByViewportChange() const
     return false;
 }
 
-void StyleResolver::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_keyframesRuleMap);
-    visitor->trace(m_matchedPropertiesCache);
-    visitor->trace(m_viewportDependentMediaQueryResults);
-    visitor->trace(m_features);
-    visitor->trace(m_attributeRuleSet);
-    visitor->trace(m_styleSharingLists);
-    visitor->trace(m_pendingStyleSheets);
-    visitor->trace(m_document);
-#endif
-}
-
 } // namespace blink

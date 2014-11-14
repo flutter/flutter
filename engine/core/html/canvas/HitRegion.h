@@ -46,8 +46,6 @@ public:
     Element* control() const { return m_control.get(); }
     WindRule fillRule() const { return m_fillRule; }
 
-    void trace(Visitor*);
-
 private:
     explicit HitRegion(const HitRegionOptions&);
 
@@ -76,8 +74,6 @@ public:
     HitRegion* getHitRegionAtPoint(const LayoutPoint&) const;
 
     unsigned getHitRegionsCount() const;
-
-    void trace(Visitor*);
 
 private:
     HitRegionManager() { }

@@ -44,8 +44,6 @@ public:
     // Determines whether the observed ImageResource should have higher priority in the decoded resources cache.
     virtual bool requestsHighLiveResourceCachePriority() { return false; }
 
-    virtual void trace(Visitor*) { }
-
 protected:
     ImageLoaderClient() { }
 };
@@ -61,7 +59,6 @@ class ImageLoader : public ImageResourceClient {
 public:
     explicit ImageLoader(Element*);
     virtual ~ImageLoader();
-    void trace(Visitor*);
 
     enum LoadType {
         LoadNormally,

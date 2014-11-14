@@ -44,8 +44,6 @@ public:
     GLint rangeMax() const;
     GLint precision() const;
 
-    void trace(Visitor*) { }
-
 private:
     WebGLShaderPrecisionFormat(GLint rangeMin, GLint rangeMax, GLint precision);
 

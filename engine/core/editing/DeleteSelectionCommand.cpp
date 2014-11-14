@@ -673,23 +673,4 @@ bool DeleteSelectionCommand::preservesTypingStyle() const
     return false;
 }
 
-void DeleteSelectionCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_selectionToDelete);
-    visitor->trace(m_upstreamStart);
-    visitor->trace(m_downstreamStart);
-    visitor->trace(m_upstreamEnd);
-    visitor->trace(m_downstreamEnd);
-    visitor->trace(m_endingPosition);
-    visitor->trace(m_leadingWhitespace);
-    visitor->trace(m_trailingWhitespace);
-    visitor->trace(m_startBlock);
-    visitor->trace(m_endBlock);
-    visitor->trace(m_deleteIntoBlockquoteStyle);
-    visitor->trace(m_startRoot);
-    visitor->trace(m_endRoot);
-    visitor->trace(m_temporaryPlaceholder);
-    CompositeEditCommand::trace(visitor);
-}
-
 } // namespace blink

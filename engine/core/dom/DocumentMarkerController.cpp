@@ -491,13 +491,6 @@ Vector<IntRect> DocumentMarkerController::renderedRectsForMarkers(DocumentMarker
     return result;
 }
 
-void DocumentMarkerController::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_markers);
-#endif
-}
-
 void DocumentMarkerController::removeMarkers(Node* node, DocumentMarker::MarkerTypes markerTypes)
 {
     if (!possiblyHasMarkers(markerTypes))

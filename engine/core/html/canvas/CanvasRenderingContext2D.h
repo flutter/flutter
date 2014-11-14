@@ -234,8 +234,6 @@ public:
     void loseContext();
     void restoreContext();
 
-    virtual void trace(Visitor*) override;
-
 private:
     enum Direction {
         DirectionInherit,
@@ -253,8 +251,6 @@ private:
 
         // CSSFontSelectorClient implementation
         virtual void fontsNeedUpdate(CSSFontSelector*) override;
-
-        virtual void trace(Visitor*) override;
 
         unsigned m_unrealizedSaveCount;
 

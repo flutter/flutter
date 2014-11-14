@@ -37,8 +37,6 @@ public:
         return adoptRef(new RemoveNodePreservingChildrenCommand(node, shouldAssumeContentIsAlwaysEditable));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     RemoveNodePreservingChildrenCommand(PassRefPtr<Node>, ShouldAssumeContentIsAlwaysEditable);
 

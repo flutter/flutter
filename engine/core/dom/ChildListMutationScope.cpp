@@ -157,15 +157,4 @@ bool ChildListMutationAccumulator::isEmpty()
     return result;
 }
 
-void ChildListMutationAccumulator::trace(Visitor* visitor)
-{
-    visitor->trace(m_target);
-    visitor->trace(m_removedNodes);
-    visitor->trace(m_addedNodes);
-    visitor->trace(m_previousSibling);
-    visitor->trace(m_nextSibling);
-    visitor->trace(m_lastAdded);
-    visitor->trace(m_observers);
-}
-
 } // namespace blink

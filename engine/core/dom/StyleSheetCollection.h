@@ -59,8 +59,6 @@ public:
     void appendActiveStyleSheet(CSSStyleSheet*);
     void appendSheetForList(StyleSheet*);
 
-    virtual void trace(Visitor*);
-
 protected:
     Vector<RefPtr<StyleSheet> > m_styleSheetsForStyleSheetList;
     Vector<RefPtr<CSSStyleSheet> > m_activeAuthorStyleSheets;

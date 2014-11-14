@@ -36,14 +36,6 @@ PassOwnPtr<Keyframe::PropertySpecificKeyframe> AnimatableValueKeyframe::createPr
     return adoptPtr(new PropertySpecificKeyframe(offset(), &easing(), propertyValue(property), composite()));
 }
 
-void AnimatableValueKeyframe::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_propertyValues);
-#endif
-    Keyframe::trace(visitor);
-}
-
 AnimatableValueKeyframe::PropertySpecificKeyframe::PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, const AnimatableValue* value, AnimationEffect::CompositeOperation op)
     : Keyframe::PropertySpecificKeyframe(offset, easing, op)
     , m_value(const_cast<AnimatableValue*>(value))
@@ -71,12 +63,6 @@ PassRefPtr<Interpolation> AnimatableValueKeyframe::PropertySpecificKeyframe::cre
 PassOwnPtr<Keyframe::PropertySpecificKeyframe> AnimatableValueKeyframe::PropertySpecificKeyframe::neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const
 {
     return adoptPtr(new AnimatableValueKeyframe::PropertySpecificKeyframe(offset, easing, AnimatableValue::neutralValue(), AnimationEffect::CompositeAdd));
-}
-
-void AnimatableValueKeyframe::PropertySpecificKeyframe::trace(Visitor* visitor)
-{
-    visitor->trace(m_value);
-    Keyframe::PropertySpecificKeyframe::trace(visitor);
 }
 
 }

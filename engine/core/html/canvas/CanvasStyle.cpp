@@ -272,10 +272,4 @@ void CanvasStyle::applyFillColor(GraphicsContext* context)
     }
 }
 
-void CanvasStyle::trace(Visitor* visitor)
-{
-    visitor->trace(m_gradient);
-    visitor->trace(m_pattern);
-}
-
 }

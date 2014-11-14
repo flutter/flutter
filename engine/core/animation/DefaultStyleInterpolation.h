@@ -22,13 +22,6 @@ public:
         StyleBuilder::applyProperty(m_id, state, toInterpolableBool(m_cachedValue.get())->value() ? m_endCSSValue.get() : m_startCSSValue.get());
     }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        StyleInterpolation::trace(visitor);
-        visitor->trace(m_startCSSValue);
-        visitor->trace(m_endCSSValue);
-    }
-
 private:
     DefaultStyleInterpolation(CSSValue* start, CSSValue* end, CSSPropertyID id)
         : StyleInterpolation(InterpolableBool::create(false), InterpolableBool::create(true), id)

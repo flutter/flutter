@@ -55,8 +55,6 @@ public:
 
     virtual Element* element() override { return m_element; }
 
-    virtual void trace(Visitor*) override;
-
 private:
     explicit ClassList(Element*);
 

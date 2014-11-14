@@ -41,7 +41,6 @@ public:
     typedef HashSet<RefPtr<ResourceLoader> > SetType;
 
     static PassOwnPtr<ResourceLoaderSet> create();
-    void trace(Visitor*);
 
     void add(const RefPtr<ResourceLoader>& loader) { m_set.add(loader); }
     void remove(const RefPtr<ResourceLoader>& loader) { m_set.remove(loader); }

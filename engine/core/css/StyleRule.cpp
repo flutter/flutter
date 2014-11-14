@@ -48,64 +48,6 @@ PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSRule* parentRule) const
     return createCSSOMWrapper(0, parentRule);
 }
 
-void StyleRuleBase::trace(Visitor* visitor)
-{
-    switch (type()) {
-    case Style:
-        toStyleRule(this)->traceAfterDispatch(visitor);
-        return;
-    case FontFace:
-        toStyleRuleFontFace(this)->traceAfterDispatch(visitor);
-        return;
-    case Media:
-        toStyleRuleMedia(this)->traceAfterDispatch(visitor);
-        return;
-    case Supports:
-        toStyleRuleSupports(this)->traceAfterDispatch(visitor);
-        return;
-    case Keyframes:
-        toStyleRuleKeyframes(this)->traceAfterDispatch(visitor);
-        return;
-    case Filter:
-        toStyleRuleFilter(this)->traceAfterDispatch(visitor);
-        return;
-    case Unknown:
-    case Keyframe:
-        ASSERT_NOT_REACHED();
-        return;
-    }
-    ASSERT_NOT_REACHED();
-}
-
-void StyleRuleBase::finalizeGarbageCollectedObject()
-{
-    switch (type()) {
-    case Style:
-        toStyleRule(this)->~StyleRule();
-        return;
-    case FontFace:
-        toStyleRuleFontFace(this)->~StyleRuleFontFace();
-        return;
-    case Media:
-        toStyleRuleMedia(this)->~StyleRuleMedia();
-        return;
-    case Supports:
-        toStyleRuleSupports(this)->~StyleRuleSupports();
-        return;
-    case Keyframes:
-        toStyleRuleKeyframes(this)->~StyleRuleKeyframes();
-        return;
-    case Filter:
-        toStyleRuleFilter(this)->~StyleRuleFilter();
-        return;
-    case Unknown:
-    case Keyframe:
-        ASSERT_NOT_REACHED();
-        return;
-    }
-    ASSERT_NOT_REACHED();
-}
-
 void StyleRuleBase::destroy()
 {
     switch (type()) {
@@ -225,12 +167,6 @@ void StyleRule::setProperties(PassRefPtr<StylePropertySet> properties)
     m_properties = properties;
 }
 
-void StyleRule::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_properties);
-    StyleRuleBase::traceAfterDispatch(visitor);
-}
-
 StyleRuleFontFace::StyleRuleFontFace()
     : StyleRuleBase(FontFace)
 {
@@ -258,12 +194,6 @@ void StyleRuleFontFace::setProperties(PassRefPtr<StylePropertySet> properties)
     m_properties = properties;
 }
 
-void StyleRuleFontFace::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_properties);
-    StyleRuleBase::traceAfterDispatch(visitor);
-}
-
 StyleRuleGroup::StyleRuleGroup(Type type, Vector<RefPtr<StyleRuleBase> >& adoptRule)
     : StyleRuleBase(type)
 {
@@ -288,12 +218,6 @@ void StyleRuleGroup::wrapperRemoveRule(unsigned index)
     m_childRules.remove(index);
 }
 
-void StyleRuleGroup::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_childRules);
-    StyleRuleBase::traceAfterDispatch(visitor);
-}
-
 StyleRuleMedia::StyleRuleMedia(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     : StyleRuleGroup(Media, adoptRules)
     , m_mediaQueries(media)
@@ -305,12 +229,6 @@ StyleRuleMedia::StyleRuleMedia(const StyleRuleMedia& o)
 {
     if (o.m_mediaQueries)
         m_mediaQueries = o.m_mediaQueries->copy();
-}
-
-void StyleRuleMedia::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_mediaQueries);
-    StyleRuleGroup::traceAfterDispatch(visitor);
 }
 
 StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules)
@@ -354,12 +272,6 @@ MutableStylePropertySet& StyleRuleFilter::mutableProperties()
 void StyleRuleFilter::setProperties(PassRefPtr<StylePropertySet> properties)
 {
     m_properties = properties;
-}
-
-void StyleRuleFilter::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_properties);
-    StyleRuleBase::traceAfterDispatch(visitor);
 }
 
 } // namespace blink

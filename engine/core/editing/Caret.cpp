@@ -109,11 +109,6 @@ void DragCaretController::nodeWillBeRemoved(Node& node)
     clear();
 }
 
-void DragCaretController::trace(Visitor* visitor)
-{
-    visitor->trace(m_position);
-}
-
 void CaretBase::clearCaretRect()
 {
     m_caretLocalRect = LayoutRect();

@@ -132,10 +132,4 @@ void CompositorPendingAnimations::notifyCompositorAnimationStarted(double monoto
     m_waitingForCompositorAnimationStart.clear();
 }
 
-void CompositorPendingAnimations::trace(Visitor* visitor)
-{
-    visitor->trace(m_pending);
-    visitor->trace(m_waitingForCompositorAnimationStart);
-}
-
 } // namespace

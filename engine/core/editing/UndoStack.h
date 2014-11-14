@@ -53,8 +53,6 @@ public:
     void undo();
     void redo();
 
-    void trace(Visitor*);
-
 private:
     UndoStack();
 

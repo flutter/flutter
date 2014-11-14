@@ -17,8 +17,6 @@ class CSSTimingData {
 public:
     ~CSSTimingData() { }
 
-    void trace(Visitor*) { }
-
     const Vector<double>& delayList() const { return m_delayList; }
     const Vector<double>& durationList() const { return m_durationList; }
     const Vector<RefPtr<TimingFunction> >& timingFunctionList() const { return m_timingFunctionList; }

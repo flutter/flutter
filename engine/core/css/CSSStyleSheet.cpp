@@ -45,12 +45,6 @@ public:
         return adoptPtr(new StyleSheetCSSRuleList(sheet));
     }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_styleSheet);
-        CSSRuleList::trace(visitor);
-    }
-
 private:
     StyleSheetCSSRuleList(CSSStyleSheet* sheet) : m_styleSheet(sheet) { }
 
@@ -345,17 +339,6 @@ Document* CSSStyleSheet::ownerDocument() const
 void CSSStyleSheet::clearChildRuleCSSOMWrappers()
 {
     m_childRuleCSSOMWrappers.clear();
-}
-
-void CSSStyleSheet::trace(Visitor* visitor)
-{
-    visitor->trace(m_contents);
-    visitor->trace(m_mediaQueries);
-    visitor->trace(m_ownerNode);
-    visitor->trace(m_mediaCSSOMWrapper);
-    visitor->trace(m_childRuleCSSOMWrappers);
-    visitor->trace(m_ruleListCSSOMWrapper);
-    StyleSheet::trace(visitor);
 }
 
 } // namespace blink

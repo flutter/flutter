@@ -46,8 +46,6 @@ public:
 
     virtual Node* virtualOwnerNode() const { return 0; }
 
-    virtual void trace(Visitor*) { }
-
 protected:
     NodeList()
     {

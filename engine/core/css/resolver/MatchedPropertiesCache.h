@@ -46,7 +46,6 @@ public:
 
     void set(const RenderStyle*, const RenderStyle* parentStyle, const MatchResult&);
     void clear();
-    void trace(Visitor* visitor) { visitor->trace(matchedProperties); }
 };
 
 class MatchedPropertiesCache {
@@ -62,8 +61,6 @@ public:
     void clearViewportDependent();
 
     static bool isCacheable(const Element*, const RenderStyle*, const RenderStyle* parentStyle);
-
-    void trace(Visitor*);
 
 private:
     // Every N additions to the matched declaration cache trigger a sweep where entries holding

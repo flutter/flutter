@@ -53,11 +53,4 @@ void Interpolation::interpolate(int iteration, double fraction) const
     }
 }
 
-void Interpolation::trace(Visitor* visitor)
-{
-    visitor->trace(m_start);
-    visitor->trace(m_end);
-    visitor->trace(m_cachedValue);
-}
-
 }

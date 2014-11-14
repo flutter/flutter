@@ -144,13 +144,4 @@ void MediaQueryMatcher::viewportChanged()
     m_document->enqueueMediaQueryChangeListeners(listenersToNotify);
 }
 
-void MediaQueryMatcher::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_document);
-    visitor->trace(m_mediaLists);
-    visitor->trace(m_viewportListeners);
-#endif
-}
-
 }

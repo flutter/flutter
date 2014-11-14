@@ -53,12 +53,6 @@ public:
     PassRefPtr<CSSValue> toCSSValue() const { return m_value; }
     CSSValueID toCSSValueID() const { return toCSSPrimitiveValue(m_value.get())->getValueID(); }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_value);
-        AnimatableValue::trace(visitor);
-    }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue* value, double fraction) const override
     {

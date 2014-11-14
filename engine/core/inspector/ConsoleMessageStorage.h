@@ -35,8 +35,6 @@ public:
 
     int expiredCount() const;
 
-    void trace(Visitor*);
-
 private:
     explicit ConsoleMessageStorage(ExecutionContext*);
     explicit ConsoleMessageStorage(LocalFrame*);

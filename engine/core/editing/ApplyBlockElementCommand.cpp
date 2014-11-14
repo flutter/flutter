@@ -238,10 +238,4 @@ PassRefPtr<HTMLElement> ApplyBlockElementCommand::createBlockElement() const
     return element.release();
 }
 
-void ApplyBlockElementCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_endOfLastParagraph);
-    CompositeEditCommand::trace(visitor);
-}
-
 }

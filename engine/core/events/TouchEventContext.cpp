@@ -56,11 +56,4 @@ void TouchEventContext::handleLocalEvents(Event* event) const
     touchEvent->setChangedTouches(m_changedTouches);
 }
 
-void TouchEventContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_touches);
-    visitor->trace(m_targetTouches);
-    visitor->trace(m_changedTouches);
-}
-
 }

@@ -109,8 +109,6 @@ private:
 
         DocumentFragment* fragment() const { return m_fragment; }
 
-        void trace(Visitor*);
-
     private:
         RawPtr<DocumentFragment> m_fragment;
     };

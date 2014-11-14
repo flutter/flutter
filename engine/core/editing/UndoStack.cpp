@@ -120,10 +120,4 @@ void UndoStack::redo()
     }
 }
 
-void UndoStack::trace(Visitor* visitor)
-{
-    visitor->trace(m_undoStack);
-    visitor->trace(m_redoStack);
-}
-
 } // namespace blink

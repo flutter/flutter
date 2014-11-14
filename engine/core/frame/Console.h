@@ -54,8 +54,6 @@ public:
 
     PassRefPtr<MemoryInfo> memory() const;
 
-    virtual void trace(Visitor* visitor) override { ConsoleBase::trace(visitor); }
-
 protected:
     virtual ExecutionContext* context() override;
     virtual void reportMessageToConsole(PassRefPtr<ConsoleMessage>) override;

@@ -70,8 +70,6 @@ public:
 
     virtual String oldValue() { return String(); }
 
-    virtual void trace(Visitor*) { }
-
 };
 
 } // namespace blink

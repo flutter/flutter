@@ -117,11 +117,6 @@ bool CSSImageValue::knownToBeOpaque(const RenderObject* renderer) const
     return m_image ? m_image->knownToBeOpaque(renderer) : false;
 }
 
-void CSSImageValue::traceAfterDispatch(Visitor* visitor)
-{
-    CSSValue::traceAfterDispatch(visitor);
-}
-
 void CSSImageValue::reResolveURL(const Document& document)
 {
     KURL url = document.completeURL(m_relativeURL);

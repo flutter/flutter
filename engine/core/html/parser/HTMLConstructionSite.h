@@ -51,13 +51,6 @@ public:
     {
     }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(parent);
-        visitor->trace(nextChild);
-        visitor->trace(child);
-    }
-
     Operation operation;
     RefPtr<ContainerNode> parent;
     RefPtr<Node> nextChild;
@@ -90,7 +83,6 @@ public:
     explicit HTMLConstructionSite(Document*);
     explicit HTMLConstructionSite(DocumentFragment*);
     ~HTMLConstructionSite();
-    void trace(Visitor*);
 
     void detach();
 
@@ -193,8 +185,6 @@ private:
             ASSERT(!stringBuilder.isEmpty() || (whitespaceMode == WhitespaceUnknown));
             return stringBuilder.isEmpty();
         }
-
-        void trace(Visitor*);
 
         RefPtr<ContainerNode> parent;
         RefPtr<Node> nextChild;

@@ -58,8 +58,6 @@ public:
     void documentDidRemoveLastRef();
 #endif
 
-    void trace(Visitor*);
-
 private:
     enum ElementFlags {
         IsActiveFlag      = 1 ,

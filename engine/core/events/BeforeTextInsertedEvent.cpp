@@ -43,9 +43,4 @@ const AtomicString& BeforeTextInsertedEvent::interfaceName() const
     return EventNames::Event;
 }
 
-void BeforeTextInsertedEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
 }

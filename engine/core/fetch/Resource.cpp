@@ -153,13 +153,6 @@ void Resource::dispose()
 {
 }
 
-void Resource::trace(Visitor* visitor)
-{
-    visitor->trace(m_loader);
-    visitor->trace(m_resourceToRevalidate);
-    visitor->trace(m_proxyResource);
-}
-
 void Resource::failBeforeStarting()
 {
     WTF_LOG(ResourceLoading, "Cannot start loading '%s'", url().string().latin1().data());

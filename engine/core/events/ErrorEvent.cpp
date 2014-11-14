@@ -88,9 +88,4 @@ const AtomicString& ErrorEvent::interfaceName() const
     return EventNames::ErrorEvent;
 }
 
-void ErrorEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
 } // namespace blink

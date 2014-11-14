@@ -71,9 +71,6 @@ public:
 
     bool isUnique() const { return m_isUnique; }
 
-    void traceAfterDispatch(Visitor*);
-    void trace(Visitor*);
-
 protected:
     ElementData();
     explicit ElementData(unsigned arraySize);
@@ -116,8 +113,6 @@ public:
     explicit ShareableElementData(const UniqueElementData&);
     ~ShareableElementData();
 
-    void traceAfterDispatch(Visitor* visitor) { ElementData::traceAfterDispatch(visitor); }
-
     // Add support for placement new as ShareableElementData is not allocated
     // with a fixed size. Instead the allocated memory size is computed based on
     // the number of attributes. This requires us to use Heap::allocate directly
@@ -152,8 +147,6 @@ public:
     UniqueElementData();
     explicit UniqueElementData(const ShareableElementData&);
     explicit UniqueElementData(const UniqueElementData&);
-
-    void traceAfterDispatch(Visitor*);
 
     AttributeVector m_attributeVector;
 };

@@ -89,11 +89,6 @@ public:
     struct NewAnimation {
         ALLOW_ONLY_INLINE_ALLOCATION();
     public:
-        void trace(Visitor* visitor)
-        {
-            visitor->trace(animation);
-        }
-
         AtomicString name;
         RefPtr<InertAnimation> animation;
     };
@@ -105,13 +100,6 @@ public:
     struct NewTransition {
         ALLOW_ONLY_INLINE_ALLOCATION();
     public:
-        void trace(Visitor* visitor)
-        {
-            visitor->trace(from);
-            visitor->trace(to);
-            visitor->trace(animation);
-        }
-
         CSSPropertyID id;
         CSSPropertyID eventId;
         RawPtr<const AnimatableValue> from;
@@ -139,8 +127,6 @@ public:
             && m_activeInterpolationsForAnimations.isEmpty()
             && m_activeInterpolationsForTransitions.isEmpty();
     }
-
-    void trace(Visitor*);
 
 private:
     // Order is significant since it defines the order in which new animations
@@ -180,19 +166,10 @@ public:
     bool isEmpty() const { return m_animations.isEmpty() && m_transitions.isEmpty() && !m_pendingUpdate; }
     void cancel();
 
-    void trace(Visitor*);
-
 private:
     struct RunningTransition {
         ALLOW_ONLY_INLINE_ALLOCATION();
     public:
-        void trace(Visitor* visitor)
-        {
-            visitor->trace(from);
-            visitor->trace(to);
-            visitor->trace(player);
-        }
-
         RefPtr<AnimationPlayer> player;
         RawPtr<const AnimatableValue> from;
         RawPtr<const AnimatableValue> to;
@@ -225,7 +202,6 @@ private:
         {
         }
         virtual void onEventCondition(const AnimationNode*) override;
-        virtual void trace(Visitor*) override;
 
     private:
         void maybeDispatch(Document::ListenerType, const AtomicString& eventName, double elapsedTime);
@@ -244,7 +220,6 @@ private:
         {
         }
         virtual void onEventCondition(const AnimationNode*) override;
-        virtual void trace(Visitor*) override;
 
     private:
         RawPtr<Element> m_target;

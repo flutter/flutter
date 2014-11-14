@@ -41,7 +41,6 @@ class RenderView final : public RenderBlockFlow {
 public:
     explicit RenderView(Document*);
     virtual ~RenderView();
-    virtual void trace(Visitor*) override;
 
     bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);

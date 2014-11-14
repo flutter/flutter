@@ -44,8 +44,6 @@ public:
     virtual void adjustDrawRects(FloatRect* srcRect, FloatRect* dstRect) const override;
     virtual FloatSize sourceSize() const override;
 
-    virtual void trace(Visitor*);
-
 private:
     ImageBitmap(HTMLImageElement*, const IntRect&);
     ImageBitmap(HTMLCanvasElement*, const IntRect&);

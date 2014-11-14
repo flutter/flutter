@@ -66,8 +66,6 @@ namespace blink {
         bool isEquivalentRGBA(float r, float g, float b, float a) const;
         bool isEquivalentCMYKA(float c, float m, float y, float k, float a) const;
 
-        void trace(Visitor*);
-
     private:
         enum Type { RGBA, CMYKA, Gradient, ImagePattern, CurrentColor, CurrentColorWithOverrideAlpha };
 

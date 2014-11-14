@@ -45,8 +45,6 @@ public:
     }
     ShadowList* shadowList() const { return m_shadowList.get(); }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 

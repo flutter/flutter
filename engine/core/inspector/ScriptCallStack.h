@@ -54,8 +54,6 @@ public:
     PassRefPtr<ScriptAsyncCallStack> asyncCallStack() const;
     void setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack>);
 
-    void trace(Visitor*);
-
 private:
     explicit ScriptCallStack(Vector<ScriptCallFrame>&);
 

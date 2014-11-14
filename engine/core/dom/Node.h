@@ -98,10 +98,7 @@ protected:
         : m_renderer(renderer)
     { }
 
-protected:
-    // Oilpan: This member is traced in NodeRareData.
-    // FIXME: Can we add traceAfterDispatch and finalizeGarbageCollectedObject
-    // to NodeRareDataBase, and make m_renderer Member<>?
+private:
     RenderObject* m_renderer;
 };
 

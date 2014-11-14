@@ -48,13 +48,6 @@ GenericEventQueue::~GenericEventQueue()
 {
 }
 
-void GenericEventQueue::trace(Visitor* visitor)
-{
-    visitor->trace(m_owner);
-    visitor->trace(m_pendingEvents);
-    EventQueue::trace(visitor);
-}
-
 bool GenericEventQueue::enqueueEvent(PassRefPtr<Event> event)
 {
     if (m_isClosed)

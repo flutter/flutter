@@ -53,8 +53,6 @@ public:
 
     virtual void doApply() = 0;
 
-    virtual void trace(Visitor*);
-
 protected:
     explicit EditCommand(Document&);
     EditCommand(Document*, const VisibleSelection&, const VisibleSelection&);

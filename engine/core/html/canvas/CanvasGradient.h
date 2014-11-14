@@ -54,8 +54,6 @@ public:
 
     void addColorStop(float value, const String& color, ExceptionState&);
 
-    void trace(Visitor*) { }
-
 private:
     CanvasGradient(const FloatPoint& p0, const FloatPoint& p1);
     CanvasGradient(const FloatPoint& p0, float r0, const FloatPoint& p1, float r1);

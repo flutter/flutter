@@ -177,10 +177,4 @@ void InputMethodContext::dispatchCandidateWindowHideEvent()
     dispatchEvent(Event::create(EventTypeNames::candidatewindowhide));
 }
 
-void InputMethodContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_element);
-    EventTargetWithInlineData::trace(visitor);
-}
-
 } // namespace blink

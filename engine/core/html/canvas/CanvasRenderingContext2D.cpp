@@ -161,16 +161,6 @@ void CanvasRenderingContext2D::restoreContext()
     }
 }
 
-void CanvasRenderingContext2D::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_stateStack);
-    visitor->trace(m_fetchedFonts);
-    visitor->trace(m_hitRegionManager);
-#endif
-    CanvasRenderingContext::trace(visitor);
-}
-
 void CanvasRenderingContext2D::dispatchContextLostEvent(Timer<CanvasRenderingContext2D>*)
 {
     if (contextLostRestoredEventsEnabled()) {
@@ -352,13 +342,6 @@ void CanvasRenderingContext2D::State::fontsNeedUpdate(CSSFontSelector* fontSelec
     ASSERT(m_realizedFont);
 
     m_font.update(fontSelector);
-}
-
-void CanvasRenderingContext2D::State::trace(Visitor* visitor)
-{
-    visitor->trace(m_strokeStyle);
-    visitor->trace(m_fillStyle);
-    CSSFontSelectorClient::trace(visitor);
 }
 
 void CanvasRenderingContext2D::realizeSaves(GraphicsContext* context)

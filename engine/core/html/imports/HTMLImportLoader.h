@@ -93,8 +93,6 @@ public:
 
     PassRefPtr<CustomElementSyncMicrotaskQueue> microtaskQueue() const;
 
-    virtual void trace(Visitor*);
-
 private:
     HTMLImportLoader(HTMLImportsController*);
 

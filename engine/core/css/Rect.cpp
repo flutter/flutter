@@ -9,12 +9,4 @@ namespace blink {
 
 DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(RectBase)
 
-void RectBase::trace(Visitor* visitor)
-{
-    visitor->trace(m_top);
-    visitor->trace(m_right);
-    visitor->trace(m_bottom);
-    visitor->trace(m_left);
-}
-
 }

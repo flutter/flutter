@@ -99,11 +99,4 @@ void HTMLImportTreeRoot::recalcTimerFired(Timer<HTMLImportTreeRoot>*)
     } while (m_recalcTimer.isActive());
 }
 
-void HTMLImportTreeRoot::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-    visitor->trace(m_imports);
-    HTMLImport::trace(visitor);
-}
-
 }

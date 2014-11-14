@@ -38,9 +38,4 @@ WebGLExtension::~WebGLExtension()
 {
 }
 
-void WebGLExtension::trace(Visitor* visitor)
-{
-    visitor->trace(m_context);
-}
-
 } // namespace blink

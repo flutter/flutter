@@ -62,8 +62,6 @@ public:
             && m_identicalValuesPolicy == other.m_identicalValuesPolicy;
     }
 
-    void trace(Visitor*);
-
 private:
     Pair()
         : m_first(nullptr)

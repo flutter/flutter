@@ -504,11 +504,6 @@ public:
 
     virtual void onContextLost() { m_context->forceLostContext(WebGLRenderingContextBase::RealLostContext, WebGLRenderingContextBase::Auto); }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_context);
-    }
-
 private:
     explicit WebGLRenderingContextLostCallback(WebGLRenderingContextBase* context)
         : m_context(context) { }
@@ -530,11 +525,6 @@ public:
     {
         if (m_context->m_synthesizedErrorsToConsole)
             m_context->printGLErrorToConsole(message);
-    }
-
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_context);
     }
 
 private:
@@ -5610,34 +5600,6 @@ void WebGLRenderingContextBase::findNewMaxNonDefaultTextureUnit()
         }
     }
     m_onePlusMaxNonDefaultTextureUnit = 0;
-}
-
-void WebGLRenderingContextBase::TextureUnitState::trace(Visitor* visitor)
-{
-    visitor->trace(m_texture2DBinding);
-    visitor->trace(m_textureCubeMapBinding);
-}
-
-void WebGLRenderingContextBase::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_contextObjects);
-#endif
-    visitor->trace(m_contextLostCallbackAdapter);
-    visitor->trace(m_errorMessageCallbackAdapter);
-    visitor->trace(m_boundArrayBuffer);
-    visitor->trace(m_defaultVertexArrayObject);
-    visitor->trace(m_boundVertexArrayObject);
-    visitor->trace(m_vertexAttrib0Buffer);
-    visitor->trace(m_currentProgram);
-    visitor->trace(m_framebufferBinding);
-    visitor->trace(m_renderbufferBinding);
-    visitor->trace(m_textureUnits);
-    visitor->trace(m_blackTexture2D);
-    visitor->trace(m_blackTextureCubeMap);
-    visitor->trace(m_requestedAttributes);
-    visitor->trace(m_extensions);
-    CanvasRenderingContext::trace(visitor);
 }
 
 #if ENABLE(OILPAN)

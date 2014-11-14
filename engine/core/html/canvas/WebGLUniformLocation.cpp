@@ -60,9 +60,4 @@ GLint WebGLUniformLocation::location() const
     return m_location;
 }
 
-void WebGLUniformLocation::trace(Visitor* visitor)
-{
-    visitor->trace(m_program);
-}
-
 }

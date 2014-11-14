@@ -120,12 +120,6 @@ void PropertySetCSSStyleDeclaration::deref()
 }
 #endif
 
-void PropertySetCSSStyleDeclaration::trace(Visitor* visitor)
-{
-    visitor->trace(m_propertySet);
-    AbstractPropertySetCSSStyleDeclaration::trace(visitor);
-}
-
 unsigned AbstractPropertySetCSSStyleDeclaration::length() const
 {
     return propertySet().propertyCount();
@@ -286,14 +280,6 @@ bool AbstractPropertySetCSSStyleDeclaration::cssPropertyMatches(CSSPropertyID pr
     return propertySet().propertyMatches(propertyID, propertyValue);
 }
 
-void AbstractPropertySetCSSStyleDeclaration::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_cssomCSSValueClones);
-#endif
-    CSSStyleDeclaration::trace(visitor);
-}
-
 StyleRuleCSSStyleDeclaration::StyleRuleCSSStyleDeclaration(MutableStylePropertySet& propertySetArg, CSSRule* parentRule)
     : PropertySetCSSStyleDeclaration(propertySetArg)
 #if !ENABLE(OILPAN)
@@ -359,12 +345,6 @@ void StyleRuleCSSStyleDeclaration::reattach(MutableStylePropertySet& propertySet
 #endif
 }
 
-void StyleRuleCSSStyleDeclaration::trace(Visitor* visitor)
-{
-    visitor->trace(m_parentRule);
-    PropertySetCSSStyleDeclaration::trace(visitor);
-}
-
 MutableStylePropertySet& InlineCSSStyleDeclaration::propertySet() const
 {
     return m_parentElement->ensureMutableInlineStyle();
@@ -402,11 +382,5 @@ void InlineCSSStyleDeclaration::deref()
     m_parentElement->deref();
 }
 #endif
-
-void InlineCSSStyleDeclaration::trace(Visitor* visitor)
-{
-    visitor->trace(m_parentElement);
-    AbstractPropertySetCSSStyleDeclaration::trace(visitor);
-}
 
 } // namespace blink

@@ -54,8 +54,6 @@ public:
         return !m_context;
     }
 
-    virtual void trace(Visitor*);
-
 protected:
     explicit WebGLExtension(WebGLRenderingContextBase*);
 

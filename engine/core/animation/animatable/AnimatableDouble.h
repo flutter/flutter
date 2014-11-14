@@ -51,8 +51,6 @@ public:
 
     double toDouble() const { return m_number; }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;

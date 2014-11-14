@@ -46,12 +46,6 @@ public:
     }
     CSSValue* toCSSValue() const { return m_value.get(); }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_value);
-        AnimatableValue::trace(visitor);
-    }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
     virtual bool usesDefaultInterpolationWith(const AnimatableValue*) const override;

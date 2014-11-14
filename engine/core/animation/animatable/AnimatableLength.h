@@ -64,8 +64,6 @@ private:
     virtual AnimatableType type() const override { return TypeLength; }
     virtual bool equalTo(const AnimatableValue*) const override;
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
     double m_pixels;
     double m_percent;
     bool m_hasPixels;

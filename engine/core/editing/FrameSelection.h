@@ -210,8 +210,6 @@ public:
     // VisibleSelection::ChangeObserver interface.
     virtual void didChangeVisibleSelection() override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     explicit FrameSelection(LocalFrame*);
 

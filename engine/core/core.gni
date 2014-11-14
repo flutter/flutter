@@ -278,7 +278,6 @@ sky_core_files = [
   "css/MediaValuesCached.h",
   "css/MediaValuesDynamic.cpp",
   "css/MediaValuesDynamic.h",
-  "css/Pair.cpp",
   "css/Pair.h",
   "css/parser/BisonCSSParser.h",
   "css/parser/CSSParserIdioms.h",

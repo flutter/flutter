@@ -71,8 +71,6 @@ public:
     bool isOldValueRequested();
     void enqueueMutationRecord(PassRefPtr<MutationRecord>);
 
-    void trace(Visitor*);
-
 private:
     static PassOwnPtr<MutationObserverInterestGroup> createIfNeeded(Node& target, MutationObserver::MutationType, MutationRecordDeliveryOptions oldValueFlag, const QualifiedName* attributeName = 0);
     MutationObserverInterestGroup(HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>& observers, MutationRecordDeliveryOptions oldValueFlag);

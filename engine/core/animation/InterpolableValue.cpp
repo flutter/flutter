@@ -48,14 +48,6 @@ PassOwnPtr<InterpolableValue> InterpolableList::interpolate(const InterpolableVa
     return result.release();
 }
 
-void InterpolableList::trace(Visitor* visitor)
-{
-#if ENABLE_OILPAN
-    visitor->trace(m_values);
-#endif
-    InterpolableValue::trace(visitor);
-}
-
 PassOwnPtr<InterpolableValue> InterpolableAnimatableValue::interpolate(const InterpolableValue &other, const double percentage) const
 {
     const InterpolableAnimatableValue& otherValue = toInterpolableAnimatableValue(other);
@@ -64,12 +56,6 @@ PassOwnPtr<InterpolableValue> InterpolableAnimatableValue::interpolate(const Int
     if (percentage == 1)
         return create(otherValue.m_value);
     return create(AnimatableValue::interpolate(m_value.get(), otherValue.m_value.get(), percentage));
-}
-
-void InterpolableAnimatableValue::trace(Visitor* visitor)
-{
-    visitor->trace(m_value);
-    InterpolableValue::trace(visitor);
 }
 
 }

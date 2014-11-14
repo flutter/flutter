@@ -58,8 +58,6 @@ public:
 
     bool persisted() const { return m_persisted; }
 
-    virtual void trace(Visitor*) override;
-
 private:
     PageTransitionEvent();
     PageTransitionEvent(const AtomicString& type, bool persisted);

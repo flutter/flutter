@@ -227,12 +227,4 @@ void HTMLImportChild::showThis()
 }
 #endif
 
-void HTMLImportChild::trace(Visitor* visitor)
-{
-    visitor->trace(m_customElementMicrotaskStep);
-    visitor->trace(m_loader);
-    visitor->trace(m_client);
-    HTMLImport::trace(visitor);
-}
-
 } // namespace blink

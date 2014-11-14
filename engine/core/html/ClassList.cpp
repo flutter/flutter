@@ -66,10 +66,4 @@ const SpaceSplitString& ClassList::classNames() const
     return m_element->classNames();
 }
 
-void ClassList::trace(Visitor* visitor)
-{
-    visitor->trace(m_element);
-    DOMTokenList::trace(visitor);
-}
-
 } // namespace blink

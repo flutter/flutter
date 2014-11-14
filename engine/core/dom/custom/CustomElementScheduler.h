@@ -62,8 +62,6 @@ public:
     static void microtaskDispatcherDidFinish();
     static void callbackDispatcherDidFinish();
 
-    void trace(Visitor*);
-
 private:
     CustomElementScheduler() { }
 

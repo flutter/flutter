@@ -90,11 +90,6 @@ HTMLTreeBuilder::FragmentParsingContext::~FragmentParsingContext()
 {
 }
 
-void HTMLTreeBuilder::FragmentParsingContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_fragment);
-}
-
 PassRefPtr<Element> HTMLTreeBuilder::takeScriptToProcess(TextPosition& scriptStartPosition)
 {
     ASSERT(m_scriptToProcess);

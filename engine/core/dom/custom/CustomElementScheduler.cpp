@@ -156,11 +156,4 @@ CustomElementCallbackQueue& CustomElementScheduler::schedule(PassRefPtr<Element>
     return callbackQueue;
 }
 
-void CustomElementScheduler::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_elementCallbackQueueMap);
-#endif
-}
-
 } // namespace blink

@@ -50,8 +50,6 @@ public:
     virtual void clearOwnerNode() = 0;
     virtual KURL baseURL() const = 0;
     virtual bool isCSSStyleSheet() const { return false; }
-
-    virtual void trace(Visitor*) { }
 };
 
 } // namespace blink

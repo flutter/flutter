@@ -216,8 +216,6 @@ public:
     };
     friend class RevealSelectionScope;
 
-    void trace(Visitor*);
-
 private:
     LocalFrame& m_frame;
     RefPtr<CompositeEditCommand> m_lastEditCommand;

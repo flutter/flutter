@@ -60,8 +60,6 @@ public:
 
     PassOwnPtr<MediaQuery> copy() const { return adoptPtr(new MediaQuery(*this)); }
 
-    void trace(Visitor*);
-
 private:
     MediaQuery(const MediaQuery&);
 

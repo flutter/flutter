@@ -35,7 +35,6 @@ class StyleElement {
 public:
     StyleElement(Document*, bool createdByParser);
     virtual ~StyleElement();
-    virtual void trace(Visitor*);
 
 protected:
     virtual const AtomicString& type() const = 0;

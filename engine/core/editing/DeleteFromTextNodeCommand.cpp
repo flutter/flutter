@@ -68,10 +68,4 @@ void DeleteFromTextNodeCommand::doUnapply()
     m_node->insertData(m_offset, m_text, IGNORE_EXCEPTION, CharacterData::DeprecatedRecalcStyleImmediatlelyForEditing);
 }
 
-void DeleteFromTextNodeCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_node);
-    SimpleEditCommand::trace(visitor);
-}
-
 } // namespace blink

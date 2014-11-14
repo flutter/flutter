@@ -53,8 +53,6 @@ public:
     unsigned length() const;
     ClientRect* item(unsigned index);
 
-    void trace(Visitor*);
-
 private:
     ClientRectList();
     explicit ClientRectList(const Vector<FloatQuad>&);

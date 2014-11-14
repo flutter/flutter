@@ -94,8 +94,6 @@ public:
 
     void nodeWillBeRemoved(Node&);
 
-    void trace(Visitor*);
-
 private:
     DragCaretController();
 

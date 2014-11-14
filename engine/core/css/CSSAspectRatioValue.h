@@ -47,8 +47,6 @@ public:
 
     bool equals(const CSSAspectRatioValue&) const;
 
-    void traceAfterDispatch(Visitor* visitor) { CSSValue::traceAfterDispatch(visitor); }
-
 private:
     CSSAspectRatioValue(float numeratorValue, float denominatorValue)
         : CSSValue(AspectRatioClass)

@@ -71,8 +71,6 @@ public:
 
     virtual void preventDefault() override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     TouchEvent();
     TouchEvent(TouchList* touches, TouchList* targetTouches,

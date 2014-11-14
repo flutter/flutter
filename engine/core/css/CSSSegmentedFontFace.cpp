@@ -204,12 +204,4 @@ void CSSSegmentedFontFace::match(const String& text, Vector<RefPtr<FontFace> >& 
     }
 }
 
-void CSSSegmentedFontFace::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_fontSelector);
-    visitor->trace(m_fontFaces);
-#endif
-}
-
 }

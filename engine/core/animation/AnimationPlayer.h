@@ -146,8 +146,6 @@ public:
 
     virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     AnimationPlayer(ExecutionContext*, AnimationTimeline&, AnimationNode*);
     double sourceEnd() const;

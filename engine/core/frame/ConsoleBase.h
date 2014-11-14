@@ -74,8 +74,6 @@ public:
     void groupCollapsed(ScriptState*, PassRefPtr<ScriptArguments>);
     void groupEnd();
 
-    virtual void trace(Visitor*) { }
-
     virtual ~ConsoleBase();
 
 protected:

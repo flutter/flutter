@@ -60,8 +60,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 protected:
     ProgressEvent();
     ProgressEvent(const AtomicString& type, bool lengthComputable, unsigned long long loaded, unsigned long long total);

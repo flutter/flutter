@@ -48,8 +48,6 @@ public:
     };
 
     virtual Result process() = 0;
-
-    virtual void trace(Visitor*) { }
 };
 
 }

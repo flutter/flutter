@@ -184,12 +184,6 @@ Node* MouseEvent::fromElement() const
     return target() ? target()->toNode() : 0;
 }
 
-void MouseEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_relatedTarget);
-    MouseRelatedEvent::trace(visitor);
-}
-
 PassRefPtr<SimulatedMouseEvent> SimulatedMouseEvent::create(const AtomicString& eventType, PassRefPtr<AbstractView> view, PassRefPtr<Event> underlyingEvent)
 {
     return adoptRef(new SimulatedMouseEvent(eventType, view, underlyingEvent));
@@ -216,11 +210,6 @@ SimulatedMouseEvent::SimulatedMouseEvent(const AtomicString& eventType, PassRefP
         m_screenLocation = mouseEvent->screenLocation();
         initCoordinates(mouseEvent->clientLocation());
     }
-}
-
-void SimulatedMouseEvent::trace(Visitor* visitor)
-{
-    MouseEvent::trace(visitor);
 }
 
 PassRefPtr<MouseEventDispatchMediator> MouseEventDispatchMediator::create(PassRefPtr<MouseEvent> mouseEvent, MouseEventType mouseEventType)

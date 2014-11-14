@@ -93,10 +93,4 @@ void FontLoader::clearPendingFonts()
     m_fontsToBeginLoading.clear();
 }
 
-void FontLoader::trace(Visitor* visitor)
-{
-    visitor->trace(m_resourceFetcher);
-    visitor->trace(m_fontSelector);
-}
-
 } // namespace blink

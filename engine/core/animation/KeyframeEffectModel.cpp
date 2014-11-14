@@ -174,16 +174,6 @@ bool KeyframeEffectModelBase::isReplaceOnly()
     return true;
 }
 
-void KeyframeEffectModelBase::trace(Visitor* visitor)
-{
-    visitor->trace(m_keyframes);
-    visitor->trace(m_interpolationEffect);
-#if ENABLE_OILPAN
-    visitor->trace(m_keyframeGroups);
-#endif
-    AnimationEffect::trace(visitor);
-}
-
 Keyframe::PropertySpecificKeyframe::PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, AnimationEffect::CompositeOperation composite)
     : m_offset(offset)
     , m_easing(easing)
@@ -223,13 +213,6 @@ void KeyframeEffectModelBase::PropertySpecificKeyframeGroup::addSyntheticKeyfram
         m_keyframes.insert(0, m_keyframes.first()->neutralKeyframe(0, nullptr));
     if (m_keyframes.last()->offset() != 1.0)
         appendKeyframe(m_keyframes.last()->neutralKeyframe(1, nullptr));
-}
-
-void KeyframeEffectModelBase::PropertySpecificKeyframeGroup::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_keyframes);
-#endif
 }
 
 } // namespace

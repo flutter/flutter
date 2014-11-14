@@ -2478,10 +2478,4 @@ PassRefPtr<CSSValueList> CSSComputedStyleDeclaration::valuesForBackgroundShortha
     return list.release();
 }
 
-void CSSComputedStyleDeclaration::trace(Visitor* visitor)
-{
-    visitor->trace(m_node);
-    CSSStyleDeclaration::trace(visitor);
-}
-
 } // namespace blink

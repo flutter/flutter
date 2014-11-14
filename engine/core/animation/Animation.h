@@ -80,8 +80,6 @@ public:
     void cancelAnimationOnCompositor();
     void pauseAnimationForTestingOnCompositor(double pauseTime);
 
-    virtual void trace(Visitor*);
-
 protected:
     void applyEffects();
     void clearEffects();

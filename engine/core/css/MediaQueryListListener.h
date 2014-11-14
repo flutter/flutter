@@ -34,8 +34,6 @@ public:
     virtual ~MediaQueryListListener();
 
     virtual void notifyMediaQueryChanged() = 0;
-
-    virtual void trace(Visitor* visitor) { }
 protected:
     MediaQueryListListener();
 };

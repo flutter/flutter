@@ -49,8 +49,6 @@ public:
     bool equals(const CSSLineBoxContainValue& other) const { return m_value == other.m_value; }
     LineBoxContain value() const { return m_value; }
 
-    void traceAfterDispatch(Visitor* visitor) { CSSValue::traceAfterDispatch(visitor); }
-
 private:
     LineBoxContain m_value;
 

@@ -318,11 +318,4 @@ void InsertParagraphSeparatorCommand::doApply()
     setEndingSelection(VisibleSelection(firstPositionInNode(blockToInsert.get()), DOWNSTREAM, endingSelection().isDirectional()));
 }
 
-void InsertParagraphSeparatorCommand::trace(Visitor *visitor)
-{
-    visitor->trace(m_style);
-    CompositeEditCommand::trace(visitor);
-}
-
-
 } // namespace blink

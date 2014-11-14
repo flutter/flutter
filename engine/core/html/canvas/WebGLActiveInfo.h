@@ -45,8 +45,6 @@ public:
     GLenum type() const { return m_type; }
     GLint size() const { return m_size; }
 
-    void trace(Visitor*) { }
-
 private:
     WebGLActiveInfo(const String& name, GLenum type, GLint size)
         : m_name(name)

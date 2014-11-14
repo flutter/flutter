@@ -63,8 +63,6 @@ public:
     virtual const AtomicString& interfaceName() const override;
     virtual bool isFocusEvent() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     FocusEvent();
     FocusEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView>, int, EventTarget*);

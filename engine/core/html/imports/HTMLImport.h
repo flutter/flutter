@@ -119,8 +119,6 @@ public:
     virtual void stateWillChange() { }
     virtual void stateDidChange();
 
-    virtual void trace(Visitor*) { }
-
 protected:
     // Stating from most conservative state.
     // It will be corrected through state update flow.

@@ -71,12 +71,4 @@ Node* ContentDistribution::previousTo(const Node* node) const
     return at(index - 1).get();
 }
 
-void ContentDistribution::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_nodes);
-    visitor->trace(m_indices);
-#endif
-}
-
 } // namespace blink

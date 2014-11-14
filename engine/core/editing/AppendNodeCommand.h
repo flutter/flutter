@@ -37,8 +37,6 @@ public:
         return adoptRef(new AppendNodeCommand(parent, node));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     AppendNodeCommand(PassRefPtr<ContainerNode> parent, PassRefPtr<Node>);
 

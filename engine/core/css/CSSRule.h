@@ -65,8 +65,6 @@ public:
         m_parentRule = rule;
     }
 
-    virtual void trace(Visitor*);
-
     CSSStyleSheet* parentStyleSheet() const
     {
         if (m_parentIsRule)

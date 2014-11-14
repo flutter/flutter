@@ -50,8 +50,6 @@ public:
 
     virtual CSSStyleSheet* styleSheet() const = 0;
 
-    virtual void trace(Visitor*) { }
-
 protected:
     CSSRuleList();
 };
@@ -71,8 +69,6 @@ public:
     Vector<RefPtr<CSSRule> >& rules() { return m_rules; }
 
     virtual CSSStyleSheet* styleSheet() const override { return 0; }
-
-    virtual void trace(Visitor*) override;
 
 private:
     StaticCSSRuleList();
@@ -99,12 +95,6 @@ public:
     virtual void ref() override { m_rule->ref(); }
     virtual void deref() override { m_rule->deref(); }
 #endif
-
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_rule);
-        CSSRuleList::trace(visitor);
-    }
 
 private:
     LiveCSSRuleList(Rule* rule) : m_rule(rule) { }

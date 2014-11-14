@@ -47,11 +47,4 @@ bool AnimatableLengthSize::equalTo(const AnimatableValue* value) const
     return width()->equals(lengthSize->width()) && height()->equals(lengthSize->height());
 }
 
-void AnimatableLengthSize::trace(Visitor* visitor)
-{
-    visitor->trace(m_width);
-    visitor->trace(m_height);
-    AnimatableValue::trace(visitor);
-}
-
 }

@@ -50,8 +50,6 @@ public:
 
     const Vector<RefPtr<AnimatableValue> >& values() const { return m_values; }
 
-    virtual void trace(Visitor*) override;
-
 protected:
     AnimatableRepeatable()
     {

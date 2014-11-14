@@ -150,8 +150,4 @@ bool MatchedPropertiesCache::isCacheable(const Element* element, const RenderSty
     return true;
 }
 
-void MatchedPropertiesCache::trace(Visitor* visitor)
-{
-}
-
 }

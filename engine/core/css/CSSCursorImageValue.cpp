@@ -124,10 +124,4 @@ bool CSSCursorImageValue::equals(const CSSCursorImageValue& other) const
         && compareCSSValuePtr(m_imageValue, other.m_imageValue);
 }
 
-void CSSCursorImageValue::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_imageValue);
-    CSSValue::traceAfterDispatch(visitor);
-}
-
 } // namespace blink

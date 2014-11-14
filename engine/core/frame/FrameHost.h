@@ -74,8 +74,6 @@ public:
     // This value does not account for Page zoom, use LocalFrame::devicePixelRatio instead.
     float deviceScaleFactor() const;
 
-    void trace(Visitor*);
-
 private:
     FrameHost(Page&, ServiceProvider&);
 

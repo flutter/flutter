@@ -299,12 +299,4 @@ void Animation::pauseAnimationForTestingOnCompositor(double pauseTime)
         CompositorAnimations::instance()->pauseAnimationForTestingOnCompositor(*m_target, m_compositorAnimationIds[i], pauseTime);
 }
 
-void Animation::trace(Visitor* visitor)
-{
-    visitor->trace(m_target);
-    visitor->trace(m_effect);
-    visitor->trace(m_sampledEffect);
-    AnimationNode::trace(visitor);
-}
-
 } // namespace blink

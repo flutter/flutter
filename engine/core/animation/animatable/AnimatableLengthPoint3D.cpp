@@ -48,12 +48,4 @@ bool AnimatableLengthPoint3D::equalTo(const AnimatableValue* value) const
     return x()->equals(lengthPoint->x()) && y()->equals(lengthPoint->y()) && z()->equals(lengthPoint->z());
 }
 
-void AnimatableLengthPoint3D::trace(Visitor* visitor)
-{
-    visitor->trace(m_x);
-    visitor->trace(m_y);
-    visitor->trace(m_z);
-    AnimatableValue::trace(visitor);
-}
-
 }

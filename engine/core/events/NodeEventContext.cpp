@@ -44,13 +44,6 @@ NodeEventContext::NodeEventContext(PassRefPtr<Node> node, PassRefPtr<EventTarget
     ASSERT(m_node);
 }
 
-void NodeEventContext::trace(Visitor* visitor)
-{
-    visitor->trace(m_node);
-    visitor->trace(m_currentTarget);
-    visitor->trace(m_treeScopeEventContext);
-}
-
 void NodeEventContext::handleLocalEvents(Event* event) const
 {
     if (touchEventContext()) {

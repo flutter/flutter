@@ -113,8 +113,6 @@ public:
 
     Element* getElementByAccessKey(const String& key) const;
 
-    virtual void trace(Visitor*);
-
     ScopedStyleResolver* scopedStyleResolver() const { return m_scopedStyleResolver.get(); }
     ScopedStyleResolver& ensureScopedStyleResolver();
     void clearScopedStyleResolver();

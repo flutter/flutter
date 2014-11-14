@@ -47,8 +47,6 @@ public:
 
     Color color() const { return Color(m_rgbColor); }
 
-    void trace(Visitor*) { }
-
 private:
     RGBColor(unsigned rgbColor)
         : m_rgbColor(rgbColor)

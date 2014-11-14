@@ -70,11 +70,4 @@ void CSSFontFaceRule::reattach(StyleRuleBase* rule)
         m_propertiesCSSOMWrapper->reattach(m_fontFaceRule->mutableProperties());
 }
 
-void CSSFontFaceRule::trace(Visitor* visitor)
-{
-    visitor->trace(m_fontFaceRule);
-    visitor->trace(m_propertiesCSSOMWrapper);
-    CSSRule::trace(visitor);
-}
-
 } // namespace blink

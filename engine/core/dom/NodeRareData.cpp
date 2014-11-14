@@ -46,29 +46,4 @@ struct SameSizeAsNodeRareData {
 
 COMPILE_ASSERT(sizeof(NodeRareData) == sizeof(SameSizeAsNodeRareData), NodeRareDataShouldStaySmall);
 
-void NodeRareData::traceAfterDispatch(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_renderer);
-#endif
-    visitor->trace(m_mutationObserverData);
-}
-
-void NodeRareData::trace(Visitor* visitor)
-{
-    if (m_isElementRareData)
-        static_cast<ElementRareData*>(this)->traceAfterDispatch(visitor);
-    else
-        traceAfterDispatch(visitor);
-}
-
-void NodeRareData::finalizeGarbageCollectedObject()
-{
-    RELEASE_ASSERT(!renderer());
-    if (m_isElementRareData)
-        static_cast<ElementRareData*>(this)->~ElementRareData();
-    else
-        this->~NodeRareData();
-}
-
 } // namespace blink

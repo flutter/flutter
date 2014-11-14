@@ -59,7 +59,6 @@ namespace WTF {
         Deque<T, 0, Allocator>& operator=(const Deque&);
 
         void finalize();
-        void finalizeGarbageCollectedObject() { finalize(); }
 
         // We hard wire the inlineCapacity to zero here, due to crbug.com/360572
         void swap(Deque<T, 0, Allocator>&);

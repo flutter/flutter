@@ -72,9 +72,4 @@ const AtomicString& TransitionEvent::interfaceName() const
     return EventNames::TransitionEvent;
 }
 
-void TransitionEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
 } // namespace blink

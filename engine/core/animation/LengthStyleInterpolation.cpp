@@ -101,9 +101,4 @@ void LengthStyleInterpolation::apply(StyleResolverState& state) const
     StyleBuilder::applyProperty(m_id, state, interpolableValueToLength(m_cachedValue.get(), m_range).get());
 }
 
-void LengthStyleInterpolation::trace(Visitor* visitor)
-{
-    StyleInterpolation::trace(visitor);
-}
-
 }

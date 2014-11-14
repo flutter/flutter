@@ -71,8 +71,6 @@ public:
 
     PassRefPtr<MutableStylePropertySet> copyPropertiesInSet(const Vector<CSSPropertyID>&) const;
 
-    virtual void trace(Visitor*) override;
-
 private:
     CSSComputedStyleDeclaration(PassRefPtr<Node>, bool allowVisitedStyle, const String&);
 

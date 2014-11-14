@@ -159,12 +159,6 @@ void AnimationTimeline::AnimationTimelineTiming::serviceOnNextFrame()
         m_timeline->m_document->view()->scheduleAnimation();
 }
 
-void AnimationTimeline::AnimationTimelineTiming::trace(Visitor* visitor)
-{
-    visitor->trace(m_timeline);
-    AnimationTimeline::PlatformTiming::trace(visitor);
-}
-
 double AnimationTimeline::currentTime(bool& isNull)
 {
     return currentTimeInternal(isNull) * 1000;
@@ -229,15 +223,5 @@ void AnimationTimeline::detachFromDocument()
     m_document = nullptr;
 }
 #endif
-
-void AnimationTimeline::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_document);
-    visitor->trace(m_timing);
-    visitor->trace(m_playersNeedingUpdate);
-    visitor->trace(m_players);
-#endif
-}
 
 } // namespace

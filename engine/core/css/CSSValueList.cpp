@@ -151,10 +151,4 @@ PassRefPtr<CSSValueList> CSSValueList::cloneForCSSOM() const
     return adoptRef(new CSSValueList(*this));
 }
 
-void CSSValueList::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_values);
-    CSSValue::traceAfterDispatch(visitor);
-}
-
 } // namespace blink

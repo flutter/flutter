@@ -30,8 +30,6 @@ public:
     HTMLImportChild* add(PassOwnPtr<HTMLImportChild>);
     HTMLImportChild* find(const KURL&) const;
 
-    virtual void trace(Visitor*) override;
-
 private:
     explicit HTMLImportTreeRoot(Document*);
 

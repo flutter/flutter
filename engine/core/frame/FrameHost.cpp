@@ -73,9 +73,4 @@ float FrameHost::deviceScaleFactor() const
     return m_page->deviceScaleFactor();
 }
 
-void FrameHost::trace(Visitor* visitor)
-{
-    visitor->trace(m_page);
-}
-
 }

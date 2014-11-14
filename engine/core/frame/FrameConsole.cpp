@@ -170,9 +170,4 @@ void FrameConsole::clearMessages()
     messageStorage()->clear();
 }
 
-void FrameConsole::trace(Visitor* visitor)
-{
-    visitor->trace(m_consoleMessageStorage);
-}
-
 } // namespace blink

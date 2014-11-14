@@ -101,13 +101,6 @@ void TouchEvent::preventDefault()
             "Ignored attempt to cancel a " + type() + " event with cancelable=false, for example because scrolling is in progress and cannot be interrupted."));
     }
 }
-void TouchEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_touches);
-    visitor->trace(m_targetTouches);
-    visitor->trace(m_changedTouches);
-    UIEventWithKeyState::trace(visitor);
-}
 
 PassRefPtr<TouchEventDispatchMediator> TouchEventDispatchMediator::create(PassRefPtr<TouchEvent> touchEvent)
 {

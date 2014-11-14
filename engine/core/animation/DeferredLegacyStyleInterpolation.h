@@ -25,8 +25,6 @@ public:
 
     virtual void apply(StyleResolverState&) const override;
 
-    virtual void trace(Visitor*) override;
-
     static bool interpolationRequiresStyleResolve(const CSSValue&);
     static bool interpolationRequiresStyleResolve(const CSSPrimitiveValue&);
     static bool interpolationRequiresStyleResolve(const CSSImageValue&);

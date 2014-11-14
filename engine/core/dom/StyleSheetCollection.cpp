@@ -67,10 +67,4 @@ void StyleSheetCollection::appendSheetForList(StyleSheet* sheet)
     m_styleSheetsForStyleSheetList.append(sheet);
 }
 
-void StyleSheetCollection::trace(Visitor* visitor)
-{
-    visitor->trace(m_activeAuthorStyleSheets);
-    visitor->trace(m_styleSheetsForStyleSheetList);
-}
-
 }

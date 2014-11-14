@@ -54,8 +54,6 @@ public:
 
     CSSStyleDeclaration* style() const;
 
-    virtual void trace(Visitor*) override;
-
 private:
     CSSFilterRule(StyleRuleFilter*, CSSStyleSheet* parent);
 

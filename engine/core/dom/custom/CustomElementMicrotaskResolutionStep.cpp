@@ -58,11 +58,4 @@ CustomElementMicrotaskStep::Result CustomElementMicrotaskResolutionStep::process
     return CustomElementMicrotaskStep::FinishedProcessing;
 }
 
-void CustomElementMicrotaskResolutionStep::trace(Visitor* visitor)
-{
-    visitor->trace(m_context);
-    visitor->trace(m_element);
-    CustomElementMicrotaskStep::trace(visitor);
-}
-
 } // namespace blink

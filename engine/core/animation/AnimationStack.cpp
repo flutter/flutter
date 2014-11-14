@@ -141,11 +141,6 @@ void AnimationStack::simplifyEffects()
     m_effects.shrink(dest);
 }
 
-void AnimationStack::trace(Visitor* visitor)
-{
-    visitor->trace(m_effects);
-}
-
 bool AnimationStack::getAnimatedBoundingBox(FloatBox& box, CSSPropertyID property) const
 {
     FloatBox originalBox(box);

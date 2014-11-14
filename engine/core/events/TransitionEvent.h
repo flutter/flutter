@@ -61,8 +61,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     TransitionEvent();
     TransitionEvent(const AtomicString& type, const String& propertyName, double elapsedTime);

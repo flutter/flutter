@@ -190,8 +190,6 @@ public:
     void increaseStyleSharingDepth() { ++m_styleSharingDepth; }
     void decreaseStyleSharingDepth() { --m_styleSharingDepth; }
 
-    void trace(Visitor*);
-
 private:
     // FIXME: This should probably go away, folded into FontBuilder.
     void updateFont(StyleResolverState&);

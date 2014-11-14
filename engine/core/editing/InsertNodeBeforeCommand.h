@@ -38,8 +38,6 @@ public:
         return adoptRef(new InsertNodeBeforeCommand(childToInsert, childToInsertBefore, shouldAssumeContentIsAlwaysEditable));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     InsertNodeBeforeCommand(PassRefPtr<Node> childToInsert, PassRefPtr<Node> childToInsertBefore, ShouldAssumeContentIsAlwaysEditable);
 

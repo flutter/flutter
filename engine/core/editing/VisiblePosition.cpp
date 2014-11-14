@@ -767,11 +767,6 @@ bool isLastVisiblePositionInNode(const VisiblePosition& visiblePosition, const C
     return next.isNull() || !next.deepEquivalent().deprecatedNode()->isDescendantOf(node);
 }
 
-void VisiblePosition::trace(Visitor* visitor)
-{
-    visitor->trace(m_deepPosition);
-}
-
 }  // namespace blink
 
 #ifndef NDEBUG

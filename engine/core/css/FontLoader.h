@@ -32,8 +32,6 @@ public:
     void clearResourceFetcherAndFontSelector();
 #endif
 
-    void trace(Visitor*);
-
 private:
     FontLoader(CSSFontSelector*, ResourceFetcher*);
     void beginLoadTimerFired(Timer<FontLoader>*);

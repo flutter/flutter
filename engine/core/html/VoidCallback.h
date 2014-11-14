@@ -33,7 +33,6 @@ namespace blink {
 class VoidCallback {
 public:
     virtual ~VoidCallback() { }
-    virtual void trace(Visitor*) { }
     virtual void handleEvent() = 0;
 };
 

@@ -50,8 +50,6 @@ public:
 
     String conditionText() const;
 
-    virtual void trace(Visitor* visitor) override { CSSGroupingRule::trace(visitor); }
-
 private:
     CSSSupportsRule(StyleRuleSupports*, CSSStyleSheet*);
 };

@@ -128,8 +128,6 @@ public:
         return !(*this == o);
     }
 
-    void trace(Visitor*);
-
 private:
     MarkerType m_type;
     unsigned m_startOffset;
@@ -152,8 +150,6 @@ public:
     virtual ~DocumentMarkerDetails();
     virtual bool isDescription() const { return false; }
     virtual bool isTextMatch() const { return false; }
-
-    virtual void trace(Visitor*) { }
 };
 
 } // namespace blink

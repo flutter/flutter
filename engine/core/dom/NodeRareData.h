@@ -43,14 +43,6 @@ public:
         return adoptPtr(new NodeMutationObserverData);
     }
 
-    void trace(Visitor* visitor)
-    {
-#if ENABLE(OILPAN)
-        visitor->trace(registry);
-        visitor->trace(transientRegistry);
-#endif
-    }
-
 private:
     NodeMutationObserverData() { }
 };
@@ -75,11 +67,6 @@ public:
     bool hasElementFlag(ElementFlags mask) const { return m_elementFlags & mask; }
     void setElementFlag(ElementFlags mask, bool value) { m_elementFlags = (m_elementFlags & ~mask) | (-(int32_t)value & mask); }
     void clearElementFlag(ElementFlags mask) { m_elementFlags &= ~mask; }
-
-    void trace(Visitor*);
-
-    void traceAfterDispatch(Visitor*);
-    void finalizeGarbageCollectedObject();
 
 protected:
     explicit NodeRareData(RenderObject* renderer)

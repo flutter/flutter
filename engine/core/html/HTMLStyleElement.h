@@ -43,8 +43,6 @@ public:
 
     using StyleElement::sheet;
 
-    virtual void trace(Visitor*) override;
-
 private:
     HTMLStyleElement(Document&, bool createdByParser);
 

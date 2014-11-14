@@ -99,8 +99,6 @@ public:
 
     StyleSheetList* styleSheets();
 
-    virtual void trace(Visitor*) override;
-
 private:
     ShadowRoot(Document&);
     virtual ~ShadowRoot();

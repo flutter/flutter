@@ -47,7 +47,6 @@ public:
 
     FontResource(const ResourceRequest&);
     virtual ~FontResource();
-    virtual void trace(Visitor*) override;
 
     virtual void load(ResourceFetcher*, const ResourceLoaderOptions&) override;
 

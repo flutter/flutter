@@ -183,9 +183,4 @@ bool DocumentMarker::activeMatch() const
     return false;
 }
 
-void DocumentMarker::trace(Visitor* visitor)
-{
-    visitor->trace(m_details);
-}
-
 } // namespace blink

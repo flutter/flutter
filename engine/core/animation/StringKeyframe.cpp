@@ -48,12 +48,6 @@ PassOwnPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::createPropertySpe
     return adoptPtr(new PropertySpecificKeyframe(offset(), &easing(), propertyValue(property), composite()));
 }
 
-void StringKeyframe::trace(Visitor* visitor)
-{
-    visitor->trace(m_propertySet);
-    Keyframe::trace(visitor);
-}
-
 StringKeyframe::PropertySpecificKeyframe::PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, CSSValue* value, AnimationEffect::CompositeOperation op)
     : Keyframe::PropertySpecificKeyframe(offset, easing, op)
     , m_value(value)
@@ -140,13 +134,6 @@ PassOwnPtr<Keyframe::PropertySpecificKeyframe> StringKeyframe::PropertySpecificK
     Keyframe::PropertySpecificKeyframe* theClone = new PropertySpecificKeyframe(offset, m_easing, m_value.get());
     toStringPropertySpecificKeyframe(theClone)->m_animatableValueCache = m_animatableValueCache;
     return adoptPtr(theClone);
-}
-
-void StringKeyframe::PropertySpecificKeyframe::trace(Visitor* visitor)
-{
-    visitor->trace(m_value);
-    visitor->trace(m_animatableValueCache);
-    Keyframe::PropertySpecificKeyframe::trace(visitor);
 }
 
 }

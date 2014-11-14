@@ -55,8 +55,6 @@ public:
     void add(const CustomElementDescriptor&, Element*);
     PassOwnPtr<ElementSet> takeUpgradeCandidatesFor(const CustomElementDescriptor&);
 
-    virtual void trace(Visitor*) override;
-
 private:
     CustomElementUpgradeCandidateMap() { }
 

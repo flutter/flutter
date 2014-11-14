@@ -49,8 +49,6 @@ public:
 
     Pattern* pattern() const { return m_pattern.get(); }
 
-    void trace(Visitor*) { }
-
 private:
     CanvasPattern(PassRefPtr<Image>, Pattern::RepeatMode);
 

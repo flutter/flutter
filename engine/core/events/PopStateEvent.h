@@ -55,8 +55,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     PopStateEvent();
     PopStateEvent(const AtomicString&, const PopStateEventInit&);

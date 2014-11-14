@@ -46,11 +46,6 @@ EventDispatchMediator::EventDispatchMediator(PassRefPtr<Event> event)
 {
 }
 
-void EventDispatchMediator::trace(Visitor* visitor)
-{
-    visitor->trace(m_event);
-}
-
 bool EventDispatchMediator::dispatchEvent(EventDispatcher* dispatcher) const
 {
     ASSERT(m_event.get() == dispatcher->event());

@@ -42,7 +42,6 @@ public:
     virtual ~FontCacheClient() { }
 
     virtual void fontCacheInvalidated() = 0;
-    virtual void trace(Visitor*) { }
 };
 
 } // namespace blink

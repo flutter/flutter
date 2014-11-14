@@ -65,11 +65,4 @@ ElementDataCache::ElementDataCache()
 {
 }
 
-void ElementDataCache::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_shareableElementDataCache);
-#endif
-}
-
 }

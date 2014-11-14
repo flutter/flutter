@@ -62,12 +62,6 @@ FocusEvent::FocusEvent(const AtomicString& type, const FocusEventInit& initializ
 {
 }
 
-void FocusEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_relatedTarget);
-    UIEvent::trace(visitor);
-}
-
 PassRefPtr<FocusEventDispatchMediator> FocusEventDispatchMediator::create(PassRefPtr<FocusEvent> focusEvent)
 {
     return adoptRef(new FocusEventDispatchMediator(focusEvent));

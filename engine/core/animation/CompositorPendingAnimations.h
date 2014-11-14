@@ -57,8 +57,6 @@ public:
     bool update(bool startOnCompositor = true);
     void notifyCompositorAnimationStarted(double monotonicAnimationStartTime);
 
-    void trace(Visitor*);
-
 private:
     void timerFired(Timer<CompositorPendingAnimations>*) { update(false); }
 

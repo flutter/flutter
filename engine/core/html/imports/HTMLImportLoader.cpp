@@ -196,14 +196,4 @@ PassRefPtr<CustomElementSyncMicrotaskQueue> HTMLImportLoader::microtaskQueue() c
     return m_microtaskQueue;
 }
 
-void HTMLImportLoader::trace(Visitor* visitor)
-{
-    visitor->trace(m_controller);
-#if ENABLE(OILPAN)
-    visitor->trace(m_imports);
-#endif
-    visitor->trace(m_document);
-    visitor->trace(m_microtaskQueue);
-}
-
 } // namespace blink

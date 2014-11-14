@@ -70,8 +70,6 @@ public:
     bool knownToBeOpaque(const RenderObject*) const;
 
     void setInitiator(const AtomicString& name) { m_initiatorName = name; }
-
-    void traceAfterDispatch(Visitor*);
     void restoreCachedResourceIfNeeded(Document&);
 
 private:

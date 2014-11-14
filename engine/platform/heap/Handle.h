@@ -85,24 +85,6 @@
 #define STACK_ALLOCATED() DISALLOW_ALLOCATION()
 #endif
 
-namespace blink {
-
-class Visitor {
-public:
-    template<typename T>
-    void trace(const T* t)
-    {
-    }
-    template<typename T>
-    void trace(T* t)
-    {
-    }
-    template<typename T>
-    void trace(const T& t)
-    {
-    }
-};
-
 #define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) \
     public:                                            \
         ~type();                                       \
@@ -117,7 +99,5 @@ public:
 
 #define DEFINE_STATIC_REF_WILL_BE_PERSISTENT(type, name, arguments) \
     DEFINE_STATIC_REF(type, name, arguments)
-
-} // namespace blink
 
 #endif

@@ -19,12 +19,6 @@ public:
 
     virtual EventQueue* eventQueue() const override { return m_queue.get(); }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_queue);
-        ExecutionContext::trace(visitor);
-    }
-
     virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) override { }
 
 #if !ENABLE(OILPAN)

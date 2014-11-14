@@ -48,8 +48,6 @@ public:
 
     StyleRuleFontFace* styleRule() const { return m_fontFaceRule.get(); }
 
-    virtual void trace(Visitor*) override;
-
 private:
     CSSFontFaceRule(StyleRuleFontFace*, CSSStyleSheet* parent);
 

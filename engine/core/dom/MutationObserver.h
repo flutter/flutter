@@ -96,8 +96,6 @@ public:
 
     HashSet<RawPtr<Node> > getObservedNodes() const;
 
-    void trace(Visitor*);
-
 private:
     struct ObserverLessThan;
 

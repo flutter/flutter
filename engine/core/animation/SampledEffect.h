@@ -32,8 +32,6 @@ public:
 
     void removeReplacedInterpolationsIfNeeded(const BitArray<numCSSProperties>&);
 
-    void trace(Visitor*);
-
 private:
     SampledEffect(Animation*, PassOwnPtr<Vector<RefPtr<Interpolation> > >);
 

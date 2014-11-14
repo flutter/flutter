@@ -433,16 +433,4 @@ void TreeScope::setNeedsStyleRecalcForViewportUnits()
     }
 }
 
-void TreeScope::trace(Visitor* visitor)
-{
-    visitor->trace(m_rootNode);
-    visitor->trace(m_document);
-    visitor->trace(m_parentTreeScope);
-    visitor->trace(m_selection);
-    visitor->trace(m_elementsById);
-    visitor->trace(m_imageMapsByName);
-    visitor->trace(m_labelsByForAttribute);
-    visitor->trace(m_scopedStyleResolver);
-}
-
 } // namespace blink

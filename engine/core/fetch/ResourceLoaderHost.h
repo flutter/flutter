@@ -67,8 +67,6 @@ public:
 
     virtual bool isLoadedBy(ResourceLoaderHost*) const = 0;
 
-    virtual void trace(Visitor*) { }
-
 #if !ENABLE(OILPAN)
     virtual void refResourceLoaderHost() = 0;
     virtual void derefResourceLoaderHost() = 0;

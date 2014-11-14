@@ -44,11 +44,6 @@ public:
 
     void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);
 
-    virtual void trace(Visitor* visitor) override
-    {
-        TreeScopeStyleSheetCollection::trace(visitor);
-    }
-
 private:
     void collectStyleSheets(StyleEngine*, StyleSheetCollection&);
 };

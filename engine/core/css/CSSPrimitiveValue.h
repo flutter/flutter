@@ -327,8 +327,6 @@ public:
 
     bool equals(const CSSPrimitiveValue&) const;
 
-    void traceAfterDispatch(Visitor*);
-
     static UnitType canonicalUnitTypeForCategory(UnitCategory);
     static double conversionToCanonicalUnitsScaleFactor(UnitType);
 

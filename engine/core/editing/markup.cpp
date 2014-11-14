@@ -79,11 +79,6 @@ public:
         m_element->setAttribute(m_name, AtomicString(m_value));
     }
 
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_element);
-    }
-
 private:
     RefPtr<Element> m_element;
     QualifiedName m_name;

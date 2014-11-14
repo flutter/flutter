@@ -48,8 +48,6 @@ public:
     virtual bool isAnimatableValueKeyframe() const { return false; }
     virtual bool isStringKeyframe() const { return false; }
 
-    virtual void trace(Visitor*) { }
-
     class PropertySpecificKeyframe {
     public:
         virtual ~PropertySpecificKeyframe() { }
@@ -65,8 +63,6 @@ public:
 
         virtual PassOwnPtr<PropertySpecificKeyframe> neutralKeyframe(double offset, PassRefPtr<TimingFunction> easing) const = 0;
         virtual PassRefPtr<Interpolation> createInterpolation(CSSPropertyID, blink::Keyframe::PropertySpecificKeyframe* end, Element*) const = 0;
-
-        virtual void trace(Visitor*) { }
 
     protected:
         PropertySpecificKeyframe(double offset, PassRefPtr<TimingFunction> easing, AnimationEffect::CompositeOperation);

@@ -22,8 +22,6 @@ public:
 
     virtual PassOwnPtr<InterpolableValue> clone() const = 0;
 
-    virtual void trace(Visitor*) { }
-
 private:
     virtual PassOwnPtr<InterpolableValue> interpolate(const InterpolableValue &to, const double progress) const = 0;
 
@@ -48,8 +46,6 @@ public:
     double value() const { return m_value; }
     virtual PassOwnPtr<InterpolableValue> clone() const override final { return create(m_value); }
 
-    virtual void trace(Visitor* visitor) override { InterpolableValue::trace(visitor); }
-
 private:
     virtual PassOwnPtr<InterpolableValue> interpolate(const InterpolableValue &to, const double progress) const override final;
     double m_value;
@@ -71,8 +67,6 @@ public:
     virtual bool isBool() const override final { return true; }
     bool value() const { return m_value; }
     virtual PassOwnPtr<InterpolableValue> clone() const override final { return create(m_value); }
-
-    virtual void trace(Visitor* visitor) override { InterpolableValue::trace(visitor); }
 
 private:
     virtual PassOwnPtr<InterpolableValue> interpolate(const InterpolableValue &to, const double progress) const override final;
@@ -111,8 +105,6 @@ public:
     size_t length() const { return m_size; }
     virtual PassOwnPtr<InterpolableValue> clone() const override final { return create(*this); }
 
-    virtual void trace(Visitor*) override;
-
 private:
     virtual PassOwnPtr<InterpolableValue> interpolate(const InterpolableValue &other, const double progress) const override final;
     explicit InterpolableList(size_t size)
@@ -144,8 +136,6 @@ public:
     virtual bool isAnimatableValue() const override final { return true; }
     AnimatableValue* value() const { return m_value.get(); }
     virtual PassOwnPtr<InterpolableValue> clone() const override final { return create(m_value); }
-
-    virtual void trace(Visitor*) override;
 
 private:
     virtual PassOwnPtr<InterpolableValue> interpolate(const InterpolableValue &other, const double progress) const override final;

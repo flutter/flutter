@@ -86,12 +86,6 @@ int StyleRuleKeyframes::findKeyframeIndex(const String& key) const
     return -1;
 }
 
-void StyleRuleKeyframes::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_keyframes);
-    StyleRuleBase::traceAfterDispatch(visitor);
-}
-
 CSSKeyframesRule::CSSKeyframesRule(StyleRuleKeyframes* keyframesRule, CSSStyleSheet* parent)
     : CSSRule(parent)
     , m_keyframesRule(keyframesRule)
@@ -208,16 +202,6 @@ void CSSKeyframesRule::reattach(StyleRuleBase* rule)
 {
     ASSERT(rule);
     m_keyframesRule = toStyleRuleKeyframes(rule);
-}
-
-void CSSKeyframesRule::trace(Visitor* visitor)
-{
-    CSSRule::trace(visitor);
-#if ENABLE(OILPAN)
-    visitor->trace(m_childRuleCSSOMWrappers);
-#endif
-    visitor->trace(m_keyframesRule);
-    visitor->trace(m_ruleListCSSOMWrapper);
 }
 
 } // namespace blink

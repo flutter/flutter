@@ -42,11 +42,6 @@ MatchedProperties::~MatchedProperties()
 {
 }
 
-void MatchedProperties::trace(Visitor* visitor)
-{
-    visitor->trace(properties);
-}
-
 void MatchResult::addMatchedProperties(const StylePropertySet* properties)
 {
     matchedProperties.grow(matchedProperties.size() + 1);

@@ -63,8 +63,6 @@ public:
     virtual String input() const override { return m_input; }
     virtual void setInput(const String&) override;
 
-    void trace(Visitor*) { }
-
 private:
     DOMURL(const String& url, const KURL& base, ExceptionState&);
 

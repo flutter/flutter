@@ -83,11 +83,4 @@ void MutationObserverInterestGroup::enqueueMutationRecord(PassRefPtr<MutationRec
     }
 }
 
-void MutationObserverInterestGroup::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_observers);
-#endif
-}
-
 } // namespace blink

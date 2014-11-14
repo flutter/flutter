@@ -40,13 +40,6 @@ PassOwnPtr<ResourceLoaderSet> ResourceLoaderSet::create()
     return adoptPtr(new ResourceLoaderSet);
 }
 
-void ResourceLoaderSet::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_set);
-#endif
-}
-
 void ResourceLoaderSet::cancelAll()
 {
     Vector<RefPtr<ResourceLoader> > loadersCopy;

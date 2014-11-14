@@ -123,14 +123,11 @@ public:
         ChangeObserver();
         virtual ~ChangeObserver();
         virtual void didChangeVisibleSelection() = 0;
-        virtual void trace(Visitor*) { }
     };
 
     void setChangeObserver(ChangeObserver&);
     void clearChangeObserver();
     void didChange(); // Fire the change observer, if any.
-
-    void trace(Visitor*);
 
     void validatePositionsIfNeeded();
 

@@ -45,7 +45,6 @@ public:
     static PassRefPtr<HTMLImageElement> createForJSConstructor(Document&, int width, int height);
 
     virtual ~HTMLImageElement();
-    virtual void trace(Visitor*) override;
 
     int width(bool ignorePendingStylesheets = false);
     int height(bool ignorePendingStylesheets = false);

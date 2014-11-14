@@ -145,13 +145,11 @@ class InspectorBackendDispatcher: public RefCounted<InspectorBackendDispatcher> 
 public:
     static PassRefPtr<InspectorBackendDispatcher> create(InspectorFrontendChannel* inspectorFrontendChannel);
     virtual ~InspectorBackendDispatcher() { }
-    virtual void trace(Visitor*) { }
 
     class CallbackBase: public RefCounted<CallbackBase> {
     public:
         CallbackBase(PassRefPtr<InspectorBackendDispatcherImpl> backendImpl, int id);
         virtual ~CallbackBase();
-        virtual void trace(Visitor*);
         void sendFailure(const ErrorString&);
         bool isActive();
 
@@ -491,11 +489,6 @@ InspectorBackendDispatcher::CallbackBase::CallbackBase(PassRefPtr<InspectorBacke
     : m_backendImpl(backendImpl), m_id(id), m_alreadySent(false) {}
 
 InspectorBackendDispatcher::CallbackBase::~CallbackBase() {}
-
-void InspectorBackendDispatcher::CallbackBase::trace(Visitor* visitor)
-{
-    visitor->trace(m_backendImpl);
-}
 
 void InspectorBackendDispatcher::CallbackBase::sendFailure(const ErrorString& error)
 {

@@ -42,7 +42,6 @@ class LocalFrame;
 class UndoStep : public RefCounted<UndoStep> {
 public:
     virtual ~UndoStep() { }
-    virtual void trace(Visitor*) { }
 
     virtual bool belongsTo(const LocalFrame&) const = 0;
     virtual void unapply() = 0;

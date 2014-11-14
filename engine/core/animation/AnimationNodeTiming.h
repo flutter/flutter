@@ -37,8 +37,6 @@ public:
     void setDirection(String);
     void setEasing(String);
 
-    void trace(Visitor*);
-
 private:
     RefPtr<AnimationNode> m_parent;
     explicit AnimationNodeTiming(AnimationNode*);

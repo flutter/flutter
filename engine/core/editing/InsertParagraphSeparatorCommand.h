@@ -39,8 +39,6 @@ public:
         return adoptRef(new InsertParagraphSeparatorCommand(document, useDefaultParagraphElement, pasteBlockquoteIntoUnquotedArea));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     InsertParagraphSeparatorCommand(Document&, bool useDefaultParagraphElement, bool pasteBlockquoteIntoUnquotedArea);
 

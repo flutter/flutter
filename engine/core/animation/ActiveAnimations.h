@@ -79,8 +79,6 @@ public:
     void addAnimation(Animation* animation) { m_animations.append(animation); }
     void notifyAnimationDestroyed(Animation* animation) { m_animations.remove(m_animations.find(animation)); }
 
-    void trace(Visitor*);
-
 private:
     bool isAnimationStyleChange() const { return m_animationStyleChange; }
 

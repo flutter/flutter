@@ -48,10 +48,4 @@ void SplitTextNodeContainingElementCommand::doApply()
     splitTextNode(m_text.get(), m_offset);
 }
 
-void SplitTextNodeContainingElementCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_text);
-    CompositeEditCommand::trace(visitor);
-}
-
 }

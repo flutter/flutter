@@ -47,8 +47,6 @@ public:
     const AnimatableValue* top() const { return m_top.get(); }
     const AnimatableValue* bottom() const { return m_bottom.get(); }
 
-    virtual void trace(Visitor*) override;
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 

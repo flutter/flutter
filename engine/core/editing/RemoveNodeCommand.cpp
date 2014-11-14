@@ -65,12 +65,4 @@ void RemoveNodeCommand::doUnapply()
     parent->insertBefore(m_node.get(), refChild.get(), IGNORE_EXCEPTION);
 }
 
-void RemoveNodeCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_node);
-    visitor->trace(m_parent);
-    visitor->trace(m_refChild);
-    SimpleEditCommand::trace(visitor);
-}
-
 }

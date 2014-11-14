@@ -62,10 +62,6 @@ public:
     uint32_t cascadeScope() const { return m_cascadeScope; }
     uint64_t position() const { return m_position; }
     const CSSStyleSheet* parentStyleSheet() const { return m_parentStyleSheet; }
-    void trace(Visitor* visitor)
-    {
-        visitor->trace(m_parentStyleSheet);
-    }
 
 private:
     // FIXME: Oilpan: RuleData is in the oilpan heap and this pointer
@@ -88,13 +84,6 @@ namespace blink {
 class StyleRuleList final : public RefCounted<StyleRuleList> {
 public:
     static PassRefPtr<StyleRuleList> create() { return adoptRef(new StyleRuleList()); }
-
-    void trace(Visitor* visitor)
-    {
-#if ENABLE(OILPAN)
-        visitor->trace(m_list);
-#endif
-    }
 
     Vector<RawPtr<StyleRule> > m_list;
 };

@@ -63,9 +63,4 @@ PassRefPtr<SimpleFontData> CSSFontFaceSource::getFontData(const FontDescription&
     return fontData; // No release, because fontData is a reference to a RefPtr that is held in the m_fontDataTable.
 }
 
-void CSSFontFaceSource::trace(Visitor* visitor)
-{
-    visitor->trace(m_face);
-}
-
 }

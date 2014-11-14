@@ -51,8 +51,6 @@ public:
         return adoptRef(new ReplaceSelectionCommand(document, fragment, options, action));
     }
 
-    virtual void trace(Visitor*) override;
-
 private:
     ReplaceSelectionCommand(Document&, PassRefPtr<DocumentFragment>, CommandOptions, EditAction);
 

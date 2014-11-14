@@ -67,8 +67,6 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    virtual void trace(Visitor*) override;
-
 private:
     CompositionEvent();
     CompositionEvent(const AtomicString& type, PassRefPtr<AbstractView>, const String&, const Vector<CompositionUnderline>& underlines);

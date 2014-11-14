@@ -59,14 +59,8 @@ public:
             m_element->notifyViewportChanged();
     }
 
-#if !ENABLE(OILPAN)
     void clearElement() { m_element = nullptr; }
-#endif
-    virtual void trace(Visitor* visitor) override
-    {
-        visitor->trace(m_element);
-        MediaQueryListListener::trace(visitor);
-    }
+
 private:
     explicit ViewportChangeListener(HTMLImageElement* element) : m_element(element) { }
     RawPtr<HTMLImageElement> m_element;
@@ -100,13 +94,6 @@ HTMLImageElement::~HTMLImageElement()
         m_listener->clearElement();
     }
 #endif
-}
-
-void HTMLImageElement::trace(Visitor* visitor)
-{
-    visitor->trace(m_imageLoader);
-    visitor->trace(m_listener);
-    HTMLElement::trace(visitor);
 }
 
 void HTMLImageElement::notifyViewportChanged()

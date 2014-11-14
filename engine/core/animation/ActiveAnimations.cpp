@@ -74,8 +74,4 @@ void ActiveAnimations::cancelAnimationOnCompositor()
         it->key->cancelAnimationOnCompositor();
 }
 
-void ActiveAnimations::trace(Visitor* visitor)
-{
-}
-
 } // namespace blink

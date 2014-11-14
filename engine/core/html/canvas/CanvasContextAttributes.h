@@ -38,7 +38,6 @@ namespace blink {
 class CanvasContextAttributes : public RefCounted<CanvasContextAttributes> {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(CanvasContextAttributes);
 public:
-    virtual void trace(Visitor*) { }
 
 protected:
     CanvasContextAttributes();

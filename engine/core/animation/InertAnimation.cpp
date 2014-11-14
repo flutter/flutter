@@ -63,10 +63,4 @@ double InertAnimation::calculateTimeToEffectChange(bool, double, double) const
     return std::numeric_limits<double>::infinity();
 }
 
-void InertAnimation::trace(Visitor* visitor)
-{
-    visitor->trace(m_effect);
-    AnimationNode::trace(visitor);
-}
-
 } // namespace blink

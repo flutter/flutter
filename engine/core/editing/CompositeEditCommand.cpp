@@ -142,17 +142,6 @@ void EditCommandComposition::setEndingSelection(const VisibleSelection& selectio
     m_endingRootEditableElement = selection.rootEditableElement();
 }
 
-void EditCommandComposition::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-    visitor->trace(m_startingSelection);
-    visitor->trace(m_endingSelection);
-    visitor->trace(m_commands);
-    visitor->trace(m_startingRootEditableElement);
-    visitor->trace(m_endingRootEditableElement);
-    UndoStep::trace(visitor);
-}
-
 CompositeEditCommand::CompositeEditCommand(Document& document)
     : EditCommand(document)
 {
@@ -1076,13 +1065,6 @@ PassRefPtr<Node> CompositeEditCommand::splitTreeToNode(Node* start, Node* end, b
     }
 
     return node.release();
-}
-
-void CompositeEditCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_commands);
-    visitor->trace(m_composition);
-    EditCommand::trace(visitor);
 }
 
 } // namespace blink

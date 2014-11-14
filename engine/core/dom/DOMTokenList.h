@@ -65,8 +65,6 @@ public:
 
     virtual Element* element() { return 0; }
 
-    virtual void trace(Visitor*) { }
-
 protected:
     virtual const AtomicString& value() const = 0;
     virtual void setValue(const AtomicString&) = 0;

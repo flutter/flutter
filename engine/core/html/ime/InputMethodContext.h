@@ -73,8 +73,6 @@ public:
     void dispatchCandidateWindowUpdateEvent();
     void dispatchCandidateWindowHideEvent();
 
-    virtual void trace(Visitor*) override;
-
 private:
     InputMethodContext(HTMLElement*);
     bool hasFocus() const;

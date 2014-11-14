@@ -170,7 +170,6 @@ public:
     // the vtable at the first word of the object. However we don't trace the
     // m_supplements here, but in the partially specialized template subclasses
     // since we only want to trace it for garbage collected classes.
-    virtual void trace(Visitor*) { }
 
     // FIXME: Oilpan: Make private and remove this ignore once PersistentHeapSupplementable is removed again.
 protected:

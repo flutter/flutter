@@ -83,11 +83,4 @@ void CustomElementMicrotaskDispatcher::doDispatch()
     m_phase = Quiescent;
 }
 
-void CustomElementMicrotaskDispatcher::trace(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    visitor->trace(m_elements);
-#endif
-}
-
 } // namespace blink

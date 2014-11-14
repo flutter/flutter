@@ -169,10 +169,6 @@ String MediaQuerySet::mediaText() const
     return text.toString();
 }
 
-void MediaQuerySet::trace(Visitor* visitor)
-{
-}
-
 MediaList::MediaList(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
     : m_mediaQueries(mediaQueries)
     , m_parentStyleSheet(parentSheet)
@@ -240,13 +236,6 @@ void MediaList::reattach(MediaQuerySet* mediaQueries)
 {
     ASSERT(mediaQueries);
     m_mediaQueries = mediaQueries;
-}
-
-void MediaList::trace(Visitor* visitor)
-{
-    visitor->trace(m_mediaQueries);
-    visitor->trace(m_parentStyleSheet);
-    visitor->trace(m_parentRule);
 }
 
 static void addResolutionWarningMessageToConsole(Document* document, const String& serializedExpression, CSSPrimitiveValue::UnitType type)

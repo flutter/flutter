@@ -146,14 +146,4 @@ void CSSGroupingRule::reattach(StyleRuleBase* rule)
     }
 }
 
-void CSSGroupingRule::trace(Visitor* visitor)
-{
-    CSSRule::trace(visitor);
-#if ENABLE(OILPAN)
-    visitor->trace(m_childRuleCSSOMWrappers);
-#endif
-    visitor->trace(m_groupRule);
-    visitor->trace(m_ruleListCSSOMWrapper);
-}
-
 } // namespace blink

@@ -28,11 +28,6 @@ public:
         return toInterpolableAnimatableValue(m_cachedValue.get())->value();
     }
 
-    virtual void trace(Visitor* visitor) override
-    {
-        StyleInterpolation::trace(visitor);
-    }
-
 private:
     LegacyStyleInterpolation(PassOwnPtr<InterpolableValue> start, PassOwnPtr<InterpolableValue> end, CSSPropertyID id)
         : StyleInterpolation(start, end, id)

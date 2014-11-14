@@ -50,7 +50,6 @@ public:
         return adoptRef(new JavaScriptCallFrame(debuggerContext, callFrame));
     }
     ~JavaScriptCallFrame();
-    void trace(Visitor*);
 
     JavaScriptCallFrame* caller();
 

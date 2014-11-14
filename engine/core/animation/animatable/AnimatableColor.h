@@ -61,8 +61,6 @@ public:
     static PassRefPtr<AnimatableColor> create(const AnimatableColorImpl&);
     Color color() const { return m_color.toColor(); }
 
-    virtual void trace(Visitor* visitor) override { AnimatableValue::trace(visitor); }
-
 protected:
     virtual PassRefPtr<AnimatableValue> interpolateTo(const AnimatableValue*, double fraction) const override;
 

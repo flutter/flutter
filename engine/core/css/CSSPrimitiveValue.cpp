@@ -1327,30 +1327,4 @@ bool CSSPrimitiveValue::equals(const CSSPrimitiveValue& other) const
     return false;
 }
 
-void CSSPrimitiveValue::traceAfterDispatch(Visitor* visitor)
-{
-#if ENABLE(OILPAN)
-    switch (m_primitiveUnitType) {
-    case CSS_RECT:
-        visitor->trace(m_value.rect);
-        break;
-    case CSS_QUAD:
-        visitor->trace(m_value.quad);
-        break;
-    case CSS_PAIR:
-        visitor->trace(m_value.pair);
-        break;
-    case CSS_CALC:
-        visitor->trace(m_value.calc);
-        break;
-    case CSS_SHAPE:
-        visitor->trace(m_value.shape);
-        break;
-    default:
-        break;
-    }
-#endif
-    CSSValue::traceAfterDispatch(visitor);
-}
-
 } // namespace blink

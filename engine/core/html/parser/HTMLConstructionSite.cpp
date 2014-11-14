@@ -262,14 +262,6 @@ HTMLConstructionSite::~HTMLConstructionSite()
     ASSERT(m_pendingText.isEmpty());
 }
 
-void HTMLConstructionSite::trace(Visitor* visitor)
-{
-    visitor->trace(m_document);
-    visitor->trace(m_attachmentRoot);
-    visitor->trace(m_taskQueue);
-    visitor->trace(m_pendingText);
-}
-
 void HTMLConstructionSite::detach()
 {
     // FIXME: We'd like to ASSERT here that we're canceling and not just discarding
@@ -358,12 +350,6 @@ PassRefPtr<HTMLElement> HTMLConstructionSite::createHTMLElement(AtomicHTMLToken*
     RefPtr<HTMLElement> element = HTMLElementFactory::createHTMLElement(token->name(), document, true);
     setAttributes(element.get(), token);
     return element.release();
-}
-
-void HTMLConstructionSite::PendingText::trace(Visitor* visitor)
-{
-    visitor->trace(parent);
-    visitor->trace(nextChild);
 }
 
 }

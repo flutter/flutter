@@ -180,8 +180,6 @@ public:
 
     bool isBeingDispatched() const { return eventPhase(); }
 
-    virtual void trace(Visitor*);
-
 protected:
     Event();
     Event(const AtomicString& type, bool canBubble, bool cancelable);

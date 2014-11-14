@@ -37,8 +37,6 @@ public:
 
     bool equals(const CSSInheritedValue&) const { return true; }
 
-    void traceAfterDispatch(Visitor* visitor) { CSSValue::traceAfterDispatch(visitor); }
-
 private:
     CSSInheritedValue()
         : CSSValue(InheritedClass)

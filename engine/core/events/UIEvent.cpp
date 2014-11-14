@@ -111,10 +111,4 @@ int UIEvent::which() const
     return 0;
 }
 
-void UIEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_view);
-    Event::trace(visitor);
-}
-
 } // namespace blink

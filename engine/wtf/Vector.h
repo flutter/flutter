@@ -600,11 +600,6 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
             Base::destruct();
         }
 
-        void finalizeGarbageCollectedObject()
-        {
-            finalize();
-        }
-
         Vector(const Vector&);
         template<size_t otherCapacity>
         explicit Vector(const Vector<T, otherCapacity, Allocator>&);

@@ -64,8 +64,6 @@ public:
 
     bool equals(const CSSFilterValue&) const;
 
-    void traceAfterDispatch(Visitor* visitor) { CSSValueList::traceAfterDispatch(visitor); }
-
 private:
     explicit CSSFilterValue(FilterOperationType);
     explicit CSSFilterValue(const CSSFilterValue& cloneFrom);

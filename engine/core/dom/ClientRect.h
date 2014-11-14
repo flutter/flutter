@@ -60,8 +60,6 @@ public:
     float width() const { return m_rect.width(); }
     float height() const { return m_rect.height(); }
 
-    void trace(Visitor*) { }
-
 private:
     ClientRect();
     explicit ClientRect(const IntRect&);

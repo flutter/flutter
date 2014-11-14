@@ -194,10 +194,4 @@ void ConsoleMessage::collectCallStack()
     m_callStack.clear();
 }
 
-void ConsoleMessage::trace(Visitor* visitor)
-{
-    visitor->trace(m_callStack);
-    visitor->trace(m_scriptArguments);
-}
-
 } // namespace blink

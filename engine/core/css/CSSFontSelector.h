@@ -80,8 +80,6 @@ public:
     const GenericFontFamilySettings& genericFontFamilySettings() const { return m_genericFontFamilySettings; }
     void updateGenericFontFamilySettings(Document&);
 
-    virtual void trace(Visitor*);
-
 private:
     explicit CSSFontSelector(Document*);
 

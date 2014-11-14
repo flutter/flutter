@@ -76,10 +76,4 @@ const AtomicString& PopStateEvent::interfaceName() const
     return EventNames::PopStateEvent;
 }
 
-void PopStateEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_history);
-    Event::trace(visitor);
-}
-
 } // namespace blink

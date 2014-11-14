@@ -120,8 +120,6 @@ public:
 
     bool fireEventListeners(Event*);
 
-    virtual void trace(Visitor*) { }
-
     virtual bool keepEventInNode(Event*) { return false; };
 
 protected:

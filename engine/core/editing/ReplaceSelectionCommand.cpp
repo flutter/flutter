@@ -1012,13 +1012,4 @@ bool ReplaceSelectionCommand::performTrivialReplace(const ReplacementFragment& f
     return true;
 }
 
-void ReplaceSelectionCommand::trace(Visitor* visitor)
-{
-    visitor->trace(m_startOfInsertedContent);
-    visitor->trace(m_endOfInsertedContent);
-    visitor->trace(m_insertionStyle);
-    visitor->trace(m_documentFragment);
-    CompositeEditCommand::trace(visitor);
-}
-
 } // namespace blink

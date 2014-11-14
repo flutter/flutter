@@ -58,10 +58,4 @@ bool AnimatableLengthBoxAndBool::equalTo(const AnimatableValue* value) const
     return box()->equals(lengthBox->box()) && flag() == lengthBox->flag();
 }
 
-void AnimatableLengthBoxAndBool::trace(Visitor* visitor)
-{
-    visitor->trace(m_box);
-    AnimatableValue::trace(visitor);
-}
-
 }

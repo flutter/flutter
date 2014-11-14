@@ -52,9 +52,4 @@ const AtomicString& AnimationPlayerEvent::interfaceName() const
     return EventNames::AnimationPlayerEvent;
 }
 
-void AnimationPlayerEvent::trace(Visitor* visitor)
-{
-    Event::trace(visitor);
-}
-
 } // namespace blink

@@ -271,13 +271,6 @@ public:
         return m_value->primitiveType();
     }
 
-
-    virtual void trace(Visitor* visitor)
-    {
-        visitor->trace(m_value);
-        CSSCalcExpressionNode::trace(visitor);
-    }
-
 private:
     CSSCalcPrimitiveValue(PassRefPtr<CSSPrimitiveValue> value, bool isInteger)
         : CSSCalcExpressionNode(unitCategory(value->primitiveType()), isInteger)
@@ -538,13 +531,6 @@ public:
         return CSSPrimitiveValue::CSS_UNKNOWN;
     }
 
-    virtual void trace(Visitor* visitor)
-    {
-        visitor->trace(m_leftSide);
-        visitor->trace(m_rightSide);
-        CSSCalcExpressionNode::trace(visitor);
-    }
-
 private:
     CSSCalcBinaryOperation(PassRefPtr<CSSCalcExpressionNode> leftSide, PassRefPtr<CSSCalcExpressionNode> rightSide, CalcOperator op, CalculationCategory category)
         : CSSCalcExpressionNode(category, isIntegerResult(leftSide.get(), rightSide.get(), op))
@@ -761,12 +747,6 @@ PassRefPtr<CSSCalcValue> CSSCalcValue::create(CSSParserString name, CSSParserVal
 PassRefPtr<CSSCalcValue> CSSCalcValue::create(PassRefPtr<CSSCalcExpressionNode> expression, ValueRange range)
 {
     return adoptRef(new CSSCalcValue(expression, range));
-}
-
-void CSSCalcValue::traceAfterDispatch(Visitor* visitor)
-{
-    visitor->trace(m_expression);
-    CSSValue::traceAfterDispatch(visitor);
 }
 
 } // namespace blink

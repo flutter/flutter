@@ -184,14 +184,6 @@ RenderObject::~RenderObject()
     --s_instanceCount;
 }
 
-void RenderObject::trace(Visitor* visitor)
-{
-    visitor->trace(m_node);
-    visitor->trace(m_parent);
-    visitor->trace(m_previous);
-    visitor->trace(m_next);
-}
-
 String RenderObject::debugName() const
 {
     StringBuilder name;

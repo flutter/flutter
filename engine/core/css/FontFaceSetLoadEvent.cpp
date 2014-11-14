@@ -58,10 +58,4 @@ const AtomicString& FontFaceSetLoadEvent::interfaceName() const
     return EventNames::FontFaceSetLoadEvent;
 }
 
-void FontFaceSetLoadEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_fontfaces);
-    Event::trace(visitor);
-}
-
 } // namespace blink

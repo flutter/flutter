@@ -103,10 +103,4 @@ const AtomicString& TextEvent::interfaceName() const
     return EventNames::TextEvent;
 }
 
-void TextEvent::trace(Visitor* visitor)
-{
-    visitor->trace(m_pastingFragment);
-    UIEvent::trace(visitor);
-}
-
 } // namespace blink

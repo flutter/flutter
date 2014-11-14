@@ -61,8 +61,6 @@ public:
 
     PassRefPtr<MediaQuerySet> copy() const { return adoptRef(new MediaQuerySet(*this)); }
 
-    void trace(Visitor*);
-
 private:
     MediaQuerySet();
     MediaQuerySet(const MediaQuerySet&);
@@ -104,8 +102,6 @@ public:
     const MediaQuerySet* queries() const { return m_mediaQueries.get(); }
 
     void reattach(MediaQuerySet*);
-
-    void trace(Visitor*);
 
 private:
     MediaList(MediaQuerySet*, CSSStyleSheet* parentSheet);

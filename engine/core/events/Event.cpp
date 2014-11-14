@@ -239,12 +239,4 @@ EventTarget* Event::currentTarget() const
     return m_currentTarget.get();
 }
 
-void Event::trace(Visitor* visitor)
-{
-    visitor->trace(m_currentTarget);
-    visitor->trace(m_target);
-    visitor->trace(m_underlyingEvent);
-    visitor->trace(m_eventPath);
-}
-
 } // namespace blink

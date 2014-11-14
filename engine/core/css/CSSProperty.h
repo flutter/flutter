@@ -82,8 +82,6 @@ public:
 
     const StylePropertyMetadata& metadata() const { return m_metadata; }
 
-    void trace(Visitor* visitor) { visitor->trace(m_value); }
-
 private:
     StylePropertyMetadata m_metadata;
     RefPtr<CSSValue> m_value;

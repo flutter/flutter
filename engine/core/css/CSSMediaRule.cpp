@@ -76,9 +76,4 @@ void CSSMediaRule::reattach(StyleRuleBase* rule)
         m_mediaCSSOMWrapper->reattach(mediaQueries());
 }
 
-void CSSMediaRule::trace(Visitor* visitor)
-{
-    visitor->trace(m_mediaCSSOMWrapper);
-    CSSGroupingRule::trace(visitor);
-}
 } // namespace blink

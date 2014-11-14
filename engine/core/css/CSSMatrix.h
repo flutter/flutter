@@ -148,8 +148,6 @@ public:
 
     String toString() const;
 
-    void trace(Visitor*) { }
-
 protected:
     CSSMatrix(const TransformationMatrix&);
     CSSMatrix(const String&, ExceptionState&);

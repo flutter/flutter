@@ -48,7 +48,6 @@ public:
         return adoptRef(new ScriptedAnimationController(document));
     }
     ~ScriptedAnimationController();
-    void trace(Visitor*);
     void clearDocumentPointer() { m_document = nullptr; }
 
     typedef int CallbackId;
