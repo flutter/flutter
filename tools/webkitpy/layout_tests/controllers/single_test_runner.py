@@ -168,14 +168,17 @@ class SingleTestRunner(object):
             self._save_baseline_data(driver_output.image, '.png', self._location_for_new_baseline(driver_output.image, '.png'))
 
     def _location_for_new_baseline(self, data, extension):
-        if self._options.add_platform_exceptions:
-            return self.VERSION_DIR
-        if extension == '.png':
-            return self.PLATFORM_DIR
-        if extension == '.wav':
-            return self.ALONGSIDE_TEST
-        if extension == '.txt' and self._render_tree_dump_pattern.match(data):
-            return self.PLATFORM_DIR
+        # TODO(ojan): Remove all of this baseline location stuff now that we
+        # only have one baseline directory.
+
+        # if self._options.add_platform_exceptions:
+        #     return self.VERSION_DIR
+        # if extension == '.png':
+        #     return self.PLATFORM_DIR
+        # if extension == '.wav':
+        #     return self.ALONGSIDE_TEST
+        # if extension == '.txt' and self._render_tree_dump_pattern.match(data):
+        #     return self.PLATFORM_DIR
         return self.ALONGSIDE_TEST
 
     def _overwrite_baselines(self, driver_output):
