@@ -299,8 +299,6 @@ sky_core_files = [
   "css/parser/MediaQueryToken.h",
   "css/parser/MediaQueryTokenizer.cpp",
   "css/parser/MediaQueryTokenizer.h",
-  "css/parser/SizesAttributeParser.cpp",
-  "css/parser/SizesAttributeParser.h",
   "css/parser/SizesCalcParser.cpp",
   "css/parser/SizesCalcParser.h",
   "css/PointerProperties.h",

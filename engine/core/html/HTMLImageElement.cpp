@@ -29,7 +29,6 @@
 #include "core/css/MediaQueryListListener.h"
 #include "core/css/MediaQueryMatcher.h"
 #include "core/css/MediaValuesDynamic.h"
-#include "core/css/parser/SizesAttributeParser.h"
 #include "core/dom/Attribute.h"
 #include "core/dom/NodeTraversal.h"
 #include "core/fetch/ImageResource.h"
@@ -384,14 +383,6 @@ FloatSize HTMLImageElement::defaultDestinationSize() const
 void HTMLImageElement::selectSourceURL(ImageLoader::UpdateFromElementBehavior behavior)
 {
     unsigned effectiveSize = 0;
-    if (RuntimeEnabledFeatures::pictureSizesEnabled()) {
-        String sizes = getAttribute(HTMLNames::sizesAttr);
-        if (!sizes.isNull())
-            UseCounter::count(document(), UseCounter::Sizes);
-        SizesAttributeParser parser = SizesAttributeParser(MediaValuesDynamic::create(document()), sizes);
-        effectiveSize = parser.length();
-        m_effectiveSizeViewportDependant = parser.viewportDependant();
-    }
     ImageCandidate candidate = bestFitSourceForImageAttributes(
         document().devicePixelRatio(), effectiveSize,
         getAttribute(HTMLNames::srcAttr), getAttribute(HTMLNames::srcsetAttr));
