@@ -256,6 +256,7 @@ class StyleDeclarationList {
   constructor ();
   void add(StyleDeclaration styles, String? pseudoElement = null); // O(1) // in debug mode, throws if the dictionary has any properties that aren't registered
   void remove(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
+  // TODO(ianh): Need to support inserting rules preserving order somehow
   Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
@@ -279,6 +280,8 @@ class Rule {
 Each frame, at some defined point relative to requestAnimationFrame():
  - If a rule starts applying to an element, sky:core calls thatElement.style.add(rule.styles, rule.pseudoElement);
  - If a rule stops applying to an element, sky:core calls thatElement.style.remove(rule.styles, rule.pseudoElement);
+
+TODO(ianh): fix the above so that rule order is maintained
 
 
 Cascade
