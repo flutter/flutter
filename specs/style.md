@@ -142,21 +142,23 @@ but for now, it supports:
    .class
    [attrname]
    [attrname=value]
-   :host
+   :host                  ("host" string is fixed)
+   ::pseudo-element
 
-These can be combined (without whitespace), with at most one tagname,
-as in:
+These can be combined (without whitespace), with at most one tagname
+(must be first) and at most one pseudo-element (must be last) as in:
 
-   tagname[attrname]#id:host.class.class[attrname=value]
+   tagname[attrname]#id:host.class.class[attrname=value]::foo
 
 In debug mode, giving two IDs, or the same selector twice (e.g. the
 same classname), or specifying other redundant or conflicting
 selectors (e.g. [foo][foo=bar], or [foo=bar][foo=baz]) will be
 flagged.
 
-Alternatively, a selector can be the following special value:
+Alternatively, a selector can be the special value "@document",
+optionally followed by a pseudo-element, as in:
 
-   @document
+   @document::bar
 
 
 Value Parser
@@ -252,9 +254,9 @@ partial class Element {
 
 class StyleDeclarationList {
   constructor ();
-  void add(StyleDeclaration styles); // O(1) // in debug mode, throws if the dictionary has any properties that aren't registered
-  void remove(StyleDeclaration styles); // O(N) in number of declarations
-  Array<StyleDeclaration> getDeclarations(); // O(N) in number of declarations
+  void add(StyleDeclaration styles, String? pseudoElement = null); // O(1) // in debug mode, throws if the dictionary has any properties that aren't registered
+  void remove(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
+  Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
 typedef StyleDeclaration Dictionary<ParsedValue>;
@@ -270,12 +272,13 @@ partial class StyleElement {
 class Rule {
   constructor ();
   attribute SelectorQuery selector; // O(1)
+  attribute String? pseudoElement; // O(1)
   attribute StyleDeclaration styles; // O(1)
 }
 
 Each frame, at some defined point relative to requestAnimationFrame():
- - If a rule starts applying to an element, sky:core calls thatElement.style.add(rule.styles);
- - If a rule stops applying to an element, sky:core calls thatElement.style.remove(rule.styles);
+ - If a rule starts applying to an element, sky:core calls thatElement.style.add(rule.styles, rule.pseudoElement);
+ - If a rule stops applying to an element, sky:core calls thatElement.style.remove(rule.styles, rule.pseudoElement);
 
 
 Cascade
@@ -314,7 +317,8 @@ node's layoutManager and ownerLayoutManager attributes to null.
     readonly attribute Node? nextSibling;
 
     // access to the results of the cascade
-    any getProperty(String name);
+    any getProperty(String name, String? pseudoElement = null);
+       // looking at the declarations for the given pseudoElement:
        // if there's a cached value, return it
        // otherwise, if there's an applicable ParsedValue, then
        //   if it has a resolver:
@@ -323,8 +327,9 @@ node's layoutManager and ownerLayoutManager attributes to null.
        //     if relativeDimension is true, then mark the value as provisional
        //     return the value
        //   otherwise use the ParsedValue's value; cache it; return it
+       // otherwise, if a pseudo-element was specified, try again without one
        // otherwise, if the property is inherited and there's a parent:
-       //   get it from the parent; cache it; return it
+       //   get it from the parent (without pseudo); cache it; return it
        // otherwise, get the default value; cache it; return it
 
     readonly attribute Boolean needsLayout; // means that a property with needsLayout:true has changed on this node or one of its descendants
