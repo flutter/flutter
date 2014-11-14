@@ -37,7 +37,7 @@ SKY MODULE
    }
    function getIntrinsicWidth() {
      let width = this.node.getProperty('width');
-     if (typeof height != 'number') {
+     if (typeof width != 'number') {
        // e.g. width: auto
        width = 0;
        let children = this.walkChildren();
