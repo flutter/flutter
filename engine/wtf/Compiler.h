@@ -127,8 +127,6 @@
 #define ALLOW_UNUSED
 #endif
 
-/* FIXME: Convert all instance of FINAL to final */
-#define FINAL final
 
 /* REFERENCED_FROM_ASM */
 

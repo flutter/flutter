@@ -32,7 +32,7 @@
 
 namespace WTF {
 
-class WTF_EXPORT FilePrintStream FINAL : public PrintStream {
+class WTF_EXPORT FilePrintStream final : public PrintStream {
 public:
     enum AdoptionMode {
         Adopt,

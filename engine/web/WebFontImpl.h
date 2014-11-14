@@ -38,7 +38,7 @@ namespace blink {
 
 class FontDescription;
 
-class WebFontImpl FINAL : public WebFont {
+class WebFontImpl final : public WebFont {
 public:
     explicit WebFontImpl(const FontDescription&);
 

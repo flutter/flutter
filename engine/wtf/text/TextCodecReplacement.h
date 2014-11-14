@@ -10,7 +10,7 @@
 
 namespace WTF {
 
-class TextCodecReplacement FINAL : public TextCodecUTF8 {
+class TextCodecReplacement final : public TextCodecUTF8 {
 public:
     TextCodecReplacement();
 

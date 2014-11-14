@@ -39,7 +39,7 @@ namespace blink {
 class LocalFrame;
 class WebViewImpl;
 
-class SpellCheckerClientImpl FINAL : public SpellCheckerClient, public TextCheckerClient {
+class SpellCheckerClientImpl final : public SpellCheckerClient, public TextCheckerClient {
 public:
     explicit SpellCheckerClientImpl(WebViewImpl*);
 

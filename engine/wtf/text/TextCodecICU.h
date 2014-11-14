@@ -37,7 +37,7 @@ namespace WTF {
 
 class TextCodecInput;
 
-class TextCodecICU FINAL : public TextCodec {
+class TextCodecICU final : public TextCodec {
 public:
     static void registerEncodingNames(EncodingNameRegistrar);
     static void registerCodecs(TextCodecRegistrar);

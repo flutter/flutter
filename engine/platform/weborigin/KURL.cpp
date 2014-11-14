@@ -93,7 +93,7 @@ static bool isUnicodeEncoding(const WTF::TextEncoding* encoding)
 
 namespace {
 
-class KURLCharsetConverter FINAL : public url::CharsetConverter {
+class KURLCharsetConverter final : public url::CharsetConverter {
 public:
     // The encoding parameter may be 0, but in this case the object must not be called.
     explicit KURLCharsetConverter(const WTF::TextEncoding* encoding)

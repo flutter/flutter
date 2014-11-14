@@ -46,7 +46,7 @@ struct WebFloatRect;
 struct WebRect;
 class WebViewImpl;
 
-class LinkHighlight FINAL : public WebContentLayerClient, public WebCompositorAnimationDelegate, blink::LinkHighlightClient {
+class LinkHighlight final : public WebContentLayerClient, public WebCompositorAnimationDelegate, blink::LinkHighlightClient {
 public:
     static PassOwnPtr<LinkHighlight> create(Node*, WebViewImpl*);
     virtual ~LinkHighlight();

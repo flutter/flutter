@@ -39,7 +39,7 @@ namespace blink {
 class LocalFrame;
 class WebViewImpl;
 
-class EditorClientImpl FINAL : public EditorClient {
+class EditorClientImpl final : public EditorClient {
 public:
     explicit EditorClientImpl(WebViewImpl*);
     virtual ~EditorClientImpl();

@@ -63,7 +63,7 @@ class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
 
-class WebViewImpl FINAL : public WebView
+class WebViewImpl final : public WebView
     , public RefCounted<WebViewImpl>
     , public WebGestureCurveTarget
     , public PageWidgetEventHandler {

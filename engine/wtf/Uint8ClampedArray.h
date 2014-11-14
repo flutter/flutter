@@ -33,7 +33,7 @@
 
 namespace WTF {
 
-class Uint8ClampedArray FINAL : public Uint8Array {
+class Uint8ClampedArray final : public Uint8Array {
 public:
     static inline PassRefPtr<Uint8ClampedArray> create(unsigned length);
     static inline PassRefPtr<Uint8ClampedArray> create(const unsigned char* array, unsigned length);

@@ -54,7 +54,7 @@ class WebViewImpl;
 template <typename T> class WebVector;
 
 // Implementation of WebFrame, note that this is a reference counted object.
-class WebLocalFrameImpl FINAL
+class WebLocalFrameImpl final
     : public WebLocalFrame
     , public RefCounted<WebLocalFrameImpl> {
 public:

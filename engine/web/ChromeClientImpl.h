@@ -52,7 +52,7 @@ class WebViewImpl;
 struct WebCursorInfo;
 
 // Handles window-level notifications from WebCore on behalf of a WebView.
-class ChromeClientImpl FINAL : public ChromeClient {
+class ChromeClientImpl final : public ChromeClient {
 public:
     explicit ChromeClientImpl(WebViewImpl* webView);
     virtual ~ChromeClientImpl();

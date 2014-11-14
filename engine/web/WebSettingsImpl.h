@@ -37,7 +37,7 @@ namespace blink {
 
 class Settings;
 
-class WebSettingsImpl FINAL : public WebSettings {
+class WebSettingsImpl final : public WebSettings {
 public:
     explicit WebSettingsImpl(Settings*);
     virtual ~WebSettingsImpl() { }

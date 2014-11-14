@@ -41,7 +41,7 @@ namespace blink {
 
 class WebLocalFrameImpl;
 
-class FrameLoaderClientImpl FINAL : public FrameLoaderClient {
+class FrameLoaderClientImpl final : public FrameLoaderClient {
 public:
     explicit FrameLoaderClientImpl(WebLocalFrameImpl* webFrame);
     virtual ~FrameLoaderClientImpl();

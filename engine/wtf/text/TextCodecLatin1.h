@@ -30,7 +30,7 @@
 
 namespace WTF {
 
-class TextCodecLatin1 FINAL : public TextCodec {
+class TextCodecLatin1 final : public TextCodec {
 public:
     static void registerEncodingNames(EncodingNameRegistrar);
     static void registerCodecs(TextCodecRegistrar);

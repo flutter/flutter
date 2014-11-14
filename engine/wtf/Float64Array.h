@@ -32,7 +32,7 @@
 
 namespace WTF {
 
-class Float64Array FINAL : public TypedArrayBase<double> {
+class Float64Array final : public TypedArrayBase<double> {
 public:
     static inline PassRefPtr<Float64Array> create(unsigned length);
     static inline PassRefPtr<Float64Array> create(const double* array, unsigned length);
