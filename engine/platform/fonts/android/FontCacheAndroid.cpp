@@ -31,7 +31,7 @@
 #include "config.h"
 #include "platform/fonts/FontCache.h"
 
-
+#include "platform/Language.h"
 #include "platform/fonts/SimpleFontData.h"
 #include "platform/fonts/FontDescription.h"
 #include "platform/fonts/FontFaceCreationParams.h"
@@ -40,31 +40,19 @@
 
 namespace blink {
 
-static AtomicString getFamilyNameForCharacter(UChar32 c, UScriptCode script)
+static AtomicString getFamilyNameForCharacter(UChar32 c, const FontDescription& fontDescription)
 {
-    // This is a hack to use the preferred font for CJK scripts.
-    // FIXME: Use new Skia API once Android system supports per-family and per-script fallback fonts.
-    const char* locale;
-    switch (script) {
-    case USCRIPT_SIMPLIFIED_HAN:
-        locale = "zh-CN";
-        break;
-    case USCRIPT_TRADITIONAL_HAN:
-        locale = "zh-TW";
-        break;
-    case USCRIPT_KATAKANA_OR_HIRAGANA:
-        locale = "ja";
-        break;
-    case USCRIPT_HANGUL:
-        locale = "ko";
-        break;
-    default:
-        locale = 0;
-        break;
-    }
-
     RefPtr<SkFontMgr> fm = adoptRef(SkFontMgr::RefDefault());
-    RefPtr<SkTypeface> typeface = adoptRef(fm->matchFamilyStyleCharacter(0, SkFontStyle(), locale, c));
+    const char* bcp47Locales[2];
+    int localeCount = 0;
+    CString defaultLocale = defaultLanguage().ascii();
+    bcp47Locales[localeCount++] = defaultLocale.data();
+    CString fontLocale;
+    if (!fontDescription.locale().isEmpty()) {
+        fontLocale = fontDescription.locale().ascii();
+        bcp47Locales[localeCount++] = fontLocale.data();
+    }
+    RefPtr<SkTypeface> typeface = adoptRef(fm->matchFamilyStyleCharacter(0, SkFontStyle(), bcp47Locales, localeCount, c));
     if (!typeface)
         return emptyAtom;
 
@@ -75,19 +63,19 @@ static AtomicString getFamilyNameForCharacter(UChar32 c, UScriptCode script)
 
 PassRefPtr<SimpleFontData> FontCache::fallbackFontForCharacter(const FontDescription& fontDescription, UChar32 c, const SimpleFontData*)
 {
-    AtomicString familyName = getFamilyNameForCharacter(c, fontDescription.script());
+    AtomicString familyName = getFamilyNameForCharacter(c, fontDescription);
     if (familyName.isEmpty())
         return getLastResortFallbackFont(fontDescription, DoNotRetain);
     return fontDataFromFontPlatformData(getFontPlatformData(fontDescription, FontFaceCreationParams(familyName)), DoNotRetain);
 }
 
 // static
-AtomicString FontCache::getGenericFamilyNameForScript(const AtomicString& familyName, UScriptCode script)
+AtomicString FontCache::getGenericFamilyNameForScript(const AtomicString& familyName, const FontDescription& fontDescription)
 {
     // This is a hack to use the preferred font for CJK scripts.
     // FIXME: Use new Skia API once Android system supports per-family and per-script fallback fonts.
     UChar32 examplerChar;
-    switch (script) {
+    switch (fontDescription.script()) {
     case USCRIPT_SIMPLIFIED_HAN:
     case USCRIPT_TRADITIONAL_HAN:
     case USCRIPT_KATAKANA_OR_HIRAGANA:
@@ -101,7 +89,7 @@ AtomicString FontCache::getGenericFamilyNameForScript(const AtomicString& family
         return familyName;
     }
 
-    return getFamilyNameForCharacter(examplerChar, script);
+    return getFamilyNameForCharacter(examplerChar, fontDescription);
 }
 
 } // namespace blink
