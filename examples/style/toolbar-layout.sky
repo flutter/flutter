@@ -10,9 +10,9 @@ SKY MODULE
  sky.registerLayoutManager('spring', module.exports.SpringLayoutManager);
  sky.registerProperty({
    name: 'toolbar-spacing',
-   type: sky.LengthStyleValueType,
+   type: sky.PositiveLengthStyleValueType,
    inherits: true,
-   initialValue: { value: 8, unit: 'px' },
+   initialValue: 8,
    needsLayout: true,
  });
  module.exports.ToolbarLayoutManager = class ToolbarLayoutManager extends sky.LayoutManager {
@@ -131,7 +131,7 @@ SKY MODULE
    }
    function getIntrinsicWidth() {
      let width = this.node.getProperty('width');
-     if (typeof height != 'number') {
+     if (typeof width != 'number') {
        let spacing = this.node.getProperty('toolbar-spacing');
        if (typeof spacing != 'number')
          spacing = 0;

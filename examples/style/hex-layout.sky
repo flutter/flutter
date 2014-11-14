@@ -112,18 +112,48 @@
        loop = children.next();
      }
    }
+   function inHex(topLeftX, topLeftY, width, height, hitX, hitY) {
+     let centerX = topLeftX - width/2;
+     let absCenteredHitX = Math.abs(hitX - centerX);
+     if (absCenteredHitX > width/2)
+       return false;
+     let centerY = topLeftY - height/2;
+     let absCenteredHitY = Math.abs(hitY - centerY);
+     if (absCenteredHitY > height/2)
+       return false;
+     if (absCenteredHitY < height * absCenteredHitX / (2 * width) + height / 2)
+       return true;
+     return false;
+   }
+   function hitTest(x, y) {
+     let cellCount = this.node.getProperty('beehive-count');
+     let cellDim = width / cellCount;
+     let children = this.walkChildren();
+     let loop = children.next();
+     while (!loop.done) {
+       let child = loop.value;
+       if (this.inHex(child.x, child.y, child.width, child.height, x, y))
+         return child.layoutManager.hitText(x, y);
+       loop = children.next();
+     }
+     return this.node;
+   }
  }
  sky.registerLayoutManager('beehive', BeehiveLayoutManager);
  let BeehiveCountStyleValueType = new StyleValueType();
  BeehiveCountStyleValueType.addParser((tokens) => {
    let token = tokens.next();
-   if (token.done) throw new Error();
-   if (token.value.kind != 'number') throw new Error();
-   if (token.value.value <= 0) throw new Error();
-   if (Math.trunc(token.value.value) != token.value.value) throw new Error();
-   let result = token.value.value;
-   if (!token.next().done) throw new Error();
-   return result;
+   if (token.done)
+     throw new Error();
+   if (token.value.kind != 'number')
+     throw new Error();
+   if (token.value.value <= 0)
+     throw new Error();
+   if (Math.trunc(token.value.value) != token.value.value) // is integer
+     throw new Error();
+   return {
+     value: token.value.value;
+   }
  });
  sky.registerProperty({
    name: 'beehive-count',

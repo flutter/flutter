@@ -410,16 +410,10 @@ Layout managers inherit from the following API:
       // as provisional, clear them
 
     Generator<StyleNode> walkChildren();
-      // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not this
+      // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not |this|
 
-    void paint(RenderingSurface canvas);
-      // set a clip rect on the canvas
-      // call the painter of each property, in order they were registered, which on this element has a painter
-      // call this.paintChildren()
-      // unset the clip
-
-    virtual void paintChildren(RenderingSurface canvas);
-      // just calls paint() for each child returned by walkChildren() whose needsPaint is true
+    Generator<StyleNode> walkChildrenBackwards();
+      // returns a generator that iterates over the children backwards, skipping any whose ownerLayoutManager is not |this|
 
     void assumeDimensions(Float width, Float height);
       // sets the assumed dimensions for calls to getProperty() on StyleNodes that have this as an ownerLayoutManager
@@ -440,6 +434,25 @@ Layout managers inherit from the following API:
       // returns { }
       // the return value should include the final value for whichever of the width and height arguments that is null
       // TODO(ianh): should we just grab the width and height from assumeDimensions()?
+
+    void paint(RenderingSurface canvas);
+      // set a clip rect on the canvas
+      // call the painter of each property, in order they were registered, which on this element has a painter
+      // call this.paintChildren()
+      // unset the clip
+
+    virtual void paintChildren(RenderingSurface canvas);
+      // just calls paint() for each child returned by walkChildren() whose needsPaint is true
+
+    virtual Node hitTest(Float x, Float y);
+      // default implementation uses the node's children nodes' x, y,
+      // width, and height, skipping any that have width=0 or height=0, or
+      // whose ownerLayoutManager is not |this|
+      // default implementation walks the tree backwards from its built-in order
+      // if no child is hit, then return this.node
+      // override this if you changed your children's z-order, or if you used take() to
+      // hoist some descendants up to be your responsibility, or if your children aren't
+      // rectangular (e.g. you lay them out in a hex grid)
 
   }
 
