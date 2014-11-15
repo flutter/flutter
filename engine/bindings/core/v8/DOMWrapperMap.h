@@ -33,9 +33,9 @@
 
 #include "bindings/core/v8/WrapperTypeInfo.h"
 #include "platform/ScriptForbiddenScope.h"
+#include "v8/include/v8-util.h"
+#include "v8/include/v8.h"
 #include "wtf/HashMap.h"
-#include <v8-util.h>
-#include <v8.h>
 
 namespace blink {
 

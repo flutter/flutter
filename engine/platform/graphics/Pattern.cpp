@@ -28,10 +28,10 @@
 #include "config.h"
 #include "platform/graphics/Pattern.h"
 
-#include <v8.h>
+#include "platform/graphics/skia/SkiaUtils.h"
 #include "SkCanvas.h"
 #include "SkColorShader.h"
-#include "platform/graphics/skia/SkiaUtils.h"
+#include "v8/include/v8.h"
 
 namespace blink {
 

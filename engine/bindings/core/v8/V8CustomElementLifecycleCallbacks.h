@@ -35,9 +35,9 @@
 #include "bindings/core/v8/ScriptState.h"
 #include "core/dom/ContextLifecycleObserver.h"
 #include "core/dom/custom/CustomElementLifecycleCallbacks.h"
+#include "v8/include/v8.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/PassRefPtr.h"
-#include <v8.h>
 
 namespace blink {
 

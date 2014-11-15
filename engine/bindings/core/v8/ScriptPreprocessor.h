@@ -31,9 +31,9 @@
 #define ScriptPreprocessor_h
 
 #include "bindings/core/v8/V8Binding.h"
+#include "v8/include/v8.h"
 #include "wtf/RefCounted.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

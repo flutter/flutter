@@ -48,9 +48,9 @@
 #include "platform/EventDispatchForbiddenScope.h"
 #include "platform/TraceEvent.h"
 #include "public/platform/Platform.h"
+#include "v8/include/v8-debug.h"
 #include "wtf/RefPtr.h"
 #include "wtf/text/WTFString.h"
-#include <v8-debug.h>
 
 namespace blink {
 

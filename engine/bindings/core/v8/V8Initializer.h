@@ -26,7 +26,7 @@
 #ifndef V8Initializer_h
 #define V8Initializer_h
 
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace blink {
 

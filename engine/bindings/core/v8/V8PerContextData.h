@@ -37,12 +37,12 @@
 #include "bindings/core/v8/WrapperTypeInfo.h"
 #include "gin/public/context_holder.h"
 #include "gin/public/gin_embedders.h"
+#include "v8/include/v8.h"
 #include "wtf/HashMap.h"
 #include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/AtomicStringHash.h"
-#include <v8.h>
+#include "wtf/Vector.h"
 
 namespace blink {
 

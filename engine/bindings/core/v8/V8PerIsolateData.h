@@ -32,11 +32,11 @@
 #include "bindings/core/v8/WrapperTypeInfo.h"
 #include "gin/public/gin_embedders.h"
 #include "gin/public/isolate_holder.h"
+#include "v8/include/v8.h"
 #include "wtf/Forward.h"
 #include "wtf/HashMap.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/Vector.h"
-#include <v8.h>
 
 namespace blink {
 

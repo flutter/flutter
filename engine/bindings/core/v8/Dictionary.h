@@ -33,12 +33,12 @@
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8BindingMacros.h"
 #include "core/events/EventListener.h"
+#include "v8/include/v8.h"
 #include "wtf/HashMap.h"
 #include "wtf/HashSet.h"
-#include "wtf/Vector.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
+#include "wtf/Vector.h"
 
 namespace blink {
 

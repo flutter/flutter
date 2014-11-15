@@ -42,8 +42,7 @@
 #include "platform/Timer.h"
 #include "public/web/WebDocument.h"
 #include "public/web/WebLocalFrame.h"
-
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace blink {
 

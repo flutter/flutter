@@ -33,7 +33,7 @@
 
 #include "bindings/core/v8/ScriptValue.h"
 #include "bindings/core/v8/V8Binding.h"
-#include <v8-debug.h>
+#include "v8/include/v8-debug.h"
 
 namespace blink {
 

@@ -32,8 +32,8 @@
 #define CustomElementBinding_h
 
 #include "bindings/core/v8/ScopedPersistent.h"
+#include "v8/include/v8.h"
 #include "wtf/PassOwnPtr.h"
-#include <v8.h>
 
 namespace blink {
 

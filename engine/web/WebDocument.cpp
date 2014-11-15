@@ -45,9 +45,9 @@
 #include "core/rendering/RenderView.h"
 #include "public/platform/WebURL.h"
 #include "public/web/WebElement.h"
+#include "v8/include/v8.h"
 #include "web/WebLocalFrameImpl.h"
 #include "wtf/PassRefPtr.h"
-#include <v8.h>
 
 namespace blink {
 

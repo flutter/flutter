@@ -39,7 +39,7 @@
 #include "public/platform/WebCommon.h"
 #include "public/platform/WebURLError.h"
 #include "public/platform/WebURLRequest.h"
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace mojo {
 class View;

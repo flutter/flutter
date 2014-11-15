@@ -31,31 +31,32 @@
 #include "config.h"
 #include "bindings/core/v8/WindowProxy.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "bindings/core/v8/DOMWrapperWorld.h"
 #include "bindings/core/v8/ScriptController.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8Document.h"
 #include "bindings/core/v8/V8GCForContextDispose.h"
-#include "bindings/core/v8/V8HTMLDocument.h"
 #include "bindings/core/v8/V8HiddenValue.h"
+#include "bindings/core/v8/V8HTMLDocument.h"
 #include "bindings/core/v8/V8Initializer.h"
 #include "bindings/core/v8/V8ObjectConstructor.h"
 #include "bindings/core/v8/V8Window.h"
 #include "core/frame/LocalFrame.h"
 #include "core/loader/FrameLoaderClient.h"
+#include "platform/heap/Handle.h"
 #include "platform/RuntimeEnabledFeatures.h"
 #include "platform/ScriptForbiddenScope.h"
 #include "platform/TraceEvent.h"
-#include "platform/heap/Handle.h"
 #include "public/platform/Platform.h"
+#include "v8/include/v8-debug.h"
+#include "v8/include/v8.h"
 #include "wtf/Assertions.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/StringExtras.h"
 #include "wtf/text/CString.h"
-#include <algorithm>
-#include <utility>
-#include <v8-debug.h>
-#include <v8.h>
 
 namespace blink {
 

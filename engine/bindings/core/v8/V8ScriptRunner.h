@@ -27,10 +27,10 @@
 #define V8ScriptRunner_h
 
 #include "bindings/core/v8/V8CacheOptions.h"
+#include "v8/include/v8.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/text/TextPosition.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

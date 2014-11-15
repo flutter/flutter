@@ -26,10 +26,10 @@
 #ifndef V8StringResource_h
 #define V8StringResource_h
 
-#include "wtf/Threading.h"
+#include "v8/include/v8.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
+#include "wtf/Threading.h"
 
 namespace blink {
 

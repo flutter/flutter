@@ -37,9 +37,8 @@
 #include "core/inspector/ScriptCallFrame.h"
 #include "core/inspector/ScriptCallStack.h"
 #include "platform/JSONValues.h"
+#include "v8/include/v8-debug.h"
 #include "wtf/text/StringBuilder.h"
-
-#include <v8-debug.h>
 
 namespace blink {
 

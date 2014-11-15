@@ -34,8 +34,8 @@
 #include "bindings/core/v8/V8PerIsolateData.h"
 #include "core/dom/ExecutionContext.h"
 #include "platform/ScriptForbiddenScope.h"
+#include "v8/include/v8.h"
 #include "wtf/Noncopyable.h"
-#include <v8.h>
 
 namespace blink {
 

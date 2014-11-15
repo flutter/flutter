@@ -29,8 +29,8 @@
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8DOMWrapper.h"
 #include "bindings/core/v8/WrapperTypeInfo.h"
+#include "v8/include/v8.h"
 #include "wtf/ArrayBuffer.h"
-#include <v8.h>
 
 namespace blink {
 

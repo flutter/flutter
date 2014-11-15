@@ -35,10 +35,10 @@
 #include "bindings/core/v8/V8ThrowException.h"
 #include "core/dom/ExceptionCode.h"
 #include "platform/heap/Handle.h"
+#include "v8/include/v8.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

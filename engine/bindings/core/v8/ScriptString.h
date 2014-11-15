@@ -32,9 +32,9 @@
 #define ScriptString_h
 
 #include "bindings/core/v8/SharedPersistent.h"
+#include "v8/include/v8.h"
 #include "wtf/RefPtr.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

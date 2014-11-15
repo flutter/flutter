@@ -32,9 +32,9 @@
 #define ScriptWrappable_h
 
 #include "bindings/core/v8/WrapperTypeInfo.h"
-#include "platform/ScriptForbiddenScope.h"
 #include "platform/heap/Handle.h"
-#include <v8.h>
+#include "platform/ScriptForbiddenScope.h"
+#include "v8/include/v8.h"
 
 namespace blink {
 

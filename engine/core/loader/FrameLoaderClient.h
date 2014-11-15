@@ -35,9 +35,9 @@
 #include "core/loader/NavigationPolicy.h"
 #include "platform/network/ResourceLoadPriority.h"
 #include "platform/weborigin/Referrer.h"
+#include "v8/include/v8.h"
 #include "wtf/Forward.h"
 #include "wtf/Vector.h"
-#include <v8.h>
 
 namespace mojo {
 class View;

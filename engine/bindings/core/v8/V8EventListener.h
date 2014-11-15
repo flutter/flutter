@@ -32,8 +32,8 @@
 #define V8EventListener_h
 
 #include "bindings/core/v8/V8AbstractEventListener.h"
+#include "v8/include/v8.h"
 #include "wtf/PassRefPtr.h"
-#include <v8.h>
 
 namespace blink {
 

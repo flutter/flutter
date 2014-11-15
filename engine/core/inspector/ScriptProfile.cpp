@@ -32,9 +32,9 @@
 #include "core/inspector/ScriptProfile.h"
 
 #include "bindings/core/v8/V8Binding.h"
+#include "v8/include/v8.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefPtr.h"
-#include <v8.h>
 
 namespace blink {
 

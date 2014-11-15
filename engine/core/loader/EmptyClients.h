@@ -40,8 +40,8 @@
 #include "platform/network/ResourceError.h"
 #include "platform/text/TextCheckerClient.h"
 #include "public/platform/WebScreenInfo.h"
+#include "v8/include/v8.h"
 #include "wtf/Forward.h"
-#include <v8.h>
 
 /*
  This file holds empty Client stubs for use by WebCore.

@@ -13,5 +13,6 @@ include_rules = [
     "+skia",
     "+third_party/khronos",
     "+third_party/skia",
+    "+v8",
     "+web",
 ]

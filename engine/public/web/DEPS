@@ -2,6 +2,7 @@ include_rules = [
     "+../platform",
     "+core",
     "+platform",
+    "+v8",
 
     # For subdirectories.
     "+../../platform",

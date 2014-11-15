@@ -42,12 +42,12 @@
 #include "core/page/EventHandler.h"
 #include "core/page/Page.h"
 #include "core/rendering/HitTestResult.h"
-#include "platform/MIMETypeRegistry.h"
-#include "platform/RuntimeEnabledFeatures.h"
-#include "platform/UserGestureIndicator.h"
 #include "platform/exported/WrappedResourceRequest.h"
 #include "platform/exported/WrappedResourceResponse.h"
+#include "platform/MIMETypeRegistry.h"
 #include "platform/network/HTTPParsers.h"
+#include "platform/RuntimeEnabledFeatures.h"
+#include "platform/UserGestureIndicator.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebMimeRegistry.h"
 #include "public/platform/WebURL.h"
@@ -58,12 +58,12 @@
 #include "public/web/WebFrameClient.h"
 #include "public/web/WebNode.h"
 #include "public/web/WebViewClient.h"
+#include "v8/include/v8.h"
 #include "web/WebLocalFrameImpl.h"
 #include "web/WebViewImpl.h"
 #include "wtf/StringExtras.h"
 #include "wtf/text/CString.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

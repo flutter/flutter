@@ -34,9 +34,9 @@
 #include "bindings/core/v8/ScopedPersistent.h"
 #include "bindings/core/v8/ScriptPromise.h"
 #include "bindings/core/v8/V8ThrowException.h"
+#include "v8/include/v8.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/text/WTFString.h"
-#include <v8.h>
 
 namespace blink {
 

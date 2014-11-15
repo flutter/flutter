@@ -33,13 +33,13 @@
 
 #include "bindings/core/v8/ScriptValue.h"
 #include "bindings/core/v8/V8CustomElementLifecycleCallbacks.h"
-#include "core/dom/QualifiedName.h"
 #include "core/dom/custom/CustomElementLifecycleCallbacks.h"
+#include "core/dom/QualifiedName.h"
+#include "v8/include/v8.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefPtr.h"
 #include "wtf/text/AtomicString.h"
-#include <v8.h>
 
 namespace blink {
 

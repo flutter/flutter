@@ -31,7 +31,7 @@
 #ifndef V8GCController_h
 #define V8GCController_h
 
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace blink {
 

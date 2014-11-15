@@ -39,10 +39,9 @@
 #include "bindings/core/v8/WrapperTypeInfo.h"
 #include "core/dom/Document.h"
 #include "core/inspector/BindingVisitors.h"
+#include "v8/include/v8-profiler.h"
+#include "v8/include/v8.h"
 #include "wtf/ThreadSpecific.h"
-
-#include <v8-profiler.h>
-#include <v8.h>
 
 namespace blink {
 

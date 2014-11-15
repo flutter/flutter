@@ -35,9 +35,9 @@
 #include "bindings/core/v8/DOMWrapperWorld.h"
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "bindings/core/v8/WrapperTypeInfo.h"
+#include "v8/include/v8.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/StdLibExtras.h"
-#include <v8.h>
 
 namespace blink {
 

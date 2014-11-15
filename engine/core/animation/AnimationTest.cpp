@@ -5,6 +5,8 @@
 #include "config.h"
 #include "core/animation/Animation.h"
 
+#include <gtest/gtest.h>
+
 #include "bindings/core/v8/Dictionary.h"
 #include "bindings/core/v8/Nullable.h"
 #include "core/animation/AnimationClock.h"
@@ -16,8 +18,7 @@
 #include "core/animation/Timing.h"
 #include "core/dom/Document.h"
 #include "core/testing/DummyPageHolder.h"
-#include <gtest/gtest.h>
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace blink {
 

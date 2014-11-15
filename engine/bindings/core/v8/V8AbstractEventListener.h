@@ -34,9 +34,9 @@
 #include "bindings/core/v8/DOMWrapperWorld.h"
 #include "bindings/core/v8/ScopedPersistent.h"
 #include "core/events/EventListener.h"
+#include "v8/include/v8.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
-#include <v8.h>
 
 namespace blink {
 
