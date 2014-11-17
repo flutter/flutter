@@ -33,7 +33,7 @@ void RenderIFrame::updateWidgetBounds()
     if (!contentView)
         return;
 
-    IntRect bounds = pixelSnappedIntRect(frameRect());
+    IntRect bounds = absoluteContentBox();
     mojo::Rect mojoBounds;
     mojoBounds.x = bounds.x();
     mojoBounds.y = bounds.y();
