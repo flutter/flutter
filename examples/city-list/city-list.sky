@@ -479,7 +479,7 @@ SkyElement({
         this.drawTop -= height;
 
         var tile = targetBottom < this.drawTop ?
-            new Tile(datum, null, viewType, -1) : // off-screen
+            new Tile(datum, null, datum.viewType, -1) : // off-screen
             this.checkoutTile(type, datum, this.drawTop);
 
         this.firstItem--;
@@ -497,7 +497,7 @@ SkyElement({
         this.drawBottom += height;
 
         var tile = targetTop > this.drawBottom ?
-            new Tile(datum, null, viewType, -1) : // off-screen
+            new Tile(datum, null, datum.viewType, -1) : // off-screen
             this.checkoutTile(type, datum, this.drawBottom - height);
 
         tiles.push(tile);
