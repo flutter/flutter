@@ -319,7 +319,9 @@ be dropped from the render tree.
 If any node is removed in this pass relative to the previous pass, and
 it has an ownerLayoutManager, then call
 
-```node.ownerLayoutManager.release(node)```
+```javascript
+node.ownerLayoutManager.release(node)
+```
 
 ...to notify the layout manager that the node went away, then set the
 node's layoutManager and ownerLayoutManager attributes to null.
@@ -407,7 +409,7 @@ sky:core by default registers:
 
 Layout managers inherit from the following API:
 
-```
+```javascript
 class LayoutManager {
   readonly attribute StyleNode node;
   constructor LayoutManager(StyleNode node);
@@ -534,28 +536,40 @@ StyleDeclaration objects as follows:
 * ``content``
 * ``title``
   These all add to themselves the same declaration with value:
-  ```{ display: { value: null } }```
+```css
+{ display: { value: null } }
+```
 
 * ``img``
   This adds to itself the declaration with value:
-  ```{ display: { value: sky.ImageElementLayoutManager } }```
+```css
+{ display: { value: sky.ImageElementLayoutManager } }
+```
 
 * ``span``
 * ``a``
   These all add to themselves the same declaration with value:
-  ```{ display: { value: sky.InlineLayoutManager } }```
+```css
+{ display: { value: sky.InlineLayoutManager } }
+```
 
 * ``iframe``
   This adds to itself the declaration with value:
-  ```{ display: { value: sky.IFrameElementLayoutManager } }```
+```css
+{ display: { value: sky.IFrameElementLayoutManager } }
+```
 
 * ``t``
   This adds to itself the declaration with value:
-  ```{ display: { value: sky.ParagraphLayoutManager } }```
+```css
+{ display: { value: sky.ParagraphLayoutManager } }
+```
 
 * ``error``
   This adds to itself the declaration with value:
-  ```{ display: { value: sky.ErrorLayoutManager } }```
+```css
+{ display: { value: sky.ErrorLayoutManager } }
+```
 
 The ``div`` element doesn't have any default styles.
 
