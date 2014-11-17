@@ -70,6 +70,7 @@ mojo_native_application("viewer") {
     "//net",
     "//skia",
     "//sky/engine/public:blink",
+    "//sky/scheduler",
     "//sky/services/inspector:bindings",
     "//sky/services/testing:bindings",
     "//sky/viewer/cc",
