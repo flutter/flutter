@@ -7,6 +7,7 @@ SKY MODULE
 <script>
  module.exports.BlockLayoutManager = class BlockLayoutManager extends sky.LayoutManager {
    function layout(width, height) {
+     this.markAsLaidOut();
      if (width == null)
        width = this.getIntrinsicWidth().value;
      let autoHeight = false;
@@ -67,7 +68,7 @@ SKY MODULE
          loop = children.next();
        }
      }
-     return super(height); // applies and provides our own min-width/max-width rules
+     return super(height); // applies and provides our own min-height/max-height rules
    }
  }
  sky.registerLayoutManager('block', module.exports.BlockLayoutManager);
