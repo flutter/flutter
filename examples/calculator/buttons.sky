@@ -43,7 +43,7 @@ SKY MODULE - button widgets for calculator
  </div>
 </template>
 
-<template id="threed-button-shadow-tree">
+<template id="flat-button-shadow-tree">
  <style>
   div { background: green; color: yellow; }
   div[clicked] { background: yellow; color: green; }
