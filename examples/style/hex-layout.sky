@@ -96,12 +96,13 @@
          canvas.save();
          try {
            canvas.beginPath();
-           canvas.moveTo(child.x, child.y + cellDim/4);
-           canvas.lineTo(child.x + cellDim/2, child.y);
-           canvas.lineTo(child.x + cellDim, child.y + cellDim/4);
-           canvas.lineTo(child.x + cellDim, child.y + 3*cellDim/4);
-           canvas.lineTo(child.x + cellDim/2, child.y + cellDim);
-           canvas.moveTo(child.x, child.y + 3*cellDim/4);
+           canvas.translate(child.x, child.y);
+           canvas.moveTo(0, cellDim/4);
+           canvas.lineTo(cellDim/2, 0);
+           canvas.lineTo(cellDim, cellDim/4);
+           canvas.lineTo(cellDim, 3*cellDim/4);
+           canvas.lineTo(cellDim/2, cellDim);
+           canvas.moveTo(0, 3*cellDim/4);
            canvas.closePath();
            canvas.clip();
            child.paint(canvas);
@@ -133,7 +134,7 @@
      while (!loop.done) {
        let child = loop.value;
        if (this.inHex(child.x, child.y, child.width, child.height, x, y))
-         return child.layoutManager.hitText(x, y);
+         return child.layoutManager.hitTest(x-child.x, y-child.y);
        loop = children.next();
      }
      return this.node;

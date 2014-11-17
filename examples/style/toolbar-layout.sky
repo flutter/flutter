@@ -195,7 +195,8 @@ SKY MODULE
        canvas.save();
        try {
          canvas.beginPath();
-         canvas.rect(child.x, child.y, child.width, child.height);
+         canvas.translate(child.x, child.y);
+         canvas.rect(0, 0, child.width, child.height);
          canvas.clip();
          child.paint(canvas);
        } finally {
