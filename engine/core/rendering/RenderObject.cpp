@@ -1413,6 +1413,8 @@ InvalidationReason RenderObject::invalidatePaintIfNeeded(const RenderLayerModelO
     if (invalidationReason == InvalidationNone)
         return invalidationReason;
 
+    invalidateWidgetBounds();
+
     if (invalidationReason == InvalidationIncremental) {
         incrementallyInvalidatePaint(paintInvalidationContainer, oldBounds, newBounds, newLocation);
         return invalidationReason;

@@ -26,6 +26,7 @@
 #include "core/rendering/LayoutState.h"
 #include "core/rendering/PaintInvalidationState.h"
 #include "core/rendering/RenderBlockFlow.h"
+#include "core/rendering/RenderIFrame.h"
 #include "platform/scroll/ScrollableArea.h"
 #include "wtf/OwnPtr.h"
 
@@ -128,6 +129,9 @@ public:
     void popLayoutState();
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override final;
 
+    void addIFrame(RenderIFrame* iframe);
+    void removeIFrame(RenderIFrame* iframe);
+
 private:
     virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
@@ -161,6 +165,8 @@ private:
     unsigned m_renderCounterCount;
 
     unsigned m_hitTestCount;
+
+    WTF::HashSet<RenderIFrame*> m_iframes;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderView, isRenderView());

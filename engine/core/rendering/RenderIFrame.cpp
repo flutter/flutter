@@ -10,6 +10,7 @@
 #include "core/html/HTMLIFrameElement.h"
 #include "core/loader/FrameLoaderClient.h"
 #include "core/rendering/PaintInfo.h"
+#include "core/rendering/RenderView.h"
 #include "platform/geometry/LayoutPoint.h"
 
 namespace blink {
@@ -17,30 +18,28 @@ namespace blink {
 RenderIFrame::RenderIFrame(HTMLIFrameElement* iframe)
     : RenderReplaced(iframe)
 {
+    view()->addIFrame(this);
 }
 
 RenderIFrame::~RenderIFrame()
 {
+    if (view())
+        view()->removeIFrame(this);
 }
 
-void RenderIFrame::layout()
+void RenderIFrame::invalidateWidgetBounds()
 {
-    RenderReplaced::layout();
-
-    // TODO(mpcomplete): This will generate extra SetBounds calls in some cases
-    // because some layout modules involve multiple passes (e.g., flexbox).
-    // Instead, we'll need to defer the work to later in the pipeline.
     mojo::View* contentView = toHTMLIFrameElement(node())->contentView();
     if (!contentView)
         return;
 
     IntRect bounds = pixelSnappedIntRect(frameRect());
-    mojo::Rect mojo_bounds;
-    mojo_bounds.x = bounds.x();
-    mojo_bounds.y = bounds.y();
-    mojo_bounds.width = bounds.width();
-    mojo_bounds.height = bounds.height();
-    contentView->SetBounds(mojo_bounds);
+    mojo::Rect mojoBounds;
+    mojoBounds.x = bounds.x();
+    mojoBounds.y = bounds.y();
+    mojoBounds.width = bounds.width();
+    mojoBounds.height = bounds.height();
+    contentView->SetBounds(mojoBounds);
 }
 
 void RenderIFrame::paintReplaced(PaintInfo& paintInfo,
