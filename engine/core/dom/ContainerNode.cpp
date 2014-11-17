@@ -69,10 +69,8 @@ void ContainerNode::removeDetachedChildren()
 ContainerNode::~ContainerNode()
 {
     ASSERT(needsAttach());
-#if !ENABLE(OILPAN)
     willBeDeletedFromDocument();
     removeDetachedChildren();
-#endif
 }
 
 bool ContainerNode::isChildTypeAllowed(const Node& child) const
@@ -143,11 +141,9 @@ bool ContainerNode::checkAcceptChildGuaranteedNodeTypes(const Node& newChild, Ex
 
 PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
 {
-#if !ENABLE(OILPAN)
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
     ASSERT(refCount() || parentOrShadowHostNode());
-#endif
 
     RefPtr<Node> protect(this);
 
@@ -256,11 +252,9 @@ void ContainerNode::appendChildCommon(Node& child)
 
 PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
-#if !ENABLE(OILPAN)
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
     ASSERT(refCount() || parentOrShadowHostNode());
-#endif
 
     RefPtr<Node> protect(this);
 
@@ -371,7 +365,6 @@ void ContainerNode::willRemoveChildren()
     }
 }
 
-#if !ENABLE(OILPAN)
 void ContainerNode::removeDetachedChildrenInContainer(ContainerNode& container)
 {
     // List of nodes to be deleted.
@@ -435,15 +428,12 @@ void ContainerNode::addChildNodesToDeletionQueue(Node*& head, Node*& tail, Conta
 
     container.setLastChild(0);
 }
-#endif
 
 PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
-#if !ENABLE(OILPAN)
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
     ASSERT(refCount() || parentOrShadowHostNode());
-#endif
 
     RefPtr<Node> protect(this);
     RefPtr<Node> child = oldChild;
@@ -551,11 +541,9 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
 {
     RefPtr<ContainerNode> protect(this);
 
-#if !ENABLE(OILPAN)
     // Check that this node is not "floating".
     // If it is, it can be deleted as a side effect of sending mutation events.
     ASSERT(refCount() || parentOrShadowHostNode());
-#endif
 
     // Make sure adding the new child is ok
     if (!checkAcceptChild(newChild.get(), 0, exceptionState)) {
@@ -955,10 +943,8 @@ PassRefPtr<StaticElementList> ContainerNode::querySelectorAll(const AtomicString
 
 void ContainerNode::updateTreeAfterInsertion(Node& child)
 {
-#if !ENABLE(OILPAN)
     ASSERT(refCount());
     ASSERT(child.refCount());
-#endif
 
     ChildListMutationScope(*this).childAdded(child);
 
