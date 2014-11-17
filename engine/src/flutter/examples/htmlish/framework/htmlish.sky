@@ -4,8 +4,11 @@ SKY MODULE - exports some basic HTML-like elements
 <!-- note: accessibility handling is not implemented yet, because the
            mojo ax service isn't yet ready -->
 
+<import src="scrollable-block.sky">
 <element name=html>
- <!-- implement a scrollable viewport -->
+ <style>
+  :host { display: scrollable-block; }
+ </style>
 </element>
 
 <element name=head />
