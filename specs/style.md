@@ -353,6 +353,7 @@ class StyleNode {
      // otherwise, get the default value; cache it; return it
 
   readonly attribute Boolean needsLayout; // means that a property with needsLayout:true has changed on this node or one of its descendants
+    // needsLayout is set to false by the ownerLayoutManager's default layout() method
   readonly attribute LayoutManager layoutManager;
 
   readonly attribute LayoutManager ownerLayoutManager; // defaults to the parentNode.layoutManager
@@ -417,7 +418,7 @@ class LayoutManager {
   void take(StyleNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
     // assert: victim.needsLayout == true
-    // assert: an ancestor of victim has needsLayout == this (aka, victim is a descendant of this.node)
+    // assert: an ancestor of victim has node.layoutManager == this (aka, victim is a descendant of this.node)
 
   virtual void release(StyleNode victim);
     // called when the StyleNode was removed from the tree
@@ -454,10 +455,11 @@ class LayoutManager {
     // returns min-height, height, and max-height, normalised, defaulting to values given in LayoutValueRange
     // if argument is provided, it overrides height
 
+  void markAsLaidOut(); // sets this.node.needsLayout to false
   virtual Dimensions layout(Number? width, Number? height);
-    // returns { }
+    // default implementation calls markAsLaidOut() and returns arguments, with null values resolved to intrinsic dimensions
+    // this should always call this.markAsLaidOut() to reset needsLayout
     // the return value should include the final value for whichever of the width and height arguments that is null
-    // TODO(ianh): should we just grab the width and height from assumeDimensions()?
 
   void markAsPainted(); // sets this.node.needsPaint to false
   virtual void paint(RenderingSurface canvas);
@@ -536,38 +538,38 @@ StyleDeclaration objects as follows:
 * ``content``
 * ``title``
   These all add to themselves the same declaration with value:
-```css
+```javascript
 { display: { value: null } }
 ```
 
 * ``img``
   This adds to itself the declaration with value:
-```css
+```javascript
 { display: { value: sky.ImageElementLayoutManager } }
 ```
 
 * ``span``
 * ``a``
   These all add to themselves the same declaration with value:
-```css
+```javascript
 { display: { value: sky.InlineLayoutManager } }
 ```
 
 * ``iframe``
   This adds to itself the declaration with value:
-```css
+```javascript
 { display: { value: sky.IFrameElementLayoutManager } }
 ```
 
 * ``t``
   This adds to itself the declaration with value:
-```css
+```javascript
 { display: { value: sky.ParagraphLayoutManager } }
 ```
 
 * ``error``
   This adds to itself the declaration with value:
-```css
+```javascript
 { display: { value: sky.ErrorLayoutManager } }
 ```
 

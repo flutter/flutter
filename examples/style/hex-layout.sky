@@ -3,6 +3,7 @@
 <script>
  class BeehiveLayoutManager extends sky.LayoutManager {
    function layout(width, height) {
+     this.markAsLaidOut();
      if (width == null)
        width = this.getIntrinsicWidth().value;
      let autoHeight = false;

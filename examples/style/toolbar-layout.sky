@@ -23,6 +23,7 @@ SKY MODULE
      this.overflowChild = null;
    }
    function layout(width, height) {
+     this.markAsLaidOut();
      let children = null;
      let loop = null;
      if (height == null)
