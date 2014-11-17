@@ -281,9 +281,6 @@ def parse_args(args):
         optparse.make_option("--builder-name", default="",
             help=("The name of the builder shown on the waterfall running "
                   "this script e.g. WebKit.")),
-        optparse.make_option("--build-name", default="DUMMY_BUILD_NAME",
-            help=("The name of the builder used in its path, e.g. "
-                  "webkit-rel.")),
         optparse.make_option("--build-number", default="DUMMY_BUILD_NUMBER",
             help=("The build number of the builder running this script.")),
         optparse.make_option("--test-results-server", default="",

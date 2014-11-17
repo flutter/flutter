@@ -311,17 +311,22 @@ def summarize_results(port_obj, expectations, initial_results, retry_results, en
     # Don't do this by default since it takes >100ms.
     # It's only used for uploading data to the flakiness dashboard.
     results['chromium_revision'] = ''
-    results['blink_revision'] = ''
+    # TODO(ojan): Clean this up now that we only have one revision field.
+    # And rename it to sky_revision (requires modifing test-results.appspot).
     if port_obj.get_option('builder_name'):
         for (name, path) in port_obj.repository_paths():
             scm = port_obj.host.scm_for_path(path)
             if scm:
-                rev = scm.svn_revision(path)
+                rev = scm.latest_git_commit()
             if rev:
                 results[name.lower() + '_revision'] = rev
             else:
-                _log.warn('Failed to determine svn revision for %s, '
+                _log.warn('Failed to determine revision for %s, '
                           'leaving "%s_revision" key blank in full_results.json.'
                           % (path, name))
+
+    # TODO(ojan): Change test-results.appspot to not require this field.
+    # test-results.appspot.com requires this field to be a number. :(
+    results['blink_revision'] = 0
 
     return results
