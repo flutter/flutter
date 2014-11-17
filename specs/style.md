@@ -345,8 +345,8 @@ node's layoutManager and ownerLayoutManager attributes to null.
     readonly attribute Boolean needsPaint; // means that either needsLayout is true or a property with needsPaint:true has changed on this node or one of its descendants
 
     // only the ownerLayoutManager can change these
-    readonly attribute Float x;
-    readonly attribute Float y;
+    readonly attribute Float x; // relative to left edge of ownerLayoutManager
+    readonly attribute Float y; // relative to top edge of ownerLayoutManager
     readonly attribute Float width;
     readonly attribute Float height;
   }
@@ -436,13 +436,14 @@ Layout managers inherit from the following API:
       // TODO(ianh): should we just grab the width and height from assumeDimensions()?
 
     void paint(RenderingSurface canvas);
-      // set a clip rect on the canvas
+      // set a clip rect on the canvas for rect(0,0,this.width,this.height)
       // call the painter of each property, in order they were registered, which on this element has a painter
       // call this.paintChildren()
       // unset the clip
 
     virtual void paintChildren(RenderingSurface canvas);
-      // just calls paint() for each child returned by walkChildren() whose needsPaint is true
+      // just calls paint() for each child returned by walkChildren() whose needsPaint is true,
+      // after transforming the coordinate space by translate(child.x,child.y)
 
     virtual Node hitTest(Float x, Float y);
       // default implementation uses the node's children nodes' x, y,
@@ -453,6 +454,7 @@ Layout managers inherit from the following API:
       // override this if you changed your children's z-order, or if you used take() to
       // hoist some descendants up to be your responsibility, or if your children aren't
       // rectangular (e.g. you lay them out in a hex grid)
+      // make sure to offset the value you pass your children: child.layoutManager.hitTest(x-child.x, y-child.y)
 
   }
 
@@ -485,6 +487,10 @@ Paint
   class RenderingSurface {
     // ...
   }
+
+The convention is that the layout manager who calls your paint will
+have transformed the coordinate space so that you should assume that
+your top-left pixel is at 0,0.
 
 
 Default Styles
