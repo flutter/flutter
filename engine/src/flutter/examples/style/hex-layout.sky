@@ -84,7 +84,7 @@
      }
      return super(height); // does the equivalent of getIntrinsicWidth() above, applying min-height etc
    }
-   function paintChildren(RenderingSurface canvas) {
+   function paintChildren(canvas) {
      let width = this.node.width;
      let cellCount = this.node.getProperty('beehive-count');
      let cellDim = width / cellCount;
