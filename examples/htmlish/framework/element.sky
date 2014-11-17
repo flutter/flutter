@@ -21,7 +21,7 @@ SKY MODULE - defines an <element> element
 <script>
  module.exports.Element = sky.registerElement({
    tagName: 'element',
-   prototype: class extends Element {
+   constructor: class extends Element {
      constructor (module) {
        super();
        this.state = 'loading';

@@ -35,9 +35,10 @@ the [``Module`` object](apis.md) that represents the module.
 
 A module can export a value by assigning the ``exports`` property of
 its ``Module`` object. By default, the ``exports`` property of a
-``Module`` is its ``Document`` object, so that a script-less
-import is still useful (it exposes its contents, e.g. templates that
-the import might have been written to provide).
+``Module`` is an empty Object. Properties can be added to the object,
+or, it can be set to an entirely different object; for example, it
+could be set to the module's Document itself, in case the point of the
+module is to expose some ``template`` elements.
 
 ### Exporting element definitions ###
 

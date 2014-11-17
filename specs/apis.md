@@ -311,7 +311,7 @@ module 'sky:core' {
     constructor (Application application, Document document, String url); // O(1)
     readonly attribute Application application; // O(1)
 
-    attribute any exports; // O(1) // defaults to the module's document
+    attribute any exports; // O(1) // defaults to {}
   }
 
   class Application : AbstractModule {
