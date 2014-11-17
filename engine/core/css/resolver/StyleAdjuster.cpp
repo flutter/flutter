@@ -92,11 +92,6 @@ static bool hasWillChangeThatCreatesStackingContext(const RenderStyle* style)
         case CSSPropertyZIndex:
         case CSSPropertyPosition:
             return true;
-        case CSSPropertyMixBlendMode:
-        case CSSPropertyIsolation:
-            if (RuntimeEnabledFeatures::cssCompositingEnabled())
-                return true;
-            break;
         default:
             break;
         }
@@ -129,8 +124,6 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
         || style->hasMask()
         || style->clipPath()
         || style->hasFilter()
-        || style->hasBlendMode()
-        || style->hasIsolation()
         || hasWillChangeThatCreatesStackingContext(style)))
         style->setZIndex(0);
 

@@ -34,7 +34,6 @@ ClientHintsDpr status=experimental
 Crypto status=stable
 CSSAnimationUnprefixed status=experimental
 CSSAttributeCaseSensitivity status=experimental
-CSSCompositing status=experimental
 CSSMaskSourceType status=experimental
 CSSOMSmoothScroll status=experimental
 CSSTouchActionDelay status=test

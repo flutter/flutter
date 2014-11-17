@@ -477,8 +477,6 @@ public:
 
     bool hasFilter() const { return style() && style()->hasFilter(); }
 
-    bool hasBlendMode() const;
-
     inline bool preservesNewline() const;
 
     RenderView* view() const { return document().renderView(); };
@@ -815,7 +813,7 @@ public:
     bool shouldUseTransformFromContainer(const RenderObject* container) const;
     void getTransformFromContainer(const RenderObject* container, const LayoutSize& offsetInContainer, TransformationMatrix&) const;
 
-    bool createsGroup() const { return isTransparent() || hasMask() || hasFilter() || hasBlendMode(); }
+    bool createsGroup() const { return isTransparent() || hasMask() || hasFilter(); }
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderLayerModelObject* /* paintContainer */ = 0) const { };
 

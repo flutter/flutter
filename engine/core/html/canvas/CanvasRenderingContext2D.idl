@@ -54,10 +54,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     void setTransform(unrestricted float a, unrestricted float b, unrestricted float c, unrestricted float d, unrestricted float e, unrestricted float f);
     void resetTransform();
 
-    // compositing
-    attribute unrestricted float globalAlpha; // (default 1.0)
-    [TreatNullAs=NullString] attribute DOMString globalCompositeOperation; // (default source-over)
-
     // image smoothing
     [MeasureAs=UnprefixedImageSmoothingEnabled] attribute boolean imageSmoothingEnabled;
 
@@ -155,8 +151,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
 
     // Non-standard APIs. Candidates for deprecation
     // https://developer.mozilla.org/en/docs/Web/API/CanvasRenderingContext2D
-    [MeasureAs=CanvasRenderingContext2DSetAlpha] void setAlpha(unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetCompositeOperation] void setCompositeOperation(DOMString compositeOperation);
     [MeasureAs=CanvasRenderingContext2DSetLineWidth] void setLineWidth(unrestricted float width);
     [MeasureAs=CanvasRenderingContext2DSetLineCap] void setLineCap(DOMString cap);
     [MeasureAs=CanvasRenderingContext2DSetLineJoin] void setLineJoin(DOMString join);

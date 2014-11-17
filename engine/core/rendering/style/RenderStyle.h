@@ -795,14 +795,6 @@ public:
     const FilterOperations& filter() const { return rareNonInheritedData->m_filter->m_operations; }
     bool hasFilter() const { return !rareNonInheritedData->m_filter->m_operations.operations().isEmpty(); }
 
-    WebBlendMode blendMode() const;
-    void setBlendMode(WebBlendMode v);
-    bool hasBlendMode() const;
-
-    EIsolation isolation() const;
-    void setIsolation(EIsolation v);
-    bool hasIsolation() const;
-
     bool shouldPlaceBlockDirectionScrollbarOnLogicalLeft() const { return !isLeftToRightDirection(); }
 
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
@@ -1379,8 +1371,6 @@ public:
     static LineClampValue initialLineClamp() { return LineClampValue(); }
     static Color initialTapHighlightColor();
     static const FilterOperations& initialFilter() { DEFINE_STATIC_LOCAL(FilterOperations, ops, ()); return ops; }
-    static WebBlendMode initialBlendMode() { return WebBlendModeNormal; }
-    static EIsolation initialIsolation() { return IsolationAuto; }
 
     Color colorIncludingFallback(int colorProperty) const;
 

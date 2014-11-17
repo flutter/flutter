@@ -83,12 +83,6 @@ void V8HTMLCanvasElement::getContextMethodCustom(const v8::FunctionCallbackInfo<
         attributes = webGLAttributes;
     } else {
         RefPtr<Canvas2DContextAttributes> canvas2DAttributes = Canvas2DContextAttributes::create();
-        if (info.Length() > 1 && info[1]->IsObject()) {
-            v8::Handle<v8::Object> jsAttributes = info[1]->ToObject();
-            v8::Handle<v8::String> alpha = v8AtomicString(isolate, "alpha");
-            if (jsAttributes->Has(alpha) && !isUndefinedOrNull(jsAttributes->Get(alpha)))
-                canvas2DAttributes->setAlpha(jsAttributes->Get(alpha)->BooleanValue());
-        }
         attributes = canvas2DAttributes;
     }
     CanvasRenderingContext* result = impl->getContext(contextId, attributes.get());

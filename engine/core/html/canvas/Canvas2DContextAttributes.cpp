@@ -33,8 +33,7 @@
 namespace blink {
 
 Canvas2DContextAttributes::Canvas2DContextAttributes()
-    : m_alpha(true)
-    , m_storage(PersistentStorage)
+    : m_storage(PersistentStorage)
 {
 }
 
@@ -43,16 +42,6 @@ DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(Canvas2DContextAttributes);
 PassRefPtr<Canvas2DContextAttributes> Canvas2DContextAttributes::create()
 {
     return adoptRef(new Canvas2DContextAttributes());
-}
-
-bool Canvas2DContextAttributes::alpha() const
-{
-    return m_alpha;
-}
-
-void Canvas2DContextAttributes::setAlpha(bool alpha)
-{
-    m_alpha = alpha;
 }
 
 String Canvas2DContextAttributes::storage() const

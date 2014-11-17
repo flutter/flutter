@@ -101,7 +101,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_needsDescendantDependentCompositingInputsUpdate(true)
     , m_childNeedsCompositingInputsUpdate(true)
     , m_hasCompositingDescendant(false)
-    , m_shouldIsolateCompositedDescendants(false)
     , m_lostGroupedMapping(false)
     , m_renderer(renderer)
     , m_parent(0)
@@ -715,16 +714,6 @@ void RenderLayer::setHasCompositingDescendant(bool hasCompositingDescendant)
         compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateLocal);
 }
 
-void RenderLayer::setShouldIsolateCompositedDescendants(bool shouldIsolateCompositedDescendants)
-{
-    if (m_shouldIsolateCompositedDescendants == static_cast<unsigned>(shouldIsolateCompositedDescendants))
-        return;
-
-    m_shouldIsolateCompositedDescendants = shouldIsolateCompositedDescendants;
-
-    if (hasCompositedLayerMapping())
-        compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateLocal);
-}
 
 bool RenderLayer::hasAncestorWithFilterOutsets() const
 {
@@ -819,27 +808,21 @@ LayoutRect RenderLayer::paintingExtent(const RenderLayer* rootLayer, const Layou
 
 void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
 {
-    bool createTransparencyLayerForBlendMode = m_stackingNode->isStackingContext() && hasDescendantWithBlendMode();
-    if ((paintsWithTransparency(paintBehavior) || paintsWithBlendMode() || createTransparencyLayerForBlendMode) && m_usedTransparency)
+    if (paintsWithTransparency(paintBehavior) && m_usedTransparency)
         return;
 
     RenderLayer* ancestor = transparentPaintingAncestor();
     if (ancestor)
         ancestor->beginTransparencyLayers(context, rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
 
-    if (paintsWithTransparency(paintBehavior) || paintsWithBlendMode() || createTransparencyLayerForBlendMode) {
+    if (paintsWithTransparency(paintBehavior)) {
         m_usedTransparency = true;
         context->save();
         LayoutRect clipRect = paintingExtent(rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
         context->clip(clipRect);
 
-        if (paintsWithBlendMode())
-            context->setCompositeOperation(context->compositeOperation(), m_renderer->style()->blendMode());
-
         context->beginTransparencyLayer(renderer()->opacity());
 
-        if (paintsWithBlendMode())
-            context->setCompositeOperation(context->compositeOperation(), WebBlendModeNormal);
 #ifdef REVEAL_TRANSPARENCY_LAYERS
         context->setFillColor(Color(0.0f, 0.0f, 0.5f, 0.2f));
         context->fillRect(clipRect);
@@ -1307,13 +1290,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
         }
     }
 
-    // Blending operations must be performed only with the nearest ancestor stacking context.
-    // Note that there is no need to create a transparency layer if we're painting the root.
-    bool createTransparencyLayerForBlendMode = !renderer()->isDocumentElement() && m_stackingNode->isStackingContext() && hasDescendantWithBlendMode();
-
-    if (createTransparencyLayerForBlendMode)
-        beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, paintingInfo.paintBehavior);
-
     LayerPaintingInfo localPaintingInfo(paintingInfo);
     bool deferredFiltersEnabled = renderer()->document().settings()->deferredFiltersEnabled();
     FilterEffectRendererHelper filterPainter(filterRenderer() && paintsWithFilters());
@@ -1445,7 +1421,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     }
 
     // End our transparency layer
-    if ((haveTransparency || paintsWithBlendMode() || createTransparencyLayerForBlendMode) && m_usedTransparency) {
+    if (haveTransparency && m_usedTransparency) {
         context->endLayer();
         context->restore();
         m_usedTransparency = false;
@@ -1554,7 +1530,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
             continue;
 
         // Begin transparency layers lazily now that we know we have to paint something.
-        if (haveTransparency || paintsWithBlendMode())
+        if (haveTransparency)
             beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation, localPaintingInfo.paintBehavior);
 
         if (localPaintingInfo.clipToDirtyRect) {
@@ -1578,7 +1554,7 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
     RenderObject* paintingRootForRenderer, bool selectionOnly, PaintLayerFlags paintFlags)
 {
     // Begin transparency if we have something to paint.
-    if (haveTransparency || paintsWithBlendMode()) {
+    if (haveTransparency) {
         for (size_t i = 0; i < layerFragments.size(); ++i) {
             const LayerFragment& fragment = layerFragments.at(i);
             if (fragment.shouldPaintContent && !fragment.foregroundRect.isEmpty()) {
@@ -2392,11 +2368,6 @@ bool RenderLayer::clipsCompositingDescendantsWithBorderRadius() const
 bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
 {
     return transform() && ((paintBehavior & PaintBehaviorFlattenCompositingLayers) || compositingState() != PaintsIntoOwnBacking);
-}
-
-bool RenderLayer::paintsWithBlendMode() const
-{
-    return m_renderer->hasBlendMode() && compositingState() != PaintsIntoOwnBacking;
 }
 
 bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const

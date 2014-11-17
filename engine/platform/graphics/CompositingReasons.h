@@ -47,11 +47,11 @@ const uint64_t CompositingReasonTransformWithCompositedDescendants       = UINT6
 const uint64_t CompositingReasonOpacityWithCompositedDescendants         = UINT64_C(1) << 29;
 const uint64_t CompositingReasonMaskWithCompositedDescendants            = UINT64_C(1) << 30;
 const uint64_t CompositingReasonFilterWithCompositedDescendants          = UINT64_C(1) << 32;
-const uint64_t CompositingReasonBlendingWithCompositedDescendants        = UINT64_C(1) << 33;
+// TODO(sky): Unused 33
 const uint64_t CompositingReasonClipsCompositingDescendants              = UINT64_C(1) << 34;
 const uint64_t CompositingReasonPerspectiveWith3DDescendants             = UINT64_C(1) << 35;
 const uint64_t CompositingReasonPreserve3DWith3DDescendants              = UINT64_C(1) << 36;
-const uint64_t CompositingReasonIsolateCompositedDescendants             = UINT64_C(1) << 38;
+// TODO(sky): Unused 37 & 38
 
 // The root layer is a special case that may be forced to be a layer, but also it needs to be
 // a layer if anything else in the subtree is composited.
@@ -100,11 +100,9 @@ const uint64_t CompositingReasonComboAllDirectStyleDeterminedReasons =
 
 const uint64_t CompositingReasonComboCompositedDescendants =
     CompositingReasonTransformWithCompositedDescendants
-    | CompositingReasonIsolateCompositedDescendants
     | CompositingReasonOpacityWithCompositedDescendants
     | CompositingReasonMaskWithCompositedDescendants
     | CompositingReasonFilterWithCompositedDescendants
-    | CompositingReasonBlendingWithCompositedDescendants
     | CompositingReasonClipsCompositingDescendants;
 
 const uint64_t CompositingReasonCombo3DDescendants =
@@ -134,8 +132,6 @@ const uint64_t CompositingReasonComboReasonsThatRequireOwnBacking =
     | CompositingReasonOpacityWithCompositedDescendants
     | CompositingReasonMaskWithCompositedDescendants
     | CompositingReasonFilterWithCompositedDescendants
-    | CompositingReasonBlendingWithCompositedDescendants
-    | CompositingReasonIsolateCompositedDescendants
     | CompositingReasonPreserve3DWith3DDescendants; // preserve-3d has to create backing store to ensure that 3d-transformed elements intersect.
 
 const uint64_t CompositingReasonComboSquashableReasons =

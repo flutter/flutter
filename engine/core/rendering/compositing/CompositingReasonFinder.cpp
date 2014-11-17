@@ -80,7 +80,7 @@ CompositingReasons CompositingReasonFinder::potentialCompositingReasonsFromStyle
         reasons |= CompositingReasonPerspectiveWith3DDescendants;
 
     // If the implementation of createsGroup changes, we need to be aware of that in this part of code.
-    ASSERT((renderer->isTransparent() || renderer->hasMask() || renderer->hasFilter() || renderer->hasBlendMode()) == renderer->createsGroup());
+    ASSERT((renderer->isTransparent() || renderer->hasMask() || renderer->hasFilter()) == renderer->createsGroup());
 
     if (style->hasMask())
         reasons |= CompositingReasonMaskWithCompositedDescendants;
@@ -94,9 +94,6 @@ CompositingReasons CompositingReasonFinder::potentialCompositingReasonsFromStyle
 
     if (renderer->isTransparent())
         reasons |= CompositingReasonOpacityWithCompositedDescendants;
-
-    if (renderer->hasBlendMode())
-        reasons |= CompositingReasonBlendingWithCompositedDescendants;
 
     ASSERT(!(reasons & ~CompositingReasonComboAllStyleDeterminedReasons));
     return reasons;

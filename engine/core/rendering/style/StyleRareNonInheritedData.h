@@ -147,8 +147,6 @@ public:
 
     unsigned m_hasAspectRatio : 1; // Whether or not an aspect ratio has been specified.
 
-    unsigned m_effectiveBlendMode: 5; // EBlendMode
-
     unsigned m_touchAction : TouchActionBits; // TouchAction
 
     unsigned m_objectFit : 3; // ObjectFit

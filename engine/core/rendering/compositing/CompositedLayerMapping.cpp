@@ -179,11 +179,6 @@ void CompositedLayerMapping::createPrimaryGraphicsLayer()
     updateOpacity(renderer()->style());
     updateTransform(renderer()->style());
     updateFilters(renderer()->style());
-
-    if (RuntimeEnabledFeatures::cssCompositingEnabled()) {
-        updateLayerBlendMode(renderer()->style());
-        updateIsRootForIsolatedGroup();
-    }
 }
 
 void CompositedLayerMapping::destroyGraphicsLayers()
@@ -222,21 +217,6 @@ void CompositedLayerMapping::updateTransform(const RenderStyle* style)
 void CompositedLayerMapping::updateFilters(const RenderStyle* style)
 {
     m_graphicsLayer->setFilters(owningLayer().computeFilterOperations(style));
-}
-
-void CompositedLayerMapping::updateLayerBlendMode(const RenderStyle* style)
-{
-    setBlendMode(style->blendMode());
-}
-
-void CompositedLayerMapping::updateIsRootForIsolatedGroup()
-{
-    bool isolate = m_owningLayer.shouldIsolateCompositedDescendants();
-
-    // non stacking context layers should never isolate
-    ASSERT(m_owningLayer.stackingNode()->isStackingContext() || !isolate);
-
-    m_graphicsLayer->setIsRootForIsolatedGroup(isolate);
 }
 
 void CompositedLayerMapping::updateContentsOpaque()
@@ -578,11 +558,6 @@ void CompositedLayerMapping::updateGraphicsLayerGeometry(const RenderLayer* comp
 
     if (m_owningLayer.scrollableArea() && m_owningLayer.scrollableArea()->scrollsOverflow())
         m_owningLayer.scrollableArea()->positionOverflowControls(IntSize());
-
-    if (RuntimeEnabledFeatures::cssCompositingEnabled()) {
-        updateLayerBlendMode(renderer()->style());
-        updateIsRootForIsolatedGroup();
-    }
 
     updateContentsRect();
     updateBackgroundColor();

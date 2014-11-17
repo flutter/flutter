@@ -67,10 +67,8 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_runningTransformAnimationOnCompositor(false)
     , m_runningFilterAnimationOnCompositor(false)
     , m_hasAspectRatio(false)
-    , m_effectiveBlendMode(RenderStyle::initialBlendMode())
     , m_touchAction(RenderStyle::initialTouchAction())
     , m_objectFit(RenderStyle::initialObjectFit())
-    , m_isolation(RenderStyle::initialIsolation())
     , m_justifyItems(RenderStyle::initialJustifyItems())
     , m_justifyItemsOverflowAlignment(RenderStyle::initialJustifyItemsOverflowAlignment())
     , m_justifyItemsPositionType(RenderStyle::initialJustifyItemsPositionType())
@@ -130,10 +128,8 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_runningTransformAnimationOnCompositor(o.m_runningTransformAnimationOnCompositor)
     , m_runningFilterAnimationOnCompositor(o.m_runningFilterAnimationOnCompositor)
     , m_hasAspectRatio(o.m_hasAspectRatio)
-    , m_effectiveBlendMode(o.m_effectiveBlendMode)
     , m_touchAction(o.m_touchAction)
     , m_objectFit(o.m_objectFit)
-    , m_isolation(o.m_isolation)
     , m_justifyItems(o.m_justifyItems)
     , m_justifyItemsOverflowAlignment(o.m_justifyItemsOverflowAlignment)
     , m_justifyItemsPositionType(o.m_justifyItemsPositionType)
@@ -192,11 +188,9 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_hasCurrentOpacityAnimation == o.m_hasCurrentOpacityAnimation
         && m_hasCurrentTransformAnimation == o.m_hasCurrentTransformAnimation
         && m_hasCurrentFilterAnimation == o.m_hasCurrentFilterAnimation
-        && m_effectiveBlendMode == o.m_effectiveBlendMode
         && m_hasAspectRatio == o.m_hasAspectRatio
         && m_touchAction == o.m_touchAction
         && m_objectFit == o.m_objectFit
-        && m_isolation == o.m_isolation
         && m_justifyItems == o.m_justifyItems
         && m_justifyItemsOverflowAlignment == o.m_justifyItemsOverflowAlignment
         && m_justifyItemsPositionType == o.m_justifyItemsPositionType

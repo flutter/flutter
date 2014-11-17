@@ -381,9 +381,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueNormal || (valueID >= CSSValueUltraCondensed && valueID <= CSSValueUltraExpanded);
     case CSSPropertyImageRendering: // auto | optimizeContrast | pixelated
         return valueID == CSSValueAuto || valueID == CSSValueWebkitOptimizeContrast || (RuntimeEnabledFeatures::imageRenderingPixelatedEnabled() && valueID == CSSValuePixelated);
-    case CSSPropertyIsolation: // auto | isolate
-        ASSERT(RuntimeEnabledFeatures::cssCompositingEnabled());
-        return valueID == CSSValueAuto || valueID == CSSValueIsolate;
     case CSSPropertyListStylePosition: // inside | outside
         return valueID == CSSValueInside || valueID == CSSValueOutside;
     case CSSPropertyListStyleType:
@@ -444,12 +441,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
     case CSSPropertyBackfaceVisibility:
     case CSSPropertyWebkitBackfaceVisibility:
         return valueID == CSSValueVisible || valueID == CSSValueHidden;
-    case CSSPropertyMixBlendMode:
-        ASSERT(RuntimeEnabledFeatures::cssCompositingEnabled());
-        return valueID == CSSValueNormal || valueID == CSSValueMultiply || valueID == CSSValueScreen || valueID == CSSValueOverlay
-            || valueID == CSSValueDarken || valueID == CSSValueLighten || valueID == CSSValueColorDodge || valueID == CSSValueColorBurn
-            || valueID == CSSValueHardLight || valueID == CSSValueSoftLight || valueID == CSSValueDifference || valueID == CSSValueExclusion
-            || valueID == CSSValueHue || valueID == CSSValueSaturation || valueID == CSSValueColor || valueID == CSSValueLuminosity;
     case CSSPropertyWebkitBoxDecorationBreak:
         return valueID == CSSValueClone || valueID == CSSValueSlice;
     case CSSPropertyAlignContent:
@@ -511,8 +502,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyAlignItems:
     case CSSPropertyAlignSelf:
     case CSSPropertyAll:
-    case CSSPropertyMixBlendMode:
-    case CSSPropertyIsolation:
     case CSSPropertyBackgroundRepeatX:
     case CSSPropertyBackgroundRepeatY:
     case CSSPropertyBorderBottomStyle:

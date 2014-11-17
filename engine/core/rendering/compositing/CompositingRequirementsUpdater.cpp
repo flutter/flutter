@@ -126,14 +126,12 @@ public:
     explicit RecursionData(RenderLayer* compositingAncestor)
         : m_compositingAncestor(compositingAncestor)
         , m_subtreeIsCompositing(false)
-        , m_hasUnisolatedCompositedBlendingDescendant(false)
         , m_testingOverlap(true)
     {
     }
 
     RenderLayer* m_compositingAncestor;
     bool m_subtreeIsCompositing;
-    bool m_hasUnisolatedCompositedBlendingDescendant;
     bool m_testingOverlap;
 };
 
@@ -156,10 +154,6 @@ static CompositingReasons subtreeReasonsForCompositing(RenderLayer* layer, bool 
     if (hasCompositedDescendants) {
         subtreeReasons |= layer->potentialCompositingReasonsFromStyle() & CompositingReasonComboCompositedDescendants;
 
-        if (layer->shouldIsolateCompositedDescendants()) {
-            ASSERT(layer->stackingNode()->isStackingContext());
-            subtreeReasons |= CompositingReasonIsolateCompositedDescendants;
-        }
 
         // FIXME: This should move into CompositingReasonFinder::potentialCompositingReasonsFromStyle, but
         // theres a poor interaction with RenderTextControlSingleLine, which sets this hasOverflowClip directly.
@@ -335,13 +329,6 @@ void CompositingRequirementsUpdater::updateRecursive(RenderLayer* ancestorLayer,
 
     // Now that the subtree has been traversed, we can check for compositing reasons that depended on the state of the subtree.
 
-    if (layer->stackingNode()->isStackingContext()) {
-        layer->setShouldIsolateCompositedDescendants(childRecursionData.m_hasUnisolatedCompositedBlendingDescendant);
-    } else {
-        layer->setShouldIsolateCompositedDescendants(false);
-        currentRecursionData.m_hasUnisolatedCompositedBlendingDescendant = childRecursionData.m_hasUnisolatedCompositedBlendingDescendant;
-    }
-
     // Subsequent layers in the parent's stacking context may also need to composite.
     if (childRecursionData.m_subtreeIsCompositing)
         currentRecursionData.m_subtreeIsCompositing = true;
@@ -380,9 +367,6 @@ void CompositingRequirementsUpdater::updateRecursive(RenderLayer* ancestorLayer,
 
         if (willBeCompositedOrSquashed)
             reasonsToComposite |= layer->potentialCompositingReasonsFromStyle() & CompositingReasonInlineTransform;
-
-        if (willBeCompositedOrSquashed && layer->renderer()->hasBlendMode())
-            currentRecursionData.m_hasUnisolatedCompositedBlendingDescendant = true;
 
         // Turn overlap testing off for later layers if it's already off, or if we have an animating transform.
         // Note that if the layer clips its descendants, there's no reason to propagate the child animation to the parent layers. That's because

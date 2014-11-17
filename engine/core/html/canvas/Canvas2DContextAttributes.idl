@@ -27,6 +27,5 @@
 [
     NoInterfaceObject,
 ] interface Canvas2DContextAttributes {
-    attribute boolean alpha;
     [RuntimeEnabled=ExperimentalCanvasFeatures] attribute DOMString storage;
 };

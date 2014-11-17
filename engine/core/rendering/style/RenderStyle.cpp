@@ -459,11 +459,6 @@ bool RenderStyle::diffNeedsPaintInvalidationLayer(const RenderStyle& other) cons
         return true;
 
     if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
-        if (RuntimeEnabledFeatures::cssCompositingEnabled()
-            && (rareNonInheritedData->m_effectiveBlendMode != other.rareNonInheritedData->m_effectiveBlendMode
-                || rareNonInheritedData->m_isolation != other.rareNonInheritedData->m_isolation))
-            return true;
-
         if (rareNonInheritedData->m_mask != other.rareNonInheritedData->m_mask
             || rareNonInheritedData->m_maskBoxImage != other.rareNonInheritedData->m_maskBoxImage)
             return true;
@@ -556,46 +551,6 @@ void RenderStyle::clearCursorList()
 {
     if (rareInheritedData->cursorData)
         rareInheritedData.access()->cursorData = nullptr;
-}
-
-WebBlendMode RenderStyle::blendMode() const
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        return static_cast<WebBlendMode>(rareNonInheritedData->m_effectiveBlendMode);
-    return WebBlendModeNormal;
-}
-
-void RenderStyle::setBlendMode(WebBlendMode v)
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        rareNonInheritedData.access()->m_effectiveBlendMode = v;
-}
-
-bool RenderStyle::hasBlendMode() const
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        return static_cast<WebBlendMode>(rareNonInheritedData->m_effectiveBlendMode) != WebBlendModeNormal;
-    return false;
-}
-
-EIsolation RenderStyle::isolation() const
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        return static_cast<EIsolation>(rareNonInheritedData->m_isolation);
-    return IsolationAuto;
-}
-
-void RenderStyle::setIsolation(EIsolation v)
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        rareNonInheritedData.access()->m_isolation = v;
-}
-
-bool RenderStyle::hasIsolation() const
-{
-    if (RuntimeEnabledFeatures::cssCompositingEnabled())
-        return rareNonInheritedData->m_isolation != IsolationAuto;
-    return false;
 }
 
 bool RenderStyle::hasWillChangeCompositingHint() const

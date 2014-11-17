@@ -385,9 +385,6 @@ static void write(TextStream& ts, RenderLayer& l,
     else if (paintPhase == LayerPaintPhaseForeground)
         ts << " layerType: foreground only";
 
-    if (l.renderer()->hasBlendMode())
-        ts << " blendMode: " << compositeOperatorName(CompositeSourceOver, l.renderer()->style()->blendMode());
-
     if (behavior & RenderAsTextShowCompositedLayers) {
         if (l.hasCompositedLayerMapping()) {
             ts << " (composited, bounds="
@@ -396,7 +393,6 @@ static void write(TextStream& ts, RenderLayer& l,
                 << l.compositedLayerMapping()->mainGraphicsLayer()->drawsContent()
                 << ", paints into ancestor="
                 << l.compositedLayerMapping()->paintsIntoCompositedAncestor()
-                << (l.shouldIsolateCompositedDescendants() ? ", isolatesCompositedBlending" : "")
                 << ")";
         }
     }

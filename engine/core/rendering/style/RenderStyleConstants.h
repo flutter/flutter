@@ -428,8 +428,6 @@ inline TouchAction& operator|= (TouchAction& a, TouchAction b) { return a = a | 
 inline TouchAction operator& (TouchAction a, TouchAction b) { return TouchAction(int(a) & int(b)); }
 inline TouchAction& operator&= (TouchAction& a, TouchAction b) { return a = a & b; }
 
-enum EIsolation { IsolationAuto, IsolationIsolate };
-
 enum TouchActionDelay { TouchActionDelayNone, TouchActionDelayScript };
 
 enum ItemPosition {

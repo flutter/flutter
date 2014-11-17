@@ -244,8 +244,6 @@ private:
 
     void updateOpacity(const RenderStyle*);
     void updateTransform(const RenderStyle*);
-    void updateLayerBlendMode(const RenderStyle*);
-    void updateIsRootForIsolatedGroup();
     // Return the opacity value that this layer should use for compositing.
     float compositingOpacity(float rendererOpacity) const;
 

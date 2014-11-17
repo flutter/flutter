@@ -260,8 +260,6 @@ public:
     void filterNeedsPaintInvalidation();
     bool hasFilter() const { return renderer()->hasFilter(); }
 
-    bool paintsWithBlendMode() const;
-
     void* operator new(size_t);
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
@@ -424,11 +422,10 @@ public:
     public:
         DescendantDependentCompositingInputs()
             : hasDescendantWithClipPath(false)
-            , hasDescendantWithBlendMode(false)
+
         { }
 
         unsigned hasDescendantWithClipPath : 1;
-        unsigned hasDescendantWithBlendMode : 1;
     };
 
     void setNeedsCompositingInputsUpdate();
@@ -459,7 +456,6 @@ public:
     bool isUnclippedDescendant() const { return ancestorDependentCompositingInputs().isUnclippedDescendant; }
     bool hasAncestorWithClipPath() const { return ancestorDependentCompositingInputs().hasAncestorWithClipPath; }
     bool hasDescendantWithClipPath() const { return descendantDependentCompositingInputs().hasDescendantWithClipPath; }
-    bool hasDescendantWithBlendMode() const { return descendantDependentCompositingInputs().hasDescendantWithBlendMode; }
 
     bool lostGroupedMapping() const { ASSERT(isAllowedToQueryCompositingState()); return m_lostGroupedMapping; }
     void setLostGroupedMapping(bool b) { m_lostGroupedMapping = b; }
@@ -469,9 +465,6 @@ public:
 
     bool hasCompositingDescendant() const { ASSERT(isAllowedToQueryCompositingState()); return m_hasCompositingDescendant; }
     void setHasCompositingDescendant(bool);
-
-    bool shouldIsolateCompositedDescendants() const { ASSERT(isAllowedToQueryCompositingState()); return m_shouldIsolateCompositedDescendants; }
-    void setShouldIsolateCompositedDescendants(bool);
 
     void updateOrRemoveFilterEffectRenderer();
 
@@ -615,9 +608,6 @@ private:
 
     // Used only while determining what layers should be composited. Applies to the tree of z-order lists.
     unsigned m_hasCompositingDescendant : 1;
-
-    // Should be for stacking contexts having unisolated blending descendants.
-    unsigned m_shouldIsolateCompositedDescendants : 1;
 
     // True if this render layer just lost its grouped mapping due to the CompositedLayerMapping being destroyed,
     // and we don't yet know to what graphics layer this RenderLayer will be assigned.

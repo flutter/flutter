@@ -251,7 +251,7 @@ public:
         SVGForeignObjectElement = 325,
         SelectionSetPosition = 327,
         AnimationPlayerFinishEvent = 328,
-        CanvasRenderingContext2DSetAlpha = 330,
+        // TODO(sky): 329, 330 Unused
         CanvasRenderingContext2DSetCompositeOperation = 331,
         CanvasRenderingContext2DSetLineWidth = 332,
         CanvasRenderingContext2DSetLineCap = 333,

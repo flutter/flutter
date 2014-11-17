@@ -46,10 +46,6 @@ public:
     // Create a new attributes object
     static PassRefPtr<Canvas2DContextAttributes> create();
 
-    // Whether or not the drawing buffer has an alpha channel; default=true
-    bool alpha() const;
-    void setAlpha(bool);
-
     String storage() const;
     void setStorage(const String&);
     Canvas2DContextStorage parsedStorage() const;
@@ -57,7 +53,6 @@ public:
 protected:
     Canvas2DContextAttributes();
 
-    bool m_alpha;
     Canvas2DContextStorage m_storage;
 };
 

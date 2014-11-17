@@ -655,7 +655,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
         break;
     }
 
-    case CSSPropertyBackgroundBlendMode:
     case CSSPropertyBackgroundAttachment:
     case CSSPropertyBackgroundClip:
     case CSSPropertyWebkitBackgroundClip:
@@ -2458,17 +2457,6 @@ bool CSSPropertyParser::parseFillProperty(CSSPropertyID propId, CSSPropertyID& p
                 case CSSPropertyWebkitBackgroundComposite:
                 case CSSPropertyWebkitMaskComposite:
                     if (val->id >= CSSValueClear && val->id <= CSSValuePlusLighter) {
-                        currValue = cssValuePool().createIdentifierValue(val->id);
-                        m_valueList->next();
-                    }
-                    break;
-                case CSSPropertyBackgroundBlendMode:
-                    if (val->id == CSSValueNormal || val->id == CSSValueMultiply
-                        || val->id == CSSValueScreen || val->id == CSSValueOverlay || val->id == CSSValueDarken
-                        || val->id == CSSValueLighten ||  val->id == CSSValueColorDodge || val->id == CSSValueColorBurn
-                        || val->id == CSSValueHardLight || val->id == CSSValueSoftLight || val->id == CSSValueDifference
-                        || val->id == CSSValueExclusion || val->id == CSSValueHue || val->id == CSSValueSaturation
-                        || val->id == CSSValueColor || val->id == CSSValueLuminosity) {
                         currValue = cssValuePool().createIdentifierValue(val->id);
                         m_valueList->next();
                     }

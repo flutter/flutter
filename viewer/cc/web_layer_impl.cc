@@ -150,14 +150,6 @@ blink::WebBlendMode WebLayerImpl::blendMode() const {
   return BlendModeFromSkia(layer_->blend_mode());
 }
 
-void WebLayerImpl::setIsRootForIsolatedGroup(bool isolate) {
-  layer_->SetIsRootForIsolatedGroup(isolate);
-}
-
-bool WebLayerImpl::isRootForIsolatedGroup() {
-  return layer_->is_root_for_isolated_group();
-}
-
 void WebLayerImpl::setOpaque(bool opaque) {
   layer_->SetContentsOpaque(opaque);
 }

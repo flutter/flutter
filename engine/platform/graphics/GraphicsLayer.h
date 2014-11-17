@@ -165,7 +165,6 @@ public:
     void setOpacity(float);
 
     void setBlendMode(WebBlendMode);
-    void setIsRootForIsolatedGroup(bool);
 
     void setFilters(const FilterOperations&);
 
@@ -290,7 +289,6 @@ private:
     bool m_masksToBounds : 1;
     bool m_drawsContent : 1;
     bool m_contentsVisible : 1;
-    bool m_isRootForIsolatedGroup : 1;
 
     bool m_hasScrollParent : 1;
     bool m_hasClipParent : 1;

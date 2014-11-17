@@ -103,7 +103,6 @@ align-items custom_all
 align-self custom_all
 backface-visibility
 background-attachment custom_all
-background-blend-mode custom_all
 background-clip custom_all
 background-color animatable, custom_all
 background-image animatable, custom_all
@@ -150,7 +149,6 @@ flex-shrink animatable, type_name=float
 flex-wrap
 height animatable, initial=initialSize, converter=convertLengthSizing
 image-rendering inherited
-isolation runtime_flag=CSSCompositing
 justify-content
 left animatable, initial=initialOffset, converter=convertLengthOrAuto
 letter-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
@@ -166,7 +164,6 @@ max-height animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
 max-width animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
 min-height animatable, initial=initialMinSize, converter=convertLengthSizing
 min-width animatable, initial=initialMinSize, converter=convertLengthSizing
-mix-blend-mode runtime_flag=CSSCompositing, type_name=blink::WebBlendMode, name_for_methods=BlendMode
 object-fit runtime_flag=ObjectFitPosition, type_name=ObjectFit
 object-position runtime_flag=ObjectFitPosition, animatable, converter=convertLengthPoint
 opacity animatable, type_name=float

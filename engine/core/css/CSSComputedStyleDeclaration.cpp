@@ -76,7 +76,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyAnimationPlayState,
     CSSPropertyAnimationTimingFunction,
     CSSPropertyBackgroundAttachment,
-    CSSPropertyBackgroundBlendMode,
     CSSPropertyBackgroundClip,
     CSSPropertyBackgroundColor,
     CSSPropertyBackgroundImage,
@@ -126,7 +125,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyFontWeight,
     CSSPropertyHeight,
     CSSPropertyImageRendering,
-    CSSPropertyIsolation,
     CSSPropertyLeft,
     CSSPropertyLetterSpacing,
     CSSPropertyLineHeight,
@@ -141,7 +139,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyMaxWidth,
     CSSPropertyMinHeight,
     CSSPropertyMinWidth,
-    CSSPropertyMixBlendMode,
     CSSPropertyObjectFit,
     CSSPropertyObjectPosition,
     CSSPropertyOpacity,
@@ -1571,8 +1568,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->hyphenationString(), CSSPrimitiveValue::CSS_STRING);
         case CSSPropertyImageRendering:
             return CSSPrimitiveValue::create(style->imageRendering());
-        case CSSPropertyIsolation:
-            return cssValuePool().createValue(style->isolation());
         case CSSPropertyLeft:
             return valueForPositionOffset(*style, CSSPropertyLeft, renderer);
         case CSSPropertyLetterSpacing:
@@ -2171,15 +2166,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createIdentifierValue(CSSValueNone);
         case CSSPropertyWebkitFilter:
             return valueForFilter(renderer, *style);
-        case CSSPropertyMixBlendMode:
-            return cssValuePool().createValue(style->blendMode());
 
-        case CSSPropertyBackgroundBlendMode: {
-            RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
-                list->append(cssValuePool().createValue(currLayer->blendMode()));
-            return list.release();
-        }
         case CSSPropertyBackground:
             return valuesForBackgroundShorthand();
         case CSSPropertyBorder: {

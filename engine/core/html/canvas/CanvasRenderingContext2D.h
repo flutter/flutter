@@ -109,13 +109,7 @@ public:
     String shadowColor() const;
     void setShadowColor(const String&);
 
-    float globalAlpha() const;
-    void setGlobalAlpha(float);
-
     bool isContextLost() const;
-
-    String globalCompositeOperation() const;
-    void setGlobalCompositeOperation(const String&);
 
     void save() { ++m_stateStack.last()->m_unrealizedSaveCount; }
     void restore();
@@ -178,8 +172,6 @@ public:
 
     void drawImageFromRect(HTMLImageElement*, float sx = 0, float sy = 0, float sw = 0, float sh = 0,
                            float dx = 0, float dy = 0, float dw = 0, float dh = 0, const String& compositeOperation = emptyString());
-
-    void setAlpha(float);
 
     void setCompositeOperation(const String&);
 
@@ -265,9 +257,6 @@ private:
         FloatSize m_shadowOffset;
         float m_shadowBlur;
         RGBA32 m_shadowColor;
-        float m_globalAlpha;
-        CompositeOperator m_globalComposite;
-        blink::WebBlendMode m_globalBlend;
         AffineTransform m_transform;
         bool m_invertibleCTM;
         Vector<float> m_lineDash;
@@ -348,7 +337,6 @@ private:
 
     virtual bool is2d() const override { return true; }
     virtual bool isAccelerated() const override;
-    virtual bool hasAlpha() const override { return m_hasAlpha; }
     virtual void setIsHidden(bool) override;
 
     virtual bool isTransformInvertible() const override { return state().m_invertibleCTM; }
@@ -358,7 +346,6 @@ private:
 
     Vector<OwnPtr<State> > m_stateStack;
     OwnPtr<HitRegionManager> m_hitRegionManager;
-    bool m_hasAlpha;
     bool m_isContextLost;
     bool m_contextRestorable;
     Canvas2DContextStorage m_storageMode;

@@ -90,7 +90,6 @@ GraphicsLayer::GraphicsLayer(GraphicsLayerClient* client)
     , m_masksToBounds(false)
     , m_drawsContent(false)
     , m_contentsVisible(true)
-    , m_isRootForIsolatedGroup(false)
     , m_hasScrollParent(false)
     , m_hasClipParent(false)
     , m_paintingPhase(GraphicsLayerPaintAllWithOverflowClip)
@@ -541,9 +540,6 @@ PassRefPtr<JSONObject> GraphicsLayer::layerTreeAsJSON(LayerTreeFlags flags, Rend
     if (m_blendMode != WebBlendModeNormal)
         json->setString("blendMode", compositeOperatorName(CompositeSourceOver, m_blendMode));
 
-    if (m_isRootForIsolatedGroup)
-        json->setBoolean("isolate", m_isRootForIsolatedGroup);
-
     if (m_contentsOpaque)
         json->setBoolean("contentsOpaque", m_contentsOpaque);
 
@@ -836,14 +832,6 @@ void GraphicsLayer::setBlendMode(WebBlendMode blendMode)
         return;
     m_blendMode = blendMode;
     platformLayer()->setBlendMode(WebBlendMode(blendMode));
-}
-
-void GraphicsLayer::setIsRootForIsolatedGroup(bool isolated)
-{
-    if (m_isRootForIsolatedGroup == isolated)
-        return;
-    m_isRootForIsolatedGroup = isolated;
-    platformLayer()->setIsRootForIsolatedGroup(isolated);
 }
 
 void GraphicsLayer::setContentsNeedsDisplay()
