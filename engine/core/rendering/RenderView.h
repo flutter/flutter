@@ -131,6 +131,7 @@ public:
 
     void addIFrame(RenderIFrame* iframe);
     void removeIFrame(RenderIFrame* iframe);
+    void updateIFramesAfterLayout();
 
 private:
     virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;

@@ -966,6 +966,8 @@ void FrameView::updateLayoutAndStyleForPainting()
         updateCompositedSelectionBoundsIfNeeded();
 
         invalidateTreeIfNeededRecursive();
+
+        view->updateIFramesAfterLayout();
     }
 
     ASSERT(lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);

@@ -299,11 +299,6 @@ void RenderView::invalidateTreeIfNeeded(const PaintInvalidationState& paintInval
         const RenderLayerModelObject* paintInvalidationContainer = &paintInvalidationState.paintInvalidationContainer();
         mapRectToPaintInvalidationBacking(paintInvalidationContainer, dirtyRect, &paintInvalidationState);
         invalidatePaintUsingContainer(paintInvalidationContainer, dirtyRect, InvalidationFull);
-
-        // Also need to handle iframes, since they have a separate view outside
-        // the hierarchy.
-        for (auto& iframe: m_iframes)
-            iframe->invalidateWidgetBounds();
     }
     RenderBlock::invalidateTreeIfNeeded(paintInvalidationState);
 }
@@ -767,6 +762,12 @@ void RenderView::addIFrame(RenderIFrame* iframe)
 void RenderView::removeIFrame(RenderIFrame* iframe)
 {
     m_iframes.remove(iframe);
+}
+
+void RenderView::updateIFramesAfterLayout()
+{
+    for (auto& iframe: m_iframes)
+        iframe->updateWidgetBounds();
 }
 
 } // namespace blink

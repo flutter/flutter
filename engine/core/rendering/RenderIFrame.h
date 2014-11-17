@@ -16,8 +16,7 @@ public:
     explicit RenderIFrame(HTMLIFrameElement*);
     virtual ~RenderIFrame();
 
-    // RenderReplaced methods:
-    void invalidateWidgetBounds() override;
+    void updateWidgetBounds();
 
 private:
     LayerType layerTypeRequired() const override { return NormalLayer; }

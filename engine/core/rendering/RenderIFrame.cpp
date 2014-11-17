@@ -27,7 +27,7 @@ RenderIFrame::~RenderIFrame()
         view()->removeIFrame(this);
 }
 
-void RenderIFrame::invalidateWidgetBounds()
+void RenderIFrame::updateWidgetBounds()
 {
     mojo::View* contentView = toHTMLIFrameElement(node())->contentView();
     if (!contentView)
