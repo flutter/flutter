@@ -499,23 +499,6 @@ void ContainerNode::removeBetween(Node* previousChild, Node* nextChild, Node& ol
     document().adoptIfNeeded(oldChild);
 }
 
-void ContainerNode::parserRemoveChild(Node& oldChild)
-{
-    ASSERT(oldChild.parentNode() == this);
-    ASSERT(!oldChild.isDocumentFragment());
-
-    Node* prev = oldChild.previousSibling();
-    Node* next = oldChild.nextSibling();
-
-    ChildListMutationScope(*this).willRemoveChild(oldChild);
-    oldChild.notifyMutationObserversNodeWillDetach();
-
-    removeBetween(prev, next, oldChild);
-
-    notifyNodeRemoved(oldChild);
-    childrenChanged(ChildrenChange::forRemoval(oldChild, ChildrenChangeSourceParser));
-}
-
 // this differs from other remove functions because it forcibly removes all the children,
 // regardless of read-only status or event exceptions, e.g.
 void ContainerNode::removeChildren()

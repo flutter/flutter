@@ -71,10 +71,6 @@ static inline void insert(HTMLConstructionSiteTask& task)
 {
     if (isHTMLTemplateElement(*task.parent))
         task.parent = toHTMLTemplateElement(task.parent.get())->content();
-
-    if (ContainerNode* parent = task.child->parentNode())
-        parent->parserRemoveChild(*task.child);
-
     task.parent->parserAppendChild(task.child.get());
 }
 

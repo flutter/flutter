@@ -68,7 +68,6 @@ public:
     // These methods are only used during parsing.
     // They don't send DOM mutation events or handle reparenting.
     void parserAppendChild(PassRefPtr<Node>);
-    void parserRemoveChild(Node&);
 
     void removeChildren();
 
