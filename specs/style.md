@@ -534,28 +534,28 @@ StyleDeclaration objects as follows:
 * ``content``
 * ``title``
   These all add to themselves the same declaration with value:
-  ``{ display: { value: null } }``
+  ```{ display: { value: null } }```
 
 * ``img``
   This adds to itself the declaration with value:
-  ``{ display: { value: sky.ImageElementLayoutManager } }``
+  ```{ display: { value: sky.ImageElementLayoutManager } }```
 
 * ``span``
 * ``a``
   These all add to themselves the same declaration with value:
-  ``{ display: { value: sky.InlineLayoutManager } }``
+  ```{ display: { value: sky.InlineLayoutManager } }```
 
 * ``iframe``
   This adds to itself the declaration with value:
-  ``{ display: { value: sky.IFrameElementLayoutManager } }``
+  ```{ display: { value: sky.IFrameElementLayoutManager } }```
 
 * ``t``
   This adds to itself the declaration with value:
-  ``{ display: { value: sky.ParagraphLayoutManager } }``
+  ```{ display: { value: sky.ParagraphLayoutManager } }```
 
 * ``error``
   This adds to itself the declaration with value:
-  ``{ display: { value: sky.ErrorLayoutManager } }``
+  ```{ display: { value: sky.ErrorLayoutManager } }```
 
 The ``div`` element doesn't have any default styles.
 
