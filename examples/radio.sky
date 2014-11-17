@@ -1,10 +1,6 @@
 SKY MODULE - radio button and radio button group
 <!-- accessibility handling not implemented yet, pending mojo service -->
 
-<script>
- module.exports = {};
-</script>
-
 <!-- <radio> -->
 <template id="radio-shadow">
  <style>
