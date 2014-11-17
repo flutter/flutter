@@ -1,9 +1,0 @@
-include_rules = [
-    "+v8",
-    "+bindings",
-    "+core",
-    "+platform",
-    "+public/platform",
-    "+mojo/public",
-    "+mojo/services/public",
-]

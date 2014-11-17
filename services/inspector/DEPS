@@ -1,6 +1,0 @@
-include_rules = [
-    "+mojo/application",
-    "+mojo/public",
-    "+net/server",
-    "+net/socket",
-]
