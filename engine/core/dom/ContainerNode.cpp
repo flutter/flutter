@@ -254,28 +254,6 @@ void ContainerNode::appendChildCommon(Node& child)
     setLastChild(&child);
 }
 
-void ContainerNode::parserInsertBefore(PassRefPtr<Node> newChild, Node& nextChild)
-{
-    ASSERT(newChild);
-    ASSERT(nextChild.parentNode() == this);
-    ASSERT(!newChild->isDocumentFragment());
-    ASSERT(!isHTMLTemplateElement(this));
-
-    if (nextChild.previousSibling() == newChild || &nextChild == newChild) // nothing to do
-        return;
-
-    RefPtr<Node> protect(this);
-
-    if (document() != newChild->document())
-        document().adoptNode(newChild.get(), ASSERT_NO_EXCEPTION);
-
-    insertBeforeCommon(nextChild, *newChild);
-
-    ChildListMutationScope(*this).childAdded(*newChild);
-
-    notifyNodeInserted(*newChild, ChildrenChangeSourceParser);
-}
-
 PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& exceptionState)
 {
 #if !ENABLE(OILPAN)

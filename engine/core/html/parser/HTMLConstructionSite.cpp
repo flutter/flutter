@@ -75,10 +75,7 @@ static inline void insert(HTMLConstructionSiteTask& task)
     if (ContainerNode* parent = task.child->parentNode())
         parent->parserRemoveChild(*task.child);
 
-    if (task.nextChild)
-        task.parent->parserInsertBefore(task.child.get(), *task.nextChild);
-    else
-        task.parent->parserAppendChild(task.child.get());
+    task.parent->parserAppendChild(task.child.get());
 }
 
 static inline void executeInsertTask(HTMLConstructionSiteTask& task)
@@ -102,7 +99,7 @@ static inline void executeInsertTextTask(HTMLConstructionSiteTask& task)
     // Merge text nodes into previous ones if possible:
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/tree-construction.html#insert-a-character
     Text* newText = toText(task.child.get());
-    Node* previousChild = task.nextChild ? task.nextChild->previousSibling() : task.parent->lastChild();
+    Node* previousChild = task.parent->lastChild();
     if (previousChild && previousChild->isTextNode()) {
         Text* previousText = toText(previousChild);
         unsigned lengthLimit = textLengthLimitForContainer(*task.parent);
@@ -188,7 +185,6 @@ void HTMLConstructionSite::flushPendingText()
 
         HTMLConstructionSiteTask task(HTMLConstructionSiteTask::InsertText);
         task.parent = pendingText.parent;
-        task.nextChild = pendingText.nextChild;
         task.child = Text::create(task.parent->document(), substring);
         queueTask(task);
 
@@ -321,12 +317,12 @@ void HTMLConstructionSite::insertTextNode(const String& string, WhitespaceMode w
     if (isHTMLTemplateElement(*dummyTask.parent))
         dummyTask.parent = toHTMLTemplateElement(dummyTask.parent.get())->content();
 
-    // Unclear when parent != case occurs. Somehow we insert text into two separate nodes while processing the same Token.
-    // The nextChild != dummy.nextChild case occurs whenever foster parenting happened and we hit a new text node "<table>a</table>b"
-    // In either case we have to flush the pending text into the task queue before making more.
-    if (!m_pendingText.isEmpty() && (m_pendingText.parent != dummyTask.parent ||  m_pendingText.nextChild != dummyTask.nextChild))
+    // Unclear when parent != case occurs. Somehow we insert text into two separate
+    // nodes while processing the same Token. When it happens we have to flush the
+    // pending text into the task queue before making more.
+    if (!m_pendingText.isEmpty() && (m_pendingText.parent != dummyTask.parent))
         flushPendingText();
-    m_pendingText.append(dummyTask.parent, dummyTask.nextChild, string, whitespaceMode);
+    m_pendingText.append(dummyTask.parent, string, whitespaceMode);
 }
 
 PassRefPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token, const AtomicString& namespaceURI)

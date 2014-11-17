@@ -53,7 +53,6 @@ public:
 
     Operation operation;
     RefPtr<ContainerNode> parent;
-    RefPtr<Node> nextChild;
     RefPtr<Node> child;
     bool selfClosing;
 };
@@ -153,12 +152,10 @@ private:
         {
         }
 
-        void append(PassRefPtr<ContainerNode> newParent, PassRefPtr<Node> newNextChild, const String& newString, WhitespaceMode newWhitespaceMode)
+        void append(PassRefPtr<ContainerNode> newParent, const String& newString, WhitespaceMode newWhitespaceMode)
         {
             ASSERT(!parent || parent == newParent);
             parent = newParent;
-            ASSERT(!nextChild || nextChild == newNextChild);
-            nextChild = newNextChild;
             stringBuilder.append(newString);
             whitespaceMode = std::min(whitespaceMode, newWhitespaceMode);
         }
@@ -167,7 +164,6 @@ private:
         {
             std::swap(whitespaceMode, other.whitespaceMode);
             parent.swap(other.parent);
-            nextChild.swap(other.nextChild);
             stringBuilder.swap(other.stringBuilder);
         }
 

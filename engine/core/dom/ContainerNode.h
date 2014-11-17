@@ -69,7 +69,6 @@ public:
     // They don't send DOM mutation events or handle reparenting.
     void parserAppendChild(PassRefPtr<Node>);
     void parserRemoveChild(Node&);
-    void parserInsertBefore(PassRefPtr<Node> newChild, Node& refChild);
 
     void removeChildren();
 
