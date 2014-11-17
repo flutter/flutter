@@ -15,3 +15,7 @@ https://github.com/domokit/mojo/issues/15 parser/empty.sky [ Skip ]
 https://github.com/domokit/mojo/issues/14 parser/normaliser-null.sky [ Skip ]
 https://github.com/domokit/mojo/issues/14 parser/utf16.sky [ Skip ]
 https://github.com/domokit/mojo/issues/16 parser/normaliser-crlf.sky [ Skip ]
+
+# These tests are flaky on the bots
+https://github.com/domokit/mojo/issues/24 custom-elements/constructor-calls-created-synchronously.sky [ Skip ]
+https://github.com/domokit/mojo/issues/24 mutation-observer/observe-attributes.sky [ Skip ]
