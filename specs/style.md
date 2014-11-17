@@ -343,6 +343,7 @@ node's layoutManager and ownerLayoutManager attributes to null.
       // using walkChildren() does this for you
 
     readonly attribute Boolean needsPaint; // means that either needsLayout is true or a property with needsPaint:true has changed on this node or one of its descendants
+      // needsPaint is set to false by the ownerLayoutManager's default paint() method
 
     // only the ownerLayoutManager can change these
     readonly attribute Float x; // relative to left edge of ownerLayoutManager
@@ -435,15 +436,18 @@ Layout managers inherit from the following API:
       // the return value should include the final value for whichever of the width and height arguments that is null
       // TODO(ianh): should we just grab the width and height from assumeDimensions()?
 
-    void paint(RenderingSurface canvas);
+    void markAsPainted(); // sets this.node.needsPaint to false
+    virtual void paint(RenderingSurface canvas);
       // set a clip rect on the canvas for rect(0,0,this.width,this.height)
       // call the painter of each property, in order they were registered, which on this element has a painter
       // call this.paintChildren()
       // unset the clip
+      // call markAsPainted()
 
     virtual void paintChildren(RenderingSurface canvas);
       // just calls paint() for each child returned by walkChildren() whose needsPaint is true,
       // after transforming the coordinate space by translate(child.x,child.y)
+      // you should skip children that will be clipped out of yourself because they're outside your bounds
 
     virtual Node hitTest(Float x, Float y);
       // default implementation uses the node's children nodes' x, y,
