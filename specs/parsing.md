@@ -8,10 +8,11 @@ Parsing in Sky is a strict pipeline consisting of five stages:
 
 - normalising, which manipulates the sequence of characters.
 
-- tokenising, which converts these characters into three kinds of
-  tokens: character tokens, start tag tokens, and end tag tokens.
-  Character tokens have a single character value. Tag tokens have a
-  tag name, and a list of name/value pairs known as attributes.
+- tokenising, which converts these characters into four kinds of
+  tokens: character tokens, start tag tokens, end tag tokens, and
+  automatic end tag tokens. Character tokens have a single character
+  value. Start and end tag tokens have a tag name, and a list of
+  name/value pairs known as attributes.
 
 - token cleanup, which converts sequences of character tokens into
   string tokens, and removes duplicate attributes in tag tokens.
@@ -371,8 +372,8 @@ If the current character is...
 
 If the current character is...
 
-* '``>``': Emit character tokens for '``</>``'. Consume the current
-  character. Switch to the **data** state.
+* '``>``': Emit an automatic end tag token. Switch to the **data**
+  state.
 
 * '``0``'..'``9``', '``a``'..'``z``', '``A``'..'``Z``',
   '``-``', '``_``', '``.``': Create an end tag token, let its
@@ -552,10 +553,10 @@ If the current character is...
 Emit the tag token.
 
 If the tag token was a start tag token and the tag name was
-'``script``', then and switch to the **script raw data** state.
+'``script``', then switch to the **script raw data** state.
 
 If the tag token was a start tag token and the tag name was
-'``style``', then and switch to the **style raw data** state.
+'``style``', then switch to the **style raw data** state.
 
 Otherwise, switch to the **data** state.
 
@@ -832,5 +833,7 @@ _document_:
         modules_ contains no entries with unresolved promises, then
         execute the script given by the element's contents, using the
         associated names as appropriate.
+   - If _token_ is an automatic end tag token:
+     1. Pop the top node from the _stack of open nodes_, if any.
 4. Yield until _imported modules_ has no promises.
 5. Fire a ``load`` event at the _parsing context_ object.

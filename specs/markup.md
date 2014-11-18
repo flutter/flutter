@@ -134,7 +134,10 @@ An element consists of the following:
         name is not ``template``, consisting of:
         1. ``<``
         2. ``/``
-        3. Same sequence of characters as "tag name" above.
+        3. Same sequence of characters as "tag name" above; this may
+           be omitted if no start tags have had their end tag omitted
+           since this element's start tag, unless this element's tag
+           name is ``script`` or ``style``.
         4. ``>``
 
 
