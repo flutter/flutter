@@ -14,6 +14,7 @@
       color: #FFF;
       background-color: #333;
       padding: 4px 4px 4px 12px;
+      display: paragraph;
     }
   </style>
   <div>{{ state }}</div>
@@ -35,6 +36,7 @@ SkyElement({
       font-weight: bold;
       padding: 2px 4px 4px 12px;
       background-color: #DDD;
+      display: paragraph;
     }
   </style>
   <div>{{ letter }}</div>
@@ -58,6 +60,10 @@ SkyElement({
       border-bottom: 1px solid #EEE;
       line-height: 15px;
       overflow: hidden;
+    }
+
+    div {
+      display: paragraph;
     }
 
     span {
