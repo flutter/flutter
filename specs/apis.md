@@ -283,6 +283,7 @@ module 'sky:core' {
   abstract class AbstractModule : EventTarget {
     readonly attribute Document document; // O(1) // the Documentof the module or application
     Promise<any> import(String url); // O(Yikes) // returns the module's exports
+    private Array<Module> getImports(); O(N) // returns the Module objects of all the imported modules
 
     readonly attribute String url;
 
