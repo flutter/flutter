@@ -834,6 +834,7 @@ _document_:
         execute the script given by the element's contents, using the
         associated names as appropriate.
    - If _token_ is an automatic end tag token:
-     1. Pop the top node from the _stack of open nodes_, if any.
+     1. Pop the top node from the _stack of open nodes_, unless it is
+        the document.
 4. Yield until _imported modules_ has no promises.
 5. Fire a ``load`` event at the _parsing context_ object.
