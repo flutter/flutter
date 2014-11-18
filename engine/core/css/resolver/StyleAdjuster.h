@@ -41,7 +41,6 @@ public:
     void adjustRenderStyle(RenderStyle* styleToAdjust, RenderStyle* parentStyle, Element&);
 
 private:
-    void adjustStyleForDisplay(RenderStyle* styleToAdjust, RenderStyle* parentStyle);
     void adjustOverflow(RenderStyle* styleToAdjust);
     void adjustStyleForAlignment(RenderStyle& styleToAdjust, const RenderStyle& parentStyle);
 };

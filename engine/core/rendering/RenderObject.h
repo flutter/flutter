@@ -326,6 +326,7 @@ public:
     virtual bool isMedia() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
+    virtual bool isRenderParagraph() const { return false; }
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
@@ -335,7 +336,8 @@ public:
 
     bool everHadLayout() const { return m_bitfields.everHadLayout(); }
 
-    bool childrenInline() const { return m_bitfields.childrenInline(); }
+    // FIXME(sky): Remove this concept.
+    bool childrenInline() const { return isRenderParagraph(); }
     void setChildrenInline(bool b) { m_bitfields.setChildrenInline(b); }
 
     bool alwaysCreateLineBoxesForRenderInline() const
@@ -400,7 +402,7 @@ public:
         // This function is kept in sync with anonymous block creation conditions in
         // RenderBlock::createAnonymousBlock(). This includes creating an anonymous
         // RenderBlock having a BLOCK or BOX display. See https://bugs.webkit.org/show_bug.cgi?id=56709.
-        return isAnonymous() && style()->display() == BLOCK && style()->styleType() == NOPSEUDO && isRenderBlock();
+        return isAnonymous() && style()->display() == PARAGRAPH;
     }
 
     bool isElementContinuation() const { return node() && node()->renderer() != this; }

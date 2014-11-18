@@ -52,6 +52,7 @@
 #include "core/rendering/RenderInline.h"
 #include "core/rendering/RenderLayer.h"
 #include "core/rendering/RenderObjectInlines.h"
+#include "core/rendering/RenderParagraph.h"
 #include "core/rendering/RenderText.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/RenderView.h"
@@ -141,6 +142,8 @@ RenderObject* RenderObject::createObject(Element* element, RenderStyle* style)
     case BLOCK:
     case INLINE_BLOCK:
         return new RenderBlockFlow(element);
+    case PARAGRAPH:
+        return new RenderParagraph(element);
     case FLEX:
     case INLINE_FLEX:
         return new RenderFlexibleBox(element);
@@ -1645,21 +1648,13 @@ void RenderObject::selectionStartEnd(int& spos, int& epos) const
 
 void RenderObject::handleDynamicFloatPositionChange()
 {
+    // FIXME(sky): Inline this function.
+
     // We have gone from not affecting the inline status of the parent flow to suddenly
     // having an impact.  See if there is a mismatch between the parent flow's
     // childrenInline() state and our state.
     setInline(style()->isDisplayInlineType());
-    if (isInline() != parent()->childrenInline()) {
-        if (!isInline())
-            toRenderBoxModelObject(parent())->childBecameNonInline(this);
-        else {
-            // An anonymous block must be made to wrap this inline.
-            RenderBlock* block = toRenderBlock(parent())->createAnonymousBlock();
-            RenderObjectChildList* childlist = parent()->virtualChildren();
-            childlist->insertChildNode(parent(), block, this);
-            block->children()->appendChildNode(block, childlist->removeChildNode(parent(), this));
-        }
-    }
+    ASSERT(isInline() == parent()->childrenInline());
 }
 
 StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const

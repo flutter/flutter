@@ -19,6 +19,13 @@ body {
   background-size: cover;
 }
 
+.line,
+.link,
+.name,
+.photograph-credit {
+  display: paragraph;
+}
+
 .photograph-credit {
   position: absolute;
   right: 0;

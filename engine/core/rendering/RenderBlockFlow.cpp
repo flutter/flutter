@@ -46,7 +46,6 @@ namespace blink {
 RenderBlockFlow::RenderBlockFlow(ContainerNode* node)
     : RenderBlock(node)
 {
-    setChildrenInline(true);
 }
 
 RenderBlockFlow::~RenderBlockFlow()

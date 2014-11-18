@@ -175,8 +175,8 @@ public:
     using RenderBoxModelObject::continuation;
     using RenderBoxModelObject::setContinuation;
 
-    static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = BLOCK);
-    RenderBlock* createAnonymousBlock(EDisplay display = BLOCK) const { return createAnonymousWithParentRendererAndDisplay(this, display); }
+    static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = PARAGRAPH);
+    RenderBlock* createAnonymousBlock(EDisplay display = PARAGRAPH) const { return createAnonymousWithParentRendererAndDisplay(this, display); }
 
     virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const override;
 
@@ -298,7 +298,6 @@ private:
     virtual bool isRenderBlock() const override final { return true; }
 
     void makeChildrenNonInline(RenderObject* insertionPoint = 0);
-    virtual void removeLeftoverAnonymousBlock(RenderBlock* child);
 
     static void collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* child);
 

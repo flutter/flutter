@@ -41,24 +41,68 @@
 
 namespace blink {
 
+static bool requiresOnlyBlockChildren(RenderStyle* parentStyle)
+{
+    switch (parentStyle->display()) {
+    case PARAGRAPH:
+    case INLINE:
+        return false;
+
+    case BLOCK:
+    case FLEX:
+    case INLINE_FLEX:
+    case INLINE_BLOCK:
+        return true;
+
+    case NONE:
+        ASSERT_NOT_REACHED();
+        return false;
+    }
+}
+
+static EDisplay equivalentInlineDisplay(EDisplay display)
+{
+    switch (display) {
+    // TODO(ojan): Do we need an INLINE_PARAGRAPH display?
+    case PARAGRAPH:
+        return INLINE;
+
+    case BLOCK:
+        return INLINE_BLOCK;
+
+    case FLEX:
+        return INLINE_FLEX;
+
+    case INLINE:
+    case INLINE_FLEX:
+    case INLINE_BLOCK:
+        return display;
+
+    case NONE:
+        ASSERT_NOT_REACHED();
+        return NONE;
+    }
+}
+
 static EDisplay equivalentBlockDisplay(EDisplay display)
 {
     switch (display) {
+    case PARAGRAPH:
     case BLOCK:
     case FLEX:
         return display;
+
     case INLINE_FLEX:
         return FLEX;
 
     case INLINE:
     case INLINE_BLOCK:
         return BLOCK;
+
     case NONE:
         ASSERT_NOT_REACHED();
         return NONE;
     }
-    ASSERT_NOT_REACHED();
-    return BLOCK;
 }
 
 // CSS requires text-decoration to be reset at each DOM element for tables,
@@ -108,7 +152,10 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
         if (style->hasOutOfFlowPosition() || element.document().documentElement() == element)
             style->setDisplay(equivalentBlockDisplay(style->display()));
 
-        adjustStyleForDisplay(style, parentStyle);
+        if (requiresOnlyBlockChildren(parentStyle))
+            style->setDisplay(equivalentBlockDisplay(style->display()));
+        else
+            style->setDisplay(equivalentInlineDisplay(style->display()));
     }
 
     // Make sure our z-index value is only applied if the object is positioned.
@@ -223,13 +270,6 @@ void StyleAdjuster::adjustOverflow(RenderStyle* style)
         style->setOverflowX(OAUTO);
     } else if (style->overflowY() == OVISIBLE && style->overflowX() != OVISIBLE) {
         style->setOverflowY(OAUTO);
-    }
-}
-
-void StyleAdjuster::adjustStyleForDisplay(RenderStyle* style, RenderStyle* parentStyle)
-{
-    if (parentStyle->isDisplayFlexibleBox()) {
-        style->setDisplay(equivalentBlockDisplay(style->display()));
     }
 }
 

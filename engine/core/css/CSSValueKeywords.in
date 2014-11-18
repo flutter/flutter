@@ -259,6 +259,9 @@ katakana-iroha
 // The order here must match the order of the EDisplay enum in RenderStyleConstants.h.
 //
 inline
+// Contains only inline content.
+paragraph
+// Contains only block content.
 block
 inline-block
 flex

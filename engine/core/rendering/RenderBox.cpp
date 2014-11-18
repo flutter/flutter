@@ -3473,47 +3473,6 @@ bool RenderBox::hasRelativeLogicalHeight() const
         || style()->logicalMaxHeight().isPercent();
 }
 
-static void markBoxForRelayoutAfterSplit(RenderBox* box)
-{
-    box->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
-}
-
-RenderObject* RenderBox::splitAnonymousBoxesAroundChild(RenderObject* beforeChild)
-{
-    bool didSplitParentAnonymousBoxes = false;
-
-    while (beforeChild->parent() != this) {
-        RenderBox* boxToSplit = toRenderBox(beforeChild->parent());
-        if (boxToSplit->slowFirstChild() != beforeChild && boxToSplit->isAnonymous()) {
-            didSplitParentAnonymousBoxes = true;
-
-            // We have to split the parent box into two boxes and move children
-            // from |beforeChild| to end into the new post box.
-            RenderBox* postBox = boxToSplit->createAnonymousBoxWithSameTypeAs(this);
-            postBox->setChildrenInline(boxToSplit->childrenInline());
-            RenderBox* parentBox = toRenderBox(boxToSplit->parent());
-            // We need to invalidate the |parentBox| before inserting the new node
-            // so that the table paint invalidation logic knows the structure is dirty.
-            // See for example RenderTableCell:clippedOverflowRectForPaintInvalidation.
-            markBoxForRelayoutAfterSplit(parentBox);
-            parentBox->virtualChildren()->insertChildNode(parentBox, postBox, boxToSplit->nextSibling());
-            boxToSplit->moveChildrenTo(postBox, beforeChild, 0, true);
-
-            markBoxForRelayoutAfterSplit(boxToSplit);
-            markBoxForRelayoutAfterSplit(postBox);
-
-            beforeChild = postBox;
-        } else
-            beforeChild = boxToSplit;
-    }
-
-    if (didSplitParentAnonymousBoxes)
-        markBoxForRelayoutAfterSplit(this);
-
-    ASSERT(beforeChild->parent() == this);
-    return beforeChild;
-}
-
 void RenderBox::savePreviousBorderBoxSizeIfNeeded()
 {
     // If m_rareData is already created, always save.

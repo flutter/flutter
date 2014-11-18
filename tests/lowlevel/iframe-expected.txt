@@ -10,8 +10,9 @@ layer at (0,0) size 800x506
         RenderText {#text} at (0,0) size 72x19
           text run at (0,0) width 72: "element."
     RenderBlock {div} at (0,228) size 800x200
-      RenderText {#text} at (0,0) size 99x19
-        text run at (0,0) width 99: "Placeholder."
+      RenderBlock (anonymous) at (0,0) size 800x19
+        RenderText {#text} at (0,0) size 99x19
+          text run at (0,0) width 99: "Placeholder."
     RenderBlock {div} at (0,428) size 800x78
       RenderBlock (anonymous) at (0,0) size 800x19
         RenderText {#text} at (0,0) size 218x19
