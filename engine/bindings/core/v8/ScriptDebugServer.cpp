@@ -580,7 +580,7 @@ void ScriptDebugServer::ensureDebuggerScriptCompiled()
 
     v8::HandleScope scope(m_isolate);
     v8::Context::Scope contextScope(v8::Debug::GetDebugContext());
-    const blink::WebData& debuggerScriptSourceResource = blink::Platform::current()->loadResource("DebuggerScriptSource.js");
+    const blink::WebData& debuggerScriptSourceResource = blink::Platform::current()->loadResource("DebuggerScript.js");
     v8::Handle<v8::String> source = v8String(m_isolate, String(debuggerScriptSourceResource.data(), debuggerScriptSourceResource.size()));
     v8::Local<v8::Value> value = V8ScriptRunner::compileAndRunInternalScript(source, m_isolate);
     ASSERT(!value.IsEmpty());

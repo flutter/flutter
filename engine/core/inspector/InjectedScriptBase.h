@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2012 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,37 +28,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallFrame_h
-#define ScriptCallFrame_h
+#ifndef InjectedScriptBase_h
+#define InjectedScriptBase_h
 
+#include "bindings/core/v8/ScriptState.h"
+#include "bindings/core/v8/ScriptValue.h"
 #include "core/InspectorTypeBuilder.h"
 #include "wtf/Forward.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 
-class ScriptCallFrame  {
+class JSONValue;
+class ScriptFunctionCall;
+
+typedef String ErrorString;
+
+
+class InjectedScriptBase {
 public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+    virtual ~InjectedScriptBase() { }
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+    const String& name() const { return m_name; }
+    bool isEmpty() const { return m_injectedScriptObject.isEmpty(); }
+    ScriptState* scriptState() const
+    {
+        ASSERT(!isEmpty());
+        return m_injectedScriptObject.scriptState();
+    }
 
-    PassRefPtr<TypeBuilder::Console::CallFrame> buildInspectorObject() const;
+protected:
+    explicit InjectedScriptBase(const String& name);
+    InjectedScriptBase(const String& name, ScriptValue);
+
+    void initialize(ScriptValue);
+    const ScriptValue& injectedScriptObject() const;
+    ScriptValue callFunctionWithEvalEnabled(ScriptFunctionCall&, bool& hadException) const;
+    void makeCall(ScriptFunctionCall&, RefPtr<JSONValue>* result);
+    void makeEvalCall(ErrorString*, ScriptFunctionCall&, RefPtr<TypeBuilder::Runtime::RemoteObject>* result, TypeBuilder::OptOutput<bool>* wasThrown, RefPtr<TypeBuilder::Debugger::ExceptionDetails>* = 0);
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    String m_name;
+    ScriptValue m_injectedScriptObject;
 };
+
 
 } // namespace blink
 
-#endif // ScriptCallFrame_h
+#endif

@@ -1,5 +1,7 @@
+<import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
-function Page() {
+function Page(delegate) {
+  this.delegate_ = delegate;
 }
 
 Page.prototype.enable = function() {
@@ -17,14 +19,28 @@ Page.prototype.canEmulate = function() {
   };
 };
 
+Page.prototype.getResourceContent = function(params, message_id) {
+  var request = new XMLHttpRequest;
+  request.onload = function() {
+    var message = {
+      'content' : request.responseText,
+    };
+    this.delegate_.sendResponse(message_id, message);
+  }.bind(this);
+  request.open("GET", params.url);
+  request.send();
+
+  return this.delegate_.ASYNC_RESPONSE;
+};
+
 Page.prototype.getResourceTree = function() {
   // Unclear if this is all needed, but if we don't return something here
   // the inspector hits an exception in WebInspector.ResourceTreeModel.
   return {
     "frameTree": {
       "frame": {
-        "id": 1,
-        "loaderId": 1,
+        "id": "1",
+        "loaderId": "1",
         "url": document.URL,
         "mimeType": "text/html",
         "securityOrigin": document.URL,

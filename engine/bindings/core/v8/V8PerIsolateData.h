@@ -94,6 +94,8 @@ public:
     bool hasInstance(const WrapperTypeInfo*, v8::Handle<v8::Value>);
     v8::Handle<v8::Object> findInstanceInPrototypeChain(const WrapperTypeInfo*, v8::Handle<v8::Value>);
 
+    v8::Local<v8::Context> ensureScriptRegexpContext();
+
     const char* previousSamplingState() const { return m_previousSamplingState; }
     void setPreviousSamplingState(const char* name) { m_previousSamplingState = name; }
 
@@ -113,6 +115,7 @@ private:
     OwnPtr<StringCache> m_stringCache;
     OwnPtr<V8HiddenValue> m_hiddenValue;
     ScopedPersistent<v8::Value> m_liveRoot;
+    RefPtr<ScriptState> m_scriptRegexpScriptState;
 
     const char* m_previousSamplingState;
 

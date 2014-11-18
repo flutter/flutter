@@ -69,6 +69,8 @@
             'ScriptPromiseProperty.h',
             'ScriptPromisePropertyBase.cpp',
             'ScriptPromisePropertyBase.h',
+            'ScriptRegexp.cpp',
+            'ScriptRegexp.h',
             'ScriptSourceCode.h',
             'ScriptState.cpp',
             'ScriptState.h',
@@ -127,6 +129,8 @@
             'WindowProxy.cpp',
             'WindowProxy.h',
             'WrapperTypeInfo.h',
+            'PageScriptDebugServer.h',
+            'PageScriptDebugServer.cpp',
         ],
     },
 }

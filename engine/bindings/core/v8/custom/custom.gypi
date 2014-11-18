@@ -26,6 +26,8 @@
             'V8HTMLCanvasElementCustom.cpp',
             'V8HTMLElementCustom.cpp',
             'V8ImageDataCustom.cpp',
+            'V8InjectedScriptHostCustom.cpp',
+            'V8InjectedScriptManager.cpp',
             'V8Int16ArrayCustom.h',
             'V8Int32ArrayCustom.h',
             'V8Int8ArrayCustom.h',

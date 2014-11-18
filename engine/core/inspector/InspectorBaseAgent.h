@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,37 +28,65 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallFrame_h
-#define ScriptCallFrame_h
+#ifndef InspectorBaseAgent_h
+#define InspectorBaseAgent_h
 
-#include "core/InspectorTypeBuilder.h"
+#include "core/InspectorBackendDispatcher.h"
+#include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
+#include "wtf/Vector.h"
 #include "wtf/text/WTFString.h"
 
 namespace blink {
 
-class ScriptCallFrame  {
+class InspectorFrontend;
+class InspectorCompositeState;
+class InspectorState;
+class InstrumentingAgents;
+
+class InspectorAgent {
 public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+    explicit InspectorAgent(const String&);
+    virtual ~InspectorAgent();
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+    void init(InstrumentingAgents* agents, InspectorState* inspectorState);
 
-    PassRefPtr<TypeBuilder::Console::CallFrame> buildInspectorObject() const;
+    virtual void setFrontend(InspectorFrontend*) { }
+    virtual void clearFrontend() { }
+    virtual void restore() { }
+    virtual void discardAgent() { }
+    virtual void didCommitLoadForMainFrame() { }
+    virtual void flushPendingFrontendMessages() { }
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    virtual void virtualInit() { }
+
+    String name() { return m_name; }
+
+protected:
+    RawPtr<InstrumentingAgents> m_instrumentingAgents;
+    RawPtr<InspectorState> m_state;
+
+private:
+    String m_name;
 };
+
+template<typename T>
+class InspectorBaseAgent : public InspectorAgent {
+public:
+    virtual ~InspectorBaseAgent() { }
+
+protected:
+    explicit InspectorBaseAgent(const String& name) : InspectorAgent(name)
+    {
+    }
+};
+
+inline bool asBool(const bool* const b)
+{
+    return b ? *b : false;
+}
 
 } // namespace blink
 
-#endif // ScriptCallFrame_h
+#endif // !defined(InspectorBaseAgent_h)

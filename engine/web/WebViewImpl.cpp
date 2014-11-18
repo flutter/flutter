@@ -32,7 +32,6 @@
 #include "web/WebViewImpl.h"
 
 #include "core/CSSValueKeywords.h"
-#include "core/HTMLNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentMarkerController.h"
 #include "core/dom/NodeRenderingTraversal.h"
@@ -41,8 +40,8 @@
 #include "core/editing/FrameSelection.h"
 #include "core/editing/HTMLInterchange.h"
 #include "core/editing/InputMethodController.h"
-#include "core/editing/TextIterator.h"
 #include "core/editing/markup.h"
+#include "core/editing/TextIterator.h"
 #include "core/events/KeyboardEvent.h"
 #include "core/events/WheelEvent.h"
 #include "core/frame/FrameHost.h"
@@ -51,6 +50,8 @@
 #include "core/frame/Settings.h"
 #include "core/html/HTMLImportElement.h"
 #include "core/html/ime/InputMethodContext.h"
+#include "core/HTMLNames.h"
+#include "core/inspector/inspector_backend_mojo.h"
 #include "core/loader/FrameLoader.h"
 #include "core/loader/UniqueIdentifier.h"
 #include "core/page/Chrome.h"
@@ -59,9 +60,14 @@
 #include "core/page/FocusController.h"
 #include "core/page/Page.h"
 #include "core/page/TouchDisambiguation.h"
-#include "core/rendering/RenderView.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
+#include "core/rendering/RenderView.h"
 #include "platform/Cursor.h"
+#include "platform/exported/WebActiveGestureAnimation.h"
+#include "platform/fonts/FontCache.h"
+#include "platform/graphics/Color.h"
+#include "platform/graphics/Image.h"
+#include "platform/graphics/ImageBuffer.h"
 #include "platform/KeyboardCodes.h"
 #include "platform/Logging.h"
 #include "platform/NotImplemented.h"
@@ -70,14 +76,9 @@
 #include "platform/PlatformMouseEvent.h"
 #include "platform/PlatformWheelEvent.h"
 #include "platform/RuntimeEnabledFeatures.h"
+#include "platform/scroll/Scrollbar.h"
 #include "platform/TraceEvent.h"
 #include "platform/UserGestureIndicator.h"
-#include "platform/exported/WebActiveGestureAnimation.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/graphics/Color.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/scroll/Scrollbar.h"
 #include "platform/weborigin/SchemeRegistry.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebFloatPoint.h"
@@ -97,10 +98,10 @@
 #include "web/CompositionUnderlineVectorBuilder.h"
 #include "web/GraphicsLayerFactoryChromium.h"
 #include "web/LinkHighlight.h"
+#include "web/painting/ContinuousPainter.h"
 #include "web/WebInputEventConversion.h"
 #include "web/WebLocalFrameImpl.h"
 #include "web/WebSettingsImpl.h"
-#include "web/painting/ContinuousPainter.h"
 #include "wtf/CurrentTime.h"
 #include "wtf/RefPtr.h"
 #include "wtf/TemporaryChange.h"
@@ -1603,6 +1604,12 @@ void WebViewImpl::injectModule(const WebString& path)
     if (!document->documentElement())
         return;
     document->documentElement()->appendChild(import.release());
+}
+
+void WebViewImpl::connectInspectorBackend()
+{
+    m_inspectorBackend = adoptPtr(new InspectorBackendMojo(page()->frameHost()));
+    m_inspectorBackend->Connect();
 }
 
 void WebViewImpl::setFocusedFrame(WebFrame* frame)

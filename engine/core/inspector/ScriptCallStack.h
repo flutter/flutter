@@ -31,6 +31,7 @@
 #ifndef ScriptCallStack_h
 #define ScriptCallStack_h
 
+#include "core/InspectorTypeBuilder.h"
 #include "core/inspector/ScriptCallFrame.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
@@ -53,6 +54,8 @@ public:
 
     PassRefPtr<ScriptAsyncCallStack> asyncCallStack() const;
     void setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack>);
+
+    PassRefPtr<TypeBuilder::Array<TypeBuilder::Console::CallFrame> > buildInspectorArray() const;
 
 private:
     explicit ScriptCallStack(Vector<ScriptCallFrame>&);

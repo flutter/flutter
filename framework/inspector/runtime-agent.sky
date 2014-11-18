@@ -115,7 +115,10 @@ Runtime.prototype.evaluate = function(params) {
   return makeResult(params, value, wasThrown);
 }
 
-Runtime.prototype.getProperties = debug.loggingStub("getProperties");
+Runtime.prototype.getProperties = function(params) {
+  // FIXME: Unclear what this is for.
+  return [];
+}
 
 module.exports = Runtime;
 </script>

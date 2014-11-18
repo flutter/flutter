@@ -89,6 +89,7 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
+  mojo::Shell* Shell() override;
 
   // ViewManagerDelegate methods:
   void OnEmbed(
@@ -121,6 +122,7 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   scoped_ptr<WebLayerTreeViewImpl> web_layer_tree_view_impl_;
   scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   scoped_ptr<ScriptRunner> script_runner_;
+  int debugger_id_;
 
   base::WeakPtrFactory<DocumentView> weak_factory_;
   DISALLOW_COPY_AND_ASSIGN(DocumentView);

@@ -12,19 +12,21 @@ rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
 
 source_set("libraries") {
   public_deps = [
-    "//base:base",
+    "//base",
     "//gin",
     "//gpu/command_buffer/client:gles2_c_lib",
     "//mojo/application",
     "//mojo/common",
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/utility",
     "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
     "//mojo/services/public/cpp/view_manager",
     "//mojo/services/public/interfaces/navigation",
     "//skia",
     "//sky/engine/wtf",
+    "//sky/services/inspector:bindings",
     "//third_party/angle:translator",
     "//third_party/iccjpeg",
     "//third_party/libpng",
@@ -104,6 +106,11 @@ source_set("core_generated") {
 
     # Additional .cpp files from the make_core_generated rules.
     "$sky_core_output_dir/CSSGrammar.cpp",
+
+    # Additional .cpp files from the inspector_protocol_sources list.
+    "$sky_core_output_dir/InspectorFrontend.cpp",
+    "$sky_core_output_dir/InspectorBackendDispatcher.cpp",
+    "$sky_core_output_dir/InspectorTypeBuilder.cpp",
   ]
 
   configs += [

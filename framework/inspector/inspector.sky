@@ -16,17 +16,21 @@ function InspectorBackend(frontend) {
   this.agents = {
     Console: new ConsoleAgent(),
     DOM: domAgent,
-    Page: new PageAgent(),
+    Page: new PageAgent(this),
     Worker: new WorkerAgent(),
     Runtime: new RuntimeAgent(this),
     CSS: new CSSAgent(domAgent),
     IndexedDB: new IndexedDBAgent(),
   };
   this.missingNames_ = {};
+  this.unansweredMessages_ = [];
 }
 
 InspectorBackend.prototype = Object.create(
     inspector.InspectorBackend.stubClass.prototype);
+
+InspectorBackend.prototype.ASYNC_RESPONSE = "ASYNC_RESPONSE";
+InspectorBackend.prototype.MESSAGE_TIMEOUT_MS = 30000;
 
 InspectorBackend.prototype.onConnect = function() {
 };
@@ -41,11 +45,15 @@ InspectorBackend.prototype.logMissing_ = function(name) {
   console.log("InspectorBackend missing " + name);
 }
 
-InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
+InspectorBackend.prototype.dispatch_ = function(descriptor, params, message_id) {
   var parsed = descriptor.split('.');
 
   var agentName = parsed[0];
   var methodName = parsed[1];
+
+  // Debugger is implemented in c++.
+  if (agentName == "Debugger")
+    return;
 
   if (!(agentName in this.agents)) {
     this.logMissing_(agentName);
@@ -55,12 +63,12 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
   var agent = this.agents[agentName];
 
   if (!(methodName in agent)) {
-    this.logMissing_(agentName + "." + methodName);
+    this.logMissing_(descriptor);
     return {};
   }
 
   try {
-    return agent[methodName](params);
+    return agent[methodName](params, message_id);
   } catch(ex) {
     console.log(descriptor + ": " + ex);
   }
@@ -68,14 +76,34 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params) {
 
 InspectorBackend.prototype.onMessage = function(data) {
   var message = JSON.parse(data);
-  var result = this.dispatch_(message.method, message.params);
+  var result = this.dispatch_(message.method, message.params, message.id);
+  this.unansweredMessages_.push(message.id);
+  // FIXME: This magic return value is kinda hacky.
+  if (result != this.ASYNC_RESPONSE)
+    this.sendResponse(message.id, result);
+  else {
+    window.setTimeout(function(message_id) {
+      if (this.unansweredMessages_.indexOf(message_id) == -1)
+        return;
+      console.log("Error, failed to reply to " + descriptor
+          + " message id " + message_id);
+    }, this.MESSAGE_TIMEOUT_MS, this, message.id);
+  }
+};
+
+InspectorBackend.prototype.sendResponse = function(message_id, result) {
+  var messageIndex = this.unansweredMessages_.indexOf(message_id);
+  if (messageIndex != -1)
+    this.unansweredMessages_.splice(messageIndex, 1);
+  else
+    console.log("Error, responding to unknown message id " + message_id);
   var response = {
-    id: message.id,
+    id: message_id,
   };
   if (typeof result !== "undefined")
     response.result = result;
   this.frontend.sendMessage(JSON.stringify(response));
-};
+}
 
 InspectorBackend.prototype.sendMessage = function(method, params) {
   var message = JSON.stringify({

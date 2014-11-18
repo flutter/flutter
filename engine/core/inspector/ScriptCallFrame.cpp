@@ -55,4 +55,15 @@ ScriptCallFrame::~ScriptCallFrame()
 {
 }
 
+PassRefPtr<TypeBuilder::Console::CallFrame> ScriptCallFrame::buildInspectorObject() const
+{
+    return TypeBuilder::Console::CallFrame::create()
+        .setFunctionName(m_functionName)
+        .setScriptId(m_scriptId)
+        .setUrl(m_scriptName)
+        .setLineNumber(m_lineNumber)
+        .setColumnNumber(m_column)
+        .release();
+}
+
 } // namespace blink

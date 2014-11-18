@@ -32,6 +32,7 @@
 #define WebViewImpl_h
 
 #include "core/html/ime/InputMethodContext.h"
+#include "core/inspector/inspector_backend_mojo.h"
 #include "platform/geometry/IntPoint.h"
 #include "platform/geometry/IntRect.h"
 #include "platform/graphics/GraphicsLayer.h"
@@ -117,6 +118,7 @@ public:
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
     virtual void injectModule(const WebString&) override;
+    virtual void connectInspectorBackend() override;
     virtual void setSpellCheckClient(WebSpellCheckClient*) override;
     virtual WebSettings* settings() override;
     virtual WebString pageEncoding() const override;
@@ -448,6 +450,8 @@ private:
     WebColor m_backgroundColorOverride;
 
     bool m_userGestureObserved;
+
+    OwnPtr<InspectorBackendMojo> m_inspectorBackend;
 };
 
 // We have no ways to check if the specified WebView is an instance of

@@ -10,6 +10,7 @@
 #include "bindings/core/v8/ScriptSourceCode.h"
 #include "core/events/Event.h"
 #include "core/frame/FrameView.h"
+#include "core/frame/LocalDOMWindow.h"
 #include "core/frame/LocalFrame.h"
 #include "core/inspector/IdentifiersFactory.h"
 #include "core/inspector/InspectorNodeIds.h"
@@ -17,11 +18,11 @@
 #include "core/page/Page.h"
 #include "core/rendering/RenderImage.h"
 #include "core/rendering/RenderObject.h"
-#include "platform/JSONValues.h"
-#include "platform/TracedValue.h"
 #include "platform/graphics/GraphicsLayer.h"
+#include "platform/JSONValues.h"
 #include "platform/network/ResourceRequest.h"
 #include "platform/network/ResourceResponse.h"
+#include "platform/TracedValue.h"
 #include "platform/weborigin/KURL.h"
 #include "wtf/Vector.h"
 #include <inttypes.h>
@@ -158,7 +159,7 @@ static LocalFrame* frameForExecutionContext(ExecutionContext* context)
 {
     LocalFrame* frame = 0;
     if (context->isDocument())
-        frame = toDocument(context)->frame();
+        frame = context->executingWindow()->frame();
     return frame;
 }
 

@@ -45,6 +45,7 @@ namespace {
 class DummyServiceProvider : public blink::ServiceProvider {
 public:
     mojo::NavigatorHost* NavigatorHost() { return 0; }
+    mojo::Shell* Shell() { return 0; }
 };
 
 }

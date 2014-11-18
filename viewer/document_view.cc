@@ -64,6 +64,8 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
 
 }  // namespace
 
+static int s_next_debugger_id = 1;
+
 DocumentView::DocumentView(
     mojo::URLResponsePtr response,
     mojo::ShellPtr shell,
@@ -75,6 +77,7 @@ DocumentView::DocumentView(
       view_manager_client_factory_(shell_.get(), this),
       inspector_service_factory_(this),
       compositor_thread_(compositor_thread),
+      debugger_id_(s_next_debugger_id++),
       weak_factory_(this) {
   shell_.set_client(this);
 }
@@ -191,8 +194,6 @@ void DocumentView::didCreateScriptContext(blink::WebLocalFrame* frame,
                                           v8::Handle<v8::Context> context,
                                           int extensionGroup,
                                           int worldId) {
-  if (frame != web_view_->mainFrame())
-    return;
   script_runner_.reset(new ScriptRunner(frame, context));
 
   v8::Isolate* isolate = context->GetIsolate();
@@ -207,6 +208,10 @@ blink::ServiceProvider& DocumentView::services() {
 
 mojo::NavigatorHost* DocumentView::NavigatorHost() {
   return navigator_host_.get();
+}
+
+mojo::Shell* DocumentView::Shell() {
+  return shell_.get();
 }
 
 void DocumentView::OnViewBoundsChanged(mojo::View* view,

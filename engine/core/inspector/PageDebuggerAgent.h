@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,37 +28,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallFrame_h
-#define ScriptCallFrame_h
+#ifndef PageDebuggerAgent_h
+#define PageDebuggerAgent_h
 
-#include "core/InspectorTypeBuilder.h"
-#include "wtf/Forward.h"
-#include "wtf/text/WTFString.h"
+#include "bindings/core/v8/PageScriptDebugServer.h"
+#include "core/inspector/InspectorDebuggerAgent.h"
 
 namespace blink {
 
-class ScriptCallFrame  {
+class DocumentLoader;
+class InspectorPageAgent;
+class Page;
+class PageScriptDebugServer;
+class ScriptSourceCode;
+
+class PageDebuggerAgent final
+    : public InspectorDebuggerAgent {
+    WTF_MAKE_NONCOPYABLE(PageDebuggerAgent);
+    WTF_MAKE_FAST_ALLOCATED;
 public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+    static PassOwnPtr<PageDebuggerAgent> create(PageScriptDebugServer*, Page*, InjectedScriptManager*);
+    virtual ~PageDebuggerAgent();
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
-
-    PassRefPtr<TypeBuilder::Console::CallFrame> buildInspectorObject() const;
+    void didClearDocumentOfWindowObject(LocalFrame*);
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    virtual void startListeningScriptDebugServer() override;
+    virtual void stopListeningScriptDebugServer() override;
+    virtual PageScriptDebugServer& scriptDebugServer() override;
+    virtual void muteConsole() override;
+    virtual void unmuteConsole() override;
+
+    virtual InjectedScript injectedScriptForEval(ErrorString*, const int* executionContextId) override;
+    virtual void setOverlayMessage(ErrorString*, const String*) override;
+
+    PageDebuggerAgent(PageScriptDebugServer*, Page*, InjectedScriptManager*);
+    PageScriptDebugServer* m_pageScriptDebugServer;
+    Page* m_page;
 };
 
 } // namespace blink
 
-#endif // ScriptCallFrame_h
+
+#endif // !defined(PageDebuggerAgent_h)

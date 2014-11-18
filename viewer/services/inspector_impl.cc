@@ -27,16 +27,17 @@ void InspectorServiceImpl::Inject() {
   if (!view_)
     return;
 
-  mojo::ServiceProviderPtr inpector_service_provider;
+  mojo::ServiceProviderPtr inspector_service_provider;
   view_->shell()->ConnectToApplication("mojo:sky_inspector_server",
-                                       GetProxy(&inpector_service_provider));
+                                       GetProxy(&inspector_service_provider));
   InspectorServerPtr inspector;
-  ConnectToService(inpector_service_provider.get(), &inspector);
+  mojo::ConnectToService(inspector_service_provider.get(), &inspector);
   inspector->Listen(9898, base::Bind(&Ignored));
   // Listen drops existing agents/backends, wait before registering new ones.
   inspector.WaitForIncomingMethodCall();
 
   view_->web_view()->injectModule("/sky/framework/inspector/inspector.sky");
+  view_->web_view()->connectInspectorBackend();
 }
 
 }  // namespace sky
