@@ -967,7 +967,7 @@ module.exports = {
    * @api public
    */
 
-   includeStack: false,
+   includeStack: true,
 
   /**
    * ### config.showDiff
@@ -999,7 +999,7 @@ module.exports = {
    * @api public
    */
 
-  truncateThreshold: 40
+  truncateThreshold: 0
 
 };
 

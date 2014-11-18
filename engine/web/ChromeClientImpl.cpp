@@ -249,6 +249,7 @@ void ChromeClientImpl::addMessageToConsole(LocalFrame* localFrame, MessageSource
         printf("ERROR: %s \nSOURCE: %s:%u\n", message.utf8().data(), sourceID.utf8().data(), lineNumber);
     else
         printf("CONSOLE: %s: %s\n", messageLevelAsString(level).utf8().data(), message.utf8().data());
+    fflush(stdout);
 
     WebLocalFrameImpl* frame = WebLocalFrameImpl::fromFrame(localFrame);
     if (frame && frame->client()) {
