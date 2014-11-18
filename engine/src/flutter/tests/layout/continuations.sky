@@ -1,0 +1,4 @@
+<sky>
+    <import src="../resources/dump-as-render-tree.sky" />
+    <div><span style="display: paragraph"><div>foo</div>bar</span></div>
+</sky>
