@@ -1,0 +1,43 @@
+<html>
+<import src="/sky/tests/resources/chai.sky" />
+<import src="/sky/tests/resources/mocha.sky" />
+<import src="/sky/framework/inspector/page-agent.sky" as="PageAgent" />
+<img src='does_not_exist.jpg' />
+<script>
+describe('PageAgent.getResourceTree', function() {
+  it('should dump the current resource tree', function() {
+    var pageAgent = new PageAgent();
+    pageAgent.enable();
+    var resourceTree = pageAgent.getResourceTree();
+    assert.deepEqual(resourceTree, {
+      "frameTree": {
+        "frame": {
+          "id": "1",
+          "loaderId": "1",
+          "url": "http://127.0.0.1:8000/sky/tests/inspector/page-agent-get-resource-tree.sky",
+          "mimeType": "text/html",
+          "securityOrigin": "http://127.0.0.1:8000/sky/tests/inspector/page-agent-get-resource-tree.sky"
+        },
+        "resources": [{
+          "url": "http://127.0.0.1:8000/sky/tests/resources/chai.sky",
+          "type": "Document",
+          "mimeType": "text/html"
+        }, {
+          "url": "http://127.0.0.1:8000/sky/tests/resources/mocha.sky",
+          "type": "Document",
+          "mimeType": "text/html"
+        }, {
+          "url": "http://127.0.0.1:8000/sky/framework/inspector/page-agent.sky",
+          "type": "Document",
+          "mimeType": "text/html"
+        }, {
+          "url": "http://127.0.0.1:8000/sky/tests/inspector/does_not_exist.jpg",
+          "type": "Image",
+          "mimeType": "image/unknown"
+        }]
+      }
+    });
+  });
+});
+</script>
+</html>
