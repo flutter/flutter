@@ -28,6 +28,7 @@
 #include "config.h"
 #include "core/rendering/RenderImage.h"
 
+#include "core/HTMLNames.h"
 #include "core/editing/FrameSelection.h"
 #include "core/fetch/ImageResource.h"
 #include "core/fetch/ResourceLoader.h"
@@ -72,6 +73,12 @@ void RenderImage::destroy()
     RenderReplaced::destroy();
 }
 
+void RenderImage::intrinsicSizeChanged()
+{
+    if (m_imageResource)
+        imageChanged(m_imageResource->imagePtr());
+}
+
 void RenderImage::setImageResource(PassOwnPtr<RenderImageResource> imageResource)
 {
     ASSERT(!m_imageResource);
@@ -84,9 +91,6 @@ void RenderImage::imageChanged(WrappedImagePtr newImage, const IntRect* rect)
     if (documentBeingDestroyed())
         return;
 
-    if (hasBoxDecorationBackground() || hasMask())
-        RenderReplaced::imageChanged(newImage, rect);
-
     if (!m_imageResource)
         return;
 
@@ -97,6 +101,17 @@ void RenderImage::imageChanged(WrappedImagePtr newImage, const IntRect* rect)
     // https://github.com/igrigorik/http-client-hints/blob/master/draft-grigorik-http-client-hints-01.txt#L255
     if (m_imageResource->cachedImage() && m_imageResource->cachedImage()->hasDevicePixelRatioHeaderValue())
         m_imageDevicePixelRatio = 1 / m_imageResource->cachedImage()->devicePixelRatioHeaderValue();
+
+    // If the RenderImage was just created we don't have style() or a parent()
+    // yet so all we can do is update our intrinsic size. Once we're inserted
+    // the resulting layout will do the rest of the work.
+    if (!parent()) {
+        updateIntrinsicSizeIfNeeded(m_imageResource->intrinsicSize());
+        return;
+    }
+
+    if (hasBoxDecorationBackground() || hasMask())
+        RenderReplaced::imageChanged(newImage, rect);
 
     paintInvalidationOrMarkForLayout(rect);
 }
@@ -119,16 +134,11 @@ void RenderImage::updateInnerContentRect()
 
 void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
 {
+    ASSERT(isRooted());
+
     LayoutSize oldIntrinsicSize = intrinsicSize();
     LayoutSize newIntrinsicSize = m_imageResource->intrinsicSize();
     updateIntrinsicSizeIfNeeded(newIntrinsicSize);
-
-    // In the case of generated image content using :before/:after/content, we might not be
-    // in the render tree yet. In that case, we just need to update our intrinsic size.
-    // layout() will be called after we are inserted in the tree which will take care of
-    // what we are doing here.
-    if (!containingBlock())
-        return;
 
     bool imageSourceHasChangedSize = oldIntrinsicSize != newIntrinsicSize;
     if (imageSourceHasChangedSize)

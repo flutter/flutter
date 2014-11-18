@@ -93,7 +93,6 @@ private:
 
     void selectSourceURL(ImageLoader::UpdateFromElementBehavior);
 
-    virtual void attach(const AttachContext& = AttachContext()) override;
     virtual RenderObject* createRenderer(RenderStyle*) override;
 
     virtual bool canStartSelection() const override;

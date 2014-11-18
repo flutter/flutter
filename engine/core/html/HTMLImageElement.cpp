@@ -149,6 +149,11 @@ RenderObject* HTMLImageElement::createRenderer(RenderStyle* style)
     RenderImage* image = new RenderImage(this);
     image->setImageResource(RenderImageResource::create());
     image->setImageDevicePixelRatio(m_imageDevicePixelRatio);
+
+    RenderImageResource* imageResource = image->imageResource();
+    if (cachedImage() || imageResource->cachedImage())
+        imageResource->setImageResource(cachedImage());
+
     return image;
 }
 
@@ -158,21 +163,6 @@ bool HTMLImageElement::canStartSelection() const
         return HTMLElement::canStartSelection();
 
     return false;
-}
-
-void HTMLImageElement::attach(const AttachContext& context)
-{
-    HTMLElement::attach(context);
-
-    if (renderer() && renderer()->isImage()) {
-        RenderImage* renderImage = toRenderImage(renderer());
-        RenderImageResource* renderImageResource = renderImage->imageResource();
-        if (renderImageResource->hasImage())
-            return;
-
-        if (imageLoader().image() || renderImageResource->cachedImage())
-            renderImageResource->setImageResource(imageLoader().image());
-    }
 }
 
 Node::InsertionNotificationRequest HTMLImageElement::insertedInto(ContainerNode* insertionPoint)
