@@ -4,6 +4,9 @@
 <import src="/mojo/services/public/interfaces/network/url_loader.mojom.sky" as="loader" />
 <import src="shell.sky" as="shell" />
 <script>
+// XHR keeps itself alive.
+var outstandingRequests = new Set();
+
 function XMLHttpRequest() {
   this.networkService_ = shell.connectToService(
     "mojo:network_service", net.NetworkService);
@@ -18,7 +21,7 @@ XMLHttpRequest.prototype.onerror = function(error) { };
 
 XMLHttpRequest.prototype.open = function(method, url) {
   this.request_ = new loader.URLRequest();
-  this.request_.url = url;
+  this.request_.url = new URL(url, document.URL);
   this.request_.method = method;
   this.request_.auto_follow_redirects = true;
   this.headers_.clear();
@@ -41,12 +44,15 @@ XMLHttpRequest.prototype.send = function() {
   this.loader_ = shell.wrapHandle(pipe.handle0, loader.URLLoader);
 
   var self = this;
+  outstandingRequests.add(this);
   this.loader_.start(this.request_).then(function(result) {
     return core.drainData(result.response.body).then(function(result) {
+      outstandingRequests.delete(self);
       self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
       self.onload();
     });
   }).catch(function(error) {
+    outstandingRequests.delete(self);
     self.onerror(error);
   });
 };

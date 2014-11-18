@@ -1,0 +1,22 @@
+<html>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+<script>
+describe('XMLHttpRequest', function() {
+  this.enableTimeouts(false);
+
+  it('should be able to fetch relative urls', function(done) {
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      // Also testing that "this" is set correctly in the onload callback.
+      assert.equal(this.responseText, "This is data from the network.\n");
+      done();
+    };
+    xhr.open("GET", "resources/pass.txt");
+    xhr.send();
+  });
+});
+</script>
+</html>
