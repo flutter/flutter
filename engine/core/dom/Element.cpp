@@ -812,18 +812,18 @@ void Element::attach(const AttachContext& context)
 
     RenderTreeBuilder(this, context.resolvedStyle).createRendererForElementIfNeeded();
 
-    // When a shadow root exists, it does the work of attaching the children.
-    if (ElementShadow* shadow = this->shadow())
-        shadow->attach(context);
-
-    ContainerNode::attach(context);
-
     if (hasRareData() && !renderer()) {
         if (ActiveAnimations* activeAnimations = elementRareData()->activeAnimations()) {
             activeAnimations->cssAnimations().cancel();
             activeAnimations->setAnimationStyleChange(false);
         }
     }
+
+    // When a shadow root exists, it does the work of attaching the children.
+    if (ElementShadow* shadow = this->shadow())
+        shadow->attach(context);
+
+    ContainerNode::attach(context);
 }
 
 void Element::detach(const AttachContext& context)
