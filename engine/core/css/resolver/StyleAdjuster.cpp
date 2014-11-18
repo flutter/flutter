@@ -58,6 +58,9 @@ static bool requiresOnlyBlockChildren(RenderStyle* parentStyle)
         ASSERT_NOT_REACHED();
         return false;
     }
+
+    ASSERT_NOT_REACHED();
+    return false;
 }
 
 static EDisplay equivalentInlineDisplay(EDisplay display)
@@ -82,6 +85,9 @@ static EDisplay equivalentInlineDisplay(EDisplay display)
         ASSERT_NOT_REACHED();
         return NONE;
     }
+
+    ASSERT_NOT_REACHED();
+    return NONE;
 }
 
 static EDisplay equivalentBlockDisplay(EDisplay display)
@@ -103,6 +109,9 @@ static EDisplay equivalentBlockDisplay(EDisplay display)
         ASSERT_NOT_REACHED();
         return NONE;
     }
+
+    ASSERT_NOT_REACHED();
+    return NONE;
 }
 
 // CSS requires text-decoration to be reset at each DOM element for tables,
