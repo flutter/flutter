@@ -28,7 +28,7 @@
 #include "core/editing/EditingStyle.h"
 
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/CSSComputedStyleDeclaration.h"
 #include "core/css/CSSPropertyMetadata.h"
 #include "core/css/CSSRuleList.h"

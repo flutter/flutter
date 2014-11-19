@@ -32,7 +32,7 @@
 
 #include "platform/graphics/gpu/DrawingBuffer.h"
 
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include <algorithm>
 #include "platform/TraceEvent.h"
 #include "platform/graphics/GraphicsLayer.h"

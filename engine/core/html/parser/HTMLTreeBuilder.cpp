@@ -28,7 +28,7 @@
 #include "core/html/parser/HTMLTreeBuilder.h"
 
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/dom/DocumentFragment.h"
 #include "core/html/HTMLDocument.h"
 #include "core/html/HTMLTemplateElement.h"

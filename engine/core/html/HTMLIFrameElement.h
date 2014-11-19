@@ -5,10 +5,10 @@
 #ifndef HTMLIFrameElement_h
 #define HTMLIFrameElement_h
 
-#include "core/HTMLNames.h"
 #include "core/dom/DOMURLUtils.h"
 #include "core/dom/Document.h"
 #include "core/html/HTMLElement.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "mojo/services/public/cpp/view_manager/view_observer.h"
 #include "wtf/OwnPtr.h"
 

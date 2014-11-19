@@ -36,7 +36,7 @@
 
 namespace blink {
 
-#include "core/CSSGrammar.h"
+#include "gen/sky/core/CSSGrammar.h"
 
 enum CharacterType {
     // Types for the main switch.

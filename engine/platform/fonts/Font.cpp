@@ -25,7 +25,7 @@
 #include "platform/fonts/Font.h"
 
 #include "platform/LayoutUnit.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/Character.h"
 #include "platform/fonts/FontCache.h"
 #include "platform/fonts/FontFallbackList.h"

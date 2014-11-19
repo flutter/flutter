@@ -20,7 +20,7 @@
  */
 
 #include "config.h"
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 
 namespace blink {
 

@@ -30,8 +30,8 @@
 
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/css/CSSValueList.h"
 #include "core/css/StylePropertySet.h"
 #include "core/dom/DocumentFragment.h"

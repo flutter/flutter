@@ -27,13 +27,13 @@
 #include "config.h"
 #include "core/html/HTMLContentElement.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/SelectorChecker.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/dom/QualifiedName.h"
 #include "core/dom/shadow/ElementShadow.h"
 #include "core/dom/shadow/ShadowRoot.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

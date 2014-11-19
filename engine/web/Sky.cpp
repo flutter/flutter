@@ -46,7 +46,7 @@
 #include "platform/graphics/ImageDecodingStore.h"
 #include "platform/LayoutTestSupport.h"
 #include "platform/Logging.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "public/platform/Platform.h"
 #include "v8/include/v8.h"
 #include "wtf/Assertions.h"

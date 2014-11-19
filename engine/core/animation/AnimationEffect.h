@@ -32,7 +32,7 @@
 #define AnimationEffect_h
 
 #include "bindings/core/v8/ScriptWrappable.h"
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "platform/heap/Handle.h"
 #include "wtf/HashMap.h"
 #include "wtf/PassOwnPtr.h"

@@ -26,11 +26,11 @@
 #ifndef CSSValuePool_h
 #define CSSValuePool_h
 
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
 #include "core/css/CSSInheritedValue.h"
 #include "core/css/CSSInitialValue.h"
 #include "core/css/CSSPrimitiveValue.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "wtf/HashMap.h"
 #include "wtf/RefPtr.h"
 #include "wtf/text/AtomicStringHash.h"

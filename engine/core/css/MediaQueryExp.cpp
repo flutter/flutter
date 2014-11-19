@@ -35,7 +35,7 @@
 #include "core/css/parser/CSSParserValues.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "platform/Decimal.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/text/StringBuffer.h"
 #include "wtf/text/StringBuilder.h"
 

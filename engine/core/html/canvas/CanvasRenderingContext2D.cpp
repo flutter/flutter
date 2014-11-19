@@ -36,7 +36,7 @@
 #include "bindings/core/v8/ExceptionMessages.h"
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "core/css/CSSFontSelector.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/StylePropertySet.h"

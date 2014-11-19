@@ -6,7 +6,7 @@
 #include "core/app/Module.h"
 
 #include "core/app/Application.h"
-#include "core/EventTargetNames.h"
+#include "gen/sky/core/EventTargetNames.h"
 
 namespace blink {
 

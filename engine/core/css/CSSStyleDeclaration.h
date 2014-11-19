@@ -22,7 +22,7 @@
 #define CSSStyleDeclaration_h
 
 #include "bindings/core/v8/ScriptWrappable.h"
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "wtf/Forward.h"
 #include "wtf/Noncopyable.h"
 

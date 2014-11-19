@@ -37,7 +37,7 @@
 #include "bindings/core/v8/V8DOMWrapper.h"
 #include "bindings/core/v8/V8Event.h"
 #include "bindings/core/v8/V8HiddenValue.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

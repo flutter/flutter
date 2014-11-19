@@ -27,7 +27,7 @@
 #include "config.h"
 #include "core/events/EventPath.h"
 
-#include "core/EventNames.h"
+#include "gen/sky/core/EventNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/Touch.h"
 #include "core/dom/TouchList.h"

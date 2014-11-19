@@ -21,10 +21,10 @@
 #ifndef CSSProperty_h
 #define CSSProperty_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/css/CSSPropertyMetadata.h"
 #include "core/css/CSSValue.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/text/TextDirection.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefPtr.h"

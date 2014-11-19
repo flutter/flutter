@@ -32,7 +32,7 @@
 #include "core/dom/DocumentStyleSheetCollector.h"
 #include "core/dom/StyleEngine.h"
 #include "core/dom/StyleSheetCandidate.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

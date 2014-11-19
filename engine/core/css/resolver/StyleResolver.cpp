@@ -29,9 +29,9 @@
 #include "config.h"
 #include "core/css/resolver/StyleResolver.h"
 
-#include "core/CSSPropertyNames.h"
-#include "core/MediaTypeNames.h"
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/MediaTypeNames.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/animation/ActiveAnimations.h"
 #include "core/animation/Animation.h"
 #include "core/animation/AnimationTimeline.h"
@@ -71,7 +71,7 @@
 #include "core/frame/LocalFrame.h"
 #include "core/rendering/RenderView.h"
 #include "core/rendering/style/KeyframeList.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/LeakAnnotations.h"
 #include "wtf/StdLibExtras.h"
 

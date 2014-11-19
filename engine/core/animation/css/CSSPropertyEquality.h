@@ -5,7 +5,7 @@
 #ifndef CSSPropertyEquality_h
 #define CSSPropertyEquality_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 namespace blink {
 

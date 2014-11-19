@@ -27,7 +27,7 @@
 #include "config.h"
 #include "core/editing/MarkupAccumulator.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentFragment.h"
 #include "core/dom/Text.h"

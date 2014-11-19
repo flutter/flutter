@@ -28,7 +28,7 @@
 #include "config.h"
 #include "core/rendering/RenderImage.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/editing/FrameSelection.h"
 #include "core/fetch/ImageResource.h"
 #include "core/fetch/ResourceLoader.h"

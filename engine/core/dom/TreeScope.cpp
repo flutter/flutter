@@ -27,7 +27,7 @@
 #include "config.h"
 #include "core/dom/TreeScope.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/resolver/ScopedStyleResolver.h"
 #include "core/dom/ContainerNode.h"
 #include "core/dom/Document.h"

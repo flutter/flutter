@@ -23,7 +23,7 @@
 #ifndef FontBuilder_h
 #define FontBuilder_h
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 
 #include "platform/fonts/FontDescription.h"
 #include "platform/heap/Handle.h"

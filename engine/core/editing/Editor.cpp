@@ -28,8 +28,8 @@
 #include "core/editing/Editor.h"
 
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/CSSPropertyNames.h"
-#include "core/EventNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/EventNames.h"
 #include "core/css/CSSComputedStyleDeclaration.h"
 #include "core/css/StylePropertySet.h"
 #include "core/dom/DocumentFragment.h"

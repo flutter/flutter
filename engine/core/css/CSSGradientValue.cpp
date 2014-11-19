@@ -26,7 +26,7 @@
 #include "config.h"
 #include "core/css/CSSGradientValue.h"
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/css/CSSCalculationValue.h"
 #include "core/css/CSSToLengthConversionData.h"
 #include "core/css/Pair.h"

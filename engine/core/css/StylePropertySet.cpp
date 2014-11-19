@@ -23,14 +23,14 @@
 #include "config.h"
 #include "core/css/StylePropertySet.h"
 
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/css/CSSPropertyMetadata.h"
 #include "core/css/CSSValuePool.h"
 #include "core/css/StylePropertySerializer.h"
 #include "core/css/StyleSheetContents.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/frame/UseCounter.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/text/StringBuilder.h"
 
 #ifndef NDEBUG

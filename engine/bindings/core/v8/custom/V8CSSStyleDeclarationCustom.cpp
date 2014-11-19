@@ -33,7 +33,7 @@
 
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/V8Binding.h"
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSPropertyMetadata.h"
 #include "core/css/CSSStyleDeclaration.h"

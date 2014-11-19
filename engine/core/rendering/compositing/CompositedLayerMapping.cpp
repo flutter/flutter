@@ -43,7 +43,7 @@
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "core/rendering/style/KeyframeList.h"
 #include "platform/LengthFunctions.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/FontCache.h"
 #include "platform/geometry/TransformState.h"
 #include "platform/graphics/GraphicsContext.h"

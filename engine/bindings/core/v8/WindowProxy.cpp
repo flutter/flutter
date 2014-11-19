@@ -47,7 +47,7 @@
 #include "core/frame/LocalFrame.h"
 #include "core/loader/FrameLoaderClient.h"
 #include "platform/heap/Handle.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/ScriptForbiddenScope.h"
 #include "platform/TraceEvent.h"
 #include "public/platform/Platform.h"

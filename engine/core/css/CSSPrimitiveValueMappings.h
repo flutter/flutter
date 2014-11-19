@@ -30,13 +30,13 @@
 #ifndef CSSPrimitiveValueMappings_h
 #define CSSPrimitiveValueMappings_h
 
-#include "core/CSSValueKeywords.h"
 #include "core/css/CSSCalculationValue.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSPrimitiveValueMappings.h"
 #include "core/css/CSSToLengthConversionData.h"
 #include "core/rendering/style/LineClampValue.h"
 #include "core/rendering/style/RenderStyleConstants.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "platform/Length.h"
 #include "platform/fonts/FontDescription.h"
 #include "platform/fonts/FontSmoothingMode.h"

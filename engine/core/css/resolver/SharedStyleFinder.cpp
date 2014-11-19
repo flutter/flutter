@@ -29,7 +29,7 @@
 #include "config.h"
 #include "core/css/resolver/SharedStyleFinder.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/resolver/StyleResolver.h"
 #include "core/css/resolver/StyleResolverStats.h"
 #include "core/dom/ContainerNode.h"

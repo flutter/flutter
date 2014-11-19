@@ -25,8 +25,8 @@
 #include "core/css/CSSComputedStyleDeclaration.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/CSSPropertyNames.h"
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/animation/DocumentAnimations.h"
 #include "core/css/BasicShapeFunctions.h"
 #include "core/css/CSSAspectRatioValue.h"
@@ -56,8 +56,8 @@
 #include "core/rendering/style/RenderStyle.h"
 #include "core/rendering/style/ShadowList.h"
 #include "core/rendering/style/ShapeValue.h"
-#include "platform/FontFamilyNames.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/FontFamilyNames.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/FontFeatureSettings.h"
 #include "wtf/text/StringBuilder.h"
 

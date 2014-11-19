@@ -46,7 +46,7 @@
 #include "platform/Cursor.h"
 #include "platform/NotImplemented.h"
 #include "platform/PlatformScreen.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/exported/WrappedResourceRequest.h"
 #include "platform/geometry/FloatRect.h"
 #include "platform/geometry/IntRect.h"

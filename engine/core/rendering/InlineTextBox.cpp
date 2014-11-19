@@ -40,7 +40,7 @@
 #include "core/rendering/RenderBlock.h"
 #include "core/rendering/RenderTheme.h"
 #include "core/rendering/style/ShadowList.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/FontCache.h"
 #include "platform/fonts/GlyphBuffer.h"
 #include "platform/fonts/WidthIterator.h"

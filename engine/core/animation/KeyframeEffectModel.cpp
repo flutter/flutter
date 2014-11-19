@@ -31,7 +31,7 @@
 #include "config.h"
 #include "core/animation/KeyframeEffectModel.h"
 
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/animation/AnimationNode.h"
 #include "platform/geometry/FloatBox.h"
 #include "platform/transforms/TransformationMatrix.h"

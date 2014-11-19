@@ -24,10 +24,10 @@
 #ifndef HTMLAnchorElement_h
 #define HTMLAnchorElement_h
 
-#include "core/HTMLNames.h"
 #include "core/dom/DOMURLUtils.h"
 #include "core/dom/Document.h"
 #include "core/html/HTMLElement.h"
+#include "gen/sky/core/HTMLNames.h"
 
 namespace blink {
 

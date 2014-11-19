@@ -24,7 +24,7 @@
 #include "config.h"
 #include "core/fetch/Resource.h"
 
-#include "core/FetchInitiatorTypeNames.h"
+#include "gen/sky/core/FetchInitiatorTypeNames.h"
 #include "core/fetch/MemoryCache.h"
 #include "core/fetch/ResourceClient.h"
 #include "core/fetch/ResourceClientWalker.h"

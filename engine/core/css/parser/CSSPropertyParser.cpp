@@ -28,8 +28,8 @@
 #include "core/css/parser/CSSPropertyParser.h"
 
 // FIXME: Way too many!
-#include "core/CSSValueKeywords.h"
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/css/CSSAspectRatioValue.h"
 #include "core/css/CSSBasicShapes.h"
 #include "core/css/CSSBorderImage.h"
@@ -66,7 +66,7 @@
 #include "core/frame/UseCounter.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "platform/FloatConversion.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/BitArray.h"
 #include "wtf/HexNumber.h"
 #include "wtf/text/StringBuffer.h"

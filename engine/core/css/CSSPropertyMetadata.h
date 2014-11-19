@@ -5,7 +5,7 @@
 #ifndef CSSPropertyMetadata_h
 #define CSSPropertyMetadata_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 namespace blink {
 

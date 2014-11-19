@@ -25,8 +25,8 @@
 #ifndef KeyframeList_h
 #define KeyframeList_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/rendering/style/StyleInheritedData.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "wtf/HashSet.h"
 #include "wtf/RefPtr.h"
 #include "wtf/Vector.h"

@@ -26,8 +26,8 @@
 #define FrameView_h
 
 #include "core/rendering/PaintPhase.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/HostWindow.h"
-#include "platform/RuntimeEnabledFeatures.h"
 #include "platform/Widget.h"
 #include "platform/geometry/LayoutRect.h"
 #include "platform/graphics/Color.h"

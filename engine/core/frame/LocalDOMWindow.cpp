@@ -77,7 +77,7 @@
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/EventDispatchForbiddenScope.h"
 #include "platform/PlatformScreen.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/UserGestureIndicator.h"
 #include "platform/geometry/FloatRect.h"
 #include "platform/weborigin/KURL.h"

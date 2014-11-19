@@ -101,6 +101,6 @@ private:
 
 } // namespace blink
 
-#include "core/HTMLElementTypeHelpers.h"
+#include "gen/sky/core/HTMLElementTypeHelpers.h"
 
 #endif // HTMLElement_h

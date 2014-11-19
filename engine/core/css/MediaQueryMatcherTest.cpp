@@ -5,7 +5,7 @@
 #include "config.h"
 #include "core/css/MediaQueryMatcher.h"
 
-#include "core/MediaTypeNames.h"
+#include "gen/sky/core/MediaTypeNames.h"
 #include "core/css/MediaList.h"
 #include "core/testing/DummyPageHolder.h"
 

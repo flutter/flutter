@@ -29,7 +29,7 @@
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ScriptCallStackFactory.h"
 #include "bindings/core/v8/V8DOMWrapper.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/resolver/StyleResolver.h"
 #include "core/dom/Attr.h"
 #include "core/dom/Attribute.h"

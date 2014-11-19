@@ -32,7 +32,7 @@
 #include "core/rendering/RenderSelectionInfo.h"
 #include "core/rendering/compositing/CompositedLayerMapping.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
 #include "platform/geometry/FloatQuad.h"
 #include "platform/geometry/TransformState.h"

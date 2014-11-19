@@ -33,7 +33,7 @@
 #include "core/rendering/style/StyleImage.h"
 #include "core/rendering/style/StyleInheritedData.h"
 #include "platform/LengthFunctions.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/Font.h"
 #include "platform/fonts/FontSelector.h"
 #include "platform/geometry/FloatRoundedRect.h"

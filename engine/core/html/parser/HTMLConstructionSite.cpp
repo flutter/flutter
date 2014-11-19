@@ -27,7 +27,7 @@
 #include "config.h"
 #include "core/html/parser/HTMLConstructionSite.h"
 
-#include "core/HTMLElementFactory.h"
+#include "gen/sky/core/HTMLElementFactory.h"
 #include "core/dom/DocumentFragment.h"
 #include "core/dom/Element.h"
 #include "core/dom/Text.h"

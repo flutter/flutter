@@ -31,7 +31,7 @@
 #include "config.h"
 #include "core/animation/css/CSSAnimatableValueFactory.h"
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/animation/animatable/AnimatableClipPathOperation.h"
 #include "core/animation/animatable/AnimatableColor.h"
 #include "core/animation/animatable/AnimatableDouble.h"

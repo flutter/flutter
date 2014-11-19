@@ -31,7 +31,7 @@
 #ifndef AnimatedStyleBuilder_h
 #define AnimatedStyleBuilder_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 namespace blink {
 

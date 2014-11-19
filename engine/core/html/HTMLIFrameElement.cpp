@@ -5,7 +5,7 @@
 #include "config.h"
 #include "core/html/HTMLIFrameElement.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "core/loader/FrameLoaderClient.h"

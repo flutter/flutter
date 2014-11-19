@@ -31,7 +31,7 @@
 #ifndef InspectorBaseAgent_h
 #define InspectorBaseAgent_h
 
-#include "core/InspectorBackendDispatcher.h"
+#include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Forward.h"
 #include "wtf/Vector.h"

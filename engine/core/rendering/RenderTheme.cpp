@@ -22,7 +22,7 @@
 #include "config.h"
 #include "core/rendering/RenderTheme.h"
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/dom/Document.h"
 #include "core/dom/shadow/ElementShadow.h"
 #include "core/editing/FrameSelection.h"
@@ -35,7 +35,7 @@
 #include "core/rendering/RenderView.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/FloatConversion.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/FontSelector.h"
 #include "platform/graphics/GraphicsContextStateSaver.h"
 #include "platform/text/StringTruncator.h"

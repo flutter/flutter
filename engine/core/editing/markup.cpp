@@ -30,9 +30,9 @@
 #include "core/editing/markup.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSValue.h"
 #include "core/css/StylePropertySet.h"

@@ -38,7 +38,7 @@
 #include "core/animation/TimingInput.h"
 #include "core/dom/Document.h"
 #include "core/dom/Element.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 
 namespace blink {

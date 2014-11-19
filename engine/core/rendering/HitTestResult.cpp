@@ -22,7 +22,7 @@
 #include "config.h"
 #include "core/rendering/HitTestResult.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/dom/DocumentMarkerController.h"
 #include "core/dom/NodeRenderingTraversal.h"
 #include "core/dom/shadow/ShadowRoot.h"

@@ -23,7 +23,7 @@
 #ifndef ElementStyleResources_h
 #define ElementStyleResources_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "platform/graphics/Color.h"
 #include "platform/heap/Handle.h"
 #include "wtf/HashMap.h"

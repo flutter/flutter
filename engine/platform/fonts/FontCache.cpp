@@ -30,9 +30,9 @@
 #include "config.h"
 #include "platform/fonts/FontCache.h"
 
-#include "platform/FontFamilyNames.h"
+#include "gen/sky/platform/FontFamilyNames.h"
 
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/fonts/AlternateFontFamily.h"
 #include "platform/fonts/FontCacheClient.h"
 #include "platform/fonts/FontCacheKey.h"

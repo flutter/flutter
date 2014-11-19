@@ -26,7 +26,7 @@
 #ifndef UseCounter_h
 #define UseCounter_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "wtf/BitVector.h"
 #include "wtf/Noncopyable.h"
 #include "wtf/OwnPtr.h"

@@ -32,10 +32,10 @@
 #define ScriptDebugServer_h
 
 #include "bindings/core/v8/ScopedPersistent.h"
-#include "core/InspectorBackendDispatcher.h"
 #include "core/inspector/ScriptBreakpoint.h"
 #include "core/inspector/ScriptCallStack.h"
 #include "core/inspector/ScriptDebugListener.h"
+#include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "v8/include/v8-debug.h"
 #include "v8/include/v8.h"
 #include "wtf/HashMap.h"

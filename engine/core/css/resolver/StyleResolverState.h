@@ -22,7 +22,7 @@
 #ifndef StyleResolverState_h
 #define StyleResolverState_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 #include "core/css/CSSToLengthConversionData.h"
 #include "core/css/resolver/CSSToStyleMap.h"

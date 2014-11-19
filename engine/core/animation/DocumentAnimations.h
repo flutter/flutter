@@ -31,7 +31,7 @@
 #ifndef DocumentAnimations_h
 #define DocumentAnimations_h
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 namespace blink {
 

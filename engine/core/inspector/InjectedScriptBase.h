@@ -33,7 +33,7 @@
 
 #include "bindings/core/v8/ScriptState.h"
 #include "bindings/core/v8/ScriptValue.h"
-#include "core/InspectorTypeBuilder.h"
+#include "gen/sky/core/InspectorTypeBuilder.h"
 #include "wtf/Forward.h"
 
 namespace blink {

@@ -28,8 +28,8 @@
 #include "core/editing/ReplaceSelectionCommand.h"
 
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/CSSPropertyNames.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/CSSStyleDeclaration.h"
 #include "core/css/StylePropertySet.h"
 #include "core/dom/Document.h"

@@ -44,7 +44,7 @@
 #include "core/rendering/compositing/CompositingRequirementsUpdater.h"
 #include "core/rendering/compositing/GraphicsLayerTreeBuilder.h"
 #include "core/rendering/compositing/GraphicsLayerUpdater.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/ScriptForbiddenScope.h"
 #include "platform/TraceEvent.h"
 #include "platform/graphics/GraphicsLayer.h"

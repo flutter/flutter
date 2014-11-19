@@ -32,7 +32,7 @@
 #include "core/dom/custom/CustomElementRegistrationContext.h"
 #include "core/frame/LocalFrame.h"
 #include "core/html/imports/HTMLImportsController.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

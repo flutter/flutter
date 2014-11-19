@@ -26,7 +26,7 @@
 #include "core/html/HTMLElement.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
 #include "core/dom/Document.h"
 #include "core/dom/ElementTraversal.h"

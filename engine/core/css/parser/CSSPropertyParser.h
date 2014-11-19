@@ -24,8 +24,6 @@
 #define CSSPropertyParser_h
 
 // FIXME: Way too many.
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
 #include "core/css/CSSCalculationValue.h"
 #include "core/css/CSSFilterValue.h"
 #include "core/css/CSSGradientValue.h"
@@ -34,6 +32,8 @@
 #include "core/css/CSSSelector.h"
 #include "core/css/parser/CSSParserMode.h"
 #include "core/css/parser/CSSParserValues.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "platform/graphics/Color.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/Vector.h"

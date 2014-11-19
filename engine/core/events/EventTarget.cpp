@@ -41,7 +41,7 @@
 #include "core/frame/LocalDOMWindow.h"
 #include "core/frame/UseCounter.h"
 #include "platform/EventDispatchForbiddenScope.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/StdLibExtras.h"
 #include "wtf/Vector.h"
 

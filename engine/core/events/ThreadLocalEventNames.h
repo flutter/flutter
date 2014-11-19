@@ -22,11 +22,11 @@
 #ifndef ThreadLocalEventNames_h
 #define ThreadLocalEventNames_h
 
-#include "core/EventInterfaces.h"
-#include "core/EventNames.h"
-#include "core/EventTargetInterfaces.h"
-#include "core/EventTargetNames.h"
-#include "core/EventTypeNames.h"
+#include "gen/sky/core/EventInterfaces.h"
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTargetInterfaces.h"
+#include "gen/sky/core/EventTargetNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "wtf/text/AtomicString.h"
 
 namespace blink {

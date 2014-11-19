@@ -46,7 +46,7 @@
 #include "platform/exported/WrappedResourceResponse.h"
 #include "platform/MIMETypeRegistry.h"
 #include "platform/network/HTTPParsers.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/UserGestureIndicator.h"
 #include "public/platform/Platform.h"
 #include "public/platform/WebMimeRegistry.h"

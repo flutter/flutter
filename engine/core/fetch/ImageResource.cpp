@@ -32,7 +32,7 @@
 #include "core/frame/FrameView.h"
 #include "core/rendering/RenderObject.h"
 #include "platform/Logging.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/SharedBuffer.h"
 #include "platform/TraceEvent.h"
 #include "platform/graphics/BitmapImage.h"

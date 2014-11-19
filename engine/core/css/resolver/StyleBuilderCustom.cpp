@@ -38,10 +38,10 @@
 
 #include "config.h"
 
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
-#include "core/StyleBuilderFunctions.h"
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/StyleBuilderFunctions.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/css/BasicShapeFunctions.h"
 #include "core/css/CSSAspectRatioValue.h"
 #include "core/css/CSSCursorImageValue.h"

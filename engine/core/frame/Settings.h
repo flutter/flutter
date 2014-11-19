@@ -28,9 +28,9 @@
 #define Settings_h
 
 #include "bindings/core/v8/V8CacheOptions.h"
-#include "core/SettingsMacros.h"
 #include "core/css/PointerProperties.h"
 #include "core/frame/SettingsDelegate.h"
+#include "gen/sky/core/SettingsMacros.h"
 #include "platform/Timer.h"
 #include "platform/fonts/GenericFontFamilySettings.h"
 #include "platform/geometry/IntSize.h"

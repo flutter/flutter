@@ -5,10 +5,10 @@
 #ifndef Keyframe_h
 #define Keyframe_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/animation/AnimationEffect.h"
 #include "core/animation/AnimationNode.h"
 #include "core/animation/animatable/AnimatableValue.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 
 namespace blink {
 

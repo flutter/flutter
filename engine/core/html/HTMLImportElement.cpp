@@ -10,7 +10,7 @@
 #include "core/html/imports/HTMLImportsController.h"
 #include "core/html/imports/HTMLImportChild.h"
 #include "core/events/Event.h"
-#include "core/EventTypeNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 
 namespace blink {
 

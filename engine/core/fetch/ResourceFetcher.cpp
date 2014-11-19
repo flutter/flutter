@@ -28,7 +28,7 @@
 #include "core/fetch/ResourceFetcher.h"
 
 #include "bindings/core/v8/ScriptController.h"
-#include "core/FetchInitiatorTypeNames.h"
+#include "gen/sky/core/FetchInitiatorTypeNames.h"
 #include "core/dom/Document.h"
 #include "core/fetch/FetchContext.h"
 #include "core/fetch/FontResource.h"
@@ -48,7 +48,7 @@
 #include "core/loader/UniqueIdentifier.h"
 #include "core/page/Page.h"
 #include "platform/Logging.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/SharedBuffer.h"
 #include "platform/TraceEvent.h"
 #include "platform/weborigin/SecurityPolicy.h"

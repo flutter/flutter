@@ -29,7 +29,7 @@
 #include "config.h"
 #include "platform/fonts/FontFallbackList.h"
 
-#include "platform/FontFamilyNames.h"
+#include "gen/sky/platform/FontFamilyNames.h"
 #include "platform/fonts/FontCache.h"
 #include "platform/fonts/FontDescription.h"
 #include "platform/fonts/FontFamily.h"

@@ -28,7 +28,7 @@
 
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/HTMLElementFactory.h"
+#include "gen/sky/core/HTMLElementFactory.h"
 #include "core/dom/Document.h"
 #include "core/dom/ElementTraversal.h"
 #include "core/dom/NodeTraversal.h"

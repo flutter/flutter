@@ -25,10 +25,10 @@
 #ifndef ClassList_h
 #define ClassList_h
 
-#include "core/HTMLNames.h"
 #include "core/dom/DOMTokenList.h"
 #include "core/dom/Element.h"
 #include "core/dom/SpaceSplitString.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "wtf/OwnPtr.h"
 #include "wtf/PassOwnPtr.h"
 

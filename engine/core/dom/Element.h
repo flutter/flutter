@@ -25,14 +25,14 @@
 #ifndef Element_h
 #define Element_h
 
-#include "core/HTMLNames.h"
-#include "core/CSSPropertyNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/dom/Attribute.h"
 #include "core/dom/ContainerNode.h"
 #include "core/dom/ElementData.h"
 #include "core/dom/SpaceSplitString.h"
 #include "core/page/FocusType.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "platform/heap/Handle.h"
 
 namespace blink {

@@ -28,7 +28,7 @@
 
 #include "core/css/CSSOMUtils.h"
 #include "core/css/CSSSelectorList.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/Assertions.h"
 #include "wtf/HashMap.h"
 #include "wtf/StdLibExtras.h"

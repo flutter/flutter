@@ -32,7 +32,7 @@
 #include "core/dom/custom/CustomElementRegistrationContext.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/Element.h"
 #include "core/dom/custom/CustomElement.h"

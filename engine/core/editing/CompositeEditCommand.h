@@ -26,9 +26,9 @@
 #ifndef CompositeEditCommand_h
 #define CompositeEditCommand_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/editing/EditCommand.h"
 #include "core/editing/UndoStep.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "wtf/Vector.h"
 
 namespace blink {

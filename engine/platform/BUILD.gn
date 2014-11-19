@@ -640,7 +640,7 @@ component("platform") {
   ]
 
   include_dirs = [
-    "$root_gen_dir/sky",
+    "$root_build_dir",
   ]
 
   deps = [
@@ -776,7 +776,7 @@ test("platform_unittests") {
   ]
 
   include_dirs = [
-    "$root_gen_dir/sky",
+    "$root_build_dir",
   ]
 }
 

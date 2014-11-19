@@ -35,7 +35,7 @@
 #include "core/css/StyleRule.h"
 #include "core/fetch/FontResource.h"
 #include "core/fetch/ResourceFetcher.h"
-#include "platform/FontFamilyNames.h"
+#include "gen/sky/platform/FontFamilyNames.h"
 #include "platform/fonts/FontDescription.h"
 #include "wtf/text/AtomicString.h"
 

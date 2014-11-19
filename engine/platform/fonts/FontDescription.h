@@ -25,7 +25,7 @@
 #ifndef FontDescription_h
 #define FontDescription_h
 
-#include "platform/FontFamilyNames.h"
+#include "gen/sky/platform/FontFamilyNames.h"
 #include "platform/fonts/FixedPitchFontType.h"
 #include "platform/fonts/FontCacheKey.h"
 #include "platform/fonts/FontFamily.h"

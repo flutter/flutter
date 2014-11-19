@@ -31,7 +31,6 @@
 #define InspectorDebuggerAgent_h
 
 #include "bindings/core/v8/ScriptState.h"
-#include "core/InspectorFrontend.h"
 #include "core/frame/ConsoleTypes.h"
 #include "core/inspector/AsyncCallStackTracker.h"
 #include "core/inspector/ConsoleAPITypes.h"
@@ -40,6 +39,7 @@
 #include "core/inspector/PromiseTracker.h"
 #include "core/inspector/ScriptBreakpoint.h"
 #include "core/inspector/ScriptDebugListener.h"
+#include "gen/sky/core/InspectorFrontend.h"
 #include "wtf/Forward.h"
 #include "wtf/HashMap.h"
 #include "wtf/PassRefPtr.h"

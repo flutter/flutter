@@ -22,9 +22,9 @@
 #ifndef CSSPrimitiveValue_h
 #define CSSPrimitiveValue_h
 
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
 #include "core/css/CSSValue.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "platform/graphics/Color.h"
 #include "wtf/Forward.h"
 #include "wtf/MathExtras.h"

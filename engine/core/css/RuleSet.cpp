@@ -34,7 +34,7 @@
 #include "core/css/CSSSelectorList.h"
 #include "core/css/SelectorChecker.h"
 #include "core/css/StyleSheetContents.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
 
 #include "wtf/TerminatedArrayBuilder.h"

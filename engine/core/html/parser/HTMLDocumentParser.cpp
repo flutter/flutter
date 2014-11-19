@@ -27,7 +27,7 @@
 #include "core/html/parser/HTMLDocumentParser.h"
 
 #include "base/bind.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/MediaValuesCached.h"
 #include "core/dom/Element.h"
 #include "core/frame/LocalFrame.h"

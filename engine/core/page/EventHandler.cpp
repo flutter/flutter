@@ -29,7 +29,7 @@
 #include "core/page/EventHandler.h"
 
 #include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentMarkerController.h"
 #include "core/dom/NodeRenderingTraversal.h"
@@ -68,7 +68,7 @@
 #include "platform/PlatformKeyboardEvent.h"
 #include "platform/PlatformTouchEvent.h"
 #include "platform/PlatformWheelEvent.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
 #include "platform/WindowsKeyboardCodes.h"
 #include "platform/geometry/FloatPoint.h"

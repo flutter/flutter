@@ -25,7 +25,6 @@
 #ifndef RenderStyle_h
 #define RenderStyle_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/animation/css/CSSAnimationData.h"
 #include "core/animation/css/CSSTransitionData.h"
 #include "core/css/CSSLineBoxContainValue.h"
@@ -50,6 +49,7 @@
 #include "core/rendering/style/StyleTransformData.h"
 #include "core/rendering/style/StyleVisualData.h"
 #include "core/rendering/style/StyleWillChangeData.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "platform/Length.h"
 #include "platform/LengthBox.h"
 #include "platform/LengthSize.h"

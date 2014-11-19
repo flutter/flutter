@@ -44,7 +44,7 @@
 #include "config.h"
 #include "core/rendering/RenderLayer.h"
 
-#include "core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "core/dom/Document.h"
 #include "core/dom/shadow/ShadowRoot.h"
 #include "core/frame/FrameView.h"
@@ -63,7 +63,7 @@
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "platform/LengthFunctions.h"
 #include "platform/Partitions.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
 #include "platform/geometry/FloatPoint3D.h"
 #include "platform/geometry/FloatRect.h"

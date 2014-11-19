@@ -27,8 +27,8 @@
 #include "core/css/CSSMatrix.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/CSSToLengthConversionData.h"
 #include "core/css/StylePropertySet.h"

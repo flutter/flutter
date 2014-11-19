@@ -5,7 +5,7 @@
 #include "config.h"
 #include "core/css/parser/SizesCalcParser.h"
 
-#include "core/MediaTypeNames.h"
+#include "gen/sky/core/MediaTypeNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/MediaValuesCached.h"
 #include "core/css/StylePropertySet.h"

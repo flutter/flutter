@@ -26,7 +26,7 @@
 #include "config.h"
 #include "core/frame/Settings.h"
 
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/scroll/Scrollbar.h"
 
 namespace blink {

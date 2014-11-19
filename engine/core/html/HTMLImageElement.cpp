@@ -23,9 +23,9 @@
 #include "config.h"
 #include "core/html/HTMLImageElement.h"
 
-#include "core/CSSPropertyNames.h"
-#include "core/HTMLNames.h"
-#include "core/MediaTypeNames.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/HTMLNames.h"
+#include "gen/sky/core/MediaTypeNames.h"
 #include "core/css/MediaQueryListListener.h"
 #include "core/css/MediaQueryMatcher.h"
 #include "core/css/MediaValuesDynamic.h"
@@ -41,7 +41,7 @@
 #include "core/inspector/ConsoleMessage.h"
 #include "core/rendering/RenderImage.h"
 #include "platform/MIMETypeRegistry.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

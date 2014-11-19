@@ -31,9 +31,9 @@
 #ifndef AnimatableUnknown_h
 #define AnimatableUnknown_h
 
-#include "core/CSSValueKeywords.h"
 #include "core/animation/animatable/AnimatableValue.h"
 #include "core/css/CSSValuePool.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 
 namespace blink {
 

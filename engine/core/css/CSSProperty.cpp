@@ -21,7 +21,7 @@
 #include "config.h"
 #include "core/css/CSSProperty.h"
 
-#include "core/StylePropertyShorthand.h"
+#include "gen/sky/core/StylePropertyShorthand.h"
 #include "core/css/CSSValueList.h"
 #include "core/rendering/style/RenderStyleConstants.h"
 

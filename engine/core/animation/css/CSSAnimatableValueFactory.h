@@ -31,8 +31,8 @@
 #ifndef CSSAnimatableValueFactory_h
 #define CSSAnimatableValueFactory_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/animation/animatable/AnimatableValue.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "wtf/PassRefPtr.h"
 
 namespace blink {

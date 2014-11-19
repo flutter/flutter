@@ -29,10 +29,10 @@
 #ifndef MediaQueryExp_h
 #define MediaQueryExp_h
 
-#include "core/CSSValueKeywords.h"
-#include "core/MediaFeatureNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSValue.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/MediaFeatureNames.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/RefPtr.h"
 

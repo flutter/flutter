@@ -132,7 +132,7 @@ source_set("core_generated") {
   ]
 
   include_dirs = [
-    "$root_gen_dir/sky",
+    "$root_build_dir",
   ]
 }
 

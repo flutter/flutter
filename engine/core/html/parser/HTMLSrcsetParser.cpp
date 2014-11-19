@@ -34,7 +34,7 @@
 
 #include "core/html/parser/HTMLParserIdioms.h"
 #include "platform/ParsingUtilities.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

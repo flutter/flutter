@@ -22,7 +22,7 @@
 #ifndef FontSize_h
 #define FontSize_h
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "platform/fonts/FixedPitchFontType.h"
 
 namespace blink {

@@ -21,10 +21,10 @@
 #ifndef CSSParserValues_h
 #define CSSParserValues_h
 
-#include "core/CSSValueKeywords.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSSelector.h"
 #include "core/css/CSSValueList.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/WTFString.h"
 

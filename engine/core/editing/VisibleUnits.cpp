@@ -40,7 +40,7 @@
 #include "core/rendering/InlineTextBox.h"
 #include "core/rendering/RenderBlockFlow.h"
 #include "core/rendering/RenderObject.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/heap/Handle.h"
 #include "platform/text/TextBoundaries.h"
 

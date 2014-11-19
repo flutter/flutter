@@ -21,7 +21,7 @@
 #include "config.h"
 #include "core/css/CSSImageValue.h"
 
-#include "core/FetchInitiatorTypeNames.h"
+#include "gen/sky/core/FetchInitiatorTypeNames.h"
 #include "core/css/CSSMarkup.h"
 #include "core/dom/Document.h"
 #include "core/fetch/FetchRequest.h"

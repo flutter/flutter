@@ -30,7 +30,7 @@
 #include "config.h"
 #include "platform/fonts/FontDescription.h"
 
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "wtf/text/AtomicStringHash.h"
 #include "wtf/text/StringHash.h"
 

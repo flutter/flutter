@@ -5,8 +5,8 @@
 #ifndef StyleWillChangeData_h
 #define StyleWillChangeData_h
 
-#include "core/CSSPropertyNames.h"
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSPropertyNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
 #include "wtf/Vector.h"

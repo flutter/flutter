@@ -22,11 +22,11 @@
 #ifndef CSSToStyleMap_h
 #define CSSToStyleMap_h
 
-#include "core/CSSPropertyNames.h"
 #include "core/animation/Timing.h"
 #include "core/animation/css/CSSTransitionData.h"
 #include "core/css/resolver/ElementStyleResources.h"
 #include "core/rendering/style/RenderStyleConstants.h"
+#include "gen/sky/core/CSSPropertyNames.h"
 #include "platform/animation/TimingFunction.h"
 #include "wtf/Noncopyable.h"
 

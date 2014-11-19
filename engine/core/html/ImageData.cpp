@@ -32,7 +32,7 @@
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/custom/V8Uint8ClampedArrayCustom.h"
 #include "core/dom/ExceptionCode.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

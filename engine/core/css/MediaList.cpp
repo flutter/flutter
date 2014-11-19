@@ -21,7 +21,7 @@
 #include "core/css/MediaList.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/MediaFeatureNames.h"
+#include "gen/sky/core/MediaFeatureNames.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/CSSStyleSheet.h"
 #include "core/css/MediaQuery.h"

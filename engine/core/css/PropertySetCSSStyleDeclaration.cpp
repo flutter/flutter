@@ -23,14 +23,14 @@
 #include "core/css/PropertySetCSSStyleDeclaration.h"
 
 #include "bindings/core/v8/ExceptionState.h"
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/CSSStyleSheet.h"
 #include "core/css/StylePropertySet.h"
 #include "core/dom/Element.h"
 #include "core/dom/MutationObserverInterestGroup.h"
 #include "core/dom/MutationRecord.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 
 namespace blink {
 

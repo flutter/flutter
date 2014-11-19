@@ -28,7 +28,7 @@
 #include "config.h"
 #include "core/css/resolver/CSSToStyleMap.h"
 
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/animation/css/CSSAnimationData.h"
 #include "core/css/CSSBorderImageSliceValue.h"
 #include "core/css/CSSPrimitiveValue.h"

@@ -32,7 +32,7 @@
 
 #include "platform/graphics/gpu/DrawingBuffer.h"
 
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/graphics/ImageBuffer.h"
 #include "platform/graphics/UnacceleratedImageBufferSurface.h"
 #include "platform/graphics/gpu/Extensions3DUtil.h"

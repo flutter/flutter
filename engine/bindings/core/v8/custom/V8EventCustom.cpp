@@ -32,8 +32,8 @@
 #include "bindings/core/v8/V8Event.h"
 
 #include "bindings/core/v8/V8Binding.h"
-#include "core/EventHeaders.h"
-#include "core/EventInterfaces.h"
+#include "gen/sky/core/EventHeaders.h"
+#include "gen/sky/core/EventInterfaces.h"
 #include "core/events/Event.h"
 
 namespace blink {

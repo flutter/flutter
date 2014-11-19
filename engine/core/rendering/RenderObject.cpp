@@ -61,7 +61,7 @@
 #include "core/rendering/style/ShadowList.h"
 #include "platform/JSONValues.h"
 #include "platform/Partitions.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/TraceEvent.h"
 #include "platform/TracedValue.h"
 #include "platform/geometry/TransformState.h"

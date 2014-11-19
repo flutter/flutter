@@ -34,7 +34,7 @@
 #include "bindings/core/v8/Dictionary.h"
 #include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ScriptState.h"
-#include "core/CSSValueKeywords.h"
+#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/css/BinaryDataFontFaceSource.h"
 #include "core/css/CSSFontFace.h"
 #include "core/css/CSSFontFaceSrcValue.h"
@@ -53,7 +53,7 @@
 #include "core/dom/StyleEngine.h"
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Settings.h"
-#include "platform/FontFamilyNames.h"
+#include "gen/sky/platform/FontFamilyNames.h"
 #include "platform/SharedBuffer.h"
 #include "wtf/ArrayBufferView.h"
 

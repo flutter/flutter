@@ -32,10 +32,10 @@
 #define InjectedScript_h
 
 #include "bindings/core/v8/ScriptValue.h"
-#include "core/InspectorTypeBuilder.h"
 #include "core/inspector/InjectedScriptBase.h"
 #include "core/inspector/InjectedScriptManager.h"
 #include "core/inspector/ScriptArguments.h"
+#include "gen/sky/core/InspectorTypeBuilder.h"
 #include "wtf/Forward.h"
 #include "wtf/Vector.h"
 

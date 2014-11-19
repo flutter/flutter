@@ -25,7 +25,7 @@
 #include "config.h"
 #include "core/html/parser/HTMLParserIdioms.h"
 
-#include "core/HTMLNames.h"
+#include "gen/sky/core/HTMLNames.h"
 #include <limits>
 #include "wtf/MathExtras.h"
 #include "wtf/text/AtomicString.h"

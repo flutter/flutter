@@ -32,7 +32,7 @@
 #include "bindings/core/v8/V8EventTarget.h"
 
 #include "core/EventTargetHeaders.h"
-#include "core/EventTargetInterfaces.h"
+#include "gen/sky/core/EventTargetInterfaces.h"
 
 namespace blink {
 

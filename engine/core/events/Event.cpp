@@ -23,8 +23,8 @@
 #include "config.h"
 #include "core/events/Event.h"
 
-#include "core/EventHeaders.h"
-#include "core/EventInterfaces.h"
+#include "gen/sky/core/EventHeaders.h"
+#include "gen/sky/core/EventInterfaces.h"
 #include "core/dom/StaticNodeList.h"
 #include "core/events/EventTarget.h"
 #include "core/frame/UseCounter.h"

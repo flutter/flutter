@@ -30,10 +30,10 @@
 #include "config.h"
 #include "core/css/MediaQueryEvaluator.h"
 
-#include "core/CSSValueKeywords.h"
-#include "core/MediaFeatureNames.h"
-#include "core/MediaFeatures.h"
-#include "core/MediaTypeNames.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/MediaFeatureNames.h"
+#include "gen/sky/core/MediaFeatures.h"
+#include "gen/sky/core/MediaTypeNames.h"
 #include "core/css/CSSAspectRatioValue.h"
 #include "core/css/CSSHelper.h"
 #include "core/css/CSSPrimitiveValue.h"
@@ -53,7 +53,7 @@
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "core/rendering/style/RenderStyle.h"
 #include "platform/PlatformScreen.h"
-#include "platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/geometry/FloatRect.h"
 #include "wtf/HashMap.h"
 
