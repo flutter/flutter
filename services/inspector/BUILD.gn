@@ -19,6 +19,7 @@ mojo_native_application("sky_inspector_server") {
   deps = [
     "//base",
     "//mojo/application",
+    "//mojo/common",
     "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
