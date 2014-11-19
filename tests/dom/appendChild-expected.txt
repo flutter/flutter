@@ -1,0 +1,9 @@
+Running 5 tests
+ok 1 appendChild should throw with invalid arguments
+ok 2 appendChild should insert children
+ok 3 appendChild should insert children with a fragment
+ok 4 appendChild should throw when inserting a tree scope
+ok 5 appendChild should throw when appending to a text
+5 tests
+5 pass
+0 fail

@@ -48,17 +48,6 @@ Node::NodeType DocumentFragment::nodeType() const
     return DOCUMENT_FRAGMENT_NODE;
 }
 
-bool DocumentFragment::childTypeAllowed(NodeType type) const
-{
-    switch (type) {
-        case ELEMENT_NODE:
-        case TEXT_NODE:
-            return true;
-        default:
-            return false;
-    }
-}
-
 PassRefPtr<Node> DocumentFragment::cloneNode(bool deep)
 {
     RefPtr<DocumentFragment> clone = create(document());

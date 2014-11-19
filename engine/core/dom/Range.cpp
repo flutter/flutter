@@ -816,18 +816,10 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
         // check each child node, not the DocumentFragment itself
         numNewChildren = 0;
         for (Node* c = toDocumentFragment(newNode)->firstChild(); c; c = c->nextSibling()) {
-            if (!checkAgainst->childTypeAllowed(c->nodeType())) {
-                exceptionState.throwDOMException(HierarchyRequestError, "The node to be inserted contains a '" + c->nodeName() + "' node, which may not be inserted here.");
-                return;
-            }
             ++numNewChildren;
         }
     } else {
         numNewChildren = 1;
-        if (!checkAgainst->childTypeAllowed(newNodeType)) {
-            exceptionState.throwDOMException(HierarchyRequestError, "The node to be inserted is a '" + newNode->nodeName() + "' node, which may not be inserted here.");
-            return;
-        }
     }
 
     for (Node* n = m_start.container(); n; n = n->parentNode()) {
@@ -1115,11 +1107,6 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
 
     if (!parentOfNewParent) {
         exceptionState.throwDOMException(HierarchyRequestError, "The container node is a detached character data node; no parent node is available for insertion.");
-        return;
-    }
-
-    if (!parentOfNewParent->childTypeAllowed(newParent->nodeType())) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The node provided is of type '" + newParent->nodeName() + "', which may not be inserted here.");
         return;
     }
 

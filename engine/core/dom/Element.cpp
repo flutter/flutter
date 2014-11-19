@@ -1064,18 +1064,6 @@ ShadowRoot* Element::shadowRoot() const
     return elementShadow->youngestShadowRoot();
 }
 
-bool Element::childTypeAllowed(NodeType type) const
-{
-    switch (type) {
-    case ELEMENT_NODE:
-    case TEXT_NODE:
-        return true;
-    default:
-        break;
-    }
-    return false;
-}
-
 void Element::childrenChanged(const ChildrenChange& change)
 {
     ContainerNode::childrenChanged(change);

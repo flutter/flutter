@@ -142,10 +142,9 @@ private:
     void notifyNodeInsertedInternal(Node&, NodeVector& postInsertionNotificationTargets);
     void notifyNodeRemoved(Node&);
 
-    inline bool checkAcceptChildGuaranteedNodeTypes(const Node& newChild, ExceptionState&) const;
-    inline bool checkAcceptChild(const Node* newChild, const Node* oldChild, ExceptionState&) const;
+    inline void checkAcceptChildType(const Node* newChild, ExceptionState&) const;
+    inline void checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState&) const;
     inline bool containsConsideringHostElements(const Node&) const;
-    inline bool isChildTypeAllowed(const Node& child) const;
 
     void attachChildren(const AttachContext& = AttachContext());
     void detachChildren(const AttachContext& = AttachContext());

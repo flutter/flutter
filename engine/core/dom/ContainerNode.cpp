@@ -73,18 +73,6 @@ ContainerNode::~ContainerNode()
     removeDetachedChildren();
 }
 
-bool ContainerNode::isChildTypeAllowed(const Node& child) const
-{
-    if (!child.isDocumentFragment())
-        return childTypeAllowed(child.nodeType());
-
-    for (Node* node = toDocumentFragment(child).firstChild(); node; node = node->nextSibling()) {
-        if (!childTypeAllowed(node->nodeType()))
-            return false;
-    }
-    return true;
-}
-
 bool ContainerNode::containsConsideringHostElements(const Node& newChild) const
 {
     if (isInShadowTree() || document().isTemplateDocument())
@@ -92,51 +80,40 @@ bool ContainerNode::containsConsideringHostElements(const Node& newChild) const
     return newChild.contains(this);
 }
 
-bool ContainerNode::checkAcceptChild(const Node* newChild, const Node* oldChild, ExceptionState& exceptionState) const
+void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& exceptionState) const
 {
-    // Not mentioned in spec: throw NotFoundError if newChild is null
     if (!newChild) {
         exceptionState.throwDOMException(NotFoundError, "The new child element is null.");
-        return false;
+        return;
     }
 
-    // Use common case fast path if possible.
-    if ((newChild->isElementNode() || newChild->isTextNode()) && isElementNode()) {
-        ASSERT(isChildTypeAllowed(*newChild));
-        if (containsConsideringHostElements(*newChild)) {
-            exceptionState.throwDOMException(HierarchyRequestError, "The new child element contains the parent.");
-            return false;
-        }
-        return true;
-    }
-
-    if (containsConsideringHostElements(*newChild)) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The new child element contains the parent.");
-        return false;
-    }
-
-    if (oldChild && isDocumentNode()) {
-        if (!toDocument(this)->canReplaceChild(*newChild, *oldChild)) {
-            // FIXME: Adjust 'Document::canReplaceChild' to return some additional detail (or an error message).
-            exceptionState.throwDOMException(HierarchyRequestError, "Failed to replace child.");
-            return false;
-        }
-    } else if (!isChildTypeAllowed(*newChild)) {
+    if (newChild->isTreeScope()) {
         exceptionState.throwDOMException(HierarchyRequestError, "Nodes of type '" + newChild->nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
-        return false;
+        return;
     }
-
-    return true;
 }
 
-bool ContainerNode::checkAcceptChildGuaranteedNodeTypes(const Node& newChild, ExceptionState& exceptionState) const
+void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState& exceptionState) const
 {
-    ASSERT(isChildTypeAllowed(newChild));
-    if (newChild.contains(this)) {
+    if (containsConsideringHostElements(newChild)) {
         exceptionState.throwDOMException(HierarchyRequestError, "The new child element contains the parent.");
-        return false;
+        return;
     }
-    return true;
+
+    // TODO(esprehn): Remove this, sky should allow multiple top level elements.
+    if (isDocumentNode()) {
+        unsigned elementCount = 0;
+        if (newChild.isElementNode()) {
+            elementCount = 1;
+        } else if (newChild.isDocumentFragment()) {
+            for (Element* element = ElementTraversal::firstChild(newChild); element; element = ElementTraversal::nextSibling(*element))
+                ++elementCount;
+        }
+        if (elementCount > 1 || ((!oldChild || !oldChild->isElementNode()) && elementCount && document().documentElement())) {
+            exceptionState.throwDOMException(HierarchyRequestError, "Document can only contain one Element.");
+            return;
+        }
+    }
 }
 
 PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
@@ -152,12 +129,14 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
         return appendChild(newChild, exceptionState);
     }
 
-    // Make sure adding the new child is OK.
-    if (!checkAcceptChild(newChild.get(), 0, exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return newChild;
-    }
+    checkAcceptChildType(newChild.get(), exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
+
+    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
+
     ASSERT(newChild);
 
     // NotFoundError: Raised if refChild is not a child of this node
@@ -179,12 +158,11 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     if (targets.isEmpty())
         return newChild;
 
-    // We need this extra check because collectChildrenAndRemoveFromOldParent() can fire mutation events.
-    if (!checkAcceptChildGuaranteedNodeTypes(*newChild, exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return newChild;
-    }
+    // Must check this again beacuse focus events might run synchronously when
+    // removing children.
+    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
 
     ChildListMutationScope mutation(*this);
     for (NodeVector::const_iterator it = targets.begin(); it != targets.end(); ++it) {
@@ -268,12 +246,13 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
 
     RefPtr<Node> child = oldChild;
 
-    // Make sure replacing the old child with the new is ok
-    if (!checkAcceptChild(newChild.get(), child.get(), exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return child;
-    }
+    checkAcceptChildType(newChild.get(), exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
+
+    checkAcceptChildHierarchy(*newChild, child.get(), exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
 
     // NotFoundError: Raised if oldChild is not a child of this node.
     if (child->parentNode() != this) {
@@ -293,24 +272,16 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
     if (next && (next->previousSibling() == newChild || next == newChild)) // nothing to do
         return child;
 
-    // Does this one more time because removeChild() fires a MutationEvent.
-    if (!checkAcceptChild(newChild.get(), child.get(), exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return child;
-    }
-
     NodeVector targets;
     collectChildrenAndRemoveFromOldParent(*newChild, targets, exceptionState);
     if (exceptionState.hadException())
         return nullptr;
 
-    // Does this yet another check because collectChildrenAndRemoveFromOldParent() fires a MutationEvent.
-    if (!checkAcceptChild(newChild.get(), child.get(), exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return child;
-    }
+    // Must check this again beacuse focus events might run synchronously when
+    // removing children.
+    checkAcceptChildHierarchy(*newChild, child.get(),exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
 
     // Add the new child(ren)
     for (NodeVector::const_iterator it = targets.begin(); it != targets.end(); ++it) {
@@ -545,12 +516,14 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     // If it is, it can be deleted as a side effect of sending mutation events.
     ASSERT(refCount() || parentOrShadowHostNode());
 
-    // Make sure adding the new child is ok
-    if (!checkAcceptChild(newChild.get(), 0, exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return newChild;
-    }
+    checkAcceptChildType(newChild.get(), exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
+
+    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
+
     ASSERT(newChild);
 
     if (newChild == m_lastChild) // nothing to do
@@ -564,12 +537,11 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     if (targets.isEmpty())
         return newChild;
 
-    // We need this extra check because collectChildrenAndRemoveFromOldParent() can fire mutation events.
-    if (!checkAcceptChildGuaranteedNodeTypes(*newChild, exceptionState)) {
-        if (exceptionState.hadException())
-            return nullptr;
-        return newChild;
-    }
+    // Must check this again beacuse focus events might run synchronously when
+    // removing children.
+    checkAcceptChildHierarchy(*newChild, 0, exceptionState);
+    if (exceptionState.hadException())
+        return nullptr;
 
     // Now actually add the child(ren)
     ChildListMutationScope mutation(*this);

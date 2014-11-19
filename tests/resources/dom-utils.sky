@@ -1,0 +1,20 @@
+<script>
+  function childNodeCount(parent) {
+    var count = 0;
+    for (var node = parent.firstChild; node; node = node.nextSibling)
+      ++count;
+    return count;
+  }
+
+  function childElementCount(parent) {
+    var count = 0;
+    for (var element = parent.firstElementChild; element; element = element.nextElementSibling)
+      ++count;
+    return count;
+  }
+
+  module.exports = {
+    childNodeCount: childNodeCount,
+    childElementCount: childElementCount,
+  };
+</script>

@@ -1,0 +1,76 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="../resources/dom-utils.sky" as="DomUtils" />
+<script>
+describe("appendChild", function() {
+  var childElementCount = DomUtils.childElementCount;
+  var childNodeCount = DomUtils.childNodeCount;
+
+  it("should throw with invalid arguments", function() {
+    var parent = document.createElement("div");
+    assert.throws(function() {
+      parent.appendChild();
+    });
+    assert.throws(function() {
+      parent.appendChild(null);
+    });
+    assert.throws(function() {
+      parent.appendChild({tagName: "div"});
+    });
+  });
+
+  it("should insert children", function() {
+    var parent = document.createElement("div");
+    var child1 = parent.appendChild(document.createElement("div"));
+    var child2 = parent.appendChild(new Text(" text "));
+    var child3 = parent.appendChild(new Text(" "));
+    var child4 = parent.appendChild(document.createElement("div"));
+    assert.equal(child1.parentNode, parent);
+    assert.equal(child2.parentNode, parent);
+    assert.equal(child3.parentNode, parent);
+    assert.equal(child4.parentNode, parent);
+    assert.equal(childNodeCount(parent), 4);
+    assert.equal(childElementCount(parent), 2);
+  });
+
+  it("should insert children with a fragment", function() {
+    var fragment = document.createDocumentFragment();
+    var child1 = fragment.appendChild(document.createElement("div"));
+    var child2 = fragment.appendChild(new Text(" text "));
+    var child3 = fragment.appendChild(new Text(" "));
+    var child4 = fragment.appendChild(document.createElement("div"));
+    var parent = document.createElement("div");
+    parent.appendChild(fragment);
+    assert.equal(child1.parentNode, parent);
+    assert.equal(child2.parentNode, parent);
+    assert.equal(child3.parentNode, parent);
+    assert.equal(child4.parentNode, parent);
+    assert.equal(childNodeCount(parent), 4);
+    assert.equal(childElementCount(parent), 2);
+  });
+
+  it("should throw when inserting a tree scope", function() {
+    var parent = document.createElement("div");
+    var doc = new Document();
+    var shadowRoot = document.createElement("span").createShadowRoot();
+    assert.throws(function() {
+      parent.appendChild(doc);
+    });
+    assert.throws(function() {
+      parent.appendChild(shadowRoot);
+    });
+    assert.throws(function() {
+      doc.appendChild(fragment);
+    });
+  });
+
+  it("should throw when appending to a text", function() {
+    var parent = new Text();
+    assert.throws(function() {
+      parent.appendChild(document.createElement("div"));
+    });
+  });
+});
+</script>
+</sky>

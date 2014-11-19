@@ -43,7 +43,6 @@ protected:
 private:
     virtual NodeType nodeType() const override final;
     virtual PassRefPtr<Node> cloneNode(bool deep = true) override;
-    virtual bool childTypeAllowed(NodeType) const override;
 
     bool isDocumentFragment() const = delete; // This will catch anyone doing an unnecessary check.
 };

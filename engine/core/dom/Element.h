@@ -358,7 +358,6 @@ private:
     void updateId(TreeScope&, const AtomicString& oldId, const AtomicString& newId);
 
     virtual NodeType nodeType() const override final;
-    virtual bool childTypeAllowed(NodeType) const override final;
 
     void setAttributeInternal(size_t index, const QualifiedName&, const AtomicString& value, SynchronizationOfLazyAttribute);
     void appendAttributeInternal(const QualifiedName&, const AtomicString& value, SynchronizationOfLazyAttribute);

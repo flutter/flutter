@@ -1,0 +1,103 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="../resources/dom-utils.sky" as="DomUtils" />
+<script>
+describe("Document", function() {
+  var doc;
+
+  var childElementCount = DomUtils.childElementCount;
+  var childNodeCount = DomUtils.childNodeCount;
+
+  beforeEach(function() {
+    doc = new Document();
+  });
+
+  it("should allow replacing the document element", function() {
+    var oldChild = doc.appendChild(doc.createElement("div"));
+    assert.equal(childElementCount(doc), 1);
+    var newChild = doc.createElement("div");
+    doc.replaceChild(newChild, oldChild);
+    assert.equal(childElementCount(doc), 1);
+    assert.equal(newChild.parentNode, doc);
+    assert.isNull(oldChild.parentNode);
+  });
+
+  it("should allow replacing a text child with an element", function() {
+    var oldChild = doc.appendChild(new Text("text here"));
+    assert.equal(childElementCount(doc), 0);
+    assert.equal(childNodeCount(doc), 1);
+    var newChild = doc.createElement("div");
+    doc.replaceChild(newChild, oldChild);
+    assert.equal(childElementCount(doc), 1);
+    assert.equal(childNodeCount(doc), 1);
+    assert.equal(newChild.parentNode, doc);
+    assert.isNull(oldChild.parentNode);
+  });
+
+  it("should allow replacing the document element with text", function() {
+    var oldChild = doc.appendChild(doc.createElement("div"));
+    assert.equal(childElementCount(doc), 1);
+    var newChild = new Text(" text ");
+    doc.replaceChild(newChild, oldChild);
+    assert.equal(childElementCount(doc), 0);
+    assert.equal(childNodeCount(doc), 1);
+    assert.equal(newChild.parentNode, doc);
+    assert.isNull(oldChild.parentNode);
+  });
+
+  it("should allow inserting text with a fragment", function() {
+    var fragment = doc.createDocumentFragment();
+    fragment.appendChild(new Text(" text "));
+    fragment.appendChild(new Text(" text "));
+    assert.equal(childNodeCount(doc), 0);
+    doc.appendChild(fragment);
+    assert.equal(childElementCount(doc), 0);
+    assert.equal(childNodeCount(doc), 2);
+  });
+
+  it("should allow replacing the document element with a fragment", function() {
+    var oldChild = doc.appendChild(doc.createElement("div"));
+    assert.equal(childElementCount(doc), 1);
+    var fragment = doc.createDocumentFragment();
+    fragment.appendChild(new Text(" text "));
+    var newChild = fragment.appendChild(doc.createElement("div"));
+    fragment.appendChild(new Text(" "));
+    doc.replaceChild(fragment, oldChild);
+    assert.equal(childElementCount(doc), 1);
+    assert.equal(childNodeCount(doc), 3);
+    assert.equal(newChild.parentNode, doc);
+    assert.isNull(oldChild.parentNode);
+  });
+
+  it("should throw when inserting multiple elements", function() {
+    doc.appendChild(doc.createElement("div"));
+    var oldChild = doc.appendChild(new Text(" text "));
+    assert.equal(childElementCount(doc), 1);
+    var newChild = doc.createElement("div");
+    assert.throws(function() {
+      doc.replaceChild(newChild, 0);
+    });
+    assert.throws(function() {
+      doc.insertBefore(newChild, oldChild);
+    });
+  });
+
+  it("should throw when inserting multiple elements with a fragment", function() {
+    var oldChild = doc.appendChild(doc.createElement("div"));
+    assert.equal(childElementCount(doc), 1);
+    var fragment = doc.createDocumentFragment();
+    fragment.appendChild(new Text(" text "));
+    fragment.appendChild(doc.createElement("div"));
+    fragment.appendChild(doc.createElement("div"));
+    fragment.appendChild(new Text(" "));
+    assert.throws(function() {
+      doc.replaceChild(fragment, 0);
+    });
+    assert.throws(function() {
+      doc.insertBefore(fragment, oldChild);
+    });
+  });
+});
+</script>
+</sky>

@@ -376,7 +376,6 @@ public:
     bool isInShadowTree() const { return getFlag(IsInShadowTreeFlag); }
     bool isInTreeScope() const { return getFlag(static_cast<NodeFlags>(InDocumentFlag | IsInShadowTreeFlag)); }
 
-    virtual bool childTypeAllowed(NodeType) const { return false; }
     unsigned countChildren() const;
 
     bool isDescendantOf(const Node*) const;
