@@ -1,0 +1,11 @@
+Running 7 tests
+ok 1 Document should allow replacing the document element
+ok 2 Document should allow replacing a text child with an element
+ok 3 Document should allow replacing the document element with text
+ok 4 Document should allow inserting text with a fragment
+ok 5 Document should allow replacing the document element with a fragment
+ok 6 Document should throw when inserting multiple elements
+ok 7 Document should throw when inserting multiple elements with a fragment
+7 tests
+7 pass
+0 fail
