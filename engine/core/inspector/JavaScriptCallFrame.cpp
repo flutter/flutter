@@ -122,7 +122,9 @@ v8::Handle<v8::Value> JavaScriptCallFrame::scopeChain() const
 
 int JavaScriptCallFrame::scopeType(int scopeIndex) const
 {
-    v8::Handle<v8::Array> scopeType = v8::Handle<v8::Array>::Cast(m_callFrame.newLocal(m_isolate)->Get(v8AtomicString(m_isolate, "scopeType")));
+    v8::Handle<v8::Object> callFrame = m_callFrame.newLocal(m_isolate);
+    v8::Handle<v8::Function> func = v8::Handle<v8::Function>::Cast(callFrame->Get(v8AtomicString(m_isolate, "scopeType")));
+    v8::Handle<v8::Array> scopeType = v8::Handle<v8::Array>::Cast(func->Call(callFrame, 0, 0));
     return scopeType->Get(scopeIndex)->Int32Value();
 }
 

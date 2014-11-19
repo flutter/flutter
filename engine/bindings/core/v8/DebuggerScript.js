@@ -77,10 +77,13 @@ DebuggerScript.getFunctionScopes = function(fun)
     var result = [];
     for (var i = 0; i < count; i++) {
         var scopeDetails = mirror.scope(i).details();
-        result[i] = {
+        var scopeObject = DebuggerScript._buildScopeObject(scopeDetails.type(), scopeDetails.object());
+        if (!scopeObject)
+            continue;
+        result.push({
             type: scopeDetails.type(),
-            object: DebuggerScript._buildScopeObject(scopeDetails.type(), scopeDetails.object())
-        };
+            object: scopeObject
+        });
     }
     return result;
 }
@@ -382,11 +385,25 @@ DebuggerScript._frameMirrorToJSCallFrame = function(frameMirror, callerFrame, sc
     {
         if (!scopeChain) {
             scopeChain = [];
-            for (var i = 0; i < scopeObjects.length; ++i)
-                scopeChain.push(DebuggerScript._buildScopeObject(scopeTypes[i], scopeObjects[i]));
+            for (var i = 0, j = 0; i < scopeObjects.length; ++i) {
+                var scopeObject = DebuggerScript._buildScopeObject(scopeTypes[i], scopeObjects[i]);
+                if (scopeObject) {
+                    scopeTypes[j] = scopeTypes[i];
+                    scopeChain[j] = scopeObject;
+                    ++j;
+                }
+            }
+            scopeTypes.length = scopeChain.length;
             scopeObjects = null; // Free for GC.
         }
         return scopeChain;
+    }
+
+    function lazyScopeTypes()
+    {
+        if (!scopeChain)
+            lazyScopeChain();
+        return scopeTypes;
     }
 
     function ensureFuncMirror()
@@ -490,7 +507,7 @@ DebuggerScript._frameMirrorToJSCallFrame = function(frameMirror, callerFrame, sc
         "functionName": functionName,
         "thisObject": thisObject,
         "scopeChain": lazyScopeChain,
-        "scopeType": scopeTypes,
+        "scopeType": lazyScopeTypes,
         "evaluate": evaluate,
         "caller": callerFrame,
         "restart": restart,
