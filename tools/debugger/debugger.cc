@@ -60,8 +60,8 @@ void SkyDebugger::OnEmbed(
   content_->SetBounds(root_->bounds());
   root_->AddChild(content_);
 
-  window_manager_app_->InitFocus(scoped_ptr<mojo::FocusRules>(
-      new mojo::BasicFocusRules(window_manager_app_.get(), content_)));
+  window_manager_app_->InitFocus(
+      scoped_ptr<mojo::FocusRules>(new mojo::BasicFocusRules(content_)));
 
   if (!pending_url_.empty())
     NavigateToURL(pending_url_);
