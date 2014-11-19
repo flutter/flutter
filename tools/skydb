@@ -58,12 +58,16 @@ class SkyDebugger(object):
             self._sky_server = subprocess.Popen(server_command)
         return 'http://localhost:%s/%s' % (HTTP_PORT, relative_path)
 
+    def _in_chromoting(self):
+        return os.environ.get('CHROME_REMOTE_DESKTOP_SESSION', False)
+
     def main(self):
         logging.basicConfig(level=logging.INFO)
 
         parser = argparse.ArgumentParser(description='Sky launcher/debugger')
         parser.add_argument('--gdb', action='store_true')
-        parser.add_argument('--use-osmesa', action='store_true')
+        parser.add_argument('--use-osmesa', action='store_true',
+            default=self._in_chromoting())
         parser.add_argument('url', nargs='?', type=str)
         args = parser.parse_args()
 
