@@ -272,7 +272,6 @@ public:
     // RenderObject tree manipulation
     //////////////////////////////////////////
     virtual bool canHaveChildren() const { return virtualChildren(); }
-    virtual bool canHaveGeneratedChildren() const;
     virtual bool isChildAllowed(RenderObject*, RenderStyle*) const { return true; }
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0);
     virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) { return addChild(newChild, beforeChild); }
@@ -323,14 +322,12 @@ public:
     virtual bool isImage() const { return false; }
     virtual bool isInlineBlock() const { return false; }
     virtual bool isLayerModelObject() const { return false; }
-    virtual bool isMedia() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
-    virtual bool isWidget() const { return false; }
 
     bool isDocumentElement() const { return document().documentElement() == m_node; }
 
@@ -359,39 +356,16 @@ public:
             setNeedsLayoutAndFullPaintInvalidation();
     }
 
-    // FIXME: Those belong into a SVG specific base-class for all renderers (see above)
-    // Unfortunately we don't have such a class yet, because it's not possible for all renderers
-    // to inherit from RenderSVGObject -> RenderObject (some need RenderBlock inheritance for instance)
-    virtual void setNeedsTransformUpdate() { }
-    virtual void setNeedsBoundariesUpdate();
-
-    // Per SVG 1.1 objectBoundingBox ignores clipping, masking, filter effects, opacity and stroke-width.
-    // This is used for all computation of objectBoundingBox relative units and by SVGLocatable::getBBox().
-    // NOTE: Markers are not specifically ignored here by SVG 1.1 spec, but we ignore them
-    // since stroke-width is ignored (and marker size can depend on stroke-width).
-    // objectBoundingBox is returned local coordinates.
-    // The name objectBoundingBox is taken from the SVG 1.1 spec.
-    virtual FloatRect objectBoundingBox() const;
-    virtual FloatRect strokeBoundingBox() const;
-
     // Returns the smallest rectangle enclosing all of the painted content
     // respecting clipping, masking, filters, opacity, stroke-width and markers
     virtual FloatRect paintInvalidationRectInLocalCoordinates() const;
-
-    // This only returns the transform="" value from the element
-    // most callsites want localToParentTransform() instead.
-    virtual AffineTransform localTransform() const;
-
-    // Returns the full transform mapping from local coordinates to local coords for the parent SVG renderer
-    // This includes any viewport transforms and x/y offsets as well as the transform="" value off the element.
-    virtual const AffineTransform& localToParentTransform() const;
 
     // SVG uses FloatPoint precise hit testing, and passes the point in parent
     // coordinates instead of in paint invalidaiton container coordinates. Eventually the
     // rest of the rendering tree will move to a similar model.
     virtual bool nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint& pointInParent, HitTestAction);
 
-    virtual bool canHaveWhitespaceChildren() const
+    bool canHaveWhitespaceChildren() const
     {
         return !isFlexibleBox();
     }
@@ -491,14 +465,6 @@ public:
         return isAnonymous() ? 0 : m_node.get();
     }
 
-    Node* nonPseudoNode() const
-    {
-        return node();
-    }
-
-    // FIXME(sky): remove this.
-    Node* generatingNode() const { return node(); }
-
     Document& document() const { return m_node->document(); }
     LocalFrame* frame() const { return document().frame(); }
 
@@ -507,7 +473,8 @@ public:
     // is true if the renderer returned is an ancestor of paintInvalidationContainer.
     RenderObject* container(const RenderLayerModelObject* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
 
-    virtual RenderObject* hoverAncestor() const { return parent(); }
+    // TODO(esprehn): Remove this.
+    RenderObject* hoverAncestor() const { return parent(); }
 
     Element* offsetParent() const;
 
@@ -563,18 +530,12 @@ public:
     // Subclasses must reimplement this method to compute the size and position
     // of this object and all its descendants.
     virtual void layout() = 0;
-    void setHasPendingResourceUpdate(bool hasPendingResourceUpdate) { m_bitfields.setHasPendingResourceUpdate(hasPendingResourceUpdate); }
-    bool hasPendingResourceUpdate() const { return m_bitfields.hasPendingResourceUpdate(); }
 
     /* This function performs a layout only if one is needed. */
     void layoutIfNeeded() { if (needsLayout()) layout(); }
 
     void forceLayout();
     void forceChildLayout();
-
-    // Used for element state updates that cannot be fixed with a
-    // paint invalidation and do not need a relayout.
-    virtual void updateFromElement() { }
 
     CompositingState compositingState() const;
     virtual CompositingReasons additionalCompositingReasons() const;
@@ -778,8 +739,6 @@ public:
     // Virtual function helper for the new FlexibleBox Layout (display: -webkit-flex).
     virtual bool isFlexibleBox() const { return false; }
 
-    virtual bool isCombineText() const { return false; }
-
     virtual int caretMinOffset() const;
     virtual int caretMaxOffset() const;
 
@@ -898,7 +857,7 @@ protected:
     // time this function is called.
     virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle);
     void propagateStyleToAnonymousChildren(bool blockChildrenOnly = false);
-    virtual void updateAnonymousChildStyle(const RenderObject* child, RenderStyle* style) const { }
+    void updateAnonymousChildStyle(const RenderObject* child, RenderStyle* style) const { }
 
     void drawLineForBoxSide(GraphicsContext*, int x1, int y1, int x2, int y2, BoxSide,
                             Color, EBorderStyle, int adjbw1, int adjbw2, bool antialias = false);
@@ -921,8 +880,8 @@ protected:
     virtual void willBeDestroyed();
     void postDestroy();
 
-    virtual void insertedIntoTree();
-    virtual void willBeRemovedFromTree();
+    void insertedIntoTree();
+    void willBeRemovedFromTree();
 
     void setDocumentForAnonymous(Document* document) { ASSERT(isAnonymous()); m_node = document; }
 
@@ -1021,7 +980,6 @@ private:
             , m_posChildNeedsLayout(false)
             , m_needsSimplifiedNormalFlowLayout(false)
             , m_preferredLogicalWidthsDirty(false)
-            , m_floating(false)
             , m_selfNeedsOverflowRecalcAfterStyleChange(false)
             , m_childNeedsOverflowRecalcAfterStyleChange(false)
             , m_isAnonymous(!node)
@@ -1036,9 +994,7 @@ private:
             , m_everHadLayout(false)
             , m_ancestorLineBoxDirty(false)
             , m_layoutDidGetCalled(false)
-            , m_hasPendingResourceUpdate(false)
             , m_childrenInline(false)
-            , m_hasColumns(false)
             , m_alwaysCreateLineBoxesForRenderInline(false)
             , m_positionedState(IsStaticallyPositioned)
             , m_selectionState(SelectionNone)
@@ -1059,7 +1015,6 @@ private:
         ADD_BOOLEAN_BITFIELD(posChildNeedsLayout, PosChildNeedsLayout);
         ADD_BOOLEAN_BITFIELD(needsSimplifiedNormalFlowLayout, NeedsSimplifiedNormalFlowLayout);
         ADD_BOOLEAN_BITFIELD(preferredLogicalWidthsDirty, PreferredLogicalWidthsDirty);
-        ADD_BOOLEAN_BITFIELD(floating, Floating);
         ADD_BOOLEAN_BITFIELD(selfNeedsOverflowRecalcAfterStyleChange, SelfNeedsOverflowRecalcAfterStyleChange);
         ADD_BOOLEAN_BITFIELD(childNeedsOverflowRecalcAfterStyleChange, ChildNeedsOverflowRecalcAfterStyleChange);
 
@@ -1079,11 +1034,8 @@ private:
 
         ADD_BOOLEAN_BITFIELD(layoutDidGetCalled, LayoutDidGetCalled);
 
-        ADD_BOOLEAN_BITFIELD(hasPendingResourceUpdate, HasPendingResourceUpdate);
-
         // from RenderBlock
         ADD_BOOLEAN_BITFIELD(childrenInline, ChildrenInline);
-        ADD_BOOLEAN_BITFIELD(hasColumns, HasColumns);
 
         // from RenderInline
         ADD_BOOLEAN_BITFIELD(alwaysCreateLineBoxesForRenderInline, AlwaysCreateLineBoxesForRenderInline);
@@ -1138,18 +1090,6 @@ private:
     LayoutPoint m_previousPositionFromPaintInvalidationContainer;
 
     static unsigned s_instanceCount;
-};
-
-// FIXME: remove this once the render object lifecycle ASSERTS are no longer hit.
-class DeprecatedDisableModifyRenderTreeStructureAsserts {
-    WTF_MAKE_NONCOPYABLE(DeprecatedDisableModifyRenderTreeStructureAsserts);
-public:
-    DeprecatedDisableModifyRenderTreeStructureAsserts();
-
-    static bool canModifyRenderTreeStateInAnyState();
-
-private:
-    TemporaryChange<bool> m_disabler;
 };
 
 // Allow equality comparisons of RenderObjects by reference or pointer, interchangeably.

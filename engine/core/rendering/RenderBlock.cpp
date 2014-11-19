@@ -1853,22 +1853,22 @@ Position RenderBlock::positionForBox(InlineBox *box, bool start) const
     if (!box)
         return Position();
 
-    if (!box->renderer().nonPseudoNode())
-        return createLegacyEditingPosition(nonPseudoNode(), start ? caretMinOffset() : caretMaxOffset());
+    if (!box->renderer().node())
+        return createLegacyEditingPosition(node(), start ? caretMinOffset() : caretMaxOffset());
 
     if (!box->isInlineTextBox())
-        return createLegacyEditingPosition(box->renderer().nonPseudoNode(), start ? box->renderer().caretMinOffset() : box->renderer().caretMaxOffset());
+        return createLegacyEditingPosition(box->renderer().node(), start ? box->renderer().caretMinOffset() : box->renderer().caretMaxOffset());
 
     InlineTextBox* textBox = toInlineTextBox(box);
-    return createLegacyEditingPosition(box->renderer().nonPseudoNode(), start ? textBox->start() : textBox->start() + textBox->len());
+    return createLegacyEditingPosition(box->renderer().node(), start ? textBox->start() : textBox->start() + textBox->len());
 }
 
 static inline bool isEditingBoundary(RenderObject* ancestor, RenderObject* child)
 {
-    ASSERT(!ancestor || ancestor->nonPseudoNode());
-    ASSERT(child && child->nonPseudoNode());
+    ASSERT(!ancestor || ancestor->node());
+    ASSERT(child && child->node());
     return !ancestor || !ancestor->parent() || (ancestor->hasLayer() && ancestor->parent()->isRenderView())
-        || ancestor->nonPseudoNode()->hasEditableStyle() == child->nonPseudoNode()->hasEditableStyle();
+        || ancestor->node()->hasEditableStyle() == child->node()->hasEditableStyle();
 }
 
 // FIXME: This function should go on RenderObject as an instance method. Then
@@ -1884,14 +1884,14 @@ static PositionWithAffinity positionForPointRespectingEditingBoundaries(RenderBl
     LayoutPoint pointInChildCoordinates(toLayoutPoint(pointInParentCoordinates - childLocation));
 
     // If this is an anonymous renderer, we just recur normally
-    Node* childNode = child->nonPseudoNode();
+    Node* childNode = child->node();
     if (!childNode)
         return child->positionForPoint(pointInChildCoordinates);
 
     // Otherwise, first make sure that the editability of the parent and child agree.
     // If they don't agree, then we return a visible position just before or after the child
     RenderObject* ancestor = parent;
-    while (ancestor && !ancestor->nonPseudoNode())
+    while (ancestor && !ancestor->node())
         ancestor = ancestor->parent();
 
     // If we can't find an ancestor to check editability on, or editability is unchanged, we recur like normal
@@ -2427,11 +2427,6 @@ LayoutRect RenderBlock::rectWithOutlineForPaintInvalidation(const RenderLayerMod
     if (isAnonymousBlockContinuation())
         r.inflateY(marginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
     return r;
-}
-
-RenderObject* RenderBlock::hoverAncestor() const
-{
-    return isAnonymousBlockContinuation() ? continuation() : RenderBox::hoverAncestor();
 }
 
 void RenderBlock::childBecameNonInline(RenderObject*)

@@ -76,12 +76,6 @@
 
 namespace blink {
 
-namespace {
-
-static bool gModifyRenderTreeStructureAnyState = false;
-
-} // namespace
-
 #if ENABLE(ASSERT)
 
 RenderObject::SetLayoutNeededForbiddenScope::SetLayoutNeededForbiddenScope(RenderObject& renderObject)
@@ -2482,7 +2476,7 @@ Element* RenderObject::offsetParent() const
 PositionWithAffinity RenderObject::createPositionWithAffinity(int offset, EAffinity affinity)
 {
     // If this is a non-anonymous renderer in an editable area, then it's simple.
-    if (Node* node = nonPseudoNode()) {
+    if (Node* node = this->node()) {
         if (!node->hasEditableStyle()) {
             // If it can be found, we prefer a visually equivalent position that is editable.
             Position position = createLegacyEditingPosition(node, offset);
@@ -2507,7 +2501,7 @@ PositionWithAffinity RenderObject::createPositionWithAffinity(int offset, EAffin
     while (RenderObject* parent = child->parent()) {
         // Find non-anonymous content after.
         for (RenderObject* renderer = child->nextInPreOrder(parent); renderer; renderer = renderer->nextInPreOrder(parent)) {
-            if (Node* node = renderer->nonPseudoNode())
+            if (Node* node = renderer->node())
                 return PositionWithAffinity(firstPositionInOrBeforeNode(node), DOWNSTREAM);
         }
 
@@ -2515,12 +2509,12 @@ PositionWithAffinity RenderObject::createPositionWithAffinity(int offset, EAffin
         for (RenderObject* renderer = child->previousInPreOrder(); renderer; renderer = renderer->previousInPreOrder()) {
             if (renderer == parent)
                 break;
-            if (Node* node = renderer->nonPseudoNode())
+            if (Node* node = renderer->node())
                 return PositionWithAffinity(lastPositionInOrAfterNode(node), DOWNSTREAM);
         }
 
         // Use the parent itself unless it too is anonymous.
-        if (Node* node = parent->nonPseudoNode())
+        if (Node* node = parent->node())
             return PositionWithAffinity(firstPositionInOrBeforeNode(node), DOWNSTREAM);
 
         // Repeat at the next level up.
@@ -2554,51 +2548,12 @@ bool RenderObject::canUpdateSelectionOnRootLineBoxes()
     return containingBlock ? !containingBlock->needsLayout() : false;
 }
 
-// We only create "generated" child renderers like one for first-letter if:
-// - the firstLetterBlock can have children in the DOM and
-// - the block doesn't have any special assumption on its text children.
-// This correctly prevents form controls from having such renderers.
-bool RenderObject::canHaveGeneratedChildren() const
-{
-    return canHaveChildren();
-}
-
-void RenderObject::setNeedsBoundariesUpdate()
-{
-    if (RenderObject* renderer = parent())
-        renderer->setNeedsBoundariesUpdate();
-}
-
-FloatRect RenderObject::objectBoundingBox() const
-{
-    ASSERT_NOT_REACHED();
-    return FloatRect();
-}
-
-FloatRect RenderObject::strokeBoundingBox() const
-{
-    ASSERT_NOT_REACHED();
-    return FloatRect();
-}
-
 // Returns the smallest rectangle enclosing all of the painted content
 // respecting clipping, masking, filters, opacity, stroke-width and markers
 FloatRect RenderObject::paintInvalidationRectInLocalCoordinates() const
 {
     ASSERT_NOT_REACHED();
     return FloatRect();
-}
-
-AffineTransform RenderObject::localTransform() const
-{
-    static const AffineTransform identity;
-    return identity;
-}
-
-const AffineTransform& RenderObject::localToParentTransform() const
-{
-    static const AffineTransform identity;
-    return identity;
 }
 
 bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint&, HitTestAction)
@@ -2639,18 +2594,7 @@ void RenderObject::clearPaintInvalidationState(const PaintInvalidationState& pai
 
 bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)
 {
-    return DeprecatedDisableModifyRenderTreeStructureAsserts::canModifyRenderTreeStateInAnyState()
-        || document.lifecycle().stateAllowsRenderTreeMutations();
-}
-
-DeprecatedDisableModifyRenderTreeStructureAsserts::DeprecatedDisableModifyRenderTreeStructureAsserts()
-    : m_disabler(gModifyRenderTreeStructureAnyState, true)
-{
-}
-
-bool DeprecatedDisableModifyRenderTreeStructureAsserts::canModifyRenderTreeStateInAnyState()
-{
-    return gModifyRenderTreeStructureAnyState;
+    return document.lifecycle().stateAllowsRenderTreeMutations();
 }
 
 } // namespace blink

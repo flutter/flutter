@@ -1236,7 +1236,7 @@ void Element::updateFocusAppearance(bool /*restorePreviousSelection*/)
         // and we don't want to change the focus to a new Element.
         frame->selection().setSelection(newSelection,  FrameSelection::CloseTyping | FrameSelection::ClearTypingStyle | FrameSelection::DoNotSetFocus);
         frame->selection().revealSelection();
-    } else if (renderer() && !renderer()->isWidget())
+    } else if (renderer())
         renderer()->scrollRectToVisible(boundingBox());
 }
 

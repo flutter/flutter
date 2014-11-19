@@ -419,7 +419,7 @@ void TextIterator::advance()
                 bool handledNode = false;
                 if (renderer->isText() && m_node->nodeType() == Node::TEXT_NODE) {
                     handledNode = handleTextNode();
-                } else if (renderer && (renderer->isImage() || renderer->isWidget())) {
+                } else if (renderer && renderer->isImage()) {
                     handledNode = handleReplacedElement();
                 } else {
                     handledNode = handleNonTextNode();
@@ -1038,7 +1038,7 @@ void SimplifiedBackwardsTextIterator::advance()
             if (renderer && renderer->isText() && m_node->nodeType() == Node::TEXT_NODE) {
                 if (m_offset > 0)
                     m_handledNode = handleTextNode();
-            } else if (renderer && (renderer->isImage() || renderer->isWidget())) {
+            } else if (renderer && renderer->isImage()) {
                 if (m_offset > 0)
                     m_handledNode = handleReplacedElement();
             } else {

@@ -329,7 +329,6 @@ private:
 
     virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const override final;
 
-    virtual RenderObject* hoverAncestor() const override final;
     virtual void childBecameNonInline(RenderObject* child) override final;
 
     virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool /*clipToVisibleContent*/) override final

@@ -2673,11 +2673,9 @@ bool EventHandler::passWheelEventToWidget(const PlatformWheelEvent& wheelEvent, 
     return toFrameView(widget)->frame().eventHandler().handleWheelEvent(wheelEvent);
 }
 
+// TODO(esprehn): Remove this.
 bool EventHandler::passWidgetMouseDownEventToWidget(const MouseEventWithHitTestResults& event)
 {
-    // Figure out which view to send the event to.
-    if (!event.targetNode() || !event.targetNode()->renderer() || !event.targetNode()->renderer()->isWidget())
-        return false;
     return false;
 }
 

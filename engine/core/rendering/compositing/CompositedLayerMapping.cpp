@@ -166,7 +166,7 @@ PassOwnPtr<GraphicsLayer> CompositedLayerMapping::createGraphicsLayer(Compositin
     OwnPtr<GraphicsLayer> graphicsLayer = GraphicsLayer::create(graphicsLayerFactory, this);
 
     graphicsLayer->setCompositingReasons(reasons);
-    if (Node* owningNode = m_owningLayer.renderer()->generatingNode())
+    if (Node* owningNode = m_owningLayer.renderer()->node())
         graphicsLayer->setOwnerNodeId(InspectorNodeIds::idForNode(owningNode));
 
     return graphicsLayer.release();

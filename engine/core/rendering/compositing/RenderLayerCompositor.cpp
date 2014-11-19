@@ -618,7 +618,7 @@ void RenderLayerCompositor::ensureRootLayer()
         IntRect overflowRect = m_renderView.pixelSnappedLayoutOverflowRect();
         m_rootContentLayer->setSize(FloatSize(overflowRect.maxX(), overflowRect.maxY()));
         m_rootContentLayer->setPosition(FloatPoint());
-        m_rootContentLayer->setOwnerNodeId(InspectorNodeIds::idForNode(m_renderView.generatingNode()));
+        m_rootContentLayer->setOwnerNodeId(InspectorNodeIds::idForNode(m_renderView.node()));
 
         // Need to clip to prevent transformed content showing outside this frame
         m_rootContentLayer->setMasksToBounds(true);

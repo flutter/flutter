@@ -122,7 +122,7 @@ void GraphicsContextAnnotator::annotate(const PaintInfo& paintInfo, const Render
         annotations.append(std::make_pair(AnnotationKeyElementTag, element->tagName()));
 
     if (mode & AnnotateInspectorId) {
-        if (Node* ownerNode = object->generatingNode()) {
+        if (Node* ownerNode = object->node()) {
             annotations.append(std::make_pair(AnnotationKeyInspectorNodeId,
                 String::number(InspectorNodeIds::idForNode(ownerNode))));
         }

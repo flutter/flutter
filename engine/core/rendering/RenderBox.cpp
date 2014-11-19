@@ -3054,7 +3054,7 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
     // no children...return this render object's element, if there is one, and offset 0
     RenderObject* firstChild = slowFirstChild();
     if (!firstChild)
-        return createPositionWithAffinity(nonPseudoNode() ? firstPositionInOrBeforeNode(nonPseudoNode()) : Position());
+        return createPositionWithAffinity(node() ? firstPositionInOrBeforeNode(node()) : Position());
 
     // Pass off to the closest child.
     LayoutUnit minDist = LayoutUnit::max();
@@ -3113,7 +3113,7 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
 
     if (closestRenderer)
         return closestRenderer->positionForPoint(adjustedPoint - closestRenderer->locationOffset());
-    return createPositionWithAffinity(firstPositionInOrBeforeNode(nonPseudoNode()));
+    return createPositionWithAffinity(firstPositionInOrBeforeNode(node()));
 }
 
 InvalidationReason RenderBox::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,

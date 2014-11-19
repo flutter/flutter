@@ -214,7 +214,7 @@ static const InlineTextBox* logicallyPreviousBox(const VisiblePosition& visibleP
         return previousBox;
 
     while (1) {
-        Node* startNode = startBox->renderer().nonPseudoNode();
+        Node* startNode = startBox->renderer().node();
         if (!startNode)
             break;
 
@@ -255,7 +255,7 @@ static const InlineTextBox* logicallyNextBox(const VisiblePosition& visiblePosit
         return nextBox;
 
     while (1) {
-        Node* startNode =startBox->renderer().nonPseudoNode();
+        Node* startNode =startBox->renderer().node();
         if (!startNode)
             break;
 
@@ -716,7 +716,7 @@ static VisiblePosition startPositionForLine(const VisiblePosition& c, LineEndpoi
             if (!startBox)
                 return VisiblePosition();
 
-            startNode = startBox->renderer().nonPseudoNode();
+            startNode = startBox->renderer().node();
             if (startNode)
                 break;
 
@@ -783,7 +783,7 @@ static VisiblePosition endPositionForLine(const VisiblePosition& c, LineEndpoint
             if (!endBox)
                 return VisiblePosition();
 
-            endNode = endBox->renderer().nonPseudoNode();
+            endNode = endBox->renderer().node();
             if (endNode)
                 break;
 

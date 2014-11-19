@@ -87,7 +87,7 @@ static void setGeneratingNodeId(TracedValue* value, const char* fieldName, const
 {
     Node* node = 0;
     for (; renderer && !node; renderer = renderer->parent())
-        node = renderer->generatingNode();
+        node = renderer->node();
     if (!node)
         return;
     value->setInteger(fieldName, InspectorNodeIds::idForNode(node));
