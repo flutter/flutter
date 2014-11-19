@@ -21,4 +21,4 @@ https://github.com/domokit/mojo/issues/24 custom-elements/constructor-calls-crea
 https://github.com/domokit/mojo/issues/24 mutation-observer/observe-attributes.sky [ Skip ]
 
 # This test only fails on the bots:
-crbug.com/434822 inspector/page-agent-get-resource-tree.sky [ Pass Text ]
+crbug.com/434822 inspector/page-agent-get-resource-tree.sky [ Pass Failure ]
