@@ -36,7 +36,8 @@ void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe,
       static_cast<const WebTransformOperationsImpl&>(keyframe.value())
           .AsTransformOperations();
   curve_->AddKeyframe(cc::TransformKeyframe::Create(
-      keyframe.time(), transform_operations, CreateTimingFunction(type)));
+      base::TimeDelta::FromSecondsD(keyframe.time()), transform_operations,
+      CreateTimingFunction(type)));
 }
 
 void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe,
@@ -48,8 +49,7 @@ void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe,
       static_cast<const WebTransformOperationsImpl&>(keyframe.value())
           .AsTransformOperations();
   curve_->AddKeyframe(cc::TransformKeyframe::Create(
-      keyframe.time(),
-      transform_operations,
+      base::TimeDelta::FromSecondsD(keyframe.time()), transform_operations,
       cc::CubicBezierTimingFunction::Create(x1, y1, x2, y2).Pass()));
 }
 

@@ -31,8 +31,9 @@ void WebFloatAnimationCurveImpl::add(const WebFloatKeyframe& keyframe) {
 
 void WebFloatAnimationCurveImpl::add(const WebFloatKeyframe& keyframe,
                                      TimingFunctionType type) {
-  curve_->AddKeyframe(cc::FloatKeyframe::Create(
-      keyframe.time, keyframe.value, CreateTimingFunction(type)));
+  curve_->AddKeyframe(
+      cc::FloatKeyframe::Create(base::TimeDelta::FromSecondsD(keyframe.time),
+                                keyframe.value, CreateTimingFunction(type)));
 }
 
 void WebFloatAnimationCurveImpl::add(const WebFloatKeyframe& keyframe,
@@ -41,13 +42,12 @@ void WebFloatAnimationCurveImpl::add(const WebFloatKeyframe& keyframe,
                                      double x2,
                                      double y2) {
   curve_->AddKeyframe(cc::FloatKeyframe::Create(
-      keyframe.time,
-      keyframe.value,
+      base::TimeDelta::FromSecondsD(keyframe.time), keyframe.value,
       cc::CubicBezierTimingFunction::Create(x1, y1, x2, y2).Pass()));
 }
 
 float WebFloatAnimationCurveImpl::getValue(double time) const {
-  return curve_->GetValue(time);
+  return curve_->GetValue(base::TimeDelta::FromSecondsD(time));
 }
 
 scoped_ptr<cc::AnimationCurve>
