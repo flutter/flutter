@@ -4,11 +4,6 @@
 <import src="/sky/framework/inspector/page-agent.sky" as="PageAgent" />
 <img src='does_not_exist.jpg' />
 <script>
-// This is to avoid hard-coding the hostname and port number in the tests.
-function absoluteURL(url) {
-  return String(new URL(url, document.URL));
-}
-
 describe('PageAgent.getResourceTree', function() {
   it('should dump the current resource tree', function() {
     var pageAgent = new PageAgent();
@@ -19,24 +14,24 @@ describe('PageAgent.getResourceTree', function() {
         "frame": {
           "id": "1",
           "loaderId": "1",
-          "url": absoluteURL("/sky/tests/inspector/page-agent-get-resource-tree.sky"),
+          "url": "http://127.0.0.1:8000/sky/tests/inspector/page-agent-get-resource-tree.sky",
           "mimeType": "text/html",
-          "securityOrigin": absoluteURL("/sky/tests/inspector/page-agent-get-resource-tree.sky")
+          "securityOrigin": "http://127.0.0.1:8000/sky/tests/inspector/page-agent-get-resource-tree.sky"
         },
         "resources": [{
-          "url": absoluteURL("/sky/tests/resources/chai.sky"),
+          "url": "http://127.0.0.1:8000/sky/tests/resources/chai.sky",
           "type": "Document",
           "mimeType": "text/html"
         }, {
-          "url": absoluteURL("/sky/tests/resources/mocha.sky"),
+          "url": "http://127.0.0.1:8000/sky/tests/resources/mocha.sky",
           "type": "Document",
           "mimeType": "text/html"
         }, {
-          "url": absoluteURL("/sky/framework/inspector/page-agent.sky"),
+          "url": "http://127.0.0.1:8000/sky/framework/inspector/page-agent.sky",
           "type": "Document",
           "mimeType": "text/html"
         }, {
-          "url": absoluteURL("/sky/tests/inspector/does_not_exist.jpg"),
+          "url": "http://127.0.0.1:8000/sky/tests/inspector/does_not_exist.jpg",
           "type": "Image",
           "mimeType": "image/unknown"
         }]
