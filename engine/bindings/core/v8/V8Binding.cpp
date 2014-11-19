@@ -669,9 +669,7 @@ ExecutionContext* callingExecutionContext(v8::Isolate* isolate)
 
 LocalFrame* toFrameIfNotDetached(v8::Handle<v8::Context> context)
 {
-    // FIXME(sky): remove.
-    LocalDOMWindow* window = toDOMWindow(context);
-    return window->frame();
+    return toDOMWindow(context)->frame();
 }
 
 v8::Local<v8::Context> toV8Context(ExecutionContext* context, DOMWrapperWorld& world)

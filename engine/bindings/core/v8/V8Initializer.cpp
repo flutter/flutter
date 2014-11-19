@@ -83,6 +83,26 @@ static void reportFatalErrorInMainThread(const char* location, const char* messa
     CRASH();
 }
 
+static LocalFrame* retrieveFrameWithGlobalObjectCheck(v8::Handle<v8::Context> context)
+{
+    if (context.IsEmpty())
+        return 0;
+
+    // FIXME: This is a temporary hack for crbug.com/345014.
+    // Currently it's possible that V8 can trigger Debugger::ProcessDebugEvent for a context
+    // that is being initialized (i.e., inside Context::New() of the context).
+    // We should fix the V8 side so that it won't trigger the event for a half-baked context
+    // because there is no way in the embedder side to check if the context is half-baked or not.
+    if (isMainThread() && DOMWrapperWorld::windowIsBeingInitialized())
+        return 0;
+
+    v8::Handle<v8::Value> global = V8Window::findInstanceInPrototypeChain(context->Global(), context->GetIsolate());
+    if (global.IsEmpty())
+        return 0;
+
+    return toFrameIfNotDetached(context);
+}
+
 static void messageHandlerInMainThread(v8::Handle<v8::Message> message, v8::Handle<v8::Value> data)
 {
     ASSERT(isMainThread());
@@ -93,6 +113,13 @@ static void messageHandlerInMainThread(v8::Handle<v8::Message> message, v8::Hand
         return;
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    // Check if we're in the V8DebugContext which does not have a window object.
+    if (!retrieveFrameWithGlobalObjectCheck(isolate->GetCurrentContext())) {
+        printf("Unhandled: %s %s\n",
+            toCoreString(message->Get()).ascii().data(),
+            toCoreString(message->GetSourceLine()).ascii().data());
+        return;
+    }
     // If called during context initialization, there will be no entered window.
     LocalDOMWindow* enteredWindow = enteredDOMWindow(isolate);
     if (!enteredWindow)

@@ -82,12 +82,11 @@ InspectorBackend.prototype.onMessage = function(data) {
   if (result != this.ASYNC_RESPONSE)
     this.sendResponse(message.id, result);
   else {
-    window.setTimeout(function(message_id) {
-      if (this.unansweredMessages_.indexOf(message_id) == -1)
+    window.setTimeout(function() {
+      if (this.unansweredMessages_.indexOf(message.id) == -1)
         return;
-      console.log("Error, failed to reply to " + descriptor
-          + " message id " + message_id);
-    }, this.MESSAGE_TIMEOUT_MS, this, message.id);
+      console.log("Error, failed to reply to message id " + message.id);
+    }.bind(this), this.MESSAGE_TIMEOUT_MS);
   }
 };
 
