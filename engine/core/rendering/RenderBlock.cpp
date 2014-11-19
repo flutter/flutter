@@ -74,8 +74,6 @@ static TrackedDescendantsMap* gPercentHeightDescendantsMap = 0;
 static TrackedContainerMap* gPositionedContainerMap = 0;
 static TrackedContainerMap* gPercentHeightContainerMap = 0;
 
-typedef WTF::HashMap<RenderBlock*, OwnPtr<ListHashSet<RenderInline*> > > ContinuationOutlineTableMap;
-
 typedef WTF::HashSet<RenderBlock*> DelayedUpdateScrollInfoSet;
 static int gDelayUpdateScrollInfo = 0;
 static DelayedUpdateScrollInfoSet* gDelayedUpdateScrollInfoSet = 0;
@@ -139,15 +137,6 @@ void RenderBlock::willBeDestroyed()
     // Make sure to destroy anonymous children first while they are still connected to the rest of the tree, so that they will
     // properly dirty line boxes that they are removed from. Effects that do :before/:after only on hover could crash otherwise.
     children()->destroyLeftoverChildren();
-
-    // Destroy our continuation before anything other than anonymous children.
-    // The reason we don't destroy it before anonymous children is that they may
-    // have continuations of their own that are anonymous children of our continuation.
-    RenderBoxModelObject* continuation = this->continuation();
-    if (continuation) {
-        continuation->destroy();
-        setContinuation(0);
-    }
 
     if (!documentBeingDestroyed()) {
         if (firstLineBox()) {
@@ -226,17 +215,6 @@ void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldSty
     RenderBox::styleDidChange(diff, oldStyle);
 
     RenderStyle* newStyle = style();
-
-    if (!isAnonymousBlock()) {
-        // Ensure that all of our continuation blocks pick up the new style.
-        for (RenderBlock* currCont = blockElementContinuation(); currCont; currCont = currCont->blockElementContinuation()) {
-            RenderBoxModelObject* nextCont = currCont->continuation();
-            currCont->setContinuation(0);
-            currCont->setStyle(newStyle);
-            currCont->setContinuation(nextCont);
-        }
-    }
-
     propagateStyleToAnonymousChildren(true);
 
     // It's possible for our border/padding to change, but for the overall logical width of the block to
@@ -296,147 +274,6 @@ void RenderBlock::invalidateTreeIfNeeded(const PaintInvalidationState& paintInva
     }
 }
 
-RenderBlock* RenderBlock::continuationBefore(RenderObject* beforeChild)
-{
-    if (beforeChild && beforeChild->parent() == this)
-        return this;
-
-    RenderBlock* curr = toRenderBlock(continuation());
-    RenderBlock* nextToLast = this;
-    RenderBlock* last = this;
-    while (curr) {
-        if (beforeChild && beforeChild->parent() == curr) {
-            if (curr->firstChild() == beforeChild)
-                return last;
-            return curr;
-        }
-
-        nextToLast = last;
-        last = curr;
-        curr = toRenderBlock(curr->continuation());
-    }
-
-    if (!beforeChild && !last->firstChild())
-        return nextToLast;
-    return last;
-}
-
-void RenderBlock::addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild)
-{
-    RenderBlock* flow = continuationBefore(beforeChild);
-    ASSERT(!beforeChild || beforeChild->parent()->isRenderBlock());
-    RenderBoxModelObject* beforeChildParent = 0;
-    if (beforeChild)
-        beforeChildParent = toRenderBoxModelObject(beforeChild->parent());
-    else {
-        RenderBoxModelObject* cont = flow->continuation();
-        if (cont)
-            beforeChildParent = cont;
-        else
-            beforeChildParent = flow;
-    }
-
-    if (newChild->isFloatingOrOutOfFlowPositioned()) {
-        beforeChildParent->addChildIgnoringContinuation(newChild, beforeChild);
-        return;
-    }
-
-    if (flow == beforeChildParent) {
-        flow->addChildIgnoringContinuation(newChild, beforeChild);
-        return;
-    }
-
-    beforeChildParent->addChildIgnoringContinuation(newChild, beforeChild);
-}
-
-RenderBlock* RenderBlock::clone() const
-{
-    RenderBlock* cloneBlock;
-    if (isAnonymousBlock()) {
-        cloneBlock = createAnonymousBlock();
-        cloneBlock->setChildrenInline(childrenInline());
-    } else {
-        RenderObject* cloneRenderer = toElement(node())->createRenderer(style());
-        cloneBlock = toRenderBlock(cloneRenderer);
-        cloneBlock->setStyle(style());
-
-        // This takes care of setting the right value of childrenInline in case
-        // generated content is added to cloneBlock and 'this' does not have
-        // generated content added yet.
-        cloneBlock->setChildrenInline(cloneBlock->firstChild() ? cloneBlock->firstChild()->isInline() : childrenInline());
-    }
-    return cloneBlock;
-}
-
-void RenderBlock::splitBlocks(RenderBlock* fromBlock, RenderBlock* toBlock,
-                              RenderBlock* middleBlock,
-                              RenderObject* beforeChild, RenderBoxModelObject* oldCont)
-{
-    // Create a clone of this inline.
-    RenderBlock* cloneBlock = clone();
-    if (!isAnonymousBlock())
-        cloneBlock->setContinuation(oldCont);
-
-    // If we are moving inline children from |this| to cloneBlock, then we need
-    // to clear our line box tree.
-    if (beforeChild && childrenInline())
-        deleteLineBoxTree();
-
-    // Now take all of the children from beforeChild to the end and remove
-    // them from |this| and place them in the clone.
-    moveChildrenTo(cloneBlock, beforeChild, 0, true);
-
-    // Hook |clone| up as the continuation of the middle block.
-    if (!cloneBlock->isAnonymousBlock())
-        middleBlock->setContinuation(cloneBlock);
-
-    // We have been reparented and are now under the fromBlock.  We need
-    // to walk up our block parent chain until we hit the containing anonymous columns block.
-    // Once we hit the anonymous columns block we're done.
-    RenderBoxModelObject* curr = toRenderBoxModelObject(parent());
-    RenderBoxModelObject* currChild = this;
-    RenderObject* currChildNextSibling = currChild->nextSibling();
-
-    while (curr && curr->isDescendantOf(fromBlock) && curr != fromBlock) {
-        ASSERT_WITH_SECURITY_IMPLICATION(curr->isRenderBlock());
-
-        RenderBlock* blockCurr = toRenderBlock(curr);
-
-        // Create a new clone.
-        RenderBlock* cloneChild = cloneBlock;
-        cloneBlock = blockCurr->clone();
-
-        // Insert our child clone as the first child.
-        cloneBlock->addChildIgnoringContinuation(cloneChild, 0);
-
-        // Hook the clone up as a continuation of |curr|.  Note we do encounter
-        // anonymous blocks possibly as we walk up the block chain.  When we split an
-        // anonymous block, there's no need to do any continuation hookup, since we haven't
-        // actually split a real element.
-        if (!blockCurr->isAnonymousBlock()) {
-            oldCont = blockCurr->continuation();
-            blockCurr->setContinuation(cloneBlock);
-            cloneBlock->setContinuation(oldCont);
-        }
-
-        // Now we need to take all of the children starting from the first child
-        // *after* currChild and append them all to the clone.
-        blockCurr->moveChildrenTo(cloneBlock, currChildNextSibling, 0, true);
-
-        // Keep walking up the chain.
-        currChild = curr;
-        currChildNextSibling = currChild->nextSibling();
-        curr = toRenderBoxModelObject(curr->parent());
-    }
-
-    // Now we are at the columns block level. We need to put the clone into the toBlock.
-    toBlock->children()->appendChildNode(toBlock, cloneBlock);
-
-    // Now take all the children after currChild and remove them from the fromBlock
-    // and put them in the toBlock.
-    fromBlock->moveChildrenTo(toBlock, currChildNextSibling, 0, true);
-}
-
 void RenderBlock::addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild)
 {
     if (beforeChild && beforeChild->parent() != this) {
@@ -462,14 +299,6 @@ void RenderBlock::addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, 
 
 void RenderBlock::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
-    if (continuation() && !isAnonymousBlock())
-        addChildToContinuation(newChild, beforeChild);
-    else
-        addChildIgnoringContinuation(newChild, beforeChild);
-}
-
-void RenderBlock::addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild)
-{
     addChildIgnoringAnonymousColumnBlocks(newChild, beforeChild);
 }
 
@@ -482,21 +311,6 @@ void RenderBlock::makeChildrenNonInline(RenderObject *insertionPoint)
 {
     ASSERT_NOT_REACHED();
     // FIXME(sky): Remove
-}
-
-static bool canMergeContiguousAnonymousBlocks(RenderObject* oldChild, RenderObject* prev, RenderObject* next)
-{
-    if (oldChild->documentBeingDestroyed() || oldChild->isInline() || oldChild->virtualContinuation())
-        return false;
-
-    if ((prev && (!prev->isAnonymousBlock() || toRenderBlock(prev)->continuation() || toRenderBlock(prev)->beingDestroyed()))
-        || (next && (!next->isAnonymousBlock() || toRenderBlock(next)->continuation() || toRenderBlock(next)->beingDestroyed())))
-        return false;
-
-    if (!prev || !next)
-        return true;
-
-    return true;
 }
 
 void RenderBlock::collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* child)
@@ -520,103 +334,15 @@ void RenderBlock::collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* 
 
 void RenderBlock::removeChild(RenderObject* oldChild)
 {
-    // No need to waste time in merging or removing empty anonymous blocks.
-    // We can just bail out if our document is getting destroyed.
-    if (documentBeingDestroyed()) {
-        RenderBox::removeChild(oldChild);
-        return;
-    }
-
-    // If this child is a block, and if our previous and next siblings are
-    // both anonymous blocks with inline content, then we can go ahead and
-    // fold the inline content back together.
-    RenderObject* prev = oldChild->previousSibling();
-    RenderObject* next = oldChild->nextSibling();
-    bool canMergeAnonymousBlocks = canMergeContiguousAnonymousBlocks(oldChild, prev, next);
-    if (canMergeAnonymousBlocks && prev && next) {
-        prev->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
-        RenderBlockFlow* nextBlock = toRenderBlockFlow(next);
-        RenderBlockFlow* prevBlock = toRenderBlockFlow(prev);
-
-        if (prev->childrenInline() != next->childrenInline()) {
-            RenderBlock* inlineChildrenBlock = prev->childrenInline() ? prevBlock : nextBlock;
-            RenderBlock* blockChildrenBlock = prev->childrenInline() ? nextBlock : prevBlock;
-
-            // Place the inline children block inside of the block children block instead of deleting it.
-            // In order to reuse it, we have to reset it to just be a generic anonymous block.  Make sure
-            // to clear out inherited column properties by just making a new style, and to also clear the
-            // column span flag if it is set.
-            ASSERT(!inlineChildrenBlock->continuation());
-            RefPtr<RenderStyle> newStyle = RenderStyle::createAnonymousStyleWithDisplay(style(), BLOCK);
-            // Cache this value as it might get changed in setStyle() call.
-            bool inlineChildrenBlockHasLayer = inlineChildrenBlock->hasLayer();
-            inlineChildrenBlock->setStyle(newStyle);
-            children()->removeChildNode(this, inlineChildrenBlock, inlineChildrenBlockHasLayer);
-
-            // Now just put the inlineChildrenBlock inside the blockChildrenBlock.
-            blockChildrenBlock->children()->insertChildNode(blockChildrenBlock, inlineChildrenBlock, prev == inlineChildrenBlock ? blockChildrenBlock->firstChild() : 0,
-                                                            inlineChildrenBlockHasLayer || blockChildrenBlock->hasLayer());
-            next->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
-
-            // inlineChildrenBlock got reparented to blockChildrenBlock, so it is no longer a child
-            // of "this". we null out prev or next so that is not used later in the function.
-            if (inlineChildrenBlock == prevBlock)
-                prev = 0;
-            else
-                next = 0;
-        } else {
-            // Take all the children out of the |next| block and put them in
-            // the |prev| block.
-            nextBlock->moveAllChildrenTo(prevBlock, nextBlock->hasLayer() || prevBlock->hasLayer());
-
-            // Delete the now-empty block's lines and nuke it.
-            nextBlock->deleteLineBoxTree();
-            nextBlock->destroy();
-            next = 0;
-        }
-    }
-
     RenderBox::removeChild(oldChild);
 
-    RenderObject* child = prev ? prev : next;
-    if (canMergeAnonymousBlocks && child && !child->previousSibling() && !child->nextSibling() && canCollapseAnonymousBlockChild()) {
-        // The removal has knocked us down to containing only a single anonymous
-        // box.  We can go ahead and pull the content right back up into our
-        // box.
-        collapseAnonymousBlockChild(this, toRenderBlock(child));
-    }
+    // No need to waste time deleting the line box tree if we're getting destroyed.
+    if (documentBeingDestroyed())
+        return;
 
-    if (!firstChild()) {
-        // If this was our last child be sure to clear out our line boxes.
-        if (childrenInline())
-            deleteLineBoxTree();
-
-        // If we are an empty anonymous block in the continuation chain,
-        // we need to remove ourself and fix the continuation chain.
-        if (!beingDestroyed() && isAnonymousBlockContinuation()) {
-            RenderObject* containingBlockIgnoringAnonymous = containingBlock();
-            while (containingBlockIgnoringAnonymous && containingBlockIgnoringAnonymous->isAnonymous())
-                containingBlockIgnoringAnonymous = containingBlockIgnoringAnonymous->containingBlock();
-            for (RenderObject* curr = this; curr; curr = curr->previousInPreOrder(containingBlockIgnoringAnonymous)) {
-                if (curr->virtualContinuation() != this)
-                    continue;
-
-                // Found our previous continuation. We just need to point it to
-                // |this|'s next continuation.
-                RenderBoxModelObject* nextContinuation = continuation();
-                if (curr->isRenderInline())
-                    toRenderInline(curr)->setContinuation(nextContinuation);
-                else if (curr->isRenderBlock())
-                    toRenderBlock(curr)->setContinuation(nextContinuation);
-                else
-                    ASSERT_NOT_REACHED();
-
-                break;
-            }
-            setContinuation(0);
-            destroy();
-        }
-    }
+    // If this was our last child be sure to clear out our line boxes.
+    if (!firstChild() && childrenInline())
+        deleteLineBoxTree();
 }
 
 void RenderBlock::startDelayUpdateScrollInfo()
@@ -1078,120 +804,16 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     paintSelection(paintInfo, scrolledOffset); // Fill in gaps in selection on lines and between blocks.
 
     // 5. paint outline.
-    if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline) && style()->hasOutline()) {
-        // Don't paint focus ring for anonymous block continuation because the
-        // inline element having outline-style:auto paints the whole focus ring.
-        if (!style()->outlineStyleIsAuto() || !isAnonymousBlockContinuation())
-            paintOutline(paintInfo, LayoutRect(paintOffset, size()));
+    if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline)
+        && style()->hasOutline() && !style()->outlineStyleIsAuto()) {
+        paintOutline(paintInfo, LayoutRect(paintOffset, size()));
     }
-
-    // 6. paint continuation outlines.
-    if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseChildOutlines))
-        paintContinuationOutlines(paintInfo, paintOffset);
 
     // 7. paint caret.
     // If the caret's node's render object's containing block is this block, and the paint action is PaintPhaseForeground,
     // then paint the caret.
     if (paintPhase == PaintPhaseForeground)
         paintCarets(paintInfo, paintOffset);
-}
-
-RenderInline* RenderBlock::inlineElementContinuation() const
-{
-    RenderBoxModelObject* continuation = this->continuation();
-    return continuation && continuation->isInline() ? toRenderInline(continuation) : 0;
-}
-
-RenderBlock* RenderBlock::blockElementContinuation() const
-{
-    RenderBoxModelObject* currentContinuation = continuation();
-    if (!currentContinuation || currentContinuation->isInline())
-        return 0;
-    RenderBlock* nextContinuation = toRenderBlock(currentContinuation);
-    if (nextContinuation->isAnonymousBlock())
-        return nextContinuation->blockElementContinuation();
-    return nextContinuation;
-}
-
-static ContinuationOutlineTableMap* continuationOutlineTable()
-{
-    DEFINE_STATIC_LOCAL(ContinuationOutlineTableMap, table, ());
-    return &table;
-}
-
-void RenderBlock::addContinuationWithOutline(RenderInline* flow)
-{
-    // We can't make this work if the inline is in a layer.  We'll just rely on the broken
-    // way of painting.
-    ASSERT(!flow->layer() && !flow->isInlineElementContinuation());
-
-    ContinuationOutlineTableMap* table = continuationOutlineTable();
-    ListHashSet<RenderInline*>* continuations = table->get(this);
-    if (!continuations) {
-        continuations = new ListHashSet<RenderInline*>;
-        table->set(this, adoptPtr(continuations));
-    }
-
-    continuations->add(flow);
-}
-
-bool RenderBlock::paintsContinuationOutline(RenderInline* flow)
-{
-    ContinuationOutlineTableMap* table = continuationOutlineTable();
-    if (table->isEmpty())
-        return false;
-
-    ListHashSet<RenderInline*>* continuations = table->get(this);
-    if (!continuations)
-        return false;
-
-    return continuations->contains(flow);
-}
-
-void RenderBlock::paintContinuationOutlines(PaintInfo& info, const LayoutPoint& paintOffset)
-{
-    RenderInline* inlineCont = inlineElementContinuation();
-    if (inlineCont && inlineCont->style()->hasOutline()) {
-        RenderInline* inlineRenderer = toRenderInline(inlineCont->node()->renderer());
-        RenderBlock* cb = containingBlock();
-
-        bool inlineEnclosedInSelfPaintingLayer = false;
-        for (RenderBoxModelObject* box = inlineRenderer; box != cb; box = box->parent()->enclosingBoxModelObject()) {
-            if (box->hasSelfPaintingLayer()) {
-                inlineEnclosedInSelfPaintingLayer = true;
-                break;
-            }
-        }
-
-        // Do not add continuations for outline painting by our containing block if we are a relative positioned
-        // anonymous block (i.e. have our own layer), paint them straightaway instead. This is because a block depends on renderers in its continuation table being
-        // in the same layer.
-        if (!inlineEnclosedInSelfPaintingLayer && !hasLayer())
-            cb->addContinuationWithOutline(inlineRenderer);
-        else if (!inlineRenderer->firstLineBox() || (!inlineEnclosedInSelfPaintingLayer && hasLayer()))
-            inlineRenderer->paintOutline(info, paintOffset - locationOffset() + inlineRenderer->containingBlock()->location());
-    }
-
-    ContinuationOutlineTableMap* table = continuationOutlineTable();
-    if (table->isEmpty())
-        return;
-
-    OwnPtr<ListHashSet<RenderInline*> > continuations = table->take(this);
-    if (!continuations)
-        return;
-
-    LayoutPoint accumulatedPaintOffset = paintOffset;
-    // Paint each continuation outline.
-    ListHashSet<RenderInline*>::iterator end = continuations->end();
-    for (ListHashSet<RenderInline*>::iterator it = continuations->begin(); it != end; ++it) {
-        // Need to add in the coordinates of the intervening blocks.
-        RenderInline* flow = *it;
-        RenderBlock* block = flow->containingBlock();
-        for ( ; block && block != this; block = block->containingBlock())
-            accumulatedPaintOffset.moveBy(block->location());
-        ASSERT(block);
-        flow->paintOutline(info, accumulatedPaintOffset);
-    }
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
@@ -1743,14 +1365,6 @@ void RenderBlock::markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit l
     }
 }
 
-Node* RenderBlock::nodeForHitTest() const
-{
-    // If we are in the margins of block elements that are part of a
-    // continuation we're actually still inside the enclosing element
-    // that was split. Use the appropriate inner node.
-    return isAnonymousBlockContinuation() ? continuation()->node() : node();
-}
-
 bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
 {
     LayoutPoint adjustedLocation(accumulatedOffset + location());
@@ -1820,7 +1434,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
         LayoutRect boundsRect(adjustedLocation, size());
         if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
             updateHitTestResult(result, locationInContainer.point() - localOffset);
-            if (!result.addNodeToRectBasedTestResult(nodeForHitTest(), request, locationInContainer, boundsRect))
+            if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
                 return true;
         }
     }
@@ -2390,49 +2004,12 @@ void RenderBlock::clearTruncation()
 
 void RenderBlock::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
 {
-    // For blocks inside inlines, we go ahead and include margins so that we run right up to the
-    // inline boxes above and below us (thus getting merged with them to form a single irregular
-    // shape).
-    if (isAnonymousBlockContinuation()) {
-        // FIXME: This is wrong for block-flows that are horizontal.
-        // https://bugs.webkit.org/show_bug.cgi?id=46781
-        rects.append(pixelSnappedIntRect(accumulatedOffset.x(), accumulatedOffset.y() - marginBefore(),
-                                width(), height() + marginBefore() + marginAfter()));
-        continuation()->absoluteRects(rects, accumulatedOffset - toLayoutSize(location() +
-                inlineElementContinuation()->containingBlock()->location()));
-    } else
-        rects.append(pixelSnappedIntRect(accumulatedOffset, size()));
+    rects.append(pixelSnappedIntRect(accumulatedOffset, size()));
 }
 
 void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads) const
 {
-    // For blocks inside inlines, we go ahead and include margins so that we run right up to the
-    // inline boxes above and below us (thus getting merged with them to form a single irregular
-    // shape).
-    if (isAnonymousBlockContinuation()) {
-        // FIXME: This is wrong for block-flows that are horizontal.
-        // https://bugs.webkit.org/show_bug.cgi?id=46781
-        FloatRect localRect(0, -marginBefore().toFloat(),
-            width().toFloat(), (height() + marginBefore() + marginAfter()).toFloat());
-        quads.append(localToAbsoluteQuad(localRect, 0 /* mode */));
-        continuation()->absoluteQuads(quads);
-    } else {
-        quads.append(RenderBox::localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));
-    }
-}
-
-LayoutRect RenderBlock::rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* paintInvalidationState) const
-{
-    LayoutRect r(RenderBox::rectWithOutlineForPaintInvalidation(paintInvalidationContainer, outlineWidth, paintInvalidationState));
-    if (isAnonymousBlockContinuation())
-        r.inflateY(marginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
-    return r;
-}
-
-void RenderBlock::childBecameNonInline(RenderObject*)
-{
-    ASSERT_NOT_REACHED();
-    // FIXME(sky): Remove
+    quads.append(RenderBox::localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));
 }
 
 void RenderBlock::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
@@ -2440,7 +2017,7 @@ void RenderBlock::updateHitTestResult(HitTestResult& result, const LayoutPoint& 
     if (result.innerNode())
         return;
 
-    if (Node* n = nodeForHitTest()) {
+    if (Node* n = node()) {
         result.setInnerNode(n);
         if (!result.innerNonSharedNode())
             result.setInnerNonSharedNode(n);
@@ -2464,24 +2041,8 @@ LayoutRect RenderBlock::localCaretRect(InlineBox* inlineBox, int caretOffset, La
 
 void RenderBlock::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer) const
 {
-    // For blocks inside inlines, we go ahead and include margins so that we run right up to the
-    // inline boxes above and below us (thus getting merged with them to form a single irregular
-    // shape).
-    if (inlineElementContinuation()) {
-        // FIXME: This check really isn't accurate.
-        bool nextInlineHasLineBox = inlineElementContinuation()->firstLineBox();
-        // FIXME: This is wrong. The principal renderer may not be the continuation preceding this block.
-        // FIXME: This is wrong for block-flows that are horizontal.
-        // https://bugs.webkit.org/show_bug.cgi?id=46781
-        bool prevInlineHasLineBox = toRenderInline(inlineElementContinuation()->node()->renderer())->firstLineBox();
-        LayoutUnit topMargin = prevInlineHasLineBox ? marginBefore() : LayoutUnit();
-        LayoutUnit bottomMargin = nextInlineHasLineBox ? marginAfter() : LayoutUnit();
-        LayoutRect rect(additionalOffset.x(), additionalOffset.y() - topMargin, width(), height() + topMargin + bottomMargin);
-        if (!rect.isEmpty())
-            rects.append(pixelSnappedIntRect(rect));
-    } else if (width() && height()) {
+    if (width() && height())
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
-    }
 
     if (!hasOverflowClip() && !hasControlClip()) {
         for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
@@ -2494,14 +2055,6 @@ void RenderBlock::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& a
 
         addChildFocusRingRects(rects, additionalOffset, paintContainer);
     }
-
-    if (inlineElementContinuation())
-        inlineElementContinuation()->addFocusRingRects(rects, flooredLayoutPoint(additionalOffset + inlineElementContinuation()->containingBlock()->location() - location()), paintContainer);
-}
-
-RenderBox* RenderBlock::createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const
-{
-    return createAnonymousWithParentRendererAndDisplay(parent, style()->display());
 }
 
 LayoutUnit RenderBlock::marginBeforeForChild(const RenderBox* child) const

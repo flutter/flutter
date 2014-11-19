@@ -223,8 +223,6 @@ RootInlineBox* RenderBlockFlow::constructLine(BidiRunList<BidiRun>& bidiRuns, co
         }
     }
 
-    // We should have a root inline box.  It should be unconstructed and
-    // be the last continuation of our line list.
     ASSERT(lastLineBox() && !lastLineBox()->isConstructed());
 
     // Set the m_selectedChildren flag on the root inline box if one of the leaf inline box

@@ -274,7 +274,6 @@ public:
     virtual bool canHaveChildren() const { return virtualChildren(); }
     virtual bool isChildAllowed(RenderObject*, RenderStyle*) const { return true; }
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0);
-    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) { return addChild(newChild, beforeChild); }
     virtual void removeChild(RenderObject*);
     //////////////////////////////////////////
 
@@ -378,10 +377,6 @@ public:
         // RenderBlock having a BLOCK or BOX display. See https://bugs.webkit.org/show_bug.cgi?id=56709.
         return isAnonymous() && style()->display() == PARAGRAPH;
     }
-
-    bool isElementContinuation() const { return node() && node()->renderer() != this; }
-    bool isInlineElementContinuation() const { return isElementContinuation() && isInline(); }
-    virtual RenderBoxModelObject* virtualContinuation() const { return 0; }
 
     bool isOutOfFlowPositioned() const { return m_bitfields.isOutOfFlowPositioned(); } // absolute or fixed positioning
     bool isRelPositioned() const { return m_bitfields.isRelPositioned(); } // relative positioning

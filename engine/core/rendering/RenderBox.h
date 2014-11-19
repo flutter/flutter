@@ -485,12 +485,6 @@ public:
 
     virtual bool hasRelativeLogicalHeight() const;
 
-    virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject*) const
-    {
-        ASSERT_NOT_REACHED();
-        return 0;
-    }
-
     bool hasSameDirectionAs(const RenderBox* object) const { return style()->direction() == object->style()->direction(); }
 
 protected:

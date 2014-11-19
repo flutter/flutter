@@ -1857,14 +1857,7 @@ void RenderObject::propagateStyleToAnonymousChildren(bool blockChildrenOnly)
             continue;
 
         RefPtr<RenderStyle> newStyle = RenderStyle::createAnonymousStyleWithDisplay(style(), child->style()->display());
-
-        // Preserve the position style of anonymous block continuations as they can have relative position when
-        // they contain block descendants of relative positioned inlines.
-        if (child->isRelPositioned() && toRenderBlock(child)->isAnonymousBlockContinuation())
-            newStyle->setPosition(child->style()->position());
-
         updateAnonymousChildStyle(child, newStyle.get());
-
         child->setStyle(newStyle.release());
     }
 }
@@ -2211,9 +2204,6 @@ void RenderObject::destroyAndCleanupAnonymousWrappers()
 
     RenderObject* destroyRoot = this;
     for (RenderObject* destroyRootParent = destroyRoot->parent(); destroyRootParent && destroyRootParent->isAnonymous(); destroyRoot = destroyRootParent, destroyRootParent = destroyRootParent->parent()) {
-        // Anonymous block continuations are tracked and destroyed elsewhere (see the bottom of RenderBlock::removeChild)
-        if (destroyRootParent->isRenderBlock() && toRenderBlock(destroyRootParent)->isAnonymousBlockContinuation())
-            break;
         if (destroyRootParent->slowFirstChild() != this || destroyRootParent->slowLastChild() != this)
             break;
     }
@@ -2373,8 +2363,6 @@ void RenderObject::getTextDecorations(unsigned decorations, AppliedTextDecoratio
             }
         }
         curr = curr->parent();
-        if (curr && curr->isAnonymousBlock() && toRenderBlock(curr)->continuation())
-            curr = toRenderBlock(curr)->continuation();
     } while (curr && decorations && (!quirksMode || !curr->node() || (!isHTMLAnchorElement(*curr->node()))));
 
     // If we bailed out, use the element we bailed out at (typically a <font> or <a> element).

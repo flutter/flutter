@@ -914,18 +914,6 @@ public:
     void setOutlineStyleIsAuto(OutlineIsAuto isAuto) { SET_VAR(m_background, m_outline.m_isAuto, isAuto); }
     void setOutlineStyle(EBorderStyle v) { SET_VAR(m_background, m_outline.m_style, v); }
     void setOutlineColor(const StyleColor& v) { SET_BORDERVALUE_COLOR(m_background, m_outline, v); }
-    bool isOutlineEquivalent(const RenderStyle* otherStyle) const
-    {
-        // No other style, so we don't have an outline then we consider them to be the same.
-        if (!otherStyle)
-            return !hasOutline();
-        return m_background->outline().visuallyEqual(otherStyle->m_background->outline());
-    }
-    void setOutlineFromStyle(const RenderStyle& o)
-    {
-        ASSERT(!isOutlineEquivalent(&o));
-        m_background.access()->m_outline = o.m_background->m_outline;
-    }
 
     void setOverflowX(EOverflow v) { noninherited_flags.overflowX = v; }
     void setOverflowY(EOverflow v) { noninherited_flags.overflowY = v; }

@@ -300,9 +300,9 @@ void InlineFlowBox::determineSpacingForFlowBoxes(bool lastLine, bool isLogically
         bool ltr = renderer().style()->isLeftToRightDirection();
 
         // Check to see if all initial lines are unconstructed.  If so, then
-        // we know the inline began on this line (unless we are a continuation).
+        // we know the inline began on this line.
         RenderLineBoxList* lineBoxList = rendererLineBoxes();
-        if (!lineBoxList->firstLineBox()->isConstructed() && !renderer().isInlineElementContinuation()) {
+        if (!lineBoxList->firstLineBox()->isConstructed()) {
             if (renderer().style()->boxDecorationBreak() == DCLONE)
                 includeLeftEdge = includeRightEdge = true;
             else if (ltr && lineBoxList->firstLineBox() == this)
@@ -312,7 +312,6 @@ void InlineFlowBox::determineSpacingForFlowBoxes(bool lastLine, bool isLogically
         }
 
         if (!lineBoxList->lastLineBox()->isConstructed()) {
-            RenderInline& inlineFlow = toRenderInline(renderer());
             bool isLastObjectOnLine = !isAnsectorAndWithinBlock(&renderer(), logicallyLastRunRenderer) || (isLastChildForRenderer(&renderer(), logicallyLastRunRenderer) && !isLogicallyLastRunWrapped);
 
             // We include the border under these conditions:
@@ -324,11 +323,11 @@ void InlineFlowBox::determineSpacingForFlowBoxes(bool lastLine, bool isLogically
                 includeLeftEdge = includeRightEdge = true;
             else if (ltr) {
                 if (!nextLineBox()
-                    && ((lastLine || isLastObjectOnLine) && !inlineFlow.continuation()))
+                    && (lastLine || isLastObjectOnLine))
                     includeRightEdge = true;
             } else {
                 if ((!prevLineBox() || prevLineBox()->isConstructed())
-                    && ((lastLine || isLastObjectOnLine) && !inlineFlow.continuation()))
+                    && (lastLine || isLastObjectOnLine))
                     includeLeftEdge = true;
             }
         }
@@ -998,40 +997,10 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (!paintInfo.rect.intersects(pixelSnappedIntRect(overflowRect)))
         return;
 
-    if (paintInfo.phase == PaintPhaseOutline || paintInfo.phase == PaintPhaseSelfOutline) {
-        // Add ourselves to the paint info struct's list of inlines that need to paint their
-        // outlines.
-        if (renderer().style()->hasOutline() && !isRootInlineBox()) {
-            RenderInline& inlineFlow = toRenderInline(renderer());
-
-            RenderBlock* cb = 0;
-            bool containingBlockPaintsContinuationOutline = inlineFlow.continuation() || inlineFlow.isInlineElementContinuation();
-            if (containingBlockPaintsContinuationOutline) {
-                // FIXME: See https://bugs.webkit.org/show_bug.cgi?id=54690. We currently don't reconnect inline continuations
-                // after a child removal. As a result, those merged inlines do not get seperated and hence not get enclosed by
-                // anonymous blocks. In this case, it is better to bail out and paint it ourself.
-                RenderBlock* enclosingAnonymousBlock = renderer().containingBlock();
-                if (!enclosingAnonymousBlock->isAnonymousBlock()) {
-                    containingBlockPaintsContinuationOutline = false;
-                } else {
-                    cb = enclosingAnonymousBlock->containingBlock();
-                    for (RenderBoxModelObject* box = boxModelObject(); box != cb; box = box->parent()->enclosingBoxModelObject()) {
-                        if (box->hasSelfPaintingLayer()) {
-                            containingBlockPaintsContinuationOutline = false;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (containingBlockPaintsContinuationOutline) {
-                // Add ourselves to the containing block of the entire continuation so that it can
-                // paint us atomically.
-                cb->addContinuationWithOutline(toRenderInline(renderer().node()->renderer()));
-            } else if (!inlineFlow.isInlineElementContinuation()) {
-                paintInfo.outlineObjects()->add(&inlineFlow);
-            }
-        }
+    if ((paintInfo.phase == PaintPhaseOutline || paintInfo.phase == PaintPhaseSelfOutline)
+        && renderer().style()->hasOutline() && !isRootInlineBox()) {
+        RenderInline& inlineFlow = toRenderInline(renderer());
+        paintInfo.outlineObjects()->add(&inlineFlow);
     } else if (paintInfo.phase == PaintPhaseMask) {
         paintMask(paintInfo, paintOffset);
         return;

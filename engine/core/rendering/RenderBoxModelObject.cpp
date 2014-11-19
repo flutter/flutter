@@ -46,16 +46,6 @@
 
 namespace blink {
 
-// The HashMap for storing continuation pointers.
-// An inline can be split with blocks occuring in between the inline content.
-// When this occurs we need a pointer to the next object. We can basically be
-// split into a sequence of inlines and blocks. The continuation will either be
-// an anonymous block (that houses other blocks) or it will be an inline flow.
-// <b><i><p>Hello</p></i></b>. In this example the <i> will have a block as
-// its continuation but the <b> will just have an inline as its continuation.
-typedef HashMap<RawPtr<const RenderBoxModelObject>, RawPtr<RenderBoxModelObject> > ContinuationMap;
-static OwnPtr<ContinuationMap>* continuationMap = 0;
-
 void RenderBoxModelObject::setSelectionState(SelectionState state)
 {
     if (state == SelectionInside && selectionState() != SelectionNone)
@@ -105,10 +95,6 @@ RenderBoxModelObject::~RenderBoxModelObject()
 void RenderBoxModelObject::willBeDestroyed()
 {
     ImageQualityController::remove(this);
-
-    // A continuation of this RenderObject should be destroyed at subclasses.
-    ASSERT(!continuation());
-
     RenderLayerModelObject::willBeDestroyed();
 }
 
@@ -127,22 +113,6 @@ void RenderBoxModelObject::updateFromStyle()
     setHasBoxDecorationBackground(calculateHasBoxDecorations());
     setInline(styleToUse->isDisplayInlineType());
     setPositionState(styleToUse->position());
-}
-
-static LayoutSize accumulateInFlowPositionOffsets(const RenderObject* child)
-{
-    if (!child->isAnonymousBlock() || !child->isRelPositioned())
-        return LayoutSize();
-    LayoutSize offset;
-    RenderObject* p = toRenderBlock(child)->inlineElementContinuation();
-    while (p && p->isRenderInline()) {
-        if (p->isRelPositioned()) {
-            RenderInline* renderInline = toRenderInline(p);
-            offset += renderInline->offsetForInFlowPosition();
-        }
-        p = p->parent();
-    }
-    return offset;
 }
 
 bool RenderBoxModelObject::hasAutoHeightOrContainingBlockWithAutoHeight() const
@@ -219,7 +189,7 @@ void RenderBoxModelObject::paintRootBackgroundColor(const PaintInfo& paintInfo, 
 
 LayoutSize RenderBoxModelObject::relativePositionOffset() const
 {
-    LayoutSize offset = accumulateInFlowPositionOffsets(this);
+    LayoutSize offset;
 
     RenderBlock* containingBlock = this->containingBlock();
 
@@ -2428,25 +2398,6 @@ LayoutUnit RenderBoxModelObject::containingBlockLogicalWidthForContent() const
     return containingBlock()->availableLogicalWidth();
 }
 
-RenderBoxModelObject* RenderBoxModelObject::continuation() const
-{
-    if (!continuationMap)
-        return 0;
-    return (*continuationMap)->get(this);
-}
-
-void RenderBoxModelObject::setContinuation(RenderBoxModelObject* continuation)
-{
-    if (continuation) {
-        if (!continuationMap)
-            continuationMap = new OwnPtr<ContinuationMap>(adoptPtr(new ContinuationMap));
-        (*continuationMap)->set(this, continuation);
-    } else {
-        if (continuationMap)
-            (*continuationMap)->remove(this);
-    }
-}
-
 LayoutRect RenderBoxModelObject::localCaretRectForEmptyElement(LayoutUnit width, LayoutUnit textIndentOffset)
 {
     ASSERT(!slowFirstChild());
@@ -2590,7 +2541,7 @@ void RenderBoxModelObject::moveChildTo(RenderBoxModelObject* toBoxModelObject, R
         toBoxModelObject->virtualChildren()->insertChildNode(toBoxModelObject, virtualChildren()->removeChildNode(this, child, fullRemoveInsert), beforeChild, fullRemoveInsert);
 }
 
-void RenderBoxModelObject::moveChildrenTo(RenderBoxModelObject* toBoxModelObject, RenderObject* startChild, RenderObject* endChild, RenderObject* beforeChild, bool fullRemoveInsert)
+void RenderBoxModelObject::moveAllChildrenTo(RenderBoxModelObject* toBoxModelObject, RenderObject* beforeChild, bool fullRemoveInsert)
 {
     // This condition is rarely hit since this function is usually called on
     // anonymous blocks which can no longer carry positioned objects (see r120761)
@@ -2601,7 +2552,7 @@ void RenderBoxModelObject::moveChildrenTo(RenderBoxModelObject* toBoxModelObject
     }
 
     ASSERT(!beforeChild || toBoxModelObject == beforeChild->parent());
-    for (RenderObject* child = startChild; child && child != endChild; ) {
+    for (RenderObject* child = slowFirstChild(); child; ) {
         // Save our next sibling as moveChildTo will clear it.
         RenderObject* nextSibling = child->nextSibling();
         moveChildTo(toBoxModelObject, child, beforeChild, fullRemoveInsert);

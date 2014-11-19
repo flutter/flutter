@@ -77,16 +77,10 @@ public:
     InlineBox* firstLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? firstLineBox() : culledInlineFirstLineBox(); }
     InlineBox* lastLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? lastLineBox() : culledInlineLastLineBox(); }
 
-    virtual RenderBoxModelObject* virtualContinuation() const override final { return continuation(); }
-    RenderInline* inlineElementContinuation() const;
-
     LayoutSize offsetForInFlowPositionedInline(const RenderBox& child) const;
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override final;
     void paintOutline(PaintInfo&, const LayoutPoint&);
-
-    using RenderBoxModelObject::continuation;
-    virtual void setContinuation(RenderBoxModelObject*) override final;
 
     bool alwaysCreateLineBoxes() const { return alwaysCreateLineBoxesForRenderInline(); }
     void setAlwaysCreateLineBoxes(bool alwaysCreateLineBoxes = true) { setAlwaysCreateLineBoxesForRenderInline(alwaysCreateLineBoxes); }
@@ -119,14 +113,6 @@ private:
     void generateLineBoxRects(GeneratorContext& yield) const;
     template<typename GeneratorContext>
     void generateCulledLineBoxRects(GeneratorContext& yield, const RenderInline* container) const;
-
-    void addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild);
-    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild = 0) override final;
-
-    void splitInlines(RenderBlock* fromBlock, RenderBlock* toBlock, RenderBlock* middleBlock,
-                      RenderObject* beforeChild, RenderBoxModelObject* oldCont);
-    void splitFlow(RenderObject* beforeChild, RenderBlock* newBlockBox,
-                   RenderObject* newChild, RenderBoxModelObject* oldCont);
 
     virtual void layout() override final { ASSERT_NOT_REACHED(); } // Do nothing for layout()
 
@@ -162,19 +148,14 @@ private:
     virtual LayoutUnit lineHeight(bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override final;
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override final;
 
-    virtual void childBecameNonInline(RenderObject* child) override final;
-
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override final;
 
     virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) override final;
 
     virtual void updateFromStyle() override final;
 
-    RenderInline* clone() const;
-
     void paintOutlineForLine(GraphicsContext*, const LayoutPoint&, const LayoutRect& prevLine, const LayoutRect& thisLine,
                              const LayoutRect& nextLine, const Color);
-    RenderBoxModelObject* continuationBefore(RenderObject* beforeChild);
 
     RenderObjectChildList m_children;
     RenderLineBoxList m_lineBoxes;   // All of the line boxes created for this inline flow.  For example, <i>Hello<br>world.</i> will have two <i> line boxes.

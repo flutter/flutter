@@ -164,21 +164,8 @@ public:
     int heightForLineCount(int);
     void clearTruncation();
 
-    void addContinuationWithOutline(RenderInline*);
-    bool paintsContinuationOutline(RenderInline*);
-
-    virtual RenderBoxModelObject* virtualContinuation() const override final { return continuation(); }
-    bool isAnonymousBlockContinuation() const { return continuation() && isAnonymousBlock(); }
-    RenderInline* inlineElementContinuation() const;
-    RenderBlock* blockElementContinuation() const;
-
-    using RenderBoxModelObject::continuation;
-    using RenderBoxModelObject::setContinuation;
-
     static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = PARAGRAPH);
     RenderBlock* createAnonymousBlock(EDisplay display = PARAGRAPH) const { return createAnonymousWithParentRendererAndDisplay(this, display); }
-
-    virtual RenderBox* createAnonymousBoxWithSameTypeAs(const RenderObject* parent) const override;
 
     // Accessors for logical width/height and margins in the containing block's block-flow direction.
     LayoutUnit logicalWidthForChild(const RenderBox* child) const { return child->width(); }
@@ -303,15 +290,10 @@ private:
 
     virtual void dirtyLinesFromChangedChild(RenderObject* child) override final { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
 
-    void addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild);
-    virtual void addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild) override;
-
     void addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild = 0);
 
     void insertIntoTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
-
-    Node* nodeForHitTest() const;
 
     void paintContents(PaintInfo&, const LayoutPoint&);
     void paintSelection(PaintInfo&, const LayoutPoint&);
@@ -326,10 +308,6 @@ private:
     // Obtains the nearest enclosing block (including this block) that contributes a first-line style to our inline
     // children.
     virtual RenderBlock* firstLineBlock() const override;
-
-    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const override final;
-
-    virtual void childBecameNonInline(RenderObject* child) override final;
 
     virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool /*clipToVisibleContent*/) override final
     {
@@ -348,19 +326,12 @@ private:
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
-    void paintContinuationOutlines(PaintInfo&, const LayoutPoint&);
-
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override final;
 
     void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
 
     Position positionForBox(InlineBox*, bool start = true) const;
     PositionWithAffinity positionForPointWithInlineChildren(const LayoutPoint&);
-
-    void splitBlocks(RenderBlock* fromBlock, RenderBlock* toBlock, RenderBlock* middleBlock,
-                     RenderObject* beforeChild, RenderBoxModelObject* oldCont);
-    RenderBlock* clone() const;
-    RenderBlock* continuationBefore(RenderObject* beforeChild);
 
     // End helper functions and structs used by layoutBlockChildren.
 
