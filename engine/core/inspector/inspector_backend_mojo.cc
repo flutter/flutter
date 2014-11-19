@@ -30,8 +30,6 @@ public:
 private:
     virtual void run(Page* page)
     {
-      if (run_loop_)
-        return;
       run_loop_.reset(new base::RunLoop());
       run_loop_->Run();
     }
