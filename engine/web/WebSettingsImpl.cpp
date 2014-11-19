@@ -52,6 +52,15 @@ WebSettingsImpl::WebSettingsImpl(Settings* settings)
     ASSERT(settings);
 }
 
+bool WebSettingsImpl::compositorIsEnabled() const
+{
+#if ENABLE(COMPOSITOR)
+    return true;
+#else
+    return false;
+#endif
+}
+
 void WebSettingsImpl::setStandardFontFamily(const WebString& font, UScriptCode script)
 {
     if (m_settings->genericFontFamilySettings().updateStandard(font, script))

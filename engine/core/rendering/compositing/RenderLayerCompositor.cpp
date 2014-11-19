@@ -115,14 +115,26 @@ void RenderLayerCompositor::enableCompositingModeIfNeeded()
 
 bool RenderLayerCompositor::rootShouldAlwaysComposite() const
 {
-    // FIXME(sky): Remove
+#if ENABLE(COMPOSITOR)
     return true;
+#else
+    return false;
+#endif
 }
 
 void RenderLayerCompositor::updateAcceleratedCompositingSettings()
 {
     m_compositingReasonFinder.updateTriggers();
     m_rootShouldAlwaysCompositeDirty = true;
+}
+
+bool RenderLayerCompositor::hasAcceleratedCompositing() const
+{
+#if ENABLE(COMPOSITOR)
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool RenderLayerCompositor::layerSquashingEnabled() const
@@ -210,7 +222,9 @@ void RenderLayerCompositor::updateIfNeeded()
     m_pendingUpdateType = CompositingUpdateNone;
 
     if (!hasAcceleratedCompositing()) {
+#if ENABLE(COMPOSITOR)
         updateWithoutAcceleratedCompositing(updateType);
+#endif
         return;
     }
 

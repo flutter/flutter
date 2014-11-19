@@ -79,7 +79,7 @@ public:
 
     // Returns true if the accelerated compositing is enabled
     // FIXME(sky): Remove
-    bool hasAcceleratedCompositing() const { return true; }
+    bool hasAcceleratedCompositing() const;
     bool layerSquashingEnabled() const;
 
     bool preferCompositingToLCDTextEnabled() const;

@@ -137,6 +137,10 @@ public:
 
     void postLayoutTimerFired(Timer<FrameView>*);
 
+#if !ENABLE(COMPOSITOR)
+    void paint(GraphicsContext* context, const IntRect& rect) override;
+#endif
+
     void paintContents(GraphicsContext*, const IntRect& damageRect);
     void setPaintBehavior(PaintBehavior);
     PaintBehavior paintBehavior() const;

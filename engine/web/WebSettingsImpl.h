@@ -42,6 +42,7 @@ public:
     explicit WebSettingsImpl(Settings*);
     virtual ~WebSettingsImpl() { }
 
+    virtual bool compositorIsEnabled() const override;
     virtual bool mainFrameResizesAreOrientationChanges() const override;
     virtual bool shrinksViewportContentToFit() const override;
     virtual int availablePointerTypes() const override;

@@ -66,7 +66,8 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   void Initialize(mojo::Array<mojo::String> args) override;
 
   // WebWidgetClient methods:
-  virtual blink::WebLayerTreeView* initializeLayerTreeView();
+  blink::WebLayerTreeView* initializeLayerTreeView() override;
+  void scheduleAnimation() override;
 
   // WebFrameClient methods:
   mojo::View* createChildFrame(const blink::WebURL& url) override;

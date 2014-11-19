@@ -13,8 +13,11 @@
 #include "mojo/cc/output_surface_mojo.h"
 #include "mojo/converters/surfaces/surfaces_type_converters.h"
 #include "mojo/services/public/cpp/view_manager/view.h"
+#include "sky/engine/public/web/WebSettings.h"
+#include "sky/engine/public/web/WebView.h"
 #include "sky/engine/public/web/WebWidget.h"
 #include "sky/viewer/cc/web_layer_impl.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 
 namespace sky {
 
@@ -57,6 +60,19 @@ WebLayerTreeViewImpl::~WebLayerTreeViewImpl() {
   layer_tree_host_.reset();
 }
 
+void WebLayerTreeViewImpl::PaintContents(SkCanvas* canvas,
+                                         const gfx::Rect& clip,
+                                         GraphicsContextStatus gc_status) {
+  blink::WebRect rect(clip.x(), clip.y(), clip.width(), clip.height());
+  widget_->paint(canvas, rect);
+  canvas->flush();
+}
+
+bool WebLayerTreeViewImpl::FillsBoundsCompletely() const {
+  // TODO(abarth): We should be able to return true when we're opaque.
+  return false;
+}
+
 void WebLayerTreeViewImpl::WillBeginMainFrame(int frame_id) {
 }
 
@@ -73,8 +89,26 @@ void WebLayerTreeViewImpl::BeginMainFrame(const cc::BeginFrameArgs& args) {
   widget_->beginFrame(web_begin_frame_args);
 }
 
+void WebLayerTreeViewImpl::set_widget(blink::WebWidget* widget) {
+  widget_ = widget;
+
+  // TODO(sky): The only reason this is here is because we need the widget to
+  // check whether the compositor is enabled.
+  if (!static_cast<blink::WebView*>(widget_)->settings()->compositorIsEnabled()) {
+    root_layer_ = cc::ContentLayer::Create(this);
+    layer_tree_host_->SetRootLayer(root_layer_);
+  }
+}
+
 void WebLayerTreeViewImpl::Layout() {
   widget_->layout();
+  blink::WebSize size = widget_->size();
+
+  if (!static_cast<blink::WebView*>(widget_)->settings()->compositorIsEnabled()) {
+    root_layer_->SetBounds(gfx::Size(size.width, size.height));
+    root_layer_->SetIsDrawable(true);
+    root_layer_->SetNeedsDisplay();
+  }
 }
 
 void WebLayerTreeViewImpl::ApplyViewportDeltas(

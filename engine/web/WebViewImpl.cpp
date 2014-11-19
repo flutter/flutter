@@ -184,6 +184,10 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     setVisibilityState(m_client->visibilityState(), true);
 
     m_layerTreeView = m_client->initializeLayerTreeView();
+
+#if !ENABLE(COMPOSITOR)
+    m_layerTreeView = nullptr;
+#endif
 }
 
 WebViewImpl::~WebViewImpl()

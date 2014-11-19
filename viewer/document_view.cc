@@ -157,6 +157,13 @@ blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
   return web_layer_tree_view_impl_.get();
 }
 
+void DocumentView::scheduleAnimation() {
+  DCHECK(web_view_);
+
+  if (!web_view_->settings()->compositorIsEnabled())
+    web_layer_tree_view_impl_->setNeedsAnimate();
+}
+
 mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
   if (!root_)
     return nullptr;

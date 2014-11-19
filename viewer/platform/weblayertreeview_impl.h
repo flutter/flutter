@@ -9,6 +9,8 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
+#include "cc/layers/content_layer.h"
+#include "cc/layers/content_layer_client.h"
 #include "cc/trees/layer_tree_host_client.h"
 #include "mojo/cc/output_surface_mojo.h"
 #include "mojo/services/public/interfaces/gpu/gpu.mojom.h"
@@ -35,6 +37,7 @@ namespace sky {
 
 class WebLayerTreeViewImpl : public blink::WebLayerTreeView,
                              public cc::LayerTreeHostClient,
+                             public cc::ContentLayerClient,
                              public mojo::OutputSurfaceMojoClient {
  public:
   WebLayerTreeViewImpl(
@@ -43,7 +46,7 @@ class WebLayerTreeViewImpl : public blink::WebLayerTreeView,
       mojo::GpuPtr gpu_service);
   virtual ~WebLayerTreeViewImpl();
 
-  void set_widget(blink::WebWidget* widget) { widget_ = widget; }
+  void set_widget(blink::WebWidget* widget);
   void set_view(mojo::View* view) { view_ = view; }
 
   // cc::LayerTreeHostClient implementation.
@@ -65,6 +68,12 @@ class WebLayerTreeViewImpl : public blink::WebLayerTreeView,
   virtual void DidCommitAndDrawFrame() override;
   virtual void DidCompleteSwapBuffers() override;
   virtual void RateLimitSharedMainThreadContext() override {}
+
+  // cc::ContentLayerClient
+  void PaintContents(SkCanvas* canvas,
+                     const gfx::Rect& clip,
+                     GraphicsContextStatus gc_status) override;
+  bool FillsBoundsCompletely() const override;
 
   // blink::WebLayerTreeView implementation.
   virtual void setSurfaceReady() override;
@@ -121,6 +130,8 @@ class WebLayerTreeViewImpl : public blink::WebLayerTreeView,
   scoped_refptr<base::SingleThreadTaskRunner>
       main_thread_compositor_task_runner_;
   base::WeakPtr<WebLayerTreeViewImpl> main_thread_bound_weak_ptr_;
+
+  scoped_refptr<cc::ContentLayer> root_layer_;
 
   base::WeakPtrFactory<WebLayerTreeViewImpl> weak_factory_;
   DISALLOW_COPY_AND_ASSIGN(WebLayerTreeViewImpl);

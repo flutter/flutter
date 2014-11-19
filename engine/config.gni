@@ -27,6 +27,8 @@ declare_args() {
   sky_gc_plugin_dump_graph = false
 
   sky_asserts_always_on = false
+
+  sky_enable_compostior = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -49,6 +51,9 @@ if (sky_enable_oilpan) {
 }
 if (sky_asserts_always_on) {
   feature_defines_list += [ "ENABLE_ASSERT=1" ]
+}
+if (sky_enable_compostior) {
+  feature_defines_list += [ "ENABLE_COMPOSITOR=1" ]
 }
 
 # feature_defines_string -------------------------------------------------------
