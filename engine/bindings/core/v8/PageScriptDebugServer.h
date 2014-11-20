@@ -31,15 +31,19 @@
 #ifndef PageScriptDebugServer_h
 #define PageScriptDebugServer_h
 
-#include "bindings/core/v8/ScriptDebugServer.h"
-#include "bindings/core/v8/ScriptPreprocessor.h"
-#include "wtf/Forward.h"
-#include "wtf/RefCounted.h"
-#include <v8.h>
+#include "sky/engine/bindings/core/v8/ScriptDebugServer.h"
+#include "sky/engine/bindings/core/v8/ScriptPreprocessor.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "v8/include/v8.h"
+
+// This whole file will move to namespace inspector.
+namespace inspector {
+class InspectorHost;
+}
 
 namespace blink {
 
-class Page;
 class ScriptController;
 class ScriptPreprocessor;
 class ScriptSourceCode;
@@ -51,15 +55,15 @@ public:
 
     static void setMainThreadIsolate(v8::Isolate*);
 
-    void addListener(ScriptDebugListener*, Page*);
-    void removeListener(ScriptDebugListener*, Page*);
+    void addListener(ScriptDebugListener*, inspector::InspectorHost*);
+    void removeListener(ScriptDebugListener*, inspector::InspectorHost*);
 
     static void interruptAndRun(PassOwnPtr<Task>);
 
     class ClientMessageLoop {
     public:
         virtual ~ClientMessageLoop() { }
-        virtual void run(Page*) = 0;
+        virtual void run(inspector::InspectorHost*) = 0;
         virtual void quitNow() = 0;
     };
     void setClientMessageLoop(PassOwnPtr<ClientMessageLoop>);
@@ -84,10 +88,10 @@ private:
     virtual void runMessageLoopOnPause(v8::Handle<v8::Context>) override;
     virtual void quitMessageLoopOnPause() override;
 
-    typedef HashMap<Page*, ScriptDebugListener*> ListenersMap;
+    typedef HashMap<inspector::InspectorHost*, ScriptDebugListener*> ListenersMap;
     ListenersMap m_listenersMap;
     OwnPtr<ClientMessageLoop> m_clientMessageLoop;
-    Page* m_pausedPage;
+    inspector::InspectorHost* m_pausedHost;
     HashMap<String, String> m_compiledScriptURLs;
 
     OwnPtr<ScriptSourceCode> m_preprocessorSourceCode;

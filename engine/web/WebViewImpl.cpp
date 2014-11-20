@@ -31,7 +31,6 @@
 #include "config.h"
 #include "web/WebViewImpl.h"
 
-#include "gen/sky/core/CSSValueKeywords.h"
 #include "core/dom/Document.h"
 #include "core/dom/DocumentMarkerController.h"
 #include "core/dom/NodeRenderingTraversal.h"
@@ -50,8 +49,6 @@
 #include "core/frame/Settings.h"
 #include "core/html/HTMLImportElement.h"
 #include "core/html/ime/InputMethodContext.h"
-#include "gen/sky/core/HTMLNames.h"
-#include "v8_inspector/inspector_backend_mojo.h"
 #include "core/loader/FrameLoader.h"
 #include "core/loader/UniqueIdentifier.h"
 #include "core/page/Chrome.h"
@@ -62,6 +59,9 @@
 #include "core/page/TouchDisambiguation.h"
 #include "core/rendering/compositing/RenderLayerCompositor.h"
 #include "core/rendering/RenderView.h"
+#include "gen/sky/core/CSSValueKeywords.h"
+#include "gen/sky/core/HTMLNames.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/Cursor.h"
 #include "platform/exported/WebActiveGestureAnimation.h"
 #include "platform/fonts/FontCache.h"
@@ -75,7 +75,6 @@
 #include "platform/PlatformKeyboardEvent.h"
 #include "platform/PlatformMouseEvent.h"
 #include "platform/PlatformWheelEvent.h"
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "platform/scroll/Scrollbar.h"
 #include "platform/TraceEvent.h"
 #include "platform/UserGestureIndicator.h"
@@ -178,7 +177,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     pageClients.spellCheckerClient = &m_spellCheckerClientImpl;
 
     m_page = adoptPtr(new Page(pageClients, m_client->services()));
-    m_page->makeOrdinary();
 
     setDeviceScaleFactor(m_client->screenInfo().deviceScaleFactor);
     setVisibilityState(m_client->visibilityState(), true);
@@ -1608,12 +1606,6 @@ void WebViewImpl::injectModule(const WebString& path)
     if (!document->documentElement())
         return;
     document->documentElement()->appendChild(import.release());
-}
-
-void WebViewImpl::connectInspectorBackend()
-{
-    m_inspectorBackend = adoptPtr(new InspectorBackendMojo(page()->frameHost()));
-    m_inspectorBackend->Connect();
 }
 
 void WebViewImpl::setFocusedFrame(WebFrame* frame)

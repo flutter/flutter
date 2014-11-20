@@ -19,6 +19,7 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebHTTPHeaderVisitor.h"
+#include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebConsoleMessage.h"
 #include "sky/engine/public/web/WebDocument.h"
 #include "sky/engine/public/web/WebElement.h"
@@ -27,6 +28,8 @@
 #include "sky/engine/public/web/WebScriptSource.h"
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebView.h"
+#include "sky/engine/v8_inspector/inspector_backend_mojo.h"
+#include "sky/engine/v8_inspector/inspector_host.h"
 #include "sky/viewer/converters/input_event_types.h"
 #include "sky/viewer/converters/url_request_types.h"
 #include "sky/viewer/internals.h"
@@ -252,6 +255,33 @@ void DocumentView::OnViewInputEvent(
       event.To<scoped_ptr<blink::WebInputEvent> >();
   if (web_event)
     web_view_->handleInputEvent(*web_event);
+}
+
+class InspectorHostImpl : public inspector::InspectorHost {
+ public:
+  InspectorHostImpl(blink::WebView* web_view, mojo::Shell* shell)
+      : web_view_(web_view), shell_(shell) {}
+
+  virtual ~InspectorHostImpl() {}
+
+  mojo::Shell* GetShell() override { return shell_; }
+  v8::Isolate* GetIsolate() override { return blink::mainThreadIsolate(); }
+  v8::Local<v8::Context> GetContext() override {
+    return web_view_->mainFrame()->mainWorldScriptContext();
+  }
+
+ private:
+  blink::WebView* web_view_;
+  mojo::Shell* shell_;
+};
+
+void DocumentView::StartDebuggerInspectorBackend() {
+  if (!inspector_backend_) {
+    inspector_host_.reset(new InspectorHostImpl(web_view_, shell_.get()));
+    inspector_backend_.reset(
+        new inspector::InspectorBackendMojo(inspector_host_.get()));
+  }
+  inspector_backend_->Connect();
 }
 
 }  // namespace sky

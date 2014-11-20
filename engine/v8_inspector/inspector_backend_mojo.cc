@@ -7,28 +7,59 @@
 
 #include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"
-#include "bindings/core/v8/PageScriptDebugServer.h"
-#include "bindings/core/v8/ScriptController.h"
 #include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/bindings/core/v8/PageScriptDebugServer.h"
+#include "sky/engine/core/inspector/InspectorFrontendChannel.h"
 #include "sky/engine/core/inspector/InspectorState.h"
 #include "sky/engine/core/inspector/InstrumentingAgents.h"
 #include "sky/engine/core/inspector/PageDebuggerAgent.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/public/platform/ServiceProvider.h"
+#include "sky/engine/v8_inspector/inspector_host.h"
 
 namespace blink {
 
+class InspectorBackendMojoImpl
+    : public InspectorFrontendChannel,
+      public mojo::InterfaceImpl<sky::InspectorBackend> {
+ public:
+  explicit InspectorBackendMojoImpl(inspector::InspectorHost*);
+  ~InspectorBackendMojoImpl();
+
+  void Connect();
+
+  // InspectorBackend:
+  void OnConnect();
+  void OnMessage(const mojo::String& message) override;
+  void OnDisconnect();
+
+  // InspectorFrontendChannel:
+  void sendMessageToFrontend(PassRefPtr<JSONObject> message) override;
+  // TODO(eseidel): Unclear if flush is needed.
+  void flush() override {}
+
+  inspector::InspectorHost* host_;
+  sky::InspectorFrontendPtr frontend_;
+
+  OwnPtr<InspectorFrontend> old_frontend_;
+  RefPtr<InspectorBackendDispatcher> dispatcher_;
+  OwnPtr<PageDebuggerAgent> debugger_agent_;
+  OwnPtr<InjectedScriptManager> script_manager_;
+  OwnPtr<InspectorState> inspector_state_;
+  OwnPtr<InstrumentingAgents> agents_;
+
+  DISALLOW_COPY_AND_ASSIGN(InspectorBackendMojoImpl);
+};
+
+// FIXME: Probably this should be provided by the InspectorHost?
 class MessageLoopAdaptor : public PageScriptDebugServer::ClientMessageLoop {
  public:
   MessageLoopAdaptor() {}
 
  private:
-  virtual void run(Page* page) {
+  virtual void run(inspector::InspectorHost* host) {
     run_loop_.reset(new base::RunLoop());
     run_loop_->Run();
   }
@@ -41,15 +72,16 @@ class MessageLoopAdaptor : public PageScriptDebugServer::ClientMessageLoop {
   scoped_ptr<base::RunLoop> run_loop_;
 };
 
-InspectorBackendMojo::InspectorBackendMojo(const FrameHost& frame_host)
-    : frame_host_(frame_host) {
+InspectorBackendMojoImpl::InspectorBackendMojoImpl(
+    inspector::InspectorHost* host)
+    : host_(host) {
 }
 
-InspectorBackendMojo::~InspectorBackendMojo() {
+InspectorBackendMojoImpl::~InspectorBackendMojoImpl() {
 }
 
-void InspectorBackendMojo::Connect() {
-  mojo::Shell* shell = frame_host_.services().Shell();
+void InspectorBackendMojoImpl::Connect() {
+  mojo::Shell* shell = host_->GetShell();
   mojo::ServiceProviderPtr inspector_service_provider;
   shell->ConnectToApplication("mojo:sky_inspector_server",
                               GetProxy(&inspector_service_provider));
@@ -61,16 +93,14 @@ void InspectorBackendMojo::Connect() {
       adoptPtr(new InspectorState(nullptr, JSONObject::create()));
   old_frontend_ = adoptPtr(new InspectorFrontend(this));
 
-  v8::Isolate* isolate = frame_host_.page().mainFrame()->script().isolate();
-  PageScriptDebugServer::setMainThreadIsolate(isolate);
+  PageScriptDebugServer::setMainThreadIsolate(host_->GetIsolate());
   OwnPtr<MessageLoopAdaptor> message_loop = adoptPtr(new MessageLoopAdaptor);
   PageScriptDebugServer::shared().setClientMessageLoop(message_loop.release());
 
   // AgentRegistry used to do this, but we don't need it for one agent.
   script_manager_ = InjectedScriptManager::createForPage();
-  debugger_agent_ =
-      PageDebuggerAgent::create(&PageScriptDebugServer::shared(),
-                                &frame_host_.page(), script_manager_.get());
+  debugger_agent_ = PageDebuggerAgent::create(&PageScriptDebugServer::shared(),
+                                              host_, script_manager_.get());
   agents_ = adoptPtr(new InstrumentingAgents(debugger_agent_.get()));
   debugger_agent_->init(agents_.get(), inspector_state_.get());
   debugger_agent_->setFrontend(old_frontend_.get());
@@ -79,22 +109,18 @@ void InspectorBackendMojo::Connect() {
   dispatcher_->registerAgent(debugger_agent_.get());
 }
 
-void InspectorBackendMojo::sendMessageToFrontend(
+void InspectorBackendMojoImpl::OnConnect() {
+}
+
+void InspectorBackendMojoImpl::OnDisconnect() {
+}
+
+void InspectorBackendMojoImpl::sendMessageToFrontend(
     PassRefPtr<JSONObject> message) {
   frontend_->SendMessage(message->toJSONString().toUTF8());
 }
 
-void InspectorBackendMojo::flush() {
-  // TODO(eseidel): Unclear if this is needed.
-}
-
-void InspectorBackendMojo::OnConnect() {
-}
-
-void InspectorBackendMojo::OnDisconnect() {
-}
-
-void InspectorBackendMojo::OnMessage(const mojo::String& message) {
+void InspectorBackendMojoImpl::OnMessage(const mojo::String& message) {
   String wtf_message = String::fromUTF8(message.To<std::string>());
   String command_name;
   InspectorBackendDispatcher::getCommandName(wtf_message, &command_name);
@@ -106,3 +132,18 @@ void InspectorBackendMojo::OnMessage(const mojo::String& message) {
 }
 
 }  // namespace blink
+
+namespace inspector {
+
+InspectorBackendMojo::InspectorBackendMojo(InspectorHost* host)
+    : impl_(new blink::InspectorBackendMojoImpl(host)) {
+}
+
+InspectorBackendMojo::~InspectorBackendMojo() {
+}
+
+void InspectorBackendMojo::Connect() {
+  impl_->Connect();
+}
+
+}  // namespace inspector

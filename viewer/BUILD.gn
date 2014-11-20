@@ -70,6 +70,7 @@ mojo_native_application("viewer") {
     "//net",
     "//skia",
     "//sky/engine",
+    "//sky/engine/v8_inspector",
     "//sky/scheduler",
     "//sky/services/inspector:bindings",
     "//sky/services/testing:bindings",

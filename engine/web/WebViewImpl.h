@@ -62,7 +62,6 @@ class WebActiveGestureAnimation;
 class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
-class InspectorBackendMojo;
 
 class WebViewImpl final : public WebView
     , public RefCounted<WebViewImpl>
@@ -118,7 +117,6 @@ public:
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
     virtual void injectModule(const WebString&) override;
-    virtual void connectInspectorBackend() override;
     virtual void setSpellCheckClient(WebSpellCheckClient*) override;
     virtual WebSettings* settings() override;
     virtual WebString pageEncoding() const override;
@@ -450,10 +448,6 @@ private:
     WebColor m_backgroundColorOverride;
 
     bool m_userGestureObserved;
-
-    // FIXME(sky): InspectorBackendMojo should be a peer to WebView
-    // however right now it depends on acccess to the Page.
-    OwnPtr<InspectorBackendMojo> m_inspectorBackend;
 };
 
 // We have no ways to check if the specified WebView is an instance of

@@ -28,31 +28,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/PageScriptDebugServer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/PageScriptDebugServer.h"
 
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/ScriptSourceCode.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
-#include "bindings/core/v8/V8Window.h"
-#include "bindings/core/v8/WindowProxy.h"
-#include "core/dom/ExecutionContext.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/FrameHost.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/UseCounter.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "core/inspector/ScriptDebugListener.h"
-#include "core/page/Page.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/TemporaryChange.h"
-#include "wtf/text/StringBuilder.h"
-#include "gin/modules/console.h"
-#include "gin/converter.h"
+#include "gen/sky/bindings/core/v8/V8Window.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
+#include "sky/engine/bindings/core/v8/WindowProxy.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/core/inspector/ScriptDebugListener.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/v8_inspector/inspector_host.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/TemporaryChange.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
@@ -100,7 +98,7 @@ void PageScriptDebugServer::setMainThreadIsolate(v8::Isolate* isolate)
 
 PageScriptDebugServer::PageScriptDebugServer()
     : ScriptDebugServer(s_mainThreadIsolate)
-    , m_pausedPage(0)
+    , m_pausedHost(0)
 {
 }
 
@@ -108,10 +106,8 @@ PageScriptDebugServer::~PageScriptDebugServer()
 {
 }
 
-void PageScriptDebugServer::addListener(ScriptDebugListener* listener, Page* page)
+void PageScriptDebugServer::addListener(ScriptDebugListener* listener, inspector::InspectorHost* host)
 {
-    ScriptController& scriptController = page->mainFrame()->script();
-
     v8::HandleScope scope(m_isolate);
 
     if (!m_listenersMap.size()) {
@@ -122,17 +118,11 @@ void PageScriptDebugServer::addListener(ScriptDebugListener* listener, Page* pag
     v8::Local<v8::Context> debuggerContext = v8::Debug::GetDebugContext();
     v8::Context::Scope contextScope(debuggerContext);
 
-    v8::Local<v8::Value> console = gin::Console::GetModule(m_isolate);
-    debuggerContext->Global()->Set(gin::StringToV8(m_isolate, "console"), console);
-
     v8::Local<v8::Object> debuggerScript = m_debuggerScript.newLocal(m_isolate);
     ASSERT(!debuggerScript->IsUndefined());
-    m_listenersMap.set(page, listener);
+    m_listenersMap.set(host, listener);
 
-    WindowProxy* windowProxy = scriptController.existingWindowProxy(DOMWrapperWorld::mainWorld());
-    if (!windowProxy || !windowProxy->isContextInitialized())
-        return;
-    v8::Local<v8::Context> context = windowProxy->context();
+    v8::Local<v8::Context> context = host->GetContext();
     v8::Handle<v8::Function> getScriptsFunction = v8::Local<v8::Function>::Cast(debuggerScript->Get(v8AtomicString(m_isolate, "getScripts")));
     v8::Handle<v8::Value> argv[] = { context->GetEmbedderData(0) };
     v8::Handle<v8::Value> value = V8ScriptRunner::callInternalFunction(getScriptsFunction, debuggerScript, WTF_ARRAY_LENGTH(argv), argv, m_isolate);
@@ -144,15 +134,15 @@ void PageScriptDebugServer::addListener(ScriptDebugListener* listener, Page* pag
         dispatchDidParseSource(listener, v8::Handle<v8::Object>::Cast(scriptsArray->Get(v8::Integer::New(m_isolate, i))), CompileSuccess);
 }
 
-void PageScriptDebugServer::removeListener(ScriptDebugListener* listener, Page* page)
+void PageScriptDebugServer::removeListener(ScriptDebugListener* listener, inspector::InspectorHost* host)
 {
-    if (!m_listenersMap.contains(page))
+    if (!m_listenersMap.contains(host))
         return;
 
-    if (m_pausedPage == page)
+    if (m_pausedHost == host)
         continueProgram();
 
-    m_listenersMap.remove(page);
+    m_listenersMap.remove(host);
 
     if (m_listenersMap.isEmpty()) {
         discardDebuggerScript();
@@ -207,23 +197,23 @@ ScriptDebugListener* PageScriptDebugServer::getDebugListenerForContext(v8::Handl
     LocalFrame* frame = retrieveFrameWithGlobalObjectCheck(context);
     if (!frame)
         return 0;
-    return m_listenersMap.get(frame->page());
+    return m_listenersMap.get(frame->page()->inspectorHost());
 }
 
 void PageScriptDebugServer::runMessageLoopOnPause(v8::Handle<v8::Context> context)
 {
     v8::HandleScope scope(m_isolate);
     LocalFrame* frame = retrieveFrameWithGlobalObjectCheck(context);
-    m_pausedPage = frame->page();
+    m_pausedHost = frame->page()->inspectorHost();
 
     // Wait for continue or step command.
-    m_clientMessageLoop->run(m_pausedPage);
+    m_clientMessageLoop->run(m_pausedHost);
 
     // The listener may have been removed in the nested loop.
-    if (ScriptDebugListener* listener = m_listenersMap.get(m_pausedPage))
+    if (ScriptDebugListener* listener = m_listenersMap.get(m_pausedHost))
         listener->didContinue();
 
-    m_pausedPage = 0;
+    m_pausedHost = 0;
 }
 
 void PageScriptDebugServer::quitMessageLoopOnPause()

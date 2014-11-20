@@ -124,8 +124,6 @@ public:
 
     virtual void injectModule(const WebString& path) = 0;
 
-    virtual void connectInspectorBackend() = 0;
-
     // Focus ---------------------------------------------------------------
 
     virtual WebFrame* focusedFrame() = 0;

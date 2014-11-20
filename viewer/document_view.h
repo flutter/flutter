@@ -31,7 +31,12 @@ class ViewManager;
 class View;
 }
 
+namespace inspector {
+class InspectorBackendMojo;
+}
+
 namespace sky {
+class InspectorHostImpl;
 class ScriptRunner;
 class WebLayerTreeViewImpl;
 
@@ -58,6 +63,8 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   }
 
   mojo::Shell* shell() const { return shell_.get(); }
+
+  void StartDebuggerInspectorBackend();
 
  private:
   // Application methods:
@@ -123,6 +130,8 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   scoped_ptr<WebLayerTreeViewImpl> web_layer_tree_view_impl_;
   scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   scoped_ptr<ScriptRunner> script_runner_;
+  scoped_ptr<InspectorHostImpl> inspector_host_;
+  scoped_ptr<inspector::InspectorBackendMojo> inspector_backend_;
   int debugger_id_;
 
   base::WeakPtrFactory<DocumentView> weak_factory_;

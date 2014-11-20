@@ -34,11 +34,16 @@
 #include "bindings/core/v8/PageScriptDebugServer.h"
 #include "core/inspector/InspectorDebuggerAgent.h"
 
+// This whole file will move to namespace inspector.
+namespace inspector {
+class InspectorHost;
+}
+
 namespace blink {
 
 class DocumentLoader;
+class InspectorHost;
 class InspectorPageAgent;
-class Page;
 class PageScriptDebugServer;
 class ScriptSourceCode;
 
@@ -47,7 +52,7 @@ class PageDebuggerAgent final
     WTF_MAKE_NONCOPYABLE(PageDebuggerAgent);
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassOwnPtr<PageDebuggerAgent> create(PageScriptDebugServer*, Page*, InjectedScriptManager*);
+    static PassOwnPtr<PageDebuggerAgent> create(PageScriptDebugServer*, inspector::InspectorHost*, InjectedScriptManager*);
     virtual ~PageDebuggerAgent();
 
     void didClearDocumentOfWindowObject(LocalFrame*);
@@ -62,9 +67,9 @@ private:
     virtual InjectedScript injectedScriptForEval(ErrorString*, const int* executionContextId) override;
     virtual void setOverlayMessage(ErrorString*, const String*) override;
 
-    PageDebuggerAgent(PageScriptDebugServer*, Page*, InjectedScriptManager*);
+    PageDebuggerAgent(PageScriptDebugServer*, inspector::InspectorHost*, InjectedScriptManager*);
     PageScriptDebugServer* m_pageScriptDebugServer;
-    Page* m_page;
+    inspector::InspectorHost* m_host;
 };
 
 } // namespace blink

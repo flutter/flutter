@@ -37,7 +37,7 @@ void InspectorServiceImpl::Inject() {
   inspector.WaitForIncomingMethodCall();
 
   view_->web_view()->injectModule("/sky/framework/inspector/inspector.sky");
-  view_->web_view()->connectInspectorBackend();
+  view_->StartDebuggerInspectorBackend();
 }
 
 }  // namespace sky

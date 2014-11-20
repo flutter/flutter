@@ -31,24 +31,25 @@
 #include "config.h"
 #include "core/inspector/PageDebuggerAgent.h"
 
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/ScriptSourceCode.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/Page.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/v8_inspector/inspector_host.h"
 
 namespace blink {
 
-PassOwnPtr<PageDebuggerAgent> PageDebuggerAgent::create(PageScriptDebugServer* pageScriptDebugServer, Page* page, InjectedScriptManager* injectedScriptManager)
+PassOwnPtr<PageDebuggerAgent> PageDebuggerAgent::create(PageScriptDebugServer* pageScriptDebugServer, inspector::InspectorHost* host, InjectedScriptManager* injectedScriptManager)
 {
-    return adoptPtr(new PageDebuggerAgent(pageScriptDebugServer, page, injectedScriptManager));
+    return adoptPtr(new PageDebuggerAgent(pageScriptDebugServer, host, injectedScriptManager));
 }
 
-PageDebuggerAgent::PageDebuggerAgent(PageScriptDebugServer* pageScriptDebugServer, Page* page, InjectedScriptManager* injectedScriptManager)
+PageDebuggerAgent::PageDebuggerAgent(PageScriptDebugServer* pageScriptDebugServer, inspector::InspectorHost* host, InjectedScriptManager* injectedScriptManager)
     : InspectorDebuggerAgent(injectedScriptManager)
     , m_pageScriptDebugServer(pageScriptDebugServer)
-    , m_page(page)
+    , m_host(host)
 {
 }
 
@@ -58,12 +59,12 @@ PageDebuggerAgent::~PageDebuggerAgent()
 
 void PageDebuggerAgent::startListeningScriptDebugServer()
 {
-    scriptDebugServer().addListener(this, m_page);
+    scriptDebugServer().addListener(this, m_host);
 }
 
 void PageDebuggerAgent::stopListeningScriptDebugServer()
 {
-    scriptDebugServer().removeListener(this, m_page);
+    scriptDebugServer().removeListener(this, m_host);
 }
 
 PageScriptDebugServer& PageDebuggerAgent::scriptDebugServer()
@@ -84,7 +85,7 @@ void PageDebuggerAgent::unmuteConsole()
 InjectedScript PageDebuggerAgent::injectedScriptForEval(ErrorString* errorString, const int* executionContextId)
 {
     if (!executionContextId) {
-        ScriptState* scriptState = ScriptState::forMainWorld(m_page->mainFrame());
+        ScriptState* scriptState = ScriptState::from(m_host->GetContext());
         return injectedScriptManager()->injectedScriptFor(scriptState);
     }
     InjectedScript injectedScript = injectedScriptManager()->injectedScriptForId(*executionContextId);

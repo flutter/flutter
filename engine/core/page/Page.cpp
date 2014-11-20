@@ -49,37 +49,6 @@ namespace blink {
 
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, pageCounter, ("Page"));
 
-// static
-HashSet<Page*>& Page::allPages()
-{
-    DEFINE_STATIC_LOCAL(HashSet<Page*>, allPages, ());
-    return allPages;
-}
-
-// static
-HashSet<Page*>& Page::ordinaryPages()
-{
-    DEFINE_STATIC_LOCAL(HashSet<Page*>, ordinaryPages, ());
-    return ordinaryPages;
-}
-
-
-void Page::networkStateChanged(bool online)
-{
-    Vector<RefPtr<LocalFrame> > frames;
-
-    // Get all the frames of all the pages in all the page groups
-    HashSet<Page*>::iterator end = allPages().end();
-    for (HashSet<Page*>::iterator it = allPages().begin(); it != end; ++it) {
-        LocalFrame* frame = (*it)->mainFrame();
-        frames.append(frame);
-    }
-
-    AtomicString eventName = online ? EventTypeNames::online : EventTypeNames::offline;
-    for (unsigned i = 0; i < frames.size(); i++)
-        frames[i]->domWindow()->dispatchEvent(Event::create(eventName));
-}
-
 float deviceScaleFactor(LocalFrame* frame)
 {
     if (!frame)
@@ -110,11 +79,9 @@ Page::Page(PageClients& pageClients, ServiceProvider& services)
     , m_isPainting(false)
 #endif
     , m_frameHost(FrameHost::create(*this, services))
+    , m_inspectorHost(0)
 {
     ASSERT(m_editorClient);
-
-    ASSERT(!allPages().contains(this));
-    allPages().add(this);
 
 #ifndef NDEBUG
     pageCounter.increment();
@@ -125,12 +92,6 @@ Page::~Page()
 {
     // willBeDestroyed() must be called before Page destruction.
     ASSERT(!m_mainFrame);
-}
-
-void Page::makeOrdinary()
-{
-    ASSERT(!ordinaryPages().contains(this));
-    ordinaryPages().add(this);
 }
 
 void Page::setMainFrame(LocalFrame* mainFrame)
@@ -156,15 +117,6 @@ bool Page::openedByDOM() const
 void Page::setOpenedByDOM()
 {
     m_openedByDOM = true;
-}
-
-void Page::scheduleForcedStyleRecalcForAllPages()
-{
-    HashSet<Page*>::iterator end = allPages().end();
-    for (HashSet<Page*>::iterator it = allPages().begin(); it != end; ++it) {
-        LocalFrame* frame = (*it)->mainFrame();
-        frame->document()->setNeedsStyleRecalc(SubtreeStyleChange);
-    }
 }
 
 void Page::setNeedsRecalcStyleInAllFrames()
@@ -333,10 +285,6 @@ void Page::willBeDestroyed()
 
     mainFrame->detach();
     mainFrame->setView(nullptr);
-
-    allPages().remove(this);
-    if (ordinaryPages().contains(this))
-        ordinaryPages().remove(this);
 
 #ifndef NDEBUG
     pageCounter.decrement();

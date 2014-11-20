@@ -36,6 +36,11 @@
 #include "wtf/Noncopyable.h"
 #include "wtf/text/WTFString.h"
 
+// FIXME: Page should not need to know anything about InspectorHost.
+namespace inspector {
+class InspectorHost;
+}
+
 namespace blink {
 
 class AutoscrollController;
@@ -53,12 +58,12 @@ class PlatformMouseEvent;
 class Range;
 class RenderBox;
 class RenderObject;
-class VisibleSelection;
 class ScrollableArea;
 class ServiceProvider;
 class Settings;
 class SpellCheckerClient;
 class UndoStack;
+class VisibleSelection;
 
 typedef uint64_t LinkHash;
 
@@ -68,8 +73,6 @@ class Page final : public Supplementable<Page>, public LifecycleContext<Page>, p
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
 public:
-    static void scheduleForcedStyleRecalcForAllPages();
-
     // It is up to the platform to ensure that non-null clients are provided where required.
     struct PageClients {
         WTF_MAKE_NONCOPYABLE(PageClients); WTF_MAKE_FAST_ALLOCATED;
@@ -85,15 +88,12 @@ public:
     Page(PageClients&, ServiceProvider&);
     virtual ~Page();
 
-    void makeOrdinary();
-
-    // This method returns all pages, incl. private ones associated with
-    // inspector overlay, popups, SVGImage, etc.
-    static HashSet<Page*>& allPages();
-    // This method returns all ordinary pages.
-    static HashSet<Page*>& ordinaryPages();
-
     FrameHost& frameHost() const { return *m_frameHost; }
+
+    // FIXME(sky): This is only needed by PageDebuggerAgent to be able to look
+    // up the InspectorHost from the frame associated with a v8 context.
+    inspector::InspectorHost* inspectorHost() const { return m_inspectorHost; }
+    void setInspectorHost(inspector::InspectorHost* host) { m_inspectorHost = host; }
 
     void setNeedsRecalcStyleInAllFrames();
     void updateAcceleratedCompositingSettings();
@@ -153,7 +153,6 @@ public:
 
     void acceptLanguagesChanged();
 
-    static void networkStateChanged(bool online);
     PassOwnPtr<LifecycleNotifier<Page> > createLifecycleNotifier();
 
     void willBeDestroyed();
@@ -218,6 +217,7 @@ private:
     // A pointer to all the interfaces provided to in-process Frames for this Page.
     // FIXME: Most of the members of Page should move onto FrameHost.
     OwnPtr<FrameHost> m_frameHost;
+    inspector::InspectorHost* m_inspectorHost;
 };
 
 } // namespace blink

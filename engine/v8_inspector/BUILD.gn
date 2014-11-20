@@ -18,6 +18,7 @@ component("v8_inspector") {
     "//sky/engine/platform", # FIXME: Remove.
     "//sky/engine/public:sky_headers",
     "//sky/services/inspector:bindings",
+    "//sky/engine/core:core_generated", # FIXME: Remove.
   ]
 
   configs += [
