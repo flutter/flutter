@@ -5,6 +5,7 @@
 #ifndef SKY_COMPOSITOR_LAYER_HOST_CLIENT_H_
 #define SKY_COMPOSITOR_LAYER_HOST_CLIENT_H_
 
+#include "base/time/time.h"
 #include "mojo/services/public/interfaces/surfaces/surface_id.mojom.h"
 
 namespace mojo {
@@ -16,7 +17,7 @@ namespace sky {
 class LayerHostClient {
  public:
   virtual mojo::Shell* GetShell() = 0;
-  virtual void BeginFrame() = 0;
+  virtual void BeginFrame(base::TimeTicks frame_time) = 0;
   virtual void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) = 0;
 
  protected:

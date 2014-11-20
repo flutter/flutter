@@ -5,6 +5,7 @@
 #include "sky/compositor/surface_holder.h"
 
 #include "base/bind.h"
+#include "base/message_loop/message_loop.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
@@ -58,7 +59,6 @@ void SurfaceHolder::ReturnResources(
   if (!resources.size())
     return;
   client_->ReturnResources(resources.Pass());
-  client_->OnReadyForNextFrame();
 }
 
 void SurfaceHolder::OnSurfaceConnectionCreated(mojo::SurfacePtr surface,
@@ -66,8 +66,6 @@ void SurfaceHolder::OnSurfaceConnectionCreated(mojo::SurfacePtr surface,
   surface_ = surface.Pass();
   surface_.set_client(this);
   surface_allocator_.reset(new SurfaceAllocator(id_namespace));
-
-  client_->OnReadyForNextFrame();
 }
 
 }  // namespace sky

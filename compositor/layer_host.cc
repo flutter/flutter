@@ -4,6 +4,7 @@
 
 #include "sky/compositor/layer_host.h"
 
+#include "base/message_loop/message_loop.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/services/public/cpp/surfaces/surfaces_utils.h"
@@ -17,25 +18,23 @@ LayerHost::LayerHost(LayerHostClient* client)
       surface_holder_(this, client->GetShell()),
       gl_context_(mojo::GLContext::Create(client->GetShell())),
       ganesh_context_(gl_context_),
-      resource_manager_(gl_context_) {
+      resource_manager_(gl_context_),
+      scheduler_(this, base::MessageLoop::current()->task_runner()) {
+  scheduler_.UpdateVSync(
+      TimeInterval(base::TimeTicks(), base::TimeDelta::FromSecondsD(1.0 / 60)));
 }
 
 LayerHost::~LayerHost() {
 }
 
 void LayerHost::SetNeedsAnimate() {
+  scheduler_.SetNeedsFrame();
 }
 
 void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
   DCHECK(!root_layer_.get());
   root_layer_ = layer;
   root_layer_->set_host(this);
-}
-
-void LayerHost::OnReadyForNextFrame() {
-  client_->BeginFrame();
-  root_layer_->Display();
-  Upload(root_layer_.get());
 }
 
 void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
@@ -45,6 +44,13 @@ void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
 void LayerHost::ReturnResources(
     mojo::Array<mojo::ReturnedResourcePtr> resources) {
   resource_manager_.ReturnResources(resources.Pass());
+}
+
+void LayerHost::BeginFrame(base::TimeTicks frame_time,
+                           base::TimeTicks deadline) {
+  client_->BeginFrame(frame_time);
+  root_layer_->Display();
+  Upload(root_layer_.get());
 }
 
 void LayerHost::Upload(Layer* layer) {
