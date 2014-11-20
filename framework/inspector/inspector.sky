@@ -29,6 +29,7 @@ function InspectorBackend(frontend) {
 InspectorBackend.prototype = Object.create(
     inspector.InspectorBackend.stubClass.prototype);
 
+InspectorBackend.prototype.IMPLEMENTED_IN_CPP = "IMPLEMENTED_IN_CPP";
 InspectorBackend.prototype.ASYNC_RESPONSE = "ASYNC_RESPONSE";
 InspectorBackend.prototype.MESSAGE_TIMEOUT_MS = 30000;
 
@@ -53,7 +54,7 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params, message_id) 
 
   // Debugger is implemented in c++.
   if (agentName == "Debugger")
-    return;
+    return this.IMPLEMENTED_IN_CPP;
 
   if (!(agentName in this.agents)) {
     this.logMissing_(agentName);
@@ -77,6 +78,8 @@ InspectorBackend.prototype.dispatch_ = function(descriptor, params, message_id) 
 InspectorBackend.prototype.onMessage = function(data) {
   var message = JSON.parse(data);
   var result = this.dispatch_(message.method, message.params, message.id);
+  if (result === this.IMPLEMENTED_IN_CPP)
+      return;
   this.unansweredMessages_.push(message.id);
   // FIXME: This magic return value is kinda hacky.
   if (result != this.ASYNC_RESPONSE)
