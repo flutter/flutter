@@ -191,16 +191,6 @@ static void timerTraceProfilerInMainThread(const char* name, int status)
     }
 }
 
-static void initializeV8Common(v8::Isolate* isolate)
-{
-    v8::V8::AddGCPrologueCallback(V8GCController::gcPrologue);
-    v8::V8::AddGCEpilogueCallback(V8GCController::gcEpilogue);
-
-    v8::Debug::SetLiveEditEnabled(isolate, false);
-
-    isolate->SetAutorunMicrotasks(false);
-}
-
 void V8Initializer::initializeMainThreadIfNeeded()
 {
     ASSERT(isMainThread());
@@ -210,11 +200,19 @@ void V8Initializer::initializeMainThreadIfNeeded()
         return;
     initialized = true;
 
+    static const char v8Flags[] = "--harmony-classes";
+    v8::V8::SetFlagsFromString(v8Flags, sizeof(v8Flags) - 1);
+
     gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode, v8ArrayBufferAllocator());
 
     v8::Isolate* isolate = V8PerIsolateData::initialize();
 
-    initializeV8Common(isolate);
+    v8::V8::AddGCPrologueCallback(V8GCController::gcPrologue);
+    v8::V8::AddGCEpilogueCallback(V8GCController::gcEpilogue);
+
+    v8::Debug::SetLiveEditEnabled(isolate, false);
+
+    isolate->SetAutorunMicrotasks(false);
 
     v8::V8::SetFatalErrorHandler(reportFatalErrorInMainThread);
     v8::V8::AddMessageListener(messageHandlerInMainThread);
