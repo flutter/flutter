@@ -26,6 +26,8 @@ HTMLIFrameElement::HTMLIFrameElement(Document& document)
 
 HTMLIFrameElement::~HTMLIFrameElement()
 {
+    if (m_contentView)
+        m_contentView->RemoveObserver(this);
 }
 
 Node::InsertionNotificationRequest HTMLIFrameElement::insertedInto(ContainerNode* insertionPoint)
@@ -39,9 +41,8 @@ Node::InsertionNotificationRequest HTMLIFrameElement::insertedInto(ContainerNode
 void HTMLIFrameElement::removedFrom(ContainerNode* insertionPoint)
 {
     HTMLElement::removedFrom(insertionPoint);
-    if (insertionPoint->inDocument()) {
-        // TODO(mpcomplete): Tear down the mojo View.
-    }
+    if (m_contentView)
+        m_contentView->Destroy();
 }
 
 RenderObject* HTMLIFrameElement::createRenderer(RenderStyle* style)
@@ -67,6 +68,8 @@ void HTMLIFrameElement::createView()
 
     KURL url = document().completeURL(urlString);
     m_contentView = parentFrame->loaderClient()->createChildFrame(url);
+    if (m_contentView)
+        m_contentView->AddObserver(this);
 }
 
 }
