@@ -74,6 +74,7 @@ class SkyTester : public mojo::ApplicationDelegate,
     content_ = mojo::View::Create(view_manager_);
     content_->SetBounds(root_->bounds());
     root_->AddChild(content_);
+    content_->SetVisible(true);
 
     std::cout << "#READY\n";
     std::cout.flush();
