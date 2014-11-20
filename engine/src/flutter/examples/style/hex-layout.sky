@@ -69,22 +69,20 @@
      let loop = children.next();
      while (!loop.done) {
        let child = loop.value;
-       if (child.needsPaint || child.descendantNeedsPaint) {
-         canvas.save();
-         try {
-           canvas.beginPath();
-           canvas.moveTo(child.x, child.y + cellDim/4);
-           canvas.lineTo(child.x + cellDim/2, child.y);
-           canvas.lineTo(child.x + cellDim, child.y + cellDim/4);
-           canvas.lineTo(child.x + cellDim, child.y + 3*cellDim/4);
-           canvas.lineTo(child.x + cellDim/2, child.y + cellDim);
-           canvas.moveTo(child.x, child.y + 3*cellDim/4);
-           canvas.closePath();
-           canvas.clip();
-           this.paintChild(child);
-         } finally {
-           canvas.restore();
-         }
+       canvas.save();
+       try {
+         canvas.beginPath();
+         canvas.moveTo(child.x, child.y + cellDim/4);
+         canvas.lineTo(child.x + cellDim/2, child.y);
+         canvas.lineTo(child.x + cellDim, child.y + cellDim/4);
+         canvas.lineTo(child.x + cellDim, child.y + 3*cellDim/4);
+         canvas.lineTo(child.x + cellDim/2, child.y + cellDim);
+         canvas.moveTo(child.x, child.y + 3*cellDim/4);
+         canvas.closePath();
+         canvas.clip();
+         canvas.paintChild(child);
+       } finally {
+         canvas.restore();
        }
        loop = children.next();
      }

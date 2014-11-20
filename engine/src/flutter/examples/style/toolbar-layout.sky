@@ -188,9 +188,9 @@ SKY MODULE
      let children = this.walkChildren();
      let loop = children.next();
      while ((!loop.done) && (loop.value != this.firstSkippedChild))
-       this.paintChild(loop.value, canvas);
+       canvas.paintChild(loop.value);
      if (this.showingOverflow)
-       this.paintChild(this.overflowChild, canvas);
+       canvas.paintChild(this.overflowChild);
    }
    function inChild(child, x, y) {
      return (x >= child.x) && (y >= child.y) && (x < child.x+child.width) && (y < child.y+child.height);
