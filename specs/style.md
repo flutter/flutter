@@ -365,14 +365,6 @@ class StyleNode {
     // if you are not the ownerLayoutManager, then ignore this StyleNode in layout() and paintChildren()
     // using walkChildren() does this for you
 
-  readonly attribute Boolean needsPaint;
-    // means that either needsLayout is true or a property with needsPaint:true has changed on this node
-    // needsPaint is set to false by the ownerLayoutManager's default paint() method
-
-  readonly attribute Boolean descendantNeedsPaint;
-    // means that some child of this node has needsPaint set to true
-    // descendantNeedsPaint is set to false by the ownerLayoutManager's default paint() method
-
   // only the ownerLayoutManager can change these
   readonly attribute Float x; // relative to left edge of ownerLayoutManager
   readonly attribute Float y; // relative to top edge of ownerLayoutManager
@@ -439,7 +431,6 @@ class LayoutManager {
   void setChildSize(child, width, height); // sets child.width, child.height
   void setChildWidth(child, width); // sets child.width
   void setChildHeight(child, height); // sets child.height
-    // these set needsPaint on the node and on any node impacted by this (?)
     // for setChildSize/Width/Height: if the new dimension is different than the last assumed dimensions, and
     // any StyleNodes with an ownerLayoutManager==this have cached values for getProperty() that are marked
     // as provisional, clear them
@@ -531,29 +522,27 @@ class LayoutManager {
     // default implementation does nothing
     // - override this if you want to lay out children but not have the children affect your dimensions
 
-  void markAsPainted(); // sets this.node.needsPaint and this.node.descendantNeedsPaint to false
   virtual void paint(RenderingSurface canvas);
-    // if needsPaint:
-    //   set a clip rect on the canvas for rect(0,0,this.width,this.height)
-    //   call the painter of each property, in order they were registered, which on this element has a painter
+    // set a clip rect on the canvas for rect(0,0,this.width,this.height)
+    // call the painter of each property, in order they were registered, which on this element has a painter
     // call this.paintChildren(canvas)
     // (the default implementation doesn't paint anything on top of the children)
     // unset the clip
-    // call markAsPainted()
+    // - this gets called by the system if:
+    //    - you are in your parent's current display list and it's in its parent's and so on up to the top, and
+    //    - you haven't had paint() called since the last time you were dirtied
+    // - the following things make you dirty:
+    //    - dimensions of your style node changed
+    //    - one of your properties with needsLayout or needsPaint changed
 
   virtual void paintChildren(RenderingSurface canvas);
-    // if this.needsPaint or this.descendantNeedsPaint:
-    //   for each child returned by walkChildren():
-    //     call this.paintChild(canvas, child)
+    // for each child returned by walkChildren():
+    //   if child bounds intersects our bounds:
+    //     call canvas.paintChild(child);
     // - you should skip children that will be clipped out of yourself because they're outside your bounds
-
-  virtual void paintChild(RenderingSurface canvas, LayoutManager child);
-    // if this.needsPaint():
-    //   insert a "paint this child" instruction in our canvas instruction list (we should probably make sure we expose that API directly, too)
-    // if child.needsPaint or child.descendantNeedsPaint:
-    //   start a new canvas for the child:
-    //   transform the coordinate space by translate(child.x, child.y)
-    //     call child.paint(canvas)
+    // - if you transform the canvas, you'll have to implement your own version of paintChildren() so
+    //   that you don't skip the children that are visible in the new coordinate space but wouldn't be
+    //   without the transform
 
   virtual Node hitTest(Float x, Float y);
     // default implementation uses the node's children nodes' x, y,
@@ -581,14 +570,6 @@ dictionary Dimensions {
 }
 ```
 
-Given a tree of StyleNode objects rooted at /node/, the application is
-rendered as follows:
-
-```javascript
-node.layoutManager.layout(screen.width, screen.height);
-node.layoutManager.paint();
-```
-
 
 Paint
 -----
@@ -597,13 +578,15 @@ Paint
 callback void Painter (StyleNode node, RenderingSurface canvas);
 
 class RenderingSurface {
-  // ...
+
+  // ... (API similar to <canvas>'s 2D API)
+
+  void paintChild(StyleNode node);
+    // inserts a "paint this child" instruction in this canvas's display list.
+    // the child's display list, transformed by the child's x and y coordinates, will be inserted into this
+    // display list during painting.
 }
 ```
-
-The convention is that the layout manager who calls your paint will
-have transformed the coordinate space so that you should assume that
-your top-left pixel is at 0,0.
 
 
 Default Styles
