@@ -29,7 +29,7 @@
  */
 
 #include "sky/engine/config.h"
-#include "sky/engine/bindings/core/v8/PageScriptDebugServer.h"
+#include "sky/engine/v8_inspector/PageScriptDebugServer.h"
 
 #include "gen/sky/bindings/core/v8/V8Window.h"
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"

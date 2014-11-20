@@ -1069,8 +1069,6 @@ sky_core_files = [
   "inspector/JavaScriptCallFrame.h",
   "inspector/JSONParser.cpp",
   "inspector/JSONParser.h",
-  "inspector/PageDebuggerAgent.cpp",
-  "inspector/PageDebuggerAgent.h",
   "inspector/PromiseTracker.cpp",
   "inspector/PromiseTracker.h",
   "inspector/ScriptArguments.cpp",

@@ -30,5 +30,9 @@ component("v8_inspector") {
   sources = [
     "inspector_backend_mojo.cc",
     "inspector_backend_mojo.h",
+    "PageDebuggerAgent.cpp",
+    "PageDebuggerAgent.h",
+    "PageScriptDebugServer.cpp",
+    "PageScriptDebugServer.h",
   ]
 }

@@ -129,8 +129,6 @@
             'WindowProxy.cpp',
             'WindowProxy.h',
             'WrapperTypeInfo.h',
-            'PageScriptDebugServer.h',
-            'PageScriptDebugServer.cpp',
         ],
     },
 }

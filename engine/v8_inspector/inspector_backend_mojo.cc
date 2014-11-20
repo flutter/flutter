@@ -11,13 +11,13 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "sky/engine/bindings/core/v8/PageScriptDebugServer.h"
 #include "sky/engine/core/inspector/InspectorFrontendChannel.h"
 #include "sky/engine/core/inspector/InspectorState.h"
 #include "sky/engine/core/inspector/InstrumentingAgents.h"
-#include "sky/engine/core/inspector/PageDebuggerAgent.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/v8_inspector/inspector_host.h"
+#include "sky/engine/v8_inspector/PageDebuggerAgent.h"
+#include "sky/engine/v8_inspector/PageScriptDebugServer.h"
 
 namespace blink {
 

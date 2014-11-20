@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/inspector/PageDebuggerAgent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/v8_inspector/PageDebuggerAgent.h"
 
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 #include "sky/engine/bindings/core/v8/ScriptController.h"

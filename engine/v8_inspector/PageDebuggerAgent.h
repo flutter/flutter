@@ -31,8 +31,8 @@
 #ifndef PageDebuggerAgent_h
 #define PageDebuggerAgent_h
 
-#include "bindings/core/v8/PageScriptDebugServer.h"
-#include "core/inspector/InspectorDebuggerAgent.h"
+#include "sky/engine/core/inspector/InspectorDebuggerAgent.h"
+#include "sky/engine/v8_inspector/PageScriptDebugServer.h"
 
 // This whole file will move to namespace inspector.
 namespace inspector {
