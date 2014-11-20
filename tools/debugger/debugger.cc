@@ -59,6 +59,7 @@ void SkyDebugger::OnEmbed(
   content_ = mojo::View::Create(view_manager_);
   content_->SetBounds(root_->bounds());
   root_->AddChild(content_);
+  content_->SetVisible(true);
 
   window_manager_app_->InitFocus(
       scoped_ptr<mojo::FocusRules>(new mojo::BasicFocusRules(content_)));

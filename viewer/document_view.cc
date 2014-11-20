@@ -169,6 +169,7 @@ mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
     return nullptr;
 
   mojo::View* child = mojo::View::Create(root_->view_manager());
+  child->SetVisible(true);
   root_->AddChild(child);
   child->Embed(mojo::String::From(url.string().utf8()));
 
