@@ -38,6 +38,7 @@ static_library("compositor") {
     "//mojo/services/public/interfaces/surfaces:surface_id",
     "//mojo/skia",
     "//skia",
+    "//sky/scheduler",
     "//ui/gfx/geometry",
   ]
 }

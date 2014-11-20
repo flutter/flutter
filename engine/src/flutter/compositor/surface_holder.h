@@ -23,7 +23,6 @@ class SurfaceHolder : public mojo::SurfaceClient {
  public:
   class Client {
    public:
-    virtual void OnReadyForNextFrame() = 0;
     virtual void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) = 0;
     virtual void ReturnResources(
         mojo::Array<mojo::ReturnedResourcePtr> resources) = 0;

@@ -11,13 +11,14 @@
 #include "sky/compositor/layer_host_client.h"
 #include "sky/compositor/resource_manager.h"
 #include "sky/compositor/surface_holder.h"
+#include "sky/scheduler/scheduler.h"
 
 namespace sky {
 class ResourceManager;
 class Layer;
 class LayerHostClient;
 
-class LayerHost : public SurfaceHolder::Client {
+class LayerHost : public SurfaceHolder::Client, public Scheduler::Client {
  public:
   explicit LayerHost(LayerHostClient* client);
   ~LayerHost();
@@ -41,10 +42,13 @@ class LayerHost : public SurfaceHolder::Client {
 
  private:
   // SurfaceHolder::Client
-  void OnReadyForNextFrame() override;
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;
+
+  // Scheduler::Client
+  void BeginFrame(base::TimeTicks frame_time,
+                  base::TimeTicks deadline) override;
 
   void Upload(Layer* layer);
 
@@ -53,6 +57,7 @@ class LayerHost : public SurfaceHolder::Client {
   base::WeakPtr<mojo::GLContext> gl_context_;
   mojo::GaneshContext ganesh_context_;
   ResourceManager resource_manager_;
+  Scheduler scheduler_;
 
   scoped_refptr<Layer> root_layer_;
 
