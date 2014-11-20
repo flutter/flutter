@@ -11,7 +11,7 @@ component("cc") {
     "//cc",
     "//gpu",
     "//skia",
-    "//sky/engine/public:blink",
+    "//sky/engine",
     "//ui/gfx",
     "//ui/gfx/geometry",
   ]

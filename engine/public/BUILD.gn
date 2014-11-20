@@ -4,14 +4,6 @@
 
 import("//tools/grit/grit_rule.gni")
 
-group("blink") {
-  deps = [
-    ":sky_headers",
-    "//sky/engine/web",
-    "//sky/engine/platform",
-  ]
-}
-
 group("test_support") {
   deps = [
     "//sky/engine/web:test_support",

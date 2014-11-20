@@ -69,7 +69,7 @@ mojo_native_application("viewer") {
     "//mojo/services/public/interfaces/surfaces",
     "//net",
     "//skia",
-    "//sky/engine/public:blink",
+    "//sky/engine",
     "//sky/scheduler",
     "//sky/services/inspector:bindings",
     "//sky/services/testing:bindings",

@@ -73,3 +73,12 @@ config("non_test_config") {
     cflags += [ "-Wglobal-constructors" ]
   }
 }
+
+group("engine") {
+  deps = [
+    "//sky/engine/public:sky_headers",
+    "//sky/engine/web",
+    "//sky/engine/platform",
+    "//sky/engine/v8_inspector",
+  ]
+}

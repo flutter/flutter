@@ -19,7 +19,7 @@ static_library("platform") {
   deps = [
     "//base",
     "//net",
-    "//sky/engine/public:blink",
+    "//sky/engine",
     "//ui/native_theme",
     "//url",
     "//skia",
