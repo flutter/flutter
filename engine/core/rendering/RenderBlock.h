@@ -284,10 +284,6 @@ private:
 
     virtual bool isRenderBlock() const override final { return true; }
 
-    void makeChildrenNonInline(RenderObject* insertionPoint = 0);
-
-    static void collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* child);
-
     virtual void dirtyLinesFromChangedChild(RenderObject* child) override final { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
 
     void addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild = 0);
@@ -345,8 +341,6 @@ protected:
     void offsetForContents(LayoutPoint&) const;
 
     virtual bool updateLogicalWidthAndColumnWidth();
-
-    virtual bool canCollapseAnonymousBlockChild() const { return true; }
 
 protected:
     RenderObjectChildList m_children;

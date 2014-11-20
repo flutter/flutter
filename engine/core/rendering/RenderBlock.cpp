@@ -307,31 +307,6 @@ void RenderBlock::deleteLineBoxTree()
     ASSERT(!m_lineBoxes.firstLineBox());
 }
 
-void RenderBlock::makeChildrenNonInline(RenderObject *insertionPoint)
-{
-    ASSERT_NOT_REACHED();
-    // FIXME(sky): Remove
-}
-
-void RenderBlock::collapseAnonymousBlockChild(RenderBlock* parent, RenderBlock* child)
-{
-    // It's possible that this block's destruction may have been triggered by the
-    // child's removal. Just bail if the anonymous child block is already being
-    // destroyed. See crbug.com/282088
-    if (child->beingDestroyed())
-        return;
-    parent->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
-    parent->setChildrenInline(child->childrenInline());
-    RenderObject* nextSibling = child->nextSibling();
-
-    parent->children()->removeChildNode(parent, child, child->hasLayer());
-    child->moveAllChildrenTo(parent, nextSibling, child->hasLayer());
-    // Explicitly delete the child's line box tree, or the special anonymous
-    // block handling in willBeDestroyed will cause problems.
-    child->deleteLineBoxTree();
-    child->destroy();
-}
-
 void RenderBlock::removeChild(RenderObject* oldChild)
 {
     RenderBox::removeChild(oldChild);
