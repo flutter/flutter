@@ -39,7 +39,7 @@
 #include "core/events/EventTarget.h"
 #include "wtf/text/StringBuilder.h"
 #include "wtf/text/StringHash.h"
-#include <v8.h>
+#include "v8/include/v8.h"
 
 namespace {
 

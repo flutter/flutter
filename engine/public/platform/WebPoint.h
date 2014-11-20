@@ -36,7 +36,7 @@
 #if INSIDE_BLINK
 #include "platform/geometry/IntPoint.h"
 #else
-#include <ui/gfx/geometry/point.h>
+#include "ui/gfx/geometry/point.h"
 #endif
 
 namespace blink {

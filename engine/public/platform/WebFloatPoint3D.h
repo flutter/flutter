@@ -11,7 +11,7 @@
 #if INSIDE_BLINK
 #include "platform/geometry/FloatPoint3D.h"
 #else
-#include <ui/gfx/geometry/point3_f.h>
+#include "ui/gfx/geometry/point3_f.h"
 #endif
 
 namespace blink {

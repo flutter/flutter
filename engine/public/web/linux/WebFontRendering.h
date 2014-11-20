@@ -32,8 +32,8 @@
 #define WebFontRendering_h
 
 #include "../../platform/WebCommon.h"
-#include <SkFontHost.h>
-#include <SkPaint.h>
+#include "third_party/skia/include/core/SkFontHost.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 namespace blink {
 

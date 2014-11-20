@@ -38,9 +38,9 @@
 #if INSIDE_BLINK
 #include "wtf/Forward.h"
 #else
-#include <base/strings/latin1_string_conversions.h>
-#include <base/strings/nullable_string16.h>
-#include <base/strings/string16.h>
+#include "base/strings/latin1_string_conversions.h"
+#include "base/strings/nullable_string16.h"
+#include "base/strings/string16.h"
 #endif
 
 namespace WTF {

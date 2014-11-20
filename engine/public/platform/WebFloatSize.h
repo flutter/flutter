@@ -39,8 +39,8 @@
 #include "platform/geometry/FloatSize.h"
 #else
 #include <cmath>
-#include <ui/gfx/geometry/size_f.h>
-#include <ui/gfx/vector2d_f.h>
+#include "ui/gfx/geometry/size_f.h"
+#include "ui/gfx/vector2d_f.h"
 #endif
 
 namespace blink {

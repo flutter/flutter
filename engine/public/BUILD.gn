@@ -21,6 +21,10 @@ source_set("sky_headers") {
     ":sky_headers_config",
   ]
 
+  deps = [
+    "//ui/gfx/geometry",
+  ]
+
   public = [
     "platform/Platform.h",
     "platform/ServiceProvider.h",

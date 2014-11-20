@@ -27,10 +27,10 @@
 #ifndef ScriptRegexp_h
 #define ScriptRegexp_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/text/WTFString.h"
-#include <v8.h>
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "v8/include/v8.h"
 
 namespace blink {
 

@@ -30,12 +30,12 @@
 #ifndef InjectedScriptManager_h
 #define InjectedScriptManager_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/WTFString.h"
-#include <v8.h>
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "v8/include/v8.h"
 
 namespace blink {
 

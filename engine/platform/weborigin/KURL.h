@@ -26,13 +26,13 @@
 #ifndef KURL_h
 #define KURL_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Forward.h"
-#include "wtf/HashTableDeletedValueType.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/text/WTFString.h"
-#include <url/third_party/mozilla/url_parse.h>
-#include <url/url_canon.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "url/third_party/mozilla/url_parse.h"
+#include "url/url_canon.h"
 
 namespace WTF {
 class TextEncoding;

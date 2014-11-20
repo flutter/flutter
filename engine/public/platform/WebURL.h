@@ -33,10 +33,10 @@
 
 #include "WebCString.h"
 #include "WebString.h"
-#include <url/third_party/mozilla/url_parse.h>
+#include "url/third_party/mozilla/url_parse.h"
 
 #if !INSIDE_BLINK
-#include <url/gurl.h>
+#include "url/gurl.h"
 #endif
 
 namespace blink {
