@@ -1,0 +1,163 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<script>
+describe("ES6 classes", function() {
+  it("should create instances", function() {
+    class Example {}
+    var instance = new Example();
+    assert.instanceOf(instance, Example);
+  });
+
+  it("should create subclasses", function() {
+    class Parent {}
+    class Child extends Parent {}
+    var instance = new Child();
+    assert.instanceOf(instance, Child);
+    assert.instanceOf(instance, Parent);
+  });
+
+  it("should create anonymous classes", function() {
+    var Parent = class {}
+    var Child = class extends Parent {}
+    var instance = new Child();
+    assert.instanceOf(instance, Child);
+    assert.instanceOf(instance, Parent);
+  });
+
+  it("should put methods on the prototype", function() {
+    class Test {
+      exampleMethod() { }
+    }
+    var instance = new Test();
+    assert.isFalse(instance.hasOwnProperty("exampleMethod"));
+    var proto = Object.getPrototypeOf(instance);
+    assert.isTrue(proto.hasOwnProperty("exampleMethod"));
+  });
+
+  it("should call methods with |this|", function() {
+    class Adder {
+      constructor(value) {
+        this.value = value;
+      }
+      add(other) {
+        return this.value + other;
+      }
+    }
+
+    var adder = new Adder(10);
+    assert.equal(adder.add(15), 25);
+  });
+
+  it("should let toMethod rebind super", function() {
+    var getValue = function() {
+      assert.isFunction(this.value);
+      assert.isFunction(this.superValue);
+      return this.value() + super.superValue();
+    }
+
+    class HolderParent {
+      superValue() {
+        return 5;
+      }
+    }
+
+    class Holder extends HolderParent {
+      constructor() {
+        this.value_ = 5;
+      }
+      value() {
+        return this.value_;
+      }
+    }
+
+    var holder = new Holder();
+    var getValueMethod = getValue.toMethod(Holder.prototype);
+    assert.equal(getValueMethod.call(holder), 10);
+  });
+
+  it("should support super() constructor calls", function() {
+    class Parent {
+      constructor(value) {
+        this.value = value;
+      }
+    }
+
+    class Child extends Parent {
+      constructor(value) {
+        super(value + 5);
+      }
+    }
+
+    var child = new Child(10);
+    assert.equal(child.value, 15);
+  });
+
+  it("should automatically call super() in default constructor", function() {
+    class Parent {
+      constructor() {
+        this.value = 10;
+      }
+    }
+
+    class Child extends Parent {
+    }
+
+    var child = new Child();
+    assert.equal(child.value, 10);
+  });
+
+  it("should call super.method()", function() {
+    class Parent {
+      value() {
+        return 10;
+      }
+    }
+
+    class Child extends Parent {
+      value() {
+        return super.value() + 5;
+      }
+    }
+
+    var child = new Child();
+    assert.equal(child.value(), 15);
+  });
+
+  it("should support getters and setters", function() {
+    class Variable {
+      constructor(value) {
+        this.value_ = value;
+      }
+
+      get value() {
+        return this.value_;
+      }
+
+      set value(newValue) {
+        this.value_ = newValue;
+      }
+    }
+
+    var variable = new Variable("first");
+
+    // Methods are on the prototype.
+    var proto = Object.getPrototypeOf(variable);
+    var descriptor = Object.getOwnPropertyDescriptor(proto, "value");
+    assert.isObject(descriptor);
+    assert.isFunction(descriptor.get);
+    assert.isFunction(descriptor.set);
+    assert.isUndefined(descriptor.value);
+
+    // Getter and setter should not be on the instance.
+    assert.isUndefined(Object.getOwnPropertyDescriptor(variable, "value"));
+
+    assert.equal(variable.value, "first");
+    assert.equal(variable.value_, "first");
+    variable.value = "second";
+    assert.equal(variable.value, "second");
+    assert.equal(variable.value_, "second");
+  });
+});
+</script>
+</sky>
