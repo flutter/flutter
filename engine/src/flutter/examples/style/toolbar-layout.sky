@@ -204,6 +204,7 @@ SKY MODULE
      if (this.showingOverflow)
        if (this.inChild(this.overflowChild, x, y))
          return this.overflowChild;
+     return this.node;
    }
  }
  sky.registerLayoutManager('toolbar', module.exports.ToolbarLayoutManager);
