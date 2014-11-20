@@ -25,6 +25,9 @@ component("web") {
   deps = [
     "//sky/engine/core",
     "//sky/engine/platform",
+    # FIXME: v8_inspector should not depend on core types and be separate
+    # from both web and core.
+    "//sky/engine/v8_inspector",
   ]
 
   configs += [

@@ -32,7 +32,6 @@
 #define WebViewImpl_h
 
 #include "core/html/ime/InputMethodContext.h"
-#include "core/inspector/inspector_backend_mojo.h"
 #include "platform/geometry/IntPoint.h"
 #include "platform/geometry/IntRect.h"
 #include "platform/graphics/GraphicsLayer.h"
@@ -63,6 +62,7 @@ class WebActiveGestureAnimation;
 class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
+class InspectorBackendMojo;
 
 class WebViewImpl final : public WebView
     , public RefCounted<WebViewImpl>
@@ -451,6 +451,8 @@ private:
 
     bool m_userGestureObserved;
 
+    // FIXME(sky): InspectorBackendMojo should be a peer to WebView
+    // however right now it depends on acccess to the Page.
     OwnPtr<InspectorBackendMojo> m_inspectorBackend;
 };
 

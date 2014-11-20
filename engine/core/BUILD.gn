@@ -26,7 +26,6 @@ source_set("libraries") {
     "//mojo/services/public/interfaces/navigation",
     "//skia",
     "//sky/engine/wtf",
-    "//sky/services/inspector:bindings",
     "//third_party/angle:translator",
     "//third_party/iccjpeg",
     "//third_party/libpng",

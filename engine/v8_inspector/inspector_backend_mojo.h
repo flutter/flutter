@@ -20,14 +20,14 @@ class InstrumentingAgents;
 class InspectorFrontend;
 
 class InspectorBackendMojo : public mojo::InterfaceImpl<sky::InspectorBackend>,
-    public InspectorFrontendChannel {
-public:
+                             public InspectorFrontendChannel {
+ public:
   explicit InspectorBackendMojo(const FrameHost& frame_host);
   ~InspectorBackendMojo();
 
   void Connect();
 
-private:
+ private:
   // InspectorBackend:
   void OnConnect() override;
   void OnDisconnect() override;

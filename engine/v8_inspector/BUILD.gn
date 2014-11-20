@@ -11,8 +11,13 @@ component("v8_inspector") {
   output_name = "v8_inspector"
 
   deps = [
-    "//sky/engine/core",
-    "//sky/engine/platform",
+    "//base",
+    "//mojo/public/cpp/application",
+    "//mojo/public/interfaces/application",
+    "//sky/engine/core", # FIXME: Remove.
+    "//sky/engine/platform", # FIXME: Remove.
+    "//sky/engine/public:sky_headers",
+    "//sky/services/inspector:bindings",
   ]
 
   configs += [
@@ -22,6 +27,7 @@ component("v8_inspector") {
   ]
 
   sources = [
-
+    "inspector_backend_mojo.cc",
+    "inspector_backend_mojo.h",
   ]
 }

@@ -2,45 +2,43 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/inspector/inspector_backend_mojo.h"
+#include "sky/engine/config.h"
+#include "v8_inspector/inspector_backend_mojo.h"
 
 #include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"
 #include "bindings/core/v8/PageScriptDebugServer.h"
 #include "bindings/core/v8/ScriptController.h"
-#include "core/frame/FrameHost.h"
-#include "core/inspector/InspectorState.h"
-#include "core/inspector/InstrumentingAgents.h"
-#include "core/inspector/PageDebuggerAgent.h"
-#include "core/page/Page.h"
 #include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "platform/JSONValues.h"
-#include "public/platform/ServiceProvider.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/inspector/InspectorState.h"
+#include "sky/engine/core/inspector/InstrumentingAgents.h"
+#include "sky/engine/core/inspector/PageDebuggerAgent.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/public/platform/ServiceProvider.h"
 
 namespace blink {
 
 class MessageLoopAdaptor : public PageScriptDebugServer::ClientMessageLoop {
-public:
-    MessageLoopAdaptor() { }
+ public:
+  MessageLoopAdaptor() {}
 
-private:
-    virtual void run(Page* page)
-    {
-      run_loop_.reset(new base::RunLoop());
-      run_loop_->Run();
-    }
+ private:
+  virtual void run(Page* page) {
+    run_loop_.reset(new base::RunLoop());
+    run_loop_->Run();
+  }
 
-    virtual void quitNow()
-    {
-      if (run_loop_)
-        run_loop_->Quit();
-    }
+  virtual void quitNow() {
+    if (run_loop_)
+      run_loop_->Quit();
+  }
 
-    scoped_ptr<base::RunLoop> run_loop_;
+  scoped_ptr<base::RunLoop> run_loop_;
 };
 
 InspectorBackendMojo::InspectorBackendMojo(const FrameHost& frame_host)
@@ -59,7 +57,8 @@ void InspectorBackendMojo::Connect() {
   frontend_.set_client(this);
 
   // Theoretically we should load our state from the inspector cookie.
-  inspector_state_ = adoptPtr(new InspectorState(nullptr, JSONObject::create()));
+  inspector_state_ =
+      adoptPtr(new InspectorState(nullptr, JSONObject::create()));
   old_frontend_ = adoptPtr(new InspectorFrontend(this));
 
   v8::Isolate* isolate = frame_host_.page().mainFrame()->script().isolate();
@@ -69,7 +68,9 @@ void InspectorBackendMojo::Connect() {
 
   // AgentRegistry used to do this, but we don't need it for one agent.
   script_manager_ = InjectedScriptManager::createForPage();
-  debugger_agent_ = PageDebuggerAgent::create(&PageScriptDebugServer::shared(), &frame_host_.page(), script_manager_.get());
+  debugger_agent_ =
+      PageDebuggerAgent::create(&PageScriptDebugServer::shared(),
+                                &frame_host_.page(), script_manager_.get());
   agents_ = adoptPtr(new InstrumentingAgents(debugger_agent_.get()));
   debugger_agent_->init(agents_.get(), inspector_state_.get());
   debugger_agent_->setFrontend(old_frontend_.get());
@@ -101,7 +102,7 @@ void InspectorBackendMojo::OnMessage(const mojo::String& message) {
   // if agents are missing, since we only want this backend to care about
   // the Debugger agent, we manually filter here.
   if (command_name.startsWith("Debugger"))
-      dispatcher_->dispatch(wtf_message);
+    dispatcher_->dispatch(wtf_message);
 }
 
-} // namespace blink
+}  // namespace blink

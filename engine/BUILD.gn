@@ -79,6 +79,5 @@ group("engine") {
     "//sky/engine/public:sky_headers",
     "//sky/engine/web",
     "//sky/engine/platform",
-    "//sky/engine/v8_inspector",
   ]
 }

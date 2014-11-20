@@ -51,7 +51,7 @@
 #include "core/html/HTMLImportElement.h"
 #include "core/html/ime/InputMethodContext.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "core/inspector/inspector_backend_mojo.h"
+#include "v8_inspector/inspector_backend_mojo.h"
 #include "core/loader/FrameLoader.h"
 #include "core/loader/UniqueIdentifier.h"
 #include "core/page/Chrome.h"

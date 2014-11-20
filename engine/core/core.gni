@@ -1052,8 +1052,6 @@ sky_core_files = [
   "inspector/InjectedScriptHost.h",
   "inspector/InjectedScriptManager.cpp",
   "inspector/InjectedScriptManager.h",
-  "inspector/inspector_backend_mojo.cc",
-  "inspector/inspector_backend_mojo.h",
   "inspector/InspectorBaseAgent.cpp",
   "inspector/InspectorBaseAgent.h",
   "inspector/InspectorCounters.cpp",
