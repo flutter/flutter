@@ -1,0 +1,43 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("compositor") {
+  sources = [
+    "layer.cc",
+    "layer.h",
+    "layer_client.cc",
+    "layer_client.h",
+    "layer_host.cc",
+    "layer_host.h",
+    "layer_host_client.cc",
+    "layer_host_client.h",
+    "resource_manager.cc",
+    "resource_manager.h",
+    "surface_allocator.cc",
+    "surface_allocator.h",
+    "surface_holder.cc",
+    "surface_holder.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/application",
+    "//mojo/converters/geometry",
+    "//mojo/converters/surfaces",
+    "//mojo/gpu",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/gles2:for_shared_library",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/public/cpp/surfaces",
+    "//mojo/services/public/interfaces/geometry",
+    "//mojo/services/public/interfaces/surfaces",
+    "//mojo/services/public/interfaces/surfaces:surface_id",
+    "//mojo/skia",
+    "//skia",
+    "//ui/gfx/geometry",
+  ]
+}
