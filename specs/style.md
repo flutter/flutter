@@ -352,16 +352,26 @@ class StyleNode {
      //   get it from the parent (without pseudo); cache it; return it
      // otherwise, get the default value; cache it; return it
 
-  readonly attribute Boolean needsLayout; // means that a property with needsLayout:true has changed on this node or one of its descendants
+  readonly attribute Boolean needsLayout;
+    // means that either needsLayout is true or a property with needsLayout:true has changed on this node
     // needsLayout is set to false by the ownerLayoutManager's default layout() method
-  readonly attribute LayoutManager layoutManager;
 
+  readonly attribute Boolean descendantNeedsLayout;
+    // means that some child of this node has needsLayout set to true
+    // descendantNeedsLayout is set to false by the ownerLayoutManager's default layout() method
+
+  readonly attribute LayoutManager layoutManager;
   readonly attribute LayoutManager ownerLayoutManager; // defaults to the parentNode.layoutManager
     // if you are not the ownerLayoutManager, then ignore this StyleNode in layout() and paintChildren()
     // using walkChildren() does this for you
 
-  readonly attribute Boolean needsPaint; // means that either needsLayout is true or a property with needsPaint:true has changed on this node or one of its descendants
+  readonly attribute Boolean needsPaint;
+    // means that either needsLayout is true or a property with needsPaint:true has changed on this node
     // needsPaint is set to false by the ownerLayoutManager's default paint() method
+
+  readonly attribute Boolean descendantNeedsPaint;
+    // means that some child of this node has needsPaint set to true
+    // descendantNeedsPaint is set to false by the ownerLayoutManager's default paint() method
 
   // only the ownerLayoutManager can change these
   readonly attribute Float x; // relative to left edge of ownerLayoutManager
@@ -448,31 +458,100 @@ class LayoutManager {
     // layout() has a forced width and/or height?
 
   virtual LayoutValueRange getIntrinsicWidth(Float? defaultWidth = null);
-    // returns min-width, width, and max-width, normalised, defaulting to values given in LayoutValueRange
-    // if argument is provided, it overrides width
+  /*
+     function getIntrinsicWidth(defaultWidth) {
+       if (defaultWidth == null) {
+         defaultWidth = this.node.getProperty('width');
+         if (typeof defaultWidth != 'number')
+           defaultWidth = 0;
+       }
+       let minWidth = this.node.getProperty('min-width');
+       if (typeof minWidth != 'number')
+         minWidth = 0;
+       let maxWidth = this.node.getProperty('max-width');
+       if (typeof maxWidth != 'number')
+         maxWidth = Infinity;
+       if (maxWidth < minWidth)
+         maxWidth = minWidth;
+       if (defaultWidth > maxWidth)
+         defaultWidth = maxWidth;
+       if (defaultWidth < minWidth)
+         defaultWidth = minWidth;
+       return {
+         minimum: minWidth,
+         value: defaultWidth,
+         maximum: maxWidth,
+       };
+     }
+  */
 
   virtual LayoutValueRange getIntrinsicHeight(Float? defaultHeight = null);
-    // returns min-height, height, and max-height, normalised, defaulting to values given in LayoutValueRange
-    // if argument is provided, it overrides height
+  /*
+     function getIntrinsicHeight(defaultHeight) {
+       if (defaultHeight == null) {
+         defaultHeight = this.node.getProperty('height');
+         if (typeof defaultHeight != 'number')
+           defaultHeight = 0;
+       }
+       let minHeight = this.node.getProperty('min-height');
+       if (typeof minHeight != 'number')
+         minHeight = 0;
+       let maxHeight = this.node.getProperty('max-height');
+       if (typeof maxHeight != 'number')
+         maxHeight = Infinity;
+       if (maxHeight < minHeight)
+         maxHeight = minHeight;
+       if (defaultHeight > maxHeight)
+         defaultHeight = maxHeight;
+       if (defaultHeight < minHeight)
+         defaultHeight = minHeight;
+       return {
+         minimum: minHeight,
+         value: defaultHeight,
+         maximum: maxHeight,
+       };
+     }
+  */
 
-  void markAsLaidOut(); // sets this.node.needsLayout to false
+  void markAsLaidOut(); // sets this.node.needsLayout and this.node.descendantNeedsLayout to false
   virtual Dimensions layout(Number? width, Number? height);
-    // default implementation calls markAsLaidOut() and returns arguments, with null values resolved to intrinsic dimensions
-    // this should always call this.markAsLaidOut() to reset needsLayout
-    // the return value should include the final value for whichever of the width and height arguments that is null
+    // call markAsLaidOut();
+    // if width is null, set width to getIntrinsicWidth().value
+    // if height is null, set width height getIntrinsicHeight().value
+    // call this.layoutChildren(width, height);
+    // return { width: width, height: height }
+    // - this should always call this.markAsLaidOut() to reset needsLayout
+    // - the return value should include the final value for whichever of the width and height arguments
+    //   that is null
+    // - subclasses that want to make 'auto' values dependent on the children should override this
+    //   entirely, rather than overriding layoutChildren
 
-  void markAsPainted(); // sets this.node.needsPaint to false
+  virtual void layoutChildren(Number width, Number height);
+    // default implementation does nothing
+    // - override this if you want to lay out children but not have the children affect your dimensions
+
+  void markAsPainted(); // sets this.node.needsPaint and this.node.descendantNeedsPaint to false
   virtual void paint(RenderingSurface canvas);
     // set a clip rect on the canvas for rect(0,0,this.width,this.height)
-    // call the painter of each property, in order they were registered, which on this element has a painter
-    // call this.paintChildren()
+    // if needsPaint is true:
+    //   call the painter of each property, in order they were registered, which on this element has a painter
+    // call this.paintChildren(canvas)
+    // (the default implementation doesn't paint anything on top of the children)
     // unset the clip
     // call markAsPainted()
 
   virtual void paintChildren(RenderingSurface canvas);
-    // just calls paint() for each child returned by walkChildren() whose needsPaint is true,
-    // after transforming the coordinate space by translate(child.x,child.y)
-    // you should skip children that will be clipped out of yourself because they're outside your bounds
+    // if descendantNeedsPaint is true:
+    //   for each child returned by walkChildren():
+    //     if child.needsPaint or child.descendantNeedsPaint:
+    //       call this.paintChild(canvas, child)
+    // - you should skip children that will be clipped out of yourself because they're outside your bounds
+
+  virtual void paintChild(RenderingSurface canvas, LayoutManager child);
+    // insert a "paint this child" instruction in our canvas instruction list (we should probably make sure we expose that API directly, too)
+    // start a new canvas for the child:
+    //   transform the coordinate space by translate(child.x, child.y)
+    //   call child.paint(canvas)
 
   virtual Node hitTest(Float x, Float y);
     // default implementation uses the node's children nodes' x, y,

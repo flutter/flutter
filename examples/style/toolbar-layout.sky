@@ -52,7 +52,7 @@ SKY MODULE
          springCount += 1;
          pendingSpacing = spacing; // not +=, because we only have one extra spacing per batch of springs
        } else {
-         if (child.needsLayout) {
+         if (child.needsLayout || child.descendantNeedsLayout) {
            childHeight = child.layoutManager.getIntrinsicHeight();
            if (childHeight.value < height)
              childHeight = childHeight.value;
@@ -185,25 +185,25 @@ SKY MODULE
    }
    function paintChildren(canvas) {
      let width = this.node.width;
+     let children = this.walkChildren();
      let loop = children.next();
      while ((!loop.done) && (loop.value != this.firstSkippedChild))
        this.paintChild(loop.value, canvas);
      if (this.showingOverflow)
        this.paintChild(this.overflowChild, canvas);
    }
-   function paintChild(child, canvas) {
-     if (child.needsPaint) {
-       canvas.save();
-       try {
-         canvas.beginPath();
-         canvas.translate(child.x, child.y);
-         canvas.rect(0, 0, child.width, child.height);
-         canvas.clip();
-         child.paint(canvas);
-       } finally {
-         canvas.restore();
-       }
-     }
+   function inChild(child, x, y) {
+     return (x >= child.x) && (y >= child.y) && (x < child.x+child.width) && (y < child.y+child.height);
+   }
+   function hitTest(x, y) {
+     let children = this.walkChildrenBackwards();
+     let loop = children.next();
+     while ((!loop.done) && (loop.value != this.firstSkippedChild))
+       if (this.inChild(loop.value, x, y))
+         return loop.value;
+     if (this.showingOverflow)
+       if (this.inChild(this.overflowChild, x, y))
+         return this.overflowChild;
    }
  }
  sky.registerLayoutManager('toolbar', module.exports.ToolbarLayoutManager);
