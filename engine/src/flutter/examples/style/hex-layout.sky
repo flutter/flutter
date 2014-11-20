@@ -20,7 +20,7 @@
      let y = 0;
      while (!loop.done) {
        let child = loop.value;
-       if (child.needsLayout) {
+       if (child.needsLayout || child.descendantNeedsLayout) {
          child.layoutManager.layout(cellDim, cellDim);
          // we ignore the size the child reported from layout(), and force it to the cell dimensions
          this.setChildSize(child, cellDim, cellDim);
@@ -39,30 +39,6 @@
        width: width,
        height: height,
      }
-   }
-   function getIntrinsicWidth() {
-     // this is the logic that LayoutManager.getIntrinsicWidth() has by default
-     // shown here because I wrote it before realising it should be the default
-     let width = this.node.getProperty('width');
-     if (typeof width != 'number')
-       width = 0;
-     let minWidth = this.node.getProperty('min-width');
-     if (typeof width != 'number')
-       minWidth = 0;
-     let maxWidth = this.node.getProperty('max-width');
-     if (typeof width != 'number')
-       maxWidth = Infinity;
-     if (maxWidth < minWidth)
-       maxWidth = minWidth;
-     if (width > maxWidth)
-       width = maxWidth;
-     if (width < minWidth)
-       width = minWidth;
-     return {
-       minimum: minWidth,
-       value: width,
-       maximum: maxWidth,
-     };
    }
    function getIntrinsicHeight() {
      let height = this.node.getProperty('height');
@@ -93,20 +69,19 @@
      let loop = children.next();
      while (!loop.done) {
        let child = loop.value;
-       if (child.needsPaint) {
+       if (child.needsPaint || child.descendantNeedsPaint) {
          canvas.save();
          try {
            canvas.beginPath();
-           canvas.translate(child.x, child.y);
-           canvas.moveTo(0, cellDim/4);
-           canvas.lineTo(cellDim/2, 0);
-           canvas.lineTo(cellDim, cellDim/4);
-           canvas.lineTo(cellDim, 3*cellDim/4);
-           canvas.lineTo(cellDim/2, cellDim);
-           canvas.moveTo(0, 3*cellDim/4);
+           canvas.moveTo(child.x, child.y + cellDim/4);
+           canvas.lineTo(child.x + cellDim/2, child.y);
+           canvas.lineTo(child.x + cellDim, child.y + cellDim/4);
+           canvas.lineTo(child.x + cellDim, child.y + 3*cellDim/4);
+           canvas.lineTo(child.x + cellDim/2, child.y + cellDim);
+           canvas.moveTo(child.x, child.y + 3*cellDim/4);
            canvas.closePath();
            canvas.clip();
-           child.paint(canvas);
+           this.paintChild(child);
          } finally {
            canvas.restore();
          }

@@ -21,7 +21,7 @@ SKY MODULE
      let y = 0;
      while (!loop.done) {
        let child = loop.value;
-       if (child.needsLayout) {
+       if (child.needsLayout || child.descendantNeedsLayout) {
          let dims = child.layoutManager.layout(width, null);
          this.setChildSize(child, dims.width, dims.height);
        }
