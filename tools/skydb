@@ -7,6 +7,7 @@ import argparse
 import logging
 import os
 from skypy.paths import Paths
+import skypy.configuration as configuration
 import socket;
 import subprocess
 import sys
@@ -23,14 +24,14 @@ SUPPORTED_MIME_TYPES = [
 class SkyDebugger(object):
     def __init__(self):
         self._sky_server = None
-        self.paths = Paths(os.path.join('out', 'Debug'))
+        self.paths = None
 
     @staticmethod
     def _port_in_use(port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return sock.connect_ex(('localhost', port)) == 0
 
-    def _start_http_server_for_file(self, path):
+    def _start_http_server_for_file(self, path, configuration):
         HTTP_PORT = 9999
 
 
@@ -51,7 +52,7 @@ class SkyDebugger(object):
         else:
             server_command = [
                 os.path.join(self.paths.sky_tools_directory, 'sky_server'),
-                '--debug',
+                '-t', configuration,
                 server_root,
                 str(HTTP_PORT),
             ]
@@ -69,7 +70,10 @@ class SkyDebugger(object):
         parser.add_argument('--use-osmesa', action='store_true',
             default=self._in_chromoting())
         parser.add_argument('url', nargs='?', type=str)
+        configuration.add_arguments(parser)
         args = parser.parse_args()
+
+        self.paths = Paths(os.path.join('out', args.configuration))
 
         content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
             for mime_type in SUPPORTED_MIME_TYPES]
@@ -83,7 +87,7 @@ class SkyDebugger(object):
         if args.url:
             url = args.url
             if not urlparse.urlparse(url).scheme:
-                url = self._start_http_server_for_file(url)
+                url = self._start_http_server_for_file(url, args.configuration)
 
             prompt_args = '--args-for=mojo:sky_debugger_prompt %s' % url
             shell_command.append(prompt_args)
