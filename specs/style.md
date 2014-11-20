@@ -518,6 +518,7 @@ class LayoutManager {
     // call markAsLaidOut();
     // if width is null, set width to getIntrinsicWidth().value
     // if height is null, set width height getIntrinsicHeight().value
+    // call this.assumeDimensions(width, height);
     // call this.layoutChildren(width, height);
     // return { width: width, height: height }
     // - this should always call this.markAsLaidOut() to reset needsLayout
@@ -532,8 +533,8 @@ class LayoutManager {
 
   void markAsPainted(); // sets this.node.needsPaint and this.node.descendantNeedsPaint to false
   virtual void paint(RenderingSurface canvas);
-    // set a clip rect on the canvas for rect(0,0,this.width,this.height)
-    // if needsPaint is true:
+    // if needsPaint:
+    //   set a clip rect on the canvas for rect(0,0,this.width,this.height)
     //   call the painter of each property, in order they were registered, which on this element has a painter
     // call this.paintChildren(canvas)
     // (the default implementation doesn't paint anything on top of the children)
@@ -541,17 +542,18 @@ class LayoutManager {
     // call markAsPainted()
 
   virtual void paintChildren(RenderingSurface canvas);
-    // if descendantNeedsPaint is true:
+    // if this.needsPaint or this.descendantNeedsPaint:
     //   for each child returned by walkChildren():
-    //     if child.needsPaint or child.descendantNeedsPaint:
-    //       call this.paintChild(canvas, child)
+    //     call this.paintChild(canvas, child)
     // - you should skip children that will be clipped out of yourself because they're outside your bounds
 
   virtual void paintChild(RenderingSurface canvas, LayoutManager child);
-    // insert a "paint this child" instruction in our canvas instruction list (we should probably make sure we expose that API directly, too)
-    // start a new canvas for the child:
+    // if this.needsPaint():
+    //   insert a "paint this child" instruction in our canvas instruction list (we should probably make sure we expose that API directly, too)
+    // if child.needsPaint or child.descendantNeedsPaint:
+    //   start a new canvas for the child:
     //   transform the coordinate space by translate(child.x, child.y)
-    //   call child.paint(canvas)
+    //     call child.paint(canvas)
 
   virtual Node hitTest(Float x, Float y);
     // default implementation uses the node's children nodes' x, y,
