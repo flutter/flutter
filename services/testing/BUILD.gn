@@ -8,4 +8,8 @@ mojom("bindings") {
   sources = [
     "test_harness.mojom",
   ]
+
+  deps = [
+    "//mojo/services/public/interfaces/input_events",
+  ]
 }
