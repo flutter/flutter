@@ -12,7 +12,6 @@
 #include "mojo/services/public/interfaces/network/network_service.mojom.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/viewer/cc/web_compositor_support_impl.h"
-#include "sky/viewer/platform/webthemeengine_impl.h"
 
 namespace mojo {
 class ApplicationImpl;
@@ -26,7 +25,6 @@ class PlatformImpl : public blink::Platform {
   virtual ~PlatformImpl();
 
   // blink::Platform methods:
-  virtual blink::WebThemeEngine* themeEngine();
   virtual blink::WebString defaultLocale();
   virtual double currentTime();
   virtual double monotonicallyIncreasingTime();
@@ -88,7 +86,6 @@ class PlatformImpl : public blink::Platform {
   bool shared_timer_fire_time_was_set_while_suspended_;
   int shared_timer_suspended_;  // counter
   sky_viewer_cc::WebCompositorSupportImpl compositor_support_;
-  WebThemeEngineImpl theme_engine_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

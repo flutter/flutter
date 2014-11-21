@@ -25,8 +25,6 @@ mojo_native_application("viewer") {
     "platform/platform_impl.h",
     "platform/weblayertreeview_impl.cc",
     "platform/weblayertreeview_impl.h",
-    "platform/webthemeengine_impl.cc",
-    "platform/webthemeengine_impl.h",
     "platform/weburlloader_impl.cc",
     "platform/weburlloader_impl.h",
     "script/script_runner.cc",

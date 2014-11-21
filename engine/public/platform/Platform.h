@@ -64,7 +64,6 @@ class WebGestureCurve;
 class WebGraphicsContext3DProvider;
 class WebSandboxSupport;
 struct WebFloatPoint;
-class WebThemeEngine;
 class WebURL;
 class WebURLLoader;
 class WebUnitTestSupport;
@@ -86,10 +85,6 @@ public:
     // May return null if sandbox support is not necessary
     virtual WebSandboxSupport* sandboxSupport() { return 0; }
 
-    // May return null on some platforms.
-    virtual WebThemeEngine* themeEngine() { return 0; }
-
-    virtual WebFallbackThemeEngine* fallbackThemeEngine() { return 0; }
 
     // Blob ----------------------------------------------------------------
 

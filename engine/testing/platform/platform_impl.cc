@@ -27,10 +27,6 @@ PlatformImpl::PlatformImpl()
 PlatformImpl::~PlatformImpl() {
 }
 
-blink::WebThemeEngine* PlatformImpl::themeEngine() {
-  return &theme_engine_;
-}
-
 blink::WebString PlatformImpl::defaultLocale() {
   return blink::WebString::fromUTF8("en-US");
 }

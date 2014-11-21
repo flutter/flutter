@@ -77,7 +77,6 @@ source_set("platform_headers") {
     "platform/WebSelectionBound.h",
     "platform/WebSize.h",
     "platform/WebString.h",
-    "platform/WebThemeEngine.h",
     "platform/WebThread.h",
     "platform/WebTransformAnimationCurve.h",
     "platform/WebTransformKeyframe.h",

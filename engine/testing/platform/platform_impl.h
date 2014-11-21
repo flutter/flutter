@@ -10,7 +10,6 @@
 #include "base/threading/thread_local_storage.h"
 #include "base/timer/timer.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/testing/platform/webthemeengine_impl.h"
 #include "sky/engine/testing/platform/webunittestsupport_impl.h"
 
 namespace sky {
@@ -22,7 +21,6 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   virtual blink::WebUnitTestSupport* unitTestSupport();
-  virtual blink::WebThemeEngine* themeEngine();
   virtual blink::WebString defaultLocale();
   virtual double currentTime();
   virtual double monotonicallyIncreasingTime();
@@ -47,7 +45,6 @@ class PlatformImpl : public blink::Platform {
   double shared_timer_fire_time_;
   bool shared_timer_fire_time_was_set_while_suspended_;
   int shared_timer_suspended_;  // counter
-  WebThemeEngineImpl theme_engine_;
   WebUnitTestSupportImpl unit_test_support_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);

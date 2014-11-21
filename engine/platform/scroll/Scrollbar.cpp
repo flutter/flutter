@@ -35,7 +35,6 @@
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebPoint.h"
 #include "sky/engine/public/platform/WebRect.h"
-#include "sky/engine/public/platform/WebThemeEngine.h"
 
 // The position of the scrollbar thumb affects the appearance of the steppers, so
 // when the thumb moves, we have to invalidate them for painting.
