@@ -5,6 +5,7 @@
 #ifndef SKY_VIEWER_DOCUMENT_VIEW_H_
 #define SKY_VIEWER_DOCUMENT_VIEW_H_
 
+#include "base/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/lazy_interface_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
@@ -46,8 +47,7 @@ class Layer;
 class LayerHost;
 class WebLayerTreeViewImpl;
 
-class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
-                     public blink::ServiceProvider,
+class DocumentView : public blink::ServiceProvider,
                      public blink::WebViewClient,
                      public blink::WebFrameClient,
 #if ENABLE_SKY_COMPOSITOR
@@ -57,8 +57,10 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
-  DocumentView(mojo::URLResponsePtr response,
-               mojo::ShellPtr shell,
+  DocumentView(const base::Closure& destruction_callback,
+               mojo::ServiceProviderPtr provider,
+               mojo::URLResponsePtr response,
+               mojo::Shell* shell,
                scoped_refptr<base::MessageLoopProxy> compositor_thread);
   virtual ~DocumentView();
 
@@ -69,7 +71,7 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
     return imported_services_.get();
   }
 
-  mojo::Shell* shell() const { return shell_.get(); }
+  mojo::Shell* shell() const { return shell_; }
 
 #if ENABLE_SKY_COMPOSITOR
   // sky::LayerHostClient
@@ -83,11 +85,6 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   void StartDebuggerInspectorBackend();
 
  private:
-  // Application methods:
-  void AcceptConnection(const mojo::String& requestor_url,
-                        mojo::ServiceProviderPtr provider) override;
-  void Initialize(mojo::Array<mojo::String> args) override;
-
   // WebWidgetClient methods:
   blink::WebLayerTreeView* initializeLayerTreeView() override;
   void scheduleAnimation() override;
@@ -134,10 +131,11 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
 
   void Load(mojo::URLResponsePtr response);
 
+  base::Closure destruction_callback_;
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
   scoped_ptr<mojo::ServiceProvider> imported_services_;
-  mojo::ShellPtr shell_;
+  mojo::Shell* shell_;
   mojo::LazyInterfacePtr<mojo::NavigatorHost> navigator_host_;
   blink::WebView* web_view_;
   mojo::View* root_;

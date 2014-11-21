@@ -72,19 +72,23 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
 static int s_next_debugger_id = 1;
 
 DocumentView::DocumentView(
+    const base::Closure& destruction_callback,
+    mojo::ServiceProviderPtr provider,
     mojo::URLResponsePtr response,
-    mojo::ShellPtr shell,
+    mojo::Shell* shell,
     scoped_refptr<base::MessageLoopProxy> compositor_thread)
-    : response_(response.Pass()),
-      shell_(shell.Pass()),
+    : destruction_callback_(destruction_callback),
+      response_(response.Pass()),
+      shell_(shell),
       web_view_(NULL),
       root_(NULL),
-      view_manager_client_factory_(shell_.get(), this),
+      view_manager_client_factory_(shell_, this),
       inspector_service_factory_(this),
       compositor_thread_(compositor_thread),
       debugger_id_(s_next_debugger_id++),
       weak_factory_(this) {
-  shell_.set_client(this);
+  exported_services_.AddService(&view_manager_client_factory_);
+  mojo::WeakBindToPipe(&exported_services_, provider.PassMessagePipe());
 }
 
 DocumentView::~DocumentView() {
@@ -92,19 +96,11 @@ DocumentView::~DocumentView() {
     web_view_->close();
   if (root_)
     root_->RemoveObserver(this);
+  destruction_callback_.Run();
 }
 
 base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
-}
-
-void DocumentView::AcceptConnection(const mojo::String& requestor_url,
-                                    mojo::ServiceProviderPtr provider) {
-  exported_services_.AddService(&view_manager_client_factory_);
-  mojo::WeakBindToPipe(&exported_services_, provider.PassMessagePipe());
-}
-
-void DocumentView::Initialize(mojo::Array<mojo::String> args) {
 }
 
 void DocumentView::OnEmbed(
@@ -267,7 +263,7 @@ mojo::NavigatorHost* DocumentView::NavigatorHost() {
 }
 
 mojo::Shell* DocumentView::Shell() {
-  return shell_.get();
+  return shell_;
 }
 
 void DocumentView::OnViewBoundsChanged(mojo::View* view,
@@ -324,7 +320,7 @@ class InspectorHostImpl : public inspector::InspectorHost {
 
 void DocumentView::StartDebuggerInspectorBackend() {
   if (!inspector_backend_) {
-    inspector_host_.reset(new InspectorHostImpl(web_view_, shell_.get()));
+    inspector_host_.reset(new InspectorHostImpl(web_view_, shell_));
     inspector_backend_.reset(
         new inspector::InspectorBackendMojo(inspector_host_.get()));
   }
