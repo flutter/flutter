@@ -15,6 +15,7 @@ namespace sky {
 
 LayerHost::LayerHost(LayerHostClient* client)
     : client_(client),
+      state_(kIdle),
       surface_holder_(this, client->GetShell()),
       gl_context_(mojo::GLContext::Create(client->GetShell())),
       ganesh_context_(gl_context_),
@@ -29,6 +30,7 @@ LayerHost::~LayerHost() {
 
 void LayerHost::SetNeedsAnimate() {
   scheduler_.SetNeedsFrame();
+  state_ = kWaitingForBeginFrame;
 }
 
 void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
@@ -39,6 +41,9 @@ void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
 
 void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
   client_->OnSurfaceIdAvailable(surface_id.Pass());
+
+  if (state_ == kWaitingForSurfaceToUploadFrame)
+    Upload(root_layer_.get());
 }
 
 void LayerHost::ReturnResources(
@@ -48,6 +53,8 @@ void LayerHost::ReturnResources(
 
 void LayerHost::BeginFrame(base::TimeTicks frame_time,
                            base::TimeTicks deadline) {
+  DCHECK_EQ(state_, kWaitingForBeginFrame);
+  state_ = kProducingFrame;
   client_->BeginFrame(frame_time);
 
   {
@@ -57,9 +64,30 @@ void LayerHost::BeginFrame(base::TimeTicks frame_time,
   }
 
   Upload(root_layer_.get());
+
+  if (state_ == kProducingFrame)
+    state_ = kIdle;
 }
 
 void LayerHost::Upload(Layer* layer) {
+  if (!surface_holder_.IsReadyForFrame()) {
+    if (state_ == kProducingFrame) {
+      // Currently we use a timer to drive the BeginFrame cycle, which means we
+      // can produce frames before the surfaces service is ready to receive
+      // frames from us. In that situation, we wait for surfaces before
+      // uploading the frame. The upload will actually happen when the surface
+      // id is available (i.e., in OnSurfaceIdAvailable). If SetNeedsAnimate is
+      // called before then, we'll go back into the kWaitingForBeginFrame state
+      // and defer to the timer again.
+      //
+      // We can avoid this complexity if we use feedback from the surfaces
+      // service to drive the BeginFrame cycle. In that approach, we wouldn't
+      // get here before we've attached to a surface.
+      state_ = kWaitingForSurfaceToUploadFrame;
+    }
+    return;
+  }
+
   gfx::Size size = layer->size();
   surface_holder_.SetSize(size);
 

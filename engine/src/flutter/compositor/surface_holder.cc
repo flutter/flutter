@@ -28,8 +28,12 @@ SurfaceHolder::SurfaceHolder(Client* client, mojo::Shell* shell)
 }
 
 SurfaceHolder::~SurfaceHolder() {
-  if (surface_id_)
+  if (surface_ && surface_id_)
     surface_->DestroySurface(surface_id_.Clone());
+}
+
+bool SurfaceHolder::IsReadyForFrame() const {
+  return surface_;
 }
 
 void SurfaceHolder::SubmitFrame(mojo::FramePtr frame) {
