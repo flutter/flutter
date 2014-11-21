@@ -1,0 +1,25 @@
+<sky>
+    <import src="../resources/dump-as-render-tree.sky" />
+    <style>
+        div {
+            width: 50px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            border: 3px solid blue;
+        }
+        p {
+            width: 50px;
+            display: paragraph;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            border: 3px solid red;
+        }
+        span {
+            display: inline;
+        }
+    </style>
+    <div>These lines <p>should</p> all ellipsize. </div>
+    <p><span>As should this.</span></p>
+</sky>

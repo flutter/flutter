@@ -1208,8 +1208,7 @@ void RenderBlockFlow::layoutInlineChildren(bool relayoutChildren, LayoutUnit& pa
 
     // Text truncation kicks in in two cases:
     //     1) If your overflow isn't visible and your text-overflow-mode isn't clip.
-    //     2) If you're an anonymous block with a block parent that satisfies #1 that was created
-    //        to accomodate a block that has inline and block children.
+    //     2) If you're an anonymous paragraph with a parent that satisfies #1.
     // FIXME: CSS3 says that descendants that are clipped must also know how to truncate.  This is insanely
     // difficult to figure out in general (especially in the middle of doing layout), so we only handle the
     // simple case of an anonymous block truncating when it's parent is clipped.
@@ -1512,8 +1511,8 @@ void RenderBlockFlow::deleteEllipsisLineBoxes()
             curr->clearTruncation();
 
             // Shift the line back where it belongs if we cannot accomodate an ellipsis.
-            float logicalLeft = logicalLeftOffsetForLine(curr->lineTop(), firstLine).toFloat();
-            float availableLogicalWidth = logicalRightOffsetForLine(curr->lineTop(), false) - logicalLeft;
+            float logicalLeft = logicalLeftOffsetForLine(firstLine).toFloat();
+            float availableLogicalWidth = logicalRightOffsetForLine(false) - logicalLeft;
             float totalLogicalWidth = curr->logicalWidth();
             updateLogicalWidthForAlignment(textAlign, curr, 0, logicalLeft, totalLogicalWidth, availableLogicalWidth, 0);
 
@@ -1547,8 +1546,8 @@ void RenderBlockFlow::checkLinesForTextOverflow()
     bool firstLine = true;
     for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
         float currLogicalLeft = curr->logicalLeft();
-        LayoutUnit blockRightEdge = logicalRightOffsetForLine(curr->lineTop(), firstLine);
-        LayoutUnit blockLeftEdge = logicalLeftOffsetForLine(curr->lineTop(), firstLine);
+        LayoutUnit blockRightEdge = logicalRightOffsetForLine(firstLine);
+        LayoutUnit blockLeftEdge = logicalLeftOffsetForLine(firstLine);
         LayoutUnit lineBoxEdge = ltr ? currLogicalLeft + curr->logicalWidth() : currLogicalLeft;
         if ((ltr && lineBoxEdge > blockRightEdge) || (!ltr && lineBoxEdge < blockLeftEdge)) {
             // This line spills out of our box in the appropriate direction.  Now we need to see if the line
@@ -1583,8 +1582,8 @@ LayoutUnit RenderBlockFlow::startAlignedOffsetForLine(bool firstLine)
 
     // updateLogicalWidthForAlignment() handles the direction of the block so no need to consider it here
     float totalLogicalWidth = 0;
-    float logicalLeft = logicalLeftOffsetForLine(logicalHeight(), false).toFloat();
-    float availableLogicalWidth = logicalRightOffsetForLine(logicalHeight(), false) - logicalLeft;
+    float logicalLeft = logicalLeftOffsetForLine(false).toFloat();
+    float availableLogicalWidth = logicalRightOffsetForLine(false) - logicalLeft;
     updateLogicalWidthForAlignment(textAlign, 0, 0, logicalLeft, totalLogicalWidth, availableLogicalWidth, 0);
 
     if (!style()->isLeftToRightDirection())

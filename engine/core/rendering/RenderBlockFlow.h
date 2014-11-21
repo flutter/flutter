@@ -65,11 +65,17 @@ public:
     }
     LayoutUnit logicalRightOffsetForLine(bool shouldIndentText) const
     {
-        return logicalRightOffsetForLine(logicalRightOffsetForContent(), shouldIndentText);
+        LayoutUnit right = logicalRightOffsetForContent();
+        if (shouldIndentText && !style()->isLeftToRightDirection())
+            right -= textIndentOffset();
+        return right;
     }
     LayoutUnit logicalLeftOffsetForLine(bool shouldIndentText) const
     {
-        return logicalLeftOffsetForLine(logicalLeftOffsetForContent(), shouldIndentText);
+        LayoutUnit left = logicalLeftOffsetForContent();
+        if (shouldIndentText && style()->isLeftToRightDirection())
+            left += textIndentOffset();
+        return left;
     }
     LayoutUnit startOffsetForLine(bool shouldIndentText) const
     {
@@ -125,21 +131,6 @@ protected:
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:
-    LayoutUnit logicalRightOffsetForLine(LayoutUnit fixedOffset, bool applyTextIndent) const
-    {
-        LayoutUnit right = fixedOffset;
-        if (applyTextIndent && !style()->isLeftToRightDirection())
-            right -= textIndentOffset();
-        return right;
-    }
-    LayoutUnit logicalLeftOffsetForLine(LayoutUnit fixedOffset, bool applyTextIndent) const
-    {
-        LayoutUnit left = fixedOffset;
-        if (applyTextIndent && style()->isLeftToRightDirection())
-            left += textIndentOffset();
-        return left;
-    }
-
     void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
     void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
