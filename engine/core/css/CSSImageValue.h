@@ -21,10 +21,10 @@
 #ifndef CSSImageValue_h
 #define CSSImageValue_h
 
-#include "core/css/CSSValue.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "platform/weborigin/Referrer.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/platform/weborigin/Referrer.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

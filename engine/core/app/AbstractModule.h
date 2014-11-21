@@ -5,12 +5,12 @@
 #ifndef SKY_ENGINE_CORE_APP_ABSTRACT_MODULE_H_
 #define SKY_ENGINE_CORE_APP_ABSTRACT_MODULE_H_
 
-#include "bindings/core/v8/ScriptPromiseResolver.h"
-#include "core/app/ModuleLoader.h"
-#include "core/dom/ContextLifecycleObserver.h"
-#include "core/dom/Document.h"
-#include "core/events/EventTarget.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptPromiseResolver.h"
+#include "sky/engine/core/app/ModuleLoader.h"
+#include "sky/engine/core/dom/ContextLifecycleObserver.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 class Application;

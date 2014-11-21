@@ -25,10 +25,10 @@
 #ifndef StyleVisualData_h
 #define StyleVisualData_h
 
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/LengthBox.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/LengthBox.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

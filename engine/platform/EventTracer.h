@@ -31,12 +31,11 @@
 #ifndef EventTracer_h
 #define EventTracer_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/WTFString.h"
-
 #include <stdint.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

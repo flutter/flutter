@@ -27,11 +27,11 @@
 #ifndef TextCodec_h
 #define TextCodec_h
 
-#include "wtf/Forward.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

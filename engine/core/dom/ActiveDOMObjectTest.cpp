@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/dom/Document.h"
-#include "core/testing/DummyPageHolder.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "core/testing/DummyPageHolder.h"
+#include "sky/engine/core/dom/Document.h"
 
 using namespace blink;
 

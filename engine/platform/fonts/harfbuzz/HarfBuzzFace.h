@@ -33,10 +33,10 @@
 
 #include <hb.h>
 
-#include "wtf/HashMap.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef AlternateFontFamily_h
 #define AlternateFontFamily_h
 
-#include "platform/fonts/FontDescription.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

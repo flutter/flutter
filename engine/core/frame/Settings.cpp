@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/Settings.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/Settings.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/scroll/Scrollbar.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
 
 namespace blink {
 

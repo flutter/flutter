@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/inspector/ConsoleMessage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
 
-#include "bindings/core/v8/ScriptCallStackFactory.h"
-#include "bindings/core/v8/ScriptValue.h"
-#include "core/inspector/ScriptArguments.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/core/inspector/ScriptArguments.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

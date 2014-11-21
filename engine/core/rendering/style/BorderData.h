@@ -25,10 +25,10 @@
 #ifndef BorderData_h
 #define BorderData_h
 
-#include "core/rendering/style/BorderValue.h"
-#include "core/rendering/style/NinePieceImage.h"
-#include "platform/LengthSize.h"
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/core/rendering/style/BorderValue.h"
+#include "sky/engine/core/rendering/style/NinePieceImage.h"
+#include "sky/engine/platform/LengthSize.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

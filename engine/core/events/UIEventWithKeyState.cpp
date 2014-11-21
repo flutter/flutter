@@ -18,8 +18,8 @@
  *
  */
 
-#include "config.h"
-#include "core/events/UIEventWithKeyState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/UIEventWithKeyState.h"
 
 namespace blink {
 

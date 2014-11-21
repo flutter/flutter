@@ -24,22 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/TextCheckingHelper.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/TextCheckingHelper.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Document.h"
-#include "core/dom/DocumentMarkerController.h"
-#include "core/dom/Range.h"
-#include "core/editing/TextIterator.h"
-#include "core/editing/VisiblePosition.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
-#include "core/page/SpellCheckerClient.h"
-#include "platform/text/TextBreakIterator.h"
-#include "platform/text/TextCheckerClient.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentMarkerController.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/editing/TextIterator.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/page/SpellCheckerClient.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "sky/engine/platform/text/TextCheckerClient.h"
 
 namespace blink {
 

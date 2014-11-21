@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/css/CSSPropertyEquality.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/css/CSSPropertyEquality.h"
 
-#include "core/animation/css/CSSAnimations.h"
-#include "core/rendering/style/DataEquivalency.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/ShadowList.h"
+#include "sky/engine/core/animation/css/CSSAnimations.h"
+#include "sky/engine/core/rendering/style/DataEquivalency.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/ShadowList.h"
 
 namespace blink {
 

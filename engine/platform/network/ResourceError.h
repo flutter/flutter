@@ -27,8 +27,8 @@
 #ifndef ResourceError_h
 #define ResourceError_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

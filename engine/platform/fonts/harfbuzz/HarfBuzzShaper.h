@@ -32,14 +32,14 @@
 #define HarfBuzzShaper_h
 
 #include "hb.h"
-#include "platform/geometry/FloatBoxExtent.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/text/TextRun.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/unicode/CharacterNames.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/FloatBoxExtent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 #include <unicode/uscript.h>
 

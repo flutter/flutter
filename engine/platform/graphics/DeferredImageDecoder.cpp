@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/DeferredImageDecoder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
 
-#include "platform/graphics/DecodingImageGenerator.h"
-#include "platform/graphics/ImageDecodingStore.h"
+#include "sky/engine/platform/graphics/DecodingImageGenerator.h"
+#include "sky/engine/platform/graphics/ImageDecodingStore.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
-#include "wtf/PassOwnPtr.h"
 
 namespace blink {
 

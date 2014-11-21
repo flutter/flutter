@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "bindings/core/v8/ScriptState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "core/dom/ExecutionContext.h"
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

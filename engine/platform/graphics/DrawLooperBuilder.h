@@ -31,11 +31,11 @@
 #ifndef DrawLooperBuilder_h
 #define DrawLooperBuilder_h
 
-#include "platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "third_party/skia/include/effects/SkLayerDrawLooper.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
 
 class SkDrawLooper;
 

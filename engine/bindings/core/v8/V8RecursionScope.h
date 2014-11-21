@@ -31,11 +31,11 @@
 #ifndef V8RecursionScope_h
 #define V8RecursionScope_h
 
-#include "bindings/core/v8/V8PerIsolateData.h"
-#include "core/dom/ExecutionContext.h"
-#include "platform/ScriptForbiddenScope.h"
+#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
+#include "sky/engine/wtf/Noncopyable.h"
 #include "v8/include/v8.h"
-#include "wtf/Noncopyable.h"
 
 namespace blink {
 

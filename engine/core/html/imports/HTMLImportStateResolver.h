@@ -31,7 +31,7 @@
 #ifndef HTMLImportStateResolver_h
 #define HTMLImportStateResolver_h
 
-#include "core/html/imports/HTMLImportState.h"
+#include "sky/engine/core/html/imports/HTMLImportState.h"
 
 namespace blink {
 

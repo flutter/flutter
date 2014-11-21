@@ -26,8 +26,8 @@
 #ifndef InstanceCounter_h
 #define InstanceCounter_h
 
-#include "wtf/Compiler.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

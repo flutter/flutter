@@ -24,10 +24,10 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/ClientRectList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ClientRectList.h"
 
-#include "core/dom/ClientRect.h"
+#include "sky/engine/core/dom/ClientRect.h"
 
 namespace blink {
 

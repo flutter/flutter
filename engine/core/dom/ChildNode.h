@@ -5,8 +5,8 @@
 #ifndef ChildNode_h
 #define ChildNode_h
 
-#include "core/dom/ElementTraversal.h"
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/Node.h"
 
 namespace blink {
 

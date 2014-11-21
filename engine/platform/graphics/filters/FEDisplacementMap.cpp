@@ -22,16 +22,16 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEDisplacementMap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEDisplacementMap.h"
 
-#include "SkBitmapSource.h"
-#include "SkDisplacementMapEffect.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/text/TextStream.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
+#include "third_party/skia/include/effects/SkBitmapSource.h"
+#include "third_party/skia/include/effects/SkDisplacementMapEffect.h"
 
 namespace blink {
 

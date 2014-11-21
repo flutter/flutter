@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/fetch/RawResource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/RawResource.h"
 
-#include "core/fetch/ResourceClientWalker.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/fetch/ResourceLoader.h"
-#include "platform/SharedBuffer.h"
+#include "sky/engine/core/fetch/ResourceClientWalker.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/fetch/ResourceLoader.h"
+#include "sky/engine/platform/SharedBuffer.h"
 
 namespace blink {
 

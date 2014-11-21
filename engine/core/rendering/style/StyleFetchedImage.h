@@ -24,9 +24,9 @@
 #ifndef StyleFetchedImage_h
 #define StyleFetchedImage_h
 
-#include "core/fetch/ImageResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
-#include "core/rendering/style/StyleImage.h"
+#include "sky/engine/core/fetch/ImageResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
 
 namespace blink {
 

@@ -27,14 +27,14 @@
 #define BackgroundHTMLParser_h
 
 #include "base/memory/weak_ptr.h"
-#include "core/html/parser/CompactHTMLToken.h"
-#include "core/html/parser/HTMLTokenizer.h"
-#include "core/html/parser/TextResourceDecoder.h"
 #include "mojo/public/cpp/system/core.h"
-#include "platform/fetcher/DataPipeDrainer.h"
-#include "platform/text/SegmentedString.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/WeakPtr.h"
+#include "sky/engine/core/html/parser/CompactHTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLTokenizer.h"
+#include "sky/engine/core/html/parser/TextResourceDecoder.h"
+#include "sky/engine/platform/fetcher/DataPipeDrainer.h"
+#include "sky/engine/platform/text/SegmentedString.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/WeakPtr.h"
 
 namespace blink {
 

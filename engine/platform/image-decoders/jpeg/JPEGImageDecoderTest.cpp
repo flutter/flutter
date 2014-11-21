@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #include "platform/image-decoders/jpeg/JPEGImageDecoder.h"
 
-#include "platform/SharedBuffer.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebData.h"
-#include "public/platform/WebSize.h"
-#include "public/platform/WebUnitTestSupport.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/StringHasher.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebSize.h"
+#include "sky/engine/public/platform/WebUnitTestSupport.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/StringHasher.h"
 
 #include <gtest/gtest.h>
 

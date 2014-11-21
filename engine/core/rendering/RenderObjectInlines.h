@@ -5,8 +5,8 @@
 #ifndef RenderObjectInlines_h
 #define RenderObjectInlines_h
 
-#include "core/dom/StyleEngine.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

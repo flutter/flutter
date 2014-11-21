@@ -5,8 +5,8 @@
 #ifndef V8HiddenValue_h
 #define V8HiddenValue_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "bindings/core/v8/ScriptPromiseProperties.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScriptPromiseProperties.h"
 #include "v8/include/v8.h"
 
 namespace blink {

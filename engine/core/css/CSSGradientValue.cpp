@@ -23,22 +23,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSGradientValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSGradientValue.h"
 
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "core/css/CSSCalculationValue.h"
-#include "core/css/CSSToLengthConversionData.h"
-#include "core/css/Pair.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/dom/TextLinkColors.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/graphics/GradientGeneratedImage.h"
-#include "platform/graphics/Image.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSCalculationValue.h"
+#include "sky/engine/core/css/CSSToLengthConversionData.h"
+#include "sky/engine/core/css/Pair.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/dom/TextLinkColors.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/graphics/GradientGeneratedImage.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

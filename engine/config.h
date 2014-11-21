@@ -22,7 +22,7 @@
  */
 
 /* Include compiler specific macros */
-#include "wtf/Compiler.h"
+#include "sky/engine/wtf/Compiler.h"
 
 /* ==== Platform adaptation macros: these describe properties of the target environment. ==== */
 

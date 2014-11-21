@@ -31,8 +31,8 @@
 #ifndef ColorSuggestion_h
 #define ColorSuggestion_h
 
-#include "platform/graphics/Color.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

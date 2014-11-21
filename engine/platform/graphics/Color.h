@@ -26,10 +26,10 @@
 #ifndef Color_h
 #define Color_h
 
-#include "platform/animation/AnimationUtilities.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Forward.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

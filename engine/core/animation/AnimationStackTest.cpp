@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/AnimationStack.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationStack.h"
 
-#include "core/animation/ActiveAnimations.h"
-#include "core/animation/AnimationClock.h"
-#include "core/animation/AnimationTimeline.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/animation/LegacyStyleInterpolation.h"
-#include "core/animation/animatable/AnimatableDouble.h"
 #include <gtest/gtest.h>
+#include "sky/engine/core/animation/ActiveAnimations.h"
+#include "sky/engine/core/animation/AnimationClock.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/animation/LegacyStyleInterpolation.h"
+#include "sky/engine/core/animation/animatable/AnimatableDouble.h"
 
 namespace blink {
 

@@ -5,8 +5,8 @@
 #ifndef Interpolation_h
 #define Interpolation_h
 
-#include "core/animation/InterpolableValue.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/animation/InterpolableValue.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

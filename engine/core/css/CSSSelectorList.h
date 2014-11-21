@@ -26,7 +26,7 @@
 #ifndef CSSSelectorList_h
 #define CSSSelectorList_h
 
-#include "core/css/CSSSelector.h"
+#include "sky/engine/core/css/CSSSelector.h"
 
 namespace blink {
 

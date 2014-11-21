@@ -31,7 +31,7 @@
 #ifndef HTMLTemplateElement_h
 #define HTMLTemplateElement_h
 
-#include "core/html/HTMLElement.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 

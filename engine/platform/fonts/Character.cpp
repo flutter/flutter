@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/Character.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/Character.h"
 
-#include "platform/fonts/FontPlatformFeatures.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/platform/fonts/FontPlatformFeatures.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 using namespace WTF;
 using namespace Unicode;

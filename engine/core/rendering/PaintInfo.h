@@ -27,13 +27,13 @@
 #define PaintInfo_h
 
 #include <limits>
-#include "core/rendering/PaintPhase.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/transforms/AffineTransform.h"
-#include "wtf/HashMap.h"
-#include "wtf/ListHashSet.h"
+#include "sky/engine/core/rendering/PaintPhase.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/ListHashSet.h"
 
 namespace blink {
 

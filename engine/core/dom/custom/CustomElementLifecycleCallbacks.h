@@ -31,8 +31,8 @@
 #ifndef CustomElementLifecycleCallbacks_h
 #define CustomElementLifecycleCallbacks_h
 
-#include "wtf/RefCounted.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

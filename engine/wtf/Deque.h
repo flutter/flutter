@@ -33,9 +33,9 @@
 // FIXME: Could move what Vector and Deque share into a separate file.
 // Deque doesn't actually use Vector.
 
-#include "wtf/PassTraits.h"
-#include "wtf/Vector.h"
 #include <iterator>
+#include "sky/engine/wtf/PassTraits.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace WTF {
     template<typename T, size_t inlineCapacity, typename Allocator> class DequeIteratorBase;

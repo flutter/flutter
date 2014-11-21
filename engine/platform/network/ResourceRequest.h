@@ -28,14 +28,14 @@
 #ifndef ResourceRequest_h
 #define ResourceRequest_h
 
-#include "platform/network/FormData.h"
-#include "platform/network/HTTPHeaderMap.h"
-#include "platform/network/HTTPParsers.h"
-#include "platform/network/ResourceLoadPriority.h"
-#include "platform/weborigin/KURL.h"
-#include "platform/weborigin/Referrer.h"
-#include "public/platform/WebURLRequest.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/platform/network/FormData.h"
+#include "sky/engine/platform/network/HTTPHeaderMap.h"
+#include "sky/engine/platform/network/HTTPParsers.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/platform/weborigin/Referrer.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

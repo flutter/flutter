@@ -30,21 +30,21 @@
 #ifndef InspectorDebuggerAgent_h
 #define InspectorDebuggerAgent_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/inspector/AsyncCallStackTracker.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/InjectedScript.h"
-#include "core/inspector/InspectorBaseAgent.h"
-#include "core/inspector/PromiseTracker.h"
-#include "core/inspector/ScriptBreakpoint.h"
-#include "core/inspector/ScriptDebugListener.h"
 #include "gen/sky/core/InspectorFrontend.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/inspector/AsyncCallStackTracker.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/inspector/InjectedScript.h"
+#include "sky/engine/core/inspector/InspectorBaseAgent.h"
+#include "sky/engine/core/inspector/PromiseTracker.h"
+#include "sky/engine/core/inspector/ScriptBreakpoint.h"
+#include "sky/engine/core/inspector/ScriptDebugListener.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

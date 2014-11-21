@@ -28,17 +28,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/inspector/InjectedScriptManager.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/InjectedScriptManager.h"
 
-#include "bindings/core/v8/ScriptValue.h"
-#include "core/inspector/InjectedScript.h"
-#include "core/inspector/InjectedScriptHost.h"
-#include "core/inspector/JSONParser.h"
-#include "platform/JSONValues.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebData.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/core/inspector/InjectedScript.h"
+#include "sky/engine/core/inspector/InjectedScriptHost.h"
+#include "sky/engine/core/inspector/JSONParser.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/linux/WebFontRendering.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/linux/WebFontRendering.h"
 
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontPlatformData.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
 
 using blink::FontDescription;
 using blink::FontPlatformData;

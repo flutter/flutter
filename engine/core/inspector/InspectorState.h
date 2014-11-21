@@ -32,10 +32,10 @@
 #define InspectorState_h
 
 
-#include "platform/JSONValues.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

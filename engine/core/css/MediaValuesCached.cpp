@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/MediaValuesCached.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaValuesCached.h"
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/dom/Document.h"
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

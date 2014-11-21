@@ -25,8 +25,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef Canvas2DLayerManager_h
 #define Canvas2DLayerManager_h
 
-#include "platform/Timer.h"
-#include "platform/graphics/Canvas2DLayerBridge.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
 
 class Canvas2DLayerManagerTest;
 

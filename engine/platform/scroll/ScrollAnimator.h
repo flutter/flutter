@@ -31,13 +31,13 @@
 #ifndef ScrollAnimator_h
 #define ScrollAnimator_h
 
-#include "platform/PlatformExport.h"
-#include "platform/PlatformWheelEvent.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Forward.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformWheelEvent.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

@@ -19,13 +19,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/CSSRule.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSRule.h"
 
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/StyleRule.h"
-#include "core/css/StyleSheetContents.h"
-#include "platform/NotImplemented.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/platform/NotImplemented.h"
 
 namespace blink {
 

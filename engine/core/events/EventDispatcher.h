@@ -26,10 +26,10 @@
 #ifndef EventDispatcher_h
 #define EventDispatcher_h
 
-#include "core/dom/SimulatedClickOptions.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/dom/SimulatedClickOptions.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

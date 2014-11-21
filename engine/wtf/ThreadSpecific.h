@@ -42,10 +42,10 @@
 #ifndef WTF_ThreadSpecific_h
 #define WTF_ThreadSpecific_h
 
-#include "wtf/Noncopyable.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/WTF.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/WTF.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 #if USE(PTHREADS)
 #include <pthread.h>

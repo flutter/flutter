@@ -29,11 +29,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/network/ParsedContentType.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/network/ParsedContentType.h"
 
-#include "wtf/text/CString.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

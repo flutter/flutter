@@ -26,8 +26,8 @@
 #ifndef RenderObjectChildList_h
 #define RenderObjectChildList_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

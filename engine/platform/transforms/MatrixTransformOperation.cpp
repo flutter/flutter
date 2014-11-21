@@ -19,8 +19,8 @@
  *
  */
 
-#include "config.h"
-#include "platform/transforms/MatrixTransformOperation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/MatrixTransformOperation.h"
 
 #include <algorithm>
 

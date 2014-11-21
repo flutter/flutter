@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/custom/CustomElementProcessingStack.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
 
-#include "core/dom/custom/CustomElementCallbackQueue.h"
-#include "core/dom/custom/CustomElementScheduler.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/core/dom/custom/CustomElementCallbackQueue.h"
+#include "sky/engine/core/dom/custom/CustomElementScheduler.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

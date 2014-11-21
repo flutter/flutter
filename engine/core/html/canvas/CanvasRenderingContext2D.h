@@ -26,22 +26,22 @@
 #ifndef CanvasRenderingContext2D_h
 #define CanvasRenderingContext2D_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/css/CSSFontSelectorClient.h"
-#include "core/html/canvas/Canvas2DContextAttributes.h"
-#include "core/html/canvas/CanvasPathMethods.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
-#include "core/html/canvas/HitRegion.h"
-#include "platform/fonts/Font.h"
-#include "platform/graphics/Color.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/Path.h"
-#include "platform/transforms/AffineTransform.h"
-#include "wtf/HashMap.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/css/CSSFontSelectorClient.h"
+#include "sky/engine/core/html/canvas/Canvas2DContextAttributes.h"
+#include "sky/engine/core/html/canvas/CanvasPathMethods.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/core/html/canvas/HitRegion.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/Path.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink { class WebLayer; }
 

@@ -26,8 +26,8 @@
 #ifndef NodeTraversal_h
 #define NodeTraversal_h
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/Node.h"
 
 namespace blink {
 

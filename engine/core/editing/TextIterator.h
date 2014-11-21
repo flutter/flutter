@@ -26,10 +26,10 @@
 #ifndef TextIterator_h
 #define TextIterator_h
 
-#include "core/dom/Range.h"
-#include "core/editing/FindOptions.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/editing/FindOptions.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef CSSImageSetValue_h
 #define CSSImageSetValue_h
 
-#include "core/css/CSSValueList.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "platform/weborigin/Referrer.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/platform/weborigin/Referrer.h"
 
 namespace blink {
 

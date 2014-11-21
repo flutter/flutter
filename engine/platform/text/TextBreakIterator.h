@@ -22,9 +22,9 @@
 #ifndef TextBreakIterator_h
 #define TextBreakIterator_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 #include <unicode/brkiter.h>
 

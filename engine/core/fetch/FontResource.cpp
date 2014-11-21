@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/fetch/FontResource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/FontResource.h"
 
-#include "core/fetch/ResourceClientWalker.h"
-#include "core/html/parser/TextResourceDecoder.h"
-#include "platform/SharedBuffer.h"
-#include "platform/fonts/FontCustomPlatformData.h"
-#include "platform/fonts/FontPlatformData.h"
-#include "public/platform/Platform.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/fetch/ResourceClientWalker.h"
+#include "sky/engine/core/html/parser/TextResourceDecoder.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/fonts/FontCustomPlatformData.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

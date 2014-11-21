@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
-#include "core/animation/animatable/AnimatableNeutral.h"
-#include "wtf/StdLibExtras.h"
 #include <algorithm>
+#include "sky/engine/core/animation/animatable/AnimatableNeutral.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace {
 

@@ -24,12 +24,12 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/dom/DocumentStyleSheetCollector.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DocumentStyleSheetCollector.h"
 
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/StyleSheet.h"
-#include "core/dom/DocumentStyleSheetCollection.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/StyleSheet.h"
+#include "sky/engine/core/dom/DocumentStyleSheetCollection.h"
 
 namespace blink {
 

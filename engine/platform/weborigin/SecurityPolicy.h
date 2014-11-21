@@ -29,9 +29,9 @@
 #ifndef SecurityPolicy_h
 #define SecurityPolicy_h
 
-#include "platform/PlatformExport.h"
-#include "platform/weborigin/ReferrerPolicy.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/weborigin/ReferrerPolicy.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

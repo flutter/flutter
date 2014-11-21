@@ -18,13 +18,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEDropShadow.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEDropShadow.h"
 
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/filters/FEGaussianBlur.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/effects/SkDropShadowImageFilter.h"

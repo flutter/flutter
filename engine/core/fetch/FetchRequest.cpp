@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/fetch/FetchRequest.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
 
-#include "core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
 
 namespace blink {
 

@@ -22,17 +22,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "SkImageFilter.h"
-#include "platform/graphics/filters/FEBlend.h"
-#include "platform/graphics/filters/FEGaussianBlur.h"
-#include "platform/graphics/filters/FEMerge.h"
-#include "platform/graphics/filters/FilterOperations.h"
-#include "platform/graphics/filters/ReferenceFilter.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/graphics/filters/SourceGraphic.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/graphics/filters/FEBlend.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/graphics/filters/FEMerge.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/platform/graphics/filters/ReferenceFilter.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/graphics/filters/SourceGraphic.h"
+#include "third_party/skia/include/core/SkImageFilter.h"
 
 using testing::Test;
 using namespace blink;

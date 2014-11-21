@@ -26,7 +26,7 @@
 #ifndef ClipRect_h
 #define ClipRect_h
 
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

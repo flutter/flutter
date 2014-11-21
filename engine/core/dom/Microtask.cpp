@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/Microtask.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/Microtask.h"
 
 #include "base/bind.h"
-#include "bindings/core/v8/V8PerIsolateData.h"
-#include "public/platform/WebThread.h"
+#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/public/platform/WebThread.h"
 #include "v8/include/v8.h"
 
 namespace blink {

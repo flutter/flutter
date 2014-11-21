@@ -25,12 +25,12 @@
 #ifndef ClassList_h
 #define ClassList_h
 
-#include "core/dom/DOMTokenList.h"
-#include "core/dom/Element.h"
-#include "core/dom/SpaceSplitString.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/dom/DOMTokenList.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/SpaceSplitString.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

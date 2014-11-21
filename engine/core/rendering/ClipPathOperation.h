@@ -30,12 +30,12 @@
 #ifndef ClipPathOperation_h
 #define ClipPathOperation_h
 
-#include "core/rendering/style/BasicShapes.h"
-#include "platform/graphics/Path.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/rendering/style/BasicShapes.h"
+#include "sky/engine/platform/graphics/Path.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

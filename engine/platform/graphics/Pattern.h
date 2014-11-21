@@ -29,14 +29,13 @@
 #ifndef Pattern_h
 #define Pattern_h
 
-#include "SkShader.h"
-#include "platform/PlatformExport.h"
-#include "platform/graphics/Image.h"
-#include "platform/transforms/AffineTransform.h"
-
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/DeferredLegacyStyleInterpolation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/DeferredLegacyStyleInterpolation.h"
 
-#include "core/css/CSSInheritedValue.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSValueList.h"
-#include "core/css/StylePropertySet.h"
-#include "core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/css/CSSInheritedValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
 
 #include <gtest/gtest.h>
 

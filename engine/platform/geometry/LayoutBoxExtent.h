@@ -31,9 +31,9 @@
 #ifndef LayoutBoxExtent_h
 #define LayoutBoxExtent_h
 
-#include "platform/LayoutUnit.h"
-#include "platform/PlatformExport.h"
-#include "platform/text/TextDirection.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

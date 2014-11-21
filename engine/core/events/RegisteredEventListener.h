@@ -24,8 +24,8 @@
 #ifndef RegisteredEventListener_h
 #define RegisteredEventListener_h
 
-#include "core/events/EventListener.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/events/EventListener.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

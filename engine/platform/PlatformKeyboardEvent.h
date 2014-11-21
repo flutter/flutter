@@ -27,9 +27,9 @@
 #ifndef PlatformKeyboardEvent_h
 #define PlatformKeyboardEvent_h
 
-#include "platform/PlatformEvent.h"
-#include "platform/PlatformExport.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformEvent.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

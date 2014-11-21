@@ -36,10 +36,10 @@
 #ifndef TextRunConstructor_h
 #define TextRunConstructor_h
 
-#include "platform/text/TextDirection.h"
-#include "platform/text/TextRun.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

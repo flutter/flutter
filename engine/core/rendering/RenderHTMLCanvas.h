@@ -26,7 +26,7 @@
 #ifndef RenderHTMLCanvas_h
 #define RenderHTMLCanvas_h
 
-#include "core/rendering/RenderReplaced.h"
+#include "sky/engine/core/rendering/RenderReplaced.h"
 
 namespace blink {
 

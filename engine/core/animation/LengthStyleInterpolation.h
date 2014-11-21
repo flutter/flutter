@@ -5,8 +5,8 @@
 #ifndef LengthStyleInterpolation_h
 #define LengthStyleInterpolation_h
 
-#include "core/animation/StyleInterpolation.h"
-#include "platform/Length.h"
+#include "sky/engine/core/animation/StyleInterpolation.h"
+#include "sky/engine/platform/Length.h"
 
 namespace blink {
 

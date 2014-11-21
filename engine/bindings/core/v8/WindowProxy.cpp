@@ -28,35 +28,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/WindowProxy.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/WindowProxy.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8Document.h"
-#include "bindings/core/v8/V8GCForContextDispose.h"
-#include "bindings/core/v8/V8HiddenValue.h"
 #include "bindings/core/v8/V8HTMLDocument.h"
-#include "bindings/core/v8/V8Initializer.h"
-#include "bindings/core/v8/V8ObjectConstructor.h"
 #include "bindings/core/v8/V8Window.h"
-#include "core/frame/LocalFrame.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "platform/heap/Handle.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/ScriptForbiddenScope.h"
-#include "platform/TraceEvent.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8GCForContextDispose.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/V8Initializer.h"
+#include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/StringExtras.h"
+#include "sky/engine/wtf/text/CString.h"
 #include "v8/include/v8-debug.h"
 #include "v8/include/v8.h"
-#include "wtf/Assertions.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/StringExtras.h"
-#include "wtf/text/CString.h"
 
 namespace blink {
 

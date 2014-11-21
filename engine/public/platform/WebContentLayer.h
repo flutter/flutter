@@ -26,8 +26,8 @@
 #ifndef WebContentLayer_h
 #define WebContentLayer_h
 
-#include "WebCommon.h"
-#include "WebLayer.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebLayer.h"
 
 namespace blink {
 

@@ -28,17 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/imports/HTMLImportsController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/imports/HTMLImportsController.h"
 
-#include "core/dom/Document.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/UseCounter.h"
-#include "core/html/imports/HTMLImportChild.h"
-#include "core/html/imports/HTMLImportChildClient.h"
-#include "core/html/imports/HTMLImportLoader.h"
-#include "core/html/imports/HTMLImportTreeRoot.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/core/html/imports/HTMLImportChild.h"
+#include "sky/engine/core/html/imports/HTMLImportChildClient.h"
+#include "sky/engine/core/html/imports/HTMLImportLoader.h"
+#include "sky/engine/core/html/imports/HTMLImportTreeRoot.h"
 
 namespace blink {
 

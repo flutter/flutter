@@ -31,8 +31,8 @@
 #ifndef CSSParserMode_h
 #define CSSParserMode_h
 
-#include "platform/weborigin/KURL.h"
-#include "platform/weborigin/Referrer.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/platform/weborigin/Referrer.h"
 
 namespace blink {
 

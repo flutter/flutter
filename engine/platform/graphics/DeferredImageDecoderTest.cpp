@@ -23,22 +23,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/DeferredImageDecoder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
 
-#include "SkBitmapDevice.h"
-#include "SkCanvas.h"
-#include "SkPicture.h"
-#include "SkPictureRecorder.h"
+#include <gtest/gtest.h>
 #include "base/bind.h"
 #include "base/threading/thread.h"
-#include "platform/SharedBuffer.h"
-#include "platform/graphics/ImageDecodingStore.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/graphics/test/MockImageDecoder.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include <gtest/gtest.h>
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/graphics/ImageDecodingStore.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/graphics/test/MockImageDecoder.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "third_party/skia/include/core/SkBitmapDevice.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
 

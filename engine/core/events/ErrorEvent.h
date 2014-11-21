@@ -31,10 +31,10 @@
 #ifndef ErrorEvent_h
 #define ErrorEvent_h
 
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "core/events/Event.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

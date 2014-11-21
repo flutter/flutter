@@ -24,12 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "StringBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
-#include "IntegerToStringConversion.h"
-#include "WTFString.h"
-#include "wtf/dtoa.h"
+#include "sky/engine/wtf/dtoa.h"
+#include "sky/engine/wtf/text/IntegerToStringConversion.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

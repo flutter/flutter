@@ -31,8 +31,8 @@
 #ifndef QuotedPrintable_h
 #define QuotedPrintable_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

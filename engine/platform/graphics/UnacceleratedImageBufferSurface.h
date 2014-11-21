@@ -31,8 +31,8 @@
 #ifndef UnacceleratedImageBufferSurface_h
 #define UnacceleratedImageBufferSurface_h
 
-#include "platform/graphics/ImageBufferSurface.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 class SkSurface;
 

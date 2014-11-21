@@ -31,8 +31,8 @@
 #ifndef RenderedPosition_h
 #define RenderedPosition_h
 
-#include "core/editing/TextAffinity.h"
-#include "core/rendering/InlineBox.h"
+#include "sky/engine/core/editing/TextAffinity.h"
+#include "sky/engine/core/rendering/InlineBox.h"
 
 namespace blink {
 

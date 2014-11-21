@@ -5,11 +5,11 @@
 #ifndef SampledEffect_h
 #define SampledEffect_h
 
-#include "core/animation/Animation.h"
-#include "core/animation/AnimationPlayer.h"
-#include "core/animation/Interpolation.h"
-#include "wtf/BitArray.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/animation/Animation.h"
+#include "sky/engine/core/animation/AnimationPlayer.h"
+#include "sky/engine/core/animation/Interpolation.h"
+#include "sky/engine/wtf/BitArray.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

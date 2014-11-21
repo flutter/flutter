@@ -23,17 +23,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/TextStream.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/TextStream.h"
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/geometry/IntPoint.h"
-#include "platform/geometry/IntRect.h"
-#include "wtf/MathExtras.h"
-#include "wtf/StringExtras.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/StringExtras.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

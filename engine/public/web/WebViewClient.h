@@ -33,13 +33,13 @@
 
 #include "../platform/WebGraphicsContext3D.h"
 #include "../platform/WebString.h"
-#include "WebContentDetectionResult.h"
-#include "WebFrame.h"
-#include "WebNavigatorContentUtilsClient.h"
-#include "WebPageVisibilityState.h"
-#include "WebTextAffinity.h"
-#include "WebTextDirection.h"
-#include "WebWidgetClient.h"
+#include "sky/engine/public/web/WebContentDetectionResult.h"
+#include "sky/engine/public/web/WebFrame.h"
+#include "sky/engine/public/web/WebNavigatorContentUtilsClient.h"
+#include "sky/engine/public/web/WebPageVisibilityState.h"
+#include "sky/engine/public/web/WebTextAffinity.h"
+#include "sky/engine/public/web/WebTextDirection.h"
+#include "sky/engine/public/web/WebWidgetClient.h"
 
 namespace blink {
 

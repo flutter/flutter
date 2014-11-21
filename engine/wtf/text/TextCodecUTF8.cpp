@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/text/TextCodecUTF8.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/TextCodecUTF8.h"
 
-#include "wtf/text/TextCodecASCIIFastPath.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/StringBuffer.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringBuffer.h"
+#include "sky/engine/wtf/text/TextCodecASCIIFastPath.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace WTF;
 using namespace WTF::Unicode;

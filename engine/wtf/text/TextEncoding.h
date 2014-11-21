@@ -26,10 +26,10 @@
 #ifndef TextEncoding_h
 #define TextEncoding_h
 
-#include "wtf/Forward.h"
-#include "wtf/WTFExport.h"
-#include "wtf/text/TextCodec.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/text/TextCodec.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

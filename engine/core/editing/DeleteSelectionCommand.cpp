@@ -23,20 +23,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/DeleteSelectionCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/DeleteSelectionCommand.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/Text.h"
-#include "core/editing/EditingBoundary.h"
-#include "core/editing/Editor.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/editing/htmlediting.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLStyleElement.h"
-#include "core/rendering/RenderText.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/EditingBoundary.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
+#include "sky/engine/core/rendering/RenderText.h"
 
 namespace blink {
 

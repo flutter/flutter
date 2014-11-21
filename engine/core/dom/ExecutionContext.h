@@ -28,17 +28,17 @@
 #ifndef ExecutionContext_h
 #define ExecutionContext_h
 
-#include "core/dom/ActiveDOMObject.h"
-#include "core/dom/ExecutionContextClient.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/frame/DOMTimer.h"
-#include "core/inspector/ConsoleMessage.h"
-#include "platform/LifecycleContext.h"
-#include "platform/Supplementable.h"
-#include "platform/heap/Handle.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/core/dom/ExecutionContextClient.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/frame/DOMTimer.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
+#include "sky/engine/platform/LifecycleContext.h"
+#include "sky/engine/platform/Supplementable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

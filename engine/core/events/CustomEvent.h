@@ -26,8 +26,8 @@
 #ifndef CustomEvent_h
 #define CustomEvent_h
 
-#include "bindings/core/v8/SerializedScriptValue.h"
-#include "core/events/Event.h"
+#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
+#include "sky/engine/core/events/Event.h"
 
 namespace blink {
 

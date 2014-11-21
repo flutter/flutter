@@ -24,17 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/FloatRect.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
 
-#include "platform/FloatConversion.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/FloatConversion.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/wtf/MathExtras.h"
 #include "third_party/skia/include/core/SkRect.h"
-#include "wtf/MathExtras.h"
 
-#include <algorithm>
 #include <math.h>
+#include <algorithm>
 
 namespace blink {
 

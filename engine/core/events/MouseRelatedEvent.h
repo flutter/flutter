@@ -24,8 +24,8 @@
 #ifndef MouseRelatedEvent_h
 #define MouseRelatedEvent_h
 
-#include "core/events/UIEventWithKeyState.h"
-#include "platform/geometry/LayoutPoint.h"
+#include "sky/engine/core/events/UIEventWithKeyState.h"
+#include "sky/engine/platform/geometry/LayoutPoint.h"
 
 namespace blink {
 

@@ -22,12 +22,12 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/rendering/RenderLayerModelObject.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderLayerModelObject.h"
 
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
 
 namespace blink {
 

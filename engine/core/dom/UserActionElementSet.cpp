@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/UserActionElementSet.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/UserActionElementSet.h"
 
-#include "core/dom/Element.h"
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Node.h"
 
 namespace blink {
 

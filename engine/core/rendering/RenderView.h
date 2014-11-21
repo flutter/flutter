@@ -22,13 +22,13 @@
 #ifndef RenderView_h
 #define RenderView_h
 
-#include "core/frame/FrameView.h"
-#include "core/rendering/LayoutState.h"
-#include "core/rendering/PaintInvalidationState.h"
-#include "core/rendering/RenderBlockFlow.h"
-#include "core/rendering/RenderIFrame.h"
-#include "platform/scroll/ScrollableArea.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/rendering/LayoutState.h"
+#include "sky/engine/core/rendering/PaintInvalidationState.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderIFrame.h"
+#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

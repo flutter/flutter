@@ -29,20 +29,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "bindings/core/v8/V8HTMLCanvasElement.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8CanvasRenderingContext2D.h"
 #include "bindings/core/v8/V8Node.h"
 #include "bindings/core/v8/V8WebGLRenderingContext.h"
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/canvas/Canvas2DContextAttributes.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
-#include "core/html/canvas/WebGLContextAttributes.h"
-#include "wtf/MathExtras.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/canvas/Canvas2DContextAttributes.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/core/html/canvas/WebGLContextAttributes.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

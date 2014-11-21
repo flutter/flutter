@@ -33,9 +33,9 @@
 
 #include "../platform/WebReferrerPolicy.h"
 #include "../platform/WebVector.h"
-#include "WebExceptionCode.h"
-#include "WebFrame.h"
-#include "WebNode.h"
+#include "sky/engine/public/web/WebExceptionCode.h"
+#include "sky/engine/public/web/WebFrame.h"
+#include "sky/engine/public/web/WebNode.h"
 
 #if BLINK_IMPLEMENTATION
 namespace WTF { template <typename T> class PassRefPtr; }

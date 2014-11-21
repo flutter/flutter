@@ -23,15 +23,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/canvas/DataView.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/canvas/DataView.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/custom/V8DataViewCustom.h"
-#include "bindings/core/v8/custom/V8TypedArrayCustom.h"
-#include "core/dom/ExceptionCode.h"
-#include "platform/CheckedInt.h"
-#include "wtf/CPU.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/custom/V8DataViewCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/platform/CheckedInt.h"
+#include "sky/engine/wtf/CPU.h"
 
 namespace {
 

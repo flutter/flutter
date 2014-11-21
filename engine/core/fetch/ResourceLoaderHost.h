@@ -31,8 +31,8 @@
 #ifndef ResourceLoaderHost_h
 #define ResourceLoaderHost_h
 
-#include "platform/network/ResourceError.h"
-#include "platform/network/ResourceLoadPriority.h"
+#include "sky/engine/platform/network/ResourceError.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
 
 namespace blink {
 

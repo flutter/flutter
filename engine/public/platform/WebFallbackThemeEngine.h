@@ -31,9 +31,9 @@
 #ifndef WebFallbackThemeEngine_h
 #define WebFallbackThemeEngine_h
 
-#include "WebCanvas.h"
-#include "WebColor.h"
-#include "WebSize.h"
+#include "sky/engine/public/platform/WebCanvas.h"
+#include "sky/engine/public/platform/WebColor.h"
+#include "sky/engine/public/platform/WebSize.h"
 
 namespace blink {
 

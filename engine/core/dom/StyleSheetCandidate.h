@@ -27,9 +27,9 @@
 #ifndef StyleSheetCandidate_h
 #define StyleSheetCandidate_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

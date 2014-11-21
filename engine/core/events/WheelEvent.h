@@ -25,9 +25,9 @@
 #ifndef WheelEvent_h
 #define WheelEvent_h
 
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/MouseEvent.h"
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/MouseEvent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 
 namespace blink {
 

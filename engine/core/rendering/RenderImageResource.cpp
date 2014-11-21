@@ -25,11 +25,11 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/RenderImageResource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderImageResource.h"
 
-#include "core/rendering/RenderImage.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/RenderImage.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

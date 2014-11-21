@@ -27,11 +27,11 @@
 #ifndef StyleMedia_h
 #define StyleMedia_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/frame/DOMWindowProperty.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/frame/DOMWindowProperty.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

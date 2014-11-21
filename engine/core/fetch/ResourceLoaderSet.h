@@ -31,8 +31,8 @@
 #ifndef ResourceLoaderSet_h
 #define ResourceLoaderSet_h
 
-#include "core/fetch/ResourceLoader.h"
-#include "wtf/HashSet.h"
+#include "sky/engine/core/fetch/ResourceLoader.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 

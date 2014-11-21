@@ -23,12 +23,12 @@
 #ifndef WTF_UNICODE_H
 #define WTF_UNICODE_H
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 // Define platform neutral 8 bit character type (L is for Latin-1).
 typedef unsigned char LChar;
 
-#include "wtf/unicode/icu/UnicodeIcu.h"
+#include "sky/engine/wtf/unicode/icu/UnicodeIcu.h"
 
 COMPILE_ASSERT(sizeof(UChar) == 2, UCharIsTwoBytes);
 

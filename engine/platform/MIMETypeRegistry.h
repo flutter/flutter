@@ -26,10 +26,10 @@
 #ifndef MIMETypeRegistry_h
 #define MIMETypeRegistry_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -26,14 +26,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/MediaQuery.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaQuery.h"
 
 #include "gen/sky/core/MediaTypeNames.h"
-#include "core/css/MediaQueryExp.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "wtf/NonCopyingSort.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/MediaQueryExp.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/wtf/NonCopyingSort.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

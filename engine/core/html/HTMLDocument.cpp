@@ -50,8 +50,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "config.h"
-#include "core/html/HTMLDocument.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLDocument.h"
 
 namespace blink {
 

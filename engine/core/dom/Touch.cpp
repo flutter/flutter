@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/dom/Touch.h"
+#include "sky/engine/core/dom/Touch.h"
 
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 
 namespace blink {
 

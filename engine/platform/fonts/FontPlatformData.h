@@ -31,17 +31,17 @@
 #ifndef FontPlatformDataHarfBuzz_h
 #define FontPlatformDataHarfBuzz_h
 
-#include "SkPaint.h"
-#include "platform/SharedBuffer.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontOrientation.h"
-#include "platform/fonts/FontRenderStyle.h"
-#include "platform/fonts/opentype/OpenTypeVerticalData.h"
-#include "wtf/Forward.h"
-#include "wtf/HashTableDeletedValueType.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/StringImpl.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontOrientation.h"
+#include "sky/engine/platform/fonts/FontRenderStyle.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringImpl.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 class SkTypeface;
 typedef uint32_t SkFontID;

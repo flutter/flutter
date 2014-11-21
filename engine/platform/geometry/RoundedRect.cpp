@@ -25,11 +25,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/RoundedRect.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/RoundedRect.h"
 
-#include "wtf/Assertions.h"
 #include <algorithm>
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

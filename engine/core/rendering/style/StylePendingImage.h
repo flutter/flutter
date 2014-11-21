@@ -26,12 +26,12 @@
 #ifndef StylePendingImage_h
 #define StylePendingImage_h
 
-#include "core/css/CSSCursorImageValue.h"
-#include "core/css/CSSImageGeneratorValue.h"
-#include "core/css/CSSImageSetValue.h"
-#include "core/css/CSSImageValue.h"
-#include "core/rendering/style/StyleImage.h"
-#include "platform/graphics/Image.h"
+#include "sky/engine/core/css/CSSCursorImageValue.h"
+#include "sky/engine/core/css/CSSImageGeneratorValue.h"
+#include "sky/engine/core/css/CSSImageSetValue.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/platform/graphics/Image.h"
 
 namespace blink {
 

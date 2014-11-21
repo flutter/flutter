@@ -27,9 +27,9 @@
 #ifndef IntPoint_h
 #define IntPoint_h
 
-#include "platform/geometry/IntSize.h"
-#include "wtf/MathExtras.h"
-#include "wtf/VectorTraits.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/VectorTraits.h"
 
 namespace blink {
 

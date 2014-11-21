@@ -31,9 +31,9 @@
 #ifndef WebGraphicsContext3D_h
 #define WebGraphicsContext3D_h
 
-#include "WebCommon.h"
-#include "WebNonCopyable.h"
-#include "WebString.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebNonCopyable.h"
+#include "sky/engine/public/platform/WebString.h"
 
 struct GrGLInterface;
 

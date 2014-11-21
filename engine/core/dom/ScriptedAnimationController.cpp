@@ -23,17 +23,17 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/ScriptedAnimationController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ScriptedAnimationController.h"
 
-#include "core/css/MediaQueryListListener.h"
-#include "core/dom/Document.h"
-#include "core/dom/RequestAnimationFrameCallback.h"
-#include "core/events/Event.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/FrameView.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "platform/Logging.h"
+#include "sky/engine/core/css/MediaQueryListListener.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/platform/Logging.h"
 
 namespace blink {
 

@@ -27,7 +27,7 @@
 #ifndef ContextLifecycleObserver_h
 #define ContextLifecycleObserver_h
 
-#include "platform/LifecycleContext.h"
+#include "sky/engine/platform/LifecycleContext.h"
 
 namespace blink {
 

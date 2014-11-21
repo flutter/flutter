@@ -31,11 +31,11 @@
 #ifndef ThreadingPrimitives_h
 #define ThreadingPrimitives_h
 
-#include "wtf/Assertions.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Locker.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Locker.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 #if USE(PTHREADS)
 #include <pthread.h>

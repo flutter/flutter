@@ -23,13 +23,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/custom/V8DataViewCustom.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/custom/V8DataViewCustom.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
-#include "bindings/core/v8/custom/V8TypedArrayCustom.h"
-#include "core/html/canvas/DataView.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
+#include "sky/engine/core/html/canvas/DataView.h"
 
 namespace blink {
 

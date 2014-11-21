@@ -26,10 +26,10 @@
 #ifndef Caret_h
 #define Caret_h
 
-#include "core/editing/VisiblePosition.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutRect.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

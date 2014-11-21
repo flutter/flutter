@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/KeyframeEffectModel.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
 
 #include "gen/sky/core/StylePropertyShorthand.h"
-#include "core/animation/AnimationNode.h"
-#include "platform/geometry/FloatBox.h"
-#include "platform/transforms/TransformationMatrix.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/platform/geometry/FloatBox.h"
+#include "sky/engine/platform/transforms/TransformationMatrix.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

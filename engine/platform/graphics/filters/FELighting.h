@@ -28,13 +28,13 @@
 #ifndef FELighting_h
 #define FELighting_h
 
-#include "platform/graphics/Color.h"
-#include "platform/graphics/filters/Filter.h"
-#include "platform/graphics/filters/FilterEffect.h"
-#include "platform/graphics/filters/LightSource.h"
-#include "platform/graphics/filters/PointLightSource.h"
-#include "platform/graphics/filters/SpotLightSource.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/filters/LightSource.h"
+#include "sky/engine/platform/graphics/filters/PointLightSource.h"
+#include "sky/engine/platform/graphics/filters/SpotLightSource.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
 
 // Common base class for FEDiffuseLighting and FESpecularLighting
 

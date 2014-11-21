@@ -26,8 +26,8 @@
 #ifndef VisibleUnits_h
 #define VisibleUnits_h
 
-#include "core/editing/EditingBoundary.h"
-#include "platform/text/TextDirection.h"
+#include "sky/engine/core/editing/EditingBoundary.h"
+#include "sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

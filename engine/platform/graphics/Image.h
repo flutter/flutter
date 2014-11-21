@@ -27,18 +27,18 @@
 #ifndef Image_h
 #define Image_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/Color.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/ImageOrientation.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkXfermode.h"
-#include "wtf/Assertions.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

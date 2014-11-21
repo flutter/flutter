@@ -19,8 +19,8 @@
  *
  */
 
-#include "config.h"
-#include "platform/transforms/TranslateTransformOperation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/TranslateTransformOperation.h"
 
 namespace blink {
 

@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/loader/DocumentLoadTiming.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/loader/DocumentLoadTiming.h"
 
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

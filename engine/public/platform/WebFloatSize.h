@@ -31,12 +31,11 @@
 #ifndef WebFloatSize_h
 #define WebFloatSize_h
 
-#include "WebCommon.h"
-
 #include <algorithm>
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/FloatSize.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
 #else
 #include <cmath>
 #include "ui/gfx/geometry/size_f.h"

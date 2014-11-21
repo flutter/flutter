@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/parser/MediaQueryParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/parser/MediaQueryParser.h"
 
 #include "gen/sky/core/MediaTypeNames.h"
-#include "core/css/parser/CSSPropertyParser.h"
-#include "core/css/parser/MediaQueryTokenizer.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/parser/CSSPropertyParser.h"
+#include "sky/engine/core/css/parser/MediaQueryTokenizer.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

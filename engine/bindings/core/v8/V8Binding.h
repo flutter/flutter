@@ -32,19 +32,19 @@
 #ifndef V8Binding_h
 #define V8Binding_h
 
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "bindings/core/v8/ExceptionMessages.h"
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "bindings/core/v8/V8BindingMacros.h"
-#include "bindings/core/v8/V8PerIsolateData.h"
-#include "bindings/core/v8/V8StringResource.h"
-#include "bindings/core/v8/V8ThrowException.h"
-#include "bindings/core/v8/V8ValueCache.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/bindings/core/v8/V8BindingMacros.h"
+#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/bindings/core/v8/V8StringResource.h"
+#include "sky/engine/bindings/core/v8/V8ThrowException.h"
+#include "sky/engine/bindings/core/v8/V8ValueCache.h"
+#include "sky/engine/wtf/GetPtr.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 #include "v8/include/v8.h"
-#include "wtf/GetPtr.h"
-#include "wtf/MathExtras.h"
-#include "wtf/text/AtomicString.h"
 
 namespace blink {
 

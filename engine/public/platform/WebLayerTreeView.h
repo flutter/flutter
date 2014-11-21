@@ -26,12 +26,12 @@
 #ifndef WebLayerTreeView_h
 #define WebLayerTreeView_h
 
-#include "WebColor.h"
-#include "WebCommon.h"
-#include "WebFloatPoint.h"
-#include "WebNonCopyable.h"
-#include "WebPrivateOwnPtr.h"
-#include "WebSize.h"
+#include "sky/engine/public/platform/WebColor.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebFloatPoint.h"
+#include "sky/engine/public/platform/WebNonCopyable.h"
+#include "sky/engine/public/platform/WebPrivateOwnPtr.h"
+#include "sky/engine/public/platform/WebSize.h"
 
 class SkBitmap;
 

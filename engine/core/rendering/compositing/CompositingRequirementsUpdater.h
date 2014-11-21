@@ -27,9 +27,9 @@
 #ifndef CompositingRequirementsUpdater_h
 #define CompositingRequirementsUpdater_h
 
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/CompositingReasons.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/CompositingReasons.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

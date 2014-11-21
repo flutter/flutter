@@ -31,14 +31,14 @@
 #ifndef HTMLImportsController_h
 #define HTMLImportsController_h
 
-#include "core/dom/DocumentSupplementable.h"
-#include "core/fetch/RawResource.h"
-#include "core/html/imports/HTMLImport.h"
-#include "platform/Supplementable.h"
-#include "platform/Timer.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/DocumentSupplementable.h"
+#include "sky/engine/core/fetch/RawResource.h"
+#include "sky/engine/core/html/imports/HTMLImport.h"
+#include "sky/engine/platform/Supplementable.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

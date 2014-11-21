@@ -26,10 +26,10 @@
 #ifndef TextEncodingRegistry_h
 #define TextEncodingRegistry_h
 
-#include "wtf/PassOwnPtr.h"
-#include "wtf/WTFExport.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

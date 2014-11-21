@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
 
-#include "platform/LengthFunctions.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/LengthFunctions.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
 
 namespace blink {
 

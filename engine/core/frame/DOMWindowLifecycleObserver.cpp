@@ -24,10 +24,10 @@
  */
 
 
-#include "config.h"
-#include "core/frame/DOMWindowLifecycleObserver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/DOMWindowLifecycleObserver.h"
 
-#include "core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
 
 namespace blink {
 

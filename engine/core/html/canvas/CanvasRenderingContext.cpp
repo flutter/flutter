@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
 
-#include "core/html/canvas/CanvasImageSource.h"
+#include "sky/engine/core/html/canvas/CanvasImageSource.h"
 
 namespace blink {
 

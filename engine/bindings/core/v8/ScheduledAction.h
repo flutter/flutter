@@ -31,12 +31,12 @@
 #ifndef ScheduledAction_h
 #define ScheduledAction_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "bindings/core/v8/ScriptSourceCode.h"
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/V8PersistentValueVector.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/V8PersistentValueVector.h"
+#include "sky/engine/wtf/Forward.h"
 #include "v8/include/v8.h"
-#include "wtf/Forward.h"
 
 namespace blink {
 

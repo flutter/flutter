@@ -31,7 +31,7 @@
 #ifndef WebMimeRegistry_h
 #define WebMimeRegistry_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

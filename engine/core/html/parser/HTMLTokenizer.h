@@ -27,10 +27,10 @@
 #ifndef HTMLTokenizer_h
 #define HTMLTokenizer_h
 
-#include "core/html/parser/HTMLEntityParser.h"
-#include "core/html/parser/HTMLToken.h"
-#include "core/html/parser/InputStreamPreprocessor.h"
-#include "platform/text/SegmentedString.h"
+#include "sky/engine/core/html/parser/HTMLEntityParser.h"
+#include "sky/engine/core/html/parser/HTMLToken.h"
+#include "sky/engine/core/html/parser/InputStreamPreprocessor.h"
+#include "sky/engine/platform/text/SegmentedString.h"
 
 namespace blink {
 

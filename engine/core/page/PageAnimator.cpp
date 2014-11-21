@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/page/PageAnimator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/PageAnimator.h"
 
-#include "core/animation/DocumentAnimations.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/Chrome.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/Page.h"
-#include "platform/Logging.h"
+#include "sky/engine/core/animation/DocumentAnimations.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/platform/Logging.h"
 
 namespace blink {
 

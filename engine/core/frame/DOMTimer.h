@@ -27,12 +27,12 @@
 #ifndef DOMTimer_h
 #define DOMTimer_h
 
-#include "bindings/core/v8/ScheduledAction.h"
-#include "core/frame/SuspendableTimer.h"
-#include "platform/UserGestureIndicator.h"
-#include "wtf/Compiler.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/bindings/core/v8/ScheduledAction.h"
+#include "sky/engine/core/frame/SuspendableTimer.h"
+#include "sky/engine/platform/UserGestureIndicator.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

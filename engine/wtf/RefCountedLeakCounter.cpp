@@ -18,13 +18,13 @@
  *
  */
 
-#include "config.h"
-#include "RefCountedLeakCounter.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/RefCountedLeakCounter.h"
 
 #if ENABLE(ASSERT)
-#include "wtf/Atomics.h"
-#include "wtf/HashCountedSet.h"
+#include "sky/engine/wtf/Atomics.h"
+#include "sky/engine/wtf/HashCountedSet.h"
 #endif
 
 namespace WTF {

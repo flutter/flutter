@@ -20,17 +20,17 @@
 #ifndef WTF_HashTable_h
 #define WTF_HashTable_h
 
-#include "wtf/Alignment.h"
-#include "wtf/Assertions.h"
-#include "wtf/DefaultAllocator.h"
-#include "wtf/HashTraits.h"
-#include "wtf/WTF.h"
+#include "sky/engine/wtf/Alignment.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/DefaultAllocator.h"
+#include "sky/engine/wtf/HashTraits.h"
+#include "sky/engine/wtf/WTF.h"
 
 #define DUMP_HASHTABLE_STATS 0
 #define DUMP_HASHTABLE_STATS_PER_TABLE 0
 
 #if DUMP_HASHTABLE_STATS_PER_TABLE
-#include "wtf/DataLog.h"
+#include "sky/engine/wtf/DataLog.h"
 #endif
 
 #if DUMP_HASHTABLE_STATS
@@ -1249,6 +1249,6 @@ namespace WTF {
 
 } // namespace WTF
 
-#include "wtf/HashIterators.h"
+#include "sky/engine/wtf/HashIterators.h"
 
 #endif // WTF_HashTable_h

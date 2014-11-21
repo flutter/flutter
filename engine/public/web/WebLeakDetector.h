@@ -31,8 +31,8 @@
 #ifndef WebLeakDetector_h
 #define WebLeakDetector_h
 
-#include "WebFrame.h"
-#include "public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/web/WebFrame.h"
 
 namespace blink {
 

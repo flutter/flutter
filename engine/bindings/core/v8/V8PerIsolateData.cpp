@@ -23,20 +23,20 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
 
-#include "bindings/core/v8/DOMDataStore.h"
-#include "bindings/core/v8/ScriptGCEvent.h"
-#include "bindings/core/v8/ScriptProfiler.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8HiddenValue.h"
-#include "bindings/core/v8/V8ObjectConstructor.h"
-#include "bindings/core/v8/V8RecursionScope.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
-#include "core/frame/UseCounter.h"
-#include "public/platform/Platform.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/bindings/core/v8/DOMDataStore.h"
+#include "sky/engine/bindings/core/v8/ScriptGCEvent.h"
+#include "sky/engine/bindings/core/v8/ScriptProfiler.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
+#include "sky/engine/bindings/core/v8/V8RecursionScope.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

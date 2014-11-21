@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/ImageFrameGenerator.h"
+#include "sky/engine/platform/graphics/ImageFrameGenerator.h"
 
-#include "platform/SharedBuffer.h"
-#include "platform/TraceEvent.h"
-#include "platform/graphics/ImageDecodingStore.h"
 #include "platform/image-decoders/ImageDecoder.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/graphics/ImageDecodingStore.h"
 
 #include "skia/ext/image_operations.h"
 #include "third_party/skia/include/core/SkMallocPixelRef.h"

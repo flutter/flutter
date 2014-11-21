@@ -21,23 +21,23 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "config.h"
-#include "core/fetch/ImageResource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/ImageResource.h"
 
-#include "core/fetch/ImageResourceClient.h"
-#include "core/fetch/MemoryCache.h"
-#include "core/fetch/ResourceClient.h"
-#include "core/fetch/ResourceClientWalker.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/frame/FrameView.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/Logging.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/SharedBuffer.h"
-#include "platform/TraceEvent.h"
-#include "platform/graphics/BitmapImage.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/core/fetch/ImageResourceClient.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/ResourceClient.h"
+#include "sky/engine/core/fetch/ResourceClientWalker.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

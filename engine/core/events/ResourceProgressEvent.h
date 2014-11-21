@@ -31,7 +31,7 @@
 #ifndef ResourceProgressEvent_h
 #define ResourceProgressEvent_h
 
-#include "core/events/ProgressEvent.h"
+#include "sky/engine/core/events/ProgressEvent.h"
 
 namespace blink {
 

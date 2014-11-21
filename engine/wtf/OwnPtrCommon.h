@@ -29,8 +29,8 @@
 #ifndef WTF_OwnPtrCommon_h
 #define WTF_OwnPtrCommon_h
 
-#include "wtf/Assertions.h"
-#include "wtf/TypeTraits.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/TypeTraits.h"
 
 namespace WTF {
 

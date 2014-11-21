@@ -25,7 +25,7 @@
 #ifndef OutlineValue_h
 #define OutlineValue_h
 
-#include "core/rendering/style/BorderValue.h"
+#include "sky/engine/core/rendering/style/BorderValue.h"
 
 namespace blink {
 

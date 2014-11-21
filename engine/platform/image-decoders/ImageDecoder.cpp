@@ -18,16 +18,16 @@
  *
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-decoders/ImageDecoder.h"
 
-#include "platform/graphics/DeferredImageDecoder.h"
 #include "platform/image-decoders/bmp/BMPImageDecoder.h"
 #include "platform/image-decoders/gif/GIFImageDecoder.h"
 #include "platform/image-decoders/ico/ICOImageDecoder.h"
 #include "platform/image-decoders/jpeg/JPEGImageDecoder.h"
 #include "platform/image-decoders/png/PNGImageDecoder.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

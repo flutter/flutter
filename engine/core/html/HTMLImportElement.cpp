@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/html/HTMLImportElement.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLImportElement.h"
 
-#include "core/dom/Document.h"
-#include "core/fetch/FetchRequest.h"
-#include "core/html/imports/HTMLImportsController.h"
-#include "core/html/imports/HTMLImportChild.h"
-#include "core/events/Event.h"
 #include "gen/sky/core/EventTypeNames.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/core/html/imports/HTMLImportChild.h"
+#include "sky/engine/core/html/imports/HTMLImportsController.h"
 
 namespace blink {
 

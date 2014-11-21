@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/FilterOperation.h"
+#include "sky/engine/platform/graphics/filters/FilterOperation.h"
 
-#include "platform/animation/AnimationUtilities.h"
+#include "sky/engine/platform/animation/AnimationUtilities.h"
 
 namespace blink {
 

@@ -29,12 +29,12 @@
 #ifndef Console_h
 #define Console_h
 
-#include "core/frame/ConsoleBase.h"
-#include "core/frame/DOMWindowProperty.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/frame/ConsoleBase.h"
+#include "sky/engine/core/frame/DOMWindowProperty.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

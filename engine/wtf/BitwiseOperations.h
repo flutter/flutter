@@ -37,8 +37,8 @@
 // have an operator to do this, but fortunately the various compilers have
 // built-ins that map to fast underlying processor instructions.
 
-#include "wtf/CPU.h"
-#include "wtf/Compiler.h"
+#include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/Compiler.h"
 
 #include <stdint.h>
 

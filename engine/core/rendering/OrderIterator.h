@@ -31,9 +31,8 @@
 #ifndef OrderIterator_h
 #define OrderIterator_h
 
-#include "wtf/Noncopyable.h"
-
 #include <set>
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

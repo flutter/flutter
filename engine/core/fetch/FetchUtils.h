@@ -5,7 +5,7 @@
 #ifndef FetchUtils_h
 #define FetchUtils_h
 
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef GestureEvent_h
 #define GestureEvent_h
 
-#include "core/events/EventDispatcher.h"
-#include "core/events/MouseRelatedEvent.h"
-#include "platform/PlatformGestureEvent.h"
+#include "sky/engine/core/events/EventDispatcher.h"
+#include "sky/engine/core/events/MouseRelatedEvent.h"
+#include "sky/engine/platform/PlatformGestureEvent.h"
 
 namespace blink {
 

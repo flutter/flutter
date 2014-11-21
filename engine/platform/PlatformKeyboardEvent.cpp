@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/PlatformKeyboardEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/PlatformKeyboardEvent.h"
 
-#include "platform/NotImplemented.h"
+#include "sky/engine/platform/NotImplemented.h"
 
 namespace blink {
 

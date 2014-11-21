@@ -26,7 +26,7 @@
 #ifndef TypingCommand_h
 #define TypingCommand_h
 
-#include "core/editing/TextInsertionBaseCommand.h"
+#include "sky/engine/core/editing/TextInsertionBaseCommand.h"
 
 namespace blink {
 

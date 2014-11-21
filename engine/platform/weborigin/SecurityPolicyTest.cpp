@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/weborigin/SecurityPolicy.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/weborigin/SecurityPolicy.h"
 
-#include "platform/weborigin/KURL.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/weborigin/KURL.h"
 
 using blink::KURL;
 using blink::SecurityPolicy;

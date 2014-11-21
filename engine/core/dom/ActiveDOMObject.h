@@ -27,8 +27,8 @@
 #ifndef ActiveDOMObject_h
 #define ActiveDOMObject_h
 
-#include "core/dom/ContextLifecycleObserver.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/core/dom/ContextLifecycleObserver.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

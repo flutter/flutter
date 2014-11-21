@@ -31,10 +31,10 @@
 #ifndef LayoutRect_h
 #define LayoutRect_h
 
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutBoxExtent.h"
-#include "platform/geometry/LayoutPoint.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutBoxExtent.h"
+#include "sky/engine/platform/geometry/LayoutPoint.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

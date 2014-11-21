@@ -23,11 +23,11 @@
 #ifndef RenderTheme_h
 #define RenderTheme_h
 
-#include "core/rendering/RenderObject.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

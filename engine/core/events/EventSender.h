@@ -26,9 +26,9 @@
 #ifndef EventSender_h
 #define EventSender_h
 
-#include "platform/Timer.h"
-#include "wtf/Vector.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

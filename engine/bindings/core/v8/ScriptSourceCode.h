@@ -31,11 +31,11 @@
 #ifndef ScriptSourceCode_h
 #define ScriptSourceCode_h
 
-#include "core/fetch/ResourcePtr.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/TextPosition.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/TextPosition.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

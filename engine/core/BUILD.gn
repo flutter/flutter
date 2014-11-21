@@ -64,6 +64,7 @@ static_library("core") {
     ":core_generated",
     ":libraries",
     ":prerequisites",
+    "//sky/engine/platform",
   ]
 
   sources = sky_core_files
@@ -78,6 +79,8 @@ source_set("testing") {
     ":core",
     ":core_generated",
     ":prerequisites",
+    "//sky/engine/platform",
+    "//sky/engine/wtf",
   ]
 
   sources = [

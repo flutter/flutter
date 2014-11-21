@@ -25,12 +25,12 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/RenderImageResourceStyleImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderImageResourceStyleImage.h"
 
-#include "core/fetch/ImageResource.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/style/StyleFetchedImage.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
 
 namespace blink {
 

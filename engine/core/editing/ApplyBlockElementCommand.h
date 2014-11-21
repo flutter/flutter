@@ -31,8 +31,8 @@
 #ifndef ApplyBlockElementCommand_h
 #define ApplyBlockElementCommand_h
 
-#include "core/dom/QualifiedName.h"
-#include "core/editing/CompositeEditCommand.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
 
 namespace blink {
 

@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/painting/PaintAggregator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/painting/PaintAggregator.h"
 
-#include "public/platform/Platform.h"
+#include "sky/engine/public/platform/Platform.h"
 
 using namespace blink;
 

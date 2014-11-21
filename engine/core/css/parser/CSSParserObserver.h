@@ -23,7 +23,7 @@
 #ifndef CSSParserObserver_h
 #define CSSParserObserver_h
 
-#include "core/css/CSSPropertySourceData.h"
+#include "sky/engine/core/css/CSSPropertySourceData.h"
 
 namespace blink {
 

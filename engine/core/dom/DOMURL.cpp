@@ -24,15 +24,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/DOMURL.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DOMURL.h"
 
-#include "bindings/core/v8/ExceptionMessages.h"
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/dom/ExceptionCode.h"
-#include "core/dom/ExecutionContext.h"
-#include "core/fetch/MemoryCache.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

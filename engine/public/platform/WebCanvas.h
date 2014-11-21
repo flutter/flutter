@@ -31,7 +31,7 @@
 #ifndef WebCanvas_h
 #define WebCanvas_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 class SkCanvas;
 

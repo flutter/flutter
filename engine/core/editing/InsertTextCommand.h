@@ -26,7 +26,7 @@
 #ifndef InsertTextCommand_h
 #define InsertTextCommand_h
 
-#include "core/editing/CompositeEditCommand.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
 
 namespace blink {
 

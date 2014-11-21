@@ -31,12 +31,12 @@
 #ifndef HTMLImportLoader_h
 #define HTMLImportLoader_h
 
-#include "platform/fetcher/DataPipeDrainer.h"
-#include "platform/fetcher/MojoFetcher.h"
-#include "platform/heap/Handle.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/fetcher/DataPipeDrainer.h"
+#include "sky/engine/platform/fetcher/MojoFetcher.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

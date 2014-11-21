@@ -5,8 +5,8 @@
 #ifndef WebConvertableToTraceFormat_h
 #define WebConvertableToTraceFormat_h
 
-#include "WebPrivatePtr.h"
-#include "WebString.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
+#include "sky/engine/public/platform/WebString.h"
 
 namespace blink {
 

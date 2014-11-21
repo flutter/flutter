@@ -25,12 +25,12 @@
 #ifndef StyleInheritedData_h
 #define StyleInheritedData_h
 
-#include "platform/Length.h"
-#include "platform/fonts/Font.h"
-#include "platform/graphics/Color.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/Length.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

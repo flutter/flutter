@@ -32,7 +32,7 @@
 #define WebElement_h
 
 #include "../platform/WebImage.h"
-#include "WebNode.h"
+#include "sky/engine/public/web/WebNode.h"
 
 namespace blink {
 

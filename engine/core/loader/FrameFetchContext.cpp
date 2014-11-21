@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/loader/FrameFetchContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/loader/FrameFetchContext.h"
 
-#include "core/dom/Document.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "core/page/Page.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/core/page/Page.h"
 
 namespace blink {
 

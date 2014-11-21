@@ -23,23 +23,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/TypingCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/TypingCommand.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/ElementTraversal.h"
-#include "core/editing/Editor.h"
-#include "core/editing/FrameSelection.h"
-#include "core/editing/InsertLineBreakCommand.h"
-#include "core/editing/InsertParagraphSeparatorCommand.h"
-#include "core/editing/InsertTextCommand.h"
-#include "core/editing/SpellChecker.h"
-#include "core/editing/VisiblePosition.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/editing/htmlediting.h"
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/editing/InsertLineBreakCommand.h"
+#include "sky/engine/core/editing/InsertParagraphSeparatorCommand.h"
+#include "sky/engine/core/editing/InsertTextCommand.h"
+#include "sky/engine/core/editing/SpellChecker.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef UnitBezier_h
 #define UnitBezier_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Assertions.h"
 #include <math.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

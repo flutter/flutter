@@ -31,7 +31,7 @@
 #ifndef WebGraphicsContext3DProvider_h
 #define WebGraphicsContext3DProvider_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 class GrContext;
 

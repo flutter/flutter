@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSTransformValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSTransformValue.h"
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

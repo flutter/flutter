@@ -25,12 +25,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/Gradient.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/Gradient.h"
 
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorShader.h"
 #include "third_party/skia/include/core/SkShader.h"

@@ -31,10 +31,10 @@
 #ifndef ReferenceFilter_h
 #define ReferenceFilter_h
 
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/filters/Filter.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -24,10 +24,10 @@
 #ifndef BidiRunForLine_h
 #define BidiRunForLine_h
 
-#include "config.h"
-#include "core/rendering/BidiRunForLine.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/BidiRunForLine.h"
 
-#include "core/rendering/InlineIterator.h"
+#include "sky/engine/core/rendering/InlineIterator.h"
 
 namespace blink {
 

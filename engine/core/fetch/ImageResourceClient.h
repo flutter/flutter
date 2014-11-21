@@ -23,7 +23,7 @@
 #ifndef ImageResourceClient_h
 #define ImageResourceClient_h
 
-#include "core/fetch/ResourceClient.h"
+#include "sky/engine/core/fetch/ResourceClient.h"
 
 namespace blink {
 

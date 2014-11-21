@@ -20,14 +20,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEMerge.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEMerge.h"
 
-#include "SkMergeImageFilter.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "third_party/skia/include/effects/SkMergeImageFilter.h"
 
 namespace blink {
 

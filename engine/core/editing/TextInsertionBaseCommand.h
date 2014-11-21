@@ -26,8 +26,8 @@
 #ifndef TextInsertionBaseCommand_h
 #define TextInsertionBaseCommand_h
 
-#include "core/editing/CompositeEditCommand.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

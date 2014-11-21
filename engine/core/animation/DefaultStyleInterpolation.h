@@ -5,8 +5,8 @@
 #ifndef DefaultStyleInterpolation_h
 #define DefaultStyleInterpolation_h
 
-#include "core/animation/StyleInterpolation.h"
-#include "core/css/resolver/StyleBuilder.h"
+#include "sky/engine/core/animation/StyleInterpolation.h"
+#include "sky/engine/core/css/resolver/StyleBuilder.h"
 
 namespace blink {
 

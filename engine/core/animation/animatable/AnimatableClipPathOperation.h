@@ -31,8 +31,8 @@
 #ifndef AnimatableClipPathOperation_h
 #define AnimatableClipPathOperation_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "core/rendering/ClipPathOperation.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/rendering/ClipPathOperation.h"
 
 namespace blink {
 

@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/WebArrayBuffer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebArrayBuffer.h"
 
-#include "wtf/ArrayBuffer.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/ArrayBuffer.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

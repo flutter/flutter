@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/TextRunConstructor.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/TextRunConstructor.h"
 
-#include "core/rendering/RenderText.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "platform/text/BidiTextRun.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/platform/text/BidiTextRun.h"
 
 namespace blink {
 

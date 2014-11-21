@@ -23,15 +23,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/SplitTextNodeCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/SplitTextNodeCommand.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Document.h"
-#include "core/dom/DocumentMarkerController.h"
-#include "core/dom/Text.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentMarkerController.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

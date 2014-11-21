@@ -26,8 +26,8 @@
 #ifndef FontFaceSetForEachCallback_h
 #define FontFaceSetForEachCallback_h
 
-#include "bindings/core/v8/ScriptValue.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

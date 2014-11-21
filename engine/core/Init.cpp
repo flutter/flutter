@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "Init.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/Init.h"
 
 #include "gen/sky/core/EventNames.h"
 #include "gen/sky/core/EventTargetNames.h"
@@ -38,14 +38,14 @@
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/core/MediaFeatureNames.h"
 #include "gen/sky/core/MediaTypeNames.h"
-#include "core/dom/Document.h"
-#include "core/events/EventFactory.h"
-#include "core/html/parser/HTMLParserThread.h"
-#include "platform/EventTracer.h"
 #include "gen/sky/platform/FontFamilyNames.h"
-#include "platform/Partitions.h"
-#include "platform/PlatformThreadData.h"
-#include "wtf/text/StringStatics.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/events/EventFactory.h"
+#include "sky/engine/core/html/parser/HTMLParserThread.h"
+#include "sky/engine/platform/EventTracer.h"
+#include "sky/engine/platform/Partitions.h"
+#include "sky/engine/platform/PlatformThreadData.h"
+#include "sky/engine/wtf/text/StringStatics.h"
 
 namespace blink {
 

@@ -27,7 +27,7 @@
 #define WebTestingSupport_h
 
 #include "../platform/WebCommon.h"
-#include "WebFrame.h"
+#include "sky/engine/public/web/WebFrame.h"
 
 namespace blink {
 

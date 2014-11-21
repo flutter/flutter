@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "bindings/core/v8/V8EventTarget.h"
 
 #include "core/EventTargetHeaders.h"

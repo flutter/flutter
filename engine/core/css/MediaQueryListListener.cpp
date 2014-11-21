@@ -17,8 +17,8 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/MediaQueryListListener.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaQueryListListener.h"
 
 namespace blink {
 

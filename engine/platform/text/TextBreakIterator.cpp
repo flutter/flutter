@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/text/TextBreakIterator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
 
 namespace blink {
 

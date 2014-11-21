@@ -25,12 +25,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/Pattern.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/Pattern.h"
 
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "SkCanvas.h"
-#include "SkColorShader.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkColorShader.h"
 #include "v8/include/v8.h"
 
 namespace blink {

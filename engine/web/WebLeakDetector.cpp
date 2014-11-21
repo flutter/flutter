@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "public/web/WebLeakDetector.h"
+#include "sky/engine/public/web/WebLeakDetector.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8GCController.h"
-#include "core/dom/Document.h"
-#include "core/fetch/MemoryCache.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/inspector/InspectorCounters.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/Timer.h"
-#include "public/web/WebDocument.h"
-#include "public/web/WebLocalFrame.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8GCController.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/inspector/InspectorCounters.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/public/web/WebDocument.h"
+#include "sky/engine/public/web/WebLocalFrame.h"
 #include "v8/include/v8.h"
 
 namespace blink {

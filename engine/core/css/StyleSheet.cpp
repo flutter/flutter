@@ -17,8 +17,8 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-#include "config.h"
-#include "core/css/StyleSheet.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/StyleSheet.h"
 
 namespace blink {
 

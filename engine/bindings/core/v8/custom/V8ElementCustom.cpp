@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "bindings/core/v8/V8Element.h"
 
-#include "bindings/core/v8/Dictionary.h"
-#include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/V8AnimationEffect.h"
 #include "bindings/core/v8/V8AnimationPlayer.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8BindingMacros.h"
-#include "core/animation/ElementAnimation.h"
-#include "core/dom/Element.h"
-#include "core/frame/UseCounter.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "wtf/GetPtr.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8BindingMacros.h"
+#include "sky/engine/core/animation/ElementAnimation.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/wtf/GetPtr.h"
 
 namespace blink {
 

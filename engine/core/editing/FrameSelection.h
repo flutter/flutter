@@ -26,16 +26,16 @@
 #ifndef FrameSelection_h
 #define FrameSelection_h
 
-#include "core/dom/Range.h"
-#include "core/editing/Caret.h"
-#include "core/editing/EditingStyle.h"
-#include "core/editing/VisibleSelection.h"
-#include "core/rendering/ScrollAlignment.h"
-#include "platform/Timer.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/editing/Caret.h"
+#include "sky/engine/core/editing/EditingStyle.h"
+#include "sky/engine/core/editing/VisibleSelection.h"
+#include "sky/engine/core/rendering/ScrollAlignment.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

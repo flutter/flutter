@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/InterpolableValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/InterpolableValue.h"
 
-#include "core/animation/Interpolation.h"
+#include "sky/engine/core/animation/Interpolation.h"
 
 #include <gtest/gtest.h>
 

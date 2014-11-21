@@ -27,10 +27,10 @@
 #ifndef UserActionElementSet_h
 #define UserActionElementSet_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

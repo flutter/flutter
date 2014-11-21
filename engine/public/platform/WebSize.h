@@ -31,10 +31,10 @@
 #ifndef WebSize_h
 #define WebSize_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/IntSize.h"
+#include "sky/engine/platform/geometry/IntSize.h"
 #else
 #include <algorithm>
 #include <cmath>

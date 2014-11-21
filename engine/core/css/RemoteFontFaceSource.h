@@ -5,9 +5,9 @@
 #ifndef RemoteFontFaceSource_h
 #define RemoteFontFaceSource_h
 
-#include "core/css/CSSFontFaceSource.h"
-#include "core/fetch/FontResource.h"
-#include "core/fetch/ResourcePtr.h"
+#include "sky/engine/core/css/CSSFontFaceSource.h"
+#include "sky/engine/core/fetch/FontResource.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
 
 namespace blink {
 

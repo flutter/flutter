@@ -31,7 +31,7 @@
 #ifndef WebLayerClient_h
 #define WebLayerClient_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

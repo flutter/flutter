@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/UnacceleratedImageBufferSurface.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
 
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "wtf/PassRefPtr.h"
 
 namespace blink {
 

@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/InertAnimation.h"
-#include "core/animation/Interpolation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/InertAnimation.h"
+#include "sky/engine/core/animation/Interpolation.h"
 
 namespace blink {
 

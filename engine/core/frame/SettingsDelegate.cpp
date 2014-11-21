@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/SettingsDelegate.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/SettingsDelegate.h"
 
-#include "core/frame/Settings.h"
+#include "sky/engine/core/frame/Settings.h"
 
 namespace blink {
 

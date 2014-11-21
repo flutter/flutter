@@ -24,15 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 
-#include "SkPoint.h"
-#include "platform/FloatConversion.h"
-#include "platform/geometry/LayoutPoint.h"
-#include "platform/geometry/LayoutSize.h"
-#include <limits>
 #include <math.h>
+#include <limits>
+#include "sky/engine/platform/FloatConversion.h"
+#include "sky/engine/platform/geometry/LayoutPoint.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "third_party/skia/include/core/SkPoint.h"
 
 namespace blink {
 

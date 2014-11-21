@@ -23,7 +23,7 @@
 #ifndef HTMLImageLoader_h
 #define HTMLImageLoader_h
 
-#include "core/loader/ImageLoader.h"
+#include "sky/engine/core/loader/ImageLoader.h"
 
 namespace blink {
 

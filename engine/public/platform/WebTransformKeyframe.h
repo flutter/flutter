@@ -25,9 +25,9 @@
 #ifndef WebTransformKeyframe_h
 #define WebTransformKeyframe_h
 
-#include "WebNonCopyable.h"
-#include "WebPrivateOwnPtr.h"
-#include "WebTransformOperations.h"
+#include "sky/engine/public/platform/WebNonCopyable.h"
+#include "sky/engine/public/platform/WebPrivateOwnPtr.h"
+#include "sky/engine/public/platform/WebTransformOperations.h"
 #if INSIDE_BLINK
 namespace WTF { template <typename T> class PassOwnPtr; }
 #endif

@@ -31,7 +31,7 @@
 #ifndef WebBlendMode_h
 #define WebBlendMode_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

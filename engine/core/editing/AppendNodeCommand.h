@@ -26,7 +26,7 @@
 #ifndef AppendNodeCommand_h
 #define AppendNodeCommand_h
 
-#include "core/editing/EditCommand.h"
+#include "sky/engine/core/editing/EditCommand.h"
 
 namespace blink {
 

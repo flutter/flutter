@@ -27,11 +27,11 @@
 #ifndef WebGLShaderPrecisionFormat_h
 #define WebGLShaderPrecisionFormat_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/graphics/GraphicsTypes3D.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

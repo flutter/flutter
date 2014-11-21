@@ -27,9 +27,9 @@
 #ifndef FloatRect_h
 #define FloatRect_h
 
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/wtf/Vector.h"
 #include "third_party/skia/include/core/SkRect.h"
-#include "wtf/Vector.h"
 
 namespace blink {
 

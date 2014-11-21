@@ -31,10 +31,10 @@
 #ifndef ExceptionStatePlaceholder_h
 #define ExceptionStatePlaceholder_h
 
-#include "bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
-#include "wtf/Assertions.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

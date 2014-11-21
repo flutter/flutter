@@ -31,10 +31,10 @@
 #ifndef WTF_h
 #define WTF_h
 
-#include "wtf/Compiler.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/PartitionAlloc.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

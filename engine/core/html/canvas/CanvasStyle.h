@@ -27,11 +27,11 @@
 #ifndef CanvasStyle_h
 #define CanvasStyle_h
 
-#include "platform/graphics/Color.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Assertions.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

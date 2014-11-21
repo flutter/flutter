@@ -31,11 +31,10 @@
 #ifndef WebFontInfo_h
 #define WebFontInfo_h
 
-#include "../WebCString.h"
-#include "WebFallbackFont.h"
-
 #include <string.h>
 #include <unistd.h>
+#include "sky/engine/public/platform/WebCString.h"
+#include "sky/engine/public/platform/linux/WebFallbackFont.h"
 
 namespace blink {
 

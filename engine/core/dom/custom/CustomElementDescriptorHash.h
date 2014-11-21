@@ -31,10 +31,10 @@
 #ifndef CustomElementDescriptorHash_h
 #define CustomElementDescriptorHash_h
 
-#include "core/dom/custom/CustomElementDescriptor.h"
-#include "wtf/HashFunctions.h"
-#include "wtf/HashTraits.h"
-#include "wtf/text/AtomicStringHash.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
+#include "sky/engine/wtf/HashFunctions.h"
+#include "sky/engine/wtf/HashTraits.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
 
 namespace blink {
 

@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/TextBoundaries.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/TextBoundaries.h"
 
-#include "platform/text/TextBreakIterator.h"
-#include "wtf/text/StringImpl.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "sky/engine/wtf/text/StringImpl.h"
 
 using namespace WTF;
 using namespace Unicode;

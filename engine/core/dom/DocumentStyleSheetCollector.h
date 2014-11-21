@@ -27,10 +27,10 @@
 #ifndef DocumentStyleSheetCollector_h
 #define DocumentStyleSheetCollector_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

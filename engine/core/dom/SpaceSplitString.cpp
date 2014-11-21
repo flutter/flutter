@@ -18,13 +18,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
-#include "core/dom/SpaceSplitString.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/SpaceSplitString.h"
 
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "wtf/ASCIICType.h"
-#include "wtf/HashMap.h"
-#include "wtf/text/AtomicStringHash.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/wtf/ASCIICType.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
 
 using namespace WTF;
 

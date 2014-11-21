@@ -24,11 +24,11 @@
 #ifndef NinePieceImage_h
 #define NinePieceImage_h
 
-#include "core/rendering/style/BorderImageLengthBox.h"
-#include "core/rendering/style/DataRef.h"
-#include "core/rendering/style/StyleImage.h"
-#include "platform/LayoutUnit.h"
-#include "platform/LengthBox.h"
+#include "sky/engine/core/rendering/style/BorderImageLengthBox.h"
+#include "sky/engine/core/rendering/style/DataRef.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/LengthBox.h"
 
 namespace blink {
 

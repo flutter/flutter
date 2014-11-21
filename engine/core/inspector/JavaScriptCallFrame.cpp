@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/inspector/JavaScriptCallFrame.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/JavaScriptCallFrame.h"
 
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "v8/include/v8-debug.h"
 
 namespace blink {

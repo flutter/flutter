@@ -26,17 +26,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/canvas/CanvasStyle.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/canvas/CanvasStyle.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/StylePropertySet.h"
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/canvas/CanvasGradient.h"
-#include "core/html/canvas/CanvasPattern.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/canvas/CanvasGradient.h"
+#include "sky/engine/core/html/canvas/CanvasPattern.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

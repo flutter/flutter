@@ -29,8 +29,8 @@
 
 #if HAVE(ARM_NEON_INTRINSICS)
 
-#include "platform/graphics/cpu/arm/filters/NEONHelpers.h"
-#include "platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/graphics/cpu/arm/filters/NEONHelpers.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
 
 namespace blink {
 

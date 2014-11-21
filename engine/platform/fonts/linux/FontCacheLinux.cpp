@@ -22,15 +22,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontCache.h"
 
-#include "public/platform/linux/WebFallbackFont.h"
-#include "public/platform/linux/WebFontInfo.h"
-#include "public/platform/linux/WebSandboxSupport.h"
-#include "public/platform/Platform.h"
-#include "wtf/text/CString.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/linux/WebFallbackFont.h"
+#include "sky/engine/public/platform/linux/WebFontInfo.h"
+#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
+#include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

@@ -21,11 +21,11 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "config.h"
-#include "platform/LengthFunctions.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/LengthFunctions.h"
 
-#include "platform/LayoutUnit.h"
-#include "platform/LengthSize.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/LengthSize.h"
 
 namespace blink {
 

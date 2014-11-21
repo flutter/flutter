@@ -25,16 +25,16 @@
 #ifndef TimingFunction_h
 #define TimingFunction_h
 
-#include "platform/animation/AnimationUtilities.h" // For blend()
-#include "platform/animation/UnitBezier.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/WTFString.h"
 #include <algorithm>
+#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "sky/engine/platform/animation/UnitBezier.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

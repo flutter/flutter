@@ -31,11 +31,10 @@
 #ifndef WebVector_h
 #define WebVector_h
 
-#include "WebCommon.h"
-
+#include <stdlib.h>
 #include <algorithm>
 #include <limits>
-#include <stdlib.h>
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

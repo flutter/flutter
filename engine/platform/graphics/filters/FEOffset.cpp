@@ -22,14 +22,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEOffset.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEOffset.h"
 
-#include "SkOffsetImageFilter.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
 #include "third_party/skia/include/core/SkDevice.h"
+#include "third_party/skia/include/effects/SkOffsetImageFilter.h"
 
 namespace blink {
 

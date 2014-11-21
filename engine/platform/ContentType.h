@@ -27,8 +27,8 @@
 #ifndef ContentType_h
 #define ContentType_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

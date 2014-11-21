@@ -24,13 +24,13 @@
 #ifndef StyleImage_h
 #define StyleImage_h
 
-#include "core/css/CSSValue.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/geometry/LayoutSize.h"
-#include "platform/graphics/Image.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

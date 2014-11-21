@@ -27,12 +27,12 @@
 
 #if ENABLE(OPENTYPE_VERTICAL)
 
-#include "platform/PlatformExport.h"
-#include "platform/fonts/Glyph.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/fonts/Glyph.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

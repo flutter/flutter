@@ -21,9 +21,9 @@
 #ifndef TextCheckingHelper_h
 #define TextCheckingHelper_h
 
-#include "platform/heap/Handle.h"
-#include "platform/text/TextChecking.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/text/TextChecking.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

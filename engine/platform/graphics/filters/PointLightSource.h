@@ -23,7 +23,7 @@
 #ifndef PointLightSource_h
 #define PointLightSource_h
 
-#include "platform/graphics/filters/LightSource.h"
+#include "sky/engine/platform/graphics/filters/LightSource.h"
 
 namespace blink {
 

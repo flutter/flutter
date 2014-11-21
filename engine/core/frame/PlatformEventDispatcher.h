@@ -5,7 +5,7 @@
 #ifndef PlatformEventDispatcher_h
 #define PlatformEventDispatcher_h
 
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 class PlatformEventController;

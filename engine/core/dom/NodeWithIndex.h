@@ -26,8 +26,8 @@
 #ifndef NodeWithIndex_h
 #define NodeWithIndex_h
 
-#include "core/dom/Node.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

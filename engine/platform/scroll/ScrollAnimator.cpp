@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/scroll/ScrollAnimator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/scroll/ScrollAnimator.h"
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/scroll/ScrollableArea.h"
-#include "wtf/PassOwnPtr.h"
 #include <algorithm>
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

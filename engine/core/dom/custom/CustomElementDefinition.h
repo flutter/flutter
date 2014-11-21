@@ -31,10 +31,10 @@
 #ifndef CustomElementDefinition_h
 #define CustomElementDefinition_h
 
-#include "core/dom/custom/CustomElementDescriptor.h"
-#include "core/dom/custom/CustomElementLifecycleCallbacks.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
+#include "sky/engine/core/dom/custom/CustomElementLifecycleCallbacks.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

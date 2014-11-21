@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/MediaQueryMatcher.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaQueryMatcher.h"
 
-#include "gen/sky/core/MediaTypeNames.h"
-#include "core/css/MediaList.h"
 #include "core/testing/DummyPageHolder.h"
+#include "gen/sky/core/MediaTypeNames.h"
+#include "sky/engine/core/css/MediaList.h"
 
 #include <gtest/gtest.h>
 

@@ -26,11 +26,11 @@
 // on systems without case-sensitive file systems.
 #include <string>
 
-#include "wtf/HashTableDeletedValueType.h"
-#include "wtf/WTFExport.h"
-#include "wtf/text/ASCIIFastPath.h"
-#include "wtf/text/StringImpl.h"
-#include "wtf/text/StringView.h"
+#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/text/ASCIIFastPath.h"
+#include "sky/engine/wtf/text/StringImpl.h"
+#include "sky/engine/wtf/text/StringView.h"
 
 namespace WTF {
 
@@ -685,5 +685,5 @@ using WTF::isAllSpecialCharacters;
 using WTF::isSpaceOrNewline;
 using WTF::reverseFind;
 
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 #endif // WTFString_h

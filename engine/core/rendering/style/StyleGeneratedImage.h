@@ -24,7 +24,7 @@
 #ifndef StyleGeneratedImage_h
 #define StyleGeneratedImage_h
 
-#include "core/rendering/style/StyleImage.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
 
 namespace blink {
 

@@ -76,7 +76,6 @@ config("non_test_config") {
 
 group("engine") {
   deps = [
-    "//sky/engine/public:sky_headers",
     "//sky/engine/web",
     "//sky/engine/platform",
   ]

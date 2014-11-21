@@ -31,8 +31,8 @@
 #ifndef SelectRuleFeatureSet_h
 #define SelectRuleFeatureSet_h
 
-#include "core/css/RuleFeature.h"
-#include "core/dom/Element.h"
+#include "sky/engine/core/css/RuleFeature.h"
+#include "sky/engine/core/dom/Element.h"
 
 namespace blink {
 

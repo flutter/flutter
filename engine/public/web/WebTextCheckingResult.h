@@ -33,7 +33,7 @@
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebString.h"
-#include "WebTextDecorationType.h"
+#include "sky/engine/public/web/WebTextDecorationType.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef WebFlingAnimator_h
 #define WebFlingAnimator_h
 
-#include "WebFloatPoint.h"
-#include "WebPoint.h"
-#include "WebRect.h"
+#include "sky/engine/public/platform/WebFloatPoint.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "sky/engine/public/platform/WebRect.h"
 
 namespace blink {
 

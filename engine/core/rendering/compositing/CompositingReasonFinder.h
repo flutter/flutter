@@ -5,9 +5,9 @@
 #ifndef CompositingReasonFinder_h
 #define CompositingReasonFinder_h
 
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/compositing/CompositingTriggers.h"
-#include "platform/graphics/CompositingReasons.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/compositing/CompositingTriggers.h"
+#include "sky/engine/platform/graphics/CompositingReasons.h"
 
 namespace blink {
 

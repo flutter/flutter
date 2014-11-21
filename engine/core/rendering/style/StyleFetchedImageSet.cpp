@@ -23,12 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/style/StyleFetchedImageSet.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
 
-#include "core/css/CSSImageSetValue.h"
-#include "core/fetch/ImageResource.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/css/CSSImageSetValue.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

@@ -31,9 +31,9 @@
 #ifndef CustomElementWrapper_h
 #define CustomElementWrapper_h
 
-#include "platform/heap/Handle.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "v8/include/v8.h"
-#include "wtf/PassRefPtr.h"
 
 namespace blink {
 

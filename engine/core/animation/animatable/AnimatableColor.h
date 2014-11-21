@@ -31,8 +31,8 @@
 #ifndef AnimatableColor_h
 #define AnimatableColor_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "platform/graphics/Color.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

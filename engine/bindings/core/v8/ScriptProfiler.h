@@ -31,12 +31,12 @@
 #ifndef ScriptProfiler_h
 #define ScriptProfiler_h
 
-#include "bindings/core/v8/ScriptHeapSnapshot.h"
-#include "core/inspector/ScriptProfile.h"
+#include "sky/engine/bindings/core/v8/ScriptHeapSnapshot.h"
+#include "sky/engine/core/inspector/ScriptProfile.h"
 
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

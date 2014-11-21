@@ -27,13 +27,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/SmartReplace.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/SmartReplace.h"
 
 #if !USE(CF)
-#include "wtf/Assertions.h"
-#include "wtf/text/WTFString.h"
 #include <unicode/uset.h>
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

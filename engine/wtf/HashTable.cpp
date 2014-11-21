@@ -17,9 +17,9 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "config.h"
-#include "HashTable.h"
-#include "DataLog.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/DataLog.h"
+#include "sky/engine/wtf/HashTable.h"
 
 namespace WTF {
 

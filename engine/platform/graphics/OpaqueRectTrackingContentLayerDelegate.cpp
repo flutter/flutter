@@ -22,17 +22,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/OpaqueRectTrackingContentLayerDelegate.h"
+#include "sky/engine/platform/graphics/OpaqueRectTrackingContentLayerDelegate.h"
 
 #include "base/debug/trace_event.h"
-#include "platform/EventTracer.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/transforms/AffineTransform.h"
-#include "public/platform/WebFloatRect.h"
-#include "public/platform/WebRect.h"
+#include "sky/engine/platform/EventTracer.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/public/platform/WebFloatRect.h"
+#include "sky/engine/public/platform/WebRect.h"
 
 namespace blink {
 

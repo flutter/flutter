@@ -30,11 +30,11 @@
 #ifndef CSSBasicShapes_h
 #define CSSBasicShapes_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

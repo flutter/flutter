@@ -31,10 +31,10 @@
 #ifndef InspectorCounters_h
 #define InspectorCounters_h
 
-#include "wtf/FastAllocBase.h"
+#include "sky/engine/wtf/FastAllocBase.h"
 
 #if ENABLE(ASSERT)
-#include "wtf/MainThread.h"
+#include "sky/engine/wtf/MainThread.h"
 #endif
 
 namespace blink {

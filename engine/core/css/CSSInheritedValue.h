@@ -21,8 +21,8 @@
 #ifndef CSSInheritedValue_h
 #define CSSInheritedValue_h
 
-#include "core/css/CSSValue.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

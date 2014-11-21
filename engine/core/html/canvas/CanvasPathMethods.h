@@ -29,7 +29,7 @@
 #ifndef CanvasPathMethods_h
 #define CanvasPathMethods_h
 
-#include "platform/graphics/Path.h"
+#include "sky/engine/platform/graphics/Path.h"
 
 namespace blink {
 

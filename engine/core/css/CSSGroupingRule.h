@@ -23,9 +23,9 @@
 #ifndef CSSGroupingRule_h
 #define CSSGroupingRule_h
 
-#include "core/css/CSSRule.h"
-#include "core/css/StyleRule.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/CSSRule.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

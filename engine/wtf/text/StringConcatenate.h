@@ -29,7 +29,7 @@
 #include <string.h>
 
 #ifndef WTFString_h
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 #endif
 
 // This macro is helpful for testing how many intermediate Strings are created while evaluating an
@@ -436,5 +436,5 @@ PassRefPtr<StringImpl> makeString(StringType1 string1, StringType2 string2)
 
 } // namespace WTF
 
-#include "wtf/text/StringOperators.h"
+#include "sky/engine/wtf/text/StringOperators.h"
 #endif

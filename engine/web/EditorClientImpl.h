@@ -31,8 +31,8 @@
 #ifndef EditorClientImpl_h
 #define EditorClientImpl_h
 
-#include "core/page/EditorClient.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/page/EditorClient.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

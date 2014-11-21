@@ -5,9 +5,9 @@
 #ifndef HTMLImportTreeRoot_h
 #define HTMLImportTreeRoot_h
 
-#include "core/html/imports/HTMLImport.h"
-#include "platform/Timer.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/html/imports/HTMLImport.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

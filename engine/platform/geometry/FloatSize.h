@@ -28,8 +28,8 @@
 #ifndef FloatSize_h
 #define FloatSize_h
 
-#include "platform/geometry/IntPoint.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

@@ -31,7 +31,7 @@
 #ifndef WebGraphicsLayerDebugInfo_h
 #define WebGraphicsLayerDebugInfo_h
 
-#include "public/platform/WebString.h"
+#include "sky/engine/public/platform/WebString.h"
 
 namespace blink {
 

@@ -24,12 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/unicode/UTF8.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/unicode/UTF8.h"
 
-#include "wtf/ASCIICType.h"
-#include "wtf/StringHasher.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/wtf/ASCIICType.h"
+#include "sky/engine/wtf/StringHasher.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace WTF {
 namespace Unicode {

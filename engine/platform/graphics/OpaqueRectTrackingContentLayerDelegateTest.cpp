@@ -22,16 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/OpaqueRectTrackingContentLayerDelegate.h"
+#include "sky/engine/platform/graphics/OpaqueRectTrackingContentLayerDelegate.h"
 
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/Color.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "public/platform/WebFloatRect.h"
-#include "public/platform/WebRect.h"
 #include "skia/ext/platform_canvas.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/public/platform/WebFloatRect.h"
+#include "sky/engine/public/platform/WebRect.h"
 
 #include <gtest/gtest.h>
 

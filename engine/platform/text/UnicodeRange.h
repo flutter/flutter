@@ -35,8 +35,8 @@
 #ifndef UnicodeRange_h
 #define UnicodeRange_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

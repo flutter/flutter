@@ -23,11 +23,11 @@
 #ifndef WidthIterator_h
 #define WidthIterator_h
 
-#include "platform/PlatformExport.h"
-#include "platform/text/TextRun.h"
-#include "wtf/HashSet.h"
-#include "wtf/unicode/Unicode.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

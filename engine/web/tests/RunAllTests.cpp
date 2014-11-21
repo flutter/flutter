@@ -29,7 +29,7 @@
  */
 
 #if BLINK_IMPLEMENTATION
-#include "config.h"
+#include "sky/engine/config.h"
 #endif
 
 #include "base/bind.h"
@@ -37,8 +37,8 @@
 #include "base/run_loop.h"
 #include "base/test/launcher/unit_test_launcher.h"
 #include "base/test/test_suite.h"
-#include "public/platform/Platform.h"
-#include "public/web/Sky.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/web/Sky.h"
 #include "sky/engine/testing/platform/platform_impl.h"
 #include "v8/include/v8.h"
 

@@ -30,8 +30,8 @@
 #ifndef Atomics_h
 #define Atomics_h
 
-#include "wtf/Assertions.h"
-#include "wtf/CPU.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/CPU.h"
 
 #include <stdint.h>
 

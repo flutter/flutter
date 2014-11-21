@@ -31,12 +31,12 @@
 #ifndef GraphicsLayerDebugInfo_h
 #define GraphicsLayerDebugInfo_h
 
-#include "platform/JSONValues.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/graphics/CompositingReasons.h"
-#include "public/platform/WebGraphicsLayerDebugInfo.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/graphics/CompositingReasons.h"
+#include "sky/engine/public/platform/WebGraphicsLayerDebugInfo.h"
 
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

@@ -10,21 +10,7 @@ group("test_support") {
   ]
 }
 
-config("sky_headers_config") {
-  include_dirs = [ ".." ]
-}
-
-# Depend on this target to use public sky API headers for things like enums
-# and public structures without actually linking against any Blink libraries.
-source_set("sky_headers") {
-  direct_dependent_configs = [
-    ":sky_headers_config",
-  ]
-
-  deps = [
-    "//ui/gfx/geometry",
-  ]
-
+source_set("platform_headers") {
   public = [
     "platform/Platform.h",
     "platform/ServiceProvider.h",
@@ -111,6 +97,11 @@ source_set("sky_headers") {
     "platform/linux/WebFontInfo.h",
     "platform/linux/WebFontRenderStyle.h",
     "platform/linux/WebSandboxSupport.h",
+  ]
+}
+
+source_set("web_headers") {
+  public = [
     "web/Sky.h",
     "web/WebActiveWheelFlingParameters.h",
     "web/WebArrayBufferConverter.h",

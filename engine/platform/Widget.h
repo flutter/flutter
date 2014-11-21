@@ -28,11 +28,11 @@
 #ifndef Widget_h
 #define Widget_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/IntRect.h"
-#include "wtf/Forward.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

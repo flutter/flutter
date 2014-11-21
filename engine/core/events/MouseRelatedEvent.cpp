@@ -20,15 +20,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/events/MouseRelatedEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/MouseRelatedEvent.h"
 
-#include "core/dom/Document.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

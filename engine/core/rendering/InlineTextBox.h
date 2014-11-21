@@ -23,10 +23,10 @@
 #ifndef InlineTextBox_h
 #define InlineTextBox_h
 
-#include "core/rendering/InlineBox.h"
-#include "core/rendering/RenderText.h" // so textRenderer() can be inline
-#include "platform/text/TextRun.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/rendering/InlineBox.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

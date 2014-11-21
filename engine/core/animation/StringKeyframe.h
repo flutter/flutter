@@ -5,8 +5,8 @@
 #ifndef StringKeyframe_h
 #define StringKeyframe_h
 
-#include "core/animation/Keyframe.h"
-#include "core/css/StylePropertySet.h"
+#include "sky/engine/core/animation/Keyframe.h"
+#include "sky/engine/core/css/StylePropertySet.h"
 
 namespace blink {
 

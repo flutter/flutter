@@ -31,12 +31,12 @@
 #define MessageQueue_h
 
 #include <limits>
-#include "wtf/Assertions.h"
-#include "wtf/Deque.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
 
 namespace WTF {
 

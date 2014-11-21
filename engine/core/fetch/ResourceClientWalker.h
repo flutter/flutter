@@ -25,9 +25,9 @@
 #ifndef ResourceClientWalker_h
 #define ResourceClientWalker_h
 
-#include "core/fetch/ResourceClient.h"
-#include "wtf/HashCountedSet.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/fetch/ResourceClient.h"
+#include "sky/engine/wtf/HashCountedSet.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

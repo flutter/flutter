@@ -26,9 +26,9 @@
 #ifndef PositionIterator_h
 #define PositionIterator_h
 
-#include "core/dom/Node.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/Position.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/Position.h"
 
 namespace blink {
 

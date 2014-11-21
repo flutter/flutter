@@ -26,11 +26,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/painting/ContinuousPainter.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/painting/ContinuousPainter.h"
 
-#include "platform/TraceEvent.h"
-#include "platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
 
 using namespace blink;
 

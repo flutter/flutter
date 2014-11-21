@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/HitTestingTransformState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/HitTestingTransformState.h"
 
-#include "platform/geometry/LayoutRect.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

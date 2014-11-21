@@ -5,9 +5,9 @@
 #ifndef InspectorTraceEvents_h
 #define InspectorTraceEvents_h
 
-#include "platform/EventTracer.h"
-#include "platform/TraceEvent.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/EventTracer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

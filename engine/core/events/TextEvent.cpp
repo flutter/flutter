@@ -24,10 +24,10 @@
  *
  */
 
-#include "config.h"
-#include "core/events/TextEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/TextEvent.h"
 
-#include "core/dom/DocumentFragment.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
 
 namespace blink {
 

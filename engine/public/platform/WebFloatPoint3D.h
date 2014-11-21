@@ -6,10 +6,10 @@
 #ifndef WebFloatPoint3D_h
 #define WebFloatPoint3D_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/FloatPoint3D.h"
+#include "sky/engine/platform/geometry/FloatPoint3D.h"
 #else
 #include "ui/gfx/geometry/point3_f.h"
 #endif

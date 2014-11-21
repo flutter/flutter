@@ -5,8 +5,8 @@
 #ifndef AppliedTextDecoration_h
 #define AppliedTextDecoration_h
 
-#include "core/css/StyleColor.h"
-#include "core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/css/StyleColor.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

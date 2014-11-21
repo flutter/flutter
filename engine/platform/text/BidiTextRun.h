@@ -31,9 +31,9 @@
 #ifndef BidiTextRun_h
 #define BidiTextRun_h
 
-#include "platform/text/TextDirection.h"
-#include "platform/text/TextRun.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef HTMLContentElement_h
 #define HTMLContentElement_h
 
-#include "core/css/CSSSelectorList.h"
-#include "core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/core/css/CSSSelectorList.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
 
 namespace blink {
 

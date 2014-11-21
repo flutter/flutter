@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/TemporaryChange.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace {
 

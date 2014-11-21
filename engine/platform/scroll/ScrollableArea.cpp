@@ -29,17 +29,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/scroll/ScrollableArea.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/scroll/ScrollableArea.h"
 
-#include "platform/HostWindow.h"
-#include "platform/Logging.h"
-#include "platform/graphics/GraphicsLayer.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/scroll/Scrollbar.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
-#include "platform/TraceEvent.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 static const int kPixelsPerLineStep = 40;
 static const float kMinFractionToStepWhenPaging = 0.875f;

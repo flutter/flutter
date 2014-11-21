@@ -26,19 +26,19 @@
 #ifndef ResourceFetcher_h
 #define ResourceFetcher_h
 
-#include "core/fetch/CachePolicy.h"
-#include "core/fetch/FetchInitiatorInfo.h"
-#include "core/fetch/FetchRequest.h"
-#include "core/fetch/Resource.h"
-#include "core/fetch/ResourceLoaderHost.h"
-#include "core/fetch/ResourceLoaderOptions.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/Timer.h"
-#include "wtf/Deque.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/core/fetch/CachePolicy.h"
+#include "sky/engine/core/fetch/FetchInitiatorInfo.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/core/fetch/Resource.h"
+#include "sky/engine/core/fetch/ResourceLoaderHost.h"
+#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

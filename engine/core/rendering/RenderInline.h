@@ -23,10 +23,10 @@
 #ifndef RenderInline_h
 #define RenderInline_h
 
-#include "core/editing/PositionWithAffinity.h"
-#include "core/rendering/InlineFlowBox.h"
-#include "core/rendering/RenderBoxModelObject.h"
-#include "core/rendering/RenderLineBoxList.h"
+#include "sky/engine/core/editing/PositionWithAffinity.h"
+#include "sky/engine/core/rendering/InlineFlowBox.h"
+#include "sky/engine/core/rendering/RenderBoxModelObject.h"
+#include "sky/engine/core/rendering/RenderLineBoxList.h"
 
 namespace blink {
 

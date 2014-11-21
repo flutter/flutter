@@ -31,8 +31,8 @@
 #ifndef GaneshUtils_h
 #define GaneshUtils_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntSize.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntSize.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 

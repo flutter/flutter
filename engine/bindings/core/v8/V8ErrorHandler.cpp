@@ -28,17 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8ErrorHandler.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8ErrorHandler.h"
 
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8ErrorEvent.h"
-#include "bindings/core/v8/V8HiddenValue.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
-#include "core/dom/ExecutionContext.h"
-#include "core/events/ErrorEvent.h"
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/events/ErrorEvent.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

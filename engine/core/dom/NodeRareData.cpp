@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/NodeRareData.h"
-#include "core/dom/Element.h"
-#include "core/dom/ElementRareData.h"
-#include "core/page/Page.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/ElementRareData.h"
+#include "sky/engine/core/dom/NodeRareData.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

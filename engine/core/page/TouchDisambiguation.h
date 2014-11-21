@@ -31,8 +31,8 @@
 #ifndef TouchDisambiguation_h
 #define TouchDisambiguation_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

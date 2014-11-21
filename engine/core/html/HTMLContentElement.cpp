@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/HTMLContentElement.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLContentElement.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/css/SelectorChecker.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/dom/QualifiedName.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/dom/shadow/ShadowRoot.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/core/css/SelectorChecker.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 namespace blink {
 

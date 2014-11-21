@@ -24,21 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSFontSelector.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSFontSelector.h"
 
-#include "core/css/CSSFontSelectorClient.h"
-#include "core/css/CSSSegmentedFontFace.h"
-#include "core/css/CSSValueList.h"
-#include "core/css/FontFaceSet.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/dom/Document.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/css/CSSFontSelectorClient.h"
+#include "sky/engine/core/css/CSSSegmentedFontFace.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/css/FontFaceSet.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

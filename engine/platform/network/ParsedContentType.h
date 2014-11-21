@@ -32,9 +32,9 @@
 #ifndef ParsedContentType_h
 #define ParsedContentType_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/HashMap.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

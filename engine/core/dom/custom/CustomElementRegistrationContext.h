@@ -31,15 +31,15 @@
 #ifndef CustomElementRegistrationContext_h
 #define CustomElementRegistrationContext_h
 
-#include "core/dom/QualifiedName.h"
-#include "core/dom/custom/CustomElementDescriptor.h"
-#include "core/dom/custom/CustomElementRegistry.h"
-#include "core/dom/custom/CustomElementUpgradeCandidateMap.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
+#include "sky/engine/core/dom/custom/CustomElementRegistry.h"
+#include "sky/engine/core/dom/custom/CustomElementUpgradeCandidateMap.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

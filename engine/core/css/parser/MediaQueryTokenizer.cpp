@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/parser/MediaQueryTokenizer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/parser/MediaQueryTokenizer.h"
 
 namespace blink {
 #include "core/MediaQueryTokenizerCodepoints.cpp"
 }
 
-#include "core/css/parser/MediaQueryInputStream.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/core/css/parser/MediaQueryInputStream.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

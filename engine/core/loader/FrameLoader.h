@@ -32,13 +32,13 @@
 #ifndef FrameLoader_h
 #define FrameLoader_h
 
-#include "core/fetch/ResourceLoaderOptions.h"
-#include "core/loader/FrameLoaderTypes.h"
-#include "platform/Timer.h"
-#include "platform/network/ResourceRequest.h"
-#include "wtf/Forward.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
+#include "sky/engine/core/loader/FrameLoaderTypes.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

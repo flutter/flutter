@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/transforms/InterpolatedTransformOperation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/InterpolatedTransformOperation.h"
 
-#include "platform/transforms/IdentityTransformOperation.h"
+#include "sky/engine/platform/transforms/IdentityTransformOperation.h"
 
 namespace blink {
 

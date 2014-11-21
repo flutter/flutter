@@ -31,12 +31,12 @@
 #ifndef WebString_h
 #define WebString_h
 
-#include "WebCommon.h"
-#include "WebPrivatePtr.h"
 #include <string>
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
 
 #if INSIDE_BLINK
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 #else
 #include "base/strings/latin1_string_conversions.h"
 #include "base/strings/nullable_string16.h"

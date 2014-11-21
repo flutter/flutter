@@ -24,10 +24,10 @@
  *
  */
 
-#include "config.h"
-#include "wtf/WTFThreadData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/WTFThreadData.h"
 
-#include "wtf/text/TextCodecICU.h"
+#include "sky/engine/wtf/text/TextCodecICU.h"
 
 namespace WTF {
 

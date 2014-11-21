@@ -5,13 +5,13 @@
 #ifndef MediaQueryParser_h
 #define MediaQueryParser_h
 
-#include "core/css/MediaList.h"
-#include "core/css/MediaQuery.h"
-#include "core/css/MediaQueryExp.h"
-#include "core/css/parser/CSSParserValues.h"
-#include "core/css/parser/MediaQueryBlockWatcher.h"
-#include "core/css/parser/MediaQueryToken.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/core/css/MediaQuery.h"
+#include "sky/engine/core/css/MediaQueryExp.h"
+#include "sky/engine/core/css/parser/CSSParserValues.h"
+#include "sky/engine/core/css/parser/MediaQueryBlockWatcher.h"
+#include "sky/engine/core/css/parser/MediaQueryToken.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

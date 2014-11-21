@@ -5,15 +5,15 @@
 #ifndef ConsoleMessage_h
 #define ConsoleMessage_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

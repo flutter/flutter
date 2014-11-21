@@ -25,8 +25,8 @@
 #ifndef ShadowData_h
 #define ShadowData_h
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/graphics/Color.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

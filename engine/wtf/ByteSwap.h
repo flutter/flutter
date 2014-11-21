@@ -31,8 +31,8 @@
 #ifndef WTF_ByteSwap_h
 #define WTF_ByteSwap_h
 
-#include "wtf/CPU.h"
-#include "wtf/Compiler.h"
+#include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/Compiler.h"
 
 #include <stdint.h>
 

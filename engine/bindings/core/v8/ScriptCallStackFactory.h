@@ -31,9 +31,9 @@
 #ifndef ScriptCallStackFactory_h
 #define ScriptCallStackFactory_h
 
-#include "core/inspector/ScriptCallStack.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/wtf/Forward.h"
 #include "v8/include/v8.h"
-#include "wtf/Forward.h"
 
 namespace blink {
 

@@ -21,11 +21,11 @@
  *
  */
 
-#include "config.h"
-#include "platform/text/BidiCharacterRun.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/BidiCharacterRun.h"
 
-#include "platform/Partitions.h"
-#include "wtf/RefCountedLeakCounter.h"
+#include "sky/engine/platform/Partitions.h"
+#include "sky/engine/wtf/RefCountedLeakCounter.h"
 
 using namespace WTF;
 

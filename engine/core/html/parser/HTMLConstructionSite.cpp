@@ -24,23 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLConstructionSite.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLConstructionSite.h"
 
-#include "gen/sky/core/HTMLElementFactory.h"
-#include "core/dom/DocumentFragment.h"
-#include "core/dom/Element.h"
-#include "core/dom/Text.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLScriptElement.h"
-#include "core/html/HTMLTemplateElement.h"
-#include "core/html/parser/AtomicHTMLToken.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/HTMLToken.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "platform/NotImplemented.h"
-#include "platform/text/TextBreakIterator.h"
 #include <limits>
+#include "gen/sky/core/HTMLElementFactory.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLScriptElement.h"
+#include "sky/engine/core/html/HTMLTemplateElement.h"
+#include "sky/engine/core/html/parser/AtomicHTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/html/parser/HTMLToken.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/platform/NotImplemented.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
 
 namespace blink {
 

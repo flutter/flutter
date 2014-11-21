@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/SegmentedString.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/SegmentedString.h"
 
 #include <gtest/gtest.h>
 

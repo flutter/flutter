@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "wtf/AddressSpaceRandomization.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/AddressSpaceRandomization.h"
 
-#include "wtf/PageAllocator.h"
-#include "wtf/ProcessID.h"
-#include "wtf/SpinLock.h"
+#include "sky/engine/wtf/PageAllocator.h"
+#include "sky/engine/wtf/ProcessID.h"
+#include "sky/engine/wtf/SpinLock.h"
 
 namespace WTF {
 

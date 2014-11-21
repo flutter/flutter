@@ -28,8 +28,8 @@
 #ifndef SelectorChecker_h
 #define SelectorChecker_h
 
-#include "core/css/CSSSelector.h"
-#include "core/dom/Element.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/core/dom/Element.h"
 
 namespace blink {
 

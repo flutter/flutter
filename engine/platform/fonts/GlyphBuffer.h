@@ -30,9 +30,9 @@
 #ifndef GlyphBuffer_h
 #define GlyphBuffer_h
 
-#include "platform/fonts/Glyph.h"
-#include "platform/geometry/FloatSize.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/fonts/Glyph.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

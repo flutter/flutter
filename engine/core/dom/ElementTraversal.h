@@ -26,8 +26,8 @@
 #ifndef ElementTraversal_h
 #define ElementTraversal_h
 
-#include "core/dom/Element.h"
-#include "core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
 
 namespace blink {
 

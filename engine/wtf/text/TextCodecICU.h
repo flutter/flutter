@@ -28,8 +28,8 @@
 #define TextCodecICU_h
 
 #include <unicode/utypes.h>
-#include "wtf/text/TextCodec.h"
-#include "wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/text/TextCodec.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 
 typedef struct UConverter UConverter;
 

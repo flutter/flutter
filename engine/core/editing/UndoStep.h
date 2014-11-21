@@ -31,9 +31,9 @@
 #ifndef UndoStep_h
 #define UndoStep_h
 
-#include "core/editing/EditAction.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/editing/EditAction.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

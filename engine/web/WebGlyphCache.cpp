@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebGlyphCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebGlyphCache.h"
 
-#include "platform/fonts/GlyphPageTreeNode.h"
+#include "sky/engine/platform/fonts/GlyphPageTreeNode.h"
 
 namespace blink {
 

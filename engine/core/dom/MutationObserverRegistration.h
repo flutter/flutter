@@ -31,11 +31,11 @@
 #ifndef MutationObserverRegistration_h
 #define MutationObserverRegistration_h
 
-#include "core/dom/MutationObserver.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/AtomicStringHash.h"
+#include "sky/engine/core/dom/MutationObserver.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
 
 namespace blink {
 

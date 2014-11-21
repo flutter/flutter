@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/fetch/FetchContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/FetchContext.h"
 
 
 namespace blink {

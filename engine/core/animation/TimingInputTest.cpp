@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/TimingInput.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/TimingInput.h"
 
 #include <gtest/gtest.h>
 
-#include "bindings/core/v8/Dictionary.h"
-#include "core/animation/AnimationNodeTiming.h"
-#include "core/animation/AnimationTestHelper.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/core/animation/AnimationNodeTiming.h"
+#include "sky/engine/core/animation/AnimationTestHelper.h"
 #include "v8/include/v8.h"
 
 namespace blink {

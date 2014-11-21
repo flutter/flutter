@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSImageGeneratorValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSImageGeneratorValue.h"
 
-#include "core/css/CSSCanvasValue.h"
-#include "core/css/CSSCrossfadeValue.h"
-#include "core/css/CSSGradientValue.h"
-#include "platform/graphics/Image.h"
+#include "sky/engine/core/css/CSSCanvasValue.h"
+#include "sky/engine/core/css/CSSCrossfadeValue.h"
+#include "sky/engine/core/css/CSSGradientValue.h"
+#include "sky/engine/platform/graphics/Image.h"
 
 namespace blink {
 

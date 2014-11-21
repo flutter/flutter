@@ -30,9 +30,9 @@
 #define ContentSearchUtils_h
 
 #include "gen/sky/core/InspectorTypeBuilder.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/TextPosition.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/TextPosition.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -26,10 +26,10 @@
 #ifndef FontSelector_h
 #define FontSelector_h
 
-#include "platform/fonts/FontCacheClient.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/platform/fonts/FontCacheClient.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

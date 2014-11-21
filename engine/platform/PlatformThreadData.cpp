@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/PlatformThreadData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/PlatformThreadData.h"
 
-#include "platform/ThreadTimers.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/ThreadSpecific.h"
+#include "sky/engine/platform/ThreadTimers.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/ThreadSpecific.h"
 
 namespace blink {
 

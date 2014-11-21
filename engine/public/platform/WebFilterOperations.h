@@ -26,10 +26,10 @@
 #ifndef WebFilterOperations_h
 #define WebFilterOperations_h
 
-#include "SkImageFilter.h"
-#include "SkScalar.h"
-#include "WebColor.h"
-#include "WebPoint.h"
+#include "sky/engine/public/platform/WebColor.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/skia/include/core/SkScalar.h"
 
 namespace blink {
 

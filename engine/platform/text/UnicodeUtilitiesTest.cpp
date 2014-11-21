@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/UnicodeUtilities.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/UnicodeUtilities.h"
 
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/CharacterNames.h"
 #include <gtest/gtest.h>
 #include <unicode/uchar.h>
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace blink;
 

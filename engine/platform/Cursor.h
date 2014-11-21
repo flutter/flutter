@@ -26,11 +26,11 @@
 #ifndef Cursor_h
 #define Cursor_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntPoint.h"
-#include "platform/graphics/Image.h"
-#include "wtf/Assertions.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

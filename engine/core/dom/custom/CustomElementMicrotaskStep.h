@@ -31,8 +31,8 @@
 #ifndef CustomElementMicrotaskStep_h
 #define CustomElementMicrotaskStep_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

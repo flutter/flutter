@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/network/ProxyServer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/network/ProxyServer.h"
 
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/TracedValue.h"
+#include "sky/engine/platform/TracedValue.h"
 
-#include "platform/JSONValues.h"
+#include "sky/engine/platform/JSONValues.h"
 
 namespace blink {
 

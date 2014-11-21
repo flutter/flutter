@@ -22,10 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/DOMSettableTokenList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DOMSettableTokenList.h"
 
-#include "bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
 
 namespace blink {
 

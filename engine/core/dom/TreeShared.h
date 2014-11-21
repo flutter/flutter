@@ -21,10 +21,10 @@
 #ifndef TreeShared_h
 #define TreeShared_h
 
-#include "public/platform/WebPrivatePtr.h"
-#include "wtf/Assertions.h"
-#include "wtf/MainThread.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

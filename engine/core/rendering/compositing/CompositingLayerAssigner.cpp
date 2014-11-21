@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/compositing/CompositingLayerAssigner.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/compositing/CompositingLayerAssigner.h"
 
-#include "core/rendering/compositing/CompositedLayerMapping.h"
-#include "platform/TraceEvent.h"
+#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 

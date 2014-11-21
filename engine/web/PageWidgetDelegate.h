@@ -31,9 +31,9 @@
 #ifndef PageWidgetDelegate_h
 #define PageWidgetDelegate_h
 
-#include "public/platform/WebCanvas.h"
-#include "public/web/WebWidget.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/public/platform/WebCanvas.h"
+#include "sky/engine/public/web/WebWidget.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

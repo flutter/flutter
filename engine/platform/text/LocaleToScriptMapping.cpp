@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/LocaleToScriptMapping.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/LocaleToScriptMapping.h"
 
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

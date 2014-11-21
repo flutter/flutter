@@ -5,9 +5,9 @@
 #ifndef SizesCalcParser_h
 #define SizesCalcParser_h
 
-#include "core/css/MediaValues.h"
-#include "core/css/parser/MediaQueryToken.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/MediaValues.h"
+#include "sky/engine/core/css/parser/MediaQueryToken.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

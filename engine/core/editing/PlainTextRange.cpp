@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/PlainTextRange.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/PlainTextRange.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/Document.h"
-#include "core/dom/Range.h"
-#include "core/editing/TextIterator.h"
-#include "core/editing/VisiblePosition.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/editing/TextIterator.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
 
 namespace blink {
 

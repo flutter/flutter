@@ -26,12 +26,12 @@
 #ifndef AtomicHTMLToken_h
 #define AtomicHTMLToken_h
 
-#include "core/dom/Attribute.h"
-#include "core/html/parser/CompactHTMLToken.h"
-#include "core/html/parser/HTMLToken.h"
 #include "gen/sky/core/HTMLElementLookupTrie.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/dom/Attribute.h"
+#include "sky/engine/core/html/parser/CompactHTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLToken.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

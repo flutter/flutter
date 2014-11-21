@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/MemoryCache.h"
-#include "core/fetch/Resource.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/fetch/ResourcePtr.h"
-#include "core/html/HTMLDocument.h"
-#include "platform/network/ResourceRequest.h"
-#include "public/platform/Platform.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/Resource.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/core/html/HTMLDocument.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 #include <gtest/gtest.h>
 

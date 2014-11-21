@@ -23,9 +23,9 @@
 #ifndef DocumentMarker_h
 #define DocumentMarker_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/VectorTraits.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/VectorTraits.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

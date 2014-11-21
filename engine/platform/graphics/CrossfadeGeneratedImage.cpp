@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/CrossfadeGeneratedImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/CrossfadeGeneratedImage.h"
 
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/GraphicsContextStateSaver.h"
-#include "platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
 
 namespace blink {
 

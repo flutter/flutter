@@ -20,7 +20,7 @@
 #ifndef EllipsisBox_h
 #define EllipsisBox_h
 
-#include "core/rendering/InlineBox.h"
+#include "sky/engine/core/rendering/InlineBox.h"
 
 namespace blink {
 

@@ -31,12 +31,12 @@
 #ifndef V8TypedArrayCustom_h
 #define V8TypedArrayCustom_h
 
-#include "bindings/core/v8/custom/V8ArrayBufferCustom.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8DOMWrapper.h"
-#include "bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/bindings/core/v8/custom/V8ArrayBufferCustom.h"
+#include "sky/engine/wtf/ArrayBuffer.h"
 #include "v8/include/v8.h"
-#include "wtf/ArrayBuffer.h"
 
 namespace blink {
 

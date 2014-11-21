@@ -28,23 +28,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/Threading.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/Threading.h"
 
 #if USE(PTHREADS)
 
-#include "wtf/DateMath.h"
-#include "wtf/HashMap.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/ThreadIdentifierDataPthreads.h"
-#include "wtf/ThreadSpecific.h"
-#include "wtf/ThreadingPrimitives.h"
-#include "wtf/WTFThreadData.h"
-#include "wtf/dtoa.h"
-#include "wtf/dtoa/cached-powers.h"
 #include <errno.h>
+#include "sky/engine/wtf/DateMath.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/ThreadIdentifierDataPthreads.h"
+#include "sky/engine/wtf/ThreadSpecific.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/WTFThreadData.h"
+#include "sky/engine/wtf/dtoa.h"
+#include "wtf/dtoa/cached-powers.h"
 
 #include <limits.h>
 #include <sched.h>

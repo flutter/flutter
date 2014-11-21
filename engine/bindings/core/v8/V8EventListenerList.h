@@ -31,8 +31,8 @@
 #ifndef V8EventListenerList_h
 #define V8EventListenerList_h
 
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8EventListener.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8EventListener.h"
 #include "v8/include/v8.h"
 
 namespace blink {

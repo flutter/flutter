@@ -26,11 +26,11 @@
 #ifndef CanvasPattern_h
 #define CanvasPattern_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/graphics/Pattern.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/graphics/Pattern.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

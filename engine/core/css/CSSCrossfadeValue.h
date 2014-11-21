@@ -26,12 +26,12 @@
 #ifndef CSSCrossfadeValue_h
 #define CSSCrossfadeValue_h
 
-#include "core/css/CSSImageGeneratorValue.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ImageResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/graphics/Image.h"
+#include "sky/engine/core/css/CSSImageGeneratorValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ImageResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/graphics/Image.h"
 
 namespace blink {
 

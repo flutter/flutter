@@ -26,16 +26,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/Location.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/Location.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/dom/DOMURLUtilsReadOnly.h"
-#include "core/dom/Document.h"
-#include "core/dom/ExceptionCode.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/LocalFrame.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/DOMURLUtilsReadOnly.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/platform/weborigin/KURL.h"
 
 namespace blink {
 

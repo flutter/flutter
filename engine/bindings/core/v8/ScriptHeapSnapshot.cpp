@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ScriptHeapSnapshot.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptHeapSnapshot.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "platform/JSONValues.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "v8/include/v8-profiler.h"
 #include "v8/include/v8.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 

@@ -25,21 +25,21 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/dom/StyleEngine.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/StyleEngine.h"
 
-#include "core/css/CSSFontSelector.h"
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/FontFaceCache.h"
-#include "core/css/StyleSheetContents.h"
-#include "core/dom/DocumentStyleSheetCollector.h"
-#include "core/dom/Element.h"
-#include "core/dom/ShadowTreeStyleSheetCollection.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/html/HTMLStyleElement.h"
-#include "core/html/imports/HTMLImportsController.h"
-#include "core/page/Page.h"
-#include "core/frame/Settings.h"
+#include "sky/engine/core/css/CSSFontSelector.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/FontFaceCache.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/dom/DocumentStyleSheetCollector.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/ShadowTreeStyleSheetCollection.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
+#include "sky/engine/core/html/imports/HTMLImportsController.h"
+#include "sky/engine/core/page/Page.h"
 
 namespace blink {
 

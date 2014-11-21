@@ -26,14 +26,14 @@
 #define MemoryCache_h
 
 #include "base/cancelable_callback.h"
-#include "core/fetch/Resource.h"
-#include "core/fetch/ResourcePtr.h"
-#include "public/platform/WebThread.h"
-#include "wtf/HashMap.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/fetch/Resource.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/public/platform/WebThread.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink  {
 

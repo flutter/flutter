@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_CORE_APP_MODULE_H_
 #define SKY_ENGINE_CORE_APP_MODULE_H_
 
-#include "core/app/AbstractModule.h"
+#include "sky/engine/core/app/AbstractModule.h"
 
 namespace blink {
 class Application;

@@ -23,9 +23,9 @@
 #ifndef FEComponentTransfer_h
 #define FEComponentTransfer_h
 
-#include "platform/graphics/filters/Filter.h"
-#include "platform/graphics/filters/FilterEffect.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

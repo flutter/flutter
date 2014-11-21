@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/FontCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontCache.h"
 
-#include "platform/Language.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontFaceCreationParams.h"
+#include "sky/engine/platform/Language.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontFaceCreationParams.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 

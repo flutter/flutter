@@ -29,8 +29,8 @@
 
 #if HAVE(ARM_NEON_INTRINSICS)
 
-#include "platform/graphics/filters/FEComposite.h"
 #include <arm_neon.h>
+#include "sky/engine/platform/graphics/filters/FEComposite.h"
 
 namespace blink {
 

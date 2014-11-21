@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/WebURLError.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebURLError.h"
 
-#include "platform/network/ResourceError.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/text/CString.h"
+#include "sky/engine/platform/network/ResourceError.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

@@ -5,8 +5,8 @@
 #ifndef MediaQueryListEvent_h
 #define MediaQueryListEvent_h
 
-#include "core/css/MediaQueryList.h"
-#include "core/events/Event.h"
+#include "sky/engine/core/css/MediaQueryList.h"
+#include "sky/engine/core/events/Event.h"
 
 namespace blink {
 

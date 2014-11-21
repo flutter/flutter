@@ -25,14 +25,14 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/DocumentInit.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DocumentInit.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/custom/CustomElementRegistrationContext.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/imports/HTMLImportsController.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/imports/HTMLImportsController.h"
 
 namespace blink {
 

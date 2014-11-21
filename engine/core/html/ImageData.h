@@ -29,12 +29,12 @@
 #ifndef ImageData_h
 #define ImageData_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
 
 namespace blink {
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/html/HTMLIFrameElement.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLIFrameElement.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "core/rendering/RenderIFrame.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/core/rendering/RenderIFrame.h"
 
 namespace blink {
 

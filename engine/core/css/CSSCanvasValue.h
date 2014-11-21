@@ -26,8 +26,8 @@
 #ifndef CSSCanvasValue_h
 #define CSSCanvasValue_h
 
-#include "core/css/CSSImageGeneratorValue.h"
-#include "core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/css/CSSImageGeneratorValue.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
 
 namespace blink {
 

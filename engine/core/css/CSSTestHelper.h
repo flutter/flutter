@@ -30,8 +30,8 @@
 #ifndef CSSTestHelper_h
 #define CSSTestHelper_h
 
-#include "core/css/RuleSet.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/RuleSet.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

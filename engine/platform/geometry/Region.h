@@ -26,9 +26,9 @@
 #ifndef Region_h
 #define Region_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntRect.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

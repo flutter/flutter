@@ -26,7 +26,7 @@
 #ifndef ClipRects_h
 #define ClipRects_h
 
-#include "core/rendering/ClipRect.h"
+#include "sky/engine/core/rendering/ClipRect.h"
 
 namespace blink {
 

@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/WebFontImpl.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/WebFontImpl.h"
 
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/text/TextRun.h"
-#include "public/platform/WebFloatPoint.h"
-#include "public/platform/WebFloatRect.h"
-#include "public/platform/WebRect.h"
-#include "public/web/WebFontDescription.h"
-#include "public/web/WebTextRun.h"
 #include "skia/ext/platform_canvas.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/public/platform/WebFloatPoint.h"
+#include "sky/engine/public/platform/WebFloatRect.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/web/WebFontDescription.h"
+#include "sky/engine/public/web/WebTextRun.h"
 
 namespace blink {
 

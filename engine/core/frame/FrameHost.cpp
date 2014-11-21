@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/FrameHost.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/FrameHost.h"
 
-#include "core/page/Chrome.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/Page.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/Page.h"
 
 namespace blink {
 

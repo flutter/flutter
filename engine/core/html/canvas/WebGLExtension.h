@@ -26,10 +26,10 @@
 #ifndef WebGLExtension_h
 #define WebGLExtension_h
 
-#include "core/html/canvas/WebGLExtensionName.h"
-#include "core/html/canvas/WebGLRenderingContextBase.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/html/canvas/WebGLExtensionName.h"
+#include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

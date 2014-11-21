@@ -16,7 +16,6 @@ component("v8_inspector") {
     "//mojo/public/interfaces/application",
     "//sky/engine/core", # FIXME: Remove.
     "//sky/engine/platform", # FIXME: Remove.
-    "//sky/engine/public:sky_headers",
     "//sky/services/inspector:bindings",
     "//sky/engine/core:core_generated", # FIXME: Remove.
   ]

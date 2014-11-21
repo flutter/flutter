@@ -20,23 +20,23 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/RenderInline.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderInline.h"
 
-#include "core/dom/StyleEngine.h"
-#include "core/page/Chrome.h"
-#include "core/page/Page.h"
-#include "core/rendering/GraphicsContextAnnotator.h"
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/InlineTextBox.h"
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderGeometryMap.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/style/StyleInheritedData.h"
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/TransformState.h"
-#include "platform/graphics/GraphicsContext.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/GraphicsContextAnnotator.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/InlineTextBox.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderGeometryMap.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/TransformState.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
 
 namespace blink {
 

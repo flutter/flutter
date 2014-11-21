@@ -24,10 +24,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/DOMURLUtilsReadOnly.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DOMURLUtilsReadOnly.h"
 
-#include "platform/weborigin/KnownPorts.h"
+#include "sky/engine/platform/weborigin/KnownPorts.h"
 
 namespace blink {
 

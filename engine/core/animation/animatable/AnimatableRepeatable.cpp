@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/animatable/AnimatableRepeatable.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/animatable/AnimatableRepeatable.h"
 
-#include "wtf/MathExtras.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

@@ -27,9 +27,9 @@
 #ifndef ComposedTreeWalker_h
 #define ComposedTreeWalker_h
 
-#include "core/dom/NodeRenderingTraversal.h"
-#include "core/dom/shadow/InsertionPoint.h"
-#include "core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/dom/NodeRenderingTraversal.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 namespace blink {
 

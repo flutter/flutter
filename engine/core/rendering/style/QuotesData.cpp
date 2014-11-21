@@ -19,8 +19,8 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/QuotesData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/QuotesData.h"
 
 namespace blink {
 

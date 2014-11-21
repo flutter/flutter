@@ -23,7 +23,7 @@
 #ifndef HTMLDocument_h
 #define HTMLDocument_h
 
-#include "core/dom/Document.h"
+#include "sky/engine/core/dom/Document.h"
 
 namespace blink {
 

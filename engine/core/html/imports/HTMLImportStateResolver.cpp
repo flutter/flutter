@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/imports/HTMLImportStateResolver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/imports/HTMLImportStateResolver.h"
 
-#include "core/html/imports/HTMLImport.h"
-#include "core/html/imports/HTMLImportChild.h"
-#include "core/html/imports/HTMLImportLoader.h"
+#include "sky/engine/core/html/imports/HTMLImport.h"
+#include "sky/engine/core/html/imports/HTMLImportChild.h"
+#include "sky/engine/core/html/imports/HTMLImportLoader.h"
 
 namespace blink {
 

@@ -26,10 +26,10 @@
 #ifndef markup_h
 #define markup_h
 
-#include "core/editing/HTMLInterchange.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/editing/HTMLInterchange.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

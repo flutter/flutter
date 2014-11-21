@@ -31,9 +31,9 @@
 #ifndef WebSettings_h
 #define WebSettings_h
 
+#include <unicode/uscript.h>
 #include "../platform/WebCommon.h"
 #include "../platform/WebSize.h"
-#include <unicode/uscript.h>
 
 namespace blink {
 

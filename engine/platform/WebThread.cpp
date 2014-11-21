@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "public/platform/WebThread.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebThread.h"
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 #include <unistd.h>
 

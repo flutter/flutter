@@ -40,8 +40,8 @@
 
 */
 
-#include "wtf/Compiler.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 // Users must test "#if ENABLE(ASSERT)", which helps ensure that code
 // testing this macro has included this header.

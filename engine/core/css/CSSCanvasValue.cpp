@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSCanvasValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSCanvasValue.h"
 
-#include "core/rendering/RenderObject.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

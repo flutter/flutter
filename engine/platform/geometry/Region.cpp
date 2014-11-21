@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/Region.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/Region.h"
 
 #include <stdio.h>
 

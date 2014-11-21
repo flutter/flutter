@@ -31,10 +31,10 @@
 #ifndef WebFloatRect_h
 #define WebFloatRect_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
 #else
 #include <algorithm>
 #include <cmath>

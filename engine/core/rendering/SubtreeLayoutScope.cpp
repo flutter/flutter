@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/SubtreeLayoutScope.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/SubtreeLayoutScope.h"
 
-#include "core/frame/FrameView.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

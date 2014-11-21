@@ -31,9 +31,9 @@
 #ifndef FontCacheClient_h
 #define FontCacheClient_h
 
-#include "platform/PlatformExport.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

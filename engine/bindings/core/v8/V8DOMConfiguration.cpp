@@ -26,11 +26,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8DOMConfiguration.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8DOMConfiguration.h"
 
-#include "bindings/core/v8/V8ObjectConstructor.h"
-#include "platform/TraceEvent.h"
+#include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 

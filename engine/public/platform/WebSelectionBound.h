@@ -5,8 +5,8 @@
 #ifndef WebSelectionBound_h
 #define WebSelectionBound_h
 
-#include "public/platform/WebPoint.h"
-#include "public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "sky/engine/public/platform/WebRect.h"
 
 namespace blink {
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/rendering/compositing/CompositingInputsUpdater.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/compositing/CompositingInputsUpdater.h"
 
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/compositing/CompositedLayerMapping.h"
-#include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "platform/TraceEvent.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 

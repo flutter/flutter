@@ -26,7 +26,7 @@
 #ifndef WebGLSharedObject_h
 #define WebGLSharedObject_h
 
-#include "core/html/canvas/WebGLObject.h"
+#include "sky/engine/core/html/canvas/WebGLObject.h"
 
 namespace blink {
 

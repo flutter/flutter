@@ -5,8 +5,8 @@
 #ifndef DoubleBufferedDeque_h
 #define DoubleBufferedDeque_h
 
-#include "wtf/Deque.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace WTF {
 

@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSLineBoxContainValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSLineBoxContainValue.h"
 
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/fetcher/MojoFetcher.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fetcher/MojoFetcher.h"
 
 #include "base/bind.h"
 #include "mojo/services/public/interfaces/network/network_service.mojom.h"
-#include "platform/weborigin/KURL.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

@@ -27,15 +27,15 @@
  */
 
 
-#include "config.h"
-#include "core/frame/Screen.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/Screen.h"
 
-#include "core/frame/FrameHost.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
-#include "platform/PlatformScreen.h"
-#include "platform/geometry/FloatRect.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/platform/PlatformScreen.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
 
 namespace blink {
 

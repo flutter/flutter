@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/animatable/AnimatableUnknown.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/animatable/AnimatableUnknown.h"
 
-#include "core/animation/animatable/AnimatableNeutral.h"
-#include "core/css/CSSValuePool.h"
+#include "sky/engine/core/animation/animatable/AnimatableNeutral.h"
+#include "sky/engine/core/css/CSSValuePool.h"
 
 #include <gtest/gtest.h>
 

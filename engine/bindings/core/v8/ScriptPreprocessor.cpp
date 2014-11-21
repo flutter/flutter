@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ScriptPreprocessor.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptPreprocessor.h"
 
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/ScriptSourceCode.h"
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/FrameHost.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/ConsoleMessage.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

@@ -26,12 +26,12 @@
 #ifndef PlatformGestureEvent_h
 #define PlatformGestureEvent_h
 
-#include "platform/PlatformEvent.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/IntPoint.h"
-#include "platform/geometry/IntSize.h"
-#include "wtf/Assertions.h"
 #include <string.h>
+#include "sky/engine/platform/PlatformEvent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

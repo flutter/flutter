@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "StringStatics.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/StringStatics.h"
 
-#include "AtomicString.h"
-#include "StringImpl.h"
-#include "wtf/DynamicAnnotations.h"
-#include "wtf/MainThread.h"
-#include "wtf/StaticConstructors.h"
+#include "sky/engine/wtf/DynamicAnnotations.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/StaticConstructors.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/StringImpl.h"
 
 namespace WTF {
 

@@ -31,8 +31,8 @@
 #ifndef V8DataViewCustom_h
 #define V8DataViewCustom_h
 
-#include "bindings/core/v8/custom/V8TypedArrayCustom.h"
-#include "core/html/canvas/DataView.h"
+#include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
+#include "sky/engine/core/html/canvas/DataView.h"
 
 namespace blink {
 

@@ -31,9 +31,9 @@
 #ifndef PlatformThreadData_h
 #define PlatformThreadData_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

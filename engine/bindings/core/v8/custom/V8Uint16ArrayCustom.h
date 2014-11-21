@@ -31,8 +31,8 @@
 #ifndef V8Uint16ArrayCustom_h
 #define V8Uint16ArrayCustom_h
 
-#include "bindings/core/v8/custom/V8TypedArrayCustom.h"
-#include "wtf/Uint16Array.h"
+#include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
+#include "sky/engine/wtf/Uint16Array.h"
 
 namespace blink {
 

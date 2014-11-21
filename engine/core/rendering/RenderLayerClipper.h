@@ -45,8 +45,8 @@
 #ifndef RenderLayerClipper_h
 #define RenderLayerClipper_h
 
-#include "core/rendering/ClipRectsCache.h"
-#include "core/rendering/RenderBox.h"
+#include "sky/engine/core/rendering/ClipRectsCache.h"
+#include "sky/engine/core/rendering/RenderBox.h"
 
 namespace blink {
 

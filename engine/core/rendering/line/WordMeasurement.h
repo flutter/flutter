@@ -24,8 +24,8 @@
 #ifndef WordMeasurement_h
 #define WordMeasurement_h
 
-#include "platform/fonts/SimpleFontData.h"
-#include "wtf/HashSet.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 

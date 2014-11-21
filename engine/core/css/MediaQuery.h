@@ -29,11 +29,11 @@
 #ifndef MediaQuery_h
 #define MediaQuery_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class MediaQueryExp;

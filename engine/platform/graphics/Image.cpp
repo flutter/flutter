@@ -24,23 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/Image.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/Image.h"
 
-#include "platform/Length.h"
-#include "platform/MIMETypeRegistry.h"
-#include "platform/SharedBuffer.h"
-#include "platform/TraceEvent.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/BitmapImage.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/GraphicsContextStateSaver.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebData.h"
-#include "wtf/MainThread.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/platform/Length.h"
+#include "sky/engine/platform/MIMETypeRegistry.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 #include <math.h>
 

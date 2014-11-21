@@ -31,10 +31,10 @@
 #ifndef SharedPersistent_h
 #define SharedPersistent_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "v8/include/v8.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
 
 namespace blink {
 

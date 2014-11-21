@@ -31,8 +31,8 @@
 #ifndef CustomElementObserver_h
 #define CustomElementObserver_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

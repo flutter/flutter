@@ -25,9 +25,9 @@
 
 #include "gen/sky/core/CSSValueKeywords.h"
 
-#include "platform/fonts/FontDescription.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

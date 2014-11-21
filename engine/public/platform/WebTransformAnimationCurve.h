@@ -25,9 +25,9 @@
 #ifndef WebTransformAnimationCurve_h
 #define WebTransformAnimationCurve_h
 
-#include "WebCommon.h"
-#include "WebCompositorAnimationCurve.h"
-#include "WebTransformKeyframe.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
+#include "sky/engine/public/platform/WebTransformKeyframe.h"
 
 namespace blink {
 

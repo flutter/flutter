@@ -24,12 +24,12 @@
  */
 
 
-#include "config.h"
-#include "CString.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/CString.h"
 
-#include "wtf/PartitionAlloc.h"
-#include "wtf/WTF.h"
 #include <string.h>
+#include "sky/engine/wtf/PartitionAlloc.h"
+#include "sky/engine/wtf/WTF.h"
 
 using namespace std;
 

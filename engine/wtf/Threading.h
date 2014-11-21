@@ -30,8 +30,8 @@
 #ifndef Threading_h
 #define Threading_h
 
-#include "wtf/WTFExport.h"
 #include <stdint.h>
+#include "sky/engine/wtf/WTFExport.h"
 
 // For portability, we do not use thread-safe statics natively supported by some compilers (e.g. gcc).
 #define AtomicallyInitializedStatic(T, name) \

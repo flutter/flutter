@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/DrawLooperBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/DrawLooperBuilder.h"
 
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/Color.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkDrawLooper.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 #include "third_party/skia/include/effects/SkBlurMaskFilter.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 

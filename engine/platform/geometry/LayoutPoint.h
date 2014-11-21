@@ -31,9 +31,9 @@
 #ifndef LayoutPoint_h
 #define LayoutPoint_h
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/LayoutSize.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

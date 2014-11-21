@@ -27,10 +27,10 @@
 #ifndef RGBColor_h
 #define RGBColor_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/graphics/Color.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

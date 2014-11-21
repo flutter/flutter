@@ -25,8 +25,8 @@
 #ifndef ResourceClient_h
 #define ResourceClient_h
 
-#include "wtf/FastAllocBase.h"
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 class Resource;

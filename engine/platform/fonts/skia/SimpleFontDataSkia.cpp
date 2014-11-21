@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/SimpleFontData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
 
 #include <unicode/normlzr.h>
-#include "SkPaint.h"
-#include "SkPath.h"
-#include "SkTypeface.h"
-#include "SkTypes.h"
-#include "SkUtils.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/GlyphPage.h"
-#include "platform/fonts/VDMXParser.h"
-#include "platform/geometry/FloatRect.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/GlyphPage.h"
+#include "sky/engine/platform/fonts/VDMXParser.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/include/core/SkTypes.h"
+#include "third_party/skia/include/core/SkUtils.h"
 
 namespace blink {
 

@@ -26,7 +26,7 @@
 #ifndef SplitTextNodeContainingElementCommand_h
 #define SplitTextNodeContainingElementCommand_h
 
-#include "core/editing/CompositeEditCommand.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
 
 namespace blink {
 

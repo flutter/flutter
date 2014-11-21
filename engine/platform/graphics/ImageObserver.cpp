@@ -27,9 +27,9 @@
  *
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/ImageObserver.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
 
 namespace blink {
 

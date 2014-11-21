@@ -31,7 +31,7 @@
 #ifndef AnimatableLengthPoint3D_h
 #define AnimatableLengthPoint3D_h
 
-#include "core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
 namespace blink {
 

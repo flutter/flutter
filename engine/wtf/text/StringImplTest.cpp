@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/text/StringImpl.h"
-#include "wtf/text/WTFString.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/text/StringImpl.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

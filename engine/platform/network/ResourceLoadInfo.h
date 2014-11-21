@@ -27,8 +27,8 @@
 #ifndef ResourceLoadInfo_h
 #define ResourceLoadInfo_h
 
-#include "platform/network/HTTPHeaderMap.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/network/HTTPHeaderMap.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

@@ -27,12 +27,12 @@
 #ifndef TreeScopeEventContext_h
 #define TreeScopeEventContext_h
 
-#include "core/dom/Node.h"
-#include "core/dom/TreeScope.h"
-#include "core/events/EventTarget.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/TreeScope.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

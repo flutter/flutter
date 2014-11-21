@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "VDMXParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/VDMXParser.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "wtf/ByteOrder.h"
+#include "sky/engine/wtf/ByteOrder.h"
 
 // Buffer helper class
 //

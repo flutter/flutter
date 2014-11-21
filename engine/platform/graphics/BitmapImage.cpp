@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/BitmapImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
 
-#include "platform/Timer.h"
-#include "platform/TraceEvent.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/GraphicsContextStateSaver.h"
-#include "platform/graphics/ImageObserver.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

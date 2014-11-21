@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/page/WindowFocusAllowedIndicator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/WindowFocusAllowedIndicator.h"
 
 namespace blink {
 

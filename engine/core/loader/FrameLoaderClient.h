@@ -30,14 +30,14 @@
 #ifndef FrameLoaderClient_h
 #define FrameLoaderClient_h
 
-#include "core/frame/FrameClient.h"
-#include "core/loader/FrameLoaderTypes.h"
-#include "core/loader/NavigationPolicy.h"
-#include "platform/network/ResourceLoadPriority.h"
-#include "platform/weborigin/Referrer.h"
+#include "sky/engine/core/frame/FrameClient.h"
+#include "sky/engine/core/loader/FrameLoaderTypes.h"
+#include "sky/engine/core/loader/NavigationPolicy.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
+#include "sky/engine/platform/weborigin/Referrer.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8.h"
-#include "wtf/Forward.h"
-#include "wtf/Vector.h"
 
 namespace mojo {
 class View;

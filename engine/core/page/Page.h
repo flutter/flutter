@@ -21,20 +21,20 @@
 #ifndef Page_h
 #define Page_h
 
-#include "core/frame/LocalFrame.h"
-#include "core/frame/SettingsDelegate.h"
-#include "core/frame/UseCounter.h"
-#include "core/page/PageAnimator.h"
-#include "core/page/PageVisibilityState.h"
-#include "platform/LifecycleContext.h"
-#include "platform/Supplementable.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/geometry/Region.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/HashSet.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/SettingsDelegate.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/core/page/PageAnimator.h"
+#include "sky/engine/core/page/PageVisibilityState.h"
+#include "sky/engine/platform/LifecycleContext.h"
+#include "sky/engine/platform/Supplementable.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/Region.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 // FIXME: Page should not need to know anything about InspectorHost.
 namespace inspector {

@@ -41,13 +41,13 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "config.h"
-#include "core/rendering/RenderLayerStackingNode.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

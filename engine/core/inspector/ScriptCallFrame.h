@@ -32,8 +32,8 @@
 #define ScriptCallFrame_h
 
 #include "gen/sky/core/InspectorTypeBuilder.h"
-#include "wtf/Forward.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -23,7 +23,7 @@
 #ifndef GapRects_h
 #define GapRects_h
 
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

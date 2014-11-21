@@ -27,16 +27,16 @@
 #ifndef Settings_h
 #define Settings_h
 
-#include "bindings/core/v8/V8CacheOptions.h"
-#include "core/css/PointerProperties.h"
-#include "core/frame/SettingsDelegate.h"
 #include "gen/sky/core/SettingsMacros.h"
-#include "platform/Timer.h"
-#include "platform/fonts/GenericFontFamilySettings.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/HashSet.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/V8CacheOptions.h"
+#include "sky/engine/core/css/PointerProperties.h"
+#include "sky/engine/core/frame/SettingsDelegate.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/fonts/GenericFontFamilySettings.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

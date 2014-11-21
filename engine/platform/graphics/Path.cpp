@@ -27,17 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/Path.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/Path.h"
 
 #include <math.h>
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "platform/transforms/AffineTransform.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/MathExtras.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
-#include "wtf/MathExtras.h"
 
 namespace blink {
 

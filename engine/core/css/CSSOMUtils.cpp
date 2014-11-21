@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSOMUtils.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSOMUtils.h"
 
-#include "wtf/HexNumber.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/HexNumber.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

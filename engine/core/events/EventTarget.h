@@ -32,10 +32,10 @@
 #ifndef EventTarget_h
 #define EventTarget_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/events/EventListenerMap.h"
-#include "core/events/ThreadLocalEventNames.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/events/EventListenerMap.h"
+#include "sky/engine/core/events/ThreadLocalEventNames.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

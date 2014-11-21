@@ -25,12 +25,12 @@
 #ifndef CompositorAnimationsTestHelper_h
 #define CompositorAnimationsTestHelper_h
 
-#include "core/animation/CompositorAnimations.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebCompositorSupport.h"
-#include "public/platform/WebFloatAnimationCurve.h"
-#include "public/platform/WebFloatKeyframe.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/animation/CompositorAnimations.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebCompositorSupport.h"
+#include "sky/engine/public/platform/WebFloatAnimationCurve.h"
+#include "sky/engine/public/platform/WebFloatKeyframe.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

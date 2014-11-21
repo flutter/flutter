@@ -26,8 +26,8 @@
 #ifndef NotImplemented_h
 #define NotImplemented_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Assertions.h"
 
 #if LOG_DISABLED
     #define notImplemented() ((void)0)

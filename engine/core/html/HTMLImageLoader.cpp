@@ -19,15 +19,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/html/HTMLImageLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLImageLoader.h"
 
-#include "core/dom/Element.h"
-#include "core/events/Event.h"
-#include "core/fetch/ImageResource.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "platform/Logging.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/platform/Logging.h"
 
 namespace blink {
 

@@ -28,7 +28,7 @@
 #ifndef DocumentStyleSheetCollection_h
 #define DocumentStyleSheetCollection_h
 
-#include "core/dom/TreeScopeStyleSheetCollection.h"
+#include "sky/engine/core/dom/TreeScopeStyleSheetCollection.h"
 
 namespace blink {
 

@@ -32,13 +32,13 @@
 #define WebFrameClient_h
 
 #include "../platform/WebColor.h"
-#include "WebFrame.h"
-#include "WebNavigationPolicy.h"
-#include "WebNavigationType.h"
-#include "WebTextDirection.h"
-#include "public/platform/WebCommon.h"
-#include "public/platform/WebURLError.h"
-#include "public/platform/WebURLRequest.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebURLError.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
+#include "sky/engine/public/web/WebFrame.h"
+#include "sky/engine/public/web/WebNavigationPolicy.h"
+#include "sky/engine/public/web/WebNavigationType.h"
+#include "sky/engine/public/web/WebTextDirection.h"
 #include "v8/include/v8.h"
 
 namespace mojo {

@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/gpu/WebGLImageBufferSurface.h"
+#include "sky/engine/platform/graphics/gpu/WebGLImageBufferSurface.h"
 
-#include "platform/graphics/skia/GaneshUtils.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebGraphicsContext3DProvider.h"
+#include "sky/engine/platform/graphics/skia/GaneshUtils.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebGraphicsContext3DProvider.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
-#include "wtf/PassOwnPtr.h"
 
 namespace blink {
 

@@ -23,12 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/UserGestureIndicator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/UserGestureIndicator.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

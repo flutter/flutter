@@ -25,11 +25,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/shadow/ComposedTreeWalker.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/shadow/ComposedTreeWalker.h"
 
-#include "core/dom/Element.h"
-#include "core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
 
 namespace blink {
 

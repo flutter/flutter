@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSCalculationValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSCalculationValue.h"
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSToLengthConversionData.h"
-#include "core/css/StylePropertySet.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSToLengthConversionData.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
 
 #include <gtest/gtest.h>
 

@@ -31,8 +31,8 @@
 #ifndef RegionTracker_h
 #define RegionTracker_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPaint.h"

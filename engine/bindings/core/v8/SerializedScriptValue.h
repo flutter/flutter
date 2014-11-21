@@ -31,10 +31,10 @@
 #ifndef SerializedScriptValue_h
 #define SerializedScriptValue_h
 
-#include "bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "v8/include/v8.h"
-#include "wtf/HashMap.h"
-#include "wtf/ThreadSafeRefCounted.h"
 
 namespace WTF {
 

@@ -23,9 +23,9 @@
 #ifndef MediaQueryResult_h
 #define MediaQueryResult_h
 
-#include "core/css/MediaQueryExp.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/css/MediaQueryExp.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

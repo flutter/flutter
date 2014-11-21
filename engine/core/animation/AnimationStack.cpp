@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/AnimationStack.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationStack.h"
 
-#include "core/animation/CompositorAnimations.h"
-#include "core/animation/StyleInterpolation.h"
-#include "core/animation/css/CSSAnimations.h"
-#include "wtf/BitArray.h"
-#include "wtf/NonCopyingSort.h"
 #include <algorithm>
+#include "sky/engine/core/animation/CompositorAnimations.h"
+#include "sky/engine/core/animation/StyleInterpolation.h"
+#include "sky/engine/core/animation/css/CSSAnimations.h"
+#include "sky/engine/wtf/BitArray.h"
+#include "sky/engine/wtf/NonCopyingSort.h"
 
 namespace blink {
 

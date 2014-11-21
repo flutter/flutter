@@ -24,31 +24,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/TextIterator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/TextIterator.h"
 
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Document.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/editing/VisiblePosition.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/editing/htmlediting.h"
-#include "core/frame/FrameView.h"
-#include "core/html/HTMLElement.h"
-#include "core/rendering/InlineTextBox.h"
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderImage.h"
-#include "platform/fonts/Character.h"
-#include "platform/fonts/Font.h"
-#include "platform/text/TextBoundaries.h"
-#include "platform/text/TextBreakIteratorInternalICU.h"
-#include "platform/text/UnicodeUtilities.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/unicode/CharacterNames.h"
 #include <unicode/usearch.h>
 #include <unicode/utf16.h>
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/rendering/InlineTextBox.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderImage.h"
+#include "sky/engine/platform/fonts/Character.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/text/TextBoundaries.h"
+#include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
+#include "sky/engine/platform/text/UnicodeUtilities.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace WTF::Unicode;
 

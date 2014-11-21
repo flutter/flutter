@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8CustomElementLifecycleCallbacks.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8CustomElementLifecycleCallbacks.h"
 
-#include "bindings/core/v8/CustomElementBinding.h"
-#include "bindings/core/v8/DOMDataStore.h"
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8Element.h"
-#include "bindings/core/v8/V8HiddenValue.h"
-#include "bindings/core/v8/V8PerContextData.h"
-#include "core/dom/ExecutionContext.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/bindings/core/v8/CustomElementBinding.h"
+#include "sky/engine/bindings/core/v8/DOMDataStore.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

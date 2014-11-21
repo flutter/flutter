@@ -26,8 +26,8 @@
 #ifndef CSSFontFeatureValue_h
 #define CSSFontFeatureValue_h
 
-#include "core/css/CSSValue.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

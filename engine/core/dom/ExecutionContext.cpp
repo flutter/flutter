@@ -25,14 +25,14 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/ExecutionContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
 
-#include "core/dom/ContextLifecycleNotifier.h"
-#include "core/events/ErrorEvent.h"
-#include "core/events/EventTarget.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/core/dom/ContextLifecycleNotifier.h"
+#include "sky/engine/core/events/ErrorEvent.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

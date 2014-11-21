@@ -27,8 +27,8 @@
 #ifndef WindowEventContext_h
 #define WindowEventContext_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

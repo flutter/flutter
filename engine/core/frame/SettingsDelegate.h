@@ -31,8 +31,8 @@
 #ifndef SettingsDelegate_h
 #define SettingsDelegate_h
 
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

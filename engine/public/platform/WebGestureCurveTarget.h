@@ -25,8 +25,8 @@
 #ifndef WebGestureCurveTarget_h
 #define WebGestureCurveTarget_h
 
-#include "WebFloatSize.h"
-#include "WebPoint.h"
+#include "sky/engine/public/platform/WebFloatSize.h"
+#include "sky/engine/public/platform/WebPoint.h"
 
 namespace blink {
 

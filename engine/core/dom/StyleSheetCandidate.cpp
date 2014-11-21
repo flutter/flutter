@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/StyleSheetCandidate.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/StyleSheetCandidate.h"
 
-#include "core/dom/Element.h"
-#include "core/dom/StyleEngine.h"
-#include "core/html/HTMLStyleElement.h"
-#include "core/html/imports/HTMLImport.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
+#include "sky/engine/core/html/imports/HTMLImport.h"
 
 namespace blink {
 

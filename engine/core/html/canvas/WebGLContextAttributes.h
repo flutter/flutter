@@ -27,10 +27,10 @@
 #ifndef WebGLContextAttributes_h
 #define WebGLContextAttributes_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/CanvasContextAttributes.h"
-#include "public/platform/WebGraphicsContext3D.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
+#include "sky/engine/public/platform/WebGraphicsContext3D.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

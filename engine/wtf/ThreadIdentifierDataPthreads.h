@@ -31,9 +31,9 @@
 #ifndef ThreadIdentifierDataPthreads_h
 #define ThreadIdentifierDataPthreads_h
 
-#include "wtf/Noncopyable.h"
-#include "wtf/Threading.h"
 #include <pthread.h>
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/Threading.h"
 
 namespace WTF {
 

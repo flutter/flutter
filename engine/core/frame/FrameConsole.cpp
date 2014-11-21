@@ -26,21 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/FrameConsole.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/FrameConsole.h"
 
-#include "bindings/core/v8/ScriptCallStackFactory.h"
-#include "core/frame/FrameHost.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/ConsoleMessage.h"
-#include "core/inspector/ConsoleMessageStorage.h"
-#include "core/inspector/ScriptArguments.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "core/page/Chrome.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/Page.h"
-#include "platform/network/ResourceResponse.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
+#include "sky/engine/core/inspector/ConsoleMessageStorage.h"
+#include "sky/engine/core/inspector/ScriptArguments.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/platform/network/ResourceResponse.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

@@ -26,7 +26,7 @@
 #ifndef CSSKeyframeRule_h
 #define CSSKeyframeRule_h
 
-#include "core/css/CSSRule.h"
+#include "sky/engine/core/css/CSSRule.h"
 
 namespace blink {
 

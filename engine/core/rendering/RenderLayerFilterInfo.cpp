@@ -27,12 +27,12 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/rendering/RenderLayerFilterInfo.h"
+#include "sky/engine/core/rendering/RenderLayerFilterInfo.h"
 
-#include "core/rendering/FilterEffectRenderer.h"
-#include "core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/FilterEffectRenderer.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
 
 namespace blink {
 

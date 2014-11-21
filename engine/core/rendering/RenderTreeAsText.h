@@ -25,9 +25,9 @@
 
 #ifndef RenderTreeAsText_h
 #define RenderTreeAsText_h
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/text/TextStream.h"
 
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

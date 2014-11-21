@@ -21,10 +21,10 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/line/TrailingObjects.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/line/TrailingObjects.h"
 
-#include "core/rendering/InlineIterator.h"
+#include "sky/engine/core/rendering/InlineIterator.h"
 
 namespace blink {
 

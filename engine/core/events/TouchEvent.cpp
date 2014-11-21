@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/events/TouchEvent.h"
+#include "sky/engine/core/events/TouchEvent.h"
 
-#include "core/events/EventDispatcher.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/ConsoleMessage.h"
+#include "sky/engine/core/events/EventDispatcher.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
 
 namespace blink {
 

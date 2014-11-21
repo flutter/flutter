@@ -28,22 +28,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/WebInputEventConversion.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/WebInputEventConversion.h"
 
-#include "core/dom/Touch.h"
-#include "core/dom/TouchList.h"
-#include "core/events/GestureEvent.h"
-#include "core/events/KeyboardEvent.h"
-#include "core/events/MouseEvent.h"
-#include "core/events/TouchEvent.h"
-#include "core/events/WheelEvent.h"
-#include "core/frame/FrameHost.h"
-#include "core/frame/FrameView.h"
-#include "core/page/Page.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/KeyboardCodes.h"
-#include "platform/Widget.h"
+#include "sky/engine/core/dom/Touch.h"
+#include "sky/engine/core/dom/TouchList.h"
+#include "sky/engine/core/events/GestureEvent.h"
+#include "sky/engine/core/events/KeyboardEvent.h"
+#include "sky/engine/core/events/MouseEvent.h"
+#include "sky/engine/core/events/TouchEvent.h"
+#include "sky/engine/core/events/WheelEvent.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/KeyboardCodes.h"
+#include "sky/engine/platform/Widget.h"
 
 namespace blink {
 

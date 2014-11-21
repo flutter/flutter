@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/ImageDecodingStore.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/ImageDecodingStore.h"
 
-#include "platform/TraceEvent.h"
-#include "wtf/Threading.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/Threading.h"
 
 namespace blink {
 

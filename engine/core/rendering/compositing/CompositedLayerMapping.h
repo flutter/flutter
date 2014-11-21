@@ -26,12 +26,12 @@
 #ifndef CompositedLayerMapping_h
 #define CompositedLayerMapping_h
 
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/compositing/GraphicsLayerUpdater.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatPoint3D.h"
-#include "platform/graphics/GraphicsLayer.h"
-#include "platform/graphics/GraphicsLayerClient.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/compositing/GraphicsLayerUpdater.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatPoint3D.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/GraphicsLayerClient.h"
 
 namespace blink {
 

@@ -32,10 +32,10 @@
 #define InspectorBaseAgent_h
 
 #include "gen/sky/core/InspectorBackendDispatcher.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

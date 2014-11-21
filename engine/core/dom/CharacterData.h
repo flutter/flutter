@@ -23,8 +23,8 @@
 #ifndef CharacterData_h
 #define CharacterData_h
 
-#include "core/dom/Node.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

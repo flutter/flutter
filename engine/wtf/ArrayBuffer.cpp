@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/ArrayBuffer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/ArrayBuffer.h"
 
-#include "wtf/ArrayBufferView.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/ArrayBufferView.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace WTF {
 

@@ -5,10 +5,10 @@
 #ifndef ScriptState_h
 #define ScriptState_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "v8/include/v8.h"
-#include "wtf/RefCounted.h"
 
 namespace blink {
 

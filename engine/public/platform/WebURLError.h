@@ -31,8 +31,8 @@
 #ifndef WebURLError_h
 #define WebURLError_h
 
-#include "WebString.h"
-#include "WebURL.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebURL.h"
 
 namespace blink {
 

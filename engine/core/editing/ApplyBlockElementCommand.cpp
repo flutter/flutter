@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/ApplyBlockElementCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/ApplyBlockElementCommand.h"
 
-#include "bindings/core/v8/ExceptionState.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/dom/Text.h"
-#include "core/editing/VisiblePosition.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/editing/htmlediting.h"
-#include "core/html/HTMLElement.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

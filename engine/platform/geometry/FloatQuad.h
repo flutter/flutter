@@ -29,9 +29,9 @@
 #ifndef FloatQuad_h
 #define FloatQuad_h
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

@@ -22,13 +22,13 @@
 #ifndef CSSPrimitiveValue_h
 #define CSSPrimitiveValue_h
 
-#include "core/css/CSSValue.h"
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "platform/graphics/Color.h"
-#include "wtf/Forward.h"
-#include "wtf/MathExtras.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

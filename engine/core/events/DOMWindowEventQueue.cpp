@@ -24,12 +24,12 @@
  *
  */
 
-#include "config.h"
-#include "core/events/DOMWindowEventQueue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/DOMWindowEventQueue.h"
 
-#include "core/events/Event.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/SuspendableTimer.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/SuspendableTimer.h"
 
 namespace blink {
 

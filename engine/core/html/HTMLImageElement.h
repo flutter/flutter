@@ -24,11 +24,11 @@
 #ifndef HTMLImageElement_h
 #define HTMLImageElement_h
 
-#include "core/html/HTMLElement.h"
-#include "core/html/HTMLImageLoader.h"
-#include "core/html/canvas/CanvasImageSource.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "wtf/WeakPtr.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/html/HTMLImageLoader.h"
+#include "sky/engine/core/html/canvas/CanvasImageSource.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/wtf/WeakPtr.h"
 
 namespace blink {
 

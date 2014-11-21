@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/inspector/ConsoleMessageStorage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 
-#include "core/dom/Document.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/ConsoleMessage.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
 
 namespace blink {
 

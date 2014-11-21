@@ -31,9 +31,9 @@
 #ifndef Timing_h
 #define Timing_h
 
-#include "platform/animation/TimingFunction.h"
-#include "wtf/MathExtras.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

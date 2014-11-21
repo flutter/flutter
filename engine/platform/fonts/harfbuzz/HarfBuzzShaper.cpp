@@ -29,24 +29,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
 
-#include "hb.h"
-#include "platform/LayoutUnit.h"
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/Character.h"
-#include "platform/fonts/Font.h"
-#include "platform/fonts/GlyphBuffer.h"
-#include "platform/fonts/harfbuzz/HarfBuzzFace.h"
-#include "platform/text/SurrogatePairAwareTextIterator.h"
-#include "platform/text/TextBreakIterator.h"
-#include "wtf/Compiler.h"
-#include "wtf/MathExtras.h"
-#include "wtf/unicode/Unicode.h"
 #include <unicode/normlzr.h>
 #include <unicode/uchar.h>
 #include <unicode/uscript.h>
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "hb.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/fonts/Character.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/fonts/GlyphBuffer.h"
+#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 #include <list>
 #include <map>

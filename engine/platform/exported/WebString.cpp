@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/WebString.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebString.h"
 
-#include "public/platform/WebCString.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/StringUTF8Adaptor.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/public/platform/WebCString.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringUTF8Adaptor.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

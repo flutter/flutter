@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/fonts/FontCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontCache.h"
 
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "public/platform/Platform.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

@@ -28,21 +28,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "public/platform/WebImage.h"
+#include "sky/engine/public/platform/WebImage.h"
 
-#include "platform/SharedBuffer.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/image-decoders/ImageDecoder.h"
-#include "public/platform/WebData.h"
-#include "public/platform/WebSize.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
 #include <algorithm>
+#include "platform/image-decoders/ImageDecoder.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebSize.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

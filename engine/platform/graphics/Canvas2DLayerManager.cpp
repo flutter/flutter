@@ -21,12 +21,12 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/Canvas2DLayerManager.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerManager.h"
 
-#include "public/platform/Platform.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace {
 

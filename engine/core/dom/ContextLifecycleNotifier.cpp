@@ -25,11 +25,11 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/ContextLifecycleNotifier.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ContextLifecycleNotifier.h"
 
-#include "core/dom/ExecutionContext.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

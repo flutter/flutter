@@ -24,8 +24,8 @@
  */
 
 
-#include "config.h"
-#include "core/page/PageLifecycleNotifier.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/PageLifecycleNotifier.h"
 
 namespace blink {
 

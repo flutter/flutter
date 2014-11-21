@@ -26,12 +26,12 @@
 #ifndef V8ValueCache_h
 #define V8ValueCache_h
 
-#include "bindings/core/v8/V8PersistentValueMap.h"
+#include "sky/engine/bindings/core/v8/V8PersistentValueMap.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
-#include "wtf/HashMap.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

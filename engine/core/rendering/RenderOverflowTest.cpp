@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/RenderOverflow.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderOverflow.h"
 
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 #include <gtest/gtest.h>
 

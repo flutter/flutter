@@ -28,23 +28,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/GraphicsContextRecorder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/GraphicsContextRecorder.h"
 
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/ImageSource.h"
-#include "platform/graphics/LoggingCanvas.h"
-#include "platform/graphics/ProfilingCanvas.h"
-#include "platform/graphics/ReplayingCanvas.h"
 #include "platform/image-decoders/ImageDecoder.h"
 #include "platform/image-decoders/ImageFrame.h"
 #include "platform/image-encoders/skia/PNGImageEncoder.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/platform/graphics/LoggingCanvas.h"
+#include "sky/engine/platform/graphics/ProfilingCanvas.h"
+#include "sky/engine/platform/graphics/ReplayingCanvas.h"
+#include "sky/engine/wtf/HexNumber.h"
+#include "sky/engine/wtf/text/Base64.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 #include "third_party/skia/include/core/SkBitmapDevice.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkStream.h"
-#include "wtf/HexNumber.h"
-#include "wtf/text/Base64.h"
-#include "wtf/text/TextEncoding.h"
 
 namespace blink {
 

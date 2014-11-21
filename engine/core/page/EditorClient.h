@@ -27,8 +27,8 @@
 #ifndef EditorClient_h
 #define EditorClient_h
 
-#include "core/editing/SelectionType.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/editing/SelectionType.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

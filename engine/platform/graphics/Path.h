@@ -29,13 +29,13 @@
 #ifndef Path_h
 #define Path_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/RoundedRect.h"
-#include "platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Forward.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathMeasure.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Forward.h"
 
 class SkPath;
 

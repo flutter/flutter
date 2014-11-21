@@ -5,8 +5,8 @@
 #ifndef MediaQueryToken_h
 #define MediaQueryToken_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

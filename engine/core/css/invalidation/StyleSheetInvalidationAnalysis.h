@@ -26,10 +26,10 @@
 #ifndef StyleSheetInvalidationAnalysis_h
 #define StyleSheetInvalidationAnalysis_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringImpl.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringImpl.h"
 
 namespace blink {
 

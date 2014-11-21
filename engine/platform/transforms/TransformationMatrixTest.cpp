@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/transforms/TransformationMatrix.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/TransformationMatrix.h"
 
 #include <gtest/gtest.h>
 

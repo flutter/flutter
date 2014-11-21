@@ -20,22 +20,22 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/StylePropertySet.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/StylePropertySet.h"
 
 #include "gen/sky/core/StylePropertyShorthand.h"
-#include "core/css/CSSPropertyMetadata.h"
-#include "core/css/CSSValuePool.h"
-#include "core/css/StylePropertySerializer.h"
-#include "core/css/StyleSheetContents.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/frame/UseCounter.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSPropertyMetadata.h"
+#include "sky/engine/core/css/CSSValuePool.h"
+#include "sky/engine/core/css/StylePropertySerializer.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 #ifndef NDEBUG
-#include "wtf/text/CString.h"
 #include <stdio.h>
+#include "sky/engine/wtf/text/CString.h"
 #endif
 
 namespace blink {

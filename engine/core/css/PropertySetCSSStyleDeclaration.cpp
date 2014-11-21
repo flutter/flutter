@@ -19,18 +19,18 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/PropertySetCSSStyleDeclaration.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
 
-#include "bindings/core/v8/ExceptionState.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/StylePropertySet.h"
-#include "core/dom/Element.h"
-#include "core/dom/MutationObserverInterestGroup.h"
-#include "core/dom/MutationRecord.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/MutationObserverInterestGroup.h"
+#include "sky/engine/core/dom/MutationRecord.h"
 
 namespace blink {
 

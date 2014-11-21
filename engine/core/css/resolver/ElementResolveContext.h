@@ -22,8 +22,8 @@
 #ifndef ElementResolveContext_h
 #define ElementResolveContext_h
 
-#include "core/dom/Element.h"
-#include "core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

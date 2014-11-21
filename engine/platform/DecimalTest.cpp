@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/Decimal.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/Decimal.h"
 
-#include "wtf/MathExtras.h"
-#include "wtf/text/CString.h"
 #include <float.h>
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

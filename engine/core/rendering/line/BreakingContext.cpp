@@ -21,8 +21,8 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/line/BreakingContextInlineHeaders.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/line/BreakingContextInlineHeaders.h"
 
 namespace blink {
 

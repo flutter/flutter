@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/rendering/PaintInvalidationState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/PaintInvalidationState.h"
 
-#include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "platform/Partitions.h"
+#include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/platform/Partitions.h"
 
 namespace blink {
 

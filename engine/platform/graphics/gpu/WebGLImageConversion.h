@@ -5,11 +5,11 @@
 #ifndef WebGLImageConversion_h
 #define WebGLImageConversion_h
 
-#include "platform/PlatformExport.h"
-#include "platform/graphics/Image.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/khronos/GLES2/gl2.h"
 #include "third_party/khronos/GLES2/gl2ext.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 class Image;

@@ -31,10 +31,10 @@
 #ifndef InjectedScriptBase_h
 #define InjectedScriptBase_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/ScriptValue.h"
 #include "gen/sky/core/InspectorTypeBuilder.h"
-#include "wtf/Forward.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

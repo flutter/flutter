@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-decoders/gif/GIFImageDecoder.h"
 
 #include <limits>
 #include "platform/image-decoders/gif/GIFImageReader.h"
-#include "wtf/NotFound.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/NotFound.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

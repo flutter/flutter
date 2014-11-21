@@ -26,9 +26,9 @@
 #ifndef LayoutState_h
 #define LayoutState_h
 
-#include "platform/geometry/LayoutRect.h"
-#include "wtf/HashMap.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

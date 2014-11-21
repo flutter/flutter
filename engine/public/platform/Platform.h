@@ -31,14 +31,14 @@
 #ifndef Platform_h
 #define Platform_h
 
-#include "WebCommon.h"
-#include "WebData.h"
-#include "WebGestureDevice.h"
-#include "WebGraphicsContext3D.h"
-#include "WebLocalizedString.h"
-#include "WebString.h"
-#include "WebURLError.h"
-#include "WebVector.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebGestureDevice.h"
+#include "sky/engine/public/platform/WebGraphicsContext3D.h"
+#include "sky/engine/public/platform/WebLocalizedString.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebURLError.h"
+#include "sky/engine/public/platform/WebVector.h"
 
 class GrContext;
 

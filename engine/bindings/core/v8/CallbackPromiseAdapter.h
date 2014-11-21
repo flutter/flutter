@@ -31,8 +31,8 @@
 #ifndef CallbackPromiseAdapter_h
 #define CallbackPromiseAdapter_h
 
-#include "bindings/core/v8/ScriptPromiseResolver.h"
-#include "public/platform/WebCallbacks.h"
+#include "sky/engine/bindings/core/v8/ScriptPromiseResolver.h"
+#include "sky/engine/public/platform/WebCallbacks.h"
 
 namespace blink {
 

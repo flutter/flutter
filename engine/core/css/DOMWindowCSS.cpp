@@ -27,13 +27,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/DOMWindowCSS.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/DOMWindowCSS.h"
 
-#include "core/css/CSSPropertyMetadata.h"
-#include "core/css/StylePropertySet.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPropertyMetadata.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

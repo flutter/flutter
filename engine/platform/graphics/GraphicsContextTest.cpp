@@ -22,18 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
 
-#include "platform/graphics/BitmapImage.h"
-#include "platform/graphics/DisplayList.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
+#include <gtest/gtest.h>
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/platform/graphics/DisplayList.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include <gtest/gtest.h>
 
 using namespace blink;
 

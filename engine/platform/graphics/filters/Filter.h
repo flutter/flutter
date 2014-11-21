@@ -21,11 +21,11 @@
 #ifndef Filter_h
 #define Filter_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

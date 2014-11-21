@@ -19,10 +19,10 @@
  *
  */
 
-#include "config.h"
-#include "TypeTraits.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/TypeTraits.h"
 
-#include "Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace WTF {
 

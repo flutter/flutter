@@ -21,10 +21,10 @@
 #ifndef Rect_h
 #define Rect_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

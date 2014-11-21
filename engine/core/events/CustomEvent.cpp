@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/CustomEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/CustomEvent.h"
 
-#include "bindings/core/v8/SerializedScriptValue.h"
+#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
 
 namespace blink {
 

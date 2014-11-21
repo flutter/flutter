@@ -26,17 +26,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/page/AutoscrollController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/AutoscrollController.h"
 
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/Chrome.h"
-#include "core/page/EventHandler.h"
-#include "core/page/Page.h"
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/RenderBox.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/EventHandler.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/RenderBox.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

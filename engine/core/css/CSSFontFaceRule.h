@@ -22,8 +22,8 @@
 #ifndef CSSFontFaceRule_h
 #define CSSFontFaceRule_h
 
-#include "core/css/CSSRule.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/css/CSSRule.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

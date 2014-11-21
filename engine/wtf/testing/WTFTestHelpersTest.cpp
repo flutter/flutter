@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "wtf/testing/WTFTestHelpers.h"
 
-#include "wtf/StdLibExtras.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 using namespace WTF;
 

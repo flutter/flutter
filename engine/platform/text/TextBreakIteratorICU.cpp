@@ -19,20 +19,20 @@
  *
  */
 
-#include "config.h"
-#include "platform/text/TextBreakIterator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
 
-#include "platform/text/TextBreakIteratorInternalICU.h"
-#include "wtf/Assertions.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/ThreadSpecific.h"
-#include "wtf/ThreadingPrimitives.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
 #include <unicode/rbbi.h>
 #include <unicode/ubrk.h>
+#include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/ThreadSpecific.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 using namespace WTF;
 

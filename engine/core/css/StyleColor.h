@@ -31,7 +31,7 @@
 #ifndef StyleColor_h
 #define StyleColor_h
 
-#include "platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

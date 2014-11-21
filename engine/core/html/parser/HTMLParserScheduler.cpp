@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLParserScheduler.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLParserScheduler.h"
 
-#include "core/dom/Document.h"
-#include "core/html/parser/HTMLDocumentParser.h"
-#include "core/frame/FrameView.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
 
 namespace blink {
 

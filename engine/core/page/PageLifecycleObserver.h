@@ -27,7 +27,7 @@
 #ifndef PageLifecycleObserver_h
 #define PageLifecycleObserver_h
 
-#include "platform/LifecycleObserver.h"
+#include "sky/engine/platform/LifecycleObserver.h"
 
 namespace blink {
 

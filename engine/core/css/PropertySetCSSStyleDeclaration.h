@@ -26,9 +26,9 @@
 #ifndef PropertySetCSSStyleDeclaration_h
 #define PropertySetCSSStyleDeclaration_h
 
-#include "core/css/CSSStyleDeclaration.h"
-#include "wtf/HashMap.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/css/CSSStyleDeclaration.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

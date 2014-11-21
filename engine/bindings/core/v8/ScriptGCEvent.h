@@ -31,8 +31,8 @@
 #ifndef ScriptGCEvent_h
 #define ScriptGCEvent_h
 
+#include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8.h"
-#include "wtf/Vector.h"
 
 namespace blink {
 

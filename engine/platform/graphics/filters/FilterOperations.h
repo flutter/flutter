@@ -26,11 +26,11 @@
 #ifndef FilterOperations_h
 #define FilterOperations_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntRectExtent.h"
-#include "platform/graphics/filters/FilterOperation.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntRectExtent.h"
+#include "sky/engine/platform/graphics/filters/FilterOperation.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

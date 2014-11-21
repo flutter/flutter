@@ -26,9 +26,9 @@
 #ifndef EventFactory_h
 #define EventFactory_h
 
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

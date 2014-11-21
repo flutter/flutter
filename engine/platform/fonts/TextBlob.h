@@ -5,9 +5,9 @@
 #ifndef TextBlob_h
 #define TextBlob_h
 
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 

@@ -17,21 +17,21 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/rendering/RootInlineBox.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RootInlineBox.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/StyleEngine.h"
-#include "core/rendering/EllipsisBox.h"
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/InlineTextBox.h"
-#include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderBlockFlow.h"
-#include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/VerticalPositionCache.h"
-#include "platform/text/BidiResolver.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/rendering/EllipsisBox.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/InlineTextBox.h"
+#include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/VerticalPositionCache.h"
+#include "sky/engine/platform/text/BidiResolver.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

@@ -20,11 +20,11 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/events/KeyboardEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/KeyboardEvent.h"
 
-#include "platform/PlatformKeyboardEvent.h"
-#include "platform/WindowsKeyboardCodes.h"
+#include "sky/engine/platform/PlatformKeyboardEvent.h"
+#include "sky/engine/platform/WindowsKeyboardCodes.h"
 
 namespace blink {
 

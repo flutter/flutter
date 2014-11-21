@@ -20,8 +20,8 @@
  *
  */
 
-#include "config.h"
-#include "platform/text/SurrogatePairAwareTextIterator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
 
 #include <unicode/unorm.h>
 

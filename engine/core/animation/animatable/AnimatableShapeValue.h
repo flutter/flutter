@@ -31,8 +31,8 @@
 #ifndef AnimatableShapeValue_h
 #define AnimatableShapeValue_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "core/rendering/style/ShapeValue.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/rendering/style/ShapeValue.h"
 
 namespace blink {
 

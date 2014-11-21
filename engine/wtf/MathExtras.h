@@ -26,9 +26,9 @@
 #ifndef WTF_MathExtras_h
 #define WTF_MathExtras_h
 
-#include "wtf/CPU.h"
 #include <cmath>
 #include <limits>
+#include "sky/engine/wtf/CPU.h"
 
 const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);

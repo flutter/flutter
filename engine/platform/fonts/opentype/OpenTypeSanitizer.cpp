@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/opentype/OpenTypeSanitizer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeSanitizer.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/SharedBuffer.h"
 #include "opentype-sanitiser.h"
 #include "ots-memory-stream.h"
+#include "sky/engine/platform/SharedBuffer.h"
 
 namespace blink {
 

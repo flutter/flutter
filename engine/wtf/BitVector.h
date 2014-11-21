@@ -26,9 +26,9 @@
 #ifndef BitVector_h
 #define BitVector_h
 
-#include "wtf/Assertions.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

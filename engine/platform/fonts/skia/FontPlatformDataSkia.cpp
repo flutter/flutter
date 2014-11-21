@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/FontPlatformData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
 
-#include "SkEndian.h"
-#include "SkTypeface.h"
-#include "platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "third_party/skia/include/core/SkEndian.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
 

@@ -72,11 +72,11 @@ or revised. This service is offered free of charge; please provide us with your
 mailing address.
 */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-decoders/gif/GIFImageReader.h"
 
 #include <string.h>
-#include "platform/graphics/ImageSource.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
 
 namespace blink {
 

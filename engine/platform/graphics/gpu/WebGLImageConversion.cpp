@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/graphics/gpu/WebGLImageConversion.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/gpu/WebGLImageConversion.h"
 
-#include "platform/CheckedInt.h"
-#include "platform/graphics/ImageObserver.h"
-#include "platform/graphics/cpu/arm/WebGLImageConversionNEON.h"
 #include "platform/image-decoders/ImageDecoder.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/CheckedInt.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
+#include "sky/engine/platform/graphics/cpu/arm/WebGLImageConversionNEON.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

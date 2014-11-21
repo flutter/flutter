@@ -22,9 +22,9 @@
 #ifndef StringHash_h
 #define StringHash_h
 
-#include "wtf/text/AtomicString.h"
-#include "wtf/HashTraits.h"
-#include "wtf/StringHasher.h"
+#include "sky/engine/wtf/HashTraits.h"
+#include "sky/engine/wtf/StringHasher.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace WTF {
 

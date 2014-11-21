@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/DistantLightSource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/DistantLightSource.h"
 
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/text/TextStream.h"
 
 namespace blink {
 

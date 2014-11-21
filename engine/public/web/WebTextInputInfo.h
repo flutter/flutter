@@ -27,7 +27,7 @@
 #define WebTextInputInfo_h
 
 #include "../platform/WebString.h"
-#include "WebTextInputType.h"
+#include "sky/engine/public/web/WebTextInputType.h"
 
 namespace blink {
 

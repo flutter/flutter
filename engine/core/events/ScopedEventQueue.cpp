@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/ScopedEventQueue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/ScopedEventQueue.h"
 
-#include "core/events/Event.h"
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/EventDispatcher.h"
-#include "core/events/EventTarget.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/EventDispatcher.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

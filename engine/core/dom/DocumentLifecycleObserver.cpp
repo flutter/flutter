@@ -24,10 +24,10 @@
  */
 
 
-#include "config.h"
-#include "core/dom/DocumentLifecycleObserver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DocumentLifecycleObserver.h"
 
-#include "core/dom/Document.h"
+#include "sky/engine/core/dom/Document.h"
 
 namespace blink {
 

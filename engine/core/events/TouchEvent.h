@@ -27,9 +27,9 @@
 #ifndef TouchEvent_h
 #define TouchEvent_h
 
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/MouseRelatedEvent.h"
-#include "core/dom/TouchList.h"
+#include "sky/engine/core/dom/TouchList.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/MouseRelatedEvent.h"
 
 namespace blink {
 

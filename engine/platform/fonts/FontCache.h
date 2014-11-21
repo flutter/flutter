@@ -31,15 +31,15 @@
 #define FontCache_h
 
 #include <limits.h>
-#include "platform/PlatformExport.h"
-#include "platform/fonts/FontFaceCreationParams.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/fonts/FontFaceCreationParams.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 #if OS(ANDROID)
 #include <unicode/uscript.h>

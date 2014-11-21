@@ -26,8 +26,8 @@
 #ifndef InspectorFrontendChannel_h
 #define InspectorFrontendChannel_h
 
-#include "platform/JSONValues.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

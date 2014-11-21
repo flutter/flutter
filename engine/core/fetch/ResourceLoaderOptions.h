@@ -31,7 +31,7 @@
 #ifndef ResourceLoaderOptions_h
 #define ResourceLoaderOptions_h
 
-#include "core/fetch/FetchInitiatorInfo.h"
+#include "sky/engine/core/fetch/FetchInitiatorInfo.h"
 
 namespace blink {
 

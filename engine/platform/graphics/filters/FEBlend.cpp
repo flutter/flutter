@@ -22,18 +22,18 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEBlend.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEBlend.h"
 
-#include "SkBitmapSource.h"
-#include "SkXfermodeImageFilter.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/cpu/arm/filters/FEBlendNEON.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "platform/text/TextStream.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/cpu/arm/filters/FEBlendNEON.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
+#include "third_party/skia/include/effects/SkBitmapSource.h"
+#include "third_party/skia/include/effects/SkXfermodeImageFilter.h"
 
 typedef unsigned char (*BlendType)(unsigned char colorA, unsigned char colorB, unsigned char alphaA, unsigned char alphaB);
 

@@ -34,7 +34,7 @@
 #include "../platform/WebCommon.h"
 #include "../platform/WebGestureDevice.h"
 #include "../platform/WebRect.h"
-#include "WebTouchPoint.h"
+#include "sky/engine/public/web/WebTouchPoint.h"
 
 #include <string.h>
 

@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/UseCounter.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/UseCounter.h"
 
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/StyleSheetContents.h"
-#include "core/dom/Document.h"
-#include "core/dom/ExecutionContext.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/FrameHost.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/ConsoleMessage.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
+#include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

@@ -31,9 +31,9 @@
 #ifndef WebTextCheckingCompletionImpl_h
 #define WebTextCheckingCompletionImpl_h
 
-#include "platform/text/TextChecking.h"
-#include "public/web/WebTextCheckingCompletion.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/text/TextChecking.h"
+#include "sky/engine/public/web/WebTextCheckingCompletion.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -27,8 +27,8 @@
 #ifndef SuspendableTimer_h
 #define SuspendableTimer_h
 
-#include "core/dom/ActiveDOMObject.h"
-#include "platform/Timer.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/platform/Timer.h"
 
 namespace blink {
 

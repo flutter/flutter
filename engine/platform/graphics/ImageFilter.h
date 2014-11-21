@@ -5,7 +5,7 @@
 #ifndef ImageFilter_h
 #define ImageFilter_h
 
-#include "platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
 
 class SkImageFilter;
 

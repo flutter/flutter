@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/Canvas2DContextAttributes.h"
+#include "sky/engine/core/html/canvas/Canvas2DContextAttributes.h"
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

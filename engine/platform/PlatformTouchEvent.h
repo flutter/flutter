@@ -20,9 +20,9 @@
 #ifndef PlatformTouchEvent_h
 #define PlatformTouchEvent_h
 
-#include "platform/PlatformEvent.h"
-#include "platform/PlatformTouchPoint.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformEvent.h"
+#include "sky/engine/platform/PlatformTouchPoint.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

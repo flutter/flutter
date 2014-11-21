@@ -29,21 +29,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
 
-#include "SkPaint.h"
-#include "SkPath.h"
-#include "SkPoint.h"
-#include "SkRect.h"
-#include "SkTypeface.h"
-#include "SkUtils.h"
-#include "platform/fonts/FontPlatformData.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkRect.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/include/core/SkUtils.h"
 
 #include "hb.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef SharedTimer_h
 #define SharedTimer_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

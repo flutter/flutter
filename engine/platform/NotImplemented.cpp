@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/NotImplemented.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/NotImplemented.h"
 
-#include "platform/Logging.h"
+#include "sky/engine/platform/Logging.h"
 
 namespace blink {
 

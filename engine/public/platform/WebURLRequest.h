@@ -31,9 +31,9 @@
 #ifndef WebURLRequest_h
 #define WebURLRequest_h
 
-#include "WebCommon.h"
-#include "WebHTTPBody.h"
-#include "WebReferrerPolicy.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebHTTPBody.h"
+#include "sky/engine/public/platform/WebReferrerPolicy.h"
 
 namespace blink {
 

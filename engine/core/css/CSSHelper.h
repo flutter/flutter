@@ -22,7 +22,7 @@
 #ifndef CSSHelper_h
 #define CSSHelper_h
 
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

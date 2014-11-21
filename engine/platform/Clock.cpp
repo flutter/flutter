@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/Clock.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/Clock.h"
 
-#include "wtf/CurrentTime.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

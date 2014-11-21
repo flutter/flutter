@@ -23,19 +23,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
 
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/cpu/arm/filters/FEGaussianBlurNEON.h"
-#include "platform/graphics/filters/ParallelJobs.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
-#include "wtf/MathExtras.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/cpu/arm/filters/FEGaussianBlurNEON.h"
+#include "sky/engine/platform/graphics/filters/ParallelJobs.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
 
-#include "SkBlurImageFilter.h"
+#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 
 static inline float gaussianKernelFactor()
 {

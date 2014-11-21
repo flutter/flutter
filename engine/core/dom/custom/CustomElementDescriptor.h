@@ -31,9 +31,9 @@
 #ifndef CustomElementDescriptor_h
 #define CustomElementDescriptor_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashTableDeletedValueType.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

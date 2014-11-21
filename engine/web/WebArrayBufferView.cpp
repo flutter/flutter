@@ -26,11 +26,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebArrayBufferView.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebArrayBufferView.h"
 
-#include "bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
-#include "wtf/ArrayBufferView.h"
+#include "sky/engine/bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
+#include "sky/engine/wtf/ArrayBufferView.h"
 
 namespace blink {
 

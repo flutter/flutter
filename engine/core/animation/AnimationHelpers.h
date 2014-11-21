@@ -5,8 +5,8 @@
 #ifndef AnimationHelpers_h
 #define AnimationHelpers_h
 
-#include "core/css/parser/BisonCSSParser.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

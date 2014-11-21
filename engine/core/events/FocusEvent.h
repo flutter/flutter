@@ -26,8 +26,8 @@
 #ifndef FocusEvent_h
 #define FocusEvent_h
 
-#include "core/events/EventTarget.h"
-#include "core/events/UIEvent.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/core/events/UIEvent.h"
 
 namespace blink {
 

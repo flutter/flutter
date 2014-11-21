@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/inspector/InspectorBaseAgent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/InspectorBaseAgent.h"
 
-#include "core/inspector/InspectorState.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/inspector/InspectorState.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

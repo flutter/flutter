@@ -31,13 +31,13 @@
 // Basic tests that verify our KURL's interface behaves the same as the
 // original KURL's.
 
-#include "config.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/weborigin/KURL.h"
 
-#include "wtf/testing/WTFTestHelpers.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "wtf/testing/WTFTestHelpers.h"
 
 namespace {
 

@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/BitmapImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
 
-#include "platform/SharedBuffer.h"
-#include "platform/graphics/DeferredImageDecoder.h"
-#include "platform/graphics/ImageObserver.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebUnitTestSupport.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebUnitTestSupport.h"
 
 #include <gtest/gtest.h>
 

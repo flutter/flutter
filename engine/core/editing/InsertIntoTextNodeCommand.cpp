@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/InsertIntoTextNodeCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/InsertIntoTextNodeCommand.h"
 
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Document.h"
-#include "core/dom/Text.h"
-#include "core/frame/Settings.h"
-#include "core/rendering/RenderText.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/rendering/RenderText.h"
 
 namespace blink {
 

@@ -31,10 +31,10 @@
 #ifndef CompositorAnimations_h
 #define CompositorAnimations_h
 
-#include "core/animation/AnimationEffect.h"
-#include "core/animation/Timing.h"
-#include "platform/animation/TimingFunction.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/animation/AnimationEffect.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

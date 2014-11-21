@@ -27,11 +27,12 @@
 #ifndef ImageFrame_h
 #define ImageFrame_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "wtf/Assertions.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "third_party/skia/include/core/SkColorPriv.h"
 
 namespace blink {
 

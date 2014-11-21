@@ -5,14 +5,14 @@
 #ifndef ImageBitmap_h
 #define ImageBitmap_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/canvas/CanvasImageSource.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/Image.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/canvas/CanvasImageSource.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

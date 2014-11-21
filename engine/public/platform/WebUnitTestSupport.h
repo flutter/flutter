@@ -26,9 +26,9 @@
 #ifndef WebUnitTestSupport_h
 #define WebUnitTestSupport_h
 
-#include "WebCommon.h"
-#include "WebData.h"
-#include "WebString.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebString.h"
 
 namespace blink {
 

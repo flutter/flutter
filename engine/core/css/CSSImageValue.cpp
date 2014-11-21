@@ -18,17 +18,17 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/CSSImageValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSImageValue.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"
-#include "core/css/CSSMarkup.h"
-#include "core/dom/Document.h"
-#include "core/fetch/FetchRequest.h"
-#include "core/fetch/ImageResource.h"
-#include "core/rendering/style/StyleFetchedImage.h"
-#include "core/rendering/style/StylePendingImage.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/core/css/CSSMarkup.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
+#include "sky/engine/core/rendering/style/StylePendingImage.h"
+#include "sky/engine/platform/weborigin/KURL.h"
 
 namespace blink {
 

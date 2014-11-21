@@ -31,8 +31,8 @@
 #ifndef LoggingCanvas_h
 #define LoggingCanvas_h
 
-#include "platform/JSONValues.h"
-#include "platform/graphics/InterceptingCanvas.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/platform/graphics/InterceptingCanvas.h"
 
 namespace blink {
 

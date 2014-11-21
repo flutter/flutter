@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/RenderedPosition.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/RenderedPosition.h"
 
-#include "core/dom/Position.h"
-#include "core/editing/VisiblePosition.h"
+#include "sky/engine/core/dom/Position.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
 
 namespace blink {
 

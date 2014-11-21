@@ -24,20 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/css/StyleSheetList.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/dom/ElementTraversal.h"
-#include "core/dom/StyleEngine.h"
-#include "core/dom/Text.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/dom/shadow/InsertionPoint.h"
-#include "core/dom/shadow/ShadowRootRareData.h"
-#include "core/editing/markup.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/css/StyleSheetList.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/core/dom/shadow/ShadowRootRareData.h"
+#include "sky/engine/core/editing/markup.h"
+#include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

@@ -27,10 +27,10 @@
 #ifndef ThreadTimers_h
 #define ThreadTimers_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/HashSet.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

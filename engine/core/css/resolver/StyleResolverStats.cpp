@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/resolver/StyleResolverStats.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/StyleResolverStats.h"
 
-#include "wtf/text/CString.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 #define PERCENT(x, y) ((!y) ? 0 : (((x) * 100.0) / (y)))
 

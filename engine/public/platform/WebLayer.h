@@ -26,16 +26,16 @@
 #ifndef WebLayer_h
 #define WebLayer_h
 
-#include "WebBlendMode.h"
-#include "WebColor.h"
-#include "WebCommon.h"
-#include "WebCompositorAnimation.h"
-#include "WebFloatPoint3D.h"
-#include "WebPoint.h"
-#include "WebRect.h"
-#include "WebSize.h"
-#include "WebString.h"
-#include "WebVector.h"
+#include "sky/engine/public/platform/WebBlendMode.h"
+#include "sky/engine/public/platform/WebColor.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimation.h"
+#include "sky/engine/public/platform/WebFloatPoint3D.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebSize.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebVector.h"
 
 class SkMatrix44;
 class SkImageFilter;

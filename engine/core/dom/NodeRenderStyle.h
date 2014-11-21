@@ -25,10 +25,10 @@
 #ifndef NodeRenderStyle_h
 #define NodeRenderStyle_h
 
-#include "core/dom/Node.h"
-#include "core/dom/NodeRenderingTraversal.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeRenderingTraversal.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

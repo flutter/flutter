@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 
-#include "core/inspector/InjectedScript.h"
+#include "sky/engine/core/inspector/InjectedScript.h"
 
-#include "bindings/core/v8/ScriptFunctionCall.h"
-#include "core/inspector/InjectedScriptHost.h"
-#include "platform/JSONValues.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptFunctionCall.h"
+#include "sky/engine/core/inspector/InjectedScriptHost.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 using blink::TypeBuilder::Array;
 using blink::TypeBuilder::Debugger::CallFrame;

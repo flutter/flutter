@@ -24,8 +24,8 @@
 #ifndef BidiRunForLine_h
 #define BidiRunForLine_h
 
-#include "core/rendering/line/TrailingObjects.h"
-#include "platform/text/BidiResolver.h"
+#include "sky/engine/core/rendering/line/TrailingObjects.h"
+#include "sky/engine/platform/text/BidiResolver.h"
 
 namespace blink {
 

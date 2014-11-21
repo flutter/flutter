@@ -22,8 +22,8 @@
 #ifndef BidiCharacterRun_h
 #define BidiCharacterRun_h
 
-#include "platform/text/BidiContext.h"
-#include "platform/text/TextDirection.h"
+#include "sky/engine/platform/text/BidiContext.h"
+#include "sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

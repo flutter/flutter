@@ -18,10 +18,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/CSSInheritedValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSInheritedValue.h"
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

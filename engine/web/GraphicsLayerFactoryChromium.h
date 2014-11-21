@@ -26,7 +26,7 @@
 #ifndef GraphicsLayerFactoryChromium_h
 #define GraphicsLayerFactoryChromium_h
 
-#include "platform/graphics/GraphicsLayerFactory.h"
+#include "sky/engine/platform/graphics/GraphicsLayerFactory.h"
 
 namespace blink {
 class WebViewImpl;

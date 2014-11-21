@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/WebGLCompressedTextureETC1.h"
+#include "sky/engine/core/html/canvas/WebGLCompressedTextureETC1.h"
 
-#include "core/html/canvas/WebGLRenderingContextBase.h"
+#include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 
 namespace blink {
 

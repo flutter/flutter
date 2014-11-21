@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "public/web/WebFrame.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebFrame.h"
 
-#include "platform/UserGestureIndicator.h"
-#include "web/WebLocalFrameImpl.h"
 #include <algorithm>
+#include "sky/engine/platform/UserGestureIndicator.h"
+#include "sky/engine/web/WebLocalFrameImpl.h"
 
 namespace blink {
 

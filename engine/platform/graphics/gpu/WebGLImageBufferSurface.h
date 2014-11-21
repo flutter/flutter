@@ -31,9 +31,9 @@
 #ifndef WebGLImageBufferSurface_h
 #define WebGLImageBufferSurface_h
 
-#include "platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/wtf/OwnPtr.h"
 #include "third_party/skia/include/core/SkBitmap.h"
-#include "wtf/OwnPtr.h"
 
 namespace blink {
 

@@ -5,7 +5,7 @@
 #ifndef StyleDifference_h
 #define StyleDifference_h
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

@@ -17,16 +17,16 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/rendering/InlineBox.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/InlineBox.h"
 
-#include "core/rendering/InlineFlowBox.h"
-#include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderBlockFlow.h"
-#include "core/rendering/RenderObjectInlines.h"
-#include "core/rendering/RootInlineBox.h"
-#include "platform/Partitions.h"
-#include "platform/fonts/FontMetrics.h"
+#include "sky/engine/core/rendering/InlineFlowBox.h"
+#include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderObjectInlines.h"
+#include "sky/engine/core/rendering/RootInlineBox.h"
+#include "sky/engine/platform/Partitions.h"
+#include "sky/engine/platform/fonts/FontMetrics.h"
 
 #ifndef NDEBUG
 #include <stdio.h>

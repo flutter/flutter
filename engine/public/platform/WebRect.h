@@ -31,10 +31,10 @@
 #ifndef WebRect_h
 #define WebRect_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 #else
 #include <algorithm>
 #include <cmath>

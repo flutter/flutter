@@ -23,8 +23,8 @@
 #ifndef RawResource_h
 #define RawResource_h
 
-#include "core/fetch/ResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
+#include "sky/engine/core/fetch/ResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
 
 namespace blink {
 class RawResourceCallback;

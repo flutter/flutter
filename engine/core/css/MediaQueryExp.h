@@ -29,12 +29,12 @@
 #ifndef MediaQueryExp_h
 #define MediaQueryExp_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSValue.h"
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/core/MediaFeatureNames.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 class CSSParserValueList;

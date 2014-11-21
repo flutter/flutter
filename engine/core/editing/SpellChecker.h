@@ -26,10 +26,10 @@
 #ifndef SpellChecker_h
 #define SpellChecker_h
 
-#include "core/dom/DocumentMarker.h"
-#include "core/editing/FrameSelection.h"
-#include "core/editing/VisibleSelection.h"
-#include "platform/text/TextChecking.h"
+#include "sky/engine/core/dom/DocumentMarker.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/editing/VisibleSelection.h"
+#include "sky/engine/platform/text/TextChecking.h"
 
 namespace blink {
 

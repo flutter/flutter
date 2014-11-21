@@ -32,11 +32,11 @@
 #ifndef ElementData_h
 #define ElementData_h
 
-#include "core/dom/Attribute.h"
-#include "core/dom/AttributeCollection.h"
-#include "core/dom/SpaceSplitString.h"
-#include "platform/heap/Handle.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/dom/Attribute.h"
+#include "sky/engine/core/dom/AttributeCollection.h"
+#include "sky/engine/core/dom/SpaceSplitString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

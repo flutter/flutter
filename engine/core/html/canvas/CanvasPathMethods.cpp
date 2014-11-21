@@ -32,14 +32,14 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/canvas/CanvasPathMethods.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/canvas/CanvasPathMethods.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/dom/ExceptionCode.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/transforms/AffineTransform.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

@@ -27,10 +27,10 @@
 #ifndef EventQueue_h
 #define EventQueue_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

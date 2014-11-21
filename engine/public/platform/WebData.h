@@ -31,8 +31,8 @@
 #ifndef WebData_h
 #define WebData_h
 
-#include "WebCommon.h"
-#include "WebPrivatePtr.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
 
 namespace blink {
 

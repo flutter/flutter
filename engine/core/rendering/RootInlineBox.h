@@ -21,8 +21,8 @@
 #ifndef RootInlineBox_h
 #define RootInlineBox_h
 
-#include "core/rendering/InlineFlowBox.h"
-#include "platform/text/BidiContext.h"
+#include "sky/engine/core/rendering/InlineFlowBox.h"
+#include "sky/engine/platform/text/BidiContext.h"
 
 namespace blink {
 

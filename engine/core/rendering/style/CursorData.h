@@ -25,8 +25,8 @@
 #ifndef CursorData_h
 #define CursorData_h
 
-#include "core/rendering/style/StyleImage.h"
-#include "platform/geometry/IntPoint.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
 
 namespace blink {
 

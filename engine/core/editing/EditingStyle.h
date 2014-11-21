@@ -32,17 +32,17 @@
 #ifndef EditingStyle_h
 #define EditingStyle_h
 
-#include "core/editing/WritingDirection.h"
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "platform/fonts/FixedPitchFontType.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/TriState.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/editing/WritingDirection.h"
+#include "sky/engine/platform/fonts/FixedPitchFontType.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/TriState.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

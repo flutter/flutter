@@ -26,12 +26,12 @@
 #ifndef GenericEventQueue_h
 #define GenericEventQueue_h
 
-#include "core/events/EventQueue.h"
-#include "core/events/EventTarget.h"
-#include "platform/Timer.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/events/EventQueue.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef EXTTextureFilterAnisotropic_h
 #define EXTTextureFilterAnisotropic_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/WebGLExtension.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/WebGLExtension.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

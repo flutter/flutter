@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/StringHasher.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/StringHasher.h"
 
 namespace {
 

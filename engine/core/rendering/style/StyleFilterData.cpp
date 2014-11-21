@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/style/StyleFilterData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/StyleFilterData.h"
 
 namespace blink {
 

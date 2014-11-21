@@ -31,8 +31,8 @@
 #ifndef WebURLResponse_h
 #define WebURLResponse_h
 
-#include "WebCommon.h"
-#include "WebPrivateOwnPtr.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivateOwnPtr.h"
 
 namespace blink {
 

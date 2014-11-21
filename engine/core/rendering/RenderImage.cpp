@@ -25,25 +25,25 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/RenderImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderImage.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/editing/FrameSelection.h"
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ResourceLoader.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/TextRunConstructor.h"
-#include "platform/fonts/Font.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/GraphicsContextStateSaver.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ResourceLoader.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/TextRunConstructor.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 
 namespace blink {
 

@@ -26,9 +26,9 @@
 #ifndef RenderImageResource_h
 #define RenderImageResource_h
 
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ResourcePtr.h"
-#include "core/rendering/style/StyleImage.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
 
 namespace blink {
 

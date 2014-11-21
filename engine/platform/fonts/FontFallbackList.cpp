@@ -26,15 +26,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/FontFallbackList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontFallbackList.h"
 
 #include "gen/sky/platform/FontFamilyNames.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontFamily.h"
-#include "platform/fonts/SegmentedFontData.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontFamily.h"
+#include "sky/engine/platform/fonts/SegmentedFontData.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

@@ -24,9 +24,9 @@
 #ifndef RenderBoxModelObject_h
 #define RenderBoxModelObject_h
 
-#include "core/rendering/RenderLayerModelObject.h"
-#include "core/rendering/style/ShadowData.h"
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/core/rendering/RenderLayerModelObject.h"
+#include "sky/engine/core/rendering/style/ShadowData.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

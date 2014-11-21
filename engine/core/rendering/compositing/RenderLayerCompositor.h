@@ -26,10 +26,10 @@
 #ifndef RenderLayerCompositor_h
 #define RenderLayerCompositor_h
 
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/compositing/CompositingReasonFinder.h"
-#include "platform/graphics/GraphicsLayerClient.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/compositing/CompositingReasonFinder.h"
+#include "sky/engine/platform/graphics/GraphicsLayerClient.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

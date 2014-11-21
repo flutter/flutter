@@ -32,13 +32,13 @@
  * file.
  */
 
-#include "config.h"
-#include "dtoa.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/dtoa.h"
 
-#include "wtf/CPU.h"
-#include "wtf/MathExtras.h"
-#include "wtf/ThreadingPrimitives.h"
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace WTF {
 

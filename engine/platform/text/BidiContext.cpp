@@ -19,11 +19,11 @@
  *
  */
 
-#include "config.h"
-#include "platform/text/BidiContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/BidiContext.h"
 
-#include "wtf/StdLibExtras.h"
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

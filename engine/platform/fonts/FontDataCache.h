@@ -31,10 +31,10 @@
 #ifndef FontDataCache_h
 #define FontDataCache_h
 
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontPlatformData.h"
-#include "wtf/HashMap.h"
-#include "wtf/ListHashSet.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/ListHashSet.h"
 
 namespace blink {
 

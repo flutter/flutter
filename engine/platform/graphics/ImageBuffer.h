@@ -28,20 +28,20 @@
 #ifndef ImageBuffer_h
 #define ImageBuffer_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/Canvas2DLayerBridge.h"
-#include "platform/graphics/ColorSpace.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/GraphicsTypes3D.h"
-#include "platform/graphics/ImageBufferSurface.h"
-#include "platform/transforms/AffineTransform.h"
-#include "wtf/Forward.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
+#include "sky/engine/platform/graphics/ColorSpace.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
 
 namespace blink {
 

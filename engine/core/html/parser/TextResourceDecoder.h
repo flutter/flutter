@@ -5,8 +5,8 @@
 #ifndef TextResourceDecoder_h
 #define TextResourceDecoder_h
 
-#include "wtf/RefCounted.h"
-#include "wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 
 namespace blink {
 

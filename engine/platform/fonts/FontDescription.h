@@ -26,20 +26,20 @@
 #define FontDescription_h
 
 #include "gen/sky/platform/FontFamilyNames.h"
-#include "platform/fonts/FixedPitchFontType.h"
-#include "platform/fonts/FontCacheKey.h"
-#include "platform/fonts/FontFamily.h"
-#include "platform/fonts/FontFeatureSettings.h"
-#include "platform/fonts/FontOrientation.h"
-#include "platform/fonts/FontSmoothingMode.h"
-#include "platform/fonts/FontTraits.h"
-#include "platform/fonts/FontWidthVariant.h"
-#include "platform/fonts/TextRenderingMode.h"
-#include "platform/fonts/TypesettingFeatures.h"
-#include "platform/text/NonCJKGlyphOrientation.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/fonts/FixedPitchFontType.h"
+#include "sky/engine/platform/fonts/FontCacheKey.h"
+#include "sky/engine/platform/fonts/FontFamily.h"
+#include "sky/engine/platform/fonts/FontFeatureSettings.h"
+#include "sky/engine/platform/fonts/FontOrientation.h"
+#include "sky/engine/platform/fonts/FontSmoothingMode.h"
+#include "sky/engine/platform/fonts/FontTraits.h"
+#include "sky/engine/platform/fonts/FontWidthVariant.h"
+#include "sky/engine/platform/fonts/TextRenderingMode.h"
+#include "sky/engine/platform/fonts/TypesettingFeatures.h"
+#include "sky/engine/platform/text/NonCJKGlyphOrientation.h"
+#include "sky/engine/wtf/MathExtras.h"
 
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 #include <unicode/uscript.h>
 

@@ -26,7 +26,7 @@
 #ifndef WindowFocusAllowedIndicator_h
 #define WindowFocusAllowedIndicator_h
 
-#include "wtf/Noncopyable.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

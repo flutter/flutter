@@ -29,12 +29,12 @@
 #ifndef ResourceLoader_h
 #define ResourceLoader_h
 
-#include "core/fetch/ResourceLoaderOptions.h"
-#include "platform/network/ResourceRequest.h"
-#include "public/platform/WebURLLoader.h"
-#include "public/platform/WebURLLoaderClient.h"
-#include "wtf/Forward.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/public/platform/WebURLLoader.h"
+#include "sky/engine/public/platform/WebURLLoaderClient.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

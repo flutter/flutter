@@ -19,12 +19,12 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/KeyframeList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/KeyframeList.h"
 
-#include "core/animation/Animation.h"
-#include "core/css/StylePropertySet.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/animation/Animation.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

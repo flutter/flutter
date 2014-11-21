@@ -26,11 +26,11 @@
 #ifndef GraphicsTypes_h
 #define GraphicsTypes_h
 
-#include "platform/PlatformExport.h"
-#include "public/platform/WebBlendMode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/public/platform/WebBlendMode.h"
+#include "sky/engine/wtf/Forward.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
-#include "wtf/Forward.h"
 
 namespace blink {
 

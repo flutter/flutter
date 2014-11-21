@@ -31,8 +31,8 @@
 #ifndef WebCursorInfo_h
 #define WebCursorInfo_h
 
-#include "WebImage.h"
-#include "WebPoint.h"
+#include "sky/engine/public/platform/WebImage.h"
+#include "sky/engine/public/platform/WebPoint.h"
 
 #ifdef WIN32
 typedef struct HICON__* HICON;

@@ -36,10 +36,9 @@
 #ifndef CSSValueTestHelper_h
 #define CSSValueTestHelper_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSValue.h"
-
-#include <iostream>
+#include <ostream>
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSValue.h"
 
 namespace testing {
 namespace internal {

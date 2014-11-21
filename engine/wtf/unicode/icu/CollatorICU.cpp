@@ -26,16 +26,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/unicode/Collator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/unicode/Collator.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/StringExtras.h"
-#include "wtf/Threading.h"
-#include "wtf/ThreadingPrimitives.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unicode/ucol.h>
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/StringExtras.h"
+#include "sky/engine/wtf/Threading.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
 
 namespace WTF {
 

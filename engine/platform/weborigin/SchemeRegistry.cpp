@@ -24,11 +24,11 @@
  *
  */
 
-#include "config.h"
-#include "platform/weborigin/SchemeRegistry.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/weborigin/SchemeRegistry.h"
 
-#include "wtf/MainThread.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

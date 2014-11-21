@@ -28,27 +28,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/animation/CompositorAnimations.h"
+#include "sky/engine/core/animation/CompositorAnimations.h"
 
-#include "core/animation/CompositorAnimationsImpl.h"
-#include "core/animation/CompositorAnimationsTestHelper.h"
-#include "core/animation/animatable/AnimatableDouble.h"
-#include "core/animation/animatable/AnimatableFilterOperations.h"
-#include "core/animation/animatable/AnimatableTransform.h"
-#include "core/animation/animatable/AnimatableValueTestHelper.h"
-#include "platform/geometry/FloatBox.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/filters/FilterOperations.h"
-#include "platform/transforms/TransformOperations.h"
-#include "platform/transforms/TranslateTransformOperation.h"
-#include "public/platform/WebCompositorAnimation.h"
-#include "wtf/HashFunctions.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/animation/CompositorAnimationsImpl.h"
+#include "sky/engine/core/animation/CompositorAnimationsTestHelper.h"
+#include "sky/engine/core/animation/animatable/AnimatableDouble.h"
+#include "sky/engine/core/animation/animatable/AnimatableFilterOperations.h"
+#include "sky/engine/core/animation/animatable/AnimatableTransform.h"
+#include "sky/engine/core/animation/animatable/AnimatableValueTestHelper.h"
+#include "sky/engine/platform/geometry/FloatBox.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/platform/transforms/TransformOperations.h"
+#include "sky/engine/platform/transforms/TranslateTransformOperation.h"
+#include "sky/engine/public/platform/WebCompositorAnimation.h"
+#include "sky/engine/wtf/HashFunctions.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

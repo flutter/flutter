@@ -31,12 +31,12 @@
 #ifndef ImageBufferSurface_h
 #define ImageBufferSurface_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/GraphicsTypes3D.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 class SkBitmap;
 class SkCanvas;

@@ -28,23 +28,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/ImageBitmap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/ImageBitmap.h"
 
-#include "SkPixelRef.h" // FIXME: qualify this skia header file.
-#include "core/dom/Document.h"
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/MemoryCache.h"
-#include "core/fetch/MockImageResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/canvas/CanvasRenderingContext2D.h"
-#include "platform/graphics/BitmapImage.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
-#include "platform/heap/Handle.h"
-#include "platform/network/ResourceRequest.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/MockImageResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext2D.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "third_party/skia/include/core/SkPixelRef.h"
 
 #include <gtest/gtest.h>
 

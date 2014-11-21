@@ -5,7 +5,7 @@
 #ifndef ClipRectsCache_h
 #define ClipRectsCache_h
 
-#include "core/rendering/ClipRects.h"
+#include "sky/engine/core/rendering/ClipRects.h"
 
 namespace blink {
 

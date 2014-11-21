@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/RGBColor.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/RGBColor.h"
 
 namespace blink {
 

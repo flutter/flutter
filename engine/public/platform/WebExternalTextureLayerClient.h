@@ -26,8 +26,8 @@
 #ifndef WebExternalTextureLayerClient_h
 #define WebExternalTextureLayerClient_h
 
-#include "WebCommon.h"
-#include "WebSize.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebSize.h"
 
 namespace blink {
 

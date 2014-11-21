@@ -31,8 +31,8 @@
 #ifndef Partitions_h
 #define Partitions_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/PartitionAlloc.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
 
 namespace blink {
 

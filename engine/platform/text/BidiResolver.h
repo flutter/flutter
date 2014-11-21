@@ -22,14 +22,14 @@
 #ifndef BidiResolver_h
 #define BidiResolver_h
 
-#include "platform/text/BidiCharacterRun.h"
-#include "platform/text/BidiContext.h"
-#include "platform/text/BidiRunList.h"
-#include "platform/text/TextDirection.h"
-#include "wtf/HashMap.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/text/BidiCharacterRun.h"
+#include "sky/engine/platform/text/BidiContext.h"
+#include "sky/engine/platform/text/BidiRunList.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

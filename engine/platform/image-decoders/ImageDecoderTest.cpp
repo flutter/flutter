@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #include "platform/image-decoders/ImageDecoder.h"
 
-#include "platform/image-decoders/ImageFrame.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
 #include <gtest/gtest.h>
+#include "platform/image-decoders/ImageFrame.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 using namespace blink;
 

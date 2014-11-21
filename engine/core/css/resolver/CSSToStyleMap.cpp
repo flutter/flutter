@@ -25,20 +25,20 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/resolver/CSSToStyleMap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/CSSToStyleMap.h"
 
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "core/animation/css/CSSAnimationData.h"
-#include "core/css/CSSBorderImageSliceValue.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSPrimitiveValueMappings.h"
-#include "core/css/CSSTimingFunctionValue.h"
-#include "core/css/Pair.h"
-#include "core/css/Rect.h"
-#include "core/css/resolver/StyleResolverState.h"
-#include "core/rendering/style/BorderImageLengthBox.h"
-#include "core/rendering/style/FillLayer.h"
+#include "sky/engine/core/animation/css/CSSAnimationData.h"
+#include "sky/engine/core/css/CSSBorderImageSliceValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
+#include "sky/engine/core/css/CSSTimingFunctionValue.h"
+#include "sky/engine/core/css/Pair.h"
+#include "sky/engine/core/css/Rect.h"
+#include "sky/engine/core/css/resolver/StyleResolverState.h"
+#include "sky/engine/core/rendering/style/BorderImageLengthBox.h"
+#include "sky/engine/core/rendering/style/FillLayer.h"
 
 namespace blink {
 

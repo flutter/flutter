@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/frame/ImageBitmap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/ImageBitmap.h"
 
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/ImageData.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
-#include "platform/graphics/BitmapImage.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/ImageData.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

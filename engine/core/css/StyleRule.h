@@ -22,10 +22,10 @@
 #ifndef StyleRule_h
 #define StyleRule_h
 
-#include "core/css/CSSSelectorList.h"
-#include "core/css/MediaList.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSSelectorList.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

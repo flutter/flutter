@@ -24,8 +24,8 @@
 #ifndef NodeList_h
 #define NodeList_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

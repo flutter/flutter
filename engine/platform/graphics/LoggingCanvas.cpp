@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/LoggingCanvas.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/LoggingCanvas.h"
 
 #include "platform/image-encoders/skia/PNGImageEncoder.h"
+#include "sky/engine/wtf/HexNumber.h"
+#include "sky/engine/wtf/text/Base64.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include "wtf/HexNumber.h"
-#include "wtf/text/Base64.h"
-#include "wtf/text/TextEncoding.h"
 
 namespace blink {
 

@@ -24,12 +24,12 @@
  *
  */
 
-#include "config.h"
-#include "core/events/TouchEventContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/TouchEventContext.h"
 
-#include "core/dom/TouchList.h"
-#include "core/events/Event.h"
-#include "core/events/TouchEvent.h"
+#include "sky/engine/core/dom/TouchList.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/TouchEvent.h"
 
 namespace blink {
 

@@ -5,12 +5,12 @@
 #ifndef HTMLIFrameElement_h
 #define HTMLIFrameElement_h
 
-#include "core/dom/DOMURLUtils.h"
-#include "core/dom/Document.h"
-#include "core/html/HTMLElement.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "mojo/services/public/cpp/view_manager/view_observer.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/dom/DOMURLUtils.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

@@ -27,12 +27,12 @@
 #ifndef ClientRectList_h
 #define ClientRectList_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/geometry/FloatQuad.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/Vector.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

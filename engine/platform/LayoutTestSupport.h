@@ -31,7 +31,7 @@
 #ifndef LayoutTestSupport_h
 #define LayoutTestSupport_h
 
-#include "platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformExport.h"
 
 namespace blink {
 

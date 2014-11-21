@@ -23,12 +23,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/ThreadSafeDataTransport.h"
+#include "sky/engine/platform/graphics/ThreadSafeDataTransport.h"
 
-#include "platform/SharedBuffer.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/SharedBuffer.h"
 
 using namespace blink;
 

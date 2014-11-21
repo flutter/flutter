@@ -30,15 +30,15 @@
  *
  */
 
-#include "config.h"
-#include "core/events/EventListenerMap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/EventListenerMap.h"
 
-#include "core/events/EventTarget.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/Vector.h"
 
 #if ENABLE(ASSERT)
-#include "wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
 #endif
 
 using namespace WTF;

@@ -23,8 +23,8 @@
 #ifndef CSSMediaRule_h
 #define CSSMediaRule_h
 
-#include "core/css/CSSGroupingRule.h"
-#include "core/css/MediaList.h"
+#include "sky/engine/core/css/CSSGroupingRule.h"
+#include "sky/engine/core/css/MediaList.h"
 
 namespace blink {
 

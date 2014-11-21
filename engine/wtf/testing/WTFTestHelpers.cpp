@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "wtf/testing/WTFTestHelpers.h"
 
-#include "wtf/text/WTFString.h"
 #include <ios> // NOLINT
 #include <ostream> // NOLINT
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

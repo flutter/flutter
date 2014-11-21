@@ -26,8 +26,8 @@
 #ifndef FetchInitiatorInfo_h
 #define FetchInitiatorInfo_h
 
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/TextPosition.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
 

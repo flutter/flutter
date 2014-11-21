@@ -23,13 +23,13 @@
 #ifndef ImageLoader_h
 #define ImageLoader_h
 
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ImageResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/WeakPtr.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ImageResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/WeakPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

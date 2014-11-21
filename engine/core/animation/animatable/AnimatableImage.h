@@ -31,9 +31,9 @@
 #ifndef AnimatableImage_h
 #define AnimatableImage_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "core/css/CSSCrossfadeValue.h"
-#include "core/rendering/style/StyleImage.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/css/CSSCrossfadeValue.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
 
 namespace blink {
 

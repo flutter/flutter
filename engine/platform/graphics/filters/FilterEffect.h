@@ -23,19 +23,17 @@
 #ifndef FilterEffect_h
 #define FilterEffect_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/graphics/Color.h"
-#include "platform/graphics/ColorSpace.h"
-
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/ColorSpace.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
+#include "sky/engine/wtf/Vector.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
-
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Uint8ClampedArray.h"
-#include "wtf/Vector.h"
 
 namespace blink {
 

@@ -25,14 +25,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FELighting.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FELighting.h"
 
-#include "SkLightingImageFilter.h"
-#include "platform/graphics/filters/DistantLightSource.h"
-#include "platform/graphics/filters/ParallelJobs.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/platform/graphics/filters/DistantLightSource.h"
+#include "sky/engine/platform/graphics/filters/ParallelJobs.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
+#include "third_party/skia/include/effects/SkLightingImageFilter.h"
 
 namespace blink {
 

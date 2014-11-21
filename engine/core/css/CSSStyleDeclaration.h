@@ -21,10 +21,10 @@
 #ifndef CSSStyleDeclaration_h
 #define CSSStyleDeclaration_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "wtf/Forward.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

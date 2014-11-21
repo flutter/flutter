@@ -28,19 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "bindings/core/v8/V8WebGLRenderingContext.h"
 
-#include "bindings/core/v8/ExceptionMessages.h"
+#include <limits>
 #include "bindings/core/v8/V8ANGLEInstancedArrays.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8EXTBlendMinMax.h"
 #include "bindings/core/v8/V8EXTFragDepth.h"
 #include "bindings/core/v8/V8EXTShaderTextureLOD.h"
 #include "bindings/core/v8/V8EXTTextureFilterAnisotropic.h"
 #include "bindings/core/v8/V8HTMLCanvasElement.h"
 #include "bindings/core/v8/V8HTMLImageElement.h"
-#include "bindings/core/v8/V8HiddenValue.h"
 #include "bindings/core/v8/V8ImageData.h"
 #include "bindings/core/v8/V8OESElementIndexUint.h"
 #include "bindings/core/v8/V8OESStandardDerivatives.h"
@@ -66,19 +64,21 @@
 #include "bindings/core/v8/V8WebGLTexture.h"
 #include "bindings/core/v8/V8WebGLUniformLocation.h"
 #include "bindings/core/v8/V8WebGLVertexArrayObjectOES.h"
-#include "bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
-#include "bindings/core/v8/custom/V8Float32ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Int16ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Int32ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Int8ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Uint16ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Uint32ArrayCustom.h"
-#include "bindings/core/v8/custom/V8Uint8ArrayCustom.h"
-#include "core/dom/ExceptionCode.h"
-#include "core/html/canvas/WebGLRenderingContext.h"
-#include "platform/NotImplemented.h"
-#include "wtf/FastMalloc.h"
-#include <limits>
+#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/custom/V8ArrayBufferViewCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Float32ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Int16ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Int32ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Int8ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Uint16ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Uint32ArrayCustom.h"
+#include "sky/engine/bindings/core/v8/custom/V8Uint8ArrayCustom.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/core/html/canvas/WebGLRenderingContext.h"
+#include "sky/engine/platform/NotImplemented.h"
+#include "sky/engine/wtf/FastMalloc.h"
 
 namespace blink {
 

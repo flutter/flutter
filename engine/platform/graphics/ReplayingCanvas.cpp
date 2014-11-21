@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/ReplayingCanvas.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/ReplayingCanvas.h"
 
 #include "third_party/skia/include/core/SkBitmapDevice.h"
 

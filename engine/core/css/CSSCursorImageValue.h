@@ -21,9 +21,9 @@
 #ifndef CSSCursorImageValue_h
 #define CSSCursorImageValue_h
 
-#include "core/css/CSSImageValue.h"
-#include "platform/geometry/IntPoint.h"
-#include "wtf/HashSet.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 

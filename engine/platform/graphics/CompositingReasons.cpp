@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/graphics/CompositingReasons.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/CompositingReasons.h"
 
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

@@ -32,9 +32,9 @@
 #define WrapperTypeInfo_h
 
 #include "gin/public/wrapper_info.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Assertions.h"
 #include "v8/include/v8.h"
-#include "wtf/Assertions.h"
 
 namespace blink {
 

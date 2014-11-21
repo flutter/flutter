@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/text/TextCodecReplacement.h"
+#include "sky/engine/wtf/text/TextCodecReplacement.h"
 
-#include "wtf/OwnPtr.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/TextCodec.h"
-#include "wtf/text/TextEncoding.h"
-#include "wtf/text/TextEncodingRegistry.h"
-#include "wtf/text/WTFString.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/TextCodec.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/text/TextEncodingRegistry.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

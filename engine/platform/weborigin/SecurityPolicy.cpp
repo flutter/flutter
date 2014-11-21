@@ -26,15 +26,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/weborigin/SecurityPolicy.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/weborigin/SecurityPolicy.h"
 
-#include "platform/weborigin/KURL.h"
-#include "wtf/HashMap.h"
-#include "wtf/MainThread.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

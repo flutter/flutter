@@ -26,12 +26,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSSupportsRule.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSSupportsRule.h"
 
-#include "core/css/CSSRule.h"
-#include "core/css/StyleRule.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSRule.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

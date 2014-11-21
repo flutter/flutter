@@ -19,10 +19,10 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/FillLayer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/FillLayer.h"
 
-#include "core/rendering/style/DataEquivalency.h"
+#include "sky/engine/core/rendering/style/DataEquivalency.h"
 
 namespace blink {
 

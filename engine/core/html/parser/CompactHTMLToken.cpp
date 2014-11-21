@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/CompactHTMLToken.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/CompactHTMLToken.h"
 
-#include "core/dom/QualifiedName.h"
-#include "core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 
 namespace blink {
 

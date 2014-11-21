@@ -24,14 +24,14 @@
  *
  */
 
-#include "config.h"
-#include "core/events/WindowEventContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/WindowEventContext.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Node.h"
-#include "core/events/Event.h"
-#include "core/events/NodeEventContext.h"
-#include "core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/NodeEventContext.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
 
 namespace blink {
 

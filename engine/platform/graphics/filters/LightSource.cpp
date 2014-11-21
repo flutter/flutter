@@ -27,9 +27,9 @@
  *
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/LightSource.h"
+#include "sky/engine/platform/graphics/filters/LightSource.h"
 
 namespace blink {
 

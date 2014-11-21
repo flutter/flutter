@@ -26,13 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/inspector/ContentSearchUtils.h"
+#include "sky/engine/core/inspector/ContentSearchUtils.h"
 
-#include "bindings/core/v8/ScriptRegexp.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/bindings/core/v8/ScriptRegexp.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 namespace ContentSearchUtils {

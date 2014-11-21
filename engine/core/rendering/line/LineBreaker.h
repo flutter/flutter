@@ -23,9 +23,9 @@
 #ifndef LineBreaker_h
 #define LineBreaker_h
 
-#include "core/rendering/InlineIterator.h"
-#include "core/rendering/line/LineInfo.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/rendering/InlineIterator.h"
+#include "sky/engine/core/rendering/line/LineInfo.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

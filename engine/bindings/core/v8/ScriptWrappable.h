@@ -31,9 +31,9 @@
 #ifndef ScriptWrappable_h
 #define ScriptWrappable_h
 
-#include "bindings/core/v8/WrapperTypeInfo.h"
-#include "platform/heap/Handle.h"
-#include "platform/ScriptForbiddenScope.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
+#include "sky/engine/platform/heap/Handle.h"
 #include "v8/include/v8.h"
 
 namespace blink {

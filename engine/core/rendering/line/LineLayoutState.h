@@ -24,8 +24,8 @@
 #ifndef LineLayoutState_h
 #define LineLayoutState_h
 
-#include "core/rendering/RenderBlockFlow.h"
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

@@ -27,7 +27,7 @@
 #include "gen/sky/core/EventTargetInterfaces.h"
 #include "gen/sky/core/EventTargetNames.h"
 #include "gen/sky/core/EventTypeNames.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

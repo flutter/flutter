@@ -23,12 +23,12 @@
 #ifndef RenderText_h
 #define RenderText_h
 
-#include "core/dom/Text.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/LengthFunctions.h"
-#include "platform/text/TextPath.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/LengthFunctions.h"
+#include "sky/engine/platform/text/TextPath.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

@@ -28,21 +28,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/Font.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/Font.h"
 
-#include "platform/NotImplemented.h"
-#include "platform/fonts/FontPlatformFeatures.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/harfbuzz/HarfBuzzShaper.h"
-#include "platform/fonts/GlyphBuffer.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/NotImplemented.h"
+#include "sky/engine/platform/fonts/FontPlatformFeatures.h"
+#include "sky/engine/platform/fonts/GlyphBuffer.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
 
-#include "SkPaint.h"
-#include "SkTemplates.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkTemplates.h"
 
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 #include <algorithm>
 

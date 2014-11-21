@@ -32,7 +32,7 @@
 #ifndef HTMLSrcsetParser_h
 #define HTMLSrcsetParser_h
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

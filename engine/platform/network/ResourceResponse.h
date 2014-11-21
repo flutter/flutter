@@ -27,15 +27,15 @@
 #ifndef ResourceResponse_h
 #define ResourceResponse_h
 
-#include "platform/PlatformExport.h"
-#include "platform/network/HTTPHeaderMap.h"
-#include "platform/network/HTTPParsers.h"
-#include "platform/network/ResourceLoadInfo.h"
-#include "platform/network/ResourceLoadTiming.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/CString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/network/HTTPHeaderMap.h"
+#include "sky/engine/platform/network/HTTPParsers.h"
+#include "sky/engine/platform/network/ResourceLoadInfo.h"
+#include "sky/engine/platform/network/ResourceLoadTiming.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

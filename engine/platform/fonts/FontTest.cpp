@@ -25,10 +25,10 @@
 
 // Tests for the Font class.
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/fonts/Character.h"
-#include "platform/fonts/Font.h"
+#include "sky/engine/platform/fonts/Character.h"
+#include "sky/engine/platform/fonts/Font.h"
 
 #include <gtest/gtest.h>
 

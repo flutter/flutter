@@ -27,19 +27,19 @@
 #ifndef ImageDecoder_h
 #define ImageDecoder_h
 
-#include "SkColorPriv.h"
-#include "platform/PlatformExport.h"
-#include "platform/PlatformScreen.h"
-#include "platform/SharedBuffer.h"
-#include "platform/graphics/ImageSource.h"
 #include "platform/image-decoders/ImageFrame.h"
-#include "public/platform/Platform.h"
-#include "wtf/Assertions.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Threading.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformScreen.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Threading.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "third_party/skia/include/core/SkColorPriv.h"
 
 #if USE(QCMSLIB)
 #include "qcms.h"

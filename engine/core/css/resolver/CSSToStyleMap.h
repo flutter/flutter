@@ -22,13 +22,13 @@
 #ifndef CSSToStyleMap_h
 #define CSSToStyleMap_h
 
-#include "core/animation/Timing.h"
-#include "core/animation/css/CSSTransitionData.h"
-#include "core/css/resolver/ElementStyleResources.h"
-#include "core/rendering/style/RenderStyleConstants.h"
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "platform/animation/TimingFunction.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/core/animation/css/CSSTransitionData.h"
+#include "sky/engine/core/css/resolver/ElementStyleResources.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

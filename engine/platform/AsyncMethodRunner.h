@@ -31,9 +31,9 @@
 #ifndef AsyncMethodRunner_h
 #define AsyncMethodRunner_h
 
-#include "platform/Timer.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

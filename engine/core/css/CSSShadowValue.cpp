@@ -17,12 +17,12 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-#include "config.h"
-#include "core/css/CSSShadowValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSShadowValue.h"
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

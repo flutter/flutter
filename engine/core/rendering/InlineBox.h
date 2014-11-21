@@ -21,9 +21,9 @@
 #ifndef InlineBox_h
 #define InlineBox_h
 
-#include "core/rendering/RenderBoxModelObject.h"
-#include "core/rendering/RenderObjectInlines.h"
-#include "platform/text/TextDirection.h"
+#include "sky/engine/core/rendering/RenderBoxModelObject.h"
+#include "sky/engine/core/rendering/RenderObjectInlines.h"
+#include "sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

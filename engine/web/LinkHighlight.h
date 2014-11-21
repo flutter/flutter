@@ -26,16 +26,16 @@
 #ifndef LinkHighlight_h
 #define LinkHighlight_h
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/IntPoint.h"
-#include "platform/graphics/GraphicsLayer.h"
-#include "platform/graphics/Path.h"
-#include "public/platform/WebCompositorAnimationDelegate.h"
-#include "public/platform/WebContentLayer.h"
-#include "public/platform/WebContentLayerClient.h"
-#include "public/platform/WebLayer.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/Path.h"
+#include "sky/engine/public/platform/WebCompositorAnimationDelegate.h"
+#include "sky/engine/public/platform/WebContentLayer.h"
+#include "sky/engine/public/platform/WebContentLayerClient.h"
+#include "sky/engine/public/platform/WebLayer.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

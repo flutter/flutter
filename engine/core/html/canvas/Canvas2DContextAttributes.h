@@ -27,10 +27,10 @@
 #ifndef Canvas2DContextAttributes_h
 #define Canvas2DContextAttributes_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/CanvasContextAttributes.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

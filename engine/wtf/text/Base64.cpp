@@ -21,11 +21,11 @@
    package by Ronald Tschalär Copyright (C) 1996-1999.
 */
 
-#include "config.h"
-#include "Base64.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/Base64.h"
 
 #include <limits.h>
-#include "wtf/StringExtras.h"
+#include "sky/engine/wtf/StringExtras.h"
 
 namespace WTF {
 

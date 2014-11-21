@@ -27,11 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/line/LineWidth.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/line/LineWidth.h"
 
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
 
 namespace blink {
 

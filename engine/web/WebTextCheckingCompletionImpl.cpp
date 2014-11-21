@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/WebTextCheckingCompletionImpl.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/WebTextCheckingCompletionImpl.h"
 
-#include "platform/text/TextCheckerClient.h"
-#include "public/platform/WebVector.h"
-#include "public/web/WebTextCheckingResult.h"
-#include "web/EditorClientImpl.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/platform/text/TextCheckerClient.h"
+#include "sky/engine/public/platform/WebVector.h"
+#include "sky/engine/public/web/WebTextCheckingResult.h"
+#include "sky/engine/web/EditorClientImpl.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

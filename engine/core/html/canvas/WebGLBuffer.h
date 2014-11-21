@@ -26,10 +26,10 @@
 #ifndef WebGLBuffer_h
 #define WebGLBuffer_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/WebGLSharedObject.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/WebGLSharedObject.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

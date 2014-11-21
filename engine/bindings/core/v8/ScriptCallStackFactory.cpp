@@ -28,17 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ScriptCallStackFactory.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
 
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "core/inspector/ScriptArguments.h"
-#include "core/inspector/ScriptCallFrame.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "platform/JSONValues.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/inspector/ScriptArguments.h"
+#include "sky/engine/core/inspector/ScriptCallFrame.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 #include "v8/include/v8-debug.h"
-#include "wtf/text/StringBuilder.h"
 
 namespace blink {
 

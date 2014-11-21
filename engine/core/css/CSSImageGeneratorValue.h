@@ -26,10 +26,10 @@
 #ifndef CSSImageGeneratorValue_h
 #define CSSImageGeneratorValue_h
 
-#include "core/css/CSSValue.h"
-#include "platform/geometry/IntSizeHash.h"
-#include "wtf/HashCountedSet.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/platform/geometry/IntSizeHash.h"
+#include "sky/engine/wtf/HashCountedSet.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

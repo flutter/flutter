@@ -28,16 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/Platform.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/Platform.h"
 
-#include "SkTypeface.h"
-#include "platform/LayoutTestSupport.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/FontPlatformData.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "public/platform/linux/WebFontRenderStyle.h"
-#include "public/platform/linux/WebSandboxSupport.h"
+#include "sky/engine/platform/LayoutTestSupport.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/public/platform/linux/WebFontRenderStyle.h"
+#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
 

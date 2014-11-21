@@ -25,7 +25,7 @@
 #ifndef Attribute_h
 #define Attribute_h
 
-#include "core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/QualifiedName.h"
 
 namespace blink {
 

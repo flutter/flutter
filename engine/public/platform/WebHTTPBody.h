@@ -31,10 +31,10 @@
 #ifndef WebHTTPBody_h
 #define WebHTTPBody_h
 
-#include "WebData.h"
-#include "WebNonCopyable.h"
-#include "WebString.h"
-#include "WebURL.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebNonCopyable.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebURL.h"
 
 #if INSIDE_BLINK
 namespace WTF { template <typename T> class PassRefPtr; }

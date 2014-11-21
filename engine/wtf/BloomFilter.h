@@ -26,8 +26,8 @@
 #ifndef BloomFilter_h
 #define BloomFilter_h
 
-#include "wtf/Compiler.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace WTF {
 

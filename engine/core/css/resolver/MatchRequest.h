@@ -23,8 +23,8 @@
 #ifndef MatchRequest_h
 #define MatchRequest_h
 
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/RuleSet.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/RuleSet.h"
 
 namespace blink {
 

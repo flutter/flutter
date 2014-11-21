@@ -24,9 +24,9 @@
 #ifndef UIEvent_h
 #define UIEvent_h
 
-#include "core/events/Event.h"
-#include "core/events/EventDispatchMediator.h"
-#include "core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
 
 namespace blink {
 

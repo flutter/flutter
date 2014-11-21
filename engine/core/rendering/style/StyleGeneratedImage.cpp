@@ -21,12 +21,12 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/StyleGeneratedImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/StyleGeneratedImage.h"
 
-#include "core/css/CSSImageGeneratorValue.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/css/CSSImageGeneratorValue.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

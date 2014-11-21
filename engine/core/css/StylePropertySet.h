@@ -21,14 +21,14 @@
 #ifndef StylePropertySet_h
 #define StylePropertySet_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSProperty.h"
-#include "core/css/PropertySetCSSStyleDeclaration.h"
-#include "core/css/parser/CSSParserMode.h"
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSProperty.h"
+#include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
+#include "sky/engine/core/css/parser/CSSParserMode.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

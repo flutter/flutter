@@ -26,11 +26,11 @@
 #ifndef ImageSource_h
 #define ImageSource_h
 
-#include "platform/PlatformExport.h"
-#include "platform/graphics/ImageOrientation.h"
-#include "wtf/Forward.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

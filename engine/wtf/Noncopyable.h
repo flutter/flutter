@@ -21,7 +21,7 @@
 #ifndef WTF_Noncopyable_h
 #define WTF_Noncopyable_h
 
-#include "wtf/Compiler.h"
+#include "sky/engine/wtf/Compiler.h"
 
 #define WTF_MAKE_NONCOPYABLE(ClassName) \
     private: \

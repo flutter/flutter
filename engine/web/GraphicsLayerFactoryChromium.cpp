@@ -23,11 +23,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/GraphicsLayerFactoryChromium.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/GraphicsLayerFactoryChromium.h"
 
-#include "platform/graphics/GraphicsLayer.h"
-#include "web/WebViewImpl.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/web/WebViewImpl.h"
 
 namespace blink {
 

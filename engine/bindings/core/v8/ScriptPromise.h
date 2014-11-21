@@ -31,14 +31,14 @@
 #ifndef ScriptPromise_h
 #define ScriptPromise_h
 
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/V8ThrowException.h"
-#include "core/dom/ExceptionCode.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/V8ThrowException.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

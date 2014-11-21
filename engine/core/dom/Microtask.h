@@ -32,8 +32,8 @@
 #define Microtask_h
 
 #include "base/callback_forward.h"
-#include "public/platform/WebThread.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/public/platform/WebThread.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

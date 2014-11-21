@@ -31,12 +31,12 @@
 #ifndef WebInputEventConversion_h
 #define WebInputEventConversion_h
 
-#include "platform/PlatformGestureEvent.h"
-#include "platform/PlatformKeyboardEvent.h"
-#include "platform/PlatformMouseEvent.h"
-#include "platform/PlatformTouchEvent.h"
-#include "platform/PlatformWheelEvent.h"
-#include "public/web/WebInputEvent.h"
+#include "sky/engine/platform/PlatformGestureEvent.h"
+#include "sky/engine/platform/PlatformKeyboardEvent.h"
+#include "sky/engine/platform/PlatformMouseEvent.h"
+#include "sky/engine/platform/PlatformTouchEvent.h"
+#include "sky/engine/platform/PlatformWheelEvent.h"
+#include "sky/engine/public/web/WebInputEvent.h"
 
 namespace blink {
 

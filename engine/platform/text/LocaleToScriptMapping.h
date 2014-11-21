@@ -31,9 +31,9 @@
 #ifndef LocaleToScriptMapping_h
 #define LocaleToScriptMapping_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Forward.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 #include <unicode/uscript.h>
 

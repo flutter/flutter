@@ -26,8 +26,8 @@
 #ifndef NestingLevelIncrementer_h
 #define NestingLevelIncrementer_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

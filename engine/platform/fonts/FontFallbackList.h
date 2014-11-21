@@ -21,11 +21,11 @@
 #ifndef FontFallbackList_h
 #define FontFallbackList_h
 
-#include "platform/fonts/FontSelector.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/WidthCache.h"
-#include "wtf/Forward.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/platform/fonts/FontSelector.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/platform/fonts/WidthCache.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

@@ -26,7 +26,7 @@
 #ifndef DictionaryHelperForBindings_h
 #define DictionaryHelperForBindings_h
 
-#include "bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
 
 namespace blink {
 

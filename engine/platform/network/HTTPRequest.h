@@ -32,13 +32,13 @@
 #ifndef HTTPRequest_h
 #define HTTPRequest_h
 
-#include "platform/PlatformExport.h"
-#include "platform/network/HTTPHeaderMap.h"
-#include "platform/network/HTTPParsers.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/network/HTTPHeaderMap.h"
+#include "sky/engine/platform/network/HTTPParsers.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

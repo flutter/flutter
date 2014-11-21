@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "core/animation/AnimationEffect.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/animation/Timing.h"
-#include "platform/animation/TimingFunction.h"
-#include "public/platform/WebCompositorAnimation.h"
+#include "sky/engine/core/animation/AnimationEffect.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/public/platform/WebCompositorAnimation.h"
 
 namespace blink {
 

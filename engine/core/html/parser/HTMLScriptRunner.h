@@ -5,9 +5,9 @@
 #ifndef HTMLScriptRunner_h
 #define HTMLScriptRunner_h
 
-#include "core/html/HTMLElement.h"
-#include "wtf/Vector.h"
-#include "wtf/text/TextPosition.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
 

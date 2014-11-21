@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSCrossfadeValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSCrossfadeValue.h"
 
-#include "core/css/CSSImageValue.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/style/StyleFetchedImage.h"
-#include "platform/graphics/CrossfadeGeneratedImage.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
+#include "sky/engine/platform/graphics/CrossfadeGeneratedImage.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

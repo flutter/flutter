@@ -27,10 +27,10 @@
 #ifndef AffineTransform_h
 #define AffineTransform_h
 
-#include "platform/transforms/TransformationMatrix.h"
+#include "sky/engine/platform/transforms/TransformationMatrix.h"
 
 #include <string.h> // for memcpy
-#include "wtf/FastAllocBase.h"
+#include "sky/engine/wtf/FastAllocBase.h"
 
 namespace blink {
 

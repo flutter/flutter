@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLTreeBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLTreeBuilder.h"
 
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "core/dom/DocumentFragment.h"
-#include "core/html/HTMLDocument.h"
-#include "core/html/HTMLTemplateElement.h"
-#include "core/html/parser/AtomicHTMLToken.h"
-#include "core/html/parser/HTMLDocumentParser.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/HTMLToken.h"
-#include "core/html/parser/HTMLTokenizer.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/html/HTMLDocument.h"
+#include "sky/engine/core/html/HTMLTemplateElement.h"
+#include "sky/engine/core/html/parser/AtomicHTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/html/parser/HTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLTokenizer.h"
 
 namespace blink {
 

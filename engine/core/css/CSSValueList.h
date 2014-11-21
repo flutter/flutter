@@ -21,9 +21,9 @@
 #ifndef CSSValueList_h
 #define CSSValueList_h
 
-#include "core/css/CSSValue.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

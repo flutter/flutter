@@ -26,10 +26,10 @@
 #ifndef MarkupAccumulator_h
 #define MarkupAccumulator_h
 
-#include "core/editing/markup.h"
-#include "wtf/HashMap.h"
-#include "wtf/Vector.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/editing/markup.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

@@ -26,14 +26,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/StringTruncator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/StringTruncator.h"
 
-#include "platform/fonts/Font.h"
-#include "platform/text/TextBreakIterator.h"
-#include "platform/text/TextRun.h"
-#include "wtf/Assertions.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "sky/engine/platform/text/TextRun.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

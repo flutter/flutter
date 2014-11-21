@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/PurgeableVector.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/PurgeableVector.h"
 
-#include "platform/TestingPlatformSupport.h"
-#include "public/platform/WebDiscardableMemory.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/TestingPlatformSupport.h"
+#include "sky/engine/public/platform/WebDiscardableMemory.h"
+#include "sky/engine/wtf/Vector.h"
 
 #include <algorithm>
 #include <cstdlib>

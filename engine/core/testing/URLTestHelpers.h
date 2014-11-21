@@ -31,8 +31,8 @@
 #ifndef URLTestHelpers_h
 #define URLTestHelpers_h
 
-#include "platform/weborigin/KURL.h"
-#include "public/platform/WebString.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/public/platform/WebString.h"
 
 namespace blink {
 

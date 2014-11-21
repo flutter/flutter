@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/RetainedDOMInfo.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/RetainedDOMInfo.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
 
 namespace blink {
 

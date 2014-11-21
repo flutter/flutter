@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/PlatformScreen.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/PlatformScreen.h"
 
-#include "platform/HostWindow.h"
-#include "platform/Widget.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebScreenInfo.h"
+#include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/platform/Widget.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
 
 namespace blink {
 

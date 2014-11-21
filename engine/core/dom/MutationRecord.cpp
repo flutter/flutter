@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/dom/MutationRecord.h"
+#include "sky/engine/core/dom/MutationRecord.h"
 
-#include "core/dom/Node.h"
-#include "core/dom/NodeList.h"
-#include "core/dom/QualifiedName.h"
-#include "core/dom/StaticNodeList.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeList.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/StaticNodeList.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

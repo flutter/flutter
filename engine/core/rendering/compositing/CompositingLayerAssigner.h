@@ -27,9 +27,9 @@
 #ifndef CompositingLayerAssigner_h
 #define CompositingLayerAssigner_h
 
-#include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/LayoutPoint.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/LayoutPoint.h"
 
 namespace blink {
 

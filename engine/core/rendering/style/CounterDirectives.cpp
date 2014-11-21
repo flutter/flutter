@@ -19,9 +19,9 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/CounterDirectives.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/CounterDirectives.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

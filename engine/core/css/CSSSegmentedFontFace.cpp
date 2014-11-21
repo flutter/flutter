@@ -23,17 +23,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSSegmentedFontFace.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSSegmentedFontFace.h"
 
-#include "core/css/CSSFontFace.h"
-#include "core/css/CSSFontSelector.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontFaceCreationParams.h"
-#include "platform/fonts/SegmentedFontData.h"
-#include "platform/fonts/SimpleFontData.h"
+#include "sky/engine/core/css/CSSFontFace.h"
+#include "sky/engine/core/css/CSSFontSelector.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontFaceCreationParams.h"
+#include "sky/engine/platform/fonts/SegmentedFontData.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
 
 namespace blink {
 

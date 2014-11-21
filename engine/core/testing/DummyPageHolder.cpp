@@ -28,16 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "core/testing/DummyPageHolder.h"
 
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
-#include "core/loader/EmptyClients.h"
-#include "public/platform/ServiceProvider.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/loader/EmptyClients.h"
+#include "sky/engine/public/platform/ServiceProvider.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 namespace {

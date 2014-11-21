@@ -26,16 +26,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/GlyphPageTreeNode.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/GlyphPageTreeNode.h"
 
 #include <stdio.h>
-#include "platform/fonts/SegmentedFontData.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/opentype/OpenTypeVerticalData.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/platform/fonts/SegmentedFontData.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

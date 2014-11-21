@@ -27,7 +27,7 @@
 #define BitArray_h
 
 #include <string.h>
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace WTF {
 

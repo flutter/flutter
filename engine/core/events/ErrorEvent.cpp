@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/ErrorEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/ErrorEvent.h"
 
-#include "bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "v8/include/v8.h"
 
 namespace blink {

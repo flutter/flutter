@@ -29,15 +29,15 @@
 #ifndef StrokeData_h
 #define StrokeData_h
 
-#include "platform/PlatformExport.h"
-#include "platform/graphics/DashArray.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/Pattern.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/DashArray.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/Pattern.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkColorPriv.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 

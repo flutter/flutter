@@ -26,18 +26,18 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/resolver/StyleAdjuster.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/StyleAdjuster.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/Length.h"
-#include "platform/transforms/TransformOperations.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/Length.h"
+#include "sky/engine/platform/transforms/TransformOperations.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

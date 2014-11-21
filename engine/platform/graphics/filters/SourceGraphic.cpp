@@ -18,15 +18,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/SourceGraphic.h"
+#include "sky/engine/platform/graphics/filters/SourceGraphic.h"
 
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/effects/SkPictureImageFilter.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

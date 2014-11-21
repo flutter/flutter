@@ -24,10 +24,10 @@
 #define ElementStyleResources_h
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "platform/graphics/Color.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

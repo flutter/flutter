@@ -23,10 +23,10 @@
  * DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/DocumentFontFaceSet.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/DocumentFontFaceSet.h"
 
-#include "core/css/FontFaceSet.h"
+#include "sky/engine/core/css/FontFaceSet.h"
 
 namespace blink {
 

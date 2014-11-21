@@ -26,11 +26,11 @@
 #ifndef WebGLProgram_h
 #define WebGLProgram_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/WebGLSharedObject.h"
-#include "core/html/canvas/WebGLShader.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/WebGLShader.h"
+#include "sky/engine/core/html/canvas/WebGLSharedObject.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

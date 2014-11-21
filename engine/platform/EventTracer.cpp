@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/EventTracer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/EventTracer.h"
 
-#include "public/platform/Platform.h"
-#include "public/platform/WebConvertableToTraceFormat.h"
-#include "wtf/Assertions.h"
 #include <stdio.h>
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebConvertableToTraceFormat.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

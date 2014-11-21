@@ -20,20 +20,20 @@
  *
  */
 
-#include "config.h"
-#include "core/css/resolver/StyleResourceLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "core/css/CSSCursorImageValue.h"
-#include "core/css/CSSImageValue.h"
-#include "core/css/resolver/ElementStyleResources.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/rendering/style/FillLayer.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/StyleFetchedImage.h"
-#include "core/rendering/style/StyleFetchedImageSet.h"
-#include "core/rendering/style/StyleGeneratedImage.h"
-#include "core/rendering/style/StylePendingImage.h"
+#include "sky/engine/core/css/CSSCursorImageValue.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/core/css/resolver/ElementStyleResources.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/rendering/style/FillLayer.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
+#include "sky/engine/core/rendering/style/StyleGeneratedImage.h"
+#include "sky/engine/core/rendering/style/StylePendingImage.h"
 
 namespace blink {
 

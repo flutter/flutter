@@ -29,8 +29,8 @@
 #ifndef V8DOMConfiguration_h
 #define V8DOMConfiguration_h
 
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8DOMWrapper.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
 #include "v8/include/v8.h"
 
 namespace blink {

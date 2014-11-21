@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/app/AbstractModule.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/app/AbstractModule.h"
 
-#include "core/app/Module.h"
+#include "sky/engine/core/app/Module.h"
 
 namespace blink {
 

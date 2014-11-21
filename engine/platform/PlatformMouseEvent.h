@@ -26,8 +26,8 @@
 #ifndef PlatformMouseEvent_h
 #define PlatformMouseEvent_h
 
-#include "platform/PlatformEvent.h"
-#include "platform/geometry/IntPoint.h"
+#include "sky/engine/platform/PlatformEvent.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
 
 namespace blink {
 

@@ -31,9 +31,9 @@
 #ifndef TransformBuilder_h
 #define TransformBuilder_h
 
-#include "platform/heap/Handle.h"
-#include "platform/transforms/TransformOperations.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/transforms/TransformOperations.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

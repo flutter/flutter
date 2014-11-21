@@ -27,12 +27,12 @@
 #ifndef CanvasGradient_h
 #define CanvasGradient_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

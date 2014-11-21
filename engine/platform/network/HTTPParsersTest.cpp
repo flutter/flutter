@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "HTTPParsers.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/network/HTTPParsers.h"
 
-#include "wtf/MathExtras.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 #include "wtf/testing/WTFTestHelpers.h"
-#include "wtf/text/AtomicString.h"
 
 #include <gtest/gtest.h>
 

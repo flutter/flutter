@@ -27,8 +27,8 @@
 #ifndef DOMWindowLifecycleObserver_h
 #define DOMWindowLifecycleObserver_h
 
-#include "platform/LifecycleObserver.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/LifecycleObserver.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

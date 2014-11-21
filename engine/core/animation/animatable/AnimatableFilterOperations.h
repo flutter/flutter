@@ -31,8 +31,8 @@
 #ifndef AnimatableFilterOperations_h
 #define AnimatableFilterOperations_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
 
 namespace blink {
 

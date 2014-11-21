@@ -5,11 +5,11 @@
 #ifndef NullExecutionContext_h
 #define NullExecutionContext_h
 
-#include "core/dom/ExecutionContext.h"
-#include "core/events/EventQueue.h"
-#include "platform/heap/Handle.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/events/EventQueue.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

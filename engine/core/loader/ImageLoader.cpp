@@ -19,25 +19,25 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/loader/ImageLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/loader/ImageLoader.h"
 
-#include "bindings/core/v8/ScriptController.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/IncrementLoadEventDelayCount.h"
-#include "core/dom/Microtask.h"
-#include "core/events/Event.h"
-#include "core/events/EventSender.h"
-#include "core/fetch/FetchRequest.h"
-#include "core/fetch/MemoryCache.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/rendering/RenderImage.h"
-#include "platform/Logging.h"
-#include "public/platform/WebURLRequest.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/IncrementLoadEventDelayCount.h"
+#include "sky/engine/core/dom/Microtask.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/EventSender.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/rendering/RenderImage.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
 
 namespace blink {
 

@@ -31,13 +31,13 @@
 #ifndef ImageQualityController_h
 #define ImageQualityController_h
 
-#include "core/rendering/RenderObject.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/geometry/LayoutSize.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/ImageOrientation.h"
-#include "platform/graphics/ImageSource.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

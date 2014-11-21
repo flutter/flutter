@@ -22,15 +22,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEConvolveMatrix.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEConvolveMatrix.h"
 
-#include "SkMatrixConvolutionImageFilter.h"
-#include "platform/graphics/filters/ParallelJobs.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/Uint8ClampedArray.h"
+#include "sky/engine/platform/graphics/filters/ParallelJobs.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Uint8ClampedArray.h"
+#include "third_party/skia/include/effects/SkMatrixConvolutionImageFilter.h"
 
 namespace blink {
 

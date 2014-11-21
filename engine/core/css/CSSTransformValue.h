@@ -26,8 +26,8 @@
 #ifndef CSSTransformValue_h
 #define CSSTransformValue_h
 
-#include "core/css/CSSValueList.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

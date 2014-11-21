@@ -31,15 +31,15 @@
 #ifndef WebFrame_h
 #define WebFrame_h
 
-#include "WebCompositionUnderline.h"
-#include "WebNode.h"
-#include "WebURLLoaderOptions.h"
-#include "public/platform/WebCanvas.h"
-#include "public/platform/WebPrivateOwnPtr.h"
-#include "public/platform/WebReferrerPolicy.h"
-#include "public/platform/WebURL.h"
-#include "public/platform/WebURLRequest.h"
 #include "mojo/public/cpp/system/data_pipe.h"
+#include "sky/engine/public/platform/WebCanvas.h"
+#include "sky/engine/public/platform/WebPrivateOwnPtr.h"
+#include "sky/engine/public/platform/WebReferrerPolicy.h"
+#include "sky/engine/public/platform/WebURL.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
+#include "sky/engine/public/web/WebCompositionUnderline.h"
+#include "sky/engine/public/web/WebNode.h"
+#include "sky/engine/public/web/WebURLLoaderOptions.h"
 
 
 namespace v8 {

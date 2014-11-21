@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/HTMLTemplateElement.h"
+#include "sky/engine/core/html/HTMLTemplateElement.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/DocumentFragment.h"
-#include "core/dom/TemplateContentDocumentFragment.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/dom/TemplateContentDocumentFragment.h"
 
 namespace blink {
 

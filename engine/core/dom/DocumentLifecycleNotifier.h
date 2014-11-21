@@ -26,9 +26,9 @@
 #ifndef DocumentLifecycleNotifier_h
 #define DocumentLifecycleNotifier_h
 
-#include "core/dom/DocumentLifecycleObserver.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/core/dom/DocumentLifecycleObserver.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

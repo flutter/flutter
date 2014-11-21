@@ -22,14 +22,14 @@
 #ifndef ElementRareData_h
 #define ElementRareData_h
 
-#include "core/animation/ActiveAnimations.h"
-#include "core/dom/NodeRareData.h"
-#include "core/dom/custom/CustomElementDefinition.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/html/ClassList.h"
-#include "core/html/ime/InputMethodContext.h"
-#include "core/rendering/style/StyleInheritedData.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/animation/ActiveAnimations.h"
+#include "sky/engine/core/dom/NodeRareData.h"
+#include "sky/engine/core/dom/custom/CustomElementDefinition.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/html/ClassList.h"
+#include "sky/engine/core/html/ime/InputMethodContext.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

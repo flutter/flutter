@@ -29,19 +29,19 @@
 #ifndef EmptyClients_h
 #define EmptyClients_h
 
-#include "core/editing/UndoStep.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/EditorClient.h"
-#include "core/page/FocusType.h"
-#include "core/page/Page.h"
-#include "core/page/SpellCheckerClient.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/network/ResourceError.h"
-#include "platform/text/TextCheckerClient.h"
-#include "public/platform/WebScreenInfo.h"
+#include "sky/engine/core/editing/UndoStep.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/EditorClient.h"
+#include "sky/engine/core/page/FocusType.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/page/SpellCheckerClient.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/network/ResourceError.h"
+#include "sky/engine/platform/text/TextCheckerClient.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
+#include "sky/engine/wtf/Forward.h"
 #include "v8/include/v8.h"
-#include "wtf/Forward.h"
 
 /*
  This file holds empty Client stubs for use by WebCore.

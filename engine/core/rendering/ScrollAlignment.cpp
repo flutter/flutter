@@ -41,10 +41,10 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "config.h"
-#include "core/rendering/ScrollAlignment.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/ScrollAlignment.h"
 
-#include "platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

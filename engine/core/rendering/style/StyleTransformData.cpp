@@ -19,10 +19,10 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/StyleTransformData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/StyleTransformData.h"
 
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

@@ -23,19 +23,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/scroll/Scrollbar.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
 
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/PlatformGestureEvent.h"
-#include "platform/PlatformMouseEvent.h"
-#include "platform/scroll/ScrollableArea.h"
-#include "platform/scroll/ScrollAnimator.h"
-#include "platform/scroll/Scrollbar.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebPoint.h"
-#include "public/platform/WebRect.h"
-#include "public/platform/WebThemeEngine.h"
+#include "sky/engine/platform/PlatformGestureEvent.h"
+#include "sky/engine/platform/PlatformMouseEvent.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/scroll/ScrollAnimator.h"
+#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebThemeEngine.h"
 
 // The position of the scrollbar thumb affects the appearance of the steppers, so
 // when the thumb moves, we have to invalidate them for painting.

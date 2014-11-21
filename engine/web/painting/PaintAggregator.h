@@ -31,9 +31,9 @@
 #ifndef PaintAggregator_h
 #define PaintAggregator_h
 
-#include "platform/geometry/IntPoint.h"
-#include "platform/geometry/IntRect.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

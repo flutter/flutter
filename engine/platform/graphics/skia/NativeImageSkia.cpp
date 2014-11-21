@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/skia/NativeImageSkia.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 
-#include "platform/TraceEvent.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/DeferredImageDecoder.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/skia/SkiaUtils.h"
 #include "skia/ext/image_operations.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkScalar.h"

@@ -17,19 +17,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/rendering/EllipsisBox.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/EllipsisBox.h"
 
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/InlineTextBox.h"
-#include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RootInlineBox.h"
-#include "core/rendering/TextRunConstructor.h"
-#include "core/rendering/style/ShadowList.h"
-#include "platform/fonts/Font.h"
-#include "platform/graphics/GraphicsContextStateSaver.h"
-#include "platform/text/TextRun.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/InlineTextBox.h"
+#include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RootInlineBox.h"
+#include "sky/engine/core/rendering/TextRunConstructor.h"
+#include "sky/engine/core/rendering/style/ShadowList.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
+#include "sky/engine/platform/text/TextRun.h"
 
 namespace blink {
 

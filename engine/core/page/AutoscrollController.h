@@ -26,8 +26,8 @@
 #ifndef AutoscrollController_h
 #define AutoscrollController_h
 
-#include "platform/geometry/IntPoint.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

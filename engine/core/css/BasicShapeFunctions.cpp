@@ -27,16 +27,16 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/BasicShapeFunctions.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/BasicShapeFunctions.h"
 
-#include "core/css/CSSBasicShapes.h"
-#include "core/css/CSSPrimitiveValueMappings.h"
-#include "core/css/CSSValuePool.h"
-#include "core/css/Pair.h"
-#include "core/css/resolver/StyleResolverState.h"
-#include "core/rendering/style/BasicShapes.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/css/CSSBasicShapes.h"
+#include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
+#include "sky/engine/core/css/CSSValuePool.h"
+#include "sky/engine/core/css/Pair.h"
+#include "sky/engine/core/css/resolver/StyleResolverState.h"
+#include "sky/engine/core/rendering/style/BasicShapes.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

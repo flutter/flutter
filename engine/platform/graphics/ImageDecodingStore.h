@@ -26,18 +26,17 @@
 #ifndef ImageDecodingStore_h
 #define ImageDecodingStore_h
 
-#include "SkSize.h"
-#include "SkTypes.h"
-#include "platform/PlatformExport.h"
-#include "platform/graphics/skia/SkSizeHash.h"
 #include "platform/image-decoders/ImageDecoder.h"
-
-#include "wtf/DoublyLinkedList.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/ThreadingPrimitives.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/graphics/skia/SkSizeHash.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/DoublyLinkedList.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/Vector.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkTypes.h"
 
 namespace blink {
 

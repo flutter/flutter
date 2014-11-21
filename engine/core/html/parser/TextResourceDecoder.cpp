@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/html/parser/TextResourceDecoder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 
-#include "wtf/text/TextCodec.h"
-#include "wtf/text/TextEncodingRegistry.h"
+#include "sky/engine/wtf/text/TextCodec.h"
+#include "sky/engine/wtf/text/TextEncodingRegistry.h"
 
 namespace blink {
 

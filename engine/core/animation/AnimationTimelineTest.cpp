@@ -28,17 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/AnimationTimeline.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
 
-#include "core/animation/Animation.h"
-#include "core/animation/AnimationClock.h"
-#include "core/animation/AnimationNode.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/QualifiedName.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/core/animation/Animation.h"
+#include "sky/engine/core/animation/AnimationClock.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/platform/weborigin/KURL.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

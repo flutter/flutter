@@ -31,12 +31,12 @@
 #ifndef GraphicsContextRecorder_h
 #define GraphicsContextRecorder_h
 
-#include "platform/JSONValues.h"
-#include "platform/PlatformExport.h"
-#include "platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "wtf/RefCounted.h"
 
 namespace blink {
 

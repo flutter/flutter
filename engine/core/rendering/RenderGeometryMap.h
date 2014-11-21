@@ -26,13 +26,13 @@
 #ifndef RenderGeometryMap_h
 #define RenderGeometryMap_h
 
-#include "core/rendering/RenderGeometryMapStep.h"
-#include "core/rendering/RenderObject.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/geometry/LayoutSize.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/rendering/RenderGeometryMapStep.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

@@ -22,14 +22,14 @@
 #ifndef HitTestLocation_h
 #define HitTestLocation_h
 
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/geometry/RoundedRect.h"
-#include "wtf/Forward.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -5,8 +5,8 @@
 #ifndef ArrayPiece_h
 #define ArrayPiece_h
 
-#include "wtf/Forward.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

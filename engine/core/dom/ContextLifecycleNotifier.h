@@ -27,10 +27,10 @@
 #ifndef ContextLifecycleNotifier_h
 #define ContextLifecycleNotifier_h
 
-#include "core/dom/ActiveDOMObject.h"
-#include "platform/LifecycleNotifier.h"
-#include "wtf/HashSet.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/platform/LifecycleNotifier.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

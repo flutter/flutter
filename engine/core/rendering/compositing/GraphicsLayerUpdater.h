@@ -27,7 +27,7 @@
 #ifndef GraphicsLayerUpdater_h
 #define GraphicsLayerUpdater_h
 
-#include "platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
 
 namespace blink {
 

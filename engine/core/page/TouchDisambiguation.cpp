@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/page/TouchDisambiguation.h"
+#include "sky/engine/core/page/TouchDisambiguation.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/EventHandler.h"
-#include "core/rendering/HitTestResult.h"
-#include "core/rendering/RenderBlock.h"
 #include <algorithm>
 #include <cmath>
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/EventHandler.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
 
 namespace blink {
 

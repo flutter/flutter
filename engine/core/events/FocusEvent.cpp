@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/FocusEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/FocusEvent.h"
 
-#include "core/events/Event.h"
-#include "core/events/EventDispatcher.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/events/EventDispatcher.h"
 
 namespace blink {
 

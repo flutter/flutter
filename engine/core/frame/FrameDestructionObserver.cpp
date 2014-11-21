@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/FrameDestructionObserver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/FrameDestructionObserver.h"
 
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

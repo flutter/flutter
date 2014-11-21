@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/ScriptForbiddenScope.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/MainThread.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/MainThread.h"
 
 namespace blink {
 

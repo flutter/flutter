@@ -5,10 +5,10 @@
 #ifndef MediaValues_h
 #define MediaValues_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/PointerProperties.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/PointerProperties.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

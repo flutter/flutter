@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/SampledEffect.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/SampledEffect.h"
 
-#include "core/animation/StyleInterpolation.h"
+#include "sky/engine/core/animation/StyleInterpolation.h"
 
 namespace blink {
 

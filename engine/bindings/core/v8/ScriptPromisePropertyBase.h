@@ -5,13 +5,13 @@
 #ifndef ScriptPromisePropertyBase_h
 #define ScriptPromisePropertyBase_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "bindings/core/v8/ScriptPromise.h"
-#include "bindings/core/v8/ScriptPromiseProperties.h"
-#include "core/dom/ContextLifecycleObserver.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/Vector.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScriptPromise.h"
+#include "sky/engine/bindings/core/v8/ScriptPromiseProperties.h"
+#include "sky/engine/core/dom/ContextLifecycleObserver.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8.h"
 
 namespace blink {

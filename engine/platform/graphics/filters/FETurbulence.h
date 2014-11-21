@@ -25,8 +25,8 @@
 #ifndef FETurbulence_h
 #define FETurbulence_h
 
-#include "platform/graphics/filters/Filter.h"
-#include "platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
 
 namespace blink {
 

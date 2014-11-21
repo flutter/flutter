@@ -31,8 +31,8 @@
 #ifndef ActiveDOMCallback_h
 #define ActiveDOMCallback_h
 
-#include "core/dom/ContextLifecycleObserver.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/dom/ContextLifecycleObserver.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

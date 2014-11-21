@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/PartitionAlloc.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
 
 #include <string.h>
 

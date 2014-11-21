@@ -22,10 +22,10 @@
 #ifndef CSSSelector_h
 #define CSSSelector_h
 
-#include "core/dom/QualifiedName.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
     class CSSSelectorList;

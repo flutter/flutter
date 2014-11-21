@@ -19,16 +19,16 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/CSSStyleRule.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSStyleRule.h"
 
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/CSSSelector.h"
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/PropertySetCSSStyleDeclaration.h"
-#include "core/css/StylePropertySet.h"
-#include "core/css/StyleRule.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

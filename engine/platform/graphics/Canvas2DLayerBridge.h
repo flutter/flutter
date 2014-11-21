@@ -26,19 +26,19 @@
 #ifndef Canvas2DLayerBridge_h
 #define Canvas2DLayerBridge_h
 
-#include "SkDeferredCanvas.h"
-#include "SkImage.h"
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/ImageBufferSurface.h"
-#include "public/platform/WebExternalTextureLayer.h"
-#include "public/platform/WebExternalTextureLayerClient.h"
-#include "public/platform/WebExternalTextureMailbox.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/public/platform/WebExternalTextureLayer.h"
+#include "sky/engine/public/platform/WebExternalTextureLayerClient.h"
+#include "sky/engine/public/platform/WebExternalTextureMailbox.h"
+#include "sky/engine/wtf/DoublyLinkedList.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/khronos/GLES2/gl2.h"
-#include "wtf/DoublyLinkedList.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/utils/SkDeferredCanvas.h"
 
 class Canvas2DLayerBridgeTest;
 

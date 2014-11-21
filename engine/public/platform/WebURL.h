@@ -31,8 +31,8 @@
 #ifndef WebURL_h
 #define WebURL_h
 
-#include "WebCString.h"
-#include "WebString.h"
+#include "sky/engine/public/platform/WebCString.h"
+#include "sky/engine/public/platform/WebString.h"
 #include "url/third_party/mozilla/url_parse.h"
 
 #if !INSIDE_BLINK

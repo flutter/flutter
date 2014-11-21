@@ -22,11 +22,11 @@
 #ifndef ASCIIFastPath_h
 #define ASCIIFastPath_h
 
-#include "wtf/Alignment.h"
-#include "wtf/CPU.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/unicode/Unicode.h"
 #include <stdint.h>
+#include "sky/engine/wtf/Alignment.h"
+#include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

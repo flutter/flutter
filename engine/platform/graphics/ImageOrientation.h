@@ -26,7 +26,7 @@
 #ifndef ImageOrientation_h
 #define ImageOrientation_h
 
-#include "platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformExport.h"
 
 namespace blink {
 

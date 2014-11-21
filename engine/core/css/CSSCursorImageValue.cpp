@@ -19,19 +19,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/CSSCursorImageValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSCursorImageValue.h"
 
-#include "core/css/CSSImageSetValue.h"
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/rendering/style/StyleFetchedImage.h"
-#include "core/rendering/style/StyleFetchedImageSet.h"
-#include "core/rendering/style/StyleImage.h"
-#include "core/rendering/style/StylePendingImage.h"
-#include "wtf/MathExtras.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSImageSetValue.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/core/rendering/style/StylePendingImage.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

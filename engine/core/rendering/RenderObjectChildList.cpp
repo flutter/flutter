@@ -24,12 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/RenderObjectChildList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderObjectChildList.h"
 
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

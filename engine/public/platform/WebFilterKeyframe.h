@@ -32,8 +32,8 @@
 #ifndef WebFilterKeyframe_h
 #define WebFilterKeyframe_h
 
-#include "WebFilterOperations.h"
-#include "WebPrivateOwnPtr.h"
+#include "sky/engine/public/platform/WebFilterOperations.h"
+#include "sky/engine/public/platform/WebPrivateOwnPtr.h"
 
 #if INSIDE_BLINK
 namespace WTF { template <typename T> class PassOwnPtr; }

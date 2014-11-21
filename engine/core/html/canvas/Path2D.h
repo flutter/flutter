@@ -28,12 +28,12 @@
 #ifndef Path2D_h
 #define Path2D_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/html/canvas/CanvasPathMethods.h"
-#include "platform/heap/Handle.h"
-#include "platform/transforms/AffineTransform.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/html/canvas/CanvasPathMethods.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

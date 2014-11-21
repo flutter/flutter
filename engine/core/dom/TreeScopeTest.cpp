@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/dom/TreeScope.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/TreeScope.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/shadow/ShadowRoot.h"
 #include <gtest/gtest.h>
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 using namespace blink;
 

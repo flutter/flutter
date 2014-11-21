@@ -26,12 +26,12 @@
 #ifndef GradientGeneratedImage_h
 #define GradientGeneratedImage_h
 
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/GeneratedImage.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/GeneratedImage.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

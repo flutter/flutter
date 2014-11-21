@@ -45,8 +45,8 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "wtf/text/WTFString.h"
-#include "wtf/WTFExport.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

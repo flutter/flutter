@@ -5,7 +5,7 @@
 #ifndef WeakNodeMap_h
 #define WeakNodeMap_h
 
-#include "wtf/HashMap.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

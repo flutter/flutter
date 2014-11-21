@@ -30,11 +30,11 @@
 
 #include "base/bind.h"
 #include "base/threading/thread.h"
-#include "public/platform/Platform.h"
-#include "wtf/Assertions.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 // Usage:
 //

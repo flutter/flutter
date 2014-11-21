@@ -26,7 +26,7 @@
 #ifndef HTMLInterchange_h
 #define HTMLInterchange_h
 
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

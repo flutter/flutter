@@ -25,10 +25,10 @@
 #ifndef HTMLParserIdioms_h
 #define HTMLParserIdioms_h
 
-#include "core/dom/QualifiedName.h"
-#include "platform/Decimal.h"
-#include "wtf/Forward.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/platform/Decimal.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 class TextEncoding;

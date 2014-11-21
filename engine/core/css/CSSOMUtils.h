@@ -31,8 +31,8 @@
 #ifndef CSSOMUtils_h
 #define CSSOMUtils_h
 
-#include "wtf/Forward.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 // Utilities for CSSOM http://dev.w3.org/csswg/cssom/
 // FIXME: This file has a similar purpose to

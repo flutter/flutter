@@ -26,9 +26,9 @@
 #ifndef EditCommand_h
 #define EditCommand_h
 
-#include "core/editing/EditAction.h"
-#include "core/editing/VisibleSelection.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/editing/EditAction.h"
+#include "sky/engine/core/editing/VisibleSelection.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

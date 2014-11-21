@@ -36,17 +36,17 @@
 #ifndef AnimatableValueTestHelper_h
 #define AnimatableValueTestHelper_h
 
-#include "core/animation/animatable/AnimatableClipPathOperation.h"
-#include "core/animation/animatable/AnimatableColor.h"
-#include "core/animation/animatable/AnimatableImage.h"
-#include "core/animation/animatable/AnimatableNeutral.h"
-#include "core/animation/animatable/AnimatableRepeatable.h"
-#include "core/animation/animatable/AnimatableShapeValue.h"
-#include "core/animation/animatable/AnimatableTransform.h"
-#include "core/animation/animatable/AnimatableUnknown.h"
-#include "core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/animation/animatable/AnimatableClipPathOperation.h"
+#include "sky/engine/core/animation/animatable/AnimatableColor.h"
+#include "sky/engine/core/animation/animatable/AnimatableImage.h"
+#include "sky/engine/core/animation/animatable/AnimatableNeutral.h"
+#include "sky/engine/core/animation/animatable/AnimatableRepeatable.h"
+#include "sky/engine/core/animation/animatable/AnimatableShapeValue.h"
+#include "sky/engine/core/animation/animatable/AnimatableTransform.h"
+#include "sky/engine/core/animation/animatable/AnimatableUnknown.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
-#include "core/css/CSSValueTestHelper.h"
+#include "sky/engine/core/css/CSSValueTestHelper.h"
 
 // FIXME: Move to something like core/wtf/WTFTestHelpers.h
 // Compares the targets of two RefPtrs for equality.

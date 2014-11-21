@@ -22,7 +22,7 @@
 #ifndef CSSUnknownRule_h
 #define CSSUnknownRule_h
 
-#include "core/css/CSSRule.h"
+#include "sky/engine/core/css/CSSRule.h"
 
 namespace blink {
 

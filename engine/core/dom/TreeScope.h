@@ -27,9 +27,9 @@
 #ifndef TreeScope_h
 #define TreeScope_h
 
-#include "core/dom/DocumentOrderedMap.h"
-#include "platform/heap/Handle.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/dom/DocumentOrderedMap.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

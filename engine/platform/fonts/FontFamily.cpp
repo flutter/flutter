@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/FontFamily.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontFamily.h"
 
 namespace blink {
 

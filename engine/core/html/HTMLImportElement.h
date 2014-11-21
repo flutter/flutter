@@ -5,8 +5,8 @@
 #ifndef HTMLImportElement_h
 #define HTMLImportElement_h
 
-#include "core/html/HTMLElement.h"
-#include "core/html/imports/HTMLImportChildClient.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/html/imports/HTMLImportChildClient.h"
 
 namespace blink {
 

@@ -24,11 +24,11 @@
 #ifndef FEConvolveMatrix_h
 #define FEConvolveMatrix_h
 
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/filters/Filter.h"
-#include "platform/graphics/filters/FilterEffect.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

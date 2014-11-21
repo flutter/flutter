@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/events/GenericEventQueue.h"
+#include "sky/engine/core/events/GenericEventQueue.h"
 
-#include "core/events/Event.h"
-#include "platform/TraceEvent.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 

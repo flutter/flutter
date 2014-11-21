@@ -31,11 +31,11 @@
 #ifndef ThreadRestrictionVerifier_h
 #define ThreadRestrictionVerifier_h
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 #if ENABLE(ASSERT)
 
-#include "wtf/Threading.h"
+#include "sky/engine/wtf/Threading.h"
 
 namespace WTF {
 

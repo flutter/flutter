@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/MoveSelectionCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/MoveSelectionCommand.h"
 
-#include "core/dom/DocumentFragment.h"
-#include "core/editing/ReplaceSelectionCommand.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/editing/ReplaceSelectionCommand.h"
 
 namespace blink {
 

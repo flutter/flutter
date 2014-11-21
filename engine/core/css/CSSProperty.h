@@ -21,13 +21,13 @@
 #ifndef CSSProperty_h
 #define CSSProperty_h
 
-#include "core/css/CSSPropertyMetadata.h"
-#include "core/css/CSSValue.h"
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/text/TextDirection.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/css/CSSPropertyMetadata.h"
+#include "sky/engine/core/css/CSSValue.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

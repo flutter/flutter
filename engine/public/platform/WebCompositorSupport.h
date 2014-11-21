@@ -26,11 +26,11 @@
 #ifndef WebCompositorSupport_h
 #define WebCompositorSupport_h
 
-#include "WebCommon.h"
-#include "WebCompositorAnimation.h"
-#include "WebCompositorAnimationCurve.h"
-#include "WebFloatPoint.h"
-#include "WebLayerTreeView.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimation.h"
+#include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
+#include "sky/engine/public/platform/WebFloatPoint.h"
+#include "sky/engine/public/platform/WebLayerTreeView.h"
 
 namespace blink {
 

@@ -23,15 +23,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/TextInsertionBaseCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/TextInsertionBaseCommand.h"
 
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/events/BeforeTextInsertedEvent.h"
-#include "core/dom/Element.h"
-#include "core/dom/Node.h"
-#include "core/editing/FrameSelection.h"
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/events/BeforeTextInsertedEvent.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

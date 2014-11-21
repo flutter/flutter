@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/CSSFontFace.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSFontFace.h"
 
 #include <gtest/gtest.h>
 

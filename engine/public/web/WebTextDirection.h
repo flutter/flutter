@@ -32,7 +32,7 @@
 #define WebTextDirection_h
 
 #if BLINK_IMPLEMENTATION
-#include "platform/text/TextDirection.h"
+#include "sky/engine/platform/text/TextDirection.h"
 #endif
 
 namespace blink {

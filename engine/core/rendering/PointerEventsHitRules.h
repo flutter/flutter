@@ -20,8 +20,8 @@
 #ifndef PointerEventsHitRules_h
 #define PointerEventsHitRules_h
 
-#include "core/rendering/HitTestRequest.h"
-#include "core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/rendering/HitTestRequest.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

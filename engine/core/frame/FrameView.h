@@ -25,17 +25,17 @@
 #ifndef FrameView_h
 #define FrameView_h
 
-#include "core/rendering/PaintPhase.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/HostWindow.h"
-#include "platform/Widget.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/graphics/Color.h"
-#include "platform/scroll/ScrollableArea.h"
-#include "wtf/Forward.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/rendering/PaintPhase.h"
+#include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/platform/Widget.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef ScopedPersistent_h
 #define ScopedPersistent_h
 
+#include "sky/engine/wtf/Noncopyable.h"
 #include "v8/include/v8.h"
-#include "wtf/Noncopyable.h"
 
 namespace blink {
 

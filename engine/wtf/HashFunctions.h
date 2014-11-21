@@ -21,10 +21,10 @@
 #ifndef WTF_HashFunctions_h
 #define WTF_HashFunctions_h
 
-#include "wtf/OwnPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/StdLibExtras.h"
 #include <stdint.h>
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace WTF {
 

@@ -21,11 +21,11 @@
 #ifndef CustomFontData_h
 #define CustomFontData_h
 
-#include "platform/PlatformExport.h"
-#include "platform/fonts/Glyph.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
 #include <unicode/uchar.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/fonts/Glyph.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

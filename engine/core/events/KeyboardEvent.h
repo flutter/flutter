@@ -24,8 +24,8 @@
 #ifndef KeyboardEvent_h
 #define KeyboardEvent_h
 
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/UIEventWithKeyState.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/UIEventWithKeyState.h"
 
 namespace blink {
 

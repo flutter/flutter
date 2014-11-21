@@ -5,9 +5,9 @@
 #ifndef CSSAnimationData_h
 #define CSSAnimationData_h
 
-#include "core/animation/Timing.h"
-#include "core/animation/css/CSSTimingData.h"
-#include "core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/core/animation/css/CSSTimingData.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

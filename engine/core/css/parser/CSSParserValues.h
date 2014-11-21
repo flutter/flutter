@@ -21,12 +21,12 @@
 #ifndef CSSParserValues_h
 #define CSSParserValues_h
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSSelector.h"
-#include "core/css/CSSValueList.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -34,8 +34,8 @@
 #include "../platform/WebColor.h"
 #include "../platform/WebString.h"
 #include "../platform/WebVector.h"
-#include "WebPageVisibilityState.h"
-#include "WebWidget.h"
+#include "sky/engine/public/web/WebPageVisibilityState.h"
+#include "sky/engine/public/web/WebWidget.h"
 
 namespace blink {
 

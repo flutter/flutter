@@ -19,19 +19,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/page/Chrome.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/Chrome.h"
 
-#include "core/dom/Document.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/Page.h"
-#include "core/rendering/HitTestResult.h"
-#include "platform/Logging.h"
-#include "platform/geometry/FloatRect.h"
-#include "public/platform/WebScreenInfo.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

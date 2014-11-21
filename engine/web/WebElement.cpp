@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebElement.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebElement.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/dom/Element.h"
-#include "core/dom/custom/CustomElementProcessingStack.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/rendering/RenderBoxModelObject.h"
-#include "core/rendering/RenderObject.h"
-#include "public/platform/WebRect.h"
-#include "public/web/WebDocument.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/rendering/RenderBoxModelObject.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/web/WebDocument.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

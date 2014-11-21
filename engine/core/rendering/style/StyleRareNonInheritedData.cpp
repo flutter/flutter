@@ -19,14 +19,14 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/StyleRareNonInheritedData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/StyleRareNonInheritedData.h"
 
-#include "core/rendering/style/DataEquivalency.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/ShadowList.h"
-#include "core/rendering/style/StyleFilterData.h"
-#include "core/rendering/style/StyleTransformData.h"
+#include "sky/engine/core/rendering/style/DataEquivalency.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/ShadowList.h"
+#include "sky/engine/core/rendering/style/StyleFilterData.h"
+#include "sky/engine/core/rendering/style/StyleTransformData.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef SurroundingText_h
 #define SurroundingText_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

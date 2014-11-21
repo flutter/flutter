@@ -29,7 +29,7 @@
 #ifndef WTF_ASCIICType_h
 #define WTF_ASCIICType_h
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 // The behavior of many of the functions in the <ctype.h> header is dependent
 // on the current locale. But in the WebKit project, all uses of those functions

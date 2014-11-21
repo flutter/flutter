@@ -31,8 +31,8 @@
 #ifndef WebImage_h
 #define WebImage_h
 
-#include "WebCommon.h"
-#include "WebVector.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebVector.h"
 
 #include "third_party/skia/include/core/SkBitmap.h"
 

@@ -5,11 +5,11 @@
 #ifndef ScriptPromiseProperty_h
 #define ScriptPromiseProperty_h
 
-#include "bindings/core/v8/ScriptPromise.h"
-#include "bindings/core/v8/ScriptPromisePropertyBase.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptPromise.h"
+#include "sky/engine/bindings/core/v8/ScriptPromisePropertyBase.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

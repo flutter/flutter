@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/Timer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/Timer.h"
 
-#include "platform/PlatformThreadData.h"
-#include "platform/ThreadTimers.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/HashSet.h"
 #include <limits.h>
 #include <math.h>
 #include <limits>
+#include "sky/engine/platform/PlatformThreadData.h"
+#include "sky/engine/platform/ThreadTimers.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 

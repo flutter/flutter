@@ -17,25 +17,25 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/page/TouchAdjustment.h"
+#include "sky/engine/core/page/TouchAdjustment.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/Node.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/dom/Text.h"
-#include "core/editing/Editor.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderBox.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/RenderText.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/text/TextBreakIterator.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderBox.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/text/TextBreakIterator.h"
 
 namespace blink {
 

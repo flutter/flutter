@@ -26,11 +26,11 @@
 #ifndef HTMLParserScheduler_h
 #define HTMLParserScheduler_h
 
-#include "core/html/parser/NestingLevelIncrementer.h"
-#include "platform/Timer.h"
-#include "wtf/CurrentTime.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/html/parser/NestingLevelIncrementer.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

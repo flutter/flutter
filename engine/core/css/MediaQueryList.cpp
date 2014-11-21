@@ -17,14 +17,14 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/MediaQueryList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaQueryList.h"
 
-#include "core/css/MediaList.h"
-#include "core/css/MediaQueryEvaluator.h"
-#include "core/css/MediaQueryListListener.h"
-#include "core/css/MediaQueryMatcher.h"
-#include "core/dom/Document.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/core/css/MediaQueryEvaluator.h"
+#include "sky/engine/core/css/MediaQueryListListener.h"
+#include "sky/engine/core/css/MediaQueryMatcher.h"
+#include "sky/engine/core/dom/Document.h"
 
 namespace blink {
 

@@ -26,21 +26,21 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/ElementRuleCollector.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/ElementRuleCollector.h"
 
-#include "core/css/CSSKeyframesRule.h"
-#include "core/css/CSSMediaRule.h"
-#include "core/css/CSSRuleList.h"
-#include "core/css/CSSSelector.h"
-#include "core/css/CSSStyleRule.h"
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/CSSSupportsRule.h"
-#include "core/css/StylePropertySet.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/core/css/CSSKeyframesRule.h"
+#include "sky/engine/core/css/CSSMediaRule.h"
+#include "sky/engine/core/css/CSSRuleList.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/core/css/CSSStyleRule.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/CSSSupportsRule.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
 
 namespace blink {
 

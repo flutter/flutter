@@ -5,10 +5,10 @@
 #ifndef TracedValue_h
 #define TracedValue_h
 
-#include "platform/EventTracer.h"
+#include "sky/engine/platform/EventTracer.h"
 
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class JSONArray;

@@ -31,8 +31,8 @@
 #ifndef ClipboardUtilities_h
 #define ClipboardUtilities_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

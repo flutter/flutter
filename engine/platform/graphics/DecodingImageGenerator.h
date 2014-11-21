@@ -26,10 +26,9 @@
 #ifndef DecodingImageGenerator_h
 #define DecodingImageGenerator_h
 
-#include "SkImageGenerator.h"
-#include "SkImageInfo.h"
-
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "third_party/skia/include/core/SkImageGenerator.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 
 class SkData;
 

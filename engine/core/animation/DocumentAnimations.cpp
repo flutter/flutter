@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/DocumentAnimations.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/DocumentAnimations.h"
 
-#include "core/animation/AnimationClock.h"
-#include "core/animation/AnimationTimeline.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/Node.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/core/animation/AnimationClock.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 
 namespace blink {
 

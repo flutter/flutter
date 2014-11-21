@@ -26,8 +26,8 @@
 #ifndef VerticalPositionCache_h
 #define VerticalPositionCache_h
 
-#include "platform/fonts/FontBaseline.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/platform/fonts/FontBaseline.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

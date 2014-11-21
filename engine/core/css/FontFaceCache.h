@@ -27,11 +27,11 @@
 #ifndef FontFaceCache_h
 #define FontFaceCache_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

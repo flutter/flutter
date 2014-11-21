@@ -20,15 +20,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/events/Event.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/Event.h"
 
 #include "gen/sky/core/EventHeaders.h"
 #include "gen/sky/core/EventInterfaces.h"
-#include "core/dom/StaticNodeList.h"
-#include "core/events/EventTarget.h"
-#include "core/frame/UseCounter.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/dom/StaticNodeList.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

@@ -24,8 +24,8 @@
  */
 
 
-#include "config.h"
-#include "core/frame/DOMWindowLifecycleNotifier.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/DOMWindowLifecycleNotifier.h"
 
 namespace blink {
 

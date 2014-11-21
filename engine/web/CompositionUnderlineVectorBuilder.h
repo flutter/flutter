@@ -31,10 +31,10 @@
 #ifndef CompositionUnderlineVectorBuilder_h
 #define CompositionUnderlineVectorBuilder_h
 
-#include "core/editing/CompositionUnderline.h"
-#include "public/platform/WebVector.h"
-#include "public/web/WebCompositionUnderline.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/editing/CompositionUnderline.h"
+#include "sky/engine/public/platform/WebVector.h"
+#include "sky/engine/public/web/WebCompositionUnderline.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

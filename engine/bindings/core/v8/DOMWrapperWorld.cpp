@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 
-#include "bindings/core/v8/DOMDataStore.h"
-#include "bindings/core/v8/ScriptController.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8DOMWrapper.h"
 #include "bindings/core/v8/V8Window.h"
-#include "bindings/core/v8/WindowProxy.h"
-#include "bindings/core/v8/WrapperTypeInfo.h"
-#include "core/dom/ExecutionContext.h"
-#include "wtf/HashTraits.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/bindings/core/v8/DOMDataStore.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
+#include "sky/engine/bindings/core/v8/WindowProxy.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/wtf/HashTraits.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

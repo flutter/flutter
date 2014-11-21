@@ -27,11 +27,11 @@
 #ifndef WebPrivateOwnPtr_h
 #define WebPrivateOwnPtr_h
 
-#include "WebCommon.h"
-#include "WebNonCopyable.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebNonCopyable.h"
 
 #if INSIDE_BLINK
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #endif
 
 namespace blink {

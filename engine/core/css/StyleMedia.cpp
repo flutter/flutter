@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/StyleMedia.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/StyleMedia.h"
 
-#include "core/css/MediaList.h"
-#include "core/css/MediaQueryEvaluator.h"
-#include "core/dom/Document.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/core/css/MediaQueryEvaluator.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

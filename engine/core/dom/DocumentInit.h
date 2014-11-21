@@ -28,11 +28,11 @@
 #ifndef DocumentInit_h
 #define DocumentInit_h
 
-#include "platform/heap/Handle.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/WeakPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/WeakPtr.h"
 
 namespace blink {
 

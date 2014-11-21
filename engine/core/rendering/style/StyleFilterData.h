@@ -26,9 +26,9 @@
 #ifndef StyleFilterData_h
 #define StyleFilterData_h
 
-#include "platform/graphics/filters/FilterOperations.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

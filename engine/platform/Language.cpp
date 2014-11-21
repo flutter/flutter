@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/Language.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/Language.h"
 
-#include "public/platform/Platform.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

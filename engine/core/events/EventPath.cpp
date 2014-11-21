@@ -24,17 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/events/EventPath.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/EventPath.h"
 
 #include "gen/sky/core/EventNames.h"
-#include "core/dom/Document.h"
-#include "core/dom/Touch.h"
-#include "core/dom/TouchList.h"
-#include "core/dom/shadow/InsertionPoint.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/events/TouchEvent.h"
-#include "core/events/TouchEventContext.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Touch.h"
+#include "sky/engine/core/dom/TouchList.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/events/TouchEvent.h"
+#include "sky/engine/core/events/TouchEventContext.h"
 
 namespace blink {
 

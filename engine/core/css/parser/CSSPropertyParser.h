@@ -24,19 +24,19 @@
 #define CSSPropertyParser_h
 
 // FIXME: Way too many.
-#include "core/css/CSSCalculationValue.h"
-#include "core/css/CSSFilterValue.h"
-#include "core/css/CSSGradientValue.h"
-#include "core/css/CSSProperty.h"
-#include "core/css/CSSPropertySourceData.h"
-#include "core/css/CSSSelector.h"
-#include "core/css/parser/CSSParserMode.h"
-#include "core/css/parser/CSSParserValues.h"
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "platform/graphics/Color.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/CSSCalculationValue.h"
+#include "sky/engine/core/css/CSSFilterValue.h"
+#include "sky/engine/core/css/CSSGradientValue.h"
+#include "sky/engine/core/css/CSSProperty.h"
+#include "sky/engine/core/css/CSSPropertySourceData.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/core/css/parser/CSSParserMode.h"
+#include "sky/engine/core/css/parser/CSSParserValues.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

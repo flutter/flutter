@@ -31,7 +31,7 @@
 #ifndef RenderLayerStackingNodeIterator_h
 #define RenderLayerStackingNodeIterator_h
 
-#include "wtf/Noncopyable.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

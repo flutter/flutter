@@ -26,8 +26,8 @@
 #ifndef CSSFontFaceSource_h
 #define CSSFontFaceSource_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

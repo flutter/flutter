@@ -31,9 +31,9 @@
 #ifndef HTMLImport_h
 #define HTMLImport_h
 
-#include "core/html/imports/HTMLImportState.h"
-#include "platform/heap/Handle.h"
-#include "wtf/TreeNode.h"
+#include "sky/engine/core/html/imports/HTMLImportState.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/TreeNode.h"
 
 namespace blink {
 

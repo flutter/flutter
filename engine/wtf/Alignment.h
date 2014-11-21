@@ -21,8 +21,8 @@
 #ifndef WTF_Alignment_h
 #define WTF_Alignment_h
 
-#include <algorithm>
 #include <stdint.h>
+#include <algorithm>
 
 
 namespace WTF {

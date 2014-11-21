@@ -31,11 +31,11 @@
 #ifndef WebCString_h
 #define WebCString_h
 
-#include "WebCommon.h"
-#include "WebPrivatePtr.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
 
 #if INSIDE_BLINK
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 #endif
 #if !INSIDE_BLINK || defined(UNIT_TEST)
 #include <string>

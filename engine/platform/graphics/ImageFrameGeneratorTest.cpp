@@ -23,15 +23,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/ImageFrameGenerator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/ImageFrameGenerator.h"
 
+#include <gtest/gtest.h>
 #include "base/bind.h"
 #include "base/threading/thread.h"
-#include "platform/SharedBuffer.h"
-#include "platform/graphics/ImageDecodingStore.h"
-#include "platform/graphics/test/MockImageDecoder.h"
-#include <gtest/gtest.h>
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/graphics/ImageDecodingStore.h"
+#include "sky/engine/platform/graphics/test/MockImageDecoder.h"
 
 namespace blink {
 

@@ -23,8 +23,8 @@
 #ifndef StylePropertySerializer_h
 #define StylePropertySerializer_h
 
-#include "core/css/CSSValueList.h"
-#include "core/css/StylePropertySet.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/css/StylePropertySet.h"
 
 namespace blink {
 

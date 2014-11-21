@@ -31,12 +31,12 @@
 #ifndef WebClipboard_h
 #define WebClipboard_h
 
-#include "WebCommon.h"
-#include "WebData.h"
-#include "WebImage.h"
-#include "WebString.h"
-#include "WebURL.h"
-#include "WebVector.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebImage.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebURL.h"
+#include "sky/engine/public/platform/WebVector.h"
 
 namespace blink {
 

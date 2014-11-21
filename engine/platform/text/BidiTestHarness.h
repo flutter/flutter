@@ -31,9 +31,9 @@
 #ifndef BidiTestHarness_h
 #define BidiTestHarness_h
 
+#include <stdio.h>
 #include <istream>
 #include <map>
-#include <stdio.h>
 #include <string>
 #include <vector>
 

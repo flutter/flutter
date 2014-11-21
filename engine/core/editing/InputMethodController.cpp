@@ -24,21 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/InputMethodController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/InputMethodController.h"
 
-#include "core/events/CompositionEvent.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/dom/Range.h"
-#include "core/dom/Text.h"
-#include "core/editing/Editor.h"
-#include "core/editing/TypingCommand.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/Chrome.h"
-#include "core/page/ChromeClient.h"
-#include "core/page/EventHandler.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/editing/TypingCommand.h"
+#include "sky/engine/core/events/CompositionEvent.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/core/page/EventHandler.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

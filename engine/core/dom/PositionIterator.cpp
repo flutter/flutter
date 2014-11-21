@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/PositionIterator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/PositionIterator.h"
 
-#include "core/editing/htmlediting.h"
-#include "core/rendering/RenderBlock.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
 
 namespace blink {
 

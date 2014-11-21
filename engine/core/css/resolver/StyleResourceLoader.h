@@ -23,8 +23,8 @@
 #ifndef StyleResourceLoader_h
 #define StyleResourceLoader_h
 
-#include "wtf/OwnPtr.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

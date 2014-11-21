@@ -27,8 +27,8 @@
 #ifndef IntSize_h
 #define IntSize_h
 
-#include "platform/PlatformExport.h"
-#include "public/platform/WebCommon.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

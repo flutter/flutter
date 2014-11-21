@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/ArrayBufferContents.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/ArrayBufferContents.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/PartitionAlloc.h"
-#include "wtf/WTF.h"
 #include <string.h>
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
+#include "sky/engine/wtf/WTF.h"
 
 namespace WTF {
 

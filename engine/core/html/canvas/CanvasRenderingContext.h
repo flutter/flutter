@@ -26,11 +26,11 @@
 #ifndef CanvasRenderingContext_h
 #define CanvasRenderingContext_h
 
-#include "core/html/HTMLCanvasElement.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink { class WebLayer; }
 

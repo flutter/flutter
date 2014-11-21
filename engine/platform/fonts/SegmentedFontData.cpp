@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/SegmentedFontData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/SegmentedFontData.h"
 
-#include "platform/fonts/SimpleFontData.h"
-#include "wtf/Assertions.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

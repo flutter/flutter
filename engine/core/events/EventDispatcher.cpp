@@ -23,21 +23,21 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/events/EventDispatcher.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/EventDispatcher.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/MouseEvent.h"
-#include "core/events/ScopedEventQueue.h"
-#include "core/events/WindowEventContext.h"
-#include "core/frame/FrameView.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "platform/EventDispatchForbiddenScope.h"
-#include "platform/TraceEvent.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/MouseEvent.h"
+#include "sky/engine/core/events/ScopedEventQueue.h"
+#include "sky/engine/core/events/WindowEventContext.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

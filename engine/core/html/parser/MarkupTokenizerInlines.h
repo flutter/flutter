@@ -28,7 +28,7 @@
 #ifndef MarkupTokenizerInlines_h
 #define MarkupTokenizerInlines_h
 
-#include "platform/text/SegmentedString.h"
+#include "sky/engine/platform/text/SegmentedString.h"
 
 namespace blink {
 

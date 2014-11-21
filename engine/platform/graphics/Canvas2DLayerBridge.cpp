@@ -23,21 +23,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/Canvas2DLayerBridge.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
 
-#include "GrContext.h"
-#include "SkDevice.h"
-#include "SkSurface.h"
-#include "platform/TraceEvent.h"
-#include "platform/graphics/Canvas2DLayerManager.h"
-#include "platform/graphics/GraphicsLayer.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebCompositorSupport.h"
-#include "public/platform/WebGraphicsContext3D.h"
-#include "public/platform/WebGraphicsContext3DProvider.h"
-#include "wtf/RefCountedLeakCounter.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerManager.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebCompositorSupport.h"
+#include "sky/engine/public/platform/WebGraphicsContext3D.h"
+#include "sky/engine/public/platform/WebGraphicsContext3DProvider.h"
+#include "sky/engine/wtf/RefCountedLeakCounter.h"
+#include "third_party/skia/include/core/SkDevice.h"
+#include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrContext.h"
 
 namespace {
 enum {

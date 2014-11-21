@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/PurgeableVector.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/PurgeableVector.h"
 
-#include "public/platform/Platform.h"
-#include "public/platform/WebDiscardableMemory.h"
-#include "wtf/Assertions.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebDiscardableMemory.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 #include <cstring>
 

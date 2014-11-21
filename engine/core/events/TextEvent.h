@@ -27,8 +27,8 @@
 #ifndef TextEvent_h
 #define TextEvent_h
 
-#include "core/events/TextEventInputType.h"
-#include "core/events/UIEvent.h"
+#include "sky/engine/core/events/TextEventInputType.h"
+#include "sky/engine/core/events/UIEvent.h"
 
 namespace blink {
 

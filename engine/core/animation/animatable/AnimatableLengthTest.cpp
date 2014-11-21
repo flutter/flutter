@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/animation/animatable/AnimatableLength.h"
+#include "sky/engine/core/animation/animatable/AnimatableLength.h"
 
-#include "platform/CalculationValue.h"
+#include "sky/engine/platform/CalculationValue.h"
 
 #include <gtest/gtest.h>
 

@@ -31,11 +31,11 @@
 #ifndef DisplayList_h
 #define DisplayList_h
 
-#include "platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
 
-#include "wtf/FastAllocBase.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 class SkCanvas;
 class SkPicture;

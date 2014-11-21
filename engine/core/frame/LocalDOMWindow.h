@@ -27,16 +27,16 @@
 #ifndef LocalDOMWindow_h
 #define LocalDOMWindow_h
 
-#include "bindings/core/v8/Dictionary.h"
-#include "bindings/core/v8/SerializedScriptValue.h"
-#include "core/events/EventTarget.h"
-#include "core/frame/DOMWindowBase64.h"
-#include "core/frame/FrameDestructionObserver.h"
-#include "platform/LifecycleContext.h"
-#include "platform/Supplementable.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/core/frame/DOMWindowBase64.h"
+#include "sky/engine/core/frame/FrameDestructionObserver.h"
+#include "sky/engine/platform/LifecycleContext.h"
+#include "sky/engine/platform/Supplementable.h"
+#include "sky/engine/platform/heap/Handle.h"
 
-#include "wtf/Forward.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

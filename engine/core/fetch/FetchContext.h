@@ -31,11 +31,11 @@
 #ifndef FetchContext_h
 #define FetchContext_h
 
-#include "core/fetch/CachePolicy.h"
-#include "core/fetch/FetchInitiatorInfo.h"
-#include "core/fetch/Resource.h"
-#include "platform/network/ResourceLoadPriority.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/core/fetch/CachePolicy.h"
+#include "sky/engine/core/fetch/FetchInitiatorInfo.h"
+#include "sky/engine/core/fetch/Resource.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

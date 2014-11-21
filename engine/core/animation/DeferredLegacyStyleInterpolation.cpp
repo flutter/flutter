@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/DeferredLegacyStyleInterpolation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/DeferredLegacyStyleInterpolation.h"
 
-#include "core/animation/LegacyStyleInterpolation.h"
-#include "core/css/CSSImageValue.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/CSSShadowValue.h"
-#include "core/css/CSSValueList.h"
-#include "core/css/Pair.h"
-#include "core/css/Rect.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/css/resolver/StyleResolverState.h"
+#include "sky/engine/core/animation/LegacyStyleInterpolation.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/CSSShadowValue.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/css/Pair.h"
+#include "sky/engine/core/css/Rect.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/css/resolver/StyleResolverState.h"
 
 namespace blink {
 

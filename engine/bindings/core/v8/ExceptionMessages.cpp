@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ExceptionMessages.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
 
-#include "platform/Decimal.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/Decimal.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

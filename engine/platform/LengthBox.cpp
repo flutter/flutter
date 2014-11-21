@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/LengthBox.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/LengthBox.h"
 
 namespace blink {
 

@@ -27,7 +27,7 @@
 #ifndef GraphicsLayerTreeBuilder_h
 #define GraphicsLayerTreeBuilder_h
 
-#include "platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/GraphicsLayer.h"
 
 namespace blink {
 

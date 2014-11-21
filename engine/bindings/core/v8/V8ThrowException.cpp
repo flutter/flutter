@@ -22,13 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8ThrowException.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8ThrowException.h"
 
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8DOMException.h"
-#include "core/dom/DOMException.h"
-#include "core/dom/ExceptionCode.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/dom/DOMException.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
 
 namespace blink {
 

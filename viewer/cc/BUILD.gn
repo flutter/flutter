@@ -66,7 +66,6 @@ test("sky_viewer_cc_unittests") {
     "//ui/gfx:test_support",
     "//cc",
     "//cc:test_support",
-    "//sky/engine/public:sky_headers",
   ]
 
   sources = [

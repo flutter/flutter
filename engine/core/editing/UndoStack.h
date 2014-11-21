@@ -31,9 +31,9 @@
 #ifndef UndoStack_h
 #define UndoStack_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/Deque.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

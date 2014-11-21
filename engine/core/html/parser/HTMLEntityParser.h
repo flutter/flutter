@@ -27,7 +27,7 @@
 #ifndef HTMLEntityParser_h
 #define HTMLEntityParser_h
 
-#include "platform/text/SegmentedString.h"
+#include "sky/engine/platform/text/SegmentedString.h"
 
 namespace blink {
 

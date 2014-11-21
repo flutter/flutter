@@ -31,10 +31,10 @@
 #ifndef TimingCalculations_h
 #define TimingCalculations_h
 
-#include "core/animation/AnimationNode.h"
-#include "core/animation/Timing.h"
-#include "platform/animation/AnimationUtilities.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

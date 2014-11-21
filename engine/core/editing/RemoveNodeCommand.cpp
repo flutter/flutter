@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/RemoveNodeCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/RemoveNodeCommand.h"
 
-#include "bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "core/dom/Node.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

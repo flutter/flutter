@@ -25,7 +25,7 @@
 #ifndef TreeScopeAdopter_h
 #define TreeScopeAdopter_h
 
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/Node.h"
 
 namespace blink {
 

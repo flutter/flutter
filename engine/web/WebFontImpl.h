@@ -31,8 +31,8 @@
 #ifndef WebFontImpl_h
 #define WebFontImpl_h
 
-#include "platform/fonts/Font.h"
-#include "public/web/WebFont.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/public/web/WebFont.h"
 
 namespace blink {
 

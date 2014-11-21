@@ -28,30 +28,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8GCController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8GCController.h"
 
-#include "bindings/core/v8/RetainedDOMInfo.h"
-#include "bindings/core/v8/V8AbstractEventListener.h"
-#include "bindings/core/v8/V8Binding.h"
+#include <algorithm>
 #include "bindings/core/v8/V8MutationObserver.h"
 #include "bindings/core/v8/V8Node.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
-#include "bindings/core/v8/WrapperTypeInfo.h"
-#include "core/dom/Attr.h"
-#include "core/dom/Document.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/TemplateContentDocumentFragment.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/HTMLTemplateElement.h"
-#include "core/html/imports/HTMLImportsController.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "platform/Partitions.h"
-#include "platform/TraceEvent.h"
-#include "wtf/Vector.h"
-#include <algorithm>
+#include "sky/engine/bindings/core/v8/RetainedDOMInfo.h"
+#include "sky/engine/bindings/core/v8/V8AbstractEventListener.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/core/dom/Attr.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/TemplateContentDocumentFragment.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/HTMLTemplateElement.h"
+#include "sky/engine/core/html/imports/HTMLImportsController.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/platform/Partitions.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

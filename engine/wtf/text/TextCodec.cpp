@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/text/TextCodec.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/TextCodec.h"
 
-#include "wtf/StringExtras.h"
+#include "sky/engine/wtf/StringExtras.h"
 
 namespace WTF {
 

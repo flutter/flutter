@@ -26,8 +26,8 @@
 #ifndef PathTraversalState_h
 #define PathTraversalState_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 
 namespace blink {
 

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/skia/GaneshUtils.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/skia/GaneshUtils.h"
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/gpu/SkGrPixelRef.h"

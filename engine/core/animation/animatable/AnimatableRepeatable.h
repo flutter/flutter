@@ -31,8 +31,8 @@
 #ifndef AnimatableRepeatable_h
 #define AnimatableRepeatable_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

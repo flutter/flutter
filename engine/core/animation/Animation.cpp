@@ -28,21 +28,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/Animation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/Animation.h"
 
-#include "bindings/core/v8/Dictionary.h"
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/animation/ActiveAnimations.h"
-#include "core/animation/AnimationHelpers.h"
-#include "core/animation/AnimationPlayer.h"
-#include "core/animation/AnimationTimeline.h"
-#include "core/animation/CompositorAnimations.h"
-#include "core/animation/Interpolation.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/dom/Element.h"
-#include "core/frame/UseCounter.h"
-#include "core/rendering/RenderLayer.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/animation/ActiveAnimations.h"
+#include "sky/engine/core/animation/AnimationHelpers.h"
+#include "sky/engine/core/animation/AnimationPlayer.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
+#include "sky/engine/core/animation/CompositorAnimations.h"
+#include "sky/engine/core/animation/Interpolation.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/frame/UseCounter.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
 
 namespace blink {
 

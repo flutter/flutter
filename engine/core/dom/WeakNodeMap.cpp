@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/dom/WeakNodeMap.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/WeakNodeMap.h"
 
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/Node.h"
 
 namespace blink {
 

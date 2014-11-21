@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/AnimationClock.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationClock.h"
 
-#include "wtf/CurrentTime.h"
 #include <math.h>
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace {
 

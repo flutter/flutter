@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/OESVertexArrayObject.h"
+#include "sky/engine/core/html/canvas/OESVertexArrayObject.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/html/canvas/WebGLRenderingContextBase.h"
-#include "core/html/canvas/WebGLVertexArrayObjectOES.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
+#include "sky/engine/core/html/canvas/WebGLVertexArrayObjectOES.h"
 
 namespace blink {
 

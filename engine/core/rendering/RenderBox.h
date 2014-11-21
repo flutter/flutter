@@ -23,9 +23,9 @@
 #ifndef RenderBox_h
 #define RenderBox_h
 
-#include "core/rendering/RenderBoxModelObject.h"
-#include "core/rendering/RenderOverflow.h"
-#include "platform/scroll/ScrollTypes.h"
+#include "sky/engine/core/rendering/RenderBoxModelObject.h"
+#include "sky/engine/core/rendering/RenderOverflow.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
 
 namespace blink {
 

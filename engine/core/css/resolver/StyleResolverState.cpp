@@ -19,13 +19,13 @@
  *
  */
 
-#include "config.h"
-#include "core/css/resolver/StyleResolverState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/StyleResolverState.h"
 
-#include "core/animation/css/CSSAnimations.h"
-#include "core/dom/Node.h"
-#include "core/dom/NodeRenderStyle.h"
-#include "core/frame/FrameHost.h"
+#include "sky/engine/core/animation/css/CSSAnimations.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/frame/FrameHost.h"
 
 namespace blink {
 

@@ -27,11 +27,11 @@
 #ifndef DOMURL_h
 #define DOMURL_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/dom/DOMURLUtils.h"
-#include "platform/heap/Handle.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/Forward.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/dom/DOMURLUtils.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

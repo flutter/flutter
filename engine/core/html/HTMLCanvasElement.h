@@ -29,17 +29,17 @@
 #define HTMLCanvasElement_h
 
 #include "base/cancelable_callback.h"
-#include "core/dom/Document.h"
-#include "core/html/HTMLElement.h"
-#include "core/html/canvas/CanvasImageSource.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/Canvas2DLayerBridge.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/ImageBufferClient.h"
-#include "platform/heap/Handle.h"
-#include "public/platform/WebThread.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/html/canvas/CanvasImageSource.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/ImageBufferClient.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/public/platform/WebThread.h"
+#include "sky/engine/wtf/Forward.h"
 
 #define CanvasDefaultInterpolationQuality InterpolationLow
 

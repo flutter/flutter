@@ -31,9 +31,9 @@
 #ifndef V8PersistentValueVector_h
 #define V8PersistentValueVector_h
 
+#include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8-util.h"
 #include "v8/include/v8.h"
-#include "wtf/Vector.h"
 
 namespace blink {
 

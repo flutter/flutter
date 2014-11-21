@@ -26,9 +26,9 @@
 #ifndef PlainTextRange_h
 #define PlainTextRange_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/NotFound.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/NotFound.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

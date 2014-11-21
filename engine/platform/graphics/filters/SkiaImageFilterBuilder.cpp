@@ -22,22 +22,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
 
-#include "SkBlurImageFilter.h"
-#include "SkColorFilterImageFilter.h"
-#include "SkColorMatrixFilter.h"
-#include "SkDropShadowImageFilter.h"
-#include "SkMatrixImageFilter.h"
-#include "SkTableColorFilter.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/filters/FilterEffect.h"
-#include "platform/graphics/filters/FilterOperations.h"
-#include "platform/graphics/filters/SourceGraphic.h"
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "public/platform/WebPoint.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/platform/graphics/filters/SourceGraphic.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/public/platform/WebPoint.h"
+#include "third_party/skia/include/effects/SkBlurImageFilter.h"
+#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
+#include "third_party/skia/include/effects/SkColorMatrixFilter.h"
+#include "third_party/skia/include/effects/SkDropShadowImageFilter.h"
+#include "third_party/skia/include/effects/SkMatrixImageFilter.h"
+#include "third_party/skia/include/effects/SkTableColorFilter.h"
 
 namespace blink {
 

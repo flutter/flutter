@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ActiveDOMCallback.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ActiveDOMCallback.h"
 
-#include "core/dom/ActiveDOMObject.h"
-#include "core/dom/ExecutionContext.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
 
 namespace blink {
 

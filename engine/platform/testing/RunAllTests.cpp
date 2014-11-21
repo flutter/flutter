@@ -28,16 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/EventTracer.h"
-#include "platform/Partitions.h"
-#include "platform/TestingPlatformSupport.h"
-#include "wtf/CryptographicallyRandomNumber.h"
-#include "wtf/MainThread.h"
-#include "wtf/WTF.h"
-#include "base/test/test_suite.h"
 #include <string.h>
+#include "base/test/test_suite.h"
+#include "sky/engine/platform/EventTracer.h"
+#include "sky/engine/platform/Partitions.h"
+#include "sky/engine/platform/TestingPlatformSupport.h"
+#include "sky/engine/wtf/CryptographicallyRandomNumber.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/WTF.h"
 
 static double CurrentTime()
 {

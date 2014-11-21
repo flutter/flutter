@@ -26,10 +26,10 @@
 #ifndef UnicodeUtilities_h
 #define UnicodeUtilities_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

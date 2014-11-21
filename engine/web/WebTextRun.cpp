@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebTextRun.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebTextRun.h"
 
-#include "platform/text/TextRun.h"
+#include "sky/engine/platform/text/TextRun.h"
 
 namespace blink {
 

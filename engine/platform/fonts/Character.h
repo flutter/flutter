@@ -31,12 +31,12 @@
 #ifndef Character_h
 #define Character_h
 
-#include "platform/PlatformExport.h"
-#include "platform/text/TextDirection.h"
-#include "platform/text/TextPath.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/WTFString.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/platform/text/TextPath.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

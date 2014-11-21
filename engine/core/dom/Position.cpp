@@ -23,27 +23,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/Position.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/Position.h"
 
-#include "core/css/CSSComputedStyleDeclaration.h"
-#include "core/dom/PositionIterator.h"
-#include "core/dom/Text.h"
-#include "core/editing/TextIterator.h"
-#include "core/editing/VisiblePosition.h"
-#include "core/editing/VisibleUnits.h"
-#include "core/editing/htmlediting.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
-#include "core/rendering/InlineIterator.h"
-#include "core/rendering/InlineTextBox.h"
-#include "core/rendering/RenderBlock.h"
-#include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderText.h"
-#include "platform/Logging.h"
-#include "wtf/text/CString.h"
-#include "wtf/unicode/CharacterNames.h"
 #include <stdio.h>
+#include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
+#include "sky/engine/core/dom/PositionIterator.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/TextIterator.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/VisibleUnits.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/rendering/InlineIterator.h"
+#include "sky/engine/core/rendering/InlineTextBox.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

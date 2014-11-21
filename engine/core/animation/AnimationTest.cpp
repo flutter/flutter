@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/Animation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/Animation.h"
 
 #include <gtest/gtest.h>
 
-#include "bindings/core/v8/Dictionary.h"
-#include "bindings/core/v8/Nullable.h"
-#include "core/animation/AnimationClock.h"
-#include "core/animation/AnimationHelpers.h"
-#include "core/animation/AnimationNodeTiming.h"
-#include "core/animation/AnimationTestHelper.h"
-#include "core/animation/AnimationTimeline.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/animation/Timing.h"
-#include "core/dom/Document.h"
 #include "core/testing/DummyPageHolder.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/Nullable.h"
+#include "sky/engine/core/animation/AnimationClock.h"
+#include "sky/engine/core/animation/AnimationHelpers.h"
+#include "sky/engine/core/animation/AnimationNodeTiming.h"
+#include "sky/engine/core/animation/AnimationTestHelper.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/animation/Timing.h"
+#include "sky/engine/core/dom/Document.h"
 #include "v8/include/v8.h"
 
 namespace blink {

@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/network/ResourceRequest.h"
-#include "public/platform/WebURLRequest.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
 
 namespace blink {
 

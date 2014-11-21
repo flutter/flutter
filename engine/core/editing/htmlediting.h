@@ -26,11 +26,11 @@
 #ifndef htmlediting_h
 #define htmlediting_h
 
-#include "core/dom/Position.h"
-#include "core/editing/EditingBoundary.h"
-#include "platform/text/TextDirection.h"
-#include "wtf/Forward.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/core/dom/Position.h"
+#include "sky/engine/core/editing/EditingBoundary.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

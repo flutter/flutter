@@ -22,11 +22,11 @@
 #ifndef Chrome_h
 #define Chrome_h
 
-#include "core/loader/NavigationPolicy.h"
-#include "core/page/FocusType.h"
-#include "platform/Cursor.h"
-#include "platform/HostWindow.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/loader/NavigationPolicy.h"
+#include "sky/engine/core/page/FocusType.h"
+#include "sky/engine/platform/Cursor.h"
+#include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

@@ -29,11 +29,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/LineEnding.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/LineEnding.h"
 
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

@@ -30,9 +30,9 @@
 #ifndef BasicShapeFunctions_h
 #define BasicShapeFunctions_h
 
-#include "core/rendering/style/BasicShapes.h"
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/core/rendering/style/BasicShapes.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

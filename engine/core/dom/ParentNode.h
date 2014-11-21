@@ -31,9 +31,9 @@
 #ifndef ParentNode_h
 #define ParentNode_h
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/ElementTraversal.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

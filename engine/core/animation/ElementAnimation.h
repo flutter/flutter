@@ -31,14 +31,14 @@
 #ifndef ElementAnimation_h
 #define ElementAnimation_h
 
-#include "core/animation/ActiveAnimations.h"
-#include "core/animation/Animation.h"
-#include "core/animation/AnimationTimeline.h"
-#include "core/animation/EffectInput.h"
-#include "core/animation/TimingInput.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/core/animation/ActiveAnimations.h"
+#include "sky/engine/core/animation/Animation.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
+#include "sky/engine/core/animation/EffectInput.h"
+#include "sky/engine/core/animation/TimingInput.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
 
 
 namespace blink {

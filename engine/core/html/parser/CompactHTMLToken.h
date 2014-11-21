@@ -26,10 +26,10 @@
 #ifndef CompactHTMLToken_h
 #define CompactHTMLToken_h
 
-#include "core/html/parser/HTMLToken.h"
-#include "wtf/Vector.h"
-#include "wtf/text/TextPosition.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/html/parser/HTMLToken.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/TextPosition.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

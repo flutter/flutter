@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/RoundedRect.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/RoundedRect.h"
 
-#include "platform/geometry/IntRect.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/geometry/IntRect.h"
 
 using namespace blink;
 

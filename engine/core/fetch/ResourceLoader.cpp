@@ -27,24 +27,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/fetch/ResourceLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/fetch/ResourceLoader.h"
 
-#include "core/fetch/Resource.h"
-#include "core/fetch/ResourceLoaderHost.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/Logging.h"
-#include "platform/SharedBuffer.h"
-#include "platform/exported/WrappedResourceRequest.h"
-#include "platform/exported/WrappedResourceResponse.h"
-#include "platform/network/ResourceError.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebData.h"
-#include "public/platform/WebURLError.h"
-#include "public/platform/WebURLRequest.h"
-#include "public/platform/WebURLResponse.h"
-#include "wtf/Assertions.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/fetch/Resource.h"
+#include "sky/engine/core/fetch/ResourceLoaderHost.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/exported/WrappedResourceRequest.h"
+#include "sky/engine/platform/exported/WrappedResourceResponse.h"
+#include "sky/engine/platform/network/ResourceError.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/public/platform/WebURLError.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
+#include "sky/engine/public/platform/WebURLResponse.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

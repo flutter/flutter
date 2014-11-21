@@ -31,10 +31,10 @@
 #ifndef WebPoint_h
 #define WebPoint_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/IntPoint.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
 #else
 #include "ui/gfx/geometry/point.h"
 #endif

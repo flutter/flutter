@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/dom/custom/CustomElementMicrotaskQueueBase.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/custom/CustomElementMicrotaskQueueBase.h"
 
-#include "core/dom/custom/CustomElementProcessingStack.h"
+#include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
 
 namespace blink {
 

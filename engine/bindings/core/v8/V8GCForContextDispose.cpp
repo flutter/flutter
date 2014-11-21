@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8GCForContextDispose.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8GCForContextDispose.h"
 
-#include "bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 #include "v8/include/v8.h"
-#include "wtf/StdLibExtras.h"
 
 namespace blink {
 

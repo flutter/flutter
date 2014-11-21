@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/ScriptProfiler.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptProfiler.h"
 
-#include "bindings/core/v8/RetainedDOMInfo.h"
-#include "bindings/core/v8/ScriptValue.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8Node.h"
 #include "bindings/core/v8/V8Window.h"
-#include "bindings/core/v8/WrapperTypeInfo.h"
-#include "core/dom/Document.h"
-#include "core/inspector/BindingVisitors.h"
+#include "sky/engine/bindings/core/v8/RetainedDOMInfo.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/inspector/BindingVisitors.h"
+#include "sky/engine/wtf/ThreadSpecific.h"
 #include "v8/include/v8-profiler.h"
 #include "v8/include/v8.h"
-#include "wtf/ThreadSpecific.h"
 
 namespace blink {
 

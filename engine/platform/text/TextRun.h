@@ -24,13 +24,13 @@
 #ifndef TextRun_h
 #define TextRun_h
 
-#include "platform/PlatformExport.h"
-#include "platform/fonts/Glyph.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/text/TextDirection.h"
-#include "platform/text/TextPath.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/fonts/Glyph.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/text/TextDirection.h"
+#include "sky/engine/platform/text/TextPath.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

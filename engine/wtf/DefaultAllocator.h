@@ -35,10 +35,10 @@
 // traced, garbage collected heap. It uses FastMalloc for collections,
 // but uses the partition allocator for the backing store of the collections.
 
-#include "wtf/Assertions.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/PartitionAlloc.h"
-#include "wtf/WTF.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
+#include "sky/engine/wtf/WTF.h"
 
 #include <string.h>
 

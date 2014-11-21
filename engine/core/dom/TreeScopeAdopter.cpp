@@ -22,14 +22,14 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-#include "config.h"
-#include "core/dom/TreeScopeAdopter.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/TreeScopeAdopter.h"
 
-#include "core/dom/Attr.h"
-#include "core/dom/Document.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/dom/Attr.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 namespace blink {
 

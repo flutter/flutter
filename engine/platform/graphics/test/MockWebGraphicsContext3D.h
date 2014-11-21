@@ -26,8 +26,8 @@
 #ifndef MockWebGraphicsContext3D_h
 #define MockWebGraphicsContext3D_h
 
-#include "platform/PlatformExport.h"
-#include "public/platform/WebGraphicsContext3D.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/public/platform/WebGraphicsContext3D.h"
 
 namespace blink {
 

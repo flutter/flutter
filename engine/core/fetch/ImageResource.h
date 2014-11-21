@@ -23,12 +23,12 @@
 #ifndef ImageResource_h
 #define ImageResource_h
 
-#include "core/fetch/ResourcePtr.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/IntSizeHash.h"
-#include "platform/geometry/LayoutSize.h"
-#include "platform/graphics/ImageObserver.h"
-#include "wtf/HashMap.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/IntSizeHash.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
+#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

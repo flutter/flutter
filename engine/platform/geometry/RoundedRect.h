@@ -27,8 +27,8 @@
 #ifndef RoundedRect_h
 #define RoundedRect_h
 
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8ValueCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8ValueCache.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

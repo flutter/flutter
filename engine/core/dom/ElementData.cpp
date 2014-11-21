@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/ElementData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ElementData.h"
 
-#include "core/css/StylePropertySet.h"
-#include "core/dom/QualifiedName.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

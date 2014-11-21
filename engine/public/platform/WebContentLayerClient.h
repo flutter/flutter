@@ -26,8 +26,8 @@
 #ifndef WebContentLayerClient_h
 #define WebContentLayerClient_h
 
-#include "WebCanvas.h"
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCanvas.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

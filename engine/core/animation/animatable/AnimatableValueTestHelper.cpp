@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/animation/animatable/AnimatableValueTestHelper.h"
+#include "sky/engine/core/animation/animatable/AnimatableValueTestHelper.h"
 
 namespace blink {
 

@@ -23,10 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/ClipRect.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/ClipRect.h"
 
-#include "core/rendering/HitTestLocation.h"
+#include "sky/engine/core/rendering/HitTestLocation.h"
 
 namespace blink {
 

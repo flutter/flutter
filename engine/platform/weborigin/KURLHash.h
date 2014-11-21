@@ -26,9 +26,9 @@
 #ifndef KURLHash_h
 #define KURLHash_h
 
-#include "platform/weborigin/KURL.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

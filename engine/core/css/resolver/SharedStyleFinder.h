@@ -22,8 +22,8 @@
 #ifndef SharedStyleFinder_h
 #define SharedStyleFinder_h
 
-#include "core/css/resolver/ElementResolveContext.h"
-#include "core/dom/Element.h"
+#include "sky/engine/core/css/resolver/ElementResolveContext.h"
+#include "sky/engine/core/dom/Element.h"
 
 namespace blink {
 

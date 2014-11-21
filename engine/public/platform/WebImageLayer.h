@@ -26,8 +26,8 @@
 #ifndef WebImageLayer_h
 #define WebImageLayer_h
 
-#include "WebCommon.h"
-#include "WebLayer.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebLayer.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
 namespace blink {

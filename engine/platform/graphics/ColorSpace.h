@@ -26,8 +26,8 @@
 #ifndef ColorSpace_h
 #define ColorSpace_h
 
-#include "platform/PlatformExport.h"
-#include "platform/graphics/Color.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

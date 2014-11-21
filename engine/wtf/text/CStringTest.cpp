@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/text/CString.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/text/CString.h"
 
 namespace {
 

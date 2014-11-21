@@ -20,11 +20,11 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FEDiffuseLighting.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FEDiffuseLighting.h"
 
-#include "platform/graphics/filters/LightSource.h"
-#include "platform/text/TextStream.h"
+#include "sky/engine/platform/graphics/filters/LightSource.h"
+#include "sky/engine/platform/text/TextStream.h"
 
 namespace blink {
 

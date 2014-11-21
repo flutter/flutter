@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/loader/MojoLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/loader/MojoLoader.h"
 
 #include "base/bind.h"
-#include "core/dom/Document.h"
-#include "core/dom/DocumentInit.h"
-#include "core/frame/LocalDOMWindow.h"
-#include "core/frame/LocalFrame.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "core/loader/FrameLoaderClient.h"
-#include "core/page/Page.h"
-#include "core/dom/DocumentParser.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentInit.h"
+#include "sky/engine/core/dom/DocumentParser.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/core/page/Page.h"
 
 namespace blink {
 

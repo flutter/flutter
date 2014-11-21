@@ -24,9 +24,9 @@
 #ifndef BidiRun_h
 #define BidiRun_h
 
-#include "core/rendering/RenderText.h"
-#include "platform/text/BidiResolver.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/platform/text/BidiResolver.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

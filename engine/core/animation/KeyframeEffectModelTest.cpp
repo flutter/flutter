@@ -28,16 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/KeyframeEffectModel.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
 
-#include "core/animation/LegacyStyleInterpolation.h"
-#include "core/animation/animatable/AnimatableLength.h"
-#include "core/animation/animatable/AnimatableUnknown.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/resolver/CSSToStyleMap.h"
 #include <gtest/gtest.h>
+#include "sky/engine/core/animation/LegacyStyleInterpolation.h"
+#include "sky/engine/core/animation/animatable/AnimatableLength.h"
+#include "sky/engine/core/animation/animatable/AnimatableUnknown.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/css/resolver/CSSToStyleMap.h"
 
 using namespace blink;
 

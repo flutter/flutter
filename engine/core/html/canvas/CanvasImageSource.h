@@ -27,7 +27,7 @@
 #ifndef CanvasImageSource_h
 #define CanvasImageSource_h
 
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

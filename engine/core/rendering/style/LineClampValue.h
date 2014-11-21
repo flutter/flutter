@@ -25,7 +25,7 @@
 #ifndef LineClampValue_h
 #define LineClampValue_h
 
-#include "core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

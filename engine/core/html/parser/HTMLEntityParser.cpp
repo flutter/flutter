@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/html/parser/HTMLEntityParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLEntityParser.h"
 
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace WTF;
 

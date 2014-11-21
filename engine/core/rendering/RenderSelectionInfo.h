@@ -25,8 +25,8 @@
 #ifndef RenderSelectionInfo_h
 #define RenderSelectionInfo_h
 
-#include "core/rendering/RenderBox.h"
-#include "platform/geometry/IntRect.h"
+#include "sky/engine/core/rendering/RenderBox.h"
+#include "sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef AnimatableShadow_h
 #define AnimatableShadow_h
 
-#include "core/animation/animatable/AnimatableValue.h"
-#include "core/rendering/style/ShadowList.h"
+#include "sky/engine/core/animation/animatable/AnimatableValue.h"
+#include "sky/engine/core/rendering/style/ShadowList.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef WrappedResourceResponse_h
 #define WrappedResourceResponse_h
 
-#include "platform/exported/WebURLResponsePrivate.h"
-#include "public/platform/WebURLResponse.h"
+#include "sky/engine/platform/exported/WebURLResponsePrivate.h"
+#include "sky/engine/public/platform/WebURLResponse.h"
 
 namespace blink {
 

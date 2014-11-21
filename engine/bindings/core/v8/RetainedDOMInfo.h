@@ -31,7 +31,7 @@
 #ifndef RetainedDOMInfo_h
 #define RetainedDOMInfo_h
 
-#include "bindings/core/v8/RetainedObjectInfo.h"
+#include "sky/engine/bindings/core/v8/RetainedObjectInfo.h"
 #include "v8/include/v8-profiler.h"
 
 namespace blink {

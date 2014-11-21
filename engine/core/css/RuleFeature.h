@@ -22,10 +22,10 @@
 #ifndef RuleFeature_h
 #define RuleFeature_h
 
-#include "core/css/CSSSelector.h"
-#include "wtf/Forward.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/AtomicStringHash.h"
+#include "sky/engine/core/css/CSSSelector.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
 
 namespace blink {
 

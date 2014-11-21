@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/parser/BisonCSSParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
 
-#include "core/css/CSSTimingFunctionValue.h"
-#include "core/css/MediaList.h"
-#include "core/css/StyleRule.h"
-#include "platform/animation/TimingFunction.h"
-#include "wtf/dtoa/utils.h"
+#include "sky/engine/core/css/CSSTimingFunctionValue.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/wtf/dtoa/utils.h"
 
 #include <gtest/gtest.h>
 

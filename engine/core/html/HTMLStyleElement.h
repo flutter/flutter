@@ -23,8 +23,8 @@
 #ifndef HTMLStyleElement_h
 #define HTMLStyleElement_h
 
-#include "core/dom/StyleElement.h"
-#include "core/html/HTMLElement.h"
+#include "sky/engine/core/dom/StyleElement.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 

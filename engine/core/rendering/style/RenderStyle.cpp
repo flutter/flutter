@@ -20,24 +20,24 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 #include <algorithm>
-#include "core/css/resolver/StyleResolver.h"
-#include "core/rendering/RenderTheme.h"
-#include "core/rendering/style/AppliedTextDecoration.h"
-#include "core/rendering/style/DataEquivalency.h"
-#include "core/rendering/style/QuotesData.h"
-#include "core/rendering/style/ShadowList.h"
-#include "core/rendering/style/StyleImage.h"
-#include "core/rendering/style/StyleInheritedData.h"
-#include "platform/LengthFunctions.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/fonts/Font.h"
-#include "platform/fonts/FontSelector.h"
-#include "platform/geometry/FloatRoundedRect.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/rendering/RenderTheme.h"
+#include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
+#include "sky/engine/core/rendering/style/DataEquivalency.h"
+#include "sky/engine/core/rendering/style/QuotesData.h"
+#include "sky/engine/core/rendering/style/ShadowList.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/platform/LengthFunctions.h"
+#include "sky/engine/platform/fonts/Font.h"
+#include "sky/engine/platform/fonts/FontSelector.h"
+#include "sky/engine/platform/geometry/FloatRoundedRect.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

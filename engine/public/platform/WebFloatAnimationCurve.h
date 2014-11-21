@@ -25,10 +25,9 @@
 #ifndef WebFloatAnimationCurve_h
 #define WebFloatAnimationCurve_h
 
-#include "WebCompositorAnimationCurve.h"
-
-#include "WebCommon.h"
-#include "WebFloatKeyframe.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
+#include "sky/engine/public/platform/WebFloatKeyframe.h"
 
 namespace blink {
 

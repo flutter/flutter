@@ -31,9 +31,9 @@
 #ifndef FrameFetchContext_h
 #define FrameFetchContext_h
 
-#include "core/fetch/FetchContext.h"
-#include "platform/network/ResourceRequest.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/fetch/FetchContext.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

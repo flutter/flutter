@@ -27,8 +27,8 @@
 #define FilePrintStream_h
 
 #include <stdio.h>
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PrintStream.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PrintStream.h"
 
 namespace WTF {
 

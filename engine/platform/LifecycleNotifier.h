@@ -27,10 +27,10 @@
 #ifndef LifecycleNotifier_h
 #define LifecycleNotifier_h
 
-#include "platform/LifecycleObserver.h"
-#include "wtf/HashSet.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/platform/LifecycleObserver.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

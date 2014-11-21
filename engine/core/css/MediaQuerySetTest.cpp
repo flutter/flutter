@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/MediaQuery.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaQuery.h"
 
-#include "core/css/MediaList.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 #include <gtest/gtest.h>
 

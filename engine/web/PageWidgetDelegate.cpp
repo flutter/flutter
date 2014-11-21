@@ -28,21 +28,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/PageWidgetDelegate.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/PageWidgetDelegate.h"
 
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/AutoscrollController.h"
-#include "core/page/EventHandler.h"
-#include "core/page/Page.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/compositing/RenderLayerCompositor.h"
-#include "platform/Logging.h"
-#include "platform/graphics/GraphicsContext.h"
-#include "public/web/WebInputEvent.h"
-#include "web/WebInputEventConversion.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/page/AutoscrollController.h"
+#include "sky/engine/core/page/EventHandler.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/public/web/WebInputEvent.h"
+#include "sky/engine/web/WebInputEventConversion.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

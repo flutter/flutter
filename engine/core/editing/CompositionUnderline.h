@@ -26,7 +26,7 @@
 #ifndef CompositionUnderline_h
 #define CompositionUnderline_h
 
-#include "platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

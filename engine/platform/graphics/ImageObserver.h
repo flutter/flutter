@@ -26,7 +26,7 @@
 #ifndef ImageObserver_h
 #define ImageObserver_h
 
-#include "platform/PlatformExport.h"
+#include "sky/engine/platform/PlatformExport.h"
 
 namespace blink {
 

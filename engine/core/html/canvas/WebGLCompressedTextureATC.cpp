@@ -23,9 +23,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/WebGLCompressedTextureATC.h"
+#include "sky/engine/core/html/canvas/WebGLCompressedTextureATC.h"
 
 namespace blink {
 

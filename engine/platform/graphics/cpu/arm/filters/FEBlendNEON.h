@@ -27,7 +27,7 @@
 #ifndef FEBlendNEON_h
 #define FEBlendNEON_h
 
-#include "platform/graphics/filters/FEBlend.h"
+#include "sky/engine/platform/graphics/filters/FEBlend.h"
 
 #if HAVE(ARM_NEON_INTRINSICS)
 

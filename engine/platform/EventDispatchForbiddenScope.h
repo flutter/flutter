@@ -5,8 +5,8 @@
 #ifndef EventDispatchForbiddenScope_h
 #define EventDispatchForbiddenScope_h
 
-#include "wtf/MainThread.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

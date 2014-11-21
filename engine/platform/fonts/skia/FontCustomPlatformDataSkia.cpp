@@ -30,17 +30,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/fonts/FontCustomPlatformData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/fonts/FontCustomPlatformData.h"
 
-#include "platform/LayoutTestSupport.h"
-#include "platform/SharedBuffer.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontPlatformData.h"
-#include "platform/fonts/opentype/OpenTypeSanitizer.h"
+#include "sky/engine/platform/LayoutTestSupport.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeSanitizer.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
-#include "wtf/PassOwnPtr.h"
 
 namespace blink {
 

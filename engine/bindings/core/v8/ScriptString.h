@@ -31,10 +31,10 @@
 #ifndef ScriptString_h
 #define ScriptString_h
 
-#include "bindings/core/v8/SharedPersistent.h"
+#include "sky/engine/bindings/core/v8/SharedPersistent.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -23,7 +23,7 @@
 #define FontSize_h
 
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "platform/fonts/FixedPitchFontType.h"
+#include "sky/engine/platform/fonts/FixedPitchFontType.h"
 
 namespace blink {
 

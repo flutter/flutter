@@ -28,26 +28,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #if !OS(WIN) && !OS(ANDROID)
-#include "SkFontConfigInterface.h"
+#include "third_party/skia/include/ports/SkFontConfigInterface.h"
 #endif
-#include "SkFontMgr.h"
-#include "SkStream.h"
-#include "SkTypeface.h"
-#include "platform/NotImplemented.h"
-#include "platform/fonts/AlternateFontFamily.h"
-#include "platform/fonts/FontCache.h"
-#include "platform/fonts/FontDescription.h"
-#include "platform/fonts/FontFaceCreationParams.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "public/platform/Platform.h"
-#include "public/platform/linux/WebSandboxSupport.h"
-#include "wtf/Assertions.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/CString.h"
 #include <unicode/locid.h>
+#include "sky/engine/platform/NotImplemented.h"
+#include "sky/engine/platform/fonts/AlternateFontFamily.h"
+#include "sky/engine/platform/fonts/FontCache.h"
+#include "sky/engine/platform/fonts/FontDescription.h"
+#include "sky/engine/platform/fonts/FontFaceCreationParams.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "third_party/skia/include/core/SkStream.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/include/ports/SkFontMgr.h"
 
 #if !OS(WIN) && !OS(ANDROID)
 static SkStream* streamForFontconfigInterfaceId(int fontconfigInterfaceId)

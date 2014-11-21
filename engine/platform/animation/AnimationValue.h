@@ -27,12 +27,12 @@
 #ifndef AnimationValue_h
 #define AnimationValue_h
 
-#include "platform/animation/TimingFunction.h"
-#include "platform/graphics/filters/FilterOperations.h"
-#include "platform/transforms/TransformOperations.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/platform/transforms/TransformOperations.h"
 
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -24,12 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/text/UnicodeUtilities.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/UnicodeUtilities.h"
 
-#include "wtf/text/StringBuffer.h"
-#include "wtf/unicode/CharacterNames.h"
 #include <unicode/unorm.h>
+#include "sky/engine/wtf/text/StringBuffer.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace WTF::Unicode;
 

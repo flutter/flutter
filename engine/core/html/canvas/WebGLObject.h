@@ -26,9 +26,9 @@
 #ifndef WebGLObject_h
 #define WebGLObject_h
 
-#include "platform/graphics/GraphicsTypes3D.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 class WebGraphicsContext3D;

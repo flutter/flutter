@@ -31,10 +31,10 @@
 #ifndef WebFloatPoint_h
 #define WebFloatPoint_h
 
-#include "WebCommon.h"
+#include "sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 #else
 #include "ui/gfx/geometry/point_f.h"
 #endif

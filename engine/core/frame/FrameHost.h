@@ -31,11 +31,11 @@
 #ifndef FrameHost_h
 #define FrameHost_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

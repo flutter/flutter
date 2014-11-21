@@ -37,11 +37,11 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-decoders/jpeg/JPEGImageDecoder.h"
 
-#include "wtf/PassOwnPtr.h"
-#include "wtf/dtoa/utils.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/dtoa/utils.h"
 
 extern "C" {
 #include <stdio.h> // jpeglib.h needs stdio FILE.

@@ -26,8 +26,8 @@
 #ifndef SuffixTree_h
 #define SuffixTree_h
 
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

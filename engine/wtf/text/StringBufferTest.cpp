@@ -4,9 +4,9 @@
  * found in the LICENSE file.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/text/StringBuffer.h"
+#include "sky/engine/wtf/text/StringBuffer.h"
 
 #include <gtest/gtest.h>
 

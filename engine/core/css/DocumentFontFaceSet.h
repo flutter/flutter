@@ -26,8 +26,8 @@
 #ifndef DocumentFontFaceSet_h
 #define DocumentFontFaceSet_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

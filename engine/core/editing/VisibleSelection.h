@@ -26,9 +26,9 @@
 #ifndef VisibleSelection_h
 #define VisibleSelection_h
 
-#include "core/editing/SelectionType.h"
-#include "core/editing/TextGranularity.h"
-#include "core/editing/VisiblePosition.h"
+#include "sky/engine/core/editing/SelectionType.h"
+#include "sky/engine/core/editing/TextGranularity.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
 
 namespace blink {
 

@@ -28,8 +28,8 @@
 #ifndef InputStreamPreprocessor_h
 #define InputStreamPreprocessor_h
 
-#include "platform/text/SegmentedString.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/text/SegmentedString.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

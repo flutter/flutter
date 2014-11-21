@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSTestHelper.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSTestHelper.h"
 
-#include "core/css/CSSRuleList.h"
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/RuleSet.h"
-#include "core/css/StyleSheetContents.h"
-#include "core/dom/Document.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSRuleList.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/RuleSet.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 #include <gtest/gtest.h>
 

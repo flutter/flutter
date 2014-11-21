@@ -22,20 +22,20 @@
 #ifndef StyleResolver_h
 #define StyleResolver_h
 
-#include "core/css/RuleFeature.h"
-#include "core/css/RuleSet.h"
-#include "core/css/SelectorChecker.h"
-#include "core/css/resolver/MatchedPropertiesCache.h"
-#include "core/css/resolver/ScopedStyleResolver.h"
-#include "core/css/resolver/StyleBuilder.h"
-#include "core/css/resolver/StyleResourceLoader.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Deque.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/RuleFeature.h"
+#include "sky/engine/core/css/RuleSet.h"
+#include "sky/engine/core/css/SelectorChecker.h"
+#include "sky/engine/core/css/resolver/MatchedPropertiesCache.h"
+#include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
+#include "sky/engine/core/css/resolver/StyleBuilder.h"
+#include "sky/engine/core/css/resolver/StyleResourceLoader.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

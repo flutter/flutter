@@ -28,24 +28,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/CustomElementConstructorBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/CustomElementConstructorBuilder.h"
 
-#include "bindings/core/v8/CustomElementBinding.h"
-#include "bindings/core/v8/DOMWrapperWorld.h"
-#include "bindings/core/v8/Dictionary.h"
-#include "bindings/core/v8/ExceptionState.h"
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8Document.h"
-#include "bindings/core/v8/V8HiddenValue.h"
-#include "bindings/core/v8/V8PerContextData.h"
 #include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
-#include "core/dom/Document.h"
-#include "core/dom/custom/CustomElementDefinition.h"
-#include "core/dom/custom/CustomElementDescriptor.h"
-#include "core/dom/custom/CustomElementException.h"
-#include "core/dom/custom/CustomElementProcessingStack.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/bindings/core/v8/CustomElementBinding.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8HiddenValue.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/custom/CustomElementDefinition.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
+#include "sky/engine/core/dom/custom/CustomElementException.h"
+#include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

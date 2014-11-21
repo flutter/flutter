@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "PrintStream.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/PrintStream.h"
 
 #include <stdio.h>
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

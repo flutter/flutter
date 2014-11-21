@@ -23,15 +23,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/HTMLInterchange.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/HTMLInterchange.h"
 
-#include "core/dom/Text.h"
-#include "core/editing/htmlediting.h"
-#include "core/rendering/RenderObject.h"
-#include "core/rendering/RenderText.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

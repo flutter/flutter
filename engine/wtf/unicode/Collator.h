@@ -29,11 +29,11 @@
 #ifndef WTF_Collator_h
 #define WTF_Collator_h
 
-#include "wtf/FastAllocBase.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/WTFExport.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 struct UCollator;
 

@@ -24,10 +24,10 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/ElementDataCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/ElementDataCache.h"
 
-#include "core/dom/ElementData.h"
+#include "sky/engine/core/dom/ElementData.h"
 
 namespace blink {
 

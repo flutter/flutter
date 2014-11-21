@@ -28,10 +28,10 @@
 #ifndef FrameData_h
 #define FrameData_h
 
-#include "platform/graphics/ImageOrientation.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/RefPtr.h"
-#include "wtf/VectorTraits.h"
+#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/VectorTraits.h"
 
 namespace blink {
 

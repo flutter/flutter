@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/WebURLResponse.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebURLResponse.h"
 
-#include "platform/exported/WebURLResponsePrivate.h"
-#include "platform/network/ResourceLoadTiming.h"
-#include "platform/network/ResourceResponse.h"
-#include "public/platform/WebHTTPHeaderVisitor.h"
-#include "public/platform/WebHTTPLoadInfo.h"
-#include "public/platform/WebString.h"
-#include "public/platform/WebURL.h"
-#include "public/platform/WebURLLoadTiming.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/exported/WebURLResponsePrivate.h"
+#include "sky/engine/platform/network/ResourceLoadTiming.h"
+#include "sky/engine/platform/network/ResourceResponse.h"
+#include "sky/engine/public/platform/WebHTTPHeaderVisitor.h"
+#include "sky/engine/public/platform/WebHTTPLoadInfo.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/public/platform/WebURL.h"
+#include "sky/engine/public/platform/WebURLLoadTiming.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/PartitionAlloc.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
 
-#include "wtf/BitwiseOperations.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sky/engine/wtf/BitwiseOperations.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 #if OS(POSIX)
 #include <sys/mman.h>

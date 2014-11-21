@@ -22,15 +22,15 @@
  *
  */
 
-#include "config.h"
-#include "core/html/HTMLElement.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "gen/sky/core/HTMLNames.h"
 #include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
-#include "core/dom/Document.h"
-#include "core/dom/ElementTraversal.h"
-#include "core/dom/ExceptionCode.h"
+#include "gen/sky/core/HTMLNames.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
 
 namespace blink {
 

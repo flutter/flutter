@@ -24,25 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/rendering/FilterEffectRenderer.h"
+#include "sky/engine/core/rendering/FilterEffectRenderer.h"
 
-#include "core/frame/Settings.h"
-#include "core/page/Page.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "platform/FloatConversion.h"
-#include "platform/LengthFunctions.h"
-#include "platform/graphics/ColorSpace.h"
-#include "platform/graphics/UnacceleratedImageBufferSurface.h"
-#include "platform/graphics/filters/FEColorMatrix.h"
-#include "platform/graphics/filters/FEComponentTransfer.h"
-#include "platform/graphics/filters/FEDropShadow.h"
-#include "platform/graphics/filters/FEGaussianBlur.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "wtf/MathExtras.h"
 #include <algorithm>
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/platform/FloatConversion.h"
+#include "sky/engine/platform/LengthFunctions.h"
+#include "sky/engine/platform/graphics/ColorSpace.h"
+#include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
+#include "sky/engine/platform/graphics/filters/FEColorMatrix.h"
+#include "sky/engine/platform/graphics/filters/FEComponentTransfer.h"
+#include "sky/engine/platform/graphics/filters/FEDropShadow.h"
+#include "sky/engine/platform/graphics/filters/FEGaussianBlur.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

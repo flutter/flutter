@@ -22,9 +22,9 @@
 #ifndef LengthBox_h
 #define LengthBox_h
 
-#include "platform/Length.h"
-#include "platform/PlatformExport.h"
-#include "platform/text/TextDirection.h"
+#include "sky/engine/platform/Length.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

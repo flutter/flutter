@@ -31,10 +31,10 @@
 #ifndef Decimal_h
 #define Decimal_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Assertions.h"
-#include "wtf/text/WTFString.h"
 #include <stdint.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

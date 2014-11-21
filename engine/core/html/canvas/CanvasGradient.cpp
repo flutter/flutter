@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/canvas/CanvasGradient.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/canvas/CanvasGradient.h"
 
-#include "bindings/core/v8/ExceptionState.h"
-#include "core/dom/ExceptionCode.h"
-#include "core/html/canvas/CanvasPattern.h"
-#include "core/html/canvas/CanvasStyle.h"
+#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/core/html/canvas/CanvasPattern.h"
+#include "sky/engine/core/html/canvas/CanvasStyle.h"
 
 namespace blink {
 

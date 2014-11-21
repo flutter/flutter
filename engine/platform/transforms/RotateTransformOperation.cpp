@@ -19,13 +19,13 @@
  *
  */
 
-#include "config.h"
-#include "platform/transforms/RotateTransformOperation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/RotateTransformOperation.h"
 
-#include "platform/animation/AnimationUtilities.h"
-#include "platform/geometry/FloatPoint3D.h"
-#include "wtf/MathExtras.h"
 #include <algorithm>
+#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "sky/engine/platform/geometry/FloatPoint3D.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

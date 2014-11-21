@@ -21,10 +21,10 @@
 #ifndef AtomicString_h
 #define AtomicString_h
 
-#include "wtf/HashTableDeletedValueType.h"
-#include "wtf/WTFExport.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 
@@ -248,5 +248,5 @@ using WTF::nullAtom;
 using WTF::emptyAtom;
 using WTF::starAtom;
 
-#include "wtf/text/StringConcatenate.h"
+#include "sky/engine/wtf/text/StringConcatenate.h"
 #endif // AtomicString_h

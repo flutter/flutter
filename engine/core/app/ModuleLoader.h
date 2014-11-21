@@ -6,10 +6,10 @@
 #define SKY_ENGINE_CORE_APP_MODULE_LOADER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "platform/fetcher/MojoFetcher.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/fetcher/MojoFetcher.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 class Application;

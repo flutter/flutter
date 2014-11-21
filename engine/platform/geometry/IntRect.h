@@ -26,10 +26,10 @@
 #ifndef IntRect_h
 #define IntRect_h
 
-#include "platform/geometry/IntPoint.h"
-#include "wtf/FastAllocBase.h"
-#include "wtf/Vector.h"
-#include "wtf/VectorTraits.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/VectorTraits.h"
 
 struct SkRect;
 struct SkIRect;

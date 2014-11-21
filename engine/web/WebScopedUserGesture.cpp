@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebScopedUserGesture.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebScopedUserGesture.h"
 
-#include "platform/UserGestureIndicator.h"
-#include "public/web/WebUserGestureToken.h"
+#include "sky/engine/platform/UserGestureIndicator.h"
+#include "sky/engine/public/web/WebUserGestureToken.h"
 
 namespace blink {
 

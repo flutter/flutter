@@ -22,18 +22,18 @@
 #ifndef ChromeClient_h
 #define ChromeClient_h
 
-#include "core/dom/Document.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/loader/NavigationPolicy.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/page/FocusType.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/Cursor.h"
-#include "platform/HostWindow.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "wtf/Forward.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/loader/NavigationPolicy.h"
+#include "sky/engine/core/page/FocusType.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/Cursor.h"
+#include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

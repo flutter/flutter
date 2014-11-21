@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/AnimationNode.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationNode.h"
 
-#include "core/animation/AnimationNodeTiming.h"
-#include "core/animation/AnimationPlayer.h"
-#include "core/animation/TimingCalculations.h"
+#include "sky/engine/core/animation/AnimationNodeTiming.h"
+#include "sky/engine/core/animation/AnimationPlayer.h"
+#include "sky/engine/core/animation/TimingCalculations.h"
 
 namespace blink {
 

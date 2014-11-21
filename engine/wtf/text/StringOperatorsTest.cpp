@@ -23,14 +23,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #define WTF_STRINGTYPEADAPTER_COPIED_WTF_STRING() (++wtfStringCopyCount)
 
 static int wtfStringCopyCount;
 
-#include "wtf/text/WTFString.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

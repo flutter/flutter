@@ -27,12 +27,12 @@
  * RC4 is a registered trademark of RSA Laboratories.
  */
 
-#include "config.h"
-#include "wtf/CryptographicallyRandomNumber.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 
-#include "wtf/StdLibExtras.h"
-#include "wtf/Threading.h"
-#include "wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/Threading.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
 
 namespace WTF {
 

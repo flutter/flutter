@@ -36,10 +36,10 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-decoders/png/PNGImageDecoder.h"
 
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 #include "png.h"
 #if USE(QCMSLIB)

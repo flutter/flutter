@@ -5,8 +5,8 @@
 #ifndef PositionWithAffinity_h
 #define PositionWithAffinity_h
 
-#include "core/dom/Position.h"
-#include "core/editing/TextAffinity.h"
+#include "sky/engine/core/dom/Position.h"
+#include "sky/engine/core/editing/TextAffinity.h"
 
 namespace blink {
 

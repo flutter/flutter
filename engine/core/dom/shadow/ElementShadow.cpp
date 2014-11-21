@@ -24,17 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/shadow/ElementShadow.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
 
-#include "core/css/StyleSheetList.h"
-#include "core/dom/Document.h"
-#include "core/dom/ElementTraversal.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/shadow/ContentDistribution.h"
-#include "core/html/HTMLContentElement.h"
-#include "platform/EventDispatchForbiddenScope.h"
-#include "platform/ScriptForbiddenScope.h"
+#include "sky/engine/core/css/StyleSheetList.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/shadow/ContentDistribution.h"
+#include "sky/engine/core/html/HTMLContentElement.h"
+#include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
 
 namespace blink {
 

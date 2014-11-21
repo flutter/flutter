@@ -31,7 +31,7 @@
 #ifndef JPEGImageEncoder_h
 #define JPEGImageEncoder_h
 
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/Vector.h"
 
 class SkBitmap;
 

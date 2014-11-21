@@ -25,19 +25,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLTokenizer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLTokenizer.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/html/parser/AtomicHTMLToken.h"
-#include "core/html/parser/HTMLEntityParser.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/HTMLTreeBuilder.h"
-#include "core/html/parser/MarkupTokenizerInlines.h"
-#include "platform/NotImplemented.h"
-#include "wtf/ASCIICType.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/core/html/parser/AtomicHTMLToken.h"
+#include "sky/engine/core/html/parser/HTMLEntityParser.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/html/parser/HTMLTreeBuilder.h"
+#include "sky/engine/core/html/parser/MarkupTokenizerInlines.h"
+#include "sky/engine/platform/NotImplemented.h"
+#include "sky/engine/wtf/ASCIICType.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 // Please don't use DEFINE_STATIC_LOCAL in this file. The HTMLTokenizer is used
 // from multiple threads and DEFINE_STATIC_LOCAL isn't threadsafe.

@@ -31,12 +31,12 @@
 #ifndef ScriptValue_h
 #define ScriptValue_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/SharedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/SharedPersistent.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

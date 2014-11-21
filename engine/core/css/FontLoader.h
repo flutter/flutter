@@ -5,11 +5,11 @@
 #ifndef FontLoader_h
 #define FontLoader_h
 
-#include "core/fetch/ResourceLoader.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/Timer.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/fetch/ResourceLoader.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

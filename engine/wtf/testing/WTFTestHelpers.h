@@ -31,9 +31,9 @@
 #ifndef WTFTestHelpers_h
 #define WTFTestHelpers_h
 
-#include "wtf/testing/WTFUnitTestHelpersExport.h"
-#include "wtf/text/WTFString.h"
 #include <iosfwd> // NOLINT
+#include "sky/engine/wtf/text/WTFString.h"
+#include "wtf/testing/WTFUnitTestHelpersExport.h"
 
 namespace WTF {
 

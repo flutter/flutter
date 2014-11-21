@@ -19,13 +19,13 @@
  *
  */
 
-#include "config.h"
-#include "platform/text/TextBreakIteratorInternalICU.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
 
-#include "platform/Language.h"
-#include "wtf/StdLibExtras.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/Language.h"
+#include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -31,8 +31,8 @@
 #ifndef JSONParser_h
 #define JSONParser_h
 
-#include "wtf/PassRefPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

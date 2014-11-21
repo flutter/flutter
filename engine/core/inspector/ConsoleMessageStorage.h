@@ -5,10 +5,10 @@
 #ifndef ConsoleMessageStorage_h
 #define ConsoleMessageStorage_h
 
-#include "core/inspector/ConsoleMessage.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Deque.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/inspector/ConsoleMessage.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

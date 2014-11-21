@@ -27,9 +27,9 @@
 #ifndef NodeEventContext_h
 #define NodeEventContext_h
 
-#include "core/events/TreeScopeEventContext.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/events/TreeScopeEventContext.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

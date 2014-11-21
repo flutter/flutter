@@ -25,21 +25,21 @@
 #ifndef StyleRareNonInheritedData_h
 #define StyleRareNonInheritedData_h
 
-#include "core/css/StyleColor.h"
-#include "core/rendering/ClipPathOperation.h"
-#include "core/rendering/style/BasicShapes.h"
-#include "core/rendering/style/CounterDirectives.h"
-#include "core/rendering/style/CursorData.h"
-#include "core/rendering/style/DataRef.h"
-#include "core/rendering/style/FillLayer.h"
-#include "core/rendering/style/LineClampValue.h"
-#include "core/rendering/style/NinePieceImage.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "core/rendering/style/ShapeValue.h"
-#include "platform/LengthPoint.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/css/StyleColor.h"
+#include "sky/engine/core/rendering/ClipPathOperation.h"
+#include "sky/engine/core/rendering/style/BasicShapes.h"
+#include "sky/engine/core/rendering/style/CounterDirectives.h"
+#include "sky/engine/core/rendering/style/CursorData.h"
+#include "sky/engine/core/rendering/style/DataRef.h"
+#include "sky/engine/core/rendering/style/FillLayer.h"
+#include "sky/engine/core/rendering/style/LineClampValue.h"
+#include "sky/engine/core/rendering/style/NinePieceImage.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/rendering/style/ShapeValue.h"
+#include "sky/engine/platform/LengthPoint.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

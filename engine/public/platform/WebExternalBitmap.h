@@ -31,7 +31,7 @@
 #ifndef WebExternalBitmap_h
 #define WebExternalBitmap_h
 
-#include "WebSize.h"
+#include "sky/engine/public/platform/WebSize.h"
 
 namespace blink {
 

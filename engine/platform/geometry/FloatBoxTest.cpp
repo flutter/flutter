@@ -22,10 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/geometry/FloatBox.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/geometry/FloatBox.h"
 
-#include "platform/geometry/FloatBoxTestHelpers.h"
+#include "sky/engine/platform/geometry/FloatBoxTestHelpers.h"
 
 #include <gtest/gtest.h>
 

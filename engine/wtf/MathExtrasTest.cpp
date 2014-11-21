@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "wtf/MathExtras.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace {
 

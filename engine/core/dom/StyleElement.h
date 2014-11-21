@@ -21,8 +21,8 @@
 #ifndef StyleElement_h
 #define StyleElement_h
 
-#include "core/css/CSSStyleSheet.h"
-#include "wtf/text/TextPosition.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
 

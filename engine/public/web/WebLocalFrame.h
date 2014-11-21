@@ -5,7 +5,7 @@
 #ifndef WebLocalFrame_h
 #define WebLocalFrame_h
 
-#include "WebFrame.h"
+#include "sky/engine/public/web/WebFrame.h"
 
 namespace blink {
 

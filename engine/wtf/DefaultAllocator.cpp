@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/DefaultAllocator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/DefaultAllocator.h"
 
-#include "wtf/PartitionAlloc.h"
+#include "sky/engine/wtf/PartitionAlloc.h"
 
 namespace WTF {
 

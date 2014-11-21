@@ -26,22 +26,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/frame/Console.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/Console.h"
 
-#include "bindings/core/v8/ScriptCallStackFactory.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/frame/FrameConsole.h"
-#include "core/frame/FrameHost.h"
-#include "core/frame/LocalFrame.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/ScriptArguments.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "core/page/Chrome.h"
-#include "core/page/ChromeClient.h"
-#include "platform/TraceEvent.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/frame/FrameConsole.h"
+#include "sky/engine/core/frame/FrameHost.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/inspector/ScriptArguments.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

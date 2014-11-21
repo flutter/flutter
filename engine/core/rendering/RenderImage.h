@@ -25,8 +25,8 @@
 #ifndef RenderImage_h
 #define RenderImage_h
 
-#include "core/rendering/RenderImageResource.h"
-#include "core/rendering/RenderReplaced.h"
+#include "sky/engine/core/rendering/RenderImageResource.h"
+#include "sky/engine/core/rendering/RenderReplaced.h"
 
 namespace blink {
 

@@ -27,8 +27,8 @@
 #ifndef CompositionEvent_h
 #define CompositionEvent_h
 
-#include "core/editing/CompositionUnderline.h"
-#include "core/events/UIEvent.h"
+#include "sky/engine/core/editing/CompositionUnderline.h"
+#include "sky/engine/core/events/UIEvent.h"
 
 namespace blink {
 

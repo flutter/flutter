@@ -23,9 +23,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/EXTFragDepth.h"
+#include "sky/engine/core/html/canvas/EXTFragDepth.h"
 
 namespace blink {
 

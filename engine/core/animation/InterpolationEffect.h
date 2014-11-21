@@ -5,10 +5,10 @@
 #ifndef InterpolationEffect_h
 #define InterpolationEffect_h
 
-#include "core/animation/Interpolation.h"
-#include "platform/animation/TimingFunction.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/animation/Interpolation.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

@@ -29,16 +29,16 @@
 #ifndef GraphicsContextState_h
 #define GraphicsContextState_h
 
-#include "platform/graphics/DrawLooperBuilder.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/graphics/GraphicsTypes.h"
-#include "platform/graphics/Path.h"
-#include "platform/graphics/Pattern.h"
-#include "platform/graphics/StrokeData.h"
+#include "sky/engine/platform/graphics/DrawLooperBuilder.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "sky/engine/platform/graphics/Path.h"
+#include "sky/engine/platform/graphics/Pattern.h"
+#include "sky/engine/platform/graphics/StrokeData.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkPaint.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
 
 namespace blink {
 

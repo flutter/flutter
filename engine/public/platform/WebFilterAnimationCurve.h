@@ -31,10 +31,9 @@
 #ifndef WebFilterAnimationCurve_h
 #define WebFilterAnimationCurve_h
 
-#include "WebCompositorAnimationCurve.h"
-
-#include "WebCommon.h"
-#include "WebFilterKeyframe.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
+#include "sky/engine/public/platform/WebFilterKeyframe.h"
 
 namespace blink {
 

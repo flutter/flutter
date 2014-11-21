@@ -27,8 +27,8 @@
 #define PNGImageDecoder_h
 
 #include "platform/image-decoders/ImageDecoder.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

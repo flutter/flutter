@@ -27,11 +27,11 @@
 #define UseCounter_h
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "wtf/BitVector.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/BitVector.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

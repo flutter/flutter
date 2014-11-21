@@ -5,7 +5,7 @@
 #ifndef CompositingInputsUpdater_h
 #define CompositingInputsUpdater_h
 
-#include "core/rendering/RenderGeometryMap.h"
+#include "sky/engine/core/rendering/RenderGeometryMap.h"
 
 namespace blink {
 

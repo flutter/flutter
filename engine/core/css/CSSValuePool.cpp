@@ -23,12 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSValuePool.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSValuePool.h"
 
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/CSSValueList.h"
-#include "core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/css/CSSValueList.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

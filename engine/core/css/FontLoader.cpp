@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/FontLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/FontLoader.h"
 
-#include "core/css/CSSFontSelector.h"
-#include "core/fetch/FontResource.h"
-#include "core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/css/CSSFontSelector.h"
+#include "sky/engine/core/fetch/FontResource.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
 
 namespace blink {
 

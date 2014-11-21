@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/shadow/ContentDistribution.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/shadow/ContentDistribution.h"
 
-#include "core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
 
 namespace blink {
 

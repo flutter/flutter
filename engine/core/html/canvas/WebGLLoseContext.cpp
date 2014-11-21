@@ -23,11 +23,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/html/canvas/WebGLLoseContext.h"
+#include "sky/engine/core/html/canvas/WebGLLoseContext.h"
 
-#include "core/html/canvas/WebGLRenderingContextBase.h"
+#include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 
 namespace blink {
 

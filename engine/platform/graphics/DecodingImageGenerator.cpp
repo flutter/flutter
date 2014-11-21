@@ -23,14 +23,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/DecodingImageGenerator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/DecodingImageGenerator.h"
 
-#include "SkData.h"
-#include "SkImageInfo.h"
-#include "platform/SharedBuffer.h"
-#include "platform/TraceEvent.h"
-#include "platform/graphics/ImageFrameGenerator.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/graphics/ImageFrameGenerator.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 
 namespace blink {
 

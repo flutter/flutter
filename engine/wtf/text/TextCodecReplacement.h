@@ -5,8 +5,8 @@
 #ifndef TextCodecReplacement_h
 #define TextCodecReplacement_h
 
-#include "wtf/text/TextCodec.h"
-#include "wtf/text/TextCodecUTF8.h"
+#include "sky/engine/wtf/text/TextCodec.h"
+#include "sky/engine/wtf/text/TextCodecUTF8.h"
 
 namespace WTF {
 

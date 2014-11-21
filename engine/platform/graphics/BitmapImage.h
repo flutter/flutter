@@ -28,13 +28,13 @@
 #ifndef BitmapImage_h
 #define BitmapImage_h
 
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/Color.h"
-#include "platform/graphics/FrameData.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/ImageOrientation.h"
-#include "platform/graphics/ImageSource.h"
-#include "wtf/Forward.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/FrameData.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

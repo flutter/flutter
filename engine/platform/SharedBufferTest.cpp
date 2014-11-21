@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #include <algorithm>
 #include <cstdlib>
 
-#include "platform/SharedBuffer.h"
-#include "platform/TestingPlatformSupport.h"
-#include "public/platform/WebDiscardableMemory.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TestingPlatformSupport.h"
+#include "sky/engine/public/platform/WebDiscardableMemory.h"
 
-#include "wtf/ArrayBuffer.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
 #include <gtest/gtest.h>
+#include "sky/engine/wtf/ArrayBuffer.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 using namespace blink;
 

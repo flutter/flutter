@@ -27,11 +27,11 @@
 #ifndef ShadowRoot_h
 #define ShadowRoot_h
 
-#include "core/dom/ContainerNode.h"
-#include "core/dom/DocumentFragment.h"
-#include "core/dom/Element.h"
-#include "core/dom/TreeScope.h"
-#include "wtf/DoublyLinkedList.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/TreeScope.h"
+#include "sky/engine/wtf/DoublyLinkedList.h"
 
 namespace blink {
 

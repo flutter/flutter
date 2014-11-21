@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/UndoStack.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/UndoStack.h"
 
-#include "core/dom/ContainerNode.h"
-#include "core/editing/UndoStep.h"
-#include "platform/EventDispatchForbiddenScope.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/editing/UndoStep.h"
+#include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

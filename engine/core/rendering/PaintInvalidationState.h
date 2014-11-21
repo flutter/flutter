@@ -5,8 +5,8 @@
 #ifndef PaintInvalidationState_h
 #define PaintInvalidationState_h
 
-#include "platform/geometry/LayoutRect.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

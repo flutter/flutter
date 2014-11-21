@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/animatable/AnimatableFilterOperations.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/animatable/AnimatableFilterOperations.h"
 
 #include <algorithm>
 

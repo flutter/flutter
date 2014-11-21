@@ -33,9 +33,9 @@
 #ifndef AttributeCollection_h
 #define AttributeCollection_h
 
-#include "core/dom/Attr.h"
-#include "core/dom/Attribute.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Attr.h"
+#include "sky/engine/core/dom/Attribute.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

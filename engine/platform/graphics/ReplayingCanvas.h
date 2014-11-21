@@ -31,7 +31,7 @@
 #ifndef ReplayingCanvas_h
 #define ReplayingCanvas_h
 
-#include "platform/graphics/InterceptingCanvas.h"
+#include "sky/engine/platform/graphics/InterceptingCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {

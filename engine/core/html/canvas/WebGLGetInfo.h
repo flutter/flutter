@@ -27,19 +27,19 @@
 #ifndef WebGLGetInfo_h
 #define WebGLGetInfo_h
 
-#include "core/html/canvas/WebGLBuffer.h"
-#include "core/html/canvas/WebGLFramebuffer.h"
-#include "core/html/canvas/WebGLProgram.h"
-#include "core/html/canvas/WebGLRenderbuffer.h"
-#include "core/html/canvas/WebGLTexture.h"
-#include "core/html/canvas/WebGLVertexArrayObjectOES.h"
-#include "wtf/Float32Array.h"
-#include "wtf/Int32Array.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Uint32Array.h"
-#include "wtf/Uint8Array.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/html/canvas/WebGLBuffer.h"
+#include "sky/engine/core/html/canvas/WebGLFramebuffer.h"
+#include "sky/engine/core/html/canvas/WebGLProgram.h"
+#include "sky/engine/core/html/canvas/WebGLRenderbuffer.h"
+#include "sky/engine/core/html/canvas/WebGLTexture.h"
+#include "sky/engine/core/html/canvas/WebGLVertexArrayObjectOES.h"
+#include "sky/engine/wtf/Float32Array.h"
+#include "sky/engine/wtf/Int32Array.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Uint32Array.h"
+#include "sky/engine/wtf/Uint8Array.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/loader/UniqueIdentifier.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/loader/UniqueIdentifier.h"
 
 namespace blink {
 

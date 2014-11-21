@@ -31,8 +31,8 @@
 #ifndef ProfilingCanvas_h
 #define ProfilingCanvas_h
 
-#include "platform/graphics/InterceptingCanvas.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/graphics/InterceptingCanvas.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

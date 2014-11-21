@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "bindings/core/v8/ScriptPromiseResolver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptPromiseResolver.h"
 
-#include "bindings/core/v8/V8RecursionScope.h"
+#include "sky/engine/bindings/core/v8/V8RecursionScope.h"
 
 namespace blink {
 

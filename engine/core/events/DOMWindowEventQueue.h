@@ -27,11 +27,11 @@
 #ifndef DOMWindowEventQueue_h
 #define DOMWindowEventQueue_h
 
-#include "core/events/EventQueue.h"
-#include "wtf/HashSet.h"
-#include "wtf/ListHashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/core/events/EventQueue.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/ListHashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

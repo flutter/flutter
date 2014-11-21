@@ -28,13 +28,13 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "config.h"
-#include "bindings/core/v8/ScriptGCEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/ScriptGCEvent.h"
 
-#include "bindings/core/v8/V8Binding.h"
-#include "core/inspector/ScriptGCEventListener.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/inspector/ScriptGCEventListener.h"
 
-#include "wtf/CurrentTime.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

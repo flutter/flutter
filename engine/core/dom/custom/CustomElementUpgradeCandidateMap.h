@@ -31,12 +31,12 @@
 #ifndef CustomElementUpgradeCandidateMap_h
 #define CustomElementUpgradeCandidateMap_h
 
-#include "core/dom/custom/CustomElementDescriptor.h"
-#include "core/dom/custom/CustomElementDescriptorHash.h"
-#include "core/dom/custom/CustomElementObserver.h"
-#include "wtf/HashMap.h"
-#include "wtf/LinkedHashSet.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
+#include "sky/engine/core/dom/custom/CustomElementDescriptorHash.h"
+#include "sky/engine/core/dom/custom/CustomElementObserver.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/LinkedHashSet.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

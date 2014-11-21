@@ -25,11 +25,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/ImageSource.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
 
-#include "platform/graphics/DeferredImageDecoder.h"
 #include "platform/image-decoders/ImageDecoder.h"
+#include "sky/engine/platform/graphics/DeferredImageDecoder.h"
 
 namespace blink {
 

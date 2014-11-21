@@ -22,9 +22,9 @@
 #ifndef FilterOperationResolver_h
 #define FilterOperationResolver_h
 
-#include "core/css/resolver/StyleResolverState.h"
-#include "platform/graphics/filters/FilterOperations.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/css/resolver/StyleResolverState.h"
+#include "sky/engine/platform/graphics/filters/FilterOperations.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

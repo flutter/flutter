@@ -21,10 +21,10 @@
 #ifndef WTF_VectorTraits_h
 #define WTF_VectorTraits_h
 
-#include "wtf/OwnPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/TypeTraits.h"
 #include <utility>
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/TypeTraits.h"
 
 using std::pair;
 

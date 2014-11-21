@@ -26,7 +26,7 @@
 #ifndef WebGLContextObject_h
 #define WebGLContextObject_h
 
-#include "core/html/canvas/WebGLObject.h"
+#include "sky/engine/core/html/canvas/WebGLObject.h"
 
 namespace blink {
 class WebGraphicsContext3D;

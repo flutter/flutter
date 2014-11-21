@@ -5,9 +5,9 @@
 #ifndef PlatformEventController_h
 #define PlatformEventController_h
 
-#include "core/page/PageLifecycleObserver.h"
-#include "platform/Timer.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/page/PageLifecycleObserver.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

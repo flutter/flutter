@@ -27,10 +27,10 @@
 #ifndef FloatPoint_h
 #define FloatPoint_h
 
-#include "platform/geometry/FloatSize.h"
-#include "platform/geometry/IntPoint.h"
-#include "wtf/MathExtras.h"
 #include <algorithm>
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 struct SkPoint;
 

@@ -26,9 +26,9 @@
 #ifndef InputMethodController_h
 #define InputMethodController_h
 
-#include "core/editing/CompositionUnderline.h"
-#include "core/editing/PlainTextRange.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/editing/CompositionUnderline.h"
+#include "sky/engine/core/editing/PlainTextRange.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

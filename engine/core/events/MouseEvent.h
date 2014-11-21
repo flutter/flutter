@@ -24,9 +24,9 @@
 #ifndef MouseEvent_h
 #define MouseEvent_h
 
-#include "core/events/EventDispatchMediator.h"
-#include "core/events/MouseRelatedEvent.h"
-#include "platform/PlatformMouseEvent.h"
+#include "sky/engine/core/events/EventDispatchMediator.h"
+#include "sky/engine/core/events/MouseRelatedEvent.h"
+#include "sky/engine/platform/PlatformMouseEvent.h"
 
 namespace blink {
 

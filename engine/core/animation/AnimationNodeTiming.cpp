@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/AnimationNodeTiming.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/AnimationNodeTiming.h"
 
-#include "core/animation/Animation.h"
-#include "core/animation/AnimationNode.h"
-#include "platform/animation/TimingFunction.h"
+#include "sky/engine/core/animation/Animation.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
 
 namespace blink {
 

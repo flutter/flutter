@@ -23,24 +23,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLDocumentParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
 
 #include "base/bind.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "core/css/MediaValuesCached.h"
-#include "core/dom/Element.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLDocument.h"
-#include "core/html/HTMLScriptElement.h"
-#include "core/html/parser/AtomicHTMLToken.h"
-#include "core/html/parser/BackgroundHTMLParser.h"
-#include "core/html/parser/HTMLParserScheduler.h"
-#include "core/html/parser/HTMLParserThread.h"
-#include "core/html/parser/HTMLTreeBuilder.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "platform/SharedBuffer.h"
-#include "platform/TraceEvent.h"
+#include "sky/engine/core/css/MediaValuesCached.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLDocument.h"
+#include "sky/engine/core/html/HTMLScriptElement.h"
+#include "sky/engine/core/html/parser/AtomicHTMLToken.h"
+#include "sky/engine/core/html/parser/BackgroundHTMLParser.h"
+#include "sky/engine/core/html/parser/HTMLParserScheduler.h"
+#include "sky/engine/core/html/parser/HTMLParserThread.h"
+#include "sky/engine/core/html/parser/HTMLTreeBuilder.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 

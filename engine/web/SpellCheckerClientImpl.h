@@ -31,8 +31,8 @@
 #ifndef SpellCheckerClientImpl_h
 #define SpellCheckerClientImpl_h
 
-#include "core/page/SpellCheckerClient.h"
-#include "platform/text/TextCheckerClient.h"
+#include "sky/engine/core/page/SpellCheckerClient.h"
+#include "sky/engine/platform/text/TextCheckerClient.h"
 
 namespace blink {
 

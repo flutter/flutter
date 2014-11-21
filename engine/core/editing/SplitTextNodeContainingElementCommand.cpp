@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/SplitTextNodeContainingElementCommand.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/SplitTextNodeContainingElementCommand.h"
 
-#include "core/dom/Element.h"
-#include "core/dom/Text.h"
-#include "core/rendering/RenderObject.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/rendering/RenderObject.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

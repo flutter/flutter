@@ -26,16 +26,16 @@
 #ifndef Editor_h
 #define Editor_h
 
-#include "core/dom/DocumentMarker.h"
-#include "core/editing/EditAction.h"
-#include "core/editing/EditingBehavior.h"
-#include "core/editing/FindOptions.h"
-#include "core/editing/FrameSelection.h"
-#include "core/editing/TextIterator.h"
-#include "core/editing/VisibleSelection.h"
-#include "core/editing/WritingDirection.h"
-#include "core/frame/FrameDestructionObserver.h"
-#include "platform/heap/Handle.h"
+#include "sky/engine/core/dom/DocumentMarker.h"
+#include "sky/engine/core/editing/EditAction.h"
+#include "sky/engine/core/editing/EditingBehavior.h"
+#include "sky/engine/core/editing/FindOptions.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/editing/TextIterator.h"
+#include "sky/engine/core/editing/VisibleSelection.h"
+#include "sky/engine/core/editing/WritingDirection.h"
+#include "sky/engine/core/frame/FrameDestructionObserver.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

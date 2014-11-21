@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/shadow/InsertionPoint.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/shadow/InsertionPoint.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/ElementTraversal.h"
-#include "core/dom/QualifiedName.h"
-#include "core/dom/StaticNodeList.h"
-#include "core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/StaticNodeList.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
 
 namespace blink {
 

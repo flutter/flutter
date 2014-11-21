@@ -26,18 +26,18 @@
 #ifndef ImageFrameGenerator_h
 #define ImageFrameGenerator_h
 
-#include "SkBitmap.h"
-#include "SkSize.h"
-#include "SkTypes.h"
-#include "platform/PlatformExport.h"
-#include "platform/graphics/ThreadSafeDataTransport.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
-#include "wtf/ThreadingPrimitives.h"
-#include "wtf/ThreadSafeRefCounted.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/ThreadSafeDataTransport.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
+#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "sky/engine/wtf/Vector.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkTypes.h"
 
 namespace blink {
 

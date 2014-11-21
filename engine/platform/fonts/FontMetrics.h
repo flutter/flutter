@@ -20,8 +20,8 @@
 #ifndef FontMetrics_h
 #define FontMetrics_h
 
-#include "platform/fonts/FontBaseline.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/fonts/FontBaseline.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

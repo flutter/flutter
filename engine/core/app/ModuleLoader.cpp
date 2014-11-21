@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/app/ModuleLoader.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/app/ModuleLoader.h"
 
 #include "base/bind.h"
-#include "core/app/Application.h"
-#include "core/app/Module.h"
-#include "core/dom/Document.h"
-#include "core/dom/DocumentParser.h"
-#include "core/html/HTMLDocument.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/app/Application.h"
+#include "sky/engine/core/app/Module.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentParser.h"
+#include "sky/engine/core/html/HTMLDocument.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

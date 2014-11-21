@@ -17,11 +17,11 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/PathTraversalState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/PathTraversalState.h"
 
-#include "wtf/MathExtras.h"
-#include "wtf/Vector.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

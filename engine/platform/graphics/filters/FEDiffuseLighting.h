@@ -23,7 +23,7 @@
 #ifndef FEDiffuseLighting_h
 #define FEDiffuseLighting_h
 
-#include "platform/graphics/filters/FELighting.h"
+#include "sky/engine/platform/graphics/filters/FELighting.h"
 
 namespace blink {
 

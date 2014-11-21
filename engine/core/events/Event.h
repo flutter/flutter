@@ -24,12 +24,12 @@
 #ifndef Event_h
 #define Event_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/dom/DOMTimeStamp.h"
-#include "core/events/EventPath.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/dom/DOMTimeStamp.h"
+#include "sky/engine/core/events/EventPath.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

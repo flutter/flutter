@@ -20,11 +20,11 @@
 #ifndef SegmentedString_h
 #define SegmentedString_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Deque.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/TextPosition.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Deque.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/TextPosition.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

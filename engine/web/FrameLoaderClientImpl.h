@@ -32,10 +32,10 @@
 #ifndef FrameLoaderClientImpl_h
 #define FrameLoaderClientImpl_h
 
-#include "core/loader/FrameLoaderClient.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

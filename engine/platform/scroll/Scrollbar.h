@@ -26,12 +26,12 @@
 #ifndef Scrollbar_h
 #define Scrollbar_h
 
-#include "platform/Timer.h"
-#include "platform/Widget.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "platform/scroll/Scrollbar.h"
-#include "wtf/MathExtras.h"
-#include "wtf/PassRefPtr.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/Widget.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

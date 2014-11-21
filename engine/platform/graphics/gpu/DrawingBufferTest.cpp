@@ -28,18 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/gpu/DrawingBuffer.h"
+#include "sky/engine/platform/graphics/gpu/DrawingBuffer.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/UnacceleratedImageBufferSurface.h"
-#include "platform/graphics/gpu/Extensions3DUtil.h"
-#include "platform/graphics/test/MockWebGraphicsContext3D.h"
-#include "public/platform/Platform.h"
-#include "public/platform/WebExternalTextureMailbox.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
+#include "sky/engine/platform/graphics/gpu/Extensions3DUtil.h"
+#include "sky/engine/platform/graphics/test/MockWebGraphicsContext3D.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebExternalTextureMailbox.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

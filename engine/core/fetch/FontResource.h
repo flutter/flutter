@@ -26,12 +26,12 @@
 #ifndef FontResource_h
 #define FontResource_h
 
-#include "core/fetch/ResourceClient.h"
-#include "core/fetch/ResourcePtr.h"
-#include "platform/Timer.h"
-#include "platform/fonts/FontOrientation.h"
-#include "platform/fonts/FontWidthVariant.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/core/fetch/ResourceClient.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/fonts/FontOrientation.h"
+#include "sky/engine/platform/fonts/FontWidthVariant.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

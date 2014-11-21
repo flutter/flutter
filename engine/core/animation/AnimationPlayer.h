@@ -31,10 +31,10 @@
 #ifndef AnimationPlayer_h
 #define AnimationPlayer_h
 
-#include "core/animation/AnimationNode.h"
-#include "core/dom/ActiveDOMObject.h"
-#include "core/events/EventTarget.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

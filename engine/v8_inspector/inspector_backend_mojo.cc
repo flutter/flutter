@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "v8_inspector/inspector_backend_mojo.h"
+#include "sky/engine/v8_inspector/inspector_backend_mojo.h"
 
 #include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"

@@ -2,11 +2,11 @@
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/css/MediaValues.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/MediaValues.h"
 
-#include "core/css/CSSPrimitiveValue.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 #include <gtest/gtest.h>
 

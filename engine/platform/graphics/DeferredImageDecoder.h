@@ -26,16 +26,16 @@
 #ifndef DeferredImageDecoder_h
 #define DeferredImageDecoder_h
 
-#include "SkBitmap.h"
-#include "SkPixelRef.h"
-#include "platform/PlatformExport.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/ImageFrameGenerator.h"
-#include "platform/graphics/ImageSource.h"
 #include "platform/image-decoders/ImageDecoder.h"
-#include "wtf/Forward.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/ImageFrameGenerator.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkPixelRef.h"
 
 namespace blink {
 

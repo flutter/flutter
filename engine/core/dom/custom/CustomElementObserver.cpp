@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/custom/CustomElementObserver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/custom/CustomElementObserver.h"
 
-#include "core/dom/Element.h"
+#include "sky/engine/core/dom/Element.h"
 
 namespace blink {
 

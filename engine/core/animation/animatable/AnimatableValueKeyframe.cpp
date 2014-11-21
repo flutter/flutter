@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/animation/animatable/AnimatableValueKeyframe.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/animatable/AnimatableValueKeyframe.h"
 
-#include "core/animation/LegacyStyleInterpolation.h"
+#include "sky/engine/core/animation/LegacyStyleInterpolation.h"
 
 namespace blink {
 

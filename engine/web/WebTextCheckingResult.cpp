@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebTextCheckingResult.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebTextCheckingResult.h"
 
-#include "platform/text/TextCheckerClient.h"
+#include "sky/engine/platform/text/TextCheckerClient.h"
 
 namespace blink {
 

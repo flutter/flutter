@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebScriptController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebScriptController.h"
 
-#include "bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings/core/v8/ScriptController.h"
 
 namespace blink {
 

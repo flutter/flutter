@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/animation/EffectInput.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/animation/EffectInput.h"
 
-#include "bindings/core/v8/Dictionary.h"
-#include "core/animation/AnimationHelpers.h"
-#include "core/animation/KeyframeEffectModel.h"
-#include "core/animation/StringKeyframe.h"
-#include "core/css/parser/BisonCSSParser.h"
-#include "core/css/resolver/CSSToStyleMap.h"
-#include "core/css/resolver/StyleResolver.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "wtf/NonCopyingSort.h"
+#include "sky/engine/bindings/core/v8/Dictionary.h"
+#include "sky/engine/core/animation/AnimationHelpers.h"
+#include "sky/engine/core/animation/KeyframeEffectModel.h"
+#include "sky/engine/core/animation/StringKeyframe.h"
+#include "sky/engine/core/css/parser/BisonCSSParser.h"
+#include "sky/engine/core/css/resolver/CSSToStyleMap.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/wtf/NonCopyingSort.h"
 
 namespace blink {
 

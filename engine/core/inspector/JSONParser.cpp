@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/inspector/JSONParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/JSONParser.h"
 
-#include "platform/JSONValues.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

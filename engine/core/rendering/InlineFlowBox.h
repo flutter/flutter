@@ -21,10 +21,10 @@
 #ifndef InlineFlowBox_h
 #define InlineFlowBox_h
 
-#include "core/rendering/InlineBox.h"
-#include "core/rendering/RenderObjectInlines.h"
-#include "core/rendering/RenderOverflow.h"
-#include "core/rendering/style/ShadowData.h"
+#include "sky/engine/core/rendering/InlineBox.h"
+#include "sky/engine/core/rendering/RenderObjectInlines.h"
+#include "sky/engine/core/rendering/RenderOverflow.h"
+#include "sky/engine/core/rendering/style/ShadowData.h"
 
 namespace blink {
 

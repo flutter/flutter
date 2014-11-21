@@ -27,8 +27,8 @@
 #ifndef DOMURLUtils_h
 #define DOMURLUtils_h
 
-#include "core/dom/DOMURLUtilsReadOnly.h"
-#include "wtf/Forward.h"
+#include "sky/engine/core/dom/DOMURLUtilsReadOnly.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace blink {
 

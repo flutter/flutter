@@ -28,16 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/CustomElementWrapper.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/CustomElementWrapper.h"
 
-#include "bindings/core/v8/DOMDataStore.h"
-#include "bindings/core/v8/DOMWrapperWorld.h"
 #include "bindings/core/v8/V8HTMLElement.h"
-#include "bindings/core/v8/V8PerContextData.h"
 #include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
-#include "core/dom/custom/CustomElement.h"
-#include "core/html/HTMLElement.h"
+#include "sky/engine/bindings/core/v8/DOMDataStore.h"
+#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/core/dom/custom/CustomElement.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 

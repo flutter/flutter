@@ -19,7 +19,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "gen/sky/core/StylePropertyShorthand.h"
 
 namespace blink {

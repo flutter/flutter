@@ -5,15 +5,15 @@
 #ifndef ScriptPromiseResolver_h
 #define ScriptPromiseResolver_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "bindings/core/v8/ScriptPromise.h"
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "core/dom/ActiveDOMObject.h"
-#include "core/dom/ExecutionContext.h"
-#include "platform/Timer.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/bindings/core/v8/ScriptPromise.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/core/dom/ActiveDOMObject.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "v8/include/v8.h"
-#include "wtf/RefCounted.h"
 
 namespace blink {
 

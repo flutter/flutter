@@ -19,21 +19,21 @@
  *
 */
 
-#include "config.h"
-#include "core/rendering/HitTestResult.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/HitTestResult.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/dom/DocumentMarkerController.h"
-#include "core/dom/NodeRenderingTraversal.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/editing/FrameSelection.h"
-#include "core/fetch/ImageResource.h"
-#include "core/frame/LocalFrame.h"
-#include "core/html/HTMLAnchorElement.h"
-#include "core/html/HTMLImageElement.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/rendering/RenderImage.h"
-#include "platform/scroll/Scrollbar.h"
+#include "sky/engine/core/dom/DocumentMarkerController.h"
+#include "sky/engine/core/dom/NodeRenderingTraversal.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLAnchorElement.h"
+#include "sky/engine/core/html/HTMLImageElement.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/rendering/RenderImage.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
 
 namespace blink {
 

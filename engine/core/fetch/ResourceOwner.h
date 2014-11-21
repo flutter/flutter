@@ -31,7 +31,7 @@
 #ifndef ResourceOwner_h
 #define ResourceOwner_h
 
-#include "core/fetch/ResourcePtr.h"
+#include "sky/engine/core/fetch/ResourcePtr.h"
 
 namespace blink {
 

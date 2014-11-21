@@ -28,8 +28,8 @@
 #ifndef MediaQueryEvaluator_h
 #define MediaQueryEvaluator_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class LocalFrame;

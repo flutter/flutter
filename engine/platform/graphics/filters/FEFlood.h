@@ -23,9 +23,9 @@
 #ifndef FEFlood_h
 #define FEFlood_h
 
-#include "platform/graphics/Color.h"
-#include "platform/graphics/filters/Filter.h"
-#include "platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
 
 namespace blink {
 

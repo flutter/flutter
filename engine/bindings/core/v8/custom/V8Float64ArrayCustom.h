@@ -31,8 +31,8 @@
 #ifndef V8Float64ArrayCustom_h
 #define V8Float64ArrayCustom_h
 
-#include "bindings/core/v8/custom/V8TypedArrayCustom.h"
-#include "wtf/Float64Array.h"
+#include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
+#include "sky/engine/wtf/Float64Array.h"
 
 namespace blink {
 

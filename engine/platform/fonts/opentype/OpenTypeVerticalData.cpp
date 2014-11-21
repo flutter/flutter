@@ -22,16 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #if ENABLE(OPENTYPE_VERTICAL)
-#include "platform/fonts/opentype/OpenTypeVerticalData.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
 
-#include "platform/SharedBuffer.h"
-#include "platform/fonts/SimpleFontData.h"
-#include "platform/fonts/GlyphPage.h"
-#include "platform/fonts/opentype/OpenTypeTypes.h"
-#include "platform/geometry/FloatRect.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/fonts/GlyphPage.h"
+#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "sky/engine/platform/fonts/opentype/OpenTypeTypes.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 namespace OpenType {

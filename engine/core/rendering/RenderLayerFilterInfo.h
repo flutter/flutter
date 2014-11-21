@@ -30,12 +30,12 @@
 #ifndef RenderLayerFilterInfo_h
 #define RenderLayerFilterInfo_h
 
-#include "core/dom/Element.h"
-#include "platform/geometry/LayoutRect.h"
-#include "platform/graphics/filters/FilterOperation.h"
-#include "wtf/HashMap.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "sky/engine/platform/graphics/filters/FilterOperation.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

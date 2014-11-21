@@ -24,15 +24,15 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 
-#include "core/css/CSSToLengthConversionData.h"
-#include "core/css/resolver/CSSToStyleMap.h"
-#include "core/css/resolver/ElementResolveContext.h"
-#include "core/css/resolver/ElementStyleResources.h"
-#include "core/css/resolver/FontBuilder.h"
-#include "core/dom/Document.h"
-#include "core/dom/Element.h"
-#include "core/rendering/style/RenderStyle.h"
-#include "core/rendering/style/StyleInheritedData.h"
+#include "sky/engine/core/css/CSSToLengthConversionData.h"
+#include "sky/engine/core/css/resolver/CSSToStyleMap.h"
+#include "sky/engine/core/css/resolver/ElementResolveContext.h"
+#include "sky/engine/core/css/resolver/ElementStyleResources.h"
+#include "sky/engine/core/css/resolver/FontBuilder.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/rendering/style/StyleInheritedData.h"
 
 namespace blink {
 

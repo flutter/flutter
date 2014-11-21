@@ -5,12 +5,12 @@
 #ifndef Extensions3DUtil_h
 #define Extensions3DUtil_h
 
-#include "platform/PlatformExport.h"
-#include "platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/khronos/GLES2/gl2.h"
 #include "third_party/khronos/GLES2/gl2ext.h"
-#include "wtf/HashSet.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

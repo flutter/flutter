@@ -20,9 +20,9 @@
 #ifndef IntSizeHash_h
 #define IntSizeHash_h
 
-#include "platform/geometry/IntSize.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashSet.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace WTF {
 

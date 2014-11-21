@@ -26,11 +26,11 @@
 #ifndef CrossfadeGeneratedImage_h
 #define CrossfadeGeneratedImage_h
 
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/GeneratedImage.h"
-#include "platform/graphics/Image.h"
-#include "platform/graphics/ImageObserver.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/GeneratedImage.h"
+#include "sky/engine/platform/graphics/Image.h"
+#include "sky/engine/platform/graphics/ImageObserver.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

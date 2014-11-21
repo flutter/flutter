@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/inspector/InspectorNodeIds.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/inspector/InspectorNodeIds.h"
 
 #if ENABLE(OILPAN)
-#include "core/dom/Node.h"
+#include "sky/engine/core/dom/Node.h"
 #else
-#include "core/dom/WeakNodeMap.h"
+#include "sky/engine/core/dom/WeakNodeMap.h"
 #endif
-#include "platform/heap/Handle.h"
+#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

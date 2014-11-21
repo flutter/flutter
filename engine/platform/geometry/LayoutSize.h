@@ -31,9 +31,9 @@
 #ifndef LayoutSize_h
 #define LayoutSize_h
 
-#include "platform/LayoutUnit.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/geometry/IntSize.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/geometry/IntSize.h"
 
 namespace blink {
 

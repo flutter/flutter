@@ -26,10 +26,10 @@
 #ifndef HTMLToken_h
 #define HTMLToken_h
 
-#include "core/dom/Attribute.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/dom/Attribute.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

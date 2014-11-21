@@ -33,7 +33,7 @@
 
 #include "../platform/WebString.h"
 #include "../platform/WebVector.h"
-#include "WebTextCheckingType.h"
+#include "sky/engine/public/web/WebTextCheckingType.h"
 
 namespace blink {
 

@@ -31,7 +31,7 @@
 #ifndef MockImageResourceClient_h
 #define MockImageResourceClient_h
 
-#include "core/fetch/ImageResourceClient.h"
+#include "sky/engine/core/fetch/ImageResourceClient.h"
 
 #include <gtest/gtest.h>
 

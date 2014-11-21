@@ -31,8 +31,8 @@
 #ifndef Canvas2DImageBufferSurface_h
 #define Canvas2DImageBufferSurface_h
 
-#include "platform/graphics/Canvas2DLayerBridge.h"
-#include "platform/graphics/ImageBufferSurface.h"
+#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
+#include "sky/engine/platform/graphics/ImageBufferSurface.h"
 
 namespace blink {
 

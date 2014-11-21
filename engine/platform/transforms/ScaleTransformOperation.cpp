@@ -19,10 +19,10 @@
  *
  */
 
-#include "config.h"
-#include "platform/transforms/ScaleTransformOperation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/ScaleTransformOperation.h"
 
-#include "platform/animation/AnimationUtilities.h"
+#include "sky/engine/platform/animation/AnimationUtilities.h"
 
 namespace blink {
 

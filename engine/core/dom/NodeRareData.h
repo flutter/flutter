@@ -22,12 +22,12 @@
 #ifndef NodeRareData_h
 #define NodeRareData_h
 
-#include "core/dom/Element.h"
-#include "core/dom/MutationObserverRegistration.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/MutationObserverRegistration.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

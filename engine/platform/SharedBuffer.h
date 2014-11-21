@@ -27,14 +27,14 @@
 #ifndef SharedBuffer_h
 #define SharedBuffer_h
 
-#include "platform/PlatformExport.h"
-#include "platform/PurgeableVector.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/PurgeableVector.h"
+#include "sky/engine/wtf/ArrayBuffer.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkData.h"
-#include "wtf/ArrayBuffer.h"
-#include "wtf/Forward.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

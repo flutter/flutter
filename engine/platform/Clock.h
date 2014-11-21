@@ -26,9 +26,9 @@
 #ifndef Clock_h
 #define Clock_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

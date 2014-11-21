@@ -19,17 +19,17 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "platform/graphics/filters/FETile.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/filters/FETile.h"
 
-#include "SkTileImageFilter.h"
+#include "third_party/skia/include/effects/SkTileImageFilter.h"
 
-#include "platform/graphics/GraphicsContext.h"
-#include "platform/graphics/Pattern.h"
-#include "platform/graphics/UnacceleratedImageBufferSurface.h"
-#include "platform/graphics/filters/SkiaImageFilterBuilder.h"
-#include "platform/text/TextStream.h"
-#include "platform/transforms/AffineTransform.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/graphics/Pattern.h"
+#include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
+#include "sky/engine/platform/graphics/filters/SkiaImageFilterBuilder.h"
+#include "sky/engine/platform/text/TextStream.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
 #include "third_party/skia/include/core/SkDevice.h"
 
 namespace blink {

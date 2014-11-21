@@ -30,10 +30,10 @@
 #ifndef DecodeEscapeSequences_h
 #define DecodeEscapeSequences_h
 
-#include "wtf/ASCIICType.h"
-#include "wtf/Assertions.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/ASCIICType.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 
 namespace blink {
 

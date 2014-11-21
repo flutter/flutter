@@ -31,8 +31,8 @@
 #ifndef CustomElementException_h
 #define CustomElementException_h
 
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

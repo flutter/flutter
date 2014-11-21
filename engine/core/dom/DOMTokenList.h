@@ -25,10 +25,10 @@
 #ifndef DOMTokenList_h
 #define DOMTokenList_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Vector.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

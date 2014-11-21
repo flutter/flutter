@@ -24,10 +24,10 @@
  */
 
 
-#include "config.h"
-#include "core/page/PageLifecycleObserver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/page/PageLifecycleObserver.h"
 
-#include "core/page/Page.h"
+#include "sky/engine/core/page/Page.h"
 
 namespace blink {
 

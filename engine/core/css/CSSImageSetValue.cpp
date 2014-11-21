@@ -23,19 +23,19 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/CSSImageSetValue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/CSSImageSetValue.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"
-#include "core/css/CSSImageValue.h"
-#include "core/css/CSSPrimitiveValue.h"
-#include "core/dom/Document.h"
-#include "core/fetch/FetchRequest.h"
-#include "core/fetch/ImageResource.h"
-#include "core/fetch/ResourceFetcher.h"
-#include "core/rendering/style/StyleFetchedImageSet.h"
-#include "core/rendering/style/StylePendingImage.h"
-#include "wtf/text/StringBuilder.h"
+#include "sky/engine/core/css/CSSImageValue.h"
+#include "sky/engine/core/css/CSSPrimitiveValue.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/core/fetch/ImageResource.h"
+#include "sky/engine/core/fetch/ResourceFetcher.h"
+#include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
+#include "sky/engine/core/rendering/style/StylePendingImage.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 

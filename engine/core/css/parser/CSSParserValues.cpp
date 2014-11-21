@@ -18,12 +18,12 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/css/parser/CSSParserValues.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/parser/CSSParserValues.h"
 
-#include "core/css/CSSFunctionValue.h"
-#include "core/css/CSSSelectorList.h"
-#include "core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/css/CSSFunctionValue.h"
+#include "sky/engine/core/css/CSSSelectorList.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 
 namespace blink {
 

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "core/dom/IncrementLoadEventDelayCount.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/IncrementLoadEventDelayCount.h"
 
-#include "core/dom/Document.h"
+#include "sky/engine/core/dom/Document.h"
 
 namespace blink {
 

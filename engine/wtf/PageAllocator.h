@@ -31,10 +31,10 @@
 #ifndef WTF_PageAllocator_h
 #define WTF_PageAllocator_h
 
-#include "wtf/Assertions.h"
-#include "wtf/CPU.h"
-#include "wtf/WTFExport.h"
 #include <stdint.h>
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

@@ -35,10 +35,10 @@
 #include "../platform/WebCommon.h"
 #include "../platform/WebRect.h"
 #include "../platform/WebSize.h"
-#include "WebBeginFrameArgs.h"
-#include "WebCompositionUnderline.h"
-#include "WebTextDirection.h"
-#include "WebTextInputInfo.h"
+#include "sky/engine/public/web/WebBeginFrameArgs.h"
+#include "sky/engine/public/web/WebCompositionUnderline.h"
+#include "sky/engine/public/web/WebTextDirection.h"
+#include "sky/engine/public/web/WebTextInputInfo.h"
 
 namespace blink {
 

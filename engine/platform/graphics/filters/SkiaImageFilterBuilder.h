@@ -26,10 +26,10 @@
 #ifndef SkiaImageFilterBuilder_h
 #define SkiaImageFilterBuilder_h
 
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatSize.h"
-#include "platform/graphics/ColorSpace.h"
-#include "public/platform/WebFilterOperations.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatSize.h"
+#include "sky/engine/platform/graphics/ColorSpace.h"
+#include "sky/engine/public/platform/WebFilterOperations.h"
 
 class SkImageFilter;
 

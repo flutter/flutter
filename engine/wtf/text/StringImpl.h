@@ -24,13 +24,13 @@
 #define StringImpl_h
 
 #include <limits.h>
-#include "wtf/ASCIICType.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/StringHasher.h"
-#include "wtf/Vector.h"
-#include "wtf/WTFExport.h"
-#include "wtf/unicode/Unicode.h"
+#include "sky/engine/wtf/ASCIICType.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/StringHasher.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/WTFExport.h"
+#include "sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

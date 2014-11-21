@@ -5,7 +5,7 @@
 #ifndef DocumentAnimation_h
 #define DocumentAnimation_h
 
-#include "core/dom/Document.h"
+#include "sky/engine/core/dom/Document.h"
 
 namespace blink {
 

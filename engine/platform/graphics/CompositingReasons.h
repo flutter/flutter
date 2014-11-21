@@ -5,9 +5,9 @@
 #ifndef CompositingReasons_h
 #define CompositingReasons_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/MathExtras.h"
 #include <stdint.h>
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

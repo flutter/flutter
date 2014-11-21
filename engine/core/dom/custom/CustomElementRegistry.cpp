@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/custom/CustomElementRegistry.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/custom/CustomElementRegistry.h"
 
-#include "bindings/core/v8/CustomElementConstructorBuilder.h"
-#include "core/dom/DocumentLifecycleObserver.h"
-#include "core/dom/custom/CustomElementException.h"
-#include "core/dom/custom/CustomElementRegistrationContext.h"
+#include "sky/engine/bindings/core/v8/CustomElementConstructorBuilder.h"
+#include "sky/engine/core/dom/DocumentLifecycleObserver.h"
+#include "sky/engine/core/dom/custom/CustomElementException.h"
+#include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
 
 namespace blink {
 

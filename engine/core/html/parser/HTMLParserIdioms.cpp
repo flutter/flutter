@@ -22,16 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 
-#include "gen/sky/core/HTMLNames.h"
 #include <limits>
-#include "wtf/MathExtras.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/StringBuilder.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/TextEncoding.h"
+#include "gen/sky/core/HTMLNames.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/TextEncoding.h"
 
 namespace blink {
 

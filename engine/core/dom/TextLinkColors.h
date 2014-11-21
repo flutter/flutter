@@ -28,8 +28,8 @@
 #ifndef TextLinkColors_h
 #define TextLinkColors_h
 
-#include "platform/graphics/Color.h"
-#include "wtf/Noncopyable.h"
+#include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

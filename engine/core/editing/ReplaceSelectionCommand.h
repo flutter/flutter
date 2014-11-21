@@ -26,8 +26,8 @@
 #ifndef ReplaceSelectionCommand_h
 #define ReplaceSelectionCommand_h
 
-#include "core/dom/NodeTraversal.h"
-#include "core/editing/CompositeEditCommand.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
 
 namespace blink {
 

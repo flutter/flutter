@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/compositing/GraphicsLayerTreeBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/compositing/GraphicsLayerTreeBuilder.h"
 
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "core/rendering/compositing/CompositedLayerMapping.h"
-#include "core/rendering/compositing/RenderLayerCompositor.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
+#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 
 namespace blink {
 

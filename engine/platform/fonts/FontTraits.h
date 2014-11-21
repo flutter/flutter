@@ -27,7 +27,7 @@
 #ifndef FontTraits_h
 #define FontTraits_h
 
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

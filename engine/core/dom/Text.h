@@ -23,7 +23,7 @@
 #ifndef Text_h
 #define Text_h
 
-#include "core/dom/CharacterData.h"
+#include "sky/engine/core/dom/CharacterData.h"
 
 namespace blink {
 

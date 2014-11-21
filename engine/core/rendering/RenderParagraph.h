@@ -5,8 +5,8 @@
 #ifndef RenderParagraph_h
 #define RenderParagraph_h
 
-#include "core/dom/ContainerNode.h"
-#include "core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/dom/ContainerNode.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
 
 namespace blink {
 

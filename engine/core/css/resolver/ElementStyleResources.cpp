@@ -20,14 +20,14 @@
  *
  */
 
-#include "config.h"
-#include "core/css/resolver/ElementStyleResources.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/ElementStyleResources.h"
 
-#include "core/css/CSSGradientValue.h"
-#include "core/rendering/style/StyleGeneratedImage.h"
-#include "core/rendering/style/StyleImage.h"
-#include "core/rendering/style/StylePendingImage.h"
-#include "platform/graphics/filters/FilterOperation.h"
+#include "sky/engine/core/css/CSSGradientValue.h"
+#include "sky/engine/core/rendering/style/StyleGeneratedImage.h"
+#include "sky/engine/core/rendering/style/StyleImage.h"
+#include "sky/engine/core/rendering/style/StylePendingImage.h"
+#include "sky/engine/platform/graphics/filters/FilterOperation.h"
 
 namespace blink {
 

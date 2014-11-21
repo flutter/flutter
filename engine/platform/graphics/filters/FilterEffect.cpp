@@ -21,13 +21,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
 
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/UnacceleratedImageBufferSurface.h"
-#include "platform/graphics/filters/Filter.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
+#include "sky/engine/platform/graphics/filters/Filter.h"
 
 #if HAVE(ARM_NEON_INTRINSICS)
 #include <arm_neon.h>

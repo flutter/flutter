@@ -17,14 +17,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/QualifiedName.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/HashSet.h"
-#include "wtf/MainThread.h"
-#include "wtf/StaticConstructors.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/StaticConstructors.h"
 
 namespace blink {
 

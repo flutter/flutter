@@ -29,11 +29,11 @@
 #ifndef FrameConsole_h
 #define FrameConsole_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "core/frame/ConsoleTypes.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

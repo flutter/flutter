@@ -26,8 +26,8 @@
 #ifndef DataLog_h
 #define DataLog_h
 
-#include "wtf/Assertions.h"
-#include "wtf/FilePrintStream.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/FilePrintStream.h"
 
 #include <stdarg.h>
 #include <stdio.h>

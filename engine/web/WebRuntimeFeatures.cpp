@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebRuntimeFeatures.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebRuntimeFeatures.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "wtf/Assertions.h"
+#include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

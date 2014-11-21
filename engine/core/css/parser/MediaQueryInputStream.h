@@ -5,7 +5,7 @@
 #ifndef MediaQueryInputStream_h
 #define MediaQueryInputStream_h
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

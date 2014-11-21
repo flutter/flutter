@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "platform/image-encoders/skia/PNGImageEncoder.h"
 
-#include "SkBitmap.h"
-#include "SkColorPriv.h"
-#include "SkUnPreMultiply.h"
-#include "platform/geometry/IntSize.h"
-#include "platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkColorPriv.h"
+#include "third_party/skia/include/core/SkUnPreMultiply.h"
 extern "C" {
 #include "png.h"
 }

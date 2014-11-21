@@ -23,16 +23,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/RenderHTMLCanvas.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/RenderHTMLCanvas.h"
 
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
-#include "core/frame/FrameView.h"
-#include "core/frame/LocalFrame.h"
-#include "core/page/Page.h"
-#include "core/rendering/PaintInfo.h"
-#include "core/rendering/RenderView.h"
+#include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderView.h"
 
 namespace blink {
 

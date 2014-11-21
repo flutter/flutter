@@ -24,16 +24,16 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/DocumentMarkerController.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/DocumentMarkerController.h"
 
-#include "core/dom/Node.h"
-#include "core/dom/NodeTraversal.h"
-#include "core/dom/Range.h"
-#include "core/dom/RenderedDocumentMarker.h"
-#include "core/dom/Text.h"
-#include "core/editing/TextIterator.h"
-#include "core/rendering/RenderObject.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
+#include "sky/engine/core/dom/Range.h"
+#include "sky/engine/core/dom/RenderedDocumentMarker.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/TextIterator.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 #ifndef NDEBUG
 #include <stdio.h>

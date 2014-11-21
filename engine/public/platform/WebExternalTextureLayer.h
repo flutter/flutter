@@ -26,9 +26,9 @@
 #ifndef WebExternalTextureLayer_h
 #define WebExternalTextureLayer_h
 
-#include "WebCommon.h"
-#include "WebFloatRect.h"
-#include "WebLayer.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebFloatRect.h"
+#include "sky/engine/public/platform/WebLayer.h"
 
 namespace blink {
 

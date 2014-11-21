@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/ArrayBufferBuilder.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/ArrayBufferBuilder.h"
 
-#include "wtf/Assertions.h"
 #include <gtest/gtest.h>
 #include <limits.h>
 #include <string.h>
+#include "sky/engine/wtf/Assertions.h"
 
 namespace WTF {
 

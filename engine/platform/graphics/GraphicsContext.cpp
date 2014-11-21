@@ -24,20 +24,22 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/GraphicsContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
 
-#include "platform/TraceEvent.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/geometry/RoundedRect.h"
-#include "platform/graphics/BitmapImage.h"
-#include "platform/graphics/DisplayList.h"
-#include "platform/graphics/Gradient.h"
-#include "platform/graphics/ImageBuffer.h"
-#include "platform/graphics/skia/SkiaUtils.h"
-#include "platform/text/BidiResolver.h"
-#include "platform/text/TextRunIterator.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "sky/engine/platform/graphics/BitmapImage.h"
+#include "sky/engine/platform/graphics/DisplayList.h"
+#include "sky/engine/platform/graphics/Gradient.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "sky/engine/platform/text/BidiResolver.h"
+#include "sky/engine/platform/text/TextRunIterator.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/MathExtras.h"
 #include "third_party/skia/include/core/SkAnnotation.h"
 #include "third_party/skia/include/core/SkClipStack.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -54,8 +56,6 @@
 #include "third_party/skia/include/effects/SkPictureImageFilter.h"
 #include "third_party/skia/include/gpu/GrRenderTarget.h"
 #include "third_party/skia/include/gpu/GrTexture.h"
-#include "wtf/Assertions.h"
-#include "wtf/MathExtras.h"
 
 namespace blink {
 

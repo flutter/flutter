@@ -26,7 +26,7 @@
 #ifndef CSSFunctionValue_h
 #define CSSFunctionValue_h
 
-#include "core/css/CSSValue.h"
+#include "sky/engine/core/css/CSSValue.h"
 
 namespace blink {
 

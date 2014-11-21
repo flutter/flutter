@@ -31,11 +31,11 @@
 #ifndef DOMWrapperMap_h
 #define DOMWrapperMap_h
 
-#include "bindings/core/v8/WrapperTypeInfo.h"
-#include "platform/ScriptForbiddenScope.h"
+#include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
+#include "sky/engine/platform/ScriptForbiddenScope.h"
+#include "sky/engine/wtf/HashMap.h"
 #include "v8/include/v8-util.h"
 #include "v8/include/v8.h"
-#include "wtf/HashMap.h"
 
 namespace blink {
 

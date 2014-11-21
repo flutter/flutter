@@ -28,12 +28,12 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/graphics/filters/ReferenceFilter.h"
+#include "sky/engine/platform/graphics/filters/ReferenceFilter.h"
 
-#include "platform/graphics/filters/FilterEffect.h"
-#include "platform/graphics/filters/SourceGraphic.h"
+#include "sky/engine/platform/graphics/filters/FilterEffect.h"
+#include "sky/engine/platform/graphics/filters/SourceGraphic.h"
 
 namespace blink {
 

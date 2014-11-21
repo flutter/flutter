@@ -5,8 +5,8 @@
 #ifndef StyleInterpolation_h
 #define StyleInterpolation_h
 
-#include "core/animation/Interpolation.h"
 #include "gen/sky/core/CSSPropertyNames.h"
+#include "sky/engine/core/animation/Interpolation.h"
 
 namespace blink {
 

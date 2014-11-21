@@ -26,12 +26,12 @@
 #ifndef AnimationUtilities_h
 #define AnimationUtilities_h
 
-#include "platform/LayoutUnit.h"
-#include "platform/PlatformExport.h"
-#include "platform/geometry/FloatPoint.h"
-#include "platform/geometry/IntPoint.h"
-#include "wtf/MathExtras.h"
-#include "wtf/TypeTraits.h"
+#include "sky/engine/platform/LayoutUnit.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/wtf/MathExtras.h"
+#include "sky/engine/wtf/TypeTraits.h"
 
 namespace blink {
 

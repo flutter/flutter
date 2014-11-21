@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/network/ResourceResponse.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/network/ResourceResponse.h"
 
-#include "wtf/CurrentTime.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/wtf/CurrentTime.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

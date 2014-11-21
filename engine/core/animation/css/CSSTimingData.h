@@ -5,9 +5,9 @@
 #ifndef CSSTimingData_h
 #define CSSTimingData_h
 
-#include "platform/animation/TimingFunction.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/animation/TimingFunction.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

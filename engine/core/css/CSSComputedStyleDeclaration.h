@@ -21,14 +21,14 @@
 #ifndef CSSComputedStyleDeclaration_h
 #define CSSComputedStyleDeclaration_h
 
-#include "core/css/CSSStyleDeclaration.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/fonts/FixedPitchFontType.h"
-#include "wtf/HashMap.h"
-#include "wtf/RefPtr.h"
-#include "wtf/text/AtomicString.h"
-#include "wtf/text/AtomicStringHash.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/css/CSSStyleDeclaration.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/fonts/FixedPitchFontType.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/AtomicString.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

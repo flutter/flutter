@@ -23,16 +23,16 @@
 #ifndef Resource_h
 #define Resource_h
 
-#include "core/fetch/ResourceLoaderOptions.h"
-#include "platform/Timer.h"
-#include "platform/network/ResourceError.h"
-#include "platform/network/ResourceLoadPriority.h"
-#include "platform/network/ResourceRequest.h"
-#include "platform/network/ResourceResponse.h"
-#include "wtf/HashCountedSet.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/network/ResourceError.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/platform/network/ResourceResponse.h"
+#include "sky/engine/wtf/HashCountedSet.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 // FIXME(crbug.com/352043): This is temporarily enabled even on RELEASE to diagnose a wild crash.
 #define ENABLE_RESOURCE_IS_DELETED_CHECK

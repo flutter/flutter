@@ -25,14 +25,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/transforms/AffineTransform.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/transforms/AffineTransform.h"
 
-#include "platform/FloatConversion.h"
-#include "platform/geometry/FloatQuad.h"
-#include "platform/geometry/FloatRect.h"
-#include "platform/geometry/IntRect.h"
-#include "wtf/MathExtras.h"
+#include "sky/engine/platform/FloatConversion.h"
+#include "sky/engine/platform/geometry/FloatQuad.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

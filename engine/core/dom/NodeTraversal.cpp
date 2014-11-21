@@ -22,10 +22,10 @@
  *
  */
 
-#include "config.h"
-#include "core/dom/NodeTraversal.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/NodeTraversal.h"
 
-#include "core/dom/ContainerNode.h"
+#include "sky/engine/core/dom/ContainerNode.h"
 
 namespace blink {
 

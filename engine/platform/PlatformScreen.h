@@ -26,10 +26,10 @@
 #ifndef PlatformScreen_h
 #define PlatformScreen_h
 
-#include "platform/geometry/FloatRect.h"
-#include "public/platform/WebScreenOrientationType.h"
-#include "wtf/Forward.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/public/platform/WebScreenOrientationType.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 typedef WTF::Vector<char> ColorProfile;
 

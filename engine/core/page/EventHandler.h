@@ -26,22 +26,22 @@
 #ifndef EventHandler_h
 #define EventHandler_h
 
-#include "core/editing/TextGranularity.h"
-#include "core/events/TextEventInputType.h"
-#include "core/page/FocusType.h"
-#include "core/rendering/HitTestRequest.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/Cursor.h"
-#include "platform/PlatformMouseEvent.h"
-#include "platform/Timer.h"
-#include "platform/UserGestureIndicator.h"
-#include "platform/geometry/LayoutPoint.h"
-#include "platform/heap/Handle.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "wtf/Forward.h"
-#include "wtf/HashMap.h"
-#include "wtf/HashTraits.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/editing/TextGranularity.h"
+#include "sky/engine/core/events/TextEventInputType.h"
+#include "sky/engine/core/page/FocusType.h"
+#include "sky/engine/core/rendering/HitTestRequest.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/Cursor.h"
+#include "sky/engine/platform/PlatformMouseEvent.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/UserGestureIndicator.h"
+#include "sky/engine/platform/geometry/LayoutPoint.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/HashTraits.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

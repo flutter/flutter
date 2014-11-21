@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/rendering/LayoutState.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/LayoutState.h"
 
-#include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderLayer.h"
-#include "core/rendering/RenderView.h"
-#include "platform/Partitions.h"
+#include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderLayer.h"
+#include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/platform/Partitions.h"
 
 namespace blink {
 

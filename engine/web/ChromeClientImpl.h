@@ -32,11 +32,11 @@
 #ifndef ChromeClientImpl_h
 #define ChromeClientImpl_h
 
-#include "core/page/ChromeClient.h"
-#include "platform/weborigin/KURL.h"
-#include "public/platform/WebColor.h"
-#include "public/web/WebNavigationPolicy.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/core/page/ChromeClient.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/public/platform/WebColor.h"
+#include "sky/engine/public/web/WebNavigationPolicy.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 class ColorChooser;

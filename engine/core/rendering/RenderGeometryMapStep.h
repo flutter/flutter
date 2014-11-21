@@ -27,9 +27,9 @@
 #ifndef RenderGeometryMapStep_h
 #define RenderGeometryMapStep_h
 
-#include "platform/geometry/LayoutSize.h"
-#include "platform/transforms/TransformationMatrix.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "sky/engine/platform/transforms/TransformationMatrix.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

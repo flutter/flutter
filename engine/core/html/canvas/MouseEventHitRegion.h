@@ -5,10 +5,10 @@
 #ifndef MouseEventHitRegion_h
 #define MouseEventHitRegion_h
 
-#include "core/events/MouseEvent.h"
-#include "core/html/HTMLCanvasElement.h"
-#include "core/html/canvas/CanvasRenderingContext.h"
-#include "core/html/canvas/CanvasRenderingContext2D.h"
+#include "sky/engine/core/events/MouseEvent.h"
+#include "sky/engine/core/html/HTMLCanvasElement.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
+#include "sky/engine/core/html/canvas/CanvasRenderingContext2D.h"
 
 namespace blink {
 

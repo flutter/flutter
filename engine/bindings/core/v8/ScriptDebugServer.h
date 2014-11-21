@@ -31,18 +31,18 @@
 #ifndef ScriptDebugServer_h
 #define ScriptDebugServer_h
 
-#include "bindings/core/v8/ScopedPersistent.h"
-#include "core/inspector/ScriptBreakpoint.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "core/inspector/ScriptDebugListener.h"
 #include "gen/sky/core/InspectorBackendDispatcher.h"
+#include "sky/engine/bindings/core/v8/ScopedPersistent.h"
+#include "sky/engine/core/inspector/ScriptBreakpoint.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/core/inspector/ScriptDebugListener.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/StringHash.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8-debug.h"
 #include "v8/include/v8.h"
-#include "wtf/HashMap.h"
-#include "wtf/Noncopyable.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/StringHash.h"
-#include "wtf/text/WTFString.h"
 
 namespace blink {
 

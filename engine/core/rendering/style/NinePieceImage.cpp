@@ -21,10 +21,10 @@
  *
  */
 
-#include "config.h"
-#include "core/rendering/style/NinePieceImage.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/rendering/style/NinePieceImage.h"
 
-#include "core/rendering/style/DataEquivalency.h"
+#include "sky/engine/core/rendering/style/DataEquivalency.h"
 
 namespace blink {
 

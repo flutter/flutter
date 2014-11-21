@@ -31,10 +31,10 @@
 #ifndef V8PersistentValueMap_h
 #define V8PersistentValueMap_h
 
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/text/StringHash.h"
 #include "v8/include/v8-util.h"
 #include "v8/include/v8.h"
-#include "wtf/HashMap.h"
-#include "wtf/text/StringHash.h"
 
 namespace blink {
 

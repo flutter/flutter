@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
 #if USE(PTHREADS)
 
-#include "wtf/ThreadIdentifierDataPthreads.h"
+#include "sky/engine/wtf/ThreadIdentifierDataPthreads.h"
 
-#include "wtf/Assertions.h"
-#include "wtf/WTF.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/WTF.h"
 
 #include <limits.h>
 

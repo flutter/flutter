@@ -31,9 +31,9 @@
 #ifndef ContentDistribution_h
 #define ContentDistribution_h
 
-#include "core/dom/Node.h"
-#include "wtf/HashMap.h"
-#include "wtf/Vector.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

@@ -26,7 +26,7 @@
 #ifndef WTF_EnumClass_h
 #define WTF_EnumClass_h
 
-#include "wtf/Compiler.h"
+#include "sky/engine/wtf/Compiler.h"
 
 namespace WTF {
 

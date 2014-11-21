@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/graphics/DisplayList.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/DisplayList.h"
 
-#include "platform/geometry/IntSize.h"
+#include "sky/engine/platform/geometry/IntSize.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "wtf/PassOwnPtr.h"
 
 namespace blink {
 

@@ -26,7 +26,7 @@
 #ifndef ResourcePtr_h
 #define ResourcePtr_h
 
-#include "core/fetch/Resource.h"
+#include "sky/engine/core/fetch/Resource.h"
 
 namespace blink {
 

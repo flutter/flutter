@@ -31,9 +31,9 @@
 #ifndef ScriptProfile_h
 #define ScriptProfile_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8-profiler.h"
 
 namespace blink {

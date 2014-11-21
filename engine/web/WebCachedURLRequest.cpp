@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebCachedURLRequest.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebCachedURLRequest.h"
 
-#include "core/fetch/FetchRequest.h"
-#include "platform/exported/WrappedResourceRequest.h"
-#include "public/platform/WebURLRequest.h"
+#include "sky/engine/core/fetch/FetchRequest.h"
+#include "sky/engine/platform/exported/WrappedResourceRequest.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
 
 namespace blink {
 

@@ -26,12 +26,12 @@
 #ifndef FetchRequest_h
 #define FetchRequest_h
 
-#include "core/dom/Element.h"
-#include "core/fetch/FetchInitiatorInfo.h"
-#include "core/fetch/ResourceLoaderOptions.h"
-#include "platform/network/ResourceLoadPriority.h"
-#include "platform/network/ResourceRequest.h"
-#include "wtf/text/AtomicString.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/fetch/FetchInitiatorInfo.h"
+#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
+#include "sky/engine/platform/network/ResourceLoadPriority.h"
+#include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

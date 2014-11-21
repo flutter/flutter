@@ -26,7 +26,7 @@
 #ifndef InsertParagraphSeparatorCommand_h
 #define InsertParagraphSeparatorCommand_h
 
-#include "core/editing/CompositeEditCommand.h"
+#include "sky/engine/core/editing/CompositeEditCommand.h"
 
 namespace blink {
 

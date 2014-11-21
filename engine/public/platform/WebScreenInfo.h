@@ -31,8 +31,8 @@
 #ifndef WebScreenInfo_h
 #define WebScreenInfo_h
 
-#include "WebRect.h"
-#include "WebScreenOrientationType.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebScreenOrientationType.h"
 
 namespace blink {
 

@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "config.h"
-#include "core/events/UIEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/UIEvent.h"
 
 
 namespace blink {

@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "core/dom/MutationObserverRegistration.h"
+#include "sky/engine/core/dom/MutationObserverRegistration.h"
 
-#include "core/dom/Node.h"
-#include "core/dom/QualifiedName.h"
+#include "sky/engine/core/dom/Node.h"
+#include "sky/engine/core/dom/QualifiedName.h"
 
 namespace blink {
 

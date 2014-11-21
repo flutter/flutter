@@ -24,18 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/editing/MarkupAccumulator.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/editing/MarkupAccumulator.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "core/dom/Document.h"
-#include "core/dom/DocumentFragment.h"
-#include "core/dom/Text.h"
-#include "core/editing/Editor.h"
-#include "core/html/HTMLElement.h"
-#include "core/html/HTMLTemplateElement.h"
-#include "platform/weborigin/KURL.h"
-#include "wtf/unicode/CharacterNames.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/core/html/HTMLTemplateElement.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

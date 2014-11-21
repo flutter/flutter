@@ -22,11 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "wtf/text/TextPosition.h"
+#include "sky/engine/config.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
-#include "wtf/PassOwnPtr.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace WTF {
 

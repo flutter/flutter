@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "ImageFilter.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/ImageFilter.h"
 
 #include "third_party/skia/include/core/SkImageFilter.h"
 

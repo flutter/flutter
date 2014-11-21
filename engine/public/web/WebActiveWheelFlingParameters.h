@@ -31,7 +31,7 @@
 #include "../platform/WebGestureDevice.h"
 #include "../platform/WebPoint.h"
 #include "../platform/WebSize.h"
-#include "WebInputEvent.h"
+#include "sky/engine/public/web/WebInputEvent.h"
 
 namespace blink {
 

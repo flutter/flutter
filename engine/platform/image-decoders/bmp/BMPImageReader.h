@@ -33,7 +33,7 @@
 
 #include <stdint.h>
 #include "platform/image-decoders/ImageDecoder.h"
-#include "wtf/CPU.h"
+#include "sky/engine/wtf/CPU.h"
 
 namespace blink {
 

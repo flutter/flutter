@@ -22,7 +22,7 @@
 #ifndef HTMLTitleElement_h
 #define HTMLTitleElement_h
 
-#include "core/html/HTMLElement.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 

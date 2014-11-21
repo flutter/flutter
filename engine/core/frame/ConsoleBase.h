@@ -30,17 +30,17 @@
 #ifndef ConsoleBase_h
 #define ConsoleBase_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/frame/ConsoleTypes.h"
-#include "core/frame/DOMWindowProperty.h"
-#include "core/inspector/ConsoleAPITypes.h"
-#include "core/inspector/ScriptCallStack.h"
-#include "platform/heap/Handle.h"
-#include "wtf/Forward.h"
-#include "wtf/HashCountedSet.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/frame/ConsoleTypes.h"
+#include "sky/engine/core/frame/DOMWindowProperty.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashCountedSet.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

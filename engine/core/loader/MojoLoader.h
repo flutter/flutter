@@ -6,7 +6,7 @@
 #define MojoLoader_h
 
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "platform/weborigin/KURL.h"
+#include "sky/engine/platform/weborigin/KURL.h"
 
 namespace blink {
 

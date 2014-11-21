@@ -26,10 +26,9 @@
 #ifndef SkSizeHash_h
 #define SkSizeHash_h
 
-#include "SkScalar.h"
-#include "SkSize.h"
-
-#include "wtf/HashMap.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "third_party/skia/include/core/SkScalar.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace WTF {
 

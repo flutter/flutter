@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/SpellCheckerClientImpl.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/SpellCheckerClientImpl.h"
 
-#include "core/dom/DocumentMarkerController.h"
-#include "core/editing/Editor.h"
-#include "core/editing/SpellChecker.h"
-#include "core/frame/LocalFrame.h"
-#include "core/frame/Settings.h"
-#include "core/page/Page.h"
-#include "public/web/WebSpellCheckClient.h"
-#include "public/web/WebTextCheckingResult.h"
-#include "web/WebTextCheckingCompletionImpl.h"
-#include "web/WebViewImpl.h"
+#include "sky/engine/core/dom/DocumentMarkerController.h"
+#include "sky/engine/core/editing/Editor.h"
+#include "sky/engine/core/editing/SpellChecker.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/page/Page.h"
+#include "sky/engine/public/web/WebSpellCheckClient.h"
+#include "sky/engine/public/web/WebTextCheckingResult.h"
+#include "sky/engine/web/WebTextCheckingCompletionImpl.h"
+#include "sky/engine/web/WebViewImpl.h"
 
 namespace blink {
 

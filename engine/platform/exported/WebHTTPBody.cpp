@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/platform/WebHTTPBody.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/platform/WebHTTPBody.h"
 
-#include "platform/network/FormData.h"
+#include "sky/engine/platform/network/FormData.h"
 
 namespace blink {
 

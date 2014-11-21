@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8DOMWrapper.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
 
-#include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/V8HTMLDocument.h"
-#include "bindings/core/v8/V8ObjectConstructor.h"
-#include "bindings/core/v8/V8PerContextData.h"
-#include "bindings/core/v8/V8ScriptRunner.h"
 #include "bindings/core/v8/V8Window.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
 
 namespace blink {
 

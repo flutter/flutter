@@ -26,7 +26,7 @@
 #ifndef TrailingFloatsRootInlineBox_h
 #define TrailingFloatsRootInlineBox_h
 
-#include "core/rendering/RootInlineBox.h"
+#include "sky/engine/core/rendering/RootInlineBox.h"
 
 namespace blink {
 

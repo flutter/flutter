@@ -28,12 +28,12 @@
 #ifndef LocalFrame_h
 #define LocalFrame_h
 
-#include "core/frame/Frame.h"
-#include "core/loader/FrameLoader.h"
-#include "platform/Supplementable.h"
-#include "platform/heap/Handle.h"
-#include "platform/scroll/ScrollTypes.h"
-#include "wtf/HashSet.h"
+#include "sky/engine/core/frame/Frame.h"
+#include "sky/engine/core/loader/FrameLoader.h"
+#include "sky/engine/platform/Supplementable.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 

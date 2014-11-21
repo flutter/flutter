@@ -23,11 +23,11 @@
 #ifndef InlineIterator_h
 #define InlineIterator_h
 
-#include "core/rendering/BidiRun.h"
-#include "core/rendering/RenderBlockFlow.h"
-#include "core/rendering/RenderInline.h"
-#include "core/rendering/RenderText.h"
-#include "wtf/StdLibExtras.h"
+#include "sky/engine/core/rendering/BidiRun.h"
+#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

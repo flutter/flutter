@@ -26,11 +26,11 @@
 #ifndef TouchList_h
 #define TouchList_h
 
-#include "bindings/core/v8/ScriptWrappable.h"
-#include "core/dom/Touch.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
-#include "wtf/Vector.h"
+#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/core/dom/Touch.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

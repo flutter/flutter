@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "web/EditorClientImpl.h"
+#include "sky/engine/config.h"
+#include "sky/engine/web/EditorClientImpl.h"
 
-#include "core/editing/SelectionType.h"
-#include "public/web/WebFrameClient.h"
-#include "public/web/WebViewClient.h"
-#include "web/WebLocalFrameImpl.h"
-#include "web/WebViewImpl.h"
+#include "sky/engine/core/editing/SelectionType.h"
+#include "sky/engine/public/web/WebFrameClient.h"
+#include "sky/engine/public/web/WebViewClient.h"
+#include "sky/engine/web/WebLocalFrameImpl.h"
+#include "sky/engine/web/WebViewImpl.h"
 
 namespace blink {
 

@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/MIMETypeRegistry.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/MIMETypeRegistry.h"
 
-#include "public/platform/Platform.h"
-#include "public/platform/WebMimeRegistry.h"
-#include "wtf/text/CString.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebMimeRegistry.h"
+#include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

@@ -22,10 +22,10 @@
 #ifndef WTF_LinkedHashSet_h
 #define WTF_LinkedHashSet_h
 
-#include "wtf/DefaultAllocator.h"
-#include "wtf/HashSet.h"
-#include "wtf/OwnPtr.h"
-#include "wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/DefaultAllocator.h"
+#include "sky/engine/wtf/HashSet.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace WTF {
 

@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebCache.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebCache.h"
 
-#include "core/fetch/MemoryCache.h"
+#include "sky/engine/core/fetch/MemoryCache.h"
 
 namespace blink {
 

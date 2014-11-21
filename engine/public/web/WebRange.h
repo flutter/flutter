@@ -31,10 +31,10 @@
 #ifndef WebRange_h
 #define WebRange_h
 
-#include "WebFrame.h"
-#include "public/platform/WebCommon.h"
-#include "public/platform/WebPrivatePtr.h"
-#include "public/platform/WebVector.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
+#include "sky/engine/public/platform/WebVector.h"
+#include "sky/engine/public/web/WebFrame.h"
 
 namespace blink {
 

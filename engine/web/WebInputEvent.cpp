@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "public/web/WebInputEvent.h"
+#include "sky/engine/config.h"
+#include "sky/engine/public/web/WebInputEvent.h"
 
-#include "platform/KeyboardCodes.h"
-#include "wtf/Assertions.h"
-#include "wtf/StringExtras.h"
 #include <ctype.h>
+#include "sky/engine/platform/KeyboardCodes.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/StringExtras.h"
 
 namespace blink {
 

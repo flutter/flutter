@@ -4,8 +4,8 @@
 #ifndef TerminatedArray_h
 #define TerminatedArray_h
 
-#include "wtf/FastAllocBase.h"
-#include "wtf/OwnPtr.h"
+#include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/OwnPtr.h"
 
 namespace WTF {
 

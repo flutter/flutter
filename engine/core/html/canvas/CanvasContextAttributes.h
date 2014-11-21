@@ -27,8 +27,8 @@
 #ifndef CanvasContextAttributes_h
 #define CanvasContextAttributes_h
 
-#include "platform/heap/Handle.h"
-#include "wtf/RefCounted.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 

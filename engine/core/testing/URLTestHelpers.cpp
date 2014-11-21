@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 #include "core/testing/URLTestHelpers.h"
 
-#include "public/platform/Platform.h"
-#include "public/platform/WebURL.h"
-#include "public/platform/WebURLResponse.h"
-#include "public/platform/WebUnitTestSupport.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/WebURL.h"
+#include "sky/engine/public/platform/WebURLResponse.h"
+#include "sky/engine/public/platform/WebUnitTestSupport.h"
 
 namespace blink {
 namespace URLTestHelpers {

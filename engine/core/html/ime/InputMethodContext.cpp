@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/ime/InputMethodContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/ime/InputMethodContext.h"
 
-#include "core/dom/Document.h"
-#include "core/dom/Text.h"
-#include "core/editing/InputMethodController.h"
-#include "core/events/Event.h"
-#include "core/frame/LocalFrame.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Text.h"
+#include "sky/engine/core/editing/InputMethodController.h"
+#include "sky/engine/core/events/Event.h"
+#include "sky/engine/core/frame/LocalFrame.h"
 
 namespace blink {
 

@@ -31,11 +31,11 @@
 #ifndef ScriptArguments_h
 #define ScriptArguments_h
 
-#include "bindings/core/v8/ScriptState.h"
-#include "wtf/Forward.h"
-#include "wtf/RefCounted.h"
-#include "wtf/Vector.h"
-#include "wtf/text/WTFString.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

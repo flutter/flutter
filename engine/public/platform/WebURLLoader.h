@@ -31,8 +31,8 @@
 #ifndef WebURLLoader_h
 #define WebURLLoader_h
 
-#include "WebCommon.h"
-#include "WebURLRequest.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebURLRequest.h"
 
 namespace blink {
 

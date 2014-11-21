@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/dom/custom/CustomElementAsyncImportMicrotaskQueue.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/dom/custom/CustomElementAsyncImportMicrotaskQueue.h"
 
-#include "core/dom/custom/CustomElementMicrotaskImportStep.h"
+#include "sky/engine/core/dom/custom/CustomElementMicrotaskImportStep.h"
 
 namespace blink {
 

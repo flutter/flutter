@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "bindings/core/v8/V8PerContextData.h"
+#include "sky/engine/config.h"
+#include "sky/engine/bindings/core/v8/V8PerContextData.h"
 
-#include "bindings/core/v8/ScriptState.h"
-#include "bindings/core/v8/V8Binding.h"
-#include "bindings/core/v8/V8ObjectConstructor.h"
-#include "wtf/StringExtras.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
+#include "sky/engine/wtf/StringExtras.h"
 
 #include <stdlib.h>
 

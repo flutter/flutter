@@ -25,8 +25,8 @@
 #ifndef WebThread_h
 #define WebThread_h
 
-#include "WebCommon.h"
 #include <stdint.h>
+#include "sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

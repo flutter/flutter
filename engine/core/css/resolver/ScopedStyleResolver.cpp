@@ -24,18 +24,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/css/resolver/ScopedStyleResolver.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 
-#include "core/css/CSSStyleSheet.h"
-#include "core/css/RuleFeature.h"
-#include "core/css/StyleRule.h"
-#include "core/css/StyleSheetContents.h"
-#include "core/css/resolver/StyleResolver.h" // For MatchRequest.
-#include "core/dom/Document.h"
-#include "core/dom/shadow/ElementShadow.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/html/HTMLStyleElement.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/RuleFeature.h"
+#include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/shadow/ElementShadow.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 

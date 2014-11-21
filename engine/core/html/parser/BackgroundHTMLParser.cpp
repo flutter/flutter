@@ -23,17 +23,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "core/html/parser/BackgroundHTMLParser.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/html/parser/BackgroundHTMLParser.h"
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "core/html/parser/HTMLDocumentParser.h"
-#include "core/html/parser/HTMLParserIdioms.h"
-#include "core/html/parser/TextResourceDecoder.h"
-#include "public/platform/Platform.h"
-#include "wtf/MainThread.h"
-#include "wtf/text/TextPosition.h"
+#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
+#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/core/html/parser/TextResourceDecoder.h"
+#include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/MainThread.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
 

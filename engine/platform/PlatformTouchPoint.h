@@ -20,7 +20,7 @@
 #ifndef PlatformTouchPoint_h
 #define PlatformTouchPoint_h
 
-#include "platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
 
 namespace blink {
 

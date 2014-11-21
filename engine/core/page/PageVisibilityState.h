@@ -31,7 +31,7 @@
 #ifndef PageVisibilityState_h
 #define PageVisibilityState_h
 
-#include "wtf/text/WTFString.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

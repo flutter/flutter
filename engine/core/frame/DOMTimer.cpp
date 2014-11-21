@@ -24,14 +24,14 @@
  *
  */
 
-#include "config.h"
-#include "core/frame/DOMTimer.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/frame/DOMTimer.h"
 
-#include "core/dom/ExecutionContext.h"
-#include "core/inspector/InspectorTraceEvents.h"
-#include "platform/Logging.h"
-#include "platform/TraceEvent.h"
-#include "wtf/CurrentTime.h"
+#include "sky/engine/core/dom/ExecutionContext.h"
+#include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/platform/Logging.h"
+#include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

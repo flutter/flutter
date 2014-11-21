@@ -31,10 +31,10 @@
 #ifndef InsertionPoint_h
 #define InsertionPoint_h
 
-#include "core/css/CSSSelectorList.h"
-#include "core/dom/shadow/ContentDistribution.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/html/HTMLElement.h"
+#include "sky/engine/core/css/CSSSelectorList.h"
+#include "sky/engine/core/dom/shadow/ContentDistribution.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 

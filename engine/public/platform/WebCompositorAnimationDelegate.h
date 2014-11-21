@@ -5,8 +5,8 @@
 #ifndef WebCompositorAnimationDelegate_h
 #define WebCompositorAnimationDelegate_h
 
-#include "WebCommon.h"
-#include "WebCompositorAnimation.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebCompositorAnimation.h"
 
 #define WEB_ANIMATION_DELEGATE_TAKES_MONOTONIC_TIME 1
 

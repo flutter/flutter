@@ -31,9 +31,9 @@
 #ifndef InertAnimation_h
 #define InertAnimation_h
 
-#include "core/animation/AnimationEffect.h"
-#include "core/animation/AnimationNode.h"
-#include "wtf/RefPtr.h"
+#include "sky/engine/core/animation/AnimationEffect.h"
+#include "sky/engine/core/animation/AnimationNode.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

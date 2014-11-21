@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "config.h"
-#include "platform/graphics/gpu/Extensions3DUtil.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/graphics/gpu/Extensions3DUtil.h"
 
-#include "public/platform/WebGraphicsContext3D.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/text/CString.h"
-#include "wtf/text/StringHash.h"
+#include "sky/engine/public/platform/WebGraphicsContext3D.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
+#include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

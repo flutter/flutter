@@ -5,9 +5,9 @@
 #ifndef ScriptForbiddenScope_h
 #define ScriptForbiddenScope_h
 
-#include "platform/PlatformExport.h"
-#include "wtf/Assertions.h"
-#include "wtf/TemporaryChange.h"
+#include "sky/engine/platform/PlatformExport.h"
+#include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/TemporaryChange.h"
 
 namespace blink {
 

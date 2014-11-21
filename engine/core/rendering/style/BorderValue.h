@@ -25,9 +25,9 @@
 #ifndef BorderValue_h
 #define BorderValue_h
 
-#include "core/css/StyleColor.h"
-#include "core/rendering/style/RenderStyleConstants.h"
-#include "platform/graphics/Color.h"
+#include "sky/engine/core/css/StyleColor.h"
+#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

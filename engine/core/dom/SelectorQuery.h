@@ -27,11 +27,11 @@
 #ifndef SelectorQuery_h
 #define SelectorQuery_h
 
-#include "core/css/CSSSelectorList.h"
-#include "platform/heap/Handle.h"
-#include "wtf/HashMap.h"
-#include "wtf/Vector.h"
-#include "wtf/text/AtomicStringHash.h"
+#include "sky/engine/core/css/CSSSelectorList.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/AtomicStringHash.h"
 
 namespace blink {
 

@@ -20,11 +20,11 @@
 #ifndef TouchAdjustment_h
 #define TouchAdjustment_h
 
-#include "platform/geometry/IntPoint.h"
-#include "platform/geometry/IntRect.h"
-#include "platform/heap/Handle.h"
-#include "wtf/RefPtr.h"
-#include "wtf/Vector.h"
+#include "sky/engine/platform/geometry/IntPoint.h"
+#include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 

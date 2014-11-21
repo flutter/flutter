@@ -23,11 +23,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/exported/WebActiveGestureAnimation.h"
+#include "sky/engine/config.h"
+#include "sky/engine/platform/exported/WebActiveGestureAnimation.h"
 
-#include "public/platform/WebGestureCurve.h"
-#include "public/platform/WebGestureCurveTarget.h"
+#include "sky/engine/public/platform/WebGestureCurve.h"
+#include "sky/engine/public/platform/WebGestureCurveTarget.h"
 
 namespace blink {
 

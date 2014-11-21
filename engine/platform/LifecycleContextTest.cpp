@@ -24,12 +24,12 @@
  *
  */
 
-#include "config.h"
+#include "sky/engine/config.h"
 
-#include "platform/LifecycleContext.h"
+#include "sky/engine/platform/LifecycleContext.h"
 
-#include "platform/LifecycleNotifier.h"
 #include <gtest/gtest.h>
+#include "sky/engine/platform/LifecycleNotifier.h"
 
 using namespace blink;
 

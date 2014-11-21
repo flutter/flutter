@@ -24,13 +24,13 @@
  *
  */
 
-#include "config.h"
-#include "core/events/TreeScopeEventContext.h"
+#include "sky/engine/config.h"
+#include "sky/engine/core/events/TreeScopeEventContext.h"
 
-#include "core/dom/StaticNodeList.h"
-#include "core/dom/shadow/ShadowRoot.h"
-#include "core/events/EventPath.h"
-#include "core/events/TouchEventContext.h"
+#include "sky/engine/core/dom/StaticNodeList.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/events/EventPath.h"
+#include "sky/engine/core/events/TouchEventContext.h"
 
 namespace blink {
 

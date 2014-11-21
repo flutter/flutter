@@ -21,8 +21,8 @@
 #ifndef WTF_HashSet_h
 #define WTF_HashSet_h
 
-#include "wtf/DefaultAllocator.h"
-#include "wtf/HashTable.h"
+#include "sky/engine/wtf/DefaultAllocator.h"
+#include "sky/engine/wtf/HashTable.h"
 
 namespace WTF {
 
