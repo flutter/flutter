@@ -49,7 +49,13 @@ void LayerHost::ReturnResources(
 void LayerHost::BeginFrame(base::TimeTicks frame_time,
                            base::TimeTicks deadline) {
   client_->BeginFrame(frame_time);
-  root_layer_->Display();
+
+  {
+    mojo::GaneshContext::Scope scope(&ganesh_context_);
+    ganesh_context_.gr()->resetContext();
+    root_layer_->Display();
+  }
+
   Upload(root_layer_.get());
 }
 

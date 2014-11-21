@@ -171,7 +171,7 @@ blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
 #if ENABLE_SKY_COMPOSITOR
 
 mojo::Shell* DocumentView::GetShell() {
-  return shell_.get();
+  return shell_;
 }
 
 void DocumentView::BeginFrame(base::TimeTicks frame_time) {

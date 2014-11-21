@@ -25,7 +25,7 @@
 #include "sky/viewer/services/inspector_impl.h"
 
 // You can try enabling the Sky compositor, but it's a bit buggy.
-#define ENABLE_SKY_COMPOSITOR 0
+#define ENABLE_SKY_COMPOSITOR 1
 
 namespace base {
 class MessageLoopProxy;
