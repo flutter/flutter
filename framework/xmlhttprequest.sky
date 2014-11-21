@@ -7,55 +7,61 @@
 // XHR keeps itself alive.
 var outstandingRequests = new Set();
 
-function XMLHttpRequest() {
-  this.networkService_ = shell.connectToService(
-    "mojo:network_service", net.NetworkService);
-  this.request_ = null;
-  this.loader_ = null;
-  this.responseText = null;
-  this.headers_ = new Map();
-};
+class XMLHttpRequest {
+  constructor() {
+    this.responseText = null;
 
-XMLHttpRequest.prototype.onload = function() { };
-XMLHttpRequest.prototype.onerror = function(error) { };
+    this.networkService_ = shell.connectToService(
+      "mojo:network_service", net.NetworkService);
+    this.request_ = null;
+    this.loader_ = null;
+    this.headers_ = new Map();
+  }
 
-XMLHttpRequest.prototype.open = function(method, url) {
-  this.request_ = new loader.URLRequest();
-  this.request_.url = new URL(url, document.URL);
-  this.request_.method = method;
-  this.request_.auto_follow_redirects = true;
-  this.headers_.clear();
-};
+  onload() {
+  }
 
-XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
-  this.headers_.set(header, value);
-};
+  onerror(error) {
+  }
 
-XMLHttpRequest.prototype.send = function() {
-  var requestHeaders = [];
-  this.headers_.forEach(function(value, key) {
-    requestHeaders.push(key + ': ' + value);
-  });
-  this.request_.headers = requestHeaders;
+  open(method, url) {
+    this.request_ = new loader.URLRequest();
+    this.request_.url = new URL(url, document.URL);
+    this.request_.method = method;
+    this.request_.auto_follow_redirects = true;
+    this.headers_.clear();
+  }
 
-  // FIXME: Factor this into the JS bindings.
-  var pipe = new core.createMessagePipe();
-  this.networkService_.createURLLoader(pipe.handle1);
-  this.loader_ = shell.wrapHandle(pipe.handle0, loader.URLLoader);
+  setRequestHeader(header, value) {
+    this.headers_.set(header, value);
+  }
 
-  var self = this;
-  outstandingRequests.add(this);
-  this.loader_.start(this.request_).then(function(result) {
-    return core.drainData(result.response.body).then(function(result) {
-      outstandingRequests.delete(self);
-      self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
-      self.onload();
+  send() {
+    var requestHeaders = [];
+    this.headers_.forEach(function(value, key) {
+      requestHeaders.push(key + ': ' + value);
     });
-  }).catch(function(error) {
-    outstandingRequests.delete(self);
-    self.onerror(error);
-  });
-};
+    this.request_.headers = requestHeaders;
+
+    // FIXME: Factor this into the JS bindings.
+    var pipe = new core.createMessagePipe();
+    this.networkService_.createURLLoader(pipe.handle1);
+    this.loader_ = shell.wrapHandle(pipe.handle0, loader.URLLoader);
+
+    var self = this;
+    outstandingRequests.add(this);
+    this.loader_.start(this.request_).then(function(result) {
+      return core.drainData(result.response.body).then(function(result) {
+        outstandingRequests.delete(self);
+        self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
+        self.onload();
+      });
+    }).catch(function(error) {
+      outstandingRequests.delete(self);
+      self.onerror(error);
+    });
+  }
+}
 
 module.exports = XMLHttpRequest;
 </script>
