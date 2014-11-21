@@ -72,6 +72,9 @@ static_library("core") {
   forward_dependent_configs_from = [
     ":libraries",
   ]
+
+  # core and core_generated are really the same thing.
+  allow_circular_includes_from = [ ":core_generated" ]
 }
 
 source_set("testing") {
@@ -124,11 +127,12 @@ source_set("core_generated") {
     ":prerequisites",
     "//gin",
     "//skia",
+    "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
+    "//sky/engine/platform",
+    "//sky/engine/wtf",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
-    "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
-    "//sky/engine/wtf",
     "//url",
     "//v8",
   ]
