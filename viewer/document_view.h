@@ -5,7 +5,6 @@
 #ifndef SKY_VIEWER_DOCUMENT_VIEW_H_
 #define SKY_VIEWER_DOCUMENT_VIEW_H_
 
-#include "base/compiler_specific.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/lazy_interface_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
@@ -17,10 +16,15 @@
 #include "mojo/services/public/interfaces/content_handler/content_handler.mojom.h"
 #include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
 #include "mojo/services/public/interfaces/network/url_loader.mojom.h"
+#include "sky/compositor/layer_client.h"
+#include "sky/compositor/layer_host_client.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/viewer/services/inspector_impl.h"
+
+// You can try enabling the Sky compositor, but it's a bit buggy.
+#define ENABLE_SKY_COMPOSITOR 0
 
 namespace base {
 class MessageLoopProxy;
@@ -38,18 +42,21 @@ class InspectorBackendMojo;
 namespace sky {
 class InspectorHostImpl;
 class ScriptRunner;
+class Layer;
+class LayerHost;
 class WebLayerTreeViewImpl;
 
 class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
                      public blink::ServiceProvider,
                      public blink::WebViewClient,
                      public blink::WebFrameClient,
+#if ENABLE_SKY_COMPOSITOR
+                     public sky::LayerClient,
+                     public sky::LayerHostClient,
+#endif
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
-  // Load a new HTMLDocument with |response|.
-  //
-  // |shell| is the Shell connection for this mojo::Application.
   DocumentView(mojo::URLResponsePtr response,
                mojo::ShellPtr shell,
                scoped_refptr<base::MessageLoopProxy> compositor_thread);
@@ -63,6 +70,15 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   }
 
   mojo::Shell* shell() const { return shell_.get(); }
+
+#if ENABLE_SKY_COMPOSITOR
+  // sky::LayerHostClient
+  mojo::Shell* GetShell() override;
+  void BeginFrame(base::TimeTicks frame_time) override;
+  void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
+  // sky::LayerClient
+  void PaintContents(SkCanvas* canvas, const gfx::Rect& clip) override;
+#endif  // ENABLE_SKY_COMPOSITOR
 
   void StartDebuggerInspectorBackend();
 
@@ -127,7 +143,12 @@ class DocumentView : public mojo::InterfaceImpl<mojo::Application>,
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
   InspectorServiceFactory inspector_service_factory_;
+#if ENABLE_SKY_COMPOSITOR
+  scoped_ptr<LayerHost> layer_host_;
+  scoped_refptr<Layer> root_layer_;
+#else
   scoped_ptr<WebLayerTreeViewImpl> web_layer_tree_view_impl_;
+#endif
   scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   scoped_ptr<ScriptRunner> script_runner_;
   scoped_ptr<InspectorHostImpl> inspector_host_;
