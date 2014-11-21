@@ -27,7 +27,6 @@ void Layer::SetSize(const gfx::Size& size) {
 void Layer::Display() {
   DCHECK(host_);
 
-  mojo::GaneshContext::Scope scope(host_->ganesh_context());
   mojo::GaneshSurface surface(host_->ganesh_context(),
                               host_->resource_manager()->CreateTexture(size_));
 
