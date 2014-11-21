@@ -112,12 +112,6 @@ String Location::origin() const
     return DOMURLUtilsReadOnly::origin(url());
 }
 
-PassRefPtr<DOMStringList> Location::ancestorOrigins() const
-{
-    // FIXME(sky): remove
-    return DOMStringList::create();
-}
-
 String Location::hash() const
 {
     if (!m_frame)

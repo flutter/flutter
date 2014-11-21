@@ -51,8 +51,6 @@
 
     readonly attribute DOMString origin;
 
-    readonly attribute DOMStringList ancestorOrigins;
-
     [NotEnumerable, Unforgeable, ImplementedAs=href] DOMString toString();
     [NotEnumerable, Custom, Unforgeable] any valueOf();
 };

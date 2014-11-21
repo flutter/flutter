@@ -30,7 +30,6 @@
 #define SKY_ENGINE_CORE_FRAME_LOCATION_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
-#include "sky/engine/core/dom/DOMStringList.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -73,8 +72,6 @@ public:
     void setHash(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
     String hash() const;
     String origin() const;
-
-    PassRefPtr<DOMStringList> ancestorOrigins() const;
 
 private:
     explicit Location(LocalFrame*);
