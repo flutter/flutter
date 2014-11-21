@@ -24,13 +24,6 @@
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/viewer/services/inspector_impl.h"
 
-// You can try enabling the Sky compositor, but it's a bit buggy.
-#define ENABLE_SKY_COMPOSITOR 1
-
-namespace base {
-class MessageLoopProxy;
-}
-
 namespace mojo {
 class ViewManager;
 class View;
@@ -45,23 +38,19 @@ class InspectorHostImpl;
 class ScriptRunner;
 class Layer;
 class LayerHost;
-class WebLayerTreeViewImpl;
 
 class DocumentView : public blink::ServiceProvider,
                      public blink::WebViewClient,
                      public blink::WebFrameClient,
-#if ENABLE_SKY_COMPOSITOR
                      public sky::LayerClient,
                      public sky::LayerHostClient,
-#endif
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
   DocumentView(const base::Closure& destruction_callback,
                mojo::ServiceProviderPtr provider,
                mojo::URLResponsePtr response,
-               mojo::Shell* shell,
-               scoped_refptr<base::MessageLoopProxy> compositor_thread);
+               mojo::Shell* shell);
   virtual ~DocumentView();
 
   base::WeakPtr<DocumentView> GetWeakPtr();
@@ -73,14 +62,12 @@ class DocumentView : public blink::ServiceProvider,
 
   mojo::Shell* shell() const { return shell_; }
 
-#if ENABLE_SKY_COMPOSITOR
   // sky::LayerHostClient
   mojo::Shell* GetShell() override;
   void BeginFrame(base::TimeTicks frame_time) override;
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   // sky::LayerClient
   void PaintContents(SkCanvas* canvas, const gfx::Rect& clip) override;
-#endif  // ENABLE_SKY_COMPOSITOR
 
   void StartDebuggerInspectorBackend();
 
@@ -141,13 +128,8 @@ class DocumentView : public blink::ServiceProvider,
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
   InspectorServiceFactory inspector_service_factory_;
-#if ENABLE_SKY_COMPOSITOR
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
-#else
-  scoped_ptr<WebLayerTreeViewImpl> web_layer_tree_view_impl_;
-#endif
-  scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   scoped_ptr<ScriptRunner> script_runner_;
   scoped_ptr<InspectorHostImpl> inspector_host_;
   scoped_ptr<inspector::InspectorBackendMojo> inspector_backend_;

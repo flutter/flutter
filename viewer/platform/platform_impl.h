@@ -11,7 +11,6 @@
 #include "base/timer/timer.h"
 #include "mojo/services/public/interfaces/network/network_service.mojom.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/viewer/cc/web_compositor_support_impl.h"
 
 namespace mojo {
 class ApplicationImpl;
@@ -85,7 +84,6 @@ class PlatformImpl : public blink::Platform {
   double shared_timer_fire_time_;
   bool shared_timer_fire_time_was_set_while_suspended_;
   int shared_timer_suspended_;  // counter
-  sky_viewer_cc::WebCompositorSupportImpl compositor_support_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

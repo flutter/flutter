@@ -26,7 +26,7 @@ namespace sky {
 class Viewer : public mojo::ApplicationDelegate,
                public mojo::InterfaceFactory<mojo::ContentHandler> {
  public:
-  Viewer() : compositor_thread_("compositor thread") {}
+  Viewer() {}
 
   virtual ~Viewer() { blink::shutdown(); }
 
@@ -35,11 +35,7 @@ class Viewer : public mojo::ApplicationDelegate,
   virtual void Initialize(mojo::ApplicationImpl* app) override {
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());
-    // FIXME: Why not in the component build?
-#if !defined(COMPONENT_BUILD)
     base::i18n::InitializeICU();
-#endif
-    compositor_thread_.Start();
   }
 
   virtual bool ConfigureIncomingConnection(
@@ -52,14 +48,10 @@ class Viewer : public mojo::ApplicationDelegate,
   // Overridden from InterfaceFactory<ContentHandler>
   virtual void Create(mojo::ApplicationConnection* connection,
                       mojo::InterfaceRequest<mojo::ContentHandler> request) override {
-    mojo::BindToRequest(
-        new ContentHandlerImpl(compositor_thread_.message_loop_proxy()),
-        &request);
+    mojo::BindToRequest(new ContentHandlerImpl(), &request);
   }
 
   scoped_ptr<PlatformImpl> platform_impl_;
-  base::Thread compositor_thread_;
-
   TracingFactory tracing_;
 
   DISALLOW_COPY_AND_ASSIGN(Viewer);

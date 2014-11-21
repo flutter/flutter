@@ -14,15 +14,13 @@ class DocumentView;
 
 class ContentHandlerImpl : public mojo::InterfaceImpl<mojo::ContentHandler> {
  public:
-  ContentHandlerImpl(scoped_refptr<base::MessageLoopProxy> compositor_thread);
-  virtual ~ContentHandlerImpl();
+  ContentHandlerImpl();
+  ~ContentHandlerImpl() override;
 
  private:
   // Overridden from ContentHandler:
-  virtual void StartApplication(mojo::ShellPtr shell,
-                                mojo::URLResponsePtr response) override;
-
-  scoped_refptr<base::MessageLoopProxy> compositor_thread_;
+  void StartApplication(mojo::ShellPtr shell,
+                        mojo::URLResponsePtr response) override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentHandlerImpl);
 };

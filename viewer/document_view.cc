@@ -35,7 +35,6 @@
 #include "sky/viewer/converters/input_event_types.h"
 #include "sky/viewer/converters/url_request_types.h"
 #include "sky/viewer/internals.h"
-#include "sky/viewer/platform/weblayertreeview_impl.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
 #include "sky/viewer/script/script_runner.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -75,8 +74,7 @@ DocumentView::DocumentView(
     const base::Closure& destruction_callback,
     mojo::ServiceProviderPtr provider,
     mojo::URLResponsePtr response,
-    mojo::Shell* shell,
-    scoped_refptr<base::MessageLoopProxy> compositor_thread)
+    mojo::Shell* shell)
     : destruction_callback_(destruction_callback),
       response_(response.Pass()),
       shell_(shell),
@@ -84,7 +82,6 @@ DocumentView::DocumentView(
       root_(NULL),
       view_manager_client_factory_(shell_, this),
       inspector_service_factory_(this),
-      compositor_thread_(compositor_thread),
       debugger_id_(s_next_debugger_id++),
       weak_factory_(this) {
   exported_services_.AddService(&view_manager_client_factory_);
@@ -121,10 +118,6 @@ void DocumentView::OnEmbed(
   // TODO(abarth): We should ask the view whether it is focused instead of
   // assuming that we're focused.
   web_view_->setFocus(true);
-#if !ENABLE_SKY_COMPOSITOR
-  web_layer_tree_view_impl_->setViewportSize(size);
-  web_layer_tree_view_impl_->set_view(root_);
-#endif
   root_->AddObserver(this);
 }
 
@@ -134,41 +127,17 @@ void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
 
 void DocumentView::Load(mojo::URLResponsePtr response) {
   web_view_ = blink::WebView::create(this);
-#if !ENABLE_SKY_COMPOSITOR
-  web_layer_tree_view_impl_->set_widget(web_view_);
-#endif
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   web_view_->mainFrame()->load(GURL(response->url), response->body.Pass());
 }
 
 blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
-#if ENABLE_SKY_COMPOSITOR
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
   layer_host_->SetRootLayer(root_layer_);
   return nullptr;
-#else
-  mojo::ServiceProviderPtr surfaces_service_provider;
-  shell_->ConnectToApplication("mojo:surfaces_service",
-                               mojo::GetProxy(&surfaces_service_provider));
-  mojo::InterfacePtr<mojo::SurfacesService> surfaces_service;
-  mojo::ConnectToService(surfaces_service_provider.get(), &surfaces_service);
-
-  mojo::ServiceProviderPtr gpu_service_provider;
-  // TODO(jamesr): Should be mojo:gpu_service
-  shell_->ConnectToApplication("mojo:native_viewport_service",
-                               mojo::GetProxy(&gpu_service_provider));
-  mojo::InterfacePtr<mojo::Gpu> gpu_service;
-  mojo::ConnectToService(gpu_service_provider.get(), &gpu_service);
-  web_layer_tree_view_impl_.reset(new WebLayerTreeViewImpl(
-      compositor_thread_, surfaces_service.Pass(), gpu_service.Pass()));
-
-  return web_layer_tree_view_impl_.get();
-#endif
 }
-
-#if ENABLE_SKY_COMPOSITOR
 
 mojo::Shell* DocumentView::GetShell() {
   return shell_;
@@ -195,17 +164,9 @@ void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   web_view_->paint(canvas, rect);
 }
 
-#endif  // ENABLE_SKY_COMPOSITOR
-
 void DocumentView::scheduleAnimation() {
   DCHECK(web_view_);
-
-#if ENABLE_SKY_COMPOSITOR
   layer_host_->SetNeedsAnimate();
-#else
-  if (!web_view_->settings()->compositorIsEnabled())
-    web_layer_tree_view_impl_->setNeedsAnimate();
-#endif
 }
 
 mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
@@ -272,9 +233,6 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
   DCHECK_EQ(view, root_);
   gfx::Size size = new_bounds.To<gfx::Rect>().size();
   web_view_->resize(size);
-#if !ENABLE_SKY_COMPOSITOR
-  web_layer_tree_view_impl_->setViewportSize(size);
-#endif
 }
 
 void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,

@@ -13,11 +13,9 @@ namespace sky {
 
 class SkyApplication : public mojo::Application {
  public:
-  SkyApplication(scoped_refptr<base::MessageLoopProxy> compositor_thread,
-                 mojo::ShellPtr shell,
+  SkyApplication(mojo::ShellPtr shell,
                  mojo::URLResponsePtr response)
-      : compositor_thread_(compositor_thread),
-        url_(response->url),
+      : url_(response->url),
         shell_(shell.Pass()),
         initial_response_(response.Pass()),
         view_count_(0) {
@@ -68,10 +66,9 @@ class SkyApplication : public mojo::Application {
                           mojo::URLResponsePtr response) {
     new DocumentView(
         base::Bind(&SkyApplication::OnViewDestroyed, base::Unretained(this)),
-        provider.Pass(), response.Pass(), shell_.get(), compositor_thread_);
+        provider.Pass(), response.Pass(), shell_.get());
   }
 
-  scoped_refptr<base::MessageLoopProxy> compositor_thread_;
   mojo::String url_;
   mojo::ShellPtr shell_;
   mojo::NetworkServicePtr network_service_;
@@ -79,9 +76,7 @@ class SkyApplication : public mojo::Application {
   uint32_t view_count_;
 };
 
-ContentHandlerImpl::ContentHandlerImpl(
-    scoped_refptr<base::MessageLoopProxy> compositor_thread)
-    : compositor_thread_(compositor_thread) {
+ContentHandlerImpl::ContentHandlerImpl() {
 }
 
 ContentHandlerImpl::~ContentHandlerImpl() {
@@ -89,7 +84,7 @@ ContentHandlerImpl::~ContentHandlerImpl() {
 
 void ContentHandlerImpl::StartApplication(mojo::ShellPtr shell,
                                           mojo::URLResponsePtr response) {
-  new SkyApplication(compositor_thread_, shell.Pass(), response.Pass());
+  new SkyApplication(shell.Pass(), response.Pass());
 }
 
 }  // namespace sky

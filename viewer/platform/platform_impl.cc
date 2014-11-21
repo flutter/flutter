@@ -118,7 +118,7 @@ bool PlatformImpl::isThreadedCompositingEnabled() {
 }
 
 blink::WebCompositorSupport* PlatformImpl::compositorSupport() {
-  return &compositor_support_;
+  return nullptr;
 }
 
 mojo::NetworkService* PlatformImpl::networkService() {
