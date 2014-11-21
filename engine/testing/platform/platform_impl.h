@@ -10,7 +10,6 @@
 #include "base/threading/thread_local_storage.h"
 #include "base/timer/timer.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/testing/platform/webmimeregistry_impl.h"
 #include "sky/engine/testing/platform/webthemeengine_impl.h"
 #include "sky/engine/testing/platform/webunittestsupport_impl.h"
 
@@ -23,7 +22,6 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   virtual blink::WebUnitTestSupport* unitTestSupport();
-  virtual blink::WebMimeRegistry* mimeRegistry();
   virtual blink::WebThemeEngine* themeEngine();
   virtual blink::WebString defaultLocale();
   virtual double currentTime();
@@ -50,7 +48,6 @@ class PlatformImpl : public blink::Platform {
   bool shared_timer_fire_time_was_set_while_suspended_;
   int shared_timer_suspended_;  // counter
   WebThemeEngineImpl theme_engine_;
-  WebMimeRegistryImpl mime_registry_;
   WebUnitTestSupportImpl unit_test_support_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);

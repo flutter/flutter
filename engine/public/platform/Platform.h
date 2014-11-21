@@ -62,7 +62,6 @@ class WebFlingAnimator;
 class WebGestureCurveTarget;
 class WebGestureCurve;
 class WebGraphicsContext3DProvider;
-class WebMimeRegistry;
 class WebSandboxSupport;
 struct WebFloatPoint;
 class WebThemeEngine;
@@ -83,9 +82,6 @@ public:
 
     // Must return non-null.
     virtual WebClipboard* clipboard() { return 0; }
-
-    // Must return non-null.
-    virtual WebMimeRegistry* mimeRegistry() { return 0; }
 
     // May return null if sandbox support is not necessary
     virtual WebSandboxSupport* sandboxSupport() { return 0; }

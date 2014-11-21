@@ -65,7 +65,6 @@ source_set("platform_headers") {
     "platform/WebLayerScrollClient.h",
     "platform/WebLayerTreeView.h",
     "platform/WebLocalizedString.h",
-    "platform/WebMimeRegistry.h",
     "platform/WebNonCopyable.h",
     "platform/WebPoint.h",
     "platform/WebPrivateOwnPtr.h",

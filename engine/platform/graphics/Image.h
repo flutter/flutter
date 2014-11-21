@@ -62,7 +62,6 @@ public:
     virtual ~Image();
 
     static PassRefPtr<Image> loadPlatformResource(const char* name);
-    static bool supportsType(const String&);
 
     virtual bool isBitmapImage() const { return false; }
     virtual bool currentFrameKnownToBeOpaque() = 0;

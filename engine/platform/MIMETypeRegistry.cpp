@@ -31,51 +31,9 @@
 #include "sky/engine/config.h"
 #include "sky/engine/platform/MIMETypeRegistry.h"
 
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebMimeRegistry.h"
 #include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
-
-String MIMETypeRegistry::getMIMETypeForExtension(const String &ext)
-{
-    return blink::Platform::current()->mimeRegistry()->mimeTypeForExtension(ext);
-}
-
-String MIMETypeRegistry::getWellKnownMIMETypeForExtension(const String &ext)
-{
-    // This method must be thread safe and should not consult the OS/registry.
-    return blink::Platform::current()->mimeRegistry()->wellKnownMimeTypeForExtension(ext);
-}
-
-String MIMETypeRegistry::getMIMETypeForPath(const String& path)
-{
-    int pos = path.reverseFind('.');
-    if (pos < 0)
-        return "application/octet-stream";
-    String extension = path.substring(pos + 1);
-    String mimeType = getMIMETypeForExtension(extension);
-    if (mimeType.isEmpty())
-        return "application/octet-stream";
-    return mimeType;
-}
-
-bool MIMETypeRegistry::isSupportedImageMIMEType(const String& mimeType)
-{
-    return blink::Platform::current()->mimeRegistry()->supportsImageMIMEType(mimeType.lower())
-        != blink::WebMimeRegistry::IsNotSupported;
-}
-
-bool MIMETypeRegistry::isSupportedImageResourceMIMEType(const String& mimeType)
-{
-    return isSupportedImageMIMEType(mimeType);
-}
-
-bool MIMETypeRegistry::isSupportedImagePrefixedMIMEType(const String& mimeType)
-{
-    return blink::Platform::current()->mimeRegistry()->supportsImagePrefixedMIMEType(mimeType.lower())
-        != blink::WebMimeRegistry::IsNotSupported;
-}
 
 bool MIMETypeRegistry::isSupportedImageMIMETypeForEncoding(const String& mimeType)
 {
@@ -84,18 +42,6 @@ bool MIMETypeRegistry::isSupportedImageMIMETypeForEncoding(const String& mimeTyp
     if (equalIgnoringCase(mimeType, "image/webp"))
         return true;
     return false;
-}
-
-bool MIMETypeRegistry::isSupportedJavaScriptMIMEType(const String& mimeType)
-{
-    return blink::Platform::current()->mimeRegistry()->supportsJavaScriptMIMEType(mimeType.lower())
-        != blink::WebMimeRegistry::IsNotSupported;
-}
-
-bool MIMETypeRegistry::isSupportedNonImageMIMEType(const String& mimeType)
-{
-    return blink::Platform::current()->mimeRegistry()->supportsNonImageMIMEType(mimeType.lower())
-        != blink::WebMimeRegistry::IsNotSupported;
 }
 
 } // namespace blink

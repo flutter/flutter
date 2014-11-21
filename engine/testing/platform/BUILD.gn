@@ -8,8 +8,6 @@ static_library("platform") {
   sources = [
     "platform_impl.cc",
     "platform_impl.h",
-    "webmimeregistry_impl.cc",
-    "webmimeregistry_impl.h",
     "webthemeengine_impl.cc",
     "webthemeengine_impl.h",
     "webunittestsupport_impl.cc",

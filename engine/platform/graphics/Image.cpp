@@ -73,11 +73,6 @@ PassRefPtr<Image> Image::loadPlatformResource(const char *name)
     return image.release();
 }
 
-bool Image::supportsType(const String& type)
-{
-    return MIMETypeRegistry::isSupportedImageResourceMIMEType(type);
-}
-
 bool Image::setData(PassRefPtr<SharedBuffer> data, bool allDataReceived)
 {
     m_encodedImageData = data;

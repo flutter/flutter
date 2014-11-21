@@ -27,10 +27,6 @@ PlatformImpl::PlatformImpl()
 PlatformImpl::~PlatformImpl() {
 }
 
-blink::WebMimeRegistry* PlatformImpl::mimeRegistry() {
-  return &mime_registry_;
-}
-
 blink::WebThemeEngine* PlatformImpl::themeEngine() {
   return &theme_engine_;
 }

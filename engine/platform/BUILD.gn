@@ -462,8 +462,6 @@ component("platform") {
     "LifecycleObserver.h",
     "Logging.cpp",
     "Logging.h",
-    "MIMETypeFromURL.cpp",
-    "MIMETypeFromURL.h",
     "MIMETypeRegistry.cpp",
     "MIMETypeRegistry.h",
     "network/FormData.cpp",

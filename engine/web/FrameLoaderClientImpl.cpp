@@ -49,7 +49,6 @@
 #include "sky/engine/platform/exported/WrappedResourceResponse.h"
 #include "sky/engine/platform/network/HTTPParsers.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebMimeRegistry.h"
 #include "sky/engine/public/platform/WebURL.h"
 #include "sky/engine/public/platform/WebURLError.h"
 #include "sky/engine/public/platform/WebVector.h"
