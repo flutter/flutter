@@ -1,0 +1,26 @@
+<sky>
+<style>
+square {
+  margin: 50px;
+  height: 100px;
+  width: 100px;
+  background-color: green;
+}
+</style>
+<square></square>
+<script>
+var square = document.querySelector('square');
+var timeBase = 0;
+
+function animate(time) {
+  if (!timeBase)
+    timeBase = time;
+  var delta = time - timeBase;
+  var rotation = Math.floor(delta / 10);
+  square.style.transform = 'rotate(' + rotation + 'deg)';
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+</sky>
