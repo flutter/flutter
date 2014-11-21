@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 height of an editable block remains the same after adding block elements and removing them
+1 tests
+1 pass
+0 fail

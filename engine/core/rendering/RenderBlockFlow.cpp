@@ -103,10 +103,8 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
 
     m_paintInvalidationLogicalTop = 0;
     m_paintInvalidationLogicalBottom = 0;
-    if (!firstChild() && !isAnonymousBlock())
-        setChildrenInline(true);
 
-    if (childrenInline())
+    if (isRenderParagraph())
         layoutInlineChildren(relayoutChildren, m_paintInvalidationLogicalTop, m_paintInvalidationLogicalBottom, afterEdge);
     else
         layoutBlockChildren(relayoutChildren, layoutScope, beforeEdge, afterEdge);

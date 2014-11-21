@@ -51,7 +51,6 @@ COMPILE_ASSERT(sizeof(RenderInline) == sizeof(SameSizeAsRenderInline), RenderInl
 RenderInline::RenderInline(Element* element)
     : RenderBoxModelObject(element)
 {
-    setChildrenInline(true);
 }
 
 RenderInline* RenderInline::createAnonymous(Document* document)

@@ -264,11 +264,6 @@ public:
     // children.
     virtual RenderBlock* firstLineBlock() const;
 
-    // Called when an object that was floating or positioned becomes a normal flow object
-    // again.  We have to make sure the render tree updates as needed to accommodate the new
-    // normal flow object.
-    void handleDynamicFloatPositionChange();
-
     // RenderObject tree manipulation
     //////////////////////////////////////////
     virtual bool canHaveChildren() const { return virtualChildren(); }
@@ -331,10 +326,6 @@ public:
     bool isDocumentElement() const { return document().documentElement() == m_node; }
 
     bool everHadLayout() const { return m_bitfields.everHadLayout(); }
-
-    // FIXME(sky): Remove this concept.
-    bool childrenInline() const { return isRenderParagraph(); }
-    void setChildrenInline(bool b) { m_bitfields.setChildrenInline(b); }
 
     bool alwaysCreateLineBoxesForRenderInline() const
     {
@@ -989,7 +980,6 @@ private:
             , m_everHadLayout(false)
             , m_ancestorLineBoxDirty(false)
             , m_layoutDidGetCalled(false)
-            , m_childrenInline(false)
             , m_alwaysCreateLineBoxesForRenderInline(false)
             , m_positionedState(IsStaticallyPositioned)
             , m_selectionState(SelectionNone)
@@ -1028,9 +1018,6 @@ private:
         ADD_BOOLEAN_BITFIELD(ancestorLineBoxDirty, AncestorLineBoxDirty);
 
         ADD_BOOLEAN_BITFIELD(layoutDidGetCalled, LayoutDidGetCalled);
-
-        // from RenderBlock
-        ADD_BOOLEAN_BITFIELD(childrenInline, ChildrenInline);
 
         // from RenderInline
         ADD_BOOLEAN_BITFIELD(alwaysCreateLineBoxesForRenderInline, AlwaysCreateLineBoxesForRenderInline);

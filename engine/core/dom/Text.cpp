@@ -120,7 +120,7 @@ bool Text::textRendererIsNeeded(const RenderStyle& style, const RenderObject& pa
         if (prev && !prev->isInline())
             return false;
     } else {
-        if (parent.isRenderBlock() && !parent.childrenInline() && (!prev || !prev->isInline()))
+        if (parent.isRenderBlock() && !parent.isRenderParagraph() && (!prev || !prev->isInline()))
             return false;
 
         // Avoiding creation of a Renderer for the text node is a non-essential memory optimization.

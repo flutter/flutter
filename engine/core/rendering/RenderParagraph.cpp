@@ -10,7 +10,6 @@ namespace blink {
 RenderParagraph::RenderParagraph(ContainerNode* node)
     : RenderBlockFlow(node)
 {
-    setChildrenInline(true);
 }
 
 RenderParagraph::~RenderParagraph()

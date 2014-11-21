@@ -286,9 +286,9 @@ void RenderBlock::addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, 
 
     // TODO(ojan): What should we do in this case? For now we insert an anonymous paragraph.
     // This only happens if we have a text node directly inside a non-paragraph.
-    if (!childrenInline() && newChild->isInline()) {
+    if (!isRenderParagraph() && newChild->isInline()) {
         RenderBlock* newBox = createAnonymousBlock();
-        ASSERT(newBox->childrenInline());
+        ASSERT(newBox->isRenderParagraph());
         RenderBox::addChild(newBox, beforeChild);
         newBox->addChild(newChild);
         return;
@@ -316,7 +316,7 @@ void RenderBlock::removeChild(RenderObject* oldChild)
         return;
 
     // If this was our last child be sure to clear out our line boxes.
-    if (!firstChild() && childrenInline())
+    if (!firstChild() && isRenderParagraph())
         deleteLineBoxTree();
 }
 
@@ -400,7 +400,7 @@ void RenderBlock::layoutBlock(bool)
 
 void RenderBlock::addOverflowFromChildren()
 {
-    if (childrenInline())
+    if (isRenderParagraph())
         toRenderBlockFlow(this)->addOverflowFromInlineChildren();
     else
         addOverflowFromBlockChildren();
@@ -472,7 +472,7 @@ void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, R
 
 void RenderBlock::simplifiedNormalFlowLayout()
 {
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         ListHashSet<RootInlineBox*> lineBoxes;
         for (InlineWalker walker(this); !walker.atEnd(); walker.advance()) {
             RenderObject* o = walker.current();
@@ -657,7 +657,7 @@ void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOf
     if (document().didLayoutWithPendingStylesheets() && !isRenderView())
         return;
 
-    if (childrenInline())
+    if (isRenderParagraph())
         m_lineBoxes.paint(this, paintInfo, paintOffset);
     else {
         PaintPhase newPhase = (paintInfo.phase == PaintPhaseChildOutlines) ? PaintPhaseOutline : paintInfo.phase;
@@ -920,7 +920,7 @@ GapRects RenderBlock::selectionGaps(RenderBlock* rootBlock, const LayoutPoint& r
         return result;
     }
 
-    if (childrenInline())
+    if (isRenderParagraph())
         result = toRenderBlockFlow(this)->inlineSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop, lastLogicalLeft, lastLogicalRight, paintInfo);
     else
         result = blockSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop, lastLogicalLeft, lastLogicalRight, paintInfo);
@@ -1419,7 +1419,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 
 bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
 {
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         // We have to hit-test our line boxes.
         if (m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset, hitTestAction))
             return true;
@@ -1497,7 +1497,7 @@ static PositionWithAffinity positionForPointRespectingEditingBoundaries(RenderBl
 
 PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const LayoutPoint& pointInLogicalContents)
 {
-    ASSERT(childrenInline());
+    ASSERT(isRenderParagraph());
 
     if (!firstRootBox())
         return createPositionWithAffinity(0, DOWNSTREAM);
@@ -1593,7 +1593,7 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
     offsetForContents(pointInContents);
     LayoutPoint pointInLogicalContents(pointInContents);
 
-    if (childrenInline())
+    if (isRenderParagraph())
         return positionForPointWithInlineChildren(pointInLogicalContents);
 
     RenderBox* lastCandidateBox = lastChildBox();
@@ -1632,7 +1632,7 @@ LayoutUnit RenderBlock::availableLogicalWidth() const
 
 void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
 {
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         // FIXME: Remove this const_cast.
         toRenderBlockFlow(const_cast<RenderBlock*>(this))->computeInlinePreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
     } else {
@@ -1789,7 +1789,7 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
 
 int RenderBlock::firstLineBoxBaseline() const
 {
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         if (firstLineBox())
             return firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(firstRootBox()->baselineType());
         else
@@ -1820,7 +1820,7 @@ int RenderBlock::inlineBlockBaseline(LineDirectionMode direction) const
 
 int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection) const
 {
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         if (!firstLineBox() && hasLineIfEmpty()) {
             const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
             return fontMetrics.ascent()
@@ -1887,7 +1887,7 @@ static bool shouldCheckLines(RenderObject* obj)
 
 static int getHeightForLineCount(RenderBlock* block, int l, bool includeBottom, int& count)
 {
-    if (block->isRenderBlockFlow() && block->childrenInline()) {
+    if (block->isRenderParagraph()) {
         for (RootInlineBox* box = toRenderBlockFlow(block)->firstRootBox(); box; box = box->nextRootBox()) {
             if (++count == l)
                 return box->lineBottom() + (includeBottom ? (block->borderBottom() + block->paddingBottom()) : LayoutUnit());
@@ -1914,7 +1914,7 @@ RootInlineBox* RenderBlock::lineAtIndex(int i) const
 {
     ASSERT(i >= 0);
 
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox())
             if (!i--)
                 return box;
@@ -1933,7 +1933,7 @@ RootInlineBox* RenderBlock::lineAtIndex(int i) const
 int RenderBlock::lineCount(const RootInlineBox* stopRootInlineBox, bool* found) const
 {
     int count = 0;
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox()) {
             count++;
             if (box == stopRootInlineBox) {
@@ -1965,7 +1965,7 @@ int RenderBlock::heightForLineCount(int l)
 
 void RenderBlock::clearTruncation()
 {
-    if (childrenInline() && hasMarkupTruncation()) {
+    if (isRenderParagraph() && hasMarkupTruncation()) {
         setHasMarkupTruncation(false);
         for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox())
             box->clearTruncation();
@@ -2093,7 +2093,7 @@ bool RenderBlock::recalcChildOverflowAfterStyleChange()
 
     bool childrenOverflowChanged = false;
 
-    if (childrenInline()) {
+    if (isRenderParagraph()) {
         ListHashSet<RootInlineBox*> lineBoxes;
         for (InlineWalker walker(this); !walker.atEnd(); walker.advance()) {
             RenderObject* renderer = walker.current();

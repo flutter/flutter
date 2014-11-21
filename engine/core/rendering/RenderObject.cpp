@@ -1640,17 +1640,6 @@ void RenderObject::selectionStartEnd(int& spos, int& epos) const
     view()->selectionStartEnd(spos, epos);
 }
 
-void RenderObject::handleDynamicFloatPositionChange()
-{
-    // FIXME(sky): Inline this function.
-
-    // We have gone from not affecting the inline status of the parent flow to suddenly
-    // having an impact.  See if there is a mismatch between the parent flow's
-    // childrenInline() state and our state.
-    setInline(style()->isDisplayInlineType());
-    ASSERT(isInline() == parent()->childrenInline());
-}
-
 StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
 {
     // If transform changed, and the layer does not paint into its own separate backing, then we need to invalidate paints.
@@ -1813,8 +1802,12 @@ static inline bool areCursorsEqual(const RenderStyle* a, const RenderStyle* b)
 
 void RenderObject::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
 {
-    if (s_affectsParentBlock)
-        handleDynamicFloatPositionChange();
+    if (s_affectsParentBlock) {
+        // An object that was floating or positioned became a normal flow object again.  We have to make sure the
+        // render tree updates as needed to accommodate the new normal flow object.
+        setInline(style()->isDisplayInlineType());
+        ASSERT(isInline() == parent()->isRenderParagraph());
+    }
 
     if (!m_parent)
         return;
@@ -2178,7 +2171,7 @@ void RenderObject::insertedIntoTree()
         addLayers(layer);
     }
 
-    if (parent()->childrenInline())
+    if (parent()->isRenderParagraph())
         parent()->dirtyLinesFromChangedChild(this);
 }
 
@@ -2190,7 +2183,7 @@ void RenderObject::willBeRemovedFromTree()
     if (slowFirstChild() || hasLayer())
         removeLayers(parent()->enclosingLayer());
 
-    if (isOutOfFlowPositioned() && parent()->childrenInline())
+    if (isOutOfFlowPositioned() && parent()->isRenderParagraph())
         parent()->dirtyLinesFromChangedChild(this);
 }
 
