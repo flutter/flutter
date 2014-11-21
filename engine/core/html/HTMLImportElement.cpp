@@ -74,7 +74,7 @@ void HTMLImportElement::importChildWasDestroyed(HTMLImportChild* child)
 
 bool HTMLImportElement::isSync() const
 {
-    return true;
+    return !hasAttribute(HTMLNames::asyncAttr);
 }
 
 Element* HTMLImportElement::link()
