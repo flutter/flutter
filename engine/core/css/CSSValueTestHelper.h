@@ -33,8 +33,8 @@
  * helper functions.
  */
 
-#ifndef CSSValueTestHelper_h
-#define CSSValueTestHelper_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSVALUETESTHELPER_H_
+#define SKY_ENGINE_CORE_CSS_CSSVALUETESTHELPER_H_
 
 #include <ostream>
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
@@ -72,4 +72,4 @@ inline void PrintTo(const CSSPrimitiveValue& cssValue, ::std::ostream* os, const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSVALUETESTHELPER_H_

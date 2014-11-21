@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWrapperWorld_h
-#define DOMWrapperWorld_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERWORLD_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERWORLD_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -170,4 +170,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMWrapperWorld_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERWORLD_H_

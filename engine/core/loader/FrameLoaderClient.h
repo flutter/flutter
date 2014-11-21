@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameLoaderClient_h
-#define FrameLoaderClient_h
+#ifndef SKY_ENGINE_CORE_LOADER_FRAMELOADERCLIENT_H_
+#define SKY_ENGINE_CORE_LOADER_FRAMELOADERCLIENT_H_
 
 #include "sky/engine/core/frame/FrameClient.h"
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
@@ -123,4 +123,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // FrameLoaderClient_h
+#endif  // SKY_ENGINE_CORE_LOADER_FRAMELOADERCLIENT_H_

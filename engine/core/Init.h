@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Init_h
-#define Init_h
+#ifndef SKY_ENGINE_CORE_INIT_H_
+#define SKY_ENGINE_CORE_INIT_H_
 
 namespace blink {
 
@@ -53,4 +53,4 @@ private:
 
 } // namespace blink
 
-#endif // Init_h
+#endif  // SKY_ENGINE_CORE_INIT_H_

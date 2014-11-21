@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BidiTextRun_h
-#define BidiTextRun_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDITEXTRUN_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDITEXTRUN_H_
 
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/TextRun.h"
@@ -43,4 +43,4 @@ PLATFORM_EXPORT TextRun textRunWithDirectionality(const String& value, bool& has
 
 } // namespace blink
 
-#endif // BidiTextRun_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDITEXTRUN_H_

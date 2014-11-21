@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Console_h
-#define Console_h
+#ifndef SKY_ENGINE_CORE_FRAME_CONSOLE_H_
+#define SKY_ENGINE_CORE_FRAME_CONSOLE_H_
 
 #include "sky/engine/core/frame/ConsoleBase.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif // Console_h
+#endif  // SKY_ENGINE_CORE_FRAME_CONSOLE_H_

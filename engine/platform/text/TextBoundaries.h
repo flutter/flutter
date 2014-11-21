@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextBoundaries_h
-#define TextBoundaries_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/unicode/Unicode.h"
@@ -45,4 +45,4 @@ PLATFORM_EXPORT int findNextWordFromIndex(const UChar*, int len, int position, b
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_

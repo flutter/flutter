@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FindOptions_h
-#define FindOptions_h
+#ifndef SKY_ENGINE_CORE_EDITING_FINDOPTIONS_H_
+#define SKY_ENGINE_CORE_EDITING_FINDOPTIONS_H_
 
 namespace blink {
 
@@ -43,4 +43,4 @@ typedef unsigned FindOptions;
 
 } // namespace blink
 
-#endif // FindOptions_h
+#endif  // SKY_ENGINE_CORE_EDITING_FINDOPTIONS_H_

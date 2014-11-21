@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebGLExtensionName_h
-#define WebGLExtensionName_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSIONNAME_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSIONNAME_H_
 
 namespace blink {
 
@@ -35,4 +35,4 @@ enum WebGLExtensionName {
 
 }
 
-#endif // WebGLExtensionName_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSIONNAME_H_

@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceRequest_h
-#define ResourceRequest_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCEREQUEST_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCEREQUEST_H_
 
 #include "sky/engine/platform/network/FormData.h"
 #include "sky/engine/platform/network/HTTPHeaderMap.h"
@@ -215,4 +215,4 @@ inline bool operator!=(ResourceRequest& a, const ResourceRequest& b) { return !(
 
 } // namespace blink
 
-#endif // ResourceRequest_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCEREQUEST_H_

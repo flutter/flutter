@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Settings_h
-#define Settings_h
+#ifndef SKY_ENGINE_CORE_FRAME_SETTINGS_H_
+#define SKY_ENGINE_CORE_FRAME_SETTINGS_H_
 
 #include "gen/sky/core/SettingsMacros.h"
 #include "sky/engine/bindings/core/v8/V8CacheOptions.h"
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // Settings_h
+#endif  // SKY_ENGINE_CORE_FRAME_SETTINGS_H_

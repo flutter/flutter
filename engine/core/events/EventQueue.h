@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef EventQueue_h
-#define EventQueue_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTQUEUE_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTQUEUE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -47,4 +47,4 @@ public:
 
 }
 
-#endif // EventQueue_h
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTQUEUE_H_

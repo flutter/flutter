@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebBeginFrameArgs_h
-#define WebBeginFrameArgs_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBBEGINFRAMEARGS_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBBEGINFRAMEARGS_H_
 
 namespace blink {
 
@@ -39,4 +39,4 @@ struct WebBeginFrameArgs {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBBEGINFRAMEARGS_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Logging_h
-#define Logging_h
+#ifndef SKY_ENGINE_PLATFORM_LOGGING_H_
+#define SKY_ENGINE_PLATFORM_LOGGING_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -66,4 +66,4 @@ PLATFORM_EXPORT WTFLogChannel* getChannelFromName(const String& channelName);
 
 #endif // !LOG_DISABLED
 
-#endif // Logging_h
+#endif  // SKY_ENGINE_PLATFORM_LOGGING_H_

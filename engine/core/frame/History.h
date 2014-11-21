@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef History_h
-#define History_h
+#ifndef SKY_ENGINE_CORE_FRAME_HISTORY_H_
+#define SKY_ENGINE_CORE_FRAME_HISTORY_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif // History_h
+#endif  // SKY_ENGINE_CORE_FRAME_HISTORY_H_

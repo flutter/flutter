@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MutationObserverRegistration_h
-#define MutationObserverRegistration_h
+#ifndef SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERREGISTRATION_H_
+#define SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERREGISTRATION_H_
 
 #include "sky/engine/core/dom/MutationObserver.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -78,4 +78,4 @@ private:
 
 } // namespace blink
 
-#endif // MutationObserverRegistration_h
+#endif  // SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERREGISTRATION_H_

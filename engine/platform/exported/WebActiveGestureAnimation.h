@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebActiveGestureAnimation_h
-#define WebActiveGestureAnimation_h
+#ifndef SKY_ENGINE_PLATFORM_EXPORTED_WEBACTIVEGESTUREANIMATION_H_
+#define SKY_ENGINE_PLATFORM_EXPORTED_WEBACTIVEGESTUREANIMATION_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_EXPORTED_WEBACTIVEGESTUREANIMATION_H_

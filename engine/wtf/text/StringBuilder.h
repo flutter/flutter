@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringBuilder_h
-#define StringBuilder_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGBUILDER_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGBUILDER_H_
 
 #include "sky/engine/wtf/WTFExport.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -399,4 +399,4 @@ inline bool operator!=(const String& a, const StringBuilder& b) { return !equal(
 
 using WTF::StringBuilder;
 
-#endif // StringBuilder_h
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGBUILDER_H_

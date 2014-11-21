@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VisibleSelection_h
-#define VisibleSelection_h
+#ifndef SKY_ENGINE_CORE_EDITING_VISIBLESELECTION_H_
+#define SKY_ENGINE_CORE_EDITING_VISIBLESELECTION_H_
 
 #include "sky/engine/core/editing/SelectionType.h"
 #include "sky/engine/core/editing/TextGranularity.h"
@@ -188,4 +188,4 @@ void showTree(const blink::VisibleSelection&);
 void showTree(const blink::VisibleSelection*);
 #endif
 
-#endif // VisibleSelection_h
+#endif  // SKY_ENGINE_CORE_EDITING_VISIBLESELECTION_H_

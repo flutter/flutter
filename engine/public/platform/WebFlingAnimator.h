@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFlingAnimator_h
-#define WebFlingAnimator_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFLINGANIMATOR_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFLINGANIMATOR_H_
 
 #include "sky/engine/public/platform/WebFloatPoint.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -45,4 +45,4 @@ public:
 
 } // namespace blink
 
-#endif // WebFlingAnimator_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFLINGANIMATOR_H_

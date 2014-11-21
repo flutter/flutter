@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositedLayerMapping_h
-#define CompositedLayerMapping_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITEDLAYERMAPPING_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITEDLAYERMAPPING_H_
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/compositing/GraphicsLayerUpdater.h"
@@ -387,4 +387,4 @@ private:
 
 } // namespace blink
 
-#endif // CompositedLayerMapping_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITEDLAYERMAPPING_H_

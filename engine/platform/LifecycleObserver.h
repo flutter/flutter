@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef LifecycleObserver_h
-#define LifecycleObserver_h
+#ifndef SKY_ENGINE_PLATFORM_LIFECYCLEOBSERVER_H_
+#define SKY_ENGINE_PLATFORM_LIFECYCLEOBSERVER_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -90,4 +90,4 @@ inline void LifecycleObserver<T>::observeContext(typename LifecycleObserver<T>::
 
 } // namespace blink
 
-#endif // LifecycleObserver_h
+#endif  // SKY_ENGINE_PLATFORM_LIFECYCLEOBSERVER_H_

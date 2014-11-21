@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef DocumentMarkerController_h
-#define DocumentMarkerController_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTMARKERCONTROLLER_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTMARKERCONTROLLER_H_
 
 #include "sky/engine/core/dom/DocumentMarker.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -115,4 +115,4 @@ private:
 void showDocumentMarkers(const blink::DocumentMarkerController*);
 #endif
 
-#endif // DocumentMarkerController_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTMARKERCONTROLLER_H_

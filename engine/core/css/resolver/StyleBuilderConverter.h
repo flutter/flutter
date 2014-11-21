@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleBuilderConverter_h
-#define StyleBuilderConverter_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDERCONVERTER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDERCONVERTER_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
@@ -112,4 +112,4 @@ AtomicString StyleBuilderConverter::convertString(StyleResolverState&, CSSValue*
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDERCONVERTER_H_

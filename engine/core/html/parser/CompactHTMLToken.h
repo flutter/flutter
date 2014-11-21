@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompactHTMLToken_h
-#define CompactHTMLToken_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_COMPACTHTMLTOKEN_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_COMPACTHTMLTOKEN_H_
 
 #include "sky/engine/core/html/parser/HTMLToken.h"
 #include "sky/engine/wtf/Vector.h"
@@ -74,4 +74,4 @@ typedef Vector<CompactHTMLToken> CompactHTMLTokenStream;
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_COMPACTHTMLTOKEN_H_

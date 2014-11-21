@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef AtomicString_h
-#define AtomicString_h
+#ifndef SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_
+#define SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_
 
 #include "sky/engine/wtf/HashTableDeletedValueType.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -249,4 +249,4 @@ using WTF::emptyAtom;
 using WTF::starAtom;
 
 #include "sky/engine/wtf/text/StringConcatenate.h"
-#endif // AtomicString_h
+#endif  // SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_

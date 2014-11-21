@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JavaScriptCallFrame_h
-#define JavaScriptCallFrame_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_JAVASCRIPTCALLFRAME_H_
+#define SKY_ENGINE_CORE_INSPECTOR_JAVASCRIPTCALLFRAME_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/ScriptState.h"
@@ -86,4 +86,4 @@ private:
 
 } // namespace blink
 
-#endif // JavaScriptCallFrame_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_JAVASCRIPTCALLFRAME_H_

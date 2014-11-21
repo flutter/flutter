@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTransformKeyframe_h
-#define WebTransformKeyframe_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMKEYFRAME_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMKEYFRAME_H_
 
 #include "sky/engine/public/platform/WebNonCopyable.h"
 #include "sky/engine/public/platform/WebPrivateOwnPtr.h"
@@ -53,4 +53,4 @@ private:
 
 } // namespace blink
 
-#endif // WebTransformKeyframe_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMKEYFRAME_H_

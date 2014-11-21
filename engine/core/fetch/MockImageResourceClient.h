@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MockImageResourceClient_h
-#define MockImageResourceClient_h
+#ifndef SKY_ENGINE_CORE_FETCH_MOCKIMAGERESOURCECLIENT_H_
+#define SKY_ENGINE_CORE_FETCH_MOCKIMAGERESOURCECLIENT_H_
 
 #include "sky/engine/core/fetch/ImageResourceClient.h"
 
@@ -67,4 +67,4 @@ private:
 
 } // namespace blink
 
-#endif // ImageResourceTest_h
+#endif  // SKY_ENGINE_CORE_FETCH_MOCKIMAGERESOURCECLIENT_H_

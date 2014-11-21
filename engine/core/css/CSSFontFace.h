@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFontFace_h
-#define CSSFontFace_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTFACE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTFACE_H_
 
 #include "sky/engine/core/css/CSSFontFaceSource.h"
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
@@ -121,4 +121,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTFACE_H_

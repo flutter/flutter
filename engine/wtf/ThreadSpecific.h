@@ -39,8 +39,8 @@
  * WebKit the repeated call bahavior is utilized.
  */
 
-#ifndef WTF_ThreadSpecific_h
-#define WTF_ThreadSpecific_h
+#ifndef SKY_ENGINE_WTF_THREADSPECIFIC_H_
+#define SKY_ENGINE_WTF_THREADSPECIFIC_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/StdLibExtras.h"
@@ -204,4 +204,4 @@ inline T& ThreadSpecific<T>::operator*()
 
 using WTF::ThreadSpecific;
 
-#endif // WTF_ThreadSpecific_h
+#endif  // SKY_ENGINE_WTF_THREADSPECIFIC_H_

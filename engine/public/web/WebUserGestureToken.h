@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebUserGestureToken_h
-#define WebUserGestureToken_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTURETOKEN_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTURETOKEN_H_
 
 #include "../platform/WebPrivatePtr.h"
 
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif // WebUserGestureToken_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTURETOKEN_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontFamily_h
-#define FontFamily_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTFAMILY_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTFAMILY_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -92,4 +92,4 @@ inline PassRefPtr<SharedFontFamily> FontFamily::releaseNext()
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTFAMILY_H_

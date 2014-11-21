@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMSettableTokenList_h
-#define DOMSettableTokenList_h
+#ifndef SKY_ENGINE_CORE_DOM_DOMSETTABLETOKENLIST_H_
+#define SKY_ENGINE_CORE_DOM_DOMSETTABLETOKENLIST_H_
 
 #include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/SpaceSplitString.h"
@@ -80,4 +80,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMSettableTokenList_h
+#endif  // SKY_ENGINE_CORE_DOM_DOMSETTABLETOKENLIST_H_

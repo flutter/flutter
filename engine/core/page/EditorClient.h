@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EditorClient_h
-#define EditorClient_h
+#ifndef SKY_ENGINE_CORE_PAGE_EDITORCLIENT_H_
+#define SKY_ENGINE_CORE_PAGE_EDITORCLIENT_H_
 
 #include "sky/engine/core/editing/SelectionType.h"
 #include "sky/engine/wtf/Forward.h"
@@ -51,4 +51,4 @@ public:
 
 }
 
-#endif // EditorClient_h
+#endif  // SKY_ENGINE_CORE_PAGE_EDITORCLIENT_H_

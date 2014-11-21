@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JSONParser_h
-#define JSONParser_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_JSONPARSER_H_
+#define SKY_ENGINE_CORE_INSPECTOR_JSONPARSER_H_
 
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -42,4 +42,4 @@ PassRefPtr<JSONValue> parseJSON(const String& json);
 
 } // namespace blink
 
-#endif // !defined(JSONParser_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_JSONPARSER_H_

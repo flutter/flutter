@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8CustomElementLifecycleCallbacks_h
-#define V8CustomElementLifecycleCallbacks_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8CUSTOMELEMENTLIFECYCLECALLBACKS_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8CUSTOMELEMENTLIFECYCLECALLBACKS_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/ScriptState.h"
@@ -77,4 +77,4 @@ private:
 
 }
 
-#endif // V8CustomElementLifecycleCallbacks_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8CUSTOMELEMENTLIFECYCLECALLBACKS_H_

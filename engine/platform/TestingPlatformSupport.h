@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TestingPlatformSupport_h
-#define TestingPlatformSupport_h
+#ifndef SKY_ENGINE_PLATFORM_TESTINGPLATFORMSUPPORT_H_
+#define SKY_ENGINE_PLATFORM_TESTINGPLATFORMSUPPORT_H_
 
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebDiscardableMemory.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif // TestingPlatformSupport_h
+#endif  // SKY_ENGINE_PLATFORM_TESTINGPLATFORMSUPPORT_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFallbackFont_h
-#define WebFallbackFont_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFALLBACKFONT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFALLBACKFONT_H_
 
 #include "../WebCString.h"
 #include "../WebCommon.h"
@@ -54,4 +54,4 @@ struct WebFallbackFont {
 
 } // namespace blink
 
-#endif // WebFallbackFont_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFALLBACKFONT_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptController_h
-#define ScriptController_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCONTROLLER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCONTROLLER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/SharedPersistent.h"
@@ -120,4 +120,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptController_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCONTROLLER_H_

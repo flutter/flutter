@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BindingSecurity_h
-#define BindingSecurity_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_BINDINGSECURITY_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_BINDINGSECURITY_H_
 
 // FIXME: The LocalFrame include should not be necessary, clients should be including it where they use it.
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -56,4 +56,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_BINDINGSECURITY_H_

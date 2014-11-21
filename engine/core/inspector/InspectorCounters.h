@@ -28,8 +28,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef InspectorCounters_h
-#define InspectorCounters_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORCOUNTERS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORCOUNTERS_H_
 
 #include "sky/engine/wtf/FastAllocBase.h"
 
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif // !defined(InspectorCounters_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORCOUNTERS_H_

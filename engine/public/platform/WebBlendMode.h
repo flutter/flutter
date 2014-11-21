@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebBlendMode_h
-#define WebBlendMode_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBBLENDMODE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBBLENDMODE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -56,4 +56,4 @@ enum WebBlendMode {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBBLENDMODE_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayer_h
-#define GraphicsLayer_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
@@ -330,4 +330,4 @@ private:
 void PLATFORM_EXPORT showGraphicsLayerTree(const blink::GraphicsLayer*);
 #endif
 
-#endif // GraphicsLayer_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYER_H_

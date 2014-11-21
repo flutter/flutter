@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCompositorSupport_h
-#define WebCompositorSupport_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORSUPPORT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORSUPPORT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebCompositorAnimation.h"
@@ -87,4 +87,4 @@ protected:
 
 }
 
-#endif // WebCompositorSupport_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORSUPPORT_H_

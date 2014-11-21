@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebInputEventConversion_h
-#define WebInputEventConversion_h
+#ifndef SKY_ENGINE_WEB_WEBINPUTEVENTCONVERSION_H_
+#define SKY_ENGINE_WEB_WEBINPUTEVENTCONVERSION_H_
 
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
@@ -141,4 +141,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBINPUTEVENTCONVERSION_H_

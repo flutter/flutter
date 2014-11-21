@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ThreadLocalEventNames_h
-#define ThreadLocalEventNames_h
+#ifndef SKY_ENGINE_CORE_EVENTS_THREADLOCALEVENTNAMES_H_
+#define SKY_ENGINE_CORE_EVENTS_THREADLOCALEVENTNAMES_H_
 
 #include "gen/sky/core/EventInterfaces.h"
 #include "gen/sky/core/EventNames.h"
@@ -41,4 +41,4 @@ inline bool isTouchEventType(const AtomicString& eventType)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_THREADLOCALEVENTNAMES_H_

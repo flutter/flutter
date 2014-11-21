@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableImage_h
-#define AnimatableImage_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEIMAGE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEIMAGE_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
@@ -66,4 +66,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableImage, isImage());
 
 } // namespace blink
 
-#endif // AnimatableImage_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEIMAGE_H_

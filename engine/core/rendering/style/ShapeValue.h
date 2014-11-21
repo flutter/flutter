@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef ShapeValue_h
-#define ShapeValue_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/rendering/style/BasicShapes.h"
@@ -135,4 +135,4 @@ inline bool ShapeValue::operator==(const ShapeValue& other) const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_

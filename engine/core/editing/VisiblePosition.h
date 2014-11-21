@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VisiblePosition_h
-#define VisiblePosition_h
+#ifndef SKY_ENGINE_CORE_EDITING_VISIBLEPOSITION_H_
+#define SKY_ENGINE_CORE_EDITING_VISIBLEPOSITION_H_
 
 #include "sky/engine/core/editing/EditingBoundary.h"
 #include "sky/engine/core/editing/PositionWithAffinity.h"
@@ -147,4 +147,4 @@ void showTree(const blink::VisiblePosition*);
 void showTree(const blink::VisiblePosition&);
 #endif
 
-#endif // VisiblePosition_h
+#endif  // SKY_ENGINE_CORE_EDITING_VISIBLEPOSITION_H_

@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatSize_h
-#define FloatSize_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATSIZE_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATSIZE_H_
 
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -179,4 +179,4 @@ inline IntPoint flooredIntPoint(const FloatSize& p)
 
 } // namespace blink
 
-#endif // FloatSize_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATSIZE_H_

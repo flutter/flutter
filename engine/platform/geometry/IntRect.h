@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IntRect_h
-#define IntRect_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTRECT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_INTRECT_H_
 
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -186,4 +186,4 @@ inline bool operator!=(const IntRect& a, const IntRect& b)
 
 WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::IntRect);
 
-#endif // IntRect_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTRECT_H_

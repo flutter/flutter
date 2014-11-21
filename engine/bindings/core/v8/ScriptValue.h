@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptValue_h
-#define ScriptValue_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTVALUE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTVALUE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/bindings/core/v8/SharedPersistent.h"
@@ -148,4 +148,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptValue_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTVALUE_H_

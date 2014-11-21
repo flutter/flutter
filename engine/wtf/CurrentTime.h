@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CurrentTime_h
-#define CurrentTime_h
+#ifndef SKY_ENGINE_WTF_CURRENTTIME_H_
+#define SKY_ENGINE_WTF_CURRENTTIME_H_
 
 #include "sky/engine/wtf/WTFExport.h"
 
@@ -62,4 +62,4 @@ using WTF::currentTime;
 using WTF::currentTimeMS;
 using WTF::monotonicallyIncreasingTime;
 
-#endif // CurrentTime_h
+#endif  // SKY_ENGINE_WTF_CURRENTTIME_H_

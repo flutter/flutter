@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlatformGestureEvent_h
-#define PlatformGestureEvent_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMGESTUREEVENT_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMGESTUREEVENT_H_
 
 #include <string.h>
 #include "sky/engine/platform/PlatformEvent.h"
@@ -168,4 +168,4 @@ protected:
 
 } // namespace blink
 
-#endif // PlatformGestureEvent_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMGESTUREEVENT_H_

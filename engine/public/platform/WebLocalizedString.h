@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLocalizedString_h
-#define WebLocalizedString_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBLOCALIZEDSTRING_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBLOCALIZEDSTRING_H_
 
 namespace blink {
 
@@ -159,4 +159,4 @@ struct WebLocalizedString {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBLOCALIZEDSTRING_H_

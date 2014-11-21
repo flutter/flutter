@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PrintStream_h
-#define PrintStream_h
+#ifndef SKY_ENGINE_WTF_PRINTSTREAM_H_
+#define SKY_ENGINE_WTF_PRINTSTREAM_H_
 
 #include <stdarg.h>
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -298,5 +298,5 @@ using WTF::PointerDump;
 using WTF::PrintStream;
 using WTF::pointerDump;
 
-#endif // PrintStream_h
+#endif  // SKY_ENGINE_WTF_PRINTSTREAM_H_
 

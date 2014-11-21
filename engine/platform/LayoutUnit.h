@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutUnit_h
-#define LayoutUnit_h
+#ifndef SKY_ENGINE_PLATFORM_LAYOUTUNIT_H_
+#define SKY_ENGINE_PLATFORM_LAYOUTUNIT_H_
 
 #include <limits.h>
 #include <stdlib.h>
@@ -790,4 +790,4 @@ inline LayoutUnit clampToLayoutUnit(LayoutUnit value, LayoutUnit min, LayoutUnit
 
 } // namespace blink
 
-#endif // LayoutUnit_h
+#endif  // SKY_ENGINE_PLATFORM_LAYOUTUNIT_H_

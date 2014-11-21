@@ -33,8 +33,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextRunConstructor_h
-#define TextRunConstructor_h
+#ifndef SKY_ENGINE_CORE_RENDERING_TEXTRUNCONSTRUCTOR_H_
+#define SKY_ENGINE_CORE_RENDERING_TEXTRUNCONSTRUCTOR_H_
 
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/TextRun.h"
@@ -83,4 +83,4 @@ TextRun constructTextRun(RenderObject* context, const Font&, const UChar* charac
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_TEXTRUNCONSTRUCTOR_H_

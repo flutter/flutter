@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VisibleUnits_h
-#define VisibleUnits_h
+#ifndef SKY_ENGINE_CORE_EDITING_VISIBLEUNITS_H_
+#define SKY_ENGINE_CORE_EDITING_VISIBLEUNITS_H_
 
 #include "sky/engine/core/editing/EditingBoundary.h"
 #include "sky/engine/platform/text/TextDirection.h"
@@ -102,4 +102,4 @@ LayoutRect localCaretRectOfPosition(const PositionWithAffinity&, RenderObject*&)
 
 } // namespace blink
 
-#endif // VisibleUnits_h
+#endif  // SKY_ENGINE_CORE_EDITING_VISIBLEUNITS_H_

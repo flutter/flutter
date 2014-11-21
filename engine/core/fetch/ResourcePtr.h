@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourcePtr_h
-#define ResourcePtr_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCEPTR_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCEPTR_H_
 
 #include "sky/engine/core/fetch/Resource.h"
 
@@ -113,4 +113,4 @@ template <class R, class RR> bool operator!=(const RR* res, const ResourcePtr<R>
 }
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCEPTR_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLConstructionSite_h
-#define HTMLConstructionSite_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLCONSTRUCTIONSITE_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLCONSTRUCTIONSITE_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/html/parser/HTMLElementStack.h"
@@ -193,4 +193,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLCONSTRUCTIONSITE_H_

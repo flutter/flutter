@@ -25,8 +25,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef LocalFrame_h
-#define LocalFrame_h
+#ifndef SKY_ENGINE_CORE_FRAME_LOCALFRAME_H_
+#define SKY_ENGINE_CORE_FRAME_LOCALFRAME_H_
 
 #include "sky/engine/core/frame/Frame.h"
 #include "sky/engine/core/loader/FrameLoader.h"
@@ -193,4 +193,4 @@ namespace blink {
 // At that time this #define will be removed and all the uses of it will need to be corrected.
 #define toLocalFrameTemporary toLocalFrame
 
-#endif // LocalFrame_h
+#endif  // SKY_ENGINE_CORE_FRAME_LOCALFRAME_H_

@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ContentSearchUtils_h
-#define ContentSearchUtils_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_CONTENTSEARCHUTILS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_CONTENTSEARCHUTILS_H_
 
 #include "gen/sky/core/InspectorTypeBuilder.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -55,4 +55,4 @@ String findSourceMapURL(const String& content, MagicCommentType, bool* deprecate
 } // namespace blink
 
 
-#endif // !defined(ContentSearchUtils_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_CONTENTSEARCHUTILS_H_

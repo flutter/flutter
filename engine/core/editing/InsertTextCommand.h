@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InsertTextCommand_h
-#define InsertTextCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_INSERTTEXTCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_INSERTTEXTCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif // InsertTextCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_INSERTTEXTCOMMAND_H_

@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef PlatformTouchEvent_h
-#define PlatformTouchEvent_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMTOUCHEVENT_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMTOUCHEVENT_H_
 
 #include "sky/engine/platform/PlatformEvent.h"
 #include "sky/engine/platform/PlatformTouchPoint.h"
@@ -45,4 +45,4 @@ protected:
 
 }
 
-#endif // PlatformTouchEvent_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMTOUCHEVENT_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Supplementable_h
-#define Supplementable_h
+#ifndef SKY_ENGINE_PLATFORM_SUPPLEMENTABLE_H_
+#define SKY_ENGINE_PLATFORM_SUPPLEMENTABLE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -196,4 +196,4 @@ class Supplementable : public SupplementableBase<T, false> {
 
 } // namespace blink
 
-#endif // Supplementable_h
+#endif  // SKY_ENGINE_PLATFORM_SUPPLEMENTABLE_H_

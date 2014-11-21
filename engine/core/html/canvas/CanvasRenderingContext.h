@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasRenderingContext_h
-#define CanvasRenderingContext_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT_H_
 
 #include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT_H_

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef WTF_ListHashSet_h
-#define WTF_ListHashSet_h
+#ifndef SKY_ENGINE_WTF_LISTHASHSET_H_
+#define SKY_ENGINE_WTF_LISTHASHSET_H_
 
 #include "sky/engine/wtf/DefaultAllocator.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -973,4 +973,4 @@ namespace WTF {
 
 using WTF::ListHashSet;
 
-#endif /* WTF_ListHashSet_h */
+#endif  // SKY_ENGINE_WTF_LISTHASHSET_H_

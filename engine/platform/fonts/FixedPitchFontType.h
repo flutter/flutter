@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FixedPitchFontType_h
-#define FixedPitchFontType_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FIXEDPITCHFONTTYPE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FIXEDPITCHFONTTYPE_H_
 
 namespace blink {
 
@@ -14,4 +14,4 @@ enum FixedPitchFontType {
 
 } // namespace blink
 
-#endif // FixedPitchFontType_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FIXEDPITCHFONTTYPE_H_

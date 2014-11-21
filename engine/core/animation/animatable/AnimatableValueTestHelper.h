@@ -33,8 +33,8 @@
  * helper functions.
  */
 
-#ifndef AnimatableValueTestHelper_h
-#define AnimatableValueTestHelper_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUETESTHELPER_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUETESTHELPER_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableClipPathOperation.h"
 #include "sky/engine/core/animation/animatable/AnimatableColor.h"
@@ -69,4 +69,4 @@ void PrintTo(const AnimatableValue&, ::std::ostream*);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUETESTHELPER_H_

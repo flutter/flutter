@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef DeferredLegacyStyleInterpolation_h
-#define DeferredLegacyStyleInterpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_DEFERREDLEGACYSTYLEINTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_DEFERREDLEGACYSTYLEINTERPOLATION_H_
 
 #include "sky/engine/core/animation/StyleInterpolation.h"
 #include "sky/engine/core/css/CSSValue.h"
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_DEFERREDLEGACYSTYLEINTERPOLATION_H_

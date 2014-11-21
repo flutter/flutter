@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InputMethodController_h
-#define InputMethodController_h
+#ifndef SKY_ENGINE_CORE_EDITING_INPUTMETHODCONTROLLER_H_
+#define SKY_ENGINE_CORE_EDITING_INPUTMETHODCONTROLLER_H_
 
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/editing/PlainTextRange.h"
@@ -115,4 +115,4 @@ private:
 
 } // namespace blink
 
-#endif // InputMethodController_h
+#endif  // SKY_ENGINE_CORE_EDITING_INPUTMETHODCONTROLLER_H_

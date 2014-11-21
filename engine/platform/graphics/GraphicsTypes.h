@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsTypes_h
-#define GraphicsTypes_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
@@ -131,4 +131,4 @@ PLATFORM_EXPORT bool parseTextBaseline(const String&, TextBaseline&);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_

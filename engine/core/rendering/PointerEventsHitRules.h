@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef PointerEventsHitRules_h
-#define PointerEventsHitRules_h
+#ifndef SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
+#define SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
 
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -45,6 +45,6 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
 
 // vim:ts=4:noet

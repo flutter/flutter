@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontCacheClient_h
-#define FontCacheClient_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTCACHECLIENT_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTCACHECLIENT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -46,4 +46,4 @@ public:
 
 } // namespace blink
 
-#endif // FontCacheClient_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCACHECLIENT_H_

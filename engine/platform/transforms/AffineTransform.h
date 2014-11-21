@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AffineTransform_h
-#define AffineTransform_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_AFFINETRANSFORM_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_AFFINETRANSFORM_H_
 
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
 
@@ -181,4 +181,4 @@ PLATFORM_EXPORT AffineTransform makeMapBetweenRects(const FloatRect& source, con
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_AFFINETRANSFORM_H_

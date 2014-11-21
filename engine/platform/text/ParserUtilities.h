@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef ParserUtilities_h
-#define ParserUtilities_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_PARSERUTILITIES_H_
+#define SKY_ENGINE_PLATFORM_TEXT_PARSERUTILITIES_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -65,4 +65,4 @@ inline bool skipString(const CharType*& ptr, const CharType* end, const char* st
 
 } // namespace blink
 
-#endif // ParserUtilities_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_PARSERUTILITIES_H_

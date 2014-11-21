@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8ThrowException_h
-#define V8ThrowException_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8THROWEXCEPTION_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8THROWEXCEPTION_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
@@ -61,4 +61,4 @@ public:
 
 } // namespace blink
 
-#endif // V8ThrowException_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8THROWEXCEPTION_H_

@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef DOMWindowEventQueue_h
-#define DOMWindowEventQueue_h
+#ifndef SKY_ENGINE_CORE_EVENTS_DOMWINDOWEVENTQUEUE_H_
+#define SKY_ENGINE_CORE_EVENTS_DOMWINDOWEVENTQUEUE_H_
 
 #include "sky/engine/core/events/EventQueue.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -71,4 +71,4 @@ private:
 
 }
 
-#endif // DOMWindowEventQueue_h
+#endif  // SKY_ENGINE_CORE_EVENTS_DOMWINDOWEVENTQUEUE_H_

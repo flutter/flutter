@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef TimingFunction_h
-#define TimingFunction_h
+#ifndef SKY_ENGINE_PLATFORM_ANIMATION_TIMINGFUNCTION_H_
+#define SKY_ENGINE_PLATFORM_ANIMATION_TIMINGFUNCTION_H_
 
 #include <algorithm>
 #include "sky/engine/platform/animation/AnimationUtilities.h"
@@ -258,4 +258,4 @@ DEFINE_TIMING_FUNCTION_TYPE_CASTS(Steps);
 
 } // namespace blink
 
-#endif // TimingFunction_h
+#endif  // SKY_ENGINE_PLATFORM_ANIMATION_TIMINGFUNCTION_H_

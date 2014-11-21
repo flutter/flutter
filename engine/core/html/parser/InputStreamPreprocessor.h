@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InputStreamPreprocessor_h
-#define InputStreamPreprocessor_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_INPUTSTREAMPREPROCESSOR_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_INPUTSTREAMPREPROCESSOR_H_
 
 #include "sky/engine/platform/text/SegmentedString.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -118,5 +118,5 @@ private:
 
 }
 
-#endif // InputStreamPreprocessor_h
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_INPUTSTREAMPREPROCESSOR_H_
 

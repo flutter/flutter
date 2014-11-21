@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptRegexp_h
-#define ScriptRegexp_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTREGEXP_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTREGEXP_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -54,4 +54,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptRegexp_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTREGEXP_H_

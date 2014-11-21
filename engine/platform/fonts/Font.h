@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Font_h
-#define Font_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONT_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
@@ -226,4 +226,4 @@ inline float Font::tabWidth(const SimpleFontData& fontData, unsigned tabSize, fl
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONT_H_

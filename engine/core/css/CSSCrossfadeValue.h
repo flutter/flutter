@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSCrossfadeValue_h
-#define CSSCrossfadeValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCROSSFADEVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSCROSSFADEVALUE_H_
 
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
@@ -108,4 +108,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSCrossfadeValue, isCrossfadeValue());
 
 } // namespace blink
 
-#endif // CSSCrossfadeValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCROSSFADEVALUE_H_

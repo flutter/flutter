@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ScriptAsyncCallStack_h
-#define ScriptAsyncCallStack_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTASYNCCALLSTACK_H_
+#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTASYNCCALLSTACK_H_
 
 #include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -27,4 +27,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptAsyncCallStack_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTASYNCCALLSTACK_H_

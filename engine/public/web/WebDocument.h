@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebDocument_h
-#define WebDocument_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBDOCUMENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBDOCUMENT_H_
 
 #include "../platform/WebReferrerPolicy.h"
 #include "../platform/WebVector.h"
@@ -98,4 +98,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBDOCUMENT_H_

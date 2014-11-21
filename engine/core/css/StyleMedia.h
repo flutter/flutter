@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleMedia_h
-#define StyleMedia_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLEMEDIA_H_
+#define SKY_ENGINE_CORE_CSS_STYLEMEDIA_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
@@ -51,4 +51,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleMedia_h
+#endif  // SKY_ENGINE_CORE_CSS_STYLEMEDIA_H_

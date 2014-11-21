@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FilterEffect_h
-#define FilterEffect_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEREFFECT_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEREFFECT_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -248,4 +248,4 @@ private:
 
 } // namespace blink
 
-#endif // FilterEffect_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEREFFECT_H_

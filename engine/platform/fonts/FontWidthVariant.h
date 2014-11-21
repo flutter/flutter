@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontWidthVariant_h
-#define FontWidthVariant_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTWIDTHVARIANT_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTWIDTHVARIANT_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -44,4 +44,4 @@ COMPILE_ASSERT(LastFontWidthVariant >> FontWidthVariantWidth == 0, FontWidthVari
 
 } // namespace blink
 
-#endif // FontWidthVariant_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTWIDTHVARIANT_H_

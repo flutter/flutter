@@ -22,8 +22,8 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-#ifndef TreeScopeAdopter_h
-#define TreeScopeAdopter_h
+#ifndef SKY_ENGINE_CORE_DOM_TREESCOPEADOPTER_H_
+#define SKY_ENGINE_CORE_DOM_TREESCOPEADOPTER_H_
 
 #include "sky/engine/core/dom/Node.h"
 
@@ -67,4 +67,4 @@ inline TreeScopeAdopter::TreeScopeAdopter(Node& toAdopt, TreeScope& newScope)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_TREESCOPEADOPTER_H_

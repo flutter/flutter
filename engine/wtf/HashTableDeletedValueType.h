@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HashTableDeletedValueType_h
-#define HashTableDeletedValueType_h
+#ifndef SKY_ENGINE_WTF_HASHTABLEDELETEDVALUETYPE_H_
+#define SKY_ENGINE_WTF_HASHTABLEDELETEDVALUETYPE_H_
 
 namespace WTF {
 
@@ -37,4 +37,4 @@ enum HashTableDeletedValueType { HashTableDeletedValue };
 
 } // namespace WTF
 
-#endif // HashTableDeletedValueType_h
+#endif  // SKY_ENGINE_WTF_HASHTABLEDELETEDVALUETYPE_H_

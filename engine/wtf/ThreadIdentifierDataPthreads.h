@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ThreadIdentifierDataPthreads_h
-#define ThreadIdentifierDataPthreads_h
+#ifndef SKY_ENGINE_WTF_THREADIDENTIFIERDATAPTHREADS_H_
+#define SKY_ENGINE_WTF_THREADIDENTIFIERDATAPTHREADS_H_
 
 #include <pthread.h>
 #include "sky/engine/wtf/Noncopyable.h"
@@ -75,6 +75,6 @@ private:
 
 } // namespace WTF
 
-#endif // ThreadIdentifierDataPthreads_h
+#endif  // SKY_ENGINE_WTF_THREADIDENTIFIERDATAPTHREADS_H_
 
 

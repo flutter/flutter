@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef RenderOverflow_h
-#define RenderOverflow_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDEROVERFLOW_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDEROVERFLOW_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 
@@ -112,4 +112,4 @@ inline void RenderOverflow::setVisualOverflow(const LayoutRect& rect)
 
 } // namespace blink
 
-#endif // RenderOverflow_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDEROVERFLOW_H_

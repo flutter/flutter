@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableValue_h
-#define AnimatableValue_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -128,4 +128,4 @@ private:
 
 } // namespace blink
 
-#endif // AnimatableValue_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUE_H_

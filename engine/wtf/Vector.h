@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_Vector_h
-#define WTF_Vector_h
+#ifndef SKY_ENGINE_WTF_VECTOR_H_
+#define SKY_ENGINE_WTF_VECTOR_H_
 
 #include <string.h>
 #include <utility>
@@ -1138,4 +1138,4 @@ static const size_t kInitialVectorSize = WTF_VECTOR_INITIAL_SIZE;
 
 using WTF::Vector;
 
-#endif // WTF_Vector_h
+#endif  // SKY_ENGINE_WTF_VECTOR_H_

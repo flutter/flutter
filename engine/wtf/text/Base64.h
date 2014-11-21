@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Base64_h
-#define Base64_h
+#ifndef SKY_ENGINE_WTF_TEXT_BASE64_H_
+#define SKY_ENGINE_WTF_TEXT_BASE64_H_
 
 #include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -87,4 +87,4 @@ using WTF::Base64ValidatePadding;
 using WTF::base64Encode;
 using WTF::base64Decode;
 
-#endif // Base64_h
+#endif  // SKY_ENGINE_WTF_TEXT_BASE64_H_

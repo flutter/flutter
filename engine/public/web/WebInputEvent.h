@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebInputEvent_h
-#define WebInputEvent_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebGestureDevice.h"
@@ -517,4 +517,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_

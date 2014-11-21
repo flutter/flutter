@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScrollTypes_h
-#define ScrollTypes_h
+#ifndef SKY_ENGINE_PLATFORM_SCROLL_SCROLLTYPES_H_
+#define SKY_ENGINE_PLATFORM_SCROLL_SCROLLTYPES_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -69,4 +69,4 @@ enum ScrollbarOverlayStyle {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_SCROLL_SCROLLTYPES_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayBuffer_h
-#define ArrayBuffer_h
+#ifndef SKY_ENGINE_WTF_ARRAYBUFFER_H_
+#define SKY_ENGINE_WTF_ARRAYBUFFER_H_
 
 #include "sky/engine/wtf/ArrayBufferContents.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -176,4 +176,4 @@ unsigned ArrayBuffer::clampIndex(int index) const
 
 using WTF::ArrayBuffer;
 
-#endif // ArrayBuffer_h
+#endif  // SKY_ENGINE_WTF_ARRAYBUFFER_H_

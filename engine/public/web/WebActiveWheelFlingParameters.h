@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebActiveWheelFlingParameters_h
-#define WebActiveWheelFlingParameters_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBACTIVEWHEELFLINGPARAMETERS_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBACTIVEWHEELFLINGPARAMETERS_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebFloatPoint.h"
@@ -54,4 +54,4 @@ struct WebActiveWheelFlingParameters {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBACTIVEWHEELFLINGPARAMETERS_H_

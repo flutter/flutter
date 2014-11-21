@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTextRun_h
-#define WebTextRun_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTEXTRUN_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTEXTRUN_H_
 
 #include "../platform/WebString.h"
 
@@ -63,4 +63,4 @@ struct WebTextRun {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTEXTRUN_H_

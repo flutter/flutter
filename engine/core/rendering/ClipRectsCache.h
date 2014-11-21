@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ClipRectsCache_h
-#define ClipRectsCache_h
+#ifndef SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_
+#define SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_
 
 #include "sky/engine/core/rendering/ClipRects.h"
 
@@ -55,4 +55,4 @@ private:
 
 } // namespace blink
 
-#endif // ClipRectsCache_h
+#endif  // SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_

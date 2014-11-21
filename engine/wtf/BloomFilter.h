@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BloomFilter_h
-#define BloomFilter_h
+#ifndef SKY_ENGINE_WTF_BLOOMFILTER_H_
+#define SKY_ENGINE_WTF_BLOOMFILTER_H_
 
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -136,4 +136,4 @@ bool BloomFilter<keyBits>::isClear() const
 
 using WTF::BloomFilter;
 
-#endif
+#endif  // SKY_ENGINE_WTF_BLOOMFILTER_H_

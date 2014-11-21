@@ -42,8 +42,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef RenderLayerStackingNode_h
-#define RenderLayerStackingNode_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODE_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODE_H_
 
 #include "sky/engine/core/rendering/RenderLayerModelObject.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -217,4 +217,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerStackingNode_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODE_H_

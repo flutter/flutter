@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementConstructorBuilder_h
-#define CustomElementConstructorBuilder_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTCONSTRUCTORBUILDER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTCONSTRUCTORBUILDER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8CustomElementLifecycleCallbacks.h"
@@ -91,4 +91,4 @@ private:
 
 }
 
-#endif // CustomElementConstructorBuilder_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTCONSTRUCTORBUILDER_H_

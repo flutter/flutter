@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef MouseRelatedEvent_h
-#define MouseRelatedEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_MOUSERELATEDEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_MOUSERELATEDEVENT_H_
 
 #include "sky/engine/core/events/UIEventWithKeyState.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
@@ -88,4 +88,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // MouseRelatedEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_MOUSERELATEDEVENT_H_

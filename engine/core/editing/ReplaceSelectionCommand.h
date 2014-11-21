@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ReplaceSelectionCommand_h
-#define ReplaceSelectionCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_REPLACESELECTIONCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_REPLACESELECTIONCOMMAND_H_
 
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/editing/CompositeEditCommand.h"
@@ -115,4 +115,4 @@ private:
 
 } // namespace blink
 
-#endif // ReplaceSelectionCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_REPLACESELECTIONCOMMAND_H_

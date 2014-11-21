@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLRequestPrivate_h
-#define WebURLRequestPrivate_h
+#ifndef SKY_ENGINE_PLATFORM_EXPORTED_WEBURLREQUESTPRIVATE_H_
+#define SKY_ENGINE_PLATFORM_EXPORTED_WEBURLREQUESTPRIVATE_H_
 
 namespace blink {
 
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_EXPORTED_WEBURLREQUESTPRIVATE_H_

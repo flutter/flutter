@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SpellCheckerClient_h
-#define SpellCheckerClient_h
+#ifndef SKY_ENGINE_CORE_PAGE_SPELLCHECKERCLIENT_H_
+#define SKY_ENGINE_CORE_PAGE_SPELLCHECKERCLIENT_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -50,4 +50,4 @@ public:
 
 }
 
-#endif // SpellCheckerClient_h
+#endif  // SKY_ENGINE_CORE_PAGE_SPELLCHECKERCLIENT_H_

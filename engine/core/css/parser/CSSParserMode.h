@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CSSParserMode_h
-#define CSSParserMode_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERMODE_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERMODE_H_
 
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/Referrer.h"
@@ -110,4 +110,4 @@ const CSSParserContext& strictCSSParserContext();
 
 };
 
-#endif // CSSParserMode_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERMODE_H_

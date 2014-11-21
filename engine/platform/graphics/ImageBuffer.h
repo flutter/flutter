@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageBuffer_h
-#define ImageBuffer_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -154,4 +154,4 @@ String PLATFORM_EXPORT ImageDataToDataURL(const ImageDataBuffer&, const String& 
 
 } // namespace blink
 
-#endif // ImageBuffer_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFER_H_

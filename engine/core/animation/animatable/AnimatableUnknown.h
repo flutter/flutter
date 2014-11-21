@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableUnknown_h
-#define AnimatableUnknown_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEUNKNOWN_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEUNKNOWN_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
@@ -83,4 +83,4 @@ inline bool AnimatableUnknown::equalTo(const AnimatableValue* value) const
 
 } // namespace blink
 
-#endif // AnimatableUnknown_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEUNKNOWN_H_

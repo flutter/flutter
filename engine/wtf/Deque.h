@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Deque_h
-#define WTF_Deque_h
+#ifndef SKY_ENGINE_WTF_DEQUE_H_
+#define SKY_ENGINE_WTF_DEQUE_H_
 
 // FIXME: Could move what Vector and Deque share into a separate file.
 // Deque doesn't actually use Vector.
@@ -514,4 +514,4 @@ namespace WTF {
 
 using WTF::Deque;
 
-#endif // WTF_Deque_h
+#endif  // SKY_ENGINE_WTF_DEQUE_H_

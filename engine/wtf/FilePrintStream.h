@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FilePrintStream_h
-#define FilePrintStream_h
+#ifndef SKY_ENGINE_WTF_FILEPRINTSTREAM_H_
+#define SKY_ENGINE_WTF_FILEPRINTSTREAM_H_
 
 #include <stdio.h>
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -58,5 +58,5 @@ private:
 
 using WTF::FilePrintStream;
 
-#endif // FilePrintStream_h
+#endif  // SKY_ENGINE_WTF_FILEPRINTSTREAM_H_
 

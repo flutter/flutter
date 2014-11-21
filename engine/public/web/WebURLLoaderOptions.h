@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLLoaderOptions_h
-#define WebURLLoaderOptions_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBURLLOADEROPTIONS_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBURLLOADEROPTIONS_H_
 
 namespace blink {
 
@@ -62,4 +62,4 @@ struct WebURLLoaderOptions {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBURLLOADEROPTIONS_H_

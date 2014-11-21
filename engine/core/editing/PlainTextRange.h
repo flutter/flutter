@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlainTextRange_h
-#define PlainTextRange_h
+#ifndef SKY_ENGINE_CORE_EDITING_PLAINTEXTRANGE_H_
+#define SKY_ENGINE_CORE_EDITING_PLAINTEXTRANGE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/NotFound.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // PlainTextRange_h
+#endif  // SKY_ENGINE_CORE_EDITING_PLAINTEXTRANGE_H_

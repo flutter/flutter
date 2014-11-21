@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebScriptController_h
-#define WebScriptController_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTCONTROLLER_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTCONTROLLER_H_
 
 #include "../platform/WebCommon.h"
 
@@ -52,4 +52,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTCONTROLLER_H_

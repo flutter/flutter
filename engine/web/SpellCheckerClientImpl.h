@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SpellCheckerClientImpl_h
-#define SpellCheckerClientImpl_h
+#ifndef SKY_ENGINE_WEB_SPELLCHECKERCLIENTIMPL_H_
+#define SKY_ENGINE_WEB_SPELLCHECKERCLIENTIMPL_H_
 
 #include "sky/engine/core/page/SpellCheckerClient.h"
 #include "sky/engine/platform/text/TextCheckerClient.h"
@@ -83,4 +83,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_SPELLCHECKERCLIENTIMPL_H_

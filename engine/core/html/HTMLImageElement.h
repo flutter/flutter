@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef HTMLImageElement_h
-#define HTMLImageElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLIMAGEELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLIMAGEELEMENT_H_
 
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/HTMLImageLoader.h"
@@ -121,4 +121,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLImageElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLIMAGEELEMENT_H_

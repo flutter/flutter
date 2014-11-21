@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UnitBezier_h
-#define UnitBezier_h
+#ifndef SKY_ENGINE_PLATFORM_ANIMATION_UNITBEZIER_H_
+#define SKY_ENGINE_PLATFORM_ANIMATION_UNITBEZIER_H_
 
 #include <math.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -161,4 +161,4 @@ private:
 
 } // namespace blink
 
-#endif // UnitBezier_h
+#endif  // SKY_ENGINE_PLATFORM_ANIMATION_UNITBEZIER_H_

@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SecurityPolicy_h
-#define SecurityPolicy_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_SECURITYPOLICY_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_SECURITYPOLICY_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/weborigin/ReferrerPolicy.h"
@@ -52,4 +52,4 @@ public:
 
 } // namespace blink
 
-#endif // SecurityPolicy_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_SECURITYPOLICY_H_

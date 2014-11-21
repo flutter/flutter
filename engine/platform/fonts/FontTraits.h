@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontTraits_h
-#define FontTraits_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -106,4 +106,4 @@ struct FontTraits {
 };
 
 } // namespace blink
-#endif // FontTraits_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_

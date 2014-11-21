@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_PLATFORM_FETCHER_DATA_PIPE_DRAINER_H_
-#define SKY_ENGINE_PLATFORM_FETCHER_DATA_PIPE_DRAINER_H_
+#ifndef SKY_ENGINE_PLATFORM_FETCHER_DATAPIPEDRAINER_H_
+#define SKY_ENGINE_PLATFORM_FETCHER_DATAPIPEDRAINER_H_
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/common/handle_watcher.h"
@@ -41,4 +41,4 @@ class DataPipeDrainer {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_PLATFORM_FETCHER_DATA_PIPE_DRAINER_H_
+#endif  // SKY_ENGINE_PLATFORM_FETCHER_DATAPIPEDRAINER_H_

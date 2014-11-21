@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositionUnderlineBuilder_h
-#define CompositionUnderlineBuilder_h
+#ifndef SKY_ENGINE_WEB_COMPOSITIONUNDERLINEBUILDER_H_
+#define SKY_ENGINE_WEB_COMPOSITIONUNDERLINEBUILDER_H_
 
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/public/platform/WebVector.h"
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_COMPOSITIONUNDERLINEBUILDER_H_

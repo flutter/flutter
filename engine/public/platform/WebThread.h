@@ -22,8 +22,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef WebThread_h
-#define WebThread_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBTHREAD_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBTHREAD_H_
 
 #include <stdint.h>
 #include "sky/engine/public/platform/WebCommon.h"
@@ -48,4 +48,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBTHREAD_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NodeRenderingTraversal_h
-#define NodeRenderingTraversal_h
+#ifndef SKY_ENGINE_CORE_DOM_NODERENDERINGTRAVERSAL_H_
+#define SKY_ENGINE_CORE_DOM_NODERENDERINGTRAVERSAL_H_
 
 #include "sky/engine/core/dom/Element.h"
 
@@ -75,4 +75,4 @@ inline Element* parentElement(const Node* node)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_NODERENDERINGTRAVERSAL_H_

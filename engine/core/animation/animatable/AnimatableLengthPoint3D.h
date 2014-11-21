@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableLengthPoint3D_h
-#define AnimatableLengthPoint3D_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHPOINT3D_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHPOINT3D_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
@@ -68,4 +68,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableLengthPoint3D, isLengthPoint3D());
 
 } // namespace blink
 
-#endif // AnimatableLengthPoint3D_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHPOINT3D_H_

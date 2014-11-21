@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLInterchange_h
-#define HTMLInterchange_h
+#ifndef SKY_ENGINE_CORE_EDITING_HTMLINTERCHANGE_H_
+#define SKY_ENGINE_CORE_EDITING_HTMLINTERCHANGE_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -44,4 +44,4 @@ String convertHTMLTextToInterchangeFormat(const String&, const Text&);
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_HTMLINTERCHANGE_H_

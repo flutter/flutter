@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TextCodecReplacement_h
-#define TextCodecReplacement_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECREPLACEMENT_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTCODECREPLACEMENT_H_
 
 #include "sky/engine/wtf/text/TextCodec.h"
 #include "sky/engine/wtf/text/TextCodecUTF8.h"
@@ -25,4 +25,4 @@ private:
 
 } // namespace WTF
 
-#endif // TextCodecReplacement_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECREPLACEMENT_H_

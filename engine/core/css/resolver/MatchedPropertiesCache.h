@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef MatchedPropertiesCache_h
-#define MatchedPropertiesCache_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_MATCHEDPROPERTIESCACHE_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_MATCHEDPROPERTIESCACHE_H_
 
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/resolver/MatchResult.h"
@@ -76,4 +76,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_MATCHEDPROPERTIESCACHE_H_

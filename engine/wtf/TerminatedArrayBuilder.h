@@ -1,8 +1,8 @@
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#ifndef TerminatedArrayBuilder_h
-#define TerminatedArrayBuilder_h
+#ifndef SKY_ENGINE_WTF_TERMINATEDARRAYBUILDER_H_
+#define SKY_ENGINE_WTF_TERMINATEDARRAYBUILDER_H_
 
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -76,4 +76,4 @@ private:
 
 using WTF::TerminatedArrayBuilder;
 
-#endif // TerminatedArrayBuilder_h
+#endif  // SKY_ENGINE_WTF_TERMINATEDARRAYBUILDER_H_

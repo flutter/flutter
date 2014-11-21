@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GlyphPage_h
-#define GlyphPage_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGE_H_
 
 #include <string.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -215,4 +215,4 @@ private:
 
 } // namespace blink
 
-#endif // GlyphPage_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGE_H_

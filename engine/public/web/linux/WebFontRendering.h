@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFontRendering_h
-#define WebFontRendering_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_LINUX_WEBFONTRENDERING_H_
+#define SKY_ENGINE_PUBLIC_WEB_LINUX_WEBFONTRENDERING_H_
 
 #include "../../platform/WebCommon.h"
 #include "third_party/skia/include/core/SkFontHost.h"
@@ -53,4 +53,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_LINUX_WEBFONTRENDERING_H_

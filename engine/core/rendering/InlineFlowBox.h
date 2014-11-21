@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef InlineFlowBox_h
-#define InlineFlowBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_INLINEFLOWBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_INLINEFLOWBOX_H_
 
 #include "sky/engine/core/rendering/InlineBox.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
@@ -371,4 +371,4 @@ inline void InlineFlowBox::setHasBadChildList()
 void showTree(const blink::InlineFlowBox*);
 #endif
 
-#endif // InlineFlowBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_INLINEFLOWBOX_H_

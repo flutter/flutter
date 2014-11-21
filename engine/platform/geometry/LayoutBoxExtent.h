@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutBoxExtent_h
-#define LayoutBoxExtent_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_
 
 #include "sky/engine/platform/LayoutUnit.h"
 #include "sky/engine/platform/PlatformExport.h"
@@ -83,4 +83,4 @@ private:
 
 } // namespace blink
 
-#endif // LayoutBoxExtent_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_

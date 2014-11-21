@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementLifecycleCallbacks_h
-#define CustomElementLifecycleCallbacks_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTLIFECYCLECALLBACKS_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTLIFECYCLECALLBACKS_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -66,4 +66,4 @@ private:
 
 }
 
-#endif // CustomElementLifecycleCallbacks_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTLIFECYCLECALLBACKS_H_

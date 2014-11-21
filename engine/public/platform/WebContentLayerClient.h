@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebContentLayerClient_h
-#define WebContentLayerClient_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCONTENTLAYERCLIENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCONTENTLAYERCLIENT_H_
 
 #include "sky/engine/public/platform/WebCanvas.h"
 #include "sky/engine/public/platform/WebCommon.h"
@@ -55,4 +55,4 @@ protected:
 
 } // namespace blink
 
-#endif // WebContentLayerClient_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCONTENTLAYERCLIENT_H_

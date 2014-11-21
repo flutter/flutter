@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMURLUtilsReadOnly_h
-#define DOMURLUtilsReadOnly_h
+#ifndef SKY_ENGINE_CORE_DOM_DOMURLUTILSREADONLY_H_
+#define SKY_ENGINE_CORE_DOM_DOMURLUTILSREADONLY_H_
 
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/Forward.h"
@@ -73,4 +73,4 @@ public:
 
 } // namespace blink
 
-#endif // DOMURLUtilsReadOnly_h
+#endif  // SKY_ENGINE_CORE_DOM_DOMURLUTILSREADONLY_H_

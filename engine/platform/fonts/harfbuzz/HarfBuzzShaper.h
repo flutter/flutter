@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HarfBuzzShaper_h
-#define HarfBuzzShaper_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_
+#define SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_
 
 #include "hb.h"
 #include "sky/engine/platform/geometry/FloatBoxExtent.h"
@@ -165,4 +165,4 @@ private:
 
 } // namespace blink
 
-#endif // HarfBuzzShaper_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSPropertySourceData_h
-#define CSSPropertySourceData_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSPROPERTYSOURCEDATA_H_
+#define SKY_ENGINE_CORE_CSS_CSSPROPERTYSOURCEDATA_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -134,4 +134,4 @@ struct CSSRuleSourceData : public RefCounted<CSSRuleSourceData> {
 WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::SourceRange);
 WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::CSSPropertySourceData);
 
-#endif // CSSPropertySourceData_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSPROPERTYSOURCEDATA_H_

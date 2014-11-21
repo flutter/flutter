@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef BasicShapeFunctions_h
-#define BasicShapeFunctions_h
+#ifndef SKY_ENGINE_CORE_CSS_BASICSHAPEFUNCTIONS_H_
+#define SKY_ENGINE_CORE_CSS_BASICSHAPEFUNCTIONS_H_
 
 #include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -48,4 +48,4 @@ PassRefPtr<BasicShape> basicShapeForValue(const StyleResolverState&, const CSSBa
 FloatPoint floatPointForCenterCoordinate(const BasicShapeCenterCoordinate&, const BasicShapeCenterCoordinate&, FloatSize);
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_BASICSHAPEFUNCTIONS_H_

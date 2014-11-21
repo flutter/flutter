@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaQuery_h
-#define MediaQuery_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERY_H_
+#define SKY_ENGINE_CORE_CSS_MEDIAQUERY_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -73,4 +73,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_MEDIAQUERY_H_

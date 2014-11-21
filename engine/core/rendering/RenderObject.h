@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef RenderObject_h
-#define RenderObject_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentLifecycle.h"
@@ -1212,4 +1212,4 @@ void showRenderTree(const blink::RenderObject* object1, const blink::RenderObjec
 
 #endif
 
-#endif // RenderObject_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_

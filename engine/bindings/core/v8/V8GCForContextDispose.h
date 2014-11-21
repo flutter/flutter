@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8GCForContextDispose_h
-#define V8GCForContextDispose_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8GCFORCONTEXTDISPOSE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8GCFORCONTEXTDISPOSE_H_
 
 #include "sky/engine/platform/Timer.h"
 
@@ -52,4 +52,4 @@ private:
 
 }
 
-#endif // V8GCForContextDispose_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8GCFORCONTEXTDISPOSE_H_

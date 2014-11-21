@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontFaceSetLoadEvent_h
-#define FontFaceSetLoadEvent_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTFACESETLOADEVENT_H_
+#define SKY_ENGINE_CORE_CSS_FONTFACESETLOADEVENT_H_
 
 #include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/dom/DOMError.h"
@@ -77,4 +77,4 @@ private:
 
 } // namespace blink
 
-#endif // FontFaceSetLoadEvent_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTFACESETLOADEVENT_H_

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef HashChangeEvent_h
-#define HashChangeEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_HASHCHANGEEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_HASHCHANGEEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -93,4 +93,4 @@ private:
 
 } // namespace blink
 
-#endif // HashChangeEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_HASHCHANGEEVENT_H_

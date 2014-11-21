@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef PopStateEvent_h
-#define PopStateEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_POPSTATEEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_POPSTATEEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // PopStateEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_POPSTATEEVENT_H_

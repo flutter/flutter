@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSParserIdioms_h
-#define CSSParserIdioms_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERIDIOMS_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERIDIOMS_H_
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
@@ -44,4 +44,4 @@ inline bool isCSSSpace(UChar c)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERIDIOMS_H_

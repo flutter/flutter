@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef InterpolableValue_h
-#define InterpolableValue_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_INTERPOLABLEVALUE_H_
+#define SKY_ENGINE_CORE_ANIMATION_INTERPOLABLEVALUE_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -154,4 +154,4 @@ DEFINE_TYPE_CASTS(InterpolableAnimatableValue, InterpolableValue, value, value->
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_INTERPOLABLEVALUE_H_

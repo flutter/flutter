@@ -30,8 +30,8 @@
 
 // All of the functions in this file should move to new homes and this file should be deleted.
 
-#ifndef SkiaUtils_h
-#define SkiaUtils_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKIAUTILS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKIAUTILS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -108,4 +108,4 @@ bool shouldDrawAntiAliased(const GraphicsContext*, const SkRect& destRect);
 
 } // namespace blink
 
-#endif  // SkiaUtils_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKIAUTILS_H_

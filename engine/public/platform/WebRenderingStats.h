@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebRenderingStats_h
-#define WebRenderingStats_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBRENDERINGSTATS_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBRENDERINGSTATS_H_
 
 namespace blink {
 
@@ -36,4 +36,4 @@ struct WebRenderingStats {
 
 } // namespace blink
 
-#endif // WebRenderingStats_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBRENDERINGSTATS_H_

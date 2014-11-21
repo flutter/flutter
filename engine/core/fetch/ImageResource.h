@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef ImageResource_h
-#define ImageResource_h
+#ifndef SKY_ENGINE_CORE_FETCH_IMAGERESOURCE_H_
+#define SKY_ENGINE_CORE_FETCH_IMAGERESOURCE_H_
 
 #include "sky/engine/core/fetch/ResourcePtr.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -130,4 +130,4 @@ DEFINE_RESOURCE_TYPE_CASTS(Image);
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_IMAGERESOURCE_H_

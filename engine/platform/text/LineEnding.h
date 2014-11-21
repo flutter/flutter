@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LineEnding_h
-#define LineEnding_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_LINEENDING_H_
+#define SKY_ENGINE_PLATFORM_TEXT_LINEENDING_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -53,4 +53,4 @@ PLATFORM_EXPORT void normalizeLineEndingsToNative(const CString& from, Vector<ch
 
 } // namespace blink
 
-#endif // LineEnding_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_LINEENDING_H_

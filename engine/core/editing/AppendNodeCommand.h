@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AppendNodeCommand_h
-#define AppendNodeCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_APPENDNODECOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_APPENDNODECOMMAND_H_
 
 #include "sky/engine/core/editing/EditCommand.h"
 
@@ -49,4 +49,4 @@ private:
 
 } // namespace blink
 
-#endif // AppendNodeCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_APPENDNODECOMMAND_H_

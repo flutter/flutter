@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageObserver_h
-#define ImageObserver_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_

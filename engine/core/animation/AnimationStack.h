@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationStack_h
-#define AnimationStack_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONSTACK_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONSTACK_H_
 
 #include "sky/engine/core/animation/Animation.h"
 #include "sky/engine/core/animation/AnimationEffect.h"
@@ -67,4 +67,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONSTACK_H_

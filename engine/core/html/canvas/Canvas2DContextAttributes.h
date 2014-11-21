@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Canvas2DContextAttributes_h
-#define Canvas2DContextAttributes_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVAS2DCONTEXTATTRIBUTES_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVAS2DCONTEXTATTRIBUTES_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
@@ -58,4 +58,4 @@ protected:
 
 } // namespace blink
 
-#endif // Canvas2DContextAttributes_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVAS2DCONTEXTATTRIBUTES_H_

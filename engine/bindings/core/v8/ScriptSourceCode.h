@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptSourceCode_h
-#define ScriptSourceCode_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSOURCECODE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSOURCECODE_H_
 
 #include "sky/engine/core/fetch/ResourcePtr.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptSourceCode_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSOURCECODE_H_

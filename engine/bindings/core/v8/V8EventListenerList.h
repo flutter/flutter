@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8EventListenerList_h
-#define V8EventListenerList_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENERLIST_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENERLIST_H_
 
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8EventListener.h"
@@ -109,4 +109,4 @@ PassRefPtr<V8EventListener> V8EventListenerList::findOrCreateWrapper(v8::Local<v
 
 } // namespace blink
 
-#endif // V8EventListenerList_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENERLIST_H_

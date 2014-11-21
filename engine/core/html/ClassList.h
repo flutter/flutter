@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ClassList_h
-#define ClassList_h
+#ifndef SKY_ENGINE_CORE_HTML_CLASSLIST_H_
+#define SKY_ENGINE_CORE_HTML_CLASSLIST_H_
 
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/core/dom/DOMTokenList.h"
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif // ClassList_h
+#endif  // SKY_ENGINE_CORE_HTML_CLASSLIST_H_

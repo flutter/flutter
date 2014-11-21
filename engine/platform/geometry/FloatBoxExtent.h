@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef FloatBoxExtent_h
-#define FloatBoxExtent_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXEXTENT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXEXTENT_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 
@@ -122,4 +122,4 @@ inline void operator+=(FloatBoxExtent& a, const FloatBoxExtent& b)
 } // namespace blink
 
 
-#endif // FloatBoxExtent_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXEXTENT_H_

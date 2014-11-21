@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebUnitTestSupport_h
-#define WebUnitTestSupport_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBUNITTESTSUPPORT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBUNITTESTSUPPORT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebData.h"
@@ -64,4 +64,4 @@ public:
 
 }
 
-#endif // WebUnitTestSupport_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBUNITTESTSUPPORT_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SharedBuffer_h
-#define SharedBuffer_h
+#ifndef SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_
+#define SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/PurgeableVector.h"
@@ -118,4 +118,4 @@ private:
 
 } // namespace blink
 
-#endif // SharedBuffer_h
+#endif  // SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_

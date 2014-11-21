@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ConsoleTypes_h
-#define ConsoleTypes_h
+#ifndef SKY_ENGINE_CORE_FRAME_CONSOLETYPES_H_
+#define SKY_ENGINE_CORE_FRAME_CONSOLETYPES_H_
 
 namespace blink {
 
@@ -51,4 +51,4 @@ enum MessageLevel {
 
 } // namespace blink
 
-#endif // ConsoleTypes_h
+#endif  // SKY_ENGINE_CORE_FRAME_CONSOLETYPES_H_

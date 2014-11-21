@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebRange_h
-#define WebRange_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBRANGE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBRANGE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebPrivatePtr.h"
@@ -83,4 +83,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBRANGE_H_

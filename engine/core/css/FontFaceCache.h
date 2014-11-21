@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontFaceCache_h
-#define FontFaceCache_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTFACECACHE_H_
+#define SKY_ENGINE_CORE_CSS_FONTFACECACHE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -80,4 +80,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_FONTFACECACHE_H_

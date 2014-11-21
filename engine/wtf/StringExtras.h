@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_StringExtras_h
-#define WTF_StringExtras_h
+#ifndef SKY_ENGINE_WTF_STRINGEXTRAS_H_
+#define SKY_ENGINE_WTF_STRINGEXTRAS_H_
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -47,4 +47,4 @@ inline char* strnstr(const char* buffer, const char* target, size_t bufferLength
 
 #endif
 
-#endif // WTF_StringExtras_h
+#endif  // SKY_ENGINE_WTF_STRINGEXTRAS_H_

@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef DocumentInit_h
-#define DocumentInit_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTINIT_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTINIT_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -83,4 +83,4 @@ private:
 
 } // namespace blink
 
-#endif // DocumentInit_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTINIT_H_

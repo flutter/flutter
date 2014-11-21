@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Partitions_h
-#define Partitions_h
+#ifndef SKY_ENGINE_PLATFORM_PARTITIONS_H_
+#define SKY_ENGINE_PLATFORM_PARTITIONS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/PartitionAlloc.h"
@@ -56,4 +56,4 @@ private:
 
 } // namespace blink
 
-#endif // Partitions_h
+#endif  // SKY_ENGINE_PLATFORM_PARTITIONS_H_

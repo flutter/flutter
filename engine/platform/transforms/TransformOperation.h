@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef TransformOperation_h
-#define TransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/geometry/FloatSize.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
@@ -87,4 +87,4 @@ public:
 
 } // namespace blink
 
-#endif // TransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMOPERATION_H_

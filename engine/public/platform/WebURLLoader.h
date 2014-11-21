@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLLoader_h
-#define WebURLLoader_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADER_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
@@ -65,4 +65,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADER_H_

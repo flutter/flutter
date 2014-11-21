@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TransformBuilder_h
-#define TransformBuilder_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_TRANSFORMBUILDER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_TRANSFORMBUILDER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
@@ -48,4 +48,4 @@ public:
 
 } // namespace blink
 
-#endif // TransformBuilder_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_TRANSFORMBUILDER_H_

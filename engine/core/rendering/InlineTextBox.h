@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef InlineTextBox_h
-#define InlineTextBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_INLINETEXTBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_INLINETEXTBOX_H_
 
 #include "sky/engine/core/rendering/InlineBox.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -204,4 +204,4 @@ inline AffineTransform InlineTextBox::rotation(const FloatRect& boxRect, Rotatio
 
 } // namespace blink
 
-#endif // InlineTextBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_INLINETEXTBOX_H_

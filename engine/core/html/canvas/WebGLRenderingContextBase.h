@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLRenderingContextBase_h
-#define WebGLRenderingContextBase_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLRENDERINGCONTEXTBASE_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLRENDERINGCONTEXTBASE_H_
 
 #include "sky/engine/bindings/core/v8/Nullable.h"
 #include "sky/engine/core/dom/ActiveDOMObject.h"
@@ -939,4 +939,4 @@ DEFINE_TYPE_CASTS(WebGLRenderingContextBase, CanvasRenderingContext, context, co
 
 WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::WebGLRenderingContextBase::TextureUnitState);
 
-#endif // WebGLRenderingContextBase_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLRENDERINGCONTEXTBASE_H_

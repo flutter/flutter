@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GlyphMetricsMap_h
-#define GlyphMetricsMap_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPHMETRICSMAP_H_
+#define SKY_ENGINE_PLATFORM_FONTS_GLYPHMETRICSMAP_H_
 
 #include "sky/engine/platform/fonts/Glyph.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -128,4 +128,4 @@ template<class T> typename GlyphMetricsMap<T>::GlyphMetricsPage* GlyphMetricsMap
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHMETRICSMAP_H_

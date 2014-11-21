@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWindowLifecycleObserver_h
-#define DOMWindowLifecycleObserver_h
+#ifndef SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLEOBSERVER_H_
+#define SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLEOBSERVER_H_
 
 #include "sky/engine/platform/LifecycleObserver.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -51,4 +51,4 @@ public:
 
 } // namespace blink
 
-#endif // DOMWindowLifecycleObserver_h
+#endif  // SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLEOBSERVER_H_

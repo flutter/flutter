@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWrapperMap_h
-#define DOMWrapperMap_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERMAP_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERMAP_H_
 
 #include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
@@ -157,4 +157,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMWrapperMap_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_DOMWRAPPERMAP_H_

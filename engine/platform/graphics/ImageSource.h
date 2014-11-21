@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageSource_h
-#define ImageSource_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGESOURCE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGESOURCE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/ImageOrientation.h"
@@ -135,4 +135,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGESOURCE_H_

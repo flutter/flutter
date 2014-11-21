@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RequestAnimationFrameCallback_h
-#define RequestAnimationFrameCallback_h
+#ifndef SKY_ENGINE_CORE_DOM_REQUESTANIMATIONFRAMECALLBACK_H_
+#define SKY_ENGINE_CORE_DOM_REQUESTANIMATIONFRAMECALLBACK_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 
@@ -47,4 +47,4 @@ public:
 
 }
 
-#endif // RequestAnimationFrameCallback_h
+#endif  // SKY_ENGINE_CORE_DOM_REQUESTANIMATIONFRAMECALLBACK_H_

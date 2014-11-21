@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DrawingBuffer_h
-#define DrawingBuffer_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GPU_DRAWINGBUFFER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GPU_DRAWINGBUFFER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -302,4 +302,4 @@ private:
 
 } // namespace blink
 
-#endif // DrawingBuffer_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GPU_DRAWINGBUFFER_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_PageAllocator_h
-#define WTF_PageAllocator_h
+#ifndef SKY_ENGINE_WTF_PAGEALLOCATOR_H_
+#define SKY_ENGINE_WTF_PAGEALLOCATOR_H_
 
 #include <stdint.h>
 #include "sky/engine/wtf/Assertions.h"
@@ -99,4 +99,4 @@ WTF_EXPORT void recommitSystemPages(void* addr, size_t len);
 
 } // namespace WTF
 
-#endif // WTF_PageAllocator_h
+#endif  // SKY_ENGINE_WTF_PAGEALLOCATOR_H_

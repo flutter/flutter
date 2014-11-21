@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef DistantLightSource_h
-#define DistantLightSource_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_DISTANTLIGHTSOURCE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_DISTANTLIGHTSOURCE_H_
 
 #include "sky/engine/platform/graphics/filters/LightSource.h"
 
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif // DistantLightSource_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_DISTANTLIGHTSOURCE_H_

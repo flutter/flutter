@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef BreakingContextInlineHeaders_h
-#define BreakingContextInlineHeaders_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_BREAKINGCONTEXTINLINEHEADERS_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_BREAKINGCONTEXTINLINEHEADERS_H_
 
 #include "sky/engine/core/rendering/InlineIterator.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
@@ -817,4 +817,4 @@ inline IndentTextOrNot requiresIndent(bool isFirstLine, bool isAfterHardLineBrea
 
 }
 
-#endif // BreakingContextInlineHeaders_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_BREAKINGCONTEXTINLINEHEADERS_H_

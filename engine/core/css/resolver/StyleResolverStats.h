@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleResolverStats_h
-#define StyleResolverStats_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATS_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATS_H_
 
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleResolverStats_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATS_H_

@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef NodeTraversal_h
-#define NodeTraversal_h
+#ifndef SKY_ENGINE_CORE_DOM_NODETRAVERSAL_H_
+#define SKY_ENGINE_CORE_DOM_NODETRAVERSAL_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/Node.h"
@@ -135,4 +135,4 @@ inline Node* NodeTraversal::childAtTemplate(NodeType& parent, unsigned index)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_NODETRAVERSAL_H_

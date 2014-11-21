@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef RuleSet_h
-#define RuleSet_h
+#ifndef SKY_ENGINE_CORE_CSS_RULESET_H_
+#define SKY_ENGINE_CORE_CSS_RULESET_H_
 
 #include "sky/engine/core/css/CSSKeyframesRule.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
@@ -171,4 +171,4 @@ private:
 
 WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::RuleData);
 
-#endif // RuleSet_h
+#endif  // SKY_ENGINE_CORE_CSS_RULESET_H_

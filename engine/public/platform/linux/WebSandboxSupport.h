@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebSandboxSupport_h
-#define WebSandboxSupport_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBSANDBOXSUPPORT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBSANDBOXSUPPORT_H_
 
 #include "../WebCommon.h"
 #include "../WebString.h"
@@ -70,4 +70,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBSANDBOXSUPPORT_H_

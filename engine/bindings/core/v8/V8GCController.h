@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8GCController_h
-#define V8GCController_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8GCCONTROLLER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8GCCONTROLLER_H_
 
 #include "v8/include/v8.h"
 
@@ -55,4 +55,4 @@ public:
 
 }
 
-#endif // V8GCController_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8GCCONTROLLER_H_

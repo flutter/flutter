@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSFontValue_h
-#define CSSFontValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -60,4 +60,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSFontValue, isFontValue());
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTVALUE_H_

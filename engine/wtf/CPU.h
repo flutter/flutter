@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_CPU_h
-#define WTF_CPU_h
+#ifndef SKY_ENGINE_WTF_CPU_H_
+#define SKY_ENGINE_WTF_CPU_H_
 
 #include "sky/engine/wtf/Compiler.h"
 
@@ -179,4 +179,4 @@
 #define WTF_CPU_64BIT 1
 #endif
 
-#endif /* WTF_CPU_h */
+#endif  // SKY_ENGINE_WTF_CPU_H_

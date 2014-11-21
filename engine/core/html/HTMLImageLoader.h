@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef HTMLImageLoader_h
-#define HTMLImageLoader_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLIMAGELOADER_H_
+#define SKY_ENGINE_CORE_HTML_HTMLIMAGELOADER_H_
 
 #include "sky/engine/core/loader/ImageLoader.h"
 
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_HTMLIMAGELOADER_H_

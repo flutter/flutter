@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Touch_h
-#define Touch_h
+#ifndef SKY_ENGINE_CORE_DOM_TOUCH_H_
+#define SKY_ENGINE_CORE_DOM_TOUCH_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/events/EventTarget.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // Touch_h
+#endif  // SKY_ENGINE_CORE_DOM_TOUCH_H_

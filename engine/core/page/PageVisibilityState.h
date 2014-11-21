@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PageVisibilityState_h
-#define PageVisibilityState_h
+#ifndef SKY_ENGINE_CORE_PAGE_PAGEVISIBILITYSTATE_H_
+#define SKY_ENGINE_CORE_PAGE_PAGEVISIBILITYSTATE_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -46,4 +46,4 @@ String pageVisibilityStateString(PageVisibilityState);
 
 } // namespace blink
 
-#endif // ifndef PageVisibilityState_h
+#endif  // SKY_ENGINE_CORE_PAGE_PAGEVISIBILITYSTATE_H_

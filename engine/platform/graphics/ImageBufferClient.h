@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageBufferClient_h
-#define ImageBufferClient_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFERCLIENT_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFERCLIENT_H_
 
 namespace blink {
 
@@ -43,5 +43,5 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEBUFFERCLIENT_H_
 

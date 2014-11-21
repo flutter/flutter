@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentLifecycleNotifier_h
-#define DocumentLifecycleNotifier_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLENOTIFIER_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLENOTIFIER_H_
 
 #include "sky/engine/core/dom/DocumentLifecycleObserver.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -76,4 +76,4 @@ inline void DocumentLifecycleNotifier::notifyDocumentWasDisposed()
 
 } // namespace blink
 
-#endif // DocumentLifecycleNotifier_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLENOTIFIER_H_

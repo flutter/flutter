@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MojoLoader_h
-#define MojoLoader_h
+#ifndef SKY_ENGINE_CORE_LOADER_MOJOLOADER_H_
+#define SKY_ENGINE_CORE_LOADER_MOJOLOADER_H_
 
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -24,4 +24,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_LOADER_MOJOLOADER_H_

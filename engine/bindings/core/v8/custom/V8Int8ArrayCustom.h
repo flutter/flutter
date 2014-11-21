@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8Int8ArrayCustom_h
-#define V8Int8ArrayCustom_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8INT8ARRAYCUSTOM_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8INT8ARRAYCUSTOM_H_
 
 #include "sky/engine/bindings/core/v8/custom/V8TypedArrayCustom.h"
 #include "sky/engine/wtf/Int8Array.h"
@@ -112,4 +112,4 @@ inline void v8SetReturnValueFast(const CallbackInfo& info, PassRefPtr<Int8Array>
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8INT8ARRAYCUSTOM_H_

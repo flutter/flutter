@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEColorMatrix_h
-#define FEColorMatrix_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOLORMATRIX_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOLORMATRIX_H_
 
 #include "sky/engine/platform/graphics/filters/Filter.h"
 #include "sky/engine/platform/graphics/filters/FilterEffect.h"
@@ -67,4 +67,4 @@ private:
 
 } // namespace blink
 
-#endif // FEColorMatrix_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOLORMATRIX_H_

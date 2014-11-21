@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TypesettingFeatures_h
-#define TypesettingFeatures_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_TYPESETTINGFEATURES_H_
+#define SKY_ENGINE_PLATFORM_FONTS_TYPESETTINGFEATURES_H_
 
 namespace blink {
 
@@ -37,4 +37,4 @@ typedef unsigned TypesettingFeatures;
 
 } // namespace blink
 
-#endif // TypesettingFeatures_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_TYPESETTINGFEATURES_H_

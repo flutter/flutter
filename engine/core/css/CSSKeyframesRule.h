@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSKeyframesRule_h
-#define CSSKeyframesRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_
 
 #include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/core/css/StyleRule.h"
@@ -112,4 +112,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSKeyframesRule, KEYFRAMES_RULE);
 
 } // namespace blink
 
-#endif // CSSKeyframesRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_

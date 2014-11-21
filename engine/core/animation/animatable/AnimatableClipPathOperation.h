@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableClipPathOperation_h
-#define AnimatableClipPathOperation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECLIPPATHOPERATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECLIPPATHOPERATION_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/core/rendering/ClipPathOperation.h"
@@ -65,4 +65,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableClipPathOperation, isClipPathOperat
 
 } // namespace blink
 
-#endif // AnimatableClipPathOperation_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECLIPPATHOPERATION_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ImageFilter_h
-#define ImageFilter_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 
@@ -17,4 +17,4 @@ PLATFORM_EXPORT FloatRect mapImageFilterRect(ImageFilter*, const FloatRect&);
 
 } // namespace blink
 
-#endif // ImageFilter_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_

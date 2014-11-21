@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationTranslationUtil_h
-#define AnimationTranslationUtil_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONTRANSLATIONUTIL_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONTRANSLATIONUTIL_H_
 
 namespace blink {
 
@@ -43,4 +43,4 @@ void toWebFilterOperations(const FilterOperations& inOperations, WebFilterOperat
 
 } // namespace blink
 
-#endif // AnimationTranslationUtil_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONTRANSLATIONUTIL_H_

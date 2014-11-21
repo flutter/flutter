@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontData_h
-#define FontData_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTDATA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -73,4 +73,4 @@ private:
 
 } // namespace blink
 
-#endif // FontData_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTDATA_H_

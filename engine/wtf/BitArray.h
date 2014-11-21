@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BitArray_h
-#define BitArray_h
+#ifndef SKY_ENGINE_WTF_BITARRAY_H_
+#define SKY_ENGINE_WTF_BITARRAY_H_
 
 #include <string.h>
 #include "sky/engine/wtf/Assertions.h"
@@ -65,4 +65,4 @@ private:
 
 using WTF::BitArray;
 
-#endif // BitArray_h
+#endif  // SKY_ENGINE_WTF_BITARRAY_H_

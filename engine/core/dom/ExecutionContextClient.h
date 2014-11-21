@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ExecutionContextClient_h
-#define ExecutionContextClient_h
+#ifndef SKY_ENGINE_CORE_DOM_EXECUTIONCONTEXTCLIENT_H_
+#define SKY_ENGINE_CORE_DOM_EXECUTIONCONTEXTCLIENT_H_
 
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
@@ -64,4 +64,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_EXECUTIONCONTEXTCLIENT_H_

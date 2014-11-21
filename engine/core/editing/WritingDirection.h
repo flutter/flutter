@@ -23,9 +23,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WritingDirection_h
-#define WritingDirection_h
+#ifndef SKY_ENGINE_CORE_EDITING_WRITINGDIRECTION_H_
+#define SKY_ENGINE_CORE_EDITING_WRITINGDIRECTION_H_
 
 enum WritingDirection { NaturalWritingDirection, LeftToRightWritingDirection, RightToLeftWritingDirection };
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_WRITINGDIRECTION_H_

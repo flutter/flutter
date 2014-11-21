@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Int16Array_h
-#define Int16Array_h
+#ifndef SKY_ENGINE_WTF_INT16ARRAY_H_
+#define SKY_ENGINE_WTF_INT16ARRAY_H_
 
 #include "sky/engine/wtf/IntegralTypedArrayBase.h"
 
@@ -100,4 +100,4 @@ PassRefPtr<Int16Array> Int16Array::subarray(int start, int end) const
 
 using WTF::Int16Array;
 
-#endif // Int16Array_h
+#endif  // SKY_ENGINE_WTF_INT16ARRAY_H_

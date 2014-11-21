@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScrollableArea_h
-#define ScrollableArea_h
+#ifndef SKY_ENGINE_PLATFORM_SCROLL_SCROLLABLEAREA_H_
+#define SKY_ENGINE_PLATFORM_SCROLL_SCROLLABLEAREA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
@@ -243,4 +243,4 @@ private:
 
 } // namespace blink
 
-#endif // ScrollableArea_h
+#endif  // SKY_ENGINE_PLATFORM_SCROLL_SCROLLABLEAREA_H_

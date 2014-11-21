@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_Noncopyable_h
-#define WTF_Noncopyable_h
+#ifndef SKY_ENGINE_WTF_NONCOPYABLE_H_
+#define SKY_ENGINE_WTF_NONCOPYABLE_H_
 
 #include "sky/engine/wtf/Compiler.h"
 
@@ -28,4 +28,4 @@
         ClassName(const ClassName&) = delete; \
         ClassName& operator=(const ClassName&) = delete;
 
-#endif // WTF_Noncopyable_h
+#endif  // SKY_ENGINE_WTF_NONCOPYABLE_H_

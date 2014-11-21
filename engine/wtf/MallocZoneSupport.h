@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MallocZoneSupport_h
-#define MallocZoneSupport_h
+#ifndef SKY_ENGINE_WTF_MALLOCZONESUPPORT_H_
+#define SKY_ENGINE_WTF_MALLOCZONESUPPORT_H_
 
 #include <malloc/malloc.h>
 
@@ -64,4 +64,4 @@ public:
 
 } // namespace WTF
 
-#endif // MallocZoneSupport_h
+#endif  // SKY_ENGINE_WTF_MALLOCZONESUPPORT_H_

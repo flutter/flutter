@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8AbstractEventListener_h
-#define V8AbstractEventListener_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8ABSTRACTEVENTLISTENER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8ABSTRACTEVENTLISTENER_H_
 
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
@@ -140,4 +140,4 @@ private:
 
 } // namespace blink
 
-#endif // V8AbstractEventListener_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8ABSTRACTEVENTLISTENER_H_

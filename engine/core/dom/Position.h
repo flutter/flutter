@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Position_h
-#define Position_h
+#ifndef SKY_ENGINE_CORE_DOM_POSITION_H_
+#define SKY_ENGINE_CORE_DOM_POSITION_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
@@ -316,4 +316,4 @@ void showTree(const blink::Position&);
 void showTree(const blink::Position*);
 #endif
 
-#endif // Position_h
+#endif  // SKY_ENGINE_CORE_DOM_POSITION_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DataView_h
-#define DataView_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_DATAVIEW_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_DATAVIEW_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/wtf/ArrayBufferView.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // DataView_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_DATAVIEW_H_

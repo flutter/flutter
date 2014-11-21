@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementProcessingStack_h
-#define CustomElementProcessingStack_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTACK_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTACK_H_
 
 #include "sky/engine/core/dom/custom/CustomElementCallbackQueue.h"
 #include "sky/engine/wtf/Vector.h"
@@ -104,4 +104,4 @@ private:
 
 }
 
-#endif // CustomElementProcessingStack_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTACK_H_

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Node_h
-#define Node_h
+#ifndef SKY_ENGINE_CORE_DOM_NODE_H_
+#define SKY_ENGINE_CORE_DOM_NODE_H_
 
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/core/dom/MutationObserver.h"
@@ -758,4 +758,4 @@ void showTree(const blink::Node*);
 void showNodePath(const blink::Node*);
 #endif
 
-#endif // Node_h
+#endif  // SKY_ENGINE_CORE_DOM_NODE_H_

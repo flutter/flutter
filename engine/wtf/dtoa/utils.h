@@ -25,8 +25,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef DOUBLE_CONVERSION_UTILS_H_
-#define DOUBLE_CONVERSION_UTILS_H_
+#ifndef SKY_ENGINE_WTF_DTOA_UTILS_H_
+#define SKY_ENGINE_WTF_DTOA_UTILS_H_
 
 #include <string.h>
 #include "sky/engine/wtf/Assertions.h"
@@ -282,4 +282,4 @@ namespace double_conversion {
 
 } // namespace WTF
 
-#endif  // DOUBLE_CONVERSION_UTILS_H_
+#endif  // SKY_ENGINE_WTF_DTOA_UTILS_H_

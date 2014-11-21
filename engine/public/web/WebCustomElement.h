@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCustomElement_h
-#define WebCustomElement_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBCUSTOMELEMENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBCUSTOMELEMENT_H_
 
 #include "../platform/WebCommon.h"
 
@@ -52,4 +52,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBCUSTOMELEMENT_H_

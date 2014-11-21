@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SurroundingText_h
-#define SurroundingText_h
+#ifndef SKY_ENGINE_CORE_EDITING_SURROUNDINGTEXT_H_
+#define SKY_ENGINE_CORE_EDITING_SURROUNDINGTEXT_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -61,5 +61,5 @@ private:
 
 } // namespace blink
 
-#endif // SurroundingText_h
+#endif  // SKY_ENGINE_CORE_EDITING_SURROUNDINGTEXT_H_
 

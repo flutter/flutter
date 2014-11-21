@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FilterOperations_h
-#define FilterOperations_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATIONS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATIONS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntRectExtent.h"
@@ -78,4 +78,4 @@ private:
 } // namespace blink
 
 
-#endif // FilterOperations_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATIONS_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationTimeline_h
-#define AnimationTimeline_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONTIMELINE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONTIMELINE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/animation/AnimationEffect.h"
@@ -136,4 +136,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONTIMELINE_H_

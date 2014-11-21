@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ElementShadow_h
-#define ElementShadow_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_ELEMENTSHADOW_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_ELEMENTSHADOW_H_
 
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/SelectRuleFeatureSet.h"
@@ -130,4 +130,4 @@ inline void ElementShadow::distributeIfNeeded()
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_ELEMENTSHADOW_H_

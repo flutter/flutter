@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaQueryEvaluator_h
-#define MediaQueryEvaluator_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYEVALUATOR_H_
+#define SKY_ENGINE_CORE_CSS_MEDIAQUERYEVALUATOR_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -96,4 +96,4 @@ private:
 };
 
 } // namespace
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_MEDIAQUERYEVALUATOR_H_

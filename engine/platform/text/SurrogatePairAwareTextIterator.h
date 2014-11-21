@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef SurrogatePairAwareTextIterator_h
-#define SurrogatePairAwareTextIterator_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_SURROGATEPAIRAWARETEXTITERATOR_H_
+#define SKY_ENGINE_PLATFORM_TEXT_SURROGATEPAIRAWARETEXTITERATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -68,4 +68,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_SURROGATEPAIRAWARETEXTITERATOR_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceResponse_h
-#define ResourceResponse_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCERESPONSE_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCERESPONSE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/network/HTTPHeaderMap.h"
@@ -252,4 +252,4 @@ inline bool operator!=(const ResourceResponse& a, const ResourceResponse& b) { r
 
 } // namespace blink
 
-#endif // ResourceResponse_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCERESPONSE_H_

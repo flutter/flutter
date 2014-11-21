@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef HTMLAnchorElement_h
-#define HTMLAnchorElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLANCHORELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLANCHORELEMENT_H_
 
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/core/dom/DOMURLUtils.h"
@@ -57,4 +57,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLAnchorElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLANCHORELEMENT_H_

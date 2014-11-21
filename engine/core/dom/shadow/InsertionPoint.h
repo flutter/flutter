@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InsertionPoint_h
-#define InsertionPoint_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_INSERTIONPOINT_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_INSERTIONPOINT_H_
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/dom/shadow/ContentDistribution.h"
@@ -110,4 +110,4 @@ void collectDestinationInsertionPoints(const Node&, Vector<RawPtr<InsertionPoint
 
 } // namespace blink
 
-#endif // InsertionPoint_h
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_INSERTIONPOINT_H_

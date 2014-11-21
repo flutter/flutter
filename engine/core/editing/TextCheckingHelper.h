@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef TextCheckingHelper_h
-#define TextCheckingHelper_h
+#ifndef SKY_ENGINE_CORE_EDITING_TEXTCHECKINGHELPER_H_
+#define SKY_ENGINE_CORE_EDITING_TEXTCHECKINGHELPER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/text/TextChecking.h"
@@ -105,4 +105,4 @@ bool unifiedTextCheckerEnabled(const LocalFrame*);
 
 } // namespace blink
 
-#endif // TextCheckingHelper_h
+#endif  // SKY_ENGINE_CORE_EDITING_TEXTCHECKINGHELPER_H_

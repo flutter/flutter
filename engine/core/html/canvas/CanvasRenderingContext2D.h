@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasRenderingContext2D_h
-#define CanvasRenderingContext2D_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT2D_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT2D_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/css/CSSFontSelectorClient.h"
@@ -360,4 +360,4 @@ DEFINE_TYPE_CASTS(CanvasRenderingContext2D, CanvasRenderingContext, context, con
 
 } // namespace blink
 
-#endif // CanvasRenderingContext2D_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASRENDERINGCONTEXT2D_H_

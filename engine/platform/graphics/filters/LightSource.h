@@ -21,8 +21,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef LightSource_h
-#define LightSource_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_LIGHTSOURCE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_LIGHTSOURCE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatPoint3D.h"
@@ -88,4 +88,4 @@ private:
 
 } // namespace blink
 
-#endif // LightSource_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_LIGHTSOURCE_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SpellChecker_h
-#define SpellChecker_h
+#ifndef SKY_ENGINE_CORE_EDITING_SPELLCHECKER_H_
+#define SKY_ENGINE_CORE_EDITING_SPELLCHECKER_H_
 
 #include "sky/engine/core/dom/DocumentMarker.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -103,4 +103,4 @@ private:
 
 } // namespace blink
 
-#endif // SpellChecker_h
+#endif  // SKY_ENGINE_CORE_EDITING_SPELLCHECKER_H_

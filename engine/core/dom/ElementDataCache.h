@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef ElementDataCache_h
-#define ElementDataCache_h
+#ifndef SKY_ENGINE_CORE_DOM_ELEMENTDATACACHE_H_
+#define SKY_ENGINE_CORE_DOM_ELEMENTDATACACHE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -56,4 +56,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_ELEMENTDATACACHE_H_

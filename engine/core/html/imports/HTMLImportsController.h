@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportsController_h
-#define HTMLImportsController_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSCONTROLLER_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSCONTROLLER_H_
 
 #include "sky/engine/core/dom/DocumentSupplementable.h"
 #include "sky/engine/core/fetch/RawResource.h"
@@ -84,4 +84,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLImportsController_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSCONTROLLER_H_

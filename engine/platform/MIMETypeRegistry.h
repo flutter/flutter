@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MIMETypeRegistry_h
-#define MIMETypeRegistry_h
+#ifndef SKY_ENGINE_PLATFORM_MIMETYPEREGISTRY_H_
+#define SKY_ENGINE_PLATFORM_MIMETYPEREGISTRY_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -41,4 +41,4 @@ public:
 
 } // namespace blink
 
-#endif // MIMETypeRegistry_h
+#endif  // SKY_ENGINE_PLATFORM_MIMETYPEREGISTRY_H_

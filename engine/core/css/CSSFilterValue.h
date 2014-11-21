@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFilterValue_h
-#define CSSFilterValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFILTERVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFILTERVALUE_H_
 
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -76,4 +76,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSFilterValue, isFilterValue());
 }
 
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSFILTERVALUE_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextCodecUTF8_h
-#define TextCodecUTF8_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECUTF8_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTCODECUTF8_H_
 
 #include "sky/engine/wtf/text/TextCodec.h"
 
@@ -60,4 +60,4 @@ private:
 
 } // namespace WTF
 
-#endif // TextCodecUTF8_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECUTF8_H_

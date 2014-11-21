@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef TouchAdjustment_h
-#define TouchAdjustment_h
+#ifndef SKY_ENGINE_CORE_PAGE_TOUCHADJUSTMENT_H_
+#define SKY_ENGINE_CORE_PAGE_TOUCHADJUSTMENT_H_
 
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -34,4 +34,4 @@ bool findBestClickableCandidate(Node*& targetNode, IntPoint& targetPoint, const 
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_PAGE_TOUCHADJUSTMENT_H_

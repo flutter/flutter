@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Timing_h
-#define Timing_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_TIMING_H_
+#define SKY_ENGINE_CORE_ANIMATION_TIMING_H_
 
 #include "sky/engine/platform/animation/TimingFunction.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -97,4 +97,4 @@ struct Timing {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_TIMING_H_

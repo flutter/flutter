@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextInsertionBaseCommand_h
-#define TextInsertionBaseCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_TEXTINSERTIONBASECOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_TEXTINSERTIONBASECOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -68,4 +68,4 @@ void forEachLineInString(const String& string, const LineOperation& operation)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_TEXTINSERTIONBASECOMMAND_H_

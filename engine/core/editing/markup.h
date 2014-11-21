@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef markup_h
-#define markup_h
+#ifndef SKY_ENGINE_CORE_EDITING_MARKUP_H_
+#define SKY_ENGINE_CORE_EDITING_MARKUP_H_
 
 #include "sky/engine/core/editing/HTMLInterchange.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -57,4 +57,4 @@ void mergeWithNextTextNode(Text*, ExceptionState&);
 
 }
 
-#endif // markup_h
+#endif  // SKY_ENGINE_CORE_EDITING_MARKUP_H_

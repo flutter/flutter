@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTouchPoint_h
-#define WebTouchPoint_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTOUCHPOINT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTOUCHPOINT_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebFloatPoint.h"
@@ -70,4 +70,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTOUCHPOINT_H_

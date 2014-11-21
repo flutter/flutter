@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CompositingReasonFinder_h
-#define CompositingReasonFinder_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREASONFINDER_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREASONFINDER_H_
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/compositing/CompositingTriggers.h"
@@ -39,4 +39,4 @@ private:
 
 } // namespace blink
 
-#endif // CompositingReasonFinder_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREASONFINDER_H_

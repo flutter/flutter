@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTransformAnimationCurve_h
-#define WebTransformAnimationCurve_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMANIMATIONCURVE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMANIMATIONCURVE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
@@ -46,4 +46,4 @@ public:
 
 } // namespace blink
 
-#endif // WebTransformAnimationCurve_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMANIMATIONCURVE_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebClipboard_h
-#define WebClipboard_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCLIPBOARD_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCLIPBOARD_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebData.h"
@@ -93,4 +93,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCLIPBOARD_H_

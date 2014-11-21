@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatRect_h
-#define FloatRect_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATRECT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATRECT_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/wtf/Vector.h"
@@ -220,4 +220,4 @@ PLATFORM_EXPORT FloatRect mapRect(const FloatRect&, const FloatRect& srcRect, co
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATRECT_H_

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WTF_UNICODE_H
-#define WTF_UNICODE_H
+#ifndef SKY_ENGINE_WTF_UNICODE_UNICODE_H_
+#define SKY_ENGINE_WTF_UNICODE_UNICODE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -32,4 +32,4 @@ typedef unsigned char LChar;
 
 COMPILE_ASSERT(sizeof(UChar) == 2, UCharIsTwoBytes);
 
-#endif // WTF_UNICODE_H
+#endif  // SKY_ENGINE_WTF_UNICODE_UNICODE_H_

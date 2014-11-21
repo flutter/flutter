@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef DOMTimer_h
-#define DOMTimer_h
+#ifndef SKY_ENGINE_CORE_FRAME_DOMTIMER_H_
+#define SKY_ENGINE_CORE_FRAME_DOMTIMER_H_
 
 #include "sky/engine/bindings/core/v8/ScheduledAction.h"
 #include "sky/engine/core/frame/SuspendableTimer.h"
@@ -79,4 +79,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMTimer_h
+#endif  // SKY_ENGINE_CORE_FRAME_DOMTIMER_H_

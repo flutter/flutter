@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSParserObserver_h
-#define CSSParserObserver_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSPARSEROBSERVER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSPARSEROBSERVER_H_
 
 #include "sky/engine/core/css/CSSPropertySourceData.h"
 
@@ -66,4 +66,4 @@ public:
 
 } // namespace blink
 
-#endif // CSSParserObserver_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSPARSEROBSERVER_H_

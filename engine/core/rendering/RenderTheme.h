@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef RenderTheme_h
-#define RenderTheme_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_
 
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/scroll/ScrollTypes.h"
@@ -79,4 +79,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderTheme_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_

@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef BidiRun_h
-#define BidiRun_h
+#ifndef SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_
+#define SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_
 
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/platform/text/BidiResolver.h"
@@ -53,4 +53,4 @@ public:
 
 }
 
-#endif // BidiRun_h
+#endif  // SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_

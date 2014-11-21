@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGlyphCache_h
-#define WebGlyphCache_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBGLYPHCACHE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBGLYPHCACHE_H_
 
 #include "../platform/WebCommon.h"
 
@@ -48,4 +48,4 @@ private:
 
 }  // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBGLYPHCACHE_H_

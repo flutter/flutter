@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Timer_h
-#define Timer_h
+#ifndef SKY_ENGINE_PLATFORM_TIMER_H_
+#define SKY_ENGINE_PLATFORM_TIMER_H_
 
 #include "base/location.h"
 #include "sky/engine/platform/PlatformExport.h"
@@ -187,4 +187,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TIMER_H_

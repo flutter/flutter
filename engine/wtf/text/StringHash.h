@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef StringHash_h
-#define StringHash_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGHASH_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGHASH_H_
 
 #include "sky/engine/wtf/HashTraits.h"
 #include "sky/engine/wtf/StringHasher.h"
@@ -153,4 +153,4 @@ using WTF::AlreadyHashed;
 using WTF::CaseFoldingHash;
 using WTF::StringHash;
 
-#endif
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGHASH_H_

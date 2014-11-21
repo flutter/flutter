@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EditingBoundary_h
-#define EditingBoundary_h
+#ifndef SKY_ENGINE_CORE_EDITING_EDITINGBOUNDARY_H_
+#define SKY_ENGINE_CORE_EDITING_EDITINGBOUNDARY_H_
 
 namespace blink {
 
@@ -41,4 +41,4 @@ enum EditableType {
 
 }
 
-#endif // EditingBoundary_h
+#endif  // SKY_ENGINE_CORE_EDITING_EDITINGBOUNDARY_H_

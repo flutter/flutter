@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef LineLayoutState_h
-#define LineLayoutState_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
 
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -121,4 +121,4 @@ private:
 
 }
 
-#endif // LineLayoutState_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_

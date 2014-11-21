@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFontDescription_h
-#define WebFontDescription_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBFONTDESCRIPTION_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBFONTDESCRIPTION_H_
 
 #include "../platform/WebString.h"
 
@@ -100,4 +100,4 @@ struct WebFontDescription {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBFONTDESCRIPTION_H_

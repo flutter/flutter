@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NotFound_h
-#define NotFound_h
+#ifndef SKY_ENGINE_WTF_NOTFOUND_H_
+#define SKY_ENGINE_WTF_NOTFOUND_H_
 
 namespace WTF {
 const size_t kNotFound = static_cast<size_t>(-1);
@@ -32,4 +32,4 @@ const size_t kNotFound = static_cast<size_t>(-1);
 
 using WTF::kNotFound;
 
-#endif // NotFound_h
+#endif  // SKY_ENGINE_WTF_NOTFOUND_H_

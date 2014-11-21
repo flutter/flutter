@@ -28,8 +28,8 @@
 //
 // These are **not** thread safe!
 
-#ifndef TreeTestHelpers_h
-#define TreeTestHelpers_h
+#ifndef SKY_ENGINE_PLATFORM_TESTING_TREETESTHELPERS_H_
+#define SKY_ENGINE_PLATFORM_TESTING_TREETESTHELPERS_H_
 
 #include <stdint.h>
 
@@ -47,4 +47,4 @@ int32_t nextRandom(const int32_t maximumValue);
 } // namespace TreeTestHelpers
 } // namespace blink
 
-#endif // TreeTestHelpers_h
+#endif  // SKY_ENGINE_PLATFORM_TESTING_TREETESTHELPERS_H_

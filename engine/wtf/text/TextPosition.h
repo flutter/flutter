@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextPosition_h
-#define TextPosition_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTPOSITION_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTPOSITION_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/Vector.h"
@@ -93,4 +93,4 @@ using WTF::TextPosition;
 
 using WTF::lineEndings;
 
-#endif // TextPosition_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTPOSITION_H_

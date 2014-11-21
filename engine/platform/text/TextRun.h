@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef TextRun_h
-#define TextRun_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTRUN_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTRUN_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/Glyph.h"
@@ -255,4 +255,4 @@ struct TextRunPaintInfo {
 };
 
 }
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTRUN_H_

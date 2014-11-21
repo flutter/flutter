@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayerFragment_h
-#define LayerFragment_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LAYERFRAGMENT_H_
+#define SKY_ENGINE_CORE_RENDERING_LAYERFRAGMENT_H_
 
 #include "sky/engine/core/rendering/ClipRect.h"
 #include "sky/engine/wtf/Vector.h"
@@ -72,4 +72,4 @@ typedef Vector<LayerFragment, 1> LayerFragments;
 
 } // namespace blink
 
-#endif // LayerFragment_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LAYERFRAGMENT_H_

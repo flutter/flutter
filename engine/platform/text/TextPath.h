@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextPath_h
-#define TextPath_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTPATH_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTPATH_H_
 
 namespace blink {
 
@@ -37,4 +37,4 @@ enum CodePath { AutoPath, SimplePath, ComplexPath, SimpleWithGlyphOverflowPath }
 
 }
 
-#endif // TextPath_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTPATH_H_

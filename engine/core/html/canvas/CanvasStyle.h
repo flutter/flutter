@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasStyle_h
-#define CanvasStyle_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASSTYLE_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASSTYLE_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -103,4 +103,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASSTYLE_H_

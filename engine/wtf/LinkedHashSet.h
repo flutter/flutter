@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef WTF_LinkedHashSet_h
-#define WTF_LinkedHashSet_h
+#ifndef SKY_ENGINE_WTF_LINKEDHASHSET_H_
+#define SKY_ENGINE_WTF_LINKEDHASHSET_H_
 
 #include "sky/engine/wtf/DefaultAllocator.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -729,4 +729,4 @@ void deleteAllValues(const LinkedHashSet<ValueType, T, U>& set)
 
 using WTF::LinkedHashSet;
 
-#endif /* WTF_LinkedHashSet_h */
+#endif  // SKY_ENGINE_WTF_LINKEDHASHSET_H_

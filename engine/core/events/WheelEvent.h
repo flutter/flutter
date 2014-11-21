@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef WheelEvent_h
-#define WheelEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_WHEELEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_WHEELEVENT_H_
 
 #include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/events/MouseEvent.h"
@@ -115,4 +115,4 @@ private:
 
 } // namespace blink
 
-#endif // WheelEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_WHEELEVENT_H_

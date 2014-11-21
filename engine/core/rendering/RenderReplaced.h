@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef RenderReplaced_h
-#define RenderReplaced_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERREPLACED_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERREPLACED_H_
 
 #include "sky/engine/core/rendering/RenderBox.h"
 
@@ -92,4 +92,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERREPLACED_H_

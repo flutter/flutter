@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CSSAnimationData_h
-#define CSSAnimationData_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONDATA_H_
+#define SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONDATA_H_
 
 #include "sky/engine/core/animation/Timing.h"
 #include "sky/engine/core/animation/css/CSSTimingData.h"
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSAnimationData_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONDATA_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebScriptSource_h
-#define WebScriptSource_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTSOURCE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTSOURCE_H_
 
 #include "../platform/WebString.h"
 #include "../platform/WebURL.h"
@@ -51,4 +51,4 @@ struct WebScriptSource {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTSOURCE_H_

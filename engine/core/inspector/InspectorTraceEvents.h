@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef InspectorTraceEvents_h
-#define InspectorTraceEvents_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORTRACEEVENTS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORTRACEEVENTS_H_
 
 #include "sky/engine/platform/EventTracer.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -131,4 +131,4 @@ public:
 } // namespace blink
 
 
-#endif // !defined(InspectorTraceEvents_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORTRACEEVENTS_H_

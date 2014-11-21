@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptWrappable_h
-#define ScriptWrappable_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTWRAPPABLE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTWRAPPABLE_H_
 
 #include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
@@ -252,4 +252,4 @@ private: \
 
 } // namespace blink
 
-#endif // ScriptWrappable_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTWRAPPABLE_H_

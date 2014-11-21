@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MediaQueryParser_h
-#define MediaQueryParser_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYPARSER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYPARSER_H_
 
 #include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/core/css/MediaQuery.h"
@@ -103,4 +103,4 @@ private:
 
 } // namespace blink
 
-#endif // MediaQueryParser_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYPARSER_H_

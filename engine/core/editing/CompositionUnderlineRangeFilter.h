@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CompositionUnderlineRangeFilter_h
-#define CompositionUnderlineRangeFilter_h
+#ifndef SKY_ENGINE_CORE_EDITING_COMPOSITIONUNDERLINERANGEFILTER_H_
+#define SKY_ENGINE_CORE_EDITING_COMPOSITIONUNDERLINERANGEFILTER_H_
 
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/wtf/NotFound.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_COMPOSITIONUNDERLINERANGEFILTER_H_

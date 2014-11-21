@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLContentElement_h
-#define HTMLContentElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLCONTENTELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLCONTENTELEMENT_H_
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
@@ -92,4 +92,4 @@ inline bool HTMLContentElement::canSelectNode(const Vector<RawPtr<Node>, 32>& si
 
 } // namespace blink
 
-#endif // HTMLContentElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLCONTENTELEMENT_H_

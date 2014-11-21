@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextStream_h
-#define TextStream_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTSTREAM_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTSTREAM_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -93,4 +93,4 @@ TextStream& operator<<(TextStream& ts, const Vector<Item>& vector)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTSTREAM_H_

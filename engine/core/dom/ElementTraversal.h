@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef ElementTraversal_h
-#define ElementTraversal_h
+#ifndef SKY_ENGINE_CORE_DOM_ELEMENTTRAVERSAL_H_
+#define SKY_ENGINE_CORE_DOM_ELEMENTTRAVERSAL_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -348,4 +348,4 @@ inline ElementType* Traversal<ElementType>::nextSibling(const Node& current, Mat
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_ELEMENTTRAVERSAL_H_

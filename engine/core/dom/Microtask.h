@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Microtask_h
-#define Microtask_h
+#ifndef SKY_ENGINE_CORE_DOM_MICROTASK_H_
+#define SKY_ENGINE_CORE_DOM_MICROTASK_H_
 
 #include "base/callback_forward.h"
 #include "sky/engine/public/platform/WebThread.h"
@@ -49,4 +49,4 @@ private:
 
 } // namespace blink
 
-#endif // Microtask_h
+#endif  // SKY_ENGINE_CORE_DOM_MICROTASK_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameSelection_h
-#define FrameSelection_h
+#ifndef SKY_ENGINE_CORE_EDITING_FRAMESELECTION_H_
+#define SKY_ENGINE_CORE_EDITING_FRAMESELECTION_H_
 
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/editing/Caret.h"
@@ -304,4 +304,4 @@ void showTree(const blink::FrameSelection&);
 void showTree(const blink::FrameSelection*);
 #endif
 
-#endif // FrameSelection_h
+#endif  // SKY_ENGINE_CORE_EDITING_FRAMESELECTION_H_

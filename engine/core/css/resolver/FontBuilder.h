@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef FontBuilder_h
-#define FontBuilder_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_FONTBUILDER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_FONTBUILDER_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 
@@ -128,4 +128,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_FONTBUILDER_H_

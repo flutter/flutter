@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSParserValues_h
-#define CSSParserValues_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERVALUES_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERVALUES_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
@@ -271,4 +271,4 @@ inline void CSSParserValue::setFromValueList(PassOwnPtr<CSSParserValueList> valu
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSPARSERVALUES_H_

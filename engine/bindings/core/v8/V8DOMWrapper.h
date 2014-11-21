@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8DOMWrapper_h
-#define V8DOMWrapper_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8DOMWRAPPER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8DOMWRAPPER_H_
 
 #include "sky/engine/bindings/core/v8/DOMDataStore.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -156,4 +156,4 @@ private:
 
 } // namespace blink
 
-#endif // V8DOMWrapper_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8DOMWRAPPER_H_

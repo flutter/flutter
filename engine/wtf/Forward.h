@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_Forward_h
-#define WTF_Forward_h
+#ifndef SKY_ENGINE_WTF_FORWARD_H_
+#define SKY_ENGINE_WTF_FORWARD_H_
 
 #include <stddef.h>
 
@@ -79,4 +79,4 @@ using WTF::Uint8ClampedArray;
 using WTF::Uint16Array;
 using WTF::Uint32Array;
 
-#endif // WTF_Forward_h
+#endif  // SKY_ENGINE_WTF_FORWARD_H_

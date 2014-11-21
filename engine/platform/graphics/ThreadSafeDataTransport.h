@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ThreadSafeDataTransport_h
-#define ThreadSafeDataTransport_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_THREADSAFEDATATRANSPORT_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_THREADSAFEDATATRANSPORT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_THREADSAFEDATATRANSPORT_H_

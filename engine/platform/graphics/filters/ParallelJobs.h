@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ParallelJobs_h
-#define ParallelJobs_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_PARALLELJOBS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_PARALLELJOBS_H_
 
 #include "base/bind.h"
 #include "base/threading/thread.h"
@@ -100,4 +100,4 @@ private:
 
 } // namespace blink
 
-#endif // ParallelJobs_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_PARALLELJOBS_H_

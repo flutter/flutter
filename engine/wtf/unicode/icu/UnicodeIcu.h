@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WTF_UNICODE_ICU_H
-#define WTF_UNICODE_ICU_H
+#ifndef SKY_ENGINE_WTF_UNICODE_ICU_UNICODEICU_H_
+#define SKY_ENGINE_WTF_UNICODE_ICU_UNICODEICU_H_
 
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
@@ -227,4 +227,4 @@ inline int umemcasecmp(const UChar* a, const UChar* b, int len)
 
 } // namespace WTF
 
-#endif // WTF_UNICODE_ICU_H
+#endif  // SKY_ENGINE_WTF_UNICODE_ICU_UNICODEICU_H_

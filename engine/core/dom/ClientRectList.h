@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef ClientRectList_h
-#define ClientRectList_h
+#ifndef SKY_ENGINE_CORE_DOM_CLIENTRECTLIST_H_
+#define SKY_ENGINE_CORE_DOM_CLIENTRECTLIST_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -62,4 +62,4 @@ private:
 
 } // namespace blink
 
-#endif // ClientRectList_h
+#endif  // SKY_ENGINE_CORE_DOM_CLIENTRECTLIST_H_

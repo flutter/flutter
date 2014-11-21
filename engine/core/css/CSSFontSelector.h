@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFontSelector_h
-#define CSSFontSelector_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTSELECTOR_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTSELECTOR_H_
 
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/FontLoader.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSFontSelector_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTSELECTOR_H_

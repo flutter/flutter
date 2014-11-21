@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LoggingCanvas_h
-#define LoggingCanvas_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_LOGGINGCANVAS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_LOGGINGCANVAS_H_
 
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/graphics/InterceptingCanvas.h"
@@ -136,4 +136,4 @@ private:
 
 } // namespace blink
 
-#endif // LoggingCanvas_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_LOGGINGCANVAS_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationEffect_h
-#define AnimationEffect_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONEFFECT_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONEFFECT_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -61,4 +61,4 @@ public:
 
 } // namespace blink
 
-#endif // AnimationEffect_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONEFFECT_H_

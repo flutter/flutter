@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Range_h
-#define Range_h
+#ifndef SKY_ENGINE_CORE_DOM_RANGE_H_
+#define SKY_ENGINE_CORE_DOM_RANGE_H_
 
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -172,4 +172,4 @@ bool areRangesEqual(const Range*, const Range*);
 void showTree(const blink::Range*);
 #endif
 
-#endif // Range_h
+#endif  // SKY_ENGINE_CORE_DOM_RANGE_H_

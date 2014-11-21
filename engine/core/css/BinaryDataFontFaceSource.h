@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BinaryDataFontFaceSource_h
-#define BinaryDataFontFaceSource_h
+#ifndef SKY_ENGINE_CORE_CSS_BINARYDATAFONTFACESOURCE_H_
+#define SKY_ENGINE_CORE_CSS_BINARYDATAFONTFACESOURCE_H_
 
 #include "sky/engine/core/css/CSSFontFaceSource.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -27,4 +27,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_BINARYDATAFONTFACESOURCE_H_

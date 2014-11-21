@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_HashFunctions_h
-#define WTF_HashFunctions_h
+#ifndef SKY_ENGINE_WTF_HASHFUNCTIONS_H_
+#define SKY_ENGINE_WTF_HASHFUNCTIONS_H_
 
 #include <stdint.h>
 #include "sky/engine/wtf/OwnPtr.h"
@@ -238,4 +238,4 @@ using WTF::DefaultHash;
 using WTF::IntHash;
 using WTF::PtrHash;
 
-#endif // WTF_HashFunctions_h
+#endif  // SKY_ENGINE_WTF_HASHFUNCTIONS_H_

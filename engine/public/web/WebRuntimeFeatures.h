@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebRuntimeFeatures_h
-#define WebRuntimeFeatures_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBRUNTIMEFEATURES_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBRUNTIMEFEATURES_H_
 
 #include "../platform/WebCommon.h"
 
@@ -104,4 +104,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBRUNTIMEFEATURES_H_

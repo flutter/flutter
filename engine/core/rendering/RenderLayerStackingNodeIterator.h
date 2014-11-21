@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderLayerStackingNodeIterator_h
-#define RenderLayerStackingNodeIterator_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODEITERATOR_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODEITERATOR_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -88,4 +88,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerStackingNodeIterator_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODEITERATOR_H_

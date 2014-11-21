@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef IdentityTransformOperation_h
-#define IdentityTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_IDENTITYTRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_IDENTITYTRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // IdentityTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_IDENTITYTRANSFORMOPERATION_H_

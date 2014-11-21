@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationClock_h
-#define AnimationClock_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONCLOCK_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONCLOCK_H_
 
 #include <limits>
 #include "sky/engine/wtf/CurrentTime.h"
@@ -63,4 +63,4 @@ private:
 
 } // namespace blink
 
-#endif // AnimationClock_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONCLOCK_H_

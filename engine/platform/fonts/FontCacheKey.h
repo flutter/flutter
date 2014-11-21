@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontCacheKey_h
-#define FontCacheKey_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTCACHEKEY_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTCACHEKEY_H_
 
 #include "sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -113,4 +113,4 @@ struct FontCacheKeyTraits : WTF::SimpleClassHashTraits<FontCacheKey> { };
 
 } // namespace blink
 
-#endif // FontCacheKey_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCACHEKEY_H_

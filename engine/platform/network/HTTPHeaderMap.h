@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTTPHeaderMap_h
-#define HTTPHeaderMap_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_HTTPHEADERMAP_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_HTTPHEADERMAP_H_
 
 #include <utility>
 #include "sky/engine/platform/PlatformExport.h"
@@ -78,4 +78,4 @@ private:
 
 } // namespace blink
 
-#endif // HTTPHeaderMap_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_HTTPHEADERMAP_H_

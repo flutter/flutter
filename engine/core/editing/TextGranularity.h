@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextGranularity_h
-#define TextGranularity_h
+#ifndef SKY_ENGINE_CORE_EDITING_TEXTGRANULARITY_H_
+#define SKY_ENGINE_CORE_EDITING_TEXTGRANULARITY_H_
 
 namespace blink {
 
@@ -44,4 +44,4 @@ enum TextGranularity {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_TEXTGRANULARITY_H_

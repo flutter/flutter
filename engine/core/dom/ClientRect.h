@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef ClientRect_h
-#define ClientRect_h
+#ifndef SKY_ENGINE_CORE_DOM_CLIENTRECT_H_
+#define SKY_ENGINE_CORE_DOM_CLIENTRECT_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif // ClientRect_h
+#endif  // SKY_ENGINE_CORE_DOM_CLIENTRECT_H_

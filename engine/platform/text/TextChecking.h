@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextChecking_h
-#define TextChecking_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTCHECKING_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTCHECKING_H_
 
 #include "sky/engine/platform/text/TextDecoration.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -114,4 +114,4 @@ public:
 
 }
 
-#endif // TextChecking_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTCHECKING_H_

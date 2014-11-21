@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8PersistentValueVector_h
-#define V8PersistentValueVector_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8PERSISTENTVALUEVECTOR_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8PERSISTENTVALUEVECTOR_H_
 
 #include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8-util.h"
@@ -74,4 +74,4 @@ public:
 
 } // namespace blink
 
-#endif // V8PersistentValueVector_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8PERSISTENTVALUEVECTOR_H_

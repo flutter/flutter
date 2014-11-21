@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EventTracer_h
-#define EventTracer_h
+#ifndef SKY_ENGINE_PLATFORM_EVENTTRACER_H_
+#define SKY_ENGINE_PLATFORM_EVENTTRACER_H_
 
 #include <stdint.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -81,4 +81,4 @@ public:
 
 } // namespace blink
 
-#endif // EventTracer_h
+#endif  // SKY_ENGINE_PLATFORM_EVENTTRACER_H_

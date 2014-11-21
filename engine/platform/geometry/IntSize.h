@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IntSize_h
-#define IntSize_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZE_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/public/platform/WebCommon.h"
@@ -151,4 +151,4 @@ inline bool operator!=(const IntSize& a, const IntSize& b)
 
 } // namespace blink
 
-#endif // IntSize_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZE_H_

@@ -28,8 +28,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef WTF_ByteOrder_h
-#define WTF_ByteOrder_h
+#ifndef SKY_ENGINE_WTF_BYTEORDER_H_
+#define SKY_ENGINE_WTF_BYTEORDER_H_
 
 #if OS(POSIX)
 #include <arpa/inet.h>
@@ -39,4 +39,4 @@
 #include <winsock2.h>
 #endif
 
-#endif // WTF_ByteOrder_h
+#endif  // SKY_ENGINE_WTF_BYTEORDER_H_

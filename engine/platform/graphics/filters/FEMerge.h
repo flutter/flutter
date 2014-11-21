@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEMerge_h
-#define FEMerge_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMERGE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMERGE_H_
 
 #include "sky/engine/platform/graphics/filters/Filter.h"
 #include "sky/engine/platform/graphics/filters/FilterEffect.h"
@@ -44,4 +44,4 @@ private:
 
 } // namespace blink
 
-#endif // FEMerge_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMERGE_H_

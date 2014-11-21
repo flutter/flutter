@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLDebugShaders_h
-#define WebGLDebugShaders_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLDEBUGSHADERS_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLDEBUGSHADERS_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
@@ -52,4 +52,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLDebugShaders_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLDEBUGSHADERS_H_

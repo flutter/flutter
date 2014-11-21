@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RoundedRect_h
-#define RoundedRect_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_ROUNDEDRECT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_ROUNDEDRECT_H_
 
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -127,4 +127,4 @@ inline bool operator==(const RoundedRect& a, const RoundedRect& b)
 
 } // namespace blink
 
-#endif // RoundedRect_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_ROUNDEDRECT_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_WeakPtr_h
-#define WTF_WeakPtr_h
+#ifndef SKY_ENGINE_WTF_WEAKPTR_H_
+#define SKY_ENGINE_WTF_WEAKPTR_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -150,4 +150,4 @@ using WTF::WeakPtr;
 using WTF::WeakPtrFactory;
 using WTF::WeakReference;
 
-#endif
+#endif  // SKY_ENGINE_WTF_WEAKPTR_H_

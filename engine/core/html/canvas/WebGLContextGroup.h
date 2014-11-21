@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLContextGroup_h
-#define WebGLContextGroup_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTGROUP_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTGROUP_H_
 
 #include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -77,4 +77,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLContextGroup_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTGROUP_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MutationObserverInterestGroup_h
-#define MutationObserverInterestGroup_h
+#ifndef SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERINTERESTGROUP_H_
+#define SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERINTERESTGROUP_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/MutationObserver.h"
@@ -83,4 +83,4 @@ private:
 
 }
 
-#endif // MutationObserverInterestGroup_h
+#endif  // SKY_ENGINE_CORE_DOM_MUTATIONOBSERVERINTERESTGROUP_H_

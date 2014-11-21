@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef StylePropertySet_h
-#define StylePropertySet_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLEPROPERTYSET_H_
+#define SKY_ENGINE_CORE_CSS_STYLEPROPERTYSET_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
@@ -282,4 +282,4 @@ inline int StylePropertySet::findPropertyIndex(CSSPropertyID propertyID) const
 
 } // namespace blink
 
-#endif // StylePropertySet_h
+#endif  // SKY_ENGINE_CORE_CSS_STYLEPROPERTYSET_H_

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 
-#ifndef WebFloatPoint3D_h
-#define WebFloatPoint3D_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT3D_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT3D_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -90,4 +90,4 @@ inline bool operator!=(const WebFloatPoint3D& a, const WebFloatPoint3D& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT3D_H_

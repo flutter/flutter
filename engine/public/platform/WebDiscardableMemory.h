@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebDiscardableMemory_h
-#define WebDiscardableMemory_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBDISCARDABLEMEMORY_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBDISCARDABLEMEMORY_H_
 
 namespace blink {
 
@@ -72,4 +72,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBDISCARDABLEMEMORY_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlatformWheelEvent_h
-#define PlatformWheelEvent_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMWHEELEVENT_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMWHEELEVENT_H_
 
 #include "sky/engine/platform/PlatformEvent.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -95,4 +95,4 @@ protected:
 
 } // namespace blink
 
-#endif // PlatformWheelEvent_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMWHEELEVENT_H_

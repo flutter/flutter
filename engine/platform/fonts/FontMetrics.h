@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FontMetrics_h
-#define FontMetrics_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTMETRICS_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTMETRICS_H_
 
 #include "sky/engine/platform/fonts/FontBaseline.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -166,4 +166,4 @@ inline float scaleEmToUnits(float x, unsigned unitsPerEm)
 
 } // namespace blink
 
-#endif // FontMetrics_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTMETRICS_H_

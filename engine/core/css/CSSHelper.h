@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef CSSHelper_h
-#define CSSHelper_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSHELPER_H_
+#define SKY_ENGINE_CORE_CSS_CSSHELPER_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -37,4 +37,4 @@ const double cssPixelsPerPica = cssPixelsPerInch / 6;
 
 } // namespace blink
 
-#endif // CSSHelper_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSHELPER_H_

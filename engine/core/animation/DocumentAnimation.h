@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef DocumentAnimation_h
-#define DocumentAnimation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATION_H_
 
 #include "sky/engine/core/dom/Document.h"
 
@@ -16,4 +16,4 @@ public:
 
 } // namespace blink
 
-#endif // DocumentAnimation_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATION_H_

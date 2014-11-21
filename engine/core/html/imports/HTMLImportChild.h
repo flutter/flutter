@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportChild_h
-#define HTMLImportChild_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILD_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILD_H_
 
 #include "sky/engine/core/html/imports/HTMLImport.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -111,4 +111,4 @@ inline HTMLImportChild* toHTMLImportChild(HTMLImport* import)
 
 } // namespace blink
 
-#endif // HTMLImportChild_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILD_H_

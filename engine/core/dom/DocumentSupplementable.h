@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef DocumentSupplementable_h
-#define DocumentSupplementable_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTSUPPLEMENTABLE_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTSUPPLEMENTABLE_H_
 
 #include "sky/engine/platform/Supplementable.h"
 
@@ -39,4 +39,4 @@ typedef Supplement<Document> DocumentSupplement;
 
 } // namespace blink
 
-#endif // DocumentSupplementable_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTSUPPLEMENTABLE_H_

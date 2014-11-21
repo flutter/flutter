@@ -27,8 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DecodeEscapeSequences_h
-#define DecodeEscapeSequences_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_DECODEESCAPESEQUENCES_H_
+#define SKY_ENGINE_PLATFORM_TEXT_DECODEESCAPESEQUENCES_H_
 
 #include "sky/engine/wtf/ASCIICType.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -155,4 +155,4 @@ String decodeEscapeSequences(const String& string, const WTF::TextEncoding& enco
 
 } // namespace blink
 
-#endif // DecodeEscapeSequences_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_DECODEESCAPESEQUENCES_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayerFactoryChromium_h
-#define GraphicsLayerFactoryChromium_h
+#ifndef SKY_ENGINE_WEB_GRAPHICSLAYERFACTORYCHROMIUM_H_
+#define SKY_ENGINE_WEB_GRAPHICSLAYERFACTORYCHROMIUM_H_
 
 #include "sky/engine/platform/graphics/GraphicsLayerFactory.h"
 
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_GRAPHICSLAYERFACTORYCHROMIUM_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TimingCalculations_h
-#define TimingCalculations_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_TIMINGCALCULATIONS_H_
+#define SKY_ENGINE_CORE_ANIMATION_TIMINGCALCULATIONS_H_
 
 #include "sky/engine/core/animation/AnimationNode.h"
 #include "sky/engine/core/animation/Timing.h"
@@ -195,4 +195,4 @@ static inline double calculateTransformedTime(double currentIteration, double it
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_TIMINGCALCULATIONS_H_

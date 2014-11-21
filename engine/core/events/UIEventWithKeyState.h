@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef UIEventWithKeyState_h
-#define UIEventWithKeyState_h
+#ifndef SKY_ENGINE_CORE_EVENTS_UIEVENTWITHKEYSTATE_H_
+#define SKY_ENGINE_CORE_EVENTS_UIEVENTWITHKEYSTATE_H_
 
 #include "sky/engine/core/events/UIEvent.h"
 
@@ -65,4 +65,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // UIEventWithKeyState_h
+#endif  // SKY_ENGINE_CORE_EVENTS_UIEVENTWITHKEYSTATE_H_

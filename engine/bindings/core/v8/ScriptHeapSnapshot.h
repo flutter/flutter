@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptHeapSnapshot_h
-#define ScriptHeapSnapshot_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTHEAPSNAPSHOT_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTHEAPSNAPSHOT_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptHeapSnapshot_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTHEAPSNAPSHOT_H_

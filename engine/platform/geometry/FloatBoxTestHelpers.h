@@ -21,8 +21,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FloatBoxTestHelpers_h
-#define FloatBoxTestHelpers_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXTESTHELPERS_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXTESTHELPERS_H_
 
 #include <gtest/gtest.h>
 namespace blink {
@@ -39,4 +39,4 @@ bool ApproximatelyEqual(const FloatBox&, const FloatBox&);
 } // namespace FloatBoxTest
 } // namespace blink
 
-#endif // FloatBoxTestHelpers_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXTESTHELPERS_H_

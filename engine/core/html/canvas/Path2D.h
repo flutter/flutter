@@ -25,8 +25,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef Path2D_h
-#define Path2D_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_PATH2D_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_PATH2D_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/CanvasPathMethods.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif // Path2D_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_PATH2D_H_

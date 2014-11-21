@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DummyPageHolder_h
-#define DummyPageHolder_h
+#ifndef SKY_ENGINE_CORE_TESTING_DUMMYPAGEHOLDER_H_
+#define SKY_ENGINE_CORE_TESTING_DUMMYPAGEHOLDER_H_
 
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/Page.h"
@@ -86,4 +86,4 @@ private:
 
 } // namespace blink
 
-#endif // DummyPageHolder_h
+#endif  // SKY_ENGINE_CORE_TESTING_DUMMYPAGEHOLDER_H_

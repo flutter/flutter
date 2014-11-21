@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TransformationMatrix_h
-#define TransformationMatrix_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMATIONMATRIX_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMATIONMATRIX_H_
 
 #include <string.h> //for memcpy
 #include "sky/engine/platform/geometry/FloatPoint.h"
@@ -353,4 +353,4 @@ private:
 
 } // namespace blink
 
-#endif // TransformationMatrix_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSFORMATIONMATRIX_H_

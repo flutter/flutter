@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentLifecycle_h
-#define DocumentLifecycle_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLE_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -172,4 +172,4 @@ inline bool DocumentLifecycle::stateAllowsDetach() const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLE_H_

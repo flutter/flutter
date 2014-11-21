@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallFrame_h
-#define ScriptCallFrame_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
 
 #include "gen/sky/core/InspectorTypeBuilder.h"
 #include "sky/engine/wtf/Forward.h"
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptCallFrame_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_

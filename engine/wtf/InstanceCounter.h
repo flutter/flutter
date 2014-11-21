@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InstanceCounter_h
-#define InstanceCounter_h
+#ifndef SKY_ENGINE_WTF_INSTANCECOUNTER_H_
+#define SKY_ENGINE_WTF_INSTANCECOUNTER_H_
 
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -62,4 +62,4 @@ inline void decrementInstanceCount(T* p)
 
 } // namespace WTF
 
-#endif
+#endif  // SKY_ENGINE_WTF_INSTANCECOUNTER_H_

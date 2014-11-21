@@ -42,8 +42,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef RenderLayerClipper_h
-#define RenderLayerClipper_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERCLIPPER_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERCLIPPER_H_
 
 #include "sky/engine/core/rendering/ClipRectsCache.h"
 #include "sky/engine/core/rendering/RenderBox.h"
@@ -144,4 +144,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerClipper_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERCLIPPER_H_

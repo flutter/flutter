@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TransformState_h
-#define TransformState_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_TRANSFORMSTATE_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_TRANSFORMSTATE_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -119,4 +119,4 @@ private:
 
 } // namespace blink
 
-#endif // TransformState_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_TRANSFORMSTATE_H_

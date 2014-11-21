@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebImageLayer_h
-#define WebImageLayer_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGELAYER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGELAYER_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebLayer.h"
@@ -42,4 +42,4 @@ public:
 
 } // namespace blink
 
-#endif // WebImageLayer_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGELAYER_H_

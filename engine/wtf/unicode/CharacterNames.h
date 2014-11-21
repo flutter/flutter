@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CharacterNames_h
-#define CharacterNames_h
+#ifndef SKY_ENGINE_WTF_UNICODE_CHARACTERNAMES_H_
+#define SKY_ENGINE_WTF_UNICODE_CHARACTERNAMES_H_
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
@@ -146,4 +146,4 @@ using WTF::Unicode::zeroWidthNonJoiner;
 using WTF::Unicode::zeroWidthSpace;
 using WTF::Unicode::zeroWidthNoBreakSpace;
 
-#endif // CharacterNames_h
+#endif  // SKY_ENGINE_WTF_UNICODE_CHARACTERNAMES_H_

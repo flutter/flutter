@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WrappedResourceResponse_h
-#define WrappedResourceResponse_h
+#ifndef SKY_ENGINE_PLATFORM_EXPORTED_WRAPPEDRESOURCERESPONSE_H_
+#define SKY_ENGINE_PLATFORM_EXPORTED_WRAPPEDRESOURCERESPONSE_H_
 
 #include "sky/engine/platform/exported/WebURLResponsePrivate.h"
 #include "sky/engine/public/platform/WebURLResponse.h"
@@ -77,4 +77,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_EXPORTED_WRAPPEDRESOURCERESPONSE_H_

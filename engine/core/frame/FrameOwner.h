@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FrameOwner_h
-#define FrameOwner_h
+#ifndef SKY_ENGINE_CORE_FRAME_FRAMEOWNER_H_
+#define SKY_ENGINE_CORE_FRAME_FRAMEOWNER_H_
 
 namespace blink {
 
@@ -18,4 +18,4 @@ public:
 
 } // namespace blink
 
-#endif // FrameOwner_h
+#endif  // SKY_ENGINE_CORE_FRAME_FRAMEOWNER_H_

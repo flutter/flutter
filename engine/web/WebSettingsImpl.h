@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebSettingsImpl_h
-#define WebSettingsImpl_h
+#ifndef SKY_ENGINE_WEB_WEBSETTINGSIMPL_H_
+#define SKY_ENGINE_WEB_WEBSETTINGSIMPL_H_
 
 #include "sky/engine/public/web/WebSettings.h"
 
@@ -134,4 +134,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBSETTINGSIMPL_H_

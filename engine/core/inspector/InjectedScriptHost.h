@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InjectedScriptHost_h
-#define InjectedScriptHost_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTHOST_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTHOST_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -105,4 +105,4 @@ private:
 
 } // namespace blink
 
-#endif // InjectedScriptHost_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTHOST_H_

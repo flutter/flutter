@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DoublyLinkedList_h
-#define DoublyLinkedList_h
+#ifndef SKY_ENGINE_WTF_DOUBLYLINKEDLIST_H_
+#define SKY_ENGINE_WTF_DOUBLYLINKEDLIST_H_
 
 namespace WTF {
 
@@ -191,4 +191,4 @@ template<typename T> inline T* DoublyLinkedList<T>::removeHead()
 using WTF::DoublyLinkedListNode;
 using WTF::DoublyLinkedList;
 
-#endif
+#endif  // SKY_ENGINE_WTF_DOUBLYLINKEDLIST_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationEvent_h
-#define AnimationEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_ANIMATIONEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_ANIMATIONEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif // AnimationEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_ANIMATIONEVENT_H_

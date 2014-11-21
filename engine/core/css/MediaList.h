@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef MediaList_h
-#define MediaList_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIALIST_H_
+#define SKY_ENGINE_CORE_CSS_MEDIALIST_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
@@ -119,4 +119,4 @@ void reportMediaQueryWarningIfNeeded(Document*, const MediaQuerySet*);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_MEDIALIST_H_

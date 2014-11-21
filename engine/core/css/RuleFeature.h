@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef RuleFeature_h
-#define RuleFeature_h
+#ifndef SKY_ENGINE_CORE_CSS_RULEFEATURE_H_
+#define SKY_ENGINE_CORE_CSS_RULEFEATURE_H_
 
 #include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/wtf/Forward.h"
@@ -107,4 +107,4 @@ template <> struct VectorTraits<blink::RuleFeature> : VectorTraitsBase<blink::Ru
 
 } // namespace WTF
 
-#endif // RuleFeature_h
+#endif  // SKY_ENGINE_CORE_CSS_RULEFEATURE_H_

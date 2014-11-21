@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWindowLifecycleNotifier_h
-#define DOMWindowLifecycleNotifier_h
+#ifndef SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLENOTIFIER_H_
+#define SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLENOTIFIER_H_
 
 #include "sky/engine/core/frame/DOMWindowLifecycleObserver.h"
 #include "sky/engine/platform/LifecycleNotifier.h"
@@ -56,4 +56,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMWindowLifecycleNotifier_h
+#endif  // SKY_ENGINE_CORE_FRAME_DOMWINDOWLIFECYCLENOTIFIER_H_

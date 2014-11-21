@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositorPendingAnimations_h
-#define CompositorPendingAnimations_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_COMPOSITORPENDINGANIMATIONS_H_
+#define SKY_ENGINE_CORE_ANIMATION_COMPOSITORPENDINGANIMATIONS_H_
 
 #include "sky/engine/core/animation/AnimationPlayer.h"
 #include "sky/engine/platform/Timer.h"
@@ -67,4 +67,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_COMPOSITORPENDINGANIMATIONS_H_

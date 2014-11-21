@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportStateResolver_h
-#define HTMLImportStateResolver_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATERESOLVER_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATERESOLVER_H_
 
 #include "sky/engine/core/html/imports/HTMLImportState.h"
 
@@ -56,5 +56,5 @@ private:
 
 }
 
-#endif // HTMLImportStateResolver_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATERESOLVER_H_
 

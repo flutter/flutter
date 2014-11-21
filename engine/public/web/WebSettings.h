@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebSettings_h
-#define WebSettings_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSETTINGS_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSETTINGS_H_
 
 #include <unicode/uscript.h>
 #include "../platform/WebCommon.h"
@@ -154,4 +154,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSETTINGS_H_

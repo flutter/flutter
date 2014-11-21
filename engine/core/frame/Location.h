@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Location_h
-#define Location_h
+#ifndef SKY_ENGINE_CORE_FRAME_LOCATION_H_
+#define SKY_ENGINE_CORE_FRAME_LOCATION_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/DOMStringList.h"
@@ -86,4 +86,4 @@ private:
 
 } // namespace blink
 
-#endif // Location_h
+#endif  // SKY_ENGINE_CORE_FRAME_LOCATION_H_

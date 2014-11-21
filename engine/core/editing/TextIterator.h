@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextIterator_h
-#define TextIterator_h
+#ifndef SKY_ENGINE_CORE_EDITING_TEXTITERATOR_H_
+#define SKY_ENGINE_CORE_EDITING_TEXTITERATOR_H_
 
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/editing/FindOptions.h"
@@ -347,4 +347,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_TEXTITERATOR_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DictionaryHelperForBindings_h
-#define DictionaryHelperForBindings_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARYHELPERFORBINDINGS_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARYHELPERFORBINDINGS_H_
 
 #include "sky/engine/bindings/core/v8/Dictionary.h"
 
@@ -67,4 +67,4 @@ bool DictionaryHelper::convert(const Dictionary& dictionary, Dictionary::Convers
 
 } // namespace blink
 
-#endif // DictionaryHelperForBindings_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARYHELPERFORBINDINGS_H_

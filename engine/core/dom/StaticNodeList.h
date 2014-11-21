@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StaticNodeList_h
-#define StaticNodeList_h
+#ifndef SKY_ENGINE_CORE_DOM_STATICNODELIST_H_
+#define SKY_ENGINE_CORE_DOM_STATICNODELIST_H_
 
 #include "sky/engine/core/dom/NodeList.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -98,4 +98,4 @@ NodeType* StaticNodeTypeList<NodeType>::item(unsigned index) const
 
 } // namespace blink
 
-#endif // StaticNodeList_h
+#endif  // SKY_ENGINE_CORE_DOM_STATICNODELIST_H_

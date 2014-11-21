@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositingLayerAssigner_h
-#define CompositingLayerAssigner_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGLAYERASSIGNER_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGLAYERASSIGNER_H_
 
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -91,4 +91,4 @@ private:
 
 } // namespace blink
 
-#endif // CompositingLayerAssigner_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGLAYERASSIGNER_H_

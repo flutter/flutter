@@ -26,8 +26,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef TextRunIterator_h
-#define TextRunIterator_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTRUNITERATOR_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTRUNITERATOR_H_
 
 #include "sky/engine/platform/text/TextRun.h"
 
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif // TextRunIterator_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTRUNITERATOR_H_

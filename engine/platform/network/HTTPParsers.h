@@ -28,8 +28,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTTPParsers_h
-#define HTTPParsers_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_HTTPPARSERS_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_HTTPPARSERS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -100,4 +100,4 @@ PLATFORM_EXPORT size_t parseHTTPRequestBody(const char* data, size_t length, Vec
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_HTTPPARSERS_H_

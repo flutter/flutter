@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ChildNode_h
-#define ChildNode_h
+#ifndef SKY_ENGINE_CORE_DOM_CHILDNODE_H_
+#define SKY_ENGINE_CORE_DOM_CHILDNODE_H_
 
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/Node.h"
@@ -30,4 +30,4 @@ public:
 
 } // namespace blink
 
-#endif // ChildNode_h
+#endif  // SKY_ENGINE_CORE_DOM_CHILDNODE_H_

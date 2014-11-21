@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementRegistrationContext_h
-#define CustomElementRegistrationContext_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRATIONCONTEXT_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRATIONCONTEXT_H_
 
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
@@ -83,5 +83,5 @@ private:
 
 }
 
-#endif // CustomElementRegistrationContext_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRATIONCONTEXT_H_
 

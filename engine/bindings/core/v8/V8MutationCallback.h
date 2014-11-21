@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8MutationCallback_h
-#define V8MutationCallback_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8MUTATIONCALLBACK_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8MUTATIONCALLBACK_H_
 
 #include "sky/engine/bindings/core/v8/ActiveDOMCallback.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif // V8MutationCallback_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8MUTATIONCALLBACK_H_

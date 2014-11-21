@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementMicrotaskStep_h
-#define CustomElementMicrotaskStep_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKSTEP_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKSTEP_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -52,4 +52,4 @@ public:
 
 }
 
-#endif // CustomElementMicrotaskStep_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKSTEP_H_

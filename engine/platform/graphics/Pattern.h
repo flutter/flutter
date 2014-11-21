@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Pattern_h
-#define Pattern_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_
 
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/PlatformExport.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_

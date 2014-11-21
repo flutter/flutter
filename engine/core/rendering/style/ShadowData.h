@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef ShadowData_h
-#define ShadowData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif // ShadowData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_

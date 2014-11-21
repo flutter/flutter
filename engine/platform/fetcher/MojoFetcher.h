@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_PLATFORM_FETCHER_MOJO_FETCHER_H_
-#define SKY_ENGINE_PLATFORM_FETCHER_MOJO_FETCHER_H_
+#ifndef SKY_ENGINE_PLATFORM_FETCHER_MOJOFETCHER_H_
+#define SKY_ENGINE_PLATFORM_FETCHER_MOJOFETCHER_H_
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/public/interfaces/network/url_loader.mojom.h"
@@ -36,4 +36,4 @@ class MojoFetcher {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_PLATFORM_FETCHER_MOJO_FETCHER_H_
+#endif  // SKY_ENGINE_PLATFORM_FETCHER_MOJOFETCHER_H_

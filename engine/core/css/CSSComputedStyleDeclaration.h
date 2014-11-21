@@ -18,8 +18,8 @@
  * 02110-1301  USA
  */
 
-#ifndef CSSComputedStyleDeclaration_h
-#define CSSComputedStyleDeclaration_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCOMPUTEDSTYLEDECLARATION_H_
+#define SKY_ENGINE_CORE_CSS_CSSCOMPUTEDSTYLEDECLARATION_H_
 
 #include "sky/engine/core/css/CSSStyleDeclaration.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -114,4 +114,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSComputedStyleDeclaration_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCOMPUTEDSTYLEDECLARATION_H_

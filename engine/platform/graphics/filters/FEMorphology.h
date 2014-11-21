@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEMorphology_h
-#define FEMorphology_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMORPHOLOGY_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMORPHOLOGY_H_
 
 #include "sky/engine/platform/graphics/filters/Filter.h"
 #include "sky/engine/platform/graphics/filters/FilterEffect.h"
@@ -82,4 +82,4 @@ private:
 
 } // namespace blink
 
-#endif // FEMorphology_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEMORPHOLOGY_H_

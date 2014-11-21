@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OpenTypeSanitizer_h
-#define OpenTypeSanitizer_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_
+#define SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -54,4 +54,4 @@ private:
 
 } // namespace blink
 
-#endif // OpenTypeSanitizer_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPESANITIZER_H_

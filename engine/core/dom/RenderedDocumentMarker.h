@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderedDocumentMarker_h
-#define RenderedDocumentMarker_h
+#ifndef SKY_ENGINE_CORE_DOM_RENDEREDDOCUMENTMARKER_H_
+#define SKY_ENGINE_CORE_DOM_RENDEREDDOCUMENTMARKER_H_
 
 #include "sky/engine/core/dom/DocumentMarker.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -74,4 +74,4 @@ DEFINE_TYPE_CASTS(RenderedDocumentMarker, DocumentMarker, marker, true, true);
 
 WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::RenderedDocumentMarker);
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_RENDEREDDOCUMENTMARKER_H_

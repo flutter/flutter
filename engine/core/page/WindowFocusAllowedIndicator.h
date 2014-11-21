@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WindowFocusAllowedIndicator_h
-#define WindowFocusAllowedIndicator_h
+#ifndef SKY_ENGINE_CORE_PAGE_WINDOWFOCUSALLOWEDINDICATOR_H_
+#define SKY_ENGINE_CORE_PAGE_WINDOWFOCUSALLOWEDINDICATOR_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -44,4 +44,4 @@ private:
 
 } // namespace blink
 
-#endif // WindowFocusAllowedIndicator_h
+#endif  // SKY_ENGINE_CORE_PAGE_WINDOWFOCUSALLOWEDINDICATOR_H_

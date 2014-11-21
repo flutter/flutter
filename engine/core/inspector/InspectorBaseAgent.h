@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InspectorBaseAgent_h
-#define InspectorBaseAgent_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORBASEAGENT_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORBASEAGENT_H_
 
 #include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -89,4 +89,4 @@ inline bool asBool(const bool* const b)
 
 } // namespace blink
 
-#endif // !defined(InspectorBaseAgent_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORBASEAGENT_H_

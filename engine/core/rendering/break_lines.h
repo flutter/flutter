@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef break_lines_h
-#define break_lines_h
+#ifndef SKY_ENGINE_CORE_RENDERING_BREAK_LINES_H_
+#define SKY_ENGINE_CORE_RENDERING_BREAK_LINES_H_
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
@@ -38,4 +38,4 @@ inline bool isBreakable(LazyLineBreakIterator& lazyBreakIterator, int pos, int& 
 
 } // namespace blink
 
-#endif // break_lines_h
+#endif  // SKY_ENGINE_CORE_RENDERING_BREAK_LINES_H_

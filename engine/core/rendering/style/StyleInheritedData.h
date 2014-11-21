@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef StyleInheritedData_h
-#define StyleInheritedData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEINHERITEDDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEINHERITEDDATA_H_
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/fonts/Font.h"
@@ -63,4 +63,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleInheritedData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEINHERITEDDATA_H_

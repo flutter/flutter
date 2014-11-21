@@ -21,8 +21,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef LengthFunctions_h
-#define LengthFunctions_h
+#ifndef SKY_ENGINE_PLATFORM_LENGTHFUNCTIONS_H_
+#define SKY_ENGINE_PLATFORM_LENGTHFUNCTIONS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -42,4 +42,4 @@ PLATFORM_EXPORT FloatSize floatSizeForLengthSize(const LengthSize&, const FloatS
 
 } // namespace blink
 
-#endif // LengthFunctions_h
+#endif  // SKY_ENGINE_PLATFORM_LENGTHFUNCTIONS_H_

@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef StyleAdjuster_h
-#define StyleAdjuster_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLEADJUSTER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLEADJUSTER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 
@@ -47,4 +47,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleAdjuster_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLEADJUSTER_H_

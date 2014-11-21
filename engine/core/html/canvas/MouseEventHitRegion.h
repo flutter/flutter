@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MouseEventHitRegion_h
-#define MouseEventHitRegion_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_MOUSEEVENTHITREGION_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_MOUSEEVENTHITREGION_H_
 
 #include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
@@ -40,4 +40,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_MOUSEEVENTHITREGION_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLVertexArrayObjectOES_h
-#define WebGLVertexArrayObjectOES_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLVERTEXARRAYOBJECTOES_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLVERTEXARRAYOBJECTOES_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLBuffer.h"
@@ -122,4 +122,4 @@ struct VectorTraits<blink::WebGLVertexArrayObjectOES::VertexAttribState> : Simpl
 
 } // namespace WTF
 
-#endif // WebGLVertexArrayObjectOES_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLVERTEXARRAYOBJECTOES_H_

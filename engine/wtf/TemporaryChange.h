@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TemporaryChange_h
-#define TemporaryChange_h
+#ifndef SKY_ENGINE_WTF_TEMPORARYCHANGE_H_
+#define SKY_ENGINE_WTF_TEMPORARYCHANGE_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -65,4 +65,4 @@ private:
 
 using WTF::TemporaryChange;
 
-#endif
+#endif  // SKY_ENGINE_WTF_TEMPORARYCHANGE_H_

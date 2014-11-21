@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_Alignment_h
-#define WTF_Alignment_h
+#ifndef SKY_ENGINE_WTF_ALIGNMENT_H_
+#define SKY_ENGINE_WTF_ALIGNMENT_H_
 
 #include <stdint.h>
 #include <algorithm>
@@ -63,4 +63,4 @@ namespace WTF {
     }
 }
 
-#endif // WTF_Alignment_h
+#endif  // SKY_ENGINE_WTF_ALIGNMENT_H_

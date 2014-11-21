@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Collator_h
-#define WTF_Collator_h
+#ifndef SKY_ENGINE_WTF_UNICODE_COLLATOR_H_
+#define SKY_ENGINE_WTF_UNICODE_COLLATOR_H_
 
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -63,4 +63,4 @@ namespace WTF {
 
 using WTF::Collator;
 
-#endif
+#endif  // SKY_ENGINE_WTF_UNICODE_COLLATOR_H_

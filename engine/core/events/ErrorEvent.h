@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ErrorEvent_h
-#define ErrorEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_ERROREVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_ERROREVENT_H_
 
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 #include "sky/engine/core/events/Event.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // ErrorEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_ERROREVENT_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSSegmentedFontFace_h
-#define CSSSegmentedFontFace_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSEGMENTEDFONTFACE_H_
+#define SKY_ENGINE_CORE_CSS_CSSSEGMENTEDFONTFACE_H_
 
 #include "sky/engine/platform/fonts/FontTraits.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -88,4 +88,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSSegmentedFontFace_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSSEGMENTEDFONTFACE_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextCodecASCIIFastPath_h
-#define TextCodecASCIIFastPath_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECASCIIFASTPATH_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTCODECASCIIFASTPATH_H_
 
 #include "sky/engine/wtf/text/ASCIIFastPath.h"
 
@@ -77,4 +77,4 @@ inline void copyASCIIMachineWord(UChar* destination, const uint8_t* source)
 
 } // namespace WTF
 
-#endif // TextCodecASCIIFastPath_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECASCIIFASTPATH_H_

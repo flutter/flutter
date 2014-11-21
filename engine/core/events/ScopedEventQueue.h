@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScopedEventQueue_h
-#define ScopedEventQueue_h
+#ifndef SKY_ENGINE_CORE_EVENTS_SCOPEDEVENTQUEUE_H_
+#define SKY_ENGINE_CORE_EVENTS_SCOPEDEVENTQUEUE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -74,4 +74,4 @@ public:
 
 }
 
-#endif // ScopedEventQueue_h
+#endif  // SKY_ENGINE_CORE_EVENTS_SCOPEDEVENTQUEUE_H_

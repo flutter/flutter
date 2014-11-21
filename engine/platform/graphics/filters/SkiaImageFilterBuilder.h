@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SkiaImageFilterBuilder_h
-#define SkiaImageFilterBuilder_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_SKIAIMAGEFILTERBUILDER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_SKIAIMAGEFILTERBUILDER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_SKIAIMAGEFILTERBUILDER_H_

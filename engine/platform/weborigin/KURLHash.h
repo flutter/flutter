@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KURLHash_h
-#define KURLHash_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_KURLHASH_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_KURLHASH_H_
 
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/text/StringHash.h"
@@ -54,4 +54,4 @@ template<> struct HashTraits<blink::KURL> : SimpleClassHashTraits<blink::KURL> {
 
 } // namespace WTF
 
-#endif // KURLHash_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_KURLHASH_H_

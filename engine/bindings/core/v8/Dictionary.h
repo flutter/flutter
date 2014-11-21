@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Dictionary_h
-#define Dictionary_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARY_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARY_H_
 
 #include "sky/engine/bindings/core/v8/ExceptionMessages.h"
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
@@ -167,4 +167,4 @@ struct DictionaryHelper {
 
 }
 
-#endif // Dictionary_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_DICTIONARY_H_

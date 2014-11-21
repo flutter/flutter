@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutSize_h
-#define LayoutSize_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTSIZE_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTSIZE_H_
 
 #include "sky/engine/platform/LayoutUnit.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
@@ -189,4 +189,4 @@ inline LayoutSize roundedLayoutSize(const FloatSize& s)
 
 } // namespace blink
 
-#endif // LayoutSize_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTSIZE_H_

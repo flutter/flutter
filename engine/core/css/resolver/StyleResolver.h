@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef StyleResolver_h
-#define StyleResolver_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_
 
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/RuleSet.h"
@@ -269,4 +269,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleResolver_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_

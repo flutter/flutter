@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HTMLImportTreeRoot_h
-#define HTMLImportTreeRoot_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTTREEROOT_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTTREEROOT_H_
 
 #include "sky/engine/core/html/imports/HTMLImport.h"
 #include "sky/engine/platform/Timer.h"
@@ -47,4 +47,4 @@ DEFINE_TYPE_CASTS(HTMLImportTreeRoot, HTMLImport, import, import->isRoot(), impo
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTTREEROOT_H_

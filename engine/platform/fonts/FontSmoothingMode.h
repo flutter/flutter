@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontSmoothingMode_h
-#define FontSmoothingMode_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTSMOOTHINGMODE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTSMOOTHINGMODE_H_
 
 namespace blink {
 
@@ -32,4 +32,4 @@ enum FontSmoothingMode { AutoSmoothing, NoSmoothing, Antialiased, SubpixelAntial
 
 } // namespace blink
 
-#endif // FontSmoothingMode_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTSMOOTHINGMODE_H_

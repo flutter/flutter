@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef StyleTransformData_h
-#define StyleTransformData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLETRANSFORMDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLETRANSFORMDATA_H_
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
@@ -55,4 +55,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleTransformData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLETRANSFORMDATA_H_

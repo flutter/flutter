@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FilterOperation_h
-#define FilterOperation_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATION_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATION_H_
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/PlatformExport.h"
@@ -312,4 +312,4 @@ DEFINE_FILTER_OPERATION_TYPE_CASTS(DropShadowFilterOperation, DROP_SHADOW);
 } // namespace blink
 
 
-#endif // FilterOperation_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FILTEROPERATION_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLToken_h
-#define HTMLToken_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKEN_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKEN_H_
 
 #include "sky/engine/core/dom/Attribute.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -313,4 +313,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKEN_H_

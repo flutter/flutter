@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationPlayer_h
-#define AnimationPlayer_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONPLAYER_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONPLAYER_H_
 
 #include "sky/engine/core/animation/AnimationNode.h"
 #include "sky/engine/core/dom/ActiveDOMObject.h"
@@ -210,4 +210,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONPLAYER_H_

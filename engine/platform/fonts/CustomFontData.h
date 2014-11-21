@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef CustomFontData_h
-#define CustomFontData_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_CUSTOMFONTDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_CUSTOMFONTDATA_H_
 
 #include <unicode/uchar.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -59,4 +59,4 @@ protected:
 
 } // namespace blink
 
-#endif // CustomFontData_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_CUSTOMFONTDATA_H_

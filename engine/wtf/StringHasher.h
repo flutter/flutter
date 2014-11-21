@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef WTF_StringHasher_h
-#define WTF_StringHasher_h
+#ifndef SKY_ENGINE_WTF_STRINGHASHER_H_
+#define SKY_ENGINE_WTF_STRINGHASHER_H_
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
@@ -236,4 +236,4 @@ private:
 
 using WTF::StringHasher;
 
-#endif // WTF_StringHasher_h
+#endif  // SKY_ENGINE_WTF_STRINGHASHER_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8ArrayBufferViewCustom_h
-#define V8ArrayBufferViewCustom_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERVIEWCUSTOM_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERVIEWCUSTOM_H_
 
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
@@ -58,4 +58,4 @@ public:
 
 
 } // namespace blink
-#endif // V8ArrayBufferViewCustom_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERVIEWCUSTOM_H_

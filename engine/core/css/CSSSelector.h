@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSSelector_h
-#define CSSSelector_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSELECTOR_H_
+#define SKY_ENGINE_CORE_CSS_CSSSELECTOR_H_
 
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -352,4 +352,4 @@ inline const AtomicString& CSSSelector::value() const
 
 } // namespace blink
 
-#endif // CSSSelector_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSSELECTOR_H_

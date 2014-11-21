@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableRepeatable_h
-#define AnimatableRepeatable_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEREPEATABLE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEREPEATABLE_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/wtf/Vector.h"
@@ -77,4 +77,4 @@ DEFINE_TYPE_CASTS(AnimatableRepeatable, AnimatableValue, value, (value->isRepeat
 
 } // namespace blink
 
-#endif // AnimatableRepeatable_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEREPEATABLE_H_

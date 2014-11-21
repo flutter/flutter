@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Character_h
-#define Character_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_
+#define SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/text/TextDirection.h"
@@ -76,4 +76,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TextBlob_h
-#define TextBlob_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_TEXTBLOB_H_
+#define SKY_ENGINE_PLATFORM_FONTS_TEXTBLOB_H_
 
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -18,4 +18,4 @@ typedef PassRefPtr<const SkTextBlob> PassTextBlobPtr;
 
 } // namespace blink
 
-#endif // TextBlob_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_TEXTBLOB_H_

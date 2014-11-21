@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef ImageLoader_h
-#define ImageLoader_h
+#ifndef SKY_ENGINE_CORE_LOADER_IMAGELOADER_H_
+#define SKY_ENGINE_CORE_LOADER_IMAGELOADER_H_
 
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/fetch/ImageResourceClient.h"
@@ -156,4 +156,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_LOADER_IMAGELOADER_H_

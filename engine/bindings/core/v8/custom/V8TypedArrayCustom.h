@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8TypedArrayCustom_h
-#define V8TypedArrayCustom_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8TYPEDARRAYCUSTOM_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8TYPEDARRAYCUSTOM_H_
 
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
@@ -208,4 +208,4 @@ void V8TypedArray<TypedArray>::derefObject(ScriptWrappableBase* internalPointer)
 
 } // namespace blink
 
-#endif // V8TypedArrayCustom_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8TYPEDARRAYCUSTOM_H_

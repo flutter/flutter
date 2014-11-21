@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef TextBreakIteratorInternalICU_h
-#define TextBreakIteratorInternalICU_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -33,4 +33,4 @@ PLATFORM_EXPORT const char* currentTextBreakLocaleID();
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_

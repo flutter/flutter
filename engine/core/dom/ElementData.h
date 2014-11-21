@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ElementData_h
-#define ElementData_h
+#ifndef SKY_ENGINE_CORE_DOM_ELEMENTDATA_H_
+#define SKY_ENGINE_CORE_DOM_ELEMENTDATA_H_
 
 #include "sky/engine/core/dom/Attribute.h"
 #include "sky/engine/core/dom/AttributeCollection.h"
@@ -186,4 +186,4 @@ inline MutableAttributeCollection UniqueElementData::attributes()
 
 } // namespace blink
 
-#endif // ElementData_h
+#endif  // SKY_ENGINE_CORE_DOM_ELEMENTDATA_H_

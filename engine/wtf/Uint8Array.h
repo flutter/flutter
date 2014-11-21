@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Uint8Array_h
-#define Uint8Array_h
+#ifndef SKY_ENGINE_WTF_UINT8ARRAY_H_
+#define SKY_ENGINE_WTF_UINT8ARRAY_H_
 
 #include "sky/engine/wtf/IntegralTypedArrayBase.h"
 
@@ -101,4 +101,4 @@ PassRefPtr<Uint8Array> Uint8Array::subarray(int start, int end) const
 
 using WTF::Uint8Array;
 
-#endif // Uint8Array_h
+#endif  // SKY_ENGINE_WTF_UINT8ARRAY_H_

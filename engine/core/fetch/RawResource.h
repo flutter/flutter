@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef RawResource_h
-#define RawResource_h
+#ifndef SKY_ENGINE_CORE_FETCH_RAWRESOURCE_H_
+#define SKY_ENGINE_CORE_FETCH_RAWRESOURCE_H_
 
 #include "sky/engine/core/fetch/ResourceClient.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
@@ -79,4 +79,4 @@ public:
 
 }
 
-#endif // RawResource_h
+#endif  // SKY_ENGINE_CORE_FETCH_RAWRESOURCE_H_

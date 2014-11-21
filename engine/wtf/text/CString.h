@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CString_h
-#define CString_h
+#ifndef SKY_ENGINE_WTF_TEXT_CSTRING_H_
+#define SKY_ENGINE_WTF_TEXT_CSTRING_H_
 
 #include <string>
 #include "sky/engine/wtf/RefCounted.h"
@@ -100,4 +100,4 @@ inline bool operator!=(const CString& a, const char* b) { return !(a == b); }
 
 using WTF::CString;
 
-#endif // CString_h
+#endif  // SKY_ENGINE_WTF_TEXT_CSTRING_H_

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_FastMalloc_h
-#define WTF_FastMalloc_h
+#ifndef SKY_ENGINE_WTF_FASTMALLOC_H_
+#define SKY_ENGINE_WTF_FASTMALLOC_H_
 
 #include "sky/engine/wtf/WTFExport.h"
 
@@ -44,4 +44,4 @@ using WTF::fastRealloc;
 using WTF::fastStrDup;
 using WTF::fastZeroedMalloc;
 
-#endif /* WTF_FastMalloc_h */
+#endif  // SKY_ENGINE_WTF_FASTMALLOC_H_

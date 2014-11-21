@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef WTF_NonCopyingSort_h
-#define WTF_NonCopyingSort_h
+#ifndef SKY_ENGINE_WTF_NONCOPYINGSORT_H_
+#define SKY_ENGINE_WTF_NONCOPYINGSORT_H_
 
 namespace WTF {
 
@@ -86,4 +86,4 @@ inline void nonCopyingSort(RandomAccessIterator start, RandomAccessIterator end,
 
 using WTF::nonCopyingSort;
 
-#endif // WTF_NonCopyingSort_h
+#endif  // SKY_ENGINE_WTF_NONCOPYINGSORT_H_

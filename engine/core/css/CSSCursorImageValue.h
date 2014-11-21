@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSCursorImageValue_h
-#define CSSCursorImageValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCURSORIMAGEVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSCURSORIMAGEVALUE_H_
 
 #include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -73,4 +73,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSCursorImageValue, isCursorImageValue());
 
 } // namespace blink
 
-#endif // CSSCursorImageValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCURSORIMAGEVALUE_H_

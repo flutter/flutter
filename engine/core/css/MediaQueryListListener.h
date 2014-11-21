@@ -17,8 +17,8 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#ifndef MediaQueryListListener_h
-#define MediaQueryListListener_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTLISTENER_H_
+#define SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTLISTENER_H_
 
 #include "sky/engine/core/css/MediaQueryList.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -40,4 +40,4 @@ protected:
 
 }
 
-#endif // MediaQueryListListener_h
+#endif  // SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTLISTENER_H_

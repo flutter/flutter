@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSMarkup_h
-#define CSSMarkup_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSMARKUP_H_
+#define SKY_ENGINE_CORE_CSS_CSSMARKUP_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -37,4 +37,4 @@ String quoteCSSURLIfNeeded(const String&);
 
 } // namespace blink
 
-#endif // CSSMarkup_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSMARKUP_H_

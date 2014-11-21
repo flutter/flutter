@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef QualifiedName_h
-#define QualifiedName_h
+#ifndef SKY_ENGINE_CORE_DOM_QUALIFIEDNAME_H_
+#define SKY_ENGINE_CORE_DOM_QUALIFIEDNAME_H_
 
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -60,4 +60,4 @@ inline bool operator!=(const QualifiedName& q, const AtomicString& a) { return a
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_QUALIFIEDNAME_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Handle_h
-#define Handle_h
+#ifndef SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_
+#define SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_
 
 #include "sky/engine/wtf/StdLibExtras.h"
 
@@ -93,4 +93,4 @@
 #define DEFINE_STATIC_REF_WILL_BE_PERSISTENT(type, name, arguments) \
     DEFINE_STATIC_REF(type, name, arguments)
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_

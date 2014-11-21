@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebHTTPBody_h
-#define WebHTTPBody_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBHTTPBODY_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBHTTPBODY_H_
 
 #include "sky/engine/public/platform/WebData.h"
 #include "sky/engine/public/platform/WebNonCopyable.h"
@@ -101,4 +101,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBHTTPBODY_H_

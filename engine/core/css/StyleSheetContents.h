@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef StyleSheetContents_h
-#define StyleSheetContents_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLESHEETCONTENTS_H_
+#define SKY_ENGINE_CORE_CSS_STYLESHEETCONTENTS_H_
 
 #include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -162,4 +162,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_STYLESHEETCONTENTS_H_

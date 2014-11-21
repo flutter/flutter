@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InterpolatedTransformOperation_h
-#define InterpolatedTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_INTERPOLATEDTRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_INTERPOLATEDTRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
@@ -77,5 +77,5 @@ private:
 
 } // namespace blink
 
-#endif // InterpolatedTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_INTERPOLATEDTRANSFORMOPERATION_H_
 

@@ -27,8 +27,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FloatBox_h
-#define FloatBox_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOX_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOX_H_
 
 #include <cmath>
 #include "sky/engine/platform/geometry/FloatPoint3D.h"
@@ -177,4 +177,4 @@ inline bool operator!=(const FloatBox& a, const FloatBox& b)
 
 } // namespace WebKit
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOX_H_

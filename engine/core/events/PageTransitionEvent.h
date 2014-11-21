@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PageTransitionEvent_h
-#define PageTransitionEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_PAGETRANSITIONEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_PAGETRANSITIONEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace blink
 
-#endif // PageTransitionEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_PAGETRANSITIONEVENT_H_

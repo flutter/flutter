@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoadTiming_h
-#define ResourceLoadTiming_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADTIMING_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADTIMING_H_
 
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -118,4 +118,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADTIMING_H_

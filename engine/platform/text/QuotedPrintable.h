@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QuotedPrintable_h
-#define QuotedPrintable_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_QUOTEDPRINTABLE_H_
+#define SKY_ENGINE_PLATFORM_TEXT_QUOTEDPRINTABLE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Vector.h"
@@ -44,4 +44,4 @@ PLATFORM_EXPORT void quotedPrintableDecode(const char*, size_t, Vector<char>&);
 
 } // namespace blink
 
-#endif // QuotedPrintable_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_QUOTEDPRINTABLE_H_

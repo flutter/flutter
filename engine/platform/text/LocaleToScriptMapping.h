@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LocaleToScriptMapping_h
-#define LocaleToScriptMapping_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_LOCALETOSCRIPTMAPPING_H_
+#define SKY_ENGINE_PLATFORM_TEXT_LOCALETOSCRIPTMAPPING_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -44,4 +44,4 @@ PLATFORM_EXPORT UScriptCode scriptNameToCode(const String&);
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_LOCALETOSCRIPTMAPPING_H_

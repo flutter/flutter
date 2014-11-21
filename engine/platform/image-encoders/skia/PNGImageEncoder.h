@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PNGImageEncoder_h
-#define PNGImageEncoder_h
+#ifndef SKY_ENGINE_PLATFORM_IMAGE_ENCODERS_SKIA_PNGIMAGEENCODER_H_
+#define SKY_ENGINE_PLATFORM_IMAGE_ENCODERS_SKIA_PNGIMAGEENCODER_H_
 
 #include "sky/engine/wtf/Vector.h"
 
@@ -48,4 +48,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_IMAGE_ENCODERS_SKIA_PNGIMAGEENCODER_H_

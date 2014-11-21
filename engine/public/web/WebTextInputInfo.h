@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTextInputInfo_h
-#define WebTextInputInfo_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTEXTINPUTINFO_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTEXTINPUTINFO_H_
 
 #include "../platform/WebString.h"
 #include "sky/engine/public/web/WebTextInputType.h"
@@ -81,4 +81,4 @@ inline bool operator!=(const WebTextInputInfo& a, const WebTextInputInfo& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTEXTINPUTINFO_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLayer_h
-#define WebLayer_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYER_H_
 
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/public/platform/WebColor.h"
@@ -183,4 +183,4 @@ public:
 
 } // namespace blink
 
-#endif // WebLayer_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYER_H_

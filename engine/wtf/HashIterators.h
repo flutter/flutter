@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_HashIterators_h
-#define WTF_HashIterators_h
+#ifndef SKY_ENGINE_WTF_HASHITERATORS_H_
+#define SKY_ENGINE_WTF_HASHITERATORS_H_
 
 namespace WTF {
 
@@ -215,4 +215,4 @@ namespace WTF {
 
 } // namespace WTF
 
-#endif // WTF_HashIterators_h
+#endif  // SKY_ENGINE_WTF_HASHITERATORS_H_

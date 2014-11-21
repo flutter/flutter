@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleColor_h
-#define StyleColor_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLECOLOR_H_
+#define SKY_ENGINE_CORE_CSS_STYLECOLOR_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 
@@ -66,4 +66,4 @@ inline bool operator!=(const StyleColor& a, const StyleColor& b)
 
 } // namespace blink
 
-#endif // StyleColor_h
+#endif  // SKY_ENGINE_CORE_CSS_STYLECOLOR_H_

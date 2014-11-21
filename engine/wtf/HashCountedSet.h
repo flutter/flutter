@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_HashCountedSet_h
-#define WTF_HashCountedSet_h
+#ifndef SKY_ENGINE_WTF_HASHCOUNTEDSET_H_
+#define SKY_ENGINE_WTF_HASHCOUNTEDSET_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -149,4 +149,4 @@ namespace WTF {
 
 using WTF::HashCountedSet;
 
-#endif /* WTF_HashCountedSet_h */
+#endif  // SKY_ENGINE_WTF_HASHCOUNTEDSET_H_

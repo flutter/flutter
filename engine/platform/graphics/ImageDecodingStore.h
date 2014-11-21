@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageDecodingStore_h
-#define ImageDecodingStore_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEDECODINGSTORE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEDECODINGSTORE_H_
 
 #include "platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/platform/graphics/skia/SkSizeHash.h"
@@ -216,4 +216,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEDECODINGSTORE_H_

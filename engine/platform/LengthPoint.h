@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LengthPoint_h
-#define LengthPoint_h
+#ifndef SKY_ENGINE_PLATFORM_LENGTHPOINT_H_
+#define SKY_ENGINE_PLATFORM_LENGTHPOINT_H_
 
 #include "sky/engine/platform/Length.h"
 
@@ -62,4 +62,4 @@ private:
 
 } // namespace blink
 
-#endif // LengthPoint_h
+#endif  // SKY_ENGINE_PLATFORM_LENGTHPOINT_H_

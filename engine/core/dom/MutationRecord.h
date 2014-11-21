@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MutationRecord_h
-#define MutationRecord_h
+#ifndef SKY_ENGINE_CORE_DOM_MUTATIONRECORD_H_
+#define SKY_ENGINE_CORE_DOM_MUTATIONRECORD_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -74,4 +74,4 @@ public:
 
 } // namespace blink
 
-#endif // MutationRecord_h
+#endif  // SKY_ENGINE_CORE_DOM_MUTATIONRECORD_H_

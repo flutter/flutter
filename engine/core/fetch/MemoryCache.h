@@ -22,8 +22,8 @@
     pages from the web. It has a memory cache for these objects.
 */
 
-#ifndef MemoryCache_h
-#define MemoryCache_h
+#ifndef SKY_ENGINE_CORE_FETCH_MEMORYCACHE_H_
+#define SKY_ENGINE_CORE_FETCH_MEMORYCACHE_H_
 
 #include "base/cancelable_callback.h"
 #include "sky/engine/core/fetch/Resource.h"
@@ -289,4 +289,4 @@ PassOwnPtr<MemoryCache> replaceMemoryCacheForTesting(PassOwnPtr<MemoryCache>);
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_MEMORYCACHE_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebViewImpl_h
-#define WebViewImpl_h
+#ifndef SKY_ENGINE_WEB_WEBVIEWIMPL_H_
+#define SKY_ENGINE_WEB_WEBVIEWIMPL_H_
 
 #include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -456,4 +456,4 @@ DEFINE_TYPE_CASTS(WebViewImpl, WebView, webView, true, true);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBVIEWIMPL_H_

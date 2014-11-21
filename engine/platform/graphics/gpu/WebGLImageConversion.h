@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebGLImageConversion_h
-#define WebGLImageConversion_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GPU_WEBGLIMAGECONVERSION_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GPU_WEBGLIMAGECONVERSION_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/Image.h"
@@ -165,4 +165,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLImageConversion_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GPU_WEBGLIMAGECONVERSION_H_

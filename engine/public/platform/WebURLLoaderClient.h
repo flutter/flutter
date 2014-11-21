@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLLoaderClient_h
-#define WebURLLoaderClient_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADERCLIENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADERCLIENT_H_
 
 namespace blink {
 
@@ -76,4 +76,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADERCLIENT_H_

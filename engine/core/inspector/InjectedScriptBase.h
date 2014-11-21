@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InjectedScriptBase_h
-#define InjectedScriptBase_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTBASE_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTBASE_H_
 
 #include "gen/sky/core/InspectorTypeBuilder.h"
 #include "sky/engine/bindings/core/v8/ScriptState.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INJECTEDSCRIPTBASE_H_

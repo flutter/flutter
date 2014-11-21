@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SettingsDelegate_h
-#define SettingsDelegate_h
+#ifndef SKY_ENGINE_CORE_FRAME_SETTINGSDELEGATE_H_
+#define SKY_ENGINE_CORE_FRAME_SETTINGSDELEGATE_H_
 
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -66,4 +66,4 @@ protected:
 
 } // namespace blink
 
-#endif // SettingsDelegate_h
+#endif  // SKY_ENGINE_CORE_FRAME_SETTINGSDELEGATE_H_

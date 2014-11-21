@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MainThread_h
-#define MainThread_h
+#ifndef SKY_ENGINE_WTF_MAINTHREAD_H_
+#define SKY_ENGINE_WTF_MAINTHREAD_H_
 
 #include <stdint.h>
 
@@ -46,4 +46,4 @@ WTF_EXPORT bool isMainThread();
 } // namespace WTF
 
 using WTF::isMainThread;
-#endif // MainThread_h
+#endif  // SKY_ENGINE_WTF_MAINTHREAD_H_

@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef RenderTreeBuilder_h
-#define RenderTreeBuilder_h
+#ifndef SKY_ENGINE_CORE_DOM_RENDERTREEBUILDER_H_
+#define SKY_ENGINE_CORE_DOM_RENDERTREEBUILDER_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_RENDERTREEBUILDER_H_

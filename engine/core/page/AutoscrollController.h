@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AutoscrollController_h
-#define AutoscrollController_h
+#ifndef SKY_ENGINE_CORE_PAGE_AUTOSCROLLCONTROLLER_H_
+#define SKY_ENGINE_CORE_PAGE_AUTOSCROLLCONTROLLER_H_
 
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif // AutoscrollController_h
+#endif  // SKY_ENGINE_CORE_PAGE_AUTOSCROLLCONTROLLER_H_

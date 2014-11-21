@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HostWindow_h
-#define HostWindow_h
+#ifndef SKY_ENGINE_PLATFORM_HOSTWINDOW_H_
+#define SKY_ENGINE_PLATFORM_HOSTWINDOW_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -56,4 +56,4 @@ public:
 
 } // namespace blink
 
-#endif // HostWindow_h
+#endif  // SKY_ENGINE_PLATFORM_HOSTWINDOW_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SpellCheckRequester_h
-#define SpellCheckRequester_h
+#ifndef SKY_ENGINE_CORE_EDITING_SPELLCHECKREQUESTER_H_
+#define SKY_ENGINE_CORE_EDITING_SPELLCHECKREQUESTER_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Range.h"
@@ -120,4 +120,4 @@ private:
 
 } // namespace blink
 
-#endif // SpellCheckRequester_h
+#endif  // SKY_ENGINE_CORE_EDITING_SPELLCHECKREQUESTER_H_

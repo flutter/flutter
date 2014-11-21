@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KeyframeValueList_h
-#define KeyframeValueList_h
+#ifndef SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_
+#define SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_
 
 #include "sky/engine/platform/animation/AnimationValue.h"
 
@@ -87,4 +87,4 @@ protected:
 
 } // namespace blink
 
-#endif // KeyframeValueList_h
+#endif  // SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_

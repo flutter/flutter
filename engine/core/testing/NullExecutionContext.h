@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef NullExecutionContext_h
-#define NullExecutionContext_h
+#ifndef SKY_ENGINE_CORE_TESTING_NULLEXECUTIONCONTEXT_H_
+#define SKY_ENGINE_CORE_TESTING_NULLEXECUTIONCONTEXT_H_
 
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/events/EventQueue.h"
@@ -41,4 +41,4 @@ private:
 
 } // namespace blink
 
-#endif // NullExecutionContext_h
+#endif  // SKY_ENGINE_CORE_TESTING_NULLEXECUTIONCONTEXT_H_

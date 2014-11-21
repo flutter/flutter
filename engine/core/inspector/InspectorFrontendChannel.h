@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InspectorFrontendChannel_h
-#define InspectorFrontendChannel_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORFRONTENDCHANNEL_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORFRONTENDCHANNEL_H_
 
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/wtf/Forward.h"
@@ -40,4 +40,4 @@ public:
 
 } // namespace blink
 
-#endif // !defined(InspectorFrontendChannel_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORFRONTENDCHANNEL_H_

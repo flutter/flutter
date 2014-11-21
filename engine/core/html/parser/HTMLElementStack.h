@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLElementStack_h
-#define HTMLElementStack_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLELEMENTSTACK_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLELEMENTSTACK_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/wtf/Forward.h"
@@ -112,4 +112,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLElementStack_h
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLELEMENTSTACK_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebImage_h
-#define WebImage_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebVector.h"
@@ -102,4 +102,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBIMAGE_H_

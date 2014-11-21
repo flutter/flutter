@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MediaQueryInputStream_h
-#define MediaQueryInputStream_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYINPUTSTREAM_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYINPUTSTREAM_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -53,5 +53,5 @@ private:
 
 } // namespace blink
 
-#endif // MediaQueryInputStream_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYINPUTSTREAM_H_
 

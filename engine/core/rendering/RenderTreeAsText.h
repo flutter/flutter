@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderTreeAsText_h
-#define RenderTreeAsText_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERTREEASTEXT_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERTREEASTEXT_H_
 #include "sky/engine/platform/text/TextStream.h"
 
 #include "sky/engine/wtf/Forward.h"
@@ -70,4 +70,4 @@ String quoteAndEscapeNonPrintables(const String&);
 
 } // namespace blink
 
-#endif // RenderTreeAsText_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERTREEASTEXT_H_

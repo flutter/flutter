@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebExternalTextureMailbox_h
-#define WebExternalTextureMailbox_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTUREMAILBOX_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTUREMAILBOX_H_
 
 namespace blink {
 
@@ -53,4 +53,4 @@ inline bool nameEquals(const WebExternalTextureMailbox& a, const WebExternalText
 
 } // namespace blink
 
-#endif // WebExternalTextureMailbox_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTUREMAILBOX_H_

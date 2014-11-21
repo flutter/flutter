@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoaderSet_h
-#define ResourceLoaderSet_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCELOADERSET_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCELOADERSET_H_
 
 #include "sky/engine/core/fetch/ResourceLoader.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -54,4 +54,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCELOADERSET_H_

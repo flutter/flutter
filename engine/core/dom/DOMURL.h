@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMURL_h
-#define DOMURL_h
+#ifndef SKY_ENGINE_CORE_DOM_DOMURL_H_
+#define SKY_ENGINE_CORE_DOM_DOMURL_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/DOMURLUtils.h"
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // DOMURL_h
+#endif  // SKY_ENGINE_CORE_DOM_DOMURL_H_

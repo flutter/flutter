@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFontSelectorClient_h
-#define CSSFontSelectorClient_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTSELECTORCLIENT_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTSELECTORCLIENT_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 
@@ -46,4 +46,4 @@ public:
 
 } // namespace blink
 
-#endif // CSSFontSelectorClient_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTSELECTORCLIENT_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CalculationValue_h
-#define CalculationValue_h
+#ifndef SKY_ENGINE_PLATFORM_CALCULATIONVALUE_H_
+#define SKY_ENGINE_PLATFORM_CALCULATIONVALUE_H_
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/LengthFunctions.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // CalculationValue_h
+#endif  // SKY_ENGINE_PLATFORM_CALCULATIONVALUE_H_

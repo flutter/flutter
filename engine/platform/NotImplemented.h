@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NotImplemented_h
-#define NotImplemented_h
+#ifndef SKY_ENGINE_PLATFORM_NOTIMPLEMENTED_H_
+#define SKY_ENGINE_PLATFORM_NOTIMPLEMENTED_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -47,4 +47,4 @@ PLATFORM_EXPORT WTFLogChannel* notImplementedLoggingChannel();
 
 #endif // NDEBUG
 
-#endif // NotImplemented_h
+#endif  // SKY_ENGINE_PLATFORM_NOTIMPLEMENTED_H_

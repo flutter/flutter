@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Caret_h
-#define Caret_h
+#ifndef SKY_ENGINE_CORE_EDITING_CARET_H_
+#define SKY_ENGINE_CORE_EDITING_CARET_H_
 
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -103,4 +103,4 @@ private:
 } // namespace blink
 
 
-#endif // Caret_h
+#endif  // SKY_ENGINE_CORE_EDITING_CARET_H_

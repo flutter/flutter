@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WidthIterator_h
-#define WidthIterator_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_WIDTHITERATOR_H_
+#define SKY_ENGINE_PLATFORM_FONTS_WIDTHITERATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/text/TextRun.h"
@@ -91,4 +91,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_WIDTHITERATOR_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositeEditCommand_h
-#define CompositeEditCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_COMPOSITEEDITCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_COMPOSITEEDITCOMMAND_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/editing/EditCommand.h"
@@ -161,4 +161,4 @@ DEFINE_TYPE_CASTS(CompositeEditCommand, EditCommand, command, command->isComposi
 
 } // namespace blink
 
-#endif // CompositeEditCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_COMPOSITEEDITCOMMAND_H_

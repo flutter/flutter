@@ -41,8 +41,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef ScrollAlignment_h
-#define ScrollAlignment_h
+#ifndef SKY_ENGINE_CORE_RENDERING_SCROLLALIGNMENT_H_
+#define SKY_ENGINE_CORE_RENDERING_SCROLLALIGNMENT_H_
 
 namespace blink {
 
@@ -80,4 +80,4 @@ struct ScrollAlignment {
 
 }; // namespace blink
 
-#endif // ScrollAlignment_h
+#endif  // SKY_ENGINE_CORE_RENDERING_SCROLLALIGNMENT_H_

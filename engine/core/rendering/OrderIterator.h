@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OrderIterator_h
-#define OrderIterator_h
+#ifndef SKY_ENGINE_CORE_RENDERING_ORDERITERATOR_H_
+#define SKY_ENGINE_CORE_RENDERING_ORDERITERATOR_H_
 
 #include <set>
 #include "sky/engine/wtf/Noncopyable.h"
@@ -79,4 +79,4 @@ private:
 
 } // namespace blink
 
-#endif //  OrderIterator_h
+#endif  // SKY_ENGINE_CORE_RENDERING_ORDERITERATOR_H_

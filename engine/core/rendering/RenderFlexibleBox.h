@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderFlexibleBox_h
-#define RenderFlexibleBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERFLEXIBLEBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERFLEXIBLEBOX_H_
 
 #include "sky/engine/core/rendering/OrderIterator.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
@@ -164,4 +164,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderFlexibleBox, isFlexibleBox());
 
 } // namespace blink
 
-#endif // RenderFlexibleBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERFLEXIBLEBOX_H_

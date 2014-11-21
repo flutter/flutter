@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLTokenizer_h
-#define HTMLTokenizer_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKENIZER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKENIZER_H_
 
 #include "sky/engine/core/html/parser/HTMLEntityParser.h"
 #include "sky/engine/core/html/parser/HTMLToken.h"
@@ -155,4 +155,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLTOKENIZER_H_

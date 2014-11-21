@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DateComponents_h
-#define DateComponents_h
+#ifndef SKY_ENGINE_PLATFORM_DATECOMPONENTS_H_
+#define SKY_ENGINE_PLATFORM_DATECOMPONENTS_H_
 
 #include <limits>
 #include "sky/engine/platform/PlatformExport.h"
@@ -212,4 +212,4 @@ private:
 
 } // namespace blink
 
-#endif // DateComponents_h
+#endif  // SKY_ENGINE_PLATFORM_DATECOMPONENTS_H_

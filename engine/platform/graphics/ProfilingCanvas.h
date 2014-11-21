@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ProfilingCanvas_h
-#define ProfilingCanvas_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_PROFILINGCANVAS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_PROFILINGCANVAS_H_
 
 #include "sky/engine/platform/graphics/InterceptingCanvas.h"
 #include "sky/engine/wtf/Vector.h"
@@ -85,4 +85,4 @@ private:
 
 } // namespace blink
 
-#endif // ProfilingCanvas_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PROFILINGCANVAS_H_

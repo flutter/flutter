@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TreeNode_h
-#define TreeNode_h
+#ifndef SKY_ENGINE_WTF_TREENODE_H_
+#define SKY_ENGINE_WTF_TREENODE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -203,4 +203,4 @@ using WTF::TreeNode;
 using WTF::traverseNext;
 using WTF::traverseNextPostOrder;
 
-#endif
+#endif  // SKY_ENGINE_WTF_TREENODE_H_

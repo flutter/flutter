@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSSelectorList_h
-#define CSSSelectorList_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSELECTORLIST_H_
+#define SKY_ENGINE_CORE_CSS_CSSSELECTORLIST_H_
 
 #include "sky/engine/core/css/CSSSelector.h"
 
@@ -83,4 +83,4 @@ inline const CSSSelector* CSSSelectorList::next(const CSSSelector& current)
 
 } // namespace blink
 
-#endif // CSSSelectorList_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSSELECTORLIST_H_

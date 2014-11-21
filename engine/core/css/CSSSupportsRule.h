@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSSupportsRule_h
-#define CSSSupportsRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSUPPORTSRULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSSUPPORTSRULE_H_
 
 #include "sky/engine/core/css/CSSGroupingRule.h"
 
@@ -58,4 +58,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSSupportsRule, SUPPORTS_RULE);
 
 } // namespace blink
 
-#endif // CSSSupportsRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSSUPPORTSRULE_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FontLoader_h
-#define FontLoader_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTLOADER_H_
+#define SKY_ENGINE_CORE_CSS_FONTLOADER_H_
 
 #include "sky/engine/core/fetch/ResourceLoader.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
@@ -47,4 +47,4 @@ private:
 
 } // namespace blink
 
-#endif // FontLoader_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTLOADER_H_

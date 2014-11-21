@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebNavigationType_h
-#define WebNavigationType_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONTYPE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONTYPE_H_
 
 namespace blink {
 
@@ -44,4 +44,4 @@ enum WebNavigationType {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONTYPE_H_

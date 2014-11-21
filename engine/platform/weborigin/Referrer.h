@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Referrer_h
-#define Referrer_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRER_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRER_H_
 
 #include "sky/engine/platform/weborigin/ReferrerPolicy.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -46,4 +46,4 @@ struct Referrer {
 
 }
 
-#endif // Referrer_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRER_H_

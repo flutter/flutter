@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameLoaderClientImpl_h
-#define FrameLoaderClientImpl_h
+#ifndef SKY_ENGINE_WEB_FRAMELOADERCLIENTIMPL_H_
+#define SKY_ENGINE_WEB_FRAMELOADERCLIENTIMPL_H_
 
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -95,4 +95,4 @@ DEFINE_TYPE_CASTS(FrameLoaderClientImpl, FrameLoaderClient, client, client->isFr
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_FRAMELOADERCLIENTIMPL_H_

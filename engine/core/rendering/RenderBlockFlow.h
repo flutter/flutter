@@ -33,8 +33,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderBlockFlow_h
-#define RenderBlockFlow_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERBLOCKFLOW_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERBLOCKFLOW_H_
 
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/line/TrailingObjects.h"
@@ -213,4 +213,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderBlockFlow, isRenderBlockFlow());
 
 } // namespace blink
 
-#endif // RenderBlockFlow_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERBLOCKFLOW_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceError_h
-#define ResourceError_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCEERROR_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCEERROR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -95,4 +95,4 @@ inline bool operator!=(const ResourceError& a, const ResourceError& b) { return 
 
 } // namespace blink
 
-#endif // ResourceError_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCEERROR_H_

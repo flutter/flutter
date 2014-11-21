@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef TextEvent_h
-#define TextEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_TEXTEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_TEXTEVENT_H_
 
 #include "sky/engine/core/events/TextEventInputType.h"
 #include "sky/engine/core/events/UIEvent.h"
@@ -83,4 +83,4 @@ DEFINE_TYPE_CASTS(TextEvent, Event, event, isTextEvent(*event), isTextEvent(even
 
 } // namespace blink
 
-#endif // TextEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_TEXTEVENT_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLEntityParser_h
-#define HTMLEntityParser_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLENTITYPARSER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLENTITYPARSER_H_
 
 #include "sky/engine/platform/text/SegmentedString.h"
 
@@ -63,4 +63,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLENTITYPARSER_H_

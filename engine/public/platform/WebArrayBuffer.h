@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebArrayBuffer_h
-#define WebArrayBuffer_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBARRAYBUFFER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBARRAYBUFFER_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebPrivatePtr.h"
@@ -80,4 +80,4 @@ protected:
 
 } // namespace blink
 
-#endif // WebArrayBuffer_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBARRAYBUFFER_H_

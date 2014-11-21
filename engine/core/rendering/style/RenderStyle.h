@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef RenderStyle_h
-#define RenderStyle_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/animation/css/CSSAnimationData.h"
@@ -1434,4 +1434,4 @@ float calcBorderRadiiConstraintScaleFor(const FloatRect&, const FloatRoundedRect
 
 } // namespace blink
 
-#endif // RenderStyle_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_

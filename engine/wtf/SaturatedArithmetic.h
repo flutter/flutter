@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SaturatedArithmetic_h
-#define SaturatedArithmetic_h
+#ifndef SKY_ENGINE_WTF_SATURATEDARITHMETIC_H_
+#define SKY_ENGINE_WTF_SATURATEDARITHMETIC_H_
 
 #include <stdint.h>
 #include <limits>
@@ -116,4 +116,4 @@ ALWAYS_INLINE int saturatedSet(unsigned value, int FractionalShift)
 }
 
 #endif // CPU(ARM) && COMPILER(GCC)
-#endif // SaturatedArithmetic_h
+#endif  // SKY_ENGINE_WTF_SATURATEDARITHMETIC_H_

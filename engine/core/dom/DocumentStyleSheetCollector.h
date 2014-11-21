@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentStyleSheetCollector_h
-#define DocumentStyleSheetCollector_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTOR_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTOR_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -77,4 +77,4 @@ public:
 
 } // namespace blink
 
-#endif // DocumentStyleSheetCollector_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTOR_H_

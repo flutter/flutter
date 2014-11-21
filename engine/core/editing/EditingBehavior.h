@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef EditingBehavior_h
-#define EditingBehavior_h
+#ifndef SKY_ENGINE_CORE_EDITING_EDITINGBEHAVIOR_H_
+#define SKY_ENGINE_CORE_EDITING_EDITINGBEHAVIOR_H_
 
 namespace blink {
 class KeyboardEvent;
@@ -97,4 +97,4 @@ public:
 
 } // namespace blink
 
-#endif // EditingBehavior_h
+#endif  // SKY_ENGINE_CORE_EDITING_EDITINGBEHAVIOR_H_

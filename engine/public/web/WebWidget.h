@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebWidget_h
-#define WebWidget_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBWIDGET_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBWIDGET_H_
 
 #include "../platform/WebCanvas.h"
 #include "../platform/WebCommon.h"
@@ -233,4 +233,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBWIDGET_H_

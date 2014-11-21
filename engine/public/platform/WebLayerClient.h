@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLayerClient_h
-#define WebLayerClient_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERCLIENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERCLIENT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -51,5 +51,5 @@ protected:
 
 } // namespace blink
 
-#endif // WebLayerClient_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERCLIENT_H_
 

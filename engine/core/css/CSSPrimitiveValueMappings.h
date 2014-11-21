@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSPrimitiveValueMappings_h
-#define CSSPrimitiveValueMappings_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSPRIMITIVEVALUEMAPPINGS_H_
+#define SKY_ENGINE_CORE_CSS_CSSPRIMITIVEVALUEMAPPINGS_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
@@ -3598,4 +3598,4 @@ template<> inline CSSPrimitiveValue::operator ScrollBehavior() const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSPRIMITIVEVALUEMAPPINGS_H_

@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef RenderBlock_h
-#define RenderBlock_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERBLOCK_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERBLOCK_H_
 
 #include "sky/engine/core/rendering/GapRects.h"
 #include "sky/engine/core/rendering/RenderBox.h"
@@ -366,4 +366,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderBlock, isRenderBlock());
 
 } // namespace blink
 
-#endif // RenderBlock_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERBLOCK_H_

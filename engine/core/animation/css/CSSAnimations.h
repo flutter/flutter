@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSAnimations_h
-#define CSSAnimations_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONS_H_
+#define SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONS_H_
 
 #include "sky/engine/core/animation/Animation.h"
 #include "sky/engine/core/animation/AnimationPlayer.h"
@@ -232,4 +232,4 @@ private:
 
 WTF_ALLOW_INIT_WITH_MEM_FUNCTIONS(blink::CSSAnimationUpdate::NewAnimation);
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_CSS_CSSANIMATIONS_H_

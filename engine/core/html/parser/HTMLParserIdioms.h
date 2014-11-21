@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLParserIdioms_h
-#define HTMLParserIdioms_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERIDIOMS_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERIDIOMS_H_
 
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/platform/Decimal.h"
@@ -128,4 +128,4 @@ inline static String attemptStaticStringCreation(const String str)
 
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERIDIOMS_H_

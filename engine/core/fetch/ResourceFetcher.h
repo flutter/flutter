@@ -23,8 +23,8 @@
     pages from the web. It has a memory cache for these objects.
 */
 
-#ifndef ResourceFetcher_h
-#define ResourceFetcher_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCEFETCHER_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCEFETCHER_H_
 
 #include "sky/engine/core/fetch/CachePolicy.h"
 #include "sky/engine/core/fetch/FetchInitiatorInfo.h"
@@ -218,4 +218,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCEFETCHER_H_

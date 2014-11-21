@@ -28,8 +28,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ScriptGCEvent_h
-#define ScriptGCEvent_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTGCEVENT_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTGCEVENT_H_
 
 #include "sky/engine/wtf/Vector.h"
 #include "v8/include/v8.h"
@@ -96,4 +96,4 @@ private:
 
 } // namespace blink
 
-#endif // !defined(ScriptGCEvent_h)
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTGCEVENT_H_

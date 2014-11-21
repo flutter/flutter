@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Assertions_h
-#define WTF_Assertions_h
+#ifndef SKY_ENGINE_WTF_ASSERTIONS_H_
+#define SKY_ENGINE_WTF_ASSERTIONS_H_
 
 /*
    No namespaces because this file has to be includable from C and Objective-C.
@@ -393,4 +393,4 @@ inline const thisType& to##thisType(const argumentType& argumentName) \
 void to##thisType(const thisType*); \
 void to##thisType(const thisType&)
 
-#endif /* WTF_Assertions_h */
+#endif  // SKY_ENGINE_WTF_ASSERTIONS_H_

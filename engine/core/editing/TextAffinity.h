@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextAffinity_h
-#define TextAffinity_h
+#ifndef SKY_ENGINE_CORE_EDITING_TEXTAFFINITY_H_
+#define SKY_ENGINE_CORE_EDITING_TEXTAFFINITY_H_
 
 namespace blink {
 
@@ -36,4 +36,4 @@ enum EAffinity { UPSTREAM = 0, DOWNSTREAM = 1 };
 
 } // namespace blink
 
-#endif // TextAffinity_h
+#endif  // SKY_ENGINE_CORE_EDITING_TEXTAFFINITY_H_

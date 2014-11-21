@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebConvertableToTraceFormat_h
-#define WebConvertableToTraceFormat_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCONVERTABLETOTRACEFORMAT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCONVERTABLETOTRACEFORMAT_H_
 
 #include "sky/engine/public/platform/WebPrivatePtr.h"
 #include "sky/engine/public/platform/WebString.h"
@@ -39,4 +39,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCONVERTABLETOTRACEFORMAT_H_

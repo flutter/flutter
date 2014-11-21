@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSCalculationValue_h
-#define CSSCalculationValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCALCULATIONVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSCALCULATIONVALUE_H_
 
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSValue.h"
@@ -147,4 +147,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSCalcValue, isCalcValue());
 } // namespace blink
 
 
-#endif // CSSCalculationValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCALCULATIONVALUE_H_

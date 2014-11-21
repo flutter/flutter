@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WrapperTypeInfo_h
-#define WrapperTypeInfo_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_WRAPPERTYPEINFO_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_WRAPPERTYPEINFO_H_
 
 #include "gin/public/wrapper_info.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -220,4 +220,4 @@ inline void releaseObject(v8::Handle<v8::Object> wrapper)
 
 } // namespace blink
 
-#endif // WrapperTypeInfo_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_WRAPPERTYPEINFO_H_

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef DocumentMarker_h
-#define DocumentMarker_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTMARKER_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTMARKER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/VectorTraits.h"
@@ -154,4 +154,4 @@ public:
 
 } // namespace blink
 
-#endif // DocumentMarker_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTMARKER_H_

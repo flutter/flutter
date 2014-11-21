@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef StyleDifference_h
-#define StyleDifference_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEDIFFERENCE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEDIFFERENCE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -97,4 +97,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleDifference_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEDIFFERENCE_H_

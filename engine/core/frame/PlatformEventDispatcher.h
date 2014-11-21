@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PlatformEventDispatcher_h
-#define PlatformEventDispatcher_h
+#ifndef SKY_ENGINE_CORE_FRAME_PLATFORMEVENTDISPATCHER_H_
+#define SKY_ENGINE_CORE_FRAME_PLATFORMEVENTDISPATCHER_H_
 
 #include "sky/engine/wtf/Vector.h"
 
@@ -34,4 +34,4 @@ private:
 
 } // namespace blink
 
-#endif // PlatformEventDispatcher_h
+#endif  // SKY_ENGINE_CORE_FRAME_PLATFORMEVENTDISPATCHER_H_

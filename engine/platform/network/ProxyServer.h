@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ProxyServer_h
-#define ProxyServer_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_PROXYSERVER_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_PROXYSERVER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Vector.h"
@@ -77,4 +77,4 @@ PLATFORM_EXPORT String toString(const Vector<ProxyServer>&);
 
 } // namespace blink
 
-#endif // ProxyServer_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_PROXYSERVER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef RenderObjectInlines_h
-#define RenderObjectInlines_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDEROBJECTINLINES_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDEROBJECTINLINES_H_
 
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -27,4 +27,4 @@ inline RenderStyle* RenderObject::style(bool firstLine) const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDEROBJECTINLINES_H_

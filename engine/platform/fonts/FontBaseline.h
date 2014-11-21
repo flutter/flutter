@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontBaseline_h
-#define FontBaseline_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTBASELINE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTBASELINE_H_
 
 namespace blink {
 
@@ -32,4 +32,4 @@ enum FontBaseline { AlphabeticBaseline, IdeographicBaseline };
 
 } // namespace blink
 
-#endif // FontBaseline_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTBASELINE_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLContextEvent_h
-#define WebGLContextEvent_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTEVENT_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLContextEvent_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTEVENT_H_

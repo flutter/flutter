@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFontRenderStyle_h
-#define WebFontRenderStyle_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTRENDERSTYLE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTRENDERSTYLE_H_
 
 #include "../WebCommon.h"
 
@@ -60,4 +60,4 @@ struct BLINK_EXPORT WebFontRenderStyle {
 
 } // namespace blink
 
-#endif // WebFontRenderStyle_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTRENDERSTYLE_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderGeometryMapStep_h
-#define RenderGeometryMapStep_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_
 
 #include "sky/engine/platform/geometry/LayoutSize.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
@@ -65,4 +65,4 @@ struct RenderGeometryMapStep {
 
 WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::RenderGeometryMapStep);
 
-#endif // RenderGeometryMapStep_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_

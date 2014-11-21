@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BeforeTextInsertedEvent_h
-#define BeforeTextInsertedEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_BEFORETEXTINSERTEDEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_BEFORETEXTINSERTEDEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -53,4 +53,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_BEFORETEXTINSERTEDEVENT_H_

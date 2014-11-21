@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UnacceleratedImageBufferSurface_h
-#define UnacceleratedImageBufferSurface_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_UNACCELERATEDIMAGEBUFFERSURFACE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_UNACCELERATEDIMAGEBUFFERSURFACE_H_
 
 #include "sky/engine/platform/graphics/ImageBufferSurface.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -53,4 +53,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_UNACCELERATEDIMAGEBUFFERSURFACE_H_

@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Glyph_h
-#define Glyph_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPH_H_
+#define SKY_ENGINE_PLATFORM_FONTS_GLYPH_H_
 
 namespace blink {
 
@@ -36,4 +36,4 @@ typedef unsigned short Glyph;
 
 } // namespace blink
 
-#endif // Glyph_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPH_H_

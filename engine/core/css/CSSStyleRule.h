@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSStyleRule_h
-#define CSSStyleRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSTYLERULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSSTYLERULE_H_
 
 #include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -65,4 +65,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSStyleRule, STYLE_RULE);
 
 } // namespace blink
 
-#endif // CSSStyleRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSSTYLERULE_H_

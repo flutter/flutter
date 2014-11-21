@@ -28,8 +28,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef WTF_StreamBuffer_h
-#define WTF_StreamBuffer_h
+#ifndef SKY_ENGINE_WTF_STREAMBUFFER_H_
+#define SKY_ENGINE_WTF_STREAMBUFFER_H_
 
 #include "sky/engine/wtf/Deque.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -114,4 +114,4 @@ private:
 
 using WTF::StreamBuffer;
 
-#endif // WTF_StreamBuffer_h
+#endif  // SKY_ENGINE_WTF_STREAMBUFFER_H_

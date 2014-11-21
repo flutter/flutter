@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef htmlediting_h
-#define htmlediting_h
+#ifndef SKY_ENGINE_CORE_EDITING_HTMLEDITING_H_
+#define SKY_ENGINE_CORE_EDITING_HTMLEDITING_H_
 
 #include "sky/engine/core/dom/Position.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
@@ -247,4 +247,4 @@ const String& nonBreakingSpaceString();
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_HTMLEDITING_H_

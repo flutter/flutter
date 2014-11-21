@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ElementRareData_h
-#define ElementRareData_h
+#ifndef SKY_ENGINE_CORE_DOM_ELEMENTRAREDATA_H_
+#define SKY_ENGINE_CORE_DOM_ELEMENTRAREDATA_H_
 
 #include "sky/engine/core/animation/ActiveAnimations.h"
 #include "sky/engine/core/dom/NodeRareData.h"
@@ -129,4 +129,4 @@ inline ElementRareData::~ElementRareData()
 
 } // namespace
 
-#endif // ElementRareData_h
+#endif  // SKY_ENGINE_CORE_DOM_ELEMENTRAREDATA_H_

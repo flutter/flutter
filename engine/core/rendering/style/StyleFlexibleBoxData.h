@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef StyleFlexibleBoxData_h
-#define StyleFlexibleBoxData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFLEXIBLEBOXDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFLEXIBLEBOXDATA_H_
 
 #include "sky/engine/platform/Length.h"
 
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleFlexibleBoxData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFLEXIBLEBOXDATA_H_

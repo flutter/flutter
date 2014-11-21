@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSBorderImage_h
-#define CSSBorderImage_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSBORDERIMAGE_H_
+#define SKY_ENGINE_CORE_CSS_CSSBORDERIMAGE_H_
 
 #include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
@@ -31,4 +31,4 @@ PassRefPtr<CSSValueList> createBorderImageValue(PassRefPtr<CSSValue> image, Pass
 
 } // namespace blink
 
-#endif // CSSBorderImage_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSBORDERIMAGE_H_

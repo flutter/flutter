@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_h
-#define WTF_h
+#ifndef SKY_ENGINE_WTF_WTF_H_
+#define SKY_ENGINE_WTF_WTF_H_
 
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/CurrentTime.h"
@@ -61,4 +61,4 @@ private:
 
 } // namespace WTF
 
-#endif // WTF_h
+#endif  // SKY_ENGINE_WTF_WTF_H_

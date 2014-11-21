@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Attribute_h
-#define Attribute_h
+#ifndef SKY_ENGINE_CORE_DOM_ATTRIBUTE_H_
+#define SKY_ENGINE_CORE_DOM_ATTRIBUTE_H_
 
 #include "sky/engine/core/dom/QualifiedName.h"
 
@@ -70,4 +70,4 @@ inline bool Attribute::matches(const QualifiedName& qualifiedName) const
 
 } // namespace blink
 
-#endif // Attribute_h
+#endif  // SKY_ENGINE_CORE_DOM_ATTRIBUTE_H_

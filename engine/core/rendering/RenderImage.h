@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef RenderImage_h
-#define RenderImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERIMAGE_H_
 
 #include "sky/engine/core/rendering/RenderImageResource.h"
 #include "sky/engine/core/rendering/RenderReplaced.h"
@@ -95,4 +95,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderImage, isRenderImage());
 
 } // namespace blink
 
-#endif // RenderImage_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERIMAGE_H_

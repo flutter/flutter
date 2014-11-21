@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableColor_h
-#define AnimatableColor_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECOLOR_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECOLOR_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -79,4 +79,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableColor, isColor());
 
 } // namespace blink
 
-#endif // AnimatableColor_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLECOLOR_H_

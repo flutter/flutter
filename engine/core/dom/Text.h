@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef Text_h
-#define Text_h
+#ifndef SKY_ENGINE_CORE_DOM_TEXT_H_
+#define SKY_ENGINE_CORE_DOM_TEXT_H_
 
 #include "sky/engine/core/dom/CharacterData.h"
 
@@ -77,4 +77,4 @@ DEFINE_NODE_TYPE_CASTS(Text, isTextNode());
 
 } // namespace blink
 
-#endif // Text_h
+#endif  // SKY_ENGINE_CORE_DOM_TEXT_H_

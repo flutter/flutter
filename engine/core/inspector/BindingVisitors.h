@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BindingVisitors_h
-#define BindingVisitors_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_BINDINGVISITORS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_BINDINGVISITORS_H_
 
 namespace WTF {
 class ArrayBufferView;
@@ -54,4 +54,4 @@ protected:
 
 } // namespace blink
 
-#endif // BindingVisitors_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_BINDINGVISITORS_H_

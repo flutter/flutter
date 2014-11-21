@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayerFactory_h
-#define GraphicsLayerFactory_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERFACTORY_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERFACTORY_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -43,4 +43,4 @@ public:
 
 } // namespace blink
 
-#endif // GraphicsLayerFactory_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERFACTORY_H_

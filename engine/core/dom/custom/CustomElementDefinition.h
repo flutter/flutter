@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementDefinition_h
-#define CustomElementDefinition_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDEFINITION_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDEFINITION_H_
 
 #include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementLifecycleCallbacks.h"
@@ -54,4 +54,4 @@ private:
 
 }
 
-#endif // CustomElementDefinition_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDEFINITION_H_

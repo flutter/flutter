@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceOwner_h
-#define ResourceOwner_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCEOWNER_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCEOWNER_H_
 
 #include "sky/engine/core/fetch/ResourcePtr.h"
 
@@ -113,4 +113,4 @@ inline ResourceOwner<R, C>& ResourceOwner<R, C>::operator=(const ResourceOwner<R
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCEOWNER_H_

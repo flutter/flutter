@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderGeometryMap_h
-#define RenderGeometryMap_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAP_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAP_H_
 
 #include "sky/engine/core/rendering/RenderGeometryMapStep.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -103,4 +103,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderGeometryMap_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAP_H_

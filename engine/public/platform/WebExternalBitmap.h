@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebExternalBitmap_h
-#define WebExternalBitmap_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALBITMAP_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALBITMAP_H_
 
 #include "sky/engine/public/platform/WebSize.h"
 
@@ -51,4 +51,4 @@ public:
 
 } // namespace blink
 
-#endif // WebExternalBitmap_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALBITMAP_H_

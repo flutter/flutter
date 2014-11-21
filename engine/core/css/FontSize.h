@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef FontSize_h
-#define FontSize_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTSIZE_H_
+#define SKY_ENGINE_CORE_CSS_FONTSIZE_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "sky/engine/platform/fonts/FixedPitchFontType.h"
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif // FontSize_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTSIZE_H_

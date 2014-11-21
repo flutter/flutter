@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_SpinLock_h
-#define WTF_SpinLock_h
+#ifndef SKY_ENGINE_WTF_SPINLOCK_H_
+#define SKY_ENGINE_WTF_SPINLOCK_H_
 
 // DESCRIPTION
 // spinLockLock() and spinLockUnlock() are simple spinlock primitives based on
@@ -57,4 +57,4 @@ ALWAYS_INLINE void spinLockUnlock(int volatile* lock)
 using WTF::spinLockLock;
 using WTF::spinLockUnlock;
 
-#endif // WTF_SpinLock_h
+#endif  // SKY_ENGINE_WTF_SPINLOCK_H_

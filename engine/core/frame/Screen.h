@@ -27,8 +27,8 @@
  */
 
 
-#ifndef Screen_h
-#define Screen_h
+#ifndef SKY_ENGINE_CORE_FRAME_SCREEN_H_
+#define SKY_ENGINE_CORE_FRAME_SCREEN_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif // Screen_h
+#endif  // SKY_ENGINE_CORE_FRAME_SCREEN_H_

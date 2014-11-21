@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TypingCommand_h
-#define TypingCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_TYPINGCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_TYPINGCOMMAND_H_
 
 #include "sky/engine/core/editing/TextInsertionBaseCommand.h"
 
@@ -133,4 +133,4 @@ private:
 
 } // namespace blink
 
-#endif // TypingCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_TYPINGCOMMAND_H_

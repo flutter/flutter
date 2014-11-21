@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OpenTypeTypes_h
-#define OpenTypeTypes_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_
+#define SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_
 
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/wtf/ByteOrder.h"
@@ -98,4 +98,4 @@ protected:
 
 } // namespace OpenType
 } // namespace blink
-#endif // OpenTypeTypes_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_

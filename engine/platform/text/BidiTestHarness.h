@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BidiTestHarness_h
-#define BidiTestHarness_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDITESTHARNESS_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDITESTHARNESS_H_
 
 #include <stdio.h>
 #include <istream>
@@ -270,4 +270,4 @@ void Harness<Runner>::parse(std::istream& bidiTestFile)
 
 } // namespace bidi_test
 
-#endif // BidiTestHarness_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDITESTHARNESS_H_

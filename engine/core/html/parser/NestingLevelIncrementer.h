@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NestingLevelIncrementer_h
-#define NestingLevelIncrementer_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_NESTINGLEVELINCREMENTER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_NESTINGLEVELINCREMENTER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -52,4 +52,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_NESTINGLEVELINCREMENTER_H_

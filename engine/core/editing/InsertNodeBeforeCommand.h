@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InsertNodeBeforeCommand_h
-#define InsertNodeBeforeCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_INSERTNODEBEFORECOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_INSERTNODEBEFORECOMMAND_H_
 
 #include "sky/engine/core/editing/EditCommand.h"
 
@@ -51,4 +51,4 @@ private:
 
 } // namespace blink
 
-#endif // InsertNodeBeforeCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_INSERTNODEBEFORECOMMAND_H_

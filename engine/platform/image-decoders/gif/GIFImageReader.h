@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef GIFImageReader_h
-#define GIFImageReader_h
+#ifndef SKY_ENGINE_PLATFORM_IMAGE_DECODERS_GIF_GIFIMAGEREADER_H_
+#define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_GIF_GIFIMAGEREADER_H_
 
 // Define ourselves as the clientPtr.  Mozilla just hacked their C++ callback class into this old C decoder,
 // so we will too.
@@ -364,4 +364,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_IMAGE_DECODERS_GIF_GIFIMAGEREADER_H_

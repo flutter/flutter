@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UniqueIdentifier_h
-#define UniqueIdentifier_h
+#ifndef SKY_ENGINE_CORE_LOADER_UNIQUEIDENTIFIER_H_
+#define SKY_ENGINE_CORE_LOADER_UNIQUEIDENTIFIER_H_
 
 namespace blink {
 
@@ -37,5 +37,5 @@ unsigned long createUniqueIdentifier();
 
 }
 
-#endif // UniqueIdentifier_h
+#endif  // SKY_ENGINE_CORE_LOADER_UNIQUEIDENTIFIER_H_
 

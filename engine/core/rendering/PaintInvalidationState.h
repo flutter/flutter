@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PaintInvalidationState_h
-#define PaintInvalidationState_h
+#ifndef SKY_ENGINE_CORE_RENDERING_PAINTINVALIDATIONSTATE_H_
+#define SKY_ENGINE_CORE_RENDERING_PAINTINVALIDATIONSTATE_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -60,4 +60,4 @@ private:
 
 } // namespace blink
 
-#endif // PaintInvalidationState_h
+#endif  // SKY_ENGINE_CORE_RENDERING_PAINTINVALIDATIONSTATE_H_

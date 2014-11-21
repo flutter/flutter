@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SizesCalcParser_h
-#define SizesCalcParser_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_SIZESCALCPARSER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_SIZESCALCPARSER_H_
 
 #include "sky/engine/core/css/MediaValues.h"
 #include "sky/engine/core/css/parser/MediaQueryToken.h"
@@ -57,5 +57,5 @@ private:
 
 } // namespace blink
 
-#endif // SizesCalcParser_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_SIZESCALCPARSER_H_
 

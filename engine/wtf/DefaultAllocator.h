@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_DefaultAllocator_h
-#define WTF_DefaultAllocator_h
+#ifndef SKY_ENGINE_WTF_DEFAULTALLOCATOR_H_
+#define SKY_ENGINE_WTF_DEFAULTALLOCATOR_H_
 
 // This is the allocator that is used for allocations that are not on the
 // traced, garbage collected heap. It uses FastMalloc for collections,
@@ -188,4 +188,4 @@ typedef int __thisIsHereToForceASemicolonAfterThisMacro
 
 using WTF::DefaultAllocator;
 
-#endif // WTF_DefaultAllocator_h
+#endif  // SKY_ENGINE_WTF_DEFAULTALLOCATOR_H_

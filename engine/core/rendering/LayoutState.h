@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutState_h
-#define LayoutState_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LAYOUTSTATE_H_
+#define SKY_ENGINE_CORE_RENDERING_LAYOUTSTATE_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -73,4 +73,4 @@ private:
 
 } // namespace blink
 
-#endif // LayoutState_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LAYOUTSTATE_H_

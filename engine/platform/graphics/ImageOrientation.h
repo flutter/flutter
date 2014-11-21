@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageOrientation_h
-#define ImageOrientation_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEORIENTATION_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEORIENTATION_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -91,4 +91,4 @@ private:
 
 } // namespace blink
 
-#endif // ImageOrientation_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEORIENTATION_H_

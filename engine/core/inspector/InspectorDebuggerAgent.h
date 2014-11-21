@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InspectorDebuggerAgent_h
-#define InspectorDebuggerAgent_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORDEBUGGERAGENT_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORDEBUGGERAGENT_H_
 
 #include "gen/sky/core/InspectorFrontend.h"
 #include "sky/engine/bindings/core/v8/ScriptState.h"
@@ -272,4 +272,4 @@ private:
 } // namespace blink
 
 
-#endif // !defined(InspectorDebuggerAgent_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORDEBUGGERAGENT_H_

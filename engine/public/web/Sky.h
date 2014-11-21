@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebKit_h
-#define WebKit_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_SKY_H_
+#define SKY_ENGINE_PUBLIC_WEB_SKY_H_
 
 #include "../platform/Platform.h"
 
@@ -83,4 +83,4 @@ BLINK_EXPORT void enableLogChannel(const char*);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_SKY_H_

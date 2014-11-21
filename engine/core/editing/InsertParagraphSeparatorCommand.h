@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InsertParagraphSeparatorCommand_h
-#define InsertParagraphSeparatorCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_INSERTPARAGRAPHSEPARATORCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_INSERTPARAGRAPHSEPARATORCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_INSERTPARAGRAPHSEPARATORCOMMAND_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebReferrerPolicy_h
-#define WebReferrerPolicy_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBREFERRERPOLICY_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBREFERRERPOLICY_H_
 
 namespace blink {
 
@@ -43,4 +43,4 @@ enum WebReferrerPolicy {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBREFERRERPOLICY_H_

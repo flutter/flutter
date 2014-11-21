@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef WordMeasurement_h
-#define WordMeasurement_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_WORDMEASUREMENT_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_WORDMEASUREMENT_H_
 
 #include "sky/engine/platform/fonts/SimpleFontData.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif // WordMeasurement_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_WORDMEASUREMENT_H_

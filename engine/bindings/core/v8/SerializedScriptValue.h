@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SerializedScriptValue_h
-#define SerializedScriptValue_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SERIALIZEDSCRIPTVALUE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SERIALIZEDSCRIPTVALUE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -108,4 +108,4 @@ private:
 
 } // namespace blink
 
-#endif // SerializedScriptValue_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SERIALIZEDSCRIPTVALUE_H_

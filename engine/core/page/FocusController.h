@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FocusController_h
-#define FocusController_h
+#ifndef SKY_ENGINE_CORE_PAGE_FOCUSCONTROLLER_H_
+#define SKY_ENGINE_CORE_PAGE_FOCUSCONTROLLER_H_
 
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -115,4 +115,4 @@ private:
 
 } // namespace blink
 
-#endif // FocusController_h
+#endif  // SKY_ENGINE_CORE_PAGE_FOCUSCONTROLLER_H_

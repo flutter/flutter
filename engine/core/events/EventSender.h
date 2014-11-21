@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EventSender_h
-#define EventSender_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTSENDER_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTSENDER_H_
 
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/wtf/Vector.h"
@@ -110,4 +110,4 @@ template<typename T> void EventSender<T>::dispatchPendingEvents()
 
 } // namespace blink
 
-#endif // EventSender_h
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTSENDER_H_

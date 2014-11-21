@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptArguments_h
-#define ScriptArguments_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTARGUMENTS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTARGUMENTS_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/wtf/Forward.h"
@@ -62,4 +62,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptArguments_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTARGUMENTS_H_

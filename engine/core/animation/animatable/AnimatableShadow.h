@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableShadow_h
-#define AnimatableShadow_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHADOW_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHADOW_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
@@ -63,4 +63,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableShadow, isShadow());
 
 } // namespace blink
 
-#endif // AnimatableShadow_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHADOW_H_

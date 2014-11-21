@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FetchUtils_h
-#define FetchUtils_h
+#ifndef SKY_ENGINE_CORE_FETCH_FETCHUTILS_H_
+#define SKY_ENGINE_CORE_FETCH_FETCHUTILS_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -28,4 +28,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_FETCHUTILS_H_

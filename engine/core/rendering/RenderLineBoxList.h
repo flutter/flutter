@@ -27,8 +27,8 @@
  */
 
 
-#ifndef RenderLineBoxList_h
-#define RenderLineBoxList_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_
 
 #include "sky/engine/core/rendering/RenderObject.h"
 
@@ -87,4 +87,4 @@ inline void RenderLineBoxList::checkConsistency() const
 
 } // namespace blink
 
-#endif // RenderFlow_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_

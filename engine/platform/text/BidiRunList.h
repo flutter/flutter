@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef BidiRunList_h
-#define BidiRunList_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDIRUNLIST_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDIRUNLIST_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -250,4 +250,4 @@ void BidiRunList<Run>::reverseRuns(unsigned start, unsigned end)
 
 } // namespace blink
 
-#endif // BidiRunList
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDIRUNLIST_H_

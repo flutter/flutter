@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AtomicStringHash_h
-#define AtomicStringHash_h
+#ifndef SKY_ENGINE_WTF_TEXT_ATOMICSTRINGHASH_H_
+#define SKY_ENGINE_WTF_TEXT_ATOMICSTRINGHASH_H_
 
 #include "sky/engine/wtf/HashTraits.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -65,4 +65,4 @@ namespace WTF {
 
 using WTF::AtomicStringHash;
 
-#endif
+#endif  // SKY_ENGINE_WTF_TEXT_ATOMICSTRINGHASH_H_

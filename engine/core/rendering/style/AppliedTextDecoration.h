@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef AppliedTextDecoration_h
-#define AppliedTextDecoration_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_APPLIEDTEXTDECORATION_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_APPLIEDTEXTDECORATION_H_
 
 #include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -31,4 +31,4 @@ private:
 
 } // namespace blink
 
-#endif // AppliedTextDecoration_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_APPLIEDTEXTDECORATION_H_

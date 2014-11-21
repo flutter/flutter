@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KeyframeEffectModel_h
-#define KeyframeEffectModel_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_KEYFRAMEEFFECTMODEL_H_
+#define SKY_ENGINE_CORE_ANIMATION_KEYFRAMEEFFECTMODEL_H_
 
 #include "sky/engine/core/animation/AnimationEffect.h"
 #include "sky/engine/core/animation/AnimationNode.h"
@@ -172,4 +172,4 @@ inline bool KeyframeEffectModel<StringKeyframe>::isStringKeyframeEffectModel() c
 
 } // namespace blink
 
-#endif // KeyframeEffectModel_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_KEYFRAMEEFFECTMODEL_H_

@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BitmapImage_h
-#define BitmapImage_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_BITMAPIMAGE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_BITMAPIMAGE_H_
 
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -194,4 +194,4 @@ DEFINE_IMAGE_TYPE_CASTS(BitmapImage);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_BITMAPIMAGE_H_

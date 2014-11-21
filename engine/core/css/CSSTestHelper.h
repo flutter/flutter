@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSTestHelper_h
-#define CSSTestHelper_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSTESTHELPER_H_
+#define SKY_ENGINE_CORE_CSS_CSSTESTHELPER_H_
 
 #include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -60,4 +60,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSTestHelper_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSTESTHELPER_H_

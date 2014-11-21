@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DashArray_h
-#define DashArray_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_DASHARRAY_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_DASHARRAY_H_
 
 #include "sky/engine/wtf/Vector.h"
 
@@ -32,4 +32,4 @@ typedef float DashArrayElement;
 
 typedef Vector<DashArrayElement> DashArray;
 
-#endif // DashArray_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_DASHARRAY_H_

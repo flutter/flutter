@@ -18,8 +18,8 @@
    Boston, MA 02110-1301, USA.
 */
 
-#ifndef EventWithHitTestResults_h
-#define EventWithHitTestResults_h
+#ifndef SKY_ENGINE_CORE_PAGE_EVENTWITHHITTESTRESULTS_H_
+#define SKY_ENGINE_CORE_PAGE_EVENTWITHHITTESTRESULTS_H_
 
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/PlatformEvent.h"
@@ -60,4 +60,4 @@ typedef EventWithHitTestResults<PlatformGestureEvent> GestureEventWithHitTestRes
 
 } // namespace blink
 
-#endif // EventWithHitTestResults_h
+#endif  // SKY_ENGINE_CORE_PAGE_EVENTWITHHITTESTRESULTS_H_

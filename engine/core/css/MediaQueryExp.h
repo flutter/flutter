@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaQueryExp_h
-#define MediaQueryExp_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYEXP_H_
+#define SKY_ENGINE_CORE_CSS_MEDIAQUERYEXP_H_
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/core/MediaFeatureNames.h"
@@ -105,4 +105,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_MEDIAQUERYEXP_H_

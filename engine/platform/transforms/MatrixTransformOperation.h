@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef MatrixTransformOperation_h
-#define MatrixTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIXTRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIXTRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
@@ -101,4 +101,4 @@ private:
 
 } // namespace blink
 
-#endif // MatrixTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIXTRANSFORMOPERATION_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RegionTracker_h
-#define RegionTracker_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -115,4 +115,4 @@ private:
 
 } // namespace blink
 
-#endif // RegionTracker_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_

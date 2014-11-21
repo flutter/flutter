@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTestingSupport_h
-#define WebTestingSupport_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTESTINGSUPPORT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTESTINGSUPPORT_H_
 
 #include "../platform/WebCommon.h"
 #include "sky/engine/public/web/WebFrame.h"
@@ -39,4 +39,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTESTINGSUPPORT_H_

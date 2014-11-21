@@ -32,8 +32,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef UnicodeRange_h
-#define UnicodeRange_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_UNICODERANGE_H_
+#define SKY_ENGINE_PLATFORM_TEXT_UNICODERANGE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/unicode/Unicode.h"
@@ -116,4 +116,4 @@ PLATFORM_EXPORT const char* langGroupFromUnicodeRange(unsigned char unicodeRange
 
 }
 
-#endif // UnicodeRange_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_UNICODERANGE_H_

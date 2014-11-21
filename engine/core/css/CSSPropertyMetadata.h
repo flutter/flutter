@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CSSPropertyMetadata_h
-#define CSSPropertyMetadata_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSPROPERTYMETADATA_H_
+#define SKY_ENGINE_CORE_CSS_CSSPROPERTYMETADATA_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 
@@ -20,4 +20,4 @@ public:
 
 } // namespace blink
 
-#endif // CSSPropertyMetadata_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSPROPERTYMETADATA_H_

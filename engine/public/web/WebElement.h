@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebElement_h
-#define WebElement_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBELEMENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBELEMENT_H_
 
 #include "../platform/WebImage.h"
 #include "sky/engine/public/web/WebNode.h"
@@ -82,4 +82,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBELEMENT_H_

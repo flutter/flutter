@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FocusEvent_h
-#define FocusEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_FOCUSEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_FOCUSEVENT_H_
 
 #include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/core/events/UIEvent.h"
@@ -111,4 +111,4 @@ private:
 
 } // namespace blink
 
-#endif // FocusEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_FOCUSEVENT_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLCompressedTextureS3TC_h
-#define WebGLCompressedTextureS3TC_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCOMPRESSEDTEXTURES3TC_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCOMPRESSEDTEXTURES3TC_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
@@ -50,4 +50,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLCompressedTextureS3TC_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCOMPRESSEDTEXTURES3TC_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderLayerCompositor_h
-#define RenderLayerCompositor_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_RENDERLAYERCOMPOSITOR_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_RENDERLAYERCOMPOSITOR_H_
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/compositing/CompositingReasonFinder.h"
@@ -216,4 +216,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerCompositor_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_RENDERLAYERCOMPOSITOR_H_

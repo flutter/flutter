@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFontFaceSource_h
-#define CSSFontFaceSource_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTFACESOURCE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTFACESOURCE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -68,4 +68,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTFACESOURCE_H_

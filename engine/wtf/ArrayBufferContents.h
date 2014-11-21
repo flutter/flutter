@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayBufferContents_h
-#define ArrayBufferContents_h
+#ifndef SKY_ENGINE_WTF_ARRAYBUFFERCONTENTS_H_
+#define SKY_ENGINE_WTF_ARRAYBUFFERCONTENTS_H_
 
 #include "sky/engine/wtf/ArrayBufferDeallocationObserver.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -80,4 +80,4 @@ private:
 
 } // namespace WTF
 
-#endif // ArrayBufferContents_h
+#endif  // SKY_ENGINE_WTF_ARRAYBUFFERCONTENTS_H_

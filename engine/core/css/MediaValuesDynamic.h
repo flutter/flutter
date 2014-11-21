@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MediaValuesDynamic_h
-#define MediaValuesDynamic_h
+#ifndef SKY_ENGINE_CORE_CSS_MEDIAVALUESDYNAMIC_H_
+#define SKY_ENGINE_CORE_CSS_MEDIAVALUESDYNAMIC_H_
 
 #include "sky/engine/core/css/MediaValues.h"
 
@@ -48,4 +48,4 @@ protected:
 
 } // namespace
 
-#endif // MediaValuesDynamic_h
+#endif  // SKY_ENGINE_CORE_CSS_MEDIAVALUESDYNAMIC_H_

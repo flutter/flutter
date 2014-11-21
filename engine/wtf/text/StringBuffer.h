@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringBuffer_h
-#define StringBuffer_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGBUFFER_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGBUFFER_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/text/StringImpl.h"
@@ -90,4 +90,4 @@ void StringBuffer<CharType>::shrink(unsigned newLength)
 
 using WTF::StringBuffer;
 
-#endif // StringBuffer_h
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGBUFFER_H_

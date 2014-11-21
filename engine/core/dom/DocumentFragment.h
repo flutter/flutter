@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef DocumentFragment_h
-#define DocumentFragment_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTFRAGMENT_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTFRAGMENT_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
 
@@ -51,4 +51,4 @@ DEFINE_NODE_TYPE_CASTS(DocumentFragment, isDocumentFragment());
 
 } // namespace blink
 
-#endif // DocumentFragment_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTFRAGMENT_H_

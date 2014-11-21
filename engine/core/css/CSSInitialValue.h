@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSInitialValue_h
-#define CSSInitialValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSINITIALVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSINITIALVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -57,4 +57,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSInitialValue, isInitialValue());
 
 } // namespace blink
 
-#endif // CSSInitialValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSINITIALVALUE_H_

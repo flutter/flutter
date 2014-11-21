@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ColorSuggestion_h
-#define ColorSuggestion_h
+#ifndef SKY_ENGINE_PLATFORM_COLORSUGGESTION_H_
+#define SKY_ENGINE_PLATFORM_COLORSUGGESTION_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -48,4 +48,4 @@ struct ColorSuggestion {
 
 } // namespace blink
 
-#endif // ColorSuggestion_h
+#endif  // SKY_ENGINE_PLATFORM_COLORSUGGESTION_H_

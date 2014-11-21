@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Float32Array_h
-#define Float32Array_h
+#ifndef SKY_ENGINE_WTF_FLOAT32ARRAY_H_
+#define SKY_ENGINE_WTF_FLOAT32ARRAY_H_
 
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/TypedArrayBase.h"
@@ -106,4 +106,4 @@ PassRefPtr<Float32Array> Float32Array::subarray(int start, int end) const
 
 using WTF::Float32Array;
 
-#endif // Float32Array_h
+#endif  // SKY_ENGINE_WTF_FLOAT32ARRAY_H_

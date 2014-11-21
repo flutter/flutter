@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringConcatenate_h
-#define StringConcatenate_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGCONCATENATE_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGCONCATENATE_H_
 
 #include <string.h>
 
@@ -437,4 +437,4 @@ PassRefPtr<StringImpl> makeString(StringType1 string1, StringType2 string2)
 } // namespace WTF
 
 #include "sky/engine/wtf/text/StringOperators.h"
-#endif
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGCONCATENATE_H_

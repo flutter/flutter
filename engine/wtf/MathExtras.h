@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_MathExtras_h
-#define WTF_MathExtras_h
+#ifndef SKY_ENGINE_WTF_MATHEXTRAS_H_
+#define SKY_ENGINE_WTF_MATHEXTRAS_H_
 
 #include <cmath>
 #include <limits>
@@ -193,4 +193,4 @@ inline unsigned fastLog2(unsigned i)
 
 } // namespace WTF
 
-#endif // #ifndef WTF_MathExtras_h
+#endif  // SKY_ENGINE_WTF_MATHEXTRAS_H_

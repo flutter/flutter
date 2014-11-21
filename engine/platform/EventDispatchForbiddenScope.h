@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EventDispatchForbiddenScope_h
-#define EventDispatchForbiddenScope_h
+#ifndef SKY_ENGINE_PLATFORM_EVENTDISPATCHFORBIDDENSCOPE_H_
+#define SKY_ENGINE_PLATFORM_EVENTDISPATCHFORBIDDENSCOPE_H_
 
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/TemporaryChange.h"
@@ -71,4 +71,4 @@ public:
 
 } // namespace blink
 
-#endif // EventDispatchForbiddenScope_h
+#endif  // SKY_ENGINE_PLATFORM_EVENTDISPATCHFORBIDDENSCOPE_H_

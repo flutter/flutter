@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLProgram_h
-#define WebGLProgram_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLPROGRAM_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLPROGRAM_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLShader.h"
@@ -87,4 +87,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLProgram_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLPROGRAM_H_

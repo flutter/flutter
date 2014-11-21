@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebUserGestureIndicator_h
-#define WebUserGestureIndicator_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTUREINDICATOR_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTUREINDICATOR_H_
 
 #include "../platform/WebCommon.h"
 
@@ -53,4 +53,4 @@ public:
 
 }
 
-#endif // WebUserGestureIndicator_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBUSERGESTUREINDICATOR_H_

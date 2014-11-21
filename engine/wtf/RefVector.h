@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef RefVector_h
-#define RefVector_h
+#ifndef SKY_ENGINE_WTF_REFVECTOR_H_
+#define SKY_ENGINE_WTF_REFVECTOR_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -37,4 +37,4 @@ private:
 
 } // namespace blink
 
-#endif // RefVector_h
+#endif  // SKY_ENGINE_WTF_REFVECTOR_H_

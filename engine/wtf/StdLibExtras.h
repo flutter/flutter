@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_StdLibExtras_h
-#define WTF_StdLibExtras_h
+#ifndef SKY_ENGINE_WTF_STDLIBEXTRAS_H_
+#define SKY_ENGINE_WTF_STDLIBEXTRAS_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/CPU.h"
@@ -149,4 +149,4 @@ inline void* operator new(size_t, NotNullTag, void* location)
 using WTF::bitwise_cast;
 using WTF::safeCast;
 
-#endif // WTF_StdLibExtras_h
+#endif  // SKY_ENGINE_WTF_STDLIBEXTRAS_H_

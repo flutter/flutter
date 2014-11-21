@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ParsingUtilities_h
-#define ParsingUtilities_h
+#ifndef SKY_ENGINE_PLATFORM_PARSINGUTILITIES_H_
+#define SKY_ENGINE_PLATFORM_PARSINGUTILITIES_H_
 
 template<typename CharType>
 bool skipExactly(const CharType*& position, const CharType* end, CharType delimiter)
@@ -79,5 +79,5 @@ void reverseSkipWhile(const CharType*& position, const CharType* start)
         --position;
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_PARSINGUTILITIES_H_
 

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef DoubleBufferedDeque_h
-#define DoubleBufferedDeque_h
+#ifndef SKY_ENGINE_WTF_DOUBLEBUFFEREDDEQUE_H_
+#define SKY_ENGINE_WTF_DOUBLEBUFFEREDDEQUE_H_
 
 #include "sky/engine/wtf/Deque.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -44,4 +44,4 @@ private:
 
 using WTF::DoubleBufferedDeque;
 
-#endif // DoubleBufferedDeque_h
+#endif  // SKY_ENGINE_WTF_DOUBLEBUFFEREDDEQUE_H_

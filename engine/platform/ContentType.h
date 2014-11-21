@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ContentType_h
-#define ContentType_h
+#ifndef SKY_ENGINE_PLATFORM_CONTENTTYPE_H_
+#define SKY_ENGINE_PLATFORM_CONTENTTYPE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif // ContentType_h
+#endif  // SKY_ENGINE_PLATFORM_CONTENTTYPE_H_

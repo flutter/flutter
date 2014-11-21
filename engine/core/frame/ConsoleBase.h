@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ConsoleBase_h
-#define ConsoleBase_h
+#ifndef SKY_ENGINE_CORE_FRAME_CONSOLEBASE_H_
+#define SKY_ENGINE_CORE_FRAME_CONSOLEBASE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -89,4 +89,4 @@ private:
 
 } // namespace blink
 
-#endif // ConsoleBase_h
+#endif  // SKY_ENGINE_CORE_FRAME_CONSOLEBASE_H_

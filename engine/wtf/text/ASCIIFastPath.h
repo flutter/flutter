@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ASCIIFastPath_h
-#define ASCIIFastPath_h
+#ifndef SKY_ENGINE_WTF_TEXT_ASCIIFASTPATH_H_
+#define SKY_ENGINE_WTF_TEXT_ASCIIFASTPATH_H_
 
 #include <stdint.h>
 #include "sky/engine/wtf/Alignment.h"
@@ -134,4 +134,4 @@ inline void copyLCharsFromUCharSource(LChar* destination, const UChar* source, s
 
 } // namespace WTF
 
-#endif // ASCIIFastPath_h
+#endif  // SKY_ENGINE_WTF_TEXT_ASCIIFASTPATH_H_

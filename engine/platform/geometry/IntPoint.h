@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IntPoint_h
-#define IntPoint_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTPOINT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_INTPOINT_H_
 
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -145,4 +145,4 @@ inline int IntPoint::distanceSquaredToPoint(const IntPoint& point) const
 
 WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::IntPoint);
 
-#endif // IntPoint_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTPOINT_H_

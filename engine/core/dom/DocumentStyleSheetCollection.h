@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef DocumentStyleSheetCollection_h
-#define DocumentStyleSheetCollection_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTION_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTION_H_
 
 #include "sky/engine/core/dom/TreeScopeStyleSheetCollection.h"
 
@@ -56,5 +56,5 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTSTYLESHEETCOLLECTION_H_
 

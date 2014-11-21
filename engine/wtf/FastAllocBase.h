@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FastAllocBase_h
-#define FastAllocBase_h
+#ifndef SKY_ENGINE_WTF_FASTALLOCBASE_H_
+#define SKY_ENGINE_WTF_FASTALLOCBASE_H_
 
 // Provides customizable overrides of fastMalloc/fastFree and operator new/delete
 //
@@ -83,4 +83,4 @@ public: \
 private: \
 typedef int __thisIsHereToForceASemicolonAfterThisMacro
 
-#endif // FastAllocBase_h
+#endif  // SKY_ENGINE_WTF_FASTALLOCBASE_H_

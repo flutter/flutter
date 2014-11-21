@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFilterOperations_h
-#define WebFilterOperations_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTEROPERATIONS_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTEROPERATIONS_H_
 
 #include "sky/engine/public/platform/WebColor.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -60,4 +60,4 @@ public:
 
 } // namespace blink
 
-#endif // WebFilterOperations_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTEROPERATIONS_H_

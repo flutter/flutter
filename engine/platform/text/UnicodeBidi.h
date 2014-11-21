@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UnicodeBidi_h
-#define UnicodeBidi_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_UNICODEBIDI_H_
+#define SKY_ENGINE_PLATFORM_TEXT_UNICODEBIDI_H_
 
 namespace blink {
 
@@ -49,4 +49,4 @@ inline bool isOverride(EUnicodeBidi unicodeBidi)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_UNICODEBIDI_H_

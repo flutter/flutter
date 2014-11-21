@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CachePolicy_h
-#define CachePolicy_h
+#ifndef SKY_ENGINE_CORE_FETCH_CACHEPOLICY_H_
+#define SKY_ENGINE_CORE_FETCH_CACHEPOLICY_H_
 
 namespace blink {
 
@@ -37,4 +37,4 @@ enum CachePolicy {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_CACHEPOLICY_H_

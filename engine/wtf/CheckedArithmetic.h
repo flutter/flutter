@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CheckedArithmetic_h
-#define CheckedArithmetic_h
+#ifndef SKY_ENGINE_WTF_CHECKEDARITHMETIC_H_
+#define SKY_ENGINE_WTF_CHECKEDARITHMETIC_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/EnumClass.h"
@@ -713,4 +713,4 @@ using WTF::Checked;
 using WTF::CheckedState;
 using WTF::RecordOverflow;
 
-#endif
+#endif  // SKY_ENGINE_WTF_CHECKEDARITHMETIC_H_

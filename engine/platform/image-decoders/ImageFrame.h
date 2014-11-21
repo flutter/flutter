@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageFrame_h
-#define ImageFrame_h
+#ifndef SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEFRAME_H_
+#define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEFRAME_H_
 
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
@@ -242,4 +242,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEFRAME_H_

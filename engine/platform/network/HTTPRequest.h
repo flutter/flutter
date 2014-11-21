@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTTPRequest_h
-#define HTTPRequest_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_HTTPREQUEST_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_HTTPREQUEST_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/network/HTTPHeaderMap.h"
@@ -79,4 +79,4 @@ protected:
 
 } // namespace blink
 
-#endif // HTTPRequest_h
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_HTTPREQUEST_H_

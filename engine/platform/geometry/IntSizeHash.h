@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  *
  */
-#ifndef IntSizeHash_h
-#define IntSizeHash_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZEHASH_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZEHASH_H_
 
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -45,4 +45,4 @@ template<> struct HashTraits<blink::IntSize> : GenericHashTraits<blink::IntSize>
 
 } // namespace WTF
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZEHASH_H_

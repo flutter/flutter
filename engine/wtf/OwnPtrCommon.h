@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_OwnPtrCommon_h
-#define WTF_OwnPtrCommon_h
+#ifndef SKY_ENGINE_WTF_OWNPTRCOMMON_H_
+#define SKY_ENGINE_WTF_OWNPTRCOMMON_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/TypeTraits.h"
@@ -70,4 +70,4 @@ struct OwnedPtrDeleter<T[n]> {
 
 } // namespace WTF
 
-#endif // WTF_OwnPtrCommon_h
+#endif  // SKY_ENGINE_WTF_OWNPTRCOMMON_H_

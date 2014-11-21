@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef PaintInfo_h
-#define PaintInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_
 
 #include <limits>
 #include "sky/engine/core/rendering/PaintPhase.h"
@@ -117,4 +117,4 @@ private:
 
 } // namespace blink
 
-#endif // PaintInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_

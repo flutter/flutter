@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutPoint_h
-#define LayoutPoint_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTPOINT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTPOINT_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/LayoutSize.h"
@@ -201,4 +201,4 @@ inline LayoutPoint flooredLayoutPoint(const FloatSize& s)
 
 } // namespace blink
 
-#endif // LayoutPoint_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTPOINT_H_

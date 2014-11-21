@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ReplayingCanvas_h
-#define ReplayingCanvas_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_REPLAYINGCANVAS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_REPLAYINGCANVAS_H_
 
 #include "sky/engine/platform/graphics/InterceptingCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -91,4 +91,4 @@ private:
 
 } // namespace blink
 
-#endif // ReplayingCanvas_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_REPLAYINGCANVAS_H_

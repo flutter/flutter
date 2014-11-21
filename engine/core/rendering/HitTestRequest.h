@@ -20,8 +20,8 @@
  *
 */
 
-#ifndef HitTestRequest_h
-#define HitTestRequest_h
+#ifndef SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_
+#define SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_
 
 namespace blink {
 
@@ -73,4 +73,4 @@ private:
 
 } // namespace blink
 
-#endif // HitTestRequest_h
+#endif  // SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_

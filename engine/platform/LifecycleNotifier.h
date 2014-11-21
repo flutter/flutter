@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef LifecycleNotifier_h
-#define LifecycleNotifier_h
+#ifndef SKY_ENGINE_PLATFORM_LIFECYCLENOTIFIER_H_
+#define SKY_ENGINE_PLATFORM_LIFECYCLENOTIFIER_H_
 
 #include "sky/engine/platform/LifecycleObserver.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -113,4 +113,4 @@ inline void LifecycleNotifier<T>::removeObserver(typename LifecycleNotifier<T>::
 
 } // namespace blink
 
-#endif // LifecycleNotifier_h
+#endif  // SKY_ENGINE_PLATFORM_LIFECYCLENOTIFIER_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8EventListener_h
-#define V8EventListener_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENER_H_
 
 #include "sky/engine/bindings/core/v8/V8AbstractEventListener.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -59,4 +59,4 @@ protected:
 
 } // namespace blink
 
-#endif // V8EventListener_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8EVENTLISTENER_H_

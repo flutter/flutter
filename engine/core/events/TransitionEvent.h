@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TransitionEvent_h
-#define TransitionEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_TRANSITIONEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_TRANSITIONEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // TransitionEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_TRANSITIONEVENT_H_

@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_PassTraits_h
-#define WTF_PassTraits_h
+#ifndef SKY_ENGINE_WTF_PASSTRAITS_H_
+#define SKY_ENGINE_WTF_PASSTRAITS_H_
 
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -60,4 +60,4 @@ template<typename T> struct PassTraits<RefPtr<T> > {
 
 using WTF::PassTraits;
 
-#endif // WTF_PassTraits_h
+#endif  // SKY_ENGINE_WTF_PASSTRAITS_H_

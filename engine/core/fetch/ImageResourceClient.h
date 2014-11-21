@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef ImageResourceClient_h
-#define ImageResourceClient_h
+#ifndef SKY_ENGINE_CORE_FETCH_IMAGERESOURCECLIENT_H_
+#define SKY_ENGINE_CORE_FETCH_IMAGERESOURCECLIENT_H_
 
 #include "sky/engine/core/fetch/ResourceClient.h"
 
@@ -49,4 +49,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_IMAGERESOURCECLIENT_H_

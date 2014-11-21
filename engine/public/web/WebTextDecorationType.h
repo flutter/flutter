@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTextDecorationType_h
-#define WebTextDecorationType_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTEXTDECORATIONTYPE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTEXTDECORATIONTYPE_H_
 
 namespace blink {
 
@@ -41,4 +41,4 @@ enum WebTextDecorationType {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTEXTDECORATIONTYPE_H_

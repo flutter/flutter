@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FEBlendNEON_h
-#define FEBlendNEON_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_CPU_ARM_FILTERS_FEBLENDNEON_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_CPU_ARM_FILTERS_FEBLENDNEON_H_
 
 #include "sky/engine/platform/graphics/filters/FEBlend.h"
 
@@ -170,4 +170,4 @@ void FEBlend::platformApplyNEON(unsigned char* srcPixelArrayA, unsigned char* sr
 
 #endif // HAVE(ARM_NEON_INTRINSICS)
 
-#endif // FEBlendNEON_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_CPU_ARM_FILTERS_FEBLENDNEON_H_

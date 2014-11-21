@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef StringImpl_h
-#define StringImpl_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGIMPL_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGIMPL_H_
 
 #include <limits.h>
 #include "sky/engine/wtf/ASCIICType.h"
@@ -721,4 +721,4 @@ using WTF::TextCaseSensitivity;
 using WTF::TextCaseSensitive;
 using WTF::TextCaseInsensitive;
 
-#endif
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGIMPL_H_

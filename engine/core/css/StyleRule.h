@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef StyleRule_h
-#define StyleRule_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLERULE_H_
+#define SKY_ENGINE_CORE_CSS_STYLERULE_H_
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/css/MediaList.h"
@@ -219,4 +219,4 @@ DEFINE_STYLE_RULE_TYPE_CASTS(Filter);
 
 } // namespace blink
 
-#endif // StyleRule_h
+#endif  // SKY_ENGINE_CORE_CSS_STYLERULE_H_

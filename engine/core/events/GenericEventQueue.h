@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GenericEventQueue_h
-#define GenericEventQueue_h
+#ifndef SKY_ENGINE_CORE_EVENTS_GENERICEVENTQUEUE_H_
+#define SKY_ENGINE_CORE_EVENTS_GENERICEVENTQUEUE_H_
 
 #include "sky/engine/core/events/EventQueue.h"
 #include "sky/engine/core/events/EventTarget.h"
@@ -62,4 +62,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_GENERICEVENTQUEUE_H_

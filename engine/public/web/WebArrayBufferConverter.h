@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebArrayBufferConverter_h
-#define WebArrayBufferConverter_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBARRAYBUFFERCONVERTER_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBARRAYBUFFERCONVERTER_H_
 
 #include "sky/engine/public/platform/WebArrayBuffer.h"
 
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif // WebArrayBufferConverter_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBARRAYBUFFERCONVERTER_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementMicrotaskImportStep_h
-#define CustomElementMicrotaskImportStep_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKIMPORTSTEP_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKIMPORTSTEP_H_
 
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskStep.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -81,4 +81,4 @@ private:
 
 }
 
-#endif // CustomElementMicrotaskImportStep_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKIMPORTSTEP_H_

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef QuotesData_h
-#define QuotesData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_QUOTESDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_QUOTESDATA_H_
 
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -50,4 +50,4 @@ private:
 
 } // namespace blink
 
-#endif // QuotesData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_QUOTESDATA_H_

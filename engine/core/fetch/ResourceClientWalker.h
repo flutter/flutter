@@ -22,8 +22,8 @@
     pages from the web. It has a memory cache for these objects.
 */
 
-#ifndef ResourceClientWalker_h
-#define ResourceClientWalker_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCECLIENTWALKER_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCECLIENTWALKER_H_
 
 #include "sky/engine/core/fetch/ResourceClient.h"
 #include "sky/engine/wtf/HashCountedSet.h"
@@ -66,4 +66,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCECLIENTWALKER_H_

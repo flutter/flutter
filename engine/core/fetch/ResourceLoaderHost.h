@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoaderHost_h
-#define ResourceLoaderHost_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCELOADERHOST_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCELOADERHOST_H_
 
 #include "sky/engine/platform/network/ResourceError.h"
 #include "sky/engine/platform/network/ResourceLoadPriority.h"
@@ -78,4 +78,4 @@ public:
 
 }
 
-#endif // ResourceLoaderHost_h
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCELOADERHOST_H_

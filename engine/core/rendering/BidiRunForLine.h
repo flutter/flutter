@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef BidiRunForLine_h
-#define BidiRunForLine_h
+#ifndef SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_
+#define SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_
 
 #include "sky/engine/core/rendering/line/TrailingObjects.h"
 #include "sky/engine/platform/text/BidiResolver.h"
@@ -38,4 +38,4 @@ void constructBidiRunsForLine(InlineBidiResolver&, BidiRunList<BidiRun>&,
 
 } // namespace blink
 
-#endif // BidiRunForLine_h
+#endif  // SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_

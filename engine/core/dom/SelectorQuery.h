@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SelectorQuery_h
-#define SelectorQuery_h
+#ifndef SKY_ENGINE_CORE_DOM_SELECTORQUERY_H_
+#define SKY_ENGINE_CORE_DOM_SELECTORQUERY_H_
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -70,4 +70,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SELECTORQUERY_H_

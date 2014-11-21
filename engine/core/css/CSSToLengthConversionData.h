@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSToLengthConversionData_h
-#define CSSToLengthConversionData_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSTOLENGTHCONVERSIONDATA_H_
+#define SKY_ENGINE_CORE_CSS_CSSTOLENGTHCONVERSIONDATA_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSTOLENGTHCONVERSIONDATA_H_

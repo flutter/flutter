@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEDiffuseLighting_h
-#define FEDiffuseLighting_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDIFFUSELIGHTING_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDIFFUSELIGHTING_H_
 
 #include "sky/engine/platform/graphics/filters/FELighting.h"
 
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif // FEDiffuseLighting_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDIFFUSELIGHTING_H_

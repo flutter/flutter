@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFrame_h
-#define WebFrame_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBFRAME_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBFRAME_H_
 
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/public/platform/WebCanvas.h"
@@ -321,4 +321,4 @@ Frame* toCoreFrame(const WebFrame*);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBFRAME_H_

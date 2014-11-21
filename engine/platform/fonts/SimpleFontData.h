@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef SimpleFontData_h
-#define SimpleFontData_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_SIMPLEFONTDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_SIMPLEFONTDATA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/CustomFontData.h"
@@ -259,4 +259,4 @@ ALWAYS_INLINE float SimpleFontData::widthForGlyph(Glyph glyph) const
 DEFINE_FONT_DATA_TYPE_CASTS(SimpleFontData, false);
 
 } // namespace blink
-#endif // SimpleFontData_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_SIMPLEFONTDATA_H_

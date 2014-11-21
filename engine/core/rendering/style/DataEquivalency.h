@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef DataEquivalency_h
-#define DataEquivalency_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_DATAEQUIVALENCY_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_DATAEQUIVALENCY_H_
 
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -34,4 +34,4 @@ bool dataEquivalent(const OwnPtr<T>& a, const OwnPtr<T>& b)
 
 } // namespace blink
 
-#endif // DataEquivalency_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_DATAEQUIVALENCY_H_

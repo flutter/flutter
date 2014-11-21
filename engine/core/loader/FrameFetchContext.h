@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameFetchContext_h
-#define FrameFetchContext_h
+#ifndef SKY_ENGINE_CORE_LOADER_FRAMEFETCHCONTEXT_H_
+#define SKY_ENGINE_CORE_LOADER_FRAMEFETCHCONTEXT_H_
 
 #include "sky/engine/core/fetch/FetchContext.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
@@ -71,4 +71,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_LOADER_FRAMEFETCHCONTEXT_H_

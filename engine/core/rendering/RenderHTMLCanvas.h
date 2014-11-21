@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderHTMLCanvas_h
-#define RenderHTMLCanvas_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERHTMLCANVAS_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERHTMLCANVAS_H_
 
 #include "sky/engine/core/rendering/RenderReplaced.h"
 
@@ -53,4 +53,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderHTMLCanvas, isCanvas());
 
 } // namespace blink
 
-#endif // RenderHTMLCanvas_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERHTMLCANVAS_H_

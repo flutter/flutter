@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef RenderStyleConstants_h
-#define RenderStyleConstants_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_
 
 namespace blink {
 
@@ -467,4 +467,4 @@ enum CSSBoxType { BoxMissing = 0, MarginBox, BorderBox, PaddingBox, ContentBox }
 
 } // namespace blink
 
-#endif // RenderStyleConstants_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MockWebGraphicsContext3D_h
-#define MockWebGraphicsContext3D_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_TEST_MOCKWEBGRAPHICSCONTEXT3D_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_TEST_MOCKWEBGRAPHICSCONTEXT3D_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
@@ -294,4 +294,4 @@ protected:
 
 } // namespace blink
 
-#endif // MockWebGraphicsContext3D_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_TEST_MOCKWEBGRAPHICSCONTEXT3D_H_

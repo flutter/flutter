@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8PerIsolateData_h
-#define V8PerIsolateData_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8PERISOLATEDATA_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8PERISOLATEDATA_H_
 
 #include "gin/public/gin_embedders.h"
 #include "gin/public/isolate_holder.h"
@@ -134,4 +134,4 @@ private:
 
 } // namespace blink
 
-#endif // V8PerIsolateData_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8PERISOLATEDATA_H_

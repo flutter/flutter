@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef FontDescription_h
-#define FontDescription_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTDESCRIPTION_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTDESCRIPTION_H_
 
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/platform/fonts/FixedPitchFontType.h"
@@ -269,4 +269,4 @@ inline bool FontDescription::operator==(const FontDescription& other) const
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTDESCRIPTION_H_

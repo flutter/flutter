@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSMatrix_h
-#define CSSMatrix_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSMATRIX_H_
+#define SKY_ENGINE_CORE_CSS_CSSMATRIX_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
@@ -157,4 +157,4 @@ protected:
 
 } // namespace blink
 
-#endif // CSSMatrix_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSMATRIX_H_

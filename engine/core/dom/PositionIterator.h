@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PositionIterator_h
-#define PositionIterator_h
+#ifndef SKY_ENGINE_CORE_DOM_POSITIONITERATOR_H_
+#define SKY_ENGINE_CORE_DOM_POSITIONITERATOR_H_
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -73,4 +73,4 @@ private:
 
 } // namespace blink
 
-#endif // PositionIterator_h
+#endif  // SKY_ENGINE_CORE_DOM_POSITIONITERATOR_H_

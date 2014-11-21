@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TrailingFloatsRootInlineBox_h
-#define TrailingFloatsRootInlineBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_TRAILINGFLOATSROOTINLINEBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_TRAILINGFLOATSROOTINLINEBOX_H_
 
 #include "sky/engine/core/rendering/RootInlineBox.h"
 
@@ -44,4 +44,4 @@ private:
 
 } // namespace blink
 
-#endif // TrailingFloatsRootInlineBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_TRAILINGFLOATSROOTINLINEBOX_H_

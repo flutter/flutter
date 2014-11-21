@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UserGestureIndicator_h
-#define UserGestureIndicator_h
+#ifndef SKY_ENGINE_PLATFORM_USERGESTUREINDICATOR_H_
+#define SKY_ENGINE_PLATFORM_USERGESTUREINDICATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -86,4 +86,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_USERGESTUREINDICATOR_H_

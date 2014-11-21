@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AtomicHTMLToken_h
-#define AtomicHTMLToken_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_ATOMICHTMLTOKEN_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_ATOMICHTMLTOKEN_H_
 
 #include "gen/sky/core/HTMLElementLookupTrie.h"
 #include "sky/engine/core/dom/Attribute.h"
@@ -204,4 +204,4 @@ inline void AtomicHTMLToken::initializeAttributes(const HTMLToken::AttributeList
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_ATOMICHTMLTOKEN_H_

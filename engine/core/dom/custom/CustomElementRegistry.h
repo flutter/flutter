@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementRegistry_h
-#define CustomElementRegistry_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRY_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRY_H_
 
 #include "sky/engine/core/dom/custom/CustomElement.h"
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRY_H_

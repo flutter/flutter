@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCommon_h
-#define WebCommon_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMMON_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMMON_H_
 
 #if !defined(BLINK_IMPLEMENTATION)
 #define BLINK_IMPLEMENTATION 0
@@ -90,4 +90,4 @@ BLINK_COMMON_EXPORT void failedAssertion(const char* file, int line, const char*
 
 #define BLINK_ASSERT_NOT_REACHED() BLINK_ASSERT(0)
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMMON_H_

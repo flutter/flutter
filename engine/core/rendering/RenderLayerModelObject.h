@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef RenderLayerModelObject_h
-#define RenderLayerModelObject_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERMODELOBJECT_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERMODELOBJECT_H_
 
 #include "sky/engine/core/rendering/RenderObject.h"
 
@@ -85,4 +85,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderLayerModelObject, isLayerModelObject());
 
 } // namespace blink
 
-#endif // RenderLayerModelObject_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERMODELOBJECT_H_

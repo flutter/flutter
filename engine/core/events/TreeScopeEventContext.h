@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef TreeScopeEventContext_h
-#define TreeScopeEventContext_h
+#ifndef SKY_ENGINE_CORE_EVENTS_TREESCOPEEVENTCONTEXT_H_
+#define SKY_ENGINE_CORE_EVENTS_TREESCOPEEVENTCONTEXT_H_
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/TreeScope.h"
@@ -117,4 +117,4 @@ inline bool TreeScopeEventContext::isInclusiveAncestorOf(const TreeScopeEventCon
 
 }
 
-#endif // TreeScopeEventContext_h
+#endif  // SKY_ENGINE_CORE_EVENTS_TREESCOPEEVENTCONTEXT_H_

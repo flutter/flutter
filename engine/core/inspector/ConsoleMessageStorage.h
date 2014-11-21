@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ConsoleMessageStorage_h
-#define ConsoleMessageStorage_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_CONSOLEMESSAGESTORAGE_H_
+#define SKY_ENGINE_CORE_INSPECTOR_CONSOLEMESSAGESTORAGE_H_
 
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -49,4 +49,4 @@ private:
 
 } // namespace blink
 
-#endif // ConsoleMessageStorage_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_CONSOLEMESSAGESTORAGE_H_

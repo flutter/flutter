@@ -20,8 +20,8 @@
     Some useful definitions needed for laying out elements
 */
 
-#ifndef GapRects_h
-#define GapRects_h
+#ifndef SKY_ENGINE_CORE_RENDERING_GAPRECTS_H_
+#define SKY_ENGINE_CORE_RENDERING_GAPRECTS_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 
@@ -59,4 +59,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // GapRects_h
+#endif  // SKY_ENGINE_CORE_RENDERING_GAPRECTS_H_

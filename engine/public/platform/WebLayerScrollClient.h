@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLayerScrollClient_h
-#define WebLayerScrollClient_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERSCROLLCLIENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERSCROLLCLIENT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -39,4 +39,4 @@ protected:
 
 } // namespace blink
 
-#endif // WebLayerScrollClient_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERSCROLLCLIENT_H_

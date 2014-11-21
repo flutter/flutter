@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ActiveDOMCallback_h
-#define ActiveDOMCallback_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_ACTIVEDOMCALLBACK_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_ACTIVEDOMCALLBACK_H_
 
 #include "sky/engine/core/dom/ContextLifecycleObserver.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -56,4 +56,4 @@ public:
 
 } // namespace blink
 
-#endif // ActiveDOMCallback_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_ACTIVEDOMCALLBACK_H_

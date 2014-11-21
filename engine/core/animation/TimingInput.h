@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TimingInput_h
-#define TimingInput_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_TIMINGINPUT_H_
+#define SKY_ENGINE_CORE_ANIMATION_TIMINGINPUT_H_
 
 #include "sky/engine/core/animation/Timing.h"
 
@@ -29,4 +29,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_TIMINGINPUT_H_

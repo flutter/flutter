@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef ActiveDOMObject_h
-#define ActiveDOMObject_h
+#ifndef SKY_ENGINE_CORE_DOM_ACTIVEDOMOBJECT_H_
+#define SKY_ENGINE_CORE_DOM_ACTIVEDOMOBJECT_H_
 
 #include "sky/engine/core/dom/ContextLifecycleObserver.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // ActiveDOMObject_h
+#endif  // SKY_ENGINE_CORE_DOM_ACTIVEDOMOBJECT_H_

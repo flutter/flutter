@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CustomElementMicrotaskDispatcher_h
-#define CustomElementMicrotaskDispatcher_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKDISPATCHER_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKDISPATCHER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -49,4 +49,4 @@ private:
 
 }
 
-#endif // CustomElementMicrotaskDispatcher_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKDISPATCHER_H_

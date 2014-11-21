@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef Page_h
-#define Page_h
+#ifndef SKY_ENGINE_CORE_PAGE_PAGE_H_
+#define SKY_ENGINE_CORE_PAGE_PAGE_H_
 
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/SettingsDelegate.h"
@@ -222,4 +222,4 @@ private:
 
 } // namespace blink
 
-#endif // Page_h
+#endif  // SKY_ENGINE_CORE_PAGE_PAGE_H_

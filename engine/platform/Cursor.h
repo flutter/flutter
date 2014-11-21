@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Cursor_h
-#define Cursor_h
+#ifndef SKY_ENGINE_PLATFORM_CURSOR_H_
+#define SKY_ENGINE_PLATFORM_CURSOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -167,4 +167,4 @@ PLATFORM_EXPORT const Cursor& grabbingCursor();
 
 } // namespace blink
 
-#endif // Cursor_h
+#endif  // SKY_ENGINE_PLATFORM_CURSOR_H_

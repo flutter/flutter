@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8ScriptRunner_h
-#define V8ScriptRunner_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8SCRIPTRUNNER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8SCRIPTRUNNER_H_
 
 #include "sky/engine/bindings/core/v8/V8CacheOptions.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -67,4 +67,4 @@ public:
 
 } // namespace blink
 
-#endif // V8ScriptRunner_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8SCRIPTRUNNER_H_

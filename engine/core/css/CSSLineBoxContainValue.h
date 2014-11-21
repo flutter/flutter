@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSLineBoxContainValue_h
-#define CSSLineBoxContainValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSLINEBOXCONTAINVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSLINEBOXCONTAINVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -60,4 +60,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSLineBoxContainValue, isLineBoxContainValue());
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSLINEBOXCONTAINVALUE_H_

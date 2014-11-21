@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GradientGeneratedImage_h
-#define GradientGeneratedImage_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENTGENERATEDIMAGE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENTGENERATEDIMAGE_H_
 
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/platform/graphics/GeneratedImage.h"
@@ -64,4 +64,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENTGENERATEDIMAGE_H_

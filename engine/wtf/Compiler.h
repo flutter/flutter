@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Compiler_h
-#define WTF_Compiler_h
+#ifndef SKY_ENGINE_WTF_COMPILER_H_
+#define SKY_ENGINE_WTF_COMPILER_H_
 
 /* COMPILER() - the compiler being used to build the project */
 #define COMPILER(WTF_FEATURE) (defined WTF_COMPILER_##WTF_FEATURE  && WTF_COMPILER_##WTF_FEATURE)
@@ -146,4 +146,4 @@
 #define WTF_PRETTY_FUNCTION __FUNCTION__
 #endif
 
-#endif /* WTF_Compiler_h */
+#endif  // SKY_ENGINE_WTF_COMPILER_H_

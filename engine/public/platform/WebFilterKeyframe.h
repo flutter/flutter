@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFilterKeyframe_h
-#define WebFilterKeyframe_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERKEYFRAME_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERKEYFRAME_H_
 
 #include "sky/engine/public/platform/WebFilterOperations.h"
 #include "sky/engine/public/platform/WebPrivateOwnPtr.h"
@@ -60,4 +60,4 @@ private:
 
 } // namespace blink
 
-#endif // WebFilterKeyframe_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERKEYFRAME_H_

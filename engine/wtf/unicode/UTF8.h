@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_UTF8_h
-#define WTF_UTF8_h
+#ifndef SKY_ENGINE_WTF_UNICODE_UTF8_H_
+#define SKY_ENGINE_WTF_UNICODE_UTF8_H_
 
 #include "sky/engine/wtf/WTFExport.h"
 #include "sky/engine/wtf/unicode/Unicode.h"
@@ -83,4 +83,4 @@ namespace Unicode {
 } // namespace Unicode
 } // namespace WTF
 
-#endif // WTF_UTF8_h
+#endif  // SKY_ENGINE_WTF_UNICODE_UTF8_H_

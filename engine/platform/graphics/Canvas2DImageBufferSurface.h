@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Canvas2DImageBufferSurface_h
-#define Canvas2DImageBufferSurface_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DIMAGEBUFFERSURFACE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DIMAGEBUFFERSURFACE_H_
 
 #include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
 #include "sky/engine/platform/graphics/ImageBufferSurface.h"
@@ -70,4 +70,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DIMAGEBUFFERSURFACE_H_

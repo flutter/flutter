@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef StyleVisualData_h
-#define StyleVisualData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEVISUALDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEVISUALDATA_H_
 
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/LengthBox.h"
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleVisualData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEVISUALDATA_H_

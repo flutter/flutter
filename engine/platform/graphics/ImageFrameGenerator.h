@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageFrameGenerator_h
-#define ImageFrameGenerator_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFRAMEGENERATOR_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFRAMEGENERATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/ThreadSafeDataTransport.h"
@@ -123,4 +123,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFRAMEGENERATOR_H_

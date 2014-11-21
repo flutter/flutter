@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef Pair_h
-#define Pair_h
+#ifndef SKY_ENGINE_CORE_CSS_PAIR_H_
+#define SKY_ENGINE_CORE_CSS_PAIR_H_
 
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -87,4 +87,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_PAIR_H_

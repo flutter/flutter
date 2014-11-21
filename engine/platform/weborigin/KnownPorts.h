@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KnownPorts_h
-#define KnownPorts_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_KNOWNPORTS_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_KNOWNPORTS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -38,4 +38,4 @@ PLATFORM_EXPORT bool portAllowed(const KURL&); // Blacklist ports that should ne
 
 } // namespace blink
 
-#endif // KnownPorts_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_KNOWNPORTS_H_

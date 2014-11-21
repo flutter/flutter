@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef PaintPhase_h
-#define PaintPhase_h
+#ifndef SKY_ENGINE_CORE_RENDERING_PAINTPHASE_H_
+#define SKY_ENGINE_CORE_RENDERING_PAINTPHASE_H_
 
 namespace blink {
 
@@ -66,4 +66,4 @@ typedef unsigned PaintBehavior;
 
 } // namespace blink
 
-#endif // PaintPhase_h
+#endif  // SKY_ENGINE_CORE_RENDERING_PAINTPHASE_H_

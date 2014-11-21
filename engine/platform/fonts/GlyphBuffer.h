@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GlyphBuffer_h
-#define GlyphBuffer_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_
+#define SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_
 
 #include "sky/engine/platform/fonts/Glyph.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
@@ -113,4 +113,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_

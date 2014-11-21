@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef HexNumber_h
-#define HexNumber_h
+#ifndef SKY_ENGINE_WTF_HEXNUMBER_H_
+#define SKY_ENGINE_WTF_HEXNUMBER_H_
 
 #include "sky/engine/wtf/text/StringConcatenate.h"
 
@@ -104,4 +104,4 @@ using WTF::placeByteAsHex;
 using WTF::placeByteAsHexCompressIfPossible;
 using WTF::Lowercase;
 
-#endif // HexNumber_h
+#endif  // SKY_ENGINE_WTF_HEXNUMBER_H_

@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ContinuousPainter_h
-#define ContinuousPainter_h
+#ifndef SKY_ENGINE_WEB_PAINTING_CONTINUOUSPAINTER_H_
+#define SKY_ENGINE_WEB_PAINTING_CONTINUOUSPAINTER_H_
 
 namespace blink {
 class GraphicsLayer;
@@ -43,4 +43,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_PAINTING_CONTINUOUSPAINTER_H_

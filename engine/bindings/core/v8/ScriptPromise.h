@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptPromise_h
-#define ScriptPromise_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8ThrowException.h"
@@ -143,4 +143,4 @@ private:
 } // namespace blink
 
 
-#endif // ScriptPromise_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISE_H_

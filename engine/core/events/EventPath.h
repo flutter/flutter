@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EventPath_h
-#define EventPath_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTPATH_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTPATH_H_
 
 #include "sky/engine/core/events/NodeEventContext.h"
 #include "sky/engine/core/events/TreeScopeEventContext.h"
@@ -96,4 +96,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTPATH_H_

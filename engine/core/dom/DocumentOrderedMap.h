@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentOrderedMap_h
-#define DocumentOrderedMap_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTORDEREDMAP_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTORDEREDMAP_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif // DocumentOrderedMap_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTORDEREDMAP_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_RawPtr_h
-#define WTF_RawPtr_h
+#ifndef SKY_ENGINE_WTF_RAWPTR_H_
+#define SKY_ENGINE_WTF_RAWPTR_H_
 
 #include <stdint.h>
 #include <algorithm>
@@ -147,4 +147,4 @@ template<typename T> inline T* getPtr(const RawPtr<T>& p)
 
 using WTF::RawPtr;
 
-#endif
+#endif  // SKY_ENGINE_WTF_RAWPTR_H_

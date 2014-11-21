@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLTemplateElement_h
-#define HTMLTemplateElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLTEMPLATEELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLTEMPLATEELEMENT_H_
 
 #include "sky/engine/core/html/HTMLElement.h"
 
@@ -57,4 +57,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLTemplateElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLTEMPLATEELEMENT_H_

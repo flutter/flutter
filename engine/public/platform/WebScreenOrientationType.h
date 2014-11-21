@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebScreenOrientationType_h
-#define WebScreenOrientationType_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBSCREENORIENTATIONTYPE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBSCREENORIENTATIONTYPE_H_
 
 namespace blink {
 
@@ -17,4 +17,4 @@ enum WebScreenOrientationType {
 
 } // namespace blink
 
-#endif // WebScreenOrientationType_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBSCREENORIENTATIONTYPE_H_

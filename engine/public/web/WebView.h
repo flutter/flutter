@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebView_h
-#define WebView_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBVIEW_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBVIEW_H_
 
 #include "../platform/WebColor.h"
 #include "../platform/WebString.h"
@@ -254,4 +254,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBVIEW_H_

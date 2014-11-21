@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementWrapper_h
-#define CustomElementWrapper_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTWRAPPER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTWRAPPER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -51,4 +51,4 @@ private:
 
 } // namespace blink
 
-#endif // CustomElementWrapper_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTWRAPPER_H_

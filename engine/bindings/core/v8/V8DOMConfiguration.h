@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8DOMConfiguration_h
-#define V8DOMConfiguration_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8DOMCONFIGURATION_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8DOMCONFIGURATION_H_
 
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
@@ -196,4 +196,4 @@ private:
 
 } // namespace blink
 
-#endif // V8DOMConfiguration_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8DOMCONFIGURATION_H_

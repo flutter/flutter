@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SkiaForCoreTesting_h
-#define SkiaForCoreTesting_h
+#ifndef SKY_ENGINE_PLATFORM_TESTING_SKIAFORCORETESTING_H_
+#define SKY_ENGINE_PLATFORM_TESTING_SKIAFORCORETESTING_H_
 
 // For tests under engine/core/ directory needing access Skia API.
 
 #include "third_party/skia/include/core/SkCanvas.h"
 
-#endif // SkiaForCoreTesting_h
+#endif  // SKY_ENGINE_PLATFORM_TESTING_SKIAFORCORETESTING_H_

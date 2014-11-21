@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatConversion_h
-#define FloatConversion_h
+#ifndef SKY_ENGINE_PLATFORM_FLOATCONVERSION_H_
+#define SKY_ENGINE_PLATFORM_FLOATCONVERSION_H_
 
 namespace blink {
 
@@ -42,4 +42,4 @@ inline float narrowPrecisionToFloat(double number)
 
 } // namespace blink
 
-#endif // FloatConversion_h
+#endif  // SKY_ENGINE_PLATFORM_FLOATCONVERSION_H_

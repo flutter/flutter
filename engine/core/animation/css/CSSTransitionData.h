@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CSSTransitionData_h
-#define CSSTransitionData_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_CSS_CSSTRANSITIONDATA_H_
+#define SKY_ENGINE_CORE_ANIMATION_CSS_CSSTRANSITIONDATA_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/animation/css/CSSTimingData.h"
@@ -78,4 +78,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSTransitionData_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_CSS_CSSTRANSITIONDATA_H_

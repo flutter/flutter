@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EditCommand_h
-#define EditCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_EDITCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_EDITCOMMAND_H_
 
 #include "sky/engine/core/editing/EditAction.h"
 #include "sky/engine/core/editing/VisibleSelection.h"
@@ -92,4 +92,4 @@ DEFINE_TYPE_CASTS(SimpleEditCommand, EditCommand, command, command->isSimpleEdit
 
 } // namespace blink
 
-#endif // EditCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_EDITCOMMAND_H_

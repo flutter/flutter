@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef NinePieceImage_h
-#define NinePieceImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_NINEPIECEIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_NINEPIECEIMAGE_H_
 
 #include "sky/engine/core/rendering/style/BorderImageLengthBox.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
@@ -130,4 +130,4 @@ private:
 
 } // namespace blink
 
-#endif // NinePieceImage_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_NINEPIECEIMAGE_H_

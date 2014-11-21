@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoader_h
-#define ResourceLoader_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCELOADER_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCELOADER_H_
 
 #include "sky/engine/core/fetch/ResourceLoaderOptions.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
@@ -132,4 +132,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCELOADER_H_

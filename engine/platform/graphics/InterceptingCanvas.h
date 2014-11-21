@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InterceptingCanvas_h
-#define InterceptingCanvas_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_INTERCEPTINGCANVAS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_INTERCEPTINGCANVAS_H_
 
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -83,4 +83,4 @@ protected:
 
 } // namespace blink
 
-#endif // InterceptingCanvas_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_INTERCEPTINGCANVAS_H_

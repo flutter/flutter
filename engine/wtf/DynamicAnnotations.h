@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_DynamicAnnotations_h
-#define WTF_DynamicAnnotations_h
+#ifndef SKY_ENGINE_WTF_DYNAMICANNOTATIONS_H_
+#define SKY_ENGINE_WTF_DYNAMICANNOTATIONS_H_
 
 /* This file defines dynamic annotations for use with dynamic analysis
  * tool such as ThreadSanitizer, Valgrind, etc.
@@ -95,4 +95,4 @@ WTF_EXPORT void WTFAnnotateHappensAfter(const char* file, int line, const volati
 #define WTF_ANNOTATE_HAPPENS_AFTER(address)
 #endif // USE(DYNAMIC_ANNOTATIONS)
 
-#endif // WTF_DynamicAnnotations_h
+#endif  // SKY_ENGINE_WTF_DYNAMICANNOTATIONS_H_

@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef TrailingObjects_h
-#define TrailingObjects_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_TRAILINGOBJECTS_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_TRAILINGOBJECTS_H_
 
 #include "sky/engine/wtf/Vector.h"
 
@@ -91,4 +91,4 @@ private:
 
 }
 
-#endif // TrailingObjects_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_TRAILINGOBJECTS_H_

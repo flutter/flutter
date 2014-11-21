@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ElementAnimation_h
-#define ElementAnimation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ELEMENTANIMATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_ELEMENTANIMATION_H_
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/animation/ActiveAnimations.h"
@@ -116,4 +116,4 @@ private:
 
 } // namespace blink
 
-#endif // ElementAnimation_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ELEMENTANIMATION_H_

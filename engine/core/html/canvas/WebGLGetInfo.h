@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLGetInfo_h
-#define WebGLGetInfo_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLGETINFO_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLGETINFO_H_
 
 #include "sky/engine/core/html/canvas/WebGLBuffer.h"
 #include "sky/engine/core/html/canvas/WebGLFramebuffer.h"
@@ -138,4 +138,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLGetInfo_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLGETINFO_H_

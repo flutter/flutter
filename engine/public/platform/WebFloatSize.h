@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFloatSize_h
-#define WebFloatSize_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATSIZE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATSIZE_H_
 
 #include <algorithm>
 #include "sky/engine/public/platform/WebCommon.h"
@@ -131,4 +131,4 @@ inline bool operator!=(const WebFloatSize& a, const WebFloatSize& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATSIZE_H_

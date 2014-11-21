@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RenderedPosition_h
-#define RenderedPosition_h
+#ifndef SKY_ENGINE_CORE_EDITING_RENDEREDPOSITION_H_
+#define SKY_ENGINE_CORE_EDITING_RENDEREDPOSITION_H_
 
 #include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/rendering/InlineBox.h"
@@ -113,4 +113,4 @@ bool renderObjectContainsPosition(RenderObject*, const Position&);
 
 };
 
-#endif // RenderedPosition_h
+#endif  // SKY_ENGINE_CORE_EDITING_RENDEREDPOSITION_H_

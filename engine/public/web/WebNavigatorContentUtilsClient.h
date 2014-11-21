@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebNavigatorContentUtilsClient_h
-#define WebNavigatorContentUtilsClient_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATORCONTENTUTILSCLIENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATORCONTENTUTILSCLIENT_H_
 
 namespace blink {
 
@@ -43,4 +43,4 @@ enum WebCustomHandlersState {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATORCONTENTUTILSCLIENT_H_

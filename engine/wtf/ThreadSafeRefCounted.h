@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ThreadSafeRefCounted_h
-#define ThreadSafeRefCounted_h
+#ifndef SKY_ENGINE_WTF_THREADSAFEREFCOUNTED_H_
+#define SKY_ENGINE_WTF_THREADSAFEREFCOUNTED_H_
 
 #include "sky/engine/wtf/Atomics.h"
 #include "sky/engine/wtf/DynamicAnnotations.h"
@@ -96,4 +96,4 @@ protected:
 
 using WTF::ThreadSafeRefCounted;
 
-#endif // ThreadSafeRefCounted_h
+#endif  // SKY_ENGINE_WTF_THREADSAFEREFCOUNTED_H_

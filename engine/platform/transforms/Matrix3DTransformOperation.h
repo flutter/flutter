@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Matrix3DTransformOperation_h
-#define Matrix3DTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIX3DTRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIX3DTRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif // Matrix3DTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIX3DTRANSFORMOPERATION_H_

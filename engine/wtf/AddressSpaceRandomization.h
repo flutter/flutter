@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WTF_AddressSpaceRandomization_h
-#define WTF_AddressSpaceRandomization_h
+#ifndef SKY_ENGINE_WTF_ADDRESSSPACERANDOMIZATION_H_
+#define SKY_ENGINE_WTF_ADDRESSSPACERANDOMIZATION_H_
 
 #include "sky/engine/wtf/WTFExport.h"
 
@@ -16,4 +16,4 @@ WTF_EXPORT void* getRandomPageBase();
 
 }
 
-#endif
+#endif  // SKY_ENGINE_WTF_ADDRESSSPACERANDOMIZATION_H_

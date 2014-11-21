@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PageDebuggerAgent_h
-#define PageDebuggerAgent_h
+#ifndef SKY_ENGINE_V8_INSPECTOR_PAGEDEBUGGERAGENT_H_
+#define SKY_ENGINE_V8_INSPECTOR_PAGEDEBUGGERAGENT_H_
 
 #include "sky/engine/core/inspector/InspectorDebuggerAgent.h"
 #include "sky/engine/v8_inspector/PageScriptDebugServer.h"
@@ -75,4 +75,4 @@ private:
 } // namespace blink
 
 
-#endif // !defined(PageDebuggerAgent_h)
+#endif  // SKY_ENGINE_V8_INSPECTOR_PAGEDEBUGGERAGENT_H_

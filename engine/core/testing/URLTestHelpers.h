@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef URLTestHelpers_h
-#define URLTestHelpers_h
+#ifndef SKY_ENGINE_CORE_TESTING_URLTESTHELPERS_H_
+#define SKY_ENGINE_CORE_TESTING_URLTESTHELPERS_H_
 
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/public/platform/WebString.h"
@@ -58,4 +58,4 @@ void registerMockedURLLoad(const WebURL& fullURL, const WebString& fileName, con
 } // namespace URLTestHelpers
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_TESTING_URLTESTHELPERS_H_

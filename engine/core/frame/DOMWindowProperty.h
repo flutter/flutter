@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWindowProperty_h
-#define DOMWindowProperty_h
+#ifndef SKY_ENGINE_CORE_FRAME_DOMWINDOWPROPERTY_H_
+#define SKY_ENGINE_CORE_FRAME_DOMWINDOWPROPERTY_H_
 
 namespace blink {
 
@@ -49,4 +49,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FRAME_DOMWINDOWPROPERTY_H_

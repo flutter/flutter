@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLLoadTiming_h
-#define WebURLLoadTiming_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADTIMING_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADTIMING_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebPrivatePtr.h"
@@ -105,4 +105,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBURLLOADTIMING_H_

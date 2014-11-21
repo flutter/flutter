@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef StyleElement_h
-#define StyleElement_h
+#ifndef SKY_ENGINE_CORE_DOM_STYLEELEMENT_H_
+#define SKY_ENGINE_CORE_DOM_STYLEELEMENT_H_
 
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/wtf/text/TextPosition.h"
@@ -64,4 +64,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_STYLEELEMENT_H_

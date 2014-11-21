@@ -27,8 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontRenderStyle_h
-#define FontRenderStyle_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTRENDERSTYLE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTRENDERSTYLE_H_
 
 namespace blink {
 
@@ -74,4 +74,4 @@ struct FontRenderStyle {
 
 } // namespace blink
 
-#endif // FontRenderStyle_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTRENDERSTYLE_H_

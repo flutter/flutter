@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef CursorData_h
-#define CursorData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_CURSORDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_CURSORDATA_H_
 
 #include "sky/engine/core/rendering/style/StyleImage.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif // CursorData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_CURSORDATA_H_

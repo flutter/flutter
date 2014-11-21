@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef RenderSelectionInfo_h
-#define RenderSelectionInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERSELECTIONINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERSELECTIONINFO_H_
 
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -117,4 +117,4 @@ private:
 } // namespace blink
 
 
-#endif // RenderSelectionInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERSELECTIONINFO_H_

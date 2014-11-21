@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef StyleEngine_h
-#define StyleEngine_h
+#ifndef SKY_ENGINE_CORE_DOM_STYLEENGINE_H_
+#define SKY_ENGINE_CORE_DOM_STYLEENGINE_H_
 
 #include "sky/engine/core/css/CSSFontSelectorClient.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
@@ -206,4 +206,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_STYLEENGINE_H_

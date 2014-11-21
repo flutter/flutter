@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef EventTarget_h
-#define EventTarget_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTTARGET_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTTARGET_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/events/EventListenerMap.h"
@@ -203,4 +203,4 @@ private: \
 // Both of these macros are meant to be placed just before the "public:" section of the class declaration.
 #define REFCOUNTED_EVENT_TARGET(className) DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(RefCounted<className>)
 
-#endif // EventTarget_h
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTTARGET_H_

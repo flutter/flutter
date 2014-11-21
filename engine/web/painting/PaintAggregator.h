@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PaintAggregator_h
-#define PaintAggregator_h
+#ifndef SKY_ENGINE_WEB_PAINTING_PAINTAGGREGATOR_H_
+#define SKY_ENGINE_WEB_PAINTING_PAINTAGGREGATOR_H_
 
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -89,4 +89,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_PAINTING_PAINTAGGREGATOR_H_

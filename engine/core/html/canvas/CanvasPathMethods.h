@@ -26,8 +26,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CanvasPathMethods_h
-#define CanvasPathMethods_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATHMETHODS_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATHMETHODS_H_
 
 #include "sky/engine/platform/graphics/Path.h"
 
@@ -59,4 +59,4 @@ protected:
 };
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATHMETHODS_H_

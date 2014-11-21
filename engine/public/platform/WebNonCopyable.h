@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebNonCopyable_h
-#define WebNonCopyable_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBNONCOPYABLE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBNONCOPYABLE_H_
 
 namespace blink {
 
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBNONCOPYABLE_H_

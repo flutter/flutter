@@ -29,8 +29,8 @@
  */
 
 
-#ifndef PlatformExport_h
-#define PlatformExport_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMEXPORT_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMEXPORT_H_
 
 #if !defined(BLINK_PLATFORM_IMPLEMENTATION)
 #define BLINK_PLATFORM_IMPLEMENTATION 0
@@ -42,4 +42,4 @@
 #define PLATFORM_EXPORT
 #endif
 
-#endif // PlatformExport_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMEXPORT_H_

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_HashMap_h
-#define WTF_HashMap_h
+#ifndef SKY_ENGINE_WTF_HASHMAP_H_
+#define SKY_ENGINE_WTF_HASHMAP_H_
 
 #include "sky/engine/wtf/DefaultAllocator.h"
 #include "sky/engine/wtf/HashTable.h"
@@ -495,4 +495,4 @@ namespace WTF {
 
 using WTF::HashMap;
 
-#endif /* WTF_HashMap_h */
+#endif  // SKY_ENGINE_WTF_HASHMAP_H_

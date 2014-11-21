@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8Initializer_h
-#define V8Initializer_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8INITIALIZER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8INITIALIZER_H_
 
 #include "v8/include/v8.h"
 
@@ -37,4 +37,4 @@ public:
 
 } // namespace blink
 
-#endif // V8Initializer_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8INITIALIZER_H_

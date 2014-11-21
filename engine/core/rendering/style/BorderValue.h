@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef BorderValue_h
-#define BorderValue_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_BORDERVALUE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_BORDERVALUE_H_
 
 #include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -104,4 +104,4 @@ protected:
 
 } // namespace blink
 
-#endif // BorderValue_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_BORDERVALUE_H_

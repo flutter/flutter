@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef MouseEvent_h
-#define MouseEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_MOUSEEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_MOUSEEVENT_H_
 
 #include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/events/MouseRelatedEvent.h"
@@ -137,4 +137,4 @@ DEFINE_EVENT_TYPE_CASTS(MouseEvent);
 
 } // namespace blink
 
-#endif // MouseEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_MOUSEEVENT_H_

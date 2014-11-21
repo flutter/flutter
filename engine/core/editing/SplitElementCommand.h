@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SplitElementCommand_h
-#define SplitElementCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_SPLITELEMENTCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_SPLITELEMENTCOMMAND_H_
 
 #include "sky/engine/core/editing/EditCommand.h"
 
@@ -52,4 +52,4 @@ private:
 
 } // namespace blink
 
-#endif // SplitElementCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_SPLITELEMENTCOMMAND_H_

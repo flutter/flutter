@@ -23,8 +23,8 @@
  * DAMAGE.
  */
 
-#ifndef DateTimeFormat_h
-#define DateTimeFormat_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_DATETIMEFORMAT_H_
+#define SKY_ENGINE_PLATFORM_TEXT_DATETIMEFORMAT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -108,4 +108,4 @@ public:
 
 } // namespace blink
 
-#endif // DateTimeFormat_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_DATETIMEFORMAT_H_

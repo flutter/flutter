@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef LineBreaker_h
-#define LineBreaker_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINEBREAKER_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_LINEBREAKER_H_
 
 #include "sky/engine/core/rendering/InlineIterator.h"
 #include "sky/engine/core/rendering/line/LineInfo.h"
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif // LineBreaker_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINEBREAKER_H_

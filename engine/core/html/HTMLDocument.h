@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef HTMLDocument_h
-#define HTMLDocument_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLDOCUMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLDOCUMENT_H_
 
 #include "sky/engine/core/dom/Document.h"
 
@@ -45,4 +45,4 @@ DEFINE_DOCUMENT_TYPE_CASTS(HTMLDocument);
 
 } // namespace blink
 
-#endif // HTMLDocument_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLDOCUMENT_H_

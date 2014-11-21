@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Platform_h
-#define Platform_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebData.h"
@@ -372,4 +372,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebScriptBindings_h
-#define WebScriptBindings_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTBINDINGS_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTBINDINGS_H_
 
 #include "../platform/WebCommon.h"
 
@@ -56,4 +56,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSCRIPTBINDINGS_H_

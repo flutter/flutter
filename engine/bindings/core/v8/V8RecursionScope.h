@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8RecursionScope_h
-#define V8RecursionScope_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8RECURSIONSCOPE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8RECURSIONSCOPE_H_
 
 #include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
@@ -121,4 +121,4 @@ private:
 
 } // namespace blink
 
-#endif // V8RecursionScope_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8RECURSIONSCOPE_H_

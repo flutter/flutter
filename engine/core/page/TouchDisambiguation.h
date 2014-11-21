@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TouchDisambiguation_h
-#define TouchDisambiguation_h
+#ifndef SKY_ENGINE_CORE_PAGE_TOUCHDISAMBIGUATION_H_
+#define SKY_ENGINE_CORE_PAGE_TOUCHDISAMBIGUATION_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Vector.h"
@@ -44,4 +44,4 @@ void findGoodTouchTargets(const IntRect& touchBox, LocalFrame* mainFrame, Vector
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_PAGE_TOUCHDISAMBIGUATION_H_

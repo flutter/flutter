@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_HashTraits_h
-#define WTF_HashTraits_h
+#ifndef SKY_ENGINE_WTF_HASHTRAITS_H_
+#define SKY_ENGINE_WTF_HASHTRAITS_H_
 
 #include <string.h> // For memset.
 #include <limits>
@@ -320,4 +320,4 @@ using WTF::PairHashTraits;
 using WTF::NullableHashTraits;
 using WTF::SimpleClassHashTraits;
 
-#endif // WTF_HashTraits_h
+#endif  // SKY_ENGINE_WTF_HASHTRAITS_H_

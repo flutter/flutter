@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef BisonCSSParser_h
-#define BisonCSSParser_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_BISONCSSPARSER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_BISONCSSPARSER_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
@@ -289,4 +289,4 @@ bool isValidNthToken(const CSSParserString&);
 
 } // namespace blink
 
-#endif // BisonCSSParser_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_BISONCSSPARSER_H_

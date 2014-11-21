@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Language_h
-#define Language_h
+#ifndef SKY_ENGINE_PLATFORM_LANGUAGE_H_
+#define SKY_ENGINE_PLATFORM_LANGUAGE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -40,4 +40,4 @@ PLATFORM_EXPORT size_t indexOfBestMatchingLanguageInList(const AtomicString& lan
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_LANGUAGE_H_

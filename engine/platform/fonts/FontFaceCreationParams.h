@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontFaceCreationParams_h
-#define FontFaceCreationParams_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTFACECREATIONPARAMS_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTFACECREATIONPARAMS_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/StringHasher.h"
@@ -117,4 +117,4 @@ public:
 
 } // namespace blink
 
-#endif // FontFaceCreationParams_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTFACECREATIONPARAMS_H_

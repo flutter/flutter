@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleSheetCandidate_h
-#define StyleSheetCandidate_h
+#ifndef SKY_ENGINE_CORE_DOM_STYLESHEETCANDIDATE_H_
+#define SKY_ENGINE_CORE_DOM_STYLESHEETCANDIDATE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -64,5 +64,5 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_STYLESHEETCANDIDATE_H_
 

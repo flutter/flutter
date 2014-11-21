@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Animation_h
-#define Animation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATION_H_
 
 #include "sky/engine/core/animation/AnimationEffect.h"
 #include "sky/engine/core/animation/AnimationNode.h"
@@ -107,4 +107,4 @@ DEFINE_TYPE_CASTS(Animation, AnimationNode, animationNode, animationNode->isAnim
 
 } // namespace blink
 
-#endif // Animation_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATION_H_

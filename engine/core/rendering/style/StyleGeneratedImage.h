@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef StyleGeneratedImage_h
-#define StyleGeneratedImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEGENERATEDIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEGENERATEDIMAGE_H_
 
 #include "sky/engine/core/rendering/style/StyleImage.h"
 
@@ -63,4 +63,4 @@ private:
 };
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEGENERATEDIMAGE_H_

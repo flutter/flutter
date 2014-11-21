@@ -24,8 +24,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef NullPtr_h
-#define NullPtr_h
+#ifndef SKY_ENGINE_WTF_NULLPTR_H_
+#define SKY_ENGINE_WTF_NULLPTR_H_
 
 // libstdc++ supports nullptr_t starting with gcc 4.6. STLport doesn't define it.
 #if (defined(__GLIBCXX__) && __GLIBCXX__ < 20110325) || defined(_STLPORT_VERSION)
@@ -41,4 +41,4 @@ typedef decltype(nullptr) nullptr_t;
     private: \
         ClassName& operator=(int) = delete
 
-#endif
+#endif  // SKY_ENGINE_WTF_NULLPTR_H_

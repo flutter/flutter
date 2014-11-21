@@ -42,8 +42,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef RenderLayerRepainter_h
-#define RenderLayerRepainter_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERREPAINTER_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERREPAINTER_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -80,4 +80,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerRepainter_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERREPAINTER_H_

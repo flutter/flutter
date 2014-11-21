@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Atomics_h
-#define Atomics_h
+#ifndef SKY_ENGINE_WTF_ATOMICS_H_
+#define SKY_ENGINE_WTF_ATOMICS_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/CPU.h"
@@ -147,4 +147,4 @@ using WTF::atomicSetOneToZero;
 using WTF::acquireLoad;
 using WTF::releaseStore;
 
-#endif // Atomics_h
+#endif  // SKY_ENGINE_WTF_ATOMICS_H_

@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef FloatPoint3D_h
-#define FloatPoint3D_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT3D_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT3D_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 
@@ -184,4 +184,4 @@ inline float FloatPoint3D::distanceTo(const FloatPoint3D& a) const
 
 } // namespace blink
 
-#endif // FloatPoint3D_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT3D_H_

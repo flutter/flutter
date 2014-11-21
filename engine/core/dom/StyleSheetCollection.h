@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef StyleSheetCollection_h
-#define StyleSheetCollection_h
+#ifndef SKY_ENGINE_CORE_DOM_STYLESHEETCOLLECTION_H_
+#define SKY_ENGINE_CORE_DOM_STYLESHEETCOLLECTION_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -66,5 +66,5 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_STYLESHEETCOLLECTION_H_
 

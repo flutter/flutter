@@ -19,8 +19,8 @@
  *
 */
 
-#ifndef HitTestResult_h
-#define HitTestResult_h
+#ifndef SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_
+#define SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_
 
 #include "sky/engine/core/rendering/HitTestLocation.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
@@ -154,4 +154,4 @@ private:
 
 } // namespace blink
 
-#endif // HitTestResult_h
+#endif  // SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_

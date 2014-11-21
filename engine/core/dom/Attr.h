@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Attr_h
-#define Attr_h
+#ifndef SKY_ENGINE_CORE_DOM_ATTR_H_
+#define SKY_ENGINE_CORE_DOM_ATTR_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/QualifiedName.h"
@@ -50,4 +50,4 @@ private:
 
 } // namespace blink
 
-#endif // Attr_h
+#endif  // SKY_ENGINE_CORE_DOM_ATTR_H_

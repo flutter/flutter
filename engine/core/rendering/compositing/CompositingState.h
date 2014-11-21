@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CompositingState_h
-#define CompositingState_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGSTATE_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGSTATE_H_
 
 namespace blink {
 
@@ -26,4 +26,4 @@ enum CompositingState {
 
 } // namespace blink
 
-#endif // CompositingState_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGSTATE_H_

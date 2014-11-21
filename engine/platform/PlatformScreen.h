@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlatformScreen_h
-#define PlatformScreen_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMSCREEN_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMSCREEN_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/public/platform/WebScreenOrientationType.h"
@@ -51,4 +51,4 @@ PLATFORM_EXPORT WebScreenOrientationType screenOrientationType(Widget*);
 
 } // namespace blink
 
-#endif // PlatformScreen_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMSCREEN_H_

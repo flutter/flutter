@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElement_h
-#define CustomElement_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENT_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENT_H_
 
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -78,4 +78,4 @@ private:
 
 }
 
-#endif // CustomElement_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENT_H_

@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTransformOperations_h
-#define WebTransformOperations_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMOPERATIONS_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMOPERATIONS_H_
 
 class SkMatrix44;
 
@@ -53,5 +53,5 @@ public:
 
 } // namespace blink
 
-#endif // WebTransformOperations_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBTRANSFORMOPERATIONS_H_
 

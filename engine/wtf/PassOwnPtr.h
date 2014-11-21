@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_PassOwnPtr_h
-#define WTF_PassOwnPtr_h
+#ifndef SKY_ENGINE_WTF_PASSOWNPTR_H_
+#define SKY_ENGINE_WTF_PASSOWNPTR_H_
 
 #include "sky/engine/wtf/NullPtr.h"
 #include "sky/engine/wtf/OwnPtrCommon.h"
@@ -147,4 +147,4 @@ using WTF::adoptPtr;
 using WTF::adoptArrayPtr;
 using WTF::static_pointer_cast;
 
-#endif // WTF_PassOwnPtr_h
+#endif  // SKY_ENGINE_WTF_PASSOWNPTR_H_

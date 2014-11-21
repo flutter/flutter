@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MarkupAccumulator_h
-#define MarkupAccumulator_h
+#ifndef SKY_ENGINE_CORE_EDITING_MARKUPACCUMULATOR_H_
+#define SKY_ENGINE_CORE_EDITING_MARKUPACCUMULATOR_H_
 
 #include "sky/engine/core/editing/markup.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -103,4 +103,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_MARKUPACCUMULATOR_H_

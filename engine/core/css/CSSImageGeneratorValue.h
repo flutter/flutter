@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSImageGeneratorValue_h
-#define CSSImageGeneratorValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSIMAGEGENERATORVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSIMAGEGENERATORVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/platform/geometry/IntSizeHash.h"
@@ -83,4 +83,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSImageGeneratorValue, isImageGeneratorValue());
 
 } // namespace blink
 
-#endif // CSSImageGeneratorValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSIMAGEGENERATORVALUE_H_

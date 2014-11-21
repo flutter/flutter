@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AsyncCallStackTracker_h
-#define AsyncCallStackTracker_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_ASYNCCALLSTACKTRACKER_H_
+#define SKY_ENGINE_CORE_INSPECTOR_ASYNCCALLSTACKTRACKER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/core/dom/ContextLifecycleObserver.h"
@@ -158,4 +158,4 @@ private:
 
 } // namespace blink
 
-#endif // !defined(AsyncCallStackTracker_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_ASYNCCALLSTACKTRACKER_H_

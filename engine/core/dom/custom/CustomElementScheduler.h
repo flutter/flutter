@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementScheduler_h
-#define CustomElementScheduler_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTSCHEDULER_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTSCHEDULER_H_
 
 #include "sky/engine/core/dom/custom/CustomElementCallbackQueue.h"
 #include "sky/engine/core/dom/custom/CustomElementLifecycleCallbacks.h"
@@ -84,4 +84,4 @@ private:
 
 }
 
-#endif // CustomElementScheduler_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTSCHEDULER_H_

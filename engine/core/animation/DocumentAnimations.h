@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentAnimations_h
-#define DocumentAnimations_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATIONS_H_
+#define SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATIONS_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 
@@ -53,4 +53,4 @@ private:
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_DOCUMENTANIMATIONS_H_

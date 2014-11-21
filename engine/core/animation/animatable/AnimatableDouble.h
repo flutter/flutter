@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableDouble_h
-#define AnimatableDouble_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEDOUBLE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEDOUBLE_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
@@ -73,4 +73,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableDouble, isDouble());
 
 } // namespace blink
 
-#endif // AnimatableDouble_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEDOUBLE_H_

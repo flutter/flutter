@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_PartitionAlloc_h
-#define WTF_PartitionAlloc_h
+#ifndef SKY_ENGINE_WTF_PARTITIONALLOC_H_
+#define SKY_ENGINE_WTF_PARTITIONALLOC_H_
 
 // DESCRIPTION
 // partitionAlloc() / partitionAllocGeneric() and partitionFree() /
@@ -669,4 +669,4 @@ using WTF::partitionAllocActualSize;
 using WTF::partitionAllocSupportsGetSize;
 using WTF::partitionAllocGetSize;
 
-#endif // WTF_PartitionAlloc_h
+#endif  // SKY_ENGINE_WTF_PARTITIONALLOC_H_

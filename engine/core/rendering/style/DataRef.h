@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef DataRef_h
-#define DataRef_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_DATAREF_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_DATAREF_H_
 
 #include "sky/engine/wtf/RefPtr.h"
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace blink
 
-#endif // DataRef_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_DATAREF_H_

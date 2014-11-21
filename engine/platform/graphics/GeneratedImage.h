@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GeneratedImage_h
-#define GeneratedImage_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GENERATEDIMAGE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GENERATEDIMAGE_H_
 
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/platform/graphics/Image.h"
@@ -60,4 +60,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GENERATEDIMAGE_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CompositingReasons_h
-#define CompositingReasons_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_COMPOSITINGREASONS_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_COMPOSITINGREASONS_H_
 
 #include <stdint.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -164,4 +164,4 @@ PLATFORM_EXPORT extern size_t kNumberOfCompositingReasons;
 
 } // namespace blink
 
-#endif // CompositingReasons_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_COMPOSITINGREASONS_H_

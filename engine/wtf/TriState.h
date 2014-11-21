@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TriState_h
-#define TriState_h
+#ifndef SKY_ENGINE_WTF_TRISTATE_H_
+#define SKY_ENGINE_WTF_TRISTATE_H_
 
 namespace WTF {
 
@@ -41,4 +41,4 @@ using WTF::FalseTriState;
 using WTF::TrueTriState;
 using WTF::MixedTriState;
 
-#endif // TriState_h
+#endif  // SKY_ENGINE_WTF_TRISTATE_H_

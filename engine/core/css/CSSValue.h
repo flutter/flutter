@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSValue_h
-#define CSSValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSVALUE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
@@ -238,4 +238,4 @@ inline bool compareCSSValuePtr(const RawPtr<CSSValueType>& first, const RawPtr<C
 
 } // namespace blink
 
-#endif // CSSValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSVALUE_H_

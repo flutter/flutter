@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementAsyncImportMicrotaskQueue_h
-#define CustomElementAsyncImportMicrotaskQueue_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTASYNCIMPORTMICROTASKQUEUE_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTASYNCIMPORTMICROTASKQUEUE_H_
 
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskQueueBase.h"
 
@@ -49,4 +49,4 @@ private:
 };
 
 }
-#endif // CustomElementAsyncImportMicrotaskQueue_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTASYNCIMPORTMICROTASKQUEUE_H_

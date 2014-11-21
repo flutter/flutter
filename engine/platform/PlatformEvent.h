@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlatformEvent_h
-#define PlatformEvent_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMEVENT_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMEVENT_H_
 
 namespace blink {
 
@@ -141,4 +141,4 @@ protected:
 
 } // namespace blink
 
-#endif // PlatformEvent_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMEVENT_H_

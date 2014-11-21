@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef DefaultStyleInterpolation_h
-#define DefaultStyleInterpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_DEFAULTSTYLEINTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_DEFAULTSTYLEINTERPOLATION_H_
 
 #include "sky/engine/core/animation/StyleInterpolation.h"
 #include "sky/engine/core/css/resolver/StyleBuilder.h"
@@ -36,4 +36,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_DEFAULTSTYLEINTERPOLATION_H_

@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ConsoleAPITypes_h
-#define ConsoleAPITypes_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_CONSOLEAPITYPES_H_
+#define SKY_ENGINE_CORE_INSPECTOR_CONSOLEAPITYPES_H_
 
 namespace blink {
 
@@ -44,4 +44,4 @@ enum MessageType {
 
 } // namespace blink
 
-#endif // ConsoleAPITypes_h
+#endif  // SKY_ENGINE_CORE_INSPECTOR_CONSOLEAPITYPES_H_

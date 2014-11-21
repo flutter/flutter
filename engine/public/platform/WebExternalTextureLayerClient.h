@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebExternalTextureLayerClient_h
-#define WebExternalTextureLayerClient_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYERCLIENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYERCLIENT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebSize.h"
@@ -53,4 +53,4 @@ protected:
 
 } // namespace blink
 
-#endif // WebExternalTextureLayerClient_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYERCLIENT_H_

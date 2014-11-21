@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGraphicsLayerDebugInfo_h
-#define WebGraphicsLayerDebugInfo_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSLAYERDEBUGINFO_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSLAYERDEBUGINFO_H_
 
 #include "sky/engine/public/platform/WebString.h"
 
@@ -43,5 +43,5 @@ public:
 
 } // namespace blink
 
-#endif // WebGraphicsLayerDebugInfo_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSLAYERDEBUGINFO_H_
 

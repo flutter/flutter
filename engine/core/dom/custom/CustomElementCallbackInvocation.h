@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementCallbackInvocation_h
-#define CustomElementCallbackInvocation_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKINVOCATION_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKINVOCATION_H_
 
 #include "sky/engine/core/dom/custom/CustomElementLifecycleCallbacks.h"
 #include "sky/engine/core/dom/custom/CustomElementProcessingStep.h"
@@ -60,4 +60,4 @@ private:
 
 }
 
-#endif // CustomElementCallbackInvocation_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKINVOCATION_H_

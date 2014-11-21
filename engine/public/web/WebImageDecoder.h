@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebImageDecoder_h
-#define WebImageDecoder_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBIMAGEDECODER_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBIMAGEDECODER_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebImage.h"
@@ -86,4 +86,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBIMAGEDECODER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PromiseTracker_h
-#define PromiseTracker_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_PROMISETRACKER_H_
+#define SKY_ENGINE_CORE_INSPECTOR_PROMISETRACKER_H_
 
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -41,4 +41,4 @@ private:
 
 } // namespace blink
 
-#endif // !defined(PromiseTracker_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_PROMISETRACKER_H_

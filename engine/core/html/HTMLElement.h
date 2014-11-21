@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef HTMLElement_h
-#define HTMLElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLELEMENT_H_
 
 #include "sky/engine/core/dom/Element.h"
 
@@ -103,4 +103,4 @@ private:
 
 #include "gen/sky/core/HTMLElementTypeHelpers.h"
 
-#endif // HTMLElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLELEMENT_H_

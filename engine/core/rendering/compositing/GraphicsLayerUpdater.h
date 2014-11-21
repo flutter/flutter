@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayerUpdater_h
-#define GraphicsLayerUpdater_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERUPDATER_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERUPDATER_H_
 
 #include "sky/engine/platform/graphics/GraphicsLayer.h"
 
@@ -62,4 +62,4 @@ private:
 
 } // namespace blink
 
-#endif // GraphicsLayerUpdater_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERUPDATER_H_

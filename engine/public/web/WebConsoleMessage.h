@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebConsoleMessage_h
-#define WebConsoleMessage_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBCONSOLEMESSAGE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBCONSOLEMESSAGE_H_
 
 #include "../platform/WebString.h"
 
@@ -57,4 +57,4 @@ struct WebConsoleMessage {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBCONSOLEMESSAGE_H_

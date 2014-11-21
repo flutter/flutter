@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef CounterDirectives_h
-#define CounterDirectives_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_COUNTERDIRECTIVES_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_COUNTERDIRECTIVES_H_
 
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -108,4 +108,4 @@ PassOwnPtr<CounterDirectiveMap> clone(const CounterDirectiveMap&);
 
 } // namespace blink
 
-#endif // CounterDirectives_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_COUNTERDIRECTIVES_H_

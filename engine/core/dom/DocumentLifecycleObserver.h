@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentLifecycleObserver_h
-#define DocumentLifecycleObserver_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLEOBSERVER_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLEOBSERVER_H_
 
 #include "sky/engine/platform/LifecycleContext.h"
 
@@ -47,4 +47,4 @@ public:
 
 } // namespace blink
 
-#endif // DocumentLifecycleObserver_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTLIFECYCLEOBSERVER_H_

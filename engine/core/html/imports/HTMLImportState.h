@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportState_h
-#define HTMLImportState_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATE_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -74,4 +74,4 @@ inline HTMLImportState::Value HTMLImportState::checkedValue() const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTSTATE_H_

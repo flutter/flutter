@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef StringKeyframe_h
-#define StringKeyframe_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_STRINGKEYFRAME_H_
+#define SKY_ENGINE_CORE_ANIMATION_STRINGKEYFRAME_H_
 
 #include "sky/engine/core/animation/Keyframe.h"
 #include "sky/engine/core/css/StylePropertySet.h"
@@ -72,4 +72,4 @@ DEFINE_TYPE_CASTS(StringPropertySpecificKeyframe, Keyframe::PropertySpecificKeyf
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_STRINGKEYFRAME_H_

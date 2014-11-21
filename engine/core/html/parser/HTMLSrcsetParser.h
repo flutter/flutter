@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLSrcsetParser_h
-#define HTMLSrcsetParser_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLSRCSETPARSER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLSRCSETPARSER_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -137,4 +137,4 @@ String bestFitSourceForImageAttributes(float deviceScaleFactor, unsigned sourceS
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLSRCSETPARSER_H_

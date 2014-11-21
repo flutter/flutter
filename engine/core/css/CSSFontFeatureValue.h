@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSFontFeatureValue_h
-#define CSSFontFeatureValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTFEATUREVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTFEATUREVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -55,4 +55,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSFontFeatureValue, isFontFeatureValue());
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTFEATUREVALUE_H_

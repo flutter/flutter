@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VoidCallback_h
-#define VoidCallback_h
+#ifndef SKY_ENGINE_CORE_HTML_VOIDCALLBACK_H_
+#define SKY_ENGINE_CORE_HTML_VOIDCALLBACK_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 
@@ -38,4 +38,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_VOIDCALLBACK_H_

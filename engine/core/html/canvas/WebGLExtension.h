@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLExtension_h
-#define WebGLExtension_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSION_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSION_H_
 
 #include "sky/engine/core/html/canvas/WebGLExtensionName.h"
 #include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
@@ -62,4 +62,4 @@ protected:
 
 } // namespace blink
 
-#endif // WebGLExtension_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLEXTENSION_H_

@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CompositingTriggers_h
-#define CompositingTriggers_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGTRIGGERS_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGTRIGGERS_H_
 
 namespace blink {
 
@@ -34,4 +34,4 @@ typedef unsigned CompositingTriggerFlags;
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGTRIGGERS_H_

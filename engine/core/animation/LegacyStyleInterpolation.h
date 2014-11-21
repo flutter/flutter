@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef LegacyStyleInterpolation_h
-#define LegacyStyleInterpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_LEGACYSTYLEINTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_LEGACYSTYLEINTERPOLATION_H_
 
 #include "sky/engine/core/animation/StyleInterpolation.h"
 #include "sky/engine/core/css/resolver/AnimatedStyleBuilder.h"
@@ -39,4 +39,4 @@ DEFINE_TYPE_CASTS(LegacyStyleInterpolation, Interpolation, value, value->isLegac
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_LEGACYSTYLEINTERPOLATION_H_

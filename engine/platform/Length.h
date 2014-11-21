@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef Length_h
-#define Length_h
+#ifndef SKY_ENGINE_PLATFORM_LENGTH_H_
+#define SKY_ENGINE_PLATFORM_LENGTH_H_
 
 #include <cstring>
 #include "sky/engine/platform/PlatformExport.h"
@@ -350,4 +350,4 @@ private:
 
 } // namespace blink
 
-#endif // Length_h
+#endif  // SKY_ENGINE_PLATFORM_LENGTH_H_

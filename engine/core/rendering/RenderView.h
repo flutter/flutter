@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef RenderView_h
-#define RenderView_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/LayoutState.h"
@@ -200,4 +200,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderView_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_

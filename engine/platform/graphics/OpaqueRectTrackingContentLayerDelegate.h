@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OpaqueRectTrackingContentLayerDelegate_h
-#define OpaqueRectTrackingContentLayerDelegate_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_OPAQUERECTTRACKINGCONTENTLAYERDELEGATE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_OPAQUERECTTRACKINGCONTENTLAYERDELEGATE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/public/platform/WebContentLayerClient.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // OpaqueRectTrackingContentLayerDelegate_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_OPAQUERECTTRACKINGCONTENTLAYERDELEGATE_H_

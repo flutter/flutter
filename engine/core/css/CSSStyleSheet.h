@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSStyleSheet_h
-#define CSSStyleSheet_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
+#define SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
 
 #include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/core/css/StyleSheet.h"
@@ -146,4 +146,4 @@ DEFINE_TYPE_CASTS(CSSStyleSheet, StyleSheet, sheet, sheet->isCSSStyleSheet(), sh
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_

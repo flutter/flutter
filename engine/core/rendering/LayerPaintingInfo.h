@@ -42,8 +42,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef LayerPaintingInfo_h
-#define LayerPaintingInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_
 
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -91,4 +91,4 @@ struct LayerPaintingInfo {
 
 } // namespace blink
 
-#endif // LayerPaintingInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_

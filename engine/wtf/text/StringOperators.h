@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef StringOperators_h
-#define StringOperators_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGOPERATORS_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGOPERATORS_H_
 
 namespace WTF {
 
@@ -144,4 +144,4 @@ StringAppend<StringAppend<U, V>, W> operator+(const StringAppend<U, V>& string1,
 
 } // namespace WTF
 
-#endif // StringOperators_h
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGOPERATORS_H_

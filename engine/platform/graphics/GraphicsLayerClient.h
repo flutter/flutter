@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayerClient_h
-#define GraphicsLayerClient_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERCLIENT_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERCLIENT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -80,4 +80,4 @@ public:
 
 } // namespace blink
 
-#endif // GraphicsLayerClient_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYERCLIENT_H_

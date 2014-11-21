@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatRoundedRect_h
-#define FloatRoundedRect_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
@@ -134,4 +134,4 @@ inline bool operator==(const FloatRoundedRect& a, const FloatRoundedRect& b)
 
 } // namespace blink
 
-#endif // FloatRoundedRect_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_

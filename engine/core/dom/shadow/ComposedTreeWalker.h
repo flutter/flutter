@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ComposedTreeWalker_h
-#define ComposedTreeWalker_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_COMPOSEDTREEWALKER_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_COMPOSEDTREEWALKER_H_
 
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
@@ -212,4 +212,4 @@ inline Node* ComposedTreeWalker::traverseLastChild(const Node* node) const
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_COMPOSEDTREEWALKER_H_

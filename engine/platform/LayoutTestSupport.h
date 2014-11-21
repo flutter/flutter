@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutTestSupport_h
-#define LayoutTestSupport_h
+#ifndef SKY_ENGINE_PLATFORM_LAYOUTTESTSUPPORT_H_
+#define SKY_ENGINE_PLATFORM_LAYOUTTESTSUPPORT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -45,4 +45,4 @@ public:
 
 } // namespace blink
 
-#endif // LayoutTestSupport_h
+#endif  // SKY_ENGINE_PLATFORM_LAYOUTTESTSUPPORT_H_

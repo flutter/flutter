@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasPattern_h
-#define CanvasPattern_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATTERN_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATTERN_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/graphics/Pattern.h"
@@ -57,4 +57,4 @@ private:
 
 } // namespace blink
 
-#endif // CanvasPattern_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATTERN_H_

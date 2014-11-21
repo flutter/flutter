@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsLayerTreeBuilder_h
-#define GraphicsLayerTreeBuilder_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERTREEBUILDER_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERTREEBUILDER_H_
 
 #include "sky/engine/platform/graphics/GraphicsLayer.h"
 
@@ -54,4 +54,4 @@ public:
 
 } // namespace blink
 
-#endif // GraphicsLayerTreeBuilder_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_GRAPHICSLAYERTREEBUILDER_H_

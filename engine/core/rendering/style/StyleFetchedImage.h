@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef StyleFetchedImage_h
-#define StyleFetchedImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFETCHEDIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFETCHEDIMAGE_H_
 
 #include "sky/engine/core/fetch/ImageResourceClient.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
@@ -66,4 +66,4 @@ private:
 DEFINE_STYLE_IMAGE_TYPE_CASTS(StyleFetchedImage, isImageResource());
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFETCHEDIMAGE_H_

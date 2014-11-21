@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef RefCountedLeakCounter_h
-#define RefCountedLeakCounter_h
+#ifndef SKY_ENGINE_WTF_REFCOUNTEDLEAKCOUNTER_H_
+#define SKY_ENGINE_WTF_REFCOUNTEDLEAKCOUNTER_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -45,4 +45,4 @@ namespace WTF {
 
 }  // namespace WTF
 
-#endif
+#endif  // SKY_ENGINE_WTF_REFCOUNTEDLEAKCOUNTER_H_

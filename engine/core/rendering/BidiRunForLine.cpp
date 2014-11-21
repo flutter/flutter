@@ -21,9 +21,6 @@
  *
  */
 
-#ifndef BidiRunForLine_h
-#define BidiRunForLine_h
-
 #include "sky/engine/config.h"
 #include "sky/engine/core/rendering/BidiRunForLine.h"
 
@@ -81,7 +78,7 @@ static RenderObject* firstRenderObjectForDirectionalityDetermination(
 }
 
 TextDirection determinePlaintextDirectionality(RenderObject* root,
-    RenderObject* current = 0, unsigned pos = 0)
+    RenderObject* current, unsigned pos)
 {
     InlineIterator iter(root,
         firstRenderObjectForDirectionalityDetermination(root, current), pos);
@@ -211,5 +208,3 @@ void constructBidiRunsForLine(InlineBidiResolver& topResolver,
 }
 
 } // namespace blink
-
-#endif // BidiRunForLine_h

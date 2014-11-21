@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositorAnimationsTestHelper_h
-#define CompositorAnimationsTestHelper_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_COMPOSITORANIMATIONSTESTHELPER_H_
+#define SKY_ENGINE_CORE_ANIMATION_COMPOSITORANIMATIONSTESTHELPER_H_
 
 #include "sky/engine/core/animation/CompositorAnimations.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -159,4 +159,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_COMPOSITORANIMATIONSTESTHELPER_H_

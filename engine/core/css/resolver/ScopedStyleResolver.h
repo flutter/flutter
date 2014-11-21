@@ -24,8 +24,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScopedStyleResolver_h
-#define ScopedStyleResolver_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_SCOPEDSTYLERESOLVER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_SCOPEDSTYLERESOLVER_H_
 
 #include "sky/engine/core/css/ElementRuleCollector.h"
 #include "sky/engine/core/css/RuleSet.h"
@@ -81,4 +81,4 @@ private:
 
 } // namespace blink
 
-#endif // ScopedStyleResolver_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_SCOPEDSTYLERESOLVER_H_

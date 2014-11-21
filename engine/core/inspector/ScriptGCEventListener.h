@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptGCEventListener_h
-#define ScriptGCEventListener_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTGCEVENTLISTENER_H_
+#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTGCEVENTLISTENER_H_
 
 
 namespace blink {
@@ -43,4 +43,4 @@ public:
 
 } // namespace blink
 
-#endif // !defined(ScriptGCEventListener_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTGCEVENTLISTENER_H_

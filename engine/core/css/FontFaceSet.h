@@ -23,8 +23,8 @@
  * DAMAGE.
  */
 
-#ifndef FontFaceSet_h
-#define FontFaceSet_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTFACESET_H_
+#define SKY_ENGINE_CORE_CSS_FONTFACESET_H_
 
 #include "sky/engine/bindings/core/v8/ScriptPromise.h"
 #include "sky/engine/core/css/FontFace.h"
@@ -148,4 +148,4 @@ private:
 
 } // namespace blink
 
-#endif // FontFaceSet_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTFACESET_H_

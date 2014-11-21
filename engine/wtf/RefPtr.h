@@ -20,8 +20,8 @@
 
 // RefPtr and PassRefPtr are documented at http://webkit.org/coding/RefPtr.html
 
-#ifndef WTF_RefPtr_h
-#define WTF_RefPtr_h
+#ifndef SKY_ENGINE_WTF_REFPTR_H_
+#define SKY_ENGINE_WTF_REFPTR_H_
 
 #include <algorithm>
 #include "sky/engine/wtf/HashTableDeletedValueType.h"
@@ -217,4 +217,4 @@ namespace WTF {
 using WTF::RefPtr;
 using WTF::static_pointer_cast;
 
-#endif // WTF_RefPtr_h
+#endif  // SKY_ENGINE_WTF_REFPTR_H_

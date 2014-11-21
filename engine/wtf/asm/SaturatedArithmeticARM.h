@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SaturatedArithmeticARM_h
-#define SaturatedArithmeticARM_h
+#ifndef SKY_ENGINE_WTF_ASM_SATURATEDARITHMETICARM_H_
+#define SKY_ENGINE_WTF_ASM_SATURATEDARITHMETICARM_H_
 
 #include <stdint.h>
 #include <limits>
@@ -102,4 +102,4 @@ ALWAYS_INLINE int saturatedSet(unsigned value, int FractionalShift)
     return result;
 }
 
-#endif // SaturatedArithmeticARM_h
+#endif  // SKY_ENGINE_WTF_ASM_SATURATEDARITHMETICARM_H_

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLContextAttributes_h
-#define WebGLContextAttributes_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTATTRIBUTES_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTATTRIBUTES_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLContextAttributes_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTATTRIBUTES_H_

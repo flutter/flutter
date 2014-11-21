@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Editor_h
-#define Editor_h
+#ifndef SKY_ENGINE_CORE_EDITING_EDITOR_H_
+#define SKY_ENGINE_CORE_EDITING_EDITOR_H_
 
 #include "sky/engine/core/dom/DocumentMarker.h"
 #include "sky/engine/core/editing/EditAction.h"
@@ -266,4 +266,4 @@ inline bool Editor::markedTextMatchesAreHighlighted() const
 
 } // namespace blink
 
-#endif // Editor_h
+#endif  // SKY_ENGINE_CORE_EDITING_EDITOR_H_

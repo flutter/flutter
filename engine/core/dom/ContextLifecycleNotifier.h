@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef ContextLifecycleNotifier_h
-#define ContextLifecycleNotifier_h
+#ifndef SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLENOTIFIER_H_
+#define SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLENOTIFIER_H_
 
 #include "sky/engine/core/dom/ActiveDOMObject.h"
 #include "sky/engine/platform/LifecycleNotifier.h"
@@ -71,4 +71,4 @@ inline PassOwnPtr<ContextLifecycleNotifier> ContextLifecycleNotifier::create(Exe
 
 } // namespace blink
 
-#endif // ContextLifecycleNotifier_h
+#endif  // SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLENOTIFIER_H_

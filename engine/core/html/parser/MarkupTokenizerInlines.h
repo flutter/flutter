@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MarkupTokenizerInlines_h
-#define MarkupTokenizerInlines_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_MARKUPTOKENIZERINLINES_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_MARKUPTOKENIZERINLINES_H_
 
 #include "sky/engine/platform/text/SegmentedString.h"
 
@@ -97,4 +97,4 @@ inline void advanceStringAndASSERT(SegmentedString& source, const char* expected
 
 }
 
-#endif // MarkupTokenizerInlines_h
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_MARKUPTOKENIZERINLINES_H_

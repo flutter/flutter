@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebSecurityPolicy_h
-#define WebSecurityPolicy_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSECURITYPOLICY_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSECURITYPOLICY_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebReferrerPolicy.h"
@@ -79,4 +79,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSECURITYPOLICY_H_

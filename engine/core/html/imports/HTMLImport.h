@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImport_h
-#define HTMLImport_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORT_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORT_H_
 
 #include "sky/engine/core/html/imports/HTMLImportState.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -141,4 +141,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLImport_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORT_H_

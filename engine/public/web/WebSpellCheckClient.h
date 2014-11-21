@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebSpellCheckClient_h
-#define WebSpellCheckClient_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSPELLCHECKCLIENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSPELLCHECKCLIENT_H_
 
 #include "../platform/WebString.h"
 #include "../platform/WebVector.h"
@@ -86,4 +86,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSPELLCHECKCLIENT_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WindowProxy_h
-#define WindowProxy_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_WINDOWPROXY_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_WINDOWPROXY_H_
 
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
@@ -104,4 +104,4 @@ private:
 
 } // namespace blink
 
-#endif // WindowProxy_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_WINDOWPROXY_H_

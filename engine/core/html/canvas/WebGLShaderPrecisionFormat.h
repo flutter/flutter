@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLShaderPrecisionFormat_h
-#define WebGLShaderPrecisionFormat_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHADERPRECISIONFORMAT_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHADERPRECISIONFORMAT_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/graphics/GraphicsTypes3D.h"
@@ -54,4 +54,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLShaderPrecisionFormat_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHADERPRECISIONFORMAT_H_

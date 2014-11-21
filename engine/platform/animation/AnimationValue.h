@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationValue_h
-#define AnimationValue_h
+#ifndef SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONVALUE_H_
+#define SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONVALUE_H_
 
 #include "sky/engine/platform/animation/TimingFunction.h"
 #include "sky/engine/platform/graphics/filters/FilterOperations.h"
@@ -111,4 +111,4 @@ private:
 
 } // namespace blink
 
-#endif // AnimationValue_h
+#endif  // SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONVALUE_H_

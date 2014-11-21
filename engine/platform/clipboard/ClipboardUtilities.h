@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ClipboardUtilities_h
-#define ClipboardUtilities_h
+#ifndef SKY_ENGINE_PLATFORM_CLIPBOARD_CLIPBOARDUTILITIES_H_
+#define SKY_ENGINE_PLATFORM_CLIPBOARD_CLIPBOARDUTILITIES_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -43,4 +43,4 @@ PLATFORM_EXPORT void validateFilename(String& name, String& extension);
 
 } // namespace blink
 
-#endif // ClipboardUtilities_h
+#endif  // SKY_ENGINE_PLATFORM_CLIPBOARD_CLIPBOARDUTILITIES_H_

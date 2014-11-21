@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KURL_h
-#define KURL_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_KURL_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_KURL_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -274,4 +274,4 @@ template<> struct DefaultHash<blink::KURL> {
 
 } // namespace WTF
 
-#endif // KURL_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_KURL_H_

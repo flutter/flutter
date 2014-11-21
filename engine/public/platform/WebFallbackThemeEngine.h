@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFallbackThemeEngine_h
-#define WebFallbackThemeEngine_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFALLBACKTHEMEENGINE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFALLBACKTHEMEENGINE_H_
 
 #include "sky/engine/public/platform/WebCanvas.h"
 #include "sky/engine/public/platform/WebColor.h"
@@ -140,4 +140,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFALLBACKTHEMEENGINE_H_

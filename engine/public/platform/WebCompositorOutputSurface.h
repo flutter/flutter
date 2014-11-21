@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCompositorOutputSurface_h
-#define WebCompositorOutputSurface_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITOROUTPUTSURFACE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITOROUTPUTSURFACE_H_
 
 namespace blink {
 
@@ -33,4 +33,4 @@ class WebCompositorOutputSurface { };
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITOROUTPUTSURFACE_H_

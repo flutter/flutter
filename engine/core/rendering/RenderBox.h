@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef RenderBox_h
-#define RenderBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERBOX_H_
 
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderOverflow.h"
@@ -664,4 +664,4 @@ inline void RenderBox::setInlineBoxWrapper(InlineBox* boxWrapper)
 
 } // namespace blink
 
-#endif // RenderBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERBOX_H_

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef RotateTransformOperation_h
-#define RotateTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_ROTATETRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_ROTATETRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 
@@ -89,4 +89,4 @@ private:
 
 } // namespace blink
 
-#endif // RotateTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_ROTATETRANSFORMOPERATION_H_

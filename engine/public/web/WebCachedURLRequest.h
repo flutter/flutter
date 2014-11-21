@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCachedURLRequest_h
-#define WebCachedURLRequest_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBCACHEDURLREQUEST_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBCACHEDURLREQUEST_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebPrivateOwnPtr.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBCACHEDURLREQUEST_H_

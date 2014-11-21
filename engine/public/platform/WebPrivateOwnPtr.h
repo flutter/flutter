@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebPrivateOwnPtr_h
-#define WebPrivateOwnPtr_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEOWNPTR_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEOWNPTR_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebNonCopyable.h"
@@ -97,4 +97,4 @@ template<typename T> template<typename U> inline WebPrivateOwnPtr<T>::WebPrivate
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEOWNPTR_H_

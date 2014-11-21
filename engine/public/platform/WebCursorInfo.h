@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCursorInfo_h
-#define WebCursorInfo_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCURSORINFO_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCURSORINFO_H_
 
 #include "sky/engine/public/platform/WebImage.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -120,4 +120,4 @@ struct WebCursorInfo {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCURSORINFO_H_

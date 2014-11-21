@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGestureDevice_h
-#define WebGestureDevice_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTUREDEVICE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTUREDEVICE_H_
 
 namespace blink {
 
@@ -35,4 +35,4 @@ enum WebGestureDevice {
 
 } // namespace blink
 
-#endif // WebGestureDevice_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTUREDEVICE_H_

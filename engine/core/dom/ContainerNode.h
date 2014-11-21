@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef ContainerNode_h
-#define ContainerNode_h
+#ifndef SKY_ENGINE_CORE_DOM_CONTAINERNODE_H_
+#define SKY_ENGINE_CORE_DOM_CONTAINERNODE_H_
 
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/core/dom/Node.h"
@@ -225,4 +225,4 @@ inline void getChildNodes(ContainerNode& node, NodeVector& nodes)
 
 } // namespace blink
 
-#endif // ContainerNode_h
+#endif  // SKY_ENGINE_CORE_DOM_CONTAINERNODE_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementProcessingStep_h
-#define CustomElementProcessingStep_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTEP_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTEP_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -49,4 +49,4 @@ public:
 
 }
 
-#endif // CustomElementProcessingStep_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTPROCESSINGSTEP_H_

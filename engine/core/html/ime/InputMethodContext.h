@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InputMethodContext_h
-#define InputMethodContext_h
+#ifndef SKY_ENGINE_CORE_HTML_IME_INPUTMETHODCONTEXT_H_
+#define SKY_ENGINE_CORE_HTML_IME_INPUTMETHODCONTEXT_H_
 
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/events/EventTarget.h"
@@ -90,4 +90,4 @@ private:
 
 } // namespace blink
 
-#endif // InputMethodContext_h
+#endif  // SKY_ENGINE_CORE_HTML_IME_INPUTMETHODCONTEXT_H_

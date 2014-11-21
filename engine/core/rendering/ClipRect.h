@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ClipRect_h
-#define ClipRect_h
+#ifndef SKY_ENGINE_CORE_RENDERING_CLIPRECT_H_
+#define SKY_ENGINE_CORE_RENDERING_CLIPRECT_H_
 
 #include "sky/engine/platform/geometry/LayoutRect.h"
 
@@ -83,4 +83,4 @@ inline ClipRect intersection(const ClipRect& a, const ClipRect& b)
 
 } // namespace blink
 
-#endif // ClipRect_h
+#endif  // SKY_ENGINE_CORE_RENDERING_CLIPRECT_H_

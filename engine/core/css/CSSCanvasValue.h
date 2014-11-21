@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSCanvasValue_h
-#define CSSCanvasValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCANVASVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSCANVASVALUE_H_
 
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
@@ -107,4 +107,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSCanvasValue, isCanvasValue());
 
 } // namespace blink
 
-#endif // CSSCanvasValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCANVASVALUE_H_

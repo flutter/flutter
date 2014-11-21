@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef SpaceSplitString_h
-#define SpaceSplitString_h
+#ifndef SKY_ENGINE_CORE_DOM_SPACESPLITSTRING_H_
+#define SKY_ENGINE_CORE_DOM_SPACESPLITSTRING_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/Vector.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // SpaceSplitString_h
+#endif  // SKY_ENGINE_CORE_DOM_SPACESPLITSTRING_H_

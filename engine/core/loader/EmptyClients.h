@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EmptyClients_h
-#define EmptyClients_h
+#ifndef SKY_ENGINE_CORE_LOADER_EMPTYCLIENTS_H_
+#define SKY_ENGINE_CORE_LOADER_EMPTYCLIENTS_H_
 
 #include "sky/engine/core/editing/UndoStep.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
@@ -191,4 +191,4 @@ void fillWithEmptyClients(Page::PageClients&);
 
 }
 
-#endif // EmptyClients_h
+#endif  // SKY_ENGINE_CORE_LOADER_EMPTYCLIENTS_H_

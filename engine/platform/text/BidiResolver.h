@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BidiResolver_h
-#define BidiResolver_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDIRESOLVER_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDIRESOLVER_H_
 
 #include "sky/engine/platform/text/BidiCharacterRun.h"
 #include "sky/engine/platform/text/BidiContext.h"
@@ -1084,4 +1084,4 @@ MidpointState<Iterator> BidiResolver<Iterator, Run>::midpointStateForIsolatedRun
 
 } // namespace blink
 
-#endif // BidiResolver_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDIRESOLVER_H_

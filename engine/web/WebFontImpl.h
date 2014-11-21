@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFontImpl_h
-#define WebFontImpl_h
+#ifndef SKY_ENGINE_WEB_WEBFONTIMPL_H_
+#define SKY_ENGINE_WEB_WEBFONTIMPL_H_
 
 #include "sky/engine/platform/fonts/Font.h"
 #include "sky/engine/public/web/WebFont.h"
@@ -63,4 +63,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBFONTIMPL_H_

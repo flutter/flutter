@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoadPriority_h
-#define ResourceLoadPriority_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADPRIORITY_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADPRIORITY_H_
 
 namespace blink {
 
@@ -43,5 +43,5 @@ enum ResourceLoadPriority {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADPRIORITY_H_
 

@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JPEGImageDecoder_h
-#define JPEGImageDecoder_h
+#ifndef SKY_ENGINE_PLATFORM_IMAGE_DECODERS_JPEG_JPEGIMAGEDECODER_H_
+#define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_JPEG_JPEGIMAGEDECODER_H_
 
 #include "platform/image-decoders/ImageDecoder.h"
 
@@ -82,4 +82,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_IMAGE_DECODERS_JPEG_JPEGIMAGEDECODER_H_

@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEDropShadow_h
-#define FEDropShadow_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDROPSHADOW_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDROPSHADOW_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/filters/Filter.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif // FEDropShadow_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FEDROPSHADOW_H_

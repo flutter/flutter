@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_dtoa_h
-#define WTF_dtoa_h
+#ifndef SKY_ENGINE_WTF_DTOA_H_
+#define SKY_ENGINE_WTF_DTOA_H_
 
 #include "sky/engine/wtf/ASCIICType.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -79,4 +79,4 @@ using WTF::numberToFixedPrecisionString;
 using WTF::numberToFixedWidthString;
 using WTF::parseDouble;
 
-#endif // WTF_dtoa_h
+#endif  // SKY_ENGINE_WTF_DTOA_H_

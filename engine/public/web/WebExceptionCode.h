@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebExceptionCode_h
-#define WebExceptionCode_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBEXCEPTIONCODE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBEXCEPTIONCODE_H_
 
 namespace blink {
 
@@ -38,4 +38,4 @@ typedef int WebExceptionCode;
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBEXCEPTIONCODE_H_

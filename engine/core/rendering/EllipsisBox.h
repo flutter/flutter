@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef EllipsisBox_h
-#define EllipsisBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_ELLIPSISBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_ELLIPSISBOX_H_
 
 #include "sky/engine/core/rendering/InlineBox.h"
 
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif // EllipsisBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_ELLIPSISBOX_H_

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef EventListener_h
-#define EventListener_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTLISTENER_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTLISTENER_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -42,4 +42,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTLISTENER_H_

@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Uint8ClampedArray_h
-#define Uint8ClampedArray_h
+#ifndef SKY_ENGINE_WTF_UINT8CLAMPEDARRAY_H_
+#define SKY_ENGINE_WTF_UINT8CLAMPEDARRAY_H_
 
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/Uint8Array.h"
@@ -122,4 +122,4 @@ PassRefPtr<Uint8ClampedArray> Uint8ClampedArray::subarray(int start, int end) co
 
 using WTF::Uint8ClampedArray;
 
-#endif // Uint8ClampedArray_h
+#endif  // SKY_ENGINE_WTF_UINT8CLAMPEDARRAY_H_

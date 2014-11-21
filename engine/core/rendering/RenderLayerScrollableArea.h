@@ -41,8 +41,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef RenderLayerScrollableArea_h
-#define RenderLayerScrollableArea_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERSCROLLABLEAREA_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERSCROLLABLEAREA_H_
 
 #include "sky/engine/platform/scroll/ScrollableArea.h"
 
@@ -197,4 +197,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderLayerScrollableArea_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERSCROLLABLEAREA_H_

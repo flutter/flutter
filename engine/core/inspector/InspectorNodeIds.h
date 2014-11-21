@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef InspectorNodeIds_h
-#define InspectorNodeIds_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORNODEIDS_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORNODEIDS_H_
 
 namespace blink {
 
@@ -18,4 +18,4 @@ public:
 } // namespace blink
 
 
-#endif // !defined(InspectorNodeIds_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORNODEIDS_H_

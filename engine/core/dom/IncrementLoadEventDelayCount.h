@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef IncrementLoadEventDelayCount_h
-#define IncrementLoadEventDelayCount_h
+#ifndef SKY_ENGINE_CORE_DOM_INCREMENTLOADEVENTDELAYCOUNT_H_
+#define SKY_ENGINE_CORE_DOM_INCREMENTLOADEVENTDELAYCOUNT_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -31,4 +31,4 @@ private:
 };
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_INCREMENTLOADEVENTDELAYCOUNT_H_

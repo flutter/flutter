@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UserActionElementSet_h
-#define UserActionElementSet_h
+#ifndef SKY_ENGINE_CORE_DOM_USERACTIONELEMENTSET_H_
+#define SKY_ENGINE_CORE_DOM_USERACTIONELEMENTSET_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -81,4 +81,4 @@ private:
 
 } // namespace
 
-#endif // UserActionElementSet_h
+#endif  // SKY_ENGINE_CORE_DOM_USERACTIONELEMENTSET_H_

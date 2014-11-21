@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_VIEWER_CONTENT_HANDLER_H_
-#define SKY_VIEWER_CONTENT_HANDLER_H_
+#ifndef SKY_VIEWER_CONTENT_HANDLER_IMPL_H_
+#define SKY_VIEWER_CONTENT_HANDLER_IMPL_H_
 
 #include "base/message_loop/message_loop.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
@@ -29,4 +29,4 @@ class ContentHandlerImpl : public mojo::InterfaceImpl<mojo::ContentHandler> {
 
 }  // namespace sky
 
-#endif  // SKY_VIEWER_DOCUMENT_VIEW_H_
+#endif  // SKY_VIEWER_CONTENT_HANDLER_IMPL_H_

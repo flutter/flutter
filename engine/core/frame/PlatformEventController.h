@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PlatformEventController_h
-#define PlatformEventController_h
+#ifndef SKY_ENGINE_CORE_FRAME_PLATFORMEVENTCONTROLLER_H_
+#define SKY_ENGINE_CORE_FRAME_PLATFORMEVENTCONTROLLER_H_
 
 #include "sky/engine/core/page/PageLifecycleObserver.h"
 #include "sky/engine/platform/Timer.h"
@@ -47,4 +47,4 @@ private:
 
 } // namespace blink
 
-#endif // PlatformEventController_h
+#endif  // SKY_ENGINE_CORE_FRAME_PLATFORMEVENTCONTROLLER_H_

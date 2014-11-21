@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef RenderText_h
-#define RenderText_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
 
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -225,4 +225,4 @@ inline RenderText* Text::renderer() const
 
 } // namespace blink
 
-#endif // RenderText_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_

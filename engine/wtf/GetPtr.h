@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_GetPtr_h
-#define WTF_GetPtr_h
+#ifndef SKY_ENGINE_WTF_GETPTR_H_
+#define SKY_ENGINE_WTF_GETPTR_H_
 
 namespace WTF {
 
@@ -35,4 +35,4 @@ namespace WTF {
 
 } // namespace WTF
 
-#endif // WTF_GetPtr_h
+#endif  // SKY_ENGINE_WTF_GETPTR_H_

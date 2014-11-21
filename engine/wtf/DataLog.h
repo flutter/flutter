@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DataLog_h
-#define DataLog_h
+#ifndef SKY_ENGINE_WTF_DATALOG_H_
+#define SKY_ENGINE_WTF_DATALOG_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/FilePrintStream.h"
@@ -124,5 +124,5 @@ using WTF::dataLog;
 using WTF::dataLogF;
 using WTF::dataLogFString;
 
-#endif // DataLog_h
+#endif  // SKY_ENGINE_WTF_DATALOG_H_
 

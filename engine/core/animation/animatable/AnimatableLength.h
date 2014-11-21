@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableLength_h
-#define AnimatableLength_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTH_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTH_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/platform/Length.h"
@@ -74,4 +74,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableLength, isLength());
 
 } // namespace blink
 
-#endif // AnimatableLength_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTH_H_

@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef ScriptedAnimationController_h
-#define ScriptedAnimationController_h
+#ifndef SKY_ENGINE_CORE_DOM_SCRIPTEDANIMATIONCONTROLLER_H_
+#define SKY_ENGINE_CORE_DOM_SCRIPTEDANIMATIONCONTROLLER_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/ListHashSet.h"
@@ -87,4 +87,4 @@ private:
 
 }
 
-#endif // ScriptedAnimationController_h
+#endif  // SKY_ENGINE_CORE_DOM_SCRIPTEDANIMATIONCONTROLLER_H_

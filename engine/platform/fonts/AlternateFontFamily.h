@@ -28,8 +28,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AlternateFontFamily_h
-#define AlternateFontFamily_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_
+#define SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_
 
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -104,4 +104,4 @@ inline const AtomicString getFallbackFontFamily(const FontDescription& descripti
 
 } // namespace blink
 
-#endif // AlternateFontFamily_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMTimeStamp_h
-#define DOMTimeStamp_h
+#ifndef SKY_ENGINE_CORE_DOM_DOMTIMESTAMP_H_
+#define SKY_ENGINE_CORE_DOM_DOMTIMESTAMP_H_
 
 namespace blink {
 
@@ -47,4 +47,4 @@ inline double convertDOMTimeStampToSeconds(DOMTimeStamp milliseconds)
 
 } // namespace blink
 
-#endif // DOMTimeStamp_h
+#endif  // SKY_ENGINE_CORE_DOM_DOMTIMESTAMP_H_

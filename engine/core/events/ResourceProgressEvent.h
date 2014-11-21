@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceProgressEvent_h
-#define ResourceProgressEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_RESOURCEPROGRESSEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_RESOURCEPROGRESSEVENT_H_
 
 #include "sky/engine/core/events/ProgressEvent.h"
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace blink
 
-#endif // ResourceProgressEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_RESOURCEPROGRESSEVENT_H_

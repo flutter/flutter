@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PageAnimator_h
-#define PageAnimator_h
+#ifndef SKY_ENGINE_CORE_PAGE_PAGEANIMATOR_H_
+#define SKY_ENGINE_CORE_PAGE_PAGEANIMATOR_H_
 
 namespace blink {
 
@@ -30,4 +30,4 @@ private:
 
 }
 
-#endif // PageAnimator_h
+#endif  // SKY_ENGINE_CORE_PAGE_PAGEANIMATOR_H_

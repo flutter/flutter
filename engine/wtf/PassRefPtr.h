@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_PassRefPtr_h
-#define WTF_PassRefPtr_h
+#ifndef SKY_ENGINE_WTF_PASSREFPTR_H_
+#define SKY_ENGINE_WTF_PASSREFPTR_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/NullPtr.h"
@@ -205,4 +205,4 @@ using WTF::PassRefPtr;
 using WTF::adoptRef;
 using WTF::static_pointer_cast;
 
-#endif // WTF_PassRefPtr_h
+#endif  // SKY_ENGINE_WTF_PASSREFPTR_H_

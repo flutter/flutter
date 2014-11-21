@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SmartReplace_h
-#define SmartReplace_h
+#ifndef SKY_ENGINE_CORE_EDITING_SMARTREPLACE_H_
+#define SKY_ENGINE_CORE_EDITING_SMARTREPLACE_H_
 
 #include "sky/engine/wtf/unicode/Unicode.h"
 
@@ -37,4 +37,4 @@ bool isCharacterSmartReplaceExempt(UChar32 c, bool isPreviousCharacter);
 
 } // namespace blink
 
-#endif // SmartReplace_h
+#endif  // SKY_ENGINE_CORE_EDITING_SMARTREPLACE_H_

@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebExternalTextureLayer_h
-#define WebExternalTextureLayer_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYER_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebFloatRect.h"
@@ -66,4 +66,4 @@ public:
 
 } // namespace blink
 
-#endif // WebExternalTextureLayer_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBEXTERNALTEXTURELAYER_H_

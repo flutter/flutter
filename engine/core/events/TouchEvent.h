@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TouchEvent_h
-#define TouchEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_TOUCHEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_TOUCHEVENT_H_
 
 #include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/events/EventDispatchMediator.h"
@@ -97,4 +97,4 @@ DEFINE_EVENT_TYPE_CASTS(TouchEvent);
 
 } // namespace blink
 
-#endif // TouchEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_TOUCHEVENT_H_

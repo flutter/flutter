@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementDescriptor_h
-#define CustomElementDescriptor_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTOR_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTOR_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashTableDeletedValueType.h"
@@ -91,4 +91,4 @@ template<> struct DefaultHash<blink::CustomElementDescriptor> {
 
 } // namespace WTF
 
-#endif // CustomElementDescriptor_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTOR_H_

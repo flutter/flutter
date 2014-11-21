@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontSelector_h
-#define FontSelector_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_
 
 #include "sky/engine/platform/fonts/FontCacheClient.h"
 #include "sky/engine/wtf/Forward.h"
@@ -47,4 +47,4 @@ public:
 
 } // namespace blink
 
-#endif // FontSelector_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_

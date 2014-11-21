@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef UIEvent_h
-#define UIEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_UIEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_UIEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/EventDispatchMediator.h"
@@ -87,4 +87,4 @@ private:
 
 } // namespace blink
 
-#endif // UIEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_UIEVENT_H_

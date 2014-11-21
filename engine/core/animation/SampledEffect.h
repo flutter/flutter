@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SampledEffect_h
-#define SampledEffect_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_SAMPLEDEFFECT_H_
+#define SKY_ENGINE_CORE_ANIMATION_SAMPLEDEFFECT_H_
 
 #include "sky/engine/core/animation/Animation.h"
 #include "sky/engine/core/animation/AnimationPlayer.h"
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_SAMPLEDEFFECT_H_

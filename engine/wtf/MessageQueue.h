@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MessageQueue_h
-#define MessageQueue_h
+#ifndef SKY_ENGINE_WTF_MESSAGEQUEUE_H_
+#define SKY_ENGINE_WTF_MESSAGEQUEUE_H_
 
 #include <limits>
 #include "sky/engine/wtf/Assertions.h"
@@ -208,4 +208,4 @@ using WTF::MessageQueueTerminated;
 using WTF::MessageQueueTimeout;
 using WTF::MessageQueueMessageReceived;
 
-#endif // MessageQueue_h
+#endif  // SKY_ENGINE_WTF_MESSAGEQUEUE_H_

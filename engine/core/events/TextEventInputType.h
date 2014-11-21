@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextEventInputType_h
-#define TextEventInputType_h
+#ifndef SKY_ENGINE_CORE_EVENTS_TEXTEVENTINPUTTYPE_H_
+#define SKY_ENGINE_CORE_EVENTS_TEXTEVENTINPUTTYPE_H_
 
 namespace blink {
 
@@ -41,4 +41,4 @@ enum TextEventInputType {
 
 } // namespace blink
 
-#endif // TextEventInputType_h
+#endif  // SKY_ENGINE_CORE_EVENTS_TEXTEVENTINPUTTYPE_H_

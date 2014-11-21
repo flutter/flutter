@@ -42,8 +42,8 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#ifndef RenderLayer_h
-#define RenderLayer_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_
 
 #include "sky/engine/core/rendering/LayerFragment.h"
 #include "sky/engine/core/rendering/LayerPaintingInfo.h"
@@ -659,4 +659,4 @@ void showLayerTree(const blink::RenderLayer*);
 void showLayerTree(const blink::RenderObject*);
 #endif
 
-#endif // RenderLayer_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_

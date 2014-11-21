@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef WTF_HashTable_h
-#define WTF_HashTable_h
+#ifndef SKY_ENGINE_WTF_HASHTABLE_H_
+#define SKY_ENGINE_WTF_HASHTABLE_H_
 
 #include "sky/engine/wtf/Alignment.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -1251,4 +1251,4 @@ namespace WTF {
 
 #include "sky/engine/wtf/HashIterators.h"
 
-#endif // WTF_HashTable_h
+#endif  // SKY_ENGINE_WTF_HASHTABLE_H_

@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSImageSetValue_h
-#define CSSImageSetValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSIMAGESETVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSIMAGESETVALUE_H_
 
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
@@ -89,4 +89,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSImageSetValue, isImageSetValue());
 
 } // namespace blink
 
-#endif // CSSImageSetValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSIMAGESETVALUE_H_

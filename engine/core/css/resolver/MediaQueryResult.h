@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef MediaQueryResult_h
-#define MediaQueryResult_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_MEDIAQUERYRESULT_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_MEDIAQUERYRESULT_H_
 
 #include "sky/engine/core/css/MediaQueryExp.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -52,4 +52,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_MEDIAQUERYRESULT_H_

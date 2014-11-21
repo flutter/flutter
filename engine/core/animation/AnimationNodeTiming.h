@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef AnimationNodeTiming_h
-#define AnimationNodeTiming_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODETIMING_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODETIMING_H_
 
 #include "sky/engine/bindings/core/v8/Nullable.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
@@ -44,4 +44,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODETIMING_H_

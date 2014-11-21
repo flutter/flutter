@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextCodec_h
-#define TextCodec_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTCODEC_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTCODEC_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -102,4 +102,4 @@ typedef void (*TextCodecRegistrar)(const char* name, NewTextCodecFunction, const
 
 using WTF::TextCodec;
 
-#endif // TextCodec_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTCODEC_H_

@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSToStyleMap_h
-#define CSSToStyleMap_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_CSSTOSTYLEMAP_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_CSSTOSTYLEMAP_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/animation/Timing.h"
@@ -91,4 +91,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_CSSTOSTYLEMAP_H_

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef NodeRenderStyle_h
-#define NodeRenderStyle_h
+#ifndef SKY_ENGINE_CORE_DOM_NODERENDERSTYLE_H_
+#define SKY_ENGINE_CORE_DOM_NODERENDERSTYLE_H_
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
@@ -46,4 +46,4 @@ inline RenderStyle* Node::parentRenderStyle() const
 }
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_NODERENDERSTYLE_H_

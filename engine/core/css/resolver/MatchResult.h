@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef MatchResult_h
-#define MatchResult_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_MATCHRESULT_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_MATCHRESULT_H_
 
 #include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/core/css/SelectorChecker.h"
@@ -100,4 +100,4 @@ inline bool operator!=(const MatchedProperties& a, const MatchedProperties& b)
 
 } // namespace blink
 
-#endif // MatchResult_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_MATCHRESULT_H_

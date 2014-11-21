@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ThreadRestrictionVerifier_h
-#define ThreadRestrictionVerifier_h
+#ifndef SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_
+#define SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -84,4 +84,4 @@ private:
 }
 
 #endif // ENABLE(ASSERT)
-#endif // ThreadRestrictionVerifier_h
+#endif  // SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_

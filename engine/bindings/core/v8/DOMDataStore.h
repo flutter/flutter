@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMDataStore_h
-#define DOMDataStore_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_DOMDATASTORE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_DOMDATASTORE_H_
 
 #include "sky/engine/bindings/core/v8/DOMWrapperMap.h"
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
@@ -312,4 +312,4 @@ inline void DOMWrapperMap<ScriptWrappableBase>::PersistentValueMapTraits::Dispos
 
 } // namespace blink
 
-#endif // DOMDataStore_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_DOMDATASTORE_H_

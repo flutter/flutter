@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebHitTestResult_h
-#define WebHitTestResult_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBHITTESTRESULT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBHITTESTRESULT_H_
 
 #include "../platform/WebPrivatePtr.h"
 
@@ -80,4 +80,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBHITTESTRESULT_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTFTestHelpers_h
-#define WTFTestHelpers_h
+#ifndef SKY_ENGINE_WTF_TESTING_WTFTESTHELPERS_H_
+#define SKY_ENGINE_WTF_TESTING_WTFTESTHELPERS_H_
 
 #include <iosfwd> // NOLINT
 #include "sky/engine/wtf/text/WTFString.h"
@@ -42,4 +42,4 @@ WTF_UNITTEST_HELPERS_EXPORT std::ostream& operator<<(std::ostream&, const String
 
 } // namespace WTF
 
-#endif // WTFTestHelpers_h
+#endif  // SKY_ENGINE_WTF_TESTING_WTFTESTHELPERS_H_

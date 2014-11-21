@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementDescriptorHash_h
-#define CustomElementDescriptorHash_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTORHASH_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTORHASH_H_
 
 #include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/wtf/HashFunctions.h"
@@ -63,4 +63,4 @@ struct HashTraits<blink::CustomElementDescriptor> : SimpleClassHashTraits<blink:
 
 } // namespace WTF
 
-#endif // CustomElementDescriptorHash
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDESCRIPTORHASH_H_

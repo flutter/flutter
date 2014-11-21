@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SplitTextNodeContainingElementCommand_h
-#define SplitTextNodeContainingElementCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_SPLITTEXTNODECONTAININGELEMENTCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_SPLITTEXTNODECONTAININGELEMENTCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -48,4 +48,4 @@ private:
 
 } // namespace blink
 
-#endif // SplitTextNodeContainingElementCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_SPLITTEXTNODECONTAININGELEMENTCOMMAND_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebNode_h
-#define WebNode_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBNODE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBNODE_H_
 
 #include "../platform/WebCommon.h"
 #include "../platform/WebPrivatePtr.h"
@@ -167,4 +167,4 @@ inline bool operator<(const WebNode& a, const WebNode& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBNODE_H_

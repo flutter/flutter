@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LinkHighlight_h
-#define LinkHighlight_h
+#ifndef SKY_ENGINE_WEB_LINKHIGHLIGHT_H_
+#define SKY_ENGINE_WEB_LINKHIGHLIGHT_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
@@ -98,4 +98,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_LINKHIGHLIGHT_H_

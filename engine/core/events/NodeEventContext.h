@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef NodeEventContext_h
-#define NodeEventContext_h
+#ifndef SKY_ENGINE_CORE_EVENTS_NODEEVENTCONTEXT_H_
+#define SKY_ENGINE_CORE_EVENTS_NODEEVENTCONTEXT_H_
 
 #include "sky/engine/core/events/TreeScopeEventContext.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -74,4 +74,4 @@ template <> struct VectorTraits<blink::NodeEventContext> : SimpleClassVectorTrai
 }
 #endif
 
-#endif // NodeEventContext_h
+#endif  // SKY_ENGINE_CORE_EVENTS_NODEEVENTCONTEXT_H_

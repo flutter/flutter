@@ -29,8 +29,8 @@
  */
 
 
-#ifndef WTFExport_h
-#define WTFExport_h
+#ifndef SKY_ENGINE_WTF_WTFEXPORT_H_
+#define SKY_ENGINE_WTF_WTFEXPORT_H_
 
 #if !defined(WTF_IMPLEMENTATION)
 #define WTF_IMPLEMENTATION 0
@@ -42,4 +42,4 @@
 #define WTF_EXPORT
 #endif
 
-#endif // WTFExport_h
+#endif  // SKY_ENGINE_WTF_WTFEXPORT_H_

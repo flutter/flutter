@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef FillLayer_h
-#define FillLayer_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_FILLLAYER_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_FILLLAYER_H_
 
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
@@ -244,4 +244,4 @@ private:
 
 } // namespace blink
 
-#endif // FillLayer_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_FILLLAYER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef Interpolation_h
-#define Interpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_INTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_INTERPOLATION_H_
 
 #include "sky/engine/core/animation/InterpolableValue.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -42,4 +42,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_INTERPOLATION_H_

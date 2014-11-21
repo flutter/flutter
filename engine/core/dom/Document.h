@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef Document_h
-#define Document_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENT_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
@@ -844,4 +844,4 @@ Node* eventTargetNodeForDocument(Document*);
 void showLiveDocumentInstances();
 #endif
 
-#endif // Document_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENT_H_

@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef TextLinkColors_h
-#define TextLinkColors_h
+#ifndef SKY_ENGINE_CORE_DOM_TEXTLINKCOLORS_H_
+#define SKY_ENGINE_CORE_DOM_TEXTLINKCOLORS_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_TEXTLINKCOLORS_H_

@@ -25,8 +25,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef SelectorChecker_h
-#define SelectorChecker_h
+#ifndef SKY_ENGINE_CORE_CSS_SELECTORCHECKER_H_
+#define SKY_ENGINE_CORE_CSS_SELECTORCHECKER_H_
 
 #include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/core/dom/Element.h"
@@ -111,4 +111,4 @@ inline bool SelectorChecker::isHostInItsShadowTree(const Element& element, const
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_SELECTORCHECKER_H_

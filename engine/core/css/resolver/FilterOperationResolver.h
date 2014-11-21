@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef FilterOperationResolver_h
-#define FilterOperationResolver_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_FILTEROPERATIONRESOLVER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_FILTEROPERATIONRESOLVER_H_
 
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 #include "sky/engine/platform/graphics/filters/FilterOperations.h"
@@ -39,4 +39,4 @@ public:
 
 } // namespace blink
 
-#endif // FilterOperationResolver_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_FILTEROPERATIONRESOLVER_H_

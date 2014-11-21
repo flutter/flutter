@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSTimingFunctionValue_h
-#define CSSTimingFunctionValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSTIMINGFUNCTIONVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSTIMINGFUNCTIONVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/platform/animation/TimingFunction.h"
@@ -96,4 +96,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSStepsTimingFunctionValue, isStepsTimingFunctionVa
 
 } // namespace
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSTIMINGFUNCTIONVALUE_H_

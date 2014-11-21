@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSProperty_h
-#define CSSProperty_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSPROPERTY_H_
+#define SKY_ENGINE_CORE_CSS_CSSPROPERTY_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
@@ -162,4 +162,4 @@ inline CSSPropertyID prefixingVariantForPropertyId(CSSPropertyID propId)
 
 WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::CSSProperty);
 
-#endif // CSSProperty_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSPROPERTY_H_

@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Threading_h
-#define Threading_h
+#ifndef SKY_ENGINE_WTF_THREADING_H_
+#define SKY_ENGINE_WTF_THREADING_H_
 
 #include <stdint.h>
 #include "sky/engine/wtf/WTFExport.h"
@@ -57,4 +57,4 @@ WTF_EXPORT void unlockAtomicallyInitializedStaticMutex();
 using WTF::ThreadIdentifier;
 using WTF::currentThread;
 
-#endif // Threading_h
+#endif  // SKY_ENGINE_WTF_THREADING_H_

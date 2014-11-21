@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebGLSharedWebGraphicsContext3D_h
-#define WebGLSharedWebGraphicsContext3D_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHAREDWEBGRAPHICSCONTEXT3D_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHAREDWEBGRAPHICSCONTEXT3D_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -45,4 +45,4 @@ private:
 
 }
 
-#endif // WebGLSharedWebGraphicsContext3D_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHAREDWEBGRAPHICSCONTEXT3D_H_

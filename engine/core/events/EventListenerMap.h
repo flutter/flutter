@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef EventListenerMap_h
-#define EventListenerMap_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTLISTENERMAP_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTLISTENERMAP_H_
 
 #include "sky/engine/core/events/RegisteredEventListener.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -92,4 +92,4 @@ inline void EventListenerMap::assertNoActiveIterators() { }
 
 } // namespace blink
 
-#endif // EventListenerMap_h
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTLISTENERMAP_H_

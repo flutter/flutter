@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NavigationPolicy_h
-#define NavigationPolicy_h
+#ifndef SKY_ENGINE_CORE_LOADER_NAVIGATIONPOLICY_H_
+#define SKY_ENGINE_CORE_LOADER_NAVIGATIONPOLICY_H_
 
 namespace blink {
 
@@ -48,4 +48,4 @@ bool navigationPolicyFromMouseEvent(unsigned short button, bool ctrl, bool shift
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_LOADER_NAVIGATIONPOLICY_H_

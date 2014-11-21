@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef DocumentParser_h
-#define DocumentParser_h
+#ifndef SKY_ENGINE_CORE_DOM_DOCUMENTPARSER_H_
+#define SKY_ENGINE_CORE_DOM_DOCUMENTPARSER_H_
 
 #include "base/callback_forward.h"
 #include "mojo/public/cpp/system/core.h"
@@ -94,4 +94,4 @@ private:
 
 } // namespace blink
 
-#endif // DocumentParser_h
+#endif  // SKY_ENGINE_CORE_DOM_DOCUMENTPARSER_H_

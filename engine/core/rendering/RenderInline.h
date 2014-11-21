@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef RenderInline_h
-#define RenderInline_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
 
 #include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/rendering/InlineFlowBox.h"
@@ -165,4 +165,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderInline, isRenderInline());
 
 } // namespace blink
 
-#endif // RenderInline_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_

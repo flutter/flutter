@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef CSSCustomFontData_h
-#define CSSCustomFontData_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSCUSTOMFONTDATA_H_
+#define SKY_ENGINE_CORE_CSS_CSSCUSTOMFONTDATA_H_
 
 #include "sky/engine/core/css/CSSFontFaceSource.h"
 #include "sky/engine/platform/fonts/CustomFontData.h"
@@ -73,4 +73,4 @@ private:
 
 }
 
-#endif // CSSCustomFontData_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSCUSTOMFONTDATA_H_

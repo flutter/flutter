@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef Keyframe_h
-#define Keyframe_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_KEYFRAME_H_
+#define SKY_ENGINE_CORE_ANIMATION_KEYFRAME_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/animation/AnimationEffect.h"
@@ -95,4 +95,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_KEYFRAME_H_

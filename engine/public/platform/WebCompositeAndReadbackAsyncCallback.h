@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebCompositeAndReadbackAsyncCallback_h
-#define WebCompositeAndReadbackAsyncCallback_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITEANDREADBACKASYNCCALLBACK_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITEANDREADBACKASYNCCALLBACK_H_
 
 class SkBitmap;
 
@@ -37,4 +37,4 @@ public:
 
 } // namespace blink
 
-#endif // WebCompositeAndReadbackAsyncCallback_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITEANDREADBACKASYNCCALLBACK_H_

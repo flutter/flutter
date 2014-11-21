@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSOMUtils_h
-#define CSSOMUtils_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSOMUTILS_H_
+#define SKY_ENGINE_CORE_CSS_CSSOMUTILS_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/unicode/Unicode.h"
@@ -48,4 +48,4 @@ void serializeString(const String&, StringBuilder& appendTo);
 
 } // namespace blink
 
-#endif // CSSOMUtils_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSOMUTILS_H_

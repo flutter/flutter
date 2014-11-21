@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameData_h
-#define FrameData_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FRAMEDATA_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FRAMEDATA_H_
 
 #include "sky/engine/platform/graphics/ImageOrientation.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -64,4 +64,4 @@ template<> struct VectorTraits<blink::FrameData> : public SimpleClassVectorTrait
 };
 }
 
-#endif // FrameData_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FRAMEDATA_H_

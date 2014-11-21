@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef SkewTransformOperation_h
-#define SkewTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_SKEWTRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_SKEWTRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 
@@ -73,4 +73,4 @@ private:
 
 } // namespace blink
 
-#endif // SkewTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_SKEWTRANSFORMOPERATION_H_

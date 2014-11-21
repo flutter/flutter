@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptDebugServer_h
-#define ScriptDebugServer_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTDEBUGSERVER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTDEBUGSERVER_H_
 
 #include "gen/sky/core/InspectorBackendDispatcher.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
@@ -164,4 +164,4 @@ private:
 } // namespace blink
 
 
-#endif // ScriptDebugServer_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTDEBUGSERVER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebSelectionBound_h
-#define WebSelectionBound_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBSELECTIONBOUND_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBSELECTIONBOUND_H_
 
 #include "sky/engine/public/platform/WebPoint.h"
 #include "sky/engine/public/platform/WebRect.h"
@@ -45,4 +45,4 @@ struct WebSelectionBound {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBSELECTIONBOUND_H_

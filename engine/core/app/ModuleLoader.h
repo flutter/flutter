@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_APP_MODULE_LOADER_H_
-#define SKY_ENGINE_CORE_APP_MODULE_LOADER_H_
+#ifndef SKY_ENGINE_CORE_APP_MODULELOADER_H_
+#define SKY_ENGINE_CORE_APP_MODULELOADER_H_
 
 #include "base/memory/weak_ptr.h"
 #include "sky/engine/platform/fetcher/MojoFetcher.h"
@@ -54,4 +54,4 @@ class ModuleLoader : public MojoFetcher::Client {
 
 } // namespace blink
 
-#endif // SKY_ENGINE_CORE_APP_MODULE_LOADER_H_
+#endif  // SKY_ENGINE_CORE_APP_MODULELOADER_H_

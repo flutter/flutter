@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FEComponentTransfer_h
-#define FEComponentTransfer_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOMPONENTTRANSFER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOMPONENTTRANSFER_H_
 
 #include "sky/engine/platform/graphics/filters/Filter.h"
 #include "sky/engine/platform/graphics/filters/FilterEffect.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace blink
 
-#endif // FEComponentTransfer_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FECOMPONENTTRANSFER_H_

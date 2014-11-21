@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef RootInlineBox_h
-#define RootInlineBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_ROOTINLINEBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_ROOTINLINEBOX_H_
 
 #include "sky/engine/core/rendering/InlineFlowBox.h"
 #include "sky/engine/platform/text/BidiContext.h"
@@ -232,4 +232,4 @@ private:
 
 } // namespace blink
 
-#endif // RootInlineBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_ROOTINLINEBOX_H_

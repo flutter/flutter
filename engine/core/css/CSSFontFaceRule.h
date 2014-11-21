@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSFontFaceRule_h
-#define CSSFontFaceRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFONTFACERULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFONTFACERULE_H_
 
 #include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -59,4 +59,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSFontFaceRule, FONT_FACE_RULE);
 
 } // namespace blink
 
-#endif // CSSFontFaceRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSFONTFACERULE_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebLocalFrame_h
-#define WebLocalFrame_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBLOCALFRAME_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBLOCALFRAME_H_
 
 #include "sky/engine/public/web/WebFrame.h"
 
@@ -31,4 +31,4 @@ public:
 
 } // namespace blink
 
-#endif // WebLocalFrame_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBLOCALFRAME_H_

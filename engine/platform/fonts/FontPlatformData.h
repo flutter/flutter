@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontPlatformDataHarfBuzz_h
-#define FontPlatformDataHarfBuzz_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMDATA_H_
 
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
@@ -120,4 +120,4 @@ private:
 
 } // namespace blink
 
-#endif // ifdef FontPlatformDataHarfBuzz_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMDATA_H_

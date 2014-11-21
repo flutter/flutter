@@ -22,8 +22,8 @@
    Boston, MA 02110-1301, USA.
 */
 
-#ifndef FrameView_h
-#define FrameView_h
+#ifndef SKY_ENGINE_CORE_FRAME_FRAMEVIEW_H_
+#define SKY_ENGINE_CORE_FRAME_FRAMEVIEW_H_
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/PaintPhase.h"
@@ -338,4 +338,4 @@ private:
 
 } // namespace blink
 
-#endif // FrameView_h
+#endif  // SKY_ENGINE_CORE_FRAME_FRAMEVIEW_H_

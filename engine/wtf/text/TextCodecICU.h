@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextCodecICU_h
-#define TextCodecICU_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECICU_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTCODECICU_H_
 
 #include <unicode/utypes.h>
 #include "sky/engine/wtf/text/TextCodec.h"
@@ -80,4 +80,4 @@ public:
 
 } // namespace WTF
 
-#endif // TextCodecICU_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECICU_H_

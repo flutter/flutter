@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLayerTreeView_h
-#define WebLayerTreeView_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERTREEVIEW_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERTREEVIEW_H_
 
 #include "sky/engine/public/platform/WebColor.h"
 #include "sky/engine/public/platform/WebCommon.h"
@@ -146,4 +146,4 @@ public:
 
 } // namespace blink
 
-#endif // WebLayerTreeView_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBLAYERTREEVIEW_H_

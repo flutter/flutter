@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SkSizeHash_h
-#define SkSizeHash_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_
 
 #include "sky/engine/wtf/HashMap.h"
 #include "third_party/skia/include/core/SkScalar.h"
@@ -82,4 +82,4 @@ template<> struct HashTraits<SkISize> : GenericHashTraits<SkISize> {
 
 } // namespace WTF
 
-#endif // SkSizeHash_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_

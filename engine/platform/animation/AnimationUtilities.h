@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimationUtilities_h
-#define AnimationUtilities_h
+#ifndef SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONUTILITIES_H_
+#define SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONUTILITIES_H_
 
 #include "sky/engine/platform/LayoutUnit.h"
 #include "sky/engine/platform/PlatformExport.h"
@@ -81,4 +81,4 @@ inline double accuracyForDuration(double duration)
 
 } // namespace blink
 
-#endif // AnimationUtilities_h
+#endif  // SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONUTILITIES_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallStackFactory_h
-#define ScriptCallStackFactory_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCALLSTACKFACTORY_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCALLSTACKFACTORY_H_
 
 #include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/Forward.h"
@@ -55,4 +55,4 @@ PassRefPtr<ScriptArguments> createScriptArguments(ScriptState*, const v8::Functi
 
 } // namespace blink
 
-#endif // ScriptCallStackFactory_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTCALLSTACKFACTORY_H_

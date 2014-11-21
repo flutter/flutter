@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef AnimatableValueKeyframe_h
-#define AnimatableValueKeyframe_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUEKEYFRAME_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUEKEYFRAME_H_
 
 #include "sky/engine/core/animation/Keyframe.h"
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
@@ -68,4 +68,4 @@ DEFINE_TYPE_CASTS(AnimatableValuePropertySpecificKeyframe, Keyframe::PropertySpe
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUEKEYFRAME_H_

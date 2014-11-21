@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_ASCIICType_h
-#define WTF_ASCIICType_h
+#ifndef SKY_ENGINE_WTF_ASCIICTYPE_H_
+#define SKY_ENGINE_WTF_ASCIICTYPE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 
@@ -183,4 +183,4 @@ using WTF::lowerNibbleToASCIIHexDigit;
 using WTF::upperNibbleToASCIIHexDigit;
 using WTF::isASCIIAlphaCaselessEqual;
 
-#endif
+#endif  // SKY_ENGINE_WTF_ASCIICTYPE_H_

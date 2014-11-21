@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLError_h
-#define WebURLError_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBURLERROR_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBURLERROR_H_
 
 #include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/public/platform/WebURL.h"
@@ -75,4 +75,4 @@ struct WebURLError {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBURLERROR_H_

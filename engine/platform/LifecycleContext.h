@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef LifecycleContext_h
-#define LifecycleContext_h
+#ifndef SKY_ENGINE_PLATFORM_LIFECYCLECONTEXT_H_
+#define SKY_ENGINE_PLATFORM_LIFECYCLECONTEXT_H_
 
 #include "sky/engine/platform/LifecycleNotifier.h"
 #include "sky/engine/platform/LifecycleObserver.h"
@@ -92,4 +92,4 @@ inline PassOwnPtr<typename LifecycleContext<T>::Notifier> LifecycleContext<T>::c
 
 } // namespace blink
 
-#endif // LifecycleContext_h
+#endif  // SKY_ENGINE_PLATFORM_LIFECYCLECONTEXT_H_

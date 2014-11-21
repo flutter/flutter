@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LineClampValue_h
-#define LineClampValue_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_LINECLAMPVALUE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_LINECLAMPVALUE_H_
 
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // LineClampValue_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_LINECLAMPVALUE_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTBlendMinMax_h
-#define EXTBlendMinMax_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_EXTBLENDMINMAX_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_EXTBLENDMINMAX_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
@@ -27,4 +27,4 @@ private:
 
 } // namespace blink
 
-#endif // EXTBlendMinMax_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_EXTBLENDMINMAX_H_

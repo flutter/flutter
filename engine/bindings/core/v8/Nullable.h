@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef Nullable_h
-#define Nullable_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_NULLABLE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_NULLABLE_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // Nullable_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_NULLABLE_H_

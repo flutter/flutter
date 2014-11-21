@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HitRegion_h
-#define HitRegion_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_HITREGION_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_HITREGION_H_
 
 #include "sky/engine/bindings/core/v8/Dictionary.h"
 #include "sky/engine/core/dom/Element.h"
@@ -90,4 +90,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_HITREGION_H_

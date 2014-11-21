@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OESElementIndexUint_h
-#define OESElementIndexUint_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_OESELEMENTINDEXUINT_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_OESELEMENTINDEXUINT_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
@@ -48,4 +48,4 @@ private:
 
 } // namespace blink
 
-#endif // OESElementIndexUint_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_OESELEMENTINDEXUINT_H_

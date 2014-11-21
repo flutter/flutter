@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef Extensions3DUtil_h
-#define Extensions3DUtil_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GPU_EXTENSIONS3DUTIL_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GPU_EXTENSIONS3DUTIL_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/GraphicsTypes3D.h"
@@ -39,4 +39,4 @@ private:
 
 } // namespace blink
 
-#endif // Extensions3DUtil_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GPU_EXTENSIONS3DUTIL_H_

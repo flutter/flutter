@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSImageValue_h
-#define CSSImageValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSIMAGEVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSIMAGEVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
@@ -87,4 +87,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSImageValue, isImageValue());
 
 } // namespace blink
 
-#endif // CSSImageValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSIMAGEVALUE_H_

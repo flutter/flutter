@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  *
  */
-#ifndef HTMLTitleElement_h
-#define HTMLTitleElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLTITLEELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLTITLEELEMENT_H_
 
 #include "sky/engine/core/html/HTMLElement.h"
 
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLTitleElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLTITLEELEMENT_H_

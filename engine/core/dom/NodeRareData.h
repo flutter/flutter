@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef NodeRareData_h
-#define NodeRareData_h
+#ifndef SKY_ENGINE_CORE_DOM_NODERAREDATA_H_
+#define SKY_ENGINE_CORE_DOM_NODERAREDATA_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/MutationObserverRegistration.h"
@@ -85,4 +85,4 @@ protected:
 
 } // namespace blink
 
-#endif // NodeRareData_h
+#endif  // SKY_ENGINE_CORE_DOM_NODERAREDATA_H_

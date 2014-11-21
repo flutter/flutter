@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableShapeValue_h
-#define AnimatableShapeValue_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHAPEVALUE_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHAPEVALUE_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/core/rendering/style/ShapeValue.h"
@@ -65,4 +65,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableShapeValue, isShapeValue());
 
 } // namespace blink
 
-#endif // AnimatableShapeValue_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLESHAPEVALUE_H_

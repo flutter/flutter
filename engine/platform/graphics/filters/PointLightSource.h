@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef PointLightSource_h
-#define PointLightSource_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_POINTLIGHTSOURCE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_POINTLIGHTSOURCE_H_
 
 #include "sky/engine/platform/graphics/filters/LightSource.h"
 
@@ -60,4 +60,4 @@ private:
 
 } // namespace blink
 
-#endif // PointLightSource_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_POINTLIGHTSOURCE_H_

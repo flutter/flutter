@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef RenderImageResource_h
-#define RenderImageResource_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCE_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCE_H_
 
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
@@ -80,4 +80,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderImage_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCE_H_

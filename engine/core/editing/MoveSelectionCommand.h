@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MoveSelectionCommand_h
-#define MoveSelectionCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_MOVESELECTIONCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_MOVESELECTIONCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -53,4 +53,4 @@ private:
 
 } // namespace blink
 
-#endif // MoveSelectionCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_MOVESELECTIONCOMMAND_H_

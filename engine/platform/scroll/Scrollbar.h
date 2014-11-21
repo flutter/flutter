@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Scrollbar_h
-#define Scrollbar_h
+#ifndef SKY_ENGINE_PLATFORM_SCROLL_SCROLLBAR_H_
+#define SKY_ENGINE_PLATFORM_SCROLL_SCROLLBAR_H_
 
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/Widget.h"
@@ -181,4 +181,4 @@ DEFINE_TYPE_CASTS(Scrollbar, Widget, widget, widget->isScrollbar(), widget.isScr
 
 } // namespace blink
 
-#endif // Scrollbar_h
+#endif  // SKY_ENGINE_PLATFORM_SCROLL_SCROLLBAR_H_

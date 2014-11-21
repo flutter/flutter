@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontResource_h
-#define FontResource_h
+#ifndef SKY_ENGINE_CORE_FETCH_FONTRESOURCE_H_
+#define SKY_ENGINE_CORE_FETCH_FONTRESOURCE_H_
 
 #include "sky/engine/core/fetch/ResourceClient.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
@@ -99,4 +99,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_FONTRESOURCE_H_

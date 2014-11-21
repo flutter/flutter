@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTextDirection_h
-#define WebTextDirection_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTEXTDIRECTION_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTEXTDIRECTION_H_
 
 #if BLINK_IMPLEMENTATION
 #include "sky/engine/platform/text/TextDirection.h"
@@ -61,4 +61,4 @@ inline WebTextDirection toWebTextDirection(TextDirection direction)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTEXTDIRECTION_H_

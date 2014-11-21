@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8BindingMacros_h
-#define V8BindingMacros_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8BINDINGMACROS_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8BINDINGMACROS_H_
 
 namespace blink {
 
@@ -169,4 +169,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // V8BindingMacros_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8BINDINGMACROS_H_

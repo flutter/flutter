@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Color_h
-#define Color_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_COLOR_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_COLOR_H_
 
 #include "sky/engine/platform/animation/AnimationUtilities.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -173,4 +173,4 @@ inline Color blend(const Color& from, const Color& to, double progress, bool ble
 }
 } // namespace blink
 
-#endif // Color_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_COLOR_H_

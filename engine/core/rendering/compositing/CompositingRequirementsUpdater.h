@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CompositingRequirementsUpdater_h
-#define CompositingRequirementsUpdater_h
+#ifndef SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREQUIREMENTSUPDATER_H_
+#define SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREQUIREMENTSUPDATER_H_
 
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/graphics/CompositingReasons.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // CompositingRequirementsUpdater_h
+#endif  // SKY_ENGINE_CORE_RENDERING_COMPOSITING_COMPOSITINGREQUIREMENTSUPDATER_H_

@@ -29,8 +29,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FrameLoader_h
-#define FrameLoader_h
+#ifndef SKY_ENGINE_CORE_LOADER_FRAMELOADER_H_
+#define SKY_ENGINE_CORE_LOADER_FRAMELOADER_H_
 
 #include "sky/engine/core/fetch/ResourceLoaderOptions.h"
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
@@ -91,4 +91,4 @@ private:
 
 } // namespace blink
 
-#endif // FrameLoader_h
+#endif  // SKY_ENGINE_CORE_LOADER_FRAMELOADER_H_

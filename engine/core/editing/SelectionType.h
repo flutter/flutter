@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SelectionType_h
-#define SelectionType_h
+#ifndef SKY_ENGINE_CORE_EDITING_SELECTIONTYPE_H_
+#define SKY_ENGINE_CORE_EDITING_SELECTIONTYPE_H_
 
 namespace blink {
 
@@ -32,4 +32,4 @@ enum SelectionType { NoSelection, CaretSelection, RangeSelection };
 
 } // namespace blink
 
-#endif // SelectionType_h
+#endif  // SKY_ENGINE_CORE_EDITING_SELECTIONTYPE_H_

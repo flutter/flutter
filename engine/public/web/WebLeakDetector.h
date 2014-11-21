@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLeakDetector_h
-#define WebLeakDetector_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBLEAKDETECTOR_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBLEAKDETECTOR_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/web/WebFrame.h"
@@ -62,4 +62,4 @@ public:
 
 } // namespace blink
 
-#endif // WebLeakDetector_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBLEAKDETECTOR_H_

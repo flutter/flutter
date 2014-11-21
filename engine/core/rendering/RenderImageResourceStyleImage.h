@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef RenderImageResourceStyleImage_h
-#define RenderImageResourceStyleImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCESTYLEIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCESTYLEIMAGE_H_
 
 #include "sky/engine/core/rendering/RenderImageResource.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
@@ -66,4 +66,4 @@ private:
 
 } // namespace blink
 
-#endif // RenderImageStyleImage_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERIMAGERESOURCESTYLEIMAGE_H_

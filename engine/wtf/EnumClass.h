@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_EnumClass_h
-#define WTF_EnumClass_h
+#ifndef SKY_ENGINE_WTF_ENUMCLASS_H_
+#define SKY_ENGINE_WTF_ENUMCLASS_H_
 
 #include "sky/engine/wtf/Compiler.h"
 
@@ -61,4 +61,4 @@ namespace WTF {
 
 } // namespace WTF
 
-#endif // WTF_EnumClass_h
+#endif  // SKY_ENGINE_WTF_ENUMCLASS_H_

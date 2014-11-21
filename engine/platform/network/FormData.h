@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef FormData_h
-#define FormData_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_FORMDATA_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_FORMDATA_H_
 
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/Forward.h"
@@ -131,4 +131,4 @@ inline bool operator!=(const FormData& a, const FormData& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_FORMDATA_H_

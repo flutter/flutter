@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageData_h
-#define ImageData_h
+#ifndef SKY_ENGINE_CORE_HTML_IMAGEDATA_H_
+#define SKY_ENGINE_CORE_HTML_IMAGEDATA_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // ImageData_h
+#endif  // SKY_ENGINE_CORE_HTML_IMAGEDATA_H_

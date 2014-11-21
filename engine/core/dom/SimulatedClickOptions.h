@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef SimulatedClickOptions_h
-#define SimulatedClickOptions_h
+#ifndef SKY_ENGINE_CORE_DOM_SIMULATEDCLICKOPTIONS_H_
+#define SKY_ENGINE_CORE_DOM_SIMULATEDCLICKOPTIONS_H_
 
 namespace blink {
 
@@ -31,4 +31,4 @@ enum SimulatedClickMouseEventOptions {
 
 } // namespace blink
 
-#endif // SimulatedClickOptions_h
+#endif  // SKY_ENGINE_CORE_DOM_SIMULATEDCLICKOPTIONS_H_

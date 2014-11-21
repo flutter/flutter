@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef FontFallbackList_h
-#define FontFallbackList_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTFALLBACKLIST_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTFALLBACKLIST_H_
 
 #include "sky/engine/platform/fonts/FontSelector.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
@@ -129,4 +129,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTFALLBACKLIST_H_

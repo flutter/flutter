@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef WTF_OwnPtr_h
-#define WTF_OwnPtr_h
+#ifndef SKY_ENGINE_WTF_OWNPTR_H_
+#define SKY_ENGINE_WTF_OWNPTR_H_
 
 #include <algorithm>
 #include "sky/engine/wtf/HashTableDeletedValueType.h"
@@ -225,4 +225,4 @@ namespace WTF {
 
 using WTF::OwnPtr;
 
-#endif // WTF_OwnPtr_h
+#endif  // SKY_ENGINE_WTF_OWNPTR_H_

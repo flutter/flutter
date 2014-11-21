@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CSSFilterRule_h
-#define CSSFilterRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSFILTERRULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSFILTERRULE_H_
 
 #include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -66,4 +66,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSFilterRule, WEBKIT_FILTER_RULE);
 }
 
 
-#endif // CSSFilterRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSFILTERRULE_H_

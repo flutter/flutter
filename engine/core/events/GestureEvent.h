@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GestureEvent_h
-#define GestureEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_GESTUREEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_GESTUREEVENT_H_
 
 #include "sky/engine/core/events/EventDispatcher.h"
 #include "sky/engine/core/events/MouseRelatedEvent.h"
@@ -72,4 +72,4 @@ DEFINE_EVENT_TYPE_CASTS(GestureEvent);
 
 } // namespace blink
 
-#endif // GestureEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_GESTUREEVENT_H_

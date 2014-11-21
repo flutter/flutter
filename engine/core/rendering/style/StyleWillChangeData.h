@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef StyleWillChangeData_h
-#define StyleWillChangeData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEWILLCHANGEDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEWILLCHANGEDATA_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
@@ -39,4 +39,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleWillChangeData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEWILLCHANGEDATA_H_

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef ElementStyleResources_h
-#define ElementStyleResources_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTSTYLERESOURCES_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTSTYLERESOURCES_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -71,4 +71,4 @@ private:
 
 } // namespace blink
 
-#endif // ElementStyleResources_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTSTYLERESOURCES_H_

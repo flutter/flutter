@@ -25,8 +25,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef Locker_h
-#define Locker_h
+#ifndef SKY_ENGINE_WTF_LOCKER_H_
+#define SKY_ENGINE_WTF_LOCKER_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -45,4 +45,4 @@ private:
 
 using WTF::Locker;
 
-#endif
+#endif  // SKY_ENGINE_WTF_LOCKER_H_

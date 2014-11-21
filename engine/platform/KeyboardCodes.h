@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KeyboardCodes_h
-#define KeyboardCodes_h
+#ifndef SKY_ENGINE_PLATFORM_KEYBOARDCODES_H_
+#define SKY_ENGINE_PLATFORM_KEYBOARDCODES_H_
 
 #include "sky/engine/platform/WindowsKeyboardCodes.h"
 
@@ -554,4 +554,4 @@ enum {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_KEYBOARDCODES_H_

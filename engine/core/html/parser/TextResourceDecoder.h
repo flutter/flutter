@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TextResourceDecoder_h
-#define TextResourceDecoder_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_TEXTRESOURCEDECODER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_TEXTRESOURCEDECODER_H_
 
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
@@ -31,4 +31,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_TEXTRESOURCEDECODER_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RangeBoundaryPoint_h
-#define RangeBoundaryPoint_h
+#ifndef SKY_ENGINE_CORE_DOM_RANGEBOUNDARYPOINT_H_
+#define SKY_ENGINE_CORE_DOM_RANGEBOUNDARYPOINT_H_
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -196,4 +196,4 @@ inline bool operator==(const RangeBoundaryPoint& a, const RangeBoundaryPoint& b)
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_RANGEBOUNDARYPOINT_H_

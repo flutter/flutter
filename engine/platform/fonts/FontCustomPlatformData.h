@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontCustomPlatformData_h
-#define FontCustomPlatformData_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTCUSTOMPLATFORMDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTCUSTOMPLATFORMDATA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/FontOrientation.h"
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif // FontCustomPlatformData_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCUSTOMPLATFORMDATA_H_

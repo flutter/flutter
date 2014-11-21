@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementCallbackQueue_h
-#define CustomElementCallbackQueue_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKQUEUE_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKQUEUE_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/custom/CustomElementProcessingStep.h"
@@ -77,4 +77,4 @@ private:
 
 }
 
-#endif // CustomElementCallbackQueue_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTCALLBACKQUEUE_H_

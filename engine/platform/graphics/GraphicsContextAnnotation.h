@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsContextAnnotation_h
-#define GraphicsContextAnnotation_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTANNOTATION_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTANNOTATION_H_
 
 #include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -52,4 +52,4 @@ typedef Vector<std::pair<const char*, String> > AnnotationList;
 
 } // namespace blink
 
-#endif // GraphicsContextAnnotation_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTANNOTATION_H_

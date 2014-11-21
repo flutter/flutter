@@ -26,8 +26,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef GraphicsContextStateSaver_h
-#define GraphicsContextStateSaver_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATESAVER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATESAVER_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif // GraphicsContextStateSaver_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATESAVER_H_

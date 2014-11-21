@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NodeWithIndex_h
-#define NodeWithIndex_h
+#ifndef SKY_ENGINE_CORE_DOM_NODEWITHINDEX_H_
+#define SKY_ENGINE_CORE_DOM_NODEWITHINDEX_H_
 
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -62,4 +62,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_NODEWITHINDEX_H_

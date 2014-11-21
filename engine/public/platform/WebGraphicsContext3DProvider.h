@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGraphicsContext3DProvider_h
-#define WebGraphicsContext3DProvider_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSCONTEXT3DPROVIDER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSCONTEXT3DPROVIDER_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -49,4 +49,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBGRAPHICSCONTEXT3DPROVIDER_H_

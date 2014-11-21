@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsTypes3D_h
-#define GraphicsTypes3D_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES3D_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES3D_H_
 
 #include <stdint.h>
 #include "sky/engine/wtf/Forward.h"
@@ -58,4 +58,4 @@ const unsigned GC3D_IMAGE_ROWBYTES_CHROMIUM = 0x78F0;
 const unsigned GC3D_IMAGE_MAP_CHROMIUM = 0x78F1;
 const unsigned GC3D_IMAGE_SCANOUT_CHROMIUM = 0x78F2;
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES3D_H_

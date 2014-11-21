@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GraphicsContextAnnotator_h
-#define GraphicsContextAnnotator_h
+#ifndef SKY_ENGINE_CORE_RENDERING_GRAPHICSCONTEXTANNOTATOR_H_
+#define SKY_ENGINE_CORE_RENDERING_GRAPHICSCONTEXTANNOTATOR_H_
 
 #define ANNOTATE_GRAPHICS_CONTEXT(paintInfo, renderer) \
     GraphicsContextAnnotator scopedGraphicsContextAnnotator; \
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // GraphicsContextAnnotator_h
+#endif  // SKY_ENGINE_CORE_RENDERING_GRAPHICSCONTEXTANNOTATOR_H_

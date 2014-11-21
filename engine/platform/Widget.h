@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Widget_h
-#define Widget_h
+#ifndef SKY_ENGINE_PLATFORM_WIDGET_H_
+#define SKY_ENGINE_PLATFORM_WIDGET_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
@@ -86,4 +86,4 @@ private:
 
 } // namespace blink
 
-#endif // Widget_h
+#endif  // SKY_ENGINE_PLATFORM_WIDGET_H_

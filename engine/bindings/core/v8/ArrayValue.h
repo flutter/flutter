@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayValue_h
-#define ArrayValue_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_ARRAYVALUE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_ARRAYVALUE_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "v8/include/v8.h"
@@ -63,4 +63,4 @@ private:
 
 }
 
-#endif // ArrayValue_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_ARRAYVALUE_H_

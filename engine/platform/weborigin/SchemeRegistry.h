@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef SchemeRegistry_h
-#define SchemeRegistry_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_SCHEMEREGISTRY_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_SCHEMEREGISTRY_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -79,4 +79,4 @@ public:
 
 } // namespace blink
 
-#endif // SchemeRegistry_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_SCHEMEREGISTRY_H_

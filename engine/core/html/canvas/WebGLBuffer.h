@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLBuffer_h
-#define WebGLBuffer_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLBUFFER_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLBUFFER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLSharedObject.h"
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLBuffer_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLBUFFER_H_

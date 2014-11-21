@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ColorSpace_h
-#define ColorSpace_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_COLORSPACE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_COLORSPACE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -53,4 +53,4 @@ Color convertColor(const Color& srcColor, ColorSpace dstColorSpace, ColorSpace s
 
 } // namespace blink
 
-#endif // ColorSpace_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_COLORSPACE_H_

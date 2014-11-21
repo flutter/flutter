@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ExceptionState_h
-#define ExceptionState_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_EXCEPTIONSTATE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_EXCEPTIONSTATE_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/ScriptPromise.h"
@@ -147,4 +147,4 @@ public:
 
 } // namespace blink
 
-#endif // ExceptionState_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_EXCEPTIONSTATE_H_

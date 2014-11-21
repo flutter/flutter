@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8ErrorHandler_h
-#define V8ErrorHandler_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8ERRORHANDLER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8ERRORHANDLER_H_
 
 #include "sky/engine/bindings/core/v8/V8EventListener.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -58,4 +58,4 @@ private:
 
 } // namespace blink
 
-#endif // V8ErrorHandler_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8ERRORHANDLER_H_

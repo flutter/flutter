@@ -16,8 +16,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef ExceptionCode_h
-#define ExceptionCode_h
+#ifndef SKY_ENGINE_CORE_DOM_EXCEPTIONCODE_H_
+#define SKY_ENGINE_CORE_DOM_EXCEPTIONCODE_H_
 
 namespace blink {
 
@@ -92,4 +92,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // ExceptionCode_h
+#endif  // SKY_ENGINE_CORE_DOM_EXCEPTIONCODE_H_

@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSTokenizer_h
-#define CSSTokenizer_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSTOKENIZER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSTOKENIZER_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -198,4 +198,4 @@ inline UChar* CSSTokenizer::tokenStart<UChar>()
 
 } // namespace blink
 
-#endif // CSSTokenizer_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSTOKENIZER_H_

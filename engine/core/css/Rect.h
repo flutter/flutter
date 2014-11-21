@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef Rect_h
-#define Rect_h
+#ifndef SKY_ENGINE_CORE_CSS_RECT_H_
+#define SKY_ENGINE_CORE_CSS_RECT_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
@@ -132,4 +132,4 @@ private:
 
 } // namespace blink
 
-#endif // Rect_h
+#endif  // SKY_ENGINE_CORE_CSS_RECT_H_

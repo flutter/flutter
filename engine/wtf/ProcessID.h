@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ProcessID_h
-#define ProcessID_h
+#ifndef SKY_ENGINE_WTF_PROCESSID_H_
+#define SKY_ENGINE_WTF_PROCESSID_H_
 
 #if OS(POSIX)
 #include <unistd.h>
@@ -42,5 +42,5 @@ inline int getCurrentProcessID()
 
 using WTF::getCurrentProcessID;
 
-#endif // ProcessID_h
+#endif  // SKY_ENGINE_WTF_PROCESSID_H_
 

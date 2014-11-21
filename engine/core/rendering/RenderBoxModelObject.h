@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef RenderBoxModelObject_h
-#define RenderBoxModelObject_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERBOXMODELOBJECT_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERBOXMODELOBJECT_H_
 
 #include "sky/engine/core/rendering/RenderLayerModelObject.h"
 #include "sky/engine/core/rendering/style/ShadowData.h"
@@ -298,4 +298,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderBoxModelObject, isBoxModelObject());
 
 } // namespace blink
 
-#endif // RenderBoxModelObject_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERBOXMODELOBJECT_H_

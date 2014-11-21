@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSPropertyParser_h
-#define CSSPropertyParser_h
+#ifndef SKY_ENGINE_CORE_CSS_PARSER_CSSPROPERTYPARSER_H_
+#define SKY_ENGINE_CORE_CSS_PARSER_CSSPROPERTYPARSER_H_
 
 // FIXME: Way too many.
 #include "gen/sky/core/CSSPropertyNames.h"
@@ -351,4 +351,4 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID, CSSValueID, const CSSParserCo
 
 } // namespace blink
 
-#endif // CSSPropertyParser_h
+#endif  // SKY_ENGINE_CORE_CSS_PARSER_CSSPROPERTYPARSER_H_

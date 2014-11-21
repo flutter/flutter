@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FetchRequest_h
-#define FetchRequest_h
+#ifndef SKY_ENGINE_CORE_FETCH_FETCHREQUEST_H_
+#define SKY_ENGINE_CORE_FETCH_FETCHREQUEST_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/fetch/FetchInitiatorInfo.h"
@@ -69,4 +69,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_FETCHREQUEST_H_

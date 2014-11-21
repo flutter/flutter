@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PNGImageDecoder_h
-#define PNGImageDecoder_h
+#ifndef SKY_ENGINE_PLATFORM_IMAGE_DECODERS_PNG_PNGIMAGEDECODER_H_
+#define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_PNG_PNGIMAGEDECODER_H_
 
 #include "platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_IMAGE_DECODERS_PNG_PNGIMAGEDECODER_H_

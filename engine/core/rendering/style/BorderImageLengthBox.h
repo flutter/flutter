@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BorderImageLengthBox_h
-#define BorderImageLengthBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_BORDERIMAGELENGTHBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_BORDERIMAGELENGTHBOX_H_
 
 #include "sky/engine/core/rendering/style/BorderImageLength.h"
 
@@ -96,4 +96,4 @@ private:
 
 } // namespace blink
 
-#endif // BorderImageLengthBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_BORDERIMAGELENGTHBOX_H_

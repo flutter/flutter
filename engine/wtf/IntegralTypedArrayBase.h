@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IntegralTypedArrayBase_h
-#define IntegralTypedArrayBase_h
+#ifndef SKY_ENGINE_WTF_INTEGRALTYPEDARRAYBASE_H_
+#define SKY_ENGINE_WTF_INTEGRALTYPEDARRAYBASE_H_
 
 #include <limits>
 #include "sky/engine/wtf/MathExtras.h"
@@ -61,4 +61,4 @@ class IntegralTypedArrayBase : public TypedArrayBase<T> {
 
 using WTF::IntegralTypedArrayBase;
 
-#endif // IntegralTypedArrayBase_h
+#endif  // SKY_ENGINE_WTF_INTEGRALTYPEDARRAYBASE_H_

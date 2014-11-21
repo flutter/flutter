@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PlatformThreadData_h
-#define PlatformThreadData_h
+#ifndef SKY_ENGINE_PLATFORM_PLATFORMTHREADDATA_H_
+#define SKY_ENGINE_PLATFORM_PLATFORMTHREADDATA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -56,4 +56,4 @@ private:
 
 } // namespace blink
 
-#endif // PlatformThreadData_h
+#endif  // SKY_ENGINE_PLATFORM_PLATFORMTHREADDATA_H_

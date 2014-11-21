@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef ContextLifecycleObserver_h
-#define ContextLifecycleObserver_h
+#ifndef SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLEOBSERVER_H_
+#define SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLEOBSERVER_H_
 
 #include "sky/engine/platform/LifecycleContext.h"
 
@@ -46,4 +46,4 @@ protected:
 
 } // namespace blink
 
-#endif // ContextLifecycleObserver_h
+#endif  // SKY_ENGINE_CORE_DOM_CONTEXTLIFECYCLEOBSERVER_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleFilterData_h
-#define StyleFilterData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_
 
 #include "sky/engine/platform/graphics/filters/FilterOperations.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -53,4 +53,4 @@ private:
 } // namespace blink
 
 
-#endif // StyleFilterData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_

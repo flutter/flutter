@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ImageBitmap_h
-#define ImageBitmap_h
+#ifndef SKY_ENGINE_CORE_FRAME_IMAGEBITMAP_H_
+#define SKY_ENGINE_CORE_FRAME_IMAGEBITMAP_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // ImageBitmap_h
+#endif  // SKY_ENGINE_CORE_FRAME_IMAGEBITMAP_H_

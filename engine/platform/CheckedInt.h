@@ -12,8 +12,8 @@
 // 3) Define MOZ_DELETE
 // 4) Change namespace mozilla to namespace blink
 
-#ifndef mozilla_CheckedInt_h_
-#define mozilla_CheckedInt_h_
+#ifndef SKY_ENGINE_PLATFORM_CHECKEDINT_H_
+#define SKY_ENGINE_PLATFORM_CHECKEDINT_H_
 
 /*
  * Build options. Comment out these #defines to disable the corresponding
@@ -815,4 +815,4 @@ typedef CheckedInt<uint64_t> CheckedUint64;
 
 } // namespace blink
 
-#endif /* mozilla_CheckedInt_h_ */
+#endif  // SKY_ENGINE_PLATFORM_CHECKEDINT_H_

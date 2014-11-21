@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontFace_h
-#define FontFace_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTFACE_H_
+#define SKY_ENGINE_CORE_CSS_FONTFACE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/bindings/core/v8/ScriptPromise.h"
@@ -139,4 +139,4 @@ typedef Vector<RefPtr<FontFace> > FontFaceArray;
 
 } // namespace blink
 
-#endif // FontFace_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTFACE_H_

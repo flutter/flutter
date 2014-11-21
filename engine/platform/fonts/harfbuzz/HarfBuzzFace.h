@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HarfBuzzFace_h
-#define HarfBuzzFace_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZFACE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZFACE_H_
 
 #include <hb.h>
 
@@ -72,4 +72,4 @@ private:
 
 } // namespace blink
 
-#endif // HarfBuzzFace_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZFACE_H_

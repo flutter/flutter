@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef TranslateTransformOperation_h
-#define TranslateTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSLATETRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSLATETRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/LengthFunctions.h"
@@ -94,4 +94,4 @@ private:
 
 } // namespace blink
 
-#endif // TranslateTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_TRANSLATETRANSFORMOPERATION_H_

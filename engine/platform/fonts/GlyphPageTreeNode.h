@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GlyphPageTreeNode_h
-#define GlyphPageTreeNode_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGETREENODE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGETREENODE_H_
 
 #include <string.h>
 #include "sky/engine/platform/fonts/GlyphPage.h"
@@ -139,4 +139,4 @@ private:
 
 } // namespace blink
 
-#endif // GlyphPageTreeNode_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGETREENODE_H_

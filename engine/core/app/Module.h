@@ -42,4 +42,4 @@ private:
 
 } // namespace blink
 
-#endif // SKY_ENGINE_CORE_APP_MODULE_H_
+#endif  // SKY_ENGINE_CORE_APP_MODULE_H_

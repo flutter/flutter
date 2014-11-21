@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef RenderLayerFilterInfo_h
-#define RenderLayerFilterInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERFILTERINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERLAYERFILTERINFO_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -71,4 +71,4 @@ private:
 } // namespace blink
 
 
-#endif // RenderLayerFilterInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERFILTERINFO_H_

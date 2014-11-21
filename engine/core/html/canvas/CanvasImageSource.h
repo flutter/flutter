@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasImageSource_h
-#define CanvasImageSource_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASIMAGESOURCE_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASIMAGESOURCE_H_
 
 #include "sky/engine/wtf/PassRefPtr.h"
 
@@ -67,4 +67,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASIMAGESOURCE_H_

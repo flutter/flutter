@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringUTF8Adaptor_h
-#define StringUTF8Adaptor_h
+#ifndef SKY_ENGINE_WTF_TEXT_STRINGUTF8ADAPTOR_H_
+#define SKY_ENGINE_WTF_TEXT_STRINGUTF8ADAPTOR_H_
 
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
@@ -83,4 +83,4 @@ private:
 
 using WTF::StringUTF8Adaptor;
 
-#endif // StringUTF8Adaptor_h
+#endif  // SKY_ENGINE_WTF_TEXT_STRINGUTF8ADAPTOR_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportLoader_h
-#define HTMLImportLoader_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTLOADER_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTLOADER_H_
 
 #include "sky/engine/platform/fetcher/DataPipeDrainer.h"
 #include "sky/engine/platform/fetcher/MojoFetcher.h"
@@ -122,4 +122,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLImportLoader_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTLOADER_H_

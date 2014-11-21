@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGestureCurveTarget_h
-#define WebGestureCurveTarget_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVETARGET_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVETARGET_H_
 
 #include "sky/engine/public/platform/WebFloatSize.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -40,4 +40,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVETARGET_H_

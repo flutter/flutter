@@ -24,8 +24,8 @@
  */
 
 
-#ifndef ResourceLoadInfo_h
-#define ResourceLoadInfo_h
+#ifndef SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADINFO_H_
+#define SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADINFO_H_
 
 #include "sky/engine/platform/network/HTTPHeaderMap.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -48,4 +48,4 @@ struct ResourceLoadInfo : RefCounted<ResourceLoadInfo> {
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_NETWORK_RESOURCELOADINFO_H_

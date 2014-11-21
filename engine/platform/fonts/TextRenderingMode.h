@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextRenderingMode_h
-#define TextRenderingMode_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_TEXTRENDERINGMODE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_TEXTRENDERINGMODE_H_
 
 namespace blink {
 
@@ -32,4 +32,4 @@ enum TextRenderingMode { AutoTextRendering, OptimizeSpeed, OptimizeLegibility, G
 
 } // namespace blink
 
-#endif // TextRenderingMode_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_TEXTRENDERINGMODE_H_

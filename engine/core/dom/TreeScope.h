@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TreeScope_h
-#define TreeScope_h
+#ifndef SKY_ENGINE_CORE_DOM_TREESCOPE_H_
+#define SKY_ENGINE_CORE_DOM_TREESCOPE_H_
 
 #include "sky/engine/core/dom/DocumentOrderedMap.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -176,4 +176,4 @@ TreeScope* commonTreeScope(Node*, Node*);
 
 } // namespace blink
 
-#endif // TreeScope_h
+#endif  // SKY_ENGINE_CORE_DOM_TREESCOPE_H_

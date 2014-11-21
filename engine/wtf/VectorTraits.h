@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef WTF_VectorTraits_h
-#define WTF_VectorTraits_h
+#ifndef SKY_ENGINE_WTF_VECTORTRAITS_H_
+#define SKY_ENGINE_WTF_VECTORTRAITS_H_
 
 #include <utility>
 #include "sky/engine/wtf/OwnPtr.h"
@@ -112,4 +112,4 @@ namespace WTF { \
 using WTF::VectorTraits;
 using WTF::SimpleClassVectorTraits;
 
-#endif // WTF_VectorTraits_h
+#endif  // SKY_ENGINE_WTF_VECTORTRAITS_H_

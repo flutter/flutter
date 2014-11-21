@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VDMXParser_h
-#define VDMXParser_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
+#define SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
 
 #include <stdint.h>
 
@@ -39,4 +39,4 @@ namespace blink {
                    unsigned targetPixelSize);
 }  // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_

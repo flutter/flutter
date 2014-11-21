@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef ReferenceFilter_h
-#define ReferenceFilter_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_REFERENCEFILTER_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_REFERENCEFILTER_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/filters/Filter.h"
@@ -65,4 +65,4 @@ private:
 
 } // namespace blink
 
-#endif // ReferenceFilter_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_REFERENCEFILTER_H_

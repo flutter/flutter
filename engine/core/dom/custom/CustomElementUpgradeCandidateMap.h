@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementUpgradeCandidateMap_h
-#define CustomElementUpgradeCandidateMap_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTUPGRADECANDIDATEMAP_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTUPGRADECANDIDATEMAP_H_
 
 #include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementDescriptorHash.h"
@@ -72,4 +72,4 @@ private:
 
 }
 
-#endif // CustomElementUpgradeCandidateMap_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTUPGRADECANDIDATEMAP_H_

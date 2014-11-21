@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InspectorState_h
-#define InspectorState_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_INSPECTORSTATE_H_
+#define SKY_ENGINE_CORE_INSPECTOR_INSPECTORSTATE_H_
 
 
 #include "sky/engine/platform/JSONValues.h"
@@ -114,4 +114,4 @@ private:
 
 } // namespace blink
 
-#endif // !defined(InspectorState_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_INSPECTORSTATE_H_

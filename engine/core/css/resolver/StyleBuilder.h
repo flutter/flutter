@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StyleBuilder_h
-#define StyleBuilder_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDER_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -52,4 +52,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLEBUILDER_H_

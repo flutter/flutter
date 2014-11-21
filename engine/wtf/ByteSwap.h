@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_ByteSwap_h
-#define WTF_ByteSwap_h
+#ifndef SKY_ENGINE_WTF_BYTESWAP_H_
+#define SKY_ENGINE_WTF_BYTESWAP_H_
 
 #include "sky/engine/wtf/CPU.h"
 #include "sky/engine/wtf/Compiler.h"
@@ -61,4 +61,4 @@ ALWAYS_INLINE size_t bswapuintptrt(size_t x) { return bswap32(x); }
 
 } // namespace WTF
 
-#endif // WTF_ByteSwap_h
+#endif  // SKY_ENGINE_WTF_BYTESWAP_H_

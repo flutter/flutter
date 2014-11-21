@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFilterAnimationCurve_h
-#define WebFilterAnimationCurve_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERANIMATIONCURVE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERANIMATIONCURVE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebCompositorAnimationCurve.h"
@@ -50,4 +50,4 @@ public:
 
 } // namespace blink
 
-#endif // WebFilterAnimationCurve_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFILTERANIMATIONCURVE_H_

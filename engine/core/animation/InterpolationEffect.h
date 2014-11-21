@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef InterpolationEffect_h
-#define InterpolationEffect_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_INTERPOLATIONEFFECT_H_
+#define SKY_ENGINE_CORE_ANIMATION_INTERPOLATIONEFFECT_H_
 
 #include "sky/engine/core/animation/Interpolation.h"
 #include "sky/engine/platform/animation/TimingFunction.h"
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_INTERPOLATIONEFFECT_H_

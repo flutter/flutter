@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef KeyboardEvent_h
-#define KeyboardEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_KEYBOARDEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_KEYBOARDEVENT_H_
 
 #include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/events/UIEventWithKeyState.h"
@@ -125,4 +125,4 @@ DEFINE_EVENT_TYPE_CASTS(KeyboardEvent);
 
 } // namespace blink
 
-#endif // KeyboardEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_KEYBOARDEVENT_H_

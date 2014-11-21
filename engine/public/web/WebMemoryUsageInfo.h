@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebMemoryUsageInfo_h
-#define WebMemoryUsageInfo_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBMEMORYUSAGEINFO_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBMEMORYUSAGEINFO_H_
 
 #include "../platform/WebString.h"
 
@@ -48,4 +48,4 @@ struct WebMemoryUsageInfo {
 
 } // namespace blink
 
-#endif // WebMemoryUsageInfo_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBMEMORYUSAGEINFO_H_

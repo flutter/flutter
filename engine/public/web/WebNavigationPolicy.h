@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebNavigationPolicy_h
-#define WebNavigationPolicy_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONPOLICY_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONPOLICY_H_
 
 namespace blink {
 
@@ -46,4 +46,4 @@ enum WebNavigationPolicy {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBNAVIGATIONPOLICY_H_

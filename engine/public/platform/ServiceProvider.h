@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_PUBLIC_PLATFORM_SERVICES_H_
-#define SKY_ENGINE_PUBLIC_PLATFORM_SERVICES_H_
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_SERVICEPROVIDER_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_SERVICEPROVIDER_H_
 
 namespace mojo {
 class NavigatorHost;
@@ -23,4 +23,4 @@ class ServiceProvider {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_SERVICEPROVIDER_H_

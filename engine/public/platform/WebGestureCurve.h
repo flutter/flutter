@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGestureCurve_h
-#define WebGestureCurve_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVE_H_
 
 namespace blink {
 
@@ -43,4 +43,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBGESTURECURVE_H_

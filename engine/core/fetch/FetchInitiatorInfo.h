@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FetchInitiatorInfo_h
-#define FetchInitiatorInfo_h
+#ifndef SKY_ENGINE_CORE_FETCH_FETCHINITIATORINFO_H_
+#define SKY_ENGINE_CORE_FETCH_FETCHINITIATORINFO_H_
 
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextPosition.h"
@@ -71,4 +71,4 @@ struct CrossThreadFetchInitiatorInfoData {
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_FETCHINITIATORINFO_H_

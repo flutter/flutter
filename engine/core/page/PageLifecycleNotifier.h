@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PageLifecycleNotifier_h
-#define PageLifecycleNotifier_h
+#ifndef SKY_ENGINE_CORE_PAGE_PAGELIFECYCLENOTIFIER_H_
+#define SKY_ENGINE_CORE_PAGE_PAGELIFECYCLENOTIFIER_H_
 
 #include "sky/engine/core/page/PageLifecycleObserver.h"
 #include "sky/engine/platform/LifecycleNotifier.h"
@@ -74,4 +74,4 @@ inline void PageLifecycleNotifier::notifyDidCommitLoad(LocalFrame* frame)
 
 } // namespace blink
 
-#endif // PageLifecycleNotifier_h
+#endif  // SKY_ENGINE_CORE_PAGE_PAGELIFECYCLENOTIFIER_H_

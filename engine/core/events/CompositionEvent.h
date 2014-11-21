@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef CompositionEvent_h
-#define CompositionEvent_h
+#ifndef SKY_ENGINE_CORE_EVENTS_COMPOSITIONEVENT_H_
+#define SKY_ENGINE_CORE_EVENTS_COMPOSITIONEVENT_H_
 
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/events/UIEvent.h"
@@ -81,4 +81,4 @@ private:
 
 } // namespace blink
 
-#endif // CompositionEvent_h
+#endif  // SKY_ENGINE_CORE_EVENTS_COMPOSITIONEVENT_H_

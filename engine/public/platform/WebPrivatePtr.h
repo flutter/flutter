@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebPrivatePtr_h
-#define WebPrivatePtr_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEPTR_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEPTR_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -207,4 +207,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEPTR_H_

@@ -23,8 +23,8 @@
  * DAMAGE.
  */
 
-#ifndef FontFaceSetForEachCallback_h
-#define FontFaceSetForEachCallback_h
+#ifndef SKY_ENGINE_CORE_CSS_FONTFACESETFOREACHCALLBACK_H_
+#define SKY_ENGINE_CORE_CSS_FONTFACESETFOREACHCALLBACK_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -43,4 +43,4 @@ public:
 
 } // namespace blink
 
-#endif // FontFaceSetForEachCallback_h
+#endif  // SKY_ENGINE_CORE_CSS_FONTFACESETFOREACHCALLBACK_H_

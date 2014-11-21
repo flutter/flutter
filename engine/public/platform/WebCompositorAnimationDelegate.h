@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WebCompositorAnimationDelegate_h
-#define WebCompositorAnimationDelegate_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORANIMATIONDELEGATE_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORANIMATIONDELEGATE_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebCompositorAnimation.h"
@@ -22,4 +22,4 @@ public:
 
 } // namespace blink
 
-#endif // WebCompositorAnimationDelegate_h
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBCOMPOSITORANIMATIONDELEGATE_H_

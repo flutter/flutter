@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef RenderTextInfo_h
-#define RenderTextInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_RENDERTEXTINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_RENDERTEXTINFO_H_
 
 #include "sky/engine/platform/text/TextBreakIterator.h"
 
@@ -44,4 +44,4 @@ struct RenderTextInfo {
 
 } // namespace blink
 
-#endif // RenderTextInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_RENDERTEXTINFO_H_

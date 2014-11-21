@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef StyleImage_h
-#define StyleImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -93,4 +93,4 @@ protected:
     typedef int NeedsSemiColonAfterDefineStyleImageTypeCasts
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_

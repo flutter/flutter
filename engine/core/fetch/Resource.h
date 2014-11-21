@@ -20,8 +20,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef Resource_h
-#define Resource_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCE_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCE_H_
 
 #include "sky/engine/core/fetch/ResourceLoaderOptions.h"
 #include "sky/engine/platform/Timer.h"
@@ -355,4 +355,4 @@ const char* ResourceTypeName(Resource::Type);
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCE_H_

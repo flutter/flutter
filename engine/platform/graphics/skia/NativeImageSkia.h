@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NativeImageSkia_h
-#define NativeImageSkia_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_NATIVEIMAGESKIA_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_NATIVEIMAGESKIA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -169,4 +169,4 @@ private:
 
 } // namespace blink
 
-#endif  // NativeImageSkia_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_NATIVEIMAGESKIA_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURLResponsePrivate_h
-#define WebURLResponsePrivate_h
+#ifndef SKY_ENGINE_PLATFORM_EXPORTED_WEBURLRESPONSEPRIVATE_H_
+#define SKY_ENGINE_PLATFORM_EXPORTED_WEBURLRESPONSEPRIVATE_H_
 
 #include "sky/engine/public/platform/WebString.h"
 
@@ -49,4 +49,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_EXPORTED_WEBURLRESPONSEPRIVATE_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8CacheOptions_h
-#define V8CacheOptions_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8CACHEOPTIONS_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8CACHEOPTIONS_H_
 
 namespace blink {
 
@@ -41,4 +41,4 @@ enum V8CacheOptions {
 
 } // namespace blink
 
-#endif // V8CacheOptions_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8CACHEOPTIONS_H_

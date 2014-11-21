@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DecodingImageGenerator_h
-#define DecodingImageGenerator_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_DECODINGIMAGEGENERATOR_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_DECODINGIMAGEGENERATOR_H_
 
 #include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
@@ -63,4 +63,4 @@ private:
 
 } // namespace blink
 
-#endif // DecodingImageGenerator_h_
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_DECODINGIMAGEGENERATOR_H_

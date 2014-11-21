@@ -30,8 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AttributeCollection_h
-#define AttributeCollection_h
+#ifndef SKY_ENGINE_CORE_DOM_ATTRIBUTECOLLECTION_H_
+#define SKY_ENGINE_CORE_DOM_ATTRIBUTECOLLECTION_H_
 
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/Attribute.h"
@@ -159,4 +159,4 @@ size_t AttributeCollectionGeneric<Container, ContainerMemberType>::findIndex(Att
 
 } // namespace blink
 
-#endif // AttributeCollection_h
+#endif  // SKY_ENGINE_CORE_DOM_ATTRIBUTECOLLECTION_H_

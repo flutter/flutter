@@ -27,8 +27,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptBreakpoint_h
-#define ScriptBreakpoint_h
+#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTBREAKPOINT_H_
+#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTBREAKPOINT_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -53,4 +53,4 @@ struct ScriptBreakpoint {
 
 } // namespace blink
 
-#endif // !defined(ScriptBreakpoint_h)
+#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTBREAKPOINT_H_

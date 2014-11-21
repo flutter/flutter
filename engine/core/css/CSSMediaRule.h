@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CSSMediaRule_h
-#define CSSMediaRule_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSMEDIARULE_H_
+#define SKY_ENGINE_CORE_CSS_CSSMEDIARULE_H_
 
 #include "sky/engine/core/css/CSSGroupingRule.h"
 #include "sky/engine/core/css/MediaList.h"
@@ -57,4 +57,4 @@ DEFINE_CSS_RULE_TYPE_CASTS(CSSMediaRule, MEDIA_RULE);
 
 } // namespace blink
 
-#endif // CSSMediaRule_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSMEDIARULE_H_

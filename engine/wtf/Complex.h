@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Complex_h
-#define WTF_Complex_h
+#ifndef SKY_ENGINE_WTF_COMPLEX_H_
+#define SKY_ENGINE_WTF_COMPLEX_H_
 
 #include <complex>
 #include "sky/engine/wtf/MathExtras.h"
@@ -46,4 +46,4 @@ inline Complex complexFromMagnitudePhase(double magnitude, double phase)
 using WTF::Complex;
 using WTF::complexFromMagnitudePhase;
 
-#endif // WTF_Complex_h
+#endif  // SKY_ENGINE_WTF_COMPLEX_H_

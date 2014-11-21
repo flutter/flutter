@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef KeyframeList_h
-#define KeyframeList_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_KEYFRAMELIST_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_KEYFRAMELIST_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
@@ -93,4 +93,4 @@ private:
 
 } // namespace blink
 
-#endif // KeyframeList_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_KEYFRAMELIST_H_

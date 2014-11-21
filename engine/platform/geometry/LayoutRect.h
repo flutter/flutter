@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LayoutRect_h
-#define LayoutRect_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTRECT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTRECT_H_
 
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/geometry/LayoutBoxExtent.h"
@@ -232,4 +232,4 @@ inline IntRect pixelSnappedIntRect(LayoutPoint location, LayoutSize size)
 
 } // namespace blink
 
-#endif // LayoutRect_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTRECT_H_

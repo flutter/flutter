@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_CryptographicallyRandomNumber_h
-#define WTF_CryptographicallyRandomNumber_h
+#ifndef SKY_ENGINE_WTF_CRYPTOGRAPHICALLYRANDOMNUMBER_H_
+#define SKY_ENGINE_WTF_CRYPTOGRAPHICALLYRANDOMNUMBER_H_
 
 #include <stdint.h>
 
@@ -46,4 +46,4 @@ WTF_EXPORT void cryptographicallyRandomValues(void* buffer, size_t length);
 using WTF::cryptographicallyRandomNumber;
 using WTF::cryptographicallyRandomValues;
 
-#endif
+#endif  // SKY_ENGINE_WTF_CRYPTOGRAPHICALLYRANDOMNUMBER_H_

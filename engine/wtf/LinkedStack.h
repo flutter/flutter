@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LinkedStack_h
-#define LinkedStack_h
+#ifndef SKY_ENGINE_WTF_LINKEDSTACK_H_
+#define SKY_ENGINE_WTF_LINKEDSTACK_H_
 
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -111,4 +111,4 @@ inline size_t LinkedStack<T>::size()
 
 using WTF::LinkedStack;
 
-#endif
+#endif  // SKY_ENGINE_WTF_LINKEDSTACK_H_

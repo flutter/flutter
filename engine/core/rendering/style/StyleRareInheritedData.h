@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef StyleRareInheritedData_h
-#define StyleRareInheritedData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLERAREINHERITEDDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLERAREINHERITEDDATA_H_
 
 #include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
@@ -141,4 +141,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleRareInheritedData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLERAREINHERITEDDATA_H_

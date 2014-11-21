@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CSSPropertyEquality_h
-#define CSSPropertyEquality_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_CSS_CSSPROPERTYEQUALITY_H_
+#define SKY_ENGINE_CORE_ANIMATION_CSS_CSSPROPERTYEQUALITY_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 
@@ -18,4 +18,4 @@ public:
 
 } // namespace blink
 
-#endif // CSSPropertyEquality_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_CSS_CSSPROPERTYEQUALITY_H_

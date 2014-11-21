@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef SharedStyleFinder_h
-#define SharedStyleFinder_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_SHAREDSTYLEFINDER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_SHAREDSTYLEFINDER_H_
 
 #include "sky/engine/core/css/resolver/ElementResolveContext.h"
 #include "sky/engine/core/dom/Element.h"
@@ -78,4 +78,4 @@ private:
 
 } // namespace blink
 
-#endif // SharedStyleFinder_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_SHAREDSTYLEFINDER_H_

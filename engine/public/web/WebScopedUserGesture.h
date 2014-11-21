@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebScopedUserGesture_h
-#define WebScopedUserGesture_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBSCOPEDUSERGESTURE_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBSCOPEDUSERGESTURE_H_
 
 #include "../platform/WebPrivateOwnPtr.h"
 
@@ -67,4 +67,4 @@ private:
 
 } // namespace blink
 
-#endif // WebScopedUserGesture_h
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBSCOPEDUSERGESTURE_H_

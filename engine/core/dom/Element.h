@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef Element_h
-#define Element_h
+#ifndef SKY_ENGINE_CORE_DOM_ELEMENT_H_
+#define SKY_ENGINE_CORE_DOM_ELEMENT_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/HTMLNames.h"
@@ -592,4 +592,4 @@ inline bool isAtShadowBoundary(const Element* element)
 
 } // namespace
 
-#endif // Element_h
+#endif  // SKY_ENGINE_CORE_DOM_ELEMENT_H_

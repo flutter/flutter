@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef HTMLStyleElement_h
-#define HTMLStyleElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLSTYLEELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLSTYLEELEMENT_H_
 
 #include "sky/engine/core/dom/StyleElement.h"
 #include "sky/engine/core/html/HTMLElement.h"
@@ -61,4 +61,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLStyleElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLSTYLEELEMENT_H_

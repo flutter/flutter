@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ShadowRootRareData_h
-#define ShadowRootRareData_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOTRAREDATA_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOTRAREDATA_H_
 
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -93,4 +93,4 @@ inline void ShadowRootRareData::didRemoveInsertionPoint(InsertionPoint* point)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOTRAREDATA_H_

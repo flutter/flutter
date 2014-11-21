@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef ReferrerPolicy_h
-#define ReferrerPolicy_h
+#ifndef SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRERPOLICY_H_
+#define SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRERPOLICY_H_
 
 namespace blink {
 
@@ -45,4 +45,4 @@ enum ReferrerPolicy {
 
 }
 
-#endif // ReferrerPolicy_h
+#endif  // SKY_ENGINE_PLATFORM_WEBORIGIN_REFERRERPOLICY_H_

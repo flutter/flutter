@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef TreeScopeStyleSheetCollection_h
-#define TreeScopeStyleSheetCollection_h
+#ifndef SKY_ENGINE_CORE_DOM_TREESCOPESTYLESHEETCOLLECTION_H_
+#define SKY_ENGINE_CORE_DOM_TREESCOPESTYLESHEETCOLLECTION_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentOrderedList.h"
@@ -97,4 +97,4 @@ protected:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_TREESCOPESTYLESHEETCOLLECTION_H_

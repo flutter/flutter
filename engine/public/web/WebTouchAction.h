@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTouchAction_h
-#define WebTouchAction_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBTOUCHACTION_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBTOUCHACTION_H_
 
 namespace blink {
 
@@ -49,4 +49,4 @@ inline WebTouchAction& operator&= (WebTouchAction& a, WebTouchAction b) { return
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBTOUCHACTION_H_

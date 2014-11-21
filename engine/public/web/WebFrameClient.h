@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFrameClient_h
-#define WebFrameClient_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBFRAMECLIENT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBFRAMECLIENT_H_
 
 #include "../platform/WebColor.h"
 #include "sky/engine/public/platform/WebCommon.h"
@@ -248,4 +248,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBFRAMECLIENT_H_

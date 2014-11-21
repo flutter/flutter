@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef RegisteredEventListener_h
-#define RegisteredEventListener_h
+#ifndef SKY_ENGINE_CORE_EVENTS_REGISTEREDEVENTLISTENER_H_
+#define SKY_ENGINE_CORE_EVENTS_REGISTEREDEVENTLISTENER_H_
 
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -48,4 +48,4 @@ namespace blink {
 
 } // namespace blink
 
-#endif // RegisteredEventListener_h
+#endif  // SKY_ENGINE_CORE_EVENTS_REGISTEREDEVENTLISTENER_H_

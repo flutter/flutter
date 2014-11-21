@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextEncodingRegistry_h
-#define TextEncodingRegistry_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTENCODINGREGISTRY_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTENCODINGREGISTRY_H_
 
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -62,4 +62,4 @@ using WTF::noExtendedTextEncodingNameUsed;
 using WTF::dumpTextEncodingNameMap;
 #endif
 
-#endif // TextEncodingRegistry_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTENCODINGREGISTRY_H_

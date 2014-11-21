@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatPoint_h
-#define FloatPoint_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT_H_
 
 #include <algorithm>
 #include "sky/engine/platform/geometry/FloatSize.h"
@@ -228,4 +228,4 @@ PLATFORM_EXPORT bool findIntersection(const FloatPoint& p1, const FloatPoint& p2
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT_H_

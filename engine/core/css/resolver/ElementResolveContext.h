@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ElementResolveContext_h
-#define ElementResolveContext_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTRESOLVECONTEXT_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTRESOLVECONTEXT_H_
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -54,4 +54,4 @@ private:
 
 } // namespace blink
 
-#endif // ElementResolveContext_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_ELEMENTRESOLVECONTEXT_H_

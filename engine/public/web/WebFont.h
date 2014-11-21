@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFont_h
-#define WebFont_h
+#ifndef SKY_ENGINE_PUBLIC_WEB_WEBFONT_H_
+#define SKY_ENGINE_PUBLIC_WEB_WEBFONT_H_
 
 #include "../platform/WebCanvas.h"
 #include "../platform/WebColor.h"
@@ -97,4 +97,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_WEB_WEBFONT_H_

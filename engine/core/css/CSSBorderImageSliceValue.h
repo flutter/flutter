@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSBorderImageSliceValue_h
-#define CSSBorderImageSliceValue_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSBORDERIMAGESLICEVALUE_H_
+#define SKY_ENGINE_CORE_CSS_CSSBORDERIMAGESLICEVALUE_H_
 
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -60,4 +60,4 @@ DEFINE_CSS_VALUE_TYPE_CASTS(CSSBorderImageSliceValue, isBorderImageSliceValue())
 
 } // namespace blink
 
-#endif // CSSBorderImageSliceValue_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSBORDERIMAGESLICEVALUE_H_

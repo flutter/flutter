@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef TextBreakIterator_h
-#define TextBreakIterator_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATOR_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -234,4 +234,4 @@ PLATFORM_EXPORT unsigned numCharactersInGraphemeClusters(const String&, unsigned
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATOR_H_

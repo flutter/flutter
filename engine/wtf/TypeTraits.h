@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef TypeTraits_h
-#define TypeTraits_h
+#ifndef SKY_ENGINE_WTF_TYPETRAITS_H_
+#define SKY_ENGINE_WTF_TYPETRAITS_H_
 
 #include <utility>
 
@@ -308,4 +308,4 @@ namespace WTF {
 
 } // namespace WTF
 
-#endif // TypeTraits_h
+#endif  // SKY_ENGINE_WTF_TYPETRAITS_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLContextObject_h
-#define WebGLContextObject_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTOBJECT_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTOBJECT_H_
 
 #include "sky/engine/core/html/canvas/WebGLObject.h"
 
@@ -71,4 +71,4 @@ private:
 
 } // namespace blink
 
-#endif // WebGLContextObject_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTOBJECT_H_

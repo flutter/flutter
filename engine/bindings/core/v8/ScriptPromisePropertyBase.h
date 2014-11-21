@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ScriptPromisePropertyBase_h
-#define ScriptPromisePropertyBase_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISEPROPERTYBASE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISEPROPERTYBASE_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/ScriptPromise.h"
@@ -75,4 +75,4 @@ private:
 
 } // namespace blink
 
-#endif // ScriptPromisePropertyBase_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROMISEPROPERTYBASE_H_

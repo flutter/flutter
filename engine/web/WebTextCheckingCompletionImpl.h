@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebTextCheckingCompletionImpl_h
-#define WebTextCheckingCompletionImpl_h
+#ifndef SKY_ENGINE_WEB_WEBTEXTCHECKINGCOMPLETIONIMPL_H_
+#define SKY_ENGINE_WEB_WEBTEXTCHECKINGCOMPLETIONIMPL_H_
 
 #include "sky/engine/platform/text/TextChecking.h"
 #include "sky/engine/public/web/WebTextCheckingCompletion.h"
@@ -57,4 +57,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBTEXTCHECKINGCOMPLETIONIMPL_H_

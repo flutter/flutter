@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef LineInfo_h
-#define LineInfo_h
+#ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_
+#define SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_
 
 #include "sky/engine/core/rendering/line/LineWidth.h"
 
@@ -65,4 +65,4 @@ private:
 
 }
 
-#endif // LineInfo_h
+#endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef LengthStyleInterpolation_h
-#define LengthStyleInterpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_LENGTHSTYLEINTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_LENGTHSTYLEINTERPOLATION_H_
 
 #include "sky/engine/core/animation/StyleInterpolation.h"
 #include "sky/engine/platform/Length.h"
@@ -36,4 +36,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_LENGTHSTYLEINTERPOLATION_H_

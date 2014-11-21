@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UseCounter_h
-#define UseCounter_h
+#ifndef SKY_ENGINE_CORE_FRAME_USECOUNTER_H_
+#define SKY_ENGINE_CORE_FRAME_USECOUNTER_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/wtf/BitVector.h"
@@ -472,4 +472,4 @@ private:
 
 } // namespace blink
 
-#endif // UseCounter_h
+#endif  // SKY_ENGINE_CORE_FRAME_USECOUNTER_H_

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BidiContext_h
-#define BidiContext_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDICONTEXT_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDICONTEXT_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -88,4 +88,4 @@ PLATFORM_EXPORT bool operator==(const BidiContext&, const BidiContext&);
 
 } // namespace blink
 
-#endif // BidiContext_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDICONTEXT_H_

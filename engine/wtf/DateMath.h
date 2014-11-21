@@ -40,8 +40,8 @@
  *
  */
 
-#ifndef DateMath_h
-#define DateMath_h
+#ifndef SKY_ENGINE_WTF_DATEMATH_H_
+#define SKY_ENGINE_WTF_DATEMATH_H_
 
 #include <stdint.h>
 #include <string.h>
@@ -99,4 +99,4 @@ using WTF::parseDateFromNullTerminatedCharacters;
 using WTF::makeRFC2822DateString;
 using WTF::convertToLocalTime;
 
-#endif // DateMath_h
+#endif  // SKY_ENGINE_WTF_DATEMATH_H_

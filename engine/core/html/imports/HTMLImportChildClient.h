@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLImportChildClient_h
-#define HTMLImportChildClient_h
+#ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILDCLIENT_H_
+#define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILDCLIENT_H_
 
 namespace blink {
 
@@ -49,4 +49,4 @@ public:
 
 } // namespace blink
 
-#endif // HTMLImportChildClient_h
+#endif  // SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTCHILDCLIENT_H_

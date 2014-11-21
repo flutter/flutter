@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFloatPoint_h
-#define WebFloatPoint_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT_H_
 
 #include "sky/engine/public/platform/WebCommon.h"
 
@@ -109,4 +109,4 @@ inline bool operator!=(const WebFloatPoint& a, const WebFloatPoint& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBFLOATPOINT_H_

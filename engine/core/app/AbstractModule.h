@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_APP_ABSTRACT_MODULE_H_
-#define SKY_ENGINE_CORE_APP_ABSTRACT_MODULE_H_
+#ifndef SKY_ENGINE_CORE_APP_ABSTRACTMODULE_H_
+#define SKY_ENGINE_CORE_APP_ABSTRACTMODULE_H_
 
 #include "sky/engine/bindings/core/v8/ScriptPromiseResolver.h"
 #include "sky/engine/core/app/ModuleLoader.h"
@@ -47,4 +47,4 @@ class AbstractModule : public RefCounted<AbstractModule>,
 
 } // namespace blink
 
-#endif // SKY_ENGINE_CORE_APP_ABSTRACT_MODULE_H_
+#endif  // SKY_ENGINE_CORE_APP_ABSTRACTMODULE_H_

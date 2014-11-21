@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ShadowRoot_h
-#define ShadowRoot_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOT_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOT_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
@@ -137,4 +137,4 @@ DEFINE_TYPE_CASTS(ShadowRoot, TreeScope, treeScope, treeScope->rootNode().isShad
 
 } // namespace blink
 
-#endif // ShadowRoot_h
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_SHADOWROOT_H_

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef Latin1TextIterator_h
-#define Latin1TextIterator_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_
+#define SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -64,4 +64,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_

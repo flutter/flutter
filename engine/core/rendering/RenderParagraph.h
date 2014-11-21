@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef RenderParagraph_h
-#define RenderParagraph_h
+#ifndef SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
+#define SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
@@ -26,4 +26,4 @@ DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());
 
 } // namespace blink
 
-#endif // RenderParagraph_h
+#endif  // SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_

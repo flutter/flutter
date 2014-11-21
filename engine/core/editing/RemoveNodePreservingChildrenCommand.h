@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RemoveNodePreservingChildrenCommand_h
-#define RemoveNodePreservingChildrenCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_REMOVENODEPRESERVINGCHILDRENCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_REMOVENODEPRESERVINGCHILDRENCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -48,4 +48,4 @@ private:
 
 } // namespace blink
 
-#endif // RemoveNodePreservingChildrenCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_REMOVENODEPRESERVINGCHILDRENCOMMAND_H_

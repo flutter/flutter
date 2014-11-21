@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HTMLIFrameElement_h
-#define HTMLIFrameElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLIFRAMEELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLIFRAMEELEMENT_H_
 
 #include "gen/sky/core/HTMLNames.h"
 #include "mojo/services/public/cpp/view_manager/view_observer.h"
@@ -46,4 +46,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLIFrameElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLIFRAMEELEMENT_H_

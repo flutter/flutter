@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_LeakAnnotations_h
-#define WTF_LeakAnnotations_h
+#ifndef SKY_ENGINE_WTF_LEAKANNOTATIONS_H_
+#define SKY_ENGINE_WTF_LEAKANNOTATIONS_H_
 
 // This file defines macros which can be used to annotate intentional memory
 // leaks. Support for annotations is implemented in HeapChecker and
@@ -88,4 +88,4 @@ public:
 
 } // namespace WTF
 
-#endif // WTF_LeakAnnotations_h
+#endif  // SKY_ENGINE_WTF_LEAKANNOTATIONS_H_

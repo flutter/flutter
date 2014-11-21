@@ -23,8 +23,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef EventDispatcher_h
-#define EventDispatcher_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTDISPATCHER_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTDISPATCHER_H_
 
 #include "sky/engine/core/dom/SimulatedClickOptions.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -77,4 +77,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTDISPATCHER_H_

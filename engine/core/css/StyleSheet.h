@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef StyleSheet_h
-#define StyleSheet_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLESHEET_H_
+#define SKY_ENGINE_CORE_CSS_STYLESHEET_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/css/parser/CSSParserMode.h"
@@ -54,4 +54,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_STYLESHEET_H_

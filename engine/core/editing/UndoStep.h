@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UndoStep_h
-#define UndoStep_h
+#ifndef SKY_ENGINE_CORE_EDITING_UNDOSTEP_H_
+#define SKY_ENGINE_CORE_EDITING_UNDOSTEP_H_
 
 #include "sky/engine/core/editing/EditAction.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -51,4 +51,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EDITING_UNDOSTEP_H_

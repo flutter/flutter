@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef BorderData_h
-#define BorderData_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_
 
 #include "sky/engine/core/rendering/style/BorderValue.h"
 #include "sky/engine/core/rendering/style/NinePieceImage.h"
@@ -140,4 +140,4 @@ private:
 
 } // namespace blink
 
-#endif // BorderData_h
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_

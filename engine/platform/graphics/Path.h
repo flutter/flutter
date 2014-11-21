@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Path_h
-#define Path_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_PATH_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_PATH_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/RoundedRect.h"
@@ -160,4 +160,4 @@ PLATFORM_EXPORT bool ellipseIsRenderable(float startAngle, float endAngle);
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PATH_H_

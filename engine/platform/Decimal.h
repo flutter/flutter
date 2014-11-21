@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Decimal_h
-#define Decimal_h
+#ifndef SKY_ENGINE_PLATFORM_DECIMAL_H_
+#define SKY_ENGINE_PLATFORM_DECIMAL_H_
 
 #include <stdint.h>
 #include "sky/engine/platform/PlatformExport.h"
@@ -179,4 +179,4 @@ private:
 
 } // namespace blink
 
-#endif // Decimal_h
+#endif  // SKY_ENGINE_PLATFORM_DECIMAL_H_

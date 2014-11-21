@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BidiCharacterRun_h
-#define BidiCharacterRun_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_BIDICHARACTERRUN_H_
+#define SKY_ENGINE_PLATFORM_TEXT_BIDICHARACTERRUN_H_
 
 #include "sky/engine/platform/text/BidiContext.h"
 #include "sky/engine/platform/text/TextDirection.h"
@@ -77,4 +77,4 @@ struct BidiCharacterRun {
 
 } // namespace blink
 
-#endif // BidiCharacterRun_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_BIDICHARACTERRUN_H_

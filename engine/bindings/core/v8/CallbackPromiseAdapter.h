@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CallbackPromiseAdapter_h
-#define CallbackPromiseAdapter_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CALLBACKPROMISEADAPTER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CALLBACKPROMISEADAPTER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptPromiseResolver.h"
 #include "sky/engine/public/platform/WebCallbacks.h"
@@ -142,4 +142,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CALLBACKPROMISEADAPTER_H_

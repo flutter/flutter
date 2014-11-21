@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef AnimationHelpers_h
-#define AnimationHelpers_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONHELPERS_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONHELPERS_H_
 
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
@@ -30,4 +30,4 @@ static inline CSSPropertyID camelCaseCSSPropertyNameToID(const String& propertyN
 
 } // namespace blink
 
-#endif // AnimationHelpers_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONHELPERS_H_

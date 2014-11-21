@@ -25,8 +25,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef Frame_h
-#define Frame_h
+#ifndef SKY_ENGINE_CORE_FRAME_FRAME_H_
+#define SKY_ENGINE_CORE_FRAME_FRAME_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -101,4 +101,4 @@ DEFINE_COMPARISON_OPERATORS_WITH_REFERENCES_REFCOUNTED(Frame)
 
 } // namespace blink
 
-#endif // Frame_h
+#endif  // SKY_ENGINE_CORE_FRAME_FRAME_H_

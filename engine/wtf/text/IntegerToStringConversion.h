@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef IntegerToStringConversion_h
-#define IntegerToStringConversion_h
+#ifndef SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_
+#define SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_
 
 #include "sky/engine/wtf/text/StringBuilder.h"
 #include "sky/engine/wtf/text/StringImpl.h"
@@ -96,4 +96,4 @@ inline typename ConversionTrait<T>::ReturnType numberToStringUnsigned(UnsignedIn
 
 } // namespace WTF
 
-#endif // IntegerToStringConversion_h
+#endif  // SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_

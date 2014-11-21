@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BackgroundHTMLParser_h
-#define BackgroundHTMLParser_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_BACKGROUNDHTMLPARSER_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_BACKGROUNDHTMLPARSER_H_
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/system/core.h"
@@ -83,4 +83,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_BACKGROUNDHTMLPARSER_H_

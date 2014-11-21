@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebURL_h
-#define WebURL_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBURL_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBURL_H_
 
 #include "sky/engine/public/platform/WebCString.h"
 #include "sky/engine/public/platform/WebString.h"
@@ -145,4 +145,4 @@ inline bool operator!=(const WebURL& a, const WebURL& b)
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBURL_H_

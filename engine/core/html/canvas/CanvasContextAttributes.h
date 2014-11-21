@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CanvasContextAttributes_h
-#define CanvasContextAttributes_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASCONTEXTATTRIBUTES_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_CANVASCONTEXTATTRIBUTES_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -45,4 +45,4 @@ protected:
 
 } // namespace blink
 
-#endif // CanvasContextAttributes_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_CANVASCONTEXTATTRIBUTES_H_

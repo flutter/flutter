@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SegmentedFontData_h
-#define SegmentedFontData_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_SEGMENTEDFONTDATA_H_
+#define SKY_ENGINE_PLATFORM_FONTS_SEGMENTEDFONTDATA_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/FontData.h"
@@ -86,4 +86,4 @@ DEFINE_FONT_DATA_TYPE_CASTS(SegmentedFontData, true);
 
 } // namespace blink
 
-#endif // SegmentedFontData_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_SEGMENTEDFONTDATA_H_

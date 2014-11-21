@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HitTestingTransformState_h
-#define HitTestingTransformState_h
+#ifndef SKY_ENGINE_CORE_RENDERING_HITTESTINGTRANSFORMSTATE_H_
+#define SKY_ENGINE_CORE_RENDERING_HITTESTINGTRANSFORMSTATE_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -92,4 +92,4 @@ private:
 
 } // namespace blink
 
-#endif // HitTestingTransformState_h
+#endif  // SKY_ENGINE_CORE_RENDERING_HITTESTINGTRANSFORMSTATE_H_

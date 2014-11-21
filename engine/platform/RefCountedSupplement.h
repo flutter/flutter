@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RefCountedSupplement_h
-#define RefCountedSupplement_h
+#ifndef SKY_ENGINE_PLATFORM_REFCOUNTEDSUPPLEMENT_H_
+#define SKY_ENGINE_PLATFORM_REFCOUNTEDSUPPLEMENT_H_
 
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -72,4 +72,4 @@ public:
 
 } // namespace blink
 
-#endif // RefCountedSupplement_h
+#endif  // SKY_ENGINE_PLATFORM_REFCOUNTEDSUPPLEMENT_H_

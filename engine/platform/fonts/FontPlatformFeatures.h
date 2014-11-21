@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FontPlatformFeatures_h
-#define FontPlatformFeatures_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMFEATURES_H_
+#define SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMFEATURES_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 
@@ -45,4 +45,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_FONTS_FONTPLATFORMFEATURES_H_

@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NonCJKGlyphOrientation_h
-#define NonCJKGlyphOrientation_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_NONCJKGLYPHORIENTATION_H_
+#define SKY_ENGINE_PLATFORM_TEXT_NONCJKGLYPHORIENTATION_H_
 
 namespace blink {
 
@@ -32,4 +32,4 @@ enum NonCJKGlyphOrientation { NonCJKGlyphOrientationVerticalRight, NonCJKGlyphOr
 
 }
 
-#endif // NonCJKGlyphOrientation_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_NONCJKGLYPHORIENTATION_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ScriptState_h
-#define ScriptState_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSTATE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSTATE_H_
 
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/V8PerContextData.h"
@@ -142,4 +142,4 @@ private:
 
 }
 
-#endif // ScriptState_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTSTATE_H_

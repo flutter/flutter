@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JSONValues_h
-#define JSONValues_h
+#ifndef SKY_ENGINE_PLATFORM_JSONVALUES_H_
+#define SKY_ENGINE_PLATFORM_JSONVALUES_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -316,4 +316,4 @@ public:
 
 } // namespace blink
 
-#endif // !defined(JSONValues_h)
+#endif  // SKY_ENGINE_PLATFORM_JSONVALUES_H_

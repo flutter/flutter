@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PathTraversalState_h
-#define PathTraversalState_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_PATHTRAVERSALSTATE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_PATHTRAVERSALSTATE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
@@ -68,4 +68,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PATHTRAVERSALSTATE_H_

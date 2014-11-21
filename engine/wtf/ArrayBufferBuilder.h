@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayBufferBuilder_h
-#define ArrayBufferBuilder_h
+#ifndef SKY_ENGINE_WTF_ARRAYBUFFERBUILDER_H_
+#define SKY_ENGINE_WTF_ARRAYBUFFERBUILDER_H_
 
 #include "sky/engine/wtf/ArrayBuffer.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -114,4 +114,4 @@ private:
 
 using WTF::ArrayBufferBuilder;
 
-#endif // ArrayBufferBuilder_h
+#endif  // SKY_ENGINE_WTF_ARRAYBUFFERBUILDER_H_

@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ChromeClientImpl_h
-#define ChromeClientImpl_h
+#ifndef SKY_ENGINE_WEB_CHROMECLIENTIMPL_H_
+#define SKY_ENGINE_WEB_CHROMECLIENTIMPL_H_
 
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -122,4 +122,4 @@ DEFINE_TYPE_CASTS(ChromeClientImpl, ChromeClient, client, client->isChromeClient
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_CHROMECLIENTIMPL_H_

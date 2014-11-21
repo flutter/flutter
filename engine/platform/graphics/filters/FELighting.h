@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FELighting_h
-#define FELighting_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FELIGHTING_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FELIGHTING_H_
 
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/filters/Filter.h"
@@ -122,4 +122,4 @@ private:
 
 } // namespace blink
 
-#endif // FELighting_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FILTERS_FELIGHTING_H_

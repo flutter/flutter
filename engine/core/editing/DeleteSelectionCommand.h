@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DeleteSelectionCommand_h
-#define DeleteSelectionCommand_h
+#ifndef SKY_ENGINE_CORE_EDITING_DELETESELECTIONCOMMAND_H_
+#define SKY_ENGINE_CORE_EDITING_DELETESELECTIONCOMMAND_H_
 
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
@@ -93,4 +93,4 @@ private:
 
 } // namespace blink
 
-#endif // DeleteSelectionCommand_h
+#endif  // SKY_ENGINE_CORE_EDITING_DELETESELECTIONCOMMAND_H_

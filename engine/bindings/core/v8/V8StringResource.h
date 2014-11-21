@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef V8StringResource_h
-#define V8StringResource_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_V8STRINGRESOURCE_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_V8STRINGRESOURCE_H_
 
 #include "sky/engine/wtf/Threading.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -294,4 +294,4 @@ template<> inline String V8StringResource<TreatNullAndUndefinedAsNullString>::fa
 
 } // namespace blink
 
-#endif // V8StringResource_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_V8STRINGRESOURCE_H_

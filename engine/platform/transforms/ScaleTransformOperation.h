@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef ScaleTransformOperation_h
-#define ScaleTransformOperation_h
+#ifndef SKY_ENGINE_PLATFORM_TRANSFORMS_SCALETRANSFORMOPERATION_H_
+#define SKY_ENGINE_PLATFORM_TRANSFORMS_SCALETRANSFORMOPERATION_H_
 
 #include "sky/engine/platform/transforms/TransformOperation.h"
 
@@ -84,4 +84,4 @@ private:
 
 } // namespace blink
 
-#endif // ScaleTransformOperation_h
+#endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_SCALETRANSFORMOPERATION_H_

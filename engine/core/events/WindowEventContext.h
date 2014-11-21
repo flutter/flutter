@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef WindowEventContext_h
-#define WindowEventContext_h
+#ifndef SKY_ENGINE_CORE_EVENTS_WINDOWEVENTCONTEXT_H_
+#define SKY_ENGINE_CORE_EVENTS_WINDOWEVENTCONTEXT_H_
 
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -64,4 +64,4 @@ inline EventTarget* WindowEventContext::target() const
 
 }
 
-#endif // WindowEventContext_h
+#endif  // SKY_ENGINE_CORE_EVENTS_WINDOWEVENTCONTEXT_H_

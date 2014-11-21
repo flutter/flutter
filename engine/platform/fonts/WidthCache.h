@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WidthCache_h
-#define WidthCache_h
+#ifndef SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_
+#define SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_
 
 #include "sky/engine/platform/geometry/IntRectExtent.h"
 #include "sky/engine/platform/text/TextRun.h"
@@ -210,4 +210,4 @@ inline bool operator==(const WidthCache::SmallStringKey& a, const WidthCache::Sm
 
 } // namespace blink
 
-#endif // WidthCache_h
+#endif  // SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_

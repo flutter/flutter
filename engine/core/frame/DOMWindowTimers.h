@@ -30,8 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DOMWindowTimers_h
-#define DOMWindowTimers_h
+#ifndef SKY_ENGINE_CORE_FRAME_DOMWINDOWTIMERS_H_
+#define SKY_ENGINE_CORE_FRAME_DOMWINDOWTIMERS_H_
 
 #include "sky/engine/wtf/Forward.h"
 
@@ -49,4 +49,4 @@ void clearInterval(EventTarget&, int timeoutId);
 
 } // namespace blink
 
-#endif // DOMWindowTimers_h
+#endif  // SKY_ENGINE_CORE_FRAME_DOMWINDOWTIMERS_H_

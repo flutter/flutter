@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef StyleResolverState_h
-#define StyleResolverState_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATE_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 
@@ -129,4 +129,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleResolverState_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVERSTATE_H_

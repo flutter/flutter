@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef SegmentedString_h
-#define SegmentedString_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_SEGMENTEDSTRING_H_
+#define SKY_ENGINE_PLATFORM_TEXT_SEGMENTEDSTRING_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Deque.h"
@@ -419,4 +419,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_TEXT_SEGMENTEDSTRING_H_

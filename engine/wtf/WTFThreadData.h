@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef WTFThreadData_h
-#define WTFThreadData_h
+#ifndef SKY_ENGINE_WTF_WTFTHREADDATA_H_
+#define SKY_ENGINE_WTF_WTFTHREADDATA_H_
 
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -83,4 +83,4 @@ inline WTFThreadData& wtfThreadData()
 using WTF::WTFThreadData;
 using WTF::wtfThreadData;
 
-#endif // WTFThreadData_h
+#endif  // SKY_ENGINE_WTF_WTFTHREADDATA_H_

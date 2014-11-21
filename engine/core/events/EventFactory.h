@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EventFactory_h
-#define EventFactory_h
+#ifndef SKY_ENGINE_CORE_EVENTS_EVENTFACTORY_H_
+#define SKY_ENGINE_CORE_EVENTS_EVENTFACTORY_H_
 
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -55,4 +55,4 @@ public:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_EVENTS_EVENTFACTORY_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HTMLImportElement_h
-#define HTMLImportElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLIMPORTELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLIMPORTELEMENT_H_
 
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/imports/HTMLImportChildClient.h"
@@ -36,4 +36,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLImportElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLIMPORTELEMENT_H_

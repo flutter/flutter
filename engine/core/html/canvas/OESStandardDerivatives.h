@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OESStandardDerivatives_h
-#define OESStandardDerivatives_h
+#ifndef SKY_ENGINE_CORE_HTML_CANVAS_OESSTANDARDDERIVATIVES_H_
+#define SKY_ENGINE_CORE_HTML_CANVAS_OESSTANDARDDERIVATIVES_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
@@ -48,4 +48,4 @@ private:
 
 } // namespace blink
 
-#endif // OESStandardDerivatives_h
+#endif  // SKY_ENGINE_CORE_HTML_CANVAS_OESSTANDARDDERIVATIVES_H_

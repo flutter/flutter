@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AsyncMethodRunner_h
-#define AsyncMethodRunner_h
+#ifndef SKY_ENGINE_PLATFORM_ASYNCMETHODRUNNER_H_
+#define SKY_ENGINE_PLATFORM_ASYNCMETHODRUNNER_H_
 
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -133,4 +133,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_ASYNCMETHODRUNNER_H_

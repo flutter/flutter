@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebLocalFrameImpl_h
-#define WebLocalFrameImpl_h
+#ifndef SKY_ENGINE_WEB_WEBLOCALFRAMEIMPL_H_
+#define SKY_ENGINE_WEB_WEBLOCALFRAMEIMPL_H_
 
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -185,4 +185,4 @@ DEFINE_TYPE_CASTS(WebLocalFrameImpl, WebFrame, frame, frame->isWebLocalFrame(), 
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_WEB_WEBLOCALFRAMEIMPL_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RetainedObjectInfo_h
-#define RetainedObjectInfo_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_RETAINEDOBJECTINFO_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_RETAINEDOBJECTINFO_H_
 
 #include "v8/include/v8-profiler.h"
 
@@ -42,4 +42,4 @@ public:
 
 } // namespace blink
 
-#endif // RetainedObjectInfo_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_RETAINEDOBJECTINFO_H_

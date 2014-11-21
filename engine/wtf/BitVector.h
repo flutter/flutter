@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BitVector_h
-#define BitVector_h
+#ifndef SKY_ENGINE_WTF_BITVECTOR_H_
+#define SKY_ENGINE_WTF_BITVECTOR_H_
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/StdLibExtras.h"
@@ -243,4 +243,4 @@ private:
 
 using WTF::BitVector;
 
-#endif // BitVector_h
+#endif  // SKY_ENGINE_WTF_BITVECTOR_H_

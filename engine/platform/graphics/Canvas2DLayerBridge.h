@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Canvas2DLayerBridge_h
-#define Canvas2DLayerBridge_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DLAYERBRIDGE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DLAYERBRIDGE_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -142,4 +142,4 @@ protected:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_CANVAS2DLAYERBRIDGE_H_

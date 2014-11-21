@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptFunctionCall_h
-#define ScriptFunctionCall_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTFUNCTIONCALL_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTFUNCTIONCALL_H_
 
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 
@@ -74,4 +74,4 @@ protected:
 
 } // namespace blink
 
-#endif // ScriptFunctionCall
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTFUNCTIONCALL_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SelectRuleFeatureSet_h
-#define SelectRuleFeatureSet_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOW_SELECTRULEFEATURESET_H_
+#define SKY_ENGINE_CORE_DOM_SHADOW_SELECTRULEFEATURESET_H_
 
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/dom/Element.h"
@@ -78,4 +78,4 @@ inline bool SelectRuleFeatureSet::hasSelectorForAttribute(const AtomicString& at
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SHADOW_SELECTRULEFEATURESET_H_

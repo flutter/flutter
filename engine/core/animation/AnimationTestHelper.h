@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef AnimationTestHelper_h
-#define AnimationTestHelper_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONTESTHELPER_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATIONTESTHELPER_H_
 
 #include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"
@@ -20,4 +20,4 @@ void setV8ObjectPropertyAsNumber(v8::Handle<v8::Object>, String, double);
 
 } // namespace blink
 
-#endif // AnimationTestHelper_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATIONTESTHELPER_H_

@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CSSValuePool_h
-#define CSSValuePool_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSVALUEPOOL_H_
+#define SKY_ENGINE_CORE_CSS_CSSVALUEPOOL_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
@@ -90,4 +90,4 @@ CSSValuePool& cssValuePool();
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_CSSVALUEPOOL_H_

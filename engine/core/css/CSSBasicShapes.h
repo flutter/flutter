@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CSSBasicShapes_h
-#define CSSBasicShapes_h
+#ifndef SKY_ENGINE_CORE_CSS_CSSBASICSHAPES_H_
+#define SKY_ENGINE_CORE_CSS_CSSBASICSHAPES_H_
 
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
@@ -210,4 +210,4 @@ private:
 
 } // namespace blink
 
-#endif // CSSBasicShapes_h
+#endif  // SKY_ENGINE_CORE_CSS_CSSBASICSHAPES_H_

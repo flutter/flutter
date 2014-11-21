@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TypedArrayBase_h
-#define TypedArrayBase_h
+#ifndef SKY_ENGINE_WTF_TYPEDARRAYBASE_H_
+#define SKY_ENGINE_WTF_TYPEDARRAYBASE_H_
 
 #include "sky/engine/wtf/ArrayBuffer.h"
 #include "sky/engine/wtf/ArrayBufferView.h"
@@ -152,4 +152,4 @@ protected:
 
 using WTF::TypedArrayBase;
 
-#endif // TypedArrayBase_h
+#endif  // SKY_ENGINE_WTF_TYPEDARRAYBASE_H_

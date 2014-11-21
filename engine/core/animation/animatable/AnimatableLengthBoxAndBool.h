@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableLengthBoxAndBool_h
-#define AnimatableLengthBoxAndBool_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHBOXANDBOOL_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHBOXANDBOOL_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 
@@ -66,4 +66,4 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableLengthBoxAndBool, isLengthBoxAndBoo
 
 } // namespace blink
 
-#endif // AnimatableLengthBoxAndBool_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLELENGTHBOXANDBOOL_H_

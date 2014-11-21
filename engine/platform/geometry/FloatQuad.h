@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FloatQuad_h
-#define FloatQuad_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATQUAD_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATQUAD_H_
 
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -176,5 +176,5 @@ inline bool operator!=(const FloatQuad& a, const FloatQuad& b)
 }   // namespace blink
 
 
-#endif // FloatQuad_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATQUAD_H_
 

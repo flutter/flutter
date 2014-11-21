@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ImageQualityController_h
-#define ImageQualityController_h
+#ifndef SKY_ENGINE_CORE_RENDERING_IMAGEQUALITYCONTROLLER_H_
+#define SKY_ENGINE_CORE_RENDERING_IMAGEQUALITYCONTROLLER_H_
 
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/geometry/IntSize.h"
@@ -79,4 +79,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_IMAGEQUALITYCONTROLLER_H_

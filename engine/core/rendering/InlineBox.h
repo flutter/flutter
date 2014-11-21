@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef InlineBox_h
-#define InlineBox_h
+#ifndef SKY_ENGINE_CORE_RENDERING_INLINEBOX_H_
+#define SKY_ENGINE_CORE_RENDERING_INLINEBOX_H_
 
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
@@ -419,4 +419,4 @@ void showTree(const blink::InlineBox*);
 void showLineTree(const blink::InlineBox*);
 #endif
 
-#endif // InlineBox_h
+#endif  // SKY_ENGINE_CORE_RENDERING_INLINEBOX_H_

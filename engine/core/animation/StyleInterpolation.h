@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef StyleInterpolation_h
-#define StyleInterpolation_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_STYLEINTERPOLATION_H_
+#define SKY_ENGINE_CORE_ANIMATION_STYLEINTERPOLATION_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/core/animation/Interpolation.h"
@@ -40,4 +40,4 @@ DEFINE_TYPE_CASTS(StyleInterpolation, Interpolation, value, value->isStyleInterp
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_ANIMATION_STYLEINTERPOLATION_H_

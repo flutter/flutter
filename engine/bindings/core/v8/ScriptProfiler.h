@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptProfiler_h
-#define ScriptProfiler_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROFILER_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROFILER_H_
 
 #include "sky/engine/bindings/core/v8/ScriptHeapSnapshot.h"
 #include "sky/engine/core/inspector/ScriptProfile.h"
@@ -82,4 +82,4 @@ public:
 
 } // namespace blink
 
-#endif // ScriptProfiler_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTPROFILER_H_

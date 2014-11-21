@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
 */
 
-#ifndef StylePropertySerializer_h
-#define StylePropertySerializer_h
+#ifndef SKY_ENGINE_CORE_CSS_STYLEPROPERTYSERIALIZER_H_
+#define SKY_ENGINE_CORE_CSS_STYLEPROPERTYSERIALIZER_H_
 
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/StylePropertySet.h"
@@ -56,4 +56,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_CSS_STYLEPROPERTYSERIALIZER_H_

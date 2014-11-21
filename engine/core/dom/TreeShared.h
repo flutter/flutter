@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef TreeShared_h
-#define TreeShared_h
+#ifndef SKY_ENGINE_CORE_DOM_TREESHARED_H_
+#define SKY_ENGINE_CORE_DOM_TREESHARED_H_
 
 #include "sky/engine/public/platform/WebPrivatePtr.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -117,4 +117,4 @@ template<typename NodeType> void adopted(TreeShared<NodeType>* object)
 
 }
 
-#endif // TreeShared.h
+#endif  // SKY_ENGINE_CORE_DOM_TREESHARED_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PageWidgetDelegate_h
-#define PageWidgetDelegate_h
+#ifndef SKY_ENGINE_WEB_PAGEWIDGETDELEGATE_H_
+#define SKY_ENGINE_WEB_PAGEWIDGETDELEGATE_H_
 
 #include "sky/engine/public/platform/WebCanvas.h"
 #include "sky/engine/public/web/WebWidget.h"
@@ -81,4 +81,4 @@ private:
 };
 
 }
-#endif
+#endif  // SKY_ENGINE_WEB_PAGEWIDGETDELEGATE_H_

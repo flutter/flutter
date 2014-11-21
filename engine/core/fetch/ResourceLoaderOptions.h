@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ResourceLoaderOptions_h
-#define ResourceLoaderOptions_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCELOADEROPTIONS_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCELOADEROPTIONS_H_
 
 #include "sky/engine/core/fetch/FetchInitiatorInfo.h"
 
@@ -121,4 +121,4 @@ struct ResourceLoaderOptions {
 
 } // namespace blink
 
-#endif // ResourceLoaderOptions_h
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCELOADEROPTIONS_H_

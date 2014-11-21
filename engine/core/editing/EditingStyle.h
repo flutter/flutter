@@ -29,8 +29,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EditingStyle_h
-#define EditingStyle_h
+#ifndef SKY_ENGINE_CORE_EDITING_EDITINGSTYLE_H_
+#define SKY_ENGINE_CORE_EDITING_EDITINGSTYLE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
@@ -233,4 +233,4 @@ CSSValueID getIdentifierValue(StylePropertySet*, CSSPropertyID);
 
 } // namespace blink
 
-#endif // EditingStyle_h
+#endif  // SKY_ENGINE_CORE_EDITING_EDITINGSTYLE_H_

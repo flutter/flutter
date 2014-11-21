@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef ShadowTreeStyleSheetCollection_h
-#define ShadowTreeStyleSheetCollection_h
+#ifndef SKY_ENGINE_CORE_DOM_SHADOWTREESTYLESHEETCOLLECTION_H_
+#define SKY_ENGINE_CORE_DOM_SHADOWTREESTYLESHEETCOLLECTION_H_
 
 #include "sky/engine/core/dom/TreeScopeStyleSheetCollection.h"
 
@@ -50,5 +50,5 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_DOM_SHADOWTREESTYLESHEETCOLLECTION_H_
 

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FilterEffectRenderer_h
-#define FilterEffectRenderer_h
+#ifndef SKY_ENGINE_CORE_RENDERING_FILTEREFFECTRENDERER_H_
+#define SKY_ENGINE_CORE_RENDERING_FILTEREFFECTRENDERER_H_
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntRectExtent.h"
@@ -121,4 +121,4 @@ private:
 } // namespace blink
 
 
-#endif // FilterEffectRenderer_h
+#endif  // SKY_ENGINE_CORE_RENDERING_FILTEREFFECTRENDERER_H_

@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextEncoding_h
-#define TextEncoding_h
+#ifndef SKY_ENGINE_WTF_TEXT_TEXTENCODING_H_
+#define SKY_ENGINE_WTF_TEXT_TEXTENCODING_H_
 
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/WTFExport.h"
@@ -88,4 +88,4 @@ using WTF::UTF32LittleEndianEncoding;
 using WTF::UTF8Encoding;
 using WTF::WindowsLatin1Encoding;
 
-#endif // TextEncoding_h
+#endif  // SKY_ENGINE_WTF_TEXT_TEXTENCODING_H_

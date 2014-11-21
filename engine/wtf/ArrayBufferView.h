@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayBufferView_h
-#define ArrayBufferView_h
+#ifndef SKY_ENGINE_WTF_ARRAYBUFFERVIEW_H_
+#define SKY_ENGINE_WTF_ARRAYBUFFERVIEW_H_
 
 #include "sky/engine/wtf/ArrayBuffer.h"
 
@@ -207,4 +207,4 @@ void ArrayBufferView::calculateOffsetAndLength(int start, int end, unsigned arra
 
 using WTF::ArrayBufferView;
 
-#endif // ArrayBufferView_h
+#endif  // SKY_ENGINE_WTF_ARRAYBUFFERVIEW_H_

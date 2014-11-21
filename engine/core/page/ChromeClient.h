@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef ChromeClient_h
-#define ChromeClient_h
+#ifndef SKY_ENGINE_CORE_PAGE_CHROMECLIENT_H_
+#define SKY_ENGINE_CORE_PAGE_CHROMECLIENT_H_
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/ConsoleTypes.h"
@@ -136,4 +136,4 @@ protected:
 };
 
 }
-#endif // ChromeClient_h
+#endif  // SKY_ENGINE_CORE_PAGE_CHROMECLIENT_H_

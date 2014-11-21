@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef SuspendableTimer_h
-#define SuspendableTimer_h
+#ifndef SKY_ENGINE_CORE_FRAME_SUSPENDABLETIMER_H_
+#define SKY_ENGINE_CORE_FRAME_SUSPENDABLETIMER_H_
 
 #include "sky/engine/core/dom/ActiveDOMObject.h"
 #include "sky/engine/platform/Timer.h"
@@ -56,4 +56,4 @@ private:
 
 } // namespace blink
 
-#endif // SuspendableTimer_h
+#endif  // SKY_ENGINE_CORE_FRAME_SUSPENDABLETIMER_H_

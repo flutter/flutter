@@ -22,8 +22,8 @@
     pages from the web. It has a memory cache for these objects.
 */
 
-#ifndef ResourceClient_h
-#define ResourceClient_h
+#ifndef SKY_ENGINE_CORE_FETCH_RESOURCECLIENT_H_
+#define SKY_ENGINE_CORE_FETCH_RESOURCECLIENT_H_
 
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/Forward.h"
@@ -53,4 +53,4 @@ protected:
 };
 }
 
-#endif
+#endif  // SKY_ENGINE_CORE_FETCH_RESOURCECLIENT_H_

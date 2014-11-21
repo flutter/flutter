@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EventHandler_h
-#define EventHandler_h
+#ifndef SKY_ENGINE_CORE_PAGE_EVENTHANDLER_H_
+#define SKY_ENGINE_CORE_PAGE_EVENTHANDLER_H_
 
 #include "sky/engine/core/editing/TextGranularity.h"
 #include "sky/engine/core/events/TextEventInputType.h"
@@ -339,4 +339,4 @@ private:
 
 } // namespace blink
 
-#endif // EventHandler_h
+#endif  // SKY_ENGINE_CORE_PAGE_EVENTHANDLER_H_

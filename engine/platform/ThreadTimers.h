@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ThreadTimers_h
-#define ThreadTimers_h
+#ifndef SKY_ENGINE_PLATFORM_THREADTIMERS_H_
+#define SKY_ENGINE_PLATFORM_THREADTIMERS_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -65,4 +65,4 @@ private:
 
 }
 
-#endif
+#endif  // SKY_ENGINE_PLATFORM_THREADTIMERS_H_

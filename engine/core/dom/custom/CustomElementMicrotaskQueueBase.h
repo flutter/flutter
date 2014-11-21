@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CustomElementMicrotaskQueueBase_h
-#define CustomElementMicrotaskQueueBase_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKQUEUEBASE_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKQUEUEBASE_H_
 
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskStep.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -34,4 +34,4 @@ protected:
 
 }
 
-#endif // CustomElementMicrotaskQueueBase_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKQUEUEBASE_H_

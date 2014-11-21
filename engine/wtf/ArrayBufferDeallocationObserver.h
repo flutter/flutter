@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ArrayBufferDeallocationObserver_h
-#define ArrayBufferDeallocationObserver_h
+#ifndef SKY_ENGINE_WTF_ARRAYBUFFERDEALLOCATIONOBSERVER_H_
+#define SKY_ENGINE_WTF_ARRAYBUFFERDEALLOCATIONOBSERVER_H_
 
 namespace WTF {
 
@@ -47,4 +47,4 @@ protected:
 
 } // namespace WTF
 
-#endif // ArrayBufferDeallocationObserver_h
+#endif  // SKY_ENGINE_WTF_ARRAYBUFFERDEALLOCATIONOBSERVER_H_

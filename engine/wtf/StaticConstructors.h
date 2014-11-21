@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef StaticConstructors_h
-#define StaticConstructors_h
+#ifndef SKY_ENGINE_WTF_STATICCONSTRUCTORS_H_
+#define SKY_ENGINE_WTF_STATICCONSTRUCTORS_H_
 
 // We need to avoid having static constructors. This is accomplished by defining
 // a static array of the appropriate size and alignment, and defining a const
@@ -35,4 +35,4 @@
     void* name##Storage[(sizeof(type) + sizeof(void *) - 1) / sizeof(void *)]; \
     const type& name = *reinterpret_cast<type*>(&name##Storage);
 
-#endif // StaticConstructors_h
+#endif  // SKY_ENGINE_WTF_STATICCONSTRUCTORS_H_

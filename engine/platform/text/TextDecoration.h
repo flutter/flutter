@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TextDecoration_h
-#define TextDecoration_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTDECORATION_H_
+#define SKY_ENGINE_PLATFORM_TEXT_TEXTDECORATION_H_
 
 namespace blink {
 
@@ -41,4 +41,4 @@ enum TextDecorationType {
 
 }
 
-#endif // TextDecoration_h
+#endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTDECORATION_H_

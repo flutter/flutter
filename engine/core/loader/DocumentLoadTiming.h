@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DocumentLoadTiming_h
-#define DocumentLoadTiming_h
+#ifndef SKY_ENGINE_CORE_LOADER_DOCUMENTLOADTIMING_H_
+#define SKY_ENGINE_CORE_LOADER_DOCUMENTLOADTIMING_H_
 
 #include "sky/engine/wtf/CurrentTime.h"
 
@@ -78,4 +78,4 @@ private:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_CORE_LOADER_DOCUMENTLOADTIMING_H_

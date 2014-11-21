@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringTruncator_h
-#define StringTruncator_h
+#ifndef SKY_ENGINE_PLATFORM_TEXT_STRINGTRUNCATOR_H_
+#define SKY_ENGINE_PLATFORM_TEXT_STRINGTRUNCATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Forward.h"
@@ -45,4 +45,4 @@ public:
 
 } // namespace blink
 
-#endif // !defined(StringTruncator_h)
+#endif  // SKY_ENGINE_PLATFORM_TEXT_STRINGTRUNCATOR_H_

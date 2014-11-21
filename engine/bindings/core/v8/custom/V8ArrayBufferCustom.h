@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef V8ArrayBufferCustom_h
-#define V8ArrayBufferCustom_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERCUSTOM_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERCUSTOM_H_
 
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
@@ -156,4 +156,4 @@ inline void v8SetReturnValueFast(const CallbackInfo& info, PassRefPtr< ArrayBuff
 
 } // namespace blink
 
-#endif // V8ArrayBufferCustom_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_CUSTOM_V8ARRAYBUFFERCUSTOM_H_

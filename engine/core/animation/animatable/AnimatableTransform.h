@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AnimatableTransform_h
-#define AnimatableTransform_h
+#ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLETRANSFORM_H_
+#define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLETRANSFORM_H_
 
 #include "sky/engine/core/animation/animatable/AnimatableValue.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
@@ -62,5 +62,5 @@ DEFINE_ANIMATABLE_VALUE_TYPE_CASTS(AnimatableTransform, isTransform());
 
 } // namespace blink
 
-#endif // AnimatableTransform_h
+#endif  // SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLETRANSFORM_H_
 

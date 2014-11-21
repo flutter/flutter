@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebFontInfo_h
-#define WebFontInfo_h
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTINFO_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTINFO_H_
 
 #include <string.h>
 #include <unistd.h>
@@ -53,4 +53,4 @@ public:
 
 } // namespace blink
 
-#endif
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_LINUX_WEBFONTINFO_H_

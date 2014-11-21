@@ -25,8 +25,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTMLCanvasElement_h
-#define HTMLCanvasElement_h
+#ifndef SKY_ENGINE_CORE_HTML_HTMLCANVASELEMENT_H_
+#define SKY_ENGINE_CORE_HTML_HTMLCANVASELEMENT_H_
 
 #include "base/cancelable_callback.h"
 #include "sky/engine/core/dom/Document.h"
@@ -195,4 +195,4 @@ private:
 
 } // namespace blink
 
-#endif // HTMLCanvasElement_h
+#endif  // SKY_ENGINE_CORE_HTML_HTMLCANVASELEMENT_H_

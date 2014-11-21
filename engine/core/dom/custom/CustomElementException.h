@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CustomElementException_h
-#define CustomElementException_h
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTEXCEPTION_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTEXCEPTION_H_
 
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -64,4 +64,4 @@ private:
 
 }
 
-#endif // CustomElementException_h
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTEXCEPTION_H_

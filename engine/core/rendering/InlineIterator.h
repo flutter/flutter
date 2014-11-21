@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef InlineIterator_h
-#define InlineIterator_h
+#ifndef SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_
+#define SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_
 
 #include "sky/engine/core/rendering/BidiRun.h"
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
@@ -725,4 +725,4 @@ inline void InlineBidiResolver::appendRun(BidiRunList<BidiRun>& runs)
 
 }
 
-#endif // InlineIterator_h
+#endif  // SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScopedPersistent_h
-#define ScopedPersistent_h
+#ifndef SKY_ENGINE_BINDINGS_CORE_V8_SCOPEDPERSISTENT_H_
+#define SKY_ENGINE_BINDINGS_CORE_V8_SCOPEDPERSISTENT_H_
 
 #include "sky/engine/wtf/Noncopyable.h"
 #include "v8/include/v8.h"
@@ -102,4 +102,4 @@ private:
 
 } // namespace blink
 
-#endif // ScopedPersistent_h
+#endif  // SKY_ENGINE_BINDINGS_CORE_V8_SCOPEDPERSISTENT_H_

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef StyleResourceLoader_h
-#define StyleResourceLoader_h
+#ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOURCELOADER_H_
+#define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOURCELOADER_H_
 
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -54,4 +54,4 @@ private:
 
 } // namespace blink
 
-#endif // StyleResourceLoader_h
+#endif  // SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOURCELOADER_H_

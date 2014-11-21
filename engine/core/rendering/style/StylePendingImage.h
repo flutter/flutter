@@ -23,8 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StylePendingImage_h
-#define StylePendingImage_h
+#ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEPENDINGIMAGE_H_
+#define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEPENDINGIMAGE_H_
 
 #include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"
@@ -79,4 +79,4 @@ private:
 DEFINE_STYLE_IMAGE_TYPE_CASTS(StylePendingImage, isPendingImage());
 
 }
-#endif
+#endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEPENDINGIMAGE_H_

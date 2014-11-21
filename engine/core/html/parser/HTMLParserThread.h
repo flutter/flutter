@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HTMLParserThread_h
-#define HTMLParserThread_h
+#ifndef SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERTHREAD_H_
+#define SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERTHREAD_H_
 
 #include "base/single_thread_task_runner.h"
 
@@ -18,4 +18,4 @@ public:
 
 } // namespace blink
 
-#endif // HTMLParserThread_h
+#endif  // SKY_ENGINE_CORE_HTML_PARSER_HTMLPARSERTHREAD_H_

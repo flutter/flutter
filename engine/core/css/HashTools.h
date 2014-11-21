@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef HashTools_h
-#define HashTools_h
+#ifndef SKY_ENGINE_CORE_CSS_HASHTOOLS_H_
+#define SKY_ENGINE_CORE_CSS_HASHTOOLS_H_
 
 namespace blink {
 
@@ -37,4 +37,4 @@ const Value* findValue(register const char* str, register unsigned len);
 
 } // namespace blink
 
-#endif // HashTools_h
+#endif  // SKY_ENGINE_CORE_CSS_HASHTOOLS_H_

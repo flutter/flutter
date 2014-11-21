@@ -23,8 +23,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Region_h
-#define Region_h
+#ifndef SKY_ENGINE_PLATFORM_GEOMETRY_REGION_H_
+#define SKY_ENGINE_PLATFORM_GEOMETRY_REGION_H_
 
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -182,4 +182,4 @@ inline bool operator==(const Region::Span& a, const Region::Span& b)
 
 } // namespace blink
 
-#endif // Region_h
+#endif  // SKY_ENGINE_PLATFORM_GEOMETRY_REGION_H_

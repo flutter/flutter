@@ -26,8 +26,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef GraphicsContextState_h
-#define GraphicsContextState_h
+#ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATE_H_
+#define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATE_H_
 
 #include "sky/engine/platform/graphics/DrawLooperBuilder.h"
 #include "sky/engine/platform/graphics/Gradient.h"
@@ -183,4 +183,4 @@ private:
 
 } // namespace blink
 
-#endif // GraphicsContextState_h
+#endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATE_H_
