@@ -41,6 +41,13 @@ class LayerHost : public SurfaceHolder::Client, public Scheduler::Client {
   void SetRootLayer(scoped_refptr<Layer> layer);
 
  private:
+  enum State {
+    kIdle,
+    kWaitingForBeginFrame,
+    kProducingFrame,
+    kWaitingForSurfaceToUploadFrame,
+  };
+
   // SurfaceHolder::Client
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   void ReturnResources(
@@ -53,6 +60,7 @@ class LayerHost : public SurfaceHolder::Client, public Scheduler::Client {
   void Upload(Layer* layer);
 
   LayerHostClient* client_;
+  State state_;
   SurfaceHolder surface_holder_;
   base::WeakPtr<mojo::GLContext> gl_context_;
   mojo::GaneshContext ganesh_context_;

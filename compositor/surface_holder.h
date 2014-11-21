@@ -34,6 +34,8 @@ class SurfaceHolder : public mojo::SurfaceClient {
   explicit SurfaceHolder(Client* client, mojo::Shell* shell);
   ~SurfaceHolder() override;
 
+  bool IsReadyForFrame() const;
+
   void SetSize(const gfx::Size& size);
   void SubmitFrame(mojo::FramePtr frame);
 
