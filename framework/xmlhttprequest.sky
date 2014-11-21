@@ -7,15 +7,22 @@
 // XHR keeps itself alive.
 var outstandingRequests = new Set();
 
+const kPrivate = Symbol("XMLHttpRequestPrivate");
+
+class Private {
+  constructor() {
+    this.networkService = shell.connectToService(
+      "mojo:network_service", net.NetworkService);
+    this.request = null;
+    this.loader = null;
+    this.headers = new Map();
+  }
+}
+
 class XMLHttpRequest {
   constructor() {
+    this[kPrivate] = new Private;
     this.responseText = null;
-
-    this.networkService_ = shell.connectToService(
-      "mojo:network_service", net.NetworkService);
-    this.request_ = null;
-    this.loader_ = null;
-    this.headers_ = new Map();
   }
 
   onload() {
@@ -25,32 +32,36 @@ class XMLHttpRequest {
   }
 
   open(method, url) {
-    this.request_ = new loader.URLRequest();
-    this.request_.url = new URL(url, document.URL);
-    this.request_.method = method;
-    this.request_.auto_follow_redirects = true;
-    this.headers_.clear();
+    var request = new loader.URLRequest();
+    request.url = new URL(url, document.URL);
+    request.method = method;
+    request.auto_follow_redirects = true;
+
+    var priv = this[kPrivate];
+    priv.request = request;
+    priv.headers.clear();
   }
 
   setRequestHeader(header, value) {
-    this.headers_.set(header, value);
+    this[kPrivate].headers.set(header, value);
   }
 
   send() {
+    var priv = this[kPrivate];
     var requestHeaders = [];
-    this.headers_.forEach(function(value, key) {
+    priv.headers.forEach(function(value, key) {
       requestHeaders.push(key + ': ' + value);
     });
-    this.request_.headers = requestHeaders;
+    priv.request.headers = requestHeaders;
 
     // FIXME: Factor this into the JS bindings.
     var pipe = new core.createMessagePipe();
-    this.networkService_.createURLLoader(pipe.handle1);
-    this.loader_ = shell.wrapHandle(pipe.handle0, loader.URLLoader);
+    priv.networkService.createURLLoader(pipe.handle1);
+    priv.loader = shell.wrapHandle(pipe.handle0, loader.URLLoader);
 
     var self = this;
     outstandingRequests.add(this);
-    this.loader_.start(this.request_).then(function(result) {
+    priv.loader.start(priv.request).then(function(result) {
       return core.drainData(result.response.body).then(function(result) {
         outstandingRequests.delete(self);
         self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
