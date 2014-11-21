@@ -16,19 +16,23 @@ class Private {
     this.request = null;
     this.loader = null;
     this.headers = new Map();
+    this.responseText = "";
   }
 }
 
 class XMLHttpRequest {
   constructor() {
     this[kPrivate] = new Private;
-    this.responseText = null;
   }
 
   onload() {
   }
 
   onerror(error) {
+  }
+
+  get responseText() {
+    return this[kPrivate].responseText;
   }
 
   open(method, url) {
@@ -64,7 +68,7 @@ class XMLHttpRequest {
     priv.loader.start(priv.request).then(function(result) {
       return core.drainData(result.response.body).then(function(result) {
         outstandingRequests.delete(self);
-        self.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
+        priv.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
         self.onload();
       });
     }).catch(function(error) {
