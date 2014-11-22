@@ -4,8 +4,8 @@
 This test verifies that the height of an editable block remains the same after adding block elements and removing them.
 <div contenteditable="true" style="border: solid blue" id="test"></div>
 <script>
-describe("height of an editable block", function(done) {
-  it("remains the same after adding block elements and removing them", function() {
+describe("height of an editable block", function() {
+  it("remains the same after adding block elements and removing them", function(done) {
     var elem = document.getElementById("test");
     var originalHeight = elem.offsetHeight;
     var d = elem.appendChild(document.createElement('div'));
