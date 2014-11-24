@@ -16,17 +16,24 @@ module 'sky:core' {
     attribute any data; // O(1)
 
     readonly attribute EventTarget target; // O(1)
-    void preventDefault(); // O(1)
-    attribute any result; // O(1) // defaults to undefined
+    attribute Boolean handled; // O(1)
+    attribute any result; // O(1)
 
     // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
-    // TODO(ianh): do events ger retargetted, e.g. focus when leaving a custom element?
+    // TODO(ianh): do events get retargetted, e.g. focus when leaving a custom element?
   }
 
-  callback EventListener any (Event event); // return value is assigned to Event.result
+  callback EventListener any (Event event);
+    // if the return value is not undefined:
+    //   assign it to event.result
+    //   set event.handled to true
 
   abstract class EventTarget {
-    any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain // returns Event.result
+    any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain
+      // sets event.handled to false and event.result to undefined
+      // makes a record of the event target chain
+      // invokes all the handlers on the chain in turn
+      // returns event.result
     void addEventListener(String type, EventListener listener); // O(1)
     void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
     private Array<String> getRegisteredEventListenerTypes(); // O(N)
