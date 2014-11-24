@@ -4,6 +4,7 @@
 
 #include "sky/compositor/layer.h"
 
+#include "base/debug/trace_event.h"
 #include "mojo/skia/ganesh_surface.h"
 #include "sky/compositor/layer_host.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -25,6 +26,8 @@ void Layer::SetSize(const gfx::Size& size) {
 }
 
 void Layer::Display() {
+  TRACE_EVENT0("sky", "Layer::Display");
+
   DCHECK(host_);
 
   mojo::GaneshSurface surface(host_->ganesh_context(),

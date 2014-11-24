@@ -4,6 +4,7 @@
 
 #include "sky/compositor/layer_host.h"
 
+#include "base/debug/trace_event.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
@@ -53,6 +54,9 @@ void LayerHost::ReturnResources(
 
 void LayerHost::BeginFrame(base::TimeTicks frame_time,
                            base::TimeTicks deadline) {
+
+  TRACE_EVENT0("sky", "LayerHost::BeginFrame");
+
   DCHECK_EQ(state_, kWaitingForBeginFrame);
   state_ = kProducingFrame;
   client_->BeginFrame(frame_time);
@@ -70,6 +74,8 @@ void LayerHost::BeginFrame(base::TimeTicks frame_time,
 }
 
 void LayerHost::Upload(Layer* layer) {
+  TRACE_EVENT0("sky", "LayerHost::Upload");
+
   if (!surface_holder_.IsReadyForFrame()) {
     if (state_ == kProducingFrame) {
       // Currently we use a timer to drive the BeginFrame cycle, which means we
