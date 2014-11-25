@@ -166,7 +166,7 @@ void InsertionPoint::childrenChanged(const ChildrenChange& change)
     }
 }
 
-Node::InsertionNotificationRequest InsertionPoint::insertedInto(ContainerNode* insertionPoint)
+void InsertionPoint::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
     if (ShadowRoot* root = containingShadowRoot()) {
@@ -180,8 +180,6 @@ Node::InsertionNotificationRequest InsertionPoint::insertedInto(ContainerNode* i
             }
         }
     }
-
-    return InsertionDone;
 }
 
 void InsertionPoint::removedFrom(ContainerNode* insertionPoint)

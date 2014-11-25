@@ -42,12 +42,11 @@ inline HTMLTitleElement::HTMLTitleElement(Document& document)
 
 DEFINE_NODE_FACTORY(HTMLTitleElement)
 
-Node::InsertionNotificationRequest HTMLTitleElement::insertedInto(ContainerNode* insertionPoint)
+void HTMLTitleElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
     if (inDocument() && !isInShadowTree())
         document().setTitleElement(this);
-    return InsertionDone;
 }
 
 void HTMLTitleElement::removedFrom(ContainerNode* insertionPoint)

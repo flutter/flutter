@@ -757,27 +757,25 @@ RenderObject* Element::createRenderer(RenderStyle* style)
     return RenderObject::createObject(this, style);
 }
 
-Node::InsertionNotificationRequest Element::insertedInto(ContainerNode* insertionPoint)
+void Element::insertedInto(ContainerNode* insertionPoint)
 {
     // need to do superclass processing first so inDocument() is true
     // by the time we reach updateId
     ContainerNode::insertedInto(insertionPoint);
 
     if (!insertionPoint->isInTreeScope())
-        return InsertionDone;
+        return;
 
     if (isUpgradedCustomElement() && inDocument())
         CustomElement::didAttach(this, document());
 
     TreeScope& scope = insertionPoint->treeScope();
     if (scope != treeScope())
-        return InsertionDone;
+        return;
 
     const AtomicString& idValue = getIdAttribute();
     if (!idValue.isNull())
         updateId(scope, nullAtom, idValue);
-
-    return InsertionDone;
 }
 
 void Element::removedFrom(ContainerNode* insertionPoint)

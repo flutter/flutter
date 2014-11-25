@@ -601,19 +601,12 @@ void ContainerNode::notifyNodeInserted(Node& root, ChildrenChangeSource source)
     RefPtr<Node> protect(this);
     RefPtr<Node> protectNode(root);
 
-    NodeVector postInsertionNotificationTargets;
-    notifyNodeInsertedInternal(root, postInsertionNotificationTargets);
+    notifyNodeInsertedInternal(root);
 
     childrenChanged(ChildrenChange::forInsertion(root, source));
-
-    for (size_t i = 0; i < postInsertionNotificationTargets.size(); ++i) {
-        Node* targetNode = postInsertionNotificationTargets[i].get();
-        if (targetNode->inDocument())
-            targetNode->didNotifySubtreeInsertionsToDocument();
-    }
 }
 
-void ContainerNode::notifyNodeInsertedInternal(Node& root, NodeVector& postInsertionNotificationTargets)
+void ContainerNode::notifyNodeInsertedInternal(Node& root)
 {
     EventDispatchForbiddenScope assertNoEventDispatch;
     ScriptForbiddenScope forbidScript;
@@ -623,10 +616,9 @@ void ContainerNode::notifyNodeInsertedInternal(Node& root, NodeVector& postInser
         // into detached subtrees.
         if (!inDocument() && !node->isContainerNode())
             continue;
-        if (Node::InsertionShouldCallDidNotifySubtreeInsertions == node->insertedInto(this))
-            postInsertionNotificationTargets.append(node);
+        node->insertedInto(this);
         for (ShadowRoot* shadowRoot = node->youngestShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot())
-            notifyNodeInsertedInternal(*shadowRoot, postInsertionNotificationTargets);
+            notifyNodeInsertedInternal(*shadowRoot);
     }
 }
 

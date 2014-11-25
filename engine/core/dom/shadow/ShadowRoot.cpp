@@ -126,25 +126,23 @@ void ShadowRoot::recalcStyle(StyleRecalcChange change)
     clearChildNeedsStyleRecalc();
 }
 
-Node::InsertionNotificationRequest ShadowRoot::insertedInto(ContainerNode* insertionPoint)
+void ShadowRoot::insertedInto(ContainerNode* insertionPoint)
 {
     DocumentFragment::insertedInto(insertionPoint);
 
     if (!insertionPoint->inDocument() || !isOldest())
-        return InsertionDone;
+        return;
 
     // FIXME: When parsing <video controls>, insertedInto() is called many times without invoking removedFrom.
     // For now, we check m_registeredWithParentShadowroot. We would like to ASSERT(!m_registeredShadowRoot) here.
     // https://bugs.webkit.org/show_bug.cig?id=101316
     if (m_registeredWithParentShadowRoot)
-        return InsertionDone;
+        return;
 
     if (ShadowRoot* root = host()->containingShadowRoot()) {
         root->addChildShadowRoot();
         m_registeredWithParentShadowRoot = true;
     }
-
-    return InsertionDone;
 }
 
 void ShadowRoot::removedFrom(ContainerNode* insertionPoint)

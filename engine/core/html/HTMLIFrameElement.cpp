@@ -30,12 +30,11 @@ HTMLIFrameElement::~HTMLIFrameElement()
         m_contentView->RemoveObserver(this);
 }
 
-Node::InsertionNotificationRequest HTMLIFrameElement::insertedInto(ContainerNode* insertionPoint)
+void HTMLIFrameElement::insertedInto(ContainerNode* insertionPoint)
 {
-    InsertionNotificationRequest result = HTMLElement::insertedInto(insertionPoint);
+    HTMLElement::insertedInto(insertionPoint);
     if (insertionPoint->inDocument())
         createView();
-    return result;
 }
 
 void HTMLIFrameElement::removedFrom(ContainerNode* insertionPoint)

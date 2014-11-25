@@ -32,7 +32,7 @@ private:
     // HTMLElement methods:
     virtual RenderObject* createRenderer(RenderStyle* style) override;
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
 
     // ViewObserver methods:

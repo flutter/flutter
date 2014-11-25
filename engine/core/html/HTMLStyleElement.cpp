@@ -67,14 +67,17 @@ void HTMLStyleElement::finishParsingChildren()
     HTMLElement::finishParsingChildren();
 }
 
-Node::InsertionNotificationRequest HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
+void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
-    if (insertionPoint->inDocument() && isInShadowTree()) {
-        if (ShadowRoot* scope = containingShadowRoot())
-            scope->registerScopedHTMLStyleChild();
-    }
-    return InsertionShouldCallDidNotifySubtreeInsertions;
+
+    if (!inDocument())
+        return;
+
+    StyleElement::processStyleSheet(document(), this);
+
+    if (ShadowRoot* scope = containingShadowRoot())
+        scope->registerScopedHTMLStyleChild();
 }
 
 void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
@@ -93,11 +96,6 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
 
     TreeScope* containingScope = containingShadowRoot();
     StyleElement::removedFromDocument(document(), this, scopingNode, containingScope ? *containingScope : insertionPoint->treeScope());
-}
-
-void HTMLStyleElement::didNotifySubtreeInsertionsToDocument()
-{
-    StyleElement::processStyleSheet(document(), this);
 }
 
 void HTMLStyleElement::childrenChanged(const ChildrenChange& change)

@@ -71,7 +71,7 @@ public:
 protected:
     InsertionPoint(const QualifiedName&, Document&);
     virtual void childrenChanged(const ChildrenChange&) override;
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
 
 private:

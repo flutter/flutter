@@ -33,16 +33,14 @@ PassRefPtr<HTMLImportElement> HTMLImportElement::create(Document& document)
     return adoptRef(new HTMLImportElement(document));
 }
 
-Node::InsertionNotificationRequest HTMLImportElement::insertedInto(ContainerNode* insertionPoint)
+void HTMLImportElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
     if (!insertionPoint->inDocument() || isInShadowTree())
-        return InsertionDone;
+        return;
 
     if (shouldLoad())
         load();
-
-    return InsertionDone;
 }
 
 bool HTMLImportElement::shouldLoad() const

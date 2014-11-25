@@ -99,7 +99,7 @@ private:
 
     virtual bool isURLAttribute(const Attribute&) const override;
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual Image* imageContents() override;
 

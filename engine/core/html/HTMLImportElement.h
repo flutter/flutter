@@ -23,7 +23,7 @@ private:
     void load();
 
     // From HTMLElement
-    InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    void insertedInto(ContainerNode*) override;
 
     // From HTMLImportChildClient
     void didFinish() override;

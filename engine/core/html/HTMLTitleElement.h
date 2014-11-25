@@ -37,7 +37,7 @@ public:
 private:
     explicit HTMLTitleElement(Document&);
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 

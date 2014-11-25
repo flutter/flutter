@@ -67,7 +67,7 @@ public:
     bool isOldest() const { return !olderShadowRoot(); }
     bool isOldestAuthorShadowRoot() const;
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
 
     void registerScopedHTMLStyleChild();

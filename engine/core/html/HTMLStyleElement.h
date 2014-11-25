@@ -48,8 +48,7 @@ private:
 
     // overload from HTMLElement
     virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
-    virtual void didNotifySubtreeInsertionsToDocument() override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 

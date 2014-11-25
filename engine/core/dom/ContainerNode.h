@@ -139,7 +139,7 @@ private:
     void addChildNodesToDeletionQueue(Node*&, Node*&, ContainerNode&);
 
     void notifyNodeInserted(Node&, ChildrenChangeSource = ChildrenChangeSourceAPI);
-    void notifyNodeInsertedInternal(Node&, NodeVector& postInsertionNotificationTargets);
+    void notifyNodeInsertedInternal(Node&);
     void notifyNodeRemoved(Node&);
 
     inline void checkAcceptChildType(const Node* newChild, ExceptionState&) const;

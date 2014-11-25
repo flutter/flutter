@@ -442,35 +442,7 @@ public:
 
     RenderStyle* computedStyle(PseudoId pseudoElementSpecifier = NOPSEUDO) { return virtualComputedStyle(pseudoElementSpecifier); }
 
-    // -----------------------------------------------------------------------------
-    // Notification of document structure changes (see ContainerNode.h for more notification methods)
-    //
-    // At first, WebKit notifies the node that it has been inserted into the document. This is called during document parsing, and also
-    // when a node is added through the DOM methods insertBefore(), appendChild() or replaceChild(). The call happens _after_ the node has been added to the tree.
-    // This is similar to the DOMNodeInsertedIntoDocument DOM event, but does not require the overhead of event
-    // dispatching.
-    //
-    // WebKit notifies this callback regardless if the subtree of the node is a document tree or a floating subtree.
-    // Implementation can determine the type of subtree by seeing insertionPoint->inDocument().
-    // For a performance reason, notifications are delivered only to ContainerNode subclasses if the insertionPoint is out of document.
-    //
-    // There are another callback named didNotifySubtreeInsertionsToDocument(), which is called after all the descendant is notified,
-    // if this node was inserted into the document tree. Only a few subclasses actually need this. To utilize this, the node should
-    // return InsertionShouldCallDidNotifySubtreeInsertions from insertedInto().
-    //
-    enum InsertionNotificationRequest {
-        InsertionDone,
-        InsertionShouldCallDidNotifySubtreeInsertions
-    };
-
-    virtual InsertionNotificationRequest insertedInto(ContainerNode* insertionPoint);
-    virtual void didNotifySubtreeInsertionsToDocument() { }
-
-    // Notifies the node that it is no longer part of the tree.
-    //
-    // This is a dual of insertedInto(), and is similar to the DOMNodeRemovedFromDocument DOM event, but does not require the overhead of event
-    // dispatching, and is called _after_ the node is removed from the tree.
-    //
+    virtual void insertedInto(ContainerNode* insertionPoint);
     virtual void removedFrom(ContainerNode* insertionPoint);
 
     String debugName() const;

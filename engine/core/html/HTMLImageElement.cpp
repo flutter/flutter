@@ -165,8 +165,10 @@ bool HTMLImageElement::canStartSelection() const
     return false;
 }
 
-Node::InsertionNotificationRequest HTMLImageElement::insertedInto(ContainerNode* insertionPoint)
+void HTMLImageElement::insertedInto(ContainerNode* insertionPoint)
 {
+    HTMLElement::insertedInto(insertionPoint);
+
     if (m_listener)
         document().mediaQueryMatcher().addViewportListener(m_listener.get());
 
@@ -174,8 +176,6 @@ Node::InsertionNotificationRequest HTMLImageElement::insertedInto(ContainerNode*
     // our loader may have not fetched the image, so do it now.
     if ((insertionPoint->inDocument() && !imageLoader().image()))
         imageLoader().updateFromElement(ImageLoader::UpdateNormal, m_elementCreatedByParser ? ImageLoader::ForceLoadImmediately : ImageLoader::LoadNormally);
-
-    return HTMLElement::insertedInto(insertionPoint);
 }
 
 void HTMLImageElement::removedFrom(ContainerNode* insertionPoint)

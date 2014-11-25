@@ -305,7 +305,7 @@ protected:
     const ElementData* elementData() const { return m_elementData.get(); }
     UniqueElementData& ensureUniqueElementData();
 
-    virtual InsertionNotificationRequest insertedInto(ContainerNode*) override;
+    virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 
@@ -527,7 +527,7 @@ inline UniqueElementData& Element::ensureUniqueElementData()
     return toUniqueElementData(*m_elementData);
 }
 
-inline Node::InsertionNotificationRequest Node::insertedInto(ContainerNode* insertionPoint)
+inline void Node::insertedInto(ContainerNode* insertionPoint)
 {
     ASSERT(insertionPoint->inDocument() || isContainerNode());
     if (insertionPoint->inDocument())
@@ -536,7 +536,6 @@ inline Node::InsertionNotificationRequest Node::insertedInto(ContainerNode* inse
         setFlag(IsInShadowTreeFlag);
     if (childNeedsDistributionRecalc() && !insertionPoint->childNeedsDistributionRecalc())
         insertionPoint->markAncestorsWithChildNeedsDistributionRecalc();
-    return InsertionDone;
 }
 
 inline void Node::removedFrom(ContainerNode* insertionPoint)
