@@ -19,9 +19,9 @@ LayerHost::LayerHost(LayerHostClient* client)
       state_(kWaitingForSurfaceService),
       frame_requested_(false),
       surface_holder_(this, client->GetShell()),
-      gl_context_(mojo::GLContext::Create(client->GetShell())),
-      ganesh_context_(gl_context_),
-      resource_manager_(gl_context_),
+      gl_context_owner_(client->GetShell()),
+      ganesh_context_(gl_context()),
+      resource_manager_(gl_context()),
       weak_factory_(this) {
 }
 

@@ -8,6 +8,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
+#include "mojo/gpu/gl_context_owner.h"
 #include "mojo/skia/ganesh_context.h"
 #include "sky/compositor/layer_host_client.h"
 #include "sky/compositor/resource_manager.h"
@@ -26,7 +27,7 @@ class LayerHost : public SurfaceHolder::Client {
   LayerHostClient* client() const { return client_; }
 
   const base::WeakPtr<mojo::GLContext>& gl_context() const {
-    return gl_context_;
+    return gl_context_owner_.context();
   }
 
   mojo::GaneshContext* ganesh_context() const {
@@ -63,7 +64,7 @@ class LayerHost : public SurfaceHolder::Client {
   State state_;
   bool frame_requested_;
   SurfaceHolder surface_holder_;
-  base::WeakPtr<mojo::GLContext> gl_context_;
+  mojo::GLContextOwner gl_context_owner_;
   mojo::GaneshContext ganesh_context_;
   ResourceManager resource_manager_;
   scoped_refptr<Layer> root_layer_;
