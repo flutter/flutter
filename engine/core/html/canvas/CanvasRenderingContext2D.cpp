@@ -1919,8 +1919,8 @@ void CanvasRenderingContext2D::drawTextInternal(const String& text, float x, flo
         return;
 
     // accessFont needs the style to be up to date, but updating style can cause script to run,
-    // (e.g. due to autofocus) which can free the GraphicsContext, so update style before grabbing
-    // the GraphicsContext.
+    // which can free the GraphicsContext, so update style before grabbing the GraphicsContext.
+    // TODO(esprehn): This isn't needed in sky.
     canvas()->document().updateRenderTreeIfNeeded();
 
     GraphicsContext* c = drawingContext();

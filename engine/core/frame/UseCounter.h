@@ -71,7 +71,7 @@ public:
         PrefixedTransitionEndEvent = 18,
         UnprefixedTransitionEndEvent = 19,
         PrefixedAndUnprefixedTransitionEndEvent = 20,
-        AutoFocusAttribute = 21,
+
         DataListElement = 23,
         FormAttribute = 24,
         IncrementalAttribute = 25,

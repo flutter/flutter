@@ -360,8 +360,6 @@ public:
     UserActionElementSet& userActionElements()  { return m_userActionElements; }
     const UserActionElementSet& userActionElements() const { return m_userActionElements; }
     void setNeedsFocusedElementCheck();
-    void setAutofocusElement(Element*);
-    Element* autofocusElement() const { return m_autofocusElement.get(); }
 
     void setActiveHoverElement(PassRefPtr<Element>);
     Element* activeHoverElement() const { return m_activeHoverElement.get(); }
@@ -675,7 +673,6 @@ private:
 
     void clearFocusedElementSoon();
     void clearFocusedElementTimerFired(Timer<Document>*);
-    void focusAutofocusElementTimerFired(Timer<Document>*);
 
     void setHoverNode(PassRefPtr<Node>);
     Node* hoverNode() const { return m_hoverNode.get(); }
@@ -717,10 +714,7 @@ private:
 
     Timer<Document> m_executeScriptsWaitingForResourcesTimer;
 
-    bool m_hasAutofocused;
     Timer<Document> m_clearFocusedElementTimer;
-    Timer<Document> m_focusAutofocusElementTimer;
-    RefPtr<Element> m_autofocusElement;
     RefPtr<Element> m_focusedElement;
     RefPtr<Node> m_hoverNode;
     RefPtr<Element> m_activeHoverElement;

@@ -253,9 +253,7 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_importsController(initializer.importsController())
     , m_activeParserCount(0)
     , m_executeScriptsWaitingForResourcesTimer(this, &Document::executeScriptsWaitingForResourcesTimerFired)
-    , m_hasAutofocused(false)
     , m_clearFocusedElementTimer(this, &Document::clearFocusedElementTimerFired)
-    , m_focusAutofocusElementTimer(this, &Document::focusAutofocusElementTimerFired)
     , m_listenerTypes(0)
     , m_mutationObserverTypes(0)
     , m_readyState(Complete)
@@ -1295,7 +1293,6 @@ void Document::detach(const AttachContext& context)
     m_hoverNode = nullptr;
     m_focusedElement = nullptr;
     m_activeHoverElement = nullptr;
-    m_autofocusElement = nullptr;
 
     m_renderView = 0;
     ContainerNode::detach(context);
@@ -2753,29 +2750,6 @@ void Document::modifiedStyleSheet(StyleSheet* sheet, StyleResolverUpdateMode upd
     if (isActive())
         styleEngine()->modifiedStyleSheet(sheet);
     styleResolverChanged(updateMode);
-}
-
-void Document::focusAutofocusElementTimerFired(Timer<Document>*)
-{
-    if (RefPtr<Element> element = autofocusElement()) {
-        setAutofocusElement(nullptr);
-        element->focus();
-    }
-}
-
-void Document::setAutofocusElement(Element* element)
-{
-    if (!element) {
-        m_autofocusElement = nullptr;
-        return;
-    }
-    if (m_hasAutofocused)
-        return;
-    m_hasAutofocused = true;
-    ASSERT(!m_autofocusElement);
-    m_autofocusElement = element;
-    if (!m_focusAutofocusElementTimer.isActive())
-        m_focusAutofocusElementTimer.startOneShot(0, FROM_HERE);
 }
 
 Element* Document::activeElement() const
