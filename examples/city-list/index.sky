@@ -29,5 +29,21 @@ window.startLoad = new Date().getTime();
 </script>
 <body>
   <city-list></city-list>
+  <script>
+    var cityList = document.querySelector('city-list');
+    var scrollBy = location.search.match(/auto=([0-9]+)/)[1];
+
+    function autoScroll() {
+      cityList.scrollBy(scrollBy);
+      requestAnimationFrame(autoScroll);
+    }
+
+    if (scrollBy) {
+      console.log('Autoscroll by ' + scrollBy);
+      setTimeout(function() {
+        requestAnimationFrame(autoScroll);
+      }, 200)
+    }
+  </script>
 </body>
 </html>

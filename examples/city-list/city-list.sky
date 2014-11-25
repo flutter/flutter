@@ -599,6 +599,11 @@ SkyElement({
           return;
 
         this.updateView(this.loader.getItems(), true);
+      },
+
+      scrollBy: function(amount) {
+        this.scrollerElement.scrollTop += amount;
+        this.handleScroll({ target: this.scrollerElement });
       }
     });
 
