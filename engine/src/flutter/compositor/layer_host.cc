@@ -16,22 +16,24 @@ namespace sky {
 
 LayerHost::LayerHost(LayerHostClient* client)
     : client_(client),
-      state_(kIdle),
+      state_(kWaitingForSurfaceService),
+      frame_requested_(false),
       surface_holder_(this, client->GetShell()),
       gl_context_(mojo::GLContext::Create(client->GetShell())),
       ganesh_context_(gl_context_),
       resource_manager_(gl_context_),
-      scheduler_(this, base::MessageLoop::current()->task_runner()) {
-  scheduler_.UpdateVSync(
-      TimeInterval(base::TimeTicks(), base::TimeDelta::FromSecondsD(1.0 / 60)));
+      weak_factory_(this) {
 }
 
 LayerHost::~LayerHost() {
 }
 
 void LayerHost::SetNeedsAnimate() {
-  scheduler_.SetNeedsFrame();
-  state_ = kWaitingForBeginFrame;
+  if (frame_requested_)
+    return;
+  frame_requested_ = true;
+  if (state_ == kReadyForFrame)
+    BeginFrameSoon();
 }
 
 void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
@@ -40,11 +42,15 @@ void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
   root_layer_->set_host(this);
 }
 
+void LayerHost::OnSurfaceConnectionCreated() {
+  DCHECK_EQ(state_, kWaitingForSurfaceService);
+  state_ = kReadyForFrame;
+  if (frame_requested_)
+    BeginFrameSoon();
+}
+
 void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
   client_->OnSurfaceIdAvailable(surface_id.Pass());
-
-  if (state_ == kWaitingForSurfaceToUploadFrame)
-    Upload(root_layer_.get());
 }
 
 void LayerHost::ReturnResources(
@@ -52,14 +58,22 @@ void LayerHost::ReturnResources(
   resource_manager_.ReturnResources(resources.Pass());
 }
 
-void LayerHost::BeginFrame(base::TimeTicks frame_time,
-                           base::TimeTicks deadline) {
+void LayerHost::BeginFrameSoon() {
+  base::MessageLoop::current()->PostTask(
+      FROM_HERE,
+      base::Bind(&LayerHost::BeginFrame, weak_factory_.GetWeakPtr()));
+}
 
+void LayerHost::BeginFrame() {
   TRACE_EVENT0("sky", "LayerHost::BeginFrame");
 
-  DCHECK_EQ(state_, kWaitingForBeginFrame);
-  state_ = kProducingFrame;
-  client_->BeginFrame(frame_time);
+  DCHECK(frame_requested_);
+  frame_requested_ = false;
+
+  DCHECK_EQ(state_, kReadyForFrame);
+  state_ = kWaitingForFrameAcknowldgement;
+
+  client_->BeginFrame(base::TimeTicks::Now());
 
   {
     mojo::GaneshContext::Scope scope(&ganesh_context_);
@@ -68,31 +82,10 @@ void LayerHost::BeginFrame(base::TimeTicks frame_time,
   }
 
   Upload(root_layer_.get());
-
-  if (state_ == kProducingFrame)
-    state_ = kIdle;
 }
 
 void LayerHost::Upload(Layer* layer) {
   TRACE_EVENT0("sky", "LayerHost::Upload");
-
-  if (!surface_holder_.IsReadyForFrame()) {
-    if (state_ == kProducingFrame) {
-      // Currently we use a timer to drive the BeginFrame cycle, which means we
-      // can produce frames before the surfaces service is ready to receive
-      // frames from us. In that situation, we wait for surfaces before
-      // uploading the frame. The upload will actually happen when the surface
-      // id is available (i.e., in OnSurfaceIdAvailable). If SetNeedsAnimate is
-      // called before then, we'll go back into the kWaitingForBeginFrame state
-      // and defer to the timer again.
-      //
-      // We can avoid this complexity if we use feedback from the surfaces
-      // service to drive the BeginFrame cycle. In that approach, we wouldn't
-      // get here before we've attached to a surface.
-      state_ = kWaitingForSurfaceToUploadFrame;
-    }
-    return;
-  }
 
   gfx::Size size = layer->size();
   surface_holder_.SetSize(size);
@@ -141,7 +134,16 @@ void LayerHost::Upload(Layer* layer) {
   pass->quads.push_back(quad.Pass());
 
   frame->passes.push_back(pass.Pass());
-  surface_holder_.SubmitFrame(frame.Pass());
+  surface_holder_.SubmitFrame(
+      frame.Pass(),
+      base::Bind(&LayerHost::DidCompleteFrame, weak_factory_.GetWeakPtr()));
+}
+
+void LayerHost::DidCompleteFrame() {
+  DCHECK_EQ(state_, kWaitingForFrameAcknowldgement);
+  state_ = kReadyForFrame;
+  if (frame_requested_)
+    BeginFrame();
 }
 
 }  // namespace sky

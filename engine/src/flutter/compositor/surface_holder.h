@@ -5,6 +5,7 @@
 #ifndef SKY_COMPOSITOR_SURFACE_HOLDER_H_
 #define SKY_COMPOSITOR_SURFACE_HOLDER_H_
 
+#include "base/callback_forward.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/public/interfaces/surfaces/surface_id.mojom.h"
@@ -23,6 +24,7 @@ class SurfaceHolder : public mojo::SurfaceClient {
  public:
   class Client {
    public:
+    virtual void OnSurfaceConnectionCreated() = 0;
     virtual void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) = 0;
     virtual void ReturnResources(
         mojo::Array<mojo::ReturnedResourcePtr> resources) = 0;
@@ -37,7 +39,7 @@ class SurfaceHolder : public mojo::SurfaceClient {
   bool IsReadyForFrame() const;
 
   void SetSize(const gfx::Size& size);
-  void SubmitFrame(mojo::FramePtr frame);
+  void SubmitFrame(mojo::FramePtr frame, const base::Closure& callback);
 
  private:
   // mojo::SurfaceClient
