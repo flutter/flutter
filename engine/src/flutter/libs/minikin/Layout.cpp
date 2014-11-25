@@ -77,11 +77,11 @@ class LayoutCacheKey {
 public:
     LayoutCacheKey(const FontCollection* collection, const MinikinPaint& paint, FontStyle style,
             const uint16_t* chars, size_t start, size_t count, size_t nchars, bool dir)
-            : mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
+            : mChars(chars), mNchars(nchars),
+            mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
             mLetterSpacing(paint.letterSpacing),
-            mPaintFlags(paint.paintFlags), mIsRtl(dir),
-            mChars(chars), mNchars(nchars) {
+            mPaintFlags(paint.paintFlags), mIsRtl(dir) {
     }
     bool operator==(const LayoutCacheKey &other) const;
     hash_t hash() const;
