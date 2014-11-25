@@ -7,18 +7,18 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/memory/weak_ptr.h"
 #include "mojo/skia/ganesh_context.h"
 #include "sky/compositor/layer_host_client.h"
 #include "sky/compositor/resource_manager.h"
 #include "sky/compositor/surface_holder.h"
-#include "sky/scheduler/scheduler.h"
 
 namespace sky {
 class ResourceManager;
 class Layer;
 class LayerHostClient;
 
-class LayerHost : public SurfaceHolder::Client, public Scheduler::Client {
+class LayerHost : public SurfaceHolder::Client {
  public:
   explicit LayerHost(LayerHostClient* client);
   ~LayerHost();
@@ -42,32 +42,33 @@ class LayerHost : public SurfaceHolder::Client, public Scheduler::Client {
 
  private:
   enum State {
-    kIdle,
-    kWaitingForBeginFrame,
-    kProducingFrame,
-    kWaitingForSurfaceToUploadFrame,
+    kWaitingForSurfaceService,
+    kReadyForFrame,
+    kWaitingForFrameAcknowldgement,
   };
 
   // SurfaceHolder::Client
+  void OnSurfaceConnectionCreated() override;
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;
 
-  // Scheduler::Client
-  void BeginFrame(base::TimeTicks frame_time,
-                  base::TimeTicks deadline) override;
+  void BeginFrameSoon();
+  void BeginFrame();
 
   void Upload(Layer* layer);
+  void DidCompleteFrame();
 
   LayerHostClient* client_;
   State state_;
+  bool frame_requested_;
   SurfaceHolder surface_holder_;
   base::WeakPtr<mojo::GLContext> gl_context_;
   mojo::GaneshContext ganesh_context_;
   ResourceManager resource_manager_;
-  Scheduler scheduler_;
-
   scoped_refptr<Layer> root_layer_;
+
+  base::WeakPtrFactory<LayerHost> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerHost);
 };

@@ -36,8 +36,9 @@ bool SurfaceHolder::IsReadyForFrame() const {
   return surface_;
 }
 
-void SurfaceHolder::SubmitFrame(mojo::FramePtr frame) {
-  surface_->SubmitFrame(surface_id_.Clone(), frame.Pass());
+void SurfaceHolder::SubmitFrame(mojo::FramePtr frame,
+                                const base::Closure& callback) {
+  surface_->SubmitFrame(surface_id_.Clone(), frame.Pass(), callback);
 }
 
 void SurfaceHolder::SetSize(const gfx::Size& size) {
@@ -70,6 +71,7 @@ void SurfaceHolder::OnSurfaceConnectionCreated(mojo::SurfacePtr surface,
   surface_ = surface.Pass();
   surface_.set_client(this);
   surface_allocator_.reset(new SurfaceAllocator(id_namespace));
+  client_->OnSurfaceConnectionCreated();
 }
 
 }  // namespace sky
