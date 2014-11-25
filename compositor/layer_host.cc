@@ -75,6 +75,16 @@ void LayerHost::BeginFrame() {
 
   client_->BeginFrame(base::TimeTicks::Now());
 
+  // If the root layer is empty, there's no reason to draw into it. (In fact,
+  // Ganesh will get upset if we try.) Instead, we just schedule the ack that
+  // the frame is complete.
+  if (root_layer_->size().IsEmpty()) {
+    base::MessageLoop::current()->PostTask(
+        FROM_HERE,
+        base::Bind(&LayerHost::DidCompleteFrame, weak_factory_.GetWeakPtr()));
+    return;
+  }
+
   {
     mojo::GaneshContext::Scope scope(&ganesh_context_);
     ganesh_context_.gr()->resetContext();
