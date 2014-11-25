@@ -9,6 +9,7 @@
 #endif
 
 #include "base/logging.h"
+#include "base/stl_util.h"
 #include "gpu/GLES2/gl2chromium.h"
 #include "gpu/GLES2/gl2extchromium.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
@@ -24,6 +25,8 @@ ResourceManager::ResourceManager(base::WeakPtr<mojo::GLContext> gl_context)
 }
 
 ResourceManager::~ResourceManager() {
+  STLDeleteContainerPairSecondPointers(resource_to_texture_map_.begin(),
+                                       resource_to_texture_map_.end());
 }
 
 scoped_ptr<mojo::GLTexture> ResourceManager::CreateTexture(
@@ -73,11 +76,14 @@ void ResourceManager::ReturnResources(
   for (size_t i = 0u; i < resources.size(); ++i) {
     mojo::ReturnedResourcePtr resource = resources[i].Pass();
     DCHECK_EQ(1, resource->count);
-    glWaitSyncPointCHROMIUM(resource->sync_point);
-    mojo::GLTexture* texture = resource_to_texture_map_[resource->id];
+    auto iter = resource_to_texture_map_.find(resource->id);
+    if (iter == resource_to_texture_map_.end())
+      continue;
+    mojo::GLTexture* texture = iter->second;
     DCHECK_NE(0u, texture->texture_id());
-    resource_to_texture_map_.erase(resource->id);
+    resource_to_texture_map_.erase(iter);
     // TODO(abarth): Consider recycling the texture.
+    glWaitSyncPointCHROMIUM(resource->sync_point);
     delete texture;
   }
 }
