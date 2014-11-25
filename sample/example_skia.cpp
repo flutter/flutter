@@ -55,8 +55,6 @@ FontCollection *makeFontCollection() {
     };
 
     FontFamily *family = new FontFamily();
-    FT_Face face;
-    FT_Error error;
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
@@ -118,7 +116,6 @@ int runMinikinTest() {
     Layout layout;
     layout.setFontCollection(collection);
     const char *text = "fine world \xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5\x87";
-    const char *style = "font-size: 32; font-weight: 700;";
     int bidiFlags = 0;
     FontStyle fontStyle(7);
     MinikinPaint minikinPaint;

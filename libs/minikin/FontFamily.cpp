@@ -191,10 +191,18 @@ const SparseBitSet* FontFamily::getCoverage() {
         MinikinFont* typeface = getClosestMatch(defaultStyle).font;
         const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
         size_t cmapSize = 0;
-        bool ok = typeface->GetTable(cmapTag, NULL, &cmapSize);
+        if (!typeface->GetTable(cmapTag, NULL, &cmapSize)) {
+            ALOGE("Could not get cmap table size!\n");
+            // Note: This means we will retry on the next call to getCoverage, as we can't store
+            //       the failure. This is fine, as we assume this doesn't really happen in practice.
+            return nullptr;
+        }
         UniquePtr<uint8_t[]> cmapData(new uint8_t[cmapSize]);
-        ok = typeface->GetTable(cmapTag, cmapData.get(), &cmapSize);
-        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize);
+        if (!typeface->GetTable(cmapTag, cmapData.get(), &cmapSize)) {
+            ALOGE("Unexpected failure to read cmap table!\n");
+            return nullptr;
+        }
+        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize);  // TODO: Error check?
 #ifdef VERBOSE_DEBUG
         ALOGD("font coverage length=%d, first ch=%x\n", mCoverage->length(),
                 mCoverage->nextSetBit(0));

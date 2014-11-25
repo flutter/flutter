@@ -49,7 +49,7 @@ float MinikinFontFreeType::GetHorizontalAdvance(uint32_t glyph_id,
     FT_Set_Pixel_Sizes(mTypeface, 0, paint.size);
 	FT_UInt32 flags = FT_LOAD_DEFAULT;  // TODO: respect hinting settings
 	FT_Fixed advance;
-    FT_Error error = FT_Get_Advance(mTypeface, glyph_id, flags, &advance);
+    FT_Get_Advance(mTypeface, glyph_id, flags, &advance);
     return advance * (1.0 / 65536);
 }
 
