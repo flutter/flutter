@@ -459,17 +459,6 @@ bool Node::hasNonEmptyBoundingBox() const
     return false;
 }
 
-#ifndef NDEBUG
-inline static ShadowRoot* oldestShadowRootFor(const Node* node)
-{
-    if (!node->isElementNode())
-        return 0;
-    if (ElementShadow* shadow = toElement(node)->shadow())
-        return shadow->oldestShadowRoot();
-    return 0;
-}
-#endif
-
 void Node::recalcDistribution()
 {
     if (isElementNode()) {
@@ -482,7 +471,7 @@ void Node::recalcDistribution()
             child->recalcDistribution();
     }
 
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
+    if (ShadowRoot* root = shadowRoot()) {
         if (root->childNeedsDistributionRecalc())
             root->recalcDistribution();
     }
@@ -533,7 +522,7 @@ unsigned Node::styledSubtreeSize() const
     for (const Node* node = this; node; node = NodeTraversal::next(*node, this)) {
         if (node->isTextNode() || node->isElementNode())
             nodeCount++;
-        for (ShadowRoot* root = node->youngestShadowRoot(); root; root = root->olderShadowRoot())
+        if (ShadowRoot* root = node->shadowRoot())
             nodeCount += root->styledSubtreeSize();
     }
 
@@ -1094,10 +1083,6 @@ unsigned short Node::compareDocumentPosition(const Node* otherNode, ShadowTreesT
                 if (!child1->isShadowRoot())
                     return Node::DOCUMENT_POSITION_PRECEDING | connection;
 
-                for (ShadowRoot* child = toShadowRoot(child2)->olderShadowRoot(); child; child = child->olderShadowRoot())
-                    if (child == child1)
-                        return Node::DOCUMENT_POSITION_FOLLOWING | connection;
-
                 return Node::DOCUMENT_POSITION_PRECEDING | connection;
             }
 
@@ -1200,10 +1185,7 @@ void Node::showNodePathForThis() const
     for (unsigned index = chain.size(); index > 0; --index) {
         const Node* node = chain[index - 1];
         if (node->isShadowRoot()) {
-            int count = 0;
-            for (ShadowRoot* shadowRoot = toShadowRoot(node)->olderShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot())
-                ++count;
-            fprintf(stderr, "/#shadow-root[%d]", count);
+            fprintf(stderr, "/#shadow-root");
             continue;
         }
 
@@ -1253,11 +1235,8 @@ static void traverseTreeAndMark(const String& baseIndent, const Node* rootNode, 
         fprintf(stderr, "%s", indent.toString().utf8().data());
         node->showNode();
         indent.append('\t');
-        if (node->isShadowRoot()) {
-            if (ShadowRoot* youngerShadowRoot = toShadowRoot(node)->youngerShadowRoot())
-                traverseTreeAndMark(indent.toString(), youngerShadowRoot, markedNode1, markedLabel1, markedNode2, markedLabel2);
-        } else if (ShadowRoot* oldestShadowRoot = oldestShadowRootFor(node))
-            traverseTreeAndMark(indent.toString(), oldestShadowRoot, markedNode1, markedLabel1, markedNode2, markedLabel2);
+        if (ShadowRoot* shadowRoot = node->shadowRoot())
+            traverseTreeAndMark(indent.toString(), shadowRoot, markedNode1, markedLabel1, markedNode2, markedLabel2);
     }
 }
 
@@ -1293,13 +1272,8 @@ static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, con
         fputs("*", stderr);
     fputs(indent.utf8().data(), stderr);
     node->showNode();
-    if (node->isShadowRoot()) {
-        if (ShadowRoot* youngerShadowRoot = toShadowRoot(node)->youngerShadowRoot())
-            showSubTreeAcrossFrame(youngerShadowRoot, markedNode, indent + "\t");
-    } else {
-        if (ShadowRoot* oldestShadowRoot = oldestShadowRootFor(node))
-            showSubTreeAcrossFrame(oldestShadowRoot, markedNode, indent + "\t");
-    }
+    if (ShadowRoot* shadowRoot = node->shadowRoot())
+        showSubTreeAcrossFrame(shadowRoot, markedNode, indent + "\t");
     for (Node* child = node->firstChild(); child; child = child->nextSibling())
         showSubTreeAcrossFrame(child, markedNode, indent + "\t");
 }
@@ -1398,7 +1372,7 @@ void Node::removeAllEventListenersRecursively()
 {
     for (Node* node = this; node; node = NodeTraversal::next(*node)) {
         node->removeAllEventListeners();
-        for (ShadowRoot* root = node->youngestShadowRoot(); root; root = root->olderShadowRoot())
+        if (ShadowRoot* root = node->shadowRoot())
             root->removeAllEventListenersRecursively();
     }
 }

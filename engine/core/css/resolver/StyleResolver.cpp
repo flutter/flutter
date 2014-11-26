@@ -682,7 +682,7 @@ void StyleResolver::collectScopedResolversForHostedShadowTrees(const Element* el
         return;
 
     // Adding scoped resolver for active shadow roots for shadow host styling.
-    for (ShadowRoot* shadowRoot = shadow->youngestShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot()) {
+    if (ShadowRoot* shadowRoot = shadow->shadowRoot()) {
         if (shadowRoot->numberOfStyles() > 0) {
             if (ScopedStyleResolver* resolver = shadowRoot->scopedStyleResolver())
                 resolvers.append(resolver);

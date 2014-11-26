@@ -171,14 +171,9 @@ private:
                 node->clearV8CollectableDuringMinorGC();
                 partiallyDependentNodes->append(node);
             }
-            if (ShadowRoot* shadowRoot = node->youngestShadowRoot()) {
+            if (ShadowRoot* shadowRoot = node->shadowRoot()) {
                 if (!traverseTree(shadowRoot, partiallyDependentNodes))
                     return false;
-            } else if (node->isShadowRoot()) {
-                if (ShadowRoot* shadowRoot = toShadowRoot(node)->olderShadowRoot()) {
-                    if (!traverseTree(shadowRoot, partiallyDependentNodes))
-                        return false;
-                }
             }
             // <template> has a |content| property holding a DOM fragment which we must traverse,
             // just like we do for the shadow trees above.

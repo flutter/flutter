@@ -617,7 +617,7 @@ void ContainerNode::notifyNodeInsertedInternal(Node& root)
         if (!inDocument() && !node->isContainerNode())
             continue;
         node->insertedInto(this);
-        for (ShadowRoot* shadowRoot = node->youngestShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot())
+        if (ShadowRoot* shadowRoot = node->shadowRoot())
             notifyNodeInsertedInternal(*shadowRoot);
     }
 }
@@ -634,7 +634,7 @@ void ContainerNode::notifyNodeRemoved(Node& root)
         if (!node->inDocument() && !node->isContainerNode())
             continue;
         node->removedFrom(this);
-        for (ShadowRoot* shadowRoot = node->youngestShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot())
+        if (ShadowRoot* shadowRoot = node->shadowRoot())
             notifyNodeRemoved(*shadowRoot);
     }
 }

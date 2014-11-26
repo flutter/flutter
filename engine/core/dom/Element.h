@@ -209,9 +209,8 @@ public:
 
     ElementShadow* shadow() const;
     ElementShadow& ensureShadow();
-    PassRefPtr<ShadowRoot> createShadowRoot(ExceptionState&);
+    PassRefPtr<ShadowRoot> ensureShadowRoot(ExceptionState&);
     ShadowRoot* shadowRoot() const;
-    ShadowRoot* youngestShadowRoot() const;
 
     bool hasAuthorShadowRoot() const { return shadowRoot(); }
 
@@ -545,6 +544,13 @@ inline void Node::removedFrom(ContainerNode* insertionPoint)
         clearFlag(InDocumentFlag);
     if (isInShadowTree() && !treeScope().rootNode().isShadowRoot())
         clearFlag(IsInShadowTreeFlag);
+}
+
+inline ShadowRoot* Node::shadowRoot() const
+{
+    if (!isElementNode())
+        return 0;
+    return toElement(this)->shadowRoot();
 }
 
 inline void Element::invalidateStyleAttribute()

@@ -26,7 +26,6 @@
 
 interface ShadowRoot : DocumentFragment {
     readonly attribute Element activeElement;
-    readonly attribute ShadowRoot olderShadowRoot;
 
     [RaisesException] Node cloneNode([Default=Undefined] optional boolean deep);
     Selection getSelection();

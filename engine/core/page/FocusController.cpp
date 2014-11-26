@@ -96,7 +96,7 @@ FocusNavigationScope FocusNavigationScope::ownedByNonFocusableFocusScopeOwner(No
 FocusNavigationScope FocusNavigationScope::ownedByShadowHost(Node* node)
 {
     ASSERT(isShadowHost(node));
-    return FocusNavigationScope(toElement(node)->shadow()->youngestShadowRoot());
+    return FocusNavigationScope(toElement(node)->shadow()->shadowRoot());
 }
 
 static inline void dispatchEventsOnWindowAndFocusedNode(Document* document, bool focused)

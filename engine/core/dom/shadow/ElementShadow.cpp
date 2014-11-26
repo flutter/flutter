@@ -129,16 +129,15 @@ PassOwnPtr<ElementShadow> ElementShadow::create()
 }
 
 ElementShadow::ElementShadow()
-    : m_needsDistributionRecalc(false)
+    : m_shadowRoot(0)
+    , m_needsDistributionRecalc(false)
     , m_needsSelectFeatureSet(false)
 {
 }
 
 ElementShadow::~ElementShadow()
 {
-#if !ENABLE(OILPAN)
-    removeDetachedShadowRoots();
-#endif
+    removeDetachedShadowRoot();
 }
 
 ShadowRoot& ElementShadow::addShadowRoot(Element& shadowHost)
@@ -146,13 +145,13 @@ ShadowRoot& ElementShadow::addShadowRoot(Element& shadowHost)
     EventDispatchForbiddenScope assertNoEventDispatch;
     ScriptForbiddenScope forbidScript;
 
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot())
-        root->lazyReattachIfAttached();
+    ASSERT(!m_shadowRoot);
 
     RefPtr<ShadowRoot> shadowRoot = ShadowRoot::create(shadowHost.document());
     shadowRoot->setParentOrShadowHostNode(&shadowHost);
     shadowRoot->setParentTreeScope(shadowHost.treeScope());
-    m_shadowRoots.push(shadowRoot.get());
+    m_shadowRoot = shadowRoot.get();
+
     setNeedsDistributionRecalc();
 
     shadowRoot->insertedInto(&shadowHost);
@@ -160,42 +159,40 @@ ShadowRoot& ElementShadow::addShadowRoot(Element& shadowHost)
     return *shadowRoot;
 }
 
-#if !ENABLE(OILPAN)
-void ElementShadow::removeDetachedShadowRoots()
+void ElementShadow::removeDetachedShadowRoot()
 {
     // Dont protect this ref count.
     Element* shadowHost = host();
     ASSERT(shadowHost);
 
-    while (RefPtr<ShadowRoot> oldRoot = m_shadowRoots.head()) {
+    if (RefPtr<ShadowRoot> oldRoot = m_shadowRoot) {
         shadowHost->document().removeFocusedElementOfSubtree(oldRoot.get());
-        m_shadowRoots.removeHead();
+        m_shadowRoot = 0;
         oldRoot->setParentOrShadowHostNode(0);
         oldRoot->setParentTreeScope(shadowHost->document());
-        oldRoot->setPrev(0);
-        oldRoot->setNext(0);
     }
 }
-#endif
 
 void ElementShadow::attach(const Node::AttachContext& context)
 {
+    if (!m_shadowRoot)
+        return;
+
+    ASSERT(m_shadowRoot->needsAttach());
+
     Node::AttachContext childrenContext(context);
     childrenContext.resolvedStyle = 0;
-
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
-        if (root->needsAttach())
-            root->attach(childrenContext);
-    }
+    m_shadowRoot->attach(childrenContext);
 }
 
 void ElementShadow::detach(const Node::AttachContext& context)
 {
+    if (!m_shadowRoot)
+        return;
+
     Node::AttachContext childrenContext(context);
     childrenContext.resolvedStyle = 0;
-
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot())
-        root->detach(childrenContext);
+    m_shadowRoot->detach(childrenContext);
 }
 
 void ElementShadow::setNeedsDistributionRecalc()
@@ -209,9 +206,9 @@ void ElementShadow::setNeedsDistributionRecalc()
 
 bool ElementShadow::hasSameStyles(const ElementShadow* other) const
 {
-    ShadowRoot* root = youngestShadowRoot();
-    ShadowRoot* otherRoot = other->youngestShadowRoot();
-    while (root || otherRoot) {
+    ShadowRoot* root = m_shadowRoot;
+    ShadowRoot* otherRoot = other->shadowRoot();
+    if (root || otherRoot) {
         if (!root || !otherRoot)
             return false;
 
@@ -225,8 +222,6 @@ bool ElementShadow::hasSameStyles(const ElementShadow* other) const
             if (toCSSStyleSheet(list->item(i))->contents() != toCSSStyleSheet(otherList->item(i))->contents())
                 return false;
         }
-        root = root->olderShadowRoot();
-        otherRoot = otherRoot->olderShadowRoot();
     }
 
     return true;
@@ -251,7 +246,7 @@ void ElementShadow::distribute()
     host()->setNeedsStyleRecalc(SubtreeStyleChange);
     DistributionPool pool(*host());
 
-    for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
+    if (ShadowRoot* root = shadowRoot()) {
         const Vector<RefPtr<InsertionPoint> >& insertionPoints = root->descendantInsertionPoints();
         for (size_t i = 0; i < insertionPoints.size(); ++i) {
             InsertionPoint* point = insertionPoints[i].get();
@@ -276,7 +271,7 @@ const SelectRuleFeatureSet& ElementShadow::ensureSelectFeatureSet()
         return m_selectFeatures;
 
     m_selectFeatures.clear();
-    for (ShadowRoot* root = oldestShadowRoot(); root; root = root->youngerShadowRoot())
+    if (ShadowRoot* root = shadowRoot())
         collectSelectFeatureSetFrom(*root);
     m_needsSelectFeatureSet = false;
     return m_selectFeatures;

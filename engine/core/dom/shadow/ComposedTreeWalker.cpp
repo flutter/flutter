@@ -44,7 +44,7 @@ Node* ComposedTreeWalker::traverseChild(const Node* node, TraversalDirection dir
 {
     ASSERT(node);
     ElementShadow* shadow = shadowFor(node);
-    return shadow ? traverseLightChildren(shadow->youngestShadowRoot(), direction)
+    return shadow ? traverseLightChildren(shadow->shadowRoot(), direction)
             : traverseLightChildren(node, direction);
 }
 
@@ -105,14 +105,6 @@ Node* ComposedTreeWalker::traverseSiblingInCurrentTree(const Node* node, Travers
     ASSERT(node);
     if (Node* found = traverseSiblings(direction == TraversalDirectionForward ? node->nextSibling() : node->previousSibling(), direction))
         return found;
-    if (Node* next = traverseBackToYoungerShadowRoot(node, direction))
-        return next;
-    return 0;
-}
-
-Node* ComposedTreeWalker::traverseBackToYoungerShadowRoot(const Node* node, TraversalDirection direction)
-{
-    // FIXME(sky): Remove this.
     return 0;
 }
 
@@ -142,8 +134,6 @@ inline Node* ComposedTreeWalker::traverseParentOrHost(const Node* node) const
     if (!parent->isShadowRoot())
         return parent;
     ShadowRoot* shadowRoot = toShadowRoot(parent);
-    if (!shadowRoot->isYoungest())
-        return 0;
     return shadowRoot->host();
 }
 

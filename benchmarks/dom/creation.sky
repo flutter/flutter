@@ -14,7 +14,7 @@ WidgetPrototype.createdCallback =  function() {
   this.wasAttached = false;
   this.wasDetached = false;
   this.attrsChanged = [];
-  this.createShadowRoot();
+  this.ensureShadowRoot();
 };
 
 WidgetPrototype.attachedCallback = function() {

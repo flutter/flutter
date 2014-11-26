@@ -37,9 +37,7 @@ void TreeScopeAdopter::moveTreeToNewScope(Node& root) const
 {
     ASSERT(needsScopeChange());
 
-#if !ENABLE(OILPAN)
     oldScope().guardRef();
-#endif
 
     Document& oldDocument = oldScope().document();
     Document& newDocument = newScope().document();
@@ -54,16 +52,14 @@ void TreeScopeAdopter::moveTreeToNewScope(Node& root) const
         if (!node->isElementNode())
             continue;
 
-        for (ShadowRoot* shadow = node->youngestShadowRoot(); shadow; shadow = shadow->olderShadowRoot()) {
+        if (ShadowRoot* shadow = node->shadowRoot()) {
             shadow->setParentTreeScope(newScope());
             if (willMoveToNewDocument)
                 moveTreeToNewDocument(*shadow, oldDocument, newDocument);
         }
     }
 
-#if !ENABLE(OILPAN)
     oldScope().guardDeref();
-#endif
 }
 
 void TreeScopeAdopter::moveTreeToNewDocument(Node& root, Document& oldDocument, Document& newDocument) const
@@ -72,7 +68,7 @@ void TreeScopeAdopter::moveTreeToNewDocument(Node& root, Document& oldDocument, 
     for (Node* node = &root; node; node = NodeTraversal::next(*node, &root)) {
         moveNodeToNewDocument(*node, oldDocument, newDocument);
 
-        for (ShadowRoot* shadow = node->youngestShadowRoot(); shadow; shadow = shadow->olderShadowRoot())
+        if (ShadowRoot* shadow = node->shadowRoot())
             moveTreeToNewDocument(*shadow, oldDocument, newDocument);
     }
 }

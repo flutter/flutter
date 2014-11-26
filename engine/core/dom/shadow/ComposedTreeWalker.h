@@ -105,8 +105,6 @@ private:
     static Node* traverseSiblings(const Node*, TraversalDirection);
     static Node* traverseDistributedNodes(const Node*, const InsertionPoint*, TraversalDirection);
 
-    static Node* traverseBackToYoungerShadowRoot(const Node*, TraversalDirection);
-
     Node* traverseParentOrHost(const Node*) const;
 
     RawPtr<const Node> m_node;

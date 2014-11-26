@@ -31,7 +31,6 @@
 #include "sky/engine/core/dom/DocumentFragment.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/TreeScope.h"
-#include "sky/engine/wtf/DoublyLinkedList.h"
 
 namespace blink {
 
@@ -42,9 +41,8 @@ class InsertionPoint;
 class ShadowRootRareData;
 class StyleSheetList;
 
-class ShadowRoot final : public DocumentFragment, public TreeScope, public DoublyLinkedListNode<ShadowRoot> {
+class ShadowRoot final : public DocumentFragment, public TreeScope {
     DEFINE_WRAPPERTYPEINFO();
-    friend class WTF::DoublyLinkedListNode<ShadowRoot>;
 public:
 
     static PassRefPtr<ShadowRoot> create(Document& document)
@@ -60,12 +58,6 @@ public:
 
     Element* host() const { return toElement(parentOrShadowHostNode()); }
     ElementShadow* owner() const { return host() ? host()->shadow() : 0; }
-
-    ShadowRoot* youngerShadowRoot() const { return prev(); }
-
-    bool isYoungest() const { return !youngerShadowRoot(); }
-    bool isOldest() const { return !olderShadowRoot(); }
-    bool isOldestAuthorShadowRoot() const;
 
     virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
@@ -92,8 +84,6 @@ public:
 public:
     Element* activeElement() const;
 
-    ShadowRoot* olderShadowRoot() const { return next(); }
-
     PassRefPtr<Node> cloneNode(bool, ExceptionState&);
     PassRefPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
 
@@ -116,11 +106,6 @@ private:
     // ShadowRoots should never be cloned.
     virtual PassRefPtr<Node> cloneNode(bool) override { return nullptr; }
 
-    // FIXME: This shouldn't happen. https://bugs.webkit.org/show_bug.cgi?id=88834
-    bool isOrphan() const { return !host(); }
-
-    RawPtr<ShadowRoot> m_prev;
-    RawPtr<ShadowRoot> m_next;
     OwnPtr<ShadowRootRareData> m_shadowRootRareData;
     unsigned m_numberOfStyles : 27;
     unsigned m_registeredWithParentShadowRoot : 1;

@@ -31,7 +31,7 @@ var BasePrototype = createPrototype(HTMLElement.prototype, {
     if (!this.shadowRoot) {
       var template = templates.get(this.localName);
       if (template) {
-        var shadow = this.createShadowRoot();
+        var shadow = this.ensureShadowRoot();
         shadow.appendChild(template.createInstance(this));
       }
     }

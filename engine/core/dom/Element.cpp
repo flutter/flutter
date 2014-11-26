@@ -967,7 +967,7 @@ void Element::recalcChildStyle(StyleRecalcChange change)
     ASSERT(!needsStyleRecalc());
 
     if (change > Inherit || childNeedsStyleRecalc()) {
-        for (ShadowRoot* root = youngestShadowRoot(); root; root = root->olderShadowRoot()) {
+        if (ShadowRoot* root = shadowRoot()) {
             if (root->shouldCallRecalcStyle(change))
                 root->recalcStyle(change);
         }
@@ -1049,8 +1049,12 @@ CustomElementDefinition* Element::customElementDefinition() const
     return 0;
 }
 
-PassRefPtr<ShadowRoot> Element::createShadowRoot(ExceptionState& exceptionState)
+// TODO(esprehn): Implement the sky spec where shadow roots are a custom
+// element registration feature.
+PassRefPtr<ShadowRoot> Element::ensureShadowRoot(ExceptionState& exceptionState)
 {
+    if (ShadowRoot* root = shadowRoot())
+        return root;
     return PassRefPtr<ShadowRoot>(ensureShadow().addShadowRoot(*this));
 }
 
@@ -1059,7 +1063,7 @@ ShadowRoot* Element::shadowRoot() const
     ElementShadow* elementShadow = shadow();
     if (!elementShadow)
         return 0;
-    return elementShadow->youngestShadowRoot();
+    return elementShadow->shadowRoot();
 }
 
 void Element::childrenChanged(const ChildrenChange& change)

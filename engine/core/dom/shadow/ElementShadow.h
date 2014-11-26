@@ -31,7 +31,6 @@
 #include "sky/engine/core/dom/shadow/SelectRuleFeatureSet.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/wtf/DoublyLinkedList.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -46,8 +45,7 @@ public:
     ~ElementShadow();
 
     Element* host() const;
-    ShadowRoot* youngestShadowRoot() const { return m_shadowRoots.head(); }
-    ShadowRoot* oldestShadowRoot() const { return m_shadowRoots.tail(); }
+    ShadowRoot* shadowRoot() const { return m_shadowRoot; }
     ElementShadow* containingShadow() const;
 
     ShadowRoot& addShadowRoot(Element& shadowHost);
@@ -71,9 +69,7 @@ public:
 private:
     ElementShadow();
 
-#if !ENABLE(OILPAN)
-    void removeDetachedShadowRoots();
-#endif
+    void removeDetachedShadowRoot();
 
     void distribute();
     void clearDistribution();
@@ -88,30 +84,15 @@ private:
     NodeToDestinationInsertionPoints m_nodeToInsertionPoints;
 
     SelectRuleFeatureSet m_selectFeatures;
-    // FIXME: Oilpan: add a heap-based version of DoublyLinkedList<>.
-    DoublyLinkedList<ShadowRoot> m_shadowRoots;
+    ShadowRoot* m_shadowRoot;
     bool m_needsDistributionRecalc;
     bool m_needsSelectFeatureSet;
 };
 
 inline Element* ElementShadow::host() const
 {
-    ASSERT(!m_shadowRoots.isEmpty());
-    return youngestShadowRoot()->host();
-}
-
-inline ShadowRoot* Node::youngestShadowRoot() const
-{
-    if (!isElementNode())
-        return 0;
-    return toElement(this)->youngestShadowRoot();
-}
-
-inline ShadowRoot* Element::youngestShadowRoot() const
-{
-    if (ElementShadow* shadow = this->shadow())
-        return shadow->youngestShadowRoot();
-    return 0;
+    ASSERT(m_shadowRoot);
+    return m_shadowRoot->host();
 }
 
 inline ElementShadow* ElementShadow::containingShadow() const

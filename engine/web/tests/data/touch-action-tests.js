@@ -4,7 +4,7 @@ document.addEventListener('touchstart', function() {});
 window.addEventListener('load', function() {
   // Create any shadow DOM nodes requested by the test.
   var shadowTrees = document.querySelectorAll('[make-shadow-dom]');
-  if (shadowTrees.length > 0 && !HTMLElement.prototype.createShadowRoot) {
+  if (shadowTrees.length > 0 && !HTMLElement.prototype.ensureShadowRoot) {
     document.body.innerHTML = 'ERROR: Shadow DOM not supported!';
     return;
   }
@@ -16,7 +16,7 @@ window.addEventListener('load', function() {
       return;
     }
     tree.parentElement.removeChild(tree);
-    var shadowRoot = host.createShadowRoot();
+    var shadowRoot = host.ensureShadowRoot();
     shadowRoot.appendChild(tree);
   }
 });

@@ -21,7 +21,7 @@ TEST(TreeScopeTest, CommonAncestorOfSameTrees)
 
     RefPtr<Element> html = document->createElement("html", nullAtom, ASSERT_NO_EXCEPTION);
     document->appendChild(html, ASSERT_NO_EXCEPTION);
-    RefPtr<ShadowRoot> shadowRoot = html->createShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRoot = html->ensureShadowRoot(ASSERT_NO_EXCEPTION);
     EXPECT_EQ(shadowRoot.get(), shadowRoot->commonAncestorTreeScope(*shadowRoot));
 }
 
@@ -34,7 +34,7 @@ TEST(TreeScopeTest, CommonAncestorOfInclusiveTrees)
     RefPtr<Document> document = Document::create();
     RefPtr<Element> html = document->createElement("html", nullAtom, ASSERT_NO_EXCEPTION);
     document->appendChild(html, ASSERT_NO_EXCEPTION);
-    RefPtr<ShadowRoot> shadowRoot = html->createShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRoot = html->ensureShadowRoot(ASSERT_NO_EXCEPTION);
 
     EXPECT_EQ(document.get(), document->commonAncestorTreeScope(*shadowRoot));
     EXPECT_EQ(document.get(), shadowRoot->commonAncestorTreeScope(*document));
@@ -54,8 +54,8 @@ TEST(TreeScopeTest, CommonAncestorOfSiblingTrees)
     RefPtr<Element> body = document->createElement("body", nullAtom, ASSERT_NO_EXCEPTION);
     html->appendChild(body);
 
-    RefPtr<ShadowRoot> shadowRootA = head->createShadowRoot(ASSERT_NO_EXCEPTION);
-    RefPtr<ShadowRoot> shadowRootB = body->createShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRootA = head->ensureShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRootB = body->ensureShadowRoot(ASSERT_NO_EXCEPTION);
 
     EXPECT_EQ(document.get(), shadowRootA->commonAncestorTreeScope(*shadowRootB));
     EXPECT_EQ(document.get(), shadowRootB->commonAncestorTreeScope(*shadowRootA));
@@ -77,12 +77,12 @@ TEST(TreeScopeTest, CommonAncestorOfTreesAtDifferentDepths)
     RefPtr<Element> body = document->createElement("body", nullAtom, ASSERT_NO_EXCEPTION);
     html->appendChild(body);
 
-    RefPtr<ShadowRoot> shadowRootY = head->createShadowRoot(ASSERT_NO_EXCEPTION);
-    RefPtr<ShadowRoot> shadowRootB = body->createShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRootY = head->ensureShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRootB = body->ensureShadowRoot(ASSERT_NO_EXCEPTION);
 
     RefPtr<Element> divInY = document->createElement("div", nullAtom, ASSERT_NO_EXCEPTION);
     shadowRootY->appendChild(divInY);
-    RefPtr<ShadowRoot> shadowRootA = divInY->createShadowRoot(ASSERT_NO_EXCEPTION);
+    RefPtr<ShadowRoot> shadowRootA = divInY->ensureShadowRoot(ASSERT_NO_EXCEPTION);
 
     EXPECT_EQ(document.get(), shadowRootA->commonAncestorTreeScope(*shadowRootB));
     EXPECT_EQ(document.get(), shadowRootB->commonAncestorTreeScope(*shadowRootA));

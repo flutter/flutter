@@ -461,23 +461,12 @@ void TextIterator::advance()
                 }
 
                 if (!next && !parentNode && m_shadowDepth > 0) {
-                    // 4. Reached the top of a shadow root. If it's created by author, then try to visit the next
-                    // sibling shadow root, if any.
+                    // 4. Reached the top of a shadow root.
                     ShadowRoot* shadowRoot = toShadowRoot(m_node);
-                    ShadowRoot* nextShadowRoot = shadowRoot->olderShadowRoot();
-                    if (nextShadowRoot) {
-                        m_fullyClippedStack.pop();
-                        m_node = nextShadowRoot;
-                        m_iterationProgress = HandledNone;
-                        // m_shadowDepth is unchanged since we exit from a shadow root and enter another.
-                        pushFullyClippedState(m_fullyClippedStack, m_node);
-                    } else {
-                        // We are the last shadow root; exit from here and go back to where we were.
-                        m_node = shadowRoot->host();
-                        m_iterationProgress = HandledAuthorShadowRoots;
-                        --m_shadowDepth;
-                        m_fullyClippedStack.pop();
-                    }
+                    m_node = shadowRoot->host();
+                    m_iterationProgress = HandledAuthorShadowRoots;
+                    --m_shadowDepth;
+                    m_fullyClippedStack.pop();
                     continue;
                 }
             }

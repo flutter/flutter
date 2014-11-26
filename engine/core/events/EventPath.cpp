@@ -138,9 +138,9 @@ void EventPath::calculateTreeScopePrePostOrderNumbers()
     TreeScopeEventContext* rootTree = 0;
     for (size_t i = 0; i < m_treeScopeEventContexts.size(); ++i) {
         TreeScopeEventContext* treeScopeEventContext = m_treeScopeEventContexts[i].get();
-        // Use olderShadowRootOrParentTreeScope here for parent-child relationships.
+        // Use parentTreeScope here for parent-child relationships.
         // See the definition of trees of trees in the Shado DOM spec: http://w3c.github.io/webcomponents/spec/shadow/
-        TreeScope* parent = treeScopeEventContext->treeScope().olderShadowRootOrParentTreeScope();
+        TreeScope* parent = treeScopeEventContext->treeScope().parentTreeScope();
         if (!parent) {
             ASSERT(!rootTree);
             rootTree = treeScopeEventContext;
@@ -167,7 +167,7 @@ TreeScopeEventContext* EventPath::ensureTreeScopeEventContext(Node* currentTarge
         treeScopeEventContext = addResult.storedValue->value.get();
     }
     if (isNewEntry) {
-        TreeScopeEventContext* parentTreeScopeEventContext = ensureTreeScopeEventContext(0, treeScope->olderShadowRootOrParentTreeScope(), treeScopeEventContextMap);
+        TreeScopeEventContext* parentTreeScopeEventContext = ensureTreeScopeEventContext(0, treeScope->parentTreeScope(), treeScopeEventContextMap);
         if (parentTreeScopeEventContext && parentTreeScopeEventContext->target()) {
             treeScopeEventContext->setTarget(parentTreeScopeEventContext->target());
         } else if (currentTarget) {
@@ -219,7 +219,7 @@ EventTarget* EventPath::findRelatedNode(TreeScope* scope, RelatedTargetMap& rela
             relatedNode = iter->value;
             break;
         }
-        scope = scope->olderShadowRootOrParentTreeScope();
+        scope = scope->parentTreeScope();
     }
     ASSERT(relatedNode);
     for (Vector<RawPtr<TreeScope>, 32>::iterator iter = parentTreeScopes.begin(); iter < parentTreeScopes.end(); ++iter)

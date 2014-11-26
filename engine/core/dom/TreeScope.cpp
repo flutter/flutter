@@ -92,18 +92,9 @@ TreeScope::~TreeScope()
 #endif
 }
 
-TreeScope* TreeScope::olderShadowRootOrParentTreeScope() const
-{
-    if (rootNode().isShadowRoot()) {
-        if (ShadowRoot* olderShadowRoot = toShadowRoot(rootNode()).olderShadowRoot())
-            return olderShadowRoot;
-    }
-    return parentTreeScope();
-}
-
 bool TreeScope::isInclusiveOlderSiblingShadowRootOrAncestorTreeScopeOf(const TreeScope& scope) const
 {
-    for (const TreeScope* current = &scope; current; current = current->olderShadowRootOrParentTreeScope()) {
+    for (const TreeScope* current = &scope; current; current = current->parentTreeScope()) {
         if (current == this)
             return true;
     }
@@ -303,10 +294,6 @@ unsigned short TreeScope::comparePosition(const TreeScope& otherScope) const
             if (shadowHost1 != shadowHost2)
                 return shadowHost1->compareDocumentPosition(shadowHost2, Node::TreatShadowTreesAsDisconnected);
 
-            for (const ShadowRoot* child = toShadowRoot(child2->rootNode()).olderShadowRoot(); child; child = child->olderShadowRoot())
-                if (child == child1)
-                    return Node::DOCUMENT_POSITION_FOLLOWING;
-
             return Node::DOCUMENT_POSITION_PRECEDING;
         }
     }
@@ -414,7 +401,7 @@ Element* TreeScope::getElementByAccessKey(const String& key) const
     for (Element* element = ElementTraversal::firstWithin(root); element; element = ElementTraversal::next(*element, &root)) {
         if (equalIgnoringCase(element->getAttribute(HTMLNames::accesskeyAttr), key))
             result = element;
-        for (ShadowRoot* shadowRoot = element->youngestShadowRoot(); shadowRoot; shadowRoot = shadowRoot->olderShadowRoot()) {
+        if (ShadowRoot* shadowRoot = element->shadowRoot()) {
             if (Element* shadowResult = shadowRoot->getElementByAccessKey(key))
                 result = shadowResult;
         }
@@ -425,7 +412,7 @@ Element* TreeScope::getElementByAccessKey(const String& key) const
 void TreeScope::setNeedsStyleRecalcForViewportUnits()
 {
     for (Element* element = ElementTraversal::firstWithin(rootNode()); element; element = ElementTraversal::next(*element)) {
-        for (ShadowRoot* root = element->youngestShadowRoot(); root; root = root->olderShadowRoot())
+        if (ShadowRoot* root = element->shadowRoot())
             root->setNeedsStyleRecalcForViewportUnits();
         RenderStyle* style = element->renderStyle();
         if (style && style->hasViewportUnits())

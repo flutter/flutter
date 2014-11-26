@@ -41,8 +41,8 @@
 
 namespace blink {
 
-struct SameSizeAsShadowRoot : public DocumentFragment, public TreeScope, public DoublyLinkedListNode<ShadowRoot> {
-    void* pointers[3];
+struct SameSizeAsShadowRoot : public DocumentFragment, public TreeScope {
+    void* pointers[1];
     unsigned countersAndFlags[1];
 };
 
@@ -51,8 +51,6 @@ COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_sh
 ShadowRoot::ShadowRoot(Document& document)
     : DocumentFragment(0, CreateShadowRoot)
     , TreeScope(*this, document)
-    , m_prev(nullptr)
-    , m_next(nullptr)
     , m_numberOfStyles(0)
     , m_registeredWithParentShadowRoot(false)
     , m_descendantInsertionPointsIsValid(false)
@@ -61,10 +59,6 @@ ShadowRoot::ShadowRoot(Document& document)
 
 ShadowRoot::~ShadowRoot()
 {
-#if !ENABLE(OILPAN)
-    ASSERT(!m_prev);
-    ASSERT(!m_next);
-
     if (m_shadowRootRareData && m_shadowRootRareData->styleSheets())
         m_shadowRootRareData->styleSheets()->detachFromDocument();
 
@@ -85,15 +79,12 @@ ShadowRoot::~ShadowRoot()
     // as well as Node. See a comment on TreeScope.h for the reason.
     if (hasRareData())
         clearRareData();
-#endif
 }
 
-#if !ENABLE(OILPAN)
 void ShadowRoot::dispose()
 {
     removeDetachedChildren();
 }
-#endif
 
 PassRefPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& exceptionState)
 {
@@ -130,7 +121,7 @@ void ShadowRoot::insertedInto(ContainerNode* insertionPoint)
 {
     DocumentFragment::insertedInto(insertionPoint);
 
-    if (!insertionPoint->inDocument() || !isOldest())
+    if (!insertionPoint->inDocument())
         return;
 
     // FIXME: When parsing <video controls>, insertedInto() is called many times without invoking removedFrom.

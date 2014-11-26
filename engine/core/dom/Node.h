@@ -212,7 +212,7 @@ public:
     // If this node is in a shadow tree, returns its shadow host. Otherwise, returns 0.
     Element* shadowHost() const;
     ShadowRoot* containingShadowRoot() const;
-    ShadowRoot* youngestShadowRoot() const;
+    ShadowRoot* shadowRoot() const;
 
     // Returns 0, a child of ShadowRoot, or a legacy shadow root.
     Node* nonBoundaryShadowTreeRootNode();
