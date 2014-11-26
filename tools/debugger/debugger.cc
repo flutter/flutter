@@ -83,16 +83,6 @@ void SkyDebugger::OnViewBoundsChanged(mojo::View* view,
   content_->SetBounds(new_bounds);
 }
 
-void SkyDebugger::OnViewInputEvent(
-    mojo::View* view, const mojo::EventPtr& event) {
-  if (view != root_)
-    return;
-  // Currently, the event targeting system is broken for mojo::Views, so we
-  // blindly forward events from the root to the content view. Once event
-  // targeting works, we should be able to rip out this code.
-  window_manager_app_->DispatchInputEventToView(content_, event.Clone());
-}
-
 void SkyDebugger::Create(mojo::ApplicationConnection* connection,
                          mojo::InterfaceRequest<Debugger> request) {
   mojo::WeakBindToRequest(this, &request);
