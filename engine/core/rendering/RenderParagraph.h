@@ -20,6 +20,16 @@ public:
     static RenderParagraph* createAnonymous(Document&);
 
     bool isRenderParagraph() const override { return true; }
+
+protected:
+    void addOverflowFromChildren() final;
+
+    void simplifiedNormalFlowLayout() final;
+
+    void paintContents(PaintInfo&, const LayoutPoint&) final;
+
+    bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) final;
+
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());

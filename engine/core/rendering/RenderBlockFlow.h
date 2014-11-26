@@ -115,8 +115,6 @@ public:
         return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
     }
 
-    void addOverflowFromInlineChildren();
-
     // FIXME: This should be const to avoid a const_cast, but can modify child dirty bits
     void computeInlinePreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth);
 

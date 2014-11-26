@@ -266,7 +266,6 @@ public:
 protected:
     virtual void addOverflowFromChildren();
     void addOverflowFromPositionedObjects();
-    void addOverflowFromBlockChildren();
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override;
 
@@ -275,6 +274,10 @@ protected:
     virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }
 
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
+
+    virtual void paintContents(PaintInfo&, const LayoutPoint&);
+
+    virtual bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
 
 private:
     virtual RenderObjectChildList* virtualChildren() override final { return children(); }
@@ -291,13 +294,10 @@ private:
     void insertIntoTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
 
-    void paintContents(PaintInfo&, const LayoutPoint&);
     void paintSelection(PaintInfo&, const LayoutPoint&);
     void paintCarets(PaintInfo&, const LayoutPoint&);
 
     bool hasCaret() const;
-
-    bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
 
     void computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const;
 

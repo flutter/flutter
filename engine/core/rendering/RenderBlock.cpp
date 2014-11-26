@@ -400,10 +400,10 @@ void RenderBlock::layoutBlock(bool)
 
 void RenderBlock::addOverflowFromChildren()
 {
-    if (isRenderParagraph())
-        toRenderBlockFlow(this)->addOverflowFromInlineChildren();
-    else
-        addOverflowFromBlockChildren();
+    for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
+        if (!child->isFloatingOrOutOfFlowPositioned())
+            addOverflowFromChild(child);
+    }
 }
 
 void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
@@ -429,14 +429,6 @@ void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
     }
 
     addVisualEffectOverflow();
-}
-
-void RenderBlock::addOverflowFromBlockChildren()
-{
-    for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-        if (!child->isFloatingOrOutOfFlowPositioned())
-            addOverflowFromChild(child);
-    }
 }
 
 void RenderBlock::addOverflowFromPositionedObjects()
@@ -472,32 +464,9 @@ void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, R
 
 void RenderBlock::simplifiedNormalFlowLayout()
 {
-    if (isRenderParagraph()) {
-        ListHashSet<RootInlineBox*> lineBoxes;
-        for (InlineWalker walker(this); !walker.atEnd(); walker.advance()) {
-            RenderObject* o = walker.current();
-            if (!o->isOutOfFlowPositioned() && o->isReplaced()) {
-                o->layoutIfNeeded();
-                if (toRenderBox(o)->inlineBoxWrapper()) {
-                    RootInlineBox& box = toRenderBox(o)->inlineBoxWrapper()->root();
-                    lineBoxes.add(&box);
-                }
-            } else if (o->isText() || (o->isRenderInline() && !walker.atEndOfInline())) {
-                o->clearNeedsLayout();
-            }
-        }
-
-        // FIXME: Glyph overflow will get lost in this case, but not really a big deal.
-        GlyphOverflowAndFallbackFontsMap textBoxDataMap;
-        for (ListHashSet<RootInlineBox*>::const_iterator it = lineBoxes.begin(); it != lineBoxes.end(); ++it) {
-            RootInlineBox* box = *it;
-            box->computeOverflow(box->lineTop(), box->lineBottom(), textBoxDataMap);
-        }
-    } else {
-        for (RenderBox* box = firstChildBox(); box; box = box->nextSiblingBox()) {
-            if (!box->isOutOfFlowPositioned())
-                box->layoutIfNeeded();
-        }
+    for (RenderBox* box = firstChildBox(); box; box = box->nextSiblingBox()) {
+        if (!box->isOutOfFlowPositioned())
+            box->layoutIfNeeded();
     }
 }
 
@@ -651,24 +620,14 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    // Avoid painting descendants of the root element when stylesheets haven't loaded.  This eliminates FOUC.
-    // It's ok not to draw, because later on, when all the stylesheets do load, styleResolverChanged() on the Document
-    // will do a full paint invalidation.
-    if (document().didLayoutWithPendingStylesheets() && !isRenderView())
-        return;
+    PaintPhase newPhase = (paintInfo.phase == PaintPhaseChildOutlines) ? PaintPhaseOutline : paintInfo.phase;
+    newPhase = (newPhase == PaintPhaseChildBlockBackgrounds) ? PaintPhaseChildBlockBackground : newPhase;
 
-    if (isRenderParagraph())
-        m_lineBoxes.paint(this, paintInfo, paintOffset);
-    else {
-        PaintPhase newPhase = (paintInfo.phase == PaintPhaseChildOutlines) ? PaintPhaseOutline : paintInfo.phase;
-        newPhase = (newPhase == PaintPhaseChildBlockBackgrounds) ? PaintPhaseChildBlockBackground : newPhase;
-
-        // We don't paint our own background, but we do let the kids paint their backgrounds.
-        PaintInfo paintInfoForChild(paintInfo);
-        paintInfoForChild.phase = newPhase;
-        paintInfoForChild.updatePaintingRootForChildren(this);
-        paintChildren(paintInfoForChild, paintOffset);
-    }
+    // We don't paint our own background, but we do let the kids paint their backgrounds.
+    PaintInfo paintInfoForChild(paintInfo);
+    paintInfoForChild.phase = newPhase;
+    paintInfoForChild.updatePaintingRootForChildren(this);
+    paintChildren(paintInfoForChild, paintOffset);
 }
 
 void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
@@ -771,8 +730,13 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
         return;
 
     // 2. paint contents
-    if (paintPhase != PaintPhaseSelfOutline)
-        paintContents(paintInfo, scrolledOffset);
+    if (paintPhase != PaintPhaseSelfOutline) {
+        // Avoid painting descendants of the root element when stylesheets haven't loaded.  This eliminates FOUC.
+        // It's ok not to draw, because later on, when all the stylesheets do load, styleResolverChanged() on the Document
+        // will do a full paint invalidation.
+        if (!document().didLayoutWithPendingStylesheets() || isRenderView())
+            paintContents(paintInfo, scrolledOffset);
+    }
 
     // 3. paint selection
     // FIXME: Make this work with multi column layouts.  For now don't fill gaps.
@@ -1419,19 +1383,13 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 
 bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
 {
-    if (isRenderParagraph()) {
-        // We have to hit-test our line boxes.
-        if (m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset, hitTestAction))
+    // Hit test our children.
+    HitTestAction childHitTest = hitTestAction;
+    if (hitTestAction == HitTestChildBlockBackgrounds)
+        childHitTest = HitTestChildBlockBackground;
+    for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
+        if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
             return true;
-    } else {
-        // Hit test our children.
-        HitTestAction childHitTest = hitTestAction;
-        if (hitTestAction == HitTestChildBlockBackgrounds)
-            childHitTest = HitTestChildBlockBackground;
-        for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
-            if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
-                return true;
-        }
     }
 
     return false;
