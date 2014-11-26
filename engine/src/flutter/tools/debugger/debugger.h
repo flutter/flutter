@@ -57,7 +57,6 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   void OnViewBoundsChanged(mojo::View* view,
                            const mojo::Rect& old_bounds,
                            const mojo::Rect& new_bounds) override;
-  void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 
   // Overridden from InterfaceFactory<Debugger>:
   void Create(mojo::ApplicationConnection* connection,
