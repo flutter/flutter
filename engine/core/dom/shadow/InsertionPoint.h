@@ -54,8 +54,8 @@ public:
 
     virtual bool canAffectSelector() const { return false; }
 
-    virtual void attach(const AttachContext& = AttachContext()) override;
-    virtual void detach(const AttachContext& = AttachContext()) override;
+    void attachDistribution(const AttachContext&);
+    void detachDistribution(const AttachContext&);
 
     bool shouldUseFallbackElements() const;
 

@@ -196,8 +196,9 @@ public:
 
     bool hasEquivalentAttributes(const Element* other) const;
 
-    virtual void attach(const AttachContext& = AttachContext()) override;
-    virtual void detach(const AttachContext& = AttachContext()) override;
+    void attach(const AttachContext& = AttachContext()) final;
+    void detach(const AttachContext& = AttachContext()) final;
+
     virtual RenderObject* createRenderer(RenderStyle*);
     void recalcStyle(StyleRecalcChange, Text* nextTextSibling = 0);
     void setAnimationStyleChange(bool);

@@ -92,7 +92,7 @@ void InsertionPoint::setDistribution(ContentDistribution& distribution)
     m_distribution.shrinkToFit();
 }
 
-void InsertionPoint::attach(const AttachContext& context)
+void InsertionPoint::attachDistribution(const AttachContext& context)
 {
     // We need to attach the distribution here so that they're inserted in the right order
     // otherwise the n^2 protection inside RenderTreeBuilder will cause them to be
@@ -102,16 +102,12 @@ void InsertionPoint::attach(const AttachContext& context)
         if (m_distribution.at(i)->needsAttach())
             m_distribution.at(i)->attach(context);
     }
-
-    HTMLElement::attach(context);
 }
 
-void InsertionPoint::detach(const AttachContext& context)
+void InsertionPoint::detachDistribution(const AttachContext& context)
 {
     for (size_t i = 0; i < m_distribution.size(); ++i)
         m_distribution.at(i)->lazyReattachIfAttached();
-
-    HTMLElement::detach(context);
 }
 
 void InsertionPoint::willRecalcStyle(StyleRecalcChange change)

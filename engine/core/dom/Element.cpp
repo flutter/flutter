@@ -801,6 +801,9 @@ void Element::attach(const AttachContext& context)
 {
     ASSERT(document().inStyleRecalc());
 
+    if (isInsertionPoint())
+        toInsertionPoint(this)->attachDistribution(context);
+
     // We've already been through detach when doing an attach, but we might
     // need to clear any state that's been added since then.
     if (hasRareData() && styleChangeType() == NeedsReattachStyleChange) {
@@ -826,6 +829,9 @@ void Element::attach(const AttachContext& context)
 
 void Element::detach(const AttachContext& context)
 {
+    if (isInsertionPoint())
+        toInsertionPoint(this)->detachDistribution(context);
+
     if (hasRareData()) {
         ElementRareData* data = elementRareData();
 
