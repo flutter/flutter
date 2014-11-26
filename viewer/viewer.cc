@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/files/file_path.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
 #include "mojo/application/application_runner_chromium.h"
+#include "mojo/common/tracing_impl.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_delegate.h"
@@ -15,7 +17,6 @@
 #include "sky/viewer/content_handler_impl.h"
 #include "sky/viewer/document_view.h"
 #include "sky/viewer/platform/platform_impl.h"
-#include "sky/viewer/services/tracing_impl.h"
 
 #if !defined(COMPONENT_BUILD)
 #include "base/i18n/icu_util.h"
@@ -24,7 +25,8 @@
 namespace sky {
 
 class Viewer : public mojo::ApplicationDelegate,
-               public mojo::InterfaceFactory<mojo::ContentHandler> {
+               public mojo::InterfaceFactory<mojo::ContentHandler>,
+               public mojo::InterfaceFactory<mojo::Tracing> {
  public:
   Viewer() {}
 
@@ -40,8 +42,8 @@ class Viewer : public mojo::ApplicationDelegate,
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
-    connection->AddService(this);
-    connection->AddService(&tracing_);
+    connection->AddService<mojo::ContentHandler>(this);
+    connection->AddService<mojo::Tracing>(this);
     return true;
   }
 
@@ -51,8 +53,13 @@ class Viewer : public mojo::ApplicationDelegate,
     mojo::BindToRequest(new ContentHandlerImpl(), &request);
   }
 
+  // Overridden from InterfaceFactory<Tracing>
+  virtual void Create(mojo::ApplicationConnection* connection,
+                      mojo::InterfaceRequest<mojo::Tracing> request) override {
+    new mojo::TracingImpl(request.Pass(), FILE_PATH_LITERAL("sky_viewer"));
+  }
+
   scoped_ptr<PlatformImpl> platform_impl_;
-  TracingFactory tracing_;
 
   DISALLOW_COPY_AND_ASSIGN(Viewer);
 };

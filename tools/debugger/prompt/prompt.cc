@@ -5,11 +5,11 @@
 #include "base/bind.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/application/application_runner_chromium.h"
+#include "mojo/common/tracing.mojom.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "sky/tools/debugger/debugger.mojom.h"
-#include "sky/viewer/services/tracing.mojom.h"
 #include <iostream>
 
 namespace sky {
@@ -148,7 +148,7 @@ class Prompt : public mojo::ApplicationDelegate {
 
   bool is_tracing_;
   DebuggerPtr debugger_;
-  TracingPtr tracing_;
+  mojo::TracingPtr tracing_;
   std::string url_;
   base::WeakPtrFactory<Prompt> weak_ptr_factory_;
 

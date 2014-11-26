@@ -27,8 +27,6 @@ mojo_native_application("viewer") {
     "platform/weburlloader_impl.h",
     "script/script_runner.cc",
     "script/script_runner.h",
-    "services/tracing_impl.cc",
-    "services/tracing_impl.h",
     "services/inspector_impl.cc",
     "services/inspector_impl.h",
     "viewer.cc",
@@ -43,6 +41,7 @@ mojo_native_application("viewer") {
     "//gin",
     "//mojo/application",
     "//mojo/common",
+    "//mojo/common:tracing_impl",
     "//mojo/converters/geometry",
     "//mojo/converters/surfaces",
     "//mojo/edk/js",
@@ -73,7 +72,6 @@ mojo_native_application("viewer") {
 
 mojom("bindings") {
   sources = [
-    "services/tracing.mojom",
     "services/inspector.mojom",
   ]
 }
