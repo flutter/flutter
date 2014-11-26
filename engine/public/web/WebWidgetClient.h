@@ -55,9 +55,7 @@ public:
     virtual void didAutoResize(const WebSize& newSize) { }
 
     // Initialize compositing for this widget.
-    // Return a compositing view used for this widget owned by the
-    // WebWidgetClient.
-    virtual WebLayerTreeView* initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); return 0; }
+    virtual void initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); };
 
     // Sometimes the WebWidget enters a state where it will generate a sequence
     // of invalidations that should not, by themselves, trigger the compositor

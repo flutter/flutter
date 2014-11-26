@@ -115,11 +115,7 @@ void RenderLayerCompositor::enableCompositingModeIfNeeded()
 
 bool RenderLayerCompositor::rootShouldAlwaysComposite() const
 {
-#if ENABLE(COMPOSITOR)
-    return true;
-#else
     return false;
-#endif
 }
 
 void RenderLayerCompositor::updateAcceleratedCompositingSettings()
@@ -130,11 +126,7 @@ void RenderLayerCompositor::updateAcceleratedCompositingSettings()
 
 bool RenderLayerCompositor::hasAcceleratedCompositing() const
 {
-#if ENABLE(COMPOSITOR)
-    return true;
-#else
     return false;
-#endif
 }
 
 bool RenderLayerCompositor::layerSquashingEnabled() const
@@ -218,89 +210,7 @@ void RenderLayerCompositor::updateWithoutAcceleratedCompositing(CompositingUpdat
 
 void RenderLayerCompositor::updateIfNeeded()
 {
-    CompositingUpdateType updateType = m_pendingUpdateType;
     m_pendingUpdateType = CompositingUpdateNone;
-
-    if (!hasAcceleratedCompositing()) {
-#if ENABLE(COMPOSITOR)
-        updateWithoutAcceleratedCompositing(updateType);
-#endif
-        return;
-    }
-
-    if (updateType == CompositingUpdateNone)
-        return;
-
-    RenderLayer* updateRoot = rootRenderLayer();
-
-    Vector<RenderLayer*> layersNeedingPaintInvalidation;
-
-    if (updateType >= CompositingUpdateAfterCompositingInputChange) {
-        CompositingInputsUpdater(updateRoot).update();
-
-#if ENABLE(ASSERT)
-        // FIXME: Move this check to the end of the compositing update.
-        CompositingInputsUpdater::assertNeedsCompositingInputsUpdateBitsCleared(updateRoot);
-#endif
-
-        CompositingRequirementsUpdater(m_renderView, m_compositingReasonFinder).update(updateRoot);
-
-        CompositingLayerAssigner layerAssigner(this);
-        layerAssigner.assign(updateRoot, layersNeedingPaintInvalidation);
-
-        bool layersChanged = layerAssigner.layersChanged();
-
-        {
-            TRACE_EVENT0("blink", "RenderLayerCompositor::updateAfterCompositingChange");
-            if (const FrameView::ScrollableAreaSet* scrollableAreas = m_renderView.frameView()->scrollableAreas()) {
-                for (FrameView::ScrollableAreaSet::iterator it = scrollableAreas->begin(); it != scrollableAreas->end(); ++it)
-                    layersChanged |= (*it)->updateAfterCompositingChange();
-            }
-        }
-
-        if (layersChanged)
-            updateType = std::max(updateType, CompositingUpdateRebuildTree);
-    }
-
-    if (updateType != CompositingUpdateNone) {
-        GraphicsLayerUpdater updater;
-        updater.update(*updateRoot, layersNeedingPaintInvalidation);
-
-        if (updater.needsRebuildTree())
-            updateType = std::max(updateType, CompositingUpdateRebuildTree);
-
-#if ENABLE(ASSERT)
-        // FIXME: Move this check to the end of the compositing update.
-        GraphicsLayerUpdater::assertNeedsToUpdateGraphicsLayerBitsCleared(*updateRoot);
-#endif
-    }
-
-    if (updateType >= CompositingUpdateRebuildTree) {
-        GraphicsLayerTreeBuilder::AncestorInfo ancestorInfo;
-        GraphicsLayerVector childList;
-        ancestorInfo.childLayersOfEnclosingCompositedLayer = &childList;
-        {
-            TRACE_EVENT0("blink", "GraphicsLayerTreeBuilder::rebuild");
-            GraphicsLayerTreeBuilder().rebuild(*updateRoot, ancestorInfo);
-        }
-
-        if (childList.isEmpty())
-            destroyRootLayer();
-        else
-            m_rootContentLayer->setChildren(childList);
-    }
-
-    if (m_needsUpdateFixedBackground) {
-        rootFixedBackgroundsChanged();
-        m_needsUpdateFixedBackground = false;
-    }
-
-    for (unsigned i = 0; i < layersNeedingPaintInvalidation.size(); i++) {
-        RenderLayer* layer = layersNeedingPaintInvalidation[i];
-        layer->paintInvalidator().computePaintInvalidationRectsIncludingNonCompositingDescendants();
-
-        paintInvalidationOnCompositingChange(layer);
-    }
 }
 
 bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer* layer, const CompositingStateTransitionType compositedLayerUpdate)

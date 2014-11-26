@@ -861,12 +861,10 @@ Color FrameView::documentBackgroundColor() const
     return result;
 }
 
-#if !ENABLE(COMPOSITOR)
 void FrameView::paint(GraphicsContext* context, const IntRect& rect)
 {
     paintContents(context, rect);
 }
-#endif
 
 void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
 {

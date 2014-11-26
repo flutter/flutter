@@ -181,11 +181,9 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     setDeviceScaleFactor(m_client->screenInfo().deviceScaleFactor);
     setVisibilityState(m_client->visibilityState(), true);
 
-    m_layerTreeView = m_client->initializeLayerTreeView();
-
-#if !ENABLE(COMPOSITOR)
+    m_client->initializeLayerTreeView();
+    // FIXME(sky): Get rid of this member variable. It's unused.
     m_layerTreeView = nullptr;
-#endif
 }
 
 WebViewImpl::~WebViewImpl()

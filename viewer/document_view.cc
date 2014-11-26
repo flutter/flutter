@@ -132,11 +132,10 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
   web_view_->mainFrame()->load(GURL(response->url), response->body.Pass());
 }
 
-blink::WebLayerTreeView* DocumentView::initializeLayerTreeView() {
+void DocumentView::initializeLayerTreeView() {
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
   layer_host_->SetRootLayer(root_layer_);
-  return nullptr;
 }
 
 mojo::Shell* DocumentView::GetShell() {

@@ -73,7 +73,7 @@ class DocumentView : public blink::ServiceProvider,
 
  private:
   // WebWidgetClient methods:
-  blink::WebLayerTreeView* initializeLayerTreeView() override;
+  void initializeLayerTreeView() override;
   void scheduleAnimation() override;
 
   // WebFrameClient methods:
