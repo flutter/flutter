@@ -52,12 +52,6 @@ WebSettingsImpl::WebSettingsImpl(Settings* settings)
     ASSERT(settings);
 }
 
-// FIXME(sky): Remove
-bool WebSettingsImpl::compositorIsEnabled() const
-{
-    return false;
-}
-
 void WebSettingsImpl::setStandardFontFamily(const WebString& font, UScriptCode script)
 {
     if (m_settings->genericFontFamilySettings().updateStandard(font, script))

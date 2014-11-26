@@ -533,23 +533,6 @@ void FrameView::setLayoutSize(const IntSize& size)
     setLayoutSizeInternal(size);
 }
 
-void FrameView::updateCompositedSelectionBoundsIfNeeded()
-{
-    if (!RuntimeEnabledFeatures::compositedSelectionUpdatesEnabled())
-        return;
-
-    Page* page = frame().page();
-    ASSERT(page);
-
-    LocalFrame* frame = page->focusController().focusedOrMainFrame();
-    if (!frame || !frame->selection().isCaretOrRange()) {
-        page->chrome().client().clearCompositedSelectionBounds();
-        return;
-    }
-
-    // TODO(jdduke): Compute and route selection bounds through ChromeClient.
-}
-
 HostWindow* FrameView::hostWindow() const
 {
     Page* page = frame().page();
@@ -967,8 +950,6 @@ void FrameView::updateLayoutAndStyleForPainting()
     if (RenderView* view = renderView()) {
         TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateLayerTree", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
         view->compositor()->updateIfNeededRecursive();
-
-        updateCompositedSelectionBoundsIfNeeded();
 
         invalidateTreeIfNeededRecursive();
 

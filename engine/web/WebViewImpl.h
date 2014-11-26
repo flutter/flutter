@@ -82,10 +82,6 @@ public:
 
     virtual void layout() override;
     virtual void paint(WebCanvas*, const WebRect&) override;
-#if OS(ANDROID)
-    virtual void paintCompositedDeprecated(WebCanvas*, const WebRect&) override;
-#endif
-    virtual void compositeAndReadbackAsync(WebCompositeAndReadbackAsyncCallback*) override;
     virtual bool isTrackingRepaints() const override;
     virtual void themeChanged() override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
@@ -111,8 +107,6 @@ public:
     virtual bool isSelectionAnchorFirst() const override;
     virtual bool caretOrSelectionRange(size_t* location, size_t* length) override;
     virtual void setTextDirection(WebTextDirection) override;
-    virtual bool isAcceleratedCompositingActive() const override;
-    virtual void willCloseLayerTreeView() override;
 
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
@@ -242,8 +236,6 @@ public:
     // unless the view did not need a layout.
     void layoutUpdated(WebLocalFrameImpl*);
 
-    void didRemoveAllPendingStylesheet(WebLocalFrameImpl*);
-
     void updateMainFrameLayoutSize();
 
     // Returns the input event we're currently processing. This is used in some
@@ -255,10 +247,8 @@ public:
 
     GraphicsLayer* rootGraphicsLayer();
     void setRootGraphicsLayer(GraphicsLayer*);
-    void scheduleCompositingLayerSync();
     GraphicsLayerFactory* graphicsLayerFactory() const;
     RenderLayerCompositor* compositor() const;
-    void registerForAnimations(WebLayer*);
     void scheduleAnimation();
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;
@@ -274,8 +264,6 @@ public:
     void enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent);
     void enableTapHighlights(Vector<RawPtr<Node> >&);
     void computeScaleAndScrollForFocusedNode(Node* focusedNode, float& scale, IntPoint& scroll, bool& needAnimation);
-
-    void clearCompositedSelectionBounds();
 
     // Exposed for the purpose of overriding device metrics.
     void sendResizeEventAndRepaint();
@@ -305,7 +293,6 @@ public:
     bool matchesHeuristicsForGpuRasterizationForTesting() const { return m_matchesHeuristicsForGpuRasterization; }
 
 private:
-    void resumeTreeViewCommits();
     IntSize contentsSize() const;
 
     void resetSavedScrollAndScaleState();
@@ -343,12 +330,9 @@ private:
     // the HitTestResult for it.
     HitTestResult hitTestResultForWindowPos(const IntPoint&);
 
-    void setIsAcceleratedCompositingActive(bool);
     void doComposite();
     void reallocateRenderer();
-    void updateLayerTreeBackgroundColor();
     void updateRootLayerTransform();
-    void updateLayerTreeDeviceScaleFactor();
 
     // Helper function: Widens the width of |source| by the specified margins
     // while keeping it smaller than page width.
@@ -419,14 +403,10 @@ private:
     RefPtr<UserGestureToken> m_mouseCaptureGestureToken;
 
     IntRect m_rootLayerScrollDamage;
-    WebLayerTreeView* m_layerTreeView;
     WebLayer* m_rootLayer;
     GraphicsLayer* m_rootGraphicsLayer;
     GraphicsLayer* m_rootTransformLayer;
     OwnPtr<GraphicsLayerFactory> m_graphicsLayerFactory;
-    bool m_isAcceleratedCompositingActive;
-    bool m_layerTreeViewCommitsDeferred;
-    bool m_layerTreeViewClosed;
     bool m_matchesHeuristicsForGpuRasterization;
     // If true, the graphics context is being restored.
     bool m_recreatingGraphicsContext;

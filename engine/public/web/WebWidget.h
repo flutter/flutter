@@ -107,13 +107,6 @@ public:
     // warranted before painting again).
     virtual void paint(WebCanvas*, const WebRect& viewPort) { }
 
-    virtual void paintCompositedDeprecated(WebCanvas*, const WebRect&) { }
-
-    // The caller is responsible for keeping the WebCompositeAndReadbackAsyncCallback
-    // object alive until it is called. This should only be called when
-    // isAcceleratedCompositingActive() is true.
-    virtual void compositeAndReadbackAsync(WebCompositeAndReadbackAsyncCallback*) { }
-
     // Returns true if we've started tracking repaint rectangles.
     virtual bool isTrackingRepaints() const { return false; }
 
@@ -204,14 +197,6 @@ public:
 
     // Changes the text direction of the selected input node.
     virtual void setTextDirection(WebTextDirection) { }
-
-    // Returns true if the WebWidget uses GPU accelerated compositing
-    // to render its contents.
-    virtual bool isAcceleratedCompositingActive() const { return false; }
-
-    // The WebLayerTreeView initialized on this WebWidgetClient will be going away and
-    // is no longer safe to access.
-    virtual void willCloseLayerTreeView() { }
 
     // Calling WebWidgetClient::requestPointerLock() will result in one
     // return call to didAcquirePointerLock() or didNotAcquirePointerLock().

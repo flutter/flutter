@@ -77,7 +77,6 @@ public:
     virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) override;
     virtual void transitionToCommittedForNewPage() override;
     virtual void didChangeScrollOffset() override;
-    virtual void didRemoveAllPendingStylesheet() override;
 
     virtual void didLoseWebGLContext(int arbRobustnessContextLostReason) override;
 

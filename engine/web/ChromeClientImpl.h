@@ -93,8 +93,6 @@ public:
     // Pass 0 as the GraphicsLayer to detatch the root layer.
     virtual void attachRootGraphicsLayer(GraphicsLayer*) override;
 
-    virtual void clearCompositedSelectionBounds() override;
-
     // ChromeClient methods:
     virtual String acceptLanguages() override;
 

@@ -29,19 +29,12 @@
 #include "sky/engine/platform/graphics/GraphicsLayerFactory.h"
 
 namespace blink {
-class WebViewImpl;
 
 class GraphicsLayerFactoryChromium final : public GraphicsLayerFactory {
 public:
-    explicit GraphicsLayerFactoryChromium(WebViewImpl*);
-
+    explicit GraphicsLayerFactoryChromium();
     virtual ~GraphicsLayerFactoryChromium();
-
     virtual PassOwnPtr<GraphicsLayer> createGraphicsLayer(GraphicsLayerClient*) override;
-
-private:
-    // The owner of this GraphicsLayerFactoryChromium.
-    WebViewImpl* m_webView;
 };
 
 } // namespace blink

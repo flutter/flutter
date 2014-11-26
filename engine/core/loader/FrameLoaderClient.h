@@ -108,7 +108,6 @@ namespace blink {
         virtual void willReleaseScriptContext(v8::Handle<v8::Context>, int worldId) = 0;
 
         virtual void didChangeScrollOffset() { }
-        virtual void didRemoveAllPendingStylesheet() { }
 
         // Informs the embedder that a WebGL canvas inside this frame received a lost context
         // notification with the given GL_ARB_robustness guilt/innocence code (see Extensions3D.h).

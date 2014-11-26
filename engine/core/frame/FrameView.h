@@ -243,8 +243,6 @@ private:
     bool wasViewportResized();
     void sendResizeEventIfNeeded();
 
-    void updateCompositedSelectionBoundsIfNeeded();
-
     void setLayoutSizeInternal(const IntSize&);
 
     bool paintInvalidationIsAllowed() const

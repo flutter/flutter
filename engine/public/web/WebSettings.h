@@ -76,7 +76,6 @@ public:
         HoverTypeHover = 4
     };
 
-    virtual bool compositorIsEnabled() const = 0;
     virtual bool mainFrameResizesAreOrientationChanges() const = 0;
     virtual int availablePointerTypes() const = 0;
     virtual PointerType primaryPointerType() const = 0;

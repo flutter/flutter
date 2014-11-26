@@ -351,11 +351,6 @@ void ChromeClientImpl::attachRootGraphicsLayer(GraphicsLayer* rootLayer)
     m_webView->setRootGraphicsLayer(rootLayer);
 }
 
-void ChromeClientImpl::clearCompositedSelectionBounds()
-{
-    m_webView->clearCompositedSelectionBounds();
-}
-
 void ChromeClientImpl::setTouchAction(TouchAction touchAction)
 {
     if (WebViewClient* client = m_webView->client()) {

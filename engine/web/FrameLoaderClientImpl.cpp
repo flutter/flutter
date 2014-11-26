@@ -103,13 +103,6 @@ void FrameLoaderClientImpl::didChangeScrollOffset()
         m_webFrame->client()->didChangeScrollOffset(m_webFrame);
 }
 
-void FrameLoaderClientImpl::didRemoveAllPendingStylesheet()
-{
-    WebViewImpl* webview = m_webFrame->viewImpl();
-    if (webview)
-        webview->didRemoveAllPendingStylesheet(m_webFrame);
-}
-
 void FrameLoaderClientImpl::detachedFromParent()
 {
     // Alert the client that the frame is being detached. This is the last

@@ -1618,9 +1618,6 @@ void Document::didRemoveAllPendingStylesheet()
 void Document::didLoadAllScriptBlockingResources()
 {
     m_executeScriptsWaitingForResourcesTimer.startOneShot(0, FROM_HERE);
-
-    if (frame())
-        frame()->loaderClient()->didRemoveAllPendingStylesheet();
 }
 
 void Document::executeScriptsWaitingForResourcesTimerFired(Timer<Document>*)

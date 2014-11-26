@@ -150,14 +150,10 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_imeAcceptEvents(true)
     , m_isTransparent(false)
     , m_tabsToLinks(false)
-    , m_layerTreeView(0)
     , m_rootLayer(0)
     , m_rootGraphicsLayer(0)
     , m_rootTransformLayer(0)
-    , m_graphicsLayerFactory(adoptPtr(new GraphicsLayerFactoryChromium(this)))
-    , m_isAcceleratedCompositingActive(false)
-    , m_layerTreeViewCommitsDeferred(false)
-    , m_layerTreeViewClosed(false)
+    , m_graphicsLayerFactory(adoptPtr(new GraphicsLayerFactoryChromium()))
     , m_matchesHeuristicsForGpuRasterization(false)
     , m_recreatingGraphicsContext(false)
     , m_flingModifier(0)
@@ -182,8 +178,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     setVisibilityState(m_client->visibilityState(), true);
 
     m_client->initializeLayerTreeView();
-    // FIXME(sky): Get rid of this member variable. It's unused.
-    m_layerTreeView = nullptr;
 }
 
 WebViewImpl::~WebViewImpl()
@@ -421,8 +415,6 @@ bool WebViewImpl::endActiveFlingAnimation()
 {
     if (m_gestureAnimation) {
         m_gestureAnimation.clear();
-        if (m_layerTreeView)
-            m_layerTreeView->didStopFlinging();
         return true;
     }
     return false;
@@ -430,43 +422,27 @@ bool WebViewImpl::endActiveFlingAnimation()
 
 void WebViewImpl::setShowFPSCounter(bool show)
 {
-    if (m_layerTreeView) {
-        TRACE_EVENT0("blink", "WebViewImpl::setShowFPSCounter");
-        m_layerTreeView->setShowFPSCounter(show);
-    }
     m_showFPSCounter = show;
 }
 
 void WebViewImpl::setShowPaintRects(bool show)
 {
-    if (m_layerTreeView) {
-        TRACE_EVENT0("blink", "WebViewImpl::setShowPaintRects");
-        m_layerTreeView->setShowPaintRects(show);
-    }
     m_showPaintRects = show;
 }
 
 void WebViewImpl::setShowDebugBorders(bool show)
 {
-    if (m_layerTreeView)
-        m_layerTreeView->setShowDebugBorders(show);
     m_showDebugBorders = show;
 }
 
 void WebViewImpl::setContinuousPaintingEnabled(bool enabled)
 {
-    if (m_layerTreeView) {
-        TRACE_EVENT0("blink", "WebViewImpl::setContinuousPaintingEnabled");
-        m_layerTreeView->setContinuousPaintingEnabled(enabled);
-    }
     m_continuousPaintingEnabled = enabled;
     m_client->scheduleAnimation();
 }
 
 void WebViewImpl::setShowScrollBottleneckRects(bool show)
 {
-    if (m_layerTreeView)
-        m_layerTreeView->setShowScrollBottleneckRects(show);
     m_showScrollBottleneckRects = show;
 }
 
@@ -948,7 +924,6 @@ void WebViewImpl::layout()
         return;
 
     PageWidgetDelegate::layout(m_page.get(), localFrameRootTemporary()->frame());
-    updateLayerTreeBackgroundColor();
 
     for (size_t i = 0; i < m_linkHighlights.size(); ++i)
         m_linkHighlights[i]->updateGeometry();
@@ -956,40 +931,12 @@ void WebViewImpl::layout()
 
 void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
 {
-    // This should only be used when compositing is not being used for this
-    // WebView, and it is painting into the recording of its parent.
-    ASSERT(!isAcceleratedCompositingActive());
-
     double paintStart = currentTime();
     PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
     double paintEnd = currentTime();
     double pixelsPerSec = (rect.width * rect.height) / (paintEnd - paintStart);
     Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintDurationMS", (paintEnd - paintStart) * 1000, 0, 120, 30);
     Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintMegapixPerSecond", pixelsPerSec / 1000000, 10, 210, 30);
-}
-
-#if OS(ANDROID)
-void WebViewImpl::paintCompositedDeprecated(WebCanvas* canvas, const WebRect& rect)
-{
-    // Note: This method exists on OS(ANDROID) and will hopefully be
-    //       removed once the link disambiguation feature renders using
-    //       the compositor.
-    ASSERT(isAcceleratedCompositingActive());
-
-    FrameView* view = page()->mainFrame()->view();
-    PaintBehavior oldPaintBehavior = view->paintBehavior();
-    view->setPaintBehavior(oldPaintBehavior | PaintBehaviorFlattenCompositingLayers);
-
-    PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
-
-    view->setPaintBehavior(oldPaintBehavior);
-}
-#endif
-
-void WebViewImpl::compositeAndReadbackAsync(WebCompositeAndReadbackAsyncCallback* callback)
-{
-    ASSERT(isAcceleratedCompositingActive());
-    m_layerTreeView->compositeAndReadbackAsync(callback);
 }
 
 bool WebViewImpl::isTrackingRepaints() const
@@ -1008,12 +955,6 @@ void WebViewImpl::themeChanged()
 
     WebRect damagedRect(0, 0, m_size.width, m_size.height);
     view->invalidateRect(damagedRect);
-}
-
-void WebViewImpl::clearCompositedSelectionBounds()
-{
-    if (m_layerTreeView)
-        m_layerTreeView->clearSelection();
 }
 
 bool WebViewImpl::hasHorizontalScrollbar()
@@ -1545,18 +1486,6 @@ void WebViewImpl::setTextDirection(WebTextDirection direction)
     }
 }
 
-bool WebViewImpl::isAcceleratedCompositingActive() const
-{
-    return m_isAcceleratedCompositingActive;
-}
-
-void WebViewImpl::willCloseLayerTreeView()
-{
-    setIsAcceleratedCompositingActive(false);
-    m_layerTreeView = 0;
-    m_layerTreeViewClosed = true;
-}
-
 // WebView --------------------------------------------------------------------
 
 WebSettingsImpl* WebViewImpl::settingsImpl()
@@ -1706,9 +1635,6 @@ void WebViewImpl::setDeviceScaleFactor(float scaleFactor)
         return;
 
     page()->setDeviceScaleFactor(scaleFactor);
-
-    if (m_layerTreeView)
-        updateLayerTreeDeviceScaleFactor();
 }
 
 void WebViewImpl::updateMainFrameLayoutSize()
@@ -1859,19 +1785,13 @@ void WebViewImpl::sendResizeEventAndRepaint()
         localFrameRootTemporary()->frame()->document()->enqueueResizeEvent();
     }
 
-    if (!isAcceleratedCompositingActive()) {
-        WebRect damagedRect(0, 0, m_size.width, m_size.height);
-        m_client->didInvalidateRect(damagedRect);
-    }
+    WebRect damagedRect(0, 0, m_size.width, m_size.height);
+    m_client->didInvalidateRect(damagedRect);
 }
 
 void WebViewImpl::setCompositorDeviceScaleFactorOverride(float deviceScaleFactor)
 {
-    if (m_compositorDeviceScaleFactorOverride == deviceScaleFactor)
-        return;
     m_compositorDeviceScaleFactorOverride = deviceScaleFactor;
-    if (page() && m_layerTreeView)
-        updateLayerTreeDeviceScaleFactor();
 }
 
 void WebViewImpl::setRootLayerTransform(const WebSize& rootLayerOffset, float rootLayerScale)
@@ -1903,6 +1823,7 @@ bool WebViewImpl::isTransparent() const
     return m_isTransparent;
 }
 
+// FIXME(sky): This is an android webview feature. Remove it.
 void WebViewImpl::setBaseBackgroundColor(WebColor color)
 {
     layout();
@@ -1914,8 +1835,6 @@ void WebViewImpl::setBaseBackgroundColor(WebColor color)
 
     if (m_page->mainFrame())
         m_page->mainFrame()->view()->setBaseBackgroundColor(color);
-
-    updateLayerTreeBackgroundColor();
 }
 
 void WebViewImpl::setIsActive(bool active)
@@ -1955,35 +1874,10 @@ void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPag
         UserGestureIndicator::clearProcessedUserGestureSinceLoad();
 }
 
-void WebViewImpl::didRemoveAllPendingStylesheet(WebLocalFrameImpl* webframe)
-{
-    if (webframe != mainFrameImpl())
-        return;
-
-    // If we have no more stylesheets to load and we're past the body tag,
-    // we should have something to paint and should start as soon as possible.
-    // FIXME(sky): This logic is probably wrong now.
-    resumeTreeViewCommits();
-}
-
-void WebViewImpl::resumeTreeViewCommits()
-{
-    if (m_layerTreeViewCommitsDeferred) {
-        if (m_layerTreeView)
-            m_layerTreeView->setDeferCommits(false);
-        m_layerTreeViewCommitsDeferred = false;
-    }
-}
-
 void WebViewImpl::layoutUpdated(WebLocalFrameImpl* webframe)
 {
     if (!m_client)
         return;
-
-    // If we finished a layout while in deferred commit mode,
-    // that means it's time to start producing frames again so un-defer.
-    resumeTreeViewCommits();
-
     m_client->didUpdateLayout();
 }
 
@@ -1996,7 +1890,6 @@ void WebViewImpl::setIgnoreInputEvents(bool newValue)
 void WebViewImpl::setBackgroundColorOverride(WebColor color)
 {
     m_backgroundColorOverride = color;
-    updateLayerTreeBackgroundColor();
 }
 
 void WebViewImpl::setOverlayLayer(GraphicsLayer* layer)
@@ -2057,38 +1950,13 @@ void WebViewImpl::setRootGraphicsLayer(GraphicsLayer* layer)
     m_rootLayer = layer ? layer->platformLayer() : 0;
     m_rootTransformLayer = 0;
 
-    setIsAcceleratedCompositingActive(layer != 0);
-
     updateRootLayerTransform();
-
-    if (m_layerTreeView) {
-        if (m_rootLayer) {
-            m_layerTreeView->setRootLayer(*m_rootLayer);
-            // We register viewport layers here since there may not be a layer
-            // tree view prior to this point.
-            GraphicsLayer* rootScrollLayer = compositor()->scrollLayer();
-            ASSERT(rootScrollLayer);
-            WebLayer* pageScaleLayer = rootScrollLayer->parent() ? rootScrollLayer->parent()->platformLayer() : 0;
-            m_layerTreeView->registerViewportLayers(pageScaleLayer, rootScrollLayer->platformLayer(), 0);
-        } else {
-            m_layerTreeView->clearRootLayer();
-            m_layerTreeView->clearViewportLayers();
-        }
-    }
-
     suppressInvalidations(false);
-}
-
-void WebViewImpl::scheduleCompositingLayerSync()
-{
-    m_layerTreeView->setNeedsAnimate();
 }
 
 void WebViewImpl::invalidateRect(const IntRect& rect)
 {
-    if (!m_isAcceleratedCompositingActive) {
-        m_client->didInvalidateRect(rect);
-    }
+    m_client->didInvalidateRect(rect);
 }
 
 GraphicsLayerFactory* WebViewImpl::graphicsLayerFactory() const
@@ -2107,12 +1975,6 @@ RenderLayerCompositor* WebViewImpl::compositor() const
     return page()->mainFrame()->document()->renderView()->compositor();
 }
 
-void WebViewImpl::registerForAnimations(WebLayer* layer)
-{
-    if (m_layerTreeView)
-        m_layerTreeView->registerForAnimations(layer);
-}
-
 GraphicsLayer* WebViewImpl::rootGraphicsLayer()
 {
     return m_rootGraphicsLayer;
@@ -2120,79 +1982,12 @@ GraphicsLayer* WebViewImpl::rootGraphicsLayer()
 
 void WebViewImpl::scheduleAnimation()
 {
-    if (isAcceleratedCompositingActive()) {
-        ASSERT(m_layerTreeView);
-        m_layerTreeView->setNeedsAnimate();
-        return;
-    }
     m_client->scheduleAnimation();
-}
-
-void WebViewImpl::setIsAcceleratedCompositingActive(bool active)
-{
-    // In the middle of shutting down; don't try to spin back up a compositor.
-    // FIXME: compositing startup/shutdown should be refactored so that it
-    // turns on explicitly rather than lazily, which causes this awkwardness.
-    if (m_layerTreeViewClosed)
-        return;
-
-    ASSERT(!active || m_layerTreeView);
-    Platform::current()->histogramEnumeration("GPU.setIsAcceleratedCompositingActive", active * 2 + m_isAcceleratedCompositingActive, 4);
-
-    if (m_isAcceleratedCompositingActive == active)
-        return;
-
-    if (!m_client)
-        return;
-
-    if (!active) {
-        m_isAcceleratedCompositingActive = false;
-        if (!m_layerTreeViewCommitsDeferred) {
-            ASSERT(m_layerTreeView);
-            // This means that we're transitioning to a new page. Suppress commits until WebKit generates invalidations so
-            // we don't attempt to paint too early in the next page load.
-            m_layerTreeView->setDeferCommits(true);
-            m_layerTreeViewCommitsDeferred = true;
-        }
-    } else {
-        TRACE_EVENT0("blink", "WebViewImpl::setIsAcceleratedCompositingActive(true)");
-        m_layerTreeView->setRootLayer(*m_rootLayer);
-
-        bool visible = page()->visibilityState() == PageVisibilityStateVisible;
-        m_layerTreeView->setVisible(visible);
-        updateLayerTreeDeviceScaleFactor();
-        updateLayerTreeBackgroundColor();
-        m_layerTreeView->setHasTransparentBackground(isTransparent());
-        m_isAcceleratedCompositingActive = true;
-        m_layerTreeView->setShowFPSCounter(m_showFPSCounter);
-        m_layerTreeView->setShowPaintRects(m_showPaintRects);
-        m_layerTreeView->setShowDebugBorders(m_showDebugBorders);
-        m_layerTreeView->setContinuousPaintingEnabled(m_continuousPaintingEnabled);
-        m_layerTreeView->setShowScrollBottleneckRects(m_showScrollBottleneckRects);
-        m_layerTreeView->heuristicsForGpuRasterizationUpdated(m_matchesHeuristicsForGpuRasterization);
-    }
 }
 
 void WebViewImpl::updateMainFrameScrollPosition(const IntPoint& scrollPosition, bool programmaticScroll)
 {
     // FIXME(sky): Remove
-}
-
-void WebViewImpl::updateLayerTreeBackgroundColor()
-{
-    if (!m_layerTreeView)
-        return;
-
-    m_layerTreeView->setBackgroundColor(alphaChannel(m_backgroundColorOverride) ? m_backgroundColorOverride : backgroundColor());
-}
-
-void WebViewImpl::updateLayerTreeDeviceScaleFactor()
-{
-    ASSERT(page());
-    ASSERT(m_layerTreeView);
-
-    float deviceScaleFactor = m_compositorDeviceScaleFactorOverride ? m_compositorDeviceScaleFactorOverride : page()->deviceScaleFactor();
-    m_layerTreeView->setDeviceScaleFactor(deviceScaleFactor);
 }
 
 void WebViewImpl::updateRootLayerTransform()
@@ -2247,11 +2042,6 @@ void WebViewImpl::setVisibilityState(WebPageVisibilityState visibilityState,
 
     ASSERT(visibilityState == WebPageVisibilityStateVisible || visibilityState == WebPageVisibilityStateHidden);
     m_page->setVisibilityState(static_cast<PageVisibilityState>(static_cast<int>(visibilityState)), isInitialState);
-
-    if (m_layerTreeView) {
-        bool visible = visibilityState == WebPageVisibilityStateVisible;
-        m_layerTreeView->setVisible(visible);
-    }
 }
 
 bool WebViewImpl::shouldDisableDesktopWorkarounds()

@@ -27,12 +27,10 @@
 #include "sky/engine/web/GraphicsLayerFactoryChromium.h"
 
 #include "sky/engine/platform/graphics/GraphicsLayer.h"
-#include "sky/engine/web/WebViewImpl.h"
 
 namespace blink {
 
-GraphicsLayerFactoryChromium::GraphicsLayerFactoryChromium(WebViewImpl* webView)
-    : m_webView(webView)
+GraphicsLayerFactoryChromium::GraphicsLayerFactoryChromium()
 {
 }
 
@@ -43,7 +41,6 @@ GraphicsLayerFactoryChromium::~GraphicsLayerFactoryChromium()
 PassOwnPtr<GraphicsLayer> GraphicsLayerFactoryChromium::createGraphicsLayer(GraphicsLayerClient* client)
 {
     OwnPtr<GraphicsLayer> layer = adoptPtr(new GraphicsLayer(client));
-    m_webView->registerForAnimations(layer->platformLayer());
     return layer.release();
 }
 

@@ -105,8 +105,6 @@ public:
     // Pass 0 as the GraphicsLayer to detatch the root layer.
     virtual void attachRootGraphicsLayer(GraphicsLayer*) = 0;
 
-    virtual void clearCompositedSelectionBounds() { }
-
     virtual void setTouchAction(TouchAction) = 0;
 
     virtual String acceptLanguages() = 0;
