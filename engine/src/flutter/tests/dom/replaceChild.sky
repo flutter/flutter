@@ -67,7 +67,7 @@ describe("replaceChild", function() {
   it("should throw when inserting a tree scope", function() {
     var parent = document.createElement("div");
     var doc = new Document();
-    var shadowRoot = document.createElement("span").createShadowRoot();
+    var shadowRoot = document.createElement("span").ensureShadowRoot();
     assert.throws(function() {
       parent.replaceChild(doc);
     });

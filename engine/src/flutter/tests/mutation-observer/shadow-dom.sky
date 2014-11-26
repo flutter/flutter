@@ -13,7 +13,7 @@ describe('MutationObservers', function() {
     }
 
     var range = document.getElementById('range');
-    var shadowRoot = range.createShadowRoot();
+    var shadowRoot = range.ensureShadowRoot();
     shadowRoot.appendChild(document.createElement('div'));
     var observer = new MutationObserver(function() { });
 
