@@ -39,12 +39,6 @@
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
-#include "sky/engine/core/rendering/compositing/CompositingInputsUpdater.h"
-#include "sky/engine/core/rendering/compositing/CompositingLayerAssigner.h"
-#include "sky/engine/core/rendering/compositing/CompositingRequirementsUpdater.h"
-#include "sky/engine/core/rendering/compositing/GraphicsLayerTreeBuilder.h"
-#include "sky/engine/core/rendering/compositing/GraphicsLayerUpdater.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/graphics/GraphicsLayer.h"
@@ -198,14 +192,6 @@ void RenderLayerCompositor::assertNoUnresolvedDirtyBits()
 
 void RenderLayerCompositor::updateWithoutAcceleratedCompositing(CompositingUpdateType updateType)
 {
-    ASSERT(!hasAcceleratedCompositing());
-
-    if (updateType >= CompositingUpdateAfterCompositingInputChange)
-        CompositingInputsUpdater(rootRenderLayer()).update();
-
-#if ENABLE(ASSERT)
-    CompositingInputsUpdater::assertNeedsCompositingInputsUpdateBitsCleared(rootRenderLayer());
-#endif
 }
 
 void RenderLayerCompositor::updateIfNeeded()
@@ -213,54 +199,9 @@ void RenderLayerCompositor::updateIfNeeded()
     m_pendingUpdateType = CompositingUpdateNone;
 }
 
-bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer* layer, const CompositingStateTransitionType compositedLayerUpdate)
+bool RenderLayerCompositor::allocateOrClearCompositedLayerMapping(RenderLayer*, const CompositingStateTransitionType)
 {
-    bool compositedLayerMappingChanged = false;
-
-    // FIXME: It would be nice to directly use the layer's compositing reason,
-    // but allocateOrClearCompositedLayerMapping also gets called without having updated compositing
-    // requirements fully.
-    switch (compositedLayerUpdate) {
-    case AllocateOwnCompositedLayerMapping:
-        ASSERT(!layer->hasCompositedLayerMapping());
-        setCompositingModeEnabled(true);
-
-        // If we need to issue paint invalidations, do so before allocating the compositedLayerMapping and clearing out the groupedMapping.
-        paintInvalidationOnCompositingChange(layer);
-
-        // If this layer was previously squashed, we need to remove its reference to a groupedMapping right away, so
-        // that computing paint invalidation rects will know the layer's correct compositingState.
-        // FIXME: do we need to also remove the layer from it's location in the squashing list of its groupedMapping?
-        // Need to create a test where a squashed layer pops into compositing. And also to cover all other
-        // sorts of compositingState transitions.
-        layer->setLostGroupedMapping(false);
-        layer->setGroupedMapping(0);
-
-        layer->ensureCompositedLayerMapping();
-        compositedLayerMappingChanged = true;
-        break;
-    case RemoveOwnCompositedLayerMapping:
-    // PutInSquashingLayer means you might have to remove the composited layer mapping first.
-    case PutInSquashingLayer:
-        if (layer->hasCompositedLayerMapping()) {
-            layer->clearCompositedLayerMapping();
-            compositedLayerMappingChanged = true;
-        }
-
-        break;
-    case RemoveFromSquashingLayer:
-    case NoCompositingStateChange:
-        // Do nothing.
-        break;
-    }
-
-    if (layer->hasCompositedLayerMapping() && layer->compositedLayerMapping()->updateRequiresOwnBackingStoreForIntrinsicReasons())
-        compositedLayerMappingChanged = true;
-
-    if (compositedLayerMappingChanged)
-        layer->clipper().clearClipRectsIncludingDescendants(PaintingClipRects);
-
-    return compositedLayerMappingChanged;
+    return false;
 }
 
 void RenderLayerCompositor::paintInvalidationOnCompositingChange(RenderLayer* layer)
@@ -339,11 +280,6 @@ String RenderLayerCompositor::layerTreeAsText(LayerTreeFlags flags)
 
 static void fullyInvalidatePaintRecursive(RenderLayer* layer)
 {
-    if (layer->compositingState() == PaintsIntoOwnBacking) {
-        layer->compositedLayerMapping()->setContentsNeedDisplay();
-        layer->compositedLayerMapping()->setSquashingContentsNeedDisplay();
-    }
-
     for (RenderLayer* child = layer->firstChild(); child; child = child->nextSibling())
         fullyInvalidatePaintRecursive(child);
 }
@@ -486,14 +422,6 @@ bool RenderLayerCompositor::needsFixedRootBackgroundLayer(const RenderLayer* lay
 
 GraphicsLayer* RenderLayerCompositor::fixedRootBackgroundLayer() const
 {
-    // Get the fixed root background from the RenderView layer's compositedLayerMapping.
-    RenderLayer* viewLayer = m_renderView.layer();
-    if (!viewLayer)
-        return 0;
-
-    if (viewLayer->compositingState() == PaintsIntoOwnBacking && viewLayer->compositedLayerMapping()->backgroundLayerPaintsFixedRootBackground())
-        return viewLayer->compositedLayerMapping()->backgroundLayer();
-
     return 0;
 }
 

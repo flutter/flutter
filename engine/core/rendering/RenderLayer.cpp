@@ -60,7 +60,6 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderTreeAsText.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/Partitions.h"
@@ -112,7 +111,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_staticBlockPosition(0)
     , m_potentialCompositingReasonsFromStyle(CompositingReasonNone)
     , m_compositingReasons(CompositingReasonNone)
-    , m_groupedMapping(0)
     , m_paintInvalidator(*renderer)
     , m_clipper(*renderer)
 {
@@ -126,17 +124,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
 RenderLayer::~RenderLayer()
 {
     removeFilterInfoIfNeeded();
-
-    if (groupedMapping()) {
-        DisableCompositingQueryAsserts disabler;
-        groupedMapping()->removeRenderLayerFromSquashingGraphicsLayer(this);
-        setGroupedMapping(0);
-    }
-
-    // Child layers will be deleted by their corresponding render objects, so
-    // we don't need to delete them ourselves.
-
-    clearCompositedLayerMapping(true);
 }
 
 String RenderLayer::debugName() const
@@ -153,36 +140,13 @@ RenderLayerCompositor* RenderLayer::compositor() const
 
 void RenderLayer::contentChanged(ContentChangeType changeType)
 {
-    // updateLayerCompositingState will query compositingReasons for accelerated overflow scrolling.
-    // This is tripped by tests/compositing/content-changed-chicken-egg.html
-    DisableCompositingQueryAsserts disabler;
-
-    if (changeType == CanvasChanged)
-        compositor()->setNeedsCompositingUpdate(CompositingUpdateAfterCompositingInputChange);
-
-    if (changeType == CanvasContextChanged) {
-        compositor()->setNeedsCompositingUpdate(CompositingUpdateAfterCompositingInputChange);
-
-        // Although we're missing test coverage, we need to call
-        // GraphicsLayer::setContentsToPlatformLayer with the new platform
-        // layer for this canvas.
-        // See http://crbug.com/349195
-        if (hasCompositedLayerMapping())
-            compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
-    }
-
-    if (m_compositedLayerMapping)
-        m_compositedLayerMapping->contentChanged(changeType);
+    // FIXME(sky): Remove
 }
 
 bool RenderLayer::paintsWithFilters() const
 {
-    if (!renderer()->hasFilter())
-        return false;
-
-    // https://code.google.com/p/chromium/issues/detail?id=343759
-    DisableCompositingQueryAsserts disabler;
-    return !m_compositedLayerMapping || compositingState() != PaintsIntoOwnBacking;
+    // FIXME(sky): Remove
+    return renderer()->hasFilter();
 }
 
 bool RenderLayer::requiresFullLayerImageForFilters() const
@@ -357,62 +321,26 @@ RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSel
 
 LayoutPoint RenderLayer::positionFromPaintInvalidationContainer(const RenderObject* renderObject, const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState)
 {
-    if (!paintInvalidationContainer || !paintInvalidationContainer->layer()->groupedMapping())
-        return renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
-
-    RenderLayerModelObject* transformedAncestor = paintInvalidationContainer->layer()->enclosingTransformedAncestor()->renderer();
-    LayoutPoint point = renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
-    if (!transformedAncestor)
-        return point;
-
-    point = LayoutPoint(paintInvalidationContainer->localToContainerPoint(point, transformedAncestor));
-    point.moveBy(-paintInvalidationContainer->layer()->groupedMapping()->squashingOffsetFromTransformedAncestor());
-    return point;
+    // FIXME(sky): Remove
+    return renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
 }
 
 void RenderLayer::mapRectToPaintBackingCoordinates(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect)
 {
-    RenderLayer* paintInvalidationLayer = paintInvalidationContainer->layer();
-    if (!paintInvalidationLayer->groupedMapping()) {
-        rect.move(paintInvalidationLayer->compositedLayerMapping()->contentOffsetInCompositingLayer());
-        return;
-    }
-
-    RenderLayerModelObject* transformedAncestor = paintInvalidationLayer->enclosingTransformedAncestor()->renderer();
-    if (!transformedAncestor)
-        return;
-
-    // |paintInvalidationContainer| may have a local 2D transform on it, so take that into account when mapping into the space of the
-    // transformed ancestor.
-    rect = LayoutRect(paintInvalidationContainer->localToContainerQuad(FloatRect(rect), transformedAncestor).boundingBox());
-
-    rect.moveBy(-paintInvalidationLayer->groupedMapping()->squashingOffsetFromTransformedAncestor());
+    // FIXME(sky): Remove
+    ASSERT_NOT_REACHED();
 }
 
 void RenderLayer::mapRectToPaintInvalidationBacking(const RenderObject* renderObject, const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState)
 {
-    if (!paintInvalidationContainer->layer()->groupedMapping()) {
-        renderObject->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-        return;
-    }
-
-    // This code adjusts the paint invalidation rectangle to be in the space of the transformed ancestor of the grouped (i.e. squashed)
-    // layer. This is because all layers that squash together need to issue paint invalidations w.r.t. a single container that is
-    // an ancestor of all of them, in order to properly take into account any local transforms etc.
-    // FIXME: remove this special-case code that works around the paint invalidation code structure.
+    // FIXME(sky): Remove
     renderObject->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-
-    mapRectToPaintBackingCoordinates(paintInvalidationContainer, rect);
 }
 
 LayoutRect RenderLayer::computePaintInvalidationRect(const RenderObject* renderObject, const RenderLayer* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState)
 {
-    if (!paintInvalidationContainer->groupedMapping())
-        return renderObject->computePaintInvalidationRect(paintInvalidationContainer->renderer(), paintInvalidationState);
-
-    LayoutRect rect = renderObject->clippedOverflowRectForPaintInvalidation(paintInvalidationContainer->renderer(), paintInvalidationState);
-    mapRectToPaintBackingCoordinates(paintInvalidationContainer->renderer(), rect);
-    return rect;
+    // FIXME(sky): Remove
+    return renderObject->computePaintInvalidationRect(paintInvalidationContainer->renderer(), paintInvalidationState);
 }
 
 void RenderLayer::dirty3DTransformedDescendantStatus()
@@ -705,13 +633,8 @@ void RenderLayer::setCompositingReasons(CompositingReasons reasons, CompositingR
 
 void RenderLayer::setHasCompositingDescendant(bool hasCompositingDescendant)
 {
-    if (m_hasCompositingDescendant == static_cast<unsigned>(hasCompositingDescendant))
-        return;
-
+    // FIXME(sky): Remove
     m_hasCompositingDescendant = hasCompositingDescendant;
-
-    if (hasCompositedLayerMapping())
-        compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateLocal);
 }
 
 
@@ -727,12 +650,7 @@ bool RenderLayer::hasAncestorWithFilterOutsets() const
 
 RenderLayer* RenderLayer::transparentPaintingAncestor()
 {
-    if (hasCompositedLayerMapping())
-        return 0;
-
     for (RenderLayer* curr = parent(); curr; curr = curr->parent()) {
-        if (curr->hasCompositedLayerMapping())
-            return 0;
         if (curr->isTransparent())
             return curr;
     }
@@ -2259,24 +2177,8 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
 
 CompositingState RenderLayer::compositingState() const
 {
-    ASSERT(isAllowedToQueryCompositingState());
-
-    // This is computed procedurally so there is no redundant state variable that
-    // can get out of sync from the real actual compositing state.
-
-    if (m_groupedMapping) {
-        ASSERT(compositor()->layerSquashingEnabled());
-        ASSERT(!m_compositedLayerMapping);
-        return PaintsIntoGroupedBacking;
-    }
-
-    if (!m_compositedLayerMapping)
-        return NotComposited;
-
-    if (compositedLayerMapping()->paintsIntoCompositedAncestor())
-        return HasOwnBackingButPaintsIntoAncestor;
-
-    return PaintsIntoOwnBacking;
+    // FIXME(sky): Remove
+    return NotComposited;
 }
 
 bool RenderLayer::isAllowedToQueryCompositingState() const
@@ -2286,74 +2188,21 @@ bool RenderLayer::isAllowedToQueryCompositingState() const
     return renderer()->document().lifecycle().state() >= DocumentLifecycle::InCompositingUpdate;
 }
 
-CompositedLayerMapping* RenderLayer::compositedLayerMapping() const
-{
-    ASSERT(isAllowedToQueryCompositingState());
-    return m_compositedLayerMapping.get();
-}
-
 GraphicsLayer* RenderLayer::graphicsLayerBacking() const
 {
-    switch (compositingState()) {
-    case NotComposited:
-        return 0;
-    case PaintsIntoGroupedBacking:
-        return groupedMapping()->squashingLayer();
-    default:
-        return compositedLayerMapping()->mainGraphicsLayer();
-    }
-}
-
-CompositedLayerMapping* RenderLayer::ensureCompositedLayerMapping()
-{
-    if (!m_compositedLayerMapping) {
-        m_compositedLayerMapping = adoptPtr(new CompositedLayerMapping(*this));
-        m_compositedLayerMapping->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
-
-        updateOrRemoveFilterEffectRenderer();
-    }
-    return m_compositedLayerMapping.get();
-}
-
-void RenderLayer::clearCompositedLayerMapping(bool layerBeingDestroyed)
-{
-    if (!layerBeingDestroyed) {
-        // We need to make sure our decendants get a geometry update. In principle,
-        // we could call setNeedsGraphicsLayerUpdate on our children, but that would
-        // require walking the z-order lists to find them. Instead, we over-invalidate
-        // by marking our parent as needing a geometry update.
-        if (RenderLayer* compositingParent = enclosingLayerWithCompositedLayerMapping(ExcludeSelf))
-            compositingParent->compositedLayerMapping()->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
-    }
-
-    m_compositedLayerMapping.clear();
-
-    if (!layerBeingDestroyed)
-        updateOrRemoveFilterEffectRenderer();
-}
-
-void RenderLayer::setGroupedMapping(CompositedLayerMapping* groupedMapping, bool layerBeingDestroyed)
-{
-    if (groupedMapping == m_groupedMapping)
-        return;
-
-    if (!layerBeingDestroyed && m_groupedMapping) {
-        m_groupedMapping->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
-        m_groupedMapping->removeRenderLayerFromSquashingGraphicsLayer(this);
-    }
-    m_groupedMapping = groupedMapping;
-    if (!layerBeingDestroyed && m_groupedMapping)
-        m_groupedMapping->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateSubtree);
+    return 0;
 }
 
 bool RenderLayer::hasCompositedMask() const
 {
-    return m_compositedLayerMapping && m_compositedLayerMapping->hasMaskLayer();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayer::hasCompositedClippingMask() const
 {
-    return m_compositedLayerMapping && m_compositedLayerMapping->hasChildClippingMaskLayer();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayer::clipsCompositingDescendantsWithBorderRadius() const
@@ -2500,6 +2349,7 @@ void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* 
 
 bool RenderLayer::attemptDirectCompositingUpdate(StyleDifference diff, const RenderStyle* oldStyle)
 {
+    // FIXME(sky): Remove this function now that we don't have compositing layers.
     CompositingReasons oldPotentialCompositingReasonsFromStyle = m_potentialCompositingReasonsFromStyle;
     compositor()->updatePotentialCompositingReasonsFromStyle(this);
 
@@ -2516,33 +2366,7 @@ bool RenderLayer::attemptDirectCompositingUpdate(StyleDifference diff, const Ren
     // a corresponding StyleDifference if an animation started or ended.
     if (m_potentialCompositingReasonsFromStyle != oldPotentialCompositingReasonsFromStyle)
         return false;
-    if (!m_compositedLayerMapping)
-        return false;
-
-    // To cut off almost all the work in the compositing update for
-    // this case, we treat inline transforms has having assumed overlap
-    // (similar to how we treat animated transforms). Notice that we read
-    // CompositingReasonInlineTransform from the m_compositingReasons, which
-    // means that the inline transform actually triggered assumed overlap in
-    // the overlap map.
-    if (diff.transformChanged() && !(m_compositingReasons & CompositingReasonInlineTransform))
-        return false;
-
-    // We composite transparent RenderLayers differently from non-transparent
-    // RenderLayers even when the non-transparent RenderLayers are already a
-    // stacking context.
-    if (diff.opacityChanged() && m_renderer->style()->hasOpacity() != oldStyle->hasOpacity())
-        return false;
-
-    updateTransform(oldStyle, renderer()->style());
-
-    // FIXME: Consider introducing a smaller graphics layer update scope
-    // that just handles transforms and opacity. GraphicsLayerUpdateLocal
-    // will also program bounds, clips, and many other properties that could
-    // not possibly have changed.
-    m_compositedLayerMapping->setNeedsGraphicsLayerUpdate(GraphicsLayerUpdateLocal);
-    compositor()->setNeedsCompositingUpdate(CompositingUpdateAfterGeometryChange);
-    return true;
+    return false;
 }
 
 void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)

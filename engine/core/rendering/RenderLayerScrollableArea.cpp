@@ -57,7 +57,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformMouseEvent.h"

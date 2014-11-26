@@ -58,7 +58,6 @@
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/JSONValues.h"

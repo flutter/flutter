@@ -65,7 +65,6 @@ class FilterOperations;
 class HitTestRequest;
 class HitTestResult;
 class HitTestingTransformState;
-class CompositedLayerMapping;
 class RenderLayerCompositor;
 class RenderStyle;
 class TransformationMatrix;
@@ -270,19 +269,7 @@ public:
     // compositing state may legally be read.
     bool isAllowedToQueryCompositingState() const;
 
-    // Don't null check this.
-    CompositedLayerMapping* compositedLayerMapping() const;
-    // FIXME: This should return a reference.
-    CompositedLayerMapping* ensureCompositedLayerMapping();
     GraphicsLayer* graphicsLayerBacking() const;
-    // NOTE: If you are using hasCompositedLayerMapping to determine the state of compositing for this layer,
-    // (and not just to do bookkeeping related to the mapping like, say, allocating or deallocating a mapping),
-    // then you may have incorrect logic. Use compositingState() instead.
-    // FIXME: This is identical to null checking compositedLayerMapping(), why not just call that?
-    bool hasCompositedLayerMapping() const { return m_compositedLayerMapping.get(); }
-    void clearCompositedLayerMapping(bool layerBeingDestroyed = false);
-    CompositedLayerMapping* groupedMapping() const { return m_groupedMapping; }
-    void setGroupedMapping(CompositedLayerMapping* groupedMapping, bool layerBeingDestroyed = false);
 
     bool hasCompositedMask() const;
     bool hasCompositedClippingMask() const;
@@ -639,10 +626,7 @@ private:
 
     IntRect m_blockSelectionGapsBounds;
 
-    OwnPtr<CompositedLayerMapping> m_compositedLayerMapping;
     OwnPtr<RenderLayerScrollableArea> m_scrollableArea;
-
-    CompositedLayerMapping* m_groupedMapping;
 
     RenderLayerRepainter m_paintInvalidator;
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?

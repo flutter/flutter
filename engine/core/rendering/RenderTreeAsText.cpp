@@ -36,7 +36,6 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/wtf/HexNumber.h"
 #include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
@@ -384,18 +383,6 @@ static void write(TextStream& ts, RenderLayer& l,
         ts << " layerType: background only";
     else if (paintPhase == LayerPaintPhaseForeground)
         ts << " layerType: foreground only";
-
-    if (behavior & RenderAsTextShowCompositedLayers) {
-        if (l.hasCompositedLayerMapping()) {
-            ts << " (composited, bounds="
-                << l.compositedLayerMapping()->compositedBounds()
-                << ", drawsContent="
-                << l.compositedLayerMapping()->mainGraphicsLayer()->drawsContent()
-                << ", paints into ancestor="
-                << l.compositedLayerMapping()->paintsIntoCompositedAncestor()
-                << ")";
-        }
-    }
 
     ts << "\n";
 

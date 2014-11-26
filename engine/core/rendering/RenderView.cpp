@@ -31,7 +31,6 @@
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderSelectionInfo.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"

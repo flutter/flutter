@@ -47,7 +47,6 @@
 #include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 
 namespace blink {
 
@@ -107,18 +106,8 @@ LayoutRect RenderLayerRepainter::paintInvalidationRectIncludingNonCompositingDes
 
 void RenderLayerRepainter::setBackingNeedsPaintInvalidationInRect(const LayoutRect& r)
 {
-    // https://bugs.webkit.org/show_bug.cgi?id=61159 describes an unreproducible crash here,
-    // so assert but check that the layer is composited.
-    ASSERT(m_renderer.compositingState() != NotComposited);
-    // FIXME: generalize accessors to backing GraphicsLayers so that this code is squashing-agnostic.
-    if (m_renderer.layer()->groupedMapping()) {
-        LayoutRect paintInvalidationRect = r;
-        paintInvalidationRect.move(m_renderer.layer()->subpixelAccumulation());
-        if (GraphicsLayer* squashingLayer = m_renderer.layer()->groupedMapping()->squashingLayer())
-            squashingLayer->setNeedsDisplayInRect(pixelSnappedIntRect(paintInvalidationRect));
-    } else {
-        m_renderer.layer()->compositedLayerMapping()->setContentsNeedDisplayInRect(r);
-    }
+    // FIXME(sky): Remove.
+    ASSERT_NOT_REACHED();
 }
 
 void RenderLayerRepainter::setFilterBackendNeedsPaintInvalidationInRect(const LayoutRect& rect)
@@ -136,11 +125,6 @@ void RenderLayerRepainter::setFilterBackendNeedsPaintInvalidationInRect(const La
 
     if (parentLayerRect.isEmpty())
         return;
-
-    if (parentLayer->hasCompositedLayerMapping()) {
-        parentLayer->paintInvalidator().setBackingNeedsPaintInvalidationInRect(parentLayerRect);
-        return;
-    }
 
     if (parentLayer->paintsWithFilters()) {
         parentLayer->paintInvalidator().setFilterBackendNeedsPaintInvalidationInRect(parentLayerRect);

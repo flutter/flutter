@@ -65,9 +65,6 @@ public:
     {
         if (o->canUpdateSelectionOnRootLineBoxes()) {
             m_rect = o->selectionRectForPaintInvalidation(m_paintInvalidationContainer, clipToVisibleContent);
-            // FIXME: groupedMapping() leaks the squashing abstraction. See RenderBlockSelectionInfo for more details.
-            if (m_paintInvalidationContainer && m_paintInvalidationContainer->layer()->groupedMapping())
-                RenderLayer::mapRectToPaintBackingCoordinates(m_paintInvalidationContainer, m_rect);
         } else {
             m_rect = LayoutRect();
         }
@@ -98,13 +95,7 @@ public:
 
     void invalidatePaint()
     {
-        LayoutRect paintInvalidationRect = m_rects;
-        // FIXME: this is leaking the squashing abstraction. However, removing the groupedMapping() condiitional causes
-        // RenderBox::mapRectToPaintInvalidationBacking to get called, which makes rect adjustments even if you pass the same
-        // paintInvalidationContainer as the render object. Find out why it does that and fix.
-        if (m_paintInvalidationContainer && m_paintInvalidationContainer->layer()->groupedMapping())
-            RenderLayer::mapRectToPaintBackingCoordinates(m_paintInvalidationContainer, paintInvalidationRect);
-        m_object->invalidatePaintUsingContainer(m_paintInvalidationContainer, enclosingIntRect(paintInvalidationRect), InvalidationSelection);
+        m_object->invalidatePaintUsingContainer(m_paintInvalidationContainer, enclosingIntRect(m_rects), InvalidationSelection);
     }
 
     RenderBlock* block() const { return toRenderBlock(m_object); }

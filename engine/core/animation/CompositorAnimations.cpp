@@ -40,7 +40,6 @@
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObject.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/platform/geometry/FloatBox.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebCompositorAnimation.h"
@@ -253,57 +252,21 @@ bool CompositorAnimations::canStartAnimationOnCompositor(const Element& element)
 
 bool CompositorAnimations::startAnimationOnCompositor(const Element& element, double startTime, double timeOffset, const Timing& timing, const AnimationEffect& effect, Vector<int>& startedAnimationIds)
 {
-    ASSERT(startedAnimationIds.isEmpty());
-    ASSERT(isCandidateForAnimationOnCompositor(timing, effect));
-    ASSERT(canStartAnimationOnCompositor(element));
-
-    const KeyframeEffectModelBase& keyframeEffect = toKeyframeEffectModelBase(effect);
-
-    RenderLayer* layer = toRenderBoxModelObject(element.renderer())->layer();
-    ASSERT(layer);
-
-    Vector<OwnPtr<WebCompositorAnimation> > animations;
-    CompositorAnimationsImpl::getAnimationOnCompositor(timing, startTime, timeOffset, keyframeEffect, animations);
-    ASSERT(!animations.isEmpty());
-    for (size_t i = 0; i < animations.size(); ++i) {
-        int id = animations[i]->id();
-        if (!layer->compositedLayerMapping()->mainGraphicsLayer()->addAnimation(animations[i].release())) {
-            // FIXME: We should know ahead of time whether these animations can be started.
-            for (size_t j = 0; j < startedAnimationIds.size(); ++j)
-                cancelAnimationOnCompositor(element, startedAnimationIds[j]);
-            startedAnimationIds.clear();
-            return false;
-        }
-        startedAnimationIds.append(id);
-    }
-    ASSERT(!startedAnimationIds.isEmpty());
+    // FIXME(sky): Remove CompositorAnimations entirely.
+    ASSERT_NOT_REACHED();
     return true;
 }
 
 void CompositorAnimations::cancelAnimationOnCompositor(const Element& element, int id)
 {
-    if (!canStartAnimationOnCompositor(element)) {
-        // When an element is being detached, we cancel any associated
-        // AnimationPlayers for CSS animations. But by the time we get
-        // here the mapping will have been removed.
-        // FIXME: Defer remove/pause operations until after the
-        // compositing update.
-        return;
-    }
-    toRenderBoxModelObject(element.renderer())->layer()->compositedLayerMapping()->mainGraphicsLayer()->removeAnimation(id);
+    // FIXME(sky): Remove CompositorAnimations entirely.
+    ASSERT_NOT_REACHED();
 }
 
 void CompositorAnimations::pauseAnimationForTestingOnCompositor(const Element& element, int id, double pauseTime)
 {
-    // FIXME: canStartAnimationOnCompositor queries compositingState, which is not necessarily up to date.
-    // https://code.google.com/p/chromium/issues/detail?id=339847
-    DisableCompositingQueryAsserts disabler;
-
-    if (!canStartAnimationOnCompositor(element)) {
-        ASSERT_NOT_REACHED();
-        return;
-    }
-    toRenderBoxModelObject(element.renderer())->layer()->compositedLayerMapping()->mainGraphicsLayer()->pauseAnimation(id, pauseTime);
+    // FIXME(sky): Remove CompositorAnimations entirely.
+    ASSERT_NOT_REACHED();
 }
 
 // -----------------------------------------------------------------------

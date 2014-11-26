@@ -222,8 +222,6 @@ private:
 
     virtual bool isFrameView() const override { return true; }
 
-    bool contentsInCompositedLayer() const;
-
     void forceLayoutParentViewIfNeeded();
     void performPreLayoutTasks();
     void performLayout(RenderObject* rootForThisLayout, bool inSubtreeLayout);
@@ -231,8 +229,6 @@ private:
     void performPostLayoutTasks();
 
     void invalidateTreeIfNeeded();
-
-    void gatherDebugLayoutRects(RenderObject* layoutRoot);
 
     DocumentLifecycle& lifecycle() const;
 

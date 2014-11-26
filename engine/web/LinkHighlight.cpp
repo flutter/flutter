@@ -34,7 +34,6 @@
 #include "sky/engine/core/rendering/RenderLayerModelObject.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/style/ShadowData.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/public/platform/Platform.h"

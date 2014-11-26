@@ -28,7 +28,6 @@
 namespace blink {
 
 class RenderLayer;
-class CompositedLayerMapping;
 class ScrollableArea;
 
 enum LayerType {

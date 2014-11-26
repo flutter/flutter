@@ -46,7 +46,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
@@ -287,7 +286,6 @@ void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLay
 
     // FIXME (crbug.com/256657): Do not do two layouts for text autosizing.
     rootForThisLayout->layout();
-    gatherDebugLayoutRects(rootForThisLayout);
 
     lifecycle().advanceTo(DocumentLifecycle::AfterPerformLayout);
 }
@@ -459,33 +457,6 @@ DocumentLifecycle& FrameView::lifecycle() const
     return m_frame->document()->lifecycle();
 }
 
-void FrameView::gatherDebugLayoutRects(RenderObject* layoutRoot)
-{
-    bool isTracing;
-    TRACE_EVENT_CATEGORY_GROUP_ENABLED(TRACE_DISABLED_BY_DEFAULT("blink.debug.layout"), &isTracing);
-    if (!isTracing)
-        return;
-    if (!layoutRoot->enclosingLayer()->hasCompositedLayerMapping())
-        return;
-    // For access to compositedLayerMapping().
-    DisableCompositingQueryAsserts disabler;
-    GraphicsLayer* graphicsLayer = layoutRoot->enclosingLayer()->compositedLayerMapping()->mainGraphicsLayer();
-    if (!graphicsLayer)
-        return;
-
-    GraphicsLayerDebugInfo& debugInfo = graphicsLayer->debugInfo();
-
-    debugInfo.currentLayoutRects().clear();
-    for (RenderObject* renderer = layoutRoot; renderer; renderer = renderer->nextInPreOrder()) {
-        if (renderer->layoutDidGetCalled()) {
-            FloatQuad quad = renderer->localToAbsoluteQuad(FloatQuad(renderer->previousPaintInvalidationRect()));
-            LayoutRect rect = quad.enclosingBoundingBox();
-            debugInfo.currentLayoutRects().append(rect);
-            renderer->setLayoutDidGetCalled(false);
-        }
-    }
-}
-
 void FrameView::setMediaType(const AtomicString& mediaType)
 {
     ASSERT(m_frame->document());
@@ -500,18 +471,6 @@ AtomicString FrameView::mediaType() const
     if (!overrideType.isNull())
         return AtomicString(overrideType);
     return m_mediaType;
-}
-
-bool FrameView::contentsInCompositedLayer() const
-{
-    RenderView* renderView = this->renderView();
-    if (renderView && renderView->compositingState() == PaintsIntoOwnBacking) {
-        GraphicsLayer* layer = renderView->layer()->compositedLayerMapping()->mainGraphicsLayer();
-        if (layer && layer->drawsContent())
-            return true;
-    }
-
-    return false;
 }
 
 bool FrameView::shouldSetCursor() const
@@ -686,9 +645,6 @@ bool FrameView::isTransparent() const
 void FrameView::setTransparent(bool isTransparent)
 {
     m_isTransparent = isTransparent;
-    DisableCompositingQueryAsserts disabler;
-    if (renderView() && renderView()->layer()->hasCompositedLayerMapping())
-        renderView()->layer()->compositedLayerMapping()->updateContentsOpaque();
 }
 
 bool FrameView::hasOpaqueBackground() const
@@ -704,13 +660,6 @@ Color FrameView::baseBackgroundColor() const
 void FrameView::setBaseBackgroundColor(const Color& backgroundColor)
 {
     m_baseBackgroundColor = backgroundColor;
-
-    if (renderView() && renderView()->layer()->hasCompositedLayerMapping()) {
-        CompositedLayerMapping* compositedLayerMapping = renderView()->layer()->compositedLayerMapping();
-        compositedLayerMapping->updateContentsOpaque();
-        if (compositedLayerMapping->mainGraphicsLayer())
-            compositedLayerMapping->mainGraphicsLayer()->setNeedsDisplay();
-    }
 }
 
 void FrameView::updateBackgroundRecursively(const Color& backgroundColor, bool transparent)

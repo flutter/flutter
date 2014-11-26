@@ -322,11 +322,7 @@ void RenderLayerClipper::getOrCalculateClipRects(const ClipRectsContext& context
 RenderLayer* RenderLayerClipper::clippingRootForPainting() const
 {
     const RenderLayer* current = m_renderer.layer();
-    // FIXME: getting rid of current->hasCompositedLayerMapping() here breaks the
-    // compositing/backing/no-backing-for-clip.html layout test, because there is a
-    // "composited but paints into ancestor" layer involved. However, it doesn't make sense that
-    // that check would be appropriate here but not inside the while loop below.
-    if (current->isPaintInvalidationContainer() || current->hasCompositedLayerMapping())
+    if (current->isPaintInvalidationContainer())
         return const_cast<RenderLayer*>(current);
 
     while (current) {

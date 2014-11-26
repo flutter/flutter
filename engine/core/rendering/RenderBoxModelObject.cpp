@@ -34,7 +34,6 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/CompositedLayerMapping.h"
 #include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/LengthFunctions.h"
@@ -768,21 +767,6 @@ IntPoint RenderBoxModelObject::BackgroundImageGeometry::relativePhase() const
     return phase;
 }
 
-bool RenderBoxModelObject::fixedBackgroundPaintsInLocalCoordinates() const
-{
-    if (!isDocumentElement())
-        return false;
-
-    if (view()->frameView() && view()->frameView()->paintBehavior() & PaintBehaviorFlattenCompositingLayers)
-        return false;
-
-    RenderLayer* rootLayer = view()->layer();
-    if (!rootLayer || rootLayer->compositingState() == NotComposited)
-        return false;
-
-    return rootLayer->compositedLayerMapping()->backgroundLayerPaintsFixedRootBackground();
-}
-
 static inline int getSpace(int areaSize, int tileSize)
 {
     int numberOfTiles = areaSize / tileSize;
@@ -847,8 +831,6 @@ void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderLayerMod
         geometry.setHasNonLocalGeometry();
 
         IntRect viewportRect = pixelSnappedIntRect(viewRect());
-        if (fixedBackgroundPaintsInLocalCoordinates())
-            viewportRect.setLocation(IntPoint());
 
         if (paintContainer) {
             IntPoint absoluteContainerOffset = roundedIntPoint(paintContainer->localToAbsolute(FloatPoint()));
