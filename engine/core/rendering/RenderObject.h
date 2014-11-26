@@ -39,7 +39,6 @@
 #include "sky/engine/core/rendering/ScrollAlignment.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
 #include "sky/engine/core/rendering/compositing/CompositingState.h"
-#include "sky/engine/core/rendering/compositing/CompositingTriggers.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -1177,10 +1176,11 @@ inline bool RenderObject::boxDecorationBackgroundIsKnownToBeObscured()
     return m_bitfields.boxDecorationBackgroundState() == HasBoxDecorationBackgroundKnownToBeObscured;
 }
 
-inline void makeMatrixRenderable(TransformationMatrix& matrix, bool has3DRendering)
+inline void makeMatrixRenderable(TransformationMatrix& matrix)
 {
-    if (!has3DRendering)
-        matrix.makeAffine();
+    // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
+    // Until then, 3d transforms don't work right.
+    matrix.makeAffine();
 }
 
 #define DEFINE_RENDER_OBJECT_TYPE_CASTS(thisType, predicate) \

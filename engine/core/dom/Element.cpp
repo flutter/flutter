@@ -82,7 +82,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/scroll/ScrollableArea.h"

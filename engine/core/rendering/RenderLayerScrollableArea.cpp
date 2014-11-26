@@ -57,7 +57,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
@@ -244,7 +243,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
         // If we're in the middle of layout, we'll just update layers once layout has finished.
         layer()->clipper().clearClipRectsIncludingDescendants();
         box().setPreviousPaintInvalidationRect(box().boundsRectForPaintInvalidation(paintInvalidationContainer));
-        updateCompositingLayersAfterScroll();
     }
 
     // The caret rect needs to be invalidated after scrolling
@@ -812,31 +810,6 @@ void RenderLayerScrollableArea::updateScrollableAreaSet(bool hasOverflow)
         frameView->addScrollableArea(this);
     else
         frameView->removeScrollableArea(this);
-}
-
-void RenderLayerScrollableArea::updateCompositingLayersAfterScroll()
-{
-    RenderLayerCompositor* compositor = box().view()->compositor();
-    if (compositor->inCompositingMode()) {
-        layer()->setNeedsCompositingInputsUpdate();
-    }
-}
-
-static bool layerNeedsCompositedScrolling(const RenderLayer* layer)
-{
-    return layer->scrollsOverflow()
-        && layer->compositor()->preferCompositingToLCDTextEnabled()
-        && !layer->hasDescendantWithClipPath()
-        && !layer->hasAncestorWithClipPath();
-}
-
-void RenderLayerScrollableArea::updateNeedsCompositedScrolling()
-{
-    const bool needsCompositedScrolling = layerNeedsCompositedScrolling(layer());
-    if (static_cast<bool>(m_needsCompositedScrolling) != needsCompositedScrolling) {
-        m_needsCompositedScrolling = needsCompositedScrolling;
-        layer()->didUpdateNeedsCompositedScrolling();
-    }
 }
 
 void RenderLayerScrollableArea::setTopmostScrollChild(RenderLayer* scrollChild)

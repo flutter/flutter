@@ -683,14 +683,6 @@ bool WebLocalFrameImpl::selectionStartHasSpellingMarkerFor(int from, int length)
     return frame()->spellChecker().selectionStartHasSpellingMarkerFor(from, length);
 }
 
-WebString WebLocalFrameImpl::layerTreeAsText(bool showDebugInfo) const
-{
-    if (!frame())
-        return WebString();
-
-    return WebString(frame()->layerTreeAsText(showDebugInfo ? LayerTreeIncludesDebugInfo : LayerTreeNormal));
-}
-
 // WebLocalFrameImpl public ---------------------------------------------------------
 
 WebLocalFrame* WebLocalFrame::create(WebFrameClient* client)

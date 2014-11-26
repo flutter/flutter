@@ -37,7 +37,6 @@
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/public/web/WebInputEvent.h"

@@ -56,7 +56,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/text/TextStream.h"
@@ -322,21 +321,6 @@ void LocalFrame::countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigne
         if (o->needsLayout())
             ++needsLayoutObjects;
     }
-}
-
-String LocalFrame::layerTreeAsText(LayerTreeFlags flags) const
-{
-    TextStream textStream;
-    textStream << localLayerTreeAsText(flags);
-    return textStream.release();
-}
-
-String LocalFrame::localLayerTreeAsText(unsigned flags) const
-{
-    if (!contentRenderer())
-        return String();
-
-    return contentRenderer()->compositor()->layerTreeAsText(static_cast<LayerTreeFlags>(flags));
 }
 
 void LocalFrame::deviceOrPageScaleFactorChanged()

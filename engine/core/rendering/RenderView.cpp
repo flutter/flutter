@@ -31,7 +31,6 @@
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderSelectionInfo.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/TransformState.h"
@@ -140,11 +139,9 @@ bool RenderView::shouldDoFullPaintInvalidationForNextLayout() const
             // i.e. html or body) as the background positioning area, and we should full paint invalidation
             // viewport resize if the background image is not composited and needs full paint invalidation on
             // background positioning area resize.
-            if (!m_compositor || !m_compositor->needsFixedRootBackgroundLayer(layer())) {
-                if (backgroundRenderer->style()->hasFixedBackgroundImage()
-                    && mustInvalidateFillLayersPaintOnHeightChange(backgroundRenderer->style()->backgroundLayers()))
-                return true;
-            }
+            if (backgroundRenderer->style()->hasFixedBackgroundImage()
+                && mustInvalidateFillLayersPaintOnHeightChange(backgroundRenderer->style()->backgroundLayers()))
+            return true;
         }
     }
 
@@ -314,17 +311,6 @@ void RenderView::invalidatePaintForRectangle(const LayoutRect& paintInvalidation
     } else {
         m_frameView->contentRectangleForPaintInvalidation(pixelSnappedIntRect(paintInvalidationRect));
     }
-}
-
-void RenderView::invalidatePaintForViewAndCompositedLayers()
-{
-    setShouldDoFullPaintInvalidation(true);
-
-    // The only way we know how to hit these ASSERTS below this point is via the Chromium OS login screen.
-    DisableCompositingQueryAsserts disabler;
-
-    if (compositor()->inCompositingMode())
-        compositor()->fullyInvalidatePaint();
 }
 
 void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
@@ -704,25 +690,6 @@ void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& p
 
         result.setLocalPoint(adjustedPoint);
     }
-}
-
-bool RenderView::usesCompositing() const
-{
-    return m_compositor && m_compositor->staleInCompositingMode();
-}
-
-RenderLayerCompositor* RenderView::compositor()
-{
-    if (!m_compositor)
-        m_compositor = adoptPtr(new RenderLayerCompositor(*this));
-
-    return m_compositor.get();
-}
-
-void RenderView::setIsInWindow(bool isInWindow)
-{
-    if (m_compositor)
-        m_compositor->setIsInWindow(isInWindow);
 }
 
 void RenderView::pushLayoutState(LayoutState& layoutState)

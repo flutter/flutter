@@ -53,7 +53,6 @@
 namespace blink {
 
 class RenderLayer;
-class RenderLayerCompositor;
 class RenderStyle;
 
 class RenderLayerStackingNode {
@@ -142,7 +141,6 @@ private:
 
     bool isDirtyStackingContext() const { return m_zOrderListsDirty && isStackingContext(); }
 
-    RenderLayerCompositor* compositor() const;
     // FIXME: Investigate changing this to Renderbox.
     RenderLayerModelObject* renderer() const;
 

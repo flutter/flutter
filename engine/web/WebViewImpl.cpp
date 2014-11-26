@@ -61,7 +61,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/page/TouchDisambiguation.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/KeyboardCodes.h"
 #include "sky/engine/platform/Logging.h"
@@ -1892,21 +1891,6 @@ void WebViewImpl::setBackgroundColorOverride(WebColor color)
     m_backgroundColorOverride = color;
 }
 
-void WebViewImpl::setOverlayLayer(GraphicsLayer* layer)
-{
-    if (!m_rootGraphicsLayer)
-        return;
-
-    // FIXME(bokan): This path goes away after virtual viewport pinch is enabled everywhere.
-    if (!m_rootTransformLayer)
-        m_rootTransformLayer = m_page->mainFrame()->view()->renderView()->compositor()->ensureRootTransformLayer();
-
-    if (m_rootTransformLayer) {
-        if (layer->parent() != m_rootTransformLayer)
-            m_rootTransformLayer->addChild(layer);
-    }
-}
-
 Element* WebViewImpl::focusedElement() const
 {
     LocalFrame* frame = m_page->focusController().focusedFrame();
@@ -1964,17 +1948,6 @@ GraphicsLayerFactory* WebViewImpl::graphicsLayerFactory() const
     return m_graphicsLayerFactory.get();
 }
 
-RenderLayerCompositor* WebViewImpl::compositor() const
-{
-    if (!page() || !page()->mainFrame())
-        return 0;
-
-    if (!page()->mainFrame()->document() || !page()->mainFrame()->document()->renderView())
-        return 0;
-
-    return page()->mainFrame()->document()->renderView()->compositor();
-}
-
 GraphicsLayer* WebViewImpl::rootGraphicsLayer()
 {
     return m_rootGraphicsLayer;
@@ -1992,22 +1965,7 @@ void WebViewImpl::updateMainFrameScrollPosition(const IntPoint& scrollPosition, 
 
 void WebViewImpl::updateRootLayerTransform()
 {
-    // If we don't have a root graphics layer, we won't bother trying to find
-    // or update the transform layer.
-    if (!m_rootGraphicsLayer)
-        return;
-
-    // FIXME(bokan): m_rootTransformLayer is always set here in pinch virtual viewport. This can go away once
-    // that's default everywhere.
-    if (!m_rootTransformLayer)
-        m_rootTransformLayer = m_page->mainFrame()->view()->renderView()->compositor()->ensureRootTransformLayer();
-
-    if (m_rootTransformLayer) {
-        TransformationMatrix transform;
-        transform.translate(m_rootLayerOffset.width, m_rootLayerOffset.height);
-        transform = transform.scale(m_rootLayerScale);
-        m_rootTransformLayer->setTransform(transform);
-    }
+    // FIXME(sky): Remove
 }
 
 bool WebViewImpl::detectContentOnTouch(const WebPoint& position)

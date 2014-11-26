@@ -96,7 +96,6 @@ public:
     void setInspectorHost(inspector::InspectorHost* host) { m_inspectorHost = host; }
 
     void setNeedsRecalcStyleInAllFrames();
-    void updateAcceleratedCompositingSettings();
 
     EditorClient& editorClient() const { return *m_editorClient; }
     SpellCheckerClient& spellCheckerClient() const { return *m_spellCheckerClient; }

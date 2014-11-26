@@ -34,7 +34,6 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/geometry/TransformState.h"
@@ -74,7 +73,8 @@ void RenderBoxModelObject::contentChanged(ContentChangeType changeType)
 
 bool RenderBoxModelObject::hasAcceleratedCompositing() const
 {
-    return view()->compositor()->hasAcceleratedCompositing();
+    // FIXME(sky): Remove
+    return false;
 }
 
 InterpolationQuality RenderBoxModelObject::chooseInterpolationQuality(GraphicsContext* context, Image* image, const void* layer, const LayoutSize& size)

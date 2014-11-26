@@ -239,7 +239,7 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
         setNeedsRecalcStyleInAllFrames();
         break;
     case SettingsDelegate::AcceleratedCompositingChange:
-        updateAcceleratedCompositingSettings();
+        // FIXME(sky): Remove
         break;
     case SettingsDelegate::MediaQueryChange:
         if (mainFrame()->document())
@@ -247,12 +247,6 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
         setNeedsRecalcStyleInAllFrames();
         break;
     }
-}
-
-void Page::updateAcceleratedCompositingSettings()
-{
-    if (FrameView* view = mainFrame()->view())
-        view->updateAcceleratedCompositingSettings();
 }
 
 void Page::didCommitLoad(LocalFrame* frame)

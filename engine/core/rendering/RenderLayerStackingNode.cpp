@@ -46,7 +46,6 @@
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
@@ -88,12 +87,6 @@ static inline bool compareZIndex(RenderLayerStackingNode* first, RenderLayerStac
     return first->zIndex() < second->zIndex();
 }
 
-RenderLayerCompositor* RenderLayerStackingNode::compositor() const
-{
-    ASSERT(renderer()->view());
-    return renderer()->view()->compositor();
-}
-
 void RenderLayerStackingNode::dirtyZOrderLists()
 {
     ASSERT(m_layerListMutationAllowed);
@@ -108,9 +101,6 @@ void RenderLayerStackingNode::dirtyZOrderLists()
     if (m_negZOrderList)
         m_negZOrderList->clear();
     m_zOrderListsDirty = true;
-
-    if (!renderer()->documentBeingDestroyed())
-        compositor()->setNeedsCompositingUpdate(CompositingUpdateRebuildTree);
 }
 
 void RenderLayerStackingNode::dirtyStackingContextZOrderLists()
@@ -130,9 +120,6 @@ void RenderLayerStackingNode::dirtyNormalFlowList()
     if (m_normalFlowList)
         m_normalFlowList->clear();
     m_normalFlowListDirty = true;
-
-    if (!renderer()->documentBeingDestroyed())
-        compositor()->setNeedsCompositingUpdate(CompositingUpdateRebuildTree);
 }
 
 void RenderLayerStackingNode::rebuildZOrderLists()

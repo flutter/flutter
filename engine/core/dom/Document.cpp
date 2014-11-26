@@ -127,7 +127,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/DateComponents.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/Language.h"
@@ -1259,9 +1258,7 @@ void Document::attach(const AttachContext& context)
     m_renderView = new RenderView(this);
     setRenderer(m_renderView);
 
-    m_renderView->setIsInWindow(true);
     m_renderView->setStyle(StyleResolver::styleForDocument(*this));
-    m_renderView->compositor()->setNeedsCompositingUpdate(CompositingUpdateAfterCompositingInputChange);
 
     ContainerNode::attach(context);
 
@@ -1286,9 +1283,6 @@ void Document::detach(const AttachContext& context)
     // FIXME: This shouldn't be needed once LocalDOMWindow becomes ExecutionContext.
     if (m_domWindow)
         m_domWindow->clearEventQueue();
-
-    if (m_renderView)
-        m_renderView->setIsInWindow(false);
 
     m_hoverNode = nullptr;
     m_focusedElement = nullptr;
@@ -1732,7 +1726,7 @@ void Document::styleResolverChanged(StyleResolverUpdateMode updateMode)
 
         ASSERT(renderView() || importsController());
         if (renderView())
-            renderView()->invalidatePaintForViewAndCompositedLayers();
+            renderView()->setShouldDoFullPaintInvalidation(true);
     }
 }
 

@@ -58,7 +58,6 @@
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/Partitions.h"
@@ -1285,10 +1284,6 @@ void RenderObject::invalidatePaintUsingContainer(const RenderLayerModelObject* p
     if (paintInvalidationContainer->isRenderView()) {
         toRenderView(paintInvalidationContainer)->invalidatePaintForRectangle(r);
         return;
-    }
-    if (paintInvalidationContainer->view()->usesCompositing()) {
-        ASSERT(paintInvalidationContainer->hasLayer() && (paintInvalidationContainer->layer()->compositingState() == PaintsIntoOwnBacking || paintInvalidationContainer->layer()->compositingState() == PaintsIntoGroupedBacking));
-        paintInvalidationContainer->layer()->paintInvalidator().setBackingNeedsPaintInvalidationInRect(r);
     }
 }
 

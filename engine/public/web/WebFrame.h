@@ -300,10 +300,6 @@ public:
     // Returns true if selection.anchorNode has a marker on range from |from| with |length|.
     virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const = 0;
 
-    // Dumps the layer tree, used by the accelerated compositor, in
-    // text form. This is used only by layout tests.
-    virtual WebString layerTreeAsText(bool showDebugInfo = false) const = 0;
-
 #if BLINK_IMPLEMENTATION
     static WebFrame* fromFrame(Frame*);
 #endif

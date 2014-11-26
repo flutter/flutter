@@ -56,7 +56,6 @@ namespace blink {
 
 class Frame;
 class LinkHighlight;
-class RenderLayerCompositor;
 class UserGestureToken;
 class WebActiveGestureAnimation;
 class WebLocalFrameImpl;
@@ -176,8 +175,6 @@ public:
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }
 
-    void setOverlayLayer(GraphicsLayer*);
-
     const WebPoint& lastMouseDownPoint() const
     {
         return m_lastMouseDownPoint;
@@ -248,7 +245,6 @@ public:
     GraphicsLayer* rootGraphicsLayer();
     void setRootGraphicsLayer(GraphicsLayer*);
     GraphicsLayerFactory* graphicsLayerFactory() const;
-    RenderLayerCompositor* compositor() const;
     void scheduleAnimation();
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;

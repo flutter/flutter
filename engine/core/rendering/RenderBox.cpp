@@ -45,7 +45,6 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/TransformState.h"

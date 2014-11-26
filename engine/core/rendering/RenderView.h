@@ -32,8 +32,6 @@
 
 namespace blink {
 
-class RenderLayerCompositor;
-
 // The root of the render tree, corresponding to the CSS initial containing block.
 // It's dimensions match that of the logical viewport (which may be different from
 // the visible viewport in fixed-layout mode), and it is always at position (0,0)
@@ -79,8 +77,6 @@ public:
 
     void invalidatePaintForRectangle(const LayoutRect&) const;
 
-    void invalidatePaintForViewAndCompositedLayers();
-
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
@@ -105,12 +101,6 @@ public:
     LayoutState* layoutState() const { return m_layoutState; }
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
-
-    // Notification that this view moved into or out of a native window.
-    void setIsInWindow(bool);
-
-    RenderLayerCompositor* compositor();
-    bool usesCompositing() const;
 
     IntRect unscaledDocumentRect() const;
     LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
@@ -161,7 +151,6 @@ private:
     int m_selectionEndPos;
 
     LayoutState* m_layoutState;
-    OwnPtr<RenderLayerCompositor> m_compositor;
 
     unsigned m_renderCounterCount;
 

@@ -105,9 +105,6 @@ namespace blink {
 
         void countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial);
 
-        // See GraphicsLayerClient.h for accepted flags.
-        String layerTreeAsText(unsigned flags = 0) const;
-
         FloatSize resizePageRectsKeepingRatio(const FloatSize& originalSize, const FloatSize& expectedSize);
 
         void deviceOrPageScaleFactorChanged();
@@ -125,8 +122,6 @@ namespace blink {
 
     private:
         LocalFrame(FrameLoaderClient*, FrameHost*);
-
-        String localLayerTreeAsText(unsigned flags) const;
 
         HashSet<FrameDestructionObserver*> m_destructionObservers;
         mutable FrameLoader m_deprecatedLoader;

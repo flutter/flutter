@@ -195,14 +195,7 @@ public:
     // For hosting this GraphicsLayer in a native layer hierarchy.
     WebLayer* platformLayer() const;
 
-    typedef HashMap<int, int> RenderingContextMap;
-    PassRefPtr<JSONObject> layerTreeAsJSON(LayerTreeFlags, RenderingContextMap&) const;
-
     int paintCount() const { return m_paintCount; }
-
-    // Return a string with a human readable form of the layer tree, If debug is true
-    // pointers for the layers and timing data will be included in the returned string.
-    String layerTreeAsText(LayerTreeFlags = LayerTreeNormal) const;
 
     void resetTrackedPaintInvalidations();
     void addRepaintRect(const FloatRect&);
@@ -324,10 +317,5 @@ private:
 };
 
 } // namespace blink
-
-#ifndef NDEBUG
-// Outside the WebCore namespace for ease of invocation from gdb.
-void PLATFORM_EXPORT showGraphicsLayerTree(const blink::GraphicsLayer*);
-#endif
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSLAYER_H_

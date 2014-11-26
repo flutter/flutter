@@ -103,8 +103,6 @@ public:
 
     bool needsFullPaintInvalidation() const { return m_doFullPaintInvalidation; }
 
-    void updateAcceleratedCompositingSettings();
-
     void recalcOverflowAfterStyleChange();
 
     bool isEnclosedInCompositingLayer() const;

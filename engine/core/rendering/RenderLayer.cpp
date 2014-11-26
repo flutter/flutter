@@ -60,7 +60,6 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderTreeAsText.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -129,13 +128,6 @@ RenderLayer::~RenderLayer()
 String RenderLayer::debugName() const
 {
     return renderer()->debugName();
-}
-
-RenderLayerCompositor* RenderLayer::compositor() const
-{
-    if (!renderer()->view())
-        return 0;
-    return renderer()->view()->compositor();
 }
 
 void RenderLayer::contentChanged(ContentChangeType changeType)
@@ -223,7 +215,7 @@ void RenderLayer::updateTransformationMatrix()
         ASSERT(box);
         m_transform->makeIdentity();
         box->style()->applyTransform(*m_transform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::IncludeTransformOrigin);
-        makeMatrixRenderable(*m_transform, compositor()->hasAcceleratedCompositing());
+        makeMatrixRenderable(*m_transform);
     }
 }
 
@@ -286,7 +278,7 @@ TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOr
         RenderBox* box = renderBox();
         TransformationMatrix currTransform;
         box->style()->applyTransform(currTransform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::ExcludeTransformOrigin);
-        makeMatrixRenderable(currTransform, compositor()->hasAcceleratedCompositing());
+        makeMatrixRenderable(currTransform);
         return currTransform;
     }
 
@@ -300,7 +292,7 @@ TransformationMatrix RenderLayer::renderableTransform(PaintBehavior paintBehavio
 
     if (paintBehavior & PaintBehaviorFlattenCompositingLayers) {
         TransformationMatrix matrix = *m_transform;
-        makeMatrixRenderable(matrix, false /* flatten 3d */);
+        makeMatrixRenderable(matrix);
         return matrix;
     }
 
@@ -546,16 +538,7 @@ bool RenderLayer::isPaintInvalidationContainer() const
 // receive graphics layers that are parented to the compositing ancestor of the squashed layer.
 RenderLayer* RenderLayer::enclosingLayerWithCompositedLayerMapping(IncludeSelfOrNot includeSelf) const
 {
-    ASSERT(isAllowedToQueryCompositingState());
-
-    if ((includeSelf == IncludeSelf) && compositingState() != NotComposited && compositingState() != PaintsIntoGroupedBacking)
-        return const_cast<RenderLayer*>(this);
-
-    for (const RenderLayer* curr = compositingContainer(); curr; curr = curr->compositingContainer()) {
-        if (curr->compositingState() != NotComposited && curr->compositingState() != PaintsIntoGroupedBacking)
-            return const_cast<RenderLayer*>(curr);
-    }
-
+    // FIXME(sky): Remove
     return 0;
 }
 
@@ -569,8 +552,6 @@ RenderLayer* RenderLayer::enclosingLayerForPaintInvalidationCrossingFrameBoundar
 
 RenderLayer* RenderLayer::enclosingLayerForPaintInvalidation() const
 {
-    ASSERT(isAllowedToQueryCompositingState());
-
     if (isPaintInvalidationContainer())
         return const_cast<RenderLayer*>(this);
 
@@ -595,13 +576,7 @@ RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) con
 
 void RenderLayer::setNeedsCompositingInputsUpdate()
 {
-    m_needsAncestorDependentCompositingInputsUpdate = true;
-    m_needsDescendantDependentCompositingInputsUpdate = true;
-
-    for (RenderLayer* current = this; current && !current->m_childNeedsCompositingInputsUpdate; current = current->parent())
-        current->m_childNeedsCompositingInputsUpdate = true;
-
-    compositor()->setNeedsCompositingUpdate(CompositingUpdateAfterCompositingInputChange);
+    // FIXME(sky): Remove
 }
 
 void RenderLayer::updateAncestorDependentCompositingInputs(const AncestorDependentCompositingInputs& compositingInputs)
@@ -614,14 +589,6 @@ void RenderLayer::updateDescendantDependentCompositingInputs(const DescendantDep
 {
     m_descendantDependentCompositingInputs = compositingInputs;
     m_needsDescendantDependentCompositingInputsUpdate = false;
-}
-
-void RenderLayer::didUpdateCompositingInputs()
-{
-    ASSERT(!needsCompositingInputsUpdate());
-    m_childNeedsCompositingInputsUpdate = false;
-    if (m_scrollableArea)
-        m_scrollableArea->updateNeedsCompositedScrolling();
 }
 
 void RenderLayer::setCompositingReasons(CompositingReasons reasons, CompositingReasons mask)
@@ -1429,15 +1396,6 @@ void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, cons
     }
 }
 
-static inline LayoutSize subPixelAccumulationIfNeeded(const LayoutSize& subPixelAccumulation, CompositingState compositingState)
-{
-    // Only apply the sub-pixel accumulation if we don't paint into our own backing layer, otherwise the position
-    // of the renderer already includes any sub-pixel offset.
-    if (compositingState == PaintsIntoOwnBacking)
-        return LayoutSize();
-    return subPixelAccumulation;
-}
-
 void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
     RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
@@ -1460,7 +1418,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
         // Paint the background.
         // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseBlockBackground, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState())));
+        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (localPaintingInfo.clipToDirtyRect)
             restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.backgroundRect);
@@ -1515,7 +1473,7 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
             clipToRect(localPaintingInfo, context, fragment.foregroundRect, paintFlags);
 
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.foregroundRect.rect()), phase, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState())));
+        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (shouldClip)
             restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.foregroundRect);
@@ -1533,7 +1491,7 @@ void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments,
         // Paint our own outline
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.outlineRect.rect()), PaintPhaseSelfOutline, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         clipToRect(localPaintingInfo, context, fragment.outlineRect, paintFlags, DoNotIncludeSelfForBorderRadius);
-        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState())));
+        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
         restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.outlineRect);
     }
 }
@@ -1552,7 +1510,7 @@ void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, Gr
         // Paint the mask.
         // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseMask, PaintBehaviorNormal, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState())));
+        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (localPaintingInfo.clipToDirtyRect)
             restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.backgroundRect);
@@ -1572,7 +1530,7 @@ void RenderLayer::paintChildClippingMaskForFragments(const LayerFragments& layer
 
         // Paint the the clipped mask.
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseClippingMask, PaintBehaviorNormal, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState())));
+        renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (localPaintingInfo.clipToDirtyRect)
             restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.foregroundRect);
@@ -1585,7 +1543,7 @@ void RenderLayer::paintOverflowControlsForFragments(const LayerFragments& layerF
         const LayerFragment& fragment = layerFragments.at(i);
         clipToRect(localPaintingInfo, context, fragment.backgroundRect, paintFlags);
         if (RenderLayerScrollableArea* scrollableArea = this->scrollableArea())
-            scrollableArea->paintOverflowControls(context, roundedIntPoint(toPoint(fragment.layerBounds.location() - renderBoxLocation() + subPixelAccumulationIfNeeded(localPaintingInfo.subPixelAccumulation, compositingState()))), pixelSnappedIntRect(fragment.backgroundRect.rect()), true);
+            scrollableArea->paintOverflowControls(context, roundedIntPoint(toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation)), pixelSnappedIntRect(fragment.backgroundRect.rect()), true);
         restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.backgroundRect);
     }
 }
@@ -2175,19 +2133,6 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     return result;
 }
 
-CompositingState RenderLayer::compositingState() const
-{
-    // FIXME(sky): Remove
-    return NotComposited;
-}
-
-bool RenderLayer::isAllowedToQueryCompositingState() const
-{
-    if (gCompositingQueryMode == CompositingQueriesAreAllowed)
-        return true;
-    return renderer()->document().lifecycle().state() >= DocumentLifecycle::InCompositingUpdate;
-}
-
 GraphicsLayer* RenderLayer::graphicsLayerBacking() const
 {
     return 0;
@@ -2207,11 +2152,8 @@ bool RenderLayer::hasCompositedClippingMask() const
 
 bool RenderLayer::clipsCompositingDescendantsWithBorderRadius() const
 {
-    RenderStyle* style = renderer()->style();
-    if (!style)
-        return false;
-
-    return compositor()->clipsCompositingDescendants(this) && style->hasBorderRadius();
+    // FIXME(sky): Remove
+    return false;
 }
 
 bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
@@ -2347,33 +2289,8 @@ void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* 
     updateOrRemoveFilterEffectRenderer();
 }
 
-bool RenderLayer::attemptDirectCompositingUpdate(StyleDifference diff, const RenderStyle* oldStyle)
-{
-    // FIXME(sky): Remove this function now that we don't have compositing layers.
-    CompositingReasons oldPotentialCompositingReasonsFromStyle = m_potentialCompositingReasonsFromStyle;
-    compositor()->updatePotentialCompositingReasonsFromStyle(this);
-
-    // This function implements an optimization for transforms and opacity.
-    // A common pattern is for a touchmove handler to update the transform
-    // and/or an opacity of an element every frame while the user moves their
-    // finger across the screen. The conditions below recognize when the
-    // compositing state is set up to receive a direct transform or opacity
-    // update.
-
-    if (!diff.hasAtMostPropertySpecificDifferences(StyleDifference::TransformChanged | StyleDifference::OpacityChanged))
-        return false;
-    // The potentialCompositingReasonsFromStyle could have changed without
-    // a corresponding StyleDifference if an animation started or ended.
-    if (m_potentialCompositingReasonsFromStyle != oldPotentialCompositingReasonsFromStyle)
-        return false;
-    return false;
-}
-
 void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)
 {
-    if (attemptDirectCompositingUpdate(diff, oldStyle))
-        return;
-
     m_stackingNode->updateIsNormalFlowOnly();
     m_stackingNode->updateStackingNodesAfterStyleChange(oldStyle);
 

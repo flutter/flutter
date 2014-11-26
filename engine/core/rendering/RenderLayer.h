@@ -54,6 +54,7 @@
 #include "sky/engine/core/rendering/RenderLayerScrollableArea.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
+#include "sky/engine/core/rendering/compositing/CompositingState.h"
 #include "sky/engine/platform/graphics/CompositingReasons.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -65,7 +66,6 @@ class FilterOperations;
 class HitTestRequest;
 class HitTestResult;
 class HitTestingTransformState;
-class RenderLayerCompositor;
 class RenderStyle;
 class TransformationMatrix;
 
@@ -135,8 +135,6 @@ public:
     LayoutRect rect() const { return LayoutRect(location(), size()); }
 
     bool isRootLayer() const { return m_isRootLayer; }
-
-    RenderLayerCompositor* compositor() const;
 
     // Notification from the renderer that its content changed (e.g. current frame of image changed).
     // Allows updates of layer content without invalidating paint.
@@ -263,11 +261,8 @@ public:
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
 
-    CompositingState compositingState() const;
-
-    // This returns true if our document is in a phase of its lifestyle during which
-    // compositing state may legally be read.
-    bool isAllowedToQueryCompositingState() const;
+    // FIXME(sky): Remove
+    CompositingState compositingState() const { return NotComposited; }
 
     GraphicsLayer* graphicsLayerBacking() const;
 
@@ -427,7 +422,6 @@ public:
 
     void updateAncestorDependentCompositingInputs(const AncestorDependentCompositingInputs&);
     void updateDescendantDependentCompositingInputs(const DescendantDependentCompositingInputs&);
-    void didUpdateCompositingInputs();
 
     const AncestorDependentCompositingInputs& ancestorDependentCompositingInputs() const { ASSERT(!m_needsAncestorDependentCompositingInputsUpdate); return m_ancestorDependentCompositingInputs; }
     const DescendantDependentCompositingInputs& descendantDependentCompositingInputs() const { ASSERT(!m_needsDescendantDependentCompositingInputsUpdate); return m_descendantDependentCompositingInputs; }
@@ -444,13 +438,13 @@ public:
     bool hasAncestorWithClipPath() const { return ancestorDependentCompositingInputs().hasAncestorWithClipPath; }
     bool hasDescendantWithClipPath() const { return descendantDependentCompositingInputs().hasDescendantWithClipPath; }
 
-    bool lostGroupedMapping() const { ASSERT(isAllowedToQueryCompositingState()); return m_lostGroupedMapping; }
+    bool lostGroupedMapping() const { return m_lostGroupedMapping; }
     void setLostGroupedMapping(bool b) { m_lostGroupedMapping = b; }
 
-    CompositingReasons compositingReasons() const { ASSERT(isAllowedToQueryCompositingState()); return m_compositingReasons; }
+    CompositingReasons compositingReasons() const { return m_compositingReasons; }
     void setCompositingReasons(CompositingReasons, CompositingReasons mask = CompositingReasonAll);
 
-    bool hasCompositingDescendant() const { ASSERT(isAllowedToQueryCompositingState()); return m_hasCompositingDescendant; }
+    bool hasCompositingDescendant() const { return m_hasCompositingDescendant; }
     void setHasCompositingDescendant(bool);
 
     void updateOrRemoveFilterEffectRenderer();
@@ -552,7 +546,6 @@ private:
     bool requiresScrollableArea() const { return renderBox(); }
     void updateScrollableArea();
 
-    bool attemptDirectCompositingUpdate(StyleDifference, const RenderStyle* oldStyle);
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
     void dirty3DTransformedDescendantStatus();

@@ -127,7 +127,6 @@ public:
     virtual WebRect selectionBoundsRect() const override;
 
     virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const override;
-    virtual WebString layerTreeAsText(bool showDebugInfo = false) const override;
 
     static WebLocalFrameImpl* create(WebFrameClient*);
     virtual ~WebLocalFrameImpl();

@@ -46,7 +46,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -172,11 +171,6 @@ void FrameView::setFrameRect(const IntRect& newRect)
         return;
 
     Widget::setFrameRect(newRect);
-
-    if (RenderView* renderView = this->renderView()) {
-        if (renderView->usesCompositing())
-            renderView->compositor()->frameViewDidChangeSize();
-    }
 }
 
 Page* FrameView::page() const
@@ -199,12 +193,6 @@ IntPoint FrameView::clampOffsetAtScale(const IntPoint& offset, float scale) cons
     clampedOffset = clampedOffset.shrunkTo(
         IntPoint(size()) - expandedIntSize(scaledSize));
     return clampedOffset;
-}
-
-void FrameView::updateAcceleratedCompositingSettings()
-{
-    if (RenderView* renderView = this->renderView())
-        renderView->compositor()->updateAcceleratedCompositingSettings();
 }
 
 void FrameView::recalcOverflowAfterStyleChange()
@@ -395,10 +383,6 @@ void FrameView::layout(bool allowSubtree)
     } // Reset m_layoutSchedulingEnabled to its previous value.
 
     layer->updateLayerPositionsAfterLayout();
-
-    if (m_doFullPaintInvalidation)
-        renderView()->compositor()->fullyInvalidatePaint();
-    renderView()->compositor()->didLayout();
 
     m_layoutCount++;
 
@@ -897,11 +881,8 @@ void FrameView::updateLayoutAndStyleForPainting()
     updateLayoutAndStyleIfNeededRecursive();
 
     if (RenderView* view = renderView()) {
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateLayerTree", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
-        view->compositor()->updateIfNeededRecursive();
-
+        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateTreeAndUpdateIframes", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
         invalidateTreeIfNeededRecursive();
-
         view->updateIFramesAfterLayout();
     }
 
@@ -972,12 +953,9 @@ IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoi
 
 void FrameView::setTracksPaintInvalidations(bool trackPaintInvalidations)
 {
+    // FIXME(sky): Does this code work anymore now that we don't have the compositor?
     if (trackPaintInvalidations == m_isTrackingPaintInvalidations)
         return;
-
-    // FIXME(sky): simplify
-    if (RenderView* renderView = m_frame->contentRenderer())
-        renderView->compositor()->setTracksPaintInvalidations(trackPaintInvalidations);
 
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"),
         "FrameView::setTracksPaintInvalidations", TRACE_EVENT_SCOPE_PROCESS, "enabled", trackPaintInvalidations);
@@ -989,8 +967,6 @@ void FrameView::setTracksPaintInvalidations(bool trackPaintInvalidations)
 void FrameView::resetTrackedPaintInvalidations()
 {
     m_trackedPaintInvalidationRects.clear();
-    if (RenderView* renderView = this->renderView())
-        renderView->compositor()->resetTrackedPaintInvalidationRects();
 }
 
 String FrameView::trackedPaintInvalidationRectsAsText() const

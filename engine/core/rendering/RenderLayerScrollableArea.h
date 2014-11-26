@@ -127,7 +127,7 @@ public:
     // layers never get added to the FrameView's collection.
     bool scrollsOverflow() const { return m_scrollsOverflow; }
 
-    void updateNeedsCompositedScrolling();
+    // FIXME(sky): Remove
     bool needsCompositedScrolling() const { return m_needsCompositedScrolling; }
 
     // These are used during compositing updates to determine if the overflow
@@ -165,8 +165,6 @@ private:
     RenderLayer* layer() const;
 
     void updateScrollableAreaSet(bool hasOverflow);
-
-    void updateCompositingLayersAfterScroll();
 
     RenderLayer& m_layer;
 

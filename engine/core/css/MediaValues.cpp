@@ -18,7 +18,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/compositing/RenderLayerCompositor.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/PlatformScreen.h"
 
@@ -99,11 +98,8 @@ const String MediaValues::calculateMediaType(LocalFrame* frame) const
 
 bool MediaValues::calculateThreeDEnabled(LocalFrame* frame) const
 {
-    ASSERT(frame && frame->contentRenderer() && frame->contentRenderer()->compositor());
-    bool threeDEnabled = false;
-    if (RenderView* view = frame->contentRenderer())
-        threeDEnabled = view->compositor()->hasAcceleratedCompositing();
-    return threeDEnabled;
+    // FIXME(sky): Remove
+    return false;
 }
 
 PointerType MediaValues::calculatePrimaryPointerType(LocalFrame* frame) const
