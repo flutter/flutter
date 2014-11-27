@@ -228,7 +228,7 @@ class Port(object):
             return ['--dump-render-tree']
         if driver_name == self.MOJO_SHELL_NAME:
             return [
-                '--args-for="mojo:native_viewport_service --use-headless-config --use-osmesa"',
+                '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
                 '--content-handlers=text/sky,mojo:sky_viewer',
                 '--url-mappings=mojo:window_manager=mojo:sky_tester',
                 'mojo:window_manager',
