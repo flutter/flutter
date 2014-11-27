@@ -31,7 +31,11 @@ window.startLoad = new Date().getTime();
   <city-list></city-list>
   <script>
     var cityList = document.querySelector('city-list');
-    var scrollBy = Number(location.search.match(/auto=([0-9]+)/)[1]);
+    var scrollBy = 0;
+    var toks = location.search.match(/auto=([0-9]+)/);
+    if (toks) {
+      scrollBy = Number(toks[1]);
+    }
 
     function autoScroll() {
       cityList.scrollBy(scrollBy);
