@@ -38,7 +38,6 @@
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/ScrollAlignment.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
-#include "sky/engine/core/rendering/compositing/CompositingState.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -522,7 +521,6 @@ public:
     void forceLayout();
     void forceChildLayout();
 
-    CompositingState compositingState() const;
     virtual CompositingReasons additionalCompositingReasons() const;
 
     bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter = HitTestAll);

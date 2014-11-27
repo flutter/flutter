@@ -247,7 +247,7 @@ bool CompositorAnimations::isCandidateForAnimationOnCompositor(const Timing& tim
 
 bool CompositorAnimations::canStartAnimationOnCompositor(const Element& element)
 {
-    return element.renderer() && element.renderer()->compositingState() == PaintsIntoOwnBacking;
+    return false;
 }
 
 bool CompositorAnimations::startAnimationOnCompositor(const Element& element, double startTime, double timeOffset, const Timing& timing, const AnimationEffect& effect, Vector<int>& startedAnimationIds)

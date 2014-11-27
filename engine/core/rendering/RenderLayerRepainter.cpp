@@ -66,8 +66,7 @@ void RenderLayerRepainter::computePaintInvalidationRectsIncludingNonCompositingD
     // forcing a full invaliation of the new position. Is this really correct?
 
     for (RenderLayer* layer = m_renderer.layer()->firstChild(); layer; layer = layer->nextSibling()) {
-        if (layer->compositingState() != PaintsIntoOwnBacking && layer->compositingState() != PaintsIntoGroupedBacking)
-            layer->paintInvalidator().computePaintInvalidationRectsIncludingNonCompositingDescendants();
+        layer->paintInvalidator().computePaintInvalidationRectsIncludingNonCompositingDescendants();
     }
 }
 
@@ -81,12 +80,8 @@ void RenderLayerRepainter::paintInvalidationIncludingNonCompositingDescendantsIn
 {
     m_renderer.invalidatePaintUsingContainer(paintInvalidationContainer, m_renderer.previousPaintInvalidationRect(), InvalidationLayer);
 
-    // Disable for reading compositingState() below.
-    DisableCompositingQueryAsserts disabler;
-
     for (RenderLayer* curr = m_renderer.layer()->firstChild(); curr; curr = curr->nextSibling()) {
-        if (curr->compositingState() != PaintsIntoOwnBacking && curr->compositingState() != PaintsIntoGroupedBacking)
-            curr->paintInvalidator().paintInvalidationIncludingNonCompositingDescendantsInternal(paintInvalidationContainer);
+        curr->paintInvalidator().paintInvalidationIncludingNonCompositingDescendantsInternal(paintInvalidationContainer);
     }
 }
 
@@ -95,10 +90,6 @@ LayoutRect RenderLayerRepainter::paintInvalidationRectIncludingNonCompositingDes
     LayoutRect paintInvalidationRect = m_renderer.previousPaintInvalidationRect();
 
     for (RenderLayer* child = m_renderer.layer()->firstChild(); child; child = child->nextSibling()) {
-        // Don't include paint invalidation rects for composited child layers; they will paint themselves and have a different origin.
-        if (child->compositingState() == PaintsIntoOwnBacking || child->compositingState() == PaintsIntoGroupedBacking)
-            continue;
-
         paintInvalidationRect.unite(child->paintInvalidator().paintInvalidationRectIncludingNonCompositingDescendants());
     }
     return paintInvalidationRect;
@@ -143,7 +134,7 @@ void RenderLayerRepainter::setFilterBackendNeedsPaintInvalidationInRect(const La
 RenderLayer* RenderLayerRepainter::enclosingFilterPaintInvalidationLayer() const
 {
     for (const RenderLayer* curr = m_renderer.layer(); curr; curr = curr->parent()) {
-        if ((curr != m_renderer.layer() && curr->requiresFullLayerImageForFilters()) || curr->compositingState() == PaintsIntoOwnBacking || curr->isRootLayer())
+        if ((curr != m_renderer.layer() && curr->requiresFullLayerImageForFilters()) || curr->isRootLayer())
             return const_cast<RenderLayer*>(curr);
     }
     return 0;

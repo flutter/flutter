@@ -531,7 +531,8 @@ const RenderLayer* RenderLayer::compositingContainer() const
 
 bool RenderLayer::isPaintInvalidationContainer() const
 {
-    return compositingState() == PaintsIntoOwnBacking || compositingState() == PaintsIntoGroupedBacking;
+    // FIXME(sky): Remove
+    return false;
 }
 
 // Note: enclosingCompositingLayer does not include squashed layers. Compositing stacking children of squashed layers
@@ -797,10 +798,6 @@ void RenderLayer::removeOnlyThisLayer()
 
     m_clipper.clearClipRectsIncludingDescendants();
 
-    // For querying RenderLayer::compositingState()
-    // Eager invalidation here is correct, since we are invalidating with respect to the previous frame's
-    // compositing state when removing the layer.
-    DisableCompositingQueryAsserts disabler;
     paintInvalidator().paintInvalidationIncludingNonCompositingDescendants();
 
     RenderLayer* nextSib = nextSibling();
@@ -940,8 +937,7 @@ bool RenderLayer::hasOverflowControls() const
 void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* paintingRoot, PaintLayerFlags paintFlags)
 {
     LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), paintBehavior, LayoutSize(), paintingRoot);
-    if (shouldPaintLayerInSoftwareMode(paintingInfo, paintFlags))
-        paintLayer(context, paintingInfo, paintFlags);
+    paintLayer(context, paintingInfo, paintFlags);
 }
 
 void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* paintingRoot)
@@ -1020,11 +1016,6 @@ static inline bool shouldSuppressPaintingLayer(RenderLayer* layer)
     return false;
 }
 
-static bool paintForFixedRootBackground(const RenderLayer* layer, PaintLayerFlags paintFlags)
-{
-    return layer->renderer()->isDocumentElement() && (paintFlags & PaintLayerPaintingRootBackgroundOnly);
-}
-
 static ShouldRespectOverflowClip shouldRespectOverflowClip(PaintLayerFlags paintFlags, const RenderObject* renderer)
 {
     return (paintFlags & PaintLayerPaintingOverflowContents || (paintFlags & PaintLayerPaintingChildClippingMaskPhase && renderer->hasClipPath())) ? IgnoreOverflowClip : RespectOverflowClip;
@@ -1032,17 +1023,6 @@ static ShouldRespectOverflowClip shouldRespectOverflowClip(PaintLayerFlags paint
 
 void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
-    // https://code.google.com/p/chromium/issues/detail?id=343772
-    DisableCompositingQueryAsserts disabler;
-
-    if (compositingState() != NotComposited) {
-        if (paintingInfo.paintBehavior & PaintBehaviorFlattenCompositingLayers) {
-            // FIXME: ok, but what about PaintBehaviorFlattenCompositingLayers? That's for printing.
-            // FIXME: why isn't the code here global, as opposed to being set on each paintLayer() call?
-            paintFlags |= PaintLayerUncachedClipRects;
-        }
-    }
-
     // Non self-painting leaf layers don't need to be painted as their renderer() should properly paint itself.
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
         return;
@@ -1144,9 +1124,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     LayoutPoint offsetFromRoot;
     convertToLayerCoords(paintingInfo.rootLayer, offsetFromRoot);
-
-    if (compositingState() == PaintsIntoOwnBacking)
-        offsetFromRoot.move(subpixelAccumulation());
 
     LayoutRect rootRelativeBounds;
     bool rootRelativeBoundsComputed = false;
@@ -1338,16 +1315,6 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext* context, const 
     paintLayerContentsAndReflection(context, transformedPaintingInfo, paintFlags);
 }
 
-bool RenderLayer::shouldPaintLayerInSoftwareMode(const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{
-    DisableCompositingQueryAsserts disabler;
-
-    return compositingState() == NotComposited
-        || compositingState() == HasOwnBackingButPaintsIntoAncestor
-        || (paintingInfo.paintBehavior & PaintBehaviorFlattenCompositingLayers)
-        || paintForFixedRootBackground(this, paintFlags);
-}
-
 void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
     if (!hasSelfPaintingLayerDescendant())
@@ -1359,13 +1326,7 @@ void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* conte
 
     RenderLayerStackingNodeIterator iterator(*m_stackingNode, childrenToVisit);
     while (RenderLayerStackingNode* child = iterator.next()) {
-        RenderLayer* childLayer = child->layer();
-        // If this RenderLayer should paint into its own backing or a grouped backing, that will be done via CompositedLayerMapping::paintContents()
-        // and CompositedLayerMapping::doPaintTask().
-        if (!childLayer->shouldPaintLayerInSoftwareMode(paintingInfo, paintFlags))
-            continue;
-
-        childLayer->paintLayer(context, paintingInfo, paintFlags);
+        child->layer()->paintLayer(context, paintingInfo, paintFlags);
     }
 }
 
@@ -2063,13 +2024,6 @@ static void expandRectForReflectionAndStackingChildren(const RenderLayer* ancest
 
     RenderLayerStackingNodeIterator iterator(*ancestorLayer->stackingNode(), AllChildren);
     while (RenderLayerStackingNode* node = iterator.next()) {
-        // Here we exclude both directly composited layers and squashing layers
-        // because those RenderLayers don't paint into the graphics layer
-        // for this RenderLayer. For example, the bounds of squashed RenderLayers
-        // will be included in the computation of the appropriate squashing
-        // GraphicsLayer.
-        if (options != RenderLayer::ApplyBoundsChickenEggHacks && node->layer()->compositingState() != NotComposited)
-            continue;
         result.unite(node->layer()->boundingBoxForCompositing(ancestorLayer, options));
     }
 }
@@ -2158,7 +2112,8 @@ bool RenderLayer::clipsCompositingDescendantsWithBorderRadius() const
 
 bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
 {
-    return transform() && ((paintBehavior & PaintBehaviorFlattenCompositingLayers) || compositingState() != PaintsIntoOwnBacking);
+    // FIXME(sky): Remove
+    return transform();
 }
 
 bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const
@@ -2369,9 +2324,6 @@ void RenderLayer::filterNeedsPaintInvalidation()
 void RenderLayer::setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants()
 {
     renderer()->setShouldDoFullPaintInvalidation(true);
-
-    // Disable for reading compositingState() in isPaintInvalidationContainer() below.
-    DisableCompositingQueryAsserts disabler;
 
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
         if (!child->isPaintInvalidationContainer())

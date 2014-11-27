@@ -112,8 +112,6 @@ RenderLayer* LinkHighlight::computeEnclosingCompositingLayer()
     RenderObject* renderer = m_node->renderer();
     RenderLayer* renderLayer = renderer->enclosingLayer()->enclosingLayerForPaintInvalidation();
 
-    ASSERT(renderLayer->compositingState() != NotComposited);
-
     GraphicsLayer* newGraphicsLayer = renderLayer->graphicsLayerBacking();
 
     m_clipLayer->setTransform(SkMatrix44(SkMatrix44::kIdentity_Constructor));

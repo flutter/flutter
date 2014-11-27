@@ -241,9 +241,6 @@ static inline bool rendererObscuresBackground(RenderBox* rootBox)
         || style->hasTransform())
         return false;
 
-    if (rootBox->compositingState() == PaintsIntoOwnBacking)
-        return false;
-
     if (rootBox->style()->backgroundClip() == TextFillBox)
         return false;
 
@@ -303,14 +300,8 @@ void RenderView::invalidatePaintForRectangle(const LayoutRect& paintInvalidation
 {
     ASSERT(!paintInvalidationRect.isEmpty());
 
-    if (!m_frameView)
-        return;
-
-    if (layer()->compositingState() == PaintsIntoOwnBacking) {
-        layer()->paintInvalidator().setBackingNeedsPaintInvalidationInRect(paintInvalidationRect);
-    } else {
+    if (m_frameView)
         m_frameView->contentRectangleForPaintInvalidation(pixelSnappedIntRect(paintInvalidationRect));
-    }
 }
 
 void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
@@ -383,10 +374,6 @@ IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
 void RenderView::invalidatePaintForSelection() const
 {
     HashSet<RenderBlock*> processedBlocks;
-
-    // For querying RenderLayer::compositingState()
-    // FIXME: this may be wrong. crbug.com/407416
-    DisableCompositingQueryAsserts disabler;
 
     RenderObject* end = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     for (RenderObject* o = m_selectionStart; o && o != end; o = o->nextInPreOrder()) {
@@ -541,10 +528,6 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     if (!m_frameView || blockPaintInvalidationMode == PaintInvalidationNothing)
         return;
 
-    // For querying RenderLayer::compositingState()
-    // FIXME: this is wrong, selection should not cause eager invalidation. crbug.com/407416
-    DisableCompositingQueryAsserts disabler;
-
     // Have any of the old selected objects changed compared to the new selection?
     for (SelectedObjectMap::iterator i = oldSelectedObjects.begin(); i != oldObjectsEnd; ++i) {
         RenderObject* obj = i->key;
@@ -597,10 +580,6 @@ void RenderView::getSelection(RenderObject*& startRenderer, int& startOffset, Re
 
 void RenderView::clearSelection()
 {
-    // For querying RenderLayer::compositingState()
-    // This is correct, since destroying render objects needs to cause eager paint invalidations.
-    DisableCompositingQueryAsserts disabler;
-
     layer()->invalidatePaintForBlockSelectionGaps();
     setSelection(0, -1, 0, -1, PaintInvalidationNewMinusOld);
 }

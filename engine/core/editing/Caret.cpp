@@ -61,10 +61,6 @@ bool DragCaretController::isContentRichlyEditable() const
 
 void DragCaretController::setCaretPosition(const VisiblePosition& position)
 {
-    // for querying RenderLayer::compositingState()
-    // This code is probably correct, since it doesn't occur in a stack that involves updating compositing state.
-    DisableCompositingQueryAsserts disabler;
-
     if (Node* node = m_position.deepEquivalent().deprecatedNode())
         invalidateCaretRect(node);
     m_position = position;

@@ -253,9 +253,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
     quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(quadForFakeMouseMoveEvent);
     frame->eventHandler().dispatchFakeMouseMoveEventSoonInQuad(quadForFakeMouseMoveEvent);
 
-    // For querying RenderLayer::compositingState()
-    // This code appears correct, since scrolling outside of layout happens during activities that do not dirty compositing state.
-    DisableCompositingQueryAsserts disabler;
     if (box().frameView()->isInPerformLayout())
         box().setShouldDoFullPaintInvalidation(true);
     else

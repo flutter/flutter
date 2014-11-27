@@ -1216,9 +1216,6 @@ const RenderLayerModelObject* RenderObject::containerForPaintInvalidation() cons
 const RenderLayerModelObject* RenderObject::enclosingCompositedContainer() const
 {
     RenderLayerModelObject* container = 0;
-    // FIXME: CompositingState is not necessarily up to date for many callers of this function.
-    DisableCompositingQueryAsserts disabler;
-
     if (RenderLayer* compositingLayer = enclosingLayer()->enclosingLayerForPaintInvalidationCrossingFrameBoundaries())
         container = compositingLayer->renderer();
     return container;
@@ -1419,7 +1416,7 @@ InvalidationReason RenderObject::getPaintInvalidationReason(const RenderLayerMod
     if (shouldDoFullPaintInvalidation())
         return InvalidationFull;
 
-    if (compositingState() != PaintsIntoOwnBacking && newLocation != oldLocation)
+    if (newLocation != oldLocation)
         return InvalidationLocationChange;
 
     // If the bounds are the same then we know that none of the statements below
@@ -2236,11 +2233,6 @@ void RenderObject::postDestroy()
 PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
 {
     return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
-}
-
-CompositingState RenderObject::compositingState() const
-{
-    return hasLayer() ? toRenderLayerModelObject(this)->layer()->compositingState() : NotComposited;
 }
 
 CompositingReasons RenderObject::additionalCompositingReasons() const

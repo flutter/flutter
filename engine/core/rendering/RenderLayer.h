@@ -54,7 +54,6 @@
 #include "sky/engine/core/rendering/RenderLayerScrollableArea.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
-#include "sky/engine/core/rendering/compositing/CompositingState.h"
 #include "sky/engine/platform/graphics/CompositingReasons.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -261,9 +260,6 @@ public:
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
 
-    // FIXME(sky): Remove
-    CompositingState compositingState() const { return NotComposited; }
-
     GraphicsLayer* graphicsLayerBacking() const;
 
     bool hasCompositedMask() const;
@@ -287,7 +283,8 @@ public:
 
     bool paintsWithTransparency(PaintBehavior paintBehavior) const
     {
-        return isTransparent() && ((paintBehavior & PaintBehaviorFlattenCompositingLayers) || compositingState() != PaintsIntoOwnBacking);
+        // FIXME(sky): Remove
+        return isTransparent();
     }
 
     bool paintsWithTransform(PaintBehavior) const;
@@ -492,10 +489,6 @@ private:
 
     void paintLayerContentsAndReflection(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
     void paintLayerByApplyingTransform(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags, const LayoutPoint& translationOffset = LayoutPoint());
-
-    // Returns whether this layer should be painted during sofware painting (i.e., not via calls from CompositedLayerMapping to draw into composited
-    // layers).
-    bool shouldPaintLayerInSoftwareMode(const LayerPaintingInfo&, PaintLayerFlags paintFlags);
 
     void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
 

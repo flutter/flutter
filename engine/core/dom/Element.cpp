@@ -841,10 +841,6 @@ void Element::detach(const AttachContext& context)
 
         if (ActiveAnimations* activeAnimations = data->activeAnimations()) {
             if (context.performingReattach) {
-                // FIXME: We call detach from within style recalc, so compositingState is not up to date.
-                // https://code.google.com/p/chromium/issues/detail?id=339847
-                DisableCompositingQueryAsserts disabler;
-
                 // FIXME: restart compositor animations rather than pull back to the main thread
                 activeAnimations->cancelAnimationOnCompositor();
             } else {

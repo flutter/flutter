@@ -154,13 +154,10 @@ bool FrameView::didFirstLayout() const
 
 void FrameView::invalidateRect(const IntRect& rect)
 {
-    // For querying RenderLayer::compositingState() when invalidating scrollbars.
-    // FIXME: do all scrollbar invalidations after layout of all frames is complete. It's currently not recursively true.
-    DisableCompositingQueryAsserts disabler;
+    // FIXME(sky): Parent is always null in sky?
     if (!parent()) {
         if (HostWindow* window = hostWindow())
             window->invalidateContentsAndRootView(rect);
-        return;
     }
 }
 

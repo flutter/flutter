@@ -828,9 +828,6 @@ static bool isCandidateForOpaquenessTest(RenderBox* childBox)
     if (!childBox->width() || !childBox->height())
         return false;
     if (RenderLayer* childLayer = childBox->layer()) {
-        // FIXME: perhaps this could be less conservative?
-        if (childLayer->compositingState() != NotComposited)
-            return false;
         // FIXME: Deal with z-index.
         if (!childStyle->hasAutoZIndex())
             return false;
@@ -925,18 +922,7 @@ void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 void RenderBox::paintClippingMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!paintInfo.shouldPaintWithinRoot(this) || paintInfo.phase != PaintPhaseClippingMask)
-        return;
-
-    if (!layer() || layer()->compositingState() != PaintsIntoOwnBacking)
-        return;
-
-    // We should never have this state in this function. A layer with a mask
-    // should have always created its own backing if it became composited.
-    ASSERT(layer()->compositingState() != HasOwnBackingButPaintsIntoAncestor);
-
-    LayoutRect paintRect = LayoutRect(paintOffset, size());
-    paintInfo.context->fillRect(pixelSnappedIntRect(paintRect), Color::black);
+    // FIXME(sky): Remove
 }
 
 void RenderBox::paintMaskImages(const PaintInfo& paintInfo, const LayoutRect& paintRect)
@@ -1081,7 +1067,7 @@ InvalidationReason RenderBox::invalidatePaintIfNeeded(const PaintInvalidationSta
     // issue paint invalidations. We can then skip issuing of paint invalidations for the child
     // renderers as they'll be covered by the RenderView.
     if (!view()->doingFullPaintInvalidation()) {
-        if ((onlyNeededPositionedMovementLayout() && compositingState() != PaintsIntoOwnBacking)
+        if (onlyNeededPositionedMovementLayout()
             || (shouldDoFullPaintInvalidationIfSelfPaintingLayer()
                 && hasLayer()
                 && layer()->isSelfPaintingLayer())) {

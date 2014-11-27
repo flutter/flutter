@@ -204,9 +204,6 @@ void HTMLCanvasElement::didFinalizeFrame()
     m_dirtyRect.intersect(srcRect);
     if (RenderBox* ro = renderBox()) {
         FloatRect mappedDirtyRect = mapRect(m_dirtyRect, srcRect, ro->contentBoxRect());
-        // For querying RenderLayer::compositingState()
-        // FIXME: is this invalidation using the correct compositing state?
-        DisableCompositingQueryAsserts disabler;
         ro->invalidatePaintRectangle(enclosingIntRect(mappedDirtyRect));
     }
     notifyObserversCanvasChanged(m_dirtyRect);
