@@ -228,7 +228,7 @@ class Port(object):
             return ['--dump-render-tree']
         if driver_name == self.MOJO_SHELL_NAME:
             return [
-                '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
+                '--args-for="mojo:native_viewport_service --use-headless-config --use-osmesa"',
                 '--content-handlers=text/sky,mojo:sky_viewer',
                 '--url-mappings=mojo:window_manager=mojo:sky_tester',
                 'mojo:window_manager',
@@ -1091,18 +1091,20 @@ class Port(object):
         be the case when the tests aren't run on the host platform."""
         return True
 
+    def server_command_line(self):
+        return [
+            self.path_to_script('sky_server'),
+            '-t', self.get_option('configuration'),
+            self.path_from_chromium_base(),
+            '8000',
+        ]
+
     def start_http_server(self, additional_dirs, number_of_drivers):
         """Start a web server. Raise an error if it can't start or is already running.
 
         Ports can stub this out if they don't need a web server to be running."""
         assert not self._http_server, 'Already running an http server.'
-
-        self._http_server = subprocess.Popen([
-            self.path_to_script('sky_server'),
-            '-t', self.get_option('configuration'),
-            self.path_from_chromium_base(),
-            '8000',
-        ])
+        self._http_server = subprocess.Popen(self.server_command_line())
 
     def start_websocket_server(self):
         """Start a web server. Raise an error if it can't start or is already running.
