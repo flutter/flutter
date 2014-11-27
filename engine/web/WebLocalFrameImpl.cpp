@@ -120,7 +120,6 @@
 #include "sky/engine/platform/clipboard/ClipboardUtilities.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/graphics/GraphicsLayerClient.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/network/ResourceRequest.h"

@@ -43,7 +43,6 @@ class SkImageFilter;
 namespace blink {
 class WebCompositorAnimationDelegate;
 class WebFilterOperations;
-class WebLayerClient;
 class WebLayerScrollClient;
 struct WebFloatPoint;
 struct WebFloatRect;
@@ -177,8 +176,6 @@ public:
 
     // True if the layer is not part of a tree attached to a WebLayerTreeView.
     virtual bool isOrphan() const = 0;
-
-    virtual void setWebLayerClient(WebLayerClient*) = 0;
 };
 
 } // namespace blink

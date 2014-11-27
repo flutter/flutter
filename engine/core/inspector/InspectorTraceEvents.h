@@ -16,7 +16,6 @@ class Event;
 class ExecutionContext;
 class FrameView;
 class GraphicsContext;
-class GraphicsLayer;
 class KURL;
 class LayoutRect;
 class LocalFrame;

@@ -60,7 +60,6 @@
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/public/platform/Platform.h"

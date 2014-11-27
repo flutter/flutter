@@ -94,8 +94,6 @@
 #include "sky/engine/public/web/WebTextInputInfo.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/engine/web/CompositionUnderlineVectorBuilder.h"
-#include "sky/engine/web/GraphicsLayerFactoryChromium.h"
-#include "sky/engine/web/LinkHighlight.h"
 #include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/web/WebSettingsImpl.h"
@@ -301,51 +299,12 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
     // FIXME: Remove redundant hit tests by pushing the call to EventHandler::targetGestureEvent
     // up to this point and pass GestureEventWithHitTestResults around.
 
-    // Handle link highlighting outside the main switch to avoid getting lost in the
-    // complicated set of cases handled below.
-    switch (event.type) {
-    case WebInputEvent::GestureShowPress:
-        // Queue a highlight animation, then hand off to regular handler.
-        enableTapHighlightAtPoint(platformEvent);
-        break;
-    case WebInputEvent::GestureTapCancel:
-    case WebInputEvent::GestureTap:
-    case WebInputEvent::GestureLongPress:
-        for (size_t i = 0; i < m_linkHighlights.size(); ++i)
-            m_linkHighlights[i]->startHighlightAnimationIfNeeded();
-        break;
-    default:
-        break;
-    }
-
     switch (event.type) {
     case WebInputEvent::GestureTap: {
         m_client->cancelScheduledContentIntents();
         if (detectContentOnTouch(platformEvent.position())) {
             eventSwallowed = true;
             break;
-        }
-
-        // Don't trigger a disambiguation popup on sites designed for mobile devices.
-        // Instead, assume that the page has been designed with big enough buttons and links.
-        if (event.data.tap.width > 0 && !shouldDisableDesktopWorkarounds()) {
-            // FIXME: didTapMultipleTargets should just take a rect instead of
-            // an event.
-            WebGestureEvent scaledEvent = event;
-            IntRect boundingBox(scaledEvent.x - scaledEvent.data.tap.width / 2, scaledEvent.y - scaledEvent.data.tap.height / 2, scaledEvent.data.tap.width, scaledEvent.data.tap.height);
-            Vector<IntRect> goodTargets;
-            Vector<RawPtr<Node> > highlightNodes;
-            findGoodTouchTargets(boundingBox, mainFrameImpl()->frame(), goodTargets, highlightNodes);
-            // FIXME: replace touch adjustment code when numberOfGoodTargets == 1?
-            // Single candidate case is currently handled by: https://bugs.webkit.org/show_bug.cgi?id=85101
-            if (goodTargets.size() >= 2 && m_client && m_client->didTapMultipleTargets(scaledEvent, goodTargets)) {
-                enableTapHighlights(highlightNodes);
-                for (size_t i = 0; i < m_linkHighlights.size(); ++i)
-                    m_linkHighlights[i]->startHighlightAnimationIfNeeded();
-                eventSwallowed = true;
-                eventCancelled = true;
-                break;
-            }
         }
 
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
@@ -602,108 +561,6 @@ void WebViewImpl::computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, co
     //FIXME(sky)
 }
 
-static Node* findCursorDefiningAncestor(Node* node, LocalFrame* frame)
-{
-    // Go up the tree to find the node that defines a mouse cursor style
-    while (node) {
-        if (node->renderer()) {
-            ECursor cursor = node->renderer()->style()->cursor();
-            if (cursor != CURSOR_AUTO || frame->eventHandler().useHandCursor(node, node->isLink()))
-                break;
-        }
-        node = NodeRenderingTraversal::parent(node);
-    }
-
-    return node;
-}
-
-static bool showsHandCursor(Node* node, LocalFrame* frame)
-{
-    if (!node || !node->renderer())
-        return false;
-
-    ECursor cursor = node->renderer()->style()->cursor();
-    return cursor == CURSOR_POINTER
-        || (cursor == CURSOR_AUTO && frame->eventHandler().useHandCursor(node, node->isLink()));
-}
-
-Node* WebViewImpl::bestTapNode(const PlatformGestureEvent& tapEvent)
-{
-    TRACE_EVENT0("input", "WebViewImpl::bestTapNode");
-
-    if (!m_page || !m_page->mainFrame())
-        return 0;
-
-    // FIXME: Rely on earlier hit test instead of hit testing again.
-    GestureEventWithHitTestResults targetedEvent =
-        m_page->mainFrame()->eventHandler().targetGestureEvent(tapEvent, true);
-    Node* bestTouchNode = targetedEvent.hitTestResult().targetNode();
-
-    // We might hit something like an image map that has no renderer on it
-    // Walk up the tree until we have a node with an attached renderer
-    // FIXME: This wants to walk composed tree with NodeRenderingTraversal::parent().
-    while (bestTouchNode && !bestTouchNode->renderer())
-        bestTouchNode = NodeRenderingTraversal::parent(bestTouchNode);
-
-    Node* cursorDefiningAncestor =
-        findCursorDefiningAncestor(bestTouchNode, m_page->mainFrame());
-    // We show a highlight on tap only when the current node shows a hand cursor
-    if (!cursorDefiningAncestor || !showsHandCursor(cursorDefiningAncestor, m_page->mainFrame())) {
-        return 0;
-    }
-
-    // We should pick the largest enclosing node with hand cursor set. We do this by first jumping
-    // up to cursorDefiningAncestor (which is already known to have hand cursor set). Then we locate
-    // the next cursor-defining ancestor up in the the tree and repeat the jumps as long as the node
-    // has hand cursor set.
-    do {
-        bestTouchNode = cursorDefiningAncestor;
-        cursorDefiningAncestor = findCursorDefiningAncestor(NodeRenderingTraversal::parent(bestTouchNode),
-            m_page->mainFrame());
-    } while (cursorDefiningAncestor && showsHandCursor(cursorDefiningAncestor, m_page->mainFrame()));
-
-    return bestTouchNode;
-}
-
-void WebViewImpl::enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent)
-{
-    Node* touchNode = bestTapNode(tapEvent);
-
-    Vector<RawPtr<Node> > highlightNodes;
-    highlightNodes.append(touchNode);
-
-    enableTapHighlights(highlightNodes);
-}
-
-void WebViewImpl::enableTapHighlights(Vector<RawPtr<Node> >& highlightNodes)
-{
-    if (highlightNodes.isEmpty())
-        return;
-
-    // Always clear any existing highlight when this is invoked, even if we
-    // don't get a new target to highlight.
-    m_linkHighlights.clear();
-
-    // LinkHighlight reads out layout and compositing state, so we need to make sure that's all up to date.
-    layout();
-
-    for (size_t i = 0; i < highlightNodes.size(); ++i) {
-        Node* node = highlightNodes[i];
-
-        if (!node || !node->renderer())
-            continue;
-
-        Color highlightColor = node->renderer()->style()->tapHighlightColor();
-        // Safari documentation for -webkit-tap-highlight-color says if the specified color has 0 alpha,
-        // then tap highlighting is disabled.
-        // http://developer.apple.com/library/safari/#documentation/appleapplications/reference/safaricssref/articles/standardcssproperties.html
-        if (!highlightColor.alpha())
-            continue;
-
-        m_linkHighlights.append(LinkHighlight::create(node, this));
-    }
-}
-
 bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)
 {
     LocalFrame* frame = focusedCoreFrame();
@@ -915,11 +772,7 @@ void WebViewImpl::layout()
     TRACE_EVENT0("blink", "WebViewImpl::layout");
     if (!localFrameRootTemporary())
         return;
-
     PageWidgetDelegate::layout(m_page.get(), localFrameRootTemporary()->frame());
-
-    for (size_t i = 0; i < m_linkHighlights.size(); ++i)
-        m_linkHighlights[i]->updateGeometry();
 }
 
 void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
@@ -1859,8 +1712,6 @@ void WebViewImpl::setSelectionColors(unsigned activeBackgroundColor,
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)
 {
-    // Make sure link highlight from previous page is cleared.
-    m_linkHighlights.clear();
     endActiveFlingAnimation();
     m_userGestureObserved = false;
     if (!isNavigationWithinPage)
@@ -1972,11 +1823,6 @@ void WebViewImpl::setVisibilityState(WebPageVisibilityState visibilityState,
 
     ASSERT(visibilityState == WebPageVisibilityStateVisible || visibilityState == WebPageVisibilityStateHidden);
     m_page->setVisibilityState(static_cast<PageVisibilityState>(static_cast<int>(visibilityState)), isInitialState);
-}
-
-bool WebViewImpl::shouldDisableDesktopWorkarounds()
-{
-    return true;
 }
 
 } // namespace blink

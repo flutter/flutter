@@ -45,8 +45,6 @@ class Element;
 class FloatRect;
 class Frame;
 class GraphicsContext;
-class GraphicsLayer;
-class GraphicsLayerFactory;
 class HitTestResult;
 class IntRect;
 class LocalFrame;

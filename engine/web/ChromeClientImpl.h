@@ -43,7 +43,6 @@ class ColorChooser;
 class ColorChooserClient;
 class Element;
 class Event;
-class GraphicsLayerFactory;
 class KeyboardEvent;
 class RenderBox;
 class DateTimeChooser;

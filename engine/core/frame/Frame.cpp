@@ -42,7 +42,6 @@
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
 #include "sky/engine/public/platform/WebLayer.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"

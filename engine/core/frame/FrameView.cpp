@@ -52,7 +52,6 @@
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/graphics/GraphicsLayerDebugInfo.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/platform/text/TextStream.h"
@@ -408,10 +407,6 @@ void FrameView::layout(bool allowSubtree)
         frame().page()->chrome().client().layoutUpdated(m_frame.get());
 }
 
-// The plan is to move to compositor-queried paint invalidation, in which case this
-// method would setNeedsRedraw on the GraphicsLayers with invalidations and
-// let the compositor pick which to actually draw.
-// See http://crbug.com/306706
 void FrameView::invalidateTreeIfNeeded()
 {
     ASSERT(renderView());

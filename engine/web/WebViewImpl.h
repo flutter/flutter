@@ -34,7 +34,6 @@
 #include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
 #include "sky/engine/public/platform/WebGestureCurveTarget.h"
 #include "sky/engine/public/platform/WebLayer.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -55,7 +54,6 @@
 namespace blink {
 
 class Frame;
-class LinkHighlight;
 class UserGestureToken;
 class WebActiveGestureAnimation;
 class WebLocalFrameImpl;
@@ -253,9 +251,6 @@ public:
         ScrollGranularity*);
 
     void computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, const WebRect& blockRect, float padding, float defaultScaleWhenAlreadyLegible, float& scale, WebPoint& scroll);
-    Node* bestTapNode(const PlatformGestureEvent& tapEvent);
-    void enableTapHighlightAtPoint(const PlatformGestureEvent& tapEvent);
-    void enableTapHighlights(Vector<RawPtr<Node> >&);
     void computeScaleAndScrollForFocusedNode(Node* focusedNode, float& scale, IntPoint& scroll, bool& needAnimation);
 
     // Exposed for the purpose of overriding device metrics.
@@ -264,14 +259,6 @@ public:
     // Exposed for testing purposes.
     bool hasHorizontalScrollbar();
     bool hasVerticalScrollbar();
-
-    // Heuristic-based function for determining if we should disable workarounds
-    // for viewing websites that are not optimized for mobile devices.
-    bool shouldDisableDesktopWorkarounds();
-
-    // Exposed for tests.
-    unsigned numLinkHighlights() { return m_linkHighlights.size(); }
-    LinkHighlight* linkHighlight(int i) { return m_linkHighlights[i].get(); }
 
     WebSettingsImpl* settingsImpl();
 
@@ -407,7 +394,6 @@ private:
     WebPoint m_globalPositionOnFlingStart;
     int m_flingModifier;
     bool m_flingSourceDevice;
-    Vector<OwnPtr<LinkHighlight> > m_linkHighlights;
 
     bool m_showFPSCounter;
     bool m_showPaintRects;

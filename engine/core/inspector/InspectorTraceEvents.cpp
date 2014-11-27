@@ -21,7 +21,6 @@
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/TracedValue.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
 #include "sky/engine/platform/weborigin/KURL.h"

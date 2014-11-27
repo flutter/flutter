@@ -29,7 +29,7 @@
 
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/graphics/Canvas2DLayerManager.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebCompositorSupport.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"

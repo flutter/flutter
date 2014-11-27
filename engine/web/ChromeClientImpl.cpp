@@ -50,7 +50,6 @@
 #include "sky/engine/platform/exported/WrappedResourceRequest.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebCursorInfo.h"
 #include "sky/engine/public/platform/WebRect.h"

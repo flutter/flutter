@@ -35,7 +35,7 @@
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
+#include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/graphics/gpu/Extensions3DUtil.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebCompositorSupport.h"

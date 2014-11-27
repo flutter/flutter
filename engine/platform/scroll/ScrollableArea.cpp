@@ -34,12 +34,11 @@
 
 #include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/Logging.h"
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/graphics/GraphicsLayer.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-
 #include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/platform/geometry/FloatPoint.h"
+#include "sky/engine/platform/scroll/Scrollbar.h"
+#include "sky/engine/public/platform/WebString.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 static const int kPixelsPerLineStep = 40;
 static const float kMinFractionToStepWhenPaging = 0.875f;
