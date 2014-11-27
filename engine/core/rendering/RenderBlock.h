@@ -299,8 +299,6 @@ private:
 
     bool hasCaret() const;
 
-    void computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const;
-
     // Obtains the nearest enclosing block (including this block) that contributes a first-line style to our inline
     // children.
     virtual RenderBlock* firstLineBlock() const override;
@@ -324,12 +322,10 @@ private:
 
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override final;
 
-    void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
-
     Position positionForBox(InlineBox*, bool start = true) const;
     PositionWithAffinity positionForPointWithInlineChildren(const LayoutPoint&);
 
-    // End helper functions and structs used by layoutBlockChildren.
+    // End helper functions and structs used by layoutChildren.
 
     void removeFromGlobalMaps();
     bool widthAvailableToChildrenHasChanged();
@@ -360,6 +356,7 @@ protected:
     // FIXME: This is temporary as we move code that accesses block flow
     // member variables out of RenderBlock and into RenderBlockFlow.
     friend class RenderBlockFlow;
+    friend class RenderParagraph;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderBlock, isRenderBlock());

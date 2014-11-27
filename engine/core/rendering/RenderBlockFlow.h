@@ -103,9 +103,8 @@ public:
 
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
 
-    bool generatesLineBoxesForInlineChild(RenderObject*);
-
     LayoutUnit startAlignedOffsetForLine(bool shouldIndentText);
+    void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
 
     void setStaticInlinePositionForChild(RenderBox*, LayoutUnit inlinePosition);
     void updateStaticInlinePositionForChild(RenderBox*);
@@ -115,14 +114,11 @@ public:
         return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
     }
 
-    // FIXME: This should be const to avoid a const_cast, but can modify child dirty bits
-    void computeInlinePreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth);
-
     GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
         LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
 
 protected:
-    void layoutInlineChildren(bool relayoutChildren, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit afterEdge);
+    virtual void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
     virtual bool updateLogicalWidthAndColumnWidth() override;
 
@@ -130,7 +126,6 @@ protected:
 
 private:
     void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
-    void layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
     void layoutBlockChild(RenderBox* child);
     void adjustPositionedBlock(RenderBox* child);
@@ -138,8 +133,6 @@ private:
     virtual void invalidatePaintForOverflow() override final;
 
     RootInlineBox* createRootInlineBox();
-
-    void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
 
 public:
     struct FloatWithRect {
@@ -155,8 +148,6 @@ public:
         bool everHadLayout;
     };
 
-protected:
-    virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 private:
     LayoutUnit m_paintInvalidationLogicalTop;
     LayoutUnit m_paintInvalidationLogicalBottom;
@@ -164,38 +155,6 @@ private:
 protected:
     friend class BreakingContext; // FIXME: It uses insertFloatingObject and positionNewFloatOnLine, if we move those out from the private scope/add a helper to LineBreaker, we can remove this friend
     friend class LineBreaker;
-
-// FIXME-BLOCKFLOW: These methods have implementations in
-// RenderBlockLineLayout. They should be moved to the proper header once the
-// line layout code is separated from RenderBlock and RenderBlockFlow.
-// START METHODS DEFINED IN RenderBlockLineLayout
-private:
-    InlineFlowBox* createLineBoxes(RenderObject*, const LineInfo&, InlineBox* childBox);
-    RootInlineBox* constructLine(BidiRunList<BidiRun>&, const LineInfo&);
-    void computeInlineDirectionPositionsForLine(RootInlineBox*, const LineInfo&, BidiRun* firstRun, BidiRun* trailingSpaceRun, bool reachedEnd, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&, WordMeasurements&);
-    BidiRun* computeInlineDirectionPositionsForSegment(RootInlineBox*, const LineInfo&, ETextAlign, float& logicalLeft,
-        float& availableLogicalWidth, BidiRun* firstRun, BidiRun* trailingSpaceRun, GlyphOverflowAndFallbackFontsMap& textBoxDataMap, VerticalPositionCache&, WordMeasurements&);
-    void computeBlockDirectionPositionsForLine(RootInlineBox*, BidiRun*, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&);
-    BidiRun* handleTrailingSpaces(BidiRunList<BidiRun>&, BidiContext*);
-    // Helper function for layoutInlineChildren()
-    RootInlineBox* createLineBoxesFromBidiRuns(unsigned bidiLevel, BidiRunList<BidiRun>&, const InlineIterator& end, LineInfo&, VerticalPositionCache&, BidiRun* trailingSpaceRun, WordMeasurements&);
-    void layoutRunsAndFloats(LineLayoutState&);
-    const InlineIterator& restartLayoutRunsAndFloatsInRange(LayoutUnit oldLogicalHeight, LayoutUnit newLogicalHeight,  FloatingObject* lastFloatFromPreviousLine, InlineBidiResolver&,  const InlineIterator&);
-    void layoutRunsAndFloatsInRange(LineLayoutState&, InlineBidiResolver&,
-        const InlineIterator& cleanLineStart, const BidiStatus& cleanLineBidiStatus);
-    void linkToEndLineIfNeeded(LineLayoutState&);
-    static void markDirtyFloatsForPaintInvalidation(Vector<FloatWithRect>& floats);
-    void checkFloatsInCleanLine(RootInlineBox*, Vector<FloatWithRect>&, size_t& floatIndex, bool& encounteredNewFloat, bool& dirtiedByFloat);
-    RootInlineBox* determineStartPosition(LineLayoutState&, InlineBidiResolver&);
-    void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
-    bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
-    bool matchedEndLine(LineLayoutState&, const InlineBidiResolver&, const InlineIterator& endLineStart, const BidiStatus& endLineStatus);
-    void deleteEllipsisLineBoxes();
-    void checkLinesForTextOverflow();
-
-
-// END METHODS DEFINED IN RenderBlockLineLayout
-
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderBlockFlow, isRenderBlockFlow());

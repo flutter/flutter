@@ -1188,7 +1188,6 @@ sky_core_files = [
   "rendering/RenderBlock.h",
   "rendering/RenderBlockFlow.cpp",
   "rendering/RenderBlockFlow.h",
-  "rendering/RenderBlockLineLayout.cpp",
   "rendering/RenderBox.cpp",
   "rendering/RenderBox.h",
   "rendering/RenderBoxModelObject.cpp",

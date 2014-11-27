@@ -30,7 +30,7 @@
 namespace blink {
 
 // Like LayoutState for layout(), LineLayoutState keeps track of global information
-// during an entire linebox tree layout pass (aka layoutInlineChildren).
+// during an entire linebox tree layout pass (aka RenderParagraph::layoutChildren).
 class LineLayoutState {
 public:
     LineLayoutState(bool fullLayout, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom)

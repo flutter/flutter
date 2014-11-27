@@ -34,6 +34,7 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/rendering/BidiRun.h"
 #include "sky/engine/core/rendering/HitTestLocation.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -104,10 +105,7 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     m_paintInvalidationLogicalTop = 0;
     m_paintInvalidationLogicalBottom = 0;
 
-    if (isRenderParagraph())
-        layoutInlineChildren(relayoutChildren, m_paintInvalidationLogicalTop, m_paintInvalidationLogicalBottom, afterEdge);
-    else
-        layoutBlockChildren(relayoutChildren, layoutScope, beforeEdge, afterEdge);
+    layoutChildren(relayoutChildren, layoutScope, m_paintInvalidationLogicalTop, m_paintInvalidationLogicalBottom, beforeEdge, afterEdge);
 
     LayoutUnit oldClientAfterEdge = clientLogicalBottom();
 
@@ -148,7 +146,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child)
     setLogicalHeight(logicalHeight() + marginBefore + logicalHeightForChild(child) + marginAfterForChild(child));
 }
 
-void RenderBlockFlow::layoutBlockChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
+void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge)
 {
     dirtyForLayoutFromPercentageHeightDescendants(layoutScope);
 
@@ -228,14 +226,14 @@ void RenderBlockFlow::addChild(RenderObject* newChild, RenderObject* beforeChild
 
 void RenderBlockFlow::invalidatePaintForOverflow()
 {
-    // FIXME: We could tighten up the left and right invalidation points if we let layoutInlineChildren fill them in based off the particular lines
+    // FIXME: We could tighten up the left and right invalidation points if we let RenderParagraph::layoutChildren fill them in based off the particular lines
     // it had to lay out. We wouldn't need the hasOverflowClip() hack in that case either.
     LayoutUnit paintInvalidationLogicalLeft = logicalLeftVisualOverflow();
     LayoutUnit paintInvalidationLogicalRight = logicalRightVisualOverflow();
     if (hasOverflowClip()) {
         // If we have clipped overflow, we should use layout overflow as well, since visual overflow from lines didn't propagate to our block's overflow.
         // Note the old code did this as well but even for overflow:visible. The addition of hasOverflowClip() at least tightens up the hack a bit.
-        // layoutInlineChildren should be patched to compute the entire paint invalidation rect.
+        // RenderParagraph::layoutChildren should be patched to compute the entire paint invalidation rect.
         paintInvalidationLogicalLeft = std::min(paintInvalidationLogicalLeft, logicalLeftLayoutOverflow());
         paintInvalidationLogicalRight = std::max(paintInvalidationLogicalRight, logicalRightLayoutOverflow());
     }
@@ -348,6 +346,123 @@ LayoutUnit RenderBlockFlow::logicalRightSelectionOffset(RenderBlock* rootBlock, 
 RootInlineBox* RenderBlockFlow::createRootInlineBox()
 {
     return new RootInlineBox(*this);
+}
+
+static void updateLogicalWidthForLeftAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    // The direction of the block should determine what happens with wide lines.
+    // In particular with RTL blocks, wide lines should still spill out to the left.
+    if (isLeftToRightDirection) {
+        if (totalLogicalWidth > availableLogicalWidth && trailingSpaceRun)
+            trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceRun->m_box->logicalWidth() - totalLogicalWidth + availableLogicalWidth));
+        return;
+    }
+
+    if (trailingSpaceRun)
+        trailingSpaceRun->m_box->setLogicalWidth(0);
+    else if (totalLogicalWidth > availableLogicalWidth)
+        logicalLeft -= (totalLogicalWidth - availableLogicalWidth);
+}
+
+static void updateLogicalWidthForRightAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    // Wide lines spill out of the block based off direction.
+    // So even if text-align is right, if direction is LTR, wide lines should overflow out of the right
+    // side of the block.
+    if (isLeftToRightDirection) {
+        if (trailingSpaceRun) {
+            totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+            trailingSpaceRun->m_box->setLogicalWidth(0);
+        }
+        if (totalLogicalWidth < availableLogicalWidth)
+            logicalLeft += availableLogicalWidth - totalLogicalWidth;
+        return;
+    }
+
+    if (totalLogicalWidth > availableLogicalWidth && trailingSpaceRun) {
+        trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceRun->m_box->logicalWidth() - totalLogicalWidth + availableLogicalWidth));
+        totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+    } else
+        logicalLeft += availableLogicalWidth - totalLogicalWidth;
+}
+
+static void updateLogicalWidthForCenterAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    float trailingSpaceWidth = 0;
+    if (trailingSpaceRun) {
+        totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+        trailingSpaceWidth = std::min(trailingSpaceRun->m_box->logicalWidth(), (availableLogicalWidth - totalLogicalWidth + 1) / 2);
+        trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceWidth));
+    }
+    if (isLeftToRightDirection)
+        logicalLeft += std::max<float>((availableLogicalWidth - totalLogicalWidth) / 2, 0);
+    else
+        logicalLeft += totalLogicalWidth > availableLogicalWidth ? (availableLogicalWidth - totalLogicalWidth) : (availableLogicalWidth - totalLogicalWidth) / 2 - trailingSpaceWidth;
+}
+
+void RenderBlockFlow::updateLogicalWidthForAlignment(const ETextAlign& textAlign, const RootInlineBox* rootInlineBox, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount)
+{
+    TextDirection direction;
+    if (rootInlineBox && rootInlineBox->renderer().style()->unicodeBidi() == Plaintext)
+        direction = rootInlineBox->direction();
+    else
+        direction = style()->direction();
+
+    // Armed with the total width of the line (without justification),
+    // we now examine our text-align property in order to determine where to position the
+    // objects horizontally. The total width of the line can be increased if we end up
+    // justifying text.
+    switch (textAlign) {
+    case LEFT:
+        updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case RIGHT:
+        updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case CENTER:
+        updateLogicalWidthForCenterAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case JUSTIFY:
+        adjustInlineDirectionLineBounds(expansionOpportunityCount, logicalLeft, availableLogicalWidth);
+        if (expansionOpportunityCount) {
+            if (trailingSpaceRun) {
+                totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+                trailingSpaceRun->m_box->setLogicalWidth(0);
+            }
+            break;
+        }
+        // Fall through
+    case TASTART:
+        if (direction == LTR)
+            updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        else
+            updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case TAEND:
+        if (direction == LTR)
+            updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        else
+            updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    }
+}
+
+LayoutUnit RenderBlockFlow::startAlignedOffsetForLine(bool firstLine)
+{
+    ETextAlign textAlign = style()->textAlign();
+
+    if (textAlign == TASTART) // FIXME: Handle TAEND here
+        return startOffsetForLine(firstLine);
+
+    // updateLogicalWidthForAlignment() handles the direction of the block so no need to consider it here
+    float totalLogicalWidth = 0;
+    float logicalLeft = logicalLeftOffsetForLine(false).toFloat();
+    float availableLogicalWidth = logicalRightOffsetForLine(false) - logicalLeft;
+    updateLogicalWidthForAlignment(textAlign, 0, 0, logicalLeft, totalLogicalWidth, availableLogicalWidth, 0);
+
+    if (!style()->isLeftToRightDirection())
+        return logicalWidth() - logicalLeft;
+    return logicalLeft;
 }
 
 } // namespace blink

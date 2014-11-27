@@ -333,7 +333,7 @@ void RenderLineBoxList::dirtyLinesFromChangedChild(RenderObject* container, Rend
         // dirty the adjacent lines that might be affected
         // NOTE: we dirty the previous line because RootInlineBox objects cache
         // the address of the first object on the next line after a BR, which we may be
-        // invalidating here.  For more info, see how RenderBlock::layoutInlineChildren
+        // invalidating here.  For more info, see how RenderParagraph::layoutChildren
         // calls setLineBreakInfo with the result of findNextLineBreak.  findNextLineBreak,
         // despite the name, actually returns the first RenderObject after the BR.
         // <rdar://problem/3849947> "Typing after pasting line does not appear until after window resize."

@@ -1231,7 +1231,7 @@ int InlineTextBox::caretMaxOffset() const
 
 float InlineTextBox::textPos() const
 {
-    // When computing the width of a text run, RenderBlock::computeInlineDirectionPositionsForLine() doesn't include the actual offset
+    // When computing the width of a text run, RenderParagraph::computeInlineDirectionPositionsForLine() doesn't include the actual offset
     // from the containing block edge in its measurement. textPos() should be consistent so the text are rendered in the same width.
     if (logicalLeft() == 0)
         return 0;

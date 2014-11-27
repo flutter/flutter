@@ -22,6 +22,8 @@ public:
     bool isRenderParagraph() const override { return true; }
 
 protected:
+    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge) final;
+
     void addOverflowFromChildren() final;
 
     void simplifiedNormalFlowLayout() final;
@@ -30,6 +32,33 @@ protected:
 
     bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) final;
 
+    virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
+
+    void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const final;
+
+private:
+    void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
+
+    InlineFlowBox* createLineBoxes(RenderObject*, const LineInfo&, InlineBox* childBox);
+    RootInlineBox* constructLine(BidiRunList<BidiRun>&, const LineInfo&);
+    void computeInlineDirectionPositionsForLine(RootInlineBox*, const LineInfo&, BidiRun* firstRun, BidiRun* trailingSpaceRun, bool reachedEnd, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&, WordMeasurements&);
+    BidiRun* computeInlineDirectionPositionsForSegment(RootInlineBox*, const LineInfo&, ETextAlign, float& logicalLeft,
+        float& availableLogicalWidth, BidiRun* firstRun, BidiRun* trailingSpaceRun, GlyphOverflowAndFallbackFontsMap& textBoxDataMap, VerticalPositionCache&, WordMeasurements&);
+    void computeBlockDirectionPositionsForLine(RootInlineBox*, BidiRun*, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&);
+    // Helper function for layoutChildren()
+    RootInlineBox* createLineBoxesFromBidiRuns(unsigned bidiLevel, BidiRunList<BidiRun>&, const InlineIterator& end, LineInfo&, VerticalPositionCache&, BidiRun* trailingSpaceRun, WordMeasurements&);
+    void layoutRunsAndFloats(LineLayoutState&);
+    void layoutRunsAndFloatsInRange(LineLayoutState&, InlineBidiResolver&,
+        const InlineIterator& cleanLineStart, const BidiStatus& cleanLineBidiStatus);
+    void linkToEndLineIfNeeded(LineLayoutState&);
+    static void markDirtyFloatsForPaintInvalidation(Vector<FloatWithRect>& floats);
+    void checkFloatsInCleanLine(RootInlineBox*, Vector<FloatWithRect>&, size_t& floatIndex, bool& encounteredNewFloat, bool& dirtiedByFloat);
+    RootInlineBox* determineStartPosition(LineLayoutState&, InlineBidiResolver&);
+    void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
+    bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
+    bool matchedEndLine(LineLayoutState&, const InlineBidiResolver&, const InlineIterator& endLineStart, const BidiStatus& endLineStatus);
+    void deleteEllipsisLineBoxes();
+    void checkLinesForTextOverflow();
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());

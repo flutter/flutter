@@ -177,7 +177,7 @@ private:
     bool m_hasBreakableEnd : 1;
     bool m_hasEndWhiteSpace : 1;
     bool m_linesDirty : 1; // This bit indicates that the text run has already dirtied specific
-                           // line boxes, and this hint will enable layoutInlineChildren to avoid
+                           // line boxes, and this hint will enable RenderParagraph::layoutChildren to avoid
                            // just dirtying everything when character data is modified (e.g., appended/inserted
                            // or removed).
     bool m_containsReversedText : 1;

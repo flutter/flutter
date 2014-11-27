@@ -1286,24 +1286,6 @@ LayoutUnit RenderBlock::textIndentOffset() const
     return minimumValueForLength(style()->textIndent(), cw);
 }
 
-void RenderBlock::markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest)
-{
-    if (logicalTop >= logicalBottom)
-        return;
-
-    RootInlineBox* lowestDirtyLine = lastRootBox();
-    RootInlineBox* afterLowest = lowestDirtyLine;
-    while (lowestDirtyLine && lowestDirtyLine->lineBottomWithLeading() >= logicalBottom && logicalBottom < LayoutUnit::max()) {
-        afterLowest = lowestDirtyLine;
-        lowestDirtyLine = lowestDirtyLine->prevRootBox();
-    }
-
-    while (afterLowest && afterLowest != highest && (afterLowest->lineBottomWithLeading() >= logicalTop || afterLowest->lineBottomWithLeading() < 0)) {
-        afterLowest->markDirty();
-        afterLowest = afterLowest->prevRootBox();
-    }
-}
-
 bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
 {
     LayoutPoint adjustedLocation(accumulatedOffset + location());
@@ -1588,18 +1570,6 @@ LayoutUnit RenderBlock::availableLogicalWidth() const
     return RenderBox::availableLogicalWidth();
 }
 
-void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
-{
-    if (isRenderParagraph()) {
-        // FIXME: Remove this const_cast.
-        toRenderBlockFlow(const_cast<RenderBlock*>(this))->computeInlinePreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
-    } else {
-        computeBlockPreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
-    }
-
-    maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
-}
-
 void RenderBlock::computePreferredLogicalWidths()
 {
     ASSERT(preferredLogicalWidthsDirty());
@@ -1632,7 +1602,7 @@ void RenderBlock::computePreferredLogicalWidths()
     clearPreferredLogicalWidthsDirty();
 }
 
-void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
+void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
 {
     RenderStyle* styleToUse = style();
     bool nowrap = styleToUse->whiteSpace() == NOWRAP;
@@ -1680,7 +1650,7 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
 
     // Always make sure these values are non-negative.
     minLogicalWidth = std::max<LayoutUnit>(0, minLogicalWidth);
-    maxLogicalWidth = std::max<LayoutUnit>(0, maxLogicalWidth);
+    maxLogicalWidth = std::max<LayoutUnit>(minLogicalWidth, maxLogicalWidth);
 }
 
 bool RenderBlock::hasLineIfEmpty() const
