@@ -510,7 +510,6 @@ WebLayer* DrawingBuffer::platformLayer()
         m_layer->setOpaque(!m_actualAttributes.alpha);
         m_layer->setBlendBackgroundColor(m_actualAttributes.alpha);
         m_layer->setPremultipliedAlpha(m_actualAttributes.premultipliedAlpha);
-        GraphicsLayer::registerContentsLayer(m_layer->layer());
     }
 
     return m_layer->layer();
@@ -612,9 +611,6 @@ void DrawingBuffer::beginDestruction()
     m_multisampleFBO = 0;
     m_fbo = 0;
     m_contextEvictionManager.clear();
-
-    if (m_layer)
-        GraphicsLayer::unregisterContentsLayer(m_layer->layer());
 }
 
 unsigned DrawingBuffer::createColorTexture()

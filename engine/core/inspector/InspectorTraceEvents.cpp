@@ -215,7 +215,7 @@ static void localToPageQuad(const RenderObject& renderer, const LayoutRect& rect
     quad->setP4(roundedIntPoint(absolute.p4()));
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(RenderObject* renderer, const LayoutRect& clipRect, const GraphicsLayer* graphicsLayer)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(RenderObject* renderer, const LayoutRect& clipRect)
 {
     RefPtr<TracedValue> value = TracedValue::create();
     value->setString("frame", toHexString(renderer->frame()));
@@ -223,8 +223,7 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(Rende
     localToPageQuad(*renderer, clipRect, &quad);
     createQuad(value.get(), "clip", quad);
     setGeneratingNodeId(value.get(), "nodeId", renderer);
-    int graphicsLayerId = graphicsLayer ? graphicsLayer->platformLayer()->id() : 0;
-    value->setInteger("layerId", graphicsLayerId);
+    value->setInteger("layerId", 0);
     return value;
 }
 

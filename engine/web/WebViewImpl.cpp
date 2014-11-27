@@ -99,7 +99,6 @@
 #include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/web/WebSettingsImpl.h"
-#include "sky/engine/web/painting/ContinuousPainter.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/TemporaryChange.h"
@@ -150,9 +149,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_isTransparent(false)
     , m_tabsToLinks(false)
     , m_rootLayer(0)
-    , m_rootGraphicsLayer(0)
-    , m_rootTransformLayer(0)
-    , m_graphicsLayerFactory(adoptPtr(new GraphicsLayerFactoryChromium()))
     , m_matchesHeuristicsForGpuRasterization(false)
     , m_recreatingGraphicsContext(false)
     , m_flingModifier(0)
@@ -906,10 +902,8 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
 
     PageWidgetDelegate::animate(m_page.get(), validFrameTime.lastFrameTimeMonotonic);
 
-    if (m_continuousPaintingEnabled) {
-        ContinuousPainter::setNeedsDisplayRecursive(m_rootGraphicsLayer);
+    if (m_continuousPaintingEnabled)
         m_client->scheduleAnimation();
-    }
 }
 
 void WebViewImpl::didCommitFrameToCompositor()
@@ -1926,31 +1920,9 @@ void WebViewImpl::suppressInvalidations(bool enable)
     m_client->suppressCompositorScheduling(enable);
 }
 
-void WebViewImpl::setRootGraphicsLayer(GraphicsLayer* layer)
-{
-    suppressInvalidations(true);
-
-    m_rootGraphicsLayer = layer;
-    m_rootLayer = layer ? layer->platformLayer() : 0;
-    m_rootTransformLayer = 0;
-
-    updateRootLayerTransform();
-    suppressInvalidations(false);
-}
-
 void WebViewImpl::invalidateRect(const IntRect& rect)
 {
     m_client->didInvalidateRect(rect);
-}
-
-GraphicsLayerFactory* WebViewImpl::graphicsLayerFactory() const
-{
-    return m_graphicsLayerFactory.get();
-}
-
-GraphicsLayer* WebViewImpl::rootGraphicsLayer()
-{
-    return m_rootGraphicsLayer;
 }
 
 void WebViewImpl::scheduleAnimation()

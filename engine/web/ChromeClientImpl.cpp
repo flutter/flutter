@@ -341,16 +341,6 @@ String ChromeClientImpl::acceptLanguages()
     return m_webView->client()->acceptLanguages();
 }
 
-GraphicsLayerFactory* ChromeClientImpl::graphicsLayerFactory() const
-{
-    return m_webView->graphicsLayerFactory();
-}
-
-void ChromeClientImpl::attachRootGraphicsLayer(GraphicsLayer* rootLayer)
-{
-    m_webView->setRootGraphicsLayer(rootLayer);
-}
-
 void ChromeClientImpl::setTouchAction(TouchAction touchAction)
 {
     if (WebViewClient* client = m_webView->client()) {

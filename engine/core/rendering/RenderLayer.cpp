@@ -2087,11 +2087,6 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     return result;
 }
 
-GraphicsLayer* RenderLayer::graphicsLayerBacking() const
-{
-    return 0;
-}
-
 bool RenderLayer::hasCompositedMask() const
 {
     // FIXME(sky): Remove

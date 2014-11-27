@@ -100,7 +100,6 @@ Canvas2DLayerBridge::Canvas2DLayerBridge(PassOwnPtr<WebGraphicsContext3DProvider
     m_layer = adoptPtr(Platform::current()->compositorSupport()->createExternalTextureLayer(this));
     m_layer->setOpaque(opacityMode == Opaque);
     m_layer->setBlendBackgroundColor(opacityMode != Opaque);
-    GraphicsLayer::registerContentsLayer(m_layer->layer());
     m_layer->setRateLimitContext(m_rateLimitingEnabled);
     m_canvas->setNotificationClient(this);
 #ifndef NDEBUG
@@ -136,7 +135,6 @@ void Canvas2DLayerBridge::beginDestruction()
     freeTransientResources();
     setIsHidden(true);
     m_destructionInProgress = true;
-    GraphicsLayer::unregisterContentsLayer(m_layer->layer());
     m_canvas->setNotificationClient(0);
     m_surface.clear();
     m_canvas.clear();

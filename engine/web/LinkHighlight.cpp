@@ -104,27 +104,7 @@ void LinkHighlight::releaseResources()
 
 RenderLayer* LinkHighlight::computeEnclosingCompositingLayer()
 {
-    if (!m_node || !m_node->renderer())
-        return 0;
-
-    // Find the nearest enclosing composited layer and attach to it. We may need to cross frame boundaries
-    // to find a suitable layer.
-    RenderObject* renderer = m_node->renderer();
-    RenderLayer* renderLayer = renderer->enclosingLayer()->enclosingLayerForPaintInvalidation();
-
-    GraphicsLayer* newGraphicsLayer = renderLayer->graphicsLayerBacking();
-
-    m_clipLayer->setTransform(SkMatrix44(SkMatrix44::kIdentity_Constructor));
-
-    if (m_currentGraphicsLayer != newGraphicsLayer) {
-        if (m_currentGraphicsLayer)
-            clearGraphicsLayerLinkHighlightPointer();
-
-        m_currentGraphicsLayer = newGraphicsLayer;
-        m_currentGraphicsLayer->addLinkHighlight(this);
-    }
-
-    return renderLayer;
+    return 0;
 }
 
 static void convertTargetSpaceQuadToCompositedLayer(const FloatQuad& targetSpaceQuad, RenderObject* targetRenderer, RenderObject* compositedRenderer, FloatQuad& compositedSpaceQuad)

@@ -96,8 +96,6 @@ component("web") {
     "WebViewImpl.cpp",
     "WebViewImpl.h",
     "linux/WebFontRendering.cpp",
-    "painting/ContinuousPainter.cpp",
-    "painting/ContinuousPainter.h",
     "painting/PaintAggregator.cpp",
     "painting/PaintAggregator.h",
   ]

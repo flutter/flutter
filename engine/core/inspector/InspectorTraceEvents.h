@@ -80,7 +80,7 @@ public:
 
 class InspectorPaintEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(RenderObject*, const LayoutRect& clipRect, const GraphicsLayer*);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(RenderObject*, const LayoutRect& clipRect);
 };
 
 class InspectorPaintImageEvent {

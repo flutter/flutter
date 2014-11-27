@@ -88,11 +88,6 @@ public:
     virtual void setCursor(const Cursor&) override;
     virtual void setTouchAction(TouchAction) override;
 
-    virtual GraphicsLayerFactory* graphicsLayerFactory() const override;
-
-    // Pass 0 as the GraphicsLayer to detatch the root layer.
-    virtual void attachRootGraphicsLayer(GraphicsLayer*) override;
-
     // ChromeClient methods:
     virtual String acceptLanguages() override;
 

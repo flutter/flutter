@@ -99,12 +99,6 @@ public:
 
     virtual void setToolTip(const String&, TextDirection) = 0;
 
-    // Allows ports to customize the type of graphics layers created by this page.
-    virtual GraphicsLayerFactory* graphicsLayerFactory() const { return 0; }
-
-    // Pass 0 as the GraphicsLayer to detatch the root layer.
-    virtual void attachRootGraphicsLayer(GraphicsLayer*) = 0;
-
     virtual void setTouchAction(TouchAction) = 0;
 
     virtual String acceptLanguages() = 0;

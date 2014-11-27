@@ -260,8 +260,6 @@ public:
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
 
-    GraphicsLayer* graphicsLayerBacking() const;
-
     bool hasCompositedMask() const;
     bool hasCompositedClippingMask() const;
     bool needsCompositedScrolling() const { return m_scrollableArea && m_scrollableArea->needsCompositedScrolling(); }

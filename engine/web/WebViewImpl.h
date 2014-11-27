@@ -242,9 +242,6 @@ public:
         return m_currentInputEvent;
     }
 
-    GraphicsLayer* rootGraphicsLayer();
-    void setRootGraphicsLayer(GraphicsLayer*);
-    GraphicsLayerFactory* graphicsLayerFactory() const;
     void scheduleAnimation();
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;
@@ -400,9 +397,6 @@ private:
 
     IntRect m_rootLayerScrollDamage;
     WebLayer* m_rootLayer;
-    GraphicsLayer* m_rootGraphicsLayer;
-    GraphicsLayer* m_rootTransformLayer;
-    OwnPtr<GraphicsLayerFactory> m_graphicsLayerFactory;
     bool m_matchesHeuristicsForGpuRasterization;
     // If true, the graphics context is being restored.
     bool m_recreatingGraphicsContext;
