@@ -161,6 +161,11 @@ void PageScriptDebugServer::setClientMessageLoop(PassOwnPtr<ClientMessageLoop> c
     m_clientMessageLoop = clientMessageLoop;
 }
 
+void PageScriptDebugServer::setInspectorHostResolver(PassOwnPtr<InspectorHostResolver> resolver)
+{
+    m_inspectorHostResolver = resolver;
+}
+
 void PageScriptDebugServer::compileScript(ScriptState* scriptState, const String& expression, const String& sourceURL, String* scriptId, String* exceptionDetailsText, int* lineNumber, int* columnNumber, RefPtr<ScriptCallStack>* stackTrace)
 {
     ExecutionContext* executionContext = scriptState->executionContext();
@@ -193,18 +198,16 @@ void PageScriptDebugServer::runScript(ScriptState* scriptState, const String& sc
 
 ScriptDebugListener* PageScriptDebugServer::getDebugListenerForContext(v8::Handle<v8::Context> context)
 {
-    v8::HandleScope scope(m_isolate);
-    LocalFrame* frame = retrieveFrameWithGlobalObjectCheck(context);
-    if (!frame)
+    inspector::InspectorHost* inspectorHost = m_inspectorHostResolver->inspectorHostFor(context);
+    if (!inspectorHost)
         return 0;
-    return m_listenersMap.get(frame->page()->inspectorHost());
+    return m_listenersMap.get(inspectorHost);
 }
 
 void PageScriptDebugServer::runMessageLoopOnPause(v8::Handle<v8::Context> context)
 {
-    v8::HandleScope scope(m_isolate);
-    LocalFrame* frame = retrieveFrameWithGlobalObjectCheck(context);
-    m_pausedHost = frame->page()->inspectorHost();
+    m_pausedHost = m_inspectorHostResolver->inspectorHostFor(context);
+    ASSERT(m_pausedHost);
 
     // Wait for continue or step command.
     m_clientMessageLoop->run(m_pausedHost);

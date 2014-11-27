@@ -79,7 +79,6 @@ Page::Page(PageClients& pageClients, ServiceProvider& services)
     , m_isPainting(false)
 #endif
     , m_frameHost(FrameHost::create(*this, services))
-    , m_inspectorHost(0)
 {
     ASSERT(m_editorClient);
 

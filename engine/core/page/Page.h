@@ -36,11 +36,6 @@
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
-// FIXME: Page should not need to know anything about InspectorHost.
-namespace inspector {
-class InspectorHost;
-}
-
 namespace blink {
 
 class AutoscrollController;
@@ -89,11 +84,6 @@ public:
     virtual ~Page();
 
     FrameHost& frameHost() const { return *m_frameHost; }
-
-    // FIXME(sky): This is only needed by PageDebuggerAgent to be able to look
-    // up the InspectorHost from the frame associated with a v8 context.
-    inspector::InspectorHost* inspectorHost() const { return m_inspectorHost; }
-    void setInspectorHost(inspector::InspectorHost* host) { m_inspectorHost = host; }
 
     void setNeedsRecalcStyleInAllFrames();
 
@@ -216,7 +206,6 @@ private:
     // A pointer to all the interfaces provided to in-process Frames for this Page.
     // FIXME: Most of the members of Page should move onto FrameHost.
     OwnPtr<FrameHost> m_frameHost;
-    inspector::InspectorHost* m_inspectorHost;
 };
 
 } // namespace blink

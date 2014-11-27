@@ -68,6 +68,13 @@ public:
     };
     void setClientMessageLoop(PassOwnPtr<ClientMessageLoop>);
 
+    class InspectorHostResolver {
+    public:
+        virtual ~InspectorHostResolver() { }
+        virtual inspector::InspectorHost* inspectorHostFor(v8::Handle<v8::Context>) = 0;
+    };
+    void setInspectorHostResolver(PassOwnPtr<InspectorHostResolver>);
+
     virtual void compileScript(ScriptState*, const String& expression, const String& sourceURL, String* scriptId, String* exceptionDetailsText, int* lineNumber, int* columnNumber, RefPtr<ScriptCallStack>* stackTrace) override;
     virtual void clearCompiledScripts() override;
     virtual void runScript(ScriptState*, const String& scriptId, ScriptValue* result, bool* wasThrown, String* exceptionDetailsText, int* lineNumber, int* columnNumber, RefPtr<ScriptCallStack>* stackTrace) override;
@@ -91,6 +98,7 @@ private:
     typedef HashMap<inspector::InspectorHost*, ScriptDebugListener*> ListenersMap;
     ListenersMap m_listenersMap;
     OwnPtr<ClientMessageLoop> m_clientMessageLoop;
+    OwnPtr<InspectorHostResolver> m_inspectorHostResolver;
     inspector::InspectorHost* m_pausedHost;
     HashMap<String, String> m_compiledScriptURLs;
 

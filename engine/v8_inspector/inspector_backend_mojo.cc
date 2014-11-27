@@ -72,6 +72,19 @@ class MessageLoopAdaptor : public PageScriptDebugServer::ClientMessageLoop {
   scoped_ptr<base::RunLoop> run_loop_;
 };
 
+class InspectorHostResolverImpl : public PageScriptDebugServer::InspectorHostResolver {
+ public:
+  explicit InspectorHostResolverImpl(inspector::InspectorHost* host) : host_(host) { }
+  ~InspectorHostResolverImpl() override { }
+  inspector::InspectorHost* inspectorHostFor(v8::Handle<v8::Context> context) override {
+    if (context == host_->GetContext())
+      return host_;
+    return nullptr;
+  }
+ private:
+  inspector::InspectorHost* host_;
+};
+
 InspectorBackendMojoImpl::InspectorBackendMojoImpl(
     inspector::InspectorHost* host)
     : host_(host) {
@@ -96,6 +109,9 @@ void InspectorBackendMojoImpl::Connect() {
   PageScriptDebugServer::setMainThreadIsolate(host_->GetIsolate());
   OwnPtr<MessageLoopAdaptor> message_loop = adoptPtr(new MessageLoopAdaptor);
   PageScriptDebugServer::shared().setClientMessageLoop(message_loop.release());
+  OwnPtr<InspectorHostResolverImpl> host_resolver =
+      adoptPtr(new InspectorHostResolverImpl(host_));
+  PageScriptDebugServer::shared().setInspectorHostResolver(host_resolver.release());
 
   // AgentRegistry used to do this, but we don't need it for one agent.
   script_manager_ = InjectedScriptManager::createForPage();
