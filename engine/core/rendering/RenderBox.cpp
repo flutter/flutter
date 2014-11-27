@@ -1647,8 +1647,7 @@ void RenderBox::computeMarginsForDirection(MarginDirection flowDirection, const 
 
     // CSS 2.1: "If both 'margin-left' and 'margin-right' are 'auto', their used values are equal. This horizontally centers the element
     // with respect to the edges of the containing block."
-    if ((marginStartLength.isAuto() && marginEndLength.isAuto() && marginBoxWidth < containerWidth)
-        || (!marginStartLength.isAuto() && !marginEndLength.isAuto())) {
+    if (marginStartLength.isAuto() && marginEndLength.isAuto() && marginBoxWidth < containerWidth) {
         // Other browsers center the margin box for align=center elements so we match them here.
         LayoutUnit centeredMarginBoxStart = std::max<LayoutUnit>(0, (containerWidth - childWidth - marginStartWidth - marginEndWidth) / 2);
         marginStart = centeredMarginBoxStart + marginStartWidth;
