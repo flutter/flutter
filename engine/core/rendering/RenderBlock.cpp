@@ -83,7 +83,6 @@ RenderBlock::RenderBlock(ContainerNode* node)
     , m_hasMarginBeforeQuirk(false)
     , m_hasMarginAfterQuirk(false)
     , m_beingDestroyed(false)
-    , m_hasMarkupTruncation(false)
     , m_hasBorderOrPaddingLogicalWidthChanged(false)
 {
 }
@@ -885,7 +884,7 @@ GapRects RenderBlock::selectionGaps(RenderBlock* rootBlock, const LayoutPoint& r
     }
 
     if (isRenderParagraph())
-        result = toRenderBlockFlow(this)->inlineSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop, lastLogicalLeft, lastLogicalRight, paintInfo);
+        result = toRenderParagraph(this)->inlineSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop, lastLogicalLeft, lastLogicalRight, paintInfo);
     else
         result = blockSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop, lastLogicalLeft, lastLogicalRight, paintInfo);
 
@@ -1717,19 +1716,11 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
 
 int RenderBlock::firstLineBoxBaseline() const
 {
-    if (isRenderParagraph()) {
-        if (firstLineBox())
-            return firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(firstRootBox()->baselineType());
-        else
-            return -1;
-    }
-    else {
-        for (RenderBox* curr = firstChildBox(); curr; curr = curr->nextSiblingBox()) {
-            if (!curr->isFloatingOrOutOfFlowPositioned()) {
-                int result = curr->firstLineBoxBaseline();
-                if (result != -1)
-                    return curr->logicalTop() + result; // Translate to our coordinate space.
-            }
+    for (RenderBox* curr = firstChildBox(); curr; curr = curr->nextSiblingBox()) {
+        if (!curr->isFloatingOrOutOfFlowPositioned()) {
+            int result = curr->firstLineBoxBaseline();
+            if (result != -1)
+                return curr->logicalTop() + result; // Translate to our coordinate space.
         }
     }
 
@@ -1748,32 +1739,20 @@ int RenderBlock::inlineBlockBaseline(LineDirectionMode direction) const
 
 int RenderBlock::lastLineBoxBaseline(LineDirectionMode lineDirection) const
 {
-    if (isRenderParagraph()) {
-        if (!firstLineBox() && hasLineIfEmpty()) {
-            const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
-            return fontMetrics.ascent()
-                 + (lineHeight(true, lineDirection, PositionOfInteriorLineBoxes) - fontMetrics.height()) / 2
-                 + (lineDirection == HorizontalLine ? borderTop() + paddingTop() : borderRight() + paddingRight());
+    bool haveNormalFlowChild = false;
+    for (RenderBox* curr = lastChildBox(); curr; curr = curr->previousSiblingBox()) {
+        if (!curr->isFloatingOrOutOfFlowPositioned()) {
+            haveNormalFlowChild = true;
+            int result = curr->inlineBlockBaseline(lineDirection);
+            if (result != -1)
+                return curr->logicalTop() + result; // Translate to our coordinate space.
         }
-        if (lastLineBox())
-            return lastLineBox()->logicalTop() + style(lastLineBox() == firstLineBox())->fontMetrics().ascent(lastRootBox()->baselineType());
-        return -1;
-    } else {
-        bool haveNormalFlowChild = false;
-        for (RenderBox* curr = lastChildBox(); curr; curr = curr->previousSiblingBox()) {
-            if (!curr->isFloatingOrOutOfFlowPositioned()) {
-                haveNormalFlowChild = true;
-                int result = curr->inlineBlockBaseline(lineDirection);
-                if (result != -1)
-                    return curr->logicalTop() + result; // Translate to our coordinate space.
-            }
-        }
-        if (!haveNormalFlowChild && hasLineIfEmpty()) {
-            const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
-            return fontMetrics.ascent()
-                 + (lineHeight(true, lineDirection, PositionOfInteriorLineBoxes) - fontMetrics.height()) / 2
-                 + (lineDirection == HorizontalLine ? borderTop() + paddingTop() : borderRight() + paddingRight());
-        }
+    }
+    if (!haveNormalFlowChild && hasLineIfEmpty()) {
+        const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
+        return fontMetrics.ascent()
+             + (lineHeight(true, lineDirection, PositionOfInteriorLineBoxes) - fontMetrics.height()) / 2
+             + (lineDirection == HorizontalLine ? borderTop() + paddingTop() : borderRight() + paddingRight());
     }
 
     return -1;
@@ -1815,25 +1794,18 @@ static bool shouldCheckLines(RenderObject* obj)
 
 static int getHeightForLineCount(RenderBlock* block, int l, bool includeBottom, int& count)
 {
-    if (block->isRenderParagraph()) {
-        for (RootInlineBox* box = toRenderBlockFlow(block)->firstRootBox(); box; box = box->nextRootBox()) {
-            if (++count == l)
-                return box->lineBottom() + (includeBottom ? (block->borderBottom() + block->paddingBottom()) : LayoutUnit());
+    RenderBox* normalFlowChildWithoutLines = 0;
+    for (RenderBox* obj = block->firstChildBox(); obj; obj = obj->nextSiblingBox()) {
+        if (shouldCheckLines(obj)) {
+            int result = getHeightForLineCount(toRenderBlock(obj), l, false, count);
+            if (result != -1)
+                return result + obj->y() + (includeBottom ? (block->borderBottom() + block->paddingBottom()) : LayoutUnit());
+        } else if (!obj->isFloatingOrOutOfFlowPositioned()) {
+            normalFlowChildWithoutLines = obj;
         }
-    } else {
-        RenderBox* normalFlowChildWithoutLines = 0;
-        for (RenderBox* obj = block->firstChildBox(); obj; obj = obj->nextSiblingBox()) {
-            if (shouldCheckLines(obj)) {
-                int result = getHeightForLineCount(toRenderBlock(obj), l, false, count);
-                if (result != -1)
-                    return result + obj->y() + (includeBottom ? (block->borderBottom() + block->paddingBottom()) : LayoutUnit());
-            } else if (!obj->isFloatingOrOutOfFlowPositioned()) {
-                normalFlowChildWithoutLines = obj;
-            }
-        }
-        if (normalFlowChildWithoutLines && l == 0)
-            return normalFlowChildWithoutLines->y() + normalFlowChildWithoutLines->height();
     }
+    if (normalFlowChildWithoutLines && l == 0)
+        return normalFlowChildWithoutLines->y() + normalFlowChildWithoutLines->height();
 
     return -1;
 }
@@ -1842,17 +1814,11 @@ RootInlineBox* RenderBlock::lineAtIndex(int i) const
 {
     ASSERT(i >= 0);
 
-    if (isRenderParagraph()) {
-        for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox())
-            if (!i--)
-                return box;
-    } else {
-        for (RenderObject* child = firstChild(); child; child = child->nextSibling()) {
-            if (!shouldCheckLines(child))
-                continue;
-            if (RootInlineBox* box = toRenderBlock(child)->lineAtIndex(i))
-                return box;
-        }
+    for (RenderObject* child = firstChild(); child; child = child->nextSibling()) {
+        if (!shouldCheckLines(child))
+            continue;
+        if (RootInlineBox* box = toRenderBlock(child)->lineAtIndex(i))
+            return box;
     }
 
     return 0;
@@ -1861,47 +1827,26 @@ RootInlineBox* RenderBlock::lineAtIndex(int i) const
 int RenderBlock::lineCount(const RootInlineBox* stopRootInlineBox, bool* found) const
 {
     int count = 0;
-    if (isRenderParagraph()) {
-        for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox()) {
-            count++;
-            if (box == stopRootInlineBox) {
+    for (RenderObject* obj = firstChild(); obj; obj = obj->nextSibling()) {
+        if (shouldCheckLines(obj)) {
+            bool recursiveFound = false;
+            count += toRenderBlock(obj)->lineCount(stopRootInlineBox, &recursiveFound);
+            if (recursiveFound) {
                 if (found)
                     *found = true;
                 break;
             }
         }
-    } else {
-        for (RenderObject* obj = firstChild(); obj; obj = obj->nextSibling())
-            if (shouldCheckLines(obj)) {
-                bool recursiveFound = false;
-                count += toRenderBlock(obj)->lineCount(stopRootInlineBox, &recursiveFound);
-                if (recursiveFound) {
-                    if (found)
-                        *found = true;
-                    break;
-                }
-            }
     }
-    return count;
-}
 
-int RenderBlock::heightForLineCount(int l)
-{
-    int count = 0;
-    return getHeightForLineCount(this, l, true, count);
+    return count;
 }
 
 void RenderBlock::clearTruncation()
 {
-    if (isRenderParagraph() && hasMarkupTruncation()) {
-        setHasMarkupTruncation(false);
-        for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox())
-            box->clearTruncation();
-    } else {
-        for (RenderObject* obj = firstChild(); obj; obj = obj->nextSibling()) {
-            if (shouldCheckLines(obj))
-                toRenderBlock(obj)->clearTruncation();
-        }
+    for (RenderObject* obj = firstChild(); obj; obj = obj->nextSibling()) {
+        if (shouldCheckLines(obj))
+            toRenderBlock(obj)->clearTruncation();
     }
 }
 

@@ -46,6 +46,88 @@ RenderParagraph* RenderParagraph::createAnonymous(Document& document)
     return renderer;
 }
 
+RootInlineBox* RenderParagraph::lineAtIndex(int i) const
+{
+    ASSERT(i >= 0);
+
+    for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox()) {
+        if (!i--)
+            return box;
+    }
+
+    return 0;
+}
+
+int RenderParagraph::lineCount(const RootInlineBox* stopRootInlineBox, bool* found) const
+{
+    int count = 0;
+    for (RootInlineBox* box = firstRootBox(); box; box = box->nextRootBox()) {
+        count++;
+        if (box == stopRootInlineBox) {
+            if (found)
+                *found = true;
+            break;
+        }
+    }
+
+    return count;
+}
+
+GapRects RenderParagraph::inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
+    LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo* paintInfo)
+{
+    GapRects result;
+
+    bool containsStart = selectionState() == SelectionStart || selectionState() == SelectionBoth;
+
+    if (!firstLineBox()) {
+        if (containsStart) {
+            // Go ahead and update our lastLogicalTop to be the bottom of the block.  <hr>s or empty blocks with height can trip this
+            // case.
+            lastLogicalTop = rootBlock->blockDirectionOffset(offsetFromRootBlock) + logicalHeight();
+            lastLogicalLeft = logicalLeftSelectionOffset(rootBlock, logicalHeight());
+            lastLogicalRight = logicalRightSelectionOffset(rootBlock, logicalHeight());
+        }
+        return result;
+    }
+
+    RootInlineBox* lastSelectedLine = 0;
+    RootInlineBox* curr;
+    for (curr = firstRootBox(); curr && !curr->hasSelectedChildren(); curr = curr->nextRootBox()) { }
+
+    // Now paint the gaps for the lines.
+    for (; curr && curr->hasSelectedChildren(); curr = curr->nextRootBox()) {
+        LayoutUnit selTop =  curr->selectionTopAdjustedForPrecedingBlock();
+        LayoutUnit selHeight = curr->selectionHeightAdjustedForPrecedingBlock();
+
+        if (!containsStart && !lastSelectedLine && selectionState() != SelectionStart && selectionState() != SelectionBoth) {
+            result.uniteCenter(blockSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop,
+                lastLogicalLeft, lastLogicalRight, selTop, paintInfo));
+        }
+
+        LayoutRect logicalRect(curr->logicalLeft(), selTop, curr->logicalWidth(), selTop + selHeight);
+        logicalRect.move(offsetFromRootBlock);
+        LayoutRect physicalRect = rootBlock->logicalRectToPhysicalRect(rootBlockPhysicalPosition, logicalRect);
+        if (!paintInfo || (physicalRect.y() < paintInfo->rect.maxY() && physicalRect.maxY() > paintInfo->rect.y()))
+            result.unite(curr->lineSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, selTop, selHeight, paintInfo));
+
+        lastSelectedLine = curr;
+    }
+
+    if (containsStart && !lastSelectedLine) {
+        // VisibleSelection must start just after our last line.
+        lastSelectedLine = lastRootBox();
+    }
+
+    if (lastSelectedLine && selectionState() != SelectionEnd && selectionState() != SelectionBoth) {
+        // Go ahead and update our lastY to be the bottom of the last selected line.
+        lastLogicalTop = rootBlock->blockDirectionOffset(offsetFromRootBlock) + lastSelectedLine->selectionBottom();
+        lastLogicalLeft = logicalLeftSelectionOffset(rootBlock, lastSelectedLine->selectionBottom());
+        lastLogicalRight = logicalRightSelectionOffset(rootBlock, lastSelectedLine->selectionBottom());
+    }
+    return result;
+}
+
 void RenderParagraph::addOverflowFromChildren()
 {
     LayoutUnit endPadding = hasOverflowClip() ? paddingEnd() : LayoutUnit();
@@ -1151,6 +1233,24 @@ void RenderParagraph::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth,
     updatePreferredWidth(maxLogicalWidth, inlineMax);
 
     maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
+}
+
+int RenderParagraph::firstLineBoxBaseline() const
+{
+    return firstLineBox() ? firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(firstRootBox()->baselineType()) : -1;
+}
+
+int RenderParagraph::lastLineBoxBaseline(LineDirectionMode lineDirection) const
+{
+    if (!firstLineBox() && hasLineIfEmpty()) {
+        const FontMetrics& fontMetrics = firstLineStyle()->fontMetrics();
+        return fontMetrics.ascent()
+             + (lineHeight(true, lineDirection, PositionOfInteriorLineBoxes) - fontMetrics.height()) / 2
+             + (lineDirection == HorizontalLine ? borderTop() + paddingTop() : borderRight() + paddingRight());
+    }
+    if (lastLineBox())
+        return lastLineBox()->logicalTop() + style(lastLineBox() == firstLineBox())->fontMetrics().ascent(lastRootBox()->baselineType());
+    return -1;
 }
 
 void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge)

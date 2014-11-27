@@ -121,9 +121,6 @@ public:
         return descendants && !descendants->isEmpty();
     }
 
-    void setHasMarkupTruncation(bool b) { m_hasMarkupTruncation = b; }
-    bool hasMarkupTruncation() const { return m_hasMarkupTruncation; }
-
     void setHasMarginBeforeQuirk(bool b) { m_hasMarginBeforeQuirk = b; }
     void setHasMarginAfterQuirk(bool b) { m_hasMarginAfterQuirk = b; }
 
@@ -159,9 +156,8 @@ public:
     LayoutRect logicalRectToPhysicalRect(const LayoutPoint& physicalPosition, const LayoutRect& logicalRect);
 
     // Helper methods for computing line counts and heights for line counts.
-    RootInlineBox* lineAtIndex(int) const;
-    int lineCount(const RootInlineBox* = 0, bool* = 0) const;
-    int heightForLineCount(int);
+    virtual RootInlineBox* lineAtIndex(int) const;
+    virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
     void clearTruncation();
 
     static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = PARAGRAPH);
@@ -239,7 +235,7 @@ protected:
 
     virtual int firstLineBoxBaseline() const override;
     virtual int inlineBlockBaseline(LineDirectionMode) const override;
-    int lastLineBoxBaseline(LineDirectionMode) const;
+    virtual int lastLineBoxBaseline(LineDirectionMode) const;
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
 
@@ -347,7 +343,6 @@ protected:
     unsigned m_hasMarginBeforeQuirk : 1; // Note these quirk values can't be put in RenderBlockRareData since they are set too frequently.
     unsigned m_hasMarginAfterQuirk : 1;
     unsigned m_beingDestroyed : 1;
-    unsigned m_hasMarkupTruncation : 1;
     unsigned m_hasBorderOrPaddingLogicalWidthChanged : 1;
 
     // FIXME-BLOCKFLOW: Remove this when the line layout stuff has all moved out of RenderBlock

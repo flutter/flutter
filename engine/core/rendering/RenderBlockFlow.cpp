@@ -260,61 +260,6 @@ void RenderBlockFlow::invalidatePaintForOverflow()
     m_paintInvalidationLogicalBottom = 0;
 }
 
-GapRects RenderBlockFlow::inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
-    LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo* paintInfo)
-{
-    GapRects result;
-
-    bool containsStart = selectionState() == SelectionStart || selectionState() == SelectionBoth;
-
-    if (!firstLineBox()) {
-        if (containsStart) {
-            // Go ahead and update our lastLogicalTop to be the bottom of the block.  <hr>s or empty blocks with height can trip this
-            // case.
-            lastLogicalTop = rootBlock->blockDirectionOffset(offsetFromRootBlock) + logicalHeight();
-            lastLogicalLeft = logicalLeftSelectionOffset(rootBlock, logicalHeight());
-            lastLogicalRight = logicalRightSelectionOffset(rootBlock, logicalHeight());
-        }
-        return result;
-    }
-
-    RootInlineBox* lastSelectedLine = 0;
-    RootInlineBox* curr;
-    for (curr = firstRootBox(); curr && !curr->hasSelectedChildren(); curr = curr->nextRootBox()) { }
-
-    // Now paint the gaps for the lines.
-    for (; curr && curr->hasSelectedChildren(); curr = curr->nextRootBox()) {
-        LayoutUnit selTop =  curr->selectionTopAdjustedForPrecedingBlock();
-        LayoutUnit selHeight = curr->selectionHeightAdjustedForPrecedingBlock();
-
-        if (!containsStart && !lastSelectedLine && selectionState() != SelectionStart && selectionState() != SelectionBoth) {
-            result.uniteCenter(blockSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop,
-                lastLogicalLeft, lastLogicalRight, selTop, paintInfo));
-        }
-
-        LayoutRect logicalRect(curr->logicalLeft(), selTop, curr->logicalWidth(), selTop + selHeight);
-        logicalRect.move(offsetFromRootBlock);
-        LayoutRect physicalRect = rootBlock->logicalRectToPhysicalRect(rootBlockPhysicalPosition, logicalRect);
-        if (!paintInfo || (physicalRect.y() < paintInfo->rect.maxY() && physicalRect.maxY() > paintInfo->rect.y()))
-            result.unite(curr->lineSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, selTop, selHeight, paintInfo));
-
-        lastSelectedLine = curr;
-    }
-
-    if (containsStart && !lastSelectedLine) {
-        // VisibleSelection must start just after our last line.
-        lastSelectedLine = lastRootBox();
-    }
-
-    if (lastSelectedLine && selectionState() != SelectionEnd && selectionState() != SelectionBoth) {
-        // Go ahead and update our lastY to be the bottom of the last selected line.
-        lastLogicalTop = rootBlock->blockDirectionOffset(offsetFromRootBlock) + lastSelectedLine->selectionBottom();
-        lastLogicalLeft = logicalLeftSelectionOffset(rootBlock, lastSelectedLine->selectionBottom());
-        lastLogicalRight = logicalRightSelectionOffset(rootBlock, lastSelectedLine->selectionBottom());
-    }
-    return result;
-}
-
 LayoutUnit RenderBlockFlow::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
 {
     LayoutUnit logicalLeft = logicalLeftOffsetForLine(false);

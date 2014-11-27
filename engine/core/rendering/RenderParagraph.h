@@ -21,6 +21,12 @@ public:
 
     bool isRenderParagraph() const override { return true; }
 
+    virtual RootInlineBox* lineAtIndex(int) const;
+    virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
+
+    GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
+        LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
+
 protected:
     void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge) final;
 
@@ -35,6 +41,9 @@ protected:
     virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 
     void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const final;
+
+    int firstLineBoxBaseline() const final;
+    int lastLineBoxBaseline(LineDirectionMode) const final;
 
 private:
     void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);

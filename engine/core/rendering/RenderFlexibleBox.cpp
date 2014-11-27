@@ -72,7 +72,6 @@ RenderFlexibleBox::RenderFlexibleBox(Element* element)
     , m_orderIterator(this)
     , m_numberOfInFlowChildrenOnFirstLine(-1)
 {
-    ASSERT(!isRenderParagraph());
 }
 
 RenderFlexibleBox::~RenderFlexibleBox()
