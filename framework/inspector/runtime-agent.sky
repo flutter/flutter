@@ -116,8 +116,14 @@ Runtime.prototype.evaluate = function(params) {
 }
 
 Runtime.prototype.getProperties = function(params) {
-  // FIXME: Unclear what this is for.
-  return [];
+  var properties = injectedScript.getProperties(params.objectId, !!params.ownProperties, !!params.accessorPropertiesOnly);
+  var result = {
+    result: properties
+  };
+  if (!params.accessorPropertiesOnly) {
+    result.internalProperties = injectedScript.getInternalProperties(params.objectId);
+  }
+  return result;
 }
 
 module.exports = Runtime;

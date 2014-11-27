@@ -82,7 +82,7 @@ InspectorBackend.prototype.onMessage = function(data) {
       return;
   this.unansweredMessages_.push(message.id);
   // FIXME: This magic return value is kinda hacky.
-  if (result != this.ASYNC_RESPONSE)
+  if (result !== this.ASYNC_RESPONSE)
     this.sendResponse(message.id, result);
   else {
     window.setTimeout(function() {

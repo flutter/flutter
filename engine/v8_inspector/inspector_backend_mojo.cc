@@ -11,6 +11,7 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
+#include "sky/engine/core/inspector/InjectedScriptHost.h"
 #include "sky/engine/core/inspector/InspectorFrontendChannel.h"
 #include "sky/engine/core/inspector/InspectorState.h"
 #include "sky/engine/core/inspector/InstrumentingAgents.h"
@@ -118,6 +119,7 @@ void InspectorBackendMojoImpl::Connect() {
   debugger_agent_ = PageDebuggerAgent::create(&PageScriptDebugServer::shared(),
                                               host_, script_manager_.get());
   agents_ = adoptPtr(new InstrumentingAgents(debugger_agent_.get()));
+  script_manager_->injectedScriptHost()->init(agents_.get(), &PageScriptDebugServer::shared());
   debugger_agent_->init(agents_.get(), inspector_state_.get());
   debugger_agent_->setFrontend(old_frontend_.get());
 

@@ -164,6 +164,11 @@ InjectedScript InjectedScriptManager::injectedScriptFor(ScriptState* inspectedSc
     ScriptValue injectedScriptValue = createInjectedScript(injectedScriptSource(), inspectedScriptState, id);
     InjectedScript result(injectedScriptValue);
     m_idToInjectedScript.set(id, result);
+
+    // TODO(yurys): InjecedScript should be available as a regular module rather that using a global variable.
+    v8::Isolate* isolate = inspectedScriptState->isolate();
+    v8::Local<v8::Object> global = inspectedScriptState->context()->Global();
+    global->Set(v8::String::NewFromUtf8(isolate, "injectedScript"), injectedScriptValue.v8ValueUnsafe());
     return result;
 }
 
