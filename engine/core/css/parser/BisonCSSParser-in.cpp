@@ -350,8 +350,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
     case CSSPropertyBackgroundRepeatX: // repeat | no-repeat
     case CSSPropertyBackgroundRepeatY: // repeat | no-repeat
         return valueID == CSSValueRepeat || valueID == CSSValueNoRepeat;
-    case CSSPropertyBorderCollapse: // collapse | separate
-        return valueID == CSSValueCollapse || valueID == CSSValueSeparate;
     case CSSPropertyBorderTopStyle: // <border-style>
     case CSSPropertyBorderRightStyle: // Defined as: none | hidden | dotted | dashed |
     case CSSPropertyBorderBottomStyle: // solid | double | groove | ridge | inset | outset
@@ -500,7 +498,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyBackgroundRepeatX:
     case CSSPropertyBackgroundRepeatY:
     case CSSPropertyBorderBottomStyle:
-    case CSSPropertyBorderCollapse:
     case CSSPropertyBorderLeftStyle:
     case CSSPropertyBorderRightStyle:
     case CSSPropertyBorderTopStyle:

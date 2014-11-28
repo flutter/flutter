@@ -142,7 +142,6 @@ protected:
                 && (_cursor_style == other._cursor_style)
                 && (_direction == other._direction)
                 && (_white_space == other._white_space)
-                && (_border_collapse == other._border_collapse)
                 && (m_rtlOrdering == other.m_rtlOrdering)
                 && (m_printColorAdjust == other.m_printColorAdjust)
                 && (_pointerEvents == other._pointerEvents);
@@ -160,7 +159,6 @@ protected:
         unsigned _cursor_style : 6; // ECursor
         unsigned _direction : 1; // TextDirection
         unsigned _white_space : 3; // EWhiteSpace
-        unsigned _border_collapse : 1; // EBorderCollapse
         // 32 bits
 
         // non CSS2 inherited
@@ -251,7 +249,6 @@ protected:
         inherited_flags._cursor_style = initialCursor();
         inherited_flags._direction = initialDirection();
         inherited_flags._white_space = initialWhiteSpace();
-        inherited_flags._border_collapse = initialBorderCollapse();
         inherited_flags.m_rtlOrdering = initialRTLOrdering();
         inherited_flags.m_printColorAdjust = initialPrintColorAdjust();
         inherited_flags._pointerEvents = initialPointerEvents();
@@ -599,7 +596,6 @@ public:
     const BorderImageLengthBox& maskBoxImageWidth() const { return rareNonInheritedData->m_maskBoxImage.borderSlices(); }
     const BorderImageLengthBox& maskBoxImageOutset() const { return rareNonInheritedData->m_maskBoxImage.outset(); }
 
-    EBorderCollapse borderCollapse() const { return static_cast<EBorderCollapse>(inherited_flags._border_collapse); }
     short horizontalBorderSpacing() const;
     short verticalBorderSpacing() const;
     EEmptyCell emptyCells() const { return static_cast<EEmptyCell>(inherited_flags._empty_cells); }
@@ -993,7 +989,6 @@ public:
     void setMaskYPosition(const Length& length) { SET_VAR(rareNonInheritedData, m_mask.m_yPosition, length); }
     void setMaskSize(const LengthSize& s) { SET_VAR(rareNonInheritedData, m_mask.m_sizeLength, s); }
 
-    void setBorderCollapse(EBorderCollapse collapse) { inherited_flags._border_collapse = collapse; }
     void setHorizontalBorderSpacing(short);
     void setVerticalBorderSpacing(short);
     void setEmptyCells(EEmptyCell v) { inherited_flags._empty_cells = v; }
@@ -1210,7 +1205,6 @@ public:
     bool hasBoxDecorations() const { return hasBorder() || hasBorderRadius() || hasOutline() || boxShadow() || hasFilter(); }
 
     // Initial values for all the properties
-    static EBorderCollapse initialBorderCollapse() { return BSEPARATE; }
     static EBorderStyle initialBorderStyle() { return BNONE; }
     static OutlineIsAuto initialOutlineStyleIsAuto() { return AUTO_OFF; }
     static NinePieceImage initialNinePieceImage() { return NinePieceImage(); }

@@ -88,7 +88,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyBorderBottomRightRadius,
     CSSPropertyBorderBottomStyle,
     CSSPropertyBorderBottomWidth,
-    CSSPropertyBorderCollapse,
     CSSPropertyBorderImageOutset,
     CSSPropertyBorderImageRepeat,
     CSSPropertyBorderImageSlice,
@@ -1399,10 +1398,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
                 list->append(pixelValueForLength(currLayer->yPosition(), *style));
             return list.release();
         }
-        case CSSPropertyBorderCollapse:
-            if (style->borderCollapse())
-                return cssValuePool().createIdentifierValue(CSSValueCollapse);
-            return cssValuePool().createIdentifierValue(CSSValueSeparate);
         case CSSPropertyBorderSpacing: {
             RefPtr<CSSValueList> list = CSSValueList::createSpaceSeparated();
             list->append(pixelValue(style->horizontalBorderSpacing(), *style));

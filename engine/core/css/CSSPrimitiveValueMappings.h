@@ -3176,37 +3176,6 @@ template<> inline CSSPrimitiveValue::operator WindRule() const
     return RULE_NONZERO;
 }
 
-
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EBorderCollapse e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case BSEPARATE:
-        m_value.valueID = CSSValueSeparate;
-        break;
-    case BCOLLAPSE:
-        m_value.valueID = CSSValueCollapse;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EBorderCollapse() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueSeparate:
-        return BSEPARATE;
-    case CSSValueCollapse:
-        return BCOLLAPSE;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return BSEPARATE;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EImageRendering e)
     : CSSValue(PrimitiveClass)
 {

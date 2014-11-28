@@ -117,7 +117,6 @@ border-bottom-left-radius animatable, initial=initialBorderRadius, converter=con
 border-bottom-right-radius animatable, initial=initialBorderRadius, converter=convertRadius
 border-bottom-style type_name=EBorderStyle, initial=initialBorderStyle
 border-bottom-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
-border-collapse inherited
 border-image-outset animatable, custom_all
 border-image-repeat custom_all
 border-image-slice animatable, custom_all
