@@ -33,7 +33,6 @@
 #include "sky/engine/core/rendering/style/BorderValue.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
-#include "sky/engine/core/rendering/style/LineClampValue.h"
 #include "sky/engine/core/rendering/style/NinePieceImage.h"
 #include "sky/engine/core/rendering/style/OutlineValue.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
@@ -784,7 +783,6 @@ public:
     bool isRunningAnimationOnCompositor() { return isRunningOpacityAnimationOnCompositor() || isRunningTransformAnimationOnCompositor() || isRunningFilterAnimationOnCompositor(); }
 
     LineBoxContain lineBoxContain() const { return rareInheritedData->m_lineBoxContain; }
-    const LineClampValue& lineClamp() const { return rareNonInheritedData->lineClamp; }
     Color tapHighlightColor() const { return rareInheritedData->tapHighlightColor; }
 
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
@@ -1151,7 +1149,6 @@ public:
     void setIsRunningFilterAnimationOnCompositor(bool b = true) { SET_VAR(rareNonInheritedData, m_runningFilterAnimationOnCompositor, b); }
 
     void setLineBoxContain(LineBoxContain c) { SET_VAR(rareInheritedData, m_lineBoxContain, c); }
-    void setLineClamp(LineClampValue c) { SET_VAR(rareNonInheritedData, lineClamp, c); }
     void setTapHighlightColor(const Color& c) { SET_VAR(rareInheritedData, tapHighlightColor, c); }
     void setTouchAction(TouchAction t) { SET_VAR(rareNonInheritedData, m_touchAction, t); }
     void setTouchActionDelay(TouchActionDelay t) { SET_VAR(rareInheritedData, m_touchActionDelay, t); }
@@ -1356,7 +1353,6 @@ public:
 
     // Keep these at the end.
     // FIXME: Why? Seems these should all be one big sorted list.
-    static LineClampValue initialLineClamp() { return LineClampValue(); }
     static Color initialTapHighlightColor();
     static const FilterOperations& initialFilter() { DEFINE_STATIC_LOCAL(FilterOperations, ops, ()); return ops; }
 

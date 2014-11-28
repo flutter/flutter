@@ -119,7 +119,6 @@ public:
         DemotedFormElement = 85,
         SVGAnimationElement = 90,
         KeyboardEventKeyLocation = 91,
-        LineClamp = 96,
         TextReplaceWholeText = 100,
         ConsoleMarkTimeline = 102,
         CSSPseudoElementUserAgentCustomPseudo = 103,

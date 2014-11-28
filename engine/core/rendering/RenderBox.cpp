@@ -291,13 +291,11 @@ void RenderBox::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignmen
     RenderBox* parentBox = 0;
     LayoutRect newRect = rect;
 
-    bool restrictedByLineClamp = false;
     if (parent()) {
         parentBox = parent()->enclosingBox();
-        restrictedByLineClamp = !parent()->style()->lineClamp().isNone();
     }
 
-    if (hasOverflowClip() && !restrictedByLineClamp) {
+    if (hasOverflowClip()) {
         // Don't scroll to reveal an overflow layer that is restricted by the -webkit-line-clamp property.
         // This will prevent us from revealing text hidden by the slider in Safari RSS.
         newRect = layer()->scrollableArea()->exposeRect(rect, alignX, alignY);
@@ -476,11 +474,7 @@ void RenderBox::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping c
     if (delta.isZero())
         return;
 
-    bool restrictedByLineClamp = false;
-    if (parent())
-        restrictedByLineClamp = !parent()->style()->lineClamp().isNone();
-
-    if (hasOverflowClip() && !restrictedByLineClamp) {
+    if (hasOverflowClip()) {
         IntSize newScrollOffset = layer()->scrollableArea()->adjustedScrollOffset() + delta;
         layer()->scrollableArea()->scrollToOffset(newScrollOffset, clamp);
 

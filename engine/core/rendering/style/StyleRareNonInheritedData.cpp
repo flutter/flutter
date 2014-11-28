@@ -37,7 +37,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_perspective(RenderStyle::initialPerspective())
     , m_perspectiveOriginX(RenderStyle::initialPerspectiveOriginX())
     , m_perspectiveOriginY(RenderStyle::initialPerspectiveOriginY())
-    , lineClamp(RenderStyle::initialLineClamp())
     , m_mask(MaskFillLayer, true)
     , m_pageSize()
     , m_clipPath(RenderStyle::initialClipPath())
@@ -89,7 +88,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_perspective(o.m_perspective)
     , m_perspectiveOriginX(o.m_perspectiveOriginX)
     , m_perspectiveOriginY(o.m_perspectiveOriginY)
-    , lineClamp(o.lineClamp)
     , m_flexibleBox(o.m_flexibleBox)
     , m_transform(o.m_transform)
     , m_willChange(o.m_willChange)
@@ -153,7 +151,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_perspective == o.m_perspective
         && m_perspectiveOriginX == o.m_perspectiveOriginX
         && m_perspectiveOriginY == o.m_perspectiveOriginY
-        && lineClamp == o.lineClamp
         && m_flexibleBox == o.m_flexibleBox
         && m_transform == o.m_transform
         && m_willChange == o.m_willChange

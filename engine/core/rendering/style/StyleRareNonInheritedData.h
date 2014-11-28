@@ -32,7 +32,6 @@
 #include "sky/engine/core/rendering/style/CursorData.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"
-#include "sky/engine/core/rendering/style/LineClampValue.h"
 #include "sky/engine/core/rendering/style/NinePieceImage.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/ShapeValue.h"
@@ -89,8 +88,6 @@ public:
     float m_perspective;
     Length m_perspectiveOriginX;
     Length m_perspectiveOriginY;
-
-    LineClampValue lineClamp; // An Apple extension.
 
     DataRef<StyleFlexibleBoxData> m_flexibleBox;
     DataRef<StyleTransformData> m_transform; // Transform properties (rotate, scale, skew, etc.)

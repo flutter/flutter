@@ -35,7 +35,6 @@
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
 #include "sky/engine/core/css/CSSToLengthConversionData.h"
-#include "sky/engine/core/rendering/style/LineClampValue.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
@@ -100,25 +99,6 @@ template<> inline CSSPrimitiveValue::operator float() const
 {
     ASSERT(isNumber());
     return clampTo<float>(getDoubleValue());
-}
-
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(LineClampValue i)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = i.isPercentage() ? CSS_PERCENTAGE : CSS_NUMBER;
-    m_value.num = static_cast<double>(i.value());
-}
-
-template<> inline CSSPrimitiveValue::operator LineClampValue() const
-{
-    if (m_primitiveUnitType == CSS_NUMBER)
-        return LineClampValue(clampTo<int>(m_value.num), LineClampLineCount);
-
-    if (m_primitiveUnitType == CSS_PERCENTAGE)
-        return LineClampValue(clampTo<int>(m_value.num), LineClampPercentage);
-
-    ASSERT_NOT_REACHED();
-    return LineClampValue();
 }
 
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ColumnFill columnFill)

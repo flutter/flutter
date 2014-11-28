@@ -387,8 +387,6 @@ enum EBackfaceVisibility {
     BackfaceVisibilityVisible, BackfaceVisibilityHidden
 };
 
-enum ELineClampType { LineClampLineCount, LineClampPercentage };
-
 enum Hyphens { HyphensNone, HyphensManual, HyphensAuto };
 
 enum ESpeak { SpeakNone, SpeakNormal, SpeakSpellOut, SpeakDigits, SpeakLiteralPunctuation, SpeakNoPunctuation };

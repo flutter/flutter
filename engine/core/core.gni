@@ -1268,7 +1268,6 @@ sky_core_files = [
   "rendering/style/FillLayer.h",
   "rendering/style/KeyframeList.cpp",
   "rendering/style/KeyframeList.h",
-  "rendering/style/LineClampValue.h",
   "rendering/style/NinePieceImage.cpp",
   "rendering/style/NinePieceImage.h",
   "rendering/style/OutlineValue.h",

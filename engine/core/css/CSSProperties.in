@@ -239,7 +239,6 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
 -webkit-line-box-contain inherited, converter=convertLineBoxContain
 -webkit-line-break inherited, type_name=LineBreak
--webkit-line-clamp type_name=LineClampValue
 -webkit-margin-after-collapse type_name=EMarginCollapse
 -webkit-margin-before-collapse type_name=EMarginCollapse
 -webkit-margin-bottom-collapse type_name=EMarginCollapse, name_for_methods=MarginAfterCollapse

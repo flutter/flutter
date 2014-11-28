@@ -321,7 +321,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
     if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
         if (rareNonInheritedData->marginBeforeCollapse != other.rareNonInheritedData->marginBeforeCollapse
             || rareNonInheritedData->marginAfterCollapse != other.rareNonInheritedData->marginAfterCollapse
-            || rareNonInheritedData->lineClamp != other.rareNonInheritedData->lineClamp
             || rareNonInheritedData->textOverflow != other.rareNonInheritedData->textOverflow
             || rareNonInheritedData->m_wrapFlow != other.rareNonInheritedData->m_wrapFlow
             || rareNonInheritedData->m_wrapThrough != other.rareNonInheritedData->m_wrapThrough

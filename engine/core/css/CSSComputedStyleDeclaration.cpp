@@ -229,7 +229,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitHyphenateCharacter,
     CSSPropertyWebkitLineBoxContain,
     CSSPropertyWebkitLineBreak,
-    CSSPropertyWebkitLineClamp,
     CSSPropertyWebkitLocale,
     CSSPropertyWebkitMarginBeforeCollapse,
     CSSPropertyWebkitMarginAfterCollapse,
@@ -1574,10 +1573,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             if (!style->letterSpacing())
                 return cssValuePool().createIdentifierValue(CSSValueNormal);
             return pixelValue(style->letterSpacing(), *style);
-        case CSSPropertyWebkitLineClamp:
-            if (style->lineClamp().isNone())
-                return cssValuePool().createIdentifierValue(CSSValueNone);
-            return cssValuePool().createValue(style->lineClamp().value(), style->lineClamp().isPercentage() ? CSSPrimitiveValue::CSS_PERCENTAGE : CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyLineHeight:
             return valueForLineHeight(*style);
         case CSSPropertyListStyleImage:
