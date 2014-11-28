@@ -1475,41 +1475,6 @@ template<> inline CSSPrimitiveValue::operator EListStyleType() const
     }
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EMarginCollapse e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case MCOLLAPSE:
-        m_value.valueID = CSSValueCollapse;
-        break;
-    case MSEPARATE:
-        m_value.valueID = CSSValueSeparate;
-        break;
-    case MDISCARD:
-        m_value.valueID = CSSValueDiscard;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EMarginCollapse() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueCollapse:
-        return MCOLLAPSE;
-    case CSSValueSeparate:
-        return MSEPARATE;
-    case CSSValueDiscard:
-        return MDISCARD;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return MCOLLAPSE;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EOverflow e)
     : CSSValue(PrimitiveClass)
 {

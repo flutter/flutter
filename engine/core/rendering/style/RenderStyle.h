@@ -709,8 +709,6 @@ public:
     EUserDrag userDrag() const { return static_cast<EUserDrag>(rareNonInheritedData->userDrag); }
     EUserSelect userSelect() const { return static_cast<EUserSelect>(rareInheritedData->userSelect); }
     TextOverflow textOverflow() const { return static_cast<TextOverflow>(rareNonInheritedData->textOverflow); }
-    EMarginCollapse marginBeforeCollapse() const { return static_cast<EMarginCollapse>(rareNonInheritedData->marginBeforeCollapse); }
-    EMarginCollapse marginAfterCollapse() const { return static_cast<EMarginCollapse>(rareNonInheritedData->marginAfterCollapse); }
     EWordBreak wordBreak() const { return static_cast<EWordBreak>(rareInheritedData->wordBreak); }
     EOverflowWrap overflowWrap() const { return static_cast<EOverflowWrap>(rareInheritedData->overflowWrap); }
     LineBreak lineBreak() const { return static_cast<LineBreak>(rareInheritedData->lineBreak); }
@@ -1083,8 +1081,6 @@ public:
     void setUserDrag(EUserDrag d) { SET_VAR(rareNonInheritedData, userDrag, d); }
     void setUserSelect(EUserSelect s) { SET_VAR(rareInheritedData, userSelect, s); }
     void setTextOverflow(TextOverflow overflow) { SET_VAR(rareNonInheritedData, textOverflow, overflow); }
-    void setMarginBeforeCollapse(EMarginCollapse c) { SET_VAR(rareNonInheritedData, marginBeforeCollapse, c); }
-    void setMarginAfterCollapse(EMarginCollapse c) { SET_VAR(rareNonInheritedData, marginAfterCollapse, c); }
     void setWordBreak(EWordBreak b) { SET_VAR(rareInheritedData, wordBreak, b); }
     void setOverflowWrap(EOverflowWrap b) { SET_VAR(rareInheritedData, overflowWrap, b); }
     void setLineBreak(LineBreak b) { SET_VAR(rareInheritedData, lineBreak, b); }
@@ -1298,8 +1294,6 @@ public:
     static EUserDrag initialUserDrag() { return DRAG_AUTO; }
     static EUserSelect initialUserSelect() { return SELECT_TEXT; }
     static TextOverflow initialTextOverflow() { return TextOverflowClip; }
-    static EMarginCollapse initialMarginBeforeCollapse() { return MCOLLAPSE; }
-    static EMarginCollapse initialMarginAfterCollapse() { return MCOLLAPSE; }
     static EWordBreak initialWordBreak() { return NormalWordBreak; }
     static EOverflowWrap initialOverflowWrap() { return NormalOverflowWrap; }
     static LineBreak initialLineBreak() { return LineBreakAuto; }

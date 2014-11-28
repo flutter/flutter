@@ -230,8 +230,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitLineBoxContain,
     CSSPropertyWebkitLineBreak,
     CSSPropertyWebkitLocale,
-    CSSPropertyWebkitMarginBeforeCollapse,
-    CSSPropertyWebkitMarginAfterCollapse,
     CSSPropertyWebkitMaskBoxImage,
     CSSPropertyWebkitMaskBoxImageOutset,
     CSSPropertyWebkitMaskBoxImageRepeat,
@@ -2028,12 +2026,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         case CSSPropertyWebkitFontSizeDelta:
             // Not a real style property -- used by the editing engine -- so has no computed value.
             break;
-        case CSSPropertyWebkitMarginBottomCollapse:
-        case CSSPropertyWebkitMarginAfterCollapse:
-            return cssValuePool().createValue(style->marginAfterCollapse());
-        case CSSPropertyWebkitMarginTopCollapse:
-        case CSSPropertyWebkitMarginBeforeCollapse:
-            return cssValuePool().createValue(style->marginBeforeCollapse());
         case CSSPropertyPerspective:
         case CSSPropertyWebkitPerspective:
             if (!style->hasPerspective())
@@ -2256,7 +2248,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
 
         /* Unimplemented -webkit- properties */
         case CSSPropertyWebkitBorderRadius:
-        case CSSPropertyWebkitMarginCollapse:
         case CSSPropertyWebkitMask:
         case CSSPropertyWebkitMaskRepeatX:
         case CSSPropertyWebkitMaskRepeatY:

@@ -239,10 +239,6 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
 -webkit-line-box-contain inherited, converter=convertLineBoxContain
 -webkit-line-break inherited, type_name=LineBreak
--webkit-margin-after-collapse type_name=EMarginCollapse
--webkit-margin-before-collapse type_name=EMarginCollapse
--webkit-margin-bottom-collapse type_name=EMarginCollapse, name_for_methods=MarginAfterCollapse
--webkit-margin-top-collapse type_name=EMarginCollapse, name_for_methods=MarginBeforeCollapse
 -webkit-mask-box-image-outset animatable, custom_all
 -webkit-mask-box-image-repeat custom_all
 -webkit-mask-box-image-slice animatable, custom_all
@@ -377,7 +373,6 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 // "-webkit-border-radius: 1px 2px" behaves as "border-radius: 1px / 2px"
 -webkit-border-radius longhands=border-top-left-radius;border-top-right-radius;border-bottom-right-radius;border-bottom-left-radius
 -webkit-border-start longhands=-webkit-border-start-width;-webkit-border-start-style;-webkit-border-start-color
--webkit-margin-collapse longhands=-webkit-margin-before-collapse;-webkit-margin-after-collapse
 -webkit-mask longhands=-webkit-mask-image;-webkit-mask-position-x;-webkit-mask-position-y;-webkit-mask-size;-webkit-mask-repeat-x;-webkit-mask-repeat-y;-webkit-mask-origin;-webkit-mask-clip
 -webkit-mask-box-image longhands=-webkit-mask-box-image-source;-webkit-mask-box-image-slice;-webkit-mask-box-image-width;-webkit-mask-box-image-outset;-webkit-mask-box-image-repeat
 -webkit-mask-position longhands=-webkit-mask-position-x;-webkit-mask-position-y

@@ -75,8 +75,6 @@ enum EPosition {
     AbsolutePosition = 2,
 };
 
-enum EMarginCollapse { MCOLLAPSE, MSEPARATE, MDISCARD };
-
 // Box decoration attributes. Not inherited.
 
 enum EBoxDecorationBreak { DSLICE, DCLONE };

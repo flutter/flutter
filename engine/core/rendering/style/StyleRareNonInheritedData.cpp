@@ -54,8 +54,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_justifyContent(RenderStyle::initialJustifyContent())
     , userDrag(RenderStyle::initialUserDrag())
     , textOverflow(RenderStyle::initialTextOverflow())
-    , marginBeforeCollapse(MCOLLAPSE)
-    , marginAfterCollapse(MCOLLAPSE)
     , m_textDecorationStyle(RenderStyle::initialTextDecorationStyle())
     , m_wrapFlow(RenderStyle::initialWrapFlow())
     , m_wrapThrough(RenderStyle::initialWrapThrough())
@@ -114,8 +112,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_justifyContent(o.m_justifyContent)
     , userDrag(o.userDrag)
     , textOverflow(o.textOverflow)
-    , marginBeforeCollapse(o.marginBeforeCollapse)
-    , marginAfterCollapse(o.marginAfterCollapse)
     , m_textDecorationStyle(o.m_textDecorationStyle)
     , m_wrapFlow(o.m_wrapFlow)
     , m_wrapThrough(o.m_wrapThrough)
@@ -177,8 +173,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_justifyContent == o.m_justifyContent
         && userDrag == o.userDrag
         && textOverflow == o.textOverflow
-        && marginBeforeCollapse == o.marginBeforeCollapse
-        && marginAfterCollapse == o.marginAfterCollapse
         && m_textDecorationStyle == o.m_textDecorationStyle
         && m_wrapFlow == o.m_wrapFlow
         && m_wrapThrough == o.m_wrapThrough

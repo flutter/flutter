@@ -1125,23 +1125,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
         return false;
     }
 
-    case CSSPropertyWebkitMarginCollapse: {
-        if (num == 1) {
-            ShorthandScope scope(this, CSSPropertyWebkitMarginCollapse);
-            if (!parseValue(webkitMarginCollapseShorthand().properties()[0], important))
-                return false;
-            CSSValue* value = m_parsedProperties.last().value();
-            addProperty(webkitMarginCollapseShorthand().properties()[1], value, important);
-            return true;
-        }
-        else if (num == 2) {
-            ShorthandScope scope(this, CSSPropertyWebkitMarginCollapse);
-            if (!parseValue(webkitMarginCollapseShorthand().properties()[0], important) || !parseValue(webkitMarginCollapseShorthand().properties()[1], important))
-                return false;
-            return true;
-        }
-        return false;
-    }
     case CSSPropertyWillChange:
         parsedValue = parseWillChange();
         break;
