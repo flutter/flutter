@@ -232,8 +232,7 @@ void RenderBlock::invalidateTreeIfNeeded(const PaintInvalidationState& paintInva
     // Take care of positioned objects. This is required as PaintInvalidationState keeps a single clip rect.
     if (TrackedRendererListHashSet* positionedObjects = this->positionedObjects()) {
         TrackedRendererListHashSet::iterator end = positionedObjects->end();
-        bool establishesNewPaintInvalidationContainer = isPaintInvalidationContainer();
-        const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(establishesNewPaintInvalidationContainer ? this : &paintInvalidationState.paintInvalidationContainer());
+        const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(&paintInvalidationState.paintInvalidationContainer());
         PaintInvalidationState childPaintInvalidationState(paintInvalidationState, *this, newPaintInvalidationContainer);
         for (TrackedRendererListHashSet::iterator it = positionedObjects->begin(); it != end; ++it) {
             RenderBox* box = *it;

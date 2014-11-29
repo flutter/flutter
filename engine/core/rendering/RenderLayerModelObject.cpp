@@ -144,8 +144,7 @@ void RenderLayerModelObject::invalidateTreeIfNeeded(const PaintInvalidationState
     if (!shouldCheckForPaintInvalidation(paintInvalidationState))
         return;
 
-    bool establishesNewPaintInvalidationContainer = isPaintInvalidationContainer();
-    const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(establishesNewPaintInvalidationContainer ? this : &paintInvalidationState.paintInvalidationContainer());
+    const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(&paintInvalidationState.paintInvalidationContainer());
     ASSERT(&newPaintInvalidationContainer == containerForPaintInvalidation());
 
     InvalidationReason reason = invalidatePaintIfNeeded(paintInvalidationState, newPaintInvalidationContainer);

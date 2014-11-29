@@ -1023,18 +1023,6 @@ void Element::setNeedsAnimationStyleRecalc()
     setAnimationStyleChange(true);
 }
 
-void Element::setNeedsCompositingUpdate()
-{
-    if (!document().isActive())
-        return;
-    RenderBoxModelObject* renderer = renderBoxModelObject();
-    if (!renderer)
-        return;
-    if (!renderer->hasLayer())
-        return;
-    renderer->layer()->setNeedsCompositingInputsUpdate();
-}
-
 void Element::setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition)
 {
     if (!hasRareData() && !definition)

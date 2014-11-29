@@ -619,7 +619,6 @@ public:
     // methods.
     const RenderLayerModelObject* containerForPaintInvalidation() const;
     const RenderLayerModelObject* adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const;
-    bool isPaintInvalidationContainer() const;
 
     LayoutRect computePaintInvalidationRect()
     {
@@ -886,8 +885,6 @@ private:
     // Invalidate the paint of the entire object. This is only used when a renderer is to be removed.
     // For other cases, the caller should call setShouldDoFullPaintInvalidation() instead.
     void invalidatePaintForWholeRenderer() const;
-
-    const RenderLayerModelObject* enclosingCompositedContainer() const;
 
     bool hasImmediateNonWhitespaceTextChildOrPropertiesDependentOnColor() const;
 

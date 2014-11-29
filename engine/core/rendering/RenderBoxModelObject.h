@@ -44,7 +44,6 @@ enum BackgroundBleedAvoidance {
 };
 
 enum ContentChangeType {
-    ImageChanged,
     CanvasChanged,
     CanvasContextChanged
 };
@@ -167,7 +166,6 @@ public:
 
     virtual void setSelectionState(SelectionState) override;
 
-    void contentChanged(ContentChangeType);
     bool hasAcceleratedCompositing() const;
 
 protected:

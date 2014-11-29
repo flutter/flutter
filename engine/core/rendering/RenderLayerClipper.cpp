@@ -322,16 +322,13 @@ void RenderLayerClipper::getOrCalculateClipRects(const ClipRectsContext& context
 RenderLayer* RenderLayerClipper::clippingRootForPainting() const
 {
     const RenderLayer* current = m_renderer.layer();
-    if (current->isPaintInvalidationContainer())
-        return const_cast<RenderLayer*>(current);
-
     while (current) {
         if (current->isRootLayer())
             return const_cast<RenderLayer*>(current);
 
         current = current->compositingContainer();
         ASSERT(current);
-        if (current->transform() || current->isPaintInvalidationContainer())
+        if (current->transform())
             return const_cast<RenderLayer*>(current);
     }
 

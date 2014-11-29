@@ -183,9 +183,6 @@ void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
         DisableCompositingQueryAsserts disabler;
         invalidatePaintRectangle(paintInvalidationRect);
     }
-
-    // Tell any potential compositing layers that the image needs updating.
-    contentChanged(ImageChanged);
 }
 
 void RenderImage::notifyFinished(Resource* newImage)
@@ -197,12 +194,6 @@ void RenderImage::notifyFinished(Resource* newImage)
         return;
 
     invalidateBackgroundObscurationStatus();
-
-    if (newImage == m_imageResource->cachedImage()) {
-        // tell any potential compositing layers
-        // that the image is done and they can reference it directly.
-        contentChanged(ImageChanged);
-    }
 }
 
 void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOffset)

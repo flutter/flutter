@@ -157,7 +157,6 @@ CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, Canvas
         if (!m_context) {
             blink::Platform::current()->histogramEnumeration("Canvas.ContextType", Context2d, ContextTypeCount);
             m_context = CanvasRenderingContext2D::create(this, static_cast<Canvas2DContextAttributes*>(attrs));
-            setNeedsCompositingUpdate();
         }
         return m_context.get();
     }
@@ -168,7 +167,6 @@ CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, Canvas
         if (!m_context) {
             blink::Platform::current()->histogramEnumeration("Canvas.ContextType", contextType, ContextTypeCount);
             m_context = WebGLRenderingContext::create(this, static_cast<WebGLContextAttributes*>(attrs));
-            setNeedsCompositingUpdate();
             updateExternallyAllocatedMemory();
         } else if (!m_context->is3d()) {
             dispatchEvent(WebGLContextEvent::create(EventTypeNames::webglcontextcreationerror, false, true, "Canvas has an existing, non-WebGL context"));
@@ -285,11 +283,6 @@ void HTMLCanvasElement::reset()
 
     if (RenderObject* renderer = this->renderer()) {
         if (renderer->isCanvas()) {
-            if (oldSize != size()) {
-                toRenderHTMLCanvas(renderer)->canvasSizeChanged();
-                if (renderBox() && renderBox()->hasAcceleratedCompositing())
-                    renderBox()->contentChanged(CanvasChanged);
-            }
             if (hadImageBuffer)
                 renderer->setShouldDoFullPaintInvalidation(true);
         }
@@ -525,9 +518,6 @@ void HTMLCanvasElement::createImageBufferInternal()
     m_imageBuffer->context()->disableDestructionChecks(); // 2D canvas is allowed to leave context in an unfinalized state.
 #endif
     m_contextStateSaver = adoptPtr(new GraphicsContextStateSaver(*m_imageBuffer->context()));
-
-    if (m_context)
-        setNeedsCompositingUpdate();
 }
 
 void HTMLCanvasElement::notifySurfaceInvalid()

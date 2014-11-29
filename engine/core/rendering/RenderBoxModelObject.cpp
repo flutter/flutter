@@ -63,14 +63,6 @@ void RenderBoxModelObject::setSelectionState(SelectionState state)
         containingBlock->setSelectionState(state);
 }
 
-void RenderBoxModelObject::contentChanged(ContentChangeType changeType)
-{
-    if (!hasLayer())
-        return;
-
-    layer()->contentChanged(changeType);
-}
-
 bool RenderBoxModelObject::hasAcceleratedCompositing() const
 {
     // FIXME(sky): Remove

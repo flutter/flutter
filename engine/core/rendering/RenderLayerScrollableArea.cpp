@@ -733,13 +733,7 @@ void RenderLayerScrollableArea::paintOverflowControls(GraphicsContext* context, 
         if (!overflowControlsIntersectRect(localDamgeRect))
             return;
 
-        RenderView* renderView = box().view();
-
-        RenderLayer* paintingRoot = layer()->enclosingLayerWithCompositedLayerMapping(IncludeSelf);
-        if (!paintingRoot)
-            paintingRoot = renderView->layer();
-
-        paintingRoot->setContainsDirtyOverlayScrollbars(true);
+        box().view()->layer()->setContainsDirtyOverlayScrollbars(true);
         return;
     }
 

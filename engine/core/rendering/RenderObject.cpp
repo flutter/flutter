@@ -1207,32 +1207,15 @@ void RenderObject::paint(PaintInfo&, const LayoutPoint&)
 
 const RenderLayerModelObject* RenderObject::containerForPaintInvalidation() const
 {
-    if (!isRooted())
-        return 0;
-
-    return adjustCompositedContainerForSpecialAncestors(enclosingCompositedContainer());
-}
-
-const RenderLayerModelObject* RenderObject::enclosingCompositedContainer() const
-{
-    RenderLayerModelObject* container = 0;
-    if (RenderLayer* compositingLayer = enclosingLayer()->enclosingLayerForPaintInvalidationCrossingFrameBoundaries())
-        container = compositingLayer->renderer();
-    return container;
+    return isRooted() ? view() : 0;
 }
 
 const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const
 {
+    // FIXME(sky): We shouldn't have any special ancestors and we don't have composited containers
     if (paintInvalidationContainer)
         return paintInvalidationContainer;
-
-    RenderView* renderView = view();
-    return renderView;
-}
-
-bool RenderObject::isPaintInvalidationContainer() const
-{
-    return hasLayer() && toRenderLayerModelObject(this)->layer()->isPaintInvalidationContainer();
+    return view();
 }
 
 template <typename T>

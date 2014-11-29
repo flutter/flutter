@@ -135,10 +135,6 @@ public:
 
     bool isRootLayer() const { return m_isRootLayer; }
 
-    // Notification from the renderer that its content changed (e.g. current frame of image changed).
-    // Allows updates of layer content without invalidating paint.
-    void contentChanged(ContentChangeType);
-
     void updateLayerPositionsAfterLayout();
 
     void updateTransformationMatrix();
@@ -147,7 +143,6 @@ public:
     // Our current relative position offset.
     const LayoutSize offsetForInFlowPosition() const;
 
-    void blockSelectionGapsBoundsChanged();
     void addBlockSelectionGapsBounds(const LayoutRect&);
     void clearBlockSelectionGapsBounds();
     void invalidatePaintForBlockSelectionGaps();
@@ -170,18 +165,6 @@ public:
     RenderLayer* enclosingPositionedAncestor() const;
 
     RenderLayer* enclosingOverflowClipLayer(IncludeSelfOrNot = IncludeSelf) const;
-
-    bool isPaintInvalidationContainer() const;
-
-    // Do *not* call this method unless you know what you are dooing. You probably want to call enclosingCompositingLayerForPaintInvalidation() instead.
-    // If includeSelf is true, may return this.
-    RenderLayer* enclosingLayerWithCompositedLayerMapping(IncludeSelfOrNot) const;
-
-    // Returns the enclosing layer root into which this layer paints, inclusive of this one. Note that the enclosing layer may or may not have its own
-    // GraphicsLayer backing, but is nevertheless the root for a call to the RenderLayer::paint*() methods.
-    RenderLayer* enclosingLayerForPaintInvalidation() const;
-
-    RenderLayer* enclosingLayerForPaintInvalidationCrossingFrameBoundaries() const;
 
     RenderLayer* enclosingFilterLayer(IncludeSelfOrNot = IncludeSelf) const;
     bool hasAncestorWithFilterOutsets() const;
@@ -260,18 +243,12 @@ public:
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
 
-    bool hasCompositedMask() const;
-    bool hasCompositedClippingMask() const;
     bool needsCompositedScrolling() const { return m_scrollableArea && m_scrollableArea->needsCompositedScrolling(); }
-
-    bool clipsCompositingDescendantsWithBorderRadius() const;
 
     // Computes the position of the given render object in the space of |paintInvalidationContainer|.
     // FIXME: invert the logic to have paint invalidation containers take care of painting objects into them, rather than the reverse.
     // This will allow us to clean up this static method messiness.
     static LayoutPoint positionFromPaintInvalidationContainer(const RenderObject*, const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0);
-
-    static void mapRectToPaintBackingCoordinates(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&);
 
     // Adjusts the given rect (in the coordinate space of the RenderObject) to the coordinate space of |paintInvalidationContainer|'s GraphicsLayer backing.
     static void mapRectToPaintInvalidationBacking(const RenderObject*, const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState* = 0);
@@ -318,7 +295,6 @@ public:
 
     Node* enclosingElement() const;
 
-    bool scrollsWithViewport() const;
     bool scrollsWithRespectTo(const RenderLayer*) const;
 
     // FIXME: This should probably return a ScrollableArea but a lot of internal methods are mistakenly exposed.
@@ -405,7 +381,6 @@ public:
         unsigned hasDescendantWithClipPath : 1;
     };
 
-    void setNeedsCompositingInputsUpdate();
     bool childNeedsCompositingInputsUpdate() const { return m_childNeedsCompositingInputsUpdate; }
     bool needsCompositingInputsUpdate() const
     {

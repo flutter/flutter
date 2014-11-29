@@ -784,7 +784,6 @@ void WebGLRenderingContextBase::markContextChanged(ContentChangeType changeType)
     if (renderBox && renderBox->hasAcceleratedCompositing()) {
         m_markedCanvasDirty = true;
         canvas()->clearCopiedImage();
-        renderBox->contentChanged(changeType);
     } else {
         if (!m_markedCanvasDirty) {
             m_markedCanvasDirty = true;
@@ -949,9 +948,7 @@ void WebGLRenderingContextBase::reshape(int width, int height)
     height = clamp(height, 1, maxHeight);
 
     if (m_needsUpdate) {
-        RenderBox* renderBox = canvas()->renderBox();
-        if (renderBox && renderBox->hasAcceleratedCompositing())
-            renderBox->contentChanged(CanvasChanged);
+        // FIXME(sky): This seems wrong.
         m_needsUpdate = false;
     }
 

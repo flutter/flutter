@@ -105,7 +105,7 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         return;
     }
 
-    if (paintInfo.phase == PaintPhaseClippingMask && (!hasLayer() || !layer()->hasCompositedClippingMask()))
+    if (paintInfo.phase == PaintPhaseClippingMask)
         return;
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());

@@ -130,11 +130,6 @@ String RenderLayer::debugName() const
     return renderer()->debugName();
 }
 
-void RenderLayer::contentChanged(ContentChangeType changeType)
-{
-    // FIXME(sky): Remove
-}
-
 bool RenderLayer::paintsWithFilters() const
 {
     // FIXME(sky): Remove
@@ -195,16 +190,8 @@ void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
     }
 }
 
-bool RenderLayer::scrollsWithViewport() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 bool RenderLayer::scrollsWithRespectTo(const RenderLayer* other) const
 {
-    if (scrollsWithViewport() != other->scrollsWithViewport())
-        return true;
     return ancestorScrollingLayer() != other->ancestorScrollingLayer();
 }
 
@@ -315,12 +302,6 @@ LayoutPoint RenderLayer::positionFromPaintInvalidationContainer(const RenderObje
 {
     // FIXME(sky): Remove
     return renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
-}
-
-void RenderLayer::mapRectToPaintBackingCoordinates(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect)
-{
-    // FIXME(sky): Remove
-    ASSERT_NOT_REACHED();
 }
 
 void RenderLayer::mapRectToPaintInvalidationBacking(const RenderObject* renderObject, const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState)
@@ -529,41 +510,6 @@ const RenderLayer* RenderLayer::compositingContainer() const
     return 0;
 }
 
-bool RenderLayer::isPaintInvalidationContainer() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-// Note: enclosingCompositingLayer does not include squashed layers. Compositing stacking children of squashed layers
-// receive graphics layers that are parented to the compositing ancestor of the squashed layer.
-RenderLayer* RenderLayer::enclosingLayerWithCompositedLayerMapping(IncludeSelfOrNot includeSelf) const
-{
-    // FIXME(sky): Remove
-    return 0;
-}
-
-// Return the enclosingCompositedLayerForPaintInvalidation for the given RenderLayer
-// including crossing frame boundaries.
-RenderLayer* RenderLayer::enclosingLayerForPaintInvalidationCrossingFrameBoundaries() const
-{
-    // FIXME(sky): remove
-    return enclosingLayerForPaintInvalidation();
-}
-
-RenderLayer* RenderLayer::enclosingLayerForPaintInvalidation() const
-{
-    if (isPaintInvalidationContainer())
-        return const_cast<RenderLayer*>(this);
-
-    for (const RenderLayer* curr = parent(); curr; curr = curr->parent()) {
-        if (curr->isPaintInvalidationContainer())
-            return const_cast<RenderLayer*>(curr);
-    }
-
-    return 0;
-}
-
 RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) const
 {
     const RenderLayer* curr = (includeSelf == IncludeSelf) ? this : parent();
@@ -573,11 +519,6 @@ RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) con
     }
 
     return 0;
-}
-
-void RenderLayer::setNeedsCompositingInputsUpdate()
-{
-    // FIXME(sky): Remove
 }
 
 void RenderLayer::updateAncestorDependentCompositingInputs(const AncestorDependentCompositingInputs& compositingInputs)
@@ -744,8 +685,6 @@ void RenderLayer::addChild(RenderLayer* child, RenderLayer* beforeChild)
         setLastChild(child);
 
     child->m_parent = this;
-
-    setNeedsCompositingInputsUpdate();
 
     if (child->stackingNode()->isNormalFlowOnly())
         m_stackingNode->dirtyNormalFlowList();
@@ -1904,15 +1843,9 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
     return resultLayer;
 }
 
-void RenderLayer::blockSelectionGapsBoundsChanged()
-{
-    setNeedsCompositingInputsUpdate();
-}
-
 void RenderLayer::addBlockSelectionGapsBounds(const LayoutRect& bounds)
 {
     m_blockSelectionGapsBounds.unite(enclosingIntRect(bounds));
-    blockSelectionGapsBoundsChanged();
 }
 
 void RenderLayer::clearBlockSelectionGapsBounds()
@@ -1920,7 +1853,6 @@ void RenderLayer::clearBlockSelectionGapsBounds()
     m_blockSelectionGapsBounds = IntRect();
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
         child->clearBlockSelectionGapsBounds();
-    blockSelectionGapsBoundsChanged();
 }
 
 void RenderLayer::invalidatePaintForBlockSelectionGaps()
@@ -2087,24 +2019,6 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     return result;
 }
 
-bool RenderLayer::hasCompositedMask() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-bool RenderLayer::hasCompositedClippingMask() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-bool RenderLayer::clipsCompositingDescendantsWithBorderRadius() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
 {
     // FIXME(sky): Remove
@@ -2150,10 +2064,6 @@ bool RenderLayer::childBackgroundIsKnownToBeOpaqueInRect(const LayoutRect& local
     RenderLayerStackingNodeReverseIterator revertseIterator(*m_stackingNode, PositiveZOrderChildren | NormalFlowChildren | NegativeZOrderChildren);
     while (RenderLayerStackingNode* child = revertseIterator.next()) {
         const RenderLayer* childLayer = child->layer();
-        // Stop at composited paint boundaries.
-        if (childLayer->isPaintInvalidationContainer())
-            continue;
-
         if (!childLayer->canUseConvertToLayerCoords())
             continue;
 
@@ -2253,8 +2163,6 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
 
     updateTransform(oldStyle, renderer()->style());
     updateFilters(oldStyle, renderer()->style());
-
-    setNeedsCompositingInputsUpdate();
 }
 
 bool RenderLayer::scrollsOverflow() const
@@ -2321,8 +2229,7 @@ void RenderLayer::setShouldDoFullPaintInvalidationIncludingNonCompositingDescend
     renderer()->setShouldDoFullPaintInvalidation(true);
 
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
-        if (!child->isPaintInvalidationContainer())
-            child->setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
+        child->setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
     }
 }
 

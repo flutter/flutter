@@ -923,13 +923,12 @@ void RenderBox::paintMaskImages(const PaintInfo& paintInfo, const LayoutRect& pa
 {
     // Figure out if we need to push a transparency layer to render our mask.
     bool pushTransparencyLayer = false;
-    bool compositedMask = hasLayer() && layer()->hasCompositedMask();
     bool flattenCompositingLayers = view()->frameView() && view()->frameView()->paintBehavior() & PaintBehaviorFlattenCompositingLayers;
     CompositeOperator compositeOp = CompositeSourceOver;
 
     bool allMaskImagesLoaded = true;
 
-    if (!compositedMask || flattenCompositingLayers) {
+    if (flattenCompositingLayers) {
         pushTransparencyLayer = true;
         StyleImage* maskBoxImage = style()->maskBoxImage().image();
         const FillLayer& maskLayers = style()->maskLayers();
