@@ -274,16 +274,7 @@ TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOr
 
 TransformationMatrix RenderLayer::renderableTransform(PaintBehavior paintBehavior) const
 {
-    if (!m_transform)
-        return TransformationMatrix();
-
-    if (paintBehavior & PaintBehaviorFlattenCompositingLayers) {
-        TransformationMatrix matrix = *m_transform;
-        makeMatrixRenderable(matrix);
-        return matrix;
-    }
-
-    return *m_transform;
+    return m_transform ? *m_transform : TransformationMatrix();
 }
 
 RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSelf) const

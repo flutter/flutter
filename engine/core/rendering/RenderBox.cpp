@@ -674,7 +674,7 @@ void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)
     const FillLayer& bgLayer = style()->backgroundLayers();
     Color bgColor = resolveColor(CSSPropertyBackgroundColor);
 
-    paintFillLayers(paintInfo, bgColor, bgLayer, view()->backgroundRect(this), BackgroundBleedNone, CompositeSourceOver, this);
+    paintFillLayers(paintInfo, bgColor, bgLayer, view()->backgroundRect(this), BackgroundBleedNone, this);
 }
 
 BackgroundBleedAvoidance RenderBox::determineBackgroundBleedAvoidance(GraphicsContext* context, const BoxDecorationData& boxDecorationData) const
@@ -921,40 +921,12 @@ void RenderBox::paintClippingMask(PaintInfo& paintInfo, const LayoutPoint& paint
 
 void RenderBox::paintMaskImages(const PaintInfo& paintInfo, const LayoutRect& paintRect)
 {
-    // Figure out if we need to push a transparency layer to render our mask.
-    bool pushTransparencyLayer = false;
-    bool flattenCompositingLayers = view()->frameView() && view()->frameView()->paintBehavior() & PaintBehaviorFlattenCompositingLayers;
-    CompositeOperator compositeOp = CompositeSourceOver;
-
-    bool allMaskImagesLoaded = true;
-
-    if (flattenCompositingLayers) {
-        pushTransparencyLayer = true;
-        StyleImage* maskBoxImage = style()->maskBoxImage().image();
-        const FillLayer& maskLayers = style()->maskLayers();
-
-        // Don't render a masked element until all the mask images have loaded, to prevent a flash of unmasked content.
-        if (maskBoxImage)
-            allMaskImagesLoaded &= maskBoxImage->isLoaded();
-
-        allMaskImagesLoaded &= maskLayers.imagesAreLoaded();
-
-        paintInfo.context->setCompositeOperation(CompositeDestinationIn);
-        paintInfo.context->beginTransparencyLayer(1);
-        compositeOp = CompositeSourceOver;
-    }
-
-    if (allMaskImagesLoaded) {
-        paintFillLayers(paintInfo, Color::transparent, style()->maskLayers(), paintRect, BackgroundBleedNone, compositeOp);
-        paintNinePieceImage(paintInfo.context, paintRect, style(), style()->maskBoxImage(), compositeOp);
-    }
-
-    if (pushTransparencyLayer)
-        paintInfo.context->endLayer();
+    paintFillLayers(paintInfo, Color::transparent, style()->maskLayers(), paintRect, BackgroundBleedNone);
+    paintNinePieceImage(paintInfo.context, paintRect, style(), style()->maskBoxImage());
 }
 
 void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, const FillLayer& fillLayer, const LayoutRect& rect,
-    BackgroundBleedAvoidance bleedAvoidance, CompositeOperator op, RenderObject* backgroundObject)
+    BackgroundBleedAvoidance bleedAvoidance, RenderObject* backgroundObject)
 {
     Vector<const FillLayer*, 8> layers;
     const FillLayer* curLayer = &fillLayer;
@@ -1001,16 +973,16 @@ void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, cons
 
     Vector<const FillLayer*>::const_reverse_iterator topLayer = layers.rend();
     for (Vector<const FillLayer*>::const_reverse_iterator it = layers.rbegin(); it != topLayer; ++it)
-        paintFillLayer(paintInfo, c, **it, rect, bleedAvoidance, op, backgroundObject, skipBaseColor);
+        paintFillLayer(paintInfo, c, **it, rect, bleedAvoidance, backgroundObject, skipBaseColor);
 
     if (shouldDrawBackgroundInSeparateBuffer)
         context->endLayer();
 }
 
 void RenderBox::paintFillLayer(const PaintInfo& paintInfo, const Color& c, const FillLayer& fillLayer, const LayoutRect& rect,
-    BackgroundBleedAvoidance bleedAvoidance, CompositeOperator op, RenderObject* backgroundObject, bool skipBaseColor)
+    BackgroundBleedAvoidance bleedAvoidance, RenderObject* backgroundObject, bool skipBaseColor)
 {
-    paintFillLayerExtended(paintInfo, c, fillLayer, rect, bleedAvoidance, 0, LayoutSize(), op, backgroundObject, skipBaseColor);
+    paintFillLayerExtended(paintInfo, c, fillLayer, rect, bleedAvoidance, 0, LayoutSize(), backgroundObject, skipBaseColor);
 }
 
 void RenderBox::imageChanged(WrappedImagePtr image, const IntRect*)

@@ -377,7 +377,7 @@ static void applyBoxShadowForBackground(GraphicsContext* context, const RenderOb
 }
 
 void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, const Color& color, const FillLayer& bgLayer, const LayoutRect& rect,
-    BackgroundBleedAvoidance bleedAvoidance, InlineFlowBox* box, const LayoutSize& boxSize, CompositeOperator op, RenderObject* backgroundObject, bool skipBaseColor)
+    BackgroundBleedAvoidance bleedAvoidance, InlineFlowBox* box, const LayoutSize& boxSize, RenderObject* backgroundObject, bool skipBaseColor)
 {
     GraphicsContext* context = paintInfo.context;
     if (rect.isEmpty())
@@ -530,7 +530,8 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
         calculateBackgroundImageGeometry(paintInfo.paintContainer(), bgLayer, scrolledPaintRect, geometry, backgroundObject);
         geometry.clip(paintInfo.rect);
         if (!geometry.destRect().isEmpty()) {
-            CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer.composite() : op;
+            // FIXME(sky): Is it possible for the bgLayer to be something other that CompositeSourceOver?
+            CompositeOperator compositeOp = bgLayer.composite();
             RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
             RefPtr<Image> image = bgImage->image(clientForBackgroundImage, geometry.tileSize());
             InterpolationQuality interpolationQuality = chooseInterpolationQuality(context, image.get(), &bgLayer, geometry.tileSize());
@@ -930,7 +931,7 @@ static LayoutUnit computeBorderImageSide(const BorderImageLength& borderSlice, L
 }
 
 bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext, const LayoutRect& rect, const RenderStyle* style,
-                                               const NinePieceImage& ninePieceImage, CompositeOperator op)
+                                               const NinePieceImage& ninePieceImage)
 {
     StyleImage* styleImage = ninePieceImage.image();
     if (!styleImage)
@@ -1009,20 +1010,20 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
         // The rect to use from within the image is obtained from our slice, and is (0, 0, leftSlice, topSlice)
         if (drawTop)
             graphicsContext->drawImage(image.get(), IntRect(borderImageRect.location(), IntSize(leftWidth, topWidth)),
-                                       LayoutRect(0, 0, leftSlice, topSlice), op);
+                                       LayoutRect(0, 0, leftSlice, topSlice), CompositeSourceOver);
 
         // The bottom left corner rect is (tx, ty + h - bottomWidth, leftWidth, bottomWidth)
         // The rect to use from within the image is (0, imageHeight - bottomSlice, leftSlice, botomSlice)
         if (drawBottom)
             graphicsContext->drawImage(image.get(), IntRect(borderImageRect.x(), borderImageRect.maxY() - bottomWidth, leftWidth, bottomWidth),
-                                       LayoutRect(0, imageHeight - bottomSlice, leftSlice, bottomSlice), op);
+                                       LayoutRect(0, imageHeight - bottomSlice, leftSlice, bottomSlice), CompositeSourceOver);
 
         // Paint the left edge.
         // Have to scale and tile into the border rect.
         if (sourceHeight > 0)
             graphicsContext->drawTiledImage(image.get(), IntRect(borderImageRect.x(), borderImageRect.y() + topWidth, leftWidth, destinationHeight),
                                             IntRect(0, topSlice, leftSlice, sourceHeight),
-                                            FloatSize(leftSideScale, leftSideScale), Image::StretchTile, (Image::TileRule)vRule, op);
+                                            FloatSize(leftSideScale, leftSideScale), Image::StretchTile, (Image::TileRule)vRule, CompositeSourceOver);
     }
 
     if (drawRight) {
@@ -1031,13 +1032,13 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
         // The rect to use from within the image is obtained from our slice, and is (imageWidth - rightSlice, 0, rightSlice, topSlice)
         if (drawTop)
             graphicsContext->drawImage(image.get(), IntRect(borderImageRect.maxX() - rightWidth, borderImageRect.y(), rightWidth, topWidth),
-                                       LayoutRect(imageWidth - rightSlice, 0, rightSlice, topSlice), op);
+                                       LayoutRect(imageWidth - rightSlice, 0, rightSlice, topSlice), CompositeSourceOver);
 
         // The bottom right corner rect is (tx + w - rightWidth, ty + h - bottomWidth, rightWidth, bottomWidth)
         // The rect to use from within the image is (imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice)
         if (drawBottom)
             graphicsContext->drawImage(image.get(), IntRect(borderImageRect.maxX() - rightWidth, borderImageRect.maxY() - bottomWidth, rightWidth, bottomWidth),
-                                       LayoutRect(imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice), op);
+                                       LayoutRect(imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice), CompositeSourceOver);
 
         // Paint the right edge.
         if (sourceHeight > 0)
@@ -1045,14 +1046,14 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
                                             destinationHeight),
                                             IntRect(imageWidth - rightSlice, topSlice, rightSlice, sourceHeight),
                                             FloatSize(rightSideScale, rightSideScale),
-                                            Image::StretchTile, (Image::TileRule)vRule, op);
+                                            Image::StretchTile, (Image::TileRule)vRule, CompositeSourceOver);
     }
 
     // Paint the top edge.
     if (drawTop && sourceWidth > 0)
         graphicsContext->drawTiledImage(image.get(), IntRect(borderImageRect.x() + leftWidth, borderImageRect.y(), destinationWidth, topWidth),
                                         IntRect(leftSlice, 0, sourceWidth, topSlice),
-                                        FloatSize(topSideScale, topSideScale), (Image::TileRule)hRule, Image::StretchTile, op);
+                                        FloatSize(topSideScale, topSideScale), (Image::TileRule)hRule, Image::StretchTile, CompositeSourceOver);
 
     // Paint the bottom edge.
     if (drawBottom && sourceWidth > 0)
@@ -1060,7 +1061,7 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
                                         destinationWidth, bottomWidth),
                                         IntRect(leftSlice, imageHeight - bottomSlice, sourceWidth, bottomSlice),
                                         FloatSize(bottomSideScale, bottomSideScale),
-                                        (Image::TileRule)hRule, Image::StretchTile, op);
+                                        (Image::TileRule)hRule, Image::StretchTile, CompositeSourceOver);
 
     // Paint the middle.
     if (drawMiddle) {
@@ -1087,7 +1088,7 @@ bool RenderBoxModelObject::paintNinePieceImage(GraphicsContext* graphicsContext,
         graphicsContext->drawTiledImage(image.get(),
             IntRect(borderImageRect.x() + leftWidth, borderImageRect.y() + topWidth, destinationWidth, destinationHeight),
             IntRect(leftSlice, topSlice, sourceWidth, sourceHeight),
-            middleScaleFactor, (Image::TileRule)hRule, (Image::TileRule)vRule, op);
+            middleScaleFactor, (Image::TileRule)hRule, (Image::TileRule)vRule, CompositeSourceOver);
     }
 
     return true;

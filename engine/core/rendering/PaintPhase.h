@@ -55,10 +55,8 @@ enum PaintBehaviorFlags {
     PaintBehaviorNormal = 0,
     // FIXME(sky): Renumber these once we're done deleting them.
     PaintBehaviorForceBlackText = 1 << 1,
-    // FIXME(sky): This is unused. Remove it.
-    PaintBehaviorFlattenCompositingLayers = 1 << 2,
-    PaintBehaviorSkipRootBackground = 1 << 4,
-    PaintBehaviorRootBackgroundOnly = 1 << 5
+    PaintBehaviorSkipRootBackground = 1 << 2,
+    PaintBehaviorRootBackgroundOnly = 1 << 3
 };
 
 typedef unsigned PaintBehavior;
