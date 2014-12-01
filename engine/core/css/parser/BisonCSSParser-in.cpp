@@ -463,8 +463,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueAuto || valueID == CSSValueNone || valueID == CSSValueAntialiased || valueID == CSSValueSubpixelAntialiased;
     case CSSPropertyWebkitLineBreak: // auto | loose | normal | strict | after-white-space
         return valueID == CSSValueAuto || valueID == CSSValueLoose || valueID == CSSValueNormal || valueID == CSSValueStrict || valueID == CSSValueAfterWhiteSpace;
-    case CSSPropertyWebkitPrintColorAdjust:
-        return valueID == CSSValueExact || valueID == CSSValueEconomy;
     case CSSPropertyWebkitRtlOrdering:
         return valueID == CSSValueLogical || valueID == CSSValueVisual;
     case CSSPropertyWebkitTextEmphasisPosition:
@@ -545,7 +543,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyFontKerning:
     case CSSPropertyWebkitFontSmoothing:
     case CSSPropertyWebkitLineBreak:
-    case CSSPropertyWebkitPrintColorAdjust:
     case CSSPropertyWebkitRtlOrdering:
     case CSSPropertyWebkitTextEmphasisPosition:
     case CSSPropertyTransformStyle:

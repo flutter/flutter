@@ -639,10 +639,6 @@ optimizeSpeed
 optimizeLegibility
 geometricPrecision
 
-// -webkit-color-adjust
-economy
-exact
-
 // -webkit-text-emphasis-position
 over
 under

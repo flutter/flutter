@@ -143,7 +143,6 @@ protected:
                 && (_direction == other._direction)
                 && (_white_space == other._white_space)
                 && (m_rtlOrdering == other.m_rtlOrdering)
-                && (m_printColorAdjust == other.m_printColorAdjust)
                 && (_pointerEvents == other._pointerEvents);
         }
 
@@ -163,7 +162,6 @@ protected:
 
         // non CSS2 inherited
         unsigned m_rtlOrdering : 1; // Order
-        unsigned m_printColorAdjust : PrintColorAdjustBits;
         unsigned _pointerEvents : 4; // EPointerEvents
     } inherited_flags;
 
@@ -250,7 +248,6 @@ protected:
         inherited_flags._direction = initialDirection();
         inherited_flags._white_space = initialWhiteSpace();
         inherited_flags.m_rtlOrdering = initialRTLOrdering();
-        inherited_flags.m_printColorAdjust = initialPrintColorAdjust();
         inherited_flags._pointerEvents = initialPointerEvents();
 
         noninherited_flags.effectiveDisplay = noninherited_flags.originalDisplay = initialDisplay();
@@ -1023,9 +1020,6 @@ public:
 
     void setIsLink(bool b) { noninherited_flags.isLink = b; }
 
-    PrintColorAdjust printColorAdjust() const { return static_cast<PrintColorAdjust>(inherited_flags.m_printColorAdjust); }
-    void setPrintColorAdjust(PrintColorAdjust value) { inherited_flags.m_printColorAdjust = value; }
-
     bool hasAutoZIndex() const { return m_box->hasAutoZIndex(); }
     void setHasAutoZIndex() { SET_VAR(m_box, m_hasAutoZIndex, true); SET_VAR(m_box, m_zIndex, 0); }
     int zIndex() const { return m_box->zIndex(); }
@@ -1325,7 +1319,6 @@ public:
     static float initialImageResolution() { return 1; }
     static StyleImage* initialBorderImageSource() { return 0; }
     static StyleImage* initialMaskBoxImageSource() { return 0; }
-    static PrintColorAdjust initialPrintColorAdjust() { return PrintColorAdjustEconomy; }
     static TouchAction initialTouchAction() { return TouchActionAuto; }
     static TouchActionDelay initialTouchActionDelay() { return TouchActionDelayScript; }
     static ShadowList* initialBoxShadow() { return 0; }

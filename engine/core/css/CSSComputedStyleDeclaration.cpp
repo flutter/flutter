@@ -247,7 +247,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitPerspective,
     CSSPropertyPerspectiveOrigin,
     CSSPropertyWebkitPerspectiveOrigin,
-    CSSPropertyWebkitPrintColorAdjust,
     CSSPropertyWebkitRtlOrdering,
     CSSPropertyWebkitTapHighlightColor,
     CSSPropertyWebkitTextDecorationsInEffect,
@@ -1449,8 +1448,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->captionSide());
         case CSSPropertyColor:
             return cssValuePool().createColorValue(m_allowVisitedStyle ? style->colorIncludingFallback(CSSPropertyColor).rgb() : style->color().rgb());
-        case CSSPropertyWebkitPrintColorAdjust:
-            return cssValuePool().createValue(style->printColorAdjust());
         case CSSPropertyTabSize:
             return cssValuePool().createValue(style->tabSize(), CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyCursor: {

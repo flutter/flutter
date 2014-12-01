@@ -467,7 +467,6 @@ bool RenderStyle::diffNeedsPaintInvalidationLayer(const RenderStyle& other) cons
 bool RenderStyle::diffNeedsPaintInvalidationObject(const RenderStyle& other) const
 {
     if (inherited_flags._visibility != other.inherited_flags._visibility
-        || inherited_flags.m_printColorAdjust != other.inherited_flags.m_printColorAdjust
         || !surround->border.visuallyEqual(other.surround->border)
         || !m_background->visuallyEqual(*other.m_background))
         return true;

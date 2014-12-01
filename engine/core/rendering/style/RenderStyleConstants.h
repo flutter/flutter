@@ -37,12 +37,6 @@ enum StyleRecalcChange {
     ReattachNoRenderer
 };
 
-static const size_t PrintColorAdjustBits = 1;
-enum PrintColorAdjust {
-    PrintColorAdjustEconomy,
-    PrintColorAdjustExact
-};
-
 // Static pseudo styles. Dynamic ones are produced on the fly.
 enum PseudoId {
     // The order must be NOP ID, public IDs, and then internal IDs.

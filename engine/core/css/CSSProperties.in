@@ -256,7 +256,6 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-perspective-origin custom_all
 -webkit-perspective-origin-x converter=convertLength
 -webkit-perspective-origin-y converter=convertLength
--webkit-print-color-adjust inherited, type_name=PrintColorAdjust
 -webkit-rtl-ordering inherited, type_name=Order, setter=setRTLOrdering, initial=initialRTLOrdering
 -webkit-tap-highlight-color inherited, converter=convertColor
 -webkit-text-emphasis-color inherited, custom_all

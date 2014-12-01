@@ -127,37 +127,6 @@ template<> inline CSSPrimitiveValue::operator ColumnFill() const
     return ColumnFillBalance;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(PrintColorAdjust value)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (value) {
-    case PrintColorAdjustExact:
-        m_value.valueID = CSSValueExact;
-        break;
-    case PrintColorAdjustEconomy:
-        m_value.valueID = CSSValueEconomy;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator PrintColorAdjust() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueEconomy:
-        return PrintColorAdjustEconomy;
-    case CSSValueExact:
-        return PrintColorAdjustExact;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return PrintColorAdjustEconomy;
-}
-
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EBorderStyle e)
     : CSSValue(PrimitiveClass)
 {
