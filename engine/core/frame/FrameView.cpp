@@ -782,8 +782,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     bool fillWithRed;
     if (isTransparent())
         fillWithRed = false; // Transparent, don't fill with red.
-    else if (m_paintBehavior & PaintBehaviorSelectionOnly)
-        fillWithRed = false; // Selections are transparent, don't fill with red.
     else if (m_nodeToDraw)
         fillWithRed = false; // Element images are transparent, don't fill with red.
     else

@@ -1161,15 +1161,14 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
         paintingRootForRenderer = localPaintingInfo.paintingRoot;
 
     ASSERT(!(localPaintingInfo.paintBehavior & PaintBehaviorForceBlackText));
-    bool selectionOnly  = localPaintingInfo.paintBehavior & PaintBehaviorSelectionOnly;
 
-    bool shouldPaintBackground = isPaintingCompositedBackground && shouldPaintContent && !selectionOnly;
+    bool shouldPaintBackground = isPaintingCompositedBackground && shouldPaintContent;
     bool shouldPaintNegZOrderList = (isPaintingScrollingContent && isPaintingOverflowContents) || (!isPaintingScrollingContent && isPaintingCompositedBackground);
     bool shouldPaintOwnContents = isPaintingCompositedForeground && shouldPaintContent;
     bool shouldPaintNormalFlowAndPosZOrderLists = isPaintingCompositedForeground;
     bool shouldPaintOverlayScrollbars = isPaintingOverlayScrollbars;
-    bool shouldPaintMask = (paintFlags & PaintLayerPaintingCompositingMaskPhase) && shouldPaintContent && renderer()->hasMask() && !selectionOnly;
-    bool shouldPaintClippingMask = (paintFlags & PaintLayerPaintingChildClippingMaskPhase) && shouldPaintContent && !selectionOnly;
+    bool shouldPaintMask = (paintFlags & PaintLayerPaintingCompositingMaskPhase) && shouldPaintContent && renderer()->hasMask();
+    bool shouldPaintClippingMask = (paintFlags & PaintLayerPaintingChildClippingMaskPhase) && shouldPaintContent;
 
     PaintBehavior paintBehavior = PaintBehaviorNormal;
     if (paintFlags & PaintLayerPaintingSkipRootBackground)
@@ -1187,7 +1186,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     if (shouldPaintOwnContents) {
         paintForegroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintBehavior, paintingRootForRenderer, selectionOnly, paintFlags);
+            localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
     }
 
     if (shouldPaintOutline)
@@ -1327,7 +1326,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 
 void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
-    RenderObject* paintingRootForRenderer, bool selectionOnly, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
 {
     // Begin transparency if we have something to paint.
     if (haveTransparency) {
@@ -1347,13 +1346,10 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
 
     // We have to loop through every fragment multiple times, since we have to issue paint invalidations in each specific phase in order for
     // interleaving of the fragments to work properly.
-    paintForegroundForFragmentsWithPhase(selectionOnly ? PaintPhaseSelection : PaintPhaseChildBlockBackgrounds, layerFragments,
+    paintForegroundForFragmentsWithPhase(PaintPhaseChildBlockBackgrounds, layerFragments,
         context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
-
-    if (!selectionOnly) {
-        paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
-        paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
-    }
+    paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+    paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
 
     if (shouldClip)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerFragments[0].foregroundRect);

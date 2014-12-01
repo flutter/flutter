@@ -1587,9 +1587,9 @@ Color RenderObject::selectionBackgroundColor() const
 
 Color RenderObject::selectionColor(int colorProperty) const
 {
-    // If the element is unselectable, or we are only painting the selection,
-    // don't override the foreground color with the selection foreground color.
-    if (!isSelectable() || (frame()->view()->paintBehavior() & PaintBehaviorSelectionOnly))
+    // If the element is unselectable, don't override the foreground
+    // color with the selection foreground color.
+    if (!isSelectable())
         return resolveColor(colorProperty);
 
     if (!RenderTheme::theme().supportsSelectionForegroundColors())

@@ -53,11 +53,10 @@ enum PaintPhase {
 
 enum PaintBehaviorFlags {
     PaintBehaviorNormal = 0,
-    PaintBehaviorSelectionOnly = 1 << 0,
+    // FIXME(sky): Renumber these once we're done deleting them.
     PaintBehaviorForceBlackText = 1 << 1,
     // FIXME(sky): This is unused. Remove it.
     PaintBehaviorFlattenCompositingLayers = 1 << 2,
-    PaintBehaviorRenderingSVGMask = 1 << 3,
     PaintBehaviorSkipRootBackground = 1 << 4,
     PaintBehaviorRootBackgroundOnly = 1 << 5
 };
