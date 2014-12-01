@@ -46,7 +46,6 @@ enum PaintPhase {
     PaintPhaseChildOutlines,
     PaintPhaseSelfOutline,
     PaintPhaseSelection,
-    PaintPhaseCollapsedTableBorders,
     PaintPhaseTextClip,
     PaintPhaseMask,
     PaintPhaseClippingMask,

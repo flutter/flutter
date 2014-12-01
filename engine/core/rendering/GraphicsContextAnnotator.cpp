@@ -66,8 +66,6 @@ static const char* paintPhaseName(blink::PaintPhase phase)
         return "SelfOutline";
     case blink::PaintPhaseSelection:
         return "Selection";
-    case blink::PaintPhaseCollapsedTableBorders:
-        return "CollapsedTableBorders";
     case blink::PaintPhaseTextClip:
         return "TextClip";
     case blink::PaintPhaseMask:
