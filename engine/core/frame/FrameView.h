@@ -206,6 +206,9 @@ public:
     bool paintsEntireContents() const { return false; }
     bool clipsPaintInvalidations() const { return true; }
 
+    // For inspector reporting:
+    void countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial);
+
 protected:
     bool isVerticalDocument() const;
     bool isFlippedDocument() const;

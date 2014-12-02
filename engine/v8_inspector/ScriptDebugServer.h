@@ -112,9 +112,6 @@ public:
     virtual String preprocessEventListener(LocalFrame*, const String& source, const String& url, const String& functionName);
     virtual void clearPreprocessor() { }
 
-    virtual void muteWarningsAndDeprecations() { }
-    virtual void unmuteWarningsAndDeprecations() { }
-
 protected:
     explicit ScriptDebugServer(v8::Isolate*);
     virtual ~ScriptDebugServer();

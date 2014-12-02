@@ -18,7 +18,6 @@ class FrameView;
 class GraphicsContext;
 class KURL;
 class LayoutRect;
-class LocalFrame;
 class RenderObject;
 class RenderImage;
 class ResourceRequest;
@@ -34,17 +33,17 @@ public:
 
 class InspectorSendRequestEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, LocalFrame*, const ResourceRequest&);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, const ResourceRequest&);
 };
 
 class InspectorReceiveResponseEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, LocalFrame*, const ResourceResponse&);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, const ResourceResponse&);
 };
 
 class InspectorReceiveDataEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, LocalFrame*, int encodedDataLength);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(unsigned long identifier, int encodedDataLength);
 };
 
 class InspectorResourceFinishEvent {
@@ -89,7 +88,7 @@ public:
 
 class InspectorMarkLoadEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(LocalFrame*);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data();
 };
 
 class InspectorScrollLayerEvent {
@@ -99,7 +98,7 @@ public:
 
 class InspectorEvaluateScriptEvent {
 public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(LocalFrame*, const String& url, int lineNumber);
+    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(const String& url, int lineNumber);
 };
 
 class InspectorFunctionCallEvent {

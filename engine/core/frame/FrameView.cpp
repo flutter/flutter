@@ -1017,4 +1017,23 @@ void FrameView::setLayoutSizeInternal(const IntSize& size)
     contentsResized();
 }
 
+void FrameView::countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial)
+{
+    RenderObject* root = layoutRoot();
+    isPartial = true;
+    if (!root) {
+        isPartial = false;
+        root = m_frame->contentRenderer();
+    }
+
+    needsLayoutObjects = 0;
+    totalObjects = 0;
+
+    for (RenderObject* o = root; o; o = o->nextInPreOrder(root)) {
+        ++totalObjects;
+        if (o->needsLayout())
+            ++needsLayoutObjects;
+    }
+}
+
 } // namespace blink

@@ -302,26 +302,6 @@ void LocalFrame::createView(const IntSize& viewportSize, const Color& background
     frameView->updateBackgroundRecursively(backgroundColor, transparent);
 }
 
-
-void LocalFrame::countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial)
-{
-    RenderObject* root = view()->layoutRoot();
-    isPartial = true;
-    if (!root) {
-        isPartial = false;
-        root = contentRenderer();
-    }
-
-    needsLayoutObjects = 0;
-    totalObjects = 0;
-
-    for (RenderObject* o = root; o; o = o->nextInPreOrder(root)) {
-        ++totalObjects;
-        if (o->needsLayout())
-            ++needsLayoutObjects;
-    }
-}
-
 void LocalFrame::deviceOrPageScaleFactorChanged()
 {
     document()->mediaQueryAffectingValueChanged();

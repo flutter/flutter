@@ -5,25 +5,23 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 
-#include <inttypes.h>
 #include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
 #include "sky/engine/bindings/core/v8/ScriptGCEvent.h"
 #include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/inspector/IdentifiersFactory.h"
 #include "sky/engine/core/inspector/InspectorNodeIds.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/platform/TracedValue.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
+#include "sky/engine/platform/TracedValue.h"
 #include "sky/engine/platform/weborigin/KURL.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {
@@ -45,11 +43,6 @@ private:
     String m_serialized;
 };
 
-String toHexString(void* p)
-{
-    return String::format("0x%" PRIx64, static_cast<uint64>(reinterpret_cast<intptr_t>(p)));
-}
-
 }
 
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorLayoutEvent::beginData(FrameView* frameView)
@@ -57,14 +50,12 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorLayoutEvent::beginData
     bool isPartial;
     unsigned needsLayoutObjects;
     unsigned totalObjects;
-    LocalFrame& frame = frameView->frame();
-    frame.countObjectsNeedingLayout(needsLayoutObjects, totalObjects, isPartial);
+    frameView->countObjectsNeedingLayout(needsLayoutObjects, totalObjects, isPartial);
 
     RefPtr<TracedValue> value = TracedValue::create();
     value->setInteger("dirtyObjects", needsLayoutObjects);
     value->setInteger("totalObjects", totalObjects);
     value->setBoolean("partialLayout", isPartial);
-    value->setString("frame", toHexString(&frame));
     return value;
 }
 
@@ -107,37 +98,34 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorLayoutEvent::endData(R
     return value;
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorSendRequestEvent::data(unsigned long identifier, LocalFrame* frame, const ResourceRequest& request)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorSendRequestEvent::data(unsigned long identifier, const ResourceRequest& request)
 {
     String requestId = IdentifiersFactory::requestId(identifier);
 
     RefPtr<TracedValue> value = TracedValue::create();
     value->setString("requestId", requestId);
-    value->setString("frame", toHexString(frame));
     value->setString("url", request.url().string());
     value->setString("requestMethod", request.httpMethod());
     return value;
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorReceiveResponseEvent::data(unsigned long identifier, LocalFrame* frame, const ResourceResponse& response)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorReceiveResponseEvent::data(unsigned long identifier, const ResourceResponse& response)
 {
     String requestId = IdentifiersFactory::requestId(identifier);
 
     RefPtr<TracedValue> value = TracedValue::create();
     value->setString("requestId", requestId);
-    value->setString("frame", toHexString(frame));
     value->setInteger("statusCode", response.httpStatusCode());
     value->setString("mimeType", response.mimeType().string().isolatedCopy());
     return value;
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorReceiveDataEvent::data(unsigned long identifier, LocalFrame* frame, int encodedDataLength)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorReceiveDataEvent::data(unsigned long identifier, int encodedDataLength)
 {
     String requestId = IdentifiersFactory::requestId(identifier);
 
     RefPtr<TracedValue> value = TracedValue::create();
     value->setString("requestId", requestId);
-    value->setString("frame", toHexString(frame));
     value->setInteger("encodedDataLength", encodedDataLength);
     return value;
 }
@@ -154,20 +142,10 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorResourceFinishEvent::d
     return value;
 }
 
-static LocalFrame* frameForExecutionContext(ExecutionContext* context)
-{
-    LocalFrame* frame = 0;
-    if (context->isDocument())
-        frame = context->executingWindow()->frame();
-    return frame;
-}
-
 static PassRefPtr<TracedValue> genericTimerData(ExecutionContext* context, int timerId)
 {
     RefPtr<TracedValue> value = TracedValue::create();
     value->setInteger("timerId", timerId);
-    if (LocalFrame* frame = frameForExecutionContext(context))
-        value->setString("frame", toHexString(frame));
     return value.release();
 }
 
@@ -193,7 +171,6 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorAnimationFrameEvent::d
 {
     RefPtr<TracedValue> value = TracedValue::create();
     value->setInteger("id", callbackId);
-    value->setString("frame", toHexString(document->frame()));
     return value;
 }
 
@@ -201,7 +178,6 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorParseHtmlEvent::beginD
 {
     RefPtr<TracedValue> value = TracedValue::create();
     value->setInteger("startLine", startLine);
-    value->setString("frame", toHexString(document->frame()));
     return value;
 }
 
@@ -217,7 +193,6 @@ static void localToPageQuad(const RenderObject& renderer, const LayoutRect& rect
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(RenderObject* renderer, const LayoutRect& clipRect)
 {
     RefPtr<TracedValue> value = TracedValue::create();
-    value->setString("frame", toHexString(renderer->frame()));
     FloatQuad quad;
     localToPageQuad(*renderer, clipRect, &quad);
     createQuad(value.get(), "clip", quad);
@@ -226,25 +201,21 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorPaintEvent::data(Rende
     return value;
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorMarkLoadEvent::data(LocalFrame* frame)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorMarkLoadEvent::data()
 {
-    RefPtr<TracedValue> value = TracedValue::create();
-    value->setString("frame", toHexString(frame));
-    return value;
+    return TracedValue::create();
 }
 
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorScrollLayerEvent::data(RenderObject* renderer)
 {
     RefPtr<TracedValue> value = TracedValue::create();
-    value->setString("frame", toHexString(renderer->frame()));
     setGeneratingNodeId(value.get(), "nodeId", renderer);
     return value;
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorEvaluateScriptEvent::data(LocalFrame* frame, const String& url, int lineNumber)
+PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorEvaluateScriptEvent::data(const String& url, int lineNumber)
 {
     RefPtr<TracedValue> value = TracedValue::create();
-    value->setString("frame", toHexString(frame));
     value->setString("url", url);
     value->setInteger("lineNumber", lineNumber);
     return value;
@@ -256,8 +227,6 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorFunctionCallEvent::dat
     value->setString("scriptId", String::number(scriptId));
     value->setString("scriptName", scriptName);
     value->setInteger("scriptLine", scriptLine);
-    if (LocalFrame* frame = frameForExecutionContext(context))
-        value->setString("frame", toHexString(frame));
     return value;
 }
 
@@ -305,8 +274,6 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorTimeStampEvent::data(E
 {
     RefPtr<TracedValue> value = TracedValue::create();
     value->setString("message", message);
-    if (LocalFrame* frame = frameForExecutionContext(context))
-        value->setString("frame", toHexString(frame));
     return value;
 }
 

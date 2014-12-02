@@ -31,9 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/v8_inspector/PageDebuggerAgent.h"
 
-#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
-#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/v8_inspector/inspector_host.h"
 

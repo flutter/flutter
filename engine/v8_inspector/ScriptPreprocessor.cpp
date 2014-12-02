@@ -37,7 +37,6 @@
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
 #include "sky/engine/core/frame/FrameConsole.h"
-#include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/wtf/TemporaryChange.h"

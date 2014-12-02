@@ -417,13 +417,8 @@ void V8InjectedScriptHost::callFunctionMethodCustom(const v8::FunctionCallbackIn
 
 void V8InjectedScriptHost::suppressWarningsAndCallFunctionMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
-    InjectedScriptHost* host = V8InjectedScriptHost::toNative(info.Holder());
-    ScriptDebugServer& debugServer = host->scriptDebugServer();
-    debugServer.muteWarningsAndDeprecations();
-
+    // In sky we no longer have a fancy console with which to supress messages.
     callFunctionMethodCustom(info);
-
-    debugServer.unmuteWarningsAndDeprecations();
 }
 
 } // namespace blink

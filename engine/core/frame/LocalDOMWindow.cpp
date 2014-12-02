@@ -738,7 +738,7 @@ void LocalDOMWindow::dispatchLoadEvent()
     RefPtr<Event> loadEvent(Event::create(EventTypeNames::load));
     dispatchEvent(loadEvent, document());
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkLoad", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data(frame()));
+    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkLoad", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data());
 }
 
 bool LocalDOMWindow::dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget)

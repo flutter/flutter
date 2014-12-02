@@ -34,7 +34,6 @@
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8RecursionScope.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
-// #include "core/dom/ExecutionContextTask.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/wtf/text/StringBuilder.h"

@@ -2302,7 +2302,7 @@ void Document::finishedParsing()
 
     if (RefPtr<LocalFrame> f = frame()) {
         checkCompleted();
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data(f.get()));
+        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data());
     }
 
     // Schedule dropping of the ElementDataCache. We keep it alive for a while after parsing finishes

@@ -103,8 +103,6 @@ namespace blink {
 
     // ======== All public functions below this point are candidates to move out of LocalFrame into another class. ========
 
-        void countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial);
-
         FloatSize resizePageRectsKeepingRatio(const FloatSize& originalSize, const FloatSize& expectedSize);
 
         void deviceOrPageScaleFactorChanged();

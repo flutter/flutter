@@ -184,7 +184,7 @@ void PageScriptDebugServer::runScript(ScriptState* scriptState, const String& sc
 
     ExecutionContext* executionContext = scriptState->executionContext();
     LocalFrame* frame = executionContext->executingWindow()->frame();
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EvaluateScript", "data", InspectorEvaluateScriptEvent::data(frame, sourceURL, TextPosition::minimumPosition().m_line.oneBasedInt()));
+    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EvaluateScript", "data", InspectorEvaluateScriptEvent::data(sourceURL, TextPosition::minimumPosition().m_line.oneBasedInt()));
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     RefPtr<LocalFrame> protect = frame;
@@ -298,18 +298,6 @@ String PageScriptDebugServer::preprocessEventListener(LocalFrame* frame, const S
 void PageScriptDebugServer::clearPreprocessor()
 {
     m_scriptPreprocessor.clear();
-}
-
-void PageScriptDebugServer::muteWarningsAndDeprecations()
-{
-    FrameConsole::mute();
-    // Used to mute UseCounter too.
-}
-
-void PageScriptDebugServer::unmuteWarningsAndDeprecations()
-{
-    FrameConsole::unmute();
-    // Used to unmute UseCounter too.
 }
 
 } // namespace blink

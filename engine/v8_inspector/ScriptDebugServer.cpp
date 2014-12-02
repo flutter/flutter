@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/v8_inspector/ScriptDebugServer.h"
 
-#include "bindings/core/v8/V8JavaScriptCallFrame.h"
+#include "gen/sky/bindings/core/v8/V8JavaScriptCallFrame.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
 #include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
 #include "sky/engine/bindings/core/v8/ScriptController.h"

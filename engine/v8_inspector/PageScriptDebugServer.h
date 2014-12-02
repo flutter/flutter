@@ -84,9 +84,6 @@ public:
     virtual String preprocessEventListener(LocalFrame*, const String& source, const String& url, const String& functionName) override;
     virtual void clearPreprocessor() override;
 
-    virtual void muteWarningsAndDeprecations() override;
-    virtual void unmuteWarningsAndDeprecations() override;
-
 private:
     PageScriptDebugServer();
     virtual ~PageScriptDebugServer();
