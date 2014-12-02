@@ -56,15 +56,6 @@ TreeScope* ScopedStyleResolver::treeScopeFor(Document& document, const CSSStyleS
     return &document;
 }
 
-ScopedStyleResolver* ScopedStyleResolver::parent() const
-{
-    for (TreeScope* scope = treeScope().parentTreeScope(); scope; scope = scope->parentTreeScope()) {
-        if (ScopedStyleResolver* resolver = scope->scopedStyleResolver())
-            return resolver;
-    }
-    return 0;
-}
-
 void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, const MediaQueryEvaluator& medium, StyleResolver* resolver)
 {
     m_authorStyleSheets.append(cssSheet);

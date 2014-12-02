@@ -54,7 +54,6 @@ public:
     static TreeScope* treeScopeFor(Document&, const CSSStyleSheet*);
 
     const TreeScope& treeScope() const { return *m_scope; }
-    ScopedStyleResolver* parent() const;
 
 public:
     const StyleRuleKeyframes* keyframeStylesForAnimation(const StringImpl* animationName);

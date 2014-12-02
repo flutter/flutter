@@ -209,7 +209,6 @@ private:
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
     bool applyAnimatedProperties(StyleResolverState&, Element* animatingElement);
 
-    void resolveScopedStyles(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
     void collectScopedResolversForHostedShadowTrees(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
     enum StyleApplicationPass {

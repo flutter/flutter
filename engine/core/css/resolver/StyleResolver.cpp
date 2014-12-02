@@ -344,7 +344,8 @@ void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& col
     }
 
     Vector<RawPtr<ScopedStyleResolver>, 8> resolvers;
-    resolveScopedStyles(element, resolvers);
+    if (ScopedStyleResolver* resolver = element->treeScope().scopedStyleResolver())
+        resolvers.append(resolver);
 
     Vector<RawPtr<ScopedStyleResolver>, 8> resolversInShadowTree;
     collectScopedResolversForHostedShadowTrees(element, resolversInShadowTree);
@@ -660,21 +661,6 @@ bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* 
     return true;
 }
 
-static inline ScopedStyleResolver* scopedResolverFor(const Element* element)
-{
-    for (TreeScope* treeScope = &element->treeScope(); treeScope; treeScope = treeScope->parentTreeScope()) {
-        if (ScopedStyleResolver* scopedStyleResolver = treeScope->scopedStyleResolver())
-            return scopedStyleResolver;
-    }
-    return 0;
-}
-
-void StyleResolver::resolveScopedStyles(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
-{
-    for (ScopedStyleResolver* scopedResolver = scopedResolverFor(element); scopedResolver; scopedResolver = scopedResolver->parent())
-        resolvers.append(scopedResolver);
-}
-
 void StyleResolver::collectScopedResolversForHostedShadowTrees(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
 {
     ElementShadow* shadow = element->shadow();
@@ -692,18 +678,12 @@ void StyleResolver::collectScopedResolversForHostedShadowTrees(const Element* el
 
 void StyleResolver::styleTreeResolveScopedKeyframesRules(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
 {
-    Document& document = element->document();
-    TreeScope& treeScope = element->treeScope();
-    bool applyAuthorStyles = treeScope.applyAuthorStyles();
-
     // Add resolvers for shadow roots hosted by the given element.
     collectScopedResolversForHostedShadowTrees(element, resolvers);
 
     // Add resolvers while walking up DOM tree from the given element.
-    for (ScopedStyleResolver* scopedResolver = scopedResolverFor(element); scopedResolver; scopedResolver = scopedResolver->parent()) {
-        if (scopedResolver->treeScope() == treeScope || (applyAuthorStyles && scopedResolver->treeScope() == document))
-            resolvers.append(scopedResolver);
-    }
+    if (ScopedStyleResolver* resolver = element->treeScope().scopedStyleResolver())
+        resolvers.append(resolver);
 }
 
 template <StyleResolver::StyleApplicationPass pass>
