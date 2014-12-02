@@ -64,20 +64,6 @@ void DocumentAnimations::updateOutdatedAnimationPlayersIfNeeded(Document& docume
         updateAnimationTiming(document, TimingUpdateOnDemand);
 }
 
-void DocumentAnimations::updateAnimationTimingForGetComputedStyle(Node& node, CSSPropertyID property)
-{
-    if (!node.isElementNode())
-        return;
-    const Element& element = toElement(node);
-    if (RenderStyle* style = element.renderStyle()) {
-        if ((property == CSSPropertyOpacity && style->isRunningOpacityAnimationOnCompositor())
-            || ((property == CSSPropertyTransform || property == CSSPropertyWebkitTransform) && style->isRunningTransformAnimationOnCompositor())
-            || (property == CSSPropertyWebkitFilter && style->isRunningFilterAnimationOnCompositor())) {
-            updateAnimationTiming(element.document(), TimingUpdateOnDemand);
-        }
-    }
-}
-
 bool DocumentAnimations::needsOutdatedAnimationPlayerUpdate(const Document& document)
 {
     return document.timeline().hasOutdatedAnimationPlayer();
@@ -87,7 +73,7 @@ bool DocumentAnimations::needsOutdatedAnimationPlayerUpdate(const Document& docu
 void DocumentAnimations::startPendingAnimations(Document& document)
 {
     ASSERT(document.lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);
-    if (document.compositorPendingAnimations().update()) {
+    if (document.pendingAnimations().update()) {
         ASSERT(document.view());
         document.view()->scheduleAnimation();
     }

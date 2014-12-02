@@ -122,7 +122,7 @@ TEST_F(AnimationAnimationStackTest, ForwardsFillDiscarding)
     play(makeAnimation(makeAnimationEffect(CSSPropertyFontSize, AnimatableDouble::create(1))).get(), 2);
     play(makeAnimation(makeAnimationEffect(CSSPropertyFontSize, AnimatableDouble::create(2))).get(), 6);
     play(makeAnimation(makeAnimationEffect(CSSPropertyFontSize, AnimatableDouble::create(3))).get(), 4);
-    document->compositorPendingAnimations().update();
+    document->pendingAnimations().update();
     HashMap<CSSPropertyID, RefPtr<Interpolation> > interpolations;
 
     updateTimeline(11);

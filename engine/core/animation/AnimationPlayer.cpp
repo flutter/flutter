@@ -52,7 +52,7 @@ static unsigned nextSequenceNumber()
 PassRefPtr<AnimationPlayer> AnimationPlayer::create(ExecutionContext* executionContext, AnimationTimeline& timeline, AnimationNode* content)
 {
     RefPtr<AnimationPlayer> player = adoptRef(new AnimationPlayer(executionContext, timeline, content));
-    timeline.document()->compositorPendingAnimations().add(player.get());
+    timeline.document()->pendingAnimations().add(player.get());
     player->suspendIfNeeded();
     return player.release();
 }
@@ -70,8 +70,7 @@ AnimationPlayer::AnimationPlayer(ExecutionContext* executionContext, AnimationTi
     , m_isPausedForTesting(false)
     , m_outdated(true)
     , m_finished(false)
-    , m_compositorState(nullptr)
-    , m_compositorPending(true)
+    , m_pending(true)
     , m_currentTimePending(false)
 {
     if (m_content) {
@@ -161,95 +160,20 @@ double AnimationPlayer::currentTimeInternal()
     return calculateCurrentTime();
 }
 
-void AnimationPlayer::preCommit(bool startOnCompositor)
+void AnimationPlayer::preCommit()
 {
-    if (m_compositorState && m_compositorState->pendingAction == Start) {
-        // Still waiting for a start time.
-        return;
-    }
-
-    bool softChange = m_compositorState && (paused() || m_compositorState->playbackRate != m_playbackRate);
-    bool hardChange = m_compositorState && (m_compositorState->sourceChanged || (m_compositorState->startTime != m_startTime && !std::isnan(m_compositorState->startTime) && !std::isnan(m_startTime)));
-
-    // FIXME: softChange && !hardChange should generate a Pause/ThenStart,
-    // not a Cancel, but we can't communicate these to the compositor yet.
-
-    bool changed = softChange || hardChange;
-    bool shouldCancel = (!playing() && m_compositorState) || changed;
-    bool shouldStart = playing() && (!m_compositorState || changed);
-
-    if (shouldCancel) {
-        cancelAnimationOnCompositor();
-        m_compositorState = nullptr;
-
-    }
-
-    if (!shouldStart) {
+    if (!playing()) {
         m_currentTimePending = false;
-    }
-
-    if (shouldStart && startOnCompositor && maybeStartAnimationOnCompositor()) {
-        m_compositorState = adoptPtr(new CompositorState(*this));
     }
 }
 
 void AnimationPlayer::postCommit(double timelineTime)
 {
-    m_compositorPending = false;
-
-    if (!m_compositorState || m_compositorState->pendingAction == None)
-        return;
-
-    switch (m_compositorState->pendingAction) {
-    case Start:
-        if (!std::isnan(m_compositorState->startTime)) {
-            ASSERT(m_startTime == m_compositorState->startTime);
-            m_compositorState->pendingAction = None;
-        }
-        break;
-    case Pause:
-    case PauseThenStart:
-        ASSERT(std::isnan(m_startTime));
-        m_compositorState->pendingAction = None;
-        setCurrentTimeInternal((timelineTime - m_compositorState->startTime) * m_playbackRate, TimingUpdateForAnimationFrame);
-        m_currentTimePending = false;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
+    m_pending = false;
 }
 
 void AnimationPlayer::notifyCompositorStartTime(double timelineTime)
 {
-    if (m_compositorState) {
-        ASSERT(m_compositorState->pendingAction == Start);
-        ASSERT(std::isnan(m_compositorState->startTime));
-
-        double initialCompositorHoldTime = m_compositorState->holdTime;
-        m_compositorState->pendingAction = None;
-        m_compositorState->startTime = timelineTime;
-
-        if (paused() || m_compositorState->playbackRate != m_playbackRate || m_compositorState->sourceChanged) {
-            // Paused state, playback rate, or source changed while starting.
-            setCompositorPending();
-        }
-
-        if (m_startTime == timelineTime) {
-            // The start time was set to the incoming compositor start time.
-            // Unlikely, but possible.
-            // FIXME: Depending on what changed above this might still be pending.
-            // Maybe...
-            m_currentTimePending = false;
-            return;
-        }
-
-        if (!std::isnan(m_startTime) || currentTimeInternal() != initialCompositorHoldTime) {
-            // A new start time or current time was set while starting.
-            setCompositorPending();
-            return;
-        }
-    }
-
     if (playing()) {
         ASSERT(std::isnan(m_startTime));
         ASSERT(m_held);
@@ -286,7 +210,7 @@ void AnimationPlayer::setCurrentTime(double newCurrentTime)
     if (!std::isfinite(newCurrentTime))
         return;
 
-    setCompositorPending();
+    setPending();
 
     // Setting current time while pending forces a start time.
     if (m_currentTimePending) {
@@ -306,7 +230,7 @@ void AnimationPlayer::setStartTime(double startTime)
     if (startTime == m_startTime)
         return;
 
-    setCompositorPending();
+    setPending();
     m_currentTimePending = false;
     setStartTimeInternal(startTime / 1000);
 }
@@ -348,7 +272,7 @@ void AnimationPlayer::setSource(AnimationNode* newSource)
     if (m_content == newSource)
         return;
 
-    setCompositorPending(true);
+    setPending();
 
     double storedCurrentTime = currentTimeInternal();
     if (m_content)
@@ -401,7 +325,7 @@ void AnimationPlayer::pause()
     if (m_paused)
         return;
     if (playing()) {
-        setCompositorPending();
+        setPending();
         m_currentTimePending = true;
     }
     m_paused = true;
@@ -412,7 +336,7 @@ void AnimationPlayer::unpause()
 {
     if (!m_paused)
         return;
-    setCompositorPending();
+    setPending();
     m_currentTimePending = true;
     unpauseInternal();
 }
@@ -430,7 +354,7 @@ void AnimationPlayer::play()
     if (!playing())
         m_startTime = nullValue();
 
-    setCompositorPending();
+    setPending();
     unpauseInternal();
     if (!m_content)
         return;
@@ -470,7 +394,7 @@ void AnimationPlayer::finish(ExceptionState& exceptionState)
         return;
     }
     if (playing()) {
-        setCompositorPending();
+        setPending();
     }
     if (m_playbackRate < 0) {
         setCurrentTimeInternal(0, TimingUpdateOnDemand);
@@ -515,7 +439,7 @@ void AnimationPlayer::setPlaybackRate(double playbackRate)
     if (playbackRate == m_playbackRate)
         return;
 
-    setCompositorPending();
+    setPending();
     if (!finished() && !paused())
         m_currentTimePending = true;
 
@@ -535,54 +459,12 @@ void AnimationPlayer::setOutdated()
         m_timeline->setOutdatedAnimationPlayer(this);
 }
 
-bool AnimationPlayer::canStartAnimationOnCompositor()
+void AnimationPlayer::setPending()
 {
-    // FIXME: Need compositor support for playback rate != 1.
-    if (playbackRate() != 1)
-        return false;
-
-    return m_timeline && m_content && m_content->isAnimation() && playing();
-}
-
-bool AnimationPlayer::maybeStartAnimationOnCompositor()
-{
-    if (!canStartAnimationOnCompositor())
-        return false;
-
-    double startTime = timeline()->zeroTime() + startTimeInternal();
-    double timeOffset = 0;
-    if (std::isnan(startTime)) {
-        timeOffset = currentTimeInternal();
+    if (!m_pending) {
+        m_pending = true;
+        timeline()->document()->pendingAnimations().add(this);
     }
-    return toAnimation(m_content.get())->maybeStartAnimationOnCompositor(startTime, timeOffset);
-}
-
-void AnimationPlayer::setCompositorPending(bool sourceChanged)
-{
-    // FIXME: Animation could notify this directly?
-    if (!hasActiveAnimationsOnCompositor()) {
-        m_compositorState.release();
-    }
-    if (!m_compositorPending) {
-        m_compositorPending = true;
-        if (sourceChanged && m_compositorState)
-            m_compositorState->sourceChanged = true;
-        timeline()->document()->compositorPendingAnimations().add(this);
-    }
-}
-
-bool AnimationPlayer::hasActiveAnimationsOnCompositor()
-{
-    if (!m_content || !m_content->isAnimation())
-        return false;
-
-    return toAnimation(m_content.get())->hasActiveAnimationsOnCompositor();
-}
-
-void AnimationPlayer::cancelAnimationOnCompositor()
-{
-    if (hasActiveAnimationsOnCompositor())
-        toAnimation(m_content.get())->cancelAnimationOnCompositor();
 }
 
 bool AnimationPlayer::update(TimingUpdateReason reason)
@@ -648,8 +530,6 @@ void AnimationPlayer::pauseForTesting(double pauseTime)
 {
     RELEASE_ASSERT(!paused());
     setCurrentTimeInternal(pauseTime, TimingUpdateOnDemand);
-    if (hasActiveAnimationsOnCompositor())
-        toAnimation(m_content.get())->pauseAnimationForTestingOnCompositor(currentTimeInternal());
     m_isPausedForTesting = true;
     pause();
 }

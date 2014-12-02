@@ -37,7 +37,6 @@
 #include "sky/engine/core/animation/AnimationHelpers.h"
 #include "sky/engine/core/animation/AnimationPlayer.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
-#include "sky/engine/core/animation/CompositorAnimations.h"
 #include "sky/engine/core/animation/Interpolation.h"
 #include "sky/engine/core/animation/KeyframeEffectModel.h"
 #include "sky/engine/core/dom/Element.h"
@@ -128,7 +127,7 @@ void Animation::specifiedTimingChanged()
     if (player()) {
         // FIXME: Needs to consider groups when added.
         ASSERT(player()->source() == this);
-        player()->setCompositorPending(true);
+        player()->setPending();
     }
 }
 
@@ -168,7 +167,6 @@ void Animation::clearEffects()
 
     m_sampledEffect->clear();
     m_sampledEffect = nullptr;
-    cancelAnimationOnCompositor();
     m_target->setNeedsAnimationStyleRecalc();
     invalidate();
 }
@@ -195,16 +193,6 @@ double Animation::calculateTimeToEffectChange(bool forwards, double localTime, d
             ? start - localTime
             : std::numeric_limits<double>::infinity();
     case PhaseActive:
-        if (forwards && hasActiveAnimationsOnCompositor()) {
-            ASSERT(specifiedTiming().playbackRate == 1);
-            // Need service to apply fill / fire events.
-            const double timeToEnd = end - localTime;
-            if (hasEvents()) {
-                return std::min(timeToEnd, timeToNextIteration);
-            } else {
-                return timeToEnd;
-            }
-        }
         return 0;
     case PhaseAfter:
         ASSERT(localTime >= end);
@@ -237,62 +225,6 @@ void Animation::notifyElementDestroyed()
     m_sampledEffect = nullptr;
     if (sampledEffect)
         sampledEffect->clear();
-}
-
-bool Animation::isCandidateForAnimationOnCompositor() const
-{
-    if (!effect() || !m_target)
-        return false;
-    return CompositorAnimations::instance()->isCandidateForAnimationOnCompositor(specifiedTiming(), *effect());
-}
-
-bool Animation::maybeStartAnimationOnCompositor(double startTime, double currentTime)
-{
-    ASSERT(!hasActiveAnimationsOnCompositor());
-    if (!isCandidateForAnimationOnCompositor())
-        return false;
-    if (!CompositorAnimations::instance()->canStartAnimationOnCompositor(*m_target))
-        return false;
-    if (!CompositorAnimations::instance()->startAnimationOnCompositor(*m_target, startTime, currentTime, specifiedTiming(), *effect(), m_compositorAnimationIds))
-        return false;
-    ASSERT(!m_compositorAnimationIds.isEmpty());
-    return true;
-}
-
-bool Animation::hasActiveAnimationsOnCompositor() const
-{
-    return !m_compositorAnimationIds.isEmpty();
-}
-
-bool Animation::hasActiveAnimationsOnCompositor(CSSPropertyID property) const
-{
-    return hasActiveAnimationsOnCompositor() && affects(property);
-}
-
-bool Animation::affects(CSSPropertyID property) const
-{
-    return m_effect && m_effect->affects(property);
-}
-
-void Animation::cancelAnimationOnCompositor()
-{
-    if (!hasActiveAnimationsOnCompositor())
-        return;
-    if (!m_target || !m_target->renderer())
-        return;
-    for (size_t i = 0; i < m_compositorAnimationIds.size(); ++i)
-        CompositorAnimations::instance()->cancelAnimationOnCompositor(*m_target, m_compositorAnimationIds[i]);
-    m_compositorAnimationIds.clear();
-    player()->setCompositorPending(true);
-}
-
-void Animation::pauseAnimationForTestingOnCompositor(double pauseTime)
-{
-    ASSERT(hasActiveAnimationsOnCompositor());
-    if (!m_target || !m_target->renderer())
-        return;
-    for (size_t i = 0; i < m_compositorAnimationIds.size(); ++i)
-        CompositorAnimations::instance()->pauseAnimationForTestingOnCompositor(*m_target, m_compositorAnimationIds[i], pauseTime);
 }
 
 } // namespace blink

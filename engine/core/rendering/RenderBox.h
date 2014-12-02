@@ -76,7 +76,7 @@ public:
     // position:static elements that are not flex-items get their z-index coerced to auto.
     virtual LayerType layerTypeRequired() const override
     {
-        if (isPositioned() || createsGroup() || hasClipPath() || hasTransform() || hasHiddenBackface() || !style()->hasAutoZIndex() || style()->shouldCompositeForCurrentAnimations())
+        if (isPositioned() || createsGroup() || hasClipPath() || hasTransform() || hasHiddenBackface() || !style()->hasAutoZIndex())
             return NormalLayer;
         if (hasOverflowClip())
             return OverflowClipLayer;

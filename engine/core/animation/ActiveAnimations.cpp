@@ -42,36 +42,4 @@ ActiveAnimations::~ActiveAnimations()
     m_animations.clear();
 }
 
-void ActiveAnimations::updateAnimationFlags(RenderStyle& style)
-{
-    for (AnimationPlayerCountedSet::const_iterator it = m_players.begin(); it != m_players.end(); ++it) {
-        const AnimationPlayer& player = *it->key;
-        ASSERT(player.source());
-        // FIXME: Needs to consider AnimationGroup once added.
-        ASSERT(player.source()->isAnimation());
-        const Animation& animation = *toAnimation(player.source());
-        if (animation.isCurrent()) {
-            if (animation.affects(CSSPropertyOpacity))
-                style.setHasCurrentOpacityAnimation(true);
-            if (animation.affects(CSSPropertyTransform))
-                style.setHasCurrentTransformAnimation(true);
-            if (animation.affects(CSSPropertyWebkitFilter))
-                style.setHasCurrentFilterAnimation(true);
-        }
-    }
-
-    if (style.hasCurrentOpacityAnimation())
-        style.setIsRunningOpacityAnimationOnCompositor(m_defaultStack.hasActiveAnimationsOnCompositor(CSSPropertyOpacity));
-    if (style.hasCurrentTransformAnimation())
-        style.setIsRunningTransformAnimationOnCompositor(m_defaultStack.hasActiveAnimationsOnCompositor(CSSPropertyTransform));
-    if (style.hasCurrentFilterAnimation())
-        style.setIsRunningFilterAnimationOnCompositor(m_defaultStack.hasActiveAnimationsOnCompositor(CSSPropertyWebkitFilter));
-}
-
-void ActiveAnimations::cancelAnimationOnCompositor()
-{
-    for (AnimationPlayerCountedSet::iterator it = m_players.begin(); it != m_players.end(); ++it)
-        it->key->cancelAnimationOnCompositor();
-}
-
 } // namespace blink

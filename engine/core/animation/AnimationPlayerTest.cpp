@@ -78,7 +78,7 @@ protected:
     bool simulateFrame(double time)
     {
         document->animationClock().updateTime(time);
-        document->compositorPendingAnimations().update(false);
+        document->pendingAnimations().update(false);
         // The timeline does not know about our player, so we have to explicitly call update().
         return player->update(TimingUpdateForAnimationFrame);
     }

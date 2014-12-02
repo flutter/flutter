@@ -123,15 +123,11 @@ public:
     void setOutdated();
     bool outdated() { return m_outdated; }
 
-    bool canStartAnimationOnCompositor();
-    bool maybeStartAnimationOnCompositor();
-    void cancelAnimationOnCompositor();
-    bool hasActiveAnimationsOnCompositor();
-    void setCompositorPending(bool sourceChanged = false);
+    void setPending();
     void notifyCompositorStartTime(double timelineTime);
 
 
-    void preCommit(bool startOnCompositor);
+    void preCommit();
     void postCommit(double timelineTime);
 
     unsigned sequenceNumber() const { return m_sequenceNumber; }
@@ -177,34 +173,7 @@ private:
     // event is actually dispatched.
     RefPtr<Event> m_pendingFinishedEvent;
 
-    enum CompositorAction {
-        None,
-        Pause,
-        Start,
-        PauseThenStart
-    };
-
-    class CompositorState {
-    public:
-        CompositorState(AnimationPlayer& player)
-            : startTime(player.m_startTime)
-            , holdTime(player.m_holdTime)
-            , playbackRate(player.m_playbackRate)
-            , sourceChanged(false)
-            , pendingAction(Start)
-        { }
-        double startTime;
-        double holdTime;
-        double playbackRate;
-        bool sourceChanged;
-        CompositorAction pendingAction;
-    };
-
-    // This mirrors the known compositor state. It is created when a compositor
-    // animation is started. Updated once the start time is known and each time
-    // modifications are pushed to the compositor.
-    OwnPtr<CompositorState> m_compositorState;
-    bool m_compositorPending;
+    bool m_pending;
     bool m_currentTimePending;
 };
 

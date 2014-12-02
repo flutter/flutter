@@ -1279,9 +1279,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
     if (updateLayout) {
         Document& document = m_node->document();
 
-        // A timing update may be required if a compositor animation is running.
-        DocumentAnimations::updateAnimationTimingForGetComputedStyle(*m_node, propertyID);
-
         document.updateRenderTreeForNodeIfNeeded(m_node.get());
         renderer = m_node->renderer();
 

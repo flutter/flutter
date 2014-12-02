@@ -57,12 +57,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_textDecorationStyle(RenderStyle::initialTextDecorationStyle())
     , m_wrapFlow(RenderStyle::initialWrapFlow())
     , m_wrapThrough(RenderStyle::initialWrapThrough())
-    , m_hasCurrentOpacityAnimation(false)
-    , m_hasCurrentTransformAnimation(false)
-    , m_hasCurrentFilterAnimation(false)
-    , m_runningOpacityAnimationOnCompositor(false)
-    , m_runningTransformAnimationOnCompositor(false)
-    , m_runningFilterAnimationOnCompositor(false)
     , m_hasAspectRatio(false)
     , m_touchAction(RenderStyle::initialTouchAction())
     , m_objectFit(RenderStyle::initialObjectFit())
@@ -115,12 +109,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_textDecorationStyle(o.m_textDecorationStyle)
     , m_wrapFlow(o.m_wrapFlow)
     , m_wrapThrough(o.m_wrapThrough)
-    , m_hasCurrentOpacityAnimation(o.m_hasCurrentOpacityAnimation)
-    , m_hasCurrentTransformAnimation(o.m_hasCurrentTransformAnimation)
-    , m_hasCurrentFilterAnimation(o.m_hasCurrentFilterAnimation)
-    , m_runningOpacityAnimationOnCompositor(o.m_runningOpacityAnimationOnCompositor)
-    , m_runningTransformAnimationOnCompositor(o.m_runningTransformAnimationOnCompositor)
-    , m_runningFilterAnimationOnCompositor(o.m_runningFilterAnimationOnCompositor)
     , m_hasAspectRatio(o.m_hasAspectRatio)
     , m_touchAction(o.m_touchAction)
     , m_objectFit(o.m_objectFit)
@@ -176,9 +164,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_textDecorationStyle == o.m_textDecorationStyle
         && m_wrapFlow == o.m_wrapFlow
         && m_wrapThrough == o.m_wrapThrough
-        && m_hasCurrentOpacityAnimation == o.m_hasCurrentOpacityAnimation
-        && m_hasCurrentTransformAnimation == o.m_hasCurrentTransformAnimation
-        && m_hasCurrentFilterAnimation == o.m_hasCurrentFilterAnimation
         && m_hasAspectRatio == o.m_hasAspectRatio
         && m_touchAction == o.m_touchAction
         && m_objectFit == o.m_objectFit

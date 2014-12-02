@@ -29,7 +29,7 @@
  */
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/animation/CompositorPendingAnimations.h"
+#include "sky/engine/core/animation/PendingAnimations.h"
 
 #include "sky/engine/core/animation/Animation.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
@@ -39,7 +39,7 @@
 
 namespace blink {
 
-void CompositorPendingAnimations::add(AnimationPlayer* player)
+void PendingAnimations::add(AnimationPlayer* player)
 {
     ASSERT(player);
     ASSERT(m_pending.find(player) == kNotFound);
@@ -55,41 +55,23 @@ void CompositorPendingAnimations::add(AnimationPlayer* player)
     }
 }
 
-bool CompositorPendingAnimations::update(bool startOnCompositor)
+bool PendingAnimations::update()
 {
     Vector<AnimationPlayer*> waitingForStartTime;
-    bool startedSynchronizedOnCompositor = false;
-
     Vector<RefPtr<AnimationPlayer> > players;
     players.swap(m_pending);
 
     for (size_t i = 0; i < players.size(); ++i) {
         AnimationPlayer& player = *players[i].get();
-        bool hadCompositorAnimation = player.hasActiveAnimationsOnCompositor();
-        player.preCommit(startOnCompositor);
-        if (player.hasActiveAnimationsOnCompositor() && !hadCompositorAnimation) {
-            startedSynchronizedOnCompositor = true;
-        }
-
+        player.preCommit();
         if (player.playing() && !player.hasStartTime()) {
             waitingForStartTime.append(&player);
         }
     }
 
-    // If any synchronized animations were started on the compositor, all
-    // remaning synchronized animations need to wait for the synchronized
-    // start time. Otherwise they may start immediately.
-    if (startedSynchronizedOnCompositor) {
-        for (size_t i = 0; i < waitingForStartTime.size(); ++i) {
-            if (!waitingForStartTime[i]->hasStartTime()) {
-                m_waitingForCompositorAnimationStart.append(waitingForStartTime[i]);
-            }
-        }
-    } else {
-        for (size_t i = 0; i < waitingForStartTime.size(); ++i) {
-            if (!waitingForStartTime[i]->hasStartTime()) {
-                waitingForStartTime[i]->notifyCompositorStartTime(waitingForStartTime[i]->timeline()->currentTimeInternal());
-            }
+    for (size_t i = 0; i < waitingForStartTime.size(); ++i) {
+        if (!waitingForStartTime[i]->hasStartTime()) {
+            waitingForStartTime[i]->notifyCompositorStartTime(waitingForStartTime[i]->timeline()->currentTimeInternal());
         }
     }
 
@@ -100,36 +82,7 @@ bool CompositorPendingAnimations::update(bool startOnCompositor)
     }
 
     ASSERT(m_pending.isEmpty());
-
-    if (startedSynchronizedOnCompositor)
-        return true;
-
-    if (m_waitingForCompositorAnimationStart.isEmpty())
-        return false;
-
-    // Check if we're still waiting for any compositor animations to start.
-    for (size_t i = 0; i < m_waitingForCompositorAnimationStart.size(); ++i) {
-        if (m_waitingForCompositorAnimationStart[i].get()->hasActiveAnimationsOnCompositor())
-            return true;
-    }
-
-    // If not, go ahead and start any animations that were waiting.
-    notifyCompositorAnimationStarted(monotonicallyIncreasingTime());
-
-    ASSERT(m_pending.isEmpty());
     return false;
-}
-
-void CompositorPendingAnimations::notifyCompositorAnimationStarted(double monotonicAnimationStartTime)
-{
-    for (size_t i = 0; i < m_waitingForCompositorAnimationStart.size(); ++i) {
-        AnimationPlayer* player = m_waitingForCompositorAnimationStart[i].get();
-        if (player->hasStartTime())
-            continue;
-        player->notifyCompositorStartTime(monotonicAnimationStartTime - player->timeline()->zeroTime());
-    }
-
-    m_waitingForCompositorAnimationStart.clear();
 }
 
 } // namespace

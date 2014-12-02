@@ -71,14 +71,6 @@ public:
     void notifySampledEffectRemovedFromAnimationStack();
     void notifyElementDestroyed();
 
-    bool isCandidateForAnimationOnCompositor() const;
-    // Must only be called once.
-    bool maybeStartAnimationOnCompositor(double startTime, double timeOffset);
-    bool hasActiveAnimationsOnCompositor() const;
-    bool hasActiveAnimationsOnCompositor(CSSPropertyID) const;
-    void cancelAnimationOnCompositor();
-    void pauseAnimationForTestingOnCompositor(double pauseTime);
-
 protected:
     void applyEffects();
     void clearEffects();
@@ -96,8 +88,6 @@ private:
     RawPtr<SampledEffect> m_sampledEffect;
 
     Priority m_priority;
-
-    Vector<int> m_compositorAnimationIds;
 
     friend class AnimationAnimationV8Test;
 };

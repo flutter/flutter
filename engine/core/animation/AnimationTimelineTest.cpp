@@ -101,7 +101,7 @@ protected:
     void updateClockAndService(double time)
     {
         document->animationClock().updateTime(time);
-        document->compositorPendingAnimations().update(false);
+        document->pendingAnimations().update(false);
         timeline->serviceAnimations(TimingUpdateForAnimationFrame);
     }
 

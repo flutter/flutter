@@ -71,9 +71,6 @@ public:
 
     bool isEmpty() const { return m_defaultStack.isEmpty() && m_cssAnimations.isEmpty() && m_players.isEmpty(); }
 
-    void cancelAnimationOnCompositor();
-
-    void updateAnimationFlags(RenderStyle&);
     void setAnimationStyleChange(bool animationStyleChange) { m_animationStyleChange = animationStyleChange; }
 
     void addAnimation(Animation* animation) { m_animations.append(animation); }

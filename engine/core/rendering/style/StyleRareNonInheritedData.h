@@ -133,13 +133,6 @@ public:
     unsigned m_wrapFlow: 3; // WrapFlow
     unsigned m_wrapThrough: 1; // WrapThrough
 
-    unsigned m_hasCurrentOpacityAnimation : 1;
-    unsigned m_hasCurrentTransformAnimation : 1;
-    unsigned m_hasCurrentFilterAnimation : 1;
-    unsigned m_runningOpacityAnimationOnCompositor : 1;
-    unsigned m_runningTransformAnimationOnCompositor : 1;
-    unsigned m_runningFilterAnimationOnCompositor : 1;
-
     unsigned m_hasAspectRatio : 1; // Whether or not an aspect ratio has been specified.
 
     unsigned m_touchAction : TouchActionBits; // TouchAction

@@ -28,6 +28,7 @@
 #include "sky/engine/core/frame/FrameView.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/FontFaceSet.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
@@ -881,6 +882,8 @@ void FrameView::updateLayoutAndStyleForPainting()
     }
 
     ASSERT(lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);
+
+    DocumentAnimations::startPendingAnimations(*m_frame->document());
 }
 
 void FrameView::updateLayoutAndStyleIfNeededRecursive()

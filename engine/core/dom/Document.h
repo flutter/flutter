@@ -31,7 +31,7 @@
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/core/animation/AnimationClock.h"
-#include "sky/engine/core/animation/CompositorPendingAnimations.h"
+#include "sky/engine/core/animation/PendingAnimations.h"
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/DocumentInit.h"
 #include "sky/engine/core/dom/DocumentLifecycle.h"
@@ -563,7 +563,7 @@ public:
 
     AnimationClock& animationClock() { return m_animationClock; }
     AnimationTimeline& timeline() const { return *m_timeline; }
-    CompositorPendingAnimations& compositorPendingAnimations() { return m_compositorPendingAnimations; }
+    PendingAnimations& pendingAnimations() { return m_pendingAnimations; }
 
     // A non-null m_templateDocumentHost implies that |this| was created by ensureTemplateDocument().
     bool isTemplateDocument() const { return !!m_templateDocumentHost; }
@@ -789,7 +789,7 @@ private:
 
     AnimationClock m_animationClock;
     RefPtr<AnimationTimeline> m_timeline;
-    CompositorPendingAnimations m_compositorPendingAnimations;
+    PendingAnimations m_pendingAnimations;
 
     RefPtr<Document> m_templateDocument;
     // With Oilpan the templateDocument and the templateDocumentHost

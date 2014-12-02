@@ -34,7 +34,6 @@
 #include "gen/sky/core/StylePropertyShorthand.h"
 #include "sky/engine/core/animation/ActiveAnimations.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
-#include "sky/engine/core/animation/CompositorAnimations.h"
 #include "sky/engine/core/animation/KeyframeEffectModel.h"
 #include "sky/engine/core/animation/LegacyStyleInterpolation.h"
 #include "sky/engine/core/animation/css/CSSAnimatableValueFactory.h"
@@ -336,9 +335,6 @@ void CSSAnimations::maybeApplyPendingUpdate(Element* element)
         ASSERT(m_transitions.contains(id));
 
         RefPtr<AnimationPlayer> player = m_transitions.take(id).player;
-        Animation* animation = toAnimation(player->source());
-        if (animation->hasActiveAnimationsOnCompositor(id) && update->newTransitions().find(id) != update->newTransitions().end())
-            retargetedCompositorTransitions.add(id, std::pair<RefPtr<Animation>, double>(animation, player->startTimeInternal()));
         player->cancel();
         player->update(TimingUpdateOnDemand);
     }
@@ -355,29 +351,6 @@ void CSSAnimations::maybeApplyPendingUpdate(Element* element)
         OwnPtr<TransitionEventDelegate> eventDelegate = adoptPtr(new TransitionEventDelegate(element, newTransition.eventId));
 
         RefPtr<AnimationEffect> effect = inertAnimation->effect();
-
-        if (retargetedCompositorTransitions.contains(id)) {
-            const std::pair<RefPtr<Animation>, double>& oldTransition = retargetedCompositorTransitions.get(id);
-            RefPtr<Animation> oldAnimation = oldTransition.first;
-            double oldStartTime = oldTransition.second;
-            double inheritedTime = isNull(oldStartTime) ? 0 : element->document().timeline().currentTimeInternal() - oldStartTime;
-
-            AnimatableValueKeyframeEffectModel* oldEffect = toAnimatableValueKeyframeEffectModel(inertAnimation->effect());
-            const KeyframeVector& frames = oldEffect->getFrames();
-
-            AnimatableValueKeyframeVector newFrames;
-            newFrames.append(toAnimatableValueKeyframe(frames[0]->clone().get()));
-            newFrames.append(toAnimatableValueKeyframe(frames[1]->clone().get()));
-
-            newFrames[0]->clearPropertyValue(id);
-            RefPtr<InertAnimation> inertAnimationForSampling = InertAnimation::create(oldAnimation->effect(), oldAnimation->specifiedTiming(), false);
-            OwnPtr<Vector<RefPtr<Interpolation> > > sample = inertAnimationForSampling->sample(inheritedTime);
-            ASSERT(sample->size() == 1);
-            newFrames[0]->setPropertyValue(id, toLegacyStyleInterpolation(sample->at(0).get())->currentValue());
-
-            effect = AnimatableValueKeyframeEffectModel::create(newFrames);
-        }
-
         RefPtr<Animation> transition = Animation::create(element, effect, inertAnimation->specifiedTiming(), Animation::TransitionPriority, eventDelegate.release());
         RefPtr<AnimationPlayer> player = element->document().timeline().createAnimationPlayer(transition.get());
         player->update(TimingUpdateOnDemand);

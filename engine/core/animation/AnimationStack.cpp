@@ -32,7 +32,6 @@
 #include "sky/engine/core/animation/AnimationStack.h"
 
 #include <algorithm>
-#include "sky/engine/core/animation/CompositorAnimations.h"
 #include "sky/engine/core/animation/StyleInterpolation.h"
 #include "sky/engine/core/animation/css/CSSAnimations.h"
 #include "sky/engine/wtf/BitArray.h"
@@ -70,24 +69,6 @@ void copyNewAnimationsToActiveInterpolationMap(const Vector<RawPtr<InertAnimatio
 
 AnimationStack::AnimationStack()
 {
-}
-
-bool AnimationStack::affects(CSSPropertyID property) const
-{
-    for (size_t i = 0; i < m_effects.size(); ++i) {
-        if (m_effects[i]->animation() && m_effects[i]->animation()->affects(property))
-            return true;
-    }
-    return false;
-}
-
-bool AnimationStack::hasActiveAnimationsOnCompositor(CSSPropertyID property) const
-{
-    for (size_t i = 0; i < m_effects.size(); ++i) {
-        if (m_effects[i]->animation() && m_effects[i]->animation()->hasActiveAnimationsOnCompositor(property))
-            return true;
-    }
-    return false;
 }
 
 HashMap<CSSPropertyID, RefPtr<Interpolation> > AnimationStack::activeInterpolations(AnimationStack* animationStack, const Vector<RawPtr<InertAnimation> >* newAnimations, const HashSet<RawPtr<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority priority, double timelineCurrentTime)
@@ -139,27 +120,6 @@ void AnimationStack::simplifyEffects()
             m_effects[i]->animation()->notifySampledEffectRemovedFromAnimationStack();
     }
     m_effects.shrink(dest);
-}
-
-bool AnimationStack::getAnimatedBoundingBox(FloatBox& box, CSSPropertyID property) const
-{
-    FloatBox originalBox(box);
-    for (size_t i = 0; i < m_effects.size(); ++i) {
-        if (m_effects[i]->animation() && m_effects[i]->animation()->affects(property)) {
-            Animation* anim = m_effects[i]->animation();
-            if (!anim)
-                continue;
-            const Timing& timing = anim->specifiedTiming();
-            double startRange = 0;
-            double endRange = 1;
-            timing.timingFunction->range(&startRange, &endRange);
-            FloatBox expandingBox(originalBox);
-            if (!CompositorAnimations::instance()->getAnimatedBoundingBox(expandingBox, *anim->effect(), startRange, endRange))
-                return false;
-            box.expandTo(expandingBox);
-        }
-    }
-    return true;
 }
 
 } // namespace blink

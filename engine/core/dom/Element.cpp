@@ -893,10 +893,7 @@ void Element::detach(const AttachContext& context)
         }
 
         if (ActiveAnimations* activeAnimations = data->activeAnimations()) {
-            if (context.performingReattach) {
-                // FIXME: restart compositor animations rather than pull back to the main thread
-                activeAnimations->cancelAnimationOnCompositor();
-            } else {
+            if (!context.performingReattach) {
                 activeAnimations->cssAnimations().cancel();
                 activeAnimations->setAnimationStyleChange(false);
             }
@@ -923,7 +920,6 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
     // styleForElement() might add active animations so we need to get it again.
     if (ActiveAnimations* activeAnimations = this->activeAnimations()) {
         activeAnimations->cssAnimations().maybeApplyPendingUpdate(this);
-        activeAnimations->updateAnimationFlags(*style);
     }
 
     if (style->hasTransform()) {

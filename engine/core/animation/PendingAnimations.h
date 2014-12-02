@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,34 +28,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/animation/AnimationEffect.h"
-#include "sky/engine/core/animation/KeyframeEffectModel.h"
-#include "sky/engine/core/animation/Timing.h"
-#include "sky/engine/platform/animation/TimingFunction.h"
-#include "sky/engine/public/platform/WebCompositorAnimation.h"
+#ifndef SKY_ENGINE_CORE_ANIMATION_PENDINGANIMATIONS_H_
+#define SKY_ENGINE_CORE_ANIMATION_PENDINGANIMATIONS_H_
+
+#include "sky/engine/core/animation/AnimationPlayer.h"
+#include "sky/engine/platform/Timer.h"
+#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
-class WebCompositorAnimationCurve;
+// Manages the starting of pending animations on the compositor following a
+// compositing update.
+// For CSS Animations, used to synchronize the start of main-thread animations
+// with compositor animations when both classes of CSS Animations are triggered
+// by the same recalc
+class PendingAnimations final {
+    DISALLOW_ALLOCATION();
+public:
 
-class CompositorAnimationsImpl {
+    PendingAnimations()
+        : m_timer(this, &PendingAnimations::timerFired)
+    { }
+
+    void add(AnimationPlayer*);
+    // Returns whether we are waiting for an animation to start and should
+    // service again on the next frame.
+    bool update();
+
 private:
-    struct CompositorTiming {
-        bool reverse;
-        bool alternate;
-        double scaledDuration;
-        double scaledTimeOffset;
-        double adjustedIterationCount;
-    };
+    void timerFired(Timer<PendingAnimations>*) { update(); }
 
-    static bool convertTimingForCompositor(const Timing&, double timeOffset, CompositorTiming& out);
-
-    static void getAnimationOnCompositor(const Timing&, double startTime, double timeOffset, const KeyframeEffectModelBase&, Vector<OwnPtr<WebCompositorAnimation> >& animations);
-
-    static void addKeyframesToCurve(WebCompositorAnimationCurve&, const AnimatableValuePropertySpecificKeyframeVector&, const Timing&, bool reverse);
-
-    friend class CompositorAnimations;
-    friend class AnimationCompositorAnimationsTest;
+    Vector<RefPtr<AnimationPlayer> > m_pending;
+    Timer<PendingAnimations> m_timer;
 };
 
 } // namespace blink
+
+#endif  // SKY_ENGINE_CORE_ANIMATION_PENDINGANIMATIONS_H_

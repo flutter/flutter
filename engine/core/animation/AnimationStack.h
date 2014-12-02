@@ -52,10 +52,7 @@ public:
     void add(PassOwnPtr<SampledEffect> effect) { m_effects.append(effect); }
     bool isEmpty() const { return m_effects.isEmpty(); }
     bool affects(CSSPropertyID) const;
-    bool hasActiveAnimationsOnCompositor(CSSPropertyID) const;
     static HashMap<CSSPropertyID, RefPtr<Interpolation> > activeInterpolations(AnimationStack*, const Vector<RawPtr<InertAnimation> >* newAnimations, const HashSet<RawPtr<const AnimationPlayer> >* cancelledAnimationPlayers, Animation::Priority, double timelineCurrentTime);
-
-    bool getAnimatedBoundingBox(FloatBox&, CSSPropertyID) const;
 
 private:
     void simplifyEffects();
