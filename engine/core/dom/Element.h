@@ -117,9 +117,6 @@ public:
     // in style attribute or one of the SVG animation attributes.
     AttributeCollection attributesWithoutUpdate() const;
 
-    void scrollIntoView(bool alignToTop = true);
-    void scrollIntoViewIfNeeded(bool centerIfNeeded = true);
-
     int offsetLeft();
     int offsetTop();
     int offsetWidth();

@@ -58,9 +58,6 @@
 
     void focus();
     void blur();
-    void scrollIntoView(optional boolean alignWithTop);
-
-    [MeasureAs=ElementScrollIntoViewIfNeeded] void scrollIntoViewIfNeeded(optional boolean centerIfNeeded);
 
     [PerWorldBindings] readonly attribute DOMTokenList classList;
 

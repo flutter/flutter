@@ -273,35 +273,6 @@ void Element::synchronizeAllAttributes() const
     synchronizeAttribute(HTMLNames::styleAttr.localName());
 }
 
-void Element::scrollIntoView(bool alignToTop)
-{
-    document().updateLayoutIgnorePendingStylesheets();
-
-    if (!renderer())
-        return;
-
-    LayoutRect bounds = boundingBox();
-    // Align to the top / bottom and to the closest edge.
-    if (alignToTop)
-        renderer()->scrollRectToVisible(bounds, ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignTopAlways);
-    else
-        renderer()->scrollRectToVisible(bounds, ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignBottomAlways);
-}
-
-void Element::scrollIntoViewIfNeeded(bool centerIfNeeded)
-{
-    document().updateLayoutIgnorePendingStylesheets();
-
-    if (!renderer())
-        return;
-
-    LayoutRect bounds = boundingBox();
-    if (centerIfNeeded)
-        renderer()->scrollRectToVisible(bounds, ScrollAlignment::alignCenterIfNeeded, ScrollAlignment::alignCenterIfNeeded);
-    else
-        renderer()->scrollRectToVisible(bounds, ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignToEdgeIfNeeded);
-}
-
 int Element::offsetLeft()
 {
     document().updateLayoutIgnorePendingStylesheets();
