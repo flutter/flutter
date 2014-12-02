@@ -648,13 +648,6 @@ WebString WebLocalFrameImpl::contentAsText(size_t maxChars) const
     return text.toString();
 }
 
-WebString WebLocalFrameImpl::contentAsMarkup() const
-{
-    if (!frame())
-        return WebString();
-    return createMarkup(frame()->document());
-}
-
 WebString WebLocalFrameImpl::renderTreeAsText(RenderAsTextControls toShow) const
 {
     RenderAsTextBehavior behavior = RenderAsTextBehaviorNormal;

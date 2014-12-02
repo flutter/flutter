@@ -45,7 +45,6 @@ gin::ObjectTemplateBuilder Internals::GetObjectTemplateBuilder(
   return Wrappable<Internals>::GetObjectTemplateBuilder(isolate)
       .SetMethod("renderTreeAsText", &Internals::RenderTreeAsText)
       .SetMethod("contentAsText", &Internals::ContentAsText)
-      .SetMethod("contentAsMarkup", &Internals::ContentAsMarkup)
       .SetMethod("notifyTestComplete", &Internals::NotifyTestComplete)
       .SetMethod("connectToService", &Internals::ConnectToService);
 }
@@ -61,12 +60,6 @@ std::string Internals::ContentAsText() {
     return std::string();
   return document_view_->web_view()->mainFrame()->contentAsText(
       1024*1024).utf8();
-}
-
-std::string Internals::ContentAsMarkup() {
-  if (!document_view_)
-    return std::string();
-  return document_view_->web_view()->mainFrame()->contentAsMarkup().utf8();
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {

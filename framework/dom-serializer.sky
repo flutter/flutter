@@ -1,0 +1,74 @@
+<script>
+const kEntityMap = new Map([
+  ['\u00a0', '&nbsp;'],
+  ['&', '&amp;'],
+  ['<', '&lt;'],
+  ['>', '&gt;'],
+  ['"', '&quot;'],
+]);
+
+const kTextEscapePattern = /&|<|>|"|\u00a0/g;
+const kAttributeEscapePattern = /&|>|"|\u00a0/g;
+
+function escapeText(value, pattern) {
+  return (value || '').replace(pattern, function(match) {
+    return kEntityMap.get(match);
+  });
+}
+
+function serializeAttributes(element) {
+  var buffer = "";
+  var attributes = element.getAttributes();
+
+  for (var i = 0; i < attributes.length; ++i) {
+    var attribute = attributes[i];
+    buffer += ' ';
+    buffer += attribute.name;
+    buffer += '="';
+    buffer += escapeText(attribute.value, kAttributeEscapePattern);
+    buffer += '"';
+  }
+
+  return buffer;
+}
+
+function getFirstChild(element) {
+  if (element.tagName === 'template')
+    return element.content.firstChild;
+  return element.firstChild;
+}
+
+function serializeElementChildren(element) {
+  if (element.tagName == "script" || element.tagName == "style")
+    return element.textContent;
+  return serializeChildren(getFirstChild(element));
+}
+
+function serializeChildren(firstChild) {
+  var buffer = "";
+  for (var child = firstChild; child; child = child.nextSibling)
+    buffer += serializeNode(child);
+  return buffer;
+}
+
+function serializeElement(element) {
+  var buffer = '<' + element.tagName + serializeAttributes(element) + '>';
+  buffer += serializeElementChildren(element);
+  buffer += '</' + element.tagName + '>';
+  return buffer;
+}
+
+function serializeNode(node) {
+  if (node instanceof Text)
+    return escapeText(node.data, kTextEscapePattern);
+  if (node instanceof Element)
+    return serializeElement(node);
+  if (node instanceof Document)
+    return serializeChildren(node.firstChild);
+  throw new Error("Cannot serialize node");
+}
+
+module.exports = {
+  serializeNode: serializeNode,
+};
+</script>

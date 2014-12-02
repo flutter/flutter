@@ -29,7 +29,6 @@ class Internals : public gin::Wrappable<Internals> {
 
   std::string RenderTreeAsText();
   std::string ContentAsText();
-  std::string ContentAsMarkup();
   void NotifyTestComplete(const std::string& test_result);
 
   mojo::Handle ConnectToService(

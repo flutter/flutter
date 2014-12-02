@@ -121,7 +121,6 @@ public:
     virtual void setCaretVisible(bool) override;
 
     virtual WebString contentAsText(size_t maxChars) const override;
-    virtual WebString contentAsMarkup() const override;
     virtual WebString renderTreeAsText(RenderAsTextControls toShow = RenderAsTextNormal) const override;
 
     virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const override;

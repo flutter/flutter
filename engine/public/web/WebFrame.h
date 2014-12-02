@@ -279,10 +279,6 @@ public:
     // frame will be separated by an empty line.
     virtual WebString contentAsText(size_t maxChars) const = 0;
 
-    // Returns HTML text for the contents of this frame.  This is generated
-    // from the DOM.
-    virtual WebString contentAsMarkup() const = 0;
-
     // Returns a text representation of the render tree.  This method is used
     // to support layout tests.
     virtual WebString renderTreeAsText(RenderAsTextControls toShow = RenderAsTextNormal) const = 0;
