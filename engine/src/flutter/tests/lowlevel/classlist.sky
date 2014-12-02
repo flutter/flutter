@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<sky>
+<import src="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<style>
+  div { font-size: 5px; }
+  .font-10 { font-size: 10px; }
+  .font-12 { font-size: 12px; }
+  .font-24 { font-size: 24px; }
+</style>
+<div id="sandbox"></div>
+<script>
+describe("Class list", function() {
+  var sandbox = document.getElementById("sandbox");
+  var target;
+
+  beforeEach(function() {
+    target = document.createElement("div");
+    sandbox.appendChild(target);
+  });
+
+  afterEach(function() {
+    target.remove();
+  });
+
+  it("should add multiple classes", function() {
+    target.classList.add("first", "second", "third");
+    assert.equal(target.classList.toString(), "first second third");
+  });
+
+  it("should add classes in order", function() {
+    target.classList.add("first");
+    target.classList.add("second");
+    assert.equal(target.classList.toString(), "first second");
+  });
+
+  it("should remove classes", function() {
+    target.classList.add("first");
+    target.classList.add("second");
+    target.classList.add("third");
+    target.classList.remove("second");
+    assert.equal(target.classList.toString(), "first third");
+  });
+
+  it("should remove multiple classes", function() {
+    target.classList.add("first", "second", "third");
+    target.classList.remove("first", "third");
+    assert.equal(target.classList.toString(), "second");
+  });
+
+  it("should check for classes", function() {
+    target.classList.add("first", "second", "third");
+    assert.isTrue(target.classList.contains("first"));
+    assert.isTrue(target.classList.contains("second"));
+    assert.isTrue(target.classList.contains("third"));
+    target.classList.remove("second");
+    assert.isTrue(target.classList.contains("first"));
+    assert.isFalse(target.classList.contains("second"));
+    assert.isTrue(target.classList.contains("third"));
+  });
+
+  it("should get classes by index", function() {
+    target.classList.add("first", "second", "third");
+    assert.equal(target.classList[0], "first");
+    assert.equal(target.classList[1], "second");
+    assert.equal(target.classList[2], "third");
+    assert.equal(target.classList.item(0), "first");
+    assert.equal(target.classList.item(1), "second");
+    assert.equal(target.classList.item(2), "third");
+  });
+
+  it("should toggle classes", function() {
+    target.classList.add("first", "second");
+    assert.isFalse(target.classList.toggle("first"));
+    assert.equal(target.classList.toString(), "second");
+    assert.isTrue(target.classList.toggle("first"));
+    assert.equal(target.classList.toString(), "second first");
+    assert.isTrue(target.classList.toggle("second", true));
+    assert.equal(target.classList.toString(), "second first");
+    assert.isTrue(target.classList.toggle("second", true));
+    assert.isFalse(target.classList.toggle("second", false));
+    assert.isFalse(target.classList.toggle("second", false));
+    assert.equal(target.classList.toString(), "first");
+  });
+
+  it("should dynamically update style", function() {
+    assert.equal(getComputedStyle(target).fontSize, "5px");
+    target.classList.add("font-10");
+    target.classList.add("font-12");
+    assert.equal(getComputedStyle(target).fontSize, "12px");
+    target.classList.add("font-24");
+    assert.equal(getComputedStyle(target).fontSize, "24px");
+    target.classList.remove("font-12");
+    assert.equal(getComputedStyle(target).fontSize, "24px");
+    target.classList.remove("font-24");
+    assert.equal(getComputedStyle(target).fontSize, "10px");
+    target.classList.remove("font-10");
+    assert.equal(getComputedStyle(target).fontSize, "5px");
+  });
+});
+</script>
+</sky>

@@ -1,0 +1,12 @@
+Running 8 tests
+ok 1 Class list should add multiple classes
+ok 2 Class list should add classes in order
+ok 3 Class list should remove classes
+ok 4 Class list should remove multiple classes
+ok 5 Class list should check for classes
+ok 6 Class list should get classes by index
+ok 7 Class list should toggle classes
+ok 8 Class list should dynamically update style
+8 tests
+8 pass
+0 fail
