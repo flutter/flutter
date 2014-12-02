@@ -109,7 +109,6 @@ public:
     virtual bool hasSelection() const override;
     virtual WebRange selectionRange() const override;
     virtual WebString selectionAsText() const override;
-    virtual WebString selectionAsMarkup() const override;
     virtual bool selectWordAroundCaret() override;
     virtual void selectRange(const WebPoint& base, const WebPoint& extent) override;
     virtual void selectRange(const WebRange&) override;

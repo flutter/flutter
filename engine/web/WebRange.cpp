@@ -85,11 +85,6 @@ WebNode WebRange::endContainer(WebExceptionCode& exceptionCode) const
     return node.release();
 }
 
-WebString WebRange::toHTMLText() const
-{
-    return m_private->toHTML();
-}
-
 WebString WebRange::toPlainText() const
 {
     return m_private->text();

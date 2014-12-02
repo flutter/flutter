@@ -36,7 +36,6 @@
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRootRareData.h"
-#include "sky/engine/core/editing/markup.h"
 #include "sky/engine/public/platform/Platform.h"
 
 namespace blink {

@@ -94,7 +94,6 @@
 #include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/editing/markup.h"
 #include "sky/engine/core/frame/Console.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -539,15 +538,6 @@ WebString WebLocalFrameImpl::selectionAsText() const
     String text = range->text();
     replaceNBSPWithSpace(text);
     return text;
-}
-
-WebString WebLocalFrameImpl::selectionAsMarkup() const
-{
-    RefPtr<Range> range = frame()->selection().toNormalizedRange();
-    if (!range)
-        return WebString();
-
-    return createMarkup(range.get(), 0, AnnotateForInterchange, false, ResolveNonLocalURLs);
 }
 
 void WebLocalFrameImpl::selectWordAroundPosition(LocalFrame* frame, VisiblePosition position)

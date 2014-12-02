@@ -36,7 +36,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeList.h"
-#include "sky/engine/core/editing/markup.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -113,11 +112,6 @@ WebNode WebNode::nextSibling() const
 bool WebNode::hasChildNodes() const
 {
     return m_private->hasChildren();
-}
-
-WebString WebNode::createMarkup() const
-{
-    return blink::createMarkup(m_private.get());
 }
 
 bool WebNode::isLink() const

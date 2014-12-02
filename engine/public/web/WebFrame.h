@@ -242,7 +242,6 @@ public:
     virtual WebRange selectionRange() const = 0;
 
     virtual WebString selectionAsText() const = 0;
-    virtual WebString selectionAsMarkup() const = 0;
 
     // Expands the selection to a word around the caret and returns
     // true. Does nothing and returns false if there is no caret or

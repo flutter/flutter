@@ -34,7 +34,6 @@
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/NodeWithIndex.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/editing/markup.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
@@ -906,11 +905,6 @@ String Range::toString() const
     }
 
     return builder.toString();
-}
-
-String Range::toHTML() const
-{
-    return createMarkup(this);
 }
 
 String Range::text() const

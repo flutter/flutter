@@ -42,7 +42,6 @@
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/editing/markup.h"
 #include "sky/engine/core/events/BeforeTextInsertedEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/UseCounter.h"

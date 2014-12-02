@@ -84,7 +84,6 @@ public:
     void insertNode(PassRefPtr<Node>, ExceptionState&);
     String toString() const;
 
-    String toHTML() const;
     String text() const;
 
     void detach();
