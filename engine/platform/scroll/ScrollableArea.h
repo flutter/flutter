@@ -83,10 +83,6 @@ public:
     void setHorizontalScrollElasticity(ScrollElasticity scrollElasticity) { m_horizontalScrollElasticity = scrollElasticity; }
     ScrollElasticity horizontalScrollElasticity() const { return static_cast<ScrollElasticity>(m_horizontalScrollElasticity); }
 
-    bool inLiveResize() const { return m_inLiveResize; }
-    void willStartLiveResize();
-    void willEndLiveResize();
-
     void mouseEnteredContentArea() const;
     void mouseExitedContentArea() const;
     void mouseMovedInContentArea() const;
@@ -216,8 +212,6 @@ private:
 
     mutable OwnPtr<ScrollableAreaAnimators> m_animators;
     unsigned m_constrainsScrollingToContentEdge : 1;
-
-    unsigned m_inLiveResize : 1;
 
     unsigned m_verticalScrollElasticity : 2; // ScrollElasticity
     unsigned m_horizontalScrollElasticity : 2; // ScrollElasticity

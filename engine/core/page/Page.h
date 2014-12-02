@@ -96,9 +96,6 @@ public:
 
     void documentDetached(Document*);
 
-    bool openedByDOM() const;
-    void setOpenedByDOM();
-
     PageAnimator& animator() { return m_animator; }
     Chrome& chrome() const { return *m_chrome; }
     AutoscrollController& autoscrollController() const { return *m_autoscrollController; }
@@ -184,8 +181,6 @@ private:
     SpellCheckerClient* const m_spellCheckerClient;
 
     UseCounter m_useCounter;
-
-    bool m_openedByDOM;
 
     bool m_tabKeyCyclesThroughElements;
 

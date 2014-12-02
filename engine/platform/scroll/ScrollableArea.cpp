@@ -73,7 +73,6 @@ int ScrollableArea::maxOverlapBetweenPages()
 
 ScrollableArea::ScrollableArea()
     : m_constrainsScrollingToContentEdge(true)
-    , m_inLiveResize(false)
     , m_verticalScrollElasticity(ScrollElasticityNone)
     , m_horizontalScrollElasticity(ScrollElasticityNone)
     , m_scrollbarOverlayStyle(ScrollbarOverlayStyleDefault)
@@ -225,24 +224,6 @@ void ScrollableArea::setScrollOffsetFromInternals(const IntPoint& offset)
 void ScrollableArea::setScrollOffsetFromAnimation(const IntPoint& offset)
 {
     scrollPositionChanged(offset);
-}
-
-void ScrollableArea::willStartLiveResize()
-{
-    if (m_inLiveResize)
-        return;
-    m_inLiveResize = true;
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->willStartLiveResize();
-}
-
-void ScrollableArea::willEndLiveResize()
-{
-    if (!m_inLiveResize)
-        return;
-    m_inLiveResize = false;
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->willEndLiveResize();
 }
 
 void ScrollableArea::mouseEnteredContentArea() const

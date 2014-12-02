@@ -41,17 +41,12 @@ namespace blink {
 
 class WebFrame;
 class WebFrameClient;
-class WebGraphicsContext3D;
 class WebHitTestResult;
-class WebNode;
-class WebRange;
 class WebSettings;
 class WebSpellCheckClient;
-class WebString;
 class WebViewClient;
 struct WebActiveWheelFlingParameters;
 struct WebPoint;
-struct WebFloatPoint;
 
 class WebView : public WebWidget {
 public:
@@ -113,11 +108,6 @@ public:
     // Allows disabling domain relaxation.
     virtual void setDomainRelaxationForbidden(bool, const WebString& scheme) = 0;
 
-    // Marks the WebView as being opened by a DOM call. This is relevant
-    // for whether window.close() may be called.
-    virtual void setOpenedByDOM() = 0;
-
-
     // Frames --------------------------------------------------------------
 
     virtual WebFrame* mainFrame() = 0;
@@ -137,29 +127,12 @@ public:
     // send it.
     virtual void clearFocusedElement() = 0;
 
-    // Scrolls the node currently in focus into |rect|, where |rect| is in
-    // window space.
-    virtual void scrollFocusedNodeIntoRect(const WebRect&) { }
-
     // Advance the focus of the WebView forward to the next element or to the
     // previous element in the tab sequence (if reverse is true).
     virtual void advanceFocus(bool reverse) { }
 
 
     // Zoom ----------------------------------------------------------------
-
-    // TODO: Reevaluate if this is needed once all users are converted to using the
-    // virtual viewport pinch model.
-    // Temporary to keep old style pinch viewport working while we gradually bring up
-    // virtual viewport pinch.
-    virtual void setMainFrameScrollOffset(const WebPoint& origin) = 0;
-
-    // Reset any saved values for the scroll and scale state.
-    virtual void resetScrollAndScaleState() = 0;
-
-    // Returns the "preferred" contents size, defined as the preferred minimum width of the main document's contents
-    // and the minimum height required to display the main document without scrollbars.
-    virtual WebSize contentsPreferredMinimumSize() = 0;
 
     // The ratio of the current device's screen DPI to the target device's screen DPI.
     virtual float deviceScaleFactor() const = 0;
@@ -168,27 +141,10 @@ public:
     virtual void setDeviceScaleFactor(float) = 0;
 
 
-    // Fixed Layout --------------------------------------------------------
-
-    // Locks main frame's layout size to specified size. Passing WebSize(0, 0)
-    // removes the lock.
-    virtual void setFixedLayoutSize(const WebSize&) = 0;
-
     // Data exchange -------------------------------------------------------
 
     // Do a hit test at given point and return the HitTestResult.
     virtual WebHitTestResult hitTestResultAt(const WebPoint&) = 0;
-
-    // Copy to the clipboard the image located at a particular point in the
-    // WebView (if there is such an image)
-    virtual void copyImageAt(const WebPoint&) = 0;
-
-    // Save as the image located at a particular point in the
-    // WebView (if there is such an image)
-    virtual void saveImageAt(const WebPoint&) = 0;
-
-    // Notfies the WebView that the system drag and drop operation has ended.
-    virtual void dragSourceSystemDragEnded() = 0;
 
     // Retrieves a list of spelling markers.
     virtual void spellingMarkers(WebVector<uint32_t>* markers) = 0;
@@ -202,20 +158,6 @@ public:
     // device metrics emulation.
     virtual void setCompositorDeviceScaleFactorOverride(float) = 0;
 
-    // Set offset and scale on the root composited layer. This is used
-    // to implement device metrics emulation.
-    virtual void setRootLayerTransform(const WebSize& offset, float scale) = 0;
-
-    // SmartClip support ---------------------------------------------------
-    virtual void extractSmartClipData(WebRect initRect, WebString& text, WebString& html, WebRect& resultRect) = 0;
-
-    // Custom colors -------------------------------------------------------
-
-    virtual void setSelectionColors(unsigned activeBackgroundColor,
-                                    unsigned activeForegroundColor,
-                                    unsigned inactiveBackgroundColor,
-                                    unsigned inactiveForegroundColor) = 0;
-
     // Called to inform the WebView that a wheel fling animation was started externally (for instance
     // by the compositor) but must be completed by the WebView.
     virtual void transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters&) = 0;
@@ -227,11 +169,6 @@ public:
     virtual void setShowFPSCounter(bool) = 0;
     virtual void setContinuousPaintingEnabled(bool) = 0;
     virtual void setShowScrollBottleneckRects(bool) = 0;
-
-    // Compute the bounds of the root element of the current selection and fills
-    // the out-parameter on success. |bounds| coordinates will be relative to
-    // the contents window and will take into account the current scale level.
-    virtual void getSelectionRootBounds(WebRect& bounds) const = 0;
 
     // Visibility -----------------------------------------------------------
 

@@ -138,7 +138,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_editorClientImpl(this)
     , m_spellCheckerClientImpl(this)
     , m_fixedLayoutSizeLock(false)
-    , m_doingDragAndDrop(false)
     , m_ignoreInputEvents(false)
     , m_compositorDeviceScaleFactorOverride(0)
     , m_rootLayerScale(1)
@@ -203,8 +202,6 @@ void WebViewImpl::handleMouseLeave(LocalFrame& mainFrame, const WebMouseEvent& e
 
 void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
-    m_lastMouseDownPoint = WebPoint(event.x, event.y);
-
     PageWidgetEventHandler::handleMouseDown(mainFrame, event);
 
     if (event.button == WebMouseEvent::ButtonLeft && m_mouseCaptureNode)
@@ -400,21 +397,6 @@ void WebViewImpl::setShowScrollBottleneckRects(bool show)
     m_showScrollBottleneckRects = show;
 }
 
-void WebViewImpl::getSelectionRootBounds(WebRect& bounds) const
-{
-    const LocalFrame* frame = focusedCoreFrame();
-    if (!frame)
-        return;
-
-    Element* root = frame->selection().rootEditableElementOrDocumentElement();
-    if (!root)
-        return;
-
-    IntRect boundingBox = root->pixelSnappedBoundingBox();
-    boundingBox = root->document().frame()->view()->contentsToWindow(boundingBox);
-    bounds = boundingBox;
-}
-
 void WebViewImpl::acceptLanguagesChanged()
 {
     if (!page())
@@ -497,68 +479,6 @@ bool WebViewImpl::handleCharEvent(const WebKeyboardEvent& event)
         return keyEventDefault(event);
 
     return true;
-}
-
-WebRect WebViewImpl::computeBlockBounds(const WebRect& rect, bool ignoreClipping)
-{
-    if (!mainFrameImpl())
-        return WebRect();
-
-    // Use the rect-based hit test to find the node.
-    IntPoint point = mainFrameImpl()->frameView()->windowToContents(IntPoint(rect.x, rect.y));
-    HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly | HitTestRequest::Active | (ignoreClipping ? HitTestRequest::IgnoreClipping : 0);
-    HitTestResult result = mainFrameImpl()->frame()->eventHandler().hitTestResultAtPoint(point, hitType, IntSize(rect.width, rect.height));
-
-    Node* node = result.innerNonSharedNode();
-    if (!node)
-        return WebRect();
-
-    // Find the block type node based on the hit node.
-    // FIXME: This wants to walk composed tree with NodeRenderingTraversal::parent().
-    while (node && (!node->renderer() || node->renderer()->isInline()))
-        node = NodeRenderingTraversal::parent(node);
-
-    // Return the bounding box in the window coordinate system.
-    if (node) {
-        IntRect rect = node->Node::pixelSnappedBoundingBox();
-        LocalFrame* frame = node->document().frame();
-        return frame->view()->contentsToWindow(rect);
-    }
-    return WebRect();
-}
-
-WebRect WebViewImpl::widenRectWithinPageBounds(const WebRect& source, int targetMargin, int minimumMargin)
-{
-    WebSize maxSize;
-    if (mainFrame())
-        maxSize = mainFrame()->contentsSize();
-    int leftMargin = targetMargin;
-    int rightMargin = targetMargin;
-
-    const int absoluteSourceX = source.x;
-    if (leftMargin > absoluteSourceX) {
-        leftMargin = absoluteSourceX;
-        rightMargin = std::max(leftMargin, minimumMargin);
-    }
-
-    const int maximumRightMargin = maxSize.width - (source.width + absoluteSourceX);
-    if (rightMargin > maximumRightMargin) {
-        rightMargin = maximumRightMargin;
-        leftMargin = std::min(leftMargin, std::max(rightMargin, minimumMargin));
-    }
-
-    const int newWidth = source.width + leftMargin + rightMargin;
-    const int newX = source.x - leftMargin;
-
-    ASSERT(newWidth >= 0);
-    ASSERT(newX + newWidth <= maxSize.width);
-
-    return WebRect(newX, source.y, newWidth, source.height);
-}
-
-void WebViewImpl::computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, const WebRect& blockRect, float padding, float defaultScaleWhenAlreadyLegible, float& scale, WebPoint& scroll)
-{
-    //FIXME(sky)
 }
 
 bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)
@@ -684,11 +604,6 @@ void WebViewImpl::close()
     deref();  // Balances ref() acquired in WebView::create
 }
 
-void WebViewImpl::willStartLiveResize()
-{
-    // FIXME(sky): Remove
-}
-
 WebSize WebViewImpl::size()
 {
     return m_size;
@@ -722,11 +637,6 @@ void WebViewImpl::resize(const WebSize& newSize)
     m_size = newSize;
     performResize();
     sendResizeEventAndRepaint();
-}
-
-void WebViewImpl::willEndLiveResize()
-{
-    // FIXME(sky): Remove
 }
 
 void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
@@ -763,10 +673,6 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
         m_client->scheduleAnimation();
 }
 
-void WebViewImpl::didCommitFrameToCompositor()
-{
-}
-
 void WebViewImpl::layout()
 {
     TRACE_EVENT0("blink", "WebViewImpl::layout");
@@ -791,16 +697,6 @@ bool WebViewImpl::isTrackingRepaints() const
         return false;
     FrameView* view = page()->mainFrame()->view();
     return view->isTrackingPaintInvalidations();
-}
-
-void WebViewImpl::themeChanged()
-{
-    if (!page())
-        return;
-    FrameView* view = page()->mainFrame()->view();
-
-    WebRect damagedRect(0, 0, m_size.width, m_size.height);
-    view->invalidateRect(damagedRect);
 }
 
 bool WebViewImpl::hasHorizontalScrollbar()
@@ -868,10 +764,6 @@ static String inputTypeToName(WebInputEvent::Type type)
 bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
 {
     TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
-    // If we've started a drag and drop operation, ignore input events until
-    // we're done.
-    if (m_doingDragAndDrop)
-        return true;
 
     // Report the event to be NOT processed by WebKit, so that the browser can handle it appropriately.
     if (m_ignoreInputEvents)
@@ -1163,47 +1055,6 @@ WebString WebViewImpl::inputModeOfFocusedElement()
     return WebString();
 }
 
-bool WebViewImpl::selectionBounds(WebRect& anchor, WebRect& focus) const
-{
-    const LocalFrame* localFrame = focusedCoreFrame();
-    if (!localFrame)
-        return false;
-
-    FrameSelection& selection = localFrame->selection();
-
-    if (selection.isCaret()) {
-        anchor = focus = selection.absoluteCaretBounds();
-    } else {
-        RefPtr<Range> selectedRange = selection.toNormalizedRange();
-        if (!selectedRange)
-            return false;
-
-        RefPtr<Range> range(Range::create(selectedRange->startContainer()->document(),
-            selectedRange->startContainer(),
-            selectedRange->startOffset(),
-            selectedRange->startContainer(),
-            selectedRange->startOffset()));
-        anchor = localFrame->editor().firstRectForRange(range.get());
-
-        range = Range::create(selectedRange->endContainer()->document(),
-            selectedRange->endContainer(),
-            selectedRange->endOffset(),
-            selectedRange->endContainer(),
-            selectedRange->endOffset());
-        focus = localFrame->editor().firstRectForRange(range.get());
-    }
-
-    IntRect scaledAnchor(localFrame->view()->contentsToWindow(anchor));
-    IntRect scaledFocus(localFrame->view()->contentsToWindow(focus));
-
-    anchor = scaledAnchor;
-    focus = scaledFocus;
-
-    if (!selection.selection().isBaseFirst())
-        std::swap(anchor, focus);
-    return true;
-}
-
 InputMethodContext* WebViewImpl::inputMethodContext()
 {
     if (!m_imeAcceptEvents)
@@ -1238,26 +1089,6 @@ void WebViewImpl::didHideCandidateWindow()
         context->dispatchCandidateWindowHideEvent();
 }
 
-bool WebViewImpl::selectionTextDirection(WebTextDirection& start, WebTextDirection& end) const
-{
-    const LocalFrame* frame = focusedCoreFrame();
-    if (!frame)
-        return false;
-    FrameSelection& selection = frame->selection();
-    if (!selection.toNormalizedRange())
-        return false;
-    start = toWebTextDirection(selection.start().primaryDirection());
-    end = toWebTextDirection(selection.end().primaryDirection());
-    return true;
-}
-
-bool WebViewImpl::isSelectionAnchorFirst() const
-{
-    if (const LocalFrame* frame = focusedCoreFrame())
-        return frame->selection().selection().isBaseFirst();
-    return false;
-}
-
 WebVector<WebCompositionUnderline> WebViewImpl::compositionUnderlines() const
 {
     const LocalFrame* focused = focusedCoreFrame();
@@ -1282,54 +1113,6 @@ WebColor WebViewImpl::backgroundColor() const
         return m_baseBackgroundColor;
     FrameView* view = m_page->mainFrame()->view();
     return view->documentBackgroundColor().rgb();
-}
-
-bool WebViewImpl::caretOrSelectionRange(size_t* location, size_t* length)
-{
-    const LocalFrame* focused = focusedCoreFrame();
-    if (!focused)
-        return false;
-
-    PlainTextRange selectionOffsets = focused->inputMethodController().getSelectionOffsets();
-    if (selectionOffsets.isNull())
-        return false;
-
-    *location = selectionOffsets.start();
-    *length = selectionOffsets.length();
-    return true;
-}
-
-void WebViewImpl::setTextDirection(WebTextDirection direction)
-{
-    // The Editor::setBaseWritingDirection() function checks if we can change
-    // the text direction of the selected node and updates its DOM "dir"
-    // attribute and its CSS "direction" property.
-    // So, we just call the function as Safari does.
-    const LocalFrame* focused = focusedCoreFrame();
-    if (!focused)
-        return;
-
-    Editor& editor = focused->editor();
-    if (!editor.canEdit())
-        return;
-
-    switch (direction) {
-    case WebTextDirectionDefault:
-        editor.setBaseWritingDirection(NaturalWritingDirection);
-        break;
-
-    case WebTextDirectionLeftToRight:
-        editor.setBaseWritingDirection(LeftToRightWritingDirection);
-        break;
-
-    case WebTextDirectionRightToLeft:
-        editor.setBaseWritingDirection(RightToLeftWritingDirection);
-        break;
-
-    default:
-        notImplemented();
-        break;
-    }
 }
 
 // WebView --------------------------------------------------------------------
@@ -1430,24 +1213,6 @@ void WebViewImpl::clearFocusedElement()
         localFrame->selection().clear();
 }
 
-void WebViewImpl::scrollFocusedNodeIntoRect(const WebRect& rect)
-{
-    LocalFrame* frame = page()->mainFrame();
-    Element* element = focusedElement();
-    if (!frame || !frame->view() || !element)
-        return;
-
-    float scale;
-    IntPoint scroll;
-    bool needAnimation;
-    computeScaleAndScrollForFocusedNode(element, scale, scroll, needAnimation);
-}
-
-void WebViewImpl::computeScaleAndScrollForFocusedNode(Node* focusedNode, float& newScale, IntPoint& newScroll, bool& needAnimation)
-{
-    //FIXME(sky)
-}
-
 void WebViewImpl::advanceFocus(bool reverse)
 {
     page()->focusController().advanceFocus(reverse ? FocusTypeBackward : FocusTypeForward);
@@ -1460,11 +1225,6 @@ IntPoint WebViewImpl::clampOffsetAtScale(const IntPoint& offset, float scale)
         return offset;
 
     return view->clampOffsetAtScale(offset, scale);
-}
-
-void WebViewImpl::setMainFrameScrollOffset(const WebPoint& origin)
-{
-    updateMainFrameScrollPosition(origin, false);
 }
 
 float WebViewImpl::deviceScaleFactor() const
@@ -1508,43 +1268,6 @@ IntSize WebViewImpl::contentsSize() const
     return root->documentRect().size();
 }
 
-WebSize WebViewImpl::contentsPreferredMinimumSize()
-{
-    Document* document = m_page->mainFrame()->document();
-    if (!document || !document->renderView() || !document->documentElement())
-        return WebSize();
-
-    layout();
-    FontCachePurgePreventer fontCachePurgePreventer; // Required by minPreferredLogicalWidth().
-    return IntSize(document->renderView()->minPreferredLogicalWidth(), document->documentElement()->scrollHeight());
-}
-
-void WebViewImpl::resetScrollAndScaleState()
-{
-    // FIXME(sky): Remove
-}
-
-void WebViewImpl::setFixedLayoutSize(const WebSize& layoutSize)
-{
-    if (!page())
-        return;
-
-    LocalFrame* frame = page()->mainFrame();
-    if (!frame)
-        return;
-
-    RefPtr<FrameView> view = frame->view();
-    if (!view)
-        return;
-
-    m_fixedLayoutSizeLock = layoutSize.width || layoutSize.height;
-
-    if (m_fixedLayoutSizeLock)
-        view->setLayoutSize(layoutSize);
-    else
-        updateMainFrameLayoutSize();
-}
-
 WebHitTestResult WebViewImpl::hitTestResultAt(const WebPoint& point)
 {
     return coreHitTestResultAt(point);
@@ -1554,52 +1277,6 @@ HitTestResult WebViewImpl::coreHitTestResultAt(const WebPoint& point)
 {
     IntPoint scaledPoint = point;
     return hitTestResultForWindowPos(scaledPoint);
-}
-
-void WebViewImpl::copyImageAt(const WebPoint& point)
-{
-    if (!m_page)
-        return;
-
-    HitTestResult result = hitTestResultForWindowPos(point);
-
-    if (result.absoluteImageURLIncludingCanvasDataURL().isEmpty()) {
-        // There isn't actually an image at these coordinates.  Might be because
-        // the window scrolled while the context menu was open or because the page
-        // changed itself between when we thought there was an image here and when
-        // we actually tried to retreive the image.
-        //
-        // FIXME: implement a cache of the most recent HitTestResult to avoid having
-        //        to do two hit tests.
-        return;
-    }
-
-    m_page->mainFrame()->editor().copyImage(result);
-}
-
-void WebViewImpl::saveImageAt(const WebPoint& point)
-{
-    if (!m_page)
-        return;
-
-    KURL url = hitTestResultForWindowPos(point).absoluteImageURLIncludingCanvasDataURL();
-
-    if (url.isEmpty())
-        return;
-
-    ResourceRequest request(url);
-    request.setRequestContext(WebURLRequest::RequestContextDownload);
-    m_page->mainFrame()->loaderClient()->loadURLExternally(
-        request, NavigationPolicyDownloadTo, WebString());
-}
-
-void WebViewImpl::dragSourceSystemDragEnded()
-{
-    // FIXME(sky): Remove
-    // It's possible for us to get this callback while not doing a drag if
-    // it's from a previous page that got unloaded.
-    if (m_doingDragAndDrop)
-        m_doingDragAndDrop = false;
 }
 
 void WebViewImpl::spellingMarkers(WebVector<uint32_t>* markers)
@@ -1638,21 +1315,6 @@ void WebViewImpl::sendResizeEventAndRepaint()
 void WebViewImpl::setCompositorDeviceScaleFactorOverride(float deviceScaleFactor)
 {
     m_compositorDeviceScaleFactorOverride = deviceScaleFactor;
-}
-
-void WebViewImpl::setRootLayerTransform(const WebSize& rootLayerOffset, float rootLayerScale)
-{
-    if (m_rootLayerScale == rootLayerScale && m_rootLayerOffset == rootLayerOffset)
-        return;
-    m_rootLayerScale = rootLayerScale;
-    m_rootLayerOffset = rootLayerOffset;
-    if (mainFrameImpl())
-        mainFrameImpl()->setInputEventsTransformForEmulation(m_rootLayerOffset, m_rootLayerScale);
-    updateRootLayerTransform();
-}
-
-void WebViewImpl::extractSmartClipData(WebRect rect, WebString& clipText, WebString& clipHtml, WebRect& clipRect)
-{
 }
 
 void WebViewImpl::setIsTransparent(bool isTransparent)
@@ -1697,17 +1359,6 @@ bool WebViewImpl::isActive() const
 void WebViewImpl::setDomainRelaxationForbidden(bool forbidden, const WebString& scheme)
 {
     SchemeRegistry::setDomainRelaxationForbiddenForURLScheme(forbidden, String(scheme));
-}
-
-void WebViewImpl::setOpenedByDOM()
-{
-    m_page->setOpenedByDOM();
-}
-
-void WebViewImpl::setSelectionColors(unsigned activeBackgroundColor,
-                                     unsigned activeForegroundColor,
-                                     unsigned inactiveBackgroundColor,
-                                     unsigned inactiveForegroundColor) {
 }
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)
@@ -1779,16 +1430,6 @@ void WebViewImpl::invalidateRect(const IntRect& rect)
 void WebViewImpl::scheduleAnimation()
 {
     m_client->scheduleAnimation();
-}
-
-void WebViewImpl::updateMainFrameScrollPosition(const IntPoint& scrollPosition, bool programmaticScroll)
-{
-    // FIXME(sky): Remove
-}
-
-void WebViewImpl::updateRootLayerTransform()
-{
-    // FIXME(sky): Remove
 }
 
 bool WebViewImpl::detectContentOnTouch(const WebPoint& position)

@@ -70,17 +70,14 @@ public:
     // WebWidget methods:
     virtual void close() override;
     virtual WebSize size() override;
-    virtual void willStartLiveResize() override;
+
     virtual void resize(const WebSize&) override;
-    virtual void willEndLiveResize() override;
 
     virtual void beginFrame(const WebBeginFrameArgs&) override;
-    virtual void didCommitFrameToCompositor() override;
 
     virtual void layout() override;
     virtual void paint(WebCanvas*, const WebRect&) override;
     virtual bool isTrackingRepaints() const override;
-    virtual void themeChanged() override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
     virtual void setCursorVisibilityState(bool isVisible) override;
     virtual void mouseCaptureLost() override;
@@ -96,14 +93,10 @@ public:
     virtual bool compositionRange(size_t* location, size_t* length) override;
     virtual WebTextInputInfo textInputInfo() override;
     virtual WebColor backgroundColor() const override;
-    virtual bool selectionBounds(WebRect& anchor, WebRect& focus) const override;
+
     virtual void didShowCandidateWindow() override;
     virtual void didUpdateCandidateWindow() override;
     virtual void didHideCandidateWindow() override;
-    virtual bool selectionTextDirection(WebTextDirection& start, WebTextDirection& end) const override;
-    virtual bool isSelectionAnchorFirst() const override;
-    virtual bool caretOrSelectionRange(size_t* location, size_t* length) override;
-    virtual void setTextDirection(WebTextDirection) override;
 
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
@@ -122,36 +115,21 @@ public:
     virtual bool isActive() const override;
     virtual void setIsActive(bool value) override;
     virtual void setDomainRelaxationForbidden(bool, const WebString& scheme) override;
-    virtual void setOpenedByDOM() override;
     virtual WebFrame* mainFrame() override;
     virtual WebFrame* focusedFrame() override;
     virtual void setFocusedFrame(WebFrame*) override;
     virtual void setInitialFocus(bool reverse) override;
     virtual void clearFocusedElement() override;
-    virtual void scrollFocusedNodeIntoRect(const WebRect&) override;
     virtual void advanceFocus(bool reverse) override;
-    virtual void setMainFrameScrollOffset(const WebPoint&) override;
-    virtual void resetScrollAndScaleState() override;
-    virtual WebSize contentsPreferredMinimumSize() override;
 
     virtual float deviceScaleFactor() const override;
     virtual void setDeviceScaleFactor(float) override;
 
-    virtual void setFixedLayoutSize(const WebSize&) override;
-
     virtual WebHitTestResult hitTestResultAt(const WebPoint&) override;
-    virtual void copyImageAt(const WebPoint&) override;
-    virtual void saveImageAt(const WebPoint&) override;
-    virtual void dragSourceSystemDragEnded() override;
     virtual void spellingMarkers(WebVector<uint32_t>* markers) override;
     virtual void removeSpellingMarkersUnderWords(const WebVector<WebString>& words) override;
     virtual void setCompositorDeviceScaleFactorOverride(float) override;
-    virtual void setRootLayerTransform(const WebSize& offset, float scale) override;
-    virtual void setSelectionColors(unsigned activeBackgroundColor,
-                                    unsigned activeForegroundColor,
-                                    unsigned inactiveBackgroundColor,
-                                    unsigned inactiveForegroundColor) override;
-    virtual void extractSmartClipData(WebRect, WebString&, WebString&, WebRect&) override;
+
     virtual void transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters&) override;
     virtual bool endActiveFlingAnimation() override;
     virtual void setShowPaintRects(bool) override;
@@ -159,7 +137,7 @@ public:
     virtual void setShowFPSCounter(bool) override;
     virtual void setContinuousPaintingEnabled(bool) override;
     virtual void setShowScrollBottleneckRects(bool) override;
-    virtual void getSelectionRootBounds(WebRect& bounds) const override;
+
     virtual void acceptLanguagesChanged() override;
 
     // WebViewImpl
@@ -172,11 +150,6 @@ public:
     void setBackgroundColorOverride(WebColor);
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }
-
-    const WebPoint& lastMouseDownPoint() const
-    {
-        return m_lastMouseDownPoint;
-    }
 
     LocalFrame* focusedCoreFrame() const;
 
@@ -250,9 +223,6 @@ public:
         ScrollDirection*,
         ScrollGranularity*);
 
-    void computeScaleAndScrollForBlockRect(const WebPoint& hitPoint, const WebRect& blockRect, float padding, float defaultScaleWhenAlreadyLegible, float& scale, WebPoint& scroll);
-    void computeScaleAndScrollForFocusedNode(Node* focusedNode, float& scale, IntPoint& scroll, bool& needAnimation);
-
     // Exposed for the purpose of overriding device metrics.
     void sendResizeEventAndRepaint();
 
@@ -261,9 +231,6 @@ public:
     bool hasVerticalScrollbar();
 
     WebSettingsImpl* settingsImpl();
-
-    // Returns the bounding box of the block type node touched by the WebRect.
-    WebRect computeBlockBounds(const WebRect&, bool ignoreClipping);
 
     IntPoint clampOffsetAtScale(const IntPoint& offset, float scale);
 
@@ -276,8 +243,6 @@ private:
     IntSize contentsSize() const;
 
     void resetSavedScrollAndScaleState();
-
-    void updateMainFrameScrollPosition(const IntPoint& scrollPosition, bool programmaticScroll);
 
     void performResize();
 
@@ -312,11 +277,6 @@ private:
 
     void doComposite();
     void reallocateRenderer();
-    void updateRootLayerTransform();
-
-    // Helper function: Widens the width of |source| by the specified margins
-    // while keeping it smaller than page width.
-    WebRect widenRectWithinPageBounds(const WebRect& source, int targetMargin, int minimumMargin);
 
     // PageWidgetEventHandler functions
     virtual void handleMouseLeave(LocalFrame&, const WebMouseEvent&) override;
@@ -345,17 +305,6 @@ private:
     // against WebCore. This is lazily allocated the first time GetWebSettings()
     // is called.
     OwnPtr<WebSettingsImpl> m_webSettings;
-
-    // The point relative to the client area where the mouse was last pressed
-    // down. This is used by the drag client to determine what was under the
-    // mouse when the drag was initiated. We need to track this here in
-    // WebViewImpl since DragClient::startDrag does not pass the position the
-    // mouse was at when the drag was initiated, only the current point, which
-    // can be misleading as it is usually not over the element the user actually
-    // dragged by the time a drag is initiated.
-    WebPoint m_lastMouseDownPoint;
-
-    bool m_doingDragAndDrop;
 
     bool m_ignoreInputEvents;
 

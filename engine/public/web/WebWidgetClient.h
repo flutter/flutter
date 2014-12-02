@@ -133,21 +133,6 @@ public:
     // reset the input method by cancelling any ongoing composition.
     virtual void resetInputMethod() { }
 
-    // Requests to lock the mouse cursor. If true is returned, the success
-    // result will be asynchronously returned via a single call to
-    // WebWidget::didAcquirePointerLock() or
-    // WebWidget::didNotAcquirePointerLock().
-    // If false, the request has been denied synchronously.
-    virtual bool requestPointerLock() { return false; }
-
-    // Cause the pointer lock to be released. This may be called at any time,
-    // including when a lock is pending but not yet acquired.
-    // WebWidget::didLosePointerLock() is called when unlock is complete.
-    virtual void requestPointerUnlock() { }
-
-    // Returns true iff the pointer is locked to this widget.
-    virtual bool isPointerLocked() { return false; }
-
     // Called when a gesture event is handled.
     virtual void didHandleGestureEvent(const WebGestureEvent& event, bool eventCancelled) { }
 

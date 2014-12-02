@@ -665,16 +665,6 @@ WebString WebLocalFrameImpl::renderTreeAsText(RenderAsTextControls toShow) const
     return externalRepresentation(frame(), behavior);
 }
 
-WebString WebLocalFrameImpl::markerTextForListItem(const WebElement& webElement) const
-{
-    return WebString();
-}
-
-WebRect WebLocalFrameImpl::selectionBoundsRect() const
-{
-    return hasSelection() ? WebRect(IntRect(frame()->selection().bounds(false))) : WebRect();
-}
-
 bool WebLocalFrameImpl::selectionStartHasSpellingMarkerFor(int from, int length) const
 {
     if (!frame())

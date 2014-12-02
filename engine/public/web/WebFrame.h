@@ -287,15 +287,6 @@ public:
     // to support layout tests.
     virtual WebString renderTreeAsText(RenderAsTextControls toShow = RenderAsTextNormal) const = 0;
 
-    // Calls markerTextForListItem() defined in WebCore/rendering/RenderTreeAsText.h.
-    virtual WebString markerTextForListItem(const WebElement&) const = 0;
-
-    // Returns the bounds rect for current selection. If selection is performed
-    // on transformed text, the rect will still bound the selection but will
-    // not be transformed itself. If no selection is present, the rect will be
-    // empty ((0,0), (0,0)).
-    virtual WebRect selectionBoundsRect() const = 0;
-
     // Only for testing purpose:
     // Returns true if selection.anchorNode has a marker on range from |from| with |length|.
     virtual bool selectionStartHasSpellingMarkerFor(int from, int length) const = 0;

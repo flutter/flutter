@@ -108,16 +108,6 @@ void Page::documentDetached(Document* document)
     m_multisamplingChangedObservers.clear();
 }
 
-bool Page::openedByDOM() const
-{
-    return m_openedByDOM;
-}
-
-void Page::setOpenedByDOM()
-{
-    m_openedByDOM = true;
-}
-
 void Page::setNeedsRecalcStyleInAllFrames()
 {
     LocalFrame* frame = mainFrame();
