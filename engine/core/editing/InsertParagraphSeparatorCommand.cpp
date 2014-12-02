@@ -135,11 +135,6 @@ void InsertParagraphSeparatorCommand::doApply()
     calculateStyleBeforeInsertion(insertionPosition);
 
     //---------------------------------------------------------------------
-    // Handle special case of typing return on an empty list item
-    if (breakOutOfEmptyListItem())
-        return;
-
-    //---------------------------------------------------------------------
     // Prepare for more general cases.
 
     bool isFirstInBlock = isStartOfBlock(visiblePos);

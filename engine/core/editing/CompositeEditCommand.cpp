@@ -49,7 +49,6 @@
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/editing/SplitElementCommand.h"
 #include "sky/engine/core/editing/SplitTextNodeCommand.h"
-#include "sky/engine/core/editing/SplitTextNodeContainingElementCommand.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/editing/htmlediting.h"
@@ -372,11 +371,6 @@ void CompositeEditCommand::splitTextNode(PassRefPtr<Text> node, unsigned offset)
 void CompositeEditCommand::splitElement(PassRefPtr<Element> element, PassRefPtr<Node> atChild)
 {
     applyCommandToComposite(SplitElementCommand::create(element, atChild));
-}
-
-void CompositeEditCommand::splitTextNodeContainingElement(PassRefPtr<Text> text, unsigned offset)
-{
-    applyCommandToComposite(SplitTextNodeContainingElementCommand::create(text, offset));
 }
 
 void CompositeEditCommand::insertTextIntoNode(PassRefPtr<Text> node, unsigned offset, const String& text)
@@ -706,75 +700,6 @@ void CompositeEditCommand::removePlaceholderAt(const Position& p)
     deleteTextFromNode(toText(p.anchorNode()), p.offsetInContainerNode(), 1);
 }
 
-PassRefPtr<HTMLElement> CompositeEditCommand::insertNewDefaultParagraphElementAt(const Position& position)
-{
-    RefPtr<HTMLElement> paragraphElement = createDefaultParagraphElement(document());
-    insertNodeAt(paragraphElement, position);
-    return paragraphElement.release();
-}
-
-// If the paragraph is not entirely within it's own block, create one and move the paragraph into
-// it, and return that block.  Otherwise return 0.
-PassRefPtr<HTMLElement> CompositeEditCommand::moveParagraphContentsToNewBlockIfNecessary(const Position& pos)
-{
-    ASSERT(isEditablePosition(pos, ContentIsEditable, DoNotUpdateStyle));
-
-    // It's strange that this function is responsible for verifying that pos has not been invalidated
-    // by an earlier call to this function.  The caller, applyBlockStyle, should do this.
-    VisiblePosition visiblePos(pos, VP_DEFAULT_AFFINITY);
-    VisiblePosition visibleParagraphStart(startOfParagraph(visiblePos));
-    VisiblePosition visibleParagraphEnd = endOfParagraph(visiblePos);
-    VisiblePosition next = visibleParagraphEnd.next();
-    VisiblePosition visibleEnd = next.isNotNull() ? next : visibleParagraphEnd;
-
-    Position upstreamStart = visibleParagraphStart.deepEquivalent().upstream();
-    Position upstreamEnd = visibleEnd.deepEquivalent().upstream();
-
-    // If there are no VisiblePositions in the same block as pos then
-    // upstreamStart will be outside the paragraph
-    if (comparePositions(pos, upstreamStart) < 0)
-        return nullptr;
-
-    // Perform some checks to see if we need to perform work in this function.
-    if (isBlock(upstreamStart.deprecatedNode())) {
-        // If the block is the root editable element, always move content to a new block,
-        // since it is illegal to modify attributes on the root editable element for editing.
-        if (upstreamStart.deprecatedNode() == editableRootForPosition(upstreamStart)) {
-            // If the block is the root editable element and it contains no visible content, create a new
-            // block but don't try and move content into it, since there's nothing for moveParagraphs to move.
-            if (!Position::hasRenderedNonAnonymousDescendantsWithHeight(upstreamStart.deprecatedNode()->renderer()))
-                return insertNewDefaultParagraphElementAt(upstreamStart);
-        } else if (isBlock(upstreamEnd.deprecatedNode())) {
-            if (!upstreamEnd.deprecatedNode()->isDescendantOf(upstreamStart.deprecatedNode())) {
-                // If the paragraph end is a descendant of paragraph start, then we need to run
-                // the rest of this function. If not, we can bail here.
-                return nullptr;
-            }
-        } else if (enclosingBlock(upstreamEnd.deprecatedNode()) != upstreamStart.deprecatedNode()) {
-            // It should be an ancestor of the paragraph start.
-            // We can bail as we have a full block to work with.
-            return nullptr;
-        } else if (isEndOfEditableOrNonEditableContent(visibleEnd)) {
-            // At the end of the editable region. We can bail here as well.
-            return nullptr;
-        }
-    }
-
-    if (visibleParagraphEnd.isNull())
-        return nullptr;
-
-    RefPtr<HTMLElement> newBlock = insertNewDefaultParagraphElementAt(upstreamStart);
-
-    // Inserting default paragraph element can change visible position. We
-    // should update visible positions before use them.
-    visiblePos = VisiblePosition(pos, VP_DEFAULT_AFFINITY);
-    visibleParagraphStart = VisiblePosition(startOfParagraph(visiblePos));
-    visibleParagraphEnd = VisiblePosition(endOfParagraph(visiblePos));
-    moveParagraphs(visibleParagraphStart, visibleParagraphEnd, VisiblePosition(firstPositionInNode(newBlock.get())));
-
-    return newBlock.release();
-}
-
 void CompositeEditCommand::pushAnchorElementDown(Element* anchorNode)
 {
     if (!anchorNode)
@@ -787,85 +712,6 @@ void CompositeEditCommand::pushAnchorElementDown(Element* anchorNode)
     if (anchorNode->inDocument())
         removeNodePreservingChildren(anchorNode);
 }
-
-// Clone the paragraph between start and end under blockElement,
-// preserving the hierarchy up to outerNode.
-
-void CompositeEditCommand::cloneParagraphUnderNewElement(const Position& start, const Position& end, Node* passedOuterNode, Element* blockElement)
-{
-    ASSERT(comparePositions(start, end) <= 0);
-    ASSERT(passedOuterNode);
-    ASSERT(blockElement);
-
-    // First we clone the outerNode
-    RefPtr<Node> lastNode = nullptr;
-    RefPtr<Node> outerNode = passedOuterNode;
-
-    if (outerNode->isRootEditableElement()) {
-        lastNode = blockElement;
-    } else {
-        lastNode = outerNode->cloneNode(false);
-        appendNode(lastNode, blockElement);
-    }
-
-    if (start.anchorNode() != outerNode && lastNode->isElementNode() && start.anchorNode()->isDescendantOf(outerNode.get())) {
-        Vector<RefPtr<Node> > ancestors;
-
-        // Insert each node from innerNode to outerNode (excluded) in a list.
-        for (Node* n = start.deprecatedNode(); n && n != outerNode; n = n->parentNode())
-            ancestors.append(n);
-
-        // Clone every node between start.deprecatedNode() and outerBlock.
-
-        for (size_t i = ancestors.size(); i != 0; --i) {
-            Node* item = ancestors[i - 1].get();
-            RefPtr<Node> child = item->cloneNode(false);
-            appendNode(child, toElement(lastNode));
-            lastNode = child.release();
-        }
-    }
-
-    // Scripts specified in javascript protocol may remove |outerNode|
-    // during insertion, e.g. <iframe src="javascript:...">
-    if (!outerNode->inDocument())
-        return;
-
-    // Handle the case of paragraphs with more than one node,
-    // cloning all the siblings until end.deprecatedNode() is reached.
-
-    if (start.deprecatedNode() != end.deprecatedNode() && !start.deprecatedNode()->isDescendantOf(end.deprecatedNode())) {
-        // If end is not a descendant of outerNode we need to
-        // find the first common ancestor to increase the scope
-        // of our nextSibling traversal.
-        while (outerNode && !end.deprecatedNode()->isDescendantOf(outerNode.get())) {
-            outerNode = outerNode->parentNode();
-        }
-
-        if (!outerNode)
-            return;
-
-        RefPtr<Node> startNode = start.deprecatedNode();
-        for (RefPtr<Node> node = NodeTraversal::nextSkippingChildren(*startNode, outerNode.get()); node; node = NodeTraversal::nextSkippingChildren(*node, outerNode.get())) {
-            // Move lastNode up in the tree as much as node was moved up in the
-            // tree by NodeTraversal::nextSkippingChildren, so that the relative depth between
-            // node and the original start node is maintained in the clone.
-            while (startNode && lastNode && startNode->parentNode() != node->parentNode()) {
-                startNode = startNode->parentNode();
-                lastNode = lastNode->parentNode();
-            }
-
-            if (!lastNode || !lastNode->parentNode())
-                return;
-
-            RefPtr<Node> clonedNode = node->cloneNode(true);
-            insertNodeAfter(clonedNode, lastNode);
-            lastNode = clonedNode.release();
-            if (node == end.deprecatedNode() || end.deprecatedNode()->isDescendantOf(node.get()))
-                break;
-        }
-    }
-}
-
 
 // There are bugs in deletion when it removes a fully selected table/list.
 // It expands and removes the entire table/list, but will let content
@@ -907,49 +753,6 @@ void CompositeEditCommand::cleanupAfterDeletion(VisiblePosition destination)
     }
 }
 
-// This is a version of moveParagraph that preserves style by keeping the original markup
-// It is currently used only by IndentOutdentCommand but it is meant to be used in the
-// future by several other commands such as InsertList and the align commands.
-// The blockElement parameter is the element to move the paragraph to,
-// outerNode is the top element of the paragraph hierarchy.
-
-void CompositeEditCommand::moveParagraphWithClones(const VisiblePosition& startOfParagraphToMove, const VisiblePosition& endOfParagraphToMove, HTMLElement* blockElement, Node* outerNode)
-{
-    ASSERT(outerNode);
-    ASSERT(blockElement);
-
-    VisiblePosition beforeParagraph = startOfParagraphToMove.previous();
-    VisiblePosition afterParagraph(endOfParagraphToMove.next());
-
-    // We upstream() the end and downstream() the start so that we don't include collapsed whitespace in the move.
-    // When we paste a fragment, spaces after the end and before the start are treated as though they were rendered.
-    Position start = startOfParagraphToMove.deepEquivalent().downstream();
-    Position end = startOfParagraphToMove == endOfParagraphToMove ? start : endOfParagraphToMove.deepEquivalent().upstream();
-    if (comparePositions(start, end) > 0)
-        end = start;
-
-    cloneParagraphUnderNewElement(start, end, outerNode, blockElement);
-
-    setEndingSelection(VisibleSelection(start, end, DOWNSTREAM));
-    deleteSelection(false, false, false);
-
-    // There are bugs in deletion when it removes a fully selected table/list.
-    // It expands and removes the entire table/list, but will let content
-    // before and after the table/list collapse onto one line.
-
-    cleanupAfterDeletion();
-
-    // Add a br if pruning an empty block level element caused a collapse.  For example:
-    // foo^
-    // <div>bar</div>
-    // baz
-    // Imagine moving 'bar' to ^.  'bar' will be deleted and its div pruned.  That would
-    // cause 'baz' to collapse onto the line with 'foobar' unless we insert a br.
-    // Must recononicalize these two VisiblePositions after the pruning above.
-    beforeParagraph = VisiblePosition(beforeParagraph.deepEquivalent());
-    afterParagraph = VisiblePosition(afterParagraph.deepEquivalent());
-}
-
 void CompositeEditCommand::moveParagraph(const VisiblePosition& startOfParagraphToMove, const VisiblePosition& endOfParagraphToMove, const VisiblePosition& destination, bool preserveSelection, bool preserveStyle, Node* constrainingAncestor)
 {
     ASSERT(isStartOfParagraph(startOfParagraphToMove));
@@ -961,19 +764,6 @@ void CompositeEditCommand::moveParagraphs(const VisiblePosition& startOfParagrap
 {
     // FIXME(sky): Remove.
     // We've probably broken editiing badly by deleting this function...
-}
-
-// FIXME: Send an appropriate shouldDeleteRange call.
-bool CompositeEditCommand::breakOutOfEmptyListItem()
-{
-    return false;
-}
-
-// If the caret is in an empty quoted paragraph, and either there is nothing before that
-// paragraph, or what is before is unquoted, and the user presses delete, unquote that paragraph.
-bool CompositeEditCommand::breakOutOfEmptyMailBlockquotedParagraph()
-{
-    return false;
 }
 
 // Operations use this function to avoid inserting content into an anchor when at the start or the end of

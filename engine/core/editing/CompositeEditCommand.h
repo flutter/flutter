@@ -121,7 +121,6 @@ protected:
     Position positionOutsideTabSpan(const Position&);
     void splitElement(PassRefPtr<Element>, PassRefPtr<Node> atChild);
     void splitTextNode(PassRefPtr<Text>, unsigned offset);
-    void splitTextNodeContainingElement(PassRefPtr<Text>, unsigned offset);
 
     void deleteInsignificantText(PassRefPtr<Text>, unsigned start, unsigned end);
     void deleteInsignificantText(const Position& start, const Position& end);
@@ -129,21 +128,12 @@ protected:
 
     void removePlaceholderAt(const Position&);
 
-    PassRefPtr<HTMLElement> insertNewDefaultParagraphElementAt(const Position&);
-
-    PassRefPtr<HTMLElement> moveParagraphContentsToNewBlockIfNecessary(const Position&);
-
     void pushAnchorElementDown(Element*);
 
     // FIXME: preserveSelection and preserveStyle should be enums
     void moveParagraph(const VisiblePosition&, const VisiblePosition&, const VisiblePosition&, bool preserveSelection = false, bool preserveStyle = true, Node* constrainingAncestor = 0);
     void moveParagraphs(const VisiblePosition&, const VisiblePosition&, const VisiblePosition&, bool preserveSelection = false, bool preserveStyle = true, Node* constrainingAncestor = 0);
-    void moveParagraphWithClones(const VisiblePosition& startOfParagraphToMove, const VisiblePosition& endOfParagraphToMove, HTMLElement* blockElement, Node* outerNode);
-    void cloneParagraphUnderNewElement(const Position& start, const Position& end, Node* outerNode, Element* blockElement);
     void cleanupAfterDeletion(VisiblePosition destination = VisiblePosition());
-
-    bool breakOutOfEmptyListItem();
-    bool breakOutOfEmptyMailBlockquotedParagraph();
 
     Position positionAvoidingSpecialElementBoundary(const Position&);
 

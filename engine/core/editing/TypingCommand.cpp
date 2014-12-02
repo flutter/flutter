@@ -399,11 +399,6 @@ void TypingCommand::deleteKeyPressed(TextGranularity granularity)
         selectionAfterUndo = selectionToDelete;
         break;
     case CaretSelection: {
-        // After breaking out of an empty mail blockquote, we still want continue with the deletion
-        // so actual content will get deleted, and not just the quote style.
-        if (breakOutOfEmptyMailBlockquotedParagraph())
-            typingAddedToOpenCommand(DeleteKey);
-
         m_smartDelete = false;
 
         OwnPtr<FrameSelection> selection = FrameSelection::create();
@@ -412,11 +407,6 @@ void TypingCommand::deleteKeyPressed(TextGranularity granularity)
 
         VisiblePosition visibleStart(endingSelection().visibleStart());
         if (visibleStart.previous(CannotCrossEditingBoundary).isNull()) {
-            // When the caret is at the start of the editable area in an empty list item, break out of the list item.
-            if (breakOutOfEmptyListItem()) {
-                typingAddedToOpenCommand(DeleteKey);
-                return;
-            }
             // When there are no visible positions in the editing root, delete its entire contents.
             if (visibleStart.next(CannotCrossEditingBoundary).isNull() && makeEditableRootEmpty()) {
                 typingAddedToOpenCommand(DeleteKey);
