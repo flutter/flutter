@@ -151,8 +151,6 @@ public:
     void updateLayoutAndStyleForPainting();
     void updateLayoutAndStyleIfNeededRecursive();
 
-    void invalidateTreeIfNeededRecursive();
-
     void forceLayout(bool allowSubtree = false);
 
     // Methods to convert points and rects between the coordinate space of the renderer, and this view.

@@ -409,6 +409,8 @@ void FrameView::layout(bool allowSubtree)
 
 void FrameView::invalidateTreeIfNeeded()
 {
+    lifecycle().advanceTo(DocumentLifecycle::InPaintInvalidation);
+
     ASSERT(renderView());
     RenderView& rootForPaintInvalidation = *renderView();
     ASSERT(!rootForPaintInvalidation.needsLayout());
@@ -426,6 +428,8 @@ void FrameView::invalidateTreeIfNeeded()
 
     if (m_frame->selection().isCaretBoundsDirty())
         m_frame->selection().invalidateCaretRect();
+
+    lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
 }
 
 DocumentLifecycle& FrameView::lifecycle() const
@@ -798,7 +802,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     }
 
     RELEASE_ASSERT(!needsLayout());
-    ASSERT(document->lifecycle().state() >= DocumentLifecycle::CompositingClean);
+    ASSERT(document->lifecycle().state() >= DocumentLifecycle::PaintInvalidationClean);
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Paint", "data", InspectorPaintEvent::data(renderView, rect));
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
@@ -872,7 +876,7 @@ void FrameView::updateLayoutAndStyleForPainting()
 
     if (RenderView* view = renderView()) {
         TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateTreeAndUpdateIframes", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
-        invalidateTreeIfNeededRecursive();
+        invalidateTreeIfNeeded();
         view->updateIFramesAfterLayout();
     }
 
@@ -902,14 +906,6 @@ void FrameView::updateLayoutAndStyleIfNeededRecursive()
     m_frame->document()->renderView()->assertRendererLaidOut();
 #endif
 
-}
-
-void FrameView::invalidateTreeIfNeededRecursive()
-{
-    // FIXME: We should be more aggressive at cutting tree traversals.
-    lifecycle().advanceTo(DocumentLifecycle::InPaintInvalidation);
-    invalidateTreeIfNeeded();
-    lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
 }
 
 void FrameView::forceLayout(bool allowSubtree)

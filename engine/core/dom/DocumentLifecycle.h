@@ -55,9 +55,6 @@ public:
         AfterPerformLayout,
         LayoutClean,
 
-        InCompositingUpdate,
-        CompositingClean,
-
         InPaintInvalidation,
         PaintInvalidationClean,
 
@@ -146,11 +143,7 @@ private:
 
 inline bool DocumentLifecycle::stateAllowsTreeMutations() const
 {
-    // FIXME: We should not allow mutations in InPreLayout or AfterPerformLayout either,
-    // but we need to fix MediaList listeners and plugins first.
-    return m_state != InStyleRecalc
-        && m_state != InPerformLayout
-        && m_state != InCompositingUpdate;
+    return m_state != InStyleRecalc && m_state != InPerformLayout;
 }
 
 inline bool DocumentLifecycle::stateAllowsRenderTreeMutations() const
@@ -165,7 +158,6 @@ inline bool DocumentLifecycle::stateAllowsDetach() const
         || m_state == StyleClean
         || m_state == InPreLayout
         || m_state == LayoutClean
-        || m_state == CompositingClean
         || m_state == PaintInvalidationClean
         || m_state == Stopping;
 }

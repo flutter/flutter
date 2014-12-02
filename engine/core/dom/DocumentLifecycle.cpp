@@ -127,15 +127,6 @@ bool DocumentLifecycle::canAdvanceTo(State state) const
             return true;
         return false;
     }
-    if (m_state == CompositingClean) {
-        if (state == InStyleRecalc)
-            return true;
-        if (state == InCompositingUpdate)
-            return true;
-        if (state == InPaintInvalidation)
-            return true;
-        return false;
-    }
     if (m_state == InPaintInvalidation) {
         if (state == PaintInvalidationClean)
             return true;
@@ -146,7 +137,7 @@ bool DocumentLifecycle::canAdvanceTo(State state) const
             return true;
         if (state == InPreLayout)
             return true;
-        if (state == InCompositingUpdate)
+        if (state == InPaintInvalidation)
             return true;
         return false;
     }
@@ -158,7 +149,7 @@ bool DocumentLifecycle::canRewindTo(State state) const
     // This transition is bogus, but we've whitelisted it anyway.
     if (s_deprecatedTransitionStack && m_state == s_deprecatedTransitionStack->from() && state == s_deprecatedTransitionStack->to())
         return true;
-    return m_state == StyleClean || m_state == AfterPerformLayout || m_state == LayoutClean || m_state == CompositingClean || m_state == PaintInvalidationClean;
+    return m_state == StyleClean || m_state == AfterPerformLayout || m_state == LayoutClean || m_state == PaintInvalidationClean;
 }
 
 #endif
