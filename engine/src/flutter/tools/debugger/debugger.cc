@@ -4,7 +4,7 @@
 
 #include "sky/tools/debugger/debugger.h"
 
-#include "mojo/services/window_manager/basic_focus_rules.h"
+#include "services/window_manager/basic_focus_rules.h"
 
 namespace sky {
 namespace debugger {
