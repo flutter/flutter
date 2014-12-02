@@ -252,9 +252,6 @@ void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const Layout
     if (!view())
         return;
 
-    if (paintInfo.skipRootBackground())
-        return;
-
     bool shouldPaintBackground = true;
     Node* documentElement = document().documentElement();
     if (RenderBox* rootBox = documentElement ? toRenderBox(documentElement->renderer()) : 0)

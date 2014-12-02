@@ -78,9 +78,6 @@ struct PaintInfo {
 
     bool forceBlackText() const { return paintBehavior & PaintBehaviorForceBlackText; }
 
-    bool skipRootBackground() const { return paintBehavior & PaintBehaviorSkipRootBackground; }
-    bool paintRootBackgroundOnly() const { return paintBehavior & PaintBehaviorRootBackgroundOnly; }
-
     void applyTransform(const AffineTransform& localToAncestorTransform, bool identityStatusUnknown = true)
     {
         if (identityStatusUnknown && localToAncestorTransform.isIdentity())

@@ -668,9 +668,6 @@ void RenderBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)
 {
-    if (paintInfo.skipRootBackground())
-        return;
-
     const FillLayer& bgLayer = style()->backgroundLayers();
     Color bgColor = resolveColor(CSSPropertyBackgroundColor);
 

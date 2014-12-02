@@ -53,10 +53,7 @@ enum PaintPhase {
 
 enum PaintBehaviorFlags {
     PaintBehaviorNormal = 0,
-    // FIXME(sky): Renumber these once we're done deleting them.
-    PaintBehaviorForceBlackText = 1 << 1,
-    PaintBehaviorSkipRootBackground = 1 << 2,
-    PaintBehaviorRootBackgroundOnly = 1 << 3
+    PaintBehaviorForceBlackText = 1 << 0,
 };
 
 typedef unsigned PaintBehavior;

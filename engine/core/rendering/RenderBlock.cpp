@@ -612,7 +612,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // Our scrollbar widgets paint exactly when we tell them to, so that they work properly with
     // z-index.  We paint after we painted the background/border, so that the scrollbars will
     // sit above the background/border.
-    if (hasOverflowClip() && (phase == PaintPhaseBlockBackground || phase == PaintPhaseChildBlockBackground) && paintInfo.shouldPaintWithinRoot(this) && !paintInfo.paintRootBackgroundOnly())
+    if (hasOverflowClip() && (phase == PaintPhaseBlockBackground || phase == PaintPhaseChildBlockBackground) && paintInfo.shouldPaintWithinRoot(this))
         layer()->scrollableArea()->paintOverflowControls(paintInfo.context, roundedIntPoint(adjustedPaintOffset), paintInfo.rect, false /* paintingOverlayControls */);
 }
 
@@ -702,12 +702,10 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 {
     PaintPhase paintPhase = paintInfo.phase;
 
-    // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
     LayoutPoint scrolledOffset = paintOffset;
     if (hasOverflowClip())
         scrolledOffset.move(-scrolledContentOffset());
 
-    // 1. paint background, borders etc
     if (paintPhase == PaintPhaseBlockBackground || paintPhase == PaintPhaseChildBlockBackground) {
         if (hasBoxDecorationBackground())
             paintBoxDecorationBackground(paintInfo, paintOffset);
@@ -724,10 +722,9 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     }
 
     // We're done.  We don't bother painting any children.
-    if (paintPhase == PaintPhaseBlockBackground || paintInfo.paintRootBackgroundOnly())
+    if (paintPhase == PaintPhaseBlockBackground)
         return;
 
-    // 2. paint contents
     if (paintPhase != PaintPhaseSelfOutline) {
         // Avoid painting descendants of the root element when stylesheets haven't loaded.  This eliminates FOUC.
         // It's ok not to draw, because later on, when all the stylesheets do load, styleResolverChanged() on the Document
@@ -736,17 +733,13 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
             paintContents(paintInfo, scrolledOffset);
     }
 
-    // 3. paint selection
-    // FIXME: Make this work with multi column layouts.  For now don't fill gaps.
     paintSelection(paintInfo, scrolledOffset); // Fill in gaps in selection on lines and between blocks.
 
-    // 5. paint outline.
     if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline)
         && style()->hasOutline() && !style()->outlineStyleIsAuto()) {
         paintOutline(paintInfo, LayoutRect(paintOffset, size()));
     }
 
-    // 7. paint caret.
     // If the caret's node's render object's containing block is this block, and the paint action is PaintPhaseForeground,
     // then paint the caret.
     if (paintPhase == PaintPhaseForeground)
