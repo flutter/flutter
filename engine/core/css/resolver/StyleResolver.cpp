@@ -166,11 +166,12 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
     if (cssSheet->mediaQueries() && !m_medium->eval(cssSheet->mediaQueries(), &m_viewportDependentMediaQueryResults))
         return;
 
-    TreeScope* treeScope = ScopedStyleResolver::treeScopeFor(document(), cssSheet);
-    if (!treeScope)
+    Node* ownerNode = cssSheet->ownerNode();
+    if (!ownerNode)
         return;
 
-    ScopedStyleResolver& resolver = treeScope->ensureScopedStyleResolver();
+    TreeScope& treeScope = ownerNode->treeScope();
+    ScopedStyleResolver& resolver = treeScope.ensureScopedStyleResolver();
     document().styleEngine()->addScopedStyleResolver(&resolver);
     resolver.addRulesFromSheet(cssSheet, *m_medium, this);
 }

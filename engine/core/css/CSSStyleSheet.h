@@ -46,7 +46,6 @@ enum StyleSheetUpdateType {
 class CSSStyleSheet final : public StyleSheet {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<CSSStyleSheet> create(PassRefPtr<StyleSheetContents>);
     static PassRefPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
     static PassRefPtr<CSSStyleSheet> createInline(PassRefPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
 

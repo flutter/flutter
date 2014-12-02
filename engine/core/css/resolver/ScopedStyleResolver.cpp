@@ -39,23 +39,6 @@
 
 namespace blink {
 
-TreeScope* ScopedStyleResolver::treeScopeFor(Document& document, const CSSStyleSheet* sheet)
-{
-    ASSERT(sheet);
-
-    if (!sheet->ownerDocument())
-        return 0;
-
-    Node* ownerNode = sheet->ownerNode();
-    if (!isHTMLStyleElement(ownerNode))
-        return &document;
-
-    HTMLStyleElement& styleElement = toHTMLStyleElement(*ownerNode);
-    if (styleElement.isInShadowTree())
-        return styleElement.containingShadowRoot();
-    return &document;
-}
-
 void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, const MediaQueryEvaluator& medium, StyleResolver* resolver)
 {
     m_authorStyleSheets.append(cssSheet);
