@@ -162,11 +162,11 @@ When down is true:
                  devices that do not detect pressure (e.g. mice),
                  returns 1.0
 
-   pressure-min: the minimum value that pressure can return for this
-                 pointer
+    pressure-min: the minimum value that pressure can return for this
+                  pointer
 
-   pressure-max: the maximum value that pressure can return for this
-                 pointer
+    pressure-max: the maximum value that pressure can return for this
+                  pointer
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted':
@@ -175,20 +175,20 @@ When kind is 'touch', 'stylus', or 'stylus-inverted':
                  distance of stylus or finger from screen), if
                  supported and down is not true, otherwise 0.0.
 
-   distance-min: the minimum value that distance can return for this
-                 pointer (always 0.0)
+    distance-min: the minimum value that distance can return for this
+                  pointer (always 0.0)
 
-   distance-max: the maximum value that distance can return for this
-                 pointer (0.0 if not supported)
+    distance-max: the maximum value that distance can return for this
+                  pointer (0.0 if not supported)
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted' and down is true:
 
-   radius-major: the radius of the contact ellipse along the major
-                 axis, in pixels
+    radius-major: the radius of the contact ellipse along the major
+                  axis, in pixels
 
-   radius-minor: the radius of the contact ellipse along the major
-                 axis, in pixels
+    radius-minor: the radius of the contact ellipse along the major
+                  axis, in pixels
 
      radius-min: the minimum value that could be reported for
                  radius-major or radius-minor for this pointer
