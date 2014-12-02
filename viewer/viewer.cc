@@ -25,8 +25,7 @@
 namespace sky {
 
 class Viewer : public mojo::ApplicationDelegate,
-               public mojo::InterfaceFactory<mojo::ContentHandler>,
-               public mojo::InterfaceFactory<mojo::Tracing> {
+               public mojo::InterfaceFactory<mojo::ContentHandler> {
  public:
   Viewer() {}
 
@@ -38,12 +37,13 @@ class Viewer : public mojo::ApplicationDelegate,
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());
     base::i18n::InitializeICU();
+
+    mojo::TracingImpl::Create(app);
   }
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->AddService<mojo::ContentHandler>(this);
-    connection->AddService<mojo::Tracing>(this);
     return true;
   }
 
@@ -51,12 +51,6 @@ class Viewer : public mojo::ApplicationDelegate,
   virtual void Create(mojo::ApplicationConnection* connection,
                       mojo::InterfaceRequest<mojo::ContentHandler> request) override {
     mojo::BindToRequest(new ContentHandlerImpl(), &request);
-  }
-
-  // Overridden from InterfaceFactory<Tracing>
-  virtual void Create(mojo::ApplicationConnection* connection,
-                      mojo::InterfaceRequest<mojo::Tracing> request) override {
-    new mojo::TracingImpl(request.Pass(), FILE_PATH_LITERAL("sky_viewer"));
   }
 
   scoped_ptr<PlatformImpl> platform_impl_;
