@@ -50,9 +50,7 @@ public:
 
     // Returns the qualified name, which may contain a prefix and a colon.
     BLINK_EXPORT WebString tagName() const;
-    // Check if this element has the specified local tag name, and the HTML
-    // namespace. Tag name matching is case-insensitive.
-    BLINK_EXPORT bool hasHTMLTagName(const WebString&) const;
+
     BLINK_EXPORT bool hasAttribute(const WebString&) const;
     BLINK_EXPORT void removeAttribute(const WebString&);
     BLINK_EXPORT WebString getAttribute(const WebString&) const;
@@ -68,10 +66,6 @@ public:
     // element that has the lang attribute set, or from the HTTP
     // "Content-Language" header as a fallback.
     BLINK_EXPORT WebString computeInheritedLanguage() const;
-
-    // Returns the image contents of this element or a null WebImage
-    // if there isn't any.
-    BLINK_EXPORT WebImage imageContents();
 
 #if BLINK_IMPLEMENTATION
     WebElement(const PassRefPtr<Element>&);

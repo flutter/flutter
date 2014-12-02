@@ -147,7 +147,7 @@ public:
     String tagName() const { return nodeName(); }
 
     bool hasTagName(const QualifiedName& tagName) const { return m_tagName == tagName; }
-    bool hasTagName(const HTMLQualifiedName& tagName) const { return ContainerNode::hasTagName(tagName); }
+    bool hasTagName(const HTMLQualifiedName& name) const { return hasLocalName(name.localName()); }
 
     // A fast function for checking the local name against another atomic string.
     bool hasLocalName(const AtomicString& other) const { return m_tagName.localName() == other; }
@@ -226,7 +226,6 @@ public:
     KURL getNonEmptyURLAttribute(const QualifiedName&) const;
 
     virtual const AtomicString imageSourceURL() const;
-    virtual Image* imageContents() { return 0; }
 
     void focus(bool restorePreviousSelection = true, FocusType = FocusTypeNone);
     void updateFocusAppearance(bool restorePreviousSelection);
@@ -239,14 +238,14 @@ public:
     // Whether the node can actually be focused.
     bool isFocusable() const;
     bool isKeyboardFocusable() const;
-    virtual bool isMouseFocusable() const;
+    bool isMouseFocusable() const;
     virtual void willCallDefaultEventHandler(const Event&) override final;
     void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
     void dispatchBlurEvent(Element* newFocusedElement);
     void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
     void dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement);
 
-    virtual String title() const { return String(); }
+    String title() const;
 
     // Called by the parser when this element's close tag is reached,
     // signaling that all child tags have been parsed and added.
@@ -291,6 +290,17 @@ public:
 
     void setTabIndex(int);
     virtual short tabIndex() const override;
+
+    String contentEditable() const;
+    void setContentEditable(const String&, ExceptionState&);
+
+    bool spellcheck() const;
+    void setSpellcheck(bool);
+
+    const AtomicString& dir();
+    void setDir(const AtomicString&);
+
+    void click();
 
     String textFromChildren();
 
@@ -547,6 +557,11 @@ inline ShadowRoot* Node::shadowRoot() const
     if (!isElementNode())
         return 0;
     return toElement(this)->shadowRoot();
+}
+
+inline bool Node::hasTagName(const HTMLQualifiedName& name) const
+{
+    return isHTMLElement() && toElement(*this).hasTagName(name);
 }
 
 inline void Element::invalidateStyleAttribute()

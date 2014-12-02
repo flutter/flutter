@@ -101,7 +101,6 @@ private:
 
     virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
-    virtual Image* imageContents() override;
 
     void setBestFitURLAndDPRFromImageCandidate(const ImageCandidate&);
     HTMLImageLoader& imageLoader() const { return *m_imageLoader; }

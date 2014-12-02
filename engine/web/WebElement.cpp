@@ -48,18 +48,6 @@ WebString WebElement::tagName() const
     return constUnwrap<Element>()->tagName();
 }
 
-bool WebElement::hasHTMLTagName(const WebString& tagName) const
-{
-    // How to create                     class              nodeName localName
-    // createElement('input')            HTMLInputElement   INPUT    input
-    // createElement('INPUT')            HTMLInputElement   INPUT    input
-    // createElementNS(xhtmlNS, 'input') HTMLInputElement   INPUT    input
-    // createElementNS(xhtmlNS, 'INPUT') HTMLUnknownElement INPUT    INPUT
-    const Element* element = constUnwrap<Element>();
-    // FIXME: This could just call element->hasLocalName().
-    return element->localName() == String(tagName).lower();
-}
-
 bool WebElement::hasAttribute(const WebString& attrName) const
 {
     return constUnwrap<Element>()->hasAttribute(attrName);
@@ -124,22 +112,6 @@ WebString WebElement::computeInheritedLanguage() const
 
 void WebElement::requestFullScreen()
 {
-}
-
-WebImage WebElement::imageContents()
-{
-    if (isNull())
-        return WebImage();
-
-    Image* image = unwrap<Element>()->imageContents();
-    if (!image)
-        return WebImage();
-
-    RefPtr<NativeImageSkia> bitmap = image->nativeImageForCurrentFrame();
-    if (!bitmap)
-        return WebImage();
-
-    return bitmap->bitmap();
 }
 
 WebElement::WebElement(const PassRefPtr<Element>& elem)

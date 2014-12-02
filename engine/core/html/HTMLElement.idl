@@ -21,19 +21,5 @@
 [
     Custom=Wrap,
 ] interface HTMLElement : Element {
-    [Reflect] attribute DOMString title;
-    [Reflect] attribute DOMString lang;
-    attribute DOMString dir;
 
-    [CustomElementCallbacks] attribute long tabIndex;
-    [Reflect] attribute DOMString accessKey;
-
-    [RuntimeEnabled=IMEAPI] readonly attribute InputMethodContext inputMethodContext;
-
-    [CustomElementCallbacks, RaisesException=Setter] attribute DOMString contentEditable;
-    readonly attribute boolean isContentEditable;
-
-    attribute boolean spellcheck;
-
-    void click();
 };

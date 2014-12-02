@@ -26,104 +26,10 @@
 #include "sky/engine/core/html/HTMLElement.h"
 
 #include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
-#include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/ElementTraversal.h"
-#include "sky/engine/core/dom/ExceptionCode.h"
 
 namespace blink {
 
-using namespace WTF;
-
 DEFINE_ELEMENT_FACTORY_WITH_TAGNAME(HTMLElement);
-
-String HTMLElement::contentEditable() const
-{
-    const AtomicString& value = getAttribute(HTMLNames::contenteditableAttr);
-
-    if (value.isNull())
-        return "inherit";
-    if (value.isEmpty() || equalIgnoringCase(value, "true"))
-        return "true";
-    if (equalIgnoringCase(value, "false"))
-         return "false";
-    if (equalIgnoringCase(value, "plaintext-only"))
-        return "plaintext-only";
-
-    return "inherit";
-}
-
-void HTMLElement::setContentEditable(const String& enabled, ExceptionState& exceptionState)
-{
-    if (equalIgnoringCase(enabled, "true"))
-        setAttribute(HTMLNames::contenteditableAttr, "true");
-    else if (equalIgnoringCase(enabled, "false"))
-        setAttribute(HTMLNames::contenteditableAttr, "false");
-    else if (equalIgnoringCase(enabled, "plaintext-only"))
-        setAttribute(HTMLNames::contenteditableAttr, "plaintext-only");
-    else if (equalIgnoringCase(enabled, "inherit"))
-        removeAttribute(HTMLNames::contenteditableAttr);
-    else
-        exceptionState.throwDOMException(SyntaxError, "The value provided ('" + enabled + "') is not one of 'true', 'false', 'plaintext-only', or 'inherit'.");
-}
-
-bool HTMLElement::spellcheck() const
-{
-    return isSpellCheckingEnabled();
-}
-
-void HTMLElement::setSpellcheck(bool enable)
-{
-    setAttribute(HTMLNames::spellcheckAttr, enable ? "true" : "false");
-}
-
-
-void HTMLElement::click()
-{
-    dispatchSimulatedClick(0, SendNoEvents);
-}
-
-String HTMLElement::title() const
-{
-    return getAttribute(HTMLNames::titleAttr);
-}
-
-short HTMLElement::tabIndex() const
-{
-    if (supportsFocus())
-        return Element::tabIndex();
-    return -1;
-}
-
-// Returns the conforming 'dir' value associated with the state the attribute is in (in its canonical case), if any,
-// or the empty string if the attribute is in a state that has no associated keyword value or if the attribute is
-// not in a defined state (e.g. the attribute is missing and there is no missing value default).
-// http://www.whatwg.org/specs/web-apps/current-work/multipage/common-dom-interfaces.html#limited-to-only-known-values
-static inline const AtomicString& toValidDirValue(const AtomicString& value)
-{
-    DEFINE_STATIC_LOCAL(const AtomicString, ltrValue, ("ltr", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, rtlValue, ("rtl", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, autoValue, ("auto", AtomicString::ConstructFromLiteral));
-
-    if (equalIgnoringCase(value, ltrValue))
-        return ltrValue;
-    if (equalIgnoringCase(value, rtlValue))
-        return rtlValue;
-    if (equalIgnoringCase(value, autoValue))
-        return autoValue;
-    return nullAtom;
-}
-
-const AtomicString& HTMLElement::dir()
-{
-    return toValidDirValue(getAttribute(HTMLNames::dirAttr));
-}
-
-void HTMLElement::setDir(const AtomicString& value)
-{
-    setAttribute(HTMLNames::dirAttr, value);
-}
 
 v8::Handle<v8::Object> HTMLElement::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
 {

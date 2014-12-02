@@ -27,28 +27,10 @@
 
 namespace blink {
 
-class ExceptionState;
-
 class HTMLElement : public Element {
     DEFINE_WRAPPERTYPEINFO();
 public:
     DECLARE_ELEMENT_FACTORY_WITH_TAGNAME(HTMLElement);
-
-    bool hasTagName(const HTMLQualifiedName& name) const { return hasLocalName(name.localName()); }
-
-    virtual String title() const override final;
-    virtual short tabIndex() const override;
-
-    String contentEditable() const;
-    void setContentEditable(const String&, ExceptionState&);
-
-    bool spellcheck() const;
-    void setSpellcheck(bool);
-
-    const AtomicString& dir();
-    void setDir(const AtomicString&);
-
-    void click();
 
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
@@ -70,20 +52,6 @@ inline HTMLElement::HTMLElement(const QualifiedName& tagName, Document& document
 {
     ASSERT(!tagName.localName().isNull());
 }
-
-inline bool Node::hasTagName(const HTMLQualifiedName& name) const
-{
-    return isHTMLElement() && toHTMLElement(*this).hasTagName(name);
-}
-
-// Functor used to match HTMLElements with a specific HTML tag when using the ElementTraversal API.
-class HasHTMLTagName {
-public:
-    explicit HasHTMLTagName(const HTMLQualifiedName& tagName): m_tagName(tagName) { }
-    bool operator() (const HTMLElement& element) const { return element.hasTagName(m_tagName); }
-private:
-    const HTMLQualifiedName& m_tagName;
-};
 
 // This requires isHTML*Element(const Element&) and isHTML*Element(const HTMLElement&).
 // When the input element is an HTMLElement, we don't need to check the namespace URI, just the local name.

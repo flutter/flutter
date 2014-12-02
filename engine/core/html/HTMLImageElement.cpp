@@ -320,14 +320,6 @@ void HTMLImageElement::didMoveToNewDocument(Document& oldDocument)
     HTMLElement::didMoveToNewDocument(oldDocument);
 }
 
-Image* HTMLImageElement::imageContents()
-{
-    if (!imageLoader().imageComplete())
-        return 0;
-
-    return imageLoader().image()->image();
-}
-
 PassRefPtr<Image> HTMLImageElement::getSourceImageForCanvas(SourceImageMode, SourceImageStatus* status) const
 {
     if (!complete() || !cachedImage()) {
