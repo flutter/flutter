@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,34 +28,65 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#ifndef SKY_ENGINE_V8_INSPECTOR_INSPECTORBASEAGENT_H_
+#define SKY_ENGINE_V8_INSPECTOR_INSPECTORBASEAGENT_H_
 
+#include "gen/v8_inspector/InspectorBackendDispatcher.h"
+#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
-class ScriptCallFrame {
-public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+class InspectorFrontend;
+class InspectorCompositeState;
+class InspectorState;
+class InstrumentingAgents;
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+class InspectorAgent {
+public:
+    explicit InspectorAgent(const String&);
+    virtual ~InspectorAgent();
+
+    void init(InstrumentingAgents* agents, InspectorState* inspectorState);
+
+    virtual void setFrontend(InspectorFrontend*) { }
+    virtual void clearFrontend() { }
+    virtual void restore() { }
+    virtual void discardAgent() { }
+    virtual void didCommitLoadForMainFrame() { }
+    virtual void flushPendingFrontendMessages() { }
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    virtual void virtualInit() { }
+
+    String name() { return m_name; }
+
+protected:
+    RawPtr<InstrumentingAgents> m_instrumentingAgents;
+    RawPtr<InspectorState> m_state;
+
+private:
+    String m_name;
 };
+
+template<typename T>
+class InspectorBaseAgent : public InspectorAgent {
+public:
+    virtual ~InspectorBaseAgent() { }
+
+protected:
+    explicit InspectorBaseAgent(const String& name) : InspectorAgent(name)
+    {
+    }
+};
+
+inline bool asBool(const bool* const b)
+{
+    return b ? *b : false;
+}
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#endif  // SKY_ENGINE_V8_INSPECTOR_INSPECTORBASEAGENT_H_

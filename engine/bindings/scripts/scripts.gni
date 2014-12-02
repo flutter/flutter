@@ -46,10 +46,10 @@ template("compute_interfaces_info_individual") {
 
     inputs = [
       "$bindings_scripts_dir/utilities.py",
-      file_list,
     ] + invoker.sources_static + invoker.sources_generated
 
     outputs = [
+      file_list,
       invoker.output_file
     ]
 

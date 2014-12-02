@@ -5,11 +5,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/inspector/InspectorNodeIds.h"
 
-#if ENABLE(OILPAN)
-#include "sky/engine/core/dom/Node.h"
-#else
 #include "sky/engine/core/dom/WeakNodeMap.h"
-#endif
 #include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {

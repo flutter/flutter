@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,34 +28,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#include "sky/engine/config.h"
+#include "sky/engine/v8_inspector/InspectorBaseAgent.h"
 
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "sky/engine/v8_inspector/InspectorState.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 
-class ScriptCallFrame {
-public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+InspectorAgent::InspectorAgent(const String& name)
+    : m_name(name)
+{
+}
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+InspectorAgent::~InspectorAgent()
+{
+}
 
-private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
-};
+void InspectorAgent::init(InstrumentingAgents* agents,
+    InspectorState* inspectorState)
+{
+    m_instrumentingAgents = agents;
+    m_state = inspectorState;
+    virtualInit();
+}
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_

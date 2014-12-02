@@ -68,12 +68,4 @@ void ScriptCallStack::setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack> asyncCa
     m_asyncCallStack = asyncCallStack;
 }
 
-PassRefPtr<TypeBuilder::Array<TypeBuilder::Console::CallFrame> > ScriptCallStack::buildInspectorArray() const
-{
-    RefPtr<TypeBuilder::Array<TypeBuilder::Console::CallFrame> > frames = TypeBuilder::Array<TypeBuilder::Console::CallFrame>::create();
-    for (size_t i = 0; i < m_frames.size(); i++)
-        frames->addItem(m_frames.at(i).buildInspectorObject());
-    return frames;
-}
-
 } // namespace blink

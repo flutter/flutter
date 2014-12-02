@@ -43,7 +43,6 @@ source_set("prerequisites") {
     ":make_core_generated",
     "//sky/engine/bindings/core/v8:bindings_core_v8_generated",
     "//sky/engine/platform",
-    "inspector:protocol_sources",
   ]
 
   forward_dependent_configs_from = [
@@ -111,11 +110,6 @@ source_set("core_generated") {
 
     # Additional .cpp files from the make_core_generated rules.
     "$sky_core_output_dir/CSSGrammar.cpp",
-
-    # Additional .cpp files from the inspector_protocol_sources list.
-    "$sky_core_output_dir/InspectorFrontend.cpp",
-    "$sky_core_output_dir/InspectorBackendDispatcher.cpp",
-    "$sky_core_output_dir/InspectorTypeBuilder.cpp",
   ]
 
   configs += [

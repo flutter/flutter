@@ -38,7 +38,6 @@
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/inspector/BindingVisitors.h"
 #include "sky/engine/wtf/ThreadSpecific.h"
 #include "v8/include/v8-profiler.h"
 #include "v8/include/v8.h"
@@ -256,41 +255,6 @@ void ScriptProfiler::initialize()
     v8::HeapProfiler* profiler = isolate->GetHeapProfiler();
     if (profiler)
         profiler->SetWrapperClassInfoProvider(WrapperTypeInfo::NodeClassId, &retainedDOMInfo);
-}
-
-void ScriptProfiler::visitNodeWrappers(WrappedNodeVisitor* visitor)
-{
-    // visitNodeWrappers() should receive a ScriptState and retrieve an Isolate
-    // from the ScriptState.
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    v8::HandleScope handleScope(isolate);
-
-    class DOMNodeWrapperVisitor : public v8::PersistentHandleVisitor {
-    public:
-        DOMNodeWrapperVisitor(WrappedNodeVisitor* visitor, v8::Isolate* isolate)
-            : m_visitor(visitor)
-            , m_isolate(isolate)
-        {
-        }
-
-        virtual void VisitPersistentHandle(v8::Persistent<v8::Value>* value, uint16_t classId) override
-        {
-            if (classId != WrapperTypeInfo::NodeClassId)
-                return;
-            // Casting to Handle is safe here, since the Persistent cannot get
-            // GCd during visiting.
-            v8::Handle<v8::Object>* wrapper = reinterpret_cast<v8::Handle<v8::Object>*>(value);
-            ASSERT_UNUSED(m_isolate, V8Node::hasInstance(*wrapper, m_isolate));
-            ASSERT((*wrapper)->IsObject());
-            m_visitor->visitNode(V8Node::toNative(*wrapper));
-        }
-
-    private:
-        WrappedNodeVisitor* m_visitor;
-        v8::Isolate* m_isolate;
-    } wrapperVisitor(visitor, isolate);
-
-    v8::V8::VisitHandlesWithClassIds(&wrapperVisitor);
 }
 
 ProfileNameIdleTimeMap* ScriptProfiler::currentProfileNameIdleTimeMap()

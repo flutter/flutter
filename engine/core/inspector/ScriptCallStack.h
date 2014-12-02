@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLSTACK_H_
 #define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLSTACK_H_
 
-#include "gen/sky/core/InspectorTypeBuilder.h"
 #include "sky/engine/core/inspector/ScriptCallFrame.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -54,8 +53,6 @@ public:
 
     PassRefPtr<ScriptAsyncCallStack> asyncCallStack() const;
     void setAsyncCallStack(PassRefPtr<ScriptAsyncCallStack>);
-
-    PassRefPtr<TypeBuilder::Array<TypeBuilder::Console::CallFrame> > buildInspectorArray() const;
 
 private:
     explicit ScriptCallStack(Vector<ScriptCallFrame>&);

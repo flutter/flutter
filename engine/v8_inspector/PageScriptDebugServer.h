@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_V8_INSPECTOR_PAGESCRIPTDEBUGSERVER_H_
 #define SKY_ENGINE_V8_INSPECTOR_PAGESCRIPTDEBUGSERVER_H_
 
-#include "sky/engine/bindings/core/v8/ScriptDebugServer.h"
-#include "sky/engine/bindings/core/v8/ScriptPreprocessor.h"
+#include "sky/engine/v8_inspector/ScriptDebugServer.h"
+#include "sky/engine/v8_inspector/ScriptPreprocessor.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "v8/include/v8.h"

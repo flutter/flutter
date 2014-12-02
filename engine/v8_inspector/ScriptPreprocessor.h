@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,35 +27,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SKY_ENGINE_V8_INSPECTOR_SCRIPTPREPROCESSOR_H_
+#define SKY_ENGINE_V8_INSPECTOR_SCRIPTPREPROCESSOR_H_
 
-#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-
-#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/bindings/core/v8/V8Binding.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "v8/include/v8.h"
 
 namespace blink {
 
-class ScriptCallFrame {
-public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+class ScriptController;
+class ScriptSourceCode;
+class ScriptDebugServer;
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+class ScriptPreprocessor {
+    WTF_MAKE_NONCOPYABLE(ScriptPreprocessor);
+public:
+    ScriptPreprocessor(const ScriptSourceCode&, LocalFrame*);
+    String preprocessSourceCode(const String& sourceCode, const String& sourceName);
+    String preprocessSourceCode(const String& sourceCode, const String& sourceName, const String& functionName);
+    bool isPreprocessing() { return m_isPreprocessing; }
+    bool isValid() { return !m_preprocessorFunction.isEmpty(); }
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    String preprocessSourceCode(const String& sourceCode, const String& sourceName, v8::Handle<v8::Value> functionName);
+    RefPtr<ScriptState> m_scriptState;
+    ScopedPersistent<v8::Function> m_preprocessorFunction;
+    bool m_isPreprocessing;
 };
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#endif  // SKY_ENGINE_V8_INSPECTOR_SCRIPTPREPROCESSOR_H_

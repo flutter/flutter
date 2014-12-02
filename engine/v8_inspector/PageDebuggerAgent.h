@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_V8_INSPECTOR_PAGEDEBUGGERAGENT_H_
 #define SKY_ENGINE_V8_INSPECTOR_PAGEDEBUGGERAGENT_H_
 
-#include "sky/engine/core/inspector/InspectorDebuggerAgent.h"
+#include "sky/engine/v8_inspector/InspectorDebuggerAgent.h"
 #include "sky/engine/v8_inspector/PageScriptDebugServer.h"
 
 // This whole file will move to namespace inspector.

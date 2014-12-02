@@ -41,16 +41,13 @@
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
-#include "sky/engine/core/inspector/ScriptDebugListener.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/v8_inspector/inspector_host.h"
+#include "sky/engine/v8_inspector/ScriptDebugListener.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/TemporaryChange.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
@@ -261,7 +258,7 @@ bool PageScriptDebugServer::canPreprocess(LocalFrame* frame)
 {
     ASSERT(frame);
 
-    if (!m_preprocessorSourceCode || !frame->page() || isCreatingPreprocessor)
+    if (!m_preprocessorSourceCode || isCreatingPreprocessor)
         return false;
 
     // We delay the creation of the preprocessor until just before the first JS from the
@@ -306,13 +303,13 @@ void PageScriptDebugServer::clearPreprocessor()
 void PageScriptDebugServer::muteWarningsAndDeprecations()
 {
     FrameConsole::mute();
-    UseCounter::muteForInspector();
+    // Used to mute UseCounter too.
 }
 
 void PageScriptDebugServer::unmuteWarningsAndDeprecations()
 {
     FrameConsole::unmute();
-    UseCounter::unmuteForInspector();
+    // Used to unmute UseCounter too.
 }
 
 } // namespace blink

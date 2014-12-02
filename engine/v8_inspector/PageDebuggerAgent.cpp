@@ -35,8 +35,6 @@
 #include "sky/engine/bindings/core/v8/ScriptController.h"
 #include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
 #include "sky/engine/core/frame/FrameConsole.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/v8_inspector/inspector_host.h"
 
 namespace blink {

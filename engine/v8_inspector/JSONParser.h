@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2009 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,34 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#ifndef SKY_ENGINE_V8_INSPECTOR_JSONPARSER_H_
+#define SKY_ENGINE_V8_INSPECTOR_JSONPARSER_H_
 
-#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
-class ScriptCallFrame {
-public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+class JSONValue;
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
-
-private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
-};
+PassRefPtr<JSONValue> parseJSON(const String& json);
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#endif  // SKY_ENGINE_V8_INSPECTOR_JSONPARSER_H_

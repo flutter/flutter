@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2007 Apple Inc. All rights reserved.
+ * Copyright (C) 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2009 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,47 +27,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
-#include "sky/engine/core/frame/Console.h"
+#ifndef SKY_ENGINE_V8_INSPECTOR_SCRIPTBREAKPOINT_H_
+#define SKY_ENGINE_V8_INSPECTOR_SCRIPTBREAKPOINT_H_
 
-#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
-#include "sky/engine/core/frame/ConsoleTypes.h"
-#include "sky/engine/core/frame/FrameConsole.h"
-#include "sky/engine/core/frame/FrameHost.h"
-#include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/inspector/ConsoleAPITypes.h"
-#include "sky/engine/core/inspector/ScriptArguments.h"
-#include "sky/engine/core/page/Chrome.h"
-#include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
-#include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
-Console::Console(LocalFrame* frame)
-    : DOMWindowProperty(frame)
-{
-}
+struct ScriptBreakpoint {
+    ScriptBreakpoint()
+    {
+    }
 
-Console::~Console()
-{
-}
+    ScriptBreakpoint(int lineNumber, int columnNumber, const String& condition)
+        : lineNumber(lineNumber)
+        , columnNumber(columnNumber)
+        , condition(condition)
+    {
+    }
 
-ExecutionContext* Console::context()
-{
-    if (!m_frame)
-        return 0;
-    return m_frame->document();
-}
-
-void Console::reportMessageToConsole(PassRefPtr<ConsoleMessage> consoleMessage)
-{
-    if (!m_frame)
-        return;
-
-    m_frame->console().addMessage(consoleMessage);
-}
+    int lineNumber;
+    int columnNumber;
+    String condition;
+};
 
 } // namespace blink
+
+#endif  // SKY_ENGINE_V8_INSPECTOR_SCRIPTBREAKPOINT_H_

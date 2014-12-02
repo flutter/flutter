@@ -15,7 +15,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/inspector/IdentifiersFactory.h"
 #include "sky/engine/core/inspector/InspectorNodeIds.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -24,6 +23,7 @@
 #include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
 #include "sky/engine/platform/weborigin/KURL.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {

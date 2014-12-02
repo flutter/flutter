@@ -7,10 +7,13 @@ import("//sky/engine/config.gni")
 
 visibility = ["//sky/*"]
 
+gen_dir = "$root_gen_dir/v8_inspector"
+
 component("v8_inspector") {
   output_name = "v8_inspector"
 
   deps = [
+    ":protocol_sources",
     "//base",
     "//mojo/public/cpp/application",
     "//mojo/public/interfaces/application",
@@ -18,6 +21,7 @@ component("v8_inspector") {
     "//sky/engine/platform", # FIXME: Remove.
     "//sky/services/inspector:bindings",
     "//sky/engine/core:core_generated", # FIXME: Remove.
+    "//sky/engine/wtf",
   ]
 
   configs += [
@@ -27,11 +31,91 @@ component("v8_inspector") {
   ]
 
   sources = [
+    "AsyncCallStackTracker.cpp",
+    "AsyncCallStackTracker.h",
+    "ContentSearchUtils.cpp",
+    "ContentSearchUtils.h",
+    "InjectedScript.cpp",
+    "InjectedScript.h",
+    "InjectedScriptBase.cpp",
+    "InjectedScriptBase.h",
+    "InjectedScriptManager.cpp",
+    "InjectedScriptManager.h",
     "inspector_backend_mojo.cc",
     "inspector_backend_mojo.h",
+    "inspector_host.h",
+    "InspectorBaseAgent.cpp",
+    "InspectorBaseAgent.h",
+    "InspectorDebuggerAgent.cpp",
+    "InspectorDebuggerAgent.h",
+    "InspectorFrontendChannel.h",
+    "InspectorState.cpp",
+    "InspectorState.h",
+    "InstrumentingAgents.h",
+    "JSONParser.cpp",
+    "JSONParser.h",
     "PageDebuggerAgent.cpp",
     "PageDebuggerAgent.h",
     "PageScriptDebugServer.cpp",
     "PageScriptDebugServer.h",
+    "PromiseTracker.cpp",
+    "PromiseTracker.h",
+    "ScriptBreakpoint.h",
+    "ScriptDebugListener.h",
+    "ScriptDebugServer.cpp",
+    "ScriptDebugServer.h",
+    "ScriptPreprocessor.cpp",
+    "ScriptPreprocessor.h",
+    "ScriptRegexp.cpp",
+    "ScriptRegexp.h",
+  ]
+
+  # TODO(eseidel): These should be compiled in a separate _generated target.
+  sources += [
+    "$gen_dir/InspectorFrontend.cpp",
+    "$gen_dir/InspectorBackendDispatcher.cpp",
+    "$gen_dir/InspectorTypeBuilder.cpp",
+  ]
+}
+
+protocol_file = "protocol.json"
+
+action("protocol_sources") {
+  script = "CodeGeneratorInspector.py"
+
+  inputs = [
+    # The helper script imported by CodeGeneratorInspector.py.
+    "CodeGeneratorInspectorStrings.py",
+    protocol_file,
+  ]
+  outputs = [
+    "$gen_dir/InspectorBackendDispatcher.cpp",
+    "$gen_dir/InspectorBackendDispatcher.h",
+    "$gen_dir/InspectorFrontend.cpp",
+    "$gen_dir/InspectorFrontend.h",
+    "$gen_dir/InspectorTypeBuilder.cpp",
+    "$gen_dir/InspectorTypeBuilder.h",
+  ]
+
+  args = [
+    rebase_path(protocol_file, root_build_dir),
+    "--output_dir", rebase_path(gen_dir, root_build_dir),
+  ]
+
+  deps = [
+    ":protocol_version",
+  ]
+}
+
+action("protocol_version") {
+  script = "generate-inspector-protocol-version"
+
+  inputs = [ protocol_file ]
+  output_file = "$gen_dir/InspectorProtocolVersion.h"
+  outputs = [ output_file ]
+
+  args = [
+    "-o", rebase_path(output_file, root_build_dir),
+    rebase_path(protocol_file, root_build_dir),
   ]
 }

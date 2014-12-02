@@ -29,19 +29,19 @@
  */
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/inspector/InjectedScriptManager.h"
+#include "sky/engine/v8_inspector/InjectedScriptManager.h"
 
 #include "bindings/core/v8/V8InjectedScriptHost.h"
 #include "bindings/core/v8/V8Window.h"
 #include "sky/engine/bindings/core/v8/BindingSecurity.h"
 #include "sky/engine/bindings/core/v8/ScopedPersistent.h"
-#include "sky/engine/bindings/core/v8/ScriptDebugServer.h"
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
 #include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/inspector/InjectedScriptHost.h"
+#include "sky/engine/v8_inspector/ScriptDebugServer.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {

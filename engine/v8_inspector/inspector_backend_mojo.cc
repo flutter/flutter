@@ -7,18 +7,18 @@
 
 #include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"
-#include "gen/sky/core/InspectorBackendDispatcher.h"
+#include "gen/v8_inspector/InspectorBackendDispatcher.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/engine/core/inspector/InjectedScriptHost.h"
-#include "sky/engine/core/inspector/InspectorFrontendChannel.h"
-#include "sky/engine/core/inspector/InspectorState.h"
-#include "sky/engine/core/inspector/InstrumentingAgents.h"
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/v8_inspector/inspector_host.h"
+#include "sky/engine/v8_inspector/InspectorFrontendChannel.h"
+#include "sky/engine/v8_inspector/InspectorState.h"
+#include "sky/engine/v8_inspector/InstrumentingAgents.h"
 #include "sky/engine/v8_inspector/PageDebuggerAgent.h"
 #include "sky/engine/v8_inspector/PageScriptDebugServer.h"
+#include "sky/engine/v8_inspector/inspector_host.h"
 
 namespace blink {
 

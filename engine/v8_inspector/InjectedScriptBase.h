@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2012 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,34 +28,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
-#define SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#ifndef SKY_ENGINE_V8_INSPECTOR_INJECTEDSCRIPTBASE_H_
+#define SKY_ENGINE_V8_INSPECTOR_INJECTEDSCRIPTBASE_H_
 
+#include "gen/v8_inspector/InspectorTypeBuilder.h"
+#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
-class ScriptCallFrame {
-public:
-    ScriptCallFrame();
-    ScriptCallFrame(const String& functionName, const String& scriptId, const String& scriptName, unsigned lineNumber, unsigned column = 0);
-    ~ScriptCallFrame();
+class JSONValue;
+class ScriptFunctionCall;
 
-    const String& functionName() const { return m_functionName; }
-    const String& scriptId() const { return m_scriptId; }
-    const String& sourceURL() const { return m_scriptName; }
-    unsigned lineNumber() const { return m_lineNumber; }
-    unsigned columnNumber() const { return m_column; }
+typedef String ErrorString;
+
+
+class InjectedScriptBase {
+public:
+    virtual ~InjectedScriptBase() { }
+
+    const String& name() const { return m_name; }
+    bool isEmpty() const { return m_injectedScriptObject.isEmpty(); }
+    ScriptState* scriptState() const
+    {
+        ASSERT(!isEmpty());
+        return m_injectedScriptObject.scriptState();
+    }
+
+protected:
+    explicit InjectedScriptBase(const String& name);
+    InjectedScriptBase(const String& name, ScriptValue);
+
+    void initialize(ScriptValue);
+    const ScriptValue& injectedScriptObject() const;
+    ScriptValue callFunctionWithEvalEnabled(ScriptFunctionCall&, bool& hadException) const;
+    void makeCall(ScriptFunctionCall&, RefPtr<JSONValue>* result);
+    void makeEvalCall(ErrorString*, ScriptFunctionCall&, RefPtr<TypeBuilder::Runtime::RemoteObject>* result, TypeBuilder::OptOutput<bool>* wasThrown, RefPtr<TypeBuilder::Debugger::ExceptionDetails>* = 0);
 
 private:
-    String m_functionName;
-    String m_scriptId;
-    String m_scriptName;
-    unsigned m_lineNumber;
-    unsigned m_column;
+    String m_name;
+    ScriptValue m_injectedScriptObject;
 };
+
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_INSPECTOR_SCRIPTCALLFRAME_H_
+#endif  // SKY_ENGINE_V8_INSPECTOR_INJECTEDSCRIPTBASE_H_

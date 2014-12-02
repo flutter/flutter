@@ -43,7 +43,6 @@
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/inspector/BindingVisitors.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/platform/EventTracer.h"

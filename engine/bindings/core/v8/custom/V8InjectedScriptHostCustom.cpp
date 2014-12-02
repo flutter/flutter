@@ -37,7 +37,6 @@
 #include "bindings/core/v8/V8NodeList.h"
 #include "sky/engine/bindings/core/v8/BindingSecurity.h"
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ScriptDebugServer.h"
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8AbstractEventListener.h"
 #include "sky/engine/bindings/core/v8/V8Binding.h"
@@ -53,10 +52,11 @@
 #include "sky/engine/bindings/core/v8/custom/V8Uint8ClampedArrayCustom.h"
 #include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/inspector/InjectedScript.h"
 #include "sky/engine/core/inspector/InjectedScriptHost.h"
 #include "sky/engine/core/inspector/JavaScriptCallFrame.h"
 #include "sky/engine/platform/JSONValues.h"
+#include "sky/engine/v8_inspector/InjectedScript.h"
+#include "sky/engine/v8_inspector/ScriptDebugServer.h"
 
 namespace blink {
 
