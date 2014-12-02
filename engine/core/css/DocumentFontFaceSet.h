@@ -26,7 +26,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_DOCUMENTFONTFACESET_H_
 #define SKY_ENGINE_CORE_CSS_DOCUMENTFONTFACESET_H_
 
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {

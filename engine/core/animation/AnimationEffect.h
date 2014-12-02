@@ -33,8 +33,6 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
-#include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 

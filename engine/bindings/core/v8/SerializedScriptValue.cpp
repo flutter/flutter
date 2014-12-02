@@ -50,7 +50,6 @@
 #include "sky/engine/core/html/ImageData.h"
 #include "sky/engine/core/html/canvas/DataView.h"
 #include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/ArrayBuffer.h"
 #include "sky/engine/wtf/ArrayBufferContents.h"

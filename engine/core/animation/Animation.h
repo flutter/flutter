@@ -35,7 +35,6 @@
 #include "sky/engine/core/animation/AnimationNode.h"
 #include "sky/engine/core/animation/EffectInput.h"
 #include "sky/engine/core/animation/TimingInput.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {

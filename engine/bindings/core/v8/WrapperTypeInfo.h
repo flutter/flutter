@@ -32,7 +32,6 @@
 #define SKY_ENGINE_BINDINGS_CORE_V8_WRAPPERTYPEINFO_H_
 
 #include "gin/public/wrapper_info.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "v8/include/v8.h"
 

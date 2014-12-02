@@ -33,7 +33,6 @@
 
 
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/text/WTFString.h"
 

@@ -34,8 +34,6 @@
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8ThrowException.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
-#include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
 #include "v8/include/v8.h"

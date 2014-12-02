@@ -31,7 +31,6 @@
 #define SKY_ENGINE_CORE_CSS_BASICSHAPEFUNCTIONS_H_
 
 #include "sky/engine/core/rendering/style/BasicShapes.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {

@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/css/MediaList.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
@@ -60,13 +59,11 @@ public:
 
     PassRefPtr<StyleRuleBase> copy() const;
 
-#if !ENABLE(OILPAN)
     void deref()
     {
         if (derefBase())
             destroy();
     }
-#endif // !ENABLE(OILPAN)
 
     // FIXME: There shouldn't be any need for the null parent version.
     PassRefPtr<CSSRule> createCSSOMWrapper(CSSStyleSheet* parentSheet = 0) const;

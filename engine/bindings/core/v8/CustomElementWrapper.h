@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTWRAPPER_H_
 #define SKY_ENGINE_BINDINGS_CORE_V8_CUSTOMELEMENTWRAPPER_H_
 
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "v8/include/v8.h"
 

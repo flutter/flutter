@@ -27,7 +27,6 @@
 #define SKY_ENGINE_CORE_CSS_CSSSEGMENTEDFONTFACE_H_
 
 #include "sky/engine/platform/fonts/FontTraits.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/ListHashSet.h"
 #include "sky/engine/wtf/PassRefPtr.h"

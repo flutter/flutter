@@ -32,7 +32,6 @@
 #define SKY_ENGINE_CORE_ANIMATION_ANIMATABLE_ANIMATABLEVALUE_H_
 
 #include "sky/engine/core/css/CSSValue.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {

@@ -32,8 +32,6 @@
 #define SKY_ENGINE_BINDINGS_CORE_V8_SCRIPTWRAPPABLE_H_
 
 #include "sky/engine/bindings/core/v8/WrapperTypeInfo.h"
-#include "sky/engine/platform/ScriptForbiddenScope.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "v8/include/v8.h"
 
 namespace blink {

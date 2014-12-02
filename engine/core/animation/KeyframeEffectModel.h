@@ -37,12 +37,9 @@
 #include "sky/engine/core/animation/StringKeyframe.h"
 #include "sky/engine/core/animation/animatable/AnimatableValueKeyframe.h"
 #include "sky/engine/platform/animation/TimingFunction.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {

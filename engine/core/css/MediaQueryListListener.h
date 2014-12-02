@@ -21,12 +21,9 @@
 #define SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTLISTENER_H_
 
 #include "sky/engine/core/css/MediaQueryList.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
-
-class MediaQueryList;
 
 // See http://dev.w3.org/csswg/cssom-view/#the-mediaquerylist-interface
 class MediaQueryListListener : public RefCounted<MediaQueryListListener> {

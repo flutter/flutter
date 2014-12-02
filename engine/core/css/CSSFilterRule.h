@@ -31,7 +31,6 @@
 #define SKY_ENGINE_CORE_CSS_CSSFILTERRULE_H_
 
 #include "sky/engine/core/css/CSSRule.h"
-#include "sky/engine/platform/heap/Handle.h"
 
 namespace blink {
 

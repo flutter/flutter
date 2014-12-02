@@ -32,6 +32,7 @@
 #define SKY_ENGINE_CORE_INSPECTOR_SCRIPTARGUMENTS_H_
 
 #include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/Vector.h"

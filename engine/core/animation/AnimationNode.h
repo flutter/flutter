@@ -33,7 +33,6 @@
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/animation/Timing.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCounted.h"

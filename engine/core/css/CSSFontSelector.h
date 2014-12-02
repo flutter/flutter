@@ -30,7 +30,6 @@
 #include "sky/engine/core/css/FontLoader.h"
 #include "sky/engine/platform/fonts/FontSelector.h"
 #include "sky/engine/platform/fonts/GenericFontFamilySettings.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -59,9 +58,7 @@ public:
     virtual void willUseFontData(const FontDescription&, const AtomicString& family, UChar32) override;
     bool isPlatformFontAvailable(const FontDescription&, const AtomicString& family);
 
-#if !ENABLE(OILPAN)
     void clearDocument();
-#endif
 
     void fontFaceInvalidated();
 
@@ -69,9 +66,7 @@ public:
     virtual void fontCacheInvalidated() override;
 
     void registerForInvalidationCallbacks(CSSFontSelectorClient*);
-#if !ENABLE(OILPAN)
     void unregisterForInvalidationCallbacks(CSSFontSelectorClient*);
-#endif
 
     Document* document() const { return m_document; }
     FontFaceCache* fontFaceCache() { return &m_fontFaceCache; }

@@ -49,7 +49,6 @@
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/OwnPtr.h"

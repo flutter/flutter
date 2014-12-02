@@ -32,7 +32,6 @@
 #define SKY_ENGINE_V8_INSPECTOR_INSPECTORBASEAGENT_H_
 
 #include "gen/v8_inspector/InspectorBackendDispatcher.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/WTFString.h"
