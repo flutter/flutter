@@ -1572,7 +1572,7 @@ void RenderObject::showRenderTreeAndMark(const RenderObject* markedObject1, cons
 
 bool RenderObject::isSelectable() const
 {
-    return !isInert() && !(style()->userSelect() == SELECT_NONE && style()->userModify() == READ_ONLY);
+    return !(style()->userSelect() == SELECT_NONE && style()->userModify() == READ_ONLY);
 }
 
 Color RenderObject::selectionBackgroundColor() const
@@ -2378,14 +2378,6 @@ int RenderObject::previousOffsetForBackwardDeletion(int current) const
 int RenderObject::nextOffset(int current) const
 {
     return current + 1;
-}
-
-bool RenderObject::isInert() const
-{
-    const RenderObject* renderer = this;
-    while (!renderer->node())
-        renderer = renderer->parent();
-    return renderer->node()->isInert();
 }
 
 // touch-action applies to all elements with both width AND height properties.

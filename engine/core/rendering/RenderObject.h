@@ -736,13 +736,11 @@ public:
 
     void remove() { if (parent()) parent()->removeChild(this); }
 
-    bool isInert() const;
-
     bool supportsTouchAction() const;
 
-    bool visibleToHitTestRequest(const HitTestRequest& request) const { return (request.ignorePointerEventsNone() || style()->pointerEvents() != PE_NONE) && !isInert(); }
+    bool visibleToHitTestRequest(const HitTestRequest& request) const { return (request.ignorePointerEventsNone() || style()->pointerEvents() != PE_NONE); }
 
-    bool visibleToHitTesting() const { return style()->pointerEvents() != PE_NONE && !isInert(); }
+    bool visibleToHitTesting() const { return style()->pointerEvents() != PE_NONE; }
 
     // Map points and quads through elements, potentially via 3d transforms. You should never need to call these directly; use
     // localToAbsolute/absoluteToLocal methods instead.

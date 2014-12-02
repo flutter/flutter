@@ -595,22 +595,6 @@ bool Node::inActiveDocument() const
     return inDocument() && document().isActive();
 }
 
-Node* Node::focusDelegate()
-{
-    return this;
-}
-
-bool Node::shouldHaveFocusAppearance() const
-{
-    ASSERT(focused());
-    return true;
-}
-
-bool Node::isInert() const
-{
-    return false;
-}
-
 unsigned Node::nodeIndex() const
 {
     Node *_tempNode = previousSibling();
@@ -704,24 +688,10 @@ void Node::attach(const AttachContext&)
     clearNeedsStyleRecalc();
 }
 
-#if ENABLE(ASSERT)
-static Node* detachingNode;
-
-bool Node::inDetach() const
-{
-    return detachingNode == this;
-}
-#endif
-
 void Node::detach(const AttachContext& context)
 {
     ASSERT(document().lifecycle().stateAllowsDetach());
     DocumentLifecycle::DetachScope willDetach(document().lifecycle());
-
-#if ENABLE(ASSERT)
-    ASSERT(!detachingNode);
-    detachingNode = this;
-#endif
 
     if (renderer())
         renderer()->destroyAndCleanupAnonymousWrappers();
@@ -742,10 +712,6 @@ void Node::detach(const AttachContext& context)
 
     setStyleChange(NeedsReattachStyleChange);
     setChildNeedsStyleRecalc();
-
-#if ENABLE(ASSERT)
-    detachingNode = 0;
-#endif
 }
 
 void Node::reattachWhitespaceSiblings(Text* start)
@@ -929,41 +895,6 @@ Document* Node::ownerDocument() const
 {
     Document* doc = &document();
     return doc == this ? 0 : doc;
-}
-
-bool Node::isEqualNode(Node* other) const
-{
-    if (!other)
-        return false;
-
-    NodeType nodeType = this->nodeType();
-    if (nodeType != other->nodeType())
-        return false;
-
-    if (nodeName() != other->nodeName())
-        return false;
-
-    if (localName() != other->localName())
-        return false;
-
-    if (isElementNode() && !toElement(this)->hasEquivalentAttributes(toElement(other)))
-        return false;
-
-    Node* child = firstChild();
-    Node* otherChild = other->firstChild();
-
-    while (child) {
-        if (!child->isEqualNode(otherChild))
-            return false;
-
-        child = child->nextSibling();
-        otherChild = otherChild->nextSibling();
-    }
-
-    if (otherChild)
-        return false;
-
-    return true;
 }
 
 static void appendTextContent(const Node* node, bool convertBRsToNewlines, StringBuilder& content)
@@ -1336,35 +1267,14 @@ void Node::didMoveToNewDocument(Document& oldDocument)
     }
 }
 
-static inline bool tryAddEventListener(Node* targetNode, const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    if (!targetNode->EventTarget::addEventListener(eventType, listener, useCapture))
-        return false;
-
-    Document& document = targetNode->document();
-    document.addListenerTypeIfNeeded(eventType);
-
-    return true;
-}
-
 bool Node::addEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
 {
-    return tryAddEventListener(this, eventType, listener, useCapture);
-}
+    if (!EventTarget::addEventListener(eventType, listener, useCapture))
+        return false;
 
-static inline bool tryRemoveEventListener(Node* targetNode, const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    return targetNode->EventTarget::removeEventListener(eventType, listener, useCapture);
-}
+    document().addListenerTypeIfNeeded(eventType);
 
-bool Node::removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    return tryRemoveEventListener(this, eventType, listener, useCapture);
-}
-
-void Node::removeAllEventListeners()
-{
-    EventTarget::removeAllEventListeners();
+    return true;
 }
 
 void Node::removeAllEventListenersRecursively()

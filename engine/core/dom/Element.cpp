@@ -1241,7 +1241,7 @@ bool Element::supportsFocus() const
 
 bool Element::isFocusable() const
 {
-    return inDocument() && supportsFocus() && !isInert() && rendererIsFocusable();
+    return inDocument() && supportsFocus() && rendererIsFocusable();
 }
 
 bool Element::isKeyboardFocusable() const

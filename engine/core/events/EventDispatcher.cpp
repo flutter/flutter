@@ -117,12 +117,11 @@ bool EventDispatcher::dispatch()
     WindowEventContext windowEventContext(m_event.get(), m_node.get(), topNodeEventContext());
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EventDispatch", "data", InspectorEventDispatchEvent::data(*m_event));
 
-    void* preDispatchEventHandlerResult;
-    if (dispatchEventPreProcess(preDispatchEventHandlerResult) == ContinueDispatching)
+    if (dispatchEventPreProcess() == ContinueDispatching)
         if (dispatchEventAtCapturing(windowEventContext) == ContinueDispatching)
             if (dispatchEventAtTarget() == ContinueDispatching)
                 dispatchEventAtBubbling(windowEventContext);
-    dispatchEventPostProcess(preDispatchEventHandlerResult);
+    dispatchEventPostProcess();
 
     // Ensure that after event dispatch, the event's target object is the
     // outermost shadow DOM boundary.
@@ -133,10 +132,8 @@ bool EventDispatcher::dispatch()
     return !m_event->defaultPrevented();
 }
 
-inline EventDispatchContinuation EventDispatcher::dispatchEventPreProcess(void*& preDispatchEventHandlerResult)
+inline EventDispatchContinuation EventDispatcher::dispatchEventPreProcess()
 {
-    // Give the target node a chance to do some work before DOM event handlers get a crack.
-    preDispatchEventHandlerResult = m_node->preDispatchEventHandler(m_event.get());
     return (m_event->eventPath().isEmpty() || m_event->propagationStopped()) ? DoneDispatching : ContinueDispatching;
 }
 
@@ -189,14 +186,11 @@ inline void EventDispatcher::dispatchEventAtBubbling(WindowEventContext& windowC
     }
 }
 
-inline void EventDispatcher::dispatchEventPostProcess(void* preDispatchEventHandlerResult)
+inline void EventDispatcher::dispatchEventPostProcess()
 {
     m_event->setTarget(EventPath::eventTargetRespectingTargetRules(m_node.get()));
     m_event->setCurrentTarget(0);
     m_event->setEventPhase(0);
-
-    // Pass the data from the preDispatchEventHandler to the postDispatchEventHandler.
-    m_node->postDispatchEventHandler(m_event.get(), preDispatchEventHandlerResult);
 
     // Call default event handlers. While the DOM does have a concept of preventing
     // default handling, the detail of which handlers are called is an internal

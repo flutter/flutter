@@ -756,7 +756,7 @@ bool isMailHTMLBlockquoteElement(const Node* node)
 int caretMinOffset(const Node* n)
 {
     RenderObject* r = n->renderer();
-    ASSERT(!n->isCharacterDataNode() || !r || r->isText()); // FIXME: This was a runtime check that seemingly couldn't fail; changed it to an assertion for now.
+    ASSERT(!n->isTextNode() || !r || r->isText()); // FIXME: This was a runtime check that seemingly couldn't fail; changed it to an assertion for now.
     return r ? r->caretMinOffset() : 0;
 }
 

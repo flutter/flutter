@@ -69,7 +69,6 @@ protected:
     String m_data;
 
 private:
-    virtual bool isCharacterDataNode() const override final { return true; }
     virtual int maxCharacterOffset() const override final;
     virtual bool offsetInCharacters() const override final;
     void setDataAndUpdate(const String&, unsigned offsetOfReplacedData, unsigned oldLength, unsigned newLength, RecalcStyleBehavior = DoNotRecalcStyle);
@@ -78,7 +77,8 @@ private:
     bool isElementNode() const = delete; // This will catch anyone doing an unnecessary check.
 };
 
-DEFINE_NODE_TYPE_CASTS(CharacterData, isCharacterDataNode());
+// TODO(esprehn): In sky all CharacterData nodes are Text, merge the classes.
+DEFINE_NODE_TYPE_CASTS(CharacterData, isTextNode());
 
 } // namespace blink
 

@@ -164,9 +164,6 @@ public:
     virtual PassRefPtr<Node> cloneNode(bool deep = false) = 0;
     virtual const AtomicString& localName() const;
 
-    bool isSameNode(Node* other) const { return this == other; }
-    bool isEqualNode(Node*) const;
-
     String textContent(bool convertBRsToNewlines = false) const;
     void setTextContent(const String&);
 
@@ -190,8 +187,6 @@ public:
             : NotCustomElement;
     }
     void setCustomElementState(CustomElementState newState);
-
-    virtual bool isCharacterDataNode() const { return false; }
 
     // StyledElements allow inline style (style="border: 1px"), presentational attributes (ex. color),
     // class names (ex. class="foo bar") and other non-basic styling features. They and also control
@@ -299,14 +294,6 @@ public:
     virtual void setHovered(bool flag = true);
 
     virtual short tabIndex() const;
-
-    virtual Node* focusDelegate();
-    // This is called only when the node is focused.
-    virtual bool shouldHaveFocusAppearance() const;
-
-    // Whether the node is inert. This can't be in Element because text nodes
-    // must be recognized as inert to prevent text selection.
-    bool isInert() const;
 
     enum UserSelectAllTreatment {
         UserSelectAllDoesNotAffectEditability,
@@ -456,9 +443,10 @@ public:
     void showTreeAndMark(const Node* markedNode1, const char* markedLabel1, const Node* markedNode2 = 0, const char* markedLabel2 = 0) const;
 #endif
 
-    virtual bool willRespondToMouseMoveEvents();
+    bool willRespondToMouseMoveEvents();
+    bool willRespondToTouchEvents();
+
     virtual bool willRespondToMouseClickEvents();
-    virtual bool willRespondToTouchEvents();
 
     enum ShadowTreesTreatment {
         TreatShadowTreesAsDisconnected,
@@ -473,14 +461,7 @@ public:
     virtual ExecutionContext* executionContext() const override final;
 
     virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
-    virtual bool removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
-    virtual void removeAllEventListeners() override;
     void removeAllEventListenersRecursively();
-
-    // Handlers to do/undo actions on the target node before an event is dispatched to it and after the event
-    // has been dispatched.  The data pointer is handed back by the preDispatch and passed to postDispatch.
-    virtual void* preDispatchEventHandler(Event*) { return 0; }
-    virtual void postDispatchEventHandler(Event*, void* /*dataFromPreDispatch*/) { }
 
     using EventTarget::dispatchEvent;
     virtual bool dispatchEvent(PassRefPtr<Event>) override;
@@ -652,10 +633,10 @@ private:
     HashSet<RawPtr<MutationObserverRegistration> >* transientMutationObserverRegistry();
 
     uint32_t m_nodeFlags;
-    RawPtr<ContainerNode> m_parentOrShadowHostNode;
-    RawPtr<TreeScope> m_treeScope;
-    RawPtr<Node> m_previous;
-    RawPtr<Node> m_next;
+    ContainerNode* m_parentOrShadowHostNode;
+    TreeScope* m_treeScope;
+    Node* m_previous;
+    Node* m_next;
     // When a node has rare data we move the renderer into the rare data.
     union DataUnion {
         DataUnion() : m_renderer(0) { }

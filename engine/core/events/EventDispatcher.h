@@ -61,11 +61,11 @@ private:
     EventDispatcher(Node*, PassRefPtr<Event>);
     const NodeEventContext* topNodeEventContext();
 
-    EventDispatchContinuation dispatchEventPreProcess(void*& preDispatchEventHandlerResult);
+    EventDispatchContinuation dispatchEventPreProcess();
     EventDispatchContinuation dispatchEventAtCapturing(WindowEventContext&);
     EventDispatchContinuation dispatchEventAtTarget();
     void dispatchEventAtBubbling(WindowEventContext&);
-    void dispatchEventPostProcess(void* preDispatchEventHandlerResult);
+    void dispatchEventPostProcess();
 
     RefPtr<Node> m_node;
     RefPtr<Event> m_event;

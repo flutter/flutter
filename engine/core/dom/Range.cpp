@@ -1096,7 +1096,7 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
     // If m_start.container() is a character data node, it will be split and it will be its parent that will
     // need to accept newParent (or in the case of a comment, it logically "would" be inserted into the parent,
     // although this will fail below for another reason).
-    if (parentOfNewParent->isCharacterDataNode())
+    if (parentOfNewParent->isTextNode())
         parentOfNewParent = parentOfNewParent->parentNode();
 
     if (!parentOfNewParent) {
