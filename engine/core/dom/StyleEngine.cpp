@@ -153,11 +153,6 @@ const Vector<RefPtr<StyleSheet> >& StyleEngine::styleSheetsForStyleSheetList(Tre
     return ensureStyleSheetCollectionFor(treeScope)->styleSheetsForStyleSheetList();
 }
 
-const Vector<RefPtr<CSSStyleSheet> >& StyleEngine::activeAuthorStyleSheets() const
-{
-    return documentStyleSheetCollection()->activeAuthorStyleSheets();
-}
-
 void StyleEngine::modifiedStyleSheet(StyleSheet* sheet)
 {
     if (!sheet)
@@ -189,11 +184,6 @@ void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
         insertTreeScopeInDocumentOrder(m_activeTreeScopes, &treeScope);
 }
 
-void StyleEngine::removeStyleSheetCandidateNode(Node* node)
-{
-    removeStyleSheetCandidateNode(node, 0, *m_document);
-}
-
 void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopingNode, TreeScope& treeScope)
 {
     ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
@@ -204,16 +194,6 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
 
     markTreeScopeDirty(treeScope);
     m_activeTreeScopes.remove(&treeScope);
-}
-
-void StyleEngine::modifiedStyleSheetCandidateNode(Node* node)
-{
-    if (!node->inDocument())
-        return;
-
-    TreeScope& treeScope = isHTMLStyleElement(*node) ? node->treeScope() : *m_document;
-    ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-    markTreeScopeDirty(treeScope);
 }
 
 bool StyleEngine::shouldUpdateDocumentStyleSheetCollection(StyleResolverUpdateMode updateMode) const
@@ -242,15 +222,6 @@ void StyleEngine::clearMediaQueryRuleSetStyleSheets()
     documentStyleSheetCollection()->clearMediaQueryRuleSetStyleSheets();
     clearMediaQueryRuleSetOnTreeScopeStyleSheets(m_activeTreeScopes);
     clearMediaQueryRuleSetOnTreeScopeStyleSheets(m_dirtyTreeScopes);
-}
-
-void StyleEngine::updateStyleSheetsInImport(DocumentStyleSheetCollector& parentCollector)
-{
-    ASSERT(!isMaster());
-    Vector<RefPtr<StyleSheet> > sheetsForList;
-    ImportedDocumentStyleSheetCollector subcollector(parentCollector, sheetsForList);
-    documentStyleSheetCollection()->collectStyleSheets(this, subcollector);
-    documentStyleSheetCollection()->swapSheetsForSheetList(sheetsForList);
 }
 
 void StyleEngine::updateActiveStyleSheets(StyleResolverUpdateMode updateMode)
@@ -284,28 +255,6 @@ void StyleEngine::updateActiveStyleSheets(StyleResolverUpdateMode updateMode)
 
     m_dirtyTreeScopes.clear();
     m_documentScopeDirty = false;
-}
-
-const Vector<RefPtr<CSSStyleSheet> > StyleEngine::activeStyleSheetsForInspector() const
-{
-    if (m_activeTreeScopes.isEmpty())
-        return documentStyleSheetCollection()->activeAuthorStyleSheets();
-
-    Vector<RefPtr<CSSStyleSheet> > activeStyleSheets;
-
-    activeStyleSheets.appendVector(documentStyleSheetCollection()->activeAuthorStyleSheets());
-
-    TreeScopeSet::const_iterator begin = m_activeTreeScopes.begin();
-    TreeScopeSet::const_iterator end = m_activeTreeScopes.end();
-    for (TreeScopeSet::const_iterator it = begin; it != end; ++it) {
-        if (TreeScopeStyleSheetCollection* collection = m_styleSheetCollectionMap.get(*it))
-            activeStyleSheets.appendVector(collection->activeAuthorStyleSheets());
-    }
-
-    // FIXME: Inspector needs a vector which has all active stylesheets.
-    // However, creating such a large vector might cause performance regression.
-    // Need to implement some smarter solution.
-    return activeStyleSheets;
 }
 
 void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)

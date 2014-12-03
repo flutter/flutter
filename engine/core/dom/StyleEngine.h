@@ -75,20 +75,14 @@ public:
 #endif
 
     const Vector<RefPtr<StyleSheet> >& styleSheetsForStyleSheetList(TreeScope&);
-    const Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() const;
 
     const Vector<RefPtr<CSSStyleSheet> >& documentAuthorStyleSheets() const { return m_authorStyleSheets; }
 
-    const Vector<RefPtr<CSSStyleSheet> > activeStyleSheetsForInspector() const;
-
     void modifiedStyleSheet(StyleSheet*);
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
-    void removeStyleSheetCandidateNode(Node*);
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
-    void modifiedStyleSheetCandidateNode(Node*);
 
     void clearMediaQueryRuleSetStyleSheets();
-    void updateStyleSheetsInImport(DocumentStyleSheetCollector& parentCollector);
     void updateActiveStyleSheets(StyleResolverUpdateMode);
 
     bool ignoringPendingStylesheets() const { return m_ignorePendingStylesheets; }
