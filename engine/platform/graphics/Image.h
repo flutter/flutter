@@ -61,8 +61,6 @@ class PLATFORM_EXPORT Image : public RefCounted<Image> {
 public:
     virtual ~Image();
 
-    static PassRefPtr<Image> loadPlatformResource(const char* name);
-
     virtual bool isBitmapImage() const { return false; }
     virtual bool currentFrameKnownToBeOpaque() = 0;
 

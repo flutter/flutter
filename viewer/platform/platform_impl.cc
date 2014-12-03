@@ -7,9 +7,6 @@
 #include <cmath>
 
 #include "base/debug/trace_event.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/path_service.h"
 #include "base/rand_util.h"
 #include "base/stl_util.h"
 #include "base/synchronization/waitable_event.h"
@@ -228,30 +225,6 @@ void PlatformImpl::updateTraceEventDuration(
   memcpy(&traceEventHandle, &handle, sizeof(handle));
   TRACE_EVENT_API_UPDATE_TRACE_EVENT_DURATION(
       category_group_enabled, name, traceEventHandle);
-}
-
-// FIXME(sky): This is a horrible hack and makes sky only work when run
-// inside its source tree!  crbug.com/434513
-blink::WebData PlatformImpl::loadResource(const char* name)
-{
-  base::FilePath root_dir;
-  PathService::Get(base::DIR_SOURCE_ROOT, &root_dir);
-  base::FilePath engine_dir = root_dir.AppendASCII("sky").AppendASCII("engine");
-  base::FilePath v8_dir = engine_dir.AppendASCII("bindings").AppendASCII("core").AppendASCII("v8");
-  base::FilePath inspector_dir = engine_dir.AppendASCII("core").AppendASCII("inspector");
-
-  base::FilePath path;
-  if (std::string("InjectedScriptSource.js") == name)
-    path = inspector_dir.AppendASCII(name);
-  else if (std::string("DebuggerScript.js") == name)
-    path = v8_dir.AppendASCII(name);
-  else
-    CHECK(false);
-
-  std::string buffer;
-  base::ReadFileToString(path, &buffer);
-  CHECK(!buffer.empty());
-  return blink::WebData(buffer.data(), buffer.size());
 }
 
 }  // namespace sky

@@ -155,27 +155,9 @@ void ImageResource::allClientsRemoved()
     Resource::allClientsRemoved();
 }
 
-pair<blink::Image*, float> ImageResource::brokenImage(float deviceScaleFactor)
-{
-    if (deviceScaleFactor >= 2) {
-        DEFINE_STATIC_REF(blink::Image, brokenImageHiRes, (blink::Image::loadPlatformResource("missingImage@2x")));
-        return std::make_pair(brokenImageHiRes, 2);
-    }
-
-    DEFINE_STATIC_REF(blink::Image, brokenImageLoRes, (blink::Image::loadPlatformResource("missingImage")));
-    return std::make_pair(brokenImageLoRes, 1);
-}
-
 blink::Image* ImageResource::image()
 {
     ASSERT(!isPurgeable());
-
-    if (errorOccurred()) {
-        // Returning the 1x broken image is non-ideal, but we cannot reliably access the appropriate
-        // deviceScaleFactor from here. It is critical that callers use ImageResource::brokenImage()
-        // when they need the real, deviceScaleFactor-appropriate broken image icon.
-        return brokenImage(1).first;
-    }
 
     if (m_image)
         return m_image.get();
@@ -186,13 +168,6 @@ blink::Image* ImageResource::image()
 blink::Image* ImageResource::imageForRenderer(const RenderObject* renderer)
 {
     ASSERT(!isPurgeable());
-
-    if (errorOccurred()) {
-        // Returning the 1x broken image is non-ideal, but we cannot reliably access the appropriate
-        // deviceScaleFactor from here. It is critical that callers use ImageResource::brokenImage()
-        // when they need the real, deviceScaleFactor-appropriate broken image icon.
-        return brokenImage(1).first;
-    }
 
     if (!m_image)
         return blink::Image::nullImage();

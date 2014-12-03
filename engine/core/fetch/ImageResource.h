@@ -58,8 +58,6 @@ public:
     bool hasImage() const { return m_image.get(); }
     bool currentFrameKnownToBeOpaque(const RenderObject*); // Side effect: ensures decoded image is in cache, therefore should only be called when about to draw the image.
 
-    static std::pair<blink::Image*, float> brokenImage(float deviceScaleFactor); // Returns an image and the image's resolution scale factor.
-
     bool canRender(const RenderObject& renderer) { return !errorOccurred() && !imageSizeForRenderer(&renderer).isEmpty(); }
 
     void setContainerSizeForRenderer(const ImageResourceClient*, const IntSize&);

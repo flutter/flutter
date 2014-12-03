@@ -60,6 +60,8 @@ component("v8_inspector") {
     "PageScriptDebugServer.h",
     "PromiseTracker.cpp",
     "PromiseTracker.h",
+    "read_from_source_tree.cc",
+    "read_from_source_tree.h",
     "ScriptBreakpoint.h",
     "ScriptDebugListener.h",
     "ScriptDebugServer.cpp",

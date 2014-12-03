@@ -65,8 +65,6 @@ class PlatformImpl : public blink::Platform {
       const char* name,
       TraceEventHandle);
 
-  virtual blink::WebData loadResource(const char* name);
-
  private:
   void SuspendSharedTimer();
   void ResumeSharedTimer();

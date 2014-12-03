@@ -62,17 +62,6 @@ Image* Image::nullImage()
     return nullImage;
 }
 
-PassRefPtr<Image> Image::loadPlatformResource(const char *name)
-{
-    const WebData& resource = Platform::current()->loadResource(name);
-    if (resource.isEmpty())
-        return Image::nullImage();
-
-    RefPtr<Image> image = BitmapImage::create();
-    image->setData(resource, true);
-    return image.release();
-}
-
 bool Image::setData(PassRefPtr<SharedBuffer> data, bool allDataReceived)
 {
     m_encodedImageData = data;

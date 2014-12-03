@@ -41,13 +41,12 @@
 #include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
 #include "sky/engine/core/inspector/JavaScriptCallFrame.h"
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebData.h"
+#include "sky/engine/v8_inspector/read_from_source_tree.h"
 #include "sky/engine/v8_inspector/ScriptDebugListener.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/dtoa/utils.h"
+#include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
@@ -580,8 +579,10 @@ void ScriptDebugServer::ensureDebuggerScriptCompiled()
 
     v8::HandleScope scope(m_isolate);
     v8::Context::Scope contextScope(v8::Debug::GetDebugContext());
-    const blink::WebData& debuggerScriptSourceResource = blink::Platform::current()->loadResource("DebuggerScript.js");
-    v8::Handle<v8::String> source = v8String(m_isolate, String(debuggerScriptSourceResource.data(), debuggerScriptSourceResource.size()));
+
+    std::string buffer;
+    inspector::ReadFileFromSourceTree("DebuggerScript.js", &buffer);
+    v8::Handle<v8::String> source = v8String(m_isolate, String::fromUTF8(buffer));
     v8::Local<v8::Value> value = V8ScriptRunner::compileAndRunInternalScript(source, m_isolate);
     ASSERT(!value.IsEmpty());
     ASSERT(value->IsObject());

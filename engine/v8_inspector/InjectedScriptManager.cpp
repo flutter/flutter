@@ -34,10 +34,9 @@
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
 #include "sky/engine/core/inspector/InjectedScriptHost.h"
 #include "sky/engine/platform/JSONValues.h"
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebData.h"
 #include "sky/engine/v8_inspector/InjectedScript.h"
 #include "sky/engine/v8_inspector/JSONParser.h"
+#include "sky/engine/v8_inspector/read_from_source_tree.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
@@ -147,8 +146,9 @@ void InjectedScriptManager::releaseObjectGroup(const String& objectGroup)
 
 String InjectedScriptManager::injectedScriptSource()
 {
-    const blink::WebData& injectedScriptSourceResource = blink::Platform::current()->loadResource("InjectedScriptSource.js");
-    return String(injectedScriptSourceResource.data(), injectedScriptSourceResource.size());
+    std::string buffer;
+    inspector::ReadFileFromSourceTree("InjectedScriptSource.js", &buffer);
+    return String::fromUTF8(buffer);
 }
 
 InjectedScript InjectedScriptManager::injectedScriptFor(ScriptState* inspectedScriptState)

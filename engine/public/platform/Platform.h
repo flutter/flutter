@@ -177,13 +177,6 @@ public:
     virtual void decrementStatsCounter(const char* name) { }
     virtual void incrementStatsCounter(const char* name) { }
 
-
-    // Resources -----------------------------------------------------------
-
-    // Returns a blob of data corresponding to the named resource.
-    virtual WebData loadResource(const char* name) { return WebData(); }
-
-
     // Screen -------------------------------------------------------------
 
     // Supplies the system monitor color profile.
