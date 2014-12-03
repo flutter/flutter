@@ -32,7 +32,6 @@
 #define SKY_ENGINE_V8_INSPECTOR_PAGESCRIPTDEBUGSERVER_H_
 
 #include "sky/engine/v8_inspector/ScriptDebugServer.h"
-#include "sky/engine/v8_inspector/ScriptPreprocessor.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "v8/include/v8.h"
@@ -45,7 +44,6 @@ class InspectorHost;
 namespace blink {
 
 class ScriptController;
-class ScriptPreprocessor;
 class ScriptSourceCode;
 
 class PageScriptDebugServer final : public ScriptDebugServer {
@@ -78,11 +76,6 @@ public:
     virtual void compileScript(ScriptState*, const String& expression, const String& sourceURL, String* scriptId, String* exceptionDetailsText, int* lineNumber, int* columnNumber, RefPtr<ScriptCallStack>* stackTrace) override;
     virtual void clearCompiledScripts() override;
     virtual void runScript(ScriptState*, const String& scriptId, ScriptValue* result, bool* wasThrown, String* exceptionDetailsText, int* lineNumber, int* columnNumber, RefPtr<ScriptCallStack>* stackTrace) override;
-    virtual void setPreprocessorSource(const String&) override;
-    virtual void preprocessBeforeCompile(const v8::Debug::EventDetails&) override;
-    virtual PassOwnPtr<ScriptSourceCode> preprocess(LocalFrame*, const ScriptSourceCode&) override;
-    virtual String preprocessEventListener(LocalFrame*, const String& source, const String& url, const String& functionName) override;
-    virtual void clearPreprocessor() override;
 
 private:
     PageScriptDebugServer();
@@ -99,9 +92,6 @@ private:
     inspector::InspectorHost* m_pausedHost;
     HashMap<String, String> m_compiledScriptURLs;
 
-    OwnPtr<ScriptSourceCode> m_preprocessorSourceCode;
-    OwnPtr<ScriptPreprocessor> m_scriptPreprocessor;
-    bool canPreprocess(LocalFrame*);
     static v8::Isolate* s_mainThreadIsolate;
 };
 

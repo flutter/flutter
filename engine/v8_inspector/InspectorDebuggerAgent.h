@@ -99,9 +99,6 @@ public:
     bool runningNestedMessageLoop();
     void addMessageToConsole(ConsoleMessage*);
 
-    String preprocessEventListener(LocalFrame*, const String& source, const String& url, const String& functionName);
-    PassOwnPtr<ScriptSourceCode> preprocess(LocalFrame*, const ScriptSourceCode&);
-
     // Part of the protocol.
     virtual void enable(ErrorString*) override final;
     virtual void disable(ErrorString*) override final;

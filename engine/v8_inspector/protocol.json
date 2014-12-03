@@ -256,8 +256,7 @@
                 "name": "reload",
                 "parameters": [
                     { "name": "ignoreCache", "type": "boolean", "optional": true, "description": "If true, browser cache is ignored (as if the user pressed Shift+refresh)." },
-                    { "name": "scriptToEvaluateOnLoad", "type": "string", "optional": true, "description": "If set, the script will be injected into all frames of the inspected page after reload." },
-                    { "name": "scriptPreprocessor", "type": "string", "optional": true, "description": "Script body that should evaluate to function that will preprocess all the scripts before their compilation.", "hidden": true }
+                    { "name": "scriptToEvaluateOnLoad", "type": "string", "optional": true, "description": "If set, the script will be injected into all frames of the inspected page after reload." }
                 ],
                 "description": "Reloads given page optionally ignoring the cache.",
                 "handlers": ["browser", "renderer"]

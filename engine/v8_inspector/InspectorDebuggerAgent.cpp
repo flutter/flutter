@@ -155,7 +155,6 @@ void InspectorDebuggerAgent::disable()
 
     scriptDebugServer().clearBreakpoints();
     scriptDebugServer().clearCompiledScripts();
-    scriptDebugServer().clearPreprocessor();
     stopListeningScriptDebugServer();
     clear();
 
@@ -272,16 +271,6 @@ void InspectorDebuggerAgent::addMessageToConsole(ConsoleMessage* consoleMessage)
 {
     if (consoleMessage->type() == AssertMessageType && scriptDebugServer().pauseOnExceptionsState() != ScriptDebugServer::DontPauseOnExceptions)
         breakProgram(InspectorFrontend::Debugger::Reason::Assert, nullptr);
-}
-
-String InspectorDebuggerAgent::preprocessEventListener(LocalFrame* frame, const String& source, const String& url, const String& functionName)
-{
-    return scriptDebugServer().preprocessEventListener(frame, source, url, functionName);
-}
-
-PassOwnPtr<ScriptSourceCode> InspectorDebuggerAgent::preprocess(LocalFrame* frame, const ScriptSourceCode& sourceCode)
-{
-    return scriptDebugServer().preprocess(frame, sourceCode);
 }
 
 static PassRefPtr<JSONObject> buildObjectForBreakpointCookie(const String& url, int lineNumber, int columnNumber, const String& condition, bool isRegex, bool isAnti)

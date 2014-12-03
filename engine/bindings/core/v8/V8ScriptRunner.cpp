@@ -152,17 +152,6 @@ v8::Local<v8::Value> V8ScriptRunner::callInternalFunction(v8::Handle<v8::Functio
     return result;
 }
 
-v8::Local<v8::Value> V8ScriptRunner::callAsFunction(v8::Isolate* isolate, v8::Handle<v8::Object> object, v8::Handle<v8::Value> receiver, int argc, v8::Handle<v8::Value> args[])
-{
-    TRACE_EVENT0("v8", "v8.callFunction");
-    TRACE_EVENT_SCOPED_SAMPLING_STATE("v8", "V8Execution");
-
-    V8RecursionScope::MicrotaskSuppression recursionScope(isolate);
-    v8::Local<v8::Value> result = object->CallAsFunction(receiver, argc, args);
-    crashIfV8IsDead();
-    return result;
-}
-
 v8::Local<v8::Object> V8ScriptRunner::instantiateObject(v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> objectTemplate)
 {
     TRACE_EVENT0("v8", "v8.newInstance");

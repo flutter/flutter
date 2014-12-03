@@ -50,7 +50,6 @@ enum WorldIdConstants {
     MainWorldId = 0,
     // Embedder isolated worlds can use IDs in [1, 1<<29).
     EmbedderWorldIdLimit = (1 << 29),
-    ScriptPreprocessorIsolatedWorldId,
     IsolatedWorldIdLimit,
     TestingWorldId,
 };

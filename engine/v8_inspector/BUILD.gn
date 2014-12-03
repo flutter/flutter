@@ -66,8 +66,6 @@ component("v8_inspector") {
     "ScriptDebugListener.h",
     "ScriptDebugServer.cpp",
     "ScriptDebugServer.h",
-    "ScriptPreprocessor.cpp",
-    "ScriptPreprocessor.h",
     "ScriptRegexp.cpp",
     "ScriptRegexp.h",
   ]

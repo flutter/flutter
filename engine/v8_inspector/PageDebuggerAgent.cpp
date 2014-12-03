@@ -100,7 +100,6 @@ void PageDebuggerAgent::setOverlayMessage(ErrorString*, const String* message)
 void PageDebuggerAgent::didClearDocumentOfWindowObject(LocalFrame* frame)
 {
     reset();
-    scriptDebugServer().setPreprocessorSource(String());
 }
 
 } // namespace blink
