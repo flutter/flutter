@@ -15,7 +15,7 @@ If you want to build release, run the following commands:
 Running applications
 --------------------
 
-* ``./sky/tools/skydb [url]``
+* ``./sky/tools/skydb --debug [url]``
   * You should see a ``(skydb)`` prompt
   * Type ``help`` to see the list of available commands
   * Note: skydb is currently hard-coded to use ``//out/Debug``
