@@ -63,7 +63,6 @@ enum PaintLayerFlag {
     PaintLayerPaintingCompositingMaskPhase = 1 << 7,
     PaintLayerPaintingCompositingScrollingPhase = 1 << 8,
     PaintLayerPaintingOverflowContents = 1 << 9,
-    PaintLayerPaintingChildClippingMaskPhase = 1 << 10,
     PaintLayerPaintingCompositingAllPhases = (PaintLayerPaintingCompositingBackgroundPhase | PaintLayerPaintingCompositingForegroundPhase | PaintLayerPaintingCompositingMaskPhase)
 };
 
