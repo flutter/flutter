@@ -1179,7 +1179,7 @@ TEST(GraphicsContextTest, DisplayList)
     EXPECT_TRUE(canvas2);
 
     EXPECT_NE(canvas1, canvas2);
-    EXPECT_EQ(1, canvas1->getRefCnt());
+    EXPECT_TRUE(canvas1->unique());
     canvas1->unref();
 
     EXPECT_TRUE(dl->isRecording());
@@ -1192,7 +1192,7 @@ TEST(GraphicsContextTest, DisplayList)
     dl->endRecording();
     pic = dl->picture();
     EXPECT_TRUE(pic);
-    EXPECT_EQ(1, pic->getRefCnt());
+    EXPECT_TRUE(pic->unique());
 }
 
 } // namespace
