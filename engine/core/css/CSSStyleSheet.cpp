@@ -163,10 +163,7 @@ void CSSStyleSheet::didMutate(StyleSheetUpdateType updateType)
     if (!owner)
         return;
 
-    // Need FullStyleUpdate when insertRule or deleteRule,
-    // because StyleSheetCollection::analyzeStyleSheetChange cannot detect partial rule update.
-    StyleResolverUpdateMode updateMode = updateType != PartialRuleUpdate ? AnalyzedStyleUpdate : FullStyleUpdate;
-    owner->modifiedStyleSheet(this, updateMode);
+    owner->modifiedStyleSheet(this);
 }
 
 void CSSStyleSheet::reattachChildRuleCSSOMWrappers()

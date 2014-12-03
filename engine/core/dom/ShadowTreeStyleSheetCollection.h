@@ -42,7 +42,7 @@ class ShadowTreeStyleSheetCollection final : public TreeScopeStyleSheetCollectio
 public:
     explicit ShadowTreeStyleSheetCollection(ShadowRoot&);
 
-    void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);
+    void updateActiveStyleSheets(StyleEngine*);
 
 private:
     void collectStyleSheets(StyleEngine*, StyleSheetCollection&);

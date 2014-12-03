@@ -129,13 +129,6 @@ struct AnnotatedRegionValue;
 typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults;
 typedef int ExceptionCode;
 
-enum StyleResolverUpdateMode {
-    // Discards the StyleResolver and rebuilds it.
-    FullStyleUpdate,
-    // Attempts to use StyleInvalidationAnalysis to avoid discarding the entire StyleResolver.
-    AnalyzedStyleUpdate
-};
-
 enum DocumentClass {
     DefaultDocumentClass = 0,
     HTMLDocumentClass = 1,
@@ -247,15 +240,13 @@ public:
     StyleEngine* styleEngine() { return m_styleEngine.get(); }
 
     // Called when one or more stylesheets in the document may have been added, removed, or changed.
-    void styleResolverChanged(StyleResolverUpdateMode = FullStyleUpdate);
-    void styleResolverMayHaveChanged();
+    void styleResolverChanged();
 
     // FIXME: Switch all callers of styleResolverChanged to these or better ones and then make them
     // do something smarter.
-    void removedStyleSheet(StyleSheet*, StyleResolverUpdateMode = FullStyleUpdate);
+    void removedStyleSheet(StyleSheet*);
     void addedStyleSheet(StyleSheet*) { styleResolverChanged(); }
-    void modifiedStyleSheet(StyleSheet*, StyleResolverUpdateMode = FullStyleUpdate);
-    void changedSelectorWatch() { styleResolverChanged(); }
+    void modifiedStyleSheet(StyleSheet*);
 
     void evaluateMediaQueryList();
 

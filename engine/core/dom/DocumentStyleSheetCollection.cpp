@@ -67,33 +67,20 @@ void DocumentStyleSheetCollection::collectStyleSheets(StyleEngine* engine, Docum
     collectStyleSheetsFromCandidates(engine, collector);
 }
 
-void DocumentStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine, StyleResolverUpdateMode updateMode)
+void DocumentStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
 {
     StyleSheetCollection collection;
     ActiveDocumentStyleSheetCollector collector(collection);
     collectStyleSheets(engine, collector);
 
-    StyleSheetChange change;
-    analyzeStyleSheetChange(updateMode, collection, change);
+    engine->clearMasterResolver();
+    // FIMXE: The following depends on whether StyleRuleFontFace was modified or not.
+    // No need to always-clear font cache.
+    engine->clearFontCache();
 
-    if (change.styleResolverUpdateType == Reconstruct) {
-        engine->clearMasterResolver();
-        // FIMXE: The following depends on whether StyleRuleFontFace was modified or not.
-        // No need to always-clear font cache.
-        engine->clearFontCache();
-    } else if (StyleResolver* styleResolver = engine->resolver()) {
-        if (change.styleResolverUpdateType != Additive) {
-            ASSERT(change.styleResolverUpdateType == Reset);
-            styleResolver->resetAuthorStyle(treeScope());
-            engine->removeFontFaceRules(change.fontFaceRulesToRemove);
-            styleResolver->removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
-            styleResolver->lazyAppendAuthorStyleSheets(0, collection.activeAuthorStyleSheets());
-        } else {
-            styleResolver->lazyAppendAuthorStyleSheets(m_activeAuthorStyleSheets.size(), collection.activeAuthorStyleSheets());
-        }
-    }
-    if (change.requiresFullStyleRecalc)
-        document().setNeedsStyleRecalc(SubtreeStyleChange);
+    // TODO(esprehn): This is terrible and not needed in Sky, we should mark
+    // specific tree scopes dirty instead.
+    document().setNeedsStyleRecalc(SubtreeStyleChange);
 
     collection.swap(*this);
 

@@ -92,7 +92,7 @@ void StyleElement::removedFromDocument(Document& document, Element* element, Con
     if (m_sheet)
         clearSheet(element);
     if (removedSheet)
-        document.removedStyleSheet(removedSheet.get(), AnalyzedStyleUpdate);
+        document.removedStyleSheet(removedSheet.get());
 }
 
 void StyleElement::clearDocumentData(Document& document, Element* element)
@@ -161,7 +161,7 @@ void StyleElement::createSheet(Element* e, const String& text)
     }
 
 
-    document.styleResolverMayHaveChanged();
+    document.styleResolverChanged();
 }
 
 }

@@ -29,7 +29,6 @@
 
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
-#include "sky/engine/core/css/invalidation/StyleSheetInvalidationAnalysis.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
@@ -58,92 +57,6 @@ void TreeScopeStyleSheetCollection::addStyleSheetCandidateNode(Node* node, bool)
 void TreeScopeStyleSheetCollection::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopingNode)
 {
     m_styleSheetCandidateNodes.remove(node);
-}
-
-TreeScopeStyleSheetCollection::StyleResolverUpdateType TreeScopeStyleSheetCollection::compareStyleSheets(const Vector<RefPtr<CSSStyleSheet> >& oldStyleSheets, const Vector<RefPtr<CSSStyleSheet> >& newStylesheets, Vector<RawPtr<StyleSheetContents> >& addedSheets)
-{
-    unsigned newStyleSheetCount = newStylesheets.size();
-    unsigned oldStyleSheetCount = oldStyleSheets.size();
-    ASSERT(newStyleSheetCount >= oldStyleSheetCount);
-
-    if (!newStyleSheetCount)
-        return Reconstruct;
-
-    unsigned newIndex = 0;
-    for (unsigned oldIndex = 0; oldIndex < oldStyleSheetCount; ++oldIndex) {
-        while (oldStyleSheets[oldIndex] != newStylesheets[newIndex]) {
-            addedSheets.append(newStylesheets[newIndex]->contents());
-            if (++newIndex == newStyleSheetCount)
-                return Reconstruct;
-        }
-        if (++newIndex == newStyleSheetCount)
-            return Reconstruct;
-    }
-    bool hasInsertions = !addedSheets.isEmpty();
-    while (newIndex < newStyleSheetCount) {
-        addedSheets.append(newStylesheets[newIndex]->contents());
-        ++newIndex;
-    }
-    // If all new sheets were added at the end of the list we can just add them to existing StyleResolver.
-    // If there were insertions we need to re-add all the stylesheets so rules are ordered correctly.
-    return hasInsertions ? Reset : Additive;
-}
-
-static bool findFontFaceRulesFromStyleSheetContents(const Vector<RawPtr<StyleSheetContents> >& sheets, Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
-{
-    bool hasFontFaceRule = false;
-
-    for (unsigned i = 0; i < sheets.size(); ++i) {
-        ASSERT(sheets[i]);
-        if (sheets[i]->hasFontFaceRule()) {
-            // FIXME: We don't need this for styles in shadow tree.
-            sheets[i]->findFontFaceRules(fontFaceRules);
-            hasFontFaceRule = true;
-        }
-    }
-    return hasFontFaceRule;
-}
-
-void TreeScopeStyleSheetCollection::analyzeStyleSheetChange(StyleResolverUpdateMode updateMode, const StyleSheetCollection& newCollection, StyleSheetChange& change)
-{
-    if (updateMode != AnalyzedStyleUpdate)
-        return;
-
-    // Find out which stylesheets are new.
-    Vector<RawPtr<StyleSheetContents> > addedSheets;
-    if (m_activeAuthorStyleSheets.size() <= newCollection.activeAuthorStyleSheets().size()) {
-        change.styleResolverUpdateType = compareStyleSheets(m_activeAuthorStyleSheets, newCollection.activeAuthorStyleSheets(), addedSheets);
-    } else {
-        StyleResolverUpdateType updateType = compareStyleSheets(newCollection.activeAuthorStyleSheets(), m_activeAuthorStyleSheets, addedSheets);
-        if (updateType != Additive) {
-            change.styleResolverUpdateType = updateType;
-        } else {
-            change.styleResolverUpdateType = Reset;
-            // If @font-face is removed, needs full style recalc.
-            if (findFontFaceRulesFromStyleSheetContents(addedSheets, change.fontFaceRulesToRemove))
-                return;
-        }
-    }
-
-    // FIXME: If styleResolverUpdateType is Reconstruct, we should return early here since
-    // we need to recalc the whole document. It's wrong to use StyleSheetInvalidationAnalysis since
-    // it only looks at the addedSheets.
-
-    // No point in doing the analysis work if we're just going to recalc the whole document anyways.
-    // This needs to be done after the compareStyleSheets calls above to ensure we don't throw away
-    // the StyleResolver if we don't need to.
-    if (document().hasPendingForcedStyleRecalc())
-        return;
-
-    // If we are already parsing the body and so may have significant amount of elements, put some effort into trying to avoid style recalcs.
-    if (document().hasNodesWithPlaceholderStyle())
-        return;
-    StyleSheetInvalidationAnalysis invalidationAnalysis(addedSheets);
-    if (invalidationAnalysis.dirtiesAllStyle())
-        return;
-    invalidationAnalysis.invalidateStyle(document());
-    change.requiresFullStyleRecalc = false;
-    return;
 }
 
 void TreeScopeStyleSheetCollection::clearMediaQueryRuleSetStyleSheets()

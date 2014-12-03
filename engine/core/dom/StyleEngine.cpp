@@ -196,16 +196,6 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
     m_activeTreeScopes.remove(&treeScope);
 }
 
-bool StyleEngine::shouldUpdateDocumentStyleSheetCollection(StyleResolverUpdateMode updateMode) const
-{
-    return m_documentScopeDirty || updateMode == FullStyleUpdate;
-}
-
-bool StyleEngine::shouldUpdateShadowTreeStyleSheetCollection(StyleResolverUpdateMode updateMode) const
-{
-    return !m_dirtyTreeScopes.isEmpty() || updateMode == FullStyleUpdate;
-}
-
 void StyleEngine::clearMediaQueryRuleSetOnTreeScopeStyleSheets(TreeScopeSet treeScopes)
 {
     for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
@@ -224,7 +214,7 @@ void StyleEngine::clearMediaQueryRuleSetStyleSheets()
     clearMediaQueryRuleSetOnTreeScopeStyleSheets(m_dirtyTreeScopes);
 }
 
-void StyleEngine::updateActiveStyleSheets(StyleResolverUpdateMode updateMode)
+void StyleEngine::updateActiveStyleSheets()
 {
     ASSERT(isMaster());
     ASSERT(!document().inStyleRecalc());
@@ -232,24 +222,21 @@ void StyleEngine::updateActiveStyleSheets(StyleResolverUpdateMode updateMode)
     if (!document().isActive())
         return;
 
-    if (shouldUpdateDocumentStyleSheetCollection(updateMode))
-        documentStyleSheetCollection()->updateActiveStyleSheets(this, updateMode);
+    documentStyleSheetCollection()->updateActiveStyleSheets(this);
 
-    if (shouldUpdateShadowTreeStyleSheetCollection(updateMode)) {
-        TreeScopeSet treeScopes = updateMode == FullStyleUpdate ? m_activeTreeScopes : m_dirtyTreeScopes;
-        HashSet<TreeScope*> treeScopesRemoved;
+    TreeScopeSet treeScopes = m_activeTreeScopes;
+    HashSet<TreeScope*> treeScopesRemoved;
 
-        for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
-            TreeScope* treeScope = *it;
-            ASSERT(treeScope != m_document);
-            ShadowTreeStyleSheetCollection* collection = static_cast<ShadowTreeStyleSheetCollection*>(styleSheetCollectionFor(*treeScope));
-            ASSERT(collection);
-            collection->updateActiveStyleSheets(this, updateMode);
-            if (!collection->hasStyleSheetCandidateNodes())
-                treeScopesRemoved.add(treeScope);
-        }
-        m_activeTreeScopes.removeAll(treeScopesRemoved);
+    for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
+        TreeScope* treeScope = *it;
+        ASSERT(treeScope != m_document);
+        ShadowTreeStyleSheetCollection* collection = static_cast<ShadowTreeStyleSheetCollection*>(styleSheetCollectionFor(*treeScope));
+        ASSERT(collection);
+        collection->updateActiveStyleSheets(this);
+        if (!collection->hasStyleSheetCandidateNodes())
+            treeScopesRemoved.add(treeScope);
     }
+    m_activeTreeScopes.removeAll(treeScopesRemoved);
 
     m_usesRemUnits = documentStyleSheetCollection()->usesRemUnits();
 
@@ -320,11 +307,11 @@ void StyleEngine::didDetach()
     clearResolver();
 }
 
-void StyleEngine::resolverChanged(StyleResolverUpdateMode mode)
+void StyleEngine::resolverChanged()
 {
     if (!isMaster()) {
         if (Document* master = this->master())
-            master->styleResolverChanged(mode);
+            master->styleResolverChanged();
         return;
     }
 
@@ -335,7 +322,7 @@ void StyleEngine::resolverChanged(StyleResolverUpdateMode mode)
         return;
     }
 
-    updateActiveStyleSheets(mode);
+    updateActiveStyleSheets();
 }
 
 void StyleEngine::clearFontCache()

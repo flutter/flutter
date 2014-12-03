@@ -70,23 +70,7 @@ protected:
         Additive
     };
 
-    class StyleSheetChange {
-        STACK_ALLOCATED();
-    public:
-        StyleResolverUpdateType styleResolverUpdateType;
-        bool requiresFullStyleRecalc;
-        Vector<RawPtr<const StyleRuleFontFace> > fontFaceRulesToRemove;
-
-        StyleSheetChange()
-            : styleResolverUpdateType(Reconstruct)
-            , requiresFullStyleRecalc(true) { }
-    };
-
-    void analyzeStyleSheetChange(StyleResolverUpdateMode, const StyleSheetCollection&, StyleSheetChange&);
     void updateUsesRemUnits();
-
-private:
-    static StyleResolverUpdateType compareStyleSheets(const Vector<RefPtr<CSSStyleSheet> >& oldStyleSheets, const Vector<RefPtr<CSSStyleSheet> >& newStylesheets, Vector<RawPtr<StyleSheetContents> >& addedSheets);
 
 protected:
     RawPtr<TreeScope> m_treeScope;

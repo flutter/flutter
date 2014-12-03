@@ -250,8 +250,6 @@ sky_core_files = [
   "css/FontSize.cpp",
   "css/FontSize.h",
   "css/HashTools.h",
-  "css/invalidation/StyleSheetInvalidationAnalysis.cpp",
-  "css/invalidation/StyleSheetInvalidationAnalysis.h",
   "css/LocalFontFaceSource.cpp",
   "css/LocalFontFaceSource.h",
   "css/MediaList.cpp",

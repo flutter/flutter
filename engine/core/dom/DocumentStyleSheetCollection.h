@@ -45,7 +45,7 @@ public:
         return adoptPtr(new DocumentStyleSheetCollection(treeScope));
     }
 
-    void updateActiveStyleSheets(StyleEngine*, StyleResolverUpdateMode);
+    void updateActiveStyleSheets(StyleEngine*);
     void collectStyleSheets(StyleEngine*, DocumentStyleSheetCollector&);
 
 private:

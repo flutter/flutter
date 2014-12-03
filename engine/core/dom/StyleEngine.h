@@ -83,7 +83,7 @@ public:
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 
     void clearMediaQueryRuleSetStyleSheets();
-    void updateActiveStyleSheets(StyleResolverUpdateMode);
+    void updateActiveStyleSheets();
 
     bool ignoringPendingStylesheets() const { return m_ignorePendingStylesheets; }
 
@@ -122,7 +122,7 @@ public:
     void updateGenericFontFamilySettings();
 
     void didDetach();
-    void resolverChanged(StyleResolverUpdateMode);
+    void resolverChanged();
     unsigned resolverAccessCount() const;
 
     void markDocumentDirty();
@@ -144,8 +144,6 @@ private:
 
     TreeScopeStyleSheetCollection* ensureStyleSheetCollectionFor(TreeScope&);
     TreeScopeStyleSheetCollection* styleSheetCollectionFor(TreeScope&);
-    bool shouldUpdateDocumentStyleSheetCollection(StyleResolverUpdateMode) const;
-    bool shouldUpdateShadowTreeStyleSheetCollection(StyleResolverUpdateMode) const;
 
     void markTreeScopeDirty(TreeScope&);
 

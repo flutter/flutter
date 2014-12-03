@@ -1592,13 +1592,13 @@ void Document::updateBaseURL()
 void Document::didLoadAllImports()
 {
     if (!importLoader())
-        styleResolverMayHaveChanged();
+        styleResolverChanged();
     didLoadAllScriptBlockingResources();
 }
 
 void Document::didRemoveAllPendingStylesheet()
 {
-    styleResolverMayHaveChanged();
+    styleResolverChanged();
 
     // Only imports on master documents can trigger rendering.
     if (HTMLImportLoader* import = importLoader())
@@ -1709,14 +1709,14 @@ void Document::notifyResizeForViewportUnits()
     setNeedsStyleRecalcForViewportUnits();
 }
 
-void Document::styleResolverChanged(StyleResolverUpdateMode updateMode)
+void Document::styleResolverChanged()
 {
     // styleResolverChanged() can be invoked during Document destruction.
     // We just skip that case.
     if (!m_styleEngine)
         return;
 
-    m_styleEngine->resolverChanged(updateMode);
+    m_styleEngine->resolverChanged();
 
     if (didLayoutWithPendingStylesheets()) {
         // We need to manually repaint because we avoid doing all repaints in layout or style
@@ -1727,11 +1727,6 @@ void Document::styleResolverChanged(StyleResolverUpdateMode updateMode)
         if (renderView())
             renderView()->setShouldDoFullPaintInvalidation(true);
     }
-}
-
-void Document::styleResolverMayHaveChanged()
-{
-    styleResolverChanged(hasNodesWithPlaceholderStyle() ? FullStyleUpdate : AnalyzedStyleUpdate);
 }
 
 void Document::setHoverNode(PassRefPtr<Node> newHoverNode)
@@ -2720,24 +2715,24 @@ DocumentLifecycleNotifier& Document::lifecycleNotifier()
     return static_cast<DocumentLifecycleNotifier&>(LifecycleContext<Document>::lifecycleNotifier());
 }
 
-void Document::removedStyleSheet(StyleSheet* sheet, StyleResolverUpdateMode updateMode)
+void Document::removedStyleSheet(StyleSheet* sheet)
 {
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that
     // imported docuements (which is inactive) notifies the change to the master document.
     if (isActive())
         styleEngine()->modifiedStyleSheet(sheet);
-    styleResolverChanged(updateMode);
+    styleResolverChanged();
 }
 
-void Document::modifiedStyleSheet(StyleSheet* sheet, StyleResolverUpdateMode updateMode)
+void Document::modifiedStyleSheet(StyleSheet* sheet)
 {
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that
     // imported docuements (which is inactive) notifies the change to the master document.
     if (isActive())
         styleEngine()->modifiedStyleSheet(sheet);
-    styleResolverChanged(updateMode);
+    styleResolverChanged();
 }
 
 Element* Document::activeElement() const

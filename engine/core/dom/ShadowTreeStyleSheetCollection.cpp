@@ -58,27 +58,20 @@ void ShadowTreeStyleSheetCollection::collectStyleSheets(StyleEngine* engine, Sty
     }
 }
 
-void ShadowTreeStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine, StyleResolverUpdateMode updateMode)
+void ShadowTreeStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
 {
     StyleSheetCollection collection;
     collectStyleSheets(engine, collection);
 
-    StyleSheetChange change;
-    analyzeStyleSheetChange(updateMode, collection, change);
-
     if (StyleResolver* styleResolver = engine->resolver()) {
-        if (change.styleResolverUpdateType != Additive) {
-            // We should not destroy StyleResolver when we find any stylesheet update in a shadow tree.
-            // In this case, we will reset rulesets created from style elements in the shadow tree.
-            styleResolver->resetAuthorStyle(treeScope());
-            styleResolver->removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
-            styleResolver->lazyAppendAuthorStyleSheets(0, collection.activeAuthorStyleSheets());
-        } else {
-            styleResolver->lazyAppendAuthorStyleSheets(m_activeAuthorStyleSheets.size(), collection.activeAuthorStyleSheets());
-        }
+        // We should not destroy StyleResolver when we find any stylesheet update in a shadow tree.
+        // In this case, we will reset rulesets created from style elements in the shadow tree.
+        styleResolver->resetAuthorStyle(treeScope());
+        styleResolver->removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
+        styleResolver->lazyAppendAuthorStyleSheets(0, collection.activeAuthorStyleSheets());
     }
-    if (change.requiresFullStyleRecalc)
-        toShadowRoot(treeScope().rootNode()).host()->setNeedsStyleRecalc(SubtreeStyleChange);
+
+    toShadowRoot(treeScope().rootNode()).host()->setNeedsStyleRecalc(SubtreeStyleChange);
 
     collection.swap(*this);
     updateUsesRemUnits();
