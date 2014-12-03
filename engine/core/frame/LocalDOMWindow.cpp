@@ -598,21 +598,6 @@ PassRefPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt, c
     return CSSComputedStyleDeclaration::create(elt, false, pseudoElt);
 }
 
-PassRefPtr<CSSRuleList> LocalDOMWindow::getMatchedCSSRules(Element* element, const String& pseudoElement) const
-{
-    if (!element)
-        return nullptr;
-
-    unsigned colonStart = pseudoElement[0] == ':' ? (pseudoElement[1] == ':' ? 2 : 1) : 0;
-    CSSSelector::PseudoType pseudoType = CSSSelector::parsePseudoType(AtomicString(pseudoElement.substring(colonStart)));
-    if (pseudoType == CSSSelector::PseudoUnknown && !pseudoElement.isEmpty())
-        return nullptr;
-
-    unsigned rulesToInclude = StyleResolver::AuthorCSSRules;
-    PseudoId pseudoId = CSSSelector::pseudoId(pseudoType);
-    return m_frame->document()->ensureStyleResolver().pseudoCSSRulesForElement(element, pseudoId, rulesToInclude);
-}
-
 double LocalDOMWindow::devicePixelRatio() const
 {
     if (!m_frame)

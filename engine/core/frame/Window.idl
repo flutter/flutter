@@ -81,10 +81,6 @@
     CSSStyleDeclaration getComputedStyle([Default=Undefined] optional Element element,
                                          [TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? pseudoElement);
 
-    // WebKit extensions
-    [MeasureAs=GetMatchedCSSRules] CSSRuleList getMatchedCSSRules([Default=Undefined] optional Element element,
-                                                                  [TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? pseudoElement);
-
     [Replaceable] readonly attribute double devicePixelRatio;
 
     // This is the interface orientation in degrees. Some examples are:

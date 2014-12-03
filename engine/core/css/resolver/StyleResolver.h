@@ -129,19 +129,6 @@ public:
 
     void styleTreeResolveScopedKeyframesRules(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
-    // These methods will give back the set of rules that matched for a given element (or a pseudo-element).
-    enum CSSRuleFilter {
-        UAAndUserCSSRules   = 1 << 1,
-        AuthorCSSRules      = 1 << 2,
-        EmptyCSSRules       = 1 << 3,
-        CrossOriginCSSRules = 1 << 4,
-        AllButEmptyCSSRules = UAAndUserCSSRules | AuthorCSSRules | CrossOriginCSSRules,
-        AllCSSRules         = AllButEmptyCSSRules | EmptyCSSRules,
-    };
-    PassRefPtr<CSSRuleList> cssRulesForElement(Element*, unsigned rulesToInclude = AllButEmptyCSSRules);
-    PassRefPtr<CSSRuleList> pseudoCSSRulesForElement(Element*, PseudoId, unsigned rulesToInclude = AllButEmptyCSSRules);
-    PassRefPtr<StyleRuleList> styleRulesForElement(Element*, unsigned rulesToInclude);
-
     // |properties| is an array with |count| elements.
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);
 

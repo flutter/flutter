@@ -600,29 +600,6 @@ void StyleResolver::updateFont(StyleResolverState& state)
         state.style()->setHasViewportUnits();
 }
 
-PassRefPtr<StyleRuleList> StyleResolver::styleRulesForElement(Element* element, unsigned rulesToInclude)
-{
-    ASSERT(element);
-    StyleResolverState state(document(), element);
-    ElementRuleCollector collector(state.elementContext(), state.style());
-    collector.setMode(SelectorChecker::CollectingStyleRules);
-    return collector.matchedStyleRuleList();
-}
-
-PassRefPtr<CSSRuleList> StyleResolver::pseudoCSSRulesForElement(Element* element, PseudoId pseudoId, unsigned rulesToInclude)
-{
-    ASSERT(element);
-    StyleResolverState state(document(), element);
-    ElementRuleCollector collector(state.elementContext(), state.style());
-    collector.setMode(SelectorChecker::CollectingCSSRules);
-    return collector.matchedCSSRuleList();
-}
-
-PassRefPtr<CSSRuleList> StyleResolver::cssRulesForElement(Element* element, unsigned rulesToInclude)
-{
-    return pseudoCSSRulesForElement(element, NOPSEUDO, rulesToInclude);
-}
-
 // -------------------------------------------------------------------------------------
 // this is mostly boring stuff on how to apply a certain rule to the renderstyle...
 

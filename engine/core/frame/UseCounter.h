@@ -155,7 +155,6 @@ public:
         DOMNodeInsertedIntoDocumentEvent = 147,
         DOMCharacterDataModifiedEvent = 148,
         DocumentAllLegacyCall = 150,
-        GetMatchedCSSRules = 155,
         SVGFontInCSS = 156,
         AttributeOwnerElement = 160, // Removed in DOM4.
         AttributeSpecified = 162, // Removed in DOM4.

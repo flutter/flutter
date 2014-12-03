@@ -105,8 +105,6 @@ public:
     bool hasAnyMatchingRules(RuleSet*);
 
     MatchResult& matchedResult();
-    PassRefPtr<StyleRuleList> matchedStyleRuleList();
-    PassRefPtr<CSSRuleList> matchedCSSRuleList();
 
     void collectMatchingRules(const MatchRequest&, RuleRange&, SelectorChecker::ContextFlags = SelectorChecker::DefaultBehavior, CascadeScope = ignoreCascadeScope, CascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
@@ -128,16 +126,8 @@ private:
 
     bool ruleMatches(const RuleData&, const ContainerNode* scope, SelectorChecker::ContextFlags);
 
-    CSSRuleList* nestedRuleList(CSSRule*);
-    template<class CSSRuleCollection>
-    CSSRule* findStyleRule(CSSRuleCollection*, StyleRule*);
-    void appendCSSOMWrapperForRule(CSSStyleSheet*, StyleRule*);
-
     void sortMatchedRules();
     void addMatchedRule(const RuleData*, CascadeScope, CascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet);
-
-    StaticCSSRuleList* ensureRuleList();
-    StyleRuleList* ensureStyleRuleList();
 
 private:
     const ElementResolveContext& m_context;
@@ -149,8 +139,6 @@ private:
     OwnPtr<Vector<MatchedRule, 32> > m_matchedRules;
 
     // Output.
-    RefPtr<StaticCSSRuleList> m_cssRuleList;
-    RefPtr<StyleRuleList> m_styleRuleList;
     MatchResult m_result;
 };
 

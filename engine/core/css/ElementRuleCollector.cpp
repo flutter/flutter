@@ -61,18 +61,6 @@ MatchResult& ElementRuleCollector::matchedResult()
     return m_result;
 }
 
-PassRefPtr<StyleRuleList> ElementRuleCollector::matchedStyleRuleList()
-{
-    ASSERT(m_mode == SelectorChecker::CollectingStyleRules);
-    return m_styleRuleList.release();
-}
-
-PassRefPtr<CSSRuleList> ElementRuleCollector::matchedCSSRuleList()
-{
-    ASSERT(m_mode == SelectorChecker::CollectingCSSRules);
-    return m_cssRuleList.release();
-}
-
 inline void ElementRuleCollector::addMatchedRule(const RuleData* rule, CascadeScope cascadeScope, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
 {
     if (!m_matchedRules)
@@ -85,20 +73,6 @@ void ElementRuleCollector::clearMatchedRules()
     if (!m_matchedRules)
         return;
     m_matchedRules->clear();
-}
-
-inline StyleRuleList* ElementRuleCollector::ensureStyleRuleList()
-{
-    if (!m_styleRuleList)
-        m_styleRuleList = StyleRuleList::create();
-    return m_styleRuleList.get();
-}
-
-inline StaticCSSRuleList* ElementRuleCollector::ensureRuleList()
-{
-    if (!m_cssRuleList)
-        m_cssRuleList = StaticCSSRuleList::create();
-    return m_cssRuleList.get();
 }
 
 void ElementRuleCollector::addElementStyleProperties(const StylePropertySet* propertySet, bool isCacheable)
@@ -160,54 +134,6 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
     collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
 }
 
-CSSRuleList* ElementRuleCollector::nestedRuleList(CSSRule* rule)
-{
-    switch (rule->type()) {
-    case CSSRule::MEDIA_RULE:
-        return toCSSMediaRule(rule)->cssRules();
-    case CSSRule::KEYFRAMES_RULE:
-        return toCSSKeyframesRule(rule)->cssRules();
-    case CSSRule::SUPPORTS_RULE:
-        return toCSSSupportsRule(rule)->cssRules();
-    default:
-        return 0;
-    }
-}
-
-template<class CSSRuleCollection>
-CSSRule* ElementRuleCollector::findStyleRule(CSSRuleCollection* cssRules, StyleRule* styleRule)
-{
-    if (!cssRules)
-        return 0;
-    CSSRule* result = 0;
-    for (unsigned i = 0; i < cssRules->length() && !result; ++i) {
-        CSSRule* cssRule = cssRules->item(i);
-        CSSRule::Type cssRuleType = cssRule->type();
-        if (cssRuleType == CSSRule::STYLE_RULE) {
-            CSSStyleRule* cssStyleRule = toCSSStyleRule(cssRule);
-            if (cssStyleRule->styleRule() == styleRule)
-                result = cssRule;
-        } else {
-            result = findStyleRule(nestedRuleList(cssRule), styleRule);
-        }
-    }
-    return result;
-}
-
-void ElementRuleCollector::appendCSSOMWrapperForRule(CSSStyleSheet* parentStyleSheet, StyleRule* rule)
-{
-    // |parentStyleSheet| is 0 if and only if the |rule| is coming from User Agent. In this case,
-    // it is safe to create CSSOM wrappers without parentStyleSheets as they will be used only
-    // by inspector which will not try to edit them.
-    RefPtr<CSSRule> cssRule = nullptr;
-    if (parentStyleSheet)
-        cssRule = findStyleRule(parentStyleSheet, rule);
-    else
-        cssRule = rule->createCSSOMWrapper();
-    ASSERT(!parentStyleSheet || cssRule);
-    ensureRuleList()->rules().append(cssRule);
-}
-
 void ElementRuleCollector::sortAndTransferMatchedRules()
 {
     if (!m_matchedRules || m_matchedRules->isEmpty())
@@ -216,17 +142,6 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
     sortMatchedRules();
 
     Vector<MatchedRule, 32>& matchedRules = *m_matchedRules;
-    if (m_mode == SelectorChecker::CollectingStyleRules) {
-        for (unsigned i = 0; i < matchedRules.size(); ++i)
-            ensureStyleRuleList()->m_list.append(matchedRules[i].ruleData()->rule());
-        return;
-    }
-
-    if (m_mode == SelectorChecker::CollectingCSSRules) {
-        for (unsigned i = 0; i < matchedRules.size(); ++i)
-            appendCSSOMWrapperForRule(const_cast<CSSStyleSheet*>(matchedRules[i].parentStyleSheet()), matchedRules[i].ruleData()->rule());
-        return;
-    }
 
     // Now transfer the set of matched rules over to our list of declarations.
     for (unsigned i = 0; i < matchedRules.size(); i++) {

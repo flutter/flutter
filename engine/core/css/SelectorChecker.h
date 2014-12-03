@@ -41,7 +41,7 @@ class RenderStyle;
 class SelectorChecker {
     WTF_MAKE_NONCOPYABLE(SelectorChecker);
 public:
-    enum Mode { ResolvingStyle = 0, CollectingStyleRules, CollectingCSSRules, QueryingRules, SharingRules };
+    enum Mode { ResolvingStyle = 0, QueryingRules, SharingRules };
     explicit SelectorChecker(Document&, Mode);
     enum ContextFlags {
         // FIXME: Revmoe DefaultBehavior.

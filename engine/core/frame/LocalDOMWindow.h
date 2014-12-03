@@ -151,7 +151,6 @@ public:
 
     // WebKit extensions
 
-    PassRefPtr<CSSRuleList> getMatchedCSSRules(Element*, const String& pseudoElt) const;
     double devicePixelRatio() const;
 
     Console& console() const;
