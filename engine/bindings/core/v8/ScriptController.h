@@ -73,16 +73,6 @@ public:
 
     void executeModuleScript(AbstractModule&, const String& source, const TextPosition& textPosition);
 
-    // Executes JavaScript in an isolated world. The script gets its own global scope,
-    // its own prototypes for intrinsic JavaScript objects (String, Array, and so-on),
-    // and its own wrappers for all DOM nodes and DOM constructors.
-    //
-    // If an isolated world with the specified ID already exists, it is reused.
-    // Otherwise, a new world is created.
-    //
-    // FIXME: Get rid of extensionGroup here.
-    void executeScriptInIsolatedWorld(int worldID, const Vector<ScriptSourceCode>& sources, int extensionGroup, Vector<v8::Local<v8::Value> >* results);
-
     v8::Local<v8::Value> callFunction(v8::Handle<v8::Function>, v8::Handle<v8::Value>, int argc, v8::Handle<v8::Value> argv[]);
     static v8::Local<v8::Value> callFunction(ExecutionContext*, v8::Handle<v8::Function>, v8::Handle<v8::Value> receiver, int argc, v8::Handle<v8::Value> info[], v8::Isolate*);
 
@@ -101,7 +91,7 @@ public:
     static void registerExtensionIfNeeded(v8::Extension*);
     static V8Extensions& registeredExtensions();
 
-    void setWorldDebugId(int worldId, int debuggerId);
+    void setWorldDebugId(int debuggerId);
 
     v8::Isolate* isolate() const { return m_isolate; }
 

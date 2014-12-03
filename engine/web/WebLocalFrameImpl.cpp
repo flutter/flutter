@@ -266,28 +266,6 @@ void WebLocalFrameImpl::executeScript(const WebScriptSource& source)
     frame()->script().executeScriptInMainWorld(ScriptSourceCode(source.code, source.url, position));
 }
 
-void WebLocalFrameImpl::executeScriptInIsolatedWorld(int worldID, const WebScriptSource* sourcesIn, unsigned numSources, int extensionGroup)
-{
-    ASSERT(frame());
-    RELEASE_ASSERT(worldID > 0);
-    RELEASE_ASSERT(worldID < EmbedderWorldIdLimit);
-
-    Vector<ScriptSourceCode> sources;
-    for (unsigned i = 0; i < numSources; ++i) {
-        TextPosition position(OrdinalNumber::fromOneBasedInt(sourcesIn[i].startLine), OrdinalNumber::first());
-        sources.append(ScriptSourceCode(sourcesIn[i].code, sourcesIn[i].url, position));
-    }
-
-    v8::HandleScope handleScope(toIsolate(frame()));
-    frame()->script().executeScriptInIsolatedWorld(worldID, sources, extensionGroup, 0);
-}
-
-void WebLocalFrameImpl::setIsolatedWorldHumanReadableName(int worldID, const WebString& humanReadableName)
-{
-    ASSERT(frame());
-    DOMWrapperWorld::setIsolatedWorldHumanReadableName(worldID, humanReadableName);
-}
-
 void WebLocalFrameImpl::addMessageToConsole(const WebConsoleMessage& message)
 {
     ASSERT(frame());
@@ -330,32 +308,6 @@ v8::Handle<v8::Value> WebLocalFrameImpl::executeScriptAndReturnValue(const WebSc
 
     TextPosition position(OrdinalNumber::fromOneBasedInt(source.startLine), OrdinalNumber::first());
     return frame()->script().executeScriptInMainWorldAndReturnValue(ScriptSourceCode(source.code, source.url, position));
-}
-
-void WebLocalFrameImpl::executeScriptInIsolatedWorld(int worldID, const WebScriptSource* sourcesIn, unsigned numSources, int extensionGroup, WebVector<v8::Local<v8::Value> >* results)
-{
-    ASSERT(frame());
-    RELEASE_ASSERT(worldID > 0);
-    RELEASE_ASSERT(worldID < EmbedderWorldIdLimit);
-
-    Vector<ScriptSourceCode> sources;
-
-    for (unsigned i = 0; i < numSources; ++i) {
-        TextPosition position(OrdinalNumber::fromOneBasedInt(sourcesIn[i].startLine), OrdinalNumber::first());
-        sources.append(ScriptSourceCode(sourcesIn[i].code, sourcesIn[i].url, position));
-    }
-
-    if (results) {
-        Vector<v8::Local<v8::Value> > scriptResults;
-        frame()->script().executeScriptInIsolatedWorld(worldID, sources, extensionGroup, &scriptResults);
-        WebVector<v8::Local<v8::Value> > v8Results(scriptResults.size());
-        for (unsigned i = 0; i < scriptResults.size(); i++)
-            v8Results[i] = v8::Local<v8::Value>::New(toIsolate(frame()), scriptResults[i]);
-        results->swap(v8Results);
-    } else {
-        v8::HandleScope handleScope(toIsolate(frame()));
-        frame()->script().executeScriptInIsolatedWorld(worldID, sources, extensionGroup, 0);
-    }
 }
 
 v8::Handle<v8::Value> WebLocalFrameImpl::callFunctionEvenIfScriptDisabled(v8::Handle<v8::Function> function, v8::Handle<v8::Value> receiver, int argc, v8::Handle<v8::Value> argv[])

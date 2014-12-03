@@ -68,7 +68,7 @@ v8::Handle<v8::Object> CustomElementWrapper<ElementType, WrapperType>::wrap(Pass
     ASSERT(!creationContext.IsEmpty());
     v8::Handle<v8::Context> context = creationContext->CreationContext();
 
-    if (!element->isUpgradedCustomElement() || DOMWrapperWorld::world(context).isIsolatedWorld())
+    if (!element->isUpgradedCustomElement())
         return createUpgradeCandidateWrapper(element.get(), creationContext, isolate, createSpecificWrapper);
 
     V8PerContextData* perContextData = V8PerContextData::from(context);

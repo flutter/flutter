@@ -47,14 +47,13 @@ namespace blink {
 unsigned DOMWrapperWorld::isolatedWorldCount = 0;
 DOMWrapperWorld* DOMWrapperWorld::worldOfInitializingWindow = 0;
 
-PassRefPtr<DOMWrapperWorld> DOMWrapperWorld::create(int worldId, int extensionGroup)
+PassRefPtr<DOMWrapperWorld> DOMWrapperWorld::create(FakeWorldMarker marker)
 {
-    return adoptRef(new DOMWrapperWorld(worldId, extensionGroup));
+    return adoptRef(new DOMWrapperWorld(marker));
 }
 
-DOMWrapperWorld::DOMWrapperWorld(int worldId, int extensionGroup)
-    : m_worldId(worldId)
-    , m_extensionGroup(extensionGroup)
+DOMWrapperWorld::DOMWrapperWorld(FakeWorldMarker marker)
+    : m_isFakeWorld(marker == FakeWorld)
     , m_domDataStore(adoptPtr(new DOMDataStore(isMainWorld())))
 {
 }
@@ -62,25 +61,8 @@ DOMWrapperWorld::DOMWrapperWorld(int worldId, int extensionGroup)
 DOMWrapperWorld& DOMWrapperWorld::mainWorld()
 {
     ASSERT(isMainThread());
-    DEFINE_STATIC_REF(DOMWrapperWorld, cachedMainWorld, (DOMWrapperWorld::create(MainWorldId, mainWorldExtensionGroup)));
+    DEFINE_STATIC_REF(DOMWrapperWorld, cachedMainWorld, (DOMWrapperWorld::create(MainWorld)));
     return *cachedMainWorld;
-}
-
-typedef HashMap<int, DOMWrapperWorld*> WorldMap;
-static WorldMap& isolatedWorldMap()
-{
-    ASSERT(isMainThread());
-    DEFINE_STATIC_LOCAL(WorldMap, map, ());
-    return map;
-}
-
-void DOMWrapperWorld::allWorldsInMainThread(Vector<RefPtr<DOMWrapperWorld> >& worlds)
-{
-    ASSERT(isMainThread());
-    worlds.append(&mainWorld());
-    WorldMap& isolatedWorlds = isolatedWorldMap();
-    for (WorldMap::iterator it = isolatedWorlds.begin(); it != isolatedWorlds.end(); ++it)
-        worlds.append(it->value);
 }
 
 DOMWrapperWorld::~DOMWrapperWorld()
@@ -88,72 +70,12 @@ DOMWrapperWorld::~DOMWrapperWorld()
     ASSERT(!isMainWorld());
 
     dispose();
-
-    if (!isIsolatedWorld())
-        return;
-
-    WorldMap& map = isolatedWorldMap();
-    WorldMap::iterator it = map.find(m_worldId);
-    if (it == map.end()) {
-        ASSERT_NOT_REACHED();
-        return;
-    }
-    ASSERT(it->value == this);
-
-    map.remove(it);
-    isolatedWorldCount--;
 }
 
 void DOMWrapperWorld::dispose()
 {
     m_domObjectHolders.clear();
     m_domDataStore.clear();
-}
-
-#if ENABLE(ASSERT)
-static bool isIsolatedWorldId(int worldId)
-{
-    return MainWorldId < worldId  && worldId < IsolatedWorldIdLimit;
-}
-#endif
-
-PassRefPtr<DOMWrapperWorld> DOMWrapperWorld::ensureIsolatedWorld(int worldId, int extensionGroup)
-{
-    ASSERT(isIsolatedWorldId(worldId));
-
-    WorldMap& map = isolatedWorldMap();
-    WorldMap::AddResult result = map.add(worldId, 0);
-    RefPtr<DOMWrapperWorld> world = result.storedValue->value;
-    if (world) {
-        ASSERT(world->worldId() == worldId);
-        ASSERT(world->extensionGroup() == extensionGroup);
-        return world.release();
-    }
-
-    world = DOMWrapperWorld::create(worldId, extensionGroup);
-    result.storedValue->value = world.get();
-    isolatedWorldCount++;
-    return world.release();
-}
-
-typedef HashMap<int, String > IsolatedWorldHumanReadableNameMap;
-static IsolatedWorldHumanReadableNameMap& isolatedWorldHumanReadableNames()
-{
-    ASSERT(isMainThread());
-    DEFINE_STATIC_LOCAL(IsolatedWorldHumanReadableNameMap, map, ());
-    return map;
-}
-
-String DOMWrapperWorld::isolatedWorldHumanReadableName()
-{
-    ASSERT(this->isIsolatedWorld());
-    return isolatedWorldHumanReadableNames().get(worldId());
-}
-
-void DOMWrapperWorld::setIsolatedWorldHumanReadableName(int worldId, const String& humanReadableName)
-{
-    ASSERT(isIsolatedWorldId(worldId));
-    isolatedWorldHumanReadableNames().set(worldId, humanReadableName);
 }
 
 void DOMWrapperWorld::registerDOMObjectHolderInternal(PassOwnPtr<DOMObjectHolderBase> holderBase)

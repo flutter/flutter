@@ -392,7 +392,7 @@ void V8GCController::majorGCEpilogue(v8::Isolate* isolate)
 void V8GCController::collectGarbage(v8::Isolate* isolate)
 {
     v8::HandleScope handleScope(isolate);
-    RefPtr<ScriptState> scriptState = ScriptState::create(v8::Context::New(isolate), DOMWrapperWorld::create());
+    RefPtr<ScriptState> scriptState = ScriptState::create(v8::Context::New(isolate), DOMWrapperWorld::create(FakeWorld));
     ScriptState::Scope scope(scriptState.get());
     V8ScriptRunner::compileAndRunInternalScript(v8String(isolate, "if (gc) gc();"), isolate);
     scriptState->disposePerContextData();

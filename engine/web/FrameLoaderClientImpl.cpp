@@ -81,20 +81,20 @@ void FrameLoaderClientImpl::documentElementAvailable()
         m_webFrame->client()->didCreateDocumentElement(m_webFrame);
 }
 
-void FrameLoaderClientImpl::didCreateScriptContext(v8::Handle<v8::Context> context, int extensionGroup, int worldId)
+void FrameLoaderClientImpl::didCreateScriptContext(v8::Handle<v8::Context> context)
 {
     // FIXME: We shouldn't need separate debugger ids in sky since
     // we should have at most one DocumentView per process, no?
-    m_webFrame->frame()->script().setWorldDebugId(worldId, 1);
+    m_webFrame->frame()->script().setWorldDebugId(1);
 
     if (m_webFrame->client())
-        m_webFrame->client()->didCreateScriptContext(m_webFrame, context, extensionGroup, worldId);
+        m_webFrame->client()->didCreateScriptContext(m_webFrame, context);
 }
 
-void FrameLoaderClientImpl::willReleaseScriptContext(v8::Handle<v8::Context> context, int worldId)
+void FrameLoaderClientImpl::willReleaseScriptContext(v8::Handle<v8::Context> context)
 {
     if (m_webFrame->client())
-        m_webFrame->client()->willReleaseScriptContext(m_webFrame, context, worldId);
+        m_webFrame->client()->willReleaseScriptContext(m_webFrame, context);
 }
 
 void FrameLoaderClientImpl::didChangeScrollOffset()

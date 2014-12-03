@@ -70,17 +70,10 @@ public:
     virtual WebView* view() const override;
     virtual WebDocument document() const override;
     virtual void executeScript(const WebScriptSource&) override;
-    virtual void executeScriptInIsolatedWorld(
-        int worldID, const WebScriptSource* sources, unsigned numSources,
-        int extensionGroup) override;
-    virtual void setIsolatedWorldHumanReadableName(int worldID, const WebString&) override;
     virtual void addMessageToConsole(const WebConsoleMessage&) override;
     virtual void collectGarbage() override;
     virtual v8::Handle<v8::Value> executeScriptAndReturnValue(
         const WebScriptSource&) override;
-    virtual void executeScriptInIsolatedWorld(
-        int worldID, const WebScriptSource* sourcesIn, unsigned numSources,
-        int extensionGroup, WebVector<v8::Local<v8::Value> >* results) override;
     virtual v8::Handle<v8::Value> callFunctionEvenIfScriptDisabled(
         v8::Handle<v8::Function>,
         v8::Handle<v8::Value>,

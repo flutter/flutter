@@ -78,7 +78,7 @@ void WindowProxy::disposeContext(GlobalDetachmentBehavior behavior)
 
     v8::HandleScope handleScope(m_isolate);
     v8::Handle<v8::Context> context = m_scriptState->context();
-    m_frame->loaderClient()->willReleaseScriptContext(context, m_world->worldId());
+    m_frame->loaderClient()->willReleaseScriptContext(context);
 
     if (behavior == DetachGlobal)
         context->DetachGlobal();
@@ -196,7 +196,7 @@ bool WindowProxy::initialize()
     }
 
     updateDocument();
-    m_frame->loaderClient()->didCreateScriptContext(context, m_world->extensionGroup(), m_world->worldId());
+    m_frame->loaderClient()->didCreateScriptContext(context);
     return true;
 }
 

@@ -46,26 +46,18 @@ class DOMDataStore;
 class ExecutionContext;
 class ScriptController;
 
-enum WorldIdConstants {
-    MainWorldId = 0,
-    // Embedder isolated worlds can use IDs in [1, 1<<29).
-    EmbedderWorldIdLimit = (1 << 29),
-    IsolatedWorldIdLimit,
-    TestingWorldId,
+enum FakeWorldMarker {
+    MainWorld,
+    FakeWorld, // Used by garbage collection and testing, not sure why.
 };
 
 // This class represent a collection of DOM wrappers for a specific world.
 class DOMWrapperWorld : public RefCounted<DOMWrapperWorld> {
 public:
-    static PassRefPtr<DOMWrapperWorld> create(int worldId = -1, int extensionGroup = -1);
+    static PassRefPtr<DOMWrapperWorld> create(FakeWorldMarker);
 
-    static const int mainWorldExtensionGroup = 0;
-    static PassRefPtr<DOMWrapperWorld> ensureIsolatedWorld(int worldId, int extensionGroup);
     ~DOMWrapperWorld();
     void dispose();
-
-    static bool isolatedWorldsExist() { return isolatedWorldCount; }
-    static void allWorldsInMainThread(Vector<RefPtr<DOMWrapperWorld> >& worlds);
 
     static DOMWrapperWorld& world(v8::Handle<v8::Context> context)
     {
@@ -86,14 +78,8 @@ public:
 
     static DOMWrapperWorld& mainWorld();
 
-    static void setIsolatedWorldHumanReadableName(int worldID, const String&);
-    String isolatedWorldHumanReadableName();
+    bool isMainWorld() const { return !m_isFakeWorld; }
 
-    bool isMainWorld() const { return m_worldId == MainWorldId; }
-    bool isIsolatedWorld() const { return MainWorldId < m_worldId  && m_worldId < IsolatedWorldIdLimit; }
-
-    int worldId() const { return m_worldId; }
-    int extensionGroup() const { return m_extensionGroup; }
     DOMDataStore& domDataStore() const { return *m_domDataStore; }
 
     static void setWorldOfInitializingWindow(DOMWrapperWorld* world)
@@ -152,7 +138,7 @@ public:
     }
 
 private:
-    DOMWrapperWorld(int worldId, int extensionGroup);
+    DOMWrapperWorld(FakeWorldMarker);
 
     static void weakCallbackForDOMObjectHolder(const v8::WeakCallbackData<v8::Value, DOMObjectHolderBase>&);
     void registerDOMObjectHolderInternal(PassOwnPtr<DOMObjectHolderBase>);
@@ -161,8 +147,7 @@ private:
     static unsigned isolatedWorldCount;
     static DOMWrapperWorld* worldOfInitializingWindow;
 
-    const int m_worldId;
-    const int m_extensionGroup;
+    bool m_isFakeWorld;
     OwnPtr<DOMDataStore> m_domDataStore;
     HashSet<OwnPtr<DOMObjectHolderBase> > m_domObjectHolders;
 };

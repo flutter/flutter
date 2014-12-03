@@ -817,7 +817,7 @@ PassRefPtr<JSONValue> v8ToJSONValue(v8::Isolate* isolate, v8::Handle<v8::Value> 
 V8TestingScope::V8TestingScope(v8::Isolate* isolate)
     : m_handleScope(isolate)
     , m_contextScope(v8::Context::New(isolate))
-    , m_scriptState(ScriptStateForTesting::create(isolate->GetCurrentContext(), DOMWrapperWorld::create()))
+    , m_scriptState(ScriptStateForTesting::create(isolate->GetCurrentContext(), DOMWrapperWorld::create(FakeWorld)))
 {
 }
 

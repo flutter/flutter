@@ -203,9 +203,7 @@ void DocumentView::didAddMessageToConsole(
 }
 
 void DocumentView::didCreateScriptContext(blink::WebLocalFrame* frame,
-                                          v8::Handle<v8::Context> context,
-                                          int extensionGroup,
-                                          int worldId) {
+                                          v8::Handle<v8::Context> context) {
   script_runner_.reset(new ScriptRunner(frame, context));
 
   v8::Isolate* isolate = context->GetIsolate();

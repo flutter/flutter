@@ -162,30 +162,13 @@ WindowProxy* ScriptController::existingWindowProxy(DOMWrapperWorld& world)
 {
     if (world.isMainWorld())
         return m_windowProxy->isContextInitialized() ? m_windowProxy.get() : 0;
-
-    IsolatedWorldMap::iterator iter = m_isolatedWorlds.find(world.worldId());
-    if (iter == m_isolatedWorlds.end())
-        return 0;
-    return iter->value->isContextInitialized() ? iter->value.get() : 0;
+    return 0;
 }
 
 WindowProxy* ScriptController::windowProxy(DOMWrapperWorld& world)
 {
-    WindowProxy* windowProxy = 0;
-    if (world.isMainWorld()) {
-        windowProxy = m_windowProxy.get();
-    } else {
-        IsolatedWorldMap::iterator iter = m_isolatedWorlds.find(world.worldId());
-        if (iter != m_isolatedWorlds.end()) {
-            windowProxy = iter->value.get();
-        } else {
-            OwnPtr<WindowProxy> isolatedWorldWindowProxy = WindowProxy::create(m_frame, world, m_isolate);
-            windowProxy = isolatedWorldWindowProxy.get();
-            m_isolatedWorlds.set(world.worldId(), isolatedWorldWindowProxy.release());
-        }
-    }
-    windowProxy->initializeIfNeeded();
-    return windowProxy;
+    m_windowProxy->initializeIfNeeded();
+    return m_windowProxy.get();
 }
 
 V8Extensions& ScriptController::registeredExtensions()
@@ -222,24 +205,14 @@ void ScriptController::setCaptureCallStackForUncaughtExceptions(bool value)
     v8::V8::SetCaptureStackTraceForUncaughtExceptions(value, ScriptCallStack::maxCallStackSizeToCapture, stackTraceOptions);
 }
 
-void ScriptController::setWorldDebugId(int worldId, int debuggerId)
+void ScriptController::setWorldDebugId(int debuggerId)
 {
     ASSERT(debuggerId > 0);
-    bool isMainWorld = worldId == MainWorldId;
-    WindowProxy* windowProxy = 0;
-    if (isMainWorld) {
-        windowProxy = m_windowProxy.get();
-    } else {
-        IsolatedWorldMap::iterator iter = m_isolatedWorlds.find(worldId);
-        if (iter != m_isolatedWorlds.end())
-            windowProxy = iter->value.get();
-    }
-    if (!windowProxy || !windowProxy->isContextInitialized())
+    if (!m_windowProxy || !m_windowProxy->isContextInitialized())
         return;
     v8::HandleScope scope(m_isolate);
-    v8::Local<v8::Context> context = windowProxy->context();
-    const char* worldName = isMainWorld ? "page" : "injected";
-    V8PerContextDebugData::setContextDebugData(context, worldName, debuggerId);
+    v8::Local<v8::Context> context = m_windowProxy->context();
+    V8PerContextDebugData::setContextDebugData(context, "page", debuggerId);
 }
 
 void ScriptController::updateDocument()
@@ -292,33 +265,6 @@ v8::Local<v8::Value> ScriptController::evaluateScriptInMainWorld(const ScriptSou
         return v8::Local<v8::Value>();
 
     return handleScope.Escape(object);
-}
-
-void ScriptController::executeScriptInIsolatedWorld(int worldID, const Vector<ScriptSourceCode>& sources, int extensionGroup, Vector<v8::Local<v8::Value> >* results)
-{
-    ASSERT(worldID > 0);
-
-    RefPtr<DOMWrapperWorld> world = DOMWrapperWorld::ensureIsolatedWorld(worldID, extensionGroup);
-    WindowProxy* isolatedWorldWindowProxy = windowProxy(*world);
-    if (!isolatedWorldWindowProxy->isContextInitialized())
-        return;
-
-    ScriptState* scriptState = isolatedWorldWindowProxy->scriptState();
-    v8::EscapableHandleScope handleScope(scriptState->isolate());
-    ScriptState::Scope scope(scriptState);
-    v8::Local<v8::Array> resultArray = v8::Array::New(m_isolate, sources.size());
-
-    for (size_t i = 0; i < sources.size(); ++i) {
-        v8::Local<v8::Value> evaluationResult = executeScriptAndReturnValue(scriptState->context(), sources[i]);
-        if (evaluationResult.IsEmpty())
-            evaluationResult = v8::Local<v8::Value>::New(m_isolate, v8::Undefined(m_isolate));
-        resultArray->Set(i, evaluationResult);
-    }
-
-    if (results) {
-        for (size_t i = 0; i < resultArray->Length(); ++i)
-            results->append(handleScope.Escape(resultArray->Get(i)));
-    }
 }
 
 void ScriptController::executeModuleScript(AbstractModule& module, const String& source, const TextPosition& textPosition)

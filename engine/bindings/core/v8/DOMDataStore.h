@@ -58,13 +58,12 @@ public:
     template<typename T>
     static bool canUseScriptWrappable(T* object)
     {
-        return !DOMWrapperWorld::isolatedWorldsExist()
-            && ScriptWrappable::wrapperCanBeStoredInObject(object);
+        return ScriptWrappable::wrapperCanBeStoredInObject(object);
     }
 
     static bool canUseScriptWrappableNonTemplate(Node* object)
     {
-        return !DOMWrapperWorld::isolatedWorldsExist();
+        return true;
     }
 
     template<typename V8T, typename T, typename Wrappable>

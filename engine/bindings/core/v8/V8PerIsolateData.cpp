@@ -162,7 +162,7 @@ v8::Local<v8::Context> V8PerIsolateData::ensureScriptRegexpContext()
 {
     if (!m_scriptRegexpScriptState) {
         v8::Local<v8::Context> context(v8::Context::New(isolate()));
-        m_scriptRegexpScriptState = ScriptState::create(context, DOMWrapperWorld::create());
+        m_scriptRegexpScriptState = ScriptState::create(context, DOMWrapperWorld::create(FakeWorld));
     }
     return m_scriptRegexpScriptState->context();
 }
