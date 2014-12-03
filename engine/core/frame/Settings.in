@@ -86,12 +86,6 @@ deviceSupportsMouse initial=true
 #   http://www.w3.org/TR/pointerevents/#widl-Navigator-maxTouchPoints
 maxTouchPoints type=int, initial=0
 
-# Whether touch gestures should be "fuzzed" to nearest touch targets.
-# It's expected that this is enabled everywhere by default, but it may be
-# disabled for testing purposes as the algorithm is not yet perfect.
-# crbug.com/304895 tracks removal once we're satisfied with the algorithm.
-touchAdjustmentEnabled initial=true
-
 DOMPasteAllowed initial=false
 
 unifiedTextCheckerEnabled initial=defaultUnifiedTextCheckerEnabled

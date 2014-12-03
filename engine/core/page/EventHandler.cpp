@@ -59,7 +59,6 @@
 #include "sky/engine/core/page/EventWithHitTestResults.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/page/TouchAdjustment.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -1868,36 +1867,6 @@ bool EventHandler::isScrollbarHandlingGestures() const
     return m_scrollbarHandlingScrollGesture.get();
 }
 
-bool EventHandler::shouldApplyTouchAdjustment(const PlatformGestureEvent& event) const
-{
-    if (m_frame->settings() && !m_frame->settings()->touchAdjustmentEnabled())
-        return false;
-    return !event.area().isEmpty();
-}
-
-bool EventHandler::bestClickableNodeForHitTestResult(const HitTestResult& result, IntPoint& targetPoint, Node*& targetNode)
-{
-    // FIXME: Unify this with the other best* functions which are very similar.
-
-    TRACE_EVENT0("input", "EventHandler::bestClickableNodeForHitTestResult");
-    ASSERT(result.isRectBasedTest());
-
-    // If the touch is over a scrollbar, don't adjust the touch point since touch adjustment only takes into account
-    // DOM nodes so a touch over a scrollbar will be adjusted towards nearby nodes. This leads to things like textarea
-    // scrollbars being untouchable.
-    if (result.scrollbar())
-        return false;
-
-    IntPoint touchCenter = m_frame->view()->contentsToWindow(result.roundedPointInMainFrame());
-    IntRect touchRect = m_frame->view()->contentsToWindow(result.hitTestLocation().boundingBox());
-
-    Vector<RefPtr<Node>, 11> nodes;
-    copyToVector(result.rectBasedTestResult(), nodes);
-
-    // FIXME: the explicit Vector conversion copies into a temporary and is wasteful.
-    return findBestClickableCandidate(targetNode, targetPoint, touchCenter, touchRect, Vector<RefPtr<Node> > (nodes));
-}
-
 GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGestureEvent& gestureEvent, bool readOnly)
 {
     // Scrolling events get hit tested per frame (like wheel events do).
@@ -1927,22 +1896,6 @@ GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGe
     // FIXME: We should not do a rect-based hit-test if touch adjustment is disabled.
     HitTestResult hitTestResult = hitTestResultAtPoint(hitTestPoint, hitType | HitTestRequest::ReadOnly, touchRadius);
 
-    // Adjust the location of the gesture to the most likely nearby node, as appropriate for the
-    // type of event.
-    PlatformGestureEvent adjustedEvent = gestureEvent;
-    applyTouchAdjustment(&adjustedEvent, &hitTestResult);
-
-    // Do a new hit-test at the (adjusted) gesture co-ordinates. This is necessary because
-    // rect-based hit testing and touch adjustment sometimes return a different node than
-    // what a point-based hit test would return for the same point.
-    // FIXME: Fix touch adjustment to avoid the need for a redundant hit test. http://crbug.com/398914
-    if (shouldApplyTouchAdjustment(gestureEvent)) {
-        LocalFrame* hitFrame = hitTestResult.innerNodeFrame();
-        if (!hitFrame)
-            hitFrame = m_frame;
-        hitTestResult = hitTestResultInFrame(hitFrame, adjustedEvent.position(), hitType | HitTestRequest::ReadOnly);
-    }
-
     // Now apply hover/active state to the final target.
     // FIXME: This is supposed to send mouseenter/mouseleave events, but doesn't because we
     // aren't passing a PlatformMouseEvent.
@@ -1955,7 +1908,7 @@ GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGe
         m_activeIntervalTimer.startOneShot(minimumActiveInterval - activeInterval, FROM_HERE);
     }
 
-    return GestureEventWithHitTestResults(adjustedEvent, hitTestResult);
+    return GestureEventWithHitTestResults(gestureEvent, hitTestResult);
 }
 
 HitTestRequest::HitTestRequestType EventHandler::getHitTypeForGestureType(PlatformEvent::Type type)
@@ -1981,38 +1934,6 @@ HitTestRequest::HitTestRequestType EventHandler::getHitTypeForGestureType(Platfo
     default:
         ASSERT_NOT_REACHED();
         return hitType | HitTestRequest::Active | HitTestRequest::ReadOnly;
-    }
-}
-
-void EventHandler::applyTouchAdjustment(PlatformGestureEvent* gestureEvent, HitTestResult* hitTestResult)
-{
-    if (!shouldApplyTouchAdjustment(*gestureEvent))
-        return;
-
-    Node* adjustedNode = 0;
-    IntPoint adjustedPoint = gestureEvent->position();
-    IntSize radius = gestureEvent->area();
-    radius.scale(1.f / 2);
-    bool adjusted = false;
-    switch (gestureEvent->type()) {
-    case PlatformEvent::GestureTap:
-    case PlatformEvent::GestureTapUnconfirmed:
-    case PlatformEvent::GestureTapDown:
-    case PlatformEvent::GestureShowPress:
-    case PlatformEvent::GestureLongPress:
-    case PlatformEvent::GestureLongTap:
-    case PlatformEvent::GestureTwoFingerTap:
-        adjusted = bestClickableNodeForHitTestResult(*hitTestResult, adjustedPoint, adjustedNode);
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-
-    // Update the hit-test result to be a point-based result instead of a rect-based result.
-    // FIXME: We should do this even when no candidate matches the node filter. crbug.com/398914
-    if (adjusted) {
-        hitTestResult->resolveRectBasedTest(adjustedNode, adjustedPoint);
-        gestureEvent->applyTouchAdjustment(adjustedPoint);
     }
 }
 

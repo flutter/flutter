@@ -106,16 +106,6 @@ public:
         return m_data.m_pinchUpdate.m_scale;
     }
 
-    void applyTouchAdjustment(const IntPoint& adjustedPosition)
-    {
-        // Update the window-relative position of the event so that the node that was
-        // ultimately hit is under this point (i.e. elementFromPoint for the client
-        // co-ordinates in a 'click' event should yield the target). The global
-        // position is intentionally left unmodified because it's intended to reflect
-        // raw co-ordinates unrelated to any content.
-        m_position = adjustedPosition;
-    }
-
     bool isScrollEvent() const
     {
         switch (m_type) {

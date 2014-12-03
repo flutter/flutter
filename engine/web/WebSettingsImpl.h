@@ -69,7 +69,7 @@ public:
     virtual void setDeviceSupportsTouch(bool) override;
 
     virtual void setDownloadableBinaryFontsEnabled(bool) override;
-    virtual void setEnableTouchAdjustment(bool) override;
+
     virtual void setExperimentalWebGLEnabled(bool) override;
     virtual void setFantasyFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) override;
     virtual void setFixedFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) override;

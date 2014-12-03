@@ -1069,8 +1069,6 @@ sky_core_files = [
   "page/PageVisibilityState.cpp",
   "page/PageVisibilityState.h",
   "page/SpellCheckerClient.h",
-  "page/TouchAdjustment.cpp",
-  "page/TouchAdjustment.h",
   "page/TouchDisambiguation.cpp",
   "page/TouchDisambiguation.h",
   "page/WindowFocusAllowedIndicator.cpp",

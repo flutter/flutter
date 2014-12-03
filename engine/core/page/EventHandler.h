@@ -144,8 +144,6 @@ public:
     bool handleGestureScrollEnd(const PlatformGestureEvent&);
     bool isScrollbarHandlingGestures() const;
 
-    bool bestClickableNodeForHitTestResult(const HitTestResult&, IntPoint& targetPoint, Node*& targetNode);
-
     void setMouseDownMayStartAutoscroll() { m_mouseDownMayStartAutoscroll = true; }
 
     static unsigned accessKeyModifiers();
@@ -188,15 +186,13 @@ private:
     bool handlePasteGlobalSelection(const PlatformMouseEvent&);
 
     HitTestRequest::HitTestRequestType getHitTypeForGestureType(PlatformEvent::Type);
-    void applyTouchAdjustment(PlatformGestureEvent*, HitTestResult*);
+
     bool handleGestureTap(const GestureEventWithHitTestResults&);
     bool handleGestureLongPress(const GestureEventWithHitTestResults&);
     bool handleGestureLongTap(const GestureEventWithHitTestResults&);
     bool handleGestureScrollUpdate(const PlatformGestureEvent&);
     bool handleGestureScrollBegin(const PlatformGestureEvent&);
     void clearGestureScrollNodes();
-
-    bool shouldApplyTouchAdjustment(const PlatformGestureEvent&) const;
 
     OptionalCursor selectCursor(const HitTestResult&);
     OptionalCursor selectAutoCursor(const HitTestResult&, Node*, const Cursor& iBeam);

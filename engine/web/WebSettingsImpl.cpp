@@ -314,11 +314,6 @@ void WebSettingsImpl::setShouldClearDocumentBackground(bool enabled)
     m_settings->setShouldClearDocumentBackground(enabled);
 }
 
-void WebSettingsImpl::setEnableTouchAdjustment(bool enabled)
-{
-    m_settings->setTouchAdjustmentEnabled(enabled);
-}
-
 int WebSettingsImpl::availablePointerTypes() const
 {
     return m_settings->availablePointerTypes();
