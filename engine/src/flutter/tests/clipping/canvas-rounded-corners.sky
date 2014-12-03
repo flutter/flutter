@@ -1,0 +1,24 @@
+<sky>
+  <import src="../resources/dump-as-render-tree.sky" />
+  <style>
+    canvas {
+      background-color: gray;
+      border: 10px solid red;
+      border-radius: 200px 100px 0px 0px;
+    }
+  </style>
+  <!-- TODO(ojan): Make this a reftest. -->
+  <h3>It passes if:</h3>
+  <ul>
+    <li>the canvas content has rounded corners (top-left and top-right)</li>
+    <li>the 10px red border is visible around the canvas content</li>
+    <li>gray border is not visible</li>
+  </ul>
+  <canvas id="theCanvas" width="257" height="257"></canvas>
+  <script>
+    var theCanvas = document.getElementById('theCanvas');
+    var context = theCanvas.getContext('2d');
+    context.fillStyle = 'green';
+    context.fillRect(0, 0, theCanvas.width, theCanvas.width);
+  </script>
+</sky>
