@@ -28,6 +28,7 @@
 
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
@@ -35,6 +36,7 @@ namespace blink {
 class StyleKeyframe;
 
 class StyleRuleKeyframes final : public StyleRuleBase {
+    WTF_MAKE_NONCOPYABLE(StyleRuleKeyframes);
 public:
     static PassRefPtr<StyleRuleKeyframes> create() { return adoptRef(new StyleRuleKeyframes()); }
 
@@ -43,8 +45,6 @@ public:
     const Vector<RefPtr<StyleKeyframe> >& keyframes() const { return m_keyframes; }
 
     void parserAppendKeyframe(PassRefPtr<StyleKeyframe>);
-    void wrapperAppendKeyframe(PassRefPtr<StyleKeyframe>);
-    void wrapperRemoveKeyframe(unsigned);
 
     String name() const { return m_name; }
     void setName(const String& name) { m_name = AtomicString(name); }
@@ -52,13 +52,8 @@ public:
     bool isVendorPrefixed() const { return m_isPrefixed; }
     void setVendorPrefixed(bool isPrefixed) { m_isPrefixed = isPrefixed; }
 
-    int findKeyframeIndex(const String& key) const;
-
-    PassRefPtr<StyleRuleKeyframes> copy() const { return adoptRef(new StyleRuleKeyframes(*this)); }
-
 private:
     StyleRuleKeyframes();
-    explicit StyleRuleKeyframes(const StyleRuleKeyframes&);
 
     Vector<RefPtr<StyleKeyframe> > m_keyframes;
     AtomicString m_name;

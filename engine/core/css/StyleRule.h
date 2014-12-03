@@ -24,12 +24,11 @@
 
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 
-class CSSStyleSheet;
-class MutableStylePropertySet;
 class StylePropertySet;
 
 class StyleRuleBase : public RefCounted<StyleRuleBase> {
@@ -55,8 +54,6 @@ public:
     bool isSupportsRule() const { return type() == Supports; }
     bool isFilterRule() const { return type() == Filter; }
 
-    PassRefPtr<StyleRuleBase> copy() const;
-
     void deref()
     {
         if (derefBase())
@@ -65,7 +62,6 @@ public:
 
 protected:
     StyleRuleBase(Type type) : m_type(type) { }
-    StyleRuleBase(const StyleRuleBase& o) : m_type(o.m_type) { }
 
     ~StyleRuleBase() { }
 
@@ -75,8 +71,9 @@ private:
     unsigned m_type : 5;
 };
 
-class StyleRule : public StyleRuleBase {
+class StyleRule final : public StyleRuleBase {
     WTF_MAKE_FAST_ALLOCATED;
+    WTF_MAKE_NONCOPYABLE(StyleRule);
 public:
     static PassRefPtr<StyleRule> create() { return adoptRef(new StyleRule()); }
 
@@ -84,40 +81,33 @@ public:
 
     const CSSSelectorList& selectorList() const { return m_selectorList; }
     const StylePropertySet& properties() const { return *m_properties; }
-    MutableStylePropertySet& mutableProperties();
 
     void parserAdoptSelectorVector(Vector<OwnPtr<CSSParserSelector> >& selectors) { m_selectorList.adoptSelectorVector(selectors); }
     void wrapperAdoptSelectorList(CSSSelectorList& selectors) { m_selectorList.adopt(selectors); }
     void setProperties(PassRefPtr<StylePropertySet>);
 
-    PassRefPtr<StyleRule> copy() const { return adoptRef(new StyleRule(*this)); }
-
     static unsigned averageSizeInBytes();
 
 private:
     StyleRule();
-    StyleRule(const StyleRule&);
 
     RefPtr<StylePropertySet> m_properties; // Cannot be null.
     CSSSelectorList m_selectorList;
 };
 
-class StyleRuleFontFace : public StyleRuleBase {
+class StyleRuleFontFace final : public StyleRuleBase {
+    WTF_MAKE_NONCOPYABLE(StyleRuleFontFace);
 public:
     static PassRefPtr<StyleRuleFontFace> create() { return adoptRef(new StyleRuleFontFace); }
 
     ~StyleRuleFontFace();
 
     const StylePropertySet& properties() const { return *m_properties; }
-    MutableStylePropertySet& mutableProperties();
 
     void setProperties(PassRefPtr<StylePropertySet>);
 
-    PassRefPtr<StyleRuleFontFace> copy() const { return adoptRef(new StyleRuleFontFace(*this)); }
-
 private:
     StyleRuleFontFace();
-    StyleRuleFontFace(const StyleRuleFontFace&);
 
     RefPtr<StylePropertySet> m_properties; // Cannot be null.
 };
@@ -126,18 +116,15 @@ class StyleRuleGroup : public StyleRuleBase {
 public:
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
 
-    void wrapperInsertRule(unsigned, PassRefPtr<StyleRuleBase>);
-    void wrapperRemoveRule(unsigned);
-
 protected:
     StyleRuleGroup(Type, Vector<RefPtr<StyleRuleBase> >& adoptRule);
-    StyleRuleGroup(const StyleRuleGroup&);
 
 private:
     Vector<RefPtr<StyleRuleBase> > m_childRules;
 };
 
-class StyleRuleMedia : public StyleRuleGroup {
+class StyleRuleMedia final : public StyleRuleGroup {
+    WTF_MAKE_NONCOPYABLE(StyleRuleMedia);
 public:
     static PassRefPtr<StyleRuleMedia> create(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     {
@@ -146,16 +133,14 @@ public:
 
     MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
 
-    PassRefPtr<StyleRuleMedia> copy() const { return adoptRef(new StyleRuleMedia(*this)); }
-
 private:
     StyleRuleMedia(PassRefPtr<MediaQuerySet>, Vector<RefPtr<StyleRuleBase> >& adoptRules);
-    StyleRuleMedia(const StyleRuleMedia&);
 
     RefPtr<MediaQuerySet> m_mediaQueries;
 };
 
-class StyleRuleSupports : public StyleRuleGroup {
+class StyleRuleSupports final : public StyleRuleGroup {
+    WTF_MAKE_NONCOPYABLE(StyleRuleSupports);
 public:
     static PassRefPtr<StyleRuleSupports> create(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     {
@@ -164,17 +149,16 @@ public:
 
     String conditionText() const { return m_conditionText; }
     bool conditionIsSupported() const { return m_conditionIsSupported; }
-    PassRefPtr<StyleRuleSupports> copy() const { return adoptRef(new StyleRuleSupports(*this)); }
 
 private:
     StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules);
-    StyleRuleSupports(const StyleRuleSupports&);
 
     String m_conditionText;
     bool m_conditionIsSupported;
 };
 
-class StyleRuleFilter : public StyleRuleBase {
+class StyleRuleFilter final : public StyleRuleBase {
+    WTF_MAKE_NONCOPYABLE(StyleRuleFilter);
 public:
     static PassRefPtr<StyleRuleFilter> create(const String& filterName) { return adoptRef(new StyleRuleFilter(filterName)); }
 
@@ -183,15 +167,11 @@ public:
     const String& filterName() const { return m_filterName; }
 
     const StylePropertySet& properties() const { return *m_properties; }
-    MutableStylePropertySet& mutableProperties();
 
     void setProperties(PassRefPtr<StylePropertySet>);
 
-    PassRefPtr<StyleRuleFilter> copy() const { return adoptRef(new StyleRuleFilter(*this)); }
-
 private:
     StyleRuleFilter(const String&);
-    StyleRuleFilter(const StyleRuleFilter&);
 
     String m_filterName;
     RefPtr<StylePropertySet> m_properties;

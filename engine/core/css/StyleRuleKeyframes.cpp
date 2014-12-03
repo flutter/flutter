@@ -35,14 +35,6 @@ StyleRuleKeyframes::StyleRuleKeyframes()
 {
 }
 
-StyleRuleKeyframes::StyleRuleKeyframes(const StyleRuleKeyframes& o)
-    : StyleRuleBase(o)
-    , m_keyframes(o.m_keyframes)
-    , m_name(o.m_name)
-    , m_isPrefixed(o.m_isPrefixed)
-{
-}
-
 StyleRuleKeyframes::~StyleRuleKeyframes()
 {
 }
@@ -52,33 +44,6 @@ void StyleRuleKeyframes::parserAppendKeyframe(PassRefPtr<StyleKeyframe> keyframe
     if (!keyframe)
         return;
     m_keyframes.append(keyframe);
-}
-
-void StyleRuleKeyframes::wrapperAppendKeyframe(PassRefPtr<StyleKeyframe> keyframe)
-{
-    m_keyframes.append(keyframe);
-}
-
-void StyleRuleKeyframes::wrapperRemoveKeyframe(unsigned index)
-{
-    m_keyframes.remove(index);
-}
-
-int StyleRuleKeyframes::findKeyframeIndex(const String& key) const
-{
-    String percentageString;
-    if (equalIgnoringCase(key, "from"))
-        percentageString = "0%";
-    else if (equalIgnoringCase(key, "to"))
-        percentageString = "100%";
-    else
-        percentageString = key;
-
-    for (unsigned i = 0; i < m_keyframes.size(); ++i) {
-        if (m_keyframes[i]->keyText() == percentageString)
-            return i;
-    }
-    return -1;
 }
 
 } // namespace blink

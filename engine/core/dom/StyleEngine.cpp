@@ -378,11 +378,6 @@ void StyleEngine::markDocumentDirty()
 
 static bool isCacheableForStyleElement(const StyleSheetContents& contents)
 {
-    // Until import rules are supported in cached sheets it's not possible for loading to fail.
-    ASSERT(!contents.didLoadErrorOccur());
-    // It is not the original sheet anymore.
-    if (contents.isMutable())
-        return false;
     if (!contents.hasSyntacticallyValidCSSHeader())
         return false;
     return true;

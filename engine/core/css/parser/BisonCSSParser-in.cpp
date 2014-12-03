@@ -1680,8 +1680,6 @@ StyleRuleBase* BisonCSSParser::createFontFaceRule()
     clearProperties();
     StyleRuleFontFace* result = rule.get();
     m_parsedRules.append(rule.release());
-    if (m_styleSheet)
-        m_styleSheet->setHasFontFaceRule(true);
     return result;
 }
 

@@ -35,51 +35,14 @@
 
 namespace blink {
 
-// Rough size estimate for the memory cache.
-unsigned StyleSheetContents::estimatedSizeInBytes() const
-{
-    // Note that this does not take into account size of the strings hanging from various objects.
-    // The assumption is that nearly all of of them are atomic and would exist anyway.
-    unsigned size = sizeof(*this);
-
-    // FIXME: This ignores the children of media rules.
-    // Most rules are StyleRules.
-    size += ruleCount() * StyleRule::averageSizeInBytes();
-    return size;
-}
-
 StyleSheetContents::StyleSheetContents(const String& originalURL, const CSSParserContext& context)
-    : m_originalURL(originalURL)
-    , m_hasSyntacticallyValidCSSHeader(true)
-    , m_didLoadErrorOccur(false)
+    : m_hasSyntacticallyValidCSSHeader(true)
     , m_usesRemUnits(false)
-    , m_isMutable(false)
-    , m_isInMemoryCache(false)
-    , m_hasFontFaceRule(false)
     , m_hasMediaQueries(false)
     , m_hasSingleOwnerDocument(true)
+    , m_originalURL(originalURL)
     , m_parserContext(context)
 {
-}
-
-StyleSheetContents::StyleSheetContents(const StyleSheetContents& o)
-    : m_originalURL(o.m_originalURL)
-    , m_childRules(o.m_childRules.size())
-    , m_namespaces(o.m_namespaces)
-    , m_hasSyntacticallyValidCSSHeader(o.m_hasSyntacticallyValidCSSHeader)
-    , m_didLoadErrorOccur(false)
-    , m_usesRemUnits(o.m_usesRemUnits)
-    , m_isMutable(false)
-    , m_isInMemoryCache(false)
-    , m_hasFontFaceRule(o.m_hasFontFaceRule)
-    , m_hasMediaQueries(o.m_hasMediaQueries)
-    , m_hasSingleOwnerDocument(true)
-    , m_parserContext(o.m_parserContext)
-{
-    ASSERT(o.isCacheable());
-
-    for (unsigned i = 0; i < m_childRules.size(); ++i)
-        m_childRules[i] = o.m_childRules[i]->copy();
 }
 
 StyleSheetContents::~StyleSheetContents()
@@ -106,11 +69,6 @@ bool StyleSheetContents::isCacheable() const
     // if they are in differently sized iframes). Once RuleSets are media query
     // agnostic, we can restore sharing of StyleSheetContents with medea queries.
     if (m_hasMediaQueries)
-        return false;
-    if (m_didLoadErrorOccur)
-        return false;
-    // It is not the original sheet anymore.
-    if (m_isMutable)
         return false;
     // If the header is valid we are not going to need to check the SecurityOrigin.
     // FIXME: Valid mime type avoids the check too.
@@ -149,30 +107,6 @@ unsigned StyleSheetContents::ruleCount() const
 void StyleSheetContents::clearRules()
 {
     m_childRules.clear();
-}
-
-bool StyleSheetContents::wrapperInsertRule(PassRefPtr<StyleRuleBase> rule, unsigned index)
-{
-    ASSERT(m_isMutable);
-    ASSERT_WITH_SECURITY_IMPLICATION(index <= ruleCount());
-
-    if (rule->isMediaRule())
-        setHasMediaQueries();
-
-    if (rule->isFontFaceRule())
-        setHasFontFaceRule(true);
-    m_childRules.insert(index, rule);
-    return true;
-}
-
-void StyleSheetContents::wrapperDeleteRule(unsigned index)
-{
-    ASSERT(m_isMutable);
-    ASSERT_WITH_SECURITY_IMPLICATION(index < ruleCount());
-
-    if (m_childRules[index]->isFontFaceRule())
-        notifyRemoveFontFaceRule(toStyleRuleFontFace(m_childRules[index].get()));
-    m_childRules.remove(index);
 }
 
 bool StyleSheetContents::parseString(const String& sheetText)
@@ -292,20 +226,6 @@ void StyleSheetContents::removeSheetFromCache(Document* document)
     document->styleEngine()->removeSheet(this);
 }
 
-void StyleSheetContents::addedToMemoryCache()
-{
-    ASSERT(!m_isInMemoryCache);
-    ASSERT(isCacheable());
-    m_isInMemoryCache = true;
-}
-
-void StyleSheetContents::removedFromMemoryCache()
-{
-    ASSERT(m_isInMemoryCache);
-    ASSERT(isCacheable());
-    m_isInMemoryCache = false;
-}
-
 void StyleSheetContents::shrinkToFit()
 {
     m_childRules.shrinkToFit();
@@ -355,27 +275,6 @@ void StyleSheetContents::notifyRemoveFontFaceRule(const StyleRuleFontFace* fontF
 {
     removeFontFaceRules(m_loadingClients, fontFaceRule);
     removeFontFaceRules(m_completedClients, fontFaceRule);
-}
-
-static void findFontFaceRulesFromRules(const Vector<RefPtr<StyleRuleBase> >& rules, Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
-{
-    for (unsigned i = 0; i < rules.size(); ++i) {
-        StyleRuleBase* rule = rules[i].get();
-
-        if (rule->isFontFaceRule()) {
-            fontFaceRules.append(toStyleRuleFontFace(rule));
-        } else if (rule->isMediaRule()) {
-            StyleRuleMedia* mediaRule = toStyleRuleMedia(rule);
-            // We cannot know whether the media rule matches or not, but
-            // for safety, remove @font-face in the media rule (if exists).
-            findFontFaceRulesFromRules(mediaRule->childRules(), fontFaceRules);
-        }
-    }
-}
-
-void StyleSheetContents::findFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
-{
-    findFontFaceRulesFromRules(childRules(), fontFaceRules);
 }
 
 }

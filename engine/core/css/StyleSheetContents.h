@@ -72,10 +72,6 @@ public:
     void setHasSyntacticallyValidCSSHeader(bool isValidCss);
     bool hasSyntacticallyValidCSSHeader() const { return m_hasSyntacticallyValidCSSHeader; }
 
-    void setHasFontFaceRule(bool b) { m_hasFontFaceRule = b; }
-    bool hasFontFaceRule() const { return m_hasFontFaceRule; }
-    void findFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules);
-
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
 
@@ -95,34 +91,15 @@ public:
 
     bool usesRemUnits() const { return m_usesRemUnits; }
 
-    unsigned estimatedSizeInBytes() const;
-
-    bool wrapperInsertRule(PassRefPtr<StyleRuleBase>, unsigned index);
-    void wrapperDeleteRule(unsigned index);
-
-    PassRefPtr<StyleSheetContents> copy() const
-    {
-        return adoptRef(new StyleSheetContents(*this));
-    }
-
     void registerClient(CSSStyleSheet*);
     void unregisterClient(CSSStyleSheet*);
     size_t clientSize() const { return m_loadingClients.size() + m_completedClients.size(); }
     bool hasOneClient() const { return clientSize() == 1; }
 
-    bool isMutable() const { return m_isMutable; }
-    void setMutable() { m_isMutable = true; }
-
     void removeSheetFromCache(Document*);
-
-    bool isInMemoryCache() const { return m_isInMemoryCache; }
-    void addedToMemoryCache();
-    void removedFromMemoryCache();
 
     void setHasMediaQueries();
     bool hasMediaQueries() const { return m_hasMediaQueries; }
-
-    bool didLoadErrorOccur() const { return m_didLoadErrorOccur; }
 
     void shrinkToFit();
     RuleSet& ruleSet() { ASSERT(m_ruleSet); return *m_ruleSet.get(); }
@@ -131,33 +108,24 @@ public:
 
 private:
     StyleSheetContents(const String& originalURL, const CSSParserContext&);
-    StyleSheetContents(const StyleSheetContents&);
+
     void notifyRemoveFontFaceRule(const StyleRuleFontFace*);
 
     Document* clientSingleOwnerDocument() const;
 
-    String m_originalURL;
-
-    Vector<RefPtr<StyleRuleBase> > m_childRules;
-    typedef HashMap<AtomicString, AtomicString> PrefixNamespaceURIMap;
-    PrefixNamespaceURIMap m_namespaces;
-
     bool m_hasSyntacticallyValidCSSHeader : 1;
-    bool m_didLoadErrorOccur : 1;
     bool m_usesRemUnits : 1;
-    bool m_isMutable : 1;
-    bool m_isInMemoryCache : 1;
-    bool m_hasFontFaceRule : 1;
     bool m_hasMediaQueries : 1;
     bool m_hasSingleOwnerDocument : 1;
 
+    String m_originalURL;
+    OwnPtr<RuleSet> m_ruleSet;
+    Vector<RefPtr<StyleRuleBase> > m_childRules;
     CSSParserContext m_parserContext;
 
     HashSet<RawPtr<CSSStyleSheet> > m_loadingClients;
     HashSet<RawPtr<CSSStyleSheet> > m_completedClients;
     typedef HashSet<RawPtr<CSSStyleSheet> >::iterator ClientsIterator;
-
-    OwnPtr<RuleSet> m_ruleSet;
 };
 
 } // namespace

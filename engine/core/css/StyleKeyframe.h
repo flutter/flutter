@@ -58,7 +58,6 @@ public:
     void setKeys(PassOwnPtr<Vector<double> >);
 
     const StylePropertySet& properties() const { return *m_properties; }
-    MutableStylePropertySet& mutableProperties();
     void setProperties(PassRefPtr<StylePropertySet>);
 
     String cssText() const;

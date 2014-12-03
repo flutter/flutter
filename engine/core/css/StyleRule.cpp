@@ -62,30 +62,6 @@ void StyleRuleBase::destroy()
     ASSERT_NOT_REACHED();
 }
 
-PassRefPtr<StyleRuleBase> StyleRuleBase::copy() const
-{
-    switch (type()) {
-    case Style:
-        return toStyleRule(this)->copy();
-    case FontFace:
-        return toStyleRuleFontFace(this)->copy();
-    case Media:
-        return toStyleRuleMedia(this)->copy();
-    case Supports:
-        return toStyleRuleSupports(this)->copy();
-    case Keyframes:
-        return toStyleRuleKeyframes(this)->copy();
-    case Filter:
-        return toStyleRuleFilter(this)->copy();
-    case Unknown:
-    case Keyframe:
-        ASSERT_NOT_REACHED();
-        return nullptr;
-    }
-    ASSERT_NOT_REACHED();
-    return nullptr;
-}
-
 unsigned StyleRule::averageSizeInBytes()
 {
     return sizeof(StyleRule) + sizeof(CSSSelector) + StylePropertySet::averageSizeInBytes();
@@ -96,22 +72,8 @@ StyleRule::StyleRule()
 {
 }
 
-StyleRule::StyleRule(const StyleRule& o)
-    : StyleRuleBase(o)
-    , m_properties(o.m_properties->mutableCopy())
-    , m_selectorList(o.m_selectorList)
-{
-}
-
 StyleRule::~StyleRule()
 {
-}
-
-MutableStylePropertySet& StyleRule::mutableProperties()
-{
-    if (!m_properties->isMutable())
-        m_properties = m_properties->mutableCopy();
-    return *toMutableStylePropertySet(m_properties.get());
 }
 
 void StyleRule::setProperties(PassRefPtr<StylePropertySet> properties)
@@ -124,21 +86,8 @@ StyleRuleFontFace::StyleRuleFontFace()
 {
 }
 
-StyleRuleFontFace::StyleRuleFontFace(const StyleRuleFontFace& o)
-    : StyleRuleBase(o)
-    , m_properties(o.m_properties->mutableCopy())
-{
-}
-
 StyleRuleFontFace::~StyleRuleFontFace()
 {
-}
-
-MutableStylePropertySet& StyleRuleFontFace::mutableProperties()
-{
-    if (!m_properties->isMutable())
-        m_properties = m_properties->mutableCopy();
-    return *toMutableStylePropertySet(m_properties);
 }
 
 void StyleRuleFontFace::setProperties(PassRefPtr<StylePropertySet> properties)
@@ -152,35 +101,10 @@ StyleRuleGroup::StyleRuleGroup(Type type, Vector<RefPtr<StyleRuleBase> >& adoptR
     m_childRules.swap(adoptRule);
 }
 
-StyleRuleGroup::StyleRuleGroup(const StyleRuleGroup& o)
-    : StyleRuleBase(o)
-    , m_childRules(o.m_childRules.size())
-{
-    for (unsigned i = 0; i < m_childRules.size(); ++i)
-        m_childRules[i] = o.m_childRules[i]->copy();
-}
-
-void StyleRuleGroup::wrapperInsertRule(unsigned index, PassRefPtr<StyleRuleBase> rule)
-{
-    m_childRules.insert(index, rule);
-}
-
-void StyleRuleGroup::wrapperRemoveRule(unsigned index)
-{
-    m_childRules.remove(index);
-}
-
 StyleRuleMedia::StyleRuleMedia(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
     : StyleRuleGroup(Media, adoptRules)
     , m_mediaQueries(media)
 {
-}
-
-StyleRuleMedia::StyleRuleMedia(const StyleRuleMedia& o)
-    : StyleRuleGroup(o)
-{
-    if (o.m_mediaQueries)
-        m_mediaQueries = o.m_mediaQueries->copy();
 }
 
 StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules)
@@ -190,35 +114,14 @@ StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool condition
 {
 }
 
-StyleRuleSupports::StyleRuleSupports(const StyleRuleSupports& o)
-    : StyleRuleGroup(o)
-    , m_conditionText(o.m_conditionText)
-    , m_conditionIsSupported(o.m_conditionIsSupported)
-{
-}
-
 StyleRuleFilter::StyleRuleFilter(const String& filterName)
     : StyleRuleBase(Filter)
     , m_filterName(filterName)
 {
 }
 
-StyleRuleFilter::StyleRuleFilter(const StyleRuleFilter& o)
-    : StyleRuleBase(o)
-    , m_filterName(o.m_filterName)
-    , m_properties(o.m_properties->mutableCopy())
-{
-}
-
 StyleRuleFilter::~StyleRuleFilter()
 {
-}
-
-MutableStylePropertySet& StyleRuleFilter::mutableProperties()
-{
-    if (!m_properties->isMutable())
-        m_properties = m_properties->mutableCopy();
-    return *toMutableStylePropertySet(m_properties);
 }
 
 void StyleRuleFilter::setProperties(PassRefPtr<StylePropertySet> properties)
