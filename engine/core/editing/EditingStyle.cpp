@@ -31,8 +31,6 @@
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/CSSPropertyMetadata.h"
-#include "sky/engine/core/css/CSSRuleList.h"
-#include "sky/engine/core/css/CSSStyleRule.h"
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/CSSValuePool.h"
 #include "sky/engine/core/css/FontSize.h"

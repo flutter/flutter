@@ -22,10 +22,10 @@
 #ifndef SKY_ENGINE_CORE_CSS_RULESET_H_
 #define SKY_ENGINE_CORE_CSS_RULESET_H_
 
-#include "sky/engine/core/css/CSSKeyframesRule.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
+#include "sky/engine/core/css/StyleRuleKeyframes.h"
 #include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"

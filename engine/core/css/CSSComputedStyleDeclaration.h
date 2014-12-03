@@ -75,7 +75,6 @@ private:
     CSSComputedStyleDeclaration(PassRefPtr<Node>, bool allowVisitedStyle, const String&);
 
     // CSSOM functions. Don't make these public.
-    virtual CSSRule* parentRule() const override;
     virtual unsigned length() const override;
     virtual String item(unsigned index) const override;
     PassRefPtr<RenderStyle> computeRenderStyle(CSSPropertyID) const;

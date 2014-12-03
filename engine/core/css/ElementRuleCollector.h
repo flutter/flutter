@@ -32,11 +32,9 @@
 namespace blink {
 
 class CSSStyleSheet;
-class CSSRuleList;
 class RuleData;
 class RuleSet;
 class ScopedStyleResolver;
-class StaticCSSRuleList;
 
 typedef unsigned CascadeScope;
 typedef unsigned CascadeOrder;

@@ -38,7 +38,6 @@
 #include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
 #include "sky/engine/core/app/Application.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
-#include "sky/engine/core/css/CSSRuleList.h"
 #include "sky/engine/core/css/DOMWindowCSS.h"
 #include "sky/engine/core/css/MediaQueryList.h"
 #include "sky/engine/core/css/MediaQueryMatcher.h"

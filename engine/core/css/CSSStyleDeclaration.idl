@@ -35,7 +35,6 @@
     getter DOMString          item([Default=Undefined] optional unsigned long index);
     [Custom=(PropertyGetter,PropertyEnumerator,PropertyQuery)] getter (DOMString or float) (DOMString name);
     [Custom] setter void (DOMString propertyName, DOMString? propertyValue);
-    readonly attribute CSSRule          parentRule;
 
     // Deprecated as of 2003: http://lists.w3.org/Archives/Public/www-style/2003Oct/0347.html
     // FIXME: This should be DeprecateAs=, but currently too many tests use

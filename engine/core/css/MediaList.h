@@ -21,7 +21,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_MEDIALIST_H_
 #define SKY_ENGINE_CORE_CSS_MEDIALIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -32,7 +31,6 @@
 
 namespace blink {
 
-class CSSRule;
 class CSSStyleSheet;
 class Document;
 class ExceptionState;
@@ -68,50 +66,34 @@ private:
     Vector<OwnPtr<MediaQuery> > m_queries;
 };
 
-class MediaList : public RefCounted<MediaList>, public ScriptWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class MediaList : public RefCounted<MediaList> {
 public:
     static PassRefPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
     {
         return adoptRef(new MediaList(mediaQueries, parentSheet));
     }
-    static PassRefPtr<MediaList> create(MediaQuerySet* mediaQueries, CSSRule* parentRule)
-    {
-        return adoptRef(new MediaList(mediaQueries, parentRule));
-    }
 
     ~MediaList();
 
     unsigned length() const { return m_mediaQueries->queryVector().size(); }
-    String item(unsigned index) const;
-    void deleteMedium(const String& oldMedium, ExceptionState&);
-    void appendMedium(const String& newMedium, ExceptionState&);
 
     String mediaText() const { return m_mediaQueries->mediaText(); }
-    void setMediaText(const String&);
 
     // Not part of CSSOM.
-    CSSRule* parentRule() const { return m_parentRule; }
     CSSStyleSheet* parentStyleSheet() const { return m_parentStyleSheet; }
 
 #if !ENABLE(OILPAN)
     void clearParentStyleSheet() { ASSERT(m_parentStyleSheet); m_parentStyleSheet = nullptr; }
-    void clearParentRule() { ASSERT(m_parentRule); m_parentRule = nullptr; }
 #endif
 
     const MediaQuerySet* queries() const { return m_mediaQueries.get(); }
 
-    void reattach(MediaQuerySet*);
-
 private:
     MediaList(MediaQuerySet*, CSSStyleSheet* parentSheet);
-    MediaList(MediaQuerySet*, CSSRule* parentRule);
 
     RefPtr<MediaQuerySet> m_mediaQueries;
     // Cleared in ~CSSStyleSheet destructor when oilpan is not enabled.
     RawPtr<CSSStyleSheet> m_parentStyleSheet;
-    // Cleared in the ~CSSMediaRule destructors when oilpan is not enabled.
-    RawPtr<CSSRule> m_parentRule;
 };
 
 // Adds message to inspector console whenever dpi or dpcm values are used for "screen" media.

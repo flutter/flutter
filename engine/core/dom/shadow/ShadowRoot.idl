@@ -34,6 +34,5 @@ interface ShadowRoot : DocumentFragment {
     Element elementFromPoint([Default=Undefined] optional long x,
                              [Default=Undefined] optional long y);
 
-    readonly attribute StyleSheetList styleSheets;
     readonly attribute Element host;
 };

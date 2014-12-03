@@ -21,7 +21,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_STYLESHEET_H_
 #define SKY_ENGINE_CORE_CSS_STYLESHEET_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/css/parser/CSSParserMode.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -29,14 +28,12 @@
 
 namespace blink {
 
-class CSSRule;
 class KURL;
 class MediaList;
 class Node;
 class StyleSheet;
 
-class StyleSheet : public RefCounted<StyleSheet>, public ScriptWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class StyleSheet : public RefCounted<StyleSheet> {
 public:
     StyleSheet()
     {
@@ -44,7 +41,6 @@ public:
     virtual ~StyleSheet();
 
     virtual Node* ownerNode() const = 0;
-    virtual MediaList* media() const { return 0; }
     virtual String type() const = 0;
 
     virtual void clearOwnerNode() = 0;

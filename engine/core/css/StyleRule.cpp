@@ -22,13 +22,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/StyleRule.h"
 
-#include "sky/engine/core/css/CSSFilterRule.h"
-#include "sky/engine/core/css/CSSFontFaceRule.h"
-#include "sky/engine/core/css/CSSKeyframesRule.h"
-#include "sky/engine/core/css/CSSMediaRule.h"
-#include "sky/engine/core/css/CSSStyleRule.h"
-#include "sky/engine/core/css/CSSSupportsRule.h"
 #include "sky/engine/core/css/StylePropertySet.h"
+#include "sky/engine/core/css/StyleRuleKeyframes.h"
 
 namespace blink {
 
@@ -37,16 +32,6 @@ struct SameSizeAsStyleRuleBase : public RefCounted<SameSizeAsStyleRuleBase> {
 };
 
 COMPILE_ASSERT(sizeof(StyleRuleBase) <= sizeof(SameSizeAsStyleRuleBase), StyleRuleBase_should_stay_small);
-
-PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet) const
-{
-    return createCSSOMWrapper(parentSheet, 0);
-}
-
-PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSRule* parentRule) const
-{
-    return createCSSOMWrapper(0, parentRule);
-}
 
 void StyleRuleBase::destroy()
 {
@@ -99,39 +84,6 @@ PassRefPtr<StyleRuleBase> StyleRuleBase::copy() const
     }
     ASSERT_NOT_REACHED();
     return nullptr;
-}
-
-PassRefPtr<CSSRule> StyleRuleBase::createCSSOMWrapper(CSSStyleSheet* parentSheet, CSSRule* parentRule) const
-{
-    RefPtr<CSSRule> rule = nullptr;
-    StyleRuleBase* self = const_cast<StyleRuleBase*>(this);
-    switch (type()) {
-    case Style:
-        rule = CSSStyleRule::create(toStyleRule(self), parentSheet);
-        break;
-    case FontFace:
-        rule = CSSFontFaceRule::create(toStyleRuleFontFace(self), parentSheet);
-        break;
-    case Media:
-        rule = CSSMediaRule::create(toStyleRuleMedia(self), parentSheet);
-        break;
-    case Supports:
-        rule = CSSSupportsRule::create(toStyleRuleSupports(self), parentSheet);
-        break;
-    case Keyframes:
-        rule = CSSKeyframesRule::create(toStyleRuleKeyframes(self), parentSheet);
-        break;
-    case Filter:
-        rule = CSSFilterRule::create(toStyleRuleFilter(self), parentSheet);
-        break;
-    case Unknown:
-    case Keyframe:
-        ASSERT_NOT_REACHED();
-        return nullptr;
-    }
-    if (parentRule)
-        rule->setParentRule(parentRule);
-    return rule.release();
 }
 
 unsigned StyleRule::averageSizeInBytes()

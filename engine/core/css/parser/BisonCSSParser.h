@@ -48,13 +48,13 @@
 namespace blink {
 
 class AnimationParseContext;
+class CSSBasicShape;
+class CSSBasicShapeInset;
 class CSSBorderImageSliceValue;
 class CSSPrimitiveValue;
 class CSSSelectorList;
 class CSSValue;
 class CSSValueList;
-class CSSBasicShape;
-class CSSBasicShapeInset;
 class Document;
 class Element;
 class ImmutableStylePropertySet;
@@ -66,7 +66,6 @@ class StyleKeyframe;
 class StylePropertyShorthand;
 class StyleRuleBase;
 class StyleRuleKeyframes;
-class StyleKeyframe;
 class StyleSheetContents;
 class UseCounter;
 

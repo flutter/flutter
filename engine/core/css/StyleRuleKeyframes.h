@@ -23,19 +23,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_
-#define SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_
+#ifndef SKY_ENGINE_CORE_CSS_STYLERULEKEYFRAMES_H_
+#define SKY_ENGINE_CORE_CSS_STYLERULEKEYFRAMES_H_
 
-#include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
-class CSSRuleList;
 class StyleKeyframe;
-class CSSKeyframeRule;
 
 class StyleRuleKeyframes final : public StyleRuleBase {
 public:
@@ -70,46 +67,6 @@ private:
 
 DEFINE_STYLE_RULE_TYPE_CASTS(Keyframes);
 
-class CSSKeyframesRule final : public CSSRule {
-public:
-    static PassRefPtr<CSSKeyframesRule> create(StyleRuleKeyframes* rule, CSSStyleSheet* sheet)
-    {
-        return adoptRef(new CSSKeyframesRule(rule, sheet));
-    }
-
-    virtual ~CSSKeyframesRule();
-
-    virtual CSSRule::Type type() const override { return KEYFRAMES_RULE; }
-    virtual String cssText() const override;
-    virtual void reattach(StyleRuleBase*) override;
-
-    String name() const { return m_keyframesRule->name(); }
-    void setName(const String&);
-
-    CSSRuleList* cssRules();
-
-    void insertRule(const String& rule);
-    void deleteRule(const String& key);
-    CSSKeyframeRule* findRule(const String& key);
-
-    // For IndexedGetter and CSSRuleList.
-    unsigned length() const;
-    CSSKeyframeRule* item(unsigned index) const;
-
-    bool isVendorPrefixed() const { return m_isPrefixed; }
-    void setVendorPrefixed(bool isPrefixed) { m_isPrefixed = isPrefixed; }
-
-private:
-    CSSKeyframesRule(StyleRuleKeyframes*, CSSStyleSheet* parent);
-
-    RefPtr<StyleRuleKeyframes> m_keyframesRule;
-    mutable Vector<RefPtr<CSSKeyframeRule> > m_childRuleCSSOMWrappers;
-    mutable OwnPtr<CSSRuleList> m_ruleListCSSOMWrapper;
-    bool m_isPrefixed;
-};
-
-DEFINE_CSS_RULE_TYPE_CASTS(CSSKeyframesRule, KEYFRAMES_RULE);
-
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_CSS_CSSKEYFRAMESRULE_H_
+#endif  // SKY_ENGINE_CORE_CSS_STYLERULEKEYFRAMES_H_

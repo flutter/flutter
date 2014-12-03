@@ -23,19 +23,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_CORE_CSS_CSSKEYFRAMERULE_H_
-#define SKY_ENGINE_CORE_CSS_CSSKEYFRAMERULE_H_
+#ifndef SKY_ENGINE_CORE_CSS_STYLEKEYFRAME_H_
+#define SKY_ENGINE_CORE_CSS_STYLEKEYFRAME_H_
 
-#include "sky/engine/core/css/CSSRule.h"
+#include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/Vector.h"
+#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
 class CSSKeyframesRule;
 class CSSParserValueList;
-class CSSStyleDeclaration;
 class MutableStylePropertySet;
 class StylePropertySet;
-class StyleRuleCSSStyleDeclaration;
 
 class StyleKeyframe final : public RefCounted<StyleKeyframe> {
     WTF_MAKE_FAST_ALLOCATED;
@@ -72,30 +74,6 @@ private:
     mutable OwnPtr<Vector<double> > m_keys;
 };
 
-class CSSKeyframeRule final : public CSSRule {
-public:
-    virtual ~CSSKeyframeRule();
-
-    virtual CSSRule::Type type() const override { return KEYFRAME_RULE; }
-    virtual String cssText() const override { return m_keyframe->cssText(); }
-    virtual void reattach(StyleRuleBase*) override;
-
-    String keyText() const { return m_keyframe->keyText(); }
-    void setKeyText(const String& s) { m_keyframe->setKeyText(s); }
-
-    CSSStyleDeclaration* style() const;
-
-private:
-    CSSKeyframeRule(StyleKeyframe*, CSSKeyframesRule* parent);
-
-    RefPtr<StyleKeyframe> m_keyframe;
-    mutable RefPtr<StyleRuleCSSStyleDeclaration> m_propertiesCSSOMWrapper;
-
-    friend class CSSKeyframesRule;
-};
-
-DEFINE_CSS_RULE_TYPE_CASTS(CSSKeyframeRule, KEYFRAME_RULE);
-
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_CSS_CSSKEYFRAMERULE_H_
+#endif  // SKY_ENGINE_CORE_CSS_STYLEKEYFRAME_H_

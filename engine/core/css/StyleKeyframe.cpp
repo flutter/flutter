@@ -24,13 +24,10 @@
  */
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/css/CSSKeyframeRule.h"
+#include "sky/engine/core/css/StyleKeyframe.h"
 
-#include "sky/engine/core/css/CSSKeyframesRule.h"
-#include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
@@ -134,34 +131,6 @@ PassOwnPtr<Vector<double> > StyleKeyframe::createKeyList(CSSParserValueList* key
         keyVector->at(i) = key / 100;
     }
     return keyVector.release();
-}
-
-CSSKeyframeRule::CSSKeyframeRule(StyleKeyframe* keyframe, CSSKeyframesRule* parent)
-    : CSSRule(0)
-    , m_keyframe(keyframe)
-{
-    setParentRule(parent);
-}
-
-CSSKeyframeRule::~CSSKeyframeRule()
-{
-#if !ENABLE(OILPAN)
-    if (m_propertiesCSSOMWrapper)
-        m_propertiesCSSOMWrapper->clearParentRule();
-#endif
-}
-
-CSSStyleDeclaration* CSSKeyframeRule::style() const
-{
-    if (!m_propertiesCSSOMWrapper)
-        m_propertiesCSSOMWrapper = StyleRuleCSSStyleDeclaration::create(m_keyframe->mutableProperties(), const_cast<CSSKeyframeRule*>(this));
-    return m_propertiesCSSOMWrapper.get();
-}
-
-void CSSKeyframeRule::reattach(StyleRuleBase*)
-{
-    // No need to reattach, the underlying data is shareable on mutation.
-    ASSERT_NOT_REACHED();
 }
 
 } // namespace blink

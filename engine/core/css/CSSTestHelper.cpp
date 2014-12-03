@@ -30,7 +30,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSTestHelper.h"
 
-#include "sky/engine/core/css/CSSRuleList.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/core/css/StyleSheetContents.h"

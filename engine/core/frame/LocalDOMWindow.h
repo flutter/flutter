@@ -41,7 +41,6 @@
 namespace blink {
 
 class Application;
-class CSSRuleList;
 class CSSStyleDeclaration;
 class Console;
 class DOMSelection;

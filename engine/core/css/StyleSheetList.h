@@ -21,7 +21,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_STYLESHEETLIST_H_
 #define SKY_ENGINE_CORE_CSS_STYLESHEETLIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/wtf/Forward.h"
@@ -34,8 +33,7 @@ namespace blink {
 class HTMLStyleElement;
 class StyleSheet;
 
-class StyleSheetList : public RefCounted<StyleSheetList>, public ScriptWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class StyleSheetList : public RefCounted<StyleSheetList> {
 public:
     static PassRefPtr<StyleSheetList> create(TreeScope* treeScope) { return adoptRef(new StyleSheetList(treeScope)); }
     ~StyleSheetList();

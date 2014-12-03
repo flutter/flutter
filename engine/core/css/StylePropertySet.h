@@ -32,7 +32,6 @@
 
 namespace blink {
 
-class CSSRule;
 class CSSStyleDeclaration;
 class Element;
 class ImmutableStylePropertySet;

@@ -21,7 +21,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
 #define SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
 
-#include "sky/engine/core/css/CSSRule.h"
 #include "sky/engine/core/css/StyleSheet.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -30,8 +29,6 @@
 namespace blink {
 
 class BisonCSSParser;
-class CSSRule;
-class CSSRuleList;
 class CSSStyleSheet;
 class Document;
 class ExceptionState;
@@ -44,7 +41,6 @@ enum StyleSheetUpdateType {
 };
 
 class CSSStyleSheet final : public StyleSheet {
-    DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
     static PassRefPtr<CSSStyleSheet> createInline(PassRefPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
@@ -52,22 +48,8 @@ public:
     virtual ~CSSStyleSheet();
 
     virtual Node* ownerNode() const override { return m_ownerNode; }
-    virtual MediaList* media() const override;
 
-    PassRefPtr<CSSRuleList> cssRules();
-    unsigned insertRule(const String& rule, unsigned index, ExceptionState&);
-    unsigned insertRule(const String& rule, ExceptionState&); // Deprecated.
-    void deleteRule(unsigned index, ExceptionState&);
-
-    // IE Extensions
-    PassRefPtr<CSSRuleList> rules();
-    int addRule(const String& selector, const String& style, int index, ExceptionState&);
-    int addRule(const String& selector, const String& style, ExceptionState&);
-    void removeRule(unsigned index, ExceptionState& exceptionState) { deleteRule(index, exceptionState); }
-
-    // For CSSRuleList.
     unsigned length() const;
-    CSSRule* item(unsigned index);
 
     virtual void clearOwnerNode() override;
 
@@ -82,7 +64,6 @@ public:
         STACK_ALLOCATED();
     public:
         explicit RuleMutationScope(CSSStyleSheet*);
-        explicit RuleMutationScope(CSSRule*);
         ~RuleMutationScope();
 
     private:
@@ -92,8 +73,6 @@ public:
     void willMutateRules();
     void didMutateRules();
     void didMutate(StyleSheetUpdateType = PartialRuleUpdate);
-
-    void clearChildRuleCSSOMWrappers();
 
     StyleSheetContents* contents() const { return m_contents.get(); }
 
@@ -107,8 +86,6 @@ private:
     virtual bool isCSSStyleSheet() const override { return true; }
     virtual String type() const override { return "text/css"; }
 
-    void reattachChildRuleCSSOMWrappers();
-
     RefPtr<StyleSheetContents> m_contents;
     bool m_isInlineStylesheet;
     RefPtr<MediaQuerySet> m_mediaQueries;
@@ -116,20 +93,10 @@ private:
     RawPtr<Node> m_ownerNode;
 
     TextPosition m_startPosition;
-    mutable RefPtr<MediaList> m_mediaCSSOMWrapper;
-    mutable Vector<RefPtr<CSSRule> > m_childRuleCSSOMWrappers;
-    mutable OwnPtr<CSSRuleList> m_ruleListCSSOMWrapper;
 };
 
 inline CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSStyleSheet* sheet)
     : m_styleSheet(sheet)
-{
-    if (m_styleSheet)
-        m_styleSheet->willMutateRules();
-}
-
-inline CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSRule* rule)
-    : m_styleSheet(rule ? rule->parentStyleSheet() : 0)
 {
     if (m_styleSheet)
         m_styleSheet->willMutateRules();

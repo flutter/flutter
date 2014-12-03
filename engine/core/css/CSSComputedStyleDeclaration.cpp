@@ -2361,11 +2361,6 @@ PassRefPtr<MutableStylePropertySet> CSSComputedStyleDeclaration::copyPropertiesI
     return MutableStylePropertySet::create(list.data(), list.size());
 }
 
-CSSRule* CSSComputedStyleDeclaration::parentRule() const
-{
-    return 0;
-}
-
 PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(const String& propertyName)
 {
     CSSPropertyID propertyID = cssPropertyID(propertyName);

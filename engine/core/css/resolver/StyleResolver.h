@@ -43,7 +43,6 @@ class AnimatableValue;
 class AnimationTimeline;
 class CSSAnimationUpdate;
 class CSSFontSelector;
-class CSSRuleList;
 class CSSSelector;
 class CSSStyleSheet;
 class CSSValue;

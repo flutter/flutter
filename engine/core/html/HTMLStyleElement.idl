@@ -21,7 +21,4 @@
 interface HTMLStyleElement : HTMLElement {
     [Reflect] attribute DOMString media;
     [Reflect] attribute DOMString type;
-
-    // DOM Level 2 Style
-    readonly attribute StyleSheet sheet;
 };

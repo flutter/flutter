@@ -29,7 +29,6 @@
 namespace blink {
 
 class CSSProperty;
-class CSSRule;
 class CSSStyleSheet;
 class CSSValue;
 class ExceptionState;
@@ -46,7 +45,6 @@ public:
     virtual void deref() = 0;
 #endif
 
-    virtual CSSRule* parentRule() const = 0;
     virtual String cssText() const = 0;
     virtual void setCSSText(const String&, ExceptionState&) = 0;
     virtual unsigned length() const = 0;

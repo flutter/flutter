@@ -27,7 +27,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/parser/CSSTokenizer.h"
 
-#include "sky/engine/core/css/CSSKeyframeRule.h"
 #include "sky/engine/core/css/MediaQuery.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"

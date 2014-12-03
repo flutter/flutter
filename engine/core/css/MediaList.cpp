@@ -172,70 +172,11 @@ String MediaQuerySet::mediaText() const
 MediaList::MediaList(MediaQuerySet* mediaQueries, CSSStyleSheet* parentSheet)
     : m_mediaQueries(mediaQueries)
     , m_parentStyleSheet(parentSheet)
-    , m_parentRule(nullptr)
-{
-}
-
-MediaList::MediaList(MediaQuerySet* mediaQueries, CSSRule* parentRule)
-    : m_mediaQueries(mediaQueries)
-    , m_parentStyleSheet(nullptr)
-    , m_parentRule(parentRule)
 {
 }
 
 MediaList::~MediaList()
 {
-}
-
-void MediaList::setMediaText(const String& value)
-{
-    CSSStyleSheet::RuleMutationScope mutationScope(m_parentRule);
-
-    m_mediaQueries->set(value);
-
-    if (m_parentStyleSheet)
-        m_parentStyleSheet->didMutate();
-}
-
-String MediaList::item(unsigned index) const
-{
-    const Vector<OwnPtr<MediaQuery> >& queries = m_mediaQueries->queryVector();
-    if (index < queries.size())
-        return queries[index]->cssText();
-    return String();
-}
-
-void MediaList::deleteMedium(const String& medium, ExceptionState& exceptionState)
-{
-    CSSStyleSheet::RuleMutationScope mutationScope(m_parentRule);
-
-    bool success = m_mediaQueries->remove(medium);
-    if (!success) {
-        exceptionState.throwDOMException(NotFoundError, "Failed to delete '" + medium + "'.");
-        return;
-    }
-    if (m_parentStyleSheet)
-        m_parentStyleSheet->didMutate();
-}
-
-void MediaList::appendMedium(const String& medium, ExceptionState& exceptionState)
-{
-    CSSStyleSheet::RuleMutationScope mutationScope(m_parentRule);
-
-    bool success = m_mediaQueries->add(medium);
-    if (!success) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The value provided ('" + medium + "') is not a valid medium.");
-        return;
-    }
-
-    if (m_parentStyleSheet)
-        m_parentStyleSheet->didMutate();
-}
-
-void MediaList::reattach(MediaQuerySet* mediaQueries)
-{
-    ASSERT(mediaQueries);
-    m_mediaQueries = mediaQueries;
 }
 
 static void addResolutionWarningMessageToConsole(Document* document, const String& serializedExpression, CSSPrimitiveValue::UnitType type)

@@ -33,7 +33,6 @@
 namespace blink {
 
 class CSSProperty;
-class CSSRule;
 class CSSValue;
 class Element;
 class ExceptionState;
@@ -46,7 +45,6 @@ public:
     StyleSheetContents* contextStyleSheet() const;
 
 private:
-    virtual CSSRule* parentRule() const override { return 0; }
     virtual unsigned length() const override final;
     virtual String item(unsigned index) const override final;
     virtual PassRefPtr<CSSValue> getPropertyCSSValue(const String& propertyName) override final;
@@ -89,40 +87,6 @@ protected:
     virtual MutableStylePropertySet& propertySet() const override final { ASSERT(m_propertySet); return *m_propertySet; }
 
     RawPtr<MutableStylePropertySet> m_propertySet; // Cannot be null
-};
-
-class StyleRuleCSSStyleDeclaration final : public PropertySetCSSStyleDeclaration
-{
-public:
-    static PassRefPtr<StyleRuleCSSStyleDeclaration> create(MutableStylePropertySet& propertySet, CSSRule* parentRule)
-    {
-        return adoptRef(new StyleRuleCSSStyleDeclaration(propertySet, parentRule));
-    }
-
-#if !ENABLE(OILPAN)
-    void clearParentRule() { m_parentRule = nullptr; }
-
-    virtual void ref() override;
-    virtual void deref() override;
-#endif
-
-    void reattach(MutableStylePropertySet&);
-
-private:
-    StyleRuleCSSStyleDeclaration(MutableStylePropertySet&, CSSRule*);
-    virtual ~StyleRuleCSSStyleDeclaration();
-
-    virtual CSSStyleSheet* parentStyleSheet() const override;
-
-    virtual CSSRule* parentRule() const override { return m_parentRule;  }
-
-    virtual void willMutate() override;
-    virtual void didMutate(MutationType) override;
-
-#if !ENABLE(OILPAN)
-    unsigned m_refCount;
-#endif
-    RawPtr<CSSRule> m_parentRule;
 };
 
 class InlineCSSStyleDeclaration final : public AbstractPropertySetCSSStyleDeclaration

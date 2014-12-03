@@ -28,8 +28,6 @@
 
 namespace blink {
 
-class CSSRule;
-class CSSStyleRule;
 class CSSStyleSheet;
 class MutableStylePropertySet;
 class StylePropertySet;
@@ -65,10 +63,6 @@ public:
             destroy();
     }
 
-    // FIXME: There shouldn't be any need for the null parent version.
-    PassRefPtr<CSSRule> createCSSOMWrapper(CSSStyleSheet* parentSheet = 0) const;
-    PassRefPtr<CSSRule> createCSSOMWrapper(CSSRule* parentRule) const;
-
 protected:
     StyleRuleBase(Type type) : m_type(type) { }
     StyleRuleBase(const StyleRuleBase& o) : m_type(o.m_type) { }
@@ -77,8 +71,6 @@ protected:
 
 private:
     void destroy();
-
-    PassRefPtr<CSSRule> createCSSOMWrapper(CSSStyleSheet* parentSheet, CSSRule* parentRule) const;
 
     unsigned m_type : 5;
 };

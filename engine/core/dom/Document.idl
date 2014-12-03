@@ -47,8 +47,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 
     [ImplementedAs=executingWindow] readonly attribute Window defaultView;
 
-    readonly attribute StyleSheetList styleSheets;
-
     readonly attribute DOMString contentType;
 
              [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;

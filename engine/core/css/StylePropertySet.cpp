@@ -498,7 +498,6 @@ CSSStyleDeclaration* MutableStylePropertySet::ensureCSSStyleDeclaration()
     // FIXME: get rid of this weirdness of a CSSStyleDeclaration inside of a
     // style property set.
     if (m_cssomWrapper) {
-        ASSERT(!static_cast<CSSStyleDeclaration*>(m_cssomWrapper.get())->parentRule());
         ASSERT(!m_cssomWrapper->parentElement());
         return m_cssomWrapper.get();
     }

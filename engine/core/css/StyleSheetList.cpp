@@ -46,13 +46,11 @@ inline const Vector<RefPtr<StyleSheet> >& StyleSheetList::styleSheets()
     return document()->styleEngine()->styleSheetsForStyleSheetList(*m_treeScope);
 }
 
-#if !ENABLE(OILPAN)
 void StyleSheetList::detachFromDocument()
 {
     m_detachedStyleSheets = document()->styleEngine()->styleSheetsForStyleSheetList(*m_treeScope);
     m_treeScope = nullptr;
 }
-#endif
 
 unsigned StyleSheetList::length()
 {
