@@ -967,8 +967,7 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
     if (paintsWithTransparency(paintingInfo.paintBehavior))
         paintFlags |= PaintLayerHaveTransparency;
 
-    // PaintLayerAppliedTransform is used in RenderReplica, to avoid applying the transform twice.
-    if (paintsWithTransform(paintingInfo.paintBehavior) && !(paintFlags & PaintLayerAppliedTransform)) {
+    if (paintsWithTransform(paintingInfo.paintBehavior)) {
         TransformationMatrix layerTransform = renderableTransform(paintingInfo.paintBehavior);
         // If the transform can't be inverted, then don't paint anything.
         if (!layerTransform.isInvertible())
@@ -1012,16 +1011,13 @@ void RenderLayer::paintLayerContentsAndReflection(GraphicsContext* context, cons
 {
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
-    PaintLayerFlags localPaintFlags = paintFlags & ~(PaintLayerAppliedTransform);
-
-    localPaintFlags |= PaintLayerPaintingCompositingAllPhases;
+    PaintLayerFlags localPaintFlags = paintFlags | PaintLayerPaintingCompositingAllPhases;
     paintLayerContents(context, paintingInfo, localPaintFlags);
 }
 
 void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
-    ASSERT(!(paintFlags & PaintLayerAppliedTransform));
 
     bool haveTransparency = paintFlags & PaintLayerHaveTransparency;
     bool isSelfPaintingLayer = this->isSelfPaintingLayer();

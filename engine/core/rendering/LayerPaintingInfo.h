@@ -54,7 +54,6 @@ class RenderLayer;
 
 enum PaintLayerFlag {
     PaintLayerHaveTransparency = 1,
-    PaintLayerAppliedTransform = 1 << 1,
     // FIXME(sky): This is unused. Remove it.
     PaintLayerUncachedClipRects = 1 << 2,
     PaintLayerPaintingOverlayScrollbars = 1 << 4,
