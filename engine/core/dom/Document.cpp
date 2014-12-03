@@ -2715,7 +2715,7 @@ DocumentLifecycleNotifier& Document::lifecycleNotifier()
     return static_cast<DocumentLifecycleNotifier&>(LifecycleContext<Document>::lifecycleNotifier());
 }
 
-void Document::removedStyleSheet(StyleSheet* sheet)
+void Document::removedStyleSheet(CSSStyleSheet* sheet)
 {
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that
@@ -2725,7 +2725,7 @@ void Document::removedStyleSheet(StyleSheet* sheet)
     styleResolverChanged();
 }
 
-void Document::modifiedStyleSheet(StyleSheet* sheet)
+void Document::modifiedStyleSheet(CSSStyleSheet* sheet)
 {
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that

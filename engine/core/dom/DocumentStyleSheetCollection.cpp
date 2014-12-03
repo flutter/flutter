@@ -50,13 +50,13 @@ void DocumentStyleSheetCollection::collectStyleSheetsFromCandidates(StyleEngine*
         Node* n = *it;
         StyleSheetCandidate candidate(*n);
 
-        StyleSheet* sheet = candidate.sheet();
+        CSSStyleSheet* sheet = candidate.sheet();
         if (!sheet)
             continue;
 
         collector.appendSheetForList(sheet);
         if (candidate.canBeActivated())
-            collector.appendActiveStyleSheet(toCSSStyleSheet(sheet));
+            collector.appendActiveStyleSheet(sheet);
     }
 }
 

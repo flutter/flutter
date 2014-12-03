@@ -28,12 +28,11 @@
 #include "sky/engine/core/dom/DocumentStyleSheetCollector.h"
 
 #include "sky/engine/core/css/CSSStyleSheet.h"
-#include "sky/engine/core/css/StyleSheet.h"
 #include "sky/engine/core/dom/DocumentStyleSheetCollection.h"
 
 namespace blink {
 
-DocumentStyleSheetCollector::DocumentStyleSheetCollector(Vector<RefPtr<StyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >& visitedDocuments)
+DocumentStyleSheetCollector::DocumentStyleSheetCollector(Vector<RefPtr<CSSStyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >& visitedDocuments)
     : m_styleSheetsForStyleSheetList(sheetsForList)
     , m_activeAuthorStyleSheets(activeList)
     , m_visitedDocuments(visitedDocuments)
@@ -54,7 +53,7 @@ void DocumentStyleSheetCollector::appendActiveStyleSheet(CSSStyleSheet* sheet)
     m_activeAuthorStyleSheets.append(sheet);
 }
 
-void DocumentStyleSheetCollector::appendSheetForList(StyleSheet* sheet)
+void DocumentStyleSheetCollector::appendSheetForList(CSSStyleSheet* sheet)
 {
     m_styleSheetsForStyleSheetList.append(sheet);
 }
@@ -64,7 +63,7 @@ ActiveDocumentStyleSheetCollector::ActiveDocumentStyleSheetCollector(StyleSheetC
 {
 }
 
-ImportedDocumentStyleSheetCollector::ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector& collector, Vector<RefPtr<StyleSheet> >& sheetForList)
+ImportedDocumentStyleSheetCollector::ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector& collector, Vector<RefPtr<CSSStyleSheet> >& sheetForList)
     : DocumentStyleSheetCollector(sheetForList, collector.m_activeAuthorStyleSheets, collector.m_visitedDocuments)
 {
 }

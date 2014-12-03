@@ -33,9 +33,9 @@
 
 namespace blink {
 
+class CSSStyleSheet;
 class Document;
 class Node;
-class StyleSheet;
 
 class StyleSheetCandidate {
     STACK_ALLOCATED();
@@ -51,7 +51,7 @@ public:
 
     bool canBeActivated() const;
 
-    StyleSheet* sheet() const;
+    CSSStyleSheet* sheet() const;
 
 private:
     Node& node() const { return *m_node; }

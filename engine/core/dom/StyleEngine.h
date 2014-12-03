@@ -49,7 +49,6 @@ class Node;
 class RuleFeatureSet;
 class ShadowTreeStyleSheetCollection;
 class StyleRuleFontFace;
-class StyleSheet;
 class StyleSheetContents;
 
 class StyleEngine final : public CSSFontSelectorClient  {
@@ -74,11 +73,11 @@ public:
     void detachFromDocument();
 #endif
 
-    const Vector<RefPtr<StyleSheet> >& styleSheetsForStyleSheetList(TreeScope&);
+    const Vector<RefPtr<CSSStyleSheet> >& styleSheetsForStyleSheetList(TreeScope&);
 
     const Vector<RefPtr<CSSStyleSheet> >& documentAuthorStyleSheets() const { return m_authorStyleSheets; }
 
-    void modifiedStyleSheet(StyleSheet*);
+    void modifiedStyleSheet(CSSStyleSheet*);
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 

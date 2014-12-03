@@ -219,7 +219,7 @@ bool ElementShadow::hasSameStyles(const ElementShadow* other) const
             return false;
 
         for (size_t i = 0; i < list->length(); i++) {
-            if (toCSSStyleSheet(list->item(i))->contents() != toCSSStyleSheet(otherList->item(i))->contents())
+            if (list->item(i)->contents() != otherList->item(i)->contents())
                 return false;
         }
     }

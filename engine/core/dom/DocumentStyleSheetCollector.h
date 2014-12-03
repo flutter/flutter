@@ -34,9 +34,8 @@
 
 namespace blink {
 
-class CSSStyleSheet;
 class Document;
-class StyleSheet;
+class CSSStyleSheet;
 class StyleSheetCollection;
 
 class DocumentStyleSheetCollector {
@@ -47,18 +46,18 @@ class DocumentStyleSheetCollector {
 public:
     friend class ImportedDocumentStyleSheetCollector;
 
-    DocumentStyleSheetCollector(Vector<RefPtr<StyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >&);
+    DocumentStyleSheetCollector(Vector<RefPtr<CSSStyleSheet> >& sheetsForList, Vector<RefPtr<CSSStyleSheet> >& activeList, HashSet<RawPtr<Document> >&);
     ~DocumentStyleSheetCollector();
 
     void appendActiveStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void appendActiveStyleSheet(CSSStyleSheet*);
-    void appendSheetForList(StyleSheet*);
+    void appendSheetForList(CSSStyleSheet*);
 
     bool hasVisited(Document* document) const { return m_visitedDocuments.contains(document); }
     void willVisit(Document* document) { m_visitedDocuments.add(document); }
 
 private:
-    Vector<RefPtr<StyleSheet> >& m_styleSheetsForStyleSheetList;
+    Vector<RefPtr<CSSStyleSheet> >& m_styleSheetsForStyleSheetList;
     Vector<RefPtr<CSSStyleSheet> >& m_activeAuthorStyleSheets;
     HashSet<RawPtr<Document> >& m_visitedDocuments;
 };
@@ -72,7 +71,7 @@ private:
 
 class ImportedDocumentStyleSheetCollector final : public DocumentStyleSheetCollector {
 public:
-    ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector&, Vector<RefPtr<StyleSheet> >&);
+    ImportedDocumentStyleSheetCollector(DocumentStyleSheetCollector&, Vector<RefPtr<CSSStyleSheet> >&);
 };
 
 } // namespace blink

@@ -36,8 +36,9 @@ namespace blink {
 
 bool StyleSheetCandidate::canBeActivated() const
 {
-    StyleSheet* sheet = this->sheet();
-    return sheet && sheet->isCSSStyleSheet();
+    // TODO(esprehn): Remove this.
+    CSSStyleSheet* sheet = this->sheet();
+    return sheet;
 }
 
 StyleSheetCandidate::Type StyleSheetCandidate::typeOf(Node& node)
@@ -54,7 +55,7 @@ StyleSheetCandidate::Type StyleSheetCandidate::typeOf(Node& node)
     return HTMLStyle;
 }
 
-StyleSheet* StyleSheetCandidate::sheet() const
+CSSStyleSheet* StyleSheetCandidate::sheet() const
 {
     switch (m_type) {
     case HTMLStyle:

@@ -342,8 +342,6 @@ sky_core_files = [
   "css/StyleKeyframe.cpp",
   "css/StyleRuleKeyframes.h",
   "css/StyleRuleKeyframes.cpp",
-  "css/StyleSheet.cpp",
-  "css/StyleSheet.h",
   "css/StyleSheetList.cpp",
   "css/StyleSheetList.h",
   "css/StyleSheetContents.cpp",

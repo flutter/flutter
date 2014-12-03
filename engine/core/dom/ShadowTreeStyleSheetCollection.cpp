@@ -50,11 +50,11 @@ void ShadowTreeStyleSheetCollection::collectStyleSheets(StyleEngine* engine, Sty
         if (!isHTMLStyleElement(*node))
             continue;
 
-        StyleSheet* sheet = toHTMLStyleElement(node)->sheet();
+        CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet();
         if (sheet)
             collection.appendSheetForList(sheet);
-        if (sheet && sheet->isCSSStyleSheet())
-            collection.appendActiveStyleSheet(toCSSStyleSheet(sheet));
+        if (sheet)
+            collection.appendActiveStyleSheet(sheet);
     }
 }
 

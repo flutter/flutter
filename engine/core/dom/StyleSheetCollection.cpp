@@ -45,7 +45,7 @@ void StyleSheetCollection::swap(StyleSheetCollection& other)
     m_activeAuthorStyleSheets.swap(other.m_activeAuthorStyleSheets);
 }
 
-void StyleSheetCollection::swapSheetsForSheetList(Vector<RefPtr<StyleSheet> >& sheets)
+void StyleSheetCollection::swapSheetsForSheetList(Vector<RefPtr<CSSStyleSheet> >& sheets)
 {
     // Only called for collection of HTML Imports that never has active sheets.
     ASSERT(m_activeAuthorStyleSheets.isEmpty());
@@ -62,7 +62,7 @@ void StyleSheetCollection::appendActiveStyleSheet(CSSStyleSheet* sheet)
     m_activeAuthorStyleSheets.append(sheet);
 }
 
-void StyleSheetCollection::appendSheetForList(StyleSheet* sheet)
+void StyleSheetCollection::appendSheetForList(CSSStyleSheet* sheet)
 {
     m_styleSheetsForStyleSheetList.append(sheet);
 }

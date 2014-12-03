@@ -117,7 +117,6 @@ class SerializedScriptValue;
 class Settings;
 class StyleEngine;
 class StyleResolver;
-class StyleSheet;
 class StyleSheetList;
 class Text;
 class Touch;
@@ -244,9 +243,9 @@ public:
 
     // FIXME: Switch all callers of styleResolverChanged to these or better ones and then make them
     // do something smarter.
-    void removedStyleSheet(StyleSheet*);
-    void addedStyleSheet(StyleSheet*) { styleResolverChanged(); }
-    void modifiedStyleSheet(StyleSheet*);
+    void removedStyleSheet(CSSStyleSheet*);
+    void addedStyleSheet(CSSStyleSheet*) { styleResolverChanged(); }
+    void modifiedStyleSheet(CSSStyleSheet*);
 
     void evaluateMediaQueryList();
 

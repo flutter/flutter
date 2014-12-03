@@ -30,8 +30,8 @@
 
 namespace blink {
 
+class CSSStyleSheet;
 class HTMLStyleElement;
-class StyleSheet;
 
 class StyleSheetList : public RefCounted<StyleSheetList> {
 public:
@@ -39,7 +39,7 @@ public:
     ~StyleSheetList();
 
     unsigned length();
-    StyleSheet* item(unsigned index);
+    CSSStyleSheet* item(unsigned index);
 
     HTMLStyleElement* getNamedItem(const AtomicString&) const;
 
@@ -53,11 +53,11 @@ public:
 
 private:
     StyleSheetList(TreeScope*);
-    const Vector<RefPtr<StyleSheet> >& styleSheets();
+    const Vector<RefPtr<CSSStyleSheet> >& styleSheets();
 
     RawPtr<TreeScope> m_treeScope;
 #if !ENABLE(OILPAN)
-    Vector<RefPtr<StyleSheet> > m_detachedStyleSheets;
+    Vector<RefPtr<CSSStyleSheet> > m_detachedStyleSheets;
 #endif
 };
 

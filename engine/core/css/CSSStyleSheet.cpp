@@ -21,19 +21,11 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/V8Binding.h"
-#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
 #include "sky/engine/core/css/MediaList.h"
-#include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
-#include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/Node.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLStyleElement.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
@@ -88,45 +80,6 @@ CSSStyleSheet::~CSSStyleSheet()
     m_contents->unregisterClient(this);
 }
 
-void CSSStyleSheet::willMutateRules()
-{
-    // If we are the only client it is safe to mutate.
-    if (m_contents->clientSize() <= 1 && !m_contents->isInMemoryCache()) {
-        m_contents->clearRuleSet();
-        if (Document* document = ownerDocument())
-            m_contents->removeSheetFromCache(document);
-        m_contents->setMutable();
-        return;
-    }
-    // Only cacheable stylesheets should have multiple clients.
-    ASSERT(m_contents->isCacheable());
-
-    // Copy-on-write.
-    m_contents->unregisterClient(this);
-    m_contents = m_contents->copy();
-    m_contents->registerClient(this);
-
-    m_contents->setMutable();
-}
-
-void CSSStyleSheet::didMutateRules()
-{
-    ASSERT(m_contents->isMutable());
-    ASSERT(m_contents->clientSize() <= 1);
-
-    didMutate(PartialRuleUpdate);
-}
-
-void CSSStyleSheet::didMutate(StyleSheetUpdateType updateType)
-{
-    Document* owner = ownerDocument();
-    if (!owner)
-        return;
-
-    owner->modifiedStyleSheet(this);
-}
-
-
 void CSSStyleSheet::setMediaQueries(PassRefPtr<MediaQuerySet> mediaQueries)
 {
     m_mediaQueries = mediaQueries;
@@ -142,7 +95,8 @@ unsigned CSSStyleSheet::length() const
 
 void CSSStyleSheet::clearOwnerNode()
 {
-    didMutate(EntireStyleSheetUpdate);
+    if (Document* owner = ownerDocument())
+        owner->modifiedStyleSheet(this);
     if (m_ownerNode)
         m_contents->unregisterClient(this);
     m_ownerNode = nullptr;

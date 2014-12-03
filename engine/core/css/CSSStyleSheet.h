@@ -21,9 +21,8 @@
 #ifndef SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
 #define SKY_ENGINE_CORE_CSS_CSSSTYLESHEET_H_
 
-#include "sky/engine/core/css/StyleSheet.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Noncopyable.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
@@ -32,7 +31,9 @@ class BisonCSSParser;
 class CSSStyleSheet;
 class Document;
 class ExceptionState;
+class KURL;
 class MediaQuerySet;
+class Node;
 class StyleSheetContents;
 
 enum StyleSheetUpdateType {
@@ -40,75 +41,45 @@ enum StyleSheetUpdateType {
     EntireStyleSheetUpdate
 };
 
-class CSSStyleSheet final : public StyleSheet {
+class CSSStyleSheet final : public RefCounted<CSSStyleSheet> {
 public:
     static PassRefPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
     static PassRefPtr<CSSStyleSheet> createInline(PassRefPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
 
-    virtual ~CSSStyleSheet();
+    ~CSSStyleSheet();
 
-    virtual Node* ownerNode() const override { return m_ownerNode; }
+    Node* ownerNode() const { return m_ownerNode; }
 
     unsigned length() const;
 
-    virtual void clearOwnerNode() override;
+    void clearOwnerNode();
 
-    virtual KURL baseURL() const override;
+    KURL baseURL() const;
 
     Document* ownerDocument() const;
     MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
     void setMediaQueries(PassRefPtr<MediaQuerySet>);
-
-    class RuleMutationScope {
-        WTF_MAKE_NONCOPYABLE(RuleMutationScope);
-        STACK_ALLOCATED();
-    public:
-        explicit RuleMutationScope(CSSStyleSheet*);
-        ~RuleMutationScope();
-
-    private:
-        RawPtr<CSSStyleSheet> m_styleSheet;
-    };
-
-    void willMutateRules();
-    void didMutateRules();
-    void didMutate(StyleSheetUpdateType = PartialRuleUpdate);
 
     StyleSheetContents* contents() const { return m_contents.get(); }
 
     bool isInline() const { return m_isInlineStylesheet; }
     TextPosition startPositionInSource() const { return m_startPosition; }
 
+    // TODO(esprehn): Remove this.
+    String type() const { return "text/css"; }
+
 private:
     CSSStyleSheet(PassRefPtr<StyleSheetContents>);
     CSSStyleSheet(PassRefPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);
-
-    virtual bool isCSSStyleSheet() const override { return true; }
-    virtual String type() const override { return "text/css"; }
 
     RefPtr<StyleSheetContents> m_contents;
     bool m_isInlineStylesheet;
     RefPtr<MediaQuerySet> m_mediaQueries;
 
-    RawPtr<Node> m_ownerNode;
+    Node* m_ownerNode;
 
     TextPosition m_startPosition;
 };
-
-inline CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSStyleSheet* sheet)
-    : m_styleSheet(sheet)
-{
-    if (m_styleSheet)
-        m_styleSheet->willMutateRules();
-}
-
-inline CSSStyleSheet::RuleMutationScope::~RuleMutationScope()
-{
-    if (m_styleSheet)
-        m_styleSheet->didMutateRules();
-}
-
-DEFINE_TYPE_CASTS(CSSStyleSheet, StyleSheet, sheet, sheet->isCSSStyleSheet(), sheet.isCSSStyleSheet());
 
 } // namespace blink
 

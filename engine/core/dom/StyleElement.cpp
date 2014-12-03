@@ -87,7 +87,7 @@ void StyleElement::removedFromDocument(Document& document, Element* element, Con
         m_registeredAsCandidate = false;
     }
 
-    RefPtr<StyleSheet> removedSheet = m_sheet.get();
+    RefPtr<CSSStyleSheet> removedSheet = m_sheet.get();
 
     if (m_sheet)
         clearSheet(element);
