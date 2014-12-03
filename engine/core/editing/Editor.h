@@ -101,10 +101,6 @@ public:
 
     void respondToChangedContents(const VisibleSelection& endingSelection);
 
-    bool selectionStartHasStyle(CSSPropertyID, const String& value) const;
-    TriState selectionHasStyle(CSSPropertyID, const String& value) const;
-    String selectionStartCSSPropertyValue(CSSPropertyID);
-
     void clearLastEditCommand();
 
     bool deleteWithDirection(SelectionDirection, TextGranularity, bool isTypingAction);

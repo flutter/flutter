@@ -66,8 +66,6 @@ class EditingStyle final : public RefCounted<EditingStyle> {
 public:
 
     enum PropertiesToInclude { AllProperties, OnlyEditingInheritableProperties, EditingPropertiesInEffect };
-    enum ShouldPreserveWritingDirection { PreserveWritingDirection, DoNotPreserveWritingDirection };
-    enum ShouldExtractMatchingStyle { ExtractMatchingStyle, DoNotExtractMatchingStyle };
     static float NoFontDelta;
 
     static PassRefPtr<EditingStyle> create()
@@ -98,50 +96,17 @@ public:
     ~EditingStyle();
 
     MutableStylePropertySet* style() { return m_mutableStyle.get(); }
-    bool textDirection(WritingDirection&) const;
+
     bool isEmpty() const;
-    void overrideWithStyle(const StylePropertySet*);
+
     void clear();
     PassRefPtr<EditingStyle> copy() const;
-    PassRefPtr<EditingStyle> extractAndRemoveBlockProperties();
-    PassRefPtr<EditingStyle> extractAndRemoveTextDirection();
+
     void removeBlockProperties();
-    void removeStyleAddedByElement(Element*);
-    void removeStyleConflictingWithStyleOfElement(Element*);
-    void collapseTextDecorationProperties();
-    enum ShouldIgnoreTextOnlyProperties { IgnoreTextOnlyProperties, DoNotIgnoreTextOnlyProperties };
-    TriState triStateOfStyle(EditingStyle*) const;
-    TriState triStateOfStyle(const VisibleSelection&) const;
-    bool conflictsWithInlineStyleOfElement(HTMLElement* element) const { return conflictsWithInlineStyleOfElement(element, 0, 0); }
-    bool conflictsWithInlineStyleOfElement(HTMLElement* element, EditingStyle* extractedStyle, Vector<CSSPropertyID>& conflictingProperties) const
-    {
-        return conflictsWithInlineStyleOfElement(element, extractedStyle, &conflictingProperties);
-    }
-    bool conflictsWithImplicitStyleOfElement(HTMLElement*, EditingStyle* extractedStyle = 0, ShouldExtractMatchingStyle = DoNotExtractMatchingStyle) const;
-    bool conflictsWithImplicitStyleOfAttributes(HTMLElement*) const;
-    bool extractConflictingImplicitStyleOfAttributes(HTMLElement*, ShouldPreserveWritingDirection, EditingStyle* extractedStyle,
-            Vector<QualifiedName>& conflictingAttributes, ShouldExtractMatchingStyle) const;
-    bool styleIsPresentInComputedStyleOfNode(Node*) const;
 
     static bool elementIsStyledSpanOrHTMLEquivalent(const HTMLElement*);
 
     void mergeTypingStyle(Document*);
-    enum CSSPropertyOverrideMode { OverrideValues, DoNotOverrideValues };
-    void mergeInlineStyleOfElement(HTMLElement*, CSSPropertyOverrideMode, PropertiesToInclude = AllProperties);
-    static PassRefPtr<EditingStyle> wrappingStyleForSerialization(ContainerNode* context, bool shouldAnnotate);
-    void mergeStyleFromRules(Element*);
-    void mergeStyleFromRulesForSerialization(Element*);
-    void removeStyleFromRulesAndContext(Element*, ContainerNode* context);
-    void removePropertiesInElementDefaultStyle(Element*);
-    void addAbsolutePositioningFromElement(const Element&);
-    void forceInline();
-    int legacyFontSize(Document*) const;
-
-    float fontSizeDelta() const { return m_fontSizeDelta; }
-    bool hasFontSizeDelta() const { return m_fontSizeDelta != NoFontDelta; }
-
-    static PassRefPtr<EditingStyle> styleAtSelectionStart(const VisibleSelection&, bool shouldUseBackgroundColorInEffect = false);
-    static WritingDirection textDirectionForSelection(const VisibleSelection&, EditingStyle* typingStyle, bool& hasNestedOrMultipleEmbeddings);
 
 private:
     EditingStyle();
@@ -154,9 +119,8 @@ private:
     void setProperty(CSSPropertyID, const String& value, bool important = false);
     void replaceFontSizeByKeywordIfPossible(RenderStyle*, CSSComputedStyleDeclaration*);
     void extractFontSizeDelta();
-    TriState triStateOfStyle(CSSStyleDeclaration* styleToCompare, ShouldIgnoreTextOnlyProperties) const;
-    bool conflictsWithInlineStyleOfElement(HTMLElement*, EditingStyle* extractedStyle, Vector<CSSPropertyID>* conflictingProperties) const;
-    void mergeInlineAndImplicitStyleOfElement(Element*, CSSPropertyOverrideMode, PropertiesToInclude);
+
+    enum CSSPropertyOverrideMode { OverrideValues, DoNotOverrideValues };
     void mergeStyle(const StylePropertySet*, CSSPropertyOverrideMode);
 
     RefPtr<MutableStylePropertySet> m_mutableStyle;
@@ -166,70 +130,6 @@ private:
     friend class HTMLElementEquivalent;
     friend class HTMLAttributeEquivalent;
 };
-
-class StyleChange {
-public:
-    StyleChange()
-        : m_applyBold(false)
-        , m_applyItalic(false)
-        , m_applyUnderline(false)
-        , m_applyLineThrough(false)
-        , m_applySubscript(false)
-        , m_applySuperscript(false)
-    { }
-
-    StyleChange(EditingStyle*, const Position&);
-
-    String cssStyle() const { return m_cssStyle; }
-    bool applyBold() const { return m_applyBold; }
-    bool applyItalic() const { return m_applyItalic; }
-    bool applyUnderline() const { return m_applyUnderline; }
-    bool applyLineThrough() const { return m_applyLineThrough; }
-    bool applySubscript() const { return m_applySubscript; }
-    bool applySuperscript() const { return m_applySuperscript; }
-    bool applyFontColor() const { return m_applyFontColor.length() > 0; }
-    bool applyFontFace() const { return m_applyFontFace.length() > 0; }
-    bool applyFontSize() const { return m_applyFontSize.length() > 0; }
-
-    String fontColor() { return m_applyFontColor; }
-    String fontFace() { return m_applyFontFace; }
-    String fontSize() { return m_applyFontSize; }
-
-    bool operator==(const StyleChange& other)
-    {
-        return m_cssStyle == other.m_cssStyle
-            && m_applyBold == other.m_applyBold
-            && m_applyItalic == other.m_applyItalic
-            && m_applyUnderline == other.m_applyUnderline
-            && m_applyLineThrough == other.m_applyLineThrough
-            && m_applySubscript == other.m_applySubscript
-            && m_applySuperscript == other.m_applySuperscript
-            && m_applyFontColor == other.m_applyFontColor
-            && m_applyFontFace == other.m_applyFontFace
-            && m_applyFontSize == other.m_applyFontSize;
-    }
-    bool operator!=(const StyleChange& other)
-    {
-        return !(*this == other);
-    }
-private:
-    void extractTextStyles(Document*, MutableStylePropertySet*, FixedPitchFontType);
-
-    String m_cssStyle;
-    bool m_applyBold;
-    bool m_applyItalic;
-    bool m_applyUnderline;
-    bool m_applyLineThrough;
-    bool m_applySubscript;
-    bool m_applySuperscript;
-    String m_applyFontColor;
-    String m_applyFontFace;
-    String m_applyFontSize;
-};
-
-// FIXME: Remove these functions or make them non-global to discourage using CSSStyleDeclaration directly.
-CSSValueID getIdentifierValue(CSSStyleDeclaration*, CSSPropertyID);
-CSSValueID getIdentifierValue(StylePropertySet*, CSSPropertyID);
 
 } // namespace blink
 

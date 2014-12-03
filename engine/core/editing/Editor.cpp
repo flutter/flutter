@@ -367,29 +367,6 @@ Element* Editor::findEventTargetFromSelection() const
     return findEventTargetFrom(m_frame.selection().selection());
 }
 
-bool Editor::selectionStartHasStyle(CSSPropertyID propertyID, const String& value) const
-{
-    return EditingStyle::create(propertyID, value)->triStateOfStyle(
-        EditingStyle::styleAtSelectionStart(m_frame.selection().selection(), propertyID == CSSPropertyBackgroundColor).get());
-}
-
-TriState Editor::selectionHasStyle(CSSPropertyID propertyID, const String& value) const
-{
-    return EditingStyle::create(propertyID, value)->triStateOfStyle(m_frame.selection().selection());
-}
-
-String Editor::selectionStartCSSPropertyValue(CSSPropertyID propertyID)
-{
-    RefPtr<EditingStyle> selectionStyle = EditingStyle::styleAtSelectionStart(m_frame.selection().selection(),
-        propertyID == CSSPropertyBackgroundColor);
-    if (!selectionStyle || !selectionStyle->style())
-        return String();
-
-    if (propertyID == CSSPropertyFontSize)
-        return String::number(selectionStyle->legacyFontSize(m_frame.document()));
-    return selectionStyle->style()->getPropertyValue(propertyID);
-}
-
 static void dispatchEditableContentChangedEvents(PassRefPtr<Element> startRoot, PassRefPtr<Element> endRoot)
 {
     if (startRoot)
