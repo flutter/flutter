@@ -58,6 +58,12 @@ the application's document.
 When it is removed, a 'pointer-removed' event is fired at the
 application's document.
 
+A pointer switches from "up" to "down" when it is a touch or stylus
+that is in contact with the display surface, or when it is a mouse
+that is being clicked, and from "down" back to "up" when this ends.
+(Note that clicking a button on a stylus doesn't change it from up to
+down. A stylus can have a button pressed while "up".)
+
 When one switches from "up" to "down", the position of the tap is hit
 tested and a 'pointer-down' event is fired at the target element under
 the cursor, if any, or the document otherwise. The return value, if
@@ -128,6 +134,9 @@ fields:
 
                       (n-4)th stylus button, again ignoring any
                       explictly back or forward buttons
+
+                 note that stylus buttons can be pressed even when the
+                 pointer is not "down"
 
            down: true if the pointer is down (in pointer-down event or
                  subsequent pointer-move events); false otherwise (in
