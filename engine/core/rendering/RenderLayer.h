@@ -256,12 +256,6 @@ public:
     // Computes the bounding paint invalidation rect for |renderObject|, in the coordinate space of |paintInvalidationContainer|'s GraphicsLayer backing.
     static LayoutRect computePaintInvalidationRect(const RenderObject*, const RenderLayer* paintInvalidationContainer, const PaintInvalidationState* = 0);
 
-    bool paintsWithTransparency(PaintBehavior paintBehavior) const
-    {
-        // FIXME(sky): Remove
-        return isTransparent();
-    }
-
     bool paintsWithTransform(PaintBehavior) const;
 
     // Returns true if background phase is painted opaque in the given rect.
@@ -421,9 +415,6 @@ public:
 
     void updateSelfPaintingLayer();
 
-    // paintLayerContents() assumes that the caller will clip to the bounds of the painting dirty rect if necessary.
-    void paintLayerContents(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
-
     RenderLayer* enclosingTransformedAncestor() const;
     LayoutPoint computeOffsetFromTransformedAncestor() const;
 
@@ -460,7 +451,9 @@ private:
 
     LayoutPoint renderBoxLocation() const { return renderer()->isBox() ? toRenderBox(renderer())->location() : LayoutPoint(); }
 
-    void paintLayerContentsAndReflection(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
+    // paintLayerContents() assumes that the caller will clip to the bounds of the painting dirty rect if necessary.
+    void paintLayerContents(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
+
     void paintLayerByApplyingTransform(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags, const LayoutPoint& translationOffset = LayoutPoint());
 
     void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);

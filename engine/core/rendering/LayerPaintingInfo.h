@@ -52,16 +52,9 @@ namespace blink {
 
 class RenderLayer;
 
+// FIXME(sky): Get rid of this bitmasking and just use a regular enum.
 enum PaintLayerFlag {
-    PaintLayerHaveTransparency = 1,
-    // FIXME(sky): This is unused. Remove it.
-    PaintLayerUncachedClipRects = 1 << 2,
-    PaintLayerPaintingOverlayScrollbars = 1 << 4,
-    PaintLayerPaintingCompositingBackgroundPhase = 1 << 5,
-    PaintLayerPaintingCompositingForegroundPhase = 1 << 6,
-    PaintLayerPaintingCompositingMaskPhase = 1 << 7,
-    PaintLayerPaintingCompositingScrollingPhase = 1 << 8,
-    PaintLayerPaintingCompositingAllPhases = (PaintLayerPaintingCompositingBackgroundPhase | PaintLayerPaintingCompositingForegroundPhase | PaintLayerPaintingCompositingMaskPhase)
+    PaintLayerPaintingOverlayScrollbars = 1,
 };
 
 typedef unsigned PaintLayerFlags;

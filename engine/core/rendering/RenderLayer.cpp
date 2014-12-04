@@ -626,14 +626,14 @@ LayoutRect RenderLayer::paintingExtent(const RenderLayer* rootLayer, const Layou
 
 void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
 {
-    if (paintsWithTransparency(paintBehavior) && m_usedTransparency)
+    if (isTransparent() && m_usedTransparency)
         return;
 
     RenderLayer* ancestor = transparentPaintingAncestor();
     if (ancestor)
         ancestor->beginTransparencyLayers(context, rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
 
-    if (paintsWithTransparency(paintBehavior)) {
+    if (isTransparent()) {
         m_usedTransparency = true;
         context->save();
         LayoutRect clipRect = paintingExtent(rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
@@ -959,9 +959,6 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
     if (!renderer()->opacity())
         return;
 
-    if (paintsWithTransparency(paintingInfo.paintBehavior))
-        paintFlags |= PaintLayerHaveTransparency;
-
     if (paintsWithTransform(paintingInfo.paintBehavior)) {
         TransformationMatrix layerTransform = renderableTransform(paintingInfo.paintBehavior);
         // If the transform can't be inverted, then don't paint anything.
@@ -970,7 +967,7 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
 
         // If we have a transparency layer enclosing us and we are the root of a transform, then we need to establish the transparency
         // layer from the parent now, assuming there is a parent
-        if (paintFlags & PaintLayerHaveTransparency) {
+        if (isTransparent()) {
             if (parent())
                 parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, paintingInfo.paintBehavior);
             else
@@ -980,7 +977,7 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
         // Make sure the parent's clip rects have been calculated.
         ClipRect clipRect = paintingInfo.paintDirtyRect;
         if (parent()) {
-            ClipRectsContext clipRectsContext(paintingInfo.rootLayer, (paintFlags & PaintLayerUncachedClipRects) ? UncachedClipRects : PaintingClipRects);
+            ClipRectsContext clipRectsContext(paintingInfo.rootLayer, PaintingClipRects);
             clipRect = clipper().backgroundClipRect(clipRectsContext);
             clipRect.intersect(paintingInfo.paintDirtyRect);
 
@@ -997,44 +994,18 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
         return;
     }
 
-    paintLayerContentsAndReflection(context, paintingInfo, paintFlags);
-}
-
-void RenderLayer::paintLayerContentsAndReflection(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{
-    ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
-
-    PaintLayerFlags localPaintFlags = paintFlags | PaintLayerPaintingCompositingAllPhases;
-    paintLayerContents(context, paintingInfo, localPaintFlags);
+    paintLayerContents(context, paintingInfo, paintFlags);
 }
 
 void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
-    bool haveTransparency = paintFlags & PaintLayerHaveTransparency;
-    bool isSelfPaintingLayer = this->isSelfPaintingLayer();
-    bool isPaintingOverlayScrollbars = paintFlags & PaintLayerPaintingOverlayScrollbars;
-    bool isPaintingScrollingContent = paintFlags & PaintLayerPaintingCompositingScrollingPhase;
-    bool isPaintingCompositedForeground = paintFlags & PaintLayerPaintingCompositingForegroundPhase;
-    bool isPaintingCompositedBackground = paintFlags & PaintLayerPaintingCompositingBackgroundPhase;
-    // Outline always needs to be painted even if we have no visible content. Also,
-    // the outline is painted in the background phase during composited scrolling.
-    // If it were painted in the foreground phase, it would move with the scrolled
-    // content. When not composited scrolling, the outline is painted in the
-    // foreground phase. Since scrolled contents are moved by paint invalidation in this
-    // case, the outline won't get 'dragged along'.
-    bool shouldPaintOutline = isSelfPaintingLayer && !isPaintingOverlayScrollbars
-        && ((isPaintingScrollingContent && isPaintingCompositedBackground)
-        || (!isPaintingScrollingContent && isPaintingCompositedForeground));
-    bool shouldPaintContent = isSelfPaintingLayer && !isPaintingOverlayScrollbars;
-
     float deviceScaleFactor = blink::deviceScaleFactor(renderer()->frame());
     context->setDeviceScaleFactor(deviceScaleFactor);
 
     GraphicsContext* transparencyLayerContext = context;
 
-    // Ensure our lists are up-to-date.
     m_stackingNode->updateLayerListsIfNeeded();
 
     LayoutPoint offsetFromRoot;
@@ -1072,14 +1043,16 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     FilterEffectRendererHelper filterPainter(filterRenderer() && paintsWithFilters());
 
     LayerFragments layerFragments;
-    if (shouldPaintContent || shouldPaintOutline || isPaintingOverlayScrollbars) {
-        // Collect the fragments. This will compute the clip rectangles and paint offsets for each layer fragment, as well as whether or not the content of each
-        // fragment should paint.
-        collectFragments(layerFragments, localPaintingInfo.rootLayer, localPaintingInfo.paintDirtyRect,
-            (paintFlags & PaintLayerUncachedClipRects) ? UncachedClipRects : PaintingClipRects,
-            &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
-        updatePaintingInfoForFragments(layerFragments, localPaintingInfo, paintFlags, shouldPaintContent, &offsetFromRoot);
-    }
+    // Collect the fragments. This will compute the clip rectangles and paint offsets for each layer fragment, as well as whether or not the content of each
+    // fragment should paint.
+    collectFragments(layerFragments, localPaintingInfo.rootLayer, localPaintingInfo.paintDirtyRect,
+        PaintingClipRects, &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
+
+    bool isPaintingOverlayScrollbars = paintFlags & PaintLayerPaintingOverlayScrollbars;
+    bool shouldPaintContent = isSelfPaintingLayer() && !isPaintingOverlayScrollbars;
+    updatePaintingInfoForFragments(layerFragments, localPaintingInfo, paintFlags, shouldPaintContent, &offsetFromRoot);
+
+    bool haveTransparency = isTransparent();
 
     if (filterPainter.haveFilterEffect()) {
         ASSERT(this->filterInfo());
@@ -1138,36 +1111,25 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     ASSERT(!(localPaintingInfo.paintBehavior & PaintBehaviorForceBlackText));
 
-    bool shouldPaintBackground = isPaintingCompositedBackground && shouldPaintContent;
-    bool shouldPaintNegZOrderList = !isPaintingScrollingContent && isPaintingCompositedBackground;
-    bool shouldPaintOwnContents = isPaintingCompositedForeground && shouldPaintContent;
-    bool shouldPaintNormalFlowAndPosZOrderLists = isPaintingCompositedForeground;
-    bool shouldPaintOverlayScrollbars = isPaintingOverlayScrollbars;
-    bool shouldPaintMask = (paintFlags & PaintLayerPaintingCompositingMaskPhase) && shouldPaintContent && renderer()->hasMask();
-
     // FIXME(sky): Get rid of PaintBehavior argument now that it's always Normal.
     PaintBehavior paintBehavior = PaintBehaviorNormal;
 
-    if (shouldPaintBackground) {
+    if (shouldPaintContent) {
         paintBackgroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
             localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
     }
 
-    if (shouldPaintNegZOrderList)
-        paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
+    paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
 
-    if (shouldPaintOwnContents) {
+    if (shouldPaintContent) {
         paintForegroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
             localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
     }
 
-    if (shouldPaintOutline)
-        paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+    paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+    paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
 
-    if (shouldPaintNormalFlowAndPosZOrderLists)
-        paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
-
-    if (shouldPaintOverlayScrollbars)
+    if (isPaintingOverlayScrollbars)
         paintOverflowControlsForFragments(layerFragments, context, localPaintingInfo, paintFlags);
 
     if (filterPainter.hasStartedFilterEffect()) {
@@ -1184,7 +1146,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     // Make sure that we now use the original transparency context.
     ASSERT(transparencyLayerContext == context);
 
-    if (shouldPaintMask)
+    if (shouldPaintContent && renderer()->hasMask())
         paintMaskForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
 
     // End our transparency layer
@@ -1217,7 +1179,7 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext* context, const 
     // Now do a paint with the root layer shifted to be us.
     LayerPaintingInfo transformedPaintingInfo(this, enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)), paintingInfo.paintBehavior,
         adjustedSubPixelAccumulation, paintingInfo.paintingRoot);
-    paintLayerContentsAndReflection(context, transformedPaintingInfo, paintFlags);
+    paintLayerContents(context, transformedPaintingInfo, paintFlags);
 }
 
 void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
@@ -1968,7 +1930,7 @@ bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect)
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
         return false;
 
-    if (paintsWithTransparency(PaintBehaviorNormal))
+    if (isTransparent())
         return false;
 
     if (paintsWithFilters() && renderer()->style()->filter().hasFilterThatAffectsOpacity())
