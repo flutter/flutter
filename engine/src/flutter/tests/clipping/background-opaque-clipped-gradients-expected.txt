@@ -1,0 +1,10 @@
+layer at (0,0) size 800x600
+  RenderView {#document} at (0,0) size 800x600
+layer at (0,0) size 800x238
+  RenderBlock {sky} at (0,0) size 800x238
+    RenderBlock (anonymous) at (0,0) size 800x38
+      RenderText {#text} at (0,0) size 778x38
+        text run at (0,0) width 778: "Test passes if the image below shows nested green, blue and yellow squares with a dotted black"
+        text run at (0,19) width 59: "border."
+    RenderBlock {div} at (0,38) size 200x200 [border: (25px dotted #000000)]
+
