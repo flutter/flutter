@@ -28,7 +28,6 @@ mojo_native_application("sky_debugger") {
     "//mojo/application",
     "//mojo/converters/geometry",
     "//mojo/converters/input_events",
-    "//mojo/public/c/system:for_shared_library",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
     "//mojo/services/public/cpp/view_manager",
