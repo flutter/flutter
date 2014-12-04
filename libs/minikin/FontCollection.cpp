@@ -53,8 +53,12 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
             continue;
         }
         family->RefLocked();
-        mFamilies.push_back(family);  // emplace_back would be better
         const SparseBitSet* coverage = family->getCoverage();
+        if (coverage == nullptr) {
+            family->UnrefLocked();
+            continue;
+        }
+        mFamilies.push_back(family);  // emplace_back would be better
         mMaxChar = max(mMaxChar, coverage->length());
         lastChar.push_back(coverage->nextSetBit(0));
     }
