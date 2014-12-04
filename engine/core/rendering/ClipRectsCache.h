@@ -18,7 +18,6 @@ enum ClipRectsCacheSlot {
 
     // Relative to painting ancestor. Used for painting.
     PaintingClipRects,
-    PaintingClipRectsIgnoringOverflowClip,
 
     NumberOfClipRectsCacheSlots,
     UncachedClipRects,

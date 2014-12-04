@@ -216,12 +216,9 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
 
     // Update the clip rects that will be passed to child layers.
     if (m_renderer.hasOverflowClip()) {
-        // This layer establishes a clip of some kind.
-        if (!isClippingRoot || context.respectOverflowClip == RespectOverflowClip) {
-            foregroundRect.intersect(toRenderBox(m_renderer).overflowClipRect(offset));
-            if (m_renderer.style()->hasBorderRadius())
-                foregroundRect.setHasRadius(true);
-        }
+        foregroundRect.intersect(toRenderBox(m_renderer).overflowClipRect(offset));
+        if (m_renderer.style()->hasBorderRadius())
+            foregroundRect.setHasRadius(true);
 
         // If we establish an overflow clip at all, then go ahead and make sure our background
         // rect is intersected with our layer's bounds including our visual overflow,
@@ -233,13 +230,11 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
             // individual region boxes as overflow.
             LayoutRect layerBoundsWithVisualOverflow = toRenderBox(m_renderer).visualOverflowRect();
             layerBoundsWithVisualOverflow.moveBy(offset);
-            if (!isClippingRoot || context.respectOverflowClip == RespectOverflowClip)
-                backgroundRect.intersect(layerBoundsWithVisualOverflow);
+            backgroundRect.intersect(layerBoundsWithVisualOverflow);
         } else {
             LayoutRect bounds = toRenderBox(m_renderer).borderBoxRect();
             bounds.moveBy(offset);
-            if (!isClippingRoot || context.respectOverflowClip == RespectOverflowClip)
-                backgroundRect.intersect(bounds);
+            backgroundRect.intersect(bounds);
         }
     }
 
@@ -281,8 +276,7 @@ void RenderLayerClipper::calculateClipRects(const ClipRectsContext& context, Cli
 
     adjustClipRectsForChildren(m_renderer, clipRects);
 
-    // FIXME: This logic looks wrong. We'll apply overflow clip rects even if we were told to IgnoreOverflowClip if m_renderer.hasClip().
-    if ((m_renderer.hasOverflowClip() && (context.respectOverflowClip == RespectOverflowClip || !isClippingRoot)) || m_renderer.hasClip()) {
+    if (m_renderer.hasOverflowClip()) {
         // This offset cannot use convertToLayerCoords, because sometimes our rootLayer may be across
         // some transformed layer boundary, for example, in the RenderLayerCompositor overlapMap, where
         // clipRects are needed in view space.

@@ -52,28 +52,13 @@ namespace blink {
 
 class RenderLayer;
 
-enum ShouldRespectOverflowClip {
-    IgnoreOverflowClip,
-    RespectOverflowClip
-};
-
 class ClipRectsContext {
 public:
     ClipRectsContext(const RenderLayer* root, ClipRectsCacheSlot slot, const LayoutSize& accumulation = LayoutSize())
         : rootLayer(root)
         , cacheSlot(slot)
         , subPixelAccumulation(accumulation)
-        , respectOverflowClip(slot == PaintingClipRectsIgnoringOverflowClip ? IgnoreOverflowClip : RespectOverflowClip)
     {
-    }
-
-    void setIgnoreOverflowClip()
-    {
-        ASSERT(!usesCache() || cacheSlot == PaintingClipRects);
-        ASSERT(respectOverflowClip == RespectOverflowClip);
-        if (usesCache())
-            cacheSlot = PaintingClipRectsIgnoringOverflowClip;
-        respectOverflowClip = IgnoreOverflowClip;
     }
 
     bool usesCache() const
@@ -88,7 +73,6 @@ private:
 
     ClipRectsCacheSlot cacheSlot;
     LayoutSize subPixelAccumulation;
-    ShouldRespectOverflowClip respectOverflowClip;
 };
 
 class RenderLayerClipper {

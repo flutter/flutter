@@ -946,11 +946,6 @@ static inline bool shouldSuppressPaintingLayer(RenderLayer* layer)
     return false;
 }
 
-static ShouldRespectOverflowClip shouldRespectOverflowClip(PaintLayerFlags paintFlags, const RenderObject* renderer)
-{
-    return (paintFlags & PaintLayerPaintingOverflowContents) ? IgnoreOverflowClip : RespectOverflowClip;
-}
-
 void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
     // Non self-painting leaf layers don't need to be painted as their renderer() should properly paint itself.
@@ -986,8 +981,6 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
         ClipRect clipRect = paintingInfo.paintDirtyRect;
         if (parent()) {
             ClipRectsContext clipRectsContext(paintingInfo.rootLayer, (paintFlags & PaintLayerUncachedClipRects) ? UncachedClipRects : PaintingClipRects);
-            if (shouldRespectOverflowClip(paintFlags, renderer()) == IgnoreOverflowClip)
-                clipRectsContext.setIgnoreOverflowClip();
             clipRect = clipper().backgroundClipRect(clipRectsContext);
             clipRect.intersect(paintingInfo.paintDirtyRect);
 
@@ -1025,7 +1018,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     bool isPaintingScrollingContent = paintFlags & PaintLayerPaintingCompositingScrollingPhase;
     bool isPaintingCompositedForeground = paintFlags & PaintLayerPaintingCompositingForegroundPhase;
     bool isPaintingCompositedBackground = paintFlags & PaintLayerPaintingCompositingBackgroundPhase;
-    bool isPaintingOverflowContents = paintFlags & PaintLayerPaintingOverflowContents;
     // Outline always needs to be painted even if we have no visible content. Also,
     // the outline is painted in the background phase during composited scrolling.
     // If it were painted in the foreground phase, it would move with the scrolled
@@ -1085,7 +1077,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
         // fragment should paint.
         collectFragments(layerFragments, localPaintingInfo.rootLayer, localPaintingInfo.paintDirtyRect,
             (paintFlags & PaintLayerUncachedClipRects) ? UncachedClipRects : PaintingClipRects,
-            shouldRespectOverflowClip(paintFlags, renderer()), &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
+            &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
         updatePaintingInfoForFragments(layerFragments, localPaintingInfo, paintFlags, shouldPaintContent, &offsetFromRoot);
     }
 
@@ -1147,7 +1139,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     ASSERT(!(localPaintingInfo.paintBehavior & PaintBehaviorForceBlackText));
 
     bool shouldPaintBackground = isPaintingCompositedBackground && shouldPaintContent;
-    bool shouldPaintNegZOrderList = (isPaintingScrollingContent && isPaintingOverflowContents) || (!isPaintingScrollingContent && isPaintingCompositedBackground);
+    bool shouldPaintNegZOrderList = !isPaintingScrollingContent && isPaintingCompositedBackground;
     bool shouldPaintOwnContents = isPaintingCompositedForeground && shouldPaintContent;
     bool shouldPaintNormalFlowAndPosZOrderLists = isPaintingCompositedForeground;
     bool shouldPaintOverlayScrollbars = isPaintingOverlayScrollbars;
@@ -1244,14 +1236,12 @@ void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* conte
 }
 
 void RenderLayer::collectFragments(LayerFragments& fragments, const RenderLayer* rootLayer, const LayoutRect& dirtyRect,
-    ClipRectsCacheSlot clipRectsCacheSlot, ShouldRespectOverflowClip respectOverflowClip, const LayoutPoint* offsetFromRoot,
+    ClipRectsCacheSlot clipRectsCacheSlot, const LayoutPoint* offsetFromRoot,
     const LayoutSize& subPixelAccumulation, const LayoutRect* layerBoundingBox)
 {
     // For unpaginated layers, there is only one fragment.
     LayerFragment fragment;
     ClipRectsContext clipRectsContext(rootLayer, clipRectsCacheSlot, subPixelAccumulation);
-    if (respectOverflowClip == IgnoreOverflowClip)
-        clipRectsContext.setIgnoreOverflowClip();
     clipper().calculateRects(clipRectsContext, dirtyRect, fragment.layerBounds, fragment.backgroundRect, fragment.foregroundRect, fragment.outlineRect, offsetFromRoot);
     fragments.append(fragment);
 }
@@ -1262,11 +1252,8 @@ void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, cons
     ASSERT(offsetFromRoot);
     for (size_t i = 0; i < fragments.size(); ++i) {
         LayerFragment& fragment = fragments.at(i);
-        fragment.shouldPaintContent = shouldPaintContent;
-        if (this != localPaintingInfo.rootLayer || !(localPaintFlags & PaintLayerPaintingOverflowContents)) {
-            LayoutPoint newOffsetFromRoot = *offsetFromRoot;
-            fragment.shouldPaintContent &= intersectsDamageRect(fragment.layerBounds, fragment.backgroundRect.rect(), localPaintingInfo.rootLayer, &newOffsetFromRoot);
-        }
+        LayoutPoint newOffsetFromRoot = *offsetFromRoot;
+        fragment.shouldPaintContent = shouldPaintContent && intersectsDamageRect(fragment.layerBounds, fragment.backgroundRect.rect(), localPaintingInfo.rootLayer, &newOffsetFromRoot);
     }
 }
 
