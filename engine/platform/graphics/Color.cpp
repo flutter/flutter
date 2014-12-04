@@ -167,14 +167,6 @@ bool Color::parseHexColor(const String& name, RGBA32& rgb)
     return parseHexColor(name.characters16(), name.length(), rgb);
 }
 
-int differenceSquared(const Color& c1, const Color& c2)
-{
-    int dR = c1.red() - c2.red();
-    int dG = c1.green() - c2.green();
-    int dB = c1.blue() - c2.blue();
-    return dR * dR + dG * dG + dB * dB;
-}
-
 bool Color::setFromString(const String& name)
 {
     if (name[0] != '#')

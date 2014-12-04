@@ -312,9 +312,7 @@ static EFillBox clipMax(EFillBox clipA, EFillBox clipB)
         return BorderFillBox;
     if (clipA == PaddingFillBox || clipB == PaddingFillBox)
         return PaddingFillBox;
-    if (clipA == ContentFillBox || clipB == ContentFillBox)
-        return ContentFillBox;
-    return TextFillBox;
+    return ContentFillBox;
 }
 
 void FillLayer::computeClipMax() const

@@ -1,0 +1,17 @@
+<sky>
+<import src="../resources/dump-as-render-tree.sky" />
+<style>
+div {
+    width: 100px;
+    height: 100px;
+    padding: 25px;
+    border: 25px dotted;
+    /* TODO(ojan): background-image appears to be broken. */
+    background-image: linear-gradient(top, yellow, yellow), linear-gradient(top, blue, blue), -linear-gradient(top, green, green);
+    background-clip: content-box, padding-box, border-box;
+}
+</style>
+<!-- TODO(ojan): Make this a reftest once we support them. -->
+Test passes if the image below shows nested green, blue and yellow squares with a dotted black border.
+<div></div>
+</sky>

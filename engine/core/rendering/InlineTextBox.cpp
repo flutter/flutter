@@ -309,13 +309,6 @@ float InlineTextBox::placeEllipsisBox(bool flowIsLTR, float visibleLeftEdge, flo
     return -1;
 }
 
-static Color textColorForWhiteBackground(Color textColor)
-{
-    int distanceFromWhite = differenceSquared(textColor, Color::white);
-    // semi-arbitrarily chose 65025 (255^2) value here after a few tests;
-    return distanceFromWhite > 65025 ? textColor : textColor.dark();
-}
-
 bool InlineTextBox::isLineBreak() const
 {
     return renderer().style()->preserveNewline() && len() == 1 && (*renderer().text().impl())[start()] == '\n';
@@ -366,44 +359,24 @@ struct TextPaintingStyle {
     bool operator!=(const TextPaintingStyle& other) { return !(*this == other); }
 };
 
-TextPaintingStyle textPaintingStyle(RenderText& renderer, RenderStyle* style, bool forceBlackText)
+TextPaintingStyle textPaintingStyle(RenderText& renderer, RenderStyle* style)
 {
     TextPaintingStyle textStyle;
-
-    if (forceBlackText) {
-        textStyle.fillColor = Color::black;
-        textStyle.strokeColor = Color::black;
-        textStyle.emphasisMarkColor = Color::black;
-        textStyle.strokeWidth = style->textStrokeWidth();
-        textStyle.shadow = 0;
-    } else {
-        textStyle.fillColor = renderer.resolveColor(style, CSSPropertyWebkitTextFillColor);
-        textStyle.strokeColor = renderer.resolveColor(style, CSSPropertyWebkitTextStrokeColor);
-        textStyle.emphasisMarkColor = renderer.resolveColor(style, CSSPropertyWebkitTextEmphasisColor);
-        textStyle.strokeWidth = style->textStrokeWidth();
-        textStyle.shadow = style->textShadow();
-
-        // Adjust text color when printing with a white background.
-        bool forceBackgroundToWhite = false;
-        if (forceBackgroundToWhite) {
-            textStyle.fillColor = textColorForWhiteBackground(textStyle.fillColor);
-            textStyle.strokeColor = textColorForWhiteBackground(textStyle.strokeColor);
-            textStyle.emphasisMarkColor = textColorForWhiteBackground(textStyle.emphasisMarkColor);
-        }
-    }
-
+    textStyle.fillColor = renderer.resolveColor(style, CSSPropertyWebkitTextFillColor);
+    textStyle.strokeColor = renderer.resolveColor(style, CSSPropertyWebkitTextStrokeColor);
+    textStyle.emphasisMarkColor = renderer.resolveColor(style, CSSPropertyWebkitTextEmphasisColor);
+    textStyle.strokeWidth = style->textStrokeWidth();
+    textStyle.shadow = style->textShadow();
     return textStyle;
 }
 
-TextPaintingStyle selectionPaintingStyle(RenderText& renderer, bool haveSelection, bool forceBlackText, const TextPaintingStyle& textStyle)
+TextPaintingStyle selectionPaintingStyle(RenderText& renderer, bool haveSelection, const TextPaintingStyle& textStyle)
 {
     TextPaintingStyle selectionStyle = textStyle;
 
     if (haveSelection) {
-        if (!forceBlackText) {
-            selectionStyle.fillColor = renderer.selectionForegroundColor();
-            selectionStyle.emphasisMarkColor = renderer.selectionEmphasisMarkColor();
-        }
+        selectionStyle.fillColor = renderer.selectionForegroundColor();
+        selectionStyle.emphasisMarkColor = renderer.selectionEmphasisMarkColor();
     }
 
     return selectionStyle;
@@ -564,8 +537,8 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     bool useCustomUnderlines = containsComposition && renderer().frame()->inputMethodController().compositionUsesCustomUnderlines();
 
     // Determine text colors.
-    TextPaintingStyle textStyle = textPaintingStyle(renderer(), styleToUse, paintInfo.forceBlackText());
-    TextPaintingStyle selectionStyle = selectionPaintingStyle(renderer(), haveSelection, paintInfo.forceBlackText(), textStyle);
+    TextPaintingStyle textStyle = textPaintingStyle(renderer(), styleToUse);
+    TextPaintingStyle selectionStyle = selectionPaintingStyle(renderer(), haveSelection, textStyle);
     bool paintSelectedTextOnly = (paintInfo.phase == PaintPhaseSelection);
     bool paintSelectedTextSeparately = !paintSelectedTextOnly && textStyle != selectionStyle;
 

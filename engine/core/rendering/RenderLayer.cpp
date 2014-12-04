@@ -1109,8 +1109,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     if (localPaintingInfo.paintingRoot && !renderer()->isDescendantOf(localPaintingInfo.paintingRoot))
         paintingRootForRenderer = localPaintingInfo.paintingRoot;
 
-    ASSERT(!(localPaintingInfo.paintBehavior & PaintBehaviorForceBlackText));
-
     // FIXME(sky): Get rid of PaintBehavior argument now that it's always Normal.
     PaintBehavior paintBehavior = PaintBehaviorNormal;
 

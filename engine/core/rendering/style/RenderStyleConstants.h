@@ -95,7 +95,7 @@ enum EFillAttachment {
 };
 
 enum EFillBox {
-    BorderFillBox, PaddingFillBox, ContentFillBox, TextFillBox
+    BorderFillBox, PaddingFillBox, ContentFillBox
 };
 
 enum EFillRepeat {

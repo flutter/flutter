@@ -241,9 +241,6 @@ static inline bool rendererObscuresBackground(RenderBox* rootBox)
         || style->hasTransform())
         return false;
 
-    if (rootBox->style()->backgroundClip() == TextFillBox)
-        return false;
-
     return true;
 }
 

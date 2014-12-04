@@ -76,8 +76,6 @@ struct PaintInfo {
         return !paintingRoot || paintingRoot == renderer;
     }
 
-    bool forceBlackText() const { return paintBehavior & PaintBehaviorForceBlackText; }
-
     void applyTransform(const AffineTransform& localToAncestorTransform, bool identityStatusUnknown = true)
     {
         if (identityStatusUnknown && localToAncestorTransform.isIdentity())

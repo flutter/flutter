@@ -348,9 +348,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EFillBox e)
     case ContentFillBox:
         m_value.valueID = CSSValueContentBox;
         break;
-    case TextFillBox:
-        m_value.valueID = CSSValueText;
-        break;
     }
 }
 
@@ -367,8 +364,6 @@ template<> inline CSSPrimitiveValue::operator EFillBox() const
     case CSSValueContent:
     case CSSValueContentBox:
         return ContentFillBox;
-    case CSSValueText:
-        return TextFillBox;
     default:
         break;
     }

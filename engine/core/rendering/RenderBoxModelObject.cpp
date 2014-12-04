@@ -480,20 +480,6 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
 
         break;
     }
-    case TextFillBox: {
-        // First figure out how big the mask has to be.  It should be no bigger than what we need
-        // to actually render, so we should intersect the dirty rect with the border box of the background.
-        maskRect = pixelSnappedIntRect(rect);
-        maskRect.intersect(paintInfo.rect);
-
-        // We draw the background into a separate layer, to be later masked with yet another layer
-        // holding the text content.
-        backgroundClipStateSaver.save();
-        context->clip(maskRect);
-        context->beginTransparencyLayer(1);
-
-        break;
-    }
     case BorderFillBox:
         break;
     default:
@@ -543,30 +529,6 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
                 compositeOp, bgLayer.blendMode(), geometry.spaceSize());
             context->setImageInterpolationQuality(previousInterpolationQuality);
         }
-    }
-
-    if (bgLayer.clip() == TextFillBox) {
-        // Create the text mask layer.
-        context->setCompositeOperation(CompositeDestinationIn);
-        context->beginTransparencyLayer(1);
-
-        // FIXME: Workaround for https://code.google.com/p/skia/issues/detail?id=1291.
-        context->clearRect(maskRect);
-
-        // Now draw the text into the mask. We do this by painting using a special paint phase that signals to
-        // InlineTextBoxes that they should just add their contents to the clip.
-        PaintInfo info(context, maskRect, PaintPhaseTextClip, PaintBehaviorForceBlackText, 0);
-        context->setCompositeOperation(CompositeSourceOver);
-        if (box) {
-            RootInlineBox& root = box->root();
-            box->paint(info, LayoutPoint(scrolledPaintRect.x() - box->x(), scrolledPaintRect.y() - box->y()), root.lineTop(), root.lineBottom());
-        } else {
-            LayoutSize localOffset = isBox() ? toRenderBox(this)->locationOffset() : LayoutSize();
-            paint(info, scrolledPaintRect.location() - localOffset);
-        }
-
-        context->endLayer();
-        context->endLayer();
     }
 }
 

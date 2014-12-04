@@ -51,9 +51,9 @@ enum PaintPhase {
     PaintPhaseClippingMask,
 };
 
+// FIXME(sky): Remove this enum now that it's unused.
 enum PaintBehaviorFlags {
     PaintBehaviorNormal = 0,
-    PaintBehaviorForceBlackText = 1 << 0,
 };
 
 typedef unsigned PaintBehavior;
