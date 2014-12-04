@@ -26,24 +26,32 @@
 
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/core/css/MediaList.h"
+#include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventSender.h"
+#include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/platform/TraceEvent.h"
 
 namespace blink {
 
 inline HTMLStyleElement::HTMLStyleElement(Document& document, bool createdByParser)
     : HTMLElement(HTMLNames::styleTag, document)
-    , StyleElement(&document, createdByParser)
+    , m_createdByParser(createdByParser)
+    , m_loading(false)
+    , m_registeredAsCandidate(false)
+    , m_startPosition(TextPosition::belowRangePosition())
 {
+    if (createdByParser)
+        m_startPosition = document.parserPosition();
 }
 
 HTMLStyleElement::~HTMLStyleElement()
 {
-#if !ENABLE(OILPAN)
-    StyleElement::clearDocumentData(document(), this);
-#endif
+    clearDocumentData();
+    if (m_sheet)
+        clearSheet();
 }
 
 PassRefPtr<HTMLStyleElement> HTMLStyleElement::create(Document& document, bool createdByParser)
@@ -63,8 +71,8 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
 
 void HTMLStyleElement::finishParsingChildren()
 {
-    StyleElement::finishParsingChildren(this);
-    HTMLElement::finishParsingChildren();
+    process();
+    m_createdByParser = false;
 }
 
 void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
@@ -74,7 +82,7 @@ void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
     if (!inDocument())
         return;
 
-    StyleElement::processStyleSheet(document(), this);
+    processStyleSheet();
 
     if (ShadowRoot* scope = containingShadowRoot())
         scope->registerScopedHTMLStyleChild();
@@ -95,13 +103,28 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
         scopingNode->unregisterScopedHTMLStyleChild();
 
     TreeScope* containingScope = containingShadowRoot();
-    StyleElement::removedFromDocument(document(), this, scopingNode, containingScope ? *containingScope : insertionPoint->treeScope());
+    TreeScope& scope = containingScope ? *containingScope : insertionPoint->treeScope();
+
+    if (m_registeredAsCandidate) {
+        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
+        m_registeredAsCandidate = false;
+    }
+
+    RefPtr<CSSStyleSheet> removedSheet = m_sheet.get();
+
+    if (m_sheet)
+        clearSheet();
+    if (removedSheet)
+        document().removedStyleSheet(removedSheet.get());
 }
 
 void HTMLStyleElement::childrenChanged(const ChildrenChange& change)
 {
     HTMLElement::childrenChanged(change);
-    StyleElement::childrenChanged(this);
+
+    if (m_createdByParser)
+        return;
+    process();
 }
 
 const AtomicString& HTMLStyleElement::media() const
@@ -123,6 +146,71 @@ ContainerNode* HTMLStyleElement::scopingNode()
         return containingShadowRoot();
 
     return &document();
+}
+
+void HTMLStyleElement::process()
+{
+    if (!inDocument())
+        return;
+    createSheet();
+}
+
+void HTMLStyleElement::clearSheet()
+{
+    ASSERT(m_sheet);
+    m_sheet.release()->clearOwnerNode();
+}
+
+void HTMLStyleElement::createSheet()
+{
+    ASSERT(inDocument());
+
+    if (m_sheet)
+        clearSheet();
+
+    const AtomicString& type = this->type();
+    if (type.isEmpty() || type == "text/css") {
+        RefPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
+
+        MediaQueryEvaluator screenEval("screen", true);
+        MediaQueryEvaluator printEval("print", true);
+        if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
+            m_loading = true;
+            const String& text = textFromChildren();
+            TextPosition startPosition = m_startPosition == TextPosition::belowRangePosition() ? TextPosition::minimumPosition() : m_startPosition;
+            m_sheet = document().styleEngine()->createSheet(this, text, startPosition, m_createdByParser);
+            m_sheet->setMediaQueries(mediaQueries.release());
+            m_loading = false;
+        }
+    }
+
+    document().styleResolverChanged();
+}
+
+void HTMLStyleElement::clearDocumentData()
+{
+    if (m_sheet)
+        m_sheet->clearOwnerNode();
+
+    if (inDocument()) {
+        ContainerNode* scopingNode = this->scopingNode();
+        TreeScope& scope = scopingNode ? scopingNode->treeScope() : treeScope();
+        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
+    }
+}
+
+void HTMLStyleElement::processStyleSheet()
+{
+    TRACE_EVENT0("blink", "StyleElement::processStyleSheet");
+
+    ASSERT(inDocument());
+
+    m_registeredAsCandidate = true;
+    document().styleEngine()->addStyleSheetCandidateNode(this, m_createdByParser);
+    if (m_createdByParser)
+        return;
+
+    process();
 }
 
 }

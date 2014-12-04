@@ -23,17 +23,19 @@
 #ifndef SKY_ENGINE_CORE_HTML_HTMLSTYLEELEMENT_H_
 #define SKY_ENGINE_CORE_HTML_HTMLSTYLEELEMENT_H_
 
-#include "sky/engine/core/dom/StyleElement.h"
+#include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/html/HTMLElement.h"
+#include "sky/engine/wtf/text/TextPosition.h" 
 
 namespace blink {
 
+class ContainerNode;
+class Document;
+class Element;
 class HTMLStyleElement;
+class TreeScope;
 
-template<typename T> class EventSender;
-typedef EventSender<HTMLStyleElement> StyleEventSender;
-
-class HTMLStyleElement final : public HTMLElement, private StyleElement {
+class HTMLStyleElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<HTMLStyleElement> create(Document&, bool createdByParser);
@@ -41,10 +43,20 @@ public:
 
     ContainerNode* scopingNode();
 
-    using StyleElement::sheet;
+    CSSStyleSheet* sheet() const { return m_sheet.get(); }
+
+    const AtomicString& media() const;
+    const AtomicString& type() const;
 
 private:
     HTMLStyleElement(Document&, bool createdByParser);
+
+    void createSheet();
+    void process();
+    void clearSheet();
+
+    void processStyleSheet();
+    void clearDocumentData();
 
     // overload from HTMLElement
     virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;
@@ -54,8 +66,12 @@ private:
 
     virtual void finishParsingChildren() override;
 
-    virtual const AtomicString& media() const override;
-    virtual const AtomicString& type() const override;
+    RefPtr<CSSStyleSheet> m_sheet;
+
+    bool m_createdByParser : 1;
+    bool m_loading : 1;
+    bool m_registeredAsCandidate : 1;
+    TextPosition m_startPosition;
 };
 
 } // namespace blink

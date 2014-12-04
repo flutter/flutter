@@ -524,8 +524,6 @@ sky_core_files = [
   "dom/SpaceSplitString.cpp",
   "dom/SpaceSplitString.h",
   "dom/StaticNodeList.h",
-  "dom/StyleElement.cpp",
-  "dom/StyleElement.h",
   "dom/StyleEngine.cpp",
   "dom/StyleEngine.h",
   "dom/StyleSheetCandidate.cpp",
