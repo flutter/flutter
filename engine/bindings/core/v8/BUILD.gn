@@ -8,7 +8,7 @@ import("//sky/engine/bindings/core/v8/generated.gni")
 import("//sky/engine/bindings/scripts/scripts.gni")
 import("//sky/engine/core/core.gni")
 
-visibility = ["//sky/engine/*"]
+visibility = [ "//sky/engine/*" ]
 
 # bindings_core_v8_generated in core/v8/generated.gyp
 group("bindings_core_v8_generated") {
@@ -42,12 +42,10 @@ action("interfaces_info") {
   args = [
     "--write-file-only-if-changed=1",
     "--",
-    rebase_path(
-        "$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle",
-        root_build_dir),
-    rebase_path(
-        "$bindings_core_output_dir/InterfacesInfoAll.pickle",
-        root_build_dir),
+    rebase_path("$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle",
+                root_build_dir),
+    rebase_path("$bindings_core_output_dir/InterfacesInfoAll.pickle",
+                root_build_dir),
   ]
 
   deps = [

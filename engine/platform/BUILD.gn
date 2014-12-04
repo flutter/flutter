@@ -7,7 +7,7 @@ import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/config.gni")
 
 # Most targets in this file are private actions so use that as the default.
-visibility = [":*"]
+visibility = [ ":*" ]
 
 sky_platform_output_dir = "$root_gen_dir/sky/platform"
 
@@ -34,10 +34,10 @@ action("runtime_enabled_features") {
 
   runtime_enabled_features_in = "RuntimeEnabledFeatures.in"
   inputs = scripts_for_in_files + [
-    runtime_enabled_features_in,
-    "../build/scripts/templates/RuntimeEnabledFeatures.cpp.tmpl",
-    "../build/scripts/templates/RuntimeEnabledFeatures.h.tmpl",
-  ]
+             runtime_enabled_features_in,
+             "../build/scripts/templates/RuntimeEnabledFeatures.cpp.tmpl",
+             "../build/scripts/templates/RuntimeEnabledFeatures.h.tmpl",
+           ]
 
   outputs = [
     "$sky_platform_output_dir/RuntimeEnabledFeatures.cpp",
@@ -55,22 +55,28 @@ action("color_data") {
   script = "../build/scripts/gperf.py"
 
   color_data_gperf = "ColorData.gperf"
-  inputs = [ color_data_gperf ]
+  inputs = [
+    color_data_gperf,
+  ]
 
   output_file = "$sky_platform_output_dir/ColorData.cpp"
-  outputs = [ output_file ]
+  outputs = [
+    output_file,
+  ]
 
   args = [
     gperf_exe,
     "--key-positions=*",
-    "-D", "-s", "2",
+    "-D",
+    "-s",
+    "2",
     rebase_path(color_data_gperf, root_build_dir),
     "--output-file=" + rebase_path(output_file, root_build_dir),
   ]
 }
 
 group("make_platform_generated") {
-  visibility += [":*"]
+  visibility += [ ":*" ]
   deps = [
     ":color_data",
     ":font_family_names",
@@ -79,7 +85,7 @@ group("make_platform_generated") {
 }
 
 component("platform") {
-  visibility += ["//sky/*"]
+  visibility += [ "//sky/*" ]
 
   output_name = "sky_platform"
 
@@ -615,10 +621,9 @@ component("platform") {
   ]
 
   # Add in the generated files.
-  sources +=
-    get_target_outputs(":font_family_names") +
-    get_target_outputs(":runtime_enabled_features") +
-    get_target_outputs(":color_data")
+  sources += get_target_outputs(":font_family_names") +
+             get_target_outputs(":runtime_enabled_features") +
+             get_target_outputs(":color_data")
 
   configs += [
     "//sky/engine:config",
@@ -630,9 +635,7 @@ component("platform") {
     "INSIDE_BLINK",
   ]
 
-  include_dirs = [
-    "$root_build_dir",
-  ]
+  include_dirs = [ "$root_build_dir" ]
 
   deps = [
     ":make_platform_generated",
@@ -691,7 +694,7 @@ component("platform") {
 }
 
 test("platform_unittests") {
-  visibility += ["//sky/*"]
+  visibility += [ "//sky/*" ]
   output_name = "sky_platform_unittests"
 
   sources = [
@@ -738,9 +741,7 @@ test("platform_unittests") {
     "weborigin/SecurityPolicyTest.cpp",
   ]
 
-  configs += [
-    "//sky/engine:config",
-  ]
+  configs += [ "//sky/engine:config" ]
 
   deps = [
     ":platform",
@@ -755,13 +756,9 @@ test("platform_unittests") {
     "//url",
   ]
 
-  defines = [
-    "INSIDE_BLINK",
-  ]
+  defines = [ "INSIDE_BLINK" ]
 
-  include_dirs = [
-    "$root_build_dir",
-  ]
+  include_dirs = [ "$root_build_dir" ]
 }
 
 if (cpu_arch == "arm") {
@@ -773,7 +770,6 @@ if (cpu_arch == "arm") {
       "graphics/cpu/arm/filters/FEGaussianBlurNEON.h",
       "graphics/cpu/arm/filters/NEONHelpers.h",
     ]
-
     # The *NEON.cpp files fail to compile when -mthumb is passed. Force
     # them to build in ARM mode.
     # See https://bugs.webkit.org/show_bug.cgi?id=62916.

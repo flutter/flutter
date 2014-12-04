@@ -10,7 +10,7 @@ if (is_posix) {
   import("//build/config/gcc/gcc_version.gni")
 }
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 # features ---------------------------------------------------------------------
 

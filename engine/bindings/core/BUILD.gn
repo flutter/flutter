@@ -6,12 +6,11 @@ import("//sky/engine/bindings/core/core.gni")
 import("//sky/engine/bindings/core/idl.gni")
 import("//sky/engine/bindings/scripts/scripts.gni")
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 compute_interfaces_info_individual("interfaces_info_individual_core") {
   sources_static = core_static_idl_files
   sources_generated = core_generated_idl_files
   component_dir = "core"
-  output_file =
-    "$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle"
+  output_file = "$bindings_core_output_dir/InterfacesInfoCoreIndividual.pickle"
 }

@@ -6,7 +6,7 @@ import("//sky/engine/bindings/bindings.gni")
 import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/core/core.gni")
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 # Main interface IDL files (excluding dependencies and testing)
 # are included as properties on global objects, and in aggregate bindings.
@@ -16,12 +16,10 @@ main_interface_idl_files_list = "$target_gen_dir/main_interface_idl_files.tmp"
 write_file(main_interface_idl_files_list,
            rebase_path(main_interface_idl_files, root_build_dir))
 
-generated_global_constructors_idl_files = [
-  "$sky_output_dir/WindowConstructors.idl",
-]
-generated_global_constructors_header_files = [
-  "$sky_output_dir/WindowConstructors.h",
-]
+generated_global_constructors_idl_files =
+    [ "$sky_output_dir/WindowConstructors.idl" ]
+generated_global_constructors_header_files =
+    [ "$sky_output_dir/WindowConstructors.h" ]
 
 # FIXME: Generate separate core_global_objects
 # http://crbug.com/358074
@@ -30,11 +28,12 @@ action("global_objects") {
   script = "scripts/compute_global_objects.py"
 
   inputs = [
-    "scripts/utilities.py",
-    # Only look in main IDL files (exclude dependencies and testing,
-    # which should not define global objects).
-    main_interface_idl_files_list,
-  ] + main_interface_idl_files
+             "scripts/utilities.py",
+
+             # Only look in main IDL files (exclude dependencies and testing,
+             # which should not define global objects).
+             main_interface_idl_files_list,
+           ] + main_interface_idl_files
 
   outputs = [
     "$bindings_output_dir/GlobalObjects.pickle",
@@ -55,16 +54,17 @@ action("global_constructors_idls") {
   script = "scripts/generate_global_constructors.py"
 
   inputs = [
-    "scripts/generate_global_constructors.py",
-    "scripts/utilities.py",
-    "$bindings_output_dir/GlobalObjects.pickle",
-    # Only includes main IDL files (exclude dependencies and testing,
-    # which should not appear on global objects).
-    main_interface_idl_files_list,
-  ] + main_interface_idl_files
+             "scripts/generate_global_constructors.py",
+             "scripts/utilities.py",
+             "$bindings_output_dir/GlobalObjects.pickle",
+
+             # Only includes main IDL files (exclude dependencies and testing,
+             # which should not appear on global objects).
+             main_interface_idl_files_list,
+           ] + main_interface_idl_files
 
   outputs = generated_global_constructors_idl_files +
-    generated_global_constructors_header_files
+            generated_global_constructors_header_files
 
   args = [
     "--idl-files-list",
@@ -77,7 +77,9 @@ action("global_constructors_idls") {
     rebase_path("$sky_output_dir/WindowConstructors.idl", root_build_dir),
   ]
 
-  deps = [ ":global_objects" ]
+  deps = [
+    ":global_objects",
+  ]
 }
 
 # GYP version: generated.gyp:generated_idls

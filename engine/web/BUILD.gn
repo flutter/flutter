@@ -5,7 +5,7 @@
 import("//build/config/ui.gni")
 import("//sky/engine/config.gni")
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 platform_web_unittest_files = [
   "//sky/engine/platform/graphics/BitmapImageTest.cpp",
@@ -25,6 +25,7 @@ component("web") {
   deps = [
     "//sky/engine/core",
     "//sky/engine/platform",
+
     # FIXME: v8_inspector should not depend on core types and be separate
     # from both web and core.
     "//sky/engine/v8_inspector",
@@ -103,9 +104,7 @@ component("web") {
       "//sky/engine/core:testing",
     ]
 
-    configs -= [
-      "//sky/engine:non_test_config",
-    ]
+    configs -= [ "//sky/engine:non_test_config" ]
 
     sources += platform_web_unittest_files
 
@@ -121,7 +120,9 @@ source_set("test_support") {
       "//sky/engine/wtf",
     ]
 
-    sources = [ "WebTestingSupport.cpp" ]
+    sources = [
+      "WebTestingSupport.cpp",
+    ]
 
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [
@@ -147,7 +148,9 @@ test("sky_unittests") {
     ":web",
   ]
 
-  sources = [ "tests/RunAllTests.cpp" ]
+  sources = [
+    "tests/RunAllTests.cpp",
+  ]
 
   configs += [ "//sky/engine:config" ]
 

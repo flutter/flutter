@@ -5,7 +5,7 @@
 import("//build/config/ui.gni")
 import("//sky/engine/config.gni")
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 gen_dir = "$root_gen_dir/v8_inspector"
 
@@ -17,10 +17,10 @@ component("v8_inspector") {
     "//base",
     "//mojo/public/cpp/application",
     "//mojo/public/interfaces/application",
-    "//sky/engine/core", # FIXME: Remove.
-    "//sky/engine/platform", # FIXME: Remove.
+    "//sky/engine/core",  # FIXME: Remove.
+    "//sky/engine/platform",  # FIXME: Remove.
     "//sky/services/inspector:bindings",
-    "//sky/engine/core:core_generated", # FIXME: Remove.
+    "//sky/engine/core:core_generated",  # FIXME: Remove.
     "//sky/engine/wtf",
   ]
 
@@ -99,7 +99,8 @@ action("protocol_sources") {
 
   args = [
     rebase_path(protocol_file, root_build_dir),
-    "--output_dir", rebase_path(gen_dir, root_build_dir),
+    "--output_dir",
+    rebase_path(gen_dir, root_build_dir),
   ]
 
   deps = [
@@ -110,12 +111,17 @@ action("protocol_sources") {
 action("protocol_version") {
   script = "generate-inspector-protocol-version"
 
-  inputs = [ protocol_file ]
+  inputs = [
+    protocol_file,
+  ]
   output_file = "$gen_dir/InspectorProtocolVersion.h"
-  outputs = [ output_file ]
+  outputs = [
+    output_file,
+  ]
 
   args = [
-    "-o", rebase_path(output_file, root_build_dir),
+    "-o",
+    rebase_path(output_file, root_build_dir),
     rebase_path(protocol_file, root_build_dir),
   ]
 }

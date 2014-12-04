@@ -6,7 +6,7 @@ import("//sky/engine/bindings/scripts/scripts.gni")
 import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/core/core.gni")
 
-visibility = ["//sky/engine/*"]
+visibility = [ "//sky/engine/*" ]
 
 rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
 
@@ -45,14 +45,12 @@ source_set("prerequisites") {
     "//sky/engine/platform",
   ]
 
-  forward_dependent_configs_from = [
-    ":libraries",
-  ]
+  forward_dependent_configs_from = [ ":libraries" ]
 
   direct_dependent_configs = [
     "//sky/engine:config",
     "//sky/engine:inside_blink",
-    "//build/config/compiler:wexit_time_destructors"
+    "//build/config/compiler:wexit_time_destructors",
   ]
 }
 
@@ -68,9 +66,7 @@ static_library("core") {
 
   sources = sky_core_files
 
-  forward_dependent_configs_from = [
-    ":libraries",
-  ]
+  forward_dependent_configs_from = [ ":libraries" ]
 
   # core and core_generated are really the same thing.
   allow_circular_includes_from = [ ":core_generated" ]
@@ -97,6 +93,7 @@ source_set("testing") {
 
 source_set("core_generated") {
   sources = bindings_core_v8_files
+
   # These files include all the .cpp files generated from the .idl files
   # in webcore_files.
   sources += bindings_core_generated_aggregate_files
@@ -112,9 +109,7 @@ source_set("core_generated") {
     "$sky_core_output_dir/CSSGrammar.cpp",
   ]
 
-  configs += [
-    "..:inside_blink",
-  ]
+  configs += [ "..:inside_blink" ]
 
   deps = [
     ":make_core_generated",
@@ -131,9 +126,7 @@ source_set("core_generated") {
     "//v8",
   ]
 
-  include_dirs = [
-    "$root_build_dir",
-  ]
+  include_dirs = [ "$root_build_dir" ]
 }
 
 # core_bindings_generated ------------------------------------------------------
@@ -155,17 +148,18 @@ action("generated_testing_idls_settings") {
   script = "../build/scripts/make_settings.py"
 
   inputs = scripts_for_in_files + [
-    "../build/scripts/make_settings.py",
-    "../build/scripts/templates/SettingsMacros.h.tmpl",
-    "frame/Settings.in",
-  ]
+             "../build/scripts/make_settings.py",
+             "../build/scripts/templates/SettingsMacros.h.tmpl",
+             "frame/Settings.in",
+           ]
   outputs = [
     "$sky_core_output_dir/SettingsMacros.h",
   ]
 
   args = [
     rebase_path("frame/Settings.in", root_build_dir),
-    "--output_dir", rel_sky_core_gen_dir,
+    "--output_dir",
+    rel_sky_core_gen_dir,
   ]
 }
 
@@ -213,9 +207,7 @@ css_properties("make_core_generated_css_property_names") {
 
 process_in_files("make_core_generated_media_features") {
   script = "../build/scripts/make_media_features.py"
-  in_files = [
-    "css/MediaFeatureNames.in",
-  ]
+  in_files = [ "css/MediaFeatureNames.in" ]
   other_inputs = [
     "../build/scripts/make_media_features.py",
     "../build/scripts/templates/MediaFeatures.h.tmpl",
@@ -261,14 +253,14 @@ css_properties("make_core_generated_style_builder") {
 
 css_properties("make_core_generated_css_property_metadata") {
   script = "../build/scripts/make_css_property_metadata.py"
-  other_inputs = [
-    "../build/scripts/templates/CSSPropertyMetadata.cpp.tmpl",
-  ]
+  other_inputs = [ "../build/scripts/templates/CSSPropertyMetadata.cpp.tmpl" ]
   outputs = [
     "$sky_core_output_dir/CSSPropertyMetadata.cpp",
   ]
 
-  deps = [ ":core_names" ]
+  deps = [
+    ":core_names",
+  ]
 }
 
 process_in_files("make_core_generated_css_value_keywords") {
@@ -283,7 +275,8 @@ process_in_files("make_core_generated_css_value_keywords") {
     "$sky_core_output_dir/CSSValueKeywords.h",
   ]
   other_args = [
-    "--gperf", gperf_exe,
+    "--gperf",
+    gperf_exe,
   ]
 
   deps = [
@@ -316,9 +309,7 @@ process_in_files("make_core_generated_html_element_factory") {
 process_in_files("make_core_generated_html_element_type_helpers") {
   script = "../build/scripts/make_element_type_helpers.py"
 
-  in_files = [
-    "html/HTMLTagNames.in",
-  ]
+  in_files = [ "html/HTMLTagNames.in" ]
   other_inputs = make_element_type_helpers_files
   outputs = [
     "$sky_core_output_dir/HTMLElementTypeHelpers.h",
@@ -346,23 +337,21 @@ process_in_files("make_core_generated_event_factory") {
 
 process_in_files("make_core_generated_media_feature_names") {
   script = "../build/scripts/make_media_feature_names.py"
-  in_files = [
-    "css/MediaFeatureNames.in",
-  ]
+  in_files = [ "css/MediaFeatureNames.in" ]
   other_inputs = make_names_files
   outputs = [
     "$sky_core_output_dir/MediaFeatureNames.cpp",
     "$sky_core_output_dir/MediaFeatureNames.h",
   ]
-  deps = [ ":libraries" ]
+  deps = [
+    ":libraries",
+  ]
 }
 
 # make_event_factory -----------------------------------------------------------
 
 make_event_factory("make_core_generated_event_target_factory") {
-  in_files = [
-    "events/EventTargetFactory.in",
-  ]
+  in_files = [ "events/EventTargetFactory.in" ]
   outputs = [
     "$sky_core_output_dir/EventTargetHeaders.h",
     "$sky_core_output_dir/EventTargetInterfaces.h",
@@ -372,9 +361,7 @@ make_event_factory("make_core_generated_event_target_factory") {
 # make_names -------------------------------------------------------------------
 
 make_names("make_core_generated_media_type_names") {
-  in_files = [
-    "css/MediaTypeNames.in",
-  ]
+  in_files = [ "css/MediaTypeNames.in" ]
   outputs = [
     "$sky_core_output_dir/MediaTypeNames.cpp",
     "$sky_core_output_dir/MediaTypeNames.h",
@@ -382,9 +369,7 @@ make_names("make_core_generated_media_type_names") {
 }
 
 make_names("make_core_generated_event_names") {
-  in_files = [
-    "$sky_core_output_dir/EventInterfaces.in",
-  ]
+  in_files = [ "$sky_core_output_dir/EventInterfaces.in" ]
   outputs = [
     "$sky_core_output_dir/EventNames.cpp",
     "$sky_core_output_dir/EventNames.h",
@@ -392,9 +377,7 @@ make_names("make_core_generated_event_names") {
 }
 
 make_names("make_core_generated_event_target_names") {
-  in_files = [
-    "events/EventTargetFactory.in",
-  ]
+  in_files = [ "events/EventTargetFactory.in" ]
   outputs = [
     "$sky_core_output_dir/EventTargetNames.cpp",
     "$sky_core_output_dir/EventTargetNames.h",
@@ -402,9 +385,7 @@ make_names("make_core_generated_event_target_names") {
 }
 
 make_names("make_core_generated_fetch_initiator_type_names") {
-  in_files = [
-    "fetch/FetchInitiatorTypeNames.in",
-  ]
+  in_files = [ "fetch/FetchInitiatorTypeNames.in" ]
   outputs = [
     "$sky_core_output_dir/FetchInitiatorTypeNames.cpp",
     "$sky_core_output_dir/FetchInitiatorTypeNames.h",
@@ -412,9 +393,7 @@ make_names("make_core_generated_fetch_initiator_type_names") {
 }
 
 make_names("make_core_generated_event_type_names") {
-  in_files = [
-    "events/EventTypeNames.in",
-  ]
+  in_files = [ "events/EventTypeNames.in" ]
   outputs = [
     "$sky_core_output_dir/EventTypeNames.cpp",
     "$sky_core_output_dir/EventTypeNames.h",
@@ -443,7 +422,8 @@ action("make_core_generated_media_query_tokenizer_codepoints") {
   ]
 
   args = [
-    "--output_dir", rel_sky_core_gen_dir,
+    "--output_dir",
+    rel_sky_core_gen_dir,
   ]
 
   deps = make_core_generated_deps
@@ -451,9 +431,7 @@ action("make_core_generated_media_query_tokenizer_codepoints") {
 
 process_in_files("make_core_generated_html_element_lookup_trie") {
   script = "../build/scripts/make_element_lookup_trie.py"
-  in_files = [
-    "html/HTMLTagNames.in",
-  ]
+  in_files = [ "html/HTMLTagNames.in" ]
   other_inputs = [
     "../build/scripts/templates/ElementLookupTrie.cpp.tmpl",
     "../build/scripts/templates/ElementLookupTrie.h.tmpl",

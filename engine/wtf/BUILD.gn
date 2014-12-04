@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-visibility = ["//sky/*"]
+visibility = [ "//sky/*" ]
 
 component("wtf") {
   sources = [
@@ -225,9 +225,7 @@ component("wtf") {
 
   defines = [ "WTF_IMPLEMENTATION=1" ]
 
-  direct_dependent_configs = [
-    "//sky/engine:features",
-  ]
+  direct_dependent_configs = [ "//sky/engine:features" ]
 
   deps = [
     "//third_party/icu",
@@ -273,7 +271,7 @@ test("unittests") {
     "testing/RunAllTests.cpp",
   ]
 
-  configs += [ "//sky/engine:config", ]
+  configs += [ "//sky/engine:config" ]
 
   deps = [
     ":test_support",
