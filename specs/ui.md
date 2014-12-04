@@ -26,7 +26,10 @@ The following interactions are intended to be easy to handle:
    continues panning (without the scroll position jumping when the
    first finger is lifted)
  - right-clicking doesn't trigger buttons by default
- - fingers after the first don't trigger buttons by default
+ - fingers after the first within a surface don't trigger buttons by
+   default
+ - if there are two independent surfaces, they capture fingers
+   unrelated to each other
 
 Frameworks are responsible for converting pointer events described
 below into widget-specific events such as the following:
@@ -75,24 +78,36 @@ A pointer that is "down" is captured -- all events for that pointer
 will be routed to the chosen target until the pointer goes up,
 regardless of whether it's in that target's visible area.
 
+When an element captures a pointer and it has no captured pointers so
+far, if either there are no buttons (touch, stylus) or only the
+primary button is active (mouse) and this is not an inverted stylus,
+then that pointer is marked as "primary" for that element. The pointer
+remains the primary pointer until the corresponding pointer-up event
+(even if the buttons change).
+
 When one moves, if it is "up" then a 'pointer-moved' event is fired at
 the application's document, otherwise if it is "down" then the event
 is fired at the element or document that was selected for the
-'pointer-down' event.
+'pointer-down' event (the capturing element). If the return value of a
+'pointer-moved' event is 'cancel', then pretend that the pointer moved
+to 'up', send 'pointer-up' as described below, and drop all events for
+this pointer until such time as it actually changes to be 'up'.
 
 When one switches from "down" to "up", a 'pointer-up' event is fired
 at the element or document that was selected for the 'pointer-down'
-event.
+event (the capturing target).
 
-When there are no "down" pointers and one switches to "down", if
-either there are no buttons (touch) or only the primary button is
-active (mouse, stylus) and this is not an inverted stylus, then this
-becomes the "primary" pointer. The pointer remains the primary pointer
-until the corresponding pointer-up event (even if the buttons change).
 At the time of a pointer-up event, if there is another pointer that is
-already down and is of the same kind, and that has either no buttons
-or only its primary button active, then that becomes the new primary
-pointer.
+already down, captured by the same element, and is of the same kind,
+and that has either no buttons or only its primary button active, then
+that becomes the new primary pointer for that element before the
+pointer-up event is sent. Otherwise, the primary pointer stops being
+primary just after the pointer-up.
+
+Nothing special happens when a capturing target moves in the DOM.
+
+The x and y position of an -up or -down event always match those of
+the previous -moved or -added event, so their dx and dy are always 0.
 
 
 These events all bubble and their data is an object with the following
@@ -112,6 +127,12 @@ fields:
 
               y: y-position relative to the top-left corner of the
                  surface of the node on which the event was fired
+
+             dx: difference in x-position since last pointer-moved
+                 event
+
+             dy: difference in y-position since last pointer-moved
+                 event
 
         buttons: a bitfield of the buttons pressed, from the following
                  list:
@@ -145,21 +166,11 @@ fields:
                  between pointer-down and pointer-up events)
 
         primary: true if this is a primary pointer/touch (see above)
+                 can only be set for pointer-moved and pointer-up
 
        obscured: true if the system was rendering another view on top
                  of the sky application at the time of the event (this
                  is intended to enable click-jacking protections)
-
-
-When primary is true, the following fields are available:
-
-             dx: if primary, then this is the delta from the
-                 x-position at the time that the pointer became
-                 primary.
-
-             dy: if primary, then this is the delta from the
-                 x-position at the time that the pointer became
-                 primary.
 
 
 When down is true:
