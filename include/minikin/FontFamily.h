@@ -141,7 +141,8 @@ public:
     MinikinFont* getFont(size_t index) const;
     FontStyle getStyle(size_t index) const;
 
-    // Get Unicode coverage. Lifetime of returned bitset is same as receiver.
+    // Get Unicode coverage. Lifetime of returned bitset is same as receiver. May return nullptr on
+    // error.
     const SparseBitSet* getCoverage();
 private:
     void addFontLocked(MinikinFont* typeface, FontStyle style);
