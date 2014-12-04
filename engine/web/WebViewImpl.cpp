@@ -76,7 +76,6 @@
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
-#include "sky/engine/platform/weborigin/SchemeRegistry.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebFloatPoint.h"
 #include "sky/engine/public/platform/WebGestureCurve.h"
@@ -1353,11 +1352,6 @@ void WebViewImpl::setIsActive(bool active)
 bool WebViewImpl::isActive() const
 {
     return page() ? page()->focusController().isActive() : false;
-}
-
-void WebViewImpl::setDomainRelaxationForbidden(bool forbidden, const WebString& scheme)
-{
-    SchemeRegistry::setDomainRelaxationForbiddenForURLScheme(forbidden, String(scheme));
 }
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)

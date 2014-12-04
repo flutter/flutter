@@ -135,7 +135,6 @@ source_set("web_headers") {
     "web/WebScriptBindings.h",
     "web/WebScriptController.h",
     "web/WebScriptSource.h",
-    "web/WebSecurityPolicy.h",
     "web/WebSettings.h",
     "web/WebSpellCheckClient.h",
     "web/WebTestingSupport.h",

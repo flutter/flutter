@@ -606,8 +606,6 @@ component("platform") {
     "weborigin/KURLHash.h",
     "weborigin/Referrer.h",
     "weborigin/ReferrerPolicy.h",
-    "weborigin/SchemeRegistry.cpp",
-    "weborigin/SchemeRegistry.h",
     "weborigin/SecurityPolicy.cpp",
     "weborigin/SecurityPolicy.h",
     "WebThread.cpp",

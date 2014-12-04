@@ -79,7 +79,6 @@ component("web") {
     "WebScopedUserGesture.cpp",
     "WebScriptBindings.cpp",
     "WebScriptController.cpp",
-    "WebSecurityPolicy.cpp",
     "WebSettingsImpl.cpp",
     "WebSettingsImpl.h",
     "WebTextCheckingCompletionImpl.cpp",

@@ -114,7 +114,6 @@ public:
     virtual void setTabKeyCyclesThroughElements(bool value) override;
     virtual bool isActive() const override;
     virtual void setIsActive(bool value) override;
-    virtual void setDomainRelaxationForbidden(bool, const WebString& scheme) override;
     virtual WebFrame* mainFrame() override;
     virtual WebFrame* focusedFrame() override;
     virtual void setFocusedFrame(WebFrame*) override;
