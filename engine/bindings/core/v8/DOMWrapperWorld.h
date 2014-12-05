@@ -144,7 +144,6 @@ private:
     void registerDOMObjectHolderInternal(PassOwnPtr<DOMObjectHolderBase>);
     void unregisterDOMObjectHolder(DOMObjectHolderBase*);
 
-    static unsigned isolatedWorldCount;
     static DOMWrapperWorld* worldOfInitializingWindow;
 
     bool m_isFakeWorld;
