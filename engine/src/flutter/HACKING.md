@@ -5,12 +5,6 @@ Building
 --------
 
 * Follow the setup & build instructions for [Mojo](https://github.com/domokit/mojo)
-* Build ``sky`` with ``ninja``, e.g. ``ninja -C out/Debug sky`` for a debug build.
-
-If you want to build release, run the following commands:
-
-* ``gn gen out/Release --args="is_debug=false"``
-* ``ninja -C out/Release sky``
 
 Running applications
 --------------------

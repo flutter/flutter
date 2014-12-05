@@ -9,7 +9,6 @@ group("sky") {
   testonly = true
 
   deps = [
-    "//mojo",
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
