@@ -1092,8 +1092,10 @@ class Port(object):
         return True
 
     def server_command_line(self):
+        path = (self._options.path_to_server or
+            self.path_from_chromium_base('out', 'downloads', 'sky_server'))
         return [
-            self.path_to_script('sky_server'),
+            path,
             '-t', self.get_option('configuration'),
             self.path_from_chromium_base(),
             '8000',
@@ -1104,6 +1106,7 @@ class Port(object):
 
         Ports can stub this out if they don't need a web server to be running."""
         assert not self._http_server, 'Already running an http server.'
+        subprocess.call(self.path_to_script('download_sky_server'))
         self._http_server = subprocess.Popen(self.server_command_line())
 
     def start_websocket_server(self):

@@ -1,0 +1,19 @@
+sky_server instructions
+#######################
+
+Building locally:
+1. cd sky/tools/skygo
+2. go build sky_server.go
+
+Testing locally:
+1. Build as per the above steps
+2. Run test_sky --path-to-server /absolute/path/to/sky/tools/skygo/sky_server
+
+Uploading the locally built server
+1. cd sky/tools/skygo
+2. upload_to_google_storage.py --bucket mojo sky_server
+
+upload_to_google_storage.py is in depot_tools. It will overwrite
+sky_server.sha1. Include that change in your code review.
+
+sky_server was last built using go version go1.3 linux/amd64.

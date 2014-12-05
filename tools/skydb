@@ -50,8 +50,10 @@ class SkyDebugger(object):
                 'Port %s already in use, assuming custom sky_server started.' %
                 HTTP_PORT)
         else:
+            subprocess.call(os.path.join(self.paths.sky_tools_directory,
+                'download_sky_server'))
             server_command = [
-                os.path.join(self.paths.sky_tools_directory, 'sky_server'),
+                os.path.join(self.paths.src_root, 'out', 'downloads', 'sky_server'),
                 '-t', configuration,
                 server_root,
                 str(HTTP_PORT),

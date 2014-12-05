@@ -267,6 +267,8 @@ def parse_args(args):
             help="Enable the leak detection of DOM objects."),
         optparse.make_option("--enable-sanitizer", action="store_true",
             help="Only alert on sanitizer-related errors and crashes"),
+        optparse.make_option("--path-to-server", action="store",
+            help="Path to a locally build sky_server executable."),
     ]))
 
     option_group_definitions.append(("Miscellaneous Options", [
