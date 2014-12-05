@@ -442,7 +442,7 @@ class Manager(object):
 
         _log.debug("Uploading JSON files for builder: %s", self._options.builder_name)
         attrs = [("builder", self._options.builder_name),
-                 ("testtype", "mojob test"),
+                 ("testtype", "Sky tests"),
                  ("master", self._options.master_name)]
 
         files = [(file, self._filesystem.join(self._results_directory, file)) for file in ["failing_results.json", "full_results.json", "times_ms.json"]]
