@@ -69,8 +69,10 @@ class PerfHarness(object):
         self.args = args
 
     def _start_server(self):
+        subprocess.call(os.path.join(self.paths.sky_tools_directory,
+            'download_sky_server'))
         return subprocess.Popen([
-            os.path.join(self.paths.sky_tools_directory, 'sky_server'),
+            os.path.join(self.paths.src_root, 'out', 'downloads', 'sky_server'),
             self.paths.src_root,
             str(HTTP_PORT),
             '-t', self.args.configuration
