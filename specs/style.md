@@ -262,9 +262,22 @@ partial class Element {
 
 class StyleDeclarationList {
   constructor ();
-  void add(StyleDeclaration styles, String? pseudoElement = null); // O(1) // in debug mode, throws if the dictionary has any properties that aren't registered
-  void remove(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
-  // TODO(ianh): Need to support inserting rules preserving order somehow
+
+  // There are two batches of styles in a StyleDeclarationList.
+
+  // The first batch is the per-frame styles. These get cleared each
+  // frame, after which all the matching rules in relevant <style> blocks
+  // get added back in, followed by all the animation-derived rules.
+  // Scripts can add styles themselves.
+  void addFrameStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
+  void clearFrameStyles();
+
+  // The second batch is the persistent styles.
+  // Once added, they remain forever until removed.
+  void addPersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
+  void removePersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
+
+  // This returns all the frame styles followed by all the persistent styles, in insertion order.
   Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
@@ -324,9 +337,14 @@ node.ownerLayoutManager.release(node)
 ```
 
 ...to notify the layout manager that the node went away, then set the
-node's layoutManager and ownerLayoutManager attributes to null.
+node's ownerLayoutManager attribute to null.
 
 ```javascript
+partial class Element {
+  readonly attribute StyleNode? layout; // TODO(ianh): come up with a better name (sadly "style" is taken)
+   // this will be null until the first time it is rendered
+}
+
 callback any ValueResolver (any value, String propertyName, StyleNode node, Float containerWidth, Float containerHeight);
 
 class StyleNode {
@@ -337,7 +355,10 @@ class StyleNode {
   readonly attribute Node? nextSibling;
 
   // access to the results of the cascade
+  // only works during layout and painting
   any getProperty(String name, String? pseudoElement = null);
+     // throw if this isn't during layout or painting
+     //   TODO(ianh): if the implementation of this does allow it to be queried the rest of the time too, relax this constraint
      // looking at the declarations for the given pseudoElement:
      // if there's a cached value, return it
      // otherwise, if there's an applicable ParsedValue, then
