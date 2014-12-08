@@ -46,13 +46,12 @@ class RenderObject;
  * (tx|ty) is the calculated position of the parent
  */
 struct PaintInfo {
-    PaintInfo(GraphicsContext* newContext, const IntRect& newRect, PaintPhase newPhase, PaintBehavior newPaintBehavior,
+    PaintInfo(GraphicsContext* newContext, const IntRect& newRect, PaintPhase newPhase,
         RenderObject* newPaintingRoot = 0, ListHashSet<RenderInline*>* newOutlineObjects = 0,
         const RenderLayerModelObject* newPaintContainer = 0)
         : context(newContext)
         , rect(newRect)
         , phase(newPhase)
-        , paintBehavior(newPaintBehavior)
         , paintingRoot(newPaintingRoot)
         , m_paintContainer(newPaintContainer)
         , m_outlineObjects(newOutlineObjects)
@@ -102,7 +101,6 @@ struct PaintInfo {
     GraphicsContext* context;
     IntRect rect;
     PaintPhase phase;
-    PaintBehavior paintBehavior;
     RenderObject* paintingRoot; // used to draw just one element and its visual kids
 
 private:

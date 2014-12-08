@@ -51,13 +51,6 @@ enum PaintPhase {
     PaintPhaseClippingMask,
 };
 
-// FIXME(sky): Remove this enum now that it's unused.
-enum PaintBehaviorFlags {
-    PaintBehaviorNormal = 0,
-};
-
-typedef unsigned PaintBehavior;
-
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_PAINTPHASE_H_

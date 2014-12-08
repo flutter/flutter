@@ -312,23 +312,6 @@ void LocalFrame::removeSpellingMarkersUnderWords(const Vector<String>& words)
     spellChecker().removeSpellingMarkersUnderWords(words);
 }
 
-struct ScopedFramePaintingState {
-    ScopedFramePaintingState(LocalFrame* frame)
-        : frame(frame)
-        , paintBehavior(frame->view()->paintBehavior())
-    {
-    }
-
-    ~ScopedFramePaintingState()
-    {
-        frame->view()->setPaintBehavior(paintBehavior);
-        frame->view()->setNodeToDraw(0);
-    }
-
-    LocalFrame* frame;
-    PaintBehavior paintBehavior;
-};
-
 double LocalFrame::devicePixelRatio() const
 {
     if (!m_host)

@@ -272,7 +272,7 @@ TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOr
     return *m_transform;
 }
 
-TransformationMatrix RenderLayer::renderableTransform(PaintBehavior paintBehavior) const
+TransformationMatrix RenderLayer::renderableTransform() const
 {
     return m_transform ? *m_transform : TransformationMatrix();
 }
@@ -567,10 +567,10 @@ enum TransparencyClipBoxMode {
     RootOfTransparencyClipBox
 };
 
-static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* rootLayer, TransparencyClipBoxBehavior, TransparencyClipBoxMode, const LayoutSize& subPixelAccumulation, PaintBehavior = 0);
+static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* rootLayer, TransparencyClipBoxBehavior, TransparencyClipBoxMode, const LayoutSize& subPixelAccumulation);
 
 static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, const RenderLayer* layer, const RenderLayer* rootLayer,
-    TransparencyClipBoxBehavior transparencyBehavior, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
+    TransparencyClipBoxBehavior transparencyBehavior, const LayoutSize& subPixelAccumulation)
 {
     // If we have a mask, then the clip is limited to the border box area (and there is
     // no need to examine child layers).
@@ -578,18 +578,18 @@ static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, cons
         // Note: we don't have to walk z-order lists since transparent elements always establish
         // a stacking container. This means we can just walk the layer tree directly.
         for (RenderLayer* curr = layer->firstChild(); curr; curr = curr->nextSibling())
-            clipRect.unite(transparencyClipBox(curr, rootLayer, transparencyBehavior, DescendantsOfTransparencyClipBox, subPixelAccumulation, paintBehavior));
+            clipRect.unite(transparencyClipBox(curr, rootLayer, transparencyBehavior, DescendantsOfTransparencyClipBox, subPixelAccumulation));
     }
 }
 
 static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLayer* rootLayer, TransparencyClipBoxBehavior transparencyBehavior,
-    TransparencyClipBoxMode transparencyMode, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
+    TransparencyClipBoxMode transparencyMode, const LayoutSize& subPixelAccumulation)
 {
     // FIXME: Although this function completely ignores CSS-imposed clipping, we did already intersect with the
     // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
     // would be better to respect clips.
 
-    if (rootLayer != layer && ((transparencyBehavior == PaintingTransparencyClipBox && layer->paintsWithTransform(paintBehavior))
+    if (rootLayer != layer && ((transparencyBehavior == PaintingTransparencyClipBox && layer->paintsWithTransform())
         || (transparencyBehavior == HitTestingTransparencyClipBox && layer->hasTransform()))) {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to encompass
         // the transformed layer and all of its children.
@@ -606,37 +606,37 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
         // We don't use fragment boxes when collecting a transformed layer's bounding box, since it always
         // paints unfragmented.
         LayoutRect clipRect = layer->physicalBoundingBox(layer);
-        expandClipRectForDescendantsAndReflection(clipRect, layer, layer, transparencyBehavior, subPixelAccumulation, paintBehavior);
+        expandClipRectForDescendantsAndReflection(clipRect, layer, layer, transparencyBehavior, subPixelAccumulation);
         layer->renderer()->style()->filterOutsets().expandRect(clipRect);
         LayoutRect result = transform.mapRect(clipRect);
         return result;
     }
 
     LayoutRect clipRect = layer->physicalBoundingBox(rootLayer);
-    expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior, subPixelAccumulation, paintBehavior);
+    expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior, subPixelAccumulation);
     layer->renderer()->style()->filterOutsets().expandRect(clipRect);
     clipRect.move(subPixelAccumulation);
     return clipRect;
 }
 
-LayoutRect RenderLayer::paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
+LayoutRect RenderLayer::paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation)
 {
-    return intersection(transparencyClipBox(this, rootLayer, PaintingTransparencyClipBox, RootOfTransparencyClipBox, subPixelAccumulation, paintBehavior), paintDirtyRect);
+    return intersection(transparencyClipBox(this, rootLayer, PaintingTransparencyClipBox, RootOfTransparencyClipBox, subPixelAccumulation), paintDirtyRect);
 }
 
-void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior paintBehavior)
+void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation)
 {
     if (isTransparent() && m_usedTransparency)
         return;
 
     RenderLayer* ancestor = transparentPaintingAncestor();
     if (ancestor)
-        ancestor->beginTransparencyLayers(context, rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
+        ancestor->beginTransparencyLayers(context, rootLayer, paintDirtyRect, subPixelAccumulation);
 
     if (isTransparent()) {
         m_usedTransparency = true;
         context->save();
-        LayoutRect clipRect = paintingExtent(rootLayer, paintDirtyRect, subPixelAccumulation, paintBehavior);
+        LayoutRect clipRect = paintingExtent(rootLayer, paintDirtyRect, subPixelAccumulation);
         context->clip(clipRect);
 
         context->beginTransparencyLayer(renderer()->opacity());
@@ -864,18 +864,18 @@ bool RenderLayer::hasOverflowControls() const
     return m_scrollableArea && m_scrollableArea->hasScrollbar();
 }
 
-void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* paintingRoot, PaintLayerFlags paintFlags)
+void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot, PaintLayerFlags paintFlags)
 {
-    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), paintBehavior, LayoutSize(), paintingRoot);
+    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
     paintLayer(context, paintingInfo, paintFlags);
 }
 
-void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* paintingRoot)
+void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
 {
     if (!m_containsDirtyOverlayScrollbars)
         return;
 
-    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), paintBehavior, LayoutSize(), paintingRoot);
+    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
     paintLayer(context, paintingInfo, PaintLayerPaintingOverlayScrollbars);
 
     m_containsDirtyOverlayScrollbars = false;
@@ -959,8 +959,8 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
     if (!renderer()->opacity())
         return;
 
-    if (paintsWithTransform(paintingInfo.paintBehavior)) {
-        TransformationMatrix layerTransform = renderableTransform(paintingInfo.paintBehavior);
+    if (paintsWithTransform()) {
+        TransformationMatrix layerTransform = renderableTransform();
         // If the transform can't be inverted, then don't paint anything.
         if (!layerTransform.isInvertible())
             return;
@@ -969,9 +969,9 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
         // layer from the parent now, assuming there is a parent
         if (isTransparent()) {
             if (parent())
-                parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, paintingInfo.paintBehavior);
+                parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
             else
-                beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, paintingInfo.paintBehavior);
+                beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
         }
 
         // Make sure the parent's clip rects have been calculated.
@@ -1072,7 +1072,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
             if (deferredFiltersEnabled) {
                 if (haveTransparency) {
                     // If we have a filter and transparency, we have to eagerly start a transparency layer here, rather than risk a child layer lazily starts one after filter processing.
-                    beginTransparencyLayers(context, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, localPaintingInfo.paintBehavior);
+                    beginTransparencyLayers(context, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
                 }
                 // We'll handle clipping to the dirty rect before filter rasterization.
                 // Filter processing will automatically expand the clip rect and the offscreen to accommodate any filter outsets.
@@ -1098,7 +1098,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     if (filterPainter.hasStartedFilterEffect() && haveTransparency && !deferredFiltersEnabled) {
         // If we have a filter and transparency, we have to eagerly start a transparency layer here, rather than risk a child layer lazily starts one with the wrong context.
-        beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation, localPaintingInfo.paintBehavior);
+        beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
     }
 
     // If this layer's renderer is a child of the paintingRoot, we render unconditionally, which
@@ -1109,22 +1109,19 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     if (localPaintingInfo.paintingRoot && !renderer()->isDescendantOf(localPaintingInfo.paintingRoot))
         paintingRootForRenderer = localPaintingInfo.paintingRoot;
 
-    // FIXME(sky): Get rid of PaintBehavior argument now that it's always Normal.
-    PaintBehavior paintBehavior = PaintBehaviorNormal;
-
     if (shouldPaintContent) {
         paintBackgroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+            localPaintingInfo, paintingRootForRenderer, paintFlags);
     }
 
     paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
 
     if (shouldPaintContent) {
         paintForegroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+            localPaintingInfo, paintingRootForRenderer, paintFlags);
     }
 
-    paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+    paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
     paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
 
     if (isPaintingOverlayScrollbars)
@@ -1162,7 +1159,7 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext* context, const 
     LayoutPoint delta;
     convertToLayerCoords(paintingInfo.rootLayer, delta);
     delta.moveBy(translationOffset);
-    TransformationMatrix transform(renderableTransform(paintingInfo.paintBehavior));
+    TransformationMatrix transform(renderableTransform());
     IntPoint roundedDelta = roundedIntPoint(delta);
     transform.translateRight(roundedDelta.x(), roundedDelta.y());
     LayoutSize adjustedSubPixelAccumulation = paintingInfo.subPixelAccumulation + (delta - roundedDelta);
@@ -1175,7 +1172,7 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext* context, const 
     }
 
     // Now do a paint with the root layer shifted to be us.
-    LayerPaintingInfo transformedPaintingInfo(this, enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)), paintingInfo.paintBehavior,
+    LayerPaintingInfo transformedPaintingInfo(this, enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)),
         adjustedSubPixelAccumulation, paintingInfo.paintingRoot);
     paintLayerContents(context, transformedPaintingInfo, paintFlags);
 }
@@ -1218,7 +1215,7 @@ void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, cons
 }
 
 void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
-    const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
+    const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
     RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
@@ -1228,7 +1225,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 
         // Begin transparency layers lazily now that we know we have to paint something.
         if (haveTransparency)
-            beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation, localPaintingInfo.paintBehavior);
+            beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation);
 
         if (localPaintingInfo.clipToDirtyRect) {
             // Paint our background first, before painting any child layers.
@@ -1238,7 +1235,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 
         // Paint the background.
         // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseBlockBackground, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseBlockBackground, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (localPaintingInfo.clipToDirtyRect)
@@ -1247,7 +1244,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 }
 
 void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
-    const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
+    const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
     RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
 {
     // Begin transparency if we have something to paint.
@@ -1255,7 +1252,7 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
         for (size_t i = 0; i < layerFragments.size(); ++i) {
             const LayerFragment& fragment = layerFragments.at(i);
             if (fragment.shouldPaintContent && !fragment.foregroundRect.isEmpty()) {
-                beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation, localPaintingInfo.paintBehavior);
+                beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation);
                 break;
             }
         }
@@ -1269,16 +1266,16 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
     // We have to loop through every fragment multiple times, since we have to issue paint invalidations in each specific phase in order for
     // interleaving of the fragments to work properly.
     paintForegroundForFragmentsWithPhase(PaintPhaseChildBlockBackgrounds, layerFragments,
-        context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
-    paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
-    paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintBehavior, paintingRootForRenderer, paintFlags);
+        context, localPaintingInfo, paintingRootForRenderer, paintFlags);
+    paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
+    paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
 
     if (shouldClip)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerFragments[0].foregroundRect);
 }
 
 void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const LayerFragments& layerFragments, GraphicsContext* context,
-    const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior, RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    const LayerPaintingInfo& localPaintingInfo, RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
 {
     bool shouldClip = localPaintingInfo.clipToDirtyRect && layerFragments.size() > 1;
 
@@ -1290,7 +1287,7 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
         if (shouldClip)
             clipToRect(localPaintingInfo, context, fragment.foregroundRect, paintFlags);
 
-        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.foregroundRect.rect()), phase, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.foregroundRect.rect()), phase, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (shouldClip)
@@ -1299,7 +1296,7 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
 }
 
 void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments, GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    PaintBehavior paintBehavior, RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
         const LayerFragment& fragment = layerFragments.at(i);
@@ -1307,7 +1304,7 @@ void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments,
             continue;
 
         // Paint our own outline
-        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.outlineRect.rect()), PaintPhaseSelfOutline, paintBehavior, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.outlineRect.rect()), PaintPhaseSelfOutline, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         clipToRect(localPaintingInfo, context, fragment.outlineRect, paintFlags, DoNotIncludeSelfForBorderRadius);
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
         restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.outlineRect);
@@ -1327,7 +1324,7 @@ void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, Gr
 
         // Paint the mask.
         // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseMask, PaintBehaviorNormal, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+        PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.backgroundRect.rect()), PaintPhaseMask, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
 
         if (localPaintingInfo.clipToDirtyRect)
@@ -1883,7 +1880,7 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     if (isRootLayer())
         return m_renderer->view()->unscaledDocumentRect();
 
-    const bool shouldIncludeTransform = paintsWithTransform(PaintBehaviorNormal) || (options == ApplyBoundsChickenEggHacks && transform());
+    const bool shouldIncludeTransform = paintsWithTransform() || (options == ApplyBoundsChickenEggHacks && transform());
 
     LayoutRect localClipRect = clipper().localClipRect();
     if (localClipRect != PaintInfo::infiniteRect()) {
@@ -1917,7 +1914,7 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     return result;
 }
 
-bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
+bool RenderLayer::paintsWithTransform() const
 {
     // FIXME(sky): Remove
     return transform();
@@ -1935,7 +1932,7 @@ bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect)
         return false;
 
     // FIXME: Handle simple transforms.
-    if (paintsWithTransform(PaintBehaviorNormal))
+    if (paintsWithTransform())
         return false;
 
     // FIXME: Remove this check.

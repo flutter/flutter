@@ -118,7 +118,7 @@ public:
 
     bool isTransparent() const { return renderer()->isTransparent() || renderer()->hasMask(); }
     RenderLayer* transparentPaintingAncestor();
-    void beginTransparencyLayers(GraphicsContext*, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior);
+    void beginTransparencyLayers(GraphicsContext*, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation);
 
     const RenderLayer* root() const
     {
@@ -182,10 +182,10 @@ public:
     // front.  The hitTest method looks for mouse events by walking
     // layers that intersect the point from front to back.
     // paint() assumes that the caller will clip to the bounds of damageRect if necessary.
-    void paint(GraphicsContext*, const LayoutRect& damageRect, PaintBehavior = PaintBehaviorNormal, RenderObject* paintingRoot = 0, PaintLayerFlags = 0);
+    void paint(GraphicsContext*, const LayoutRect& damageRect, RenderObject* paintingRoot = 0, PaintLayerFlags = 0);
     bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
-    void paintOverlayScrollbars(GraphicsContext*, const LayoutRect& damageRect, PaintBehavior, RenderObject* paintingRoot = 0);
+    void paintOverlayScrollbars(GraphicsContext*, const LayoutRect& damageRect, RenderObject* paintingRoot = 0);
 
     // Pass offsetFromRoot if known.
     bool intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot = 0) const;
@@ -223,7 +223,7 @@ public:
     // resulting transform has transform-origin baked in. If the layer does not have a transform,
     // returns the identity matrix.
     TransformationMatrix currentTransform(RenderStyle::ApplyTransformOrigin = RenderStyle::IncludeTransformOrigin) const;
-    TransformationMatrix renderableTransform(PaintBehavior) const;
+    TransformationMatrix renderableTransform() const;
 
     // Get the perspective transform, which is applied to transformed sublayers.
     // Returns true if the layer has a -webkit-perspective.
@@ -256,7 +256,7 @@ public:
     // Computes the bounding paint invalidation rect for |renderObject|, in the coordinate space of |paintInvalidationContainer|'s GraphicsLayer backing.
     static LayoutRect computePaintInvalidationRect(const RenderObject*, const RenderLayer* paintInvalidationContainer, const PaintInvalidationState* = 0);
 
-    bool paintsWithTransform(PaintBehavior) const;
+    bool paintsWithTransform() const;
 
     // Returns true if background phase is painted opaque in the given rect.
     // The query rect is given in local coordinates.
@@ -463,12 +463,12 @@ private:
         const LayoutSize& subPixelAccumulation = LayoutSize(), const LayoutRect* layerBoundingBox = 0);
     void updatePaintingInfoForFragments(LayerFragments&, const LayerPaintingInfo&, PaintLayerFlags, bool shouldPaintContent, const LayoutPoint* offsetFromRoot);
     void paintBackgroundForFragments(const LayerFragments&, GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, PaintBehavior, RenderObject* paintingRootForRenderer, PaintLayerFlags);
+        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
     void paintForegroundForFragments(const LayerFragments&, GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, PaintBehavior, RenderObject* paintingRootForRenderer,
+        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         PaintLayerFlags);
-    void paintForegroundForFragmentsWithPhase(PaintPhase, const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, PaintBehavior, RenderObject* paintingRootForRenderer, PaintLayerFlags);
-    void paintOutlineForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, PaintBehavior, RenderObject* paintingRootForRenderer, PaintLayerFlags);
+    void paintForegroundForFragmentsWithPhase(PaintPhase, const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
+    void paintOutlineForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
     void paintOverflowControlsForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
     void paintMaskForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
     void paintChildClippingMaskForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
@@ -513,7 +513,7 @@ private:
 
     void updateOrRemoveFilterClients();
 
-    LayoutRect paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation, PaintBehavior);
+    LayoutRect paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation);
 
     LayerType m_layerType;
 

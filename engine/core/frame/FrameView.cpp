@@ -126,7 +126,6 @@ void FrameView::reset()
     m_isTrackingPaintInvalidations = false;
     m_trackedPaintInvalidationRects.clear();
     m_lastPaintTime = 0;
-    m_paintBehavior = PaintBehaviorNormal;
     m_isPainting = false;
 }
 
@@ -812,11 +811,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     s_inPaintContents = true;
 
     FontCachePurgePreventer fontCachePurgePreventer;
-
-    PaintBehavior oldPaintBehavior = m_paintBehavior; // FIXME(sky): is this needed?
-
-    if (m_paintBehavior == PaintBehaviorNormal)
-        document->markers().invalidateRenderedRectsForMarkersInRect(rect);
+    document->markers().invalidateRenderedRectsForMarkersInRect(rect);
 
     ASSERT(!m_isPainting);
     m_isPainting = true;
@@ -830,14 +825,12 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     RenderObject::SetLayoutNeededForbiddenScope forbidSetNeedsLayout(*rootLayer->renderer());
 #endif
 
-    rootLayer->paint(p, rect, m_paintBehavior, renderer);
+    rootLayer->paint(p, rect, renderer);
 
     if (rootLayer->containsDirtyOverlayScrollbars())
-        rootLayer->paintOverlayScrollbars(p, rect, m_paintBehavior, renderer);
+        rootLayer->paintOverlayScrollbars(p, rect, renderer);
 
     m_isPainting = false;
-
-    m_paintBehavior = oldPaintBehavior;
     m_lastPaintTime = currentTime();
 
     if (isTopLevelPainter) {
@@ -846,16 +839,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
         s_currentFrameTimeStamp = currentTime();
         s_inPaintContents = false;
     }
-}
-
-void FrameView::setPaintBehavior(PaintBehavior behavior)
-{
-    m_paintBehavior = behavior;
-}
-
-PaintBehavior FrameView::paintBehavior() const
-{
-    return m_paintBehavior;
 }
 
 bool FrameView::isPainting() const

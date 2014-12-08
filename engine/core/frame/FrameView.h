@@ -138,8 +138,6 @@ public:
     void paint(GraphicsContext* context, const IntRect& rect) override;
 
     void paintContents(GraphicsContext*, const IntRect& damageRect);
-    void setPaintBehavior(PaintBehavior);
-    PaintBehavior paintBehavior() const;
     bool isPainting() const;
     bool hasEverPainted() const { return m_lastPaintTime; }
     void setNodeToDraw(Node*);
@@ -284,7 +282,6 @@ private:
     Vector<IntRect> m_trackedPaintInvalidationRects;
 
     RefPtr<Node> m_nodeToDraw;
-    PaintBehavior m_paintBehavior;
     bool m_isPainting;
 
     OwnPtr<ScrollableAreaSet> m_scrollableAreas;

@@ -61,20 +61,17 @@ typedef unsigned PaintLayerFlags;
 
 struct LayerPaintingInfo {
     LayerPaintingInfo(RenderLayer* inRootLayer, const LayoutRect& inDirtyRect,
-        PaintBehavior inPaintBehavior, const LayoutSize& inSubPixelAccumulation,
-        RenderObject* inPaintingRoot = 0)
+        const LayoutSize& inSubPixelAccumulation, RenderObject* inPaintingRoot = 0)
         : rootLayer(inRootLayer)
         , paintingRoot(inPaintingRoot)
         , paintDirtyRect(inDirtyRect)
         , subPixelAccumulation(inSubPixelAccumulation)
-        , paintBehavior(inPaintBehavior)
         , clipToDirtyRect(true)
     { }
     RenderLayer* rootLayer;
     RenderObject* paintingRoot; // only paint descendants of this object
     LayoutRect paintDirtyRect; // relative to rootLayer;
     LayoutSize subPixelAccumulation;
-    PaintBehavior paintBehavior;
     bool clipToDirtyRect;
 };
 
