@@ -270,10 +270,7 @@ class Port(object):
 
     def default_child_processes(self):
         """Return the number of drivers to use for this port."""
-        # FIXME: See if we can reduce the denominator here without causing timeouts.
-        # Maybe we need to run one sky_shell process and multiple sky_viewers
-        # instead of multiple sky_shells
-        return int(math.ceil(float(self._executive.cpu_count()) / 4))
+        return self._executive.cpu_count()
 
     def default_max_locked_shards(self):
         """Return the number of "locked" shards to run in parallel (like the http tests)."""
