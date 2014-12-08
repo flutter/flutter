@@ -69,12 +69,6 @@ void ProfilingCanvas::setTimings(Vector<double>* timings)
     m_timings = timings;
 }
 
-void ProfilingCanvas::clear(SkColor color)
-{
-    AutoStamper stamper(this);
-    this->SkCanvas::clear(color);
-}
-
 void ProfilingCanvas::drawPaint(const SkPaint& paint)
 {
     AutoStamper stamper(this);

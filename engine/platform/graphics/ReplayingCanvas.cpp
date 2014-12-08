@@ -83,12 +83,6 @@ bool ReplayingCanvas::abortDrawing()
     return m_abortDrawing;
 }
 
-void ReplayingCanvas::clear(SkColor color)
-{
-    AutoReplayer replayer(this);
-    this->SkCanvas::clear(color);
-}
-
 void ReplayingCanvas::drawPaint(const SkPaint& paint)
 {
     AutoReplayer replayer(this);

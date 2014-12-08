@@ -40,7 +40,6 @@ public:
     InterceptingCanvas(SkBitmap bitmap) : SkCanvas(bitmap), m_depthCount(0) { };
     InterceptingCanvas(int width, int height) : SkCanvas(width, height), m_depthCount(0) { };
 
-    virtual void clear(SkColor) override = 0;
     virtual void drawPaint(const SkPaint&) override = 0;
     virtual void drawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override = 0;
     virtual void drawRect(const SkRect&, const SkPaint&) override = 0;

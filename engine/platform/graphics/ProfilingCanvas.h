@@ -41,7 +41,6 @@ public:
     ProfilingCanvas(SkBitmap);
     void setTimings(Vector<double>*);
 
-    virtual void clear(SkColor) override;
     virtual void drawPaint(const SkPaint&) override;
     virtual void drawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
     virtual void drawRect(const SkRect&, const SkPaint&) override;

@@ -84,13 +84,6 @@ LoggingCanvas::LoggingCanvas(int width, int height) : InterceptingCanvas(width, 
     m_log = JSONArray::create();
 }
 
-void LoggingCanvas::clear(SkColor color)
-{
-    AutoLogger logger(this);
-    logger.logItemWithParams("clear")->setString("color", stringForSkColor(color));
-    this->SkCanvas::clear(color);
-}
-
 void LoggingCanvas::drawPaint(const SkPaint& paint)
 {
     AutoLogger logger(this);

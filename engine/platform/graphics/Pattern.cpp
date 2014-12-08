@@ -30,7 +30,6 @@
 
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColorShader.h"
 #include "v8/include/v8.h"
 
 namespace blink {
@@ -64,7 +63,7 @@ SkShader* Pattern::shader()
 
     // If we don't have a bitmap, return a transparent shader.
     if (!m_tileImage) {
-        m_pattern = adoptRef(new SkColorShader(SK_ColorTRANSPARENT));
+        m_pattern = adoptRef(SkShader::CreateColorShader(SK_ColorTRANSPARENT));
     } else if (m_repeatMode == RepeatModeXY) {
         m_pattern = adoptRef(SkShader::CreateBitmapShader(m_tileImage->bitmap(),
             SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));

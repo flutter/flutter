@@ -32,7 +32,6 @@
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkColorShader.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
@@ -260,7 +259,7 @@ SkShader* Gradient::shader()
 
     if (!m_gradient) {
         // use last color, since our "geometry" was degenerate (e.g. radius==0)
-        m_gradient = adoptRef(new SkColorShader(colors[countUsed - 1]));
+        m_gradient = adoptRef(SkShader::CreateColorShader(colors[countUsed - 1]));
     }
     return m_gradient.get();
 }
