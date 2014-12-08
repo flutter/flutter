@@ -655,7 +655,7 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
     // stacking context.  (See Appendix E.2, section 7.2.1.4 on
     // inline block/table/replaced elements in the CSS2.1 specification.)
     // This is also used by other elements (e.g. flex items).
-    bool preservePhase = paintInfo.phase == PaintPhaseSelection || paintInfo.phase == PaintPhaseTextClip;
+    bool preservePhase = paintInfo.phase == PaintPhaseSelection;
     PaintInfo info(paintInfo);
     info.phase = preservePhase ? paintInfo.phase : PaintPhaseBlockBackground;
     renderer->paint(info, childPoint);

@@ -502,7 +502,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
         return;
 
     // Determine whether or not we're selected.
-    bool haveSelection = paintInfo.phase != PaintPhaseTextClip && selectionState() != RenderObject::SelectionNone;
+    bool haveSelection = selectionState() != RenderObject::SelectionNone;
     if (!haveSelection && paintInfo.phase == PaintPhaseSelection)
         // When only painting the selection, don't bother to paint if there is none.
         return;
@@ -549,7 +549,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection
     // and composition highlights.
-    if (paintInfo.phase != PaintPhaseSelection && paintInfo.phase != PaintPhaseTextClip) {
+    if (paintInfo.phase != PaintPhaseSelection) {
         if (containsComposition) {
             paintCompositionBackgrounds(context, boxOrigin, styleToUse, font, useCustomUnderlines);
         }
