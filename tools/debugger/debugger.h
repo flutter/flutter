@@ -62,7 +62,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   void Create(mojo::ApplicationConnection* connection,
               mojo::InterfaceRequest<Debugger> request) override;
 
-  scoped_ptr<mojo::WindowManagerApp> window_manager_app_;
+  scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
   mojo::ViewManager* view_manager_;
   mojo::View* root_;
