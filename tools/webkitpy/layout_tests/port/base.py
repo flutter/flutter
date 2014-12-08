@@ -1159,7 +1159,17 @@ class Port(object):
     def test_configuration(self):
         """Returns the current TestConfiguration for the port."""
         if not self._test_configuration:
-            self._test_configuration = TestConfiguration(self._version, self._architecture, self._options.configuration.lower())
+            gn_args = self._executive.run_command([
+                'gn', 'args',
+                self._build_path_with_configuration(self._options.configuration),
+                '--list', '--short'])
+
+            if 'is_debug = true' in gn_args:
+                configuration = 'debug'
+            else:
+                configuration = 'release'
+
+            self._test_configuration = TestConfiguration(self._version, self._architecture, configuration)
         return self._test_configuration
 
     # FIXME: Belongs on a Platform object.
