@@ -864,10 +864,10 @@ bool RenderLayer::hasOverflowControls() const
     return m_scrollableArea && m_scrollableArea->hasScrollbar();
 }
 
-void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot, PaintLayerFlags paintFlags)
+void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
 {
     LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
-    paintLayer(context, paintingInfo, paintFlags);
+    paintLayer(context, paintingInfo, PaintContent);
 }
 
 void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
@@ -876,7 +876,7 @@ void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutR
         return;
 
     LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
-    paintLayer(context, paintingInfo, PaintLayerPaintingOverlayScrollbars);
+    paintLayer(context, paintingInfo, PaintOverlayScrollbars);
 
     m_containsDirtyOverlayScrollbars = false;
 }
@@ -896,7 +896,7 @@ static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLaye
 }
 
 void RenderLayer::clipToRect(const LayerPaintingInfo& localPaintingInfo, GraphicsContext* context, const ClipRect& clipRect,
-    PaintLayerFlags paintFlags, BorderRadiusClippingRule rule)
+    BorderRadiusClippingRule rule)
 {
     if (clipRect.rect() == localPaintingInfo.paintDirtyRect && !clipRect.hasRadius())
         return;
@@ -982,7 +982,7 @@ void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& 
             clipRect.intersect(paintingInfo.paintDirtyRect);
 
             // Push the parent coordinate space's clip.
-            parent()->clipToRect(paintingInfo, context, clipRect, paintFlags);
+            parent()->clipToRect(paintingInfo, context, clipRect);
         }
 
         paintLayerByApplyingTransform(context, paintingInfo, paintFlags);
@@ -1048,9 +1048,9 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     collectFragments(layerFragments, localPaintingInfo.rootLayer, localPaintingInfo.paintDirtyRect,
         PaintingClipRects, &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
 
-    bool isPaintingOverlayScrollbars = paintFlags & PaintLayerPaintingOverlayScrollbars;
+    bool isPaintingOverlayScrollbars = paintFlags == PaintOverlayScrollbars;
     bool shouldPaintContent = isSelfPaintingLayer() && !isPaintingOverlayScrollbars;
-    updatePaintingInfoForFragments(layerFragments, localPaintingInfo, paintFlags, shouldPaintContent, &offsetFromRoot);
+    updatePaintingInfoForFragments(layerFragments, localPaintingInfo, shouldPaintContent, &offsetFromRoot);
 
     bool haveTransparency = isTransparent();
 
@@ -1078,7 +1078,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
                 // Filter processing will automatically expand the clip rect and the offscreen to accommodate any filter outsets.
                 // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
                 ClipRect backgroundRect = layerFragments.isEmpty() ? ClipRect() : layerFragments[0].backgroundRect;
-                clipToRect(localPaintingInfo, context, backgroundRect, paintFlags);
+                clipToRect(localPaintingInfo, context, backgroundRect);
                 // Subsequent code should not clip to the dirty rect, since we've already
                 // done it above, and doing it later will defeat the outsets.
                 localPaintingInfo.clipToDirtyRect = false;
@@ -1111,28 +1111,28 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     if (shouldPaintContent) {
         paintBackgroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintingRootForRenderer, paintFlags);
+            localPaintingInfo, paintingRootForRenderer);
     }
 
     paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
 
     if (shouldPaintContent) {
         paintForegroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintingRootForRenderer, paintFlags);
+            localPaintingInfo, paintingRootForRenderer);
     }
 
-    paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
+    paintOutlineForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer);
     paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
 
     if (isPaintingOverlayScrollbars)
-        paintOverflowControlsForFragments(layerFragments, context, localPaintingInfo, paintFlags);
+        paintOverflowControlsForFragments(layerFragments, context, localPaintingInfo);
 
     if (filterPainter.hasStartedFilterEffect()) {
         // Apply the correct clipping (ie. overflow: hidden).
         // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
         ClipRect backgroundRect = layerFragments.isEmpty() ? ClipRect() : layerFragments[0].backgroundRect;
         if (!deferredFiltersEnabled)
-            clipToRect(localPaintingInfo, transparencyLayerContext, backgroundRect, paintFlags);
+            clipToRect(localPaintingInfo, transparencyLayerContext, backgroundRect);
 
         context = filterPainter.applyFilterEffect();
         restoreClip(transparencyLayerContext, localPaintingInfo.paintDirtyRect, backgroundRect);
@@ -1142,7 +1142,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     ASSERT(transparencyLayerContext == context);
 
     if (shouldPaintContent && renderer()->hasMask())
-        paintMaskForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
+        paintMaskForFragments(layerFragments, context, localPaintingInfo, paintingRootForRenderer);
 
     // End our transparency layer
     if (haveTransparency && m_usedTransparency) {
@@ -1203,7 +1203,7 @@ void RenderLayer::collectFragments(LayerFragments& fragments, const RenderLayer*
     fragments.append(fragment);
 }
 
-void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, const LayerPaintingInfo& localPaintingInfo, PaintLayerFlags localPaintFlags,
+void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, const LayerPaintingInfo& localPaintingInfo,
     bool shouldPaintContent, const LayoutPoint* offsetFromRoot)
 {
     ASSERT(offsetFromRoot);
@@ -1216,7 +1216,7 @@ void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, cons
 
 void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
         const LayerFragment& fragment = layerFragments.at(i);
@@ -1230,7 +1230,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
         if (localPaintingInfo.clipToDirtyRect) {
             // Paint our background first, before painting any child layers.
             // Establish the clip used to paint our background.
-            clipToRect(localPaintingInfo, context, fragment.backgroundRect, paintFlags, DoNotIncludeSelfForBorderRadius); // Background painting will handle clipping to self.
+            clipToRect(localPaintingInfo, context, fragment.backgroundRect, DoNotIncludeSelfForBorderRadius); // Background painting will handle clipping to self.
         }
 
         // Paint the background.
@@ -1245,7 +1245,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 
 void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragments, GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer)
 {
     // Begin transparency if we have something to paint.
     if (haveTransparency) {
@@ -1261,21 +1261,21 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
     // Optimize clipping for the single fragment case.
     bool shouldClip = localPaintingInfo.clipToDirtyRect && layerFragments.size() == 1 && layerFragments[0].shouldPaintContent && !layerFragments[0].foregroundRect.isEmpty();
     if (shouldClip)
-        clipToRect(localPaintingInfo, context, layerFragments[0].foregroundRect, paintFlags);
+        clipToRect(localPaintingInfo, context, layerFragments[0].foregroundRect);
 
     // We have to loop through every fragment multiple times, since we have to issue paint invalidations in each specific phase in order for
     // interleaving of the fragments to work properly.
     paintForegroundForFragmentsWithPhase(PaintPhaseChildBlockBackgrounds, layerFragments,
-        context, localPaintingInfo, paintingRootForRenderer, paintFlags);
-    paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
-    paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintingRootForRenderer, paintFlags);
+        context, localPaintingInfo, paintingRootForRenderer);
+    paintForegroundForFragmentsWithPhase(PaintPhaseForeground, layerFragments, context, localPaintingInfo, paintingRootForRenderer);
+    paintForegroundForFragmentsWithPhase(PaintPhaseChildOutlines, layerFragments, context, localPaintingInfo, paintingRootForRenderer);
 
     if (shouldClip)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerFragments[0].foregroundRect);
 }
 
 void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const LayerFragments& layerFragments, GraphicsContext* context,
-    const LayerPaintingInfo& localPaintingInfo, RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    const LayerPaintingInfo& localPaintingInfo, RenderObject* paintingRootForRenderer)
 {
     bool shouldClip = localPaintingInfo.clipToDirtyRect && layerFragments.size() > 1;
 
@@ -1285,7 +1285,7 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
             continue;
 
         if (shouldClip)
-            clipToRect(localPaintingInfo, context, fragment.foregroundRect, paintFlags);
+            clipToRect(localPaintingInfo, context, fragment.foregroundRect);
 
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.foregroundRect.rect()), phase, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
@@ -1296,23 +1296,22 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
 }
 
 void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments, GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
         const LayerFragment& fragment = layerFragments.at(i);
         if (fragment.outlineRect.isEmpty())
             continue;
 
-        // Paint our own outline
         PaintInfo paintInfo(context, pixelSnappedIntRect(fragment.outlineRect.rect()), PaintPhaseSelfOutline, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-        clipToRect(localPaintingInfo, context, fragment.outlineRect, paintFlags, DoNotIncludeSelfForBorderRadius);
+        clipToRect(localPaintingInfo, context, fragment.outlineRect, DoNotIncludeSelfForBorderRadius);
         renderer()->paint(paintInfo, toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation));
         restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.outlineRect);
     }
 }
 
 void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, PaintLayerFlags paintFlags)
+    RenderObject* paintingRootForRenderer)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
         const LayerFragment& fragment = layerFragments.at(i);
@@ -1320,7 +1319,7 @@ void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, Gr
             continue;
 
         if (localPaintingInfo.clipToDirtyRect)
-            clipToRect(localPaintingInfo, context, fragment.backgroundRect, paintFlags, DoNotIncludeSelfForBorderRadius); // Mask painting will handle clipping to self.
+            clipToRect(localPaintingInfo, context, fragment.backgroundRect, DoNotIncludeSelfForBorderRadius); // Mask painting will handle clipping to self.
 
         // Paint the mask.
         // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
@@ -1332,11 +1331,11 @@ void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, Gr
     }
 }
 
-void RenderLayer::paintOverflowControlsForFragments(const LayerFragments& layerFragments, GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo, PaintLayerFlags paintFlags)
+void RenderLayer::paintOverflowControlsForFragments(const LayerFragments& layerFragments, GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo)
 {
     for (size_t i = 0; i < layerFragments.size(); ++i) {
         const LayerFragment& fragment = layerFragments.at(i);
-        clipToRect(localPaintingInfo, context, fragment.backgroundRect, paintFlags);
+        clipToRect(localPaintingInfo, context, fragment.backgroundRect);
         if (RenderLayerScrollableArea* scrollableArea = this->scrollableArea())
             scrollableArea->paintOverflowControls(context, roundedIntPoint(toPoint(fragment.layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation)), pixelSnappedIntRect(fragment.backgroundRect.rect()), true);
         restoreClip(context, localPaintingInfo.paintDirtyRect, fragment.backgroundRect);

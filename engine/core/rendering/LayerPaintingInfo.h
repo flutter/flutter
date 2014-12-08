@@ -52,13 +52,6 @@ namespace blink {
 
 class RenderLayer;
 
-// FIXME(sky): Get rid of this bitmasking and just use a regular enum.
-enum PaintLayerFlag {
-    PaintLayerPaintingOverlayScrollbars = 1,
-};
-
-typedef unsigned PaintLayerFlags;
-
 struct LayerPaintingInfo {
     LayerPaintingInfo(RenderLayer* inRootLayer, const LayoutRect& inDirtyRect,
         const LayoutSize& inSubPixelAccumulation, RenderObject* inPaintingRoot = 0)
