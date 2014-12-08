@@ -911,11 +911,6 @@ void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     paintMaskImages(paintInfo, paintRect);
 }
 
-void RenderBox::paintClippingMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    // FIXME(sky): Remove
-}
-
 void RenderBox::paintMaskImages(const PaintInfo& paintInfo, const LayoutRect& paintRect)
 {
     paintFillLayers(paintInfo, Color::transparent, style()->maskLayers(), paintRect, BackgroundBleedNone);

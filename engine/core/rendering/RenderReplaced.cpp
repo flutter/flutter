@@ -105,14 +105,11 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         return;
     }
 
-    if (paintInfo.phase == PaintPhaseClippingMask)
-        return;
-
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());
     if ((paintInfo.phase == PaintPhaseOutline || paintInfo.phase == PaintPhaseSelfOutline) && style()->outlineWidth())
         paintOutline(paintInfo, paintRect);
 
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && !canHaveChildren() && paintInfo.phase != PaintPhaseClippingMask)
+    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && !canHaveChildren())
         return;
 
     if (!paintInfo.shouldPaintWithinRoot(this))
@@ -141,12 +138,7 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     }
 
     if (!completelyClippedOut) {
-        if (paintInfo.phase == PaintPhaseClippingMask) {
-            paintClippingMask(paintInfo, adjustedPaintOffset);
-        } else {
-            paintReplaced(paintInfo, adjustedPaintOffset);
-        }
-
+        paintReplaced(paintInfo, adjustedPaintOffset);
         if (style()->hasBorderRadius())
             paintInfo.context->restore();
     }
@@ -163,7 +155,7 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 bool RenderReplaced::shouldPaint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseOutline && paintInfo.phase != PaintPhaseSelfOutline
-        && paintInfo.phase != PaintPhaseSelection && paintInfo.phase != PaintPhaseMask && paintInfo.phase != PaintPhaseClippingMask)
+        && paintInfo.phase != PaintPhaseSelection && paintInfo.phase != PaintPhaseMask)
         return false;
 
     if (!paintInfo.shouldPaintWithinRoot(this))

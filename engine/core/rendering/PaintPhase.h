@@ -48,7 +48,6 @@ enum PaintPhase {
     PaintPhaseSelection,
     PaintPhaseTextClip,
     PaintPhaseMask,
-    PaintPhaseClippingMask,
 };
 
 } // namespace blink

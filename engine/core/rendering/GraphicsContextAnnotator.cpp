@@ -70,8 +70,6 @@ static const char* paintPhaseName(blink::PaintPhase phase)
         return "TextClip";
     case blink::PaintPhaseMask:
         return "Mask";
-    case blink::PaintPhaseClippingMask:
-        return "ClippingMask";
     default:
         ASSERT_NOT_REACHED();
         return "<unknown>";
