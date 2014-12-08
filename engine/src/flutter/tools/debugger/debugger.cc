@@ -10,7 +10,7 @@ namespace sky {
 namespace debugger {
 
 SkyDebugger::SkyDebugger()
-    : window_manager_app_(new mojo::WindowManagerApp(this, nullptr)),
+    : window_manager_app_(new window_manager::WindowManagerApp(this, nullptr)),
       view_manager_(nullptr),
       root_(nullptr),
       content_(nullptr),
@@ -62,7 +62,7 @@ void SkyDebugger::OnEmbed(
   content_->SetVisible(true);
 
   window_manager_app_->InitFocus(
-      scoped_ptr<mojo::FocusRules>(new mojo::BasicFocusRules(content_)));
+      make_scoped_ptr(new window_manager::BasicFocusRules(content_)));
 
   if (!pending_url_.empty())
     NavigateToURL(pending_url_);

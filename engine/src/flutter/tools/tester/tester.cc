@@ -33,12 +33,12 @@ std::string WaitForURL() {
 
 class SkyTester : public mojo::ApplicationDelegate,
                   public mojo::ViewManagerDelegate,
-                  public mojo::WindowManagerDelegate,
+                  public window_manager::WindowManagerDelegate,
                   public mojo::ViewObserver,
                   public TestRunnerClient {
  public:
   SkyTester()
-      : window_manager_app_(new mojo::WindowManagerApp(this, this)),
+      : window_manager_app_(new window_manager::WindowManagerApp(this, this)),
         view_manager_(NULL),
         root_(NULL),
         content_(NULL),
@@ -81,7 +81,7 @@ class SkyTester : public mojo::ApplicationDelegate,
     ScheduleRun();
   }
 
-  // Overridden from WindowManagerDelegate:
+  // Overridden from window_manager::WindowManagerDelegate:
   virtual void Embed(
       const mojo::String& url,
       mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) override {
@@ -125,7 +125,7 @@ class SkyTester : public mojo::ApplicationDelegate,
     window_manager_app_->DispatchInputEventToView(content_, event.Pass());
   }
 
-  scoped_ptr<mojo::WindowManagerApp> window_manager_app_;
+  scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
   std::string url_from_args_;
 
