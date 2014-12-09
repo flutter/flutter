@@ -47,8 +47,7 @@ class DocumentView : public blink::ServiceProvider,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
-  DocumentView(const base::Closure& destruction_callback,
-               mojo::ServiceProviderPtr provider,
+  DocumentView(mojo::ServiceProviderPtr provider,
                mojo::URLResponsePtr response,
                mojo::Shell* shell);
   virtual ~DocumentView();
@@ -116,7 +115,6 @@ class DocumentView : public blink::ServiceProvider,
 
   void Load(mojo::URLResponsePtr response);
 
-  base::Closure destruction_callback_;
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
   scoped_ptr<mojo::ServiceProvider> imported_services_;

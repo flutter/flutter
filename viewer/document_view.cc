@@ -71,12 +71,10 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
 static int s_next_debugger_id = 1;
 
 DocumentView::DocumentView(
-    const base::Closure& destruction_callback,
     mojo::ServiceProviderPtr provider,
     mojo::URLResponsePtr response,
     mojo::Shell* shell)
-    : destruction_callback_(destruction_callback),
-      response_(response.Pass()),
+    : response_(response.Pass()),
       shell_(shell),
       web_view_(NULL),
       root_(NULL),
@@ -93,7 +91,6 @@ DocumentView::~DocumentView() {
     web_view_->close();
   if (root_)
     root_->RemoveObserver(this);
-  destruction_callback_.Run();
 }
 
 base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
@@ -244,7 +241,7 @@ void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,
 void DocumentView::OnViewDestroyed(mojo::View* view) {
   DCHECK_EQ(view, root_);
 
-  delete this;
+  root_ = nullptr;
 }
 
 void DocumentView::OnViewInputEvent(

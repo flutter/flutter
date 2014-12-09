@@ -17,8 +17,7 @@ class SkyApplication : public mojo::Application {
                  mojo::URLResponsePtr response)
       : url_(response->url),
         shell_(shell.Pass()),
-        initial_response_(response.Pass()),
-        view_count_(0) {
+        initial_response_(response.Pass()) {
     shell_.set_client(this);
     mojo::ServiceProviderPtr service_provider;
     shell_->ConnectToApplication("mojo:network_service",
@@ -30,7 +29,6 @@ class SkyApplication : public mojo::Application {
 
   void AcceptConnection(const mojo::String& requestor_url,
                         mojo::ServiceProviderPtr provider) override {
-    ++view_count_;
     if (initial_response_) {
       OnResponseReceived(mojo::URLLoaderPtr(), provider.Pass(),
                          initial_response_.Pass());
@@ -54,26 +52,16 @@ class SkyApplication : public mojo::Application {
   }
 
  private:
-  void OnViewDestroyed() {
-    --view_count_;
-    if (view_count_ == 0) {
-      delete this;
-    }
-  }
-
   void OnResponseReceived(mojo::URLLoaderPtr loader,
                           mojo::ServiceProviderPtr provider,
                           mojo::URLResponsePtr response) {
-    new DocumentView(
-        base::Bind(&SkyApplication::OnViewDestroyed, base::Unretained(this)),
-        provider.Pass(), response.Pass(), shell_.get());
+    new DocumentView(provider.Pass(), response.Pass(), shell_.get());
   }
 
   mojo::String url_;
   mojo::ShellPtr shell_;
   mojo::NetworkServicePtr network_service_;
   mojo::URLResponsePtr initial_response_;
-  uint32_t view_count_;
 };
 
 ContentHandlerImpl::ContentHandlerImpl() {
