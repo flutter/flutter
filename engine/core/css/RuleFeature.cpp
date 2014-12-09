@@ -67,10 +67,10 @@ void RuleFeatureSet::collectFeaturesFromRuleData(const RuleData& ruleData)
 
 void RuleFeatureSet::collectFeaturesFromSelector(const CSSSelector& selector)
 {
-    addSelectorFeatures(selector);
-
-    for (const CSSSelector* current = &selector; current; current = current->tagHistory())
+    for (const CSSSelector* current = &selector; current; current = current->tagHistory()) {
+        addSelectorFeatures(*current);
         collectFeaturesFromSelectorList(current->selectorList());
+   }
 }
 
 void RuleFeatureSet::collectFeaturesFromSelectorList(const CSSSelectorList* selectorList)

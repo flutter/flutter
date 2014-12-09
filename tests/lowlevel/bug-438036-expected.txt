@@ -1,0 +1,6 @@
+Running 2 tests
+ok 1 Div width should grow width to 200px
+ok 2 Div width should grow height to 200px
+2 tests
+2 pass
+0 fail
