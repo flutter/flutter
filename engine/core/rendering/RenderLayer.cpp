@@ -1042,11 +1042,14 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     bool deferredFiltersEnabled = renderer()->document().settings()->deferredFiltersEnabled();
     FilterEffectRendererHelper filterPainter(filterRenderer() && paintsWithFilters());
 
+    // FIXME(sky): There's only one fragment. Get rid of the vector.
     LayerFragments layerFragments;
-    // Collect the fragments. This will compute the clip rectangles and paint offsets for each layer fragment, as well as whether or not the content of each
-    // fragment should paint.
-    collectFragments(layerFragments, localPaintingInfo.rootLayer, localPaintingInfo.paintDirtyRect,
-        PaintingClipRects, &offsetFromRoot, localPaintingInfo.subPixelAccumulation);
+    LayerFragment fragment;
+    ClipRectsContext clipRectsContext(localPaintingInfo.rootLayer, PaintingClipRects, localPaintingInfo.subPixelAccumulation);
+    clipper().calculateRects(clipRectsContext, localPaintingInfo.paintDirtyRect,
+        fragment.layerBounds, fragment.backgroundRect, fragment.foregroundRect, fragment.outlineRect,
+        &offsetFromRoot);
+    layerFragments.append(fragment);
 
     bool isPaintingOverlayScrollbars = paintFlags == PaintOverlayScrollbars;
     bool shouldPaintContent = isSelfPaintingLayer() && !isPaintingOverlayScrollbars;
@@ -1077,7 +1080,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
                 // We'll handle clipping to the dirty rect before filter rasterization.
                 // Filter processing will automatically expand the clip rect and the offscreen to accommodate any filter outsets.
                 // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
-                ClipRect backgroundRect = layerFragments.isEmpty() ? ClipRect() : layerFragments[0].backgroundRect;
+                ClipRect backgroundRect = fragment.backgroundRect;
                 clipToRect(localPaintingInfo, context, backgroundRect);
                 // Subsequent code should not clip to the dirty rect, since we've already
                 // done it above, and doing it later will defeat the outsets.
@@ -1130,7 +1133,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     if (filterPainter.hasStartedFilterEffect()) {
         // Apply the correct clipping (ie. overflow: hidden).
         // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
-        ClipRect backgroundRect = layerFragments.isEmpty() ? ClipRect() : layerFragments[0].backgroundRect;
+        ClipRect backgroundRect = fragment.backgroundRect;
         if (!deferredFiltersEnabled)
             clipToRect(localPaintingInfo, transparencyLayerContext, backgroundRect);
 
@@ -1190,17 +1193,6 @@ void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* conte
     while (RenderLayerStackingNode* child = iterator.next()) {
         child->layer()->paintLayer(context, paintingInfo, paintFlags);
     }
-}
-
-void RenderLayer::collectFragments(LayerFragments& fragments, const RenderLayer* rootLayer, const LayoutRect& dirtyRect,
-    ClipRectsCacheSlot clipRectsCacheSlot, const LayoutPoint* offsetFromRoot,
-    const LayoutSize& subPixelAccumulation, const LayoutRect* layerBoundingBox)
-{
-    // For unpaginated layers, there is only one fragment.
-    LayerFragment fragment;
-    ClipRectsContext clipRectsContext(rootLayer, clipRectsCacheSlot, subPixelAccumulation);
-    clipper().calculateRects(clipRectsContext, dirtyRect, fragment.layerBounds, fragment.backgroundRect, fragment.foregroundRect, fragment.outlineRect, offsetFromRoot);
-    fragments.append(fragment);
 }
 
 void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, const LayerPaintingInfo& localPaintingInfo,
@@ -1571,17 +1563,16 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
         candidateLayer = hitLayer;
     }
 
-    // Collect the fragments. This will compute the clip rectangles for each layer fragment.
-    LayerFragments layerFragments;
-    collectFragments(layerFragments, rootLayer, hitTestRect, RootRelativeClipRects);
+    LayoutRect layerBounds;
+    ClipRect backgroundRect, foregroundRect, outlineRect;
+    ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
+    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, backgroundRect, foregroundRect, outlineRect);
 
-    // Next we want to see if the mouse pos is inside the child RenderObjects of the layer. Check
-    // every fragment in reverse order.
-    if (isSelfPaintingLayer()) {
+    // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
+    if (isSelfPaintingLayer() && !foregroundRect.intersects(hitTestLocation)) {
         // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
         HitTestResult tempResult(result.hitTestLocation());
-        bool insideFragmentForegroundRect = false;
-        if (hitTestContentsForFragments(layerFragments, request, tempResult, hitTestLocation, HitTestDescendants, insideFragmentForegroundRect)
+        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestDescendants)
             && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
             if (result.isRectBasedTest())
                 result.append(tempResult);
@@ -1591,8 +1582,9 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
                 return this;
             // Foreground can depth-sort with descendant layers, so keep this as a candidate.
             candidateLayer = this;
-        } else if (insideFragmentForegroundRect && result.isRectBasedTest())
+        } else if (result.isRectBasedTest()) {
             result.append(tempResult);
+        }
     }
 
     // Now check our negative z-index children.
@@ -1608,10 +1600,9 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     if (candidateLayer)
         return candidateLayer;
 
-    if (isSelfPaintingLayer()) {
+    if (isSelfPaintingLayer() && !backgroundRect.intersects(hitTestLocation)) {
         HitTestResult tempResult(result.hitTestLocation());
-        bool insideFragmentBackgroundRect = false;
-        if (hitTestContentsForFragments(layerFragments, request, tempResult, hitTestLocation, HitTestSelf, insideFragmentBackgroundRect)
+        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestSelf)
             && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
             if (result.isRectBasedTest())
                 result.append(tempResult);
@@ -1619,30 +1610,11 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
                 result = tempResult;
             return this;
         }
-        if (insideFragmentBackgroundRect && result.isRectBasedTest())
+        if (result.isRectBasedTest())
             result.append(tempResult);
     }
 
     return 0;
-}
-
-bool RenderLayer::hitTestContentsForFragments(const LayerFragments& layerFragments, const HitTestRequest& request, HitTestResult& result,
-    const HitTestLocation& hitTestLocation, HitTestFilter hitTestFilter, bool& insideClipRect) const
-{
-    if (layerFragments.isEmpty())
-        return false;
-
-    for (int i = layerFragments.size() - 1; i >= 0; --i) {
-        const LayerFragment& fragment = layerFragments.at(i);
-        if ((hitTestFilter == HitTestSelf && !fragment.backgroundRect.intersects(hitTestLocation))
-            || (hitTestFilter == HitTestDescendants && !fragment.foregroundRect.intersects(hitTestLocation)))
-            continue;
-        insideClipRect = true;
-        if (hitTestContents(request, result, fragment.layerBounds, hitTestLocation, hitTestFilter))
-            return true;
-    }
-
-    return false;
 }
 
 RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,

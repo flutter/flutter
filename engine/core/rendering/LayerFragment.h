@@ -38,29 +38,6 @@ public:
     {
     }
 
-    void setRects(const LayoutRect& bounds, const ClipRect& background, const ClipRect& foreground, const ClipRect& outline)
-    {
-        layerBounds = bounds;
-        backgroundRect = background;
-        foregroundRect = foreground;
-        outlineRect = outline;
-    }
-
-    void moveBy(const LayoutPoint& offset)
-    {
-        layerBounds.moveBy(offset);
-        backgroundRect.moveBy(offset);
-        foregroundRect.moveBy(offset);
-        outlineRect.moveBy(offset);
-    }
-
-    void intersect(const LayoutRect& rect)
-    {
-        backgroundRect.intersect(rect);
-        foregroundRect.intersect(rect);
-        outlineRect.intersect(rect);
-    }
-
     bool shouldPaintContent;
     LayoutRect layerBounds;
     ClipRect backgroundRect;
