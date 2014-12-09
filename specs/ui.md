@@ -67,42 +67,50 @@ that is being clicked, and from "down" back to "up" when this ends.
 (Note that clicking a button on a stylus doesn't change it from up to
 down. A stylus can have a button pressed while "up".)
 
-When one switches from "up" to "down", the position of the tap is hit
-tested and a 'pointer-down' event is fired at the target element under
-the cursor, if any, or the document otherwise. The return value, if
-it's a node, is used as the target of future move and up events until
-this touch goes up. If there is no return value, the target continues
-to be the application's document.
+When one switches from "up" to "down", the following algorithm is run:
+
+ 1. Hit test the position of the pointer, let 'node' be the result.
+ 2. Fire a pointer-down event at the layoutManager for 'node'.
+    Let 'result' be the returned value.
+ 3. If 'result' is undefined, then fire a pointer-down event at the
+    Element for 'node'.
+    Let 'result' be the returned value.
+ 4. If 'result' is undefined or is not an EventTarget, let 'result' be
+    the application document.
+ 5. Let 'result' capture this pointer.
 
 A pointer that is "down" is captured -- all events for that pointer
 will be routed to the chosen target until the pointer goes up,
 regardless of whether it's in that target's visible area.
 
-When an element captures a pointer and it has no captured pointers so
+When an object captures a pointer and it has no captured pointers so
 far, if either there are no buttons (touch, stylus) or only the
 primary button is active (mouse) and this is not an inverted stylus,
-then that pointer is marked as "primary" for that element. The pointer
+then that pointer is marked as "primary" for that object. The pointer
 remains the primary pointer until the corresponding pointer-up event
 (even if the buttons change).
 
 When one moves, if it is "up" then a 'pointer-moved' event is fired at
 the application's document, otherwise if it is "down" then the event
-is fired at the element or document that was selected for the
-'pointer-down' event (the capturing element). If the return value of a
-'pointer-moved' event is 'cancel', then pretend that the pointer moved
-to 'up', send 'pointer-up' as described below, and drop all events for
-this pointer until such time as it actually changes to be 'up'.
+is fired at the object or document that was selected for the
+'pointer-down' event (the capturing object). If the return value of a
+'pointer-moved' event is 'cancel' then cancel the pointer.
 
 When one switches from "down" to "up", a 'pointer-up' event is fired
-at the element or document that was selected for the 'pointer-down'
+at the object or document that was selected for the 'pointer-down'
 event (the capturing target).
 
 At the time of a pointer-up event, if there is another pointer that is
-already down, captured by the same element, and is of the same kind,
+already down, captured by the same object, and is of the same kind,
 and that has either no buttons or only its primary button active, then
-that becomes the new primary pointer for that element before the
+that becomes the new primary pointer for that object before the
 pointer-up event is sent. Otherwise, the primary pointer stops being
 primary just after the pointer-up.
+
+When a pointer is canceled, if it is "down", pretend that the pointer
+moved to "up", send 'pointer-up' as described below, and drop all
+events for this pointer until such time as it actually changes to be
+truly "up".
 
 Nothing special happens when a capturing target moves in the DOM.
 

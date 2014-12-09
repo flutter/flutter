@@ -281,7 +281,9 @@ class StyleDeclarationList {
   Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
-typedef StyleDeclaration Dictionary<ParsedValue>;
+class StyleDeclaration {
+  // TODO(ianh): define this
+}
 ```
 
 Rule Matching
@@ -347,7 +349,7 @@ partial class Element {
 
 callback any ValueResolver (any value, String propertyName, StyleNode node, Float containerWidth, Float containerHeight);
 
-class StyleNode {
+class StyleNode { // implemented in C++ with no virtual tables
   // this is generated before layout
   readonly attribute String text;
   readonly attribute Node? parentNode;
@@ -434,9 +436,18 @@ sky:core by default registers:
 Layout managers inherit from the following API:
 
 ```javascript
-class LayoutManager {
+class LayoutManager : EventTarget {
   readonly attribute StyleNode node;
   constructor LayoutManager(StyleNode node);
+
+  virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of this.node's ancestors // implements EventTarget.getEventDispatchChain()
+    // let result = [];
+    // let node = this.node;
+    // while (node && node.layoutManager) {
+    //   result.push(node.layoutManager);
+    //   node = node.parentNode;
+    // }
+    // return result;
 
   void take(StyleNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
@@ -565,7 +576,7 @@ class LayoutManager {
     //   that you don't skip the children that are visible in the new coordinate space but wouldn't be
     //   without the transform
 
-  virtual Node hitTest(Float x, Float y);
+  virtual StyleNode hitTest(Float x, Float y);
     // default implementation uses the node's children nodes' x, y,
     // width, and height, skipping any that have width=0 or height=0, or
     // whose ownerLayoutManager is not |this|

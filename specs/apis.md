@@ -31,20 +31,31 @@ module 'sky:core' {
   abstract class EventTarget {
     any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain
       // sets event.handled to false and event.result to undefined
-      // makes a record of the event target chain
+      // makes a record of the event target chain by calling getEventDispatchChain()
       // invokes all the handlers on the chain in turn
       // returns event.result
+    virtual Array<EventTarget> getEventDispatchChain(); // O(1) // returns []
     void addEventListener(String type, EventListener listener); // O(1)
     void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
     private Array<String> getRegisteredEventListenerTypes(); // O(N)
     private Array<EventListener> getRegisteredEventListenersForType(String type); // O(N)
   }
 
-  class CustomEventTarget : EventTarget {
+  class CustomEventTarget : EventTarget { // implemented in JS
     constructor (); // O(1)
     attribute EventTarget parentNode; // getter O(1), setter O(N) in height of tree, throws if this would make a loop
 
+    virtual Array<EventTarget> getEventDispatchChain(); // O(N) in height of tree // implements EventTarget.getEventDispatchChain()
+      // let result = [];
+      // let node = this;
+      // while (node) {
+      //   result.push(node);
+      //   node = node.parentNode;
+      // }
+      // return result;
+
     // you can inherit from this to make your object into an event target
+    // or you can inherit from EventTarget and implement your own getEventDispatchChain()
   }
 
 
@@ -54,13 +65,16 @@ module 'sky:core' {
   typedef ChildNode (Element or Text);
   typedef ChildArgument (Element or Text or String);
 
-  abstract class Node : EventTarget {
+  abstract class Node : EventTarget { // implemented in C++
     readonly attribute TreeScope? ownerScope; // O(1)
     
     readonly attribute ParentNode? parentNode; // O(1)
     readonly attribute Element? parentElement; // O(1) // if parentNode isn't an element, returns null
     readonly attribute ChildNode? previousSibling; // O(1)
     readonly attribute ChildNode? nextSibling; // O(1)
+
+    virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of ancestors across shadow trees // implements EventTarget.getEventDispatchChain()
+      // returns the event dispatch chain (including handling shadow trees)
     
     // the following all throw if parentNode is null
     void insertBefore(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
