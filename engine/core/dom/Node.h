@@ -46,7 +46,6 @@ namespace blink {
 
 class Attribute;
 class ContainerNode;
-class DOMSettableTokenList;
 class Document;
 class Element;
 class Event;
