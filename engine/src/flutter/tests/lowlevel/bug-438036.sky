@@ -1,0 +1,29 @@
+<sky>
+<import src="../resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<style>
+  div { width: 100px; height: 100px; background-color: red; }
+  div.wide { width: 200px; }
+  div#high { height: 200px; }
+</style>
+<div></div>
+<div></div>
+<script>
+
+describe("Div width", function() {
+  it("should grow width to 200px", function() {
+    var target = document.querySelector('div');
+
+    target.classList.add("wide");
+    assert.equal(getComputedStyle(target).width, "200px");
+  });
+
+  it("should grow height to 200px", function() {
+    var target = document.querySelectorAll('div')[1];
+
+    target.id = 'high';
+    assert.equal(getComputedStyle(target).height, "200px");
+  });
+});
+</script>
+</sky>
