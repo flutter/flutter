@@ -196,6 +196,7 @@ class TokenSourceBookmark {
   // TokenSource stores unforgeable state on this object using symbols or a weakmap or some such
 }
 
+// TODO(ianh): this is a non-starter, we need something better to handle units and custom painting
 dictionary ParsedValue {
   any value = null;
   ValueResolver? resolver = null;
@@ -393,6 +394,8 @@ class StyleNode { // implemented in C++ with no virtual tables
   readonly attribute Float y; // relative to top edge of ownerLayoutManager
   readonly attribute Float width;
   readonly attribute Float height;
+  readonly attribute Boolean isNew; // node has just been added (and maybe you want to animate it in)
+  readonly attribute Boolean isGhost; // node has just been removed (and maybe you want to animate it away)
 }
 ```
 
@@ -440,6 +443,10 @@ class LayoutManager : EventTarget {
   readonly attribute StyleNode node;
   constructor LayoutManager(StyleNode node);
 
+  readonly attribute Boolean autoreap;
+    // defaults to true
+    // when true, any children that are isNew or isGhost are welcomed/reaped implicitly by default layout()
+
   virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of this.node's ancestors // implements EventTarget.getEventDispatchChain()
     // let result = [];
     // let node = this.node;
@@ -466,6 +473,8 @@ class LayoutManager : EventTarget {
     // for setChildSize/Width/Height: if the new dimension is different than the last assumed dimensions, and
     // any StyleNodes with an ownerLayoutManager==this have cached values for getProperty() that are marked
     // as provisional, clear them
+  void welcomeChild(child); // resets child.isNew
+  void reapChild(child); // resets child.isGhost
 
   Generator<StyleNode> walkChildren();
     // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not |this|
@@ -539,6 +548,7 @@ class LayoutManager : EventTarget {
   void markAsLaidOut(); // sets this.node.needsLayout and this.node.descendantNeedsLayout to false
   virtual Dimensions layout(Number? width, Number? height);
     // call markAsLaidOut();
+    // if autoreap is true: use walkChildren() to call welcomeChild() and reapChild() on each child
     // if width is null, set width to getIntrinsicWidth().value
     // if height is null, set width height getIntrinsicHeight().value
     // call this.assumeDimensions(width, height);
