@@ -9,7 +9,7 @@
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread_local_storage.h"
 #include "base/timer/timer.h"
-#include "mojo/services/public/interfaces/network/network_service.mojom.h"
+#include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "sky/engine/public/platform/Platform.h"
 
 namespace mojo {

@@ -6,7 +6,7 @@
 #include "sky/engine/platform/fetcher/MojoFetcher.h"
 
 #include "base/bind.h"
-#include "mojo/services/public/interfaces/network/network_service.mojom.h"
+#include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/public/platform/Platform.h"
 

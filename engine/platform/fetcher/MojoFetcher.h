@@ -6,7 +6,7 @@
 #define SKY_ENGINE_PLATFORM_FETCHER_MOJOFETCHER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "mojo/services/public/interfaces/network/url_loader.mojom.h"
+#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 
 namespace blink {
 class KURL;

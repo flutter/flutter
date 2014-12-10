@@ -6,7 +6,7 @@
 
 #include "base/bind.h"
 #include "mojo/public/cpp/application/connect.h"
-#include "mojo/services/public/interfaces/network/network_service.mojom.h"
+#include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "sky/viewer/document_view.h"
 
 namespace sky {

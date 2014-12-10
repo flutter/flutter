@@ -648,7 +648,7 @@ component("platform") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
-    "//mojo/services/public/interfaces/network",
+    "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine/wtf",
     "//third_party/harfbuzz-ng",
