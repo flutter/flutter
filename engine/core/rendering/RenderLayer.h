@@ -45,7 +45,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_
 
-#include "sky/engine/core/rendering/LayerFragment.h"
 #include "sky/engine/core/rendering/LayerPaintingInfo.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/core/rendering/RenderLayerClipper.h"
@@ -450,16 +449,20 @@ private:
 
     void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
 
-    void updatePaintingInfoForFragments(LayerFragments&, const LayerPaintingInfo&, bool shouldPaintContent, const LayoutPoint* offsetFromRoot);
-    void paintBackgroundForFragments(const LayerFragments&, GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer);
-    void paintForegroundForFragments(const LayerFragments&, GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer);
-    void paintForegroundForFragmentsWithPhase(PaintPhase, const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer);
-    void paintOutlineForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer);
-    void paintOverflowControlsForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&);
-    void paintMaskForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer);
-    void paintChildClippingMaskForFragments(const LayerFragments&, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer, PaintLayerFlags);
+    void paintBackground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
+        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
+    void paintForeground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
+        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
+    void paintForegroundWithPhase(PaintPhase, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
+    void paintOutline(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        LayoutPoint& layerLocation, ClipRect& layerOutlineRect);
+    void paintOverflowControls(GraphicsContext*, const LayerPaintingInfo&,
+        LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
+    void paintMask(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
 
     RenderLayer* hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
                               const LayoutRect& hitTestRect, const HitTestLocation&, bool appliedTransform,

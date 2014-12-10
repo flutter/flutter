@@ -1098,7 +1098,6 @@ sky_core_files = [
   "rendering/InlineIterator.h",
   "rendering/InlineTextBox.cpp",
   "rendering/InlineTextBox.h",
-  "rendering/LayerFragment.h",
   "rendering/LayerPaintingInfo.h",
   "rendering/LayoutState.cpp",
   "rendering/LayoutState.h",
