@@ -8,7 +8,7 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
-#include "mojo/services/public/cpp/surfaces/surfaces_utils.h"
+#include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
 #include "mojo/skia/ganesh_context.h"
 #include "sky/compositor/layer.h"
 

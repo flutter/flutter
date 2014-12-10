@@ -54,7 +54,7 @@ mojo_native_application("viewer") {
     "//mojo/services/public/interfaces/input_events",
     "//mojo/services/public/interfaces/navigation",
     "//mojo/services/public/interfaces/network",
-    "//mojo/services/public/interfaces/surfaces",
+    "//mojo/services/surfaces/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//net",
     "//skia",

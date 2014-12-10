@@ -6,7 +6,7 @@
 #define SKY_COMPOSITOR_LAYER_HOST_CLIENT_H_
 
 #include "base/time/time.h"
-#include "mojo/services/public/interfaces/surfaces/surface_id.mojom.h"
+#include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
 
 namespace mojo {
 class Shell;
