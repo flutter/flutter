@@ -48,6 +48,14 @@ describe("Class list", function() {
     assert.equal(target.classList.toString(), "second");
   });
 
+  it("should clear all classes", function() {
+    target.classList.add("first");
+    target.classList.add("second");
+    target.classList.clear();
+    assert.equal(target.classList.toString(), "");
+    assert.isFalse(target.hasAttribute("class"));
+  });
+
   it("should check for classes", function() {
     target.classList.add("first", "second", "third");
     assert.isTrue(target.classList.contains("first"));

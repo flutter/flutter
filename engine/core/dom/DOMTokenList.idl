@@ -32,6 +32,8 @@
     [RaisesException, CustomElementCallbacks] void remove(DOMString... tokens);
     [RaisesException, CustomElementCallbacks] boolean toggle(DOMString token, optional boolean force);
 
+    void clear();
+
     [NotEnumerable] stringifier;
 };
 

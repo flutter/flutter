@@ -83,6 +83,11 @@ void DOMTokenList::setValue(const AtomicString& value)
     m_element->setAttribute(HTMLNames::classAttr, value);
 }
 
+void DOMTokenList::clear()
+{
+    m_element->removeAttribute(HTMLNames::classAttr);
+}
+
 bool DOMTokenList::validateToken(const String& token, ExceptionState& exceptionState)
 {
     if (token.isEmpty()) {

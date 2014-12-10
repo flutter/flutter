@@ -62,6 +62,7 @@ public:
     void remove(const AtomicString&, ExceptionState&);
     bool toggle(const AtomicString&, ExceptionState&);
     bool toggle(const AtomicString&, bool force, ExceptionState&);
+    void clear();
 
     const AtomicString& toString() const { return value(); }
 
