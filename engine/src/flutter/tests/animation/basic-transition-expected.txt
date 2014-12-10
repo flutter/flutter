@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 width should transition from 100px to 200px
+1 tests
+1 pass
+0 fail

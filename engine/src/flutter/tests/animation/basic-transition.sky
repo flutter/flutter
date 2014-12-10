@@ -1,0 +1,31 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<div></div>
+<style>
+div {
+  width: 100px;
+  height: 100px;
+  background: red;
+  position: relative;
+  transition: width  2s;
+  transition-timing-function: linear;
+}
+
+div#example {
+  width: 200px;
+}
+</style>
+<script>
+var example = document.querySelector('div');
+example.offsetWidth; // force a style resolution so that next line's assigment triggers the transition
+example.id = "example";
+
+describe('width', function() {
+  it('should transition from 100px to 200px', function() {
+    internals.pauseAnimations(1);
+    assert.equal('150px', getComputedStyle(example).width);
+  });
+});
+</script>
+</sky>
