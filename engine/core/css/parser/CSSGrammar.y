@@ -766,7 +766,6 @@ keyframes_rule:
 keyframe_rule_list:
     /* empty */ {
         $$ = parser->createFloatingKeyframeVector();
-        parser->resumeErrorLogging();
     }
     |  keyframe_rule_list keyframe_rule maybe_space location_label {
         $$ = $1;
@@ -774,7 +773,6 @@ keyframe_rule_list:
     }
     | keyframe_rule_list keyframes_error_recovery invalid_block maybe_space location_label {
         parser->clearProperties();
-        parser->resumeErrorLogging();
     }
     ;
 
@@ -1427,7 +1425,6 @@ regular_invalid_at_rule_header:
         parser->popSupportsRuleData();
     }
   | error_location invalid_at at_rule_header_recovery {
-        parser->resumeErrorLogging();
         parser->reportError($1, InvalidRuleCSSError);
     }
   ;

@@ -36,15 +36,11 @@
 
 namespace blink {
 
-inline HTMLStyleElement::HTMLStyleElement(Document& document, bool createdByParser)
+inline HTMLStyleElement::HTMLStyleElement(Document& document)
     : HTMLElement(HTMLNames::styleTag, document)
-    , m_createdByParser(createdByParser)
     , m_loading(false)
     , m_registeredAsCandidate(false)
-    , m_startPosition(TextPosition::belowRangePosition())
 {
-    if (createdByParser)
-        m_startPosition = document.parserPosition();
 }
 
 HTMLStyleElement::~HTMLStyleElement()
@@ -54,9 +50,9 @@ HTMLStyleElement::~HTMLStyleElement()
         clearSheet();
 }
 
-PassRefPtr<HTMLStyleElement> HTMLStyleElement::create(Document& document, bool createdByParser)
+PassRefPtr<HTMLStyleElement> HTMLStyleElement::create(Document& document)
 {
-    return adoptRef(new HTMLStyleElement(document, createdByParser));
+    return adoptRef(new HTMLStyleElement(document));
 }
 
 void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
@@ -67,12 +63,6 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
     } else {
         HTMLElement::parseAttribute(name, value);
     }
-}
-
-void HTMLStyleElement::finishParsingChildren()
-{
-    process();
-    m_createdByParser = false;
 }
 
 void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
@@ -121,9 +111,6 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
 void HTMLStyleElement::childrenChanged(const ChildrenChange& change)
 {
     HTMLElement::childrenChanged(change);
-
-    if (m_createdByParser)
-        return;
     process();
 }
 
@@ -177,8 +164,7 @@ void HTMLStyleElement::createSheet()
         if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
             m_loading = true;
             const String& text = textFromChildren();
-            TextPosition startPosition = m_startPosition == TextPosition::belowRangePosition() ? TextPosition::minimumPosition() : m_startPosition;
-            m_sheet = document().styleEngine()->createSheet(this, text, startPosition, m_createdByParser);
+            m_sheet = document().styleEngine()->createSheet(this, text);
             m_sheet->setMediaQueries(mediaQueries.release());
             m_loading = false;
         }
@@ -206,10 +192,7 @@ void HTMLStyleElement::processStyleSheet()
     ASSERT(inDocument());
 
     m_registeredAsCandidate = true;
-    document().styleEngine()->addStyleSheetCandidateNode(this, m_createdByParser);
-    if (m_createdByParser)
-        return;
-
+    document().styleEngine()->addStyleSheetCandidateNode(this, false);
     process();
 }
 

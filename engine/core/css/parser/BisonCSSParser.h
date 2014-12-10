@@ -86,7 +86,7 @@ public:
     void rollbackLastProperties(int num);
     void setCurrentProperty(CSSPropertyID);
 
-    void parseSheet(StyleSheetContents*, const String&, const TextPosition& startPosition = TextPosition::minimumPosition(), CSSParserObserver* = 0, bool = false);
+    void parseSheet(StyleSheetContents*, const String&);
     PassRefPtr<StyleRuleBase> parseRule(StyleSheetContents*, const String&);
     PassRefPtr<StyleKeyframe> parseKeyframeRule(StyleSheetContents*, const String&);
     bool parseSupportsCondition(const String&);
@@ -184,7 +184,6 @@ public:
     unsigned m_numParsedPropertiesBeforeMarginBox;
 
     bool m_hadSyntacticallyValidCSSRule;
-    bool m_logErrors;
     bool m_ignoreErrors;
 
     AtomicString m_defaultNamespace;
@@ -205,8 +204,7 @@ public:
     void startEndUnknownRule();
 
     void endInvalidRuleHeader();
-    void reportError(const CSSParserLocation&, CSSParserError = GeneralCSSError);
-    void resumeErrorLogging() { m_ignoreErrors = false; }
+    void reportError(const CSSParserLocation&, CSSParserError = GeneralCSSError) { }
     void setLocationLabel(const CSSParserLocation& location) { m_locationLabel = location; }
     const CSSParserLocation& lastLocationLabel() const { return m_locationLabel; }
 
@@ -269,9 +267,6 @@ private:
     Vector<OwnPtr<CSSParserSelector> > m_reusableSelectorVector;
 
     OwnPtr<RuleSourceDataList> m_supportsRuleDataStack;
-
-    bool isLoggingErrors();
-    void logError(const String& message, const CSSParserLocation&);
 
     CSSTokenizer m_tokenizer;
 

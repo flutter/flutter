@@ -383,15 +383,15 @@ static bool isCacheableForStyleElement(const StyleSheetContents& contents)
     return true;
 }
 
-PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text, TextPosition startPosition, bool createdByParser)
+PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)
 {
-    RefPtr<CSSStyleSheet> styleSheet = nullptr;
-
+    RefPtr<CSSStyleSheet> styleSheet;
     AtomicString textContent(text);
 
     HashMap<AtomicString, RawPtr<StyleSheetContents> >::AddResult result = m_textToSheetCache.add(textContent, nullptr);
     if (result.isNewEntry || !result.storedValue->value) {
-        styleSheet = StyleEngine::parseSheet(e, text, startPosition, createdByParser);
+        styleSheet = CSSStyleSheet::createInline(e, KURL());
+        styleSheet->contents()->parseString(text);
         if (result.isNewEntry && isCacheableForStyleElement(*styleSheet->contents())) {
             result.storedValue->value = styleSheet->contents();
             m_sheetToTextCache.add(styleSheet->contents(), textContent);
@@ -401,18 +401,10 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
         ASSERT(contents);
         ASSERT(isCacheableForStyleElement(*contents));
         ASSERT(contents->singleOwnerDocument() == e->document());
-        styleSheet = CSSStyleSheet::createInline(contents, e, startPosition);
+        styleSheet = CSSStyleSheet::createInline(contents, e);
     }
 
     ASSERT(styleSheet);
-    return styleSheet;
-}
-
-PassRefPtr<CSSStyleSheet> StyleEngine::parseSheet(Element* e, const String& text, TextPosition startPosition, bool createdByParser)
-{
-    RefPtr<CSSStyleSheet> styleSheet = nullptr;
-    styleSheet = CSSStyleSheet::createInline(e, KURL(), startPosition);
-    styleSheet->contents()->parseStringAtPosition(text, startPosition, createdByParser);
     return styleSheet;
 }
 

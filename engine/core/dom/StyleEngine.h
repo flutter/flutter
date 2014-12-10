@@ -126,7 +126,7 @@ public:
 
     void markDocumentDirty();
 
-    PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text, TextPosition startPosition, bool createdByParser);
+    PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text);
     void removeSheet(StyleSheetContents*);
 
     void addScopedStyleResolver(const ScopedStyleResolver* resolver) { m_scopedStyleResolvers.add(resolver); }
@@ -155,8 +155,6 @@ private:
     void clearMediaQueryRuleSetOnTreeScopeStyleSheets(TreeScopeSet treeScopes);
 
     void createResolver();
-
-    static PassRefPtr<CSSStyleSheet> parseSheet(Element*, const String& text, TextPosition startPosition, bool createdByParser);
 
     const DocumentStyleSheetCollection* documentStyleSheetCollection() const
     {

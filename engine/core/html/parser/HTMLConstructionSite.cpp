@@ -77,14 +77,7 @@ static inline void insert(HTMLConstructionSiteTask& task)
 static inline void executeInsertTask(HTMLConstructionSiteTask& task)
 {
     ASSERT(task.operation == HTMLConstructionSiteTask::Insert);
-
     insert(task);
-
-    if (task.child->isElementNode()) {
-        Element& child = toElement(*task.child);
-        if (task.selfClosing)
-            child.finishParsingChildren();
-    }
 }
 
 static inline void executeInsertTextTask(HTMLConstructionSiteTask& task)

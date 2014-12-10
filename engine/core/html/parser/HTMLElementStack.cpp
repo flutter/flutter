@@ -57,12 +57,8 @@ void HTMLElementStack::popAll()
 {
     m_rootNode = nullptr;
     m_stackDepth = 0;
-    while (m_top) {
-        Node& node = *topNode();
-        if (node.isElementNode())
-            toElement(node).finishParsingChildren();
+    while (m_top)
         m_top = m_top->releaseNext();
-    }
 }
 
 void HTMLElementStack::pop()
@@ -112,25 +108,8 @@ void HTMLElementStack::pushCommon(PassRefPtr<ContainerNode> node)
 
 void HTMLElementStack::popCommon()
 {
-    top()->finishParsingChildren();
     m_top = m_top->releaseNext();
     m_stackDepth--;
-}
-
-void HTMLElementStack::removeNonTopCommon(Element* element)
-{
-    ASSERT(top() != element);
-    for (ElementRecord* pos = m_top.get(); pos; pos = pos->next()) {
-        if (pos->next()->element() == element) {
-            // FIXME: Is it OK to call finishParsingChildren()
-            // when the children aren't actually finished?
-            element->finishParsingChildren();
-            pos->setNext(pos->next()->releaseNext());
-            m_stackDepth--;
-            return;
-        }
-    }
-    ASSERT_NOT_REACHED();
 }
 
 #ifndef NDEBUG

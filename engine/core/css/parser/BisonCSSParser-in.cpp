@@ -107,7 +107,6 @@ BisonCSSParser::BisonCSSParser(const CSSParserContext& context)
     , m_selectorListForParseSelector(0)
     , m_numParsedPropertiesBeforeMarginBox(INVALID_NUM_PARSED_PROPERTIES)
     , m_hadSyntacticallyValidCSSRule(false)
-    , m_logErrors(false)
     , m_ignoreErrors(false)
     , m_defaultNamespace(starAtom)
     , m_observer(0)
@@ -139,15 +138,12 @@ void BisonCSSParser::setupParser(const char* prefix, unsigned prefixLength, cons
     m_ruleHasHeader = true;
 }
 
-void BisonCSSParser::parseSheet(StyleSheetContents* sheet, const String& string, const TextPosition& startPosition, CSSParserObserver* observer, bool logErrors)
+void BisonCSSParser::parseSheet(StyleSheetContents* sheet, const String& string)
 {
     setStyleSheet(sheet);
     m_defaultNamespace = starAtom; // Reset the default namespace.
-    TemporaryChange<CSSParserObserver*> scopedObsever(m_observer, observer);
-    m_logErrors = logErrors && sheet->singleOwnerDocument() && !sheet->baseURL().isEmpty() && sheet->singleOwnerDocument()->frameHost();
     m_ignoreErrors = false;
     m_tokenizer.m_lineNumber = 0;
-    m_startPosition = startPosition;
     m_source = &string;
     m_tokenizer.m_internal = false;
     setupParser("", string, "");
@@ -157,7 +153,6 @@ void BisonCSSParser::parseSheet(StyleSheetContents* sheet, const String& string,
     m_rule = nullptr;
     m_lineEndings.clear();
     m_ignoreErrors = false;
-    m_logErrors = false;
     m_tokenizer.m_internal = true;
 }
 
@@ -1584,25 +1579,6 @@ void BisonCSSParser::endInvalidRuleHeader()
     endRuleHeader();
 }
 
-void BisonCSSParser::reportError(const CSSParserLocation&, CSSParserError)
-{
-    // FIXME: error reporting temporatily disabled.
-}
-
-bool BisonCSSParser::isLoggingErrors()
-{
-    return m_logErrors && !m_ignoreErrors;
-}
-
-void BisonCSSParser::logError(const String& message, const CSSParserLocation& location)
-{
-    unsigned lineNumberInStyleSheet;
-    unsigned columnNumber = 0;
-    lineNumberInStyleSheet = location.lineNumber;
-    FrameConsole& console = m_styleSheet->singleOwnerDocument()->frame()->console();
-    console.addMessage(ConsoleMessage::create(CSSMessageSource, WarningMessageLevel, message, m_styleSheet->baseURL().string(), lineNumberInStyleSheet + m_startPosition.m_line.zeroBasedInt() + 1, columnNumber + 1));
-}
-
 StyleRuleKeyframes* BisonCSSParser::createKeyframesRule(const String& name, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > popKeyframes, bool isPrefixed)
 {
     OwnPtr<Vector<RefPtr<StyleKeyframe> > > keyframes = popKeyframes;
@@ -1763,7 +1739,6 @@ void BisonCSSParser::endRule(bool valid)
 
 void BisonCSSParser::startRuleHeader(CSSRuleSourceData::Type ruleType)
 {
-    resumeErrorLogging();
     m_ruleHeaderType = ruleType;
     m_ruleHeaderStartOffset = m_tokenizer.safeUserStringTokenOffset();
     m_ruleHeaderStartLineNumber = m_tokenizer.m_tokenStartLineNumber;
@@ -1804,7 +1779,6 @@ void BisonCSSParser::startRuleBody()
 
 void BisonCSSParser::startProperty()
 {
-    resumeErrorLogging();
     if (m_observer)
         m_observer->startProperty(m_tokenizer.safeUserStringTokenOffset());
 }

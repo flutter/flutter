@@ -102,7 +102,6 @@ private:
     void popUntil(Element*);
     void pushCommon(PassRefPtr<ContainerNode>);
     void popCommon();
-    void removeNonTopCommon(Element*);
 
     OwnPtr<ElementRecord> m_top;
 

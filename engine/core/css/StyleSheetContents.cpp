@@ -111,15 +111,9 @@ void StyleSheetContents::clearRules()
 
 bool StyleSheetContents::parseString(const String& sheetText)
 {
-    return parseStringAtPosition(sheetText, TextPosition::minimumPosition(), false);
-}
-
-bool StyleSheetContents::parseStringAtPosition(const String& sheetText, const TextPosition& startPosition, bool createdByParser)
-{
     CSSParserContext context(parserContext(), UseCounter::getFrom(this));
     BisonCSSParser p(context);
-    p.parseSheet(this, sheetText, startPosition, 0, createdByParser);
-
+    p.parseSheet(this, sheetText);
     return true;
 }
 

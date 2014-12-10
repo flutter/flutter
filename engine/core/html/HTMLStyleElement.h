@@ -31,14 +31,11 @@ namespace blink {
 
 class ContainerNode;
 class Document;
-class Element;
-class HTMLStyleElement;
-class TreeScope;
 
 class HTMLStyleElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<HTMLStyleElement> create(Document&, bool createdByParser);
+    static PassRefPtr<HTMLStyleElement> create(Document&);
     virtual ~HTMLStyleElement();
 
     ContainerNode* scopingNode();
@@ -49,7 +46,7 @@ public:
     const AtomicString& type() const;
 
 private:
-    HTMLStyleElement(Document&, bool createdByParser);
+    HTMLStyleElement(Document&);
 
     void createSheet();
     void process();
@@ -64,14 +61,10 @@ private:
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 
-    virtual void finishParsingChildren() override;
-
     RefPtr<CSSStyleSheet> m_sheet;
 
-    bool m_createdByParser : 1;
     bool m_loading : 1;
     bool m_registeredAsCandidate : 1;
-    TextPosition m_startPosition;
 };
 
 } // namespace blink
