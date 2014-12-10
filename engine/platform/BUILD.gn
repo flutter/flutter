@@ -84,10 +84,8 @@ group("make_platform_generated") {
   ]
 }
 
-component("platform") {
+source_set("platform") {
   visibility += [ "//sky/*" ]
-
-  output_name = "sky_platform"
 
   sources = [
     "animation/AnimationUtilities.h",
@@ -644,7 +642,7 @@ component("platform") {
     "//mojo/application",
     "//mojo/common",
     "//mojo/environment:chromium",
-    "//mojo/public/c/system:for_shared_library",
+    "//mojo/public/c/system",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
@@ -755,6 +753,12 @@ test("platform_unittests") {
     "//sky/engine/wtf:test_support",
     "//url",
   ]
+
+  # TODO(abarth): This is a lie - this test is not embedded in an environment
+  # that injects the system thunks, so system calls don't actually work. This
+  # just tricks the linker into thinking that an implementation of these calls
+  # will be injected at runtime so the link succeeds.
+  deps += [ "//mojo/public/platform/native:system" ]
 
   defines = [ "INSIDE_BLINK" ]
 
