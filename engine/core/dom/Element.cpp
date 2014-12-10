@@ -44,6 +44,7 @@
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/ClientRect.h"
 #include "sky/engine/core/dom/ClientRectList.h"
+#include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementDataCache.h"
 #include "sky/engine/core/dom/ElementRareData.h"
@@ -69,7 +70,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/frame/UseCounter.h"
-#include "sky/engine/core/html/ClassList.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/html/HTMLElement.h"
@@ -1439,7 +1439,7 @@ DOMTokenList& Element::classList()
 {
     ElementRareData& rareData = ensureElementRareData();
     if (!rareData.classList())
-        rareData.setClassList(ClassList::create(this));
+        rareData.setClassList(DOMTokenList::create(*this));
     return *rareData.classList();
 }
 

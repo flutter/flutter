@@ -27,6 +27,7 @@
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -34,44 +35,49 @@ namespace blink {
 
 class Element;
 class ExceptionState;
+class SpaceSplitString;
 
-class DOMTokenList : public ScriptWrappable {
+class DOMTokenList final : public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(DOMTokenList);
 public:
-    DOMTokenList()
+    static PassOwnPtr<DOMTokenList> create(Element& element)
     {
+        return adoptPtr(new DOMTokenList(element));
     }
-    virtual ~DOMTokenList() { }
 
-#if !ENABLE(OILPAN)
-    virtual void ref() = 0;
-    virtual void deref() = 0;
-#endif
+    ~DOMTokenList() { }
 
-    virtual unsigned length() const = 0;
-    virtual const AtomicString item(unsigned index) const = 0;
+    void ref();
+    void deref();
+
+    unsigned length() const;
+    const AtomicString item(unsigned index) const;
 
     bool contains(const AtomicString&, ExceptionState&) const;
-    virtual void add(const Vector<String>&, ExceptionState&);
+    void add(const Vector<String>&, ExceptionState&);
     void add(const AtomicString&, ExceptionState&);
-    virtual void remove(const Vector<String>&, ExceptionState&);
+    void remove(const Vector<String>&, ExceptionState&);
     void remove(const AtomicString&, ExceptionState&);
     bool toggle(const AtomicString&, ExceptionState&);
     bool toggle(const AtomicString&, bool force, ExceptionState&);
 
     const AtomicString& toString() const { return value(); }
 
-    virtual Element* element() { return 0; }
+    Element* element() { return m_element.get(); }
 
-protected:
-    virtual const AtomicString& value() const = 0;
-    virtual void setValue(const AtomicString&) = 0;
+    const AtomicString& value() const;
+    void setValue(const AtomicString& value);
 
-    virtual void addInternal(const AtomicString&);
-    virtual bool containsInternal(const AtomicString&) const = 0;
-    virtual void removeInternal(const AtomicString&);
+private:
+    DOMTokenList(Element&);
+
+    const SpaceSplitString& classNames() const;
+
+    void addInternal(const AtomicString&);
+    bool containsInternal(const AtomicString&) const;
+    void removeInternal(const AtomicString&);
 
     static bool validateToken(const String&, ExceptionState&);
     static bool validateTokens(const Vector<String>&, ExceptionState&);
@@ -79,6 +85,8 @@ protected:
     static AtomicString addTokens(const AtomicString&, const Vector<String>&);
     static AtomicString removeToken(const AtomicString&, const AtomicString&);
     static AtomicString removeTokens(const AtomicString&, const Vector<String>&);
+
+    RawPtr<Element> m_element;
 };
 
 } // namespace blink

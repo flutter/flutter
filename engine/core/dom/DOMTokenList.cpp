@@ -26,11 +26,62 @@
 #include "sky/engine/core/dom/DOMTokenList.h"
 
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
+#include "sky/engine/core/dom/SpaceSplitString.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
+
+DOMTokenList::DOMTokenList(Element& element)
+    : m_element(&element)
+{
+}
+
+void DOMTokenList::ref()
+{
+    m_element->ref();
+}
+
+void DOMTokenList::deref()
+{
+    m_element->deref();
+}
+
+unsigned DOMTokenList::length() const
+{
+    return m_element->hasClass() ? classNames().size() : 0;
+}
+
+const AtomicString DOMTokenList::item(unsigned index) const
+{
+    if (index >= length())
+        return AtomicString();
+    return classNames()[index];
+}
+
+bool DOMTokenList::containsInternal(const AtomicString& token) const
+{
+    return m_element->hasClass() && classNames().contains(token);
+}
+
+const SpaceSplitString& DOMTokenList::classNames() const
+{
+    ASSERT(m_element->hasClass());
+    return m_element->classNames();
+}
+
+const AtomicString& DOMTokenList::value() const
+{
+    return m_element->getAttribute(HTMLNames::classAttr);
+}
+
+void DOMTokenList::setValue(const AtomicString& value)
+{
+    m_element->setAttribute(HTMLNames::classAttr, value);
+}
 
 bool DOMTokenList::validateToken(const String& token, ExceptionState& exceptionState)
 {

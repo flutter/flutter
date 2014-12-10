@@ -912,8 +912,6 @@ sky_core_files = [
   "html/canvas/WebGLUniformLocation.h",
   "html/canvas/WebGLVertexArrayObjectOES.cpp",
   "html/canvas/WebGLVertexArrayObjectOES.h",
-  "html/ClassList.cpp",
-  "html/ClassList.h",
   "html/HTMLAnchorElement.cpp",
   "html/HTMLAnchorElement.h",
   "html/HTMLCanvasElement.cpp",

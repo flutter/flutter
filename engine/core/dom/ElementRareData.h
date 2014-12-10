@@ -23,10 +23,10 @@
 #define SKY_ENGINE_CORE_DOM_ELEMENTRAREDATA_H_
 
 #include "sky/engine/core/animation/ActiveAnimations.h"
+#include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/NodeRareData.h"
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/html/ClassList.h"
 #include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -73,8 +73,8 @@ public:
     void setComputedStyle(PassRefPtr<RenderStyle> computedStyle) { m_computedStyle = computedStyle; }
     void clearComputedStyle() { m_computedStyle = nullptr; }
 
-    ClassList* classList() const { return m_classList.get(); }
-    void setClassList(PassOwnPtr<ClassList> classList) { m_classList = classList; }
+    DOMTokenList* classList() const { return m_classList.get(); }
+    void setClassList(PassOwnPtr<DOMTokenList> classList) { m_classList = classList; }
 
     IntSize savedLayerScrollOffset() const { return m_savedLayerScrollOffset; }
     void setSavedLayerScrollOffset(IntSize size) { m_savedLayerScrollOffset = size; }
@@ -101,7 +101,7 @@ private:
 
     IntSize m_savedLayerScrollOffset;
 
-    OwnPtr<ClassList> m_classList;
+    OwnPtr<DOMTokenList> m_classList;
     OwnPtr<ElementShadow> m_shadow;
     OwnPtr<InputMethodContext> m_inputMethodContext;
     OwnPtr<ActiveAnimations> m_activeAnimations;
