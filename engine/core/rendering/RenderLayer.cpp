@@ -101,8 +101,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_last(0)
     , m_staticInlinePosition(0)
     , m_staticBlockPosition(0)
-    , m_potentialCompositingReasonsFromStyle(CompositingReasonNone)
-    , m_compositingReasons(CompositingReasonNone)
     , m_paintInvalidator(*renderer)
     , m_clipper(*renderer)
 {
@@ -515,13 +513,6 @@ void RenderLayer::updateDescendantDependentCompositingInputs(const DescendantDep
 {
     m_descendantDependentCompositingInputs = compositingInputs;
     m_needsDescendantDependentCompositingInputsUpdate = false;
-}
-
-void RenderLayer::setCompositingReasons(CompositingReasons reasons, CompositingReasons mask)
-{
-    if ((compositingReasons() & mask) == (reasons & mask))
-        return;
-    m_compositingReasons = (reasons & mask) | (compositingReasons() & ~mask);
 }
 
 void RenderLayer::setHasCompositingDescendant(bool hasCompositingDescendant)

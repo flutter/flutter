@@ -42,7 +42,6 @@
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
-#include "sky/engine/platform/graphics/CompositingReasons.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
 
 namespace blink {
@@ -520,8 +519,6 @@ public:
 
     void forceLayout();
     void forceChildLayout();
-
-    virtual CompositingReasons additionalCompositingReasons() const;
 
     bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter = HitTestAll);
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);

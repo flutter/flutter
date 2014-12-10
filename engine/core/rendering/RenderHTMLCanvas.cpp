@@ -107,13 +107,4 @@ void RenderHTMLCanvas::canvasSizeChanged()
         setNeedsLayoutAndFullPaintInvalidation();
 }
 
-CompositingReasons RenderHTMLCanvas::additionalCompositingReasons() const
-{
-    HTMLCanvasElement* canvas = toHTMLCanvasElement(node());
-    if (canvas->renderingContext() && canvas->renderingContext()->isAccelerated())
-        return CompositingReasonCanvas;
-
-    return CompositingReasonNone;
-}
-
 } // namespace blink

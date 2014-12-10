@@ -45,8 +45,6 @@ private:
     virtual const char* renderName() const override { return "RenderHTMLCanvas"; }
     virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
     virtual void intrinsicSizeChanged() override { canvasSizeChanged(); }
-
-    virtual CompositingReasons additionalCompositingReasons() const override;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderHTMLCanvas, isCanvas());

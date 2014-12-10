@@ -1617,22 +1617,20 @@ StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
     if (diff.transformChanged()) {
         // Text nodes share style with their parents but transforms don't apply to them,
         // hence the !isText() check.
-        if (!isText() && (!hasLayer() || !toRenderLayerModelObject(this)->layer()->hasStyleDeterminedDirectCompositingReasons()))
+        if (!isText())
             diff.setNeedsPaintInvalidationLayer();
     }
 
     // If opacity or zIndex changed, and the layer does not paint into its own separate backing, then we need to invalidate paints (also
     // ignoring text nodes)
     if (diff.opacityChanged() || diff.zIndexChanged()) {
-        if (!isText() && (!hasLayer() || !toRenderLayerModelObject(this)->layer()->hasStyleDeterminedDirectCompositingReasons()))
+        if (!isText())
             diff.setNeedsPaintInvalidationLayer();
     }
 
     // If filter changed, and the layer does not paint into its own separate backing or it paints with filters, then we need to invalidate paints.
     if (diff.filterChanged() && hasLayer()) {
-        RenderLayer* layer = toRenderLayerModelObject(this)->layer();
-        if (!layer->hasStyleDeterminedDirectCompositingReasons() || layer->paintsWithFilters())
-            diff.setNeedsPaintInvalidationLayer();
+        diff.setNeedsPaintInvalidationLayer();
     }
 
     if (diff.textOrColorChanged() && !diff.needsPaintInvalidation()
@@ -2213,11 +2211,6 @@ void RenderObject::postDestroy()
 PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
 {
     return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
-}
-
-CompositingReasons RenderObject::additionalCompositingReasons() const
-{
-    return CompositingReasonNone;
 }
 
 bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter hitTestFilter)

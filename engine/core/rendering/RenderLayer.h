@@ -53,7 +53,6 @@
 #include "sky/engine/core/rendering/RenderLayerScrollableArea.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
-#include "sky/engine/platform/graphics/CompositingReasons.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -291,11 +290,6 @@ public:
 
     bool scrollsOverflow() const;
 
-    CompositingReasons potentialCompositingReasonsFromStyle() const { return m_potentialCompositingReasonsFromStyle; }
-    void setPotentialCompositingReasonsFromStyle(CompositingReasons reasons) { ASSERT(reasons == (reasons & CompositingReasonComboAllStyleDeterminedReasons)); m_potentialCompositingReasonsFromStyle = reasons; }
-
-    bool hasStyleDeterminedDirectCompositingReasons() const { return m_potentialCompositingReasonsFromStyle & CompositingReasonComboAllDirectStyleDeterminedReasons; }
-
     class AncestorDependentCompositingInputs {
     public:
         AncestorDependentCompositingInputs()
@@ -386,9 +380,6 @@ public:
 
     bool lostGroupedMapping() const { return m_lostGroupedMapping; }
     void setLostGroupedMapping(bool b) { m_lostGroupedMapping = b; }
-
-    CompositingReasons compositingReasons() const { return m_compositingReasons; }
-    void setCompositingReasons(CompositingReasons, CompositingReasons mask = CompositingReasonAll);
 
     bool hasCompositingDescendant() const { return m_hasCompositingDescendant; }
     void setHasCompositingDescendant(bool);
@@ -555,13 +546,6 @@ private:
     LayoutUnit m_staticBlockPosition;
 
     OwnPtr<TransformationMatrix> m_transform;
-
-    // These compositing reasons are updated whenever style changes, not while updating compositing layers.
-    // They should not be used to infer the compositing state of this layer.
-    CompositingReasons m_potentialCompositingReasonsFromStyle;
-
-    // Once computed, indicates all that a layer needs to become composited using the CompositingReasons enum bitfield.
-    CompositingReasons m_compositingReasons;
 
     DescendantDependentCompositingInputs m_descendantDependentCompositingInputs;
     AncestorDependentCompositingInputs m_ancestorDependentCompositingInputs;

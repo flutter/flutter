@@ -267,8 +267,6 @@ source_set("platform") {
     "graphics/Color.h",
     "graphics/ColorSpace.cpp",
     "graphics/ColorSpace.h",
-    "graphics/CompositingReasons.cpp",
-    "graphics/CompositingReasons.h",
     "graphics/CrossfadeGeneratedImage.cpp",
     "graphics/CrossfadeGeneratedImage.h",
     "graphics/DashArray.h",
