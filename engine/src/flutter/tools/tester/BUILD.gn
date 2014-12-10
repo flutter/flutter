@@ -23,7 +23,7 @@ mojo_native_application("tester") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
-    "//mojo/services/public/interfaces/input_events",
+    "//mojo/services/input_events/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//services/window_manager:lib",
     "//sky/services/testing:bindings",
