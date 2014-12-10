@@ -110,9 +110,6 @@ public:
     // Returns the visible content rect (minus scrollbars, in absolute coordinate)
     virtual WebRect visibleContentRect() const = 0;
 
-    virtual bool hasHorizontalScrollbar() const = 0;
-    virtual bool hasVerticalScrollbar() const = 0;
-
     // Hierarchy ----------------------------------------------------------
 
     // Returns the containing view.

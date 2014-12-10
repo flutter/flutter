@@ -70,7 +70,6 @@ RenderLayerScrollableArea::RenderLayerScrollableArea(RenderLayer& layer)
     : m_layer(layer)
     , m_scrollsOverflow(false)
     , m_scrollDimensionsDirty(true)
-    , m_inOverflowRelayout(false)
     , m_nextTopmostScrollChild(0)
     , m_topmostScrollChild(0)
     , m_needsCompositedScrolling(false)
@@ -408,67 +407,32 @@ void RenderLayerScrollableArea::updateAfterLayout()
     bool hasHorizontalOverflow = this->hasHorizontalOverflow();
     bool hasVerticalOverflow = this->hasVerticalOverflow();
 
-    {
-        // Hits in compositing/overflow/automatically-opt-into-composited-scrolling-after-style-change.html.
-        DisableCompositingQueryAsserts disabler;
-
-        // overflow:scroll should just enable/disable.
-        if (box().style()->overflowX() == OSCROLL)
-            horizontalScrollbar()->setEnabled(hasHorizontalOverflow);
-        if (box().style()->overflowY() == OSCROLL)
-            verticalScrollbar()->setEnabled(hasVerticalOverflow);
-    }
+    // overflow:scroll should just enable/disable.
+    if (box().style()->overflowX() == OSCROLL)
+        horizontalScrollbar()->setEnabled(hasHorizontalOverflow);
+    if (box().style()->overflowY() == OSCROLL)
+        verticalScrollbar()->setEnabled(hasVerticalOverflow);
 
     // overflow:auto may need to lay out again if scrollbars got added/removed.
-    bool autoHorizontalScrollBarChanged = box().hasAutoHorizontalScrollbar() && (hasHorizontalScrollbar() != hasHorizontalOverflow);
-    bool autoVerticalScrollBarChanged = box().hasAutoVerticalScrollbar() && (hasVerticalScrollbar() != hasVerticalOverflow);
+    if (box().hasAutoHorizontalScrollbar())
+        setHasHorizontalScrollbar(hasHorizontalOverflow);
+    if (box().hasAutoVerticalScrollbar())
+        setHasVerticalScrollbar(hasVerticalOverflow);
 
-    if (autoHorizontalScrollBarChanged || autoVerticalScrollBarChanged) {
-        if (box().hasAutoHorizontalScrollbar())
-            setHasHorizontalScrollbar(hasHorizontalOverflow);
-        if (box().hasAutoVerticalScrollbar())
-            setHasVerticalScrollbar(hasVerticalOverflow);
-
-        layer()->updateSelfPaintingLayer();
-
-        if (box().style()->overflowX() == OAUTO || box().style()->overflowY() == OAUTO) {
-            if (!m_inOverflowRelayout) {
-                // Our proprietary overflow: overlay value doesn't trigger a layout.
-                m_inOverflowRelayout = true;
-                SubtreeLayoutScope layoutScope(box());
-                layoutScope.setNeedsLayout(&box());
-                if (box().isRenderBlock()) {
-                    RenderBlock& block = toRenderBlock(box());
-                    block.scrollbarsChanged(autoHorizontalScrollBarChanged, autoVerticalScrollBarChanged);
-                    block.layoutBlock(true);
-                } else {
-                    box().layout();
-                }
-                m_inOverflowRelayout = false;
-            }
-        }
+    // Set up the range (and page step/line step).
+    if (Scrollbar* horizontalScrollbar = this->horizontalScrollbar()) {
+        int clientWidth = box().pixelSnappedClientWidth();
+        horizontalScrollbar->setProportion(clientWidth, overflowRect().width());
     }
-
-    {
-        // Hits in compositing/overflow/automatically-opt-into-composited-scrolling-after-style-change.html.
-        DisableCompositingQueryAsserts disabler;
-
-        // Set up the range (and page step/line step).
-        if (Scrollbar* horizontalScrollbar = this->horizontalScrollbar()) {
-            int clientWidth = box().pixelSnappedClientWidth();
-            horizontalScrollbar->setProportion(clientWidth, overflowRect().width());
-        }
-        if (Scrollbar* verticalScrollbar = this->verticalScrollbar()) {
-            int clientHeight = box().pixelSnappedClientHeight();
-            verticalScrollbar->setProportion(clientHeight, overflowRect().height());
-        }
+    if (Scrollbar* verticalScrollbar = this->verticalScrollbar()) {
+        int clientHeight = box().pixelSnappedClientHeight();
+        verticalScrollbar->setProportion(clientHeight, overflowRect().height());
     }
 
     bool hasOverflow = hasScrollableHorizontalOverflow() || hasScrollableVerticalOverflow();
     updateScrollableAreaSet(hasOverflow);
 
     if (hasOverflow) {
-        DisableCompositingQueryAsserts disabler;
         positionOverflowControls(IntSize());
     }
 }
@@ -663,9 +627,6 @@ void RenderLayerScrollableArea::setHasHorizontalScrollbar(bool hasScrollbar)
         return;
 
     if (hasScrollbar) {
-        // This doesn't hit in any tests, but since the equivalent code in setHasVerticalScrollbar
-        // does, presumably this code does as well.
-        DisableCompositingQueryAsserts disabler;
         m_hBar = createScrollbar(HorizontalScrollbar);
     } else {
         destroyScrollbar(HorizontalScrollbar);
@@ -678,8 +639,6 @@ void RenderLayerScrollableArea::setHasVerticalScrollbar(bool hasScrollbar)
         return;
 
     if (hasScrollbar) {
-        // Hits in compositing/overflow/automatically-opt-into-composited-scrolling-after-style-change.html
-        DisableCompositingQueryAsserts disabler;
         m_vBar = createScrollbar(VerticalScrollbar);
     } else {
         destroyScrollbar(VerticalScrollbar);

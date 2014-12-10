@@ -171,7 +171,6 @@ private:
     unsigned m_scrollsOverflow : 1;
 
     unsigned m_scrollDimensionsDirty : 1;
-    unsigned m_inOverflowRelayout : 1;
 
     RenderLayer* m_nextTopmostScrollChild;
     RenderLayer* m_topmostScrollChild;

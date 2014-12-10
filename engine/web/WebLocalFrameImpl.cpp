@@ -233,18 +233,6 @@ WebRect WebLocalFrameImpl::visibleContentRect() const
     return frame()->view()->frameRect();
 }
 
-bool WebLocalFrameImpl::hasHorizontalScrollbar() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-bool WebLocalFrameImpl::hasVerticalScrollbar() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 WebView* WebLocalFrameImpl::view() const
 {
     return viewImpl();

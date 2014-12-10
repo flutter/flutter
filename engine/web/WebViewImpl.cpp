@@ -697,18 +697,6 @@ bool WebViewImpl::isTrackingRepaints() const
     return view->isTrackingPaintInvalidations();
 }
 
-bool WebViewImpl::hasHorizontalScrollbar()
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
-bool WebViewImpl::hasVerticalScrollbar()
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
 
 // FIXME: autogenerate this kind of code, and use it throughout Blink rather than

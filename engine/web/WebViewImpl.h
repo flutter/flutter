@@ -225,10 +225,6 @@ public:
     // Exposed for the purpose of overriding device metrics.
     void sendResizeEventAndRepaint();
 
-    // Exposed for testing purposes.
-    bool hasHorizontalScrollbar();
-    bool hasVerticalScrollbar();
-
     WebSettingsImpl* settingsImpl();
 
     IntPoint clampOffsetAtScale(const IntPoint& offset, float scale);

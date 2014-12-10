@@ -65,8 +65,6 @@ public:
     virtual WebSize contentsSize() const override;
     virtual bool hasVisibleContent() const override;
     virtual WebRect visibleContentRect() const override;
-    virtual bool hasHorizontalScrollbar() const override;
-    virtual bool hasVerticalScrollbar() const override;
     virtual WebView* view() const override;
     virtual WebDocument document() const override;
     virtual void executeScript(const WebScriptSource&) override;
