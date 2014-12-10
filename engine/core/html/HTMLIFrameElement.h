@@ -6,7 +6,7 @@
 #define SKY_ENGINE_CORE_HTML_HTMLIFRAMEELEMENT_H_
 
 #include "gen/sky/core/HTMLNames.h"
-#include "mojo/services/public/cpp/view_manager/view_observer.h"
+#include "mojo/services/view_manager/public/cpp/view_observer.h"
 #include "sky/engine/core/dom/DOMURLUtils.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/html/HTMLElement.h"
