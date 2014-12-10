@@ -7,7 +7,7 @@
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
-#include "mojo/services/public/interfaces/input_events/input_events.mojom.h"
+#include "mojo/services/input_events/public/interfaces/input_events.mojom.h"
 #include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
 #include "mojo/services/view_manager/public/cpp/view_manager.h"
 #include "mojo/services/view_manager/public/cpp/view_manager_delegate.h"

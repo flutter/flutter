@@ -6,7 +6,7 @@
 #define SKY_VIEWER_CONVERTERS_INPUT_EVENT_TYPES_H_
 
 #include "base/memory/scoped_ptr.h"
-#include "mojo/services/public/interfaces/input_events/input_events.mojom.h"
+#include "mojo/services/input_events/public/interfaces/input_events.mojom.h"
 
 namespace blink {
 class WebInputEvent;

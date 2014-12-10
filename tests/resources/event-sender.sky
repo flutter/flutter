@@ -1,6 +1,6 @@
-<import src="/mojo/services/public/interfaces/input_events/input_event_constants.mojom.sky" as="constants" />
-<import src="/mojo/services/public/interfaces/input_events/input_events.mojom.sky" as="events" />
-<import src="/mojo/services/public/interfaces/input_events/input_key_codes.mojom.sky" as="codes" />
+<import src="/mojo/services/input_events/public/interfaces/input_event_constants.mojom.sky" as="constants" />
+<import src="/mojo/services/input_events/public/interfaces/input_events.mojom.sky" as="events" />
+<import src="/mojo/services/input_events/public/interfaces/input_key_codes.mojom.sky" as="codes" />
 <import src="/sky/framework/shell.sky" as="shell" />
 <import src="/sky/services/testing/test_harness.mojom.sky" as="harness" />
 <script>

@@ -10,6 +10,6 @@ mojom("bindings") {
   ]
 
   deps = [
-    "//mojo/services/public/interfaces/input_events",
+    "//mojo/services/input_events/public/interfaces",
   ]
 }

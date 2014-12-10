@@ -4,7 +4,7 @@
 
 module sky;
 
-import "mojo/services/public/interfaces/input_events/input_events.mojom";
+import "mojo/services/input_events/public/interfaces/input_events.mojom";
 
 interface TestHarness {
   OnTestComplete(string test_result);

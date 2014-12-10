@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 #include "base/time/time.h"
-#include "mojo/services/public/interfaces/input_events/input_event_constants.mojom.h"
+#include "mojo/services/input_events/public/interfaces/input_event_constants.mojom.h"
 #include "sky/engine/public/web/WebInputEvent.h"
 
 namespace mojo {
