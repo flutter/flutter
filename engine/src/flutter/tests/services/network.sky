@@ -3,8 +3,8 @@
 <import src="../resources/mocha.sky" />
 <import src="/mojo/public/sky/core.sky" as="core" />
 <import src="/mojo/public/sky/connection.sky" as="connection" />
-<import src="/mojo/services/public/interfaces/network/network_service.mojom.sky" as="net" />
-<import src="/mojo/services/public/interfaces/network/url_loader.mojom.sky" as="loader" />
+<import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
+<import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
 <script>
 describe('Mojo network_service', function() {
   this.enableTimeouts(false);
