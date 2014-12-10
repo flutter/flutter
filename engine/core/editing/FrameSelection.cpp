@@ -259,8 +259,6 @@ void FrameSelection::setSelection(const VisibleSelection& newSelection, SetSelec
         setFocusedNodeIfNeeded();
 
     if (!(options & DoNotUpdateAppearance)) {
-        // Hits in compositing/overflow/do-not-paint-outline-into-composited-scrolling-contents.html
-        DisableCompositingQueryAsserts disabler;
         updateAppearance(ResetCaretBlink);
     }
 
@@ -490,8 +488,6 @@ TextDirection FrameSelection::directionOfSelection()
 
 void FrameSelection::didChangeFocus()
 {
-    // Hits in virtual/gpu/compositedscrolling/scrollbars/scrollbar-miss-mousemove-disabled.html
-    DisableCompositingQueryAsserts disabler;
     updateAppearance();
 }
 

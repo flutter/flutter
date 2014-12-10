@@ -108,9 +108,6 @@ HostWindow* RenderLayerScrollableArea::hostWindow() const
 
 void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, const IntRect& rect)
 {
-    // See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
-
     IntRect scrollRect = rect;
     // If we are not yet inserted into the tree, there is no need to issue paint invaldiations.
     if (!box().parent())

@@ -70,20 +70,6 @@ class TransformationMatrix;
 enum BorderRadiusClippingRule { IncludeSelfForBorderRadius, DoNotIncludeSelfForBorderRadius };
 enum IncludeSelfOrNot { IncludeSelf, ExcludeSelf };
 
-enum CompositingQueryMode {
-    CompositingQueriesAreAllowed,
-    CompositingQueriesAreOnlyAllowedInCertainDocumentLifecyclePhases
-};
-
-// FIXME: remove this once the compositing query ASSERTS are no longer hit.
-class DisableCompositingQueryAsserts {
-    WTF_MAKE_NONCOPYABLE(DisableCompositingQueryAsserts);
-public:
-    DisableCompositingQueryAsserts();
-private:
-    TemporaryChange<CompositingQueryMode> m_disabler;
-};
-
 class RenderLayer {
     WTF_MAKE_NONCOPYABLE(RenderLayer);
 public:

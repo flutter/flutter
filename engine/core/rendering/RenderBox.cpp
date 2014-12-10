@@ -256,19 +256,12 @@ int RenderBox::pixelSnappedScrollHeight() const
 
 void RenderBox::setScrollLeft(LayoutUnit newLeft)
 {
-    // This doesn't hit in any tests, but since the equivalent code in setScrollTop
-    // does, presumably this code does as well.
-    DisableCompositingQueryAsserts disabler;
-
     if (hasOverflowClip())
         layer()->scrollableArea()->scrollToXOffset(newLeft, ScrollOffsetClamped);
 }
 
 void RenderBox::setScrollTop(LayoutUnit newTop)
 {
-    // Hits in compositing/overflow/do-not-assert-on-invisible-composited-layers.html
-    DisableCompositingQueryAsserts disabler;
-
     if (hasOverflowClip())
         layer()->scrollableArea()->scrollToYOffset(newTop, ScrollOffsetClamped);
 }
@@ -276,18 +269,11 @@ void RenderBox::setScrollTop(LayoutUnit newTop)
 void RenderBox::scrollToOffset(const IntSize& offset)
 {
     ASSERT(hasOverflowClip());
-
-    // This doesn't hit in any tests, but since the equivalent code in setScrollTop
-    // does, presumably this code does as well.
-    DisableCompositingQueryAsserts disabler;
     layer()->scrollableArea()->scrollToOffset(offset, ScrollOffsetClamped);
 }
 
 void RenderBox::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
 {
-    // Presumably the same issue as in setScrollTop. See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
-
     RenderBox* parentBox = 0;
     LayoutRect newRect = rect;
 
@@ -378,8 +364,6 @@ void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& add
 
 bool RenderBox::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
 {
-    // Presumably the same issue as in setScrollTop. See crbug.com/343132.
-    DisableCompositingQueryAsserts disabler;
     if (!layer() || !layer()->scrollableArea())
         return false;
     return layer()->scrollableArea()->scroll(direction, granularity, delta);

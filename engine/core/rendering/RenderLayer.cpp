@@ -78,13 +78,6 @@
 
 namespace blink {
 
-namespace {
-
-static CompositingQueryMode gCompositingQueryMode =
-    CompositingQueriesAreOnlyAllowedInCertainDocumentLifecyclePhases;
-
-} // namespace
-
 RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     : m_layerType(type)
     , m_hasSelfPaintingLayerDescendant(false)
@@ -2056,9 +2049,6 @@ void RenderLayer::setShouldDoFullPaintInvalidationIncludingNonCompositingDescend
         child->setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
     }
 }
-
-DisableCompositingQueryAsserts::DisableCompositingQueryAsserts()
-    : m_disabler(gCompositingQueryMode, CompositingQueriesAreAllowed) { }
 
 } // namespace blink
 

@@ -250,9 +250,6 @@ void RenderBlockFlow::invalidatePaintForOverflow()
 
     // Make sure the rect is still non-empty after intersecting for overflow above
     if (!paintInvalidationRect.isEmpty()) {
-        // Hits in media/event-attributes.html
-        DisableCompositingQueryAsserts disabler;
-
         invalidatePaintRectangle(paintInvalidationRect); // We need to do a partial paint invalidation of our content.
     }
 

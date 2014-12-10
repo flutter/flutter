@@ -1272,9 +1272,6 @@ void RenderObject::invalidatePaintForWholeRenderer() const
     if (!isRooted())
         return;
 
-    // FIXME: really, we're in the paint invalidation phase here, and the following queries are legal.
-    // Until those states are fully fledged, I'll just disable the ASSERTS.
-    DisableCompositingQueryAsserts disabler;
     const RenderLayerModelObject* paintInvalidationContainer = containerForPaintInvalidation();
 
     // FIXME: We should invalidate only previousPaintInvalidationRect, but for now we invalidate both the previous
