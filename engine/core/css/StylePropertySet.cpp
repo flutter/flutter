@@ -147,14 +147,7 @@ bool MutableStylePropertySet::removeShorthandProperty(CSSPropertyID propertyID)
     if (!shorthand.length())
         return false;
 
-    bool ret = removePropertiesInSet(shorthand.properties(), shorthand.length());
-
-    CSSPropertyID prefixingVariant = prefixingVariantForPropertyId(propertyID);
-    if (prefixingVariant == propertyID)
-        return ret;
-
-    StylePropertyShorthand shorthandPrefixingVariant = shorthandForProperty(prefixingVariant);
-    return removePropertiesInSet(shorthandPrefixingVariant.properties(), shorthandPrefixingVariant.length());
+    return removePropertiesInSet(shorthand.properties(), shorthand.length());
 }
 
 bool MutableStylePropertySet::removeProperty(CSSPropertyID propertyID, String* returnText)
@@ -180,17 +173,7 @@ bool MutableStylePropertySet::removeProperty(CSSPropertyID propertyID, String* r
     // and sweeping them when the vector grows too big.
     m_propertyVector.remove(foundPropertyIndex);
 
-    removePrefixedOrUnprefixedProperty(propertyID);
-
     return true;
-}
-
-void MutableStylePropertySet::removePrefixedOrUnprefixedProperty(CSSPropertyID propertyID)
-{
-    int foundPropertyIndex = findPropertyIndex(prefixingVariantForPropertyId(propertyID));
-    if (foundPropertyIndex == -1)
-        return;
-    m_propertyVector.remove(foundPropertyIndex);
 }
 
 bool StylePropertySet::propertyIsImportant(CSSPropertyID propertyID) const
@@ -259,40 +242,15 @@ void MutableStylePropertySet::setProperty(const CSSProperty& property, CSSProper
         CSSProperty* toReplace = slot ? slot : findCSSPropertyWithID(property.id());
         if (toReplace) {
             *toReplace = property;
-            setPrefixingVariantProperty(property);
             return;
         }
     }
-    appendPrefixingVariantProperty(property);
+    appendProperty(property);
 }
 
-unsigned getIndexInShorthandVectorForPrefixingVariant(const CSSProperty& property, CSSPropertyID prefixingVariant)
-{
-    if (!property.isSetFromShorthand())
-        return 0;
-
-    CSSPropertyID prefixedShorthand = prefixingVariantForPropertyId(property.shorthandID());
-    Vector<StylePropertyShorthand, 4> shorthands;
-    getMatchingShorthandsForLonghand(prefixingVariant, &shorthands);
-    return indexOfShorthandForLonghand(prefixedShorthand, shorthands);
-}
-
-void MutableStylePropertySet::appendPrefixingVariantProperty(const CSSProperty& property)
+void MutableStylePropertySet::appendProperty(const CSSProperty& property)
 {
     m_propertyVector.append(property);
-    CSSPropertyID prefixingVariant = prefixingVariantForPropertyId(property.id());
-    if (prefixingVariant == property.id())
-        return;
-
-    m_propertyVector.append(CSSProperty(prefixingVariant, property.value(), property.isImportant(), property.isSetFromShorthand(), getIndexInShorthandVectorForPrefixingVariant(property, prefixingVariant), property.metadata().m_implicit));
-}
-
-void MutableStylePropertySet::setPrefixingVariantProperty(const CSSProperty& property)
-{
-    CSSPropertyID prefixingVariant = prefixingVariantForPropertyId(property.id());
-    CSSProperty* toReplace = findCSSPropertyWithID(prefixingVariant);
-    if (toReplace && prefixingVariant != property.id())
-        *toReplace = CSSProperty(prefixingVariant, property.value(), property.isImportant(), property.isSetFromShorthand(), getIndexInShorthandVectorForPrefixingVariant(property, prefixingVariant), property.metadata().m_implicit);
 }
 
 bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, CSSValueID identifier, bool important)
@@ -337,19 +295,6 @@ void MutableStylePropertySet::addParsedProperty(const CSSProperty& property)
 String StylePropertySet::asText() const
 {
     return StylePropertySerializer(*this).asText();
-}
-
-void MutableStylePropertySet::mergeAndOverrideOnConflict(const StylePropertySet* other)
-{
-    unsigned size = other->propertyCount();
-    for (unsigned n = 0; n < size; ++n) {
-        PropertyReference toMerge = other->propertyAt(n);
-        CSSProperty* old = findCSSPropertyWithID(toMerge.id());
-        if (old)
-            setProperty(toMerge.toCSSProperty(), old);
-        else
-            appendPrefixingVariantProperty(toMerge.toCSSProperty());
-    }
 }
 
 bool StylePropertySet::hasFailedOrCanceledSubresources() const

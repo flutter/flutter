@@ -114,12 +114,8 @@ visibilitychange
 webglcontextcreationerror
 webglcontextlost
 webglcontextrestored
-webkitAnimationEnd
-webkitAnimationIteration
-webkitAnimationStart
 webkitBeforeTextInserted
 webkitEditableContentChanged
-webkitTransitionEnd
 webkitkeyadded
 webkitkeyerror
 webkitkeymessage

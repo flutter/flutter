@@ -187,7 +187,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token INTERNAL_KEYFRAME_KEY_LIST_SYM
 %token INTERNAL_SUPPORTS_CONDITION_SYM
 %token KEYFRAMES_SYM
-%token WEBKIT_KEYFRAMES_SYM
 
 %token ATKEYWORD
 
@@ -740,9 +739,6 @@ before_keyframes_rule:
 keyframes_rule_start:
     before_keyframes_rule KEYFRAMES_SYM maybe_space {
         $$ = false;
-    }
-  | before_keyframes_rule WEBKIT_KEYFRAMES_SYM maybe_space {
-        $$ = true;
     }
     ;
 

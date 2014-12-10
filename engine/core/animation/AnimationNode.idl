@@ -28,9 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    RuntimeEnabled=WebAnimationsAPI,
-] interface AnimationNode {
+interface AnimationNode {
     // Playback state
     readonly attribute double? localTime;
     readonly attribute unsigned long? currentIteration;

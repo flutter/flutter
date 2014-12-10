@@ -1,0 +1,31 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<div id="example"></div>
+<style>
+#example {
+    width: 100px;
+    height: 100px;
+    background: red;
+    position: relative;
+    animation-name: anim;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+}
+
+@keyframes anim {
+    0%   { top: 0px; }
+    100% { top: 100px; }
+}
+</style>
+<script>
+var example = document.getElementById('example');
+
+describe('top', function() {
+  it('should amimate from 0 to 100px', function() {
+    internals.pauseAnimations(3);
+    assert.equal('60px', getComputedStyle(example).top);
+  });
+});
+</script>
+</sky>

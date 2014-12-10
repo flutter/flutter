@@ -35,6 +35,7 @@
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
 #include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
@@ -136,6 +137,11 @@ v8::Handle<v8::Value> WebDocument::registerEmbedderCustomElement(const WebString
     if (exceptionState.hadException())
         return v8::Handle<v8::Value>();
     return constructor.v8Value();
+}
+
+void WebDocument::pauseAnimationsForTesting(double pauseTime) const {
+    constUnwrap<Document>()->frame()->view()->updateLayoutAndStyleForPainting();
+    constUnwrap<Document>()->timeline().pauseAnimationsForTesting(pauseTime);
 }
 
 WebDocument::WebDocument(const PassRefPtr<Document>& elem)

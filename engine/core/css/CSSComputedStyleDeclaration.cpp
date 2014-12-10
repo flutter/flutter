@@ -193,14 +193,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWordWrap,
     CSSPropertyZIndex,
 
-    CSSPropertyWebkitAnimationDelay,
-    CSSPropertyWebkitAnimationDirection,
-    CSSPropertyWebkitAnimationDuration,
-    CSSPropertyWebkitAnimationFillMode,
-    CSSPropertyWebkitAnimationIterationCount,
-    CSSPropertyWebkitAnimationName,
-    CSSPropertyWebkitAnimationPlayState,
-    CSSPropertyWebkitAnimationTimingFunction,
     CSSPropertyBackfaceVisibility,
     CSSPropertyWebkitBackfaceVisibility,
     CSSPropertyWebkitBackgroundClip,
@@ -263,10 +255,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitTransformOrigin,
     CSSPropertyTransformStyle,
     CSSPropertyWebkitTransformStyle,
-    CSSPropertyWebkitTransitionDelay,
-    CSSPropertyWebkitTransitionDuration,
-    CSSPropertyWebkitTransitionProperty,
-    CSSPropertyWebkitTransitionTimingFunction,
     CSSPropertyWebkitUserDrag,
     CSSPropertyWebkitUserModify,
     CSSPropertyWebkitUserSelect,
@@ -1872,12 +1860,8 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
                 return cssValuePool().createIdentifierValue(CSSValueContentBox);
             return cssValuePool().createIdentifierValue(CSSValueBorderBox);
         case CSSPropertyAnimationDelay:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationDelay:
             return valueForAnimationDelay(style->animations());
-        case CSSPropertyAnimationDirection:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationDirection: {
+        case CSSPropertyAnimationDirection: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
@@ -1889,12 +1873,8 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return list.release();
         }
         case CSSPropertyAnimationDuration:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationDuration:
             return valueForAnimationDuration(style->animations());
-        case CSSPropertyAnimationFillMode:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationFillMode: {
+        case CSSPropertyAnimationFillMode: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
@@ -1905,9 +1885,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             }
             return list.release();
         }
-        case CSSPropertyAnimationIterationCount:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationIterationCount: {
+        case CSSPropertyAnimationIterationCount: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
@@ -1918,9 +1896,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             }
             return list.release();
         }
-        case CSSPropertyAnimationName:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationName: {
+        case CSSPropertyAnimationName: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
@@ -1931,9 +1907,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             }
             return list.release();
         }
-        case CSSPropertyAnimationPlayState:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationPlayState: {
+        case CSSPropertyAnimationPlayState: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
@@ -1945,11 +1919,8 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return list.release();
         }
         case CSSPropertyAnimationTimingFunction:
-            ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-        case CSSPropertyWebkitAnimationTimingFunction:
             return valueForAnimationTimingFunction(style->animations());
-        case CSSPropertyAnimation:
-        case CSSPropertyWebkitAnimation: {
+        case CSSPropertyAnimation: {
             const CSSAnimationData* animationData = style->animations();
             if (animationData) {
                 RefPtr<CSSValueList> animationsList = CSSValueList::createCommaSeparated();
@@ -2093,19 +2064,14 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         case CSSPropertyWebkitTransformStyle:
             return cssValuePool().createIdentifierValue((style->transformStyle3D() == TransformStyle3DPreserve3D) ? CSSValuePreserve3d : CSSValueFlat);
         case CSSPropertyTransitionDelay:
-        case CSSPropertyWebkitTransitionDelay:
             return valueForAnimationDelay(style->transitions());
         case CSSPropertyTransitionDuration:
-        case CSSPropertyWebkitTransitionDuration:
             return valueForAnimationDuration(style->transitions());
         case CSSPropertyTransitionProperty:
-        case CSSPropertyWebkitTransitionProperty:
             return valueForTransitionProperty(style->transitions());
         case CSSPropertyTransitionTimingFunction:
-        case CSSPropertyWebkitTransitionTimingFunction:
             return valueForAnimationTimingFunction(style->transitions());
-        case CSSPropertyTransition:
-        case CSSPropertyWebkitTransition: {
+        case CSSPropertyTransition: {
             const CSSTransitionData* transitionData = style->transitions();
             if (transitionData) {
                 RefPtr<CSSValueList> transitionsList = CSSValueList::createCommaSeparated();

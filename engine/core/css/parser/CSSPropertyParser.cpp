@@ -122,25 +122,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID property, bool important,
     return parser.parseValue(property, important);
 }
 
-void CSSPropertyParser::addPropertyWithPrefixingVariant(CSSPropertyID propId, PassRefPtr<CSSValue> value, bool important, bool implicit)
-{
-    RefPtr<CSSValue> val = value.get();
-    addProperty(propId, value, important, implicit);
-
-    CSSPropertyID prefixingVariant = prefixingVariantForPropertyId(propId);
-    if (prefixingVariant == propId)
-        return;
-
-    if (m_currentShorthand) {
-        // We can't use ShorthandScope here as we can already be inside one (e.g we are parsing CSSTransition).
-        m_currentShorthand = prefixingVariantForPropertyId(m_currentShorthand);
-        addProperty(prefixingVariant, val.release(), important, implicit);
-        m_currentShorthand = prefixingVariantForPropertyId(m_currentShorthand);
-    } else {
-        addProperty(prefixingVariant, val.release(), important, implicit);
-    }
-}
-
 void CSSPropertyParser::addProperty(CSSPropertyID propId, PassRefPtr<CSSValue> value, bool important, bool implicit)
 {
     int shorthandIndex = 0;
@@ -405,7 +386,7 @@ void CSSPropertyParser::addExpandedPropertyForValue(CSSPropertyID propId, PassRe
     const StylePropertyShorthand& shorthand = shorthandForProperty(propId);
     unsigned shorthandLength = shorthand.length();
     if (!shorthandLength) {
-        addPropertyWithPrefixingVariant(propId, prpValue, important);
+        addProperty(propId, prpValue, important);
         return;
     }
 
@@ -413,7 +394,7 @@ void CSSPropertyParser::addExpandedPropertyForValue(CSSPropertyID propId, PassRe
     ShorthandScope scope(this, propId);
     const CSSPropertyID* longhands = shorthand.properties();
     for (unsigned i = 0; i < shorthandLength; ++i)
-        addPropertyWithPrefixingVariant(longhands[i], value, important);
+        addProperty(longhands[i], value, important);
 }
 
 bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
@@ -1099,25 +1080,12 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
     case CSSPropertyAnimationPlayState:
     case CSSPropertyAnimationIterationCount:
     case CSSPropertyAnimationTimingFunction:
-        ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-    case CSSPropertyWebkitAnimationDelay:
-    case CSSPropertyWebkitAnimationDirection:
-    case CSSPropertyWebkitAnimationDuration:
-    case CSSPropertyWebkitAnimationFillMode:
-    case CSSPropertyWebkitAnimationName:
-    case CSSPropertyWebkitAnimationPlayState:
-    case CSSPropertyWebkitAnimationIterationCount:
-    case CSSPropertyWebkitAnimationTimingFunction:
     case CSSPropertyTransitionDelay:
     case CSSPropertyTransitionDuration:
     case CSSPropertyTransitionTimingFunction:
-    case CSSPropertyTransitionProperty:
-    case CSSPropertyWebkitTransitionDelay:
-    case CSSPropertyWebkitTransitionDuration:
-    case CSSPropertyWebkitTransitionTimingFunction:
-    case CSSPropertyWebkitTransitionProperty: {
+    case CSSPropertyTransitionProperty: {
         if (RefPtr<CSSValueList> val = parseAnimationPropertyList(propId)) {
-            addPropertyWithPrefixingVariant(propId, val.release(), important);
+            addProperty(propId, val.release(), important);
             return true;
         }
         return false;
@@ -1231,11 +1199,8 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
     case CSSPropertyWebkitTextStroke:
         return parseShorthand(propId, webkitTextStrokeShorthand(), important);
     case CSSPropertyAnimation:
-        ASSERT(RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled());
-    case CSSPropertyWebkitAnimation:
         return parseAnimationShorthand(propId, important);
     case CSSPropertyTransition:
-    case CSSPropertyWebkitTransition:
         return parseTransitionShorthand(propId, important);
     case CSSPropertyInvalid:
         return false;
@@ -1560,10 +1525,7 @@ bool CSSPropertyParser::parseAnimationShorthand(CSSPropertyID propId, bool impor
         if (!parsedProperty[i])
             values[i]->append(cssValuePool().createImplicitInitialValue());
 
-        if (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled())
-            addPropertyWithPrefixingVariant(animationProperties.properties()[i], values[i].release(), important);
-        else
-            addProperty(animationProperties.properties()[i], values[i].release(), important);
+        addProperty(animationProperties.properties()[i], values[i].release(), important);
     }
 
     return true;
@@ -1611,7 +1573,7 @@ bool CSSPropertyParser::parseTransitionShorthand(CSSPropertyID propId, bool impo
             return false;
     }
 
-    ASSERT(shorthand.properties()[3] == CSSPropertyTransitionProperty || shorthand.properties()[3] == CSSPropertyWebkitTransitionProperty);
+    ASSERT(shorthand.properties()[3] == CSSPropertyTransitionProperty);
     if (!isValidTransitionPropertyList(values[3].get()))
         return false;
 
@@ -1619,7 +1581,7 @@ bool CSSPropertyParser::parseTransitionShorthand(CSSPropertyID propId, bool impo
     for (size_t i = 0; i < numProperties; ++i) {
         if (!parsedProperty[i])
             values[i]->append(cssValuePool().createImplicitInitialValue());
-        addPropertyWithPrefixingVariant(shorthand.properties()[i], values[i].release(), important);
+        addProperty(shorthand.properties()[i], values[i].release(), important);
     }
 
     return true;
@@ -2665,8 +2627,6 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseAnimationTimingFunction()
                 return nullptr;
             switch (args->current()->id) {
             case CSSValueMiddle:
-                if (!RuntimeEnabledFeatures::webAnimationsAPIEnabled())
-                    return nullptr;
                 stepAtPosition = StepsTimingFunction::StepAtMiddle;
                 break;
             case CSSValueStart:
@@ -2715,45 +2675,33 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseAnimationProperty(CSSPropertyID pro
     RefPtr<CSSValue> value = nullptr;
     switch (propId) {
     case CSSPropertyAnimationDelay:
-    case CSSPropertyWebkitAnimationDelay:
     case CSSPropertyTransitionDelay:
-    case CSSPropertyWebkitTransitionDelay:
         value = parseAnimationDelay();
         break;
     case CSSPropertyAnimationDirection:
-    case CSSPropertyWebkitAnimationDirection:
         value = parseAnimationDirection();
         break;
     case CSSPropertyAnimationDuration:
-    case CSSPropertyWebkitAnimationDuration:
     case CSSPropertyTransitionDuration:
-    case CSSPropertyWebkitTransitionDuration:
         value = parseAnimationDuration();
         break;
     case CSSPropertyAnimationFillMode:
-    case CSSPropertyWebkitAnimationFillMode:
         value = parseAnimationFillMode();
         break;
     case CSSPropertyAnimationIterationCount:
-    case CSSPropertyWebkitAnimationIterationCount:
         value = parseAnimationIterationCount();
         break;
     case CSSPropertyAnimationName:
-    case CSSPropertyWebkitAnimationName:
         value = parseAnimationName();
         break;
     case CSSPropertyAnimationPlayState:
-    case CSSPropertyWebkitAnimationPlayState:
         value = parseAnimationPlayState();
         break;
     case CSSPropertyTransitionProperty:
-    case CSSPropertyWebkitTransitionProperty:
         value = parseAnimationProperty();
         break;
     case CSSPropertyAnimationTimingFunction:
-    case CSSPropertyWebkitAnimationTimingFunction:
     case CSSPropertyTransitionTimingFunction:
-    case CSSPropertyWebkitTransitionTimingFunction:
         value = parseAnimationTimingFunction();
         break;
     default:
@@ -2781,7 +2729,7 @@ PassRefPtr<CSSValueList> CSSPropertyParser::parseAnimationPropertyList(CSSProper
             ASSERT(m_valueList->current());
         }
     }
-    if ((propId == CSSPropertyTransitionProperty || propId == CSSPropertyWebkitTransitionProperty) && !isValidTransitionPropertyList(list.get()))
+    if (propId == CSSPropertyTransitionProperty && !isValidTransitionPropertyList(list.get()))
         return nullptr;
     ASSERT(list->length());
     return list.release();

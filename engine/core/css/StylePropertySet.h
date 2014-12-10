@@ -193,18 +193,14 @@ public:
     // These do not. FIXME: This is too messy, we can do better.
     bool setProperty(CSSPropertyID, CSSValueID identifier, bool important = false);
     bool setProperty(CSSPropertyID, CSSPropertyID identifier, bool important = false);
-    void appendPrefixingVariantProperty(const CSSProperty&);
-    void setPrefixingVariantProperty(const CSSProperty&);
+    void appendProperty(const CSSProperty&);
     void setProperty(const CSSProperty&, CSSProperty* slot = 0);
 
     bool removeProperty(CSSPropertyID, String* returnText = 0);
-    void removePrefixedOrUnprefixedProperty(CSSPropertyID);
     void removeBlockProperties();
     bool removePropertiesInSet(const CSSPropertyID* set, unsigned length);
     void removeEquivalentProperties(const StylePropertySet*);
     void removeEquivalentProperties(const CSSStyleDeclaration*);
-
-    void mergeAndOverrideOnConflict(const StylePropertySet*);
 
     void clear();
     void parseDeclaration(const String& styleDeclaration, StyleSheetContents* contextStyleSheet);

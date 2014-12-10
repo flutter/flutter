@@ -36,5 +36,5 @@ partial interface Element {
     // FIXME: needs support for union types http://crbug.com/240176
     // AnimationPlayer animate((AnimationEffect or sequence<Dictionary>)? effect, optional (double or Dictionary) timing);
     [Custom, RaisesException] AnimationPlayer animate(object effect, optional object timing);
-    [RuntimeEnabled=WebAnimationsAPI] sequence<AnimationPlayer> getAnimationPlayers();
+    sequence<AnimationPlayer> getAnimationPlayers();
 };

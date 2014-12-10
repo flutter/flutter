@@ -2067,13 +2067,13 @@ PassRefPtr<Event> Document::createEvent(const String& eventType, ExceptionState&
 
 void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
 {
-    if (eventType == EventTypeNames::webkitAnimationStart || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationstart)) {
+    if (eventType == EventTypeNames::animationstart) {
         addListenerType(ANIMATIONSTART_LISTENER);
-    } else if (eventType == EventTypeNames::webkitAnimationEnd || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationend)) {
+    } else if (eventType == EventTypeNames::animationend) {
         addListenerType(ANIMATIONEND_LISTENER);
-    } else if (eventType == EventTypeNames::webkitAnimationIteration || (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && eventType == EventTypeNames::animationiteration)) {
+    } else if (eventType == EventTypeNames::animationiteration) {
         addListenerType(ANIMATIONITERATION_LISTENER);
-    } else if (eventType == EventTypeNames::webkitTransitionEnd || eventType == EventTypeNames::transitionend) {
+    } else if (eventType == EventTypeNames::transitionend) {
         addListenerType(TRANSITIONEND_LISTENER);
     } else if (eventType == EventTypeNames::scroll) {
         addListenerType(SCROLL_LISTENER);

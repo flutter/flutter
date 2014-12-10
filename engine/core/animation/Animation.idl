@@ -36,6 +36,5 @@
     Constructor(Element? target, sequence<Dictionary> keyframes, double timingInput),
     Constructor(Element? target, sequence<Dictionary> keyframes, Dictionary timingInput),
     RaisesException=Constructor,
-    RuntimeEnabled=WebAnimationsAPI,
 ] interface Animation : AnimationNode {
 };

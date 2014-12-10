@@ -6,6 +6,5 @@ MouseEvents ImplementedAs=MouseEvent
 OrientationEvent ImplementedAs=Event, RuntimeEnabled=OrientationEventEnabled
 SVGEvents ImplementedAs=Event
 UIEvents ImplementedAs=UIEvent
-WebKitTransitionEvent ImplementedAs=TransitionEvent
 
 core/events/TouchEvent RuntimeEnabled=touchEnabled

@@ -32,17 +32,17 @@
     NoInterfaceObject,
     ActiveDOMObject,
 ] interface AnimationPlayer : EventTarget {
-    [RuntimeEnabled=WebAnimationsAPI]          attribute AnimationNode? source;
-    [RuntimeEnabled=WebAnimationsAPI]          attribute double     startTime;
-    [RuntimeEnabled=WebAnimationsAPI]          attribute double     currentTime;
-    [RuntimeEnabled=WebAnimationsAPI]          attribute double     playbackRate;
-    [RuntimeEnabled=WebAnimationsAPI] readonly attribute boolean    paused;
-    [RuntimeEnabled=WebAnimationsAPI] readonly attribute boolean    finished;
-    [RuntimeEnabled=WebAnimationsAPI] readonly attribute DOMString  playState;
-    [RuntimeEnabled=WebAnimationsAPI, RaisesException] void finish();
-    [RuntimeEnabled=WebAnimationsAPI] void play();
-    [RuntimeEnabled=WebAnimationsAPI] void pause();
-    [RuntimeEnabled=WebAnimationsAPI] void reverse();
+    attribute AnimationNode? source;
+    attribute double     startTime;
+    attribute double     currentTime;
+    attribute double     playbackRate;
+    readonly attribute boolean    paused;
+    readonly attribute boolean    finished;
+    readonly attribute DOMString  playState;
+    [RaisesException] void finish();
+    void play();
+    void pause();
+    void reverse();
 
     void cancel();
 };

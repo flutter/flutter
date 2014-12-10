@@ -52,36 +52,30 @@ PassRefPtr<Animation> Animation::create(Element* target, PassRefPtr<AnimationEff
 
 PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, const Dictionary& timingInputDictionary)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, TimingInput::convert(timingInputDictionary));
 }
 PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, double duration)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, TimingInput::convert(duration));
 }
 PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     return create(element, effect, Timing());
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
         UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectObjectTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(timingInputDictionary));
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
         UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectDoubleTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(duration));
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
 {
-    ASSERT(RuntimeEnabledFeatures::webAnimationsAPIEnabled());
     if (element)
         UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectNoTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), Timing());

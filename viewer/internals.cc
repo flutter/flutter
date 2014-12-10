@@ -9,6 +9,7 @@
 #include "mojo/edk/js/support.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
+#include "sky/engine/public/web/WebDocument.h"
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/viewer/document_view.h"
@@ -46,7 +47,8 @@ gin::ObjectTemplateBuilder Internals::GetObjectTemplateBuilder(
       .SetMethod("renderTreeAsText", &Internals::RenderTreeAsText)
       .SetMethod("contentAsText", &Internals::ContentAsText)
       .SetMethod("notifyTestComplete", &Internals::NotifyTestComplete)
-      .SetMethod("connectToService", &Internals::ConnectToService);
+      .SetMethod("connectToService", &Internals::ConnectToService)
+      .SetMethod("pauseAnimations", &Internals::pauseAnimations);
 }
 
 std::string Internals::RenderTreeAsText() {
@@ -78,6 +80,13 @@ mojo::Handle Internals::ConnectToService(
   mojo::MessagePipe pipe;
   service_provider->ConnectToService(interface_name, pipe.handle1.Pass());
   return pipe.handle0.release();
+}
+
+void Internals::pauseAnimations(double pauseTime) {
+  if (pauseTime < 0)
+    return;
+
+    document_view_->web_view()->mainFrame()->document().pauseAnimationsForTesting(pauseTime);
 }
 
 }  // namespace sky

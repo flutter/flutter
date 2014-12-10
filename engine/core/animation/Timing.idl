@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 [
-    RuntimeEnabled=WebAnimationsAPI,
     ImplementedAs=AnimationNodeTiming,
 ] interface Timing {
     attribute double delay;

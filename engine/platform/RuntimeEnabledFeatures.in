@@ -32,7 +32,6 @@ BleedingEdgeFastPaths
 
 ClientHintsDpr status=experimental
 Crypto status=stable
-CSSAnimationUnprefixed status=experimental
 CSSAttributeCaseSensitivity status=experimental
 CSSMaskSourceType status=experimental
 CSSOMSmoothScroll status=experimental
@@ -121,7 +120,6 @@ HoverMediaQueryKeywords status=stable
 TextBlob
 TouchIconLoading
 UserSelectAll status=experimental
-WebAnimationsAPI status=experimental
 WebGLDraftExtensions status=experimental
 WebGLImageChromium
 WOFF2 status=stable

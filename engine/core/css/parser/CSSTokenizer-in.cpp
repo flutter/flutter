@@ -904,8 +904,7 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
             m_token = FONT_FACE_SYM;
         }
         CASE("keyframes") {
-            if (RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled())
-                m_token = KEYFRAMES_SYM;
+            m_token = KEYFRAMES_SYM;
         }
         CASE("media") {
             m_parsingMode = MediaQueryMode;
@@ -926,9 +925,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
         CASE("-internal-value") {
             if (LIKELY(!hasEscape && m_internal))
                 m_token = INTERNAL_VALUE_SYM;
-        }
-        CASE("-webkit-keyframes") {
-            m_token = WEBKIT_KEYFRAMES_SYM;
         }
         CASE("-internal-selector") {
             if (LIKELY(!hasEscape && m_internal))

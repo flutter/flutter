@@ -109,7 +109,7 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
         for (unsigned j = 0; j < properties.propertyCount(); j++) {
             specifiedPropertiesForUseCounter.add(properties.propertyAt(j).id());
             CSSPropertyID property = propertyForAnimation(properties.propertyAt(j).id());
-            if (property == CSSPropertyWebkitAnimationTimingFunction || property == CSSPropertyAnimationTimingFunction) {
+            if (property == CSSPropertyAnimationTimingFunction) {
                 CSSValue* value = properties.propertyAt(j).value();
                 RefPtr<TimingFunction> timingFunction;
                 if (value->isInheritedValue() && parentStyle->animations())
@@ -642,20 +642,6 @@ bool CSSAnimations::isAllowedAnimation(CSSPropertyID property)
     case CSSPropertyTransitionDuration:
     case CSSPropertyTransitionProperty:
     case CSSPropertyTransitionTimingFunction:
-    case CSSPropertyWebkitAnimation:
-    case CSSPropertyWebkitAnimationDelay:
-    case CSSPropertyWebkitAnimationDirection:
-    case CSSPropertyWebkitAnimationDuration:
-    case CSSPropertyWebkitAnimationFillMode:
-    case CSSPropertyWebkitAnimationIterationCount:
-    case CSSPropertyWebkitAnimationName:
-    case CSSPropertyWebkitAnimationPlayState:
-    case CSSPropertyWebkitAnimationTimingFunction:
-    case CSSPropertyWebkitTransition:
-    case CSSPropertyWebkitTransitionDelay:
-    case CSSPropertyWebkitTransitionDuration:
-    case CSSPropertyWebkitTransitionProperty:
-    case CSSPropertyWebkitTransitionTimingFunction:
         return false;
     default:
         return true;

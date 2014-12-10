@@ -68,9 +68,6 @@ public:
         UnprefixedIndexedDB = 9,
         UnprefixedRequestAnimationFrame = 13,
         PrefixedRequestAnimationFrame = 14,
-        PrefixedTransitionEndEvent = 18,
-        UnprefixedTransitionEndEvent = 19,
-        PrefixedAndUnprefixedTransitionEndEvent = 20,
 
         DataListElement = 23,
         FormAttribute = 24,
@@ -137,15 +134,6 @@ public:
         NavigatorVendorSub = 125,
         FileError = 126,
         DocumentCharset = 127, // Documented as IE extensions = 0, from KHTML days.
-        PrefixedAnimationEndEvent = 128,
-        UnprefixedAnimationEndEvent = 129,
-        PrefixedAndUnprefixedAnimationEndEvent = 130,
-        PrefixedAnimationStartEvent = 131,
-        UnprefixedAnimationStartEvent = 132,
-        PrefixedAndUnprefixedAnimationStartEvent = 133,
-        PrefixedAnimationIterationEvent = 134,
-        UnprefixedAnimationIterationEvent = 135,
-        PrefixedAndUnprefixedAnimationIterationEvent = 136,
         EventReturnValue = 137, // Legacy IE extension.
         HasAttributes = 142, // Removed from DOM4.
         DOMSubtreeModifiedEvent = 143,

@@ -76,6 +76,15 @@ String StylePropertySerializer::asText() const
         String value;
 
         switch (propertyID) {
+        case CSSPropertyAnimationName:
+        case CSSPropertyAnimationDuration:
+        case CSSPropertyAnimationTimingFunction:
+        case CSSPropertyAnimationDelay:
+        case CSSPropertyAnimationIterationCount:
+        case CSSPropertyAnimationDirection:
+        case CSSPropertyAnimationFillMode:
+            shorthandPropertyID = CSSPropertyAnimation;
+            break;
         case CSSPropertyBackgroundAttachment:
         case CSSPropertyBackgroundClip:
         case CSSPropertyBackgroundColor:
@@ -164,15 +173,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyTransitionDelay:
             shorthandPropertyID = CSSPropertyTransition;
             break;
-        case CSSPropertyWebkitAnimationName:
-        case CSSPropertyWebkitAnimationDuration:
-        case CSSPropertyWebkitAnimationTimingFunction:
-        case CSSPropertyWebkitAnimationDelay:
-        case CSSPropertyWebkitAnimationIterationCount:
-        case CSSPropertyWebkitAnimationDirection:
-        case CSSPropertyWebkitAnimationFillMode:
-            shorthandPropertyID = CSSPropertyWebkitAnimation;
-            break;
         case CSSPropertyFlexDirection:
         case CSSPropertyFlexWrap:
             shorthandPropertyID = CSSPropertyFlexFlow;
@@ -197,12 +197,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyWebkitTransformOriginY:
         case CSSPropertyWebkitTransformOriginZ:
             shorthandPropertyID = CSSPropertyWebkitTransformOrigin;
-            break;
-        case CSSPropertyWebkitTransitionProperty:
-        case CSSPropertyWebkitTransitionDuration:
-        case CSSPropertyWebkitTransitionTimingFunction:
-        case CSSPropertyWebkitTransitionDelay:
-            shorthandPropertyID = CSSPropertyWebkitTransition;
             break;
         default:
             break;
@@ -299,10 +293,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
     case CSSPropertyTransformOrigin:
     case CSSPropertyWebkitTransformOrigin:
         return getShorthandValue(webkitTransformOriginShorthand());
-    case CSSPropertyWebkitTransition:
-        return getLayeredShorthandValue(webkitTransitionShorthand());
-    case CSSPropertyWebkitAnimation:
-        return getLayeredShorthandValue(webkitAnimationShorthand());
     case CSSPropertyBorderRadius:
         return get4Values(borderRadiusShorthand());
     default:

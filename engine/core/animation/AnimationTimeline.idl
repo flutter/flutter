@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[
-    RuntimeEnabled=WebAnimationsAPI,
-] interface AnimationTimeline {
+interface AnimationTimeline {
     readonly attribute double? currentTime;
     AnimationPlayer play(AnimationNode source);
     sequence<AnimationPlayer> getAnimationPlayers();

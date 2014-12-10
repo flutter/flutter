@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 [
-    RuntimeEnabled=WebAnimationsAPI,
     NoInterfaceObject,
 ] interface AnimationEffect {
 };

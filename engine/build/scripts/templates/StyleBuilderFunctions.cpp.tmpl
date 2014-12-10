@@ -100,18 +100,18 @@ namespace blink {
         data.{{vector}}.append(state.styleMap().mapAnimation{{attribute}}(i.value()));
 }
 {% endmacro %}
-{{apply_animation('CSSPropertyWebkitAnimationDelay', 'Delay', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationDirection', 'Direction', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationDuration', 'Duration', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationFillMode', 'FillMode', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationIterationCount', 'IterationCount', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationName', 'Name', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationPlayState', 'PlayState', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitAnimationTimingFunction', 'TimingFunction', 'Animation')}}
-{{apply_animation('CSSPropertyWebkitTransitionDelay', 'Delay', 'Transition')}}
-{{apply_animation('CSSPropertyWebkitTransitionDuration', 'Duration', 'Transition')}}
-{{apply_animation('CSSPropertyWebkitTransitionProperty', 'Property', 'Transition')}}
-{{apply_animation('CSSPropertyWebkitTransitionTimingFunction', 'TimingFunction', 'Transition')}}
+{{apply_animation('CSSPropertyAnimationDelay', 'Delay', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationDirection', 'Direction', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationDuration', 'Duration', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationFillMode', 'FillMode', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationIterationCount', 'IterationCount', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationName', 'Name', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationPlayState', 'PlayState', 'Animation')}}
+{{apply_animation('CSSPropertyAnimationTimingFunction', 'TimingFunction', 'Animation')}}
+{{apply_animation('CSSPropertyTransitionDelay', 'Delay', 'Transition')}}
+{{apply_animation('CSSPropertyTransitionDuration', 'Duration', 'Transition')}}
+{{apply_animation('CSSPropertyTransitionProperty', 'Property', 'Transition')}}
+{{apply_animation('CSSPropertyTransitionTimingFunction', 'TimingFunction', 'Transition')}}
 
 {% macro apply_auto(property_id, auto_getter=none, auto_setter=none, auto_identity='CSSValueAuto') %}
 {% set property = properties[property_id] %}

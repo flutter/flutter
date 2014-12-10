@@ -324,7 +324,7 @@ h1 :hover {
 }
 
 .overallComments .open {
-  -webkit-transition: height .2s;
+  transition: height .2s;
   height: 4em;
 }
 
@@ -407,7 +407,7 @@ h1 :hover {
   font-family: sans-serif;
   font-size: small;
   font-style: normal;
-  -webkit-transition: opacity 0.5s;
+  transition: opacity 0.5s;
 }
 
 .LinkContainer a {
@@ -487,7 +487,7 @@ div:focus {
   padding: 0 3px;
   outline: 1px solid #DDD;
   color: #8FDF5F;
-  font-size: small;   
+  font-size: small;
   background-color: #EEE;
 }
 

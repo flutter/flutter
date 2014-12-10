@@ -4,7 +4,6 @@
 
 [
     EventConstructor,
-    RuntimeEnabled=WebAnimationsAPI,
 ] interface AnimationPlayerEvent : Event {
     [InitializedByEventConstructor] readonly attribute double currentTime;
     [InitializedByEventConstructor] readonly attribute double timelineTime;

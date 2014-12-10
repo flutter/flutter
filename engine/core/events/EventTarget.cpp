@@ -159,59 +159,10 @@ void EventTarget::uncaughtExceptionInEventHandler()
 
 static const AtomicString& legacyType(const Event* event)
 {
-    if (event->type() == EventTypeNames::transitionend)
-        return EventTypeNames::webkitTransitionEnd;
-
-    if (event->type() == EventTypeNames::animationstart)
-        return EventTypeNames::webkitAnimationStart;
-
-    if (event->type() == EventTypeNames::animationend)
-        return EventTypeNames::webkitAnimationEnd;
-
-    if (event->type() == EventTypeNames::animationiteration)
-        return EventTypeNames::webkitAnimationIteration;
-
     if (event->type() == EventTypeNames::wheel)
         return EventTypeNames::mousewheel;
 
     return emptyAtom;
-}
-
-void EventTarget::countLegacyEvents(const AtomicString& legacyTypeName, EventListenerVector* listenersVector, EventListenerVector* legacyListenersVector)
-{
-    UseCounter::Feature unprefixedFeature;
-    UseCounter::Feature prefixedFeature;
-    UseCounter::Feature prefixedAndUnprefixedFeature;
-    if (legacyTypeName == EventTypeNames::webkitTransitionEnd) {
-        prefixedFeature = UseCounter::PrefixedTransitionEndEvent;
-        unprefixedFeature = UseCounter::UnprefixedTransitionEndEvent;
-        prefixedAndUnprefixedFeature = UseCounter::PrefixedAndUnprefixedTransitionEndEvent;
-    } else if (legacyTypeName == EventTypeNames::webkitAnimationEnd) {
-        prefixedFeature = UseCounter::PrefixedAnimationEndEvent;
-        unprefixedFeature = UseCounter::UnprefixedAnimationEndEvent;
-        prefixedAndUnprefixedFeature = UseCounter::PrefixedAndUnprefixedAnimationEndEvent;
-    } else if (legacyTypeName == EventTypeNames::webkitAnimationStart) {
-        prefixedFeature = UseCounter::PrefixedAnimationStartEvent;
-        unprefixedFeature = UseCounter::UnprefixedAnimationStartEvent;
-        prefixedAndUnprefixedFeature = UseCounter::PrefixedAndUnprefixedAnimationStartEvent;
-    } else if (legacyTypeName == EventTypeNames::webkitAnimationIteration) {
-        prefixedFeature = UseCounter::PrefixedAnimationIterationEvent;
-        unprefixedFeature = UseCounter::UnprefixedAnimationIterationEvent;
-        prefixedAndUnprefixedFeature = UseCounter::PrefixedAndUnprefixedAnimationIterationEvent;
-    } else {
-        return;
-    }
-
-    if (LocalDOMWindow* executingWindow = this->executingWindow()) {
-        if (legacyListenersVector) {
-            if (listenersVector)
-                UseCounter::count(executingWindow->document(), prefixedAndUnprefixedFeature);
-            else
-                UseCounter::count(executingWindow->document(), prefixedFeature);
-        } else if (listenersVector) {
-            UseCounter::count(executingWindow->document(), unprefixedFeature);
-        }
-    }
 }
 
 bool EventTarget::fireEventListeners(Event* event)
@@ -229,13 +180,6 @@ bool EventTarget::fireEventListeners(Event* event)
         legacyListenersVector = d->eventListenerMap.find(legacyTypeName);
 
     EventListenerVector* listenersVector = d->eventListenerMap.find(event->type());
-    if (!RuntimeEnabledFeatures::cssAnimationUnprefixedEnabled() && (event->type() == EventTypeNames::animationiteration || event->type() == EventTypeNames::animationend
-        || event->type() == EventTypeNames::animationstart)
-        // Some code out-there uses custom events to dispatch unprefixed animation events manually,
-        // we can safely remove all this block when cssAnimationUnprefixedEnabled is always on, this
-        // is really a special case. DO NOT ADD MORE EVENTS HERE.
-        && event->interfaceName() != EventNames::CustomEvent)
-        listenersVector = 0;
 
     if (listenersVector) {
         fireEventListeners(event, d, *listenersVector);
@@ -247,7 +191,6 @@ bool EventTarget::fireEventListeners(Event* event)
     }
 
     Editor::countEvent(executionContext(), event);
-    countLegacyEvents(legacyTypeName, listenersVector, legacyListenersVector);
     return !event->defaultPrevented();
 }
 

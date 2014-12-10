@@ -34,6 +34,8 @@ class Internals : public gin::Wrappable<Internals> {
   mojo::Handle ConnectToService(
       const std::string& application_url, const std::string& interface_name);
 
+  void pauseAnimations(double pauseTime);
+
   base::WeakPtr<DocumentView> document_view_;
   TestHarnessPtr test_harness_;
 

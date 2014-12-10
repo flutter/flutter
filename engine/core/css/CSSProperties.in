@@ -213,14 +213,14 @@ transform-origin animatable, custom_all
 transform-style name_for_methods=TransformStyle3D
 unicode-bidi
 vertical-align animatable, custom_inherit, custom_value
--webkit-animation-delay custom_all
--webkit-animation-direction custom_all
--webkit-animation-duration custom_all
--webkit-animation-fill-mode custom_all
--webkit-animation-iteration-count custom_all
--webkit-animation-name custom_all
--webkit-animation-play-state custom_all
--webkit-animation-timing-function custom_all
+animation-delay custom_all
+animation-direction custom_all
+animation-duration custom_all
+animation-fill-mode custom_all
+animation-iteration-count custom_all
+animation-name custom_all
+animation-play-state custom_all
+animation-timing-function custom_all
 -webkit-aspect-ratio inherited, custom_all
 -webkit-backface-visibility use_handlers_for=CSSPropertyBackfaceVisibility
 -webkit-background-clip use_handlers_for=CSSPropertyBackgroundClip
@@ -269,10 +269,10 @@ vertical-align animatable, custom_inherit, custom_value
 -webkit-transform-origin-y converter=convertLength
 -webkit-transform-origin-z converter=convertComputedLength<float>
 -webkit-transform-style name_for_methods=TransformStyle3D
--webkit-transition-delay custom_all
--webkit-transition-duration custom_all
--webkit-transition-property custom_all
--webkit-transition-timing-function custom_all
+transition-delay custom_all
+transition-duration custom_all
+transition-property custom_all
+transition-timing-function custom_all
 -webkit-user-drag
 -webkit-user-modify inherited
 -webkit-user-select inherited
@@ -315,33 +315,19 @@ z-index animatable, type_name=int, custom_all
 -webkit-max-logical-width direction_aware
 -webkit-max-logical-height direction_aware
 
-// Properties that we ignore in the StyleBuilder. Note that unprefixed animation
-// and transition properties are here due to the way they have been unprefixed
+// Properties that we ignore in the StyleBuilder.
 // FIXME: We should see if any of these should actually be unreachable
 
 all builder_skip
-animation-delay runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-direction runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-duration runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-fill-mode runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-iteration-count runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-name runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-play-state runtime_flag=CSSAnimationUnprefixed, builder_skip
-animation-timing-function runtime_flag=CSSAnimationUnprefixed, builder_skip
 orientation builder_skip
 page builder_skip
 src builder_skip
-transition-delay builder_skip
-transition-duration builder_skip
-transition-property builder_skip
-transition-timing-function builder_skip
 unicode-range builder_skip
 -webkit-font-size-delta builder_skip
 -webkit-text-decorations-in-effect inherited, builder_skip
 
 // Shorthands
 
-animation runtime_flag=CSSAnimationUnprefixed, longhands=animation-name;animation-duration;animation-timing-function;animation-delay;animation-iteration-count;animation-direction;animation-fill-mode;animation-play-state
 background longhands=background-image;background-position-x;background-position-y;background-size;background-repeat-x;background-repeat-y;background-attachment;background-origin;background-clip;background-color
 background-position longhands=background-position-x;background-position-y
 background-repeat longhands=background-repeat-x;background-repeat-y
@@ -363,8 +349,7 @@ margin longhands=margin-top;margin-right;margin-bottom;margin-left
 outline longhands=outline-color;outline-style;outline-width
 overflow longhands=overflow-x;overflow-y
 padding longhands=padding-top;padding-right;padding-bottom;padding-left
-transition longhands=transition-property;transition-duration;transition-timing-function;transition-delay
--webkit-animation longhands=-webkit-animation-name;-webkit-animation-duration;-webkit-animation-timing-function;-webkit-animation-delay;-webkit-animation-iteration-count;-webkit-animation-direction;-webkit-animation-fill-mode;-webkit-animation-play-state
+animation longhands=animation-name;animation-duration;animation-timing-function;animation-delay;animation-iteration-count;animation-direction;animation-fill-mode;animation-play-state
 -webkit-border-after longhands=-webkit-border-after-width;-webkit-border-after-style;-webkit-border-after-color
 -webkit-border-before longhands=-webkit-border-before-width;-webkit-border-before-style;-webkit-border-before-color
 -webkit-border-end longhands=-webkit-border-end-width;-webkit-border-end-style;-webkit-border-end-color
@@ -378,7 +363,7 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 -webkit-text-emphasis longhands=-webkit-text-emphasis-style;-webkit-text-emphasis-color
 -webkit-text-stroke longhands=-webkit-text-stroke-width;-webkit-text-stroke-color
 -webkit-transform-origin longhands=-webkit-transform-origin-x;-webkit-transform-origin-y;-webkit-transform-origin-z
--webkit-transition longhands=-webkit-transition-property;-webkit-transition-duration;-webkit-transition-timing-function;-webkit-transition-delay
+transition longhands=transition-property;transition-duration;transition-timing-function;transition-delay
 
 // Aliases; these map to the same CSSPropertyID
 
