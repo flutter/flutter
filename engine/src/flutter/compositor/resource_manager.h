@@ -7,7 +7,7 @@
 
 #include "base/containers/hash_tables.h"
 #include "base/memory/weak_ptr.h"
-#include "mojo/services/public/interfaces/surfaces/surfaces.mojom.h"
+#include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
 
 namespace gfx {
 class Size;
