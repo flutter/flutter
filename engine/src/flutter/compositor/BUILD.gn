@@ -32,7 +32,7 @@ source_set("compositor") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
-    "//mojo/services/public/interfaces/geometry",
+    "//mojo/services/geometry/public/interfaces",
     "//mojo/services/surfaces/public/cpp",
     "//mojo/services/surfaces/public/interfaces",
     "//mojo/services/surfaces/public/interfaces:surface_id",
