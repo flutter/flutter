@@ -39,6 +39,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace blink {
 
@@ -77,8 +78,8 @@ public:
         m_actualDecoder = decoder.get();
         m_actualDecoder->setSize(1, 1);
         m_lazyDecoder = DeferredImageDecoder::createForTesting(decoder.release());
-        m_canvas.reset(SkCanvas::NewRasterN32(100, 100));
-        ASSERT_TRUE(m_canvas.get());
+        m_surface.reset(SkSurface::NewRasterPMColor(100, 100));
+        ASSERT_TRUE(m_surface.get());
         m_frameBufferRequestCount = 0;
         m_frameCount = 1;
         m_repetitionCount = cAnimationNone;
@@ -136,7 +137,7 @@ protected:
     // Don't own this but saves the pointer to query states.
     MockImageDecoder* m_actualDecoder;
     OwnPtr<DeferredImageDecoder> m_lazyDecoder;
-    SkAutoTUnref<SkCanvas> m_canvas;
+    SkAutoTUnref<SkSurface> m_surface;
     int m_frameBufferRequestCount;
     RefPtr<SharedBuffer> m_data;
     size_t m_frameCount;
@@ -161,12 +162,12 @@ TEST_F(DeferredImageDecoderTest, drawIntoSkPicture)
     RefPtr<SkPicture> picture = adoptRef(recorder.endRecording());
     EXPECT_EQ(0, m_frameBufferRequestCount);
 
-    m_canvas->drawPicture(picture.get());
+    m_surface->getCanvas()->drawPicture(picture.get());
     EXPECT_EQ(0, m_frameBufferRequestCount);
 
     SkBitmap canvasBitmap;
     canvasBitmap.allocN32Pixels(100, 100);
-    ASSERT_TRUE(m_canvas->readPixels(&canvasBitmap, 0, 0));
+    ASSERT_TRUE(m_surface->getCanvas()->readPixels(&canvasBitmap, 0, 0));
     SkAutoLockPixels autoLock(canvasBitmap);
     EXPECT_EQ(SkColorSetARGB(255, 255, 255, 255), canvasBitmap.getColor(0, 0));
 }
@@ -182,7 +183,7 @@ TEST_F(DeferredImageDecoderTest, drawIntoSkPictureProgressive)
     SkCanvas* tempCanvas = recorder.beginRecording(100, 100, 0, 0);
     tempCanvas->drawBitmap(image->bitmap(), 0, 0);
     RefPtr<SkPicture> picture = adoptRef(recorder.endRecording());
-    m_canvas->drawPicture(picture.get());
+    m_surface->getCanvas()->drawPicture(picture.get());
 
     // Fully received the file and draw the SkPicture again.
     m_lazyDecoder->setData(*m_data, true);
@@ -190,11 +191,11 @@ TEST_F(DeferredImageDecoderTest, drawIntoSkPictureProgressive)
     tempCanvas = recorder.beginRecording(100, 100, 0, 0);
     tempCanvas->drawBitmap(image->bitmap(), 0, 0);
     picture = adoptRef(recorder.endRecording());
-    m_canvas->drawPicture(picture.get());
+    m_surface->getCanvas()->drawPicture(picture.get());
 
     SkBitmap canvasBitmap;
     canvasBitmap.allocN32Pixels(100, 100);
-    ASSERT_TRUE(m_canvas->readPixels(&canvasBitmap, 0, 0));
+    ASSERT_TRUE(m_surface->getCanvas()->readPixels(&canvasBitmap, 0, 0));
     SkAutoLockPixels autoLock(canvasBitmap);
     EXPECT_EQ(SkColorSetARGB(255, 255, 255, 255), canvasBitmap.getColor(0, 0));
 }
@@ -222,13 +223,13 @@ TEST_F(DeferredImageDecoderTest, decodeOnOtherThread)
     // Create a thread to rasterize SkPicture.
     OwnPtr<base::Thread> thread = adoptPtr(new base::Thread("RasterThread"));
     thread->Start();
-    thread->message_loop()->PostTask(FROM_HERE, base::Bind(&rasterizeMain, m_canvas.get(), picture.get()));
+    thread->message_loop()->PostTask(FROM_HERE, base::Bind(&rasterizeMain, m_surface->getCanvas(), picture.get()));
     thread.clear();
     EXPECT_EQ(0, m_frameBufferRequestCount);
 
     SkBitmap canvasBitmap;
     canvasBitmap.allocN32Pixels(100, 100);
-    ASSERT_TRUE(m_canvas->readPixels(&canvasBitmap, 0, 0));
+    ASSERT_TRUE(m_surface->getCanvas()->readPixels(&canvasBitmap, 0, 0));
     SkAutoLockPixels autoLock(canvasBitmap);
     EXPECT_EQ(SkColorSetARGB(255, 255, 255, 255), canvasBitmap.getColor(0, 0));
 }
@@ -325,7 +326,7 @@ TEST_F(DeferredImageDecoderTest, decodedSize)
     tempCanvas->drawBitmap(image->bitmap(), 0, 0);
     RefPtr<SkPicture> picture = adoptRef(recorder.endRecording());
     EXPECT_EQ(0, m_frameBufferRequestCount);
-    m_canvas->drawPicture(picture.get());
+    m_surface->getCanvas()->drawPicture(picture.get());
     EXPECT_EQ(1, m_frameBufferRequestCount);
 }
 
