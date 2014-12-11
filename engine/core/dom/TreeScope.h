@@ -38,8 +38,8 @@ class DOMSelection;
 class Document;
 class Element;
 class HitTestResult;
-class ScopedStyleResolver;
 class Node;
+class ScopedStyleResolver;
 
 // A class which inherits both Node and TreeScope must call clearRareData() in its destructor
 // so that the Node destructor no longer does problematic NodeList cache manipulation in
@@ -77,6 +77,7 @@ public:
 
     ContainerNode& rootNode() const { return *m_rootNode; }
 
+    bool hasSameStyles(TreeScope&);
 
 #if !ENABLE(OILPAN)
     // Nodes belonging to this scope hold guard references -

@@ -58,9 +58,6 @@ ShadowRoot::ShadowRoot(Document& document)
 
 ShadowRoot::~ShadowRoot()
 {
-    if (m_shadowRootRareData && m_shadowRootRareData->styleSheets())
-        m_shadowRootRareData->styleSheets()->detachFromDocument();
-
     document().styleEngine()->didRemoveShadowRoot(this);
 
     // We cannot let ContainerNode destructor call willBeDeletedFromDocument()
@@ -233,14 +230,6 @@ const Vector<RefPtr<InsertionPoint> >& ShadowRoot::descendantInsertionPoints()
     ensureShadowRootRareData()->setDescendantInsertionPoints(insertionPoints);
 
     return m_shadowRootRareData->descendantInsertionPoints();
-}
-
-StyleSheetList* ShadowRoot::styleSheets()
-{
-    if (!ensureShadowRootRareData()->styleSheets())
-        m_shadowRootRareData->setStyleSheets(StyleSheetList::create(this));
-
-    return m_shadowRootRareData->styleSheets();
 }
 
 }

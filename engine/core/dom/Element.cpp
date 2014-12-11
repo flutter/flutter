@@ -990,15 +990,8 @@ StyleRecalcChange Element::recalcOwnStyle(StyleRecalcChange change)
     ASSERT(oldStyle);
 
     if (RenderObject* renderer = this->renderer()) {
-        if (localChange != NoChange) {
+        if (localChange != NoChange)
             renderer->setStyle(newStyle.get());
-        } else {
-            // Although no change occurred, we use the new style so that the cousin style sharing code won't get
-            // fooled into believing this style is the same.
-            // FIXME: We may be able to remove this hack, see discussion in
-            // https://codereview.chromium.org/30453002/
-            renderer->setStyleInternal(newStyle.get());
-        }
     }
 
     if (styleChangeType() >= SubtreeStyleChange)

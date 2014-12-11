@@ -46,6 +46,7 @@ public:
         , m_features(features)
         , m_styleResolver(styleResolver)
         , m_context(context)
+        , m_renderingParent(nullptr)
     { }
 
     RenderStyle* findSharedStyle();
@@ -71,6 +72,7 @@ private:
     const RuleFeatureSet& m_features;
     StyleResolver& m_styleResolver;
     const ElementResolveContext& m_context;
+    ContainerNode* m_renderingParent;
 };
 
 } // namespace blink

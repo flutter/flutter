@@ -233,9 +233,6 @@ public:
     bool isRenderingReady() const { return haveImportsLoaded(); }
     bool isScriptExecutionReady() const { return isRenderingReady(); }
 
-    // This is a DOM function.
-    StyleSheetList* styleSheets();
-
     StyleEngine* styleEngine() { return m_styleEngine.get(); }
 
     // Called when one or more stylesheets in the document may have been added, removed, or changed.
@@ -719,7 +716,6 @@ private:
     MutationObserverOptions m_mutationObserverTypes;
 
     OwnPtr<StyleEngine> m_styleEngine;
-    RefPtr<StyleSheetList> m_styleSheetList;
 
     TextLinkColors m_textLinkColors;
 

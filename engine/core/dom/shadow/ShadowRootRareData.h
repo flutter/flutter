@@ -60,15 +60,10 @@ public:
     void setDescendantInsertionPoints(Vector<RefPtr<InsertionPoint> >& list) { m_descendantInsertionPoints.swap(list); }
     void clearDescendantInsertionPoints() { m_descendantInsertionPoints.clear(); }
 
-    StyleSheetList* styleSheets() { return m_styleSheetList.get(); }
-    void setStyleSheets(PassRefPtr<StyleSheetList> styleSheetList) { m_styleSheetList = styleSheetList; }
-
-
 private:
     unsigned m_descendantContentElementCount;
     unsigned m_childShadowRootCount;
     Vector<RefPtr<InsertionPoint> > m_descendantInsertionPoints;
-    RefPtr<StyleSheetList> m_styleSheetList;
 };
 
 inline void ShadowRootRareData::didAddInsertionPoint(InsertionPoint* point)

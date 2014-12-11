@@ -102,60 +102,37 @@ bool SharedStyleFinder::sharingCandidateCanShareHostStyles(Element& candidate) c
     return elementShadow->hasSameStyles(candidateShadow);
 }
 
-bool SharedStyleFinder::sharingCandidateDistributedToSameInsertionPoint(Element& candidate) const
-{
-    Vector<RawPtr<InsertionPoint>, 8> insertionPoints, candidateInsertionPoints;
-    collectDestinationInsertionPoints(element(), insertionPoints);
-    collectDestinationInsertionPoints(candidate, candidateInsertionPoints);
-    if (insertionPoints.size() != candidateInsertionPoints.size())
-        return false;
-    for (size_t i = 0; i < insertionPoints.size(); ++i) {
-        if (insertionPoints[i] != candidateInsertionPoints[i])
-            return false;
-    }
-    return true;
-}
-
 bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
 {
+    ASSERT(candidate.supportsStyleSharing());
+
     if (element() == candidate)
         return false;
-    Element* parent = candidate.parentOrShadowHostElement();
+    if (candidate.tagQName() != element().tagQName())
+        return false;
+    if (candidate.needsStyleRecalc())
+        return false;
     RenderStyle* style = candidate.renderStyle();
     if (!style)
         return false;
     if (!style->isSharable())
         return false;
+    ContainerNode* parent = NodeRenderingTraversal::parent(&candidate);
     if (!parent)
         return false;
-    if (element().parentOrShadowHostElement()->renderStyle() != parent->renderStyle())
+    RenderStyle* parentStyle = parent->renderStyle();
+    if (!parentStyle)
         return false;
-    if (candidate.tagQName() != element().tagQName())
-        return false;
-    if (candidate.inlineStyle())
-        return false;
-    if (candidate.needsStyleRecalc())
+    if (m_renderingParent->renderStyle()->inheritedNotEqual(parentStyle))
         return false;
     if (!sharingCandidateHasIdenticalStyleAffectingAttributes(candidate))
         return false;
-    if (candidate.hasID() && m_features.hasSelectorForId(candidate.idForStyleResolution()))
-        return false;
     if (!sharingCandidateCanShareHostStyles(candidate))
         return false;
-    if (!sharingCandidateDistributedToSameInsertionPoint(candidate))
+    if (!candidate.treeScope().hasSameStyles(element().treeScope()))
         return false;
     if (candidate.isUnresolvedCustomElement() != element().isUnresolvedCustomElement())
         return false;
-
-    if (element().parentOrShadowHostElement() != parent) {
-        if (!parent->isStyledElement())
-            return false;
-        if (parent->inlineStyle())
-            return false;
-        if (parent->hasID() && m_features.hasSelectorForId(parent->idForStyleResolution()))
-            return false;
-    }
-
     return true;
 }
 
@@ -200,6 +177,7 @@ RenderStyle* SharedStyleFinder::findSharedStyle()
 
     // Cache whether context.element() is affected by any known class selectors.
     m_elementAffectedByClassRules = element().hasClass() && classNamesAffectedByRules(element());
+    m_renderingParent = NodeRenderingTraversal::parent(&element());
 
     Element* shareElement = findElementForStyleSharing();
 

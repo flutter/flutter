@@ -261,6 +261,7 @@ void StyleResolver::addToStyleSharingList(Element& element)
     // otherwise we could leave stale pointers in there.
     if (!document().inStyleRecalc())
         return;
+    ASSERT(element.supportsStyleSharing());
     INCREMENT_STYLE_STATS_COUNTER(*this, sharedStyleCandidates);
     StyleSharingList& list = styleSharingList();
     if (list.size() >= styleSharingListSize)

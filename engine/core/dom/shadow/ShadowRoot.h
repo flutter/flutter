@@ -87,8 +87,6 @@ public:
     PassRefPtr<Node> cloneNode(bool, ExceptionState&);
     PassRefPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
 
-    StyleSheetList* styleSheets();
-
 private:
     ShadowRoot(Document&);
     virtual ~ShadowRoot();

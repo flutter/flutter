@@ -331,8 +331,6 @@ Document::~Document()
 #endif
 
 #if !ENABLE(OILPAN)
-    if (m_styleSheetList)
-        m_styleSheetList->detachFromDocument();
 
     if (m_importsController)
         HTMLImportsController::removeFrom(*this);
@@ -1675,13 +1673,6 @@ PassRefPtr<Node> Document::cloneNode(bool deep)
 PassRefPtr<Document> Document::cloneDocumentWithoutChildren()
 {
     return create(DocumentInit(url()).withRegistrationContext(registrationContext()));
-}
-
-StyleSheetList* Document::styleSheets()
-{
-    if (!m_styleSheetList)
-        m_styleSheetList = StyleSheetList::create(this);
-    return m_styleSheetList.get();
 }
 
 void Document::evaluateMediaQueryListIfNeeded()

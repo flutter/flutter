@@ -208,23 +208,11 @@ bool ElementShadow::hasSameStyles(const ElementShadow* other) const
 {
     ShadowRoot* root = m_shadowRoot;
     ShadowRoot* otherRoot = other->shadowRoot();
-    if (root || otherRoot) {
-        if (!root || !otherRoot)
-            return false;
-
-        StyleSheetList* list = root->styleSheets();
-        StyleSheetList* otherList = otherRoot->styleSheets();
-
-        if (list->length() != otherList->length())
-            return false;
-
-        for (size_t i = 0; i < list->length(); i++) {
-            if (list->item(i)->contents() != otherList->item(i)->contents())
-                return false;
-        }
-    }
-
-    return true;
+    if (!root && !otherRoot)
+        return true;
+    if (root && otherRoot)
+        return root->hasSameStyles(*otherRoot);
+    return false;
 }
 
 const InsertionPoint* ElementShadow::finalDestinationInsertionPointFor(const Node* key) const
