@@ -54,16 +54,16 @@ class TestResultWriterTests(unittest.TestCase):
 
     def test_reference_exists(self):
         failure = test_failures.FailureReftestMismatch()
-        failure.reference_filename = '/src/exists-expected.html'
-        files = {'/src/exists-expected.html': 'yup'}
+        failure.reference_filename = '/src/exists-expected.sky'
+        files = {'/src/exists-expected.sky': 'yup'}
         written_files = self.run_test(failures=[failure], files=files)
-        self.assertEqual(written_files, {'/tmp/exists-expected.html': 'yup'})
+        self.assertEqual(written_files, {'/tmp/exists-expected.sky': 'yup'})
 
         failure = test_failures.FailureReftestMismatchDidNotOccur()
-        failure.reference_filename = '/src/exists-expected-mismatch.html'
-        files = {'/src/exists-expected-mismatch.html': 'yup'}
+        failure.reference_filename = '/src/exists-expected-mismatch.sky'
+        files = {'/src/exists-expected-mismatch.sky': 'yup'}
         written_files = self.run_test(failures=[failure], files=files)
-        self.assertEqual(written_files, {'/tmp/exists-expected-mismatch.html': 'yup'})
+        self.assertEqual(written_files, {'/tmp/exists-expected-mismatch.sky': 'yup'})
 
     def test_reference_is_missing(self):
         failure = test_failures.FailureReftestMismatch()

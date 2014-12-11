@@ -105,7 +105,7 @@ class InterpretTestFailuresTest(unittest.TestCase):
         self.port = host.port_factory.get(port_name='test')
 
     def test_interpret_test_failures(self):
-        test_dict = test_run_results._interpret_test_failures([test_failures.FailureReftestMismatchDidNotOccur(self.port.abspath_for_test('foo/reftest-expected-mismatch.html'))])
+        test_dict = test_run_results._interpret_test_failures([test_failures.FailureReftestMismatchDidNotOccur(self.port.abspath_for_test('foo/reftest-expected-mismatch.sky'))])
         self.assertEqual(len(test_dict), 0)
 
         test_dict = test_run_results._interpret_test_failures([test_failures.FailureMissingAudio()])

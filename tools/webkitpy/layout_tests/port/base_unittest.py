@@ -287,10 +287,10 @@ class PortTest(unittest.TestCase):
         self.assertTrue(Port.is_test_file(filesystem, '', 'foo.svg'))
         self.assertTrue(Port.is_test_file(filesystem, '', 'test-ref-test.html'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo.png'))
-        self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected.html'))
+        self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected.sky'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected.svg'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected.xht'))
-        self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected-mismatch.html'))
+        self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected-mismatch.sky'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected-mismatch.svg'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo-expected-mismatch.xhtml'))
         self.assertFalse(Port.is_test_file(filesystem, '', 'foo-ref.html'))
@@ -321,7 +321,7 @@ class PortTest(unittest.TestCase):
     def test_reference_files(self):
         port = self.make_port(with_tests=True)
         self.assertEqual(port.reference_files('passes/svgreftest.svg'), [('==', port.layout_tests_dir() + '/passes/svgreftest-expected.svg')])
-        self.assertEqual(port.reference_files('passes/xhtreftest.svg'), [('==', port.layout_tests_dir() + '/passes/xhtreftest-expected.html')])
+        self.assertEqual(port.reference_files('passes/xhtreftest.svg'), [('==', port.layout_tests_dir() + '/passes/xhtreftest-expected.sky')])
         self.assertEqual(port.reference_files('passes/phpreftest.php'), [('!=', port.layout_tests_dir() + '/passes/phpreftest-expected-mismatch.svg')])
 
     def test_operating_system(self):

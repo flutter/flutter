@@ -263,7 +263,7 @@ Bug(A) [ Debug ] : fast/css/large-list-of-rules-crash.html [ Failure ]
 
     def test_rebaseline_reftest(self):
         self._write("userscripts/another-test.html", "test data")
-        self._write("userscripts/another-test-expected.html", "generic result")
+        self._write("userscripts/another-test-expected.sky", "generic result")
         OutputCapture().assert_outputs(self, self.command._rebaseline_test_and_update_expectations, args=[self.options],
             expected_logs="Cannot rebaseline reftest: userscripts/another-test.html\n")
         self.assertDictEqual(self.command._scm_changes, {'add': [], 'remove-lines': [], "delete": []})

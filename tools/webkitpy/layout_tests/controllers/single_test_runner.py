@@ -71,7 +71,7 @@ class SingleTestRunner(object):
 
         if self._reference_files:
             # Detect and report a test which has a wrong combination of expectation files.
-            # For example, if 'foo.html' has two expectation files, 'foo-expected.html' and
+            # For example, if 'foo.html' has two expectation files, 'foo-expected.sky' and
             # 'foo-expected.txt', we should warn users. One test file must be used exclusively
             # in either layout tests or reftests, but not in both.
             for suffix in ('.txt', '.png', '.wav'):
@@ -402,22 +402,17 @@ class SingleTestRunner(object):
         if not reference_driver_output.image_hash and not actual_driver_output.image_hash:
             failures.append(test_failures.FailureReftestNoImagesGenerated(reference_filename))
         elif mismatch:
-            if reference_driver_output.image_hash == actual_driver_output.image_hash:
-                diff, err_str = self._port.diff_image(reference_driver_output.image, actual_driver_output.image)
-                if not diff:
-                    failures.append(test_failures.FailureReftestMismatchDidNotOccur(reference_filename))
-                elif err_str:
-                    _log.error(err_str)
-                else:
-                    _log.warning("  %s -> ref test hashes matched but diff failed" % self._test_name)
+            diff, err_str = self._port.diff_image(reference_driver_output.image, actual_driver_output.image)
+            if not diff:
+                failures.append(test_failures.FailureReftestMismatchDidNotOccur(reference_filename))
+            elif err_str:
+                _log.error(err_str)
 
-        elif reference_driver_output.image_hash != actual_driver_output.image_hash:
+        else:
             diff, err_str = self._port.diff_image(reference_driver_output.image, actual_driver_output.image)
             if diff:
                 failures.append(test_failures.FailureReftestMismatch(reference_filename))
             elif err_str:
                 _log.error(err_str)
-            else:
-                _log.warning("  %s -> ref test hashes didn't match but diff passed" % self._test_name)
 
         return TestResult(self._test_name, failures, total_test_time, has_stderr, pid=actual_driver_output.pid)

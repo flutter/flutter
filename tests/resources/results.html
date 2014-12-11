@@ -331,14 +331,14 @@ function expandExpectations(expandLink)
     var row = parentOfType(expandLink, 'tr');
     var parentTbody = row.parentNode;
     var existingResultsRow = parentTbody.querySelector('.results-row');
-    
+
     var enDash = '\u2013';
     expandLink.textContent = enDash;
     if (existingResultsRow) {
         updateExpandedState(existingResultsRow, true);
         return;
     }
-    
+
     var newRow = document.createElement('tr');
     newRow.className = 'results-row';
     var newCell = document.createElement('td');
@@ -355,7 +355,7 @@ function expandExpectations(expandLink)
         } else
             result = resultIframe(link.href);
 
-        appendHTML(newCell, result);    
+        appendHTML(newCell, result);
     }
 
     newRow.appendChild(newCell);
@@ -466,7 +466,7 @@ function processGlobalStateFor(testObject)
 
     globalState().hasHttpTests = globalState().hasHttpTests || test.indexOf('http/') == 0;
 
-    var actual = testObject.actual;    
+    var actual = testObject.actual;
     var expected = testObject.expected || 'PASS';
 
     if (actual == 'MISSING') {
@@ -504,7 +504,7 @@ function processGlobalStateFor(testObject)
         globalState().timeoutTests.push(testObject);
         return;
     }
-    
+
     globalState().failingTests.push(testObject);
 }
 
@@ -547,11 +547,11 @@ function imageResultsCell(testObject, testPrefix, actual) {
         globalState().hasImageFailures = true;
 
         if (testObject.reftest_type && testObject.reftest_type.indexOf('!=') != -1) {
-            row += resultLink(testPrefix, '-expected-mismatch.html', 'ref mismatch html');
+            row += resultLink(testPrefix, '-expected-mismatch.sky', 'ref mismatch html');
             row += resultLink(testPrefix, '-actual.png', 'actual');
         } else {
             if (testObject.reftest_type && testObject.reftest_type.indexOf('==') != -1) {
-                row += resultLink(testPrefix, '-expected.html', 'ref html');
+                row += resultLink(testPrefix, '-expected.sky', 'ref html');
             }
             if (globalState().shouldToggleImages) {
                 row += resultLink(testPrefix, '-diffs.html', 'images');
@@ -571,7 +571,7 @@ function imageResultsCell(testObject, testPrefix, actual) {
 }
 
 function tableRow(testObject)
-{    
+{
     var row = '<tbody class="' + (testObject.is_unexpected ? '' : 'expected') + '"';
     if (testObject.reftest_type && testObject.reftest_type.indexOf('!=') != -1)
         row += ' mismatchreftest=true';
@@ -581,7 +581,7 @@ function tableRow(testObject)
 
     var testPrefix = stripExtension(testObject.name);
     row += '<td>';
-    
+
     var actual = testObject.actual;
     if (actual.indexOf('TEXT') != -1) {
         globalState().hasTextFailures = true;
@@ -591,7 +591,7 @@ function tableRow(testObject)
             row += textResultLinks(testObject.name, testPrefix);
         }
     }
-    
+
     if (actual.indexOf('AUDIO') != -1) {
         row += resultLink(testPrefix, '-expected.wav', 'expected audio');
         row += resultLink(testPrefix, '-actual.wav', 'actual audio');
@@ -708,7 +708,7 @@ function testList(tests, header, tableId)
             // FIXME: only include timeout actual/diff results here if we actually spit out results for timeout tests.
             html += textResultLinks(test, stripExtension(test));
         }
-        
+
         if (testObject.has_repaint_overlay)
             html += resultLink(stripExtension(test), '-overlay.html?' + encodeURIComponent(testLinkTarget(test)), 'overlay');
 
@@ -777,7 +777,7 @@ TableSorter._sortRows = function(newHeader, reversed)
         // Only need to support lexicographic sort for now.
         var aText = TableSorter._textContent(a, sortColumn);
         var bText = TableSorter._textContent(b, sortColumn);
-        
+
         // Forward sort equal values by test name.
         if (sortColumn && aText == bText) {
             var aTestName = TableSorter._textContent(a, 0);
@@ -814,11 +814,11 @@ TableSorter.handleClick = function(e)
 TableSorter._sort = function(newHeader)
 {
     TableSorter._updateHeaderClassNames(newHeader);
-    
+
     var reversed = newHeader.classList.contains('reversed');
     var sortArrow = reversed ? TableSorter._backwardArrow : TableSorter._forwardArrow;
     newHeader.innerHTML = TableSorter._sortedContents(newHeader, sortArrow);
-    
+
     TableSorter._sortRows(newHeader, reversed);
 }
 
@@ -839,15 +839,15 @@ PixelZoomer._zoomImageContainer = function(url)
     container.className = 'zoom-image-container';
 
     var title = url.match(/\-([^\-]*)\.png/)[1];
-    
+
     var label = document.createElement('div');
     label.className = 'label';
     label.appendChild(document.createTextNode(title));
     container.appendChild(label);
-    
+
     var imageContainer = document.createElement('div');
     imageContainer.className = 'scaled-image-container';
-    
+
     var image = new Image();
     image.src = url;
     image.style.display = 'none';
@@ -857,7 +857,7 @@ PixelZoomer._zoomImageContainer = function(url)
     imageContainer.appendChild(image);
     imageContainer.appendChild(canvas);
     container.appendChild(imageContainer);
-    
+
     return container;
 }
 
@@ -866,19 +866,19 @@ PixelZoomer._createContainer = function(e)
     var tbody = parentOfType(e.target, 'tbody');
     var row = tbody.querySelector('tr');
     var imageDiffLinks = row.querySelectorAll('a[href$=".png"]');
-    
+
     var container = document.createElement('div');
     container.className = 'pixel-zoom-container';
-    
+
     var html = '';
-    
+
     var togglingImageLink = row.querySelector('a[href$="-diffs.html"]');
     if (togglingImageLink) {
         var prefix = togglingImageLink.getAttribute('data-prefix');
         container.appendChild(PixelZoomer._zoomImageContainer(prefix + '-expected.png'));
         container.appendChild(PixelZoomer._zoomImageContainer(prefix + '-actual.png'));
     }
-    
+
     for (var i = 0; i < imageDiffLinks.length; i++)
         container.appendChild(PixelZoomer._zoomImageContainer(imageDiffLinks[i].href));
 
@@ -935,7 +935,7 @@ PixelZoomer.handleMouseMove = function(e) {
         return;
 
     var container = document.querySelector('.pixel-zoom-container');
-    
+
     var resultContainer = (e.target.className == 'result-container') ?
         e.target : parentOfType(e.target, '.result-container');
     if (!resultContainer || !resultContainer.querySelector('img')) {
@@ -959,7 +959,7 @@ PixelZoomer.handleMouseMove = function(e) {
         PixelZoomer._createContainer(e);
         return;
     }
-    
+
     PixelZoomer._drawAll();
 }
 
@@ -1072,7 +1072,7 @@ TestNavigator._toggleCurrentTestFlagged = function()
 TestNavigator.flagTest = function(testTbody, shouldFlag)
 {
     var testName = testTbody.querySelector('.test-link').innerText;
-    
+
     if (shouldFlag) {
         testTbody.classList.add('flagged');
         TestNavigator.flaggedTests[testName] = 1;
@@ -1250,7 +1250,7 @@ function updateTogglingImages()
 {
     var shouldToggle = document.getElementById('toggle-images').checked;
     globalState().shouldToggleImages = shouldToggle;
-    
+
     if (shouldToggle) {
         forEach(document.querySelectorAll('table:not(#missing-table) tbody:not([mismatchreftest]) a[href$=".png"]'), convertToTogglingHandler(function(prefix) {
             return resultLink(prefix, '-diffs.html', 'images');

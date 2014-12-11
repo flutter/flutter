@@ -206,22 +206,22 @@ layer at (0,0) size 800x34
               expected_text='\nfoo\n\n', actual_text='\nfoo\r\n\r\r\n')
 
     # For reftests.
-    tests.add_reftest('passes/reftest.html', 'passes/reftest-expected.html', same_image=True)
+    tests.add_reftest('passes/reftest.html', 'passes/reftest-expected.sky', same_image=True)
 
     # This adds a different virtual reference to ensure that that also works.
-    tests.add('virtual/passes/reftest-expected.html', actual_checksum='xxx', actual_image='XXX', is_reftest=True)
+    tests.add('virtual/passes/reftest-expected.sky', actual_checksum='xxx', actual_image='XXX', is_reftest=True)
 
-    tests.add_reftest('passes/mismatch.html', 'passes/mismatch-expected-mismatch.html', same_image=False)
+    tests.add_reftest('passes/mismatch.html', 'passes/mismatch-expected-mismatch.sky', same_image=False)
     tests.add_reftest('passes/svgreftest.svg', 'passes/svgreftest-expected.svg', same_image=True)
-    tests.add_reftest('passes/xhtreftest.xht', 'passes/xhtreftest-expected.html', same_image=True)
+    tests.add_reftest('passes/xhtreftest.xht', 'passes/xhtreftest-expected.sky', same_image=True)
     tests.add_reftest('passes/phpreftest.php', 'passes/phpreftest-expected-mismatch.svg', same_image=False)
-    tests.add_reftest('failures/expected/reftest.html', 'failures/expected/reftest-expected.html', same_image=False)
-    tests.add_reftest('failures/expected/mismatch.html', 'failures/expected/mismatch-expected-mismatch.html', same_image=True)
-    tests.add_reftest('failures/unexpected/crash-reftest.html', 'failures/unexpected/crash-reftest-expected.html', same_image=True, crash=True)
-    tests.add_reftest('failures/unexpected/reftest.html', 'failures/unexpected/reftest-expected.html', same_image=False)
-    tests.add_reftest('failures/unexpected/mismatch.html', 'failures/unexpected/mismatch-expected-mismatch.html', same_image=True)
+    tests.add_reftest('failures/expected/reftest.html', 'failures/expected/reftest-expected.sky', same_image=False)
+    tests.add_reftest('failures/expected/mismatch.html', 'failures/expected/mismatch-expected-mismatch.sky', same_image=True)
+    tests.add_reftest('failures/unexpected/crash-reftest.html', 'failures/unexpected/crash-reftest-expected.sky', same_image=True, crash=True)
+    tests.add_reftest('failures/unexpected/reftest.html', 'failures/unexpected/reftest-expected.sky', same_image=False)
+    tests.add_reftest('failures/unexpected/mismatch.html', 'failures/unexpected/mismatch-expected-mismatch.sky', same_image=True)
     tests.add('failures/unexpected/reftest-nopixel.html', actual_checksum=None, actual_image=None, is_reftest=True)
-    tests.add('failures/unexpected/reftest-nopixel-expected.html', actual_checksum=None, actual_image=None, is_reftest=True)
+    tests.add('failures/unexpected/reftest-nopixel-expected.sky', actual_checksum=None, actual_image=None, is_reftest=True)
     tests.add('reftests/foo/test.html')
     tests.add('reftests/foo/test-ref.html')
 
@@ -237,7 +237,7 @@ layer at (0,0) size 800x34
     tests.add('reftests/foo/second-mismatching-ref.html', actual_checksum='ghi', actual_image='ghi')
 
     # The following files shouldn't be treated as reftests
-    tests.add_reftest('reftests/foo/unlistedtest.html', 'reftests/foo/unlistedtest-expected.html', same_image=True)
+    tests.add_reftest('reftests/foo/unlistedtest.html', 'reftests/foo/unlistedtest-expected.sky', same_image=True)
     tests.add('reftests/foo/reference/bar/common.html')
     tests.add('reftests/foo/reftest/bar/shared.html')
 

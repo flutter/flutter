@@ -750,16 +750,16 @@ class RunTest(unittest.TestCase, StreamTestingMixin):
         self.assertEqual(['passes/reftest.html'], tests_run)
 
     def test_reftest_expected_html_should_be_ignored(self):
-        tests_run = get_tests_run(['passes/reftest-expected.html'])
+        tests_run = get_tests_run(['passes/reftest-expected.sky'])
         self.assertEqual([], tests_run)
 
     def test_reftest_driver_should_run_expected_html(self):
         tests_run = get_test_results(['passes/reftest.html'])
-        self.assertEqual(tests_run[0].references, ['passes/reftest-expected.html'])
+        self.assertEqual(tests_run[0].references, ['passes/reftest-expected.sky'])
 
     def test_reftest_driver_should_run_expected_mismatch_html(self):
         tests_run = get_test_results(['passes/mismatch.html'])
-        self.assertEqual(tests_run[0].references, ['passes/mismatch-expected-mismatch.html'])
+        self.assertEqual(tests_run[0].references, ['passes/mismatch-expected-mismatch.sky'])
 
     def test_reftest_should_not_use_naming_convention_if_not_listed_in_reftestlist(self):
         host = MockHost()
@@ -777,7 +777,7 @@ class RunTest(unittest.TestCase, StreamTestingMixin):
 
     def test_reftest_with_virtual_reference(self):
         _, err, _ = logging_run(['--details', 'virtual/passes/reftest.html'], tests_included=True)
-        self.assertTrue('ref: virtual/passes/reftest-expected.html' in err.getvalue())
+        self.assertTrue('ref: virtual/passes/reftest-expected.sky' in err.getvalue())
 
     def test_additional_platform_directory(self):
         self.assertTrue(passing_run(['--additional-platform-directory', '/tmp/foo']))
