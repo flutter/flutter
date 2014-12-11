@@ -7,7 +7,7 @@
 
 #include "base/message_loop/message_loop.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "mojo/services/public/interfaces/content_handler/content_handler.mojom.h"
+#include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
 
 namespace sky {
 class DocumentView;
