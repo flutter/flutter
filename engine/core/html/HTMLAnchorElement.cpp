@@ -24,7 +24,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 
-#include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
+#include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "sky/engine/core/dom/Attribute.h"
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/events/KeyboardEvent.h"

@@ -31,7 +31,7 @@ mojo_native_application("sky_debugger") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
     "//mojo/services/input_events/public/interfaces",
-    "//mojo/services/public/interfaces/navigation",
+    "//mojo/services/navigation/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//services/window_manager:lib",
     "//sky/viewer:bindings",
