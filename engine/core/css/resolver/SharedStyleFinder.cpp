@@ -48,11 +48,21 @@
 
 namespace blink {
 
-bool SharedStyleFinder::classNamesAffectedByRules(const SpaceSplitString& classNames) const
+bool SharedStyleFinder::classNamesAffectedByRules(const Element& element) const
 {
+    const SpaceSplitString& classNames = element.classNames();
     unsigned count = classNames.size();
     for (unsigned i = 0; i < count; ++i) {
         if (m_features.hasSelectorForClass(classNames[i]))
+            return true;
+    }
+    return false;
+}
+
+bool SharedStyleFinder::attributesAffectedByRules(const Element& element) const
+{
+    for (auto& attribute : element.attributesWithoutUpdate()) {
+        if (m_features.hasSelectorForAttribute(attribute.localName()))
             return true;
     }
     return false;
@@ -66,7 +76,7 @@ bool SharedStyleFinder::sharingCandidateHasIdenticalStyleAffectingAttributes(Ele
         return false;
 
     if (!m_elementAffectedByClassRules) {
-        if (candidate.hasClass() && classNamesAffectedByRules(candidate.classNames()))
+        if (candidate.hasClass() && classNamesAffectedByRules(candidate))
             return false;
     } else if (candidate.hasClass()) {
         if (element().classNames() != candidate.classNames())
@@ -176,14 +186,6 @@ inline Element* SharedStyleFinder::findElementForStyleSharing() const
     return 0;
 }
 
-bool SharedStyleFinder::matchesRuleSet(RuleSet* ruleSet)
-{
-    if (!ruleSet)
-        return false;
-    ElementRuleCollector collector(m_context);
-    return collector.hasAnyMatchingRules(ruleSet);
-}
-
 RenderStyle* SharedStyleFinder::findSharedStyle()
 {
     INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleLookups);
@@ -191,8 +193,13 @@ RenderStyle* SharedStyleFinder::findSharedStyle()
     if (!element().supportsStyleSharing())
         return 0;
 
+    if (attributesAffectedByRules(element())) {
+        INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleRejectedByAttributeRules);
+        return 0;
+    }
+
     // Cache whether context.element() is affected by any known class selectors.
-    m_elementAffectedByClassRules = element().hasClass() && classNamesAffectedByRules(element().classNames());
+    m_elementAffectedByClassRules = element().hasClass() && classNamesAffectedByRules(element());
 
     Element* shareElement = findElementForStyleSharing();
 
@@ -204,7 +211,7 @@ RenderStyle* SharedStyleFinder::findSharedStyle()
 
     INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleFound);
 
-    if (matchesRuleSet(m_attributeRuleSet)) {
+    if (attributesAffectedByRules(*shareElement)) {
         INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleRejectedByAttributeRules);
         return 0;
     }

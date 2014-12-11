@@ -41,11 +41,9 @@ public:
     // RuleSets are passed non-const as the act of matching against them can cause them
     // to be compacted. :(
     SharedStyleFinder(const ElementResolveContext& context,
-        const RuleFeatureSet& features,
-        RuleSet* attributeRuleSet, StyleResolver& styleResolver)
+        const RuleFeatureSet& features, StyleResolver& styleResolver)
         : m_elementAffectedByClassRules(false)
         , m_features(features)
-        , m_attributeRuleSet(attributeRuleSet)
         , m_styleResolver(styleResolver)
         , m_context(context)
     { }
@@ -58,20 +56,19 @@ private:
     // Only used when we're collecting stats on styles.
     bool documentContainsValidCandidate() const;
 
-    bool classNamesAffectedByRules(const SpaceSplitString&) const;
+    bool classNamesAffectedByRules(const Element&) const;
+    bool attributesAffectedByRules(const Element&) const;
 
     bool canShareStyleWithElement(Element& candidate) const;
     bool sharingCandidateHasIdenticalStyleAffectingAttributes(Element& candidate) const;
     bool sharingCandidateCanShareHostStyles(Element& candidate) const;
     bool sharingCandidateDistributedToSameInsertionPoint(Element& candidate) const;
-    bool matchesRuleSet(RuleSet*);
 
     Element& element() const { return *m_context.element(); }
     Document& document() const { return element().document(); }
 
     bool m_elementAffectedByClassRules;
     const RuleFeatureSet& m_features;
-    RawPtr<RuleSet> m_attributeRuleSet;
     StyleResolver& m_styleResolver;
     const ElementResolveContext& m_context;
 };

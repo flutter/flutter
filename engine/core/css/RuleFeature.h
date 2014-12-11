@@ -34,18 +34,6 @@ class Element;
 class QualifiedName;
 class RuleData;
 class SpaceSplitString;
-class StyleRule;
-
-struct RuleFeature {
-    RuleFeature(StyleRule* rule, unsigned selectorIndex)
-        : rule(rule)
-        , selectorIndex(selectorIndex)
-    {
-    }
-
-    StyleRule* rule;
-    unsigned selectorIndex;
-};
 
 class RuleFeatureSet {
 public:
@@ -56,7 +44,6 @@ public:
     void clear();
 
     void collectFeaturesFromSelector(const CSSSelector&);
-    void collectFeaturesFromRuleData(const RuleData&);
 
     inline bool hasSelectorForAttribute(const AtomicString& attributeName) const
     {
@@ -83,8 +70,6 @@ public:
     void scheduleStyleInvalidationForAttributeChange(const QualifiedName& attributeName, Element&);
     void scheduleStyleInvalidationForIdChange(const AtomicString& oldId, const AtomicString& newId, Element&);
 
-    Vector<RuleFeature> attributeRules;
-
 private:
     void addSelectorFeatures(const CSSSelector&);
     void collectFeaturesFromSelectorList(const CSSSelectorList*);
@@ -94,17 +79,6 @@ private:
     HashSet<AtomicString> m_idNames;
 };
 
-
 } // namespace blink
-
-namespace WTF {
-
-template <> struct VectorTraits<blink::RuleFeature> : VectorTraitsBase<blink::RuleFeature> {
-    static const bool needsDestruction = false;
-    static const bool canInitializeWithMemset = true;
-    static const bool canMoveWithMemcpy = true;
-};
-
-} // namespace WTF
 
 #endif  // SKY_ENGINE_CORE_CSS_RULEFEATURE_H_

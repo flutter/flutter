@@ -57,14 +57,6 @@ void RuleFeatureSet::addSelectorFeatures(const CSSSelector& selector)
         m_attributeNames.add(selector.attribute().localName());
 }
 
-void RuleFeatureSet::collectFeaturesFromRuleData(const RuleData& ruleData)
-{
-    collectFeaturesFromSelector(ruleData.selector());
-
-    if (ruleData.containsAttributeSelector())
-        attributeRules.append(RuleFeature(ruleData.rule(), ruleData.selectorIndex()));
-}
-
 void RuleFeatureSet::collectFeaturesFromSelector(const CSSSelector& selector)
 {
     for (const CSSSelector* current = &selector; current; current = current->tagHistory()) {
@@ -90,13 +82,10 @@ void RuleFeatureSet::add(const RuleFeatureSet& other)
         m_attributeNames.add(*it);
     for (HashSet<AtomicString>::const_iterator it = other.m_idNames.begin(); it != other.m_idNames.end(); ++it)
         m_idNames.add(*it);
-
-    attributeRules.appendVector(other.attributeRules);
 }
 
 void RuleFeatureSet::clear()
 {
-    attributeRules.clear();
     m_classNames.clear();
     m_attributeNames.clear();
     m_idNames.clear();

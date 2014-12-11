@@ -191,20 +191,4 @@ void ElementRuleCollector::sortMatchedRules()
     std::sort(m_matchedRules->begin(), m_matchedRules->end(), compareRules);
 }
 
-bool ElementRuleCollector::hasAnyMatchingRules(RuleSet* ruleSet)
-{
-    clearMatchedRules();
-
-    m_mode = SelectorChecker::SharingRules;
-    // To check whether a given RuleSet has any rule matching a given element,
-    // should not see the element's treescope. Because RuleSet has no
-    // information about "scope".
-    int firstRuleIndex = -1, lastRuleIndex = -1;
-    RuleRange ruleRange(firstRuleIndex, lastRuleIndex);
-    // FIXME: Verify whether it's ok to ignore CascadeScope here.
-    collectMatchingRules(MatchRequest(ruleSet), ruleRange, SelectorChecker::DefaultBehavior);
-
-    return m_matchedRules && !m_matchedRules->isEmpty();
-}
-
 } // namespace blink

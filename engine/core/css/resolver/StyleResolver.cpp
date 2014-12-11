@@ -203,7 +203,6 @@ void StyleResolver::resetRuleFeatures()
 {
     // Need to recreate RuleFeatureSet.
     m_features.clear();
-    m_attributeRuleSet.clear();
     m_needCollectFeatures = true;
 }
 
@@ -241,17 +240,6 @@ void StyleResolver::resetAuthorStyle(TreeScope& treeScope)
     treeScope.clearScopedStyleResolver();
 }
 
-static PassOwnPtr<RuleSet> makeRuleSet(const Vector<RuleFeature>& rules)
-{
-    size_t size = rules.size();
-    if (!size)
-        return nullptr;
-    OwnPtr<RuleSet> ruleSet = RuleSet::create();
-    for (size_t i = 0; i < size; ++i)
-        ruleSet->addRule(rules[i].rule, rules[i].selectorIndex, RuleHasNoSpecialState);
-    return ruleSet.release();
-}
-
 void StyleResolver::collectFeatures()
 {
     m_features.clear();
@@ -259,7 +247,6 @@ void StyleResolver::collectFeatures()
 
     document().styleEngine()->collectScopedStyleFeaturesTo(m_features);
 
-    m_attributeRuleSet = makeRuleSet(m_features.attributeRules);
     m_needCollectFeatures = false;
 }
 
@@ -449,7 +436,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     StyleResolverState state(document(), element, defaultParent);
 
     if (sharingBehavior == AllowStyleSharing && state.parentStyle()) {
-        SharedStyleFinder styleFinder(state.elementContext(), m_features, m_attributeRuleSet.get(), *this);
+        SharedStyleFinder styleFinder(state.elementContext(), m_features, *this);
         if (RefPtr<RenderStyle> sharedStyle = styleFinder.findSharedStyle())
             return sharedStyle.release();
     }

@@ -100,7 +100,6 @@ public:
     void setMode(SelectorChecker::Mode mode) { m_mode = mode; }
 
     void setMatchingUARules(bool matchingUARules) { m_matchingUARules = matchingUARules; }
-    bool hasAnyMatchingRules(RuleSet*);
 
     MatchResult& matchedResult();
 

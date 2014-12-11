@@ -234,7 +234,6 @@ private:
     // FIXME: The entire logic of collecting features on StyleResolver, as well as transferring them
     // between various parts of machinery smells wrong. This needs to be better somehow.
     RuleFeatureSet m_features;
-    OwnPtr<RuleSet> m_attributeRuleSet;
 
     bool m_needCollectFeatures;
     bool m_printMediaType;
