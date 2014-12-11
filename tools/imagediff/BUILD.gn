@@ -1,0 +1,20 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+executable("imagediff") {
+  output_name = "image_diff"  # Different than dir nam for historical reasons.
+  sources = [
+    "image_diff.cc",
+    "image_diff_png.h",
+    "image_diff_png.cc",
+  ]
+
+  configs += [ "//build/config/compiler:wexit_time_destructors" ]
+
+  deps = [
+    "//base",
+    "//third_party/libpng",
+    "//third_party/zlib",
+  ]
+}
