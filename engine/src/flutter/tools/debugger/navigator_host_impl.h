@@ -7,7 +7,7 @@
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
-#include "mojo/services/public/interfaces/navigation/navigation.mojom.h"
+#include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "sky/tools/debugger/debugger.mojom.h"
 
 namespace sky {
