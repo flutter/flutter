@@ -73,8 +73,7 @@ public:
     void detachFromDocument();
 #endif
 
-    const Vector<RefPtr<CSSStyleSheet> >& styleSheetsForStyleSheetList(TreeScope&);
-
+    const Vector<RefPtr<CSSStyleSheet>>& activeAuthorStyleSheetsFor(TreeScope&);
     const Vector<RefPtr<CSSStyleSheet> >& documentAuthorStyleSheets() const { return m_authorStyleSheets; }
 
     void modifiedStyleSheet(CSSStyleSheet*);

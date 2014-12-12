@@ -41,25 +41,17 @@ class StyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(StyleSheetCollection);
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    friend class ActiveDocumentStyleSheetCollector;
-    friend class ImportedDocumentStyleSheetCollector;
-
     StyleSheetCollection();
     virtual ~StyleSheetCollection();
 
     Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() { return m_activeAuthorStyleSheets; }
-    Vector<RefPtr<CSSStyleSheet> >& styleSheetsForStyleSheetList() { return m_styleSheetsForStyleSheetList; }
     const Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() const { return m_activeAuthorStyleSheets; }
-    const Vector<RefPtr<CSSStyleSheet> >& styleSheetsForStyleSheetList() const { return m_styleSheetsForStyleSheetList; }
 
     void swap(StyleSheetCollection&);
-    void swapSheetsForSheetList(Vector<RefPtr<CSSStyleSheet> >&);
     void appendActiveStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void appendActiveStyleSheet(CSSStyleSheet*);
-    void appendSheetForList(CSSStyleSheet*);
 
 protected:
-    Vector<RefPtr<CSSStyleSheet> > m_styleSheetsForStyleSheetList;
     Vector<RefPtr<CSSStyleSheet> > m_activeAuthorStyleSheets;
 };
 

@@ -28,7 +28,6 @@
 #include "sky/engine/core/dom/TreeScope.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/core/css/StyleSheetList.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/Document.h"
@@ -425,8 +424,8 @@ bool TreeScope::hasSameStyles(TreeScope& other)
 {
     if (this == &other)
         return true;
-    const Vector<RefPtr<blink::CSSStyleSheet> >& list = document().styleEngine()->styleSheetsForStyleSheetList(*this);
-    const Vector<RefPtr<blink::CSSStyleSheet> >& otherList = document().styleEngine()->styleSheetsForStyleSheetList(other);
+    const Vector<RefPtr<blink::CSSStyleSheet> >& list = document().styleEngine()->activeAuthorStyleSheetsFor(*this);
+    const Vector<RefPtr<blink::CSSStyleSheet> >& otherList = document().styleEngine()->activeAuthorStyleSheetsFor(other);
 
     if (list.size() != otherList.size())
         return false;

@@ -28,7 +28,6 @@
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/core/css/StyleSheetList.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/StyleEngine.h"

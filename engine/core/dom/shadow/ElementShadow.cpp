@@ -27,7 +27,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 
-#include "sky/engine/core/css/StyleSheetList.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"

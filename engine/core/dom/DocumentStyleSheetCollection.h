@@ -32,7 +32,6 @@
 
 namespace blink {
 
-class DocumentStyleSheetCollector;
 class StyleEngine;
 class TreeScope;
 
@@ -46,12 +45,12 @@ public:
     }
 
     void updateActiveStyleSheets(StyleEngine*);
-    void collectStyleSheets(StyleEngine*, DocumentStyleSheetCollector&);
 
 private:
     explicit DocumentStyleSheetCollection(TreeScope&);
 
-    void collectStyleSheetsFromCandidates(StyleEngine*, DocumentStyleSheetCollector&);
+    void collectStyleSheets(StyleEngine*, StyleSheetCollection&);
+    void collectStyleSheetsFromCandidates(StyleEngine*, StyleSheetCollection&);
 };
 
 }

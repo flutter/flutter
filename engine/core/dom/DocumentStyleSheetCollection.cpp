@@ -30,9 +30,8 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/DocumentStyleSheetCollector.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/StyleSheetCandidate.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 
@@ -42,36 +41,30 @@ DocumentStyleSheetCollection::DocumentStyleSheetCollection(TreeScope& treeScope)
     ASSERT(treeScope.rootNode() == treeScope.rootNode().document());
 }
 
-void DocumentStyleSheetCollection::collectStyleSheetsFromCandidates(StyleEngine* engine, DocumentStyleSheetCollector& collector)
+void DocumentStyleSheetCollection::collectStyleSheetsFromCandidates(StyleEngine* engine, StyleSheetCollection& collection)
 {
     DocumentOrderedList::iterator begin = m_styleSheetCandidateNodes.begin();
     DocumentOrderedList::iterator end = m_styleSheetCandidateNodes.end();
     for (DocumentOrderedList::iterator it = begin; it != end; ++it) {
-        Node* n = *it;
-        StyleSheetCandidate candidate(*n);
-
-        CSSStyleSheet* sheet = candidate.sheet();
-        if (!sheet)
+        Node* node = *it;
+        if (!isHTMLStyleElement(*node))
             continue;
-
-        collector.appendSheetForList(sheet);
-        if (candidate.canBeActivated())
-            collector.appendActiveStyleSheet(sheet);
+        if (CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet())
+            collection.appendActiveStyleSheet(sheet);
     }
 }
 
-void DocumentStyleSheetCollection::collectStyleSheets(StyleEngine* engine, DocumentStyleSheetCollector& collector)
+void DocumentStyleSheetCollection::collectStyleSheets(StyleEngine* engine, StyleSheetCollection& collection)
 {
     ASSERT(document().styleEngine() == engine);
-    collector.appendActiveStyleSheets(engine->documentAuthorStyleSheets());
-    collectStyleSheetsFromCandidates(engine, collector);
+    collection.appendActiveStyleSheets(engine->documentAuthorStyleSheets());
+    collectStyleSheetsFromCandidates(engine, collection);
 }
 
 void DocumentStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
 {
     StyleSheetCollection collection;
-    ActiveDocumentStyleSheetCollector collector(collection);
-    collectStyleSheets(engine, collector);
+    collectStyleSheets(engine, collection);
 
     engine->clearMasterResolver();
     // FIMXE: The following depends on whether StyleRuleFontFace was modified or not.

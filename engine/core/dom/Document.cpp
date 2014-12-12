@@ -47,7 +47,6 @@
 #include "sky/engine/core/css/MediaQueryMatcher.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
-#include "sky/engine/core/css/StyleSheetList.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/resolver/FontBuilder.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"

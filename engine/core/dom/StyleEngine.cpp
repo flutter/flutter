@@ -32,7 +32,6 @@
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
-#include "sky/engine/core/dom/DocumentStyleSheetCollector.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ShadowTreeStyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
@@ -96,6 +95,13 @@ inline Document* StyleEngine::master()
     return import->master();
 }
 
+const Vector<RefPtr<CSSStyleSheet>>& StyleEngine::activeAuthorStyleSheetsFor(TreeScope& treeScope)
+{
+    if (treeScope == m_document)
+        return documentStyleSheetCollection()->activeAuthorStyleSheets();
+    return ensureStyleSheetCollectionFor(treeScope)->activeAuthorStyleSheets();
+}
+
 void StyleEngine::insertTreeScopeInDocumentOrder(TreeScopeSet& treeScopes, TreeScope* treeScope)
 {
     if (treeScopes.isEmpty()) {
@@ -143,14 +149,6 @@ TreeScopeStyleSheetCollection* StyleEngine::styleSheetCollectionFor(TreeScope& t
     if (it == m_styleSheetCollectionMap.end())
         return 0;
     return it->value.get();
-}
-
-const Vector<RefPtr<CSSStyleSheet> >& StyleEngine::styleSheetsForStyleSheetList(TreeScope& treeScope)
-{
-    if (treeScope == m_document)
-        return documentStyleSheetCollection()->styleSheetsForStyleSheetList();
-
-    return ensureStyleSheetCollectionFor(treeScope)->styleSheetsForStyleSheetList();
 }
 
 void StyleEngine::modifiedStyleSheet(CSSStyleSheet* sheet)

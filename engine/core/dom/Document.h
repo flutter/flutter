@@ -117,7 +117,6 @@ class SerializedScriptValue;
 class Settings;
 class StyleEngine;
 class StyleResolver;
-class StyleSheetList;
 class Text;
 class Touch;
 class TouchList;
