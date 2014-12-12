@@ -1,0 +1,23 @@
+<sky>
+<import src="/sky/tests/resources/chai.sky" />
+<import src="/sky/tests/resources/mocha.sky" />
+<import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+<script>
+describe("xmlhttprequest.responseType", function() {
+  this.enableTimeouts(false);
+
+  it("should default to text when empty", function() {
+    var xhr = new XMLHttpRequest();
+    assert.equal(xhr.responseType, "");
+    xhr.responseType = 'foo';
+    xhr.responseType = '';
+    xhr.onload = function() {
+      assert.typeOf(this.response, "string", "Response is a string\n");
+      done();
+    };
+    xhr.open("GET", "resources/pass.txt");
+    xhr.send();
+  });
+});
+</script>
+</sky>

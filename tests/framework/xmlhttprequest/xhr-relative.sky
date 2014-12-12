@@ -1,6 +1,6 @@
 <html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
+<import src="/sky/tests/resources/chai.sky" />
+<import src="/sky/tests/resources/mocha.sky" />
 <import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 describe('XMLHttpRequest', function() {

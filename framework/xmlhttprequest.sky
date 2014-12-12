@@ -2,7 +2,7 @@
 <import src="/mojo/public/sky/unicode.sky" as="unicode" />
 <import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
 <import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
-<import src="shell.sky" as="shell" />
+<import src="/sky/framework/shell.sky" as="shell" />
 <script>
 // XHR keeps itself alive.
 var outstandingRequests = new Set();
@@ -16,13 +16,16 @@ class Private {
     this.request = null;
     this.loader = null;
     this.headers = new Map();
-    this.responseText = "";
+    this.responseArrayBuffer = null;
+    this.responseText = null; // Cached to avoid re-decoding each access.
   }
 }
 
+// https://xhr.spec.whatwg.org
 class XMLHttpRequest {
   constructor() {
     this[kPrivate] = new Private;
+    this.responseType = ''; // Only text and arraybuffer support for now.
   }
 
   onload() {
@@ -32,7 +35,23 @@ class XMLHttpRequest {
   }
 
   get responseText() {
+    if (this.responseType !== '' && this.responseType !== 'text')
+      throw 'Non-text responseType ' + this.responseType;
+    if (this[kPrivate].responseArrayBuffer === null)
+      return null;
+    if (this[kPrivate].responseText === null) {
+      var intArray = new Uint8Array(this[kPrivate].responseArrayBuffer);
+      this[kPrivate].responseText = unicode.decodeUtf8String(intArray);
+    }
     return this[kPrivate].responseText;
+  }
+
+  get response() {
+    if (this.responseType === 'text' || this.responseType == '')
+      return this.responseText;
+    else if (this.responseType === 'arraybuffer')
+      return this[kPrivate].responseArrayBuffer;
+    throw 'Unknown responseType ' + this.responseType;
   }
 
   open(method, url) {
@@ -68,7 +87,8 @@ class XMLHttpRequest {
     priv.loader.start(priv.request).then(function(result) {
       return core.drainData(result.response.body).then(function(result) {
         outstandingRequests.delete(self);
-        priv.responseText = unicode.decodeUtf8String(new Uint8Array(result.buffer));
+        priv.responseArrayBuffer = result.buffer;
+        // FIXME: Catch exceptions during onload so they don't trip onerror.
         self.onload();
       });
     }).catch(function(error) {
