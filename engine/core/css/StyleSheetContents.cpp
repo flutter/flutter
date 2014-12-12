@@ -36,8 +36,7 @@
 namespace blink {
 
 StyleSheetContents::StyleSheetContents(const String& originalURL, const CSSParserContext& context)
-    : m_hasSyntacticallyValidCSSHeader(true)
-    , m_usesRemUnits(false)
+    : m_usesRemUnits(false)
     , m_hasMediaQueries(false)
     , m_hasSingleOwnerDocument(true)
     , m_originalURL(originalURL)
@@ -52,15 +51,6 @@ StyleSheetContents::~StyleSheetContents()
 #endif
 }
 
-void StyleSheetContents::setHasSyntacticallyValidCSSHeader(bool isValidCss)
-{
-    if (!isValidCss) {
-        if (Document* document = clientSingleOwnerDocument())
-            removeSheetFromCache(document);
-    }
-    m_hasSyntacticallyValidCSSHeader = isValidCss;
-}
-
 bool StyleSheetContents::isCacheable() const
 {
     // FIXME: StyleSheets with media queries can't be cached because their RuleSet
@@ -69,10 +59,6 @@ bool StyleSheetContents::isCacheable() const
     // if they are in differently sized iframes). Once RuleSets are media query
     // agnostic, we can restore sharing of StyleSheetContents with medea queries.
     if (m_hasMediaQueries)
-        return false;
-    // If the header is valid we are not going to need to check the SecurityOrigin.
-    // FIXME: Valid mime type avoids the check too.
-    if (!m_hasSyntacticallyValidCSSHeader)
         return false;
     return true;
 }

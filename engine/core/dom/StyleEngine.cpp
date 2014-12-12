@@ -376,13 +376,6 @@ void StyleEngine::markDocumentDirty()
         document().importsController()->master()->styleEngine()->markDocumentDirty();
 }
 
-static bool isCacheableForStyleElement(const StyleSheetContents& contents)
-{
-    if (!contents.hasSyntacticallyValidCSSHeader())
-        return false;
-    return true;
-}
-
 PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)
 {
     RefPtr<CSSStyleSheet> styleSheet;
@@ -392,14 +385,13 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
     if (result.isNewEntry || !result.storedValue->value) {
         styleSheet = CSSStyleSheet::createInline(e, KURL());
         styleSheet->contents()->parseString(text);
-        if (result.isNewEntry && isCacheableForStyleElement(*styleSheet->contents())) {
+        if (result.isNewEntry) {
             result.storedValue->value = styleSheet->contents();
             m_sheetToTextCache.add(styleSheet->contents(), textContent);
         }
     } else {
         StyleSheetContents* contents = result.storedValue->value;
         ASSERT(contents);
-        ASSERT(isCacheableForStyleElement(*contents));
         ASSERT(contents->singleOwnerDocument() == e->document());
         styleSheet = CSSStyleSheet::createInline(contents, e);
     }

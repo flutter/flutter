@@ -159,7 +159,7 @@ public:
     CSSParserSelector* rewriteSpecifiers(CSSParserSelector*, CSSParserSelector*);
     CSSParserSelector* rewriteSpecifiersForShadowDistributed(CSSParserSelector* specifiers, CSSParserSelector* distributedPseudoElementSelector);
 
-    void invalidBlockHit();
+    void invalidBlockHit() { }
 
     Vector<OwnPtr<CSSParserSelector> >* reusableSelectorVector() { return &m_reusableSelectorVector; }
 

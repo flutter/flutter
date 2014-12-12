@@ -67,9 +67,6 @@ public:
 
     KURL completeURL(const String& url) const;
 
-    void setHasSyntacticallyValidCSSHeader(bool isValidCss);
-    bool hasSyntacticallyValidCSSHeader() const { return m_hasSyntacticallyValidCSSHeader; }
-
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
 
@@ -111,7 +108,6 @@ private:
 
     Document* clientSingleOwnerDocument() const;
 
-    bool m_hasSyntacticallyValidCSSHeader : 1;
     bool m_usesRemUnits : 1;
     bool m_hasMediaQueries : 1;
     bool m_hasSingleOwnerDocument : 1;

@@ -1712,12 +1712,6 @@ StyleKeyframe* BisonCSSParser::createKeyframe(CSSParserValueList* keys)
     return keyframePtr;
 }
 
-void BisonCSSParser::invalidBlockHit()
-{
-    if (m_styleSheet && !m_hadSyntacticallyValidCSSRule)
-        m_styleSheet->setHasSyntacticallyValidCSSHeader(false);
-}
-
 void BisonCSSParser::startRule()
 {
     if (!m_observer)
