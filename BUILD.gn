@@ -14,7 +14,6 @@ group("sky") {
     "//sky/engine/wtf:unittests",
     "//sky/services/inspector",
     "//sky/tools/debugger",
-    "//sky/tools/imagediff",
     "//sky/tools/tester",
     "//sky/viewer",
   ]
