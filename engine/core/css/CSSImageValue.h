@@ -63,8 +63,6 @@ public:
 
     PassRefPtr<CSSValue> cloneForCSSOM() const;
 
-    bool hasFailedOrCanceledSubresources() const;
-
     bool equals(const CSSImageValue&) const;
 
     bool knownToBeOpaque(const RenderObject*) const;

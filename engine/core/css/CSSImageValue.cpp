@@ -85,15 +85,6 @@ void CSSImageValue::restoreCachedResourceIfNeeded(Document& document)
     document.fetcher()->requestLoadStarted(resource, request, ResourceFetcher::ResourceLoadingFromCache);
 }
 
-bool CSSImageValue::hasFailedOrCanceledSubresources() const
-{
-    if (!m_image || !m_image->isImageResource())
-        return false;
-    if (Resource* cachedResource = toStyleFetchedImage(m_image)->cachedImage())
-        return cachedResource->loadFailedOrCanceled();
-    return true;
-}
-
 bool CSSImageValue::equals(const CSSImageValue& other) const
 {
     return m_absoluteURL == other.m_absoluteURL;

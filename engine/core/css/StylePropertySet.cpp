@@ -297,16 +297,6 @@ String StylePropertySet::asText() const
     return StylePropertySerializer(*this).asText();
 }
 
-bool StylePropertySet::hasFailedOrCanceledSubresources() const
-{
-    unsigned size = propertyCount();
-    for (unsigned i = 0; i < size; ++i) {
-        if (propertyAt(i).value()->hasFailedOrCanceledSubresources())
-            return true;
-    }
-    return false;
-}
-
 // This is the list of properties we want to copy in the copyBlockProperties() function.
 // It is the list of CSS properties that apply specially to block-level elements.
 static const CSSPropertyID staticBlockProperties[] = {

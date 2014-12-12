@@ -65,8 +65,6 @@ public:
     Node* singleOwnerNode() const;
     Document* singleOwnerDocument() const;
 
-    bool hasFailedOrCanceledSubresources() const;
-
     KURL completeURL(const String& url) const;
 
     void setHasSyntacticallyValidCSSHeader(bool isValidCss);

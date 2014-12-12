@@ -61,8 +61,6 @@ public:
         float scaleFactor;
     };
 
-    bool hasFailedOrCanceledSubresources() const;
-
     PassRefPtr<CSSImageSetValue> cloneForCSSOM() const;
 
 protected:

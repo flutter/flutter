@@ -75,13 +75,6 @@ String CSSFontFaceSrcValue::customCSSText() const
     return result.toString();
 }
 
-bool CSSFontFaceSrcValue::hasFailedOrCanceledSubresources() const
-{
-    if (!m_fetched)
-        return false;
-    return m_fetched->loadFailedOrCanceled();
-}
-
 FontResource* CSSFontFaceSrcValue::fetch(Document* document)
 {
     if (!m_fetched) {

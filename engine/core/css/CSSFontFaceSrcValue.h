@@ -60,8 +60,6 @@ public:
 
     String customCSSText() const;
 
-    bool hasFailedOrCanceledSubresources() const;
-
     FontResource* fetch(Document*);
 
     bool equals(const CSSFontFaceSrcValue&) const;

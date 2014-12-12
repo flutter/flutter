@@ -63,8 +63,6 @@ public:
 
     void setPercentage(PassRefPtr<CSSPrimitiveValue> percentageValue) { m_percentageValue = percentageValue; }
 
-    bool hasFailedOrCanceledSubresources() const;
-
     bool equals(const CSSCrossfadeValue&) const;
 
 private:

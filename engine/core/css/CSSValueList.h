@@ -57,8 +57,6 @@ public:
     bool equals(const CSSValueList&) const;
     bool equals(const CSSValue&) const;
 
-    bool hasFailedOrCanceledSubresources() const;
-
     PassRefPtr<CSSValueList> cloneForCSSOM() const;
 
 protected:

@@ -142,40 +142,6 @@ KURL StyleSheetContents::completeURL(const String& url) const
     return m_parserContext.completeURL(url);
 }
 
-static bool childRulesHaveFailedOrCanceledSubresources(const Vector<RefPtr<StyleRuleBase> >& rules)
-{
-    for (unsigned i = 0; i < rules.size(); ++i) {
-        const StyleRuleBase* rule = rules[i].get();
-        switch (rule->type()) {
-        case StyleRuleBase::Style:
-            if (toStyleRule(rule)->properties().hasFailedOrCanceledSubresources())
-                return true;
-            break;
-        case StyleRuleBase::FontFace:
-            if (toStyleRuleFontFace(rule)->properties().hasFailedOrCanceledSubresources())
-                return true;
-            break;
-        case StyleRuleBase::Media:
-            if (childRulesHaveFailedOrCanceledSubresources(toStyleRuleMedia(rule)->childRules()))
-                return true;
-            break;
-        case StyleRuleBase::Keyframes:
-        case StyleRuleBase::Unknown:
-        case StyleRuleBase::Keyframe:
-        case StyleRuleBase::Supports:
-        case StyleRuleBase::Filter:
-            break;
-        }
-    }
-    return false;
-}
-
-bool StyleSheetContents::hasFailedOrCanceledSubresources() const
-{
-    ASSERT(isCacheable());
-    return childRulesHaveFailedOrCanceledSubresources(m_childRules);
-}
-
 Document* StyleSheetContents::clientSingleOwnerDocument() const
 {
     if (!m_hasSingleOwnerDocument || clientSize() <= 0)

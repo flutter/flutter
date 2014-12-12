@@ -100,25 +100,6 @@ CSSValue::Type CSSValue::cssValueType() const
     return CSS_CUSTOM;
 }
 
-bool CSSValue::hasFailedOrCanceledSubresources() const
-{
-    // This should get called for internal instances only.
-    ASSERT(!isCSSOMSafe());
-
-    if (isValueList())
-        return toCSSValueList(this)->hasFailedOrCanceledSubresources();
-    if (classType() == FontFaceSrcClass)
-        return toCSSFontFaceSrcValue(this)->hasFailedOrCanceledSubresources();
-    if (classType() == ImageClass)
-        return toCSSImageValue(this)->hasFailedOrCanceledSubresources();
-    if (classType() == CrossfadeClass)
-        return toCSSCrossfadeValue(this)->hasFailedOrCanceledSubresources();
-    if (classType() == ImageSetClass)
-        return toCSSImageSetValue(this)->hasFailedOrCanceledSubresources();
-
-    return false;
-}
-
 template<class ChildClassType>
 inline static bool compareCSSValues(const CSSValue& first, const CSSValue& second)
 {

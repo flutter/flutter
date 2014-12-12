@@ -164,15 +164,6 @@ String CSSImageSetValue::customCSSText() const
     return result.toString();
 }
 
-bool CSSImageSetValue::hasFailedOrCanceledSubresources() const
-{
-    if (!m_imageSet || !m_imageSet->isImageResourceSet())
-        return false;
-    if (Resource* cachedResource = toStyleFetchedImageSet(m_imageSet)->cachedImage())
-        return cachedResource->loadFailedOrCanceled();
-    return true;
-}
-
 CSSImageSetValue::CSSImageSetValue(const CSSImageSetValue& cloneFrom)
     : CSSValueList(cloneFrom)
     , m_accessedBestFitImage(false)

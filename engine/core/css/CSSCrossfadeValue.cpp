@@ -202,15 +202,6 @@ void CSSCrossfadeValue::CrossfadeSubimageObserverProxy::imageChanged(ImageResour
         m_ownerValue->crossfadeChanged(*rect);
 }
 
-bool CSSCrossfadeValue::hasFailedOrCanceledSubresources() const
-{
-    if (m_cachedFromImage && m_cachedFromImage->loadFailedOrCanceled())
-        return true;
-    if (m_cachedToImage && m_cachedToImage->loadFailedOrCanceled())
-        return true;
-    return false;
-}
-
 bool CSSCrossfadeValue::equals(const CSSCrossfadeValue& other) const
 {
     return compareCSSValuePtr(m_fromValue, other.m_fromValue)

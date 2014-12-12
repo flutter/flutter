@@ -111,8 +111,6 @@ public:
 
     PassRefPtr<CSSValue> cloneForCSSOM() const;
 
-    bool hasFailedOrCanceledSubresources() const;
-
     bool equals(const CSSValue&) const;
 
 protected:
