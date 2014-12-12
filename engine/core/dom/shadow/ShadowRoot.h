@@ -62,16 +62,12 @@ public:
     virtual void insertedInto(ContainerNode*) override;
     virtual void removedFrom(ContainerNode*) override;
 
-    void registerScopedHTMLStyleChild();
-    void unregisterScopedHTMLStyleChild();
-
     bool containsContentElements() const;
     bool containsInsertionPoints() const { return containsContentElements(); }
     bool containsShadowRoots() const;
 
     // For Internals, don't use this.
     unsigned childShadowRootCount() const;
-    unsigned numberOfStyles() const { return m_numberOfStyles; }
 
     void didAddInsertionPoint(InsertionPoint*);
     void didRemoveInsertionPoint(InsertionPoint*);
@@ -105,7 +101,6 @@ private:
     virtual PassRefPtr<Node> cloneNode(bool) override { return nullptr; }
 
     OwnPtr<ShadowRootRareData> m_shadowRootRareData;
-    unsigned m_numberOfStyles : 27;
     unsigned m_registeredWithParentShadowRoot : 1;
     unsigned m_descendantInsertionPointsIsValid : 1;
 };

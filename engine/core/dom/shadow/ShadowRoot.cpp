@@ -50,7 +50,6 @@ COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_sh
 ShadowRoot::ShadowRoot(Document& document)
     : DocumentFragment(0, CreateShadowRoot)
     , TreeScope(*this, document)
-    , m_numberOfStyles(0)
     , m_registeredWithParentShadowRoot(false)
     , m_descendantInsertionPointsIsValid(false)
 {
@@ -144,17 +143,6 @@ void ShadowRoot::removedFrom(ContainerNode* insertionPoint)
     }
 
     DocumentFragment::removedFrom(insertionPoint);
-}
-
-void ShadowRoot::registerScopedHTMLStyleChild()
-{
-    ++m_numberOfStyles;
-}
-
-void ShadowRoot::unregisterScopedHTMLStyleChild()
-{
-    ASSERT(m_numberOfStyles > 0);
-    --m_numberOfStyles;
 }
 
 ShadowRootRareData* ShadowRoot::ensureShadowRootRareData()

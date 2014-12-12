@@ -73,9 +73,6 @@ void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
         return;
 
     processStyleSheet();
-
-    if (ShadowRoot* scope = containingShadowRoot())
-        scope->registerScopedHTMLStyleChild();
 }
 
 void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
@@ -88,9 +85,6 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
     ShadowRoot* scopingNode = containingShadowRoot();
     if (!scopingNode)
         scopingNode = insertionPoint->containingShadowRoot();
-
-    if (scopingNode)
-        scopingNode->unregisterScopedHTMLStyleChild();
 
     TreeScope* containingScope = containingShadowRoot();
     TreeScope& scope = containingScope ? *containingScope : insertionPoint->treeScope();
