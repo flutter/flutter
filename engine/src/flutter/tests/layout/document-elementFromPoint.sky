@@ -1,0 +1,26 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<style>
+foo { width: 100px; height: 100px; background: blue; }
+bar { width: 100px; height: 100px; background: purple; }
+</style>
+<foo /><bar />
+<script>
+describe("elementFromPoint", function() {
+  it("should hit test", function() {
+    // FIXME: We should have much better hit-testing coverage, at least:
+    // inline content (both sections of a wrapped run)
+    // text node
+    // flex box
+    // display: paragraph
+    // position: absolute
+    // position: relative
+    // z-order (missing, zero, positive and negative)
+    assert.equal(document.elementFromPoint(50, 50).tagName, 'foo')
+    assert.equal(document.elementFromPoint(50, 150).tagName, 'bar')
+    assert.equal(document.elementFromPoint(50, 250).tagName, 'sky')
+  });
+});
+</script>
+</sky>
