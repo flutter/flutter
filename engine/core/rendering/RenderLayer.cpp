@@ -1511,7 +1511,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, backgroundRect, foregroundRect, outlineRect);
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
-    if (isSelfPaintingLayer() && !foregroundRect.intersects(hitTestLocation)) {
+    if (isSelfPaintingLayer() && foregroundRect.intersects(hitTestLocation)) {
         // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
         HitTestResult tempResult(result.hitTestLocation());
         if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestDescendants)
@@ -1542,7 +1542,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     if (candidateLayer)
         return candidateLayer;
 
-    if (isSelfPaintingLayer() && !backgroundRect.intersects(hitTestLocation)) {
+    if (isSelfPaintingLayer() && backgroundRect.intersects(hitTestLocation)) {
         HitTestResult tempResult(result.hitTestLocation());
         if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestSelf)
             && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
