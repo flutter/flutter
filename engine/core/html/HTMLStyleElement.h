@@ -47,12 +47,8 @@ public:
 private:
     HTMLStyleElement(Document&);
 
-    void createSheet();
     void process();
     void clearSheet();
-
-    void processStyleSheet();
-    void clearDocumentData();
 
     // overload from HTMLElement
     virtual void parseAttribute(const QualifiedName&, const AtomicString&) override;

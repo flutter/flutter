@@ -43,7 +43,17 @@ inline HTMLStyleElement::HTMLStyleElement(Document& document)
 
 HTMLStyleElement::~HTMLStyleElement()
 {
-    clearDocumentData();
+    if (m_sheet)
+        m_sheet->clearOwnerNode();
+
+    // TODO(esprehn): How can we still be in the document when our destructor
+    // is running?
+    if (inDocument()) {
+        ContainerNode* scopingNode = this->scopingNode();
+        TreeScope& scope = scopingNode ? scopingNode->treeScope() : treeScope();
+        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
+    }
+
     if (m_sheet)
         clearSheet();
 }
@@ -66,11 +76,8 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
 void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
-
-    if (!inDocument())
-        return;
-
-    processStyleSheet();
+    document().styleEngine()->addStyleSheetCandidateNode(this, false);
+    process();
 }
 
 void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
@@ -119,22 +126,18 @@ ContainerNode* HTMLStyleElement::scopingNode()
     return &document();
 }
 
-void HTMLStyleElement::process()
-{
-    if (!inDocument())
-        return;
-    createSheet();
-}
-
 void HTMLStyleElement::clearSheet()
 {
     ASSERT(m_sheet);
     m_sheet.release()->clearOwnerNode();
 }
 
-void HTMLStyleElement::createSheet()
+void HTMLStyleElement::process()
 {
-    ASSERT(inDocument());
+    if (!inDocument())
+        return;
+
+    TRACE_EVENT0("blink", "StyleElement::process");
 
     if (m_sheet)
         clearSheet();
@@ -142,36 +145,13 @@ void HTMLStyleElement::createSheet()
     RefPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
 
     MediaQueryEvaluator screenEval("screen", true);
-    MediaQueryEvaluator printEval("print", true);
-    if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
+    if (screenEval.eval(mediaQueries.get())) {
         const String& text = textFromChildren();
         m_sheet = document().styleEngine()->createSheet(this, text);
         m_sheet->setMediaQueries(mediaQueries.release());
     }
 
     document().styleResolverChanged();
-}
-
-void HTMLStyleElement::clearDocumentData()
-{
-    if (m_sheet)
-        m_sheet->clearOwnerNode();
-
-    if (inDocument()) {
-        ContainerNode* scopingNode = this->scopingNode();
-        TreeScope& scope = scopingNode ? scopingNode->treeScope() : treeScope();
-        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
-    }
-}
-
-void HTMLStyleElement::processStyleSheet()
-{
-    TRACE_EVENT0("blink", "StyleElement::processStyleSheet");
-
-    ASSERT(inDocument());
-
-    document().styleEngine()->addStyleSheetCandidateNode(this, false);
-    process();
 }
 
 }
