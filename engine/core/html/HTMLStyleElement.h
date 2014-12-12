@@ -61,9 +61,6 @@ private:
     virtual void childrenChanged(const ChildrenChange&) override;
 
     RefPtr<CSSStyleSheet> m_sheet;
-
-    bool m_loading : 1;
-    bool m_registeredAsCandidate : 1;
 };
 
 } // namespace blink

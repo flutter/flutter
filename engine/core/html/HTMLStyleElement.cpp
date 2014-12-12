@@ -38,8 +38,6 @@ namespace blink {
 
 inline HTMLStyleElement::HTMLStyleElement(Document& document)
     : HTMLElement(HTMLNames::styleTag, document)
-    , m_loading(false)
-    , m_registeredAsCandidate(false)
 {
 }
 
@@ -89,10 +87,7 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
     TreeScope* containingScope = containingShadowRoot();
     TreeScope& scope = containingScope ? *containingScope : insertionPoint->treeScope();
 
-    if (m_registeredAsCandidate) {
-        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
-        m_registeredAsCandidate = false;
-    }
+    document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
 
     RefPtr<CSSStyleSheet> removedSheet = m_sheet.get();
 
@@ -149,11 +144,9 @@ void HTMLStyleElement::createSheet()
     MediaQueryEvaluator screenEval("screen", true);
     MediaQueryEvaluator printEval("print", true);
     if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
-        m_loading = true;
         const String& text = textFromChildren();
         m_sheet = document().styleEngine()->createSheet(this, text);
         m_sheet->setMediaQueries(mediaQueries.release());
-        m_loading = false;
     }
 
     document().styleResolverChanged();
@@ -177,7 +170,6 @@ void HTMLStyleElement::processStyleSheet()
 
     ASSERT(inDocument());
 
-    m_registeredAsCandidate = true;
     document().styleEngine()->addStyleSheetCandidateNode(this, false);
     process();
 }
