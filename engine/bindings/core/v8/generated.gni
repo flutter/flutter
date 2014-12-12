@@ -7,9 +7,8 @@ import("//sky/engine/bindings/bindings.gni")
 bindings_core_v8_output_dir = "$bindings_output_dir/core/v8"
 
 if (is_win && is_official_build) {
-  bindings_core_generated_aggregate_files = [
-    "$bindings_core_v8_output_dir/V8GeneratedCoreBindings.cpp",
-  ]
+  bindings_core_generated_aggregate_files =
+      [ "$bindings_core_v8_output_dir/V8GeneratedCoreBindings.cpp" ]
 } else {
   bindings_core_generated_aggregate_files = [
     "$bindings_core_v8_output_dir/V8GeneratedCoreBindings01.cpp",

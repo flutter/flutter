@@ -23,39 +23,41 @@ scripts_for_in_files = [
   "$_scripts_dir/templates/macros.tmpl",
 ]
 
-css_properties_files = scripts_for_in_files + [
-  "$_scripts_dir/css_properties.py",
-]
+css_properties_files =
+    scripts_for_in_files + [ "$_scripts_dir/css_properties.py" ]
 
 make_event_factory_files = scripts_for_in_files + [
-  "$_scripts_dir/make_event_factory.py",
-  "$_scripts_dir/templates/EventFactory.cpp.tmpl",
-]
+                             "$_scripts_dir/make_event_factory.py",
+                             "$_scripts_dir/templates/EventFactory.cpp.tmpl",
+                           ]
 
 make_names_files = scripts_for_in_files + [
-  "$_scripts_dir/make_names.py",
-  "$_scripts_dir/templates/MakeNames.cpp.tmpl",
-  "$_scripts_dir/templates/MakeNames.h.tmpl",
-]
+                     "$_scripts_dir/make_names.py",
+                     "$_scripts_dir/templates/MakeNames.cpp.tmpl",
+                     "$_scripts_dir/templates/MakeNames.h.tmpl",
+                   ]
 
-make_qualified_names_files = scripts_for_in_files + [
-  "$_scripts_dir/make_qualified_names.py",
-  "$_scripts_dir/templates/MakeQualifiedNames.cpp.tmpl",
-  "$_scripts_dir/templates/MakeQualifiedNames.h.tmpl",
-]
+make_qualified_names_files =
+    scripts_for_in_files + [
+      "$_scripts_dir/make_qualified_names.py",
+      "$_scripts_dir/templates/MakeQualifiedNames.cpp.tmpl",
+      "$_scripts_dir/templates/MakeQualifiedNames.h.tmpl",
+    ]
 
-make_element_factory_files = make_qualified_names_files + [
-  "$_scripts_dir/make_element_factory.py",
-  "$_scripts_dir/templates/ElementFactory.cpp.tmpl",
-  "$_scripts_dir/templates/ElementFactory.h.tmpl",
-  "$_scripts_dir/templates/ElementWrapperFactory.cpp.tmpl",
-  "$_scripts_dir/templates/ElementWrapperFactory.h.tmpl",
-]
+make_element_factory_files =
+    make_qualified_names_files + [
+      "$_scripts_dir/make_element_factory.py",
+      "$_scripts_dir/templates/ElementFactory.cpp.tmpl",
+      "$_scripts_dir/templates/ElementFactory.h.tmpl",
+      "$_scripts_dir/templates/ElementWrapperFactory.cpp.tmpl",
+      "$_scripts_dir/templates/ElementWrapperFactory.h.tmpl",
+    ]
 
-make_element_type_helpers_files = make_qualified_names_files + [
-  "$_scripts_dir/make_element_type_helpers.py",
-  "$_scripts_dir/templates/ElementTypeHelpers.h.tmpl",
-]
+make_element_type_helpers_files =
+    make_qualified_names_files + [
+      "$_scripts_dir/make_element_type_helpers.py",
+      "$_scripts_dir/templates/ElementTypeHelpers.h.tmpl",
+    ]
 
 # The executables are relative to the build directory. Don't rebase it because
 # on Posix we want to run the system one on the path.
@@ -110,8 +112,9 @@ template("process_in_files") {
     output_dir = get_path_info(outputs[0], "dir")
 
     args = rebase_path(invoker.in_files, root_build_dir) + [
-      "--output_dir", rebase_path(output_dir, root_build_dir),
-    ]
+             "--output_dir",
+             rebase_path(output_dir, root_build_dir),
+           ]
     if (defined(invoker.other_args)) {
       args += invoker.other_args
     }
@@ -125,7 +128,7 @@ template("process_in_files") {
     configs += [
       "//build/config/compiler:wexit_time_destructors",
       "//sky/engine:inside_blink",
-      "//sky/engine:config"
+      "//sky/engine:config",
     ]
 
     deps = [
@@ -143,13 +146,14 @@ template("process_in_files") {
 template("css_properties") {
   process_in_files(target_name) {
     script = invoker.script
-    in_files = ["css/CSSProperties.in"]
+    in_files = [ "css/CSSProperties.in" ]
     other_inputs = css_properties_files
     if (defined(invoker.other_inputs)) {
       other_inputs += invoker.other_inputs
     }
     other_args = [
-      "--gperf", gperf_exe,
+      "--gperf",
+      gperf_exe,
     ]
     outputs = invoker.outputs
 
@@ -234,7 +238,9 @@ template("make_token_matcher") {
     script = "//sky/engine/build/scripts/make_token_matcher.py"
 
     inputs = scripts_for_in_files + [ invoker.input_file ]
-    outputs = [ invoker.output_file ]
+    outputs = [
+      invoker.output_file,
+    ]
 
     args = [
       rebase_path(invoker.input_file, root_build_dir),
@@ -244,4 +250,3 @@ template("make_token_matcher") {
     deps = make_core_generated_deps
   }
 }
-

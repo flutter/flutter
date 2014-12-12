@@ -8,26 +8,27 @@
 # core/v8/custom/custom.gypi ---------------------------------------------------
 
 # These paths are relative to v8/custom.
-_core_v8_custom_gypi = exec_script(
-    "//build/gypi_to_gn.py",
-    [ rebase_path("core/v8/custom/custom.gypi") ],
-    "scope",
-    [ "core/v8/custom/custom.gypi" ])
+_core_v8_custom_gypi =
+    exec_script("//build/gypi_to_gn.py",
+                [ rebase_path("core/v8/custom/custom.gypi") ],
+                "scope",
+                [ "core/v8/custom/custom.gypi" ])
 
 bindings_core_v8_custom_dir = get_path_info("core/v8/custom", "abspath")
-bindings_core_v8_custom_files = get_path_info(
-    rebase_path(_core_v8_custom_gypi.bindings_core_v8_custom_files, ".",
-                bindings_core_v8_custom_dir),
-    "abspath")
+bindings_core_v8_custom_files =
+    get_path_info(
+        rebase_path(_core_v8_custom_gypi.bindings_core_v8_custom_files,
+                    ".",
+                    bindings_core_v8_custom_dir),
+        "abspath")
 
 # core/v8/v8.gypi --------------------------------------------------------------
 
 # These paths are relative to v8.
-_core_v8_gypi = exec_script(
-    "//build/gypi_to_gn.py",
-    [ rebase_path("core/v8/v8.gypi") ],
-    "scope",
-    [ "core/v8/v8.gypi" ])
+_core_v8_gypi = exec_script("//build/gypi_to_gn.py",
+                            [ rebase_path("core/v8/v8.gypi") ],
+                            "scope",
+                            [ "core/v8/v8.gypi" ])
 
 bindings_core_v8_dir = get_path_info("core/v8", "abspath")
 
@@ -35,9 +36,9 @@ bindings_core_v8_dir = get_path_info("core/v8", "abspath")
 # expand that.
 _rel_bindings_core_v8_files = _core_v8_gypi.bindings_core_v8_files
 _rel_bindings_core_v8_files -= [ "<@(bindings_core_v8_custom_files)" ]
-bindings_core_v8_files = get_path_info(
-    rebase_path(_rel_bindings_core_v8_files, ".", "core/v8"),
-    "abspath")
+bindings_core_v8_files =
+    get_path_info(rebase_path(_rel_bindings_core_v8_files, ".", "core/v8"),
+                  "abspath")
 bindings_core_v8_files += bindings_core_v8_custom_files
 
 # bindings.gypi ----------------------------------------------------------------

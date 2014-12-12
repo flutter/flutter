@@ -10,12 +10,13 @@ bindings_scripts_dir = get_path_info(".", "abspath")
 bindings_scripts_output_dir = "$root_gen_dir/sky/bindings/scripts"
 
 # Replacing <(DEPTH) with "/" makes paths like "<(DEPTH)/foo" absolute.
-_gypi = exec_script(
-    "//build/gypi_to_gn.py",
-    [ rebase_path("scripts.gypi"),
-      "--replace=<(DEPTH)=/" ],
-    "scope",
-    [ "scripts.gypi" ])
+_gypi = exec_script("//build/gypi_to_gn.py",
+                    [
+                      rebase_path("scripts.gypi"),
+                      "--replace=<(DEPTH)=/",
+                    ],
+                    "scope",
+                    [ "scripts.gypi" ])
 
 jinja_module_files = get_path_info(_gypi.jinja_module_files, "abspath")
 idl_lexer_parser_files = get_path_info(_gypi.idl_lexer_parser_files, "abspath")
@@ -44,23 +45,24 @@ template("compute_interfaces_info_individual") {
     file_list = "$target_gen_dir/${target_name}_file_list.txt"
     write_file(file_list, rebase_path(invoker.sources_static, root_build_dir))
 
-    inputs = [
-      "$bindings_scripts_dir/utilities.py",
-    ] + invoker.sources_static + invoker.sources_generated
+    inputs = [ "$bindings_scripts_dir/utilities.py" ] + invoker.sources_static +
+             invoker.sources_generated
 
     outputs = [
       file_list,
-      invoker.output_file
+      invoker.output_file,
     ]
 
     args = [
-      "--component-dir", invoker.component_dir,
-      "--idl-files-list", rebase_path(file_list, root_build_dir),
-      "--interfaces-info-file",
-      rebase_path(invoker.output_file, root_build_dir),
-      "--write-file-only-if-changed=1",
-      "--",
-    ] + rebase_path(invoker.sources_generated, root_build_dir)
+             "--component-dir",
+             invoker.component_dir,
+             "--idl-files-list",
+             rebase_path(file_list, root_build_dir),
+             "--interfaces-info-file",
+             rebase_path(invoker.output_file, root_build_dir),
+             "--write-file-only-if-changed=1",
+             "--",
+           ] + rebase_path(invoker.sources_generated, root_build_dir)
 
     deps = [
       # FIXME: should be {modules|core}_generated_idls
@@ -81,16 +83,17 @@ template("generate_event_interfaces") {
     # Write the file list to a unique temp file to avoid blowing out the
     # command line length limit.
     idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
-    write_file(idl_files_list,
-               rebase_path(invoker.sources, root_build_dir))
+    write_file(idl_files_list, rebase_path(invoker.sources, root_build_dir))
 
     inputs = [
-      "//sky/engine/bindings/scripts/utilities.py",
-      idl_files_list,
-    ] + invoker.sources
+               "//sky/engine/bindings/scripts/utilities.py",
+               idl_files_list,
+             ] + invoker.sources
 
     output_file = "$root_gen_dir/sky/" + invoker.output_file
-    outputs = [ output_file ]
+    outputs = [
+      output_file,
+    ]
 
     script = "//sky/engine/bindings/scripts/generate_event_interfaces.py"
     args = [
@@ -102,7 +105,10 @@ template("generate_event_interfaces") {
     ]
 
     if (defined(invoker.suffix)) {
-      args += [ "--suffix", invoker.suffix ]
+      args += [
+        "--suffix",
+        invoker.suffix,
+      ]
     }
   }
 }
@@ -121,20 +127,20 @@ template("idl_compiler") {
     # really expressible in GN now).
     script = "//sky/engine/bindings/scripts/idl_compiler.py"
 
-    inputs =
-      idl_lexer_parser_files +  # to be explicit (covered by parsetab)
-      idl_compiler_files
+    inputs = idl_lexer_parser_files + idl_compiler_files  # to be explicit (covered by parsetab)
     inputs += [
       "$bindings_scripts_output_dir/lextab.py",
       "$bindings_scripts_output_dir/parsetab.pickle",
       "$bindings_scripts_output_dir/cached_jinja_templates.stamp",
       "$bindings_dir/IDLExtendedAttributes.txt",
+
       # If the dependency structure or public interface info (e.g.,
       # [ImplementedAs]) changes, we rebuild all files, since we're not
       # computing dependencies file-by-file in the build.
       # This data is generally stable.
       "$bindings_core_output_dir/InterfacesInfoAll.pickle",
     ]
+
     # Further, if any dependency (partial interface or implemented
     # interface) changes, rebuild everything, since every IDL potentially
     # depends on them, because we're not computing dependencies

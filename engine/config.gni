@@ -60,7 +60,7 @@ if (sky_enable_compostior) {
 
 # Convert the list to a space-separated string for passing to scripts.
 # This would be the equivalent of passing '<(feature_defines)' in GYP.
-feature_defines_string = exec_script(
-    "build/gn_list_to_space_separated_string.py",
-    feature_defines_list,
-    "trim string")
+feature_defines_string =
+    exec_script("build/gn_list_to_space_separated_string.py",
+                feature_defines_list,
+                "trim string")

@@ -7,21 +7,18 @@ import("//sky/engine/core/core.gni")
 
 # IDL file lists; see: http://www.chromium.org/developers/web-idl-interfaces
 # Interface IDL files: generate individual bindings (includes testing)
-core_interface_idl_files =
-  core_idl_files
+core_interface_idl_files = core_idl_files
 
 # Static IDL files
-core_static_interface_idl_files =
-  core_idl_files
+core_static_interface_idl_files = core_idl_files
 
-core_static_dependency_idl_files =
-  core_dependency_idl_files
+core_static_dependency_idl_files = core_dependency_idl_files
 
 # Generated IDL files
 core_generated_dependency_idl_files =
-  # FIXME: Generate separate core_global_constructors_idls
-  # http://crbug.com/358074
-  generated_global_constructors_idl_files  # partial interfaces
+    # FIXME: Generate separate core_global_constructors_idls
+    # http://crbug.com/358074
+    generated_global_constructors_idl_files  # partial interfaces
 
 # Static IDL files / Generated IDL files
 #
@@ -35,15 +32,12 @@ core_generated_dependency_idl_files =
 # is still supported, we match its behavior for easier maintenance but this can
 # be simplified.
 core_static_idl_files =
-  core_static_interface_idl_files +
-  core_static_dependency_idl_files
-core_generated_idl_files =
-  core_generated_dependency_idl_files
+    core_static_interface_idl_files + core_static_dependency_idl_files
+core_generated_idl_files = core_generated_dependency_idl_files
 
 # Dependency IDL files: don't generate individual bindings, but do process
 # in IDL dependency computation, and count as build dependencies
 # 'core_dependency_idl_files' is already used in engine/core, so avoid
 # collision
 core_all_dependency_idl_files =
-  core_static_dependency_idl_files +
-  core_generated_dependency_idl_files
+    core_static_dependency_idl_files + core_generated_dependency_idl_files
