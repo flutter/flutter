@@ -1,5 +1,5 @@
 Running 1 tests
-ok 1 xmlhttprequest.responseType should support arraybuffer
+ok 1 xmlhttprequest.responseType should default to text when empty
 1 tests
 1 pass
 0 fail
