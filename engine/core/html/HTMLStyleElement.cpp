@@ -119,11 +119,6 @@ const AtomicString& HTMLStyleElement::media() const
     return getAttribute(HTMLNames::mediaAttr);
 }
 
-const AtomicString& HTMLStyleElement::type() const
-{
-    return getAttribute(HTMLNames::typeAttr);
-}
-
 ContainerNode* HTMLStyleElement::scopingNode()
 {
     if (!inDocument())
@@ -155,19 +150,16 @@ void HTMLStyleElement::createSheet()
     if (m_sheet)
         clearSheet();
 
-    const AtomicString& type = this->type();
-    if (type.isEmpty() || type == "text/css") {
-        RefPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
+    RefPtr<MediaQuerySet> mediaQueries = MediaQuerySet::create(media());
 
-        MediaQueryEvaluator screenEval("screen", true);
-        MediaQueryEvaluator printEval("print", true);
-        if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
-            m_loading = true;
-            const String& text = textFromChildren();
-            m_sheet = document().styleEngine()->createSheet(this, text);
-            m_sheet->setMediaQueries(mediaQueries.release());
-            m_loading = false;
-        }
+    MediaQueryEvaluator screenEval("screen", true);
+    MediaQueryEvaluator printEval("print", true);
+    if (screenEval.eval(mediaQueries.get()) || printEval.eval(mediaQueries.get())) {
+        m_loading = true;
+        const String& text = textFromChildren();
+        m_sheet = document().styleEngine()->createSheet(this, text);
+        m_sheet->setMediaQueries(mediaQueries.release());
+        m_loading = false;
     }
 
     document().styleResolverChanged();

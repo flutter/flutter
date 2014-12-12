@@ -43,7 +43,6 @@ public:
     CSSStyleSheet* sheet() const { return m_sheet.get(); }
 
     const AtomicString& media() const;
-    const AtomicString& type() const;
 
 private:
     HTMLStyleElement(Document&);

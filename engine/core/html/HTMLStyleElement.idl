@@ -20,5 +20,4 @@
 
 interface HTMLStyleElement : HTMLElement {
     [Reflect] attribute DOMString media;
-    [Reflect] attribute DOMString type;
 };
