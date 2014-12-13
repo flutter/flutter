@@ -21,7 +21,8 @@ class TestHarnessImpl : public mojo::InterfaceImpl<TestHarness> {
 
  private:
   // TestHarness implementation.
-  void OnTestComplete(const mojo::String& test_result) override;
+  void OnTestComplete(const mojo::String& test_result,
+    const mojo::Array<uint8_t> pixels) override;
   void DispatchInputEvent(mojo::EventPtr event) override;
 
   base::WeakPtr<TestRunner> test_runner_;

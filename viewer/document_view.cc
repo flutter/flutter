@@ -80,8 +80,8 @@ DocumentView::DocumentView(
       root_(NULL),
       view_manager_client_factory_(shell_, this),
       inspector_service_factory_(this),
-      debugger_id_(s_next_debugger_id++),
-      weak_factory_(this) {
+      weak_factory_(this),
+      debugger_id_(s_next_debugger_id++) {
   exported_services_.AddService(&view_manager_client_factory_);
   mojo::WeakBindToPipe(&exported_services_, provider.PassMessagePipe());
 }
@@ -133,6 +133,10 @@ void DocumentView::initializeLayerTreeView() {
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
   layer_host_->SetRootLayer(root_layer_);
+}
+
+void DocumentView::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
+  return layer_host_->GetPixelsForTesting(pixels);
 }
 
 mojo::Shell* DocumentView::GetShell() {

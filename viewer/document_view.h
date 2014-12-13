@@ -70,6 +70,8 @@ class DocumentView : public blink::ServiceProvider,
 
   void StartDebuggerInspectorBackend();
 
+  void GetPixelsForTesting(std::vector<unsigned char>* pixels);
+
  private:
   // WebWidgetClient methods:
   void initializeLayerTreeView() override;
@@ -129,9 +131,9 @@ class DocumentView : public blink::ServiceProvider,
   scoped_ptr<ScriptRunner> script_runner_;
   scoped_ptr<InspectorHostImpl> inspector_host_;
   scoped_ptr<inspector::InspectorBackendMojo> inspector_backend_;
+  base::WeakPtrFactory<DocumentView> weak_factory_;
   int debugger_id_;
 
-  base::WeakPtrFactory<DocumentView> weak_factory_;
   DISALLOW_COPY_AND_ASSIGN(DocumentView);
 };
 

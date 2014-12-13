@@ -7,6 +7,6 @@ module sky;
 import "mojo/services/input_events/public/interfaces/input_events.mojom";
 
 interface TestHarness {
-  OnTestComplete(string test_result);
+  OnTestComplete(string test_result, array<uint8>? pixels);
   DispatchInputEvent(mojo.Event event);
 };

@@ -17,10 +17,11 @@ TestRunnerClient::~TestRunnerClient() {
 }
 
 TestRunner::TestRunner(TestRunnerClient* client, mojo::View* container,
-    const std::string& url)
+    const std::string& url, bool enable_pixel_dumping)
     : test_harness_factory_(this),
       client_(client),
-      weak_ptr_factory_(this) {
+      weak_ptr_factory_(this),
+      enable_pixel_dumping_(enable_pixel_dumping) {
   CHECK(client);
 
   scoped_ptr<mojo::ServiceProviderImpl> exported_services(
@@ -42,10 +43,22 @@ void TestRunner::OnTestStart() {
   std::cout.flush();
 }
 
-void TestRunner::OnTestComplete(const std::string& test_result) {
+void TestRunner::OnTestComplete(const std::string& test_result,
+    const mojo::Array<uint8_t>& pixels) {
   std::cout << "Content-Type: text/plain\n";
   std::cout << test_result << "\n";
   std::cout << "#EOF\n";
+
+  // TODO(ojan): Don't generate the pixels if enable_pixel_dumping_ is false.
+  if (enable_pixel_dumping_) {
+    // TODO(ojan): Add real hashes here once we want to do pixel tests.
+    std::cout << "\nActualHash: FAKEHASHSTUB\n";
+    std::cout << "Content-Type: image/png\n";
+    std::cout << "Content-Length: " << pixels.size() << "\n";
+    std::cout.write(
+        reinterpret_cast<const char*>(&pixels[0]), pixels.size());
+  }
+
   std::cout << "#EOF\n";
   std::cout.flush();
   std::cerr << "#EOF\n";

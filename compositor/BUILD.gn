@@ -4,6 +4,12 @@
 
 source_set("compositor") {
   sources = [
+    "display_delegate.cc",
+    "display_delegate.h",
+    "display_delegate_bitmap.cc",
+    "display_delegate_bitmap.h",
+    "display_delegate_ganesh.cc",
+    "display_delegate_ganesh.h",
     "layer.cc",
     "layer.h",
     "layer_client.cc",

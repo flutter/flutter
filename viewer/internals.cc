@@ -8,6 +8,7 @@
 #include "mojo/edk/js/handle.h"
 #include "mojo/edk/js/support.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "mojo/public/cpp/bindings/array.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/engine/public/web/WebDocument.h"
 #include "sky/engine/public/web/WebFrame.h"
@@ -65,7 +66,10 @@ std::string Internals::ContentAsText() {
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {
-  test_harness_->OnTestComplete(test_result);
+  std::vector<unsigned char> pixels;
+  document_view_->GetPixelsForTesting(&pixels);
+  test_harness_->OnTestComplete(test_result,
+      mojo::Array<uint8_t>::From(pixels));
 }
 
 mojo::Handle Internals::ConnectToService(
