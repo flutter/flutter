@@ -23,10 +23,32 @@ namespace sky {
 namespace tester {
 namespace {
 
-std::string WaitForURL() {
+struct UrlData {
   std::string url;
-  std::cin >> url;
-  return url;
+  std::string expected_pixel_hash;
+  bool enable_pixel_dumping = false;
+};
+
+void WaitForURL(UrlData& data) {
+  // A test name is formated like file:///path/to/test'--pixel-test'pixelhash
+  std::cin >> data.url;
+
+  std::string pixel_switch;
+  std::string::size_type separator_position = data.url.find('\'');
+  if (separator_position != std::string::npos) {
+    pixel_switch = data.url.substr(separator_position + 1);
+    data.url.erase(separator_position);
+  }
+
+  std::string pixel_hash;
+  separator_position = pixel_switch.find('\'');
+  if (separator_position != std::string::npos) {
+    pixel_hash = pixel_switch.substr(separator_position + 1);
+    pixel_switch.erase(separator_position);
+  }
+
+  data.enable_pixel_dumping = pixel_switch == "--pixel-test";
+  data.expected_pixel_hash = pixel_hash;
 }
 
 }  // namespace
@@ -110,8 +132,16 @@ class SkyTester : public mojo::ApplicationDelegate,
 
   void Run() {
     DCHECK(!test_runner_);
-    std::string url = url_from_args_.length() ? url_from_args_ : WaitForURL();
-    test_runner_.reset(new TestRunner(this, content_, url));
+
+    UrlData data;
+    if (url_from_args_.length()) {
+      data.url = url_from_args_;
+    } else {
+      WaitForURL(data);
+    }
+
+    test_runner_.reset(new TestRunner(this, content_, data.url,
+        data.enable_pixel_dumping));
   }
 
   void OnTestComplete() override {

@@ -20,9 +20,10 @@ TestHarnessImpl::TestHarnessImpl(TestRunner* test_runner)
 TestHarnessImpl::~TestHarnessImpl() {
 }
 
-void TestHarnessImpl::OnTestComplete(const mojo::String& test_result) {
+void TestHarnessImpl::OnTestComplete(const mojo::String& test_result,
+    const mojo::Array<uint8_t> pixels) {
   if (test_runner_)
-    test_runner_->OnTestComplete(test_result);
+    test_runner_->OnTestComplete(test_result, pixels);
 }
 
 void TestHarnessImpl::DispatchInputEvent(mojo::EventPtr event) {

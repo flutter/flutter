@@ -6,23 +6,27 @@
 
 #include "base/debug/trace_event.h"
 #include "mojo/skia/ganesh_surface.h"
+#include "sky/compositor/display_delegate.h"
 #include "sky/compositor/layer_host.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace sky {
 
-Layer::Layer(LayerClient* client) : client_(client), host_(nullptr) {
+Layer::Layer(LayerClient* client)
+  : client_(client),
+    host_(nullptr) {
+  delegate_.reset(DisplayDelegate::create(client));
 }
 
 Layer::~Layer() {
 }
 
-void Layer::ClearClient() {
-  client_ = nullptr;
-}
-
 void Layer::SetSize(const gfx::Size& size) {
   size_ = size;
+}
+
+void Layer::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
+  delegate_->GetPixelsForTesting(pixels);
 }
 
 void Layer::Display() {
@@ -33,11 +37,8 @@ void Layer::Display() {
   mojo::GaneshSurface surface(host_->ganesh_context(),
                               host_->resource_manager()->CreateTexture(size_));
 
-  SkCanvas* canvas = surface.canvas();
-
   gfx::Rect rect(size_);
-  client_->PaintContents(canvas, rect);
-  canvas->flush();
+  delegate_->Paint(surface, rect);
 
   texture_ = surface.TakeTexture();
 }

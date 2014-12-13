@@ -11,15 +11,16 @@
 #include "ui/gfx/geometry/rect.h"
 
 namespace sky {
+
+class DisplayDelegate;
 class LayerHost;
 
 class Layer : public base::RefCounted<Layer> {
  public:
   explicit Layer(LayerClient* client);
 
-  void ClearClient();
-
   void SetSize(const gfx::Size& size);
+  void GetPixelsForTesting(std::vector<unsigned char>* pixels);
   void Display();
 
   scoped_ptr<mojo::GLTexture> GetTexture();
@@ -35,8 +36,8 @@ class Layer : public base::RefCounted<Layer> {
   LayerClient* client_;
   LayerHost* host_;
   gfx::Size size_;
-
   scoped_ptr<mojo::GLTexture> texture_;
+  scoped_ptr<DisplayDelegate> delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

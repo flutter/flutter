@@ -27,7 +27,7 @@ class TestRunnerClient {
 class TestRunner {
  public:
   TestRunner(TestRunnerClient* client, mojo::View* container,
-      const std::string& url);
+      const std::string& url, bool enable_pixel_dumping);
   virtual ~TestRunner();
 
   TestRunnerClient* client() const { return client_; }
@@ -35,12 +35,14 @@ class TestRunner {
 
   base::WeakPtr<TestRunner> GetWeakPtr();
   void OnTestStart();
-  void OnTestComplete(const std::string& test_result);
+  void OnTestComplete(const std::string& test_result,
+    const mojo::Array<uint8_t>& pixels);
 
  private:
   TestHarnessFactory test_harness_factory_;
   TestRunnerClient* client_;
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
+  bool enable_pixel_dumping_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestRunner);
 };

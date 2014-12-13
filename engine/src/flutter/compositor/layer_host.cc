@@ -42,6 +42,10 @@ void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
   root_layer_->set_host(this);
 }
 
+void LayerHost::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
+  return root_layer_->GetPixelsForTesting(pixels);
+}
+
 void LayerHost::OnSurfaceConnectionCreated() {
   DCHECK_EQ(state_, kWaitingForSurfaceService);
   state_ = kReadyForFrame;
