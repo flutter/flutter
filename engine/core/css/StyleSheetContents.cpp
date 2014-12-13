@@ -38,26 +38,21 @@ namespace blink {
 StyleSheetContents::StyleSheetContents(const CSSParserContext& context)
     : m_usesRemUnits(false)
     , m_hasMediaQueries(false)
-    , m_hasSingleOwnerDocument(true)
     , m_parserContext(context)
 {
 }
 
 StyleSheetContents::~StyleSheetContents()
 {
-#if !ENABLE(OILPAN)
-    clearRules();
-#endif
+    // TODO(esprehn): Why is this here? The rules will be cleared immediately
+    // after this destructor runs anyway.
+    m_childRules.clear();
 }
 
 void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
 {
-    // Add warning message to inspector if dpi/dpcm values are used for screen media.
-    if (rule->isMediaRule()) {
+    if (rule->isMediaRule())
         setHasMediaQueries();
-        reportMediaQueryWarningIfNeeded(singleOwnerDocument(), toStyleRuleMedia(rule.get())->mediaQueries());
-    }
-
     m_childRules.append(rule);
 }
 
@@ -77,46 +72,12 @@ unsigned StyleSheetContents::ruleCount() const
     return m_childRules.size();
 }
 
-void StyleSheetContents::clearRules()
-{
-    m_childRules.clear();
-}
-
 bool StyleSheetContents::parseString(const String& sheetText)
 {
     CSSParserContext context(parserContext(), UseCounter::getFrom(this));
     BisonCSSParser p(context);
     p.parseSheet(this, sheetText);
     return true;
-}
-
-bool StyleSheetContents::hasSingleOwnerNode() const
-{
-    return hasOneClient();
-}
-
-Node* StyleSheetContents::singleOwnerNode() const
-{
-    if (!hasOneClient())
-        return 0;
-    if (m_loadingClients.size())
-        return (*m_loadingClients.begin())->ownerNode();
-    return (*m_completedClients.begin())->ownerNode();
-}
-
-Document* StyleSheetContents::singleOwnerDocument() const
-{
-    return clientSingleOwnerDocument();
-}
-
-Document* StyleSheetContents::clientSingleOwnerDocument() const
-{
-    if (!m_hasSingleOwnerDocument || clientSize() <= 0)
-        return 0;
-
-    if (m_loadingClients.size())
-        return (*m_loadingClients.begin())->ownerDocument();
-    return (*m_completedClients.begin())->ownerDocument();
 }
 
 void StyleSheetContents::registerClient(CSSStyleSheet* sheet)
@@ -126,11 +87,6 @@ void StyleSheetContents::registerClient(CSSStyleSheet* sheet)
     // InspectorCSSAgent::buildObjectForRule creates CSSStyleSheet without any owner node.
     if (!sheet->ownerDocument())
         return;
-
-    if (Document* document = clientSingleOwnerDocument()) {
-        if (sheet->ownerDocument() != document)
-            m_hasSingleOwnerDocument = false;
-    }
     m_loadingClients.add(sheet);
 }
 
@@ -141,16 +97,7 @@ void StyleSheetContents::unregisterClient(CSSStyleSheet* sheet)
 
     if (!sheet->ownerDocument() || !m_loadingClients.isEmpty() || !m_completedClients.isEmpty())
         return;
-
-    if (m_hasSingleOwnerDocument)
-        removeSheetFromCache(sheet->ownerDocument());
-    m_hasSingleOwnerDocument = true;
-}
-
-void StyleSheetContents::removeSheetFromCache(Document* document)
-{
-    ASSERT(document);
-    document->styleEngine()->removeSheet(this);
+    sheet->ownerDocument()->styleEngine()->removeSheet(this);
 }
 
 void StyleSheetContents::shrinkToFit()

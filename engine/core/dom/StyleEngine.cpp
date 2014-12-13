@@ -390,7 +390,6 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
     } else {
         StyleSheetContents* contents = result.storedValue->value;
         ASSERT(contents);
-        ASSERT(contents->singleOwnerDocument() == e->document());
         styleSheet = CSSStyleSheet::create(contents, e);
     }
 

@@ -55,14 +55,8 @@ public:
     bool parseString(const String&);
     bool parseStringAtPosition(const String&, const TextPosition&, bool);
 
-    bool hasSingleOwnerNode() const;
-    Node* singleOwnerNode() const;
-    Document* singleOwnerDocument() const;
-
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
-
-    void clearRules();
 
     // Rules other than @charset and @import.
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
@@ -74,10 +68,6 @@ public:
 
     void registerClient(CSSStyleSheet*);
     void unregisterClient(CSSStyleSheet*);
-    size_t clientSize() const { return m_loadingClients.size() + m_completedClients.size(); }
-    bool hasOneClient() const { return clientSize() == 1; }
-
-    void removeSheetFromCache(Document*);
 
     void setHasMediaQueries();
     bool hasMediaQueries() const { return m_hasMediaQueries; }
@@ -92,11 +82,8 @@ private:
 
     void notifyRemoveFontFaceRule(const StyleRuleFontFace*);
 
-    Document* clientSingleOwnerDocument() const;
-
     bool m_usesRemUnits : 1;
     bool m_hasMediaQueries : 1;
-    bool m_hasSingleOwnerDocument : 1;
 
     OwnPtr<RuleSet> m_ruleSet;
     Vector<RefPtr<StyleRuleBase> > m_childRules;

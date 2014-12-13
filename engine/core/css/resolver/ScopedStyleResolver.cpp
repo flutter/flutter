@@ -55,7 +55,7 @@ void ScopedStyleResolver::collectFeaturesTo(RuleFeatureSet& features, HashSet<co
 {
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
         StyleSheetContents* contents = m_authorStyleSheets[i]->contents();
-        if (contents->hasOneClient() || visitedSharedStyleSheetContents.add(contents).isNewEntry)
+        if (visitedSharedStyleSheetContents.add(contents).isNewEntry)
             features.add(contents->ruleSet().features());
     }
 }
