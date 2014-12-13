@@ -1579,7 +1579,7 @@ void Document::updateBaseURL()
         // Element sheet is silly. It never contains anything.
         ASSERT(!m_elemSheet->contents()->ruleCount());
         bool usesRemUnits = m_elemSheet->contents()->usesRemUnits();
-        m_elemSheet = CSSStyleSheet::createInline(this, m_baseURL);
+        m_elemSheet = CSSStyleSheet::create(this, m_baseURL);
         // FIXME: So we are not really the parser. The right fix is to eliminate the element sheet completely.
         m_elemSheet->contents()->parserSetUsesRemUnits(usesRemUnits);
     }
@@ -1627,7 +1627,7 @@ TextPosition Document::parserPosition() const
 CSSStyleSheet& Document::elementSheet()
 {
     if (!m_elemSheet)
-        m_elemSheet = CSSStyleSheet::createInline(this, m_baseURL);
+        m_elemSheet = CSSStyleSheet::create(this, m_baseURL);
     return *m_elemSheet;
 }
 

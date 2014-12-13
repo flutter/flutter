@@ -45,11 +45,7 @@ class StyleSheetContents : public RefCounted<StyleSheetContents> {
 public:
     static PassRefPtr<StyleSheetContents> create(const CSSParserContext& context)
     {
-        return adoptRef(new StyleSheetContents(String(), context));
-    }
-    static PassRefPtr<StyleSheetContents> create(const String& originalURL, const CSSParserContext& context)
-    {
-        return adoptRef(new StyleSheetContents(originalURL, context));
+        return adoptRef(new StyleSheetContents(context));
     }
 
     ~StyleSheetContents();
@@ -59,13 +55,9 @@ public:
     bool parseString(const String&);
     bool parseStringAtPosition(const String&, const TextPosition&, bool);
 
-    bool isCacheable() const;
-
     bool hasSingleOwnerNode() const;
     Node* singleOwnerNode() const;
     Document* singleOwnerDocument() const;
-
-    KURL completeURL(const String& url) const;
 
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
@@ -74,12 +66,6 @@ public:
 
     // Rules other than @charset and @import.
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
-
-    // Note that href is the URL that started the redirect chain that led to
-    // this style sheet. This property probably isn't useful for much except
-    // the JavaScript binding (which needs to use this value for security).
-    String originalURL() const { return m_originalURL; }
-    const KURL& baseURL() const { return m_parserContext.baseURL(); }
 
     unsigned ruleCount() const;
     StyleRuleBase* ruleAt(unsigned index) const;
@@ -102,7 +88,7 @@ public:
     void clearRuleSet();
 
 private:
-    StyleSheetContents(const String& originalURL, const CSSParserContext&);
+    explicit StyleSheetContents(const CSSParserContext&);
 
     void notifyRemoveFontFaceRule(const StyleRuleFontFace*);
 
@@ -112,7 +98,6 @@ private:
     bool m_hasMediaQueries : 1;
     bool m_hasSingleOwnerDocument : 1;
 
-    String m_originalURL;
     OwnPtr<RuleSet> m_ruleSet;
     Vector<RefPtr<StyleRuleBase> > m_childRules;
     CSSParserContext m_parserContext;

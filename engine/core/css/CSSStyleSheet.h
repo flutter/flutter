@@ -27,24 +27,17 @@
 
 namespace blink {
 
-class BisonCSSParser;
 class CSSStyleSheet;
 class Document;
-class ExceptionState;
 class KURL;
 class MediaQuerySet;
 class Node;
 class StyleSheetContents;
 
-enum StyleSheetUpdateType {
-    PartialRuleUpdate,
-    EntireStyleSheetUpdate
-};
-
 class CSSStyleSheet final : public RefCounted<CSSStyleSheet> {
 public:
-    static PassRefPtr<CSSStyleSheet> createInline(Node*, const KURL&, const TextPosition& startPosition = TextPosition::minimumPosition());
-    static PassRefPtr<CSSStyleSheet> createInline(PassRefPtr<StyleSheetContents>, Node* ownerNode, const TextPosition& startPosition = TextPosition::minimumPosition());
+    static PassRefPtr<CSSStyleSheet> create(Node*, const KURL&);
+    static PassRefPtr<CSSStyleSheet> create(PassRefPtr<StyleSheetContents>, Node* ownerNode);
 
     ~CSSStyleSheet();
 
@@ -54,31 +47,19 @@ public:
 
     void clearOwnerNode();
 
-    KURL baseURL() const;
-
     Document* ownerDocument() const;
     MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
     void setMediaQueries(PassRefPtr<MediaQuerySet>);
 
     StyleSheetContents* contents() const { return m_contents.get(); }
 
-    bool isInline() const { return m_isInlineStylesheet; }
-    TextPosition startPositionInSource() const { return m_startPosition; }
-
-    // TODO(esprehn): Remove this.
-    String type() const { return "text/css"; }
-
 private:
-    CSSStyleSheet(PassRefPtr<StyleSheetContents>);
-    CSSStyleSheet(PassRefPtr<StyleSheetContents>, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition);
+    CSSStyleSheet(PassRefPtr<StyleSheetContents>, Node* ownerNode);
 
     RefPtr<StyleSheetContents> m_contents;
-    bool m_isInlineStylesheet;
     RefPtr<MediaQuerySet> m_mediaQueries;
 
     Node* m_ownerNode;
-
-    TextPosition m_startPosition;
 };
 
 } // namespace blink

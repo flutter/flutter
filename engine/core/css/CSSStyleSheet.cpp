@@ -43,33 +43,22 @@ static bool isAcceptableCSSStyleSheetParent(Node* parentNode)
 }
 #endif
 
-PassRefPtr<CSSStyleSheet> CSSStyleSheet::createInline(PassRefPtr<StyleSheetContents> sheet, Node* ownerNode, const TextPosition& startPosition)
+PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(PassRefPtr<StyleSheetContents> sheet, Node* ownerNode)
 {
     ASSERT(sheet);
-    return adoptRef(new CSSStyleSheet(sheet, ownerNode, true, startPosition));
+    return adoptRef(new CSSStyleSheet(sheet, ownerNode));
 }
 
-PassRefPtr<CSSStyleSheet> CSSStyleSheet::createInline(Node* ownerNode, const KURL& baseURL, const TextPosition& startPosition)
+PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(Node* ownerNode, const KURL& baseURL)
 {
     CSSParserContext parserContext(ownerNode->document(), 0, baseURL);
-    RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(baseURL.string(), parserContext);
-    return adoptRef(new CSSStyleSheet(sheet.release(), ownerNode, true, startPosition));
+    RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(parserContext);
+    return adoptRef(new CSSStyleSheet(sheet.release(), ownerNode));
 }
 
-CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents)
+CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents, Node* ownerNode)
     : m_contents(contents)
-    , m_isInlineStylesheet(false)
-    , m_ownerNode(nullptr)
-    , m_startPosition(TextPosition::minimumPosition())
-{
-    m_contents->registerClient(this);
-}
-
-CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents, Node* ownerNode, bool isInlineStylesheet, const TextPosition& startPosition)
-    : m_contents(contents)
-    , m_isInlineStylesheet(isInlineStylesheet)
     , m_ownerNode(ownerNode)
-    , m_startPosition(startPosition)
 {
     ASSERT(isAcceptableCSSStyleSheetParent(ownerNode));
     m_contents->registerClient(this);
@@ -100,11 +89,6 @@ void CSSStyleSheet::clearOwnerNode()
     if (m_ownerNode)
         m_contents->unregisterClient(this);
     m_ownerNode = nullptr;
-}
-
-KURL CSSStyleSheet::baseURL() const
-{
-    return m_contents->baseURL();
 }
 
 Document* CSSStyleSheet::ownerDocument() const

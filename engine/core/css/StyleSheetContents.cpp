@@ -35,11 +35,10 @@
 
 namespace blink {
 
-StyleSheetContents::StyleSheetContents(const String& originalURL, const CSSParserContext& context)
+StyleSheetContents::StyleSheetContents(const CSSParserContext& context)
     : m_usesRemUnits(false)
     , m_hasMediaQueries(false)
     , m_hasSingleOwnerDocument(true)
-    , m_originalURL(originalURL)
     , m_parserContext(context)
 {
 }
@@ -49,18 +48,6 @@ StyleSheetContents::~StyleSheetContents()
 #if !ENABLE(OILPAN)
     clearRules();
 #endif
-}
-
-bool StyleSheetContents::isCacheable() const
-{
-    // FIXME: StyleSheets with media queries can't be cached because their RuleSet
-    // is processed differently based off the media queries, which might resolve
-    // differently depending on the context of the parent CSSStyleSheet (e.g.
-    // if they are in differently sized iframes). Once RuleSets are media query
-    // agnostic, we can restore sharing of StyleSheetContents with medea queries.
-    if (m_hasMediaQueries)
-        return false;
-    return true;
 }
 
 void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
@@ -120,12 +107,6 @@ Node* StyleSheetContents::singleOwnerNode() const
 Document* StyleSheetContents::singleOwnerDocument() const
 {
     return clientSingleOwnerDocument();
-}
-
-KURL StyleSheetContents::completeURL(const String& url) const
-{
-    // FIXME: This is only OK when we have a singleOwnerNode, right?
-    return m_parserContext.completeURL(url);
 }
 
 Document* StyleSheetContents::clientSingleOwnerDocument() const

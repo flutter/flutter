@@ -381,7 +381,7 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
 
     HashMap<AtomicString, RawPtr<StyleSheetContents> >::AddResult result = m_textToSheetCache.add(textContent, nullptr);
     if (result.isNewEntry || !result.storedValue->value) {
-        styleSheet = CSSStyleSheet::createInline(e, KURL());
+        styleSheet = CSSStyleSheet::create(e, KURL());
         styleSheet->contents()->parseString(text);
         if (result.isNewEntry) {
             result.storedValue->value = styleSheet->contents();
@@ -391,7 +391,7 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
         StyleSheetContents* contents = result.storedValue->value;
         ASSERT(contents);
         ASSERT(contents->singleOwnerDocument() == e->document());
-        styleSheet = CSSStyleSheet::createInline(contents, e);
+        styleSheet = CSSStyleSheet::create(contents, e);
     }
 
     ASSERT(styleSheet);

@@ -48,7 +48,7 @@ CSSTestHelper::CSSTestHelper()
 {
     m_document = Document::create();
     TextPosition position;
-    m_styleSheet = CSSStyleSheet::createInline(m_document.get(), KURL(), position);
+    m_styleSheet = CSSStyleSheet::create(m_document.get(), KURL(), position);
 }
 
 RuleSet& CSSTestHelper::ruleSet()
