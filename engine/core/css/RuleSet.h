@@ -56,8 +56,6 @@ public:
     bool isLastInArray() const { return m_isLastInArray; }
     void setLastInArray(bool flag) { m_isLastInArray = flag; }
 
-    bool containsAttributeSelector() const { return m_containsAttributeSelector; }
-
 private:
     RawPtr<StyleRule> m_rule;
     unsigned m_selectorIndex : 12;
@@ -65,7 +63,6 @@ private:
     // This number was picked fairly arbitrarily. We can probably lower it if we need to.
     // Some simple testing showed <100,000 RuleData's on large sites.
     unsigned m_position : 17;
-    unsigned m_containsAttributeSelector : 1;
 };
 
 struct SameSizeAsRuleData {

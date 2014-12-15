@@ -208,7 +208,11 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context) const
     case CSSSelector::Contain:
     case CSSSelector::Begin:
     case CSSSelector::End:
-        return anyAttributeMatches(element, selector.match(), selector);
+        if (anyAttributeMatches(element, selector.match(), selector)) {
+            if (m_mode == ResolvingStyle && context.elementStyle)
+                context.elementStyle->setUnique();
+        }
+        return false;
     case CSSSelector::PseudoClass:
         return checkPseudoClass(context);
     // FIXME(sky): Remove pseudo elements completely.

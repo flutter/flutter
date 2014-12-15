@@ -140,10 +140,7 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
 
     // Now transfer the set of matched rules over to our list of declarations.
     for (unsigned i = 0; i < matchedRules.size(); i++) {
-        // FIXME: Matching should not modify the style directly.
         const RuleData* ruleData = matchedRules[i].ruleData();
-        if (m_style && ruleData->containsAttributeSelector())
-            m_style->setUnique();
         m_result.addMatchedProperties(&ruleData->rule()->properties());
     }
 }

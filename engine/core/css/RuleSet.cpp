@@ -43,38 +43,11 @@ namespace blink {
 
 // -----------------------------------------------------------------
 
-// FIXME(sky): Track attribute selectors properly in maps.
-static inline bool selectorListContainsAttributeSelector(const CSSSelector* selector)
-{
-    const CSSSelectorList* selectorList = selector->selectorList();
-    if (!selectorList)
-        return false;
-    for (const CSSSelector* selector = selectorList->first(); selector; selector = CSSSelectorList::next(*selector)) {
-        for (const CSSSelector* component = selector; component; component = component->tagHistory()) {
-            if (component->isAttributeSelector())
-                return true;
-        }
-    }
-    return false;
-}
-
-static inline bool containsAttributeSelector(const CSSSelector& selector)
-{
-    for (const CSSSelector* current = &selector; current; current = current->tagHistory()) {
-        if (current->isAttributeSelector())
-            return true;
-        if (selectorListContainsAttributeSelector(current))
-            return true;
-    }
-    return false;
-}
-
 RuleData::RuleData(StyleRule* rule, unsigned selectorIndex, unsigned position, AddRuleFlags addRuleFlags)
     : m_rule(rule)
     , m_selectorIndex(selectorIndex)
     , m_isLastInArray(false)
     , m_position(position)
-    , m_containsAttributeSelector(blink::containsAttributeSelector(selector()))
 {
     ASSERT(m_position == position);
     ASSERT(m_selectorIndex == selectorIndex);
