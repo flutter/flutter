@@ -80,8 +80,6 @@ public:
 private:
     explicit StyleSheetContents(const CSSParserContext&);
 
-    void notifyRemoveFontFaceRule(const StyleRuleFontFace*);
-
     bool m_usesRemUnits : 1;
     bool m_hasMediaQueries : 1;
 
@@ -89,9 +87,7 @@ private:
     Vector<RefPtr<StyleRuleBase> > m_childRules;
     CSSParserContext m_parserContext;
 
-    HashSet<RawPtr<CSSStyleSheet> > m_loadingClients;
-    HashSet<RawPtr<CSSStyleSheet> > m_completedClients;
-    typedef HashSet<RawPtr<CSSStyleSheet> >::iterator ClientsIterator;
+    HashSet<RawPtr<CSSStyleSheet> > m_clients;
 };
 
 } // namespace

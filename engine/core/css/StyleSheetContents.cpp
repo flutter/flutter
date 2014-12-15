@@ -82,20 +82,19 @@ bool StyleSheetContents::parseString(const String& sheetText)
 
 void StyleSheetContents::registerClient(CSSStyleSheet* sheet)
 {
-    ASSERT(!m_loadingClients.contains(sheet) && !m_completedClients.contains(sheet));
+    ASSERT(!m_clients.contains(sheet));
 
     // InspectorCSSAgent::buildObjectForRule creates CSSStyleSheet without any owner node.
     if (!sheet->ownerDocument())
         return;
-    m_loadingClients.add(sheet);
+    m_clients.add(sheet);
 }
 
 void StyleSheetContents::unregisterClient(CSSStyleSheet* sheet)
 {
-    m_loadingClients.remove(sheet);
-    m_completedClients.remove(sheet);
+    m_clients.remove(sheet);
 
-    if (!sheet->ownerDocument() || !m_loadingClients.isEmpty() || !m_completedClients.isEmpty())
+    if (!sheet->ownerDocument() || !m_clients.isEmpty())
         return;
     sheet->ownerDocument()->styleEngine()->removeSheet(this);
 }
@@ -114,14 +113,6 @@ RuleSet& StyleSheetContents::ensureRuleSet(const MediaQueryEvaluator& medium, Ad
     return *m_ruleSet.get();
 }
 
-static void clearResolvers(HashSet<RawPtr<CSSStyleSheet> >& clients)
-{
-    for (HashSet<RawPtr<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (Document* document = (*it)->ownerDocument())
-            document->styleEngine()->clearResolver();
-    }
-}
-
 void StyleSheetContents::clearRuleSet()
 {
     // Don't want to clear the StyleResolver if the RuleSet hasn't been created
@@ -132,23 +123,11 @@ void StyleSheetContents::clearRuleSet()
 
     // Clearing the ruleSet means we need to recreate the styleResolver data structures.
     // See the StyleResolver calls in ScopedStyleResolver::addRulesFromSheet.
-    clearResolvers(m_loadingClients);
-    clearResolvers(m_completedClients);
-    m_ruleSet.clear();
-}
-
-static void removeFontFaceRules(HashSet<RawPtr<CSSStyleSheet> >& clients, const StyleRuleFontFace* fontFaceRule)
-{
-    for (HashSet<RawPtr<CSSStyleSheet> >::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (Node* ownerNode = (*it)->ownerNode())
-            ownerNode->document().styleEngine()->removeFontFaceRules(Vector<RawPtr<const StyleRuleFontFace> >(1, fontFaceRule));
+    for (RawPtr<CSSStyleSheet> client : m_clients) {
+        if (Document* document = client->ownerDocument())
+            document->styleEngine()->clearResolver();
     }
-}
-
-void StyleSheetContents::notifyRemoveFontFaceRule(const StyleRuleFontFace* fontFaceRule)
-{
-    removeFontFaceRules(m_loadingClients, fontFaceRule);
-    removeFontFaceRules(m_completedClients, fontFaceRule);
+    m_ruleSet.clear();
 }
 
 }
