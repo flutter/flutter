@@ -61,17 +61,6 @@ void StyleSheetContents::setHasMediaQueries()
     m_hasMediaQueries = true;
 }
 
-StyleRuleBase* StyleSheetContents::ruleAt(unsigned index) const
-{
-    ASSERT_WITH_SECURITY_IMPLICATION(index < ruleCount());
-    return m_childRules[index].get();
-}
-
-unsigned StyleSheetContents::ruleCount() const
-{
-    return m_childRules.size();
-}
-
 bool StyleSheetContents::parseString(const String& sheetText)
 {
     CSSParserContext context(parserContext(), UseCounter::getFrom(this));

@@ -53,16 +53,11 @@ public:
     const CSSParserContext& parserContext() const { return m_parserContext; }
 
     bool parseString(const String&);
-    bool parseStringAtPosition(const String&, const TextPosition&, bool);
 
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
     void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
 
-    // Rules other than @charset and @import.
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
-
-    unsigned ruleCount() const;
-    StyleRuleBase* ruleAt(unsigned index) const;
 
     bool usesRemUnits() const { return m_usesRemUnits; }
 

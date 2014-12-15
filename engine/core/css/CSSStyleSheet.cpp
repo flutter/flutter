@@ -77,11 +77,6 @@ void CSSStyleSheet::setMediaQueries(PassRefPtr<MediaQuerySet> mediaQueries)
     reportMediaQueryWarningIfNeeded(ownerDocument(), m_mediaQueries.get());
 }
 
-unsigned CSSStyleSheet::length() const
-{
-    return m_contents->ruleCount();
-}
-
 void CSSStyleSheet::clearOwnerNode()
 {
     if (Document* owner = ownerDocument())

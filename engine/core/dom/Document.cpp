@@ -1577,7 +1577,6 @@ void Document::updateBaseURL()
     // FIXME(sky): remove?
     if (m_elemSheet) {
         // Element sheet is silly. It never contains anything.
-        ASSERT(!m_elemSheet->contents()->ruleCount());
         bool usesRemUnits = m_elemSheet->contents()->usesRemUnits();
         m_elemSheet = CSSStyleSheet::create(this, m_baseURL);
         // FIXME: So we are not really the parser. The right fix is to eliminate the element sheet completely.

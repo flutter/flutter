@@ -43,8 +43,6 @@ public:
 
     Node* ownerNode() const { return m_ownerNode; }
 
-    unsigned length() const;
-
     void clearOwnerNode();
 
     Document* ownerDocument() const;

@@ -96,8 +96,6 @@ public:
     const Vector<RawPtr<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
     const MediaQueryResultList& viewportDependentMediaQueryResults() const { return m_viewportDependentMediaQueryResults; }
 
-    unsigned ruleCount() const { return m_ruleCount; }
-
     void compactRulesIfNeeded()
     {
         if (!m_pendingRules)
