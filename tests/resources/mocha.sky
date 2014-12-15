@@ -2441,7 +2441,7 @@ Mocha.process = process;
 mocha.setup();
 
 window.addEventListener('load', function() {
-  setTimeout(function() {
+  requestAnimationFrame(function() {
     mocha.run();
   });
 })

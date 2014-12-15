@@ -231,7 +231,7 @@ class Port(object):
                 '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
                 '--args-for=mojo:sky_viewer --testing',
                 '--content-handlers=text/sky,mojo:sky_viewer',
-                '--url-mappings=mojo:window_manager=mojo:sky_tester',
+                '--url-mappings=mojo:window_manager=mojo:sky_tester,mojo:surfaces_service=mojo:fake_surfaces_service',
                 'mojo:window_manager',
             ]
         return []
