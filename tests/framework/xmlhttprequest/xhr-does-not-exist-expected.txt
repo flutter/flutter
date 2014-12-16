@@ -1,0 +1,5 @@
+Running 1 tests
+ok 1 xmlhttprequest should call onerror when endpoint does not exist
+1 tests
+1 pass
+0 fail

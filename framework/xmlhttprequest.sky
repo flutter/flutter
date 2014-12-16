@@ -21,11 +21,24 @@ class Private {
   }
 }
 
+// Somewhat hacky, but works.
+function stringToUTF8Buffer(string) {
+    var string = unescape(encodeURIComponent(string));
+    var charList = string.split('');
+    var uintArray = [];
+    for (var i = 0; i < charList.length; i++) {
+        uintArray.push(charList[i].charCodeAt(0));
+    }
+    return new Uint8Array(uintArray);
+}
+
 // https://xhr.spec.whatwg.org
 class XMLHttpRequest {
   constructor() {
     this[kPrivate] = new Private;
     this.responseType = ''; // Only text and arraybuffer support for now.
+    this.status = null;
+    this.statusText = null;
   }
 
   onload() {
@@ -56,7 +69,7 @@ class XMLHttpRequest {
 
   open(method, url) {
     var request = new loader.URLRequest();
-    request.url = new URL(url, document.URL);
+    request.url = String(new URL(url, document.URL));
     request.method = method;
     request.auto_follow_redirects = true;
 
@@ -69,8 +82,29 @@ class XMLHttpRequest {
     this[kPrivate].headers.set(header, value);
   }
 
-  send() {
+  send(body) {
     var priv = this[kPrivate];
+    // Handle the body before the headers as it can affect Content-Type.
+    if (body) {
+      var bodyAsBufferView = null;
+      if (typeof(body) === "string") {
+        this.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        bodyAsBufferView = stringToUTF8Buffer(body);
+      } else {
+        bodyAsBufferView = new Uint8Array(body);
+      }
+      var dataPipe = new core.createDataPipe();
+      // FIXME: body is currently assumed to be an ArrayBuffer.
+      var writeResult = core.writeData(dataPipe.producerHandle,
+        bodyAsBufferView, core.WRITE_DATA_FLAG_ALL_OR_NONE);
+      core.close(dataPipe.producerHandle);
+      // FIXME: Much better error handling needed.
+      console.assert(writeResult.result === core.RESULT_OK);
+      console.assert(writeResult.numBytes === body.length);
+      // 'body' is actually an array of body segments.
+      priv.request.body = [dataPipe.consumerHandle];
+    }
+
     var requestHeaders = [];
     priv.headers.forEach(function(value, key) {
       requestHeaders.push(key + ': ' + value);
@@ -85,14 +119,21 @@ class XMLHttpRequest {
     var self = this;
     outstandingRequests.add(this);
     priv.loader.start(priv.request).then(function(result) {
+      self.status = result.response.status_code;
+      self.statusText = result.response.status_line;
+      if (result.response.error)
+        throw new Error(result.response.error.description);
       return core.drainData(result.response.body).then(function(result) {
         outstandingRequests.delete(self);
         priv.responseArrayBuffer = result.buffer;
-        // FIXME: Catch exceptions during onload so they don't trip onerror.
-        self.onload();
+        // Use a setTimeout to avoid exceptions in onload tripping onerror.
+        window.setTimeout(function() {
+          self.onload();
+        });
       });
     }).catch(function(error) {
       outstandingRequests.delete(self);
+      // Technically this should throw a ProgressEvent.
       self.onerror(error);
     });
   }
