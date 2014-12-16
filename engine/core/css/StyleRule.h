@@ -42,7 +42,6 @@ public:
         Keyframes = 5,
         Keyframe, // Not used. These are internally non-rule StyleKeyframe objects.
         Supports = 12,
-        Filter = 17
     };
 
     Type type() const { return static_cast<Type>(m_type); }
@@ -52,7 +51,6 @@ public:
     bool isMediaRule() const { return type() == Media; }
     bool isStyleRule() const { return type() == Style; }
     bool isSupportsRule() const { return type() == Supports; }
-    bool isFilterRule() const { return type() == Filter; }
 
     void deref()
     {
@@ -157,26 +155,6 @@ private:
     bool m_conditionIsSupported;
 };
 
-class StyleRuleFilter final : public StyleRuleBase {
-    WTF_MAKE_NONCOPYABLE(StyleRuleFilter);
-public:
-    static PassRefPtr<StyleRuleFilter> create(const String& filterName) { return adoptRef(new StyleRuleFilter(filterName)); }
-
-    ~StyleRuleFilter();
-
-    const String& filterName() const { return m_filterName; }
-
-    const StylePropertySet& properties() const { return *m_properties; }
-
-    void setProperties(PassRefPtr<StylePropertySet>);
-
-private:
-    StyleRuleFilter(const String&);
-
-    String m_filterName;
-    RefPtr<StylePropertySet> m_properties;
-};
-
 #define DEFINE_STYLE_RULE_TYPE_CASTS(Type) \
     DEFINE_TYPE_CASTS(StyleRule##Type, StyleRuleBase, rule, rule->is##Type##Rule(), rule.is##Type##Rule())
 
@@ -184,7 +162,6 @@ DEFINE_TYPE_CASTS(StyleRule, StyleRuleBase, rule, rule->isStyleRule(), rule.isSt
 DEFINE_STYLE_RULE_TYPE_CASTS(FontFace);
 DEFINE_STYLE_RULE_TYPE_CASTS(Media);
 DEFINE_STYLE_RULE_TYPE_CASTS(Supports);
-DEFINE_STYLE_RULE_TYPE_CASTS(Filter);
 
 } // namespace blink
 

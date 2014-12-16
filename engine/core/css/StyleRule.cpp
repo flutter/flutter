@@ -51,9 +51,6 @@ void StyleRuleBase::destroy()
     case Keyframes:
         delete toStyleRuleKeyframes(this);
         return;
-    case Filter:
-        delete toStyleRuleFilter(this);
-        return;
     case Unknown:
     case Keyframe:
         ASSERT_NOT_REACHED();
@@ -112,21 +109,6 @@ StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool condition
     , m_conditionText(conditionText)
     , m_conditionIsSupported(conditionIsSupported)
 {
-}
-
-StyleRuleFilter::StyleRuleFilter(const String& filterName)
-    : StyleRuleBase(Filter)
-    , m_filterName(filterName)
-{
-}
-
-StyleRuleFilter::~StyleRuleFilter()
-{
-}
-
-void StyleRuleFilter::setProperties(PassRefPtr<StylePropertySet> properties)
-{
-    m_properties = properties;
 }
 
 } // namespace blink
