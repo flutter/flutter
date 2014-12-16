@@ -156,7 +156,8 @@ void DocumentView::BeginFrame(base::TimeTicks frame_time) {
 }
 
 void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
-  root_->SetSurfaceId(surface_id.Pass());
+  if (root_)
+    root_->SetSurfaceId(surface_id.Pass());
 }
 
 void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {

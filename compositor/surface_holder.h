@@ -43,6 +43,7 @@ class SurfaceHolder : public mojo::SurfaceClient {
 
  private:
   // mojo::SurfaceClient
+  void SetIdNamespace(uint32_t id_namespace) override;
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;
 

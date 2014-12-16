@@ -51,11 +51,14 @@ void SurfaceHolder::SetSize(const gfx::Size& size) {
     surface_id_ = mojo::SurfaceId::New();
   }
 
-  surface_id_->id = surface_allocator_->CreateSurfaceId();
-  surface_->CreateSurface(surface_id_.Clone(), mojo::Size::From(size));
+  surface_id_ = surface_allocator_->CreateSurfaceId();
+  surface_->CreateSurface(surface_id_.Clone());
   size_ = size;
 
   client_->OnSurfaceIdAvailable(surface_id_.Clone());
+}
+
+void SurfaceHolder::SetIdNamespace(uint32_t id_namespace) {
 }
 
 void SurfaceHolder::ReturnResources(
