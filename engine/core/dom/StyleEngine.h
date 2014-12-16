@@ -134,9 +134,6 @@ private:
 
     void markTreeScopeDirty(TreeScope&);
 
-    typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
-    static void insertTreeScopeInDocumentOrder(TreeScopeSet&, TreeScope*);
-
     void createResolver();
 
     const StyleSheetCollection* documentStyleSheetCollection() const
@@ -159,6 +156,7 @@ private:
     typedef HashSet<RawPtr<const ScopedStyleResolver> > ScopedStyleResolverSet;
     ScopedStyleResolverSet m_scopedStyleResolvers;
 
+    typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     TreeScopeSet m_dirtyTreeScopes;
     TreeScopeSet m_activeTreeScopes;
 

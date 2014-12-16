@@ -85,33 +85,6 @@ const Vector<RefPtr<CSSStyleSheet>>& StyleEngine::activeAuthorStyleSheetsFor(Tre
     return ensureStyleSheetCollectionFor(treeScope)->activeAuthorStyleSheets();
 }
 
-void StyleEngine::insertTreeScopeInDocumentOrder(TreeScopeSet& treeScopes, TreeScope* treeScope)
-{
-    if (treeScopes.isEmpty()) {
-        treeScopes.add(treeScope);
-        return;
-    }
-    if (treeScopes.contains(treeScope))
-        return;
-
-    TreeScopeSet::iterator begin = treeScopes.begin();
-    TreeScopeSet::iterator end = treeScopes.end();
-    TreeScopeSet::iterator it = end;
-    TreeScope* followingTreeScope = 0;
-    do {
-        --it;
-        TreeScope* n = *it;
-        unsigned short position = n->comparePosition(*treeScope);
-        if (position & Node::DOCUMENT_POSITION_FOLLOWING) {
-            treeScopes.insertBefore(followingTreeScope, treeScope);
-            return;
-        }
-        followingTreeScope = n;
-    } while (it != begin);
-
-    treeScopes.insertBefore(followingTreeScope, treeScope);
-}
-
 StyleSheetCollection* StyleEngine::ensureStyleSheetCollectionFor(TreeScope& treeScope)
 {
     if (treeScope == m_document)
@@ -162,7 +135,7 @@ void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
 
     markTreeScopeDirty(treeScope);
     if (treeScope != m_document)
-        insertTreeScopeInDocumentOrder(m_activeTreeScopes, &treeScope);
+        m_activeTreeScopes.add(&treeScope);
 }
 
 void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopingNode, TreeScope& treeScope)
