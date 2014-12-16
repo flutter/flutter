@@ -4,8 +4,6 @@
 <import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 describe('XMLHttpRequest', function() {
-  this.enableTimeouts(false);
-
   it('should be able to fetch text files', function(done) {
 
     var xhr = new XMLHttpRequest();
