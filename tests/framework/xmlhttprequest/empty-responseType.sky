@@ -4,7 +4,9 @@
 <import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 describe("xmlhttprequest.responseType", function() {
-  it("should default to text when empty", function(done) {
+  this.enableTimeouts(false);
+
+  it("should default to text when empty", function() {
     var xhr = new XMLHttpRequest();
     assert.equal(xhr.responseType, "");
     xhr.responseType = 'foo';

@@ -4,11 +4,12 @@
 <import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 describe("xmlhttprequest.responseType", function() {
-  it("should support arraybuffer", function(done) {
+  this.enableTimeouts(false);
+
+  it("should support arraybuffer", function() {
     var xhr = new XMLHttpRequest();
-    xhr.responseType = 'arraybuffer';
     xhr.onload = function() {
-      assert.instanceOf(xhr.response, ArrayBuffer, "Response is an ArrayBuffer\n");
+      assert.typeOf(this.response, "arraybuffer", "Response is an arraybuffer\n");
       done();
     };
     xhr.open("GET", "resources/pass.txt");
