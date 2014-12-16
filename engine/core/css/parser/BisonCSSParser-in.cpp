@@ -57,8 +57,6 @@
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/CSSValuePool.h"
 #include "sky/engine/core/css/HashTools.h"
-#include "sky/engine/core/css/MediaList.h"
-#include "sky/engine/core/css/MediaQueryExp.h"
 #include "sky/engine/core/css/Pair.h"
 #include "sky/engine/core/css/Rect.h"
 #include "sky/engine/core/css/StylePropertySet.h"
@@ -978,19 +976,6 @@ bool BisonCSSParser::parseDeclaration(MutableStylePropertySet* declaration, cons
     return ok;
 }
 
-PassRefPtr<MediaQuerySet> BisonCSSParser::parseMediaQueryList(const String& string)
-{
-    ASSERT(!m_mediaList);
-
-    // can't use { because tokenizer state switches from mediaquery to initial state when it sees { token.
-    // instead insert one " " (which is caught by maybe_space in CSSGrammar.y)
-    setupParser("@-internal-medialist ", string, "");
-    cssyyparse(this);
-
-    ASSERT(m_mediaList);
-    return m_mediaList.release();
-}
-
 bool BisonCSSParser::parseAttributeMatchType(CSSSelector::AttributeMatchType& matchType, const String& string)
 {
     if (!RuntimeEnabledFeatures::cssAttributeCaseSensitivityEnabled() && !isUASheetBehavior(m_context.mode()))
@@ -1374,52 +1359,6 @@ CSSParserValue& BisonCSSParser::sinkFloatingValue(CSSParserValue& value)
     return value;
 }
 
-MediaQueryExp* BisonCSSParser::createFloatingMediaQueryExp(const AtomicString& mediaFeature, CSSParserValueList* values)
-{
-    m_floatingMediaQueryExp = MediaQueryExp::createIfValid(mediaFeature, values);
-    return m_floatingMediaQueryExp.get();
-}
-
-PassOwnPtr<MediaQueryExp> BisonCSSParser::sinkFloatingMediaQueryExp(MediaQueryExp* expression)
-{
-    ASSERT_UNUSED(expression, expression == m_floatingMediaQueryExp);
-    return m_floatingMediaQueryExp.release();
-}
-
-Vector<OwnPtr<MediaQueryExp> >* BisonCSSParser::createFloatingMediaQueryExpList()
-{
-    m_floatingMediaQueryExpList = adoptPtr(new Vector<OwnPtr<MediaQueryExp> >);
-    return m_floatingMediaQueryExpList.get();
-}
-
-PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > BisonCSSParser::sinkFloatingMediaQueryExpList(Vector<OwnPtr<MediaQueryExp> >* list)
-{
-    ASSERT_UNUSED(list, list == m_floatingMediaQueryExpList);
-    return m_floatingMediaQueryExpList.release();
-}
-
-MediaQuery* BisonCSSParser::createFloatingMediaQuery(MediaQuery::Restrictor restrictor, const AtomicString& mediaType, PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > expressions)
-{
-    m_floatingMediaQuery = adoptPtr(new MediaQuery(restrictor, mediaType, expressions));
-    return m_floatingMediaQuery.get();
-}
-
-MediaQuery* BisonCSSParser::createFloatingMediaQuery(PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > expressions)
-{
-    return createFloatingMediaQuery(MediaQuery::None, AtomicString("all", AtomicString::ConstructFromLiteral), expressions);
-}
-
-MediaQuery* BisonCSSParser::createFloatingNotAllQuery()
-{
-    return createFloatingMediaQuery(MediaQuery::Not, AtomicString("all", AtomicString::ConstructFromLiteral), sinkFloatingMediaQueryExpList(createFloatingMediaQueryExpList()));
-}
-
-PassOwnPtr<MediaQuery> BisonCSSParser::sinkFloatingMediaQuery(MediaQuery* query)
-{
-    ASSERT_UNUSED(query, query == m_floatingMediaQuery);
-    return m_floatingMediaQuery.release();
-}
-
 Vector<RefPtr<StyleKeyframe> >* BisonCSSParser::createFloatingKeyframeVector()
 {
     m_floatingKeyframeVector = adoptPtr(new Vector<RefPtr<StyleKeyframe> >());
@@ -1430,29 +1369,6 @@ PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > BisonCSSParser::sinkFloatingKeyframe
 {
     ASSERT_UNUSED(keyframeVector, m_floatingKeyframeVector == keyframeVector);
     return m_floatingKeyframeVector.release();
-}
-
-MediaQuerySet* BisonCSSParser::createMediaQuerySet()
-{
-    RefPtr<MediaQuerySet> queries = MediaQuerySet::create();
-    MediaQuerySet* result = queries.get();
-    m_parsedMediaQuerySets.append(queries.release());
-    return result;
-}
-
-StyleRuleBase* BisonCSSParser::createMediaRule(MediaQuerySet* media, RuleList* rules)
-{
-    m_allowImportRules = m_allowNamespaceDeclarations = false;
-    RefPtr<StyleRuleMedia> rule = nullptr;
-    if (rules) {
-        rule = StyleRuleMedia::create(media ? media : MediaQuerySet::create().get(), *rules);
-    } else {
-        RuleList emptyRules;
-        rule = StyleRuleMedia::create(media ? media : MediaQuerySet::create().get(), emptyRules);
-    }
-    StyleRuleMedia* result = rule.get();
-    m_parsedRules.append(rule.release());
-    return result;
 }
 
 StyleRuleBase* BisonCSSParser::createSupportsRule(bool conditionIsSupported, RuleList* rules)

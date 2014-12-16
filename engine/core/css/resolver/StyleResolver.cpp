@@ -101,7 +101,6 @@ static RuleSet& defaultStyles()
 {
     DEFINE_STATIC_LOCAL(RefPtr<StyleSheetContents>, styleSheet, ());
     DEFINE_STATIC_LOCAL(OwnPtr<RuleSet>, ruleSet, ());
-    DEFINE_STATIC_LOCAL(const MediaQueryEvaluator, screenEval, ("screen"));
 
     if (ruleSet)
         return *ruleSet;
@@ -121,7 +120,7 @@ static RuleSet& defaultStyles()
     styleSheet->parseString(cssText);
 
     ruleSet = RuleSet::create();
-    ruleSet->addRulesFromSheet(styleSheet.get(), screenEval);
+    ruleSet->addRulesFromSheet(styleSheet.get());
 
     return *ruleSet;
 }
@@ -170,7 +169,7 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
     TreeScope& treeScope = ownerNode->treeScope();
     ScopedStyleResolver& resolver = treeScope.ensureScopedStyleResolver();
     document().styleEngine()->addScopedStyleResolver(&resolver);
-    resolver.addRulesFromSheet(cssSheet, *m_medium, this);
+    resolver.addRulesFromSheet(cssSheet, this);
 }
 
 void StyleResolver::appendPendingAuthorStyleSheets()

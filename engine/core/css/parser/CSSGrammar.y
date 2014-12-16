@@ -29,8 +29,6 @@
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSSelector.h"
 #include "core/css/CSSSelectorList.h"
-#include "core/css/MediaList.h"
-#include "core/css/MediaQueryExp.h"
 #include "core/css/StyleKeyframe.h"
 #include "core/css/StyleRule.h"
 #include "core/css/StyleRuleKeyframes.h"
@@ -38,7 +36,6 @@
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/parser/CSSParserMode.h"
 #include "core/dom/Document.h"
-#include "sky/engine/core/css/MediaList.h"
 #include "wtf/FastMalloc.h"
 #include <stdlib.h>
 #include <string.h>
@@ -73,18 +70,13 @@ using namespace blink;
 
     StyleRuleBase* rule;
     // The content of the three below HeapVectors are guaranteed to be kept alive by
-    // the corresponding m_parsedRules, m_floatingMediaQueryExpList, and m_parsedKeyFrames
+    // the corresponding m_parsedRules, and m_parsedKeyFrames
     // lists in BisonCSSParser.h.
     Vector<RefPtr<StyleRuleBase> >* ruleList;
-    Vector<OwnPtr<MediaQueryExp> >* mediaQueryExpList;
     Vector<RefPtr<StyleKeyframe> >* keyframeRuleList;
     CSSParserSelector* selector;
     Vector<OwnPtr<CSSParserSelector> >* selectorList;
     CSSSelector::AttributeMatchType attributeMatchType;
-    MediaQuerySet* mediaList;
-    MediaQuery* mediaQuery;
-    MediaQuery::Restrictor mediaQueryRestrictor;
-    MediaQueryExp* mediaQueryExp;
     CSSParserValue value;
     CSSParserValueList* valueList;
     StyleKeyframe* keyframe;
@@ -174,12 +166,10 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %nonassoc error
 %left '|'
 
-%token MEDIA_SYM
 %token SUPPORTS_SYM
 %token FONT_FACE_SYM
 %token CHARSET_SYM
 %token INTERNAL_DECLS_SYM
-%token INTERNAL_MEDIALIST_SYM
 %token INTERNAL_RULE_SYM
 %token INTERNAL_SELECTOR_SYM
 %token INTERNAL_VALUE_SYM
@@ -191,10 +181,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token ATKEYWORD
 
 %token IMPORTANT_SYM
-%token MEDIA_ONLY
-%token MEDIA_NOT
-%token MEDIA_AND
-%token MEDIA_OR
 
 %token SUPPORTS_NOT
 %token SUPPORTS_AND
@@ -240,7 +226,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token <string> UNICODERANGE
 
 %type <rule> ruleset
-%type <rule> media
 %type <rule> font_face
 %type <rule> keyframes
 %type <rule> rule
@@ -253,18 +238,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %type <boolean> keyframes_rule_start
 
 %type <string> ident_or_string
-%type <string> medium
-
-%type <mediaList> media_list
-%type <mediaList> maybe_media_list
-%type <mediaList> mq_list
-%type <mediaQuery> media_query
-%type <mediaQuery> valid_media_query
-%type <mediaQueryRestrictor> maybe_media_restrictor
-%type <valueList> maybe_media_value
-%type <mediaQueryExp> media_query_exp
-%type <mediaQueryExpList> media_query_exp_list
-%type <mediaQueryExpList> maybe_and_media_query_exp_list
 
 %type <boolean> supports_condition
 %type <boolean> supports_condition_in_parens
@@ -332,7 +305,6 @@ stylesheet:
   | internal_rule
   | internal_selector
   | internal_value
-  | internal_medialist
   | internal_keyframe_rule
   | internal_keyframe_key_list
   | internal_supports_condition
@@ -369,12 +341,6 @@ internal_value:
         if (!parser->parseValue(parser->m_id, parser->m_important))
             parser->rollbackLastProperties(parser->m_parsedProperties.size() - oldParsedProperties);
         parser->m_valueList = nullptr;
-    }
-;
-
-internal_medialist:
-    INTERNAL_MEDIALIST_SYM maybe_space location_label maybe_media_list TOKEN_EOF {
-        parser->m_mediaList = $4;
     }
 ;
 
@@ -446,7 +412,6 @@ rule_list:
 
 valid_rule:
     ruleset
-  | media
   | font_face
   | keyframes
   | supports
@@ -491,7 +456,6 @@ block_rule_recovery:
 block_valid_rule:
     ruleset
   | font_face
-  | media
   | keyframes
   | supports
   ;
@@ -507,123 +471,9 @@ block_rule:
     }
   ;
 
-maybe_media_value:
-    /*empty*/ {
-        $$ = 0;
-    }
-    | ':' maybe_space expr {
-        $$ = $3;
-    }
-    ;
-
-media_query_exp:
-    '(' maybe_space IDENT maybe_space maybe_media_value closing_parenthesis {
-        parser->tokenToLowerCase($3);
-        $$ = parser->createFloatingMediaQueryExp($3, $5);
-        if (!$$)
-            YYERROR;
-    }
-    | '(' error error_recovery closing_parenthesis {
-        YYERROR;
-    }
-    ;
-
-media_query_exp_list:
-    media_query_exp {
-        $$ = parser->createFloatingMediaQueryExpList();
-        $$->append(parser->sinkFloatingMediaQueryExp($1));
-    }
-    | media_query_exp_list maybe_space MEDIA_AND maybe_space media_query_exp {
-        $$ = $1;
-        $$->append(parser->sinkFloatingMediaQueryExp($5));
-    }
-    ;
-
-maybe_and_media_query_exp_list:
-    maybe_space {
-        $$ = parser->createFloatingMediaQueryExpList();
-    }
-    | maybe_space MEDIA_AND maybe_space media_query_exp_list maybe_space {
-        $$ = $4;
-    }
-    ;
-
-maybe_media_restrictor:
-    /*empty*/ {
-        $$ = MediaQuery::None;
-    }
-    | MEDIA_ONLY maybe_space {
-        $$ = MediaQuery::Only;
-    }
-    | MEDIA_NOT maybe_space {
-        $$ = MediaQuery::Not;
-    }
-    ;
-
-valid_media_query:
-    media_query_exp_list maybe_space {
-        $$ = parser->createFloatingMediaQuery(parser->sinkFloatingMediaQueryExpList($1));
-    }
-    | maybe_media_restrictor medium maybe_and_media_query_exp_list {
-        parser->tokenToLowerCase($2);
-        $$ = parser->createFloatingMediaQuery($1, $2, parser->sinkFloatingMediaQueryExpList($3));
-    }
-    ;
-
-media_query:
-    valid_media_query
-    | valid_media_query error error_location rule_error_recovery {
-        parser->reportError(parser->lastLocationLabel(), InvalidMediaQueryCSSError);
-        $$ = parser->createFloatingNotAllQuery();
-    }
-    | error error_location rule_error_recovery {
-        parser->reportError(parser->lastLocationLabel(), InvalidMediaQueryCSSError);
-        $$ = parser->createFloatingNotAllQuery();
-    }
-    ;
-
-maybe_media_list:
-    /* empty */ {
-        $$ = parser->createMediaQuerySet();
-    }
-    | media_list
-    ;
-
-media_list:
-    media_query {
-        $$ = parser->createMediaQuerySet();
-        $$->addMediaQuery(parser->sinkFloatingMediaQuery($1));
-    }
-    | mq_list media_query {
-        $$ = $1;
-        $$->addMediaQuery(parser->sinkFloatingMediaQuery($2));
-    }
-    | mq_list {
-        $$ = $1;
-        $$->addMediaQuery(parser->sinkFloatingMediaQuery(parser->createFloatingNotAllQuery()));
-    }
-    ;
-
-mq_list:
-    media_query ',' maybe_space location_label {
-        $$ = parser->createMediaQuerySet();
-        $$->addMediaQuery(parser->sinkFloatingMediaQuery($1));
-    }
-    | mq_list media_query ',' maybe_space location_label {
-        $$ = $1;
-        $$->addMediaQuery(parser->sinkFloatingMediaQuery($2));
-    }
-    ;
-
 at_rule_body_start:
     /* empty */ {
         parser->startRuleBody();
-    }
-    ;
-
-before_media_rule:
-    /* empty */ {
-        parser->startRuleHeader(CSSRuleSourceData::MEDIA_RULE);
     }
     ;
 
@@ -632,19 +482,6 @@ at_rule_header_end_maybe_space:
         parser->endRuleHeader();
     }
     ;
-
-media_rule_start:
-    before_media_rule MEDIA_SYM maybe_space;
-
-media:
-    media_rule_start maybe_media_list '{' at_rule_header_end at_rule_body_start maybe_space block_rule_body closing_brace {
-        $$ = parser->createMediaRule($2, $7);
-    }
-    ;
-
-medium:
-  IDENT
-  ;
 
 supports:
     before_supports_rule SUPPORTS_SYM maybe_space supports_condition at_supports_rule_header_end '{' at_rule_body_start maybe_space block_rule_body closing_brace {
@@ -1425,7 +1262,6 @@ invalid_rule:
     }
   | regular_invalid_at_rule_header at_invalid_rule_header_end ';'
   | regular_invalid_at_rule_header at_invalid_rule_header_end invalid_block
-  | media_rule_start maybe_media_list ';'
     ;
 
 invalid_rule_header:
@@ -1433,7 +1269,6 @@ invalid_rule_header:
         parser->reportError($2, InvalidRuleCSSError);
     }
   | regular_invalid_at_rule_header at_invalid_rule_header_end
-  | media_rule_start maybe_media_list
     ;
 
 at_invalid_rule_header_end:

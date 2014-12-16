@@ -37,7 +37,6 @@
 
 namespace blink {
 
-class MediaQueryEvaluator;
 class StyleResolver;
 class StyleSheetContents;
 
@@ -58,7 +57,7 @@ public:
     void addKeyframeStyle(PassRefPtr<StyleRuleKeyframes>);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, bool includeEmptyRules, bool applyAuthorStyles, CascadeScope, CascadeOrder = ignoreCascadeOrder);
-    void addRulesFromSheet(CSSStyleSheet*, const MediaQueryEvaluator&, StyleResolver*);
+    void addRulesFromSheet(CSSStyleSheet*, StyleResolver*);
     void collectFeaturesTo(RuleFeatureSet&, HashSet<const StyleSheetContents*>& visitedSharedStyleSheetContents) const;
     void resetAuthorStyle();
 

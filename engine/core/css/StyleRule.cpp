@@ -42,9 +42,6 @@ void StyleRuleBase::destroy()
     case FontFace:
         delete toStyleRuleFontFace(this);
         return;
-    case Media:
-        delete toStyleRuleMedia(this);
-        return;
     case Supports:
         delete toStyleRuleSupports(this);
         return;
@@ -52,7 +49,6 @@ void StyleRuleBase::destroy()
         delete toStyleRuleKeyframes(this);
         return;
     case Unknown:
-    case Keyframe:
         ASSERT_NOT_REACHED();
         return;
     }
@@ -96,12 +92,6 @@ StyleRuleGroup::StyleRuleGroup(Type type, Vector<RefPtr<StyleRuleBase> >& adoptR
     : StyleRuleBase(type)
 {
     m_childRules.swap(adoptRule);
-}
-
-StyleRuleMedia::StyleRuleMedia(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
-    : StyleRuleGroup(Media, adoptRules)
-    , m_mediaQueries(media)
-{
 }
 
 StyleRuleSupports::StyleRuleSupports(const String& conditionText, bool conditionIsSupported, Vector<RefPtr<StyleRuleBase> >& adoptRules)

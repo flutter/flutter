@@ -54,8 +54,6 @@ public:
 
     DocumentOrderedList& styleSheetCandidateNodes() { return m_styleSheetCandidateNodes; }
 
-    void clearMediaQueryRuleSetStyleSheets();
-
 protected:
     explicit TreeScopeStyleSheetCollection(TreeScope&);
 

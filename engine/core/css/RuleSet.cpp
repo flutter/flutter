@@ -149,7 +149,7 @@ void RuleSet::addKeyframesRule(StyleRuleKeyframes* rule)
     m_keyframesRules.append(rule);
 }
 
-void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, const MediaQueryEvaluator& medium, AddRuleFlags addRuleFlags)
+void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, AddRuleFlags addRuleFlags)
 {
     for (unsigned i = 0; i < rules.size(); ++i) {
         StyleRuleBase* rule = rules[i].get();
@@ -160,26 +160,22 @@ void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, const M
             const CSSSelectorList& selectorList = styleRule->selectorList();
             for (size_t selectorIndex = 0; selectorIndex != kNotFound; selectorIndex = selectorList.indexOfNextSelectorAfter(selectorIndex))
                 addRule(styleRule, selectorIndex, addRuleFlags);
-        } else if (rule->isMediaRule()) {
-            StyleRuleMedia* mediaRule = toStyleRuleMedia(rule);
-            if ((!mediaRule->mediaQueries() || medium.eval(mediaRule->mediaQueries(), &m_viewportDependentMediaQueryResults)))
-                addChildRules(mediaRule->childRules(), medium, addRuleFlags);
         } else if (rule->isFontFaceRule()) {
             addFontFaceRule(toStyleRuleFontFace(rule));
         } else if (rule->isKeyframesRule()) {
             addKeyframesRule(toStyleRuleKeyframes(rule));
         } else if (rule->isSupportsRule() && toStyleRuleSupports(rule)->conditionIsSupported()) {
-            addChildRules(toStyleRuleSupports(rule)->childRules(), medium, addRuleFlags);
+            addChildRules(toStyleRuleSupports(rule)->childRules(), addRuleFlags);
         }
     }
 }
 
-void RuleSet::addRulesFromSheet(StyleSheetContents* sheet, const MediaQueryEvaluator& medium, AddRuleFlags addRuleFlags)
+void RuleSet::addRulesFromSheet(StyleSheetContents* sheet, AddRuleFlags addRuleFlags)
 {
     TRACE_EVENT0("blink", "RuleSet::addRulesFromSheet");
     ASSERT(sheet);
     addRuleFlags = static_cast<AddRuleFlags>(addRuleFlags | RuleCanUseFastCheckSelector);
-    addChildRules(sheet->childRules(), medium, addRuleFlags);
+    addChildRules(sheet->childRules(), addRuleFlags);
 }
 
 void RuleSet::addStyleRule(StyleRule* rule, AddRuleFlags addRuleFlags)

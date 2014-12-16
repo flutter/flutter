@@ -105,7 +105,6 @@ private:
     void setBestFitURLAndDPRFromImageCandidate(const ImageCandidate&);
     HTMLImageLoader& imageLoader() const { return *m_imageLoader; }
     void notifyViewportChanged();
-    void createMediaQueryListIfDoesNotExist();
 
     OwnPtr<HTMLImageLoader> m_imageLoader;
     RefPtr<ViewportChangeListener> m_listener;

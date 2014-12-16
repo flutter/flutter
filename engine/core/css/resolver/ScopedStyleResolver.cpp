@@ -39,14 +39,14 @@
 
 namespace blink {
 
-void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, const MediaQueryEvaluator& medium, StyleResolver* resolver)
+void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, StyleResolver* resolver)
 {
     m_authorStyleSheets.append(cssSheet);
     unsigned index = m_authorStyleSheets.size() - 1;
     StyleSheetContents* sheet = cssSheet->contents();
 
     AddRuleFlags addRuleFlags = RuleHasNoSpecialState;
-    const RuleSet& ruleSet = sheet->ensureRuleSet(medium, addRuleFlags);
+    const RuleSet& ruleSet = sheet->ensureRuleSet(addRuleFlags);
     resolver->addMediaQueryResults(ruleSet.viewportDependentMediaQueryResults());
     resolver->processScopedRules(ruleSet, cssSheet, index, treeScope().rootNode());
 }

@@ -425,7 +425,7 @@ MediaQueryMatcher& Document::mediaQueryMatcher()
 void Document::mediaQueryAffectingValueChanged()
 {
     m_evaluateMediaQueriesOnStyleRecalc = true;
-    styleEngine()->clearMediaQueryRuleSetStyleSheets();
+    // FIXME(sky): Actually update media queries from <style media>.
 }
 
 Location* Document::location() const

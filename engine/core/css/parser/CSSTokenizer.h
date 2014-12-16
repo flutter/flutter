@@ -124,8 +124,6 @@ private:
     template <typename CharacterType>
     inline bool detectFunctionTypeToken(int);
     template <typename CharacterType>
-    inline void detectMediaQueryToken(int);
-    template <typename CharacterType>
     inline void detectNumberToken(CharacterType*, int);
     template <typename CharacterType>
     inline void detectDashToken(int);
@@ -144,7 +142,6 @@ private:
 
     enum ParsingMode {
         NormalMode,
-        MediaQueryMode,
         SupportsMode,
     };
 

@@ -40,7 +40,6 @@ enum AddRuleFlags {
 };
 
 class CSSSelector;
-class MediaQueryEvaluator;
 class StyleSheetContents;
 
 class RuleData {
@@ -78,7 +77,7 @@ class RuleSet {
 public:
     static PassOwnPtr<RuleSet> create() { return adoptPtr(new RuleSet); }
 
-    void addRulesFromSheet(StyleSheetContents*, const MediaQueryEvaluator&, AddRuleFlags = RuleHasNoSpecialState);
+    void addRulesFromSheet(StyleSheetContents*, AddRuleFlags = RuleHasNoSpecialState);
     void addStyleRule(StyleRule*, AddRuleFlags);
     void addRule(StyleRule*, unsigned selectorIndex, AddRuleFlags);
 
@@ -117,7 +116,7 @@ private:
     void addFontFaceRule(StyleRuleFontFace*);
     void addKeyframesRule(StyleRuleKeyframes*);
 
-    void addChildRules(const Vector<RefPtr<StyleRuleBase> >&, const MediaQueryEvaluator& medium, AddRuleFlags);
+    void addChildRules(const Vector<RefPtr<StyleRuleBase> >&, AddRuleFlags);
     bool findBestRuleSetAndAdd(const CSSSelector&, RuleData&);
 
     void compactRules();

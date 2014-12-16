@@ -193,24 +193,6 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
     m_activeTreeScopes.remove(&treeScope);
 }
 
-void StyleEngine::clearMediaQueryRuleSetOnTreeScopeStyleSheets(TreeScopeSet treeScopes)
-{
-    for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
-        TreeScope& treeScope = **it;
-        ASSERT(treeScope != m_document);
-        ShadowTreeStyleSheetCollection* collection = static_cast<ShadowTreeStyleSheetCollection*>(styleSheetCollectionFor(treeScope));
-        ASSERT(collection);
-        collection->clearMediaQueryRuleSetStyleSheets();
-    }
-}
-
-void StyleEngine::clearMediaQueryRuleSetStyleSheets()
-{
-    documentStyleSheetCollection()->clearMediaQueryRuleSetStyleSheets();
-    clearMediaQueryRuleSetOnTreeScopeStyleSheets(m_activeTreeScopes);
-    clearMediaQueryRuleSetOnTreeScopeStyleSheets(m_dirtyTreeScopes);
-}
-
 void StyleEngine::updateActiveStyleSheets()
 {
     ASSERT(isMaster());

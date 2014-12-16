@@ -27,7 +27,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/parser/CSSTokenizer.h"
 
-#include "sky/engine/core/css/MediaQuery.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/parser/CSSParserValues.h"
@@ -50,7 +49,7 @@ enum CharacterType {
     CharacterOther,
     CharacterNull,
     CharacterWhiteSpace,
-    CharacterEndMediaQueryOrSupports,
+    CharacterEndSupports,
     CharacterEndNthChild,
     CharacterQuote,
     CharacterExclamationMark,
@@ -129,7 +128,7 @@ static const CharacterType typesOfASCIICharacters[128] = {
 /*  56 - 8                  */ CharacterNumber,
 /*  57 - 9                  */ CharacterNumber,
 /*  58 - :                  */ CharacterOther,
-/*  59 - ;                  */ CharacterEndMediaQueryOrSupports,
+/*  59 - ;                  */ CharacterEndSupports,
 /*  60 - <                  */ CharacterLess,
 /*  61 - =                  */ CharacterOther,
 /*  62 - >                  */ CharacterOther,
@@ -193,7 +192,7 @@ static const CharacterType typesOfASCIICharacters[128] = {
 /* 120 - x                  */ CharacterIdentifierStart,
 /* 121 - y                  */ CharacterIdentifierStart,
 /* 122 - z                  */ CharacterIdentifierStart,
-/* 123 - {                  */ CharacterEndMediaQueryOrSupports,
+/* 123 - {                  */ CharacterEndSupports,
 /* 124 - |                  */ CharacterVerticalBar,
 /* 125 - }                  */ CharacterOther,
 /* 126 - ~                  */ CharacterTilde,
@@ -756,28 +755,6 @@ inline bool CSSTokenizer::detectFunctionTypeToken(int length)
 }
 
 template <typename CharacterType>
-inline void CSSTokenizer::detectMediaQueryToken(int length)
-{
-    ASSERT(m_parsingMode == MediaQueryMode);
-    CharacterType* name = tokenStart<CharacterType>();
-
-    SWITCH(name, length) {
-        CASE("and") {
-            m_token = MEDIA_AND;
-        }
-        CASE("not") {
-            m_token = MEDIA_NOT;
-        }
-        CASE("only") {
-            m_token = MEDIA_ONLY;
-        }
-        CASE("or") {
-            m_token = MEDIA_OR;
-        }
-    }
-}
-
-template <typename CharacterType>
 inline void CSSTokenizer::detectNumberToken(CharacterType* type, int length)
 {
     ASSERT(length > 0);
@@ -903,10 +880,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
         CASE("keyframes") {
             m_token = KEYFRAMES_SYM;
         }
-        CASE("media") {
-            m_parsingMode = MediaQueryMode;
-            m_token = MEDIA_SYM;
-        }
         CASE("supports") {
             m_parsingMode = SupportsMode;
             m_token = SUPPORTS_SYM;
@@ -926,12 +899,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
         CASE("-internal-selector") {
             if (LIKELY(!hasEscape && m_internal))
                 m_token = INTERNAL_SELECTOR_SYM;
-        }
-        CASE("-internal-medialist") {
-            if (!m_internal)
-                return;
-            m_parsingMode = MediaQueryMode;
-            m_token = INTERNAL_MEDIALIST_SYM;
         }
         CASE("-internal-keyframe-rule") {
             if (LIKELY(!hasEscape && m_internal))
@@ -1034,9 +1001,7 @@ restartAfterComment:
                     parseURI<UChar>(yylval->string);
             }
         } else if (UNLIKELY(m_parsingMode != NormalMode) && !hasEscape) {
-            if (m_parsingMode == MediaQueryMode) {
-                detectMediaQueryToken<SrcCharacterType>(result - tokenStart<SrcCharacterType>());
-            } else if (m_parsingMode == SupportsMode) {
+            if (m_parsingMode == SupportsMode) {
                 detectSupportsToken<SrcCharacterType>(result - tokenStart<SrcCharacterType>());
             }
         }
@@ -1132,8 +1097,8 @@ restartAfterComment:
         } while (*currentCharacter<SrcCharacterType>() <= ' ' && (typesOfASCIICharacters[*currentCharacter<SrcCharacterType>()] == CharacterWhiteSpace));
         break;
 
-    case CharacterEndMediaQueryOrSupports:
-        if (m_parsingMode == MediaQueryMode || m_parsingMode == SupportsMode)
+    case CharacterEndSupports:
+        if (m_parsingMode == SupportsMode)
             m_parsingMode = NormalMode;
         break;
 

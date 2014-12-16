@@ -84,28 +84,4 @@ static void testMediaQuery(const char* expected, MediaQuerySet& querySet)
     ASSERT_STREQ(expected, output.toString().ascii().data());
 }
 
-TEST(BisonCSSParserTest, MediaQuery)
-{
-    struct {
-        const char* input;
-        const char* output;
-    } testCases[] = {
-        {"@media s} {}", "not all"},
-        {"@media } {}", "not all"},
-        {"@media tv {}", "tv"},
-        {"@media tv, screen {}", "tv, screen"},
-        {"@media s}, tv {}", "not all, tv"},
-        {"@media tv, screen and (}) {}", "tv, not all"},
-    };
-
-    BisonCSSParser parser(strictCSSParserContext());
-
-    for (unsigned i = 0; i < ARRAY_SIZE(testCases); ++i) {
-        RefPtr<StyleRuleBase> rule = parser.parseRule(nullptr, String(testCases[i].input));
-
-        EXPECT_TRUE(rule->isMediaRule());
-        testMediaQuery(testCases[i].output, *static_cast<StyleRuleMedia*>(rule.get())->mediaQueries());
-    }
-}
-
 } // namespace blink

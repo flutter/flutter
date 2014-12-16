@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSProperty.h"
 #include "sky/engine/core/css/CSSPropertySourceData.h"
 #include "sky/engine/core/css/CSSSelector.h"
-#include "sky/engine/core/css/MediaQuery.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/CSSParserMode.h"
 #include "sky/engine/core/css/parser/CSSParserObserver.h"
@@ -58,8 +57,6 @@ class CSSValueList;
 class Document;
 class Element;
 class ImmutableStylePropertySet;
-class MediaQueryExp;
-class MediaQuerySet;
 class MutableStylePropertySet;
 class StyleColor;
 class StyleKeyframe;
@@ -98,7 +95,6 @@ public:
     static PassRefPtr<CSSValue> parseAnimationTimingFunctionValue(const String&);
     bool parseDeclaration(MutableStylePropertySet*, const String&, CSSParserObserver*, StyleSheetContents* contextStyleSheet);
     static PassRefPtr<ImmutableStylePropertySet> parseInlineStyleDeclaration(const String&, Element*);
-    PassRefPtr<MediaQuerySet> parseMediaQueryList(const String&);
     PassOwnPtr<Vector<double> > parseKeyframeKeyList(const String&);
     bool parseAttributeMatchType(CSSSelector::AttributeMatchType&, const String&);
 
@@ -123,12 +119,10 @@ public:
 
     CSSParserValue& sinkFloatingValue(CSSParserValue&);
 
-    MediaQuerySet* createMediaQuerySet();
     StyleKeyframe* createKeyframe(CSSParserValueList*);
     StyleRuleKeyframes* createKeyframesRule(const String&, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > >, bool isPrefixed);
 
     typedef Vector<RefPtr<StyleRuleBase> > RuleList;
-    StyleRuleBase* createMediaRule(MediaQuerySet*, RuleList*);
     RuleList* createRuleList();
     RuleList* appendRule(RuleList*, StyleRuleBase*);
     StyleRuleBase* createStyleRule(Vector<OwnPtr<CSSParserSelector> >* selectors);
@@ -141,15 +135,6 @@ public:
 
     void startDeclarationsForMarginBox();
     void endDeclarationsForMarginBox();
-
-    MediaQueryExp* createFloatingMediaQueryExp(const AtomicString&, CSSParserValueList*);
-    PassOwnPtr<MediaQueryExp> sinkFloatingMediaQueryExp(MediaQueryExp*);
-    Vector<OwnPtr<MediaQueryExp> >* createFloatingMediaQueryExpList();
-    PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > > sinkFloatingMediaQueryExpList(Vector<OwnPtr<MediaQueryExp> >*);
-    MediaQuery* createFloatingMediaQuery(MediaQuery::Restrictor, const AtomicString&, PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > >);
-    MediaQuery* createFloatingMediaQuery(PassOwnPtr<Vector<OwnPtr<MediaQueryExp> > >);
-    MediaQuery* createFloatingNotAllQuery();
-    PassOwnPtr<MediaQuery> sinkFloatingMediaQuery(MediaQuery*);
 
     Vector<RefPtr<StyleKeyframe> >* createFloatingKeyframeVector();
     PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > sinkFloatingKeyframeVector(Vector<RefPtr<StyleKeyframe> >*);
@@ -174,7 +159,6 @@ public:
     RawPtr<StyleSheetContents> m_styleSheet;
     RefPtr<StyleRuleBase> m_rule;
     RefPtr<StyleKeyframe> m_keyframe;
-    RefPtr<MediaQuerySet> m_mediaList;
     OwnPtr<CSSParserValueList> m_valueList;
     bool m_supportsCondition;
 
@@ -251,16 +235,11 @@ private:
 
     Vector<RefPtr<StyleRuleBase> > m_parsedRules;
     Vector<RefPtr<StyleKeyframe> > m_parsedKeyframes;
-    Vector<RefPtr<MediaQuerySet> > m_parsedMediaQuerySets;
     Vector<OwnPtr<RuleList> > m_parsedRuleLists;
     Vector<CSSParserSelector*> m_floatingSelectors;
     Vector<Vector<OwnPtr<CSSParserSelector> >*> m_floatingSelectorVectors;
     Vector<CSSParserValueList*> m_floatingValueLists;
     Vector<CSSParserFunction*> m_floatingFunctions;
-
-    OwnPtr<MediaQuery> m_floatingMediaQuery;
-    OwnPtr<MediaQueryExp> m_floatingMediaQueryExp;
-    OwnPtr<Vector<OwnPtr<MediaQueryExp> > > m_floatingMediaQueryExpList;
 
     OwnPtr<Vector<RefPtr<StyleKeyframe> > > m_floatingKeyframeVector;
 

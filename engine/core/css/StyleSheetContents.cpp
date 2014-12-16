@@ -36,8 +36,7 @@
 namespace blink {
 
 StyleSheetContents::StyleSheetContents(const CSSParserContext& context)
-    : m_hasMediaQueries(false)
-    , m_parserContext(context)
+    : m_parserContext(context)
 {
 }
 
@@ -50,14 +49,7 @@ StyleSheetContents::~StyleSheetContents()
 
 void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
 {
-    if (rule->isMediaRule())
-        setHasMediaQueries();
     m_childRules.append(rule);
-}
-
-void StyleSheetContents::setHasMediaQueries()
-{
-    m_hasMediaQueries = true;
 }
 
 bool StyleSheetContents::parseString(const String& sheetText)
@@ -92,11 +84,11 @@ void StyleSheetContents::shrinkToFit()
     m_childRules.shrinkToFit();
 }
 
-RuleSet& StyleSheetContents::ensureRuleSet(const MediaQueryEvaluator& medium, AddRuleFlags addRuleFlags)
+RuleSet& StyleSheetContents::ensureRuleSet(AddRuleFlags addRuleFlags)
 {
     if (!m_ruleSet) {
         m_ruleSet = RuleSet::create();
-        m_ruleSet->addRulesFromSheet(this, medium, addRuleFlags);
+        m_ruleSet->addRulesFromSheet(this, addRuleFlags);
     }
     return *m_ruleSet.get();
 }

@@ -80,7 +80,6 @@ public:
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 
-    void clearMediaQueryRuleSetStyleSheets();
     void updateActiveStyleSheets();
 
     bool ignoringPendingStylesheets() const { return m_ignorePendingStylesheets; }
@@ -148,7 +147,6 @@ private:
 
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     static void insertTreeScopeInDocumentOrder(TreeScopeSet&, TreeScope*);
-    void clearMediaQueryRuleSetOnTreeScopeStyleSheets(TreeScopeSet treeScopes);
 
     void createResolver();
 

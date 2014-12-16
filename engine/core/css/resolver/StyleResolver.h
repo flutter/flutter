@@ -132,8 +132,6 @@ public:
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);
 
     void addMediaQueryResults(const MediaQueryResultList&);
-    MediaQueryResultList* viewportDependentMediaQueryResults() { return &m_viewportDependentMediaQueryResults; }
-    bool hasViewportDependentMediaQueries() const { return !m_viewportDependentMediaQueryResults.isEmpty(); }
     bool mediaQueryAffectedByViewportChange() const;
 
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.

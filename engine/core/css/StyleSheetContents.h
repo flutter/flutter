@@ -61,18 +61,13 @@ public:
     void registerClient(CSSStyleSheet*);
     void unregisterClient(CSSStyleSheet*);
 
-    void setHasMediaQueries();
-    bool hasMediaQueries() const { return m_hasMediaQueries; }
-
     void shrinkToFit();
     RuleSet& ruleSet() { ASSERT(m_ruleSet); return *m_ruleSet.get(); }
-    RuleSet& ensureRuleSet(const MediaQueryEvaluator&, AddRuleFlags);
+    RuleSet& ensureRuleSet(AddRuleFlags);
     void clearRuleSet();
 
 private:
     explicit StyleSheetContents(const CSSParserContext&);
-
-    bool m_hasMediaQueries : 1;
 
     OwnPtr<RuleSet> m_ruleSet;
     Vector<RefPtr<StyleRuleBase> > m_childRules;

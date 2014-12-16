@@ -23,7 +23,6 @@
 #define SKY_ENGINE_CORE_CSS_STYLERULE_H_
 
 #include "sky/engine/core/css/CSSSelectorList.h"
-#include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/RefPtr.h"
 
@@ -37,10 +36,8 @@ public:
     enum Type {
         Unknown, // Not used.
         Style,
-        Media,
         FontFace = 4,
         Keyframes = 5,
-        Keyframe, // Not used. These are internally non-rule StyleKeyframe objects.
         Supports = 12,
     };
 
@@ -48,7 +45,6 @@ public:
 
     bool isFontFaceRule() const { return type() == FontFace; }
     bool isKeyframesRule() const { return type() == Keyframes; }
-    bool isMediaRule() const { return type() == Media; }
     bool isStyleRule() const { return type() == Style; }
     bool isSupportsRule() const { return type() == Supports; }
 
@@ -121,22 +117,6 @@ private:
     Vector<RefPtr<StyleRuleBase> > m_childRules;
 };
 
-class StyleRuleMedia final : public StyleRuleGroup {
-    WTF_MAKE_NONCOPYABLE(StyleRuleMedia);
-public:
-    static PassRefPtr<StyleRuleMedia> create(PassRefPtr<MediaQuerySet> media, Vector<RefPtr<StyleRuleBase> >& adoptRules)
-    {
-        return adoptRef(new StyleRuleMedia(media, adoptRules));
-    }
-
-    MediaQuerySet* mediaQueries() const { return m_mediaQueries.get(); }
-
-private:
-    StyleRuleMedia(PassRefPtr<MediaQuerySet>, Vector<RefPtr<StyleRuleBase> >& adoptRules);
-
-    RefPtr<MediaQuerySet> m_mediaQueries;
-};
-
 class StyleRuleSupports final : public StyleRuleGroup {
     WTF_MAKE_NONCOPYABLE(StyleRuleSupports);
 public:
@@ -160,7 +140,6 @@ private:
 
 DEFINE_TYPE_CASTS(StyleRule, StyleRuleBase, rule, rule->isStyleRule(), rule.isStyleRule());
 DEFINE_STYLE_RULE_TYPE_CASTS(FontFace);
-DEFINE_STYLE_RULE_TYPE_CASTS(Media);
 DEFINE_STYLE_RULE_TYPE_CASTS(Supports);
 
 } // namespace blink

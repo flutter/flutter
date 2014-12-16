@@ -58,13 +58,4 @@ void TreeScopeStyleSheetCollection::removeStyleSheetCandidateNode(Node* node, Co
     m_styleSheetCandidateNodes.remove(node);
 }
 
-void TreeScopeStyleSheetCollection::clearMediaQueryRuleSetStyleSheets()
-{
-    for (size_t i = 0; i < m_activeAuthorStyleSheets.size(); ++i) {
-        StyleSheetContents* contents = m_activeAuthorStyleSheets[i]->contents();
-        if (contents->hasMediaQueries())
-            contents->clearRuleSet();
-    }
-}
-
 }
