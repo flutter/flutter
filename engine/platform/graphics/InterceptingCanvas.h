@@ -48,7 +48,6 @@ public:
     virtual void drawPath(const SkPath&, const SkPaint&) override = 0;
     virtual void drawBitmap(const SkBitmap&, SkScalar left, SkScalar top, const SkPaint* = 0) override = 0;
     virtual void drawBitmapRectToRect(const SkBitmap&, const SkRect* src, const SkRect& dst, const SkPaint*, DrawBitmapRectFlags) override = 0;
-    virtual void drawBitmapMatrix(const SkBitmap&, const SkMatrix&, const SkPaint* = 0) override = 0;
     virtual void drawBitmapNine(const SkBitmap&, const SkIRect& center, const SkRect& dst, const SkPaint*) override = 0;
     virtual void drawSprite(const SkBitmap&, int left, int top, const SkPaint* = 0) override = 0;
     virtual void drawVertices(VertexMode vmode, int vertexCount, const SkPoint vertices[], const SkPoint texs[],
@@ -63,8 +62,6 @@ public:
     virtual void onDrawPosText(const void* text, size_t byteLength, const SkPoint pos[], const SkPaint&) override = 0;
     virtual void onDrawPosTextH(const void* text, size_t byteLength, const SkScalar xpos[], SkScalar constY, const SkPaint&) override = 0;
     virtual void onDrawTextOnPath(const void* text, size_t byteLength, const SkPath&, const SkMatrix*, const SkPaint&) override = 0;
-    virtual void onPushCull(const SkRect& cullRect) override = 0;
-    virtual void onPopCull() override = 0;
     virtual void onClipRect(const SkRect&, SkRegion::Op, ClipEdgeStyle) override = 0;
     virtual void onClipRRect(const SkRRect&, SkRegion::Op, ClipEdgeStyle) override = 0;
     virtual void onClipPath(const SkPath&, SkRegion::Op, ClipEdgeStyle) override = 0;

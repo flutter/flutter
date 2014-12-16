@@ -118,12 +118,6 @@ void ProfilingCanvas::drawBitmapRectToRect(const SkBitmap& bitmap, const SkRect*
     this->SkCanvas::drawBitmapRectToRect(bitmap, src, dst, paint, flags);
 }
 
-void ProfilingCanvas::drawBitmapMatrix(const SkBitmap& bitmap, const SkMatrix& m, const SkPaint* paint)
-{
-    AutoStamper stamper(this);
-    this->SkCanvas::drawBitmapMatrix(bitmap, m, paint);
-}
-
 void ProfilingCanvas::drawBitmapNine(const SkBitmap& bitmap, const SkIRect& center, const SkRect& dst, const SkPaint* paint)
 {
     AutoStamper stamper(this);
@@ -195,18 +189,6 @@ void ProfilingCanvas::onDrawTextOnPath(const void* text, size_t byteLength, cons
 {
     AutoStamper stamper(this);
     this->SkCanvas::onDrawTextOnPath(text, byteLength, path, matrix, paint);
-}
-
-void ProfilingCanvas::onPushCull(const SkRect& cullRect)
-{
-    AutoStamper stamper(this);
-    this->SkCanvas::onPushCull(cullRect);
-}
-
-void ProfilingCanvas::onPopCull()
-{
-    AutoStamper stamper(this);
-    this->SkCanvas::onPopCull();
 }
 
 void ProfilingCanvas::onClipRect(const SkRect& rect, SkRegion::Op op, ClipEdgeStyle edgeStyle)

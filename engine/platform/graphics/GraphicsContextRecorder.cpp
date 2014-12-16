@@ -100,10 +100,9 @@ PassRefPtr<GraphicsContextSnapshot> GraphicsContextSnapshot::load(const char* da
 
 PassOwnPtr<Vector<char> > GraphicsContextSnapshot::replay(unsigned fromStep, unsigned toStep, double scale) const
 {
-    int width = ceil(scale * m_picture->width());
-    int height = ceil(scale * m_picture->height());
+    const SkIRect bounds = m_picture->cullRect().roundOut();
     SkBitmap bitmap;
-    bitmap.allocPixels(SkImageInfo::MakeN32Premul(width, height));
+    bitmap.allocPixels(SkImageInfo::MakeN32Premul(bounds.width(), bounds.height()));
     {
         ReplayingCanvas canvas(bitmap, fromStep, toStep);
         canvas.scale(scale, scale);
@@ -122,8 +121,9 @@ PassOwnPtr<GraphicsContextSnapshot::Timings> GraphicsContextSnapshot::profile(un
 {
     OwnPtr<GraphicsContextSnapshot::Timings> timings = adoptPtr(new GraphicsContextSnapshot::Timings());
     timings->reserveCapacity(minRepeatCount);
+    const SkIRect bounds = m_picture->cullRect().roundOut();
     SkBitmap bitmap;
-    bitmap.allocPixels(SkImageInfo::MakeN32Premul(m_picture->width(), m_picture->height()));
+    bitmap.allocPixels(SkImageInfo::MakeN32Premul(bounds.width(), bounds.height()));
     OwnPtr<ProfilingCanvas> canvas = adoptPtr(new ProfilingCanvas(bitmap));
 
     double now = WTF::monotonicallyIncreasingTime();
@@ -144,7 +144,8 @@ PassOwnPtr<GraphicsContextSnapshot::Timings> GraphicsContextSnapshot::profile(un
 
 PassRefPtr<JSONArray> GraphicsContextSnapshot::snapshotCommandLog() const
 {
-    LoggingCanvas canvas(m_picture->width(), m_picture->height());
+    const SkIRect bounds = m_picture->cullRect().roundOut();
+    LoggingCanvas canvas(bounds.width(), bounds.height());
     m_picture->draw(&canvas);
     return canvas.log();
 }

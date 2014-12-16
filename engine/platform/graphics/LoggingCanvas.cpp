@@ -160,16 +160,6 @@ void LoggingCanvas::drawBitmapRectToRect(const SkBitmap& bitmap, const SkRect* s
     this->SkCanvas::drawBitmapRectToRect(bitmap, src, dst, paint, flags);
 }
 
-void LoggingCanvas::drawBitmapMatrix(const SkBitmap& bitmap, const SkMatrix& m, const SkPaint* paint)
-{
-    AutoLogger logger(this);
-    RefPtr<JSONObject> params = logger.logItemWithParams("drawBitmapMatrix");
-    params->setObject("bitmap", objectForSkBitmap(bitmap));
-    params->setArray("matrix", arrayForSkMatrix(m));
-    params->setObject("paint", objectForSkPaint(*paint));
-    this->SkCanvas::drawBitmapMatrix(bitmap, m, paint);
-}
-
 void LoggingCanvas::drawBitmapNine(const SkBitmap& bitmap, const SkIRect& center, const SkRect& dst, const SkPaint* paint)
 {
     AutoLogger logger(this);
@@ -286,21 +276,6 @@ void LoggingCanvas::onDrawTextOnPath(const void* text, size_t byteLength, const 
     params->setArray("matrix", arrayForSkMatrix(*matrix));
     params->setObject("paint", objectForSkPaint(paint));
     this->SkCanvas::onDrawTextOnPath(text, byteLength, path, matrix, paint);
-}
-
-void LoggingCanvas::onPushCull(const SkRect& cullRect)
-{
-    AutoLogger logger(this);
-    RefPtr<JSONObject> params = logger.logItemWithParams("pushCull");
-    params->setObject("cullRect", objectForSkRect(cullRect));
-    this->SkCanvas::onPushCull(cullRect);
-}
-
-void LoggingCanvas::onPopCull()
-{
-    AutoLogger logger(this);
-    logger.logItem("popCull");
-    this->SkCanvas::onPopCull();
 }
 
 void LoggingCanvas::onClipRect(const SkRect& rect, SkRegion::Op op, ClipEdgeStyle style)
@@ -461,9 +436,10 @@ PassRefPtr<JSONArray> LoggingCanvas::arrayForSkPoints(size_t count, const SkPoin
 
 PassRefPtr<JSONObject> LoggingCanvas::objectForSkPicture(const SkPicture& picture)
 {
+    const SkIRect bounds = picture.cullRect().roundOut();
     RefPtr<JSONObject> pictureItem = JSONObject::create();
-    pictureItem->setNumber("width", picture.width());
-    pictureItem->setNumber("height", picture.height());
+    pictureItem->setNumber("width", bounds.width());
+    pictureItem->setNumber("height", bounds.height());
     return pictureItem.release();
 }
 

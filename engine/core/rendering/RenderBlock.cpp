@@ -49,7 +49,6 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/TransformState.h"
-#include "sky/engine/platform/graphics/GraphicsContextCullSaver.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/TemporaryChange.h"
@@ -597,13 +596,6 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
     {
-        GraphicsContextCullSaver cullSaver(*paintInfo.context);
-        // Cull if we have more than one child and we didn't already clip.
-        bool shouldCull = document().settings()->containerCullingEnabled() && !pushedClip && !isDocumentElement()
-            && firstChild() && lastChild() && firstChild() != lastChild();
-        if (shouldCull)
-            cullSaver.cull(overflowBox);
-
         paintObject(paintInfo, adjustedPaintOffset);
     }
     if (pushedClip)

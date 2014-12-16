@@ -325,9 +325,6 @@ public:
     void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilter = ColorFilterNone, ImageFilter* = 0);
     void endLayer();
 
-    void beginCull(const FloatRect&);
-    void endCull();
-
     // Instead of being dispatched to the active canvas, draw commands following beginRecording()
     // are stored in a display list that can be replayed at a later time.
     void beginRecording(const FloatRect& bounds);
