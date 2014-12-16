@@ -28,31 +28,46 @@
 #ifndef SKY_ENGINE_CORE_DOM_STYLESHEETCOLLECTION_H_
 #define SKY_ENGINE_CORE_DOM_STYLESHEETCOLLECTION_H_
 
-#include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/core/dom/DocumentOrderedList.h"
 #include "sky/engine/wtf/FastAllocBase.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
 class CSSStyleSheet;
+class ContainerNode;
+class StyleEngine;
+class TreeScope;
 
 class StyleSheetCollection {
     WTF_MAKE_NONCOPYABLE(StyleSheetCollection);
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    StyleSheetCollection();
-    virtual ~StyleSheetCollection();
+    static PassOwnPtr<StyleSheetCollection> create(TreeScope& treeScope)
+    {
+        return adoptPtr(new StyleSheetCollection(treeScope));
+    }
+    ~StyleSheetCollection();
 
     Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() { return m_activeAuthorStyleSheets; }
     const Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() const { return m_activeAuthorStyleSheets; }
 
-    void swap(StyleSheetCollection&);
-    void appendActiveStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
-    void appendActiveStyleSheet(CSSStyleSheet*);
+    void addStyleSheetCandidateNode(Node*, bool createdByParser);
+    void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode);
+    bool hasStyleSheetCandidateNodes() const { return !m_styleSheetCandidateNodes.isEmpty(); }
 
-protected:
-    Vector<RefPtr<CSSStyleSheet> > m_activeAuthorStyleSheets;
+    void updateActiveStyleSheets(StyleEngine*);
+
+private:
+    explicit StyleSheetCollection(TreeScope&);
+
+    void collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& candidateSheets);
+
+    TreeScope& m_treeScope;
+    DocumentOrderedList m_styleSheetCandidateNodes;    
+    Vector<RefPtr<CSSStyleSheet>> m_activeAuthorStyleSheets;
 };
 
 }

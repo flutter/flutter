@@ -32,7 +32,7 @@
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentOrderedList.h"
-#include "sky/engine/core/dom/DocumentStyleSheetCollection.h"
+#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/ListHashSet.h"
@@ -47,7 +47,6 @@ class CSSFontSelector;
 class CSSStyleSheet;
 class Node;
 class RuleFeatureSet;
-class ShadowTreeStyleSheetCollection;
 class StyleRuleFontFace;
 class StyleSheetContents;
 
@@ -74,7 +73,6 @@ public:
 #endif
 
     const Vector<RefPtr<CSSStyleSheet>>& activeAuthorStyleSheetsFor(TreeScope&);
-    const Vector<RefPtr<CSSStyleSheet> >& documentAuthorStyleSheets() const { return m_authorStyleSheets; }
 
     void modifiedStyleSheet(CSSStyleSheet*);
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
@@ -136,8 +134,8 @@ private:
 private:
     StyleEngine(Document&);
 
-    TreeScopeStyleSheetCollection* ensureStyleSheetCollectionFor(TreeScope&);
-    TreeScopeStyleSheetCollection* styleSheetCollectionFor(TreeScope&);
+    StyleSheetCollection* ensureStyleSheetCollectionFor(TreeScope&);
+    StyleSheetCollection* styleSheetCollectionFor(TreeScope&);
 
     void markTreeScopeDirty(TreeScope&);
 
@@ -150,12 +148,12 @@ private:
 
     void createResolver();
 
-    const DocumentStyleSheetCollection* documentStyleSheetCollection() const
+    const StyleSheetCollection* documentStyleSheetCollection() const
     {
         return m_documentStyleSheetCollection.get();
     }
 
-    DocumentStyleSheetCollection* documentStyleSheetCollection()
+    StyleSheetCollection* documentStyleSheetCollection()
     {
         return m_documentStyleSheetCollection.get();
     }
@@ -163,11 +161,10 @@ private:
     RawPtr<Document> m_document;
     bool m_isMaster;
 
-    Vector<RefPtr<CSSStyleSheet> > m_authorStyleSheets;
+    // TODO(esprehn): Remove special separate collection for document.
+    OwnPtr<StyleSheetCollection> m_documentStyleSheetCollection;
 
-    OwnPtr<DocumentStyleSheetCollection> m_documentStyleSheetCollection;
-
-    typedef HashMap<RawPtr<TreeScope>, OwnPtr<ShadowTreeStyleSheetCollection> > StyleSheetCollectionMap;
+    typedef HashMap<RawPtr<TreeScope>, OwnPtr<StyleSheetCollection> > StyleSheetCollectionMap;
     StyleSheetCollectionMap m_styleSheetCollectionMap;
     typedef HashSet<RawPtr<const ScopedStyleResolver> > ScopedStyleResolverSet;
     ScopedStyleResolverSet m_scopedStyleResolvers;

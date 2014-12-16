@@ -33,7 +33,7 @@
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/dom/ShadowTreeStyleSheetCollection.h"
+#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLStyleElement.h"
@@ -45,7 +45,7 @@ namespace blink {
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
     , m_isMaster(!document.importsController() || document.importsController()->master() == &document)
-    , m_documentStyleSheetCollection(DocumentStyleSheetCollection::create(document))
+    , m_documentStyleSheetCollection(StyleSheetCollection::create(document))
     , m_documentScopeDirty(true)
     , m_ignorePendingStylesheets(false)
     // We don't need to create CSSFontSelector for imported document or
@@ -60,14 +60,11 @@ StyleEngine::~StyleEngine()
 {
 }
 
-#if !ENABLE(OILPAN)
 void StyleEngine::detachFromDocument()
 {
     // Cleanup is performed eagerly when the StyleEngine is removed from the
     // document. The StyleEngine is unreachable after this, since only the
     // document has a reference to it.
-    for (unsigned i = 0; i < m_authorStyleSheets.size(); ++i)
-        m_authorStyleSheets[i]->clearOwnerNode();
 
     if (m_fontSelector) {
         m_fontSelector->clearDocument();
@@ -82,7 +79,6 @@ void StyleEngine::detachFromDocument()
         const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
     m_scopedStyleResolvers.clear();
 }
-#endif
 
 inline Document* StyleEngine::master()
 {
@@ -128,18 +124,18 @@ void StyleEngine::insertTreeScopeInDocumentOrder(TreeScopeSet& treeScopes, TreeS
     treeScopes.insertBefore(followingTreeScope, treeScope);
 }
 
-TreeScopeStyleSheetCollection* StyleEngine::ensureStyleSheetCollectionFor(TreeScope& treeScope)
+StyleSheetCollection* StyleEngine::ensureStyleSheetCollectionFor(TreeScope& treeScope)
 {
     if (treeScope == m_document)
         return documentStyleSheetCollection();
 
     StyleSheetCollectionMap::AddResult result = m_styleSheetCollectionMap.add(&treeScope, nullptr);
     if (result.isNewEntry)
-        result.storedValue->value = adoptPtr(new ShadowTreeStyleSheetCollection(toShadowRoot(treeScope)));
+        result.storedValue->value = StyleSheetCollection::create(treeScope);
     return result.storedValue->value.get();
 }
 
-TreeScopeStyleSheetCollection* StyleEngine::styleSheetCollectionFor(TreeScope& treeScope)
+StyleSheetCollection* StyleEngine::styleSheetCollectionFor(TreeScope& treeScope)
 {
     if (treeScope == m_document)
         return documentStyleSheetCollection();
@@ -172,7 +168,7 @@ void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
 
     TreeScope& treeScope = isHTMLStyleElement(*node) ? node->treeScope() : *m_document;
     ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-    TreeScopeStyleSheetCollection* collection = ensureStyleSheetCollectionFor(treeScope);
+    StyleSheetCollection* collection = ensureStyleSheetCollectionFor(treeScope);
     ASSERT(collection);
     collection->addStyleSheetCandidateNode(node, createdByParser);
 
@@ -185,7 +181,7 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
 {
     ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
 
-    TreeScopeStyleSheetCollection* collection = styleSheetCollectionFor(treeScope);
+    StyleSheetCollection* collection = styleSheetCollectionFor(treeScope);
     ASSERT(collection);
     collection->removeStyleSheetCandidateNode(node, scopingNode);
 
@@ -209,7 +205,7 @@ void StyleEngine::updateActiveStyleSheets()
     for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
         TreeScope* treeScope = *it;
         ASSERT(treeScope != m_document);
-        ShadowTreeStyleSheetCollection* collection = static_cast<ShadowTreeStyleSheetCollection*>(styleSheetCollectionFor(*treeScope));
+        StyleSheetCollection* collection = styleSheetCollectionFor(*treeScope);
         ASSERT(collection);
         collection->updateActiveStyleSheets(this);
         if (!collection->hasStyleSheetCandidateNodes())
@@ -237,7 +233,7 @@ void StyleEngine::appendActiveAuthorStyleSheets()
     TreeScopeSet::iterator begin = m_activeTreeScopes.begin();
     TreeScopeSet::iterator end = m_activeTreeScopes.end();
     for (TreeScopeSet::iterator it = begin; it != end; ++it) {
-        if (TreeScopeStyleSheetCollection* collection = m_styleSheetCollectionMap.get(*it))
+        if (StyleSheetCollection* collection = m_styleSheetCollectionMap.get(*it))
             m_resolver->appendAuthorStyleSheets(collection->activeAuthorStyleSheets());
     }
     m_resolver->finishAppendAuthorStyleSheets();
