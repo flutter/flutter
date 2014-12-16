@@ -196,9 +196,6 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
 const StyleRuleKeyframes* CSSAnimations::matchScopedKeyframesRule(StyleResolver* resolver, const Element* element, const StringImpl* animationName)
 {
     // FIXME: This is all implementation detail of style resolver, CSSAnimations shouldn't be reaching into any of it.
-    if (resolver->document().styleEngine()->hasOnlyScopedResolverForDocument())
-        return element->document().scopedStyleResolver()->keyframeStylesForAnimation(animationName);
-
     Vector<RawPtr<ScopedStyleResolver>, 8> stack;
     resolver->styleTreeResolveScopedKeyframesRules(element, stack);
     if (stack.isEmpty())

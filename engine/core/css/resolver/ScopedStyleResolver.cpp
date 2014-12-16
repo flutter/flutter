@@ -39,6 +39,11 @@
 
 namespace blink {
 
+ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
+    : m_scope(scope)
+{
+}
+
 void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, StyleResolver* resolver)
 {
     m_authorStyleSheets.append(cssSheet);

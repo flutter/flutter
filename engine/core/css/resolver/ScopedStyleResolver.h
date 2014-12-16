@@ -62,13 +62,9 @@ public:
     void resetAuthorStyle();
 
 private:
-    explicit ScopedStyleResolver(TreeScope& scope)
-        : m_scope(scope)
-    {
-    }
+    explicit ScopedStyleResolver(TreeScope&);
 
     RawPtr<TreeScope> m_scope;
-
     Vector<RawPtr<CSSStyleSheet> > m_authorStyleSheets;
 
     typedef HashMap<const StringImpl*, RefPtr<StyleRuleKeyframes> > KeyframesRuleMap;

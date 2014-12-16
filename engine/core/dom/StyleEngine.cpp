@@ -33,6 +33,7 @@
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -73,9 +74,6 @@ void StyleEngine::detachFromDocument()
     m_fontSelector.clear();
     m_resolver.clear();
     m_styleSheetCollectionMap.clear();
-    for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
-        const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
-    m_scopedStyleResolvers.clear();
 }
 
 const Vector<RefPtr<CSSStyleSheet>>& StyleEngine::activeAuthorStyleSheetsFor(TreeScope& treeScope)
@@ -178,8 +176,6 @@ void StyleEngine::updateActiveStyleSheets()
 
 void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)
 {
-    if (shadowRoot->scopedStyleResolver())
-        removeScopedStyleResolver(shadowRoot->scopedStyleResolver());
     m_styleSheetCollectionMap.remove(shadowRoot);
 }
 
@@ -205,7 +201,6 @@ void StyleEngine::createResolver()
     ASSERT(m_document->frame());
 
     m_resolver = adoptPtr(new StyleResolver(*m_document));
-    addScopedStyleResolver(&m_document->ensureScopedStyleResolver());
 
     appendActiveAuthorStyleSheets();
 }
@@ -213,10 +208,6 @@ void StyleEngine::createResolver()
 void StyleEngine::clearResolver()
 {
     ASSERT(!m_document->inStyleRecalc());
-
-    for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
-        const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
-    m_scopedStyleResolvers.clear();
     m_resolver.clear();
 }
 
@@ -317,11 +308,21 @@ void StyleEngine::removeSheet(StyleSheetContents* contents)
     m_sheetToTextCache.remove(contents);
 }
 
+// TODO(esprehn): This walks the entire document to collect features, instead
+// we should store features per scope and get rid of the global set.
+static void collectFeatures(TreeScope& scope, RuleFeatureSet& features, HashSet<const StyleSheetContents*> visitedSharedStyleSheetContents)
+{
+    scope.scopedStyleResolver().collectFeaturesTo(features, visitedSharedStyleSheetContents);
+    for (Element* element = ElementTraversal::firstWithin(scope.rootNode()); element; element = ElementTraversal::next(*element, &scope.rootNode())) {
+        if (ShadowRoot* root = element->shadowRoot())
+            collectFeatures(*root, features, visitedSharedStyleSheetContents);
+    }
+}
+
 void StyleEngine::collectScopedStyleFeaturesTo(RuleFeatureSet& features) const
 {
     HashSet<const StyleSheetContents*> visitedSharedStyleSheetContents;
-    for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
-        (*it)->collectFeaturesTo(features, visitedSharedStyleSheetContents);
+    collectFeatures(*m_document, features, visitedSharedStyleSheetContents);
 }
 
 void StyleEngine::fontsNeedUpdate(CSSFontSelector*)

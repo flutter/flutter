@@ -113,9 +113,7 @@ public:
 
     Element* getElementByAccessKey(const String& key) const;
 
-    ScopedStyleResolver* scopedStyleResolver() const { return m_scopedStyleResolver.get(); }
-    ScopedStyleResolver& ensureScopedStyleResolver();
-    void clearScopedStyleResolver();
+    ScopedStyleResolver& scopedStyleResolver() const { return *m_scopedStyleResolver; }
 
 protected:
     TreeScope(ContainerNode&, Document&);
@@ -156,17 +154,15 @@ private:
     RawPtr<Document> m_document;
     RawPtr<TreeScope> m_parentTreeScope;
 
-#if !ENABLE(OILPAN)
-    int m_guardRefCount;
-#endif
+    OwnPtr<ScopedStyleResolver> m_scopedStyleResolver;
 
     OwnPtr<DocumentOrderedMap> m_elementsById;
     OwnPtr<DocumentOrderedMap> m_imageMapsByName;
     OwnPtr<DocumentOrderedMap> m_labelsByForAttribute;
 
-    OwnPtr<ScopedStyleResolver> m_scopedStyleResolver;
-
     mutable RefPtr<DOMSelection> m_selection;
+
+    int m_guardRefCount;
 };
 
 DEFINE_COMPARISON_OPERATORS_WITH_REFERENCES(TreeScope)

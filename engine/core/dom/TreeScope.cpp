@@ -54,9 +54,8 @@ TreeScope::TreeScope(ContainerNode& rootNode, Document& document)
     : m_rootNode(&rootNode)
     , m_document(&document)
     , m_parentTreeScope(&document)
-#if !ENABLE(OILPAN)
+    , m_scopedStyleResolver(ScopedStyleResolver::create(*this))
     , m_guardRefCount(0)
-#endif
 {
     ASSERT(rootNode != document);
 #if !ENABLE(OILPAN)
@@ -69,16 +68,14 @@ TreeScope::TreeScope(Document& document)
     : m_rootNode(document)
     , m_document(&document)
     , m_parentTreeScope(nullptr)
-#if !ENABLE(OILPAN)
+    , m_scopedStyleResolver(ScopedStyleResolver::create(*this))
     , m_guardRefCount(0)
-#endif
 {
     m_rootNode->setTreeScope(this);
 }
 
 TreeScope::~TreeScope()
 {
-#if !ENABLE(OILPAN)
     ASSERT(!m_guardRefCount);
     m_rootNode->setTreeScope(0);
 
@@ -89,7 +86,6 @@ TreeScope::~TreeScope()
 
     if (m_parentTreeScope)
         m_parentTreeScope->guardDeref();
-#endif
 }
 
 bool TreeScope::isInclusiveOlderSiblingShadowRootOrAncestorTreeScopeOf(const TreeScope& scope) const
@@ -127,19 +123,6 @@ void TreeScope::setParentTreeScope(TreeScope& newParentScope)
 #endif
     m_parentTreeScope = &newParentScope;
     setDocument(newParentScope.document());
-}
-
-ScopedStyleResolver& TreeScope::ensureScopedStyleResolver()
-{
-    RELEASE_ASSERT(this);
-    if (!m_scopedStyleResolver)
-        m_scopedStyleResolver = ScopedStyleResolver::create(*this);
-    return *m_scopedStyleResolver;
-}
-
-void TreeScope::clearScopedStyleResolver()
-{
-    m_scopedStyleResolver.clear();
 }
 
 Element* TreeScope::getElementById(const AtomicString& elementId) const

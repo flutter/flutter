@@ -117,9 +117,6 @@ public:
     PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text);
     void removeSheet(StyleSheetContents*);
 
-    void addScopedStyleResolver(const ScopedStyleResolver* resolver) { m_scopedStyleResolvers.add(resolver); }
-    void removeScopedStyleResolver(const ScopedStyleResolver* resolver) { m_scopedStyleResolvers.remove(resolver); }
-    bool hasOnlyScopedResolverForDocument() const { return m_scopedStyleResolvers.size() == 1; }
     void collectScopedStyleFeaturesTo(RuleFeatureSet&) const;
 
 private:
@@ -153,8 +150,6 @@ private:
 
     typedef HashMap<RawPtr<TreeScope>, OwnPtr<StyleSheetCollection> > StyleSheetCollectionMap;
     StyleSheetCollectionMap m_styleSheetCollectionMap;
-    typedef HashSet<RawPtr<const ScopedStyleResolver> > ScopedStyleResolverSet;
-    ScopedStyleResolverSet m_scopedStyleResolvers;
 
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     TreeScopeSet m_dirtyTreeScopes;

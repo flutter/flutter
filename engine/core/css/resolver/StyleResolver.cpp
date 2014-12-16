@@ -167,8 +167,7 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
         return;
 
     TreeScope& treeScope = ownerNode->treeScope();
-    ScopedStyleResolver& resolver = treeScope.ensureScopedStyleResolver();
-    document().styleEngine()->addScopedStyleResolver(&resolver);
+    ScopedStyleResolver& resolver = treeScope.scopedStyleResolver();
     resolver.addRulesFromSheet(cssSheet, this);
 }
 
@@ -208,8 +207,7 @@ void StyleResolver::resetRuleFeatures()
 void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet* parentStyleSheet, unsigned parentIndex, ContainerNode& scope)
 {
     const Vector<RawPtr<StyleRuleKeyframes> > keyframesRules = authorRules.keyframesRules();
-    ScopedStyleResolver* resolver = &scope.treeScope().ensureScopedStyleResolver();
-    document().styleEngine()->addScopedStyleResolver(resolver);
+    ScopedStyleResolver* resolver = &scope.treeScope().scopedStyleResolver();
     for (unsigned i = 0; i < keyframesRules.size(); ++i)
         resolver->addKeyframeStyle(keyframesRules[i]);
 
@@ -225,18 +223,8 @@ void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet
 
 void StyleResolver::resetAuthorStyle(TreeScope& treeScope)
 {
-    ScopedStyleResolver* resolver = treeScope.scopedStyleResolver();
-    if (!resolver)
-        return;
-
-    resolver->resetAuthorStyle();
+    treeScope.scopedStyleResolver().resetAuthorStyle();
     resetRuleFeatures();
-    if (treeScope.rootNode().isDocumentNode())
-        return;
-
-    // resolver is going to be freed below.
-    document().styleEngine()->removeScopedStyleResolver(resolver);
-    treeScope.clearScopedStyleResolver();
 }
 
 void StyleResolver::collectFeatures()
@@ -322,15 +310,9 @@ void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& col
     collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
 
     bool applyAuthorStyles = applyAuthorStylesOf(element);
-    if (document().styleEngine()->hasOnlyScopedResolverForDocument()) {
-        document().scopedStyleResolver()->collectMatchingAuthorRules(collector, includeEmptyRules, applyAuthorStyles, ignoreCascadeScope);
-        collector.sortAndTransferMatchedRules();
-        return;
-    }
 
     Vector<RawPtr<ScopedStyleResolver>, 8> resolvers;
-    if (ScopedStyleResolver* resolver = element->treeScope().scopedStyleResolver())
-        resolvers.append(resolver);
+    resolvers.append(&element->treeScope().scopedStyleResolver());
 
     Vector<RawPtr<ScopedStyleResolver>, 8> resolversInShadowTree;
     collectScopedResolversForHostedShadowTrees(element, resolversInShadowTree);
@@ -630,20 +612,15 @@ void StyleResolver::collectScopedResolversForHostedShadowTrees(const Element* el
         return;
 
     // Adding scoped resolver for active shadow roots for shadow host styling.
-    if (ShadowRoot* shadowRoot = shadow->shadowRoot()) {
-        if (ScopedStyleResolver* resolver = shadowRoot->scopedStyleResolver())
-            resolvers.append(resolver);
-    }
+    if (ShadowRoot* shadowRoot = shadow->shadowRoot())
+        resolvers.append(&shadowRoot->scopedStyleResolver());
 }
 
 void StyleResolver::styleTreeResolveScopedKeyframesRules(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
 {
     // Add resolvers for shadow roots hosted by the given element.
     collectScopedResolversForHostedShadowTrees(element, resolvers);
-
-    // Add resolvers while walking up DOM tree from the given element.
-    if (ScopedStyleResolver* resolver = element->treeScope().scopedStyleResolver())
-        resolvers.append(resolver);
+    resolvers.append(&element->treeScope().scopedStyleResolver());
 }
 
 template <StyleResolver::StyleApplicationPass pass>
