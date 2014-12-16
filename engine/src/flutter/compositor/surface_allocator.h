@@ -6,6 +6,7 @@
 #define SKY_COMPOSITOR_SURFACE_ALLOCATOR_H_
 
 #include "base/basictypes.h"
+#include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
 
 namespace sky {
 
@@ -14,7 +15,7 @@ class SurfaceAllocator {
   SurfaceAllocator(uint32_t id_namespace);
   ~SurfaceAllocator();
 
-  uint64_t CreateSurfaceId();
+  mojo::SurfaceIdPtr CreateSurfaceId();
 
  private:
   uint32_t id_namespace_;

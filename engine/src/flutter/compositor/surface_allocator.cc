@@ -16,13 +16,11 @@ SurfaceAllocator::SurfaceAllocator(uint32_t id_namespace)
 SurfaceAllocator::~SurfaceAllocator() {
 }
 
-uint64_t SurfaceAllocator::CreateSurfaceId() {
-  // Surface IDs are 64 integers. The high 32 bits are the namespace of the ID,
-  // which is assigned to us by the surfaces service. The lower 32 bits are ours
-  // to allocate as we see fit. For simplicity, we just allocate them
-  // sequentially. In principle, we could run out, but at 60 Hz, it takes
-  // several years to run out.
-  return static_cast<uint64_t>(id_namespace_) << 32 | next_id_++;
+mojo::SurfaceIdPtr SurfaceAllocator::CreateSurfaceId() {
+  auto id = mojo::SurfaceId::New();
+  id->local = next_id_++;
+  id->id_namespace = id_namespace_;
+  return id.Pass();
 }
 
 }  // namespace sky
