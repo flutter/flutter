@@ -38,7 +38,6 @@ namespace blink {
 
 TreeScopeStyleSheetCollection::TreeScopeStyleSheetCollection(TreeScope& treeScope)
     : m_treeScope(treeScope)
-    , m_usesRemUnits(false)
 {
 }
 
@@ -66,20 +65,6 @@ void TreeScopeStyleSheetCollection::clearMediaQueryRuleSetStyleSheets()
         if (contents->hasMediaQueries())
             contents->clearRuleSet();
     }
-}
-
-static bool styleSheetsUseRemUnits(const Vector<RefPtr<CSSStyleSheet> >& sheets)
-{
-    for (unsigned i = 0; i < sheets.size(); ++i) {
-        if (sheets[i]->contents()->usesRemUnits())
-            return true;
-    }
-    return false;
-}
-
-void TreeScopeStyleSheetCollection::updateUsesRemUnits()
-{
-    m_usesRemUnits = styleSheetsUseRemUnits(m_activeAuthorStyleSheets);
 }
 
 }

@@ -136,7 +136,6 @@ bool MediaValues::computeLengthImpl(double value, CSSPrimitiveValue::UnitType ty
     double factor = 0;
     switch (type) {
     case CSSPrimitiveValue::CSS_EMS:
-    case CSSPrimitiveValue::CSS_REMS:
         factor = defaultFontSize;
         break;
     case CSSPrimitiveValue::CSS_PX:

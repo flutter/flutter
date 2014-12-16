@@ -41,10 +41,9 @@ class RenderView;
 
 class CSSToLengthConversionData {
 public:
-    CSSToLengthConversionData(const RenderStyle* currStyle, const RenderStyle* rootStyle, const RenderView*, bool computingFontSize = false);
+    CSSToLengthConversionData(const RenderStyle* currStyle, const RenderView*, bool computingFontSize = false);
 
     const RenderStyle& style() const { return *m_style; }
-    const RenderStyle* rootStyle() const { return m_rootStyle; }
     bool computingFontSize() const { return m_computingFontSize; }
 
     // Accessing these marks the style as having viewport units
@@ -54,11 +53,9 @@ public:
     double viewportMaxPercent() const;
 
     void setStyle(const RenderStyle* style) { m_style = style; }
-    void setRootStyle(const RenderStyle* rootStyle) { m_rootStyle = rootStyle; }
 
 private:
     const RenderStyle* m_style;
-    const RenderStyle* m_rootStyle;
     float m_viewportWidth;
     float m_viewportHeight;
     bool m_computingFontSize;

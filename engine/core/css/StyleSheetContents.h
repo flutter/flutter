@@ -55,11 +55,8 @@ public:
     bool parseString(const String&);
 
     void parserAppendRule(PassRefPtr<StyleRuleBase>);
-    void parserSetUsesRemUnits(bool b) { m_usesRemUnits = b; }
 
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
-
-    bool usesRemUnits() const { return m_usesRemUnits; }
 
     void registerClient(CSSStyleSheet*);
     void unregisterClient(CSSStyleSheet*);
@@ -75,7 +72,6 @@ public:
 private:
     explicit StyleSheetContents(const CSSParserContext&);
 
-    bool m_usesRemUnits : 1;
     bool m_hasMediaQueries : 1;
 
     OwnPtr<RuleSet> m_ruleSet;

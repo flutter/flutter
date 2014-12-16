@@ -52,8 +52,6 @@ public:
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode);
     bool hasStyleSheetCandidateNodes() const { return !m_styleSheetCandidateNodes.isEmpty(); }
 
-    bool usesRemUnits() const { return m_usesRemUnits; }
-
     DocumentOrderedList& styleSheetCandidateNodes() { return m_styleSheetCandidateNodes; }
 
     void clearMediaQueryRuleSetStyleSheets();
@@ -70,11 +68,8 @@ protected:
         Additive
     };
 
-    void updateUsesRemUnits();
-
 protected:
     RawPtr<TreeScope> m_treeScope;
-    bool m_usesRemUnits;
 
     DocumentOrderedList m_styleSheetCandidateNodes;
 };

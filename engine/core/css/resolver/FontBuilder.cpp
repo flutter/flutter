@@ -276,7 +276,7 @@ static float smallerFontSize(float size)
 }
 
 // FIXME: Have to pass RenderStyles here for calc/computed values. This shouldn't be neecessary.
-void FontBuilder::setFontSizeValue(CSSValue* value, RenderStyle* parentStyle, const RenderStyle* rootElementStyle)
+void FontBuilder::setFontSizeValue(CSSValue* value, RenderStyle* parentStyle)
 {
     if (!value->isPrimitiveValue())
         return;
@@ -328,7 +328,7 @@ void FontBuilder::setFontSizeValue(CSSValue* value, RenderStyle* parentStyle, co
             // If we have viewport units the conversion will mark the parent style as having viewport units.
             bool parentHasViewportUnits = parentStyle->hasViewportUnits();
             parentStyle->setHasViewportUnits(false);
-            CSSToLengthConversionData conversionData(parentStyle, rootElementStyle, m_document->renderView(), true);
+            CSSToLengthConversionData conversionData(parentStyle, m_document->renderView(), true);
             if (primitiveValue->isLength())
                 size = primitiveValue->computeLength<float>(conversionData);
             else if (primitiveValue->isCalculatedPercentageWithLength())

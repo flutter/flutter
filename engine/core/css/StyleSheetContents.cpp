@@ -36,8 +36,7 @@
 namespace blink {
 
 StyleSheetContents::StyleSheetContents(const CSSParserContext& context)
-    : m_usesRemUnits(false)
-    , m_hasMediaQueries(false)
+    : m_hasMediaQueries(false)
     , m_parserContext(context)
 {
 }

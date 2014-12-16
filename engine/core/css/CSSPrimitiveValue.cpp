@@ -76,7 +76,6 @@ static inline bool isValidCSSUnitTypeForDoubleConversion(CSSPrimitiveValue::Unit
     case CSSPrimitiveValue::CSS_PT:
     case CSSPrimitiveValue::CSS_PX:
     case CSSPrimitiveValue::CSS_RAD:
-    case CSSPrimitiveValue::CSS_REMS:
     case CSSPrimitiveValue::CSS_CHS:
     case CSSPrimitiveValue::CSS_S:
     case CSSPrimitiveValue::CSS_TURN:
@@ -134,7 +133,6 @@ StringToUnitTable createStringToUnitTable()
     table.set(String("vh"), CSSPrimitiveValue::CSS_VH);
     table.set(String("vmax"), CSSPrimitiveValue::CSS_VMIN);
     table.set(String("vmin"), CSSPrimitiveValue::CSS_VMAX);
-    table.set(String("rem"), CSSPrimitiveValue::CSS_REMS);
     table.set(String("fr"), CSSPrimitiveValue::CSS_FR);
     table.set(String("turn"), CSSPrimitiveValue::CSS_TURN);
     table.set(String("ch"), CSSPrimitiveValue::CSS_CHS);
@@ -460,7 +458,6 @@ void CSSPrimitiveValue::cleanup()
     case CSS_PERCENTAGE:
     case CSS_EMS:
     case CSS_EXS:
-    case CSS_REMS:
     case CSS_CHS:
     case CSS_PX:
     case CSS_CM:
@@ -575,7 +572,6 @@ double CSSPrimitiveValue::computeLengthDouble(const CSSToLengthConversionData& c
         return m_value.calc->computeLengthPx(conversionData);
 
     const RenderStyle& style = conversionData.style();
-    const RenderStyle* rootStyle = conversionData.rootStyle();
     bool computingFontSize = conversionData.computingFontSize();
 
     double factor;
@@ -592,12 +588,6 @@ double CSSPrimitiveValue::computeLengthDouble(const CSSToLengthConversionData& c
                 factor = style.fontMetrics().xHeight();
             else
                 factor = (computingFontSize ? style.fontDescription().specifiedSize() : style.fontDescription().computedSize()) / 2.0;
-            break;
-        case CSS_REMS:
-            if (rootStyle)
-                factor = computingFontSize ? rootStyle->fontDescription().specifiedSize() : rootStyle->fontDescription().computedSize();
-            else
-                factor = 1.0;
             break;
         case CSS_CHS:
             factor = style.fontMetrics().zeroWidth();
@@ -840,9 +830,6 @@ bool CSSPrimitiveValue::unitTypeToLengthUnitType(UnitType unitType, LengthUnitTy
     case CSSPrimitiveValue::CSS_EXS:
         lengthType = UnitTypeFontXSize;
         return true;
-    case CSSPrimitiveValue::CSS_REMS:
-        lengthType = UnitTypeRootFontSize;
-        return true;
     case CSSPrimitiveValue::CSS_CHS:
         lengthType = UnitTypeZeroCharacterWidth;
         return true;
@@ -875,8 +862,6 @@ CSSPrimitiveValue::UnitType CSSPrimitiveValue::lengthUnitTypeToUnitType(LengthUn
         return CSSPrimitiveValue::CSS_EMS;
     case UnitTypeFontXSize:
         return CSSPrimitiveValue::CSS_EXS;
-    case UnitTypeRootFontSize:
-        return CSSPrimitiveValue::CSS_REMS;
     case UnitTypeZeroCharacterWidth:
         return CSSPrimitiveValue::CSS_CHS;
     case UnitTypePercentage:
@@ -1012,8 +997,6 @@ const char* CSSPrimitiveValue::unitTypeToString(UnitType type)
         return "em";
     case CSS_EXS:
         return "ex";
-    case CSS_REMS:
-        return "rem";
     case CSS_CHS:
         return "ch";
     case CSS_PX:
@@ -1103,7 +1086,6 @@ String CSSPrimitiveValue::customCSSText(CSSTextFormattingFlags formattingFlag) c
         case CSS_PERCENTAGE:
         case CSS_EMS:
         case CSS_EXS:
-        case CSS_REMS:
         case CSS_CHS:
         case CSS_PX:
         case CSS_CM:
@@ -1218,7 +1200,6 @@ PassRefPtr<CSSPrimitiveValue> CSSPrimitiveValue::cloneForCSSOM() const
     case CSS_PERCENTAGE:
     case CSS_EMS:
     case CSS_EXS:
-    case CSS_REMS:
     case CSS_CHS:
     case CSS_PX:
     case CSS_CM:
@@ -1277,7 +1258,6 @@ bool CSSPrimitiveValue::equals(const CSSPrimitiveValue& other) const
     case CSS_PERCENTAGE:
     case CSS_EMS:
     case CSS_EXS:
-    case CSS_REMS:
     case CSS_PX:
     case CSS_CM:
     case CSS_DPPX:

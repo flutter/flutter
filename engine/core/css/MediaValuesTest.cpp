@@ -27,7 +27,6 @@ TEST(MediaValuesTest, Basic)
     TestCase testCases[] = {
         { 40.0, CSSPrimitiveValue::CSS_PX, 16, 300, 300, true, 40 },
         { 40.0, CSSPrimitiveValue::CSS_EMS, 16, 300, 300, true, 640 },
-        { 40.0, CSSPrimitiveValue::CSS_REMS, 16, 300, 300, true, 640 },
         { 40.0, CSSPrimitiveValue::CSS_EXS, 16, 300, 300, true, 320 },
         { 40.0, CSSPrimitiveValue::CSS_CHS, 16, 300, 300, true, 320 },
         { 43.0, CSSPrimitiveValue::CSS_VW, 16, 848, 976, true, 364 },

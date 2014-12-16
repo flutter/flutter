@@ -200,7 +200,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token SUPPORTS_AND
 %token SUPPORTS_OR
 
-%token <number> REMS
 %token <number> CHS
 %token <number> EMS
 %token <number> EXS
@@ -1302,11 +1301,6 @@ unary_term:
   | KHERTZ { $$.setFromNumber($1, CSSPrimitiveValue::CSS_KHZ); }
   | EMS { $$.setFromNumber($1, CSSPrimitiveValue::CSS_EMS); }
   | EXS { $$.setFromNumber($1, CSSPrimitiveValue::CSS_EXS); }
-  | REMS {
-      $$.setFromNumber($1, CSSPrimitiveValue::CSS_REMS);
-      if (parser->m_styleSheet)
-          parser->m_styleSheet->parserSetUsesRemUnits(true);
-  }
   | CHS { $$.setFromNumber($1, CSSPrimitiveValue::CSS_CHS); }
   | VW { $$.setFromNumber($1, CSSPrimitiveValue::CSS_VW); }
   | VH { $$.setFromNumber($1, CSSPrimitiveValue::CSS_VH); }

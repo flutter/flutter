@@ -66,7 +66,6 @@ bool DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(const C
         primitiveValue.accumulateLengthArray(lengthArray);
         return lengthArray[CSSPrimitiveValue::UnitTypeFontSize] != 0
             || lengthArray[CSSPrimitiveValue::UnitTypeFontXSize] != 0
-            || lengthArray[CSSPrimitiveValue::UnitTypeRootFontSize] != 0
             || lengthArray[CSSPrimitiveValue::UnitTypeZeroCharacterWidth] != 0
             || lengthArray[CSSPrimitiveValue::UnitTypeViewportWidth] != 0
             || lengthArray[CSSPrimitiveValue::UnitTypeViewportHeight] != 0

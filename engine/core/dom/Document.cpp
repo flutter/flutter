@@ -1078,9 +1078,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
     // re-attaching our containing iframe, which when asked HTMLFrameElementBase::isURLAllowed
     // hits a null-dereference due to security code always assuming the document has a SecurityOrigin.
 
-    if (m_elemSheet && m_elemSheet->contents()->usesRemUnits())
-        m_styleEngine->setUsesRemUnit(true);
-
     updateStyle(change);
 
     // As a result of the style recalculation, the currently hovered element might have been
@@ -1573,15 +1570,6 @@ void Document::updateBaseURL()
 
     if (!m_baseURL.isValid())
         m_baseURL = KURL();
-
-    // FIXME(sky): remove?
-    if (m_elemSheet) {
-        // Element sheet is silly. It never contains anything.
-        bool usesRemUnits = m_elemSheet->contents()->usesRemUnits();
-        m_elemSheet = CSSStyleSheet::create(this, m_baseURL);
-        // FIXME: So we are not really the parser. The right fix is to eliminate the element sheet completely.
-        m_elemSheet->contents()->parserSetUsesRemUnits(usesRemUnits);
-    }
 }
 
 void Document::didLoadAllImports()

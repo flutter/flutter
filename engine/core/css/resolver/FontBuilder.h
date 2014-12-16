@@ -59,7 +59,7 @@ public:
 
     void setFontSizeInitial();
     void setFontSizeInherit(const FontDescription&);
-    void setFontSizeValue(CSSValue*, RenderStyle* parentStyle, const RenderStyle* rootElementStyle);
+    void setFontSizeValue(CSSValue*, RenderStyle* parentStyle);
 
     void setWeight(FontWeight);
     void setStretch(FontStretch);

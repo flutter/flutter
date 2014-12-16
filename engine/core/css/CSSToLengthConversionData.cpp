@@ -36,9 +36,8 @@
 
 namespace blink {
 
-CSSToLengthConversionData::CSSToLengthConversionData(const RenderStyle* style, const RenderStyle* rootStyle, const RenderView* renderView, bool computingFontSize)
+CSSToLengthConversionData::CSSToLengthConversionData(const RenderStyle* style, const RenderView* renderView, bool computingFontSize)
     : m_style(style)
-    , m_rootStyle(rootStyle)
     , m_viewportWidth(renderView ? renderView->layoutViewportWidth() : 0)
     , m_viewportHeight(renderView ? renderView->layoutViewportHeight() : 0)
     , m_computingFontSize(computingFontSize)

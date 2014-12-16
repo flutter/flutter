@@ -42,13 +42,11 @@ public:
 
     Element* element() const { return m_element; }
     const ContainerNode* parentNode() const { return m_parentNode; }
-    const RenderStyle* rootElementStyle() const { return m_rootElementStyle; }
     bool distributedToInsertionPoint() const { return m_distributedToInsertionPoint; }
 
 private:
     RawPtr<Element> m_element;
     RawPtr<ContainerNode> m_parentNode;
-    RenderStyle* m_rootElementStyle;
     bool m_distributedToInsertionPoint;
 };
 

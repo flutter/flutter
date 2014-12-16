@@ -53,7 +53,6 @@ public:
     // These are all just pass-through methods to ElementResolveContext.
     Element* element() const { return m_elementContext.element(); }
     const ContainerNode* parentNode() const { return m_elementContext.parentNode(); }
-    const RenderStyle* rootElementStyle() const { return m_elementContext.rootElementStyle(); }
 
     bool distributedToInsertionPoint() const { return m_elementContext.distributedToInsertionPoint(); }
 

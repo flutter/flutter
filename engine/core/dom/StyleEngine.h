@@ -88,9 +88,6 @@ public:
     // FIXME(sky): Remove this and ::first-line.
     bool usesFirstLineRules() const { return false; }
 
-    bool usesRemUnits() const { return m_usesRemUnits; }
-    void setUsesRemUnit(bool b) { m_usesRemUnits = b; }
-
     void didRemoveShadowRoot(ShadowRoot*);
     void appendActiveAuthorStyleSheets();
 
@@ -180,8 +177,6 @@ private:
     bool m_documentScopeDirty;
     TreeScopeSet m_dirtyTreeScopes;
     TreeScopeSet m_activeTreeScopes;
-
-    bool m_usesRemUnits;
 
     bool m_ignorePendingStylesheets;
     OwnPtr<StyleResolver> m_resolver;

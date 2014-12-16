@@ -113,7 +113,7 @@ public:
 
         // These are from CSS3 Values and Units, but that isn't a finished standard yet
         CSS_TURN = 107,
-        CSS_REMS = 108,
+        // CSS_REMS = 108,
         CSS_CHS = 109,
 
         // This is used by the CSS Shapes draft
@@ -135,7 +135,6 @@ public:
         UnitTypePercentage,
         UnitTypeFontSize,
         UnitTypeFontXSize,
-        UnitTypeRootFontSize,
         UnitTypeZeroCharacterWidth,
         UnitTypeViewportWidth,
         UnitTypeViewportHeight,
@@ -177,14 +176,13 @@ public:
     {
         return m_primitiveUnitType == CSS_EMS
             || m_primitiveUnitType == CSS_EXS
-            || m_primitiveUnitType == CSS_REMS
             || m_primitiveUnitType == CSS_CHS;
     }
     bool isViewportPercentageLength() const { return isViewportPercentageLength(static_cast<UnitType>(m_primitiveUnitType)); }
     static bool isViewportPercentageLength(UnitType type) { return type >= CSS_VW && type <= CSS_VMAX; }
     static bool isLength(UnitType type)
     {
-        return (type >= CSS_EMS && type <= CSS_PC) || type == CSS_REMS || type == CSS_CHS || isViewportPercentageLength(type);
+        return (type >= CSS_EMS && type <= CSS_PC) || type == CSS_CHS || isViewportPercentageLength(type);
     }
     bool isLength() const { return isLength(primitiveType()); }
     bool isNumber() const { return primitiveType() == CSS_NUMBER; }

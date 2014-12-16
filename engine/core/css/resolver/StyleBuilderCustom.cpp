@@ -186,7 +186,7 @@ void StyleBuilderFunctions::applyInheritCSSPropertyFontSize(StyleResolverState& 
 
 void StyleBuilderFunctions::applyValueCSSPropertyFontSize(StyleResolverState& state, CSSValue* value)
 {
-    state.fontBuilder().setFontSizeValue(value, state.parentStyle(), state.rootElementStyle());
+    state.fontBuilder().setFontSizeValue(value, state.parentStyle());
 }
 
 void StyleBuilderFunctions::applyValueCSSPropertyLineHeight(StyleResolverState& state, CSSValue* value)

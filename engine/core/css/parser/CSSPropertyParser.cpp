@@ -248,7 +248,6 @@ bool CSSPropertyParser::validUnit(CSSParserValue* value, Units unitflags, CSSPar
         b = (unitflags & FPercent);
         break;
     case CSSPrimitiveValue::CSS_EMS:
-    case CSSPrimitiveValue::CSS_REMS:
     case CSSPrimitiveValue::CSS_CHS:
     case CSSPrimitiveValue::CSS_EXS:
     case CSSPrimitiveValue::CSS_PX:

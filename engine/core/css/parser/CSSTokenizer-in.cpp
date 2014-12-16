@@ -843,9 +843,6 @@ inline void CSSTokenizer::detectNumberToken(CharacterType* type, int length)
         CASE("rad") {
             m_token = RADS;
         }
-        CASE("rem") {
-            m_token = REMS;
-        }
         CASE("s") {
             m_token = SECS;
         }

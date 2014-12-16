@@ -76,8 +76,6 @@ void DocumentStyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
     document().setNeedsStyleRecalc(SubtreeStyleChange);
 
     collection.swap(*this);
-
-    updateUsesRemUnits();
 }
 
 }

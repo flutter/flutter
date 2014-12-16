@@ -47,7 +47,6 @@ StyleEngine::StyleEngine(Document& document)
     , m_isMaster(!document.importsController() || document.importsController()->master() == &document)
     , m_documentStyleSheetCollection(DocumentStyleSheetCollection::create(document))
     , m_documentScopeDirty(true)
-    , m_usesRemUnits(false)
     , m_ignorePendingStylesheets(false)
     // We don't need to create CSSFontSelector for imported document or
     // HTMLTemplateElement's document, because those documents have no frame.
@@ -235,8 +234,6 @@ void StyleEngine::updateActiveStyleSheets()
             treeScopesRemoved.add(treeScope);
     }
     m_activeTreeScopes.removeAll(treeScopesRemoved);
-
-    m_usesRemUnits = documentStyleSheetCollection()->usesRemUnits();
 
     m_dirtyTreeScopes.clear();
     m_documentScopeDirty = false;
