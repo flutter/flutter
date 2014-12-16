@@ -6,6 +6,7 @@ package main
 
 import (
     "flag"
+    "io/ioutil"
     "net/http"
     "path"
     "strings"
@@ -38,6 +39,11 @@ func main() {
     genRoot := path.Join(root, "out", *configuration, "gen")
 
     http.Handle("/", skyHandler(root))
+    http.HandleFunc("/echo_post", func(w http.ResponseWriter, r *http.Request) {
+        defer r.Body.Close()
+        body, _ := ioutil.ReadAll(r.Body)
+        w.Write(body)
+    })
     http.Handle("/mojo/public/", http.StripPrefix("/mojo/public/", skyHandler(path.Join(genRoot, "mojo", "public"))))
     http.Handle("/mojo/services/", http.StripPrefix("/mojo/services/", skyHandler(path.Join(genRoot, "mojo", "services"))))
     http.Handle("/sky/services/", http.StripPrefix("/sky/services/", skyHandler(path.Join(genRoot, "sky", "services"))))
