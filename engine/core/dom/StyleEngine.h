@@ -68,9 +68,7 @@ public:
 
     ~StyleEngine();
 
-#if !ENABLE(OILPAN)
     void detachFromDocument();
-#endif
 
     const Vector<RefPtr<CSSStyleSheet>>& activeAuthorStyleSheetsFor(TreeScope&);
 
@@ -105,7 +103,6 @@ public:
 
     bool hasResolver() const { return m_resolver.get(); }
     void clearResolver();
-    void clearMasterResolver();
 
     CSSFontSelector* fontSelector() { return m_fontSelector.get(); }
     void removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFace> >&);
@@ -116,8 +113,6 @@ public:
     void didDetach();
     void resolverChanged();
     unsigned resolverAccessCount() const;
-
-    void markDocumentDirty();
 
     PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text);
     void removeSheet(StyleSheetContents*);
@@ -139,10 +134,6 @@ private:
 
     void markTreeScopeDirty(TreeScope&);
 
-    bool isMaster() const { return m_isMaster; }
-    Document* master();
-    Document& document() const { return *m_document; }
-
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     static void insertTreeScopeInDocumentOrder(TreeScopeSet&, TreeScope*);
 
@@ -159,7 +150,6 @@ private:
     }
 
     RawPtr<Document> m_document;
-    bool m_isMaster;
 
     // TODO(esprehn): Remove special separate collection for document.
     OwnPtr<StyleSheetCollection> m_documentStyleSheetCollection;
@@ -169,7 +159,6 @@ private:
     typedef HashSet<RawPtr<const ScopedStyleResolver> > ScopedStyleResolverSet;
     ScopedStyleResolverSet m_scopedStyleResolvers;
 
-    bool m_documentScopeDirty;
     TreeScopeSet m_dirtyTreeScopes;
     TreeScopeSet m_activeTreeScopes;
 

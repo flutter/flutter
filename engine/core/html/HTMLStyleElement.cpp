@@ -51,7 +51,8 @@ HTMLStyleElement::~HTMLStyleElement()
     if (inDocument()) {
         ContainerNode* scopingNode = this->scopingNode();
         TreeScope& scope = scopingNode ? scopingNode->treeScope() : treeScope();
-        document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
+        if (StyleEngine* styleEngine = document().styleEngine())
+            styleEngine->removeStyleSheetCandidateNode(this, scopingNode, scope);
     }
 
     if (m_sheet)
@@ -76,15 +77,17 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
 void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
-    document().styleEngine()->addStyleSheetCandidateNode(this, false);
-    process();
+    if (inActiveDocument()) {
+        document().styleEngine()->addStyleSheetCandidateNode(this, false);
+        process();
+    }
 }
 
 void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
 {
     HTMLElement::removedFrom(insertionPoint);
 
-    if (!insertionPoint->inDocument())
+    if (!insertionPoint->inActiveDocument())
         return;
 
     ShadowRoot* scopingNode = containingShadowRoot();
@@ -117,7 +120,7 @@ const AtomicString& HTMLStyleElement::media() const
 
 ContainerNode* HTMLStyleElement::scopingNode()
 {
-    if (!inDocument())
+    if (!inActiveDocument())
         return 0;
 
     if (isInShadowTree())
@@ -134,7 +137,7 @@ void HTMLStyleElement::clearSheet()
 
 void HTMLStyleElement::process()
 {
-    if (!inDocument())
+    if (!inActiveDocument())
         return;
 
     TRACE_EVENT0("blink", "StyleElement::process");

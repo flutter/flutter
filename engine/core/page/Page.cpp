@@ -223,7 +223,7 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
         }
         break;
     case SettingsDelegate::FontFamilyChange:
-        if (mainFrame()->document())
+        if (mainFrame()->document() && mainFrame()->document()->isActive())
             mainFrame()->document()->styleEngine()->updateGenericFontFamilySettings();
         setNeedsRecalcStyleInAllFrames();
         break;

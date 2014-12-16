@@ -44,9 +44,7 @@ namespace blink {
 
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
-    , m_isMaster(!document.importsController() || document.importsController()->master() == &document)
     , m_documentStyleSheetCollection(StyleSheetCollection::create(document))
-    , m_documentScopeDirty(true)
     , m_ignorePendingStylesheets(false)
     // We don't need to create CSSFontSelector for imported document or
     // HTMLTemplateElement's document, because those documents have no frame.
@@ -78,16 +76,6 @@ void StyleEngine::detachFromDocument()
     for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
         const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
     m_scopedStyleResolvers.clear();
-}
-
-inline Document* StyleEngine::master()
-{
-    if (isMaster())
-        return m_document;
-    HTMLImportsController* import = document().importsController();
-    if (!import) // Document::import() can return null while executing its destructor.
-        return 0;
-    return import->master();
 }
 
 const Vector<RefPtr<CSSStyleSheet>>& StyleEngine::activeAuthorStyleSheetsFor(TreeScope& treeScope)
@@ -191,10 +179,9 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
 
 void StyleEngine::updateActiveStyleSheets()
 {
-    ASSERT(isMaster());
-    ASSERT(!document().inStyleRecalc());
+    ASSERT(!m_document->inStyleRecalc());
 
-    if (!document().isActive())
+    if (!m_document->isActive())
         return;
 
     documentStyleSheetCollection()->updateActiveStyleSheets(this);
@@ -214,7 +201,6 @@ void StyleEngine::updateActiveStyleSheets()
     m_activeTreeScopes.removeAll(treeScopesRemoved);
 
     m_dirtyTreeScopes.clear();
-    m_documentScopeDirty = false;
 }
 
 void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)
@@ -226,8 +212,6 @@ void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)
 
 void StyleEngine::appendActiveAuthorStyleSheets()
 {
-    ASSERT(isMaster());
-
     m_resolver->appendAuthorStyleSheets(documentStyleSheetCollection()->activeAuthorStyleSheets());
 
     TreeScopeSet::iterator begin = m_activeTreeScopes.begin();
@@ -245,7 +229,7 @@ void StyleEngine::createResolver()
     // which is not in a frame. Code which hits this should have checked
     // Document::isActive() before calling into code which could get here.
 
-    ASSERT(document().frame());
+    ASSERT(m_document->frame());
 
     m_resolver = adoptPtr(new StyleResolver(*m_document));
     addScopedStyleResolver(&m_document->ensureScopedStyleResolver());
@@ -255,19 +239,12 @@ void StyleEngine::createResolver()
 
 void StyleEngine::clearResolver()
 {
-    ASSERT(!document().inStyleRecalc());
-    ASSERT(isMaster() || !m_resolver);
+    ASSERT(!m_document->inStyleRecalc());
 
     for (ScopedStyleResolverSet::iterator it = m_scopedStyleResolvers.begin(); it != m_scopedStyleResolvers.end(); ++it)
         const_cast<TreeScope&>((*it)->treeScope()).clearScopedStyleResolver();
     m_scopedStyleResolvers.clear();
     m_resolver.clear();
-}
-
-void StyleEngine::clearMasterResolver()
-{
-    if (Document* master = this->master())
-        master->styleEngine()->clearResolver();
 }
 
 unsigned StyleEngine::resolverAccessCount() const
@@ -282,15 +259,9 @@ void StyleEngine::didDetach()
 
 void StyleEngine::resolverChanged()
 {
-    if (!isMaster()) {
-        if (Document* master = this->master())
-            master->styleResolverChanged();
-        return;
-    }
-
     // Don't bother updating, since we haven't loaded all our style info yet
     // and haven't calculated the style selector for the first time.
-    if (!document().isActive()) {
+    if (!m_document->isActive()) {
         clearResolver();
         return;
     }
@@ -310,7 +281,7 @@ void StyleEngine::updateGenericFontFamilySettings()
 {
     // FIXME: we should not update generic font family settings when
     // document is inactive.
-    ASSERT(document().isActive());
+    ASSERT(m_document->isActive());
 
     if (!m_fontSelector)
         return;
@@ -334,19 +305,10 @@ void StyleEngine::removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFac
 
 void StyleEngine::markTreeScopeDirty(TreeScope& scope)
 {
-    if (scope == m_document) {
-        markDocumentDirty();
+    // TODO(esprehn): Make document not special.
+    if (scope == m_document)
         return;
-    }
-
     m_dirtyTreeScopes.add(&scope);
-}
-
-void StyleEngine::markDocumentDirty()
-{
-    m_documentScopeDirty = true;
-    if (document().importLoader())
-        document().importsController()->master()->styleEngine()->markDocumentDirty();
 }
 
 PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)
@@ -391,12 +353,9 @@ void StyleEngine::collectScopedStyleFeaturesTo(RuleFeatureSet& features) const
 
 void StyleEngine::fontsNeedUpdate(CSSFontSelector*)
 {
-    if (!document().isActive())
-        return;
-
     if (m_resolver)
         m_resolver->invalidateMatchedPropertiesCache();
-    document().setNeedsStyleRecalc(SubtreeStyleChange);
+    m_document->setNeedsStyleRecalc(SubtreeStyleChange);
 }
 
 }

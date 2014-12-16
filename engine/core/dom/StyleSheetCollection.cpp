@@ -85,7 +85,7 @@ void StyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
 
     // TODO(esprehn): Remove special casing for Document.
     if (root.isDocumentNode()) {
-        engine->clearMasterResolver();
+        engine->clearResolver();
         // FIMXE: The following depends on whether StyleRuleFontFace was modified or not.
         // No need to always-clear font cache.
         engine->clearFontCache();

@@ -292,11 +292,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
 
     m_lifecycle.advanceTo(DocumentLifecycle::Inactive);
 
-    // Since CSSFontSelector requires Document::m_fetcher and StyleEngine owns
-    // CSSFontSelector, need to initialize m_styleEngine after initializing
-    // m_fetcher.
-    m_styleEngine = StyleEngine::create(*this);
-
 #ifndef NDEBUG
     liveDocumentSet().add(this);
 #endif
@@ -1230,11 +1225,14 @@ PassRefPtr<RenderStyle> Document::styleForElementIgnoringPendingStylesheets(Elem
 
 StyleResolver* Document::styleResolver() const
 {
+    if (!isActive())
+        return 0;
     return m_styleEngine->resolver();
 }
 
 StyleResolver& Document::ensureStyleResolver() const
 {
+    ASSERT(isActive());
     return m_styleEngine->ensureResolver();
 }
 
@@ -1246,6 +1244,8 @@ void Document::clearStyleResolver()
 void Document::attach(const AttachContext& context)
 {
     ASSERT(m_lifecycle.state() == DocumentLifecycle::Inactive);
+
+    m_styleEngine = StyleEngine::create(*this);
 
     m_renderView = new RenderView(this);
     setRenderer(m_renderView);
@@ -1284,6 +1284,7 @@ void Document::detach(const AttachContext& context)
     ContainerNode::detach(context);
 
     m_styleEngine->didDetach();
+    m_styleEngine = nullptr;
 
     // This is required, as our LocalFrame might delete itself as soon as it detaches
     // us. However, this violates Node::detach() semantics, as it's never
