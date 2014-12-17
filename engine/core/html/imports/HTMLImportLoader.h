@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTLOADER_H_
 #define SKY_ENGINE_CORE_HTML_IMPORTS_HTMLIMPORTLOADER_H_
 
-#include "sky/engine/platform/fetcher/DataPipeDrainer.h"
 #include "sky/engine/platform/fetcher/MojoFetcher.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/OwnPtr.h"

@@ -27,11 +27,11 @@
 #define SKY_ENGINE_CORE_HTML_PARSER_BACKGROUNDHTMLPARSER_H_
 
 #include "base/memory/weak_ptr.h"
+#include "mojo/common/data_pipe_drainer.h"
 #include "mojo/public/cpp/system/core.h"
 #include "sky/engine/core/html/parser/CompactHTMLToken.h"
 #include "sky/engine/core/html/parser/HTMLTokenizer.h"
 #include "sky/engine/core/html/parser/TextResourceDecoder.h"
-#include "sky/engine/platform/fetcher/DataPipeDrainer.h"
 #include "sky/engine/platform/text/SegmentedString.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/WeakPtr.h"
@@ -41,7 +41,7 @@ namespace blink {
 class HTMLDocumentParser;
 class SharedBuffer;
 
-class BackgroundHTMLParser : public DataPipeDrainer::Client {
+class BackgroundHTMLParser : public mojo::common::DataPipeDrainer::Client {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     struct Configuration {
@@ -58,6 +58,7 @@ private:
     explicit BackgroundHTMLParser(PassOwnPtr<Configuration>);
     ~BackgroundHTMLParser();
 
+    // DataPipeDrainer::Client:
     void OnDataAvailable(const void* data, size_t numberOfBytes) override;
     void OnDataComplete() override;
 
@@ -76,7 +77,7 @@ private:
     OwnPtr<TextResourceDecoder> m_decoder;
 
     mojo::ScopedDataPipeConsumerHandle m_source;
-    OwnPtr<DataPipeDrainer> m_drainer;
+    OwnPtr<mojo::common::DataPipeDrainer> m_drainer;
 
     base::WeakPtrFactory<BackgroundHTMLParser> m_weakFactory;
 };

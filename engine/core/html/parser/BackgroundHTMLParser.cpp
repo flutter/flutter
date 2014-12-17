@@ -76,7 +76,7 @@ BackgroundHTMLParser::~BackgroundHTMLParser()
 
 void BackgroundHTMLParser::start()
 {
-    m_drainer = adoptPtr(new DataPipeDrainer(this, m_source.Pass()));
+    m_drainer = adoptPtr(new mojo::common::DataPipeDrainer(this, m_source.Pass()));
 }
 
 void BackgroundHTMLParser::stop()

@@ -144,8 +144,6 @@ source_set("platform") {
     "exported/WebURLResponsePrivate.h",
     "exported/WrappedResourceRequest.h",
     "exported/WrappedResourceResponse.h",
-    "fetcher/DataPipeDrainer.cpp",
-    "fetcher/DataPipeDrainer.h",
     "fetcher/MojoFetcher.cpp",
     "fetcher/MojoFetcher.h",
     "FloatConversion.h",
