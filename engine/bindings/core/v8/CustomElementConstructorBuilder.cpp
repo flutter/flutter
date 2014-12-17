@@ -198,6 +198,8 @@ bool CustomElementConstructorBuilder::createConstructor(Document* document, Cust
     V8HiddenValue::setHiddenValue(isolate, m_constructor, V8HiddenValue::customElementType(isolate), v8Type);
 
     v8::Handle<v8::String> prototypeKey = v8String(isolate, "prototype");
+    v8::Handle<v8::String> constructorKey = v8String(isolate, "constructor");
+
     ASSERT(m_constructor->HasOwnProperty(prototypeKey));
     // This sets the property *value*; calling Set is safe because
     // "prototype" is a non-configurable data property so there can be
@@ -207,9 +209,11 @@ bool CustomElementConstructorBuilder::createConstructor(Document* document, Cust
     // "prototype" does not affect the value, but can reconfigure the
     // property.
     m_constructor->ForceSet(prototypeKey, m_prototype, v8::PropertyAttribute(v8::ReadOnly | v8::DontEnum | v8::DontDelete));
+    // The generated constructor should inherit from your constructor.
+    m_constructor->SetPrototype(m_prototype->Get(constructorKey));
 
     V8HiddenValue::setHiddenValue(isolate, m_prototype, V8HiddenValue::customElementIsInterfacePrototypeObject(isolate), v8::True(isolate));
-    m_prototype->ForceSet(v8String(isolate, "constructor"), m_constructor, v8::DontEnum);
+    m_prototype->ForceSet(constructorKey, m_constructor, v8::DontEnum);
 
     return true;
 }
