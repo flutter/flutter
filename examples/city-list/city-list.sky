@@ -7,6 +7,12 @@
 <import src="city-data-service.sky" as="CityDataService" />
 <import src="city-sequence.sky" as="CitySequence" />
 
+<script>
+// TODO(esprehn): exports should start as the empty object.
+module.exports = {};
+</script>
+
+<sky-element name="state-header">
 <template>
   <style>
     div {
@@ -20,15 +26,15 @@
   <div>{{ state }}</div>
 </template>
 <script>
-SkyElement({
-  name: 'state-header',
-
+module.exports.StateHeaderElement = class extends SkyElement {
   set datum(datum) {
     this.state = datum.state;
   }
-});
+}.register();
 </script>
+</sky-element>
 
+<sky-element name="letter-header">
 <template>
   <style>
     div {
@@ -42,15 +48,15 @@ SkyElement({
   <div>{{ letter }}</div>
 </template>
 <script>
-SkyElement({
-  name: 'letter-header',
-
+module.exports.LetterHeaderElement = class extends SkyElement {
   set datum(datum) {
     this.letter = datum.letter;
   }
-});
+}.register();
 </script>
+</sky-element>
 
+<sky-element name="city-item">
 <template>
   <style>
     :host {
@@ -85,16 +91,16 @@ SkyElement({
   </div>
 </template>
 <script>
-  SkyElement({
-    name: 'city-item',
-
-    set datum(datum) {
-      this.name = datum.name;
-      this.population = datum.population;
-    }
-  });
+module.exports.CityItemElement = class extends SkyElement {
+  set datum(datum) {
+    this.name = datum.name;
+    this.population = datum.population;
+  }
+}.register();
 </script>
+</sky-element>
 
+<sky-element name="city-list">
 <template>
   <style>
 
@@ -146,14 +152,12 @@ SkyElement({
   }
 
   </style>
-
   <div id="scroller" fit>
     <div id="scrollarea">
       <div id="contentarea">
       </div>
     </div>
   </div>
-
 </template>
 <script>
 
@@ -540,16 +544,18 @@ SkyElement({
       this.drawBottom = 0;
     }
 
-    SkyElement({
-      name: 'city-list',
-      loader: null,
-      scroller: null,
-      tiler: null,
-      date: null,
-      month: null,
-      views: null,
+    module.exports.CityListElement = class extends SkyElement {
 
-      attached: function() {
+      created() {
+        this.loader = null;
+        this.scroller = null;
+        this.tiler = null;
+        this.date = null;
+        this.month = null;
+        this.views = null;
+      }
+
+      attached() {
         this.views = {};
         this.loader = new Loader(this);
         this.scroller = new Scroller();
@@ -570,44 +576,43 @@ SkyElement({
           self.domReady();
           self.loader.maybeLoadMoreData(self.dataLoaded);
         });
-      },
+      }
 
-      domReady: function() {
+      domReady() {
         this.scroller.setup(this.shadowRoot.getElementById('scroller'),
             this.shadowRoot.getElementById('scrollarea'),
             this.shadowRoot.getElementById('contentarea'));
         var scrollFrame = this.scroller.getCurrentFrame();
         this.tiler.setupViews(scrollFrame);
-      },
+      }
 
-      updateView: function(data, scrollChanged) {
+      updateView(data, scrollChanged) {
         var scrollFrame = this.scroller.getCurrentFrame();
         this.tiler.drawTiles(scrollFrame, data);
         var datum = scrollChanged ?
             this.tiler.getFirstVisibleDatum(scrollFrame) : null;
         this.loader.maybeLoadMoreData(this.dataLoaded, datum);
-      },
+      }
 
-      dataLoaded: function(data, indexOffset) {
+      dataLoaded(data, indexOffset) {
         var scrollFrame = this.scroller.getCurrentFrame();
         this.tiler.updateFirstItem(indexOffset);
         this.updateView(data.items, false);
-      },
+      }
 
-      handleScroll: function(event) {
+      handleScroll(event) {
         if (!this.scroller.captureNewFrame(event))
           return;
 
         this.updateView(this.loader.getItems(), true);
-      },
+      }
 
-      scrollBy: function(amount) {
+      scrollBy(amount) {
         this.scrollerElement.scrollTop += amount;
         this.handleScroll({ target: this.scrollerElement });
       }
-    });
+    }.register();
 
 })(this);
-
 </script>
-
+</sky-element>

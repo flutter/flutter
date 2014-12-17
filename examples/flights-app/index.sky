@@ -1,5 +1,5 @@
 <sky>
-  <import src="flights-app.sky" />
+  <import src="flights-app.sky" as="FlightsAppElement"/>
   <style>
     sky {
       height: 100%;
@@ -8,8 +8,8 @@
   <script>
     // TODO(esprehn): Work around a bug where having <flights-app /> in the
     // page doesn't render anything until the first input event.
-    addEventListener("load", function() {
-      document.querySelector("sky").appendChild(document.createElement("flights-app"));
+    window.addEventListener("load", function() {
+      document.querySelector("sky").appendChild(new FlightsAppElement());
     });
   </script>
 </sky>
