@@ -8,10 +8,10 @@
   <tag-name-3 class="class7" id="tag1"></tag-name-3>
   <tag-name-3 class="class7" id="tag2"></tag-name-3>
   <span class="class2">
-    <span class="class5" id="id5"></span>
+    <span class="class5" id="id5" testAttr></span>
   </span>
   <div id="id5"></div>
-  <tag-name-6 class="class6" id="id6">
+  <tag-name-6 class="class6" id="id6" testAttr="the value">
     <tag-name-3 class="class7" id="tag2"></tag-name-3>
   </tag-name-6>
 </div>
@@ -56,6 +56,17 @@ describe("querySelector", function() {
     assert.equal(queryAll("tag-name-3.class7").length, 3);
     assert.equal(queryAll("tag-name-3.class7")[0].id, "tag1");
     assert.equal(queryAll("tag-name-3.class7")[1].id, "tag2");
+  });
+  it("should find all elements by attribute presence selector", function() {
+    assert.ok(queryAll("[testAttr]"));
+    assert.equal(queryAll("[testAttr]").length, 2);
+    assert.equal(queryAll("[testAttr]")[0].id, "id5");
+    assert.equal(queryAll("[testAttr]")[1].id, "id6");
+  });
+  it("should find all elements by attribute value selector", function() {
+    assert.ok(queryAll("[testAttr='the value']"));
+    assert.equal(queryAll("[testAttr='the value']").length, 1);
+    assert.equal(queryAll("[testAttr='the value']")[0].id, "id6");
   });
 });
 </script>

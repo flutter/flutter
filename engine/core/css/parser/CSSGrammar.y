@@ -804,8 +804,6 @@ class:
 
 attr_name:
     IDENT maybe_space {
-        if (parser->m_context.isHTMLDocument())
-            parser->tokenToLowerCase($1);
         $$ = $1;
     }
     ;

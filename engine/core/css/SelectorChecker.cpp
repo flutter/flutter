@@ -211,6 +211,7 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context) const
         if (anyAttributeMatches(element, selector.match(), selector)) {
             if (m_mode == ResolvingStyle && context.elementStyle)
                 context.elementStyle->setUnique();
+            return true;
         }
         return false;
     case CSSSelector::PseudoClass:
