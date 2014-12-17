@@ -21,17 +21,6 @@ class Private {
   }
 }
 
-// Somewhat hacky, but works.
-function stringToUTF8Buffer(string) {
-    var string = unescape(encodeURIComponent(string));
-    var charList = string.split('');
-    var uintArray = [];
-    for (var i = 0; i < charList.length; i++) {
-        uintArray.push(charList[i].charCodeAt(0));
-    }
-    return new Uint8Array(uintArray);
-}
-
 // https://xhr.spec.whatwg.org
 class XMLHttpRequest {
   constructor() {
@@ -89,7 +78,8 @@ class XMLHttpRequest {
       var bodyAsBufferView = null;
       if (typeof(body) === "string") {
         this.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-        bodyAsBufferView = stringToUTF8Buffer(body);
+        var bodyAsBufferView = new Uint8Array(unicode.utf8Length(body));
+        unicode.encodeUtf8String(body, bodyAsBufferView);
       } else {
         bodyAsBufferView = new Uint8Array(body);
       }
