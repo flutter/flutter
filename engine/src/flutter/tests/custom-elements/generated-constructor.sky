@@ -4,7 +4,7 @@
 <script>
 describe("Custom element constructor", function() {
   it("should inherit from the passed constructor", function() {
-    class TestElementClass {
+    class TestElementClass extends HTMLElement {
       static test() { return 10; }
     }
     var TestElement = document.registerElement("test-element-1", {
@@ -12,6 +12,7 @@ describe("Custom element constructor", function() {
     });
     assert.isFunction(TestElement.test);
     assert.equal(TestElement.test(), 10);
+    assert.equal(Object.getPrototypeOf(TestElement), TestElementClass);
   });
 });
 </script>
