@@ -125,6 +125,19 @@ module 'sky:core' {
     virtual void endTagParsedCallback(); // noop
     virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
     // TODO(ianh): does a node ever need to know when it's been redistributed?
+
+    readonly attribute StyleDeclarationList style; // O(1)
+    virtual LayoutManagerConstructor getLayoutManager(RenderNode renderNode); // O(1)
+      // default implementation looks up the 'display' property and returns the value:
+      //   if (renderNode)
+      //     return renderNode.getProperty(phDisplay);
+      //   return null;
+    readonly attribute RenderNode? renderNode; // O(1)
+      // this will be null until the first time it is rendered
+    void resetLayoutManager(); // O(1)
+      // if renderNode is non-null:
+      //   sets renderNode.layoutManager to null
+      //   sets renderNode.needsManager to true
   }
 
   class Text : Node {
@@ -204,6 +217,8 @@ module 'sky:core' {
     constructor (); // shorthand
     constructor attribute String tagName; // O(1) // "style"
     constructor attribute Boolean shadow; // O(1) // false
+
+    Array<Rule> getRules(); // O(N) in rules
   }
   class ContentElement : Element {
     constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -388,8 +403,17 @@ module 'sky:modulename' {
   }
 
   abstract class Superclass {
-    // an abstract class can't have a constructor
-    // in every other respect it is the same as a regular class
+    // an abstract class can't have a non-abstract constructor
+    // an abstract class may have abstract constructors and methods
+    // an abstract class may have everything else a class can have
+
+    abstract constructor ();
+      // this indicates that non-abstract subclasses must have a constructor with the given arguments
+
+    abstract ReturnType methodCallback();
+      // this method does nothing, but is included to describe the interface that subclasses will implement
+      // a non-abstract class must have an explicit implementation of all inherited abstract methods
+    
   }
 
   class Subclass : Superclass {
@@ -410,6 +434,9 @@ module 'sky:modulename' {
       // affect what gets called. Make sure if you override it that you call the superclass implementation!
       // The default implementations of 'virtual' methods all end by calling the identically named method
       // on the superclass, if there is such a method.
+
+    // non-abstract classes cannot have abstract constructors or methods, and in particular, must
+    // have explicit non-abstract versions of any inherited abstract constructors or methods
 
     // properties on the constructor
     constructor readonly attribute ReturnType staticName;
@@ -479,6 +506,7 @@ The following types are available:
 * ``Boolean`` - WebIDL ``boolean``
 # ``Object`` - WebIDL ``object`` (``ClassName`` can be used as a literal for this type)
 * ``ClassName`` - an instance of the class ClassName
+* ``Class<ClassName>`` - a class ClassName or one of its subclasses (not an instance)
 * ``DictionaryName`` - an instance of the dictionary DictionaryName
 * ``Promise<Type>`` - WebIDL ``Promise<T>``
 * ``Generator<Type>`` - An ECMAScript generator function that returns data of the given type

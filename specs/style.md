@@ -191,29 +191,18 @@ class TokenSource {
   TokenSourceBookmark getBookmark();
   void rewind(TokenSourceBookmark bookmark);
 }
+
 class TokenSourceBookmark {
   constructor ();
   // TokenSource stores unforgeable state on this object using symbols or a weakmap or some such
 }
 
-// TODO(ianh): this is a non-starter, we need something better to handle units and custom painting
-dictionary ParsedValue {
-  any value = null;
-  ValueResolver? resolver = null;
-  Boolean relativeDimension = false; // if true, e.g. for % lengths, the callback will be called again if an ancestor's dimensions change
-  Painter? painter = null;
-}
+callback ParserCallback = AbstractStyleValue (TokenSource tokens); // return if successful, throw if not
 
-// best practice convention: if you're creating a property with needsPaint, you should 
-// create a new style value type for it so that it can set the paint callback right;
-// you should never use such a style type when parsing another property
-
-callback any ParserCallback (TokenSource tokens);
-
-class StyleValueType {
+class StyleGrammar {
   constructor ();
   void addParser(ParserCallback parser);
-  any parse(TokenSource tokens, Boolean root = false);
+  AbstractStyleValue parse(TokenSource tokens, Boolean root = false);
    // for each parser callback that was registered, in reverse
    // order (most recently registered first), run these steps:
    //   let bookmark = tokens.getBookmark();
@@ -229,40 +218,137 @@ class StyleValueType {
    // (root is set when you need to parse the entire token stream to be valid)
 }
 
-// note: if you define a style value type that uses other style value types, e.g. a "length pair" that accepts two lengths, then
-// if any of the subtypes have a resolver, you need to make sure you have a resolver that calls them to compute the final value
+/*
+StyleNode
+ |
+ +-- Property
+ |
+ +-- AbstractStyleValue
+     |   
+     +-- NumericStyleValue
+     |    |
+     |    +-- AnimatableNumericStyleValue
+     |   
+     +-- LengthStyleValue
+     |    |
+     |    +-- AnimatableLengthStyleValue
+     |    |
+     |    +-- PixelLengthStyleValue
+     |    |
+     |    +-- EmLengthStyleValue
+     |    |
+     |    +-- VHLengthStyleValue
+     |    |
+     |    +-- CalcLengthStyleValue
+     |    
+     +-- ColorStyleValue
+     |    |
+     |    +-- RGBColorStyleValue
+     |    |
+     |    +-- AnimatableColorStyleValue
+     |    
+     +-- AbstractStringStyleValue
+     |    |
+     |    +-- IdentifierStyleValue
+     |    |    |
+     |    |    +-- AnimatableIdentifierStyleValue
+     |    |    
+     |    +-- URLStyleValue
+     |    |    |
+     |    |    +-- AnimatableURLStyleValue
+     |    |    
+     |    +-- StringStyleValue
+     |         |
+     |         +-- AnimatableStringStyleValue
+     |    
+     +-- PrimitiveValuesListStyleValue
+*/
+
+abstract class StyleNode {
+  abstract void markDirty();
+}
+
+class StyleValueResolverSettings {
+  // this is used as an "out" parameter for 'resolve()' below
+  constructor();
+  void reset(); // resets values to defaults so that object can be reused
+  attribute Boolean layoutDependent; // default to false
+    // set this if the value should be recomputed each time the ownerLayoutManager's dimensions change, rather than being precomputed
+
+  // attribute "BitField" dependencies; // defaults to no bits set
+  void dependsOn(PropertyHandle property);
+    // if the given property doesn't have a dependency bit assigned:
+    //  - assign the next bit to the property
+    //  - if there's no bits left, throw
+    // set the bit on this StyleValueResolverSettings's dependencies bitfield
+}
+
+class Property : StyleNode {
+  constructor (StyleDeclaration parentNode, PropertyHandle property, AbstractStyleValue? initialValue = null);
+  readonly attribute StyleDeclaration parentNode;
+  readonly attribute PropertyHandle property;
+  readonly attribute AbstractStyleValue value;
+
+  void setValue(AbstractStyleValue? newValue);
+    // updates value and calls markDirty()
+
+  void markDirty();
+    // call parentNode.markDirty(property);
+
+  abstract any resolve(RenderNode node, StyleValueResolverSettings? settings = null);
+    // if value is null, returns null
+    // otherwise, returns value.resolve(property, node, settings)
+}
+
+abstract class AbstractStyleValue : StyleNode {
+  abstract constructor(StyleNode parentNode);
+  readonly attribute StyleNode parentNode;
+
+  void markDirty();
+    // call this.parentNode.markDirty()
+
+  abstract any resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+}
+
+abstract class LengthStyleValue : AbstractStyleValue {
+  abstract Float resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+}
+
+class PixelLengthStyleValue : LengthStyleValue {
+  Float resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+}
+
+// ...
 
 dictionary PropertySettings {
   String name;
-  StyleValueType type; // the output from the parser is coerced to a ParsedValue
-  Boolean inherits = false;
+  StyleGrammar grammar;
+  Boolean inherited = false;
   any initialValue = null;
+  Boolean needsManager = false;
   Boolean needsLayout = false;
   Boolean needsPaint = false;
+  // PropertyHandle propertyHandle; // assigned by registerProperty
+  // Integer dependencyBit; // assigned by StyleValueResolverSettings.dependsOn()
 }
+typedef PropertyHandle Integer;
+PropertyHandle registerProperty(PropertySettings propertySettings);
 
-void registerProperty(PropertySettings propertySettings);
-  // when you register a new property, document the format that is expected to be cascaded
-  // (the output from the propertySettings.type parser's ParsedValue.value field after the resolver, if any, has been called)
-
-// sky:core exports a bunch of style value types so that people can
-// extend them
-attribute StyleValueType PositiveLengthOrInfinityStyleValueType;
-attribute StyleValueType PositiveLengthOrAutoStyleValueType;
-attribute StyleValueType PositiveLengthStyleValueType;
-attribute StyleValueType DisplayStyleValueType;
+// sky:core exports a bunch of style grammars so that people can extend them
+attribute StyleGrammar PositiveLengthOrInfinityStyleGrammar; // resolves to Float
+attribute StyleGrammar PositiveLengthOrAutoStyleGrammar; // resolves to Float or null
+attribute StyleGrammar PositiveLengthStyleGrammar; // resolves to Float
+attribute StyleGrammar NumberGrammar; // resolves to Float
+attribute StyleGrammar ColorGrammar; // resolves to object with 'red', 'green', 'blue', and 'alpha' properties each of which is a Float 0..1
+attribute StyleGrammar DisplayStyleGrammar; // resolves to null or LayoutManager constructor
 ```  
 
 Inline Styles
 -------------
 
 ```javascript
-partial class Element {
-  readonly attribute StyleDeclarationList style;
-}
-
 class StyleDeclarationList {
-  constructor ();
+  constructor (Element? element);
 
   // There are two batches of styles in a StyleDeclarationList.
 
@@ -278,12 +364,47 @@ class StyleDeclarationList {
   void addPersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
   void removePersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
 
+  // as StyleDeclaration are added and removed here, the StyleDeclarationList calls register(element) and
+  // unregister(element) respectively on those StyleDeclaration objects, where element is the element that
+  // was passed to the constructor, if not null
+  // then, it calls element.renderNode.cascadedValueAdded/cascadedValueRemoved for each property on the object
+
   // This returns all the frame styles followed by all the persistent styles, in insertion order.
   Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
 class StyleDeclaration {
-  // TODO(ianh): define this
+  void markDirty(PropertyHandle property);
+    // this indicates that the cascaded value of the property thinks
+    // it will now have a different result (as opposed to the cascaded
+    // value itself having changed)
+    // invoke element.renderNode.cascadedValueDirty(property, pseudoElement); for each
+    // currently registered consumer element/pseudoElement pair
+
+  void register(Element element, String? pseudoElement = null); // O(1)
+  void unregister(Element element, String? pseudoElement = null); // O(N)
+    // registers an element/pseudoElement pair with this StyleDeclaration so that when
+    // a property/value on the style declaration is marked dirty, the element
+    // is informed and can then clear its property cache
+
+  getter AbstractStyleValue? (PropertyHandle property);
+    // looks up the Property object for /property/, and returns its value
+    // null if property is missing
+
+  setter void (PropertyHandle property, AbstractStyleValue value);
+    // if there is no Property object for /property/, creates one
+    // else calls its update() method to change the value
+    // if the value changed:
+    // invoke consumer.renderNode.cascadedValueChanged(property); for each
+    // currently registered consumer
+    // if the value is new:
+    // invoke consumer.renderNode.cascadedValueAdded(property); for each
+    // currently registered consumer
+
+  void remove(PropertyHandle property);
+    // drops the Property object for /property/ from this StyleDeclaration object
+    // invoke consumer.renderNode.cascadedValueRemoved(property); for each
+    // currently registered consumer
 }
 ```
 
@@ -291,10 +412,6 @@ Rule Matching
 -------------
 
 ```javascript
-partial class StyleElement {
-  Array<Rule> getRules(); // O(N) in rules
-}
-
 class Rule {
   constructor ();
   attribute SelectorQuery selector; // O(1)
@@ -313,71 +430,82 @@ TODO(ianh): fix the above so that rule order is maintained
 Cascade
 -------
 
-For each Element, the StyleDeclarationList is conceptually flattened
-so that only the last declaration mentioning a property is left.
+Simultaneously walk the tree rooted at the application Document,
+taking into account shadow trees and child distribution, and the tree
+rooted at the document's RenderNode.
 
-Create the flattened render tree as a tree of StyleNode objects
-(described below). For each one, run the equivalent of the following
-code:
+If you come across a node that doesn't have an assigned RenderNode,
+then create one and mark it "isNew", and place it in the appropriate
+place in the RenderTree tree, after any nodes marked isGhost.
+
+For each element, if the node's needsManager is true, call
+getLayoutManager() on the element, and if that's not null, and if the
+returned class isn't the same class as the current layoutManager, if
+any, construct the given class and assign it to the RenderNode's
+layoutManager, then set all the child RenderNodes' ownerLayoutManager
+to that object; if it returns null, and that node already has a
+layoutManager, then set isGhost=true for that node and all its
+children (without changing the layoutManager). Otherwise, if it
+returned null and there's already no layoutManager, remove the node
+from the tree. Then, in any case, clear the needsManager bit.
+
+When an Element or Text node is to be removed from its parent, and it
+has a renderNode, and that renderNode has an ownerLayoutManager with
+autoreap=false, then before actually removing the node, the node's
+renderNode should be marked isGhost=true, and the relevant
+StyleDeclarationList should be flattened and the values stored on the
+RenderNode for use later.
+
+When an Element is to be removed from its parent, regardless of the
+above, the node's renderNode attribute should be nulled out.
+
 
 ```javascript
-var display = node.getProperty('display');
-if (display) {
-  node.layoutManager = new display(node, ownerManager);
-  return true;
-}
-return false;
-```
+callback any ValueResolver (any value, String propertyName, RenderNode node, Float containerWidth, Float containerHeight);
 
-If that code returns false, then that node an all its descendants must
-be dropped from the render tree.
-
-If any node is removed in this pass relative to the previous pass, and
-it has an ownerLayoutManager, then call
-
-```javascript
-node.ownerLayoutManager.release(node)
-```
-
-...to notify the layout manager that the node went away, then set the
-node's ownerLayoutManager attribute to null.
-
-```javascript
-partial class Element {
-  readonly attribute StyleNode? layout; // TODO(ianh): come up with a better name (sadly "style" is taken)
-   // this will be null until the first time it is rendered
-}
-
-callback any ValueResolver (any value, String propertyName, StyleNode node, Float containerWidth, Float containerHeight);
-
-class StyleNode { // implemented in C++ with no virtual tables
+class RenderNode { // implemented in C++ with no virtual tables
   // this is generated before layout
   readonly attribute String text;
   readonly attribute Node? parentNode;
   readonly attribute Node? firstChild;
   readonly attribute Node? nextSibling;
 
-  // access to the results of the cascade
-  // only works during layout and painting
-  any getProperty(String name, String? pseudoElement = null);
-     // throw if this isn't during layout or painting
-     //   TODO(ianh): if the implementation of this does allow it to be queried the rest of the time too, relax this constraint
-     // looking at the declarations for the given pseudoElement:
+  any getProperty(PropertyHandle property, String? pseudoElement = null);
+     // looking at the cached data for the given pseudoElement:
      // if there's a cached value, return it
-     // otherwise, if there's an applicable ParsedValue, then
-     //   if it has a resolver:
-     //     call it
-     //     cache the value
-     //     if relativeDimension is true, then mark the value as provisional
-     //     return the value
-     //   otherwise use the ParsedValue's value; cache it; return it
-     // otherwise, if a pseudo-element was specified, try again without one
-     // otherwise, if the property is inherited and there's a parent:
-     //   get it from the parent (without pseudo); cache it; return it
-     // otherwise, get the default value; cache it; return it
+     // otherwise, figure out which StyleValue we're going to be using, in this order:
+     //   - if we're isGhost, look out our cached declarations
+     //   - look at this element's StyleDeclarations for the given pseudo-element (if any)
+     //   - look at this element's StyleDeclarations with no pseudo-element
+     //   - if it's an inherited property and there's a parent
+     //      - call getProperty() on the parent
+     //     otherwise use the default value
+     // resolve the StyleValue giving it the property and node in question
+     // cache the value, along with the StyleValueResolverSettings
+
+  private void cascadedValueAdded(PropertyHandle property, String? pseudoElement = null);
+  private void cascadedValueRemoved(PropertyHandle property, String? pseudoElement = null);
+  private void cascadedValueChanged(PropertyHandle property, String? pseudoElement = null);
+  private void cascadedValueDirty(PropertyHandle property, String? pseudoElement = null);
+    // - clear the cached data for this property/pseudoElement pair
+    // - if the property is needsManager, set needsManager to true
+    // - if the property is needsLayout, set needsLayout to true and walk
+    //   up the tree setting descendantNeedsLayout
+    // - if the property is needsPaint, add the node to the list of nodes that need painting
+    // - if the property has a dependencyBit defined, then check the cache of all the
+    //   properties on this RenderNode, and the cache for the property in all the child
+    //   nodes and (if pseudoElement is null) or the pseudoElements
+    //   and if any of them have the relevant dependency bit set then call
+    //     thatRenderNode.cascadedValueDirty(thatProperty, thatPseudoElement)
+    // - if the property is inherited:
+    //     - call this.cascadedValueDirty(property, eachPseudoElement)
+    //     - call eachChildRenderNode.cascadedValueDirty(property, null)
+
+  readonly attribute Boolean needsManager;
+    // means that a property with needsManager:true has changed on this node
 
   readonly attribute Boolean needsLayout;
-    // means that either needsLayout is true or a property with needsLayout:true has changed on this node
+    // means that either needsManager is true or a property with needsLayout:true has changed on this node
     // needsLayout is set to false by the ownerLayoutManager's default layout() method
 
   readonly attribute Boolean descendantNeedsLayout;
@@ -386,7 +514,7 @@ class StyleNode { // implemented in C++ with no virtual tables
 
   readonly attribute LayoutManager layoutManager;
   readonly attribute LayoutManager ownerLayoutManager; // defaults to the parentNode.layoutManager
-    // if you are not the ownerLayoutManager, then ignore this StyleNode in layout() and paintChildren()
+    // if you are not the ownerLayoutManager, then ignore this RenderNode in layout() and paintChildren()
     // using walkChildren() does this for you
 
   // only the ownerLayoutManager can change these
@@ -415,10 +543,10 @@ sky:core registers 'display' as follows:
 ```javascript
   {
     name: 'display',
-    type: sky.DisplayStyleValueType,
-    inherits: false,
+    grammar: sky.DisplayStyleGrammar,
+    inherited: false,
     initialValue: sky.BlockLayoutManager,
-    needsLayout: true,
+    needsManager: true,
   }
 ```
 
@@ -440,12 +568,14 @@ Layout managers inherit from the following API:
 
 ```javascript
 class LayoutManager : EventTarget {
-  readonly attribute StyleNode node;
-  constructor LayoutManager(StyleNode node);
+  readonly attribute RenderNode node;
+  constructor LayoutManager(RenderNode node);
+    // sets needsManager to false on the node
 
   readonly attribute Boolean autoreap;
     // defaults to true
-    // when true, any children that are isNew or isGhost are welcomed/reaped implicitly by default layout()
+    // when true, any children that are isNew are automatically welcomed by the default layout()
+    // when true, children that are removd don't get set to isGhost=true, they're just removed
 
   virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of this.node's ancestors // implements EventTarget.getEventDispatchChain()
     // let result = [];
@@ -456,13 +586,24 @@ class LayoutManager : EventTarget {
     // }
     // return result;
 
-  void take(StyleNode victim); // sets victim.ownerLayoutManager = this;
+  void setProperty(RenderNode node, PropertyHandle property, any value, String? pseudoElement = null); // O(1)
+    // if called from an adjustProperties() method during the property adjustment phase,
+    // replaces the value that getProperty() would return on that node with /value/
+
+  virtual void adjustProperties();
+    // called before layout; can call setProperty to set new values
+    // note that this happens after the cascade so inheritance isn't applied to this new value
+    // also note that the value you set is a post-computation value, not an AbstractStyleValue descendant
+    // so e.g. you can have an AnimatableColorStyleValue, get its value, and push it into setProperty()
+    // but you can't push the AnimatableColorStyleValue directly in, it won't do what you expect
+
+  void take(RenderNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
     // assert: victim.needsLayout == true
     // assert: an ancestor of victim has node.layoutManager == this (aka, victim is a descendant of this.node)
 
-  virtual void release(StyleNode victim);
-    // called when the StyleNode was removed from the tree
+  virtual void release(RenderNode victim);
+    // called when the RenderNode was removed from the tree
 
   void setChildPosition(child, x, y); // sets child.x, child.y
   void setChildX(child, y); // sets child.x
@@ -471,21 +612,21 @@ class LayoutManager : EventTarget {
   void setChildWidth(child, width); // sets child.width
   void setChildHeight(child, height); // sets child.height
     // for setChildSize/Width/Height: if the new dimension is different than the last assumed dimensions, and
-    // any StyleNodes with an ownerLayoutManager==this have cached values for getProperty() that are marked
-    // as provisional, clear them
+    // any RenderNodes with an ownerLayoutManager==this have cached values for getProperty() that are marked
+    // as layout-dependent, clear them
   void welcomeChild(child); // resets child.isNew
   void reapChild(child); // resets child.isGhost
 
-  Generator<StyleNode> walkChildren();
+  Generator<RenderNode> walkChildren();
     // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not |this|
 
-  Generator<StyleNode> walkChildrenBackwards();
+  Generator<RenderNode> walkChildrenBackwards();
     // returns a generator that iterates over the children backwards, skipping any whose ownerLayoutManager is not |this|
 
   void assumeDimensions(Float width, Float height);
-    // sets the assumed dimensions for calls to getProperty() on StyleNodes that have this as an ownerLayoutManager
-    // if the new dimension is different than the last assumed dimensions, and any StyleNodes with an
-    // ownerLayoutManager==this have cached values for getProperty() that are marked as provisional, clear them
+    // sets the assumed dimensions for calls to getProperty() on RenderNodes that have this as an ownerLayoutManager
+    // if the new dimension is different than the last assumed dimensions, and any RenderNodes with an
+    // ownerLayoutManager==this have cached values for getProperty() that are marked as layout-dependent, clear them
     // TODO(ianh): should we force this to match the input to layout(), when called from inside layout() and when
     // layout() has a forced width and/or height?
 
@@ -546,7 +687,7 @@ class LayoutManager : EventTarget {
   */
 
   void markAsLaidOut(); // sets this.node.needsLayout and this.node.descendantNeedsLayout to false
-  virtual Dimensions layout(Number? width, Number? height);
+  virtual Dimensions layout(Float? width, Float? height);
     // call markAsLaidOut();
     // if autoreap is true: use walkChildren() to call welcomeChild() and reapChild() on each child
     // if width is null, set width to getIntrinsicWidth().value
@@ -560,12 +701,13 @@ class LayoutManager : EventTarget {
     // - subclasses that want to make 'auto' values dependent on the children should override this
     //   entirely, rather than overriding layoutChildren
 
-  virtual void layoutChildren(Number width, Number height);
+  virtual void layoutChildren(Float width, Float height);
     // default implementation does nothing
     // - override this if you want to lay out children but not have the children affect your dimensions
 
   virtual void paint(RenderingSurface canvas);
     // set a clip rect on the canvas for rect(0,0,this.width,this.height)
+    //   (? we don't really have to do this; consider shadows...)
     // call the painter of each property, in order they were registered, which on this element has a painter
     // call this.paintChildren(canvas)
     // (the default implementation doesn't paint anything on top of the children)
@@ -574,7 +716,7 @@ class LayoutManager : EventTarget {
     //    - you are in your parent's current display list and it's in its parent's and so on up to the top, and
     //    - you haven't had paint() called since the last time you were dirtied
     // - the following things make you dirty:
-    //    - dimensions of your style node changed
+    //    - dimensions of your RenderNode changed
     //    - one of your properties with needsLayout or needsPaint changed
 
   virtual void paintChildren(RenderingSurface canvas);
@@ -586,7 +728,7 @@ class LayoutManager : EventTarget {
     //   that you don't skip the children that are visible in the new coordinate space but wouldn't be
     //   without the transform
 
-  virtual StyleNode hitTest(Float x, Float y);
+  virtual RenderNode hitTest(Float x, Float y);
     // default implementation uses the node's children nodes' x, y,
     // width, and height, skipping any that have width=0 or height=0, or
     // whose ownerLayoutManager is not |this|
@@ -596,7 +738,6 @@ class LayoutManager : EventTarget {
     // hoist some descendants up to be your responsibility, or if your children aren't
     // rectangular (e.g. you lay them out in a hex grid)
     // make sure to offset the value you pass your children: child.layoutManager.hitTest(x-child.x, y-child.y)
-
 }
 
 dictionary LayoutValueRange {
@@ -616,19 +757,33 @@ dictionary Dimensions {
 Paint
 -----
 
+Sky has a list of RenderNodes that need painting.
+When a RenderNode is created, it's added to this list.
+
 ```javascript
-callback void Painter (StyleNode node, RenderingSurface canvas);
+callback void Painter (RenderNode node, RenderingSurface canvas);
 
 class RenderingSurface {
 
   // ... (API similar to <canvas>'s 2D API)
 
-  void paintChild(StyleNode node);
+  void paintChild(RenderNode node);
     // inserts a "paint this child" instruction in this canvas's display list.
     // the child's display list, transformed by the child's x and y coordinates, will be inserted into this
     // display list during painting.
 }
 ```
+
+
+The default framework provides global hooks for extending the painting of:
+
+ - borders
+ - backgrounds
+
+These are called during the default framework's layout managers'
+paint() functions. They are also made available so that other people
+can call them from their paint() functions.
+
 
 
 Default Styles
