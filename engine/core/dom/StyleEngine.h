@@ -72,7 +72,6 @@ public:
 
     const Vector<RefPtr<CSSStyleSheet>>& activeAuthorStyleSheetsFor(TreeScope&);
 
-    void modifiedStyleSheet(CSSStyleSheet*);
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 
@@ -129,8 +128,6 @@ private:
     StyleSheetCollection* ensureStyleSheetCollectionFor(TreeScope&);
     StyleSheetCollection* styleSheetCollectionFor(TreeScope&);
 
-    void markTreeScopeDirty(TreeScope&);
-
     void createResolver();
 
     const StyleSheetCollection* documentStyleSheetCollection() const
@@ -152,7 +149,6 @@ private:
     StyleSheetCollectionMap m_styleSheetCollectionMap;
 
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
-    TreeScopeSet m_dirtyTreeScopes;
     TreeScopeSet m_activeTreeScopes;
 
     bool m_ignorePendingStylesheets;

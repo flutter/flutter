@@ -105,21 +105,6 @@ StyleSheetCollection* StyleEngine::styleSheetCollectionFor(TreeScope& treeScope)
     return it->value.get();
 }
 
-void StyleEngine::modifiedStyleSheet(CSSStyleSheet* sheet)
-{
-    if (!sheet)
-        return;
-
-    Node* node = sheet->ownerNode();
-    if (!node || !node->inDocument())
-        return;
-
-    TreeScope& treeScope = isHTMLStyleElement(*node) ? node->treeScope() : *m_document;
-    ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-
-    markTreeScopeDirty(treeScope);
-}
-
 void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
 {
     if (!node->inDocument())
@@ -131,7 +116,6 @@ void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
     ASSERT(collection);
     collection->addStyleSheetCandidateNode(node, createdByParser);
 
-    markTreeScopeDirty(treeScope);
     if (treeScope != m_document)
         m_activeTreeScopes.add(&treeScope);
 }
@@ -144,7 +128,6 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
     ASSERT(collection);
     collection->removeStyleSheetCandidateNode(node, scopingNode);
 
-    markTreeScopeDirty(treeScope);
     m_activeTreeScopes.remove(&treeScope);
 }
 
@@ -170,8 +153,6 @@ void StyleEngine::updateActiveStyleSheets()
             treeScopesRemoved.add(treeScope);
     }
     m_activeTreeScopes.removeAll(treeScopesRemoved);
-
-    m_dirtyTreeScopes.clear();
 }
 
 void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)
@@ -265,14 +246,6 @@ void StyleEngine::removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFac
         cache->remove(fontFaceRules[i]);
     if (m_resolver)
         m_resolver->invalidateMatchedPropertiesCache();
-}
-
-void StyleEngine::markTreeScopeDirty(TreeScope& scope)
-{
-    // TODO(esprehn): Make document not special.
-    if (scope == m_document)
-        return;
-    m_dirtyTreeScopes.add(&scope);
 }
 
 PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)

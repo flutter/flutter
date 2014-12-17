@@ -2697,8 +2697,6 @@ void Document::removedStyleSheet(CSSStyleSheet* sheet)
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that
     // imported docuements (which is inactive) notifies the change to the master document.
-    if (isActive())
-        styleEngine()->modifiedStyleSheet(sheet);
     styleResolverChanged();
 }
 
@@ -2707,8 +2705,6 @@ void Document::modifiedStyleSheet(CSSStyleSheet* sheet)
     // If we're in document teardown, then we don't need this notification of our sheet's removal.
     // styleResolverChanged() is needed even when the document is inactive so that
     // imported docuements (which is inactive) notifies the change to the master document.
-    if (isActive())
-        styleEngine()->modifiedStyleSheet(sheet);
     styleResolverChanged();
 }
 
