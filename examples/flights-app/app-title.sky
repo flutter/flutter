@@ -1,4 +1,6 @@
 <import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<sky-element name="app-title">
 <template>
   <style>
     :host {
@@ -12,7 +14,7 @@
   <content></content>
 </template>
 <script>
-SkyElement({
-  name: "app-title"
-});
+module.exports = class extends SkyElement {
+}.register();
 </script>
+</sky-element>

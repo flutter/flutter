@@ -10,6 +10,7 @@
 <import src="app-scrollable.sky" />
 <import src="app-toast.sky" />
 
+<sky-element name="flights-app">
 <template>
   <style>
     * { box-sizing: border-box; }
@@ -200,7 +201,7 @@
   </app-toast>
 </template>
 <script>
-SkyElement({
-  name: "flights-app",
-});
+module.exports = class extends SkyElement {
+}.register();
 </script>
+</sky-element>
