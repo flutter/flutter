@@ -43,9 +43,9 @@ class StyleRuleFontFace;
 
 class StyleSheetContents : public RefCounted<StyleSheetContents> {
 public:
-    static PassRefPtr<StyleSheetContents> create(const CSSParserContext& context)
+    static PassRefPtr<StyleSheetContents> create(Document* document, const CSSParserContext& context)
     {
-        return adoptRef(new StyleSheetContents(context));
+        return adoptRef(new StyleSheetContents(document, context));
     }
 
     ~StyleSheetContents();
@@ -58,22 +58,18 @@ public:
 
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
 
-    void registerClient(CSSStyleSheet*);
-    void unregisterClient(CSSStyleSheet*);
-
     void shrinkToFit();
     RuleSet& ruleSet() { ASSERT(m_ruleSet); return *m_ruleSet.get(); }
     RuleSet& ensureRuleSet(AddRuleFlags);
-    void clearRuleSet();
 
 private:
-    explicit StyleSheetContents(const CSSParserContext&);
+    explicit StyleSheetContents(Document* document, const CSSParserContext&);
 
     OwnPtr<RuleSet> m_ruleSet;
     Vector<RefPtr<StyleRuleBase> > m_childRules;
     CSSParserContext m_parserContext;
 
-    HashSet<RawPtr<CSSStyleSheet> > m_clients;
+    RefPtr<Document> m_document;
 };
 
 } // namespace

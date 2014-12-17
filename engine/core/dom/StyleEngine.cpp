@@ -280,7 +280,7 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
     RefPtr<CSSStyleSheet> styleSheet;
     AtomicString textContent(text);
 
-    HashMap<AtomicString, RawPtr<StyleSheetContents> >::AddResult result = m_textToSheetCache.add(textContent, nullptr);
+    HashMap<AtomicString, StyleSheetContents*>::AddResult result = m_textToSheetCache.add(textContent, nullptr);
     if (result.isNewEntry || !result.storedValue->value) {
         styleSheet = CSSStyleSheet::create(e, KURL());
         styleSheet->contents()->parseString(text);
@@ -300,7 +300,7 @@ PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& tex
 
 void StyleEngine::removeSheet(StyleSheetContents* contents)
 {
-    HashMap<RawPtr<StyleSheetContents>, AtomicString>::iterator it = m_sheetToTextCache.find(contents);
+    HashMap<StyleSheetContents*, AtomicString>::iterator it = m_sheetToTextCache.find(contents);
     if (it == m_sheetToTextCache.end())
         return;
 

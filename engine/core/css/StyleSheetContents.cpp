@@ -35,8 +35,9 @@
 
 namespace blink {
 
-StyleSheetContents::StyleSheetContents(const CSSParserContext& context)
+StyleSheetContents::StyleSheetContents(Document* document, const CSSParserContext& context)
     : m_parserContext(context)
+    , m_document(document)
 {
 }
 
@@ -45,6 +46,9 @@ StyleSheetContents::~StyleSheetContents()
     // TODO(esprehn): Why is this here? The rules will be cleared immediately
     // after this destructor runs anyway.
     m_childRules.clear();
+
+    if (m_document && m_document->isActive())
+        m_document->styleEngine()->removeSheet(this);
 }
 
 void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
@@ -60,25 +64,6 @@ bool StyleSheetContents::parseString(const String& sheetText)
     return true;
 }
 
-void StyleSheetContents::registerClient(CSSStyleSheet* sheet)
-{
-    ASSERT(!m_clients.contains(sheet));
-
-    // InspectorCSSAgent::buildObjectForRule creates CSSStyleSheet without any owner node.
-    if (!sheet->ownerDocument())
-        return;
-    m_clients.add(sheet);
-}
-
-void StyleSheetContents::unregisterClient(CSSStyleSheet* sheet)
-{
-    m_clients.remove(sheet);
-
-    if (!sheet->ownerDocument() || !m_clients.isEmpty())
-        return;
-    sheet->ownerDocument()->styleEngine()->removeSheet(this);
-}
-
 void StyleSheetContents::shrinkToFit()
 {
     m_childRules.shrinkToFit();
@@ -91,23 +76,6 @@ RuleSet& StyleSheetContents::ensureRuleSet(AddRuleFlags addRuleFlags)
         m_ruleSet->addRulesFromSheet(this, addRuleFlags);
     }
     return *m_ruleSet.get();
-}
-
-void StyleSheetContents::clearRuleSet()
-{
-    // Don't want to clear the StyleResolver if the RuleSet hasn't been created
-    // since we only clear the StyleResolver so that it's members are properly
-    // updated in ScopedStyleResolver::addRulesFromSheet.
-    if (!m_ruleSet)
-        return;
-
-    // Clearing the ruleSet means we need to recreate the styleResolver data structures.
-    // See the StyleResolver calls in ScopedStyleResolver::addRulesFromSheet.
-    for (RawPtr<CSSStyleSheet> client : m_clients) {
-        if (Document* document = client->ownerDocument())
-            document->styleEngine()->clearResolver();
-    }
-    m_ruleSet.clear();
 }
 
 }

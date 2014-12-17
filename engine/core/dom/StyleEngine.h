@@ -160,8 +160,8 @@ private:
 
     RefPtr<CSSFontSelector> m_fontSelector;
 
-    HashMap<AtomicString, RawPtr<StyleSheetContents> > m_textToSheetCache;
-    HashMap<RawPtr<StyleSheetContents>, AtomicString> m_sheetToTextCache;
+    HashMap<AtomicString, StyleSheetContents*> m_textToSheetCache;
+    HashMap<StyleSheetContents*, AtomicString> m_sheetToTextCache;
 };
 
 }

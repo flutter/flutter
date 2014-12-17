@@ -52,7 +52,7 @@ PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(PassRefPtr<StyleSheetContents> s
 PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(Node* ownerNode, const KURL& baseURL)
 {
     CSSParserContext parserContext(ownerNode->document(), 0, baseURL);
-    RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(parserContext);
+    RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(&ownerNode->document(), parserContext);
     return adoptRef(new CSSStyleSheet(sheet.release(), ownerNode));
 }
 
@@ -61,12 +61,10 @@ CSSStyleSheet::CSSStyleSheet(PassRefPtr<StyleSheetContents> contents, Node* owne
     , m_ownerNode(ownerNode)
 {
     ASSERT(isAcceptableCSSStyleSheetParent(ownerNode));
-    m_contents->registerClient(this);
 }
 
 CSSStyleSheet::~CSSStyleSheet()
 {
-    m_contents->unregisterClient(this);
 }
 
 void CSSStyleSheet::setMediaQueries(PassRefPtr<MediaQuerySet> mediaQueries)
@@ -81,8 +79,6 @@ void CSSStyleSheet::clearOwnerNode()
 {
     if (Document* owner = ownerDocument())
         owner->modifiedStyleSheet(this);
-    if (m_ownerNode)
-        m_contents->unregisterClient(this);
     m_ownerNode = nullptr;
 }
 
