@@ -1,4 +1,6 @@
 <import src="../../framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<sky-element name="app-search-input">
 <template>
   <style>
     :host {
@@ -19,7 +21,7 @@
   <span class="input-text"><t>flights today to dc by price</t></span>
 </template>
 <script>
-SkyElement({
-  name: "app-search-input"
-});
+module.exports = class extends SkyElement {
+}.register();
 </script>
+</sky-element>
