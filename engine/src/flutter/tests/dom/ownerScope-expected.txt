@@ -1,0 +1,9 @@
+Running 5 tests
+ok 1 ownerScope should return null for elements not a child of a scope
+ok 2 ownerScope should return the document for elements in the document scope
+ok 3 ownerScope should return the shadow root for elements in the shadow root scope
+ok 4 ownerScope should return self for a shadow root or document
+ok 5 ownerScope should dynamically update
+5 tests
+5 pass
+0 fail

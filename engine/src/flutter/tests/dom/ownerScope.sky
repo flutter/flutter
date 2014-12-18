@@ -1,0 +1,47 @@
+<sky>
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<script>
+describe("ownerScope", function() {
+  it("should return null for elements not a child of a scope", function() {
+    var doc = new Document();
+    var element = doc.createElement("div");
+    assert.isNull(element.ownerScope);
+  });
+  it("should return the document for elements in the document scope", function() {
+    var doc = new Document();
+    var element = doc.createElement("div");
+    doc.appendChild(element);
+    assert.equal(element.ownerScope, element.ownerDocument);
+    assert.equal(element.ownerScope, doc);
+  });
+  it("should return the shadow root for elements in the shadow root scope", function() {
+    var doc = new Document();
+    var host = doc.createElement("div");
+    var child = doc.createElement("div");
+    var shadowRoot = host.ensureShadowRoot();
+    shadowRoot.appendChild(child);
+    assert.equal(child.ownerScope, shadowRoot);
+  });
+  it("should return self for a shadow root or document", function() {
+    var doc = new Document();
+    var host = doc.createElement("div");
+    doc.appendChild(host);
+    var shadowRoot = host.ensureShadowRoot();
+    assert.equal(shadowRoot.ownerScope, shadowRoot);
+    assert.equal(doc.ownerScope, doc);
+  });
+  it("should dynamically update", function() {
+    var doc = new Document();
+    var host = doc.createElement("div");
+    var child = doc.createElement("div");
+    var shadowRoot = host.ensureShadowRoot();
+    assert.equal(child.ownerScope, null);
+    shadowRoot.appendChild(child);
+    assert.equal(child.ownerScope, shadowRoot);
+    child.remove();
+    assert.equal(child.ownerScope, null);
+  });
+});
+</script>
+</sky>
