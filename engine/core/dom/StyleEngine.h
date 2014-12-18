@@ -103,7 +103,6 @@ public:
     // updateGenericFontFamilySettings is used from WebSettingsImpl.
     void updateGenericFontFamilySettings();
 
-    void didDetach();
     void resolverChanged();
     unsigned resolverAccessCount() const;
 

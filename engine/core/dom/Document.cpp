@@ -331,10 +331,6 @@ Document::~Document()
 
     m_timeline->detachFromDocument();
 
-    // We need to destroy CSSFontSelector before destroying m_fetcher.
-    if (m_styleEngine)
-        m_styleEngine->detachFromDocument();
-
     if (m_elemSheet)
         m_elemSheet->clearOwnerNode();
 
@@ -1283,7 +1279,6 @@ void Document::detach(const AttachContext& context)
     m_renderView = 0;
     ContainerNode::detach(context);
 
-    m_styleEngine->didDetach();
     m_styleEngine = nullptr;
 
     // This is required, as our LocalFrame might delete itself as soon as it detaches

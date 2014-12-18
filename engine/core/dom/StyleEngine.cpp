@@ -47,32 +47,15 @@ namespace blink {
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
     , m_ignorePendingStylesheets(false)
-    // We don't need to create CSSFontSelector for imported document or
-    // HTMLTemplateElement's document, because those documents have no frame.
-    , m_fontSelector(document.frame() ? CSSFontSelector::create(&document) : nullptr)
+    , m_fontSelector(CSSFontSelector::create(&document))
 {
-    if (m_fontSelector)
-        m_fontSelector->registerForInvalidationCallbacks(this);
+    m_fontSelector->registerForInvalidationCallbacks(this);
 }
 
 StyleEngine::~StyleEngine()
 {
-}
-
-void StyleEngine::detachFromDocument()
-{
-    // Cleanup is performed eagerly when the StyleEngine is removed from the
-    // document. The StyleEngine is unreachable after this, since only the
-    // document has a reference to it.
-
-    if (m_fontSelector) {
-        m_fontSelector->clearDocument();
-        m_fontSelector->unregisterForInvalidationCallbacks(this);
-    }
-
-    // Decrement reference counts for things we could be keeping alive.
-    m_fontSelector.clear();
-    m_resolver.clear();
+    m_fontSelector->clearDocument();
+    m_fontSelector->unregisterForInvalidationCallbacks(this);
 }
 
 void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
@@ -158,11 +141,6 @@ unsigned StyleEngine::resolverAccessCount() const
     return m_resolver ? m_resolver->accessCount() : 0;
 }
 
-void StyleEngine::didDetach()
-{
-    clearResolver();
-}
-
 void StyleEngine::resolverChanged()
 {
     // Don't bother updating, since we haven't loaded all our style info yet
@@ -177,8 +155,7 @@ void StyleEngine::resolverChanged()
 
 void StyleEngine::clearFontCache()
 {
-    if (m_fontSelector)
-        m_fontSelector->fontFaceCache()->clearCSSConnected();
+    m_fontSelector->fontFaceCache()->clearCSSConnected();
     if (m_resolver)
         m_resolver->invalidateMatchedPropertiesCache();
 }
@@ -189,9 +166,6 @@ void StyleEngine::updateGenericFontFamilySettings()
     // document is inactive.
     ASSERT(m_document->isActive());
 
-    if (!m_fontSelector)
-        return;
-
     m_fontSelector->updateGenericFontFamilySettings(*m_document);
     if (m_resolver)
         m_resolver->invalidateMatchedPropertiesCache();
@@ -199,9 +173,6 @@ void StyleEngine::updateGenericFontFamilySettings()
 
 void StyleEngine::removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
 {
-    if (!m_fontSelector)
-        return;
-
     FontFaceCache* cache = m_fontSelector->fontFaceCache();
     for (unsigned i = 0; i < fontFaceRules.size(); ++i)
         cache->remove(fontFaceRules[i]);
