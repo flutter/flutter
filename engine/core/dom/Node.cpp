@@ -897,6 +897,15 @@ Document* Node::ownerDocument() const
     return doc == this ? 0 : doc;
 }
 
+ContainerNode* Node::ownerScope() const
+{
+    if (inDocument())
+        return &treeScope().rootNode();
+    if (ShadowRoot* root = containingShadowRoot())
+        return root;
+    return 0;
+}
+
 static void appendTextContent(const Node* node, bool convertBRsToNewlines, StringBuilder& content)
 {
     if (node->nodeType() == Node::TEXT_NODE) {

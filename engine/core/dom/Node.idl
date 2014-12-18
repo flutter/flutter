@@ -29,6 +29,10 @@
     [PerWorldBindings] readonly attribute Node             nextSibling;
     [PerWorldBindings] readonly attribute Document         ownerDocument;
 
+    // TODO(esprehn): This should return TreeScope in Sky, but we don't have
+    // a TreeScope type yet.
+    readonly attribute Node ownerScope;
+
     [CustomElementCallbacks, PerWorldBindings, RaisesException, TypeChecking=Interface] Node insertBefore(Node newChild, Node? refChild);
     [CustomElementCallbacks, PerWorldBindings, RaisesException, TypeChecking=Interface] Node replaceChild(Node newChild, Node oldChild);
     [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node removeChild(Node oldChild);

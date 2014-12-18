@@ -351,6 +351,8 @@ public:
         return *m_treeScope;
     }
 
+    ContainerNode* ownerScope() const;
+
     bool inActiveDocument() const;
 
     // Returns true if this node is associated with a document and is in its associated document's
