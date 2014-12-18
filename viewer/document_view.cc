@@ -98,11 +98,9 @@ base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
 }
 
 void DocumentView::OnEmbed(
-    mojo::ViewManager* view_manager,
     mojo::View* root,
     mojo::ServiceProviderImpl* exported_services,
     scoped_ptr<mojo::ServiceProvider> imported_services) {
-
   root_ = root;
   imported_services_ = imported_services.Pass();
   navigator_host_.set_service_provider(imported_services_.get());

@@ -61,7 +61,6 @@ class SkyTester : public mojo::ApplicationDelegate,
  public:
   SkyTester()
       : window_manager_app_(new window_manager::WindowManagerApp(this, this)),
-        view_manager_(NULL),
         root_(NULL),
         content_(NULL),
         weak_ptr_factory_(this) {}
@@ -85,15 +84,13 @@ class SkyTester : public mojo::ApplicationDelegate,
 
   // Overridden from mojo::ViewManagerDelegate:
   virtual void OnEmbed(
-      mojo::ViewManager* view_manager,
       mojo::View* root,
       mojo::ServiceProviderImpl* exported_services,
       scoped_ptr<mojo::ServiceProvider> remote_service_provider) override {
-    view_manager_ = view_manager;
     root_ = root;
     root_->AddObserver(this);
 
-    content_ = mojo::View::Create(view_manager_);
+    content_ = mojo::View::Create(root->view_manager());
     content_->SetBounds(root_->bounds());
     root_->AddChild(content_);
     content_->SetVisible(true);
@@ -111,7 +108,6 @@ class SkyTester : public mojo::ApplicationDelegate,
 
   virtual void OnViewManagerDisconnected(
       mojo::ViewManager* view_manager) override {
-    view_manager_ = NULL;
     root_ = NULL;
   }
 
@@ -159,7 +155,6 @@ class SkyTester : public mojo::ApplicationDelegate,
 
   std::string url_from_args_;
 
-  mojo::ViewManager* view_manager_;
   mojo::View* root_;
   mojo::View* content_;
 

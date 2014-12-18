@@ -11,7 +11,6 @@ namespace debugger {
 
 SkyDebugger::SkyDebugger()
     : window_manager_app_(new window_manager::WindowManagerApp(this, nullptr)),
-      view_manager_(nullptr),
       root_(nullptr),
       content_(nullptr),
       navigator_host_factory_(this),
@@ -45,18 +44,15 @@ bool SkyDebugger::ConfigureOutgoingConnection(
 }
 
 void SkyDebugger::OnEmbed(
-    mojo::ViewManager* view_manager,
     mojo::View* root,
     mojo::ServiceProviderImpl* exported_services,
     scoped_ptr<mojo::ServiceProvider> imported_services) {
-  view_manager_ = view_manager;
-
   root_ = root;
   root_->AddObserver(this);
 
   window_manager_app_->SetViewportSize(gfx::Size(320, 640));
 
-  content_ = mojo::View::Create(view_manager_);
+  content_ = mojo::View::Create(root->view_manager());
   content_->SetBounds(root_->bounds());
   root_->AddChild(content_);
   content_->SetVisible(true);
@@ -69,7 +65,6 @@ void SkyDebugger::OnEmbed(
 }
 
 void SkyDebugger::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
-  view_manager_ = nullptr;
   root_ = nullptr;
 }
 
