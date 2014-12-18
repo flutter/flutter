@@ -98,7 +98,6 @@ public:
     void clearResolver();
 
     CSSFontSelector* fontSelector() { return m_fontSelector.get(); }
-    void removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFace> >&);
     void clearFontCache();
     // updateGenericFontFamilySettings is used from WebSettingsImpl.
     void updateGenericFontFamilySettings();

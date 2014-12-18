@@ -171,15 +171,6 @@ void StyleEngine::updateGenericFontFamilySettings()
         m_resolver->invalidateMatchedPropertiesCache();
 }
 
-void StyleEngine::removeFontFaceRules(const Vector<RawPtr<const StyleRuleFontFace> >& fontFaceRules)
-{
-    FontFaceCache* cache = m_fontSelector->fontFaceCache();
-    for (unsigned i = 0; i < fontFaceRules.size(); ++i)
-        cache->remove(fontFaceRules[i]);
-    if (m_resolver)
-        m_resolver->invalidateMatchedPropertiesCache();
-}
-
 PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)
 {
     RefPtr<CSSStyleSheet> styleSheet;
