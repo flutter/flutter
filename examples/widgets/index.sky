@@ -4,7 +4,7 @@
 // found in the LICENSE file.
 -->
 <sky>
-<import src="/sky/framework/sky-element/sky-element.sky"/>
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement"/>
 <import src="/sky/framework/sky-button/sky-button.sky"/>
 <import src="/sky/framework/sky-box/sky-box.sky"/>
 <import src="/sky/framework/sky-checkbox/sky-checkbox.sky"/>
