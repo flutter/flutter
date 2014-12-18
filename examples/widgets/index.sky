@@ -1,0 +1,56 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<sky>
+<import src="/sky/framework/sky-element/sky-element.sky"/>
+<import src="/sky/framework/sky-button/sky-button.sky"/>
+<import src="/sky/framework/sky-box/sky-box.sky"/>
+<import src="/sky/framework/sky-checkbox/sky-checkbox.sky"/>
+<import src="/sky/framework/sky-radio/sky-radio.sky"/>
+<sky-element name="widget-root">
+<template>
+  <style>
+  div { display: paragraph; }
+  </style>
+
+  <sky-box title='Buttons'>
+    <sky-button id='button'>Button</sky-button>
+    <div>highlight: {{ myButton.highlight }}</div>
+  </sky-box>
+
+  <sky-box title='Checkboxes'>
+    <div><sky-checkbox id='checkbox' />Checkbox</div>
+    <div>highlight: {{ myCheckbox.highlight }}</div>
+    <div>checked: {{ myCheckbox.checked }}</div>
+
+    <div><sky-checkbox id='checkbox' checked='true'/>Checkbox, default checked.</div>
+  </sky-box>
+
+  <sky-box title='Radios'>
+    <sky-box title='Group One'>
+      <div><sky-radio group='foo'/>one</div>
+      <div><sky-radio group='foo' selected='true' />two</div>
+      <div><sky-radio group='foo'/>three</div>
+    </sky-box>
+    <sky-box title='Group Two'>
+      <div><sky-radio group='bar'/>A</div>
+      <div><sky-radio group='bar'/>B</div>
+      <div><sky-radio group='bar' selected='true' />C</div>
+    </sky-box>
+  </sky-box>
+
+</template>
+<script>
+module.exports = class extends SkyElement {
+  attached() {
+    this.myButton = this.shadowRoot.getElementById('button');
+    this.myCheckbox = this.shadowRoot.getElementById('checkbox');
+  }
+}.register();
+</script>
+</sky-element>
+
+<widget-root />
+</sky>
