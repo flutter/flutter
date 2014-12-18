@@ -46,8 +46,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
       mojo::ApplicationConnection* connection) override;
 
   // Overridden from mojo::ViewManagerDelegate:
-  void OnEmbed(mojo::ViewManager* view_manager,
-               mojo::View* root,
+  void OnEmbed(mojo::View* root,
                mojo::ServiceProviderImpl* exported_services,
                scoped_ptr<mojo::ServiceProvider> imported_services) override;
   void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
@@ -64,7 +63,6 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
   scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
-  mojo::ViewManager* view_manager_;
   mojo::View* root_;
   mojo::View* content_;
   std::string pending_url_;
