@@ -55,9 +55,6 @@ ShadowRoot::ShadowRoot(Document& document)
 
 ShadowRoot::~ShadowRoot()
 {
-    if (StyleEngine* styleEngine = document().styleEngine())
-        styleEngine->didRemoveShadowRoot(this);
-
     // We cannot let ContainerNode destructor call willBeDeletedFromDocument()
     // for this ShadowRoot instance because TreeScope destructor
     // clears Node::m_treeScope thus ContainerNode is no longer able

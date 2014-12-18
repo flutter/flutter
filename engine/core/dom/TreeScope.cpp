@@ -34,6 +34,7 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
+#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/TreeScopeAdopter.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
@@ -55,12 +56,11 @@ TreeScope::TreeScope(ContainerNode& rootNode, Document& document)
     , m_document(&document)
     , m_parentTreeScope(&document)
     , m_scopedStyleResolver(ScopedStyleResolver::create(*this))
+    , m_styleSheets(StyleSheetCollection::create(*this))
     , m_guardRefCount(0)
 {
     ASSERT(rootNode != document);
-#if !ENABLE(OILPAN)
     m_parentTreeScope->guardRef();
-#endif
     m_rootNode->setTreeScope(this);
 }
 
@@ -69,6 +69,7 @@ TreeScope::TreeScope(Document& document)
     , m_document(&document)
     , m_parentTreeScope(nullptr)
     , m_scopedStyleResolver(ScopedStyleResolver::create(*this))
+    , m_styleSheets(StyleSheetCollection::create(*this))
     , m_guardRefCount(0)
 {
     m_rootNode->setTreeScope(this);
@@ -407,8 +408,8 @@ bool TreeScope::hasSameStyles(TreeScope& other)
 {
     if (this == &other)
         return true;
-    const Vector<RefPtr<blink::CSSStyleSheet> >& list = document().styleEngine()->activeAuthorStyleSheetsFor(*this);
-    const Vector<RefPtr<blink::CSSStyleSheet> >& otherList = document().styleEngine()->activeAuthorStyleSheetsFor(other);
+    const Vector<RefPtr<blink::CSSStyleSheet> >& list = styleSheets().activeAuthorStyleSheets();
+    const Vector<RefPtr<blink::CSSStyleSheet> >& otherList = other.styleSheets().activeAuthorStyleSheets();
 
     if (list.size() != otherList.size())
         return false;

@@ -32,6 +32,7 @@
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/StyleSheetCollection.h"
@@ -45,7 +46,6 @@ namespace blink {
 
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
-    , m_documentStyleSheetCollection(StyleSheetCollection::create(document))
     , m_ignorePendingStylesheets(false)
     // We don't need to create CSSFontSelector for imported document or
     // HTMLTemplateElement's document, because those documents have no frame.
@@ -73,36 +73,6 @@ void StyleEngine::detachFromDocument()
     // Decrement reference counts for things we could be keeping alive.
     m_fontSelector.clear();
     m_resolver.clear();
-    m_styleSheetCollectionMap.clear();
-}
-
-const Vector<RefPtr<CSSStyleSheet>>& StyleEngine::activeAuthorStyleSheetsFor(TreeScope& treeScope)
-{
-    if (treeScope == m_document)
-        return documentStyleSheetCollection()->activeAuthorStyleSheets();
-    return ensureStyleSheetCollectionFor(treeScope)->activeAuthorStyleSheets();
-}
-
-StyleSheetCollection* StyleEngine::ensureStyleSheetCollectionFor(TreeScope& treeScope)
-{
-    if (treeScope == m_document)
-        return documentStyleSheetCollection();
-
-    StyleSheetCollectionMap::AddResult result = m_styleSheetCollectionMap.add(&treeScope, nullptr);
-    if (result.isNewEntry)
-        result.storedValue->value = StyleSheetCollection::create(treeScope);
-    return result.storedValue->value.get();
-}
-
-StyleSheetCollection* StyleEngine::styleSheetCollectionFor(TreeScope& treeScope)
-{
-    if (treeScope == m_document)
-        return documentStyleSheetCollection();
-
-    StyleSheetCollectionMap::iterator it = m_styleSheetCollectionMap.find(&treeScope);
-    if (it == m_styleSheetCollectionMap.end())
-        return 0;
-    return it->value.get();
 }
 
 void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
@@ -112,9 +82,8 @@ void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
 
     TreeScope& treeScope = isHTMLStyleElement(*node) ? node->treeScope() : *m_document;
     ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-    StyleSheetCollection* collection = ensureStyleSheetCollectionFor(treeScope);
-    ASSERT(collection);
-    collection->addStyleSheetCandidateNode(node, createdByParser);
+    StyleSheetCollection& collection = treeScope.styleSheets();
+    collection.addStyleSheetCandidateNode(node, createdByParser);
 
     if (treeScope != m_document)
         m_activeTreeScopes.add(&treeScope);
@@ -124,9 +93,8 @@ void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopi
 {
     ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
 
-    StyleSheetCollection* collection = styleSheetCollectionFor(treeScope);
-    ASSERT(collection);
-    collection->removeStyleSheetCandidateNode(node, scopingNode);
+    StyleSheetCollection& collection = treeScope.styleSheets();
+    collection.removeStyleSheetCandidateNode(node, scopingNode);
 
     m_activeTreeScopes.remove(&treeScope);
 }
@@ -138,7 +106,8 @@ void StyleEngine::updateActiveStyleSheets()
     if (!m_document->isActive())
         return;
 
-    documentStyleSheetCollection()->updateActiveStyleSheets(this);
+    // TODO(esprehn): Remove special case for document.
+    m_document->styleSheets().updateActiveStyleSheets(this);
 
     TreeScopeSet treeScopes = m_activeTreeScopes;
     HashSet<TreeScope*> treeScopesRemoved;
@@ -146,30 +115,22 @@ void StyleEngine::updateActiveStyleSheets()
     for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
         TreeScope* treeScope = *it;
         ASSERT(treeScope != m_document);
-        StyleSheetCollection* collection = styleSheetCollectionFor(*treeScope);
-        ASSERT(collection);
-        collection->updateActiveStyleSheets(this);
-        if (!collection->hasStyleSheetCandidateNodes())
+        StyleSheetCollection& collection = treeScope->styleSheets();
+        collection.updateActiveStyleSheets(this);
+        if (!collection.hasStyleSheetCandidateNodes())
             treeScopesRemoved.add(treeScope);
     }
     m_activeTreeScopes.removeAll(treeScopesRemoved);
 }
 
-void StyleEngine::didRemoveShadowRoot(ShadowRoot* shadowRoot)
-{
-    m_styleSheetCollectionMap.remove(shadowRoot);
-}
-
 void StyleEngine::appendActiveAuthorStyleSheets()
 {
-    m_resolver->appendAuthorStyleSheets(documentStyleSheetCollection()->activeAuthorStyleSheets());
+    // TODO(esprehn): Remove special case for document.
+    m_resolver->appendAuthorStyleSheets(m_document->styleSheets().activeAuthorStyleSheets());
 
-    TreeScopeSet::iterator begin = m_activeTreeScopes.begin();
-    TreeScopeSet::iterator end = m_activeTreeScopes.end();
-    for (TreeScopeSet::iterator it = begin; it != end; ++it) {
-        if (StyleSheetCollection* collection = m_styleSheetCollectionMap.get(*it))
-            m_resolver->appendAuthorStyleSheets(collection->activeAuthorStyleSheets());
-    }
+    for (TreeScope* treeScope : m_activeTreeScopes)
+        m_resolver->appendAuthorStyleSheets(treeScope->styleSheets().activeAuthorStyleSheets());
+
     m_resolver->finishAppendAuthorStyleSheets();
 }
 

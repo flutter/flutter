@@ -30,10 +30,6 @@
 
 #include "sky/engine/core/css/CSSFontSelectorClient.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/DocumentOrderedList.h"
-#include "sky/engine/core/dom/StyleSheetCollection.h"
-#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/ListHashSet.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -45,6 +41,7 @@ namespace blink {
 
 class CSSFontSelector;
 class CSSStyleSheet;
+class Document;
 class Node;
 class RuleFeatureSet;
 class StyleRuleFontFace;
@@ -70,8 +67,6 @@ public:
 
     void detachFromDocument();
 
-    const Vector<RefPtr<CSSStyleSheet>>& activeAuthorStyleSheetsFor(TreeScope&);
-
     void addStyleSheetCandidateNode(Node*, bool createdByParser);
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 
@@ -82,7 +77,6 @@ public:
     // FIXME(sky): Remove this and ::first-line.
     bool usesFirstLineRules() const { return false; }
 
-    void didRemoveShadowRoot(ShadowRoot*);
     void appendActiveAuthorStyleSheets();
 
     StyleResolver* resolver() const
@@ -123,30 +117,11 @@ private:
     virtual void fontsNeedUpdate(CSSFontSelector*) override;
 
 private:
-    StyleEngine(Document&);
-
-    StyleSheetCollection* ensureStyleSheetCollectionFor(TreeScope&);
-    StyleSheetCollection* styleSheetCollectionFor(TreeScope&);
+    explicit StyleEngine(Document&);
 
     void createResolver();
 
-    const StyleSheetCollection* documentStyleSheetCollection() const
-    {
-        return m_documentStyleSheetCollection.get();
-    }
-
-    StyleSheetCollection* documentStyleSheetCollection()
-    {
-        return m_documentStyleSheetCollection.get();
-    }
-
     RawPtr<Document> m_document;
-
-    // TODO(esprehn): Remove special separate collection for document.
-    OwnPtr<StyleSheetCollection> m_documentStyleSheetCollection;
-
-    typedef HashMap<RawPtr<TreeScope>, OwnPtr<StyleSheetCollection> > StyleSheetCollectionMap;
-    StyleSheetCollectionMap m_styleSheetCollectionMap;
 
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     TreeScopeSet m_activeTreeScopes;

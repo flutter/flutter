@@ -40,6 +40,7 @@ class Element;
 class HitTestResult;
 class Node;
 class ScopedStyleResolver;
+class StyleSheetCollection;
 
 // A class which inherits both Node and TreeScope must call clearRareData() in its destructor
 // so that the Node destructor no longer does problematic NodeList cache manipulation in
@@ -114,6 +115,7 @@ public:
     Element* getElementByAccessKey(const String& key) const;
 
     ScopedStyleResolver& scopedStyleResolver() const { return *m_scopedStyleResolver; }
+    StyleSheetCollection& styleSheets() const { return *m_styleSheets; }
 
 protected:
     TreeScope(ContainerNode&, Document&);
@@ -155,6 +157,7 @@ private:
     RawPtr<TreeScope> m_parentTreeScope;
 
     OwnPtr<ScopedStyleResolver> m_scopedStyleResolver;
+    OwnPtr<StyleSheetCollection> m_styleSheets;
 
     OwnPtr<DocumentOrderedMap> m_elementsById;
     OwnPtr<DocumentOrderedMap> m_imageMapsByName;
