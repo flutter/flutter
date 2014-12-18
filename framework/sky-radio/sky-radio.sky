@@ -1,0 +1,103 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
+
+<sky-element name="sky-radio">
+<template>
+  <style>
+    :host {
+      display: inline-block;
+      -webkit-user-select: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+      border: 1px solid blue;
+      margin: 0 5px;
+    }
+    :host([highlight=true]) box {
+      background-color: orange;
+    }
+    dot {
+      -webkit-user-select: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 5px;
+      background-color: black;
+      margin: 2px;
+    }
+  </style>
+  <template if="{{ selected }}">
+    <dot />
+  </template>
+</template>
+<script>
+const kControllerMap = new WeakMap();
+
+class RadioGroupController {
+  static forRadio(radio) {
+    var scope = radio.ownerScope;
+    var controller = kControllerMap.get(scope);
+    if (!controller)
+      kControllerMap.set(scope, new RadioGroupController());
+    return kControllerMap.get(scope);
+  }
+  constructor() {
+    this.radios = new Set();
+  }
+  addRadio(radio) {
+    this.radios.add(radio);
+    // If this new radio is default-selected, take selection from the group.
+    if (radio.selected)
+      this.takeSelectionFromGroup(radio);
+  }
+  removeRadio(radio) {
+    this.radios.remove(radio);
+  }
+  takeSelectionFromGroup(selectedRadio) {
+    // Emtpy/null/undefined group means and isolated radio.
+    if (!selectedRadio.group)
+      return;
+    this.radios.forEach(function(radio) {
+      if (selectedRadio === radio)
+        return;
+      if (radio.group != selectedRadio.group)
+        return;
+      radio.setSelected(false);
+    })
+  }
+};
+
+module.exports = class extends SkyButton {
+  created() {
+    super.created();
+    this.setSelected(this.getAttribute('selected'));
+    this.group = this.getAttribute('group');
+
+    this.addEventListener("mouseup", function() {
+      this.setSelected(true);
+    });
+    this.cachedController = null;
+  }
+  attached() {
+    super.attached();
+    this.cachedController = RadioGroupController.forRadio(this);
+    this.cachedController.addRadio(this);
+  }
+  detached() {
+    super.detached();
+    this.cachedController.removeRadio(this);
+  }
+  setSelected(selected) {
+    if (selected == this.selected)
+      return;
+    this.setAttribute('selected', selected);
+    this.selected = selected;
+    if (selected && this.cachedController)
+      this.cachedController.takeSelectionFromGroup(this);
+  }
+}.register();
+</script>
+</sky-element>

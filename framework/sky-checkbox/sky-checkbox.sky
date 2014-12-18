@@ -1,0 +1,49 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
+
+<sky-element name="sky-checkbox">
+<template>
+  <style>
+    :host {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-user-select: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid blue;
+      margin: 5px;
+    }
+    :host([highlight=true]) {
+      background-color: orange;
+    }
+  </style>
+  <template if="{{ checked }}">
+    <check>&check;</check>
+  </template>
+</template>
+<script>
+module.exports = class extends SkyButton {
+  created() {
+    super.created();
+    this.setChecked(this.getAttribute('checked') == 'true');
+
+    this.addEventListener("mouseup", function() {
+      this.toggleChecked();
+    });
+  }
+  toggleChecked() {
+    this.setChecked(!this.checked);
+  }
+  setChecked(checked) {
+    this.checked = checked;
+    this.setAttribute('checked', checked);
+  }
+}.register();
+</script>
+</sky-element>

@@ -1,0 +1,33 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<sky-element name="sky-box">
+<template>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      border-radius: 4px;
+      border: 1px solid gray;
+      margin: 10px;
+    }
+    #title {
+      text-align: center;
+      font-size: 10px;
+    }
+    div {
+      flex: 1 100%;
+    }
+  </style>
+  <div id='title'>{{ title }}</div>
+  <div><content></content></div>
+</template>
+<script>
+module.exports = class extends SkyElement {
+}.register();
+</script>
+</sky-element>
