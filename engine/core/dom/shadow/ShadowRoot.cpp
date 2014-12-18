@@ -49,7 +49,6 @@ COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_sh
 ShadowRoot::ShadowRoot(Document& document)
     : DocumentFragment(0, CreateShadowRoot)
     , TreeScope(*this, document)
-    , m_registeredWithParentShadowRoot(false)
     , m_descendantInsertionPointsIsValid(false)
 {
 }
@@ -115,31 +114,17 @@ void ShadowRoot::insertedInto(ContainerNode* insertionPoint)
 {
     DocumentFragment::insertedInto(insertionPoint);
 
-    if (!insertionPoint->inDocument())
-        return;
-
-    // FIXME: When parsing <video controls>, insertedInto() is called many times without invoking removedFrom.
-    // For now, we check m_registeredWithParentShadowroot. We would like to ASSERT(!m_registeredShadowRoot) here.
-    // https://bugs.webkit.org/show_bug.cig?id=101316
-    if (m_registeredWithParentShadowRoot)
-        return;
-
-    if (ShadowRoot* root = host()->containingShadowRoot()) {
+    if (ShadowRoot* root = host()->containingShadowRoot())
         root->addChildShadowRoot();
-        m_registeredWithParentShadowRoot = true;
-    }
 }
 
 void ShadowRoot::removedFrom(ContainerNode* insertionPoint)
 {
-    if (insertionPoint->inDocument() && m_registeredWithParentShadowRoot) {
-        ShadowRoot* root = host()->containingShadowRoot();
-        if (!root)
-            root = insertionPoint->containingShadowRoot();
-        if (root)
-            root->removeChildShadowRoot();
-        m_registeredWithParentShadowRoot = false;
-    }
+    ShadowRoot* root = host()->containingShadowRoot();
+    if (!root)
+        root = insertionPoint->containingShadowRoot();
+    if (root)
+        root->removeChildShadowRoot();
 
     DocumentFragment::removedFrom(insertionPoint);
 }

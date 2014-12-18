@@ -101,7 +101,6 @@ private:
     virtual PassRefPtr<Node> cloneNode(bool) override { return nullptr; }
 
     OwnPtr<ShadowRootRareData> m_shadowRootRareData;
-    unsigned m_registeredWithParentShadowRoot : 1;
     unsigned m_descendantInsertionPointsIsValid : 1;
 };
 
