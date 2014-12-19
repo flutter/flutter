@@ -360,8 +360,8 @@ class ObjectStyleValue : AbstractOpaqueStyleValue {
 }
 
 dictionary PropertySettings {
-  String name;
-  StyleGrammar grammar;
+  String? name = null; // null if the property can't be set from a <style> block
+  StyleGrammar? grammar = null; // msut be non-null if name is non-null; must be null otherwise
   Boolean inherited = false;
   any initialValue = null;
   Boolean needsManager = false;
@@ -372,6 +372,8 @@ dictionary PropertySettings {
 }
 typedef PropertyHandle Integer;
 PropertyHandle registerProperty(PropertySettings propertySettings);
+  // registers a property with the given settings, and returns an integer >= 0
+  // that can be used to refer to this property
 
 // sky:core exports a bunch of style grammars so that people can extend them
 attribute StyleGrammar PositiveLengthOrInfinityStyleGrammar; // resolves to LengthStyleValue
