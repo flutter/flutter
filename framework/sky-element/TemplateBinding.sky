@@ -14,7 +14,7 @@ Node.prototype.bind = function(name, observable, oneTime) {
     return;
   }
 
-  observable.open(function(value) {
+  this[name] = observable.open(function(value) {
     self[name] = value;
   });
 
@@ -544,6 +544,16 @@ function parseWithDefault(el, name, prepareBindingFn) {
   return parseMustaches(v == '' ? '{{}}' : v, name, el, prepareBindingFn);
 }
 
+function addEventHandler(element, name, method) {
+  element.addEventListener(name, function(event) {
+    var scope = element.ownerScope;
+    var host = scope.host;
+    var handler = host && host[method];
+    if (handler instanceof Function)
+      return handler.call(host, event);
+  });
+}
+
 function parseAttributeBindings(element, prepareBindingFn) {
   var bindings = [];
   var ifFound = false;
@@ -557,6 +567,13 @@ function parseAttributeBindings(element, prepareBindingFn) {
 
     if (isTemplate(element) &&
         (name === IF || name === BIND || name === REPEAT)) {
+      continue;
+    }
+
+    if (name.startsWith('on-')) {
+      if (!bindings.eventHandlers)
+        bindings.eventHandlers = new Map();
+      bindings.eventHandlers.set(name.substring(3), value);
       continue;
     }
 
@@ -616,6 +633,12 @@ function cloneAndBindInstance(node, parent, stagingDocument, bindings, model,
 
     if (delegate)
       clone.setDelegate_(delegate);
+  }
+
+  if (bindings.eventHandlers) {
+    bindings.eventHandlers.forEach(function(handler, eventName) {
+      addEventHandler(clone, eventName, handler);
+    });
   }
 
   processBindings(clone, bindings, model, instanceBindings);

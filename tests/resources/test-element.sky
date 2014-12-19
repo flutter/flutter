@@ -1,0 +1,23 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<sky-element name="test-element">
+<template>
+  <div id="inside" on-test-event="handleEvent" attr="{{ value }}">{{ value }}</div>
+</template>
+<script>
+module.exports = class extends SkyElement {
+  created() {
+    this.lastEvent = null;
+    this.value = 10;
+  }
+  handleEvent(event) {
+    this.lastEvent = event;
+  }
+}.register();
+</script>
+</sky-element>

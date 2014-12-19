@@ -16,8 +16,9 @@
   </style>
 
   <sky-box title='Buttons'>
-    <sky-button id='button'>Button</sky-button>
+    <sky-button id='button' on-click='handleClick'>Button</sky-button>
     <div>highlight: {{ myButton.highlight }}</div>
+    <div>clickCount: {{ clickCount }}</div>
   </sky-box>
 
   <sky-box title='Checkboxes'>
@@ -47,6 +48,10 @@ module.exports = class extends SkyElement {
   attached() {
     this.myButton = this.shadowRoot.getElementById('button');
     this.myCheckbox = this.shadowRoot.getElementById('checkbox');
+    this.clickCount = 0;
+  }
+  handleClick(event) {
+    this.clickCount++;
   }
 }.register();
 </script>

@@ -1,0 +1,54 @@
+<sky>
+<import src="/sky/tests//resources/chai.sky" />
+<import src="/sky/tests/resources/mocha.sky" />
+<import src="/sky/tests/resources/test-element.sky" as="TestElement" />
+
+<div id="sandbox"></div>
+
+<script>
+describe("SkyElement templates", function() {
+  var element;
+  var sandbox = document.getElementById("sandbox");
+
+  beforeEach(function() {
+    element = new TestElement();
+  });
+  afterEach(function() {
+    element.remove();
+  });
+
+  it("should stamp when the element is inserted", function() {
+    assert.isNull(element.shadowRoot);
+    sandbox.appendChild(element);
+    assert.instanceOf(element.shadowRoot, ShadowRoot);
+    assert.ok(element.shadowRoot.getElementById("inside"));
+  });
+
+  it("should connect data binding", function(done) {
+    sandbox.appendChild(element);
+    var inside = element.shadowRoot.getElementById("inside");
+    Promise.resolve().then(function() {
+      assert.equal(inside.textContent, 10);
+      assert.equal(inside.attr, 10);
+      element.value = 20;
+    }).then(function() {
+      assert.equal(inside.textContent, 20);
+      assert.equal(inside.attr, 20);
+      done();
+    }).catch(function(e) {
+      done(e);
+    });
+  });
+
+  it("should connect event handlers", function() {
+    sandbox.appendChild(element);
+    var inside = element.shadowRoot.getElementById("inside");
+    inside.dispatchEvent(new CustomEvent("wrong-event"));
+    assert.isNull(element.lastEvent);
+    var event = new CustomEvent("test-event");
+    inside.dispatchEvent(event);
+    assert.equal(element.lastEvent, event);
+  });
+});
+</script>
+</sky>
