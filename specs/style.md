@@ -227,43 +227,49 @@ StyleNode
      |   
      +-- NumericStyleValue
      |    |
-     |    +-- AnimatableNumericStyleValue
+     |    +-- AnimatableNumericStyleValue*
      |   
      +-- LengthStyleValue
      |    |
-     |    +-- AnimatableLengthStyleValue
+     |    +-- AnimatableLengthStyleValue*
      |    |
      |    +-- PixelLengthStyleValue
      |    |
-     |    +-- EmLengthStyleValue
+     |    +-- EmLengthStyleValue*
      |    |
-     |    +-- VHLengthStyleValue
+     |    +-- VHLengthStyleValue*
      |    |
-     |    +-- CalcLengthStyleValue
+     |    +-- CalcLengthStyleValue*
      |    
      +-- ColorStyleValue
      |    |
      |    +-- RGBColorStyleValue
      |    |
-     |    +-- AnimatableColorStyleValue
+     |    +-- AnimatableColorStyleValue*
      |    
-     +-- AbstractStringStyleValue
+     +-- AbstractOpaqueStyleValue
      |    |
      |    +-- IdentifierStyleValue
      |    |    |
-     |    |    +-- AnimatableIdentifierStyleValue
+     |    |    +-- AnimatableIdentifierStyleValue*
      |    |    
-     |    +-- URLStyleValue
+     |    +-- URLStyleValue*
      |    |    |
-     |    |    +-- AnimatableURLStyleValue
+     |    |    +-- AnimatableURLStyleValue*
      |    |    
-     |    +-- StringStyleValue
-     |         |
-     |         +-- AnimatableStringStyleValue
+     |    +-- StringStyleValue*
+     |    |    |
+     |    |    +-- AnimatableStringStyleValue*
+     |    |    
+     |    +-- ObjectStyleValue
      |    
-     +-- PrimitiveValuesListStyleValue
+     +-- PrimitiveValuesListStyleValue*
 */
+```
 
+The types marked with * in the list above are not part of sky:core.
+
+```javascript
 abstract class StyleNode {
   abstract void markDirty();
 }
@@ -284,8 +290,8 @@ class StyleValueResolverSettings {
 }
 
 class Property : StyleNode {
-  constructor (StyleDeclaration parentNode, PropertyHandle property, AbstractStyleValue? initialValue = null);
-  readonly attribute StyleDeclaration parentNode;
+  constructor (AbstractStyleDeclaration parentNode, PropertyHandle property, AbstractStyleValue? initialValue = null);
+  readonly attribute AbstractStyleDeclaration parentNode;
   readonly attribute PropertyHandle property;
   readonly attribute AbstractStyleValue value;
 
@@ -315,10 +321,43 @@ abstract class LengthStyleValue : AbstractStyleValue {
 }
 
 class PixelLengthStyleValue : LengthStyleValue {
+  constructor(StyleNode parentNode, Float number);
+  readonly attribute Float value;
   Float resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
 }
 
-// ...
+typedef Color Float; // TODO(ianh): figure out what Color should be
+class ColorStyleValue : LengthStyleValue {
+  constructor(StyleNode parentNode, Float red, Float green, Float blue, Float alpha);
+  // ... color API ...
+  Color resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+}
+
+class AbstractOpaqueStyleValue : AbstractStyleValue {
+  abstract constructor(StyleNode parentNode, any value);
+  readonly attribute any value;
+  any resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+    // returns value
+}
+
+class IdentifierStyleValue : AbstractOpaqueStyleValue {
+  constructor(StyleNode parentNode, String value);
+    // calls superclass constructor
+}
+
+/*
+class AnimatableIdentifierStyleValue : AbstractOpaqueStyleValue {
+  constructor(StyleNode parentNode, String value, String newValue, AnimationFunction player);
+  readonly attribute String newValue;
+  readonly attribute AnimationFunction player;
+  any resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+}
+*/
+
+class ObjectStyleValue : AbstractOpaqueStyleValue {
+  constructor(StyleNode parentNode, any value);
+    // calls superclass constructor
+}
 
 dictionary PropertySettings {
   String name;
@@ -335,45 +374,65 @@ typedef PropertyHandle Integer;
 PropertyHandle registerProperty(PropertySettings propertySettings);
 
 // sky:core exports a bunch of style grammars so that people can extend them
-attribute StyleGrammar PositiveLengthOrInfinityStyleGrammar; // resolves to Float
-attribute StyleGrammar PositiveLengthOrAutoStyleGrammar; // resolves to Float or null
-attribute StyleGrammar PositiveLengthStyleGrammar; // resolves to Float
-attribute StyleGrammar NumberGrammar; // resolves to Float
-attribute StyleGrammar ColorGrammar; // resolves to object with 'red', 'green', 'blue', and 'alpha' properties each of which is a Float 0..1
-attribute StyleGrammar DisplayStyleGrammar; // resolves to null or LayoutManager constructor
+attribute StyleGrammar PositiveLengthOrInfinityStyleGrammar; // resolves to LengthStyleValue
+attribute StyleGrammar PositiveLengthOrAutoStyleGrammar; // resolves to LengthStyleValue or IdentifierStyleValue (with value 'auto')
+attribute StyleGrammar PositiveLengthStyleGrammar; // resolves to LengthStyleValue
+attribute StyleGrammar NumberGrammar; // resolves to NumericStyleValue
+attribute StyleGrammar ColorGrammar; // resolves to ColorStyleValue
+attribute StyleGrammar DisplayStyleGrammar; // resolves to ObjectStyleValue
 ```  
 
 Inline Styles
 -------------
 
 ```javascript
-class StyleDeclarationList {
-  constructor (Element? element);
-
-  // There are two batches of styles in a StyleDeclarationList.
-
-  // The first batch is the per-frame styles. These get cleared each
-  // frame, after which all the matching rules in relevant <style> blocks
-  // get added back in, followed by all the animation-derived rules.
-  // Scripts can add styles themselves.
-  void addFrameStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
-  void clearFrameStyles();
-
-  // The second batch is the persistent styles.
-  // Once added, they remain forever until removed.
-  void addPersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
-  void removePersistentStyles(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
-
-  // as StyleDeclaration are added and removed here, the StyleDeclarationList calls register(element) and
-  // unregister(element) respectively on those StyleDeclaration objects, where element is the element that
-  // was passed to the constructor, if not null
-  // then, it calls element.renderNode.cascadedValueAdded/cascadedValueRemoved for each property on the object
-
-  // This returns all the frame styles followed by all the persistent styles, in insertion order.
+abstract class AbstractStyleDeclarationList {
+  void addStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
+  void removeStyles(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
   Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
 }
 
+class ElementStyleDeclarationList : AbstractStyleDeclarationList {
+  constructor (Element? element);
+
+  // there are two batches of styles in an ElementStyleDeclarationList.
+
+  // the first batch is the per-frame styles; these get (conceptually)
+  // cleared each frame, after which all the matching rules in relevant
+  // <style> blocks get added back in, followed by all the animation-
+  // derived rules; scripts can also add styles themselves, but they are
+  // dropped after the next frame
+  void addFrameStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
+  void clearFrameStyles();
+
+  // the second batch is the persistent styles, which remain until removed;
+  // they are accessed via the AbstractStyleDeclarationList accessors
+
+  // as StyleDeclarations are added and removed, the ElementStyleDeclarationList
+  // calls register(element) and unregister(element) respectively on those
+  // StyleDeclaration objects, where element is the element that was passed
+  // to the constructor, if not null
+  // then, it calls element.renderNode.cascadedValueAdded/cascadedValueRemoved
+  // for each property on the object
+
+  // the inherited getDeclarations() method returns all the frame
+  // styles followed by all the persistent styles, in insertion order
+}
+
+class RenderNodeStyleDeclarationList : AbstractStyleDeclarationList {
+  constructor (RenderNode? renderNode);
+
+  // as StyleDeclarations are added and removed, the RenderNodeStyleDeclarationList
+  // calls register(renderNode) and unregister(renderNode) respectively on those
+  // StyleDeclaration objects, where renderNode is the RenderNode that was passed
+  // to the constructor, if not null
+  // then, it calls renderNode.cascadedValueAdded/cascadedValueRemoved
+  // for each property on the object
+}
+
 class StyleDeclaration {
+  constructor ();
+
   void markDirty(PropertyHandle property);
     // this indicates that the cascaded value of the property thinks
     // it will now have a different result (as opposed to the cascaded
@@ -381,11 +440,12 @@ class StyleDeclaration {
     // invoke element.renderNode.cascadedValueDirty(property, pseudoElement); for each
     // currently registered consumer element/pseudoElement pair
 
-  void register(Element element, String? pseudoElement = null); // O(1)
-  void unregister(Element element, String? pseudoElement = null); // O(N)
-    // registers an element/pseudoElement pair with this StyleDeclaration so that when
-    // a property/value on the style declaration is marked dirty, the element
-    // is informed and can then clear its property cache
+  void register((Element or RenderNode) consumer, String? pseudoElement = null); // O(1)
+  void unregister((Element or RenderNode) consumer, String? pseudoElement = null); // O(N)
+    // registers an element/pseudoElement or renderNode/pseudoElement pair with
+    // this StyleDeclaration so that a property/value on the style declaration
+    // is marked dirty, the relevant render node is informed and can then update
+    // its property cache accordingly
 
   getter AbstractStyleValue? (PropertyHandle property);
     // looks up the Property object for /property/, and returns its value
@@ -420,11 +480,12 @@ class Rule {
 }
 ```
 
-Each frame, at some defined point relative to requestAnimationFrame():
- - If a rule starts applying to an element, sky:core calls thatElement.style.add(rule.styles, rule.pseudoElement);
- - If a rule stops applying to an element, sky:core calls thatElement.style.remove(rule.styles, rule.pseudoElement);
-
-TODO(ianh): fix the above so that rule order is maintained
+Each frame, at some defined point relative to requestAnimationFrame(),
+if a Rule has started applying, or a Rule stopped applying, to an
+element, sky:core calls thatElement.style.clearFrameStyles() and then,
+for each Rule that now applies, calls
+thatElement.style.addFrameStyles() with the relevant StyleDeclaration
+and pseudoElement from each such Rule.
 
 
 Cascade
@@ -453,8 +514,10 @@ When an Element or Text node is to be removed from its parent, and it
 has a renderNode, and that renderNode has an ownerLayoutManager with
 autoreap=false, then before actually removing the node, the node's
 renderNode should be marked isGhost=true, and the relevant
-StyleDeclarationList should be flattened and the values stored on the
-RenderNode for use later.
+ElementStyleDeclarationList should be flattened and the values stored on
+the RenderNode's overrideStyles for use later. (Or we can just clone the
+StyleDeclarations directly without flattening. That would probably
+be faster.)
 
 When an Element is to be removed from its parent, regardless of the
 above, the node's renderNode attribute should be nulled out.
@@ -474,14 +537,19 @@ class RenderNode { // implemented in C++ with no virtual tables
      // looking at the cached data for the given pseudoElement:
      // if there's a cached value, return it
      // otherwise, figure out which StyleValue we're going to be using, in this order:
-     //   - if we're isGhost, look out our cached declarations
-     //   - look at this element's StyleDeclarations for the given pseudo-element (if any)
-     //   - look at this element's StyleDeclarations with no pseudo-element
-     //   - if it's an inherited property and there's a parent
-     //      - call getProperty() on the parent
-     //     otherwise use the default value
+     //   - look out our override declarations (first with the pseudo, if any, then without)
+     //   - if there's an element:
+     //     - look at this element's StyleDeclarations (first with the pseudo, if any, then without)
+     //   - if it's an inherited property and there's a parent:
+     //      - call getProperty() on the parent (without the pseudo)
+     //   - use the default value
      // resolve the StyleValue giving it the property and node in question
      // cache the value, along with the StyleValueResolverSettings
+
+  readonly attribute RenderNodeStyleDeclarationList overrideStyles;
+     // mutable; initially empty
+     // this is used when isGhost is true, and can also be used more generally to
+     // override styles from the layout manager (e.g. to animate a new node into view)
 
   private void cascadedValueAdded(PropertyHandle property, String? pseudoElement = null);
   private void cascadedValueRemoved(PropertyHandle property, String? pseudoElement = null);
@@ -500,6 +568,8 @@ class RenderNode { // implemented in C++ with no virtual tables
     // - if the property is inherited:
     //     - call this.cascadedValueDirty(property, eachPseudoElement)
     //     - call eachChildRenderNode.cascadedValueDirty(property, null)
+    // (these four methods all do the same thing; they might get merged into one. For now
+    // they're separate in case we want to make them cleverer later.)
 
   readonly attribute Boolean needsManager;
     // means that a property with needsManager:true has changed on this node
@@ -589,13 +659,6 @@ class LayoutManager : EventTarget {
   void setProperty(RenderNode node, PropertyHandle property, any value, String? pseudoElement = null); // O(1)
     // if called from an adjustProperties() method during the property adjustment phase,
     // replaces the value that getProperty() would return on that node with /value/
-
-  virtual void adjustProperties();
-    // called before layout; can call setProperty to set new values
-    // note that this happens after the cascade so inheritance isn't applied to this new value
-    // also note that the value you set is a post-computation value, not an AbstractStyleValue descendant
-    // so e.g. you can have an AnimatableColorStyleValue, get its value, and push it into setProperty()
-    // but you can't push the AnimatableColorStyleValue directly in, it won't do what you expect
 
   void take(RenderNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
@@ -757,8 +820,9 @@ dictionary Dimensions {
 Paint
 -----
 
-Sky has a list of RenderNodes that need painting.
-When a RenderNode is created, it's added to this list.
+Sky has a list of RenderNodes that need painting. When a RenderNode is
+created, it's added to this list. (See also needsPaint for another
+time it is added to the list.)
 
 ```javascript
 callback void Painter (RenderNode node, RenderingSurface canvas);
@@ -798,40 +862,52 @@ StyleDeclaration objects as follows:
 * ``script``
 * ``content``
 * ``title``
-  These all add to themselves the same declaration with value:
+  These all add to themselves the same declaration as follows:
 ```javascript
-{ display: { value: null } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(null);
+this.style.addStyles(d);
 ```
 
 * ``img``
-  This adds to itself the declaration with value:
+  This adds to itself the declaration as follows:
 ```javascript
-{ display: { value: sky.ImageElementLayoutManager } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(ImageElementLayoutManager);
+this.style.addStyles(d);
 ```
 
 * ``span``
 * ``a``
-  These all add to themselves the same declaration with value:
+  These all add to themselves the same declaration as follows:
 ```javascript
-{ display: { value: sky.InlineLayoutManager } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(InlineLayoutManager);
+this.style.addStyles(d);
 ```
 
 * ``iframe``
-  This adds to itself the declaration with value:
+  This adds to itself the declaration as follows:
 ```javascript
-{ display: { value: sky.IFrameElementLayoutManager } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(IFrameElementLayoutManager);
+this.style.addStyles(d);
 ```
 
 * ``t``
-  This adds to itself the declaration with value:
+  This adds to itself the declaration as follows:
 ```javascript
-{ display: { value: sky.ParagraphLayoutManager } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(ParagraphLayoutManager);
+this.style.addStyles(d);
 ```
 
 * ``error``
-  This adds to itself the declaration with value:
+  This adds to itself the declaration as follows:
 ```javascript
-{ display: { value: sky.ErrorLayoutManager } }
+let d = new StyleDeclaration();
+d[pDisplay] = new ObjectStyleValue(ErrorLayoutManager);
+this.style.addStyles(d);
 ```
 
 The ``div`` element doesn't have any default styles.
@@ -839,4 +915,6 @@ The ``div`` element doesn't have any default styles.
 These declarations are all shared between all the elements (so e.g. if
 you reach in and change the declaration that was added to a ``title``
 element, you're going to change the styles of all the other
-default-hidden elements).
+default-hidden elements). (In other words, in the code snippets above,
+the ``d`` variable is initialised in shared code, and only the
+addStyles() call is per-element.)

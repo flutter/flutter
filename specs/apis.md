@@ -126,7 +126,7 @@ module 'sky:core' {
     virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
     // TODO(ianh): does a node ever need to know when it's been redistributed?
 
-    readonly attribute StyleDeclarationList style; // O(1)
+    readonly attribute ElementStyleDeclarationList style; // O(1)
     virtual LayoutManagerConstructor getLayoutManager(RenderNode renderNode); // O(1)
       // default implementation looks up the 'display' property and returns the value:
       //   if (renderNode)
