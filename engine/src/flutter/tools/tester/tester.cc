@@ -90,7 +90,7 @@ class SkyTester : public mojo::ApplicationDelegate,
     root_ = root;
     root_->AddObserver(this);
 
-    content_ = mojo::View::Create(root->view_manager());
+    content_ = root->view_manager()->CreateView();
     content_->SetBounds(root_->bounds());
     root_->AddChild(content_);
     content_->SetVisible(true);
