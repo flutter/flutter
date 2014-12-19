@@ -49,6 +49,15 @@ describe("SkyElement templates", function() {
     inside.dispatchEvent(event);
     assert.equal(element.lastEvent, event);
   });
+
+  it("should call shadowRootReady after creating the template instance", function() {
+    assert.equal(element.shadowRootReadyCount, 0);
+    sandbox.appendChild(element);
+    assert.equal(element.shadowRootReadyCount, 1);
+    element.remove();
+    sandbox.appendChild(element);
+    assert.equal(element.shadowRootReadyCount, 1);
+  });
 });
 </script>
 </sky>

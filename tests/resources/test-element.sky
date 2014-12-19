@@ -14,9 +14,13 @@ module.exports = class extends SkyElement {
   created() {
     this.lastEvent = null;
     this.value = 10;
+    this.shadowRootReadyCount = 0;
   }
   handleEvent(event) {
     this.lastEvent = event;
+  }
+  shadowRootReady() {
+    this.shadowRootReadyCount++;
   }
 }.register();
 </script>

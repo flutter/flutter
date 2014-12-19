@@ -44,6 +44,10 @@ class SkyElement extends HTMLElement {
     // override
   }
 
+  shadowRootReady() {
+    // override
+  }
+
   createdCallback() {
     this.created();
   }
@@ -54,6 +58,7 @@ class SkyElement extends HTMLElement {
       if (template) {
         var shadow = this.ensureShadowRoot();
         shadow.appendChild(template.createInstance(this));
+        this.shadowRootReady();
       }
     }
     this.attached();
