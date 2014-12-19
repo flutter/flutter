@@ -16,6 +16,7 @@
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/surfaces/public/interfaces/surfaces_service.mojom.h"
 #include "mojo/services/view_manager/public/cpp/view.h"
+#include "mojo/services/view_manager/public/cpp/view_manager.h"
 #include "skia/ext/refptr.h"
 #include "sky/compositor/layer.h"
 #include "sky/compositor/layer_host.h"
@@ -172,7 +173,7 @@ mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
   if (!root_)
     return nullptr;
 
-  mojo::View* child = mojo::View::Create(root_->view_manager());
+  mojo::View* child = root_->view_manager()->CreateView();
   child->SetVisible(true);
   root_->AddChild(child);
   child->Embed(mojo::String::From(url.string().utf8()));
