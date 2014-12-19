@@ -1,0 +1,22 @@
+--- platform/graphics/GraphicsContext.cpp
++++ platform/graphics/GraphicsContext.cpp
+@@ -419,19 +419,6 @@
+     paint->setLCDRenderText(couldUseLCDRenderedText());
+ }
+ 
+-bool GraphicsContext::couldUseLCDRenderedText() const
+-{
+-    ASSERT(m_canvas);
+-    // Our layers only have a single alpha channel. This means that subpixel
+-    // rendered text cannot be composited correctly when the layer is
+-    // collapsed. Therefore, subpixel text is contextDisabled when we are drawing
+-    // onto a layer.
+-    if (contextDisabled() || m_canvas->isDrawingToLayer() || !isCertainlyOpaque())
+-        return false;
+-
+-    return shouldSmoothFonts();
+-}
+-
+ void GraphicsContext::setCompositeOperation(CompositeOperator compositeOperation, WebBlendMode blendMode)
+ {
+     if (contextDisabled())

@@ -107,7 +107,7 @@ PassOwnPtr<Vector<char> > GraphicsContextSnapshot::replay(unsigned fromStep, uns
         ReplayingCanvas canvas(bitmap, fromStep, toStep);
         canvas.scale(scale, scale);
         canvas.resetStepCount();
-        m_picture->draw(&canvas, &canvas);
+        m_picture->playback(&canvas, &canvas);
     }
     OwnPtr<Vector<char> > base64Data = adoptPtr(new Vector<char>());
     Vector<char> encodedImage;
@@ -136,7 +136,7 @@ PassOwnPtr<GraphicsContextSnapshot::Timings> GraphicsContextSnapshot::profile(un
         if (step)
             canvas = adoptPtr(new ProfilingCanvas(bitmap));
         canvas->setTimings(currentTimings);
-        m_picture->draw(canvas.get());
+        m_picture->playback(canvas.get());
         now = WTF::monotonicallyIncreasingTime();
     }
     return timings.release();
@@ -146,7 +146,7 @@ PassRefPtr<JSONArray> GraphicsContextSnapshot::snapshotCommandLog() const
 {
     const SkIRect bounds = m_picture->cullRect().roundOut();
     LoggingCanvas canvas(bounds.width(), bounds.height());
-    m_picture->draw(&canvas);
+    m_picture->playback(&canvas);
     return canvas.log();
 }
 

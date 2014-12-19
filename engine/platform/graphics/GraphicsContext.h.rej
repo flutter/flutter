@@ -1,0 +1,15 @@
+--- platform/graphics/GraphicsContext.h
++++ platform/graphics/GraphicsContext.h
+@@ -155,11 +155,10 @@
+     // FIXME: the setter is only used once, at construction time; convert to a constructor param,
+     // and possibly consolidate with other flags (paintDisabled, isPrinting, ...)
+     void setShouldSmoothFonts(bool smoothFonts) { m_shouldSmoothFonts = smoothFonts; }
+-    bool shouldSmoothFonts() const { return m_shouldSmoothFonts; }
+ 
+     // Turn off LCD text for the paint if not supported on this context.
+     void adjustTextRenderMode(SkPaint*) const;
+-    bool couldUseLCDRenderedText() const;
++    bool couldUseLCDRenderedText() const { return m_isCertainlyOpaque && m_shouldSmoothFonts; }
+ 
+     void setTextDrawingMode(TextDrawingModeFlags mode) { mutableState()->setTextDrawingMode(mode); }
+     TextDrawingModeFlags textDrawingMode() const { return immutableState()->textDrawingMode(); }
