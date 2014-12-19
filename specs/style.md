@@ -496,8 +496,10 @@ taking into account shadow trees and child distribution, and the tree
 rooted at the document's RenderNode.
 
 If you come across a node that doesn't have an assigned RenderNode,
-then create one and mark it "isNew", and place it in the appropriate
-place in the RenderTree tree, after any nodes marked isGhost.
+then create one, placing it in the appropriate place in the RenderTree
+tree, after any nodes marked isGhost=true, with ownerLayoutManager
+pointing to the parent RenderNode's layoutManager, and then, if
+autoreap is false on the ownerLayoutManager, mark it "isNew".
 
 For each element, if the node's needsManager is true, call
 getLayoutManager() on the element, and if that's not null, and if the
@@ -521,6 +523,11 @@ be faster.)
 
 When an Element is to be removed from its parent, regardless of the
 above, the node's renderNode attribute should be nulled out.
+
+When a RenderNode is added with isNew=true, call its parent
+RenderNode's LayoutManager's childAdded() callback. When a a
+RenderNode has its isGhost property set to true, then call it's parent
+RenderNode's LayoutManager's childRemoved() callback.
 
 
 ```javascript
@@ -667,6 +674,10 @@ class LayoutManager : EventTarget {
 
   virtual void release(RenderNode victim);
     // called when the RenderNode was removed from the tree
+
+  virtual void childAdded(RenderNode child);
+  virtual void childRemoved(RenderNode child);
+    // called when a child has its isNew or isGhost attributes set respectively
 
   void setChildPosition(child, x, y); // sets child.x, child.y
   void setChildX(child, y); // sets child.x
