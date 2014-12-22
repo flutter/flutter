@@ -269,6 +269,8 @@ StyleNode
 
 The types marked with * in the list above are not part of sky:core.
 
+TODO(ianh): consider removing 'StyleValue' from these class names
+
 ```javascript
 abstract class StyleNode {
   abstract void markDirty();
@@ -326,11 +328,11 @@ class PixelLengthStyleValue : LengthStyleValue {
   Float resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
 }
 
-typedef Color Float; // TODO(ianh): figure out what Color should be
+typedef RawColor Float; // TODO(ianh): figure out what Color should be
 class ColorStyleValue : LengthStyleValue {
   constructor(StyleNode parentNode, Float red, Float green, Float blue, Float alpha);
   // ... color API ...
-  Color resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+  RawColor resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
 }
 
 class AbstractOpaqueStyleValue : AbstractStyleValue {
@@ -500,8 +502,10 @@ rooted at the document's RenderNode.
 If you come across a node that doesn't have an assigned RenderNode,
 then create one, placing it in the appropriate place in the RenderTree
 tree, after any nodes marked isGhost=true, with ownerLayoutManager
-pointing to the parent RenderNode's layoutManager, and then, if
-autoreap is false on the ownerLayoutManager, mark it "isNew".
+pointing to the parent RenderNode's layoutManager, if it has one, and,
+if it has one and autoreap is false on that layout manager, mark the
+new node "isNew". (This means that when a node is marked isNew, the
+layout manager has already laid out at least one frame.)
 
 For each element, if the node's needsManager is true, call
 getLayoutManager() on the element, and if that's not null, and if the
