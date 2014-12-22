@@ -38,8 +38,11 @@ namespace blink {
 
 UnacceleratedImageBufferSurface::UnacceleratedImageBufferSurface(const IntSize& size, OpacityMode opacityMode)
     : ImageBufferSurface(size, opacityMode)
-    , m_surface(adoptRef(SkSurface::NewRasterPMColor(size.width(), size.height())))
 {
+    SkAlphaType alphaType = (Opaque == opacityMode) ? kOpaque_SkAlphaType : kPremul_SkAlphaType;
+    SkImageInfo info = SkImageInfo::MakeN32(size.width(), size.height(), alphaType);
+    SkSurfaceProps disableLCDProps(0, kUnknown_SkPixelGeometry);
+    m_surface = adoptRef(SkSurface::NewRaster(info, Opaque == opacityMode ? 0 : &disableLCDProps));
     if (m_surface)
         clear();
 }
