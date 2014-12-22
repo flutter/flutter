@@ -24,3 +24,16 @@ For module files, one of the following:
 * ``53 4b 59 20 4d 4f 44 55 4c 45 0a`` ("``SKY MODULE\n``")
 * ``53 4b 59 20 4d 4f 44 55 4c 45 0d`` ("``SKY MODULE\r``")
 * ``53 4b 59 20 4d 4f 44 55 4c 45 20`` ("``SKY MODULE ``")
+
+
+Notes
+-----
+
+```
+magical imports:
+  the core mojo fabric JS API   sky:mojo:fabric:core
+  the asyncWait/cancelWait mojo fabric JS API (interface to IPC thread)  sky:mojo:fabric:ipc
+  the mojom for the shell, proxying through C++ so that the shell pipe isn't exposed  sky:mojo:shell
+  the sky API  sky:core
+  the sky debug symbols for private APIs  sky:debug
+```
