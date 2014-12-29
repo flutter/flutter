@@ -405,8 +405,9 @@ base::FilePath FilePathFromASCII(const std::string& str) {
 
 int main(int argc, const char* argv[]) {
   base::EnableTerminationOnHeapCorruption();
-  CommandLine::Init(argc, argv);
-  const CommandLine& parsed_command_line = *CommandLine::ForCurrentProcess();
+  base::CommandLine::Init(argc, argv);
+  const base::CommandLine& parsed_command_line =
+      *base::CommandLine::ForCurrentProcess();
   bool histograms = parsed_command_line.HasSwitch(kOptionCompareHistograms);
   if (parsed_command_line.HasSwitch(kOptionPollStdin)) {
     // Watch stdin for filenames.
@@ -432,7 +433,7 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
-  const CommandLine::StringVector& args = parsed_command_line.GetArgs();
+  const base::CommandLine::StringVector& args = parsed_command_line.GetArgs();
   if (parsed_command_line.HasSwitch(kOptionGenerateDiff)) {
     if (args.size() == 3) {
       return DiffImages(base::FilePath(args[0]),
