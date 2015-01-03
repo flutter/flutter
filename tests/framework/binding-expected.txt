@@ -1,0 +1,24 @@
+
+  <style>
+  .blue { border: 1px solid blue; }
+  .orange { border: 1px solid orange; }
+  .repeat { margin: 8px; }
+  </style>
+  <span style="color: red">10</span>
+  <template repeat="{{ list }}"></template>
+    <div class="blue repeat">first</div>
+  
+    <div class="orange repeat">second</div>
+  
+  <template if="{{ test }}"></template>
+    Hello World
+  
+  <template if="{{ testFalse }}"></template>
+  <template repeat="{{ nullInstances }}"></template>
+  <div>10 test redblue test</div>
+  <a href="http://www.google.com/">http://www.google.com/</a>
+  <span on-test-event="handleTestEvent">
+    <span id="target">Test event handler: event dispatch success</span>
+  </span>
+  <div class="[[ className ]]">[[ url ]]</div>
+

@@ -63,7 +63,7 @@ function serializeNode(node) {
     return escapeText(node.data, kTextEscapePattern);
   if (node instanceof Element)
     return serializeElement(node);
-  if (node instanceof Document)
+  if (node instanceof Document || node instanceof ShadowRoot)
     return serializeChildren(node.firstChild);
   throw new Error("Cannot serialize node");
 }

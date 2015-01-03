@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<import src="/sky/framework/dom-serializer.sky" as="DomSerializer" />
+<import src="/sky/framework/sky-element/sky-binder.sky" as="binder" />
+
+<div id="host"></div>
+
+<template id="template">
+  <style>
+  .blue { border: 1px solid blue; }
+  .orange { border: 1px solid orange; }
+  .repeat { margin: 8px; }
+  </style>
+  <span style="color: {{ red }}">{{ value }}</span>
+  <template repeat="{{ list }}">
+    <div class="{{ className }} repeat">{{ item }}</div>
+  </template>
+  <template if="{{ test }}">
+    Hello World
+  </template>
+  <template if="{{ testFalse }}">
+    Should not be visible.
+  </template>
+  <template repeat="{{ nullInstances }}">
+    Should not be visible.
+  </template>
+  <div>{{ value }} test {{ red }}{{ className }} test</div>
+  <a href="{{ url }}">{{ url }}</a>
+  <span on-test-event="handleTestEvent">
+    <span id="target">Test event handler: </span>
+  </span>
+  <div class="[[ className ]]">[[ url ]]</div>
+</template>
+
+<script>
+window.addEventListener("load", function() {
+  var template = document.getElementById('template');
+  var host = document.getElementById('host');
+  host.handleTestEvent = function(e) {
+    e.target.appendChild(new Text("event dispatch success"));
+  };
+  window.model = {
+    value: 10,
+    test: true,
+    testFalse: false,
+    nullInstances: [null],
+    url: "http://www.google.com/",
+    red: "red",
+    className: "blue",
+    list: [{
+      item: "first",
+      className: "blue",
+    }, {
+      item: "second",
+      className: "orange",
+    }],
+  };
+  var instance = binder.createInstance(template, window.model);
+  host.ensureShadowRoot().appendChild(instance.fragment);
+  var target = host.shadowRoot.getElementById("target");
+  target.dispatchEvent(new CustomEvent("test-event", {
+    bubbles: true,
+  }));
+  internals.notifyTestComplete(DomSerializer.serializeNode(host.shadowRoot));
+});
+</script>
