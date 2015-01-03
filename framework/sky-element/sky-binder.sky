@@ -455,10 +455,10 @@ class TemplateIterator {
 
     this.instances.length = 0;
 
-    if (this.ifBinding)
-      this.ifBinding.close();
-    if (this.binding)
-      this.binding.close();
+    if (this.ifObserver)
+      this.ifObserver.close();
+    if (this.valueObserver)
+      this.valueObserver.close();
 
     iterators.delete(this.template);
     this.closed = true;
