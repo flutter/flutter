@@ -1,0 +1,28 @@
+<sky>
+<import src="/sky/benchmarks/resources/runner.sky" as="PerfRunner" />
+<import src="/sky/examples/city-list/city-list.sky" as="citylist" />
+<script>
+var sky = document.querySelector("sky");
+var element;
+
+var CityListElement = citylist.CityListElement;
+
+var runner = new PerfRunner({
+  setup: function() {
+    // Don't benchmark removal.
+    if (element)
+      element.remove();
+  },
+  iterations: 10,
+  unit: "ms",
+});
+
+runner.runAsync(function(done) {
+  element = new CityListElement();
+  sky.appendChild(element);
+  element.addEventListener('load', function() {
+    done();
+  });
+});
+</script>
+</sky>
