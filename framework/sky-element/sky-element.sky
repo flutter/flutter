@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="TemplateBinding.sky" />
+<import src="sky-binder.sky" as="binder" />
 <script>
 var templates = new Map();
 
@@ -57,7 +57,8 @@ class SkyElement extends HTMLElement {
       var template = templates.get(this.localName);
       if (template) {
         var shadow = this.ensureShadowRoot();
-        shadow.appendChild(template.createInstance(this));
+        var instance = binder.createInstance(template, this);
+        shadow.appendChild(instance.fragment);
         this.shadowRootReady();
       }
     }
