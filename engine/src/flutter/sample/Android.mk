@@ -21,7 +21,6 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_C_INCLUDES += \
 	external/harfbuzz_ng/src \
 	external/freetype/include \
-	external/icu/icu4c/source/common \
 	frameworks/minikin/include
 
 LOCAL_SRC_FILES:= example.cpp
@@ -49,7 +48,6 @@ LOCAL_MODULE_TAG := tests
 LOCAL_C_INCLUDES += \
 	external/harfbuzz_ng/src \
 	external/freetype/include \
-	external/icu/icu4c/source/common \
 	frameworks/minikin/include \
 	external/skia/src/core
 
