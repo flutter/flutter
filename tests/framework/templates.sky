@@ -24,6 +24,14 @@ describe("SkyElement templates", function() {
     assert.ok(element.shadowRoot.getElementById("inside"));
   });
 
+  it("should update isAttached when inserting", function() {
+    assert.isFalse(element.isAttached);
+    sandbox.appendChild(element);
+    assert.isTrue(element.isAttached);
+    element.remove();
+    assert.isFalse(element.isAttached);
+  });
+
   it("should connect data binding", function(done) {
     sandbox.appendChild(element);
     var inside = element.shadowRoot.getElementById("inside");

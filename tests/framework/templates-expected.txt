@@ -1,8 +1,9 @@
-Running 4 tests
+Running 5 tests
 ok 1 SkyElement templates should stamp when the element is inserted
-ok 2 SkyElement templates should connect data binding
-ok 3 SkyElement templates should connect event handlers
-ok 4 SkyElement templates should call shadowRootReady after creating the template instance
-4 tests
-4 pass
+ok 2 SkyElement templates should update isAttached when inserting
+ok 3 SkyElement templates should connect data binding
+ok 4 SkyElement templates should connect event handlers
+ok 5 SkyElement templates should call shadowRootReady after creating the template instance
+5 tests
+5 pass
 0 fail

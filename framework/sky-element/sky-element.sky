@@ -36,7 +36,7 @@ class SkyElement extends HTMLElement {
     // override
   }
 
-  dettached() {
+  detached() {
     // override
   }
 
@@ -49,6 +49,7 @@ class SkyElement extends HTMLElement {
   }
 
   createdCallback() {
+    this.isAttached = false;
     this.created();
   }
 
@@ -63,10 +64,12 @@ class SkyElement extends HTMLElement {
       }
     }
     this.attached();
+    this.isAttached = true;
   }
 
-  dettachedCallback() {
-    this.dettached();
+  detachedCallback() {
+    this.detached();
+    this.isAttached = false;
   }
 
   attributeChangedCallback(attrName, oldValue, newValue) {
