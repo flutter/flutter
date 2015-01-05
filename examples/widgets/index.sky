@@ -12,7 +12,16 @@
 <sky-element name="widget-root">
 <template>
   <style>
-  div { display: paragraph; }
+  div {
+    display: flex;
+    align-items: center;
+  }
+  sky-checkbox {
+    margin: 5px;
+  }
+  .output {
+    margin-left: 48px;
+  }
   </style>
 
   <sky-box title='Buttons'>
@@ -23,9 +32,8 @@
 
   <sky-box title='Checkboxes'>
     <div><sky-checkbox id='checkbox' />Checkbox</div>
-    <div>highlight: {{ myCheckbox.highlight }}</div>
-    <div>checked: {{ myCheckbox.checked }}</div>
-
+    <div class="output">highlight: {{ myCheckbox.highlight }}</div>
+    <div class="output">checked: {{ myCheckbox.checked }}</div>
     <div><sky-checkbox id='checkbox' checked='true'/>Checkbox, default checked.</div>
   </sky-box>
 

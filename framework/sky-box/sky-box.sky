@@ -15,16 +15,20 @@
       border: 1px solid gray;
       margin: 10px;
     }
-    #title {
+    .title {
       text-align: center;
       font-size: 10px;
+      padding: 8px 8px 4px 8px;
+    }
+    .content {
+      padding: 4px 8px 8px 8px;
     }
     div {
-      flex: 1 100%;
+      flex: 1;
     }
   </style>
-  <div id='title'>{{ title }}</div>
-  <div><content></content></div>
+  <div class="title">{{ title }}</div>
+  <div class="content"><content></content></div>
 </template>
 <script>
 module.exports = class extends SkyElement {

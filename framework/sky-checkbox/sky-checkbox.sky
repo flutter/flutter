@@ -9,28 +9,53 @@
 <template>
   <style>
     :host {
-      display: inline-flex;
+      display: flex;
       justify-content: center;
       align-items: center;
       -webkit-user-select: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      border: 1px solid blue;
-      margin: 5px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
     }
-    :host([highlight=true]) {
+    #container {
+      border: solid 2px;
+      border-color: rgba(90, 90, 90, 0.25);
+      width: 10px;
+      height: 10px;
+    }
+    #container.highlight {
+      border-radius: 10px;
       background-color: orange;
+      border-color: orange;
+    }
+    #check {
+      top: 0px;
+      left: 0px;
+    }
+    #check.checked {
+      transform: translate(2px, -15px) rotate(45deg);
+      width: 10px;
+      height: 20px;
+      border-style: solid;
+      border-top: none;
+      border-left: none;
+      border-right-width: 2px;
+      border-bottom-width: 2px;
+      border-color: #0f9d58;
     }
   </style>
-  <template if="{{ checked }}">
-    <check>&check;</check>
-  </template>
+  <div id="container" class="{{ containerStyle }}">
+    <div id="check" class="{{ checkStyle }}"></div>
+  </div>
 </template>
 <script>
 module.exports = class extends SkyButton {
   created() {
     super.created();
+
+    this.containerStyle = "";
+    this.checkStyle = "";
+
     this.setChecked(this.getAttribute('checked') == 'true');
 
     this.addEventListener("mouseup", function() {
@@ -43,6 +68,19 @@ module.exports = class extends SkyButton {
   setChecked(checked) {
     this.checked = checked;
     this.setAttribute('checked', checked);
+    this.checkStyle = checked ? 'checked' : '';
+  }
+  setHighlight(newValue) {
+    super.setHighlight(newValue);
+    this.containerStyle = newValue ? 'highlight' : '';
+  }
+  shadowRootReady() {
+    // TODO(esprehn): This is needed because the checked and highlight
+    // setters might be called before the shadowRoot is created since that
+    // doesn't happen until attached(). We should figure out a better way to do
+    // this.
+    this.setHighlight(this.highlight);
+    this.setChecked(this.checked);
   }
 }.register();
 </script>
