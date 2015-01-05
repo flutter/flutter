@@ -276,12 +276,25 @@ abstract class StyleNode {
   abstract void markDirty();
 }
 
+dictionary StyleValueResolverSettingsSettings {
+  Boolean firstTime = false;
+  any state = null;
+}
+
 class StyleValueResolverSettings {
   // this is used as an "out" parameter for 'resolve()' below
-  constructor();
-  void reset(); // resets values to defaults so that object can be reused
+  constructor(StyleValueResolverSettingsSettings initial);
+  void reset(StyleValueResolverSettingsSettings initial);
+    // sets firstTime and state to given values
+    // sets layoutDependent to false
+    // sets dependencies to empty set
+
+  readonly attribute Boolean firstTime;
+    // true if this is the first time this property is being resolved for this element,
+    // or if the last time it was resolved, the value was a different object
+
   attribute Boolean layoutDependent; // default to false
-    // set this if the value should be recomputed each time the ownerLayoutManager's dimensions change, rather than being precomputed
+    // set this if the value should be recomputed each time the ownerLayoutManager's dimensions change, rather than being cached
 
   // attribute "BitField" dependencies; // defaults to no bits set
   void dependsOn(PropertyHandle property);
@@ -289,6 +302,19 @@ class StyleValueResolverSettings {
     //  - assign the next bit to the property
     //  - if there's no bits left, throw
     // set the bit on this StyleValueResolverSettings's dependencies bitfield
+  Array<PropertyHandle> getDependencies();
+    // returns an array of the PropertyHandle values for the bits that are set in dependencies
+
+  attribute any state; // initially null, can be set to store value for this RenderNode/property pair
+    // for example, TransitioningColorStyleValue would store
+    //    {
+    //      initial: /* color at time of transition */,
+    //      target: /* color at end of transition */,
+    //      start: /* time at start of transition */,
+    //    }
+    // ...which would enable it to update appropriately, and would also
+    // let other transitions that come later know that you were half-way
+    // through a transition so they can shorten their time accordingly
 }
 
 class Property : StyleNode {
@@ -309,8 +335,8 @@ class Property : StyleNode {
 }
 
 abstract class AbstractStyleValue : StyleNode {
-  abstract constructor(StyleNode parentNode);
-  readonly attribute StyleNode parentNode;
+  abstract constructor(StyleNode? parentNode = null);
+  attribute StyleNode? parentNode;
 
   void markDirty();
     // call this.parentNode.markDirty()
@@ -323,33 +349,36 @@ abstract class LengthStyleValue : AbstractStyleValue {
 }
 
 class PixelLengthStyleValue : LengthStyleValue {
-  constructor(StyleNode parentNode, Float number);
-  readonly attribute Float value;
+  constructor(Float number, StyleNode? parentNode = null);
+  attribute Float value;
+    // on setting, calls markDirty();
   Float resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
+    // return value
 }
 
 typedef RawColor Float; // TODO(ianh): figure out what Color should be
 class ColorStyleValue : LengthStyleValue {
-  constructor(StyleNode parentNode, Float red, Float green, Float blue, Float alpha);
+  constructor(Float red, Float green, Float blue, Float alpha, StyleNode? parentNode = null);
   // ... color API ...
   RawColor resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
 }
 
 class AbstractOpaqueStyleValue : AbstractStyleValue {
-  abstract constructor(StyleNode parentNode, any value);
-  readonly attribute any value;
+  abstract constructor(any value, StyleNode? parentNode = null);
+  attribute any value;
+    // on setting, calls markDirty();
   any resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
     // returns value
 }
 
 class IdentifierStyleValue : AbstractOpaqueStyleValue {
-  constructor(StyleNode parentNode, String value);
+  constructor(String value, StyleNode? parentNode = null);
     // calls superclass constructor
 }
 
 /*
 class AnimatableIdentifierStyleValue : AbstractOpaqueStyleValue {
-  constructor(StyleNode parentNode, String value, String newValue, AnimationFunction player);
+  constructor(String value, String newValue, AnimationFunction player, StyleNode? parentNode = null);
   readonly attribute String newValue;
   readonly attribute AnimationFunction player;
   any resolve(PropertyHandle property, RenderNode node, StyleValueResolverSettings? settings = null);
@@ -357,13 +386,13 @@ class AnimatableIdentifierStyleValue : AbstractOpaqueStyleValue {
 */
 
 class ObjectStyleValue : AbstractOpaqueStyleValue {
-  constructor(StyleNode parentNode, any value);
+  constructor(any value, StyleNode? parentNode = null);
     // calls superclass constructor
 }
 
 dictionary PropertySettings {
   String? name = null; // null if the property can't be set from a <style> block
-  StyleGrammar? grammar = null; // msut be non-null if name is non-null; must be null otherwise
+  StyleGrammar? grammar = null; // must be non-null if name is non-null; must be null otherwise
   Boolean inherited = false;
   any initialValue = null;
   Boolean needsManager = false;
@@ -391,9 +420,9 @@ Inline Styles
 
 ```javascript
 abstract class AbstractStyleDeclarationList {
-  void addStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
-  void removeStyles(StyleDeclaration styles, String? pseudoElement = null); // O(N) in number of declarations
-  Array<StyleDeclaration> getDeclarations(String? pseudoElement = null); // O(N) in number of declarations
+  void addStyles(StyleDeclaration styles, String pseudoElement = ''); // O(1)
+  void removeStyles(StyleDeclaration styles, String pseudoElement = ''); // O(N) in number of declarations
+  Array<StyleDeclaration> getDeclarations(String pseudoElement = ''); // O(N) in number of declarations
 }
 
 class ElementStyleDeclarationList : AbstractStyleDeclarationList {
@@ -406,7 +435,7 @@ class ElementStyleDeclarationList : AbstractStyleDeclarationList {
   // <style> blocks get added back in, followed by all the animation-
   // derived rules; scripts can also add styles themselves, but they are
   // dropped after the next frame
-  void addFrameStyles(StyleDeclaration styles, String? pseudoElement = null); // O(1)
+  void addFrameStyles(StyleDeclaration styles, String pseudoElement = ''); // O(1)
   void clearFrameStyles();
 
   // the second batch is the persistent styles, which remain until removed;
@@ -416,7 +445,7 @@ class ElementStyleDeclarationList : AbstractStyleDeclarationList {
   // calls register(element) and unregister(element) respectively on those
   // StyleDeclaration objects, where element is the element that was passed
   // to the constructor, if not null
-  // then, it calls element.renderNode.cascadedValueAdded/cascadedValueRemoved
+  // then, it calls element.renderNode.cascadedValueChanged
   // for each property on the object
 
   // the inherited getDeclarations() method returns all the frame
@@ -430,7 +459,7 @@ class RenderNodeStyleDeclarationList : AbstractStyleDeclarationList {
   // calls register(renderNode) and unregister(renderNode) respectively on those
   // StyleDeclaration objects, where renderNode is the RenderNode that was passed
   // to the constructor, if not null
-  // then, it calls renderNode.cascadedValueAdded/cascadedValueRemoved
+  // then, it calls renderNode.cascadedValueChanged
   // for each property on the object
 }
 
@@ -444,8 +473,8 @@ class StyleDeclaration {
     // invoke element.renderNode.cascadedValueDirty(property, pseudoElement); for each
     // currently registered consumer element/pseudoElement pair
 
-  void register((Element or RenderNode) consumer, String? pseudoElement = null); // O(1)
-  void unregister((Element or RenderNode) consumer, String? pseudoElement = null); // O(N)
+  void register((Element or RenderNode) consumer, String pseudoElement = ''); // O(1)
+  void unregister((Element or RenderNode) consumer, String pseudoElement = ''); // O(N)
     // registers an element/pseudoElement or renderNode/pseudoElement pair with
     // this StyleDeclaration so that a property/value on the style declaration
     // is marked dirty, the relevant render node is informed and can then update
@@ -456,18 +485,16 @@ class StyleDeclaration {
     // null if property is missing
 
   setter void (PropertyHandle property, AbstractStyleValue value);
+    // verify that value.parentNode is null
     // if there is no Property object for /property/, creates one
     // else calls its update() method to change the value
-    // if the value changed:
+    // update value's parentNode
     // invoke consumer.renderNode.cascadedValueChanged(property); for each
-    // currently registered consumer
-    // if the value is new:
-    // invoke consumer.renderNode.cascadedValueAdded(property); for each
     // currently registered consumer
 
   void remove(PropertyHandle property);
     // drops the Property object for /property/ from this StyleDeclaration object
-    // invoke consumer.renderNode.cascadedValueRemoved(property); for each
+    // invoke consumer.renderNode.cascadedValueChanged(property); for each
     // currently registered consumer
 }
 ```
@@ -479,7 +506,7 @@ Rule Matching
 class Rule {
   constructor ();
   attribute SelectorQuery selector; // O(1)
-  attribute String? pseudoElement; // O(1)
+  attribute String pseudoElement; // O(1)
   attribute StyleDeclaration styles; // O(1)
 }
 ```
@@ -537,7 +564,24 @@ RenderNode's LayoutManager's childRemoved() callback.
 
 
 ```javascript
-callback any ValueResolver (any value, String propertyName, RenderNode node, Float containerWidth, Float containerHeight);
+dictionary PropertySettings {
+  String? name = null; // null if the property can't be set from a <style> block
+  StyleGrammar? grammar = null; // must be non-null if name is non-null; must be null otherwise
+  Boolean inherited = false;
+  any initialValue = null;
+  Boolean needsManager = false;
+  Boolean needsLayout = false;
+  Boolean needsPaint = false;
+  // PropertyHandle propertyHandle; // assigned by registerProperty
+  // Integer dependencyBit; // assigned by StyleValueResolverSettings.dependsOn()
+}
+
+dictionary GetPropertySettings {
+  String pseudoElement = '';
+  Boolean forceCache = false;
+    // if set to true, will return the cached value if any, or null otherwise
+    // this is used by transitions to figure out what to transition from
+}
 
 class RenderNode { // implemented in C++ with no virtual tables
   // this is generated before layout
@@ -546,43 +590,70 @@ class RenderNode { // implemented in C++ with no virtual tables
   readonly attribute Node? firstChild;
   readonly attribute Node? nextSibling;
 
-  any getProperty(PropertyHandle property, String? pseudoElement = null);
+  // internal state:
+  // - back pointer to backing Node, if we're not a ghost
+  // - cache of resolved property values, mapping as follows:
+  //    - pseudoElement, property => StyleValue object, resolved value, StyleValueResolverSettings, cascade dirty bit, value dirty bit
+  // - property state map (initially empty), as follows:
+  //    - pseudoElement, property => object
+
+  any getProperty(PropertyHandle property, GetPropertySettings? settings = null);
      // looking at the cached data for the given pseudoElement:
-     // if there's a cached value, return it
-     // otherwise, figure out which StyleValue we're going to be using, in this order:
-     //   - look out our override declarations (first with the pseudo, if any, then without)
-     //   - if there's an element:
-     //     - look at this element's StyleDeclarations (first with the pseudo, if any, then without)
-     //   - if it's an inherited property and there's a parent:
-     //      - call getProperty() on the parent (without the pseudo)
-     //   - use the default value
-     // resolve the StyleValue giving it the property and node in question
-     // cache the value, along with the StyleValueResolverSettings
+     // if there's a cached value:
+     //   if settings.forceCache is true, return the value
+     //   if neither dirty bit is set, return the cached resolved value
+     //   if the cascade dirty bit is not set (value dirty is set) then
+     //     resolve the value using the same StyleValue object
+     //      - with firstTime=false on the resolver settings
+     //      - with the cached state object if any
+     // if settings.forceCache is true, return null
+     // - if there's an override declaration with the property (with
+     //   the pseudo or without), then get the value object from there and
+     //   jump to "resolve" below.
+     // - if there's an element and it has a style declaration with the property
+     //   (with the pseudo or without), then get the value object from there
+     //   and jump to "resolve" below.
+     // - if it's not an inherited property, or if there's no parent, then get the
+     //   default value and jump to "resolve" below.
+     // - call the parent render node's getProperty() with the same property
+     //   but no settings, then cache that value as the value for this element
+     //   with the given pseudoElement, with no StyleValue object, no resolver
+     //   settings, and set the state to null.
+     // resolve:
+     //   - get a new resolver settings object
+     //   - if the obtained StyleValue object is different than the
+     //     cached StyleValue object, or if there is no cached object, then set
+     //     the resolver settings to firstTime=true, otherwise it's the same object
+     //     and set firstTime=false.
+     //   - set the resolver settings' state to the current state for this
+     //     pseudoElement/property combination
+     //   - using the obtained StyleValue object, call resolve(),
+     //     passing it this node and the resolver settings object.
+     //   - update the cache with the obtained value and resolver settings,
+     //     resetting the dirty bits; update the state similarly
 
   readonly attribute RenderNodeStyleDeclarationList overrideStyles;
      // mutable; initially empty
      // this is used when isGhost is true, and can also be used more generally to
      // override styles from the layout manager (e.g. to animate a new node into view)
 
-  private void cascadedValueAdded(PropertyHandle property, String? pseudoElement = null);
-  private void cascadedValueRemoved(PropertyHandle property, String? pseudoElement = null);
-  private void cascadedValueChanged(PropertyHandle property, String? pseudoElement = null);
-  private void cascadedValueDirty(PropertyHandle property, String? pseudoElement = null);
-    // - clear the cached data for this property/pseudoElement pair
+  private void cascadedValueChanged(PropertyHandle property, String pseudoElement = '');
+  private void cascadedValueDirty(PropertyHandle property, String pseudoElement = '');
+    // - set the appropriate dirty bit on the cached data for this property/pseudoElement pair
+    //    - cascade dirty for cascadedValueChanged
+    //    - value dirty for cascadedValueDirty
     // - if the property is needsManager, set needsManager to true
-    // - if the property is needsLayout, set needsLayout to true and walk
-    //   up the tree setting descendantNeedsLayout
+    // - if the property is needsLayout, set needsLayout to true and walk up the
+    //   tree setting descendantNeedsLayout
     // - if the property is needsPaint, add the node to the list of nodes that need painting
     // - if the property has a dependencyBit defined, then check the cache of all the
     //   properties on this RenderNode, and the cache for the property in all the child
-    //   nodes and (if pseudoElement is null) or the pseudoElements
-    //   and if any of them have the relevant dependency bit set then call
+    //   nodes and, if pseudoElement is '', the pseudoElements of this node, and,
+    //   if any of them have the relevant dependency bit set, then call
     //     thatRenderNode.cascadedValueDirty(thatProperty, thatPseudoElement)
-    // - if the property is inherited:
-    //     - call this.cascadedValueDirty(property, eachPseudoElement)
-    //     - call eachChildRenderNode.cascadedValueDirty(property, null)
-    // (these four methods all do the same thing; they might get merged into one. For now
-    // they're separate in case we want to make them cleverer later.)
+    // - if the property is inherited, then for each child node, and, if pseudoElement
+    //   is '', the pseudoElements of this node, if the cached value for this property
+    //   is present but has no StyleValue, call thatNode.cascadedValueChanged(property, thatPseudoElement)
 
   readonly attribute Boolean needsManager;
     // means that a property with needsManager:true has changed on this node
@@ -669,9 +740,10 @@ class LayoutManager : EventTarget {
     // }
     // return result;
 
-  void setProperty(RenderNode node, PropertyHandle property, any value, String? pseudoElement = null); // O(1)
+  void setProperty(RenderNode node, PropertyHandle property, any value, String pseudoElement = ''); // O(1)
     // if called from an adjustProperties() method during the property adjustment phase,
     // replaces the value that getProperty() would return on that node with /value/
+    // this also clears the dependency bits and sets the property state to null
 
   void take(RenderNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
