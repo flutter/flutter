@@ -2,13 +2,7 @@
 <import src="/mojo/public/sky/connection.sky" as="connection" />
 <script>
 function wrapHandle(handle, service, client) {
-  var clientClass = client && service.client.delegatingStubClass;
-  var serviceConnection = new connection.Connection(
-      handle, clientClass, service.proxyClass);
-  if (serviceConnection.local)
-      serviceConnection.local.delegate$ = client;
-  serviceConnection.remote.connection$ = serviceConnection;
-  return serviceConnection.remote;
+  return connection.bindProxyHandle(handle, service.client, service);
 }
 
 function connectToService(url, service, client) {
