@@ -123,7 +123,7 @@ class Document : TreeScope {
   constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
 
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // default implementation returns sky.rootLayoutManager;
+    // returns sky.rootLayoutManager;
 }
 
 attribute LayoutManagerConstructor rootLayoutManager; // O(1)
@@ -139,6 +139,9 @@ class ImportElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "import"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class TemplateElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -149,6 +152,8 @@ class TemplateElement : Element {
   constructor attribute Boolean shadow; // O(1) // false
 
   readonly attribute DocumentFragment content; // O(1)
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class ScriptElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -157,6 +162,9 @@ class ScriptElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "script"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class StyleElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -167,6 +175,8 @@ class StyleElement : Element {
   constructor attribute Boolean shadow; // O(1) // false
 
   Array<Rule> getRules(); // O(N) in rules
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class ContentElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -177,6 +187,8 @@ class ContentElement : Element {
   constructor attribute Boolean shadow; // O(1) // false
 
   Array<Node> getDistributedNodes(); // O(N) in distributed nodes
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class ImgElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -185,6 +197,9 @@ class ImgElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "img"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns ImgElementLayoutManager
 }
 class DivElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -209,6 +224,9 @@ class IframeElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "iframe"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns IframeElementLayoutManager
 }
 class TElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -233,6 +251,9 @@ class TitleElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "title"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns null
 }
 class ErrorElement : Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
@@ -241,6 +262,9 @@ class ErrorElement : Element {
   constructor (); // shorthand
   constructor attribute String tagName; // O(1) // "error"
   constructor attribute Boolean shadow; // O(1) // false
+
+  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
+    // returns ErrorElementLayoutManager
 }
 
 callback InternalElementConstructor void (Module module);

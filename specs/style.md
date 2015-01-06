@@ -233,6 +233,8 @@ StyleNode
      |    |
      |    +-- AnimatableLengthStyleValue*
      |    |
+     |    +-- TransitionLengthStyleValue*
+     |    |
      |    +-- PixelLengthStyleValue
      |    |
      |    +-- EmLengthStyleValue*
@@ -267,7 +269,9 @@ StyleNode
 */
 ```
 
-The types marked with * in the list above are not part of sky:core.
+The types marked with * in the list above are not part of sky:core,
+and are only shown here to illustrate what kinds of extensions are
+possible and where they would fit.
 
 TODO(ianh): consider removing 'StyleValue' from these class names
 
@@ -293,8 +297,11 @@ class StyleValueResolverSettings {
     // true if this is the first time this property is being resolved for this element,
     // or if the last time it was resolved, the value was a different object
 
-  attribute Boolean layoutDependent; // default to false
-    // set this if the value should be recomputed each time the ownerLayoutManager's dimensions change, rather than being cached
+  // attribute Boolean layoutDependent
+  void setLayoutDependent();
+    // call this if the value should be recomputed each time the ownerLayoutManager's dimensions change, rather than being cached
+  Boolean getLayoutDependent();
+    // returns true if setLayoutDependent has been called since the last reset()
 
   // attribute "BitField" dependencies; // defaults to no bits set
   void dependsOn(PropertyHandle property);
@@ -315,6 +322,26 @@ class StyleValueResolverSettings {
     // ...which would enable it to update appropriately, and would also
     // let other transitions that come later know that you were half-way
     // through a transition so they can shorten their time accordingly
+    //
+    // best practices: if you're a style value that contains multiple
+    // style values, then before you call their resolve you should
+    // replace the state with a state that is specific to them, and
+    // when you get it back you should insert that value into your
+    // state somehow. For example, in a resolve()r with two child
+    // style values a and b:
+    //    let ourState;
+    //    if (settings.firstTime)
+    //      ourState = { a: null, b: null };
+    //    else
+    //      ourState = settings.state;
+    //    settings.state = ourState.a;
+    //    let aResult = a.resolve(node, settings);
+    //    ourState.a = settings.state;
+    //    settings.state = ourState.b;
+    //    let aResult = b.resolve(node, settings);
+    //    ourState.b = settings.state;
+    //    settings.state = ourState;
+    //    return a + b; // or whatever
 }
 
 class Property : StyleNode {
@@ -945,41 +972,12 @@ Default Styles
 In the constructors for the default elements, they add to themselves
 StyleDeclaration objects as follows:
 
-* ``import``
-* ``template``
-* ``style``
-* ``script``
-* ``content``
-* ``title``
-  These all add to themselves the same declaration as follows:
-```javascript
-let d = new StyleDeclaration();
-d[pDisplay] = new ObjectStyleValue(null);
-this.style.addStyles(d);
-```
-
-* ``img``
-  This adds to itself the declaration as follows:
-```javascript
-let d = new StyleDeclaration();
-d[pDisplay] = new ObjectStyleValue(ImageElementLayoutManager);
-this.style.addStyles(d);
-```
-
 * ``span``
 * ``a``
   These all add to themselves the same declaration as follows:
 ```javascript
 let d = new StyleDeclaration();
 d[pDisplay] = new ObjectStyleValue(InlineLayoutManager);
-this.style.addStyles(d);
-```
-
-* ``iframe``
-  This adds to itself the declaration as follows:
-```javascript
-let d = new StyleDeclaration();
-d[pDisplay] = new ObjectStyleValue(IFrameElementLayoutManager);
 this.style.addStyles(d);
 ```
 
@@ -991,18 +989,10 @@ d[pDisplay] = new ObjectStyleValue(ParagraphLayoutManager);
 this.style.addStyles(d);
 ```
 
-* ``error``
-  This adds to itself the declaration as follows:
-```javascript
-let d = new StyleDeclaration();
-d[pDisplay] = new ObjectStyleValue(ErrorLayoutManager);
-this.style.addStyles(d);
-```
-
-The ``div`` element doesn't have any default styles.
+The other elements doe't have any default styles.
 
 These declarations are all shared between all the elements (so e.g. if
-you reach in and change the declaration that was added to a ``title``
+you reach in and change the declaration that was added to a ``span``
 element, you're going to change the styles of all the other
 default-hidden elements). (In other words, in the code snippets above,
 the ``d`` variable is initialised in shared code, and only the

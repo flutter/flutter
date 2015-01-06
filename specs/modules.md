@@ -29,7 +29,7 @@ Module API
 ----------
 
 Within a script in a module, the ``module`` identifier is bound to
-the [``Module`` object](apis.md) that represents the module.
+the ``Module`` object that represents the module.
 
 ### Exporting values ###
 
@@ -37,8 +37,8 @@ A module can export a value by assigning the ``exports`` property of
 its ``Module`` object. By default, the ``exports`` property of a
 ``Module`` is an empty Object. Properties can be added to the object,
 or, it can be set to an entirely different object; for example, it
-could be set to the module's Document itself, in case the point of the
-module is to expose some ``template`` elements.
+could be set to the module's ``Document`` itself, in case the point of
+the module is to expose some ``template`` elements.
 
 ### Exporting element definitions ###
 
