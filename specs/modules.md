@@ -50,6 +50,24 @@ an element to the importee's element registry.
 ### IDL ###
 
 ```javascript
+dictionary InternalElementOptions {
+  String tagName;
+  Boolean shadow = false;
+  Object prototype = Element;
+}
+interface InternalElementConstructorWithoutShadow {
+  constructor (Module module);
+  attribute String tagName;
+}
+interface InternalElementConstructorWithShadow {
+  constructor (Module module);
+  attribute String tagName;
+  attribute Boolean shadow;
+}
+typedef ElementRegistrationOptions (InternalElementOptions or
+                                    InternalElementConstructorWithoutShadow or
+                                    InternalElementConstructorWithShadow);
+
 abstract class AbstractModule : EventTarget {
   readonly attribute Document document; // O(1) // the Documentof the module or application
   Promise<any> import(String url); // O(Yikes) // returns the module's exports
@@ -57,23 +75,37 @@ abstract class AbstractModule : EventTarget {
 
   readonly attribute String url;
 
-  ElementConstructor registerElement(ElementRegistration options); // O(1)
+  ElementConstructor registerElement(Object options); // O(1)
   // if you call registerElement() with an object that was created by
   // registerElement(), it just returns the object after registering it,
   // rather than creating a new constructor
   // otherwise, it proceeds as follows:
-  //  1. let constructor be the constructor passed in, if any
-  //  2. let prototype be the constructor's prototype; if there is no
-  //     constructor, let prototype be Element
-  //  3. create a new Function that:
-  //      1. throws if not called as a constructor
-  //      2. creates an actual Element object
-  //      3. initialises the shadow tree if shadow on the options is true
-  //      4. calls constructor, if it's not null, with the module as the argument
-  //  4. let that new Function's prototype be the aforementioned prototype
-  //  5. let that new Function have tagName and shadow properties set to
-  //     the values passed in on options
-  //  6. register the new element
+  //  - if options is a Function (i.e. it is either an
+  //    InternalElementConstructorWithoutShadow object or an
+  //    InternalElementConstructorWithShadow object), then let
+  //    constructor be that function, and let prototype be that
+  //    functions's prototype; otherwise, let constructor be a no-op
+  //    function and let prototype be the prototype property of the
+  //    object passed in (the InternalElementOptions; prototype
+  //    defaults to Element).
+  //  - let shadow be option's shadow property's value coerced to a
+  //    boolean, if the property is present, or else the value false.
+  //  - let shadow be option's tagName property's value.
+  //  - create a new Function that:
+  //      - throws if not called as a constructor
+  //      - creates an actual element object (the C++-backed object)
+  //      - initialises the shadow tree if shadow on the options is
+  //        true
+  //      - calls constructor, if it's not null, with the module as
+  //        the argument
+  //      - is marked as created by registerElement() so that it can
+  //        be recognised if used as an argument to registerElement()
+  //  - let that new Function's prototype be the aforementioned prototype
+  //  - let that new Function have tagName and shadow properties set to
+  //    the aforementioned tagName and shadow
+  //  - register the new tagName with this constructor
+  //  - return the new Function (which is, not coincidentally, an
+  //    InternalElementConstructorWithShadow)
 
   readonly attribute ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
 }

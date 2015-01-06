@@ -267,13 +267,6 @@ class ErrorElement : Element {
     // returns ErrorElementLayoutManager
 }
 
-callback InternalElementConstructor void (Module module);
-dictionary ElementRegistration {
-  String tagName;
-  Boolean shadow = false;
-  InternalElementConstructor? constructor = null;
-}
-
 interface ElementConstructor {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand

@@ -55,25 +55,25 @@ SKY MODULE - button widgets for calculator
 
 <script>
  module.exports = {
-   ThreeDButtonElement: module.registerElement({
-     tagName: 'graybutton',
-     shadow: true,
-     constructor: class extends AbstractButton {
+   ThreeDButtonElement: module.registerElement(
+     class extends AbstractButton {
+       static get tagName() { return 'graybutton'; }
+       static get shadow() { return true; }
        constructor (module) {
          super(module);
          this.shadowRoot.append(module.document.findId('threed-button-shadow-tree').cloneNode(true));
        }
-     },
-   }),
-   FlatButtonElement: module.registerElement({
-     tagName: 'graybutton',
-     shadow: true,
-     constructor: class extends AbstractButton {
+     }
+   ),
+   FlatButtonElement: module.registerElement(
+     class extends AbstractButton {
+       static get tagName() { return 'flatbutton'; }
+       static get shadow() { return true; }
        constructor (module) {
          super(module);
          this.shadowRoot.append(module.document.findId('flat-shadow-tree').cloneNode(true));
        }
-     },
-   }),
+     }
+   ),
  };
 </script>

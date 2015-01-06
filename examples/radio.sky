@@ -9,10 +9,10 @@ SKY MODULE - radio button and radio button group
  </style>
 </template>
 <script>
- module.exports.RadioElement = module.registerElement({
-   tagName: 'radio',
-   shadow: true,
-   constructor: class extends Element {
+ module.exports.RadioElement = module.registerElement(
+   class extends Element {
+     static get tagName() { return 'radio'; }
+     static get shadow() { return true; }
      constructor (module) {
        super(module);
        this.addEventListener('click', (event) => this.checked = true);
@@ -38,8 +38,8 @@ SKY MODULE - radio button and radio button group
          if (this.parentNode instanceof module.exports.RadioGroupElement)
            this.parentNode.setChecked(this);
      }
-   },
- });
+   }
+ );
 </script>
 
 <!-- <radiogroup> -->
@@ -49,10 +49,10 @@ SKY MODULE - radio button and radio button group
  </style>
 </template>
 <script>
- module.exports.RadioGroupElement = module.registerElement{
-   tagName: 'radiogroup',
-   shadow: true,
-   constructor: (class extends Element {
+ module.exports.RadioGroupElement = module.registerElement(
+   class extends Element {
+     static get tagName() { return 'radiogroup'; }
+     static get shadow() { return true; }
      constructor (module) {
        super(module);
        this.shadowRoot.append(module.document.findId('radiogroup-shadow').content.cloneNode(true));
@@ -81,6 +81,6 @@ SKY MODULE - radio button and radio button group
            if (child != radio)
              child.checked = false;
      }
-   },
- });
+   }
+ );
 </script>
