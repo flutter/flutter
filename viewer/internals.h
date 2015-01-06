@@ -31,6 +31,8 @@ class Internals : public gin::Wrappable<Internals> {
   std::string ContentAsText();
   void NotifyTestComplete(const std::string& test_result);
 
+  mojo::Handle ConnectToEmbedderService(const std::string& interface_name);
+
   mojo::Handle ConnectToService(
       const std::string& application_url, const std::string& interface_name);
 

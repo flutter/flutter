@@ -49,6 +49,8 @@ gin::ObjectTemplateBuilder Internals::GetObjectTemplateBuilder(
       .SetMethod("contentAsText", &Internals::ContentAsText)
       .SetMethod("notifyTestComplete", &Internals::NotifyTestComplete)
       .SetMethod("connectToService", &Internals::ConnectToService)
+      .SetMethod("connectToEmbedderService",
+                 &Internals::ConnectToEmbedderService)
       .SetMethod("pauseAnimations", &Internals::pauseAnimations);
 }
 
@@ -70,6 +72,17 @@ void Internals::NotifyTestComplete(const std::string& test_result) {
   document_view_->GetPixelsForTesting(&pixels);
   test_harness_->OnTestComplete(test_result,
       mojo::Array<uint8_t>::From(pixels));
+}
+
+mojo::Handle Internals::ConnectToEmbedderService(
+    const std::string& interface_name) {
+  if (!document_view_)
+    return mojo::Handle();
+
+  mojo::MessagePipe pipe;
+  document_view_->imported_services()->ConnectToService(interface_name,
+                                                        pipe.handle1.Pass());
+  return pipe.handle0.release();
 }
 
 mojo::Handle Internals::ConnectToService(
