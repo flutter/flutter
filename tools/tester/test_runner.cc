@@ -55,6 +55,7 @@ void TestRunner::OnTestComplete(const std::string& test_result,
     std::cout << "\nActualHash: FAKEHASHSTUB\n";
     std::cout << "Content-Type: image/png\n";
     std::cout << "Content-Length: " << pixels.size() << "\n";
+    CHECK(pixels.size()) << "Could not dump pixels. Did you call notifyTestComplete before the first paint?";
     std::cout.write(
         reinterpret_cast<const char*>(&pixels[0]), pixels.size());
   }

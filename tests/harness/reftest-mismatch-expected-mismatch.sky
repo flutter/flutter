@@ -1,12 +1,9 @@
 <foo>
+<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
 This is a mismatch reftest.
 <script>
-window.addEventListener('load', function() {
-    // TODO(ojan): requestAnimationFrame once we properly pump frames.
-    // https://github.com/domokit/mojo/issues/32
-    setTimeout(function() {
-        internals.notifyTestComplete("");
-    }, 100);
-})
+runAfterDisplay(function() {
+    internals.notifyTestComplete("");
+});
 </script>
 </foo>
