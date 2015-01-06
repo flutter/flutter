@@ -3,14 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from skypy.paths import Paths
+from skypy.skyserver import SkyServer
 import argparse
 import logging
 import os
-from skypy.paths import Paths
 import skypy.configuration as configuration
-import socket;
 import subprocess
-import sys
 import urlparse
 
 
@@ -21,21 +20,19 @@ SUPPORTED_MIME_TYPES = [
 ]
 
 
+HTTP_PORT = 9999
+
+
 class SkyDebugger(object):
     def __init__(self):
-        self._sky_server = None
         self.paths = None
 
-    @staticmethod
-    def _port_in_use(port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        return sock.connect_ex(('localhost', port)) == 0
+    def _server_root_and_url_from_path_arg(self, url_or_path):
+        # This is already a valid url we don't need a local server.
+        if urlparse.urlparse(url_or_path).scheme:
+            return None, url_or_path
 
-    def _start_http_server_for_file(self, path, configuration):
-        HTTP_PORT = 9999
-
-
-        path = os.path.abspath(path)
+        path = os.path.abspath(url_or_path)
         if os.path.commonprefix([path, self.paths.src_root]) == self.paths.src_root:
             server_root = self.paths.src_root
         else:
@@ -43,23 +40,8 @@ class SkyDebugger(object):
             logging.warn(
                 '%s is outside of mojo root, using %s as server root' %
                 (path, server_root))
-        relative_path = os.path.relpath(path, server_root)
-
-        if self._port_in_use(HTTP_PORT):
-            logging.warn(
-                'Port %s already in use, assuming custom sky_server started.' %
-                HTTP_PORT)
-        else:
-            subprocess.call(os.path.join(self.paths.sky_tools_directory,
-                'download_sky_server'))
-            server_command = [
-                os.path.join(self.paths.src_root, 'out', 'downloads', 'sky_server'),
-                '-t', configuration,
-                server_root,
-                str(HTTP_PORT),
-            ]
-            self._sky_server = subprocess.Popen(server_command)
-        return 'http://localhost:%s/%s' % (HTTP_PORT, relative_path)
+        local_url = SkyServer.url_for_path(HTTP_PORT, server_root, path)
+        return server_root, local_url
 
     def _in_chromoting(self):
         return os.environ.get('CHROME_REMOTE_DESKTOP_SESSION', False)
@@ -71,7 +53,7 @@ class SkyDebugger(object):
         parser.add_argument('--gdb', action='store_true')
         parser.add_argument('--use-osmesa', action='store_true',
             default=self._in_chromoting())
-        parser.add_argument('url', nargs='?', type=str)
+        parser.add_argument('url_or_path', nargs='?', type=str)
         configuration.add_arguments(parser)
         args = parser.parse_args()
 
@@ -86,31 +68,28 @@ class SkyDebugger(object):
             '--url-mappings=mojo:window_manager=mojo:sky_debugger',
             'mojo:window_manager',
         ]
-        if args.url:
-            url = args.url
-            if not urlparse.urlparse(url).scheme:
-                url = self._start_http_server_for_file(url, args.configuration)
-
-            prompt_args = '--args-for=mojo:sky_debugger_prompt %s' % url
-            shell_command.append(prompt_args)
         if args.use_osmesa:
             shell_command.append('--args-for=mojo:native_viewport_service --use-osmesa')
+
+        server_root = None
+
+        if args.url_or_path:
+            # Check if we need a local server for the url/path arg:
+            server_root, url = \
+                self._server_root_and_url_from_path_arg(args.url_or_path)
+            prompt_args = '--args-for=mojo:sky_debugger_prompt %s' % url
+            shell_command.append(prompt_args)
+
         if args.gdb:
             shell_command = ['gdb', '--args'] + shell_command
 
-        subprocess.check_call(shell_command)
-
-    def shutdown(self):
-        print "Quitting"
-        if self._sky_server:
-            self._sky_server.terminate()
+        if server_root:
+            with SkyServer(self.paths, HTTP_PORT, args.configuration,
+                    server_root):
+                subprocess.check_call(shell_command)
+        else:
+            subprocess.check_call(shell_command)
 
 
 if __name__ == '__main__':
-    skydb = SkyDebugger()
-    try:
-        skydb.main()
-    except (KeyboardInterrupt, SystemExit):
-        pass
-    finally:
-        skydb.shutdown()
+    SkyDebugger().main()
