@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 
-<sky-element name="test-element">
+<sky-element name="test-element" attributes="size:number, checked:boolean,name:string">
 <template>
   <div id="inside" on-test-event="handleEvent" attr="{{ value }}">{{ value }}</div>
 </template>
@@ -15,12 +15,29 @@ module.exports = class extends SkyElement {
     this.lastEvent = null;
     this.value = 10;
     this.shadowRootReadyCount = 0;
+    this.changes = [];
   }
   handleEvent(event) {
     this.lastEvent = event;
   }
   shadowRootReady() {
     this.shadowRootReadyCount++;
+  }
+  sizeChanged(oldValue, newValue) {
+    this.recordAttributeChange('size', oldValue, newValue);
+  }
+  checkedChanged(oldValue, newValue) {
+    this.recordAttributeChange('checked', oldValue, newValue);
+  }
+  nameChanged(oldValue, newValue) {
+    this.recordAttributeChange('name', oldValue, newValue);
+  }
+  recordAttributeChange(name, oldValue, newValue) {
+    this.changes.push({
+      name: name,
+      newValue: newValue,
+      oldValue: oldValue,
+    });
   }
 }.register();
 </script>

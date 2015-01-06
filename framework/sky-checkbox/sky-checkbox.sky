@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
 
-<sky-element name="sky-checkbox">
+<sky-element name="sky-checkbox" attributes="checked:boolean">
 <template>
   <style>
     :host {
@@ -45,7 +45,7 @@
     }
   </style>
   <div id="container" class="{{ containerStyle }}">
-    <div id="check" class="{{ checkStyle }}"></div>
+    <div id="check" class="{{ checkStyle }}" />
   </div>
 </template>
 <script>
@@ -53,34 +53,18 @@ module.exports = class extends SkyButton {
   created() {
     super.created();
 
-    this.containerStyle = "";
-    this.checkStyle = "";
+    this.containerStyle = '';
+    this.checkStyle = '';
 
-    this.setChecked(this.getAttribute('checked') == 'true');
-
-    this.addEventListener("mouseup", function() {
-      this.toggleChecked();
+    this.addEventListener('mouseup', function() {
+      this.checked = !this.checked;
     });
   }
-  toggleChecked() {
-    this.setChecked(!this.checked);
+  checkedChanged(oldValue, newValue) {
+    this.checkStyle = newValue ? 'checked' : '';
   }
-  setChecked(checked) {
-    this.checked = checked;
-    this.setAttribute('checked', checked);
-    this.checkStyle = checked ? 'checked' : '';
-  }
-  setHighlight(newValue) {
-    super.setHighlight(newValue);
+  highlightChanged(oldValue, newValue) {
     this.containerStyle = newValue ? 'highlight' : '';
-  }
-  shadowRootReady() {
-    // TODO(esprehn): This is needed because the checked and highlight
-    // setters might be called before the shadowRoot is created since that
-    // doesn't happen until attached(). We should figure out a better way to do
-    // this.
-    this.setHighlight(this.highlight);
-    this.setChecked(this.checked);
   }
 }.register();
 </script>

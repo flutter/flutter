@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
 
-<sky-element name="sky-radio">
+<sky-element name="sky-radio" attributes="selected:boolean, group:string">
 <template>
   <style>
     :host {
@@ -57,7 +57,7 @@ class RadioGroupController {
     this.radios.remove(radio);
   }
   takeSelectionFromGroup(selectedRadio) {
-    // Emtpy/null/undefined group means and isolated radio.
+    // Emtpy/null/undefined group means an isolated radio.
     if (!selectedRadio.group)
       return;
     this.radios.forEach(function(radio) {
@@ -65,38 +65,38 @@ class RadioGroupController {
         return;
       if (radio.group != selectedRadio.group)
         return;
-      radio.setSelected(false);
-    })
+      radio.selected = false;
+    });
   }
 };
 
 module.exports = class extends SkyButton {
   created() {
     super.created();
-    this.setSelected(this.getAttribute('selected'));
-    this.group = this.getAttribute('group');
 
-    this.addEventListener("mouseup", function() {
-      this.setSelected(true);
+    this.controller = null;
+
+    this.addEventListener('mouseup', function() {
+      this.selected = true;
     });
-    this.cachedController = null;
   }
   attached() {
     super.attached();
-    this.cachedController = RadioGroupController.forRadio(this);
-    this.cachedController.addRadio(this);
+    this.controller = RadioGroupController.forRadio(this);
+    this.controller.addRadio(this);
   }
   detached() {
     super.detached();
-    this.cachedController.removeRadio(this);
+    this.controller.removeRadio(this);
+    this.controller = null;
   }
-  setSelected(selected) {
-    if (selected == this.selected)
-      return;
-    this.setAttribute('selected', selected);
-    this.selected = selected;
-    if (selected && this.cachedController)
-      this.cachedController.takeSelectionFromGroup(this);
+  selectedChanged(oldValue, newValue) {
+    if (newValue && this.controller)
+      this.controller.takeSelectionFromGroup(this);
+  }
+  groupChanged(oldValue, newValue) {
+    if (this.selected && this.controller)
+      this.controller.takeSelectionFromGroup(this);
   }
 }.register();
 </script>

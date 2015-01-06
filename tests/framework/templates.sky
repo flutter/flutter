@@ -5,8 +5,10 @@
 
 <div id="sandbox"></div>
 
+<test-element id="parser-element" checked="true" size="10" name="foo bar" />
+
 <script>
-describe("SkyElement templates", function() {
+describe("SkyElement", function() {
   var element;
   var sandbox = document.getElementById("sandbox");
 
@@ -30,6 +32,87 @@ describe("SkyElement templates", function() {
     assert.isTrue(element.isAttached);
     element.remove();
     assert.isFalse(element.isAttached);
+  });
+
+  it("should handle parser created elements with attributes", function() {
+    var element = document.getElementById("parser-element");
+    assert.isTrue(element.checked);
+    assert.isNumber(element.size);
+    assert.equal(element.size, 10);
+    assert.isString(element.name);
+    assert.equal(element.name, "foo bar");
+  });
+
+  it("should have defaults for all attributes", function() {
+    var element = new TestElement();
+    assert.isFalse(element.checked);
+    assert.isNumber(element.size);
+    assert.equal(element.size, 0);
+    assert.isString(element.name);
+    assert.equal(element.name, "");
+  });
+
+  it("should call change callbacks", function() {
+    var element = new TestElement();
+    element.size = 20;
+    element.name = "first name";
+    element.checked = true;
+    element.size = 10;
+    element.name = "second name";
+    assert.deepEqual(element.changes, [
+      { name: 'size', oldValue: 0, newValue: 20 },
+      { name: 'name', oldValue: "", newValue: "first name" },
+      { name: 'checked', oldValue: false, newValue: true },
+      { name: 'size', oldValue: 20, newValue: 10 },
+      { name: 'name', oldValue: "first name", newValue: "second name" },
+    ]);
+  });
+
+  it("should convert boolean reflected attributes", function() {
+    var element = new TestElement();
+    assert.isFalse(element.checked);
+    element.checked = null;
+    assert.isFalse(element.checked);
+    element.checked = "true";
+    assert.isTrue(element.checked);
+    element.checked = "false";
+    assert.isFalse(element.checked);
+    element.checked = {};
+    assert.isTrue(element.checked);
+  });
+
+  it("should convert string reflected attributes", function() {
+    var element = new TestElement();
+    assert.equal(element.name, "");
+    element.name = null;
+    assert.equal(element.name, "");
+    element.name = [1, 2];
+    assert.equal(element.name, "1,2");
+    element.name = false;
+    assert.equal(element.name, "false");
+    element.name = {};
+    assert.equal(element.name, "[object Object]");
+    element.name = "";
+    assert.equal(element.name, "");
+  });
+
+  it("should convert number reflected attributes", function() {
+    var element = new TestElement();
+    assert.isNumber(element.size);
+    element.size = 20;
+    assert.isNumber(element.size);
+    assert.equal(element.size, 20);
+    element.size = "08";
+    assert.equal(element.size, 8);
+    element.size = " 30 ";
+    assert.equal(element.size, 30);
+    element.size = "1.5";
+    assert.isNumber(element.size);
+    assert.equal(element.size, 1.5);
+    element.size = "false";
+    assert.isTrue(isNaN(element.size));
+    element.size = {};
+    assert.isTrue(isNaN(element.size));
   });
 
   it("should connect data binding", function(done) {

@@ -7,6 +7,53 @@
 <script>
 var templates = new Map();
 
+var attributeConverters = {
+  boolean: function(value) {
+    if (typeof value == 'string')
+      return value == 'true';
+    return !!value;
+  },
+  number: function(value) {
+    return Number(value);
+  },
+  string: function(value) {
+    if (value === null)
+      return '';
+    return String(value);
+  },
+};
+
+function defineReflectedAttribute(prototype, converter, name) {
+  Object.defineProperty(prototype, name, {
+    get: function() {
+      return converter(this.getAttribute(name));
+    },
+    set: function(newValue) {
+      this.setAttribute(name, converter(newValue));
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  prototype[name + 'AttributeChanged'] = function(oldValue, newValue) {
+    this.notifyPropertyChanged(name, converter(oldValue), converter(newValue));
+  };
+}
+
+function defineReflectedAttributes(elementClass, list) {
+  var attributeNames = (list || '').split(',');
+  var prototype = elementClass.prototype;
+
+  for (var i = 0; i < attributeNames.length; ++i) {
+    var parts = attributeNames[i].split(':');
+    var name = parts[0].trim();
+    var type = (parts[1] || '').trim();
+    var converter = attributeConverters[type] || attributeConverters.string;
+
+    defineReflectedAttribute(prototype, converter, name);
+  }
+}
+
 class SkyElement extends HTMLElement {
 
   static register() {
@@ -15,13 +62,15 @@ class SkyElement extends HTMLElement {
     if (wrapper.localName !== 'sky-element')
       throw new Error('No <sky-element>.');
 
-    var tagName = wrapper.getAttribute("name");
+    var tagName = wrapper.getAttribute('name');
     if (!tagName)
       throw new Error('<sky-element> must have a name.');
 
     var template = wrapper.querySelector('template');
     if (template)
       templates.set(tagName, template);
+
+    defineReflectedAttributes(this, wrapper.getAttribute('attributes'));
 
     return document.registerElement(tagName, {
       prototype: this.prototype,
@@ -51,6 +100,13 @@ class SkyElement extends HTMLElement {
   createdCallback() {
     this.isAttached = false;
     this.created();
+
+    // Invoke attributeChanged callback when element is first created too.
+    var attributes = this.getAttributes();
+    for (var i = 0; i < attributes.length; ++i) {
+      var attribute = attributes[i];
+      this.attributeChangedCallback(attribute.name, null, attribute.value);
+    }
   }
 
   attachedCallback() {
@@ -72,9 +128,23 @@ class SkyElement extends HTMLElement {
     this.isAttached = false;
   }
 
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    // reserved for canonical behavior
-    this.attributeChanged(attrName, oldValue, newValue);
+  attributeChangedCallback(name, oldValue, newValue) {
+    this.attributeChanged(name, oldValue, newValue);
+    var handler = this[name + 'AttributeChanged'];
+    if (typeof handler == 'function')
+      handler.call(this, oldValue, newValue);
+  }
+
+  notifyPropertyChanged(name, oldValue, newValue) {
+    var notifier = Object.getNotifier(this);
+    notifier.notify({
+      type: 'update',
+      name: name,
+      oldValue: oldValue,
+    });
+    var handler = this[name + 'Changed'];
+    if (typeof handler == 'function')
+      handler.call(this, oldValue, newValue);
   }
 };
 

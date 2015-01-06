@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 
-<sky-element name="sky-button">
+<sky-element name="sky-button" attributes="highlight:boolean">
 <template>
   <style>
     :host {
@@ -21,28 +21,22 @@
       background-color: orange;
     }
   </style>
-  <content></content>
+  <content />
 </template>
 <script>
 module.exports = class extends SkyElement {
   created() {
     this.tabIndex = 0; // Make focusable.
-    this.setHighlight(false);
 
-    this.addEventListener("mousedown", function() {
-      this.setHighlight(true);
+    this.addEventListener('mousedown', function() {
+      this.highlight = true;
     });
-    this.addEventListener("mouseup", function() {
-      this.setHighlight(false);
+    this.addEventListener('mouseup', function() {
+      this.highlight = false;
     });
-    this.addEventListener("mouseout", function() {
-      this.setHighlight(false);
+    this.addEventListener('mouseout', function() {
+      this.highlight = false;
     });
-  }
-  setHighlight(newValue) {
-    // Set both a property and an attribute to keep both parents happy.
-    this.setAttribute('highlight', newValue);
-    this.highlight = newValue;
   }
 }.register();
 </script>
