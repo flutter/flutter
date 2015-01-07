@@ -13,8 +13,8 @@ SKY MODULE - radio button and radio button group
    class extends Element {
      static get tagName() { return 'radio'; }
      static get shadow() { return true; }
-     constructor (module) {
-       super(module);
+     constructor (hostModule) {
+       super(hostModule);
        this.addEventListener('click', (event) => this.checked = true);
        this.shadowRoot.append(module.document.findId('radio-shadow').content.cloneNode(true));
      }
@@ -53,8 +53,8 @@ SKY MODULE - radio button and radio button group
    class extends Element {
      static get tagName() { return 'radiogroup'; }
      static get shadow() { return true; }
-     constructor (module) {
-       super(module);
+     constructor (hostModule) {
+       super(hostModule);
        this.shadowRoot.append(module.document.findId('radiogroup-shadow').content.cloneNode(true));
      }
      get value () {
