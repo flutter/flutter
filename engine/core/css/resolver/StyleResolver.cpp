@@ -316,7 +316,7 @@ void StyleResolver::matchUARules(ElementRuleCollector& collector, RuleSet* rules
     collector.sortAndTransferMatchedRules();
 }
 
-void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollector& collector, bool includeSMILProperties)
+void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollector& collector)
 {
     matchUARules(collector);
     matchAuthorRules(state.element(), collector, false);
@@ -351,8 +351,7 @@ void StyleResolver::loadPendingResources(StyleResolverState& state)
     document().styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
 }
 
-PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderStyle* defaultParent, StyleSharingBehavior sharingBehavior,
-    RuleMatchingBehavior matchingBehavior)
+PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderStyle* defaultParent)
 {
     ASSERT(document().frame());
     ASSERT(document().settings());
@@ -364,7 +363,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
         document().setDirectionSetOnDocumentElement(false);
     StyleResolverState state(document(), element, defaultParent);
 
-    if (sharingBehavior == AllowStyleSharing && state.parentStyle()) {
+    if (state.parentStyle()) {
         SharedStyleFinder styleFinder(state.elementContext(), *this);
         if (RefPtr<RenderStyle> sharedStyle = styleFinder.findSharedStyle())
             return sharedStyle.release();
@@ -391,7 +390,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     {
         ElementRuleCollector collector(state.elementContext(), state.style());
 
-        matchAllRules(state, collector, matchingBehavior != MatchAllRulesExcludingSMIL);
+        matchAllRules(state, collector);
 
         applyMatchedProperties(state, collector.matchedResult());
     }

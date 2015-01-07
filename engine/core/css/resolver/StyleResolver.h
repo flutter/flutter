@@ -64,16 +64,6 @@ class StyleRuleKeyframes;
 
 class MatchResult;
 
-enum StyleSharingBehavior {
-    AllowStyleSharing,
-    DisallowStyleSharing,
-};
-
-enum RuleMatchingBehavior {
-    MatchAllRules,
-    MatchAllRulesExcludingSMIL
-};
-
 const unsigned styleSharingListSize = 15;
 const unsigned styleSharingMaxDepth = 32;
 typedef Deque<RawPtr<Element>, styleSharingListSize> StyleSharingList;
@@ -96,8 +86,7 @@ public:
     explicit StyleResolver(Document&);
     virtual ~StyleResolver();
 
-    PassRefPtr<RenderStyle> styleForElement(Element*, RenderStyle* parentStyle = 0, StyleSharingBehavior = AllowStyleSharing,
-        RuleMatchingBehavior = MatchAllRules);
+    PassRefPtr<RenderStyle> styleForElement(Element*, RenderStyle* parentStyle = 0);
 
     PassRefPtr<RenderStyle> styleForKeyframe(Element*, const RenderStyle&, RenderStyle* parentStyle, const StyleKeyframe*, const AtomicString& animationName);
     static PassRefPtr<AnimatableValue> createAnimatableValueSnapshot(Element&, CSSPropertyID, CSSValue&);
@@ -166,7 +155,7 @@ private:
     void matchUARules(ElementRuleCollector&, RuleSet*);
     void matchAuthorRules(Element*, ElementRuleCollector&, bool includeEmptyRules);
     void matchAuthorRulesForShadowHost(Element*, ElementRuleCollector&, bool includeEmptyRules, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers, Vector<RawPtr<ScopedStyleResolver>, 8>& resolversInShadowTree);
-    void matchAllRules(StyleResolverState&, ElementRuleCollector&, bool includeSMILProperties);
+    void matchAllRules(StyleResolverState&, ElementRuleCollector&);
     void matchUARules(ElementRuleCollector&);
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
