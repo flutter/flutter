@@ -71,8 +71,6 @@ public:
 
     DOMSelection* getSelection() const;
 
-    bool applyAuthorStyles() const;
-
     // Used by the basic DOM mutation methods (e.g., appendChild()).
     void adoptIfNeeded(Node&);
 

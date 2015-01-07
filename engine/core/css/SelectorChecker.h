@@ -46,8 +46,7 @@ public:
     enum ContextFlags {
         // FIXME: Revmoe DefaultBehavior.
         DefaultBehavior = 0,
-        ScopeContainsLastMatchedElement = 1,
-        TreatShadowHostAsNormalScope = 2,
+        TreatShadowHostAsNormalScope = 1,
     };
 
     struct SelectorCheckingContext {

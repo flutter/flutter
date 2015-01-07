@@ -77,8 +77,6 @@ bool SelectorQuery::selectorMatches(ContainerNode& rootNode, Element& element) c
     for (const CSSSelector* selector = m_selectors.first(); selector; selector = CSSSelectorList::next(*selector)) {
         SelectorChecker::SelectorCheckingContext context(*selector, &element);
         context.scope = !rootNode.isDocumentNode() ? &rootNode : 0;
-        if (context.scope)
-            context.contextFlags = SelectorChecker::ScopeContainsLastMatchedElement;
         if (checker.match(context))
             return true;
     }

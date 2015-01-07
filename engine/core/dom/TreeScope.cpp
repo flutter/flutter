@@ -213,11 +213,6 @@ DOMSelection* TreeScope::getSelection() const
     return m_selection.get();
 }
 
-bool TreeScope::applyAuthorStyles() const
-{
-    return rootNode().isDocumentNode();
-}
-
 void TreeScope::adoptIfNeeded(Node& node)
 {
     ASSERT(this);

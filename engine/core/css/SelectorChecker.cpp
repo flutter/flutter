@@ -46,7 +46,7 @@ SelectorChecker::SelectorChecker(Document& document, Mode mode)
 
 static bool scopeContainsLastMatchedElement(const SelectorChecker::SelectorCheckingContext& context)
 {
-    if (!(context.contextFlags & SelectorChecker::ScopeContainsLastMatchedElement))
+    if (!context.scope)
         return true;
 
     ASSERT(context.scope);
