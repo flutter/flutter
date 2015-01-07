@@ -154,7 +154,7 @@ public:
     // FIXME: This method is only used here and in the legacy animations
     // implementation. It should be made private or file-scope when the legacy
     // engine is removed.
-    static const StyleRuleKeyframes* matchScopedKeyframesRule(StyleResolver*, const Element*, const StringImpl*);
+    static const StyleRuleKeyframes* matchScopedKeyframesRule(StyleResolver*, const Element*, String animationName);
 
     static const StylePropertyShorthand& animatableProperties();
     static bool isAllowedAnimation(CSSPropertyID);

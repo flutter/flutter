@@ -54,8 +54,7 @@ public:
     const TreeScope& treeScope() const { return *m_scope; }
 
 public:
-    const StyleRuleKeyframes* keyframeStylesForAnimation(const StringImpl* animationName);
-    void addKeyframeStyle(PassRefPtr<StyleRuleKeyframes>);
+    const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, bool includeEmptyRules, bool applyAuthorStyles, CascadeScope, CascadeOrder = ignoreCascadeOrder);
     void addRulesFromSheet(CSSStyleSheet*, StyleResolver*);
@@ -69,9 +68,6 @@ private:
 
     RawPtr<TreeScope> m_scope;
     Vector<RawPtr<CSSStyleSheet> > m_authorStyleSheets;
-
-    typedef HashMap<const StringImpl*, RefPtr<StyleRuleKeyframes> > KeyframesRuleMap;
-    KeyframesRuleMap m_keyframesRuleMap;
 
     RuleFeatureSet m_features;
 };

@@ -86,7 +86,7 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
 {
     // When the element is null, use its parent for scoping purposes.
     const Element* elementForScoping = element ? element : &parentElement;
-    const StyleRuleKeyframes* keyframesRule = CSSAnimations::matchScopedKeyframesRule(resolver, elementForScoping, name.impl());
+    const StyleRuleKeyframes* keyframesRule = CSSAnimations::matchScopedKeyframesRule(resolver, elementForScoping, name);
     if (!keyframesRule)
         return;
 
@@ -193,7 +193,7 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
 
 } // namespace
 
-const StyleRuleKeyframes* CSSAnimations::matchScopedKeyframesRule(StyleResolver* resolver, const Element* element, const StringImpl* animationName)
+const StyleRuleKeyframes* CSSAnimations::matchScopedKeyframesRule(StyleResolver* resolver, const Element* element, String animationName)
 {
     // FIXME: This is all implementation detail of style resolver, CSSAnimations shouldn't be reaching into any of it.
     Vector<RawPtr<ScopedStyleResolver>, 8> stack;

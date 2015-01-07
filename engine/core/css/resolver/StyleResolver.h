@@ -196,10 +196,6 @@ private:
     template <StyleResolver::StyleApplicationPass pass>
     void applyAllProperty(StyleResolverState&, CSSValue*);
 
-    // FIXME: This likely belongs on RuleSet.
-    typedef HashMap<StringImpl*, RefPtr<StyleRuleKeyframes> > KeyframesRuleMap;
-    KeyframesRuleMap m_keyframesRuleMap;
-
     static RenderStyle* s_styleNotYetAvailable;
 
     MatchedPropertiesCache m_matchedPropertiesCache;

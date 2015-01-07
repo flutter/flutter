@@ -195,11 +195,6 @@ void StyleResolver::finishAppendAuthorStyleSheets()
 
 void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet* parentStyleSheet, unsigned parentIndex, ContainerNode& scope)
 {
-    const Vector<RawPtr<StyleRuleKeyframes> > keyframesRules = authorRules.keyframesRules();
-    ScopedStyleResolver* resolver = &scope.treeScope().scopedStyleResolver();
-    for (unsigned i = 0; i < keyframesRules.size(); ++i)
-        resolver->addKeyframeStyle(keyframesRules[i]);
-
     // FIXME(BUG 72461): We don't add @font-face rules of scoped style sheets for the moment.
     if (scope.isDocumentNode()) {
         const Vector<RawPtr<StyleRuleFontFace> > fontFaceRules = authorRules.fontFaceRules();

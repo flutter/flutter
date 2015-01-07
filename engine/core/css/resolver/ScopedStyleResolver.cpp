@@ -61,34 +61,19 @@ void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, StyleResolv
 void ScopedStyleResolver::resetAuthorStyle()
 {
     m_authorStyleSheets.clear();
-    m_keyframesRuleMap.clear();
     m_features.clear();
 }
 
-const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(const StringImpl* animationName)
+const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String animationName)
 {
-    if (m_keyframesRuleMap.isEmpty())
-        return 0;
-
-    KeyframesRuleMap::iterator it = m_keyframesRuleMap.find(animationName);
-    if (it == m_keyframesRuleMap.end())
-        return 0;
-
-    return it->value.get();
-}
-
-void ScopedStyleResolver::addKeyframeStyle(PassRefPtr<StyleRuleKeyframes> rule)
-{
-    AtomicString s(rule->name());
-    if (rule->isVendorPrefixed()) {
-        KeyframesRuleMap::iterator it = m_keyframesRuleMap.find(rule->name().impl());
-        if (it == m_keyframesRuleMap.end())
-            m_keyframesRuleMap.set(s.impl(), rule);
-        else if (it->value->isVendorPrefixed())
-            m_keyframesRuleMap.set(s.impl(), rule);
-    } else {
-        m_keyframesRuleMap.set(s.impl(), rule);
+    for (auto& sheet : m_authorStyleSheets) {
+        // TODO(esprehn): Maybe just store the keyframes in a map?
+        for (auto& rule : sheet->contents()->ruleSet().keyframesRules()) {
+            if (rule->name() == animationName)
+                return rule.get();
+        }
     }
+    return nullptr;
 }
 
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, bool includeEmptyRules, bool applyAuthorStyles, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
