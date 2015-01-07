@@ -3,8 +3,8 @@ SKY MODULE - button widgets for calculator
 
 <script>
   class AbstractButton extends Element {
-    constructor (module) {
-      super(module);
+    constructor (hostModule) {
+      super(hostModule);
       let selector = new SelectorQuery('.dynamic');
       this.addEventListener('pointer-down', (event) => {
         selector.findAll(this.shadowRoot).every((element) => element.setAttribute('clicked'));
@@ -59,8 +59,8 @@ SKY MODULE - button widgets for calculator
      class extends AbstractButton {
        static get tagName() { return 'graybutton'; }
        static get shadow() { return true; }
-       constructor (module) {
-         super(module);
+       constructor (hostModule) {
+         super(hostModule);
          this.shadowRoot.append(module.document.findId('threed-button-shadow-tree').cloneNode(true));
        }
      }
@@ -69,8 +69,8 @@ SKY MODULE - button widgets for calculator
      class extends AbstractButton {
        static get tagName() { return 'flatbutton'; }
        static get shadow() { return true; }
-       constructor (module) {
-         super(module);
+       constructor (hostModule) {
+         super(hostModule);
          this.shadowRoot.append(module.document.findId('flat-shadow-tree').cloneNode(true));
        }
      }

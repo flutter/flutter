@@ -22,10 +22,10 @@ SKY MODULE - defines an <element> element
  module.exports.Element = sky.registerElement(
    class extends Element {
      static get tagName() { return 'element'; }
-     constructor (module) {
-       super();
+     constructor (hostModule) {
+       super(hostModule);
        this.state = 'loading';
-       this.module = module;
+       this.module = hostModule;
        this.definedPrototype = sky.Element;
      }
      setPrototype(prototype) {
@@ -44,8 +44,8 @@ SKY MODULE - defines an <element> element
        }
        let tagName = this.getAttribute('name');
        let constructorName = tagName.charAt(0).toUpperCase() + tagName.slice(1) + 'Element';
-       let constructor = function (module) {
-         super(module);
+       let constructor = function (hostModule) {
+         super(hostModule);
          if (this.init)
            this.init();
          if (style)
