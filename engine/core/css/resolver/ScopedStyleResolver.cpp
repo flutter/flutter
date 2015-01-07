@@ -78,12 +78,10 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String
 
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, bool includeEmptyRules, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
 {
-    unsigned contextFlags = SelectorChecker::DefaultBehavior;
-
     RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
         MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), includeEmptyRules, &m_scope->rootNode(), m_authorStyleSheets[i], i);
-        collector.collectMatchingRules(matchRequest, ruleRange, static_cast<SelectorChecker::ContextFlags>(contextFlags), cascadeScope, cascadeOrder);
+        collector.collectMatchingRules(matchRequest, ruleRange, cascadeScope, cascadeOrder);
     }
 }
 

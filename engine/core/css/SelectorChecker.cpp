@@ -64,8 +64,7 @@ bool SelectorChecker::match(const SelectorCheckingContext& context) const
     // FIXME(sky): Get rid of SelectorCheckingContext.
     SelectorCheckingContext matchContext(context);
 
-    bool isShadowHost = isHostInItsShadowTree(*context.element, context.scope)
-        && !(context.contextFlags & TreatShadowHostAsNormalScope);
+    bool isShadowHost = isHostInItsShadowTree(*context.element, context.scope);
 
     while (true) {
         const CSSSelector& selector = *matchContext.selector;
@@ -287,7 +286,10 @@ bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context) c
                 return true;
 
             SelectorCheckingContext subContext(context);
-            subContext.contextFlags = TreatShadowHostAsNormalScope;
+
+            // Treat the inside of :host() rules as if they were defined in the
+            // same scope as the host.
+            subContext.scope = &context.element->treeScope().rootNode();
 
             for (subContext.selector = selector.selectorList()->first(); subContext.selector; subContext.selector = CSSSelectorList::next(*subContext.selector)) {
                 if (match(subContext))

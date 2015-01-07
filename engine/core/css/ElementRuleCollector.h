@@ -103,25 +103,25 @@ public:
 
     MatchResult& matchedResult();
 
-    void collectMatchingRules(const MatchRequest&, RuleRange&, SelectorChecker::ContextFlags = SelectorChecker::DefaultBehavior, CascadeScope = ignoreCascadeScope, CascadeOrder = ignoreCascadeOrder);
+    void collectMatchingRules(const MatchRequest&, RuleRange&, CascadeScope = ignoreCascadeScope, CascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
     void clearMatchedRules();
     void addElementStyleProperties(const StylePropertySet*, bool isCacheable = true);
 
 private:
-    void collectRuleIfMatches(const RuleData&, SelectorChecker::ContextFlags, CascadeScope, CascadeOrder, const MatchRequest&, RuleRange&);
+    void collectRuleIfMatches(const RuleData&, CascadeScope, CascadeOrder, const MatchRequest&, RuleRange&);
 
     template<typename RuleDataListType>
-    void collectMatchingRulesForList(const RuleDataListType* rules, SelectorChecker::ContextFlags contextFlags, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+    void collectMatchingRulesForList(const RuleDataListType* rules, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
     {
         if (!rules)
             return;
 
         for (typename RuleDataListType::const_iterator it = rules->begin(), end = rules->end(); it != end; ++it)
-            collectRuleIfMatches(*it, contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
+            collectRuleIfMatches(*it, cascadeScope, cascadeOrder, matchRequest, ruleRange);
     }
 
-    bool ruleMatches(const RuleData&, const ContainerNode* scope, SelectorChecker::ContextFlags);
+    bool ruleMatches(const RuleData&, const ContainerNode* scope);
 
     void sortMatchedRules();
     void addMatchedRule(const RuleData*, CascadeScope, CascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet);

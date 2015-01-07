@@ -43,11 +43,6 @@ class SelectorChecker {
 public:
     enum Mode { ResolvingStyle = 0, QueryingRules, SharingRules };
     explicit SelectorChecker(Document&, Mode);
-    enum ContextFlags {
-        // FIXME: Revmoe DefaultBehavior.
-        DefaultBehavior = 0,
-        TreatShadowHostAsNormalScope = 1,
-    };
 
     struct SelectorCheckingContext {
         STACK_ALLOCATED();
@@ -58,7 +53,6 @@ public:
             , element(element)
             , scope(nullptr)
             , elementStyle(0)
-            , contextFlags(DefaultBehavior)
         {
         }
 
@@ -66,7 +60,6 @@ public:
         RawPtr<Element> element;
         RawPtr<const ContainerNode> scope;
         RenderStyle* elementStyle;
-        ContextFlags contextFlags;
     };
 
     bool match(const SelectorCheckingContext&) const;

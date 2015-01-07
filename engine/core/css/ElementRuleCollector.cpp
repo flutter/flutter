@@ -90,7 +90,7 @@ static bool rulesApplicableInCurrentTreeScope(const Element* element, const Cont
         SelectorChecker::isHostInItsShadowTree(*element, scopingNode);
 }
 
-void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, SelectorChecker::ContextFlags contextFlags, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
+void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
 {
     ASSERT(matchRequest.ruleSet);
     ASSERT(m_context.element());
@@ -103,14 +103,14 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
     // We need to collect the rules for id, class, tag, and everything else into a buffer and
     // then sort the buffer.
     if (element.hasID())
-        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
+        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), cascadeScope, cascadeOrder, matchRequest, ruleRange);
     if (element.isStyledElement() && element.hasClass()) {
         for (size_t i = 0; i < element.classNames().size(); ++i)
-            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
+            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), cascadeScope, cascadeOrder, matchRequest, ruleRange);
     }
 
-    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
-    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), contextFlags, cascadeScope, cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeScope, cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeScope, cascadeOrder, matchRequest, ruleRange);
 }
 
 void ElementRuleCollector::sortAndTransferMatchedRules()
@@ -129,20 +129,19 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
     }
 }
 
-inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const ContainerNode* scope, SelectorChecker::ContextFlags contextFlags)
+inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const ContainerNode* scope)
 {
     SelectorChecker selectorChecker(m_context.element()->document(), m_mode);
     SelectorChecker::SelectorCheckingContext context(ruleData.selector(), m_context.element());
     context.elementStyle = m_style.get();
     context.scope = scope;
-    context.contextFlags = contextFlags;
     return selectorChecker.match(context);
 }
 
-void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, SelectorChecker::ContextFlags contextFlags, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
 {
     StyleRule* rule = ruleData.rule();
-    if (ruleMatches(ruleData, matchRequest.scope, contextFlags)) {
+    if (ruleMatches(ruleData, matchRequest.scope)) {
         // If the rule has no properties to apply, then ignore it in the non-debug mode.
         const StylePropertySet& properties = rule->properties();
         if (properties.isEmpty() && !matchRequest.includeEmptyRules)
