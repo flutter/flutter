@@ -56,11 +56,11 @@ dictionary InternalElementOptions {
   Object prototype = Element;
 }
 interface InternalElementConstructorWithoutShadow {
-  constructor (Module module);
+  constructor (Module hostModule);
   attribute String tagName;
 }
 interface InternalElementConstructorWithShadow {
-  constructor (Module module);
+  constructor (Module hostModule);
   attribute String tagName;
   attribute Boolean shadow;
 }
@@ -69,7 +69,7 @@ typedef ElementRegistrationOptions (InternalElementOptions or
                                     InternalElementConstructorWithShadow);
 
 abstract class AbstractModule : EventTarget {
-  readonly attribute Document document; // O(1) // the Documentof the module or application
+  readonly attribute Document document; // O(1) // the Document of the module or application
   Promise<any> import(String url); // O(Yikes) // returns the module's exports
   private Array<Module> getImports(); O(N) // returns the Module objects of all the imported modules
 
@@ -90,16 +90,21 @@ abstract class AbstractModule : EventTarget {
   //    defaults to Element).
   //  - let shadow be option's shadow property's value coerced to a
   //    boolean, if the property is present, or else the value false.
-  //  - let shadow be option's tagName property's value.
-  //  - create a new Function that:
-  //      - throws if not called as a constructor
-  //      - creates an actual element object (the C++-backed object)
-  //      - initialises the shadow tree if shadow on the options is
-  //        true
-  //      - calls constructor, if it's not null, with the module as
-  //        the argument
-  //      - is marked as created by registerElement() so that it can
-  //        be recognised if used as an argument to registerElement()
+  //  - let tagName be option's tagName property's value.
+  //  - create a new Function that acts as if it had the signature of
+  //    the constructors in the ElementConstructor interface, and that
+  //    runs the follows steps when called:
+  //      - throw if not called as a constructor
+  //      - create an actual element object (the C++-backed object)
+  //        called tagName, along with the specified attributes
+  //      - initialise the shadow tree if shadow is true
+  //      - call constructor, if it's not null, with the module
+  //        within which the new element is being constructed as the
+  //        argument
+  //      - append all the specified children
+  //  - mark that new Function as created by registerElement() so that
+  //    it can be recognised if used as an argument to
+  //    registerElement()
   //  - let that new Function's prototype be the aforementioned prototype
   //  - let that new Function have tagName and shadow properties set to
   //    the aforementioned tagName and shadow

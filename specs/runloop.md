@@ -31,7 +31,7 @@ takes 8.333ms):
 7. Run pending tasks until the 8.333ms expires. Each task may only run
    for at most 1ms, after 1ms they get a (catchable) EDeadlineExceeded
    exception. While there are no pending tasks, sleep.
-   Tasks are thingsl like:
+   Tasks are things like:
     - timers
     - updating the DOM in response to parsing
     - input events
@@ -39,3 +39,6 @@ takes 8.333ms):
 
 TODO(ianh): Update the timings above to have some relationship to
 reality.
+
+TODO(ianh): Define how scroll notifications get sent, or decide to
+drop them entirely from this model.
