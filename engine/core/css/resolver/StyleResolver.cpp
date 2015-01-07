@@ -126,7 +126,6 @@ static RuleSet& defaultStyles()
 
 StyleResolver::StyleResolver(Document& document)
     : m_document(document)
-    , m_needCollectFeatures(false)
     , m_printMediaType(false)
     , m_styleResourceLoader(document.fetcher())
     , m_styleSharingDepth(0)
@@ -190,17 +189,8 @@ void StyleResolver::appendAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >
 
 void StyleResolver::finishAppendAuthorStyleSheets()
 {
-    collectFeatures();
-
     if (document().renderView() && document().renderView()->style())
         document().renderView()->style()->font().update(document().styleEngine()->fontSelector());
-}
-
-void StyleResolver::resetRuleFeatures()
-{
-    // Need to recreate RuleFeatureSet.
-    m_features.clear();
-    m_needCollectFeatures = true;
 }
 
 void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet* parentStyleSheet, unsigned parentIndex, ContainerNode& scope)
@@ -218,27 +208,6 @@ void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet
         if (fontFaceRules.size())
             invalidateMatchedPropertiesCache();
     }
-}
-
-void StyleResolver::resetAuthorStyle(TreeScope& treeScope)
-{
-    treeScope.scopedStyleResolver().resetAuthorStyle();
-    resetRuleFeatures();
-}
-
-void StyleResolver::collectFeatures()
-{
-    m_features.clear();
-    m_features.add(defaultStyles().features());
-
-    document().styleEngine()->collectScopedStyleFeaturesTo(m_features);
-
-    m_needCollectFeatures = false;
-}
-
-bool StyleResolver::hasRulesForId(const AtomicString& id) const
-{
-    return m_features.hasSelectorForId(id);
 }
 
 void StyleResolver::addToStyleSharingList(Element& element)
@@ -395,7 +364,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     ASSERT(document().frame());
     ASSERT(document().settings());
     ASSERT(!hasPendingAuthorStyleSheets());
-    ASSERT(!m_needCollectFeatures);
 
     // Once an element has a renderer, we don't try to destroy it, since otherwise the renderer
     // will vanish if a style recalc happens during loading.
@@ -417,7 +385,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     StyleResolverState state(document(), element, defaultParent);
 
     if (sharingBehavior == AllowStyleSharing && state.parentStyle()) {
-        SharedStyleFinder styleFinder(state.elementContext(), m_features, *this);
+        SharedStyleFinder styleFinder(state.elementContext(), *this);
         if (RefPtr<RenderStyle> sharedStyle = styleFinder.findSharedStyle())
             return sharedStyle.release();
     }

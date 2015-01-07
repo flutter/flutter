@@ -153,7 +153,7 @@ SpaceSplitString::DataMap& SpaceSplitString::sharedDataMap()
 
 void SpaceSplitString::set(const AtomicString& inputString, bool shouldFoldCase)
 {
-    if (inputString.isNull()) {
+    if (inputString.isNull() || inputString.isEmpty()) {
         clear();
         return;
     }

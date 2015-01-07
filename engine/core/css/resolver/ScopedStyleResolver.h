@@ -39,6 +39,7 @@ namespace blink {
 
 class StyleResolver;
 class StyleSheetContents;
+class RuleFeatureSet;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
 class ScopedStyleResolver final {
@@ -58,8 +59,10 @@ public:
 
     void collectMatchingAuthorRules(ElementRuleCollector&, bool includeEmptyRules, bool applyAuthorStyles, CascadeScope, CascadeOrder = ignoreCascadeOrder);
     void addRulesFromSheet(CSSStyleSheet*, StyleResolver*);
-    void collectFeaturesTo(RuleFeatureSet&, HashSet<const StyleSheetContents*>& visitedSharedStyleSheetContents) const;
+
     void resetAuthorStyle();
+
+    const RuleFeatureSet& features() const { return m_features; }
 
 private:
     explicit ScopedStyleResolver(TreeScope&);
@@ -69,6 +72,8 @@ private:
 
     typedef HashMap<const StringImpl*, RefPtr<StyleRuleKeyframes> > KeyframesRuleMap;
     KeyframesRuleMap m_keyframesRuleMap;
+
+    RuleFeatureSet m_features;
 };
 
 } // namespace blink

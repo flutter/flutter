@@ -53,7 +53,7 @@ bool SharedStyleFinder::classNamesAffectedByRules(const Element& element) const
     const SpaceSplitString& classNames = element.classNames();
     unsigned count = classNames.size();
     for (unsigned i = 0; i < count; ++i) {
-        if (m_features.hasSelectorForClass(classNames[i]))
+        if (element.affectedByClassSelector(classNames[i]))
             return true;
     }
     return false;
@@ -62,7 +62,7 @@ bool SharedStyleFinder::classNamesAffectedByRules(const Element& element) const
 bool SharedStyleFinder::attributesAffectedByRules(const Element& element) const
 {
     for (auto& attribute : element.attributesWithoutUpdate()) {
-        if (m_features.hasSelectorForAttribute(attribute.localName()))
+        if (element.affectedByAttributeSelector(attribute.localName()))
             return true;
     }
     return false;

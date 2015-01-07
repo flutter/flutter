@@ -54,21 +54,15 @@ void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, StyleResolv
     const RuleSet& ruleSet = sheet->ensureRuleSet(addRuleFlags);
     resolver->addMediaQueryResults(ruleSet.viewportDependentMediaQueryResults());
     resolver->processScopedRules(ruleSet, cssSheet, index, treeScope().rootNode());
-}
 
-void ScopedStyleResolver::collectFeaturesTo(RuleFeatureSet& features, HashSet<const StyleSheetContents*>& visitedSharedStyleSheetContents) const
-{
-    for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        StyleSheetContents* contents = m_authorStyleSheets[i]->contents();
-        if (visitedSharedStyleSheetContents.add(contents).isNewEntry)
-            features.add(contents->ruleSet().features());
-    }
+    m_features.add(ruleSet.features());
 }
 
 void ScopedStyleResolver::resetAuthorStyle()
 {
     m_authorStyleSheets.clear();
     m_keyframesRuleMap.clear();
+    m_features.clear();
 }
 
 const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(const StringImpl* animationName)

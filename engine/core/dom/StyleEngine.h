@@ -108,8 +108,6 @@ public:
     PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text);
     void removeSheet(StyleSheetContents*);
 
-    void collectScopedStyleFeaturesTo(RuleFeatureSet&) const;
-
 private:
     // CSSFontSelectorClient implementation.
     virtual void fontsNeedUpdate(CSSFontSelector*) override;

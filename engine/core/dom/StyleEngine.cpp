@@ -204,23 +204,6 @@ void StyleEngine::removeSheet(StyleSheetContents* contents)
     m_sheetToTextCache.remove(contents);
 }
 
-// TODO(esprehn): This walks the entire document to collect features, instead
-// we should store features per scope and get rid of the global set.
-static void collectFeatures(TreeScope& scope, RuleFeatureSet& features, HashSet<const StyleSheetContents*> visitedSharedStyleSheetContents)
-{
-    scope.scopedStyleResolver().collectFeaturesTo(features, visitedSharedStyleSheetContents);
-    for (Element* element = ElementTraversal::firstWithin(scope.rootNode()); element; element = ElementTraversal::next(*element, &scope.rootNode())) {
-        if (ShadowRoot* root = element->shadowRoot())
-            collectFeatures(*root, features, visitedSharedStyleSheetContents);
-    }
-}
-
-void StyleEngine::collectScopedStyleFeaturesTo(RuleFeatureSet& features) const
-{
-    HashSet<const StyleSheetContents*> visitedSharedStyleSheetContents;
-    collectFeatures(*m_document, features, visitedSharedStyleSheetContents);
-}
-
 void StyleEngine::fontsNeedUpdate(CSSFontSelector*)
 {
     if (m_resolver)

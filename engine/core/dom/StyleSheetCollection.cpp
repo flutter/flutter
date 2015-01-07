@@ -92,7 +92,7 @@ void StyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
     } else if (StyleResolver* styleResolver = engine->resolver()) {
         // We should not destroy StyleResolver when we find any stylesheet update in a shadow tree.
         // In this case, we will reset rulesets created from style elements in the shadow tree.
-        styleResolver->resetAuthorStyle(m_treeScope);
+        m_treeScope.scopedStyleResolver().resetAuthorStyle();
         styleResolver->removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
         styleResolver->lazyAppendAuthorStyleSheets(0, candidateSheets);
     }

@@ -63,13 +63,6 @@ public:
         return m_idNames.contains(idValue);
     }
 
-    void scheduleStyleInvalidationForClassChange(const SpaceSplitString& changedClasses, Element&);
-    void scheduleStyleInvalidationForClassChange(const SpaceSplitString& oldClasses, const SpaceSplitString& newClasses, Element&);
-
-    void scheduleStyleInvalidationForClassChange(const AtomicString& className, Element& element);
-    void scheduleStyleInvalidationForAttributeChange(const QualifiedName& attributeName, Element&);
-    void scheduleStyleInvalidationForIdChange(const AtomicString& oldId, const AtomicString& newId, Element&);
-
 private:
     void addSelectorFeatures(const CSSSelector&);
     void collectFeaturesFromSelectorList(const CSSSelectorList*);

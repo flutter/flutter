@@ -22,7 +22,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_
 #define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_
 
-#include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/core/css/SelectorChecker.h"
 #include "sky/engine/core/css/resolver/MatchedPropertiesCache.h"
@@ -116,7 +115,6 @@ public:
     // FIXME: It could be better to call appendAuthorStyleSheets() directly after we factor StyleResolver further.
     // https://bugs.webkit.org/show_bug.cgi?id=108890
     void appendAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
-    void resetAuthorStyle(TreeScope&);
     void finishAppendAuthorStyleSheets();
 
     void processScopedRules(const RuleSet& authorRules, CSSStyleSheet*, unsigned sheetIndex, ContainerNode& scope);
@@ -124,7 +122,7 @@ public:
     void lazyAppendAuthorStyleSheets(unsigned firstNew, const Vector<RefPtr<CSSStyleSheet> >&);
     void removePendingAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void appendPendingAuthorStyleSheets();
-    bool hasPendingAuthorStyleSheets() const { return m_pendingStyleSheets.size() > 0 || m_needCollectFeatures; }
+    bool hasPendingAuthorStyleSheets() const { return m_pendingStyleSheets.size() > 0; }
 
     void styleTreeResolveScopedKeyframesRules(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
@@ -142,21 +140,7 @@ public:
     // Exposed for RenderStyle::isStyleAvilable().
     static RenderStyle* styleNotYetAvailable() { return s_styleNotYetAvailable; }
 
-    RuleFeatureSet& ensureUpdatedRuleFeatureSet()
-    {
-        if (hasPendingAuthorStyleSheets())
-            appendPendingAuthorStyleSheets();
-        return m_features;
-    }
-
-    RuleFeatureSet& ruleFeatureSet()
-    {
-        return m_features;
-    }
-
     StyleSharingList& styleSharingList();
-
-    bool hasRulesForId(const AtomicString&) const;
 
     void addToStyleSharingList(Element&);
     void clearStyleSharingList();
@@ -187,8 +171,6 @@ private:
     void matchAuthorRulesForShadowHost(Element*, ElementRuleCollector&, bool includeEmptyRules, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers, Vector<RawPtr<ScopedStyleResolver>, 8>& resolversInShadowTree);
     void matchAllRules(StyleResolverState&, ElementRuleCollector&, bool includeSMILProperties);
     void matchUARules(ElementRuleCollector&);
-    void collectFeatures();
-    void resetRuleFeatures();
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
     bool applyAnimatedProperties(StyleResolverState&, Element* animatingElement);
@@ -229,11 +211,6 @@ private:
 
     ListHashSet<RawPtr<CSSStyleSheet>, 16> m_pendingStyleSheets;
 
-    // FIXME: The entire logic of collecting features on StyleResolver, as well as transferring them
-    // between various parts of machinery smells wrong. This needs to be better somehow.
-    RuleFeatureSet m_features;
-
-    bool m_needCollectFeatures;
     bool m_printMediaType;
 
     StyleResourceLoader m_styleResourceLoader;

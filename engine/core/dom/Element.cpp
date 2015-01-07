@@ -663,8 +663,8 @@ void Element::attributeChanged(const QualifiedName& name, const AtomicString& ne
         AtomicString newId = newValue;
         if (newId != oldId) {
             elementData()->setIdForStyleResolution(newId);
-            if (testShouldInvalidateStyle)
-                styleResolver->ensureUpdatedRuleFeatureSet().scheduleStyleInvalidationForIdChange(oldId, newId, *this);
+            if (testShouldInvalidateStyle && (affectedByIdSelector(oldId) || affectedByIdSelector(newId)))
+                setNeedsStyleRecalc(LocalStyleChange);
         }
     } else if (name == HTMLNames::classAttr) {
         classAttributeChanged(newValue);
@@ -680,51 +680,51 @@ inline void Element::attributeChangedFromParserOrByCloning(const QualifiedName& 
     attributeChanged(name, newValue, reason);
 }
 
-template <typename CharacterType>
-static inline bool classStringHasClassName(const CharacterType* characters, unsigned length)
-{
-    ASSERT(length > 0);
-
-    unsigned i = 0;
-    do {
-        if (isNotHTMLSpace<CharacterType>(characters[i]))
-            break;
-        ++i;
-    } while (i < length);
-
-    return i < length;
-}
-
-static inline bool classStringHasClassName(const AtomicString& newClassString)
-{
-    unsigned length = newClassString.length();
-
-    if (!length)
-        return false;
-
-    if (newClassString.is8Bit())
-        return classStringHasClassName(newClassString.characters8(), length);
-    return classStringHasClassName(newClassString.characters16(), length);
-}
-
 void Element::classAttributeChanged(const AtomicString& newClassString)
 {
     StyleResolver* styleResolver = document().styleResolver();
     bool testShouldInvalidateStyle = inActiveDocument() && styleResolver && styleChangeType() < SubtreeStyleChange;
 
     ASSERT(elementData());
-    if (classStringHasClassName(newClassString)) {
-        const SpaceSplitString oldClasses = elementData()->classNames();
-        elementData()->setClass(newClassString, false);
-        const SpaceSplitString& newClasses = elementData()->classNames();
-        if (testShouldInvalidateStyle)
-            styleResolver->ensureUpdatedRuleFeatureSet().scheduleStyleInvalidationForClassChange(oldClasses, newClasses, *this);
-    } else {
-        const SpaceSplitString& oldClasses = elementData()->classNames();
-        if (testShouldInvalidateStyle)
-            styleResolver->ensureUpdatedRuleFeatureSet().scheduleStyleInvalidationForClassChange(oldClasses, *this);
+    const SpaceSplitString oldClasses = elementData()->classNames();
+    elementData()->setClass(newClassString, false);
+    const SpaceSplitString& newClasses = elementData()->classNames();
+    if (testShouldInvalidateStyle && classChangeNeedsStyleRecalc(oldClasses, newClasses))
+        setNeedsStyleRecalc(LocalStyleChange);
+    if (!newClasses.size())
         elementData()->clearClass();
+}
+
+bool Element::classChangeNeedsStyleRecalc(const SpaceSplitString& oldClasses, const SpaceSplitString& newClasses)
+{
+    // Class vectors tend to be very short. This is faster than using a hash table.
+    BitVector remainingClassBits;
+    remainingClassBits.ensureSize(oldClasses.size());
+
+    for (unsigned i = 0; i < newClasses.size(); ++i) {
+        bool found = false;
+        for (unsigned j = 0; j < oldClasses.size(); ++j) {
+            if (newClasses[i] == oldClasses[j]) {
+                // Mark each class that is still in the newClasses so we can skip doing
+                // an n^2 search below when looking for removals. We can't break from
+                // this loop early since a class can appear more than once.
+                remainingClassBits.quickSet(j);
+                found = true;
+            }
+        }
+        // Class was added.
+        if (!found && affectedByClassSelector(newClasses[i]))
+            return true;
     }
+
+    for (unsigned i = 0; i < oldClasses.size(); ++i) {
+        if (remainingClassBits.quickGet(i))
+            continue;
+        // Class was removed.
+        if (affectedByClassSelector(oldClasses[i]))
+            return true;
+    }
+    return false;
 }
 
 bool Element::shouldInvalidateDistributionWhenAttributeChanged(ElementShadow* elementShadow, const QualifiedName& name, const AtomicString& newValue)
@@ -744,17 +744,10 @@ bool Element::shouldInvalidateDistributionWhenAttributeChanged(ElementShadow* el
     }
 
     if (name == HTMLNames::classAttr) {
-        const AtomicString& newClassString = newValue;
-        if (classStringHasClassName(newClassString)) {
-            const SpaceSplitString& oldClasses = elementData()->classNames();
-            const SpaceSplitString newClasses(newClassString, false);
-            if (featureSet.checkSelectorsForClassChange(oldClasses, newClasses))
-                return true;
-        } else {
-            const SpaceSplitString& oldClasses = elementData()->classNames();
-            if (featureSet.checkSelectorsForClassChange(oldClasses))
-                return true;
-        }
+        const SpaceSplitString& oldClasses = elementData()->classNames();
+        const SpaceSplitString newClasses(newValue, false);
+        if (featureSet.checkSelectorsForClassChange(oldClasses, newClasses))
+            return true;
     }
 
     return featureSet.hasSelectorForAttribute(name.localName());
@@ -1561,8 +1554,8 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
     }
 
     if (oldValue != newValue) {
-        if (inActiveDocument() && document().styleResolver() && styleChangeType() < SubtreeStyleChange)
-            document().ensureStyleResolver().ensureUpdatedRuleFeatureSet().scheduleStyleInvalidationForAttributeChange(name, *this);
+        if (inActiveDocument() && document().styleResolver() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
+            setNeedsStyleRecalc(LocalStyleChange);
 
         if (isUpgradedCustomElement())
             CustomElement::attributeDidChange(this, name.localName(), oldValue, newValue);
@@ -1810,7 +1803,7 @@ bool Element::supportsStyleSharing() const
     if (inlineStyle())
         return false;
     // Ids stop style sharing if they show up in the stylesheets.
-    if (hasID() && document().ensureStyleResolver().hasRulesForId(idForStyleResolution()))
+    if (hasID() && affectedByIdSelector(idForStyleResolution()))
         return false;
     // :active and :hover elements always make a chain towards the document node
     // and no siblings or cousins will have the same state. There's also only one
@@ -1825,6 +1818,51 @@ bool Element::supportsStyleSharing() const
     if (isHTMLCanvasElement(*this))
         return false;
     return true;
+}
+
+bool Element::affectedByAttributeSelector(const AtomicString& attributeName) const
+{
+    if (attributeName.isEmpty())
+        return false;
+    // TODO(esprehn): This makes sure the style system is updated, eventually
+    // we'll remove all the global lists and this won't be needed.
+    document().ensureStyleResolver();
+    if (treeScope().scopedStyleResolver().features().hasSelectorForAttribute(attributeName))
+        return true;
+    // Host rules could also have effects.
+    if (ShadowRoot* shadowRoot = this->shadowRoot())
+        return shadowRoot->scopedStyleResolver().features().hasSelectorForAttribute(attributeName);
+    return false;
+}
+
+bool Element::affectedByClassSelector(const AtomicString& classValue) const
+{
+    if (classValue.isEmpty())
+        return false;
+    // TODO(esprehn): This makes sure the style system is updated, eventually
+    // we'll remove all the global lists and this won't be needed.
+    document().ensureStyleResolver();
+    if (treeScope().scopedStyleResolver().features().hasSelectorForClass(classValue))
+        return true;
+    // Host rules could also have effects.
+    if (ShadowRoot* shadowRoot = this->shadowRoot())
+        return shadowRoot->scopedStyleResolver().features().hasSelectorForClass(classValue);
+    return false;
+}
+
+bool Element::affectedByIdSelector(const AtomicString& idValue) const
+{
+    if (idValue.isEmpty())
+        return false;
+    // TODO(esprehn): This makes sure the style system is updated, eventually
+    // we'll remove all the global lists and this won't be needed.
+    document().ensureStyleResolver();
+    if (treeScope().scopedStyleResolver().features().hasSelectorForId(idValue))
+        return true;
+    // Host rules could also have effects.
+    if (ShadowRoot* shadowRoot = this->shadowRoot())
+        return shadowRoot->scopedStyleResolver().features().hasSelectorForId(idValue);
+    return false;
 }
 
 } // namespace blink

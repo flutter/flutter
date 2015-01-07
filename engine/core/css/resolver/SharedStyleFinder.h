@@ -27,12 +27,9 @@
 
 namespace blink {
 
+class ContainerNode;
 class Element;
-class Node;
 class RenderStyle;
-class RuleFeatureSet;
-class RuleSet;
-class SpaceSplitString;
 class StyleResolver;
 
 class SharedStyleFinder {
@@ -40,10 +37,8 @@ class SharedStyleFinder {
 public:
     // RuleSets are passed non-const as the act of matching against them can cause them
     // to be compacted. :(
-    SharedStyleFinder(const ElementResolveContext& context,
-        const RuleFeatureSet& features, StyleResolver& styleResolver)
+    SharedStyleFinder(const ElementResolveContext& context, StyleResolver& styleResolver)
         : m_elementAffectedByClassRules(false)
-        , m_features(features)
         , m_styleResolver(styleResolver)
         , m_context(context)
         , m_renderingParent(nullptr)
@@ -69,7 +64,6 @@ private:
     Document& document() const { return element().document(); }
 
     bool m_elementAffectedByClassRules;
-    const RuleFeatureSet& m_features;
     StyleResolver& m_styleResolver;
     const ElementResolveContext& m_context;
     ContainerNode* m_renderingParent;

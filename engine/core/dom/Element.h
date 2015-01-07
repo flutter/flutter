@@ -163,6 +163,10 @@ public:
 
     void invalidateStyleAttribute();
 
+    bool affectedByAttributeSelector(const AtomicString& attributeName) const;
+    bool affectedByClassSelector(const AtomicString& classValue) const;
+    bool affectedByIdSelector(const AtomicString& idValue) const;
+
     const StylePropertySet* inlineStyle() const { return elementData() ? elementData()->m_inlineStyle.get() : 0; }
 
     bool setInlineStyleProperty(CSSPropertyID, CSSValueID identifier, bool important = false);
@@ -326,6 +330,8 @@ protected:
 
 private:
     void attributeChanged(const QualifiedName&, const AtomicString&, AttributeModificationReason = ModifiedDirectly);
+
+    bool classChangeNeedsStyleRecalc(const SpaceSplitString& oldClasses, const SpaceSplitString& newClasses);
 
     bool hasElementFlag(ElementFlags mask) const { return hasRareData() && hasElementFlagInternal(mask); }
     void setElementFlag(ElementFlags, bool value = true);
