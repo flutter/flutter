@@ -61,19 +61,14 @@ public:
     void registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& type, CustomElement::NameSet validNames, ExceptionState&);
 
     PassRefPtr<Element> createCustomTagElement(Document&, const QualifiedName&);
-    static void setIsAttributeAndTypeExtension(Element*, const AtomicString& type);
-    static void setTypeExtension(Element*, const AtomicString& type);
 
     void resolve(Element*, const CustomElementDescriptor&);
 
 protected:
     CustomElementRegistrationContext();
 
-    // Instance creation
-    void didGiveTypeExtension(Element*, const AtomicString& type);
-
 private:
-    void resolveOrScheduleResolution(Element*, const AtomicString& typeExtension);
+    void resolveOrScheduleResolution(Element*);
 
     CustomElementRegistry m_registry;
 

@@ -71,25 +71,13 @@ PassRefPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Doc
 
     RefPtr<Element> element = HTMLElement::create(tagName, document);
     element->setCustomElementState(Element::WaitingForUpgrade);
-    resolveOrScheduleResolution(element.get(), nullAtom);
+    resolveOrScheduleResolution(element.get());
     return element.release();
 }
 
-void CustomElementRegistrationContext::didGiveTypeExtension(Element* element, const AtomicString& type)
+void CustomElementRegistrationContext::resolveOrScheduleResolution(Element* element)
 {
-    resolveOrScheduleResolution(element, type);
-}
-
-void CustomElementRegistrationContext::resolveOrScheduleResolution(Element* element, const AtomicString& typeExtension)
-{
-    // If an element has a custom tag name it takes precedence over
-    // the "is" attribute (if any).
-    const AtomicString& type = CustomElement::isValidName(element->localName())
-        ? element->localName()
-        : typeExtension;
-    ASSERT(!type.isNull());
-
-    CustomElementDescriptor descriptor(type, element->localName());
+    CustomElementDescriptor descriptor(element->localName());
     ASSERT(element->customElementState() == Element::WaitingForUpgrade);
 
     CustomElementScheduler::resolveOrScheduleResolution(this, element, descriptor);
@@ -104,44 +92,6 @@ void CustomElementRegistrationContext::resolve(Element* element, const CustomEle
         ASSERT(element->customElementState() == Element::WaitingForUpgrade);
         m_candidates->add(descriptor, element);
     }
-}
-
-void CustomElementRegistrationContext::setIsAttributeAndTypeExtension(Element* element, const AtomicString& type)
-{
-    ASSERT(element);
-    ASSERT(!type.isEmpty());
-    element->setAttribute(HTMLNames::isAttr, type);
-    setTypeExtension(element, type);
-}
-
-void CustomElementRegistrationContext::setTypeExtension(Element* element, const AtomicString& type)
-{
-    if (!element->isHTMLElement())
-        return;
-
-    CustomElementRegistrationContext* context = element->document().registrationContext();
-    if (!context)
-        return;
-
-    if (element->isCustomElement()) {
-        // This can happen if:
-        // 1. The element has a custom tag, which takes precedence over
-        //    type extensions.
-        // 2. Undoing a command (eg ReplaceNodeWithSpan) recycles an
-        //    element but tries to overwrite its attribute list.
-        return;
-    }
-
-    // Custom tags take precedence over type extensions
-    ASSERT(!CustomElement::isValidName(element->localName()));
-
-    if (!CustomElement::isValidName(type))
-        return;
-
-    element->setCustomElementState(Element::WaitingForUpgrade);
-    // FIXME(sky) this used to call Document::convertLocalName(type) which
-    // would lowercase if Document was HTML, that made no sense.
-    context->didGiveTypeExtension(element, type);
 }
 
 } // namespace blink

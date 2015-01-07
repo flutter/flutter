@@ -41,7 +41,7 @@ namespace blink {
 struct CustomElementDescriptorHash {
     static unsigned hash(const CustomElementDescriptor& descriptor)
     {
-        return WTF::pairIntHash(AtomicStringHash::hash(descriptor.type()), AtomicStringHash::hash(descriptor.localName()));
+        return AtomicStringHash::hash(descriptor.localName());
     }
 
     static bool equal(const CustomElementDescriptor& a, const CustomElementDescriptor& b)

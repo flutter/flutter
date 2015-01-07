@@ -60,7 +60,6 @@ protected:
 private:
     typedef HashMap<CustomElementDescriptor, RefPtr<CustomElementDefinition> > DefinitionMap;
     DefinitionMap m_definitions;
-    HashSet<AtomicString> m_registeredTypeNames;
 };
 
 } // namespace blink

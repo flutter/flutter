@@ -79,7 +79,7 @@ CustomElementDefinition* CustomElementRegistry::registerElement(Document* docume
         return 0;
     }
 
-    if (m_registeredTypeNames.contains(type)) {
+    if (m_definitions.contains(type)) {
         CustomElementException::throwException(CustomElementException::TypeAlreadyRegistered, type, exceptionState);
         return 0;
     }
@@ -99,14 +99,13 @@ CustomElementDefinition* CustomElementRegistry::registerElement(Document* docume
         return 0;
     }
 
-    const CustomElementDescriptor descriptor(type, tagName.localName());
+    const CustomElementDescriptor descriptor(tagName.localName());
     RefPtr<CustomElementDefinition> definition = CustomElementDefinition::create(descriptor, lifecycleCallbacks);
 
     if (!constructorBuilder->createConstructor(document, definition.get(), exceptionState))
         return 0;
 
     m_definitions.add(descriptor, definition);
-    m_registeredTypeNames.add(descriptor.type());
 
     if (!constructorBuilder->didRegisterDefinition(definition.get())) {
         CustomElementException::throwException(CustomElementException::ContextDestroyedRegisteringDefinition, type, exceptionState);

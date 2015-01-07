@@ -445,29 +445,6 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
     return Element::create(QualifiedName(name), this);
 }
 
-PassRefPtr<Element> Document::createElement(const AtomicString& localName, const AtomicString& typeExtension, ExceptionState& exceptionState)
-{
-    if (!isValidName(localName)) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The tag name provided ('" + localName + "') is not a valid name.");
-        return nullptr;
-    }
-
-    RefPtr<Element> element;
-
-    if (CustomElement::isValidName(localName) && registrationContext()) {
-        element = registrationContext()->createCustomTagElement(*this, QualifiedName(localName));
-    } else {
-        element = createElement(localName, exceptionState);
-        if (exceptionState.hadException())
-            return nullptr;
-    }
-
-    if (!typeExtension.isEmpty())
-        CustomElementRegistrationContext::setIsAttributeAndTypeExtension(element.get(), typeExtension);
-
-    return element.release();
-}
-
 ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, ExceptionState& exceptionState)
 {
     return registerElement(scriptState, name, Dictionary(), exceptionState);

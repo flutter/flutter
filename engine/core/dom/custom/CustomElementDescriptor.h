@@ -44,9 +44,8 @@ struct CustomElementDescriptorHash;
 class CustomElementDescriptor {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    CustomElementDescriptor(const AtomicString& type, const AtomicString& localName)
-        : m_type(type)
-        , m_localName(localName)
+    CustomElementDescriptor(const AtomicString& localName)
+        : m_localName(localName)
     {
     }
 
@@ -55,28 +54,19 @@ public:
     // The tag name.
     const AtomicString& localName() const { return m_localName; }
 
-    // The name of the definition. For custom tags, this is the tag
-    // name and the same as "localName". For type extensions, this is
-    // the value of the "is" attribute.
-    const AtomicString& type() const { return m_type; }
-
-    bool isTypeExtension() const { return m_type != m_localName; }
-
     // Stuff for hashing.
 
     CustomElementDescriptor() { }
     explicit CustomElementDescriptor(WTF::HashTableDeletedValueType value)
-        : m_type(value) { }
-    bool isHashTableDeletedValue() const { return m_type.isHashTableDeletedValue(); }
+        : m_localName(value) { }
+    bool isHashTableDeletedValue() const { return m_localName.isHashTableDeletedValue(); }
 
     bool operator==(const CustomElementDescriptor& other) const
     {
-        return m_type == other.m_type
-            && m_localName == other.m_localName;
+        return m_localName == other.m_localName;
     }
 
 private:
-    AtomicString m_type;
     AtomicString m_localName;
 };
 

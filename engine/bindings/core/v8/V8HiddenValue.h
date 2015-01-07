@@ -23,7 +23,6 @@ class ScriptWrappable;
     V(customElementIsInterfacePrototypeObject) \
     V(customElementNamespaceURI) \
     V(customElementTagName) \
-    V(customElementType) \
     V(callback) \
     V(condition) \
     V(data) \

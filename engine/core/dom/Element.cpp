@@ -677,8 +677,6 @@ void Element::attributeChanged(const QualifiedName& name, const AtomicString& ne
 
 inline void Element::attributeChangedFromParserOrByCloning(const QualifiedName& name, const AtomicString& newValue, AttributeModificationReason reason)
 {
-    if (name == HTMLNames::isAttr)
-        CustomElementRegistrationContext::setTypeExtension(this, newValue);
     attributeChanged(name, newValue, reason);
 }
 
