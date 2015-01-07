@@ -1,4 +1,4 @@
-#!mojo mojo:sky
+#!mojo:sky_viewer
 <div><!-- remove this element once Document can have multiple element children -->
 <style>
  .h1 { font-size: 2em; margin: 1em; }
