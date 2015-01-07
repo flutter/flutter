@@ -185,7 +185,7 @@ void HTMLImageElement::removedFrom(ContainerNode* insertionPoint)
     HTMLElement::removedFrom(insertionPoint);
 }
 
-int HTMLImageElement::width(bool ignorePendingStylesheets)
+int HTMLImageElement::width()
 {
     if (!renderer()) {
         // check the attribute first for an explicit pixel value
@@ -199,16 +199,13 @@ int HTMLImageElement::width(bool ignorePendingStylesheets)
             return imageLoader().image()->imageSizeForRenderer(renderer()).width();
     }
 
-    if (ignorePendingStylesheets)
-        document().updateLayoutIgnorePendingStylesheets();
-    else
-        document().updateLayout();
+    document().updateLayout();
 
     RenderBox* box = renderBox();
     return box ? box->contentBoxRect().pixelSnappedWidth() : 0;
 }
 
-int HTMLImageElement::height(bool ignorePendingStylesheets)
+int HTMLImageElement::height()
 {
     if (!renderer()) {
         // check the attribute first for an explicit pixel value
@@ -222,10 +219,7 @@ int HTMLImageElement::height(bool ignorePendingStylesheets)
             return imageLoader().image()->imageSizeForRenderer(renderer()).height();
     }
 
-    if (ignorePendingStylesheets)
-        document().updateLayoutIgnorePendingStylesheets();
-    else
-        document().updateLayout();
+    document().updateLayout();
 
     RenderBox* box = renderBox();
     return box ? box->contentBoxRect().pixelSnappedHeight() : 0;
@@ -287,7 +281,7 @@ void HTMLImageElement::setWidth(int value)
 
 int HTMLImageElement::x() const
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     RenderObject* r = renderer();
     if (!r)
         return 0;
@@ -299,7 +293,7 @@ int HTMLImageElement::x() const
 
 int HTMLImageElement::y() const
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     RenderObject* r = renderer();
     if (!r)
         return 0;

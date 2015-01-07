@@ -358,8 +358,6 @@ public:
     Order rtlOrdering() const { return static_cast<Order>(inherited_flags.m_rtlOrdering); }
     void setRTLOrdering(Order o) { inherited_flags.m_rtlOrdering = o; }
 
-    bool isStyleAvailable() const;
-
     // attribute getter methods
 
     EDisplay display() const { return static_cast<EDisplay>(noninherited_flags.effectiveDisplay); }

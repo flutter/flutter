@@ -409,7 +409,7 @@ bool EventHandler::handleMousePressEventSingleClick(const MouseEventWithHitTestR
 {
     TRACE_EVENT0("blink", "EventHandler::handleMousePressEventSingleClick");
 
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
+    m_frame->document()->updateLayout();
     Node* innerNode = event.targetNode();
     if (!(innerNode && innerNode->renderer() && m_mouseDownMayStartSelect))
         return false;
@@ -488,7 +488,7 @@ bool EventHandler::handleMousePressEvent(const MouseEventWithHitTestResults& eve
 
     cancelFakeMouseMoveEvent();
 
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
+    m_frame->document()->updateLayout();
 
     bool singleClick = event.event().clickCount() <= 1;
 
@@ -774,7 +774,7 @@ bool EventHandler::bubblingScroll(ScrollDirection direction, ScrollGranularity g
 {
     // The layout needs to be up to date to determine if we can scroll. We may be
     // here because of an onLoad event, in which case the final layout hasn't been performed yet.
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
+    m_frame->document()->updateLayout();
     if (scroll(direction, granularity, startingNode))
         return true;
     return false;
@@ -1354,7 +1354,7 @@ bool EventHandler::dispatchMouseEvent(const AtomicString& eventType, Node* targe
 bool EventHandler::handleMouseFocus(const PlatformMouseEvent& mouseEvent)
 {
     // The layout needs to be up to date to determine if an element is focusable.
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
+    m_frame->document()->updateLayout();
 
     Element* element = 0;
     if (m_nodeUnderMouse)

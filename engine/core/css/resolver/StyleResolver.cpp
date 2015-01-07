@@ -88,8 +88,6 @@ void setAnimationUpdateIfNeeded(StyleResolverState& state, Element& element)
 
 namespace blink {
 
-RenderStyle* StyleResolver::s_styleNotYetAvailable;
-
 static void addFontFaceRule(Document* document, CSSFontSelector* cssFontSelector, const StyleRuleFontFace* fontFaceRule)
 {
     RefPtr<FontFace> fontFace = FontFace::create(document, fontFaceRule);
@@ -359,19 +357,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     ASSERT(document().frame());
     ASSERT(document().settings());
     ASSERT(!hasPendingAuthorStyleSheets());
-
-    // Once an element has a renderer, we don't try to destroy it, since otherwise the renderer
-    // will vanish if a style recalc happens during loading.
-    if (sharingBehavior == AllowStyleSharing && !document().isRenderingReady() && !element->renderer()) {
-        if (!s_styleNotYetAvailable) {
-            s_styleNotYetAvailable = RenderStyle::create().leakRef();
-            s_styleNotYetAvailable->setDisplay(NONE);
-            s_styleNotYetAvailable->font().update(document().styleEngine()->fontSelector());
-        }
-
-        document().setHasNodesWithPlaceholderStyle();
-        return s_styleNotYetAvailable;
-    }
 
     didAccess();
 

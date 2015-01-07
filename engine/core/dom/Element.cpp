@@ -358,7 +358,7 @@ void Element::setDir(const AtomicString& value)
 
 int Element::offsetLeft()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
         return renderer->offsetLeft();
     return 0;
@@ -366,7 +366,7 @@ int Element::offsetLeft()
 
 int Element::offsetTop()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
         return renderer->pixelSnappedOffsetTop();
     return 0;
@@ -374,7 +374,7 @@ int Element::offsetTop()
 
 int Element::offsetWidth()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
         return renderer->pixelSnappedOffsetWidth();
     return 0;
@@ -382,7 +382,7 @@ int Element::offsetWidth()
 
 int Element::offsetHeight()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBoxModelObject* renderer = renderBoxModelObject())
         return renderer->pixelSnappedOffsetHeight();
     return 0;
@@ -390,7 +390,7 @@ int Element::offsetHeight()
 
 Element* Element::offsetParent()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderObject* renderer = this->renderer())
         return renderer->offsetParent();
     return 0;
@@ -398,7 +398,7 @@ Element* Element::offsetParent()
 
 int Element::clientLeft()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (RenderBox* renderer = renderBox())
         return roundToInt(renderer->clientLeft());
@@ -407,7 +407,7 @@ int Element::clientLeft()
 
 int Element::clientTop()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (RenderBox* renderer = renderBox())
         return roundToInt(renderer->clientTop());
@@ -416,7 +416,7 @@ int Element::clientTop()
 
 int Element::clientWidth()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     // FIXME(sky): Can we just use getBoundingClientRect() instead?
     if (document().documentElement() == this) {
@@ -431,7 +431,7 @@ int Element::clientWidth()
 
 int Element::clientHeight()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     // FIXME(sky): Can we just use getBoundingClientRect() instead?
     if (document().documentElement() == this) {
@@ -446,7 +446,7 @@ int Element::clientHeight()
 
 int Element::scrollLeft()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
@@ -458,7 +458,7 @@ int Element::scrollLeft()
 
 int Element::scrollTop()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
@@ -470,7 +470,7 @@ int Element::scrollTop()
 
 void Element::setScrollLeft(int newLeft)
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
@@ -501,7 +501,7 @@ void Element::setScrollLeft(const Dictionary& scrollOptionsHorizontal, Exception
 
 void Element::setScrollTop(int newTop)
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     if (document().documentElement() != this) {
         if (RenderBox* rend = renderBox())
@@ -532,7 +532,7 @@ void Element::setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionSta
 
 int Element::scrollWidth()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBox* rend = renderBox())
         return rend->scrollWidth().toDouble();
     return 0;
@@ -540,7 +540,7 @@ int Element::scrollWidth()
 
 int Element::scrollHeight()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (RenderBox* rend = renderBox())
         return rend->scrollHeight().toDouble();
     return 0;
@@ -548,7 +548,7 @@ int Element::scrollHeight()
 
 PassRefPtr<ClientRectList> Element::getClientRects()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     RenderBoxModelObject* renderBoxModelObject = this->renderBoxModelObject();
     if (!renderBoxModelObject)
@@ -565,7 +565,7 @@ PassRefPtr<ClientRectList> Element::getClientRects()
 
 PassRefPtr<ClientRect> Element::getBoundingClientRect()
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     Vector<FloatQuad> quads;
     // Get the bounding rectangle from the box model.
@@ -1207,7 +1207,7 @@ void Element::focus(bool restorePreviousSelection, FocusType type)
     if (!document().isActive())
         return;
 
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (!isFocusable())
         return;
 
@@ -1216,7 +1216,7 @@ void Element::focus(bool restorePreviousSelection, FocusType type)
         return;
 
     // Setting the focused node above might have invalidated the layout due to scripts.
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
     if (!isFocusable())
         return;
     updateFocusAppearance(restorePreviousSelection);
@@ -1383,8 +1383,10 @@ RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
         return 0;
 
     ElementRareData& rareData = ensureElementRareData();
-    if (!rareData.computedStyle())
-        rareData.setComputedStyle(document().styleForElementIgnoringPendingStylesheets(this));
+    if (!rareData.computedStyle()) {
+        RenderStyle* parentStyle = parentNode() ? parentNode()->computedStyle() : 0;
+        rareData.setComputedStyle(document().ensureStyleResolver().styleForElement(this, parentStyle));
+    }
     return rareData.computedStyle();
 }
 

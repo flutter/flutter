@@ -266,12 +266,6 @@ public:
     void updateRenderTreeIfNeeded() { updateRenderTree(NoChange); }
     void updateRenderTreeForNodeIfNeeded(Node*);
     void updateLayout();
-    enum RunPostLayoutTasks {
-        RunPostLayoutTasksAsyhnchronously,
-        RunPostLayoutTasksSynchronously,
-    };
-    void updateLayoutIgnorePendingStylesheets(RunPostLayoutTasks = RunPostLayoutTasksAsyhnchronously);
-    PassRefPtr<RenderStyle> styleForElementIgnoringPendingStylesheets(Element*);
 
     void updateDistributionForNodeIfNeeded(Node*);
 
@@ -455,9 +449,6 @@ public:
 
     bool didLayoutWithPendingStylesheets() const { return m_pendingSheetLayout == DidLayoutWithPendingSheets; }
     bool ignoreLayoutWithPendingStylesheets() const { return m_pendingSheetLayout == IgnoreLayoutWithPendingSheets; }
-
-    bool hasNodesWithPlaceholderStyle() const { return m_hasNodesWithPlaceholderStyle; }
-    void setHasNodesWithPlaceholderStyle() { m_hasNodesWithPlaceholderStyle = true; }
 
     // Extension for manipulating canvas drawing contexts for use in CSS
     void getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtr<CanvasRenderingContext2D>&, RefPtr<WebGLRenderingContext>&);
@@ -669,7 +660,6 @@ private:
 
     AbstractModule* m_module;
 
-    bool m_hasNodesWithPlaceholderStyle;
     bool m_evaluateMediaQueriesOnStyleRecalc;
 
     // If we do ignore the pending stylesheet count, then we need to add a boolean

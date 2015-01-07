@@ -46,7 +46,6 @@ namespace blink {
 
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
-    , m_ignorePendingStylesheets(false)
     , m_fontSelector(CSSFontSelector::create(&document))
 {
     m_fontSelector->registerForInvalidationCallbacks(this);

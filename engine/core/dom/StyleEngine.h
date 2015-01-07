@@ -50,17 +50,6 @@ class StyleSheetContents;
 class StyleEngine final : public CSSFontSelectorClient  {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-
-    class IgnoringPendingStylesheet : public TemporaryChange<bool> {
-    public:
-        IgnoringPendingStylesheet(StyleEngine* engine)
-            : TemporaryChange<bool>(engine->m_ignorePendingStylesheets, true)
-        {
-        }
-    };
-
-    friend class IgnoringPendingStylesheet;
-
     static PassOwnPtr<StyleEngine> create(Document& document) { return adoptPtr(new StyleEngine(document)); }
 
     ~StyleEngine();
@@ -71,8 +60,6 @@ public:
     void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
 
     void updateActiveStyleSheets();
-
-    bool ignoringPendingStylesheets() const { return m_ignorePendingStylesheets; }
 
     // FIXME(sky): Remove this and ::first-line.
     bool usesFirstLineRules() const { return false; }
@@ -122,7 +109,6 @@ private:
     typedef ListHashSet<TreeScope*, 16> TreeScopeSet;
     TreeScopeSet m_activeTreeScopes;
 
-    bool m_ignorePendingStylesheets;
     OwnPtr<StyleResolver> m_resolver;
 
     RefPtr<CSSFontSelector> m_fontSelector;

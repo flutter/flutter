@@ -274,7 +274,7 @@ void InsertParagraphSeparatorCommand::doApply()
         insertNodeAfter(blockToInsert.get(), startBlock);
     }
 
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     // Move the start node and the siblings of the start node.
     if (VisiblePosition(insertionPosition) != VisiblePosition(positionBeforeNode(blockToInsert.get()))) {
@@ -300,7 +300,7 @@ void InsertParagraphSeparatorCommand::doApply()
 
     // Handle whitespace that occurs after the split
     if (positionAfterSplit.isNotNull()) {
-        document().updateLayoutIgnorePendingStylesheets();
+        document().updateLayout();
         if (!positionAfterSplit.isRenderedCharacter()) {
             // Clear out all whitespace and insert one non-breaking space
             ASSERT(!positionAfterSplit.containerNode()->renderer() || positionAfterSplit.containerNode()->renderer()->style()->collapseWhiteSpace());

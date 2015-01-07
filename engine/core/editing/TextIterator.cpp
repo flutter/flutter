@@ -321,7 +321,7 @@ void TextIterator::initialize(const Position& start, const Position& end)
     if (!m_node)
         return;
 
-    m_node->document().updateLayoutIgnorePendingStylesheets();
+    m_node->document().updateLayout();
 
     setUpFullyClippedStack(m_fullyClippedStack, m_node);
     m_offset = m_node == m_startContainer ? m_startOffset : 0;

@@ -320,7 +320,7 @@ bool FocusController::advanceFocusInDocumentOrder(FocusType type, bool initialFo
 
     Node* currentNode = document->focusedElement();
 
-    document->updateLayoutIgnorePendingStylesheets();
+    document->updateLayout();
 
     RefPtr<Node> node = findFocusableNodeAcrossFocusScope(type, FocusNavigationScope::focusNavigationScopeOf(currentNode ? currentNode : document), currentNode);
 

@@ -568,7 +568,7 @@ Position VisiblePosition::canonicalPosition(const Position& passedPosition)
         return Position();
 
     ASSERT(position.document());
-    position.document()->updateLayoutIgnorePendingStylesheets();
+    position.document()->updateLayout();
 
     Node* node = position.containerNode();
 

@@ -896,7 +896,7 @@ VisiblePosition previousLinePosition(const VisiblePosition &visiblePosition, int
     if (!node)
         return VisiblePosition();
 
-    node->document().updateLayoutIgnorePendingStylesheets();
+    node->document().updateLayout();
 
     RenderObject* renderer = node->renderer();
     if (!renderer)
@@ -951,7 +951,7 @@ VisiblePosition nextLinePosition(const VisiblePosition &visiblePosition, int lin
     if (!node)
         return VisiblePosition();
 
-    node->document().updateLayoutIgnorePendingStylesheets();
+    node->document().updateLayout();
 
     RenderObject* renderer = node->renderer();
     if (!renderer)

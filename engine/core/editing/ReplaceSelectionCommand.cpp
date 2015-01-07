@@ -222,7 +222,7 @@ PassRefPtr<HTMLElement> ReplacementFragment::insertFragmentForTestRendering(Elem
 
     holder->appendChild(m_fragment);
     rootEditableElement->appendChild(holder.get());
-    m_document->updateLayoutIgnorePendingStylesheets();
+    m_document->updateLayout();
 
     return holder.release();
 }
@@ -420,7 +420,7 @@ static inline bool nodeHasVisibleRenderText(Text& text)
 
 void ReplaceSelectionCommand::removeUnrenderedTextNodesAtEnds(InsertedNodes& insertedNodes)
 {
-    document().updateLayoutIgnorePendingStylesheets();
+    document().updateLayout();
 
     Node* lastLeafInserted = insertedNodes.lastLeafInserted();
     if (lastLeafInserted && lastLeafInserted->isTextNode() && !nodeHasVisibleRenderText(toText(*lastLeafInserted))

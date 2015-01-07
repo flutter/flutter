@@ -46,8 +46,8 @@ public:
 
     virtual ~HTMLImageElement();
 
-    int width(bool ignorePendingStylesheets = false);
-    int height(bool ignorePendingStylesheets = false);
+    int width();
+    int height();
 
     int naturalWidth() const;
     int naturalHeight() const;

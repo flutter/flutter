@@ -137,9 +137,6 @@ public:
 
     void notifyResizeForViewportUnits();
 
-    // Exposed for RenderStyle::isStyleAvilable().
-    static RenderStyle* styleNotYetAvailable() { return s_styleNotYetAvailable; }
-
     StyleSharingList& styleSharingList();
 
     void addToStyleSharingList(Element&);
@@ -195,8 +192,6 @@ private:
     void applyAnimatedProperties(StyleResolverState&, const HashMap<CSSPropertyID, RefPtr<Interpolation> >&);
     template <StyleResolver::StyleApplicationPass pass>
     void applyAllProperty(StyleResolverState&, CSSValue*);
-
-    static RenderStyle* s_styleNotYetAvailable;
 
     MatchedPropertiesCache m_matchedPropertiesCache;
 

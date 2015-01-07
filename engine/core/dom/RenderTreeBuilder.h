@@ -48,12 +48,7 @@ public:
         ASSERT(!node->renderer());
         ASSERT(node->needsAttach());
         ASSERT(node->document().inStyleRecalc());
-
-        // FIXME: We should be able to ASSERT(node->inActiveDocument()) but childrenChanged is called
-        // before ChildNodeInsertionNotifier in ContainerNode's methods and some implementations
-        // will trigger a layout inside childrenChanged.
-        // Mainly HTMLTextAreaElement::childrenChanged calls HTMLTextFormControlElement::setSelectionRange
-        // which does an updateLayoutIgnorePendingStylesheets.
+        ASSERT(node->inActiveDocument());
 
         m_renderingParent = NodeRenderingTraversal::parent(node, &m_parentDetails);
     }

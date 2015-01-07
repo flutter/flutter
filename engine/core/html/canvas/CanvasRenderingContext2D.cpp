@@ -1095,7 +1095,7 @@ void CanvasRenderingContext2D::scrollPathIntoViewInternal(const Path& path)
     if (!renderer || !renderBox || !state().m_invertibleCTM || path.isEmpty())
         return;
 
-    canvas()->document().updateLayoutIgnorePendingStylesheets();
+    canvas()->document().updateLayout();
 
     // Apply transformation and get the bounding rect
     Path transformedPath = path;

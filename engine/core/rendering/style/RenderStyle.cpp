@@ -212,11 +212,6 @@ bool RenderStyle::operator==(const RenderStyle& o) const
         && inherited == o.inherited;
 }
 
-bool RenderStyle::isStyleAvailable() const
-{
-    return this != StyleResolver::styleNotYetAvailable();
-}
-
 bool RenderStyle::inheritedNotEqual(const RenderStyle* other) const
 {
     return inherited_flags != other->inherited_flags

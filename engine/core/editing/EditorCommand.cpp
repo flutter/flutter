@@ -595,7 +595,7 @@ bool Editor::Command::execute(const String& parameter, Event* triggeringEvent) c
         if (!isSupported() || !m_frame || !m_command->allowExecutionWhenDisabled)
             return false;
     }
-    m_frame->document()->updateLayoutIgnorePendingStylesheets();
+    m_frame->document()->updateLayout();
     blink::Platform::current()->histogramSparse("WebCore.Editing.Commands", m_command->idForUserMetrics);
     return m_command->execute(*m_frame, triggeringEvent, m_source, parameter);
 }

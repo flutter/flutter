@@ -241,7 +241,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     : ContainerNode(0, CreateDocument)
     , TreeScope(*this)
     , m_module(nullptr)
-    , m_hasNodesWithPlaceholderStyle(false)
     , m_evaluateMediaQueriesOnStyleRecalc(false)
     , m_pendingSheetLayout(NoLayoutWithPendingSheets)
     , m_frame(initializer.frame())
@@ -1078,7 +1077,6 @@ void Document::updateStyle(StyleRecalcChange change)
     // mac when accessing the resolver by what appears to be a viewport size difference.
 
     if (change == Force) {
-        m_hasNodesWithPlaceholderStyle = false;
         RefPtr<RenderStyle> documentStyle = StyleResolver::styleForDocument(*this);
         StyleRecalcChange localChange = RenderStyle::stylePropagationDiff(documentStyle.get(), renderView()->style());
         if (localChange != NoChange)
@@ -1173,27 +1171,6 @@ void Document::clearFocusedElementTimerFired(Timer<Document>*)
 
     if (m_focusedElement && !m_focusedElement->isFocusable())
         m_focusedElement->blur();
-}
-
-// FIXME: This is a bad idea and needs to be removed eventually.
-// Other browsers load stylesheets before they continue parsing the web page.
-// Since we don't, we can run JavaScript code that needs answers before the
-// stylesheets are loaded. Doing a layout ignoring the pending stylesheets
-// lets us get reasonable answers. The long term solution to this problem is
-// to instead suspend JavaScript execution.
-void Document::updateLayoutIgnorePendingStylesheets(Document::RunPostLayoutTasks runPostLayoutTasks)
-{
-    StyleEngine::IgnoringPendingStylesheet ignoring(m_styleEngine.get());
-    updateLayout();
-    if (runPostLayoutTasks == RunPostLayoutTasksSynchronously && view())
-        view()->flushAnyPendingPostLayoutTasks();
-}
-
-PassRefPtr<RenderStyle> Document::styleForElementIgnoringPendingStylesheets(Element* element)
-{
-    ASSERT_ARG(element, element->document() == this);
-    StyleEngine::IgnoringPendingStylesheet ignoring(m_styleEngine.get());
-    return ensureStyleResolver().styleForElement(element, element->parentNode() ? element->parentNode()->computedStyle() : 0);
 }
 
 StyleResolver* Document::styleResolver() const

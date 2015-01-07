@@ -954,7 +954,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getFontSizeCSSValuePreferringK
     if (!m_node)
         return nullptr;
 
-    m_node->document().updateLayoutIgnorePendingStylesheets();
+    m_node->document().updateLayout();
 
     RefPtr<RenderStyle> style = m_node->computedStyle(m_pseudoElementSpecifier);
     if (!style)
@@ -1275,7 +1275,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         bool forceFullLayout = isLayoutDependent(propertyID, style, renderer) || m_node->isInShadowTree();
 
         if (forceFullLayout) {
-            document.updateLayoutIgnorePendingStylesheets();
+            document.updateLayout();
             style = computeRenderStyle(propertyID);
             renderer = m_node->renderer();
         }
@@ -2259,7 +2259,7 @@ String CSSComputedStyleDeclaration::item(unsigned i) const
 bool CSSComputedStyleDeclaration::cssPropertyMatches(CSSPropertyID propertyID, const CSSValue* propertyValue) const
 {
     if (propertyID == CSSPropertyFontSize && propertyValue->isPrimitiveValue() && m_node) {
-        m_node->document().updateLayoutIgnorePendingStylesheets();
+        m_node->document().updateLayout();
         RenderStyle* style = m_node->computedStyle(m_pseudoElementSpecifier);
         if (style && style->fontDescription().keywordSize()) {
             CSSValueID sizeValue = cssIdentifierForFontSizeKeyword(style->fontDescription().keywordSize());
