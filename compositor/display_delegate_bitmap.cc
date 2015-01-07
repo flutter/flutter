@@ -22,7 +22,7 @@ DisplayDelegate* DisplayDelegateBitmap::create(LayerClient* client) {
 }
 
 void DisplayDelegateBitmap::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
-  gfx::PNGCodec::EncodeBGRASkBitmap(bitmap_, false, pixels);
+  gfx::PNGCodec::EncodeBGRASkBitmap(bitmap_, true, pixels);
 }
 
 void DisplayDelegateBitmap::Paint(mojo::GaneshSurface& surface, const gfx::Rect& size) {
