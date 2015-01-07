@@ -77,7 +77,7 @@ abstract class Element : ParentNode {
   // Returns a new Array and new Attr instances every time.
   Array<Attr> getAttributes(); // O(N) in number of attributes
 
-  readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root
+  readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root // TODO(ianh): Should this be mutable? It would help explain how it gets set...
   Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
 
   virtual void endTagParsedCallback(); // noop

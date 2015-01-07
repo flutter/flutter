@@ -802,13 +802,18 @@ _document_:
      1. If the tag name isn't a registered tag name, then yield until
         _imported modules_ contains no entries with unresolved
         promises.
-     2. If the tag name is registered, create an element _node_ with
-        tag name and attributes given by the token. Otherwise, create
-        an element with the tag name "error" and the attributes given
-        by the token.
-     3. Append _node_ to the top node in the _stack of open nodes_.
-     4. Push _node_ onto the top of the _stack of open nodes_.
-     5. If _node_ is a ``template`` element, then:
+     2. If the tag name is not registered, then let the ErrorElement
+        constructor from sky:core be the element constructor.
+        Otherwise, let the element constructor be the registered
+        element's constructor for that tag name in this module.
+     3. Create an element _node_ with the attributes given by the
+        token by calling the constructor.
+     4. If _node_ is not an Element object, then let the constructor
+        be the ErrorElement constructor and return to the previous
+        step.
+     5. Append _node_ to the top node in the _stack of open nodes_.
+     6. Push _node_ onto the top of the _stack of open nodes_.
+     7. If _node_ is a ``template`` element, then:
         1. Let _fragment_ be the ``DocumentFragment`` object that the
            ``template`` element uses as its template contents container.
         2. Push _fragment_ onto the top of the _stack of open nodes_.
