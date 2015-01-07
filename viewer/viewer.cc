@@ -49,7 +49,11 @@ class Viewer : public mojo::ApplicationDelegate,
 
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());
+
+    // TODO(eseidel): Haven't solved ICU data loading for MojoShell.apk yet.
+#if !defined(OS_ANDROID)
     base::i18n::InitializeICU();
+#endif
 
     mojo::TracingImpl::Create(app);
   }

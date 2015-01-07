@@ -56,7 +56,14 @@ class Prompt : public mojo::ApplicationDelegate {
     connection->ConnectToService(&debugger_);
     std::cout << "Loading " << url_ << std::endl;
     Reload();
+#if !defined(OS_ANDROID)
+    // FIXME: To support device-centric development we need to re-write
+    // prompt.cc to just be a server and have all the command handling move
+    // to python (skydb).  prompt.cc would just run until told to quit.
+    // If we don't comment this out then prompt.cc just quits when run headless
+    // as it immediately recieves EOF which it treats as quit.
     ScheduleWaitForInput();
+#endif
     return true;
   }
 
