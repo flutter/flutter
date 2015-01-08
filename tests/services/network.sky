@@ -5,28 +5,26 @@
 <import src="/mojo/public/sky/connection.sky" as="connection" />
 <import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
 <import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
+<import src="/mojo/services/public/sky/application.sky" as="application" />
 <script>
 describe('Mojo network_service', function() {
   this.enableTimeouts(false);
 
   it('should be able to fetch text files', function(done) {
-    var netServiceHandle = internals.connectToService(
-        "mojo:network_service", "mojo::NetworkService");
-    var netConnection = new connection.Connection(
-        netServiceHandle,
-        net.NetworkService.stubClass,
-        net.NetworkService.proxyClass);
-    var urlLoaderPipe = new core.createMessagePipe();
-    netConnection.remote.createURLLoader(urlLoaderPipe.handle1);
-    var urlLoaderConnection = new connection.Connection(
-        urlLoaderPipe.handle0,
-        loader.URLLoader.stubClass,
-        loader.URLLoader.proxyClass);
+    var app = new application.Application(internals.passShellProxyHandle());
+    var netService = app.shell.connectToService(
+      "mojo:network_service", net.NetworkService);
+
+    var urlLoader;
+    netService.createURLLoader(function(urlLoaderProxy) {
+      urlLoader = urlLoaderProxy;
+    });
+
     var urlRequest = new loader.URLRequest();
     urlRequest.url = "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt";
     urlRequest.method = "GET";
     urlRequest.auto_follow_redirects = true;
-    var urlRequestPromise = urlLoaderConnection.remote.start(urlRequest);
+    var urlRequestPromise = urlLoader.start(urlRequest);
     urlRequestPromise.then(function(result) {
       console.log("url => " + result.response["url"]);
       console.log("status_line => " + result.response["status_line"]);

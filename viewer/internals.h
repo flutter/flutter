@@ -9,12 +9,14 @@
 #include "gin/handle.h"
 #include "gin/object_template_builder.h"
 #include "gin/wrappable.h"
+#include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/services/testing/test_harness.mojom.h"
 
 namespace sky {
 class DocumentView;
 
-class Internals : public gin::Wrappable<Internals> {
+class Internals : public gin::Wrappable<Internals>,
+                  public mojo::Shell {
  public:
   static gin::WrapperInfo kWrapperInfo;
   static gin::Handle<Internals> Create(v8::Isolate*, DocumentView*);
@@ -27,6 +29,12 @@ class Internals : public gin::Wrappable<Internals> {
  private:
   explicit Internals(DocumentView* document_view);
 
+  // mojo::Shell method:
+  void ConnectToApplication(
+      const mojo::String& application_url, 
+      mojo::InterfaceRequest<mojo::ServiceProvider> provider) override;
+
+  mojo::Handle PassShellProxyHandle();
   std::string RenderTreeAsText();
   std::string ContentAsText();
   void NotifyTestComplete(const std::string& test_result);
@@ -39,6 +47,7 @@ class Internals : public gin::Wrappable<Internals> {
   void pauseAnimations(double pauseTime);
 
   base::WeakPtr<DocumentView> document_view_;
+  mojo::Binding<mojo::Shell> shell_binding_;
   TestHarnessPtr test_harness_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Internals);

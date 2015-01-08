@@ -7,9 +7,9 @@
 #include "mojo/edk/js/core.h"
 #include "mojo/edk/js/handle.h"
 #include "mojo/edk/js/support.h"
+#include "mojo/edk/js/threading.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
-#include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/engine/public/web/WebDocument.h"
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebView.h"
@@ -31,11 +31,14 @@ gin::Handle<Internals> Internals::Create(
               mojo::js::Core::GetModule(isolate));
   object->Set(gin::StringToV8(isolate, "support"),
               mojo::js::Support::GetModule(isolate));
+  object->Set(gin::StringToV8(isolate, "threading"),
+              mojo::js::Threading::GetModule(isolate));
   return internals;
 }
 
 Internals::Internals(DocumentView* document_view)
-    : document_view_(document_view->GetWeakPtr()) {
+  : document_view_(document_view->GetWeakPtr()),
+    shell_binding_(this) {
   mojo::ConnectToService(document_view->imported_services(), &test_harness_);
 }
 
@@ -51,7 +54,8 @@ gin::ObjectTemplateBuilder Internals::GetObjectTemplateBuilder(
       .SetMethod("connectToService", &Internals::ConnectToService)
       .SetMethod("connectToEmbedderService",
                  &Internals::ConnectToEmbedderService)
-      .SetMethod("pauseAnimations", &Internals::pauseAnimations);
+      .SetMethod("pauseAnimations", &Internals::pauseAnimations)
+      .SetMethod("passShellProxyHandle", &Internals::PassShellProxyHandle);
 }
 
 std::string Internals::RenderTreeAsText() {
@@ -85,14 +89,31 @@ mojo::Handle Internals::ConnectToEmbedderService(
   return pipe.handle0.release();
 }
 
+// Returns a MessagePipe handle that's connected to this Shell. The caller
+// owns the handle and is expected to use it to create the JS Application for
+// the DocumentView.
+mojo::Handle Internals::PassShellProxyHandle() {
+    mojo::MessagePipe pipe;
+    if (!shell_binding_.is_bound())
+      shell_binding_.Bind(pipe.handle0.Pass());
+    return pipe.handle1.release();
+}
+
+void Internals::ConnectToApplication(
+    const mojo::String& application_url, 
+    mojo::InterfaceRequest<mojo::ServiceProvider> provider) {
+  if (document_view_) 
+    document_view_->shell()->ConnectToApplication(
+        application_url, provider.Pass());
+}
+
 mojo::Handle Internals::ConnectToService(
     const std::string& application_url, const std::string& interface_name) {
   if (!document_view_)
     return mojo::Handle();
 
   mojo::ServiceProviderPtr service_provider;
-  document_view_->shell()->ConnectToApplication(
-      application_url, mojo::GetProxy(&service_provider));
+  ConnectToApplication(application_url, mojo::GetProxy(&service_provider));
 
   mojo::MessagePipe pipe;
   service_provider->ConnectToService(interface_name, pipe.handle1.Pass());

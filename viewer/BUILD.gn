@@ -79,6 +79,7 @@ copy("sky_modules") {
   sources = [
     "script/core.sky",
     "script/support.sky",
+    "script/threading.sky",
   ]
   outputs = [
     "$root_gen_dir/mojo/public/sky/{{source_file_part}}",
