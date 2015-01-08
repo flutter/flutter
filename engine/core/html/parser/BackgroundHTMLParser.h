@@ -68,6 +68,12 @@ private:
     void sendTokensToMainThread();
     bool updateTokenizerState(const CompactHTMLToken& token);
 
+    enum State {
+        InitialState,
+        DidSeeImportState,
+    };
+
+    State m_state;
     SegmentedString m_input;
     OwnPtr<HTMLToken> m_token;
     OwnPtr<HTMLTokenizer> m_tokenizer;

@@ -531,7 +531,7 @@ public:
 
     ElementDataCache* elementDataCache() { return m_elementDataCache.get(); }
 
-    void didLoadAllScriptBlockingResources();
+    void didLoadAllParserBlockingResources();
     void didRemoveAllPendingStylesheet();
     void clearStyleResolver();
 
@@ -634,7 +634,7 @@ private:
     void updateTitle(const String&);
     void updateBaseURL();
 
-    void executeScriptsWaitingForResourcesTimerFired(Timer<Document>*);
+    void resumeParserWaitingForResourcesTimerFired(Timer<Document>*);
 
     void loadEventDelayTimerFired(Timer<Document>*);
 
@@ -687,7 +687,7 @@ private:
 
     RefPtr<CSSStyleSheet> m_elemSheet;
 
-    Timer<Document> m_executeScriptsWaitingForResourcesTimer;
+    Timer<Document> m_resumeParserWaitingForResourcesTimer;
 
     Timer<Document> m_clearFocusedElementTimer;
     RefPtr<Element> m_focusedElement;

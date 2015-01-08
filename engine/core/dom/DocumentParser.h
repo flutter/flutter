@@ -46,7 +46,7 @@ public:
                        const base::Closure& completionCallback) = 0;
 
     virtual TextPosition textPosition() const = 0;
-    virtual void executeScriptsWaitingForResources() = 0;
+    virtual void resumeAfterWaitingForImports() = 0;
     virtual bool isWaitingForScripts() const = 0;
     virtual bool isExecutingScript() const = 0;
 

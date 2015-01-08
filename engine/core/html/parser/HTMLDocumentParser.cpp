@@ -58,19 +58,12 @@ HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors
 
 HTMLDocumentParser::~HTMLDocumentParser()
 {
-#if ENABLE(OILPAN)
-    if (m_haveBackgroundParser)
-        stopBackgroundParser();
-    // In Oilpan, HTMLDocumentParser can die together with Document, and
-    // detach() is not called in this case.
-#else
     ASSERT(!m_parserScheduler);
     ASSERT(!m_pumpSessionNestingLevel);
     ASSERT(!m_haveBackgroundParser);
     // FIXME: We should be able to ASSERT(m_speculations.isEmpty()),
     // but there are cases where that's not true currently. For example,
     // we we're told to stop parsing before we've consumed all the input.
-#endif
 }
 
 void HTMLDocumentParser::parse(mojo::ScopedDataPipeConsumerHandle source,
@@ -192,20 +185,6 @@ void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<Pa
     pumpPendingSpeculations();
 }
 
-void HTMLDocumentParser::validateSpeculations(PassOwnPtr<ParsedChunk> chunk)
-{
-    ASSERT(chunk);
-    if (isWaitingForScripts()) {
-        // We're waiting on a network script, just save the chunk, we'll get
-        // a second validateSpeculations call after the script completes.
-        // This call should have been made immediately after runScriptsForPausedTreeBuilder
-        // which may have started a network load and left us waiting.
-        ASSERT(!m_lastChunkBeforeScript);
-        m_lastChunkBeforeScript = chunk;
-        return;
-    }
-}
-
 void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk> popChunk)
 {
     TRACE_EVENT0("blink", "HTMLDocumentParser::processParsedChunkFromBackgroundParser");
@@ -214,11 +193,9 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
     ASSERT(!isParsingFragment());
     ASSERT(!isWaitingForScripts());
     ASSERT(!isStopped());
-#if !ENABLE(OILPAN)
+
     // ASSERT that this object is both attached to the Document and protected.
     ASSERT(refCount() >= 2);
-#endif
-    ASSERT(!m_lastChunkBeforeScript);
 
     ActiveParserSession session(contextForParsingSession());
 
@@ -238,7 +215,6 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
         if (isWaitingForScripts()) {
             ASSERT(it + 1 == tokens->end()); // The </script> is assumed to be the last token of this bunch.
             runScriptsForPausedTreeBuilder();
-            validateSpeculations(chunk.release());
             break;
         }
 
@@ -260,11 +236,8 @@ void HTMLDocumentParser::pumpPendingSpeculations()
     // FIXME: Share this constant with the parser scheduler.
     const double parserTimeLimit = 0.500;
 
-#if !ENABLE(OILPAN)
     // ASSERT that this object is both attached to the Document and protected.
     ASSERT(refCount() >= 2);
-#endif
-    ASSERT(!m_lastChunkBeforeScript);
     ASSERT(!isWaitingForScripts());
     ASSERT(!isStopped());
 
@@ -278,7 +251,7 @@ void HTMLDocumentParser::pumpPendingSpeculations()
         processParsedChunkFromBackgroundParser(m_speculations.takeFirst());
 
         // Always check isStopped first as m_document may be null.
-        if (isStopped() || isWaitingForScripts())
+        if (isStopped() || isWaitingForScripts() || !document()->haveImportsLoaded())
             break;
 
         if (currentTime() - startTime > parserTimeLimit && !m_speculations.isEmpty()) {
@@ -334,10 +307,6 @@ void HTMLDocumentParser::constructTreeFromCompactHTMLToken(const CompactHTMLToke
 bool HTMLDocumentParser::hasInsertionPoint()
 {
     return false;
-}
-
-void HTMLDocumentParser::startBackgroundParser()
-{
 }
 
 void HTMLDocumentParser::stopBackgroundParser()
@@ -412,28 +381,15 @@ bool HTMLDocumentParser::isWaitingForScripts() const
     return m_treeBuilder->hasParserBlockingScript() || m_scriptRunner.hasPendingScripts();
 }
 
-void HTMLDocumentParser::resumeParsingAfterScriptExecution()
+void HTMLDocumentParser::resumeAfterWaitingForImports()
 {
+    RefPtr<HTMLDocumentParser> protect(this);
+    if (m_scriptRunner.hasPendingScripts())
+        m_scriptRunner.executePendingScripts();
     ASSERT(!isExecutingScript());
     ASSERT(!isWaitingForScripts());
     ASSERT(m_haveBackgroundParser);
-
-    validateSpeculations(m_lastChunkBeforeScript.release());
-    ASSERT(!m_lastChunkBeforeScript);
-    // processParsedChunkFromBackgroundParser can cause this parser to be detached from the Document,
-    // but we need to ensure it isn't deleted yet.
-    RefPtr<HTMLDocumentParser> protect(this);
     pumpPendingSpeculations();
-}
-
-void HTMLDocumentParser::executeScriptsWaitingForResources()
-{
-    if (!m_scriptRunner.hasPendingScripts())
-        return;
-    RefPtr<HTMLDocumentParser> protect(this);
-    m_scriptRunner.executePendingScripts();
-    if (!isWaitingForScripts())
-        resumeParsingAfterScriptExecution();
 }
 
 }

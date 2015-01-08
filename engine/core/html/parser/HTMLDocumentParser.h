@@ -86,7 +86,7 @@ public:
     void stopParsing() override final;
     bool isWaitingForScripts() const override final;
     bool isExecutingScript() const override final;
-    void executeScriptsWaitingForResources() override final;
+    void resumeAfterWaitingForImports() override final;
 
     UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
@@ -97,9 +97,7 @@ private:
 
     bool hasInsertionPoint();
 
-    void startBackgroundParser();
     void stopBackgroundParser();
-    void validateSpeculations(PassOwnPtr<ParsedChunk> lastChunk);
     void processParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
     void pumpPendingSpeculations();
 
@@ -109,7 +107,6 @@ private:
     void constructTreeFromCompactHTMLToken(const CompactHTMLToken&);
 
     void runScriptsForPausedTreeBuilder();
-    void resumeParsingAfterScriptExecution();
 
     void attemptToEnd();
     void endIfDelayed();

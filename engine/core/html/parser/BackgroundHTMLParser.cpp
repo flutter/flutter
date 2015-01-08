@@ -60,7 +60,8 @@ base::WeakPtr<BackgroundHTMLParser> BackgroundHTMLParser::create(PassOwnPtr<Back
 }
 
 BackgroundHTMLParser::BackgroundHTMLParser(PassOwnPtr<Configuration> config)
-    : m_token(adoptPtr(new HTMLToken))
+    : m_state(InitialState)
+    , m_token(adoptPtr(new HTMLToken))
     , m_tokenizer(HTMLTokenizer::create())
     , m_parser(config->parser)
     , m_pendingTokens(adoptPtr(new CompactHTMLTokenStream))
@@ -116,8 +117,20 @@ bool BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& token)
 {
     if (token.type() == HTMLToken::StartTag) {
         const String& tagName = token.data();
+
         if (threadSafeMatch(tagName, HTMLNames::scriptTag) || threadSafeMatch(tagName, HTMLNames::styleTag))
             m_tokenizer->setState(HTMLTokenizer::RawDataState);
+
+        if (threadSafeMatch(tagName, HTMLNames::importTag)) {
+            m_state = DidSeeImportState;
+            return true;
+        }
+
+        if (m_state == InitialState)
+            return true;
+
+        m_state = InitialState;
+        return false;
     }
 
     return token.type() != HTMLToken::EndTag || !threadSafeMatch(token.data(), HTMLNames::scriptTag);

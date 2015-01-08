@@ -247,7 +247,7 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_domWindow(m_frame ? m_frame->domWindow() : 0)
     , m_importsController(initializer.importsController())
     , m_activeParserCount(0)
-    , m_executeScriptsWaitingForResourcesTimer(this, &Document::executeScriptsWaitingForResourcesTimerFired)
+    , m_resumeParserWaitingForResourcesTimer(this, &Document::resumeParserWaitingForResourcesTimerFired)
     , m_clearFocusedElementTimer(this, &Document::clearFocusedElementTimerFired)
     , m_listenerTypes(0)
     , m_mutationObserverTypes(0)
@@ -1525,7 +1525,7 @@ void Document::didLoadAllImports()
 {
     if (!importLoader())
         styleResolverChanged();
-    didLoadAllScriptBlockingResources();
+    didLoadAllParserBlockingResources();
 }
 
 void Document::didRemoveAllPendingStylesheet()
@@ -1537,20 +1537,20 @@ void Document::didRemoveAllPendingStylesheet()
         import->didRemoveAllPendingStylesheet();
     if (!haveImportsLoaded())
         return;
-    didLoadAllScriptBlockingResources();
+    didLoadAllParserBlockingResources();
 }
 
-void Document::didLoadAllScriptBlockingResources()
+void Document::didLoadAllParserBlockingResources()
 {
-    m_executeScriptsWaitingForResourcesTimer.startOneShot(0, FROM_HERE);
+    m_resumeParserWaitingForResourcesTimer.startOneShot(0, FROM_HERE);
 }
 
-void Document::executeScriptsWaitingForResourcesTimerFired(Timer<Document>*)
+void Document::resumeParserWaitingForResourcesTimerFired(Timer<Document>*)
 {
     if (!isRenderingReady())
         return;
     if (m_parser)
-        m_parser->executeScriptsWaitingForResources();
+        m_parser->resumeAfterWaitingForImports();
 }
 
 TextPosition Document::parserPosition() const
