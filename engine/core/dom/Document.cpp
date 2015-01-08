@@ -1106,7 +1106,6 @@ void Document::updateStyle(StyleRecalcChange change)
     clearChildNeedsStyleRecalc();
 
     if (m_styleEngine->hasResolver()) {
-        // Pseudo element removal and similar may only work with these flags still set. Reset them after the style recalc.
         StyleResolver& resolver = m_styleEngine->ensureResolver();
         resolver.clearStyleSharingList();
     }

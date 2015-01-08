@@ -65,8 +65,7 @@ class StyleRuleKeyframes;
 class MatchResult;
 
 const unsigned styleSharingListSize = 15;
-const unsigned styleSharingMaxDepth = 32;
-typedef Deque<RawPtr<Element>, styleSharingListSize> StyleSharingList;
+typedef Deque<Element*, styleSharingListSize> StyleSharingList;
 
 struct CSSPropertyValue {
     STACK_ALLOCATED();
@@ -123,7 +122,7 @@ public:
 
     void notifyResizeForViewportUnits();
 
-    StyleSharingList& styleSharingList();
+    StyleSharingList& styleSharingList() { return m_styleSharingList; }
 
     void addToStyleSharingList(Element&);
     void clearStyleSharingList();
@@ -137,9 +136,6 @@ public:
 
     unsigned accessCount() const { return m_accessCount; }
     void didAccess() { ++m_accessCount; }
-
-    void increaseStyleSharingDepth() { ++m_styleSharingDepth; }
-    void decreaseStyleSharingDepth() { --m_styleSharingDepth; }
 
 private:
     // FIXME: This should probably go away, folded into FontBuilder.
@@ -188,8 +184,7 @@ private:
 
     StyleResourceLoader m_styleResourceLoader;
 
-    unsigned m_styleSharingDepth;
-    Vector<OwnPtr<StyleSharingList>, styleSharingMaxDepth> m_styleSharingLists;
+    StyleSharingList m_styleSharingList;
 
     OwnPtr<StyleResolverStats> m_styleResolverStats;
     OwnPtr<StyleResolverStats> m_styleResolverStatsTotals;

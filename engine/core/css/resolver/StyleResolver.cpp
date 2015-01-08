@@ -119,7 +119,6 @@ StyleResolver::StyleResolver(Document& document)
     : m_document(document)
     , m_printMediaType(false)
     , m_styleResourceLoader(document.fetcher())
-    , m_styleSharingDepth(0)
     , m_styleResolverStatsSequence(0)
     , m_accessCount(0)
 {
@@ -216,22 +215,9 @@ void StyleResolver::addToStyleSharingList(Element& element)
     list.prepend(&element);
 }
 
-StyleSharingList& StyleResolver::styleSharingList()
-{
-    m_styleSharingLists.resize(styleSharingMaxDepth);
-
-    // We never put things at depth 0 into the list since that's only the <html> element
-    // and it has no siblings or cousins to share with.
-    unsigned depth = std::max(std::min(m_styleSharingDepth, styleSharingMaxDepth), 1u) - 1u;
-
-    if (!m_styleSharingLists[depth])
-        m_styleSharingLists[depth] = adoptPtr(new StyleSharingList);
-    return *m_styleSharingLists[depth];
-}
-
 void StyleResolver::clearStyleSharingList()
 {
-    m_styleSharingLists.resize(0);
+    m_styleSharingList.clear();
 }
 
 StyleResolver::~StyleResolver()
