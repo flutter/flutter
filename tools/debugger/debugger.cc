@@ -58,7 +58,7 @@ void SkyDebugger::OnEmbed(
   content_->SetVisible(true);
 
   window_manager_app_->InitFocus(
-      make_scoped_ptr(new window_manager::BasicFocusRules(content_)));
+      make_scoped_ptr(new window_manager::BasicFocusRules(root_)));
 
   if (!pending_url_.empty())
     NavigateToURL(pending_url_);

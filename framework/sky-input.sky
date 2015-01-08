@@ -1,0 +1,51 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<sky-element name="sky-input" attributes="value:string">
+<template>
+  <style>
+  :host {
+    display: flex;
+    border: 1px solid blue;
+    margin: 5px;
+    padding: 4px;
+  }
+  #control {
+    align-self: center;
+    height: 1.2em;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  </style>
+  <div id="control" contenteditable on-keydown="handleKeyDown">{{ value }}</div>
+</template>
+<script>
+module.exports = class extends SkyElement {
+  shadowRootReady() {
+    var control = this.shadowRoot.getElementById('control');
+
+    var observer = new MutationObserver(function() {
+      this.value = control.textContent;
+      this.dispatchEvent(new CustomEvent('change', {
+        bubbles: true,
+      }));
+    }.bind(this));
+
+    observer.observe(control, {
+      subtree: true,
+      characterData: true,
+      childList: true,
+    });
+  }
+  handleKeyDown(event) {
+    // TODO(abarth): You can still get newlines if the user pastes them.
+    if (event.keyCode == 0xD)
+      event.preventDefault();
+  }
+}.register();
+</script>
+</sky-element>
