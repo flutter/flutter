@@ -15,6 +15,7 @@
     padding: 4px;
   }
   #control {
+    flex: 1;
     align-self: center;
     height: 1.2em;
     white-space: nowrap;
