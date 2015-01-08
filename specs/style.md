@@ -748,6 +748,8 @@ sky:core by default registers:
 Layout managers inherit from the following API:
 
 ```javascript
+callback LayoutManagerConstructor LayoutManager (RenderNode node);
+
 class LayoutManager : EventTarget {
   readonly attribute RenderNode node;
   constructor LayoutManager(RenderNode node);
@@ -756,7 +758,7 @@ class LayoutManager : EventTarget {
   readonly attribute Boolean autoreap;
     // defaults to true
     // when true, any children that are isNew are automatically welcomed by the default layout()
-    // when true, children that are removd don't get set to isGhost=true, they're just removed
+    // when true, children that are removed don't get set to isGhost=true, they're just removed
 
   virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of this.node's ancestors // implements EventTarget.getEventDispatchChain()
     // let result = [];
@@ -989,7 +991,7 @@ d[pDisplay] = new ObjectStyleValue(ParagraphLayoutManager);
 this.style.addStyles(d);
 ```
 
-The other elements doe't have any default styles.
+The other elements don't have any default styles.
 
 These declarations are all shared between all the elements (so e.g. if
 you reach in and change the declaration that was added to a ``span``

@@ -40,5 +40,8 @@ takes 8.333ms):
 TODO(ianh): Update the timings above to have some relationship to
 reality.
 
+TODO(ianh): Define an API so that the application can adjust the
+budgets.
+
 TODO(ianh): Define how scroll notifications get sent, or decide to
 drop them entirely from this model.
