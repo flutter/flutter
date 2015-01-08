@@ -27,6 +27,9 @@ module.exports = {};
 </template>
 <script>
 module.exports.StateHeaderElement = class extends SkyElement {
+  created() {
+    this.state = "";
+  }
   set datum(datum) {
     this.state = datum.state;
   }
@@ -49,6 +52,9 @@ module.exports.StateHeaderElement = class extends SkyElement {
 </template>
 <script>
 module.exports.LetterHeaderElement = class extends SkyElement {
+  created() {
+    this.letter = "";
+  }
   set datum(datum) {
     this.letter = datum.letter;
   }
@@ -92,6 +98,10 @@ module.exports.LetterHeaderElement = class extends SkyElement {
 </template>
 <script>
 module.exports.CityItemElement = class extends SkyElement {
+  created() {
+    this.name = "";
+    this.population = "";
+  }
   set datum(datum) {
     this.name = datum.name;
     this.population = datum.population;
@@ -553,6 +563,7 @@ module.exports.CityItemElement = class extends SkyElement {
         this.date = null;
         this.month = null;
         this.views = null;
+        this.scrollerElement = null;
       }
 
       attached() {
@@ -566,7 +577,6 @@ module.exports.CityItemElement = class extends SkyElement {
           cityItem: 30
         });
 
-        this.dataLoaded = this.dataLoaded.bind(this);
         this.scrollerElement = this.shadowRoot.getElementById('scroller');
         this.scrollerElement.addEventListener('scroll',
             this.handleScroll.bind(this));
@@ -574,7 +584,7 @@ module.exports.CityItemElement = class extends SkyElement {
         var self = this;
         setTimeout(function() {
           self.domReady();
-          self.loader.maybeLoadMoreData(self.dataLoaded);
+          self.loader.maybeLoadMoreData(self.dataLoaded.bind(self));
         });
       }
 
@@ -591,7 +601,7 @@ module.exports.CityItemElement = class extends SkyElement {
         this.tiler.drawTiles(scrollFrame, data);
         var datum = scrollChanged ?
             this.tiler.getFirstVisibleDatum(scrollFrame) : null;
-        this.loader.maybeLoadMoreData(this.dataLoaded, datum);
+        this.loader.maybeLoadMoreData(this.dataLoaded.bind(this), datum);
       }
 
       dataLoaded(data, indexOffset) {

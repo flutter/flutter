@@ -101,6 +101,8 @@ class SkyElement extends HTMLElement {
     this.isAttached = false;
     this.created();
 
+    Object.preventExtensions(this);
+
     // Invoke attributeChanged callback when element is first created too.
     var attributes = this.getAttributes();
     for (var i = 0; i < attributes.length; ++i) {
