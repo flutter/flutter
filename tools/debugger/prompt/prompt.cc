@@ -4,6 +4,8 @@
 
 #include "base/bind.h"
 #include "base/memory/weak_ptr.h"
+#include "base/strings/string_number_conversions.h"
+#include "base/strings/stringprintf.h"
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
@@ -31,21 +33,20 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   // Overridden from mojo::ApplicationDelegate:
   virtual void Initialize(mojo::ApplicationImpl* app) override {
     app->ConnectToService("mojo:tracing", &tracing_);
-    if (app->args().size() > 1)
-      url_ = app->args()[1];
-    else {
-      url_ = "https://raw.githubusercontent.com/domokit/mojo/master/sky/"
-          "examples/home.sky";
+    // app_url, command_port, url_to_load
+    if (app->args().size() < 2) {
+      LOG(ERROR) << "--args-for required to specify command_port";
+      exit(2);
     }
+
+    base::StringToUint(app->args()[1], &command_port_);
+
     scoped_ptr<net::ServerSocket> server_socket(
         new net::TCPServerSocket(NULL, net::NetLog::Source()));
-    // FIXME: This port needs to be configurable, as-is we can only run
-    // one copy of mojo_shell with sky at a time!
-    uint16 port = 7777;
-    int result = server_socket->ListenWithAddressAndPort("0.0.0.0", port, 1);
+    int result = server_socket->ListenWithAddressAndPort("0.0.0.0", command_port_, 1);
     if (result != net::OK) {
       // FIXME: Should we quit here?
-      LOG(ERROR) << "Failed to bind to port " << port
+      LOG(ERROR) << "Failed to bind to port " << command_port_
                  << " skydb commands will not work, exiting.";
       exit(2);
       return;
@@ -56,7 +57,6 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->ConnectToService(&debugger_);
-    Reload();
     return true;
   }
 
@@ -102,13 +102,14 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   }
 
   void Help(std::string path, int connection_id) {
-    std::string help = "Sky Debugger\n"
+    std::string help = base::StringPrintf("Sky Debugger running on port %d\n"
         "Supported URLs:\n"
         "/toggle_tracing   -- Start/stop tracing\n"
         "/reload           -- Reload the current page\n"
         "/inspect          -- Start inspector server for current page\n"
         "/quit             -- Quit\n"
-        "/load             -- Load a new URL, url in POST body.\n";
+        "/load             -- Load a new URL, url in POST body.\n",
+        command_port_);
     if (path != "/")
       help = "Unknown path: " + path + "\n\n" + help;
     Respond(connection_id, help);
@@ -117,7 +118,8 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   void Load(int connection_id, std::string url) {
     url_ = url;
     Reload();
-    Respond(connection_id, "OK\n");
+    std::string response = std::string("Loaded ") + url + "\n";
+    Respond(connection_id, response);
   }
 
   void Reload() {
@@ -154,6 +156,7 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   std::string url_;
   base::WeakPtrFactory<Prompt> weak_ptr_factory_;
   scoped_ptr<net::HttpServer> web_server_;
+  unsigned command_port_;
 
   DISALLOW_COPY_AND_ASSIGN(Prompt);
 };

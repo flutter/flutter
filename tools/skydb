@@ -14,6 +14,7 @@ import signal
 import skypy.configuration as configuration
 import subprocess
 import urlparse
+import time
 
 
 SUPPORTED_MIME_TYPES = [
@@ -22,23 +23,18 @@ SUPPORTED_MIME_TYPES = [
     'text/plain',
 ]
 
-HTTP_PORT = 9999
+DEFAULT_SKY_COMMAND_PORT = 7777
+SKY_SERVER_PORT = 9999
 PID_FILE_PATH = "/tmp/skydb.pids"
+DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/examples/home.sky"
 
 
 class SkyDebugger(object):
     def __init__(self):
         self.paths = None
         self.pids = {}
-        # FIXME: This is not android aware nor aware of the port
-        # skyserver is listening on.
-        self.base_url = 'http://localhost:7777'
 
-    def _server_root_and_url_from_path_arg(self, url_or_path):
-        # This is already a valid url we don't need a local server.
-        if urlparse.urlparse(url_or_path).scheme:
-            return None, url_or_path
-
+    def _server_root_for_url(self, url_or_path):
         path = os.path.abspath(url_or_path)
         if os.path.commonprefix([path, self.paths.src_root]) == self.paths.src_root:
             server_root = self.paths.src_root
@@ -47,14 +43,12 @@ class SkyDebugger(object):
             logging.warn(
                 '%s is outside of mojo root, using %s as server root' %
                 (path, server_root))
-        local_url = SkyServer.url_for_path(HTTP_PORT, server_root, path)
-        return server_root, local_url
+        return server_root
 
     def _in_chromoting(self):
         return os.environ.get('CHROME_REMOTE_DESKTOP_SESSION', False)
 
     def _build_mojo_shell_command(self, args):
-        sky_server = None
         self.paths = Paths(os.path.join('out', args.configuration))
 
         content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
@@ -64,39 +58,43 @@ class SkyDebugger(object):
             '--v=1',
             '--content-handlers=%s' % ','.join(content_handlers),
             '--url-mappings=mojo:window_manager=mojo:sky_debugger',
+            '--args-for=mojo:sky_debugger_prompt %d' % args.command_port,
             'mojo:window_manager',
         ]
         if args.use_osmesa:
             shell_command.append('--args-for=mojo:native_viewport_service --use-osmesa')
 
-        if args.url_or_path:
-            # Check if we need a local server for the url/path arg:
-            server_root, url = \
-                self._server_root_and_url_from_path_arg(args.url_or_path)
-            sky_server = SkyServer(self.paths, HTTP_PORT, args.configuration,
-                server_root)
-
-            prompt_args = '--args-for=mojo:sky_debugger_prompt %s' % url
-            shell_command.append(prompt_args)
-
         if args.gdb:
             shell_command = ['gdb', '--args'] + shell_command
 
-        return shell_command, sky_server
+        return shell_command
 
     def start_command(self, args):
-        shell_command, sky_server = self._build_mojo_shell_command(args)
+        shell_command = self._build_mojo_shell_command(args)
         if args.show_command:
             print " ".join(shell_command)
             return
 
-        self.stop_command([]) # Quit any existing process.
+        self.stop_command(None) # Quit any existing process.
 
-        if sky_server:
+        print args.url_or_path
+        # We only start a server for paths:
+        if not urlparse.urlparse(args.url_or_path).scheme:
+            server_root = self._server_root_for_url(args.url_or_path)
+            sky_server = SkyServer(self.paths, SKY_SERVER_PORT,
+                args.configuration, server_root)
             self.pids['sky_server_pid'] = sky_server.start()
-            # self.pids['sky_server_port'] = sky_server.port
-            # self.pids['sky_server_root'] = sky_server.root
+            self.pids['sky_server_port'] = sky_server.port
+            self.pids['sky_server_root'] = sky_server.root
+
         self.pids['mojo_shell_pid'] = subprocess.Popen(shell_command).pid
+        self.pids['sky_command_port'] = args.command_port
+
+        if not self._wait_for_sky_command_port():
+            logging.error('Failed to start sky')
+            self.stop_command(None)
+        else:
+            self.load_command(args)
 
     def _kill_if_exists(self, key, name):
         pid = self.pids.pop(key, None)
@@ -116,12 +114,19 @@ class SkyDebugger(object):
         self._kill_if_exists('sky_server_pid', 'sky_server')
 
     def load_command(self, args):
-        # Should resolve paths to relative urls like start does.
-        # self.pids['sky_server_root'] and port should help.
-        self._send_command_to_sky('/load', args.url_or_path)
+        if not urlparse.urlparse(args.url_or_path).scheme:
+            url = SkyServer.url_for_path(self.pids['sky_server_port'],
+                    self.pids['sky_server_root'], args.url_or_path)
+        else:
+            url = args.url_or_path
+        self._send_command_to_sky('/load', url)
+
+    def _command_base_url(self):
+        return 'http://localhost:%s' % self.pids['sky_command_port']
 
     def _send_command_to_sky(self, command_path, payload=None):
-        url = self.base_url + command_path
+        url = 'http://localhost:%s%s' % (
+            self.pids['sky_command_port'], command_path)
         if payload:
             response = requests.post(url, payload)
         else:
@@ -150,6 +155,21 @@ class SkyDebugger(object):
         command = lambda args: self._send_command_to_sky(url_path)
         parser.set_defaults(func=command)
 
+    def _wait_for_sky_command_port(self):
+        tries = 0
+        while True:
+            try:
+                self._send_command_to_sky('/')
+                return True
+            except:
+                tries += 1
+                if tries == 3:
+                    logging.warn('Still waiting for sky on port %s' %
+                        self.pids['sky_command_port'])
+                if tries > 10:
+                    return False
+                time.sleep(1)
+
     def main(self):
         logging.basicConfig(level=logging.INFO)
 
@@ -162,9 +182,12 @@ class SkyDebugger(object):
             help='launch a new mojo_shell with sky')
         configuration.add_arguments(start_parser)
         start_parser.add_argument('--gdb', action='store_true')
+        start_parser.add_argument('--command-port', type=int,
+            default=DEFAULT_SKY_COMMAND_PORT)
         start_parser.add_argument('--use-osmesa', action='store_true',
             default=self._in_chromoting())
-        start_parser.add_argument('url_or_path', nargs='?', type=str)
+        start_parser.add_argument('url_or_path', nargs='?', type=str,
+            default=DEFAULT_URL)
         start_parser.add_argument('--show-command', action='store_true',
             help='Display the shell command and exit')
         start_parser.set_defaults(func=self.start_command)
