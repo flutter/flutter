@@ -69,11 +69,11 @@ void StyleSheetContents::shrinkToFit()
     m_childRules.shrinkToFit();
 }
 
-RuleSet& StyleSheetContents::ensureRuleSet(AddRuleFlags addRuleFlags)
+RuleSet& StyleSheetContents::ensureRuleSet()
 {
     if (!m_ruleSet) {
         m_ruleSet = RuleSet::create();
-        m_ruleSet->addRulesFromSheet(this, addRuleFlags);
+        m_ruleSet->addRulesFromSheet(this);
     }
     return *m_ruleSet.get();
 }

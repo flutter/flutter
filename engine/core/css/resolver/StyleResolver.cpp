@@ -88,13 +88,6 @@ void setAnimationUpdateIfNeeded(StyleResolverState& state, Element& element)
 
 namespace blink {
 
-static void addFontFaceRule(Document* document, CSSFontSelector* cssFontSelector, const StyleRuleFontFace* fontFaceRule)
-{
-    RefPtr<FontFace> fontFace = FontFace::create(document, fontFaceRule);
-    if (fontFace)
-        cssFontSelector->fontFaceCache()->add(cssFontSelector, fontFaceRule, fontFace);
-}
-
 static RuleSet& defaultStyles()
 {
     DEFINE_STATIC_LOCAL(RefPtr<StyleSheetContents>, styleSheet, ());
@@ -164,7 +157,25 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
 
     TreeScope& treeScope = ownerNode->treeScope();
     ScopedStyleResolver& resolver = treeScope.scopedStyleResolver();
-    resolver.addRulesFromSheet(cssSheet, this);
+    resolver.addRulesFromSheet(cssSheet);
+
+    RuleSet& ruleSet = cssSheet->contents()->ruleSet();
+
+    const MediaQueryResultList& list = ruleSet.viewportDependentMediaQueryResults();
+    for (size_t i = 0; i < list.size(); ++i)
+        m_viewportDependentMediaQueryResults.append(list[i]);
+
+    // FIXME(BUG 72461): We don't add @font-face rules of scoped style sheets for the moment.
+    if (ownerNode->isDocumentNode()) {
+        CSSFontSelector* fontSelector = document().styleEngine()->fontSelector();
+        const Vector<RawPtr<StyleRuleFontFace> > fontFaceRules = ruleSet.fontFaceRules();
+        for (unsigned i = 0; i < fontFaceRules.size(); ++i) {
+            if (RefPtr<FontFace> fontFace = FontFace::create(&document(), fontFaceRules[i]))
+                fontSelector->fontFaceCache()->add(fontSelector, fontFaceRules[i], fontFace);
+        }
+        if (fontFaceRules.size())
+            invalidateMatchedPropertiesCache();
+    }
 }
 
 void StyleResolver::appendPendingAuthorStyleSheets()
@@ -189,18 +200,6 @@ void StyleResolver::finishAppendAuthorStyleSheets()
 {
     if (document().renderView() && document().renderView()->style())
         document().renderView()->style()->font().update(document().styleEngine()->fontSelector());
-}
-
-void StyleResolver::processScopedRules(const RuleSet& authorRules, CSSStyleSheet* parentStyleSheet, unsigned parentIndex, ContainerNode& scope)
-{
-    // FIXME(BUG 72461): We don't add @font-face rules of scoped style sheets for the moment.
-    if (scope.isDocumentNode()) {
-        const Vector<RawPtr<StyleRuleFontFace> > fontFaceRules = authorRules.fontFaceRules();
-        for (unsigned i = 0; i < fontFaceRules.size(); ++i)
-            addFontFaceRule(m_document, document().styleEngine()->fontSelector(), fontFaceRules[i]);
-        if (fontFaceRules.size())
-            invalidateMatchedPropertiesCache();
-    }
 }
 
 void StyleResolver::addToStyleSharingList(Element& element)
@@ -798,12 +797,6 @@ void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, s
             StyleBuilder::applyProperty(properties[i].property, state, properties[i].value);
         }
     }
-}
-
-void StyleResolver::addMediaQueryResults(const MediaQueryResultList& list)
-{
-    for (size_t i = 0; i < list.size(); ++i)
-        m_viewportDependentMediaQueryResults.append(list[i]);
 }
 
 bool StyleResolver::mediaQueryAffectedByViewportChange() const

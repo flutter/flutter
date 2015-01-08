@@ -34,18 +34,13 @@
 
 namespace blink {
 
-enum AddRuleFlags {
-    RuleHasNoSpecialState         = 0,
-    RuleCanUseFastCheckSelector   = 1,
-};
-
 class CSSSelector;
 class StyleSheetContents;
 
 class RuleData {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    RuleData(StyleRule*, unsigned selectorIndex, unsigned position, AddRuleFlags);
+    RuleData(StyleRule*, unsigned selectorIndex, unsigned position);
 
     unsigned position() const { return m_position; }
     StyleRule* rule() const { return m_rule; }
@@ -77,9 +72,9 @@ class RuleSet {
 public:
     static PassOwnPtr<RuleSet> create() { return adoptPtr(new RuleSet); }
 
-    void addRulesFromSheet(StyleSheetContents*, AddRuleFlags = RuleHasNoSpecialState);
-    void addStyleRule(StyleRule*, AddRuleFlags);
-    void addRule(StyleRule*, unsigned selectorIndex, AddRuleFlags);
+    void addRulesFromSheet(StyleSheetContents*);
+    void addStyleRule(StyleRule*);
+    void addRule(StyleRule*, unsigned selectorIndex);
 
     const RuleFeatureSet& features() const { return m_features; }
 
@@ -116,7 +111,7 @@ private:
     void addFontFaceRule(StyleRuleFontFace*);
     void addKeyframesRule(StyleRuleKeyframes*);
 
-    void addChildRules(const Vector<RefPtr<StyleRuleBase> >&, AddRuleFlags);
+    void addChildRules(const Vector<RefPtr<StyleRuleBase> >&);
     bool findBestRuleSetAndAdd(const CSSSelector&, RuleData&);
 
     void compactRules();

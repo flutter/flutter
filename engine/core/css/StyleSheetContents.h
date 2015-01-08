@@ -60,7 +60,7 @@ public:
 
     void shrinkToFit();
     RuleSet& ruleSet() { ASSERT(m_ruleSet); return *m_ruleSet.get(); }
-    RuleSet& ensureRuleSet(AddRuleFlags);
+    RuleSet& ensureRuleSet();
 
 private:
     explicit StyleSheetContents(Document* document, const CSSParserContext&);

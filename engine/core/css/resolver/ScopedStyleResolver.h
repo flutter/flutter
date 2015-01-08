@@ -37,7 +37,6 @@
 
 namespace blink {
 
-class StyleResolver;
 class StyleSheetContents;
 class RuleFeatureSet;
 
@@ -57,7 +56,7 @@ public:
     const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, bool includeEmptyRules, CascadeScope, CascadeOrder = ignoreCascadeOrder);
-    void addRulesFromSheet(CSSStyleSheet*, StyleResolver*);
+    void addRulesFromSheet(CSSStyleSheet*);
 
     void resetAuthorStyle();
 

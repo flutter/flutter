@@ -31,11 +31,6 @@
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
-#include "sky/engine/core/css/resolver/StyleResolver.h"
-#include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 
@@ -44,17 +39,11 @@ ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
 {
 }
 
-void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet, StyleResolver* resolver)
+void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet)
 {
     m_authorStyleSheets.append(cssSheet);
-    unsigned index = m_authorStyleSheets.size() - 1;
-    StyleSheetContents* sheet = cssSheet->contents();
 
-    AddRuleFlags addRuleFlags = RuleHasNoSpecialState;
-    const RuleSet& ruleSet = sheet->ensureRuleSet(addRuleFlags);
-    resolver->addMediaQueryResults(ruleSet.viewportDependentMediaQueryResults());
-    resolver->processScopedRules(ruleSet, cssSheet, index, treeScope().rootNode());
-
+    const RuleSet& ruleSet = cssSheet->contents()->ensureRuleSet();
     m_features.add(ruleSet.features());
 }
 

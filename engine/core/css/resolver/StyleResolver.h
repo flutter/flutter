@@ -106,8 +106,6 @@ public:
     void appendAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void finishAppendAuthorStyleSheets();
 
-    void processScopedRules(const RuleSet& authorRules, CSSStyleSheet*, unsigned sheetIndex, ContainerNode& scope);
-
     void lazyAppendAuthorStyleSheets(unsigned firstNew, const Vector<RefPtr<CSSStyleSheet> >&);
     void removePendingAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
     void appendPendingAuthorStyleSheets();
@@ -118,7 +116,6 @@ public:
     // |properties| is an array with |count| elements.
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);
 
-    void addMediaQueryResults(const MediaQueryResultList&);
     bool mediaQueryAffectedByViewportChange() const;
 
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.

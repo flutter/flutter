@@ -43,7 +43,7 @@ namespace blink {
 
 // -----------------------------------------------------------------
 
-RuleData::RuleData(StyleRule* rule, unsigned selectorIndex, unsigned position, AddRuleFlags addRuleFlags)
+RuleData::RuleData(StyleRule* rule, unsigned selectorIndex, unsigned position)
     : m_rule(rule)
     , m_selectorIndex(selectorIndex)
     , m_isLastInArray(false)
@@ -126,9 +126,9 @@ bool RuleSet::findBestRuleSetAndAdd(const CSSSelector& component, RuleData& rule
     return false;
 }
 
-void RuleSet::addRule(StyleRule* rule, unsigned selectorIndex, AddRuleFlags addRuleFlags)
+void RuleSet::addRule(StyleRule* rule, unsigned selectorIndex)
 {
-    RuleData ruleData(rule, selectorIndex, m_ruleCount++, addRuleFlags);
+    RuleData ruleData(rule, selectorIndex, m_ruleCount++);
     m_features.collectFeaturesFromSelector(ruleData.selector());
 
     if (!findBestRuleSetAndAdd(ruleData.selector(), ruleData)) {
@@ -149,7 +149,7 @@ void RuleSet::addKeyframesRule(StyleRuleKeyframes* rule)
     m_keyframesRules.append(rule);
 }
 
-void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, AddRuleFlags addRuleFlags)
+void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules)
 {
     for (unsigned i = 0; i < rules.size(); ++i) {
         StyleRuleBase* rule = rules[i].get();
@@ -159,29 +159,28 @@ void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules, AddRule
 
             const CSSSelectorList& selectorList = styleRule->selectorList();
             for (size_t selectorIndex = 0; selectorIndex != kNotFound; selectorIndex = selectorList.indexOfNextSelectorAfter(selectorIndex))
-                addRule(styleRule, selectorIndex, addRuleFlags);
+                addRule(styleRule, selectorIndex);
         } else if (rule->isFontFaceRule()) {
             addFontFaceRule(toStyleRuleFontFace(rule));
         } else if (rule->isKeyframesRule()) {
             addKeyframesRule(toStyleRuleKeyframes(rule));
         } else if (rule->isSupportsRule() && toStyleRuleSupports(rule)->conditionIsSupported()) {
-            addChildRules(toStyleRuleSupports(rule)->childRules(), addRuleFlags);
+            addChildRules(toStyleRuleSupports(rule)->childRules());
         }
     }
 }
 
-void RuleSet::addRulesFromSheet(StyleSheetContents* sheet, AddRuleFlags addRuleFlags)
+void RuleSet::addRulesFromSheet(StyleSheetContents* sheet)
 {
     TRACE_EVENT0("blink", "RuleSet::addRulesFromSheet");
     ASSERT(sheet);
-    addRuleFlags = static_cast<AddRuleFlags>(addRuleFlags | RuleCanUseFastCheckSelector);
-    addChildRules(sheet->childRules(), addRuleFlags);
+    addChildRules(sheet->childRules());
 }
 
-void RuleSet::addStyleRule(StyleRule* rule, AddRuleFlags addRuleFlags)
+void RuleSet::addStyleRule(StyleRule* rule)
 {
     for (size_t selectorIndex = 0; selectorIndex != kNotFound; selectorIndex = rule->selectorList().indexOfNextSelectorAfter(selectorIndex))
-        addRule(rule, selectorIndex, addRuleFlags);
+        addRule(rule, selectorIndex);
 }
 
 void RuleSet::compactPendingRules(PendingRuleMap& pendingMap, CompactRuleMap& compactMap)
