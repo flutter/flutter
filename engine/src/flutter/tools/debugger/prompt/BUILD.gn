@@ -16,6 +16,8 @@ mojo_native_application("prompt") {
     "//mojo/application",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/utility",
+    "//net",
+    "//net:http_server",
     "//services/tracing:bindings",
     "//sky/tools/debugger:bindings",
     "//sky/viewer:bindings",
