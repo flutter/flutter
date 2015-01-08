@@ -8,12 +8,12 @@
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
+#include "net/base/net_errors.h"
 #include "net/server/http_server.h"
 #include "net/server/http_server_request_info.h"
 #include "net/socket/tcp_server_socket.h"
 #include "services/tracing/tracing.mojom.h"
 #include "sky/tools/debugger/debugger.mojom.h"
-#include <iostream>
 
 namespace sky {
 namespace debugger {
@@ -41,14 +41,21 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
         new net::TCPServerSocket(NULL, net::NetLog::Source()));
     // FIXME: This port needs to be configurable, as-is we can only run
     // one copy of mojo_shell with sky at a time!
-    server_socket->ListenWithAddressAndPort("0.0.0.0", 7777, 1);
+    uint16 port = 7777;
+    int result = server_socket->ListenWithAddressAndPort("0.0.0.0", port, 1);
+    if (result != net::OK) {
+      // FIXME: Should we quit here?
+      LOG(ERROR) << "Failed to bind to port " << port
+                 << " skydb commands will not work, exiting.";
+      exit(2);
+      return;
+    }
     web_server_.reset(new net::HttpServer(server_socket.Pass(), this));
   }
 
   virtual bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->ConnectToService(&debugger_);
-    std::cout << "Loading " << url_ << std::endl;
     Reload();
     return true;
   }
@@ -125,20 +132,20 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   }
 
   void Quit(int connection_id) {
-    std::cout << "quitting" << std::endl;
     debugger_->Shutdown();
   }
 
   void ToggleTracing(int connection_id) {
+    std::string response;
     if (is_tracing_) {
-      std::cout << "Stopping trace (writing to sky_viewer.trace)" << std::endl;
+      response = "Stopping trace (writing to sky_viewer.trace)\n";
       tracing_->StopAndFlush();
     } else {
-      std::cout << "Starting trace (type 'trace' to stop tracing)" << std::endl;
+      response = "Starting trace (type 'trace' to stop tracing)\n";
       tracing_->Start(mojo::String("sky_viewer"), mojo::String("*"));
     }
     is_tracing_ = !is_tracing_;
-    Respond(connection_id, "OK\n");
+    Respond(connection_id, response);
   }
 
   bool is_tracing_;
