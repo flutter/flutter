@@ -37,7 +37,6 @@ mojo_native_application("viewer") {
   deps = [
     ":bindings",
     ":sky_modules",
-    "//base:i18n",
     "//gin",
     "//mojo/application",
     "//mojo/common",
@@ -45,6 +44,7 @@ mojo_native_application("viewer") {
     "//mojo/converters/geometry",
     "//mojo/converters/surfaces",
     "//mojo/edk/js",
+    "//mojo/icu",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",

@@ -7,6 +7,7 @@
 #include "base/threading/thread.h"
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/common/tracing_impl.h"
+#include "mojo/icu/icu.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_delegate.h"
@@ -19,10 +20,6 @@
 #include "sky/viewer/content_handler_impl.h"
 #include "sky/viewer/document_view.h"
 #include "sky/viewer/platform/platform_impl.h"
-
-#if !defined(COMPONENT_BUILD)
-#include "base/i18n/icu_util.h"
-#endif
 
 namespace sky {
 
@@ -50,11 +47,7 @@ class Viewer : public mojo::ApplicationDelegate,
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());
 
-    // TODO(eseidel): Haven't solved ICU data loading for MojoShell.apk yet.
-#if !defined(OS_ANDROID)
-    base::i18n::InitializeICU();
-#endif
-
+    mojo::icu::Initialize(app);
     mojo::TracingImpl::Create(app);
   }
 
