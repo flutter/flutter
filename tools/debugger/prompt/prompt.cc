@@ -8,29 +8,17 @@
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
+#include "net/server/http_server.h"
+#include "net/server/http_server_request_info.h"
+#include "net/socket/tcp_server_socket.h"
 #include "services/tracing/tracing.mojom.h"
 #include "sky/tools/debugger/debugger.mojom.h"
 #include <iostream>
 
 namespace sky {
 namespace debugger {
-namespace {
 
-std::string GetCommand() {
-  std::cout << "(skydb) ";
-  std::cout.flush();
-
-  std::string command;
-  std::getline(std::cin, command);
-  // Any errors (including eof) just quit the debugger:
-  if (!std::cin.good())
-    command = 'q';
-  return command;
-}
-
-}
-
-class Prompt : public mojo::ApplicationDelegate {
+class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegate {
  public:
   Prompt()
       : is_tracing_(false),
@@ -49,6 +37,12 @@ class Prompt : public mojo::ApplicationDelegate {
       url_ = "https://raw.githubusercontent.com/domokit/mojo/master/sky/"
           "examples/home.sky";
     }
+    scoped_ptr<net::ServerSocket> server_socket(
+        new net::TCPServerSocket(NULL, net::NetLog::Source()));
+    // FIXME: This port needs to be configurable, as-is we can only run
+    // one copy of mojo_shell with sky at a time!
+    server_socket->ListenWithAddressAndPort("0.0.0.0", 7777, 1);
+    web_server_.reset(new net::HttpServer(server_socket.Pass(), this));
   }
 
   virtual bool ConfigureIncomingConnection(
@@ -56,93 +50,86 @@ class Prompt : public mojo::ApplicationDelegate {
     connection->ConnectToService(&debugger_);
     std::cout << "Loading " << url_ << std::endl;
     Reload();
-#if !defined(OS_ANDROID)
-    // FIXME: To support device-centric development we need to re-write
-    // prompt.cc to just be a server and have all the command handling move
-    // to python (skydb).  prompt.cc would just run until told to quit.
-    // If we don't comment this out then prompt.cc just quits when run headless
-    // as it immediately recieves EOF which it treats as quit.
-    ScheduleWaitForInput();
-#endif
     return true;
   }
 
-  bool ExecuteCommand(const std::string& command) {
-    if (command == "help" || command == "h") {
-      PrintHelp();
-      return true;
-    }
-    if (command == "trace") {
-      ToggleTracing();
-      return true;
-    }
-    if (command == "reload" || command == "r") {
-      Reload();
-      return true;
-    }
-    if (command == "inspect") {
-      Inspect();
-      return true;
-    }
-    if (command == "quit" || command == "q") {
-      Quit();
-      return true;
-    }
-    if (command.size() == 1) {
-      std::cout << "Unknown command: " << command << std::endl;
-      return true;
-    }
-    return false;
+  // net::HttpServer::Delegate
+  void OnConnect(int connection_id) override {
   }
 
-  void WaitForInput() {
-    std::string command = GetCommand();
+  void OnClose(int connection_id) override {
+  }
 
-    if (!ExecuteCommand(command)) {
-      if (command.size() > 0) {
-        url_ = command;
-        Reload();
-      }
+  void OnHttpRequest(
+      int connection_id, const net::HttpServerRequestInfo& info) override {
+
+    // FIXME: We should use use a fancier lookup system more like what
+    // services/http_server/http_server.cc does with AddHandler.
+    if (info.path == "/trace")
+      ToggleTracing(connection_id);
+    else if (info.path == "/reload")
+      Load(connection_id, url_);
+    else if (info.path == "/inspect")
+      Inspect(connection_id);
+    else if (info.path == "/quit")
+      Quit(connection_id);
+    else if (info.path == "/load")
+      Load(connection_id, info.data);
+    else {
+      Help(info.path, connection_id);
     }
-
-    ScheduleWaitForInput();
   }
 
-  void ScheduleWaitForInput() {
-    base::MessageLoop::current()->PostTask(FROM_HERE,
-        base::Bind(&Prompt::WaitForInput, weak_ptr_factory_.GetWeakPtr()));
+  void OnWebSocketRequest(
+      int connection_id, const net::HttpServerRequestInfo& info) override {
+    web_server_->Send500(connection_id, "http only");
   }
 
-  void PrintHelp() {
-    std::cout
-      << "Sky Debugger" << std::endl
-      << "============" << std::endl
-      << "Type a URL to load in the debugger, enter to reload." << std::endl
-      << "Commands: help    -- Help" << std::endl
-      << "          trace   -- Capture a trace" << std::endl
-      << "          reload  -- Reload the current page" << std::endl
-      << "          inspect -- Inspect the current page" << std::endl
-      << "          quit    -- Quit" << std::endl;
+  void OnWebSocketMessage(
+      int connection_id, const std::string& data) override {
+    web_server_->Send500(connection_id, "http only");
+  }
+
+  void Respond(int connection_id, std::string response) {
+    web_server_->Send200(connection_id, response, "text/plain");
+  }
+
+  void Help(std::string path, int connection_id) {
+    std::string help = "Sky Debugger\n"
+        "Supported URLs:\n"
+        "/toggle_tracing   -- Start/stop tracing\n"
+        "/reload           -- Reload the current page\n"
+        "/inspect          -- Start inspector server for current page\n"
+        "/quit             -- Quit\n"
+        "/load             -- Load a new URL, url in POST body.\n";
+    if (path != "/")
+      help = "Unknown path: " + path + "\n\n" + help;
+    Respond(connection_id, help);
+  }
+
+  void Load(int connection_id, std::string url) {
+    url_ = url;
+    Reload();
+    Respond(connection_id, "OK\n");
   }
 
   void Reload() {
     debugger_->NavigateToURL(url_);
   }
 
-  void Inspect() {
+  void Inspect(int connection_id) {
     debugger_->InjectInspector();
-    std::cout
-      << "Open the following URL in Chrome:" << std::endl
-      << "chrome-devtools://devtools/bundled/devtools.html?ws=localhost:9898"
-      << std::endl;
+    Respond(connection_id,
+        "Open the following URL in Chrome:\n"
+        "chrome-devtools://devtools/bundled/devtools.html?ws=localhost:9898\n");
   }
 
-  void Quit() {
+  void Quit(int connection_id) {
     std::cout << "quitting" << std::endl;
     debugger_->Shutdown();
   }
 
-  void ToggleTracing() {
+  void ToggleTracing(int connection_id) {
     if (is_tracing_) {
       std::cout << "Stopping trace (writing to sky_viewer.trace)" << std::endl;
       tracing_->StopAndFlush();
@@ -151,6 +138,7 @@ class Prompt : public mojo::ApplicationDelegate {
       tracing_->Start(mojo::String("sky_viewer"), mojo::String("*"));
     }
     is_tracing_ = !is_tracing_;
+    Respond(connection_id, "OK\n");
   }
 
   bool is_tracing_;
@@ -158,6 +146,7 @@ class Prompt : public mojo::ApplicationDelegate {
   tracing::TraceCoordinatorPtr tracing_;
   std::string url_;
   base::WeakPtrFactory<Prompt> weak_ptr_factory_;
+  scoped_ptr<net::HttpServer> web_server_;
 
   DISALLOW_COPY_AND_ASSIGN(Prompt);
 };
@@ -167,5 +156,6 @@ class Prompt : public mojo::ApplicationDelegate {
 
 MojoResult MojoMain(MojoHandle shell_handle) {
   mojo::ApplicationRunnerChromium runner(new sky::debugger::Prompt);
+  runner.set_message_loop_type(base::MessageLoop::TYPE_IO);
   return runner.Run(shell_handle);
 }

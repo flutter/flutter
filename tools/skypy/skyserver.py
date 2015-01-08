@@ -26,7 +26,7 @@ class SkyServer(object):
             'download_sky_server'))
         return os.path.join(paths.src_root, 'out', 'downloads', 'sky_server')
 
-    def __enter__(self):
+    def start(self):
         if self._port_in_use(self.port):
             logging.warn(
                 'Port %s already in use, assuming custom sky_server started.' %
@@ -41,10 +41,17 @@ class SkyServer(object):
             str(self.port),
         ]
         self.server = subprocess.Popen(server_command)
+        return self.server.pid
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def stop(self):
         if self.server:
             self.server.terminate()
+
+    def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
 
     def path_as_url(self, path):
         return self.url_for_path(self.port, self.root, path)
