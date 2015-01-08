@@ -239,51 +239,25 @@ StyleResolver::~StyleResolver()
 {
 }
 
-void StyleResolver::matchAuthorRulesForShadowHost(Element* element, ElementRuleCollector& collector, bool includeEmptyRules, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers, Vector<RawPtr<ScopedStyleResolver>, 8>& resolversInShadowTree)
+void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& collector)
 {
     collector.clearMatchedRules();
     collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
 
+    // TODO(esprehn): Eliminate CascadeScope and CascadeOrder.
     CascadeScope cascadeScope = 0;
     CascadeOrder cascadeOrder = 0;
 
-    for (int j = resolversInShadowTree.size() - 1; j >= 0; --j)
-        resolversInShadowTree.at(j)->collectMatchingAuthorRules(collector, includeEmptyRules, cascadeScope, cascadeOrder++);
+    // TODO(esprehn): Remove this.
+    bool includeEmptyRules = false;
 
-    if (resolvers.isEmpty() || resolvers.first()->treeScope() != element->treeScope())
-        ++cascadeScope;
-    cascadeOrder += resolvers.size();
-    for (unsigned i = 0; i < resolvers.size(); ++i)
-        resolvers.at(i)->collectMatchingAuthorRules(collector, includeEmptyRules, cascadeScope++, --cascadeOrder);
+    // TODO(esprehn): This can only match :host rules, we should just store
+    // them in a separate RuleSet.
+    if (ShadowRoot* shadowRoot = element->shadowRoot())
+        shadowRoot->scopedStyleResolver().collectMatchingAuthorRules(collector, includeEmptyRules, cascadeScope, cascadeOrder++);
 
-    collector.sortAndTransferMatchedRules();
-}
-
-void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& collector, bool includeEmptyRules)
-{
-    collector.clearMatchedRules();
-    collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
-
-    Vector<RawPtr<ScopedStyleResolver>, 8> resolvers;
-    resolvers.append(&element->treeScope().scopedStyleResolver());
-
-    Vector<RawPtr<ScopedStyleResolver>, 8> resolversInShadowTree;
-    collectScopedResolversForHostedShadowTrees(element, resolversInShadowTree);
-    if (!resolversInShadowTree.isEmpty()) {
-        matchAuthorRulesForShadowHost(element, collector, includeEmptyRules, resolvers, resolversInShadowTree);
-        return;
-    }
-
-    if (resolvers.isEmpty())
-        return;
-
-    CascadeScope cascadeScope = 0;
-    CascadeOrder cascadeOrder = resolvers.size();
-    for (unsigned i = 0; i < resolvers.size(); ++i, --cascadeOrder) {
-        ScopedStyleResolver* resolver = resolvers.at(i);
-        // FIXME: Need to clarify how to treat style scoped.
-        resolver->collectMatchingAuthorRules(collector, includeEmptyRules, cascadeScope++, resolver->treeScope() == element->treeScope() && resolver->treeScope().rootNode().isShadowRoot() ? 0 : cascadeOrder);
-    }
+    ScopedStyleResolver& resolver = element->treeScope().scopedStyleResolver();
+    resolver.collectMatchingAuthorRules(collector, includeEmptyRules, cascadeScope, cascadeOrder);
 
     collector.sortAndTransferMatchedRules();
 }
@@ -292,26 +266,21 @@ void StyleResolver::matchUARules(ElementRuleCollector& collector)
 {
     collector.setMatchingUARules(true);
 
-    matchUARules(collector, &defaultStyles());
-
-    collector.setMatchingUARules(false);
-}
-
-void StyleResolver::matchUARules(ElementRuleCollector& collector, RuleSet* rules)
-{
     collector.clearMatchedRules();
     collector.matchedResult().ranges.lastUARule = collector.matchedResult().matchedProperties.size() - 1;
 
     RuleRange ruleRange = collector.matchedResult().ranges.UARuleRange();
-    collector.collectMatchingRules(MatchRequest(rules), ruleRange);
+    collector.collectMatchingRules(MatchRequest(&defaultStyles()), ruleRange);
 
     collector.sortAndTransferMatchedRules();
+
+    collector.setMatchingUARules(false);
 }
 
 void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollector& collector)
 {
     matchUARules(collector);
-    matchAuthorRules(state.element(), collector, false);
+    matchAuthorRules(state.element(), collector);
 
     if (state.element()->isStyledElement()) {
         if (state.element()->inlineStyle()) {
@@ -543,21 +512,11 @@ bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* 
     return true;
 }
 
-void StyleResolver::collectScopedResolversForHostedShadowTrees(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
-{
-    ElementShadow* shadow = element->shadow();
-    if (!shadow)
-        return;
-
-    // Adding scoped resolver for active shadow roots for shadow host styling.
-    if (ShadowRoot* shadowRoot = shadow->shadowRoot())
-        resolvers.append(&shadowRoot->scopedStyleResolver());
-}
-
 void StyleResolver::styleTreeResolveScopedKeyframesRules(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
 {
     // Add resolvers for shadow roots hosted by the given element.
-    collectScopedResolversForHostedShadowTrees(element, resolvers);
+    if (ShadowRoot* shadowRoot = element->shadowRoot())
+        resolvers.append(&shadowRoot->scopedStyleResolver());
     resolvers.append(&element->treeScope().scopedStyleResolver());
 }
 

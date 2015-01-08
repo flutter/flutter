@@ -152,16 +152,12 @@ private:
 
     void appendCSSStyleSheet(CSSStyleSheet*);
 
-    void matchUARules(ElementRuleCollector&, RuleSet*);
-    void matchAuthorRules(Element*, ElementRuleCollector&, bool includeEmptyRules);
-    void matchAuthorRulesForShadowHost(Element*, ElementRuleCollector&, bool includeEmptyRules, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers, Vector<RawPtr<ScopedStyleResolver>, 8>& resolversInShadowTree);
+    void matchAuthorRules(Element*, ElementRuleCollector&);
     void matchAllRules(StyleResolverState&, ElementRuleCollector&);
     void matchUARules(ElementRuleCollector&);
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
     bool applyAnimatedProperties(StyleResolverState&, Element* animatingElement);
-
-    void collectScopedResolversForHostedShadowTrees(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
     enum StyleApplicationPass {
         HighPriorityProperties,
