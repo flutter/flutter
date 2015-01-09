@@ -41,28 +41,6 @@
 
 namespace blink {
 
-static bool requiresOnlyBlockChildren(RenderStyle* parentStyle)
-{
-    switch (parentStyle->display()) {
-    case PARAGRAPH:
-    case INLINE:
-        return false;
-
-    case BLOCK:
-    case FLEX:
-    case INLINE_FLEX:
-    case INLINE_BLOCK:
-        return true;
-
-    case NONE:
-        ASSERT_NOT_REACHED();
-        return false;
-    }
-
-    ASSERT_NOT_REACHED();
-    return false;
-}
-
 static EDisplay equivalentInlineDisplay(EDisplay display)
 {
     switch (display) {
@@ -161,7 +139,7 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
         if (style->hasOutOfFlowPosition() || element.document().documentElement() == element)
             style->setDisplay(equivalentBlockDisplay(style->display()));
 
-        if (requiresOnlyBlockChildren(parentStyle))
+        if (parentStyle->requiresOnlyBlockChildren())
             style->setDisplay(equivalentBlockDisplay(style->display()));
         else
             style->setDisplay(equivalentInlineDisplay(style->display()));

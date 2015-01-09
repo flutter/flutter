@@ -1149,6 +1149,7 @@ public:
     bool inheritedNotEqual(const RenderStyle*) const;
     bool inheritedDataShared(const RenderStyle*) const;
 
+    bool requiresOnlyBlockChildren();
     bool isDisplayReplacedType() const { return isDisplayReplacedType(display()); }
     bool isDisplayInlineType() const { return isDisplayInlineType(display()); }
     bool isOriginalDisplayInlineType() const { return isDisplayInlineType(originalDisplay()); }

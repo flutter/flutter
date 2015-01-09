@@ -123,6 +123,11 @@ bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
     RenderStyle* parentStyle = parent->renderStyle();
     if (!parentStyle)
         return false;
+    // The StyleAdjuster will change the display of the renderer depending
+    // on it's parent's display.
+    if (parentStyle->requiresOnlyBlockChildren() !=
+        m_renderingParent->renderStyle()->requiresOnlyBlockChildren())
+        return false;
     if (m_renderingParent->renderStyle()->inheritedNotEqual(parentStyle))
         return false;
     if (!sharingCandidateHasIdenticalStyleAffectingAttributes(candidate))

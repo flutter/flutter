@@ -227,6 +227,28 @@ bool RenderStyle::inheritedDataShared(const RenderStyle* other) const
         && rareInheritedData.get() == other->rareInheritedData.get();
 }
 
+bool RenderStyle::requiresOnlyBlockChildren()
+{
+    switch (display()) {
+    case PARAGRAPH:
+    case INLINE:
+        return false;
+
+    case BLOCK:
+    case FLEX:
+    case INLINE_FLEX:
+    case INLINE_BLOCK:
+        return true;
+
+    case NONE:
+        ASSERT_NOT_REACHED();
+        return false;
+    }
+
+    ASSERT_NOT_REACHED();
+    return false;
+}
+
 static bool positionedObjectMovedOnly(const LengthBox& a, const LengthBox& b, const Length& width)
 {
     // If any unit types are different, then we can't guarantee
