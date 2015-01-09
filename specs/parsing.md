@@ -784,7 +784,7 @@ Tree construction stage
 -----------------------
 
 To construct a node tree from a _sequence of tokens_ and a document
-_document_:
+_document_ (this is implemented in JS):
 
 1. Initialize the _stack of open nodes_ to be _document_.
 2. Initialize _imported modules_ to an empty list.

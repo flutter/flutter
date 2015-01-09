@@ -10,7 +10,7 @@ SKY MODULE
  sky.registerLayoutManager('spring', module.exports.SpringLayoutManager);
  sky.registerProperty({
    name: 'toolbar-spacing',
-   type: sky.PositiveLengthStyleValueType,
+   type: sky.PositiveLengthStyleGrammar,
    inherits: true,
    initialValue: 8,
    needsLayout: true,

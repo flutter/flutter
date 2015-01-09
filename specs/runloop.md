@@ -12,23 +12,26 @@ takes 8.333ms):
    EDeadlineExceeded exception. If it's not caught, drop subsequent
    callbacks.
 
-3. Spend up to 1ms to update the render tree, including calling
+4. Spend up to 1ms to update the render tree, including calling
    childAdded(), childRemoved(), and getLayoutManager() as needed.
    Once 1ms has expired, throw a (catchable) EDeadlineExceeded
    exception, leaving the render tree in whatever state it has
    reached.
 
-4. Update as much of layout as possible; after 1ms, throw a
+3. Update the ElementStyleDeclarationList objects for all elements on
+   the RenderTree.
+
+5. Update as much of layout as possible; after 1ms, throw a
    (catchable) EDeadlineExceeded exception, leaving the remaining
    nodes unprepared.
 
-5. Update as much of paint as possible; after 1ms, throw a (catchable)
+6. Update as much of paint as possible; after 1ms, throw a (catchable)
    EDeadlineExceeded exception, leaving any remaining nodes
    unprepared.
 
-6. Send frame to GPU.
+7. Send frame to GPU.
 
-7. Run pending tasks until the 8.333ms expires. Each task may only run
+8. Run pending tasks until the 8.333ms expires. Each task may only run
    for at most 1ms, after 1ms they get a (catchable) EDeadlineExceeded
    exception. While there are no pending tasks, sleep.
    Tasks are things like:

@@ -323,6 +323,10 @@ class StyleValueResolverSettings {
     // let other transitions that come later know that you were half-way
     // through a transition so they can shorten their time accordingly
     //
+    // best practices: if you're storing values on the state object,
+    // then remove the values once they are no longer needed. For
+    // example, when your transition ends, set the object to null.
+    //
     // best practices: if you're a style value that contains multiple
     // style values, then before you call their resolve you should
     // replace the state with a state that is specific to them, and
@@ -342,6 +346,16 @@ class StyleValueResolverSettings {
     //    ourState.b = settings.state;
     //    settings.state = ourState;
     //    return a + b; // or whatever
+    //
+    // best practices: if you're a style value that contains multiple
+    // style values, and all those style values are storing null, then
+    // store null yourself, instead of storing many nulls of your own.
+
+  // attribute Boolean wasStateSet;
+  Boolean getShouldSaveState();
+    // returns true if state is not null, and either state was set
+    // since the last reset, or firstTime is false.
+
 }
 
 class Property : StyleNode {
@@ -507,6 +521,7 @@ class StyleDeclaration {
     // is marked dirty, the relevant render node is informed and can then update
     // its property cache accordingly
 
+
   getter AbstractStyleValue? (PropertyHandle property);
     // looks up the Property object for /property/, and returns its value
     // null if property is missing
@@ -627,12 +642,13 @@ class RenderNode { // implemented in C++ with no virtual tables
   any getProperty(PropertyHandle property, GetPropertySettings? settings = null);
      // looking at the cached data for the given pseudoElement:
      // if there's a cached value:
-     //   if settings.forceCache is true, return the value
-     //   if neither dirty bit is set, return the cached resolved value
+     //   if settings.forceCache is true, return the cached value
+     //   if neither dirty bit is set, return the cached value
      //   if the cascade dirty bit is not set (value dirty is set) then
      //     resolve the value using the same StyleValue object
      //      - with firstTime=false on the resolver settings
      //      - with the cached state object if any
+     //      - jump to "cache" below
      // if settings.forceCache is true, return null
      // - if there's an override declaration with the property (with
      //   the pseudo or without), then get the value object from there and
@@ -656,8 +672,12 @@ class RenderNode { // implemented in C++ with no virtual tables
      //     pseudoElement/property combination
      //   - using the obtained StyleValue object, call resolve(),
      //     passing it this node and the resolver settings object.
-     //   - update the cache with the obtained value and resolver settings,
-     //     resetting the dirty bits; update the state similarly
+     //   - jump to "cache" below
+     // cache:
+     //   - update the cache with the obtained value and resolver settings
+     //   - reset the dirty bits
+     //   - if the resolver settings' getShouldSaveState() method returns false,
+     //     then discard any cached state, otherwise, cache the new state
 
   readonly attribute RenderNodeStyleDeclarationList overrideStyles;
      // mutable; initially empty

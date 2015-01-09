@@ -21,8 +21,8 @@ SKY MODULE
    displayTypes.set(displayValue, layoutManagerConstructor);
  };
 
- module.exports.DisplayStyleValueType = new StyleValueType(); // value is null or a LayoutManagerConstructor
- module.exports.DisplayStyleValueType.addParser((tokens) => {
+ module.exports.DisplayStyleGrammar = new StyleGrammar(); // value is null or a LayoutManagerConstructor
+ module.exports.DisplayStyleGrammar.addParser((tokens) => {
    let token = tokens.next();
    if (token.done)
      throw new Error();
@@ -37,14 +37,14 @@ SKY MODULE
 
  internals.registerProperty({
    name: 'display',
-   type: module.exports.DisplayStyleValueType,
+   type: module.exports.DisplayStyleGrammar,
    inherits: false,
    initialValue: internals.BlockLayoutManager,
    needsLayout: true,
  });
 
- module.exports.PositiveLengthStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is a number in 96dpi pixels, >=0
- module.exports.PositiveLengthStyleValueType.addParser((tokens) => {
+ module.exports.PositiveLengthStyleGrammar = new StyleGrammar(); // value is a ParsedValue whose value (once resolved) is a number in 96dpi pixels, >=0
+ module.exports.PositiveLengthStyleGrammar.addParser((tokens) => {
    // just handle "<number>px"
    let token = tokens.next();
    if (token.done)
@@ -62,21 +62,21 @@ SKY MODULE
 
  internals.registerProperty({
    name: 'min-width',
-   type: module.exports.PositiveLengthStyleValueType,
+   type: module.exports.PositiveLengthStyleGrammar,
    inherits: false,
    initialValue: 0,
    needsLayout: true,
  });
  internals.registerProperty({
    name: 'min-height',
-   type: module.exports.PositiveLengthStyleValueType,
+   type: module.exports.PositiveLengthStyleGrammar,
    inherits: false,
    initialValue: 0,
    needsLayout: true,
  });
 
- module.exports.PositiveLengthOrAutoStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or null (meaning 'auto')
- module.exports.PositiveLengthOrAutoStyleValueType.addParser((tokens) => {
+ module.exports.PositiveLengthOrAutoStyleGrammar = new StyleGrammar(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or null (meaning 'auto')
+ module.exports.PositiveLengthOrAutoStyleGrammar.addParser((tokens) => {
    // handle 'auto'
    let token = tokens.next();
    if (token.done)
@@ -89,27 +89,27 @@ SKY MODULE
      value: null,
    };
  });
- module.exports.PositiveLengthOrAutoStyleValueType.addParser((tokens) => {
-   return module.exports.PositiveLengthStyleValueType.parse(tokens);
+ module.exports.PositiveLengthOrAutoStyleGrammar.addParser((tokens) => {
+   return module.exports.PositiveLengthStyleGrammar.parse(tokens);
  });
 
  internals.registerProperty({
    name: 'width',
-   type: module.exports.PositiveLengthOrAutoStyleValueType,
+   type: module.exports.PositiveLengthOrAutoStyleGrammar,
    inherits: false,
    initialValue: null,
    needsLayout: true,
  });
  internals.registerProperty({
    name: 'height',
-   type: module.exporets.PositiveLengthOrAutoStyleValueType,
+   type: module.exporets.PositiveLengthOrAutoStyleGrammar,
    inherits: false,
    initialValue: null,
    needsLayout: true,
  });
 
- module.exports.PositiveLengthOrInfinityStyleValueType = new StyleValueType(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or Infinity
- module.exports.PositiveLengthOrInfinityStyleValueType.addParser((tokens) => {
+ module.exports.PositiveLengthOrInfinityStyleGrammar = new StyleGrammar(); // value is a ParsedValue whose value (once resolved) is either a number in 96dpi pixels (>=0) or Infinity
+ module.exports.PositiveLengthOrInfinityStyleGrammar.addParser((tokens) => {
    // handle 'infinity'
    let token = tokens.next();
    if (token.done)
@@ -122,20 +122,20 @@ SKY MODULE
      value: Infinity,
    };
  });
- module.exports.PositiveLengthOrInfinityStyleValueType.addParser((tokens) => {
-   return module.exports.PositiveLengthStyleValueType.parse(tokens);
+ module.exports.PositiveLengthOrInfinityStyleGrammar.addParser((tokens) => {
+   return module.exports.PositiveLengthStyleGrammar.parse(tokens);
  });
 
  internals.registerProperty({
    name: 'width',
-   type: module.exports.PositiveLengthOrInfinityStyleValueType,
+   type: module.exports.PositiveLengthOrInfinityStyleGrammar,
    inherits: false,
    initialValue: Infinity,
    needsLayout: true,
  });
  internals.registerProperty({
    name: 'height',
-   type: module.exporets.PositiveLengthOrInfinityStyleValueType,
+   type: module.exporets.PositiveLengthOrInfinityStyleGrammar,
    inherits: false,
    initialValue: Infinity,
    needsLayout: true,
