@@ -26,6 +26,46 @@ class TemplateInstance {
 var emptyInstance = new TemplateInstance();
 var directiveCache = new WeakMap();
 
+// TODO(esprehn): It would be nice if these were exposed by the platform so
+// the framework didn't need to hard code a list.
+var defaultAttributesNames = new Set([
+  'accesskey',
+  'alt',
+  'as',
+  'async',
+  'class',
+  'contenteditable',
+  'crossorigin',
+  'dir',
+  'height',
+  'href',
+  'id',
+  'is',
+  'lang',
+  'media',
+  'name',
+  'rel',
+  'select',
+  'sizes',
+  'spellcheck',
+  'src',
+  'srcset',
+  'style',
+  'tabindex',
+  'title',
+  'type',
+  'width',
+]);
+var elementAttributeNames = new Map();
+
+function registerElement(name, options) {
+  elementAttributeNames.set(name, new Set(options.attributeNames));
+}
+
+registerElement('template', {
+  attributeNames: ['if', 'repeat'],
+});
+
 function createInstance(template, model) {
   var content = template.content;
   if (!content.firstChild)
@@ -154,8 +194,20 @@ function parsePropertyDirective(value, property) {
   return result;
 }
 
+function checkAttribute(name, allowedAttributeNames) {
+  if (name.startsWith('data-'))
+    return true;
+  if (defaultAttributesNames.has(name))
+    return true;
+  if (allowedAttributeNames && allowedAttributeNames.has(name))
+    return true;
+  return false;
+}
+
 function parseAttributeDirectives(element, directives) {
   var attributes = element.getAttributes();
+
+  var allowedAttributeNames = elementAttributeNames.get(element.tagName);
 
   for (var i = 0; i < attributes.length; i++) {
     var attr = attributes[i];
@@ -165,6 +217,11 @@ function parseAttributeDirectives(element, directives) {
     if (name.startsWith('on-')) {
       directives.eventHandlers.push(name.substring(3));
       continue;
+    }
+
+    if (!checkAttribute(name, allowedAttributeNames)) {
+      console.error('Element "'+ element.tagName +
+          '" has unknown attribute "' + name + '".');
     }
 
     var property = parsePropertyDirective(value, name);
@@ -467,5 +524,6 @@ class TemplateIterator {
 
 module.exports = {
   createInstance: createInstance,
+  registerElement: registerElement,
 };
 </script>

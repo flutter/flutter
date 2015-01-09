@@ -40,18 +40,24 @@ function defineReflectedAttribute(prototype, converter, name) {
   };
 }
 
-function defineReflectedAttributes(elementClass, list) {
-  var attributeNames = (list || '').split(',');
+function defineReflectedAttributes(elementClass, tagName, list) {
+  var attributeTokens = (list || '').split(',');
+  var attributeNames = [];
   var prototype = elementClass.prototype;
 
-  for (var i = 0; i < attributeNames.length; ++i) {
-    var parts = attributeNames[i].split(':');
+  for (var i = 0; i < attributeTokens.length; ++i) {
+    var parts = attributeTokens[i].split(':');
     var name = parts[0].trim();
     var type = (parts[1] || '').trim();
     var converter = attributeConverters[type] || attributeConverters.string;
 
+    attributeNames.push(name);
     defineReflectedAttribute(prototype, converter, name);
   }
+
+  binder.registerElement(tagName, {
+    attributeNames: attributeNames,
+  });
 }
 
 class SkyElement extends HTMLElement {
@@ -70,7 +76,8 @@ class SkyElement extends HTMLElement {
     if (template)
       templates.set(tagName, template);
 
-    defineReflectedAttributes(this, wrapper.getAttribute('attributes'));
+    defineReflectedAttributes(this, tagName,
+        wrapper.getAttribute('attributes'));
 
     return document.registerElement(tagName, {
       prototype: this.prototype,

@@ -7,7 +7,7 @@
 
 <sky-element name="test-element" attributes="size:number, checked:boolean,name:string">
 <template>
-  <div id="inside" on-test-event="handleEvent" attr="{{ value }}">{{ value }}</div>
+  <div id="inside" on-test-event="handleEvent" lang="{{ value }}">{{ value }}</div>
 </template>
 <script>
 module.exports = class extends SkyElement {

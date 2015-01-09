@@ -162,7 +162,7 @@ module.exports.CityItemElement = class extends SkyElement {
   }
 
   </style>
-  <div id="scroller" fit>
+  <div id="scroller">
     <div id="scrollarea">
       <div id="contentarea">
       </div>

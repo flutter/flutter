@@ -120,11 +120,11 @@ describe("SkyElement", function() {
     var inside = element.shadowRoot.getElementById("inside");
     Promise.resolve().then(function() {
       assert.equal(inside.textContent, 10);
-      assert.equal(inside.attr, 10);
+      assert.equal(inside.lang, 10);
       element.value = 20;
     }).then(function() {
       assert.equal(inside.textContent, 20);
-      assert.equal(inside.attr, 20);
+      assert.equal(inside.lang, 20);
       done();
     }).catch(function(e) {
       done(e);
