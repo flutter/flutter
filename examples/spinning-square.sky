@@ -1,3 +1,4 @@
+#!mojo mojo:sky_viewer
 <sky>
 <style>
 square {
