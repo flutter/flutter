@@ -41,42 +41,45 @@ class RenderStyle;
 class SelectorChecker {
     WTF_MAKE_NONCOPYABLE(SelectorChecker);
 public:
-    enum Mode { ResolvingStyle = 0, QueryingRules, SharingRules };
-    explicit SelectorChecker(Document&, Mode);
+    explicit SelectorChecker();
 
     struct SelectorCheckingContext {
         STACK_ALLOCATED();
     public:
         // Initial selector constructor
-        SelectorCheckingContext(const CSSSelector& selector, Element* element)
+        SelectorCheckingContext(const CSSSelector& selector, const Element* element)
             : selector(&selector)
             , element(element)
             , scope(nullptr)
-            , elementStyle(0)
         {
         }
 
         const CSSSelector* selector;
-        RawPtr<Element> element;
+        const Element* element;
         RawPtr<const ContainerNode> scope;
-        RenderStyle* elementStyle;
     };
 
-    bool match(const SelectorCheckingContext&) const;
+    bool match(const SelectorCheckingContext&);
+
+    bool matchedAttributeSelector() const { return m_matchedAttributeSelector; }
+    bool matchedFocusSelector() const { return m_matchedFocusSelector; }
+    bool matchedHoverSelector() const { return m_matchedHoverSelector; }
+    bool matchedActiveSelector() const { return m_matchedActiveSelector; }
 
     static bool tagMatches(const Element&, const QualifiedName&);
     static bool isHostInItsShadowTree(const Element&, const ContainerNode* scope);
 
 private:
-    bool checkPseudoClass(const SelectorCheckingContext&) const;
-    bool checkOne(const SelectorCheckingContext&) const;
-
-    Mode mode() const { return m_mode; }
+    bool checkPseudoClass(const SelectorCheckingContext&);
+    bool checkOne(const SelectorCheckingContext&);
 
     static bool checkExactAttribute(const Element&, const QualifiedName& selectorAttributeName, const StringImpl* value);
     static bool matchesFocusPseudoClass(const Element&);
 
-    Mode m_mode;
+    bool m_matchedAttributeSelector;
+    bool m_matchedFocusSelector;
+    bool m_matchedHoverSelector;
+    bool m_matchedActiveSelector;
 };
 
 inline bool SelectorChecker::tagMatches(const Element& element, const QualifiedName& tagQName)

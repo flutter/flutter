@@ -216,8 +216,8 @@ public:
 
     RenderStyle* computedStyle(PseudoId = NOPSEUDO);
 
-    bool isUpgradedCustomElement() { return customElementState() == Upgraded; }
-    bool isUnresolvedCustomElement() { return customElementState() == WaitingForUpgrade; }
+    bool isUpgradedCustomElement() const { return customElementState() == Upgraded; }
+    bool isUnresolvedCustomElement() const { return customElementState() == WaitingForUpgrade; }
 
     AtomicString computeInheritedLanguage() const;
 

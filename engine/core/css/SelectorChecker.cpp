@@ -39,8 +39,11 @@
 
 namespace blink {
 
-SelectorChecker::SelectorChecker(Document& document, Mode mode)
-    : m_mode(mode)
+SelectorChecker::SelectorChecker()
+    : m_matchedAttributeSelector(false)
+    , m_matchedFocusSelector(false)
+    , m_matchedHoverSelector(false)
+    , m_matchedActiveSelector(false)
 {
 }
 
@@ -59,7 +62,7 @@ static bool scopeContainsLastMatchedElement(const SelectorChecker::SelectorCheck
     return context.element == context.scope->shadowHost();
 }
 
-bool SelectorChecker::match(const SelectorCheckingContext& context) const
+bool SelectorChecker::match(const SelectorCheckingContext& context)
 {
     // FIXME(sky): Get rid of SelectorCheckingContext.
     SelectorCheckingContext matchContext(context);
@@ -160,7 +163,7 @@ static bool attributeValueMatches(const Attribute& attributeItem, CSSSelector::M
     return true;
 }
 
-static bool anyAttributeMatches(Element& element, CSSSelector::Match match, const CSSSelector& selector)
+static bool anyAttributeMatches(const Element& element, CSSSelector::Match match, const CSSSelector& selector)
 {
     const QualifiedName& selectorAttr = selector.attribute();
     ASSERT(selectorAttr.localName() != starAtom); // Should not be possible from the CSS grammar.
@@ -186,10 +189,10 @@ static bool anyAttributeMatches(Element& element, CSSSelector::Match match, cons
     return false;
 }
 
-bool SelectorChecker::checkOne(const SelectorCheckingContext& context) const
+bool SelectorChecker::checkOne(const SelectorCheckingContext& context)
 {
     ASSERT(context.element);
-    Element& element = *context.element;
+    const Element& element = *context.element;
     ASSERT(context.selector);
     const CSSSelector& selector = *context.selector;
 
@@ -208,8 +211,7 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context) const
     case CSSSelector::Begin:
     case CSSSelector::End:
         if (anyAttributeMatches(element, selector.match(), selector)) {
-            if (m_mode == ResolvingStyle && context.elementStyle)
-                context.elementStyle->setUnique();
+            m_matchedAttributeSelector = true;
             return true;
         }
         return false;
@@ -224,10 +226,10 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context) const
     return false;
 }
 
-bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context) const
+bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context)
 {
     ASSERT(context.element);
-    Element& element = *context.element;
+    const Element& element = *context.element;
     ASSERT(context.selector);
     const CSSSelector& selector = *context.selector;
     ASSERT(selector.match() == CSSSelector::PseudoClass);
@@ -235,24 +237,15 @@ bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context) c
     // Normal element pseudo class checking.
     switch (selector.pseudoType()) {
     case CSSSelector::PseudoFocus:
-        if (m_mode == ResolvingStyle) {
-            if (context.elementStyle)
-                context.elementStyle->setAffectedByFocus();
-        }
+        m_matchedFocusSelector = true;
         return matchesFocusPseudoClass(element);
 
     case CSSSelector::PseudoHover:
-        if (m_mode == ResolvingStyle) {
-            if (context.elementStyle)
-                context.elementStyle->setAffectedByHover();
-        }
+        m_matchedHoverSelector = true;
         return element.hovered();
 
     case CSSSelector::PseudoActive:
-        if (m_mode == ResolvingStyle) {
-            if (context.elementStyle)
-                context.elementStyle->setAffectedByActive();
-        }
+        m_matchedActiveSelector = true;
         return element.active();
 
     case CSSSelector::PseudoLang:
@@ -271,8 +264,6 @@ bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context) c
 
     case CSSSelector::PseudoHost:
         {
-            if (m_mode == SharingRules)
-                return true;
             // :host only matches a shadow host when :host is in a shadow tree of the shadow host.
             if (!context.scope)
                 return false;

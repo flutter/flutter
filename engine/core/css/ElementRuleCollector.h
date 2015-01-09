@@ -92,8 +92,6 @@ public:
     ElementRuleCollector(const ElementResolveContext&, RenderStyle* = 0);
     ~ElementRuleCollector();
 
-    void setMode(SelectorChecker::Mode mode) { m_mode = mode; }
-
     void setMatchingUARules(bool matchingUARules) { m_matchingUARules = matchingUARules; }
 
     MatchResult& matchedResult();
@@ -125,7 +123,6 @@ private:
     const ElementResolveContext& m_context;
     RefPtr<RenderStyle> m_style; // FIXME: This can be mutated during matching!
 
-    SelectorChecker::Mode m_mode;
     bool m_matchingUARules;
 
     OwnPtr<Vector<MatchedRule, 32> > m_matchedRules;

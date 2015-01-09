@@ -43,7 +43,6 @@ ElementRuleCollector::ElementRuleCollector(const ElementResolveContext& context,
     RenderStyle* style)
     : m_context(context)
     , m_style(style)
-    , m_mode(SelectorChecker::ResolvingStyle)
     , m_matchingUARules(false)
 { }
 
@@ -131,11 +130,21 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
 
 inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const ContainerNode* scope)
 {
-    SelectorChecker selectorChecker(m_context.element()->document(), m_mode);
+    SelectorChecker selectorChecker;
     SelectorChecker::SelectorCheckingContext context(ruleData.selector(), m_context.element());
-    context.elementStyle = m_style.get();
     context.scope = scope;
-    return selectorChecker.match(context);
+    if (selectorChecker.match(context)) {
+        if (selectorChecker.matchedAttributeSelector())
+            m_style->setUnique();
+        if (selectorChecker.matchedFocusSelector())
+            m_style->setAffectedByFocus();
+        if (selectorChecker.matchedHoverSelector())
+            m_style->setAffectedByHover();
+        if (selectorChecker.matchedActiveSelector())
+            m_style->setAffectedByActive();
+        return true;
+    }
+    return false;
 }
 
 void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)

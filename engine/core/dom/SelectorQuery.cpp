@@ -73,7 +73,7 @@ PassRefPtr<Element> SelectorQuery::queryFirst(ContainerNode& rootNode) const
 
 bool SelectorQuery::selectorMatches(ContainerNode& rootNode, Element& element) const
 {
-    SelectorChecker checker(element.document(), SelectorChecker::QueryingRules);
+    SelectorChecker checker;
     for (const CSSSelector* selector = m_selectors.first(); selector; selector = CSSSelectorList::next(*selector)) {
         SelectorChecker::SelectorCheckingContext context(*selector, &element);
         context.scope = !rootNode.isDocumentNode() ? &rootNode : 0;

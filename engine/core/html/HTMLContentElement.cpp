@@ -110,7 +110,7 @@ bool HTMLContentElement::validateSelect() const
 static inline bool checkOneSelector(const CSSSelector& selector, const Vector<RawPtr<Node>, 32>& siblings, int nth)
 {
     Element* element = toElement(siblings[nth]);
-    SelectorChecker selectorChecker(element->document(), SelectorChecker::QueryingRules);
+    SelectorChecker selectorChecker;
     SelectorChecker::SelectorCheckingContext context(selector, element);
     return selectorChecker.match(context);
 }
