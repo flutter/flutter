@@ -91,12 +91,14 @@ SkBitmap NativeImageSkia::extractScaledImageFragment(const SkRect& srcRect, floa
     scaleTransform.setRectToRect(imageRect, scaledImageRect, SkMatrix::kFill_ScaleToFit);
     scaleTransform.mapRect(scaledSrcRect, srcRect);
 
-    scaledSrcRect->intersect(scaledImageRect);
+    bool ok = scaledSrcRect->intersect(scaledImageRect);
+    ASSERT_UNUSED(ok, ok);
     SkIRect enclosingScaledSrcRect = enclosingIntRect(*scaledSrcRect);
 
     // |enclosingScaledSrcRect| can be larger than |scaledImageSize| because
     // of float inaccuracy so clip to get inside.
-    enclosingScaledSrcRect.intersect(SkIRect::MakeSize(scaledImageSize));
+    ok = enclosingScaledSrcRect.intersect(SkIRect::MakeSize(scaledImageSize));
+    ASSERT_UNUSED(ok, ok);
 
     // scaledSrcRect is relative to the pixel snapped fragment we're extracting.
     scaledSrcRect->offset(-enclosingScaledSrcRect.x(), -enclosingScaledSrcRect.y());

@@ -32,6 +32,7 @@
 #define SKY_ENGINE_PLATFORM_GRAPHICS_REPLAYINGCANVAS_H_
 
 #include "sky/engine/platform/graphics/InterceptingCanvas.h"
+#include "third_party/skia/include/core/SkDrawPictureCallback.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
