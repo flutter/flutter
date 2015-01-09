@@ -56,6 +56,12 @@
 </template>
 <script>
 module.exports = class extends SkyElement {
+  created() {
+    this.myButton = null;
+    this.myCheckbox = null;
+    this.myText = null;
+    this.clickCount = 0;
+  }
   attached() {
     this.myButton = this.shadowRoot.getElementById('button');
     this.myCheckbox = this.shadowRoot.getElementById('checkbox');
