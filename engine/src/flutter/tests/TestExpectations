@@ -22,5 +22,3 @@ https://github.com/domokit/mojo/issues/24 mutation-observer/observe-attributes.s
 
 # This test only fails on the bots:
 crbug.com/434822 inspector/page-agent-get-resource-tree.sky [ Pass Failure ]
-
-crbug.com/446739 layout/continuations.sky [ Crash ]
