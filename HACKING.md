@@ -31,7 +31,7 @@ Writing tests
 -------------
 
 * Import ``resources/mocha.html`` and ``resources/chai.html``
-* Write tests in [mocha format](http://visionmedia.github.io/mocha/#getting-started) and use [chai asserts](http://chaijs.com/api/assert/):
+* Write tests in [mocha format](http://mochajs.org/#getting-started) and use [chai asserts](http://chaijs.com/api/assert/):
 ```html
 describe('My pretty test of my subject', function() {
   var subject = new MySubject();
