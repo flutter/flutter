@@ -28,7 +28,6 @@
 #ifndef SKY_ENGINE_CORE_CSS_SELECTORCHECKER_H_
 #define SKY_ENGINE_CORE_CSS_SELECTORCHECKER_H_
 
-#include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/core/dom/Element.h"
 
 namespace blink {
@@ -36,68 +35,32 @@ namespace blink {
 class CSSSelector;
 class ContainerNode;
 class Element;
-class RenderStyle;
 
 class SelectorChecker {
     WTF_MAKE_NONCOPYABLE(SelectorChecker);
 public:
-    explicit SelectorChecker();
+    explicit SelectorChecker(const Element&);
 
-    struct SelectorCheckingContext {
-        STACK_ALLOCATED();
-    public:
-        // Initial selector constructor
-        SelectorCheckingContext(const CSSSelector& selector, const Element* element)
-            : selector(&selector)
-            , element(element)
-            , scope(nullptr)
-        {
-        }
-
-        const CSSSelector* selector;
-        const Element* element;
-        RawPtr<const ContainerNode> scope;
-    };
-
-    bool match(const SelectorCheckingContext&);
+    // TODO(esprehn): scope should never be null.
+    bool match(const CSSSelector&, const ContainerNode* scope);
 
     bool matchedAttributeSelector() const { return m_matchedAttributeSelector; }
     bool matchedFocusSelector() const { return m_matchedFocusSelector; }
     bool matchedHoverSelector() const { return m_matchedHoverSelector; }
     bool matchedActiveSelector() const { return m_matchedActiveSelector; }
 
-    static bool tagMatches(const Element&, const QualifiedName&);
     static bool isHostInItsShadowTree(const Element&, const ContainerNode* scope);
 
 private:
-    bool checkPseudoClass(const SelectorCheckingContext&);
-    bool checkOne(const SelectorCheckingContext&);
+    bool checkPseudoClass(const CSSSelector&, const ContainerNode* scope);
+    bool checkOne(const CSSSelector&, const ContainerNode* scope);
 
-    static bool checkExactAttribute(const Element&, const QualifiedName& selectorAttributeName, const StringImpl* value);
-    static bool matchesFocusPseudoClass(const Element&);
-
+    const Element& m_element;
     bool m_matchedAttributeSelector;
     bool m_matchedFocusSelector;
     bool m_matchedHoverSelector;
     bool m_matchedActiveSelector;
 };
-
-inline bool SelectorChecker::tagMatches(const Element& element, const QualifiedName& tagQName)
-{
-    const AtomicString& localName = tagQName.localName();
-    return localName == starAtom || localName == element.localName();
-}
-
-inline bool SelectorChecker::checkExactAttribute(const Element& element, const QualifiedName& selectorAttributeName, const StringImpl* value)
-{
-    AttributeCollection attributes = element.attributesWithoutUpdate();
-    AttributeCollection::iterator end = attributes.end();
-    for (AttributeCollection::iterator it = attributes.begin(); it != end; ++it) {
-        if (it->matches(selectorAttributeName) && (!value || it->value().impl() == value))
-            return true;
-    }
-    return false;
-}
 
 inline bool SelectorChecker::isHostInItsShadowTree(const Element& element, const ContainerNode* scope)
 {

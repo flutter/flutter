@@ -28,6 +28,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/SelectorChecker.h"
 
+#include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
@@ -39,47 +40,46 @@
 
 namespace blink {
 
-SelectorChecker::SelectorChecker()
-    : m_matchedAttributeSelector(false)
+static bool matchesFocusPseudoClass(const Element& element)
+{
+    if (!element.focused())
+        return false;
+    LocalFrame* frame = element.document().frame();
+    if (!frame)
+        return false;
+    if (!frame->selection().isFocusedAndActive())
+        return false;
+    return true;
+}
+
+SelectorChecker::SelectorChecker(const Element& element)
+    : m_element(element)
+    , m_matchedAttributeSelector(false)
     , m_matchedFocusSelector(false)
     , m_matchedHoverSelector(false)
     , m_matchedActiveSelector(false)
 {
 }
 
-static bool scopeContainsLastMatchedElement(const SelectorChecker::SelectorCheckingContext& context)
+bool SelectorChecker::match(const CSSSelector& selector, const ContainerNode* scope)
 {
-    if (!context.scope)
-        return true;
+    bool isShadowHost = isHostInItsShadowTree(m_element, scope);
 
-    ASSERT(context.scope);
-    if (context.scope->treeScope() == context.element->treeScope())
-        return true;
-
-    // Because Blink treats a shadow host's TreeScope as a separate one from its descendent shadow roots,
-    // if the last matched element is a shadow host, the condition above isn't met, even though it
-    // should be.
-    return context.element == context.scope->shadowHost();
-}
-
-bool SelectorChecker::match(const SelectorCheckingContext& context)
-{
-    // FIXME(sky): Get rid of SelectorCheckingContext.
-    SelectorCheckingContext matchContext(context);
-
-    bool isShadowHost = isHostInItsShadowTree(*context.element, context.scope);
-
+    const CSSSelector* current = &selector;
     while (true) {
-        const CSSSelector& selector = *matchContext.selector;
-        // Only :host and :host-context() should match the host:
+        // Only :host should match the host:
         // http://drafts.csswg.org/css-scoping/#host-element
-        if (isShadowHost && !selector.isHostPseudoClass())
+        if (isShadowHost && !current->isHostPseudoClass())
             return false;
-        if (!checkOne(matchContext))
+        if (!checkOne(*current, scope))
             return false;
-        if (selector.isLastInTagHistory())
-            return scopeContainsLastMatchedElement(matchContext);
-        matchContext.selector = selector.tagHistory();
+        if (current->isLastInTagHistory()) {
+            // Only rules in the same scope, or from :host can match.
+            return !scope ||
+                scope->treeScope() == m_element.treeScope() ||
+                m_element == scope->shadowHost();
+        }
+        current = current->tagHistory();
     }
 
     ASSERT_NOT_REACHED();
@@ -189,20 +189,18 @@ static bool anyAttributeMatches(const Element& element, CSSSelector::Match match
     return false;
 }
 
-bool SelectorChecker::checkOne(const SelectorCheckingContext& context)
+bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode* scope)
 {
-    ASSERT(context.element);
-    const Element& element = *context.element;
-    ASSERT(context.selector);
-    const CSSSelector& selector = *context.selector;
-
     switch (selector.match()) {
     case CSSSelector::Tag:
-        return tagMatches(element, selector.tagQName());
+        {
+            const AtomicString& localName = selector.tagQName().localName();
+            return localName == starAtom || localName == m_element.localName();
+        }
     case CSSSelector::Class:
-        return element.hasClass() && element.classNames().contains(selector.value());
+        return m_element.hasClass() && m_element.classNames().contains(selector.value());
     case CSSSelector::Id:
-        return element.hasID() && element.idForStyleResolution() == selector.value();
+        return m_element.hasID() && m_element.idForStyleResolution() == selector.value();
     case CSSSelector::Exact:
     case CSSSelector::Set:
     case CSSSelector::Hyphen:
@@ -210,13 +208,13 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context)
     case CSSSelector::Contain:
     case CSSSelector::Begin:
     case CSSSelector::End:
-        if (anyAttributeMatches(element, selector.match(), selector)) {
+        if (anyAttributeMatches(m_element, selector.match(), selector)) {
             m_matchedAttributeSelector = true;
             return true;
         }
         return false;
     case CSSSelector::PseudoClass:
-        return checkPseudoClass(context);
+        return checkPseudoClass(selector, scope);
     // FIXME(sky): Remove pseudo elements completely.
     case CSSSelector::PseudoElement:
     case CSSSelector::Unknown:
@@ -226,31 +224,24 @@ bool SelectorChecker::checkOne(const SelectorCheckingContext& context)
     return false;
 }
 
-bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context)
+bool SelectorChecker::checkPseudoClass(const CSSSelector& selector, const ContainerNode* scope)
 {
-    ASSERT(context.element);
-    const Element& element = *context.element;
-    ASSERT(context.selector);
-    const CSSSelector& selector = *context.selector;
-    ASSERT(selector.match() == CSSSelector::PseudoClass);
-
-    // Normal element pseudo class checking.
     switch (selector.pseudoType()) {
     case CSSSelector::PseudoFocus:
         m_matchedFocusSelector = true;
-        return matchesFocusPseudoClass(element);
+        return matchesFocusPseudoClass(m_element);
 
     case CSSSelector::PseudoHover:
         m_matchedHoverSelector = true;
-        return element.hovered();
+        return m_element.hovered();
 
     case CSSSelector::PseudoActive:
         m_matchedActiveSelector = true;
-        return element.active();
+        return m_element.active();
 
     case CSSSelector::PseudoLang:
         {
-            AtomicString value = element.computeInheritedLanguage();
+            AtomicString value = m_element.computeInheritedLanguage();
             const AtomicString& argument = selector.argument();
             if (value.isEmpty() || !value.startsWith(argument, false))
                 break;
@@ -260,30 +251,24 @@ bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context)
         }
 
     case CSSSelector::PseudoUnresolved:
-        return element.isUnresolvedCustomElement();
+        return m_element.isUnresolvedCustomElement();
 
     case CSSSelector::PseudoHost:
         {
-            // :host only matches a shadow host when :host is in a shadow tree of the shadow host.
-            if (!context.scope)
+            const ContainerNode* shadowHost = scope->shadowHost();
+            if (!shadowHost || shadowHost != m_element)
                 return false;
-            const ContainerNode* shadowHost = context.scope->shadowHost();
-            if (!shadowHost || shadowHost != element)
-                return false;
-            ASSERT(element.shadow());
 
             // For empty parameter case, i.e. just :host or :host().
             if (!selector.selectorList())
                 return true;
 
-            SelectorCheckingContext subContext(context);
-
             // Treat the inside of :host() rules as if they were defined in the
             // same scope as the host.
-            subContext.scope = &context.element->treeScope().rootNode();
+            const ContainerNode& scope = m_element.treeScope().rootNode();
 
-            for (subContext.selector = selector.selectorList()->first(); subContext.selector; subContext.selector = CSSSelectorList::next(*subContext.selector)) {
-                if (match(subContext))
+            for (const CSSSelector* current = selector.selectorList()->first(); current; current = CSSSelectorList::next(*current)) {
+                if (match(*current, &scope))
                     return true;
             }
             return false;
@@ -296,18 +281,6 @@ bool SelectorChecker::checkPseudoClass(const SelectorCheckingContext& context)
     }
     ASSERT_NOT_REACHED();
     return false;
-}
-
-bool SelectorChecker::matchesFocusPseudoClass(const Element& element)
-{
-    if (!element.focused())
-        return false;
-    LocalFrame* frame = element.document().frame();
-    if (!frame)
-        return false;
-    if (!frame->selection().isFocusedAndActive())
-        return false;
-    return true;
 }
 
 }

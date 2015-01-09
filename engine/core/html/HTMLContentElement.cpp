@@ -107,18 +107,12 @@ bool HTMLContentElement::validateSelect() const
     return true;
 }
 
-static inline bool checkOneSelector(const CSSSelector& selector, const Vector<RawPtr<Node>, 32>& siblings, int nth)
-{
-    Element* element = toElement(siblings[nth]);
-    SelectorChecker selectorChecker;
-    SelectorChecker::SelectorCheckingContext context(selector, element);
-    return selectorChecker.match(context);
-}
-
 bool HTMLContentElement::matchSelector(const Vector<RawPtr<Node>, 32>& siblings, int nth) const
 {
     for (const CSSSelector* selector = selectorList().first(); selector; selector = CSSSelectorList::next(*selector)) {
-        if (checkOneSelector(*selector, siblings, nth))
+        Element* element = toElement(siblings[nth]);
+        SelectorChecker checker(*element);
+        if (checker.match(*selector, element))
             return true;
     }
     return false;

@@ -130,17 +130,15 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
 
 inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const ContainerNode* scope)
 {
-    SelectorChecker selectorChecker;
-    SelectorChecker::SelectorCheckingContext context(ruleData.selector(), m_context.element());
-    context.scope = scope;
-    if (selectorChecker.match(context)) {
-        if (selectorChecker.matchedAttributeSelector())
+    SelectorChecker checker(*m_context.element());
+    if (checker.match(ruleData.selector(), scope)) {
+        if (checker.matchedAttributeSelector())
             m_style->setUnique();
-        if (selectorChecker.matchedFocusSelector())
+        if (checker.matchedFocusSelector())
             m_style->setAffectedByFocus();
-        if (selectorChecker.matchedHoverSelector())
+        if (checker.matchedHoverSelector())
             m_style->setAffectedByHover();
-        if (selectorChecker.matchedActiveSelector())
+        if (checker.matchedActiveSelector())
             m_style->setAffectedByActive();
         return true;
     }
