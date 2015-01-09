@@ -712,8 +712,6 @@ void RenderLayer::removeOnlyThisLayer()
 
     m_clipper.clearClipRectsIncludingDescendants();
 
-    paintInvalidator().paintInvalidationIncludingNonCompositingDescendants();
-
     RenderLayer* nextSib = nextSibling();
 
     // Now walk our kids and reattach them to our parent.

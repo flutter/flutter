@@ -225,10 +225,6 @@ void DocumentMarkerController::addMarker(Node* node, const DocumentMarker& newMa
             list->insert(pos - list->begin(), RenderedDocumentMarker::create(toInsert));
         }
     }
-
-    // repaint the affected node
-    if (node->renderer())
-        node->renderer()->doNotUseInvalidatePaintForWholeRendererSynchronously();
 }
 
 void DocumentMarkerController::mergeOverlapping(MarkerList* list, DocumentMarker& toInsert)
@@ -286,10 +282,6 @@ void DocumentMarkerController::copyMarkers(Node* srcNode, unsigned startOffset, 
             addMarker(dstNode, *marker);
         }
     }
-
-    // repaint the affected node
-    if (docDirty && dstNode->renderer())
-        dstNode->renderer()->doNotUseInvalidatePaintForWholeRendererSynchronously();
 }
 
 void DocumentMarkerController::removeMarkers(Node* node, unsigned startOffset, int length, DocumentMarker::MarkerTypes markerTypes, RemovePartiallyOverlappingMarkerOrNot shouldRemovePartiallyOverlappingMarker)
@@ -367,10 +359,6 @@ void DocumentMarkerController::removeMarkers(Node* node, unsigned startOffset, i
         if (m_markers.isEmpty())
             m_possiblyExistingMarkerTypes = 0;
     }
-
-    // repaint the affected node
-    if (docDirty && node->renderer())
-        node->renderer()->doNotUseInvalidatePaintForWholeRendererSynchronously();
 }
 
 DocumentMarker* DocumentMarkerController::markerContainingPoint(const LayoutPoint& point, DocumentMarker::MarkerType markerType)
@@ -570,42 +558,10 @@ void DocumentMarkerController::removeMarkersFromList(MarkerMap::iterator iterato
         nodeCanBeRemoved = emptyListsCount == DocumentMarker::MarkerTypeIndexesCount;
     }
 
-    if (needsRepainting) {
-        if (RenderObject* renderer = iterator->key->renderer())
-            renderer->doNotUseInvalidatePaintForWholeRendererSynchronously();
-    }
-
     if (nodeCanBeRemoved) {
         m_markers.remove(iterator);
         if (m_markers.isEmpty())
             m_possiblyExistingMarkerTypes = 0;
-    }
-}
-
-void DocumentMarkerController::repaintMarkers(DocumentMarker::MarkerTypes markerTypes)
-{
-    if (!possiblyHasMarkers(markerTypes))
-        return;
-    ASSERT(!m_markers.isEmpty());
-
-    // outer loop: process each markered node in the document
-    MarkerMap::iterator end = m_markers.end();
-    for (MarkerMap::iterator i = m_markers.begin(); i != end; ++i) {
-        const Node* node = i->key;
-
-        // inner loop: process each marker in the current node
-        MarkerLists* markers = i->value.get();
-        for (size_t markerListIndex = 0; markerListIndex < DocumentMarker::MarkerTypeIndexesCount; ++markerListIndex) {
-            OwnPtr<MarkerList>& list = (*markers)[markerListIndex];
-            if (!list || list->isEmpty() || !markerTypes.contains((*list->begin())->type()))
-                continue;
-
-            // cause the node to be redrawn
-            if (RenderObject* renderer = node->renderer()) {
-                renderer->doNotUseInvalidatePaintForWholeRendererSynchronously();
-                break;
-            }
-        }
     }
 }
 
@@ -653,10 +609,6 @@ void DocumentMarkerController::shiftMarkers(Node* node, unsigned startOffset, in
             (*marker)->invalidate();
         }
     }
-
-    // repaint the affected node
-    if (docDirty && node->renderer())
-        node->renderer()->doNotUseInvalidatePaintForWholeRendererSynchronously();
 }
 
 void DocumentMarkerController::setMarkersActive(Range* range, bool active)
@@ -697,10 +649,6 @@ void DocumentMarkerController::setMarkersActive(Node* node, unsigned startOffset
         (*marker)->setActiveMatch(active);
         docDirty = true;
     }
-
-    // repaint the affected node
-    if (docDirty && node->renderer())
-        node->renderer()->doNotUseInvalidatePaintForWholeRendererSynchronously();
 }
 
 bool DocumentMarkerController::hasMarkers(Range* range, DocumentMarker::MarkerTypes markerTypes)

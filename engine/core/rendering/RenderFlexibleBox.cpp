@@ -990,9 +990,6 @@ void RenderFlexibleBox::layoutAndPlaceChildren(LayoutUnit& crossAxisOffset, cons
             continue;
         }
 
-        // FIXME Investigate if this can be removed based on other flags. crbug.com/370010
-        child->setMayNeedPaintInvalidation(true);
-
         LayoutUnit childPreferredSize = childSizes[i] + mainAxisBorderAndPaddingExtentForChild(child);
         setLogicalOverrideSize(child, childPreferredSize);
         if (childPreferredSize != mainAxisExtentForChild(child)) {

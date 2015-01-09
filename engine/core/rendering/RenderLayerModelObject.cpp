@@ -120,22 +120,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
     }
 }
 
-InvalidationReason RenderLayerModelObject::invalidatePaintIfNeeded(const PaintInvalidationState& paintInvalidationState, const RenderLayerModelObject& newPaintInvalidationContainer)
-{
-    const LayoutRect oldPaintInvalidationRect = previousPaintInvalidationRect();
-    const LayoutPoint oldPositionFromPaintInvalidationContainer = previousPositionFromPaintInvalidationContainer();
-    setPreviousPaintInvalidationRect(boundsRectForPaintInvalidation(&newPaintInvalidationContainer, &paintInvalidationState));
-    setPreviousPositionFromPaintInvalidationContainer(RenderLayer::positionFromPaintInvalidationContainer(this, &newPaintInvalidationContainer, &paintInvalidationState));
-
-    // If we are set to do a full paint invalidation that means the RenderView will issue
-    // paint invalidations. We can then skip issuing of paint invalidations for the child
-    // renderers as they'll be covered by the RenderView.
-    if (view()->doingFullPaintInvalidation())
-        return InvalidationNone;
-
-    return RenderObject::invalidatePaintIfNeeded(newPaintInvalidationContainer, oldPaintInvalidationRect, oldPositionFromPaintInvalidationContainer, paintInvalidationState);
-}
-
 void RenderLayerModelObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
 {
     // FIXME: SVG should probably also go through this unified paint invalidation system.
@@ -147,11 +131,7 @@ void RenderLayerModelObject::invalidateTreeIfNeeded(const PaintInvalidationState
     const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(&paintInvalidationState.paintInvalidationContainer());
     ASSERT(&newPaintInvalidationContainer == containerForPaintInvalidation());
 
-    InvalidationReason reason = invalidatePaintIfNeeded(paintInvalidationState, newPaintInvalidationContainer);
-
     PaintInvalidationState childTreeWalkState(paintInvalidationState, *this, newPaintInvalidationContainer);
-    if (reason == InvalidationLocationChange || reason == InvalidationFull)
-        childTreeWalkState.setForceCheckForPaintInvalidation();
     RenderObject::invalidateTreeIfNeeded(childTreeWalkState);
 }
 

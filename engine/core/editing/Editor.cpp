@@ -802,11 +802,7 @@ PassRefPtr<Range> Editor::rangeOfString(const String& target, Range* referenceRa
 
 void Editor::setMarkedTextMatchesAreHighlighted(bool flag)
 {
-    if (flag == m_areMarkedTextMatchesHighlighted)
-        return;
-
     m_areMarkedTextMatchesHighlighted = flag;
-    m_frame.document()->markers().repaintMarkers(DocumentMarker::TextMatch);
 }
 
 void Editor::respondToChangedSelection(const VisibleSelection& oldSelection, FrameSelection::SetSelectionOptions options)

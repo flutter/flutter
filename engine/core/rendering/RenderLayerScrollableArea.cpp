@@ -250,8 +250,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
 
     if (box().frameView()->isInPerformLayout())
         box().setShouldDoFullPaintInvalidation(true);
-    else
-        box().invalidatePaintUsingContainer(paintInvalidationContainer, layer()->renderer()->previousPaintInvalidationRect(), InvalidationScroll);
 
     // Schedule the scroll DOM event.
     if (box().node())

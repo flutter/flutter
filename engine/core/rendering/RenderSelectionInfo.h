@@ -57,6 +57,7 @@ protected:
     RenderObject::SelectionState m_state;
 };
 
+// FIXME(sky): Remove this class.
 // This struct is used when the selection changes to cache the old and new state of the selection for each RenderObject.
 class RenderSelectionInfo final : public RenderSelectionInfoBase {
 public:
@@ -72,7 +73,6 @@ public:
 
     void invalidatePaint()
     {
-        m_object->invalidatePaintUsingContainer(m_paintInvalidationContainer, enclosingIntRect(m_rect), InvalidationSelection);
     }
 
     LayoutRect rect() const { return m_rect; }
@@ -81,6 +81,7 @@ private:
     LayoutRect m_rect; // relative to paint invalidation container
 };
 
+// FIXME(sky): Remove this class.
 // This struct is used when the selection changes to cache the old and new state of the selection for each RenderBlock.
 class RenderBlockSelectionInfo final : public RenderSelectionInfoBase {
 public:
@@ -95,7 +96,6 @@ public:
 
     void invalidatePaint()
     {
-        m_object->invalidatePaintUsingContainer(m_paintInvalidationContainer, enclosingIntRect(m_rects), InvalidationSelection);
     }
 
     RenderBlock* block() const { return toRenderBlock(m_object); }

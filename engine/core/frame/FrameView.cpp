@@ -371,11 +371,6 @@ void FrameView::layout(bool allowSubtree)
         performLayout(rootForThisLayout, inSubtreeLayout);
 
         m_layoutSubtreeRoot = 0;
-        // We need to ensure that we mark up all renderers up to the RenderView
-        // for paint invalidation. This simplifies our code as we just always
-        // do a full tree walk.
-        if (RenderObject* container = rootForThisLayout->container())
-            container->setMayNeedPaintInvalidation(true);
     } // Reset m_layoutSchedulingEnabled to its previous value.
 
     layer->updateLayerPositionsAfterLayout();

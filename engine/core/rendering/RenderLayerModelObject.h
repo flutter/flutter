@@ -69,8 +69,6 @@ protected:
     void createLayer(LayerType);
 
     virtual void willBeDestroyed() override;
-
-    virtual InvalidationReason invalidatePaintIfNeeded(const PaintInvalidationState&, const RenderLayerModelObject& newPaintInvalidationContainer);
 private:
     virtual bool isLayerModelObject() const override final { return true; }
 

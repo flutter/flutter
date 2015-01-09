@@ -628,18 +628,8 @@ public:
     // Returns the rect bounds needed to invalidate the paint of this object, in the coordinate space of the rendering backing of |paintInvalidationContainer|
     LayoutRect boundsRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
 
-    // Actually do the paint invalidate of rect r for this object which has been computed in the coordinate space
-    // of the GraphicsLayer backing of |paintInvalidationContainer|. Note that this coordinaten space is not the same
-    // as the local coordinate space of |paintInvalidationContainer| in the presence of layer squashing.
-    // If |paintInvalidationContainer| is 0, invalidate paints via the view.
-    // FIXME: |paintInvalidationContainer| should never be 0. See crbug.com/363699.
-    void invalidatePaintUsingContainer(const RenderLayerModelObject* paintInvalidationContainer, const LayoutRect&, InvalidationReason) const;
-
     // Invalidate the paint of a specific subrectangle within a given object. The rect |r| is in the object's coordinate space.
     void invalidatePaintRectangle(const LayoutRect&) const;
-
-    InvalidationReason invalidatePaintIfNeeded(const RenderLayerModelObject& paintInvalidationContainer,
-        const LayoutRect& oldBounds, const LayoutPoint& oldPositionFromPaintInvalidationContainer, const PaintInvalidationState&);
 
     // Walk the tree after layout issuing paint invalidations for renderers that have changed or moved, updating bounds that have changed, and clearing paint invalidation state.
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&);
@@ -770,15 +760,6 @@ public:
 
     bool shouldInvalidateOverflowForPaint() const { return m_bitfields.shouldInvalidateOverflowForPaint(); }
 
-    bool shouldDoFullPaintInvalidationIfSelfPaintingLayer() const { return m_bitfields.shouldDoFullPaintInvalidationIfSelfPaintingLayer(); }
-    void setShouldDoFullPaintInvalidationIfSelfPaintingLayer(bool b)
-    {
-        m_bitfields.setShouldDoFullPaintInvalidationIfSelfPaintingLayer(b);
-
-        if (b)
-            markContainingBlockChainForPaintInvalidation();
-    }
-
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }
 
@@ -789,21 +770,11 @@ public:
     bool layoutDidGetCalled() const { return m_bitfields.layoutDidGetCalled(); }
     void setLayoutDidGetCalled(bool b)
     {
+        // FIXME(sky): Get rid of this once we get rid of all paint invalidation.
         m_bitfields.setLayoutDidGetCalled(b);
-
-        if (b)
-            markContainingBlockChainForPaintInvalidation();
     }
 
     bool mayNeedPaintInvalidation() const { return m_bitfields.mayNeedPaintInvalidation(); }
-    void setMayNeedPaintInvalidation(bool b)
-    {
-        m_bitfields.setMayNeedPaintInvalidation(b);
-
-        // Make sure our parent is marked as needing invalidation.
-        if (b)
-            markContainingBlockChainForPaintInvalidation();
-    }
 
     bool neededLayoutBecauseOfChildren() const { return m_bitfields.neededLayoutBecauseOfChildren(); }
     void setNeededLayoutBecauseOfChildren(bool b) { m_bitfields.setNeededLayoutBecauseOfChildren(b); }
@@ -815,16 +786,13 @@ public:
 
     bool shouldCheckForPaintInvalidationRegardlessOfPaintInvalidationState()
     {
-        return layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation() || shouldDoFullPaintInvalidationIfSelfPaintingLayer();
+        return layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation();
     }
 
     bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform(); }
 
     void setNeedsOverflowRecalcAfterStyleChange();
     void markContainingBlocksForOverflowRecalc();
-
-    // FIXME: This is temporary for cases that setShouldDoFullPaintInvalidation(true) doesn't work yet.
-    void doNotUseInvalidatePaintForWholeRendererSynchronously() const { invalidatePaintForWholeRenderer(); }
 
 protected:
     // Overrides should call the superclass at the end. m_style will be 0 the first time
@@ -865,22 +833,16 @@ protected:
     virtual InvalidationReason getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
         const LayoutRect& oldBounds, const LayoutPoint& oldPositionFromPaintInvalidationContainer,
         const LayoutRect& newBounds, const LayoutPoint& newPositionFromPaintInvalidationContainer);
-    virtual void incrementallyInvalidatePaint(const RenderLayerModelObject& paintInvalidationContainer, const LayoutRect& oldBounds, const LayoutRect& newBounds, const LayoutPoint& positionFromPaintInvalidationContainer);
-    void fullyInvalidatePaint(const RenderLayerModelObject& paintInvalidationContainer, InvalidationReason, const LayoutRect& oldBounds, const LayoutRect& newBounds);
 
 #if ENABLE(ASSERT)
     virtual bool paintInvalidationStateIsDirty() const
     {
-        return layoutDidGetCalled() || shouldDoFullPaintInvalidation() || shouldDoFullPaintInvalidationIfSelfPaintingLayer()
+        return layoutDidGetCalled() || shouldDoFullPaintInvalidation()
             || onlyNeededPositionedMovementLayout() || neededLayoutBecauseOfChildren() || mayNeedPaintInvalidation();
     }
 #endif
 
 private:
-    // Invalidate the paint of the entire object. This is only used when a renderer is to be removed.
-    // For other cases, the caller should call setShouldDoFullPaintInvalidation() instead.
-    void invalidatePaintForWholeRenderer() const;
-
     bool hasImmediateNonWhitespaceTextChildOrPropertiesDependentOnColor() const;
 
     StyleDifference adjustStyleDifference(StyleDifference) const;
@@ -891,12 +853,6 @@ private:
     void checkBlockPositionedObjectsNeedLayout();
 #endif
     const char* invalidationReasonToString(InvalidationReason) const;
-
-    void markContainingBlockChainForPaintInvalidation()
-    {
-        for (RenderObject* container = this->container(); container && !container->shouldCheckForPaintInvalidationRegardlessOfPaintInvalidationState(); container = container->container())
-            container->setMayNeedPaintInvalidation(true);
-    }
 
     // FIXME(sky): This method is just to avoid copy-paste.
     // Merge container into containingBlock and then get rid of this method.
@@ -944,7 +900,6 @@ private:
             : m_selfNeedsLayout(false)
             , m_shouldDoFullPaintInvalidation(false)
             , m_shouldInvalidateOverflowForPaint(false)
-            , m_shouldDoFullPaintInvalidationIfSelfPaintingLayer(false)
             // FIXME: We should remove mayNeedPaintInvalidation once we are able to
             // use the other layout flags to detect the same cases. crbug.com/370118
             , m_mayNeedPaintInvalidation(false)
@@ -980,7 +935,6 @@ private:
         ADD_BOOLEAN_BITFIELD(selfNeedsLayout, SelfNeedsLayout);
         ADD_BOOLEAN_BITFIELD(shouldDoFullPaintInvalidation, ShouldDoFullPaintInvalidation);
         ADD_BOOLEAN_BITFIELD(shouldInvalidateOverflowForPaint, ShouldInvalidateOverflowForPaint);
-        ADD_BOOLEAN_BITFIELD(shouldDoFullPaintInvalidationIfSelfPaintingLayer, ShouldDoFullPaintInvalidationIfSelfPaintingLayer);
         ADD_BOOLEAN_BITFIELD(mayNeedPaintInvalidation, MayNeedPaintInvalidation);
         ADD_BOOLEAN_BITFIELD(onlyNeededPositionedMovementLayout, OnlyNeededPositionedMovementLayout);
         ADD_BOOLEAN_BITFIELD(neededLayoutBecauseOfChildren, NeededLayoutBecauseOfChildren);

@@ -537,7 +537,6 @@ protected:
     virtual InvalidationReason getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
         const LayoutRect& oldBounds, const LayoutPoint& oldPositionFromPaintInvalidationContainer,
         const LayoutRect& newBounds, const LayoutPoint& newPositionFromPaintInvalidationContainer) override;
-    virtual void incrementallyInvalidatePaint(const RenderLayerModelObject& paintInvalidationContainer, const LayoutRect& oldBounds, const LayoutRect& newBounds, const LayoutPoint& positionFromPaintInvalidationContainer) override;
 
     virtual void clearPaintInvalidationState(const PaintInvalidationState&) override;
 #if ENABLE(ASSERT)
@@ -588,8 +587,6 @@ private:
     LayoutSize computePreviousBorderBoxSize(const LayoutSize& previousBoundsSize) const;
 
     bool logicalHeightComputesAsNone(SizeType) const;
-
-    virtual InvalidationReason invalidatePaintIfNeeded(const PaintInvalidationState&, const RenderLayerModelObject& newPaintInvalidationContainer) override final;
 
     bool isBox() const = delete; // This will catch anyone doing an unnecessary check.
 

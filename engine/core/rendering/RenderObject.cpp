@@ -1218,70 +1218,9 @@ const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialA
     return view();
 }
 
-template <typename T>
-void addJsonObjectForRect(TracedValue* value, const char* name, const T& rect)
-{
-    value->beginDictionary(name);
-    value->setDouble("x", rect.x());
-    value->setDouble("y", rect.y());
-    value->setDouble("width", rect.width());
-    value->setDouble("height", rect.height());
-    value->endDictionary();
-}
-
-static PassRefPtr<TraceEvent::ConvertableToTraceFormat> jsonObjectForPaintInvalidationInfo(const LayoutRect& rect, const String& invalidationReason)
-{
-    RefPtr<TracedValue> value = TracedValue::create();
-    addJsonObjectForRect(value.get(), "rect", rect);
-    value->setString("invalidation_reason", invalidationReason);
-    return value;
-}
-
 LayoutRect RenderObject::computePaintInvalidationRect(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
 {
     return clippedOverflowRectForPaintInvalidation(paintInvalidationContainer, paintInvalidationState);
-}
-
-void RenderObject::invalidatePaintUsingContainer(const RenderLayerModelObject* paintInvalidationContainer, const LayoutRect& r, InvalidationReason invalidationReason) const
-{
-    if (r.isEmpty())
-        return;
-
-    // FIXME: This should be an assert, but editing/selection can trigger this case to invalidate
-    // the selection. crbug.com/368140.
-    if (!isRooted())
-        return;
-
-    TRACE_EVENT2(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"), "RenderObject::invalidatePaintUsingContainer()",
-        "object", this->debugName().ascii().data(),
-        "info", jsonObjectForPaintInvalidationInfo(r, invalidationReasonToString(invalidationReason)));
-
-    if (paintInvalidationContainer->hasFilter() && paintInvalidationContainer->layer()->requiresFullLayerImageForFilters()) {
-        paintInvalidationContainer->layer()->paintInvalidator().setFilterBackendNeedsPaintInvalidationInRect(r);
-        return;
-    }
-
-    if (paintInvalidationContainer->isRenderView()) {
-        toRenderView(paintInvalidationContainer)->invalidatePaintForRectangle(r);
-        return;
-    }
-}
-
-void RenderObject::invalidatePaintForWholeRenderer() const
-{
-    if (!isRooted())
-        return;
-
-    const RenderLayerModelObject* paintInvalidationContainer = containerForPaintInvalidation();
-
-    // FIXME: We should invalidate only previousPaintInvalidationRect, but for now we invalidate both the previous
-    // and current paint rects to meet the expectations of some callers in some cases (crbug.com/397555):
-    // - transform style change without a layout - crbug.com/394004;
-    // - some objects don't save previousPaintInvalidationRect - crbug.com/394133.
-    LayoutRect paintInvalidationRect = boundsRectForPaintInvalidation(paintInvalidationContainer);
-    invalidatePaintUsingContainer(paintInvalidationContainer, paintInvalidationRect, InvalidationPaint);
-    if (paintInvalidationRect != previousPaintInvalidationRect())
-        invalidatePaintUsingContainer(paintInvalidationContainer, previousPaintInvalidationRect(), InvalidationPaint);
 }
 
 LayoutRect RenderObject::boundsRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
@@ -1291,16 +1230,9 @@ LayoutRect RenderObject::boundsRectForPaintInvalidation(const RenderLayerModelOb
     return RenderLayer::computePaintInvalidationRect(this, paintInvalidationContainer->layer(), paintInvalidationState);
 }
 
+// FIXME(sky): Remove
 void RenderObject::invalidatePaintRectangle(const LayoutRect& r) const
 {
-    if (!isRooted())
-        return;
-
-    LayoutRect dirtyRect(r);
-
-    const RenderLayerModelObject* paintInvalidationContainer = containerForPaintInvalidation();
-    RenderLayer::mapRectToPaintInvalidationBacking(this, paintInvalidationContainer, dirtyRect);
-    invalidatePaintUsingContainer(paintInvalidationContainer, dirtyRect, InvalidationPaintRectangle);
 }
 
 IntRect RenderObject::pixelSnappedAbsoluteClippedOverflowRect() const
@@ -1353,43 +1285,6 @@ void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInv
     }
 }
 
-static PassRefPtr<TraceEvent::ConvertableToTraceFormat> jsonObjectForOldAndNewRects(const LayoutRect& oldRect, const LayoutRect& newRect)
-{
-    RefPtr<TracedValue> value = TracedValue::create();
-    addJsonObjectForRect(value.get(), "old", oldRect);
-    addJsonObjectForRect(value.get(), "new", newRect);
-    return value;
-}
-
-InvalidationReason RenderObject::invalidatePaintIfNeeded(const RenderLayerModelObject& paintInvalidationContainer, const LayoutRect& oldBounds, const LayoutPoint& oldLocation, const PaintInvalidationState& paintInvalidationState)
-{
-    const LayoutRect& newBounds = previousPaintInvalidationRect();
-    const LayoutPoint& newLocation = previousPositionFromPaintInvalidationContainer();
-
-    // FIXME(sky): Do we need this now that we don't have flipForWritingMode?
-    // FIXME: PaintInvalidationState should not be required here, but the call to flipForWritingMode
-    // in mapRectToPaintInvalidationBacking will give us the wrong results with it disabled.
-    // crbug.com/393762
-    ASSERT(newBounds == boundsRectForPaintInvalidation(&paintInvalidationContainer, &paintInvalidationState));
-
-    TRACE_EVENT2(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"), "RenderObject::invalidatePaintIfNeeded()",
-        "object", this->debugName().ascii().data(),
-        "info", jsonObjectForOldAndNewRects(oldBounds, newBounds));
-
-    InvalidationReason invalidationReason = getPaintInvalidationReason(paintInvalidationContainer, oldBounds, oldLocation, newBounds, newLocation);
-
-    if (invalidationReason == InvalidationNone)
-        return invalidationReason;
-
-    if (invalidationReason == InvalidationIncremental) {
-        incrementallyInvalidatePaint(paintInvalidationContainer, oldBounds, newBounds, newLocation);
-        return invalidationReason;
-    }
-
-    fullyInvalidatePaint(paintInvalidationContainer, invalidationReason, oldBounds, newBounds);
-    return invalidationReason;
-}
-
 InvalidationReason RenderObject::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
     const LayoutRect& oldBounds, const LayoutPoint& oldLocation, const LayoutRect& newBounds, const LayoutPoint& newLocation)
 {
@@ -1425,31 +1320,6 @@ InvalidationReason RenderObject::getPaintInvalidationReason(const RenderLayerMod
         return InvalidationNone;
 
     return InvalidationIncremental;
-}
-
-void RenderObject::incrementallyInvalidatePaint(const RenderLayerModelObject& paintInvalidationContainer, const LayoutRect& oldBounds, const LayoutRect& newBounds, const LayoutPoint& positionFromPaintInvalidationContainer)
-{
-    ASSERT(oldBounds.location() == newBounds.location());
-
-    LayoutUnit deltaRight = newBounds.maxX() - oldBounds.maxX();
-    if (deltaRight > 0)
-        invalidatePaintUsingContainer(&paintInvalidationContainer, LayoutRect(oldBounds.maxX(), newBounds.y(), deltaRight, newBounds.height()), InvalidationIncremental);
-    else if (deltaRight < 0)
-        invalidatePaintUsingContainer(&paintInvalidationContainer, LayoutRect(newBounds.maxX(), oldBounds.y(), -deltaRight, oldBounds.height()), InvalidationIncremental);
-
-    LayoutUnit deltaBottom = newBounds.maxY() - oldBounds.maxY();
-    if (deltaBottom > 0)
-        invalidatePaintUsingContainer(&paintInvalidationContainer, LayoutRect(newBounds.x(), oldBounds.maxY(), newBounds.width(), deltaBottom), InvalidationIncremental);
-    else if (deltaBottom < 0)
-        invalidatePaintUsingContainer(&paintInvalidationContainer, LayoutRect(oldBounds.x(), newBounds.maxY(), oldBounds.width(), -deltaBottom), InvalidationIncremental);
-}
-
-void RenderObject::fullyInvalidatePaint(const RenderLayerModelObject& paintInvalidationContainer, InvalidationReason invalidationReason, const LayoutRect& oldBounds, const LayoutRect& newBounds)
-{
-    // Otherwise do full paint invalidation.
-    invalidatePaintUsingContainer(&paintInvalidationContainer, oldBounds, invalidationReason);
-    if (newBounds != oldBounds)
-        invalidatePaintUsingContainer(&paintInvalidationContainer, newBounds, invalidationReason);
 }
 
 void RenderObject::invalidatePaintForOverflow()
@@ -2501,12 +2371,10 @@ bool RenderObject::isRelayoutBoundaryForInspector() const
 
 void RenderObject::setShouldDoFullPaintInvalidation(bool b, MarkingBehavior markBehavior)
 {
-    m_bitfields.setShouldDoFullPaintInvalidation(b);
-
     if (markBehavior == MarkContainingBlockChain && b) {
         ASSERT(document().lifecycle().state() != DocumentLifecycle::InPaintInvalidation);
+        // FIXME(sky): Do we still need this here?
         frame()->page()->animator().scheduleVisualUpdate(); // In case that this is called not during FrameView::updateLayoutAndStyleForPainting().
-        markContainingBlockChainForPaintInvalidation();
     }
 }
 
@@ -2516,12 +2384,10 @@ void RenderObject::clearPaintInvalidationState(const PaintInvalidationState& pai
     // booleans that are cleared below.
     ASSERT(paintInvalidationState.forceCheckForPaintInvalidation() || paintInvalidationStateIsDirty());
     setShouldDoFullPaintInvalidation(false);
-    setShouldDoFullPaintInvalidationIfSelfPaintingLayer(false);
     setOnlyNeededPositionedMovementLayout(false);
     setNeededLayoutBecauseOfChildren(false);
     setShouldInvalidateOverflowForPaint(false);
     setLayoutDidGetCalled(false);
-    setMayNeedPaintInvalidation(false);
 }
 
 bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)

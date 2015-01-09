@@ -70,37 +70,6 @@ void RenderLayerRepainter::computePaintInvalidationRectsIncludingNonCompositingD
     }
 }
 
-// Since we're only painting non-composited layers, we know that they all share the same paintInvalidationContainer.
-void RenderLayerRepainter::paintInvalidationIncludingNonCompositingDescendants()
-{
-    paintInvalidationIncludingNonCompositingDescendantsInternal(m_renderer.containerForPaintInvalidation());
-}
-
-void RenderLayerRepainter::paintInvalidationIncludingNonCompositingDescendantsInternal(const RenderLayerModelObject* paintInvalidationContainer)
-{
-    m_renderer.invalidatePaintUsingContainer(paintInvalidationContainer, m_renderer.previousPaintInvalidationRect(), InvalidationLayer);
-
-    for (RenderLayer* curr = m_renderer.layer()->firstChild(); curr; curr = curr->nextSibling()) {
-        curr->paintInvalidator().paintInvalidationIncludingNonCompositingDescendantsInternal(paintInvalidationContainer);
-    }
-}
-
-LayoutRect RenderLayerRepainter::paintInvalidationRectIncludingNonCompositingDescendants() const
-{
-    LayoutRect paintInvalidationRect = m_renderer.previousPaintInvalidationRect();
-
-    for (RenderLayer* child = m_renderer.layer()->firstChild(); child; child = child->nextSibling()) {
-        paintInvalidationRect.unite(child->paintInvalidator().paintInvalidationRectIncludingNonCompositingDescendants());
-    }
-    return paintInvalidationRect;
-}
-
-void RenderLayerRepainter::setBackingNeedsPaintInvalidationInRect(const LayoutRect& r)
-{
-    // FIXME(sky): Remove.
-    ASSERT_NOT_REACHED();
-}
-
 void RenderLayerRepainter::setFilterBackendNeedsPaintInvalidationInRect(const LayoutRect& rect)
 {
     if (rect.isEmpty())

@@ -779,7 +779,6 @@ void SpellChecker::removeSpellingMarkersUnderWords(const Vector<String>& words)
 
     DocumentMarkerController& markerController = m_frame.document()->markers();
     markerController.removeMarkers(removerPredicate);
-    markerController.repaintMarkers();
 }
 
 void SpellChecker::spellCheckAfterBlur()
