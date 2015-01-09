@@ -8,12 +8,10 @@ interface InspectorServer {
   Listen(int32 port) => ();
 };
 
-[Client=InspectorBackend]
 interface InspectorFrontend {
   SendMessage(string message);
 };
 
-[Client=InspectorFrontend]
 interface InspectorBackend {
   OnConnect();
   OnDisconnect();

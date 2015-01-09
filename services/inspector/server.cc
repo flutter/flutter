@@ -4,6 +4,7 @@
 
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/common/weak_binding_set.h"
+#include "mojo/common/weak_interface_ptr_set.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
@@ -38,6 +39,12 @@ class Server : public mojo::ApplicationDelegate,
       mojo::ApplicationConnection* connection) override {
     connection->AddService<InspectorFrontend>(this);
     connection->AddService<InspectorServer>(this);
+    // The application connecting to us may implement InspectorBackend,
+    // attempt to establish a connection to find out. If it doesn't then this
+    // pipe will close.
+    InspectorBackendPtr backend;
+    connection->ConnectToService(&backend);
+    backends_.AddInterfacePtr(backend.Pass());
     return true;
   }
 
@@ -72,6 +79,7 @@ class Server : public mojo::ApplicationDelegate,
   int connection_id_;
   scoped_ptr<net::HttpServer> web_server_;
 
+  mojo::WeakInterfacePtrSet<InspectorBackend> backends_;
   mojo::WeakBindingSet<InspectorFrontend> frontend_bindings_;
   mojo::Binding<InspectorServer> server_binding_;
 
@@ -98,27 +106,26 @@ void Server::OnWebSocketRequest(
   }
   web_server_->AcceptWebSocket(connection_id, info);
   connection_id_ = connection_id;
-  frontend_bindings_.ForAllBindings(
-      [](InspectorFrontend::Client* client) { client->OnConnect(); });
+  backends_.ForAllPtrs([](InspectorBackend* backend) { backend->OnConnect(); });
 }
 
 void Server::OnWebSocketMessage(
     int connection_id, const std::string& data) {
   DCHECK_EQ(connection_id, connection_id_);
-  frontend_bindings_.ForAllBindings(
-      [data](InspectorFrontend::Client* client) { client->OnMessage(data); });
+  backends_.ForAllPtrs(
+      [data](InspectorBackend* backend) { backend->OnMessage(data); });
 }
 
 void Server::OnClose(int connection_id) {
   if (connection_id != connection_id_)
     return;
   connection_id_ = kNotConnected;
-  frontend_bindings_.ForAllBindings(
-      [](InspectorFrontend::Client* client) { client->OnDisconnect(); });
+  backends_.ForAllPtrs(
+      [](InspectorBackend* backend) { backend->OnDisconnect(); });
 }
 
 void Server::Listen(int32_t port, const mojo::Closure& callback) {
-  frontend_bindings_.CloseAllBindings();  // Assume caller represents a new app.
+  backends_.CloseAll();  // Assume caller represents a new app.
 
   // TODO(eseidel): Early-out here if we're already bound to the right port.
   web_server_.reset();

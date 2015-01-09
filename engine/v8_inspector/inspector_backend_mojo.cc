@@ -24,13 +24,15 @@ namespace blink {
 
 class InspectorBackendMojoImpl
     : public InspectorFrontendChannel,
-      public mojo::InterfaceImpl<sky::InspectorBackend> {
+      public sky::InspectorBackend,
+      public mojo::InterfaceFactory<sky::InspectorBackend> {
  public:
   explicit InspectorBackendMojoImpl(inspector::InspectorHost*);
   ~InspectorBackendMojoImpl();
 
   void Connect();
 
+ private:
   // InspectorBackend:
   void OnConnect();
   void OnMessage(const mojo::String& message) override;
@@ -41,8 +43,13 @@ class InspectorBackendMojoImpl
   // TODO(eseidel): Unclear if flush is needed.
   void flush() override {}
 
+  // mojo::InterfaceFactory<sky::InspectorBackend>
+  void Create(mojo::ApplicationConnection* connection,
+              mojo::InterfaceRequest<sky::InspectorBackend> request) override;
+
   inspector::InspectorHost* host_;
   sky::InspectorFrontendPtr frontend_;
+  mojo::ServiceProviderImpl inspector_service_provider_;
 
   OwnPtr<InspectorFrontend> old_frontend_;
   RefPtr<InspectorBackendDispatcher> dispatcher_;
@@ -50,6 +57,8 @@ class InspectorBackendMojoImpl
   OwnPtr<InjectedScriptManager> script_manager_;
   OwnPtr<InspectorState> inspector_state_;
   OwnPtr<InstrumentingAgents> agents_;
+
+  mojo::Binding<sky::InspectorBackend> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(InspectorBackendMojoImpl);
 };
@@ -88,7 +97,8 @@ class InspectorHostResolverImpl : public PageScriptDebugServer::InspectorHostRes
 
 InspectorBackendMojoImpl::InspectorBackendMojoImpl(
     inspector::InspectorHost* host)
-    : host_(host) {
+    : host_(host), binding_(this) {
+  inspector_service_provider_.AddService(this);
 }
 
 InspectorBackendMojoImpl::~InspectorBackendMojoImpl() {
@@ -96,11 +106,13 @@ InspectorBackendMojoImpl::~InspectorBackendMojoImpl() {
 
 void InspectorBackendMojoImpl::Connect() {
   mojo::Shell* shell = host_->GetShell();
-  mojo::ServiceProviderPtr inspector_service_provider;
+  mojo::InterfaceRequest<mojo::ServiceProvider> service_provider_request;
+  mojo::MessagePipe pipe;
+  service_provider_request.Bind(pipe.handle0.Pass());
+  inspector_service_provider_.BindToHandle(pipe.handle1.Pass());
   shell->ConnectToApplication("mojo:sky_inspector_server",
-                              GetProxy(&inspector_service_provider));
-  mojo::ConnectToService(inspector_service_provider.get(), &frontend_);
-  frontend_.set_client(this);
+                              service_provider_request.Pass());
+  mojo::ConnectToService(&inspector_service_provider_, &frontend_);
 
   // Theoretically we should load our state from the inspector cookie.
   inspector_state_ =
@@ -147,6 +159,12 @@ void InspectorBackendMojoImpl::OnMessage(const mojo::String& message) {
   // the Debugger agent, we manually filter here.
   if (command_name.startsWith("Debugger"))
     dispatcher_->dispatch(wtf_message);
+}
+
+void InspectorBackendMojoImpl::Create(
+    mojo::ApplicationConnection* connection,
+    mojo::InterfaceRequest<sky::InspectorBackend> request) {
+  binding_.Bind(request.Pass());
 }
 
 }  // namespace blink

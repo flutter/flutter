@@ -1,6 +1,7 @@
 <import src="/mojo/public/sky/connection.sky" as="connection" />
 <import src="/mojo/public/sky/core.sky" as="core" />
 <import src="/mojo/public/sky/support.sky" as="support" />
+<import src="/mojo/services/public/sky/application.sky" as="application" />
 <import src="/sky/services/inspector/inspector.mojom.sky" as="inspector" />
 <import src="console-agent.sky" as="ConsoleAgent" />
 <import src="dom-agent.sky" as="DOMAgent" />
@@ -11,7 +12,6 @@
 <import src="css-agent.sky" as="CSSAgent" />
 <script>
 function InspectorBackend(frontend) {
-  this.frontend = frontend;
   var domAgent = new DOMAgent(this);
   this.agents = {
     Console: new ConsoleAgent(),
@@ -104,7 +104,7 @@ InspectorBackend.prototype.sendResponse = function(message_id, result) {
   };
   if (typeof result !== "undefined")
     response.result = result;
-  this.frontend.sendMessage(JSON.stringify(response));
+  window.frontend.sendMessage(JSON.stringify(response));
 }
 
 InspectorBackend.prototype.sendMessage = function(method, params) {
@@ -112,15 +112,16 @@ InspectorBackend.prototype.sendMessage = function(method, params) {
     method: method,
     params: params,
   });
-  this.frontend.sendMessage(message);
+  window.frontend.sendMessage(message);
 };
 
-var frontendHandle = internals.connectToService(
-    "mojo:sky_inspector_server", inspector.InspectorFrontend.name);
-window.frontendConnection = new connection.Connection(
-    frontendHandle,
-    InspectorBackend,
-    inspector.InspectorFrontend.proxyClass);
+(function() {
+  var app = new application.Application(internals.passShellProxyHandle());
+  var tracingApp = app.shell.connectToApplication("mojo:sky_inspector_server");
+  tracingApp.provideService(inspector.InspectorBackend, InspectorBackend);
 
-window.frontend = frontendConnection.remote;
+  window.frontend = tracingApp.requestService(inspector.InspectorFrontend);
+})();
+
+
 </script>
