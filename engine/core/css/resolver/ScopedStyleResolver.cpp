@@ -65,12 +65,12 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String
     return nullptr;
 }
 
-void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
+void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
     RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
         MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), &m_scope->rootNode(), m_authorStyleSheets[i], i);
-        collector.collectMatchingRules(matchRequest, ruleRange, cascadeScope, cascadeOrder);
+        collector.collectMatchingRules(matchRequest, ruleRange, cascadeOrder);
     }
 }
 

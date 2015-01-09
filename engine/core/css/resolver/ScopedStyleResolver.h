@@ -55,7 +55,7 @@ public:
 public:
     const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
 
-    void collectMatchingAuthorRules(ElementRuleCollector&, CascadeScope, CascadeOrder = ignoreCascadeOrder);
+    void collectMatchingAuthorRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
     void addRulesFromSheet(CSSStyleSheet*);
 
     void resetAuthorStyle();

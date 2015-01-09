@@ -36,18 +36,15 @@ class RuleData;
 class RuleSet;
 class ScopedStyleResolver;
 
-typedef unsigned CascadeScope;
 typedef unsigned CascadeOrder;
 
-const CascadeScope ignoreCascadeScope = 0;
 const CascadeOrder ignoreCascadeOrder = 0;
 
 class MatchedRule {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    MatchedRule(const RuleData* ruleData, CascadeScope cascadeScope, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
+    MatchedRule(const RuleData* ruleData, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
         : m_ruleData(ruleData)
-        , m_cascadeScope(cascadeScope)
         , m_parentStyleSheet(parentStyleSheet)
     {
         ASSERT(m_ruleData);
@@ -57,7 +54,6 @@ public:
     }
 
     const RuleData* ruleData() const { return m_ruleData; }
-    uint32_t cascadeScope() const { return m_cascadeScope; }
     uint64_t position() const { return m_position; }
     const CSSStyleSheet* parentStyleSheet() const { return m_parentStyleSheet; }
 
@@ -67,7 +63,6 @@ private:
     // allocated inside larger TerminatedArray objects and we cannot
     // trace a raw rule data pointer at this point.
     const RuleData* m_ruleData;
-    CascadeScope m_cascadeScope;
     uint64_t m_position;
     RawPtr<const CSSStyleSheet> m_parentStyleSheet;
 };
@@ -103,28 +98,28 @@ public:
 
     MatchResult& matchedResult();
 
-    void collectMatchingRules(const MatchRequest&, RuleRange&, CascadeScope = ignoreCascadeScope, CascadeOrder = ignoreCascadeOrder);
+    void collectMatchingRules(const MatchRequest&, RuleRange&, CascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
     void clearMatchedRules();
     void addElementStyleProperties(const StylePropertySet*, bool isCacheable = true);
 
 private:
-    void collectRuleIfMatches(const RuleData&, CascadeScope, CascadeOrder, const MatchRequest&, RuleRange&);
+    void collectRuleIfMatches(const RuleData&, CascadeOrder, const MatchRequest&, RuleRange&);
 
     template<typename RuleDataListType>
-    void collectMatchingRulesForList(const RuleDataListType* rules, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+    void collectMatchingRulesForList(const RuleDataListType* rules, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
     {
         if (!rules)
             return;
 
         for (typename RuleDataListType::const_iterator it = rules->begin(), end = rules->end(); it != end; ++it)
-            collectRuleIfMatches(*it, cascadeScope, cascadeOrder, matchRequest, ruleRange);
+            collectRuleIfMatches(*it, cascadeOrder, matchRequest, ruleRange);
     }
 
     bool ruleMatches(const RuleData&, const ContainerNode* scope);
 
     void sortMatchedRules();
-    void addMatchedRule(const RuleData*, CascadeScope, CascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet);
+    void addMatchedRule(const RuleData*, CascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet);
 
 private:
     const ElementResolveContext& m_context;

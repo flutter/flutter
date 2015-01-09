@@ -229,17 +229,16 @@ void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& col
     collector.clearMatchedRules();
     collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
 
-    // TODO(esprehn): Eliminate CascadeScope and CascadeOrder.
-    CascadeScope cascadeScope = 0;
+    // TODO(esprehn): Eliminate CascadeOrder.
     CascadeOrder cascadeOrder = 0;
 
     // TODO(esprehn): This can only match :host rules, we should just store
     // them in a separate RuleSet.
     if (ShadowRoot* shadowRoot = element->shadowRoot())
-        shadowRoot->scopedStyleResolver().collectMatchingAuthorRules(collector, cascadeScope, cascadeOrder++);
+        shadowRoot->scopedStyleResolver().collectMatchingAuthorRules(collector, cascadeOrder++);
 
     ScopedStyleResolver& resolver = element->treeScope().scopedStyleResolver();
-    resolver.collectMatchingAuthorRules(collector, cascadeScope, cascadeOrder);
+    resolver.collectMatchingAuthorRules(collector, cascadeOrder);
 
     collector.sortAndTransferMatchedRules();
 }

@@ -56,11 +56,11 @@ MatchResult& ElementRuleCollector::matchedResult()
     return m_result;
 }
 
-inline void ElementRuleCollector::addMatchedRule(const RuleData* rule, CascadeScope cascadeScope, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
+inline void ElementRuleCollector::addMatchedRule(const RuleData* rule, CascadeOrder cascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet)
 {
     if (!m_matchedRules)
         m_matchedRules = adoptPtr(new Vector<MatchedRule, 32>);
-    m_matchedRules->append(MatchedRule(rule, cascadeScope, cascadeOrder, styleSheetIndex, parentStyleSheet));
+    m_matchedRules->append(MatchedRule(rule, cascadeOrder, styleSheetIndex, parentStyleSheet));
 }
 
 void ElementRuleCollector::clearMatchedRules()
@@ -90,7 +90,7 @@ static bool rulesApplicableInCurrentTreeScope(const Element* element, const Cont
         SelectorChecker::isHostInItsShadowTree(*element, scopingNode);
 }
 
-void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeScope cascadeScope, CascadeOrder cascadeOrder)
+void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeOrder cascadeOrder)
 {
     ASSERT(matchRequest.ruleSet);
     ASSERT(m_context.element());
@@ -103,14 +103,14 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
     // We need to collect the rules for id, class, tag, and everything else into a buffer and
     // then sort the buffer.
     if (element.hasID())
-        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), cascadeScope, cascadeOrder, matchRequest, ruleRange);
+        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), cascadeOrder, matchRequest, ruleRange);
     if (element.isStyledElement() && element.hasClass()) {
         for (size_t i = 0; i < element.classNames().size(); ++i)
-            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), cascadeScope, cascadeOrder, matchRequest, ruleRange);
+            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), cascadeOrder, matchRequest, ruleRange);
     }
 
-    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeScope, cascadeOrder, matchRequest, ruleRange);
-    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeScope, cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeOrder, matchRequest, ruleRange);
 }
 
 void ElementRuleCollector::sortAndTransferMatchedRules()
@@ -138,7 +138,7 @@ inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const Co
     return selectorChecker.match(context);
 }
 
-void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeScope cascadeScope, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
 {
     StyleRule* rule = ruleData.rule();
     if (ruleMatches(ruleData, matchRequest.scope)) {
@@ -153,15 +153,12 @@ void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, Cascad
             ruleRange.firstRuleIndex = ruleRange.lastRuleIndex;
 
         // Add this rule to our list of matched rules.
-        addMatchedRule(&ruleData, cascadeScope, cascadeOrder, matchRequest.styleSheetIndex, matchRequest.styleSheet);
+        addMatchedRule(&ruleData, cascadeOrder, matchRequest.styleSheetIndex, matchRequest.styleSheet);
     }
 }
 
 static inline bool compareRules(const MatchedRule& matchedRule1, const MatchedRule& matchedRule2)
 {
-    if (matchedRule1.cascadeScope() != matchedRule2.cascadeScope())
-        return matchedRule1.cascadeScope() > matchedRule2.cascadeScope();
-
     return matchedRule1.position() < matchedRule2.position();
 }
 
