@@ -144,7 +144,7 @@ void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, Cascad
     if (ruleMatches(ruleData, matchRequest.scope)) {
         // If the rule has no properties to apply, then ignore it in the non-debug mode.
         const StylePropertySet& properties = rule->properties();
-        if (properties.isEmpty() && !matchRequest.includeEmptyRules)
+        if (properties.isEmpty())
             return;
 
         // Update our first/last rule indices in the matched rules array.

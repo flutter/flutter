@@ -33,9 +33,8 @@ class ContainerNode;
 class MatchRequest {
     STACK_ALLOCATED();
 public:
-    MatchRequest(RuleSet* ruleSet, bool includeEmptyRules = false, const ContainerNode* scope = 0, const CSSStyleSheet* cssSheet = 0, unsigned styleSheetIndex = 0)
+    MatchRequest(RuleSet* ruleSet, const ContainerNode* scope = 0, const CSSStyleSheet* cssSheet = 0, unsigned styleSheetIndex = 0)
         : ruleSet(ruleSet)
-        , includeEmptyRules(includeEmptyRules)
         , scope(scope)
         , styleSheet(cssSheet)
         , styleSheetIndex(styleSheetIndex)
@@ -46,7 +45,6 @@ public:
     }
 
     RawPtr<const RuleSet> ruleSet;
-    const bool includeEmptyRules;
     RawPtr<const ContainerNode> scope;
     RawPtr<const CSSStyleSheet> styleSheet;
     const unsigned styleSheetIndex;
