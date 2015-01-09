@@ -6,36 +6,36 @@ layer at (0,0) size 800x600
     RenderBlock {body} at (0,0) size 800x600 [bgcolor=#FFFFFF]
       RenderBlock {div} at (0,0) size 800x265
         RenderBlock {div} at (0,0) size 800x115
-          RenderBlock {div} at (15,15) size 770x49
+          RenderParagraph {div} at (15,15) size 770x49
             RenderInline {a} at (0,0) size 242x48 [color=#333333]
               RenderText {#text} at (528,0) size 242x48
                 text run at (528,0) width 242: "Adam Barth"
           RenderBlock {div} at (15,64) size 770x36
-            RenderBlock {div} at (0,0) size 770x18
+            RenderParagraph {div} at (0,0) size 770x18
               RenderText {#text} at (574,0) size 196x17
                 text run at (574,0) width 196: "Ph.D., M.S., Stanford, 2008"
-            RenderBlock {div} at (0,18) size 770x18
+            RenderParagraph {div} at (0,18) size 770x18
               RenderText {#text} at (635,0) size 135x17
                 text run at (635,0) width 135: "B.A., Cornell, 2003"
         RenderBlock {div} at (0,115) size 800x150
-          RenderBlock {div} at (0,19) size 800x28
+          RenderParagraph {div} at (0,19) size 800x28
             RenderInline {a} at (0,0) size 93x17 [color=#333333]
               RenderText {#text} at (692,5) size 93x17
                 text run at (692,5) width 93: "@adambarth"
-          RenderBlock {div} at (0,47) size 800x28
+          RenderParagraph {div} at (0,47) size 800x28
             RenderInline {a} at (0,0) size 35x17 [color=#333333]
               RenderText {#text} at (750,5) size 35x17
                 text run at (750,5) width 35: "Blink"
-          RenderBlock {div} at (0,75) size 800x28
+          RenderParagraph {div} at (0,75) size 800x28
             RenderInline {a} at (0,0) size 74x17 [color=#333333]
               RenderText {#text} at (711,5) size 74x17
                 text run at (711,5) width 74: "Chromium"
-          RenderBlock {div} at (0,103) size 800x28
+          RenderParagraph {div} at (0,103) size 800x28
             RenderInline {a} at (0,0) size 87x17 [color=#333333]
               RenderText {#text} at (698,5) size 87x17
                 text run at (698,5) width 87: "Publications"
 layer at (686,582) size 114x18
-  RenderBlock (positioned) {div} at (686.19,582) size 113.81x18 [color=#333333]
+  RenderParagraph {div} at (686.19,582) size 113.81x18 [color=#333333]
     RenderText {#text} at (3,3) size 73x12
       text run at (3,3) width 73: "Photograph by "
     RenderInline {a} at (0,0) size 36x12

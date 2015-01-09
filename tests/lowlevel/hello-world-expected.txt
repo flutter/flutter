@@ -2,7 +2,7 @@ layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
 layer at (0,0) size 800x19
   RenderBlock {foo} at (0,0) size 800x19
-    RenderBlock (anonymous) at (0,0) size 800x19
+    RenderParagraph (anonymous) at (0,0) size 800x19
       RenderText {#text} at (0,0) size 99x19
         text run at (0,0) width 99: "Hello World!"
 

@@ -39,6 +39,13 @@ RenderParagraph::~RenderParagraph()
 {
 }
 
+const char* RenderParagraph::renderName() const
+{
+    if (isAnonymous())
+        return "RenderParagraph (anonymous)";
+    return "RenderParagraph";
+}
+
 RenderParagraph* RenderParagraph::createAnonymous(Document& document)
 {
     RenderParagraph* renderer = new RenderParagraph(0);

@@ -1908,6 +1908,8 @@ bool RenderBlock::hasMarginAfterQuirk(const RenderBox* child) const
 
 const char* RenderBlock::renderName() const
 {
+    if (isInlineBlock())
+        return "RenderBlock (inline-block)";
     if (isOutOfFlowPositioned())
         return "RenderBlock (positioned)";
     if (isAnonymousBlock())

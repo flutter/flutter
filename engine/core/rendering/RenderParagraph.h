@@ -46,6 +46,8 @@ protected:
     int lastLineBoxBaseline(LineDirectionMode) const final;
 
 private:
+    virtual const char* renderName() const override;
+
     void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
 
     InlineFlowBox* createLineBoxes(RenderObject*, const LineInfo&, InlineBox* childBox);
