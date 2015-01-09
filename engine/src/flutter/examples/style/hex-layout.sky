@@ -115,8 +115,8 @@
    }
  }
  sky.registerLayoutManager('beehive', BeehiveLayoutManager);
- let BeehiveCountStyleValueType = new StyleValueType();
- BeehiveCountStyleValueType.addParser((tokens) => {
+ let BeehiveCountStyleGrammar = new StyleGrammar();
+ BeehiveCountStyleGrammar.addParser((tokens) => {
    let token = tokens.next();
    if (token.done)
      throw new Error();
@@ -126,13 +126,11 @@
      throw new Error();
    if (Math.trunc(token.value.value) != token.value.value) // is integer
      throw new Error();
-   return {
-     value: token.value.value;
-   }
+   return new NumericStyleValue(token.value.value);
  });
  sky.registerProperty({
    name: 'beehive-count',
-   type: BeehiveCountStyleValueType,
+   type: BeehiveCountStyleGrammar,
    inherits: true,
    initialValue: 5,
    needsLayout: true,
