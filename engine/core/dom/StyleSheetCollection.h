@@ -39,7 +39,7 @@ namespace blink {
 class CSSStyleSheet;
 class ContainerNode;
 class HTMLStyleElement;
-class StyleEngine;
+class StyleResolver;
 class TreeScope;
 
 class StyleSheetCollection {
@@ -58,7 +58,7 @@ public:
     void addStyleSheetCandidateNode(HTMLStyleElement&);
     void removeStyleSheetCandidateNode(HTMLStyleElement&);
 
-    void updateActiveStyleSheets(StyleEngine*);
+    void updateActiveStyleSheets(StyleResolver&);
 
 private:
     explicit StyleSheetCollection(TreeScope&);

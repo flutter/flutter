@@ -30,7 +30,6 @@
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/html/HTMLStyleElement.h"
@@ -69,31 +68,19 @@ void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& she
     }
 }
 
-void StyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
+void StyleSheetCollection::updateActiveStyleSheets(StyleResolver& resolver)
 {
-    // TODO(esprehn): We need to check if the resolver exists otherwise style
-    // doesn't get computed right. We should figure out why.
-    if (!m_needsUpdate && engine->resolver())
+    if (!m_needsUpdate)
         return;
 
     Vector<RefPtr<CSSStyleSheet>> candidateSheets;
     collectStyleSheets(candidateSheets);
 
-    Node& root = m_treeScope.rootNode();
+    m_treeScope.scopedStyleResolver().resetAuthorStyle();
+    resolver.removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
+    resolver.lazyAppendAuthorStyleSheets(0, candidateSheets);
 
-    // TODO(esprehn): Remove special casing for Document.
-    if (root.isDocumentNode()) {
-        engine->clearResolver();
-        // FIMXE: The following depends on whether StyleRuleFontFace was modified or not.
-        // No need to always-clear font cache.
-        engine->clearFontCache();
-    } else if (StyleResolver* styleResolver = engine->resolver()) {
-        // We should not destroy StyleResolver when we find any stylesheet update in a shadow tree.
-        // In this case, we will reset rulesets created from style elements in the shadow tree.
-        m_treeScope.scopedStyleResolver().resetAuthorStyle();
-        styleResolver->removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
-        styleResolver->lazyAppendAuthorStyleSheets(0, candidateSheets);
-    }
+    Node& root = m_treeScope.rootNode();
 
     // TODO(esprehn): We should avoid subtree recalcs in sky when rules change
     // and only recalc specific tree scopes.

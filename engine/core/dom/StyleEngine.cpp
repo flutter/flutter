@@ -71,12 +71,10 @@ void StyleEngine::removeTreeScope(TreeScope& scope)
 void StyleEngine::updateActiveStyleSheets()
 {
     ASSERT(!m_document->inStyleRecalc());
-
-    if (!m_document->isActive())
-        return;
+    ASSERT(m_resolver);
 
     for (TreeScope* treeScope : m_activeTreeScopes)
-        treeScope->styleSheets().updateActiveStyleSheets(this);
+        treeScope->styleSheets().updateActiveStyleSheets(*m_resolver);
 }
 
 void StyleEngine::appendActiveAuthorStyleSheets()
@@ -113,14 +111,10 @@ unsigned StyleEngine::resolverAccessCount() const
 
 void StyleEngine::resolverChanged()
 {
-    // Don't bother updating, since we haven't loaded all our style info yet
-    // and haven't calculated the style selector for the first time.
-    if (!m_document->isActive()) {
-        clearResolver();
+    if (!m_document->isActive())
         return;
-    }
-
-    updateActiveStyleSheets();
+    if (m_resolver)
+        updateActiveStyleSheets();
 }
 
 void StyleEngine::clearFontCache()

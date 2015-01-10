@@ -59,8 +59,6 @@ public:
     void addTreeScope(TreeScope&);
     void removeTreeScope(TreeScope&);
 
-    void updateActiveStyleSheets();
-
     // FIXME(sky): Remove this and ::first-line.
     bool usesFirstLineRules() const { return false; }
 
@@ -102,6 +100,7 @@ private:
 private:
     explicit StyleEngine(Document&);
 
+    void updateActiveStyleSheets();
     void createResolver();
 
     RawPtr<Document> m_document;
