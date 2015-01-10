@@ -52,12 +52,12 @@ public:
 
     const TreeScope& treeScope() const { return *m_scope; }
 
-public:
     const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
-    void addRulesFromSheet(CSSStyleSheet*);
+    void collectMatchingHostRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
 
+    void addRulesFromSheet(CSSStyleSheet*);
     void resetAuthorStyle();
 
     const RuleFeatureSet& features() const { return m_features; }

@@ -232,10 +232,8 @@ void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& col
     // TODO(esprehn): Eliminate CascadeOrder.
     CascadeOrder cascadeOrder = 0;
 
-    // TODO(esprehn): This can only match :host rules, we should just store
-    // them in a separate RuleSet.
     if (ShadowRoot* shadowRoot = element->shadowRoot())
-        shadowRoot->scopedStyleResolver().collectMatchingAuthorRules(collector, cascadeOrder++);
+        shadowRoot->scopedStyleResolver().collectMatchingHostRules(collector, cascadeOrder++);
 
     ScopedStyleResolver& resolver = element->treeScope().scopedStyleResolver();
     resolver.collectMatchingAuthorRules(collector, cascadeOrder);
@@ -245,8 +243,6 @@ void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& col
 
 void StyleResolver::matchUARules(ElementRuleCollector& collector)
 {
-    collector.setMatchingUARules(true);
-
     collector.clearMatchedRules();
     collector.matchedResult().ranges.lastUARule = collector.matchedResult().matchedProperties.size() - 1;
 
@@ -254,8 +250,6 @@ void StyleResolver::matchUARules(ElementRuleCollector& collector)
     collector.collectMatchingRules(MatchRequest(&defaultStyles()), ruleRange);
 
     collector.sortAndTransferMatchedRules();
-
-    collector.setMatchingUARules(false);
 }
 
 void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollector& collector)

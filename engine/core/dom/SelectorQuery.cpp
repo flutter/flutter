@@ -75,8 +75,7 @@ bool SelectorQuery::selectorMatches(ContainerNode& rootNode, Element& element) c
 {
     SelectorChecker checker(element);
     for (const CSSSelector* selector = m_selectors.first(); selector; selector = CSSSelectorList::next(*selector)) {
-        const ContainerNode* scope = !rootNode.isDocumentNode() ? &rootNode : 0;
-        if (checker.match(*selector, scope))
+        if (checker.match(*selector))
             return true;
     }
     return false;

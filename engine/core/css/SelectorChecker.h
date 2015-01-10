@@ -41,19 +41,16 @@ class SelectorChecker {
 public:
     explicit SelectorChecker(const Element&);
 
-    // TODO(esprehn): scope should never be null.
-    bool match(const CSSSelector&, const ContainerNode* scope);
+    bool match(const CSSSelector&);
 
     bool matchedAttributeSelector() const { return m_matchedAttributeSelector; }
     bool matchedFocusSelector() const { return m_matchedFocusSelector; }
     bool matchedHoverSelector() const { return m_matchedHoverSelector; }
     bool matchedActiveSelector() const { return m_matchedActiveSelector; }
 
-    static bool isHostInItsShadowTree(const Element&, const ContainerNode* scope);
-
 private:
-    bool checkPseudoClass(const CSSSelector&, const ContainerNode* scope);
-    bool checkOne(const CSSSelector&, const ContainerNode* scope);
+    bool checkPseudoClass(const CSSSelector&);
+    bool checkOne(const CSSSelector&);
 
     const Element& m_element;
     bool m_matchedAttributeSelector;
@@ -61,11 +58,6 @@ private:
     bool m_matchedHoverSelector;
     bool m_matchedActiveSelector;
 };
-
-inline bool SelectorChecker::isHostInItsShadowTree(const Element& element, const ContainerNode* scope)
-{
-    return scope && scope->isInShadowTree() && scope->shadowHost() == element;
-}
 
 }
 

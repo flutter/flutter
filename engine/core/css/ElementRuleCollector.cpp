@@ -43,7 +43,6 @@ ElementRuleCollector::ElementRuleCollector(const ElementResolveContext& context,
     RenderStyle* style)
     : m_context(context)
     , m_style(style)
-    , m_matchingUARules(false)
 { }
 
 ElementRuleCollector::~ElementRuleCollector()
@@ -81,23 +80,12 @@ void ElementRuleCollector::addElementStyleProperties(const StylePropertySet* pro
         m_result.isCacheable = false;
 }
 
-static bool rulesApplicableInCurrentTreeScope(const Element* element, const ContainerNode* scopingNode)
-{
-    TreeScope& treeScope = element->treeScope();
-    return !scopingNode ||
-        treeScope == scopingNode->treeScope() ||
-        SelectorChecker::isHostInItsShadowTree(*element, scopingNode);
-}
-
 void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeOrder cascadeOrder)
 {
     ASSERT(matchRequest.ruleSet);
     ASSERT(m_context.element());
 
     Element& element = *m_context.element();
-
-    if (!m_matchingUARules && !rulesApplicableInCurrentTreeScope(&element, matchRequest.scope))
-        return;
 
     // We need to collect the rules for id, class, tag, and everything else into a buffer and
     // then sort the buffer.
@@ -110,6 +98,11 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
 
     collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeOrder, matchRequest, ruleRange);
     collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeOrder, matchRequest, ruleRange);
+}
+
+void ElementRuleCollector::collectMatchingHostRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeOrder cascadeOrder)
+{
+    collectMatchingRulesForList(matchRequest.ruleSet->hostRules(), cascadeOrder, matchRequest, ruleRange);
 }
 
 void ElementRuleCollector::sortAndTransferMatchedRules()
@@ -128,10 +121,10 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
     }
 }
 
-inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const ContainerNode* scope)
+inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData)
 {
     SelectorChecker checker(*m_context.element());
-    if (checker.match(ruleData.selector(), scope)) {
+    if (checker.match(ruleData.selector())) {
         if (checker.matchedAttributeSelector())
             m_style->setUnique();
         if (checker.matchedFocusSelector())
@@ -148,7 +141,7 @@ inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, const Co
 void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
 {
     StyleRule* rule = ruleData.rule();
-    if (ruleMatches(ruleData, matchRequest.scope)) {
+    if (ruleMatches(ruleData)) {
         // If the rule has no properties to apply, then ignore it in the non-debug mode.
         const StylePropertySet& properties = rule->properties();
         if (properties.isEmpty())

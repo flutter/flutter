@@ -92,11 +92,10 @@ public:
     ElementRuleCollector(const ElementResolveContext&, RenderStyle* = 0);
     ~ElementRuleCollector();
 
-    void setMatchingUARules(bool matchingUARules) { m_matchingUARules = matchingUARules; }
-
     MatchResult& matchedResult();
 
     void collectMatchingRules(const MatchRequest&, RuleRange&, CascadeOrder = ignoreCascadeOrder);
+    void collectMatchingHostRules(const MatchRequest&, RuleRange&, CascadeOrder cascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
     void clearMatchedRules();
     void addElementStyleProperties(const StylePropertySet*, bool isCacheable = true);
@@ -114,7 +113,7 @@ private:
             collectRuleIfMatches(*it, cascadeOrder, matchRequest, ruleRange);
     }
 
-    bool ruleMatches(const RuleData&, const ContainerNode* scope);
+    bool ruleMatches(const RuleData&);
 
     void sortMatchedRules();
     void addMatchedRule(const RuleData*, CascadeOrder, unsigned styleSheetIndex, const CSSStyleSheet* parentStyleSheet);
@@ -122,8 +121,6 @@ private:
 private:
     const ElementResolveContext& m_context;
     RefPtr<RenderStyle> m_style; // FIXME: This can be mutated during matching!
-
-    bool m_matchingUARules;
 
     OwnPtr<Vector<MatchedRule, 32> > m_matchedRules;
 

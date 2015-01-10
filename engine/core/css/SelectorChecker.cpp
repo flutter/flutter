@@ -61,29 +61,17 @@ SelectorChecker::SelectorChecker(const Element& element)
 {
 }
 
-bool SelectorChecker::match(const CSSSelector& selector, const ContainerNode* scope)
+bool SelectorChecker::match(const CSSSelector& selector)
 {
-    bool isShadowHost = isHostInItsShadowTree(m_element, scope);
-
     const CSSSelector* current = &selector;
-    while (true) {
-        // Only :host should match the host:
-        // http://drafts.csswg.org/css-scoping/#host-element
-        if (isShadowHost && !current->isHostPseudoClass())
-            return false;
-        if (!checkOne(*current, scope))
-            return false;
-        if (current->isLastInTagHistory()) {
-            // Only rules in the same scope, or from :host can match.
-            return !scope ||
-                scope->treeScope() == m_element.treeScope() ||
-                m_element == scope->shadowHost();
-        }
-        current = current->tagHistory();
-    }
 
-    ASSERT_NOT_REACHED();
-    return false;
+    do {
+        if (!checkOne(*current))
+            return false;
+        current = current->tagHistory();
+    } while (current);
+
+    return true;
 }
 
 static bool anyAttributeMatches(const Element& element, CSSSelector::Match match, const CSSSelector& selector)
@@ -106,7 +94,7 @@ static bool anyAttributeMatches(const Element& element, CSSSelector::Match match
     return selectorValue == value;
 }
 
-bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode* scope)
+bool SelectorChecker::checkOne(const CSSSelector& selector)
 {
     switch (selector.match()) {
     case CSSSelector::Tag:
@@ -126,7 +114,7 @@ bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode*
         }
         return false;
     case CSSSelector::PseudoClass:
-        return checkPseudoClass(selector, scope);
+        return checkPseudoClass(selector);
     // FIXME(sky): Remove pseudo elements completely.
     case CSSSelector::PseudoElement:
     case CSSSelector::Unknown:
@@ -136,7 +124,7 @@ bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode*
     return false;
 }
 
-bool SelectorChecker::checkPseudoClass(const CSSSelector& selector, const ContainerNode* scope)
+bool SelectorChecker::checkPseudoClass(const CSSSelector& selector)
 {
     switch (selector.pseudoType()) {
     case CSSSelector::PseudoFocus:
@@ -167,20 +155,14 @@ bool SelectorChecker::checkPseudoClass(const CSSSelector& selector, const Contai
 
     case CSSSelector::PseudoHost:
         {
-            const ContainerNode* shadowHost = scope->shadowHost();
-            if (!shadowHost || shadowHost != m_element)
-                return false;
+            // We can only get here if the selector was defined in the right
+            // scope so we don't need to check it.
 
             // For empty parameter case, i.e. just :host or :host().
             if (!selector.selectorList())
                 return true;
-
-            // Treat the inside of :host() rules as if they were defined in the
-            // same scope as the host.
-            const ContainerNode& scope = m_element.treeScope().rootNode();
-
             for (const CSSSelector* current = selector.selectorList()->first(); current; current = CSSSelectorList::next(*current)) {
-                if (match(*current, &scope))
+                if (match(*current))
                     return true;
             }
             return false;

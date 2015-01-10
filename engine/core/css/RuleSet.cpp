@@ -93,12 +93,19 @@ bool RuleSet::findBestRuleSetAndAdd(const CSSSelector& component, RuleData& rule
 #endif
 
     const CSSSelector* it = &component;
+
+    if (it->pseudoType() == CSSSelector::PseudoHost) {
+        m_hostRules.append(ruleData);
+        return true;
+    }
+
     for (; it; it = it->tagHistory()) {
+        // Host rules can't match when combined with other selectors, so we just
+        // ignore them.
+        if (it->pseudoType() == CSSSelector::PseudoHost)
+            return true;
         extractValuesforSelector(it, id, className, customPseudoElementName, tagName);
     }
-    // FIXME: this null check should not be necessary. See crbug.com/358475
-    if (it)
-        extractValuesforSelector(it, id, className, customPseudoElementName, tagName);
 
     // Prefer rule sets in order of most likely to apply infrequently.
     if (!id.isEmpty()) {
@@ -109,7 +116,6 @@ bool RuleSet::findBestRuleSetAndAdd(const CSSSelector& component, RuleData& rule
         addToRuleSet(className, ensurePendingRules()->classRules, ruleData);
         return true;
     }
-
     if (!tagName.isEmpty()) {
         addToRuleSet(tagName, ensurePendingRules()->tagRules, ruleData);
         return true;

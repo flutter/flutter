@@ -82,6 +82,7 @@ public:
     const TerminatedArray<RuleData>* classRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_classRules.get(key); }
     const TerminatedArray<RuleData>* tagRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_tagRules.get(key); }
     const Vector<RuleData>* universalRules() const { ASSERT(!m_pendingRules); return &m_universalRules; }
+    const Vector<RuleData>* hostRules() const { ASSERT(!m_pendingRules); return &m_hostRules; }
     const Vector<RawPtr<StyleRuleFontFace> >& fontFaceRules() const { return m_fontFaceRules; }
     const Vector<RawPtr<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
     const MediaQueryResultList& viewportDependentMediaQueryResults() const { return m_viewportDependentMediaQueryResults; }
@@ -139,9 +140,11 @@ private:
     CompactRuleMap m_classRules;
     CompactRuleMap m_tagRules;
     Vector<RuleData> m_universalRules;
-    RuleFeatureSet m_features;
+    Vector<RuleData> m_hostRules;
     Vector<RawPtr<StyleRuleFontFace> > m_fontFaceRules;
     Vector<RawPtr<StyleRuleKeyframes> > m_keyframesRules;
+
+    RuleFeatureSet m_features;
 
     MediaQueryResultList m_viewportDependentMediaQueryResults;
 

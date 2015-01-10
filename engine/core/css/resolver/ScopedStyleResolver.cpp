@@ -69,8 +69,17 @@ void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& colle
 {
     RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), &m_scope->rootNode(), m_authorStyleSheets[i], i);
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i], i);
         collector.collectMatchingRules(matchRequest, ruleRange, cascadeOrder);
+    }
+}
+
+void ScopedStyleResolver::collectMatchingHostRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
+{
+    RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
+    for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i], i);
+        collector.collectMatchingHostRules(matchRequest, ruleRange, cascadeOrder);
     }
 }
 
