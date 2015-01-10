@@ -86,107 +86,24 @@ bool SelectorChecker::match(const CSSSelector& selector, const ContainerNode* sc
     return false;
 }
 
-template<typename CharType>
-static inline bool containsHTMLSpaceTemplate(const CharType* string, unsigned length)
-{
-    for (unsigned i = 0; i < length; ++i)
-        if (isHTMLSpace<CharType>(string[i]))
-            return true;
-    return false;
-}
-
-static inline bool containsHTMLSpace(const AtomicString& string)
-{
-    if (LIKELY(string.is8Bit()))
-        return containsHTMLSpaceTemplate<LChar>(string.characters8(), string.length());
-    return containsHTMLSpaceTemplate<UChar>(string.characters16(), string.length());
-}
-
-static bool attributeValueMatches(const Attribute& attributeItem, CSSSelector::Match match, const AtomicString& selectorValue, bool caseSensitive)
-{
-    const AtomicString& value = attributeItem.value();
-    if (value.isNull())
-        return false;
-
-    switch (match) {
-    case CSSSelector::Exact:
-        if (caseSensitive ? selectorValue != value : !equalIgnoringCase(selectorValue, value))
-            return false;
-        break;
-    case CSSSelector::List:
-        {
-            // Ignore empty selectors or selectors containing HTML spaces
-            if (selectorValue.isEmpty() || containsHTMLSpace(selectorValue))
-                return false;
-
-            unsigned startSearchAt = 0;
-            while (true) {
-                size_t foundPos = value.find(selectorValue, startSearchAt, caseSensitive);
-                if (foundPos == kNotFound)
-                    return false;
-                if (!foundPos || isHTMLSpace<UChar>(value[foundPos - 1])) {
-                    unsigned endStr = foundPos + selectorValue.length();
-                    if (endStr == value.length() || isHTMLSpace<UChar>(value[endStr]))
-                        break; // We found a match.
-                }
-
-                // No match. Keep looking.
-                startSearchAt = foundPos + 1;
-            }
-            break;
-        }
-    case CSSSelector::Contain:
-        if (!value.contains(selectorValue, caseSensitive) || selectorValue.isEmpty())
-            return false;
-        break;
-    case CSSSelector::Begin:
-        if (!value.startsWith(selectorValue, caseSensitive) || selectorValue.isEmpty())
-            return false;
-        break;
-    case CSSSelector::End:
-        if (!value.endsWith(selectorValue, caseSensitive) || selectorValue.isEmpty())
-            return false;
-        break;
-    case CSSSelector::Hyphen:
-        if (value.length() < selectorValue.length())
-            return false;
-        if (!value.startsWith(selectorValue, caseSensitive))
-            return false;
-        // It they start the same, check for exact match or following '-':
-        if (value.length() != selectorValue.length() && value[selectorValue.length()] != '-')
-            return false;
-        break;
-    default:
-        break;
-    }
-
-    return true;
-}
-
 static bool anyAttributeMatches(const Element& element, CSSSelector::Match match, const CSSSelector& selector)
 {
     const QualifiedName& selectorAttr = selector.attribute();
     ASSERT(selectorAttr.localName() != starAtom); // Should not be possible from the CSS grammar.
 
-    // Synchronize the attribute in case it is lazy-computed.
-    element.synchronizeAttribute(selectorAttr.localName());
+    if (match == CSSSelector::Set)
+        return element.hasAttribute(selectorAttr);
+
+    ASSERT(match == CSSSelector::Exact);
 
     const AtomicString& selectorValue = selector.value();
-    bool caseInsensitive = selector.attributeMatchType() == CSSSelector::CaseInsensitive;
+    const AtomicString& value = element.getAttribute(selectorAttr);
 
-    AttributeCollection attributes = element.attributesWithoutUpdate();
-    AttributeCollection::iterator end = attributes.end();
-    for (AttributeCollection::iterator it = attributes.begin(); it != end; ++it) {
-        const Attribute& attributeItem = *it;
-
-        if (!attributeItem.matches(selectorAttr))
-            continue;
-
-        if (attributeValueMatches(attributeItem, match, selectorValue, !caseInsensitive))
-            return true;
-    }
-
-    return false;
+    if (value.isNull())
+        return false;
+    if (selector.attributeMatchType() == CSSSelector::CaseInsensitive)
+        return equalIgnoringCase(selectorValue, value);
+    return selectorValue == value;
 }
 
 bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode* scope)
@@ -203,11 +120,6 @@ bool SelectorChecker::checkOne(const CSSSelector& selector, const ContainerNode*
         return m_element.hasID() && m_element.idForStyleResolution() == selector.value();
     case CSSSelector::Exact:
     case CSSSelector::Set:
-    case CSSSelector::Hyphen:
-    case CSSSelector::List:
-    case CSSSelector::Contain:
-    case CSSSelector::Begin:
-    case CSSSelector::End:
         if (anyAttributeMatches(m_element, selector.match(), selector)) {
             m_matchedAttributeSelector = true;
             return true;

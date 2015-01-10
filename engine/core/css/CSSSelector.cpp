@@ -266,38 +266,14 @@ String CSSSelector::selectorText(const String& rightSide) const
         } else if (cs->isAttributeSelector()) {
             str.append('[');
             str.append(cs->attribute().localName());
-            switch (cs->m_match) {
-                case CSSSelector::Exact:
-                    str.append('=');
-                    break;
-                case CSSSelector::Set:
-                    // set has no operator or value, just the attrName
-                    str.append(']');
-                    break;
-                case CSSSelector::List:
-                    str.appendLiteral("~=");
-                    break;
-                case CSSSelector::Hyphen:
-                    str.appendLiteral("|=");
-                    break;
-                case CSSSelector::Begin:
-                    str.appendLiteral("^=");
-                    break;
-                case CSSSelector::End:
-                    str.appendLiteral("$=");
-                    break;
-                case CSSSelector::Contain:
-                    str.appendLiteral("*=");
-                    break;
-                default:
-                    break;
-            }
+            if (cs->m_match == CSSSelector::Exact)
+                str.append('=');
             if (cs->m_match != CSSSelector::Set) {
                 serializeString(cs->value(), str);
                 if (cs->attributeMatchType() == CaseInsensitive)
                     str.appendLiteral(" i");
-                str.append(']');
             }
+            str.append(']');
         }
         if (!cs->tagHistory())
             break;
@@ -334,11 +310,6 @@ static bool validateSubSelector(const CSSSelector* selector)
     case CSSSelector::Class:
     case CSSSelector::Exact:
     case CSSSelector::Set:
-    case CSSSelector::List:
-    case CSSSelector::Hyphen:
-    case CSSSelector::Contain:
-    case CSSSelector::Begin:
-    case CSSSelector::End:
         return true;
     case CSSSelector::PseudoElement:
     case CSSSelector::Unknown:

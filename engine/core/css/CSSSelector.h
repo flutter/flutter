@@ -110,11 +110,6 @@ namespace blink {
             PseudoElement, // Example: ::first-line
             Exact, // Example: E[foo="bar"]
             Set, // Example: E[foo]
-            Hyphen, // Example: E[foo|="bar"]
-            List, // Example: E[foo~="bar"]
-            Contain, // css3: E[foo*="bar"]
-            Begin, // css3: E[foo^="bar"]
-            End, // css3: E[foo$="bar"]
             FirstAttributeSelectorMatch = Exact,
         };
 

@@ -1179,23 +1179,6 @@ restartAfterComment:
         }
         break;
 
-    case CharacterDollar:
-        if (*currentCharacter<SrcCharacterType>() == '=') {
-            ++currentCharacter<SrcCharacterType>();
-            m_token = ENDSWITH;
-        }
-        break;
-
-    case CharacterAsterisk:
-        if (*currentCharacter<SrcCharacterType>() == '=') {
-            ++currentCharacter<SrcCharacterType>();
-            m_token = CONTAINS;
-        }
-        break;
-
-    case CharacterPlus:
-        break;
-
     case CharacterLess:
         if (currentCharacter<SrcCharacterType>()[0] == '!' && currentCharacter<SrcCharacterType>()[1] == '-' && currentCharacter<SrcCharacterType>()[2] == '-') {
             currentCharacter<SrcCharacterType>() += 3;
@@ -1222,25 +1205,14 @@ restartAfterComment:
         }
         break;
 
+    // TODO(esprehn): Remove these and fix the assert about trying to parse them
+    // as identifiers.
+    case CharacterDollar:
+    case CharacterAsterisk:
+    case CharacterPlus:
     case CharacterXor:
-        if (*currentCharacter<SrcCharacterType>() == '=') {
-            ++currentCharacter<SrcCharacterType>();
-            m_token = BEGINSWITH;
-        }
-        break;
-
     case CharacterVerticalBar:
-        if (*currentCharacter<SrcCharacterType>() == '=') {
-            ++currentCharacter<SrcCharacterType>();
-            m_token = DASHMATCH;
-        }
-        break;
-
     case CharacterTilde:
-        if (*currentCharacter<SrcCharacterType>() == '=') {
-            ++currentCharacter<SrcCharacterType>();
-            m_token = INCLUDES;
-        }
         break;
 
     default:

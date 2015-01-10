@@ -147,12 +147,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token WHITESPACE SGML_CD
 %token TOKEN_EOF 0
 
-%token INCLUDES
-%token DASHMATCH
-%token BEGINSWITH
-%token ENDSWITH
-%token CONTAINS
-
 %token <string> STRING
 %right <string> IDENT
 %token <string> NTH
@@ -271,7 +265,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 
 %type <boolean> prio
 
-%type <integer> match
 %type <integer> unary_operator
 %type <integer> maybe_unary_operator
 %type <character> operator
@@ -828,37 +821,16 @@ attrib:
         $$->setAttribute(QualifiedName($3), CSSSelector::CaseSensitive);
         $$->setMatch(CSSSelector::Set);
     }
-    | '[' maybe_space attr_name match maybe_space ident_or_string maybe_space maybe_attr_match_type closing_square_bracket {
+    | '[' maybe_space attr_name '=' maybe_space ident_or_string maybe_space maybe_attr_match_type closing_square_bracket {
         $$ = parser->createFloatingSelector();
         $$->setAttribute(QualifiedName($3), $8);
-        $$->setMatch((CSSSelector::Match)$4);
+        $$->setMatch(CSSSelector::Exact);
         $$->setValue($6);
     }
     | '[' selector_recovery closing_square_bracket {
         YYERROR;
     }
   ;
-
-match:
-    '=' {
-        $$ = CSSSelector::Exact;
-    }
-    | INCLUDES {
-        $$ = CSSSelector::List;
-    }
-    | DASHMATCH {
-        $$ = CSSSelector::Hyphen;
-    }
-    | BEGINSWITH {
-        $$ = CSSSelector::Begin;
-    }
-    | ENDSWITH {
-        $$ = CSSSelector::End;
-    }
-    | CONTAINS {
-        $$ = CSSSelector::Contain;
-    }
-    ;
 
 ident_or_string:
     IDENT
