@@ -988,25 +988,6 @@ bool RenderBox::paintInvalidationLayerRectsForImage(WrappedImagePtr image, const
     return false;
 }
 
-void RenderBox::clearPaintInvalidationState(const PaintInvalidationState& paintInvalidationState)
-{
-    RenderBoxModelObject::clearPaintInvalidationState(paintInvalidationState);
-
-    if (ScrollableArea* area = scrollableArea())
-        area->resetScrollbarDamage();
-}
-
-#if ENABLE(ASSERT)
-bool RenderBox::paintInvalidationStateIsDirty() const
-{
-    if (ScrollableArea* area = scrollableArea()) {
-        if (area->hasVerticalBarDamage() || area->hasHorizontalBarDamage())
-            return true;
-    }
-    return RenderBoxModelObject::paintInvalidationStateIsDirty();
-}
-#endif
-
 bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset, ContentsClipBehavior contentsClipBehavior)
 {
     if (paintInfo.phase == PaintPhaseBlockBackground || paintInfo.phase == PaintPhaseSelfOutline || paintInfo.phase == PaintPhaseMask)
@@ -1239,13 +1220,6 @@ void RenderBox::deleteLineBoxWrapper()
         ASSERT(m_rareData);
         m_rareData->m_inlineBoxWrapper = 0;
     }
-}
-
-LayoutRect RenderBox::clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
-{
-    LayoutRect r = visualOverflowRect();
-    mapRectToPaintInvalidationBacking(paintInvalidationContainer, r, paintInvalidationState);
-    return r;
 }
 
 void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const

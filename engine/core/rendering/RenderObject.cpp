@@ -1218,23 +1218,6 @@ const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialA
     return view();
 }
 
-LayoutRect RenderObject::computePaintInvalidationRect(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
-{
-    return clippedOverflowRectForPaintInvalidation(paintInvalidationContainer, paintInvalidationState);
-}
-
-LayoutRect RenderObject::boundsRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
-{
-    if (!paintInvalidationContainer)
-        return computePaintInvalidationRect(paintInvalidationContainer, paintInvalidationState);
-    return RenderLayer::computePaintInvalidationRect(this, paintInvalidationContainer->layer(), paintInvalidationState);
-}
-
-IntRect RenderObject::pixelSnappedAbsoluteClippedOverflowRect() const
-{
-    return pixelSnappedIntRect(absoluteClippedOverflowRect());
-}
-
 void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
 {
     // If we didn't need paint invalidation then our children don't need as well.
@@ -1248,24 +1231,6 @@ void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInv
         if (!child->isOutOfFlowPositioned())
             child->invalidateTreeIfNeeded(paintInvalidationState);
     }
-}
-
-LayoutRect RenderObject::rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* paintInvalidationState) const
-{
-    LayoutRect r(clippedOverflowRectForPaintInvalidation(paintInvalidationContainer, paintInvalidationState));
-    r.inflate(outlineWidth);
-    return r;
-}
-
-LayoutRect RenderObject::absoluteClippedOverflowRect() const
-{
-    return clippedOverflowRectForPaintInvalidation(view());
-}
-
-LayoutRect RenderObject::clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject*, const PaintInvalidationState*) const
-{
-    ASSERT_NOT_REACHED();
-    return LayoutRect();
 }
 
 void RenderObject::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
@@ -1283,11 +1248,6 @@ void RenderObject::mapRectToPaintInvalidationBacking(const RenderLayerModelObjec
 
         o->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
     }
-}
-
-void RenderObject::computeFloatRectForPaintInvalidation(const RenderLayerModelObject*, FloatRect&, const PaintInvalidationState*) const
-{
-    ASSERT_NOT_REACHED();
 }
 
 void RenderObject::dirtyLinesFromChangedChild(RenderObject*)

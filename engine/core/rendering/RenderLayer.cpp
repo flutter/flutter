@@ -291,12 +291,6 @@ void RenderLayer::mapRectToPaintInvalidationBacking(const RenderObject* renderOb
     renderObject->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
 }
 
-LayoutRect RenderLayer::computePaintInvalidationRect(const RenderObject* renderObject, const RenderLayer* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState)
-{
-    // FIXME(sky): Remove
-    return renderObject->computePaintInvalidationRect(paintInvalidationContainer->renderer(), paintInvalidationState);
-}
-
 void RenderLayer::dirty3DTransformedDescendantStatus()
 {
     RenderLayerStackingNode* stackingNode = m_stackingNode->ancestorStackingContextNode();

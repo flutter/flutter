@@ -603,31 +603,12 @@ public:
     const RenderLayerModelObject* containerForPaintInvalidation() const;
     const RenderLayerModelObject* adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const;
 
-    LayoutRect computePaintInvalidationRect()
-    {
-        return computePaintInvalidationRect(containerForPaintInvalidation());
-    }
-
-    // Returns the paint invalidation rect for this RenderObject in the coordinate space of the paint backing (typically a GraphicsLayer) for |paintInvalidationContainer|.
-    LayoutRect computePaintInvalidationRect(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
-
-    // Returns the rect bounds needed to invalidate the paint of this object, in the coordinate space of the rendering backing of |paintInvalidationContainer|
-    LayoutRect boundsRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
-
     // Walk the tree after layout issuing paint invalidations for renderers that have changed or moved, updating bounds that have changed, and clearing paint invalidation state.
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&);
-
-    // Returns the rect that should have paint invalidated whenever this object changes. The rect is in the view's
-    // coordinate space. This method deals with outlines and overflow.
-    LayoutRect absoluteClippedOverflowRect() const;
-    IntRect pixelSnappedAbsoluteClippedOverflowRect() const;
-    virtual LayoutRect clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
-    virtual LayoutRect rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* = 0) const;
 
     // Given a rect in the object's coordinate space, compute a rect suitable for invalidating paints of
     // that rect in the coordinate space of paintInvalidationContainer.
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const;
-    virtual void computeFloatRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, FloatRect& paintInvalidationRect, const PaintInvalidationState*) const;
 
     virtual unsigned length() const { return 1; }
 
@@ -741,7 +722,7 @@ public:
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }
 
-    virtual void clearPaintInvalidationState(const PaintInvalidationState&);
+    void clearPaintInvalidationState(const PaintInvalidationState&);
 
     // layoutDidGetCalled indicates whether this render object was re-laid-out
     // since the last call to setLayoutDidGetCalled(false) on this object.
@@ -759,12 +740,8 @@ public:
 
     bool shouldCheckForPaintInvalidation(const PaintInvalidationState& paintInvalidationState)
     {
-        return paintInvalidationState.forceCheckForPaintInvalidation() || shouldCheckForPaintInvalidationRegardlessOfPaintInvalidationState();
-    }
-
-    bool shouldCheckForPaintInvalidationRegardlessOfPaintInvalidationState()
-    {
-        return layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation();
+        return paintInvalidationState.forceCheckForPaintInvalidation() ||
+            layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation();
     }
 
     bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform(); }
@@ -809,7 +786,7 @@ protected:
     void setDocumentForAnonymous(Document* document) { ASSERT(isAnonymous()); m_node = document; }
 
 #if ENABLE(ASSERT)
-    virtual bool paintInvalidationStateIsDirty() const
+    bool paintInvalidationStateIsDirty() const
     {
         return layoutDidGetCalled() || shouldDoFullPaintInvalidation()
             || onlyNeededPositionedMovementLayout() || neededLayoutBecauseOfChildren() || mayNeedPaintInvalidation();

@@ -479,11 +479,6 @@ void RenderReplaced::setSelectionState(SelectionState state)
     if (!inlineBoxWrapper())
         return;
 
-    // We only include the space below the baseline in our layer's cached paint invalidation rect if the
-    // image is selected. Since the selection state has changed update the rect.
-    if (hasLayer())
-        setPreviousPaintInvalidationRect(boundsRectForPaintInvalidation(containerForPaintInvalidation()));
-
     if (canUpdateSelectionOnRootLineBoxes())
         inlineBoxWrapper()->root().setHasSelectedChildren(isSelected());
 }
@@ -509,15 +504,6 @@ bool RenderReplaced::isSelected() const
 
     ASSERT(0);
     return false;
-}
-
-LayoutRect RenderReplaced::clippedOverflowRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
-{
-    // The selectionRect can project outside of the overflowRect, so take their union
-    // for paint invalidation to avoid selection painting glitches.
-    LayoutRect r = isSelected() ? localSelectionRect() : visualOverflowRect();
-    mapRectToPaintInvalidationBacking(paintInvalidationContainer, r, paintInvalidationState);
-    return r;
 }
 
 }

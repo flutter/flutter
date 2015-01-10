@@ -235,8 +235,8 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
     // We don't update compositing layers, because we need to do a deep update from the compositing ancestor.
     if (!frameView->isInPerformLayout()) {
         // If we're in the middle of layout, we'll just update layers once layout has finished.
+        // FIXME(sky): Do we still need this?
         layer()->clipper().clearClipRectsIncludingDescendants();
-        box().setPreviousPaintInvalidationRect(box().boundsRectForPaintInvalidation(paintInvalidationContainer));
     }
 
     // The caret rect needs to be invalidated after scrolling
