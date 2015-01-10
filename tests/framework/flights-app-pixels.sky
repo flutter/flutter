@@ -2,12 +2,31 @@
   <import src="../resources/run-after-display.sky" as="runAfterDisplay" />
   <import src="/sky/examples/flights-app/flights-app.sky" />
   <script>
-  addEventListener("load", function() {
-    var app = document.createElement("flights-app");
-    document.querySelector("sky").appendChild(app);
+  var app;
+
+  function imagesLoaded() {
+    var images = app.shadowRoot.querySelectorAll('img');
+    for (var i = 0; i < images.length; i++) {
+      if (!images[i].complete)
+        return false;
+    }
+    return true;
+  }
+
+  function checkImagesLoaded() {
+    if (!imagesLoaded()) {
+      setTimeout(checkImagesLoaded, 10);
+      return;
+    }
     runAfterDisplay(function() {
       internals.notifyTestComplete("");
     });
+  }
+
+  addEventListener("load", function() {
+    app = document.createElement("flights-app");
+    document.querySelector("sky").appendChild(app);
+    checkImagesLoaded();
   });
   </script>
 </sky>
