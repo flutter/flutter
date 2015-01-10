@@ -106,20 +106,6 @@ enum MapCoordinatesMode {
 };
 typedef unsigned MapCoordinatesFlags;
 
-enum InvalidationReason {
-    InvalidationNone,
-    InvalidationIncremental,
-    InvalidationFull,
-    InvalidationBorderBoxChange,
-    InvalidationBoundsChange,
-    InvalidationLocationChange,
-    InvalidationScroll,
-    InvalidationSelection,
-    InvalidationLayer,
-    InvalidationPaint,
-    InvalidationPaintRectangle
-};
-
 const int caretWidth = 1;
 
 struct AnnotatedRegionValue {
@@ -634,9 +620,6 @@ public:
     // Walk the tree after layout issuing paint invalidations for renderers that have changed or moved, updating bounds that have changed, and clearing paint invalidation state.
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&);
 
-    virtual void invalidatePaintForOverflow();
-    void invalidatePaintForOverflowIfNeeded();
-
     bool checkForPaintInvalidation() const;
 
     // Returns the rect that should have paint invalidated whenever this object changes. The rect is in the view's
@@ -830,10 +813,6 @@ protected:
 
     void setDocumentForAnonymous(Document* document) { ASSERT(isAnonymous()); m_node = document; }
 
-    virtual InvalidationReason getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
-        const LayoutRect& oldBounds, const LayoutPoint& oldPositionFromPaintInvalidationContainer,
-        const LayoutRect& newBounds, const LayoutPoint& newPositionFromPaintInvalidationContainer);
-
 #if ENABLE(ASSERT)
     virtual bool paintInvalidationStateIsDirty() const
     {
@@ -852,7 +831,6 @@ private:
 #if ENABLE(ASSERT)
     void checkBlockPositionedObjectsNeedLayout();
 #endif
-    const char* invalidationReasonToString(InvalidationReason) const;
 
     // FIXME(sky): This method is just to avoid copy-paste.
     // Merge container into containingBlock and then get rid of this method.

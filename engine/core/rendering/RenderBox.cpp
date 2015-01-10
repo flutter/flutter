@@ -2996,43 +2996,6 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
     return createPositionWithAffinity(firstPositionInOrBeforeNode(node()));
 }
 
-InvalidationReason RenderBox::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
-    const LayoutRect& oldBounds, const LayoutPoint& oldLocation, const LayoutRect& newBounds, const LayoutPoint& newLocation)
-{
-    InvalidationReason invalidationReason = RenderBoxModelObject::getPaintInvalidationReason(paintInvalidationContainer, oldBounds, oldLocation, newBounds, newLocation);
-    if (invalidationReason != InvalidationNone && invalidationReason != InvalidationIncremental)
-        return invalidationReason;
-
-    if (!style()->hasBackground() && !style()->hasBoxDecorations())
-        return invalidationReason;
-
-    LayoutSize oldBorderBoxSize = computePreviousBorderBoxSize(oldBounds.size());
-    LayoutSize newBorderBoxSize = size();
-
-    if (oldBorderBoxSize == newBorderBoxSize)
-        return invalidationReason;
-
-    // FIXME: Implement correct incremental invalidation for visual overflowing effects.
-    if (style()->hasVisualOverflowingEffect() || style()->hasFilter())
-        return InvalidationBorderBoxChange;
-
-    if (style()->hasBorderRadius()) {
-        // If a border-radius exists and width/height is smaller than radius width/height,
-        // we need to fully invalidate to cover the changed radius.
-        RoundedRect oldRoundedRect = style()->getRoundedBorderFor(LayoutRect(LayoutPoint(0, 0), oldBorderBoxSize));
-        RoundedRect newRoundedRect = style()->getRoundedBorderFor(LayoutRect(LayoutPoint(0, 0), newBorderBoxSize));
-        if (oldRoundedRect.radii() != newRoundedRect.radii())
-            return InvalidationBorderBoxChange;
-    }
-
-    if (oldBorderBoxSize.width() != newBorderBoxSize.width() && mustInvalidateBackgroundOrBorderPaintOnWidthChange())
-        return InvalidationBorderBoxChange;
-    if (oldBorderBoxSize.height() != newBorderBoxSize.height() && mustInvalidateBackgroundOrBorderPaintOnHeightChange())
-        return InvalidationBorderBoxChange;
-
-    return InvalidationIncremental;
-}
-
 void RenderBox::addVisualEffectOverflow()
 {
     if (!style()->hasVisualOverflowingEffect())

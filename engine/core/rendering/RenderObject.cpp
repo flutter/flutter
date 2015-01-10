@@ -1240,36 +1240,6 @@ IntRect RenderObject::pixelSnappedAbsoluteClippedOverflowRect() const
     return pixelSnappedIntRect(absoluteClippedOverflowRect());
 }
 
-const char* RenderObject::invalidationReasonToString(InvalidationReason reason) const
-{
-    switch (reason) {
-    case InvalidationNone:
-        return "none";
-    case InvalidationIncremental:
-        return "incremental";
-    case InvalidationFull:
-        return "full";
-    case InvalidationBorderBoxChange:
-        return "border box change";
-    case InvalidationBoundsChange:
-        return "bounds change";
-    case InvalidationLocationChange:
-        return "location change";
-    case InvalidationScroll:
-        return "scroll";
-    case InvalidationSelection:
-        return "selection";
-    case InvalidationLayer:
-        return "layer";
-    case InvalidationPaint:
-        return "invalidate paint";
-    case InvalidationPaintRectangle:
-        return "invalidate paint rectangle";
-    }
-    ASSERT_NOT_REACHED();
-    return "";
-}
-
 void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
 {
     // If we didn't need paint invalidation then our children don't need as well.
@@ -1283,53 +1253,6 @@ void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInv
         if (!child->isOutOfFlowPositioned())
             child->invalidateTreeIfNeeded(paintInvalidationState);
     }
-}
-
-InvalidationReason RenderObject::getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
-    const LayoutRect& oldBounds, const LayoutPoint& oldLocation, const LayoutRect& newBounds, const LayoutPoint& newLocation)
-{
-    if (shouldDoFullPaintInvalidation())
-        return InvalidationFull;
-
-    if (newLocation != oldLocation)
-        return InvalidationLocationChange;
-
-    // If the bounds are the same then we know that none of the statements below
-    // can match, so we can early out since we will not need to do any
-    // invalidation.
-    if (oldBounds == newBounds)
-        return InvalidationNone;
-
-    // If we shifted, we don't know the exact reason so we are conservative and trigger a full invalidation. Shifting could
-    // be caused by some layout property (left / top) or some in-flow renderer inserted / removed before us in the tree.
-    if (newBounds.location() != oldBounds.location())
-        return InvalidationBoundsChange;
-
-    // If the size is zero on one of our bounds then we know we're going to have
-    // to do a full invalidation of either old bounds or new bounds. If we fall
-    // into the incremental invalidation we'll issue two invalidations instead
-    // of one.
-    if (oldBounds.size().isZero() || newBounds.size().isZero())
-        return InvalidationBoundsChange;
-
-    // This covers the case where we mark containing blocks for layout
-    // and they change size but don't have anything to paint. This is
-    // a pretty common case for <body> as we add / remove children
-    // (and the default background is done by FrameView).
-    if (skipInvalidationWhenLaidOutChildren() && !mayNeedPaintInvalidation())
-        return InvalidationNone;
-
-    return InvalidationIncremental;
-}
-
-void RenderObject::invalidatePaintForOverflow()
-{
-}
-
-void RenderObject::invalidatePaintForOverflowIfNeeded()
-{
-    if (shouldInvalidateOverflowForPaint())
-        invalidatePaintForOverflow();
 }
 
 bool RenderObject::checkForPaintInvalidation() const

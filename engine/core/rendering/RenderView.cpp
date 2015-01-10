@@ -364,28 +364,6 @@ IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
     return pixelSnappedIntRect(selRect);
 }
 
-void RenderView::invalidatePaintForSelection() const
-{
-    HashSet<RenderBlock*> processedBlocks;
-
-    RenderObject* end = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
-    for (RenderObject* o = m_selectionStart; o && o != end; o = o->nextInPreOrder()) {
-        if (!o->canBeSelectionLeaf() && o != m_selectionStart && o != m_selectionEnd)
-            continue;
-        if (o->selectionState() == SelectionNone)
-            continue;
-
-        RenderSelectionInfo(o, true).invalidatePaint();
-
-        // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
-        for (RenderBlock* block = o->containingBlock(); block && !block->isRenderView(); block = block->containingBlock()) {
-            if (!processedBlocks.add(block).isNewEntry)
-                break;
-            RenderSelectionInfo(block, true).invalidatePaint();
-        }
-    }
-}
-
 // When exploring the RenderTree looking for the nodes involved in the Selection, sometimes it's
 // required to change the traversing direction because the "start" position is below the "end" one.
 static inline RenderObject* getNextOrPrevRenderObjectBasedOnDirection(const RenderObject* o, const RenderObject* stop, bool& continueExploring, bool& exploringBackwards)

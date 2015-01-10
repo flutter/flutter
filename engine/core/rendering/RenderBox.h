@@ -534,10 +534,6 @@ protected:
 
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
-    virtual InvalidationReason getPaintInvalidationReason(const RenderLayerModelObject& paintInvalidationContainer,
-        const LayoutRect& oldBounds, const LayoutPoint& oldPositionFromPaintInvalidationContainer,
-        const LayoutRect& newBounds, const LayoutPoint& newPositionFromPaintInvalidationContainer) override;
-
     virtual void clearPaintInvalidationState(const PaintInvalidationState&) override;
 #if ENABLE(ASSERT)
     virtual bool paintInvalidationStateIsDirty() const override;

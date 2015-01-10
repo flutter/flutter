@@ -127,8 +127,6 @@ private:
     void layoutBlockChild(RenderBox* child);
     void adjustPositionedBlock(RenderBox* child);
 
-    virtual void invalidatePaintForOverflow() override final;
-
     RootInlineBox* createRootInlineBox();
 
 public:

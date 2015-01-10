@@ -224,39 +224,6 @@ void RenderBlockFlow::addChild(RenderObject* newChild, RenderObject* beforeChild
     RenderBlock::addChild(newChild, beforeChild);
 }
 
-void RenderBlockFlow::invalidatePaintForOverflow()
-{
-    // FIXME: We could tighten up the left and right invalidation points if we let RenderParagraph::layoutChildren fill them in based off the particular lines
-    // it had to lay out. We wouldn't need the hasOverflowClip() hack in that case either.
-    LayoutUnit paintInvalidationLogicalLeft = logicalLeftVisualOverflow();
-    LayoutUnit paintInvalidationLogicalRight = logicalRightVisualOverflow();
-    if (hasOverflowClip()) {
-        // If we have clipped overflow, we should use layout overflow as well, since visual overflow from lines didn't propagate to our block's overflow.
-        // Note the old code did this as well but even for overflow:visible. The addition of hasOverflowClip() at least tightens up the hack a bit.
-        // RenderParagraph::layoutChildren should be patched to compute the entire paint invalidation rect.
-        paintInvalidationLogicalLeft = std::min(paintInvalidationLogicalLeft, logicalLeftLayoutOverflow());
-        paintInvalidationLogicalRight = std::max(paintInvalidationLogicalRight, logicalRightLayoutOverflow());
-    }
-
-    LayoutRect paintInvalidationRect = LayoutRect(paintInvalidationLogicalLeft, m_paintInvalidationLogicalTop, paintInvalidationLogicalRight - paintInvalidationLogicalLeft, m_paintInvalidationLogicalBottom - m_paintInvalidationLogicalTop);
-
-    if (hasOverflowClip()) {
-        // Adjust the paint invalidation rect for scroll offset
-        paintInvalidationRect.move(-scrolledContentOffset());
-
-        // Don't allow this rect to spill out of our overflow box.
-        paintInvalidationRect.intersect(LayoutRect(LayoutPoint(), size()));
-    }
-
-    // Make sure the rect is still non-empty after intersecting for overflow above
-    if (!paintInvalidationRect.isEmpty()) {
-        invalidatePaintRectangle(paintInvalidationRect); // We need to do a partial paint invalidation of our content.
-    }
-
-    m_paintInvalidationLogicalTop = 0;
-    m_paintInvalidationLogicalBottom = 0;
-}
-
 LayoutUnit RenderBlockFlow::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
 {
     LayoutUnit logicalLeft = logicalLeftOffsetForLine(false);

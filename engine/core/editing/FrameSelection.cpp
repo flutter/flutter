@@ -1372,12 +1372,6 @@ void FrameSelection::focusedOrActiveStateChanged()
     RefPtr<Document> document = m_frame->document();
     document->updateRenderTreeIfNeeded();
 
-    // Because RenderObject::selectionBackgroundColor() and
-    // RenderObject::selectionForegroundColor() check if the frame is active,
-    // we have to update places those colors were painted.
-    if (RenderView* view = document->renderView())
-        view->invalidatePaintForSelection();
-
     // Caret appears in the active frame.
     if (activeAndFocused)
         setSelectionFromNone();
