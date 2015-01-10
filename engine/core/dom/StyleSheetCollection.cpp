@@ -39,6 +39,7 @@ namespace blink {
 
 StyleSheetCollection::StyleSheetCollection(TreeScope& treeScope)
     : m_treeScope(treeScope)
+    , m_needsUpdate(true)
 {
 }
 
@@ -50,11 +51,13 @@ void StyleSheetCollection::addStyleSheetCandidateNode(HTMLStyleElement& element)
 {
     ASSERT(element.inActiveDocument());
     m_styleSheetCandidateNodes.add(&element);
+    m_needsUpdate = true;
 }
 
 void StyleSheetCollection::removeStyleSheetCandidateNode(HTMLStyleElement& element)
 {
     m_styleSheetCandidateNodes.remove(&element);
+    m_needsUpdate = true;
 }
 
 void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
@@ -68,6 +71,11 @@ void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& she
 
 void StyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
 {
+    // TODO(esprehn): We need to check if the resolver exists otherwise style
+    // doesn't get computed right. We should figure out why.
+    if (!m_needsUpdate && engine->resolver())
+        return;
+
     Vector<RefPtr<CSSStyleSheet>> candidateSheets;
     collectStyleSheets(candidateSheets);
 
@@ -97,6 +105,7 @@ void StyleSheetCollection::updateActiveStyleSheets(StyleEngine* engine)
         toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
 
     m_activeAuthorStyleSheets.swap(candidateSheets);
+    m_needsUpdate = false;
 }
 
 }
