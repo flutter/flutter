@@ -200,10 +200,6 @@ void HTMLCanvasElement::didFinalizeFrame()
     // before restarting with a blank dirty rect.
     FloatRect srcRect(0, 0, size().width(), size().height());
     m_dirtyRect.intersect(srcRect);
-    if (RenderBox* ro = renderBox()) {
-        FloatRect mappedDirtyRect = mapRect(m_dirtyRect, srcRect, ro->contentBoxRect());
-        ro->invalidatePaintRectangle(enclosingIntRect(mappedDirtyRect));
-    }
     notifyObserversCanvasChanged(m_dirtyRect);
     m_finalizeFrameTask.Cancel();
     m_dirtyRect = FloatRect();

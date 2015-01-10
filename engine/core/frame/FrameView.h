@@ -224,7 +224,6 @@ private:
     DocumentLifecycle& lifecycle() const;
 
     // FIXME(sky): Remove now that we're not a ScrollView?
-    void contentRectangleForPaintInvalidation(const IntRect&);
     void contentsResized();
 
     bool wasViewportResized();

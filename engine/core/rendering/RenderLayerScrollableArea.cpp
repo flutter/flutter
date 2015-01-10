@@ -106,6 +106,7 @@ HostWindow* RenderLayerScrollableArea::hostWindow() const
     return nullptr;
 }
 
+// FIXME(sky): Remove
 void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, const IntRect& rect)
 {
     IntRect scrollRect = rect;
@@ -125,8 +126,6 @@ void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, co
 
     if (box().frameView()->isInPerformLayout())
         addScrollbarDamage(scrollbar, intRect);
-    else
-        box().invalidatePaintRectangle(intRect);
 }
 
 bool RenderLayerScrollableArea::isActive() const

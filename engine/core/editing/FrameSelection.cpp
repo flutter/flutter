@@ -83,7 +83,6 @@ FrameSelection::FrameSelection(LocalFrame* frame)
     , m_observingVisibleSelection(false)
     , m_granularity(CharacterGranularity)
     , m_caretBlinkTimer(this, &FrameSelection::caretBlinkTimerFired)
-    , m_caretRectDirty(true)
     , m_shouldPaintCaret(true)
     , m_isCaretBlinkingSuspended(false)
     , m_focused(frame && frame->page() && frame->page()->focusController().focusedFrame() == frame)
@@ -1156,7 +1155,6 @@ void FrameSelection::prepareForDestruction()
         view->clearSelection();
 
     setSelection(VisibleSelection(), CloseTyping | ClearTypingStyle | DoNotUpdateAppearance);
-    m_previousCaretNode.clear();
 }
 
 void FrameSelection::setStart(const VisiblePosition &pos, EUserTriggered trigger)
@@ -1207,37 +1205,6 @@ IntRect FrameSelection::absoluteCaretBounds()
         updateCaretRect(m_frame->document(), VisiblePosition(m_selection.start(), m_selection.affinity()));
     }
     return absoluteBoundsForLocalRect(m_selection.start().deprecatedNode(), localCaretRectWithoutUpdate());
-}
-
-static LayoutRect localCaretRect(const VisibleSelection& m_selection, const PositionWithAffinity& caretPosition, RenderObject*& renderer)
-{
-    renderer = nullptr;
-    if (!isNonOrphanedCaret(m_selection))
-        return LayoutRect();
-
-    return localCaretRectOfPosition(caretPosition, renderer);
-}
-
-void FrameSelection::invalidateCaretRect()
-{
-    if (!m_caretRectDirty)
-        return;
-    m_caretRectDirty = false;
-
-    RenderObject* renderer = nullptr;
-    LayoutRect newRect = localCaretRect(m_selection, PositionWithAffinity(m_selection.start(), m_selection.affinity()), renderer);
-    Node* newNode = renderer ? renderer->node() : nullptr;
-
-    if (!m_caretBlinkTimer.isActive() && newNode == m_previousCaretNode && newRect == m_previousCaretRect)
-        return;
-
-    if (m_previousCaretNode && m_previousCaretNode->isContentEditable())
-        invalidateLocalCaretRect(m_previousCaretNode.get(), m_previousCaretRect);
-    if (newNode && newNode->isContentEditable())
-        invalidateLocalCaretRect(newNode, newRect);
-
-    m_previousCaretNode = newNode;
-    m_previousCaretRect = newRect;
 }
 
 void FrameSelection::paintCaret(GraphicsContext* context, const LayoutPoint& paintOffset, const LayoutRect& clipRect)
@@ -1688,8 +1655,6 @@ void FrameSelection::showTreeForThis() const
 
 void FrameSelection::setCaretRectNeedsUpdate()
 {
-    m_caretRectDirty = true;
-
     scheduleVisualUpdate();
 }
 

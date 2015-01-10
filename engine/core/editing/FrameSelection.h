@@ -167,10 +167,8 @@ public:
 
     void updateAppearance(ResetCaretBlinkOption = None);
     void setCaretVisible(bool caretIsVisible) { setCaretVisibility(caretIsVisible ? Visible : Hidden); }
-    bool isCaretBoundsDirty() const { return m_caretRectDirty; }
     void setCaretRectNeedsUpdate();
     void scheduleVisualUpdate() const;
-    void invalidateCaretRect();
     void paintCaret(GraphicsContext*, const LayoutPoint&, const LayoutRect& clipRect);
     bool ShouldPaintCaretForTesting() const { return m_shouldPaintCaret; }
 
@@ -268,14 +266,10 @@ private:
     // become null, in which case logical positions == visible positions.
     RefPtr<Range> m_logicalRange;
 
-    RefPtr<Node> m_previousCaretNode; // The last node which painted the caret. Retained for clearing the old caret when it moves.
-    LayoutRect m_previousCaretRect;
-
     RefPtr<EditingStyle> m_typingStyle;
 
     Timer<FrameSelection> m_caretBlinkTimer;
 
-    bool m_caretRectDirty : 1;
     bool m_shouldPaintCaret : 1;
     bool m_isCaretBlinkingSuspended : 1;
     bool m_focused : 1;

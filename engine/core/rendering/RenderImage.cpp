@@ -165,23 +165,6 @@ void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
         // early. It may be that layout hasn't even taken place once yet.
         updateInnerContentRect();
     }
-
-    LayoutRect paintInvalidationRect;
-    if (rect) {
-        // The image changed rect is in source image coordinates,
-        // so map from the bounds of the image to the contentsBox.
-        paintInvalidationRect = enclosingIntRect(mapRect(*rect, FloatRect(FloatPoint(), m_imageResource->imageSize()), contentBoxRect()));
-        // Guard against too-large changed rects.
-        paintInvalidationRect.intersect(contentBoxRect());
-    } else {
-        paintInvalidationRect = contentBoxRect();
-    }
-
-    {
-        // FIXME: We should not be allowing paint invalidations during layout. crbug.com/339584
-        AllowPaintInvalidationScope scoper(frameView());
-        invalidatePaintRectangle(paintInvalidationRect);
-    }
 }
 
 void RenderImage::notifyFinished(Resource* newImage)

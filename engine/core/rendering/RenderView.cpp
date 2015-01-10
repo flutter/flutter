@@ -275,35 +275,12 @@ void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const Layout
     }
 }
 
-void RenderView::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
-{
-    ASSERT(!needsLayout());
-
-    // We specifically need to issue paint invalidations for the viewRect since other renderers
-    // short-circuit on full-paint invalidation.
-    LayoutRect dirtyRect = viewRect();
-    if (doingFullPaintInvalidation() && !dirtyRect.isEmpty()) {
-        const RenderLayerModelObject* paintInvalidationContainer = &paintInvalidationState.paintInvalidationContainer();
-        mapRectToPaintInvalidationBacking(paintInvalidationContainer, dirtyRect, &paintInvalidationState);
-    }
-    RenderBlock::invalidateTreeIfNeeded(paintInvalidationState);
-}
-
-void RenderView::invalidatePaintForRectangle(const LayoutRect& paintInvalidationRect) const
-{
-    ASSERT(!paintInvalidationRect.isEmpty());
-
-    if (m_frameView)
-        m_frameView->contentRectangleForPaintInvalidation(pixelSnappedIntRect(paintInvalidationRect));
-}
-
 void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
 {
     // Apply our transform if we have one (because of full page zooming).
     if (!paintInvalidationContainer && layer() && layer()->transform())
         rect = layer()->transform()->mapRect(rect);
 }
-
 
 void RenderView::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
 {
@@ -551,7 +528,6 @@ void RenderView::getSelection(RenderObject*& startRenderer, int& startOffset, Re
 
 void RenderView::clearSelection()
 {
-    layer()->invalidatePaintForBlockSelectionGaps();
     setSelection(0, -1, 0, -1, PaintInvalidationNewMinusOld);
 }
 

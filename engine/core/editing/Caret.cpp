@@ -61,13 +61,10 @@ bool DragCaretController::isContentRichlyEditable() const
 
 void DragCaretController::setCaretPosition(const VisiblePosition& position)
 {
-    if (Node* node = m_position.deepEquivalent().deprecatedNode())
-        invalidateCaretRect(node);
     m_position = position;
     setCaretRectNeedsUpdate();
     Document* document = 0;
     if (Node* node = m_position.deepEquivalent().deprecatedNode()) {
-        invalidateCaretRect(node);
         document = &node->document();
     }
     if (m_position.isNull() || m_position.isOrphan()) {
@@ -182,42 +179,6 @@ IntRect CaretBase::absoluteBoundsForLocalRect(Node* node, const LayoutRect& rect
     if (!caretPainter)
         return IntRect();
     return caretPainter->localToAbsoluteQuad(FloatRect(rect)).enclosingBoundingBox();
-}
-
-void CaretBase::invalidateLocalCaretRect(Node* node, const LayoutRect& rect)
-{
-    RenderBlock* caretPainter = caretRenderer(node);
-    if (!caretPainter)
-        return;
-
-    // FIXME: Need to over-paint 1 pixel to workaround some rounding problems.
-    // https://bugs.webkit.org/show_bug.cgi?id=108283
-    LayoutRect inflatedRect = rect;
-    inflatedRect.inflate(1);
-
-    caretPainter->invalidatePaintRectangle(inflatedRect);
-}
-
-void CaretBase::invalidateCaretRect(Node* node, bool caretRectChanged)
-{
-    // EDIT FIXME: This is an unfortunate hack.
-    // Basically, we can't trust this layout position since we
-    // can't guarantee that the check to see if we are in unrendered
-    // content will work at this point. We may have to wait for
-    // a layout and re-render of the document to happen. So, resetting this
-    // flag will cause another caret layout to happen the first time
-    // that we try to paint the caret after this call. That one will work since
-    // it happens after the document has accounted for any editing
-    // changes which may have been done.
-    // And, we need to leave this layout here so the caret moves right
-    // away after clicking.
-    m_caretRectNeedsUpdate = true;
-
-    if (caretRectChanged)
-        return;
-
-    if (node->isContentEditable(Node::UserSelectAllIsAlwaysNonEditable))
-        invalidateLocalCaretRect(node, localCaretRectWithoutUpdate());
 }
 
 void CaretBase::paintCaret(Node* node, GraphicsContext* context, const LayoutPoint& paintOffset, const LayoutRect& clipRect) const

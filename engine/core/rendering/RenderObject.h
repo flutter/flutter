@@ -614,13 +614,8 @@ public:
     // Returns the rect bounds needed to invalidate the paint of this object, in the coordinate space of the rendering backing of |paintInvalidationContainer|
     LayoutRect boundsRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
 
-    // Invalidate the paint of a specific subrectangle within a given object. The rect |r| is in the object's coordinate space.
-    void invalidatePaintRectangle(const LayoutRect&) const;
-
     // Walk the tree after layout issuing paint invalidations for renderers that have changed or moved, updating bounds that have changed, and clearing paint invalidation state.
     virtual void invalidateTreeIfNeeded(const PaintInvalidationState&);
-
-    bool checkForPaintInvalidation() const;
 
     // Returns the rect that should have paint invalidated whenever this object changes. The rect is in the view's
     // coordinate space. This method deals with outlines and overflow.

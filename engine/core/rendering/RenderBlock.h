@@ -204,6 +204,8 @@ public:
     bool recalcChildOverflowAfterStyleChange();
     bool recalcOverflowAfterStyleChange();
 
+    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
+
 protected:
     virtual void willBeDestroyed() override;
 
@@ -268,8 +270,6 @@ protected:
     void updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox*);
 
     virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }
-
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
 
     virtual void paintContents(PaintInfo&, const LayoutPoint&);
 

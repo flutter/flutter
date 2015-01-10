@@ -407,8 +407,6 @@ void FrameView::invalidateTreeIfNeeded()
     RenderView& rootForPaintInvalidation = *renderView();
     ASSERT(!rootForPaintInvalidation.needsLayout());
 
-    TRACE_EVENT1("blink", "FrameView::invalidateTree", "root", rootForPaintInvalidation.debugName().ascii().data());
-
     PaintInvalidationState rootPaintInvalidationState(rootForPaintInvalidation);
 
     rootForPaintInvalidation.invalidateTreeIfNeeded(rootPaintInvalidationState);
@@ -417,9 +415,6 @@ void FrameView::invalidateTreeIfNeeded()
 #ifndef NDEBUG
     renderView()->assertSubtreeClearedPaintInvalidationState();
 #endif
-
-    if (m_frame->selection().isCaretBoundsDirty())
-        m_frame->selection().invalidateCaretRect();
 
     lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
 }
@@ -470,20 +465,6 @@ HostWindow* FrameView::hostWindow() const
     if (!page)
         return 0;
     return &page->chrome();
-}
-
-void FrameView::contentRectangleForPaintInvalidation(const IntRect& r)
-{
-    ASSERT(paintInvalidationIsAllowed());
-
-    IntRect paintRect = r;
-    if (clipsPaintInvalidations() && !paintsEntireContents())
-        paintRect.intersect(visibleContentRect());
-    if (paintRect.isEmpty())
-        return;
-
-    if (HostWindow* window = hostWindow())
-        window->invalidateContentsAndRootView(contentsToWindow(paintRect));
 }
 
 void FrameView::contentsResized()

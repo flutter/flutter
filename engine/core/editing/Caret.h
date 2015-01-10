@@ -46,7 +46,6 @@ protected:
     enum CaretVisibility { Visible, Hidden };
     explicit CaretBase(CaretVisibility = Hidden);
 
-    void invalidateCaretRect(Node*, bool caretRectChanged = false);
     void clearCaretRect();
     // Creating VisiblePosition causes synchronous layout so we should use the
     // PositionWithAffinity version if possible.
@@ -67,7 +66,6 @@ protected:
 
 protected:
     static RenderBlock* caretRenderer(Node*);
-    static void invalidateLocalCaretRect(Node*, const LayoutRect&);
 
 private:
     LayoutRect m_caretLocalRect; // caret rect in coords local to the renderer responsible for painting the caret

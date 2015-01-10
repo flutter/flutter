@@ -735,7 +735,6 @@ void RenderParagraph::layoutRunsAndFloats(LineLayoutState& layoutState)
 
     layoutRunsAndFloatsInRange(layoutState, resolver, cleanLineStart, cleanLineBidiStatus);
     linkToEndLineIfNeeded(layoutState);
-    markDirtyFloatsForPaintInvalidation(layoutState.floats());
 }
 
 void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
@@ -849,22 +848,6 @@ void RenderParagraph::linkToEndLineIfNeeded(LineLayoutState& layoutState)
         } else {
             // Delete all the remaining lines.
             deleteLineRange(layoutState, layoutState.endLine());
-        }
-    }
-}
-
-void RenderParagraph::markDirtyFloatsForPaintInvalidation(Vector<FloatWithRect>& floats)
-{
-    size_t floatCount = floats.size();
-    // Floats that did not have layout did not paint invalidations when we laid them out. They would have
-    // painted by now if they had moved, but if they stayed at (0, 0), they still need to be
-    // painted.
-    for (size_t i = 0; i < floatCount; ++i) {
-        if (!floats[i].everHadLayout) {
-            RenderBox* f = floats[i].object;
-            if (!f->x() && !f->y() && f->checkForPaintInvalidation()) {
-                f->setShouldDoFullPaintInvalidation(true);
-            }
         }
     }
 }

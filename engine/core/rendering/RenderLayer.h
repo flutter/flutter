@@ -128,7 +128,6 @@ public:
 
     void addBlockSelectionGapsBounds(const LayoutRect&);
     void clearBlockSelectionGapsBounds();
-    void invalidatePaintForBlockSelectionGaps();
     IntRect blockSelectionGapsBounds() const;
 
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }

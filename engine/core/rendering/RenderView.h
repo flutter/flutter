@@ -75,8 +75,6 @@ public:
 
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;
 
-    void invalidatePaintForRectangle(const LayoutRect&) const;
-
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
@@ -116,7 +114,6 @@ public:
 
     void pushLayoutState(LayoutState&);
     void popLayoutState();
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override final;
 
     void addIFrame(RenderIFrame* iframe);
     void removeIFrame(RenderIFrame* iframe);

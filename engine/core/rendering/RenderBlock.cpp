@@ -235,37 +235,6 @@ void RenderBlock::invalidateTreeIfNeeded(const PaintInvalidationState& paintInva
         PaintInvalidationState childPaintInvalidationState(paintInvalidationState, *this, newPaintInvalidationContainer);
         for (TrackedRendererListHashSet::iterator it = positionedObjects->begin(); it != end; ++it) {
             RenderBox* box = *it;
-
-            // One of the renderers we're skipping over here may be the child's paint invalidation container,
-            // so we can't pass our own paint invalidation container along.
-            const RenderLayerModelObject& paintInvalidationContainerForChild = *box->containerForPaintInvalidation();
-
-            // If it's a new paint invalidation container, we won't have properly accumulated the offset into the
-            // PaintInvalidationState.
-            // FIXME: Teach PaintInvalidationState to handle this case. crbug.com/371485
-            if (&paintInvalidationContainerForChild != newPaintInvalidationContainer) {
-                ForceHorriblySlowRectMapping slowRectMapping(&childPaintInvalidationState);
-                PaintInvalidationState disabledPaintInvalidationState(childPaintInvalidationState, *this, paintInvalidationContainerForChild);
-                box->invalidateTreeIfNeeded(disabledPaintInvalidationState);
-                continue;
-            }
-
-            // If the positioned renderer is absolutely positioned and it is inside
-            // a relatively positioned inline element, we need to account for
-            // the inline elements position in PaintInvalidationState.
-            if (box->style()->position() == AbsolutePosition) {
-                RenderObject* container = box->container(&paintInvalidationContainerForChild, 0);
-                if (container->isRelPositioned() && container->isRenderInline()) {
-                    // FIXME: We should be able to use PaintInvalidationState for this.
-                    // Currently, we will place absolutely positioned elements inside
-                    // relatively positioned inline blocks in the wrong location. crbug.com/371485
-                    ForceHorriblySlowRectMapping slowRectMapping(&childPaintInvalidationState);
-                    PaintInvalidationState disabledPaintInvalidationState(childPaintInvalidationState, *this, paintInvalidationContainerForChild);
-                    box->invalidateTreeIfNeeded(disabledPaintInvalidationState);
-                    continue;
-                }
-            }
-
             box->invalidateTreeIfNeeded(childPaintInvalidationState);
         }
     }

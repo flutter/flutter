@@ -1660,26 +1660,6 @@ void RenderLayer::clearBlockSelectionGapsBounds()
         child->clearBlockSelectionGapsBounds();
 }
 
-void RenderLayer::invalidatePaintForBlockSelectionGaps()
-{
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
-        child->invalidatePaintForBlockSelectionGaps();
-
-    if (m_blockSelectionGapsBounds.isEmpty())
-        return;
-
-    LayoutRect rect = m_blockSelectionGapsBounds;
-    if (renderer()->hasOverflowClip()) {
-        RenderBox* box = renderBox();
-        rect.move(-box->scrolledContentOffset());
-        rect.intersect(box->overflowClipRect(LayoutPoint()));
-    }
-    if (renderer()->hasClip())
-        rect.intersect(toRenderBox(renderer())->clipRect(LayoutPoint()));
-    if (!rect.isEmpty())
-        renderer()->invalidatePaintRectangle(rect);
-}
-
 IntRect RenderLayer::blockSelectionGapsBounds() const
 {
     if (!renderer()->isRenderBlock())

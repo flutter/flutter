@@ -1230,11 +1230,6 @@ LayoutRect RenderObject::boundsRectForPaintInvalidation(const RenderLayerModelOb
     return RenderLayer::computePaintInvalidationRect(this, paintInvalidationContainer->layer(), paintInvalidationState);
 }
 
-// FIXME(sky): Remove
-void RenderObject::invalidatePaintRectangle(const LayoutRect& r) const
-{
-}
-
 IntRect RenderObject::pixelSnappedAbsoluteClippedOverflowRect() const
 {
     return pixelSnappedIntRect(absoluteClippedOverflowRect());
@@ -1253,11 +1248,6 @@ void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInv
         if (!child->isOutOfFlowPositioned())
             child->invalidateTreeIfNeeded(paintInvalidationState);
     }
-}
-
-bool RenderObject::checkForPaintInvalidation() const
-{
-    return !document().view()->needsFullPaintInvalidation() && everHadLayout();
 }
 
 LayoutRect RenderObject::rectWithOutlineForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, LayoutUnit outlineWidth, const PaintInvalidationState* paintInvalidationState) const
