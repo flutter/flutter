@@ -164,12 +164,6 @@ public:
     // FIXME: Remove this method once plugin loading is decoupled from layout.
     void flushAnyPendingPostLayoutTasks();
 
-    void setTracksPaintInvalidations(bool);
-    bool isTrackingPaintInvalidations() const { return m_isTrackingPaintInvalidations; }
-    void resetTrackedPaintInvalidations();
-
-    String trackedPaintInvalidationRectsAsText() const;
-
     typedef HashSet<ScrollableArea*> ScrollableAreaSet;
     void addScrollableArea(ScrollableArea*);
     void removeScrollableArea(ScrollableArea*);
@@ -277,9 +271,6 @@ private:
     RenderObject* m_viewportRenderer;
 
     double m_lastPaintTime;
-
-    bool m_isTrackingPaintInvalidations; // Used for testing.
-    Vector<IntRect> m_trackedPaintInvalidationRects;
 
     RefPtr<Node> m_nodeToDraw;
     bool m_isPainting;

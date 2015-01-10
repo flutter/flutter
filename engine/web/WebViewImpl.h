@@ -77,7 +77,6 @@ public:
 
     virtual void layout() override;
     virtual void paint(WebCanvas*, const WebRect&) override;
-    virtual bool isTrackingRepaints() const override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
     virtual void setCursorVisibilityState(bool isVisible) override;
     virtual void mouseCaptureLost() override;

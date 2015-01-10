@@ -689,14 +689,6 @@ void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
     Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintMegapixPerSecond", pixelsPerSec / 1000000, 10, 210, 30);
 }
 
-bool WebViewImpl::isTrackingRepaints() const
-{
-    if (!page())
-        return false;
-    FrameView* view = page()->mainFrame()->view();
-    return view->isTrackingPaintInvalidations();
-}
-
 const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
 
 // FIXME: autogenerate this kind of code, and use it throughout Blink rather than

@@ -77,9 +77,6 @@ public:
     // warranted before painting again).
     virtual void paint(WebCanvas*, const WebRect& viewPort) = 0;
 
-    // Returns true if we've started tracking repaint rectangles.
-    virtual bool isTrackingRepaints() const = 0;
-
     // Called to inform the WebWidget of an input event. Returns true if
     // the event has been processed, false otherwise.
     virtual bool handleInputEvent(const WebInputEvent&) = 0;

@@ -75,7 +75,6 @@ FrameView::FrameView(LocalFrame* frame)
     , m_mediaType("screen")
     , m_overflowStatusDirty(true)
     , m_viewportRenderer(0)
-    , m_isTrackingPaintInvalidations(false)
     , m_hasSoftwareFilters(false)
     , m_visibleContentScaleFactor(1)
     , m_inputEventsScaleFactorForEmulation(1)
@@ -123,8 +122,6 @@ void FrameView::reset()
     m_firstLayout = true;
     m_firstLayoutCallbackPending = false;
     m_lastViewportSize = IntSize();
-    m_isTrackingPaintInvalidations = false;
-    m_trackedPaintInvalidationRects.clear();
     m_lastPaintTime = 0;
     m_isPainting = false;
 }
@@ -478,14 +475,6 @@ HostWindow* FrameView::hostWindow() const
 void FrameView::contentRectangleForPaintInvalidation(const IntRect& r)
 {
     ASSERT(paintInvalidationIsAllowed());
-
-    if (m_isTrackingPaintInvalidations) {
-        m_trackedPaintInvalidationRects.append(r);
-        // FIXME: http://crbug.com/368518. Eventually, invalidateContentRectangleForPaint
-        // is going away entirely once all layout tests are FCM. In the short
-        // term, no code should be tracking non-composited FrameView paint invalidations.
-        RELEASE_ASSERT_NOT_REACHED();
-    }
 
     IntRect paintRect = r;
     if (clipsPaintInvalidations() && !paintsEntireContents())
@@ -911,36 +900,6 @@ IntPoint FrameView::convertFromRenderer(const RenderObject& renderer, const IntP
 IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoint& viewPoint) const
 {
     return roundedIntPoint(renderer.absoluteToLocal(viewPoint, UseTransforms));
-}
-
-void FrameView::setTracksPaintInvalidations(bool trackPaintInvalidations)
-{
-    // FIXME(sky): Does this code work anymore now that we don't have the compositor?
-    if (trackPaintInvalidations == m_isTrackingPaintInvalidations)
-        return;
-
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("blink.invalidation"),
-        "FrameView::setTracksPaintInvalidations", TRACE_EVENT_SCOPE_PROCESS, "enabled", trackPaintInvalidations);
-
-    resetTrackedPaintInvalidations();
-    m_isTrackingPaintInvalidations = trackPaintInvalidations;
-}
-
-void FrameView::resetTrackedPaintInvalidations()
-{
-    m_trackedPaintInvalidationRects.clear();
-}
-
-String FrameView::trackedPaintInvalidationRectsAsText() const
-{
-    TextStream ts;
-    if (!m_trackedPaintInvalidationRects.isEmpty()) {
-        ts << "(repaint rects\n";
-        for (size_t i = 0; i < m_trackedPaintInvalidationRects.size(); ++i)
-            ts << "  (rect " << m_trackedPaintInvalidationRects[i].x() << " " << m_trackedPaintInvalidationRects[i].y() << " " << m_trackedPaintInvalidationRects[i].width() << " " << m_trackedPaintInvalidationRects[i].height() << ")\n";
-        ts << ")\n";
-    }
-    return ts.release();
 }
 
 void FrameView::addScrollableArea(ScrollableArea* scrollableArea)
