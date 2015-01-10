@@ -29,6 +29,7 @@
 
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
@@ -112,6 +113,9 @@ void ShadowRoot::insertedInto(ContainerNode* insertionPoint)
 {
     DocumentFragment::insertedInto(insertionPoint);
 
+    if (inActiveDocument())
+        document().styleEngine()->addTreeScope(*this);
+
     if (ShadowRoot* root = host()->containingShadowRoot())
         root->addChildShadowRoot();
 }
@@ -123,6 +127,9 @@ void ShadowRoot::removedFrom(ContainerNode* insertionPoint)
         root = insertionPoint->containingShadowRoot();
     if (root)
         root->removeChildShadowRoot();
+
+    if (inActiveDocument())
+        document().styleEngine()->removeTreeScope(*this);
 
     DocumentFragment::removedFrom(insertionPoint);
 }

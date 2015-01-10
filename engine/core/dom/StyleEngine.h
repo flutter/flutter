@@ -56,8 +56,8 @@ public:
 
     void detachFromDocument();
 
-    void addStyleSheetCandidateNode(Node*, bool createdByParser);
-    void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode, TreeScope&);
+    void addTreeScope(TreeScope&);
+    void removeTreeScope(TreeScope&);
 
     void updateActiveStyleSheets();
 

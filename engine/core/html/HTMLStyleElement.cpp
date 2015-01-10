@@ -30,6 +30,7 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -45,16 +46,6 @@ HTMLStyleElement::~HTMLStyleElement()
 {
     if (m_sheet)
         m_sheet->clearOwnerNode();
-
-    // TODO(esprehn): How can we still be in the document when our destructor
-    // is running?
-    if (inDocument()) {
-        ContainerNode* scopingNode = this->scopingNode();
-        TreeScope& scope = scopingNode ? scopingNode->treeScope() : treeScope();
-        if (StyleEngine* styleEngine = document().styleEngine())
-            styleEngine->removeStyleSheetCandidateNode(this, scopingNode, scope);
-    }
-
     if (m_sheet)
         clearSheet();
 }
@@ -77,10 +68,10 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
 void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
-    if (inActiveDocument()) {
-        document().styleEngine()->addStyleSheetCandidateNode(this, false);
-        process();
-    }
+    if (!inActiveDocument())
+        return;
+    treeScope().styleSheets().addStyleSheetCandidateNode(*this);
+    process();
 }
 
 void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
@@ -90,14 +81,10 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
     if (!insertionPoint->inActiveDocument())
         return;
 
-    ShadowRoot* scopingNode = containingShadowRoot();
-    if (!scopingNode)
-        scopingNode = insertionPoint->containingShadowRoot();
-
     TreeScope* containingScope = containingShadowRoot();
     TreeScope& scope = containingScope ? *containingScope : insertionPoint->treeScope();
 
-    document().styleEngine()->removeStyleSheetCandidateNode(this, scopingNode, scope);
+    scope.styleSheets().removeStyleSheetCandidateNode(*this);
 
     RefPtr<CSSStyleSheet> removedSheet = m_sheet.get();
 

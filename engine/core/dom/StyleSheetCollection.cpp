@@ -46,31 +46,21 @@ StyleSheetCollection::~StyleSheetCollection()
 {
 }
 
-void StyleSheetCollection::addStyleSheetCandidateNode(Node* node, bool)
+void StyleSheetCollection::addStyleSheetCandidateNode(HTMLStyleElement& element)
 {
-    if (!node->inDocument())
-        return;
-
-    // Until the <body> exists, we have no choice but to compare document positions,
-    // since styles outside of the body and head continue to be shunted into the head
-    // (and thus can shift to end up before dynamically added DOM content that is also
-    // outside the body).
-    m_styleSheetCandidateNodes.add(node);
+    ASSERT(element.inActiveDocument());
+    m_styleSheetCandidateNodes.add(&element);
 }
 
-void StyleSheetCollection::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopingNode)
+void StyleSheetCollection::removeStyleSheetCandidateNode(HTMLStyleElement& element)
 {
-    m_styleSheetCandidateNodes.remove(node);
+    m_styleSheetCandidateNodes.remove(&element);
 }
 
 void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
 {
-    DocumentOrderedList::iterator begin = m_styleSheetCandidateNodes.begin();
-    DocumentOrderedList::iterator end = m_styleSheetCandidateNodes.end();
-    for (DocumentOrderedList::iterator it = begin; it != end; ++it) {
-        Node* node = *it;
-        if (!isHTMLStyleElement(*node))
-            continue;
+    for (Node* node : m_styleSheetCandidateNodes) {
+        ASSERT(isHTMLStyleElement(*node));
         if (CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet())
             sheets.append(sheet);
     }

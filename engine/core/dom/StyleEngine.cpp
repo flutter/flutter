@@ -49,6 +49,7 @@ StyleEngine::StyleEngine(Document& document)
     , m_fontSelector(CSSFontSelector::create(&document))
 {
     m_fontSelector->registerForInvalidationCallbacks(this);
+    m_activeTreeScopes.add(&document);
 }
 
 StyleEngine::~StyleEngine()
@@ -57,28 +58,14 @@ StyleEngine::~StyleEngine()
     m_fontSelector->unregisterForInvalidationCallbacks(this);
 }
 
-void StyleEngine::addStyleSheetCandidateNode(Node* node, bool createdByParser)
+void StyleEngine::addTreeScope(TreeScope& scope)
 {
-    if (!node->inDocument())
-        return;
-
-    TreeScope& treeScope = isHTMLStyleElement(*node) ? node->treeScope() : *m_document;
-    ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-    StyleSheetCollection& collection = treeScope.styleSheets();
-    collection.addStyleSheetCandidateNode(node, createdByParser);
-
-    if (treeScope != m_document)
-        m_activeTreeScopes.add(&treeScope);
+    m_activeTreeScopes.add(&scope);
 }
 
-void StyleEngine::removeStyleSheetCandidateNode(Node* node, ContainerNode* scopingNode, TreeScope& treeScope)
+void StyleEngine::removeTreeScope(TreeScope& scope)
 {
-    ASSERT(isHTMLStyleElement(node) || treeScope == m_document);
-
-    StyleSheetCollection& collection = treeScope.styleSheets();
-    collection.removeStyleSheetCandidateNode(node, scopingNode);
-
-    m_activeTreeScopes.remove(&treeScope);
+    m_activeTreeScopes.remove(&scope);
 }
 
 void StyleEngine::updateActiveStyleSheets()
@@ -88,28 +75,12 @@ void StyleEngine::updateActiveStyleSheets()
     if (!m_document->isActive())
         return;
 
-    // TODO(esprehn): Remove special case for document.
-    m_document->styleSheets().updateActiveStyleSheets(this);
-
-    TreeScopeSet treeScopes = m_activeTreeScopes;
-    HashSet<TreeScope*> treeScopesRemoved;
-
-    for (TreeScopeSet::iterator it = treeScopes.begin(); it != treeScopes.end(); ++it) {
-        TreeScope* treeScope = *it;
-        ASSERT(treeScope != m_document);
-        StyleSheetCollection& collection = treeScope->styleSheets();
-        collection.updateActiveStyleSheets(this);
-        if (!collection.hasStyleSheetCandidateNodes())
-            treeScopesRemoved.add(treeScope);
-    }
-    m_activeTreeScopes.removeAll(treeScopesRemoved);
+    for (TreeScope* treeScope : m_activeTreeScopes)
+        treeScope->styleSheets().updateActiveStyleSheets(this);
 }
 
 void StyleEngine::appendActiveAuthorStyleSheets()
 {
-    // TODO(esprehn): Remove special case for document.
-    m_resolver->appendAuthorStyleSheets(m_document->styleSheets().activeAuthorStyleSheets());
-
     for (TreeScope* treeScope : m_activeTreeScopes)
         m_resolver->appendAuthorStyleSheets(treeScope->styleSheets().activeAuthorStyleSheets());
 

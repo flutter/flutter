@@ -38,6 +38,7 @@ namespace blink {
 
 class CSSStyleSheet;
 class ContainerNode;
+class HTMLStyleElement;
 class StyleEngine;
 class TreeScope;
 
@@ -54,9 +55,8 @@ public:
     Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() { return m_activeAuthorStyleSheets; }
     const Vector<RefPtr<CSSStyleSheet> >& activeAuthorStyleSheets() const { return m_activeAuthorStyleSheets; }
 
-    void addStyleSheetCandidateNode(Node*, bool createdByParser);
-    void removeStyleSheetCandidateNode(Node*, ContainerNode* scopingNode);
-    bool hasStyleSheetCandidateNodes() const { return !m_styleSheetCandidateNodes.isEmpty(); }
+    void addStyleSheetCandidateNode(HTMLStyleElement&);
+    void removeStyleSheetCandidateNode(HTMLStyleElement&);
 
     void updateActiveStyleSheets(StyleEngine*);
 
