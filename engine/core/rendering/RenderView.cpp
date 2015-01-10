@@ -301,7 +301,7 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
     return child ? child : object->nextInPreOrderAfterChildren();
 }
 
-IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
+IntRect RenderView::selectionBounds() const
 {
     typedef HashMap<RawPtr<RenderObject>, OwnPtr<RenderSelectionInfo> > SelectionMap;
     SelectionMap selectedObjects;
@@ -311,13 +311,13 @@ IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
     while (os && os != stop) {
         if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
             // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
-            selectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, clipToVisibleContent)));
+            selectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, false)));
             RenderBlock* cb = os->containingBlock();
             while (cb && !cb->isRenderView()) {
                 OwnPtr<RenderSelectionInfo>& blockInfo = selectedObjects.add(cb, nullptr).storedValue->value;
                 if (blockInfo)
                     break;
-                blockInfo = adoptPtr(new RenderSelectionInfo(cb, clipToVisibleContent));
+                blockInfo = adoptPtr(new RenderSelectionInfo(cb, false));
                 cb = cb->containingBlock();
             }
         }

@@ -84,7 +84,7 @@ public:
     void clearSelection();
     RenderObject* selectionStart() const { return m_selectionStart; }
     RenderObject* selectionEnd() const { return m_selectionEnd; }
-    IntRect selectionBounds(bool clipToVisibleContent = true) const;
+    IntRect selectionBounds() const;
     void selectionStartEnd(int& startPos, int& endPos) const;
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;

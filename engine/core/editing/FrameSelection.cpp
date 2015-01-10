@@ -1527,7 +1527,7 @@ String FrameSelection::selectedText() const
     return plainText(toNormalizedRange().get()).replace(0, "");
 }
 
-FloatRect FrameSelection::bounds(bool clipToVisibleContent) const
+FloatRect FrameSelection::bounds() const
 {
     m_frame->document()->updateRenderTreeIfNeeded();
 
@@ -1537,8 +1537,7 @@ FloatRect FrameSelection::bounds(bool clipToVisibleContent) const
     if (!view || !renderView)
         return FloatRect();
 
-    LayoutRect selectionRect = renderView->selectionBounds(clipToVisibleContent);
-    return clipToVisibleContent ? intersection(selectionRect, view->visibleContentRect()) : selectionRect;
+    return renderView->selectionBounds();
 }
 
 void FrameSelection::revealSelection(const ScrollAlignment& alignment, RevealExtentOption revealExtentOption)
@@ -1552,7 +1551,7 @@ void FrameSelection::revealSelection(const ScrollAlignment& alignment, RevealExt
         rect = absoluteCaretBounds();
         break;
     case RangeSelection:
-        rect = revealExtentOption == RevealExtent ? VisiblePosition(extent()).absoluteCaretBounds() : enclosingIntRect(bounds(false));
+        rect = revealExtentOption == RevealExtent ? VisiblePosition(extent()).absoluteCaretBounds() : enclosingIntRect(bounds());
         break;
     }
 

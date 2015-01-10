@@ -198,7 +198,7 @@ public:
 
     String selectedText() const;
 
-    FloatRect bounds(bool clipToVisibleContent = true) const;
+    FloatRect bounds() const;
 
     void revealSelection(const ScrollAlignment& = ScrollAlignment::alignCenterIfNeeded, RevealExtentOption = DoNotRevealExtent);
     void setSelectionFromNone();
