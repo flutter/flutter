@@ -81,7 +81,6 @@ public:
     const TerminatedArray<RuleData>* idRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_idRules.get(key); }
     const TerminatedArray<RuleData>* classRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_classRules.get(key); }
     const TerminatedArray<RuleData>* tagRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_tagRules.get(key); }
-    const TerminatedArray<RuleData>* shadowPseudoElementRules(const AtomicString& key) const { ASSERT(!m_pendingRules); return m_shadowPseudoElementRules.get(key); }
     const Vector<RuleData>* universalRules() const { ASSERT(!m_pendingRules); return &m_universalRules; }
     const Vector<RawPtr<StyleRuleFontFace> >& fontFaceRules() const { return m_fontFaceRules; }
     const Vector<RawPtr<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
@@ -124,7 +123,6 @@ private:
         PendingRuleMap idRules;
         PendingRuleMap classRules;
         PendingRuleMap tagRules;
-        PendingRuleMap shadowPseudoElementRules;
 
     private:
         PendingRuleMaps() { }
@@ -140,7 +138,6 @@ private:
     CompactRuleMap m_idRules;
     CompactRuleMap m_classRules;
     CompactRuleMap m_tagRules;
-    CompactRuleMap m_shadowPseudoElementRules;
     Vector<RuleData> m_universalRules;
     RuleFeatureSet m_features;
     Vector<RawPtr<StyleRuleFontFace> > m_fontFaceRules;

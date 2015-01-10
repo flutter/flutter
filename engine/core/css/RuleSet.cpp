@@ -109,14 +109,6 @@ bool RuleSet::findBestRuleSetAndAdd(const CSSSelector& component, RuleData& rule
         addToRuleSet(className, ensurePendingRules()->classRules, ruleData);
         return true;
     }
-    if (!customPseudoElementName.isEmpty()) {
-        // Custom pseudos come before ids and classes in the order of tagHistory, and have a relation of
-        // ShadowPseudo between them. Therefore we should never be a situation where extractValuesforSelector
-        // finsd id and className in addition to custom pseudo.
-        ASSERT(id.isEmpty() && className.isEmpty());
-        addToRuleSet(customPseudoElementName, ensurePendingRules()->shadowPseudoElementRules, ruleData);
-        return true;
-    }
 
     if (!tagName.isEmpty()) {
         addToRuleSet(tagName, ensurePendingRules()->tagRules, ruleData);
@@ -208,7 +200,6 @@ void RuleSet::compactRules()
     compactPendingRules(pendingRules->idRules, m_idRules);
     compactPendingRules(pendingRules->classRules, m_classRules);
     compactPendingRules(pendingRules->tagRules, m_tagRules);
-    compactPendingRules(pendingRules->shadowPseudoElementRules, m_shadowPseudoElementRules);
     m_universalRules.shrinkToFit();
     m_fontFaceRules.shrinkToFit();
     m_keyframesRules.shrinkToFit();
