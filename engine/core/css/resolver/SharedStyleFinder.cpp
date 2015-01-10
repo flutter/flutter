@@ -194,11 +194,6 @@ RenderStyle* SharedStyleFinder::findSharedStyle()
 
     INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleFound);
 
-    if (attributesAffectedByRules(*shareElement)) {
-        INCREMENT_STYLE_STATS_COUNTER(m_styleResolver, sharedStyleRejectedByAttributeRules);
-        return 0;
-    }
-
     return shareElement->renderStyle();
 }
 
