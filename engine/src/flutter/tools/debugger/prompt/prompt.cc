@@ -156,7 +156,7 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   std::string url_;
   base::WeakPtrFactory<Prompt> weak_ptr_factory_;
   scoped_ptr<net::HttpServer> web_server_;
-  unsigned command_port_;
+  uint32_t command_port_;
 
   DISALLOW_COPY_AND_ASSIGN(Prompt);
 };
