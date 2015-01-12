@@ -22,6 +22,7 @@
 #include "sky/compositor/layer_host.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebHTTPHeaderVisitor.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebConsoleMessage.h"
 #include "sky/engine/public/web/WebDocument.h"
@@ -109,8 +110,11 @@ void DocumentView::OnEmbed(
 
   Load(response_.Pass());
 
-  gfx::Size size = root_->bounds().To<gfx::Rect>().size();
-  web_view_->resize(size);
+  auto& bounds = root_->bounds();
+  float device_pixel_ratio = GetDevicePixelRatio();
+  web_view_->resize(blink::WebSize(bounds.width / device_pixel_ratio,
+                                   bounds.height / device_pixel_ratio));
+
   // TODO(abarth): We should ask the view whether it is focused instead of
   // assuming that we're focused.
   web_view_->setFocus(true);
@@ -151,7 +155,9 @@ void DocumentView::BeginFrame(base::TimeTicks frame_time) {
   web_view_->beginFrame(web_begin_frame_args);
   web_view_->layout();
   blink::WebSize size = web_view_->size();
-  root_layer_->SetSize(gfx::Size(size.width, size.height));
+  float device_pixel_ratio = GetDevicePixelRatio();
+  root_layer_->SetSize(gfx::Size(size.width * device_pixel_ratio,
+                                 size.height * device_pixel_ratio));
 }
 
 void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
@@ -169,6 +175,16 @@ void DocumentView::scheduleAnimation() {
   layer_host_->SetNeedsAnimate();
 }
 
+blink::WebScreenInfo DocumentView::screenInfo() {
+  DCHECK(root_);
+  auto& metrics = root_->viewport_metrics();
+  blink::WebScreenInfo screen;
+  screen.rect = blink::WebRect(0, 0, metrics.size->width, metrics.size->height);
+  screen.availableRect = screen.rect;
+  screen.deviceScaleFactor = metrics.device_pixel_ratio;
+  return screen;
+}
+
 mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
   if (!root_)
     return nullptr;
@@ -184,6 +200,12 @@ mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
 void DocumentView::frameDetached(blink::WebFrame* frame) {
   // |frame| is invalid after here.
   frame->close();
+}
+
+float DocumentView::GetDevicePixelRatio() const {
+  if (root_)
+    return root_->viewport_metrics().device_pixel_ratio;
+  return 1.f;
 }
 
 blink::WebNavigationPolicy DocumentView::decidePolicyForNavigation(

@@ -76,6 +76,7 @@ class DocumentView : public blink::ServiceProvider,
   // WebWidgetClient methods:
   void initializeLayerTreeView() override;
   void scheduleAnimation() override;
+  blink::WebScreenInfo screenInfo() override;
 
   // WebFrameClient methods:
   mojo::View* createChildFrame(const blink::WebURL& url) override;
@@ -115,6 +116,7 @@ class DocumentView : public blink::ServiceProvider,
   void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 
   void Load(mojo::URLResponsePtr response);
+  float GetDevicePixelRatio() const;
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
