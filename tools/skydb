@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from skypy.paths import Paths
+import skypy.paths
 from skypy.skyserver import SkyServer
 import argparse
 import json
@@ -17,7 +17,8 @@ import sys
 import time
 import urlparse
 
-sys.path.insert(0, os.path.join(Paths('ignored').src_root, 'build', 'android'))
+SRC_ROOT = skypy.paths.Paths('ignored').src_root
+sys.path.insert(0, os.path.join(SRC_ROOT, 'build', 'android'))
 from pylib import android_commands
 from pylib import constants
 from pylib import forwarder
@@ -52,13 +53,13 @@ def gn_args_from_build_dir(build_dir):
 
 class SkyDebugger(object):
     def __init__(self):
-        self.paths = None
         self.pids = {}
+        self.paths = None
 
     def _server_root_for_url(self, url_or_path):
         path = os.path.abspath(url_or_path)
-        if os.path.commonprefix([path, self.paths.src_root]) == self.paths.src_root:
-            server_root = self.paths.src_root
+        if os.path.commonprefix([path, SRC_ROOT]) == SRC_ROOT:
+            server_root = SRC_ROOT
         else:
             server_root = os.path.dirname(path)
             logging.warn(
@@ -116,7 +117,7 @@ class SkyDebugger(object):
 
         # FIXME: This doesn't work for android
         if args.gdb:
-            shell_command = ['gdb', '--args'] + shell_command
+            shell_command = ['gdb'] + shell_command
 
         return shell_command
 
@@ -136,8 +137,11 @@ class SkyDebugger(object):
         return sky_server
 
     def start_command(self, args):
+        # skypy.paths.Paths takes a root-relative build_dir argument. :(
+        build_dir = os.path.abspath(args.build_dir)
+        root_relative_build_dir = os.path.relpath(build_dir, SRC_ROOT)
         # FIXME: Lame that we use self for a command-specific variable.
-        self.paths = Paths(args.build_dir)
+        self.paths = skypy.paths.Paths(root_relative_build_dir)
 
         self.stop_command(None) # Quit any existing process.
         self.pids = {} # Clear out our pid file.
@@ -195,11 +199,8 @@ class SkyDebugger(object):
             logging.info('%s (%s) already gone.' % (name, pid))
 
     def stop_command(self, args):
-        try:
-            self._send_command_to_sky('/quit')
-        except:
-            pass
-        # Kill the mojo process for good measure. :)
+        # TODO(eseidel): mojo_shell crashes when attempting graceful shutdown.
+        # self._send_command_to_sky('/quit')
         self._kill_if_exists('mojo_shell_pid', 'mojo_shell')
 
         self._kill_if_exists('sky_server_pid', 'sky_server')
@@ -274,6 +275,16 @@ class SkyDebugger(object):
                     return False
                 time.sleep(1)
 
+    def logcat_command(self, args):
+        TAGS = [
+            'AndroidHandler',
+            'MojoMain',
+            'MojoShellActivity',
+            'MojoShellApplication',
+            'chromium',
+        ]
+        subprocess.call(['adb', 'logcat', '-s'] + TAGS)
+
     def main(self):
         logging.basicConfig(level=logging.INFO)
         logging.getLogger("requests").setLevel(logging.WARNING)
@@ -300,6 +311,10 @@ class SkyDebugger(object):
         stop_parser = subparsers.add_parser('stop',
             help=('stop sky (as listed in %s)' % PID_FILE_PATH))
         stop_parser.set_defaults(func=self.stop_command)
+
+        logcat_parser = subparsers.add_parser('logcat',
+            help=('dump sky-related logs from device'))
+        logcat_parser.set_defaults(func=self.logcat_command)
 
         self._add_basic_command(subparsers, 'trace', '/trace',
             'toggle tracing')

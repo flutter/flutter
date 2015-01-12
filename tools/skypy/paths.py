@@ -4,6 +4,7 @@
 
 import os
 
+# FIXME: All callers should use mopy/paths.py instead!
 class Paths(object):
     def __init__(self, build_directory):
         self.src_root = os.path.abspath(os.path.join(__file__,
