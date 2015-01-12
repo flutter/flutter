@@ -9,12 +9,18 @@ import argparse
 import json
 import logging
 import os
+import pipes
 import requests
 import signal
-import skypy.configuration as configuration
 import subprocess
-import urlparse
+import sys
 import time
+import urlparse
+
+sys.path.insert(0, os.path.join(Paths('ignored').src_root, 'build', 'android'))
+from pylib import android_commands
+from pylib import constants
+from pylib import forwarder
 
 
 SUPPORTED_MIME_TYPES = [
@@ -27,6 +33,21 @@ DEFAULT_SKY_COMMAND_PORT = 7777
 SKY_SERVER_PORT = 9999
 PID_FILE_PATH = "/tmp/skydb.pids"
 DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/examples/home.sky"
+
+
+# FIXME: Move this into mopy.config
+def gn_args_from_build_dir(build_dir):
+    gn_cmd = [
+        'gn', 'args',
+        build_dir,
+        '--list', '--short'
+    ]
+    config = {}
+    for line in subprocess.check_output(gn_cmd).strip().split('\n'):
+        # FIXME: This doesn't handle = in values.
+        key, value = line.split(' = ')
+        config[key] = value
+    return config
 
 
 class SkyDebugger(object):
@@ -48,47 +69,113 @@ class SkyDebugger(object):
     def _in_chromoting(self):
         return os.environ.get('CHROME_REMOTE_DESKTOP_SESSION', False)
 
-    def _build_mojo_shell_command(self, args):
-        self.paths = Paths(os.path.join('out', args.configuration))
+    def _wrap_for_android(self, shell_args):
+        build_dir_url = SkyServer.url_for_path(
+            self.pids['remote_sky_server_port'],
+            self.pids['sky_server_root'],
+            self.pids['build_dir'])
+        shell_args += ['--origin=%s' % build_dir_url]
 
+        # am shell --esa: (someone shoot me now)
+        #  [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]
+        #  (to embed a comma into a string escape it using "\,")
+        escaped_args = map(lambda arg: arg.replace(',', '\\,'), shell_args)
+        return [
+            'adb', 'shell',
+            'am', 'start',
+            '-W',
+            '-S',
+            '-a', 'android.intent.action.VIEW',
+            '-n', 'org.chromium.mojo.shell/.MojoShellActivity',
+            # FIXME: This quoting is very error-prone.  Perhaps we should read
+            # our args from a file instead?
+            '--esa', 'parameters', ','.join(escaped_args),
+        ]
+
+    def _build_mojo_shell_command(self, args):
         content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
             for mime_type in SUPPORTED_MIME_TYPES]
-        shell_command = [
-            self.paths.mojo_shell_path,
+
+        remote_command_port = self.pids.get('remote_sky_command_port', self.pids['sky_command_port'])
+
+        shell_args = [
             '--v=1',
             '--content-handlers=%s' % ','.join(content_handlers),
             '--url-mappings=mojo:window_manager=mojo:sky_debugger',
-            '--args-for=mojo:sky_debugger_prompt %d' % args.command_port,
+            '--args-for=mojo:sky_debugger_prompt %d' % remote_command_port,
             'mojo:window_manager',
         ]
+        # FIXME: This probably is wrong for android?
         if args.use_osmesa:
-            shell_command.append('--args-for=mojo:native_viewport_service --use-osmesa')
+            shell_args.append('--args-for=mojo:native_viewport_service --use-osmesa')
 
+        if 'remote_sky_server_port' in self.pids:
+            shell_command = self._wrap_for_android(shell_args)
+        else:
+            shell_command = [self.paths.mojo_shell_path] + shell_args
+
+        # FIXME: This doesn't work for android
         if args.gdb:
             shell_command = ['gdb', '--args'] + shell_command
 
         return shell_command
 
+    def _connect_to_device(self):
+        device = android_commands.AndroidCommands(
+            android_commands.GetAttachedDevices()[0])
+        device.EnableAdbRoot()
+        return device
+
+    def sky_server_for_args(self, args):
+        # FIXME: This is a hack.  sky_server should just take a build_dir
+        # not a magical "configuration" name.
+        configuration = os.path.basename(os.path.normpath(args.build_dir))
+        server_root = self._server_root_for_url(args.url_or_path)
+        sky_server = SkyServer(self.paths, SKY_SERVER_PORT,
+            configuration, server_root)
+        return sky_server
+
     def start_command(self, args):
-        shell_command = self._build_mojo_shell_command(args)
-        if args.show_command:
-            print " ".join(shell_command)
-            return
+        # FIXME: Lame that we use self for a command-specific variable.
+        self.paths = Paths(args.build_dir)
 
         self.stop_command(None) # Quit any existing process.
+        self.pids = {} # Clear out our pid file.
 
-        print args.url_or_path
-        # We only start a server for paths:
-        if not urlparse.urlparse(args.url_or_path).scheme:
-            server_root = self._server_root_for_url(args.url_or_path)
-            sky_server = SkyServer(self.paths, SKY_SERVER_PORT,
-                args.configuration, server_root)
-            self.pids['sky_server_pid'] = sky_server.start()
-            self.pids['sky_server_port'] = sky_server.port
-            self.pids['sky_server_root'] = sky_server.root
+        # FIXME: This is probably not the right way to compute is_android
+        # from the build directory?
+        gn_args = gn_args_from_build_dir(args.build_dir)
+        is_android = 'android_sdk_version' in gn_args
 
-        self.pids['mojo_shell_pid'] = subprocess.Popen(shell_command).pid
+        sky_server = self.sky_server_for_args(args)
+        self.pids['sky_server_pid'] = sky_server.start()
+        self.pids['sky_server_port'] = sky_server.port
+        self.pids['sky_server_root'] = sky_server.root
+
+        self.pids['build_dir'] = args.build_dir
         self.pids['sky_command_port'] = args.command_port
+
+        if is_android:
+            # Pray to the build/android gods in their misspelled tongue.
+            constants.SetOutputDirectort(args.build_dir)
+
+            device = self._connect_to_device()
+            self.pids['device_serial'] = device.GetDevice()
+
+            forwarder.Forwarder.Map([(0, sky_server.port)], device)
+            device_http_port = forwarder.Forwarder.DevicePortForHostPort(
+                sky_server.port)
+            self.pids['remote_sky_server_port'] = device_http_port
+
+            port_string = 'tcp:%s' % args.command_port
+            subprocess.check_call([
+                'adb', 'forward', port_string, port_string
+            ])
+            self.pids['remote_sky_command_port'] = args.command_port
+
+        shell_command = self._build_mojo_shell_command(args)
+        print ' '.join(map(pipes.quote, shell_command))
+        self.pids['mojo_shell_pid'] = subprocess.Popen(shell_command).pid
 
         if not self._wait_for_sky_command_port():
             logging.error('Failed to start sky')
@@ -108,14 +195,31 @@ class SkyDebugger(object):
             logging.info('%s (%s) already gone.' % (name, pid))
 
     def stop_command(self, args):
-        # FIXME: Send /quit to sky prompt instead of killing.
-        # self._send_command_to_sky('/quit')
+        try:
+            self._send_command_to_sky('/quit')
+        except:
+            pass
+        # Kill the mojo process for good measure. :)
         self._kill_if_exists('mojo_shell_pid', 'mojo_shell')
+
         self._kill_if_exists('sky_server_pid', 'sky_server')
+        # We could be much more surgical here:
+        if 'remote_sky_command_port' in self.pids:
+            device = android_commands.AndroidCommands(
+                self.pids['device_serial'])
+            forwarder.Forwarder.UnmapAllDevicePorts(device)
+
+        if 'remote_sky_command_port' in self.pids:
+            # adb forward --remove takes the *host* port, not the remote port.
+            port_string = 'tcp:%s' % self.pids['sky_command_port']
+            subprocess.call(['adb', 'forward', '--remove', port_string])
 
     def load_command(self, args):
         if not urlparse.urlparse(args.url_or_path).scheme:
-            url = SkyServer.url_for_path(self.pids['sky_server_port'],
+            # The load happens on the remote device, use the remote port.
+            remote_sky_server_port = self.pids.get('remote_sky_server_port',
+                self.pids['sky_server_port'])
+            url = SkyServer.url_for_path(remote_sky_server_port,
                     self.pids['sky_server_root'], args.url_or_path)
         else:
             url = args.url_or_path
@@ -146,7 +250,7 @@ class SkyDebugger(object):
     def _write_pid_file(self, path, pids):
         try:
             with open(path, 'w') as pid_file:
-                json.dump(pids, pid_file)
+                json.dump(pids, pid_file, indent=2, sort_keys=True)
         except:
             logging.warn('Failed to write pid file: %s' % path)
 
@@ -172,6 +276,7 @@ class SkyDebugger(object):
 
     def main(self):
         logging.basicConfig(level=logging.INFO)
+        logging.getLogger("requests").setLevel(logging.WARNING)
 
         self.pids = self._load_pid_file(PID_FILE_PATH)
 
@@ -180,12 +285,12 @@ class SkyDebugger(object):
 
         start_parser = subparsers.add_parser('start',
             help='launch a new mojo_shell with sky')
-        configuration.add_arguments(start_parser)
         start_parser.add_argument('--gdb', action='store_true')
         start_parser.add_argument('--command-port', type=int,
             default=DEFAULT_SKY_COMMAND_PORT)
         start_parser.add_argument('--use-osmesa', action='store_true',
             default=self._in_chromoting())
+        start_parser.add_argument('build_dir', type=str)
         start_parser.add_argument('url_or_path', nargs='?', type=str,
             default=DEFAULT_URL)
         start_parser.add_argument('--show-command', action='store_true',
