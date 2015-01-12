@@ -92,9 +92,7 @@ void RenderBox::styleWillChange(StyleDifference diff, const RenderStyle& newStyl
         // to dirty the render tree using the old position value now.
         if (diff.needsFullLayout() && parent() && oldStyle->position() != newStyle.position()) {
             markContainingBlocksForLayout();
-            if (oldStyle->position() == StaticPosition)
-                setShouldDoFullPaintInvalidation(true);
-            else if (newStyle.hasOutOfFlowPosition())
+            if (newStyle.hasOutOfFlowPosition())
                 parent()->setChildNeedsLayout();
         }
     }
@@ -952,40 +950,6 @@ void RenderBox::paintFillLayer(const PaintInfo& paintInfo, const Color& c, const
     BackgroundBleedAvoidance bleedAvoidance, RenderObject* backgroundObject, bool skipBaseColor)
 {
     paintFillLayerExtended(paintInfo, c, fillLayer, rect, bleedAvoidance, 0, LayoutSize(), backgroundObject, skipBaseColor);
-}
-
-void RenderBox::imageChanged(WrappedImagePtr image, const IntRect*)
-{
-    if (!parent())
-        return;
-
-    AllowPaintInvalidationScope scoper(frameView());
-
-    if ((style()->borderImage().image() && style()->borderImage().image()->data() == image) ||
-        (style()->maskBoxImage().image() && style()->maskBoxImage().image()->data() == image)) {
-        setShouldDoFullPaintInvalidation(true);
-        return;
-    }
-
-    if (!paintInvalidationLayerRectsForImage(image, style()->backgroundLayers(), true))
-        paintInvalidationLayerRectsForImage(image, style()->maskLayers(), false);
-}
-
-bool RenderBox::paintInvalidationLayerRectsForImage(WrappedImagePtr image, const FillLayer& layers, bool drawingBackground)
-{
-    RenderBox* layerRenderer = 0;
-    if (drawingBackground && isDocumentElement())
-        layerRenderer = view();
-    else
-        layerRenderer = this;
-
-    for (const FillLayer* curLayer = &layers; curLayer; curLayer = curLayer->next()) {
-        if (curLayer->image() && image == curLayer->image()->data() && curLayer->image()->canRender(*this)) {
-            layerRenderer->setShouldDoFullPaintInvalidation(true);
-            return true;
-        }
-    }
-    return false;
 }
 
 bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset, ContentsClipBehavior contentsClipBehavior)

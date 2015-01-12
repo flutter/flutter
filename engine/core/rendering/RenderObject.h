@@ -216,23 +216,6 @@ public:
         for (const RenderObject* renderer = this; renderer; renderer = renderer->nextInPreOrder())
             renderer->assertRendererLaidOut();
     }
-
-    void assertRendererClearedPaintInvalidationState() const
-    {
-#ifndef NDEBUG
-        if (paintInvalidationStateIsDirty()) {
-            showRenderTreeForThis();
-            ASSERT_NOT_REACHED();
-        }
-#endif
-    }
-
-    void assertSubtreeClearedPaintInvalidationState() const
-    {
-        for (const RenderObject* renderer = this; renderer; renderer = renderer->nextInPreOrder())
-            renderer->assertRendererClearedPaintInvalidationState();
-    }
-
 #endif
 
     bool skipInvalidationWhenLaidOutChildren() const;
@@ -603,9 +586,6 @@ public:
     const RenderLayerModelObject* containerForPaintInvalidation() const;
     const RenderLayerModelObject* adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const;
 
-    // Walk the tree after layout issuing paint invalidations for renderers that have changed or moved, updating bounds that have changed, and clearing paint invalidation state.
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&);
-
     // Given a rect in the object's coordinate space, compute a rect suitable for invalidating paints of
     // that rect in the coordinate space of paintInvalidationContainer.
     virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const;
@@ -675,7 +655,7 @@ public:
     virtual int nextOffset(int current) const;
 
     virtual void imageChanged(ImageResource*, const IntRect* = 0) override final;
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) { }
+    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0);
     virtual bool willRenderImage(ImageResource*) override final;
 
     void selectionStartEnd(int& spos, int& epos) const;
@@ -708,41 +688,21 @@ public:
 
     bool isRelayoutBoundaryForInspector() const;
 
+    void scheduleVisualUpdate();
+
     const LayoutRect& previousPaintInvalidationRect() const { return m_previousPaintInvalidationRect; }
     void setPreviousPaintInvalidationRect(const LayoutRect& rect) { m_previousPaintInvalidationRect = rect; }
 
     const LayoutPoint& previousPositionFromPaintInvalidationContainer() const { return m_previousPositionFromPaintInvalidationContainer; }
     void setPreviousPositionFromPaintInvalidationContainer(const LayoutPoint& location) { m_previousPositionFromPaintInvalidationContainer = location; }
 
-    bool shouldDoFullPaintInvalidation() const { return m_bitfields.shouldDoFullPaintInvalidation(); }
-    void setShouldDoFullPaintInvalidation(bool, MarkingBehavior = MarkContainingBlockChain);
-
     bool shouldInvalidateOverflowForPaint() const { return m_bitfields.shouldInvalidateOverflowForPaint(); }
 
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }
 
-    void clearPaintInvalidationState(const PaintInvalidationState&);
-
-    // layoutDidGetCalled indicates whether this render object was re-laid-out
-    // since the last call to setLayoutDidGetCalled(false) on this object.
-    bool layoutDidGetCalled() const { return m_bitfields.layoutDidGetCalled(); }
-    void setLayoutDidGetCalled(bool b)
-    {
-        // FIXME(sky): Get rid of this once we get rid of all paint invalidation.
-        m_bitfields.setLayoutDidGetCalled(b);
-    }
-
-    bool mayNeedPaintInvalidation() const { return m_bitfields.mayNeedPaintInvalidation(); }
-
     bool neededLayoutBecauseOfChildren() const { return m_bitfields.neededLayoutBecauseOfChildren(); }
     void setNeededLayoutBecauseOfChildren(bool b) { m_bitfields.setNeededLayoutBecauseOfChildren(b); }
-
-    bool shouldCheckForPaintInvalidation(const PaintInvalidationState& paintInvalidationState)
-    {
-        return paintInvalidationState.forceCheckForPaintInvalidation() ||
-            layoutDidGetCalled() || mayNeedPaintInvalidation() || shouldDoFullPaintInvalidation();
-    }
 
     bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform(); }
 
@@ -784,14 +744,6 @@ protected:
     void willBeRemovedFromTree();
 
     void setDocumentForAnonymous(Document* document) { ASSERT(isAnonymous()); m_node = document; }
-
-#if ENABLE(ASSERT)
-    bool paintInvalidationStateIsDirty() const
-    {
-        return layoutDidGetCalled() || shouldDoFullPaintInvalidation()
-            || onlyNeededPositionedMovementLayout() || neededLayoutBecauseOfChildren() || mayNeedPaintInvalidation();
-    }
-#endif
 
 private:
     bool hasImmediateNonWhitespaceTextChildOrPropertiesDependentOnColor() const;
@@ -848,11 +800,7 @@ private:
     public:
         RenderObjectBitfields(Node* node)
             : m_selfNeedsLayout(false)
-            , m_shouldDoFullPaintInvalidation(false)
             , m_shouldInvalidateOverflowForPaint(false)
-            // FIXME: We should remove mayNeedPaintInvalidation once we are able to
-            // use the other layout flags to detect the same cases. crbug.com/370118
-            , m_mayNeedPaintInvalidation(false)
             , m_onlyNeededPositionedMovementLayout(false)
             , m_neededLayoutBecauseOfChildren(false)
             , m_needsPositionedMovementLayout(false)
@@ -873,7 +821,6 @@ private:
             , m_hasTransform(false)
             , m_everHadLayout(false)
             , m_ancestorLineBoxDirty(false)
-            , m_layoutDidGetCalled(false)
             , m_alwaysCreateLineBoxesForRenderInline(false)
             , m_positionedState(IsStaticallyPositioned)
             , m_selectionState(SelectionNone)
@@ -883,9 +830,7 @@ private:
 
         // 32 bits have been used in the first word, and 11 in the second.
         ADD_BOOLEAN_BITFIELD(selfNeedsLayout, SelfNeedsLayout);
-        ADD_BOOLEAN_BITFIELD(shouldDoFullPaintInvalidation, ShouldDoFullPaintInvalidation);
         ADD_BOOLEAN_BITFIELD(shouldInvalidateOverflowForPaint, ShouldInvalidateOverflowForPaint);
-        ADD_BOOLEAN_BITFIELD(mayNeedPaintInvalidation, MayNeedPaintInvalidation);
         ADD_BOOLEAN_BITFIELD(onlyNeededPositionedMovementLayout, OnlyNeededPositionedMovementLayout);
         ADD_BOOLEAN_BITFIELD(neededLayoutBecauseOfChildren, NeededLayoutBecauseOfChildren);
         ADD_BOOLEAN_BITFIELD(needsPositionedMovementLayout, NeedsPositionedMovementLayout);
@@ -909,8 +854,6 @@ private:
 
         ADD_BOOLEAN_BITFIELD(everHadLayout, EverHadLayout);
         ADD_BOOLEAN_BITFIELD(ancestorLineBoxDirty, AncestorLineBoxDirty);
-
-        ADD_BOOLEAN_BITFIELD(layoutDidGetCalled, LayoutDidGetCalled);
 
         // from RenderInline
         ADD_BOOLEAN_BITFIELD(alwaysCreateLineBoxesForRenderInline, AlwaysCreateLineBoxesForRenderInline);
@@ -988,17 +931,16 @@ inline void RenderObject::setNeedsLayout(MarkingBehavior markParents, SubtreeLay
     }
 }
 
+// FIXME(sky): Remove this method.
 inline void RenderObject::setNeedsLayoutAndFullPaintInvalidation(MarkingBehavior markParents, SubtreeLayoutScope* layouter)
 {
     setNeedsLayout(markParents, layouter);
-    setShouldDoFullPaintInvalidation(true);
 }
 
 inline void RenderObject::clearNeedsLayout()
 {
     setOnlyNeededPositionedMovementLayout(needsPositionedMovementLayoutOnly());
     setNeededLayoutBecauseOfChildren(needsLayoutBecauseOfChildren());
-    setLayoutDidGetCalled(true);
     setSelfNeedsLayout(false);
     setEverHadLayout(true);
     setPosChildNeedsLayout(false);

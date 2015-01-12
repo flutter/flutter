@@ -1290,13 +1290,12 @@ bool Element::isMouseFocusable() const
 
 void Element::willCallDefaultEventHandler(const Event& event)
 {
+    // FIXME(sky): wasFocusedByMouse always returns false. Remove this function.
     if (!wasFocusedByMouse())
         return;
     if (!event.isKeyboardEvent() || event.type() != EventTypeNames::keydown)
         return;
     setWasFocusedByMouse(false);
-    if (renderer())
-        renderer()->setShouldDoFullPaintInvalidation(true);
 }
 
 void Element::dispatchFocusEvent(Element* oldFocusedElement, FocusType type)

@@ -1643,14 +1643,11 @@ void Document::styleResolverChanged()
 
     m_styleEngine->resolverChanged();
 
+    // FIXME(sky): didLayoutWithPendingStylesheets never returns true anymore. Remove this.
     if (didLayoutWithPendingStylesheets()) {
         // We need to manually repaint because we avoid doing all repaints in layout or style
         // recalc while sheets are still loading to avoid FOUC.
         m_pendingSheetLayout = IgnoreLayoutWithPendingSheets;
-
-        ASSERT(renderView() || importsController());
-        if (renderView())
-            renderView()->setShouldDoFullPaintInvalidation(true);
     }
 }
 

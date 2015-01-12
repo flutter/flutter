@@ -247,9 +247,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
     quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(quadForFakeMouseMoveEvent);
     frame->eventHandler().dispatchFakeMouseMoveEventSoonInQuad(quadForFakeMouseMoveEvent);
 
-    if (box().frameView()->isInPerformLayout())
-        box().setShouldDoFullPaintInvalidation(true);
-
     // Schedule the scroll DOM event.
     if (box().node())
         box().node()->document().enqueueScrollEventForNode(box().node());

@@ -63,8 +63,6 @@ public:
 
     // This is null for anonymous renderers.
     ContainerNode* node() const { return toContainerNode(RenderObject::node()); }
-
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
 protected:
     void createLayer(LayerType);
 

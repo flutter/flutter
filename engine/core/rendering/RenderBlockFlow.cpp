@@ -157,9 +157,6 @@ void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
         RenderBox* child = next;
         next = child->nextSiblingBox();
 
-        // FIXME: this should only be set from clearNeedsLayout crbug.com/361250
-        child->setLayoutDidGetCalled(true);
-
         updateBlockChildDirtyBitsBeforeLayout(relayoutChildren, child);
 
         if (child->isOutOfFlowPositioned()) {

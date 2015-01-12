@@ -55,7 +55,7 @@ private:
     virtual bool needsPreferredWidthsRecalculation() const override final;
     virtual void computeIntrinsicRatioInformation(FloatSize& intrinsicSize, double& intrinsicRatio) const override final;
 
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) override;
+    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) final;
 
     void paintIntoRect(GraphicsContext*, const LayoutRect&);
     virtual void paint(PaintInfo&, const LayoutPoint&) override final;

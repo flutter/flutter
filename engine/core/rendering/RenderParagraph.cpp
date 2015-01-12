@@ -1250,12 +1250,8 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
     bool isFullLayout = !firstLineBox() || selfNeedsLayout() || relayoutChildren;
     LineLayoutState layoutState(isFullLayout, paintInvalidationLogicalTop, paintInvalidationLogicalBottom);
 
-    if (isFullLayout) {
-        // Ensure the old line boxes will be erased.
-        if (firstLineBox())
-            setShouldDoFullPaintInvalidation(true);
+    if (isFullLayout)
         lineBoxes()->deleteLineBoxes();
-    }
 
     // Text truncation kicks in in two cases:
     //     1) If your overflow isn't visible and your text-overflow-mode isn't clip.
@@ -1330,10 +1326,6 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
     // truncate text.
     if (hasTextOverflow)
         checkLinesForTextOverflow();
-
-    // Ensure the new line boxes will be painted.
-    if (isFullLayout && firstLineBox())
-        setShouldDoFullPaintInvalidation(true);
 }
 
 void RenderParagraph::checkFloatsInCleanLine(RootInlineBox* line, Vector<FloatWithRect>& floats, size_t& floatIndex, bool& encounteredNewFloat, bool& dirtiedByFloat)
@@ -1393,7 +1385,6 @@ RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutSt
         // If we encountered a new float and have inline children, mark ourself to force us to issue paint invalidations.
         if (layoutState.hasInlineChild() && !selfNeedsLayout()) {
             setNeedsLayoutAndFullPaintInvalidation(MarkOnlyThis);
-            setShouldDoFullPaintInvalidation(true);
         }
 
         // FIXME: This should just call deleteLineBoxTree, but that causes

@@ -148,8 +148,6 @@ private:
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override final;
 
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) override final;
-
     virtual void updateFromStyle() override final;
 
     void paintOutlineForLine(GraphicsContext*, const LayoutPoint&, const LayoutRect& prevLine, const LayoutRect& thisLine,

@@ -220,26 +220,6 @@ void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldSty
     m_hasBorderOrPaddingLogicalWidthChanged = oldStyle && diff.needsFullLayout() && needsLayout() && borderOrPaddingLogicalWidthChanged(oldStyle, newStyle);
 }
 
-void RenderBlock::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
-{
-    // Note, we don't want to early out here using shouldCheckForInvalidationAfterLayout as
-    // we have to make sure we go through any positioned objects as they won't be seen in
-    // the normal tree walk.
-
-    RenderBox::invalidateTreeIfNeeded(paintInvalidationState);
-
-    // Take care of positioned objects. This is required as PaintInvalidationState keeps a single clip rect.
-    if (TrackedRendererListHashSet* positionedObjects = this->positionedObjects()) {
-        TrackedRendererListHashSet::iterator end = positionedObjects->end();
-        const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(&paintInvalidationState.paintInvalidationContainer());
-        PaintInvalidationState childPaintInvalidationState(paintInvalidationState, *this, newPaintInvalidationContainer);
-        for (TrackedRendererListHashSet::iterator it = positionedObjects->begin(); it != end; ++it) {
-            RenderBox* box = *it;
-            box->invalidateTreeIfNeeded(childPaintInvalidationState);
-        }
-    }
-}
-
 void RenderBlock::addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild)
 {
     if (beforeChild && beforeChild->parent() != this) {
@@ -505,9 +485,6 @@ void RenderBlock::layoutPositionedObjects(bool relayoutChildren, PositionedLayou
     TrackedRendererListHashSet::iterator end = positionedDescendants->end();
     for (TrackedRendererListHashSet::iterator it = positionedDescendants->begin(); it != end; ++it) {
         r = *it;
-
-        // FIXME: this should only be set from clearNeedsLayout crbug.com/361250
-        r->setLayoutDidGetCalled(true);
 
         SubtreeLayoutScope layoutScope(*r);
 

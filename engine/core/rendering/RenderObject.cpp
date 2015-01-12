@@ -99,7 +99,6 @@ struct SameSizeAsRenderObject {
 #endif
 #endif
     unsigned m_bitfields;
-    unsigned m_bitfields2;
     LayoutRect rect; // Stores the previous paint invalidation rect.
     LayoutPoint position; // Stores the previous position from the paint invalidation container.
 };
@@ -1218,21 +1217,6 @@ const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialA
     return view();
 }
 
-void RenderObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
-{
-    // If we didn't need paint invalidation then our children don't need as well.
-    // Skip walking down the tree as everything should be fine below us.
-    if (!shouldCheckForPaintInvalidation(paintInvalidationState))
-        return;
-
-    clearPaintInvalidationState(paintInvalidationState);
-
-    for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
-        if (!child->isOutOfFlowPositioned())
-            child->invalidateTreeIfNeeded(paintInvalidationState);
-    }
-}
-
 void RenderObject::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
 {
     if (paintInvalidationContainer == this)
@@ -1472,11 +1456,6 @@ void RenderObject::setStyle(PassRefPtr<RenderStyle> style)
         if (RenderBlock* container = containingBlock())
             container->setNeedsOverflowRecalcAfterStyleChange();
     }
-
-    if (updatedDiff.needsPaintInvalidationLayer())
-        toRenderLayerModelObject(this)->layer()->setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
-    else if (diff.needsPaintInvalidationObject() || updatedDiff.needsPaintInvalidationObject())
-        setShouldDoFullPaintInvalidation(true);
 }
 
 void RenderObject::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
@@ -2014,7 +1993,6 @@ void RenderObject::scheduleRelayout()
 void RenderObject::forceLayout()
 {
     setSelfNeedsLayout(true);
-    setShouldDoFullPaintInvalidation(true);
     layout();
 }
 
@@ -2127,6 +2105,12 @@ bool RenderObject::supportsTouchAction() const
 void RenderObject::imageChanged(ImageResource* image, const IntRect* rect)
 {
     imageChanged(static_cast<WrappedImagePtr>(image), rect);
+}
+
+void RenderObject::imageChanged(WrappedImagePtr, const IntRect*)
+{
+    if (parent())
+        scheduleVisualUpdate();
 }
 
 Element* RenderObject::offsetParent() const
@@ -2242,25 +2226,9 @@ bool RenderObject::isRelayoutBoundaryForInspector() const
     return objectIsRelayoutBoundary(this);
 }
 
-void RenderObject::setShouldDoFullPaintInvalidation(bool b, MarkingBehavior markBehavior)
+void RenderObject::scheduleVisualUpdate()
 {
-    if (markBehavior == MarkContainingBlockChain && b) {
-        ASSERT(document().lifecycle().state() != DocumentLifecycle::InPaintInvalidation);
-        // FIXME(sky): Do we still need this here?
-        frame()->page()->animator().scheduleVisualUpdate(); // In case that this is called not during FrameView::updateLayoutAndStyleForPainting().
-    }
-}
-
-void RenderObject::clearPaintInvalidationState(const PaintInvalidationState& paintInvalidationState)
-{
-    // paintInvalidationStateIsDirty should be kept in sync with the
-    // booleans that are cleared below.
-    ASSERT(paintInvalidationState.forceCheckForPaintInvalidation() || paintInvalidationStateIsDirty());
-    setShouldDoFullPaintInvalidation(false);
-    setOnlyNeededPositionedMovementLayout(false);
-    setNeededLayoutBecauseOfChildren(false);
-    setShouldInvalidateOverflowForPaint(false);
-    setLayoutDidGetCalled(false);
+    frame()->page()->animator().scheduleVisualUpdate();
 }
 
 bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)

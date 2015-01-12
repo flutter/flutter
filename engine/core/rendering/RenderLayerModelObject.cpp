@@ -98,9 +98,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
         if (!layer()) {
             createLayer(type);
             if (parent() && !needsLayout()) {
-                // FIXME: This invalidation is overly broad. We should update to
-                // do the correct invalidation at RenderStyle::diff time. crbug.com/349061
-                layer()->renderer()->setShouldDoFullPaintInvalidation(true);
                 // FIXME: We should call a specialized version of this function.
                 layer()->updateLayerPositionsAfterLayout();
             }
@@ -118,21 +115,6 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
         layer()->setLayerType(type);
         layer()->styleChanged(diff, oldStyle);
     }
-}
-
-void RenderLayerModelObject::invalidateTreeIfNeeded(const PaintInvalidationState& paintInvalidationState)
-{
-    // FIXME: SVG should probably also go through this unified paint invalidation system.
-    ASSERT(!needsLayout());
-
-    if (!shouldCheckForPaintInvalidation(paintInvalidationState))
-        return;
-
-    const RenderLayerModelObject& newPaintInvalidationContainer = *adjustCompositedContainerForSpecialAncestors(&paintInvalidationState.paintInvalidationContainer());
-    ASSERT(&newPaintInvalidationContainer == containerForPaintInvalidation());
-
-    PaintInvalidationState childTreeWalkState(paintInvalidationState, *this, newPaintInvalidationContainer);
-    RenderObject::invalidateTreeIfNeeded(childTreeWalkState);
 }
 
 } // namespace blink

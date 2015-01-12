@@ -302,8 +302,11 @@ void InputMethodController::setComposition(const String& text, const Vector<Comp
                 m_customCompositionUnderlines[i].startOffset += baseOffset;
                 m_customCompositionUnderlines[i].endOffset += baseOffset;
             }
+
+            // TODO(ojan): What was this for? Do we need it in sky since we
+            // don't need to support legacy IMEs?
             if (baseNode->renderer())
-                baseNode->renderer()->setShouldDoFullPaintInvalidation(true);
+                baseNode->renderer()->scheduleVisualUpdate();
 
             unsigned start = std::min(baseOffset + selectionStart, extentOffset);
             unsigned end = std::min(std::max(start, baseOffset + selectionEnd), extentOffset);
@@ -337,8 +340,12 @@ void InputMethodController::setCompositionFromExistingText(const Vector<Composit
             m_customCompositionUnderlines[i].startOffset += m_compositionStart;
             m_customCompositionUnderlines[i].endOffset += m_compositionStart;
         }
+
+        // TODO(ojan): What was this for? Do we need it in sky since we
+        // don't need to support legacy IMEs?
         if (baseNode->renderer())
-            baseNode->renderer()->setShouldDoFullPaintInvalidation(true);
+            baseNode->renderer()->scheduleVisualUpdate();
+
         return;
     }
 

@@ -387,8 +387,6 @@ public:
 
     void didUpdateNeedsCompositedScrolling();
 
-    void setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
-
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
     enum PaintLayerFlags {

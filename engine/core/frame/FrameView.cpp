@@ -399,23 +399,11 @@ void FrameView::layout(bool allowSubtree)
         frame().page()->chrome().client().layoutUpdated(m_frame.get());
 }
 
+// FIXME(sky): Remove
 void FrameView::invalidateTreeIfNeeded()
 {
     lifecycle().advanceTo(DocumentLifecycle::InPaintInvalidation);
-
-    ASSERT(renderView());
-    RenderView& rootForPaintInvalidation = *renderView();
-    ASSERT(!rootForPaintInvalidation.needsLayout());
-
-    PaintInvalidationState rootPaintInvalidationState(rootForPaintInvalidation);
-
-    rootForPaintInvalidation.invalidateTreeIfNeeded(rootPaintInvalidationState);
-
     m_doFullPaintInvalidation = false;
-#ifndef NDEBUG
-    renderView()->assertSubtreeClearedPaintInvalidationState();
-#endif
-
     lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
 }
 

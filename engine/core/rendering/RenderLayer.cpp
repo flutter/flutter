@@ -714,7 +714,6 @@ void RenderLayer::removeOnlyThisLayer()
         removeChild(current);
         m_parent->addChild(current, nextSib);
 
-        current->renderer()->setShouldDoFullPaintInvalidation(true);
         // FIXME: We should call a specialized version of this function.
         current->updateLayerPositionsAfterLayout();
         current = next;
@@ -2001,15 +2000,6 @@ void RenderLayer::updateOrRemoveFilterEffectRenderer()
 
 void RenderLayer::filterNeedsPaintInvalidation()
 {
-}
-
-void RenderLayer::setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants()
-{
-    renderer()->setShouldDoFullPaintInvalidation(true);
-
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
-        child->setShouldDoFullPaintInvalidationIncludingNonCompositingDescendants();
-    }
 }
 
 } // namespace blink

@@ -838,15 +838,6 @@ LayoutSize RenderInline::offsetForInFlowPositionedInline(const RenderBox& child)
     return logicalOffset;
 }
 
-void RenderInline::imageChanged(WrappedImagePtr, const IntRect*)
-{
-    if (!parent())
-        return;
-
-    // FIXME: We can do better.
-    setShouldDoFullPaintInvalidation(true);
-}
-
 namespace {
 
 class AbsoluteRectsIgnoringEmptyRectsGeneratorContext : public AbsoluteRectsGeneratorContext {

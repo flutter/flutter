@@ -204,8 +204,6 @@ public:
     bool recalcChildOverflowAfterStyleChange();
     bool recalcOverflowAfterStyleChange();
 
-    virtual void invalidateTreeIfNeeded(const PaintInvalidationState&) override;
-
 protected:
     virtual void willBeDestroyed() override;
 

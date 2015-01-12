@@ -136,7 +136,7 @@ void ImageQualityController::highQualityRepaintTimerFired(Timer<ImageQualityCont
     m_animatedResizeIsActive = false;
 
     for (ObjectLayerSizeMap::iterator it = m_objectLayerSizeMap.begin(); it != m_objectLayerSizeMap.end(); ++it) {
-        it->key->setShouldDoFullPaintInvalidation(true);
+        it->key->scheduleVisualUpdate();
     }
 
     m_liveResizeOptimizationIsActive = false;
