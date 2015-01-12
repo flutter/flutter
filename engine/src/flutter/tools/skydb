@@ -115,10 +115,6 @@ class SkyDebugger(object):
         else:
             shell_command = [self.paths.mojo_shell_path] + shell_args
 
-        # FIXME: This doesn't work for android
-        if args.gdb:
-            shell_command = ['gdb'] + shell_command
-
         return shell_command
 
     def _connect_to_device(self):
@@ -180,6 +176,12 @@ class SkyDebugger(object):
         shell_command = self._build_mojo_shell_command(args)
         print ' '.join(map(pipes.quote, shell_command))
         self.pids['mojo_shell_pid'] = subprocess.Popen(shell_command).pid
+
+        if args.gdb:
+            print "Sorry, I'm not sure how best to wire up --gdb to work"
+            print "with mojo_shell as a background process.  For now use:"
+            print "gdb --pid %s" % self.pids['mojo_shell_pid']
+            shell_command = ['gdb'] + shell_command
 
         if not self._wait_for_sky_command_port():
             logging.error('Failed to start sky')
