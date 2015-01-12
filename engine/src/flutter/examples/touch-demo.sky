@@ -1,0 +1,16 @@
+<sky>
+<div id="log">Ready</div>
+<script>
+function logTouchEvent(evt) {
+  var message = "type=" + event.type;
+  if (evt.touches && evt.touches.length > 0)
+    message += " x=" + evt.touches[0].clientX + " y=" + evt.touches[0].clientY;
+  document.getElementById("log").textContent = message;
+}
+
+document.documentElement.addEventListener("touchstart", logTouchEvent);
+document.documentElement.addEventListener("touchmove", logTouchEvent);
+document.documentElement.addEventListener("touchend", logTouchEvent);
+document.documentElement.addEventListener("touchcancel", logTouchEvent);
+</script>
+</sky>
