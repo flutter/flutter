@@ -57,6 +57,62 @@ int GetClickCount(int flags) {
   return 1;
 }
 
+scoped_ptr<blink::WebInputEvent> BuildWebTouchEvent(const EventPtr& event) {
+  scoped_ptr<blink::WebTouchEvent> web_event(new blink::WebTouchEvent);
+
+  web_event->timeStampSeconds =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
+
+  web_event->touchesLength = 1;
+  web_event->changedTouchesLength = 1;
+  web_event->targetTouchesLength = 1;
+
+  blink::WebTouchPoint touch;
+
+  switch (event->action) {
+    case EVENT_TYPE_TOUCH_RELEASED:
+      web_event->type = blink::WebInputEvent::TouchEnd;
+      touch.state = blink::WebTouchPoint::StateReleased;
+      break;
+    case EVENT_TYPE_TOUCH_PRESSED:
+      web_event->type = blink::WebInputEvent::TouchStart;
+      touch.state = blink::WebTouchPoint::StatePressed;
+      break;
+    case EVENT_TYPE_TOUCH_MOVED:
+      web_event->type = blink::WebInputEvent::TouchMove;
+      touch.state = blink::WebTouchPoint::StateMoved;
+      break;
+    case EVENT_TYPE_TOUCH_CANCELLED:
+      web_event->type = blink::WebInputEvent::TouchCancel;
+      touch.state = blink::WebTouchPoint::StateCancelled;
+      break;
+    default:
+      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
+      break;
+  }
+
+  touch.id = event->touch_data->pointer_id;
+
+  touch.position.x = event->location_data->in_view_location->x;
+  touch.position.y = event->location_data->in_view_location->y;
+
+  if (event->location_data->screen_location) {
+    touch.screenPosition.x = event->location_data->screen_location->x;
+    touch.screenPosition.y = event->location_data->screen_location->y;
+  }
+
+  if (web_event->touchesLength)
+    web_event->touches[0] = touch;
+  if (web_event->changedTouchesLength)
+    web_event->changedTouches[0] = touch;
+  if (web_event->targetTouchesLength)
+    web_event->targetTouches[0] = touch;
+
+  web_event->cancelable = true;
+
+  return web_event.Pass();
+}
+
 scoped_ptr<blink::WebInputEvent> BuildWebMouseEventFrom(const EventPtr& event) {
   scoped_ptr<blink::WebMouseEvent> web_event(new blink::WebMouseEvent);
   web_event->x = event->location_data->in_view_location->x;
@@ -182,7 +238,12 @@ scoped_ptr<blink::WebInputEvent> BuildWebMouseWheelEventFrom(
 scoped_ptr<blink::WebInputEvent>
 TypeConverter<scoped_ptr<blink::WebInputEvent>, EventPtr>::Convert(
     const EventPtr& event) {
-  if (event->action == EVENT_TYPE_MOUSE_PRESSED ||
+  if (event->action == EVENT_TYPE_TOUCH_RELEASED ||
+      event->action == EVENT_TYPE_TOUCH_PRESSED ||
+      event->action == EVENT_TYPE_TOUCH_MOVED ||
+      event->action == EVENT_TYPE_TOUCH_CANCELLED) {
+    return BuildWebTouchEvent(event);
+  } else if (event->action == EVENT_TYPE_MOUSE_PRESSED ||
       event->action == EVENT_TYPE_MOUSE_RELEASED ||
       event->action == EVENT_TYPE_MOUSE_ENTERED ||
       event->action == EVENT_TYPE_MOUSE_EXITED ||
