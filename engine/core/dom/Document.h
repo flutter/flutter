@@ -237,12 +237,6 @@ public:
     // Called when one or more stylesheets in the document may have been added, removed, or changed.
     void styleResolverChanged();
 
-    // FIXME: Switch all callers of styleResolverChanged to these or better ones and then make them
-    // do something smarter.
-    void removedStyleSheet(CSSStyleSheet*);
-    void addedStyleSheet(CSSStyleSheet*) { styleResolverChanged(); }
-    void modifiedStyleSheet(CSSStyleSheet*);
-
     void evaluateMediaQueryList();
 
     void setStateForNewFormElements(const Vector<String>&);

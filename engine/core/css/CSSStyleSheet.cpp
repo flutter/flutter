@@ -78,7 +78,7 @@ void CSSStyleSheet::setMediaQueries(PassRefPtr<MediaQuerySet> mediaQueries)
 void CSSStyleSheet::clearOwnerNode()
 {
     if (Document* owner = ownerDocument())
-        owner->modifiedStyleSheet(this);
+        owner->styleResolverChanged();
     m_ownerNode = nullptr;
 }
 

@@ -59,7 +59,7 @@ void HTMLStyleElement::parseAttribute(const QualifiedName& name, const AtomicStr
 {
     if (name == HTMLNames::mediaAttr && inDocument() && document().isActive() && m_sheet) {
         m_sheet->setMediaQueries(MediaQuerySet::create(value));
-        document().modifiedStyleSheet(m_sheet.get());
+        document().styleResolverChanged();
     } else {
         HTMLElement::parseAttribute(name, value);
     }
@@ -91,7 +91,7 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
     if (m_sheet)
         clearSheet();
     if (removedSheet)
-        document().removedStyleSheet(removedSheet.get());
+        document().styleResolverChanged();
 }
 
 void HTMLStyleElement::childrenChanged(const ChildrenChange& change)
