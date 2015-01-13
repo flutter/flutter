@@ -909,24 +909,10 @@ void RenderLayer::restoreClip(GraphicsContext* context, const LayoutRect& paintD
     context->restore();
 }
 
-static inline bool shouldSuppressPaintingLayer(RenderLayer* layer)
-{
-    // Avoid painting descendants of the root layer when stylesheets haven't loaded. This eliminates FOUC.
-    // It's ok not to draw, because later on, when all the stylesheets do load, updateStyleSelector on the Document
-    // will do a full paintInvalidationForWholeRenderer().
-    if (layer->renderer()->document().didLayoutWithPendingStylesheets() && !layer->isRootLayer() && !layer->renderer()->isDocumentElement())
-        return true;
-
-    return false;
-}
-
 void RenderLayer::paintLayer(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
 {
     // Non self-painting leaf layers don't need to be painted as their renderer() should properly paint itself.
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
-        return;
-
-    if (shouldSuppressPaintingLayer(this))
         return;
 
     // If this layer is totally invisible then there is nothing to paint.

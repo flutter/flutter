@@ -242,7 +242,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , TreeScope(*this)
     , m_module(nullptr)
     , m_evaluateMediaQueriesOnStyleRecalc(false)
-    , m_pendingSheetLayout(NoLayoutWithPendingSheets)
     , m_frame(initializer.frame())
     , m_domWindow(m_frame ? m_frame->domWindow() : 0)
     , m_importsController(initializer.importsController())
@@ -1640,15 +1639,7 @@ void Document::styleResolverChanged()
     // We just skip that case.
     if (!m_styleEngine)
         return;
-
     m_styleEngine->resolverChanged();
-
-    // FIXME(sky): didLayoutWithPendingStylesheets never returns true anymore. Remove this.
-    if (didLayoutWithPendingStylesheets()) {
-        // We need to manually repaint because we avoid doing all repaints in layout or style
-        // recalc while sheets are still loading to avoid FOUC.
-        m_pendingSheetLayout = IgnoreLayoutWithPendingSheets;
-    }
 }
 
 void Document::setHoverNode(PassRefPtr<Node> newHoverNode)

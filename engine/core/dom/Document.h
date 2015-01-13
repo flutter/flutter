@@ -445,11 +445,6 @@ public:
     void pushCurrentScript(PassRefPtr<HTMLScriptElement>);
     void popCurrentScript();
 
-    enum PendingSheetLayout { NoLayoutWithPendingSheets, DidLayoutWithPendingSheets, IgnoreLayoutWithPendingSheets };
-
-    bool didLayoutWithPendingStylesheets() const { return m_pendingSheetLayout == DidLayoutWithPendingSheets; }
-    bool ignoreLayoutWithPendingStylesheets() const { return m_pendingSheetLayout == IgnoreLayoutWithPendingSheets; }
-
     // Extension for manipulating canvas drawing contexts for use in CSS
     void getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtr<CanvasRenderingContext2D>&, RefPtr<WebGLRenderingContext>&);
     HTMLCanvasElement& getCSSCanvasElement(const String& name);
@@ -661,11 +656,6 @@ private:
     AbstractModule* m_module;
 
     bool m_evaluateMediaQueriesOnStyleRecalc;
-
-    // If we do ignore the pending stylesheet count, then we need to add a boolean
-    // to track that this happened so that we can do a full repaint when the stylesheets
-    // do eventually load.
-    PendingSheetLayout m_pendingSheetLayout;
 
     LocalFrame* m_frame;
     RawPtr<LocalDOMWindow> m_domWindow;

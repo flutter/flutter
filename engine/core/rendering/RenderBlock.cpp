@@ -658,13 +658,8 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     if (paintPhase == PaintPhaseBlockBackground)
         return;
 
-    if (paintPhase != PaintPhaseSelfOutline) {
-        // Avoid painting descendants of the root element when stylesheets haven't loaded.  This eliminates FOUC.
-        // It's ok not to draw, because later on, when all the stylesheets do load, styleResolverChanged() on the Document
-        // will do a full paint invalidation.
-        if (!document().didLayoutWithPendingStylesheets() || isRenderView())
-            paintContents(paintInfo, scrolledOffset);
-    }
+    if (paintPhase != PaintPhaseSelfOutline)
+        paintContents(paintInfo, scrolledOffset);
 
     paintSelection(paintInfo, scrolledOffset); // Fill in gaps in selection on lines and between blocks.
 
