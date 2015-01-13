@@ -23,7 +23,6 @@ SKY MODULE
      this.overflowChild = null;
    }
    function layout(width, height) {
-     this.markAsLaidOut();
      let children = null;
      let loop = null;
      if (height == null)
@@ -58,7 +57,7 @@ SKY MODULE
              childHeight = childHeight.value;
            else
              childHeight = height;
-           dims = child.layoutManager.layout(width, height);
+           dims = child.layoutManager.layout(null, height);
            this.setChildSize(child, dims.width, dims.height);
          } else {
            dims = {
@@ -125,10 +124,14 @@ SKY MODULE
      else
        this.firstSkippedChild = this.overflowChild;
 
+     this.markAsLaidOut();
      return {
        width: width,
        height: height,
      }
+   }
+   function layoutDescendants() {
+     this.layout(node.width, node.height);
    }
    function getIntrinsicWidth() {
      let width = this.node.getProperty('width');

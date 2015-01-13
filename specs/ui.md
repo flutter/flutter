@@ -65,7 +65,9 @@ A pointer switches from "up" to "down" when it is a touch or stylus
 that is in contact with the display surface, or when it is a mouse
 that is being clicked, and from "down" back to "up" when this ends.
 (Note that clicking a button on a stylus doesn't change it from up to
-down. A stylus can have a button pressed while "up".)
+down. A stylus can have a button pressed while "up".) In the case of a
+mouse with multiple buttons, the pointer switches back to "up" only
+when all the buttons have been released.
 
 When one switches from "up" to "down", the following algorithm is run:
 
@@ -96,9 +98,16 @@ is fired at the object or document that was selected for the
 'pointer-down' event (the capturing object). If the return value of a
 'pointer-moved' event is 'cancel' then cancel the pointer.
 
+When a pointer's button state changes but this doesn't impact whether
+it is "up" or "down", e.g. when a mouse with a button down gets a
+second button down, or when a stylus' buttons change state, but the
+pointer doesn't simultaneously move, then a 'pointer-moved' event is
+fired anyway, with dx=dy=0.
+
 When one switches from "down" to "up", a 'pointer-up' event is fired
 at the object or document that was selected for the 'pointer-down'
-event (the capturing target).
+event (the capturing target). The buttons exposed on that event are
+those that were down immediately prior to the buttons being released.
 
 At the time of a pointer-up event, if there is another pointer that is
 already down, captured by the same object, and is of the same kind,
@@ -116,6 +125,8 @@ Nothing special happens when a capturing target moves in the DOM.
 
 The x and y position of an -up or -down event always match those of
 the previous -moved or -added event, so their dx and dy are always 0.
+
+Positions are floating point numbers; they can have subpixel values.
 
 
 These events all bubble and their data is an object with the following
@@ -166,6 +177,12 @@ fields:
 
                  note that stylus buttons can be pressed even when the
                  pointer is not "down"
+
+                 e.g. if the left mouse button and the right mouse
+                 button are pressed at the same time, the value will
+                 be 3 (bits 1 and 2); if the right mouse button and
+                 the back button are pressed at the same time, the
+                 value will be 10 (bits 2 and 4)
 
            down: true if the pointer is down (in pointer-down event or
                  subsequent pointer-move events); false otherwise (in
@@ -265,6 +282,13 @@ When kind is 'stylus' or 'stylus-inverted':
                  (thus 0 indicates the stylus is orthogonal to the
                  plane of the screen, while pi/2 indicates that the
                  stylus is flat on the screen)
+
+
+TODO(ianh): add an API that exposes the currently existing pointers,
+so that you can determine e.g. if you have a mouse.
+
+TODO(ianh): determine what the update frequency of these events should
+be. One set of events per frame? Multiple updates per frame?
 
 
 Wheel events

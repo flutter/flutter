@@ -292,6 +292,7 @@ class StyleValueResolverSettings {
     // sets firstTime and state to given values
     // sets layoutDependent to false
     // sets dependencies to empty set
+    // sets lifetime to Infinity
 
   readonly attribute Boolean firstTime;
     // true if this is the first time this property is being resolved for this element,
@@ -311,6 +312,12 @@ class StyleValueResolverSettings {
     // set the bit on this StyleValueResolverSettings's dependencies bitfield
   Array<PropertyHandle> getDependencies();
     // returns an array of the PropertyHandle values for the bits that are set in dependencies
+
+  // attribute (Float or Infinity) lifetime;
+  void setLifetime(Float age);
+    // if the new value is less than the current value of lifetime, update the current value
+  (Float or Infinity) getLifetime();
+    // return current value of lfietime
 
   attribute any state; // initially null, can be set to store value for this RenderNode/property pair
     // for example, TransitioningColorStyleValue would store
@@ -468,6 +475,7 @@ abstract class AbstractStyleDeclarationList {
 
 class ElementStyleDeclarationList : AbstractStyleDeclarationList {
   constructor (Element? element);
+  readonly attribute Element? element;
 
   // there are two batches of styles in an ElementStyleDeclarationList.
 
@@ -495,6 +503,7 @@ class ElementStyleDeclarationList : AbstractStyleDeclarationList {
 
 class RenderNodeStyleDeclarationList : AbstractStyleDeclarationList {
   constructor (RenderNode? renderNode);
+  readonly attribute RenderNode? renderNode;
 
   // as StyleDeclarations are added and removed, the RenderNodeStyleDeclarationList
   // calls register(renderNode) and unregister(renderNode) respectively on those
@@ -590,11 +599,10 @@ from the tree. Then, in any case, clear the needsManager bit.
 When an Element or Text node is to be removed from its parent, and it
 has a renderNode, and that renderNode has an ownerLayoutManager with
 autoreap=false, then before actually removing the node, the node's
-renderNode should be marked isGhost=true, and the relevant
-ElementStyleDeclarationList should be flattened and the values stored on
-the RenderNode's overrideStyles for use later. (Or we can just clone the
-StyleDeclarations directly without flattening. That would probably
-be faster.)
+renderNode should be marked isGhost=true, and all the
+StyleDeclarations in the relevant ElementStyleDeclarationList should
+be added to the RenderNode's overrideStyles for use later (creating a
+RenderNodeStyleDeclarationList if necessary).
 
 When an Element is to be removed from its parent, regardless of the
 above, the node's renderNode attribute should be nulled out.
@@ -645,44 +653,57 @@ class RenderNode { // implemented in C++ with no virtual tables
      //   if settings.forceCache is true, return the cached value
      //   if neither dirty bit is set, return the cached value
      //   if the cascade dirty bit is not set (value dirty is set) then
-     //     resolve the value using the same StyleValue object
-     //      - with firstTime=false on the resolver settings
-     //      - with the cached state object if any
-     //      - jump to "cache" below
+     //    - clear any pending lifetime-enforcing tasks for this
+     //      property/pseudoElement pair on this render node
+     //    - resolve the value using the same StyleValue object
+     //       - with firstTime=false on the resolver settings
+     //       - with the cached state object if any
+     //       - jump to "cache" below
      // if settings.forceCache is true, return null
+     // - clear any pending lifetime-enforcing tasks for this
+     //   property/pseudoElement pair on this render node
      // - if there's an override declaration with the property (with
-     //   the pseudo or without), then get the value object from there and
-     //   jump to "resolve" below.
-     // - if there's an element and it has a style declaration with the property
-     //   (with the pseudo or without), then get the value object from there
+     //   the pseudo or without), then get the value object from there
      //   and jump to "resolve" below.
-     // - if it's not an inherited property, or if there's no parent, then get the
-     //   default value and jump to "resolve" below.
-     // - call the parent render node's getProperty() with the same property
-     //   but no settings, then cache that value as the value for this element
-     //   with the given pseudoElement, with no StyleValue object, no resolver
-     //   settings, and set the state to null.
+     // - if there's an element and it has a style declaration with
+     //   the property (with the pseudo or without), then get the
+     //   value object from there and jump to "resolve" below.
+     // - if it's not an inherited property, or if there's no parent,
+     //   then get the default value and jump to "resolve" below.
+     // - call the parent render node's getProperty() with the same
+     //   property but no settings, then cache that value as the value
+     //   for this element with the given pseudoElement, with no
+     //   StyleValue object, no resolver settings, and set the state
+     //   to null.
      // resolve:
-     //   - get a new resolver settings object
-     //   - if the obtained StyleValue object is different than the
-     //     cached StyleValue object, or if there is no cached object, then set
-     //     the resolver settings to firstTime=true, otherwise it's the same object
-     //     and set firstTime=false.
-     //   - set the resolver settings' state to the current state for this
-     //     pseudoElement/property combination
+     //   - get a new resolver settings object (or reset an existing one)
+     //     - if the obtained StyleValue object is different than the
+     //       cached StyleValue object, or if there is no cached
+     //       object, then set the resolver settings to
+     //       firstTime=true, otherwise it's the same object and set
+     //       firstTime=false.
+     //     - set the resolver settings' state to the current state
+     //       for this pseudoElement/property combination
      //   - using the obtained StyleValue object, call resolve(),
      //     passing it this node and the resolver settings object.
      //   - jump to "cache" below
      // cache:
-     //   - update the cache with the obtained value and resolver settings
+     //   - update the cache with the obtained value and resolver
+     //     settings
      //   - reset the dirty bits
-     //   - if the resolver settings' getShouldSaveState() method returns false,
-     //     then discard any cached state, otherwise, cache the new state
+     //   - if the resolver settings' getShouldSaveState() method
+     //     returns false, then discard any cached state, otherwise,
+     //     cache the new state
+     //   - if the resolver settings' lifetime is not infinity, then
+     //     queue a lifetime-enforcing task for the appropriate time
+     //     in the future which calls cascadedValueDirty for this
+     //     property/pseudoElement pair on this render node
 
-  readonly attribute RenderNodeStyleDeclarationList overrideStyles;
-     // mutable; initially empty
+  attribute RenderNodeStyleDeclarationList overrideStyles;
+     // mutable; initially null
      // this is used when isGhost is true, and can also be used more generally to
-     // override styles from the layout manager (e.g. to animate a new node into view)
+     // override styles from the layout manager (e.g. to animate a new node into view)  
+     // this is the only arbitrarily mutable state of a RenderNode object
 
   private void cascadedValueChanged(PropertyHandle property, String pseudoElement = '');
   private void cascadedValueDirty(PropertyHandle property, String pseudoElement = '');
@@ -777,7 +798,7 @@ class LayoutManager : EventTarget {
 
   readonly attribute Boolean autoreap;
     // defaults to true
-    // when true, any children that are isNew are automatically welcomed by the default layout()
+    // when true, children that are added don't get set to isNew=true
     // when true, children that are removed don't get set to isGhost=true, they're just removed
 
   virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of this.node's ancestors // implements EventTarget.getEventDispatchChain()
@@ -790,13 +811,12 @@ class LayoutManager : EventTarget {
     // return result;
 
   void setProperty(RenderNode node, PropertyHandle property, any value, String pseudoElement = ''); // O(1)
-    // if called from an adjustProperties() method during the property adjustment phase,
     // replaces the value that getProperty() would return on that node with /value/
-    // this also clears the dependency bits and sets the property state to null
+    // this also clears the dependency bits, dirty bits, and sets the property state to null
+    // this also clears any relevant lifetime-enforcing tasks
 
   void take(RenderNode victim); // sets victim.ownerLayoutManager = this;
     // assert: victim hasn't been take()n yet during this layout
-    // assert: victim.needsLayout == true
     // assert: an ancestor of victim has node.layoutManager == this (aka, victim is a descendant of this.node)
 
   virtual void release(RenderNode victim);
@@ -812,24 +832,17 @@ class LayoutManager : EventTarget {
   void setChildSize(child, width, height); // sets child.width, child.height
   void setChildWidth(child, width); // sets child.width
   void setChildHeight(child, height); // sets child.height
+    // assert: child.ownerLayoutManager == this
     // for setChildSize/Width/Height: if the new dimension is different than the last assumed dimensions, and
     // any RenderNodes with an ownerLayoutManager==this have cached values for getProperty() that are marked
-    // as layout-dependent, clear them
-  void welcomeChild(child); // resets child.isNew
-  void reapChild(child); // resets child.isGhost
-
-  Generator<RenderNode> walkChildren();
-    // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not |this|
-
-  Generator<RenderNode> walkChildrenBackwards();
-    // returns a generator that iterates over the children backwards, skipping any whose ownerLayoutManager is not |this|
+    // as layout-dependent, mark them as dirty with cascadedValueDirty()
 
   void assumeDimensions(Float width, Float height);
-    // sets the assumed dimensions for calls to getProperty() on RenderNodes that have this as an ownerLayoutManager
+    // sets the assumed dimensions for calls to getProperty() on RenderNodes that have this as an ownerLayoutManager,
+    // by updating renderNode width/height;
     // if the new dimension is different than the last assumed dimensions, and any RenderNodes with an
-    // ownerLayoutManager==this have cached values for getProperty() that are marked as layout-dependent, clear them
-    // TODO(ianh): should we force this to match the input to layout(), when called from inside layout() and when
-    // layout() has a forced width and/or height?
+    // ownerLayoutManager==this have cached values for getProperty() that are marked as layout-dependent, mark them
+    // as dirty with cascadedValueDirty()
 
   virtual LayoutValueRange getIntrinsicWidth(Float? defaultWidth = null);
   /*
@@ -887,24 +900,62 @@ class LayoutManager : EventTarget {
      }
   */
 
+  void welcomeChild(child);
+    // assert: this == child.ownerLayoutManager
+    // assert: child.isNew is true
+    // resets child.isNew
+  void reapChild(child);
+    // assert: this == child.ownerLayoutManager
+    // assert: child.isGhost is true
+    // removes the RenderNode from its parent if isGhost is true
+
+  Generator<RenderNode> walkChildren();
+    // returns a generator that iterates over the children, skipping any whose ownerLayoutManager is not |this|
+
+  Generator<RenderNode> walkChildrenBackwards();
+    // returns a generator that iterates over the children backwards, skipping any whose ownerLayoutManager is not |this|
+
   void markAsLaidOut(); // sets this.node.needsLayout and this.node.descendantNeedsLayout to false
   virtual Dimensions layout(Float? width, Float? height);
-    // call markAsLaidOut();
-    // if autoreap is true: use walkChildren() to call welcomeChild() and reapChild() on each child
     // if width is null, set width to getIntrinsicWidth().value
-    // if height is null, set width height getIntrinsicHeight().value
+    // if height is null, set height to getIntrinsicHeight().value
     // call this.assumeDimensions(width, height);
     // call this.layoutChildren(width, height);
+    // call markAsLaidOut();
     // return { width: width, height: height }
-    // - this should always call this.markAsLaidOut() to reset needsLayout
-    // - the return value should include the final value for whichever of the width and height arguments
-    //   that is null
-    // - subclasses that want to make 'auto' values dependent on the children should override this
-    //   entirely, rather than overriding layoutChildren
+    // - this should always call this.markAsLaidOut() to reset
+    //   needsLayout and descendantNeedsLayout
+    // - the return value should include the final value for whichever
+    //   of the width and height arguments that is null
+    // - subclasses that want to make 'auto' values dependent on the
+    //   children should override this entirely, rather than
+    //   overriding layoutChildren; but see layoutChildren()'s notes
+    //   for how to do this
 
   virtual void layoutChildren(Float width, Float height);
     // default implementation does nothing
-    // - override this if you want to lay out children but not have the children affect your dimensions
+    // - override only this (and not layout()) if you want to lay out
+    //   children but not have the children affect your dimensions
+    // - always call setChildSize() and setChildPosition() after
+    //   calling a child's layout() method
+    // - if the child has needsLayout or if you need to have it
+    //   autosize, call its ownerLayoutManager's layout() method
+    // - otherwise if the child has needs descendantNeedsLayout, call
+    //   layoutDescendants()
+
+  virtual Dimensions layoutDescendants();
+    // assert: node.needsLayout is false, node.descendantNeedsLayout is true
+    // walk children:
+    //  - if it has needsLayout, call its layout() method with its
+    //    current width and height, then call setChildSize() with
+    //    those same dimensions
+    //  - else, if it has descendantNeedsLayout, call its
+    //    layoutDescendants() method
+    // call markAsLaidOut();
+    // - override this if you use take() to control more children, in
+    //   which case you should call their methods too
+    // - this should always call this.markAsLaidOut() to reset
+    //   needsLayout and descendantNeedsLayout
 
   virtual void paint(RenderingSurface canvas);
     // set a clip rect on the canvas for rect(0,0,this.width,this.height)
