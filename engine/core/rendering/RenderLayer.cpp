@@ -1641,29 +1641,6 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
     return resultLayer;
 }
 
-void RenderLayer::addBlockSelectionGapsBounds(const LayoutRect& bounds)
-{
-    m_blockSelectionGapsBounds.unite(enclosingIntRect(bounds));
-}
-
-void RenderLayer::clearBlockSelectionGapsBounds()
-{
-    m_blockSelectionGapsBounds = IntRect();
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
-        child->clearBlockSelectionGapsBounds();
-}
-
-IntRect RenderLayer::blockSelectionGapsBounds() const
-{
-    if (!renderer()->isRenderBlock())
-        return IntRect();
-
-    RenderBlock* renderBlock = toRenderBlock(renderer());
-    LayoutRect gapRects = renderBlock->selectionGapRectsForPaintInvalidation(renderBlock);
-
-    return pixelSnappedIntRect(gapRects);
-}
-
 bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot) const
 {
     // Always examine the canvas and the root.

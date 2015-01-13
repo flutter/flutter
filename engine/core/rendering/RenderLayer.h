@@ -126,10 +126,6 @@ public:
     // Our current relative position offset.
     const LayoutSize offsetForInFlowPosition() const;
 
-    void addBlockSelectionGapsBounds(const LayoutRect&);
-    void clearBlockSelectionGapsBounds();
-    IntRect blockSelectionGapsBounds() const;
-
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
     const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
 
@@ -541,8 +537,6 @@ private:
 
     DescendantDependentCompositingInputs m_descendantDependentCompositingInputs;
     AncestorDependentCompositingInputs m_ancestorDependentCompositingInputs;
-
-    IntRect m_blockSelectionGapsBounds;
 
     OwnPtr<RenderLayerScrollableArea> m_scrollableArea;
 

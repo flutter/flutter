@@ -1160,7 +1160,6 @@ sky_core_files = [
   "rendering/RenderParagraph.h",
   "rendering/RenderReplaced.cpp",
   "rendering/RenderReplaced.h",
-  "rendering/RenderSelectionInfo.h",
   "rendering/RenderText.cpp",
   "rendering/RenderText.h",
   "rendering/RenderTheme.cpp",

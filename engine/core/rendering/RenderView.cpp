@@ -30,7 +30,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
-#include "sky/engine/core/rendering/RenderSelectionInfo.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/TransformState.h"
@@ -303,21 +302,18 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
 
 IntRect RenderView::selectionBounds() const
 {
-    typedef HashMap<RawPtr<RenderObject>, OwnPtr<RenderSelectionInfo> > SelectionMap;
-    SelectionMap selectedObjects;
+    HashSet<RenderObject*> selectedObjects;
 
     RenderObject* os = m_selectionStart;
     RenderObject* stop = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     while (os && os != stop) {
         if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
             // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
-            selectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, false)));
+            selectedObjects.add(os);
             RenderBlock* cb = os->containingBlock();
             while (cb && !cb->isRenderView()) {
-                OwnPtr<RenderSelectionInfo>& blockInfo = selectedObjects.add(cb, nullptr).storedValue->value;
-                if (blockInfo)
+                if (!selectedObjects.add(cb).isNewEntry)
                     break;
-                blockInfo = adoptPtr(new RenderSelectionInfo(cb, false));
                 cb = cb->containingBlock();
             }
         }
@@ -327,16 +323,15 @@ IntRect RenderView::selectionBounds() const
 
     // Now create a single bounding box rect that encloses the whole selection.
     LayoutRect selRect;
-    SelectionMap::iterator end = selectedObjects.end();
-    for (SelectionMap::iterator i = selectedObjects.begin(); i != end; ++i) {
-        RenderSelectionInfo* info = i->value.get();
-        // RenderSelectionInfo::rect() is in the coordinates of the paintInvalidationContainer, so map to page coordinates.
-        LayoutRect currRect = info->rect();
-        if (const RenderLayerModelObject* paintInvalidationContainer = info->paintInvalidationContainer()) {
-            FloatQuad absQuad = paintInvalidationContainer->localToAbsoluteQuad(FloatRect(currRect));
-            currRect = absQuad.enclosingBoundingBox();
-        }
-        selRect.unite(currRect);
+
+    for (auto& renderer : selectedObjects) {
+        const RenderLayerModelObject* paintInvalidationContainer = renderer->containerForPaintInvalidation();
+        ASSERT(paintInvalidationContainer);
+        // selectionRectForPaintInvalidation is in the coordinates of the paintInvalidationContainer, so map to page coordinates.
+        bool clipToVisibleContent = false;
+        LayoutRect rect = renderer->selectionRectForPaintInvalidation(paintInvalidationContainer, clipToVisibleContent);
+        FloatQuad absQuad = paintInvalidationContainer->localToAbsoluteQuad(FloatRect(rect));
+        selRect.unite(absQuad.enclosingBoundingBox());
     }
     return pixelSnappedIntRect(selRect);
 }
@@ -379,50 +374,17 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
         m_selectionEnd == end && m_selectionEndPos == endPos)
         return;
 
-    // Record the old selected objects.  These will be used later
-    // when we compare against the new selected objects.
-    int oldStartPos = m_selectionStartPos;
-    int oldEndPos = m_selectionEndPos;
-
-    // Objects each have a single selection rect to examine.
-    typedef HashMap<RawPtr<RenderObject>, OwnPtr<RenderSelectionInfo> > SelectedObjectMap;
-    SelectedObjectMap oldSelectedObjects;
-    SelectedObjectMap newSelectedObjects;
-
-    // Blocks contain selected objects and fill gaps between them, either on the left, right, or in between lines and blocks.
-    // In order to get the paint invalidation rect right, we have to examine left, middle, and right rects individually, since otherwise
-    // the union of those rects might remain the same even when changes have occurred.
-    typedef HashMap<RawPtr<RenderBlock>, OwnPtr<RenderBlockSelectionInfo> > SelectedBlockMap;
-    SelectedBlockMap oldSelectedBlocks;
-    SelectedBlockMap newSelectedBlocks;
-
     RenderObject* os = m_selectionStart;
     RenderObject* stop = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
     bool exploringBackwards = false;
     bool continueExploring = os && (os != stop);
     while (continueExploring) {
         if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
-            // Blocks are responsible for painting line gaps and margin gaps.  They must be examined as well.
-            oldSelectedObjects.set(os, adoptPtr(new RenderSelectionInfo(os, true)));
-            if (blockPaintInvalidationMode == PaintInvalidationNewXOROld) {
-                RenderBlock* cb = os->containingBlock();
-                while (cb && !cb->isRenderView()) {
-                    OwnPtr<RenderBlockSelectionInfo>& blockInfo = oldSelectedBlocks.add(cb, nullptr).storedValue->value;
-                    if (blockInfo)
-                        break;
-                    blockInfo = adoptPtr(new RenderBlockSelectionInfo(cb));
-                    cb = cb->containingBlock();
-                }
-            }
+            os->setSelectionStateIfNeeded(SelectionNone);
         }
 
         os = getNextOrPrevRenderObjectBasedOnDirection(os, stop, continueExploring, exploringBackwards);
     }
-
-    // Now clear the selection.
-    SelectedObjectMap::iterator oldObjectsEnd = oldSelectedObjects.end();
-    for (SelectedObjectMap::iterator i = oldSelectedObjects.begin(); i != oldObjectsEnd; ++i)
-        i->key->setSelectionStateIfNeeded(SelectionNone);
 
     // set selection start and end
     m_selectionStart = start;
@@ -431,9 +393,9 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
     m_selectionEndPos = endPos;
 
     // Update the selection status of all objects between m_selectionStart and m_selectionEnd
-    if (start && start == end)
+    if (start && start == end) {
         start->setSelectionStateIfNeeded(SelectionBoth);
-    else {
+    } else {
         if (start)
             start->setSelectionStateIfNeeded(SelectionStart);
         if (end)
@@ -448,74 +410,6 @@ void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* e
             o->setSelectionStateIfNeeded(SelectionInside);
         o = o->nextInPreOrder();
     }
-
-    if (blockPaintInvalidationMode != PaintInvalidationNothing)
-        layer()->clearBlockSelectionGapsBounds();
-
-    // Now that the selection state has been updated for the new objects, walk them again and
-    // put them in the new objects list.
-    o = start;
-    exploringBackwards = false;
-    continueExploring = o && (o != stop);
-    while (continueExploring) {
-        if ((o->canBeSelectionLeaf() || o == start || o == end) && o->selectionState() != SelectionNone) {
-            newSelectedObjects.set(o, adoptPtr(new RenderSelectionInfo(o, true)));
-            RenderBlock* cb = o->containingBlock();
-            while (cb && !cb->isRenderView()) {
-                OwnPtr<RenderBlockSelectionInfo>& blockInfo = newSelectedBlocks.add(cb, nullptr).storedValue->value;
-                if (blockInfo)
-                    break;
-                blockInfo = adoptPtr(new RenderBlockSelectionInfo(cb));
-                cb = cb->containingBlock();
-            }
-        }
-
-        o = getNextOrPrevRenderObjectBasedOnDirection(o, stop, continueExploring, exploringBackwards);
-    }
-
-    if (!m_frameView || blockPaintInvalidationMode == PaintInvalidationNothing)
-        return;
-
-    // Have any of the old selected objects changed compared to the new selection?
-    for (SelectedObjectMap::iterator i = oldSelectedObjects.begin(); i != oldObjectsEnd; ++i) {
-        RenderObject* obj = i->key;
-        RenderSelectionInfo* newInfo = newSelectedObjects.get(obj);
-        RenderSelectionInfo* oldInfo = i->value.get();
-        if (!newInfo || oldInfo->rect() != newInfo->rect() || oldInfo->state() != newInfo->state() ||
-            (m_selectionStart == obj && oldStartPos != m_selectionStartPos) ||
-            (m_selectionEnd == obj && oldEndPos != m_selectionEndPos)) {
-            oldInfo->invalidatePaint();
-            if (newInfo) {
-                newInfo->invalidatePaint();
-                newSelectedObjects.remove(obj);
-            }
-        }
-    }
-
-    // Any new objects that remain were not found in the old objects dict, and so they need to be updated.
-    SelectedObjectMap::iterator newObjectsEnd = newSelectedObjects.end();
-    for (SelectedObjectMap::iterator i = newSelectedObjects.begin(); i != newObjectsEnd; ++i)
-        i->value->invalidatePaint();
-
-    // Have any of the old blocks changed?
-    SelectedBlockMap::iterator oldBlocksEnd = oldSelectedBlocks.end();
-    for (SelectedBlockMap::iterator i = oldSelectedBlocks.begin(); i != oldBlocksEnd; ++i) {
-        RenderBlock* block = i->key;
-        RenderBlockSelectionInfo* newInfo = newSelectedBlocks.get(block);
-        RenderBlockSelectionInfo* oldInfo = i->value.get();
-        if (!newInfo || oldInfo->rects() != newInfo->rects() || oldInfo->state() != newInfo->state()) {
-            oldInfo->invalidatePaint();
-            if (newInfo) {
-                newInfo->invalidatePaint();
-                newSelectedBlocks.remove(block);
-            }
-        }
-    }
-
-    // Any new blocks that remain were not found in the old blocks dict, and so they need to be updated.
-    SelectedBlockMap::iterator newBlocksEnd = newSelectedBlocks.end();
-    for (SelectedBlockMap::iterator i = newSelectedBlocks.begin(); i != newBlocksEnd; ++i)
-        i->value->invalidatePaint();
 }
 
 void RenderView::getSelection(RenderObject*& startRenderer, int& startOffset, RenderObject*& endRenderer, int& endOffset) const

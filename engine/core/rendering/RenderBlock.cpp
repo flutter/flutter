@@ -704,7 +704,7 @@ bool RenderBlock::isSelectionRoot() const
     return false;
 }
 
-GapRects RenderBlock::selectionGapRectsForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer)
+LayoutRect RenderBlock::selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool)
 {
     ASSERT(!needsLayout());
 
@@ -733,18 +733,10 @@ void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintO
         LayoutUnit lastRight = logicalRightSelectionOffset(this, lastTop);
         GraphicsContextStateSaver stateSaver(*paintInfo.context);
 
-        LayoutRect gapRectsBounds = selectionGaps(this, paintOffset, LayoutSize(), lastTop, lastLeft, lastRight, &paintInfo);
-        if (!gapRectsBounds.isEmpty()) {
-            RenderLayer* layer = enclosingLayer();
-            gapRectsBounds.moveBy(-paintOffset);
-            if (!hasLayer()) {
-                LayoutRect localBounds(gapRectsBounds);
-                gapRectsBounds = localToContainerQuad(FloatRect(localBounds), layer->renderer()).enclosingBoundingBox();
-                if (layer->renderer()->hasOverflowClip())
-                    gapRectsBounds.move(layer->renderBox()->scrolledContentOffset());
-            }
-            layer->addBlockSelectionGapsBounds(gapRectsBounds);
-        }
+        // TODO(ojan): In sky, we don't use the return value, but we
+        // need this in order to actually paint selection gaps.
+        // We should rename it appropriately.
+        selectionGaps(this, paintOffset, LayoutSize(), lastTop, lastLeft, lastRight, &paintInfo);
     }
 }
 
