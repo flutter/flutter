@@ -101,8 +101,6 @@ public:
     void setLayoutSizeFixedToFrameSize(bool isFixed) { m_layoutSizeFixedToFrameSize = isFixed; }
     bool layoutSizeFixedToFrameSize() { return m_layoutSizeFixedToFrameSize; }
 
-    bool needsFullPaintInvalidation() const { return m_doFullPaintInvalidation; }
-
     void recalcOverflowAfterStyleChange();
 
     bool isEnclosedInCompositingLayer() const;
@@ -242,8 +240,6 @@ private:
     LayoutSize m_size;
 
     RefPtr<LocalFrame> m_frame;
-
-    bool m_doFullPaintInvalidation;
 
     bool m_hasPendingLayout;
     RenderObject* m_layoutSubtreeRoot;

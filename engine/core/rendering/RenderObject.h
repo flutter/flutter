@@ -359,10 +359,6 @@ public:
     bool hasBoxDecorationBackground() const { return m_bitfields.boxDecorationBackgroundState() != NoBoxDecorationBackground; }
     bool boxDecorationBackgroundIsKnownToBeObscured();
     bool canRenderBorderImage() const;
-    bool mustInvalidateBackgroundOrBorderPaintOnWidthChange() const;
-    bool mustInvalidateBackgroundOrBorderPaintOnHeightChange() const;
-    bool mustInvalidateFillLayersPaintOnWidthChange(const FillLayer&) const;
-    bool mustInvalidateFillLayersPaintOnHeightChange(const FillLayer&) const;
     bool hasBackground() const { return style()->hasBackground(); }
     bool hasEntirelyFixedBackground() const;
 

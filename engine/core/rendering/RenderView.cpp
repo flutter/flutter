@@ -121,32 +121,6 @@ void RenderView::checkLayoutState()
 }
 #endif
 
-bool RenderView::shouldDoFullPaintInvalidationForNextLayout() const
-{
-    // It's hard to predict here which of full paint invalidation or per-descendant paint invalidation costs less.
-    // For vertical writing mode or width change it's more likely that per-descendant paint invalidation
-    // eventually turns out to be full paint invalidation but with the cost to handle more layout states
-    // and discrete paint invalidation rects, so marking full paint invalidation here is more likely to cost less.
-    // Otherwise, per-descendant paint invalidation is more likely to avoid unnecessary full paint invalidation.
-
-    if (width() != viewWidth())
-        return true;
-
-    if (height() != viewHeight()) {
-        if (RenderObject* backgroundRenderer = this->backgroundRenderer()) {
-            // When background-attachment is 'fixed', we treat the viewport (instead of the 'root'
-            // i.e. html or body) as the background positioning area, and we should full paint invalidation
-            // viewport resize if the background image is not composited and needs full paint invalidation on
-            // background positioning area resize.
-            if (backgroundRenderer->style()->hasFixedBackgroundImage()
-                && mustInvalidateFillLayersPaintOnHeightChange(backgroundRenderer->style()->backgroundLayers()))
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void RenderView::layout()
 {
     SubtreeLayoutScope layoutScope(*this);

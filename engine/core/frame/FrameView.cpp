@@ -111,7 +111,6 @@ void FrameView::reset()
 {
     m_hasPendingLayout = false;
     m_layoutSubtreeRoot = 0;
-    m_doFullPaintInvalidation = false;
     m_layoutSchedulingEnabled = true;
     m_inPerformLayout = false;
     m_canInvalidatePaintDuringPerformLayout = false;
@@ -350,17 +349,12 @@ void FrameView::layout(bool allowSubtree)
 
         if (!inSubtreeLayout) {
             if (m_firstLayout) {
-                m_doFullPaintInvalidation = true;
                 m_firstLayout = false;
                 m_firstLayoutCallbackPending = true;
                 m_lastViewportSize = layoutSize(IncludeScrollbars);
             }
 
             m_size = LayoutSize(layoutSize().width(), layoutSize().height());
-
-            // We need to set m_doFullPaintInvalidation before triggering layout as RenderObject::checkForPaintInvalidation
-            // checks the boolean to disable local paint invalidations.
-            m_doFullPaintInvalidation |= renderView()->shouldDoFullPaintInvalidationForNextLayout();
         }
 
         layer = rootForThisLayout->enclosingLayer();
@@ -403,7 +397,6 @@ void FrameView::layout(bool allowSubtree)
 void FrameView::invalidateTreeIfNeeded()
 {
     lifecycle().advanceTo(DocumentLifecycle::InPaintInvalidation);
-    m_doFullPaintInvalidation = false;
     lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
 }
 

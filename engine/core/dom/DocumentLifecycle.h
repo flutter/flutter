@@ -44,7 +44,6 @@ public:
         Inactive,
 
         // When the document is active, it traverses these states.
-
         VisualUpdatePending,
 
         InStyleRecalc,

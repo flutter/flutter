@@ -92,9 +92,6 @@ public:
 
     virtual LayoutRect viewRect() const override;
 
-    bool shouldDoFullPaintInvalidationForNextLayout() const;
-    bool doingFullPaintInvalidation() const { return m_frameView->needsFullPaintInvalidation(); }
-
     LayoutState* layoutState() const { return m_layoutState; }
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
