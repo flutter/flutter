@@ -243,7 +243,6 @@ public:
     bool isFocusable() const;
     bool isKeyboardFocusable() const;
     bool isMouseFocusable() const;
-    virtual void willCallDefaultEventHandler(const Event&) override final;
     void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
     void dispatchBlurEvent(Element* newFocusedElement);
     void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
@@ -318,10 +317,6 @@ protected:
     // moved to RenderObject because some focusable nodes don't have renderers,
     // e.g., HTMLOptionElement.
     virtual bool rendererIsFocusable() const;
-
-    // These methods are overridden by subclasses whose default focus appearance should not remain hidden on mouse focus.
-    virtual bool wasFocusedByMouse() const { return false; }
-    virtual void setWasFocusedByMouse(bool) { }
 
     // classAttributeChanged() exists to share code between
     // parseAttribute (called via setAttribute()) and

@@ -1554,10 +1554,6 @@ void Node::defaultEventHandler(Event* event)
     }
 }
 
-void Node::willCallDefaultEventHandler(const Event&)
-{
-}
-
 bool Node::willRespondToMouseMoveEvents()
 {
     return hasEventListeners(EventTypeNames::mousemove) || hasEventListeners(EventTypeNames::mouseover) || hasEventListeners(EventTypeNames::mouseout);

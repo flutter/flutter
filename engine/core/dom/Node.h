@@ -486,7 +486,6 @@ public:
 
     // Perform the default action for an event.
     virtual void defaultEventHandler(Event*);
-    virtual void willCallDefaultEventHandler(const Event&);
 
     virtual EventTargetData* eventTargetData() override;
     virtual EventTargetData& ensureEventTargetData() override;
