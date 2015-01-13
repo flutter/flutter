@@ -3,7 +3,6 @@
 <script>
  class BeehiveLayoutManager extends sky.LayoutManager {
    function layout(width, height) {
-     this.markAsLaidOut();
      if (width == null)
        width = this.getIntrinsicWidth().value;
      let autoHeight = false;
@@ -20,9 +19,12 @@
      let y = 0;
      while (!loop.done) {
        let child = loop.value;
-       if (child.needsLayout || child.descendantNeedsLayout) {
+       if (child.needsLayout) {
          child.layoutManager.layout(cellDim, cellDim);
          // we ignore the size the child reported from layout(), and force it to the cell dimensions
+         this.setChildSize(child, cellDim, cellDim);
+       } else if (child.descendantNeedsLayout) {
+         child.layoutManager.layoutDescendants();
          this.setChildSize(child, cellDim, cellDim);
        }
        this.setChildPosition(child, x * cellDim + (y % 2) * cellDim/2, y * 3/4 * cellDim);
@@ -35,6 +37,7 @@
      }
      if (height == 0)
        height = (1 + y * 3/4) * cellDim;
+     this.markAsLaidOut();
      return {
        width: width,
        height: height,
