@@ -5,7 +5,10 @@
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 
-<sky-element name="test-element" attributes="size:number, checked:boolean,name:string">
+<sky-element
+    name="test-element"
+    attributes="size:number, checked:boolean,name:string"
+    on-host-event="handleEvent">
 <template>
   <div id="inside" on-test-event="handleEvent" lang="{{ value }}">{{ value }}</div>
 </template>

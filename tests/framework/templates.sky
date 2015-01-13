@@ -131,13 +131,22 @@ describe("SkyElement", function() {
     });
   });
 
-  it("should connect event handlers", function() {
+  it("should connect template event handlers", function() {
     sandbox.appendChild(element);
     var inside = element.shadowRoot.getElementById("inside");
     inside.dispatchEvent(new CustomEvent("wrong-event"));
     assert.isNull(element.lastEvent);
     var event = new CustomEvent("test-event");
     inside.dispatchEvent(event);
+    assert.equal(element.lastEvent, event);
+  });
+
+  it("should connect host event handlers", function() {
+    sandbox.appendChild(element);
+    element.dispatchEvent(new CustomEvent("wrong-event"));
+    assert.isNull(element.lastEvent);
+    var event = new CustomEvent("host-event");
+    element.dispatchEvent(event);
     assert.equal(element.lastEvent, event);
   });
 

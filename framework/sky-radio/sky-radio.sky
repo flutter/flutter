@@ -5,7 +5,10 @@
 -->
 <import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
 
-<sky-element name="sky-radio" attributes="selected:boolean, group:string">
+<sky-element
+    name="sky-radio"
+    attributes="selected:boolean, group:string"
+    on-mouseup="handleMouseUp">
 <template>
   <style>
     :host {
@@ -75,10 +78,6 @@ module.exports = class extends SkyButton {
     super.created();
 
     this.controller = null;
-
-    this.addEventListener('mouseup', function() {
-      this.selected = true;
-    });
   }
   attached() {
     super.attached();
@@ -97,6 +96,9 @@ module.exports = class extends SkyButton {
   groupChanged(oldValue, newValue) {
     if (this.selected && this.controller)
       this.controller.takeSelectionFromGroup(this);
+  }
+  handleMouseUp() {
+    this.selected = true;
   }
 }.register();
 </script>

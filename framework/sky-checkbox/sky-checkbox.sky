@@ -5,7 +5,10 @@
 -->
 <import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
 
-<sky-element name="sky-checkbox" attributes="checked:boolean">
+<sky-element
+    name="sky-checkbox"
+    attributes="checked:boolean"
+    on-mouseup="handleMouseUp">
 <template>
   <style>
     :host {
@@ -55,16 +58,15 @@ module.exports = class extends SkyButton {
 
     this.containerStyle = '';
     this.checkStyle = '';
-
-    this.addEventListener('mouseup', function() {
-      this.checked = !this.checked;
-    });
   }
   checkedChanged(oldValue, newValue) {
     this.checkStyle = newValue ? 'checked' : '';
   }
   highlightChanged(oldValue, newValue) {
     this.containerStyle = newValue ? 'highlight' : '';
+  }
+  handleMouseUp() {
+    this.checked = !this.checked;
   }
 }.register();
 </script>

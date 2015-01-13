@@ -5,8 +5,6 @@
 -->
 <import src="sky-binder.sky" as="binder" />
 <script>
-var templates = new Map();
-
 var attributeConverters = {
   boolean: function(value) {
     if (typeof value == 'string')
@@ -23,27 +21,9 @@ var attributeConverters = {
   },
 };
 
-function defineReflectedAttribute(prototype, converter, name) {
-  Object.defineProperty(prototype, name, {
-    get: function() {
-      return converter(this.getAttribute(name));
-    },
-    set: function(newValue) {
-      this.setAttribute(name, converter(newValue));
-    },
-    enumerable: true,
-    configurable: true,
-  });
-
-  prototype[name + 'AttributeChanged'] = function(oldValue, newValue) {
-    this.notifyPropertyChanged(name, converter(oldValue), converter(newValue));
-  };
-}
-
-function defineReflectedAttributes(elementClass, tagName, list) {
-  var attributeTokens = (list || '').split(',');
-  var attributeNames = [];
-  var prototype = elementClass.prototype;
+function parseAttributeSpec(spec) {
+  var attributes = new Map();
+  var attributeTokens = (spec || '').split(',');
 
   for (var i = 0; i < attributeTokens.length; ++i) {
     var parts = attributeTokens[i].split(':');
@@ -51,35 +31,109 @@ function defineReflectedAttributes(elementClass, tagName, list) {
     var type = (parts[1] || '').trim();
     var converter = attributeConverters[type] || attributeConverters.string;
 
-    attributeNames.push(name);
-    defineReflectedAttribute(prototype, converter, name);
+    attributes.set(name, converter);
   }
 
-  binder.registerElement(tagName, {
-    attributeNames: attributeNames,
-  });
+  return attributes;
 }
+
+function collectEventHandlers(definition) {
+  var eventHandlers = [];
+  var attributes = definition.getAttributes();
+
+  for (var i = 0; i < attributes.length; i++) {
+    var attr = attributes[i];
+    var name = attr.name;
+    var value = attr.value;
+
+    if (name.startsWith('on-')) {
+      eventHandlers.push(name.substring(3));
+    }
+  }
+
+  return eventHandlers;
+}
+
+function eventHandlerCallback(event) {
+  var element = event.currentTarget;
+  var registration = registrations.get(element.localName);
+  var method = registration.getEventHandler(event.type);
+  var handler = element[method];
+  if (handler instanceof Function)
+    return handler.call(element, event);
+}
+
+class ElementRegistration {
+  constructor(definition) {
+    this.definition = definition;
+    this.tagName = definition.getAttribute('name');
+    this.attributes = parseAttributeSpec(definition.getAttribute('attributes'));
+    this.eventHandlers = collectEventHandlers(definition);
+    this.template = definition.querySelector('template');
+    Object.preventExtensions(this);
+  }
+
+  getEventHandler(eventName) {
+    return this.definition.getAttribute('on-' + eventName);
+  }
+
+  getAttributeNames() {
+    // TODO(esprehn): We can replace this method with
+    // Array.from(registration.attributes) once we turn that on.
+    var names = []
+    this.attributes.forEach(function(converter, name) {
+      names.push(name);
+    });
+    return names;
+  }
+
+  synthesizeAttributes(prototype) {
+    this.attributes.forEach(function(converter, name) {
+      Object.defineProperty(prototype, name, {
+        get: function() {
+          return converter(this.getAttribute(name));
+        },
+        set: function(newValue) {
+          this.setAttribute(name, converter(newValue));
+        },
+        enumerable: true,
+        configurable: true,
+      });
+    });
+  }
+}
+
+var registrations = new Map();
 
 class SkyElement extends HTMLElement {
 
   static register() {
-    var wrapper = document.currentScript.parentNode;
+    var definition = document.currentScript.parentNode;
 
-    if (wrapper.localName !== 'sky-element')
-      throw new Error('No <sky-element>.');
+    if (definition.localName !== 'sky-element') {
+      throw new Error('register() calls must be inside a <sky-element>.');
+    }
 
-    var tagName = wrapper.getAttribute('name');
-    if (!tagName)
+    var registration = new ElementRegistration(definition);
+
+    if (!registration.tagName) {
       throw new Error('<sky-element> must have a name.');
+    }
 
-    var template = wrapper.querySelector('template');
-    if (template)
-      templates.set(tagName, template);
+    if (registrations.has(registration.tagName)) {
+      throw new Error('Duplicate registration for tag name: ' +
+          registration.tagName);
+    }
 
-    defineReflectedAttributes(this, tagName,
-        wrapper.getAttribute('attributes'));
+    registration.synthesizeAttributes(this.prototype);
 
-    return document.registerElement(tagName, {
+    // TODO(esprehn): Combine the two element registries here and in sky binder.
+    binder.registerElement(registration.tagName, {
+      attributeNames: registration.getAttributeNames(),
+    });
+
+    registrations.set(registration.tagName, registration);
+    return document.registerElement(registration.tagName, {
       prototype: this.prototype,
     });
   }
@@ -116,14 +170,20 @@ class SkyElement extends HTMLElement {
       var attribute = attributes[i];
       this.attributeChangedCallback(attribute.name, null, attribute.value);
     }
+
+    var registration = registrations.get(this.localName);
+    for (var i = 0; i < registration.eventHandlers.length; ++i) {
+      var eventName = registration.eventHandlers[i];
+      this.addEventListener(eventName, eventHandlerCallback);
+    }
   }
 
   attachedCallback() {
     if (!this.shadowRoot) {
-      var template = templates.get(this.localName);
-      if (template) {
+      var registration = registrations.get(this.localName);
+      if (registration.template) {
         var shadow = this.ensureShadowRoot();
-        var instance = binder.createInstance(template, this);
+        var instance = binder.createInstance(registration.template, this);
         shadow.appendChild(instance.fragment);
         this.shadowRootReady();
       }
@@ -139,9 +199,12 @@ class SkyElement extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     this.attributeChanged(name, oldValue, newValue);
-    var handler = this[name + 'AttributeChanged'];
-    if (typeof handler == 'function')
-      handler.call(this, oldValue, newValue);
+    var registration = registrations.get(this.localName);
+    var converter = registration.attributes.get(name);
+    if (converter) {
+      this.notifyPropertyChanged(name, converter(oldValue),
+          converter(newValue));
+    }
   }
 
   notifyPropertyChanged(name, oldValue, newValue) {
