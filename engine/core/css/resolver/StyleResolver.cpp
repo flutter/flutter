@@ -142,18 +142,12 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
         return;
 
     TreeScope& treeScope = ownerNode->treeScope();
-    ScopedStyleResolver& resolver = treeScope.scopedStyleResolver();
-    resolver.addRulesFromSheet(cssSheet);
-
-    RuleSet& ruleSet = cssSheet->contents()->ruleSet();
-
-    const MediaQueryResultList& list = ruleSet.viewportDependentMediaQueryResults();
-    for (size_t i = 0; i < list.size(); ++i)
-        m_viewportDependentMediaQueryResults.append(list[i]);
+    treeScope.scopedStyleResolver().addRulesFromSheet(cssSheet);
 
     // FIXME(BUG 72461): We don't add @font-face rules of scoped style sheets for the moment.
     if (ownerNode->isDocumentNode()) {
         CSSFontSelector* fontSelector = document().styleEngine()->fontSelector();
+        RuleSet& ruleSet = cssSheet->contents()->ruleSet();
         const Vector<RawPtr<StyleRuleFontFace> > fontFaceRules = ruleSet.fontFaceRules();
         for (unsigned i = 0; i < fontFaceRules.size(); ++i) {
             if (RefPtr<FontFace> fontFace = FontFace::create(&document(), fontFaceRules[i]))

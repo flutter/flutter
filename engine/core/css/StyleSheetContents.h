@@ -22,6 +22,7 @@
 #define SKY_ENGINE_CORE_CSS_STYLESHEETCONTENTS_H_
 
 #include "sky/engine/core/css/RuleSet.h"
+#include "sky/engine/core/css/parser/CSSParserMode.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/HashMap.h"

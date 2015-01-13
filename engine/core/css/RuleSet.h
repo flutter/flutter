@@ -22,11 +22,10 @@
 #ifndef SKY_ENGINE_CORE_CSS_RULESET_H_
 #define SKY_ENGINE_CORE_CSS_RULESET_H_
 
-#include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/StyleRuleKeyframes.h"
-#include "sky/engine/core/css/resolver/MediaQueryResult.h"
+#include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/LinkedStack.h"
@@ -85,7 +84,6 @@ public:
     const Vector<RuleData>* hostRules() const { ASSERT(!m_pendingRules); return &m_hostRules; }
     const Vector<RawPtr<StyleRuleFontFace> >& fontFaceRules() const { return m_fontFaceRules; }
     const Vector<RawPtr<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
-    const MediaQueryResultList& viewportDependentMediaQueryResults() const { return m_viewportDependentMediaQueryResults; }
 
     void compactRulesIfNeeded()
     {
@@ -145,8 +143,6 @@ private:
     Vector<RawPtr<StyleRuleKeyframes> > m_keyframesRules;
 
     RuleFeatureSet m_features;
-
-    MediaQueryResultList m_viewportDependentMediaQueryResults;
 
     unsigned m_ruleCount;
     OwnPtr<PendingRuleMaps> m_pendingRules;
