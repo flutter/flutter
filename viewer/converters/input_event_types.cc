@@ -60,6 +60,7 @@ int GetClickCount(int flags) {
 scoped_ptr<blink::WebInputEvent> BuildWebTouchEvent(const EventPtr& event) {
   scoped_ptr<blink::WebTouchEvent> web_event(new blink::WebTouchEvent);
 
+  web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
   web_event->timeStampSeconds =
       base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
 
@@ -113,7 +114,83 @@ scoped_ptr<blink::WebInputEvent> BuildWebTouchEvent(const EventPtr& event) {
   return web_event.Pass();
 }
 
-scoped_ptr<blink::WebInputEvent> BuildWebMouseEventFrom(const EventPtr& event) {
+scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(const EventPtr& event) {
+  scoped_ptr<blink::WebGestureEvent> web_event(new blink::WebGestureEvent);
+
+  web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
+  web_event->timeStampSeconds =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
+
+  switch (event->action) {
+    case EVENT_TYPE_GESTURE_SCROLL_BEGIN:
+      web_event->type = blink::WebInputEvent::GestureScrollBegin;
+      break;
+    case EVENT_TYPE_GESTURE_SCROLL_END:
+      web_event->type = blink::WebInputEvent::GestureScrollEnd;
+      break;
+    case EVENT_TYPE_GESTURE_SCROLL_UPDATE:
+      web_event->type = blink::WebInputEvent::GestureScrollUpdate;
+      break;
+    case EVENT_TYPE_SCROLL_FLING_START:
+      web_event->type = blink::WebInputEvent::GestureFlingStart;
+      break;
+    case EVENT_TYPE_SCROLL_FLING_CANCEL:
+      web_event->type = blink::WebInputEvent::GestureFlingCancel;
+      break;
+    case EVENT_TYPE_GESTURE_SHOW_PRESS:
+      web_event->type = blink::WebInputEvent::GestureShowPress;
+      break;
+    case EVENT_TYPE_GESTURE_TAP:
+      web_event->type = blink::WebInputEvent::GestureTap;
+      break;
+    case EVENT_TYPE_GESTURE_TAP_UNCONFIRMED:
+      web_event->type = blink::WebInputEvent::GestureTapUnconfirmed;
+      break;
+    case EVENT_TYPE_GESTURE_TAP_DOWN:
+      web_event->type = blink::WebInputEvent::GestureTapDown;
+      break;
+    case EVENT_TYPE_GESTURE_TAP_CANCEL:
+      web_event->type = blink::WebInputEvent::GestureTapCancel;
+      break;
+    case EVENT_TYPE_GESTURE_DOUBLE_TAP:
+      web_event->type = blink::WebInputEvent::GestureDoubleTap;
+      break;
+    case EVENT_TYPE_GESTURE_TWO_FINGER_TAP:
+      web_event->type = blink::WebInputEvent::GestureTwoFingerTap;
+      break;
+    case EVENT_TYPE_GESTURE_LONG_PRESS:
+      web_event->type = blink::WebInputEvent::GestureLongPress;
+      break;
+    case EVENT_TYPE_GESTURE_LONG_TAP:
+      web_event->type = blink::WebInputEvent::GestureLongTap;
+      break;
+    case EVENT_TYPE_GESTURE_PINCH_BEGIN:
+      web_event->type = blink::WebInputEvent::GesturePinchBegin;
+      break;
+    case EVENT_TYPE_GESTURE_PINCH_END:
+      web_event->type = blink::WebInputEvent::GesturePinchEnd;
+      break;
+    case EVENT_TYPE_GESTURE_PINCH_UPDATE:
+      web_event->type = blink::WebInputEvent::GesturePinchUpdate;
+      break;
+    default:
+      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
+      break;
+  }
+
+  web_event->x = event->location_data->in_view_location->x;
+  web_event->y = event->location_data->in_view_location->y;
+
+  // TODO(erg): Remove this null check as parallel to above.
+  if (!event->location_data->screen_location.is_null()) {
+    web_event->globalX = event->location_data->screen_location->x;
+    web_event->globalY = event->location_data->screen_location->y;
+  }
+
+  return web_event.Pass();
+}
+
+scoped_ptr<blink::WebInputEvent> BuildWebMouseEvent(const EventPtr& event) {
   scoped_ptr<blink::WebMouseEvent> web_event(new blink::WebMouseEvent);
   web_event->x = event->location_data->in_view_location->x;
   web_event->y = event->location_data->in_view_location->y;
@@ -198,7 +275,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
   return web_event.Pass();
 }
 
-scoped_ptr<blink::WebInputEvent> BuildWebMouseWheelEventFrom(
+scoped_ptr<blink::WebInputEvent> BuildWebMouseWheelEvent(
     const EventPtr& event) {
   scoped_ptr<blink::WebMouseWheelEvent> web_event(
       new blink::WebMouseWheelEvent);
@@ -243,19 +320,41 @@ TypeConverter<scoped_ptr<blink::WebInputEvent>, EventPtr>::Convert(
       event->action == EVENT_TYPE_TOUCH_MOVED ||
       event->action == EVENT_TYPE_TOUCH_CANCELLED) {
     return BuildWebTouchEvent(event);
+  } else if (event->action == EVENT_TYPE_GESTURE_SCROLL_BEGIN ||
+      event->action == EVENT_TYPE_GESTURE_SCROLL_END ||
+      event->action == EVENT_TYPE_GESTURE_SCROLL_UPDATE ||
+      event->action == EVENT_TYPE_GESTURE_TAP ||
+      event->action == EVENT_TYPE_GESTURE_TAP_DOWN ||
+      event->action == EVENT_TYPE_GESTURE_TAP_CANCEL ||
+      event->action == EVENT_TYPE_GESTURE_TAP_UNCONFIRMED ||
+      event->action == EVENT_TYPE_GESTURE_DOUBLE_TAP ||
+      event->action == EVENT_TYPE_GESTURE_BEGIN ||
+      event->action == EVENT_TYPE_GESTURE_END ||
+      event->action == EVENT_TYPE_GESTURE_TWO_FINGER_TAP ||
+      event->action == EVENT_TYPE_GESTURE_PINCH_BEGIN ||
+      event->action == EVENT_TYPE_GESTURE_PINCH_END ||
+      event->action == EVENT_TYPE_GESTURE_PINCH_UPDATE ||
+      event->action == EVENT_TYPE_GESTURE_LONG_PRESS ||
+      event->action == EVENT_TYPE_GESTURE_LONG_TAP ||
+      event->action == EVENT_TYPE_GESTURE_SWIPE ||
+      event->action == EVENT_TYPE_GESTURE_SHOW_PRESS ||
+      event->action == EVENT_TYPE_GESTURE_WIN8_EDGE_SWIPE ||
+      event->action == EVENT_TYPE_SCROLL_FLING_START ||
+      event->action == EVENT_TYPE_SCROLL_FLING_CANCEL) {
+    return BuildWebGestureEvent(event);
   } else if (event->action == EVENT_TYPE_MOUSE_PRESSED ||
       event->action == EVENT_TYPE_MOUSE_RELEASED ||
       event->action == EVENT_TYPE_MOUSE_ENTERED ||
       event->action == EVENT_TYPE_MOUSE_EXITED ||
       event->action == EVENT_TYPE_MOUSE_MOVED ||
       event->action == EVENT_TYPE_MOUSE_DRAGGED) {
-    return BuildWebMouseEventFrom(event);
+    return BuildWebMouseEvent(event);
   } else if ((event->action == EVENT_TYPE_KEY_PRESSED ||
               event->action == EVENT_TYPE_KEY_RELEASED) &&
              event->key_data) {
     return BuildWebKeyboardEvent(event);
   } else if (event->action == EVENT_TYPE_MOUSEWHEEL) {
-    return BuildWebMouseWheelEventFrom(event);
+    return BuildWebMouseWheelEvent(event);
   }
 
   return scoped_ptr<blink::WebInputEvent>();
