@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import skypy.paths
 from skypy.skyserver import SkyServer
 import argparse
 import json
@@ -12,6 +11,8 @@ import os
 import pipes
 import requests
 import signal
+import skypy.paths
+import StringIO
 import subprocess
 import sys
 import time
@@ -318,7 +319,7 @@ class SkyDebugger(object):
             'MojoShellApplication',
             'chromium',
         ]
-        subprocess.call(['adb', 'logcat', '-s'] + TAGS)
+        subprocess.call(['adb', 'logcat', '-d', '-s'] + TAGS)
 
     def gdb_attach_command(self, args):
         self.paths = self._create_paths_for_build_dir(self.pids['build_dir'])
@@ -330,6 +331,16 @@ class SkyDebugger(object):
         # We don't want python listenting for signals or anything, so exec
         # gdb and let it take the entire process.
         os.execv(gdb_command[0], gdb_command)
+
+    def print_crash_command(self, args):
+        logcat_cmd = ['adb', 'logcat', '-d']
+        logcat = subprocess.Popen(logcat_cmd, stdout=subprocess.PIPE)
+
+        stack_path = os.path.join(SRC_ROOT,
+            'tools', 'android_stack_parser', 'stack')
+        stack = subprocess.Popen([stack_path, '-'], stdin=logcat.stdout)
+        logcat.wait()
+        stack.wait()
 
     def main(self):
         logging.basicConfig(level=logging.INFO)
@@ -361,6 +372,10 @@ class SkyDebugger(object):
         logcat_parser = subparsers.add_parser('logcat',
             help=('dump sky-related logs from device'))
         logcat_parser.set_defaults(func=self.logcat_command)
+
+        print_crash_parser = subparsers.add_parser('print_crash',
+            help=('dump (and symbolicate) recent crash-stacks'))
+        print_crash_parser.set_defaults(func=self.print_crash_command)
 
         gdb_attach_parser = subparsers.add_parser('gdb_attach',
             help='launch gdb and attach to gdbserver launched from start --gdb')
