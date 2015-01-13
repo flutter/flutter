@@ -153,7 +153,7 @@ void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
     bool containingBlockNeedsToRecomputePreferredSize = style()->logicalWidth().isPercent() || style()->logicalMaxWidth().isPercent()  || style()->logicalMinWidth().isPercent();
 
     if (imageSourceHasChangedSize && (!imageSizeIsConstrained || containingBlockNeedsToRecomputePreferredSize)) {
-        setNeedsLayoutAndFullPaintInvalidation();
+        setNeedsLayout();
         return;
     }
 

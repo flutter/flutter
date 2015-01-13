@@ -85,7 +85,7 @@ void RenderReplaced::layout()
 void RenderReplaced::intrinsicSizeChanged()
 {
     m_intrinsicSize = IntSize(defaultWidth, defaultHeight);
-    setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+    setNeedsLayoutAndPrefWidthsRecalc();
 }
 
 void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)

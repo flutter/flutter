@@ -106,7 +106,7 @@ void RenderLayerModelObject::styleDidChange(StyleDifference diff, const RenderSt
         setHasTransform(false); // Either a transform wasn't specified or the object doesn't support transforms, so just null out the bit.
         layer()->removeOnlyThisLayer(); // calls destroyLayer() which clears m_layer
         if (hadTransform)
-            setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+            setNeedsLayoutAndPrefWidthsRecalc();
     }
 
     if (layer()) {

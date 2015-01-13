@@ -309,7 +309,7 @@ public:
     {
         m_bitfields.setAncestorLineBoxDirty(value);
         if (value)
-            setNeedsLayoutAndFullPaintInvalidation();
+            setNeedsLayout();
     }
 
     // Returns the smallest rectangle enclosing all of the painted content
@@ -432,7 +432,6 @@ public:
 
     void markContainingBlocksForLayout(bool scheduleRelayout = true, RenderObject* newRoot = 0, SubtreeLayoutScope* = 0);
     void setNeedsLayout(MarkingBehavior = MarkContainingBlockChain, SubtreeLayoutScope* = 0);
-    void setNeedsLayoutAndFullPaintInvalidation(MarkingBehavior = MarkContainingBlockChain, SubtreeLayoutScope* = 0);
     void clearNeedsLayout();
     void setChildNeedsLayout(MarkingBehavior = MarkContainingBlockChain, SubtreeLayoutScope* = 0);
     void setNeedsPositionedMovementLayout();
@@ -443,11 +442,6 @@ public:
     void setNeedsLayoutAndPrefWidthsRecalc()
     {
         setNeedsLayout();
-        setPreferredLogicalWidthsDirty();
-    }
-    void setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation()
-    {
-        setNeedsLayoutAndFullPaintInvalidation();
         setPreferredLogicalWidthsDirty();
     }
 
@@ -919,7 +913,7 @@ inline bool RenderObject::documentBeingDestroyed() const
 }
 
 // setNeedsLayout() won't cause full paint invalidations as
-// setNeedsLayoutAndFullPaintInvalidation() does. Otherwise the two methods are identical.
+// setNeedsLayout() does. Otherwise the two methods are identical.
 inline void RenderObject::setNeedsLayout(MarkingBehavior markParents, SubtreeLayoutScope* layouter)
 {
     ASSERT(!isSetNeedsLayoutForbidden());
@@ -929,12 +923,6 @@ inline void RenderObject::setNeedsLayout(MarkingBehavior markParents, SubtreeLay
         if (markParents == MarkContainingBlockChain && (!layouter || layouter->root() != this))
             markContainingBlocksForLayout(true, 0, layouter);
     }
-}
-
-// FIXME(sky): Remove this method.
-inline void RenderObject::setNeedsLayoutAndFullPaintInvalidation(MarkingBehavior markParents, SubtreeLayoutScope* layouter)
-{
-    setNeedsLayout(markParents, layouter);
 }
 
 inline void RenderObject::clearNeedsLayout()

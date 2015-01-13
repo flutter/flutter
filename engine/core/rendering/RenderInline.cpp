@@ -113,7 +113,7 @@ void RenderInline::styleDidChange(StyleDifference diff, const RenderStyle* oldSt
         bool alwaysCreateLineBoxesNew = hasSelfPaintingLayer() || hasBoxDecorationBackground() || newStyle->hasPadding() || newStyle->hasMargin() || newStyle->hasOutline();
         if (oldStyle && alwaysCreateLineBoxesNew) {
             dirtyLineBoxes(false);
-            setNeedsLayoutAndFullPaintInvalidation();
+            setNeedsLayout();
         }
         setAlwaysCreateLineBoxes(alwaysCreateLineBoxesNew);
     }
@@ -178,7 +178,7 @@ LayoutRect RenderInline::localCaretRect(InlineBox* inlineBox, int, LayoutUnit* e
 void RenderInline::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
     RenderBoxModelObject::addChild(newChild, beforeChild);
-    newChild->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+    newChild->setNeedsLayoutAndPrefWidthsRecalc();
 }
 
 void RenderInline::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)

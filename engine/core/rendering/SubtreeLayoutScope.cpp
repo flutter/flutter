@@ -55,7 +55,7 @@ SubtreeLayoutScope::~SubtreeLayoutScope()
 void SubtreeLayoutScope::setNeedsLayout(RenderObject* descendant)
 {
     ASSERT(descendant->isDescendantOf(&m_root));
-    descendant->setNeedsLayoutAndFullPaintInvalidation(MarkContainingBlockChain, this);
+    descendant->setNeedsLayout(MarkContainingBlockChain, this);
 }
 
 void SubtreeLayoutScope::setChildNeedsLayout(RenderObject* descendant)

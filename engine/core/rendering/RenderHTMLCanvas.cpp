@@ -104,7 +104,7 @@ void RenderHTMLCanvas::canvasSizeChanged()
         return;
 
     if (!selfNeedsLayout())
-        setNeedsLayoutAndFullPaintInvalidation();
+        setNeedsLayout();
 }
 
 } // namespace blink

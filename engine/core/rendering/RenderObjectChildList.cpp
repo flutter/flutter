@@ -59,7 +59,7 @@ RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner, Render
         // that a positioned child got yanked). We also issue paint invalidations, so that the area exposed when the child
         // disappears gets paint invalidated properly.
         if (!owner->documentBeingDestroyed() && notifyRenderer && oldChild->everHadLayout())
-            oldChild->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+            oldChild->setNeedsLayoutAndPrefWidthsRecalc();
     }
 
     // If we have a line box wrapper, delete it.
@@ -134,7 +134,7 @@ void RenderObjectChildList::insertChildNode(RenderObject* owner, RenderObject* n
     if (!owner->documentBeingDestroyed() && notifyRenderer)
         newChild->insertedIntoTree();
 
-    newChild->setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+    newChild->setNeedsLayoutAndPrefWidthsRecalc();
     if (!owner->normalChildNeedsLayout())
         owner->setChildNeedsLayout(); // We may supply the static position for an absolute positioned child.
 }

@@ -110,7 +110,7 @@ void RenderText::styleDidChange(StyleDifference diff, const RenderStyle* oldStyl
     // We do have to schedule layouts, though, since a style change can force us to
     // need to relayout.
     if (diff.needsFullLayout()) {
-        setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+        setNeedsLayoutAndPrefWidthsRecalc();
         m_knownToHaveNoOverflowAndNoFallbackFonts = false;
     }
 
@@ -1209,7 +1209,7 @@ void RenderText::setText(PassRefPtr<StringImpl> text, bool force)
     // insertChildNode() fails to set true to owner. To avoid that, we call
     // setNeedsLayoutAndPrefWidthsRecalc() only if this RenderText has parent.
     if (parent())
-        setNeedsLayoutAndPrefWidthsRecalcAndFullPaintInvalidation();
+        setNeedsLayoutAndPrefWidthsRecalc();
     m_knownToHaveNoOverflowAndNoFallbackFonts = false;
 }
 

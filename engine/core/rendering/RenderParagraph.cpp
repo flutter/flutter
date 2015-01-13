@@ -1384,7 +1384,7 @@ RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutSt
     if (layoutState.isFullLayout()) {
         // If we encountered a new float and have inline children, mark ourself to force us to issue paint invalidations.
         if (layoutState.hasInlineChild() && !selfNeedsLayout()) {
-            setNeedsLayoutAndFullPaintInvalidation(MarkOnlyThis);
+            setNeedsLayout(MarkOnlyThis);
         }
 
         // FIXME: This should just call deleteLineBoxTree, but that causes
