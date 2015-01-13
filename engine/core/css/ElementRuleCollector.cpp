@@ -124,18 +124,21 @@ void ElementRuleCollector::sortAndTransferMatchedRules()
 inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData)
 {
     SelectorChecker checker(*m_context.element());
-    if (checker.match(ruleData.selector())) {
-        if (checker.matchedAttributeSelector())
-            m_style->setUnique();
-        if (checker.matchedFocusSelector())
-            m_style->setAffectedByFocus();
-        if (checker.matchedHoverSelector())
-            m_style->setAffectedByHover();
-        if (checker.matchedActiveSelector())
-            m_style->setAffectedByActive();
-        return true;
-    }
-    return false;
+    bool matched = checker.match(ruleData.selector());
+
+    if (checker.matchedAttributeSelector())
+        m_style->setUnique();
+
+    if (checker.matchedFocusSelector())
+        m_style->setAffectedByFocus();
+
+    if (checker.matchedHoverSelector())
+        m_style->setAffectedByHover();
+
+    if (checker.matchedActiveSelector())
+        m_style->setAffectedByActive();
+
+    return matched;
 }
 
 void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
