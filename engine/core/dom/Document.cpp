@@ -1443,18 +1443,7 @@ void Document::setParsing(bool b)
 
 bool Document::shouldScheduleLayout() const
 {
-    // This function will only be called when FrameView thinks a layout is needed.
-    // This enforces a couple extra rules.
-    //
-    //    (a) Only schedule a layout once the stylesheets are loaded.
-    //    (b) Only schedule layout once we have a body element.
-    if (!isActive())
-        return false;
-
-    if (isRenderingReady())
-        return true;
-
-    return false;
+   return isActive();
 }
 
 int Document::elapsedTime() const
@@ -1526,7 +1515,7 @@ void Document::didLoadAllParserBlockingResources()
 
 void Document::resumeParserWaitingForResourcesTimerFired(Timer<Document>*)
 {
-    if (!isRenderingReady())
+    if (!haveImportsLoaded())
         return;
     if (m_parser)
         m_parser->resumeAfterWaitingForImports();

@@ -229,8 +229,7 @@ public:
     StyleResolver* styleResolver() const;
     StyleResolver& ensureStyleResolver() const;
 
-    bool isRenderingReady() const { return haveImportsLoaded(); }
-    bool isScriptExecutionReady() const { return isRenderingReady(); }
+    bool isScriptExecutionReady() const { return haveImportsLoaded(); }
 
     StyleEngine* styleEngine() { return m_styleEngine.get(); }
 
