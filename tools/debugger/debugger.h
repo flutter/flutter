@@ -25,7 +25,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
                     public mojo::ViewManagerDelegate,
                     public mojo::ViewObserver,
                     public mojo::InterfaceFactory<Debugger>,
-                    public mojo::InterfaceImpl<Debugger> {
+                    public mojo::InterfaceImpl<Debugger>,
+                    public window_manager::WindowManagerDelegate {
  public:
   SkyDebugger();
   virtual ~SkyDebugger();
@@ -60,6 +61,11 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   // Overridden from InterfaceFactory<Debugger>:
   void Create(mojo::ApplicationConnection* connection,
               mojo::InterfaceRequest<Debugger> request) override;
+
+  // Overridden from WindowManagerDelegate
+  void Embed(
+      const mojo::String& url,
+      mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) override;
 
   scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
