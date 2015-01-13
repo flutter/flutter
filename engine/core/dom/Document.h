@@ -343,7 +343,6 @@ public:
     void updateHoverActiveState(const HitTestRequest&, Element*, const PlatformMouseEvent* = 0);
 
     void scheduleRenderTreeUpdateIfNeeded();
-    bool hasPendingForcedStyleRecalc() const;
 
     void attachRange(Range*);
     void detachRange(Range*);

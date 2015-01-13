@@ -957,11 +957,6 @@ void Document::scheduleRenderTreeUpdate()
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 }
 
-bool Document::hasPendingForcedStyleRecalc() const
-{
-    return hasPendingStyleRecalc() && !inStyleRecalc() && styleChangeType() >= SubtreeStyleChange;
-}
-
 void Document::updateDistributionIfNeeded()
 {
     ScriptForbiddenScope forbidScript;

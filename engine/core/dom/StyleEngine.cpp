@@ -81,11 +81,6 @@ void StyleEngine::updateActiveStyleSheets()
     m_document->renderView()->style()->font().update(fontSelector());
 }
 
-unsigned StyleEngine::resolverAccessCount() const
-{
-    return m_resolver->accessCount();
-}
-
 void StyleEngine::resolverChanged()
 {
     if (!m_document->isActive())

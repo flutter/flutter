@@ -50,11 +50,12 @@ class StyleSheetContents;
 class StyleEngine final : public CSSFontSelectorClient  {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassOwnPtr<StyleEngine> create(Document& document) { return adoptPtr(new StyleEngine(document)); }
+    static PassOwnPtr<StyleEngine> create(Document& document)
+    {
+        return adoptPtr(new StyleEngine(document));
+    }
 
     ~StyleEngine();
-
-    void detachFromDocument();
 
     void addTreeScope(TreeScope&);
     void removeTreeScope(TreeScope&);
@@ -62,12 +63,10 @@ public:
     StyleResolver& resolver() { return *m_resolver; }
 
     CSSFontSelector* fontSelector() { return m_fontSelector.get(); }
-    void clearFontCache();
-    // updateGenericFontFamilySettings is used from WebSettingsImpl.
+
     void updateGenericFontFamilySettings();
 
     void resolverChanged();
-    unsigned resolverAccessCount() const;
 
     PassRefPtr<CSSStyleSheet> createSheet(Element*, const String& text);
     void removeSheet(StyleSheetContents*);
@@ -78,6 +77,9 @@ private:
 
 private:
     explicit StyleEngine(Document&);
+
+    // TODO(esprehn): Need to call this after @font-face rules load.
+    void clearFontCache();
 
     void updateActiveStyleSheets();
 
