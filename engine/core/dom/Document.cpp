@@ -1519,18 +1519,6 @@ void Document::didLoadAllImports()
     didLoadAllParserBlockingResources();
 }
 
-void Document::didRemoveAllPendingStylesheet()
-{
-    styleResolverChanged();
-
-    // Only imports on master documents can trigger rendering.
-    if (HTMLImportLoader* import = importLoader())
-        import->didRemoveAllPendingStylesheet();
-    if (!haveImportsLoaded())
-        return;
-    didLoadAllParserBlockingResources();
-}
-
 void Document::didLoadAllParserBlockingResources()
 {
     m_resumeParserWaitingForResourcesTimer.startOneShot(0, FROM_HERE);

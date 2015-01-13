@@ -146,12 +146,6 @@ void HTMLImportLoader::didFinishParsing()
     setState(finishLoading());
 }
 
-void HTMLImportLoader::didRemoveAllPendingStylesheet()
-{
-    if (m_state == StateParsed)
-        setState(finishLoading());
-}
-
 void HTMLImportLoader::didFinishLoading()
 {
     for (size_t i = 0; i < m_imports.size(); ++i)

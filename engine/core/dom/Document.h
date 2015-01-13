@@ -521,7 +521,6 @@ public:
     ElementDataCache* elementDataCache() { return m_elementDataCache.get(); }
 
     void didLoadAllParserBlockingResources();
-    void didRemoveAllPendingStylesheet();
 
     bool inStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::InStyleRecalc; }
 

@@ -85,10 +85,6 @@ public:
     // Tells the loader that the parser is done with this import.
     // Called by Document::finishedParsing, after DOMContentLoaded was dispatched.
     void didFinishParsing();
-    // Tells the loader that all of the import's stylesheets finished
-    // loading.
-    // Called by Document::didRemoveAllPendingStylesheet.
-    void didRemoveAllPendingStylesheet();
 
     PassRefPtr<CustomElementSyncMicrotaskQueue> microtaskQueue() const;
 
