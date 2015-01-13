@@ -1,0 +1,14 @@
+<div>
+<style>
+ .h1 { font-size: 2em; margin: 1em; }
+ .p { margin: 0.5em 1em; color: #bcd8f5; font-weight: 900; }
+</style>
+<div class="h1">about:blank</div>
+<div class="p">Welcome to Sky!</div>
+<script>
+// Don't use dump-as-render-tree.sky, we want a test with no imports.
+window.addEventListener('load', function() {
+  internals.notifyTestComplete(internals.renderTreeAsText());
+});
+</script>
+</div>
