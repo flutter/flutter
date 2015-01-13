@@ -68,8 +68,6 @@ private:
     TreeScope& m_treeScope;
     DocumentOrderedList m_styleSheetCandidateNodes;    
     Vector<RefPtr<CSSStyleSheet>> m_activeAuthorStyleSheets;
-
-    bool m_needsUpdate;
 };
 
 }

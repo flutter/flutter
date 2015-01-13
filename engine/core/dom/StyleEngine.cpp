@@ -41,11 +41,13 @@
 #include "sky/engine/core/html/HTMLStyleElement.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/RenderView.h"
 
 namespace blink {
 
 StyleEngine::StyleEngine(Document& document)
     : m_document(&document)
+    , m_resolver(adoptPtr(new StyleResolver(*m_document)))
     , m_fontSelector(CSSFontSelector::create(&document))
 {
     m_fontSelector->registerForInvalidationCallbacks(this);
@@ -75,53 +77,26 @@ void StyleEngine::updateActiveStyleSheets()
 
     for (TreeScope* treeScope : m_activeTreeScopes)
         treeScope->styleSheets().updateActiveStyleSheets(*m_resolver);
-}
 
-void StyleEngine::appendActiveAuthorStyleSheets()
-{
-    for (TreeScope* treeScope : m_activeTreeScopes)
-        m_resolver->appendAuthorStyleSheets(treeScope->styleSheets().activeAuthorStyleSheets());
-
-    m_resolver->finishAppendAuthorStyleSheets();
-}
-
-void StyleEngine::createResolver()
-{
-    // It is a programming error to attempt to resolve style on a Document
-    // which is not in a frame. Code which hits this should have checked
-    // Document::isActive() before calling into code which could get here.
-
-    ASSERT(m_document->frame());
-
-    m_resolver = adoptPtr(new StyleResolver(*m_document));
-
-    appendActiveAuthorStyleSheets();
-}
-
-void StyleEngine::clearResolver()
-{
-    ASSERT(!m_document->inStyleRecalc());
-    m_resolver.clear();
+    m_document->renderView()->style()->font().update(fontSelector());
 }
 
 unsigned StyleEngine::resolverAccessCount() const
 {
-    return m_resolver ? m_resolver->accessCount() : 0;
+    return m_resolver->accessCount();
 }
 
 void StyleEngine::resolverChanged()
 {
     if (!m_document->isActive())
         return;
-    if (m_resolver)
-        updateActiveStyleSheets();
+    updateActiveStyleSheets();
 }
 
 void StyleEngine::clearFontCache()
 {
     m_fontSelector->fontFaceCache()->clearCSSConnected();
-    if (m_resolver)
-        m_resolver->invalidateMatchedPropertiesCache();
+    m_resolver->invalidateMatchedPropertiesCache();
 }
 
 void StyleEngine::updateGenericFontFamilySettings()
@@ -131,8 +106,7 @@ void StyleEngine::updateGenericFontFamilySettings()
     ASSERT(m_document->isActive());
 
     m_fontSelector->updateGenericFontFamilySettings(*m_document);
-    if (m_resolver)
-        m_resolver->invalidateMatchedPropertiesCache();
+    m_resolver->invalidateMatchedPropertiesCache();
 }
 
 PassRefPtr<CSSStyleSheet> StyleEngine::createSheet(Element* e, const String& text)
@@ -170,8 +144,7 @@ void StyleEngine::removeSheet(StyleSheetContents* contents)
 
 void StyleEngine::fontsNeedUpdate(CSSFontSelector*)
 {
-    if (m_resolver)
-        m_resolver->invalidateMatchedPropertiesCache();
+    m_resolver->invalidateMatchedPropertiesCache();
     m_document->setNeedsStyleRecalc(SubtreeStyleChange);
 }
 

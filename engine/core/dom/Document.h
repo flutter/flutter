@@ -528,7 +528,6 @@ public:
 
     void didLoadAllParserBlockingResources();
     void didRemoveAllPendingStylesheet();
-    void clearStyleResolver();
 
     bool inStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::InStyleRecalc; }
 

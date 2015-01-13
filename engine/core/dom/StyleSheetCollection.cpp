@@ -38,7 +38,6 @@ namespace blink {
 
 StyleSheetCollection::StyleSheetCollection(TreeScope& treeScope)
     : m_treeScope(treeScope)
-    , m_needsUpdate(true)
 {
 }
 
@@ -50,13 +49,11 @@ void StyleSheetCollection::addStyleSheetCandidateNode(HTMLStyleElement& element)
 {
     ASSERT(element.inActiveDocument());
     m_styleSheetCandidateNodes.add(&element);
-    m_needsUpdate = true;
 }
 
 void StyleSheetCollection::removeStyleSheetCandidateNode(HTMLStyleElement& element)
 {
     m_styleSheetCandidateNodes.remove(&element);
-    m_needsUpdate = true;
 }
 
 void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
@@ -70,15 +67,10 @@ void StyleSheetCollection::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& she
 
 void StyleSheetCollection::updateActiveStyleSheets(StyleResolver& resolver)
 {
-    if (!m_needsUpdate)
-        return;
-
     Vector<RefPtr<CSSStyleSheet>> candidateSheets;
     collectStyleSheets(candidateSheets);
 
     m_treeScope.scopedStyleResolver().resetAuthorStyle();
-    resolver.removePendingAuthorStyleSheets(m_activeAuthorStyleSheets);
-    resolver.lazyAppendAuthorStyleSheets(0, candidateSheets);
 
     Node& root = m_treeScope.rootNode();
 
@@ -92,7 +84,9 @@ void StyleSheetCollection::updateActiveStyleSheets(StyleResolver& resolver)
         toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
 
     m_activeAuthorStyleSheets.swap(candidateSheets);
-    m_needsUpdate = false;
+
+    for (RefPtr<CSSStyleSheet>& sheet : m_activeAuthorStyleSheets)
+        resolver.appendCSSStyleSheet(sheet.get());
 }
 
 }

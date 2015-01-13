@@ -131,19 +131,6 @@ StyleResolver::StyleResolver(Document& document)
     }
 }
 
-void StyleResolver::lazyAppendAuthorStyleSheets(unsigned firstNew, const Vector<RefPtr<CSSStyleSheet> >& styleSheets)
-{
-    unsigned size = styleSheets.size();
-    for (unsigned i = firstNew; i < size; ++i)
-        m_pendingStyleSheets.add(styleSheets[i].get());
-}
-
-void StyleResolver::removePendingAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >& styleSheets)
-{
-    for (unsigned i = 0; i < styleSheets.size(); ++i)
-        m_pendingStyleSheets.remove(styleSheets[i].get());
-}
-
 void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
 {
     ASSERT(cssSheet);
@@ -175,30 +162,6 @@ void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
         if (fontFaceRules.size())
             invalidateMatchedPropertiesCache();
     }
-}
-
-void StyleResolver::appendPendingAuthorStyleSheets()
-{
-    for (ListHashSet<RawPtr<CSSStyleSheet>, 16>::iterator it = m_pendingStyleSheets.begin(); it != m_pendingStyleSheets.end(); ++it)
-        appendCSSStyleSheet(*it);
-
-    m_pendingStyleSheets.clear();
-    finishAppendAuthorStyleSheets();
-}
-
-void StyleResolver::appendAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >& styleSheets)
-{
-    // This handles sheets added to the end of the stylesheet list only. In other cases the style resolver
-    // needs to be reconstructed. To handle insertions too the rule order numbers would need to be updated.
-    unsigned size = styleSheets.size();
-    for (unsigned i = 0; i < size; ++i)
-        appendCSSStyleSheet(styleSheets[i].get());
-}
-
-void StyleResolver::finishAppendAuthorStyleSheets()
-{
-    if (document().renderView() && document().renderView()->style())
-        document().renderView()->style()->font().update(document().styleEngine()->fontSelector());
 }
 
 void StyleResolver::addToStyleSharingList(Element& element)
@@ -291,7 +254,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
 {
     ASSERT(document().frame());
     ASSERT(document().settings());
-    ASSERT(!hasPendingAuthorStyleSheets());
 
     didAccess();
 
@@ -356,7 +318,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
 {
     ASSERT(document().frame());
     ASSERT(document().settings());
-    ASSERT(!hasPendingAuthorStyleSheets());
 
     if (element == document().documentElement())
         document().setDirectionSetOnDocumentElement(false);

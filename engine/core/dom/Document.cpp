@@ -1104,10 +1104,7 @@ void Document::updateStyle(StyleRecalcChange change)
 
     clearChildNeedsStyleRecalc();
 
-    if (m_styleEngine->hasResolver()) {
-        StyleResolver& resolver = m_styleEngine->ensureResolver();
-        resolver.clearStyleSharingList();
-    }
+    m_styleEngine->resolver().clearStyleSharingList();
 
     ASSERT(!needsStyleRecalc());
     ASSERT(!childNeedsStyleRecalc());
@@ -1175,18 +1172,13 @@ StyleResolver* Document::styleResolver() const
 {
     if (!isActive())
         return 0;
-    return m_styleEngine->resolver();
+    return &m_styleEngine->resolver();
 }
 
 StyleResolver& Document::ensureStyleResolver() const
 {
     ASSERT(isActive());
-    return m_styleEngine->ensureResolver();
-}
-
-void Document::clearStyleResolver()
-{
-    m_styleEngine->clearResolver();
+    return m_styleEngine->resolver();
 }
 
 void Document::attach(const AttachContext& context)

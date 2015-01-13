@@ -100,16 +100,6 @@ public:
     // their dependency on Document* instead of grabbing one through StyleResolver.
     Document& document() { return *m_document; }
 
-    // FIXME: It could be better to call appendAuthorStyleSheets() directly after we factor StyleResolver further.
-    // https://bugs.webkit.org/show_bug.cgi?id=108890
-    void appendAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
-    void finishAppendAuthorStyleSheets();
-
-    void lazyAppendAuthorStyleSheets(unsigned firstNew, const Vector<RefPtr<CSSStyleSheet> >&);
-    void removePendingAuthorStyleSheets(const Vector<RefPtr<CSSStyleSheet> >&);
-    void appendPendingAuthorStyleSheets();
-    bool hasPendingAuthorStyleSheets() const { return m_pendingStyleSheets.size() > 0; }
-
     void styleTreeResolveScopedKeyframesRules(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
     // |properties| is an array with |count| elements.
@@ -119,6 +109,8 @@ public:
 
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.
     void invalidateMatchedPropertiesCache();
+
+    void appendCSSStyleSheet(CSSStyleSheet*);
 
     void notifyResizeForViewportUnits();
 
@@ -142,8 +134,6 @@ private:
     void updateFont(StyleResolverState&);
 
     void loadPendingResources(StyleResolverState&);
-
-    void appendCSSStyleSheet(CSSStyleSheet*);
 
     void matchAuthorRules(Element*, ElementRuleCollector&);
     void matchAllRules(StyleResolverState&, ElementRuleCollector&);
@@ -177,8 +167,6 @@ private:
     MediaQueryResultList m_viewportDependentMediaQueryResults;
 
     RawPtr<Document> m_document;
-
-    ListHashSet<RawPtr<CSSStyleSheet>, 16> m_pendingStyleSheets;
 
     bool m_printMediaType;
 

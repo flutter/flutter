@@ -62,25 +62,7 @@ public:
     // FIXME(sky): Remove this and ::first-line.
     bool usesFirstLineRules() const { return false; }
 
-    void appendActiveAuthorStyleSheets();
-
-    StyleResolver* resolver() const
-    {
-        return m_resolver.get();
-    }
-
-    StyleResolver& ensureResolver()
-    {
-        if (!m_resolver) {
-            createResolver();
-        } else if (m_resolver->hasPendingAuthorStyleSheets()) {
-            m_resolver->appendPendingAuthorStyleSheets();
-        }
-        return *m_resolver.get();
-    }
-
-    bool hasResolver() const { return m_resolver.get(); }
-    void clearResolver();
+    StyleResolver& resolver() { return *m_resolver; }
 
     CSSFontSelector* fontSelector() { return m_fontSelector.get(); }
     void clearFontCache();
@@ -101,7 +83,6 @@ private:
     explicit StyleEngine(Document&);
 
     void updateActiveStyleSheets();
-    void createResolver();
 
     RawPtr<Document> m_document;
 
