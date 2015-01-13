@@ -321,7 +321,6 @@ public:
     void setParsing(bool);
     bool parsing() const { return m_isParsing; }
 
-    bool shouldScheduleLayout() const;
     int elapsedTime() const;
 
     TextLinkColors& textLinkColors() { return m_textLinkColors; }

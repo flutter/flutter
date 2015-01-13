@@ -941,8 +941,6 @@ bool Document::shouldScheduleRenderTreeUpdate() const
     // InPreLayout will recalc style itself. There's no reason to schedule another recalc.
     if (m_lifecycle.state() == DocumentLifecycle::InPreLayout)
         return false;
-    if (!shouldScheduleLayout())
-        return false;
     return true;
 }
 
@@ -1439,11 +1437,6 @@ void Document::setParsing(bool b)
 
     if (m_isParsing && !m_elementDataCache)
         m_elementDataCache = ElementDataCache::create();
-}
-
-bool Document::shouldScheduleLayout() const
-{
-   return isActive();
 }
 
 int Document::elapsedTime() const

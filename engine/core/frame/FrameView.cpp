@@ -465,7 +465,7 @@ void FrameView::scheduleRelayout()
         return;
     if (!needsLayout())
         return;
-    if (!m_frame->document()->shouldScheduleLayout())
+    if (!m_frame->document()->isActive())
         return;
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
@@ -491,7 +491,6 @@ void FrameView::scheduleRelayoutOfSubtree(RenderObject* relayoutRoot)
 {
     ASSERT(m_frame->view() == this);
 
-    // FIXME: Should this call shouldScheduleLayout instead?
     if (!m_frame->document()->isActive())
         return;
 
@@ -547,10 +546,6 @@ bool FrameView::isInPerformLayout() const
 
 bool FrameView::needsLayout() const
 {
-    // This can return true in cases where the document does not have a body yet.
-    // Document::shouldScheduleLayout takes care of preventing us from scheduling
-    // layout in that case.
-
     RenderView* renderView = this->renderView();
     return layoutPending()
         || (renderView && renderView->needsLayout())
