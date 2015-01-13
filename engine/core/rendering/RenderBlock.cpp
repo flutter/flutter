@@ -1577,9 +1577,7 @@ LayoutUnit RenderBlock::lineHeight(bool firstLine, LineDirectionMode direction, 
     // just like a block.
     if (isReplaced() && linePositionMode == PositionOnContainingLine)
         return RenderBox::lineHeight(firstLine, direction, linePositionMode);
-
-    RenderStyle* s = style(firstLine && document().styleEngine()->usesFirstLineRules());
-    return s->computedLineHeight();
+    return style()->computedLineHeight();
 }
 
 int RenderBlock::beforeMarginInLineDirection(LineDirectionMode direction) const

@@ -135,15 +135,6 @@ void RenderInline::updateAlwaysCreateLineBoxes(bool fullLayout)
         || !parentStyle->font().fontMetrics().hasIdenticalAscentDescentAndLineGap(style()->font().fontMetrics())
         || parentStyle->lineHeight() != style()->lineHeight();
 
-    if (!alwaysCreateLineBoxesNew && document().styleEngine()->usesFirstLineRules()) {
-        // Have to check the first line style as well.
-        parentStyle = parent()->style(true);
-        RenderStyle* childStyle = style(true);
-        alwaysCreateLineBoxesNew = !parentStyle->font().fontMetrics().hasIdenticalAscentDescentAndLineGap(childStyle->font().fontMetrics())
-        || childStyle->verticalAlign() != BASELINE
-        || parentStyle->lineHeight() != childStyle->lineHeight();
-    }
-
     if (alwaysCreateLineBoxesNew) {
         if (!fullLayout)
             dirtyLineBoxes(false);
@@ -784,12 +775,6 @@ InlineFlowBox* RenderInline::createAndAppendInlineFlowBox()
 
 LayoutUnit RenderInline::lineHeight(bool firstLine, LineDirectionMode /*direction*/, LinePositionMode /*linePositionMode*/) const
 {
-    if (firstLine && document().styleEngine()->usesFirstLineRules()) {
-        RenderStyle* s = style(firstLine);
-        if (s != style())
-            return s->computedLineHeight();
-    }
-
     return style()->computedLineHeight();
 }
 

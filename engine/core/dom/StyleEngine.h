@@ -59,9 +59,6 @@ public:
     void addTreeScope(TreeScope&);
     void removeTreeScope(TreeScope&);
 
-    // FIXME(sky): Remove this and ::first-line.
-    bool usesFirstLineRules() const { return false; }
-
     StyleResolver& resolver() { return *m_resolver; }
 
     CSSFontSelector* fontSelector() { return m_fontSelector.get(); }
