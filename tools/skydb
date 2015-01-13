@@ -36,6 +36,8 @@ SKY_SERVER_PORT = 9999
 PID_FILE_PATH = "/tmp/skydb.pids"
 DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/examples/home.sky"
 
+ANDROID_PACKAGE = "org.chromium.mojo.shell"
+ANDROID_ACTIVITY = "%s/.MojoShellActivity" % ANDROID_PACKAGE
 
 # FIXME: Move this into mopy.config
 def gn_args_from_build_dir(build_dir):
@@ -88,7 +90,7 @@ class SkyDebugger(object):
             '-W',
             '-S',
             '-a', 'android.intent.action.VIEW',
-            '-n', 'org.chromium.mojo.shell/.MojoShellActivity',
+            '-n', ANDROID_ACTIVITY,
             # FIXME: This quoting is very error-prone.  Perhaps we should read
             # our args from a file instead?
             '--esa', 'parameters', ','.join(escaped_args),
@@ -107,9 +109,6 @@ class SkyDebugger(object):
             '--args-for=mojo:sky_debugger_prompt %d' % remote_command_port,
             'mojo:window_manager',
         ]
-        # FIXME: This probably is wrong for android?
-        if args.use_osmesa:
-            shell_args.append('--args-for=mojo:native_viewport_service --use-osmesa')
 
         if 'remote_sky_server_port' in self.pids:
             shell_command = self._wrap_for_android(shell_args)
@@ -179,9 +178,15 @@ class SkyDebugger(object):
 
         shell_command = self._build_mojo_shell_command(args)
 
-        # On android we can't launch inside gdb, but rather have to attach.
-        if args.gdb and not is_android:
-            shell_command = ['gdbserver', ':%s' % GDB_PORT] + shell_command
+        if not is_android:
+            # Desktop-only work-around for mojo crashing under chromoting.
+            if args.use_osmesa:
+                shell_args.append(
+                    '--args-for=mojo:native_viewport_service --use-osmesa')
+
+            # On android we can't launch inside gdb, but rather have to attach.
+            if args.gdb:
+                shell_command = ['gdbserver', ':%s' % GDB_PORT] + shell_command
 
         print ' '.join(map(pipes.quote, shell_command))
         self.pids['mojo_shell_pid'] = subprocess.Popen(shell_command).pid
@@ -232,6 +237,9 @@ class SkyDebugger(object):
             # adb forward --remove takes the *host* port, not the remote port.
             port_string = 'tcp:%s' % self.pids['sky_command_port']
             subprocess.call(['adb', 'forward', '--remove', port_string])
+
+            subprocess.call([
+                'adb', 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
 
         if 'remote_gdbserver_port' in self.pids:
             port_string = 'tcp:%s' % self.pids['remote_gdbserver_port']
