@@ -10,7 +10,7 @@ namespace sky {
 namespace debugger {
 
 SkyDebugger::SkyDebugger()
-    : window_manager_app_(new window_manager::WindowManagerApp(this, nullptr)),
+    : window_manager_app_(new window_manager::WindowManagerApp(this, this)),
       root_(nullptr),
       content_(nullptr),
       navigator_host_factory_(this),
@@ -62,6 +62,15 @@ void SkyDebugger::OnEmbed(
 
   if (!pending_url_.empty())
     NavigateToURL(pending_url_);
+}
+
+void SkyDebugger::Embed(
+    const mojo::String& url,
+    mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) {
+  scoped_ptr<mojo::ServiceProviderImpl> exported_services(
+      new mojo::ServiceProviderImpl());
+  // exported_services->AddService(TBD) -- no exported services for now.
+  content_->Embed(url, exported_services.Pass());
 }
 
 void SkyDebugger::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
