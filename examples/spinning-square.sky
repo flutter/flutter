@@ -1,5 +1,6 @@
 #!mojo mojo:sky_viewer
 <sky>
+<import src="fps-counter.sky" />
 <style>
 square {
   margin: 50px;
@@ -8,7 +9,8 @@ square {
   background-color: green;
 }
 </style>
-<square></square>
+<square />
+<fps-counter showHistory="true" />
 <script>
 var square = document.querySelector('square');
 var timeBase = 0;
