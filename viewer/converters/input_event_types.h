@@ -12,13 +12,10 @@ namespace blink {
 class WebInputEvent;
 }
 
-namespace mojo {
+namespace sky {
 
-template <>
-struct TypeConverter<scoped_ptr<blink::WebInputEvent>, EventPtr> {
-  static scoped_ptr<blink::WebInputEvent> Convert(const EventPtr& input);
-};
-
-}  // namespace mojo
+scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
+                                              float device_pixel_ratio);
+}
 
 #endif  // SKY_VIEWER_CONVERTERS_INPUT_EVENT_TYPES_H_

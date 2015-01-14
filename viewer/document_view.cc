@@ -273,7 +273,7 @@ void DocumentView::OnViewDestroyed(mojo::View* view) {
 void DocumentView::OnViewInputEvent(
     mojo::View* view, const mojo::EventPtr& event) {
   scoped_ptr<blink::WebInputEvent> web_event =
-      event.To<scoped_ptr<blink::WebInputEvent> >();
+      ConvertEvent(event, GetDevicePixelRatio());
   if (web_event)
     web_view_->handleInputEvent(*web_event);
 }
