@@ -1,0 +1,11 @@
+<foo>
+<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
+
+<div style="filter: grayscale(1) blur(2px); color: green;">This should be gray and blurred</div>
+
+<script>
+runAfterDisplay(function() {
+    internals.notifyTestComplete("");
+});
+</script>
+</foo>

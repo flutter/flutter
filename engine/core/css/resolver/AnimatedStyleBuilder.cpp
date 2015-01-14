@@ -443,7 +443,7 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
     case CSSPropertyWebkitClipPath:
         style->setClipPath(toAnimatableClipPathOperation(value)->clipPathOperation());
         return;
-    case CSSPropertyWebkitFilter:
+    case CSSPropertyFilter:
         style->setFilter(toAnimatableFilterOperations(value)->operations());
         return;
     case CSSPropertyWebkitMaskBoxImageOutset:

@@ -205,7 +205,7 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitBoxDecorationBreak,
     CSSPropertyWebkitBoxShadow,
     CSSPropertyWebkitClipPath,
-    CSSPropertyWebkitFilter,
+    CSSPropertyFilter,
     CSSPropertyAlignContent,
     CSSPropertyAlignItems,
     CSSPropertyAlignSelf,
@@ -1202,7 +1202,7 @@ static bool isLayoutDependent(CSSPropertyID propertyID, PassRefPtr<RenderStyle> 
     case CSSPropertyTransformOrigin:
     case CSSPropertyWebkitTransformOrigin:
     case CSSPropertyWidth:
-    case CSSPropertyWebkitFilter:
+    case CSSPropertyFilter:
         return true;
     case CSSPropertyMargin:
         return renderer && renderer->isBox() && (!style || !style->marginBottom().isFixed() || !style->marginTop().isFixed() || !style->marginLeft().isFixed() || !style->marginRight().isFixed());
@@ -2106,7 +2106,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
                     return valueForBasicShape(*style, toShapeClipPathOperation(operation)->basicShape());
             }
             return cssValuePool().createIdentifierValue(CSSValueNone);
-        case CSSPropertyWebkitFilter:
+        case CSSPropertyFilter:
             return valueForFilter(renderer, *style);
 
         case CSSPropertyBackground:

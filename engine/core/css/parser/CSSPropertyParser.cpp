@@ -954,7 +954,7 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId, bool important)
     case CSSPropertyOpacity:
         validPrimitive = validUnit(value, FNumber);
         break;
-    case CSSPropertyWebkitFilter:
+    case CSSPropertyFilter:
         if (id == CSSValueNone)
             validPrimitive = true;
         else {
@@ -5517,7 +5517,7 @@ PassRefPtr<CSSFilterValue> CSSPropertyParser::parseBuiltinFilterArguments(CSSPar
     }
     case CSSFilterValue::DropShadowFilterOperation: {
         // drop-shadow() takes a single shadow.
-        RefPtr<CSSValueList> shadowValueList = parseShadow(args, CSSPropertyWebkitFilter);
+        RefPtr<CSSValueList> shadowValueList = parseShadow(args, CSSPropertyFilter);
         if (!shadowValueList || shadowValueList->length() != 1)
             return nullptr;
 

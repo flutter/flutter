@@ -221,6 +221,7 @@ animation-iteration-count custom_all
 animation-name custom_all
 animation-play-state custom_all
 animation-timing-function custom_all
+filter animatable, custom_value
 -webkit-aspect-ratio inherited, custom_all
 -webkit-backface-visibility use_handlers_for=CSSPropertyBackfaceVisibility
 -webkit-background-clip use_handlers_for=CSSPropertyBackgroundClip
@@ -233,7 +234,6 @@ animation-timing-function custom_all
 -webkit-box-decoration-break
 -webkit-box-shadow animatable, use_handlers_for=CSSPropertyBoxShadow
 -webkit-clip-path animatable, custom_value
--webkit-filter animatable, custom_value
 -webkit-highlight inherited, converter=convertString<CSSValueNone>
 -webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
 -webkit-line-box-contain inherited, converter=convertLineBoxContain

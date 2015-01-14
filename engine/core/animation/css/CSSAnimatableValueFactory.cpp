@@ -313,6 +313,8 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         return createFromLengthBox(style.clip(), style);
     case CSSPropertyColor:
         return createFromColor(property, style);
+    case CSSPropertyFilter:
+        return AnimatableFilterOperations::create(style.filter());
     case CSSPropertyFlexGrow:
         return createFromDouble(style.flexGrow(), AnimatableDouble::InterpolationIsNonContinuousWithZero);
     case CSSPropertyFlexShrink:
@@ -393,8 +395,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         if (ClipPathOperation* operation = style.clipPath())
             return AnimatableClipPathOperation::create(operation);
         return AnimatableUnknown::create(CSSValueNone);
-    case CSSPropertyWebkitFilter:
-        return AnimatableFilterOperations::create(style.filter());
     case CSSPropertyWebkitMaskBoxImageOutset:
         return createFromBorderImageLengthBox(style.maskBoxImageOutset(), style);
     case CSSPropertyWebkitMaskBoxImageSlice:

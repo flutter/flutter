@@ -40,7 +40,7 @@ enum AnimatedPropertyID {
     AnimatedPropertyTransform,
     AnimatedPropertyOpacity,
     AnimatedPropertyBackgroundColor,
-    AnimatedPropertyWebkitFilter
+    AnimatedPropertyFilter
 };
 
 // Used to store a series of values in a keyframe list.

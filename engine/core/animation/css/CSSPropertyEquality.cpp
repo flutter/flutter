@@ -109,6 +109,8 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.clip() == b.clip();
     case CSSPropertyColor:
         return a.color() == b.color();
+    case CSSPropertyFilter:
+        return a.filter() == b.filter();
     case CSSPropertyFlexBasis:
         return a.flexBasis() == b.flexBasis();
     case CSSPropertyFlexGrow:
@@ -194,8 +196,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return dataEquivalent(a.boxShadow(), b.boxShadow());
     case CSSPropertyWebkitClipPath:
         return dataEquivalent(a.clipPath(), b.clipPath());
-    case CSSPropertyWebkitFilter:
-        return a.filter() == b.filter();
     case CSSPropertyWebkitMaskBoxImageOutset:
         return a.maskBoxImageOutset() == b.maskBoxImageOutset();
     case CSSPropertyWebkitMaskBoxImageSlice:

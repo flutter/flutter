@@ -119,7 +119,7 @@ static bool hasWillChangeThatCreatesStackingContext(const RenderStyle* style)
         case CSSPropertyWebkitMask:
         case CSSPropertyWebkitMaskBoxImage:
         case CSSPropertyWebkitClipPath:
-        case CSSPropertyWebkitFilter:
+        case CSSPropertyFilter:
         case CSSPropertyZIndex:
         case CSSPropertyPosition:
             return true;

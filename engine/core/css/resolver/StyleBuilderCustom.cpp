@@ -633,7 +633,7 @@ void StyleBuilderFunctions::applyValueCSSPropertyWebkitClipPath(StyleResolverSta
     }
 }
 
-void StyleBuilderFunctions::applyValueCSSPropertyWebkitFilter(StyleResolverState& state, CSSValue* value)
+void StyleBuilderFunctions::applyValueCSSPropertyFilter(StyleResolverState& state, CSSValue* value)
 {
     FilterOperations operations;
     if (FilterOperationResolver::createFilterOperations(value, state.cssToLengthConversionData(), operations, state))

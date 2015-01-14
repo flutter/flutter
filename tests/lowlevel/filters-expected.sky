@@ -1,0 +1,13 @@
+<foo>
+<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
+
+<img src="http://storage.googleapis.com/mojo/sky-pngs/9a7b59f74e2bbcd0d0ceee17ead05b0da64a2af7" />
+
+<script>
+window.addEventListener('load', function() {
+  runAfterDisplay(function() {
+    internals.notifyTestComplete("");
+  });
+});
+</script>
+</foo>

@@ -71,19 +71,19 @@ TEST_F(AnimationDeferredLegacyStyleInterpolationTest, Transform)
 
 TEST_F(AnimationDeferredLegacyStyleInterpolationTest, Filter)
 {
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "hue-rotate(180deg) blur(6px)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "grayscale(0) blur(0px)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "none"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "brightness(0) contrast(0)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "drop-shadow(20px 10px green)"));
-    EXPECT_TRUE(test(CSSPropertyWebkitFilter, "drop-shadow(20px 10vw green)"));
-    EXPECT_TRUE(test(CSSPropertyWebkitFilter, "drop-shadow(0px 0px 0px currentcolor)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "opacity(1)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "saturate(0)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "grayscale(1)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "invert(1)"));
-    EXPECT_FALSE(test(CSSPropertyWebkitFilter, "sepia(1)"));
-    EXPECT_TRUE(test(CSSPropertyWebkitFilter, "url(#svgfilter)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "hue-rotate(180deg) blur(6px)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "grayscale(0) blur(0px)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "none"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "brightness(0) contrast(0)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "drop-shadow(20px 10px green)"));
+    EXPECT_TRUE(test(CSSPropertyFilter, "drop-shadow(20px 10vw green)"));
+    EXPECT_TRUE(test(CSSPropertyFilter, "drop-shadow(0px 0px 0px currentcolor)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "opacity(1)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "saturate(0)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "grayscale(1)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "invert(1)"));
+    EXPECT_FALSE(test(CSSPropertyFilter, "sepia(1)"));
+    EXPECT_TRUE(test(CSSPropertyFilter, "url(#svgfilter)"));
 }
 
 }
