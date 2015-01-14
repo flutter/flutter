@@ -6,6 +6,7 @@ class DOMAgent {
     this.nextNodeId_ = 1;
     this.nodeToId_ = new Map();
     this.idToNode_ = new Map();
+    this.observer_ = null;
     Object.preventExtensions(this);
   }
 
