@@ -45,13 +45,11 @@ class LayerHost : public SurfaceHolder::Client {
 
  private:
   enum State {
-    kWaitingForSurfaceService,
     kReadyForFrame,
     kWaitingForFrameAcknowldgement,
   };
 
   // SurfaceHolder::Client
-  void OnSurfaceConnectionCreated() override;
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;

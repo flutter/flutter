@@ -16,7 +16,7 @@ namespace sky {
 
 LayerHost::LayerHost(LayerHostClient* client)
     : client_(client),
-      state_(kWaitingForSurfaceService),
+      state_(kReadyForFrame),
       frame_requested_(false),
       surface_holder_(this, client->GetShell()),
       gl_context_owner_(client->GetShell()),
@@ -44,13 +44,6 @@ void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
 
 void LayerHost::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
   return root_layer_->GetPixelsForTesting(pixels);
-}
-
-void LayerHost::OnSurfaceConnectionCreated() {
-  DCHECK_EQ(state_, kWaitingForSurfaceService);
-  state_ = kReadyForFrame;
-  if (frame_requested_)
-    BeginFrameSoon();
 }
 
 void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {

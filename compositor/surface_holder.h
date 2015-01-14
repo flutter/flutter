@@ -24,7 +24,6 @@ class SurfaceHolder : public mojo::SurfaceClient {
  public:
   class Client {
    public:
-    virtual void OnSurfaceConnectionCreated() = 0;
     virtual void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) = 0;
     virtual void ReturnResources(
         mojo::Array<mojo::ReturnedResourcePtr> resources) = 0;
@@ -36,8 +35,6 @@ class SurfaceHolder : public mojo::SurfaceClient {
   explicit SurfaceHolder(Client* client, mojo::Shell* shell);
   ~SurfaceHolder() override;
 
-  bool IsReadyForFrame() const;
-
   void SetSize(const gfx::Size& size);
   void SubmitFrame(mojo::FramePtr frame, const base::Closure& callback);
 
@@ -47,15 +44,13 @@ class SurfaceHolder : public mojo::SurfaceClient {
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;
 
-  void OnSurfaceConnectionCreated(mojo::SurfacePtr surface,
-                                  uint32_t id_namespace);
+  void SetQualifiedId();
 
   Client* client_;
   gfx::Size size_;
-  scoped_ptr<SurfaceAllocator> surface_allocator_;
-  mojo::SurfacesServicePtr surfaces_service_;
+  uint32_t id_namespace_;
+  uint32_t local_id_;
   mojo::SurfacePtr surface_;
-  mojo::SurfaceIdPtr surface_id_;
 
   base::WeakPtrFactory<SurfaceHolder> weak_factory_;
 
