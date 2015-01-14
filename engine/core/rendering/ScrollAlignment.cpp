@@ -52,7 +52,6 @@ const ScrollAlignment ScrollAlignment::alignCenterIfNeeded = { ScrollAlignmentNo
 const ScrollAlignment ScrollAlignment::alignToEdgeIfNeeded = { ScrollAlignmentNoScroll, ScrollAlignmentClosestEdge, ScrollAlignmentClosestEdge };
 const ScrollAlignment ScrollAlignment::alignCenterAlways = { ScrollAlignmentCenter, ScrollAlignmentCenter, ScrollAlignmentCenter };
 const ScrollAlignment ScrollAlignment::alignTopAlways = { ScrollAlignmentTop, ScrollAlignmentTop, ScrollAlignmentTop };
-const ScrollAlignment ScrollAlignment::alignBottomAlways = { ScrollAlignmentBottom, ScrollAlignmentBottom, ScrollAlignmentBottom };
 
 #define MIN_INTERSECT_FOR_REVEAL 32
 

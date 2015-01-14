@@ -46,10 +46,6 @@ public:
     // mouse-based or keyboard-based.
     bool shouldConsiderSelectionAsDirectional() const { return true; }
 
-    // On Mac, when revealing a selection (for example as a result of a Find operation on the Browser),
-    // content should be scrolled such that the selection gets certer aligned.
-    bool shouldCenterAlignWhenSelectionIsRevealed() const { return false; }
-
     // On Mac, style is considered present when present at the beginning of selection. On other platforms,
     // style has to be present throughout the selection.
     bool shouldToggleStyleBasedOnStartOfSelection() const { return false; }

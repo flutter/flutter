@@ -268,13 +268,7 @@ void FrameSelection::setSelection(const VisibleSelection& newSelection, SetSelec
     notifyRendererOfSelectionChange(userTriggered);
     m_frame->editor().respondToChangedSelection(oldSelection, options);
     if (userTriggered == UserTriggered) {
-        ScrollAlignment alignment;
-
-        if (m_frame->editor().behavior().shouldCenterAlignWhenSelectionIsRevealed())
-            alignment = (align == AlignCursorOnScrollAlways) ? ScrollAlignment::alignCenterAlways : ScrollAlignment::alignCenterIfNeeded;
-        else
-            alignment = (align == AlignCursorOnScrollAlways) ? ScrollAlignment::alignTopAlways : ScrollAlignment::alignToEdgeIfNeeded;
-
+        ScrollAlignment alignment = (align == AlignCursorOnScrollAlways) ? ScrollAlignment::alignTopAlways : ScrollAlignment::alignToEdgeIfNeeded;
         revealSelection(alignment, RevealExtent);
     }
 
