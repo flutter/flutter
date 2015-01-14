@@ -9,6 +9,8 @@ mojom("bindings") {
     "test_harness.mojom",
   ]
 
+  import_dirs = [ get_path_info("../../../mojo/services", "abspath") ]
+
   deps = [
     "//mojo/services/input_events/public/interfaces",
   ]
