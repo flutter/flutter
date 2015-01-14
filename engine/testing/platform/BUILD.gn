@@ -16,7 +16,6 @@ static_library("platform") {
     "//base",
     "//net",
     "//sky/engine",
-    "//ui/native_theme",
     "//url",
     "//skia",
   ]

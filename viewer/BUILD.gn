@@ -64,7 +64,6 @@ mojo_native_application("viewer") {
     "//sky/services/inspector:bindings",
     "//sky/services/testing:bindings",
     "//third_party/icu",
-    "//ui/native_theme",
     "//url",
   ]
 }
