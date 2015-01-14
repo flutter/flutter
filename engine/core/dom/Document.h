@@ -496,7 +496,7 @@ public:
 
     ScriptValue registerElement(ScriptState*, const AtomicString& name, ExceptionState&);
     ScriptValue registerElement(ScriptState*, const AtomicString& name, const Dictionary& options, ExceptionState&);
-    CustomElementRegistrationContext* registrationContext() { return m_registrationContext.get(); }
+    CustomElementRegistrationContext& registrationContext() { return *m_registrationContext; }
     CustomElementMicrotaskRunQueue* customElementMicrotaskRunQueue();
 
     void setImportsController(HTMLImportsController*);

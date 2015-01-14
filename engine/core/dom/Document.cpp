@@ -267,7 +267,7 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
     , m_directionSetOnDocumentElement(false)
-    , m_registrationContext(initializer.registrationContext(this))
+    , m_registrationContext(initializer.registrationContext())
     , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
     , m_timeline(AnimationTimeline::create(this))
     , m_templateDocumentHost(nullptr)
@@ -275,6 +275,9 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_styleRecalcElementCounter(0)
 {
     setClient(this);
+
+    if (!m_registrationContext)
+        m_registrationContext = CustomElementRegistrationContext::create();
 
     m_fetcher = ResourceFetcher::create(this);
 
@@ -450,13 +453,8 @@ ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicStri
 
 ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, const Dictionary& options, ExceptionState& exceptionState)
 {
-    if (!registrationContext()) {
-        exceptionState.throwDOMException(NotSupportedError, "No element registration context is available.");
-        return ScriptValue();
-    }
-
     CustomElementConstructorBuilder constructorBuilder(scriptState, &options);
-    registrationContext()->registerElement(this, &constructorBuilder, name, exceptionState);
+    registrationContext().registerElement(this, &constructorBuilder, name, exceptionState);
     return constructorBuilder.bindingsReturnValue();
 }
 
@@ -2559,7 +2557,7 @@ Document& Document::ensureTemplateDocument()
         return *m_templateDocument;
 
     if (isHTMLDocument()) {
-        DocumentInit init = DocumentInit::fromContext(contextDocument(), blankURL()).withNewRegistrationContext();
+        DocumentInit init = DocumentInit::fromContext(contextDocument(), blankURL());
         m_templateDocument = HTMLDocument::create(init);
     } else {
         m_templateDocument = Document::create(DocumentInit(blankURL()));

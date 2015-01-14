@@ -81,8 +81,8 @@ PassRefPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}
     if (ConstructorFunction function = g_constructors->get(localName))
         return function(document, createdByParser);
 
-    if (document.registrationContext() && CustomElement::isValidName(localName)) {
-        RefPtr<Element> element = document.registrationContext()->createCustomTagElement(document, QualifiedName(localName));
+    if (CustomElement::isValidName(localName)) {
+        RefPtr<Element> element = document.registrationContext().createCustomTagElement(document, QualifiedName(localName));
         ASSERT_WITH_SECURITY_IMPLICATION(element->is{{namespace}}Element());
         return static_pointer_cast<{{namespace}}Element>(element.release());
     }

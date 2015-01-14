@@ -27,7 +27,6 @@ MojoLoader::MojoLoader(LocalFrame& frame)
 void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStream)
 {
     DocumentInit init(url, &m_frame);
-    init.withNewRegistrationContext();
 
     // FIXME(sky): Poorly named method for creating the FrameView:
     m_frame.loaderClient()->transitionToCommittedForNewPage();

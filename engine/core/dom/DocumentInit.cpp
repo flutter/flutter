@@ -41,7 +41,6 @@ DocumentInit::DocumentInit(const KURL& url, LocalFrame* frame, WeakPtr<Document>
     , m_frame(frame)
     , m_contextDocument(contextDocument)
     , m_importsController(importsController)
-    , m_createNewRegistrationContext(false)
 {
 }
 
@@ -51,7 +50,6 @@ DocumentInit::DocumentInit(const DocumentInit& other)
     , m_contextDocument(other.m_contextDocument)
     , m_importsController(other.m_importsController)
     , m_registrationContext(other.m_registrationContext)
-    , m_createNewRegistrationContext(other.m_createNewRegistrationContext)
 {
 }
 
@@ -79,25 +77,15 @@ Settings* DocumentInit::settings() const
     return frameForSecurityContext()->settings();
 }
 
-DocumentInit& DocumentInit::withRegistrationContext(CustomElementRegistrationContext* registrationContext)
+DocumentInit& DocumentInit::withRegistrationContext(CustomElementRegistrationContext& registrationContext)
 {
-    ASSERT(!m_createNewRegistrationContext && !m_registrationContext);
-    m_registrationContext = registrationContext;
+    ASSERT(!m_registrationContext);
+    m_registrationContext = &registrationContext;
     return *this;
 }
 
-DocumentInit& DocumentInit::withNewRegistrationContext()
+PassRefPtr<CustomElementRegistrationContext> DocumentInit::registrationContext() const
 {
-    ASSERT(!m_createNewRegistrationContext && !m_registrationContext);
-    m_createNewRegistrationContext = true;
-    return *this;
-}
-
-PassRefPtr<CustomElementRegistrationContext> DocumentInit::registrationContext(Document* document) const
-{
-    if (m_createNewRegistrationContext)
-        return CustomElementRegistrationContext::create();
-
     return m_registrationContext.get();
 }
 

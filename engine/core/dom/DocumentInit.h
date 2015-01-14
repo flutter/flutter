@@ -61,9 +61,8 @@ public:
     LocalFrame* ownerFrame() const;
     Settings* settings() const;
 
-    DocumentInit& withRegistrationContext(CustomElementRegistrationContext*);
-    DocumentInit& withNewRegistrationContext();
-    PassRefPtr<CustomElementRegistrationContext> registrationContext(Document*) const;
+    DocumentInit& withRegistrationContext(CustomElementRegistrationContext&);
+    PassRefPtr<CustomElementRegistrationContext> registrationContext() const;
     WeakPtr<Document> contextDocument() const;
 
     static DocumentInit fromContext(WeakPtr<Document> contextDocument, const KURL& = KURL());
@@ -78,7 +77,6 @@ private:
     WeakPtr<Document> m_contextDocument;
     RawPtr<HTMLImportsController> m_importsController;
     RefPtr<CustomElementRegistrationContext> m_registrationContext;
-    bool m_createNewRegistrationContext;
 };
 
 } // namespace blink
