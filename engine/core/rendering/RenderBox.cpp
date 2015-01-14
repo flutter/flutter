@@ -1036,18 +1036,10 @@ LayoutUnit RenderBox::containingBlockLogicalHeightForContent(AvailableLogicalHei
     return containingBlock()->availableLogicalHeight(heightType);
 }
 
-void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
+void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
         return;
-
-    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer)) {
-        LayoutSize offset = paintInvalidationState->paintOffset() + locationOffset();
-        if (style()->hasInFlowPosition() && layer())
-            offset += layer()->offsetForInFlowPosition();
-        transformState.move(offset);
-        return;
-    }
 
     bool containerSkipped;
     RenderObject* o = container(paintInvalidationContainer, &containerSkipped);

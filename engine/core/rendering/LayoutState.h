@@ -32,7 +32,6 @@
 
 namespace blink {
 
-class ForceHorriblySlowRectMapping;
 class RenderBox;
 class RenderObject;
 class RenderInline;
@@ -59,8 +58,6 @@ public:
     RenderObject& renderer() const { return m_renderer; }
 
 private:
-    friend class ForceHorriblySlowRectMapping;
-
     bool m_containingBlockLogicalWidthChanged : 1;
 
     LayoutState* m_next;

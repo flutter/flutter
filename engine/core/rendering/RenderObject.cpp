@@ -1003,16 +1003,6 @@ void RenderObject::addChildFocusRingRects(Vector<IntRect>& rects, const LayoutPo
     }
 }
 
-LayoutPoint RenderObject::positionFromPaintInvalidationContainer(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState) const
-{
-    ASSERT(containerForPaintInvalidation() == paintInvalidationContainer);
-
-    if (paintInvalidationContainer == this)
-        return LayoutPoint();
-
-    return LayoutPoint(localToContainerPoint(LayoutPoint(), paintInvalidationContainer, 0, paintInvalidationState));
-}
-
 IntRect RenderObject::absoluteBoundingBoxRect() const
 {
     Vector<FloatQuad> quads;
@@ -1476,7 +1466,7 @@ FloatQuad RenderObject::absoluteToLocalQuad(const FloatQuad& quad, MapCoordinate
     return transformState.lastPlanarQuad();
 }
 
-void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
+void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
         return;
@@ -1493,7 +1483,7 @@ void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvali
     if (o->hasOverflowClip())
         transformState.move(-toRenderBox(o)->scrolledContentOffset());
 
-    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode, paintInvalidationState);
+    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode);
 }
 
 const RenderObject* RenderObject::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
@@ -1564,10 +1554,10 @@ FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const R
     return transformState.lastPlanarQuad();
 }
 
-FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
+FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags mode) const
 {
     TransformState transformState(TransformState::ApplyTransformDirection, localPoint);
-    mapLocalToContainer(paintInvalidationContainer, transformState, mode | ApplyContainerFlip | UseTransforms, paintInvalidationState);
+    mapLocalToContainer(paintInvalidationContainer, transformState, mode | ApplyContainerFlip | UseTransforms);
     transformState.flatten();
 
     return transformState.lastPlanarPoint();

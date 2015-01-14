@@ -33,7 +33,6 @@
 #include "sky/engine/core/fetch/ImageResourceClient.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
-#include "sky/engine/core/rendering/PaintInvalidationState.h"
 #include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/ScrollAlignment.h"
@@ -514,7 +513,7 @@ public:
 
     // Convert a local quad into the coordinate system of container, taking transforms into account.
     FloatQuad localToContainerQuad(const FloatQuad&, const RenderLayerModelObject* paintInvalidatinoContainer, MapCoordinatesFlags = 0) const;
-    FloatPoint localToContainerPoint(const FloatPoint&, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags = 0, const PaintInvalidationState* = 0) const;
+    FloatPoint localToContainerPoint(const FloatPoint&, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags = 0) const;
 
     // Return the offset from the container() renderer (excluding transforms). In multi-column layout,
     // different offsets apply at different points, so return the offset that applies to the given point.
@@ -523,9 +522,6 @@ public:
     LayoutSize offsetFromAncestorContainer(const RenderObject*) const;
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint&) const { }
-
-    // Computes the position of the given render object in the space of |paintInvalidationContainer|.
-    LayoutPoint positionFromPaintInvalidationContainer(const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const;
 
     IntRect absoluteBoundingBoxRect() const;
     // FIXME: This function should go away eventually
@@ -652,7 +648,7 @@ public:
 
     // Map points and quads through elements, potentially via 3d transforms. You should never need to call these directly; use
     // localToAbsolute/absoluteToLocal methods instead.
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const;
 
     // Pushes state onto RenderGeometryMap about how to map coordinates from this renderer to its container, or ancestorToStopAt (whichever is encountered first).
@@ -685,8 +681,6 @@ public:
 
     bool neededLayoutBecauseOfChildren() const { return m_bitfields.neededLayoutBecauseOfChildren(); }
     void setNeededLayoutBecauseOfChildren(bool b) { m_bitfields.setNeededLayoutBecauseOfChildren(b); }
-
-    bool supportsPaintInvalidationStateCachedOffsets() const { return !hasTransform(); }
 
     void setNeedsOverflowRecalcAfterStyleChange();
     void markContainingBlocksForOverflowRecalc();

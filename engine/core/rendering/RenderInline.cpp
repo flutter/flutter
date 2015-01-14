@@ -616,18 +616,10 @@ LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, cons
     return offset;
 }
 
-void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode, const PaintInvalidationState* paintInvalidationState) const
+void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
         return;
-
-    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer)) {
-        LayoutSize offset = paintInvalidationState->paintOffset();
-        if (style()->hasInFlowPosition() && layer())
-            offset += layer()->offsetForInFlowPosition();
-        transformState.move(offset);
-        return;
-    }
 
     bool containerSkipped;
     RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
@@ -656,7 +648,7 @@ void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvali
         return;
     }
 
-    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode, paintInvalidationState);
+    o->mapLocalToContainer(paintInvalidationContainer, transformState, mode);
 }
 
 void RenderInline::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)

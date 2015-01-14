@@ -279,12 +279,6 @@ RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSel
     return 0;
 }
 
-LayoutPoint RenderLayer::positionFromPaintInvalidationContainer(const RenderObject* renderObject, const RenderLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* paintInvalidationState)
-{
-    // FIXME(sky): Remove
-    return renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
-}
-
 void RenderLayer::dirty3DTransformedDescendantStatus()
 {
     RenderLayerStackingNode* stackingNode = m_stackingNode->ancestorStackingContextNode();

@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/LayoutState.h"
-#include "sky/engine/core/rendering/PaintInvalidationState.h"
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
 #include "sky/engine/core/rendering/RenderIFrame.h"
 #include "sky/engine/platform/scroll/ScrollableArea.h"
@@ -114,7 +113,7 @@ public:
     void updateIFramesAfterLayout();
 
 private:
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
 
@@ -127,8 +126,6 @@ private:
 
     void positionDialog(RenderBox*);
     void positionDialogs();
-
-    friend class ForceHorriblySlowRectMapping;
 
     RenderObject* backgroundRenderer() const;
 
@@ -150,32 +147,6 @@ private:
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderView, isRenderView());
-
-// Suspends the LayoutState cached offset and clipRect optimization. Used under transforms
-// that cannot be represented by LayoutState (common in SVG) and when manipulating the render
-// tree during layout in ways that can trigger paint invalidation of a non-child (e.g. when a list item
-// moves its list marker around). Note that even when disabled, LayoutState is still used to
-// store layoutDelta.
-class ForceHorriblySlowRectMapping {
-    WTF_MAKE_NONCOPYABLE(ForceHorriblySlowRectMapping);
-public:
-    ForceHorriblySlowRectMapping(const PaintInvalidationState* paintInvalidationState)
-        : m_paintInvalidationState(paintInvalidationState)
-        , m_didDisable(m_paintInvalidationState && m_paintInvalidationState->cachedOffsetsEnabled())
-    {
-        if (m_paintInvalidationState)
-            m_paintInvalidationState->m_cachedOffsetsEnabled = false;
-    }
-
-    ~ForceHorriblySlowRectMapping()
-    {
-        if (m_didDisable)
-            m_paintInvalidationState->m_cachedOffsetsEnabled = true;
-    }
-private:
-    const PaintInvalidationState* m_paintInvalidationState;
-    bool m_didDisable;
-};
 
 } // namespace blink
 

@@ -127,7 +127,7 @@ private:
     virtual LayoutUnit offsetWidth() const override final { return linesBoundingBox().width(); }
     virtual LayoutUnit offsetHeight() const override final { return linesBoundingBox().height(); }
 
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip, const PaintInvalidationState* = 0) const override;
+    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
 
     virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
 
