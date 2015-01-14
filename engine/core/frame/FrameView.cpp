@@ -113,7 +113,6 @@ void FrameView::reset()
     m_layoutSubtreeRoot = 0;
     m_layoutSchedulingEnabled = true;
     m_inPerformLayout = false;
-    m_canInvalidatePaintDuringPerformLayout = false;
     m_inSynchronousPostLayout = false;
     m_layoutCount = 0;
     m_nestedLayoutCount = 0;

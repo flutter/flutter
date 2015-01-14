@@ -51,16 +51,11 @@ RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner, Render
     if (oldChild->isFloatingOrOutOfFlowPositioned())
         toRenderBox(oldChild)->removeFloatingOrPositionedChildFromBlockLists();
 
-    {
-        // FIXME: We should not be allowing paint invalidation during layout. crbug.com/336250
-        AllowPaintInvalidationScope scoper(owner->frameView());
-
-        // So that we'll get the appropriate dirty bit set (either that a normal flow child got yanked or
-        // that a positioned child got yanked). We also issue paint invalidations, so that the area exposed when the child
-        // disappears gets paint invalidated properly.
-        if (!owner->documentBeingDestroyed() && notifyRenderer && oldChild->everHadLayout())
-            oldChild->setNeedsLayoutAndPrefWidthsRecalc();
-    }
+    // So that we'll get the appropriate dirty bit set (either that a normal flow child got yanked or
+    // that a positioned child got yanked). We also issue paint invalidations, so that the area exposed when the child
+    // disappears gets paint invalidated properly.
+    if (!owner->documentBeingDestroyed() && notifyRenderer && oldChild->everHadLayout())
+        oldChild->setNeedsLayoutAndPrefWidthsRecalc();
 
     // If we have a line box wrapper, delete it.
     if (oldChild->isBox())

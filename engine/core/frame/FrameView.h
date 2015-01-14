@@ -81,9 +81,6 @@ public:
     bool layoutPending() const;
     bool isInPerformLayout() const;
 
-    void setCanInvalidatePaintDuringPerformLayout(bool b) { m_canInvalidatePaintDuringPerformLayout = b; }
-    bool canInvalidatePaintDuringPerformLayout() const { return m_canInvalidatePaintDuringPerformLayout; }
-
     RenderObject* layoutRoot(bool onlyDuringLayout = false) const;
     void clearLayoutSubtreeRoot() { m_layoutSubtreeRoot = 0; }
     int layoutCount() const { return m_layoutCount; }
@@ -227,11 +224,6 @@ private:
 
     void setLayoutSizeInternal(const IntSize&);
 
-    bool paintInvalidationIsAllowed() const
-    {
-        return !isInPerformLayout() || canInvalidatePaintDuringPerformLayout();
-    }
-
     static double s_currentFrameTimeStamp; // used for detecting decoded resource thrash in the cache
     static bool s_inPaintContents;
 
@@ -244,7 +236,6 @@ private:
 
     bool m_layoutSchedulingEnabled;
     bool m_inPerformLayout;
-    bool m_canInvalidatePaintDuringPerformLayout;
     bool m_inSynchronousPostLayout;
     int m_layoutCount;
     unsigned m_nestedLayoutCount;
@@ -283,30 +274,6 @@ private:
 };
 
 DEFINE_TYPE_CASTS(FrameView, Widget, widget, widget->isFrameView(), widget.isFrameView());
-
-class AllowPaintInvalidationScope {
-public:
-    explicit AllowPaintInvalidationScope(FrameView* view)
-        : m_view(view)
-        , m_originalValue(view ? view->canInvalidatePaintDuringPerformLayout() : false)
-    {
-        if (!m_view)
-            return;
-
-        m_view->setCanInvalidatePaintDuringPerformLayout(true);
-    }
-
-    ~AllowPaintInvalidationScope()
-    {
-        if (!m_view)
-            return;
-
-        m_view->setCanInvalidatePaintDuringPerformLayout(m_originalValue);
-    }
-private:
-    FrameView* m_view;
-    bool m_originalValue;
-};
 
 } // namespace blink
 
