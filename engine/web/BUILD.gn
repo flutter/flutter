@@ -56,7 +56,6 @@ component("web") {
     "WebArrayBufferView.cpp",
     "WebCache.cpp",
     "WebCachedURLRequest.cpp",
-    "WebCustomElement.cpp",
     "WebDocument.cpp",
     "WebElement.cpp",
     "WebFontDescription.cpp",

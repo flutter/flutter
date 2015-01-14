@@ -108,7 +108,6 @@ source_set("web_headers") {
     "web/WebCompositionUnderline.h",
     "web/WebConsoleMessage.h",
     "web/WebContentDetectionResult.h",
-    "web/WebCustomElement.h",
     "web/WebDocument.h",
     "web/WebElement.h",
     "web/WebExceptionCode.h",

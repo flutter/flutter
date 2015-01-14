@@ -495,7 +495,7 @@ public:
     IntSize initialViewportSize() const;
 
     ScriptValue registerElement(ScriptState*, const AtomicString& name, ExceptionState&);
-    ScriptValue registerElement(ScriptState*, const AtomicString& name, const Dictionary& options, ExceptionState&, CustomElement::NameSet validNames = CustomElement::StandardNames);
+    ScriptValue registerElement(ScriptState*, const AtomicString& name, const Dictionary& options, ExceptionState&);
     CustomElementRegistrationContext* registrationContext() { return m_registrationContext.get(); }
     CustomElementMicrotaskRunQueue* customElementMicrotaskRunQueue();
 

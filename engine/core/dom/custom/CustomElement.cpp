@@ -49,26 +49,9 @@ void CustomElement::didFinishLoadingImport(Document& master)
     master.customElementMicrotaskRunQueue()->requestDispatchIfNeeded();
 }
 
-Vector<AtomicString>& CustomElement::embedderCustomElementNames()
+bool CustomElement::isValidName(const AtomicString& name)
 {
-    DEFINE_STATIC_LOCAL(Vector<AtomicString>, names, ());
-    return names;
-}
-
-void CustomElement::addEmbedderCustomElementName(const AtomicString& name)
-{
-    AtomicString lower = name.lower();
-    if (isValidName(lower, EmbedderNames))
-        return;
-    embedderCustomElementNames().append(lower);
-}
-
-bool CustomElement::isValidName(const AtomicString& name, NameSet validNames)
-{
-    if ((validNames & EmbedderNames) && kNotFound != embedderCustomElementNames().find(name))
-        return Document::isValidName(name);
-
-    if ((validNames & StandardNames) && kNotFound != name.find('-'))
+    if (kNotFound != name.find('-'))
         return Document::isValidName(name.string());
 
     return false;

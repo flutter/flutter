@@ -448,7 +448,7 @@ ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicStri
     return registerElement(scriptState, name, Dictionary(), exceptionState);
 }
 
-ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, const Dictionary& options, ExceptionState& exceptionState, CustomElement::NameSet validNames)
+ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, const Dictionary& options, ExceptionState& exceptionState)
 {
     if (!registrationContext()) {
         exceptionState.throwDOMException(NotSupportedError, "No element registration context is available.");
@@ -456,7 +456,7 @@ ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicStri
     }
 
     CustomElementConstructorBuilder constructorBuilder(scriptState, &options);
-    registrationContext()->registerElement(this, &constructorBuilder, name, validNames, exceptionState);
+    registrationContext()->registerElement(this, &constructorBuilder, name, exceptionState);
     return constructorBuilder.bindingsReturnValue();
 }
 

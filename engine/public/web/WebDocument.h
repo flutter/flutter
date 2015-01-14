@@ -87,7 +87,6 @@ public:
     BLINK_EXPORT WebReferrerPolicy referrerPolicy() const;
     BLINK_EXPORT WebElement createElement(const WebString& tagName);
 
-    BLINK_EXPORT v8::Handle<v8::Value> registerEmbedderCustomElement(const WebString& name, v8::Handle<v8::Value> options, WebExceptionCode&);
     BLINK_EXPORT void pauseAnimationsForTesting(double pauseTime) const;
 
 

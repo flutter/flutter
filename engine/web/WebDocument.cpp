@@ -126,19 +126,6 @@ WebElement WebDocument::createElement(const WebString& tagName)
     return element;
 }
 
-v8::Handle<v8::Value> WebDocument::registerEmbedderCustomElement(const WebString& name, v8::Handle<v8::Value> options, WebExceptionCode& ec)
-{
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    Document* document = unwrap<Document>();
-    Dictionary dictionary(options, isolate);
-    TrackExceptionState exceptionState;
-    ScriptValue constructor = document->registerElement(ScriptState::current(isolate), name, dictionary, exceptionState, CustomElement::EmbedderNames);
-    ec = exceptionState.code();
-    if (exceptionState.hadException())
-        return v8::Handle<v8::Value>();
-    return constructor.v8Value();
-}
-
 void WebDocument::pauseAnimationsForTesting(double pauseTime) const {
     constUnwrap<Document>()->frame()->view()->updateLayoutAndStyleForPainting();
     constUnwrap<Document>()->timeline().pauseAnimationsForTesting(pauseTime);

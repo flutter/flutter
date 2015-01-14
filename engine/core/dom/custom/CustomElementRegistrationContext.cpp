@@ -47,9 +47,9 @@ CustomElementRegistrationContext::CustomElementRegistrationContext()
 {
 }
 
-void CustomElementRegistrationContext::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& type, CustomElement::NameSet validNames, ExceptionState& exceptionState)
+void CustomElementRegistrationContext::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& type, ExceptionState& exceptionState)
 {
-    m_registry.registerElement(document, constructorBuilder, type, validNames, exceptionState);
+    m_registry.registerElement(document, constructorBuilder, type, exceptionState);
 }
 
 PassRefPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Document& document, const QualifiedName& tagName)

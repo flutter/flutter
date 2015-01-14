@@ -59,7 +59,7 @@ private:
     bool m_wentAway;
 };
 
-CustomElementDefinition* CustomElementRegistry::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& userSuppliedName, CustomElement::NameSet validNames, ExceptionState& exceptionState)
+CustomElementDefinition* CustomElementRegistry::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& userSuppliedName, ExceptionState& exceptionState)
 {
     // FIXME: In every instance except one it is the
     // CustomElementConstructorBuilder that observes document
@@ -69,7 +69,7 @@ CustomElementDefinition* CustomElementRegistry::registerElement(Document* docume
 
     AtomicString type = userSuppliedName.lower();
 
-    if (!CustomElement::isValidName(type, validNames)) {
+    if (!CustomElement::isValidName(type)) {
         CustomElementException::throwException(CustomElementException::InvalidName, type, exceptionState);
         return 0;
     }

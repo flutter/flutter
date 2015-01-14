@@ -54,7 +54,7 @@ protected:
 
     CustomElementRegistry() { }
 
-    CustomElementDefinition* registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& name, CustomElement::NameSet validNames, ExceptionState&);
+    CustomElementDefinition* registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& name, ExceptionState&);
     CustomElementDefinition* find(const CustomElementDescriptor&) const;
 
 private:

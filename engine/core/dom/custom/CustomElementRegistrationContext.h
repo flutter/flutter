@@ -57,7 +57,7 @@ public:
     ~CustomElementRegistrationContext() { }
 
     // Definitions
-    void registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& type, CustomElement::NameSet validNames, ExceptionState&);
+    void registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& type, ExceptionState&);
 
     PassRefPtr<Element> createCustomTagElement(Document&, const QualifiedName&);
 

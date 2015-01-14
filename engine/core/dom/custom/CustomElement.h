@@ -48,13 +48,7 @@ class HTMLImportChild;
 
 class CustomElement {
 public:
-    enum NameSet {
-        EmbedderNames = 1 << 0,
-        StandardNames = 1 << 1,
-        AllNames = EmbedderNames | StandardNames
-    };
-    static bool isValidName(const AtomicString& name, NameSet validNames = AllNames);
-    static void addEmbedderCustomElementName(const AtomicString& name);
+    static bool isValidName(const AtomicString& name);
 
     // API to notify of document-level changes
     static CustomElementMicrotaskImportStep* didCreateImport(HTMLImportChild*);
@@ -72,8 +66,6 @@ public:
 
 private:
     CustomElement();
-
-    static Vector<AtomicString>& embedderCustomElementNames();
 };
 
 }
