@@ -5,11 +5,5 @@
       height: 100%;
     }
   </style>
-  <script>
-    // TODO(esprehn): Work around a bug where having <flights-app /> in the
-    // page doesn't render anything until the first input event.
-    window.addEventListener("load", function() {
-      document.querySelector("sky").appendChild(new FlightsAppElement());
-    });
-  </script>
+  <flights-app />
 </sky>
