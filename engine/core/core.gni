@@ -404,8 +404,6 @@ sky_core_files = [
   "dom/custom/CustomElementScheduler.h",
   "dom/custom/CustomElementSyncMicrotaskQueue.cpp",
   "dom/custom/CustomElementSyncMicrotaskQueue.h",
-  "dom/custom/CustomElementUpgradeCandidateMap.cpp",
-  "dom/custom/CustomElementUpgradeCandidateMap.h",
   "dom/Document.cpp",
   "dom/Document.h",
   "dom/DocumentFragment.cpp",

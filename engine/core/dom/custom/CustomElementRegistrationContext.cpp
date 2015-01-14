@@ -44,25 +44,12 @@
 namespace blink {
 
 CustomElementRegistrationContext::CustomElementRegistrationContext()
-    : m_candidates(CustomElementUpgradeCandidateMap::create())
 {
 }
 
 void CustomElementRegistrationContext::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& type, CustomElement::NameSet validNames, ExceptionState& exceptionState)
 {
-    CustomElementDefinition* definition = m_registry.registerElement(document, constructorBuilder, type, validNames, exceptionState);
-
-    if (!definition)
-        return;
-
-    // Upgrade elements that were waiting for this definition.
-    OwnPtr<CustomElementUpgradeCandidateMap::ElementSet> upgradeCandidates = m_candidates->takeUpgradeCandidatesFor(definition->descriptor());
-
-    if (!upgradeCandidates)
-        return;
-
-    for (CustomElementUpgradeCandidateMap::ElementSet::const_iterator it = upgradeCandidates->begin(); it != upgradeCandidates->end(); ++it)
-        CustomElement::define(*it, definition);
+    m_registry.registerElement(document, constructorBuilder, type, validNames, exceptionState);
 }
 
 PassRefPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Document& document, const QualifiedName& tagName)
@@ -85,13 +72,8 @@ void CustomElementRegistrationContext::resolveOrScheduleResolution(Element* elem
 
 void CustomElementRegistrationContext::resolve(Element* element, const CustomElementDescriptor& descriptor)
 {
-    CustomElementDefinition* definition = m_registry.find(descriptor);
-    if (definition) {
+    if (CustomElementDefinition* definition = m_registry.find(descriptor))
         CustomElement::define(element, definition);
-    } else {
-        ASSERT(element->customElementState() == Element::WaitingForUpgrade);
-        m_candidates->add(descriptor, element);
-    }
 }
 
 } // namespace blink

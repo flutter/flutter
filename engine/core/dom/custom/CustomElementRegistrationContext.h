@@ -34,7 +34,6 @@
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementRegistry.h"
-#include "sky/engine/core/dom/custom/CustomElementUpgradeCandidateMap.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -71,9 +70,6 @@ private:
     void resolveOrScheduleResolution(Element*);
 
     CustomElementRegistry m_registry;
-
-    // Element creation
-    OwnPtr<CustomElementUpgradeCandidateMap> m_candidates;
 };
 
 }
