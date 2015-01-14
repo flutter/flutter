@@ -54,7 +54,8 @@ uploaded file in the reference.
 2. Create an dummy reference file (foo-expected.sky).
 3. Run the test (it will fail).
 4. Copy the -actual.png file to googlestorage (see below).
-5. Put an <img> pointing to your newly uploaded png in the reference file.
+5. Put an <img> pointing to your newly uploaded png in the reference file at
+http://storage.googleapis.com/mojo/sky-pngs/SHA1_HASH_HERE
 
 Copying the file to googlestorage:
 $ sha1sum ../out/Debug/layout-test-results/framework/flights-app-pixels-actual.png
