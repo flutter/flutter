@@ -17,48 +17,50 @@ SurfaceHolder::Client::~Client() {
 }
 
 SurfaceHolder::SurfaceHolder(Client* client, mojo::Shell* shell)
-    : client_(client), weak_factory_(this) {
+    : client_(client), id_namespace_(0u), local_id_(0u), weak_factory_(this) {
   mojo::ServiceProviderPtr service_provider;
   shell->ConnectToApplication("mojo:surfaces_service",
                               mojo::GetProxy(&service_provider));
-  mojo::ConnectToService(service_provider.get(), &surfaces_service_);
-
-  surfaces_service_->CreateSurfaceConnection(base::Bind(
-      &SurfaceHolder::OnSurfaceConnectionCreated, weak_factory_.GetWeakPtr()));
+  mojo::ConnectToService(service_provider.get(), &surface_);
+  surface_.set_client(this);
 }
 
 SurfaceHolder::~SurfaceHolder() {
-  if (surface_ && surface_id_)
-    surface_->DestroySurface(surface_id_.Clone());
-}
-
-bool SurfaceHolder::IsReadyForFrame() const {
-  return surface_;
+  if (local_id_ != 0u)
+    surface_->DestroySurface(local_id_);
 }
 
 void SurfaceHolder::SubmitFrame(mojo::FramePtr frame,
                                 const base::Closure& callback) {
-  surface_->SubmitFrame(surface_id_.Clone(), frame.Pass(), callback);
+  surface_->SubmitFrame(local_id_, frame.Pass(), callback);
 }
 
 void SurfaceHolder::SetSize(const gfx::Size& size) {
-  if (surface_id_ && size_ == size)
+  if (local_id_ != 0u && size_ == size)
     return;
 
-  if (surface_id_) {
-    surface_->DestroySurface(surface_id_.Clone());
-  } else {
-    surface_id_ = mojo::SurfaceId::New();
-  }
+  if (local_id_ != 0u)
+    surface_->DestroySurface(local_id_);
 
-  surface_id_ = surface_allocator_->CreateSurfaceId();
-  surface_->CreateSurface(surface_id_.Clone());
+  local_id_++;
+  surface_->CreateSurface(local_id_);
   size_ = size;
 
-  client_->OnSurfaceIdAvailable(surface_id_.Clone());
+  if (id_namespace_ != 0u)
+    SetQualifiedId();
+}
+
+void SurfaceHolder::SetQualifiedId() {
+  auto qualified_id = mojo::SurfaceId::New();
+  qualified_id->id_namespace = id_namespace_;
+  qualified_id->local = local_id_;
+  client_->OnSurfaceIdAvailable(qualified_id.Pass());
 }
 
 void SurfaceHolder::SetIdNamespace(uint32_t id_namespace) {
+  id_namespace_ = id_namespace;
+  if (local_id_ != 0u)
+    SetQualifiedId();
 }
 
 void SurfaceHolder::ReturnResources(
@@ -67,14 +69,6 @@ void SurfaceHolder::ReturnResources(
   if (!resources.size())
     return;
   client_->ReturnResources(resources.Pass());
-}
-
-void SurfaceHolder::OnSurfaceConnectionCreated(mojo::SurfacePtr surface,
-                                               uint32_t id_namespace) {
-  surface_ = surface.Pass();
-  surface_.set_client(this);
-  surface_allocator_.reset(new SurfaceAllocator(id_namespace));
-  client_->OnSurfaceConnectionCreated();
 }
 
 }  // namespace sky
