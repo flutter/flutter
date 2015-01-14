@@ -1,12 +1,15 @@
 <script>
-function ConsoleAgent() {
-}
+class ConsoleAgent {
+  constructor() {
+    Object.preventExtensions(this);
+  }
 
-ConsoleAgent.prototype.enable = function() {
-  return {
-    result: true,
-  };
-};
+  enable() {
+    return {
+      result: true,
+    };
+  }
+}
 
 module.exports = ConsoleAgent;
 </script>

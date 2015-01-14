@@ -1,37 +1,65 @@
 <import src="debug.sky" as="debug" />
 <script>
-function Runtime(delegate) {
-  this.delegate_ = delegate;
-}
-
-Runtime.prototype.enable = function() {
-  this.delegate_.sendMessage("Runtime.executionContextCreated", {
-    "context": {
-      "frameId": 1,
-      "id": 1,
-    }
-  });
-  return {
-    result: true,
-  };
-};
-
-Runtime.prototype.callFunctionOn = function(params) {
-  var object = g_objectRegistry.lookup(params.objectId);
-  // This is a horrible hack:
-  var functionName = params.functionDeclaration.match(/^function (\w+)\(/)[1];
-  var expression = params.functionDeclaration + "; return " + functionName + ";";
-  var wasThrown = false;
-  var value;
-  try {
-    var func = new Function('', expression)();
-    value = func(object);
-  } catch (e) {
-    value = e;
-    wasThrown = true;
+class Runtime {
+  constructor(delegate) {
+    this.delegate_ = delegate;
+    Object.preventExtensions(this);
   }
 
-  return makeResult(params, value, wasThrown);
+  enable() {
+    this.delegate_.sendMessage("Runtime.executionContextCreated", {
+      "context": {
+        "frameId": 1,
+        "id": 1,
+      }
+    });
+    return {
+      result: true,
+    };
+  }
+
+  callFunctionOn(params) {
+    var object = g_objectRegistry.lookup(params.objectId);
+    // This is a horrible hack:
+    var functionName = params.functionDeclaration.match(/^function (\w+)\(/)[1];
+    var expression = params.functionDeclaration + "; return " + functionName + ";";
+    var wasThrown = false;
+    var value;
+    try {
+      var func = new Function('', expression)();
+      value = func(object);
+    } catch (e) {
+      value = e;
+      wasThrown = true;
+    }
+
+    return makeResult(params, value, wasThrown);
+  }
+
+  // FIXME: See Blink"s inspected-script-source.js InjectedScript.RemoteObject.
+  evaluate(params) {
+    var wasThrown = false;
+    var value;
+    try {
+      value = eval(params.expression);
+    } catch (e) {
+      value = e;
+      wasThrown = true;
+    }
+
+    return makeResult(params, value, wasThrown);
+  }
+
+  getProperties(params) {
+    var properties = injectedScript.getProperties(params.objectId, !!params.ownProperties, !!params.accessorPropertiesOnly);
+    var result = {
+      result: properties
+    };
+    if (!params.accessorPropertiesOnly) {
+      result.internalProperties = injectedScript.getInternalProperties(params.objectId);
+    }
+    return result;
+  }
 }
 
 // FIXME: This should release all objects associated with an object
@@ -41,23 +69,25 @@ Runtime.prototype.releaseObjectGroup = debug.loggingStub("releaseObjectGroup");
 
 // See InjectedScript._bind for a fancier version of this:
 
-function RemoteObjectRegistery() {
-  this.lastObjectId = 0;
-  this.objectsById = [];
-}
+class RemoteObjectRegistery {
+  constructor() {
+    this.lastObjectId = 0;
+    this.objectsById = [];
+    Object.preventExtensions(this);
+  }
 
-RemoteObjectRegistery.prototype.register = function(object) {
-  var objectId = ++this.lastObjectId;
-  this.objectsById[objectId] = object;
-  return String(objectId);
-}
+  register(object) {
+    var objectId = ++this.lastObjectId;
+    this.objectsById[objectId] = object;
+    return String(objectId);
+  }
 
-RemoteObjectRegistery.prototype.lookup = function(objectId) {
-  return this.objectsById[Number(objectId)];
+  lookup(objectId) {
+    return this.objectsById[Number(objectId)];
+  }
 }
 
 var g_objectRegistry = new RemoteObjectRegistery();
-
 
 function makeResult(params, value, wasThrown) {
   var type = typeof(value)
@@ -97,31 +127,6 @@ function makeResult(params, value, wasThrown) {
         "columnNumber": 0
       }]
     }
-  }
-  return result;
-}
-
-// FIXME: See Blink"s inspected-script-source.js InjectedScript.RemoteObject.
-Runtime.prototype.evaluate = function(params) {
-  var wasThrown = false;
-  var value;
-  try {
-    value = eval(params.expression);
-  } catch (e) {
-    value = e;
-    wasThrown = true;
-  }
-
-  return makeResult(params, value, wasThrown);
-}
-
-Runtime.prototype.getProperties = function(params) {
-  var properties = injectedScript.getProperties(params.objectId, !!params.ownProperties, !!params.accessorPropertiesOnly);
-  var result = {
-    result: properties
-  };
-  if (!params.accessorPropertiesOnly) {
-    result.internalProperties = injectedScript.getInternalProperties(params.objectId);
   }
   return result;
 }

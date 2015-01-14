@@ -1,12 +1,15 @@
 <script>
-function WorkerAgent() {
-}
+class WorkerAgent {
+  constructor() {
+    Object.preventExtensions(this);
+  }
 
-WorkerAgent.prototype.canInspectWorkers = function() {
-  return {
-    result: false
-  };
-};
+  canInspectWorkers() {
+    return {
+      result: false
+    };
+  }
+}
 
 module.exports = WorkerAgent;
 </script>

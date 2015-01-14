@@ -1,11 +1,14 @@
 <script>
-function IndexedDB() {
-}
+class IndexedDB {
+  constructor() {
+    Object.preventExtensions(this);
+  }
 
-// Needed to make the inspector not throw an exception.
-IndexedDB.prototype.requestDatabaseNames = function() {
-  return { "databaseNames": [] };
-};
+  // Needed to make the inspector not throw an exception.
+  requestDatabaseNames() {
+    return { "databaseNames": [] };
+  }
+}
 
 module.exports = IndexedDB;
 </script>

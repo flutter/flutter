@@ -1,37 +1,57 @@
 <import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
-function Page(delegate) {
-  this.delegate_ = delegate;
-}
+class Page {
+  constructor(delegate) {
+    this.delegate_ = delegate;
+    Object.preventExtensions(this);
+  }
 
-Page.prototype.enable = function() {
-};
+  enable() {
+  }
 
-Page.prototype.canScreencast = function() {
-  return {
-    result: false
-  };
-};
-
-Page.prototype.canEmulate = function() {
-  return {
-    result: false
-  };
-};
-
-Page.prototype.getResourceContent = function(params, messageId) {
-  var request = new XMLHttpRequest;
-  request.onload = function() {
-    var message = {
-      'content' : request.responseText,
+  canScreencast() {
+    return {
+      result: false
     };
-    this.delegate_.sendResponse(messageId, message);
-  }.bind(this);
-  request.open("GET", params.url);
-  request.send();
+  }
 
-  return this.delegate_.ASYNC_RESPONSE;
-};
+  canEmulate() {
+    return {
+      result: false
+    };
+  }
+
+  getResourceContent(params, messageId) {
+    var request = new XMLHttpRequest;
+    request.onload = function() {
+      var message = {
+        'content' : request.responseText,
+      };
+      this.delegate_.sendResponse(messageId, message);
+    }.bind(this);
+    request.open("GET", params.url);
+    request.send();
+
+    return this.delegate_.ASYNC_RESPONSE;
+  }
+
+  getResourceTree() {
+    // Unclear if this is all needed, but if we don't return something here
+    // the inspector hits an exception in WebInspector.ResourceTreeModel.
+    return {
+      "frameTree": {
+        "frame": {
+          "id": "1",
+          "loaderId": "1",
+          "url": String(document.URL),
+          "mimeType": "text/html",
+          "securityOrigin": String(document.URL),
+        },
+        "resources": arrayFromIterator(resourcesMapForSubtree(document).values()),
+      }
+    };
+  }
+}
 
 // FIXME: ES6 has Array.from which theoretically does this.
 function arrayFromIterator(iterator) {
@@ -46,7 +66,7 @@ function forEachInNodeList(array, callback, scope) {
   for (var i = 0; i < array.length; i++) {
     callback.call(scope, array[i]);
   }
-};
+}
 
 function addResource(map, url, type, mimeType) {
   // Be sure to string the url object since has(new Object)
@@ -83,23 +103,6 @@ function resourcesMapForSubtree(root_doc) {
   }
   return map;
 }
-
-Page.prototype.getResourceTree = function() {
-  // Unclear if this is all needed, but if we don't return something here
-  // the inspector hits an exception in WebInspector.ResourceTreeModel.
-  return {
-    "frameTree": {
-      "frame": {
-        "id": "1",
-        "loaderId": "1",
-        "url": String(document.URL),
-        "mimeType": "text/html",
-        "securityOrigin": String(document.URL),
-      },
-      "resources": arrayFromIterator(resourcesMapForSubtree(document).values()),
-    }
-  };
-};
 
 module.exports = Page;
 </script>
