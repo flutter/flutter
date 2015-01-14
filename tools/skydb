@@ -187,7 +187,7 @@ class SkyDebugger(object):
         if not is_android:
             # Desktop-only work-around for mojo crashing under chromoting.
             if args.use_osmesa:
-                shell_args.append(
+                shell_command.append(
                     '--args-for=mojo:native_viewport_service --use-osmesa')
 
             # On android we can't launch inside gdb, but rather have to attach.
