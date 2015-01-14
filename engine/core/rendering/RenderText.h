@@ -107,7 +107,6 @@ public:
 
     virtual bool canBeSelectionLeaf() const override { return true; }
     virtual void setSelectionState(SelectionState s) override final;
-    virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool clipToVisibleContent = true) override;
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override;
 
     LayoutUnit marginLeft() const { return minimumValueForLength(style()->marginLeft(), 0); }

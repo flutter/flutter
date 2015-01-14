@@ -576,10 +576,6 @@ public:
     const RenderLayerModelObject* containerForPaintInvalidation() const;
     const RenderLayerModelObject* adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const;
 
-    // Given a rect in the object's coordinate space, compute a rect suitable for invalidating paints of
-    // that rect in the coordinate space of paintInvalidationContainer.
-    virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const;
-
     virtual unsigned length() const { return 1; }
 
     // FIXME(sky): Remove
@@ -602,10 +598,6 @@ public:
     virtual void setSelectionState(SelectionState state) { m_bitfields.setSelectionState(state); }
     inline void setSelectionStateIfNeeded(SelectionState);
     bool canUpdateSelectionOnRootLineBoxes();
-
-    // A single rectangle that encompasses all of the selected objects within this object.  Used to determine the tightest
-    // possible bounding box for the selection. The rect returned is in the coordinate space of the paint invalidation container's backing.
-    virtual LayoutRect selectionRectForPaintInvalidation(const RenderLayerModelObject* /*paintInvalidationContainer*/, bool /*clipToVisibleContent*/ = true) { return LayoutRect(); }
 
     virtual bool canBeSelectionLeaf() const { return false; }
     bool hasSelectedChildren() const { return selectionState() != SelectionNone; }

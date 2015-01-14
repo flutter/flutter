@@ -363,8 +363,6 @@ public:
     void setInlineBoxWrapper(InlineBox*);
     void deleteLineBoxWrapper();
 
-    virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;
-
     LayoutUnit containingBlockLogicalHeightForContent(AvailableLogicalHeightType) const;
 
     virtual void updateLogicalWidth();
@@ -478,7 +476,6 @@ public:
     virtual void computeIntrinsicRatioInformation(FloatSize& /* intrinsicSize */, double& /* intrinsicRatio */) const { }
 
     IntSize scrolledContentOffset() const;
-    void applyCachedClipAndScrollOffsetForPaintInvalidation(LayoutRect& paintRect) const;
 
     virtual bool hasRelativeLogicalHeight() const;
 
@@ -583,8 +580,6 @@ private:
     // updateLogicalHeight. This is logicalHeight() before it is clamped to
     // min/max.
     mutable LayoutUnit m_intrinsicContentLogicalHeight;
-
-    void inflatePaintInvalidationRectForReflectionAndFilter(LayoutRect&) const;
 
 protected:
     LayoutBoxExtent m_marginBox;

@@ -478,20 +478,6 @@ IntSize RenderBox::scrolledContentOffset() const
     return layer()->scrollableArea()->scrollOffset();
 }
 
-void RenderBox::applyCachedClipAndScrollOffsetForPaintInvalidation(LayoutRect& paintRect) const
-{
-    ASSERT(hasLayer());
-    ASSERT(hasOverflowClip());
-
-    paintRect.move(-scrolledContentOffset()); // For overflow:auto/scroll/hidden.
-
-    // height() is inaccurate if we're in the middle of a layout of this RenderBox, so use the
-    // layer's size instead. Even if the layer's size is wrong, the layer itself will issue paint invalidations
-    // anyway if its size does change.
-    LayoutRect clipRect(LayoutPoint(), layer()->size());
-    paintRect = intersection(paintRect, clipRect);
-}
-
 void RenderBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
 {
     minLogicalWidth = minPreferredLogicalWidth() - borderAndPaddingLogicalWidth();
@@ -1184,96 +1170,6 @@ void RenderBox::deleteLineBoxWrapper()
         ASSERT(m_rareData);
         m_rareData->m_inlineBoxWrapper = 0;
     }
-}
-
-void RenderBox::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
-{
-    // The rect we compute at each step is shifted by our x/y offset in the parent container's coordinate space.
-    //
-    // RenderView::computeRectForPaintInvalidation then converts the rect to physical coordinates. We also convert to
-    // physical when we hit a paintInvalidationContainer boundary. Therefore the final rect returned is always in the
-    // physical coordinate space of the paintInvalidationContainer.
-    RenderStyle* styleToUse = style();
-
-    EPosition position = styleToUse->position();
-
-    // We need to inflate the paint invalidation rect before we use paintInvalidationState,
-    // else we would forget to inflate it for the current renderer. FIXME: If these were
-    // included into the visual overflow for repaint, we wouldn't have this issue.
-    inflatePaintInvalidationRectForReflectionAndFilter(rect);
-
-    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer)) {
-        if (layer() && layer()->transform())
-            rect = layer()->transform()->mapRect(pixelSnappedIntRect(rect));
-
-        // We can't trust the bits on RenderObject, because this might be called while re-resolving style.
-        if (styleToUse->hasInFlowPosition() && layer())
-            rect.move(layer()->offsetForInFlowPosition());
-
-        rect.moveBy(location());
-        rect.move(paintInvalidationState->paintOffset());
-        if (paintInvalidationState->isClipped())
-            rect.intersect(paintInvalidationState->clipRect());
-        return;
-    }
-
-    if (paintInvalidationContainer == this) {
-        return;
-    }
-
-    bool containerSkipped;
-    RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
-    if (!o)
-        return;
-
-    LayoutPoint topLeft = rect.location();
-    topLeft.move(locationOffset());
-
-    // We are now in our parent container's coordinate space.  Apply our transform to obtain a bounding box
-    // in the parent's coordinate space that encloses us.
-    if (hasLayer() && layer()->transform()) {
-        rect = layer()->transform()->mapRect(pixelSnappedIntRect(rect));
-        topLeft = rect.location();
-        topLeft.move(locationOffset());
-    }
-
-    if (position == AbsolutePosition && o->isRelPositioned() && o->isRenderInline()) {
-        topLeft += toRenderInline(o)->offsetForInFlowPositionedInline(*this);
-    } else if (styleToUse->hasInFlowPosition() && layer()) {
-        // Apply the relative position offset when invalidating a rectangle.  The layer
-        // is translated, but the render box isn't, so we need to do this to get the
-        // right dirty rect.  Since this is called from RenderObject::setStyle, the relative position
-        // flag on the RenderObject has been cleared, so use the one on the style().
-        topLeft += layer()->offsetForInFlowPosition();
-    }
-
-    // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
-    // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    rect.setLocation(topLeft);
-    if (o->hasOverflowClip()) {
-        RenderBox* containerBox = toRenderBox(o);
-        containerBox->applyCachedClipAndScrollOffsetForPaintInvalidation(rect);
-        if (rect.isEmpty())
-            return;
-    }
-
-    if (containerSkipped) {
-        // If the paintInvalidationContainer is below o, then we need to map the rect into paintInvalidationContainer's coordinates.
-        LayoutSize containerOffset = paintInvalidationContainer->offsetFromAncestorContainer(o);
-        rect.move(-containerOffset);
-        return;
-    }
-
-    if (o->isRenderView())
-        toRenderView(o)->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-    else
-        o->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-}
-
-void RenderBox::inflatePaintInvalidationRectForReflectionAndFilter(LayoutRect& paintInvalidationRect) const
-{
-    if (style()->hasFilter())
-        style()->filterOutsets().expandRect(paintInvalidationRect);
 }
 
 void RenderBox::updateLogicalWidth()

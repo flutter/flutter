@@ -198,8 +198,6 @@ public:
 
     String selectedText() const;
 
-    FloatRect bounds() const;
-
     void revealSelection(const ScrollAlignment& = ScrollAlignment::alignCenterIfNeeded, RevealExtentOption = DoNotRevealExtent);
     void setSelectionFromNone();
 

@@ -1520,19 +1520,6 @@ String FrameSelection::selectedText() const
     return plainText(toNormalizedRange().get()).replace(0, "");
 }
 
-FloatRect FrameSelection::bounds() const
-{
-    m_frame->document()->updateRenderTreeIfNeeded();
-
-    FrameView* view = m_frame->view();
-    RenderView* renderView = m_frame->contentRenderer();
-
-    if (!view || !renderView)
-        return FloatRect();
-
-    return renderView->selectionBounds();
-}
-
 void FrameSelection::revealSelection(const ScrollAlignment& alignment, RevealExtentOption revealExtentOption)
 {
     LayoutRect rect;
@@ -1544,7 +1531,8 @@ void FrameSelection::revealSelection(const ScrollAlignment& alignment, RevealExt
         rect = absoluteCaretBounds();
         break;
     case RangeSelection:
-        rect = revealExtentOption == RevealExtent ? VisiblePosition(extent()).absoluteCaretBounds() : enclosingIntRect(bounds());
+        Position position = revealExtentOption == RevealExtent ? extent() : base();
+        rect = VisiblePosition(position).absoluteCaretBounds();
         break;
     }
 

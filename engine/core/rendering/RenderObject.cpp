@@ -1105,23 +1105,6 @@ const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialA
     return view();
 }
 
-void RenderObject::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
-{
-    if (paintInvalidationContainer == this)
-        return;
-
-    if (RenderObject* o = parent()) {
-        if (o->hasOverflowClip()) {
-            RenderBox* boxParent = toRenderBox(o);
-            boxParent->applyCachedClipAndScrollOffsetForPaintInvalidation(rect);
-            if (rect.isEmpty())
-                return;
-        }
-
-        o->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-    }
-}
-
 void RenderObject::dirtyLinesFromChangedChild(RenderObject*)
 {
 }

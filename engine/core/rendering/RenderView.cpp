@@ -248,13 +248,6 @@ void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const Layout
     }
 }
 
-void RenderView::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* state) const
-{
-    // Apply our transform if we have one (because of full page zooming).
-    if (!paintInvalidationContainer && layer() && layer()->transform())
-        rect = layer()->transform()->mapRect(rect);
-}
-
 void RenderView::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
 {
     rects.append(pixelSnappedIntRect(accumulatedOffset, layer()->size()));
@@ -272,42 +265,6 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
 
     RenderObject* child = object->childAt(offset);
     return child ? child : object->nextInPreOrderAfterChildren();
-}
-
-IntRect RenderView::selectionBounds() const
-{
-    HashSet<RenderObject*> selectedObjects;
-
-    RenderObject* os = m_selectionStart;
-    RenderObject* stop = rendererAfterPosition(m_selectionEnd, m_selectionEndPos);
-    while (os && os != stop) {
-        if ((os->canBeSelectionLeaf() || os == m_selectionStart || os == m_selectionEnd) && os->selectionState() != SelectionNone) {
-            // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
-            selectedObjects.add(os);
-            RenderBlock* cb = os->containingBlock();
-            while (cb && !cb->isRenderView()) {
-                if (!selectedObjects.add(cb).isNewEntry)
-                    break;
-                cb = cb->containingBlock();
-            }
-        }
-
-        os = os->nextInPreOrder();
-    }
-
-    // Now create a single bounding box rect that encloses the whole selection.
-    LayoutRect selRect;
-
-    for (auto& renderer : selectedObjects) {
-        const RenderLayerModelObject* paintInvalidationContainer = renderer->containerForPaintInvalidation();
-        ASSERT(paintInvalidationContainer);
-        // selectionRectForPaintInvalidation is in the coordinates of the paintInvalidationContainer, so map to page coordinates.
-        bool clipToVisibleContent = false;
-        LayoutRect rect = renderer->selectionRectForPaintInvalidation(paintInvalidationContainer, clipToVisibleContent);
-        FloatQuad absQuad = paintInvalidationContainer->localToAbsoluteQuad(FloatRect(rect));
-        selRect.unite(absQuad.enclosingBoundingBox());
-    }
-    return pixelSnappedIntRect(selRect);
 }
 
 // When exploring the RenderTree looking for the nodes involved in the Selection, sometimes it's

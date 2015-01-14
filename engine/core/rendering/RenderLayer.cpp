@@ -285,12 +285,6 @@ LayoutPoint RenderLayer::positionFromPaintInvalidationContainer(const RenderObje
     return renderObject->positionFromPaintInvalidationContainer(paintInvalidationContainer, paintInvalidationState);
 }
 
-void RenderLayer::mapRectToPaintInvalidationBacking(const RenderObject* renderObject, const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState)
-{
-    // FIXME(sky): Remove
-    renderObject->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-}
-
 void RenderLayer::dirty3DTransformedDescendantStatus()
 {
     RenderLayerStackingNode* stackingNode = m_stackingNode->ancestorStackingContextNode();

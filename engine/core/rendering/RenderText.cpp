@@ -1364,49 +1364,6 @@ LayoutRect RenderText::linesVisualOverflowBoundingBox() const
     return rect;
 }
 
-LayoutRect RenderText::selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool clipToVisibleContent)
-{
-    ASSERT(!needsLayout());
-
-    if (selectionState() == SelectionNone)
-        return LayoutRect();
-    RenderBlock* cb = containingBlock();
-    if (!cb)
-        return LayoutRect();
-
-    // Now calculate startPos and endPos for painting selection.
-    // We include a selection while endPos > 0
-    int startPos, endPos;
-    if (selectionState() == SelectionInside) {
-        // We are fully selected.
-        startPos = 0;
-        endPos = textLength();
-    } else {
-        selectionStartEnd(startPos, endPos);
-        if (selectionState() == SelectionStart)
-            endPos = textLength();
-        else if (selectionState() == SelectionEnd)
-            startPos = 0;
-    }
-
-    if (startPos == endPos)
-        return IntRect();
-
-    LayoutRect rect;
-    for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {
-        rect.unite(box->localSelectionRect(startPos, endPos));
-        rect.unite(ellipsisRectForBox(box, startPos, endPos));
-    }
-
-    if (clipToVisibleContent) {
-        mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, 0);
-    } else {
-        rect = localToContainerQuad(FloatRect(rect), paintInvalidationContainer).enclosingBoundingBox();
-    }
-
-    return rect;
-}
-
 int RenderText::caretMinOffset() const
 {
     InlineTextBox* box = firstTextBox();

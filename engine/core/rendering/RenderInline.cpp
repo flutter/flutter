@@ -598,55 +598,6 @@ LayoutRect RenderInline::linesVisualOverflowBoundingBox() const
     return rect;
 }
 
-void RenderInline::mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect& rect, const PaintInvalidationState* paintInvalidationState) const
-{
-    if (paintInvalidationState && paintInvalidationState->canMapToContainer(paintInvalidationContainer)) {
-        if (style()->hasInFlowPosition() && layer())
-            rect.move(layer()->offsetForInFlowPosition());
-        rect.move(paintInvalidationState->paintOffset());
-        if (paintInvalidationState->isClipped())
-            rect.intersect(paintInvalidationState->clipRect());
-        return;
-    }
-
-    if (paintInvalidationContainer == this)
-        return;
-
-    bool containerSkipped;
-    RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
-    if (!o)
-        return;
-
-    LayoutPoint topLeft = rect.location();
-
-    if (style()->hasInFlowPosition() && layer()) {
-        // Apply the in-flow position offset when invalidating a rectangle. The layer
-        // is translated, but the render box isn't, so we need to do this to get the
-        // right dirty rect. Since this is called from RenderObject::setStyle, the relative position
-        // flag on the RenderObject has been cleared, so use the one on the style().
-        topLeft += layer()->offsetForInFlowPosition();
-    }
-
-    // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
-    // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    rect.setLocation(topLeft);
-    if (o->hasOverflowClip()) {
-        RenderBox* containerBox = toRenderBox(o);
-        containerBox->applyCachedClipAndScrollOffsetForPaintInvalidation(rect);
-        if (rect.isEmpty())
-            return;
-    }
-
-    if (containerSkipped) {
-        // If the paintInvalidationContainer is below o, then we need to map the rect into paintInvalidationContainer's coordinates.
-        LayoutSize containerOffset = paintInvalidationContainer->offsetFromAncestorContainer(o);
-        rect.move(-containerOffset);
-        return;
-    }
-
-    o->mapRectToPaintInvalidationBacking(paintInvalidationContainer, rect, paintInvalidationState);
-}
-
 LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, const LayoutPoint& point, bool* offsetDependsOnPoint) const
 {
     ASSERT(container == this->container());

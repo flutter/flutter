@@ -699,27 +699,6 @@ bool RenderBlock::isSelectionRoot() const
     return false;
 }
 
-LayoutRect RenderBlock::selectionRectForPaintInvalidation(const RenderLayerModelObject* paintInvalidationContainer, bool)
-{
-    ASSERT(!needsLayout());
-
-    if (!shouldPaintSelectionGaps())
-        return GapRects();
-
-    TransformState transformState(TransformState::ApplyTransformDirection, FloatPoint());
-    mapLocalToContainer(paintInvalidationContainer, transformState, ApplyContainerFlip | UseTransforms);
-    LayoutPoint offsetFromPaintInvalidationContainer = roundedLayoutPoint(transformState.mappedPoint());
-
-    if (hasOverflowClip())
-        offsetFromPaintInvalidationContainer -= scrolledContentOffset();
-
-    LayoutUnit lastTop = 0;
-    LayoutUnit lastLeft = logicalLeftSelectionOffset(this, lastTop);
-    LayoutUnit lastRight = logicalRightSelectionOffset(this, lastTop);
-
-    return selectionGaps(this, offsetFromPaintInvalidationContainer, IntSize(), lastTop, lastLeft, lastRight);
-}
-
 void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     if (shouldPaintSelectionGaps() && paintInfo.phase == PaintPhaseForeground) {

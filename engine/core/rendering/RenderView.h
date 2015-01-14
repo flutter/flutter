@@ -73,8 +73,6 @@ public:
 
     FrameView* frameView() const { return m_frameView; }
 
-    virtual void mapRectToPaintInvalidationBacking(const RenderLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;
-
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
@@ -84,7 +82,6 @@ public:
     void clearSelection();
     RenderObject* selectionStart() const { return m_selectionStart; }
     RenderObject* selectionEnd() const { return m_selectionEnd; }
-    IntRect selectionBounds() const;
     void selectionStartEnd(int& startPos, int& endPos) const;
 
     virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
