@@ -29,7 +29,8 @@ void InspectorServiceImpl::Inject() {
 
   mojo::ServiceProviderPtr inspector_service_provider;
   view_->shell()->ConnectToApplication("mojo:sky_inspector_server",
-                                       GetProxy(&inspector_service_provider));
+                                       GetProxy(&inspector_service_provider),
+                                       nullptr);
   InspectorServerPtr inspector;
   mojo::ConnectToService(inspector_service_provider.get(), &inspector);
   inspector->Listen(9898, base::Bind(&Ignored));

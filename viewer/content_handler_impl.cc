@@ -21,17 +21,18 @@ class SkyApplication : public mojo::Application {
     shell_.set_client(this);
     mojo::ServiceProviderPtr service_provider;
     shell_->ConnectToApplication("mojo:network_service",
-                                 mojo::GetProxy(&service_provider));
+                                 mojo::GetProxy(&service_provider), nullptr);
     mojo::ConnectToService(service_provider.get(), &network_service_);
   }
 
   void Initialize(mojo::Array<mojo::String> args) override {}
 
   void AcceptConnection(const mojo::String& requestor_url,
-                        mojo::ServiceProviderPtr provider) override {
+                        mojo::InterfaceRequest<mojo::ServiceProvider> services,
+                        mojo::ServiceProviderPtr exposed_services) override {
     if (initial_response_) {
-      OnResponseReceived(mojo::URLLoaderPtr(), provider.Pass(),
-                         initial_response_.Pass());
+      OnResponseReceived(mojo::URLLoaderPtr(), services.Pass(),
+                         exposed_services.Pass(), initial_response_.Pass());
     } else {
       mojo::URLLoaderPtr loader;
       network_service_->CreateURLLoader(mojo::GetProxy(&loader));
@@ -47,15 +48,18 @@ class SkyApplication : public mojo::Application {
           request.Pass(),
           base::Bind(&SkyApplication::OnResponseReceived,
                      base::Unretained(this), base::Passed(&loader),
-                     base::Passed(&provider)));
+                     base::Passed(&services), base::Passed(&exposed_services)));
     }
   }
 
  private:
-  void OnResponseReceived(mojo::URLLoaderPtr loader,
-                          mojo::ServiceProviderPtr provider,
-                          mojo::URLResponsePtr response) {
-    new DocumentView(provider.Pass(), response.Pass(), shell_.get());
+  void OnResponseReceived(
+      mojo::URLLoaderPtr loader,
+      mojo::InterfaceRequest<mojo::ServiceProvider> services,
+      mojo::ServiceProviderPtr exposed_services,
+      mojo::URLResponsePtr response) {
+    new DocumentView(services.Pass(), exposed_services.Pass(), response.Pass(),
+                     shell_.get());
   }
 
   mojo::String url_;

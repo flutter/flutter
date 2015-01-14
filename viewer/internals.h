@@ -31,8 +31,9 @@ class Internals : public gin::Wrappable<Internals>,
 
   // mojo::Shell method:
   void ConnectToApplication(
-      const mojo::String& application_url, 
-      mojo::InterfaceRequest<mojo::ServiceProvider> provider) override;
+      const mojo::String& application_url,
+      mojo::InterfaceRequest<mojo::ServiceProvider> services,
+      mojo::ServiceProviderPtr exposed_services) override;
 
   mojo::Handle PassShellProxyHandle();
   std::string RenderTreeAsText();

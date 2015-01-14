@@ -73,7 +73,8 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
 static int s_next_debugger_id = 1;
 
 DocumentView::DocumentView(
-    mojo::ServiceProviderPtr provider,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exported_services,
     mojo::URLResponsePtr response,
     mojo::Shell* shell)
     : response_(response.Pass()),
@@ -84,8 +85,9 @@ DocumentView::DocumentView(
       inspector_service_factory_(this),
       weak_factory_(this),
       debugger_id_(s_next_debugger_id++) {
+  // TODO(jamesr): Is this right?
   exported_services_.AddService(&view_manager_client_factory_);
-  mojo::WeakBindToPipe(&exported_services_, provider.PassMessagePipe());
+  mojo::WeakBindToPipe(&exported_services_, services.PassMessagePipe());
 }
 
 DocumentView::~DocumentView() {

@@ -20,7 +20,7 @@ SurfaceHolder::SurfaceHolder(Client* client, mojo::Shell* shell)
     : client_(client), id_namespace_(0u), local_id_(0u), weak_factory_(this) {
   mojo::ServiceProviderPtr service_provider;
   shell->ConnectToApplication("mojo:surfaces_service",
-                              mojo::GetProxy(&service_provider));
+                              mojo::GetProxy(&service_provider), nullptr);
   mojo::ConnectToService(service_provider.get(), &surface_);
   surface_.set_client(this);
 }

@@ -100,11 +100,13 @@ mojo::Handle Internals::PassShellProxyHandle() {
 }
 
 void Internals::ConnectToApplication(
-    const mojo::String& application_url, 
-    mojo::InterfaceRequest<mojo::ServiceProvider> provider) {
-  if (document_view_) 
+    const mojo::String& application_url,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exposed_services) {
+  if (document_view_) {
     document_view_->shell()->ConnectToApplication(
-        application_url, provider.Pass());
+        application_url, services.Pass(), exposed_services.Pass());
+  }
 }
 
 mojo::Handle Internals::ConnectToService(
@@ -113,7 +115,8 @@ mojo::Handle Internals::ConnectToService(
     return mojo::Handle();
 
   mojo::ServiceProviderPtr service_provider;
-  ConnectToApplication(application_url, mojo::GetProxy(&service_provider));
+  ConnectToApplication(application_url, mojo::GetProxy(&service_provider),
+                       nullptr);
 
   mojo::MessagePipe pipe;
   service_provider->ConnectToService(interface_name, pipe.handle1.Pass());

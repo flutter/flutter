@@ -47,7 +47,8 @@ class DocumentView : public blink::ServiceProvider,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver {
  public:
-  DocumentView(mojo::ServiceProviderPtr provider,
+  DocumentView(mojo::InterfaceRequest<mojo::ServiceProvider> services,
+               mojo::ServiceProviderPtr exported_services,
                mojo::URLResponsePtr response,
                mojo::Shell* shell);
   virtual ~DocumentView();
