@@ -288,7 +288,7 @@ static inline RenderObject* getNextOrPrevRenderObjectBasedOnDirection(const Rend
     return next;
 }
 
-void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* end, int endPos, SelectionPaintInvalidationMode blockPaintInvalidationMode)
+void RenderView::setSelection(RenderObject* start, int startPos, RenderObject* end, int endPos)
 {
     // This code makes no assumptions as to if the rendering tree is up to date or not
     // and will not try to update it. Currently clearSelection calls this
@@ -353,7 +353,7 @@ void RenderView::getSelection(RenderObject*& startRenderer, int& startOffset, Re
 
 void RenderView::clearSelection()
 {
-    setSelection(0, -1, 0, -1, PaintInvalidationNewMinusOld);
+    setSelection(0, -1, 0, -1);
 }
 
 void RenderView::selectionStartEnd(int& startPos, int& endPos) const

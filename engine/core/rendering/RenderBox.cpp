@@ -3089,42 +3089,6 @@ bool RenderBox::hasRelativeLogicalHeight() const
         || style()->logicalMaxHeight().isPercent();
 }
 
-void RenderBox::savePreviousBorderBoxSizeIfNeeded()
-{
-    // If m_rareData is already created, always save.
-    if (!m_rareData) {
-        LayoutSize paintInvalidationSize = previousPaintInvalidationRect().size();
-
-        // Don't save old border box size if the paint rect is empty because we'll
-        // full invalidate once the paint rect becomes non-empty.
-        if (paintInvalidationSize.isEmpty())
-            return;
-
-        // Don't save old border box size if we can use size of the old paint rect
-        // as the old border box size in the next invalidation.
-        if (paintInvalidationSize == size())
-            return;
-
-        // We need the old border box size only when the box has background or box decorations.
-        if (!style()->hasBackground() && !style()->hasBoxDecorations())
-            return;
-    }
-
-    ensureRareData().m_previousBorderBoxSize = size();
-}
-
-LayoutSize RenderBox::computePreviousBorderBoxSize(const LayoutSize& previousBoundsSize) const
-{
-    // PreviousBorderBoxSize is only valid when there is background or box decorations.
-    ASSERT(style()->hasBackground() || style()->hasBoxDecorations());
-
-    if (m_rareData && m_rareData->m_previousBorderBoxSize.width() != -1)
-        return m_rareData->m_previousBorderBoxSize;
-
-    // We didn't save the old border box size because it was the same as the size of oldBounds.
-    return previousBoundsSize;
-}
-
 RenderBox::BoxDecorationData::BoxDecorationData(const RenderStyle& style)
 {
     backgroundColor = style.colorIncludingFallback(CSSPropertyBackgroundColor);

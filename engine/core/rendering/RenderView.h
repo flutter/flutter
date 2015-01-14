@@ -75,8 +75,7 @@ public:
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
-    enum SelectionPaintInvalidationMode { PaintInvalidationNewXOROld, PaintInvalidationNewMinusOld, PaintInvalidationNothing };
-    void setSelection(RenderObject* start, int startPos, RenderObject*, int endPos, SelectionPaintInvalidationMode = PaintInvalidationNewXOROld);
+    void setSelection(RenderObject* start, int startPos, RenderObject*, int endPos);
     void getSelection(RenderObject*& startRenderer, int& startOffset, RenderObject*& endRenderer, int& endOffset) const;
     void clearSelection();
     RenderObject* selectionStart() const { return m_selectionStart; }
@@ -116,8 +115,6 @@ private:
     virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
-
-    bool shouldInvalidatePaint(const LayoutRect&) const;
 
     void layoutContent();
 #if ENABLE(ASSERT)

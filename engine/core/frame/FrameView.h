@@ -191,7 +191,6 @@ public:
     // FIXME(sky): Not clear what values these should return. This is just what they happen to be
     // returning today.
     bool paintsEntireContents() const { return false; }
-    bool clipsPaintInvalidations() const { return true; }
 
     // For inspector reporting:
     void countObjectsNeedingLayout(unsigned& needsLayoutObjects, unsigned& totalObjects, bool& isPartial);

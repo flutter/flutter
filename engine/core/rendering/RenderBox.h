@@ -53,18 +53,13 @@ public:
         : m_inlineBoxWrapper(0)
         , m_overrideLogicalContentHeight(-1)
         , m_overrideLogicalContentWidth(-1)
-        , m_previousBorderBoxSize(-1, -1)
     {
     }
 
     // For inline replaced elements, the inline box that owns us.
     InlineBox* m_inlineBoxWrapper;
-
     LayoutUnit m_overrideLogicalContentHeight;
     LayoutUnit m_overrideLogicalContentWidth;
-
-    // Set by RenderBox::updatePreviousBorderBoxSizeIfNeeded().
-    LayoutSize m_previousBorderBoxSize;
 };
 
 
@@ -565,9 +560,6 @@ private:
             m_rareData = adoptPtr(new RenderBoxRareData());
         return *m_rareData.get();
     }
-
-    void savePreviousBorderBoxSizeIfNeeded();
-    LayoutSize computePreviousBorderBoxSize(const LayoutSize& previousBoundsSize) const;
 
     bool logicalHeightComputesAsNone(SizeType) const;
 

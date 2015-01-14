@@ -1949,10 +1949,6 @@ void RenderLayer::updateOrRemoveFilterEffectRenderer()
         filterInfo->setRenderer(nullptr);
 }
 
-void RenderLayer::filterNeedsPaintInvalidation()
-{
-}
-
 } // namespace blink
 
 #ifndef NDEBUG
