@@ -82,6 +82,7 @@ private:
     void clearFontCache();
 
     void updateActiveStyleSheets();
+    void updateDocumentFonts();
 
     RawPtr<Document> m_document;
 

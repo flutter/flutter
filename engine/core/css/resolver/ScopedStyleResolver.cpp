@@ -27,9 +27,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 
-#include "sky/engine/core/css/CSSFontSelector.h"
-#include "sky/engine/core/css/CSSStyleSheet.h"
-#include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
@@ -60,17 +57,6 @@ void ScopedStyleResolver::appendStyleSheet(CSSStyleSheet& sheet)
 
     const RuleSet& ruleSet = sheet.contents()->ensureRuleSet();
     m_features.add(ruleSet.features());
-
-    if (m_scope.rootNode().isDocumentNode()) {
-        CSSFontSelector* fontSelector = document.styleEngine()->fontSelector();
-        RuleSet& ruleSet = sheet.contents()->ruleSet();
-        for (const auto& rule : ruleSet.fontFaceRules()) {
-            if (RefPtr<FontFace> fontFace = FontFace::create(&document, rule))
-                fontSelector->fontFaceCache()->add(fontSelector, rule, fontFace);
-        }
-        if (!ruleSet.fontFaceRules().isEmpty())
-            styleResolver.invalidateMatchedPropertiesCache();
-    }
 }
 
 void ScopedStyleResolver::updateActiveStyleSheets()

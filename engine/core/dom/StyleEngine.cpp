@@ -30,6 +30,7 @@
 
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/FontFaceCache.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Document.h"
@@ -81,7 +82,7 @@ void StyleEngine::updateActiveStyleSheets()
     for (TreeScope* treeScope : m_activeTreeScopes)
         treeScope->scopedStyleResolver().updateActiveStyleSheets();
 
-    m_document->renderView()->style()->font().update(fontSelector());
+    updateDocumentFonts();
 }
 
 void StyleEngine::resolverChanged()
@@ -89,6 +90,25 @@ void StyleEngine::resolverChanged()
     if (!m_document->isActive())
         return;
     updateActiveStyleSheets();
+}
+
+void StyleEngine::updateDocumentFonts()
+{
+    // TODO(esprehn): We should really support @font-face in ShadowRoot too.
+
+    const auto& sheets = m_document->scopedStyleResolver().authorStyleSheets();
+
+    for (const auto& sheet : sheets) {
+        RuleSet& ruleSet = sheet->contents()->ruleSet();
+        for (const auto& rule : ruleSet.fontFaceRules()) {
+            if (RefPtr<FontFace> fontFace = FontFace::create(m_document, rule))
+                m_fontSelector->fontFaceCache()->add(m_fontSelector.get(), rule, fontFace);
+        }
+        if (!ruleSet.fontFaceRules().isEmpty())
+            m_resolver->invalidateMatchedPropertiesCache();
+    }
+
+    m_document->renderView()->style()->font().update(m_fontSelector.get());
 }
 
 void StyleEngine::clearFontCache()

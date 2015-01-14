@@ -68,8 +68,8 @@ public:
 
     const MediaQueryResultList& viewportDependentMediaQueryResults() const;
 
-    Vector<RefPtr<CSSStyleSheet> >& authorStyleSheets() { return m_authorStyleSheets; }
-    const Vector<RefPtr<CSSStyleSheet> >& authorStyleSheets() const { return m_authorStyleSheets; }
+    Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() { return m_authorStyleSheets; }
+    const Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() const { return m_authorStyleSheets; }
 
     void addStyleSheetCandidateNode(HTMLStyleElement&);
     void removeStyleSheetCandidateNode(HTMLStyleElement&);
