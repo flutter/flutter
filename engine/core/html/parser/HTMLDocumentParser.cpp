@@ -388,6 +388,8 @@ void HTMLDocumentParser::resumeAfterWaitingForImports()
         m_scriptRunner.executePendingScripts();
     ASSERT(!isExecutingScript());
     ASSERT(!isWaitingForScripts());
+    if (m_speculations.isEmpty())
+        return;
     ASSERT(m_haveBackgroundParser);
     pumpPendingSpeculations();
 }
