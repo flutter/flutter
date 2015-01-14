@@ -65,7 +65,6 @@ public:
     // points. These methods must be called in order. When one fails
     // (returns false), the calls must stop.
 
-    bool isFeatureAllowed() const;
     bool validateOptions(const AtomicString& type, QualifiedName& tagName, ExceptionState&);
     PassRefPtr<CustomElementLifecycleCallbacks> createCallbacks();
     bool createConstructor(Document*, CustomElementDefinition*, ExceptionState&);

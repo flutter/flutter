@@ -41,7 +41,6 @@ class ExceptionState;
 class CustomElementException {
 public:
     enum Reason {
-        CannotRegisterFromExtension,
         ConstructorPropertyNotConfigurable,
         ContextDestroyedCheckingPrototype,
         ContextDestroyedCreatingCallbacks,

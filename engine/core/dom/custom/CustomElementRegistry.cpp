@@ -69,11 +69,6 @@ CustomElementDefinition* CustomElementRegistry::registerElement(Document* docume
 
     AtomicString type = userSuppliedName.lower();
 
-    if (!constructorBuilder->isFeatureAllowed()) {
-        CustomElementException::throwException(CustomElementException::CannotRegisterFromExtension, type, exceptionState);
-        return 0;
-    }
-
     if (!CustomElement::isValidName(type, validNames)) {
         CustomElementException::throwException(CustomElementException::InvalidName, type, exceptionState);
         return 0;

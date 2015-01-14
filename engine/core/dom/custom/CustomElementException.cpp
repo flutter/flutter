@@ -44,10 +44,6 @@ String CustomElementException::preamble(const AtomicString& type)
 void CustomElementException::throwException(Reason reason, const AtomicString& type, ExceptionState& exceptionState)
 {
     switch (reason) {
-    case CannotRegisterFromExtension:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "Elements cannot be registered from extensions.");
-        return;
-
     case ConstructorPropertyNotConfigurable:
         exceptionState.throwDOMException(NotSupportedError, preamble(type) + "Prototype constructor property is not configurable.");
         return;

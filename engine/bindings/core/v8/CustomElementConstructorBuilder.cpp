@@ -59,11 +59,6 @@ CustomElementConstructorBuilder::CustomElementConstructorBuilder(ScriptState* sc
     ASSERT(m_scriptState->context() == m_scriptState->isolate()->GetCurrentContext());
 }
 
-bool CustomElementConstructorBuilder::isFeatureAllowed() const
-{
-    return m_scriptState->world().isMainWorld();
-}
-
 bool CustomElementConstructorBuilder::validateOptions(const AtomicString& type, QualifiedName& tagName, ExceptionState& exceptionState)
 {
     ASSERT(m_prototype.IsEmpty());
