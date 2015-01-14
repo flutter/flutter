@@ -1197,7 +1197,6 @@ static bool isNonOrphanedCaret(const VisibleSelection& selection)
 
 IntRect FrameSelection::absoluteCaretBounds()
 {
-    ASSERT(m_frame->document()->lifecycle().state() != DocumentLifecycle::InPaintInvalidation);
     m_frame->document()->updateLayout();
     if (!isNonOrphanedCaret(m_selection)) {
         clearCaretRect();

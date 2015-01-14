@@ -393,13 +393,6 @@ void FrameView::layout(bool allowSubtree)
         frame().page()->chrome().client().layoutUpdated(m_frame.get());
 }
 
-// FIXME(sky): Remove
-void FrameView::invalidateTreeIfNeeded()
-{
-    lifecycle().advanceTo(DocumentLifecycle::InPaintInvalidation);
-    lifecycle().advanceTo(DocumentLifecycle::PaintInvalidationClean);
-}
-
 DocumentLifecycle& FrameView::lifecycle() const
 {
     return m_frame->document()->lifecycle();
@@ -738,7 +731,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     }
 
     RELEASE_ASSERT(!needsLayout());
-    ASSERT(document->lifecycle().state() >= DocumentLifecycle::PaintInvalidationClean);
+    ASSERT(document->lifecycle().state() >= DocumentLifecycle::StyleAndLayoutClean);
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Paint", "data", InspectorPaintEvent::data(renderView, rect));
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
@@ -795,12 +788,12 @@ void FrameView::updateLayoutAndStyleForPainting()
     updateLayoutAndStyleIfNeededRecursive();
 
     if (RenderView* view = renderView()) {
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateTreeAndUpdateIframes", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
-        invalidateTreeIfNeeded();
+        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "updateIFramesAfterLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
         view->updateIFramesAfterLayout();
     }
 
-    ASSERT(lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);
+    // TODO(ojan): Get rid of this and just have the LayoutClean state.
+    lifecycle().advanceTo(DocumentLifecycle::StyleAndLayoutClean);
 
     DocumentAnimations::startPendingAnimations(*m_frame->document());
 }

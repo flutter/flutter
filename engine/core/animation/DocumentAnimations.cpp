@@ -72,7 +72,7 @@ bool DocumentAnimations::needsOutdatedAnimationPlayerUpdate(const Document& docu
 // FIXME: Rename to updateCompositorAnimations
 void DocumentAnimations::startPendingAnimations(Document& document)
 {
-    ASSERT(document.lifecycle().state() == DocumentLifecycle::PaintInvalidationClean);
+    ASSERT(document.lifecycle().state() == DocumentLifecycle::StyleAndLayoutClean);
     if (document.pendingAnimations().update()) {
         ASSERT(document.view());
         document.view()->scheduleAnimation();

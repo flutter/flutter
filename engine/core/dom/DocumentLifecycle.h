@@ -54,8 +54,7 @@ public:
         AfterPerformLayout,
         LayoutClean,
 
-        InPaintInvalidation,
-        PaintInvalidationClean,
+        StyleAndLayoutClean,
 
         // Once the document starts shuting down, we cannot return
         // to the style/layout/rendering states.
@@ -157,7 +156,7 @@ inline bool DocumentLifecycle::stateAllowsDetach() const
         || m_state == StyleClean
         || m_state == InPreLayout
         || m_state == LayoutClean
-        || m_state == PaintInvalidationClean
+        || m_state == StyleAndLayoutClean
         || m_state == Stopping;
 }
 

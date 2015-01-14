@@ -217,8 +217,6 @@ private:
     void scheduleOrPerformPostLayoutTasks();
     void performPostLayoutTasks();
 
-    void invalidateTreeIfNeeded();
-
     DocumentLifecycle& lifecycle() const;
 
     // FIXME(sky): Remove now that we're not a ScrollView?
