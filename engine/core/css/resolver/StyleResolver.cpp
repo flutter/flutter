@@ -131,33 +131,6 @@ StyleResolver::StyleResolver(Document& document)
     }
 }
 
-void StyleResolver::appendCSSStyleSheet(CSSStyleSheet* cssSheet)
-{
-    ASSERT(cssSheet);
-    if (cssSheet->mediaQueries() && !m_medium->eval(cssSheet->mediaQueries(), &m_viewportDependentMediaQueryResults))
-        return;
-
-    Node* ownerNode = cssSheet->ownerNode();
-    if (!ownerNode)
-        return;
-
-    TreeScope& treeScope = ownerNode->treeScope();
-    treeScope.scopedStyleResolver().addRulesFromSheet(cssSheet);
-
-    // FIXME(BUG 72461): We don't add @font-face rules of scoped style sheets for the moment.
-    if (ownerNode->isDocumentNode()) {
-        CSSFontSelector* fontSelector = document().styleEngine()->fontSelector();
-        RuleSet& ruleSet = cssSheet->contents()->ruleSet();
-        const Vector<RawPtr<StyleRuleFontFace> > fontFaceRules = ruleSet.fontFaceRules();
-        for (unsigned i = 0; i < fontFaceRules.size(); ++i) {
-            if (RefPtr<FontFace> fontFace = FontFace::create(&document(), fontFaceRules[i]))
-                fontSelector->fontFaceCache()->add(fontSelector, fontFaceRules[i], fontFace);
-        }
-        if (fontFaceRules.size())
-            invalidateMatchedPropertiesCache();
-    }
-}
-
 void StyleResolver::addToStyleSharingList(Element& element)
 {
     // Never add elements to the style sharing list if we're not in a recalcStyle,
@@ -728,6 +701,16 @@ void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, s
             StyleBuilder::applyProperty(properties[i].property, state, properties[i].value);
         }
     }
+}
+
+void StyleResolver::resetMediaQueryAffectedByViewportChange()
+{
+    m_viewportDependentMediaQueryResults.clear();
+}
+
+void StyleResolver::addMediaQueryAffectedByViewportChange(const MediaQueryResultList& list)
+{
+    m_viewportDependentMediaQueryResults.appendVector(list);
 }
 
 bool StyleResolver::mediaQueryAffectedByViewportChange() const

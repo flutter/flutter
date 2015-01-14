@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -70,7 +69,7 @@ void HTMLStyleElement::insertedInto(ContainerNode* insertionPoint)
     HTMLElement::insertedInto(insertionPoint);
     if (!inActiveDocument())
         return;
-    treeScope().styleSheets().addStyleSheetCandidateNode(*this);
+    treeScope().scopedStyleResolver().addStyleSheetCandidateNode(*this);
     process();
 }
 
@@ -84,7 +83,7 @@ void HTMLStyleElement::removedFrom(ContainerNode* insertionPoint)
     TreeScope* containingScope = containingShadowRoot();
     TreeScope& scope = containingScope ? *containingScope : insertionPoint->treeScope();
 
-    scope.styleSheets().removeStyleSheetCandidateNode(*this);
+    scope.scopedStyleResolver().removeStyleSheetCandidateNode(*this);
 
     RefPtr<CSSStyleSheet> removedSheet = m_sheet.get();
 

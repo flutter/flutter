@@ -35,7 +35,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
-#include "sky/engine/core/dom/StyleSheetCollection.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLStyleElement.h"
@@ -75,8 +74,12 @@ void StyleEngine::updateActiveStyleSheets()
     ASSERT(!m_document->inStyleRecalc());
     ASSERT(m_resolver);
 
+    StyleResolver& resolver = m_document->ensureStyleResolver();
+
+    resolver.resetMediaQueryAffectedByViewportChange();
+
     for (TreeScope* treeScope : m_activeTreeScopes)
-        treeScope->styleSheets().updateActiveStyleSheets(*m_resolver);
+        treeScope->scopedStyleResolver().updateActiveStyleSheets();
 
     m_document->renderView()->style()->font().update(fontSelector());
 }

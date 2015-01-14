@@ -27,10 +27,18 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 
+#include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
+#include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
+#include "sky/engine/core/css/resolver/StyleResolver.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/dom/TreeScope.h"
+#include "sky/engine/core/dom/shadow/ShadowRoot.h"
+#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 
@@ -39,18 +47,79 @@ ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
 {
 }
 
-void ScopedStyleResolver::addRulesFromSheet(CSSStyleSheet* cssSheet)
+void ScopedStyleResolver::appendStyleSheet(CSSStyleSheet& sheet)
 {
-    m_authorStyleSheets.append(cssSheet);
+    Document& document = m_scope.document();
+    StyleResolver& styleResolver = document.ensureStyleResolver();
+    MediaQueryEvaluator& medium  = styleResolver.medium();
 
-    const RuleSet& ruleSet = cssSheet->contents()->ensureRuleSet();
+    if (sheet.mediaQueries() && !medium.eval(sheet.mediaQueries(), &m_viewportDependentMediaQueryResults))
+        return;
+
+    styleResolver.addMediaQueryAffectedByViewportChange(m_viewportDependentMediaQueryResults);
+
+    const RuleSet& ruleSet = sheet.contents()->ensureRuleSet();
     m_features.add(ruleSet.features());
+
+    if (m_scope.rootNode().isDocumentNode()) {
+        CSSFontSelector* fontSelector = document.styleEngine()->fontSelector();
+        RuleSet& ruleSet = sheet.contents()->ruleSet();
+        for (const auto& rule : ruleSet.fontFaceRules()) {
+            if (RefPtr<FontFace> fontFace = FontFace::create(&document, rule))
+                fontSelector->fontFaceCache()->add(fontSelector, rule, fontFace);
+        }
+        if (!ruleSet.fontFaceRules().isEmpty())
+            styleResolver.invalidateMatchedPropertiesCache();
+    }
 }
 
-void ScopedStyleResolver::resetAuthorStyle()
+void ScopedStyleResolver::updateActiveStyleSheets()
 {
-    m_authorStyleSheets.clear();
+    Vector<RefPtr<CSSStyleSheet>> candidateSheets;
+    collectStyleSheets(candidateSheets);
+    m_authorStyleSheets.swap(candidateSheets);
+
+    Node& root = m_scope.rootNode();
+
+    // TODO(esprehn): We should avoid subtree recalcs in sky when rules change
+    // and only recalc specific tree scopes.
+    root.setNeedsStyleRecalc(SubtreeStyleChange);
+
+    // TODO(esprehn): We should use LocalStyleChange, :host rule changes
+    // can only impact the host directly as Sky has no descendant selectors.
+    if (root.isShadowRoot())
+        toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
+
     m_features.clear();
+    m_viewportDependentMediaQueryResults.clear();
+
+    for (RefPtr<CSSStyleSheet>& sheet : m_authorStyleSheets)
+        appendStyleSheet(*sheet);
+}
+
+const MediaQueryResultList& ScopedStyleResolver::viewportDependentMediaQueryResults() const
+{
+    return m_viewportDependentMediaQueryResults;
+}
+
+void ScopedStyleResolver::addStyleSheetCandidateNode(HTMLStyleElement& element)
+{
+    ASSERT(element.inActiveDocument());
+    m_styleSheetCandidateNodes.add(&element);
+}
+
+void ScopedStyleResolver::removeStyleSheetCandidateNode(HTMLStyleElement& element)
+{
+    m_styleSheetCandidateNodes.remove(&element);
+}
+
+void ScopedStyleResolver::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
+{
+    for (Node* node : m_styleSheetCandidateNodes) {
+        ASSERT(isHTMLStyleElement(*node));
+        if (CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet())
+            sheets.append(sheet);
+    }
 }
 
 const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String animationName)
@@ -69,7 +138,7 @@ void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& colle
 {
     RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i], i);
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
         collector.collectMatchingRules(matchRequest, ruleRange, cascadeOrder);
     }
 }
@@ -78,7 +147,7 @@ void ScopedStyleResolver::collectMatchingHostRules(ElementRuleCollector& collect
 {
     RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i], i);
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
         collector.collectMatchingHostRules(matchRequest, ruleRange, cascadeOrder);
     }
 }

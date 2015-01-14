@@ -514,8 +514,6 @@ sky_core_files = [
   "dom/StaticNodeList.h",
   "dom/StyleEngine.cpp",
   "dom/StyleEngine.h",
-  "dom/StyleSheetCollection.cpp",
-  "dom/StyleSheetCollection.h",
   "dom/TemplateContentDocumentFragment.h",
   "dom/Text.cpp",
   "dom/Text.h",

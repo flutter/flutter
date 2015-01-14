@@ -28,7 +28,9 @@
 #define SKY_ENGINE_CORE_CSS_RESOLVER_SCOPEDSTYLERESOLVER_H_
 
 #include "sky/engine/core/css/ElementRuleCollector.h"
+#include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/RuleSet.h"
+#include "sky/engine/core/dom/DocumentOrderedList.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -37,8 +39,11 @@
 
 namespace blink {
 
-class StyleSheetContents;
+class CSSStyleSheet;
+class ContainerNode;
+class HTMLStyleElement;
 class RuleFeatureSet;
+class StyleSheetContents;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
 class ScopedStyleResolver final {
@@ -50,24 +55,35 @@ public:
         return adoptPtr(new ScopedStyleResolver(scope));
     }
 
-    const TreeScope& treeScope() const { return *m_scope; }
+    const TreeScope& treeScope() const { return m_scope; }
 
     const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
 
     void collectMatchingAuthorRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
     void collectMatchingHostRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
 
-    void addRulesFromSheet(CSSStyleSheet*);
-    void resetAuthorStyle();
-
     const RuleFeatureSet& features() const { return m_features; }
+
+    void updateActiveStyleSheets();
+
+    const MediaQueryResultList& viewportDependentMediaQueryResults() const;
+
+    Vector<RefPtr<CSSStyleSheet> >& authorStyleSheets() { return m_authorStyleSheets; }
+    const Vector<RefPtr<CSSStyleSheet> >& authorStyleSheets() const { return m_authorStyleSheets; }
+
+    void addStyleSheetCandidateNode(HTMLStyleElement&);
+    void removeStyleSheetCandidateNode(HTMLStyleElement&);
 
 private:
     explicit ScopedStyleResolver(TreeScope&);
 
-    RawPtr<TreeScope> m_scope;
-    Vector<RawPtr<CSSStyleSheet> > m_authorStyleSheets;
+    void appendStyleSheet(CSSStyleSheet&);
+    void collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& candidateSheets);
 
+    TreeScope& m_scope;
+    DocumentOrderedList m_styleSheetCandidateNodes;
+    Vector<RefPtr<CSSStyleSheet>> m_authorStyleSheets;
+    MediaQueryResultList m_viewportDependentMediaQueryResults;
     RuleFeatureSet m_features;
 };
 

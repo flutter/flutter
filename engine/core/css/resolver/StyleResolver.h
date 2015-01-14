@@ -112,7 +112,10 @@ public:
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.
     void invalidateMatchedPropertiesCache();
 
-    void appendCSSStyleSheet(CSSStyleSheet*);
+    MediaQueryEvaluator& medium() const { return *m_medium; }
+
+    void resetMediaQueryAffectedByViewportChange();
+    void addMediaQueryAffectedByViewportChange(const MediaQueryResultList&);
 
     void notifyResizeForViewportUnits();
 
