@@ -113,27 +113,6 @@ void RenderImage::imageChanged(WrappedImagePtr newImage, const IntRect* rect)
     if (hasBoxDecorationBackground() || hasMask())
         RenderReplaced::imageChanged(newImage, rect);
 
-    paintInvalidationOrMarkForLayout(rect);
-}
-
-void RenderImage::updateIntrinsicSizeIfNeeded(const LayoutSize& newSize)
-{
-    if (m_imageResource->errorOccurred() || !m_imageResource->hasImage())
-        return;
-    setIntrinsicSize(newSize);
-}
-
-void RenderImage::updateInnerContentRect()
-{
-    // Propagate container size to the image resource.
-    LayoutRect containerRect = replacedContentRect();
-    IntSize containerSize(containerRect.width(), containerRect.height());
-    if (!containerSize.isEmpty())
-        m_imageResource->setContainerSizeForRenderer(containerSize);
-}
-
-void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
-{
     ASSERT(isRooted());
 
     LayoutSize oldIntrinsicSize = intrinsicSize();
@@ -165,6 +144,22 @@ void RenderImage::paintInvalidationOrMarkForLayout(const IntRect* rect)
         // early. It may be that layout hasn't even taken place once yet.
         updateInnerContentRect();
     }
+}
+
+void RenderImage::updateIntrinsicSizeIfNeeded(const LayoutSize& newSize)
+{
+    if (m_imageResource->errorOccurred() || !m_imageResource->hasImage())
+        return;
+    setIntrinsicSize(newSize);
+}
+
+void RenderImage::updateInnerContentRect()
+{
+    // Propagate container size to the image resource.
+    LayoutRect containerRect = replacedContentRect();
+    IntSize containerSize(containerRect.width(), containerRect.height());
+    if (!containerSize.isEmpty())
+        m_imageResource->setContainerSizeForRenderer(containerSize);
 }
 
 void RenderImage::notifyFinished(Resource* newImage)
