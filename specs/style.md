@@ -960,7 +960,6 @@ class LayoutManager : EventTarget {
   virtual void paint(RenderingSurface canvas);
     // set a clip rect on the canvas for rect(0,0,this.width,this.height)
     //   (? we don't really have to do this; consider shadows...)
-    // call the painter of each property, in order they were registered, which on this element has a painter
     // call this.paintChildren(canvas)
     // (the default implementation doesn't paint anything on top of the children)
     // unset the clip

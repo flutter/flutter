@@ -31,6 +31,9 @@ abstract class Node : EventTarget { // implemented in C++
   virtual void attachedCallback(); // noop
   virtual void detachedCallback(); // noop
 
+  Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
+    // returns the <content> elements to which this element was distributed
+
   readonly attribute ElementStyleDeclarationList? style; // O(1)
     // for nodes that aren't reachable from the Application Document, returns null
     // (so in particular orphaned subtrees and nodes in module documents don't have one)
@@ -78,7 +81,6 @@ abstract class Element : ParentNode {
   Array<Attr> getAttributes(); // O(N) in number of attributes
 
   readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root // TODO(ianh): Should this be mutable? It would help explain how it gets set...
-  Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
 
   virtual void endTagParsedCallback(); // noop
   virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
