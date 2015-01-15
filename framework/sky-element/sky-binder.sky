@@ -160,6 +160,8 @@ class PropertyDirective {
         node[name] = value;
       });
     }
+    if (typeof node.addPropertyBinding == 'function')
+      node.addPropertyBinding(this.name, observable);
     return observable;
   }
 }

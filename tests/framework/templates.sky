@@ -131,6 +131,43 @@ describe("SkyElement", function() {
     });
   });
 
+  it("should two way bind attributes", function(done) {
+    sandbox.appendChild(element);
+    var checkbox = element.shadowRoot.getElementById("checkbox");
+    assert.isFalse(checkbox.checked);
+    assert.isFalse(element.checked);
+    element.checked = true;
+    assert.isTrue(element.checked);
+    assert.isFalse(checkbox.checked);
+    Promise.resolve().then(function() {
+      assert.isTrue(checkbox.checked);
+      checkbox.checked = false;
+      assert.isFalse(checkbox.checked);
+      return Promise.resolve().then(function() {
+        assert.isFalse(element.checked);
+        assert.isFalse(checkbox.checked);
+        checkbox.checked = true;
+        assert.isTrue(checkbox.checked);
+        return Promise.resolve().then(function() {
+          assert.isTrue(element.checked);
+          element.checked = true;
+          assert.isTrue(element.checked);
+          assert.isTrue(checkbox.checked);
+          element.checked = false;
+          assert.isFalse(element.checked);
+          assert.isTrue(checkbox.checked);
+          return Promise.resolve().then(function() {
+            assert.isFalse(checkbox.checked);
+            assert.isFalse(element.checked);
+            done();
+          });
+        });
+      });
+    }).catch(function(e) {
+      done(e);
+    });
+  });
+
   it("should connect template event handlers", function() {
     sandbox.appendChild(element);
     var inside = element.shadowRoot.getElementById("inside");

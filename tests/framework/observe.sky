@@ -334,11 +334,8 @@ describe('ObserverTransform', function() {
 
     function valueFn(value) { return value * 2; }
 
-    function setValueFn(value) { return value / 2; }
-
     observer = new ObserverTransform(new PathObserver(obj, 'foo'),
-                                     valueFn,
-                                     setValueFn);
+                                     valueFn);
     observer.open(callback);
 
     obj.foo = 2;
@@ -347,11 +344,10 @@ describe('ObserverTransform', function() {
     assertNoChanges();
 
     observer.setValue(2);
-    assert.strictEqual(obj.foo, 1);
-    assertPathChanges(2, 4);
+    assert.strictEqual(obj.foo, 2);
 
     obj.foo = 10;
-    assertPathChanges(20, 2);
+    assertPathChanges(20, 4);
 
     observer.close();
   });

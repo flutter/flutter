@@ -1,7 +1,7 @@
 ERROR: Exception caught during observer callback: ouch 
-SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:627
+SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:630
 ERROR: Exception caught during observer callback: ouch 
-SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:627
+SOURCE: http://127.0.0.1:8000/sky/framework/sky-element/observe.sky:630
 Running 79 tests
 ok 1 Path constructor throws
 ok 2 Path path validity

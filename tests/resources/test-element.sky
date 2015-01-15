@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/sky/framework/sky-checkbox/sky-checkbox.sky" />
 
 <sky-element
     name="test-element"
@@ -11,6 +12,7 @@
     on-host-event="handleEvent">
 <template>
   <div id="inside" on-test-event="handleEvent" lang="{{ value }}">{{ value }}</div>
+  <sky-checkbox id="checkbox" checked="{{ checked }}" />
 </template>
 <script>
 module.exports = class extends SkyElement {
