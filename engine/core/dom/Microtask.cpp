@@ -33,6 +33,7 @@
 
 #include "base/bind.h"
 #include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/public/platform/WebThread.h"
 #include "v8/include/v8.h"
 
@@ -65,6 +66,7 @@ void Microtask::performCheckpoint()
     ASSERT(isolateData);
     if (isolateData->recursionLevel() || isolateData->performingMicrotaskCheckpoint())
         return;
+    TRACE_EVENT0("v8", "v8.runMicrotasks");
     isolateData->setPerformingMicrotaskCheckpoint(true);
     isolate->RunMicrotasks();
     isolateData->setPerformingMicrotaskCheckpoint(false);
