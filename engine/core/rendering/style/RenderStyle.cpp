@@ -286,12 +286,9 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
 
     StyleDifference diff;
 
-    if (diffNeedsFullLayoutAndPaintInvalidation(other)) {
-        diff.setNeedsFullLayout();
-        diff.setNeedsPaintInvalidationObject();
-    }
-
-    if (!diff.needsFullLayout() && diffNeedsFullLayout(other))
+    // FIXME(sky): Combine these two into one function call.
+    if (diffNeedsFullLayoutAndPaintInvalidation(other)
+        || diffNeedsFullLayout(other))
         diff.setNeedsFullLayout();
 
     if (!diff.needsFullLayout() && position() != StaticPosition && surround->offset != other.surround->offset) {
@@ -302,10 +299,8 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
             diff.setNeedsFullLayout();
     }
 
-    if (diffNeedsPaintInvalidationLayer(other))
-        diff.setNeedsPaintInvalidationLayer();
-    else if (diffNeedsPaintInvalidationObject(other))
-        diff.setNeedsPaintInvalidationObject();
+    if (!diff.needsFullLayout() && diffNeedsPaintInvalidation(other))
+        diff.setNeedsPaintInvalidation();
 
     updatePropertySpecificDifferences(other, diff);
 
@@ -467,21 +462,7 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
     return false;
 }
 
-bool RenderStyle::diffNeedsPaintInvalidationLayer(const RenderStyle& other) const
-{
-    if (position() != StaticPosition && (visual->clip != other.visual->clip || visual->hasAutoClip != other.visual->hasAutoClip))
-        return true;
-
-    if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
-        if (rareNonInheritedData->m_mask != other.rareNonInheritedData->m_mask
-            || rareNonInheritedData->m_maskBoxImage != other.rareNonInheritedData->m_maskBoxImage)
-            return true;
-    }
-
-    return false;
-}
-
-bool RenderStyle::diffNeedsPaintInvalidationObject(const RenderStyle& other) const
+bool RenderStyle::diffNeedsPaintInvalidation(const RenderStyle& other) const
 {
     if (inherited_flags._visibility != other.inherited_flags._visibility
         || !surround->border.visuallyEqual(other.surround->border)
@@ -503,6 +484,15 @@ bool RenderStyle::diffNeedsPaintInvalidationObject(const RenderStyle& other) con
             return true;
     }
 
+    if (position() != StaticPosition && (visual->clip != other.visual->clip || visual->hasAutoClip != other.visual->hasAutoClip))
+        return true;
+
+    if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
+        if (rareNonInheritedData->m_mask != other.rareNonInheritedData->m_mask
+            || rareNonInheritedData->m_maskBoxImage != other.rareNonInheritedData->m_maskBoxImage)
+            return true;
+    }
+
     return false;
 }
 
@@ -521,25 +511,6 @@ void RenderStyle::updatePropertySpecificDifferences(const RenderStyle& other, St
 
         if (rareNonInheritedData->m_filter != other.rareNonInheritedData->m_filter)
             diff.setFilterChanged();
-    }
-
-    if (!diff.needsPaintInvalidation()) {
-        if (inherited->color != other.inherited->color
-            || inherited_flags.m_textUnderline != other.inherited_flags.m_textUnderline
-            || visual->textDecoration != other.visual->textDecoration) {
-            diff.setTextOrColorChanged();
-        } else if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
-            if (rareNonInheritedData->m_textDecorationStyle != other.rareNonInheritedData->m_textDecorationStyle
-                || rareNonInheritedData->m_textDecorationColor != other.rareNonInheritedData->m_textDecorationColor)
-                diff.setTextOrColorChanged();
-        } else if (rareInheritedData.get() != other.rareInheritedData.get()) {
-            if (rareInheritedData->textFillColor() != other.rareInheritedData->textFillColor()
-                || rareInheritedData->textStrokeColor() != other.rareInheritedData->textStrokeColor()
-                || rareInheritedData->textEmphasisColor() != other.rareInheritedData->textEmphasisColor()
-                || rareInheritedData->textEmphasisFill != other.rareInheritedData->textEmphasisFill
-                || rareInheritedData->appliedTextDecorations != other.rareInheritedData->appliedTextDecorations)
-                diff.setTextOrColorChanged();
-        }
     }
 }
 

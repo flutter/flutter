@@ -76,7 +76,7 @@ void RenderLayerModelObject::willBeDestroyed()
 void RenderLayerModelObject::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
 {
     if (RenderStyle* oldStyle = style()) {
-        if (parent() && diff.needsPaintInvalidationLayer()) {
+        if (parent()) {
             if (oldStyle->hasAutoClip() != newStyle.hasAutoClip()
                 || oldStyle->clip() != newStyle.clip())
                 layer()->clipper().clearClipRectsIncludingDescendants();

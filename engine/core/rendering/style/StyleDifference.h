@@ -16,37 +16,19 @@ public:
         OpacityChanged = 1 << 1,
         ZIndexChanged = 1 << 2,
         FilterChanged = 1 << 3,
-        // The object needs to issue paint invalidations if it contains text or properties dependent on color (e.g., border or outline).
-        TextOrColorChanged = 1 << 4,
     };
 
     StyleDifference()
-        : m_paintInvalidationType(NoPaintInvalidation)
+        : m_needsPaintInvalidation(false)
         , m_layoutType(NoLayout)
         , m_propertySpecificDifferences(0)
     { }
 
-    bool hasDifference() const { return m_paintInvalidationType || m_layoutType || m_propertySpecificDifferences; }
-
-    bool hasAtMostPropertySpecificDifferences(unsigned propertyDifferences) const
+    bool needsPaintInvalidation() const { return m_needsPaintInvalidation; }
+    void setNeedsPaintInvalidation()
     {
-        return !m_paintInvalidationType && !m_layoutType && !(m_propertySpecificDifferences & ~propertyDifferences);
+        m_needsPaintInvalidation = true;
     }
-
-    bool needsPaintInvalidation() const { return m_paintInvalidationType != NoPaintInvalidation; }
-    void clearNeedsPaintInvalidation() { m_paintInvalidationType = NoPaintInvalidation; }
-
-    // The object just needs to issue paint invalidations.
-    bool needsPaintInvalidationObject() const { return m_paintInvalidationType == PaintInvalidationObject; }
-    void setNeedsPaintInvalidationObject()
-    {
-        ASSERT(!needsPaintInvalidationLayer());
-        m_paintInvalidationType = PaintInvalidationObject;
-    }
-
-    // The layer and its descendant layers need to issue paint invalidations.
-    bool needsPaintInvalidationLayer() const { return m_paintInvalidationType == PaintInvalidationLayer; }
-    void setNeedsPaintInvalidationLayer() { m_paintInvalidationType = PaintInvalidationLayer; }
 
     bool needsLayout() const { return m_layoutType != NoLayout; }
     void clearNeedsLayout() { m_layoutType = NoLayout; }
@@ -74,16 +56,8 @@ public:
     bool filterChanged() const { return m_propertySpecificDifferences & FilterChanged; }
     void setFilterChanged() { m_propertySpecificDifferences |= FilterChanged; }
 
-    bool textOrColorChanged() const { return m_propertySpecificDifferences & TextOrColorChanged; }
-    void setTextOrColorChanged() { m_propertySpecificDifferences |= TextOrColorChanged; }
-
 private:
-    enum PaintInvalidationType {
-        NoPaintInvalidation = 0,
-        PaintInvalidationObject,
-        PaintInvalidationLayer
-    };
-    unsigned m_paintInvalidationType : 2;
+    unsigned m_needsPaintInvalidation : 1;
 
     enum LayoutType {
         NoLayout = 0,

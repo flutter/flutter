@@ -1199,29 +1199,17 @@ void RenderObject::selectionStartEnd(int& spos, int& epos) const
 
 StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
 {
-    // If transform changed, and the layer does not paint into its own separate backing, then we need to invalidate paints.
-    if (diff.transformChanged()) {
-        // Text nodes share style with their parents but transforms don't apply to them,
-        // hence the !isText() check.
-        if (!isText())
-            diff.setNeedsPaintInvalidationLayer();
+    // If transform, opacity or zIndex changed, then we need to invalidate paints.
+    // Text nodes share style with their parents but transform/opacity/z-index don't apply to them,
+    if (!isText() &&
+        (diff.transformChanged() || diff.opacityChanged() || diff.zIndexChanged())) {
+        diff.setNeedsPaintInvalidation();
     }
 
-    // If opacity or zIndex changed, and the layer does not paint into its own separate backing, then we need to invalidate paints (also
-    // ignoring text nodes)
-    if (diff.opacityChanged() || diff.zIndexChanged()) {
-        if (!isText())
-            diff.setNeedsPaintInvalidationLayer();
-    }
-
-    // If filter changed, and the layer does not paint into its own separate backing or it paints with filters, then we need to invalidate paints.
+    // If filter changed and it paints with filters, then we need to invalidate paints.
     if (diff.filterChanged() && hasLayer()) {
-        diff.setNeedsPaintInvalidationLayer();
+        diff.setNeedsPaintInvalidation();
     }
-
-    if (diff.textOrColorChanged() && !diff.needsPaintInvalidation()
-        && hasImmediateNonWhitespaceTextChildOrPropertiesDependentOnColor())
-        diff.setNeedsPaintInvalidationObject();
 
     // The answer to layerTypeRequired() for plugins, iframes, and canvas can change without the actual
     // style changing, since it depends on whether we decide to composite these elements. When the
@@ -1230,12 +1218,6 @@ StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
         bool requiresLayer = toRenderLayerModelObject(this)->layerTypeRequired() != NoLayer;
         if (hasLayer() != requiresLayer)
             diff.setNeedsFullLayout();
-    }
-
-    // If we have no layer(), just treat a PaintInvalidationLayer hint as a normal paint invalidation.
-    if (diff.needsPaintInvalidationLayer() && !hasLayer()) {
-        diff.clearNeedsPaintInvalidation();
-        diff.setNeedsPaintInvalidationObject();
     }
 
     return diff;
