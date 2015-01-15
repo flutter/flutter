@@ -143,7 +143,6 @@ class SkyDebugger(object):
         # FIXME: Lame that we use self for a command-specific variable.
         self.paths = self._create_paths_for_build_dir(args.build_dir)
         self.stop_command(None) # Quit any existing process.
-        self.pids = {} # Clear out our pid file.
 
         if not os.path.exists(self.paths.mojo_shell_path):
             print "mojo_shell not found in build_dir '%s'" % args.build_dir
@@ -250,6 +249,7 @@ class SkyDebugger(object):
         if 'remote_gdbserver_port' in self.pids:
             port_string = 'tcp:%s' % self.pids['remote_gdbserver_port']
             subprocess.call(['adb', 'forward', '--remove', port_string])
+        self.pids = {} # Clear out our pid file.
 
     def load_command(self, args):
         if not urlparse.urlparse(args.url_or_path).scheme:
