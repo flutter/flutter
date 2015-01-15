@@ -10,7 +10,7 @@ dot {
 </style>
 <dot />
 <log>Ready</log>
-<x-fps-counter />
+<fps-counter />
 <script>
 var dot = document.querySelector("dot");
 var log = document.querySelector("log");
