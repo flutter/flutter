@@ -668,14 +668,6 @@ public:
 
     void scheduleVisualUpdate();
 
-    const LayoutRect& previousPaintInvalidationRect() const { return m_previousPaintInvalidationRect; }
-    void setPreviousPaintInvalidationRect(const LayoutRect& rect) { m_previousPaintInvalidationRect = rect; }
-
-    const LayoutPoint& previousPositionFromPaintInvalidationContainer() const { return m_previousPositionFromPaintInvalidationContainer; }
-    void setPreviousPositionFromPaintInvalidationContainer(const LayoutPoint& location) { m_previousPositionFromPaintInvalidationContainer = location; }
-
-    bool shouldInvalidateOverflowForPaint() const { return m_bitfields.shouldInvalidateOverflowForPaint(); }
-
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }
 
@@ -776,7 +768,6 @@ private:
     public:
         RenderObjectBitfields(Node* node)
             : m_selfNeedsLayout(false)
-            , m_shouldInvalidateOverflowForPaint(false)
             , m_onlyNeededPositionedMovementLayout(false)
             , m_neededLayoutBecauseOfChildren(false)
             , m_needsPositionedMovementLayout(false)
@@ -806,7 +797,6 @@ private:
 
         // 32 bits have been used in the first word, and 11 in the second.
         ADD_BOOLEAN_BITFIELD(selfNeedsLayout, SelfNeedsLayout);
-        ADD_BOOLEAN_BITFIELD(shouldInvalidateOverflowForPaint, ShouldInvalidateOverflowForPaint);
         ADD_BOOLEAN_BITFIELD(onlyNeededPositionedMovementLayout, OnlyNeededPositionedMovementLayout);
         ADD_BOOLEAN_BITFIELD(neededLayoutBecauseOfChildren, NeededLayoutBecauseOfChildren);
         ADD_BOOLEAN_BITFIELD(needsPositionedMovementLayout, NeedsPositionedMovementLayout);
@@ -868,20 +858,12 @@ private:
     void setNeedsSimplifiedNormalFlowLayout(bool b) { m_bitfields.setNeedsSimplifiedNormalFlowLayout(b); }
     void setIsDragging(bool b) { m_bitfields.setIsDragging(b); }
     void setEverHadLayout(bool b) { m_bitfields.setEverHadLayout(b); }
-    void setShouldInvalidateOverflowForPaint(bool b) { m_bitfields.setShouldInvalidateOverflowForPaint(b); }
     void setSelfNeedsOverflowRecalcAfterStyleChange(bool b) { m_bitfields.setSelfNeedsOverflowRecalcAfterStyleChange(b); }
     void setChildNeedsOverflowRecalcAfterStyleChange(bool b) { m_bitfields.setChildNeedsOverflowRecalcAfterStyleChange(b); }
 
 private:
     // Store state between styleWillChange and styleDidChange
     static bool s_affectsParentBlock;
-
-    // This stores the paint invalidation rect from the previous layout.
-    LayoutRect m_previousPaintInvalidationRect;
-
-    // This stores the position in the paint invalidation container's coordinate.
-    // It is used to detect renderer shifts that forces a full invalidation.
-    LayoutPoint m_previousPositionFromPaintInvalidationContainer;
 
     static unsigned s_instanceCount;
 };

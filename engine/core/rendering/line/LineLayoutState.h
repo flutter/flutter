@@ -33,7 +33,7 @@ namespace blink {
 // during an entire linebox tree layout pass (aka RenderParagraph::layoutChildren).
 class LineLayoutState {
 public:
-    LineLayoutState(bool fullLayout, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom)
+    LineLayoutState(bool fullLayout)
         : m_lastFloat(0)
         , m_endLine(0)
         , m_floatIndex(0)
@@ -42,29 +42,11 @@ public:
         , m_checkForFloatsFromLastLine(false)
         , m_hasInlineChild(false)
         , m_isFullLayout(fullLayout)
-        , m_paintInvalidationLogicalTop(paintInvalidationLogicalTop)
-        , m_paintInvalidationLogicalBottom(paintInvalidationLogicalBottom)
         , m_adjustedLogicalLineTop(0)
-        , m_usesPaintInvalidationBounds(false)
     { }
 
     void markForFullLayout() { m_isFullLayout = true; }
     bool isFullLayout() const { return m_isFullLayout; }
-
-    bool usesPaintInvalidationBounds() const { return m_usesPaintInvalidationBounds; }
-
-    void setPaintInvalidationRange(LayoutUnit logicalHeight)
-    {
-        m_usesPaintInvalidationBounds = true;
-        m_paintInvalidationLogicalTop = m_paintInvalidationLogicalBottom = logicalHeight;
-    }
-
-    void updatePaintInvalidationRangeFromBox(RootInlineBox* box, LayoutUnit paginationDelta = 0)
-    {
-        m_usesPaintInvalidationBounds = true;
-        m_paintInvalidationLogicalTop = std::min(m_paintInvalidationLogicalTop, box->logicalTopVisualOverflow() + std::min<LayoutUnit>(paginationDelta, 0));
-        m_paintInvalidationLogicalBottom = std::max(m_paintInvalidationLogicalBottom, box->logicalBottomVisualOverflow() + std::max<LayoutUnit>(paginationDelta, 0));
-    }
 
     bool endLineMatched() const { return m_endLineMatched; }
     void setEndLineMatched(bool endLineMatched) { m_endLineMatched = endLineMatched; }
@@ -110,13 +92,7 @@ private:
 
     bool m_isFullLayout;
 
-    // FIXME: Should this be a range object instead of two ints?
-    LayoutUnit& m_paintInvalidationLogicalTop;
-    LayoutUnit& m_paintInvalidationLogicalBottom;
-
     LayoutUnit m_adjustedLogicalLineTop;
-
-    bool m_usesPaintInvalidationBounds;
 };
 
 }

@@ -242,9 +242,9 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
     // The caret rect needs to be invalidated after scrolling
     frame->selection().setCaretRectNeedsUpdate();
 
-    FloatQuad quadForFakeMouseMoveEvent = FloatQuad(layer()->renderer()->previousPaintInvalidationRect());
-
-    quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(quadForFakeMouseMoveEvent);
+    // TODO(ojan): Is there a better way to get this value now that we always just pass the empty
+    // FloatQuat to localToAbsoluteQuad?
+    FloatQuad quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(FloatQuad());
     frame->eventHandler().dispatchFakeMouseMoveEventSoonInQuad(quadForFakeMouseMoveEvent);
 
     // Schedule the scroll DOM event.

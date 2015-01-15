@@ -28,7 +28,7 @@ public:
         LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
 
 protected:
-    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge) final;
+    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge) final;
 
     void addOverflowFromChildren() final;
 

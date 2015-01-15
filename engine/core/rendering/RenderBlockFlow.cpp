@@ -83,9 +83,6 @@ void RenderBlockFlow::layoutBlock(bool relayoutChildren)
     // we overflow or not.
     updateScrollInfoAfterLayout();
 
-    if (m_paintInvalidationLogicalTop != m_paintInvalidationLogicalBottom)
-        setShouldInvalidateOverflowForPaint(true);
-
     clearNeedsLayout();
 }
 
@@ -102,10 +99,7 @@ inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayou
     LayoutUnit previousHeight = logicalHeight();
     setLogicalHeight(beforeEdge);
 
-    m_paintInvalidationLogicalTop = 0;
-    m_paintInvalidationLogicalBottom = 0;
-
-    layoutChildren(relayoutChildren, layoutScope, m_paintInvalidationLogicalTop, m_paintInvalidationLogicalBottom, beforeEdge, afterEdge);
+    layoutChildren(relayoutChildren, layoutScope, beforeEdge, afterEdge);
 
     LayoutUnit oldClientAfterEdge = clientLogicalBottom();
 
@@ -146,7 +140,7 @@ void RenderBlockFlow::layoutBlockChild(RenderBox* child)
     setLogicalHeight(logicalHeight() + marginBefore + logicalHeightForChild(child) + marginAfterForChild(child));
 }
 
-void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge)
+void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
 {
     dirtyForLayoutFromPercentageHeightDescendants(layoutScope);
 

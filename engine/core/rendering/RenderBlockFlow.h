@@ -115,7 +115,7 @@ public:
     }
 
 protected:
-    virtual void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge);
+    virtual void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
     virtual bool updateLogicalWidthAndColumnWidth() override;
 
@@ -142,10 +142,6 @@ public:
         LayoutRect rect;
         bool everHadLayout;
     };
-
-private:
-    LayoutUnit m_paintInvalidationLogicalTop;
-    LayoutUnit m_paintInvalidationLogicalBottom;
 
 protected:
     friend class BreakingContext; // FIXME: It uses insertFloatingObject and positionNewFloatOnLine, if we move those out from the private scope/add a helper to LineBreaker, we can remove this friend

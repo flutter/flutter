@@ -705,7 +705,6 @@ static void deleteLineRange(LineLayoutState& layoutState, RootInlineBox* startLi
 {
     RootInlineBox* boxToDelete = startLine;
     while (boxToDelete && boxToDelete != stopLine) {
-        layoutState.updatePaintInvalidationRangeFromBox(boxToDelete);
         // Note: deleteLineRange(firstRootBox()) is not identical to deleteLineBoxTree().
         // deleteLineBoxTree uses nextLineBox() instead of nextRootBox() when traversing.
         RootInlineBox* next = boxToDelete->nextRootBox();
@@ -727,11 +726,8 @@ void RenderParagraph::layoutRunsAndFloats(LineLayoutState& layoutState)
     if (!layoutState.isFullLayout() && startLine)
         determineEndPosition(layoutState, startLine, cleanLineStart, cleanLineBidiStatus);
 
-    if (startLine) {
-        if (!layoutState.usesPaintInvalidationBounds())
-            layoutState.setPaintInvalidationRange(logicalHeight());
+    if (startLine)
         deleteLineRange(layoutState, startLine);
-    }
 
     layoutRunsAndFloatsInRange(layoutState, resolver, cleanLineStart, cleanLineBidiStatus);
     linkToEndLineIfNeeded(layoutState);
@@ -813,11 +809,8 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
             bidiRuns.deleteRuns();
             resolver.markCurrentRunEmpty(); // FIXME: This can probably be replaced by an ASSERT (or just removed).
 
-            if (lineBox) {
+            if (lineBox)
                 lineBox->setLineBreakInfo(endOfLine.object(), endOfLine.offset(), resolver.status());
-                if (layoutState.usesPaintInvalidationBounds())
-                    layoutState.updatePaintInvalidationRangeFromBox(lineBox);
-            }
         }
 
         for (size_t i = 0; i < lineBreaker.positionedObjects().size(); ++i)
@@ -839,10 +832,8 @@ void RenderParagraph::linkToEndLineIfNeeded(LineLayoutState& layoutState)
             LayoutUnit delta = logicalHeight() - layoutState.endLineLogicalTop();
             for (RootInlineBox* line = layoutState.endLine(); line; line = line->nextRootBox()) {
                 line->attachLine();
-                if (delta) {
-                    layoutState.updatePaintInvalidationRangeFromBox(line, delta);
+                if (delta)
                     line->adjustBlockDirectionPosition(delta.toFloat());
-                }
             }
             setLogicalHeight(lastRootBox()->lineBottomWithLeading());
         } else {
@@ -1243,12 +1234,12 @@ int RenderParagraph::lastLineBoxBaseline(LineDirectionMode lineDirection) const
     return -1;
 }
 
-void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit& paintInvalidationLogicalTop, LayoutUnit& paintInvalidationLogicalBottom, LayoutUnit beforeEdge, LayoutUnit afterEdge)
+void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
 {
     // Figure out if we should clear out our line boxes.
     // FIXME: Handle resize eventually!
     bool isFullLayout = !firstLineBox() || selfNeedsLayout() || relayoutChildren;
-    LineLayoutState layoutState(isFullLayout, paintInvalidationLogicalTop, paintInvalidationLogicalBottom);
+    LineLayoutState layoutState(isFullLayout);
 
     if (isFullLayout)
         lineBoxes()->deleteLineBoxes();

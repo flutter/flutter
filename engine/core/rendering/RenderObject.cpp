@@ -99,8 +99,6 @@ struct SameSizeAsRenderObject {
 #endif
 #endif
     unsigned m_bitfields;
-    LayoutRect rect; // Stores the previous paint invalidation rect.
-    LayoutPoint position; // Stores the previous position from the paint invalidation container.
 };
 
 COMPILE_ASSERT(sizeof(RenderObject) == sizeof(SameSizeAsRenderObject), RenderObject_should_stay_small);
