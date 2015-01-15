@@ -25,7 +25,10 @@
   }
   </style>
 
-  <sky-input id="text" value="Ready" />
+  <sky-box title='Text'>
+    <sky-input id="text" value="{{ inputValue }}" />
+    <div>value = {{ inputValue }}</div>
+  </sky-box>
 
   <sky-box title='Buttons'>
     <sky-button id='button' on-click='handleClick'>Button</sky-button>
@@ -37,7 +40,8 @@
     <div><sky-checkbox id='checkbox' />Checkbox</div>
     <div class="output">highlight: {{ myCheckbox.highlight }}</div>
     <div class="output">checked: {{ myCheckbox.checked }}</div>
-    <div><sky-checkbox id='checkbox' checked='true'/>Checkbox, default checked.</div>
+    <div><sky-checkbox id='checkbox' checked='{{ checked }}'/>Checkbox, default checked.</div>
+    <div class="output">checked: {{ checked }}</div>
   </sky-box>
 
   <sky-box title='Radios'>
@@ -61,6 +65,8 @@ module.exports = class extends SkyElement {
     this.myCheckbox = null;
     this.myText = null;
     this.clickCount = 0;
+    this.inputValue = "Ready";
+    this.checked = false;
   }
   attached() {
     this.myButton = this.shadowRoot.getElementById('button');
@@ -70,7 +76,8 @@ module.exports = class extends SkyElement {
   }
   handleClick(event) {
     this.clickCount++;
-    this.myText.value = "Moar clicking " + this.clickCount;
+    this.checked = !this.checked;
+    this.inputValue = "Moar clicking " + this.clickCount;
   }
 }.register();
 </script>
