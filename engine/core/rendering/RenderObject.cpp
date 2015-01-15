@@ -2066,14 +2066,6 @@ bool RenderObject::canUpdateSelectionOnRootLineBoxes()
     return containingBlock ? !containingBlock->needsLayout() : false;
 }
 
-// Returns the smallest rectangle enclosing all of the painted content
-// respecting clipping, masking, filters, opacity, stroke-width and markers
-FloatRect RenderObject::paintInvalidationRectInLocalCoordinates() const
-{
-    ASSERT_NOT_REACHED();
-    return FloatRect();
-}
-
 bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint&, HitTestAction)
 {
     ASSERT_NOT_REACHED();

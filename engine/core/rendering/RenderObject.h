@@ -311,10 +311,6 @@ public:
             setNeedsLayout();
     }
 
-    // Returns the smallest rectangle enclosing all of the painted content
-    // respecting clipping, masking, filters, opacity, stroke-width and markers
-    virtual FloatRect paintInvalidationRectInLocalCoordinates() const;
-
     // SVG uses FloatPoint precise hit testing, and passes the point in parent
     // coordinates instead of in paint invalidaiton container coordinates. Eventually the
     // rest of the rendering tree will move to a similar model.
