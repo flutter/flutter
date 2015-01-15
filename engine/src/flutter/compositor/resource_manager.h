@@ -6,6 +6,8 @@
 #define SKY_COMPOSITOR_RESOURCE_MANAGER_H_
 
 #include "base/containers/hash_tables.h"
+#include "base/memory/scoped_ptr.h"
+#include "base/memory/scoped_vector.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
 
@@ -36,6 +38,8 @@ class ResourceManager {
   base::WeakPtr<mojo::GLContext> gl_context_;
   uint32_t next_resource_id_;
   base::hash_map<uint32_t, mojo::GLTexture*> resource_to_texture_map_;
+
+  ScopedVector<mojo::GLTexture> available_textures_;
 
   DISALLOW_COPY_AND_ASSIGN(ResourceManager);
 };
