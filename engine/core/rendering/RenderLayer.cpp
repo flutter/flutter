@@ -828,6 +828,7 @@ bool RenderLayer::hasOverflowControls() const
 
 void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
 {
+    TRACE_EVENT0("blink", "RenderLayer::paint");
     LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
     paintLayer(context, paintingInfo, PaintContent);
 }
