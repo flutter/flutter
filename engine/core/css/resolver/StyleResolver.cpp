@@ -58,6 +58,7 @@
 #include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/core/css/resolver/SharedStyleFinder.h"
 #include "sky/engine/core/css/resolver/StyleAdjuster.h"
+#include "sky/engine/core/css/resolver/StyleBuilder.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 #include "sky/engine/core/css/resolver/StyleResolverStats.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"

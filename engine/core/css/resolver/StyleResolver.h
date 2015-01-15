@@ -23,47 +23,27 @@
 #define SKY_ENGINE_CORE_CSS_RESOLVER_STYLERESOLVER_H_
 
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
-#include "sky/engine/core/css/RuleSet.h"
-#include "sky/engine/core/css/SelectorChecker.h"
 #include "sky/engine/core/css/resolver/MatchedPropertiesCache.h"
 #include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
-#include "sky/engine/core/css/resolver/StyleBuilder.h"
 #include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Deque.h"
 #include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/ListHashSet.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
 class AnimatableValue;
-class AnimationTimeline;
-class CSSAnimationUpdate;
-class CSSFontSelector;
-class CSSSelector;
-class CSSStyleSheet;
 class CSSValue;
-class ContainerNode;
 class Document;
 class Element;
 class ElementRuleCollector;
 class Interpolation;
-class KeyframeList;
-class KeyframeValue;
-class MediaQueryEvaluator;
-class MediaQueryResult;
-class RuleData;
-class Settings;
 class StyleKeyframe;
 class StylePropertySet;
 class StyleResolverStats;
-class StyleRule;
-class StyleRuleKeyframes;
-
 class MatchResult;
 
 const unsigned styleSharingListSize = 15;
