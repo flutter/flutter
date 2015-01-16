@@ -1,0 +1,6 @@
+Running 2 tests
+ok 1 Gesture events should be creatable
+ok 2 Gesture events should be dispatchable
+2 tests
+2 pass
+0 fail
