@@ -23,13 +23,31 @@ var attributeConverters = {
 
 function parseAttributeSpec(spec) {
   var attributes = new Map();
-  var attributeTokens = (spec || '').split(',');
+
+  if (!spec)
+    return attributes;
+
+  var attributeTokens = spec.split(',');
 
   for (var i = 0; i < attributeTokens.length; ++i) {
     var parts = attributeTokens[i].split(':');
+
+    if (parts.length != 2) {
+      console.error('Invalid attribute spec "' + spec + '", attributes must' +
+          ' be {name}:{type}, where type is one of  boolean, number or' +
+          ' string.');
+      continue;
+    }
+
     var name = parts[0].trim();
-    var type = (parts[1] || '').trim();
-    var converter = attributeConverters[type] || attributeConverters.string;
+    var type = parts[1].trim();
+    var converter = attributeConverters[type];
+
+    if (!converter) {
+      console.error('Invalid attribute spec "' + spec + '", type must be one'
+          + ' of boolean, number or string.');
+      continue;
+    }
 
     attributes.set(name, converter);
   }
