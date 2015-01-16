@@ -163,7 +163,7 @@ public:
     virtual PassRefPtr<Node> cloneNode(bool deep = false) = 0;
     virtual const AtomicString& localName() const;
 
-    String textContent(bool convertBRsToNewlines = false) const;
+    String textContent() const;
     void setTextContent(const String&);
 
     // Other methods (not part of DOM)

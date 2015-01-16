@@ -906,22 +906,13 @@ ContainerNode* Node::ownerScope() const
     return 0;
 }
 
-static void appendTextContent(const Node* node, bool convertBRsToNewlines, StringBuilder& content)
-{
-    if (node->nodeType() == Node::TEXT_NODE) {
-        content.append(toCharacterData(node)->data());
-        return;
-    }
-
-    for (Node* child = toContainerNode(node)->firstChild(); child; child = child->nextSibling()) {
-        appendTextContent(child, convertBRsToNewlines, content);
-    }
-}
-
-String Node::textContent(bool convertBRsToNewlines) const
+String Node::textContent() const
 {
     StringBuilder content;
-    appendTextContent(this, convertBRsToNewlines, content);
+    for (const Node* node = this; node; node = NodeTraversal::next(*node, this)) {
+        if (node->isTextNode())
+            content.append(toText(node)->data());
+    }
     return content.toString();
 }
 
