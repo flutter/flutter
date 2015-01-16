@@ -15,6 +15,7 @@ mojo_native_application("prompt") {
 
   deps = [
     "//base",
+    "//base/allocator",
     "//mojo/application",
     "//mojo/common",
     "//mojo/public/cpp/bindings",
