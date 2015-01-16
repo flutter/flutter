@@ -26,11 +26,9 @@ module.exports = class extends SkyElement {
     this.rafId = 0;
     this.currentDeltaIndex = 0;
     this.deltas = new Array(kMaxDeltaLength);
-    for (var i = 0; i < kMaxDeltaLength; ++i)
-      this.deltas[i] = 0;
+    this.deltas.fill(0);
     this.history = new Array(kMaxDeltaLength);
-    for (var i = 0; i < kMaxDeltaLength; ++i)
-      this.history[i] = 0;
+    this.history.fill(0);
   }
   attached() {
     this.scheduleTick();
