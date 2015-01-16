@@ -28,8 +28,15 @@
 module.exports = class extends SkyElement {
   shadowRootReady() {
     var control = this.shadowRoot.getElementById('control');
+    var text = control.firstChild;
 
     var observer = new MutationObserver(function() {
+      // contenteditable might remove the text node, but we need to keep it
+      // since that's where the data binding is connected to.
+      if (!text.parentNode)
+        control.appendChild(text);
+      if (this.value == control.textContent)
+        return;
       this.value = control.textContent;
       this.dispatchEvent(new CustomEvent('change', {
         bubbles: true,
