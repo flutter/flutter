@@ -27,12 +27,6 @@ class TemplateInstance {
 var emptyInstance = new TemplateInstance();
 var directiveCache = new WeakMap();
 
-(function() {
-  var templateRegistration = registry.registerElement('template');
-  templateRegistration.defineAttribute('if', 'string');
-  templateRegistration.defineAttribute('repeat', 'string');
-})();
-
 function createInstance(template, model) {
   var content = template.content;
   if (!content.firstChild)

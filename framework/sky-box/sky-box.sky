@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 
-<sky-element name="sky-box">
+<sky-element name="sky-box" attributes="title:string">
 <template>
   <style>
     :host {

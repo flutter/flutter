@@ -69,7 +69,6 @@
     ClientRectList getClientRects();
     ClientRect getBoundingClientRect();
 
-    [Reflect] attribute DOMString title;
     [Reflect] attribute DOMString lang;
     attribute DOMString dir;
 
