@@ -1,0 +1,21 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    EventConstructor,
+] interface GestureEvent : UIEvent {
+    [InitializedByEventConstructor] readonly attribute long screenX;
+    [InitializedByEventConstructor] readonly attribute long screenY;
+    [InitializedByEventConstructor] readonly attribute long clientX;
+    [InitializedByEventConstructor] readonly attribute long clientY;
+    [InitializedByEventConstructor] readonly attribute boolean ctrlKey;
+    [InitializedByEventConstructor] readonly attribute boolean shiftKey;
+    [InitializedByEventConstructor] readonly attribute boolean altKey;
+    [InitializedByEventConstructor] readonly attribute boolean metaKey;
+
+    [InitializedByEventConstructor] readonly attribute double deltaX;
+    [InitializedByEventConstructor] readonly attribute double deltaY;
+    [InitializedByEventConstructor] readonly attribute double velocityX;
+    [InitializedByEventConstructor] readonly attribute double velocityY;
+};

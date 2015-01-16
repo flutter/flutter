@@ -1483,7 +1483,7 @@ bool Node::dispatchMouseEvent(const PlatformMouseEvent& event, const AtomicStrin
 bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
 {
     RefPtr<GestureEvent> gestureEvent = GestureEvent::create(document().domWindow(), event);
-    if (!gestureEvent.get())
+    if (!gestureEvent)
         return false;
     return EventDispatcher::dispatchEvent(this, GestureEventDispatchMediator::create(gestureEvent));
 }

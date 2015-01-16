@@ -32,25 +32,50 @@
 
 namespace blink {
 
+struct GestureEventInit : public UIEventInit {
+    int screenX = 0;
+    int screenY = 0;
+    int clientX = 0;
+    int clientY = 0;
+    bool ctrlKey = false;
+    bool altKey = false;
+    bool shiftKey = false;
+    bool metaKey = false;;
+    double deltaX = 0;
+    double deltaY = 0;
+    double velocityX = 0;
+    double velocityY = 0;
+};
+
 class GestureEvent final : public MouseRelatedEvent {
+    DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~GestureEvent() { }
 
+    static PassRefPtr<GestureEvent> create() { return adoptRef(new GestureEvent); }
     static PassRefPtr<GestureEvent> create(PassRefPtr<AbstractView>, const PlatformGestureEvent&);
+    static PassRefPtr<GestureEvent> create(const AtomicString& type, const GestureEventInit&);
 
-    virtual bool isGestureEvent() const override;
+    bool isGestureEvent() const override;
 
-    virtual const AtomicString& interfaceName() const override;
+    const AtomicString& interfaceName() const override;
 
     float deltaX() const { return m_deltaX; }
     float deltaY() const { return m_deltaY; }
 
+    float velocityX() const { return m_velocityX; }
+    float velocityY() const { return m_velocityY; }
+
 private:
     GestureEvent();
-    GestureEvent(const AtomicString& type, PassRefPtr<AbstractView>, int screenX, int screenY, int clientX, int clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, float deltaX, float deltaY);
+    GestureEvent(const AtomicString& type, const GestureEventInit&);
+    GestureEvent(const AtomicString& type, PassRefPtr<AbstractView>, int screenX, int screenY, int clientX, int clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, float deltaX, float deltaY, float velocityX, float velocityY);
 
     float m_deltaX;
     float m_deltaY;
+
+    float m_velocityX;
+    float m_velocityY;
 };
 
 class GestureEventDispatchMediator final : public EventDispatchMediator {

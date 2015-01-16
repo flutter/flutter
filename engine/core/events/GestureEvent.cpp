@@ -35,11 +35,15 @@ PassRefPtr<GestureEvent> GestureEvent::create(PassRefPtr<AbstractView> view, con
     AtomicString eventType;
     float deltaX = 0;
     float deltaY = 0;
+    float velocityX = 0;
+    float velocityY = 0;
     switch (event.type()) {
     case PlatformEvent::GestureScrollBegin:
-        eventType = EventTypeNames::gesturescrollstart; break;
+        eventType = EventTypeNames::gesturescrollstart;
+        break;
     case PlatformEvent::GestureScrollEnd:
-        eventType = EventTypeNames::gesturescrollend; break;
+        eventType = EventTypeNames::gesturescrollend;
+        break;
     case PlatformEvent::GestureScrollUpdate:
     case PlatformEvent::GestureScrollUpdateWithoutPropagation:
         // Only deltaX/Y are used when converting this
@@ -47,15 +51,21 @@ PassRefPtr<GestureEvent> GestureEvent::create(PassRefPtr<AbstractView> view, con
         eventType = EventTypeNames::gesturescrollupdate;
         deltaX = event.deltaX();
         deltaY = event.deltaY();
+        velocityX = event.velocityX();
+        velocityY = event.velocityY();
         break;
     case PlatformEvent::GestureTap:
-        eventType = EventTypeNames::gesturetap; break;
+        eventType = EventTypeNames::gesturetap;
+        break;
     case PlatformEvent::GestureTapUnconfirmed:
-        eventType = EventTypeNames::gesturetapunconfirmed; break;
+        eventType = EventTypeNames::gesturetapunconfirmed;
+        break;
     case PlatformEvent::GestureTapDown:
-        eventType = EventTypeNames::gesturetapdown; break;
+        eventType = EventTypeNames::gesturetapdown;
+        break;
     case PlatformEvent::GestureShowPress:
-        eventType = EventTypeNames::gestureshowpress; break;
+        eventType = EventTypeNames::gestureshowpress;
+        break;
     case PlatformEvent::GestureTwoFingerTap:
     case PlatformEvent::GestureLongPress:
     case PlatformEvent::GesturePinchBegin:
@@ -65,15 +75,17 @@ PassRefPtr<GestureEvent> GestureEvent::create(PassRefPtr<AbstractView> view, con
     default:
         return nullptr;
     }
-    return adoptRef(new GestureEvent(eventType, view, event.globalPosition().x(), event.globalPosition().y(), event.position().x(), event.position().y(), event.ctrlKey(), event.altKey(), event.shiftKey(), event.metaKey(), deltaX, deltaY));
+    return adoptRef(new GestureEvent(eventType, view, event.globalPosition().x(), event.globalPosition().y(), event.position().x(), event.position().y(), event.ctrlKey(), event.altKey(), event.shiftKey(), event.metaKey(), deltaX, deltaY, velocityX, velocityY));
+}
+
+PassRefPtr<GestureEvent> GestureEvent::create(const AtomicString& type, const GestureEventInit& initializer)
+{
+    return adoptRef(new GestureEvent(type, initializer));
 }
 
 const AtomicString& GestureEvent::interfaceName() const
 {
-    // FIXME: when a GestureEvent.idl interface is defined, return the string "GestureEvent".
-    // Until that happens, do not advertise an interface that does not exist, since it will
-    // trip up the bindings integrity checks.
-    return UIEvent::interfaceName();
+    return EventNames::GestureEvent;
 }
 
 bool GestureEvent::isGestureEvent() const
@@ -84,13 +96,29 @@ bool GestureEvent::isGestureEvent() const
 GestureEvent::GestureEvent()
     : m_deltaX(0)
     , m_deltaY(0)
+    , m_velocityX(0)
+    , m_velocityY(0)
 {
 }
 
-GestureEvent::GestureEvent(const AtomicString& type, PassRefPtr<AbstractView> view, int screenX, int screenY, int clientX, int clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, float deltaX, float deltaY)
+GestureEvent::GestureEvent(const AtomicString& type, const GestureEventInit& initializer)
+    : MouseRelatedEvent(type, initializer.bubbles, initializer.cancelable, initializer.view, initializer.detail, IntPoint(initializer.screenX, initializer.screenY),
+        IntPoint(0 /* pageX */, 0 /* pageY */),
+        IntPoint(0 /* movementX */, 0 /* movementY */),
+        initializer.ctrlKey, initializer.altKey, initializer.shiftKey, initializer.metaKey, false /* isSimulated */)
+    , m_deltaX(initializer.deltaX)
+    , m_deltaY(initializer.deltaY)
+    , m_velocityX(initializer.velocityX)
+    , m_velocityY(initializer.velocityY)
+{
+}
+
+GestureEvent::GestureEvent(const AtomicString& type, PassRefPtr<AbstractView> view, int screenX, int screenY, int clientX, int clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, float deltaX, float deltaY, float velocityX, float velocityY)
     : MouseRelatedEvent(type, true, true, view, 0, IntPoint(screenX, screenY), IntPoint(clientX, clientY), IntPoint(0, 0), ctrlKey, altKey, shiftKey, metaKey)
     , m_deltaX(deltaX)
     , m_deltaY(deltaY)
+    , m_velocityX(velocityX)
+    , m_velocityY(velocityY)
 {
 }
 
