@@ -4,28 +4,13 @@
 // found in the LICENSE file.
 -->
 <import src="sky-binder.sky" as="binder" />
+<import src="element-registry.sky" as="registry" />
 <script>
-var attributeConverters = {
-  boolean: function(value) {
-    if (typeof value == 'string')
-      return value == 'true';
-    return !!value;
-  },
-  number: function(value) {
-    return Number(value);
-  },
-  string: function(value) {
-    if (value === null)
-      return '';
-    return String(value);
-  },
-};
-
-function parseAttributeSpec(spec) {
-  var attributes = new Map();
+function parseAttributeSpec(registration, definition) {
+  var spec = definition.getAttribute('attributes');
 
   if (!spec)
-    return attributes;
+    return;
 
   var attributeTokens = spec.split(',');
 
@@ -41,21 +26,12 @@ function parseAttributeSpec(spec) {
 
     var name = parts[0].trim();
     var type = parts[1].trim();
-    var converter = attributeConverters[type];
 
-    if (!converter) {
-      console.error('Invalid attribute spec "' + spec + '", type must be one'
-          + ' of boolean, number or string.');
-      continue;
-    }
-
-    attributes.set(name, converter);
+    registration.defineAttribute(name, type);
   }
-
-  return attributes;
 }
 
-function collectEventHandlers(definition) {
+function parseEventHandlers(registration, definition) {
   var eventHandlers = [];
   var attributes = definition.getAttributes();
 
@@ -65,53 +41,10 @@ function collectEventHandlers(definition) {
     var value = attr.value;
 
     if (name.startsWith('on-')) {
-      eventHandlers.push(name.substring(3));
+      registration.eventHandlers.set(name.substring(3), value);
     }
   }
-
-  return eventHandlers;
 }
-
-function eventHandlerCallback(event) {
-  var element = event.currentTarget;
-  var registration = registrations.get(element.localName);
-  var method = registration.getEventHandler(event.type);
-  var handler = element[method];
-  if (handler instanceof Function)
-    return handler.call(element, event);
-}
-
-class ElementRegistration {
-  constructor(definition) {
-    this.definition = definition;
-    this.tagName = definition.getAttribute('name');
-    this.attributes = parseAttributeSpec(definition.getAttribute('attributes'));
-    this.eventHandlers = collectEventHandlers(definition);
-    this.template = definition.querySelector('template');
-    Object.preventExtensions(this);
-  }
-
-  getEventHandler(eventName) {
-    return this.definition.getAttribute('on-' + eventName);
-  }
-
-  synthesizeAttributes(prototype) {
-    this.attributes.forEach(function(converter, name) {
-      Object.defineProperty(prototype, name, {
-        get: function() {
-          return converter(this.getAttribute(name));
-        },
-        set: function(newValue) {
-          this.setAttribute(name, converter(newValue));
-        },
-        enumerable: true,
-        configurable: true,
-      });
-    });
-  }
-}
-
-var registrations = new Map();
 
 class SkyElement extends HTMLElement {
 
@@ -122,26 +55,21 @@ class SkyElement extends HTMLElement {
       throw new Error('register() calls must be inside a <sky-element>.');
     }
 
-    var registration = new ElementRegistration(definition);
-
-    if (!registration.tagName) {
+    var tagName = definition.getAttribute('name');
+    if (!tagName) {
       throw new Error('<sky-element> must have a name.');
     }
 
-    if (registrations.has(registration.tagName)) {
-      throw new Error('Duplicate registration for tag name: ' +
-          registration.tagName);
-    }
+    var registration = registry.registerElement(tagName);
+
+    parseAttributeSpec(registration, definition);
+    parseEventHandlers(registration, definition);
+
+    registration.template = definition.querySelector('template');
 
     registration.synthesizeAttributes(this.prototype);
 
-    // TODO(esprehn): Combine the two element registries here and in sky binder.
-    binder.registerElement(registration.tagName, {
-      attributeNames: Array.from(registration.attributes.keys()),
-    });
-
-    registrations.set(registration.tagName, registration);
-    return document.registerElement(registration.tagName, {
+    return document.registerElement(tagName, {
       prototype: this.prototype,
     });
   }
@@ -181,16 +109,13 @@ class SkyElement extends HTMLElement {
       this.attributeChangedCallback(attribute.name, null, attribute.value);
     }
 
-    var registration = registrations.get(this.localName);
-    for (var i = 0; i < registration.eventHandlers.length; ++i) {
-      var eventName = registration.eventHandlers[i];
-      this.addEventListener(eventName, eventHandlerCallback);
-    }
+    var registration = registry.getRegistration(this.localName);
+    registration.addInstanceEventListeners(this);
   }
 
   attachedCallback() {
     if (!this.shadowRoot) {
-      var registration = registrations.get(this.localName);
+      var registration = registry.getRegistration(this.localName);
       if (registration.template) {
         var shadow = this.ensureShadowRoot();
         var instance = binder.createInstance(registration.template, this);
@@ -209,7 +134,7 @@ class SkyElement extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     this.attributeChanged(name, oldValue, newValue);
-    var registration = registrations.get(this.localName);
+    var registration = registry.getRegistration(this.localName);
     var converter = registration.attributes.get(name);
     if (converter) {
       this.notifyPropertyChanged(name, converter(oldValue),

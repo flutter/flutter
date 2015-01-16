@@ -1,0 +1,148 @@
+<!--
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="sky-binder.sky" as="binder" />
+<script>
+// TODO(esprehn): It would be nice if these were exposed by the platform so
+// the framework didn't need to hard code a list.
+var defaultAttributesNames = new Set([
+  'accesskey',
+  'alt',
+  'as',
+  'async',
+  'class',
+  'contenteditable',
+  'crossorigin',
+  'dir',
+  'height',
+  'href',
+  'id',
+  'is',
+  'lang',
+  'media',
+  'name',
+  'rel',
+  'select',
+  'sizes',
+  'spellcheck',
+  'src',
+  'srcset',
+  'style',
+  'tabindex',
+  'title',
+  'type',
+  'width',
+]);
+
+var attributeConverters = {
+  boolean: function(value) {
+    if (typeof value == 'string')
+      return value == 'true';
+    return !!value;
+  },
+  number: function(value) {
+    return Number(value);
+  },
+  string: function(value) {
+    if (value === null)
+      return '';
+    return String(value);
+  },
+};
+
+function eventHandlerCallback(event) {
+  var element = event.currentTarget;
+  var registration = getRegistration(element.localName);
+  var method = registration.eventHandlers.get(event.type);
+  var handler = element[method];
+  if (!(typeof handler == 'function')) {
+    throw new Error('Element ' + element.localName +
+        ' specifies invalid event handler "' + method + '"');
+  }
+  handler.call(element, event);
+}
+
+class ElementRegistration {
+  constructor(tagName) {
+    this.tagName = tagName;
+    this.attributes = new Map();
+    this.eventHandlers = new Map();
+    this.template = null;
+    Object.preventExtensions(this);
+  }
+
+  allowsAttribute(name) {
+    if (name.startsWith('data-'))
+      return true;
+    if (defaultAttributesNames.has(name))
+      return true;
+    if (this.attributes.has(name))
+      return true;
+    return false;
+  }
+
+  defineAttribute(name, type) {
+    var converter = attributeConverters[type];
+
+    if (!converter) {
+      console.error('Invalid attribute type "' + type + '", type must be one'
+          + ' of boolean, number or string.');
+      return;
+    }
+
+    this.attributes.set(name, converter);
+  }
+
+  synthesizeAttributes(prototype) {
+    this.attributes.forEach(function(converter, name) {
+      Object.defineProperty(prototype, name, {
+        get: function() {
+          return converter(this.getAttribute(name));
+        },
+        set: function(newValue) {
+          this.setAttribute(name, converter(newValue));
+        },
+        enumerable: true,
+        configurable: true,
+      });
+    });
+  }
+
+  addInstanceEventListeners(instance) {
+    for (var eventName of this.eventHandlers.keys()) {
+      instance.addEventListener(eventName, eventHandlerCallback);
+    }
+  }
+}
+
+var registrations = new Map();
+
+function registerElement(tagName) {
+  if (registrations.has(tagName))
+    throw new Error('tagName "' + tagName + '" registered twice.');
+  var registration = new ElementRegistration(tagName);
+  registrations.set(tagName, registration);
+  return registration;
+}
+
+function getRegistration(tagName) {
+  return registrations.get(tagName);
+}
+
+function checkAttribute(tagName, attrName) {
+  var registration = getRegistration(tagName);
+
+  if (!registration)
+    return defaultAttributesNames.has(attrName);
+
+  return registration.allowsAttribute(attrName);
+}
+
+module.exports = {
+  registerElement: registerElement,
+  getRegistration: getRegistration,
+  checkAttribute: checkAttribute,
+};
+</script>

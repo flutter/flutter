@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 -->
 <import src="observe.sky" as="observe" />
+<import src="element-registry.sky" as="registry" />
 
 <script>
 var stagingDocument = new Document();
@@ -26,45 +27,11 @@ class TemplateInstance {
 var emptyInstance = new TemplateInstance();
 var directiveCache = new WeakMap();
 
-// TODO(esprehn): It would be nice if these were exposed by the platform so
-// the framework didn't need to hard code a list.
-var defaultAttributesNames = new Set([
-  'accesskey',
-  'alt',
-  'as',
-  'async',
-  'class',
-  'contenteditable',
-  'crossorigin',
-  'dir',
-  'height',
-  'href',
-  'id',
-  'is',
-  'lang',
-  'media',
-  'name',
-  'rel',
-  'select',
-  'sizes',
-  'spellcheck',
-  'src',
-  'srcset',
-  'style',
-  'tabindex',
-  'title',
-  'type',
-  'width',
-]);
-var elementAttributeNames = new Map();
-
-function registerElement(name, options) {
-  elementAttributeNames.set(name, new Set(options.attributeNames));
-}
-
-registerElement('template', {
-  attributeNames: ['if', 'repeat'],
-});
+(function() {
+  var templateRegistration = registry.registerElement('template');
+  templateRegistration.defineAttribute('if', 'string');
+  templateRegistration.defineAttribute('repeat', 'string');
+})();
 
 function createInstance(template, model) {
   var content = template.content;
@@ -196,20 +163,9 @@ function parsePropertyDirective(value, property) {
   return result;
 }
 
-function checkAttribute(name, allowedAttributeNames) {
-  if (name.startsWith('data-'))
-    return true;
-  if (defaultAttributesNames.has(name))
-    return true;
-  if (allowedAttributeNames && allowedAttributeNames.has(name))
-    return true;
-  return false;
-}
-
 function parseAttributeDirectives(element, directives) {
   var attributes = element.getAttributes();
-
-  var allowedAttributeNames = elementAttributeNames.get(element.tagName);
+  var tagName = element.tagName;
 
   for (var i = 0; i < attributes.length; i++) {
     var attr = attributes[i];
@@ -221,8 +177,8 @@ function parseAttributeDirectives(element, directives) {
       continue;
     }
 
-    if (!checkAttribute(name, allowedAttributeNames)) {
-      console.error('Element "'+ element.tagName +
+    if (!registry.checkAttribute(tagName, name)) {
+      console.error('Element "'+ tagName +
           '" has unknown attribute "' + name + '".');
     }
 
@@ -526,6 +482,5 @@ class TemplateIterator {
 
 module.exports = {
   createInstance: createInstance,
-  registerElement: registerElement,
 };
 </script>
