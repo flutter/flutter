@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "base/bind.h"
-#include "base/files/file_path.h"
+#include "base/debug/profiler.h"
 #include "base/memory/weak_ptr.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
@@ -91,6 +91,10 @@ class Prompt : public mojo::ApplicationDelegate,
       Quit(connection_id);
     else if (info.path == "/load")
       Load(connection_id, info.data);
+    else if (info.path == "/start_profiling")
+      StartProfiling(connection_id);
+    else if (info.path == "/stop_profiling")
+      StopProfiling(connection_id);
     else {
       Help(info.path, connection_id);
     }
@@ -170,6 +174,16 @@ class Prompt : public mojo::ApplicationDelegate,
   void OnTraceAvailable(int connection_id, std::string trace) {
     trace_collector_.reset();
     Respond(connection_id, trace);
+  }
+
+  void StartProfiling(int connection_id) {
+    base::debug::StartProfiling("sky_viewer.pprof");
+    Respond(connection_id, "Starting profiling (type 'stop_profiling' to stop");
+  }
+
+  void StopProfiling(int connection_id) {
+    base::debug::StopProfiling();
+    Respond(connection_id, "Stopped profiling");
   }
 
   bool is_tracing_;
