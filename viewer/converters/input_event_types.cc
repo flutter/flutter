@@ -138,9 +138,13 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_SCROLL_UPDATE:
       web_event->type = blink::WebInputEvent::GestureScrollUpdate;
+      web_event->data.scrollUpdate.deltaX = event->gesture_data->scroll_x;
+      web_event->data.scrollUpdate.deltaY = event->gesture_data->scroll_y;
       break;
     case mojo::EVENT_TYPE_SCROLL_FLING_START:
       web_event->type = blink::WebInputEvent::GestureFlingStart;
+      web_event->data.flingStart.velocityX = event->gesture_data->velocity_x;
+      web_event->data.flingStart.velocityY = event->gesture_data->velocity_y;
       break;
     case mojo::EVENT_TYPE_SCROLL_FLING_CANCEL:
       web_event->type = blink::WebInputEvent::GestureFlingCancel;
@@ -150,9 +154,11 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_TAP:
       web_event->type = blink::WebInputEvent::GestureTap;
+      web_event->data.tap.tapCount = event->gesture_data->tap_count;
       break;
     case mojo::EVENT_TYPE_GESTURE_TAP_UNCONFIRMED:
       web_event->type = blink::WebInputEvent::GestureTapUnconfirmed;
+      web_event->data.tap.tapCount = event->gesture_data->tap_count;
       break;
     case mojo::EVENT_TYPE_GESTURE_TAP_DOWN:
       web_event->type = blink::WebInputEvent::GestureTapDown;
@@ -162,6 +168,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_DOUBLE_TAP:
       web_event->type = blink::WebInputEvent::GestureDoubleTap;
+      web_event->data.tap.tapCount = event->gesture_data->tap_count;
       break;
     case mojo::EVENT_TYPE_GESTURE_TWO_FINGER_TAP:
       web_event->type = blink::WebInputEvent::GestureTwoFingerTap;
@@ -180,6 +187,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_PINCH_UPDATE:
       web_event->type = blink::WebInputEvent::GesturePinchUpdate;
+      web_event->data.pinchUpdate.scale = event->gesture_data->scale;
       break;
     default:
       NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
