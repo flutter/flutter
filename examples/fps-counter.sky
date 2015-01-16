@@ -8,27 +8,34 @@
 <sky-element name="fps-counter" attributes="showHistory:boolean">
 <template>
   <template if="{{ showHistory }}">
-    <template repeat="{{ history }}">
-      <div>{{ }} ms</div>
+    <template repeat="{{ deltas }}">
+      <div>{{ roundedValue }} ms</div>
     </template>
     <div>max = {{ max }} ms</div>
   </template>
-  <div>fps = {{ framerate }} Hz</div>
+  <div>fps = {{ frameRate }} Hz</div>
 </template>
 <script>
-var kMaxDeltaLength = 10;
+const kMaxDeltaLength = 10;
+
+class Delta {
+  constructor(value) {
+    this.value = value;
+    this.roundedValue = value.toFixed(2);
+    Object.preventExtensions(this);
+  }
+}
 
 module.exports = class extends SkyElement {
   created() {
-    this.framerate = "...";
+    this.frameRate = "...";
     this.max = 0;
+    this.sum = 0;
     this.lastTimeStamp = 0;
     this.rafId = 0;
-    this.currentDeltaIndex = 0;
-    this.deltas = new Array(kMaxDeltaLength);
-    this.deltas.fill(0);
-    this.history = new Array(kMaxDeltaLength);
-    this.history.fill(0);
+    this.deltas = [];
+    for (var i = 0; i < kMaxDeltaLength; ++i)
+      this.deltas[i] = new Delta(0);
   }
   attached() {
     this.scheduleTick();
@@ -38,7 +45,7 @@ module.exports = class extends SkyElement {
     this.rafId = 0;
   }
   scheduleTick() {
-    this.rafId = requestAnimationFrame(this.tick.bind(this));  
+    this.rafId = requestAnimationFrame(this.tick.bind(this));
   }
   tick(timeStamp) {
     this.scheduleTick();
@@ -46,16 +53,14 @@ module.exports = class extends SkyElement {
     this.lastTimeStamp = timeStamp;
     if (!lastTimeStamp)
       return;
-    var delta = timeStamp - lastTimeStamp;
-    this.deltas[this.currentDeltaIndex++ % kMaxDeltaLength] = delta;
-    for (var i = 0; i < kMaxDeltaLength; ++i) {
-      var value = this.deltas[(i + this.currentDeltaIndex) % kMaxDeltaLength];
-      this.history[i] = value.toFixed(2);
-    }
-    var sum = this.deltas.reduce(function(a, b) { return a + b }, 0);
-    var avg = sum / kMaxDeltaLength;
-    this.framerate = (1000 / avg).toFixed(2);
-    this.max = Math.max(delta, this.max).toFixed(2);
+    var delta = new Delta(timeStamp - lastTimeStamp);
+    var removedDelta = this.deltas.shift();
+    this.deltas.push(delta);
+    this.sum -= removedDelta.value;
+    this.sum += delta.value;
+    var avg = this.sum / this.deltas.length;
+    this.frameRate = (1000 / avg).toFixed(2);
+    this.max = Math.max(delta.value, this.max).toFixed(2);
   }
 }.register();
 </script>
