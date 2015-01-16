@@ -1733,59 +1733,6 @@ bool RenderLayer::paintsWithTransform() const
     return transform();
 }
 
-bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const
-{
-    if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
-        return false;
-
-    if (isTransparent())
-        return false;
-
-    if (paintsWithFilters() && renderer()->style()->filter().hasFilterThatAffectsOpacity())
-        return false;
-
-    // FIXME: Handle simple transforms.
-    if (paintsWithTransform())
-        return false;
-
-    // FIXME: Remove this check.
-    // This function should not be called when layer-lists are dirty.
-    // It is somehow getting triggered during style update.
-    if (m_stackingNode->zOrderListsDirty() || m_stackingNode->normalFlowListDirty())
-        return false;
-
-    // FIXME: We currently only check the immediate renderer,
-    // which will miss many cases.
-    if (renderer()->backgroundIsKnownToBeOpaqueInRect(localRect))
-        return true;
-
-    // We can't consult child layers if we clip, since they might cover
-    // parts of the rect that are clipped out.
-    if (renderer()->hasOverflowClip())
-        return false;
-
-    return childBackgroundIsKnownToBeOpaqueInRect(localRect);
-}
-
-bool RenderLayer::childBackgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const
-{
-    RenderLayerStackingNodeReverseIterator revertseIterator(*m_stackingNode, PositiveZOrderChildren | NormalFlowChildren | NegativeZOrderChildren);
-    while (RenderLayerStackingNode* child = revertseIterator.next()) {
-        const RenderLayer* childLayer = child->layer();
-        if (!childLayer->canUseConvertToLayerCoords())
-            continue;
-
-        LayoutPoint childOffset;
-        LayoutRect childLocalRect(localRect);
-        childLayer->convertToLayerCoords(this, childOffset);
-        childLocalRect.moveBy(-childOffset);
-
-        if (childLayer->backgroundIsKnownToBeOpaqueInRect(childLocalRect))
-            return true;
-    }
-    return false;
-}
-
 bool RenderLayer::shouldBeSelfPaintingLayer() const
 {
     return m_layerType == NormalLayer

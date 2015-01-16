@@ -1199,18 +1199,6 @@ void RenderObject::selectionStartEnd(int& spos, int& epos) const
 
 StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
 {
-    // If transform, opacity or zIndex changed, then we need to invalidate paints.
-    // Text nodes share style with their parents but transform/opacity/z-index don't apply to them,
-    if (!isText() &&
-        (diff.transformChanged() || diff.opacityChanged() || diff.zIndexChanged())) {
-        diff.setNeedsPaintInvalidation();
-    }
-
-    // If filter changed and it paints with filters, then we need to invalidate paints.
-    if (diff.filterChanged() && hasLayer()) {
-        diff.setNeedsPaintInvalidation();
-    }
-
     // The answer to layerTypeRequired() for plugins, iframes, and canvas can change without the actual
     // style changing, since it depends on whether we decide to composite these elements. When the
     // layer status of one of these elements changes, we need to force a layout.

@@ -147,11 +147,6 @@ public:
     RenderLayer* enclosingFilterLayer(IncludeSelfOrNot = IncludeSelf) const;
     bool hasAncestorWithFilterOutsets() const;
 
-    bool canUseConvertToLayerCoords() const
-    {
-        return !renderer()->hasTransform();
-    }
-
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutPoint&) const;
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutRect&) const;
 
@@ -223,10 +218,6 @@ public:
     bool needsCompositedScrolling() const { return m_scrollableArea && m_scrollableArea->needsCompositedScrolling(); }
 
     bool paintsWithTransform() const;
-
-    // Returns true if background phase is painted opaque in the given rect.
-    // The query rect is given in local coordinates.
-    bool backgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const;
 
     bool containsDirtyOverlayScrollbars() const { return m_containsDirtyOverlayScrollbars; }
     void setContainsDirtyOverlayScrollbars(bool dirtyScrollbars) { m_containsDirtyOverlayScrollbars = dirtyScrollbars; }
@@ -451,8 +442,6 @@ private:
                             const LayoutPoint& translationOffset = LayoutPoint()) const;
 
     bool hitTestContents(const HitTestRequest&, HitTestResult&, const LayoutRect& layerBounds, const HitTestLocation&, HitTestFilter) const;
-
-    bool childBackgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const;
 
     bool shouldBeSelfPaintingLayer() const;
 

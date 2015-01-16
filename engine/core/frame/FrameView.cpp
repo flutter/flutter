@@ -560,11 +560,6 @@ void FrameView::setTransparent(bool isTransparent)
     m_isTransparent = isTransparent;
 }
 
-bool FrameView::hasOpaqueBackground() const
-{
-    return !m_isTransparent && !m_baseBackgroundColor.hasAlpha();
-}
-
 Color FrameView::baseBackgroundColor() const
 {
     return m_baseBackgroundColor;

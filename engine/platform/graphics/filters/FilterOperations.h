@@ -67,7 +67,6 @@ public:
     bool hasOutsets() const;
     FilterOutsets outsets() const;
 
-    bool hasFilterThatAffectsOpacity() const;
     bool hasFilterThatMovesPixels() const;
 
     bool hasReferenceFilter() const;

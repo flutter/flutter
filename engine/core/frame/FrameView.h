@@ -109,9 +109,6 @@ public:
     bool isTransparent() const;
     void setTransparent(bool isTransparent);
 
-    // True if the FrameView is not transparent, and the base background color is opaque.
-    bool hasOpaqueBackground() const;
-
     Color baseBackgroundColor() const;
     void setBaseBackgroundColor(const Color&);
     void updateBackgroundRecursively(const Color&, bool);

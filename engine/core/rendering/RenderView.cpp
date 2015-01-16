@@ -454,11 +454,6 @@ void RenderView::popLayoutState()
     m_layoutState = m_layoutState->next();
 }
 
-bool RenderView::backgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const
-{
-    return m_frameView->hasOpaqueBackground();
-}
-
 // FIXME(sky): remove
 double RenderView::layoutViewportWidth() const
 {

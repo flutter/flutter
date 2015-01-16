@@ -299,9 +299,6 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
             diff.setNeedsFullLayout();
     }
 
-    if (!diff.needsFullLayout() && diffNeedsPaintInvalidation(other))
-        diff.setNeedsPaintInvalidation();
-
     updatePropertySpecificDifferences(other, diff);
 
     // Cursors are not checked, since they will be set appropriately in response to mouse events,
@@ -456,40 +453,6 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
             return true;
 
         if (surround->padding != other.surround->padding)
-            return true;
-    }
-
-    return false;
-}
-
-bool RenderStyle::diffNeedsPaintInvalidation(const RenderStyle& other) const
-{
-    if (inherited_flags._visibility != other.inherited_flags._visibility
-        || !surround->border.visuallyEqual(other.surround->border)
-        || !m_background->visuallyEqual(*other.m_background))
-        return true;
-
-    if (rareInheritedData.get() != other.rareInheritedData.get()) {
-        if (rareInheritedData->userModify != other.rareInheritedData->userModify
-            || rareInheritedData->userSelect != other.rareInheritedData->userSelect
-            || rareInheritedData->m_imageRendering != other.rareInheritedData->m_imageRendering)
-            return true;
-    }
-
-    if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
-        if (rareNonInheritedData->userDrag != other.rareNonInheritedData->userDrag
-            || rareNonInheritedData->m_objectFit != other.rareNonInheritedData->m_objectFit
-            || rareNonInheritedData->m_objectPosition != other.rareNonInheritedData->m_objectPosition
-            || !dataEquivalent(rareNonInheritedData->m_clipPath, other.rareNonInheritedData->m_clipPath))
-            return true;
-    }
-
-    if (position() != StaticPosition && (visual->clip != other.visual->clip || visual->hasAutoClip != other.visual->hasAutoClip))
-        return true;
-
-    if (rareNonInheritedData.get() != other.rareNonInheritedData.get()) {
-        if (rareNonInheritedData->m_mask != other.rareNonInheritedData->m_mask
-            || rareNonInheritedData->m_maskBoxImage != other.rareNonInheritedData->m_maskBoxImage)
             return true;
     }
 

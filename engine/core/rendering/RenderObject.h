@@ -342,17 +342,7 @@ public:
 
     bool hasLayer() const { return m_bitfields.hasLayer(); }
 
-    // "Box decoration background" includes all box decorations and backgrounds
-    // that are painted as the background of the object. It includes borders,
-    // box-shadows, background-color and background-image, etc.
-    enum BoxDecorationBackgroundState {
-        NoBoxDecorationBackground,
-        HasBoxDecorationBackgroundObscurationStatusInvalid,
-        HasBoxDecorationBackgroundKnownToBeObscured,
-        HasBoxDecorationBackgroundMayBeVisible,
-    };
-    bool hasBoxDecorationBackground() const { return m_bitfields.boxDecorationBackgroundState() != NoBoxDecorationBackground; }
-    bool boxDecorationBackgroundIsKnownToBeObscured();
+    bool hasBoxDecorationBackground() const { return m_bitfields.hasBoxDecorationBackground(); }
     bool canRenderBorderImage() const;
     bool hasBackground() const { return style()->hasBackground(); }
     bool hasEntirelyFixedBackground() const;
@@ -445,16 +435,13 @@ public:
 
     void setInline(bool isInline) { m_bitfields.setIsInline(isInline); }
 
-    void setHasBoxDecorationBackground(bool);
-    void invalidateBackgroundObscurationStatus();
-    virtual bool computeBackgroundIsKnownToBeObscured() { return false; }
-
     void setIsText() { m_bitfields.setIsText(true); }
     void setIsBox() { m_bitfields.setIsBox(true); }
     void setReplaced(bool isReplaced) { m_bitfields.setIsReplaced(isReplaced); }
     void setHasOverflowClip(bool hasOverflowClip) { m_bitfields.setHasOverflowClip(hasOverflowClip); }
     void setHasLayer(bool hasLayer) { m_bitfields.setHasLayer(hasLayer); }
     void setHasTransform(bool hasTransform) { m_bitfields.setHasTransform(hasTransform); }
+    void setHasBoxDecorationBackground(bool b) { m_bitfields.setHasBoxDecorationBackground(b); }
 
     void scheduleRelayout();
 
@@ -782,12 +769,12 @@ private:
             , m_hasLayer(false)
             , m_hasOverflowClip(false)
             , m_hasTransform(false)
+            , m_hasBoxDecorationBackground(false)
             , m_everHadLayout(false)
             , m_ancestorLineBoxDirty(false)
             , m_alwaysCreateLineBoxesForRenderInline(false)
             , m_positionedState(IsStaticallyPositioned)
             , m_selectionState(SelectionNone)
-            , m_boxDecorationBackgroundState(NoBoxDecorationBackground)
         {
         }
 
@@ -813,6 +800,7 @@ private:
         ADD_BOOLEAN_BITFIELD(hasLayer, HasLayer);
         ADD_BOOLEAN_BITFIELD(hasOverflowClip, HasOverflowClip); // Set in the case of overflow:auto/scroll/hidden
         ADD_BOOLEAN_BITFIELD(hasTransform, HasTransform);
+        ADD_BOOLEAN_BITFIELD(hasBoxDecorationBackground, HasBoxDecorationBackground);
 
         ADD_BOOLEAN_BITFIELD(everHadLayout, EverHadLayout);
         ADD_BOOLEAN_BITFIELD(ancestorLineBoxDirty, AncestorLineBoxDirty);
@@ -823,7 +811,6 @@ private:
     private:
         unsigned m_positionedState : 2; // PositionedState
         unsigned m_selectionState : 3; // SelectionState
-        unsigned m_boxDecorationBackgroundState : 2; // BoxDecorationBackgroundState
 
     public:
         bool isOutOfFlowPositioned() const { return m_positionedState == IsOutOfFlowPositioned; }
@@ -838,9 +825,6 @@ private:
 
         ALWAYS_INLINE SelectionState selectionState() const { return static_cast<SelectionState>(m_selectionState); }
         ALWAYS_INLINE void setSelectionState(SelectionState selectionState) { m_selectionState = selectionState; }
-
-        ALWAYS_INLINE BoxDecorationBackgroundState boxDecorationBackgroundState() const { return static_cast<BoxDecorationBackgroundState>(m_boxDecorationBackgroundState); }
-        ALWAYS_INLINE void setBoxDecorationBackgroundState(BoxDecorationBackgroundState s) { m_boxDecorationBackgroundState = s; }
     };
 
 #undef ADD_BOOLEAN_BITFIELD
@@ -931,33 +915,6 @@ inline void RenderObject::setSelectionStateIfNeeded(SelectionState state)
         return;
 
     setSelectionState(state);
-}
-
-inline void RenderObject::setHasBoxDecorationBackground(bool b)
-{
-    if (!b) {
-        m_bitfields.setBoxDecorationBackgroundState(NoBoxDecorationBackground);
-        return;
-    }
-    if (hasBoxDecorationBackground())
-        return;
-    m_bitfields.setBoxDecorationBackgroundState(HasBoxDecorationBackgroundObscurationStatusInvalid);
-}
-
-inline void RenderObject::invalidateBackgroundObscurationStatus()
-{
-    if (!hasBoxDecorationBackground())
-        return;
-    m_bitfields.setBoxDecorationBackgroundState(HasBoxDecorationBackgroundObscurationStatusInvalid);
-}
-
-inline bool RenderObject::boxDecorationBackgroundIsKnownToBeObscured()
-{
-    if (m_bitfields.boxDecorationBackgroundState() == HasBoxDecorationBackgroundObscurationStatusInvalid) {
-        BoxDecorationBackgroundState state = computeBackgroundIsKnownToBeObscured() ? HasBoxDecorationBackgroundKnownToBeObscured : HasBoxDecorationBackgroundMayBeVisible;
-        m_bitfields.setBoxDecorationBackgroundState(state);
-    }
-    return m_bitfields.boxDecorationBackgroundState() == HasBoxDecorationBackgroundKnownToBeObscured;
 }
 
 inline void makeMatrixRenderable(TransformationMatrix& matrix)

@@ -57,10 +57,6 @@ public:
 
     virtual LayerType layerTypeRequired() const = 0;
 
-    // Returns true if the background is painted opaque in the given rect.
-    // The query rect is given in local coordinate system.
-    virtual bool backgroundIsKnownToBeOpaqueInRect(const LayoutRect&) const { return false; }
-
     // This is null for anonymous renderers.
     ContainerNode* node() const { return toContainerNode(RenderObject::node()); }
 protected:

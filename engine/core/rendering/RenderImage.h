@@ -68,15 +68,9 @@ private:
 
     virtual void paintReplaced(PaintInfo&, const LayoutPoint&) override;
 
-    virtual bool foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect, unsigned maxDepthToTest) const override final;
-    virtual bool computeBackgroundIsKnownToBeObscured() override final;
-
     virtual LayoutUnit minimumReplacedHeight() const override;
 
-    virtual void notifyFinished(Resource*) override final;
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
-
-    virtual bool boxShadowShouldBeAppliedToBackground(BackgroundBleedAvoidance, InlineFlowBox*) const override final;
 
     void updateIntrinsicSizeIfNeeded(const LayoutSize& newSize);
     // Update the size of the image to be rendered. Object-fit may cause this to be different from the CSS box's content rect.

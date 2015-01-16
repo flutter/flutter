@@ -55,7 +55,6 @@ namespace blink {
 // Size of border belt for autoscroll. When mouse pointer in border belt,
 // autoscroll is started.
 static const int autoscrollBeltSize = 20;
-static const unsigned backgroundObscurationTestMaxDepth = 4;
 
 RenderBox::RenderBox(ContainerNode* node)
     : RenderBoxModelObject(node)
@@ -115,15 +114,6 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
             && parent() && !parent()->normalChildNeedsLayout())
             parent()->setChildNeedsLayout();
     }
-
-    // Our opaqueness might have changed without triggering layout.
-    if (diff.needsPaintInvalidation()) {
-        RenderObject* parentToInvalidate = parent();
-        for (unsigned i = 0; i < backgroundObscurationTestMaxDepth && parentToInvalidate; ++i) {
-            parentToInvalidate->invalidateBackgroundObscurationStatus();
-            parentToInvalidate = parentToInvalidate->parent();
-        }
-    }
 }
 
 void RenderBox::updateFromStyle()
@@ -165,7 +155,6 @@ void RenderBox::layout()
         ASSERT(!child->needsLayout());
         child = child->nextSibling();
     }
-    invalidateBackgroundObscurationStatus();
     clearNeedsLayout();
 }
 
@@ -712,132 +701,7 @@ void RenderBox::paintBackground(const PaintInfo& paintInfo, const LayoutRect& pa
         paintRootBoxFillLayers(paintInfo);
         return;
     }
-    if (boxDecorationBackgroundIsKnownToBeObscured())
-        return;
     paintFillLayers(paintInfo, backgroundColor, style()->backgroundLayers(), paintRect, bleedAvoidance);
-}
-
-bool RenderBox::getBackgroundPaintedExtent(LayoutRect& paintedExtent) const
-{
-    ASSERT(hasBackground());
-    LayoutRect backgroundRect = pixelSnappedIntRect(borderBoxRect());
-
-    Color backgroundColor = resolveColor(CSSPropertyBackgroundColor);
-    if (backgroundColor.alpha()) {
-        paintedExtent = backgroundRect;
-        return true;
-    }
-
-    if (!style()->backgroundLayers().image() || style()->backgroundLayers().next()) {
-        paintedExtent =  backgroundRect;
-        return true;
-    }
-
-    BackgroundImageGeometry geometry;
-    calculateBackgroundImageGeometry(0, style()->backgroundLayers(), backgroundRect, geometry);
-    if (geometry.hasNonLocalGeometry())
-        return false;
-    paintedExtent = geometry.destRect();
-    return true;
-}
-
-bool RenderBox::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const
-{
-    Color backgroundColor = resolveColor(CSSPropertyBackgroundColor);
-    if (backgroundColor.hasAlpha())
-        return false;
-
-    // FIXME: Check the opaqueness of background images.
-
-    // FIXME: Use rounded rect if border radius is present.
-    if (style()->hasBorderRadius())
-        return false;
-    // FIXME: The background color clip is defined by the last layer.
-    if (style()->backgroundLayers().next())
-        return false;
-    LayoutRect backgroundRect;
-    switch (style()->backgroundClip()) {
-    case BorderFillBox:
-        backgroundRect = borderBoxRect();
-        break;
-    case PaddingFillBox:
-        backgroundRect = paddingBoxRect();
-        break;
-    case ContentFillBox:
-        backgroundRect = contentBoxRect();
-        break;
-    default:
-        break;
-    }
-    return backgroundRect.contains(localRect);
-}
-
-static bool isCandidateForOpaquenessTest(RenderBox* childBox)
-{
-    RenderStyle* childStyle = childBox->style();
-    if (childStyle->position() != StaticPosition && childBox->containingBlock() != childBox->parent())
-        return false;
-    if (!childBox->width() || !childBox->height())
-        return false;
-    if (RenderLayer* childLayer = childBox->layer()) {
-        // FIXME: Deal with z-index.
-        if (!childStyle->hasAutoZIndex())
-            return false;
-        if (childLayer->hasTransform() || childLayer->isTransparent() || childLayer->hasFilter())
-            return false;
-        if (childBox->hasOverflowClip() && childStyle->hasBorderRadius())
-            return false;
-    }
-    return true;
-}
-
-bool RenderBox::foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect, unsigned maxDepthToTest) const
-{
-    if (!maxDepthToTest)
-        return false;
-    for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
-        if (!child->isBox())
-            continue;
-        RenderBox* childBox = toRenderBox(child);
-        if (!isCandidateForOpaquenessTest(childBox))
-            continue;
-        LayoutPoint childLocation = childBox->location();
-        if (childBox->isRelPositioned())
-            childLocation.move(childBox->relativePositionOffset());
-        LayoutRect childLocalRect = localRect;
-        childLocalRect.moveBy(-childLocation);
-        if (childLocalRect.y() < 0 || childLocalRect.x() < 0) {
-            // If there is unobscured area above/left of a static positioned box then the rect is probably not covered.
-            if (childBox->style()->position() == StaticPosition)
-                return false;
-            continue;
-        }
-        if (childLocalRect.maxY() > childBox->height() || childLocalRect.maxX() > childBox->width())
-            continue;
-        if (childBox->backgroundIsKnownToBeOpaqueInRect(childLocalRect))
-            return true;
-        if (childBox->foregroundIsKnownToBeOpaqueInRect(childLocalRect, maxDepthToTest - 1))
-            return true;
-    }
-    return false;
-}
-
-bool RenderBox::computeBackgroundIsKnownToBeObscured()
-{
-    // Test to see if the children trivially obscure the background.
-    // FIXME: This test can be much more comprehensive.
-    if (!hasBackground())
-        return false;
-    // Table and root background painting is special.
-    if (isDocumentElement())
-        return false;
-    // FIXME: box-shadow is painted while background painting.
-    if (style()->boxShadow())
-        return false;
-    LayoutRect backgroundRect;
-    if (!getBackgroundPaintedExtent(backgroundRect))
-        return false;
-    return foregroundIsKnownToBeOpaqueInRect(backgroundRect, backgroundObscurationTestMaxDepth);
 }
 
 bool RenderBox::backgroundHasOpaqueTopLayer() const

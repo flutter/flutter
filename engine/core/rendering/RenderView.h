@@ -99,8 +99,6 @@ public:
     // Renderer that paints the root background has background-images which all have background-attachment: fixed.
     bool rootBackgroundIsEntirelyFixed() const;
 
-    virtual bool backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const override;
-
     double layoutViewportWidth() const;
     double layoutViewportHeight() const;
 

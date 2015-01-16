@@ -162,17 +162,6 @@ void RenderImage::updateInnerContentRect()
         m_imageResource->setContainerSizeForRenderer(containerSize);
 }
 
-void RenderImage::notifyFinished(Resource* newImage)
-{
-    if (!m_imageResource)
-        return;
-
-    if (documentBeingDestroyed())
-        return;
-
-    invalidateBackgroundObscurationStatus();
-}
-
 void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     GraphicsContext* context = paintInfo.context;
@@ -225,51 +214,6 @@ void RenderImage::paintIntoRect(GraphicsContext* context, const LayoutRect& rect
     context->setImageInterpolationQuality(interpolationQuality);
     context->drawImage(image, alignedRect, CompositeSourceOver, shouldRespectImageOrientation());
     context->setImageInterpolationQuality(previousInterpolationQuality);
-}
-
-bool RenderImage::boxShadowShouldBeAppliedToBackground(BackgroundBleedAvoidance bleedAvoidance, InlineFlowBox*) const
-{
-    if (!RenderBoxModelObject::boxShadowShouldBeAppliedToBackground(bleedAvoidance))
-        return false;
-
-    return !const_cast<RenderImage*>(this)->boxDecorationBackgroundIsKnownToBeObscured();
-}
-
-bool RenderImage::foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect, unsigned) const
-{
-    if (!m_imageResource->hasImage() || m_imageResource->errorOccurred())
-        return false;
-    if (m_imageResource->cachedImage() && !m_imageResource->cachedImage()->isLoaded())
-        return false;
-    if (!contentBoxRect().contains(localRect))
-        return false;
-    EFillBox backgroundClip = style()->backgroundClip();
-    // Background paints under borders.
-    if (backgroundClip == BorderFillBox && style()->hasBorder() && !borderObscuresBackground())
-        return false;
-    // Background shows in padding area.
-    if ((backgroundClip == BorderFillBox || backgroundClip == PaddingFillBox) && style()->hasPadding())
-        return false;
-    // Object-position may leave parts of the content box empty, regardless of the value of object-fit.
-    if (style()->objectPosition() != RenderStyle::initialObjectPosition())
-        return false;
-    // Object-fit may leave parts of the content box empty.
-    ObjectFit objectFit = style()->objectFit();
-    if (objectFit != ObjectFitFill && objectFit != ObjectFitCover)
-        return false;
-    // Check for image with alpha.
-    return m_imageResource->cachedImage() && m_imageResource->cachedImage()->currentFrameKnownToBeOpaque(this);
-}
-
-bool RenderImage::computeBackgroundIsKnownToBeObscured()
-{
-    if (!hasBackground())
-        return false;
-
-    LayoutRect paintedExtent;
-    if (!getBackgroundPaintedExtent(paintedExtent))
-        return false;
-    return foregroundIsKnownToBeOpaqueInRect(paintedExtent, 0);
 }
 
 LayoutUnit RenderImage::minimumReplacedHeight() const

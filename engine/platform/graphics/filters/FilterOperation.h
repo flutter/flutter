@@ -89,8 +89,6 @@ public:
     OperationType type() const { return m_type; }
     virtual bool isSameType(const FilterOperation& o) const { return o.type() == m_type; }
 
-    // True if the alpha channel of any pixel can change under this operation.
-    virtual bool affectsOpacity() const { return false; }
     // True if the the value of one pixel can affect the value of another pixel under this operation, such as blur.
     virtual bool movesPixels() const { return false; }
 
@@ -116,7 +114,6 @@ public:
         return adoptRef(new ReferenceFilterOperation(url, fragment));
     }
 
-    virtual bool affectsOpacity() const override { return true; }
     virtual bool movesPixels() const override { return true; }
 
     const String& url() const { return m_url; }
@@ -203,8 +200,6 @@ public:
 
     double amount() const { return m_amount; }
 
-    virtual bool affectsOpacity() const override { return m_type == OPACITY; }
-
 
 private:
     virtual PassRefPtr<FilterOperation> blend(const FilterOperation* from, double progress) const override;
@@ -242,7 +237,6 @@ public:
 
     const Length& stdDeviation() const { return m_stdDeviation; }
 
-    virtual bool affectsOpacity() const override { return true; }
     virtual bool movesPixels() const override { return true; }
 
 
@@ -280,7 +274,6 @@ public:
     int stdDeviation() const { return m_stdDeviation; }
     Color color() const { return m_color; }
 
-    virtual bool affectsOpacity() const override { return true; }
     virtual bool movesPixels() const override { return true; }
 
 

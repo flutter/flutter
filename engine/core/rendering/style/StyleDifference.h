@@ -19,16 +19,9 @@ public:
     };
 
     StyleDifference()
-        : m_needsPaintInvalidation(false)
-        , m_layoutType(NoLayout)
+        : m_layoutType(NoLayout)
         , m_propertySpecificDifferences(0)
     { }
-
-    bool needsPaintInvalidation() const { return m_needsPaintInvalidation; }
-    void setNeedsPaintInvalidation()
-    {
-        m_needsPaintInvalidation = true;
-    }
 
     bool needsLayout() const { return m_layoutType != NoLayout; }
     void clearNeedsLayout() { m_layoutType = NoLayout; }
@@ -57,8 +50,6 @@ public:
     void setFilterChanged() { m_propertySpecificDifferences |= FilterChanged; }
 
 private:
-    unsigned m_needsPaintInvalidation : 1;
-
     enum LayoutType {
         NoLayout = 0,
         PositionedMovement,

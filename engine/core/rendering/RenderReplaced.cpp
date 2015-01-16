@@ -77,7 +77,6 @@ void RenderReplaced::layout()
     m_overflow.clear();
     addVisualEffectOverflow();
     updateLayerTransformAfterLayout();
-    invalidateBackgroundObscurationStatus();
 
     clearNeedsLayout();
 }

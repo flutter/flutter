@@ -315,8 +315,6 @@ void RenderBlock::layout()
     // If we have a lightweight clip, there can never be any overflow from children.
     if (hasControlClip() && m_overflow)
         clearLayoutOverflow();
-
-    invalidateBackgroundObscurationStatus();
 }
 
 bool RenderBlock::widthAvailableToChildrenHasChanged()
