@@ -200,7 +200,7 @@ void V8Initializer::initializeMainThreadIfNeeded()
         return;
     initialized = true;
 
-    static const char v8Flags[] = "--harmony-classes";
+    static const char v8Flags[] = "--harmony-classes --harmony-arrays --harmony-array-includes --harmony-regexps";
     v8::V8::SetFlagsFromString(v8Flags, sizeof(v8Flags) - 1);
 
     gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode, v8ArrayBufferAllocator());

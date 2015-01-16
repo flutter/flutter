@@ -77,16 +77,6 @@ class ElementRegistration {
     return this.definition.getAttribute('on-' + eventName);
   }
 
-  getAttributeNames() {
-    // TODO(esprehn): We can replace this method with
-    // Array.from(registration.attributes) once we turn that on.
-    var names = []
-    this.attributes.forEach(function(converter, name) {
-      names.push(name);
-    });
-    return names;
-  }
-
   synthesizeAttributes(prototype) {
     this.attributes.forEach(function(converter, name) {
       Object.defineProperty(prototype, name, {
@@ -129,7 +119,7 @@ class SkyElement extends HTMLElement {
 
     // TODO(esprehn): Combine the two element registries here and in sky binder.
     binder.registerElement(registration.tagName, {
-      attributeNames: registration.getAttributeNames(),
+      attributeNames: Array.from(registration.attributes.keys()),
     });
 
     registrations.set(registration.tagName, registration);
