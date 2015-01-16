@@ -32,13 +32,6 @@
 
 namespace blink {
 
-EventInit::EventInit()
-    : bubbles(false)
-    , cancelable(false)
-{
-}
-
-
 Event::Event()
     : m_canBubble(false)
     , m_cancelable(false)

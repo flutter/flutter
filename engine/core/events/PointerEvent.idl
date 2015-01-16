@@ -1,0 +1,30 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    EventConstructor,
+] interface PointerEvent : Event {
+    [InitializedByEventConstructor] readonly attribute long pointer;
+    [InitializedByEventConstructor] readonly attribute DOMString kind;
+    [InitializedByEventConstructor] readonly attribute double x;
+    [InitializedByEventConstructor] readonly attribute double y;
+    [InitializedByEventConstructor] readonly attribute double dx;
+    [InitializedByEventConstructor] readonly attribute double dy;
+    [InitializedByEventConstructor] readonly attribute long buttons;
+    [InitializedByEventConstructor] readonly attribute boolean down;
+    [InitializedByEventConstructor] readonly attribute boolean primary;
+    [InitializedByEventConstructor] readonly attribute boolean obscured;
+    [InitializedByEventConstructor] readonly attribute double pressure;
+    [InitializedByEventConstructor] readonly attribute double pressureMin;
+    [InitializedByEventConstructor] readonly attribute double pressureMax;
+    [InitializedByEventConstructor] readonly attribute double distance;
+    [InitializedByEventConstructor] readonly attribute double distanceMin;
+    [InitializedByEventConstructor] readonly attribute double distanceMax;
+    [InitializedByEventConstructor] readonly attribute double radiusMajor;
+    [InitializedByEventConstructor] readonly attribute double radiusMinor;
+    [InitializedByEventConstructor] readonly attribute double radiusMin;
+    [InitializedByEventConstructor] readonly attribute double radiusMax;
+    [InitializedByEventConstructor] readonly attribute double orientation;
+    [InitializedByEventConstructor] readonly attribute double tilt;
+};

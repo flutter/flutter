@@ -38,12 +38,11 @@ class EventDispatcher;
 class ExecutionContext;
 
 struct EventInit {
-    STACK_ALLOCATED();
-public:
-    EventInit();
+    bool bubbles = false;
+    bool cancelable = false;
 
-    bool bubbles;
-    bool cancelable;
+private:
+    STACK_ALLOCATED();
 };
 
 class Event : public RefCounted<Event>,  public ScriptWrappable {
