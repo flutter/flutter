@@ -137,7 +137,7 @@ class SkyDebugger(object):
     def sky_server_for_args(self, args):
         # FIXME: This is a hack.  sky_server should just take a build_dir
         # not a magical "configuration" name.
-        configuration = os.path.basename(os.path.normpath(args.build_dir))
+        configuration = os.path.basename(os.path.normpath(self.paths.build_dir))
         server_root = self._server_root_for_url(args.url_or_path)
         sky_server = SkyServer(self.paths, SKY_SERVER_PORT,
             configuration, server_root)
@@ -176,7 +176,7 @@ class SkyDebugger(object):
 
         # FIXME: This is probably not the right way to compute is_android
         # from the build directory?
-        gn_args = gn_args_from_build_dir(args.build_dir)
+        gn_args = gn_args_from_build_dir(self.paths.build_dir)
         is_android = 'android_sdk_version' in gn_args
 
         sky_server = self.sky_server_for_args(args)
@@ -184,12 +184,12 @@ class SkyDebugger(object):
         self.pids['sky_server_port'] = sky_server.port
         self.pids['sky_server_root'] = sky_server.root
 
-        self.pids['build_dir'] = args.build_dir
+        self.pids['build_dir'] = self.paths.build_dir
         self.pids['sky_command_port'] = args.command_port
 
         if is_android:
             # Pray to the build/android gods in their misspelled tongue.
-            constants.SetOutputDirectort(args.build_dir)
+            constants.SetOutputDirectort(self.paths.build_dir)
 
             device = self._connect_to_device()
             self.pids['device_serial'] = device.GetDevice()
@@ -409,8 +409,26 @@ class SkyDebugger(object):
         # Write out our pid file before we exec ourselves.
         self._write_pid_file(PID_FILE_PATH, self.pids)
 
+        # Pull down the system libraries this pid has already mapped in.
+        # TODO(eseidel): This does not handle dynamic loads well.
+        system_libs_root = '/tmp/device_libs'
+        library_cacher_path = os.path.join(
+            self.paths.sky_tools_directory, 'android_library_cacher.py')
+        subprocess.call([
+            library_cacher_path, system_libs_root, self.pids['mojo_shell_pid']
+        ])
+
+        # TODO(eseidel): adb_gdb does, this, unclear why solib-absolute-prefix
+        # doesn't make this explicit listing not necessary?
+        system_lib_dirs = subprocess.check_output([
+            'find', system_libs_root,
+            '-mindepth', '1',
+            '-maxdepth', '4',
+            '-type', 'd',
+        ]).strip().split('\n')
+
         # TODO(eseidel): Need to sync down system libraries into a directory.
-        symbol_search_paths = [
+        symbol_search_paths = system_lib_dirs + [
             links_path,
             self.pids['build_dir'],
         ]
@@ -425,6 +443,7 @@ class SkyDebugger(object):
             '--eval-command', 'target remote localhost:%s' % GDB_PORT,
             '--eval-command', 'set solib-search-path %s' %
                 ':'.join(symbol_search_paths),
+            '--eval-command', 'set solib-absolute-prefix %s' % system_libs_root,
         ]
         print " ".join(gdb_command)
         # We don't want python listening for signals or anything, so exec

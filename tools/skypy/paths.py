@@ -10,6 +10,7 @@ class Paths(object):
         self.src_root = os.path.abspath(os.path.join(__file__,
             os.pardir, os.pardir, os.pardir, os.pardir))
         self.sky_root = os.path.join(self.src_root, 'sky')
-        self.gen_root = os.path.join(self.src_root, build_directory, 'gen')
+        self.build_dir = os.path.join(self.src_root, build_directory)
+        self.gen_root = os.path.join(self.build_dir, 'gen')
         self.sky_tools_directory = os.path.join(self.src_root, 'sky', 'tools')
         self.mojo_shell_path = os.path.join(self.src_root, build_directory, 'mojo_shell')
