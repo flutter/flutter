@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "base/bind.h"
+#include "base/files/file_path.h"
 #include "base/memory/weak_ptr.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
@@ -16,11 +19,17 @@
 #include "net/socket/tcp_server_socket.h"
 #include "services/tracing/tracing.mojom.h"
 #include "sky/tools/debugger/debugger.mojom.h"
+#include "sky/tools/debugger/prompt/trace_collector.h"
 
 namespace sky {
 namespace debugger {
+namespace {
 
-class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegate {
+const size_t kMinSendBufferSize = 1024 * 1024;
+}
+
+class Prompt : public mojo::ApplicationDelegate,
+               public net::HttpServer::Delegate {
  public:
   Prompt()
       : is_tracing_(false),
@@ -98,6 +107,10 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   }
 
   void Respond(int connection_id, std::string response) {
+    // When sending tracing data back over the wire to the client, we can blow
+    // through the default send buffer size.
+    web_server_->SetSendBufferSize(
+        connection_id, std::max(kMinSendBufferSize, response.length()));
     web_server_->Send200(connection_id, response, "text/plain");
   }
 
@@ -138,16 +151,25 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   }
 
   void ToggleTracing(int connection_id) {
-    std::string response;
-    if (is_tracing_) {
-      response = "Stopping trace (writing to sky_viewer.trace)\n";
-      tracing_->StopAndFlush();
-    } else {
-      response = "Starting trace (type 'trace' to stop tracing)\n";
-      tracing_->Start(mojo::String("sky_viewer"), mojo::String("*"));
-    }
+    bool was_tracing = is_tracing_;
     is_tracing_ = !is_tracing_;
-    Respond(connection_id, response);
+
+    if (was_tracing) {
+      tracing_->StopAndFlush();
+      trace_collector_->GetTrace(base::Bind(
+          &Prompt::OnTraceAvailable, base::Unretained(this), connection_id));
+      return;
+    }
+
+    mojo::DataPipe pipe;
+    tracing_->Start(pipe.producer_handle.Pass(), mojo::String("*"));
+    trace_collector_.reset(new TraceCollector(pipe.consumer_handle.Pass()));
+    Respond(connection_id, "Starting trace (type 'trace' to stop tracing)\n");
+  }
+
+  void OnTraceAvailable(int connection_id, std::string trace) {
+    trace_collector_.reset();
+    Respond(connection_id, trace);
   }
 
   bool is_tracing_;
@@ -157,6 +179,8 @@ class Prompt : public mojo::ApplicationDelegate, public net::HttpServer::Delegat
   base::WeakPtrFactory<Prompt> weak_ptr_factory_;
   scoped_ptr<net::HttpServer> web_server_;
   uint32_t command_port_;
+
+  scoped_ptr<TraceCollector> trace_collector_;
 
   DISALLOW_COPY_AND_ASSIGN(Prompt);
 };
