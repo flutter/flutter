@@ -1289,25 +1289,6 @@ DocumentParser* Document::startParsing()
     return m_parser.get();
 }
 
-Element* Document::viewportDefiningElement(RenderStyle* rootStyle) const
-{
-    // If a BODY element sets non-visible overflow, it is to be propagated to the viewport, as long
-    // as the following conditions are all met:
-    // (1) The root element is HTML.
-    // (2) It is the primary BODY element (we only assert for this, expecting callers to behave).
-    // (3) The root element has visible overflow.
-    // Otherwise it's the root element's properties that are to be propagated.
-    Element* rootElement = documentElement();
-    if (!rootElement)
-        return 0;
-    if (!rootStyle) {
-        rootStyle = rootElement->renderStyle();
-        if (!rootStyle)
-            return 0;
-    }
-    return rootElement;
-}
-
 void Document::implicitClose()
 {
     ASSERT(!inStyleRecalc());

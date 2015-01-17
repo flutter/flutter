@@ -415,12 +415,6 @@ public:
     // is invalid.  It also sets ExceptionCode when name is invalid.
     static bool parseQualifiedName(const AtomicString& qualifiedName, AtomicString& prefix, AtomicString& localName, ExceptionState&);
 
-    // Decide which element is to define the viewport's overflow policy. If |rootStyle| is set, use
-    // that as the style for the root element, rather than obtaining it on our own. The reason for
-    // this is that style may not have been associated with the elements yet - in which case it may
-    // have been calculated on the fly (without associating it with the actual element) somewhere.
-    Element* viewportDefiningElement(RenderStyle* rootStyle = 0) const;
-
     DocumentMarkerController& markers() const { return *m_markers; }
 
     bool directionSetOnDocumentElement() const { return m_directionSetOnDocumentElement; }

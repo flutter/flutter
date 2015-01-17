@@ -128,14 +128,10 @@ void RenderBox::updateFromStyle()
     if (isRootObject || isViewObject)
         setHasBoxDecorationBackground(true);
 
-    bool boxHasOverflowClip = false;
-    if (!styleToUse->isOverflowVisible() && isRenderBlock() && !isViewObject) {
-        // If overflow has been propagated to the viewport, it has no effect here.
-        if (node() != document().viewportDefiningElement())
-            boxHasOverflowClip = true;
-    }
+    // TODO(esprehn): Why do we not want to set this on the RenderView?
+    if (isRenderBlock() && !isViewObject)
+        setHasOverflowClip(!styleToUse->isOverflowVisible());
 
-    setHasOverflowClip(boxHasOverflowClip);
     setHasTransform(styleToUse->hasTransformRelatedProperty());
 }
 
