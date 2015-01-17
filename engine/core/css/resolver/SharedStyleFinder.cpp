@@ -136,8 +136,6 @@ bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
         return false;
     if (!candidate.treeScope().hasSameStyles(element().treeScope()))
         return false;
-    if (candidate.isUnresolvedCustomElement() != element().isUnresolvedCustomElement())
-        return false;
     return true;
 }
 

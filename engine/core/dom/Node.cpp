@@ -1678,9 +1678,6 @@ void Node::setCustomElementState(CustomElementState newState)
     ASSERT(isHTMLElement());
     setFlag(CustomElementFlag);
     setFlag(newState == Upgraded, CustomElementUpgradedFlag);
-
-    if (oldState == NotCustomElement || newState == Upgraded)
-        setNeedsStyleRecalc(SubtreeStyleChange); // :unresolved has changed
 }
 
 unsigned Node::lengthOfContents() const

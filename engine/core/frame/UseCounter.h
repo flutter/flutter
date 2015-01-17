@@ -340,8 +340,6 @@ public:
         HTMLImportsAsyncAttribute = 463,
         FontFaceSetReady = 464,
 
-        CSSSelectorPseudoUnresolved = 466,
-
         CSSSelectorPseudoHost = 469,
 
         CSSDeepCombinator = 471,

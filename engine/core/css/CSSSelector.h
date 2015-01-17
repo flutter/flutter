@@ -121,7 +121,6 @@ namespace blink {
             PseudoActive,
             PseudoLang,
             PseudoUserAgentCustomElement,
-            PseudoUnresolved,
             PseudoHost,
         };
 

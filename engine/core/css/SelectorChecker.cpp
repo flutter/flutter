@@ -150,9 +150,6 @@ bool SelectorChecker::checkPseudoClass(const CSSSelector& selector)
             return true;
         }
 
-    case CSSSelector::PseudoUnresolved:
-        return m_element.isUnresolvedCustomElement();
-
     case CSSSelector::PseudoHost:
         {
             // We can only get here if the selector was defined in the right

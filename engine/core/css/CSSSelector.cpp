@@ -68,7 +68,6 @@ PseudoId CSSSelector::pseudoId(PseudoType type)
     case PseudoActive:
     case PseudoLang:
     case PseudoUserAgentCustomElement:
-    case PseudoUnresolved:
     case PseudoHost:
         return NOPSEUDO;
     case PseudoNotParsed:
@@ -96,7 +95,6 @@ const static NameToPseudoStruct pseudoTypeMap[] = {
 {"host(",                         CSSSelector::PseudoHost},
 {"hover",                         CSSSelector::PseudoHover},
 {"lang(",                         CSSSelector::PseudoLang},
-{"unresolved",                    CSSSelector::PseudoUnresolved},
 };
 
 class NameToPseudoCompare {
@@ -180,7 +178,6 @@ void CSSSelector::extractPseudoType() const
     case PseudoLang:
     case PseudoNotParsed:
     case PseudoHost:
-    case PseudoUnresolved:
         break;
     }
 
