@@ -248,8 +248,6 @@ public:
     void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);
     void dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement);
 
-    String title() const;
-
     bool matches(const String& selectors, ExceptionState&);
 
     DOMTokenList& classList();

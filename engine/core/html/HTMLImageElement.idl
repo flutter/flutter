@@ -24,15 +24,12 @@
     NamedConstructor=Image([Default=Undefined] optional long width, [Default=Undefined] optional long height),
     ConstructorCallWith=Document
 ] interface HTMLImageElement : HTMLElement {
-    [Reflect] attribute DOMString alt;
     readonly attribute boolean complete;
     [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] attribute DOMString crossOrigin;
     attribute long height;
     readonly attribute long naturalHeight;
     readonly attribute long naturalWidth;
     [Reflect, URL] attribute DOMString src;
-    [Reflect] attribute DOMString srcset;
-    [Reflect, RuntimeEnabled=PictureSizes] attribute DOMString sizes;
     [RuntimeEnabled=PictureSizes] readonly attribute DOMString currentSrc;
     attribute long width;
 

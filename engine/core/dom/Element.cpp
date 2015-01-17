@@ -276,11 +276,6 @@ void Element::synchronizeAllAttributes() const
     synchronizeAttribute(HTMLNames::styleAttr.localName());
 }
 
-String Element::title() const
-{
-    return getAttribute(HTMLNames::titleAttr);
-}
-
 String Element::contentEditable() const
 {
     const AtomicString& value = getAttribute(HTMLNames::contenteditableAttr);

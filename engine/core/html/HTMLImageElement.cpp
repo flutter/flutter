@@ -137,7 +137,7 @@ void HTMLImageElement::setBestFitURLAndDPRFromImageCandidate(const ImageCandidat
 
 void HTMLImageElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
 {
-    if (name == HTMLNames::srcAttr || name == HTMLNames::srcsetAttr || name == HTMLNames::sizesAttr) {
+    if (name == HTMLNames::srcAttr) {
         selectSourceURL(ImageLoader::UpdateIgnorePreviousError);
     } else {
         HTMLElement::parseAttribute(name, value);
@@ -361,7 +361,7 @@ void HTMLImageElement::selectSourceURL(ImageLoader::UpdateFromElementBehavior be
     unsigned effectiveSize = 0;
     ImageCandidate candidate = bestFitSourceForImageAttributes(
         document().devicePixelRatio(), effectiveSize,
-        getAttribute(HTMLNames::srcAttr), getAttribute(HTMLNames::srcsetAttr));
+        getAttribute(HTMLNames::srcAttr), AtomicString());
     setBestFitURLAndDPRFromImageCandidate(candidate);
     if (m_intrinsicSizingViewportDependant && m_effectiveSizeViewportDependant && !m_listener.get()) {
         m_listener = ViewportChangeListener::create(this);

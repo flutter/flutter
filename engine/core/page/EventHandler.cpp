@@ -2064,25 +2064,6 @@ void EventHandler::notifyElementActivated()
     m_lastDeferredTapElement = nullptr;
 }
 
-bool EventHandler::handleAccessKey(const PlatformKeyboardEvent& evt)
-{
-    // FIXME: Ignoring the state of Shift key is what neither IE nor Firefox do.
-    // IE matches lower and upper case access keys regardless of Shift key state - but if both upper and
-    // lower case variants are present in a document, the correct element is matched based on Shift key state.
-    // Firefox only matches an access key if Shift is not pressed, and does that case-insensitively.
-    ASSERT(!(accessKeyModifiers() & PlatformEvent::ShiftKey));
-    if ((evt.modifiers() & ~PlatformEvent::ShiftKey) != accessKeyModifiers())
-        return false;
-    String key = evt.unmodifiedText();
-    Element* elem = m_frame->document()->getElementByAccessKey(key.lower());
-    if (!elem)
-        return false;
-    // FIXME(sky): We should probably pass SendMouseUpDownEvents here, not
-    // firing mouseup and mousedown is IE legacy.
-    elem->dispatchSimulatedClick(0, SendNoEvents);
-    return true;
-}
-
 bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
 {
     RefPtr<FrameView> protector(m_frame->view());
@@ -2098,15 +2079,6 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
 
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
 
-    // In IE, access keys are special, they are handled after default keydown processing, but cannot be canceled - this is hard to match.
-    // On Mac OS X, we process them before dispatching keydown, as the default keydown handler implements Emacs key bindings, which may conflict
-    // with access keys. Then we dispatch keydown, but suppress its default handling.
-    // On Windows, WebKit explicitly calls handleAccessKey() instead of dispatching a keypress event for WM_SYSCHAR messages.
-    // Other platforms currently match either Mac or Windows behavior, depending on whether they send combined KeyDown events.
-    bool matchedAnAccessKey = false;
-    if (initialKeyEvent.type() == PlatformEvent::KeyDown)
-        matchedAnAccessKey = handleAccessKey(initialKeyEvent);
-
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.type() == PlatformEvent::KeyUp || initialKeyEvent.type() == PlatformEvent::Char)
         return !node->dispatchKeyEvent(initialKeyEvent);
@@ -2115,8 +2087,7 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     if (keyDownEvent.type() != PlatformEvent::RawKeyDown)
         keyDownEvent.disambiguateKeyDownEvent(PlatformEvent::RawKeyDown);
     RefPtr<KeyboardEvent> keydown = KeyboardEvent::create(keyDownEvent, m_frame->document()->domWindow());
-    if (matchedAnAccessKey)
-        keydown->setDefaultPrevented(true);
+
     keydown->setTarget(node);
 
     if (initialKeyEvent.type() == PlatformEvent::RawKeyDown) {
@@ -2606,15 +2577,6 @@ void EventHandler::focusDocumentView()
     if (!page)
         return;
     page->focusController().focusDocumentView(m_frame);
-}
-
-unsigned EventHandler::accessKeyModifiers()
-{
-#if OS(MACOSX)
-    return PlatformEvent::CtrlKey | PlatformEvent::AltKey;
-#else
-    return PlatformEvent::AltKey;
-#endif
 }
 
 } // namespace blink

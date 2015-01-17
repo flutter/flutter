@@ -209,8 +209,6 @@ void ImageLoader::doUpdateFromElement(UpdateFromElementBehavior updateBehavior)
         // Unlike raw <img>, we block mixed content inside of <picture> or <img srcset>.
         ResourceLoaderOptions resourceLoaderOptions = ResourceFetcher::defaultResourceOptions();
         ResourceRequest resourceRequest(url);
-        if (!element()->getAttribute(HTMLNames::srcsetAttr).isNull())
-            resourceRequest.setRequestContext(WebURLRequest::RequestContextImageSet);
         FetchRequest request(ResourceRequest(url), element()->localName(), resourceLoaderOptions);
 
         newImage = document.fetcher()->fetchImage(request);

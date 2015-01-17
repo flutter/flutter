@@ -1,28 +1,31 @@
 namespace="HTML"
 
-accesskey
-alt
-as
-async
+# Global
 class
 contenteditable
-crossorigin
 dir
-height
-href
 id
-is
 lang
-media
-name
-rel
-select
-sizes
 spellcheck
-src
-srcset
 style
 tabindex
-title
-type
+
+# <a>
+href
+
+# <img>
+crossorigin
+height
+src
 width
+
+# <import>
+as
+async
+# src
+
+# <style>
+media
+
+# <content>
+select

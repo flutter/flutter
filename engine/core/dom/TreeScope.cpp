@@ -368,23 +368,6 @@ bool TreeScope::isInclusiveAncestorOf(const TreeScope& scope) const
     return false;
 }
 
-Element* TreeScope::getElementByAccessKey(const String& key) const
-{
-    if (key.isEmpty())
-        return 0;
-    Element* result = 0;
-    Node& root = rootNode();
-    for (Element* element = ElementTraversal::firstWithin(root); element; element = ElementTraversal::next(*element, &root)) {
-        if (equalIgnoringCase(element->getAttribute(HTMLNames::accesskeyAttr), key))
-            result = element;
-        if (ShadowRoot* shadowRoot = element->shadowRoot()) {
-            if (Element* shadowResult = shadowRoot->getElementByAccessKey(key))
-                result = shadowResult;
-        }
-    }
-    return result;
-}
-
 void TreeScope::setNeedsStyleRecalcForViewportUnits()
 {
     for (Element* element = ElementTraversal::firstWithin(rootNode()); element; element = ElementTraversal::next(*element)) {

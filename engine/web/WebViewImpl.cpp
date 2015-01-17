@@ -462,10 +462,6 @@ bool WebViewImpl::handleCharEvent(const WebKeyboardEvent& event)
     if (!evt.isCharacterKey())
         return true;
 
-    // Accesskeys are triggered by char events and can't be suppressed.
-    if (handler.handleAccessKey(evt))
-        return true;
-
     // Safari 3.1 does not pass off windows system key messages (WM_SYSCHAR) to
     // the eventHandler::keyEvent. We mimic this behavior on all platforms since
     // for now we are converting other platform's key events to windows key

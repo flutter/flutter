@@ -174,37 +174,6 @@ String HitTestResult::spellingToolTip(TextDirection& dir) const
     return marker->description();
 }
 
-String HitTestResult::title(TextDirection& dir) const
-{
-    dir = LTR;
-    // Find the title in the nearest enclosing DOM node.
-    // For <area> tags in image maps, walk the tree for the <area>, not the <img> using it.
-    for (Node* titleNode = m_innerNode.get(); titleNode; titleNode = titleNode->parentNode()) {
-        if (titleNode->isElementNode()) {
-            String title = toElement(titleNode)->title();
-            if (!title.isNull()) {
-                if (RenderObject* renderer = titleNode->renderer())
-                    dir = renderer->style()->direction();
-                return title;
-            }
-        }
-    }
-    return String();
-}
-
-const AtomicString& HitTestResult::altDisplayString() const
-{
-    if (!m_innerNonSharedNode)
-        return nullAtom;
-
-    if (isHTMLImageElement(*m_innerNonSharedNode)) {
-        HTMLImageElement& image = toHTMLImageElement(*m_innerNonSharedNode);
-        return image.getAttribute(HTMLNames::altAttr);
-    }
-
-    return nullAtom;
-}
-
 Image* HitTestResult::image() const
 {
     if (!m_innerNonSharedNode)

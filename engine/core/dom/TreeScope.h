@@ -109,8 +109,6 @@ public:
     const TreeScope* commonAncestorTreeScope(const TreeScope& other) const;
     TreeScope* commonAncestorTreeScope(TreeScope& other);
 
-    Element* getElementByAccessKey(const String& key) const;
-
     ScopedStyleResolver& scopedStyleResolver() const { return *m_scopedStyleResolver; }
 
 protected:
