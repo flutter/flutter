@@ -55,9 +55,6 @@ public:
     // Returns a positive ID that will be unique across all WebLayers allocated in this process.
     virtual int id() const = 0;
 
-    // Sets the entire layer as invalid, i.e. needs to update its content.
-    virtual void invalidate() = 0;
-
     // These functions do not take ownership of the WebLayer* parameter.
     virtual void addChild(WebLayer*) = 0;
     virtual void insertChild(WebLayer*, size_t index) = 0;
