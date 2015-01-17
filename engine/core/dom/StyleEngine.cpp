@@ -75,9 +75,7 @@ void StyleEngine::updateActiveStyleSheets()
     ASSERT(!m_document->inStyleRecalc());
     ASSERT(m_resolver);
 
-    StyleResolver& resolver = m_document->ensureStyleResolver();
-
-    resolver.resetMediaQueryAffectedByViewportChange();
+    m_resolver->resetMediaQueryAffectedByViewportChange();
 
     for (TreeScope* treeScope : m_activeTreeScopes)
         treeScope->scopedStyleResolver().updateActiveStyleSheets();

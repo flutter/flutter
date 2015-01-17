@@ -47,7 +47,7 @@ ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
 void ScopedStyleResolver::appendStyleSheet(CSSStyleSheet& sheet)
 {
     Document& document = m_scope.document();
-    StyleResolver& styleResolver = document.ensureStyleResolver();
+    StyleResolver& styleResolver = document.styleResolver();
     MediaQueryEvaluator& medium  = styleResolver.medium();
 
     if (sheet.mediaQueries() && !medium.eval(sheet.mediaQueries(), &m_viewportDependentMediaQueryResults))

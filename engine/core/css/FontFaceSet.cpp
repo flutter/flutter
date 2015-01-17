@@ -340,7 +340,6 @@ bool FontFaceSet::has(FontFace* fontFace, ExceptionState& exceptionState) const
 const ListHashSet<RefPtr<FontFace> >& FontFaceSet::cssConnectedFontFaceList() const
 {
     Document* d = document();
-    d->ensureStyleResolver(); // Flush pending style changes.
     return d->styleEngine()->fontSelector()->fontFaceCache()->cssConnectedFontFaces();
 }
 
@@ -527,7 +526,7 @@ bool FontFaceSet::resolveFontStyle(const String& fontString, Font& font)
         CSSPropertyValue(CSSPropertyFontSize, *parsedStyle),
         CSSPropertyValue(CSSPropertyLineHeight, *parsedStyle),
     };
-    StyleResolver& styleResolver = document()->ensureStyleResolver();
+    StyleResolver& styleResolver = document()->styleResolver();
     styleResolver.applyPropertiesToStyle(properties, WTF_ARRAY_LENGTH(properties), style.get());
 
     font = style->font();

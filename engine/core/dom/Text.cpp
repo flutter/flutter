@@ -153,7 +153,7 @@ void Text::recalcTextStyle(StyleRecalcChange change, Text* nextTextSibling)
 {
     if (RenderText* renderer = this->renderer()) {
         if (change != NoChange || needsStyleRecalc())
-            renderer->setStyle(document().ensureStyleResolver().styleForText(this));
+            renderer->setStyle(document().styleResolver().styleForText(this));
         if (needsStyleRecalc())
             renderer->setText(dataImpl());
         clearNeedsStyleRecalc();

@@ -226,8 +226,7 @@ public:
     };
     void getTransitionElementData(Vector<TransitionElementData>&);
 
-    StyleResolver* styleResolver() const;
-    StyleResolver& ensureStyleResolver() const;
+    StyleResolver& styleResolver() const;
 
     bool isScriptExecutionReady() const { return haveImportsLoaded(); }
 

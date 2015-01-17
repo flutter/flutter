@@ -1061,7 +1061,7 @@ void Document::updateStyle(StyleRecalcChange change)
     if (styleChangeType() >= SubtreeStyleChange)
         change = Force;
 
-    // FIXME: Cannot access the ensureStyleResolver() before calling styleForDocument below because
+    // FIXME: Cannot access the styleResolver() before calling styleForDocument below because
     // apparently the StyleResolver's constructor has side effects. We should fix it.
     // See printing/setPrinting.html, printing/width-overflow.html though they only fail on
     // mac when accessing the resolver by what appears to be a viewport size difference.
@@ -1079,9 +1079,9 @@ void Document::updateStyle(StyleRecalcChange change)
     // Optionally pass StyleResolver::ReportSlowStats to print numbers that require crawling the
     // entire DOM (where collecting them is very slow).
     // FIXME: Expose this as a runtime flag.
-    // ensureStyleResolver().enableStats(/*StyleResolver::ReportSlowStats*/);
+    // styleResolver().enableStats(/*StyleResolver::ReportSlowStats*/);
 
-    if (StyleResolverStats* stats = ensureStyleResolver().stats())
+    if (StyleResolverStats* stats = styleResolver().stats())
         stats->reset();
 
     if (Element* documentElement = this->documentElement()) {
@@ -1089,7 +1089,7 @@ void Document::updateStyle(StyleRecalcChange change)
             documentElement->recalcStyle(change);
     }
 
-    ensureStyleResolver().printStats();
+    styleResolver().printStats();
 
     view()->recalcOverflowAfterStyleChange();
 
@@ -1159,14 +1159,7 @@ void Document::clearFocusedElementTimerFired(Timer<Document>*)
         m_focusedElement->blur();
 }
 
-StyleResolver* Document::styleResolver() const
-{
-    if (!isActive())
-        return 0;
-    return &m_styleEngine->resolver();
-}
-
-StyleResolver& Document::ensureStyleResolver() const
+StyleResolver& Document::styleResolver() const
 {
     ASSERT(isActive());
     return m_styleEngine->resolver();
@@ -1584,7 +1577,7 @@ void Document::notifyResizeForViewportUnits()
         m_mediaQueryMatcher->viewportChanged();
     if (!hasViewportUnits())
         return;
-    ensureStyleResolver().notifyResizeForViewportUnits();
+    styleResolver().notifyResizeForViewportUnits();
     setNeedsStyleRecalcForViewportUnits();
 }
 

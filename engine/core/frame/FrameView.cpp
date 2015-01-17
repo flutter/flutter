@@ -226,7 +226,7 @@ void FrameView::performPreLayoutTasks()
         document->notifyResizeForViewportUnits();
 
     // Viewport-dependent media queries may cause us to need completely different style information.
-    if (!document->styleResolver() || document->styleResolver()->mediaQueryAffectedByViewportChange()) {
+    if (document->styleResolver().mediaQueryAffectedByViewportChange()) {
         document->styleResolverChanged();
         document->mediaQueryAffectingValueChanged();
     } else {

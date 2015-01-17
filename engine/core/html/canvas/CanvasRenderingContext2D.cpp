@@ -1736,7 +1736,7 @@ void CanvasRenderingContext2D::setFont(const String& newFont)
         CSSPropertyValue(CSSPropertyLineHeight, *parsedStyle),
     };
 
-    StyleResolver& styleResolver = canvas()->document().ensureStyleResolver();
+    StyleResolver& styleResolver = canvas()->document().styleResolver();
     styleResolver.applyPropertiesToStyle(properties, WTF_ARRAY_LENGTH(properties), newStyle.get());
 
 #if !ENABLE(OILPAN)

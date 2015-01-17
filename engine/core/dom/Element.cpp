@@ -651,8 +651,7 @@ void Element::attributeChanged(const QualifiedName& name, const AtomicString& ne
 
     parseAttribute(name, newValue);
 
-    StyleResolver* styleResolver = document().styleResolver();
-    bool testShouldInvalidateStyle = inActiveDocument() && styleResolver && styleChangeType() < SubtreeStyleChange;
+    bool testShouldInvalidateStyle = inActiveDocument() && styleChangeType() < SubtreeStyleChange;
 
     if (isStyledElement() && name == HTMLNames::styleAttr) {
         styleAttributeChanged(newValue);
@@ -669,10 +668,6 @@ void Element::attributeChanged(const QualifiedName& name, const AtomicString& ne
     } else if (name == HTMLNames::classAttr) {
         classAttributeChanged(newValue);
     }
-
-    // If there is currently no StyleResolver, we can't be sure that this attribute change won't affect style.
-    if (!styleResolver)
-        setNeedsStyleRecalc(SubtreeStyleChange);
 }
 
 inline void Element::attributeChangedFromParserOrByCloning(const QualifiedName& name, const AtomicString& newValue, AttributeModificationReason reason)
@@ -682,8 +677,7 @@ inline void Element::attributeChangedFromParserOrByCloning(const QualifiedName& 
 
 void Element::classAttributeChanged(const AtomicString& newClassString)
 {
-    StyleResolver* styleResolver = document().styleResolver();
-    bool testShouldInvalidateStyle = inActiveDocument() && styleResolver && styleChangeType() < SubtreeStyleChange;
+    bool testShouldInvalidateStyle = inActiveDocument() && styleChangeType() < SubtreeStyleChange;
 
     ASSERT(elementData());
     const SpaceSplitString oldClasses = elementData()->classNames();
@@ -905,7 +899,7 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
     if (ActiveAnimations* activeAnimations = this->activeAnimations())
         activeAnimations->cssAnimations().setPendingUpdate(nullptr);
 
-    RefPtr<RenderStyle> style = document().ensureStyleResolver().styleForElement(this);
+    RefPtr<RenderStyle> style = document().styleResolver().styleForElement(this);
     ASSERT(style);
 
     // styleForElement() might add active animations so we need to get it again.
@@ -1010,7 +1004,7 @@ void Element::recalcChildStyle(StyleRecalcChange change)
         // a potentially n^2 loop to find the insertion point while resolving style. Having us start from the last
         // child and work our way back means in the common case, we'll find the insertion point in O(1) time.
         // See crbug.com/288225
-        StyleResolver& styleResolver = document().ensureStyleResolver();
+        StyleResolver& styleResolver = document().styleResolver();
         Text* lastTextNode = 0;
         for (Node* child = lastChild(); child; child = child->previousSibling()) {
             if (child->isTextNode()) {
@@ -1371,7 +1365,7 @@ RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
     ElementRareData& rareData = ensureElementRareData();
     if (!rareData.computedStyle()) {
         RenderStyle* parentStyle = parentNode() ? parentNode()->computedStyle() : 0;
-        rareData.setComputedStyle(document().ensureStyleResolver().styleForElement(this, parentStyle));
+        rareData.setComputedStyle(document().styleResolver().styleForElement(this, parentStyle));
     }
     return rareData.computedStyle();
 }
@@ -1542,7 +1536,7 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
     }
 
     if (oldValue != newValue) {
-        if (inActiveDocument() && document().styleResolver() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
+        if (inActiveDocument() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
             setNeedsStyleRecalc(LocalStyleChange);
 
         if (isUpgradedCustomElement())
@@ -1812,9 +1806,6 @@ bool Element::affectedByAttributeSelector(const AtomicString& attributeName) con
 {
     if (attributeName.isEmpty())
         return false;
-    // TODO(esprehn): This makes sure the style system is updated, eventually
-    // we'll remove all the global lists and this won't be needed.
-    document().ensureStyleResolver();
     if (treeScope().scopedStyleResolver().features().hasSelectorForAttribute(attributeName))
         return true;
     // Host rules could also have effects.
@@ -1827,9 +1818,6 @@ bool Element::affectedByClassSelector(const AtomicString& classValue) const
 {
     if (classValue.isEmpty())
         return false;
-    // TODO(esprehn): This makes sure the style system is updated, eventually
-    // we'll remove all the global lists and this won't be needed.
-    document().ensureStyleResolver();
     if (treeScope().scopedStyleResolver().features().hasSelectorForClass(classValue))
         return true;
     // Host rules could also have effects.
@@ -1842,9 +1830,6 @@ bool Element::affectedByIdSelector(const AtomicString& idValue) const
 {
     if (idValue.isEmpty())
         return false;
-    // TODO(esprehn): This makes sure the style system is updated, eventually
-    // we'll remove all the global lists and this won't be needed.
-    document().ensureStyleResolver();
     if (treeScope().scopedStyleResolver().features().hasSelectorForId(idValue))
         return true;
     // Host rules could also have effects.
