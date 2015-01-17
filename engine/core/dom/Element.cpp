@@ -632,11 +632,13 @@ ALWAYS_INLINE void Element::setAttributeInternal(size_t index, const QualifiedNa
     const Attribute& existingAttribute = elementData()->attributes().at(index);
     QualifiedName existingAttributeName = existingAttribute.name();
 
+    if (newValue == existingAttribute.value())
+        return;
+
     if (!inSynchronizationOfLazyAttribute)
         willModifyAttribute(existingAttributeName, existingAttribute.value(), newValue);
 
-    if (newValue != existingAttribute.value())
-        ensureUniqueElementData().attributes().at(index).setValue(newValue);
+    ensureUniqueElementData().attributes().at(index).setValue(newValue);
 
     if (!inSynchronizationOfLazyAttribute)
         attributeChanged(existingAttributeName, newValue);
@@ -1531,17 +1533,14 @@ inline void Element::updateId(TreeScope& scope, const AtomicString& oldId, const
 
 void Element::willModifyAttribute(const QualifiedName& name, const AtomicString& oldValue, const AtomicString& newValue)
 {
-    if (name == HTMLNames::idAttr) {
+    if (name == HTMLNames::idAttr)
         updateId(oldValue, newValue);
-    }
 
-    if (oldValue != newValue) {
-        if (inActiveDocument() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
-            setNeedsStyleRecalc(LocalStyleChange);
+    if (inActiveDocument() && styleChangeType() < SubtreeStyleChange && affectedByAttributeSelector(name.localName()))
+        setNeedsStyleRecalc(LocalStyleChange);
 
-        if (isUpgradedCustomElement())
-            CustomElement::attributeDidChange(this, name.localName(), oldValue, newValue);
-    }
+    if (isUpgradedCustomElement())
+        CustomElement::attributeDidChange(this, name.localName(), oldValue, newValue);
 
     if (OwnPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
         recipients->enqueueMutationRecord(MutationRecord::createAttributes(this, name, oldValue));
