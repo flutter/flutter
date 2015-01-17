@@ -9,21 +9,21 @@ describe('MutationObserver.observe', function() {
     element.setAttribute('data-test', '1');
 
     observer.observe(element, {attributeOldValue: true});
-    element.setAttribute('data-test', '1');
+    element.setAttribute('data-test', '2');
     var records = observer.takeRecords();
     assert.equal(records.length, 1);
     assert.equal(records[0].oldValue, 1);
     observer.disconnect();
 
     observer.observe(element, {attributeOldValue: false});
-    element.setAttribute('data-test', '1');
+    element.setAttribute('data-test', '3');
     var records = observer.takeRecords();
     assert.equal(records.length, 1);
     assert.isNull(records[0].oldValue);
     observer.disconnect();
 
     observer.observe(element, {attributeFilter: ['data-test']});
-    element.setAttribute('data-test', '2');
+    element.setAttribute('data-test', '4');
     var records = observer.takeRecords();
     assert.equal(records.length, 1);
     assert.isNull(records[0].oldValue);
