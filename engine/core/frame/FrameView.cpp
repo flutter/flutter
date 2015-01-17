@@ -725,7 +725,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     s_inPaintContents = true;
 
     FontCachePurgePreventer fontCachePurgePreventer;
-    document->markers().invalidateRenderedRectsForMarkersInRect(rect);
 
     ASSERT(!m_isPainting);
     m_isPainting = true;

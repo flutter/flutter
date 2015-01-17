@@ -1039,14 +1039,6 @@ void InlineTextBox::paintDocumentMarker(GraphicsContext* pt, const FloatPoint& b
         IntRect markerRect = enclosingIntRect(font.selectionRectForText(run, startPoint, selHeight, startPosition, endPosition));
         start = markerRect.x() - startPoint.x();
         width = markerRect.width();
-
-        // Store rendered rects for bad grammar markers, so we can hit-test against it elsewhere in order to
-        // display a toolTip. We don't do this for misspelling markers.
-        if (grammar) {
-            markerRect.move(-boxOrigin.x(), -boxOrigin.y());
-            markerRect = renderer().localToAbsoluteQuad(FloatRect(markerRect)).enclosingBoundingBox();
-            toRenderedDocumentMarker(marker)->setRenderedRect(markerRect);
-        }
     }
 
     // IMPORTANT: The misspelling underline is not considered when calculating the text bounds, so we have to
@@ -1071,18 +1063,8 @@ void InlineTextBox::paintDocumentMarker(GraphicsContext* pt, const FloatPoint& b
 
 void InlineTextBox::paintTextMatchMarker(GraphicsContext* pt, const FloatPoint& boxOrigin, DocumentMarker* marker, RenderStyle* style, const Font& font)
 {
-    // Use same y positioning and height as for selection, so that when the selection and this highlight are on
-    // the same word there are no pieces sticking out.
-    int selHeight = selectionHeight();
-
-    int sPos = std::max(marker->startOffset() - m_start, (unsigned)0);
-    int ePos = std::min(marker->endOffset() - m_start, (unsigned)m_len);
-    TextRun run = constructTextRun(style, font);
-
-    // Always compute and store the rect associated with this marker. The computed rect is in absolute coordinates.
-    IntRect markerRect = enclosingIntRect(font.selectionRectForText(run, IntPoint(x(), selectionTop()), selHeight, sPos, ePos));
-    markerRect = renderer().localToAbsoluteQuad(FloatRect(markerRect)).enclosingBoundingBox();
-    toRenderedDocumentMarker(marker)->setRenderedRect(markerRect);
+    // FIXME(sky): This function didn't seem to actually paint.
+    // Do we even have TextMatch markers in sky? What are they for?
 }
 
 void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const FloatPoint& boxOrigin, RenderStyle* style, const Font& font, bool useCustomUnderlines)

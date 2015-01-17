@@ -99,8 +99,6 @@ public:
     void setIsOverWidget(bool b) { m_isOverWidget = b; }
 
     bool isSelected() const;
-    String spellingToolTip(TextDirection&) const;
-
     Image* image() const;
     IntRect imageRect() const;
     KURL absoluteImageURL() const;

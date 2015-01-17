@@ -78,16 +78,13 @@ public:
     void removeMarkers(DocumentMarker::MarkerTypes = DocumentMarker::AllMarkers());
     void removeMarkers(Node*, DocumentMarker::MarkerTypes = DocumentMarker::AllMarkers());
     void removeMarkers(const MarkerRemoverPredicate& shouldRemoveMarker);
-    void invalidateRenderedRectsForMarkersInRect(const LayoutRect&);
     void shiftMarkers(Node*, unsigned startOffset, int delta);
     void setMarkersActive(Range*, bool);
     void setMarkersActive(Node*, unsigned startOffset, unsigned endOffset, bool);
 
-    DocumentMarker* markerContainingPoint(const LayoutPoint&, DocumentMarker::MarkerType);
     DocumentMarkerVector markersFor(Node*, DocumentMarker::MarkerTypes = DocumentMarker::AllMarkers());
     DocumentMarkerVector markersInRange(Range*, DocumentMarker::MarkerTypes);
     DocumentMarkerVector markers();
-    Vector<IntRect> renderedRectsForMarkers(DocumentMarker::MarkerType);
 
 #ifndef NDEBUG
     void showMarkers() const;

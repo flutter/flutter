@@ -130,15 +130,6 @@ void DocumentMarkerController::addTextMatchMarker(const Range* range, bool activ
         unsigned startOffset = textPiece->startOffset();
         unsigned endOffset = textPiece->endOffset();
         addMarker(textPiece->startContainer(), DocumentMarker(startOffset, endOffset, activeMatch));
-        if (endOffset > startOffset) {
-            // Rendered rects for markers in WebKit are not populated until each time
-            // the markers are painted. However, we need it to happen sooner, because
-            // the whole purpose of tickmarks on the scrollbar is to show where
-            // matches off-screen are (that haven't been painted yet).
-            Node* node = textPiece->startContainer();
-            DocumentMarkerVector markers = markersFor(node);
-            toRenderedDocumentMarker(markers[markers.size() - 1])->setRenderedRect(range->boundingBox());
-        }
     }
 }
 
@@ -361,29 +352,6 @@ void DocumentMarkerController::removeMarkers(Node* node, unsigned startOffset, i
     }
 }
 
-DocumentMarker* DocumentMarkerController::markerContainingPoint(const LayoutPoint& point, DocumentMarker::MarkerType markerType)
-{
-    if (!possiblyHasMarkers(markerType))
-        return 0;
-    ASSERT(!(m_markers.isEmpty()));
-
-    // outer loop: process each node that contains any markers
-    MarkerMap::iterator end = m_markers.end();
-    for (MarkerMap::iterator nodeIterator = m_markers.begin(); nodeIterator != end; ++nodeIterator) {
-        // inner loop; process each marker in this node
-        MarkerLists* markers = nodeIterator->value.get();
-        OwnPtr<MarkerList>& list = (*markers)[MarkerTypeToMarkerIndex(markerType)];
-        unsigned markerCount = list.get() ? list->size() : 0;
-        for (unsigned markerIndex = 0; markerIndex < markerCount; ++markerIndex) {
-            RenderedDocumentMarker* marker = list->at(markerIndex).get();
-            if (marker->contains(point))
-                return marker;
-        }
-    }
-
-    return 0;
-}
-
 DocumentMarkerVector DocumentMarkerController::markersFor(Node* node, DocumentMarker::MarkerTypes markerTypes)
 {
     DocumentMarkerVector result;
@@ -448,35 +416,6 @@ DocumentMarkerVector DocumentMarkerController::markersInRange(Range* range, Docu
         }
     }
     return foundMarkers;
-}
-
-Vector<IntRect> DocumentMarkerController::renderedRectsForMarkers(DocumentMarker::MarkerType markerType)
-{
-    Vector<IntRect> result;
-
-    if (!possiblyHasMarkers(markerType))
-        return result;
-    ASSERT(!(m_markers.isEmpty()));
-
-    // outer loop: process each node
-    MarkerMap::iterator end = m_markers.end();
-    for (MarkerMap::iterator nodeIterator = m_markers.begin(); nodeIterator != end; ++nodeIterator) {
-        // inner loop; process each marker in this node
-        MarkerLists* markers = nodeIterator->value.get();
-        for (size_t markerListIndex = 0; markerListIndex < DocumentMarker::MarkerTypeIndexesCount; ++markerListIndex) {
-            OwnPtr<MarkerList>& list = (*markers)[markerListIndex];
-            if (!list || list->isEmpty() || (*list->begin())->type() != markerType)
-                continue;
-            for (unsigned markerIndex = 0; markerIndex < list->size(); ++markerIndex) {
-                RenderedDocumentMarker* marker = list->at(markerIndex).get();
-                if (!marker->isRendered())
-                    continue;
-                result.append(marker->renderedRect());
-            }
-        }
-    }
-
-    return result;
 }
 
 void DocumentMarkerController::removeMarkers(Node* node, DocumentMarker::MarkerTypes markerTypes)
@@ -565,22 +504,6 @@ void DocumentMarkerController::removeMarkersFromList(MarkerMap::iterator iterato
     }
 }
 
-void DocumentMarkerController::invalidateRenderedRectsForMarkersInRect(const LayoutRect& r)
-{
-    // outer loop: process each markered node in the document
-    MarkerMap::iterator end = m_markers.end();
-    for (MarkerMap::iterator i = m_markers.begin(); i != end; ++i) {
-
-        // inner loop: process each rect in the current node
-        MarkerLists* markers = i->value.get();
-        for (size_t markerListIndex = 0; markerListIndex < DocumentMarker::MarkerTypeIndexesCount; ++markerListIndex) {
-            OwnPtr<MarkerList>& list = (*markers)[markerListIndex];
-            for (size_t markerIndex = 0; list.get() && markerIndex < list->size(); ++markerIndex)
-                list->at(markerIndex)->invalidate(r);
-        }
-    }
-}
-
 void DocumentMarkerController::shiftMarkers(Node* node, unsigned startOffset, int delta)
 {
     if (!possiblyHasMarkers(DocumentMarker::AllMarkers()))
@@ -604,9 +527,6 @@ void DocumentMarkerController::shiftMarkers(Node* node, unsigned startOffset, in
 #endif
             (*marker)->shiftOffsets(delta);
             docDirty = true;
-
-            // Marker moved, so previously-computed rendered rectangle is now invalid
-            (*marker)->invalidate();
         }
     }
 }

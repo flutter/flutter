@@ -157,23 +157,6 @@ bool HitTestResult::isSelected() const
     return false;
 }
 
-String HitTestResult::spellingToolTip(TextDirection& dir) const
-{
-    dir = LTR;
-    // Return the tool tip string associated with this point, if any. Only markers associated with bad grammar
-    // currently supply strings, but maybe someday markers associated with misspelled words will also.
-    if (!m_innerNonSharedNode)
-        return String();
-
-    DocumentMarker* marker = m_innerNonSharedNode->document().markers().markerContainingPoint(m_hitTestLocation.point(), DocumentMarker::Grammar);
-    if (!marker)
-        return String();
-
-    if (RenderObject* renderer = m_innerNonSharedNode->renderer())
-        dir = renderer->style()->direction();
-    return marker->description();
-}
-
 Image* HitTestResult::image() const
 {
     if (!m_innerNonSharedNode)

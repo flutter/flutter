@@ -106,16 +106,6 @@ void Chrome::mouseDidMoveOverElement(const HitTestResult& result, unsigned modif
     m_client->mouseDidMoveOverElement(result, modifierFlags);
 }
 
-// TODO(esprehn): Remove this in sky.
-void Chrome::setToolTip(const HitTestResult& result)
-{
-    // First priority is a potential toolTip representing a spelling or grammar error
-    TextDirection toolTipDirection;
-    String toolTip = result.spellingToolTip(toolTipDirection);
-
-    m_client->setToolTip(toolTip, toolTipDirection);
-}
-
 void Chrome::setCursor(const Cursor& cursor)
 {
     m_client->setCursor(cursor);

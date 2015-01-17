@@ -306,12 +306,6 @@ void ChromeClientImpl::mouseDidMoveOverElement(
     m_webView->client()->setMouseOverURL(url);
 }
 
-void ChromeClientImpl::setToolTip(const String& tooltipText, TextDirection dir)
-{
-    if (m_webView->client())
-        m_webView->client()->setToolTipText(tooltipText, toWebTextDirection(dir));
-}
-
 void ChromeClientImpl::setCursor(const Cursor& cursor)
 {
     setCursor(WebCursorInfo(cursor));

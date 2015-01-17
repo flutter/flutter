@@ -91,8 +91,6 @@ public:
 
     virtual void mouseDidMoveOverElement(const HitTestResult&, unsigned) override { }
 
-    virtual void setToolTip(const String&, TextDirection) override { }
-
     virtual void setCursor(const Cursor&) override { }
 
     virtual void setTouchAction(TouchAction touchAction) override { };

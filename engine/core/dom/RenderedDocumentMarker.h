@@ -32,6 +32,9 @@
 
 namespace blink {
 
+// FIXME(sky): We no longer need this subclass. Remove it
+// and just used DocumentMarker.
+
 class RenderedDocumentMarker final : public DocumentMarker {
 public:
     static PassOwnPtr<RenderedDocumentMarker> create(const DocumentMarker& marker)
@@ -39,34 +42,12 @@ public:
         return adoptPtr(new RenderedDocumentMarker(marker));
     }
 
-    bool isRendered() const { return invalidMarkerRect() != m_renderedRect; }
-    bool contains(const LayoutPoint& point) const { return isRendered() && m_renderedRect.contains(point); }
-    void setRenderedRect(const LayoutRect& r) { m_renderedRect = r; }
-    const LayoutRect& renderedRect() const { return m_renderedRect; }
-    void invalidate(const LayoutRect&);
-    void invalidate() { m_renderedRect = invalidMarkerRect(); }
-
 private:
     explicit RenderedDocumentMarker(const DocumentMarker& marker)
         : DocumentMarker(marker)
-        , m_renderedRect(invalidMarkerRect())
     {
     }
-
-    static const LayoutRect& invalidMarkerRect()
-    {
-        static const LayoutRect rect = LayoutRect(-1, -1, -1, -1);
-        return rect;
-    }
-
-    LayoutRect m_renderedRect;
 };
-
-inline void RenderedDocumentMarker::invalidate(const LayoutRect& r)
-{
-    if (m_renderedRect.intersects(r))
-        invalidate();
-}
 
 DEFINE_TYPE_CASTS(RenderedDocumentMarker, DocumentMarker, marker, true, true);
 

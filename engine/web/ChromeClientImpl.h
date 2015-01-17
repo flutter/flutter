@@ -81,7 +81,6 @@ public:
     virtual void layoutUpdated(LocalFrame*) const override;
     virtual void mouseDidMoveOverElement(
         const HitTestResult&, unsigned modifierFlags) override;
-    virtual void setToolTip(const WTF::String& tooltipText, TextDirection) override;
     virtual void setCursor(const Cursor&) override;
     virtual void setTouchAction(TouchAction) override;
 

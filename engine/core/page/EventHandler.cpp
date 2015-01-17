@@ -1110,7 +1110,6 @@ bool EventHandler::handleMouseMoveEvent(const PlatformMouseEvent& event)
     }
 
     page->chrome().mouseDidMoveOverElement(hoveredNode, event.modifierFlags());
-    page->chrome().setToolTip(hoveredNode);
 
     return result;
 }
