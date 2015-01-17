@@ -63,8 +63,6 @@ public:
     void move(const IntPoint& p) { setFrameRect(IntRect(p, size())); }
 
     virtual void paint(GraphicsContext*, const IntRect&) { }
-    // FIXME(sky): Remove
-    void invalidate() { }
 
     virtual bool isFrameView() const { return false; }
     virtual bool isScrollbar() const { return false; }

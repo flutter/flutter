@@ -62,7 +62,6 @@ Scrollbar::Scrollbar(ScrollableArea* scrollableArea, ScrollbarOrientation orient
     , m_pressedPos(0)
     , m_scrollPos(0)
     , m_documentDragPos(0)
-    , m_enabled(true)
     , m_scrollTimer(this, &Scrollbar::autoscrollTimerFired)
     , m_overlapsResizer(false)
 {
@@ -78,11 +77,6 @@ Scrollbar::Scrollbar(ScrollableArea* scrollableArea, ScrollbarOrientation orient
 Scrollbar::~Scrollbar()
 {
     stopTimerIfNeeded();
-}
-
-ScrollbarOverlayStyle Scrollbar::scrollbarOverlayStyle() const
-{
-    return m_scrollableArea ? m_scrollableArea->scrollbarOverlayStyle() : ScrollbarOverlayStyleDefault;
 }
 
 bool Scrollbar::isScrollableAreaActive() const
@@ -368,14 +362,6 @@ void Scrollbar::mouseDown(const PlatformMouseEvent& evt)
     m_pressedPos = pressedPos;
 
     autoscrollPressedPart(initialAutoscrollTimerDelay());
-}
-
-void Scrollbar::setEnabled(bool e)
-{
-    if (m_enabled == e)
-        return;
-    m_enabled = e;
-    invalidate();
 }
 
 bool Scrollbar::isOverlayScrollbar() const

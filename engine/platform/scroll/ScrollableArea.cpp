@@ -74,7 +74,6 @@ ScrollableArea::ScrollableArea()
     : m_constrainsScrollingToContentEdge(true)
     , m_verticalScrollElasticity(ScrollElasticityNone)
     , m_horizontalScrollElasticity(ScrollElasticityNone)
-    , m_scrollbarOverlayStyle(ScrollbarOverlayStyleDefault)
     , m_scrollOriginChanged(false)
 {
 }
@@ -150,12 +149,6 @@ void ScrollableArea::scrollToOffsetWithoutAnimation(ScrollbarOrientation orienta
         scrollToOffsetWithoutAnimation(FloatPoint(scrollAnimator()->currentPosition().x(), offset));
 }
 
-void ScrollableArea::notifyScrollPositionChanged(const IntPoint& position)
-{
-    scrollPositionChanged(position);
-    scrollAnimator()->setCurrentPosition(position);
-}
-
 void ScrollableArea::scrollPositionChanged(const IntPoint& position)
 {
     TRACE_EVENT0("blink", "ScrollableArea::scrollPositionChanged");
@@ -164,21 +157,11 @@ void ScrollableArea::scrollPositionChanged(const IntPoint& position)
     // Tell the derived class to scroll its contents.
     setScrollOffset(position);
 
-    Scrollbar* verticalScrollbar = this->verticalScrollbar();
+    if (Scrollbar* scrollbar = this->horizontalScrollbar())
+        scrollbar->offsetDidChange();
 
-    // Tell the scrollbars to update their thumb postions.
-    if (Scrollbar* horizontalScrollbar = this->horizontalScrollbar()) {
-        horizontalScrollbar->offsetDidChange();
-        if (horizontalScrollbar->isOverlayScrollbar()) {
-            if (!verticalScrollbar)
-                horizontalScrollbar->invalidate();
-        }
-    }
-    if (verticalScrollbar) {
-        verticalScrollbar->offsetDidChange();
-        if (verticalScrollbar->isOverlayScrollbar())
-            verticalScrollbar->invalidate();
-    }
+    if (Scrollbar* scrollbar = this->verticalScrollbar())
+        scrollbar->offsetDidChange();
 
     if (scrollPosition() != oldPosition)
         scrollAnimator()->notifyContentAreaScrolled(scrollPosition() - oldPosition);
@@ -205,12 +188,6 @@ bool ScrollableArea::handleWheelEvent(const PlatformWheelEvent& wheelEvent)
         return false;
 
     return scrollAnimator()->handleWheelEvent(wheelEvent);
-}
-
-// NOTE: Only called from Internals for testing.
-void ScrollableArea::setScrollOffsetFromInternals(const IntPoint& offset)
-{
-    setScrollOffsetFromAnimation(offset);
 }
 
 void ScrollableArea::setScrollOffsetFromAnimation(const IntPoint& offset)
@@ -270,9 +247,6 @@ void ScrollableArea::didAddScrollbar(Scrollbar* scrollbar, ScrollbarOrientation 
         scrollAnimator()->didAddVerticalScrollbar(scrollbar);
     else
         scrollAnimator()->didAddHorizontalScrollbar(scrollbar);
-
-    // <rdar://problem/9797253> AppKit resets the scrollbar's style when you attach a scrollbar
-    setScrollbarOverlayStyle(scrollbarOverlayStyle());
 }
 
 void ScrollableArea::willRemoveScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orientation)
@@ -296,19 +270,6 @@ bool ScrollableArea::hasOverlayScrollbars() const
         return true;
     Scrollbar* hScrollbar = horizontalScrollbar();
     return hScrollbar && hScrollbar->isOverlayScrollbar();
-}
-
-void ScrollableArea::setScrollbarOverlayStyle(ScrollbarOverlayStyle overlayStyle)
-{
-    m_scrollbarOverlayStyle = overlayStyle;
-
-    if (Scrollbar* scrollbar = horizontalScrollbar()) {
-        scrollbar->invalidate();
-    }
-
-    if (Scrollbar* scrollbar = verticalScrollbar()) {
-        scrollbar->invalidate();
-    }
 }
 
 bool ScrollableArea::scheduleAnimation()

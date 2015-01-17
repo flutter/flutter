@@ -376,12 +376,6 @@ void RenderLayerScrollableArea::updateAfterLayout()
     bool hasHorizontalOverflow = this->hasHorizontalOverflow();
     bool hasVerticalOverflow = this->hasVerticalOverflow();
 
-    // overflow:scroll should just enable/disable.
-    if (box().style()->overflowX() == OSCROLL)
-        horizontalScrollbar()->setEnabled(hasHorizontalOverflow);
-    if (box().style()->overflowY() == OSCROLL)
-        verticalScrollbar()->setEnabled(hasVerticalOverflow);
-
     // overflow:auto may need to lay out again if scrollbars got added/removed.
     if (box().hasAutoHorizontalScrollbar())
         setHasHorizontalScrollbar(hasHorizontalOverflow);
@@ -462,22 +456,13 @@ void RenderLayerScrollableArea::updateAfterStyleChange(const RenderStyle* oldSty
     EOverflow overflowY = box().style()->overflowY();
 
     // To avoid doing a relayout in updateScrollbarsAfterLayout, we try to keep any automatic scrollbar that was already present.
+    // FIXME(sky): We only have overlay scrollbars, so we never do a relayout
+    // due to scrollbars. We probably don't need to do this at all. Also,
+    // updateScrollbarsAfterLayout not longer exists.
     bool needsHorizontalScrollbar = (hasHorizontalScrollbar() && overflowDefinesAutomaticScrollbar(overflowX)) || overflowRequiresScrollbar(overflowX);
     bool needsVerticalScrollbar = (hasVerticalScrollbar() && overflowDefinesAutomaticScrollbar(overflowY)) || overflowRequiresScrollbar(overflowY);
     setHasHorizontalScrollbar(needsHorizontalScrollbar);
     setHasVerticalScrollbar(needsVerticalScrollbar);
-
-    // With overflow: scroll, scrollbars are always visible but may be disabled.
-    // When switching to another value, we need to re-enable them (see bug 11985).
-    if (needsHorizontalScrollbar && oldStyle && oldStyle->overflowX() == OSCROLL && overflowX != OSCROLL) {
-        ASSERT(hasHorizontalScrollbar());
-        m_hBar->setEnabled(true);
-    }
-
-    if (needsVerticalScrollbar && oldStyle && oldStyle->overflowY() == OSCROLL && overflowY != OSCROLL) {
-        ASSERT(hasVerticalScrollbar());
-        m_vBar->setEnabled(true);
-    }
 }
 
 bool RenderLayerScrollableArea::updateAfterCompositingChange()

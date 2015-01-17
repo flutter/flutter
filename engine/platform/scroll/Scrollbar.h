@@ -47,7 +47,6 @@ public:
 
     virtual ~Scrollbar();
 
-    ScrollbarOverlayStyle scrollbarOverlayStyle() const;
     bool isScrollableAreaActive() const;
 
     ScrollbarOrientation orientation() const { return m_orientation; }
@@ -58,9 +57,6 @@ public:
     int visibleSize() const { return m_visibleSize; }
     int totalSize() const { return m_totalSize; }
     int maximum() const { return m_totalSize - m_visibleSize; }
-
-    bool enabled() const { return m_enabled; }
-    void setEnabled(bool);
 
     // Called by the ScrollableArea when the scroll offset changes.
     void offsetDidChange();
@@ -151,8 +147,6 @@ protected:
     int m_pressedPos;
     float m_scrollPos;
     int m_documentDragPos;
-
-    bool m_enabled;
 
     Timer<Scrollbar> m_scrollTimer;
     bool m_overlapsResizer;

@@ -65,10 +65,6 @@ public:
     void scrollToOffsetWithoutAnimation(const FloatPoint&);
     void scrollToOffsetWithoutAnimation(ScrollbarOrientation, float offset);
 
-    // Should be called when the scroll position changes externally, for example if the scroll layer position
-    // is updated on the scrolling thread and we need to notify the main thread.
-    void notifyScrollPositionChanged(const IntPoint&);
-
     static bool scrollBehaviorFromString(const String&, ScrollBehavior&);
 
     bool handleWheelEvent(const PlatformWheelEvent&);
@@ -99,8 +95,6 @@ public:
     void contentsResized();
 
     bool hasOverlayScrollbars() const;
-    void setScrollbarOverlayStyle(ScrollbarOverlayStyle);
-    ScrollbarOverlayStyle scrollbarOverlayStyle() const { return static_cast<ScrollbarOverlayStyle>(m_scrollbarOverlayStyle); }
 
     // This getter will create a ScrollAnimator if it doesn't already exist.
     ScrollAnimator* scrollAnimator() const;
@@ -135,9 +129,6 @@ public:
     virtual IntSize contentsSize() const = 0;
 
     bool shouldSuspendScrollAnimations() const { return true; }
-
-    // NOTE: Only called from Internals for testing.
-    void setScrollOffsetFromInternals(const IntPoint&);
 
     IntPoint clampScrollPosition(const IntPoint&) const;
 
@@ -189,8 +180,6 @@ private:
 
     unsigned m_verticalScrollElasticity : 2; // ScrollElasticity
     unsigned m_horizontalScrollElasticity : 2; // ScrollElasticity
-
-    unsigned m_scrollbarOverlayStyle : 2; // ScrollbarOverlayStyle
 
     unsigned m_scrollOriginChanged : 1;
 
