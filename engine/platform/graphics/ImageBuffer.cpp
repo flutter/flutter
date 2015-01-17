@@ -120,9 +120,9 @@ void ImageBuffer::didFinalizeFrame()
         m_client->didFinalizeFrame();
 }
 
-void ImageBuffer::finalizeFrame(const FloatRect &dirtyRect)
+void ImageBuffer::finalizeFrame()
 {
-    m_surface->finalizeFrame(dirtyRect);
+    m_surface->finalizeFrame();
     didFinalizeFrame();
 }
 

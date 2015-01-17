@@ -139,10 +139,7 @@ public:
     virtual void acceptLanguagesChanged() override;
 
     // WebViewImpl
-
     HitTestResult coreHitTestResultAt(const WebPoint&);
-    void suppressInvalidations(bool enable);
-    void invalidateRect(const IntRect&);
 
     void setIgnoreInputEvents(bool newValue);
     void setBackgroundColorOverride(WebColor);

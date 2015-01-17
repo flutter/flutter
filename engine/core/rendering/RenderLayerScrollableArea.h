@@ -67,7 +67,6 @@ public:
 
     HostWindow* hostWindow() const override;
 
-    void invalidateScrollbarRect(Scrollbar*, const IntRect&) override;
     bool isActive() const override;
     IntRect scrollCornerRect() const;
     IntRect convertFromScrollbarToContainingView(const Scrollbar*, const IntRect&) const override;

@@ -146,15 +146,6 @@ bool FrameView::didFirstLayout() const
     return !m_firstLayout;
 }
 
-void FrameView::invalidateRect(const IntRect& rect)
-{
-    // FIXME(sky): Parent is always null in sky?
-    if (!parent()) {
-        if (HostWindow* window = hostWindow())
-            window->invalidateContentsAndRootView(rect);
-    }
-}
-
 void FrameView::setFrameRect(const IntRect& newRect)
 {
     IntRect oldRect = frameRect();

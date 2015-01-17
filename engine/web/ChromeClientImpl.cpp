@@ -265,18 +265,6 @@ bool ChromeClientImpl::tabsToLinks()
     return m_webView->tabsToLinks();
 }
 
-void ChromeClientImpl::invalidateContentsAndRootView(const IntRect& updateRect)
-{
-    if (updateRect.isEmpty())
-        return;
-    m_webView->invalidateRect(updateRect);
-}
-
-void ChromeClientImpl::invalidateContentsForSlowScroll(const IntRect& updateRect)
-{
-    invalidateContentsAndRootView(updateRect);
-}
-
 void ChromeClientImpl::scheduleAnimation()
 {
     m_webView->scheduleAnimation();

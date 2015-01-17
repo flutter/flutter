@@ -106,28 +106,6 @@ HostWindow* RenderLayerScrollableArea::hostWindow() const
     return nullptr;
 }
 
-// FIXME(sky): Remove
-void RenderLayerScrollableArea::invalidateScrollbarRect(Scrollbar* scrollbar, const IntRect& rect)
-{
-    IntRect scrollRect = rect;
-    // If we are not yet inserted into the tree, there is no need to issue paint invaldiations.
-    if (!box().parent())
-        return;
-
-    if (scrollbar == m_vBar.get())
-        scrollRect.move(verticalScrollbarStart(0, box().width()), box().borderTop());
-    else
-        scrollRect.move(horizontalScrollbarStart(0), box().height() - box().borderBottom() - scrollbar->height());
-
-    if (scrollRect.isEmpty())
-        return;
-
-    IntRect intRect = pixelSnappedIntRect(scrollRect);
-
-    if (box().frameView()->isInPerformLayout())
-        addScrollbarDamage(scrollbar, intRect);
-}
-
 bool RenderLayerScrollableArea::isActive() const
 {
     Page* page = box().frame()->page();

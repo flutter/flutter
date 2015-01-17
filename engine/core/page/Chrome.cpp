@@ -51,16 +51,6 @@ PassOwnPtr<Chrome> Chrome::create(Page* page, ChromeClient* client)
     return adoptPtr(new Chrome(page, client));
 }
 
-void Chrome::invalidateContentsAndRootView(const IntRect& updateRect)
-{
-    m_client->invalidateContentsAndRootView(updateRect);
-}
-
-void Chrome::invalidateContentsForSlowScroll(const IntRect& updateRect)
-{
-    m_client->invalidateContentsForSlowScroll(updateRect);
-}
-
 IntRect Chrome::rootViewToScreen(const IntRect& rect) const
 {
     return m_client->rootViewToScreen(rect);

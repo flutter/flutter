@@ -55,9 +55,6 @@ public:
     // Returns a positive ID that will be unique across all WebLayers allocated in this process.
     virtual int id() const = 0;
 
-    // Sets a region of the layer as invalid, i.e. needs to update its content.
-    virtual void invalidateRect(const WebFloatRect&) = 0;
-
     // Sets the entire layer as invalid, i.e. needs to update its content.
     virtual void invalidate() = 0;
 

@@ -74,7 +74,7 @@ public:
     virtual void setImageBuffer(ImageBuffer*) { }
     virtual PassRefPtr<SkPicture> getPicture();
     virtual void didClearCanvas() { }
-    virtual void finalizeFrame(const FloatRect &dirtyRect) { }
+    virtual void finalizeFrame() { }
 
     OpacityMode opacityMode() const { return m_opacityMode; }
     const IntSize& size() const { return m_size; }

@@ -64,8 +64,7 @@ public:
 
     virtual void beginFrame(const WebBeginFrameArgs& frameTime) = 0;
 
-    // Called to layout the WebWidget. This MUST be called before Paint,
-    // and it may result in calls to WebWidgetClient::didInvalidateRect.
+    // Called to layout the WebWidget. This MUST be called before Paint.
     virtual void layout() = 0;
 
     // Called to paint the rectangular region within the WebWidget

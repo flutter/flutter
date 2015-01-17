@@ -139,9 +139,6 @@ public:
 
     static void selectWordAroundPosition(LocalFrame*, VisiblePosition);
 
-    // Invalidates both content area and the scrollbar.
-    void invalidateAll() const;
-
     // Returns a hit-tested VisiblePosition for the given point
     VisiblePosition visiblePositionForWindowPoint(const WebPoint&);
 

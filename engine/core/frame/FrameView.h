@@ -64,7 +64,6 @@ public:
     virtual ~FrameView();
 
     virtual HostWindow* hostWindow() const override;
-    virtual void invalidateRect(const IntRect&) override;
     virtual void setFrameRect(const IntRect&) override;
 
     LocalFrame& frame() const { return *m_frame; }

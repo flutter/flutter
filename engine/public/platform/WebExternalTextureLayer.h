@@ -61,6 +61,7 @@ public:
 
     // Sets whether this context should be rate limited by the compositor. Rate limiting works by blocking
     // invalidate() and invalidateRect() calls if the compositor is too many frames behind.
+    // FIXME(sky): Does this do anything in sky now that we don't have paintInvalidation?
     virtual void setRateLimitContext(bool) = 0;
 };
 

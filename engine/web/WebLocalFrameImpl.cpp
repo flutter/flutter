@@ -640,12 +640,8 @@ void WebLocalFrameImpl::createFrameView()
     ASSERT(frame()); // If frame() doesn't exist, we probably didn't init properly.
 
     WebViewImpl* webView = viewImpl();
-    webView->suppressInvalidations(true);
-
     frame()->createView(webView->size(), webView->baseBackgroundColor(), webView->isTransparent());
     frame()->view()->setInputEventsTransformForEmulation(m_inputEventsOffsetForEmulation, m_inputEventsScaleFactorForEmulation);
-
-    webView->suppressInvalidations(false);
 }
 
 WebLocalFrameImpl* WebLocalFrameImpl::fromFrame(LocalFrame* frame)
@@ -683,13 +679,6 @@ void WebLocalFrameImpl::setInputEventsTransformForEmulation(const IntSize& offse
     m_inputEventsScaleFactorForEmulation = contentScaleFactor;
     if (frame()->view())
         frame()->view()->setInputEventsTransformForEmulation(m_inputEventsOffsetForEmulation, m_inputEventsScaleFactorForEmulation);
-}
-
-void WebLocalFrameImpl::invalidateAll() const
-{
-    ASSERT(frame() && frame()->view());
-    FrameView* view = frame()->view();
-    view->invalidateRect(view->frameRect());
 }
 
 } // namespace blink

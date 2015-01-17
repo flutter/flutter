@@ -216,14 +216,12 @@ void HTMLCanvasElement::resetDirtyRect()
 void HTMLCanvasElement::finalizeFrameMicrotask()
 {
     // This method gets invoked if didDraw was called earlier in the current task.
-    ASSERT(!m_dirtyRect.isEmpty());
     if (is3D()) {
         didFinalizeFrame();
     } else {
         ASSERT(hasImageBuffer());
-        m_imageBuffer->finalizeFrame(m_dirtyRect);
+        m_imageBuffer->finalizeFrame();
     }
-    ASSERT(m_dirtyRect.isEmpty());
     ASSERT(m_finalizeFrameTask.IsCancelled());
 }
 

@@ -53,8 +53,6 @@ public:
     ChromeClient& client() { return *m_client; }
 
     // HostWindow methods.
-    virtual void invalidateContentsAndRootView(const IntRect&) override;
-    virtual void invalidateContentsForSlowScroll(const IntRect&) override;
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual blink::WebScreenInfo screenInfo() const override;
 

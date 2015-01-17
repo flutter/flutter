@@ -47,7 +47,6 @@ namespace blink {
 
 struct SameSizeAsScrollableArea {
     virtual ~SameSizeAsScrollableArea();
-    IntRect scrollbarDamage[2];
     void* pointer;
     unsigned bitfields : 16;
     IntPoint origin;
@@ -173,13 +172,6 @@ void ScrollableArea::scrollPositionChanged(const IntPoint& position)
         if (horizontalScrollbar->isOverlayScrollbar()) {
             if (!verticalScrollbar)
                 horizontalScrollbar->invalidate();
-            else {
-                // If there is both a horizontalScrollbar and a verticalScrollbar,
-                // then we must also invalidate the corner between them.
-                IntRect boundsAndCorner = horizontalScrollbar->boundsRect();
-                boundsAndCorner.setWidth(boundsAndCorner.width() + verticalScrollbar->width());
-                horizontalScrollbar->invalidateRect(boundsAndCorner);
-            }
         }
     }
     if (verticalScrollbar) {
@@ -317,11 +309,6 @@ void ScrollableArea::setScrollbarOverlayStyle(ScrollbarOverlayStyle overlayStyle
     if (Scrollbar* scrollbar = verticalScrollbar()) {
         scrollbar->invalidate();
     }
-}
-
-void ScrollableArea::invalidateScrollbar(Scrollbar* scrollbar, const IntRect& rect)
-{
-    invalidateScrollbarRect(scrollbar, rect);
 }
 
 bool ScrollableArea::scheduleAnimation()

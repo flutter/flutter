@@ -1285,9 +1285,6 @@ void WebViewImpl::sendResizeEventAndRepaint()
         // Enqueues the resize event.
         localFrameRootTemporary()->frame()->document()->enqueueResizeEvent();
     }
-
-    WebRect damagedRect(0, 0, m_size.width, m_size.height);
-    m_client->didInvalidateRect(damagedRect);
 }
 
 void WebViewImpl::setCompositorDeviceScaleFactorOverride(float deviceScaleFactor)
@@ -1388,16 +1385,6 @@ void WebViewImpl::setTabsToLinks(bool enable)
 bool WebViewImpl::tabsToLinks() const
 {
     return m_tabsToLinks;
-}
-
-void WebViewImpl::suppressInvalidations(bool enable)
-{
-    m_client->suppressCompositorScheduling(enable);
-}
-
-void WebViewImpl::invalidateRect(const IntRect& rect)
-{
-    m_client->didInvalidateRect(rect);
 }
 
 void WebViewImpl::scheduleAnimation()

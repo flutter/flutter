@@ -114,7 +114,6 @@ public:
     // FIXME(bokan): Meaningless name, rename to isActiveFocus
     virtual bool isActive() const = 0;
     virtual int scrollSize(ScrollbarOrientation) const = 0;
-    void invalidateScrollbar(Scrollbar*, const IntRect&);
 
     // Convert points and rects between the scrollbar and its containing view.
     // The client needs to implement these in order to be aware of layout effects
@@ -158,33 +157,12 @@ public:
     int maximumScrollPosition(ScrollbarOrientation orientation) { return orientation == HorizontalScrollbar ? maximumScrollPosition().x() : maximumScrollPosition().y(); }
     int clampScrollPosition(ScrollbarOrientation orientation, int pos)  { return std::max(std::min(pos, maximumScrollPosition(orientation)), minimumScrollPosition(orientation)); }
 
-    bool hasVerticalBarDamage() const { return !m_verticalBarDamage.isEmpty(); }
-    bool hasHorizontalBarDamage() const { return !m_horizontalBarDamage.isEmpty(); }
-    const IntRect& verticalBarDamage() const { return m_verticalBarDamage; }
-    const IntRect& horizontalBarDamage() const { return m_horizontalBarDamage; }
-
-    void addScrollbarDamage(Scrollbar* scrollbar, const IntRect& rect)
-    {
-        if (scrollbar == horizontalScrollbar())
-            m_horizontalBarDamage.unite(rect);
-        else
-            m_verticalBarDamage.unite(rect);
-    }
-
-    void resetScrollbarDamage()
-    {
-        m_verticalBarDamage = IntRect();
-        m_horizontalBarDamage = IntRect();
-    }
-
 protected:
     ScrollableArea();
     virtual ~ScrollableArea();
 
     void setScrollOrigin(const IntPoint&);
     void resetScrollOriginChanged() { m_scrollOriginChanged = false; }
-
-    virtual void invalidateScrollbarRect(Scrollbar*, const IntRect&) = 0;
 
 private:
     void scrollPositionChanged(const IntPoint&);
@@ -201,10 +179,6 @@ private:
     int documentStep(ScrollbarOrientation) const;
     virtual int pageStep(ScrollbarOrientation) const = 0;
     float pixelStep(ScrollbarOrientation) const;
-
-    // Stores the paint invalidations for the scrollbars during layout.
-    IntRect m_horizontalBarDamage;
-    IntRect m_verticalBarDamage;
 
     struct ScrollableAreaAnimators {
         OwnPtr<ScrollAnimator> scrollAnimator;

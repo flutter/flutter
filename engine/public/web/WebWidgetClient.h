@@ -48,20 +48,11 @@ struct WebSize;
 
 class WebWidgetClient {
 public:
-    // Called when a region of the WebWidget needs to be re-painted.
-    virtual void didInvalidateRect(const WebRect&) { }
-
     // Called when the Widget has changed size as a result of an auto-resize.
     virtual void didAutoResize(const WebSize& newSize) { }
 
     // Initialize compositing for this widget.
     virtual void initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); };
-
-    // Sometimes the WebWidget enters a state where it will generate a sequence
-    // of invalidations that should not, by themselves, trigger the compositor
-    // to schedule a new frame. This call indicates to the embedder that it
-    // should suppress compositor scheduling temporarily.
-    virtual void suppressCompositorScheduling(bool enable) { }
 
     // Indicates to the embedder that the compositor is about to begin a
     // frame. This is primarily to signal to flow control mechanisms that a

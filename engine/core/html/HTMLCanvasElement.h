@@ -177,6 +177,7 @@ private:
 
     bool m_ignoreReset;
     bool m_accelerationDisabled;
+    // FIXME(sky): Do we need this in sky since we don't do paint invalidation?
     FloatRect m_dirtyRect;
     base::CancelableClosure m_finalizeFrameTask;
 

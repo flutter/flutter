@@ -47,8 +47,6 @@ public:
 
     virtual ~Scrollbar();
 
-    void invalidateRect(const IntRect&);
-
     ScrollbarOverlayStyle scrollbarOverlayStyle() const;
     bool isScrollableAreaActive() const;
 
@@ -60,9 +58,6 @@ public:
     int visibleSize() const { return m_visibleSize; }
     int totalSize() const { return m_totalSize; }
     int maximum() const { return m_totalSize - m_visibleSize; }
-
-    ScrollbarPart pressedPart() const { return m_pressedPart; }
-    ScrollbarPart hoveredPart() const { return m_hoveredPart; }
 
     bool enabled() const { return m_enabled; }
     void setEnabled(bool);
@@ -109,15 +104,6 @@ public:
 
     static int scrollbarThickness();
 
-    void invalidateParts()
-    {
-        invalidatePart(BackTrackPart);
-        invalidatePart(ThumbPart);
-        invalidatePart(ForwardTrackPart);
-    }
-
-    void invalidatePart(ScrollbarPart);
-
     // The position of the thumb relative to the track.
     int thumbPosition();
     // The length of the thumb along the axis of the scrollbar.
@@ -143,8 +129,6 @@ public:
 protected:
     Scrollbar(ScrollableArea*, ScrollbarOrientation);
 
-    void updateThumb();
-
     void autoscrollTimerFired(Timer<Scrollbar>*);
     void startTimerIfNeeded(double delay);
     void stopTimerIfNeeded();
@@ -160,6 +144,8 @@ protected:
     float m_currentPos;
     float m_dragOrigin;
 
+    // FIXME(sky): Does any of this hovered/pressed tracking do anything
+    // since we only have overlay scrollbars?
     ScrollbarPart m_hoveredPart;
     ScrollbarPart m_pressedPart;
     int m_pressedPos;

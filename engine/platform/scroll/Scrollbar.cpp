@@ -107,7 +107,6 @@ void Scrollbar::offsetDidChange()
 
     int oldThumbPosition = thumbPosition();
     m_currentPos = position;
-    updateThumb();
     if (m_pressedPart == ThumbPart)
         setPressedPos(m_pressedPos + thumbPosition() - oldThumbPosition);
 }
@@ -119,17 +118,6 @@ void Scrollbar::setProportion(int visibleSize, int totalSize)
 
     m_visibleSize = visibleSize;
     m_totalSize = totalSize;
-
-    updateThumb();
-}
-
-void Scrollbar::updateThumb()
-{
-#ifdef THUMB_POSITION_AFFECTS_BUTTONS
-    invalidate();
-#else
-    invalidateParts();
-#endif
 }
 
 void Scrollbar::paint(GraphicsContext* context, const IntRect& damageRect)
@@ -165,7 +153,6 @@ void Scrollbar::autoscrollPressedPart(double delay)
 
     // Handle the track.
     if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && thumbUnderMouse(this)) {
-        invalidatePart(m_pressedPart);
         setHoveredPart(ThumbPart);
         return;
     }
@@ -184,7 +171,6 @@ void Scrollbar::startTimerIfNeeded(double delay)
     // Handle the track.  We halt track scrolling once the thumb is level
     // with us.
     if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && thumbUnderMouse(this)) {
-        invalidatePart(m_pressedPart);
         setHoveredPart(ThumbPart);
         return;
     }
@@ -255,23 +241,12 @@ void Scrollbar::setHoveredPart(ScrollbarPart part)
 {
     if (part == m_hoveredPart)
         return;
-
-    if (m_pressedPart == NoPart) {  // When there's a pressed part, we don't draw a hovered state, so there's no reason to invalidate.
-        invalidatePart(part);
-        invalidatePart(m_hoveredPart);
-    }
     m_hoveredPart = part;
 }
 
 void Scrollbar::setPressedPart(ScrollbarPart part)
 {
-    if (m_pressedPart != NoPart)
-        invalidatePart(m_pressedPart);
     m_pressedPart = part;
-    if (m_pressedPart != NoPart)
-        invalidatePart(m_pressedPart);
-    else if (m_hoveredPart != NoPart)  // When we no longer have a pressed part, we can start drawing a hovered state on the hovered part.
-        invalidatePart(m_hoveredPart);
 }
 
 bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
@@ -338,12 +313,10 @@ void Scrollbar::mouseMoved(const PlatformMouseEvent& evt)
                 // The mouse is moving back over the pressed part.  We
                 // need to start up the timer action again.
                 startTimerIfNeeded(autoscrollTimerDelay());
-                invalidatePart(m_pressedPart);
             } else if (m_hoveredPart == m_pressedPart) {
                 // The mouse is leaving the pressed part.  Kill our timer
                 // if needed.
                 stopTimerIfNeeded();
-                invalidatePart(m_pressedPart);
             }
         }
 
@@ -419,12 +392,6 @@ bool Scrollbar::shouldParticipateInHitTesting()
     return m_scrollableArea->scrollAnimator()->shouldScrollbarParticipateInHitTesting(this);
 }
 
-void Scrollbar::invalidateRect(const IntRect& rect)
-{
-    if (m_scrollableArea)
-        m_scrollableArea->invalidateScrollbar(this, rect);
-}
-
 IntRect Scrollbar::convertToContainingView(const IntRect& localRect) const
 {
     if (m_scrollableArea)
@@ -471,26 +438,6 @@ float Scrollbar::scrollableAreaCurrentPos() const
 int Scrollbar::scrollbarThickness()
 {
     return kThumbThickness + kScrollbarMargin;
-}
-
-void Scrollbar::invalidatePart(ScrollbarPart part)
-{
-    if (part == NoPart)
-        return;
-
-    IntRect result;
-
-    IntRect beforeThumbRect, thumbRect, afterThumbRect;
-    splitTrack(trackRect(), beforeThumbRect, thumbRect, afterThumbRect);
-    if (part == BackTrackPart)
-        result = beforeThumbRect;
-    else if (part == ForwardTrackPart)
-        result = afterThumbRect;
-    else
-        result = thumbRect;
-
-    result.moveBy(-location());
-    invalidateRect(result);
 }
 
 int Scrollbar::thumbPosition()

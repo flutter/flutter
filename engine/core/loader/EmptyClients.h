@@ -84,8 +84,6 @@ public:
 
     virtual bool tabsToLinks() override { return false; }
 
-    virtual void invalidateContentsAndRootView(const IntRect&) override { }
-    virtual void invalidateContentsForSlowScroll(const IntRect&) override { }
     virtual void scheduleAnimation() override { }
 
     virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }
