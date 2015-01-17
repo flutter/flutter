@@ -241,17 +241,16 @@ bool FilterEffectRenderer::build(RenderObject* renderer, const FilterOperations&
     return true;
 }
 
-bool FilterEffectRenderer::updateBackingStoreRect(const FloatRect& floatFilterRect)
+void FilterEffectRenderer::updateBackingStoreRect(const FloatRect& floatFilterRect)
 {
     IntRect filterRect = enclosingIntRect(floatFilterRect);
     if (!filterRect.isEmpty() && FilterEffect::isFilterSizeValid(filterRect)) {
         FloatRect currentSourceRect = sourceImageRect();
         if (filterRect != currentSourceRect) {
             setSourceImageRect(filterRect);
-            return true;
+            return;
         }
     }
-    return false;
 }
 
 void FilterEffectRenderer::allocateBackingStoreIfNeeded()
@@ -297,7 +296,6 @@ bool FilterEffectRendererHelper::prepareFilterEffect(RenderLayer* renderLayer, c
 {
     ASSERT(m_haveFilterEffect && renderLayer->filterRenderer());
     m_renderLayer = renderLayer;
-    m_paintInvalidationRect = dirtyRect;
 
     // Prepare a transformation that brings the coordinates into the space
     // filter coordinates are defined in.
@@ -320,13 +318,7 @@ bool FilterEffectRendererHelper::prepareFilterEffect(RenderLayer* renderLayer, c
     filter->setFilterRegion(filter->mapAbsoluteRectToLocalRect(filterSourceRect));
     filter->lastEffect()->determineFilterPrimitiveSubregion(MapRectForward);
 
-    bool hasUpdatedBackingStore = filter->updateBackingStoreRect(filterSourceRect);
-    if (filter->hasFilterThatMovesPixels()) {
-        if (hasUpdatedBackingStore)
-            m_paintInvalidationRect = filterSourceRect;
-        else
-            m_paintInvalidationRect.intersect(filterSourceRect);
-    }
+    filter->updateBackingStoreRect(filterSourceRect);
     return true;
 }
 

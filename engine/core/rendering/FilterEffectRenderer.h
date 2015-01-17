@@ -59,13 +59,10 @@ public:
     bool prepareFilterEffect(RenderLayer*, const LayoutRect& filterBoxRect, const LayoutRect& dirtyRect);
     GraphicsContext* beginFilterEffect(GraphicsContext* oldContext);
     GraphicsContext* applyFilterEffect();
-
-    const LayoutRect& paintInvalidationRect() const { return m_paintInvalidationRect; }
 private:
     GraphicsContext* m_savedGraphicsContext;
     RenderLayer* m_renderLayer;
 
-    LayoutRect m_paintInvalidationRect;
     FloatRect m_filterBoxRect;
     bool m_haveFilterEffect;
 };
@@ -90,7 +87,7 @@ public:
     ImageBuffer* output() const { return lastEffect()->asImageBuffer(); }
 
     bool build(RenderObject* renderer, const FilterOperations&);
-    bool updateBackingStoreRect(const FloatRect& filterRect);
+    void updateBackingStoreRect(const FloatRect& filterRect);
     void allocateBackingStoreIfNeeded();
     void clearIntermediateResults();
     void apply();
