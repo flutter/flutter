@@ -1366,8 +1366,6 @@ private:
 
     void addAppliedTextDecoration(const AppliedTextDecoration&);
 
-    // FIXME(sky): Combine these first two.
-    bool diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& other) const;
     bool diffNeedsFullLayout(const RenderStyle& other) const;
     bool diffNeedsRecompositeLayer(const RenderStyle& other) const;
     void updatePropertySpecificDifferences(const RenderStyle& other, StyleDifference&) const;

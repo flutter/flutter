@@ -286,12 +286,9 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
 
     StyleDifference diff;
 
-    // FIXME(sky): Combine these two into one function call.
-    if (diffNeedsFullLayoutAndPaintInvalidation(other)
-        || diffNeedsFullLayout(other))
+    if (diffNeedsFullLayout(other)) {
         diff.setNeedsFullLayout();
-
-    if (!diff.needsFullLayout() && position() != StaticPosition && surround->offset != other.surround->offset) {
+    } else if (position() != StaticPosition && surround->offset != other.surround->offset) {
         // Optimize for the case where a positioned layer is moving but not changing size.
         if (positionedObjectMovedOnly(surround->offset, other.surround->offset, m_box->width()))
             diff.setNeedsPositionedMovementLayout();
@@ -310,7 +307,7 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
     return diff;
 }
 
-bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& other) const
+bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
 {
     // FIXME: Not all cases in this method need both full layout and paint invalidation.
     // Should move cases into diffNeedsFullLayout() if
@@ -422,13 +419,6 @@ bool RenderStyle::diffNeedsFullLayoutAndPaintInvalidation(const RenderStyle& oth
         return true;
     }
 
-    // Movement of non-static-positioned object is special cased in RenderStyle::visualInvalidationDiff().
-
-    return false;
-}
-
-bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
-{
     if (m_box.get() != other.m_box.get()) {
         if (m_box->width() != other.m_box->width()
             || m_box->minWidth() != other.m_box->minWidth()
@@ -455,6 +445,8 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
         if (surround->padding != other.surround->padding)
             return true;
     }
+
+    // Movement of non-static-positioned object is special cased in RenderStyle::visualInvalidationDiff().
 
     return false;
 }
