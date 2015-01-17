@@ -1659,19 +1659,17 @@ bool Node::isUserActionElementFocused() const
 
 void Node::setCustomElementState(CustomElementState newState)
 {
-    CustomElementState oldState = customElementState();
-
     switch (newState) {
     case NotCustomElement:
         ASSERT_NOT_REACHED(); // Everything starts in this state
         return;
 
     case WaitingForUpgrade:
-        ASSERT(NotCustomElement == oldState);
+        ASSERT(NotCustomElement == customElementState());
         break;
 
     case Upgraded:
-        ASSERT(WaitingForUpgrade == oldState);
+        ASSERT(WaitingForUpgrade == customElementState());
         break;
     }
 
