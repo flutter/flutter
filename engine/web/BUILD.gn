@@ -66,7 +66,6 @@ component("web") {
     "WebHitTestResult.cpp",
     "WebImageCache.cpp",
     "WebImageDecoder.cpp",
-    "WebInputEvent.cpp",
     "WebInputEventConversion.cpp",
     "WebInputEventConversion.h",
     "Sky.cpp",

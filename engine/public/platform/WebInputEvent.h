@@ -28,15 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_
-#define SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_
-
-#include "../platform/WebCommon.h"
-#include "../platform/WebGestureDevice.h"
-#include "../platform/WebRect.h"
-#include "sky/engine/public/web/WebTouchPoint.h"
+#ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBINPUTEVENT_H_
+#define SKY_ENGINE_PUBLIC_PLATFORM_WEBINPUTEVENT_H_
 
 #include <string.h>
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebGestureDevice.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebTouchPoint.h"
 
 namespace blink {
 
@@ -517,4 +516,4 @@ public:
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_PUBLIC_WEB_WEBINPUTEVENT_H_
+#endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBINPUTEVENT_H_

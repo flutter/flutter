@@ -36,7 +36,7 @@
 #include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/PlatformTouchEvent.h"
 #include "sky/engine/platform/PlatformWheelEvent.h"
-#include "sky/engine/public/web/WebInputEvent.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
 

@@ -39,7 +39,7 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/public/web/WebInputEvent.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/wtf/CurrentTime.h"
 

@@ -133,6 +133,7 @@ source_set("platform") {
     "exported/WebHTTPBody.cpp",
     "exported/WebHTTPLoadInfo.cpp",
     "exported/WebImageSkia.cpp",
+    "exported/WebInputEvent.cpp",
     "exported/WebString.cpp",
     "exported/WebTransformKeyframe.cpp",
     "exported/WebURL.cpp",

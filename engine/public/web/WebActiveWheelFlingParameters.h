@@ -29,9 +29,9 @@
 #include "../platform/WebCommon.h"
 #include "../platform/WebFloatPoint.h"
 #include "../platform/WebGestureDevice.h"
+#include "../platform/WebInputEvent.h"
 #include "../platform/WebPoint.h"
 #include "../platform/WebSize.h"
-#include "sky/engine/public/web/WebInputEvent.h"
 
 namespace blink {
 

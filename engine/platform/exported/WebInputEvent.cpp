@@ -29,7 +29,7 @@
  */
 
 #include "sky/engine/config.h"
-#include "sky/engine/public/web/WebInputEvent.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 
 #include <ctype.h>
 #include "sky/engine/platform/KeyboardCodes.h"

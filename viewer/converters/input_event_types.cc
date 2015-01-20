@@ -7,7 +7,7 @@
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "mojo/services/input_events/public/interfaces/input_event_constants.mojom.h"
-#include "sky/engine/public/web/WebInputEvent.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace sky {
 namespace {
