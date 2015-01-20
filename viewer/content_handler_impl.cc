@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "mojo/public/cpp/utility/run_loop.h"
 #include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "sky/viewer/document_view.h"
 
@@ -50,6 +51,10 @@ class SkyApplication : public mojo::Application {
                      base::Unretained(this), base::Passed(&loader),
                      base::Passed(&services), base::Passed(&exposed_services)));
     }
+  }
+
+  void RequestQuit() override {
+    mojo::RunLoop::current()->Quit();
   }
 
  private:
