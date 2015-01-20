@@ -295,8 +295,6 @@ public:
 
     void click();
 
-    String textFromChildren();
-
 protected:
     Element(const QualifiedName& tagName, Document*, ConstructionType);
 

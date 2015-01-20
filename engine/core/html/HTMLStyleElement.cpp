@@ -30,6 +30,7 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
+#include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -124,8 +125,9 @@ void HTMLStyleElement::process()
 
     MediaQueryEvaluator screenEval("screen", true);
     if (screenEval.eval(mediaQueries.get())) {
-        const String& text = textFromChildren();
-        m_sheet = document().styleEngine()->createSheet(this, text);
+        if (hasOneTextChild())
+            toText(firstChild())->atomize();
+        m_sheet = document().styleEngine()->createSheet(this, textContent());
         m_sheet->setMediaQueries(mediaQueries.release());
     }
 

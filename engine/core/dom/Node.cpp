@@ -908,6 +908,8 @@ ContainerNode* Node::ownerScope() const
 
 String Node::textContent() const
 {
+    if (isTextNode())
+        return toText(this)->data();
     StringBuilder content;
     for (const Node* node = this; node; node = NodeTraversal::next(*node, this)) {
         if (node->isTextNode())
