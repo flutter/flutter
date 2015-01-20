@@ -66,8 +66,6 @@ public:
 
     void updateActiveStyleSheets();
 
-    const MediaQueryResultList& viewportDependentMediaQueryResults() const;
-
     Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() { return m_authorStyleSheets; }
     const Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() const { return m_authorStyleSheets; }
 
@@ -83,7 +81,6 @@ private:
     TreeScope& m_scope;
     DocumentOrderedList m_styleSheetCandidateNodes;
     Vector<RefPtr<CSSStyleSheet>> m_authorStyleSheets;
-    MediaQueryResultList m_viewportDependentMediaQueryResults;
     RuleFeatureSet m_features;
 };
 

@@ -41,9 +41,9 @@
 #include "sky/engine/core/css/CSSToLengthConversionData.h"
 #include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/core/css/MediaQuery.h"
+#include "sky/engine/core/css/MediaQueryExp.h"
 #include "sky/engine/core/css/MediaValuesDynamic.h"
 #include "sky/engine/core/css/PointerProperties.h"
-#include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -116,7 +116,7 @@ static bool applyRestrictor(MediaQuery::Restrictor r, bool value)
     return r == MediaQuery::Not ? !value : value;
 }
 
-bool MediaQueryEvaluator::eval(const MediaQuery* query, MediaQueryResultList* viewportDependentMediaQueryResults) const
+bool MediaQueryEvaluator::eval(const MediaQuery* query) const
 {
     if (!mediaTypeMatch(query->mediaType()))
         return applyRestrictor(query->restrictor(), false);
@@ -125,10 +125,7 @@ bool MediaQueryEvaluator::eval(const MediaQuery* query, MediaQueryResultList* vi
     // Iterate through expressions, stop if any of them eval to false (AND semantics).
     size_t i = 0;
     for (; i < expressions.size(); ++i) {
-        bool exprResult = eval(expressions.at(i).get());
-        if (viewportDependentMediaQueryResults && expressions.at(i)->isViewportDependent())
-            viewportDependentMediaQueryResults->append(adoptRef(new MediaQueryResult(*expressions.at(i), exprResult)));
-        if (!exprResult)
+        if (!eval(expressions.at(i).get()))
             break;
     }
 
@@ -136,7 +133,7 @@ bool MediaQueryEvaluator::eval(const MediaQuery* query, MediaQueryResultList* vi
     return applyRestrictor(query->restrictor(), expressions.size() == i);
 }
 
-bool MediaQueryEvaluator::eval(const MediaQuerySet* querySet, MediaQueryResultList* viewportDependentMediaQueryResults) const
+bool MediaQueryEvaluator::eval(const MediaQuerySet* querySet) const
 {
     if (!querySet)
         return true;
@@ -148,7 +145,7 @@ bool MediaQueryEvaluator::eval(const MediaQuerySet* querySet, MediaQueryResultLi
     // Iterate over queries, stop if any of them eval to true (OR semantics).
     bool result = false;
     for (size_t i = 0; i < queries.size() && !result; ++i)
-        result = eval(queries[i].get(), viewportDependentMediaQueryResults);
+        result = eval(queries[i].get());
 
     return result;
 }

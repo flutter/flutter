@@ -222,15 +222,13 @@ void FrameView::performPreLayoutTasks()
     }
 
     Document* document = m_frame->document();
-    if (wasViewportResized())
+    if (wasViewportResized()) {
         document->notifyResizeForViewportUnits();
-
-    // Viewport-dependent media queries may cause us to need completely different style information.
-    if (document->styleResolver().mediaQueryAffectedByViewportChange()) {
-        document->styleResolverChanged();
         document->mediaQueryAffectingValueChanged();
-    } else {
-        document->evaluateMediaQueryList();
+
+        // TODO(esprehn): This is way too much work, it rebuilds the entire sheet list
+        // and does a full document recalc.
+        document->styleResolverChanged();
     }
 
     document->updateRenderTreeIfNeeded();

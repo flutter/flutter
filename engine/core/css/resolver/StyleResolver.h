@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/resolver/MatchedPropertiesCache.h"
-#include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 #include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -92,11 +91,6 @@ public:
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.
     void invalidateMatchedPropertiesCache();
 
-    MediaQueryEvaluator& medium() const { return *m_medium; }
-
-    void resetMediaQueryAffectedByViewportChange();
-    void addMediaQueryAffectedByViewportChange(const MediaQueryResultList&);
-
     void notifyResizeForViewportUnits();
 
     StyleSharingList& styleSharingList() { return m_styleSharingList; }
@@ -149,11 +143,8 @@ private:
     MatchedPropertiesCache m_matchedPropertiesCache;
 
     OwnPtr<MediaQueryEvaluator> m_medium;
-    MediaQueryResultList m_viewportDependentMediaQueryResults;
 
     RawPtr<Document> m_document;
-
-    bool m_printMediaType;
 
     StyleResourceLoader m_styleResourceLoader;
 

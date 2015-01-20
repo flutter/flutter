@@ -299,7 +299,6 @@ sky_core_files = [
   "css/resolver/MatchRequest.h",
   "css/resolver/MatchResult.cpp",
   "css/resolver/MatchResult.h",
-  "css/resolver/MediaQueryResult.h",
   "css/resolver/ScopedStyleResolver.cpp",
   "css/resolver/ScopedStyleResolver.h",
   "css/resolver/SharedStyleFinder.cpp",

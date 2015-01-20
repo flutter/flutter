@@ -46,14 +46,10 @@ ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
 
 void ScopedStyleResolver::appendStyleSheet(CSSStyleSheet& sheet)
 {
-    Document& document = m_scope.document();
-    StyleResolver& styleResolver = document.styleResolver();
-    MediaQueryEvaluator& medium  = styleResolver.medium();
+    MediaQueryEvaluator medium(m_scope.document().view());
 
-    if (sheet.mediaQueries() && !medium.eval(sheet.mediaQueries(), &m_viewportDependentMediaQueryResults))
+    if (sheet.mediaQueries() && !medium.eval(sheet.mediaQueries()))
         return;
-
-    styleResolver.addMediaQueryAffectedByViewportChange(m_viewportDependentMediaQueryResults);
 
     const RuleSet& ruleSet = sheet.contents()->ensureRuleSet();
     m_features.add(ruleSet.features());
@@ -77,15 +73,9 @@ void ScopedStyleResolver::updateActiveStyleSheets()
         toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
 
     m_features.clear();
-    m_viewportDependentMediaQueryResults.clear();
 
     for (RefPtr<CSSStyleSheet>& sheet : m_authorStyleSheets)
         appendStyleSheet(*sheet);
-}
-
-const MediaQueryResultList& ScopedStyleResolver::viewportDependentMediaQueryResults() const
-{
-    return m_viewportDependentMediaQueryResults;
 }
 
 void ScopedStyleResolver::addStyleSheetCandidateNode(HTMLStyleElement& element)

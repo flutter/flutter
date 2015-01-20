@@ -55,7 +55,6 @@
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/resolver/AnimatedStyleBuilder.h"
 #include "sky/engine/core/css/resolver/MatchResult.h"
-#include "sky/engine/core/css/resolver/MediaQueryResult.h"
 #include "sky/engine/core/css/resolver/SharedStyleFinder.h"
 #include "sky/engine/core/css/resolver/StyleAdjuster.h"
 #include "sky/engine/core/css/resolver/StyleBuilder.h"
@@ -118,18 +117,10 @@ static RuleSet& defaultStyles()
 
 StyleResolver::StyleResolver(Document& document)
     : m_document(document)
-    , m_printMediaType(false)
     , m_styleResourceLoader(document.fetcher())
     , m_styleResolverStatsSequence(0)
     , m_accessCount(0)
 {
-    FrameView* view = document.view();
-    if (view) {
-        m_medium = adoptPtr(new MediaQueryEvaluator(&view->frame()));
-        m_printMediaType = equalIgnoringCase(view->mediaType(), MediaTypeNames::print);
-    } else {
-        m_medium = adoptPtr(new MediaQueryEvaluator("all"));
-    }
 }
 
 void StyleResolver::addToStyleSharingList(Element& element)
@@ -702,25 +693,6 @@ void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, s
             StyleBuilder::applyProperty(properties[i].property, state, properties[i].value);
         }
     }
-}
-
-void StyleResolver::resetMediaQueryAffectedByViewportChange()
-{
-    m_viewportDependentMediaQueryResults.clear();
-}
-
-void StyleResolver::addMediaQueryAffectedByViewportChange(const MediaQueryResultList& list)
-{
-    m_viewportDependentMediaQueryResults.appendVector(list);
-}
-
-bool StyleResolver::mediaQueryAffectedByViewportChange() const
-{
-    for (unsigned i = 0; i < m_viewportDependentMediaQueryResults.size(); ++i) {
-        if (m_medium->eval(m_viewportDependentMediaQueryResults[i]->expression()) != m_viewportDependentMediaQueryResults[i]->result())
-            return true;
-    }
-    return false;
 }
 
 } // namespace blink

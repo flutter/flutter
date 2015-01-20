@@ -35,12 +35,9 @@ namespace blink {
 class LocalFrame;
 class MediaQuery;
 class MediaQueryExp;
-class MediaQueryResult;
 class MediaQuerySet;
 class MediaValues;
 class RenderStyle;
-
-typedef Vector<RefPtr<MediaQueryResult> > MediaQueryResultList;
 
 // Class that evaluates css media queries as defined in
 // CSS3 Module "Media Queries" (http://www.w3.org/TR/css3-mediaqueries/)
@@ -79,10 +76,10 @@ public:
     bool mediaTypeMatch(const String& mediaTypeToMatch) const;
 
     // Evaluates a list of media queries.
-    bool eval(const MediaQuerySet*, MediaQueryResultList* = 0) const;
+    bool eval(const MediaQuerySet*) const;
 
     // Evaluates media query.
-    bool eval(const MediaQuery*, MediaQueryResultList*) const;
+    bool eval(const MediaQuery*) const;
 
     // Evaluates media query subexpression, ie "and (media-feature: value)" part.
     bool eval(const MediaQueryExp*) const;
