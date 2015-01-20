@@ -82,6 +82,10 @@ overflowchanged
 pagehide
 pageshow
 paste
+pointercancel
+pointerdown
+pointermove
+pointerup
 popstate
 progress
 push

@@ -86,6 +86,12 @@ public:
         Undefined = -1,
         TypeFirst = Undefined,
 
+        // WebPointerEvent
+        PointerDown,
+        PointerUp,
+        PointerMove,
+        PointerCancel,
+
         // WebMouseEvent
         MouseDown,
         MouseTypeFirst = MouseDown,
@@ -214,6 +220,39 @@ protected:
         type = Undefined;
         modifiers = 0;
     }
+};
+
+// WebPointerEvent ------------------------------------------------------------
+
+class WebPointerEvent : public WebInputEvent {
+public:
+    enum Kind {
+        Touch,
+        Mouse,
+        Stylus,
+    };
+
+    int pointer = 0;
+    Kind kind = Touch;
+    double x = 0;
+    double y = 0;
+    double dx = 0;
+    double dy = 0;
+    int buttons = 0;
+    double pressure = 0;
+    double pressureMin = 0;
+    double pressureMax = 0;
+    double distance = 0;
+    double distanceMin = 0;
+    double distanceMax = 0;
+    double radiusMajor = 0;
+    double radiusMinor = 0;
+    double radiusMin = 0;
+    double radiusMax = 0;
+    double orientation = 0;
+    double tilt = 0;
+
+    WebPointerEvent() : WebInputEvent(sizeof(WebPointerEvent)) {}
 };
 
 // WebKeyboardEvent -----------------------------------------------------------

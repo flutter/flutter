@@ -8,6 +8,7 @@
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
 
@@ -43,6 +44,10 @@ public:
     {
         return adoptRef(new PointerEvent);
     }
+    static PassRefPtr<PointerEvent> create(const WebPointerEvent& event)
+    {
+        return adoptRef(new PointerEvent(event));
+    }
     static PassRefPtr<PointerEvent> create(const AtomicString& type, const PointerEventInit& initializer)
     {
         return adoptRef(new PointerEvent(type, initializer));
@@ -72,11 +77,11 @@ public:
     double orientation() const { return m_orientation; }
     double tilt() const { return m_tilt; }
 
-protected:
+private:
     PointerEvent();
+    explicit PointerEvent(const WebPointerEvent& event);
     PointerEvent(const AtomicString&, const PointerEventInit&);
 
-private:
     int m_pointer;
     String m_kind;
     double m_x;
