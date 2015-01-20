@@ -716,7 +716,7 @@ HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTe
         return result;
 
     // hitTestResultAtPoint is specifically used to hitTest into all frames, thus it always allows child frame content.
-    HitTestRequest request(hitType | HitTestRequest::AllowChildFrameContent);
+    HitTestRequest request(hitType);
     m_frame->contentRenderer()->hitTest(request, result);
     if (!request.readOnly())
         m_frame->document()->updateHoverActiveState(request, result.innerElement());
@@ -1898,7 +1898,7 @@ GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGe
     // Now apply hover/active state to the final target.
     // FIXME: This is supposed to send mouseenter/mouseleave events, but doesn't because we
     // aren't passing a PlatformMouseEvent.
-    HitTestRequest request(hitType | HitTestRequest::AllowChildFrameContent);
+    HitTestRequest request(hitType);
     if (!request.readOnly())
         m_frame->document()->updateHoverActiveState(request, hitTestResult.innerElement());
 
@@ -1912,7 +1912,7 @@ GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGe
 
 HitTestRequest::HitTestRequestType EventHandler::getHitTypeForGestureType(PlatformEvent::Type type)
 {
-    HitTestRequest::HitTestRequestType hitType = HitTestRequest::TouchEvent | HitTestRequest::AllowFrameScrollbars;
+    HitTestRequest::HitTestRequestType hitType = HitTestRequest::TouchEvent;
     switch (type) {
     case PlatformEvent::GestureShowPress:
     case PlatformEvent::GestureTapUnconfirmed:
