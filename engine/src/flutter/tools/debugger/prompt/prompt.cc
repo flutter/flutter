@@ -178,7 +178,7 @@ class Prompt : public mojo::ApplicationDelegate,
 
   void StartProfiling(int connection_id) {
     base::debug::StartProfiling("sky_viewer.pprof");
-    Respond(connection_id, "Starting profiling (type 'stop_profiling' to stop");
+    Respond(connection_id, "Starting profiling (stop with 'stop_profiling')");
   }
 
   void StopProfiling(int connection_id) {
