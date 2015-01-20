@@ -5,17 +5,14 @@
 #include "sky/compositor/layer.h"
 
 #include "base/debug/trace_event.h"
-#include "mojo/skia/ganesh_surface.h"
-#include "sky/compositor/display_delegate.h"
 #include "sky/compositor/layer_host.h"
+#include "sky/compositor/rasterizer.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace sky {
 
-Layer::Layer(LayerClient* client)
-  : client_(client),
-    host_(nullptr) {
-  delegate_.reset(DisplayDelegate::create(client));
+Layer::Layer(LayerClient* client) : client_(client) {
 }
 
 Layer::~Layer() {
@@ -25,22 +22,25 @@ void Layer::SetSize(const gfx::Size& size) {
   size_ = size;
 }
 
-void Layer::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
-  delegate_->GetPixelsForTesting(pixels);
-}
-
 void Layer::Display() {
   TRACE_EVENT0("sky", "Layer::Display");
+  DCHECK(rasterizer_);
+  auto picture = RecordPicture();
+  texture_ = rasterizer_->Rasterize(picture.get());
+}
 
-  DCHECK(host_);
+skia::RefPtr<SkPicture> Layer::RecordPicture() {
+  TRACE_EVENT0("sky", "Layer::RecordPicture");
 
-  mojo::GaneshSurface surface(host_->ganesh_context(),
-                              host_->resource_manager()->CreateTexture(size_));
+  SkRTreeFactory factory;
+  SkPictureRecorder recorder;
 
-  gfx::Rect rect(size_);
-  delegate_->Paint(surface, rect);
+  auto canvas = skia::SharePtr(recorder.beginRecording(
+      size_.width(), size_.height(), &factory,
+      SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag));
 
-  texture_ = surface.TakeTexture();
+  client_->PaintContents(canvas.get(), gfx::Rect(size_));
+  return skia::AdoptRef(recorder.endRecordingAsPicture());
 }
 
 scoped_ptr<mojo::GLTexture> Layer::GetTexture() {

@@ -39,11 +39,6 @@ void LayerHost::SetNeedsAnimate() {
 void LayerHost::SetRootLayer(scoped_refptr<Layer> layer) {
   DCHECK(!root_layer_.get());
   root_layer_ = layer;
-  root_layer_->set_host(this);
-}
-
-void LayerHost::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
-  return root_layer_->GetPixelsForTesting(pixels);
 }
 
 void LayerHost::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {

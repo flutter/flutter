@@ -4,12 +4,6 @@
 
 source_set("compositor") {
   sources = [
-    "display_delegate.cc",
-    "display_delegate.h",
-    "display_delegate_bitmap.cc",
-    "display_delegate_bitmap.h",
-    "display_delegate_ganesh.cc",
-    "display_delegate_ganesh.h",
     "layer.cc",
     "layer.h",
     "layer_client.cc",
@@ -18,6 +12,12 @@ source_set("compositor") {
     "layer_host.h",
     "layer_host_client.cc",
     "layer_host_client.h",
+    "rasterizer.cc",
+    "rasterizer.h",
+    "rasterizer_bitmap.cc",
+    "rasterizer_bitmap.h",
+    "rasterizer_ganesh.cc",
+    "rasterizer_ganesh.h",
     "resource_manager.cc",
     "resource_manager.h",
     "surface_allocator.cc",
