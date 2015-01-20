@@ -104,17 +104,6 @@ const AtomicString& HTMLStyleElement::media() const
     return getAttribute(HTMLNames::mediaAttr);
 }
 
-ContainerNode* HTMLStyleElement::scopingNode()
-{
-    if (!inActiveDocument())
-        return 0;
-
-    if (isInShadowTree())
-        return containingShadowRoot();
-
-    return &document();
-}
-
 void HTMLStyleElement::clearSheet()
 {
     ASSERT(m_sheet);

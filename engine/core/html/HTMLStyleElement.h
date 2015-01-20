@@ -38,8 +38,6 @@ public:
     static PassRefPtr<HTMLStyleElement> create(Document&);
     virtual ~HTMLStyleElement();
 
-    ContainerNode* scopingNode();
-
     CSSStyleSheet* sheet() const { return m_sheet.get(); }
 
     const AtomicString& media() const;
