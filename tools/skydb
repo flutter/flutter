@@ -320,6 +320,16 @@ class SkyDebugger(object):
             url = args.url_or_path
         self._send_command_to_sky('/load', url)
 
+    def stop_profiling_command(self, args):
+        self._send_command_to_sky('/stop_profiling')
+        # We need to munge the profile to replace foo.mojo with libfoo.so so
+        # that pprof knows this represents an SO.
+        with open("sky_viewer.pprof", "r+") as profile_file:
+            data = profile_file.read()
+            profile_file.seek(0)
+            profile_file.write(re.sub(r'(\w+)\.mojo', r'lib\1_library.so', data))
+            profile_file.truncate()
+
     def _command_base_url(self):
         return 'http://localhost:%s' % self.pids['sky_command_port']
 
@@ -507,8 +517,10 @@ class SkyDebugger(object):
             'stop the running sky instance')
         self._add_basic_command(subparsers, 'start_profiling', '/start_profiling',
             'starts profiling the running sky instance (Linux only)')
-        self._add_basic_command(subparsers, 'stop_profiling', '/stop_profiling',
-            'stios profiling the running sky instance (Linux only)')
+
+        stop_profiling_parser = subparsers.add_parser('stop_profiling',
+            help='stops profiling the running sky instance (Linux only)')
+        stop_profiling_parser.set_defaults(func=self.stop_profiling_command)
 
         load_parser = subparsers.add_parser('load',
             help='load a new page in the currently running sky')
