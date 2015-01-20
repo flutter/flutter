@@ -20,6 +20,8 @@
 #include "skia/ext/refptr.h"
 #include "sky/compositor/layer.h"
 #include "sky/compositor/layer_host.h"
+#include "sky/compositor/rasterizer_bitmap.h"
+#include "sky/compositor/rasterizer_ganesh.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebHTTPHeaderVisitor.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
@@ -38,6 +40,7 @@
 #include "sky/viewer/converters/url_request_types.h"
 #include "sky/viewer/internals.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
+#include "sky/viewer/runtime_flags.h"
 #include "sky/viewer/script/script_runner.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -79,12 +82,13 @@ DocumentView::DocumentView(
     mojo::Shell* shell)
     : response_(response.Pass()),
       shell_(shell),
-      web_view_(NULL),
-      root_(NULL),
+      web_view_(nullptr),
+      root_(nullptr),
       view_manager_client_factory_(shell_, this),
       inspector_service_factory_(this),
-      weak_factory_(this),
-      debugger_id_(s_next_debugger_id++) {
+      bitmap_rasterizer_(nullptr),
+      debugger_id_(s_next_debugger_id++),
+      weak_factory_(this) {
   // TODO(jamesr): Is this right?
   exported_services_.AddService(&view_manager_client_factory_);
   mojo::WeakBindToPipe(&exported_services_, services.PassMessagePipe());
@@ -137,11 +141,24 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
 void DocumentView::initializeLayerTreeView() {
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
+  root_layer_->set_rasterizer(CreateRasterizer());
   layer_host_->SetRootLayer(root_layer_);
 }
 
+scoped_ptr<Rasterizer> DocumentView::CreateRasterizer() {
+  if (!RuntimeFlags::Get().testing())
+    return make_scoped_ptr(new RasterizerGanesh(layer_host_.get()));
+  // TODO(abarth): If we have more than one layer, we'll need to re-think how
+  // we capture pixels for testing;
+  DCHECK(!bitmap_rasterizer_);
+  bitmap_rasterizer_ = new RasterizerBitmap(layer_host_.get());
+  return make_scoped_ptr(bitmap_rasterizer_);
+}
+
 void DocumentView::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
-  return layer_host_->GetPixelsForTesting(pixels);
+  DCHECK(RuntimeFlags::Get().testing()) << "Requires testing runtime flag";
+  DCHECK(root_layer_) << "The root layer owns the rasterizer";
+  return bitmap_rasterizer_->GetPixelsForTesting(pixels);
 }
 
 mojo::Shell* DocumentView::GetShell() {

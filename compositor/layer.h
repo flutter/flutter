@@ -7,12 +7,14 @@
 
 #include "base/memory/ref_counted.h"
 #include "mojo/gpu/gl_texture.h"
+#include "skia/ext/refptr.h"
 #include "sky/compositor/layer_client.h"
+#include "sky/compositor/rasterizer.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/rect.h"
 
 namespace sky {
 
-class DisplayDelegate;
 class LayerHost;
 
 class Layer : public base::RefCounted<Layer> {
@@ -20,24 +22,26 @@ class Layer : public base::RefCounted<Layer> {
   explicit Layer(LayerClient* client);
 
   void SetSize(const gfx::Size& size);
-  void GetPixelsForTesting(std::vector<unsigned char>* pixels);
   void Display();
 
   scoped_ptr<mojo::GLTexture> GetTexture();
 
   const gfx::Size& size() const { return size_; }
 
-  void set_host(LayerHost* host) { host_ = host; }
+  void set_rasterizer(scoped_ptr<Rasterizer> rasterizer) {
+    rasterizer_ = rasterizer.Pass();
+  }
 
  private:
   friend class base::RefCounted<Layer>;
   ~Layer();
 
+  skia::RefPtr<SkPicture> RecordPicture();
+
   LayerClient* client_;
-  LayerHost* host_;
   gfx::Size size_;
   scoped_ptr<mojo::GLTexture> texture_;
-  scoped_ptr<DisplayDelegate> delegate_;
+  scoped_ptr<Rasterizer> rasterizer_;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };

@@ -14,17 +14,13 @@
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
-#include "sky/compositor/display_delegate_bitmap.h"
-#include "sky/compositor/display_delegate_ganesh.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/viewer/content_handler_impl.h"
 #include "sky/viewer/document_view.h"
 #include "sky/viewer/platform/platform_impl.h"
+#include "sky/viewer/runtime_flags.h"
 
 namespace sky {
-
-// Load the viewer in testing mode so we can dump pixels.
-const char kTesting[] = "--testing";
 
 class Viewer : public mojo::ApplicationDelegate,
                public mojo::InterfaceFactory<mojo::ContentHandler> {
@@ -36,13 +32,7 @@ class Viewer : public mojo::ApplicationDelegate,
  private:
   // Overridden from ApplicationDelegate:
   virtual void Initialize(mojo::ApplicationImpl* app) override {
-    if (app->HasArg(kTesting)) {
-      DisplayDelegate::setDisplayDelegateCreateFunction(
-          DisplayDelegateBitmap::create);
-    } else {
-      DisplayDelegate::setDisplayDelegateCreateFunction(
-          DisplayDelegateGanesh::create);
-    }
+    RuntimeFlags::Initialize(app);
 
     platform_impl_.reset(new PlatformImpl(app));
     blink::initialize(platform_impl_.get());

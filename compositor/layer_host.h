@@ -41,8 +41,6 @@ class LayerHost : public SurfaceHolder::Client {
   void SetNeedsAnimate();
   void SetRootLayer(scoped_refptr<Layer> layer);
 
-  void GetPixelsForTesting(std::vector<unsigned char>* pixels);
-
  private:
   enum State {
     kReadyForFrame,

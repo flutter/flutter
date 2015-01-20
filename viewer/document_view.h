@@ -35,6 +35,8 @@ class InspectorBackendMojo;
 
 namespace sky {
 class InspectorHostImpl;
+class Rasterizer;
+class RasterizerBitmap;
 class ScriptRunner;
 class Layer;
 class LayerHost;
@@ -118,6 +120,7 @@ class DocumentView : public blink::ServiceProvider,
 
   void Load(mojo::URLResponsePtr response);
   float GetDevicePixelRatio() const;
+  scoped_ptr<Rasterizer> CreateRasterizer();
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
@@ -130,11 +133,13 @@ class DocumentView : public blink::ServiceProvider,
   InspectorServiceFactory inspector_service_factory_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
+  RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   scoped_ptr<ScriptRunner> script_runner_;
   scoped_ptr<InspectorHostImpl> inspector_host_;
   scoped_ptr<inspector::InspectorBackendMojo> inspector_backend_;
-  base::WeakPtrFactory<DocumentView> weak_factory_;
   int debugger_id_;
+
+  base::WeakPtrFactory<DocumentView> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentView);
 };
