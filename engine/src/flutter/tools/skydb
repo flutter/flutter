@@ -40,6 +40,8 @@ DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/example
 
 ANDROID_PACKAGE = "org.chromium.mojo.shell"
 ANDROID_ACTIVITY = "%s/.MojoShellActivity" % ANDROID_PACKAGE
+CACHE_LINKS_PATH = '/tmp/mojo_cache_links'
+SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs'
 
 
 # FIXME: Move this into mopy.config
@@ -389,12 +391,9 @@ class SkyDebugger(object):
         ]
         subprocess.call(['adb', 'logcat', '-d', '-s'] + TAGS)
 
-    def gdb_attach_command(self, args):
-        self.paths = self._create_paths_for_build_dir(self.pids['build_dir'])
-
+    def _start_mojo_cache_linker(self, links_path):
         self._kill_if_exists('mojo_cache_linker_pid', 'mojo cache linker')
 
-        links_path = '/tmp/mojo_cache_links'
         if not os.path.exists(links_path):
             os.makedirs(links_path)
         shell_link_path = os.path.join(links_path, 'libmojo_shell.so')
@@ -413,15 +412,11 @@ class SkyDebugger(object):
             self.pids['build_dir'],
             'http://localhost:%s' % self.pids['remote_sky_server_port']
         ]
-        self.pids['mojo_cache_linker_pid'] = \
-            subprocess.Popen(cache_linker_cmd, stdin=logcat.stdout).pid
+        return subprocess.Popen(cache_linker_cmd, stdin=logcat.stdout).pid
 
-        # Write out our pid file before we exec ourselves.
-        self._write_pid_file(PID_FILE_PATH, self.pids)
-
+    def _pull_system_libraries(self, system_libs_root):
         # Pull down the system libraries this pid has already mapped in.
-        # TODO(eseidel): This does not handle dynamic loads well.
-        system_libs_root = '/tmp/device_libs'
+        # TODO(eseidel): This does not handle dynamic loads.
         library_cacher_path = os.path.join(
             self.paths.sky_tools_directory, 'android_library_cacher.py')
         subprocess.call([
@@ -430,35 +425,57 @@ class SkyDebugger(object):
 
         # TODO(eseidel): adb_gdb does, this, unclear why solib-absolute-prefix
         # doesn't make this explicit listing not necessary?
-        system_lib_dirs = subprocess.check_output([
+        return subprocess.check_output([
             'find', system_libs_root,
             '-mindepth', '1',
             '-maxdepth', '4',
             '-type', 'd',
         ]).strip().split('\n')
 
-        # TODO(eseidel): Need to sync down system libraries into a directory.
-        symbol_search_paths = system_lib_dirs + [
-            links_path,
-            self.pids['build_dir'],
+
+    def gdb_attach_command(self, args):
+        self.paths = self._create_paths_for_build_dir(self.pids['build_dir'])
+
+        symbol_search_paths = [self.pids['build_dir']]
+        gdb_path = '/usr/bin/gdb'
+
+        init_commands = [
+            'file %s' % self.paths.mojo_shell_path,
+            'directory %s' % self.paths.src_root,
+            'target remote localhost:%s' % GDB_PORT,
         ]
-        # TODO(eseidel): We need to look up the toolchain somehow?
-        gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
-            'toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/'
-            'bin/arm-linux-androideabi-gdb')
-        gdb_command = [
-            gdb_path,
-            '--eval-command', 'file %s' % self.paths.mojo_shell_path,
-            '--eval-command', 'directory %s' % self.paths.src_root,
-            '--eval-command', 'target remote localhost:%s' % GDB_PORT,
-            '--eval-command', 'set solib-search-path %s' %
-                ':'.join(symbol_search_paths),
-            '--eval-command', 'set solib-absolute-prefix %s' % system_libs_root,
-        ]
-        print " ".join(gdb_command)
-        # We don't want python listening for signals or anything, so exec
-        # gdb and let it take the entire process.
-        os.execv(gdb_command[0], gdb_command)
+
+        # A bunch of extra work is needed for android:
+        if 'remote_sky_server_port' in self.pids:
+            pid = self._start_mojo_cache_linker(CACHE_LINKS_PATH)
+            self.pids['mojo_cache_linker_pid'] = pid
+
+            system_lib_dirs = self._pull_system_libraries(SYSTEM_LIBS_ROOT_PATH)
+            init_commands.append(
+                'set solib-absolute-prefix %s' % SYSTEM_LIBS_ROOT_PATH)
+
+            symbol_search_paths = system_lib_dirs + symbol_search_paths
+            symbol_search_paths.append(CACHE_LINKS_PATH)
+
+            # TODO(eseidel): We need to look up the toolchain somehow?
+            gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
+                'toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/'
+                'bin/arm-linux-androideabi-gdb')
+
+        # Set solib-search-path after letting android modify symbol_search_paths
+        init_commands.append(
+            'set solib-search-path %s' % ':'.join(symbol_search_paths))
+
+        exec_command = [gdb_path]
+        for command in init_commands:
+            exec_command += ['--eval-command', command]
+        print " ".join(exec_command)
+
+        # Write out our pid file before we exec ourselves.
+        self._write_pid_file(PID_FILE_PATH, self.pids)
+
+        # Exec gdb directly to avoid python intercepting symbols, etc.
+        os.execv(exec_command[0], exec_command)
 
     def print_crash_command(self, args):
         logcat_cmd = ['adb', 'logcat', '-d']
