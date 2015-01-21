@@ -119,7 +119,6 @@ static RuleSet& defaultStyles()
 StyleResolver::StyleResolver(Document& document)
     : m_document(document)
     , m_styleResolverStatsSequence(0)
-    , m_accessCount(0)
 {
 }
 
@@ -127,7 +126,7 @@ void StyleResolver::addToStyleSharingList(Element& element)
 {
     // Never add elements to the style sharing list if we're not in a recalcStyle,
     // otherwise we could leave stale pointers in there.
-    if (!document().inStyleRecalc())
+    if (!m_document.inStyleRecalc())
         return;
     ASSERT(element.supportsStyleSharing());
     INCREMENT_STYLE_STATS_COUNTER(*this, sharedStyleCandidates);
@@ -187,21 +186,19 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
 
 void StyleResolver::loadPendingResources(StyleResolverState& state)
 {
-    StyleResourceLoader loader(document().fetcher());
+    StyleResourceLoader loader(m_document.fetcher());
     loader.loadPendingResources(state.style(), state.elementStyleResources());
-    document().styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
+    m_document.styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
 }
 
 PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderStyle* defaultParent)
 {
-    ASSERT(document().frame());
-    ASSERT(document().settings());
+    ASSERT(m_document.frame());
+    ASSERT(m_document.settings());
 
-    didAccess();
-
-    if (element == document().documentElement())
-        document().setDirectionSetOnDocumentElement(false);
-    StyleResolverState state(document(), element, defaultParent);
+    if (element == m_document.documentElement())
+        m_document.setDirectionSetOnDocumentElement(false);
+    StyleResolverState state(m_document, element, defaultParent);
 
     if (state.parentStyle()) {
         SharedStyleFinder styleFinder(state.elementContext(), *this);
@@ -250,7 +247,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     setAnimationUpdateIfNeeded(state, *element);
 
     if (state.style()->hasViewportUnits())
-        document().setHasViewportUnits();
+        m_document.setHasViewportUnits();
 
     // Now return the style.
     return state.takeStyle();
@@ -258,12 +255,12 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
 
 PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const RenderStyle& elementStyle, RenderStyle* parentStyle, const StyleKeyframe* keyframe, const AtomicString& animationName)
 {
-    ASSERT(document().frame());
-    ASSERT(document().settings());
+    ASSERT(m_document.frame());
+    ASSERT(m_document.settings());
 
-    if (element == document().documentElement())
-        document().setDirectionSetOnDocumentElement(false);
-    StyleResolverState state(document(), element, parentStyle);
+    if (element == m_document.documentElement())
+        m_document.setDirectionSetOnDocumentElement(false);
+    StyleResolverState state(m_document, element, parentStyle);
 
     MatchResult result;
     result.addMatchedProperties(&keyframe->properties());
@@ -296,8 +293,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
 
     loadPendingResources(state);
 
-    didAccess();
-
     return state.takeStyle();
 }
 
@@ -324,13 +319,13 @@ PassRefPtr<AnimatableValue> StyleResolver::createAnimatableValueSnapshot(StyleRe
 
 PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
 {
-    StyleResolverState state(document(), 0);
+    StyleResolverState state(m_document, 0);
     state.setStyle(RenderStyle::create());
-    state.fontBuilder().initForStyleResolve(document(), state.style());
+    state.fontBuilder().initForStyleResolve(m_document, state.style());
     state.style()->setLineHeight(RenderStyle::initialLineHeight());
     state.setLineHeightValue(0);
     state.fontBuilder().setInitial();
-    state.style()->font().update(document().styleEngine()->fontSelector());
+    state.style()->font().update(m_document.styleEngine()->fontSelector());
     return state.takeStyle();
 }
 
@@ -346,7 +341,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForText(Text* textNode)
 
 void StyleResolver::updateFont(StyleResolverState& state)
 {
-    state.fontBuilder().createFont(document().styleEngine()->fontSelector(), state.parentStyle(), state.style());
+    state.fontBuilder().createFont(m_document.styleEngine()->fontSelector(), state.parentStyle(), state.style());
     if (state.fontBuilder().fontSizeHasViewportUnits())
         state.style()->setHasViewportUnits();
 }
@@ -647,7 +642,7 @@ void StyleResolver::printStats()
 {
     if (!m_styleResolverStats)
         return;
-    fprintf(stderr, "=== Style Resolver Stats (resolve #%u) (%s) ===\n", ++m_styleResolverStatsSequence, document().url().string().utf8().data());
+    fprintf(stderr, "=== Style Resolver Stats (resolve #%u) (%s) ===\n", ++m_styleResolverStatsSequence, m_document.url().string().utf8().data());
     fprintf(stderr, "%s\n", m_styleResolverStats->report().utf8().data());
     fprintf(stderr, "== Totals ==\n");
     fprintf(stderr, "%s\n", m_styleResolverStatsTotals->report().utf8().data());
@@ -655,10 +650,10 @@ void StyleResolver::printStats()
 
 void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle* style)
 {
-    StyleResolverState state(document(), document().documentElement(), style);
+    StyleResolverState state(m_document, m_document.documentElement(), style);
     state.setStyle(style);
 
-    state.fontBuilder().initForStyleResolve(document(), style);
+    state.fontBuilder().initForStyleResolve(m_document, style);
 
     for (size_t i = 0; i < count; ++i) {
         if (properties[i].value) {

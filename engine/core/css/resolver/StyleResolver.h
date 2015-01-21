@@ -76,16 +76,10 @@ public:
 
     static PassRefPtr<RenderStyle> styleForDocument(Document&);
 
-    // FIXME: This only has 5 callers and should be removed. Callers should be explicit about
-    // their dependency on Document* instead of grabbing one through StyleResolver.
-    Document& document() { return *m_document; }
-
     void styleTreeResolveScopedKeyframesRules(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
     // |properties| is an array with |count| elements.
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);
-
-    bool mediaQueryAffectedByViewportChange() const;
 
     // FIXME: Rename to reflect the purpose, like didChangeFontSize or something.
     void invalidateMatchedPropertiesCache();
@@ -103,9 +97,6 @@ public:
     void enableStats(StatsReportType = ReportDefaultStats);
     void disableStats();
     void printStats();
-
-    unsigned accessCount() const { return m_accessCount; }
-    void didAccess() { ++m_accessCount; }
 
 private:
     // FIXME: This should probably go away, folded into FontBuilder.
@@ -139,16 +130,13 @@ private:
 
     MatchedPropertiesCache m_matchedPropertiesCache;
 
-    RawPtr<Document> m_document;
+    Document& m_document;
 
     StyleSharingList m_styleSharingList;
 
     OwnPtr<StyleResolverStats> m_styleResolverStats;
     OwnPtr<StyleResolverStats> m_styleResolverStatsTotals;
     unsigned m_styleResolverStatsSequence;
-
-    // Use only for Internals::updateStyleAndReturnAffectedElementCount.
-    unsigned m_accessCount;
 };
 
 } // namespace blink

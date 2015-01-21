@@ -1019,7 +1019,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
     TRACE_EVENT_BEGIN0("blink", "Document::updateRenderTree");
     TRACE_EVENT_SCOPED_SAMPLING_STATE("blink", "UpdateRenderTree");
 
-    // FIXME: Remove m_styleRecalcElementCounter, we should just use the accessCount() on the resolver.
     m_styleRecalcElementCounter = 0;
     TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RecalculateStyles", "frame", frame());
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
