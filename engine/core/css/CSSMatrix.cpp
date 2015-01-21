@@ -57,7 +57,7 @@ void CSSMatrix::setMatrixValue(const String& string, ExceptionState& exceptionSt
 
     // FIXME: crbug.com/154722 - should this continue to use legacy style parsing?
     RefPtr<MutableStylePropertySet> styleDeclaration = MutableStylePropertySet::create();
-    if (BisonCSSParser::parseValue(styleDeclaration.get(), CSSPropertyWebkitTransform, string, true, HTMLStandardMode, 0)) {
+    if (BisonCSSParser::parseValue(styleDeclaration.get(), CSSPropertyWebkitTransform, string, HTMLStandardMode, 0)) {
         // Convert to TransformOperations. This can fail if a property
         // requires style (i.e., param uses 'ems' or 'exs')
         RefPtr<CSSValue> value = styleDeclaration->getPropertyCSSValue(CSSPropertyWebkitTransform);

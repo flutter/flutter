@@ -26,7 +26,6 @@
 
     DOMString?          getPropertyValue([Default=Undefined] optional DOMString propertyName);
     [RaisesException] DOMString?          removeProperty([Default=Undefined] optional DOMString propertyName);
-    DOMString?          getPropertyPriority([Default=Undefined] optional DOMString propertyName);
     [RaisesException] void setProperty([Default=Undefined] optional DOMString propertyName,
                                        [Default=Undefined] optional DOMString? value,
                                        optional DOMString? priority = null);

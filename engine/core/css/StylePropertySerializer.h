@@ -46,7 +46,7 @@ private:
     String fontValue() const;
     void appendFontLonghandValueIfExplicit(CSSPropertyID, StringBuilder& result, String& value) const;
     String backgroundRepeatPropertyValue() const;
-    String getPropertyText(CSSPropertyID, const String& value, bool isImportant, bool isNotFirstDecl) const;
+    String getPropertyText(CSSPropertyID, const String& value, bool isNotFirstDecl) const;
     bool isPropertyShorthandAvailable(const StylePropertyShorthand&) const;
     bool shorthandHasOnlyInitialOrInheritedValue(const StylePropertyShorthand&) const;
     void appendBackgroundPropertyAsText(StringBuilder& result, unsigned& numDecls) const;

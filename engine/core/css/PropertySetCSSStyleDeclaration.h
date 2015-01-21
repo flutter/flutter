@@ -49,7 +49,6 @@ private:
     virtual String item(unsigned index) const override final;
     virtual PassRefPtr<CSSValue> getPropertyCSSValue(const String& propertyName) override final;
     virtual String getPropertyValue(const String& propertyName) override final;
-    virtual String getPropertyPriority(const String& propertyName) override final;
     virtual String getPropertyShorthand(const String& propertyName) override final;
     virtual bool isPropertyImplicit(const String& propertyName) override final;
     virtual void setProperty(const String& propertyName, const String& value, const String& priority, ExceptionState&) override final;
@@ -58,7 +57,7 @@ private:
     virtual void setCSSText(const String&, ExceptionState&) override final;
     virtual PassRefPtr<CSSValue> getPropertyCSSValueInternal(CSSPropertyID) override final;
     virtual String getPropertyValueInternal(CSSPropertyID) override final;
-    virtual void setPropertyInternal(CSSPropertyID, const String& value, bool important, ExceptionState&) override final;
+    virtual void setPropertyInternal(CSSPropertyID, const String& value, ExceptionState&) override final;
 
     virtual bool cssPropertyMatches(CSSPropertyID, const CSSValue*) const override final;
     virtual PassRefPtr<MutableStylePropertySet> copyProperties() const override final;

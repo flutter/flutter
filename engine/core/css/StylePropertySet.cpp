@@ -176,23 +176,6 @@ bool MutableStylePropertySet::removeProperty(CSSPropertyID propertyID, String* r
     return true;
 }
 
-bool StylePropertySet::propertyIsImportant(CSSPropertyID propertyID) const
-{
-    int foundPropertyIndex = findPropertyIndex(propertyID);
-    if (foundPropertyIndex != -1)
-        return propertyAt(foundPropertyIndex).isImportant();
-
-    StylePropertyShorthand shorthand = shorthandForProperty(propertyID);
-    if (!shorthand.length())
-        return false;
-
-    for (unsigned i = 0; i < shorthand.length(); ++i) {
-        if (!propertyIsImportant(shorthand.properties()[i]))
-            return false;
-    }
-    return true;
-}
-
 CSSPropertyID StylePropertySet::getPropertyShorthand(CSSPropertyID propertyID) const
 {
     int foundPropertyIndex = findPropertyIndex(propertyID);
@@ -209,7 +192,7 @@ bool StylePropertySet::isPropertyImplicit(CSSPropertyID propertyID) const
     return propertyAt(foundPropertyIndex).isImplicit();
 }
 
-bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, const String& value, bool important, StyleSheetContents* contextStyleSheet)
+bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, const String& value, StyleSheetContents* contextStyleSheet)
 {
     // Setting the value to an empty string just removes the property in both IE and Gecko.
     // Setting it to null seems to produce less consistent results, but we treat it just the same.
@@ -218,14 +201,14 @@ bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, const String
 
     // When replacing an existing property value, this moves the property to the end of the list.
     // Firefox preserves the position, and MSIE moves the property to the beginning.
-    return BisonCSSParser::parseValue(this, propertyID, value, important, cssParserMode(), contextStyleSheet);
+    return BisonCSSParser::parseValue(this, propertyID, value, cssParserMode(), contextStyleSheet);
 }
 
-void MutableStylePropertySet::setProperty(CSSPropertyID propertyID, PassRefPtr<CSSValue> prpValue, bool important)
+void MutableStylePropertySet::setProperty(CSSPropertyID propertyID, PassRefPtr<CSSValue> prpValue)
 {
     StylePropertyShorthand shorthand = shorthandForProperty(propertyID);
     if (!shorthand.length()) {
-        setProperty(CSSProperty(propertyID, prpValue, important));
+        setProperty(CSSProperty(propertyID, prpValue));
         return;
     }
 
@@ -233,7 +216,7 @@ void MutableStylePropertySet::setProperty(CSSPropertyID propertyID, PassRefPtr<C
 
     RefPtr<CSSValue> value = prpValue;
     for (unsigned i = 0; i < shorthand.length(); ++i)
-        m_propertyVector.append(CSSProperty(shorthand.properties()[i], value, important));
+        m_propertyVector.append(CSSProperty(shorthand.properties()[i], value));
 }
 
 void MutableStylePropertySet::setProperty(const CSSProperty& property, CSSProperty* slot)
@@ -253,15 +236,15 @@ void MutableStylePropertySet::appendProperty(const CSSProperty& property)
     m_propertyVector.append(property);
 }
 
-bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, CSSValueID identifier, bool important)
+bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, CSSValueID identifier)
 {
-    setProperty(CSSProperty(propertyID, cssValuePool().createIdentifierValue(identifier), important));
+    setProperty(CSSProperty(propertyID, cssValuePool().createIdentifierValue(identifier)));
     return true;
 }
 
-bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, CSSPropertyID identifier, bool important)
+bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, CSSPropertyID identifier)
 {
-    setProperty(CSSProperty(propertyID, cssValuePool().createIdentifierValue(identifier), important));
+    setProperty(CSSProperty(propertyID, cssValuePool().createIdentifierValue(identifier)));
     return true;
 }
 
@@ -285,11 +268,10 @@ void MutableStylePropertySet::addParsedProperties(const Vector<CSSProperty, 256>
         addParsedProperty(properties[i]);
 }
 
+// TODO(esprehn): Remove this, it used to have !important logic before sky.
 void MutableStylePropertySet::addParsedProperty(const CSSProperty& property)
 {
-    // Only add properties that have no !important counterpart present
-    if (!propertyIsImportant(property.id()) || property.isImportant())
-        setProperty(property);
+    setProperty(property);
 }
 
 String StylePropertySet::asText() const
@@ -357,8 +339,7 @@ bool MutableStylePropertySet::removePropertiesInSet(const CSSPropertyID* set, un
     const CSSProperty* properties = m_propertyVector.data();
     for (unsigned n = 0; n < initialSize; ++n) {
         const CSSProperty& property = properties[n];
-        // Not quite sure if the isImportant test is needed but it matches the existing behavior.
-        if (!property.isImportant() && containsId(set, length, property.id()))
+        if (containsId(set, length, property.id()))
             continue;
         newProperties.append(property);
     }
@@ -497,8 +478,6 @@ String StylePropertySet::PropertyReference::cssText() const
     result.append(cssName());
     result.appendLiteral(": ");
     result.append(propertyValue()->cssText());
-    if (isImportant())
-        result.appendLiteral(" !important");
     result.append(';');
     return result.toString();
 }

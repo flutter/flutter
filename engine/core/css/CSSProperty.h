@@ -32,11 +32,10 @@
 namespace blink {
 
 struct StylePropertyMetadata {
-    StylePropertyMetadata(CSSPropertyID propertyID, bool isSetFromShorthand, int indexInShorthandsVector, bool important, bool implicit, bool inherited)
+    StylePropertyMetadata(CSSPropertyID propertyID, bool isSetFromShorthand, int indexInShorthandsVector, bool implicit, bool inherited)
         : m_propertyID(propertyID)
         , m_isSetFromShorthand(isSetFromShorthand)
         , m_indexInShorthandsVector(indexInShorthandsVector)
-        , m_important(important)
         , m_implicit(implicit)
         , m_inherited(inherited)
     {
@@ -47,7 +46,6 @@ struct StylePropertyMetadata {
     uint16_t m_propertyID : 10;
     uint16_t m_isSetFromShorthand : 1;
     uint16_t m_indexInShorthandsVector : 2; // If this property was set as part of an ambiguous shorthand, gives the index in the shorthands vector.
-    uint16_t m_important : 1;
     uint16_t m_implicit : 1; // Whether or not the property was set implicitly as the result of a shorthand.
     uint16_t m_inherited : 1;
 };
@@ -55,8 +53,8 @@ struct StylePropertyMetadata {
 class CSSProperty {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    CSSProperty(CSSPropertyID propertyID, PassRefPtr<CSSValue> value, bool important = false, bool isSetFromShorthand = false, int indexInShorthandsVector = 0, bool implicit = false)
-        : m_metadata(propertyID, isSetFromShorthand, indexInShorthandsVector, important, implicit, CSSPropertyMetadata::isInheritedProperty(propertyID))
+    CSSProperty(CSSPropertyID propertyID, PassRefPtr<CSSValue> value, bool isSetFromShorthand = false, int indexInShorthandsVector = 0, bool implicit = false)
+        : m_metadata(propertyID, isSetFromShorthand, indexInShorthandsVector, implicit, CSSPropertyMetadata::isInheritedProperty(propertyID))
         , m_value(value)
     {
     }
@@ -71,7 +69,6 @@ public:
     CSSPropertyID id() const { return static_cast<CSSPropertyID>(m_metadata.m_propertyID); }
     bool isSetFromShorthand() const { return m_metadata.m_isSetFromShorthand; };
     CSSPropertyID shorthandID() const { return m_metadata.shorthandID(); };
-    bool isImportant() const { return m_metadata.m_important; }
 
     CSSValue* value() const { return m_value.get(); }
 

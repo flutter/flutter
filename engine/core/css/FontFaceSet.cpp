@@ -494,7 +494,7 @@ bool FontFaceSet::resolveFontStyle(const String& fontString, Font& font)
 
     // Interpret fontString in the same way as the 'font' attribute of CanvasRenderingContext2D.
     RefPtr<MutableStylePropertySet> parsedStyle = MutableStylePropertySet::create();
-    BisonCSSParser::parseValue(parsedStyle.get(), CSSPropertyFont, fontString, true, HTMLStandardMode, 0);
+    BisonCSSParser::parseValue(parsedStyle.get(), CSSPropertyFont, fontString, HTMLStandardMode, 0);
     if (parsedStyle->isEmpty())
         return false;
 

@@ -598,7 +598,7 @@ void Editor::redo()
 void Editor::setBaseWritingDirection(WritingDirection direction)
 {
     RefPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
-    style->setProperty(CSSPropertyDirection, direction == LeftToRightWritingDirection ? "ltr" : direction == RightToLeftWritingDirection ? "rtl" : "inherit", false);
+    style->setProperty(CSSPropertyDirection, direction == LeftToRightWritingDirection ? "ltr" : direction == RightToLeftWritingDirection ? "rtl" : "inherit");
 }
 
 void Editor::revealSelectionAfterEditingOperation(const ScrollAlignment& alignment, RevealExtentOption revealExtentOption)

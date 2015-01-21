@@ -455,8 +455,6 @@ void CSSAnimations::calculateTransitionUpdate(CSSAnimationUpdate* update, const 
                         continue;
                 }
 
-                // FIXME: We should transition if an !important property changes even when an animation is running,
-                // but this is a bit hard to do with the current applyMatchedProperties system.
                 if (!update->activeInterpolationsForAnimations().contains(id)
                     && (!activeAnimations || !activeAnimations->cssAnimations().m_previousActiveInterpolationsForAnimations.contains(id))) {
                     calculateTransitionUpdateForProperty(id, eventId, *transitionData, i, oldStyle, style, activeTransitions, update, element);

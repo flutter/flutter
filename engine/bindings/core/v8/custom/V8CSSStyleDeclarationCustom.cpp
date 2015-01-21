@@ -222,7 +222,7 @@ void V8CSSStyleDeclaration::namedPropertySetterCustom(v8::Local<v8::String> name
 
     TOSTRING_VOID(V8StringResource<TreatNullAsNullString>, propertyValue, value);
     ExceptionState exceptionState(ExceptionState::SetterContext, getPropertyName(static_cast<CSSPropertyID>(propInfo->propID)), "CSSStyleDeclaration", info.Holder(), info.GetIsolate());
-    impl->setPropertyInternal(static_cast<CSSPropertyID>(propInfo->propID), propertyValue, false, exceptionState);
+    impl->setPropertyInternal(static_cast<CSSPropertyID>(propInfo->propID), propertyValue, exceptionState);
 
     if (exceptionState.throwIfNeeded())
         return;

@@ -1686,7 +1686,7 @@ void CanvasRenderingContext2D::setFont(const String& newFont)
 
     if (!parsedStyle) {
         parsedStyle = MutableStylePropertySet::create();
-        BisonCSSParser::parseValue(parsedStyle.get(), CSSPropertyFont, newFont, true, HTMLStandardMode, 0);
+        BisonCSSParser::parseValue(parsedStyle.get(), CSSPropertyFont, newFont, HTMLStandardMode, 0);
         m_fetchedFonts.add(newFont, parsedStyle);
     }
     if (parsedStyle->isEmpty())

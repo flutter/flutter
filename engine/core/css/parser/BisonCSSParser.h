@@ -87,7 +87,7 @@ public:
     PassRefPtr<StyleRuleBase> parseRule(StyleSheetContents*, const String&);
     PassRefPtr<StyleKeyframe> parseKeyframeRule(StyleSheetContents*, const String&);
     bool parseSupportsCondition(const String&);
-    static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, bool important, CSSParserMode, StyleSheetContents*);
+    static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, CSSParserMode, StyleSheetContents*);
     static bool parseColor(RGBA32& color, const String&, bool strict = false);
     static StyleColor colorFromRGBColorString(const String&);
     static bool parseSystemColor(RGBA32& color, const String&);
@@ -98,9 +98,9 @@ public:
     PassOwnPtr<Vector<double> > parseKeyframeKeyList(const String&);
     bool parseAttributeMatchType(CSSSelector::AttributeMatchType&, const String&);
 
-    static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, bool important, const Document&);
+    static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, const Document&);
 
-    bool parseValue(CSSPropertyID, bool important);
+    bool parseValue(CSSPropertyID);
     void parseSelector(const String&, CSSSelectorList&);
 
     CSSParserSelector* createFloatingSelector();
@@ -154,7 +154,6 @@ public:
 
     CSSParserContext m_context;
 
-    bool m_important;
     CSSPropertyID m_id;
     RawPtr<StyleSheetContents> m_styleSheet;
     RefPtr<StyleRuleBase> m_rule;
@@ -184,7 +183,7 @@ public:
     void endSelector();
     void startRuleBody();
     void startProperty();
-    void endProperty(bool isImportantFound, bool isPropertyParsed, CSSParserError = NoCSSError);
+    void endProperty(bool isPropertyParsed, CSSParserError = NoCSSError);
     void startEndUnknownRule();
 
     void endInvalidRuleHeader();
@@ -212,7 +211,7 @@ private:
     }
     void setupParser(const char* prefix, unsigned prefixLength, const String&, const char* suffix, unsigned suffixLength);
 
-    bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, bool important, StyleSheetContents* contextStyleSheet);
+    bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, StyleSheetContents* contextStyleSheet);
     PassRefPtr<ImmutableStylePropertySet> parseDeclaration(const String&, StyleSheetContents* contextStyleSheet);
 
     bool parseColor(const String&);

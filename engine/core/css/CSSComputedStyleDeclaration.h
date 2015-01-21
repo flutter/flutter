@@ -61,7 +61,6 @@ public:
 #endif
 
     String getPropertyValue(CSSPropertyID) const;
-    bool getPropertyPriority(CSSPropertyID) const;
 
     virtual PassRefPtr<MutableStylePropertySet> copyProperties() const override;
 
@@ -80,7 +79,6 @@ private:
     PassRefPtr<RenderStyle> computeRenderStyle(CSSPropertyID) const;
     virtual PassRefPtr<CSSValue> getPropertyCSSValue(const String& propertyName) override;
     virtual String getPropertyValue(const String& propertyName) override;
-    virtual String getPropertyPriority(const String& propertyName) override;
     virtual String getPropertyShorthand(const String& propertyName) override;
     virtual bool isPropertyImplicit(const String& propertyName) override;
     virtual void setProperty(const String& propertyName, const String& value, const String& priority, ExceptionState&) override;
@@ -89,7 +87,7 @@ private:
     virtual void setCSSText(const String&, ExceptionState&) override;
     virtual PassRefPtr<CSSValue> getPropertyCSSValueInternal(CSSPropertyID) override;
     virtual String getPropertyValueInternal(CSSPropertyID) override;
-    virtual void setPropertyInternal(CSSPropertyID, const String& value, bool important, ExceptionState&) override;
+    virtual void setPropertyInternal(CSSPropertyID, const String& value, ExceptionState&) override;
 
     virtual bool cssPropertyMatches(CSSPropertyID, const CSSValue*) const override;
 

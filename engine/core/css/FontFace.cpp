@@ -64,7 +64,7 @@ static PassRefPtr<CSSValue> parseCSSValue(const Document* document, const String
     if (s.isEmpty())
         return nullptr;
     RefPtr<MutableStylePropertySet> parsedStyle = MutableStylePropertySet::create();
-    BisonCSSParser::parseValue(parsedStyle.get(), propertyID, s, true, *document);
+    BisonCSSParser::parseValue(parsedStyle.get(), propertyID, s, *document);
     return parsedStyle->getPropertyCSSValue(propertyID);
 }
 

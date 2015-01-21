@@ -116,7 +116,7 @@ private:
     EditingStyle(CSSPropertyID, const String& value);
     void init(Node*, PropertiesToInclude);
     void removeTextFillAndStrokeColorsIfNeeded(RenderStyle*);
-    void setProperty(CSSPropertyID, const String& value, bool important = false);
+    void setProperty(CSSPropertyID, const String& value);
     void replaceFontSizeByKeywordIfPossible(RenderStyle*, CSSComputedStyleDeclaration*);
     void extractFontSizeDelta();
 

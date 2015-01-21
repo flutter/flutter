@@ -120,9 +120,9 @@ private:
     template <StyleResolver::StyleApplicationPass pass>
     static inline bool isPropertyForPass(CSSPropertyID);
     template <StyleApplicationPass pass>
-    void applyMatchedProperties(StyleResolverState&, const MatchResult&, bool important, bool inheritedOnly);
+    void applyMatchedProperties(StyleResolverState&, const MatchResult&, bool inheritedOnly);
     template <StyleApplicationPass pass>
-    void applyProperties(StyleResolverState&, const StylePropertySet* properties, bool isImportant, bool inheritedOnly);
+    void applyProperties(StyleResolverState&, const StylePropertySet* properties, bool inheritedOnly);
     template <StyleApplicationPass pass>
     void applyAnimatedProperties(StyleResolverState&, const HashMap<CSSPropertyID, RefPtr<Interpolation> >&);
     template <StyleResolver::StyleApplicationPass pass>

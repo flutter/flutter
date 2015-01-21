@@ -1110,14 +1110,8 @@ restartAfterComment:
         }
         break;
 
-    case CharacterExclamationMark: {
-        SrcCharacterType* start = skipWhiteSpace(currentCharacter<SrcCharacterType>());
-        if (isEqualToCSSIdentifier(start, "important")) {
-            m_token = IMPORTANT_SYM;
-            currentCharacter<SrcCharacterType>() = start + 9;
-        }
+    case CharacterExclamationMark:
         break;
-    }
 
     case CharacterHashmark: {
         SrcCharacterType* start = currentCharacter<SrcCharacterType>();

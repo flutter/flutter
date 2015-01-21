@@ -21,7 +21,7 @@ protected:
     {
         CSSParserMode parserMode = HTMLStandardMode;
         RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
-        bool parseSuccess = BisonCSSParser::parseValue(dummyStyle.get(), propertyID, string, false, parserMode, 0);
+        bool parseSuccess = BisonCSSParser::parseValue(dummyStyle.get(), propertyID, string, parserMode, 0);
         ASSERT_UNUSED(parseSuccess, parseSuccess);
         return DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(*dummyStyle->getPropertyCSSValue(propertyID));
     }

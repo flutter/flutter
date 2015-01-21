@@ -375,12 +375,12 @@ void EditingStyle::removeTextFillAndStrokeColorsIfNeeded(RenderStyle* renderStyl
         m_mutableStyle->removeProperty(CSSPropertyWebkitTextStrokeColor);
 }
 
-void EditingStyle::setProperty(CSSPropertyID propertyID, const String& value, bool important)
+void EditingStyle::setProperty(CSSPropertyID propertyID, const String& value)
 {
     if (!m_mutableStyle)
         m_mutableStyle = MutableStylePropertySet::create();
 
-    m_mutableStyle->setProperty(propertyID, value, important);
+    m_mutableStyle->setProperty(propertyID, value);
 }
 
 void EditingStyle::replaceFontSizeByKeywordIfPossible(RenderStyle* renderStyle, CSSComputedStyleDeclaration* computedStyle)
@@ -552,7 +552,7 @@ void EditingStyle::mergeStyle(const StylePropertySet* style, CSSPropertyOverride
         }
 
         if (mode == OverrideValues || (mode == DoNotOverrideValues && !value))
-            m_mutableStyle->setProperty(property.id(), property.value()->cssText(), property.isImportant());
+            m_mutableStyle->setProperty(property.id(), property.value()->cssText());
     }
 }
 

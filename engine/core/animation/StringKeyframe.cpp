@@ -26,7 +26,7 @@ void StringKeyframe::setPropertyValue(CSSPropertyID property, const String& valu
 {
     ASSERT(property != CSSPropertyInvalid);
     if (CSSAnimations::isAllowedAnimation(property))
-        m_propertySet->setProperty(property, value, false, styleSheetContents);
+        m_propertySet->setProperty(property, value, styleSheetContents);
 }
 
 PropertySet StringKeyframe::properties() const

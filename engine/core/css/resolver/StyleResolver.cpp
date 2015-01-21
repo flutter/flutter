@@ -236,9 +236,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     StyleAdjuster adjuster;
     adjuster.adjustRenderStyle(state.style(), state.parentStyle(), *element);
 
-    // FIXME: The CSSWG wants to specify that the effects of animations are applied before
-    // important rules, but this currently happens here as we require adjustment to have happened
-    // before deciding which properties to transition.
     if (applyAnimatedProperties(state, element))
         adjuster.adjustRenderStyle(state.style(), state.parentStyle(), *element);
 
@@ -271,13 +268,11 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
 
     state.fontBuilder().initForStyleResolve(state.document(), state.style());
 
-    // We don't need to bother with !important. Since there is only ever one
-    // decl, there's nothing to override. So just add the first properties.
     // We also don't need to bother with animation properties since the only
     // relevant one is animation-timing-function and we special-case that in
     // CSSAnimations.cpp
     bool inheritedOnly = false;
-    applyMatchedProperties<HighPriorityProperties>(state, result, false, inheritedOnly);
+    applyMatchedProperties<HighPriorityProperties>(state, result, inheritedOnly);
 
     // If our font got dirtied, go ahead and update it now.
     updateFont(state);
@@ -287,7 +282,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
         StyleBuilder::applyProperty(CSSPropertyLineHeight, state, state.lineHeightValue());
 
     // Now do rest of the properties.
-    applyMatchedProperties<LowPriorityProperties>(state, result, false, inheritedOnly);
+    applyMatchedProperties<LowPriorityProperties>(state, result, inheritedOnly);
 
     loadPendingResources(state);
 
@@ -488,13 +483,11 @@ void StyleResolver::applyAllProperty(StyleResolverState& state, CSSValue* allVal
 }
 
 template <StyleResolver::StyleApplicationPass pass>
-void StyleResolver::applyProperties(StyleResolverState& state, const StylePropertySet* properties, bool isImportant, bool inheritedOnly)
+void StyleResolver::applyProperties(StyleResolverState& state, const StylePropertySet* properties, bool inheritedOnly)
 {
     unsigned propertyCount = properties->propertyCount();
     for (unsigned i = 0; i < propertyCount; ++i) {
         StylePropertySet::PropertyReference current = properties->propertyAt(i);
-        if (isImportant != current.isImportant())
-            continue;
 
         CSSPropertyID property = current.id();
         if (property == CSSPropertyAll) {
@@ -520,10 +513,10 @@ void StyleResolver::applyProperties(StyleResolverState& state, const StyleProper
 }
 
 template <StyleResolver::StyleApplicationPass pass>
-void StyleResolver::applyMatchedProperties(StyleResolverState& state, const MatchResult& matchResult, bool isImportant, bool inheritedOnly)
+void StyleResolver::applyMatchedProperties(StyleResolverState& state, const MatchResult& matchResult, bool inheritedOnly)
 {
     for (const RefPtr<StylePropertySet>& properties : matchResult.matchedProperties) {
-        applyProperties<pass>(state, properties.get(), isImportant, inheritedOnly);
+        applyProperties<pass>(state, properties.get(), inheritedOnly);
     }
 }
 
@@ -572,13 +565,8 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
         applyInheritedOnly = true;
     }
 
-    // Now we have all of the matched rules in the appropriate order. Walk the rules and apply
-    // high-priority properties first, i.e., those properties that other properties depend on.
-    // The order is (1) high-priority not important, (2) high-priority important, (3) normal not important
-    // and (4) normal important.
     state.setLineHeightValue(0);
-    applyMatchedProperties<HighPriorityProperties>(state, matchResult, false, applyInheritedOnly);
-    applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, applyInheritedOnly);
+    applyMatchedProperties<HighPriorityProperties>(state, matchResult, applyInheritedOnly);
 
     // If our font got dirtied, go ahead and update it now.
     updateFont(state);
@@ -591,9 +579,7 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
     if (cachedMatchedProperties && cachedMatchedProperties->renderStyle->fontDescription() != state.style()->fontDescription())
         applyInheritedOnly = false;
 
-    // Now do the author and user normal priority properties and all the !important properties.
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, false, applyInheritedOnly);
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, true, applyInheritedOnly);
+    applyMatchedProperties<LowPriorityProperties>(state, matchResult, applyInheritedOnly);
 
     loadPendingResources(state);
 

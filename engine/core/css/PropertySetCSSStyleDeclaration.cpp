@@ -166,14 +166,6 @@ String AbstractPropertySetCSSStyleDeclaration::getPropertyValue(const String &pr
     return propertySet().getPropertyValue(propertyID);
 }
 
-String AbstractPropertySetCSSStyleDeclaration::getPropertyPriority(const String& propertyName)
-{
-    CSSPropertyID propertyID = cssPropertyID(propertyName);
-    if (!propertyID)
-        return String();
-    return propertySet().propertyIsImportant(propertyID) ? "important" : "";
-}
-
 String AbstractPropertySetCSSStyleDeclaration::getPropertyShorthand(const String& propertyName)
 {
     CSSPropertyID propertyID = cssPropertyID(propertyName);
@@ -199,11 +191,7 @@ void AbstractPropertySetCSSStyleDeclaration::setProperty(const String& propertyN
     if (!propertyID)
         return;
 
-    bool important = equalIgnoringCase(priority, "important");
-    if (!important && !priority.isEmpty())
-        return;
-
-    setPropertyInternal(propertyID, value, important, exceptionState);
+    setPropertyInternal(propertyID, value, exceptionState);
 }
 
 String AbstractPropertySetCSSStyleDeclaration::removeProperty(const String& propertyName, ExceptionState& exceptionState)
@@ -235,12 +223,12 @@ String AbstractPropertySetCSSStyleDeclaration::getPropertyValueInternal(CSSPrope
     return propertySet().getPropertyValue(propertyID);
 }
 
-void AbstractPropertySetCSSStyleDeclaration::setPropertyInternal(CSSPropertyID propertyID, const String& value, bool important, ExceptionState&)
+void AbstractPropertySetCSSStyleDeclaration::setPropertyInternal(CSSPropertyID propertyID, const String& value, ExceptionState&)
 {
     StyleAttributeMutationScope mutationScope(this);
     willMutate();
 
-    bool changed = propertySet().setProperty(propertyID, value, important, contextStyleSheet());
+    bool changed = propertySet().setProperty(propertyID, value, contextStyleSheet());
 
     didMutate(changed ? PropertyChanged : NoChanges);
 

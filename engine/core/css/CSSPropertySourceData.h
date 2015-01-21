@@ -55,7 +55,7 @@ public:
 struct CSSPropertySourceData {
     ALLOW_ONLY_INLINE_ALLOCATION();
 public:
-    CSSPropertySourceData(const String& name, const String& value, bool important, bool disabled, bool parsedOk, const SourceRange& range);
+    CSSPropertySourceData(const String& name, const String& value, bool disabled, bool parsedOk, const SourceRange& range);
     CSSPropertySourceData(const CSSPropertySourceData& other);
     CSSPropertySourceData();
 
@@ -64,7 +64,6 @@ public:
 
     String name;
     String value;
-    bool important;
     bool disabled;
     bool parsedOk;
     SourceRange range;

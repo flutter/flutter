@@ -1686,26 +1686,26 @@ void Element::inlineStyleChanged()
     elementData()->m_styleAttributeIsDirty = true;
 }
 
-bool Element::setInlineStyleProperty(CSSPropertyID propertyID, CSSValueID identifier, bool important)
+bool Element::setInlineStyleProperty(CSSPropertyID propertyID, CSSValueID identifier)
 {
     ASSERT(isStyledElement());
-    ensureMutableInlineStyle().setProperty(propertyID, cssValuePool().createIdentifierValue(identifier), important);
+    ensureMutableInlineStyle().setProperty(propertyID, cssValuePool().createIdentifierValue(identifier));
     inlineStyleChanged();
     return true;
 }
 
-bool Element::setInlineStyleProperty(CSSPropertyID propertyID, double value, CSSPrimitiveValue::UnitType unit, bool important)
+bool Element::setInlineStyleProperty(CSSPropertyID propertyID, double value, CSSPrimitiveValue::UnitType unit)
 {
     ASSERT(isStyledElement());
-    ensureMutableInlineStyle().setProperty(propertyID, cssValuePool().createValue(value, unit), important);
+    ensureMutableInlineStyle().setProperty(propertyID, cssValuePool().createValue(value, unit));
     inlineStyleChanged();
     return true;
 }
 
-bool Element::setInlineStyleProperty(CSSPropertyID propertyID, const String& value, bool important)
+bool Element::setInlineStyleProperty(CSSPropertyID propertyID, const String& value)
 {
     ASSERT(isStyledElement());
-    bool changes = ensureMutableInlineStyle().setProperty(propertyID, value, important, document().elementSheet().contents());
+    bool changes = ensureMutableInlineStyle().setProperty(propertyID, value, document().elementSheet().contents());
     if (changes)
         inlineStyleChanged();
     return changes;

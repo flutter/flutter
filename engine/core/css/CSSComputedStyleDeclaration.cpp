@@ -2345,12 +2345,6 @@ String CSSComputedStyleDeclaration::getPropertyValue(const String& propertyName)
     return getPropertyValue(propertyID);
 }
 
-String CSSComputedStyleDeclaration::getPropertyPriority(const String&)
-{
-    // All computed styles have a priority of not "important".
-    return "";
-}
-
 String CSSComputedStyleDeclaration::getPropertyShorthand(const String&)
 {
     return "";
@@ -2382,7 +2376,7 @@ String CSSComputedStyleDeclaration::getPropertyValueInternal(CSSPropertyID prope
     return getPropertyValue(propertyID);
 }
 
-void CSSComputedStyleDeclaration::setPropertyInternal(CSSPropertyID id, const String&, bool, ExceptionState& exceptionState)
+void CSSComputedStyleDeclaration::setPropertyInternal(CSSPropertyID id, const String&, ExceptionState& exceptionState)
 {
     exceptionState.throwDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + getPropertyNameString(id) + "' property is read-only.");
 }

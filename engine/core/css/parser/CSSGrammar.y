@@ -174,8 +174,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 
 %token ATKEYWORD
 
-%token IMPORTANT_SYM
-
 %token SUPPORTS_NOT
 %token SUPPORTS_AND
 %token SUPPORTS_OR
@@ -263,8 +261,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %type <boolean> decl_list
 %type <boolean> declaration
 
-%type <boolean> prio
-
 %type <integer> unary_operator
 %type <integer> maybe_unary_operator
 %type <character> operator
@@ -331,7 +327,7 @@ internal_value:
     INTERNAL_VALUE_SYM maybe_space expr TOKEN_EOF {
         parser->m_valueList = parser->sinkFloatingValueList($3);
         int oldParsedProperties = parser->m_parsedProperties.size();
-        if (!parser->parseValue(parser->m_id, parser->m_important))
+        if (!parser->parseValue(parser->m_id))
             parser->rollbackLastProperties(parser->m_parsedProperties.size() - oldParsedProperties);
         parser->m_valueList = nullptr;
     }
@@ -539,23 +535,23 @@ supports_condition_in_parens:
     ;
 
 supports_declaration_condition:
-    '(' maybe_space IDENT maybe_space ':' maybe_space expr prio closing_parenthesis maybe_space {
+    '(' maybe_space IDENT maybe_space ':' maybe_space expr closing_parenthesis maybe_space {
         $$ = false;
         CSSPropertyID id = cssPropertyID($3);
         if (id != CSSPropertyInvalid) {
             parser->m_valueList = parser->sinkFloatingValueList($7);
             int oldParsedProperties = parser->m_parsedProperties.size();
-            $$ = parser->parseValue(id, $8);
+            $$ = parser->parseValue(id);
             // We just need to know if the declaration is supported as it is written. Rollback any additions.
             if ($$)
                 parser->rollbackLastProperties(parser->m_parsedProperties.size() - oldParsedProperties);
         }
         parser->m_valueList = nullptr;
-        parser->endProperty($8, false);
+        parser->endProperty(false);
     }
     | '(' maybe_space IDENT maybe_space ':' maybe_space error error_recovery closing_parenthesis maybe_space {
         $$ = false;
-        parser->endProperty(false, false, GeneralCSSError);
+        parser->endProperty(false, GeneralCSSError);
     }
     ;
 
@@ -957,13 +953,13 @@ decl_list:
     ;
 
 declaration:
-    property ':' maybe_space error_location expr prio {
+    property ':' maybe_space error_location expr {
         $$ = false;
         bool isPropertyParsed = false;
         if ($1 != CSSPropertyInvalid) {
             parser->m_valueList = parser->sinkFloatingValueList($5);
             int oldParsedProperties = parser->m_parsedProperties.size();
-            $$ = parser->parseValue($1, $6);
+            $$ = parser->parseValue($1);
             if (!$$) {
                 parser->rollbackLastProperties(parser->m_parsedProperties.size() - oldParsedProperties);
                 parser->reportError($4, InvalidPropertyValueCSSError);
@@ -971,25 +967,25 @@ declaration:
                 isPropertyParsed = true;
             parser->m_valueList = nullptr;
         }
-        parser->endProperty($6, isPropertyParsed);
+        parser->endProperty(isPropertyParsed);
     }
     |
-    property ':' maybe_space error_location expr prio error error_recovery {
+    property ':' maybe_space error_location expr error error_recovery {
         /* When we encounter something like p {color: red !important fail;} we should drop the declaration */
         parser->reportError($4, InvalidPropertyValueCSSError);
-        parser->endProperty(false, false);
+        parser->endProperty(false);
         $$ = false;
     }
     |
     property ':' maybe_space error_location error error_recovery {
         parser->reportError($4, InvalidPropertyValueCSSError);
-        parser->endProperty(false, false);
+        parser->endProperty(false);
         $$ = false;
     }
     |
     property error error_location error_recovery {
         parser->reportError($3, PropertyDeclarationCSSError);
-        parser->endProperty(false, false, GeneralCSSError);
+        parser->endProperty(false, GeneralCSSError);
         $$ = false;
     }
     |
@@ -1006,11 +1002,6 @@ property:
         if ($$ == CSSPropertyInvalid)
             parser->reportError($1, InvalidPropertyCSSError);
     }
-  ;
-
-prio:
-    IMPORTANT_SYM maybe_space { $$ = true; }
-    | /* empty */ { $$ = false; }
   ;
 
 ident_list:

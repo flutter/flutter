@@ -169,9 +169,9 @@ public:
 
     const StylePropertySet* inlineStyle() const { return elementData() ? elementData()->m_inlineStyle.get() : 0; }
 
-    bool setInlineStyleProperty(CSSPropertyID, CSSValueID identifier, bool important = false);
-    bool setInlineStyleProperty(CSSPropertyID, double value, CSSPrimitiveValue::UnitType, bool important = false);
-    bool setInlineStyleProperty(CSSPropertyID, const String& value, bool important = false);
+    bool setInlineStyleProperty(CSSPropertyID, CSSValueID identifier);
+    bool setInlineStyleProperty(CSSPropertyID, double value, CSSPrimitiveValue::UnitType);
+    bool setInlineStyleProperty(CSSPropertyID, const String& value);
     bool removeInlineStyleProperty(CSSPropertyID);
     void removeAllInlineStyleProperties();
 

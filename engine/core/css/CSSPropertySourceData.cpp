@@ -55,10 +55,9 @@ unsigned SourceRange::length() const
     return end - start;
 }
 
-CSSPropertySourceData::CSSPropertySourceData(const String& name, const String& value, bool important, bool disabled, bool parsedOk, const SourceRange& range)
+CSSPropertySourceData::CSSPropertySourceData(const String& name, const String& value, bool disabled, bool parsedOk, const SourceRange& range)
     : name(name)
     , value(value)
-    , important(important)
     , disabled(disabled)
     , parsedOk(parsedOk)
     , range(range)
@@ -68,7 +67,6 @@ CSSPropertySourceData::CSSPropertySourceData(const String& name, const String& v
 CSSPropertySourceData::CSSPropertySourceData(const CSSPropertySourceData& other)
     : name(other.name)
     , value(other.value)
-    , important(other.important)
     , disabled(other.disabled)
     , parsedOk(other.parsedOk)
     , range(other.range)
@@ -78,7 +76,6 @@ CSSPropertySourceData::CSSPropertySourceData(const CSSPropertySourceData& other)
 CSSPropertySourceData::CSSPropertySourceData()
     : name("")
     , value("")
-    , important(false)
     , disabled(false)
     , parsedOk(false)
     , range(SourceRange(0, 0))
@@ -97,8 +94,6 @@ String CSSPropertySourceData::toString() const
     result.append(name);
     result.appendLiteral(": ");
     result.append(value);
-    if (important)
-        result.appendLiteral(" !important");
     result.append(';');
     if (disabled)
         result.appendLiteral(" */");
@@ -107,7 +102,7 @@ String CSSPropertySourceData::toString() const
 
 unsigned CSSPropertySourceData::hash() const
 {
-    return StringHash::hash(name) + 3 * StringHash::hash(value) + 7 * important + 13 * parsedOk + 31;
+    return StringHash::hash(name) + 3 * StringHash::hash(value) + 13 * parsedOk + 31;
 }
 
 } // namespace blink

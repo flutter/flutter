@@ -98,7 +98,6 @@ static const unsigned INVALID_NUM_PARSED_PROPERTIES = UINT_MAX;
 
 BisonCSSParser::BisonCSSParser(const CSSParserContext& context)
     : m_context(context)
-    , m_important(false)
     , m_id(CSSPropertyInvalid)
     , m_styleSheet(nullptr)
     , m_supportsCondition(false)
@@ -211,7 +210,7 @@ static inline bool isColorPropertyID(CSSPropertyID propertyId)
     }
 }
 
-static bool parseColorValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, bool important, CSSParserMode cssParserMode)
+static bool parseColorValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, CSSParserMode cssParserMode)
 {
     ASSERT(!string.isEmpty());
     bool quirksMode = isQuirksModeBehavior(cssParserMode);
@@ -226,14 +225,14 @@ static bool parseColorValue(MutableStylePropertySet* declaration, CSSPropertyID 
 
     if (validPrimitive) {
         RefPtr<CSSValue> value = cssValuePool().createIdentifierValue(valueID);
-        declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
+        declaration->addParsedProperty(CSSProperty(propertyId, value.release()));
         return true;
     }
     RGBA32 color;
     if (!CSSPropertyParser::fastParseColor(color, string, !quirksMode && string[0] != '#'))
         return false;
     RefPtr<CSSValue> value = cssValuePool().createColorValue(color);
-    declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
+    declaration->addParsedProperty(CSSProperty(propertyId, value.release()));
     return true;
 }
 
@@ -297,7 +296,7 @@ static inline bool parseSimpleLength(const CharacterType* characters, unsigned l
     return ok;
 }
 
-static bool parseSimpleLengthValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, bool important, CSSParserMode cssParserMode)
+static bool parseSimpleLengthValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, CSSParserMode cssParserMode)
 {
     ASSERT(!string.isEmpty());
     bool acceptsNegativeNumbers = false;
@@ -328,7 +327,7 @@ static bool parseSimpleLengthValue(MutableStylePropertySet* declaration, CSSProp
         return false;
 
     RefPtr<CSSValue> value = cssValuePool().createValue(number, unit);
-    declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
+    declaration->addParsedProperty(CSSProperty(propertyId, value.release()));
     return true;
 }
 
@@ -552,7 +551,7 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     }
 }
 
-static bool parseKeywordValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, bool important, const CSSParserContext& parserContext)
+static bool parseKeywordValue(MutableStylePropertySet* declaration, CSSPropertyID propertyId, const String& string, const CSSParserContext& parserContext)
 {
     ASSERT(!string.isEmpty());
 
@@ -584,7 +583,7 @@ static bool parseKeywordValue(MutableStylePropertySet* declaration, CSSPropertyI
     else
         return false;
 
-    declaration->addParsedProperty(CSSProperty(propertyId, value.release(), important));
+    declaration->addParsedProperty(CSSProperty(propertyId, value.release()));
     return true;
 }
 
@@ -734,7 +733,7 @@ static PassRefPtr<CSSValueList> parseSimpleTransformList(CharType*& pos, CharTyp
     return transformList.release();
 }
 
-static bool parseSimpleTransform(MutableStylePropertySet* properties, CSSPropertyID propertyID, const String& string, bool important)
+static bool parseSimpleTransform(MutableStylePropertySet* properties, CSSPropertyID propertyID, const String& string)
 {
     if (propertyID != CSSPropertyTransform && propertyID != CSSPropertyWebkitTransform)
         return false;
@@ -754,7 +753,7 @@ static bool parseSimpleTransform(MutableStylePropertySet* properties, CSSPropert
         if (!transformList)
             return false;
     }
-    properties->addParsedProperty(CSSProperty(propertyID, transformList.release(), important));
+    properties->addParsedProperty(CSSProperty(propertyID, transformList.release()));
     return true;
 }
 
@@ -763,7 +762,7 @@ PassRefPtr<CSSValueList> BisonCSSParser::parseFontFaceValue(const AtomicString& 
     if (string.isEmpty())
         return nullptr;
     RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
-    if (!parseValue(dummyStyle.get(), CSSPropertyFontFamily, string, false, HTMLStandardMode, 0))
+    if (!parseValue(dummyStyle.get(), CSSPropertyFontFamily, string, HTMLStandardMode, 0))
         return nullptr;
 
     RefPtr<CSSValue> fontFamily = dummyStyle->getPropertyCSSValue(CSSPropertyFontFamily);
@@ -778,7 +777,7 @@ PassRefPtr<CSSValue> BisonCSSParser::parseAnimationTimingFunctionValue(const Str
     if (string.isEmpty())
         return nullptr;
     RefPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
-    if (!parseValue(style.get(), CSSPropertyTransitionTimingFunction, string, false, HTMLStandardMode, 0))
+    if (!parseValue(style.get(), CSSPropertyTransitionTimingFunction, string, HTMLStandardMode, 0))
         return nullptr;
 
     RefPtr<CSSValue> value = style->getPropertyCSSValue(CSSPropertyTransitionTimingFunction);
@@ -790,29 +789,29 @@ PassRefPtr<CSSValue> BisonCSSParser::parseAnimationTimingFunctionValue(const Str
     return valueList->item(0);
 }
 
-bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, bool important, const Document& document)
+bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, const Document& document)
 {
     ASSERT(!string.isEmpty());
 
     CSSParserContext context(document, UseCounter::getFrom(&document));
 
-    if (parseSimpleLengthValue(declaration, propertyID, string, important, context.mode()))
+    if (parseSimpleLengthValue(declaration, propertyID, string, context.mode()))
         return true;
-    if (parseColorValue(declaration, propertyID, string, important, context.mode()))
+    if (parseColorValue(declaration, propertyID, string, context.mode()))
         return true;
-    if (parseKeywordValue(declaration, propertyID, string, important, context))
+    if (parseKeywordValue(declaration, propertyID, string, context))
         return true;
 
     BisonCSSParser parser(context);
-    return parser.parseValue(declaration, propertyID, string, important, static_cast<StyleSheetContents*>(0));
+    return parser.parseValue(declaration, propertyID, string, static_cast<StyleSheetContents*>(0));
 }
 
-bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, bool important, CSSParserMode cssParserMode, StyleSheetContents* contextStyleSheet)
+bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, CSSParserMode cssParserMode, StyleSheetContents* contextStyleSheet)
 {
     ASSERT(!string.isEmpty());
-    if (parseSimpleLengthValue(declaration, propertyID, string, important, cssParserMode))
+    if (parseSimpleLengthValue(declaration, propertyID, string, cssParserMode))
         return true;
-    if (parseColorValue(declaration, propertyID, string, important, cssParserMode))
+    if (parseColorValue(declaration, propertyID, string, cssParserMode))
         return true;
 
     CSSParserContext context(0); // FIXME: Why does this not have a UseCounter?
@@ -820,16 +819,16 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
         context = contextStyleSheet->parserContext();
     }
 
-    if (parseKeywordValue(declaration, propertyID, string, important, context))
+    if (parseKeywordValue(declaration, propertyID, string, context))
         return true;
-    if (parseSimpleTransform(declaration, propertyID, string, important))
+    if (parseSimpleTransform(declaration, propertyID, string))
         return true;
 
     BisonCSSParser parser(context);
-    return parser.parseValue(declaration, propertyID, string, important, contextStyleSheet);
+    return parser.parseValue(declaration, propertyID, string, contextStyleSheet);
 }
 
-bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, bool important, StyleSheetContents* contextStyleSheet)
+bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, StyleSheetContents* contextStyleSheet)
 {
     if (m_context.useCounter())
         m_context.useCounter()->count(m_context, propertyID);
@@ -839,7 +838,6 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
     setupParser("@-internal-value ", string, "");
 
     m_id = propertyID;
-    m_important = important;
 
     cssyyparse(this);
 
@@ -987,13 +985,11 @@ bool BisonCSSParser::parseAttributeMatchType(CSSSelector::AttributeMatchType& ma
     return false;
 }
 
-static inline void filterProperties(bool important, const Vector<CSSProperty, 256>& input, Vector<CSSProperty, 256>& output, size_t& unusedEntries, BitArray<numCSSProperties>& seenProperties)
+static inline void filterProperties(const Vector<CSSProperty, 256>& input, Vector<CSSProperty, 256>& output, size_t& unusedEntries, BitArray<numCSSProperties>& seenProperties)
 {
     // Add properties in reverse order so that highest priority definitions are reached first. Duplicate definitions can then be ignored when found.
     for (int i = input.size() - 1; i >= 0; --i) {
         const CSSProperty& property = input[i];
-        if (property.isImportant() != important)
-            continue;
         const unsigned propertyIDIndex = property.id() - firstCSSProperty;
         if (seenProperties.get(propertyIDIndex))
             continue;
@@ -1008,9 +1004,7 @@ PassRefPtr<ImmutableStylePropertySet> BisonCSSParser::createStylePropertySet()
     size_t unusedEntries = m_parsedProperties.size();
     Vector<CSSProperty, 256> results(unusedEntries);
 
-    // Important properties have higher priority, so add them first. Duplicate definitions can then be ignored when found.
-    filterProperties(true, m_parsedProperties, results, unusedEntries, seenProperties);
-    filterProperties(false, m_parsedProperties, results, unusedEntries, seenProperties);
+    filterProperties(m_parsedProperties, results, unusedEntries, seenProperties);
     if (unusedEntries)
         results.remove(0, unusedEntries);
 
@@ -1035,9 +1029,9 @@ void BisonCSSParser::setCurrentProperty(CSSPropertyID propId)
     m_id = propId;
 }
 
-bool BisonCSSParser::parseValue(CSSPropertyID propId, bool important)
+bool BisonCSSParser::parseValue(CSSPropertyID propId)
 {
-    return CSSPropertyParser::parseValue(propId, important, m_valueList.get(), m_context, m_inViewport, m_parsedProperties, m_ruleHeaderType);
+    return CSSPropertyParser::parseValue(propId, m_valueList.get(), m_context, m_inViewport, m_parsedProperties, m_ruleHeaderType);
 }
 
 
@@ -1690,11 +1684,11 @@ void BisonCSSParser::startProperty()
         m_observer->startProperty(m_tokenizer.safeUserStringTokenOffset());
 }
 
-void BisonCSSParser::endProperty(bool isImportantFound, bool isPropertyParsed, CSSParserError errorType)
+void BisonCSSParser::endProperty(bool isPropertyParsed, CSSParserError errorType)
 {
     m_id = CSSPropertyInvalid;
     if (m_observer)
-        m_observer->endProperty(isImportantFound, isPropertyParsed, m_tokenizer.safeUserStringTokenOffset(), errorType);
+        m_observer->endProperty(isPropertyParsed, m_tokenizer.safeUserStringTokenOffset(), errorType);
 }
 
 void BisonCSSParser::startEndUnknownRule()

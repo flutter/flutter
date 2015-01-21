@@ -59,7 +59,6 @@ public:
         CSSPropertyID id() const { return static_cast<CSSPropertyID>(propertyMetadata().m_propertyID); }
         CSSPropertyID shorthandID() const { return propertyMetadata().shorthandID(); }
 
-        bool isImportant() const { return propertyMetadata().m_important; }
         bool isInherited() const { return propertyMetadata().m_inherited; }
         bool isImplicit() const { return propertyMetadata().m_implicit; }
 
@@ -91,7 +90,6 @@ public:
     PassRefPtr<CSSValue> getPropertyCSSValue(CSSPropertyID) const;
     String getPropertyValue(CSSPropertyID) const;
 
-    bool propertyIsImportant(CSSPropertyID) const;
     CSSPropertyID getPropertyShorthand(CSSPropertyID) const;
     bool isPropertyImplicit(CSSPropertyID) const;
 
@@ -185,12 +183,12 @@ public:
     void addParsedProperty(const CSSProperty&);
 
     // These expand shorthand properties into multiple properties.
-    bool setProperty(CSSPropertyID, const String& value, bool important = false, StyleSheetContents* contextStyleSheet = 0);
-    void setProperty(CSSPropertyID, PassRefPtr<CSSValue>, bool important = false);
+    bool setProperty(CSSPropertyID, const String& value, StyleSheetContents* contextStyleSheet = 0);
+    void setProperty(CSSPropertyID, PassRefPtr<CSSValue>);
 
     // These do not. FIXME: This is too messy, we can do better.
-    bool setProperty(CSSPropertyID, CSSValueID identifier, bool important = false);
-    bool setProperty(CSSPropertyID, CSSPropertyID identifier, bool important = false);
+    bool setProperty(CSSPropertyID, CSSValueID identifier);
+    bool setProperty(CSSPropertyID, CSSPropertyID identifier);
     void appendProperty(const CSSProperty&);
     void setProperty(const CSSProperty&, CSSProperty* slot = 0);
 

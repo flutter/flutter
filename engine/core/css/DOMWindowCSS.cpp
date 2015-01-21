@@ -42,20 +42,6 @@ PassRefPtr<DOMWindowCSS> DOMWindowCSS::create()
     return adoptRef(new DOMWindowCSS());
 }
 
-static String valueWithoutImportant(const String& value)
-{
-    if (!value.endsWith("important", false))
-        return value;
-
-    String newValue = value;
-    int bangIndex = newValue.length() - 9 - 1;
-    if (newValue[bangIndex] == ' ')
-        bangIndex--;
-    newValue = newValue.left(bangIndex);
-
-    return newValue;
-}
-
 bool DOMWindowCSS::supports(const String& property, const String& value) const
 {
     CSSPropertyID propertyID = cssPropertyID(property.stripWhiteSpace());
@@ -63,17 +49,13 @@ bool DOMWindowCSS::supports(const String& property, const String& value) const
         return false;
     ASSERT(CSSPropertyMetadata::isEnabledProperty(propertyID));
 
-    // BisonCSSParser::parseValue() won't work correctly if !important is present,
-    // so just get rid of it. It doesn't matter to supports() if it's actually
-    // there or not, provided how it's specified in the value is correct.
     String normalizedValue = value.stripWhiteSpace().simplifyWhiteSpace();
-    normalizedValue = valueWithoutImportant(normalizedValue);
 
     if (normalizedValue.isEmpty())
         return false;
 
     RefPtr<MutableStylePropertySet> dummyStyle = MutableStylePropertySet::create();
-    return BisonCSSParser::parseValue(dummyStyle.get(), propertyID, normalizedValue, false, HTMLStandardMode, 0);
+    return BisonCSSParser::parseValue(dummyStyle.get(), propertyID, normalizedValue, HTMLStandardMode, 0);
 }
 
 bool DOMWindowCSS::supports(const String& conditionText) const
