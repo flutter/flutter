@@ -18,6 +18,17 @@ Sky Event Model
     // TODO(ianh): do events get retargetted, e.g. focus when leaving a custom element?
   }
 
+  // TODO(ianh): decide if we're using this generic Event class and
+  // allowing any arbitrary properties to be set on it, or if we're
+  // going to use subclasses (and drop "type"). If we use subclasses
+  // then how will declarative event handling work in frameworks?
+  // (consider that multiple modules can each have their own FooEvent
+  // class with the same name...)
+  //
+  // The advantage of this would be the ability to enforce (or at
+  // least better catch) incorrect uses of the API, e.g. to make sure
+  // people don't stop on themselves in 'pointer-down' capture.
+
   callback EventListener any (Event event);
     // if the return value is not undefined:
     //   assign it to event.result
