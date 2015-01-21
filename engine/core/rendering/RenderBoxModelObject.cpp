@@ -27,7 +27,6 @@
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/rendering/ImageQualityController.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderInline.h"
@@ -69,11 +68,6 @@ bool RenderBoxModelObject::hasAcceleratedCompositing() const
     return false;
 }
 
-InterpolationQuality RenderBoxModelObject::chooseInterpolationQuality(GraphicsContext* context, Image* image, const void* layer, const LayoutSize& size)
-{
-    return ImageQualityController::imageQualityController()->chooseInterpolationQuality(context, this, image, layer, size);
-}
-
 RenderBoxModelObject::RenderBoxModelObject(ContainerNode* node)
     : RenderLayerModelObject(node)
 {
@@ -81,12 +75,6 @@ RenderBoxModelObject::RenderBoxModelObject(ContainerNode* node)
 
 RenderBoxModelObject::~RenderBoxModelObject()
 {
-}
-
-void RenderBoxModelObject::willBeDestroyed()
-{
-    ImageQualityController::remove(this);
-    RenderLayerModelObject::willBeDestroyed();
 }
 
 bool RenderBoxModelObject::calculateHasBoxDecorations() const
@@ -520,11 +508,10 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
             CompositeOperator compositeOp = bgLayer.composite();
             RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
             RefPtr<Image> image = bgImage->image(clientForBackgroundImage, geometry.tileSize());
-            InterpolationQuality interpolationQuality = chooseInterpolationQuality(context, image.get(), &bgLayer, geometry.tileSize());
             if (bgLayer.maskSourceType() == MaskLuminance)
                 context->setColorFilter(ColorFilterLuminanceToAlpha);
             InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
-            context->setImageInterpolationQuality(interpolationQuality);
+            context->setImageInterpolationQuality(InterpolationLow);
             context->drawTiledImage(image.get(), geometry.destRect(), geometry.relativePhase(), geometry.tileSize(),
                 compositeOp, bgLayer.blendMode(), geometry.spaceSize());
             context->setImageInterpolationQuality(previousInterpolationQuality);

@@ -1074,8 +1074,6 @@ sky_core_files = [
   "rendering/HitTestRequest.h",
   "rendering/HitTestResult.cpp",
   "rendering/HitTestResult.h",
-  "rendering/ImageQualityController.cpp",
-  "rendering/ImageQualityController.h",
   "rendering/InlineBox.cpp",
   "rendering/InlineBox.h",
   "rendering/InlineFlowBox.cpp",

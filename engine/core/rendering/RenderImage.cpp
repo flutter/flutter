@@ -207,11 +207,10 @@ void RenderImage::paintIntoRect(GraphicsContext* context, const LayoutRect& rect
         return;
 
     Image* image = img.get();
-    InterpolationQuality interpolationQuality = chooseInterpolationQuality(context, image, image, alignedRect.size());
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "PaintImage", "data", InspectorPaintImageEvent::data(*this));
     InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
-    context->setImageInterpolationQuality(interpolationQuality);
+    context->setImageInterpolationQuality(InterpolationLow);
     context->drawImage(image, alignedRect, CompositeSourceOver, shouldRespectImageOrientation());
     context->setImageInterpolationQuality(previousInterpolationQuality);
 }

@@ -169,8 +169,6 @@ public:
     bool hasAcceleratedCompositing() const;
 
 protected:
-    virtual void willBeDestroyed() override;
-
     class BackgroundImageGeometry {
     public:
         BackgroundImageGeometry()
@@ -243,8 +241,6 @@ protected:
     bool borderObscuresBackground() const;
     RoundedRect backgroundRoundedRectAdjustedForBleedAvoidance(GraphicsContext*, const LayoutRect&, BackgroundBleedAvoidance, InlineFlowBox*, const LayoutSize&, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const;
     LayoutRect borderInnerRectAdjustedForBleedAvoidance(GraphicsContext*, const LayoutRect&, BackgroundBleedAvoidance) const;
-
-    InterpolationQuality chooseInterpolationQuality(GraphicsContext*, Image*, const void*, const LayoutSize&);
 
     LayoutRect localCaretRectForEmptyElement(LayoutUnit width, LayoutUnit textIndentOffset);
 
