@@ -82,7 +82,7 @@ class DocumentView : public blink::ServiceProvider,
   blink::WebScreenInfo screenInfo() override;
 
   // WebFrameClient methods:
-  mojo::View* createChildFrame(const blink::WebURL& url) override;
+  mojo::View* createChildFrame() override;
   void frameDetached(blink::WebFrame*) override;
   blink::WebNavigationPolicy decidePolicyForNavigation(
     const blink::WebFrameClient::NavigationPolicyInfo& info) override;

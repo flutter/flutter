@@ -204,15 +204,13 @@ blink::WebScreenInfo DocumentView::screenInfo() {
   return screen;
 }
 
-mojo::View* DocumentView::createChildFrame(const blink::WebURL& url) {
+mojo::View* DocumentView::createChildFrame() {
   if (!root_)
     return nullptr;
 
   mojo::View* child = root_->view_manager()->CreateView();
   child->SetVisible(true);
   root_->AddChild(child);
-  child->Embed(mojo::String::From(url.string().utf8()));
-
   return child;
 }
 

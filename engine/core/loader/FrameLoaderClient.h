@@ -93,7 +93,7 @@ namespace blink {
 
         virtual void loadURLExternally(const ResourceRequest&, NavigationPolicy, const String& suggestedName = String()) = 0;
 
-        virtual mojo::View* createChildFrame(const KURL&) = 0;
+        virtual mojo::View* createChildFrame() = 0;
 
         // Transmits the change in the set of watched CSS selectors property
         // that match any element on the frame.

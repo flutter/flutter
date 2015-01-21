@@ -66,9 +66,12 @@ void HTMLIFrameElement::createView()
         return;
 
     KURL url = document().completeURL(urlString);
-    m_contentView = parentFrame->loaderClient()->createChildFrame(url);
-    if (m_contentView)
-        m_contentView->AddObserver(this);
+    m_contentView = parentFrame->loaderClient()->createChildFrame();
+    if (!m_contentView)
+        return;
+
+    m_contentView->Embed(mojo::String::From(url.string().utf8().data()));
+    m_contentView->AddObserver(this);
 }
 
 }

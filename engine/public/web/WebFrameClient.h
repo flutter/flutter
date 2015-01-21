@@ -69,7 +69,7 @@ public:
     // until frameDetached() is called on it.
     // Note: If you override this, you should almost certainly be overriding
     // frameDetached().
-    virtual mojo::View* createChildFrame(const WebURL& url) { return nullptr; }
+    virtual mojo::View* createChildFrame() { return nullptr; }
 
     // This frame has been detached from the view, but has not been closed yet.
     // TODO(mpcomplete): reuse these.

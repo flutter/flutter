@@ -246,11 +246,10 @@ void FrameLoaderClientImpl::loadURLExternally(const ResourceRequest& request, Na
     }
 }
 
-mojo::View* FrameLoaderClientImpl::createChildFrame(const KURL& url)
+mojo::View* FrameLoaderClientImpl::createChildFrame()
 {
-    if (m_webFrame->client()) {
-        return m_webFrame->client()->createChildFrame(url);
-    }
+    if (m_webFrame->client())
+        return m_webFrame->client()->createChildFrame();
     ASSERT_NOT_REACHED();
     return nullptr;
 }
