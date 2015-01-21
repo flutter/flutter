@@ -25,7 +25,6 @@
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/resolver/MatchedPropertiesCache.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
-#include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Deque.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -142,11 +141,7 @@ private:
 
     MatchedPropertiesCache m_matchedPropertiesCache;
 
-    OwnPtr<MediaQueryEvaluator> m_medium;
-
     RawPtr<Document> m_document;
-
-    StyleResourceLoader m_styleResourceLoader;
 
     StyleSharingList m_styleSharingList;
 

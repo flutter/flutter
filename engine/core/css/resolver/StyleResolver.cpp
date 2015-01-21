@@ -60,6 +60,7 @@
 #include "sky/engine/core/css/resolver/StyleBuilder.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 #include "sky/engine/core/css/resolver/StyleResolverStats.h"
+#include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
@@ -117,7 +118,6 @@ static RuleSet& defaultStyles()
 
 StyleResolver::StyleResolver(Document& document)
     : m_document(document)
-    , m_styleResourceLoader(document.fetcher())
     , m_styleResolverStatsSequence(0)
     , m_accessCount(0)
 {
@@ -202,10 +202,10 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
     return documentStyle.release();
 }
 
-// Start loading resources referenced by this style.
 void StyleResolver::loadPendingResources(StyleResolverState& state)
 {
-    m_styleResourceLoader.loadPendingResources(state.style(), state.elementStyleResources());
+    StyleResourceLoader loader(document().fetcher());
+    loader.loadPendingResources(state.style(), state.elementStyleResources());
     document().styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
 }
 

@@ -42,30 +42,25 @@ StyleResourceLoader::StyleResourceLoader(ResourceFetcher* fetcher)
 {
 }
 
-static PassRefPtr<StyleImage> doLoadPendingImage(ResourceFetcher* fetcher, StylePendingImage* pendingImage, float deviceScaleFactor, const ResourceLoaderOptions& options)
+PassRefPtr<StyleImage> StyleResourceLoader::loadPendingImage(StylePendingImage* pendingImage, float deviceScaleFactor)
 {
     if (CSSImageValue* imageValue = pendingImage->cssImageValue())
-        return imageValue->cachedImage(fetcher, options);
+        return imageValue->cachedImage(m_fetcher, ResourceFetcher::defaultResourceOptions());
 
     if (CSSImageGeneratorValue* imageGeneratorValue
         = pendingImage->cssImageGeneratorValue()) {
-        imageGeneratorValue->loadSubimages(fetcher);
+        imageGeneratorValue->loadSubimages(m_fetcher);
         return StyleGeneratedImage::create(imageGeneratorValue);
     }
 
     if (CSSCursorImageValue* cursorImageValue
         = pendingImage->cssCursorImageValue())
-        return cursorImageValue->cachedImage(fetcher, deviceScaleFactor);
+        return cursorImageValue->cachedImage(m_fetcher, deviceScaleFactor);
 
     if (CSSImageSetValue* imageSetValue = pendingImage->cssImageSetValue())
-        return imageSetValue->cachedImageSet(fetcher, deviceScaleFactor, options);
+        return imageSetValue->cachedImageSet(m_fetcher, deviceScaleFactor, ResourceFetcher::defaultResourceOptions());
 
     return nullptr;
-}
-
-PassRefPtr<StyleImage> StyleResourceLoader::loadPendingImage(StylePendingImage* pendingImage, float deviceScaleFactor)
-{
-    return doLoadPendingImage(m_fetcher, pendingImage, deviceScaleFactor, ResourceFetcher::defaultResourceOptions());
 }
 
 void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleResources& elementStyleResources)
