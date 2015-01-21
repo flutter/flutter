@@ -117,7 +117,7 @@ Touch status=stable
 // Temporary setting to allow easy rollback of change to hover media feature.
 HoverMediaQueryKeywords status=stable
 
-TextBlob
+TextBlob status=stable
 TouchIconLoading
 UserSelectAll status=experimental
 WebGLDraftExtensions status=experimental
