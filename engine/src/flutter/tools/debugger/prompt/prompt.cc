@@ -102,12 +102,16 @@ class Prompt : public mojo::ApplicationDelegate,
 
   void OnWebSocketRequest(
       int connection_id, const net::HttpServerRequestInfo& info) override {
-    web_server_->Send500(connection_id, "http only");
+    Error(connection_id, "OnWebSocketRequest not implemented");
   }
 
   void OnWebSocketMessage(
       int connection_id, const std::string& data) override {
-    web_server_->Send500(connection_id, "http only");
+    Error(connection_id, "OnWebSocketMessage not implemented");
+  }
+
+  void Error(int connection_id, std::string message) {
+    web_server_->Send500(connection_id, message);
   }
 
   void Respond(int connection_id, std::string response) {
@@ -177,11 +181,21 @@ class Prompt : public mojo::ApplicationDelegate,
   }
 
   void StartProfiling(int connection_id) {
+#if !defined(NDEBUG) || !defined(ENABLE_PROFILING)
+    Error(connection_id,
+          "Profiling requires is_debug=false and enable_profiling=true");
+    return;
+#else
     base::debug::StartProfiling("sky_viewer.pprof");
     Respond(connection_id, "Starting profiling (stop with 'stop_profiling')");
+#endif
   }
 
   void StopProfiling(int connection_id) {
+    if (!base::debug::BeingProfiled()) {
+      Error(connection_id, "Profiling not started");
+      return;
+    }
     base::debug::StopProfiling();
     Respond(connection_id, "Stopped profiling");
   }

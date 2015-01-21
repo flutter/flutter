@@ -79,12 +79,6 @@ class SkyDebugger(object):
         return os.environ.get('CHROME_REMOTE_DESKTOP_SESSION', False)
 
     def _wrap_for_android(self, shell_args):
-        build_dir_url = SkyServer.url_for_path(
-            self.pids['remote_sky_server_port'],
-            self.pids['sky_server_root'],
-            self.pids['build_dir'])
-        shell_args += ['--origin=%s' % build_dir_url]
-
         # am shell --esa: (someone shoot me now)
         #  [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]
         #  (to embed a comma into a string escape it using "\,")
@@ -106,6 +100,7 @@ class SkyDebugger(object):
             for mime_type in SUPPORTED_MIME_TYPES]
 
         remote_command_port = self.pids.get('remote_sky_command_port', self.pids['sky_command_port'])
+        remote_server_port = self.pids.get('remote_sky_server_port', self.pids['sky_server_port'])
 
         shell_args = [
             '--v=1',
@@ -114,6 +109,13 @@ class SkyDebugger(object):
             '--args-for=mojo:sky_debugger_prompt %d' % remote_command_port,
             'mojo:window_manager',
         ]
+
+        # Map all mojo: urls to http: urls using the --origin command.
+        build_dir_url = SkyServer.url_for_path(
+            remote_server_port,
+            self.pids['sky_server_root'],
+            self.pids['build_dir'])
+        shell_args += ['--origin=%s' % build_dir_url]
 
         # Desktop-only work-around for mojo crashing under chromoting.
         if not is_android and args.use_osmesa:
@@ -322,14 +324,46 @@ class SkyDebugger(object):
             url = args.url_or_path
         self._send_command_to_sky('/load', url)
 
+    def _read_mojo_map(self):
+        # TODO(eseidel): Does not work for android.
+        mojo_map_path = "/tmp/mojo_shell.%d.maps" % self.pids['mojo_shell_pid']
+        with open(mojo_map_path, 'r') as maps_file:
+            lines = maps_file.read().strip().split('\n')
+            return dict(map(lambda line: line.split(' '), lines))
+
     def stop_profiling_command(self, args):
         self._send_command_to_sky('/stop_profiling')
-        # We need to munge the profile to replace foo.mojo with libfoo.so so
-        # that pprof knows this represents an SO.
-        with open("sky_viewer.pprof", "r+") as profile_file:
-            data = profile_file.read()
+        mojo_map = self._read_mojo_map()
+
+        # TODO(eseidel): We should have a helper for resolving urls, etc.
+        remote_server_port = self.pids.get('remote_sky_server_port', self.pids['sky_server_port'])
+        build_dir_url = SkyServer.url_for_path(
+            remote_server_port,
+            self.pids['sky_server_root'],
+            self.pids['build_dir'])
+
+        # Map /tmp cache paths to urls and then to local build_dir paths.
+        def map_to_local_paths(match):
+            path = match.group('mojo_path')
+            url = mojo_map.get(path)
+            if url and url.startswith(build_dir_url):
+                return url.replace(build_dir_url, self.pids['build_dir'])
+            return match.group(0)
+
+        MOJO_PATH_RE = re.compile(r'(?P<mojo_path>\S+\.mojo)')
+        MOJO_NAME_RE = re.compile(r'(?P<mojo_name>\w+)\.mojo')
+
+        with open("sky_viewer.pprof", "rb+") as profile_file:
+            # ISO-8859-1 can represent arbitrary binary while still keeping
+            # ASCII characters in the ASCII range (allowing us to regexp).
+            # http://en.wikipedia.org/wiki/ISO/IEC_8859-1
+            as_string = profile_file.read().decode('iso-8859-1')
+            # Using the mojo_shell.PID.maps file tmp paths to build_dir paths.
+            as_string = MOJO_PATH_RE.sub(map_to_local_paths, as_string)
+            # In release foo.mojo is stripped but libfoo_library.so isn't.
+            as_string = MOJO_NAME_RE.sub(r'lib\1_library.so', as_string)
             profile_file.seek(0)
-            profile_file.write(re.sub(r'(\w+)\.mojo', r'lib\1_library.so', data))
+            profile_file.write(as_string.encode('iso-8859-1'))
             profile_file.truncate()
 
     def _command_base_url(self):
@@ -487,6 +521,9 @@ class SkyDebugger(object):
         logcat.wait()
         stack.wait()
 
+    def pids_command(self, args):
+        print json.dumps(self.pids, indent=1)
+
     def main(self):
         logging.basicConfig(level=logging.WARNING)
         logging.getLogger("requests").setLevel(logging.WARNING)
@@ -513,6 +550,10 @@ class SkyDebugger(object):
         stop_parser = subparsers.add_parser('stop',
             help=('stop sky (as listed in %s)' % PID_FILE_PATH))
         stop_parser.set_defaults(func=self.stop_command)
+
+        pids_parser = subparsers.add_parser('pids',
+            help='dump the current skydb pids file')
+        pids_parser.set_defaults(func=self.pids_command)
 
         logcat_parser = subparsers.add_parser('logcat',
             help=('dump sky-related logs from device'))
