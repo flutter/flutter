@@ -56,7 +56,7 @@ namespace blink {
 struct SameSizeAsInlineTextBox : public InlineBox {
     unsigned variables[1];
     unsigned short variables2[2];
-    void* pointers[2];
+    void* pointers[3];
 };
 
 COMPILE_ASSERT(sizeof(InlineTextBox) == sizeof(SameSizeAsInlineTextBox), InlineTextBox_should_stay_small);
@@ -416,13 +416,16 @@ void paintText(GraphicsContext* context,
     const Font& font, const TextRun& textRun,
     const AtomicString& emphasisMark, int emphasisMarkOffset,
     int startOffset, int endOffset, int truncationPoint,
-    const FloatPoint& textOrigin, const FloatRect& boxRect)
+    const FloatPoint& textOrigin, const FloatRect& boxRect,
+    TextBlobPtr* cachedTextBlob = 0)
 {
     TextRunPaintInfo textRunPaintInfo(textRun);
     textRunPaintInfo.bounds = boxRect;
     if (startOffset <= endOffset) {
         textRunPaintInfo.from = startOffset;
         textRunPaintInfo.to = endOffset;
+        // FIXME: We should be able to use cachedTextBlob in more cases.
+        textRunPaintInfo.cachedTextBlob = cachedTextBlob;
         if (emphasisMark.isEmpty())
             context->drawText(font, textRunPaintInfo, textOrigin);
         else
@@ -460,11 +463,11 @@ inline void paintEmphasisMark(GraphicsContext* context,
 void paintTextWithEmphasisMark(
     GraphicsContext* context, const Font& font, const TextPaintingStyle& textStyle, const TextRun& textRun,
     const AtomicString& emphasisMark, int emphasisMarkOffset, int startOffset, int endOffset, int length,
-    const FloatPoint& textOrigin, const FloatRect& boxRect)
+    const FloatPoint& textOrigin, const FloatRect& boxRect, TextBlobPtr* cachedTextBlob = 0)
 {
     GraphicsContextStateSaver stateSaver(*context, false);
     updateGraphicsContext(context, textStyle, stateSaver);
-    paintText(context, font, textRun, nullAtom, 0, startOffset, endOffset, length, textOrigin, boxRect);
+    paintText(context, font, textRun, nullAtom, 0, startOffset, endOffset, length, textOrigin, boxRect, cachedTextBlob);
 
     if (!emphasisMark.isEmpty()) {
         if (textStyle.emphasisMarkColor != textStyle.fillColor)
@@ -603,12 +606,19 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
             startOffset = ePos;
             endOffset = sPos;
         }
-        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect);
+        // FIXME: This cache should probably ultimately be held somewhere else.
+        // A hashmap is convenient to avoid a memory hit when the
+        // RuntimeEnabledFeature is off.
+        bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && startOffset == 0 && endOffset == length;
+        TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
+        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, cachedTextBlob);
     }
 
     if ((paintSelectedTextOnly || paintSelectedTextSeparately) && sPos < ePos) {
         // paint only the text that is selected
-        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect);
+        bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && sPos == 0 && ePos == length;
+        TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
+        paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect, cachedTextBlob);
     }
 
     // Paint decorations

@@ -60,7 +60,6 @@ public:
 
     void setDrawRange(int from, int to);
     bool shape(GlyphBuffer* = 0);
-    FloatPoint adjustStartPoint(const FloatPoint&);
     float totalWidth() { return m_totalWidth; }
     int offsetForPosition(float targetX);
     FloatRect selectionRect(const FloatPoint&, int height, int from, int to);
@@ -90,7 +89,7 @@ private:
         unsigned numGlyphs() const { return m_numGlyphs; }
         uint16_t* glyphs() { return &m_glyphs[0]; }
         float* advances() { return &m_advances[0]; }
-        FloatPoint* offsets() { return &m_offsets[0]; }
+        FloatSize* offsets() { return &m_offsets[0]; }
         bool hasGlyphToCharacterIndexes() const
         {
             return m_glyphToCharacterIndexes.size() > 0;
@@ -116,7 +115,7 @@ private:
         Vector<uint16_t, 256> m_glyphs;
         Vector<float, 256> m_advances;
         Vector<uint16_t, 256> m_glyphToCharacterIndexes;
-        Vector<FloatPoint, 256> m_offsets;
+        Vector<FloatSize, 256> m_offsets;
         float m_width;
     };
 
@@ -130,7 +129,7 @@ private:
     bool createHarfBuzzRuns();
     bool shapeHarfBuzzRuns();
     bool fillGlyphBuffer(GlyphBuffer*);
-    void fillGlyphBufferFromHarfBuzzRun(GlyphBuffer*, HarfBuzzRun*, FloatPoint& firstOffsetOfNextRun);
+    void fillGlyphBufferFromHarfBuzzRun(GlyphBuffer*, HarfBuzzRun*, float& carryAdvance);
     void fillGlyphBufferForTextEmphasis(GlyphBuffer*, HarfBuzzRun* currentRun);
     void setGlyphPositionsForHarfBuzzRun(HarfBuzzRun*, hb_buffer_t*);
     void addHarfBuzzRun(unsigned startCharacter, unsigned endCharacter, const SimpleFontData*, UScriptCode);
@@ -148,8 +147,6 @@ private:
 
     Vector<hb_feature_t, 4> m_features;
     Vector<OwnPtr<HarfBuzzRun>, 16> m_harfBuzzRuns;
-
-    FloatPoint m_startOffset;
 
     int m_fromIndex;
     int m_toIndex;

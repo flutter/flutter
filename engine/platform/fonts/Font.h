@@ -100,7 +100,8 @@ public:
     void update(PassRefPtr<FontSelector>) const;
 
     enum CustomFontNotReadyAction { DoNotPaintIfFontNotReady, UseFallbackIfFontNotReady };
-    void drawText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&, CustomFontNotReadyAction = DoNotPaintIfFontNotReady) const;
+    void drawText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&) const;
+    float drawUncachedText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&, CustomFontNotReadyAction) const;
     void drawEmphasisMarks(GraphicsContext*, const TextRunPaintInfo&, const AtomicString& mark, const FloatPoint&) const;
 
     float width(const TextRun&, HashSet<const SimpleFontData*>* fallbackFonts = 0, GlyphOverflow* = 0) const;
@@ -136,12 +137,11 @@ private:
     enum ForTextEmphasisOrNot { NotForTextEmphasis, ForTextEmphasis };
 
     // Returns the initial in-stream advance.
-    float getGlyphsAndAdvancesForSimpleText(const TextRunPaintInfo&, GlyphBuffer&, ForTextEmphasisOrNot = NotForTextEmphasis) const;
-    void drawSimpleText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&) const;
-    void drawEmphasisMarksForSimpleText(GraphicsContext*, const TextRunPaintInfo&, const AtomicString& mark, const FloatPoint&) const;
+    float buildGlyphBuffer(const TextRunPaintInfo&, GlyphBuffer&, ForTextEmphasisOrNot = NotForTextEmphasis) const;
+    PassTextBlobPtr buildTextBlob(const GlyphBuffer&, float initialAdvance, const FloatRect& bounds) const;
     void drawGlyphs(GraphicsContext*, const SimpleFontData*, const GlyphBuffer&, unsigned from, unsigned numGlyphs, const FloatPoint&, const FloatRect& textRect) const;
-    void drawGlyphBuffer(GraphicsContext*, const TextRunPaintInfo&, const GlyphBuffer&, const FloatPoint&) const;
     void drawTextBlob(GraphicsContext*, const SkTextBlob*, const SkPoint& origin) const;
+    float drawGlyphBuffer(GraphicsContext*, const TextRunPaintInfo&, const GlyphBuffer&, const FloatPoint&) const;
     void drawEmphasisMarks(GraphicsContext*, const TextRunPaintInfo&, const GlyphBuffer&, const AtomicString&, const FloatPoint&) const;
     float floatWidthForSimpleText(const TextRun&, HashSet<const SimpleFontData*>* fallbackFonts = 0, IntRectExtent* glyphBounds = 0) const;
     int offsetForPositionForSimpleText(const TextRun&, float position, bool includePartialGlyphs) const;
@@ -149,10 +149,6 @@ private:
 
     bool getEmphasisMarkGlyphData(const AtomicString&, GlyphData&) const;
 
-    // Returns the initial in-stream advance.
-    float getGlyphsAndAdvancesForComplexText(const TextRunPaintInfo&, GlyphBuffer&, ForTextEmphasisOrNot = NotForTextEmphasis) const;
-    void drawComplexText(GraphicsContext*, const TextRunPaintInfo&, const FloatPoint&) const;
-    void drawEmphasisMarksForComplexText(GraphicsContext*, const TextRunPaintInfo&, const AtomicString& mark, const FloatPoint&) const;
     float floatWidthForComplexText(const TextRun&, HashSet<const SimpleFontData*>* fallbackFonts, IntRectExtent* glyphBounds) const;
     int offsetForPositionForComplexText(const TextRun&, float position, bool includePartialGlyphs) const;
     FloatRect selectionRectForComplexText(const TextRun&, const FloatPoint&, int h, int from, int to) const;
@@ -182,8 +178,6 @@ private:
     {
         return m_fontFallbackList && m_fontFallbackList->shouldSkipDrawing();
     }
-
-    PassTextBlobPtr buildTextBlob(const GlyphBuffer&, float initialAdvance, const FloatRect& bounds) const;
 
     FontDescription m_fontDescription;
     mutable RefPtr<FontFallbackList> m_fontFallbackList;

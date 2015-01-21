@@ -918,12 +918,10 @@ void GraphicsContext::drawBidiText(const Font& font, const TextRunPaintInfo& run
 
         TextRunPaintInfo subrunInfo(subrun);
         subrunInfo.bounds = runInfo.bounds;
-        font.drawText(this, subrunInfo, currPoint, customFontNotReadyAction);
+        float runWidth = font.drawUncachedText(this, subrunInfo, currPoint, customFontNotReadyAction);
 
         bidiRun = bidiRun->next();
-        // FIXME: Have Font::drawText return the width of what it drew so that we don't have to re-measure here.
-        if (bidiRun)
-            currPoint.move(font.width(subrun), 0);
+        currPoint.move(runWidth, 0);
     }
 
     bidiRuns.deleteRuns();

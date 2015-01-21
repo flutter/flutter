@@ -32,6 +32,8 @@
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
+class SkTextBlob;
+
 namespace blink {
 
 class FloatPoint;
@@ -245,6 +247,7 @@ struct TextRunPaintInfo {
         : run(r)
         , from(0)
         , to(r.length())
+        , cachedTextBlob(nullptr)
     {
     }
 
@@ -252,6 +255,7 @@ struct TextRunPaintInfo {
     int from;
     int to;
     FloatRect bounds;
+    RefPtr<const SkTextBlob>* cachedTextBlob;
 };
 
 }

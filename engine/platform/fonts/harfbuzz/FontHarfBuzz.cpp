@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/platform/fonts/Font.h"
 
-#include "sky/engine/platform/NotImplemented.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/fonts/FontPlatformFeatures.h"
 #include "sky/engine/platform/fonts/GlyphBuffer.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
@@ -157,7 +157,7 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
                 pos[i].set(
                     x + SkIntToScalar(lroundf(translations[i].x())),
                     y + -SkIntToScalar(-lroundf(currentWidth - translations[i].y())));
-                currentWidth += glyphBuffer.advanceAt(from + glyphIndex).width();
+                currentWidth += glyphBuffer.advanceAt(from + glyphIndex);
             }
             horizontalOffset += currentWidth;
             paintGlyphs(gc, font, glyphs, chunkLength, pos, textRect);
@@ -167,13 +167,13 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
         return;
     }
 
-    if (!glyphBuffer.hasVerticalAdvances()) {
+    if (!glyphBuffer.hasOffsets()) {
         SkAutoSTMalloc<64, SkScalar> storage(numGlyphs);
         SkScalar* xpos = storage.get();
-        const FloatSize* adv = glyphBuffer.advances(from);
+        const float* adv = glyphBuffer.advances(from);
         for (unsigned i = 0; i < numGlyphs; i++) {
             xpos[i] = x;
-            x += SkFloatToScalar(adv[i].width());
+            x += SkFloatToScalar(adv[i]);
         }
         const Glyph* glyphs = glyphBuffer.glyphs(from);
         paintGlyphsHorizontal(gc, font, glyphs, numGlyphs, xpos, SkFloatToScalar(y), textRect);
@@ -188,11 +188,14 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
     // here.
     SkAutoSTMalloc<32, SkPoint> storage(numGlyphs);
     SkPoint* pos = storage.get();
-    const FloatSize* adv = glyphBuffer.advances(from);
+    const FloatSize* offsets = glyphBuffer.offsets(from);
+    const float* advances = glyphBuffer.advances(from);
+    SkScalar advanceSoFar = SkFloatToScalar(0);
     for (unsigned i = 0; i < numGlyphs; i++) {
-        pos[i].set(x, y);
-        x += SkFloatToScalar(adv[i].width());
-        y += SkFloatToScalar(adv[i].height());
+        pos[i].set(
+            x + SkFloatToScalar(offsets[i].width()) + advanceSoFar,
+            y + SkFloatToScalar(offsets[i].height()));
+        advanceSoFar += SkFloatToScalar(advances[i]);
     }
 
     const Glyph* glyphs = glyphBuffer.glyphs(from);
@@ -201,67 +204,22 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
 
 void Font::drawTextBlob(GraphicsContext* gc, const SkTextBlob* blob, const SkPoint& origin) const
 {
+    ASSERT(RuntimeEnabledFeatures::textBlobEnabled());
+
     // FIXME: It would be good to move this to Font.cpp, if we're sure that none
     // of the things in FontMac's setupPaint need to apply here.
     // See also paintGlyphs.
     TextDrawingModeFlags textMode = gc->textDrawingMode();
 
-    if (textMode & TextModeFill) {
-        SkPaint paint = gc->fillPaint();
-        gc->adjustTextRenderMode(&paint);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        gc->drawTextBlob(blob, origin, paint);
-    }
+    if (textMode & TextModeFill)
+        gc->drawTextBlob(blob, origin, gc->fillPaint());
 
     if ((textMode & TextModeStroke) && gc->hasStroke()) {
         SkPaint paint = gc->strokePaint();
-        gc->adjustTextRenderMode(&paint);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         if (textMode & TextModeFill)
             paint.setLooper(0);
         gc->drawTextBlob(blob, origin, paint);
     }
-}
-
-void Font::drawComplexText(GraphicsContext* gc, const TextRunPaintInfo& runInfo, const FloatPoint& point) const
-{
-    if (!runInfo.run.length())
-        return;
-
-    TextDrawingModeFlags textMode = gc->textDrawingMode();
-    bool fill = textMode & TextModeFill;
-    bool stroke = (textMode & TextModeStroke) && gc->hasStroke();
-
-    if (!fill && !stroke)
-        return;
-
-    GlyphBuffer glyphBuffer;
-    HarfBuzzShaper shaper(this, runInfo.run);
-    shaper.setDrawRange(runInfo.from, runInfo.to);
-    if (!shaper.shape(&glyphBuffer) || glyphBuffer.isEmpty())
-        return;
-    FloatPoint adjustedPoint = shaper.adjustStartPoint(point);
-    drawGlyphBuffer(gc, runInfo, glyphBuffer, adjustedPoint);
-}
-
-void Font::drawEmphasisMarksForComplexText(GraphicsContext* context, const TextRunPaintInfo& runInfo, const AtomicString& mark, const FloatPoint& point) const
-{
-    GlyphBuffer glyphBuffer;
-
-    float initialAdvance = getGlyphsAndAdvancesForComplexText(runInfo, glyphBuffer, ForTextEmphasis);
-
-    if (glyphBuffer.isEmpty())
-        return;
-
-    drawEmphasisMarks(context, runInfo, glyphBuffer, mark, FloatPoint(point.x() + initialAdvance, point.y()));
-}
-
-float Font::getGlyphsAndAdvancesForComplexText(const TextRunPaintInfo& runInfo, GlyphBuffer& glyphBuffer, ForTextEmphasisOrNot forTextEmphasis) const
-{
-    HarfBuzzShaper shaper(this, runInfo.run, HarfBuzzShaper::ForTextEmphasis);
-    shaper.setDrawRange(runInfo.from, runInfo.to);
-    shaper.shape(&glyphBuffer);
-    return 0;
 }
 
 float Font::floatWidthForComplexText(const TextRun& run, HashSet<const SimpleFontData*>* fallbackFonts, IntRectExtent* glyphBounds) const
@@ -299,27 +257,23 @@ FloatRect Font::selectionRectForComplexText(const TextRun& run,
     return shaper.selectionRect(point, height, from, to);
 }
 
-PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdvance, const FloatRect& bounds) const
+namespace {
+
+template <bool hasOffsets>
+bool buildTextBlobInternal(const GlyphBuffer& glyphBuffer, SkScalar initialAdvance, SkTextBlobBuilder& builder)
 {
-    // FIXME: Except for setupPaint, this is not specific to FontHarfBuzz.
-    // FIXME: Also implement the more general full-positioning path.
-    ASSERT(!glyphBuffer.hasVerticalAdvances());
-
-    SkTextBlobBuilder builder;
-    SkScalar x = SkFloatToScalar(initialAdvance);
-    SkRect skBounds = bounds;
-
+    SkScalar x = initialAdvance;
     unsigned i = 0;
     while (i < glyphBuffer.size()) {
         const SimpleFontData* fontData = glyphBuffer.fontDataAt(i);
 
         // FIXME: Handle vertical text.
         if (fontData->platformData().orientation() == Vertical)
-            return nullptr;
+            return false;
 
         // FIXME: Handle SVG fonts.
         if (fontData->isSVGFont())
-            return nullptr;
+            return false;
 
         // FIXME: FontPlatformData makes some decisions on the device scale
         // factor, which is found via the GraphicsContext. This should be fixed
@@ -333,19 +287,43 @@ PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initia
             i++;
         unsigned count = i - start;
 
-        const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPosH(paint, count, 0, &skBounds);
+        const SkTextBlobBuilder::RunBuffer& buffer = hasOffsets ?
+            builder.allocRunPos(paint, count) :
+            builder.allocRunPosH(paint, count, 0);
 
         const uint16_t* glyphs = glyphBuffer.glyphs(start);
         std::copy(glyphs, glyphs + count, buffer.glyphs);
 
-        const FloatSize* advances = glyphBuffer.advances(start);
+        const float* advances = glyphBuffer.advances(start);
+        const FloatSize* offsets = glyphBuffer.offsets(start);
         for (unsigned j = 0; j < count; j++) {
-            buffer.pos[j] = x;
-            x += SkFloatToScalar(advances[j].width());
+            if (hasOffsets) {
+                const FloatSize& offset = offsets[j];
+                buffer.pos[2 * j] = x + offset.width();
+                buffer.pos[2 * j + 1] = offset.height();
+            } else {
+                buffer.pos[j] = x;
+            }
+            x += SkFloatToScalar(advances[j]);
         }
     }
-
-    return adoptRef(builder.build());
+    return true;
 }
+
+} // namespace
+
+PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdvance, const FloatRect& bounds) const
+{
+    ASSERT(RuntimeEnabledFeatures::textBlobEnabled());
+
+    SkTextBlobBuilder builder;
+    SkScalar advance = SkFloatToScalar(initialAdvance);
+
+    bool success = glyphBuffer.hasOffsets() ?
+        buildTextBlobInternal<true>(glyphBuffer, advance, builder) :
+        buildTextBlobInternal<false>(glyphBuffer, advance, builder);
+    return success ? adoptRef(builder.build()) : nullptr;
+}
+
 
 } // namespace blink

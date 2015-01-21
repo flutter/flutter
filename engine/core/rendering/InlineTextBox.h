@@ -161,6 +161,7 @@ public:
 private:
     InlineTextBox* m_prevTextBox; // The previous box that also uses our RenderObject
     InlineTextBox* m_nextTextBox; // The next box that also uses our RenderObject
+    TextBlobPtr m_cachedTextBlob;
 
     int m_start;
     unsigned short m_len;
