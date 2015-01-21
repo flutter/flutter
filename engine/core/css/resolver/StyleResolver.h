@@ -113,9 +113,7 @@ private:
 
     void loadPendingResources(StyleResolverState&);
 
-    void matchAuthorRules(Element*, ElementRuleCollector&);
-    void matchAllRules(StyleResolverState&, ElementRuleCollector&);
-    void matchUARules(ElementRuleCollector&);
+    void matchRules(Element&, ElementRuleCollector&);
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
     bool applyAnimatedProperties(StyleResolverState&, Element* animatingElement);

@@ -146,45 +146,28 @@ StyleResolver::~StyleResolver()
 {
 }
 
-void StyleResolver::matchAuthorRules(Element* element, ElementRuleCollector& collector)
+void StyleResolver::matchRules(Element& element, ElementRuleCollector& collector)
 {
     collector.clearMatchedRules();
     collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
 
-    // TODO(esprehn): Eliminate CascadeOrder.
     CascadeOrder cascadeOrder = 0;
 
-    if (ShadowRoot* shadowRoot = element->shadowRoot())
-        shadowRoot->scopedStyleResolver().collectMatchingHostRules(collector, cascadeOrder++);
+    RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
+    collector.collectMatchingRules(MatchRequest(&defaultStyles()), ruleRange, ++cascadeOrder);
 
-    ScopedStyleResolver& resolver = element->treeScope().scopedStyleResolver();
-    resolver.collectMatchingAuthorRules(collector, cascadeOrder);
+    if (ShadowRoot* shadowRoot = element.shadowRoot())
+        shadowRoot->scopedStyleResolver().collectMatchingHostRules(collector, ++cascadeOrder);
 
-    collector.sortAndTransferMatchedRules();
-}
-
-void StyleResolver::matchUARules(ElementRuleCollector& collector)
-{
-    collector.clearMatchedRules();
-    collector.matchedResult().ranges.lastUARule = collector.matchedResult().matchedProperties.size() - 1;
-
-    RuleRange ruleRange = collector.matchedResult().ranges.UARuleRange();
-    collector.collectMatchingRules(MatchRequest(&defaultStyles()), ruleRange);
+    ScopedStyleResolver& resolver = element.treeScope().scopedStyleResolver();
+    resolver.collectMatchingAuthorRules(collector, ++cascadeOrder);
 
     collector.sortAndTransferMatchedRules();
-}
 
-void StyleResolver::matchAllRules(StyleResolverState& state, ElementRuleCollector& collector)
-{
-    matchUARules(collector);
-    matchAuthorRules(state.element(), collector);
-
-    if (state.element()->isStyledElement()) {
-        if (state.element()->inlineStyle()) {
-            // Inline style is immutable as long as there is no CSSOM wrapper.
-            bool isInlineStyleCacheable = !state.element()->inlineStyle()->isMutable();
-            collector.addElementStyleProperties(state.element()->inlineStyle(), isInlineStyleCacheable);
-        }
+    if (const StylePropertySet* inlineStyle = element.inlineStyle()) {
+        // Inline style is immutable as long as there is no CSSOM wrapper.
+        bool isInlineStyleCacheable = !inlineStyle->isMutable();
+        collector.addElementStyleProperties(inlineStyle, isInlineStyleCacheable);
     }
 }
 
@@ -247,7 +230,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     {
         ElementRuleCollector collector(state.elementContext(), state.style());
 
-        matchAllRules(state, collector);
+        matchRules(*element, collector);
 
         applyMatchedProperties(state, collector.matchedResult());
     }
