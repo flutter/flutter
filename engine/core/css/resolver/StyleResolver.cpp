@@ -148,12 +148,10 @@ StyleResolver::~StyleResolver()
 void StyleResolver::matchRules(Element& element, ElementRuleCollector& collector)
 {
     collector.clearMatchedRules();
-    collector.matchedResult().ranges.lastAuthorRule = collector.matchedResult().matchedProperties.size() - 1;
 
     CascadeOrder cascadeOrder = 0;
 
-    RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
-    collector.collectMatchingRules(MatchRequest(&defaultStyles()), ruleRange, ++cascadeOrder);
+    collector.collectMatchingRules(MatchRequest(&defaultStyles()), ++cascadeOrder);
 
     if (ShadowRoot* shadowRoot = element.shadowRoot())
         shadowRoot->scopedStyleResolver().collectMatchingHostRules(collector, ++cascadeOrder);
@@ -279,7 +277,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
     // relevant one is animation-timing-function and we special-case that in
     // CSSAnimations.cpp
     bool inheritedOnly = false;
-    applyMatchedProperties<HighPriorityProperties>(state, result, false, 0, result.matchedProperties.size() - 1, inheritedOnly);
+    applyMatchedProperties<HighPriorityProperties>(state, result, false, inheritedOnly);
 
     // If our font got dirtied, go ahead and update it now.
     updateFont(state);
@@ -289,7 +287,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const 
         StyleBuilder::applyProperty(CSSPropertyLineHeight, state, state.lineHeightValue());
 
     // Now do rest of the properties.
-    applyMatchedProperties<LowPriorityProperties>(state, result, false, 0, result.matchedProperties.size() - 1, inheritedOnly);
+    applyMatchedProperties<LowPriorityProperties>(state, result, false, inheritedOnly);
 
     loadPendingResources(state);
 
@@ -522,19 +520,16 @@ void StyleResolver::applyProperties(StyleResolverState& state, const StyleProper
 }
 
 template <StyleResolver::StyleApplicationPass pass>
-void StyleResolver::applyMatchedProperties(StyleResolverState& state, const MatchResult& matchResult, bool isImportant, int startIndex, int endIndex, bool inheritedOnly)
+void StyleResolver::applyMatchedProperties(StyleResolverState& state, const MatchResult& matchResult, bool isImportant, bool inheritedOnly)
 {
-    if (startIndex == -1)
-        return;
-    for (int i = startIndex; i <= endIndex; ++i) {
-        const MatchedProperties& matchedProperties = matchResult.matchedProperties[i];
-        applyProperties<pass>(state, matchedProperties.properties.get(), isImportant, inheritedOnly);
+    for (const RefPtr<StylePropertySet>& properties : matchResult.matchedProperties) {
+        applyProperties<pass>(state, properties.get(), isImportant, inheritedOnly);
     }
 }
 
-static unsigned computeMatchedPropertiesHash(const MatchedProperties* properties, unsigned size)
+static unsigned computeMatchedPropertiesHash(const RefPtr<StylePropertySet>* properties, unsigned size)
 {
-    return StringHasher::hashMemory(properties, sizeof(MatchedProperties) * size);
+    return StringHasher::hashMemory(properties, sizeof(*properties) * size);
 }
 
 void StyleResolver::invalidateMatchedPropertiesCache()
@@ -582,9 +577,8 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
     // The order is (1) high-priority not important, (2) high-priority important, (3) normal not important
     // and (4) normal important.
     state.setLineHeightValue(0);
-    applyMatchedProperties<HighPriorityProperties>(state, matchResult, false, 0, matchResult.matchedProperties.size() - 1, applyInheritedOnly);
-    applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, matchResult.ranges.firstAuthorRule, matchResult.ranges.lastAuthorRule, applyInheritedOnly);
-    applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, matchResult.ranges.firstUARule, matchResult.ranges.lastUARule, applyInheritedOnly);
+    applyMatchedProperties<HighPriorityProperties>(state, matchResult, false, applyInheritedOnly);
+    applyMatchedProperties<HighPriorityProperties>(state, matchResult, true, applyInheritedOnly);
 
     // If our font got dirtied, go ahead and update it now.
     updateFont(state);
@@ -597,13 +591,9 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
     if (cachedMatchedProperties && cachedMatchedProperties->renderStyle->fontDescription() != state.style()->fontDescription())
         applyInheritedOnly = false;
 
-    // Now do the normal priority UA properties.
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, false, matchResult.ranges.firstUARule, matchResult.ranges.lastUARule, applyInheritedOnly);
-
     // Now do the author and user normal priority properties and all the !important properties.
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, false, matchResult.ranges.lastUARule + 1, matchResult.matchedProperties.size() - 1, applyInheritedOnly);
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, true, matchResult.ranges.firstAuthorRule, matchResult.ranges.lastAuthorRule, applyInheritedOnly);
-    applyMatchedProperties<LowPriorityProperties>(state, matchResult, true, matchResult.ranges.firstUARule, matchResult.ranges.lastUARule, applyInheritedOnly);
+    applyMatchedProperties<LowPriorityProperties>(state, matchResult, false, applyInheritedOnly);
+    applyMatchedProperties<LowPriorityProperties>(state, matchResult, true, applyInheritedOnly);
 
     loadPendingResources(state);
 

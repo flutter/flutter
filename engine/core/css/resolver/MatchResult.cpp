@@ -34,19 +34,10 @@
 
 namespace blink {
 
-MatchedProperties::MatchedProperties()
-{
-}
-
-MatchedProperties::~MatchedProperties()
-{
-}
-
 void MatchResult::addMatchedProperties(const StylePropertySet* properties)
 {
     matchedProperties.grow(matchedProperties.size() + 1);
-    MatchedProperties& newProperties = matchedProperties.last();
-    newProperties.properties = const_cast<StylePropertySet*>(properties);
+    matchedProperties.last() = const_cast<StylePropertySet*>(properties);
 }
 
 } // namespace blink

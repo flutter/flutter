@@ -112,19 +112,17 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String
 
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
-    RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
         MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
-        collector.collectMatchingRules(matchRequest, ruleRange, cascadeOrder);
+        collector.collectMatchingRules(matchRequest, cascadeOrder);
     }
 }
 
 void ScopedStyleResolver::collectMatchingHostRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
-    RuleRange ruleRange = collector.matchedResult().ranges.authorRuleRange();
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
         MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
-        collector.collectMatchingHostRules(matchRequest, ruleRange, cascadeOrder);
+        collector.collectMatchingHostRules(matchRequest, cascadeOrder);
     }
 }
 

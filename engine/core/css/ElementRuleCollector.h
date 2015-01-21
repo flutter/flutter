@@ -22,6 +22,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_ELEMENTRULECOLLECTOR_H_
 #define SKY_ENGINE_CORE_CSS_ELEMENTRULECOLLECTOR_H_
 
+#include "sky/engine/core/css/RuleSet.h"
 #include "sky/engine/core/css/SelectorChecker.h"
 #include "sky/engine/core/css/resolver/ElementResolveContext.h"
 #include "sky/engine/core/css/resolver/MatchRequest.h"
@@ -32,8 +33,6 @@
 namespace blink {
 
 class CSSStyleSheet;
-class RuleData;
-class RuleSet;
 class ScopedStyleResolver;
 
 typedef unsigned CascadeOrder;
@@ -94,23 +93,23 @@ public:
 
     MatchResult& matchedResult();
 
-    void collectMatchingRules(const MatchRequest&, RuleRange&, CascadeOrder = ignoreCascadeOrder);
-    void collectMatchingHostRules(const MatchRequest&, RuleRange&, CascadeOrder cascadeOrder = ignoreCascadeOrder);
+    void collectMatchingRules(const MatchRequest&, CascadeOrder = ignoreCascadeOrder);
+    void collectMatchingHostRules(const MatchRequest&, CascadeOrder cascadeOrder = ignoreCascadeOrder);
     void sortAndTransferMatchedRules();
     void clearMatchedRules();
     void addElementStyleProperties(const StylePropertySet*, bool isCacheable = true);
 
 private:
-    void collectRuleIfMatches(const RuleData&, CascadeOrder, const MatchRequest&, RuleRange&);
+    void collectRuleIfMatches(const RuleData&, CascadeOrder, const MatchRequest&);
 
     template<typename RuleDataListType>
-    void collectMatchingRulesForList(const RuleDataListType* rules, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+    void collectMatchingRulesForList(const RuleDataListType* rules, CascadeOrder cascadeOrder, const MatchRequest& matchRequest)
     {
         if (!rules)
             return;
 
         for (typename RuleDataListType::const_iterator it = rules->begin(), end = rules->end(); it != end; ++it)
-            collectRuleIfMatches(*it, cascadeOrder, matchRequest, ruleRange);
+            collectRuleIfMatches(*it, cascadeOrder, matchRequest);
     }
 
     bool ruleMatches(const RuleData&);

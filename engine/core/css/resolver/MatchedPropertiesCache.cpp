@@ -38,7 +38,6 @@ namespace blink {
 void CachedMatchedProperties::set(const RenderStyle* style, const RenderStyle* parentStyle, const MatchResult& matchResult)
 {
     matchedProperties.appendVector(matchResult.matchedProperties);
-    ranges = matchResult.ranges;
 
     // Note that we don't cache the original RenderStyle instance. It may be further modified.
     // The RenderStyle in the cache is really just a holder for the substructures and never used as-is.
@@ -76,8 +75,6 @@ const CachedMatchedProperties* MatchedPropertiesCache::find(unsigned hash, const
         if (matchResult.matchedProperties[i] != cacheItem->matchedProperties[i])
             return 0;
     }
-    if (cacheItem->ranges != matchResult.ranges)
-        return 0;
     return cacheItem;
 }
 
@@ -126,9 +123,9 @@ void MatchedPropertiesCache::sweep(Timer<MatchedPropertiesCache>*)
     Cache::iterator end = m_cache.end();
     for (; it != end; ++it) {
         CachedMatchedProperties* cacheItem = it->value.get();
-        Vector<MatchedProperties>& matchedProperties = cacheItem->matchedProperties;
+        Vector<RefPtr<StylePropertySet>>& matchedProperties = cacheItem->matchedProperties;
         for (size_t i = 0; i < matchedProperties.size(); ++i) {
-            if (matchedProperties[i].properties->hasOneRef()) {
+            if (matchedProperties[i]->hasOneRef()) {
                 toRemove.append(it->key);
                 break;
             }

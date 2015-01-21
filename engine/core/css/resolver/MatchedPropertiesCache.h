@@ -37,10 +37,8 @@ class RenderStyle;
 class StyleResolverState;
 
 class CachedMatchedProperties final {
-
 public:
-    Vector<MatchedProperties> matchedProperties;
-    MatchRanges ranges;
+    Vector<RefPtr<StylePropertySet>> matchedProperties;
     RefPtr<RenderStyle> renderStyle;
     RefPtr<RenderStyle> parentRenderStyle;
 

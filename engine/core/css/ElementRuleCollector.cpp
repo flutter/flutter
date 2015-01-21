@@ -72,15 +72,12 @@ void ElementRuleCollector::addElementStyleProperties(const StylePropertySet* pro
 {
     if (!propertySet)
         return;
-    m_result.ranges.lastAuthorRule = m_result.matchedProperties.size();
-    if (m_result.ranges.firstAuthorRule == -1)
-        m_result.ranges.firstAuthorRule = m_result.ranges.lastAuthorRule;
     m_result.addMatchedProperties(propertySet);
     if (!isCacheable)
         m_result.isCacheable = false;
 }
 
-void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeOrder cascadeOrder)
+void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest, CascadeOrder cascadeOrder)
 {
     ASSERT(matchRequest.ruleSet);
     ASSERT(m_context.element());
@@ -90,19 +87,19 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
     // We need to collect the rules for id, class, tag, and everything else into a buffer and
     // then sort the buffer.
     if (element.hasID())
-        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), cascadeOrder, matchRequest, ruleRange);
+        collectMatchingRulesForList(matchRequest.ruleSet->idRules(element.idForStyleResolution()), cascadeOrder, matchRequest);
     if (element.isStyledElement() && element.hasClass()) {
         for (size_t i = 0; i < element.classNames().size(); ++i)
-            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), cascadeOrder, matchRequest, ruleRange);
+            collectMatchingRulesForList(matchRequest.ruleSet->classRules(element.classNames()[i]), cascadeOrder, matchRequest);
     }
 
-    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeOrder, matchRequest, ruleRange);
-    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->tagRules(element.localName()), cascadeOrder, matchRequest);
+    collectMatchingRulesForList(matchRequest.ruleSet->universalRules(), cascadeOrder, matchRequest);
 }
 
-void ElementRuleCollector::collectMatchingHostRules(const MatchRequest& matchRequest, RuleRange& ruleRange, CascadeOrder cascadeOrder)
+void ElementRuleCollector::collectMatchingHostRules(const MatchRequest& matchRequest, CascadeOrder cascadeOrder)
 {
-    collectMatchingRulesForList(matchRequest.ruleSet->hostRules(), cascadeOrder, matchRequest, ruleRange);
+    collectMatchingRulesForList(matchRequest.ruleSet->hostRules(), cascadeOrder, matchRequest);
 }
 
 void ElementRuleCollector::sortAndTransferMatchedRules()
@@ -141,7 +138,7 @@ inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData)
     return matched;
 }
 
-void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest, RuleRange& ruleRange)
+void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, CascadeOrder cascadeOrder, const MatchRequest& matchRequest)
 {
     StyleRule* rule = ruleData.rule();
     if (ruleMatches(ruleData)) {
@@ -149,11 +146,6 @@ void ElementRuleCollector::collectRuleIfMatches(const RuleData& ruleData, Cascad
         const StylePropertySet& properties = rule->properties();
         if (properties.isEmpty())
             return;
-
-        // Update our first/last rule indices in the matched rules array.
-        ++ruleRange.lastRuleIndex;
-        if (ruleRange.firstRuleIndex == -1)
-            ruleRange.firstRuleIndex = ruleRange.lastRuleIndex;
 
         // Add this rule to our list of matched rules.
         addMatchedRule(&ruleData, cascadeOrder, matchRequest.styleSheetIndex, matchRequest.styleSheet);
