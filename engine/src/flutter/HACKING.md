@@ -6,6 +6,9 @@ Building
 
 * Follow the setup & build instructions for [Mojo](https://github.com/domokit/mojo)
 
+If building for Android, be aware a patch to V8's GN build is required:
+https://code.google.com/p/v8/issues/detail?id=3841
+
 Running applications
 --------------------
 
