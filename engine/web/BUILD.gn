@@ -4,6 +4,7 @@
 
 import("//build/config/ui.gni")
 import("//sky/engine/config.gni")
+import("//testing/test.gni")
 
 visibility = [ "//sky/*" ]
 

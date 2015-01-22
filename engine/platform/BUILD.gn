@@ -5,6 +5,7 @@
 import("//build/config/ui.gni")
 import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/config.gni")
+import("//testing/test.gni")
 
 # Most targets in this file are private actions so use that as the default.
 visibility = [ ":*" ]
