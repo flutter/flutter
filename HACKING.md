@@ -9,10 +9,15 @@ Building
 Running applications
 --------------------
 
-* ``./sky/tools/skydb --debug [url]``
-  * You should see a ``(skydb)`` prompt
-  * Type ``help`` to see the list of available commands
-  * Note: skydb is currently hard-coded to use ``//out/Debug``
+* ``./sky/tools/skydb start out/Debug [url]``
+
+    `skydb` has numerous commands, visible via skydb help.  Common ones include:
+    * skybd start BUILD_DIR [url]
+    * skydb load [url]
+    * skydb stop
+    * skydb print_crash # Symbolicate the most recent crash from android.
+
+Once skydb start is issued, all subsequent commands will be sent to the running mojo_shell instance (even on an attached android device).  skydb start reads gn args from the passed build directory to determine whether its using android, etc.
 
 * ``./sky/tools/test_sky --debug``
   * This runs the tests against ``//out/Debug``. If you want to run against
