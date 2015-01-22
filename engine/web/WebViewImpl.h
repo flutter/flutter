@@ -75,7 +75,6 @@ public:
     virtual void layout() override;
     virtual void paint(WebCanvas*, const WebRect&) override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
-    virtual void setCursorVisibilityState(bool isVisible) override;
     virtual void mouseCaptureLost() override;
     virtual void setFocus(bool enable) override;
     virtual bool setComposition(
@@ -99,13 +98,9 @@ public:
     virtual void injectModule(const WebString&) override;
     virtual void setSpellCheckClient(WebSpellCheckClient*) override;
     virtual WebSettings* settings() override;
-    virtual WebString pageEncoding() const override;
-    virtual void setPageEncoding(const WebString&) override;
     virtual bool isTransparent() const override;
     virtual void setIsTransparent(bool value) override;
     virtual void setBaseBackgroundColor(WebColor) override;
-    virtual bool tabsToLinks() const override;
-    virtual void setTabsToLinks(bool value) override;
     virtual bool isActive() const override;
     virtual void setIsActive(bool value) override;
     virtual WebFrame* mainFrame() override;
@@ -121,11 +116,9 @@ public:
     virtual WebHitTestResult hitTestResultAt(const WebPoint&) override;
     virtual void spellingMarkers(WebVector<uint32_t>* markers) override;
     virtual void removeSpellingMarkersUnderWords(const WebVector<WebString>& words) override;
-    virtual void setCompositorDeviceScaleFactorOverride(float) override;
 
     virtual void setShowPaintRects(bool) override;
     void setShowDebugBorders(bool);
-    virtual void setContinuousPaintingEnabled(bool) override;
     virtual void setShowScrollBottleneckRects(bool) override;
 
     virtual void acceptLanguagesChanged() override;
@@ -133,7 +126,6 @@ public:
     // WebViewImpl
     HitTestResult coreHitTestResultAt(const WebPoint&);
 
-    void setIgnoreInputEvents(bool newValue);
     void setBackgroundColorOverride(WebColor);
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }
@@ -172,8 +164,6 @@ public:
 
     // Event related methods:
     void mouseDoubleClick(const WebMouseEvent&);
-
-    bool detectContentOnTouch(const WebPoint&);
 
     // Notifies the WebView that a load has been committed. isNewNavigation
     // will be true if a new session history item should be created for that
@@ -286,9 +276,6 @@ private:
     // is called.
     OwnPtr<WebSettingsImpl> m_webSettings;
 
-    bool m_ignoreInputEvents;
-
-    float m_compositorDeviceScaleFactorOverride;
     WebSize m_rootLayerOffset;
     float m_rootLayerScale;
 
@@ -303,9 +290,6 @@ private:
 
     // Whether the webview is rendering transparently.
     bool m_isTransparent;
-
-    // Whether the user can press tab to focus links.
-    bool m_tabsToLinks;
 
     // If set, the (plugin) node which has mouse capture.
     RefPtr<Node> m_mouseCaptureNode;
@@ -325,7 +309,6 @@ private:
 
     bool m_showPaintRects;
     bool m_showDebugBorders;
-    bool m_continuousPaintingEnabled;
     bool m_showScrollBottleneckRects;
     WebColor m_baseBackgroundColor;
     WebColor m_backgroundColorOverride;

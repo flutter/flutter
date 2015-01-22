@@ -80,9 +80,6 @@ public:
     // the event has been processed, false otherwise.
     virtual bool handleInputEvent(const WebInputEvent&) = 0;
 
-    // Called to inform the WebWidget of the mouse cursor's visibility.
-    virtual void setCursorVisibilityState(bool isVisible) = 0;
-
     // Called to inform the WebWidget that mouse capture was lost.
     virtual void mouseCaptureLost() = 0;
 

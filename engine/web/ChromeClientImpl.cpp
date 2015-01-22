@@ -260,11 +260,6 @@ void ChromeClientImpl::addMessageToConsole(LocalFrame* localFrame, MessageSource
     }
 }
 
-bool ChromeClientImpl::tabsToLinks()
-{
-    return m_webView->tabsToLinks();
-}
-
 void ChromeClientImpl::scheduleAnimation()
 {
     m_webView->scheduleAnimation();

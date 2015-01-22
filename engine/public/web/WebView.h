@@ -71,11 +71,6 @@ public:
     // The returned pointer is valid for the lifetime of the WebView.
     virtual WebSettings* settings() = 0;
 
-    // Corresponds to the encoding of the main frame.  Setting the page
-    // encoding may cause the main frame to reload.
-    virtual WebString pageEncoding() const = 0;
-    virtual void setPageEncoding(const WebString&) = 0;
-
     // Makes the WebView transparent.  This is useful if you want to have
     // some custom background rendered behind it.
     virtual bool isTransparent() const = 0;
@@ -90,10 +85,6 @@ public:
     // persists across subsequent navigations. Defaults to white prior to the
     // first call to this method.
     virtual void setBaseBackgroundColor(WebColor) = 0;
-
-    // Controls whether pressing Tab key advances focus to links.
-    virtual bool tabsToLinks() const = 0;
-    virtual void setTabsToLinks(bool) = 0;
 
     // Controls the WebView's active state, which may affect the rendering
     // of elements on the page (i.e., tinting of input elements).
@@ -145,13 +136,7 @@ public:
 
     // Developer tools -----------------------------------------------------
 
-    // Set an override of device scale factor passed from WebView to
-    // compositor. Pass zero to cancel override. This is used to implement
-    // device metrics emulation.
-    virtual void setCompositorDeviceScaleFactorOverride(float) = 0;
-
     virtual void setShowPaintRects(bool) = 0;
-    virtual void setContinuousPaintingEnabled(bool) = 0;
     virtual void setShowScrollBottleneckRects(bool) = 0;
 
     // Visibility -----------------------------------------------------------

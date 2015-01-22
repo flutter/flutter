@@ -134,13 +134,10 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_editorClientImpl(this)
     , m_spellCheckerClientImpl(this)
     , m_fixedLayoutSizeLock(false)
-    , m_ignoreInputEvents(false)
-    , m_compositorDeviceScaleFactorOverride(0)
     , m_rootLayerScale(1)
     , m_suppressNextKeypressEvent(false)
     , m_imeAcceptEvents(true)
     , m_isTransparent(false)
-    , m_tabsToLinks(false)
     , m_rootLayer(0)
     , m_matchesHeuristicsForGpuRasterization(false)
     , m_recreatingGraphicsContext(false)
@@ -148,7 +145,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_flingSourceDevice(false)
     , m_showPaintRects(false)
     , m_showDebugBorders(false)
-    , m_continuousPaintingEnabled(false)
     , m_showScrollBottleneckRects(false)
     , m_baseBackgroundColor(Color::white)
     , m_backgroundColorOverride(Color::transparent)
@@ -214,11 +210,6 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
     switch (event.type) {
     case WebInputEvent::GestureTap: {
         m_client->cancelScheduledContentIntents();
-        if (detectContentOnTouch(platformEvent.position())) {
-            eventSwallowed = true;
-            break;
-        }
-
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
         break;
     }
@@ -272,12 +263,6 @@ void WebViewImpl::setShowPaintRects(bool show)
 void WebViewImpl::setShowDebugBorders(bool show)
 {
     m_showDebugBorders = show;
-}
-
-void WebViewImpl::setContinuousPaintingEnabled(bool enabled)
-{
-    m_continuousPaintingEnabled = enabled;
-    m_client->scheduleAnimation();
 }
 
 void WebViewImpl::setShowScrollBottleneckRects(bool show)
@@ -533,9 +518,6 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
         return;
 
     PageWidgetDelegate::animate(m_page.get(), validFrameTime.lastFrameTimeMonotonic);
-
-    if (m_continuousPaintingEnabled)
-        m_client->scheduleAnimation();
 }
 
 void WebViewImpl::layout()
@@ -548,12 +530,7 @@ void WebViewImpl::layout()
 
 void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
 {
-    double paintStart = currentTime();
     PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
-    double paintEnd = currentTime();
-    double pixelsPerSec = (rect.width * rect.height) / (paintEnd - paintStart);
-    Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintDurationMS", (paintEnd - paintStart) * 1000, 0, 120, 30);
-    Platform::current()->histogramCustomCounts("Renderer4.SoftwarePaintMegapixPerSecond", pixelsPerSec / 1000000, 10, 210, 30);
 }
 
 const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
@@ -610,10 +587,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
 {
     TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
 
-    // Report the event to be NOT processed by WebKit, so that the browser can handle it appropriately.
-    if (m_ignoreInputEvents)
-        return false;
-
     TemporaryChange<const WebInputEvent*> currentEventChange(m_currentInputEvent, &inputEvent);
 
     if (m_mouseCaptureNode && WebInputEvent::isMouseEventType(inputEvent.type)) {
@@ -655,12 +628,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     }
 
     return PageWidgetDelegate::handleInputEvent(m_page.get(), *this, inputEvent);
-}
-
-void WebViewImpl::setCursorVisibilityState(bool isVisible)
-{
-    if (m_page)
-        m_page->setIsCursorVisible(isVisible);
 }
 
 void WebViewImpl::mouseCaptureLost()
@@ -975,20 +942,6 @@ WebSettings* WebViewImpl::settings()
     return settingsImpl();
 }
 
-WebString WebViewImpl::pageEncoding() const
-{
-    // FIXME(sky): remove.
-    if (!m_page)
-        return WebString();
-
-    return m_page->mainFrame()->document()->encodingName();
-}
-
-void WebViewImpl::setPageEncoding(const WebString& encodingName)
-{
-    // FIXME(sky): remove
-}
-
 WebFrame* WebViewImpl::mainFrame()
 {
     return WebFrame::fromFrame(m_page ? m_page->mainFrame() : 0);
@@ -1154,11 +1107,6 @@ void WebViewImpl::sendResizeEventAndRepaint()
     }
 }
 
-void WebViewImpl::setCompositorDeviceScaleFactorOverride(float deviceScaleFactor)
-{
-    m_compositorDeviceScaleFactorOverride = deviceScaleFactor;
-}
-
 void WebViewImpl::setIsTransparent(bool isTransparent)
 {
     // Set any existing frames to be transparent.
@@ -1212,12 +1160,6 @@ void WebViewImpl::layoutUpdated(WebLocalFrameImpl* webframe)
     m_client->didUpdateLayout();
 }
 
-void WebViewImpl::setIgnoreInputEvents(bool newValue)
-{
-    ASSERT(m_ignoreInputEvents != newValue);
-    m_ignoreInputEvents = newValue;
-}
-
 void WebViewImpl::setBackgroundColorOverride(WebColor color)
 {
     m_backgroundColorOverride = color;
@@ -1243,44 +1185,9 @@ HitTestResult WebViewImpl::hitTestResultForWindowPos(const IntPoint& pos)
     return result;
 }
 
-void WebViewImpl::setTabsToLinks(bool enable)
-{
-    m_tabsToLinks = enable;
-}
-
-bool WebViewImpl::tabsToLinks() const
-{
-    return m_tabsToLinks;
-}
-
 void WebViewImpl::scheduleAnimation()
 {
     m_client->scheduleAnimation();
-}
-
-bool WebViewImpl::detectContentOnTouch(const WebPoint& position)
-{
-    HitTestResult touchHit = hitTestResultForWindowPos(position);
-
-    if (touchHit.isContentEditable())
-        return false;
-
-    Node* node = touchHit.innerNode();
-    if (!node || !node->isTextNode())
-        return false;
-
-    // Ignore when tapping on links or nodes listening to click events.
-    for (; node; node = NodeRenderingTraversal::parent(node)) {
-        if (node->isLink() || node->willRespondToTouchEvents() || node->willRespondToMouseClickEvents())
-            return false;
-    }
-
-    WebContentDetectionResult content = m_client->detectContentAround(touchHit);
-    if (!content.isValid())
-        return false;
-
-    m_client->scheduleContentIntent(content.intent());
-    return true;
 }
 
 void WebViewImpl::setVisibilityState(WebPageVisibilityState visibilityState,

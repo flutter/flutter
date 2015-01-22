@@ -78,8 +78,6 @@ public:
     virtual bool shouldReportDetailedMessageForSource(const String& source) = 0;
     virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace) = 0;
 
-    virtual bool tabsToLinks() = 0;
-
     virtual void* webView() const = 0;
 
     // Methods used by HostWindow.

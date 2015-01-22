@@ -126,9 +126,6 @@ public:
     // Toggles the debug borders on layers
     virtual void setShowDebugBorders(bool) { }
 
-    // Toggles continuous painting
-    virtual void setContinuousPaintingEnabled(bool) { }
-
     // Toggles scroll bottleneck rects on the HUD layer
     virtual void setShowScrollBottleneckRects(bool) { }
 };

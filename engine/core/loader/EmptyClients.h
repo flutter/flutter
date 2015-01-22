@@ -82,8 +82,6 @@ public:
     virtual bool shouldReportDetailedMessageForSource(const String&) override { return false; }
     virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String&, unsigned, const String&, const String&) override { }
 
-    virtual bool tabsToLinks() override { return false; }
-
     virtual void scheduleAnimation() override { }
 
     virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }
