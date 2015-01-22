@@ -14,6 +14,7 @@
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/viewer/document_view.h"
+#include "sky/viewer/runtime_flags.h"
 #include "v8/include/v8.h"
 #include <limits>
 
@@ -72,6 +73,8 @@ std::string Internals::ContentAsText() {
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {
+  if (!RuntimeFlags::Get().testing())
+    return;
   std::vector<unsigned char> pixels;
   document_view_->GetPixelsForTesting(&pixels);
   test_harness_->OnTestComplete(test_result,
