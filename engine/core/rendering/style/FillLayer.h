@@ -183,8 +183,8 @@ public:
     static EFillAttachment initialFillAttachment(EFillLayerType) { return ScrollBackgroundAttachment; }
     static EFillBox initialFillClip(EFillLayerType) { return BorderFillBox; }
     static EFillBox initialFillOrigin(EFillLayerType type) { return type == BackgroundFillLayer ? PaddingFillBox : BorderFillBox; }
-    static EFillRepeat initialFillRepeatX(EFillLayerType) { return RepeatFill; }
-    static EFillRepeat initialFillRepeatY(EFillLayerType) { return RepeatFill; }
+    static EFillRepeat initialFillRepeatX(EFillLayerType) { return NoRepeatFill; }
+    static EFillRepeat initialFillRepeatY(EFillLayerType) { return NoRepeatFill; }
     static CompositeOperator initialFillComposite(EFillLayerType) { return CompositeSourceOver; }
     static WebBlendMode initialFillBlendMode(EFillLayerType) { return WebBlendModeNormal; }
     static EFillSizeType initialFillSizeType(EFillLayerType) { return SizeLength; }
