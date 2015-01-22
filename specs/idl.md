@@ -127,7 +127,7 @@ The following types are available:
 * ``Infinity`` - singleton type with value ``Infinity``
 * ``String`` - WebIDL ``USVString``
 * ``Boolean`` - WebIDL ``boolean``
-# ``Object`` - WebIDL ``object`` (``ClassName`` can be used as a literal for this type)
+* ``Object`` - WebIDL ``object`` (``ClassName`` can be used as a literal for this type)
 * ``ClassName`` - an instance of the class ClassName
 * ``Class<ClassName>`` - a class ClassName or one of its subclasses (not an instance)
 * ``DictionaryName`` - an instance of the dictionary DictionaryName
