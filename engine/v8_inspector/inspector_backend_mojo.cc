@@ -106,13 +106,13 @@ InspectorBackendMojoImpl::~InspectorBackendMojoImpl() {
 
 void InspectorBackendMojoImpl::Connect() {
   mojo::Shell* shell = host_->GetShell();
-  mojo::InterfaceRequest<mojo::ServiceProvider> service_provider_request;
-  mojo::MessagePipe pipe;
-  service_provider_request.Bind(pipe.handle0.Pass());
-  inspector_service_provider_.BindToHandle(pipe.handle1.Pass());
-  shell->ConnectToApplication("mojo:sky_inspector_server",
-                              service_provider_request.Pass(), nullptr);
-  mojo::ConnectToService(&inspector_service_provider_, &frontend_);
+
+  mojo::ServiceProviderPtr services;
+  mojo::ServiceProviderPtr exposed_services;
+  inspector_service_provider_.Bind(GetProxy(&exposed_services));
+  shell->ConnectToApplication("mojo:sky_inspector_server", GetProxy(&services),
+                              exposed_services.Pass());
+  mojo::ConnectToService(services.get(), &frontend_);
 
   // Theoretically we should load our state from the inspector cookie.
   inspector_state_ =

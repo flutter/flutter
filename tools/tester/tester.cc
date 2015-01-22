@@ -83,10 +83,9 @@ class SkyTester : public mojo::ApplicationDelegate,
   }
 
   // Overridden from mojo::ViewManagerDelegate:
-  virtual void OnEmbed(
-      mojo::View* root,
-      mojo::ServiceProviderImpl* exported_services,
-      scoped_ptr<mojo::ServiceProvider> remote_service_provider) override {
+  virtual void OnEmbed(mojo::View* root,
+                       mojo::InterfaceRequest<mojo::ServiceProvider> services,
+                       mojo::ServiceProviderPtr exposed_services) override {
     root_ = root;
     root_->AddObserver(this);
 
@@ -101,10 +100,9 @@ class SkyTester : public mojo::ApplicationDelegate,
   }
 
   // Overridden from window_manager::WindowManagerDelegate:
-  virtual void Embed(
-      const mojo::String& url,
-      mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) override {
-  }
+  virtual void Embed(const mojo::String& url,
+                     mojo::InterfaceRequest<mojo::ServiceProvider> services,
+                     mojo::ServiceProviderPtr exposed_services) override {}
 
   virtual void OnViewManagerDisconnected(
       mojo::ViewManager* view_manager) override {

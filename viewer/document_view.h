@@ -103,10 +103,9 @@ class DocumentView : public blink::ServiceProvider,
   mojo::Shell* Shell() override;
 
   // ViewManagerDelegate methods:
-  void OnEmbed(
-      mojo::View* root,
-      mojo::ServiceProviderImpl* exported_services,
-      scoped_ptr<mojo::ServiceProvider> imported_services) override;
+  void OnEmbed(mojo::View* root,
+               mojo::InterfaceRequest<mojo::ServiceProvider> services,
+               mojo::ServiceProviderPtr exposed_services) override;
   void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
 
   // ViewObserver methods:
@@ -124,13 +123,14 @@ class DocumentView : public blink::ServiceProvider,
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
-  scoped_ptr<mojo::ServiceProvider> imported_services_;
+  mojo::ServiceProviderPtr imported_services_;
   mojo::Shell* shell_;
   mojo::LazyInterfacePtr<mojo::NavigatorHost> navigator_host_;
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
   InspectorServiceFactory inspector_service_factory_;
+  mojo::ServiceProviderImpl inspector_service_provider_impl_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.

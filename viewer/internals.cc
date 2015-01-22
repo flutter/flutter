@@ -40,7 +40,8 @@ gin::Handle<Internals> Internals::Create(
 Internals::Internals(DocumentView* document_view)
   : document_view_(document_view->GetWeakPtr()),
     shell_binding_(this) {
-  mojo::ConnectToService(document_view->imported_services(), &test_harness_);
+  if (document_view_->imported_services())
+    mojo::ConnectToService(document_view_->imported_services(), &test_harness_);
 }
 
 Internals::~Internals() {
@@ -77,13 +78,15 @@ void Internals::NotifyTestComplete(const std::string& test_result) {
     return;
   std::vector<unsigned char> pixels;
   document_view_->GetPixelsForTesting(&pixels);
-  test_harness_->OnTestComplete(test_result,
-      mojo::Array<uint8_t>::From(pixels));
+  if (test_harness_) {
+    test_harness_->OnTestComplete(test_result,
+        mojo::Array<uint8_t>::From(pixels));
+  }
 }
 
 mojo::Handle Internals::ConnectToEmbedderService(
     const std::string& interface_name) {
-  if (!document_view_)
+  if (!document_view_ || !document_view_->imported_services())
     return mojo::Handle();
 
   mojo::MessagePipe pipe;

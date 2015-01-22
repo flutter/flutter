@@ -44,7 +44,7 @@ private:
     void createView();
 
     mojo::View* m_contentView;
-    mojo::ScopedMessagePipeHandle m_serviceProvider;
+    mojo::ServiceProviderPtr m_services;
 };
 
 } // namespace blink

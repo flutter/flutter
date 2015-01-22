@@ -48,8 +48,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
   // Overridden from mojo::ViewManagerDelegate:
   void OnEmbed(mojo::View* root,
-               mojo::ServiceProviderImpl* exported_services,
-               scoped_ptr<mojo::ServiceProvider> imported_services) override;
+               mojo::InterfaceRequest<mojo::ServiceProvider> services,
+               mojo::ServiceProviderPtr exposed_services) override;
   void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override;
 
   // Overriden from mojo::ViewObserver:
@@ -63,9 +63,9 @@ class SkyDebugger : public mojo::ApplicationDelegate,
               mojo::InterfaceRequest<Debugger> request) override;
 
   // Overridden from WindowManagerDelegate
-  void Embed(
-      const mojo::String& url,
-      mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) override;
+  void Embed(const mojo::String& url,
+             mojo::InterfaceRequest<mojo::ServiceProvider> services,
+             mojo::ServiceProviderPtr exposed_services) override;
 
   scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
@@ -73,9 +73,10 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   mojo::View* content_;
   std::string pending_url_;
 
-  scoped_ptr<mojo::ServiceProvider> viewer_services_;
+  mojo::ServiceProviderPtr viewer_services_;
 
   NavigatorHostFactory navigator_host_factory_;
+  mojo::ServiceProviderImpl exposed_services_impl_;
 
   base::WeakPtrFactory<SkyDebugger> weak_factory_;
 

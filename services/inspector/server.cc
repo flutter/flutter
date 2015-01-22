@@ -39,12 +39,14 @@ class Server : public mojo::ApplicationDelegate,
       mojo::ApplicationConnection* connection) override {
     connection->AddService<InspectorFrontend>(this);
     connection->AddService<InspectorServer>(this);
-    // The application connecting to us may implement InspectorBackend,
-    // attempt to establish a connection to find out. If it doesn't then this
-    // pipe will close.
-    InspectorBackendPtr backend;
-    connection->ConnectToService(&backend);
-    backends_.AddInterfacePtr(backend.Pass());
+    if (connection->GetServiceProvider()) {
+      // The application connecting to us may implement InspectorBackend,
+      // attempt to establish a connection to find out. If it doesn't then this
+      // pipe will close.
+      InspectorBackendPtr backend;
+      connection->ConnectToService(&backend);
+      backends_.AddInterfacePtr(backend.Pass());
+    }
     return true;
   }
 

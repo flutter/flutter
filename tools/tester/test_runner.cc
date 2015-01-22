@@ -7,7 +7,6 @@
 #include <iostream>
 #include "base/bind.h"
 #include "mojo/public/cpp/application/connect.h"
-#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/services/view_manager/public/cpp/view.h"
 
 namespace sky {
@@ -24,11 +23,11 @@ TestRunner::TestRunner(TestRunnerClient* client, mojo::View* container,
       enable_pixel_dumping_(enable_pixel_dumping) {
   CHECK(client);
 
-  scoped_ptr<mojo::ServiceProviderImpl> exported_services(
-    new mojo::ServiceProviderImpl());
-  exported_services->AddService(&test_harness_factory_);
+  mojo::ServiceProviderPtr test_harness_provider;
+  test_harness_provider_impl_.AddService(&test_harness_factory_);
+  test_harness_provider_impl_.Bind(GetProxy(&test_harness_provider));
 
-  container->Embed(url, exported_services.Pass());
+  container->Embed(url, nullptr, test_harness_provider.Pass());
 }
 
 TestRunner::~TestRunner() {

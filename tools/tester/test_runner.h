@@ -6,6 +6,7 @@
 #define SKY_TOOLS_TESTER_TEST_RUNNER_H_
 
 #include "base/memory/weak_ptr.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "sky/tools/tester/test_harness_impl.h"
 
 namespace mojo{
@@ -40,6 +41,7 @@ class TestRunner {
 
  private:
   TestHarnessFactory test_harness_factory_;
+  mojo::ServiceProviderImpl test_harness_provider_impl_;
   TestRunnerClient* client_;
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
   bool enable_pixel_dumping_;

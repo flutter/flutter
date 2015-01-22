@@ -81,6 +81,7 @@ DocumentView::DocumentView(
     mojo::URLResponsePtr response,
     mojo::Shell* shell)
     : response_(response.Pass()),
+      exported_services_(services.Pass()),
       shell_(shell),
       web_view_(nullptr),
       root_(nullptr),
@@ -89,9 +90,8 @@ DocumentView::DocumentView(
       bitmap_rasterizer_(nullptr),
       debugger_id_(s_next_debugger_id++),
       weak_factory_(this) {
-  // TODO(jamesr): Is this right?
   exported_services_.AddService(&view_manager_client_factory_);
-  mojo::WeakBindToPipe(&exported_services_, services.PassMessagePipe());
+  inspector_service_provider_impl_.AddService(&inspector_service_factory_);
 }
 
 DocumentView::~DocumentView() {
@@ -107,12 +107,14 @@ base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
 
 void DocumentView::OnEmbed(
     mojo::View* root,
-    mojo::ServiceProviderImpl* exported_services,
-    scoped_ptr<mojo::ServiceProvider> imported_services) {
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exposed_services) {
   root_ = root;
-  imported_services_ = imported_services.Pass();
+  imported_services_ = exposed_services.Pass();
   navigator_host_.set_service_provider(imported_services_.get());
-  exported_services->AddService(&inspector_service_factory_);
+
+  if (services.is_pending())
+    inspector_service_provider_impl_.Bind(services.Pass());
 
   Load(response_.Pass());
 

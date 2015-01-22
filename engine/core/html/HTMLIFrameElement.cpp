@@ -58,7 +58,7 @@ void HTMLIFrameElement::OnViewDestroyed(mojo::View* view)
 
 ScriptValue HTMLIFrameElement::takeServiceProvider(ScriptState* scriptState)
 {
-    return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_serviceProvider.release()));
+    return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_services.PassMessagePipe().release()));
 }
 
 void HTMLIFrameElement::createView()
@@ -76,10 +76,9 @@ void HTMLIFrameElement::createView()
     if (!m_contentView)
         return;
 
-    mojo::MessagePipe pipe;
-    m_serviceProvider = pipe.handle0.Pass();
     m_contentView->Embed(mojo::String::From(url.string().utf8().data()),
-        mojo::MakeRequest<mojo::ServiceProvider>(pipe.handle1.Pass()));
+        GetProxy(&m_services),
+        nullptr);  // TODO(abarth) Expose the exposedService parameter.
     m_contentView->AddObserver(this);
 }
 
