@@ -69,8 +69,8 @@ PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* 
         return nullptr; // validation failed.
     buffer = transcodeBuffer.get();
 
-    RefPtr<SkMemoryStream> stream = adoptRef(new SkMemoryStream(buffer->getAsSkData().get()));
-    RefPtr<SkTypeface> typeface = adoptRef(SkTypeface::CreateFromStream(stream.get()));
+    SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData().get());
+    RefPtr<SkTypeface> typeface = adoptRef(SkTypeface::CreateFromStream(stream));
     if (!typeface)
         return nullptr;
 

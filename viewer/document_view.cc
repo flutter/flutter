@@ -127,7 +127,9 @@ void DocumentView::OnEmbed(
   // assuming that we're focused.
   web_view_->setFocus(true);
   // Needed on android, as the window does not get the focus otherwise.
+#if defined(OS_ANDROID)
   root_->SetFocus();
+#endif
   root_->AddObserver(this);
 }
 

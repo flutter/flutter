@@ -109,11 +109,6 @@ void WindowProxy::clearForNavigation()
 
     m_document.clear();
 
-    // Clear the document wrapper cache before turning on access checks on
-    // the old LocalDOMWindow wrapper. This way, access to the document wrapper
-    // will be protected by the security checks on the LocalDOMWindow wrapper.
-    clearDocumentProperty();
-
     v8::Handle<v8::Object> windowWrapper = V8Window::findInstanceInPrototypeChain(m_global.newLocal(m_isolate), m_isolate);
     ASSERT(!windowWrapper.IsEmpty());
     windowWrapper->TurnOnAccessCheck();
@@ -288,12 +283,6 @@ void WindowProxy::updateDocumentProperty()
     if (m_document.isEmpty())
         updateDocumentWrapper(v8::Handle<v8::Object>::Cast(documentWrapper));
 
-    // If instantiation of the document wrapper fails, clear the cache
-    // and let the LocalDOMWindow accessor handle access to the document.
-    if (documentWrapper.IsEmpty()) {
-        clearDocumentProperty();
-        return;
-    }
     ASSERT(documentWrapper->IsObject());
     context->Global()->ForceSet(v8AtomicString(m_isolate, "document"), documentWrapper, static_cast<v8::PropertyAttribute>(v8::ReadOnly | v8::DontDelete));
 
@@ -301,15 +290,6 @@ void WindowProxy::updateDocumentProperty()
     // LocalDOMWindow objects we obtain from JavaScript references are guaranteed to have
     // live Document objects.
     V8HiddenValue::setHiddenValue(m_isolate, toInnerGlobalObject(context), V8HiddenValue::document(m_isolate), documentWrapper);
-}
-
-void WindowProxy::clearDocumentProperty()
-{
-    ASSERT(isContextInitialized());
-    if (!m_world->isMainWorld())
-        return;
-    v8::HandleScope handleScope(m_isolate);
-    m_scriptState->context()->Global()->ForceDelete(v8AtomicString(m_isolate, "document"));
 }
 
 void WindowProxy::updateDocument()

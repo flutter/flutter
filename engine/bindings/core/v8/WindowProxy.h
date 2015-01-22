@@ -84,10 +84,8 @@ private:
 
     // The JavaScript wrapper for the document object is cached on the global
     // object for fast access. UpdateDocumentProperty sets the wrapper
-    // for the current document on the global object. ClearDocumentProperty
-    // deletes the document wrapper from the global object.
+    // for the current document on the global object.
     void updateDocumentProperty();
-    void clearDocumentProperty();
 
     void createContext();
     bool installDOMWindow();
