@@ -60,7 +60,6 @@ public:
     const Vector<RefPtr<StyleRuleBase> >& childRules() const { return m_childRules; }
 
     void shrinkToFit();
-    RuleSet& ruleSet() { ASSERT(m_ruleSet); return *m_ruleSet.get(); }
     RuleSet& ensureRuleSet();
 
 private:

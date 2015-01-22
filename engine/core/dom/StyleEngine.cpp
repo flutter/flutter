@@ -95,7 +95,7 @@ void StyleEngine::updateDocumentFonts()
     const auto& sheets = m_document->scopedStyleResolver().authorStyleSheets();
 
     for (const auto& sheet : sheets) {
-        RuleSet& ruleSet = sheet->contents()->ruleSet();
+        RuleSet& ruleSet = sheet->contents()->ensureRuleSet();
         for (const auto& rule : ruleSet.fontFaceRules()) {
             if (RefPtr<FontFace> fontFace = FontFace::create(m_document, rule))
                 m_fontSelector->fontFaceCache()->add(m_fontSelector.get(), rule, fontFace);

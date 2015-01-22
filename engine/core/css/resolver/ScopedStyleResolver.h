@@ -42,7 +42,6 @@ namespace blink {
 class CSSStyleSheet;
 class ContainerNode;
 class HTMLStyleElement;
-class RuleFeatureSet;
 class StyleSheetContents;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
@@ -62,11 +61,12 @@ public:
     void collectMatchingAuthorRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
     void collectMatchingHostRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
 
-    const RuleFeatureSet& features() const { return m_features; }
+    bool hasSelectorForId(const AtomicString& id) const;
+    bool hasSelectorForClass(const AtomicString& className) const;
+    bool hasSelectorForAttribute(const AtomicString& attributeName) const;
 
     void updateActiveStyleSheets();
 
-    Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() { return m_authorStyleSheets; }
     const Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() const { return m_authorStyleSheets; }
 
     void addStyleSheetCandidateNode(HTMLStyleElement&);
@@ -75,13 +75,11 @@ public:
 private:
     explicit ScopedStyleResolver(TreeScope&);
 
-    void appendStyleSheet(CSSStyleSheet&);
     void collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& candidateSheets);
 
     TreeScope& m_scope;
     DocumentOrderedList m_styleSheetCandidateNodes;
     Vector<RefPtr<CSSStyleSheet>> m_authorStyleSheets;
-    RuleFeatureSet m_features;
 };
 
 } // namespace blink

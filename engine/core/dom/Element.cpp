@@ -1760,11 +1760,11 @@ bool Element::affectedByAttributeSelector(const AtomicString& attributeName) con
 {
     if (attributeName.isEmpty())
         return false;
-    if (treeScope().scopedStyleResolver().features().hasSelectorForAttribute(attributeName))
+    if (treeScope().scopedStyleResolver().hasSelectorForAttribute(attributeName))
         return true;
     // Host rules could also have effects.
     if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().features().hasSelectorForAttribute(attributeName);
+        return shadowRoot->scopedStyleResolver().hasSelectorForAttribute(attributeName);
     return false;
 }
 
@@ -1772,11 +1772,11 @@ bool Element::affectedByClassSelector(const AtomicString& classValue) const
 {
     if (classValue.isEmpty())
         return false;
-    if (treeScope().scopedStyleResolver().features().hasSelectorForClass(classValue))
+    if (treeScope().scopedStyleResolver().hasSelectorForClass(classValue))
         return true;
     // Host rules could also have effects.
     if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().features().hasSelectorForClass(classValue);
+        return shadowRoot->scopedStyleResolver().hasSelectorForClass(classValue);
     return false;
 }
 
@@ -1784,11 +1784,11 @@ bool Element::affectedByIdSelector(const AtomicString& idValue) const
 {
     if (idValue.isEmpty())
         return false;
-    if (treeScope().scopedStyleResolver().features().hasSelectorForId(idValue))
+    if (treeScope().scopedStyleResolver().hasSelectorForId(idValue))
         return true;
     // Host rules could also have effects.
     if (ShadowRoot* shadowRoot = this->shadowRoot())
-        return shadowRoot->scopedStyleResolver().features().hasSelectorForId(idValue);
+        return shadowRoot->scopedStyleResolver().hasSelectorForId(idValue);
     return false;
 }
 

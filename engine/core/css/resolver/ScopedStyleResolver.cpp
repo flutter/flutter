@@ -44,17 +44,6 @@ ScopedStyleResolver::ScopedStyleResolver(TreeScope& scope)
 {
 }
 
-void ScopedStyleResolver::appendStyleSheet(CSSStyleSheet& sheet)
-{
-    MediaQueryEvaluator medium(m_scope.document().view());
-
-    if (sheet.mediaQueries() && !medium.eval(sheet.mediaQueries()))
-        return;
-
-    const RuleSet& ruleSet = sheet.contents()->ensureRuleSet();
-    m_features.add(ruleSet.features());
-}
-
 void ScopedStyleResolver::updateActiveStyleSheets()
 {
     Vector<RefPtr<CSSStyleSheet>> candidateSheets;
@@ -71,11 +60,36 @@ void ScopedStyleResolver::updateActiveStyleSheets()
     // can only impact the host directly as Sky has no descendant selectors.
     if (root.isShadowRoot())
         toShadowRoot(root).host()->setNeedsStyleRecalc(SubtreeStyleChange);
+}
 
-    m_features.clear();
+bool ScopedStyleResolver::hasSelectorForId(const AtomicString& id) const
+{
+    for (auto& sheet : m_authorStyleSheets) {
+        RuleSet& ruleSet = sheet->contents()->ensureRuleSet();
+        if (ruleSet.features().hasSelectorForId(id))
+            return true;
+    }
+    return false;
+}
 
-    for (RefPtr<CSSStyleSheet>& sheet : m_authorStyleSheets)
-        appendStyleSheet(*sheet);
+bool ScopedStyleResolver::hasSelectorForClass(const AtomicString& className) const
+{
+    for (auto& sheet : m_authorStyleSheets) {
+        RuleSet& ruleSet = sheet->contents()->ensureRuleSet();
+        if (ruleSet.features().hasSelectorForClass(className))
+            return true;
+    }
+    return false;
+}
+
+bool ScopedStyleResolver::hasSelectorForAttribute(const AtomicString& attributeName) const
+{
+    for (auto& sheet : m_authorStyleSheets) {
+        RuleSet& ruleSet = sheet->contents()->ensureRuleSet();
+        if (ruleSet.features().hasSelectorForAttribute(attributeName))
+            return true;
+    }
+    return false;
 }
 
 void ScopedStyleResolver::addStyleSheetCandidateNode(HTMLStyleElement& element)
@@ -91,10 +105,14 @@ void ScopedStyleResolver::removeStyleSheetCandidateNode(HTMLStyleElement& elemen
 
 void ScopedStyleResolver::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
 {
+    MediaQueryEvaluator medium(m_scope.document().view());
+
     for (Node* node : m_styleSheetCandidateNodes) {
         ASSERT(isHTMLStyleElement(*node));
-        if (CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet())
+        CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet();
+        if (sheet && (!sheet->mediaQueries() || medium.eval(sheet->mediaQueries()))) {
             sheets.append(sheet);
+        }
     }
 }
 
@@ -102,7 +120,7 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String
 {
     for (auto& sheet : m_authorStyleSheets) {
         // TODO(esprehn): Maybe just store the keyframes in a map?
-        for (auto& rule : sheet->contents()->ruleSet().keyframesRules()) {
+        for (auto& rule : sheet->contents()->ensureRuleSet().keyframesRules()) {
             if (rule->name() == animationName)
                 return rule.get();
         }
@@ -113,7 +131,7 @@ const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ensureRuleSet(), m_authorStyleSheets[i].get(), i);
         collector.collectMatchingRules(matchRequest, cascadeOrder);
     }
 }
@@ -121,7 +139,7 @@ void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& colle
 void ScopedStyleResolver::collectMatchingHostRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {
-        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ruleSet(), m_authorStyleSheets[i].get(), i);
+        MatchRequest matchRequest(&m_authorStyleSheets[i]->contents()->ensureRuleSet(), m_authorStyleSheets[i].get(), i);
         collector.collectMatchingHostRules(matchRequest, cascadeOrder);
     }
 }

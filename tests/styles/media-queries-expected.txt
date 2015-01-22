@@ -1,0 +1,6 @@
+Running 2 tests
+ok 1 Media queries should allow sheets to apply when they match
+ok 2 Media queries should cause sheets to be skipped when they do not match
+2 tests
+2 pass
+0 fail
