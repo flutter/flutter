@@ -132,7 +132,6 @@ public:
     virtual void setSerifFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) = 0;
     virtual void setShouldClearDocumentBackground(bool) = 0;
     virtual void setShouldRespectImageOrientation(bool) = 0;
-    virtual void setShowFPSCounter(bool) = 0;
     virtual void setShowPaintRects(bool) = 0;
     virtual void setShrinksViewportContentToFit(bool) = 0;
     virtual void setSmartInsertDeleteEnabled(bool) = 0;

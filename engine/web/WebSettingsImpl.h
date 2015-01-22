@@ -96,7 +96,6 @@ public:
     virtual void setSerifFontFamily(const WebString&, UScriptCode = USCRIPT_COMMON) override;
     virtual void setShouldClearDocumentBackground(bool) override;
     virtual void setShouldRespectImageOrientation(bool) override;
-    virtual void setShowFPSCounter(bool) override;
     virtual void setShowPaintRects(bool) override;
     virtual void setShrinksViewportContentToFit(bool) override;
     virtual void setSmartInsertDeleteEnabled(bool) override;
@@ -109,7 +108,6 @@ public:
     virtual void setV8CacheOptions(V8CacheOptions) override;
     virtual void setWebGLErrorsToConsoleEnabled(bool) override;
 
-    bool showFPSCounter() const { return m_showFPSCounter; }
     bool showPaintRects() const { return m_showPaintRects; }
     bool renderVSyncNotificationEnabled() const { return m_renderVSyncNotificationEnabled; }
     bool perTilePaintingEnabled() const { return m_perTilePaintingEnabled; }
@@ -120,7 +118,6 @@ public:
 
 private:
     Settings* m_settings;
-    bool m_showFPSCounter;
     bool m_showPaintRects;
     bool m_renderVSyncNotificationEnabled;
     bool m_deferredImageDecodingEnabled;

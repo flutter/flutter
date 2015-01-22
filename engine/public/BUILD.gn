@@ -49,8 +49,6 @@ source_set("platform_headers") {
     "platform/WebFloatPoint3D.h",
     "platform/WebFloatRect.h",
     "platform/WebFloatSize.h",
-    "platform/WebGestureCurve.h",
-    "platform/WebGestureCurveTarget.h",
     "platform/WebGestureDevice.h",
     "platform/WebGraphicsContext3D.h",
     "platform/WebGraphicsContext3DProvider.h",

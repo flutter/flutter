@@ -59,8 +59,6 @@ class WebConvertableToTraceFormat;
 class WebDiscardableMemory;
 class WebFallbackThemeEngine;
 class WebFlingAnimator;
-class WebGestureCurveTarget;
-class WebGestureCurve;
 class WebGraphicsContext3DProvider;
 class WebSandboxSupport;
 struct WebFloatPoint;
@@ -354,10 +352,6 @@ public:
     virtual WebCompositorSupport* compositorSupport() { return 0; }
 
     virtual WebFlingAnimator* createFlingAnimator() { return 0; }
-
-    // Creates a new fling animation curve instance for device |deviceSource|
-    // with |velocity| and already scrolled |cumulativeScroll| pixels.
-    virtual WebGestureCurve* createFlingAnimationCurve(WebGestureDevice deviceSource, const WebFloatPoint& velocity, const WebSize& cumulativeScroll) { return 0; }
 
 protected:
     virtual ~Platform() { }

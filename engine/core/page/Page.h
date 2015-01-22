@@ -106,9 +106,6 @@ public:
 
     UseCounter& useCounter() { return m_useCounter; }
 
-    void setTabKeyCyclesThroughElements(bool b) { m_tabKeyCyclesThroughElements = b; }
-    bool tabKeyCyclesThroughElements() const { return m_tabKeyCyclesThroughElements; }
-
     void unmarkAllTextMatches();
 
     float deviceScaleFactor() const { return m_deviceScaleFactor; }
@@ -181,8 +178,6 @@ private:
     SpellCheckerClient* const m_spellCheckerClient;
 
     UseCounter m_useCounter;
-
-    bool m_tabKeyCyclesThroughElements;
 
     float m_deviceScaleFactor;
 

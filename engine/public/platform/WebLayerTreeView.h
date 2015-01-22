@@ -120,9 +120,6 @@ public:
 
     // Debugging / dangerous ---------------------------------------------
 
-    // Toggles the FPS counter in the HUD layer
-    virtual void setShowFPSCounter(bool) { }
-
     // Toggles the paint rects in the HUD layer
     virtual void setShowPaintRects(bool) { }
 

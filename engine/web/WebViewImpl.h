@@ -34,7 +34,6 @@
 #include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/public/platform/WebGestureCurveTarget.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/WebLayer.h"
 #include "sky/engine/public/platform/WebPoint.h"
@@ -55,14 +54,12 @@ namespace blink {
 
 class Frame;
 class UserGestureToken;
-class WebActiveGestureAnimation;
 class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
 
 class WebViewImpl final : public WebView
     , public RefCounted<WebViewImpl>
-    , public WebGestureCurveTarget
     , public PageWidgetEventHandler {
 public:
     static WebViewImpl* create(WebViewClient*);
@@ -109,8 +106,6 @@ public:
     virtual void setBaseBackgroundColor(WebColor) override;
     virtual bool tabsToLinks() const override;
     virtual void setTabsToLinks(bool value) override;
-    virtual bool tabKeyCyclesThroughElements() const override;
-    virtual void setTabKeyCyclesThroughElements(bool value) override;
     virtual bool isActive() const override;
     virtual void setIsActive(bool value) override;
     virtual WebFrame* mainFrame() override;
@@ -128,11 +123,8 @@ public:
     virtual void removeSpellingMarkersUnderWords(const WebVector<WebString>& words) override;
     virtual void setCompositorDeviceScaleFactorOverride(float) override;
 
-    virtual void transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters&) override;
-    virtual bool endActiveFlingAnimation() override;
     virtual void setShowPaintRects(bool) override;
     void setShowDebugBorders(bool);
-    virtual void setShowFPSCounter(bool) override;
     virtual void setContinuousPaintingEnabled(bool) override;
     virtual void setShowScrollBottleneckRects(bool) override;
 
@@ -182,9 +174,6 @@ public:
     void mouseDoubleClick(const WebMouseEvent&);
 
     bool detectContentOnTouch(const WebPoint&);
-
-    // WebGestureCurveTarget implementation for fling.
-    virtual bool scrollBy(const WebFloatSize& delta, const WebFloatSize& velocity) override;
 
     // Notifies the WebView that a load has been committed. isNewNavigation
     // will be true if a new session history item should be created for that
@@ -329,13 +318,11 @@ private:
     bool m_recreatingGraphicsContext;
     static const WebInputEvent* m_currentInputEvent;
 
-    OwnPtr<WebActiveGestureAnimation> m_gestureAnimation;
     WebPoint m_positionOnFlingStart;
     WebPoint m_globalPositionOnFlingStart;
     int m_flingModifier;
     bool m_flingSourceDevice;
 
-    bool m_showFPSCounter;
     bool m_showPaintRects;
     bool m_showDebugBorders;
     bool m_continuousPaintingEnabled;

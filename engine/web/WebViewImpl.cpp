@@ -70,7 +70,6 @@
 #include "sky/engine/platform/PlatformWheelEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/UserGestureIndicator.h"
-#include "sky/engine/platform/exported/WebActiveGestureAnimation.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/Image.h"
@@ -78,7 +77,6 @@
 #include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebFloatPoint.h"
-#include "sky/engine/public/platform/WebGestureCurve.h"
 #include "sky/engine/public/platform/WebImage.h"
 #include "sky/engine/public/platform/WebLayerTreeView.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
@@ -148,7 +146,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_recreatingGraphicsContext(false)
     , m_flingModifier(0)
     , m_flingSourceDevice(false)
-    , m_showFPSCounter(false)
     , m_showPaintRects(false)
     , m_showDebugBorders(false)
     , m_continuousPaintingEnabled(false)
@@ -180,18 +177,6 @@ WebLocalFrameImpl* WebViewImpl::mainFrameImpl()
     return m_page ? WebLocalFrameImpl::fromFrame(m_page->mainFrame()) : 0;
 }
 
-bool WebViewImpl::tabKeyCyclesThroughElements() const
-{
-    ASSERT(m_page);
-    return m_page->tabKeyCyclesThroughElements();
-}
-
-void WebViewImpl::setTabKeyCyclesThroughElements(bool value)
-{
-    if (m_page)
-        m_page->setTabKeyCyclesThroughElements(value);
-}
-
 void WebViewImpl::handleMouseLeave(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
     m_client->setMouseOverURL(WebURL());
@@ -216,78 +201,10 @@ bool WebViewImpl::handleMouseWheel(LocalFrame& mainFrame, const WebMouseWheelEve
     return PageWidgetEventHandler::handleMouseWheel(mainFrame, event);
 }
 
-// FIXME(sky): This appears to be unused.
-bool WebViewImpl::scrollBy(const WebFloatSize& delta, const WebFloatSize& velocity)
-{
-    if (m_flingSourceDevice == WebGestureDeviceTouchpad) {
-        WebMouseWheelEvent syntheticWheel;
-        const float tickDivisor = WheelEvent::TickMultiplier;
-
-        syntheticWheel.deltaX = delta.width;
-        syntheticWheel.deltaY = delta.height;
-        syntheticWheel.wheelTicksX = delta.width / tickDivisor;
-        syntheticWheel.wheelTicksY = delta.height / tickDivisor;
-        syntheticWheel.hasPreciseScrollingDeltas = true;
-        syntheticWheel.x = m_positionOnFlingStart.x;
-        syntheticWheel.y = m_positionOnFlingStart.y;
-        syntheticWheel.globalX = m_globalPositionOnFlingStart.x;
-        syntheticWheel.globalY = m_globalPositionOnFlingStart.y;
-        syntheticWheel.modifiers = m_flingModifier;
-
-        if (m_page && m_page->mainFrame() && m_page->mainFrame()->view())
-            return handleMouseWheel(*m_page->mainFrame(), syntheticWheel);
-    } else {
-        WebGestureEvent syntheticGestureEvent;
-
-        syntheticGestureEvent.type = WebInputEvent::GestureScrollUpdateWithoutPropagation;
-        syntheticGestureEvent.data.scrollUpdate.deltaX = delta.width;
-        syntheticGestureEvent.data.scrollUpdate.deltaY = delta.height;
-        syntheticGestureEvent.x = m_positionOnFlingStart.x;
-        syntheticGestureEvent.y = m_positionOnFlingStart.y;
-        syntheticGestureEvent.globalX = m_globalPositionOnFlingStart.x;
-        syntheticGestureEvent.globalY = m_globalPositionOnFlingStart.y;
-        syntheticGestureEvent.modifiers = m_flingModifier;
-        syntheticGestureEvent.sourceDevice = WebGestureDeviceTouchscreen;
-
-        if (m_page && m_page->mainFrame() && m_page->mainFrame()->view())
-            return handleGestureEvent(syntheticGestureEvent);
-    }
-    return false;
-}
-
 bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
 {
     bool eventSwallowed = false;
     bool eventCancelled = false; // for disambiguation
-
-    // Special handling for slow-path fling gestures.
-    switch (event.type) {
-    case WebInputEvent::GestureFlingStart: {
-        if (mainFrameImpl()->frame()->eventHandler().isScrollbarHandlingGestures())
-            break;
-        m_client->cancelScheduledContentIntents();
-        m_positionOnFlingStart = WebPoint(event.x, event.y);
-        m_globalPositionOnFlingStart = WebPoint(event.globalX, event.globalY);
-        m_flingModifier = event.modifiers;
-        m_flingSourceDevice = event.sourceDevice;
-        OwnPtr<WebGestureCurve> flingCurve = adoptPtr(Platform::current()->createFlingAnimationCurve(event.sourceDevice, WebFloatPoint(event.data.flingStart.velocityX, event.data.flingStart.velocityY), WebSize()));
-        ASSERT(flingCurve);
-        m_gestureAnimation = WebActiveGestureAnimation::createAtAnimationStart(flingCurve.release(), this);
-        scheduleAnimation();
-        eventSwallowed = true;
-
-        m_client->didHandleGestureEvent(event, eventCancelled);
-        return eventSwallowed;
-    }
-    case WebInputEvent::GestureFlingCancel:
-        if (endActiveFlingAnimation())
-            eventSwallowed = true;
-
-        m_client->didHandleGestureEvent(event, eventCancelled);
-        return eventSwallowed;
-    default:
-        break;
-    }
 
     PlatformGestureEventBuilder platformEvent(mainFrameImpl()->frameView(), event);
 
@@ -347,33 +264,6 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
     return eventSwallowed;
 }
 
-void WebViewImpl::transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters& parameters)
-{
-    TRACE_EVENT0("blink", "WebViewImpl::transferActiveWheelFlingAnimation");
-    ASSERT(!m_gestureAnimation);
-    m_positionOnFlingStart = parameters.point;
-    m_globalPositionOnFlingStart = parameters.globalPoint;
-    m_flingModifier = parameters.modifiers;
-    OwnPtr<WebGestureCurve> curve = adoptPtr(Platform::current()->createFlingAnimationCurve(parameters.sourceDevice, WebFloatPoint(parameters.delta), parameters.cumulativeScroll));
-    ASSERT(curve);
-    m_gestureAnimation = WebActiveGestureAnimation::createWithTimeOffset(curve.release(), this, parameters.startTime);
-    scheduleAnimation();
-}
-
-bool WebViewImpl::endActiveFlingAnimation()
-{
-    if (m_gestureAnimation) {
-        m_gestureAnimation.clear();
-        return true;
-    }
-    return false;
-}
-
-void WebViewImpl::setShowFPSCounter(bool show)
-{
-    m_showFPSCounter = show;
-}
-
 void WebViewImpl::setShowPaintRects(bool show)
 {
     m_showPaintRects = show;
@@ -408,9 +298,6 @@ bool WebViewImpl::handleKeyEvent(const WebKeyboardEvent& event)
     ASSERT((event.type == WebInputEvent::RawKeyDown)
         || (event.type == WebInputEvent::KeyDown)
         || (event.type == WebInputEvent::KeyUp));
-
-    // Halt an in-progress fling on a key event.
-    endActiveFlingAnimation();
 
     // Please refer to the comments explaining the m_suppressNextKeypressEvent
     // member.
@@ -640,22 +527,6 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
     WebBeginFrameArgs validFrameTime(frameTime);
     if (!validFrameTime.lastFrameTimeMonotonic)
         validFrameTime.lastFrameTimeMonotonic = monotonicallyIncreasingTime();
-
-    // Create synthetic wheel events as necessary for fling.
-    if (m_gestureAnimation) {
-        if (m_gestureAnimation->animate(validFrameTime.lastFrameTimeMonotonic))
-            scheduleAnimation();
-        else {
-            endActiveFlingAnimation();
-
-            PlatformGestureEvent endScrollEvent(PlatformEvent::GestureScrollEnd,
-                m_positionOnFlingStart, m_globalPositionOnFlingStart,
-                IntSize(), 0, false, false, false, false,
-                0, 0, 0, 0);
-
-            mainFrameImpl()->frame()->eventHandler().handleGestureScrollEnd(endScrollEvent);
-        }
-    }
 
     WTF_LOG(ScriptedAnimationController, "WebViewImpl::beginFrame: page = %d", !m_page ? 0 : 1);
     if (!m_page)
@@ -1329,7 +1200,6 @@ bool WebViewImpl::isActive() const
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)
 {
-    endActiveFlingAnimation();
     m_userGestureObserved = false;
     if (!isNavigationWithinPage)
         UserGestureIndicator::clearProcessedUserGestureSinceLoad();

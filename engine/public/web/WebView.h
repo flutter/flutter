@@ -95,11 +95,6 @@ public:
     virtual bool tabsToLinks() const = 0;
     virtual void setTabsToLinks(bool) = 0;
 
-    // Method that controls whether pressing Tab key cycles through page
-    // elements or inserts a '\t' char in the focused text area.
-    virtual bool tabKeyCyclesThroughElements() const = 0;
-    virtual void setTabKeyCyclesThroughElements(bool) = 0;
-
     // Controls the WebView's active state, which may affect the rendering
     // of elements on the page (i.e., tinting of input elements).
     virtual bool isActive() const = 0;
@@ -155,15 +150,7 @@ public:
     // device metrics emulation.
     virtual void setCompositorDeviceScaleFactorOverride(float) = 0;
 
-    // Called to inform the WebView that a wheel fling animation was started externally (for instance
-    // by the compositor) but must be completed by the WebView.
-    virtual void transferActiveWheelFlingAnimation(const WebActiveWheelFlingParameters&) = 0;
-
-    // Cancels an active fling, returning true if a fling was active.
-    virtual bool endActiveFlingAnimation() = 0;
-
     virtual void setShowPaintRects(bool) = 0;
-    virtual void setShowFPSCounter(bool) = 0;
     virtual void setContinuousPaintingEnabled(bool) = 0;
     virtual void setShowScrollBottleneckRects(bool) = 0;
 

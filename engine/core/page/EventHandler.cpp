@@ -2193,22 +2193,6 @@ void EventHandler::defaultTextInputEventHandler(TextEvent* event)
 
 void EventHandler::defaultTabEventHandler(KeyboardEvent* event)
 {
-    ASSERT(event->type() == EventTypeNames::keydown);
-
-    // We should only advance focus on tabs if no special modifier keys are held down.
-    if (event->ctrlKey() || event->metaKey())
-        return;
-
-    Page* page = m_frame->page();
-    if (!page)
-        return;
-    if (!page->tabKeyCyclesThroughElements())
-        return;
-
-    FocusType focusType = event->shiftKey() ? FocusTypeBackward : FocusTypeForward;
-
-    if (page->focusController().advanceFocus(focusType))
-        event->setDefaultHandled();
 }
 
 void EventHandler::capsLockStateMayHaveChanged()

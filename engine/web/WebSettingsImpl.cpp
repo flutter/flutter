@@ -41,7 +41,6 @@ namespace blink {
 
 WebSettingsImpl::WebSettingsImpl(Settings* settings)
     : m_settings(settings)
-    , m_showFPSCounter(false)
     , m_showPaintRects(false)
     , m_renderVSyncNotificationEnabled(false)
     , m_deferredImageDecodingEnabled(false)
@@ -237,11 +236,6 @@ void WebSettingsImpl::setRenderVSyncNotificationEnabled(bool enabled)
 void WebSettingsImpl::setWebGLErrorsToConsoleEnabled(bool enabled)
 {
     m_settings->setWebGLErrorsToConsoleEnabled(enabled);
-}
-
-void WebSettingsImpl::setShowFPSCounter(bool show)
-{
-    m_showFPSCounter = show;
 }
 
 void WebSettingsImpl::setShowPaintRects(bool show)

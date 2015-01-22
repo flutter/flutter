@@ -122,8 +122,6 @@ source_set("platform") {
     "exported/linux/WebFontRenderStyle.cpp",
     "exported/Platform.cpp",
     "exported/ServiceProvider.cpp",
-    "exported/WebActiveGestureAnimation.cpp",
-    "exported/WebActiveGestureAnimation.h",
     "exported/WebArrayBuffer.cpp",
     "exported/WebCommon.cpp",
     "exported/WebConvertableToTraceFormat.cpp",
