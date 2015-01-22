@@ -12,6 +12,8 @@ source_set("compositor") {
     "layer_host.h",
     "layer_host_client.cc",
     "layer_host_client.h",
+    "picture_serializer.cc",
+    "picture_serializer.h",
     "rasterizer.cc",
     "rasterizer.h",
     "rasterizer_bitmap.cc",
@@ -44,6 +46,8 @@ source_set("compositor") {
     "//mojo/services/surfaces/public/interfaces:surface_id",
     "//mojo/skia",
     "//skia",
+    "//third_party/libpng",
+    "//ui/gfx",
     "//ui/gfx/geometry",
   ]
 }

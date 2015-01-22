@@ -6,6 +6,7 @@
 
 #include "base/debug/trace_event.h"
 #include "sky/compositor/layer_host.h"
+#include "sky/compositor/picture_serializer.h"
 #include "sky/compositor/rasterizer.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -26,6 +27,12 @@ void Layer::Display() {
   TRACE_EVENT0("sky", "Layer::Display");
   DCHECK(rasterizer_);
   auto picture = RecordPicture();
+
+#if 0
+  SerializePicture(
+      "/data/data/org.chromium.mojo.shell/cache/layer0.skp", picture.get());
+#endif
+
   texture_ = rasterizer_->Rasterize(picture.get());
 }
 
