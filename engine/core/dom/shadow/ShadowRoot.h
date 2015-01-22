@@ -38,8 +38,6 @@ class Document;
 class ElementShadow;
 class ExceptionState;
 class InsertionPoint;
-class ShadowRootRareData;
-class StyleSheetList;
 
 class ShadowRoot final : public DocumentFragment, public TreeScope {
     DEFINE_WRAPPERTYPEINFO();
@@ -63,44 +61,36 @@ public:
     virtual void removedFrom(ContainerNode*) override;
 
     bool containsContentElements() const;
-    bool containsInsertionPoints() const { return containsContentElements(); }
     bool containsShadowRoots() const;
 
-    // For Internals, don't use this.
-    unsigned childShadowRootCount() const;
-
-    void didAddInsertionPoint(InsertionPoint*);
-    void didRemoveInsertionPoint(InsertionPoint*);
+    void didAddInsertionPoint();
+    void didRemoveInsertionPoint();
     const Vector<RefPtr<InsertionPoint> >& descendantInsertionPoints();
 
     // Make protected methods from base class public here.
     using TreeScope::setDocument;
     using TreeScope::setParentTreeScope;
 
-public:
     Element* activeElement() const;
 
     PassRefPtr<Node> cloneNode(bool, ExceptionState&);
-    PassRefPtr<Node> cloneNode(ExceptionState& exceptionState) { return cloneNode(true, exceptionState); }
+    PassRefPtr<Node> cloneNode(ExceptionState& exceptionState);
 
 private:
-    ShadowRoot(Document&);
+    explicit ShadowRoot(Document&);
     virtual ~ShadowRoot();
 
-#if !ENABLE(OILPAN)
     virtual void dispose() override;
-#endif
-
-    ShadowRootRareData* ensureShadowRootRareData();
 
     void addChildShadowRoot();
     void removeChildShadowRoot();
     void invalidateDescendantInsertionPoints();
 
-    // ShadowRoots should never be cloned.
-    virtual PassRefPtr<Node> cloneNode(bool) override { return nullptr; }
+    virtual PassRefPtr<Node> cloneNode(bool) override;
 
-    OwnPtr<ShadowRootRareData> m_shadowRootRareData;
+    Vector<RefPtr<InsertionPoint> > m_descendantInsertionPoints;
+    unsigned m_descendantContentElementCount;
+    unsigned m_childShadowRootCount;
     unsigned m_descendantInsertionPointsIsValid : 1;
 };
 

@@ -35,14 +35,13 @@
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
-#include "sky/engine/core/dom/shadow/ShadowRootRareData.h"
 #include "sky/engine/public/platform/Platform.h"
 
 namespace blink {
 
 struct SameSizeAsShadowRoot : public DocumentFragment, public TreeScope {
-    void* pointers[1];
-    unsigned countersAndFlags[1];
+    Vector<RefPtr<InsertionPoint>> vector;
+    unsigned countersAndFlags[3];
 };
 
 COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_should_stay_small);
@@ -50,6 +49,8 @@ COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_sh
 ShadowRoot::ShadowRoot(Document& document)
     : DocumentFragment(0, CreateShadowRoot)
     , TreeScope(*this, document)
+    , m_descendantContentElementCount(0)
+    , m_childShadowRootCount(0)
     , m_descendantInsertionPointsIsValid(false)
 {
 }
@@ -75,12 +76,23 @@ ShadowRoot::~ShadowRoot()
 
 void ShadowRoot::dispose()
 {
+    invalidateDescendantInsertionPoints();
     removeDetachedChildren();
 }
 
 PassRefPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& exceptionState)
 {
     exceptionState.throwDOMException(DataCloneError, "ShadowRoot nodes are not clonable.");
+    return nullptr;
+}
+
+PassRefPtr<Node> ShadowRoot::cloneNode(ExceptionState& exceptionState)
+{
+    return cloneNode(exceptionState);
+}
+
+PassRefPtr<Node> ShadowRoot::cloneNode(bool deep)
+{
     return nullptr;
 }
 
@@ -134,79 +146,64 @@ void ShadowRoot::removedFrom(ContainerNode* insertionPoint)
     DocumentFragment::removedFrom(insertionPoint);
 }
 
-ShadowRootRareData* ShadowRoot::ensureShadowRootRareData()
+void ShadowRoot::didAddInsertionPoint()
 {
-    if (m_shadowRootRareData)
-        return m_shadowRootRareData.get();
-
-    m_shadowRootRareData = adoptPtr(new ShadowRootRareData);
-    return m_shadowRootRareData.get();
-}
-
-bool ShadowRoot::containsContentElements() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->containsContentElements() : 0;
-}
-
-bool ShadowRoot::containsShadowRoots() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->containsShadowRoots() : 0;
-}
-
-void ShadowRoot::didAddInsertionPoint(InsertionPoint* insertionPoint)
-{
-    ensureShadowRootRareData()->didAddInsertionPoint(insertionPoint);
+    ++m_descendantContentElementCount;
     invalidateDescendantInsertionPoints();
 }
 
-void ShadowRoot::didRemoveInsertionPoint(InsertionPoint* insertionPoint)
+void ShadowRoot::didRemoveInsertionPoint()
 {
-    m_shadowRootRareData->didRemoveInsertionPoint(insertionPoint);
+    ASSERT(m_descendantContentElementCount);
+    --m_descendantContentElementCount;
     invalidateDescendantInsertionPoints();
 }
 
 void ShadowRoot::addChildShadowRoot()
 {
-    ensureShadowRootRareData()->didAddChildShadowRoot();
+    ++m_childShadowRootCount;
 }
 
 void ShadowRoot::removeChildShadowRoot()
 {
-    // FIXME: Why isn't this an ASSERT?
-    if (!m_shadowRootRareData)
-        return;
-    m_shadowRootRareData->didRemoveChildShadowRoot();
-}
-
-unsigned ShadowRoot::childShadowRootCount() const
-{
-    return m_shadowRootRareData ? m_shadowRootRareData->childShadowRootCount() : 0;
+    ASSERT(m_childShadowRootCount);
+    --m_childShadowRootCount;
 }
 
 void ShadowRoot::invalidateDescendantInsertionPoints()
 {
     m_descendantInsertionPointsIsValid = false;
-    m_shadowRootRareData->clearDescendantInsertionPoints();
+    m_descendantInsertionPoints.clear();
+}
+
+bool ShadowRoot::containsContentElements() const
+{
+    return m_descendantContentElementCount;
+}
+
+bool ShadowRoot::containsShadowRoots() const
+{
+    return m_childShadowRootCount;
 }
 
 const Vector<RefPtr<InsertionPoint> >& ShadowRoot::descendantInsertionPoints()
 {
     DEFINE_STATIC_LOCAL(Vector<RefPtr<InsertionPoint> >, emptyList, ());
-    if (m_shadowRootRareData && m_descendantInsertionPointsIsValid)
-        return m_shadowRootRareData->descendantInsertionPoints();
+    if (m_descendantInsertionPointsIsValid)
+        return m_descendantInsertionPoints;
 
     m_descendantInsertionPointsIsValid = true;
 
-    if (!containsInsertionPoints())
+    if (!containsContentElements())
         return emptyList;
 
     Vector<RefPtr<InsertionPoint> > insertionPoints;
     for (InsertionPoint* insertionPoint = Traversal<InsertionPoint>::firstWithin(*this); insertionPoint; insertionPoint = Traversal<InsertionPoint>::next(*insertionPoint, this))
         insertionPoints.append(insertionPoint);
 
-    ensureShadowRootRareData()->setDescendantInsertionPoints(insertionPoints);
+    m_descendantInsertionPoints.swap(insertionPoints);
 
-    return m_shadowRootRareData->descendantInsertionPoints();
+    return m_descendantInsertionPoints;
 }
 
 }

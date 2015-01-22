@@ -170,7 +170,7 @@ void InsertionPoint::insertedInto(ContainerNode* insertionPoint)
             rootOwner->setNeedsDistributionRecalc();
             if (canBeActive() && !m_registeredWithShadowRoot && insertionPoint->treeScope().rootNode() == root) {
                 m_registeredWithShadowRoot = true;
-                root->didAddInsertionPoint(this);
+                root->didAddInsertionPoint();
                 if (canAffectSelector())
                     rootOwner->willAffectSelector();
             }
@@ -198,7 +198,7 @@ void InsertionPoint::removedFrom(ContainerNode* insertionPoint)
     if (m_registeredWithShadowRoot && insertionPoint->treeScope().rootNode() == root) {
         ASSERT(root);
         m_registeredWithShadowRoot = false;
-        root->didRemoveInsertionPoint(this);
+        root->didRemoveInsertionPoint();
         if (rootOwner) {
             if (canAffectSelector())
                 rootOwner->willAffectSelector();
