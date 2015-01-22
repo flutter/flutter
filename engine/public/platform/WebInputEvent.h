@@ -234,23 +234,23 @@ public:
 
     int pointer = 0;
     Kind kind = Touch;
-    double x = 0;
-    double y = 0;
-    double dx = 0;
-    double dy = 0;
+    float x = 0;
+    float y = 0;
+    float dx = 0;
+    float dy = 0;
     int buttons = 0;
-    double pressure = 0;
-    double pressureMin = 0;
-    double pressureMax = 0;
-    double distance = 0;
-    double distanceMin = 0;
-    double distanceMax = 0;
-    double radiusMajor = 0;
-    double radiusMinor = 0;
-    double radiusMin = 0;
-    double radiusMax = 0;
-    double orientation = 0;
-    double tilt = 0;
+    float pressure = 0;
+    float pressureMin = 0;
+    float pressureMax = 0;
+    float distance = 0;
+    float distanceMin = 0;
+    float distanceMax = 0;
+    float radiusMajor = 0;
+    float radiusMinor = 0;
+    float radiusMin = 0;
+    float radiusMax = 0;
+    float orientation = 0;
+    float tilt = 0;
 
     WebPointerEvent() : WebInputEvent(sizeof(WebPointerEvent)) {}
 };
