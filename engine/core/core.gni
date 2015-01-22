@@ -506,7 +506,6 @@ sky_core_files = [
   "dom/shadow/SelectRuleFeatureSet.h",
   "dom/shadow/ShadowRoot.cpp",
   "dom/shadow/ShadowRoot.h",
-  "dom/shadow/ShadowRootRareData.h",
   "dom/SimulatedClickOptions.h",
   "dom/SpaceSplitString.cpp",
   "dom/SpaceSplitString.h",
