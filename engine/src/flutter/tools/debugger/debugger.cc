@@ -15,6 +15,7 @@ SkyDebugger::SkyDebugger()
       content_(nullptr),
       navigator_host_factory_(this),
       weak_factory_(this) {
+  exposed_services_impl_.AddService(&navigator_host_factory_);
 }
 
 SkyDebugger::~SkyDebugger() {
@@ -45,8 +46,8 @@ bool SkyDebugger::ConfigureOutgoingConnection(
 
 void SkyDebugger::OnEmbed(
     mojo::View* root,
-    mojo::ServiceProviderImpl* exported_services,
-    scoped_ptr<mojo::ServiceProvider> imported_services) {
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exposed_services) {
   root_ = root;
   root_->AddObserver(this);
 
@@ -64,13 +65,10 @@ void SkyDebugger::OnEmbed(
     NavigateToURL(pending_url_);
 }
 
-void SkyDebugger::Embed(
-    const mojo::String& url,
-    mojo::InterfaceRequest<mojo::ServiceProvider> service_provider) {
-  scoped_ptr<mojo::ServiceProviderImpl> exported_services(
-      new mojo::ServiceProviderImpl());
-  // exported_services->AddService(TBD) -- no exported services for now.
-  content_->Embed(url, exported_services.Pass());
+void SkyDebugger::Embed(const mojo::String& url,
+                        mojo::InterfaceRequest<mojo::ServiceProvider> services,
+                        mojo::ServiceProviderPtr exposed_services) {
+  content_->Embed(url, nullptr, nullptr);
 }
 
 void SkyDebugger::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
@@ -97,10 +95,9 @@ void SkyDebugger::NavigateToURL(const mojo::String& url) {
   // embedded into the view and content_ created.
   // Just save the last one.
   if (content_) {
-    scoped_ptr<mojo::ServiceProviderImpl> exported_services(
-      new mojo::ServiceProviderImpl());
-    exported_services->AddService(&navigator_host_factory_);
-    viewer_services_ = content_->Embed(url, exported_services.Pass());
+    mojo::ServiceProviderPtr exposed_services;
+    exposed_services_impl_.Bind(GetProxy(&exposed_services));
+    content_->Embed(url, GetProxy(&viewer_services_), exposed_services.Pass());
   } else {
     pending_url_ = url;
   }
