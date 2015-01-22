@@ -6,6 +6,7 @@
 #include "sky/engine/core/html/HTMLIFrameElement.h"
 
 #include "gen/sky/core/HTMLNames.h"
+#include "mojo/edk/js/handle.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
@@ -55,6 +56,11 @@ void HTMLIFrameElement::OnViewDestroyed(mojo::View* view)
     m_contentView = nullptr;
 }
 
+ScriptValue HTMLIFrameElement::takeServiceProvider(ScriptState* scriptState)
+{
+    return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_serviceProvider.release()));
+}
+
 void HTMLIFrameElement::createView()
 {
     String urlString = stripLeadingAndTrailingHTMLSpaces(getAttribute(HTMLNames::srcAttr));
@@ -70,7 +76,10 @@ void HTMLIFrameElement::createView()
     if (!m_contentView)
         return;
 
-    m_contentView->Embed(mojo::String::From(url.string().utf8().data()));
+    mojo::MessagePipe pipe;
+    m_serviceProvider = pipe.handle0.Pass();
+    m_contentView->Embed(mojo::String::From(url.string().utf8().data()),
+        mojo::MakeRequest<mojo::ServiceProvider>(pipe.handle1.Pass()));
     m_contentView->AddObserver(this);
 }
 

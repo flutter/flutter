@@ -3,4 +3,5 @@
 // found in the LICENSE file.
 
 interface HTMLIFrameElement : HTMLElement {
+  [CallWith=ScriptState] any takeServiceProvider();
 };

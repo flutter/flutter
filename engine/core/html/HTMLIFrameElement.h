@@ -26,6 +26,8 @@ public:
 
     mojo::View* contentView() const { return m_contentView; }
 
+    ScriptValue takeServiceProvider(ScriptState*);
+
 private:
     explicit HTMLIFrameElement(Document&);
 
@@ -42,6 +44,7 @@ private:
     void createView();
 
     mojo::View* m_contentView;
+    mojo::ScopedMessagePipeHandle m_serviceProvider;
 };
 
 } // namespace blink

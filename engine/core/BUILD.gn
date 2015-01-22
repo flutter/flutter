@@ -17,6 +17,7 @@ source_set("libraries") {
     "//gpu/command_buffer/client:gles2_c_lib",
     "//mojo/application",
     "//mojo/common",
+    "//mojo/edk/js",
     "//mojo/public/c/system",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
