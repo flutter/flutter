@@ -49,8 +49,6 @@ component("web") {
     "EditorClientImpl.h",
     "FrameLoaderClientImpl.cpp",
     "FrameLoaderClientImpl.h",
-    "PageWidgetDelegate.cpp",
-    "PageWidgetDelegate.h",
     "SpellCheckerClientImpl.cpp",
     "SpellCheckerClientImpl.h",
     "WebArrayBufferConverter.cpp",

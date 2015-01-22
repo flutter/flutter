@@ -53,6 +53,7 @@
 #include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/core/loader/FrameLoader.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
+#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/EventWithHitTestResults.h"
@@ -72,6 +73,7 @@
 #include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
@@ -176,12 +178,12 @@ WebLocalFrameImpl* WebViewImpl::mainFrameImpl()
 void WebViewImpl::handleMouseLeave(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
     m_client->setMouseOverURL(WebURL());
-    PageWidgetEventHandler::handleMouseLeave(mainFrame, event);
+    mainFrame.eventHandler().handleMouseLeaveEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
 }
 
 void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
-    PageWidgetEventHandler::handleMouseDown(mainFrame, event);
+    mainFrame.eventHandler().handleMousePressEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
 
     if (event.button == WebMouseEvent::ButtonLeft && m_mouseCaptureNode)
         m_mouseCaptureGestureToken = mainFrame.eventHandler().takeLastMouseDownGestureToken();
@@ -189,12 +191,22 @@ void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& ev
 
 void WebViewImpl::handleMouseUp(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
-    PageWidgetEventHandler::handleMouseUp(mainFrame, event);
+    mainFrame.eventHandler().handleMouseReleaseEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
 }
 
 bool WebViewImpl::handleMouseWheel(LocalFrame& mainFrame, const WebMouseWheelEvent& event)
 {
-    return PageWidgetEventHandler::handleMouseWheel(mainFrame, event);
+    return mainFrame.eventHandler().handleWheelEvent(PlatformWheelEventBuilder(mainFrame.view(), event));
+}
+
+void WebViewImpl::handleMouseMove(LocalFrame& mainFrame, const WebMouseEvent& event)
+{
+    mainFrame.eventHandler().handleMouseMoveEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
+}
+
+bool WebViewImpl::handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event)
+{
+    return mainFrame.eventHandler().handleTouchEvent(PlatformTouchEventBuilder(mainFrame.view(), event));
 }
 
 bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
@@ -475,20 +487,14 @@ WebSize WebViewImpl::size()
     return m_size;
 }
 
-WebLocalFrameImpl* WebViewImpl::localFrameRootTemporary() const
-{
-    // FIXME(sky): remove
-    return WebLocalFrameImpl::fromFrame(page()->mainFrame());
-}
-
 void WebViewImpl::performResize()
 {
     updateMainFrameLayoutSize();
 
     // If the virtual viewport pinch mode is enabled, the main frame will be resized
     // after layout so it can be sized to the contentsSize.
-    if (localFrameRootTemporary()->frameView())
-        localFrameRootTemporary()->frameView()->resize(m_size);
+    if (FrameView* view = m_page->mainFrame()->view())
+        view->resize(m_size);
 }
 
 void WebViewImpl::resize(const WebSize& newSize)
@@ -496,7 +502,7 @@ void WebViewImpl::resize(const WebSize& newSize)
     if (m_size == newSize)
         return;
 
-    FrameView* view = localFrameRootTemporary()->frameView();
+    FrameView* view = m_page->mainFrame()->view();
     if (!view)
         return;
 
@@ -517,20 +523,39 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
     if (!m_page)
         return;
 
-    PageWidgetDelegate::animate(m_page.get(), validFrameTime.lastFrameTimeMonotonic);
+    RefPtr<FrameView> view = m_page->mainFrame()->view();
+    if (!view)
+        return;
+    m_page->autoscrollController().animate(validFrameTime.lastFrameTimeMonotonic);
+    m_page->animator().serviceScriptedAnimations(validFrameTime.lastFrameTimeMonotonic);
 }
 
 void WebViewImpl::layout()
 {
     TRACE_EVENT0("blink", "WebViewImpl::layout");
-    if (!localFrameRootTemporary())
+    if (!m_page)
         return;
-    PageWidgetDelegate::layout(m_page.get(), localFrameRootTemporary()->frame());
+    m_page->animator().updateLayoutAndStyleForPainting(m_page->mainFrame());
 }
 
 void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
 {
-    PageWidgetDelegate::paint(m_page.get(), canvas, rect, isTransparent() ? PageWidgetDelegate::Translucent : PageWidgetDelegate::Opaque);
+    if (rect.isEmpty())
+        return;
+    GraphicsContext gc(canvas);
+    gc.setCertainlyOpaque(!isTransparent());
+    gc.applyDeviceScaleFactor(m_page->deviceScaleFactor());
+    gc.setDeviceScaleFactor(m_page->deviceScaleFactor());
+    IntRect dirtyRect(rect);
+    gc.save(); // Needed to save the canvas, not the GraphicsContext.
+    FrameView* view = m_page->mainFrame()->view();
+    if (view) {
+        gc.clip(dirtyRect);
+        view->paint(&gc, dirtyRect);
+    } else {
+        gc.fillRect(dirtyRect, Color::white);
+    }
+    gc.restore();
 }
 
 const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
@@ -627,7 +652,81 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         return true;
     }
 
-    return PageWidgetDelegate::handleInputEvent(m_page.get(), *this, inputEvent);
+    LocalFrame* frame = m_page ? m_page->mainFrame() : nullptr;
+    switch (inputEvent.type) {
+
+    // FIXME: WebKit seems to always return false on mouse events processing
+    // methods. For now we'll assume it has processed them (as we are only
+    // interested in whether keyboard events are processed).
+    case WebInputEvent::MouseMove:
+        if (!frame || !frame->view())
+            return true;
+        handleMouseMove(*frame, static_cast<const WebMouseEvent&>(inputEvent));
+        return true;
+    case WebInputEvent::MouseLeave:
+        if (!frame || !frame->view())
+            return true;
+        handleMouseLeave(*frame, static_cast<const WebMouseEvent&>(inputEvent));
+        return true;
+    case WebInputEvent::MouseDown:
+        if (!frame || !frame->view())
+            return true;
+        handleMouseDown(*frame, static_cast<const WebMouseEvent&>(inputEvent));
+        return true;
+    case WebInputEvent::MouseUp:
+        if (!frame || !frame->view())
+            return true;
+        handleMouseUp(*frame, static_cast<const WebMouseEvent&>(inputEvent));
+        return true;
+
+    case WebInputEvent::MouseWheel:
+        if (!frame || !frame->view())
+            return false;
+        return handleMouseWheel(*frame, static_cast<const WebMouseWheelEvent&>(inputEvent));
+
+    case WebInputEvent::RawKeyDown:
+    case WebInputEvent::KeyDown:
+    case WebInputEvent::KeyUp:
+        return handleKeyEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
+
+    case WebInputEvent::Char:
+        return handleCharEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
+    case WebInputEvent::GestureScrollBegin:
+    case WebInputEvent::GestureScrollEnd:
+    case WebInputEvent::GestureScrollUpdate:
+    case WebInputEvent::GestureScrollUpdateWithoutPropagation:
+    case WebInputEvent::GestureFlingStart:
+    case WebInputEvent::GestureFlingCancel:
+    case WebInputEvent::GestureTap:
+    case WebInputEvent::GestureTapUnconfirmed:
+    case WebInputEvent::GestureTapDown:
+    case WebInputEvent::GestureShowPress:
+    case WebInputEvent::GestureTapCancel:
+    case WebInputEvent::GestureDoubleTap:
+    case WebInputEvent::GestureTwoFingerTap:
+    case WebInputEvent::GestureLongPress:
+    case WebInputEvent::GestureLongTap:
+        return handleGestureEvent(static_cast<const WebGestureEvent&>(inputEvent));
+
+    case WebInputEvent::TouchStart:
+    case WebInputEvent::TouchMove:
+    case WebInputEvent::TouchEnd:
+    case WebInputEvent::TouchCancel:
+        if (!frame || !frame->view())
+            return false;
+        return handleTouchEvent(*frame, static_cast<const WebTouchEvent&>(inputEvent));
+
+    case WebInputEvent::GesturePinchBegin:
+    case WebInputEvent::GesturePinchEnd:
+    case WebInputEvent::GesturePinchUpdate:
+        // FIXME: Once PlatformGestureEvent is updated to support pinch, this
+        // should call handleGestureEvent, just like it currently does for
+        // gesture scroll.
+        return false;
+
+    default:
+        return false;
+    }
 }
 
 void WebViewImpl::mouseCaptureLost()
@@ -1101,9 +1200,9 @@ void WebViewImpl::sendResizeEventAndRepaint()
     // FIXME: This is wrong. The FrameView is responsible sending a resizeEvent
     // as part of layout. Layout is also responsible for sending invalidations
     // to the embedder. This method and all callers may be wrong. -- eseidel.
-    if (localFrameRootTemporary()->frameView()) {
+    if (m_page->mainFrame()->view()) {
         // Enqueues the resize event.
-        localFrameRootTemporary()->frame()->document()->enqueueResizeEvent();
+        m_page->mainFrame()->document()->enqueueResizeEvent();
     }
 }
 

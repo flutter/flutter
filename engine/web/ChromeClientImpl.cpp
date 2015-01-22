@@ -219,7 +219,7 @@ void ChromeClientImpl::show(NavigationPolicy navigationPolicy)
 
 bool ChromeClientImpl::shouldReportDetailedMessageForSource(const String& url)
 {
-    WebLocalFrameImpl* webframe = m_webView->localFrameRootTemporary();
+    WebLocalFrameImpl* webframe = m_webView->mainFrameImpl();
     return webframe->client() && webframe->client()->shouldReportDetailedMessageForSource(url);
 }
 

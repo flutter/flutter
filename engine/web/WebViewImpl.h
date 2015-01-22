@@ -44,7 +44,6 @@
 #include "sky/engine/public/web/WebView.h"
 #include "sky/engine/web/ChromeClientImpl.h"
 #include "sky/engine/web/EditorClientImpl.h"
-#include "sky/engine/web/PageWidgetDelegate.h"
 #include "sky/engine/web/SpellCheckerClientImpl.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -58,9 +57,7 @@ class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
 
-class WebViewImpl final : public WebView
-    , public RefCounted<WebViewImpl>
-    , public PageWidgetEventHandler {
+class WebViewImpl final : public WebView, public RefCounted<WebViewImpl> {
 public:
     static WebViewImpl* create(WebViewClient*);
 
@@ -158,10 +155,6 @@ public:
     // the page is shutting down, but will be valid at all other times.
     WebLocalFrameImpl* mainFrameImpl();
 
-    // FIXME: Temporary method to accommodate out-of-process frame ancestors;
-    // will be removed when there can be multiple WebWidgets for a single page.
-    WebLocalFrameImpl* localFrameRootTemporary() const;
-
     // Event related methods:
     void mouseDoubleClick(const WebMouseEvent&);
 
@@ -248,14 +241,15 @@ private:
     void doComposite();
     void reallocateRenderer();
 
-    // PageWidgetEventHandler functions
-    virtual void handleMouseLeave(LocalFrame&, const WebMouseEvent&) override;
-    virtual void handleMouseDown(LocalFrame&, const WebMouseEvent&) override;
-    virtual void handleMouseUp(LocalFrame&, const WebMouseEvent&) override;
-    virtual bool handleMouseWheel(LocalFrame&, const WebMouseWheelEvent&) override;
-    virtual bool handleGestureEvent(const WebGestureEvent&) override;
-    virtual bool handleKeyEvent(const WebKeyboardEvent&) override;
-    virtual bool handleCharEvent(const WebKeyboardEvent&) override;
+    bool handleCharEvent(const WebKeyboardEvent&);
+    bool handleGestureEvent(const WebGestureEvent&);
+    bool handleKeyEvent(const WebKeyboardEvent&);
+    bool handleMouseWheel(LocalFrame&, const WebMouseWheelEvent&);
+    bool handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event);
+    void handleMouseDown(LocalFrame&, const WebMouseEvent&);
+    void handleMouseLeave(LocalFrame&, const WebMouseEvent&);
+    void handleMouseMove(LocalFrame& mainFrame, const WebMouseEvent& event);
+    void handleMouseUp(LocalFrame&, const WebMouseEvent&);
 
     InputMethodContext* inputMethodContext();
 
