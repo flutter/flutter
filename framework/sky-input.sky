@@ -3,7 +3,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
+<import src="/sky/framework/shell.sky" as="shell" />
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/mojo/services/keyboard/public/interfaces/keyboard.mojom.sky" as="keyboard" />
 
 <sky-element name="sky-input" attributes="value:string">
 <template>
@@ -22,9 +24,13 @@
     overflow: hidden;
   }
   </style>
-  <div id="control" contenteditable on-keydown="handleKeyDown">{{ value }}</div>
+  <div id="control" contenteditable
+       on-focus="handleFocus"
+       on-blur="handleBlur"
+       on-keydown="handleKeyDown">{{ value }}</div>
 </template>
 <script>
+var keyboard = shell.connectToService("mojo:keyboard", keyboard.Keyboard);
 module.exports = class extends SkyElement {
   shadowRootReady() {
     var control = this.shadowRoot.getElementById('control');
@@ -53,6 +59,12 @@ module.exports = class extends SkyElement {
     // TODO(abarth): You can still get newlines if the user pastes them.
     if (event.keyCode == 0xD)
       event.preventDefault();
+  }
+  handleFocus(event) {
+    keyboard.show();
+  }
+  handleBlur(event) {
+    keyboard.hide();
   }
 }.register();
 </script>

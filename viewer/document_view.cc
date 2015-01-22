@@ -126,6 +126,8 @@ void DocumentView::OnEmbed(
   // TODO(abarth): We should ask the view whether it is focused instead of
   // assuming that we're focused.
   web_view_->setFocus(true);
+  // Needed on android, as the window does not get the focus otherwise.
+  root_->SetFocus();
   root_->AddObserver(this);
 }
 
