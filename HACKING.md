@@ -14,13 +14,16 @@ Running applications
 
 * ``./sky/tools/skydb start out/Debug [url]``
 
-    `skydb` has numerous commands, visible via skydb help.  Common ones include:
-    * skybd start BUILD_DIR [url]
-    * skydb load [url]
-    * skydb stop
-    * skydb print_crash # Symbolicate the most recent crash from android.
+    `skydb` has numerous commands, visible via `skydb help`.  Common ones include:
+    * `skybd start` BUILD_DIR [url]
+    * `skydb load` [url]
+    * `skydb stop`
+    * `skydb print_crash` # Symbolicate the most recent crash from android.
 
-Once skydb start is issued, all subsequent commands will be sent to the running mojo_shell instance (even on an attached android device).  skydb start reads gn args from the passed build directory to determine whether its using android, etc.
+Once `skydb start` is issued, all subsequent commands will be sent to
+the running mojo_shell instance (even on an attached android device).
+`skydb start` reads gn args from the passed build directory to
+determine whether its using android, etc.
 
 * ``./sky/tools/test_sky --debug``
   * This runs the tests against ``//out/Debug``. If you want to run against
@@ -62,13 +65,15 @@ uploaded file in the reference.
 2. Create an dummy reference file (foo-expected.sky).
 3. Run the test (it will fail).
 4. Copy the -actual.png file to googlestorage (see below).
-5. Put an <img> pointing to your newly uploaded png in the reference file at
+5. Put an ``<img>`` pointing to your newly uploaded png in the reference file at
 http://storage.googleapis.com/mojo/sky-pngs/SHA1_HASH_HERE
 
 Copying the file to googlestorage:
+```bash
 $ sha1sum ../out/Debug/layout-test-results/framework/flights-app-pixels-actual.png
 db0508cdfe69e996a93464050dc383f6480f1283  ../out/Debug/layout-test-results/framework/flights-app-pixels-actual.png
 $ gsutil.py cp ../out/Debug/layout-test-results/framework/flights-app-pixels-actual.png gs://mojo/sky-pngs/db0508cdfe69e996a93464050dc383f6480f1283
+```
 
 Long-term, we should not have these tests at all and should just
 dump paint commands. In the short-term, if we find we're doing this
