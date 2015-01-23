@@ -136,11 +136,6 @@ public:
     virtual v8::Handle<v8::Value> executeScriptAndReturnValue(
         const WebScriptSource&) = 0;
 
-    // ONLY FOR TESTS: Same as above but sets a fake UserGestureIndicator before
-    // execution.
-    virtual v8::Handle<v8::Value> executeScriptAndReturnValueForTests(
-        const WebScriptSource&);
-
     // Call the function with the given receiver and arguments, bypassing
     // canExecute().
     virtual v8::Handle<v8::Value> callFunctionEvenIfScriptDisabled(

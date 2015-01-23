@@ -77,7 +77,6 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/PlatformScreen.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"

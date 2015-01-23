@@ -83,7 +83,6 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/scroll/ScrollableArea.h"
 #include "sky/engine/wtf/BitVector.h"
 #include "sky/engine/wtf/HashFunctions.h"
@@ -1212,13 +1211,7 @@ void Element::focus(bool restorePreviousSelection, FocusType type)
         return;
     updateFocusAppearance(restorePreviousSelection);
 
-    if (UserGestureIndicator::processedUserGestureSinceLoad()) {
-        // Bring up the keyboard in the context of anything triggered by a user
-        // gesture. Since tracking that across arbitrary boundaries (eg.
-        // animations) is difficult, for now we match IE's heuristic and bring
-        // up the keyboard if there's been any gesture since load.
-        document().page()->chrome().client().showImeIfNeeded();
-    }
+    document().page()->chrome().client().showImeIfNeeded();
 }
 
 void Element::updateFocusAppearance(bool /*restorePreviousSelection*/)

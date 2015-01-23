@@ -151,10 +151,6 @@ public:
     int requestorProcessID() const { return m_requestorProcessID; }
     void setRequestorProcessID(int requestorProcessID) { m_requestorProcessID = requestorProcessID; }
 
-    // True if request was user initiated.
-    bool hasUserGesture() const { return m_hasUserGesture; }
-    void setHasUserGesture(bool hasUserGesture) { m_hasUserGesture = hasUserGesture; }
-
     // True if request should be downloaded to file.
     bool downloadToFile() const { return m_downloadToFile; }
     void setDownloadToFile(bool downloadToFile) { m_downloadToFile = downloadToFile; }
@@ -192,7 +188,6 @@ private:
     bool m_allowStoredCredentials : 1;
     bool m_reportUploadProgress : 1;
     bool m_reportRawHeaders : 1;
-    bool m_hasUserGesture : 1;
     bool m_downloadToFile : 1;
     ResourceLoadPriority m_priority;
     int m_intraPriorityValue;

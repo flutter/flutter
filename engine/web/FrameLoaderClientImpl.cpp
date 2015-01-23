@@ -44,7 +44,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/MIMETypeRegistry.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/exported/WrappedResourceRequest.h"
 #include "sky/engine/platform/exported/WrappedResourceResponse.h"
 #include "sky/engine/platform/network/HTTPParsers.h"

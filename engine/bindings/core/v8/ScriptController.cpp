@@ -61,7 +61,6 @@
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/platform/NotImplemented.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/Widget.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/core/inspector/ScriptCallStack.h"

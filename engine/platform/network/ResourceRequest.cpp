@@ -300,7 +300,6 @@ void ResourceRequest::initialize(const KURL& url, ResourceRequestCachePolicy cac
     m_allowStoredCredentials = true;
     m_reportUploadProgress = false;
     m_reportRawHeaders = false;
-    m_hasUserGesture = false;
     m_downloadToFile = false;
     m_priority = ResourceLoadPriorityLow;
     m_intraPriorityValue = 0;

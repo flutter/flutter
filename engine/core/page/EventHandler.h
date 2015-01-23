@@ -34,7 +34,6 @@
 #include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/Timer.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/scroll/ScrollTypes.h"
@@ -161,8 +160,6 @@ public:
     bool useHandCursor(Node*, bool isOverLink);
 
     void notifyElementActivated();
-
-    PassRefPtr<UserGestureToken> takeLastMouseDownGestureToken() { return m_lastMouseDownUserGestureToken.release(); }
 
 private:
     bool updateSelectionForMouseDownDispatchingSelectStart(Node*, const VisibleSelection&, TextGranularity);
@@ -301,7 +298,6 @@ private:
     IntPoint m_mouseDownPos; // In our view's coords.
     double m_mouseDownTimestamp;
     PlatformMouseEvent m_mouseDown;
-    RefPtr<UserGestureToken> m_lastMouseDownUserGestureToken;
 
     RefPtr<Node> m_latchedWheelEventNode;
     bool m_widgetIsLatched;
@@ -314,7 +310,6 @@ private:
 
     // If set, the document of the active touch sequence. Unset if no touch sequence active.
     RefPtr<Document> m_touchSequenceDocument;
-    RefPtr<UserGestureToken> m_touchSequenceUserGestureToken;
 
     bool m_touchPressed;
 

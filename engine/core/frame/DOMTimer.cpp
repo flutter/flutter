@@ -35,7 +35,6 @@
 
 namespace blink {
 
-static const int maxIntervalForUserGestureForwarding = 1000; // One second matches Gecko.
 static const int maxTimerNestingLevel = 5;
 static const double oneMillisecond = 0.001;
 // Chromium uses a minimum timer interval of 4ms. We'd like to go
@@ -46,13 +45,6 @@ static const double oneMillisecond = 0.001;
 static const double minimumInterval = 0.004;
 
 static int timerNestingLevel = 0;
-
-static inline bool shouldForwardUserGesture(int interval, int nestingLevel)
-{
-    return UserGestureIndicator::processingUserGesture()
-        && interval <= maxIntervalForUserGestureForwarding
-        && nestingLevel == 1; // Gestures should not be forwarded to nested timers.
-}
 
 double DOMTimer::hiddenPageAlignmentInterval()
 {
@@ -91,8 +83,6 @@ DOMTimer::DOMTimer(ExecutionContext* context, PassOwnPtr<ScheduledAction> action
     , m_action(action)
 {
     ASSERT(timeoutID > 0);
-    if (shouldForwardUserGesture(interval, m_nestingLevel))
-        m_userGestureToken = UserGestureIndicator::currentToken();
 
     double intervalMilliseconds = std::max(oneMillisecond, interval * oneMillisecond);
     if (intervalMilliseconds < minimumInterval && m_nestingLevel >= maxTimerNestingLevel)
@@ -117,8 +107,6 @@ void DOMTimer::fired()
     ExecutionContext* context = executionContext();
     timerNestingLevel = m_nestingLevel;
     ASSERT(!context->activeDOMObjectsAreSuspended());
-    // Only the first execution of a multi-shot timer should get an affirmative user gesture indicator.
-    UserGestureIndicator gestureIndicator(m_userGestureToken.release());
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimerFire", "data", InspectorTimerFireEvent::data(context, m_timeoutID));
 

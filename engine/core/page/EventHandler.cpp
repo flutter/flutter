@@ -199,7 +199,6 @@ void EventHandler::clear()
     m_mousePositionIsUnknown = true;
     m_lastKnownMousePosition = IntPoint();
     m_lastKnownMouseGlobalPosition = IntPoint();
-    m_lastMouseDownUserGestureToken.clear();
     m_mousePressNode = nullptr;
     m_mousePressed = false;
     m_capturesDragging = false;
@@ -208,7 +207,6 @@ void EventHandler::clear()
     m_previousWheelScrolledNode = nullptr;
     m_targetForTouchID.clear();
     m_touchSequenceDocument.clear();
-    m_touchSequenceUserGestureToken.clear();
     m_scrollGestureHandlingNode = nullptr;
     m_lastGestureScrollOverWidget = false;
     m_previousGestureScrolledNode = nullptr;
@@ -995,9 +993,6 @@ bool EventHandler::handleMousePressEvent(const PlatformMouseEvent& mouseEvent)
 
     RefPtr<FrameView> protector(m_frame->view());
 
-    UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
-    m_frame->eventHandler().m_lastMouseDownUserGestureToken = gestureIndicator.currentToken();
-
     cancelFakeMouseMoveEvent();
     if (m_eventHandlerWillResetCapturingMouseEventsNode)
         m_capturingMouseEventsNode = nullptr;
@@ -1204,13 +1199,6 @@ bool EventHandler::handleMouseReleaseEvent(const PlatformMouseEvent& mouseEvent)
     RefPtr<FrameView> protector(m_frame->view());
 
     m_frame->selection().setCaretBlinkingSuspended(false);
-
-    OwnPtr<UserGestureIndicator> gestureIndicator;
-
-    if (m_frame->eventHandler().m_lastMouseDownUserGestureToken)
-        gestureIndicator = adoptPtr(new UserGestureIndicator(m_frame->eventHandler().m_lastMouseDownUserGestureToken.release()));
-    else
-        gestureIndicator = adoptPtr(new UserGestureIndicator(DefinitelyProcessingUserGesture));
 
     m_mousePressed = false;
     setLastKnownMousePosition(mouseEvent);
@@ -1647,8 +1635,6 @@ bool EventHandler::handleGestureTap(const GestureEventWithHitTestResults& target
     RefPtr<FrameView> protector(m_frame->view());
     const PlatformGestureEvent& gestureEvent = targetedEvent.event();
 
-    UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
-
     unsigned modifierFlags = 0;
     if (gestureEvent.altKey())
         modifierFlags |= PlatformEvent::AltKey;
@@ -2076,8 +2062,6 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     if (!node)
         return false;
 
-    UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
-
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.type() == PlatformEvent::KeyUp || initialKeyEvent.type() == PlatformEvent::Char)
         return !node->dispatchKeyEvent(initialKeyEvent);
@@ -2279,17 +2263,7 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
         // there may be cases where the browser doesn't reliably release all
         // touches. http://crbug.com/345372 tracks this.
         m_touchSequenceDocument.clear();
-        m_touchSequenceUserGestureToken.clear();
     }
-
-    OwnPtr<UserGestureIndicator> gestureIndicator;
-
-    if (m_touchSequenceUserGestureToken)
-        gestureIndicator = adoptPtr(new UserGestureIndicator(m_touchSequenceUserGestureToken.release()));
-    else
-        gestureIndicator = adoptPtr(new UserGestureIndicator(DefinitelyProcessingUserGesture));
-
-    m_touchSequenceUserGestureToken = gestureIndicator->currentToken();
 
     ASSERT(m_frame->view());
     if (m_touchSequenceDocument && (!m_touchSequenceDocument->frame() || !m_touchSequenceDocument->frame()->view())) {
@@ -2352,10 +2326,8 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
     // If there's no document receiving touch events,  then we can skip all the
     // rest of this work.
     if (!m_touchSequenceDocument || !m_touchSequenceDocument->frame()) {
-        if (allTouchReleased) {
+        if (allTouchReleased)
             m_touchSequenceDocument.clear();
-            m_touchSequenceUserGestureToken.clear();
-        }
         return false;
     }
 
@@ -2462,10 +2434,8 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
             changedTouches[pointState].m_targets.add(touchTarget);
         }
     }
-    if (allTouchReleased) {
+    if (allTouchReleased)
         m_touchSequenceDocument.clear();
-        m_touchSequenceUserGestureToken.clear();
-    }
 
     // Now iterate the changedTouches list and m_targets within it, sending
     // events to the targets as required.

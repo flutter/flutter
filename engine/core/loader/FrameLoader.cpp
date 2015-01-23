@@ -63,7 +63,6 @@
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/network/HTTPParsers.h"
 #include "sky/engine/platform/network/ResourceRequest.h"

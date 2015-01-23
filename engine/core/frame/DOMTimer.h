@@ -29,7 +29,6 @@
 
 #include "sky/engine/bindings/core/v8/ScheduledAction.h"
 #include "sky/engine/core/frame/SuspendableTimer.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -74,7 +73,6 @@ private:
     int m_timeoutID;
     int m_nestingLevel;
     OwnPtr<ScheduledAction> m_action;
-    RefPtr<UserGestureToken> m_userGestureToken;
 };
 
 } // namespace blink

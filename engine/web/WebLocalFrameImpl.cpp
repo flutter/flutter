@@ -114,7 +114,6 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/clipboard/ClipboardUtilities.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -289,10 +288,6 @@ void WebLocalFrameImpl::collectGarbage()
 v8::Handle<v8::Value> WebLocalFrameImpl::executeScriptAndReturnValue(const WebScriptSource& source)
 {
     ASSERT(frame());
-
-    // TODO: Remove this after blink has rolled and chromium change landed. (crrev.com/516753002)
-    UserGestureIndicator gestureIndicator(DefinitelyProcessingNewUserGesture);
-
     TextPosition position(OrdinalNumber::fromOneBasedInt(source.startLine), OrdinalNumber::first());
     return frame()->script().executeScriptInMainWorldAndReturnValue(ScriptSourceCode(source.code, source.url, position));
 }

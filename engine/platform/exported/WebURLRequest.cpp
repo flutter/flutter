@@ -232,16 +232,6 @@ void WebURLRequest::addHTTPOriginIfNeeded(const WebString& origin)
     m_private->m_resourceRequest->addHTTPOriginIfNeeded(origin);
 }
 
-bool WebURLRequest::hasUserGesture() const
-{
-    return m_private->m_resourceRequest->hasUserGesture();
-}
-
-void WebURLRequest::setHasUserGesture(bool hasUserGesture)
-{
-    m_private->m_resourceRequest->setHasUserGesture(hasUserGesture);
-}
-
 void WebURLRequest::setRequestContext(RequestContext requestContext)
 {
     m_private->m_resourceRequest->setRequestContext(requestContext);

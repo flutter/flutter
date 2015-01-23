@@ -61,8 +61,6 @@ accelerated2dCanvasMSAASampleCount type=int, initial=0
 
 asynchronousSpellCheckingEnabled initial=false
 
-mediaPlaybackRequiresUserGesture initial=false
-
 # Used in layout tests for gesture tap highlights. Makes the highlights square
 # (rather than rounded) to make it possible to reftest the results.
 mockGestureTapHighlightsEnabled initial=false

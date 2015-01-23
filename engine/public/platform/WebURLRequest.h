@@ -177,10 +177,6 @@ public:
     // request requires it.
     BLINK_PLATFORM_EXPORT void addHTTPOriginIfNeeded(const WebString& origin);
 
-    // True if the request was user initiated.
-    BLINK_PLATFORM_EXPORT bool hasUserGesture() const;
-    BLINK_PLATFORM_EXPORT void setHasUserGesture(bool);
-
     // A consumer controlled value intended to be used to identify the
     // requestor.
     BLINK_PLATFORM_EXPORT int requestorID() const;

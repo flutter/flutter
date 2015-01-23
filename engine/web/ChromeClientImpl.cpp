@@ -62,8 +62,6 @@
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebTextDirection.h"
 #include "sky/engine/public/web/WebTouchAction.h"
-#include "sky/engine/public/web/WebUserGestureIndicator.h"
-#include "sky/engine/public/web/WebUserGestureToken.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"

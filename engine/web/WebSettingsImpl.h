@@ -81,7 +81,6 @@ public:
     virtual void setMainFrameResizesAreOrientationChanges(bool) override;
     virtual void setMaxTouchPoints(int) override;
     virtual void setMediaControlsOverlayPlayButtonEnabled(bool) override;
-    virtual void setMediaPlaybackRequiresUserGesture(bool) override;
     virtual void setMinimumAccelerated2dCanvasSize(int) override;
     virtual void setOpenGLMultisamplingEnabled(bool) override;
     virtual void setPerTilePaintingEnabled(bool) override;

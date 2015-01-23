@@ -588,8 +588,6 @@ source_set("platform") {
     "transforms/TransformOperations.h",
     "transforms/TranslateTransformOperation.cpp",
     "transforms/TranslateTransformOperation.h",
-    "UserGestureIndicator.cpp",
-    "UserGestureIndicator.h",
     "weborigin/KnownPorts.cpp",
     "weborigin/KnownPorts.h",
     "weborigin/KURL.cpp",

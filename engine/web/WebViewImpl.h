@@ -52,7 +52,6 @@
 namespace blink {
 
 class Frame;
-class UserGestureToken;
 class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
@@ -287,7 +286,6 @@ private:
 
     // If set, the (plugin) node which has mouse capture.
     RefPtr<Node> m_mouseCaptureNode;
-    RefPtr<UserGestureToken> m_mouseCaptureGestureToken;
 
     IntRect m_rootLayerScrollDamage;
     WebLayer* m_rootLayer;
@@ -306,8 +304,6 @@ private:
     bool m_showScrollBottleneckRects;
     WebColor m_baseBackgroundColor;
     WebColor m_backgroundColorOverride;
-
-    bool m_userGestureObserved;
 };
 
 // We have no ways to check if the specified WebView is an instance of

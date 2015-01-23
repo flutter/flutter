@@ -347,11 +347,6 @@ void WebSettingsImpl::setMediaControlsOverlayPlayButtonEnabled(bool enabled)
 {
 }
 
-void WebSettingsImpl::setMediaPlaybackRequiresUserGesture(bool required)
-{
-    m_settings->setMediaPlaybackRequiresUserGesture(required);
-}
-
 void WebSettingsImpl::setSelectionIncludesAltImageText(bool enabled)
 {
     m_settings->setSelectionIncludesAltImageText(enabled);

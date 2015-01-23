@@ -70,7 +70,6 @@
 #include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/PlatformWheelEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/UserGestureIndicator.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -150,7 +149,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_showScrollBottleneckRects(false)
     , m_baseBackgroundColor(Color::white)
     , m_backgroundColorOverride(Color::transparent)
-    , m_userGestureObserved(false)
 {
     Page::PageClients pageClients;
     pageClients.chromeClient = &m_chromeClientImpl;
@@ -184,9 +182,6 @@ void WebViewImpl::handleMouseLeave(LocalFrame& mainFrame, const WebMouseEvent& e
 void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& event)
 {
     mainFrame.eventHandler().handleMousePressEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
-
-    if (event.button == WebMouseEvent::ButtonLeft && m_mouseCaptureNode)
-        m_mouseCaptureGestureToken = mainFrame.eventHandler().takeLastMouseDownGestureToken();
 }
 
 void WebViewImpl::handleMouseUp(LocalFrame& mainFrame, const WebMouseEvent& event)
@@ -623,8 +618,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         if (inputEvent.type == WebInputEvent::MouseUp)
             mouseCaptureLost();
 
-        OwnPtr<UserGestureIndicator> gestureIndicator;
-
         AtomicString eventType;
         switch (inputEvent.type) {
         case WebInputEvent::MouseMove:
@@ -635,12 +628,9 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
             break;
         case WebInputEvent::MouseDown:
             eventType = EventTypeNames::mousedown;
-            gestureIndicator = adoptPtr(new UserGestureIndicator(DefinitelyProcessingNewUserGesture));
-            m_mouseCaptureGestureToken = gestureIndicator->currentToken();
             break;
         case WebInputEvent::MouseUp:
             eventType = EventTypeNames::mouseup;
-            gestureIndicator = adoptPtr(new UserGestureIndicator(m_mouseCaptureGestureToken.release()));
             break;
         default:
             ASSERT_NOT_REACHED();
@@ -1247,9 +1237,6 @@ bool WebViewImpl::isActive() const
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)
 {
-    m_userGestureObserved = false;
-    if (!isNavigationWithinPage)
-        UserGestureIndicator::clearProcessedUserGestureSinceLoad();
 }
 
 void WebViewImpl::layoutUpdated(WebLocalFrameImpl* webframe)
