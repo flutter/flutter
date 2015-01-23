@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_FRAME_NEWEVENTHANDLER_H_
 #define SKY_ENGINE_CORE_FRAME_NEWEVENTHANDLER_H_
 
+#include <map>
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
@@ -36,7 +37,7 @@ private:
     HitTestResult performHitTest(const LayoutPoint&);
     void updateSelectionForPointerDown(const HitTestResult&, const WebPointerEvent&);
 
-    typedef HashMap<int, RefPtr<Node>> PointerTargetMap;
+    typedef std::map<int, RefPtr<Node>> PointerTargetMap;
 
     LocalFrame& m_frame;
     PointerTargetMap m_targetForPointer;

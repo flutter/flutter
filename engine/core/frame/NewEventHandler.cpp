@@ -112,10 +112,10 @@ bool NewEventHandler::handlePointerEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
 {
-    ASSERT(!m_targetForPointer.contains(event.pointer));
+    ASSERT(m_targetForPointer.find(event.pointer) == m_targetForPointer.end());
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
-    m_targetForPointer.set(event.pointer, target);
+    m_targetForPointer[event.pointer] = target;
     bool eventSwallowed = !dispatchPointerEvent(*target, event);
     // TODO(abarth): Set the target for the pointer to something determined when
     // dispatching the event.
@@ -125,9 +125,10 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerUpEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer.take(event.pointer);
+    RefPtr<Node> target = m_targetForPointer[event.pointer];
     if (!target)
         return false;
+    m_targetForPointer.erase(event.pointer);
     bool eventSwallowed = !dispatchPointerEvent(*target, event);
     // When the user releases the primary pointer, we need to dispatch a tap
     // event to the common ancestor for where the pointer went down and where
@@ -139,13 +140,13 @@ bool NewEventHandler::handlePointerUpEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerMoveEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer.get(event.pointer);
+    RefPtr<Node> target = m_targetForPointer[event.pointer];
     return target && dispatchPointerEvent(*target.get(), event);
 }
 
 bool NewEventHandler::handlePointerCancelEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer.take(event.pointer);
+    RefPtr<Node> target = m_targetForPointer[event.pointer];
     return target && dispatchPointerEvent(*target, event);
 }
 

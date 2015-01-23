@@ -88,9 +88,11 @@ public:
 
         // WebPointerEvent
         PointerDown,
+        PointerTypeFirst = PointerDown,
         PointerUp,
         PointerMove,
         PointerCancel,
+        PointerTypeLast = PointerCancel,
 
         // WebMouseEvent
         MouseDown,
@@ -186,6 +188,11 @@ public:
     unsigned size; // The size of this structure, for serialization.
     Type type;
     int modifiers;
+
+    static bool isPointerEventType(int type)
+    {
+        return PointerTypeFirst <= type && type <= PointerTypeLast;
+    }
 
     // Returns true if the WebInputEvent |type| is a mouse event.
     static bool isMouseEventType(int type)

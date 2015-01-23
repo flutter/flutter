@@ -48,74 +48,60 @@ int EventFlagsToWebInputEventModifiers(int flags) {
        blink::WebInputEvent::AltKey : 0);
 }
 
-int GetClickCount(int flags) {
-  if (flags & mojo::MOUSE_EVENT_FLAGS_IS_TRIPLE_CLICK)
-    return 3;
-  else if (flags & mojo::MOUSE_EVENT_FLAGS_IS_DOUBLE_CLICK)
-    return 2;
-
-  return 1;
-}
-
-blink::WebFloatPoint ConvertPoint(const mojo::Point& point,
-                                  float device_pixel_ratio) {
-  return blink::WebFloatPoint(point.x / device_pixel_ratio,
-                              point.y / device_pixel_ratio);
-}
-
-scoped_ptr<blink::WebInputEvent> BuildWebTouchEvent(const mojo::EventPtr& event,
-                                                    float device_pixel_ratio) {
-  scoped_ptr<blink::WebTouchEvent> web_event(new blink::WebTouchEvent);
+scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
+    const mojo::EventPtr& event, float device_pixel_ratio) {
+  scoped_ptr<blink::WebPointerEvent> web_event(new blink::WebPointerEvent);
 
   web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
   web_event->timeStampSeconds =
       base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
 
-  web_event->touchesLength = 1;
-  web_event->changedTouchesLength = 1;
-  web_event->targetTouchesLength = 1;
-
-  blink::WebTouchPoint touch;
-
   switch (event->action) {
-    case mojo::EVENT_TYPE_TOUCH_RELEASED:
-      web_event->type = blink::WebInputEvent::TouchEnd;
-      touch.state = blink::WebTouchPoint::StateReleased;
-      break;
     case mojo::EVENT_TYPE_TOUCH_PRESSED:
-      web_event->type = blink::WebInputEvent::TouchStart;
-      touch.state = blink::WebTouchPoint::StatePressed;
+    case mojo::EVENT_TYPE_MOUSE_PRESSED:
+      web_event->type = blink::WebInputEvent::PointerDown;
       break;
     case mojo::EVENT_TYPE_TOUCH_MOVED:
-      web_event->type = blink::WebInputEvent::TouchMove;
-      touch.state = blink::WebTouchPoint::StateMoved;
+    case mojo::EVENT_TYPE_MOUSE_DRAGGED:
+      web_event->type = blink::WebInputEvent::PointerMove;
+      break;
+    case mojo::EVENT_TYPE_TOUCH_RELEASED:
+    case mojo::EVENT_TYPE_MOUSE_RELEASED:
+      web_event->type = blink::WebInputEvent::PointerUp;
       break;
     case mojo::EVENT_TYPE_TOUCH_CANCELLED:
-      web_event->type = blink::WebInputEvent::TouchCancel;
-      touch.state = blink::WebTouchPoint::StateCancelled;
+    case mojo::EVENT_TYPE_MOUSE_EXITED:
+      web_event->type = blink::WebInputEvent::PointerCancel;
       break;
     default:
       NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
       break;
   }
 
-  touch.id = event->touch_data->pointer_id;
-
-  touch.position =
-      ConvertPoint(*event->location_data->in_view_location, device_pixel_ratio);
-  if (event->location_data->screen_location) {
-    touch.screenPosition = ConvertPoint(*event->location_data->screen_location,
-                                        device_pixel_ratio);
+  switch (event->action) {
+    case mojo::EVENT_TYPE_TOUCH_CANCELLED:
+    case mojo::EVENT_TYPE_TOUCH_MOVED:
+    case mojo::EVENT_TYPE_TOUCH_PRESSED:
+    case mojo::EVENT_TYPE_TOUCH_RELEASED:
+      web_event->kind = blink::WebPointerEvent::Touch;
+      break;
+    case mojo::EVENT_TYPE_MOUSE_DRAGGED:
+    case mojo::EVENT_TYPE_MOUSE_EXITED:
+    case mojo::EVENT_TYPE_MOUSE_PRESSED:
+    case mojo::EVENT_TYPE_MOUSE_RELEASED:
+      web_event->kind = blink::WebPointerEvent::Mouse;
+      break;
+    default:
+      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
+      break;
   }
 
-  if (web_event->touchesLength)
-    web_event->touches[0] = touch;
-  if (web_event->changedTouchesLength)
-    web_event->changedTouches[0] = touch;
-  if (web_event->targetTouchesLength)
-    web_event->targetTouches[0] = touch;
+  if (event->touch_data)
+    web_event->pointer = event->touch_data->pointer_id;
 
-  web_event->cancelable = true;
+  const auto& location = event->location_data->in_view_location;
+  web_event->x = location->x / device_pixel_ratio;
+  web_event->y = location->y / device_pixel_ratio;
 
   return web_event.Pass();
 }
@@ -208,62 +194,6 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
   return web_event.Pass();
 }
 
-scoped_ptr<blink::WebInputEvent> BuildWebMouseEvent(const mojo::EventPtr& event,
-                                                    float device_pixel_ratio) {
-  scoped_ptr<blink::WebMouseEvent> web_event(new blink::WebMouseEvent);
-  web_event->x = event->location_data->in_view_location->x / device_pixel_ratio;
-  web_event->y = event->location_data->in_view_location->y / device_pixel_ratio;
-
-  // TODO(erg): Remove this if check once we can rely on screen_location
-  // actually being passed to us. As written today, getting the screen
-  // location from ui::Event objects can only be done by querying the
-  // underlying native events, so all synthesized events don't have screen
-  // locations.
-  if (!event->location_data->screen_location.is_null()) {
-    web_event->globalX =
-        event->location_data->screen_location->x / device_pixel_ratio;
-    web_event->globalY =
-        event->location_data->screen_location->y / device_pixel_ratio;
-  }
-
-  web_event->modifiers = EventFlagsToWebEventModifiers(event->flags);
-  web_event->timeStampSeconds =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
-
-  web_event->button = blink::WebMouseEvent::ButtonNone;
-  if (event->flags & mojo::EVENT_FLAGS_LEFT_MOUSE_BUTTON)
-    web_event->button = blink::WebMouseEvent::ButtonLeft;
-  if (event->flags & mojo::EVENT_FLAGS_MIDDLE_MOUSE_BUTTON)
-    web_event->button = blink::WebMouseEvent::ButtonMiddle;
-  if (event->flags & mojo::EVENT_FLAGS_RIGHT_MOUSE_BUTTON)
-    web_event->button = blink::WebMouseEvent::ButtonRight;
-
-  switch (event->action) {
-    case mojo::EVENT_TYPE_MOUSE_PRESSED:
-      web_event->type = blink::WebInputEvent::MouseDown;
-      break;
-    case mojo::EVENT_TYPE_MOUSE_RELEASED:
-      web_event->type = blink::WebInputEvent::MouseUp;
-      break;
-    case mojo::EVENT_TYPE_MOUSE_ENTERED:
-      web_event->type = blink::WebInputEvent::MouseLeave;
-      web_event->button = blink::WebMouseEvent::ButtonNone;
-      break;
-    case mojo::EVENT_TYPE_MOUSE_EXITED:
-    case mojo::EVENT_TYPE_MOUSE_MOVED:
-    case mojo::EVENT_TYPE_MOUSE_DRAGGED:
-      web_event->type = blink::WebInputEvent::MouseMove;
-      break;
-    default:
-      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
-      break;
-  }
-
-  web_event->clickCount = GetClickCount(event->flags);
-
-  return web_event.Pass();
-}
-
 scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
     const mojo::EventPtr& event,
     float device_pixel_ratio) {
@@ -341,8 +271,12 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
   if (event->action == mojo::EVENT_TYPE_TOUCH_RELEASED ||
       event->action == mojo::EVENT_TYPE_TOUCH_PRESSED ||
       event->action == mojo::EVENT_TYPE_TOUCH_MOVED ||
-      event->action == mojo::EVENT_TYPE_TOUCH_CANCELLED) {
-    return BuildWebTouchEvent(event, device_pixel_ratio);
+      event->action == mojo::EVENT_TYPE_TOUCH_CANCELLED ||
+      event->action == mojo::EVENT_TYPE_MOUSE_DRAGGED ||
+      event->action == mojo::EVENT_TYPE_MOUSE_EXITED ||
+      event->action == mojo::EVENT_TYPE_MOUSE_PRESSED ||
+      event->action == mojo::EVENT_TYPE_MOUSE_RELEASED) {
+    return BuildWebPointerEvent(event, device_pixel_ratio);
   } else if (event->action == mojo::EVENT_TYPE_GESTURE_SCROLL_BEGIN ||
              event->action == mojo::EVENT_TYPE_GESTURE_SCROLL_END ||
              event->action == mojo::EVENT_TYPE_GESTURE_SCROLL_UPDATE ||
@@ -365,13 +299,6 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
              event->action == mojo::EVENT_TYPE_SCROLL_FLING_START ||
              event->action == mojo::EVENT_TYPE_SCROLL_FLING_CANCEL) {
     return BuildWebGestureEvent(event, device_pixel_ratio);
-  } else if (event->action == mojo::EVENT_TYPE_MOUSE_PRESSED ||
-             event->action == mojo::EVENT_TYPE_MOUSE_RELEASED ||
-             event->action == mojo::EVENT_TYPE_MOUSE_ENTERED ||
-             event->action == mojo::EVENT_TYPE_MOUSE_EXITED ||
-             event->action == mojo::EVENT_TYPE_MOUSE_MOVED ||
-             event->action == mojo::EVENT_TYPE_MOUSE_DRAGGED) {
-    return BuildWebMouseEvent(event, device_pixel_ratio);
   } else if ((event->action == mojo::EVENT_TYPE_KEY_PRESSED ||
               event->action == mojo::EVENT_TYPE_KEY_RELEASED) &&
              event->key_data) {

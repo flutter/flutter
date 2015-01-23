@@ -8,9 +8,9 @@
 <sky-element
     name="sky-button"
     attributes="highlight:boolean"
-    on-mousedown="handleMouseDown"
-    on-mouseup="handleMouseUp"
-    on-mouseout="handleMouseOut">
+    on-pointerdown="handlePointerDown"
+    on-pointerup="handlePointerUp"
+    on-pointercancel="handlePointerCancel">
 <template>
   <style>
     :host {
@@ -35,13 +35,13 @@ module.exports = class extends SkyElement {
 
     this.tabIndex = 0; // Make focusable.
   }
-  handleMouseDown() {
+  handlePointerDown() {
     this.highlight = true;
   }
-  handleMouseUp() {
+  handlePointerUp() {
     this.highlight = false;
   }
-  handleMouseOut() {
+  handlePointerCancel() {
     this.highlight = false;
   }
 }.register();

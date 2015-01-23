@@ -53,6 +53,7 @@ namespace blink {
     class IntPoint;
     class IntSize;
     class MojoLoader;
+    class NewEventHandler;
     class Node;
     class Range;
     class RenderView;
@@ -89,6 +90,7 @@ namespace blink {
 
         Editor& editor() const;
         EventHandler& eventHandler() const;
+        NewEventHandler& newEventHandler() const;
         MojoLoader& mojoLoader() const { return *m_mojoLoader; }
         FrameSelection& selection() const;
         InputMethodController& inputMethodController() const;
@@ -132,6 +134,7 @@ namespace blink {
         const OwnPtr<SpellChecker> m_spellChecker;
         const OwnPtr<FrameSelection> m_selection;
         const OwnPtr<EventHandler> m_eventHandler;
+        const OwnPtr<NewEventHandler> m_newEventHandler;
         const OwnPtr<FrameConsole> m_console;
         OwnPtr<InputMethodController> m_inputMethodController;
     };
@@ -175,6 +178,12 @@ namespace blink {
     {
         ASSERT(m_eventHandler);
         return *m_eventHandler;
+    }
+
+    inline NewEventHandler& LocalFrame::newEventHandler() const
+    {
+        ASSERT(m_newEventHandler);
+        return *m_newEventHandler;
     }
 
     DEFINE_TYPE_CASTS(LocalFrame, Frame, localFrame, true, true);

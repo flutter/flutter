@@ -48,6 +48,7 @@
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/frame/NewEventHandler.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLImportElement.h"
 #include "sky/engine/core/html/ime/InputMethodContext.h"
@@ -601,6 +602,11 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
 
     TemporaryChange<const WebInputEvent*> currentEventChange(m_currentInputEvent, &inputEvent);
+
+    if (WebInputEvent::isPointerEventType(inputEvent.type)) {
+        const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
+        return m_page->mainFrame()->newEventHandler().handlePointerEvent(event);
+    }
 
     if (m_mouseCaptureNode && WebInputEvent::isMouseEventType(inputEvent.type)) {
         TRACE_EVENT1("input", "captured mouse event", "type", inputEvent.type);

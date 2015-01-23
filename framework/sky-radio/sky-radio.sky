@@ -8,7 +8,7 @@
 <sky-element
     name="sky-radio"
     attributes="selected:boolean, group:string"
-    on-mouseup="handleMouseUp">
+    on-click="handleClick">
 <template>
   <style>
     :host {
@@ -97,7 +97,7 @@ module.exports = class extends SkyButton {
     if (this.selected && this.controller)
       this.controller.takeSelectionFromGroup(this);
   }
-  handleMouseUp() {
+  handleClick() {
     this.selected = true;
   }
 }.register();

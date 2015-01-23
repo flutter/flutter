@@ -44,6 +44,7 @@
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
+#include "sky/engine/core/frame/NewEventHandler.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
@@ -72,6 +73,7 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     , m_spellChecker(SpellChecker::create(*this))
     , m_selection(FrameSelection::create(this))
     , m_eventHandler(adoptPtr(new EventHandler(this)))
+    , m_newEventHandler(adoptPtr(new NewEventHandler(*this)))
     , m_console(FrameConsole::create(*this))
     , m_inputMethodController(InputMethodController::create(*this))
 {
