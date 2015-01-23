@@ -308,20 +308,6 @@ void WebLocalFrameImpl::load(const WebURL& url, mojo::ScopedDataPipeConsumerHand
     frame()->mojoLoader().load(url, responseStream.Pass());
 }
 
-void WebLocalFrameImpl::setReferrerForRequest(WebURLRequest& request, const WebURL& referrerURL)
-{
-    String referrer = referrerURL.isEmpty() ? frame()->document()->outgoingReferrer() : String(referrerURL.spec().utf16());
-    referrer = SecurityPolicy::generateReferrerHeader(frame()->document()->referrerPolicy(), request.url(), referrer);
-    if (referrer.isEmpty())
-        return;
-    request.setHTTPReferrer(referrer, static_cast<WebReferrerPolicy>(frame()->document()->referrerPolicy()));
-}
-
-unsigned WebLocalFrameImpl::unloadListenerCount() const
-{
-    return frame()->domWindow()->pendingUnloadEventListeners();
-}
-
 void WebLocalFrameImpl::replaceSelection(const WebString& text)
 {
     bool selectReplacement = false;

@@ -79,8 +79,6 @@ public:
         v8::Handle<v8::Value> argv[]) override;
     virtual v8::Local<v8::Context> mainWorldScriptContext() const override;
     virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle);
-    virtual void setReferrerForRequest(WebURLRequest&, const WebURL& referrer) override;
-    virtual unsigned unloadListenerCount() const override;
     virtual void replaceSelection(const WebString&) override;
     virtual void insertText(const WebString&) override;
     virtual void setMarkedText(const WebString&, unsigned location, unsigned length) override;

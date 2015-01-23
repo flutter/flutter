@@ -155,16 +155,6 @@ public:
 
     virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle) = 0;
 
-    // Sets the referrer for the given request to be the specified URL or
-    // if that is null, then it sets the referrer to the referrer that the
-    // frame would use for subresources.  NOTE: This method also filters
-    // out invalid referrers (e.g., it is invalid to send a HTTPS URL as
-    // the referrer for a HTTP request).
-    virtual void setReferrerForRequest(WebURLRequest&, const WebURL&) = 0;
-
-    // Returns the number of registered unload listeners.
-    virtual unsigned unloadListenerCount() const = 0;
-
 
     // Editing -------------------------------------------------------------
 
