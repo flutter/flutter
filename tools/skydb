@@ -40,6 +40,7 @@ DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/example
 
 ANDROID_PACKAGE = "org.chromium.mojo.shell"
 ANDROID_ACTIVITY = "%s/.MojoShellActivity" % ANDROID_PACKAGE
+ANDROID_APK_NAME = 'MojoShell.apk'
 CACHE_LINKS_PATH = '/tmp/mojo_cache_links'
 SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs'
 
@@ -195,6 +196,11 @@ class SkyDebugger(object):
             # Pray to the build/android gods in their misspelled tongue.
             constants.SetOutputDirectort(self.paths.build_dir)
 
+            # We could make installing conditional on an argument.
+            apk_path = os.path.join(self.paths.build_dir, 'apks',
+                ANDROID_APK_NAME)
+            subprocess.check_call(['adb', 'install', '-r', apk_path])
+
             device = self._connect_to_device()
             self.pids['device_serial'] = device.GetDevice()
 
@@ -311,8 +317,6 @@ class SkyDebugger(object):
             subprocess.call(['adb', 'forward', '--remove', port_string])
         self.pids = {} # Clear out our pid file.
 
-        self._kill_if_exists('mojo_cache_linker_pid', 'mojo cache linker')
-
     def load_command(self, args):
         if not urlparse.urlparse(args.url_or_path).scheme:
             # The load happens on the remote device, use the remote port.
@@ -425,29 +429,6 @@ class SkyDebugger(object):
         ]
         subprocess.call(['adb', 'logcat', '-d', '-s'] + TAGS)
 
-    def _start_mojo_cache_linker(self, links_path):
-        self._kill_if_exists('mojo_cache_linker_pid', 'mojo cache linker')
-
-        if not os.path.exists(links_path):
-            os.makedirs(links_path)
-        shell_link_path = os.path.join(links_path, 'libmojo_shell.so')
-        if os.path.lexists(shell_link_path):
-            os.unlink(shell_link_path)
-        os.symlink(self.paths.mojo_shell_path, shell_link_path)
-
-        logcat_cmd = ['adb', 'logcat']
-        logcat = subprocess.Popen(logcat_cmd, stdout=subprocess.PIPE)
-
-        mojo_cache_linker_path = os.path.join(
-            self.paths.sky_tools_directory, 'mojo_cache_linker.py')
-        cache_linker_cmd = [
-            mojo_cache_linker_path,
-            links_path,
-            self.pids['build_dir'],
-            'http://localhost:%s' % self.pids['remote_sky_server_port']
-        ]
-        return subprocess.Popen(cache_linker_cmd, stdin=logcat.stdout).pid
-
     def _pull_system_libraries(self, system_libs_root):
         # Pull down the system libraries this pid has already mapped in.
         # TODO(eseidel): This does not handle dynamic loads.
@@ -466,30 +447,45 @@ class SkyDebugger(object):
             '-type', 'd',
         ]).strip().split('\n')
 
+    def _add_android_library_links(self, links_path):
+        # TODO(eseidel): This might not match mojo_shell on the device?
+        # TODO(eseidel): Should we pass libmojo_shell.so as 'file' to gdb?
+        shell_link_path = os.path.join(links_path, 'libmojo_shell.so')
+        if os.path.lexists(shell_link_path):
+            os.unlink(shell_link_path)
+        os.symlink(self.paths.mojo_shell_path, shell_link_path)
 
     def gdb_attach_command(self, args):
         self.paths = self._create_paths_for_build_dir(self.pids['build_dir'])
 
-        symbol_search_paths = [self.pids['build_dir']]
+        if not os.path.exists(CACHE_LINKS_PATH):
+            os.makedirs(CACHE_LINKS_PATH)
+        cache_linker_path = os.path.join(
+             self.paths.sky_tools_directory, 'mojo_cache_linker.py')
+        subprocess.check_call([
+            cache_linker_path, CACHE_LINKS_PATH, self.paths.build_dir])
+
+        symbol_search_paths = [
+            self.pids['build_dir'],
+            CACHE_LINKS_PATH,
+        ]
         gdb_path = '/usr/bin/gdb'
 
-        init_commands = [
-            'file %s' % self.paths.mojo_shell_path,
+        eval_commands = [
             'directory %s' % self.paths.src_root,
+            'file %s' % self.paths.mojo_shell_path,
             'target remote localhost:%s' % GDB_PORT,
         ]
 
         # A bunch of extra work is needed for android:
         if 'remote_sky_server_port' in self.pids:
-            pid = self._start_mojo_cache_linker(CACHE_LINKS_PATH)
-            self.pids['mojo_cache_linker_pid'] = pid
+            self._add_android_library_links(CACHE_LINKS_PATH)
 
             system_lib_dirs = self._pull_system_libraries(SYSTEM_LIBS_ROOT_PATH)
-            init_commands.append(
+            eval_commands.append(
                 'set solib-absolute-prefix %s' % SYSTEM_LIBS_ROOT_PATH)
 
             symbol_search_paths = system_lib_dirs + symbol_search_paths
-            symbol_search_paths.append(CACHE_LINKS_PATH)
 
             # TODO(eseidel): We need to look up the toolchain somehow?
             gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
@@ -497,12 +493,13 @@ class SkyDebugger(object):
                 'bin/arm-linux-androideabi-gdb')
 
         # Set solib-search-path after letting android modify symbol_search_paths
-        init_commands.append(
+        eval_commands.append(
             'set solib-search-path %s' % ':'.join(symbol_search_paths))
 
-        exec_command = [gdb_path]
-        for command in init_commands:
+        exec_command = ['/usr/bin/strace', '-o', 'trace.txt', gdb_path]
+        for command in eval_commands:
             exec_command += ['--eval-command', command]
+
         print " ".join(exec_command)
 
         # Write out our pid file before we exec ourselves.

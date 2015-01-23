@@ -6,59 +6,59 @@
 import argparse
 import logging
 import os
-import re
 import sys
+import subprocess
 
-# TODO(eseidel): This should be shared with tools/android_stack_parser/stack
-# TODO(eseidel): This could be replaced by using build-ids on Android
-# TODO(eseidel): mojo_shell should write out a cache mapping file.
+# TODO(eseidel): Share logic with tools/android_stack_parser/stack
 def main():
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(
-        description='Watches mojo_shell logcat output and builds a directory '
-        'of symlinks to symboled binaries for seen cache names.')
+        description='Builds a directory of app_id symlinks to symbols'
+        ' to match expected dlopen names from mojo_shell\'s NetworkLoader.')
     parser.add_argument('links_dir', type=str)
-    parser.add_argument('symbols_dir', type=str)
-    parser.add_argument('base_url', type=str)
+    parser.add_argument('build_dir', type=str)
     args = parser.parse_args()
-
-    regex = re.compile('Caching mojo app (?P<url>\S+) at (?P<path>\S+)')
 
     if not os.path.isdir(args.links_dir):
         logging.fatal('links_dir: %s is not a directory' % args.links_dir)
         sys.exit(1)
 
-    for line in sys.stdin:
-        result = regex.search(line)
-        if not result:
+    for name in os.listdir(args.build_dir):
+        path = os.path.join(args.build_dir, name)
+        if not os.path.isfile(path):
             continue
 
-        url = result.group('url')
-        if not url.startswith(args.base_url):
-            logging.debug('%s does not match base %s' % (url, args.base_url))
-            continue
-        full_name = os.path.basename(url)
-        name, ext = os.path.splitext(full_name)
-        if ext != '.mojo':
-            logging.debug('%s is not a .mojo library' % url)
+        # md5sum is slow, so only bother for suffixes we care about:
+        basename, ext = os.path.splitext(name)
+        if ext not in ('', '.mojo', '.so'):
             continue
 
-        symboled_name = 'lib%s_library.so' % name
-        cache_link_path = os.path.join(args.links_dir,
-            os.path.basename(result.group('path')))
-        symboled_path = os.path.realpath(
-            os.path.join(args.symbols_dir, symboled_name))
-        if not os.path.isfile(symboled_path):
-            logging.warn('symboled path %s does not exist' % symboled_path)
+        # Ignore ninja's dot-files.
+        if basename.startswith('.'):
             continue
 
-        print "%s -> %s" % (cache_link_path, symboled_path)
+        # Example output:
+        # f82a3551478a9a0e010adccd675053b9 png_viewer.mojo
+        md5 = subprocess.check_output(['md5sum', path]).strip().split()[0]
+        link_path = os.path.join(args.links_dir, '%s.mojo' % md5)
 
-        if os.path.lexists(cache_link_path):
-            logging.debug('link already exists %s, replacing' % symboled_path)
-            os.unlink(cache_link_path)
+        lib_path = os.path.realpath(os.path.join(args.build_dir, name))
 
-        os.symlink(symboled_path, cache_link_path)
+        # On android foo.mojo is stripped, but libfoo_library.so is not.
+        if ext == '.mojo':
+            symboled_name = 'lib%s_library.so' % basename
+            symboled_path = os.path.realpath(
+                os.path.join(args.build_dir, symboled_name))
+            if os.path.exists(symboled_path):
+                lib_path = symboled_path
+
+        print "%s -> %s" % (link_path, lib_path)
+
+        if os.path.lexists(link_path):
+            logging.debug('link already exists %s, replacing' % lib_path)
+            os.unlink(link_path)
+
+        os.symlink(lib_path, link_path)
 
 if __name__ == '__main__':
     main()
