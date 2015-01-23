@@ -1,5 +1,0 @@
-Running 1 tests
-ok 1 top should amimate from 0 to 100px
-1 tests
-1 pass
-0 fail
