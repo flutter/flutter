@@ -341,6 +341,8 @@ public:
 
     void updateHoverActiveState(const HitTestRequest&, Element*, const PlatformMouseEvent* = 0);
 
+    void scheduleVisualUpdate();
+
     void scheduleRenderTreeUpdateIfNeeded();
 
     void attachRange(Range*);

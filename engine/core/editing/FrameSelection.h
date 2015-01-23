@@ -168,7 +168,6 @@ public:
     void updateAppearance(ResetCaretBlinkOption = None);
     void setCaretVisible(bool caretIsVisible) { setCaretVisibility(caretIsVisible ? Visible : Hidden); }
     void setCaretRectNeedsUpdate();
-    void scheduleVisualUpdate() const;
     void paintCaret(GraphicsContext*, const LayoutPoint&, const LayoutRect& clipRect);
     bool ShouldPaintCaretForTesting() const { return m_shouldPaintCaret; }
 
@@ -232,7 +231,6 @@ private:
     LayoutUnit lineDirectionPointForBlockDirectionNavigation(EPositionType);
 
     void notifyAccessibilityForSelectionChange();
-    void notifyCompositorForSelectionChange();
 
     void focusedOrActiveStateChanged();
 

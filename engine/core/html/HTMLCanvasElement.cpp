@@ -278,7 +278,7 @@ void HTMLCanvasElement::reset()
     if (RenderObject* renderer = this->renderer()) {
         if (renderer->isCanvas()) {
             if (hadImageBuffer)
-                renderer->scheduleVisualUpdate();
+                document().scheduleVisualUpdate();
         }
     }
 

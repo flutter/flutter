@@ -1938,7 +1938,7 @@ void RenderObject::imageChanged(ImageResource* image, const IntRect* rect)
 void RenderObject::imageChanged(WrappedImagePtr, const IntRect*)
 {
     if (parent())
-        scheduleVisualUpdate();
+        document().scheduleVisualUpdate();
 }
 
 Element* RenderObject::offsetParent() const
@@ -2044,11 +2044,6 @@ bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const
 bool RenderObject::isRelayoutBoundaryForInspector() const
 {
     return objectIsRelayoutBoundary(this);
-}
-
-void RenderObject::scheduleVisualUpdate()
-{
-    frame()->page()->animator().scheduleVisualUpdate();
 }
 
 bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)

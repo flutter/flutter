@@ -948,11 +948,19 @@ void Document::scheduleRenderTreeUpdate()
     ASSERT(shouldScheduleRenderTreeUpdate());
     ASSERT(needsRenderTreeUpdate());
 
-    page()->animator().scheduleVisualUpdate();
+    scheduleVisualUpdate();
+
+    // TODO(esprehn): We should either rename this state, or change the other
+    // users of scheduleVisualUpdate() so they don't expect different states.
     m_lifecycle.ensureStateAtMost(DocumentLifecycle::VisualUpdatePending);
 
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ScheduleStyleRecalculation", TRACE_EVENT_SCOPE_PROCESS, "frame", frame());
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
+}
+
+void Document::scheduleVisualUpdate()
+{
+    page()->animator().scheduleVisualUpdate();
 }
 
 void Document::updateDistributionIfNeeded()

@@ -455,7 +455,7 @@ void FrameView::scheduleRelayout()
         return;
     m_hasPendingLayout = true;
 
-    page()->animator().scheduleVisualUpdate();
+    m_frame->document()->scheduleVisualUpdate();
     lifecycle().ensureStateAtMost(DocumentLifecycle::StyleClean);
 }
 
@@ -506,7 +506,7 @@ void FrameView::scheduleRelayoutOfSubtree(RenderObject* relayoutRoot)
         ASSERT(!m_layoutSubtreeRoot->container() || !m_layoutSubtreeRoot->container()->needsLayout());
         m_hasPendingLayout = true;
 
-        page()->animator().scheduleVisualUpdate();
+        m_frame->document()->scheduleVisualUpdate();
         lifecycle().ensureStateAtMost(DocumentLifecycle::StyleClean);
     }
     TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());

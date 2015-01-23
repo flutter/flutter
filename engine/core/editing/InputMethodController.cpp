@@ -306,7 +306,7 @@ void InputMethodController::setComposition(const String& text, const Vector<Comp
             // TODO(ojan): What was this for? Do we need it in sky since we
             // don't need to support legacy IMEs?
             if (baseNode->renderer())
-                baseNode->renderer()->scheduleVisualUpdate();
+                baseNode->document().scheduleVisualUpdate();
 
             unsigned start = std::min(baseOffset + selectionStart, extentOffset);
             unsigned end = std::min(std::max(start, baseOffset + selectionEnd), extentOffset);
@@ -344,7 +344,7 @@ void InputMethodController::setCompositionFromExistingText(const Vector<Composit
         // TODO(ojan): What was this for? Do we need it in sky since we
         // don't need to support legacy IMEs?
         if (baseNode->renderer())
-            baseNode->renderer()->scheduleVisualUpdate();
+            baseNode->document().scheduleVisualUpdate();
 
         return;
     }

@@ -649,8 +649,6 @@ public:
 
     bool isRelayoutBoundaryForInspector() const;
 
-    void scheduleVisualUpdate();
-
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }
 

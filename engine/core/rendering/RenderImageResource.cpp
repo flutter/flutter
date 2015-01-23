@@ -86,7 +86,7 @@ void RenderImageResource::resetAnimation()
 
     image()->resetAnimation();
 
-    m_renderer->scheduleVisualUpdate();
+    m_renderer->document().scheduleVisualUpdate();
 }
 
 void RenderImageResource::setContainerSizeForRenderer(const IntSize& imageContainerSize)

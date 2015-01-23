@@ -273,7 +273,7 @@ void FrameSelection::setSelection(const VisibleSelection& newSelection, SetSelec
     }
 
     notifyAccessibilityForSelectionChange();
-    notifyCompositorForSelectionChange();
+
     m_frame->domWindow()->enqueueDocumentEvent(Event::create(EventTypeNames::selectionchange));
 }
 
@@ -1317,14 +1317,6 @@ void FrameSelection::notifyAccessibilityForSelectionChange()
 {
 }
 
-void FrameSelection::notifyCompositorForSelectionChange()
-{
-    if (!RuntimeEnabledFeatures::compositedSelectionUpdatesEnabled())
-        return;
-
-    scheduleVisualUpdate();
-}
-
 void FrameSelection::focusedOrActiveStateChanged()
 {
     bool activeAndFocused = isFocusedAndActive();
@@ -1635,15 +1627,8 @@ void FrameSelection::showTreeForThis() const
 
 void FrameSelection::setCaretRectNeedsUpdate()
 {
-    scheduleVisualUpdate();
-}
-
-void FrameSelection::scheduleVisualUpdate() const
-{
-    if (!m_frame)
-        return;
-    if (Page* page = m_frame->page())
-        page->animator().scheduleVisualUpdate();
+    if (m_frame)
+        m_frame->document()->scheduleVisualUpdate();
 }
 
 }
