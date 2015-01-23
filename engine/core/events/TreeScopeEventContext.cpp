@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/events/EventPath.h"
-#include "sky/engine/core/events/TouchEventContext.h"
 
 namespace blink {
 
@@ -50,13 +49,6 @@ PassRefPtr<StaticNodeList> TreeScopeEventContext::ensureEventPath(EventPath& pat
     }
     m_eventPath = StaticNodeList::adopt(nodes);
     return m_eventPath;
-}
-
-TouchEventContext* TreeScopeEventContext::ensureTouchEventContext()
-{
-    if (!m_touchEventContext)
-        m_touchEventContext = TouchEventContext::create();
-    return m_touchEventContext.get();
 }
 
 PassRefPtr<TreeScopeEventContext> TreeScopeEventContext::create(TreeScope& treeScope)

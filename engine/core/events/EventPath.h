@@ -38,8 +38,6 @@ namespace blink {
 class Event;
 class EventTarget;
 class Node;
-class TouchEvent;
-class TouchList;
 class TreeScope;
 
 class EventPath final {
@@ -56,7 +54,6 @@ public:
     size_t size() const { return m_nodeEventContexts.size(); }
 
     void adjustForRelatedTarget(Node*, EventTarget* relatedTarget);
-    void adjustForTouchEvent(Node*, TouchEvent&);
 
     static EventTarget* eventTargetRespectingTargetRules(Node*);
 
@@ -74,8 +71,6 @@ private:
     void shrink(size_t newSize) { m_nodeEventContexts.shrink(newSize); }
     void shrinkIfNeeded(const Node* target, const EventTarget* relatedTarget);
 
-    void adjustTouchList(const Node*, const TouchList*, Vector<RawPtr<TouchList> > adjustedTouchList, const Vector<RawPtr<TreeScope> >& treeScopes);
-
     typedef HashMap<RawPtr<TreeScope>, RefPtr<TreeScopeEventContext> > TreeScopeEventContextMap;
     TreeScopeEventContext* ensureTreeScopeEventContext(Node* currentTarget, TreeScope*, TreeScopeEventContextMap&);
 
@@ -83,10 +78,6 @@ private:
 
     static void buildRelatedNodeMap(const Node*, RelatedTargetMap&);
     static EventTarget* findRelatedNode(TreeScope*, RelatedTargetMap&);
-
-#if ENABLE(ASSERT)
-    static void checkReachability(TreeScope&, TouchList&);
-#endif
 
     Vector<NodeEventContext, 64> m_nodeEventContexts;
     RawPtr<Node> m_node;

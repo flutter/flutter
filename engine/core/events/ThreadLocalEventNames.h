@@ -29,16 +29,4 @@
 #include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
-namespace blink {
-
-inline bool isTouchEventType(const AtomicString& eventType)
-{
-    return eventType == EventTypeNames::touchstart
-        || eventType == EventTypeNames::touchmove
-        || eventType == EventTypeNames::touchend
-        || eventType == EventTypeNames::touchcancel;
-}
-
-}
-
 #endif  // SKY_ENGINE_CORE_EVENTS_THREADLOCALEVENTNAMES_H_

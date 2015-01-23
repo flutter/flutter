@@ -29,12 +29,9 @@
 
 #include "gen/sky/core/EventNames.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/Touch.h"
-#include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/events/TouchEvent.h"
-#include "sky/engine/core/events/TouchEventContext.h"
+#include "sky/engine/core/events/Event.h"
 
 namespace blink {
 
@@ -272,57 +269,5 @@ void EventPath::shrinkIfNeeded(const Node* target, const EventTarget* relatedTar
         }
     }
 }
-
-void EventPath::adjustForTouchEvent(Node* node, TouchEvent& touchEvent)
-{
-    Vector<RawPtr<TouchList> > adjustedTouches;
-    Vector<RawPtr<TouchList> > adjustedTargetTouches;
-    Vector<RawPtr<TouchList> > adjustedChangedTouches;
-    Vector<RawPtr<TreeScope> > treeScopes;
-
-    for (size_t i = 0; i < m_treeScopeEventContexts.size(); ++i) {
-        TouchEventContext* touchEventContext = m_treeScopeEventContexts[i]->ensureTouchEventContext();
-        adjustedTouches.append(&touchEventContext->touches());
-        adjustedTargetTouches.append(&touchEventContext->targetTouches());
-        adjustedChangedTouches.append(&touchEventContext->changedTouches());
-        treeScopes.append(&m_treeScopeEventContexts[i]->treeScope());
-    }
-
-    adjustTouchList(node, touchEvent.touches(), adjustedTouches, treeScopes);
-    adjustTouchList(node, touchEvent.targetTouches(), adjustedTargetTouches, treeScopes);
-    adjustTouchList(node, touchEvent.changedTouches(), adjustedChangedTouches, treeScopes);
-
-#if ENABLE(ASSERT)
-    for (size_t i = 0; i < m_treeScopeEventContexts.size(); ++i) {
-        TreeScope& treeScope = m_treeScopeEventContexts[i]->treeScope();
-        TouchEventContext* touchEventContext = m_treeScopeEventContexts[i]->touchEventContext();
-        checkReachability(treeScope, touchEventContext->touches());
-        checkReachability(treeScope, touchEventContext->targetTouches());
-        checkReachability(treeScope, touchEventContext->changedTouches());
-    }
-#endif
-}
-
-void EventPath::adjustTouchList(const Node* node, const TouchList* touchList, Vector<RawPtr<TouchList> > adjustedTouchList, const Vector<RawPtr<TreeScope> >& treeScopes)
-{
-    if (!touchList)
-        return;
-    for (size_t i = 0; i < touchList->length(); ++i) {
-        const Touch& touch = *touchList->item(i);
-        RelatedTargetMap relatedNodeMap;
-        buildRelatedNodeMap(touch.target()->toNode(), relatedNodeMap);
-        for (size_t j = 0; j < treeScopes.size(); ++j) {
-            adjustedTouchList[j]->append(touch.cloneWithNewTarget(findRelatedNode(treeScopes[j], relatedNodeMap)));
-        }
-    }
-}
-
-#if ENABLE(ASSERT)
-void EventPath::checkReachability(TreeScope& treeScope, TouchList& touchList)
-{
-    for (size_t i = 0; i < touchList.length(); ++i)
-        ASSERT(touchList.item(i)->target()->toNode()->treeScope().isInclusiveOlderSiblingShadowRootOrAncestorTreeScopeOf(treeScope));
-}
-#endif
 
 } // namespace

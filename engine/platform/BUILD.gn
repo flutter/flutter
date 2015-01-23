@@ -486,8 +486,6 @@ source_set("platform") {
     "PlatformScreen.h",
     "PlatformThreadData.cpp",
     "PlatformThreadData.h",
-    "PlatformTouchEvent.h",
-    "PlatformTouchPoint.h",
     "PurgeableVector.cpp",
     "PurgeableVector.h",
     "RefCountedSupplement.h",

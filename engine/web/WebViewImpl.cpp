@@ -169,11 +169,6 @@ WebLocalFrameImpl* WebViewImpl::mainFrameImpl()
     return m_page ? WebLocalFrameImpl::fromFrame(m_page->mainFrame()) : 0;
 }
 
-bool WebViewImpl::handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event)
-{
-    return mainFrame.eventHandler().handleTouchEvent(PlatformTouchEventBuilder(mainFrame.view(), event));
-}
-
 bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
 {
     bool eventSwallowed = false;
@@ -543,14 +538,6 @@ static String inputTypeToName(WebInputEvent::Type type)
         return EventTypeNames::gesturetap;
     case WebInputEvent::GestureTapUnconfirmed:
         return EventTypeNames::gesturetapunconfirmed;
-    case WebInputEvent::TouchStart:
-        return EventTypeNames::touchstart;
-    case WebInputEvent::TouchMove:
-        return EventTypeNames::touchmove;
-    case WebInputEvent::TouchEnd:
-        return EventTypeNames::touchend;
-    case WebInputEvent::TouchCancel:
-        return EventTypeNames::touchcancel;
     default:
         return String("unknown");
     }
@@ -567,7 +554,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         return m_page->mainFrame()->newEventHandler().handlePointerEvent(event);
     }
 
-    LocalFrame* frame = m_page ? m_page->mainFrame() : nullptr;
     switch (inputEvent.type) {
     case WebInputEvent::RawKeyDown:
     case WebInputEvent::KeyDown:
@@ -592,14 +578,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     case WebInputEvent::GestureLongPress:
     case WebInputEvent::GestureLongTap:
         return handleGestureEvent(static_cast<const WebGestureEvent&>(inputEvent));
-
-    case WebInputEvent::TouchStart:
-    case WebInputEvent::TouchMove:
-    case WebInputEvent::TouchEnd:
-    case WebInputEvent::TouchCancel:
-        if (!frame || !frame->view())
-            return false;
-        return handleTouchEvent(*frame, static_cast<const WebTouchEvent&>(inputEvent));
 
     case WebInputEvent::GesturePinchBegin:
     case WebInputEvent::GesturePinchEnd:

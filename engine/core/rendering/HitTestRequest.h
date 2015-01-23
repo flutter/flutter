@@ -34,7 +34,6 @@ public:
         Release = 1 << 4,
         IgnoreClipping = 1 << 5,
         SVGClipContent = 1 << 6,
-        TouchEvent = 1 << 7,
         IgnorePointerEventsNone = 1 << 8,
     };
 
@@ -51,11 +50,7 @@ public:
     bool release() const { return m_requestType & Release; }
     bool ignoreClipping() const { return m_requestType & IgnoreClipping; }
     bool svgClipContent() const { return m_requestType & SVGClipContent; }
-    bool touchEvent() const { return m_requestType & TouchEvent; }
     bool ignorePointerEventsNone() const { return m_requestType & IgnorePointerEventsNone; }
-
-    // Convenience functions
-    bool touchMove() const { return move() && touchEvent(); }
 
     HitTestRequestType type() const { return m_requestType; }
 

@@ -72,7 +72,6 @@ class ShadowRoot;
 template <typename NodeType> class StaticNodeTypeList;
 typedef StaticNodeTypeList<Node> StaticNodeList;
 class Text;
-class TouchEvent;
 class WeakNodeMap;
 
 const int nodeStyleChangeShift = 19;
@@ -442,7 +441,6 @@ public:
 #endif
 
     bool willRespondToMouseMoveEvents();
-    bool willRespondToTouchEvents();
 
     virtual bool willRespondToMouseClickEvents();
 
@@ -473,7 +471,6 @@ public:
 
     bool dispatchKeyEvent(const PlatformKeyboardEvent&);
     bool dispatchGestureEvent(const PlatformGestureEvent&);
-    bool dispatchTouchEvent(PassRefPtr<TouchEvent>);
 
     void dispatchInputEvent();
 

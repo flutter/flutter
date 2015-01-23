@@ -115,7 +115,6 @@ public:
     virtual void setLoadWithOverviewMode(bool) = 0;
     virtual void setMainFrameClipsContent(bool) = 0;
     virtual void setMainFrameResizesAreOrientationChanges(bool) = 0;
-    virtual void setMaxTouchPoints(int) = 0;
     virtual void setMediaControlsOverlayPlayButtonEnabled(bool) = 0;
     virtual void setMinimumAccelerated2dCanvasSize(int) = 0;
     virtual void setOpenGLMultisamplingEnabled(bool) = 0;

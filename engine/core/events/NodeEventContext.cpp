@@ -27,10 +27,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/events/NodeEventContext.h"
 
-#include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/FocusEvent.h"
-#include "sky/engine/core/events/TouchEventContext.h"
 
 namespace blink {
 
@@ -45,9 +43,7 @@ NodeEventContext::NodeEventContext(PassRefPtr<Node> node, PassRefPtr<EventTarget
 
 void NodeEventContext::handleLocalEvents(Event* event) const
 {
-    if (touchEventContext()) {
-        touchEventContext()->handleLocalEvents(event);
-    } else if (relatedTarget()) {
+    if (relatedTarget()) {
         if (event->isFocusEvent())
             toFocusEvent(event)->setRelatedTarget(relatedTarget());
     }

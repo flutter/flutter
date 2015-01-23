@@ -33,7 +33,6 @@
 
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
-#include "sky/engine/platform/PlatformTouchEvent.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
@@ -41,9 +40,7 @@ namespace blink {
 class GestureEvent;
 class KeyboardEvent;
 class RenderObject;
-class TouchEvent;
 class WebKeyboardEvent;
-class WebTouchEvent;
 class WebGestureEvent;
 class Widget;
 
@@ -62,18 +59,6 @@ public:
     bool isCharacterKey() const;
 };
 
-// Converts a WebTouchPoint to a PlatformTouchPoint.
-class PlatformTouchPointBuilder : public PlatformTouchPoint {
-public:
-    PlatformTouchPointBuilder(Widget*, const WebTouchPoint&);
-};
-
-// Converts a WebTouchEvent to a PlatformTouchEvent.
-class PlatformTouchEventBuilder : public PlatformTouchEvent {
-public:
-    PlatformTouchEventBuilder(Widget*, const WebTouchEvent&);
-};
-
 // Converts a KeyboardEvent or PlatformKeyboardEvent to a
 // corresponding WebKeyboardEvent.
 // NOTE: For KeyboardEvent, this is only implemented for keydown,
@@ -83,14 +68,6 @@ class WebKeyboardEventBuilder : public WebKeyboardEvent {
 public:
     WebKeyboardEventBuilder(const KeyboardEvent&);
     WebKeyboardEventBuilder(const PlatformKeyboardEvent&);
-};
-
-// Converts a TouchEvent to a corresponding WebTouchEvent.
-// NOTE: WebTouchEvents have a cap on the number of WebTouchPoints. Any points
-// exceeding that cap will be dropped.
-class WebTouchEventBuilder : public WebTouchEvent {
-public:
-    WebTouchEventBuilder(const Widget*, const RenderObject*, const TouchEvent&);
 };
 
 // Converts GestureEvent to a corresponding WebGestureEvent.

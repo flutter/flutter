@@ -240,7 +240,6 @@ private:
     bool handleCharEvent(const WebKeyboardEvent&);
     bool handleGestureEvent(const WebGestureEvent&);
     bool handleKeyEvent(const WebKeyboardEvent&);
-    bool handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event);
 
     InputMethodContext* inputMethodContext();
 

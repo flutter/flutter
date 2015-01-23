@@ -65,12 +65,6 @@ public:
         GesturePinchEnd,
         GesturePinchUpdate,
         GestureFlingStart,
-
-        // PlatformTouchEvent
-        TouchStart,
-        TouchMove,
-        TouchEnd,
-        TouchCancel,
     };
 
     enum Modifiers {

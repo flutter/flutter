@@ -72,7 +72,6 @@
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskRunQueue.h"
 #include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
@@ -2267,40 +2266,6 @@ void Document::serviceScriptedAnimations(double monotonicAnimationStartTime)
     if (!m_scriptedAnimationController)
         return;
     m_scriptedAnimationController->serviceScriptedAnimations(monotonicAnimationStartTime);
-}
-
-PassRefPtr<Touch> Document::createTouch(LocalDOMWindow* window, EventTarget* target, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const
-{
-    // Match behavior from when these types were integers, and avoid surprises from someone explicitly
-    // passing Infinity/NaN.
-    if (!std::isfinite(pageX))
-        pageX = 0;
-    if (!std::isfinite(pageY))
-        pageY = 0;
-    if (!std::isfinite(screenX))
-        screenX = 0;
-    if (!std::isfinite(screenY))
-        screenY = 0;
-    if (!std::isfinite(radiusX))
-        radiusX = 0;
-    if (!std::isfinite(radiusY))
-        radiusY = 0;
-    if (!std::isfinite(rotationAngle))
-        rotationAngle = 0;
-    if (!std::isfinite(force))
-        force = 0;
-
-    // FIXME: It's not clear from the documentation at
-    // http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/DocumentAdditionsReference/DocumentAdditions/DocumentAdditions.html
-    // when this method should throw and nor is it by inspection of iOS behavior. It would be nice to verify any cases where it throws under iOS
-    // and implement them here. See https://bugs.webkit.org/show_bug.cgi?id=47819
-    LocalFrame* frame = window ? window->frame() : this->frame();
-    return Touch::create(frame, target, identifier, FloatPoint(screenX, screenY), FloatPoint(pageX, pageY), FloatSize(radiusX, radiusY), rotationAngle, force);
-}
-
-PassRefPtr<TouchList> Document::createTouchList(Vector<RefPtr<Touch> >& touches) const
-{
-    return TouchList::adopt(touches);
 }
 
 DocumentLoadTiming* Document::timing() const

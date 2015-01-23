@@ -61,14 +61,12 @@ class Node;
 class OptionalCursor;
 class PlatformGestureEvent;
 class PlatformKeyboardEvent;
-class PlatformTouchEvent;
 class RenderLayer;
 class RenderLayerScrollableArea;
 class RenderObject;
 class ScrollableArea;
 class Scrollbar;
 class TextEvent;
-class TouchEvent;
 class VisibleSelection;
 class Widget;
 
@@ -138,8 +136,6 @@ public:
     void focusDocumentView();
 
     void capsLockStateMayHaveChanged(); // Only called by FrameSelection
-
-    bool handleTouchEvent(const PlatformTouchEvent&);
 
     bool useHandCursor(Node*, bool isOverLink);
 
@@ -248,15 +244,6 @@ private:
     IntPoint m_mouseDownPos; // In our view's coords.
 
     RefPtr<Node> m_previousWheelScrolledNode;
-
-    // The target of each active touch point indexed by the touch ID.
-    typedef HashMap<unsigned, RefPtr<EventTarget>, DefaultHash<unsigned>::Hash, WTF::UnsignedWithZeroKeyHashTraits<unsigned> > TouchTargetMap;
-    TouchTargetMap m_targetForTouchID;
-
-    // If set, the document of the active touch sequence. Unset if no touch sequence active.
-    RefPtr<Document> m_touchSequenceDocument;
-
-    bool m_touchPressed;
 
     RefPtr<Node> m_scrollGestureHandlingNode;
     bool m_lastGestureScrollOverWidget;

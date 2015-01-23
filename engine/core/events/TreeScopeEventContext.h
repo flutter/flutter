@@ -41,7 +41,6 @@ class EventTarget;
 class Node;
 template <typename NodeType> class StaticNodeTypeList;
 typedef StaticNodeTypeList<Node> StaticNodeList;
-class TouchEventContext;
 class TreeScope;
 
 class TreeScopeEventContext final : public RefCounted<TreeScopeEventContext> {
@@ -56,9 +55,6 @@ public:
 
     EventTarget* relatedTarget() const { return m_relatedTarget.get(); }
     void setRelatedTarget(PassRefPtr<EventTarget>);
-
-    TouchEventContext* touchEventContext() const { return m_touchEventContext.get(); }
-    TouchEventContext* ensureTouchEventContext();
 
     PassRefPtr<StaticNodeList> ensureEventPath(EventPath&);
 
@@ -80,7 +76,6 @@ private:
     RefPtr<EventTarget> m_target;
     RefPtr<EventTarget> m_relatedTarget;
     RefPtr<StaticNodeList> m_eventPath;
-    RefPtr<TouchEventContext> m_touchEventContext;
 
     Vector<RawPtr<TreeScopeEventContext> > m_children;
     int m_preOrder;

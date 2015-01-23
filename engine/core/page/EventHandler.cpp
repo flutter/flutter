@@ -34,7 +34,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
-#include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -44,7 +43,6 @@
 #include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/TextEvent.h"
-#include "sky/engine/core/events/TouchEvent.h"
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -64,7 +62,6 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
-#include "sky/engine/platform/PlatformTouchEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/WindowsKeyboardCodes.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
@@ -140,7 +137,6 @@ EventHandler::EventHandler(LocalFrame* frame)
     , m_clickCount(0)
     , m_shouldOnlyFireDragOverEvent(false)
     , m_mousePositionIsUnknown(true)
-    , m_touchPressed(false)
     , m_scrollGestureHandlingNode(nullptr)
     , m_lastGestureScrollOverWidget(false)
     , m_maxMouseMovedDuration(0)
@@ -173,15 +169,12 @@ void EventHandler::clear()
     m_mousePressed = false;
     m_capturesDragging = false;
     m_previousWheelScrolledNode = nullptr;
-    m_targetForTouchID.clear();
-    m_touchSequenceDocument.clear();
     m_scrollGestureHandlingNode = nullptr;
     m_lastGestureScrollOverWidget = false;
     m_previousGestureScrolledNode = nullptr;
     m_scrollbarHandlingScrollGesture = nullptr;
     m_maxMouseMovedDuration = 0;
     m_didStartDrag = false;
-    m_touchPressed = false;
     m_mouseDownMayStartSelect = false;
     m_mouseDownMayStartDrag = false;
     m_lastShowPressTimestamp = 0;
@@ -834,23 +827,17 @@ bool EventHandler::handleGestureLongPress(const GestureEventWithHitTestResults& 
     // supplied HitTestResult), but that will require some overhaul of the touch drag-and-drop code
     // and LongPress is such a special scenario that it's unlikely to matter much in practice.
 
-#if OS(ANDROID)
-    bool shouldLongPressSelectWord = true;
-#else
-    bool shouldLongPressSelectWord = m_frame->settings() && m_frame->settings()->touchEditingEnabled();
-#endif
-    if (shouldLongPressSelectWord) {
-        IntPoint hitTestPoint = gestureEvent.position();
-        HitTestResult result = hitTestResultAtPoint(hitTestPoint);
-        Node* innerNode = result.targetNode();
-        if (!result.isLiveLink() && innerNode && (innerNode->isContentEditable() || innerNode->isTextNode())) {
-            selectClosestWordFromHitTestResult(result, DontAppendTrailingWhitespace);
-            if (m_frame->selection().isRange()) {
-                focusDocumentView();
-                return true;
-            }
+    IntPoint hitTestPoint = gestureEvent.position();
+    HitTestResult result = hitTestResultAtPoint(hitTestPoint);
+    Node* innerNode = result.targetNode();
+    if (!result.isLiveLink() && innerNode && (innerNode->isContentEditable() || innerNode->isTextNode())) {
+        selectClosestWordFromHitTestResult(result, DontAppendTrailingWhitespace);
+        if (m_frame->selection().isRange()) {
+            focusDocumentView();
+            return true;
         }
     }
+
     return true;
 }
 
@@ -1007,7 +994,7 @@ GestureEventWithHitTestResults EventHandler::targetGestureEvent(const PlatformGe
 
 HitTestRequest::HitTestRequestType EventHandler::getHitTypeForGestureType(PlatformEvent::Type type)
 {
-    HitTestRequest::HitTestRequestType hitType = HitTestRequest::TouchEvent;
+    HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly;
     switch (type) {
     case PlatformEvent::GestureShowPress:
     case PlatformEvent::GestureTapUnconfirmed:
@@ -1227,25 +1214,6 @@ void EventHandler::updateLastScrollbarUnderMouse(Scrollbar* scrollbar, bool setL
     }
 }
 
-static const AtomicString& eventNameForTouchPointState(PlatformTouchPoint::State state)
-{
-    switch (state) {
-    case PlatformTouchPoint::TouchReleased:
-        return EventTypeNames::touchend;
-    case PlatformTouchPoint::TouchCancelled:
-        return EventTypeNames::touchcancel;
-    case PlatformTouchPoint::TouchPressed:
-        return EventTypeNames::touchstart;
-    case PlatformTouchPoint::TouchMoved:
-        return EventTypeNames::touchmove;
-    case PlatformTouchPoint::TouchStationary:
-        // TouchStationary state is not converted to touch events, so fall through to assert.
-    default:
-        ASSERT_NOT_REACHED();
-        return emptyAtom;
-    }
-}
-
 HitTestResult EventHandler::hitTestResultInFrame(LocalFrame* frame, const LayoutPoint& point, HitTestRequest::HitTestRequestType hitType)
 {
     HitTestResult result(point);
@@ -1259,226 +1227,6 @@ HitTestResult EventHandler::hitTestResultInFrame(LocalFrame* frame, const Layout
     }
     frame->contentRenderer()->hitTest(HitTestRequest(hitType), result);
     return result;
-}
-
-bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
-{
-    TRACE_EVENT0("blink", "EventHandler::handleTouchEvent");
-
-    const Vector<PlatformTouchPoint>& points = event.touchPoints();
-
-    unsigned i;
-    bool freshTouchEvents = true;
-    bool allTouchReleased = true;
-    for (i = 0; i < points.size(); ++i) {
-        const PlatformTouchPoint& point = points[i];
-        if (point.state() != PlatformTouchPoint::TouchPressed)
-            freshTouchEvents = false;
-        if (point.state() != PlatformTouchPoint::TouchReleased && point.state() != PlatformTouchPoint::TouchCancelled)
-            allTouchReleased = false;
-    }
-    if (freshTouchEvents) {
-        // Ideally we'd ASSERT !m_touchSequenceDocument here since we should
-        // have cleared the active document when we saw the last release. But we
-        // have some tests that violate this, ClusterFuzz could trigger it, and
-        // there may be cases where the browser doesn't reliably release all
-        // touches. http://crbug.com/345372 tracks this.
-        m_touchSequenceDocument.clear();
-    }
-
-    ASSERT(m_frame->view());
-    if (m_touchSequenceDocument && (!m_touchSequenceDocument->frame() || !m_touchSequenceDocument->frame()->view())) {
-        // If the active touch document has no frame or view, it's probably being destroyed
-        // so we can't dispatch events.
-        return false;
-    }
-
-    // First do hit tests for any new touch points.
-    for (i = 0; i < points.size(); ++i) {
-        const PlatformTouchPoint& point = points[i];
-
-        // Touch events implicitly capture to the touched node, and don't change
-        // active/hover states themselves (Gesture events do). So we only need
-        // to hit-test on touchstart, and it can be read-only.
-        if (point.state() == PlatformTouchPoint::TouchPressed) {
-            HitTestRequest::HitTestRequestType hitType = HitTestRequest::TouchEvent | HitTestRequest::ReadOnly | HitTestRequest::Active;
-            LayoutPoint pagePoint = roundedLayoutPoint(point.pos());
-            HitTestResult result;
-            if (!m_touchSequenceDocument) {
-                result = hitTestResultAtPoint(pagePoint, hitType);
-            } else if (m_touchSequenceDocument->frame()) {
-                LayoutPoint framePoint = roundedLayoutPoint(point.pos());
-                result = hitTestResultInFrame(m_touchSequenceDocument->frame(), framePoint, hitType);
-            } else
-                continue;
-
-            Node* node = result.innerNode();
-            if (!node)
-                continue;
-
-            // Touch events should not go to text nodes
-            if (node->isTextNode())
-                node = NodeRenderingTraversal::parent(node);
-
-            if (!m_touchSequenceDocument) {
-                // Keep track of which document should receive all touch events
-                // in the active sequence. This must be a single document to
-                // ensure we don't leak Nodes between documents.
-                m_touchSequenceDocument = &(result.innerNode()->document());
-                ASSERT(m_touchSequenceDocument->frame()->view());
-            }
-
-            // Ideally we'd ASSERT(!m_targetForTouchID.contains(point.id())
-            // since we shouldn't get a touchstart for a touch that's already
-            // down. However EventSender allows this to be violated and there's
-            // some tests that take advantage of it. There may also be edge
-            // cases in the browser where this happens.
-            // See http://crbug.com/345372.
-            m_targetForTouchID.set(point.id(), node);
-
-            TouchAction effectiveTouchAction = computeEffectiveTouchAction(*node);
-            if (effectiveTouchAction != TouchActionAuto)
-                m_frame->page()->chrome().client().setTouchAction(effectiveTouchAction);
-        }
-    }
-
-    m_touchPressed = !allTouchReleased;
-
-    // If there's no document receiving touch events,  then we can skip all the
-    // rest of this work.
-    if (!m_touchSequenceDocument || !m_touchSequenceDocument->frame()) {
-        if (allTouchReleased)
-            m_touchSequenceDocument.clear();
-        return false;
-    }
-
-    // Build up the lists to use for the 'touches', 'targetTouches' and
-    // 'changedTouches' attributes in the JS event. See
-    // http://www.w3.org/TR/touch-events/#touchevent-interface for how these
-    // lists fit together.
-
-    // Holds the complete set of touches on the screen.
-    RefPtr<TouchList> touches = TouchList::create();
-
-    // A different view on the 'touches' list above, filtered and grouped by
-    // event target. Used for the 'targetTouches' list in the JS event.
-    typedef HashMap<EventTarget*, RefPtr<TouchList> > TargetTouchesHeapMap;
-    TargetTouchesHeapMap touchesByTarget;
-
-    // Array of touches per state, used to assemble the 'changedTouches' list.
-    typedef HashSet<RefPtr<EventTarget> > EventTargetSet;
-    struct {
-        // The touches corresponding to the particular change state this struct
-        // instance represents.
-        RefPtr<TouchList> m_touches;
-        // Set of targets involved in m_touches.
-        EventTargetSet m_targets;
-    } changedTouches[PlatformTouchPoint::TouchStateEnd];
-
-    for (i = 0; i < points.size(); ++i) {
-        const PlatformTouchPoint& point = points[i];
-        PlatformTouchPoint::State pointState = point.state();
-        RefPtr<EventTarget> touchTarget = nullptr;
-
-        if (pointState == PlatformTouchPoint::TouchReleased || pointState == PlatformTouchPoint::TouchCancelled) {
-            // The target should be the original target for this touch, so get
-            // it from the hashmap. As it's a release or cancel we also remove
-            // it from the map.
-            touchTarget = m_targetForTouchID.take(point.id());
-        } else {
-            // No hittest is performed on move or stationary, since the target
-            // is not allowed to change anyway.
-            touchTarget = m_targetForTouchID.get(point.id());
-        }
-
-        LocalFrame* targetFrame = 0;
-        bool knownTarget = false;
-        if (touchTarget) {
-            Document& doc = touchTarget->toNode()->document();
-            // If the target node has moved to a new document while it was being touched,
-            // we can't send events to the new document because that could leak nodes
-            // from one document to another. See http://crbug.com/394339.
-            if (&doc == m_touchSequenceDocument.get()) {
-                targetFrame = doc.frame();
-                knownTarget = true;
-            }
-        }
-        if (!knownTarget) {
-            // If we don't have a target registered for the point it means we've
-            // missed our opportunity to do a hit test for it (due to some
-            // optimization that prevented blink from ever seeing the
-            // touchstart), or that the touch started outside the active touch
-            // sequence document. We should still include the touch in the
-            // Touches list reported to the application (eg. so it can
-            // differentiate between a one and two finger gesture), but we won't
-            // actually dispatch any events for it. Set the target to the
-            // Document so that there's some valid node here. Perhaps this
-            // should really be LocalDOMWindow, but in all other cases the target of
-            // a Touch is a Node so using the window could be a breaking change.
-            // Since we know there was no handler invoked, the specific target
-            // should be completely irrelevant to the application.
-            touchTarget = m_touchSequenceDocument;
-            targetFrame = m_touchSequenceDocument->frame();
-        }
-        ASSERT(targetFrame);
-
-        RefPtr<Touch> touch = Touch::create(
-            targetFrame, touchTarget.get(), point.id(), point.screenPos(), point.pos(), point.radius(), point.rotationAngle(), point.force());
-
-        // Ensure this target's touch list exists, even if it ends up empty, so
-        // it can always be passed to TouchEvent::Create below.
-        TargetTouchesHeapMap::iterator targetTouchesIterator = touchesByTarget.find(touchTarget.get());
-        if (targetTouchesIterator == touchesByTarget.end()) {
-            touchesByTarget.set(touchTarget.get(), TouchList::create());
-            targetTouchesIterator = touchesByTarget.find(touchTarget.get());
-        }
-
-        // touches and targetTouches should only contain information about
-        // touches still on the screen, so if this point is released or
-        // cancelled it will only appear in the changedTouches list.
-        if (pointState != PlatformTouchPoint::TouchReleased && pointState != PlatformTouchPoint::TouchCancelled) {
-            touches->append(touch);
-            targetTouchesIterator->value->append(touch);
-        }
-
-        // Now build up the correct list for changedTouches.
-        // Note that  any touches that are in the TouchStationary state (e.g. if
-        // the user had several points touched but did not move them all) should
-        // never be in the changedTouches list so we do not handle them
-        // explicitly here. See https://bugs.webkit.org/show_bug.cgi?id=37609
-        // for further discussion about the TouchStationary state.
-        if (pointState != PlatformTouchPoint::TouchStationary && knownTarget) {
-            ASSERT(pointState < PlatformTouchPoint::TouchStateEnd);
-            if (!changedTouches[pointState].m_touches)
-                changedTouches[pointState].m_touches = TouchList::create();
-            changedTouches[pointState].m_touches->append(touch);
-            changedTouches[pointState].m_targets.add(touchTarget);
-        }
-    }
-    if (allTouchReleased)
-        m_touchSequenceDocument.clear();
-
-    // Now iterate the changedTouches list and m_targets within it, sending
-    // events to the targets as required.
-    bool swallowedEvent = false;
-    for (unsigned state = 0; state != PlatformTouchPoint::TouchStateEnd; ++state) {
-        if (!changedTouches[state].m_touches)
-            continue;
-
-        const AtomicString& stateName(eventNameForTouchPointState(static_cast<PlatformTouchPoint::State>(state)));
-        const EventTargetSet& targetsForState = changedTouches[state].m_targets;
-        for (EventTargetSet::const_iterator it = targetsForState.begin(); it != targetsForState.end(); ++it) {
-            EventTarget* touchEventTarget = it->get();
-            RefPtr<TouchEvent> touchEvent = TouchEvent::create(
-                touches.get(), touchesByTarget.get(touchEventTarget), changedTouches[state].m_touches.get(),
-                stateName, touchEventTarget->toNode()->document().domWindow(),
-                event.ctrlKey(), event.altKey(), event.shiftKey(), event.metaKey(), event.cancelable());
-            touchEventTarget->toNode()->dispatchTouchEvent(touchEvent.get());
-            swallowedEvent = swallowedEvent || touchEvent->defaultPrevented() || touchEvent->defaultHandled();
-        }
-    }
-
-    return swallowedEvent;
 }
 
 TouchAction EventHandler::intersectTouchAction(TouchAction action1, TouchAction action2)

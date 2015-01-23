@@ -31,11 +31,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/web/WebInputEventConversion.h"
 
-#include "sky/engine/core/dom/Touch.h"
-#include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/TouchEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/page/Page.h"
@@ -264,93 +261,6 @@ bool PlatformKeyboardEventBuilder::isCharacterKey() const
     return true;
 }
 
-inline PlatformEvent::Type toPlatformTouchEventType(const WebInputEvent::Type type)
-{
-    switch (type) {
-    case WebInputEvent::TouchStart:
-        return PlatformEvent::TouchStart;
-    case WebInputEvent::TouchMove:
-        return PlatformEvent::TouchMove;
-    case WebInputEvent::TouchEnd:
-        return PlatformEvent::TouchEnd;
-    case WebInputEvent::TouchCancel:
-        return PlatformEvent::TouchCancel;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-    return PlatformEvent::TouchStart;
-}
-
-inline PlatformTouchPoint::State toPlatformTouchPointState(const WebTouchPoint::State state)
-{
-    switch (state) {
-    case WebTouchPoint::StateReleased:
-        return PlatformTouchPoint::TouchReleased;
-    case WebTouchPoint::StatePressed:
-        return PlatformTouchPoint::TouchPressed;
-    case WebTouchPoint::StateMoved:
-        return PlatformTouchPoint::TouchMoved;
-    case WebTouchPoint::StateStationary:
-        return PlatformTouchPoint::TouchStationary;
-    case WebTouchPoint::StateCancelled:
-        return PlatformTouchPoint::TouchCancelled;
-    case WebTouchPoint::StateUndefined:
-        ASSERT_NOT_REACHED();
-    }
-    return PlatformTouchPoint::TouchReleased;
-}
-
-inline WebTouchPoint::State toWebTouchPointState(const AtomicString& type)
-{
-    if (type == EventTypeNames::touchend)
-        return WebTouchPoint::StateReleased;
-    if (type == EventTypeNames::touchcancel)
-        return WebTouchPoint::StateCancelled;
-    if (type == EventTypeNames::touchstart)
-        return WebTouchPoint::StatePressed;
-    if (type == EventTypeNames::touchmove)
-        return WebTouchPoint::StateMoved;
-    return WebTouchPoint::StateUndefined;
-}
-
-PlatformTouchPointBuilder::PlatformTouchPointBuilder(Widget* widget, const WebTouchPoint& point)
-{
-    float scale = 1.0f / widgetInputEventsScaleFactor(widget);
-    IntSize offset = widgetInputEventsOffset(widget);
-    m_id = point.id;
-    m_state = toPlatformTouchPointState(point.state);
-    FloatPoint pos = (point.position - offset).scaledBy(scale);
-    IntPoint flooredPoint = flooredIntPoint(pos);
-    // This assumes convertFromContainingView does only translations, not scales.
-    m_pos = widget->convertFromContainingView(flooredPoint) + (pos - flooredPoint);
-    m_screenPos = FloatPoint(point.screenPosition.x, point.screenPosition.y);
-    m_radius = FloatSize(point.radiusX, point.radiusY).scaledBy(scale);
-    m_rotationAngle = point.rotationAngle;
-    m_force = point.force;
-}
-
-PlatformTouchEventBuilder::PlatformTouchEventBuilder(Widget* widget, const WebTouchEvent& event)
-{
-    m_type = toPlatformTouchEventType(event.type);
-
-    m_modifiers = 0;
-    if (event.modifiers & WebInputEvent::ShiftKey)
-        m_modifiers |= PlatformEvent::ShiftKey;
-    if (event.modifiers & WebInputEvent::ControlKey)
-        m_modifiers |= PlatformEvent::CtrlKey;
-    if (event.modifiers & WebInputEvent::AltKey)
-        m_modifiers |= PlatformEvent::AltKey;
-    if (event.modifiers & WebInputEvent::MetaKey)
-        m_modifiers |= PlatformEvent::MetaKey;
-
-    m_timestamp = event.timeStampSeconds;
-
-    for (unsigned i = 0; i < event.touchesLength; ++i)
-        m_touchPoints.append(PlatformTouchPointBuilder(widget, event.touches[i]));
-
-    m_cancelable = event.cancelable;
-}
-
 static int getWebInputModifiers(const UIEventWithKeyState& event)
 {
     int modifiers = 0;
@@ -457,52 +367,6 @@ WebKeyboardEventBuilder::WebKeyboardEventBuilder(const PlatformKeyboardEvent& ev
     event.text().copyTo(text, 0, textLengthCap);
     event.unmodifiedText().copyTo(unmodifiedText, 0, textLengthCap);
     memcpy(keyIdentifier, event.keyIdentifier().ascii().data(), std::min(static_cast<unsigned>(keyIdentifierLengthCap), event.keyIdentifier().length()));
-}
-
-static void addTouchPoints(const Widget* widget, const AtomicString& touchType, TouchList* touches, WebTouchPoint* touchPoints, unsigned* touchPointsLength, const RenderObject* renderObject)
-{
-    unsigned numberOfTouches = std::min(touches->length(), static_cast<unsigned>(WebTouchEvent::touchesLengthCap));
-    for (unsigned i = 0; i < numberOfTouches; ++i) {
-        const Touch* touch = touches->item(i);
-
-        WebTouchPoint point;
-        point.id = touch->identifier();
-        point.screenPosition = touch->screenLocation();
-        point.position = convertAbsoluteLocationForRenderObjectFloat(touch->absoluteLocation(), *renderObject);
-        point.radiusX = touch->radiusX();
-        point.radiusY = touch->radiusY();
-        point.rotationAngle = touch->rotationAngle();
-        point.force = touch->force();
-        point.state = toWebTouchPointState(touchType);
-
-        touchPoints[i] = point;
-    }
-    *touchPointsLength = numberOfTouches;
-}
-
-WebTouchEventBuilder::WebTouchEventBuilder(const Widget* widget, const RenderObject* renderObject, const TouchEvent& event)
-{
-    if (event.type() == EventTypeNames::touchstart)
-        type = TouchStart;
-    else if (event.type() == EventTypeNames::touchmove)
-        type = TouchMove;
-    else if (event.type() == EventTypeNames::touchend)
-        type = TouchEnd;
-    else if (event.type() == EventTypeNames::touchcancel)
-        type = TouchCancel;
-    else {
-        ASSERT_NOT_REACHED();
-        type = Undefined;
-        return;
-    }
-
-    modifiers = getWebInputModifiers(event);
-    timeStampSeconds = event.timeStamp() / millisPerSecond;
-    cancelable = event.cancelable();
-
-    addTouchPoints(widget, event.type(), event.touches(), touches, &touchesLength, renderObject);
-    addTouchPoints(widget, event.type(), event.changedTouches(), changedTouches, &changedTouchesLength, renderObject);
-    addTouchPoints(widget, event.type(), event.targetTouches(), targetTouches, &targetTouchesLength, renderObject);
 }
 
 WebGestureEventBuilder::WebGestureEventBuilder(const Widget* widget, const RenderObject* renderObject, const GestureEvent& event)

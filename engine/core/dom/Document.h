@@ -117,8 +117,6 @@ class Settings;
 class StyleEngine;
 class StyleResolver;
 class Text;
-class Touch;
-class TouchList;
 class WebGLRenderingContext;
 
 struct AnnotatedRegionValue;
@@ -470,9 +468,6 @@ public:
     void decrementLoadEventDelayCount();
     void checkLoadEventSoon();
     bool isDelayingLoadEvent();
-
-    PassRefPtr<Touch> createTouch(LocalDOMWindow*, EventTarget*, int identifier, double pageX, double pageY, double screenX, double screenY, double radiusX, double radiusY, float rotationAngle, float force) const;
-    PassRefPtr<TouchList> createTouchList(Vector<RefPtr<Touch> >&) const;
 
     int requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelAnimationFrame(int id);

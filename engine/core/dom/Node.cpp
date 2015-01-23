@@ -62,7 +62,6 @@
 #include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/TextEvent.h"
-#include "sky/engine/core/events/TouchEvent.h"
 #include "sky/engine/core/events/UIEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -1453,8 +1452,6 @@ void Node::dispatchScopedEventDispatchMediator(PassRefPtr<EventDispatchMediator>
 
 bool Node::dispatchEvent(PassRefPtr<Event> event)
 {
-    if (event->isTouchEvent())
-        return dispatchTouchEvent(static_pointer_cast<TouchEvent>(event));
     return EventDispatcher::dispatchEvent(this, EventDispatchMediator::create(event));
 }
 
@@ -1478,11 +1475,6 @@ bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
     if (!gestureEvent)
         return false;
     return EventDispatcher::dispatchEvent(this, GestureEventDispatchMediator::create(gestureEvent));
-}
-
-bool Node::dispatchTouchEvent(PassRefPtr<TouchEvent> event)
-{
-    return EventDispatcher::dispatchEvent(this, TouchEventDispatchMediator::create(event));
 }
 
 void Node::dispatchInputEvent()
@@ -1522,11 +1514,6 @@ bool Node::willRespondToMouseMoveEvents()
 bool Node::willRespondToMouseClickEvents()
 {
     return isContentEditable(UserSelectAllIsAlwaysNonEditable) || hasEventListeners(EventTypeNames::mouseup) || hasEventListeners(EventTypeNames::mousedown) || hasEventListeners(EventTypeNames::click) || hasEventListeners(EventTypeNames::DOMActivate);
-}
-
-bool Node::willRespondToTouchEvents()
-{
-    return hasEventListeners(EventTypeNames::touchstart) || hasEventListeners(EventTypeNames::touchmove) || hasEventListeners(EventTypeNames::touchcancel) || hasEventListeners(EventTypeNames::touchend);
 }
 
 #if !ENABLE(OILPAN)

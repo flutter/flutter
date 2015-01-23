@@ -79,7 +79,6 @@ public:
     virtual void setLoadWithOverviewMode(bool) override;
     virtual void setMainFrameClipsContent(bool) override;
     virtual void setMainFrameResizesAreOrientationChanges(bool) override;
-    virtual void setMaxTouchPoints(int) override;
     virtual void setMediaControlsOverlayPlayButtonEnabled(bool) override;
     virtual void setMinimumAccelerated2dCanvasSize(int) override;
     virtual void setOpenGLMultisamplingEnabled(bool) override;

@@ -35,7 +35,6 @@
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebGestureDevice.h"
 #include "sky/engine/public/platform/WebRect.h"
-#include "sky/engine/public/platform/WebTouchPoint.h"
 
 namespace blink {
 
@@ -123,16 +122,6 @@ public:
         GesturePinchEnd,
         GesturePinchUpdate,
         GestureTypeLast = GesturePinchUpdate,
-
-        // WebTouchEvent
-        TouchStart,
-        TouchTypeFirst = TouchStart,
-        TouchMove,
-        TouchEnd,
-        TouchCancel,
-        TouchTypeLast = TouchCancel,
-
-        TypeLast = TouchTypeLast
     };
 
     enum Modifiers {
@@ -186,12 +175,6 @@ public:
     static bool isKeyboardEventType(int type)
     {
         return KeyboardTypeFirst <= type && type <= KeyboardTypeLast;
-    }
-
-    // Returns true if the WebInputEvent |type| is a touch event.
-    static bool isTouchEventType(int type)
-    {
-        return TouchTypeFirst <= type && type <= TouchTypeLast;
     }
 
     // Returns true if the WebInputEvent is a gesture event.
@@ -382,41 +365,6 @@ public:
         , globalY(0)
     {
         memset(&data, 0, sizeof(data));
-    }
-};
-
-// WebTouchEvent --------------------------------------------------------------
-
-class WebTouchEvent : public WebInputEvent {
-public:
-    // Maximum number of simultaneous touches supported on
-    // Ash/Aura.
-    enum { touchesLengthCap = 12 };
-
-    unsigned touchesLength;
-    // List of all touches which are currently down.
-    WebTouchPoint touches[touchesLengthCap];
-
-    unsigned changedTouchesLength;
-    // List of all touches whose state has changed since the last WebTouchEvent
-    WebTouchPoint changedTouches[touchesLengthCap];
-
-    unsigned targetTouchesLength;
-    // List of all touches which are currently down and are targeting the event recipient.
-    WebTouchPoint targetTouches[touchesLengthCap];
-
-    // Whether the event can be canceled (with preventDefault). If true then the browser
-    // must wait for an ACK for this event. If false then no ACK IPC is expected.
-    // See comment at the top for why an int is used here instead of a bool.
-    int cancelable;
-
-    WebTouchEvent()
-        : WebInputEvent(sizeof(WebTouchEvent))
-        , touchesLength(0)
-        , changedTouchesLength(0)
-        , targetTouchesLength(0)
-        , cancelable(true)
-    {
     }
 };
 

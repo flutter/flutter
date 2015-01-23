@@ -5,5 +5,3 @@ KeyboardEvents ImplementedAs=KeyboardEvent
 OrientationEvent ImplementedAs=Event, RuntimeEnabled=OrientationEventEnabled
 SVGEvents ImplementedAs=Event
 UIEvents ImplementedAs=UIEvent
-
-core/events/TouchEvent RuntimeEnabled=touchEnabled

@@ -208,11 +208,6 @@ void WebSettingsImpl::setMainFrameClipsContent(bool enabled)
     m_settings->setMainFrameClipsContent(enabled);
 }
 
-void WebSettingsImpl::setMaxTouchPoints(int maxTouchPoints)
-{
-    m_settings->setMaxTouchPoints(maxTouchPoints);
-}
-
 void WebSettingsImpl::setTouchEditingEnabled(bool enabled)
 {
     m_settings->setTouchEditingEnabled(enabled);

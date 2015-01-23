@@ -73,19 +73,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
     readonly attribute Element activeElement;
     boolean hasFocus();
 
-    [RuntimeEnabled=Touch] Touch createTouch([Default=Undefined] optional Window window,
-                                             [Default=Undefined] optional EventTarget target,
-                                             [Default=Undefined] optional long identifier,
-                                             [Default=Undefined] optional double pageX,
-                                             [Default=Undefined] optional double pageY,
-                                             [Default=Undefined] optional double screenX,
-                                             [Default=Undefined] optional double screenY,
-                                             [Default=Undefined] optional double radiusX,
-                                             [Default=Undefined] optional double radiusY,
-                                             [Default=Undefined] optional float rotationAngle,
-                                             [Default=Undefined] optional float force);
-    [RuntimeEnabled=Touch] TouchList createTouchList(Touch... touches);
-
     [CallWith=ScriptState, CustomElementCallbacks, RaisesException, MeasureAs=DocumentRegisterElement] CustomElementConstructor registerElement(DOMString name, optional Dictionary options);
 
     // Page visibility API.

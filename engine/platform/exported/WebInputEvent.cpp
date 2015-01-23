@@ -50,15 +50,9 @@ struct SameSizeAsWebGestureEvent : public SameSizeAsWebInputEvent {
     int gestureData[9];
 };
 
-struct SameSizeAsWebTouchEvent : public SameSizeAsWebInputEvent {
-    WebTouchPoint touchPoints[3 * WebTouchEvent::touchesLengthCap];
-    int touchData[4];
-};
-
 COMPILE_ASSERT(sizeof(WebInputEvent) == sizeof(SameSizeAsWebInputEvent), WebInputEvent_has_gaps);
 COMPILE_ASSERT(sizeof(WebKeyboardEvent) == sizeof(SameSizeAsWebKeyboardEvent), WebKeyboardEvent_has_gaps);
 COMPILE_ASSERT(sizeof(WebGestureEvent) == sizeof(SameSizeAsWebGestureEvent), WebGestureEvent_has_gaps);
-COMPILE_ASSERT(sizeof(WebTouchEvent) == sizeof(SameSizeAsWebTouchEvent), WebTouchEvent_has_gaps);
 
 static const char* staticKeyIdentifiers(unsigned short keyCode)
 {
