@@ -29,11 +29,12 @@
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/EventDispatchMediator.h"
-#include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/events/ScopedEventQueue.h"
 #include "sky/engine/core/events/WindowEventContext.h"
 #include "sky/engine/core/frame/FrameView.h"
+#include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -70,36 +71,6 @@ void EventDispatcher::dispatchScopedEvent(Node* node, PassRefPtr<EventDispatchMe
     // We need to set the target here because it can go away by the time we actually fire the event.
     mediator->event()->setTarget(EventPath::eventTargetRespectingTargetRules(node));
     ScopedEventQueue::instance()->enqueueEventDispatchMediator(mediator);
-}
-
-void EventDispatcher::dispatchSimulatedClick(Node* node, Event* underlyingEvent, SimulatedClickMouseEventOptions mouseEventOptions)
-{
-    // This persistent vector doesn't cause leaks, because added Nodes are removed
-    // before dispatchSimulatedClick() returns. This vector is here just to prevent
-    // the code from running into an infinite recursion of dispatchSimulatedClick().
-    DEFINE_STATIC_LOCAL(OwnPtr<HashSet<RawPtr<Node> > >, nodesDispatchingSimulatedClicks, (adoptPtr(new HashSet<RawPtr<Node> >())));
-
-    if (nodesDispatchingSimulatedClicks->contains(node))
-        return;
-
-    nodesDispatchingSimulatedClicks->add(node);
-
-    if (mouseEventOptions == SendMouseOverUpDownEvents)
-        EventDispatcher(node, SimulatedMouseEvent::create(EventTypeNames::mouseover, node->document().domWindow(), underlyingEvent)).dispatch();
-
-    if (mouseEventOptions != SendNoEvents) {
-        EventDispatcher(node, SimulatedMouseEvent::create(EventTypeNames::mousedown, node->document().domWindow(), underlyingEvent)).dispatch();
-        node->setActive(true);
-        EventDispatcher(node, SimulatedMouseEvent::create(EventTypeNames::mouseup, node->document().domWindow(), underlyingEvent)).dispatch();
-    }
-    // Some elements (e.g. the color picker) may set active state to true before
-    // calling this method and expect the state to be reset during the call.
-    node->setActive(false);
-
-    // always send click
-    EventDispatcher(node, SimulatedMouseEvent::create(EventTypeNames::click, node->document().domWindow(), underlyingEvent)).dispatch();
-
-    nodesDispatchingSimulatedClicks->remove(node);
 }
 
 bool EventDispatcher::dispatch()

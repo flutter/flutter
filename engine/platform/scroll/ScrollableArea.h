@@ -36,7 +36,6 @@ namespace blink {
 
 class FloatPoint;
 class HostWindow;
-class PlatformWheelEvent;
 class ScrollAnimator;
 
 enum ScrollBehavior {
@@ -66,8 +65,6 @@ public:
     void scrollToOffsetWithoutAnimation(ScrollbarOrientation, float offset);
 
     static bool scrollBehaviorFromString(const String&, ScrollBehavior&);
-
-    bool handleWheelEvent(const PlatformWheelEvent&);
 
     // Functions for controlling if you can scroll past the end of the document.
     bool constrainsScrollingToContentEdge() const { return m_constrainsScrollingToContentEdge; }

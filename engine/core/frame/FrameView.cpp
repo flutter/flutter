@@ -847,12 +847,6 @@ void FrameView::removeScrollableArea(ScrollableArea* scrollableArea)
     m_scrollableAreas->remove(scrollableArea);
 }
 
-bool FrameView::wheelEvent(const PlatformWheelEvent& wheelEvent)
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 bool FrameView::isVerticalDocument() const
 {
     // FIXME(sky): Remove

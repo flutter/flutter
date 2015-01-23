@@ -94,18 +94,6 @@ public:
         PointerCancel,
         PointerTypeLast = PointerCancel,
 
-        // WebMouseEvent
-        MouseDown,
-        MouseTypeFirst = MouseDown,
-        MouseUp,
-        MouseMove,
-        MouseEnter,
-        MouseLeave,
-        MouseTypeLast = MouseLeave,
-
-        // WebMouseWheelEvent
-        MouseWheel,
-
         // WebKeyboardEvent
         RawKeyDown,
         KeyboardTypeFirst = RawKeyDown,
@@ -192,12 +180,6 @@ public:
     static bool isPointerEventType(int type)
     {
         return PointerTypeFirst <= type && type <= PointerTypeLast;
-    }
-
-    // Returns true if the WebInputEvent |type| is a mouse event.
-    static bool isMouseEventType(int type)
-    {
-        return MouseTypeFirst <= type && type <= MouseTypeLast;
     }
 
     // Returns true if the WebInputEvent |type| is a keyboard event.
@@ -327,126 +309,6 @@ public:
 
     static int windowsKeyCodeWithoutLocation(int keycode);
     static int locationModifiersFromWindowsKeyCode(int keycode);
-};
-
-// WebMouseEvent --------------------------------------------------------------
-
-class WebMouseEvent : public WebInputEvent {
-public:
-    enum Button {
-        ButtonNone = -1,
-        ButtonLeft,
-        ButtonMiddle,
-        ButtonRight
-    };
-
-    Button button;
-    int x;
-    int y;
-    int windowX;
-    int windowY;
-    int globalX;
-    int globalY;
-    int movementX;
-    int movementY;
-    int clickCount;
-
-    WebMouseEvent()
-        : WebInputEvent(sizeof(WebMouseEvent))
-        , button(ButtonNone)
-        , x(0)
-        , y(0)
-        , windowX(0)
-        , windowY(0)
-        , globalX(0)
-        , globalY(0)
-        , movementX(0)
-        , movementY(0)
-        , clickCount(0)
-    {
-    }
-
-protected:
-    explicit WebMouseEvent(unsigned sizeParam)
-        : WebInputEvent(sizeParam)
-        , button(ButtonNone)
-        , x(0)
-        , y(0)
-        , windowX(0)
-        , windowY(0)
-        , globalX(0)
-        , globalY(0)
-        , movementX(0)
-        , movementY(0)
-        , clickCount(0)
-    {
-    }
-};
-
-// WebMouseWheelEvent ---------------------------------------------------------
-
-class WebMouseWheelEvent : public WebMouseEvent {
-public:
-    enum Phase {
-        PhaseNone        = 0,
-        PhaseBegan       = 1 << 0,
-        PhaseStationary  = 1 << 1,
-        PhaseChanged     = 1 << 2,
-        PhaseEnded       = 1 << 3,
-        PhaseCancelled   = 1 << 4,
-        PhaseMayBegin    = 1 << 5,
-    };
-
-    float deltaX;
-    float deltaY;
-    float wheelTicksX;
-    float wheelTicksY;
-
-    float accelerationRatioX;
-    float accelerationRatioY;
-
-    // See comment at the top of the file for why an int is used here.
-    int scrollByPage;
-
-    // See comment at the top of the file for why an int is used here.
-    int hasPreciseScrollingDeltas;
-    Phase phase;
-    Phase momentumPhase;
-
-    // See comment at the top of the file for why an int is used here.
-    // Rubberbanding is an OSX visual effect. When a user scrolls the content
-    // area with a track pad, and the content area is already at its limit in
-    // the direction being scrolled, the entire content area is allowed to
-    // scroll slightly off screen, revealing a grey background. When the user
-    // lets go, the content area snaps back into place. Blink is responsible
-    // for this rubberbanding effect, but the embedder may wish to disable
-    // rubber banding in the left or right direction, if the scroll should have
-    // an alternate effect. The common case is that a scroll in the left or
-    // right directions causes a back or forwards navigation, respectively.
-    //
-    // These flags prevent rubber banding from starting in a given direction,
-    // but have no effect on an ongoing rubber banding. A rubber banding that
-    // started in the vertical direction is allowed to continue in the right
-    // direction, even if canRubberbandRight is 0.
-    int canRubberbandLeft;
-    int canRubberbandRight;
-
-    WebMouseWheelEvent()
-        : WebMouseEvent(sizeof(WebMouseWheelEvent))
-        , deltaX(0.0f)
-        , deltaY(0.0f)
-        , wheelTicksX(0.0f)
-        , wheelTicksY(0.0f)
-        , accelerationRatioX(1.0f)
-        , accelerationRatioY(1.0f)
-        , scrollByPage(false)
-        , hasPreciseScrollingDeltas(false)
-        , phase(PhaseNone)
-        , momentumPhase(PhaseNone)
-        , canRubberbandLeft(true)
-        , canRubberbandRight(true)
-    {
-    }
 };
 
 // WebGestureEvent --------------------------------------------------------------

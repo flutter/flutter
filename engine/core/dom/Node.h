@@ -27,7 +27,6 @@
 
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/core/dom/MutationObserver.h"
-#include "sky/engine/core/dom/SimulatedClickOptions.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/TreeShared.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
@@ -63,8 +62,6 @@ class NodeList;
 class NodeRareData;
 class PlatformGestureEvent;
 class PlatformKeyboardEvent;
-class PlatformMouseEvent;
-class PlatformWheelEvent;
 class QualifiedName;
 class RegisteredEventListener;
 class RenderBox;
@@ -475,12 +472,8 @@ public:
     bool dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent);
 
     bool dispatchKeyEvent(const PlatformKeyboardEvent&);
-    bool dispatchWheelEvent(const PlatformWheelEvent&);
-    bool dispatchMouseEvent(const PlatformMouseEvent&, const AtomicString& eventType, int clickCount = 0, Node* relatedTarget = 0);
     bool dispatchGestureEvent(const PlatformGestureEvent&);
     bool dispatchTouchEvent(PassRefPtr<TouchEvent>);
-
-    void dispatchSimulatedClick(Event* underlyingEvent, SimulatedClickMouseEventOptions = SendNoEvents);
 
     void dispatchInputEvent();
 

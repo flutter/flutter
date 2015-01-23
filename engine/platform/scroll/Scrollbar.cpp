@@ -27,7 +27,6 @@
 #include "sky/engine/platform/scroll/Scrollbar.h"
 
 #include "sky/engine/platform/PlatformGestureEvent.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
 #include "sky/engine/platform/scroll/ScrollableArea.h"
@@ -287,39 +286,6 @@ bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
     }
 }
 
-void Scrollbar::mouseMoved(const PlatformMouseEvent& evt)
-{
-    if (m_pressedPart == ThumbPart) {
-        moveThumb(m_orientation == HorizontalScrollbar ?
-                  convertFromContainingView(evt.position()).x() :
-                  convertFromContainingView(evt.position()).y());
-        return;
-    }
-
-    if (m_pressedPart != NoPart)
-        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
-
-    // FIXME(sky): Cleanup this code now that part is always NoPart.
-    ScrollbarPart part = NoPart;
-    if (part != m_hoveredPart) {
-        if (m_pressedPart != NoPart) {
-            if (part == m_pressedPart) {
-                // The mouse is moving back over the pressed part.  We
-                // need to start up the timer action again.
-                startTimerIfNeeded(autoscrollTimerDelay());
-            } else if (m_hoveredPart == m_pressedPart) {
-                // The mouse is leaving the pressed part.  Kill our timer
-                // if needed.
-                stopTimerIfNeeded();
-            }
-        }
-
-        setHoveredPart(part);
-    }
-
-    return;
-}
-
 void Scrollbar::mouseEntered()
 {
     if (m_scrollableArea)
@@ -331,37 +297,6 @@ void Scrollbar::mouseExited()
     if (m_scrollableArea)
         m_scrollableArea->mouseExitedScrollbar(this);
     setHoveredPart(NoPart);
-}
-
-void Scrollbar::mouseUp(const PlatformMouseEvent& mouseEvent)
-{
-    setPressedPart(NoPart);
-    m_pressedPos = 0;
-    stopTimerIfNeeded();
-
-    if (m_scrollableArea) {
-        // m_hoveredPart won't be updated until the next mouseMoved or mouseDown, so we have to hit test
-        // to really know if the mouse has exited the scrollbar on a mouseUp.
-        m_scrollableArea->mouseExitedScrollbar(this);
-    }
-}
-
-void Scrollbar::mouseDown(const PlatformMouseEvent& evt)
-{
-    // Early exit for right click
-    if (evt.button() == RightButton)
-        return;
-
-    // FIXME(sky): Do we still need setPressedPart now that we only set it to NoPart?
-    setPressedPart(NoPart);
-    int pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
-
-    if (m_pressedPart == ThumbPart)
-        m_dragOrigin = m_currentPos;
-
-    m_pressedPos = pressedPos;
-
-    autoscrollPressedPart(initialAutoscrollTimerDelay());
 }
 
 bool Scrollbar::isOverlayScrollbar() const

@@ -36,7 +36,6 @@ class LocalFrame;
 class FrameView;
 class Node;
 class Page;
-class PlatformMouseEvent;
 class RenderBox;
 class RenderObject;
 

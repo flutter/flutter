@@ -99,7 +99,6 @@ public:
     BLINK_EXPORT bool isFocusable() const;
     BLINK_EXPORT bool isContentEditable() const;
     BLINK_EXPORT bool isElementNode() const;
-    BLINK_EXPORT void simulateClick();
     BLINK_EXPORT WebElement querySelector(const WebString&, WebExceptionCode&) const;
     BLINK_EXPORT WebElement rootEditableElement() const;
     BLINK_EXPORT bool focused() const;

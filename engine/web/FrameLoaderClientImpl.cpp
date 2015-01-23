@@ -35,7 +35,6 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/core/v8/ScriptController.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLIFrameElement.h"

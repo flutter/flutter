@@ -38,7 +38,6 @@ namespace blink {
 class GraphicsContext;
 class IntRect;
 class PlatformGestureEvent;
-class PlatformMouseEvent;
 class ScrollableArea;
 
 class PLATFORM_EXPORT Scrollbar final : public Widget {
@@ -79,16 +78,8 @@ public:
 
     bool gestureEvent(const PlatformGestureEvent&);
 
-    // These methods are used for platform scrollbars to give :hover feedback.  They will not get called
-    // when the mouse went down in a scrollbar, since it is assumed the scrollbar will start
-    // grabbing all events in that case anyway.
-    void mouseMoved(const PlatformMouseEvent&);
     void mouseEntered();
     void mouseExited();
-
-    // Used by some platform scrollbars to know when they've been released from capture.
-    void mouseUp(const PlatformMouseEvent&);
-    void mouseDown(const PlatformMouseEvent&);
 
     virtual IntRect convertToContainingView(const IntRect&) const override;
     virtual IntRect convertFromContainingView(const IntRect&) const override;

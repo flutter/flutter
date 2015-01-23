@@ -314,12 +314,6 @@ void Element::setSpellcheck(bool enable)
     setAttribute(HTMLNames::spellcheckAttr, enable ? "true" : "false");
 }
 
-
-void Element::click()
-{
-    dispatchSimulatedClick(0, SendNoEvents);
-}
-
 // Returns the conforming 'dir' value associated with the state the attribute is in (in its canonical case), if any,
 // or the empty string if the attribute is in a state that has no associated keyword value or if the attribute is
 // not in a defined state (e.g. the attribute is missing and there is no missing value default).

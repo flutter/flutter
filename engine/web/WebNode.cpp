@@ -142,11 +142,6 @@ bool WebNode::isElementNode() const
     return m_private->isElementNode();
 }
 
-void WebNode::simulateClick()
-{
-    m_private->dispatchSimulatedClick(0);
-}
-
 WebElement WebNode::querySelector(const WebString& tag, WebExceptionCode& ec) const
 {
     TrackExceptionState exceptionState;

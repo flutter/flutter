@@ -58,7 +58,6 @@
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
@@ -207,8 +206,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
 
     TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ScrollLayer", "data", InspectorScrollLayerEvent::data(&box()));
 
-    const RenderLayerModelObject* paintInvalidationContainer = box().containerForPaintInvalidation();
-
     // Update the positions of our child layers (if needed as only fixed layers should be impacted by a scroll).
     // We don't update compositing layers, because we need to do a deep update from the compositing ancestor.
     if (!frameView->isInPerformLayout()) {
@@ -219,11 +216,6 @@ void RenderLayerScrollableArea::setScrollOffset(const IntPoint& newScrollOffset)
 
     // The caret rect needs to be invalidated after scrolling
     frame->selection().setCaretRectNeedsUpdate();
-
-    // TODO(ojan): Is there a better way to get this value now that we always just pass the empty
-    // FloatQuat to localToAbsoluteQuad?
-    FloatQuad quadForFakeMouseMoveEvent = paintInvalidationContainer->localToAbsoluteQuad(FloatQuad());
-    frame->eventHandler().dispatchFakeMouseMoveEventSoonInQuad(quadForFakeMouseMoveEvent);
 
     // Schedule the scroll DOM event.
     if (box().node())

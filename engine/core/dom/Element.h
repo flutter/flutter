@@ -293,8 +293,6 @@ public:
     const AtomicString& dir();
     void setDir(const AtomicString&);
 
-    void click();
-
 protected:
     Element(const QualifiedName& tagName, Document*, ConstructionType);
 

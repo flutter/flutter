@@ -44,7 +44,6 @@
 #include "sky/engine/core/editing/InputMethodController.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -67,8 +66,6 @@
 #include "sky/engine/platform/NotImplemented.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
-#include "sky/engine/platform/PlatformWheelEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -170,32 +167,6 @@ WebViewImpl::~WebViewImpl()
 WebLocalFrameImpl* WebViewImpl::mainFrameImpl()
 {
     return m_page ? WebLocalFrameImpl::fromFrame(m_page->mainFrame()) : 0;
-}
-
-void WebViewImpl::handleMouseLeave(LocalFrame& mainFrame, const WebMouseEvent& event)
-{
-    m_client->setMouseOverURL(WebURL());
-    mainFrame.eventHandler().handleMouseLeaveEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
-}
-
-void WebViewImpl::handleMouseDown(LocalFrame& mainFrame, const WebMouseEvent& event)
-{
-    mainFrame.eventHandler().handleMousePressEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
-}
-
-void WebViewImpl::handleMouseUp(LocalFrame& mainFrame, const WebMouseEvent& event)
-{
-    mainFrame.eventHandler().handleMouseReleaseEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
-}
-
-bool WebViewImpl::handleMouseWheel(LocalFrame& mainFrame, const WebMouseWheelEvent& event)
-{
-    return mainFrame.eventHandler().handleWheelEvent(PlatformWheelEventBuilder(mainFrame.view(), event));
-}
-
-void WebViewImpl::handleMouseMove(LocalFrame& mainFrame, const WebMouseEvent& event)
-{
-    mainFrame.eventHandler().handleMouseMoveEvent(PlatformMouseEventBuilder(mainFrame.view(), event));
 }
 
 bool WebViewImpl::handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event)
@@ -554,18 +525,6 @@ const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
 static String inputTypeToName(WebInputEvent::Type type)
 {
     switch (type) {
-    case WebInputEvent::MouseDown:
-        return EventTypeNames::mousedown;
-    case WebInputEvent::MouseUp:
-        return EventTypeNames::mouseup;
-    case WebInputEvent::MouseMove:
-        return EventTypeNames::mousemove;
-    case WebInputEvent::MouseEnter:
-        return EventTypeNames::mouseenter;
-    case WebInputEvent::MouseLeave:
-        return EventTypeNames::mouseleave;
-    case WebInputEvent::MouseWheel:
-        return EventTypeNames::mousewheel;
     case WebInputEvent::KeyDown:
         return EventTypeNames::keydown;
     case WebInputEvent::KeyUp:
@@ -608,71 +567,8 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         return m_page->mainFrame()->newEventHandler().handlePointerEvent(event);
     }
 
-    if (m_mouseCaptureNode && WebInputEvent::isMouseEventType(inputEvent.type)) {
-        TRACE_EVENT1("input", "captured mouse event", "type", inputEvent.type);
-        // Save m_mouseCaptureNode since mouseCaptureLost() will clear it.
-        RefPtr<Node> node = m_mouseCaptureNode;
-
-        // Not all platforms call mouseCaptureLost() directly.
-        if (inputEvent.type == WebInputEvent::MouseUp)
-            mouseCaptureLost();
-
-        AtomicString eventType;
-        switch (inputEvent.type) {
-        case WebInputEvent::MouseMove:
-            eventType = EventTypeNames::mousemove;
-            break;
-        case WebInputEvent::MouseLeave:
-            eventType = EventTypeNames::mouseout;
-            break;
-        case WebInputEvent::MouseDown:
-            eventType = EventTypeNames::mousedown;
-            break;
-        case WebInputEvent::MouseUp:
-            eventType = EventTypeNames::mouseup;
-            break;
-        default:
-            ASSERT_NOT_REACHED();
-        }
-
-        node->dispatchMouseEvent(
-            PlatformMouseEventBuilder(mainFrameImpl()->frameView(), static_cast<const WebMouseEvent&>(inputEvent)),
-            eventType, static_cast<const WebMouseEvent&>(inputEvent).clickCount);
-        return true;
-    }
-
     LocalFrame* frame = m_page ? m_page->mainFrame() : nullptr;
     switch (inputEvent.type) {
-
-    // FIXME: WebKit seems to always return false on mouse events processing
-    // methods. For now we'll assume it has processed them (as we are only
-    // interested in whether keyboard events are processed).
-    case WebInputEvent::MouseMove:
-        if (!frame || !frame->view())
-            return true;
-        handleMouseMove(*frame, static_cast<const WebMouseEvent&>(inputEvent));
-        return true;
-    case WebInputEvent::MouseLeave:
-        if (!frame || !frame->view())
-            return true;
-        handleMouseLeave(*frame, static_cast<const WebMouseEvent&>(inputEvent));
-        return true;
-    case WebInputEvent::MouseDown:
-        if (!frame || !frame->view())
-            return true;
-        handleMouseDown(*frame, static_cast<const WebMouseEvent&>(inputEvent));
-        return true;
-    case WebInputEvent::MouseUp:
-        if (!frame || !frame->view())
-            return true;
-        handleMouseUp(*frame, static_cast<const WebMouseEvent&>(inputEvent));
-        return true;
-
-    case WebInputEvent::MouseWheel:
-        if (!frame || !frame->view())
-            return false;
-        return handleMouseWheel(*frame, static_cast<const WebMouseWheelEvent&>(inputEvent));
-
     case WebInputEvent::RawKeyDown:
     case WebInputEvent::KeyDown:
     case WebInputEvent::KeyUp:

@@ -28,7 +28,6 @@
 #include "sky/engine/core/dom/Attribute.h"
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -39,7 +38,6 @@
 #include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/rendering/RenderImage.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/weborigin/KnownPorts.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
@@ -51,14 +49,9 @@
 
 namespace blink {
 
-static bool isEnterKeyKeydownEvent(Event* event)
-{
-    return event->type() == EventTypeNames::keydown && event->isKeyboardEvent() && toKeyboardEvent(event)->keyIdentifier() == "Enter";
-}
-
 static bool isLinkClick(Event* event)
 {
-    return event->type() == EventTypeNames::click && (!event->isMouseEvent() || toMouseEvent(event)->button() != RightButton);
+    return event->type() == EventTypeNames::click;
 }
 
 PassRefPtr<HTMLAnchorElement> HTMLAnchorElement::create(Document& document)
@@ -84,12 +77,6 @@ bool HTMLAnchorElement::supportsFocus() const
 
 void HTMLAnchorElement::defaultEventHandler(Event* event)
 {
-    if (focused() && isEnterKeyKeydownEvent(event) && isLiveLink()) {
-        event->setDefaultHandled();
-        dispatchSimulatedClick(event);
-        return;
-    }
-
     if (isLinkClick(event) && isLiveLink()) {
         handleClick(event);
         return;

@@ -12,30 +12,6 @@
 namespace sky {
 namespace {
 
-// Used for scrolling. This matches Firefox behavior.
-const int kPixelsPerTick = 53;
-
-int EventFlagsToWebEventModifiers(int flags) {
-  int modifiers = 0;
-
-  if (flags & mojo::EVENT_FLAGS_SHIFT_DOWN)
-    modifiers |= blink::WebInputEvent::ShiftKey;
-  if (flags & mojo::EVENT_FLAGS_CONTROL_DOWN)
-    modifiers |= blink::WebInputEvent::ControlKey;
-  if (flags & mojo::EVENT_FLAGS_ALT_DOWN)
-    modifiers |= blink::WebInputEvent::AltKey;
-  // TODO(beng): MetaKey/META_MASK
-  if (flags & mojo::EVENT_FLAGS_LEFT_MOUSE_BUTTON)
-    modifiers |= blink::WebInputEvent::LeftButtonDown;
-  if (flags & mojo::EVENT_FLAGS_MIDDLE_MOUSE_BUTTON)
-    modifiers |= blink::WebInputEvent::MiddleButtonDown;
-  if (flags & mojo::EVENT_FLAGS_RIGHT_MOUSE_BUTTON)
-    modifiers |= blink::WebInputEvent::RightButtonDown;
-  if (flags & mojo::EVENT_FLAGS_CAPS_LOCK_DOWN)
-    modifiers |= blink::WebInputEvent::CapsLockOn;
-  return modifiers;
-}
-
 int EventFlagsToWebInputEventModifiers(int flags) {
   return
       (flags & mojo::EVENT_FLAGS_SHIFT_DOWN ?
@@ -227,43 +203,6 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
   return web_event.Pass();
 }
 
-scoped_ptr<blink::WebInputEvent> BuildWebMouseWheelEvent(
-    const mojo::EventPtr& event,
-    float device_pixel_ratio) {
-  scoped_ptr<blink::WebMouseWheelEvent> web_event(
-      new blink::WebMouseWheelEvent);
-  web_event->type = blink::WebInputEvent::MouseWheel;
-  web_event->button = blink::WebMouseEvent::ButtonNone;
-  web_event->modifiers = EventFlagsToWebEventModifiers(event->flags);
-  web_event->timeStampSeconds =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
-
-  web_event->x = event->location_data->in_view_location->x / device_pixel_ratio;
-  web_event->y = event->location_data->in_view_location->y / device_pixel_ratio;
-
-  // TODO(erg): Remove this null check as parallel to above.
-  if (!event->location_data->screen_location.is_null()) {
-    web_event->globalX =
-        event->location_data->screen_location->x / device_pixel_ratio;
-    web_event->globalY =
-        event->location_data->screen_location->y / device_pixel_ratio;
-  }
-
-  if ((event->flags & mojo::EVENT_FLAGS_SHIFT_DOWN) != 0 &&
-      event->wheel_data->x_offset == 0) {
-    web_event->deltaX = event->wheel_data->y_offset;
-    web_event->deltaY = 0;
-  } else {
-    web_event->deltaX = event->wheel_data->x_offset;
-    web_event->deltaY = event->wheel_data->y_offset;
-  }
-
-  web_event->wheelTicksX = web_event->deltaX / kPixelsPerTick;
-  web_event->wheelTicksY = web_event->deltaY / kPixelsPerTick;
-
-  return web_event.Pass();
-}
-
 }  // namespace
 
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
@@ -303,8 +242,6 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
               event->action == mojo::EVENT_TYPE_KEY_RELEASED) &&
              event->key_data) {
     return BuildWebKeyboardEvent(event, device_pixel_ratio);
-  } else if (event->action == mojo::EVENT_TYPE_MOUSEWHEEL) {
-    return BuildWebMouseWheelEvent(event, device_pixel_ratio);
   }
 
   return scoped_ptr<blink::WebInputEvent>();

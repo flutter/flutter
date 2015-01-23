@@ -42,8 +42,7 @@ def case_insensitive_matching(name):
             or name == 'Event'
             or name == 'Events'
             or name.startswith('UIEvent')
-            or name.startswith('CustomEvent')
-            or name.startswith('MouseEvent'))
+            or name.startswith('CustomEvent'))
 
 class EventFactoryWriter(name_macros.Writer):
     defaults = {

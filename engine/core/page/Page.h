@@ -48,7 +48,6 @@ class FocusController;
 class Frame;
 class FrameHost;
 class PageLifecycleNotifier;
-class PlatformMouseEvent;
 class Range;
 class RenderBox;
 class RenderObject;

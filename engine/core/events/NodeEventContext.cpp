@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/TouchList.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/FocusEvent.h"
-#include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/events/TouchEventContext.h"
 
 namespace blink {
@@ -49,11 +48,8 @@ void NodeEventContext::handleLocalEvents(Event* event) const
     if (touchEventContext()) {
         touchEventContext()->handleLocalEvents(event);
     } else if (relatedTarget()) {
-        if (event->isMouseEvent()) {
-            toMouseEvent(event)->setRelatedTarget(relatedTarget());
-        } else if (event->isFocusEvent()) {
+        if (event->isFocusEvent())
             toFocusEvent(event)->setRelatedTarget(relatedTarget());
-        }
     }
     event->setTarget(target());
     event->setCurrentTarget(m_currentTarget.get());

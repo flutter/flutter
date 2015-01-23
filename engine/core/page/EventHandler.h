@@ -32,7 +32,7 @@
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/Cursor.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
+#include "sky/engine/platform/PlatformEvent.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -62,7 +62,6 @@ class OptionalCursor;
 class PlatformGestureEvent;
 class PlatformKeyboardEvent;
 class PlatformTouchEvent;
-class PlatformWheelEvent;
 class RenderLayer;
 class RenderLayerScrollableArea;
 class RenderObject;
@@ -71,11 +70,9 @@ class Scrollbar;
 class TextEvent;
 class TouchEvent;
 class VisibleSelection;
-class WheelEvent;
 class Widget;
 
 typedef EventWithHitTestResults<PlatformGestureEvent> GestureEventWithHitTestResults;
-typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults;
 
 enum AppendTrailingWhitespace { ShouldAppendTrailingWhitespace, DontAppendTrailingWhitespace };
 enum CheckDragHysteresis { ShouldCheckDragHysteresis, DontCheckDragHysteresis };
@@ -95,17 +92,12 @@ public:
 
     void stopAutoscroll();
 
-    void dispatchFakeMouseMoveEventSoon();
-    void dispatchFakeMouseMoveEventSoonInQuad(const FloatQuad&);
-
     HitTestResult hitTestResultAtPoint(const LayoutPoint&,
         HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly | HitTestRequest::Active,
         const LayoutSize& padding = LayoutSize());
 
     bool mousePressed() const { return m_mousePressed; }
     void setMousePressed(bool pressed) { m_mousePressed = pressed; }
-
-    void setCapturingMouseEventsNode(PassRefPtr<Node>); // A caller is responsible for resetting capturing node to 0.
 
     void scheduleHoverStateUpdate();
     void scheduleCursorUpdate();
@@ -116,14 +108,6 @@ public:
     // Attempts to scroll the DOM tree. If that fails, scrolls the view.
     // If the view can't be scrolled either, recursively bubble to the parent frame.
     bool bubblingScroll(ScrollDirection, ScrollGranularity, Node* startingNode = 0);
-
-    bool handleMouseMoveEvent(const PlatformMouseEvent&);
-    void handleMouseLeaveEvent(const PlatformMouseEvent&);
-
-    bool handleMousePressEvent(const PlatformMouseEvent&);
-    bool handleMouseReleaseEvent(const PlatformMouseEvent&);
-    bool handleWheelEvent(const PlatformWheelEvent&);
-    void defaultWheelEventHandler(Node*, WheelEvent*);
 
     // Called on the local root frame exactly once per gesture event.
     bool handleGestureEvent(const PlatformGestureEvent&);
@@ -165,20 +149,6 @@ private:
     bool updateSelectionForMouseDownDispatchingSelectStart(Node*, const VisibleSelection&, TextGranularity);
     void selectClosestWordFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
     void selectClosestMisspellingFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
-    void selectClosestWordFromMouseEvent(const MouseEventWithHitTestResults&);
-    void selectClosestMisspellingFromMouseEvent(const MouseEventWithHitTestResults&);
-    void selectClosestWordOrLinkFromMouseEvent(const MouseEventWithHitTestResults&);
-
-    bool handleMouseMoveOrLeaveEvent(const PlatformMouseEvent&, HitTestResult* hoveredNode = 0, bool onlyUpdateScrollbars = false);
-    bool handleMousePressEvent(const MouseEventWithHitTestResults&);
-    bool handleMousePressEventSingleClick(const MouseEventWithHitTestResults&);
-    bool handleMousePressEventDoubleClick(const MouseEventWithHitTestResults&);
-    bool handleMousePressEventTripleClick(const MouseEventWithHitTestResults&);
-    bool handleMouseFocus(const PlatformMouseEvent&);
-    bool handleMouseDraggedEvent(const MouseEventWithHitTestResults&);
-    bool handleMouseReleaseEvent(const MouseEventWithHitTestResults&);
-
-    bool handlePasteGlobalSelection(const PlatformMouseEvent&);
 
     HitTestRequest::HitTestRequestType getHitTypeForGestureType(PlatformEvent::Type);
 
@@ -198,8 +168,6 @@ private:
 
     bool mouseDownMayStartSelect() const { return m_mouseDownMayStartSelect; }
 
-    void fakeMouseMoveEventTimerFired(Timer<EventHandler>*);
-    void cancelFakeMouseMoveEvent();
     bool isCursorVisible() const;
     void updateCursor();
 
@@ -227,20 +195,9 @@ private:
 
     void invalidateClick();
 
-    void updateMouseEventTargetNode(Node*, const PlatformMouseEvent&, bool fireMouseOverOut);
-
-    MouseEventWithHitTestResults prepareMouseEvent(const HitTestRequest&, const PlatformMouseEvent&);
-
-    bool dispatchMouseEvent(const AtomicString& eventType, Node* target, int clickCount, const PlatformMouseEvent&, bool setUnder);
-
     bool dragHysteresisExceeded(const FloatPoint&) const;
     bool dragHysteresisExceeded(const IntPoint&) const;
 
-    bool passMousePressEventToScrollbar(MouseEventWithHitTestResults&);
-
-    bool passWidgetMouseDownEventToWidget(const MouseEventWithHitTestResults&);
-
-    bool passWheelEventToWidget(const PlatformWheelEvent&, Widget*);
     void defaultTabEventHandler(KeyboardEvent*);
 
     void updateSelectionForMouseDrag(const HitTestResult&);
@@ -255,7 +212,6 @@ private:
     bool sendScrollEventToView(const PlatformGestureEvent&, const FloatSize&);
 
     AutoscrollController* autoscrollController() const;
-    void setLastKnownMousePosition(const PlatformMouseEvent&);
 
     LocalFrame* const m_frame;
 
@@ -265,7 +221,6 @@ private:
 
     bool m_mouseDownMayStartSelect;
     bool m_mouseDownMayStartDrag;
-    bool m_mouseDownWasSingleClickInSelection;
     enum SelectionInitiationState { HaveNotStartedSelection, PlacedCaret, ExtendedSelection };
     SelectionInitiationState m_selectionInitiationState;
 
@@ -275,11 +230,6 @@ private:
     Timer<EventHandler> m_cursorUpdateTimer;
 
     bool m_mouseDownMayStartAutoscroll;
-
-    Timer<EventHandler> m_fakeMouseMoveEventTimer;
-
-    RefPtr<Node> m_capturingMouseEventsNode;
-    bool m_eventHandlerWillResetCapturingMouseEventsNode;
 
     RefPtr<Node> m_nodeUnderMouse;
     RefPtr<Node> m_lastNodeUnderMouse;
@@ -296,11 +246,6 @@ private:
     IntPoint m_lastKnownMousePosition;
     IntPoint m_lastKnownMouseGlobalPosition;
     IntPoint m_mouseDownPos; // In our view's coords.
-    double m_mouseDownTimestamp;
-    PlatformMouseEvent m_mouseDown;
-
-    RefPtr<Node> m_latchedWheelEventNode;
-    bool m_widgetIsLatched;
 
     RefPtr<Node> m_previousWheelScrolledNode;
 

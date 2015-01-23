@@ -160,11 +160,6 @@ public:
     void removeScrollableArea(ScrollableArea*);
     const ScrollableAreaSet* scrollableAreas() const { return m_scrollableAreas.get(); }
 
-    // This function exists for ports that need to handle wheel events manually.
-    // On Mac WebKit1 the underlying NSScrollView just does the scrolling, but on most other platforms
-    // we need this function in order to do the scroll ourselves.
-    bool wheelEvent(const PlatformWheelEvent&);
-
     void setHasSoftwareFilters(bool hasSoftwareFilters) { m_hasSoftwareFilters = hasSoftwareFilters; }
     bool hasSoftwareFilters() const { return m_hasSoftwareFilters; }
 

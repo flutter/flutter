@@ -26,7 +26,6 @@
 #ifndef SKY_ENGINE_CORE_EVENTS_EVENTDISPATCHER_H_
 #define SKY_ENGINE_CORE_EVENTS_EVENTDISPATCHER_H_
 
-#include "sky/engine/core/dom/SimulatedClickOptions.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -50,8 +49,6 @@ class EventDispatcher {
 public:
     static bool dispatchEvent(Node*, PassRefPtr<EventDispatchMediator>);
     static void dispatchScopedEvent(Node*, PassRefPtr<EventDispatchMediator>);
-
-    static void dispatchSimulatedClick(Node*, Event* underlyingEvent, SimulatedClickMouseEventOptions);
 
     bool dispatch();
     Node* node() const { return m_node.get(); }

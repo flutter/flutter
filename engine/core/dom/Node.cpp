@@ -61,11 +61,9 @@
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/MouseEvent.h"
 #include "sky/engine/core/events/TextEvent.h"
 #include "sky/engine/core/events/TouchEvent.h"
 #include "sky/engine/core/events/UIEvent.h"
-#include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
@@ -1455,8 +1453,6 @@ void Node::dispatchScopedEventDispatchMediator(PassRefPtr<EventDispatchMediator>
 
 bool Node::dispatchEvent(PassRefPtr<Event> event)
 {
-    if (event->isMouseEvent())
-        return EventDispatcher::dispatchEvent(this, MouseEventDispatchMediator::create(static_pointer_cast<MouseEvent>(event), MouseEventDispatchMediator::SyntheticMouseEvent));
     if (event->isTouchEvent())
         return dispatchTouchEvent(static_pointer_cast<TouchEvent>(event));
     return EventDispatcher::dispatchEvent(this, EventDispatchMediator::create(event));
@@ -1476,12 +1472,6 @@ bool Node::dispatchKeyEvent(const PlatformKeyboardEvent& event)
     return EventDispatcher::dispatchEvent(this, KeyboardEventDispatchMediator::create(KeyboardEvent::create(event, document().domWindow())));
 }
 
-bool Node::dispatchMouseEvent(const PlatformMouseEvent& event, const AtomicString& eventType,
-    int detail, Node* relatedTarget)
-{
-    return EventDispatcher::dispatchEvent(this, MouseEventDispatchMediator::create(MouseEvent::create(eventType, document().domWindow(), event, detail, relatedTarget)));
-}
-
 bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
 {
     RefPtr<GestureEvent> gestureEvent = GestureEvent::create(document().domWindow(), event);
@@ -1493,16 +1483,6 @@ bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
 bool Node::dispatchTouchEvent(PassRefPtr<TouchEvent> event)
 {
     return EventDispatcher::dispatchEvent(this, TouchEventDispatchMediator::create(event));
-}
-
-void Node::dispatchSimulatedClick(Event* underlyingEvent, SimulatedClickMouseEventOptions eventOptions)
-{
-    EventDispatcher::dispatchSimulatedClick(this, underlyingEvent, eventOptions);
-}
-
-bool Node::dispatchWheelEvent(const PlatformWheelEvent& event)
-{
-    return EventDispatcher::dispatchEvent(this, WheelEventDispatchMediator::create(event, document().domWindow()));
 }
 
 void Node::dispatchInputEvent()
@@ -1528,19 +1508,6 @@ void Node::defaultEventHandler(Event* event)
         if (event->hasInterface(EventNames::TextEvent)) {
             if (LocalFrame* frame = document().frame())
                 frame->eventHandler().defaultTextInputEventHandler(toTextEvent(event));
-        }
-    } else if ((eventType == EventTypeNames::wheel || eventType == EventTypeNames::mousewheel) && event->hasInterface(EventNames::WheelEvent)) {
-        WheelEvent* wheelEvent = toWheelEvent(event);
-
-        // If we don't have a renderer, send the wheel event to the first node we find with a renderer.
-        // This is needed for <option> and <optgroup> elements so that <select>s get a wheel scroll.
-        Node* startNode = this;
-        while (startNode && !startNode->renderer())
-            startNode = startNode->parentOrShadowHostNode();
-
-        if (startNode && startNode->renderer()) {
-            if (LocalFrame* frame = document().frame())
-                frame->eventHandler().defaultWheelEventHandler(startNode, wheelEvent);
         }
     } else if (event->type() == EventTypeNames::webkitEditableContentChanged) {
         dispatchInputEvent();

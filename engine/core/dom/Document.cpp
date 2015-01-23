@@ -1044,12 +1044,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
 
     updateStyle(change);
 
-    // As a result of the style recalculation, the currently hovered element might have been
-    // detached (for example, by setting display:none in the :hover style), schedule another mouseMove event
-    // to check if any other elements ended up under the mouse pointer due to re-layout.
-    if (hoverNode() && !hoverNode()->renderer() && frame())
-        frame()->eventHandler().dispatchFakeMouseMoveEventSoon();
-
     if (m_focusedElement && !m_focusedElement->isFocusable())
         clearFocusedElementSoon();
 
@@ -1508,28 +1502,6 @@ String Document::outgoingReferrer()
     // for why we walk the parent chain for srcdoc documents.
     Document* referrerDocument = this;
     return referrerDocument->m_url.strippedForUseAsReferrer();
-}
-
-MouseEventWithHitTestResults Document::prepareMouseEvent(const HitTestRequest& request, const LayoutPoint& documentPoint, const PlatformMouseEvent& event)
-{
-    ASSERT(!renderView() || renderView()->isRenderView());
-
-    // RenderView::hitTest causes a layout, and we don't want to hit that until the first
-    // layout because until then, there is nothing shown on the screen - the user can't
-    // have intentionally clicked on something belonging to this page. Furthermore,
-    // mousemove events before the first layout should not lead to a premature layout()
-    // happening, which could show a flash of white.
-    // See also the similar code in EventHandler::hitTestResultAtPoint.
-    if (!renderView() || !view() || !view()->didFirstLayout())
-        return MouseEventWithHitTestResults(event, HitTestResult(LayoutPoint()));
-
-    HitTestResult result(documentPoint);
-    renderView()->hitTest(request, result);
-
-    if (!request.readOnly())
-        updateHoverActiveState(request, result.innerElement(), &event);
-
-    return MouseEventWithHitTestResults(event, result);
 }
 
 PassRefPtr<Node> Document::cloneNode(bool deep)
@@ -2376,157 +2348,6 @@ void Document::adjustFloatRectForScroll(FloatRect& rect)
 void Document::decrementActiveParserCount()
 {
     --m_activeParserCount;
-}
-
-static RenderObject* nearestCommonHoverAncestor(RenderObject* obj1, RenderObject* obj2)
-{
-    if (!obj1 || !obj2)
-        return 0;
-
-    for (RenderObject* currObj1 = obj1; currObj1; currObj1 = currObj1->hoverAncestor()) {
-        for (RenderObject* currObj2 = obj2; currObj2; currObj2 = currObj2->hoverAncestor()) {
-            if (currObj1 == currObj2)
-                return currObj1;
-        }
-    }
-
-    return 0;
-}
-
-void Document::updateHoverActiveState(const HitTestRequest& request, Element* innerElement, const PlatformMouseEvent* event)
-{
-    ASSERT(!request.readOnly());
-
-    if (request.active() && m_frame)
-        m_frame->eventHandler().notifyElementActivated();
-
-    Element* innerElementInDocument = innerElement;
-
-    Element* oldActiveElement = activeHoverElement();
-    if (oldActiveElement && !request.active()) {
-        // The oldActiveElement renderer is null, dropped on :active by setting display: none,
-        // for instance. We still need to clear the ActiveChain as the mouse is released.
-        for (Node* node = oldActiveElement; node; node = NodeRenderingTraversal::parent(node)) {
-            ASSERT(!node->isTextNode());
-            node->setActive(false);
-            m_userActionElements.setInActiveChain(node, false);
-        }
-        setActiveHoverElement(nullptr);
-    } else {
-        Element* newActiveElement = innerElementInDocument;
-        if (!oldActiveElement && newActiveElement && request.active() && !request.touchMove()) {
-            // We are setting the :active chain and freezing it. If future moves happen, they
-            // will need to reference this chain.
-            for (Node* node = newActiveElement; node; node = NodeRenderingTraversal::parent(node)) {
-                ASSERT(!node->isTextNode());
-                m_userActionElements.setInActiveChain(node, true);
-            }
-            setActiveHoverElement(newActiveElement);
-        }
-    }
-    // If the mouse has just been pressed, set :active on the chain. Those (and only those)
-    // nodes should remain :active until the mouse is released.
-    bool allowActiveChanges = !oldActiveElement && activeHoverElement();
-
-    // If the mouse is down and if this is a mouse move event, we want to restrict changes in
-    // :hover/:active to only apply to elements that are in the :active chain that we froze
-    // at the time the mouse went down.
-    bool mustBeInActiveChain = request.active() && request.move();
-
-    RefPtr<Node> oldHoverNode = hoverNode();
-
-    // Check to see if the hovered node has changed.
-    // If it hasn't, we do not need to do anything.
-    Node* newHoverNode = innerElementInDocument;
-    while (newHoverNode && !newHoverNode->renderer())
-        newHoverNode = newHoverNode->parentOrShadowHostNode();
-
-    // Update our current hover node.
-    setHoverNode(newHoverNode);
-
-    // We have two different objects. Fetch their renderers.
-    RenderObject* oldHoverObj = oldHoverNode ? oldHoverNode->renderer() : 0;
-    RenderObject* newHoverObj = newHoverNode ? newHoverNode->renderer() : 0;
-
-    // Locate the common ancestor render object for the two renderers.
-    RenderObject* ancestor = nearestCommonHoverAncestor(oldHoverObj, newHoverObj);
-    RefPtr<Node> ancestorNode(ancestor ? ancestor->node() : 0);
-
-    Vector<RefPtr<Node>, 32> nodesToRemoveFromChain;
-    Vector<RefPtr<Node>, 32> nodesToAddToChain;
-
-    if (oldHoverObj != newHoverObj) {
-        // If the old hovered node is not nil but it's renderer is, it was probably detached as part of the :hover style
-        // (for instance by setting display:none in the :hover pseudo-class). In this case, the old hovered element (and its ancestors)
-        // must be updated, to ensure it's normal style is re-applied.
-        if (oldHoverNode && !oldHoverObj) {
-            for (Node* node = oldHoverNode.get(); node; node = node->parentNode()) {
-                if (!mustBeInActiveChain || (node->isElementNode() && toElement(node)->inActiveChain()))
-                    nodesToRemoveFromChain.append(node);
-            }
-
-        }
-
-        // The old hover path only needs to be cleared up to (and not including) the common ancestor;
-        for (RenderObject* curr = oldHoverObj; curr && curr != ancestor; curr = curr->hoverAncestor()) {
-            if (curr->node() && !curr->isText() && (!mustBeInActiveChain || curr->node()->inActiveChain()))
-                nodesToRemoveFromChain.append(curr->node());
-        }
-    }
-
-    // Now set the hover state for our new object up to the root.
-    for (RenderObject* curr = newHoverObj; curr; curr = curr->hoverAncestor()) {
-        if (curr->node() && !curr->isText() && (!mustBeInActiveChain || curr->node()->inActiveChain()))
-            nodesToAddToChain.append(curr->node());
-    }
-
-    // mouseenter and mouseleave events do not bubble, so they are dispatched iff there is a capturing
-    // event handler on an ancestor or a normal event handler on the element itself. This special
-    // handling is necessary to avoid O(n^2) capturing event handler checks. We'll check the previously
-    // hovered node's ancestor tree for 'mouseleave' handlers here, then check the newly hovered node's
-    // ancestor tree for 'mouseenter' handlers after dispatching the 'mouseleave' events (as the handler
-    // for 'mouseleave' might set a capturing 'mouseenter' handler, odd as that might be).
-    bool ancestorHasCapturingMouseleaveListener = false;
-    if (event && newHoverNode != oldHoverNode.get()) {
-        for (Node* node = oldHoverNode.get(); node; node = node->parentOrShadowHostNode()) {
-            if (node->hasCapturingEventListeners(EventTypeNames::mouseleave)) {
-                ancestorHasCapturingMouseleaveListener = true;
-                break;
-            }
-        }
-    }
-
-    size_t removeCount = nodesToRemoveFromChain.size();
-    for (size_t i = 0; i < removeCount; ++i) {
-        nodesToRemoveFromChain[i]->setHovered(false);
-        if (event && (ancestorHasCapturingMouseleaveListener || nodesToRemoveFromChain[i]->hasEventListeners(EventTypeNames::mouseleave)))
-            nodesToRemoveFromChain[i]->dispatchMouseEvent(*event, EventTypeNames::mouseleave, 0, newHoverNode);
-    }
-
-    bool ancestorHasCapturingMouseenterListener = false;
-    if (event && newHoverNode != oldHoverNode.get()) {
-        for (Node* node = newHoverNode; node; node = node->parentOrShadowHostNode()) {
-            if (node->hasCapturingEventListeners(EventTypeNames::mouseenter)) {
-                ancestorHasCapturingMouseenterListener = true;
-                break;
-            }
-        }
-    }
-
-    bool sawCommonAncestor = false;
-    size_t addCount = nodesToAddToChain.size();
-    for (size_t i = 0; i < addCount; ++i) {
-        // Elements past the common ancestor do not change hover state, but might change active state.
-        if (ancestorNode && nodesToAddToChain[i] == ancestorNode)
-            sawCommonAncestor = true;
-        if (allowActiveChanges)
-            nodesToAddToChain[i]->setActive(true);
-        if (!sawCommonAncestor) {
-            nodesToAddToChain[i]->setHovered(true);
-            if (event && (ancestorHasCapturingMouseenterListener || nodesToAddToChain[i]->hasEventListeners(EventTypeNames::mouseenter)))
-                nodesToAddToChain[i]->dispatchMouseEvent(*event, EventTypeNames::mouseenter, 0, oldHoverNode.get());
-        }
-    }
 }
 
 Document& Document::ensureTemplateDocument()

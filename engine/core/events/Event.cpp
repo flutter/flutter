@@ -118,11 +118,6 @@ bool Event::isUIEvent() const
     return false;
 }
 
-bool Event::isMouseEvent() const
-{
-    return false;
-}
-
 bool Event::isFocusEvent() const
 {
     return false;
@@ -139,11 +134,6 @@ bool Event::isTouchEvent() const
 }
 
 bool Event::isGestureEvent() const
-{
-    return false;
-}
-
-bool Event::isWheelEvent() const
 {
     return false;
 }

@@ -181,15 +181,6 @@ bool ScrollableArea::scrollBehaviorFromString(const String& behaviorString, Scro
     return true;
 }
 
-bool ScrollableArea::handleWheelEvent(const PlatformWheelEvent& wheelEvent)
-{
-    // ctrl+wheel events are used to trigger zooming, not scrolling.
-    if (wheelEvent.modifiers() & PlatformEvent::CtrlKey)
-        return false;
-
-    return scrollAnimator()->handleWheelEvent(wheelEvent);
-}
-
 void ScrollableArea::setScrollOffsetFromAnimation(const IntPoint& offset)
 {
     scrollPositionChanged(offset);

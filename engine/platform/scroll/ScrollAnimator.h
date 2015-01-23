@@ -32,7 +32,6 @@
 #define SKY_ENGINE_PLATFORM_SCROLL_SCROLLANIMATOR_H_
 
 #include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/PlatformWheelEvent.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
 #include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/wtf/FastAllocBase.h"
@@ -63,8 +62,6 @@ public:
     ScrollableArea* scrollableArea() const { return m_scrollableArea; }
 
     virtual void setIsActive() { }
-
-    virtual bool handleWheelEvent(const PlatformWheelEvent&);
 
     void setCurrentPosition(const FloatPoint&);
     FloatPoint currentPosition() const;

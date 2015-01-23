@@ -103,7 +103,6 @@ class Location;
 class MediaQueryListListener;
 class MediaQueryMatcher;
 class Page;
-class PlatformMouseEvent;
 class QualifiedName;
 class Range;
 class RenderView;
@@ -124,7 +123,6 @@ class WebGLRenderingContext;
 
 struct AnnotatedRegionValue;
 
-typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults;
 typedef int ExceptionCode;
 
 enum DocumentClass {
@@ -324,8 +322,6 @@ public:
 
     TextLinkColors& textLinkColors() { return m_textLinkColors; }
 
-    MouseEventWithHitTestResults prepareMouseEvent(const HitTestRequest&, const LayoutPoint&, const PlatformMouseEvent&);
-
     bool setFocusedElement(PassRefPtr<Element>, FocusType = FocusTypeNone);
     Element* focusedElement() const { return m_focusedElement.get(); }
     UserActionElementSet& userActionElements()  { return m_userActionElements; }
@@ -338,8 +334,6 @@ public:
     void removeFocusedElementOfSubtree(Node*, bool amongChildrenOnly = false);
     void hoveredNodeDetached(Node*);
     void activeChainNodeDetached(Node*);
-
-    void updateHoverActiveState(const HitTestRequest&, Element*, const PlatformMouseEvent* = 0);
 
     void scheduleVisualUpdate();
 

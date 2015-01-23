@@ -44,8 +44,6 @@ enum NavigationPolicy {
     NavigationPolicyNewPopup,
 };
 
-bool navigationPolicyFromMouseEvent(unsigned short button, bool ctrl, bool shift, bool alt, bool meta, NavigationPolicy*);
-
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_LOADER_NAVIGATIONPOLICY_H_

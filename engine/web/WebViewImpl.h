@@ -154,9 +154,6 @@ public:
     // the page is shutting down, but will be valid at all other times.
     WebLocalFrameImpl* mainFrameImpl();
 
-    // Event related methods:
-    void mouseDoubleClick(const WebMouseEvent&);
-
     // Notifies the WebView that a load has been committed. isNewNavigation
     // will be true if a new session history item should be created for that
     // load. isNavigationWithinPage will be true if the navigation does
@@ -243,12 +240,7 @@ private:
     bool handleCharEvent(const WebKeyboardEvent&);
     bool handleGestureEvent(const WebGestureEvent&);
     bool handleKeyEvent(const WebKeyboardEvent&);
-    bool handleMouseWheel(LocalFrame&, const WebMouseWheelEvent&);
     bool handleTouchEvent(LocalFrame& mainFrame, const WebTouchEvent& event);
-    void handleMouseDown(LocalFrame&, const WebMouseEvent&);
-    void handleMouseLeave(LocalFrame&, const WebMouseEvent&);
-    void handleMouseMove(LocalFrame& mainFrame, const WebMouseEvent& event);
-    void handleMouseUp(LocalFrame&, const WebMouseEvent&);
 
     InputMethodContext* inputMethodContext();
 

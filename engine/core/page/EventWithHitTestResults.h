@@ -24,7 +24,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/PlatformEvent.h"
 #include "sky/engine/platform/PlatformGestureEvent.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 
 namespace blink {
 
@@ -53,8 +52,6 @@ private:
     EventType m_event;
     HitTestResult m_hitTestResult;
 };
-
-typedef EventWithHitTestResults<PlatformMouseEvent> MouseEventWithHitTestResults;
 
 typedef EventWithHitTestResults<PlatformGestureEvent> GestureEventWithHitTestResults;
 

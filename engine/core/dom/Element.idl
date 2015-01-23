@@ -80,8 +80,6 @@
     readonly attribute boolean isContentEditable;
 
     attribute boolean spellcheck;
-
-    void click();
 };
 
 Element implements ParentNode;

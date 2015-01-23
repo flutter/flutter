@@ -138,12 +138,10 @@ public:
 
     // These events are general classes of events.
     virtual bool isUIEvent() const;
-    virtual bool isMouseEvent() const;
     virtual bool isFocusEvent() const;
     virtual bool isKeyboardEvent() const;
     virtual bool isTouchEvent() const;
     virtual bool isGestureEvent() const;
-    virtual bool isWheelEvent() const;
 
     // Drag events are a subset of mouse events.
     virtual bool isDragEvent() const;

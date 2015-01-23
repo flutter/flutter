@@ -45,7 +45,6 @@
 #include "sky/engine/core/page/PageVisibilityState.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/Cursor.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/fonts/FontSmoothingMode.h"
 #include "sky/engine/platform/graphics/filters/FilterOperation.h"
@@ -158,11 +157,6 @@ COMPILE_ASSERT_MATCHING_ENUM(WebNode::ElementNode, Node::ELEMENT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::TextNode, Node::TEXT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::DocumentNode, Node::DOCUMENT_NODE);
 COMPILE_ASSERT_MATCHING_ENUM(WebNode::DocumentFragmentNode, Node::DOCUMENT_FRAGMENT_NODE);
-
-COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonNone, NoButton);
-COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonLeft, LeftButton);
-COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonMiddle, MiddleButton);
-COMPILE_ASSERT_MATCHING_ENUM(WebMouseEvent::ButtonRight, RightButton);
 
 COMPILE_ASSERT_MATCHING_ENUM(WebTextAffinityUpstream, UPSTREAM);
 COMPILE_ASSERT_MATCHING_ENUM(WebTextAffinityDownstream, DOWNSTREAM);

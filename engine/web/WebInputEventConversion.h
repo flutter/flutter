@@ -33,38 +33,22 @@
 
 #include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
-#include "sky/engine/platform/PlatformMouseEvent.h"
 #include "sky/engine/platform/PlatformTouchEvent.h"
-#include "sky/engine/platform/PlatformWheelEvent.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
 
 class GestureEvent;
 class KeyboardEvent;
-class MouseEvent;
 class RenderObject;
 class TouchEvent;
-class WebMouseEvent;
-class WebMouseWheelEvent;
 class WebKeyboardEvent;
 class WebTouchEvent;
 class WebGestureEvent;
-class WheelEvent;
 class Widget;
 
 // These classes are used to convert from WebInputEvent subclasses to
 // corresponding WebCore events.
-
-class PlatformMouseEventBuilder : public PlatformMouseEvent {
-public:
-    PlatformMouseEventBuilder(Widget*, const WebMouseEvent&);
-};
-
-class PlatformWheelEventBuilder : public PlatformWheelEvent {
-public:
-    PlatformWheelEventBuilder(Widget*, const WebMouseWheelEvent&);
-};
 
 class PlatformGestureEventBuilder : public PlatformGestureEvent {
 public:
@@ -88,29 +72,6 @@ public:
 class PlatformTouchEventBuilder : public PlatformTouchEvent {
 public:
     PlatformTouchEventBuilder(Widget*, const WebTouchEvent&);
-};
-
-class WebMouseEventBuilder : public WebMouseEvent {
-public:
-    // Converts a MouseEvent to a corresponding WebMouseEvent.
-    // NOTE: This is only implemented for mousemove, mouseover, mouseout,
-    // mousedown and mouseup. If the event mapping fails, the event type will
-    // be set to Undefined.
-    WebMouseEventBuilder(const Widget*, const RenderObject*, const MouseEvent&);
-    WebMouseEventBuilder(const Widget*, const RenderObject*, const TouchEvent&);
-
-    // Converts a PlatformMouseEvent to a corresponding WebMouseEvent.
-    // NOTE: This is only implemented for mousepressed, mousereleased, and
-    // mousemoved. If the event mapping fails, the event type will be set to
-    // Undefined.
-    WebMouseEventBuilder(const Widget*, const PlatformMouseEvent&);
-};
-
-// Converts a WheelEvent to a corresponding WebMouseWheelEvent.
-// If the event mapping fails, the event type will be set to Undefined.
-class WebMouseWheelEventBuilder : public WebMouseWheelEvent {
-public:
-    WebMouseWheelEventBuilder(const Widget*, const RenderObject*, const WheelEvent&);
 };
 
 // Converts a KeyboardEvent or PlatformKeyboardEvent to a

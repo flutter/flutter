@@ -37,8 +37,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/MouseEvent.h"
-#include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/frame/Console.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -162,46 +160,9 @@ void ChromeClientImpl::focusedFrameChanged(LocalFrame* frame)
         webframe->client()->frameFocused();
 }
 
-static inline void updatePolicyForEvent(const WebInputEvent* inputEvent, NavigationPolicy* policy)
-{
-    if (!inputEvent || inputEvent->type != WebInputEvent::MouseUp)
-        return;
-
-    const WebMouseEvent* mouseEvent = static_cast<const WebMouseEvent*>(inputEvent);
-
-    unsigned short buttonNumber;
-    switch (mouseEvent->button) {
-    case WebMouseEvent::ButtonLeft:
-        buttonNumber = 0;
-        break;
-    case WebMouseEvent::ButtonMiddle:
-        buttonNumber = 1;
-        break;
-    case WebMouseEvent::ButtonRight:
-        buttonNumber = 2;
-        break;
-    default:
-        return;
-    }
-    bool ctrl = mouseEvent->modifiers & WebMouseEvent::ControlKey;
-    bool shift = mouseEvent->modifiers & WebMouseEvent::ShiftKey;
-    bool alt = mouseEvent->modifiers & WebMouseEvent::AltKey;
-    bool meta = mouseEvent->modifiers & WebMouseEvent::MetaKey;
-
-    NavigationPolicy userPolicy = *policy;
-    navigationPolicyFromMouseEvent(buttonNumber, ctrl, shift, alt, meta, &userPolicy);
-    // User and app agree that we want a new window; let the app override the decorations.
-    if (userPolicy == NavigationPolicyNewWindow && *policy == NavigationPolicyNewPopup)
-        return;
-    *policy = userPolicy;
-}
-
 WebNavigationPolicy ChromeClientImpl::getNavigationPolicy()
 {
-    NavigationPolicy policy = NavigationPolicyNewForegroundTab;
-    updatePolicyForEvent(WebViewImpl::currentInputEvent(), &policy);
-
-    return static_cast<WebNavigationPolicy>(policy);
+    return WebNavigationPolicyCurrentTab;
 }
 
 void ChromeClientImpl::show(NavigationPolicy navigationPolicy)
@@ -353,18 +314,6 @@ void ChromeClientImpl::forwardInputEvent(
     // FIXME: Add a check for out-of-process iframes enabled.
     if (event->isKeyboardEvent()) {
         WebKeyboardEventBuilder webEvent(*static_cast<KeyboardEvent*>(event));
-        webFrame->client()->forwardInputEvent(&webEvent);
-    } else if (event->isMouseEvent()) {
-        WebMouseEventBuilder webEvent(webFrame->frameView(), 0, *static_cast<MouseEvent*>(event));
-        // Internal Blink events should not be forwarded.
-        if (webEvent.type == WebInputEvent::Undefined)
-            return;
-
-        webFrame->client()->forwardInputEvent(&webEvent);
-    } else if (event->isWheelEvent()) {
-        WebMouseWheelEventBuilder webEvent(webFrame->frameView(), 0, *static_cast<WheelEvent*>(event));
-        if (webEvent.type == WebInputEvent::Undefined)
-            return;
         webFrame->client()->forwardInputEvent(&webEvent);
     }
 }

@@ -45,7 +45,6 @@ namespace blink {
 class WebCompositeAndReadbackAsyncCallback;
 class WebInputEvent;
 class WebLayerTreeView;
-class WebMouseEvent;
 class WebString;
 struct WebPoint;
 struct WebRenderingStats;

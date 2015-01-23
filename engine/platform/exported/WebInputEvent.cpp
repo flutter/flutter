@@ -46,14 +46,6 @@ struct SameSizeAsWebKeyboardEvent : public SameSizeAsWebInputEvent {
     int keyboardData[12];
 };
 
-struct SameSizeAsWebMouseEvent : public SameSizeAsWebInputEvent {
-    int mouseData[10];
-};
-
-struct SameSizeAsWebMouseWheelEvent : public SameSizeAsWebMouseEvent {
-    int mousewheelData[12];
-};
-
 struct SameSizeAsWebGestureEvent : public SameSizeAsWebInputEvent {
     int gestureData[9];
 };
@@ -65,8 +57,6 @@ struct SameSizeAsWebTouchEvent : public SameSizeAsWebInputEvent {
 
 COMPILE_ASSERT(sizeof(WebInputEvent) == sizeof(SameSizeAsWebInputEvent), WebInputEvent_has_gaps);
 COMPILE_ASSERT(sizeof(WebKeyboardEvent) == sizeof(SameSizeAsWebKeyboardEvent), WebKeyboardEvent_has_gaps);
-COMPILE_ASSERT(sizeof(WebMouseEvent) == sizeof(SameSizeAsWebMouseEvent), WebMouseEvent_has_gaps);
-COMPILE_ASSERT(sizeof(WebMouseWheelEvent) == sizeof(SameSizeAsWebMouseWheelEvent), WebMouseWheelEvent_has_gaps);
 COMPILE_ASSERT(sizeof(WebGestureEvent) == sizeof(SameSizeAsWebGestureEvent), WebGestureEvent_has_gaps);
 COMPILE_ASSERT(sizeof(WebTouchEvent) == sizeof(SameSizeAsWebTouchEvent), WebTouchEvent_has_gaps);
 
