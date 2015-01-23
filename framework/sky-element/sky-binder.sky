@@ -177,11 +177,27 @@ function parseAttributeDirectives(element, directives) {
     }
 
     var property = parsePropertyDirective(value, name);
-    if (!property)
-      continue;
-
-    directives.properties.push(property);
+    if (property)
+      directives.properties.push(property);
   }
+}
+
+function createCloneSource(element, properties) {
+  if (!properties.length)
+    return element;
+
+  // Leave attributes alone on template so you can see the if/repeat statements
+  // in the inspector.
+  if (element instanceof HTMLTemplateElement)
+    return element;
+
+  var result = element.cloneNode(false);
+
+  for (var i = 0; i < properties.length; ++i) {
+    result.removeAttribute(properties[i].name);
+  }
+
+  return result;
 }
 
 function eventHandlerCallback(event) {
@@ -200,10 +216,12 @@ class NodeDirectives {
     this.children = [];
     this.properties = [];
     this.node = node;
+    this.cloneSourceNode = node;
     Object.preventExtensions(this);
 
     if (node instanceof Element) {
       parseAttributeDirectives(node, this);
+      this.cloneSourceNode = createCloneSource(node, this.properties);
     } else if (node instanceof Text) {
       var property = parsePropertyDirective(node.data, 'textContent');
       if (property)
@@ -225,20 +243,20 @@ class NodeDirectives {
     // TODO(esprehn): In sky instead of needing to use a staging docuemnt per
     // custom element registry we're going to need to use the current module's
     // registry.
-    var clone = stagingDocument.importNode(this.node, false);
+    var clone = stagingDocument.importNode(this.cloneSourceNode, false);
 
     for (var i = 0; i < this.eventHandlers.length; ++i) {
       clone.addEventListener(this.eventHandlers[i], eventHandlerCallback);
     }
 
-    var clone = parent.appendChild(clone);
+    for (var i = 0; i < this.properties.length; ++i) {
+      bindings.push(this.properties[i].bindProperty(clone, model));
+    }
+
+    parent.appendChild(clone);
 
     for (var i = 0; i < this.children.length; ++i) {
       this.children[i].createBoundClone(clone, model, bindings);
-    }
-
-    for (var i = 0; i < this.properties.length; ++i) {
-      bindings.push(this.properties[i].bindProperty(clone, model));
     }
 
     if (clone instanceof HTMLTemplateElement) {

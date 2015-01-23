@@ -1,11 +1,27 @@
 <sky>
 <import src="/sky/tests//resources/chai.sky" />
 <import src="/sky/tests/resources/mocha.sky" />
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 <import src="/sky/tests/resources/test-element.sky" as="TestElement" />
 
 <div id="sandbox"></div>
 
 <test-element id="parser-element" checked="true" size="10" name="foo bar" />
+
+<sky-element name="test-element-parent">
+  <template>
+    <test-element size="{{ size }}" />
+  </template>
+  <script>
+    (class extends SkyElement {
+      created() {
+        this.size = 10;
+      }
+    }).register();
+  </script>
+</sky-element>
+
+<test-element-parent id="parent" />
 
 <script>
 describe("SkyElement", function() {
@@ -185,6 +201,14 @@ describe("SkyElement", function() {
     var event = new CustomEvent("host-event");
     element.dispatchEvent(event);
     assert.equal(element.lastEvent, event);
+  });
+
+  it("should not call attributeChanged for binding expression values", function() {
+    var parent = document.getElementById('parent');
+    var element = parent.shadowRoot.querySelector('test-element');
+    assert.deepEqual(element.changes, [
+      { name: 'size', oldValue: 0, newValue: 10 },
+    ]);
   });
 
   it("should call shadowRootReady after creating the template instance", function() {

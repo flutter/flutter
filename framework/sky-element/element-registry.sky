@@ -18,6 +18,16 @@ var globalAttributesNames = new Set([
   'style',
 ]);
 
+function isExpandableAttribute(name) {
+  return name.startsWith('data-') || name.startsWith('on-');
+}
+
+function isGlobalAttribute(name) {
+  if (isExpandableAttribute(name))
+    return true;
+  return globalAttributesNames.has(name);
+}
+
 var attributeConverters = {
   boolean: function(value) {
     if (typeof value == 'string')
@@ -56,9 +66,7 @@ class ElementRegistration {
   }
 
   allowsAttribute(name) {
-    if (name.startsWith('data-'))
-      return true;
-    if (globalAttributesNames.has(name))
+    if (isGlobalAttribute(name))
       return true;
     if (this.attributes.has(name))
       return true;
@@ -120,7 +128,7 @@ function checkAttribute(tagName, attrName) {
   var registration = getRegistration(tagName);
 
   if (!registration)
-    return globalAttributesNames.has(attrName);
+    return isGlobalAttribute(attrName);
 
   return registration.allowsAttribute(attrName);
 }
@@ -161,5 +169,7 @@ module.exports = {
   registerElement: registerElement,
   getRegistration: getRegistration,
   checkAttribute: checkAttribute,
+  isGlobalAttribute: isGlobalAttribute,
+  isExpandableAttribute: isExpandableAttribute,
 };
 </script>

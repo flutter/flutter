@@ -1,4 +1,4 @@
-Running 13 tests
+Running 14 tests
 ok 1 SkyElement should stamp when the element is inserted
 ok 2 SkyElement should update isAttached when inserting
 ok 3 SkyElement should handle parser created elements with attributes
@@ -11,7 +11,8 @@ ok 9 SkyElement should connect data binding
 ok 10 SkyElement should two way bind attributes
 ok 11 SkyElement should connect template event handlers
 ok 12 SkyElement should connect host event handlers
-ok 13 SkyElement should call shadowRootReady after creating the template instance
-13 tests
-13 pass
+ok 13 SkyElement should not call attributeChanged for binding expression values
+ok 14 SkyElement should call shadowRootReady after creating the template instance
+14 tests
+14 pass
 0 fail

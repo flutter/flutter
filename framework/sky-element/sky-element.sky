@@ -133,6 +133,8 @@ class SkyElement extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (registry.isExpandableAttribute(name))
+      return;
     this.attributeChanged(name, oldValue, newValue);
     var registration = registry.getRegistration(this.localName);
     var converter = registration.attributes.get(name);
