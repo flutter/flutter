@@ -789,8 +789,6 @@ sky_core_files = [
   "frame/SettingsDelegate.h",
   "frame/SuspendableTimer.cpp",
   "frame/SuspendableTimer.h",
-  "frame/UseCounter.cpp",
-  "frame/UseCounter.h",
   "html/canvas/ANGLEInstancedArrays.cpp",
   "html/canvas/ANGLEInstancedArrays.h",
   "html/canvas/Canvas2DContextAttributes.cpp",

@@ -35,7 +35,6 @@
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/events/AnimationPlayerEvent.h"
-#include "sky/engine/core/frame/UseCounter.h"
 
 namespace blink {
 
@@ -521,8 +520,6 @@ bool AnimationPlayer::canFree() const
 
 bool AnimationPlayer::addEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
 {
-    if (eventType == EventTypeNames::finish)
-        UseCounter::count(executionContext(), UseCounter::AnimationPlayerFinishEvent);
     return EventTargetWithInlineData::addEventListener(eventType, listener, useCapture);
 }
 

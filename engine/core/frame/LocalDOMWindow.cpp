@@ -690,10 +690,9 @@ bool LocalDOMWindow::addEventListener(const AtomicString& eventType, PassRefPtr<
 
     lifecycleNotifier().notifyAddEventListener(this, eventType);
 
-    if (eventType == EventTypeNames::unload) {
-        UseCounter::count(document(), UseCounter::DocumentUnloadRegistered);
+    if (eventType == EventTypeNames::unload)
         addUnloadEventListener(this);
-    }
+
     return true;
 }
 

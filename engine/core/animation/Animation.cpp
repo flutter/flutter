@@ -40,7 +40,6 @@
 #include "sky/engine/core/animation/Interpolation.h"
 #include "sky/engine/core/animation/KeyframeEffectModel.h"
 #include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 
 namespace blink {
@@ -64,20 +63,14 @@ PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEf
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
 {
-    if (element)
-        UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectObjectTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(timingInputDictionary));
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
 {
-    if (element)
-        UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectDoubleTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(duration));
 }
 PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
 {
-    if (element)
-        UseCounter::count(element->document(), UseCounter::AnimationConstructorKeyframeListEffectNoTiming);
     return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), Timing());
 }
 

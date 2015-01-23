@@ -240,10 +240,8 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
 void Page::didCommitLoad(LocalFrame* frame)
 {
     lifecycleNotifier().notifyDidCommitLoad(frame);
-    if (m_mainFrame == frame) {
+    if (m_mainFrame == frame)
         frame->console().clearMessages();
-        useCounter().didCommitLoad();
-    }
 }
 
 void Page::acceptLanguagesChanged()

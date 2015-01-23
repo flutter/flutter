@@ -63,11 +63,6 @@ Chrome& FrameHost::chrome() const
     return m_page->chrome();
 }
 
-UseCounter& FrameHost::useCounter() const
-{
-    return m_page->useCounter();
-}
-
 float FrameHost::deviceScaleFactor() const
 {
     return m_page->deviceScaleFactor();

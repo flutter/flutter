@@ -32,7 +32,6 @@
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 
 #include <limits>
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/LengthFunctions.h"
@@ -521,9 +520,6 @@ bool RenderFlexibleBox::childPreferredMainAxisContentExtentRequiresLayout(Render
 LayoutUnit RenderFlexibleBox::preferredMainAxisContentExtentForChild(RenderBox* child, bool hasInfiniteLineLength, bool relayoutChildren)
 {
     child->clearOverrideSize();
-
-    if (child->style()->hasAspectRatio() || child->isImage() || child->isCanvas())
-        UseCounter::count(document(), UseCounter::AspectRatioFlexItem);
 
     Length flexBasis = flexBasisForChild(child);
     if (preferredMainAxisExtentDependsOnLayout(flexBasis, hasInfiniteLineLength)) {

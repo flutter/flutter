@@ -64,7 +64,6 @@ class StylePropertyShorthand;
 class StyleRuleBase;
 class StyleRuleKeyframes;
 class StyleSheetContents;
-class UseCounter;
 
 // FIXME: This class is shared with CSSTokenizer so should we rename it to CSSSourceLocation?
 struct CSSParserLocation {

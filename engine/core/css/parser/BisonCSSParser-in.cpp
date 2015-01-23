@@ -70,7 +70,6 @@
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
@@ -793,7 +792,7 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
 {
     ASSERT(!string.isEmpty());
 
-    CSSParserContext context(document, UseCounter::getFrom(&document));
+    CSSParserContext context(document);
 
     if (parseSimpleLengthValue(declaration, propertyID, string, context.mode()))
         return true;
@@ -814,10 +813,9 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
     if (parseColorValue(declaration, propertyID, string, cssParserMode))
         return true;
 
-    CSSParserContext context(0); // FIXME: Why does this not have a UseCounter?
-    if (contextStyleSheet) {
+    CSSParserContext context;
+    if (contextStyleSheet)
         context = contextStyleSheet->parserContext();
-    }
 
     if (parseKeywordValue(declaration, propertyID, string, context))
         return true;
@@ -830,9 +828,6 @@ bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropert
 
 bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, StyleSheetContents* contextStyleSheet)
 {
-    if (m_context.useCounter())
-        m_context.useCounter()->count(m_context, propertyID);
-
     setStyleSheet(contextStyleSheet);
 
     setupParser("@-internal-value ", string, "");
@@ -926,7 +921,7 @@ void BisonCSSParser::parseSelector(const String& string, CSSSelectorList& select
 PassRefPtr<ImmutableStylePropertySet> BisonCSSParser::parseInlineStyleDeclaration(const String& string, Element* element)
 {
     Document& document = element->document();
-    CSSParserContext context = CSSParserContext(document.elementSheet().contents()->parserContext(), UseCounter::getFrom(&document));
+    CSSParserContext context = CSSParserContext(document.elementSheet().contents()->parserContext());
     return BisonCSSParser(context).parseDeclaration(string, document.elementSheet().contents());
 }
 
@@ -1503,29 +1498,6 @@ StyleRuleKeyframes* BisonCSSParser::createKeyframesRule(const String& name, Pass
     return rulePtr;
 }
 
-static void recordSelectorStats(const CSSParserContext& context, const CSSSelectorList& selectorList)
-{
-    if (!context.useCounter())
-        return;
-
-    for (const CSSSelector* selector = selectorList.first(); selector; selector = CSSSelectorList::next(*selector)) {
-        for (const CSSSelector* current = selector; current ; current = current->tagHistory()) {
-            UseCounter::Feature feature = UseCounter::NumberOfFeatures;
-            switch (current->pseudoType()) {
-            case CSSSelector::PseudoHost:
-                feature = UseCounter::CSSSelectorPseudoHost;
-                break;
-            default:
-                break;
-            }
-            if (feature != UseCounter::NumberOfFeatures)
-                context.useCounter()->count(feature);
-            if (current->selectorList())
-                recordSelectorStats(context, *current->selectorList());
-        }
-    }
-}
-
 StyleRuleBase* BisonCSSParser::createStyleRule(Vector<OwnPtr<CSSParserSelector> >* selectors)
 {
     StyleRule* result = 0;
@@ -1536,7 +1508,6 @@ StyleRuleBase* BisonCSSParser::createStyleRule(Vector<OwnPtr<CSSParserSelector> 
         rule->setProperties(createStylePropertySet());
         result = rule.get();
         m_parsedRules.append(rule.release());
-        recordSelectorStats(m_context, result->selectorList());
     }
     clearProperties();
     return result;

@@ -48,7 +48,6 @@
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/events/AnimationEvent.h"
 #include "sky/engine/core/events/TransitionEvent.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/style/KeyframeList.h"
@@ -95,7 +94,6 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
         return;
 
     // Construct and populate the style for each keyframe
-    PropertySet specifiedPropertiesForUseCounter;
     for (size_t i = 0; i < styleKeyframes.size(); ++i) {
         const StyleKeyframe* styleKeyframe = styleKeyframes[i].get();
         // It's OK to pass a null element here.
@@ -107,7 +105,6 @@ static void resolveKeyframes(StyleResolver* resolver, Element* element, const El
         keyframe->setEasing(defaultTimingFunction);
         const StylePropertySet& properties = styleKeyframe->properties();
         for (unsigned j = 0; j < properties.propertyCount(); j++) {
-            specifiedPropertiesForUseCounter.add(properties.propertyAt(j).id());
             CSSPropertyID property = propertyForAnimation(properties.propertyAt(j).id());
             if (property == CSSPropertyAnimationTimingFunction) {
                 CSSValue* value = properties.propertyAt(j).value();

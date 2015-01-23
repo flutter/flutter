@@ -32,22 +32,19 @@
 
 namespace blink {
 
-CSSParserContext::CSSParserContext(UseCounter* useCounter)
-    : m_useCounter(useCounter)
+CSSParserContext::CSSParserContext()
 {
 }
 
-CSSParserContext::CSSParserContext(const Document& document, UseCounter* useCounter, const KURL& baseURL)
+CSSParserContext::CSSParserContext(const Document& document, const KURL& baseURL)
     : m_baseURL(baseURL.isNull() ? document.baseURL() : baseURL)
     , m_referrer(m_baseURL.strippedForUseAsReferrer(), document.referrerPolicy())
-    , m_useCounter(useCounter)
 {
 }
 
-CSSParserContext::CSSParserContext(const CSSParserContext& other, UseCounter* useCounter)
+CSSParserContext::CSSParserContext(const CSSParserContext& other)
     : m_baseURL(other.m_baseURL)
     , m_referrer(other.m_referrer)
-    , m_useCounter(useCounter)
 {
 }
 
@@ -58,7 +55,7 @@ bool CSSParserContext::operator==(const CSSParserContext& other) const
 
 const CSSParserContext& strictCSSParserContext()
 {
-    DEFINE_STATIC_LOCAL(CSSParserContext, strictContext, (0));
+    DEFINE_STATIC_LOCAL(CSSParserContext, strictContext, ());
     return strictContext;
 }
 

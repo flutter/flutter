@@ -27,7 +27,6 @@
 #include "gen/sky/core/EventInterfaces.h"
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/events/EventTarget.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
@@ -96,20 +95,11 @@ void Event::initEvent(const AtomicString& eventTypeArg, bool canBubbleArg, bool 
 
 bool Event::legacyReturnValue(ExecutionContext* executionContext) const
 {
-    bool returnValue = !defaultPrevented();
-    if (returnValue)
-        UseCounter::count(executionContext, UseCounter::EventGetReturnValueTrue);
-    else
-        UseCounter::count(executionContext, UseCounter::EventGetReturnValueFalse);
-    return returnValue;
+    return !defaultPrevented();
 }
 
 void Event::setLegacyReturnValue(ExecutionContext* executionContext, bool returnValue)
 {
-    if (returnValue)
-        UseCounter::count(executionContext, UseCounter::EventSetReturnValueTrue);
-    else
-        UseCounter::count(executionContext, UseCounter::EventSetReturnValueFalse);
     setDefaultPrevented(!returnValue);
 }
 

@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
 #include "sky/engine/core/css/FontFaceSet.h"
 #include "sky/engine/core/css/RemoteFontFaceSource.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
 

@@ -111,8 +111,6 @@ def interface_context(interface):
 
     # [MeasureAs]
     is_measure_as = 'MeasureAs' in extended_attributes
-    if is_measure_as:
-        includes.add('core/frame/UseCounter.h')
 
     # [SetWrapperReferenceFrom]
     reachable_node_function = extended_attributes.get('SetWrapperReferenceFrom')

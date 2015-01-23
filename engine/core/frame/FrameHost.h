@@ -43,7 +43,6 @@ class Chrome;
 class Page;
 class ServiceProvider;
 class Settings;
-class UseCounter;
 
 // FrameHost is the set of global data shared between multiple frames
 // and is provided by the embedder to each frame when created.
@@ -64,7 +63,6 @@ public:
     Page& page() const { return *m_page; }
     Settings& settings() const;
     Chrome& chrome() const;
-    UseCounter& useCounter() const;
 
     ServiceProvider& services() const { return m_services; }
 

@@ -40,7 +40,6 @@
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/Vector.h"
@@ -203,17 +202,6 @@ void EventTarget::fireEventListeners(Event* event, EventTargetData* d, EventList
     // dispatch. Conveniently, all new event listeners will be added after or at
     // index |size|, so iterating up to (but not including) |size| naturally excludes
     // new event listeners.
-
-    if (event->type() == EventTypeNames::unload) {
-        if (LocalDOMWindow* executingWindow = this->executingWindow())
-            UseCounter::count(executingWindow->document(), UseCounter::DocumentUnloadFired);
-    } else if (event->type() == EventTypeNames::DOMFocusIn || event->type() == EventTypeNames::DOMFocusOut) {
-        if (LocalDOMWindow* executingWindow = this->executingWindow())
-            UseCounter::count(executingWindow->document(), UseCounter::DOMFocusInOutEvent);
-    } else if (event->type() == EventTypeNames::focusin || event->type() == EventTypeNames::focusout) {
-        if (LocalDOMWindow* executingWindow = this->executingWindow())
-            UseCounter::count(executingWindow->document(), UseCounter::FocusInOutEvent);
-    }
 
     size_t i = 0;
     size_t size = entry.size();

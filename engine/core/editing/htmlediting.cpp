@@ -44,7 +44,6 @@
 #include "sky/engine/core/editing/VisibleSelection.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/StdLibExtras.h"

@@ -107,7 +107,7 @@ static RuleSet& defaultStyles()
         "    text-decoration: underline;\n"
         "}\n";
 
-    styleSheet = StyleSheetContents::create(0, CSSParserContext(0));
+    styleSheet = StyleSheetContents::create(0, CSSParserContext());
     styleSheet->parseString(cssText);
 
     ruleSet = RuleSet::create();

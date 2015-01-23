@@ -23,7 +23,6 @@
 
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/SettingsDelegate.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/page/PageAnimator.h"
 #include "sky/engine/core/page/PageVisibilityState.h"
 #include "sky/engine/platform/LifecycleContext.h"
@@ -104,8 +103,6 @@ public:
 
     Settings& settings() const { return *m_settings; }
 
-    UseCounter& useCounter() { return m_useCounter; }
-
     void unmarkAllTextMatches();
 
     float deviceScaleFactor() const { return m_deviceScaleFactor; }
@@ -176,8 +173,6 @@ private:
 
     EditorClient* const m_editorClient;
     SpellCheckerClient* const m_spellCheckerClient;
-
-    UseCounter m_useCounter;
 
     float m_deviceScaleFactor;
 

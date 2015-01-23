@@ -44,7 +44,6 @@
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/events/BeforeTextInsertedEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -497,18 +496,12 @@ static bool isInlineHTMLElementWithStyle(const Node* node)
     // one of our internal classes.
     const HTMLElement* element = toHTMLElement(node);
     const AtomicString& classAttributeValue = element->getAttribute(HTMLNames::classAttr);
-    if (classAttributeValue == AppleTabSpanClass) {
-        UseCounter::count(element->document(), UseCounter::EditingAppleTabSpanClass);
+    if (classAttributeValue == AppleTabSpanClass)
         return true;
-    }
-    if (classAttributeValue == AppleConvertedSpace) {
-        UseCounter::count(element->document(), UseCounter::EditingAppleConvertedSpace);
+    if (classAttributeValue == AppleConvertedSpace)
         return true;
-    }
-    if (classAttributeValue == ApplePasteAsQuotation) {
-        UseCounter::count(element->document(), UseCounter::EditingApplePasteAsQuotation);
+    if (classAttributeValue == ApplePasteAsQuotation)
         return true;
-    }
 
     return EditingStyle::elementIsStyledSpanOrHTMLEquivalent(element);
 }

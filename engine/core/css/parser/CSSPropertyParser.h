@@ -48,7 +48,6 @@ class CSSBasicShape;
 class CSSBasicShapeInset;
 class ImmutableStylePropertySet;
 class StylePropertyShorthand;
-class UseCounter;
 
 // Inputs: PropertyID, CSSParserValueList.
 // Outputs: Vector of CSSProperties

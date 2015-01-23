@@ -383,12 +383,6 @@ we must ensure either ALL or NO methods in this overload return Promise #}
 static void {{overloads.name}}Method{{world_suffix}}(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
     ExceptionState exceptionState(ExceptionState::ExecutionContext, "{{overloads.name}}", "{{interface_name}}", info.Holder(), info.GetIsolate());
-    {% if overloads.measure_all_as %}
-    UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{overloads.measure_all_as}});
-    {% endif %}
-    {% if overloads.deprecate_all_as %}
-    UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{overloads.deprecate_all_as}});
-    {% endif %}
     {# First resolve by length #}
     {# 2. Initialize argcount to be min(maxarg, n). #}
     switch (std::min({{overloads.maxarg}}, info.Length())) {
@@ -401,12 +395,6 @@ static void {{overloads.name}}Method{{world_suffix}}(const v8::FunctionCallbackI
         {% filter runtime_enabled(not overloads.runtime_enabled_function_all and
                                   method.runtime_enabled_function) %}
         if ({{test}}) {
-            {% if method.measure_as and not overloads.measure_all_as %}
-            UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{method.measure_as}});
-            {% endif %}
-            {% if method.deprecate_as and not overloads.deprecate_all_as %}
-            UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{method.deprecate_as}});
-            {% endif %}
             {{method.name}}{{method.overload_index}}Method{{world_suffix}}(info);
             return;
         }
@@ -443,12 +431,6 @@ static void {{method.name}}MethodCallback{{world_suffix}}(const v8::FunctionCall
 {
     TRACE_EVENT_SET_SAMPLING_STATE("blink", "DOMMethod");
     {% if not method.overloads %}{# Overloaded methods are measured in overload_resolution_method() #}
-    {% if method.measure_as %}
-    UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{method.measure_as}});
-    {% endif %}
-    {% if method.deprecate_as %}
-    UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{method.deprecate_as}});
-    {% endif %}
     {% endif %}{# not method.overloads #}
     {% if method.is_custom %}
     {{v8_class}}::{{method.name}}MethodCustom(info);

@@ -54,7 +54,8 @@ void HTMLContentElement::parseSelect()
 {
     ASSERT(m_shouldParseSelect);
 
-    BisonCSSParser parser(CSSParserContext(document(), 0));
+    CSSParserContext context(document());
+    BisonCSSParser parser(context);
     parser.parseSelector(m_select, m_selectorList);
     m_shouldParseSelect = false;
     m_isValidSelector = validateSelect();

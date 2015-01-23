@@ -53,7 +53,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"

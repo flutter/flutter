@@ -51,7 +51,7 @@ PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(PassRefPtr<StyleSheetContents> s
 
 PassRefPtr<CSSStyleSheet> CSSStyleSheet::create(Node* ownerNode, const KURL& baseURL)
 {
-    CSSParserContext parserContext(ownerNode->document(), 0, baseURL);
+    CSSParserContext parserContext(ownerNode->document(), baseURL);
     RefPtr<StyleSheetContents> sheet = StyleSheetContents::create(&ownerNode->document(), parserContext);
     return adoptRef(new CSSStyleSheet(sheet.release(), ownerNode));
 }

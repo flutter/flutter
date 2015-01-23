@@ -6,7 +6,6 @@
 // - alias_for=other-property
 // Properties specifying alias_for do not get their own enum and instead map
 // directly onto the CSSPropertyID they alias. Currently this means that the
-// UseCounter will not pick up on these (crbug.com/304855)
 
 
 // - runtime_flag=CSSFooProperty

@@ -232,7 +232,6 @@ def deprecate_as(member):
     extended_attributes = member.extended_attributes
     if 'DeprecateAs' not in extended_attributes:
         return None
-    includes.add('core/frame/UseCounter.h')
     return extended_attributes['DeprecateAs']
 
 
@@ -282,7 +281,6 @@ def measure_as(definition_or_member):
     extended_attributes = definition_or_member.extended_attributes
     if 'MeasureAs' not in extended_attributes:
         return None
-    includes.add('core/frame/UseCounter.h')
     return extended_attributes['MeasureAs']
 
 

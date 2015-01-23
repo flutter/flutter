@@ -34,7 +34,6 @@
 #include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"
 #include "sky/engine/bindings/core/v8/V8RecursionScope.h"
 #include "sky/engine/bindings/core/v8/V8ScriptRunner.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/MainThread.h"
 
@@ -48,17 +47,6 @@ static void assertV8RecursionScope()
     ASSERT(V8RecursionScope::properlyUsed(v8::Isolate::GetCurrent()));
 }
 #endif
-
-static void useCounterCallback(v8::Isolate* isolate, v8::Isolate::UseCounterFeature feature)
-{
-    switch (feature) {
-    case v8::Isolate::kUseAsm:
-        UseCounter::count(currentExecutionContext(isolate), UseCounter::UseAsm);
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-}
 
 V8PerIsolateData::V8PerIsolateData()
     : m_isolateHolder(adoptPtr(new gin::IsolateHolder()))
@@ -81,7 +69,6 @@ V8PerIsolateData::V8PerIsolateData()
 #endif
     if (isMainThread())
         mainThreadPerIsolateData = this;
-    isolate()->SetUseCounterCallback(&useCounterCallback);
 }
 
 V8PerIsolateData::~V8PerIsolateData()

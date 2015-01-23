@@ -30,7 +30,6 @@
 #include "sky/engine/core/css/StylePropertySerializer.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 #ifndef NDEBUG
@@ -252,10 +251,9 @@ void MutableStylePropertySet::parseDeclaration(const String& styleDeclaration, S
 {
     m_propertyVector.clear();
 
-    CSSParserContext context(UseCounter::getFrom(contextStyleSheet));
-    if (contextStyleSheet) {
+    CSSParserContext context;
+    if (contextStyleSheet)
         context = contextStyleSheet->parserContext();
-    }
 
     BisonCSSParser parser(context);
     parser.parseDeclaration(this, styleDeclaration, 0, contextStyleSheet);

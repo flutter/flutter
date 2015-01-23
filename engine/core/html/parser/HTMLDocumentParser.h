@@ -30,7 +30,6 @@
 #include "base/memory/weak_ptr.h"
 #include "sky/engine/core/dom/DocumentParser.h"
 #include "sky/engine/core/fetch/ResourceClient.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/parser/CompactHTMLToken.h"
 #include "sky/engine/core/html/parser/HTMLInputStream.h"
 #include "sky/engine/core/html/parser/HTMLScriptRunner.h"
@@ -87,8 +86,6 @@ public:
     bool isWaitingForScripts() const override final;
     bool isExecutingScript() const override final;
     void resumeAfterWaitingForImports() override final;
-
-    UseCounter* useCounter() { return UseCounter::getFrom(contextForParsingSession()); }
 
 private:
     HTMLDocumentParser(HTMLDocument&, bool reportErrors);

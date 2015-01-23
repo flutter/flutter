@@ -40,7 +40,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/page/AutoscrollController.h"

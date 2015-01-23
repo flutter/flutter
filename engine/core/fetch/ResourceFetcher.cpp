@@ -41,7 +41,6 @@
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"

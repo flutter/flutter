@@ -49,7 +49,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/PlatformScreen.h"
@@ -301,8 +300,6 @@ static bool evalResolution(const MediaQueryExpValue& value, MediaFeaturePrefix o
 
 static bool devicePixelRatioMediaFeatureEval(const MediaQueryExpValue& value, MediaFeaturePrefix op, const MediaValues& mediaValues)
 {
-    UseCounter::count(mediaValues.document(), UseCounter::PrefixedDevicePixelRatioMediaFeature);
-
     return (!value.isValid() || value.unit == CSSPrimitiveValue::CSS_NUMBER) && evalResolution(value, op, mediaValues);
 }
 
@@ -424,15 +421,11 @@ static bool maxDeviceAspectRatioMediaFeatureEval(const MediaQueryExpValue& value
 
 static bool minDevicePixelRatioMediaFeatureEval(const MediaQueryExpValue& value, MediaFeaturePrefix, const MediaValues& mediaValues)
 {
-    UseCounter::count(mediaValues.document(), UseCounter::PrefixedMinDevicePixelRatioMediaFeature);
-
     return devicePixelRatioMediaFeatureEval(value, MinPrefix, mediaValues);
 }
 
 static bool maxDevicePixelRatioMediaFeatureEval(const MediaQueryExpValue& value, MediaFeaturePrefix, const MediaValues& mediaValues)
 {
-    UseCounter::count(mediaValues.document(), UseCounter::PrefixedMaxDevicePixelRatioMediaFeature);
-
     return devicePixelRatioMediaFeatureEval(value, MaxPrefix, mediaValues);
 }
 
@@ -488,8 +481,6 @@ static bool maxResolutionMediaFeatureEval(const MediaQueryExpValue& value, Media
 
 static bool transform3dMediaFeatureEval(const MediaQueryExpValue& value, MediaFeaturePrefix op, const MediaValues& mediaValues)
 {
-    UseCounter::count(mediaValues.document(), UseCounter::PrefixedTransform3dMediaFeature);
-
     bool returnValueIfNoParameter;
     int have3dRendering;
 

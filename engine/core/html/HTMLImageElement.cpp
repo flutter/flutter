@@ -33,7 +33,6 @@
 #include "sky/engine/core/dom/Attribute.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/fetch/ImageResource.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
@@ -125,12 +124,8 @@ void HTMLImageElement::setBestFitURLAndDPRFromImageCandidate(const ImageCandidat
     float candidateDensity = candidate.density();
     if (candidateDensity >= 0)
         m_imageDevicePixelRatio = 1.0 / candidateDensity;
-    if (candidate.resourceWidth() > 0) {
+    if (candidate.resourceWidth() > 0)
         m_intrinsicSizingViewportDependant = true;
-        UseCounter::count(document(), UseCounter::SrcsetWDescriptor);
-    } else if (!candidate.srcOrigin()) {
-        UseCounter::count(document(), UseCounter::SrcsetXDescriptor);
-    }
     if (renderer() && renderer()->isImage())
         toRenderImage(renderer())->setImageDevicePixelRatio(m_imageDevicePixelRatio);
 }

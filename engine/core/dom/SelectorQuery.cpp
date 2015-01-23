@@ -87,7 +87,8 @@ SelectorQuery* SelectorQueryCache::add(const AtomicString& selectors, const Docu
     if (it != m_entries.end())
         return it->value.get();
 
-    BisonCSSParser parser(CSSParserContext(document, 0));
+    CSSParserContext context(document);
+    BisonCSSParser parser(context);
     CSSSelectorList selectorList;
     parser.parseSelector(selectors, selectorList);
 

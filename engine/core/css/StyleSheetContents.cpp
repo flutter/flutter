@@ -29,7 +29,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/wtf/Deque.h"
 
@@ -58,7 +57,7 @@ void StyleSheetContents::parserAppendRule(PassRefPtr<StyleRuleBase> rule)
 
 bool StyleSheetContents::parseString(const String& sheetText)
 {
-    CSSParserContext context(parserContext(), UseCounter::getFrom(this));
+    CSSParserContext context(parserContext());
     BisonCSSParser p(context);
     p.parseSheet(this, sheetText);
     return true;

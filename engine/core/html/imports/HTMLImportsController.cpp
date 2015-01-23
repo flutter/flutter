@@ -34,7 +34,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/html/imports/HTMLImportChildClient.h"
 #include "sky/engine/core/html/imports/HTMLImportLoader.h"
@@ -64,7 +63,6 @@ void HTMLImportsController::removeFrom(Document& master)
 HTMLImportsController::HTMLImportsController(Document& master)
     : m_root(HTMLImportTreeRoot::create(&master))
 {
-    UseCounter::count(master, UseCounter::HTMLImports);
 }
 
 HTMLImportsController::~HTMLImportsController()
@@ -91,8 +89,6 @@ static bool makesCycle(HTMLImport* parent, const KURL& url)
 HTMLImportChild* HTMLImportsController::createChild(const KURL& url, HTMLImportLoader* loader, HTMLImport* parent, HTMLImportChildClient* client)
 {
     HTMLImport::SyncMode mode = client->isSync() && !makesCycle(parent, url) ? HTMLImport::Sync : HTMLImport::Async;
-    if (mode == HTMLImport::Async)
-        UseCounter::count(root()->document(), UseCounter::HTMLImportsAsyncAttribute);
 
     OwnPtr<HTMLImportChild> child = adoptPtr(new HTMLImportChild(url, loader, mode));
     child->setClient(client);

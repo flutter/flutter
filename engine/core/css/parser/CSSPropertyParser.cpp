@@ -63,7 +63,6 @@
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/parser/CSSParserIdioms.h"
 #include "sky/engine/core/css/parser/CSSParserValues.h"
-#include "sky/engine/core/frame/UseCounter.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/platform/FloatConversion.h"
 #include "sky/engine/wtf/BitArray.h"
@@ -401,10 +400,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
     if (!isInternalPropertyAndValueParsingEnabledForMode(m_context.mode()) && isInternalProperty(propId))
         return false;
 
-    // We don't count the UA style sheet in our statistics.
-    if (m_context.useCounter())
-        m_context.useCounter()->count(m_context, propId);
-
     if (!m_valueList)
         return false;
 
@@ -602,12 +597,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
             if (!consumeComma(m_valueList))
                 return false;
             value = m_valueList->current();
-        }
-        if (value && m_context.useCounter()) {
-            if (value->id == CSSValueWebkitZoomIn)
-                m_context.useCounter()->count(UseCounter::PrefixedCursorZoomIn);
-            else if (value->id == CSSValueWebkitZoomOut)
-                m_context.useCounter()->count(UseCounter::PrefixedCursorZoomOut);
         }
         if (list) {
             if (!value)

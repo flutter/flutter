@@ -146,12 +146,6 @@ v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>& info
 {%- endif %})
 {
     TRACE_EVENT_SET_SAMPLING_STATE("blink", "DOMGetter");
-    {% if attribute.deprecate_as %}
-    UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.deprecate_as}});
-    {% endif %}
-    {% if attribute.measure_as %}
-    UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.measure_as}});
-    {% endif %}
     {% if attribute.has_custom_getter %}
     {{v8_class}}::{{attribute.name}}AttributeGetterCustom(info);
     {% else %}
@@ -169,12 +163,6 @@ v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>& info
 static void {{attribute.name}}ConstructorGetterCallback{{world_suffix}}(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
 {
     TRACE_EVENT_SET_SAMPLING_STATE("blink", "DOMGetter");
-    {% if attribute.deprecate_as %}
-    UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.deprecate_as}});
-    {% endif %}
-    {% if attribute.measure_as %}
-    UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.measure_as}});
-    {% endif %}
     {{cpp_class}}V8Internal::{{cpp_class}}ConstructorGetter{{world_suffix}}(property, info);
     TRACE_EVENT_SET_SAMPLING_STATE("v8", "V8Execution");
 }
@@ -289,12 +277,6 @@ v8::Local<v8::String>, v8::Local<v8::Value> v8Value, const v8::PropertyCallbackI
     v8::Local<v8::Value> v8Value = info[0];
     {% endif %}
     TRACE_EVENT_SET_SAMPLING_STATE("blink", "DOMSetter");
-    {% if attribute.deprecate_as %}
-    UseCounter::countDeprecation(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.deprecate_as}});
-    {% endif %}
-    {% if attribute.measure_as %}
-    UseCounter::count(callingExecutionContext(info.GetIsolate()), UseCounter::{{attribute.measure_as}});
-    {% endif %}
     {% if attribute.is_custom_element_callbacks or attribute.is_reflect %}
     CustomElementProcessingStack::CallbackDeliveryScope deliveryScope;
     {% endif %}
