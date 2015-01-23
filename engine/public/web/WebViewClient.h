@@ -33,7 +33,6 @@
 
 #include "../platform/WebGraphicsContext3D.h"
 #include "../platform/WebString.h"
-#include "sky/engine/public/web/WebContentDetectionResult.h"
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebNavigatorContentUtilsClient.h"
 #include "sky/engine/public/web/WebPageVisibilityState.h"
@@ -148,19 +147,6 @@ public:
     {
         return WebPageVisibilityStateVisible;
     }
-
-    // Content detection ----------------------------------------------------
-
-    // Retrieves detectable content (e.g., email addresses, phone numbers)
-    // around a hit test result. The embedder should use platform-specific
-    // content detectors to analyze the region around the hit test result.
-    virtual WebContentDetectionResult detectContentAround(const WebHitTestResult&) { return WebContentDetectionResult(); }
-
-    // Schedules a new content intent with the provided url.
-    virtual void scheduleContentIntent(const WebURL&) { }
-
-    // Cancels any previously scheduled content intents that have not yet launched.
-    virtual void cancelScheduledContentIntents() { }
 
 protected:
     ~WebViewClient() { }

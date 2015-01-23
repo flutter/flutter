@@ -51,8 +51,6 @@ component("web") {
     "FrameLoaderClientImpl.h",
     "SpellCheckerClientImpl.cpp",
     "SpellCheckerClientImpl.h",
-    "WebArrayBufferConverter.cpp",
-    "WebArrayBufferView.cpp",
     "WebCache.cpp",
     "WebCachedURLRequest.cpp",
     "WebDocument.cpp",
@@ -61,10 +59,7 @@ component("web") {
     "WebFontImpl.cpp",
     "WebFontImpl.h",
     "WebFrame.cpp",
-    "WebGlyphCache.cpp",
     "WebHitTestResult.cpp",
-    "WebImageCache.cpp",
-    "WebImageDecoder.cpp",
     "WebInputEventConversion.cpp",
     "WebInputEventConversion.h",
     "Sky.cpp",
@@ -74,8 +69,6 @@ component("web") {
     "WebNode.cpp",
     "WebRange.cpp",
     "WebRuntimeFeatures.cpp",
-    "WebScriptBindings.cpp",
-    "WebScriptController.cpp",
     "WebSettingsImpl.cpp",
     "WebSettingsImpl.h",
     "WebTextCheckingCompletionImpl.cpp",
@@ -87,41 +80,6 @@ component("web") {
     "WebViewImpl.h",
     "linux/WebFontRendering.cpp",
   ]
-
-  if (is_component_build) {
-    deps += [
-      "//base/test:test_support",
-      "//testing/gmock",
-      "//testing/gtest",
-      "//sky/engine/core:testing",
-    ]
-
-    configs -= [ "//sky/engine:non_test_config" ]
-
-    sources += platform_web_unittest_files
-
-    sources += [ "WebTestingSupport.cpp" ]
-  }
-}
-
-source_set("test_support") {
-  if (!is_component_build) {
-    deps = [
-      "//skia",
-      "//sky/engine/core:testing",
-      "//sky/engine/wtf",
-    ]
-
-    sources = [
-      "WebTestingSupport.cpp",
-    ]
-
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [
-      "//build/config/compiler:no_chromium_code",
-      "//sky/engine:config",
-    ]
-  }
 }
 
 test("sky_unittests") {
@@ -136,7 +94,6 @@ test("sky_unittests") {
     "//third_party/zlib",
     "//url",
     "//v8",
-    ":test_support",
     ":web",
   ]
 

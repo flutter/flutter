@@ -45,7 +45,6 @@ class WebHitTestResult;
 class WebSettings;
 class WebSpellCheckClient;
 class WebViewClient;
-struct WebActiveWheelFlingParameters;
 struct WebPoint;
 
 class WebView : public WebWidget {

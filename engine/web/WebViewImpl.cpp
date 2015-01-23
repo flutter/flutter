@@ -82,7 +82,6 @@
 #include "sky/engine/public/platform/WebLayerTreeView.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
 #include "sky/engine/public/platform/WebVector.h"
-#include "sky/engine/public/web/WebActiveWheelFlingParameters.h"
 #include "sky/engine/public/web/WebBeginFrameArgs.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebHitTestResult.h"
@@ -216,7 +215,6 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
 
     switch (event.type) {
     case WebInputEvent::GestureTap: {
-        m_client->cancelScheduledContentIntents();
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
         break;
     }
@@ -225,13 +223,10 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
     case WebInputEvent::GestureLongTap: {
         if (!mainFrameImpl() || !mainFrameImpl()->frameView())
             break;
-
-        m_client->cancelScheduledContentIntents();
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
         break;
     }
     case WebInputEvent::GestureShowPress: {
-        m_client->cancelScheduledContentIntents();
         eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
         break;
     }
@@ -242,7 +237,6 @@ bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
         break;
     case WebInputEvent::GestureScrollBegin:
     case WebInputEvent::GesturePinchBegin:
-        m_client->cancelScheduledContentIntents();
     case WebInputEvent::GestureTapDown:
     case WebInputEvent::GestureScrollEnd:
     case WebInputEvent::GestureScrollUpdate:
