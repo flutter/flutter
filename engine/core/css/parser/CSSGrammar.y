@@ -29,9 +29,7 @@
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSSelector.h"
 #include "core/css/CSSSelectorList.h"
-#include "core/css/StyleKeyframe.h"
 #include "core/css/StyleRule.h"
-#include "core/css/StyleRuleKeyframes.h"
 #include "core/css/StyleSheetContents.h"
 #include "core/css/parser/BisonCSSParser.h"
 #include "core/css/parser/CSSParserMode.h"
@@ -70,16 +68,14 @@ using namespace blink;
 
     StyleRuleBase* rule;
     // The content of the three below HeapVectors are guaranteed to be kept alive by
-    // the corresponding m_parsedRules, and m_parsedKeyFrames
+    // the corresponding m_parsedRules.
     // lists in BisonCSSParser.h.
     Vector<RefPtr<StyleRuleBase> >* ruleList;
-    Vector<RefPtr<StyleKeyframe> >* keyframeRuleList;
     CSSParserSelector* selector;
     Vector<OwnPtr<CSSParserSelector> >* selectorList;
     CSSSelector::AttributeMatchType attributeMatchType;
     CSSParserValue value;
     CSSParserValueList* valueList;
-    StyleKeyframe* keyframe;
     float val;
     CSSPropertyID id;
     CSSParserLocation location;
@@ -167,10 +163,7 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %token INTERNAL_RULE_SYM
 %token INTERNAL_SELECTOR_SYM
 %token INTERNAL_VALUE_SYM
-%token INTERNAL_KEYFRAME_RULE_SYM
-%token INTERNAL_KEYFRAME_KEY_LIST_SYM
 %token INTERNAL_SUPPORTS_CONDITION_SYM
-%token KEYFRAMES_SYM
 
 %token ATKEYWORD
 
@@ -219,7 +212,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 
 %type <rule> ruleset
 %type <rule> font_face
-%type <rule> keyframes
 %type <rule> rule
 %type <rule> valid_rule
 %type <ruleList> block_rule_body
@@ -227,7 +219,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %type <rule> block_rule
 %type <rule> block_valid_rule
 %type <rule> supports
-%type <boolean> keyframes_rule_start
 
 %type <string> ident_or_string
 
@@ -237,13 +228,6 @@ inline static CSSParserValue makeIdentValue(CSSParserString string)
 %type <boolean> supports_conjunction
 %type <boolean> supports_disjunction
 %type <boolean> supports_declaration_condition
-
-%type <string> keyframe_name
-%type <keyframe> keyframe_rule
-%type <keyframeRuleList> keyframes_rule
-%type <keyframeRuleList> keyframe_rule_list
-%type <valueList> key_list
-%type <value> key
 
 %type <id> property
 
@@ -294,26 +278,12 @@ stylesheet:
   | internal_rule
   | internal_selector
   | internal_value
-  | internal_keyframe_rule
-  | internal_keyframe_key_list
   | internal_supports_condition
   ;
 
 internal_rule:
     INTERNAL_RULE_SYM maybe_space valid_rule maybe_space TOKEN_EOF {
         parser->m_rule = $3;
-    }
-;
-
-internal_keyframe_rule:
-    INTERNAL_KEYFRAME_RULE_SYM maybe_space keyframe_rule maybe_space TOKEN_EOF {
-        parser->m_keyframe = $3;
-    }
-;
-
-internal_keyframe_key_list:
-    INTERNAL_KEYFRAME_KEY_LIST_SYM maybe_space key_list TOKEN_EOF {
-        parser->m_valueList = parser->sinkFloatingValueList($3);
     }
 ;
 
@@ -402,7 +372,6 @@ rule_list:
 valid_rule:
     ruleset
   | font_face
-  | keyframes
   | supports
   ;
 
@@ -445,7 +414,6 @@ block_rule_recovery:
 block_valid_rule:
     ruleset
   | font_face
-  | keyframes
   | supports
   ;
 
@@ -552,86 +520,6 @@ supports_declaration_condition:
     | '(' maybe_space IDENT maybe_space ':' maybe_space error error_recovery closing_parenthesis maybe_space {
         $$ = false;
         parser->endProperty(false, GeneralCSSError);
-    }
-    ;
-
-before_keyframes_rule:
-    /* empty */ {
-        parser->startRuleHeader(CSSRuleSourceData::KEYFRAMES_RULE);
-    }
-    ;
-
-keyframes_rule_start:
-    before_keyframes_rule KEYFRAMES_SYM maybe_space {
-        $$ = false;
-    }
-    ;
-
-keyframes:
-    keyframes_rule_start keyframe_name at_rule_header_end_maybe_space '{' at_rule_body_start maybe_space location_label keyframes_rule closing_brace {
-        $$ = parser->createKeyframesRule($2, parser->sinkFloatingKeyframeVector($8), $1 /* isPrefixed */);
-    }
-    ;
-
-keyframe_name:
-    IDENT
-    | STRING
-    ;
-
-keyframes_rule:
-    keyframe_rule_list
-    | keyframe_rule_list keyframes_error_recovery {
-        parser->clearProperties();
-    };
-
-keyframe_rule_list:
-    /* empty */ {
-        $$ = parser->createFloatingKeyframeVector();
-    }
-    |  keyframe_rule_list keyframe_rule maybe_space location_label {
-        $$ = $1;
-        $$->append($2);
-    }
-    | keyframe_rule_list keyframes_error_recovery invalid_block maybe_space location_label {
-        parser->clearProperties();
-    }
-    ;
-
-keyframe_rule:
-    key_list '{' maybe_space declaration_list closing_brace {
-        $$ = parser->createKeyframe($1);
-    }
-    ;
-
-key_list:
-    key maybe_space {
-        $$ = parser->createFloatingValueList();
-        $$->addValue(parser->sinkFloatingValue($1));
-    }
-    | key_list ',' maybe_space key maybe_space {
-        $$ = $1;
-        $$->addValue(parser->sinkFloatingValue($4));
-    }
-    ;
-
-key:
-    maybe_unary_operator PERCENTAGE {
-        $$.setFromNumber($1 * $2);
-    }
-    | IDENT {
-        if ($1.equalIgnoringCase("from"))
-            $$.setFromNumber(0);
-        else if ($1.equalIgnoringCase("to"))
-            $$.setFromNumber(100);
-        else {
-            YYERROR;
-        }
-    }
-    ;
-
-keyframes_error_recovery:
-    error rule_error_recovery {
-        parser->reportError(parser->lastLocationLabel(), InvalidKeyframeSelectorCSSError);
     }
     ;
 
@@ -1206,8 +1094,7 @@ at_rule_end:
     ;
 
 regular_invalid_at_rule_header:
-    keyframes_rule_start at_rule_header_recovery
-  | before_font_face_rule FONT_FACE_SYM at_rule_header_recovery
+    before_font_face_rule FONT_FACE_SYM at_rule_header_recovery
   | before_supports_rule SUPPORTS_SYM error error_location rule_error_recovery {
         parser->reportError($4, InvalidSupportsConditionCSSError);
         parser->popSupportsRuleData();
@@ -1257,11 +1144,6 @@ opening_parenthesis:
 
 error_location: {
         $$ = parser->currentLocation();
-    }
-    ;
-
-location_label: {
-        parser->setLocationLabel(parser->currentLocation());
     }
     ;
 

@@ -868,7 +868,7 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
     --length;
 
     // charset, font-face, media, supports,
-    // -webkit-keyframes, keyframes, and -webkit-mediaquery are not affected by hasEscape.
+    // -webkit-mediaquery are not affected by hasEscape.
     SWITCH(name, length) {
         CASE("charset") {
             if (name - 1 == dataStart<CharacterType>())
@@ -876,9 +876,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
         }
         CASE("font-face") {
             m_token = FONT_FACE_SYM;
-        }
-        CASE("keyframes") {
-            m_token = KEYFRAMES_SYM;
         }
         CASE("supports") {
             m_parsingMode = SupportsMode;
@@ -899,15 +896,6 @@ inline void CSSTokenizer::detectAtToken(int length, bool hasEscape)
         CASE("-internal-selector") {
             if (LIKELY(!hasEscape && m_internal))
                 m_token = INTERNAL_SELECTOR_SYM;
-        }
-        CASE("-internal-keyframe-rule") {
-            if (LIKELY(!hasEscape && m_internal))
-                m_token = INTERNAL_KEYFRAME_RULE_SYM;
-        }
-        CASE("-internal-keyframe-key-list") {
-            if (!m_internal)
-                return;
-            m_token = INTERNAL_KEYFRAME_KEY_LIST_SYM;
         }
         CASE("-internal-supports-condition") {
             if (!m_internal)
